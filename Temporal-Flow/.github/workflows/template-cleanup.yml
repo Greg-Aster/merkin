@@ -1,0 +1,45 @@
+name: Template Cleanup
+on:
+  push:
+    branches:
+      - main
+    # Only run on first push to the main branch
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: github.event.repository.name != 'Temporal-Flow'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Remove template-specific files
+        run: |
+          rm -f CNAME
+          # Remove posts from potential locations
+          find . -path "*/content/posts/*" -type f -delete
+          find . -path "*/src/content/posts/*" -type f -delete
+          # Make sure directories remain but are empty
+          find . -path "*/content/posts" -type d -exec touch {}/.gitkeep \;
+          find . -path "*/src/content/posts" -type d -exec touch {}/.gitkeep \;
+
+          
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "Remove template-specific files" || echo "No changes to commit"
+          git push
+        
+      # Self-destruct this workflow after it runs once
+      - name: Remove cleanup workflow
+        run: |
+          rm -f .github/workflows/template-cleanup.yml
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "Remove cleanup workflow" || echo "No changes to commit"
+          git push

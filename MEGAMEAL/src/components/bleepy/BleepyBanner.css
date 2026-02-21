@@ -1,0 +1,263 @@
+/* BleepyBanner - Self-contained styling */
+@import './mascotAnimations.css';
+
+/* Structural variables, not theme colors directly */
+:root {
+  --speech-bubble-max-width: 50rem;
+  --speech-bubble-padding: 0.6em 1em; /* Default padding for messages */
+  --speech-bubble-radius: 15px;      /* Default radius for messages */
+  --speech-bubble-tail-size: 0.7rem; /* If tails were to be re-added */
+  --hue: 270; /* Fallback hue, ideally set globally or by theme switcher */
+  /* Assuming --radius-large and --radius-medium are globally available from main.css or similar */
+  --radius-large: 0.75rem;
+  --radius-medium: 0.4rem;
+}
+
+.bleepy-banner-container {
+  /* Theme variables. These inherit from global scope (e.g. main.css) or provide component-specific theming.
+     --primary, --primary-hover, --card-bg, --bg-opacity, --card-border-subtle-opacity
+     are expected to be available globally.
+  */
+
+  /* Base Theme Colors (Light Mode Defaults) */
+  --text-color-light: oklch(0.15 0.01 var(--hue));
+  --text-color-dark: oklch(0.85 0.01 var(--hue));
+  --text-color: var(--text-color-light);
+
+  /* Card Colors */
+  --card-bg-light: oklch(0.98 0.01 var(--hue));
+  --card-bg-dark: oklch(0.15 0.01 var(--hue));
+  --card-bg: var(--card-bg-light);
+
+  /* Border Colors */
+  --border-light: oklch(0.85 0.01 var(--hue));
+  --border-dark: oklch(0.35 0.01 var(--hue));
+  --border: var(--border-light);
+
+  /* Input Colors */
+  --input-bg-light: oklch(1 0 0);
+  --input-bg-dark: oklch(0.1 0.01 var(--hue));
+  --input-bg: var(--input-bg-light);
+
+  /* Layout */
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto 1fr;
+  grid-template-areas: 
+    "visual chat-history ."
+    "chat-ui chat-ui chat-ui";
+  align-items: start;
+  gap: 1.5rem;
+  padding: 2rem;
+  min-height: 24rem;
+  max-height: 32rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-large);
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+  box-sizing: border-box;
+}
+
+.bleepy-banner-container .mascot-visual-area {
+  grid-area: visual;
+  width: 8rem;
+  height: 8rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.bleepy-banner-container .mascot-visual-area:hover {
+  transform: scale(1.05);
+}
+
+.bleepy-banner-container .mascot-visual-area svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.bleepy-banner-container .speech-bubble {
+  position: absolute;
+  top: 1rem;
+  left: 10rem;
+  max-width: var(--speech-bubble-max-width);
+  padding: var(--speech-bubble-padding);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--speech-bubble-radius);
+  font-size: 0.9rem;
+  color: var(--text-color);
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 1000;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.bleepy-banner-container .speech-bubble.appearing {
+  animation: speech-appear 0.8s ease-out forwards;
+}
+
+.bleepy-banner-container .speech-bubble.fading {
+  animation: speech-fade 1.2s ease-in forwards;
+}
+
+@keyframes speech-appear {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); pointer-events: auto; }
+}
+
+@keyframes speech-fade {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); pointer-events: none; }
+}
+
+.bleepy-banner-container .chat-history-window {
+  grid-area: chat-history;
+  height: 18rem;
+  overflow-y: auto;
+  padding: 1rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  font-size: 0.9rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.bleepy-banner-container .chat-history-window::-webkit-scrollbar {
+  width: 8px;
+}
+
+.bleepy-banner-container .chat-history-window::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bleepy-banner-container .chat-history-window::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.bleepy-banner-container .chat-history-window::-webkit-scrollbar-thumb:hover {
+  background: var(--text-color);
+}
+
+.bleepy-banner-container .chat-ui {
+  grid-area: chat-ui;
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+}
+
+.bleepy-banner-container .chat-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  background: var(--input-bg);
+  color: var(--text-color);
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bleepy-banner-container .chat-input::placeholder {
+  color: oklch(0.5 0.01 var(--hue));
+}
+
+.bleepy-banner-container .chat-input:focus {
+  outline: none;
+  border-color: var(--primary, #3b82f6);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary, #3b82f6) 20%, transparent);
+}
+
+.bleepy-banner-container .chat-send {
+  padding: 0.75rem 1.5rem;
+  background: var(--primary, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: var(--radius-medium);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.bleepy-banner-container .chat-send:hover:not(:disabled) {
+  background: var(--primary-hover, #2563eb);
+  transform: translateY(-1px);
+}
+
+.bleepy-banner-container .chat-send:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Mascot animations */
+.bleepy-banner-container .mascot-image.wiggling {
+  animation: mascotWobble 0.6s ease-in-out;
+}
+
+@keyframes mascotWobble {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-3deg) scale(1.05); }
+  50% { transform: rotate(3deg) scale(1.1); }
+  75% { transform: rotate(-2deg) scale(1.05); }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .bleepy-banner-container {
+    --text-color: var(--text-color-dark);
+    --card-bg: var(--card-bg-dark);
+    --border: var(--border-dark);
+    --input-bg: var(--input-bg-dark);
+  }
+
+  .bleepy-banner-container .chat-input::placeholder {
+    color: oklch(0.6 0.01 var(--hue));
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .bleepy-banner-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas: 
+      "visual"
+      "speech"
+      "chat-history"
+      "chat-ui";
+    gap: 1rem;
+    padding: 1.5rem;
+    min-height: 28rem;
+  }
+
+  .bleepy-banner-container .mascot-visual-area {
+    width: 6rem;
+    height: 6rem;
+    justify-self: center;
+  }
+
+  .bleepy-banner-container .speech-bubble {
+    position: relative;
+    top: auto;
+    left: auto;
+    grid-area: speech;
+    max-width: none;
+  }
+
+  .bleepy-banner-container .chat-history-window {
+    height: 12rem;
+  }
+}

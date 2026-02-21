@@ -1,0 +1,1012 @@
+---
+export interface Props {
+  backgroundImageUrl?: string
+  mascotContext?: string // Added for page-specific context
+  instanceIdentifier?: string
+}
+const { backgroundImageUrl, mascotContext, instanceIdentifier} = Astro.props
+// Debug logging removed for production - check browser console in dev mode
+
+import {
+  cuppyDismissDialogues,
+  cuppyMascotData,
+  cuppyPersonaString,
+  cuppyRandomDialogues,
+  // MascotName, // This is a type and not needed as a runtime value for define:vars
+  currentAiProvider,
+} from '../../config/bleepyConfig.ts'
+---
+<!-- Main Mascot Container -->
+<div id="mascot-container" data-background-image-url={backgroundImageUrl} data-mascot-context={mascotContext}>
+  <p style="color: black; display: none;">BLEEPY HERE (Instance: {Astro.props.instanceIdentifier})</p> {/* Hidden debug text */}
+  <div id="mascot-visual-area">
+    <img id="mascot-image-display" src="" alt="Current Mascot Expression" style="max-width: 100%; max-height: 100%; object-fit: contain; display: none;" />
+    <!-- SVG content will be injected here if mascot is SVG type, replacing the img -->
+  </div>
+
+  <div id="mascot-speech-bubble">
+    <p id="mascot-speech-text"></p>
+  </div>
+
+
+  <div id="mascot-chat-ui">
+    <input type="text" id="mascot-chat-input" placeholder="Talk to me...">
+    <button id="mascot-chat-send">Send</button>
+  </div>
+</div>
+
+
+<!-- Mobile Function Card -->
+<div id="mobile-mascot-function-card" class="group fixed bottom-0 left-0 w-full z-[1010] flex sm:hidden items-center gap-2 py-2 px-3 bg-white dark:bg-slate-800 border-t border-slate-300 dark:border-slate-700 shadow-[0_-2px_5px_rgba(0,0,0,0.05)] dark:shadow-[0_-2px_5px_rgba(0,0,0,0.2)]"> <!-- Initially hidden by sm:hidden, shown by flex on smaller screens -->
+  <input type="text" id="mascot-chat-input-mobile" placeholder="Talk to CUPPY..." aria-label="Chat with mascot" class="flex-grow h-10 px-3 py-2 rounded-full text-sm group-[.mascot-dismissed-state]:hidden">
+  <button id="mascot-chat-send-mobile" aria-label="Send message" class="flex-shrink-0 flex items-center justify-center h-10 w-10 p-2 bg-transparent border-none text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 text-xl cursor-pointer group-[.mascot-dismissed-state]:hidden">🍳</button>
+</div>
+
+<style>
+  @import './mascotAnimations.css';
+
+  :root {
+    /* Structural variables for speech bubble, not theme colors */
+    --speech-bubble-max-width: 50rem;
+    --speech-bubble-padding: 0.6rem 0.6rem;
+    --speech-bubble-radius: 0.75rem;
+    --speech-bubble-tail-size: 0.7rem;
+
+    /* Fallback for --hue if not defined globally, though main.css should provide it */
+    --hue: 270;
+  }
+
+  /* Global variables like --primary, --primary-hover, --card-bg, --bg-opacity,
+     --card-border-opacity, --card-border-subtle-opacity are expected to be defined in src/styles/main.css
+     or by a theme switcher.
+     Bleepy will now directly use these or oklch values based on --hue.
+  */
+
+  #mascot-container {
+    position: fixed;
+    bottom: 2rem;
+    right: 1rem;
+    width: 12rem;
+    height: 10rem; /* New height */
+    background-color: transparent;
+    /* Background image will be set by --mascot-background-image variable */
+    background-image: var(--mascot-background-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* padding-top removed */
+    opacity: 0; /* Initial: opacity */
+    transform: translateY(calc(100% + 1.5rem)); /* Initial: transform */
+    transition: transform 0.7s ease-in-out, opacity 0.7s ease-in-out;
+  }
+
+  #mascot-container.visible {
+    transform: translateY(0); /* Final position */
+    opacity: 0.75; /* Default opacity */
+  }
+
+  #mascot-visual-area {
+    width: 85%; /* New: percentage */
+    height: 77%; /* New: percentage */
+    margin-top: auto;    /* New */
+    margin-bottom: 5%;   /* New */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* margin-bottom: 0.5rem; removed */
+  }
+
+  #mascot-visual-area svg { /* Ensure SVGs scale nicely */
+    width: 100%; /* New: percentage */
+    height: 100%; /* New: percentage */
+    object-fit: contain;
+  }
+  
+  /* Speech Bubble Styling */
+#mascot-speech-bubble {
+  position: absolute;
+  right: calc(100% - 3rem);
+  bottom: 60%;
+  width: auto;
+  min-width: 12rem;
+  max-width: var(--speech-bubble-max-width);
+  height: auto;
+  padding: var(--speech-bubble-padding);
+  --speech-bubble-bg: oklch(0.98 0.01 var(--hue)); /* Light background */
+  --speech-bubble-border: oklch(0.85 0.01 var(--hue)); /* Light border */
+  background-color: var(--speech-bubble-bg);
+  border: 1px solid var(--speech-bubble-border);
+  border-radius: var(--speech-bubble-radius);
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+  font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+  color: oklch(0.15 0.01 var(--hue)); /* Default light mode text */
+  text-align: left;
+  z-index: 1001;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  overflow-wrap: break-words;
+}
+
+  #mascot-speech-bubble::after, #mascot-speech-bubble::before {
+    content: '';
+    position: absolute;
+    bottom: 1rem; /* Adjust to align with bubble's bottom edge */
+    width: 0;
+    height: 0;
+    border-style: solid;
+  }
+
+  /* Tail pointing right */
+  #mascot-speech-bubble::after { /* Border part of the tail */
+    left: 100%; /* Position tail to the right of the bubble */
+    border-width: var(--speech-bubble-tail-size) 0 var(--speech-bubble-tail-size) var(--speech-bubble-tail-size);
+    border-color: transparent transparent transparent var(--speech-bubble-border);
+  }
+
+  #mascot-speech-bubble::before { /* Background part of the tail */
+    left: calc(100% - 2px); /* Position slightly inside the border tail */
+    /* border-width needs to be slightly smaller than ::after to fit inside */
+    border-width: calc(var(--speech-bubble-tail-size) - 2px) 0 calc(var(--speech-bubble-tail-size) - 2px) calc(var(--speech-bubble-tail-size) - 2px);
+    border-color: transparent transparent transparent var(--speech-bubble-bg);
+    /* Adjust bottom to align with the border tail's inner edge */
+    bottom: calc(1rem + 2px);
+  }
+
+
+#mascot-speech-text {
+  margin: 0;
+  padding: 0;
+  /* Font, color, and text-align are typically inherited from #mascot-speech-bubble */
+}
+
+  /* Animations for the new speech bubble */
+  #mascot-speech-bubble.appearing {
+    animation: speech-appear 0.8s ease-out forwards;
+  }
+
+  #mascot-speech-bubble.fading {
+    animation: speech-fade 1.2s ease-in forwards;
+  }
+
+  #mascot-speech-bubble.quick-fading { /* If needed */
+    animation: speech-quick-fade 0.2s ease-in forwards;
+  }
+
+  @keyframes speech-appear {
+    from { opacity: 0; transform: translateY(10px); } /* Start slightly lower */
+    to { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  }
+
+  @keyframes speech-fade {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); pointer-events: none; } /* Fade upwards */
+  }
+
+  @keyframes speech-quick-fade { /* If needed */
+    from { opacity: 1; }
+    to { opacity: 0; pointer-events: none; }
+  }
+
+  /* Old #mascot-dialogue styles removed or commented out if needed for reference */
+  /*
+  #mascot-dialogue { ... }
+  */
+
+  #mascot-chat-ui {
+    display: flex;
+    align-items: center;
+    width: 90%;
+    margin: 0.5rem auto 0.25rem;
+    gap: 0.5rem;
+    background-color: oklch(0.95 0.01 var(--hue)); /* Simple light background */
+    border: 1px solid oklch(0.85 0.01 var(--hue)); /* Simple light border */
+    padding: 0.25rem;
+    border-radius: 0.3rem;
+  }
+
+  #mascot-chat-input {
+    flex-grow: 1;
+    min-width: 0;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.3rem;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+    font-size: 0.8rem;
+    /* Theme-aware background and border */
+    background-color: oklch(1 0 0); /* white */
+    border: 1px solid oklch(0.8 0.01 var(--hue)); /* Simple light border */
+    color: oklch(0.15 0.01 var(--hue)); /* Light mode default text */
+  }
+
+#mascot-chat-input::placeholder {
+    color: oklch(0.55 0.01 var(--hue)); /* Light mode default placeholder */
+    opacity: 1;
+  }
+
+#mascot-chat-send {
+    flex-shrink: 0; /* Prevent button from shrinking */
+    padding: 0.3rem 0.6rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+    font-size: 0.8rem;
+    transition: background-color 0.2s ease-in-out;
+  }
+
+  #mascot-chat-send:hover {
+    background-color: var(--primary-hover);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    #mascot-speech-bubble {
+      color: oklch(0.85 0.01 var(--hue)); /* Dark mode text */
+      --speech-bubble-bg: oklch(0.2 0.01 var(--hue)); /* Dark background */
+      --speech-bubble-border: oklch(0.35 0.01 var(--hue)); /* Dark border */
+    }
+
+    #mascot-chat-ui { /* Added for dark mode */
+      background-color: oklch(0.25 0.01 var(--hue)); /* Simple dark background */
+      border-color: oklch(0.4 0.01 var(--hue)); /* Simple dark border */
+    }
+
+    #mascot-chat-input,
+    #mascot-chat-input-mobile {
+      background-color: oklch(0.15 0.01 var(--hue)); /* Simple dark background */
+      border-color: oklch(0.35 0.01 var(--hue)); /* Simple dark border */
+      color: oklch(0.85 0.01 var(--hue)); /* Dark mode text */
+    }
+
+    #mascot-chat-input::placeholder,
+    #mascot-chat-input-mobile::placeholder {
+      color: oklch(0.50 0.01 var(--hue)); /* Dark mode placeholder */
+    }
+  }
+
+  #mascot-chat-input-mobile {
+    /* Basic structure from existing Tailwind: flex-grow h-10 px-3 py-2 rounded-full text-sm */
+    /* Themeable properties (Light mode defaults): */
+    /* Theme-aware background and border */
+    background-color: oklch(1 0 0); /* white */
+    border: 1px solid oklch(0.8 0.01 var(--hue)); /* Simple light border */
+    color: oklch(0.15 0.01 var(--hue)); /* Light mode default text */
+  }
+
+#mascot-chat-input-mobile::placeholder {
+    color: oklch(0.55 0.01 var(--hue)); /* Light mode default placeholder */
+    opacity: 1;
+  }
+
+
+  /* #mascot-dialogue::after removed as tail design is incompatible with new centering */
+
+  /* @media (prefers-color-scheme: dark) {
+    #mascot-dialogue {
+      background-color: var(--dialogue-bg-dark);
+      color: var(--dialogue-text-dark);
+      border: 1px solid var(--dialogue-border-dark);
+    }
+  } */
+
+
+
+
+  /* Specific Mascot Styles (Example - can be extended) */
+  .cuppy-cake-specific-styles .eyes { /* Example if Cuppy had unique eye CSS */
+    /* ... */
+  }
+  /* Add more specific styles for Pretzel Pete, Sushi Sam if needed */
+
+
+/* --- Responsive Adjustments --- */
+
+  /* Tablet Breakpoint */
+  @media (max-width: 768px) {
+    #mascot-container {
+      width: 5.5rem; /* New */
+      height: 7rem; /* New */
+      right: 1rem;
+      bottom: 1rem;
+      /* padding-top removed */
+    }
+
+    #mascot-visual-area {
+      /* No changes needed here, scales with parent */
+    }
+
+    /* #mascot-dialogue {
+      font-size: 0.8rem;
+      max-height: 8rem;
+    } */
+    #mascot-speech-bubble {
+      font-size: clamp(0.75rem, 2vw, 0.9rem);
+      max-width: calc(var(--speech-bubble-max-width) * 0.9); /* Adjust max-width */
+      /* Potential adjustments for tail or position if needed */
+    }
+
+    #mascot-chat-ui {
+      /* Adjustments for tablet if needed, for now inherits well */
+    }
+    #mascot-chat-input, #mascot-chat-send {
+      font-size: 0.7rem;
+    }
+
+
+    /* #mascot-dialogue::after removed */
+
+    #dismiss-mascot-button {
+      font-size: 0.9rem; /* New */
+      /* Width scales with parent, aspect-ratio maintained */
+    }
+
+    #bring-back-mascot-button {
+      /* bottom: 1rem; removed, inherit from base */
+      /* right: 1rem; removed, inherit from base */
+      width: 2rem; /* Kept from "New width" */
+      /* height: 2rem; removed, now determined by base aspect-ratio */
+      /* font-size: 0.9rem; removed, inherit from base */
+    }
+  }
+
+  /* Mobile Breakpoint */
+  @media (max-width: 480px) {
+    #mascot-container {
+      width: 8rem; /* New */
+      height: 10.28rem; /* New */
+      right: 0.0rem;
+      bottom: 2.5rem;
+      /* padding-top removed */
+      opacity: 0.85; /* This was an existing override, kept it */
+    }
+
+    #mascot-visual-area {
+      /* No changes needed here, scales with parent */
+    }
+
+    /* #mascot-dialogue {
+      font-size: 0.7rem;
+      max-height: 7rem;
+    } */
+    #mascot-speech-bubble {
+      font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+      max-width: calc(var(--speech-bubble-max-width) * 0.8); /* Adjust max-width */
+       /* Potential adjustments for tail or position if needed */
+    }
+
+    #mascot-chat-ui {
+      flex-direction: column;
+      align-items: stretch; /* Makes input and button full width of this container */
+      gap: 0.5rem; /* Space between stacked input and button */
+    }
+    #mascot-chat-input, #mascot-chat-send {
+      font-size: 0.65rem;
+      padding: 0.25rem 0.4rem;
+      width: 100%; /* Make them full width in the stacked layout */
+      margin-left: 0; /* Reset any specific side margins */
+      margin-right: 0;
+    }
+
+    /* #mascot-dialogue::after and its dark mode override removed */
+
+
+    #dismiss-mascot-button {
+      font-size: 0.8rem; /* New */
+      /* Width scales with parent, aspect-ratio maintained */
+    }
+
+    #bring-back-mascot-button {
+      bottom: 0.5rem; /* This was not "New", so kept */
+      right: 0.5rem; /* This was not "New", so kept */
+      width: 1.75rem; /* Kept from "New width" */
+      /* height: 1.75rem; removed, now determined by base aspect-ratio */
+      /* font-size: 0.8rem; removed, inherit from base */
+    }
+
+    #mobile-mascot-function-card {
+      display: flex !important; /* Ensure visibility on small screens */
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+ 
+    /* Hide original desktop controls */
+    #mascot-chat-ui,
+    #mascot-container > #dismiss-mascot-button, /* Original dismiss button is child of mascot-container */
+    body > #bring-back-mascot-button { /* Original bring back button is child of body */
+      display: none !important; /* Ensured !important is present on all */
+    }
+  }
+</style>
+
+<script type="module" define:vars={{ mascotContextPropValue: mascotContext, instanceId: instanceIdentifier, cuppyMascotData, cuppyPersonaString, cuppyRandomDialogues, cuppyDismissDialogues, currentAiProvider }}>
+// The following imports are now passed from Astro frontmatter via define:vars
+// and are available globally in this script's scope:
+// cuppyMascotData, cuppyPersonaString, cuppyRandomDialogues,
+// cuppyDismissDialogues, currentAiProvider.
+// The MascotName type is not passed as it's a type, not a runtime value.
+
+  function setupBleepy(mascotContextPropValue, instanceId) {
+    // Debug logging (only in development - localhost)
+    if (window.location.hostname === 'localhost') {
+      console.log(`Client (${instanceId || 'UNKNOWN'}): mascotContextPropValue received by script:`, mascotContextPropValue);
+    }
+    // General types like SurrealAnimationData, CuppyCakeSurrealAnimation, etc.,
+    // are removed as Bleepy is an image-set mascot and does not use them.
+    // If mascotData.ts still holds other universally needed types (e.g. BaseAnimation),
+    // and they weren't part of Bleepy's specific data, they would need a separate import if used.
+    // For this refactor, focusing on Bleepy's data migration.
+
+
+    // --- DOM Elements ---
+    const mascotContainer = document.getElementById('mascot-container');
+    const mascotVisualArea = document.getElementById('mascot-visual-area');
+    // const mascotDialogue = document.getElementById('mascot-dialogue'); // Old dialogue
+    // const mascotEphemeralSpeech = document.getElementById('mascot-ephemeral-speech'); // Old ephemeral
+    const mascotSpeechBubble = document.getElementById('mascot-speech-bubble');
+    const mascotSpeechText = document.getElementById('mascot-speech-text');
+    const mascotChatInput = document.getElementById('mascot-chat-input');
+    if (window.location.hostname === 'localhost') {
+      console.log('Mascot chat input (desktop):', mascotChatInput); // Verify element
+    }
+    const mascotChatSendButton = document.getElementById('mascot-chat-send');
+
+    // Mobile Function Card Elements
+    const mobileMascotFunctionCard = document.getElementById('mobile-mascot-function-card');
+    const mascotChatInputMobile = document.getElementById('mascot-chat-input-mobile');
+    if (window.location.hostname === 'localhost') {
+      console.log('Mascot chat input (mobile):', mascotChatInputMobile); // Verify element
+    }
+    const mascotChatSendMobile = document.getElementById('mascot-chat-send-mobile');
+    // const chatHistoryWindow = document.getElementById('chat-history-window'); // Removed as it's banner-specific
+
+
+    // --- State Variables ---
+    let activeMascot = cuppyMascotData; // Bleepy is now the only mascot, sourced from correct import
+    // let currentMascotIndex = 0; // No longer needed
+    let inactivityTimer;
+    let hoverTimeout;
+    let dialogueCycleInterval; // setInterval returns a number in browsers
+    let specialAnimationInterval;
+    // let surrealAnimationInterval; // Removed, Bleepy is image-set
+    let proactiveDialogueTimer;
+    let mouthOpenTimeout;
+    let randomExpressionTimeout;
+    
+    let conversationHistory = [];
+    let originalPlaceholder = ""; // To store the original placeholder
+
+
+    // --- Core Functions ---
+    function loadMascot() { // Index no longer needed
+      if (!mascotVisualArea) return;
+      activeMascot = cuppyMascotData; // Always Bleepy, sourced from correct import
+      // currentMascotIndex = 0; // Implicitly Bleepy
+      conversationHistory = []; // Reset conversation history
+
+      // Store original placeholder
+      if (mascotChatInput) {
+        originalPlaceholder = mascotChatInput.placeholder;
+      } else if (mascotChatInputMobile) { // Fallback for mobile if desktop isn't primary
+        originalPlaceholder = mascotChatInputMobile.placeholder;
+      }
+
+      const mascotImageDisplay = document.getElementById('mascot-image-display');
+      mascotVisualArea.innerHTML = ''; // Clear previous content (SVG or old image if structure changes)
+
+      if (activeMascot.type === "image-set") {
+        if (mascotImageDisplay) {
+          mascotImageDisplay.src = activeMascot.images.standard;
+          mascotImageDisplay.style.display = 'block';
+          mascotVisualArea.appendChild(mascotImageDisplay); // Ensure it's in the visual area
+        }
+      } else { // SVG type
+        if (mascotImageDisplay) {
+          mascotImageDisplay.style.display = 'none'; // Hide the static img tag
+        }
+        mascotVisualArea.innerHTML = activeMascot.svgHTML; // Inject SVG
+      }
+      
+      // Apply/remove specific CSS classes to mascotVisualArea itself
+      mascotVisualArea.className = ''; // Clear previous classes from the container
+      if (activeMascot.cssClasses) {
+        mascotVisualArea.classList.add(activeMascot.cssClasses);
+      }
+
+      // Clear previous animation intervals
+      clearInterval(specialAnimationInterval);
+      // clearInterval(surrealAnimationInterval as number); // Removed
+
+      // Conditionally set up animation intervals
+      // Bleepy is image-set, so only image-set logic applies.
+      // The random image expression is now tied to tryPlayRandomVisualEffect
+      specialAnimationInterval = setInterval(tryPlayRandomVisualEffect, 18000 + Math.random() * 5000);
+      
+      restartAnimationsAndDialogue();
+    }
+
+    function showMascot() {
+      if (!mascotContainer || !mascotVisualArea) return; // Removed bringBackButton from condition
+      (mascotContainer).style.display = 'flex'; // Make sure it's flex before animation
+      (mascotVisualArea).style.opacity = '1'; // Reset visual opacity
+      mascotVisualArea.classList.remove('visual-fading-out'); // Ensure animation class is removed
+
+      setTimeout(() => {
+        mascotContainer.classList.add('visible');
+        startProactiveDialogueTimer(); // MOVED HERE: Restart proactive dialogue when mascot is shown
+      }, 50); // Delay for CSS transition
+      // (bringBackButton).style.display = 'none'; // Removed: bringBackButton no longer exists
+      sessionStorage.setItem('cuppyDismissed', 'false');
+      sessionStorage.removeItem('lastSelectedMascot'); // Clear any old session storage for this
+      conversationHistory = []; // Reset conversation history when mascot is shown
+
+      // Load Bleepy
+      loadMascot(); // This function now correctly uses the imported cuppyMascotData
+
+      // Mobile card state
+      if (mobileMascotFunctionCard) {
+        mobileMascotFunctionCard.classList.remove('mascot-dismissed-state');
+      }
+      // showRandomCharacterSelectionUI(); // Removed: No character selection UI logic
+
+      // Initial dialogue after being brought back
+      // displayNewDialogue(false, "I'm back! Ready for more fun?");
+      // startProactiveDialogueTimer(); // OLD POSITION
+      document.dispatchEvent(new CustomEvent('bleepy:visibilityChanged', { detail: { visible: true, instanceId: instanceId } }));
+    }
+
+    function hideMascot(isDismissal = true) {
+      if (!mascotContainer || !mascotVisualArea) return; // Removed bringBackButton from condition
+
+      if (isDismissal) {
+        sessionStorage.setItem('cuppyDismissed', 'true');
+        // (bringBackButton).style.display = 'flex'; // Removed: bringBackButton no longer exists
+
+        // Mobile card state
+        if (mobileMascotFunctionCard) {
+          mobileMascotFunctionCard.classList.add('mascot-dismissed-state');
+        }
+
+        if (mascotSpeechBubble && mascotSpeechText && (mascotSpeechText).textContent) {
+          // Speech handling
+        }
+
+
+        // Start fade-out animation for the visual element
+        mascotVisualArea.classList.add('visual-fading-out');
+
+        const onVisualFadeEnd = () => {
+          (mascotVisualArea).style.opacity = '0';
+          setTimeout(() => {
+            if (sessionStorage.getItem('cuppyDismissed') === 'true') {
+              (mascotContainer).style.display = 'none';
+            }
+            mascotContainer.classList.remove('visible');
+            mascotVisualArea.classList.remove('visual-fading-out');
+          }, 1500);
+        };
+        mascotVisualArea.addEventListener('animationend', onVisualFadeEnd, { once: true });
+
+      } else { // Not a dismissal (e.g., initial load dismissed)
+        (mascotContainer).style.display = 'none';
+        mascotContainer.classList.remove('visible');
+        (mascotVisualArea).style.opacity = '0';
+        if (mobileMascotFunctionCard) {
+          mobileMascotFunctionCard.classList.add('mascot-dismissed-state');
+        }
+      }
+      document.dispatchEvent(new CustomEvent('bleepy:visibilityChanged', { detail: { visible: false, dismissed: isDismissal, instanceId: instanceId } }));
+      clearTimers();
+    }
+
+    function clearTimers() {
+      clearTimeout(inactivityTimer);
+      clearTimeout(hoverTimeout);
+      clearInterval(dialogueCycleInterval);
+      clearInterval(specialAnimationInterval);
+      clearTimeout(proactiveDialogueTimer);
+    }
+
+    function restartAnimationsAndDialogue() {
+      if (!mascotContainer) return;
+      mascotContainer.classList.remove('jiggle');
+      void (mascotContainer).offsetWidth; // Trigger reflow
+      mascotContainer.classList.add('jiggle');
+    }
+    
+    let speechLingerTimeout;
+    let speechFadeCleanupListener;
+
+    function displayEphemeralSpeech(text) {
+      const mascotImageDisplay = document.getElementById('mascot-image-display');
+      if (activeMascot && mascotImageDisplay) {
+        if (activeMascot.type === "image-set") {
+          if (activeMascot.images.openmouth) {
+            clearTimeout(mouthOpenTimeout);
+            mascotImageDisplay.src = activeMascot.images.openmouth;
+            mouthOpenTimeout = setTimeout(() => {
+              if (activeMascot && activeMascot.images.standard && mascotImageDisplay) {
+                 mascotImageDisplay.src = activeMascot.images.standard;
+              }
+            }, 700);
+          }
+          if (!mascotImageDisplay.classList.contains('wiggling')) {
+             mascotImageDisplay.classList.remove('jiggle');
+             void mascotImageDisplay.offsetWidth;
+             mascotImageDisplay.classList.add('jiggle');
+             setTimeout(() => { if (mascotImageDisplay) mascotImageDisplay.classList.remove('jiggle'); }, 500);
+          }
+        } else { 
+          const svgElement = mascotVisualArea?.querySelector('svg');
+          if (svgElement) {
+            svgElement.classList.remove('jiggle');
+            void (svgElement).offsetWidth;
+            svgElement.classList.add('jiggle');
+            setTimeout(() => { svgElement.classList.remove('jiggle'); }, 500);
+          }
+        }
+      }
+
+      if (!mascotSpeechBubble || !mascotSpeechText) return;
+
+      clearTimeout(speechLingerTimeout);
+      speechLingerTimeout = undefined;
+      if (speechFadeCleanupListener) {
+        mascotSpeechBubble.removeEventListener('animationend', speechFadeCleanupListener);
+        speechFadeCleanupListener = undefined;
+      }
+      mascotSpeechBubble.className = '';
+      (mascotSpeechBubble).style.opacity = '0';
+      (mascotSpeechBubble).style.transform = 'translateY(0)';
+      (mascotSpeechBubble).style.pointerEvents = 'none';
+      (mascotSpeechText).textContent = '';
+
+      (mascotSpeechText).textContent = text;
+      void (mascotSpeechBubble).offsetWidth;
+      mascotSpeechBubble.classList.add('appearing');
+
+      const onAppearAnimationEnd = (event) => {
+        if (event.animationName !== 'speech-appear') return;
+        const words = text.split(/\s+/).length;
+        let currentLingerDuration = (words / 2.5) * 1000 + 2000;
+        currentLingerDuration = Math.max(3000, Math.min(currentLingerDuration, 17000));
+        speechLingerTimeout = setTimeout(() => {
+          if (!mascotSpeechBubble || !mascotSpeechText) return;
+          mascotSpeechBubble.classList.remove('appearing');
+          mascotSpeechBubble.classList.add('fading');
+          speechFadeCleanupListener = (fadeEvent) => {
+            if (fadeEvent.animationName !== 'speech-fade') return;
+            if (!mascotSpeechBubble || !mascotSpeechText) return;
+            mascotSpeechBubble.classList.remove('fading');
+            (mascotSpeechText).textContent = '';
+            (mascotSpeechBubble).style.opacity = '0';
+            (mascotSpeechBubble).style.pointerEvents = 'none';
+            speechFadeCleanupListener = undefined;
+          };
+          mascotSpeechBubble.addEventListener('animationend', speechFadeCleanupListener, { once: true });
+        }, currentLingerDuration);
+      };
+      mascotSpeechBubble.addEventListener('animationend', onAppearAnimationEnd, { once: true });
+    }
+
+    function resetInactivityBasedDialogueTimer() {
+      // Placeholder
+    }
+
+    async function handleSendMessage() {
+      let currentInput = null;
+      let userMessage = "";
+      const isMobileView = mobileMascotFunctionCard && getComputedStyle(mobileMascotFunctionCard).display !== 'none';
+
+      if (isMobileView && mascotChatInputMobile) {
+        currentInput = mascotChatInputMobile;
+      } else if (mascotChatInput) {
+        currentInput = mascotChatInput;
+      }
+
+      if (!currentInput) {
+        console.warn(`Client (${instanceId || 'UNKNOWN'}): handleSendMessage: No valid input field found.`);
+        return;
+      }
+      userMessage = currentInput.value.trim();
+      if (!userMessage) return;
+
+      currentInput.value = ""; // Clear input first
+      currentInput.placeholder = "Thinking..."; // Then set placeholder
+      currentInput.disabled = true; // Then disable
+      
+      if (!mascotSpeechBubble || !mascotSpeechText) {
+          console.warn(`Client (${instanceId || 'UNKNOWN'}): handleSendMessage: Speech bubble elements not found for overlay mode.`);
+      }
+
+      const currentMascot = cuppyMascotData;
+      const currentMascotName = currentMascot.name;
+      const currentMascotPersonaString = cuppyPersonaString;
+
+      const historyForWorker = [...conversationHistory];
+      const messageForWorker = userMessage;
+      
+      // Store original placeholder if not already stored (e.g. if loadMascot didn't run for some reason or for mobile specific)
+      if (!originalPlaceholder && currentInput) {
+          originalPlaceholder = currentInput.placeholder;
+      }
+
+      // The lines for setting placeholder and disabling input have been moved up.
+      // The line `currentInput.value = '';` is now handled before the fetch call.
+      resetProactiveDialogueTimer();
+
+      const workerUrl = 'https://my-mascot-worker-service.greggles.workers.dev';
+      try {
+        const pageContextForPayload = mascotContextPropValue && mascotContextPropValue.trim() !== ''
+          ? mascotContextPropValue
+          : "Default context: No specific page information available.";
+
+        if (window.location.hostname === 'localhost') {
+          console.log(`Client (${instanceId || 'UNKNOWN'}): pageContextForPayload being used:`, pageContextForPayload);
+        }
+
+        const payload = {
+          message: messageForWorker,
+          persona: currentMascotPersonaString,
+          history: historyForWorker,
+          provider: currentAiProvider,
+          pageContext: pageContextForPayload
+        };
+
+        // console.log('Client: mascotContextPropValue before fetch:', mascotContextPropValue); // Redundant with the one at the start of setupCuppy
+        if (window.location.hostname === 'localhost') {
+          console.log(`Client (${instanceId || 'UNKNOWN'}): payload being sent:`, payload);
+        }
+
+        const response = await fetch(workerUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        conversationHistory.push({ role: 'user', content: userMessage });
+
+        const data = await response.json();
+        if (response.ok && data.reply) {
+          conversationHistory.push({ role: 'assistant', content: data.reply });
+          displayEphemeralSpeech(data.reply);
+        } else {
+          const errorMessage = data.error || 'Failed to get a response.';
+          conversationHistory.push({ role: 'assistant', content: errorMessage });
+          displayEphemeralSpeech(errorMessage);
+        }
+      } catch (error) {
+        conversationHistory.push({ role: 'user', content: userMessage }); // Log user message even on fetch error
+        const connectErrorMessage = 'Could not connect to the mascot.';
+        conversationHistory.push({ role: 'assistant', content: connectErrorMessage });
+        displayEphemeralSpeech(connectErrorMessage);
+        console.error(`Client (${instanceId || 'UNKNOWN'}): Error calling mascot worker:`, error);
+      } finally {
+        if (currentInput) {
+          currentInput.placeholder = originalPlaceholder || "Talk to me..."; // Fallback if original wasn't captured
+          currentInput.disabled = false;
+          // currentInput.value = ""; // Now cleared before fetch
+          currentInput.focus();
+        }
+      }
+    }
+
+    function triggerProactiveDialogue() {
+      if (!mascotContainer?.classList.contains('visible')) {
+        return;
+      }
+      if (cuppyRandomDialogues && cuppyRandomDialogues.length > 0) {
+        const randomIndex = Math.floor(Math.random() * cuppyRandomDialogues.length);
+        const selectedDialogue = cuppyRandomDialogues[randomIndex];
+        displayEphemeralSpeech(selectedDialogue);
+      } else {
+        displayEphemeralSpeech("...");
+      }
+      startProactiveDialogueTimer();
+    }
+
+    function startProactiveDialogueTimer() {
+      clearTimeout(proactiveDialogueTimer);
+      if (!mascotContainer?.classList.contains('visible')) {
+        return;
+      }
+      const randomDelay = Math.random() * (60000 - 45000) + 45000; // 45-60 seconds
+      proactiveDialogueTimer = setTimeout(triggerProactiveDialogue, randomDelay);
+    }
+
+    function resetProactiveDialogueTimer() {
+      startProactiveDialogueTimer();
+    }
+
+    function playRandomImageExpression() {
+      const mascotImageDisplay = document.getElementById('mascot-image-display');
+      if (!activeMascot || activeMascot.type !== "image-set" || !mascotImageDisplay || !activeMascot.images) {
+        return;
+      }
+      const expressionKeys = Object.keys(activeMascot.images).filter(
+        key => key !== "standard" && key !== "openmouth"
+      );
+      if (expressionKeys.length === 0) return;
+      const randomKey = expressionKeys[Math.floor(Math.random() * expressionKeys.length)];
+      mascotImageDisplay.src = activeMascot.images[randomKey];
+      clearTimeout(randomExpressionTimeout);
+      randomExpressionTimeout = setTimeout(() => {
+        if (activeMascot && activeMascot.images.standard && mascotImageDisplay) {
+          mascotImageDisplay.src = activeMascot.images.standard;
+        }
+      }, Math.random() * 500 + 1000);
+    }
+
+    function playRandomMascotAnimation() {
+      if (!mascotVisualArea || !mascotContainer?.classList.contains('visible')) return;
+      if (!activeMascot || activeMascot.type === "image-set") return;
+      const mascotData = activeMascot;
+      if (!mascotData.uniqueAnimations || mascotData.uniqueAnimations.length === 0) return;
+      const availableAnimations = mascotData.uniqueAnimations;
+      const animToPlay = availableAnimations[Math.floor(Math.random() * availableAnimations.length)];
+      const targetElement = mascotVisualArea.querySelector(animToPlay.targetSelector);
+      if (targetElement && !targetElement.classList.contains(animToPlay.animationClass)) {
+        let alreadyAnimating = false;
+        if (targetElement.classList) {
+          for (const anim of availableAnimations) {
+              if (targetElement.classList.contains(anim.animationClass)) {
+                  alreadyAnimating = true;
+                  break;
+              }
+          }
+        }
+        if (alreadyAnimating) return;
+        targetElement.classList.add(animToPlay.animationClass);
+        const onAnimationEnd = (event) => {
+          const currentTarget = event.currentTarget;
+          if (animToPlay.cssAnimationName && (event).animationName === animToPlay.cssAnimationName &&
+              currentTarget.classList.contains(animToPlay.animationClass)) {
+              currentTarget.classList.remove(animToPlay.animationClass);
+          }
+          currentTarget.removeEventListener('animationcancel', onAnimationCancel);
+        };
+        const onAnimationCancel = (event) => {
+          const currentTarget = event.currentTarget;
+          if (animToPlay.cssAnimationName && (event).animationName === animToPlay.cssAnimationName &&
+              currentTarget.classList.contains(animToPlay.animationClass)) {
+              currentTarget.classList.remove(animToPlay.animationClass);
+          }
+          currentTarget.removeEventListener('animationend', onAnimationEnd);
+        };
+        targetElement.addEventListener('animationend', onAnimationEnd, { once: true });
+        targetElement.addEventListener('animationcancel', onAnimationCancel, { once: true });
+      }
+    }
+
+    function tryPlayRandomVisualEffect() {
+      if (!activeMascot || !mascotContainer?.classList.contains('visible')) return;
+      if (activeMascot.type === "image-set") {
+        const mascotImageEl = document.getElementById('mascot-image-display');
+        if (!mascotImageEl) return;
+        const randomNumber = Math.random();
+        if (randomNumber < 0.4) {
+          mascotImageEl.classList.add('wiggling');
+          mascotImageEl.addEventListener('animationend', () => {
+            mascotImageEl.classList.remove('wiggling');
+          }, { once: true });
+        } else if (randomNumber < 0.8) {
+          playRandomImageExpression();
+        }
+      } else {
+        if (activeMascot.uniqueAnimations && activeMascot.uniqueAnimations.length > 0) {
+          if (Math.random() < 0.4) {
+             playRandomMascotAnimation();
+          }
+        }
+      }
+    }
+
+    function setupEventListeners() {
+      // Removed dismissButton, bringBackButton, dismissMascotButtonMobile, bringBackMascotButtonMobile from condition and listeners
+      if (!mascotContainer || !mascotChatSendButton || !mascotChatInput) return;
+
+      mascotChatSendButton.addEventListener('click', handleSendMessage);
+      mascotChatInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+          handleSendMessage();
+        }
+      });
+      if (mascotChatInputMobile) {
+        mascotChatInputMobile.addEventListener('keypress', (event) => {
+          if (event.key === 'Enter') {
+            handleSendMessage();
+          }
+        });
+      }
+      if (mascotChatSendMobile) {
+        mascotChatSendMobile.addEventListener('click', handleSendMessage);
+      }
+
+      // Add Global Event Listeners
+      document.addEventListener('bleepy:show', (event) => {
+        // Optional: if multiple bleepy instances could exist, you might filter by event.detail.targetInstanceId === instanceId
+        if (window.location.hostname === 'localhost') {
+          console.log(`Client (${instanceId || 'UNKNOWN'}): Received bleepy:show event.`);
+        }
+        showMascot();
+      });
+
+      document.addEventListener('bleepy:hide', (event) => {
+        // Optional: filter by instanceId if necessary
+        if (window.location.hostname === 'localhost') {
+          console.log(`Client (${instanceId || 'UNKNOWN'}): Received bleepy:hide event.`);
+        }
+        
+        // Restore dismissal dialogue logic
+        if (cuppyDismissDialogues && cuppyDismissDialogues.length > 0) {
+          const dismissalMessage = cuppyDismissDialogues[Math.floor(Math.random() * cuppyDismissDialogues.length)];
+          displayEphemeralSpeech(dismissalMessage);
+        }
+        
+        hideMascot(true); // Ensure this is called to actually hide the mascot
+      });
+    }
+
+    // This is the main initialization logic, formerly initializeMascotSystem
+    const mainMascotContainer = document.getElementById('mascot-container'); // Renamed to avoid conflict
+    if (!mainMascotContainer) return;
+
+    const backgroundUrlFromDataAttr = mainMascotContainer.dataset.backgroundImageUrl;
+    if (backgroundUrlFromDataAttr && backgroundUrlFromDataAttr.trim() !== "") {
+      mainMascotContainer.style.setProperty('--mascot-background-image', `url('${backgroundUrlFromDataAttr}')`);
+    } else {
+      mainMascotContainer.style.setProperty('--mascot-background-image', 'none');
+    }
+
+    const mascotDismissedState = sessionStorage.getItem('cuppyDismissed');
+
+    if (mascotDismissedState === 'true' || mascotDismissedState === null) {
+      // Hide if explicitly dismissed OR if no state is set yet (new user)
+      hideMascot(false); // Pass false for initial hide without dismissal message
+      if (mainMascotContainer) mainMascotContainer.style.display = 'none';
+    } else { // mascotDismissedState === 'false'
+      // Show if explicitly un-dismissed in the past
+      showMascot();
+    }
+    setupEventListeners();
+
+    // astro:page-load listener for logging (original lines 1167-1179)
+    // This can be part of the setup if desired, or kept separate in Astro component
+    // For simplicity, including it here to run once when setupCuppy is called.
+    document.addEventListener('astro:page-load', () => {
+      const mobileCard = document.getElementById('mobile-mascot-function-card');
+      if (mobileCard) {
+        // console.log("Mobile card #mobile-mascot-function-card FOUND in DOM for logging.");
+      } else {
+        console.error(`Client (${instanceId || 'UNKNOWN'}): Mobile card #mobile-mascot-function-card NOT FOUND in DOM for logging.`);
+      }
+
+      const desktopChatUi = document.getElementById('mascot-chat-ui');
+      if (desktopChatUi) {
+        // console.log("Desktop #mascot-chat-ui FOUND in DOM for logging.");
+      } else {
+        console.error(`Client (${instanceId || 'UNKNOWN'}): Desktop #mascot-chat-ui NOT FOUND in DOM for logging.`);
+      }
+    });
+  }
+
+  async function init() {
+    // mascotContextPropValue and instanceId are available here from define:vars
+    try {
+      setupBleepy(mascotContextPropValue, instanceId);
+    } catch (error) {
+      console.error('Failed to initialize Bleepy script:', error);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init(); // DOMContentLoaded has already fired
+  }
+</script>

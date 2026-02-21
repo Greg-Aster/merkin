@@ -1,0 +1,14 @@
+---
+// This file creates the /host page and renders our Svelte UI component.
+import { HostPanel } from '../threlte/features/multiplayer';
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>MEGAMEAL Host</title>
+  </head>
+  <body>
+    <HostPanel client:only="svelte" />
+  </body>
+</html>

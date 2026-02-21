@@ -1,0 +1,310 @@
+/* Timeline-specific styles to match your site's Tailwind theme */
+
+/* CSS variables for timeline colors */
+:root {
+  /* Timeline star node colors */
+  --timeline-blue: #3b82f6;
+  --timeline-purple: #8b5cf6;
+  --timeline-indigo: #6366f1;
+  --timeline-lavender: #a78bfa;
+  --timeline-light-blue: #60a5fa;
+  --timeline-cyan: #22d3ee;
+}
+
+/* Ensure rounded corners match site style */
+.timeline {
+  --radius-large: var(--radius-large, 12px);
+  border-radius: var(--radius-large);
+  overflow: hidden;
+}
+
+/* Match site's card styling */
+.card-base {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-large);
+  transition: all 0.2s ease;
+}
+
+/* Match button hover states */
+.btn-plain {
+  @apply transition relative flex items-center justify-center bg-none
+  text-black/75 hover:text-[var(--primary)] dark:text-white/75 dark:hover:text-[var(--primary)];
+}
+
+.btn-plain:hover {
+  background-color: var(--btn-plain-bg-hover, rgba(0, 0, 0, 0.05));
+}
+
+.btn-plain:active {
+  background-color: var(--btn-plain-bg-active, rgba(0, 0, 0, 0.1));
+}
+
+/* Better looking controls */
+.timeline-controls button svg,
+.timeline-footer button svg {
+  transform-origin: center;
+  transition: transform 0.2s ease;
+}
+
+.timeline-controls button:hover svg,
+.timeline-footer button:hover svg {
+  transform: scale(1.2);
+}
+
+/* Match text styles */
+.text-75 {
+  @apply text-black/75 dark:text-white/75;
+}
+
+.text-50 {
+  @apply text-black/50 dark:text-white/50;
+}
+
+/* Quality of life: better transitions */
+.timeline-event {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+              opacity 0.3s ease;
+}
+
+/* Enhanced star node styling */
+.star-node {
+  filter: drop-shadow(0 0 8px var(--star-color, var(--primary))) !important;
+}
+
+.is-selected.star-node {
+  filter: drop-shadow(0 0 12px var(--star-color, var(--primary))) !important;
+}
+
+/* Make star effects more visible */
+.star-icon {
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* Ensure sparkles are visible */
+.sparkle-container {
+  z-index: 20;
+  filter: drop-shadow(0 0 5px var(--star-color, var(--primary)));
+}
+
+/* Improve timeline hover behaviors */
+.timeline-event:hover .star-icon {
+  filter: drop-shadow(0 0 6px var(--primary));
+}
+
+/* Enhance selected state */
+.timeline-event.selected .timeline-card {
+  border-color: var(--primary);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1), 0 0 10px rgba(var(--primary-rgb), 0.4);
+}
+
+/* Custom animation for star twinkling with site color palette */
+@keyframes starGlow {
+  0% { 
+    filter: drop-shadow(0 0 2px var(--primary));
+    transform: scale(1);
+  }
+  100% { 
+    filter: drop-shadow(0 0 6px var(--primary));
+    transform: scale(1.15);
+  }
+}
+
+/* Add focus indicators for accessibility */
+.timeline-controls button:focus-visible,
+.timeline-footer button:focus-visible,
+.timeline-event:focus-visible .star-node {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Subtle hover effects on navigation controls */
+.timeline-controls, .timeline-footer {
+  position: relative;
+  z-index: 10;
+}
+
+.timeline-controls::after,
+.timeline-footer::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, 
+    transparent, 
+    var(--primary, oklch(0.65 0.15 var(--hue))) 50%, 
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.timeline-controls::after { bottom: 0; }
+.timeline-footer::after { top: 0; }
+
+.timeline-controls:hover::after,
+.timeline-footer:hover::after {
+  opacity: 0.3;
+}
+
+/* Better handle for dragging indicator */
+.timeline-container {
+  cursor: grab;
+}
+
+.timeline-container.dragging {
+  cursor: grabbing;
+}
+
+/* Timeline basic styles */
+.timeline-container {
+  transform-origin: center;
+  transition: transform 0.3s ease;
+  will-change: transform;
+}
+
+/* Disable animations during dragging for better performance */
+.dragging .timeline-event,
+.dragging .timeline-container {
+  transition: none !important;
+}
+
+/* Timeline event zoom handling */
+.timeline-event {
+  transform-origin: center;
+}
+
+/* Card wrapper for proper scaling */
+.card-wrapper {
+  position: absolute;
+  z-index: 30;
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+/* Ensure proper card positioning after scaling */
+.timeline-event-desktop .card-wrapper {
+  left: 0;
+  top: 0;
+}
+
+.timeline-event-mobile .card-wrapper {
+  left: 0;
+  top: 0;
+}
+
+/* Enhanced hit area for better interaction */
+.event-node {
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Make events stand out better on hover */
+.timeline-event:hover {
+  z-index: 20;
+}
+
+/* Smoother background image scaling */
+.timeline .absolute.inset-0 img {
+  transition: transform 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+  will-change: transform;
+}
+
+/* Fixed mobile card container */
+.fixed-mobile-card-container {
+  position: fixed;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 40;
+  pointer-events: none;
+  width: auto;
+  max-width: 90%;
+}
+
+/* For mobile timeline card in fixed container */
+.fixed-mobile-card-container .timeline-card {
+  pointer-events: auto;
+  position: relative;
+  transform: none !important;
+  margin: 0;
+  max-width: 280px;
+  width: auto;
+}
+
+/* Ensure card pointer looks correct in fixed position */
+.fixed-mobile-card-container .card-pointer {
+  display: none;
+}
+
+/* Better touch interaction settings */
+@media (pointer: coarse) {
+  /* Applies to touch-screen devices */
+  .timeline-container {
+    /* Adjust the hit area for better touch interaction */
+    touch-action: none;
+  }
+  
+  /* Make buttons easier to tap on mobile */
+  .timeline-custom-controls button {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  
+  /* Increase the touch target size for star nodes */
+  .event-node {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  /* Visual feedback when touched */
+  .timeline-container:active {
+    cursor: grabbing;
+  }
+  
+  /* Make sure the card is big enough to read and interact with on mobile */
+  .fixed-mobile-card-container .timeline-card {
+    min-width: 250px;
+    padding: 12px;
+  }
+}
+
+/* Mobile-specific enhancements */
+@media (max-width: 767px) {
+  .star-node {
+    transform: scale(1.2); /* Make stars slightly bigger on mobile */
+  }
+  
+  .star-glow {
+    opacity: 0.8; /* More visible glow on mobile */
+  }
+  
+  /* Make sure sparkles render properly on mobile */
+  .sparkle-container {
+    transform: translateZ(0); /* Force GPU acceleration */
+  }
+}
+/* Add to the style section in TimelineCore.svelte */
+.card-wrapper {
+  position: absolute;
+  z-index: 30;
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+/* Position the card wrapper properly */
+.timeline-event-desktop .card-wrapper {
+  left: 0;
+  top: 0;
+}
+
+/* During touch interactions, disable transitions for smoother feel */
+.touch-active .card-wrapper {
+  transition: none !important;
+}

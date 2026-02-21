@@ -1,0 +1,152 @@
+{
+  "name": "Observatory-Environment",
+  "id": "observatory-environment",
+  "type": "terrain",
+  "version": "1.0.0",
+  "assets": {
+    "environment": "/models/levels/observatory-environment.glb",
+    "heightmap": "/terrain/heightmaps/observatory-environment_heightmap.png",
+    "chunksPath": "/terrain/levels/observatory-environment/"
+  },
+  "spawn": {
+    "position": [
+      -137.2,
+      20,
+      -49.5
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  "physics": {
+    "type": "trimesh",
+    "worldSize": 393.5526885986328,
+    "gridX": 4,
+    "gridY": 4,
+    "chunkSize": 98.3881721496582,
+    "minHeight": -1.8438290357589722,
+    "maxHeight": 56.307861328125,
+    "bounds": {
+      "min": [
+        -196.7517120361328,
+        -1.8438290357589722,
+        -194.6022491455078
+      ],
+      "max": [
+        196.8009765625,
+        56.307861328125,
+        194.5846710205078
+      ]
+    },
+    "trimesh": {
+      "downsample": 8,
+      "mode": "chunked",
+      "chunkVerts": 65,
+      "activeRadius": 3
+    }
+  },
+  "lighting": {
+    "ambientIntensity": 0.3,
+    "directionalLights": [
+      {
+        "position": [
+          100,
+          200,
+          100
+        ],
+        "color": 16777215,
+        "intensity": 1
+      }
+    ]
+  },
+  "optimization": {
+    "oceanSegments": {
+      "ultra_low": {
+        "width": 8,
+        "height": 8
+      },
+      "low": {
+        "width": 12,
+        "height": 12
+      },
+      "medium": {
+        "width": 24,
+        "height": 24
+      },
+      "high": {
+        "width": 32,
+        "height": 32
+      },
+      "ultra": {
+        "width": 64,
+        "height": 64
+      }
+    },
+    "terrainSegments": {
+      "ultra_low": {
+        "width": 16,
+        "height": 16
+      },
+      "low": {
+        "width": 24,
+        "height": 24
+      },
+      "medium": {
+        "width": 32,
+        "height": 32
+      },
+      "high": {
+        "width": 48,
+        "height": 48
+      },
+      "ultra": {
+        "width": 96,
+        "height": 96
+      }
+    }
+  },
+  "style": {
+    "preset": "ghibli",
+    "enabled": true,
+    "colorGrading": {
+      "saturation": 1.2,
+      "contrast": 1.1,
+      "brightness": 1,
+      "warmth": 1.05
+    },
+    "fog": {
+      "enabled": true,
+      "density": 0.002,
+      "color": "#87CEEB"
+    },
+    "bloom": {
+      "enabled": true,
+      "intensity": 0.3,
+      "threshold": 0.9
+    }
+  },
+  "features": {
+    "ocean": true,
+    "vegetation": true,
+    "fireflies": true,
+    "starMap": true,
+    "conversations": true,
+    "styles": true
+  },
+  "ocean": {
+    "size": {
+      "width": 4000,
+      "height": 4000
+    },
+    "enableRising": true,
+    "initialLevel": -2,
+    "targetLevel": 5,
+    "riseRate": 0.01,
+    "enableAnimation": true,
+    "underwaterFogDensity": 0.1,
+    "underwaterFogColor": 533536,
+    "surfaceFogDensity": 0.001
+  }
+}

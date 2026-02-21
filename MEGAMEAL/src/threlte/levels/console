@@ -1,0 +1,5 @@
+  // Switch back to observatory (should show HybridObservatory.svelte)  
+  gameActions.transitionToLevel('observatory')
+
+    // Switch to sci-fi room (should show SciFiRoom.svelte)
+    gameActions.transitionToLevel('sci-fi-room')

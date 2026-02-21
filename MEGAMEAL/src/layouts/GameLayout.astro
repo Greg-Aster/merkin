@@ -1,0 +1,67 @@
+---
+// /src/layouts/GameLayout.astro - Minimal layout just for the game
+import Layout from './Layout.astro';
+import { siteConfig } from '../config/config';
+
+interface Props {
+  title?: string;
+  description?: string;
+  lang?: string;
+}
+
+const { 
+  title = "MegaMeal: The Game",
+  description = "Navigate through cosmic time in your beat-up spaceship, discovering the lost stories of the MegaMeal universe.",
+  lang = "en"
+} = Astro.props;
+---
+
+<Layout 
+  title={title}
+  description={description}
+  lang={lang}
+  setOGTypeArticle={false}
+  
+>
+  <!-- Full viewport game container -->
+  <div id="game-viewport" class="fixed inset-0 bg-black dark:bg-gray-900 overflow-hidden">
+    <!-- Game Exit Button (top-left) -->
+    <!-- <div class="absolute top-4 left-4 z-50">
+      <a 
+        href="/" 
+        class="card-base2 p-3 text-sm font-bold transition-all duration-200 hover:scale-105 text-gray-100 dark:text-gray-200 hover:text-white dark:hover:text-white no-underline"
+        title="Return to MegaMeal Site"
+      >
+        ← Exit Game
+      </a>
+    </div> -->
+    
+    <!-- Game Content -->
+    <div id="game-content" class="w-full h-full">
+      <slot />
+    </div>
+  </div>
+</Layout>
+
+<style>
+  /* Minimal game-specific styles using CSS variables */
+  #game-viewport {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+  }
+  
+  /* Remove any potential scrollbars */
+  /* body {
+    overflow: hidden;
+  } */
+  
+  /* Ensure game content fills the space */
+  #game-content {
+    display: flex;
+    flex-direction: column;
+  }
+</style>

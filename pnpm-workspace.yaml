@@ -1,0 +1,9 @@
+packages:
+  # Sites - blog-only sites in workspace
+  - 'Temporal-Flow'
+  - 'DNDIY.github.io'
+  # MEGAMEAL excluded: uses --ignore-workspace due to Threlte 3D engine
+  # having pre-compiled Svelte code that conflicts with workspace resolution
+  # - 'MEGAMEAL'
+  # Shared packages
+  - 'packages/*'

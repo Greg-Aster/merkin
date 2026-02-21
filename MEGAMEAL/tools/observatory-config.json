@@ -1,0 +1,15 @@
+{
+  "name": "Observatory Environment",
+  "id": "observatory-environment",
+  "type": "hybrid",
+  "glbPath": "/home/greggles/Merkin/MEGAMEAL/public/models/levels/observatory-environment.glb",
+  "resolution": 1024,
+  "gridX": 4,
+  "gridY": 4,
+  "lodLevels": 3,
+  "outputDir": "/home/greggles/Merkin/MEGAMEAL/output",
+  "enableOcean": false,
+  "enableVegetation": true,
+  "enableFireflies": true,
+  "enableStarMap": true
+}

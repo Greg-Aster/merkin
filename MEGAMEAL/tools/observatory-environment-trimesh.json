@@ -1,0 +1,42 @@
+{
+  "name": "Observatory Environment",
+  "id": "observatory-environment",
+  "type": "terrain",
+  "glbPath": "public/models/levels/observatory-environment.glb",
+  "resolution": 1024,
+  "gridX": 4,
+  "gridY": 4,
+  "lodLevels": 3,
+  "outputDir": "public",
+  "enableOcean": true,
+  "enableVegetation": true,
+  "enableFireflies": true,
+  "enableStarMap": true,
+  "collisionMode": "trimesh",
+  "trimesh": {
+    "downsample": 16,
+    "mode": "single",
+    "chunkVerts": 65,
+    "activeRadius": 2
+  },
+  "ocean": {
+    "size": { "width": 10000, "height": 10000 },
+    "enableRising": false,
+    "initialLevel": -1,
+    "targetLevel": 5,
+    "riseRate": 0.05,
+    "enableAnimation": true,
+    "underwaterFogDensity": 0.1,
+    "underwaterFogColor": 533536,
+    "surfaceFogDensity": 0.001
+  },
+  "style": {
+    "preset": "ghibli",
+    "enabled": true,
+    "fog": { 
+      "enabled": true, 
+      "density": 0.002, 
+      "color": "#87CEEB" 
+    }
+  }
+}

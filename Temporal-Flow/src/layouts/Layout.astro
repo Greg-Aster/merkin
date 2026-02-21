@@ -1,0 +1,8 @@
+---
+import SharedLayout from '@merkin/blog-core/layouts/Layout.astro'
+---
+
+<SharedLayout {...Astro.props}>
+  <slot slot="head" name="head" />
+  <slot />
+</SharedLayout>

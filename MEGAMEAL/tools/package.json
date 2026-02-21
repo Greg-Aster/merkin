@@ -1,0 +1,23 @@
+{
+  "name": "megameal-dev-tools",
+  "version": "1.0.0",
+  "description": "MEGAMEAL Development Tools - Zero-Install Standalone App",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "canvas": "^3.2.0",
+    "three": "^0.179.1",
+    "three-mesh-bvh": "^0.9.1"
+  },
+  "keywords": [
+    "megameal",
+    "development",
+    "tools",
+    "heightmap",
+    "level-processor"
+  ],
+  "author": "MEGAMEAL Development Team",
+  "license": "ISC"
+}

@@ -1,0 +1,138 @@
+{
+  "name": "Observatory Environment",
+  "id": "observatory-environment",
+  "type": "hybrid",
+  "version": "1.0.0",
+  "assets": {
+    "environment": "/models/levels/observatory-environment.glb",
+    "heightmap": "/terrain/heightmaps/observatory-environment_heightmap.png",
+    "chunksPath": "/terrain/levels/observatory-environment/"
+  },
+  "spawn": {
+    "position": [
+      0,
+      18,
+      -50
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  "physics": {
+    "type": "trimesh",
+    "worldSize": 393.5526885986328,
+    "gridX": 4,
+    "gridY": 4,
+    "chunkSize": 98.3881721496582,
+    "minHeight": -1.8438290357589722,
+    "maxHeight": 56.307861328125,
+    "bounds": {
+      "min": [
+        -199.5517120361328,
+        -1.8438290357589722,
+        -195.1022491455078
+      ],
+      "max": [
+        194.0009765625,
+        56.307861328125,
+        194.0846710205078
+      ]
+    },
+    "trimesh": {
+      "downsample": 16,
+      "mode": "single",
+      "chunkVerts": 65,
+      "activeRadius": 2
+    }
+  },
+  "lighting": {
+    "ambientIntensity": 0.2,
+    "directionalLights": [
+      {
+        "position": [
+          0,
+          200,
+          0
+        ],
+        "color": 16777215,
+        "intensity": 0.8
+      }
+    ]
+  },
+  "optimization": {
+    "oceanSegments": {
+      "ultra_low": {
+        "width": 8,
+        "height": 8
+      },
+      "low": {
+        "width": 12,
+        "height": 12
+      },
+      "medium": {
+        "width": 24,
+        "height": 24
+      },
+      "high": {
+        "width": 32,
+        "height": 32
+      },
+      "ultra": {
+        "width": 64,
+        "height": 64
+      }
+    },
+    "terrainSegments": {
+      "ultra_low": {
+        "width": 16,
+        "height": 16
+      },
+      "low": {
+        "width": 24,
+        "height": 24
+      },
+      "medium": {
+        "width": 32,
+        "height": 32
+      },
+      "high": {
+        "width": 48,
+        "height": 48
+      },
+      "ultra": {
+        "width": 96,
+        "height": 96
+      }
+    }
+  },
+  "style": {
+    "preset": "ghibli",
+    "enabled": true,
+    "colorGrading": {
+      "saturation": 1.2,
+      "contrast": 1.1,
+      "brightness": 1,
+      "warmth": 1.05
+    },
+    "fog": {
+      "enabled": true,
+      "density": 0.002,
+      "color": "#87CEEB"
+    },
+    "bloom": {
+      "enabled": true,
+      "intensity": 0.3,
+      "threshold": 0.9
+    }
+  },
+  "features": {
+    "ocean": false,
+    "vegetation": true,
+    "fireflies": true,
+    "starMap": true,
+    "conversations": true,
+    "styles": true
+  }
+}

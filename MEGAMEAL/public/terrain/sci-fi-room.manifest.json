@@ -1,0 +1,147 @@
+{
+  "name": "sci-fi-room",
+  "id": "sci-fi-room",
+  "type": "interior",
+  "version": "1.0.0",
+  "assets": {
+    "environment": "/models/levels/sci-fi-room.glb",
+    "heightmap": null,
+    "chunksPath": "/terrain/levels/sci-fi-room/"
+  },
+  "spawn": {
+    "position": [
+      0,
+      1,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  "physics": {
+    "type": "trimesh",
+    "worldSize": 5.39045262336731,
+    "gridX": 4,
+    "gridY": 4,
+    "chunkSize": 1.3476131558418274,
+    "minHeight": -0.08223403990268707,
+    "maxHeight": 1.983830451965332,
+    "bounds": {
+      "min": [
+        -2.6336541175842285,
+        -0.08223403990268707,
+        -2.2834396362304688
+      ],
+      "max": [
+        2.756798505783081,
+        1.983830451965332,
+        2.3493473529815674
+      ]
+    },
+    "trimesh": {
+      "downsample": 16,
+      "mode": "single",
+      "chunkVerts": 65,
+      "activeRadius": 2
+    }
+  },
+  "lighting": {
+    "ambientIntensity": 0.8,
+    "directionalLights": [
+      {
+        "position": [
+          0,
+          10,
+          0
+        ],
+        "color": 16777215,
+        "intensity": 2
+      },
+      {
+        "position": [
+          5,
+          5,
+          5
+        ],
+        "color": 8900331,
+        "intensity": 1.5
+      }
+    ]
+  },
+  "optimization": {
+    "oceanSegments": {
+      "ultra_low": {
+        "width": 8,
+        "height": 8
+      },
+      "low": {
+        "width": 12,
+        "height": 12
+      },
+      "medium": {
+        "width": 24,
+        "height": 24
+      },
+      "high": {
+        "width": 32,
+        "height": 32
+      },
+      "ultra": {
+        "width": 64,
+        "height": 64
+      }
+    },
+    "terrainSegments": {
+      "ultra_low": {
+        "width": 16,
+        "height": 16
+      },
+      "low": {
+        "width": 24,
+        "height": 24
+      },
+      "medium": {
+        "width": 32,
+        "height": 32
+      },
+      "high": {
+        "width": 48,
+        "height": 48
+      },
+      "ultra": {
+        "width": 96,
+        "height": 96
+      }
+    }
+  },
+  "style": {
+    "preset": "ghibli",
+    "enabled": true,
+    "colorGrading": {
+      "saturation": 1.2,
+      "contrast": 1.1,
+      "brightness": 1,
+      "warmth": 1.05
+    },
+    "fog": {
+      "enabled": true,
+      "density": 0.002,
+      "color": "#87CEEB"
+    },
+    "bloom": {
+      "enabled": true,
+      "intensity": 0.3,
+      "threshold": 0.9
+    }
+  },
+  "features": {
+    "ocean": false,
+    "vegetation": false,
+    "fireflies": false,
+    "starMap": false,
+    "conversations": false,
+    "styles": true
+  }
+}

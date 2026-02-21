@@ -1,0 +1,656 @@
+---
+import Footer from '@components/Footer.astro'
+import Navbar from '@components/Navbar.astro'
+import BackToTop from '@components/control/BackToTop.astro'
+import SideBar from '@components/widget/SideBar.astro'
+import Layout from '@/layouts/Layout.astro'
+import { Icon } from 'astro-icon/components'
+import { siteConfig } from '@/config/config'
+import type { MarkdownHeading } from 'astro'
+import TOC from '@components/widget/TOC.astro';
+import ImageWrapper from '@components/misc/ImageWrapper.astro';
+import { Image } from 'astro:assets';
+import path from 'node:path';
+import { getDir } from '@/utils/url-utils';
+import TimelineController from '@components/timeline/TimelineBanner.astro';
+import '@/styles/timeline-styles.css';
+
+// Import banner configuration and helper functions
+import { 
+  bannerConfig, 
+  getResponsiveBannerDimensions, 
+  getFallbackBannerCSS,
+  isVideoBannerData,
+  isImageBannerData,
+  isTimelineBannerData,
+  getPanelTopPosition,
+  getNavbarHeight,
+  getBannerAnimationSettings
+} from '@/config/banner.config';
+
+interface Props {
+  title?: string
+  banner?: string
+  description?: string
+  lang?: string
+  setOGTypeArticle?: boolean
+  headings?: MarkdownHeading[]
+  post?: any 
+  bannerLink?: string
+}
+
+// Update the Props destructuring in MainGridLayout.astro
+const { 
+  title, 
+  banner = siteConfig.banner.src, // Default to the site banner if none provided
+  description, 
+  lang, 
+  setOGTypeArticle, 
+  headings = [], 
+  post,
+  bannerLink = ''
+} = Astro.props
+
+// Get the banner link from post data if available (for cases where post data is passed directly)
+const bannerLinkFromPost = post?.data?.bannerLink || '';
+// Use bannerLinkFromPost as priority, then fall back to the prop
+const finalBannerLink = bannerLinkFromPost || bannerLink;
+
+// Get the post slug if available
+const postSlug = post?.slug || '';
+// Get custom avatar from post data if available
+const customAvatar = post?.data?.avatarImage || '';
+const customName = post?.data?.authorName || '';
+const customBio = post?.data?.authorBio || '';
+
+// Use the config helper functions for dimensions
+const { height: BANNER_HEIGHT, overlap: BANNER_OVERLAP } = getResponsiveBannerDimensions(false);
+const NAVBAR_HEIGHT = getNavbarHeight(false);
+const NAVBAR_HEIGHT_MOBILE = getNavbarHeight(true);
+
+// Check if post has a specific banner type
+const hasPostTimelineBanner = post?.data?.bannerType === "timeline" && post?.data?.bannerData?.category;
+const hasPostVideoBanner = post?.data?.bannerType === "video" && post?.data?.bannerData?.videoId;
+const hasPostImageBanner = (post?.data?.image || (post?.data?.bannerType === "image" && post?.data?.bannerData?.imageUrl)) && !hasPostVideoBanner && !hasPostTimelineBanner;
+const hasPostBanner = hasPostVideoBanner || hasPostImageBanner || hasPostTimelineBanner;
+
+// Determine which banner type to use for standard pages
+const useDefaultVideo = !hasPostBanner && bannerConfig.defaultBannerType === 'video' && isVideoBannerData(bannerConfig.defaultBannerData);
+const useDefaultImage = !hasPostBanner && bannerConfig.defaultBannerType === 'image' && isImageBannerData(bannerConfig.defaultBannerData);
+const useDefaultTimeline = !hasPostBanner && bannerConfig.defaultBannerType === 'timeline' && isTimelineBannerData(bannerConfig.defaultBannerData);
+const useDefaultStandard = !hasPostBanner && (bannerConfig.defaultBannerType === 'standard' || (!useDefaultVideo && !useDefaultImage && !useDefaultTimeline));
+
+// Master flag to determine which banner type to use
+const hasTimelineBanner = hasPostTimelineBanner || useDefaultTimeline;
+const hasVideoBanner = hasPostVideoBanner || useDefaultVideo;
+const hasImageBanner = hasPostImageBanner || useDefaultImage;
+const hasStandardBanner = useDefaultStandard;
+const isStandardPage = !hasPostBanner;
+
+// Get banner data based on source (post or default config)
+const videoBannerData = hasPostVideoBanner 
+  ? post.data.bannerData
+  : useDefaultVideo ? bannerConfig.defaultBannerData : null;
+
+const imageBannerData = hasPostImageBanner 
+  ? { imageUrl: post.data.bannerData?.imageUrl || post.data.image }
+  : useDefaultImage ? bannerConfig.defaultBannerData : null;
+
+const timelineBannerData = hasPostTimelineBanner 
+  ? post.data.bannerData
+  : useDefaultTimeline ? bannerConfig.defaultBannerData : null;
+
+// Use centralized config for panel position
+const currentBannerType = hasVideoBanner 
+  ? 'video' 
+  : hasImageBanner 
+    ? 'image' 
+    : hasTimelineBanner 
+      ? 'timeline' 
+      : 'standard';
+
+const mainPanelTop = getPanelTopPosition(currentBannerType);
+
+// Use bannerList from config
+const bannerList = bannerConfig.bannerList;
+const MAX_BANNER_WIDTH = bannerConfig.layout.maxWidth; // px
+
+// Get navbar spacing based on banner type
+const getBannerNavbarSpacing = () => {
+  if (hasTimelineBanner) return bannerConfig.navbarSpacing.timeline;
+  if (hasVideoBanner) return bannerConfig.navbarSpacing.video;
+  if (hasImageBanner) return bannerConfig.navbarSpacing.image;
+  return bannerConfig.navbarSpacing.standard;
+};
+
+const navbarSpacing = getBannerNavbarSpacing();
+---
+
+<Layout 
+  title={title} 
+  banner={banner} 
+  description={description} 
+  lang={lang} 
+  setOGTypeArticle={setOGTypeArticle}
+  post={post} 
+>
+
+  <!-- Parallax Background (if enabled) -->
+  {siteConfig.banner.enable && bannerConfig.parallax.enabled && 
+    <div id="parallax-banner" class="fixed top-0 left-0 w-full h-screen z-[-1] overflow-hidden">
+      <ImageWrapper 
+        id="parallax-image" 
+        alt="Site background image" 
+        class="parallax-bg object-cover w-full h-[120vh]"
+        src={siteConfig.banner.src} 
+        position={siteConfig.banner.position || 'center'}
+      />
+      {siteConfig.banner.credit?.enable && 
+        <div class="absolute bottom-4 right-4 text-white/50 text-xs bg-black/30 px-2 py-1 rounded">
+          {siteConfig.banner.credit.text && 
+            <a href={siteConfig.banner.credit.url || '#'} class="hover:text-white/80 transition">
+              {siteConfig.banner.credit.text}
+            </a>
+          }
+        </div>
+      }
+      <!-- Optional overlay for better text readability -->
+      <div class="absolute inset-0 bg-gradient-to-b from-black/20 to-black/50 pointer-events-none"></div>
+    </div>
+  }
+
+  <!-- Navbar -->
+  <slot slot="head" name="head"></slot>
+  <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto">
+    <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
+      <Navbar></Navbar>
+    </div>
+  </div>
+
+<!-- Unified Banner Container - handles all banner types -->
+<div id="banner-container" 
+class={`z-10 w-full 
+  ${hasTimelineBanner ? 'has-timeline-banner' : ''} 
+  ${hasVideoBanner ? 'has-video-banner' : ''} 
+  ${hasImageBanner ? 'has-image-banner' : ''} 
+  ${hasStandardBanner ? 'has-standard-banner' : ''} 
+  ${hasTimelineBanner ? '' : 'overflow-hidden'} 
+  transition-all duration-500 
+  ${isStandardPage ? 'absolute h-[' + bannerConfig.layout.height.desktop + ']' : 'relative'}`} 
+style={isStandardPage 
+  ? '' 
+  : `margin-top: ${navbarSpacing};`
+}>
+
+<!-- Video Banner Content -->
+{hasVideoBanner && (
+  <div class="video-banner-content max-w-screen-2xl mx-auto px-4">
+    <div class="relative w-full pb-[56.25%] bg-black overflow-hidden shadow-lg rounded-lg">
+      <iframe
+        src={`https://www.youtube.com/embed/${hasPostVideoBanner ? post.data.bannerData.videoId : videoBannerData.videoId}?autoplay=0&mute=0&controls=1`}
+        title="YouTube video player"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
+        allowfullscreen
+        class="absolute top-0 left-0 w-full h-full"
+      ></iframe>
+    </div>
+  </div>
+)}
+
+{hasTimelineBanner && (
+  <div class="timeline-banner-content max-w-screen-2xl mx-auto px-0 py-0">
+    <div class="timeline-banner-container">
+      <div class="timeline-banner-inner">
+        <TimelineController 
+          title={hasPostTimelineBanner ? (post.data.bannerData.title || post.data.title) : (timelineBannerData.title || title || "Timeline")}
+          category={hasPostTimelineBanner ? post.data.bannerData.category : (timelineBannerData?.category || "MEGA MEAL")}
+          startYear={hasPostTimelineBanner ? post.data.bannerData.startYear : timelineBannerData?.startYear}
+          endYear={hasPostTimelineBanner ? post.data.bannerData.endYear : timelineBannerData?.endYear}
+          background={hasPostTimelineBanner ? (post.data.bannerData.background || "/posts/timeline/universe.png") : (timelineBannerData?.background || "/posts/timeline/universe.png")}
+          isCollapsed={false}
+          compact={hasPostTimelineBanner ? (post.data.bannerData.compact || false) : (timelineBannerData?.compact || false)}
+          class="timeline-banner-controller"
+          asBanner={true}
+          bannerHeight={hasPostTimelineBanner ? (post.data.bannerData.height || "70vh") : (timelineBannerData?.height || "70vh")}
+        />
+      </div>
+    </div>
+  </div>
+)}
+
+<!-- Image Banner Content -->
+{hasImageBanner && (
+  <div class="image-banner-content max-w-screen-2xl mx-auto px-0">
+    <div class="relative w-full overflow-hidden shadow-lg rounded-lg">
+      {post?.data?.bannerLink || bannerLink ? (
+        <a 
+          href={post?.data?.bannerLink || bannerLink} 
+          aria-label="Banner Link" 
+          class="group block relative"
+        >
+          <div class="absolute transition pointer-events-none group-hover:bg-black/30 group-active:bg-black/50 w-full h-full z-50 flex items-center justify-center">
+            <Icon
+              name="fa6-solid:link"
+              class="transition opacity-0 scale-90 group-hover:scale-100 group-hover:opacity-100 text-white text-5xl"
+            ></Icon>
+          </div>
+          <img 
+            src={hasPostImageBanner ? (post.data.bannerData?.imageUrl || post.data.image) : imageBannerData.imageUrl}
+            alt={hasPostImageBanner ? (post.data.title || "Post banner image") : (title || "Banner image")}
+            class="w-full object-cover"
+          />
+        </a>
+      ) : (
+        <img 
+          src={hasPostImageBanner ? (post.data.bannerData?.imageUrl || post.data.image) : imageBannerData.imageUrl}
+          alt={hasPostImageBanner ? (post.data.title || "Post banner image") : (title || "Banner image")}
+          class="w-full object-cover"
+        />
+      )}
+    </div>
+  </div>
+)}
+
+<!-- Standard Animated Banner (only show if none of the above banner types are used) -->
+{hasStandardBanner && (
+  <div class="animated-banner-content max-w-screen-2xl mx-auto h-full relative">
+   {bannerList.length > 0 ? bannerList.map((src, index) => (
+     <Image
+       src={src}
+       alt="Banner image"
+       width={bannerConfig.layout.maxWidth} 
+       height={Math.round(bannerConfig.layout.maxWidth * 0.5625)} // 16:9 aspect ratio
+       class={`absolute inset-0 w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-opacity duration-${bannerConfig.animation.transitionDuration} ${
+       index === 0 ? 'opacity-100' : 'opacity-0'
+       }`}
+       loading={index === 0 ? 'eager' : 'lazy'}
+     />
+   )) : (
+     <!-- Fallback for empty banner list -->
+     <div class="w-full h-full" style={`background: ${getFallbackBannerCSS()}`}></div>
+   )}
+   
+   {/* Gradient overlay if enabled */}
+   {bannerConfig.visual.applyGradientOverlay && (
+     <div class="absolute inset-0 w-full h-full" style={`background: ${bannerConfig.visual.gradientOverlay}`}></div>
+   )}
+  </div>
+)}
+</div>
+
+<!-- Main content wrapper -->
+<div class={`w-full z-30 pointer-events-none ${isStandardPage ? 'absolute' : 'relative'}`} 
+style={isStandardPage 
+  ? `top: calc(${bannerConfig.layout.height.desktop} - ${bannerConfig.layout.overlap.desktop});` 
+  : 'margin-top: 1rem;'}>
+<div class="relative max-w-[var(--page-width)] mx-auto pointer-events-auto">
+<div id="main-grid" class="transition duration-700 w-full left-0 right-0 grid grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto]
+   mx-auto gap-4 px-0 md:px-4">
+   
+   <SideBar 
+   class="mb-4 row-start-2 row-end-3 col-span-2 lg:row-start-1 lg:row-end-2 lg:col-span-1 lg:max-w-[17.5rem] onload-animation" 
+   headings={headings}
+   postSlug={postSlug}
+   customAvatar={customAvatar}
+   customName={customName}
+   customBio={customBio}
+ ></SideBar>
+ 
+ <main id="main" class="transition-swup-fade col-span-2 lg:col-span-1 overflow-hidden">
+   <div id="main-content-wrapper" class="onload-animation">
+     <slot></slot>
+     <div class="footer col-span-2 onload-animation hidden lg:block">
+       <Footer></Footer>
+     </div>
+   </div>
+ </main>
+ 
+ <div class="footer col-span-2 onload-animation block lg:hidden">
+   <Footer></Footer>
+ </div>
+</div>
+
+<BackToTop></BackToTop>
+</div>
+</div>
+
+  <!-- The things that should be under the banner, only the TOC for now -->
+  <div class="absolute w-full z-0 hidden 2xl:block">
+    <div class="relative max-w-[var(--page-width)] mx-auto">
+        <!-- TOC component -->
+        {siteConfig.toc.enable && <div id="toc-wrapper" class="hidden lg:block transition absolute top-0 -right-[var(--toc-width)] w-[var(--toc-width)] flex items-center toc-animated">
+            <div id="toc-inner-wrapper" class="fixed top-14 w-[var(--toc-width)] h-[calc(100vh_-_20rem)] overflow-y-scroll overflow-x-hidden hide-scrollbar">
+                <div id="toc" class="w-full h-full transition-swup-fade ">
+                    <div class="h-8 w-full"></div>
+                    <TOC headings={headings}></TOC>
+                    <div class="h-8 w-full"></div>
+                </div>
+            </div>
+        </div>}
+
+        <!-- #toc needs to exist for Swup to work normally -->
+        {!siteConfig.toc.enable && <div id="toc"></div>}
+    </div>
+  </div>
+</Layout>
+
+
+<style define:vars={{ 
+  'banner-height': bannerConfig.layout.height.desktop, 
+  'banner-height-mobile': bannerConfig.layout.height.mobile,
+  'banner-overlap': bannerConfig.layout.overlap.desktop,
+  'banner-overlap-mobile': bannerConfig.layout.overlap.mobile,
+  'navbar-height': bannerConfig.navbar.height.desktop,
+  'navbar-height-mobile': bannerConfig.navbar.height.mobile,
+  'standard-navbar-spacing': bannerConfig.navbarSpacing.standard,
+  'timeline-navbar-spacing': bannerConfig.navbarSpacing.timeline,
+  'video-navbar-spacing': bannerConfig.navbarSpacing.video,
+  'image-navbar-spacing': bannerConfig.navbarSpacing.image
+}}>
+  /* Banner styles */
+  #banner-container, #animated-banner {
+    transition: height 0.5s ease-in-out;
+  }
+  
+  #banner-container.absolute, #animated-banner {
+    top: 0;
+    height: var(--banner-height);
+  }
+  
+  /* Banner type-specific spacing */
+  .has-standard-banner {
+    margin-top: var(--standard-navbar-spacing) !important;
+  }
+  
+  .has-timeline-banner {
+    margin-top: var(--timeline-navbar-spacing) !important;
+  }
+  
+  .has-video-banner {
+    margin-top: var(--video-navbar-spacing) !important;
+  }
+  
+  .has-image-banner {
+    margin-top: var(--image-navbar-spacing) !important;
+  }
+  
+  /* Video banner specifics */
+  .video-banner-content {
+    width: 100%;
+  }
+  
+  /* Large screen handling */
+  @media (min-width: 1921px) {
+    .animated-banner-content:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to right, rgba(0,0,0,0.15), transparent 10%, transparent 90%, rgba(0,0,0,0.15));
+      z-index: 1;
+    }
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    #banner-container.absolute, #animated-banner {
+      height: var(--banner-height-mobile);
+    }
+    
+    .w-full.z-30.absolute {
+      top: calc(var(--banner-height-mobile) - var(--banner-overlap-mobile)) !important;
+    }
+    
+    .video-banner-content, .image-banner-content {
+      padding: 0 0.5rem;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    #post-video-banner, #post-image-banner {
+      margin-top: var(--navbar-height-mobile); /* Smaller navbar on mobile */
+    }
+  }
+
+  /* Animation styles */
+  .onload-animation {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  
+  .onload-animation.loaded {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* TOC styles */
+  .toc-animated {
+    transition: opacity 0.3s ease;
+  }
+  
+  .toc-hide {
+    opacity: 0;
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  // Import banner animation settings from config
+  const bannerAnimationSettings = {
+    enabled: true,
+    interval: 5000,            // Default to 5 seconds if import fails
+    transitionDuration: 1000,  // Default to 1 second if import fails
+    direction: 'alternate'     // Default if import fails
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Update navbar height
+    updateNavbarHeight();
+    
+    // Initialize animations
+    initializeAnimations();
+    
+    // Setup banner animation for standard pages
+    setupBannerAnimation();
+    
+    // Setup efficient parallax effect
+    setupEfficientParallax();
+    
+    // Set up event listeners
+    setupEventListeners();
+  });
+  
+  // Navbar height function
+  function updateNavbarHeight() {
+    const navbar = document.getElementById('navbar-wrapper');
+    if (navbar) {
+      const navbarHeight = navbar.offsetHeight;
+      document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`);
+    }
+  }
+  
+  // Animation initialization
+  function initializeAnimations() {
+    const elements = document.querySelectorAll('.onload-animation');
+    elements.forEach((element, index) => {
+      setTimeout(() => {
+        element.classList.add('loaded');
+      }, 100 + (index * 50));
+    });
+    
+    // Show post image if present
+    const postImage = document.getElementById('post-image');
+    if (postImage) {
+      setTimeout(() => {
+        postImage.classList.remove('opacity-0', 'scale-105');
+      }, 100);
+    }
+  }
+  
+  // Banner animation setup for standard pages
+  function setupBannerAnimation() {
+    const bannerContent = document.querySelector('.animated-banner-content');
+    if (!bannerContent) return;
+    
+    const bannerImages = bannerContent.querySelectorAll('img');
+    if (bannerImages.length <= 1) return; // Skip if only one image
+    
+    let currentIndex = 0;
+    let direction = 1;
+    
+    function animateBanner() {
+      // Determine next index based on animation direction
+      let nextIndex;
+      
+      if (bannerAnimationSettings.direction === 'forward') {
+        nextIndex = (currentIndex + 1) % bannerImages.length;
+      } else if (bannerAnimationSettings.direction === 'reverse') {
+        nextIndex = (currentIndex - 1 + bannerImages.length) % bannerImages.length;
+      } else { // 'alternate'
+        nextIndex = (currentIndex + direction) % bannerImages.length;
+        
+        // Change direction if we hit an edge
+        if (nextIndex >= bannerImages.length - 1) direction = -1;
+        if (nextIndex <= 0) direction = 1;
+      }
+      
+      const nextImage = bannerImages[nextIndex] as HTMLImageElement;
+      const currentImage = bannerImages[currentIndex] as HTMLImageElement;
+      
+      // Preload and fade
+      const img = new Image();
+      img.src = nextImage.src;
+      img.onload = () => {
+        nextImage.style.opacity = '1';
+        setTimeout(() => {
+          currentImage.style.opacity = '0';
+        }, 100);
+      };
+      
+      currentIndex = nextIndex;
+    }
+    
+    // Only set up animation if enabled in config
+    if (bannerAnimationSettings.enabled && bannerImages.length > 1) {
+      setInterval(animateBanner, bannerAnimationSettings.interval);
+    }
+  }
+  
+  function setupEfficientParallax() {
+    // Check if we have the parallax banner
+    const parallaxBanner = document.getElementById('parallax-banner');
+    if (!parallaxBanner) return;
+    
+    // Get the parallax image
+    const parallaxImage = document.getElementById('parallax-image');
+    if (!parallaxImage) return;
+    
+    // Calculate initial position based on current scroll BEFORE anything is visible
+    const initialScrollY = window.scrollY;
+    const scrollFactor = (window.bannerConfig?.parallax?.scrollFactor) || -0.05;
+    const initialOffset = initialScrollY * scrollFactor;
+    
+    // Set the initial transform directly on the element
+    parallaxImage.style.transform = `translate3d(0, ${initialOffset}px, 0)`;
+    
+    // After everything is ready and positioned correctly, fade in the container
+    window.addEventListener('load', () => {
+      // Wait a tiny bit to make sure all calculations are done
+      setTimeout(() => {
+        // Show the container now that everything is positioned
+        parallaxBanner.classList.add('loaded');
+        
+        // Now add the smooth transition (AFTER initial positioning)
+        setTimeout(() => {
+          // Add smooth transition now that everything is stable
+          parallaxImage.style.transition = "transform 0.3s cubic-bezier(0.1, 0.7, 0.1, 1)";
+        }, 500);
+        
+        // Setup the scroll handling for parallax effect
+        let ticking = false;
+        let lastScrollY = window.scrollY;
+        let currentOffset = initialOffset;
+        
+        function updateParallax() {
+          const scrollY = window.scrollY;
+          const targetOffset = scrollY * scrollFactor;
+          
+          // Add easing for smoother movement
+          currentOffset += (targetOffset - currentOffset) * 0.1;
+          
+          // Apply the transform with easing
+          parallaxImage.style.transform = `translate3d(0, ${currentOffset}px, 0)`;
+          
+          // Continue animation if still moving significantly
+          if (Math.abs(targetOffset - currentOffset) > 0.1) {
+            requestAnimationFrame(updateParallax);
+          } else {
+            ticking = false;
+          }
+        }
+        
+        // Handle scroll events efficiently
+        window.addEventListener('scroll', () => {
+          if (!ticking) {
+            requestAnimationFrame(updateParallax);
+            ticking = true;
+          }
+        });
+      }, 100);
+    });
+  }
+
+// Call this function when the DOM is ready
+document.addEventListener('DOMContentLoaded', setupEfficientParallax);
+
+  // Apply background opacity from config if available
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.siteConfig && window.siteConfig.transparency) {
+      document.documentElement.style.setProperty('--bg-opacity', window.siteConfig.transparency);
+    }
+  });
+  
+  // Set up various event listeners
+  function setupEventListeners() {
+    // Handle TOC visibility on scroll
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const tocWrapper = document.querySelector('#toc-wrapper');
+      if (tocWrapper) {
+        if (scrollY > 300) {
+          tocWrapper.classList.remove('toc-hide');
+        } else {
+          tocWrapper.classList.add('toc-hide');
+        }
+      }
+    });
+    
+    // Handle resize events
+    window.addEventListener('resize', () => {
+      updateNavbarHeight();
+      
+      // Update banner height on mobile devices
+      const isMobile = window.innerWidth <= 768;
+      const bannerContainer = document.getElementById('banner-container');
+      if (bannerContainer && bannerContainer.classList.contains('absolute')) {
+        bannerContainer.style.height = isMobile 
+          ? 'var(--banner-height-mobile)' 
+          : 'var(--banner-height)';
+      }
+    });
+    
+    // Initial mobile check
+    const isMobile = window.innerWidth <= 768;
+    const bannerContainer = document.getElementById('banner-container');
+    if (bannerContainer && bannerContainer.classList.contains('absolute')) {
+      bannerContainer.style.height = isMobile 
+        ? 'var(--banner-height-mobile)' 
+        : 'var(--banner-height)';
+    }
+  }
+  
+</script>

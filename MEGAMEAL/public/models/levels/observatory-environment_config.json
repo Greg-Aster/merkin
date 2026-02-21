@@ -1,0 +1,23 @@
+{
+  "heightmapUrl": "/terrain/heightmaps/observatory-environment_heightmap.png",
+  "worldSize": 500,
+  "heightScale": 193.43363666534424,
+  "heightOffset": -183.41871643066406,
+  "bounds": {
+    "min": [
+      -250,
+      -183.41871643066406,
+      -250
+    ],
+    "max": [
+      250,
+      10.014920234680176,
+      250
+    ]
+  },
+  "resolution": "1024x1024",
+  "originalGLB": "observatory-environment.glb",
+  "generatedAt": "2025-08-24T00:00:00.000Z",
+  "syncedWith": "terrain-config",
+  "note": "Updated to match terrain heightmap resolution for consistency"
+}

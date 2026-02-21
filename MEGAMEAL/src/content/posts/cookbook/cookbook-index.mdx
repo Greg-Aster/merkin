@@ -1,0 +1,400 @@
+---
+title: "The Galactic Cookbook: A Culinary Compendium"
+published: 2025-06-10
+description: "A comprehensive collection of recipes, beverages, and culinary traditions spanning millennia - from the golden age of corporate excess to the chromatic innovations of the neo-sensoria era."
+image: "/posts/cookbook/cookbook.png"
+# Custom author profile fields
+avatarImage: "/posts/cookbook/cookbook.png"
+authorName: "Culinary Archivist Zara Chen"
+authorBio: "Keeper of Gastronomic History & Temporal Recipe Preservation"
+oneColumn: true
+# Use the timeline as a banner
+bannerType: "timeline"
+bannerData:
+  category: "MEGA MEAL"
+  startYear: 1
+  endYear: 50000
+  background: "/posts/timeline/universe.png"
+# Regular post metadata for timeline integration
+timelineYear: 35000 # Central point in the timeline
+timelineEra: "preservation-era"
+timelineLocation: "The Great Culinary Archives, Sector 7"
+isKeyEvent: true
+# Other post metadata
+showImageOnPost: true
+tags: [Cookbook, Recipe Collection, Culinary History, Galactic Cuisine, Archive]
+category: "MEGA MEAL"
+draft: false
+lang: ""
+mascotContext: "The ultimate galactic cookbook index - organizing legendary recipes from across time and space. From extinction-level delicacies to chromatic molecular masterpieces, this collection preserves the culinary heritage of a universe where food is art, politics, and sometimes temporal physics. Your guide to cooking the impossible."
+---
+
+import ImageWrapper from '../../../components/misc/ImageWrapper.astro';
+
+<div className="text-xl text-gray-700 dark:text-neutral-300 italic mb-8 text-center max-w-4xl mx-auto">
+  "In every recipe lies a story. In every meal, a moment in time. This compendium preserves the culinary echoes of civilizations past, present, and yet to come." — Archivist Zara Chen
+</div>
+
+# Welcome to the Galactic Cookbook
+
+Greetings, fellow culinary adventurers and temporal gastronomes! Welcome to the most comprehensive collection of recipes spanning the known universe and beyond. Whether you're a corporate executive seeking the extinct delicacies of the golden age, a molecular gastronomist pushing the boundaries of flavor in the neo-sensoria era, or simply someone trying to recreate a legendary cocktail from a time-trapped saloon, you've come to the right archive.
+
+
+
+## Recipe Gallery
+
+{/* View Toggle Controls */}
+<div className="flex items-center justify-between mb-6">
+  <h3 className="text-2xl font-bold text-gray-800 dark:text-neutral-200">Featured Recipes</h3>
+  <div className="flex items-center gap-3">
+    <span className="text-sm text-gray-600 dark:text-neutral-400">View:</span>
+    <div className="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
+      <button 
+        id="gallery-view-btn" 
+        className="px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
+      >
+        Gallery
+      </button>
+      <button 
+        id="list-view-btn" 
+        className="px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white"
+      >
+        List
+      </button>
+    </div>
+  </div>
+</div>
+
+{/* Gallery View */}
+<div id="gallery-view" className="space-y-12 mb-12">
+  
+  {/* Legendary Beverages */}
+  <section>
+    <h5 className="text-3xl font-bold mb-6 text-gray-800 dark:text-neutral-200 border-b border-gray-300 dark:border-gray-600 pb-2">
+      🍹 Legendary Beverages & Libations
+    </h5>
+    
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="space-y-4">
+        <h5 className="text-2xl font-bold text-gray-800 dark:text-neutral-200">The Perfect Bloody Mary</h5>
+        <div className="flex flex-wrap gap-2 mb-4">
+          <span className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 text-sm rounded-full">Temporal Physics</span>
+          <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 text-sm rounded-full">Quantum Resonance</span>
+          <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-neutral-300 text-sm rounded-full">Miranda System</span>
+        </div>
+        <p className="text-lg text-gray-700 dark:text-neutral-300 mb-4">
+          A legendary cocktail that achieved quantum resonance across 1,342 time loops, documented by automated systems during the Miranda catastrophe. Features temporal-stabilized ingredients and causality-defying flavor profiles. This recipe represents the intersection of bartending artistry and theoretical physics.
+        </p>
+        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-neutral-400 mb-4">
+          <span><span className="font-bold">Difficulty:</span> 🔴 Complex</span>
+          <span><span className="font-bold">Prep Time:</span> ∞ loops</span>
+          <span><span className="font-bold">Era:</span> Singularity Conflict</span>
+        </div>
+        <a href="/posts/timelines/perfect-mary-recipe/" className="inline-block bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors">
+          View Recipe →
+        </a>
+      </div>
+      <div className="rounded-xl overflow-hidden shadow-lg">
+        <ImageWrapper
+          src="/posts/timeline/bartender.png"
+          alt="The Perfect Bloody Mary - a quantum-resonant cocktail with temporal stabilization effects"
+          class="w-full h-80 object-cover"
+        />
+      </div>
+    </div>
+  </section>
+
+  {/* Main Courses */}
+  <section>
+    <h4 className="text-3xl font-bold mb-6 text-gray-800 dark:text-neutral-200 border-b border-gray-300 dark:border-gray-600 pb-2">
+      🥩 Magnificent Main Courses
+    </h4>
+    
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="order-2 lg:order-1 rounded-xl overflow-hidden shadow-lg">
+        <ImageWrapper
+          src="/posts/timeline/zelephant-roast.png"
+          alt="Zelephant Truffle Roast - an extinct delicacy from the W Corporation era"
+          class="w-full h-80 object-cover"
+        />
+      </div>
+      <div className="order-1 lg:order-2 space-y-4">
+        <h5 className="text-2xl font-bold text-gray-800 dark:text-neutral-200">Zelephant Truffle Roast</h5>
+        <div className="flex flex-wrap gap-2 mb-4">
+          <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-sm rounded-full">Extinct Ingredients</span>
+          <span className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 text-sm rounded-full">Corporate Luxury</span>
+          <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-neutral-300 text-sm rounded-full">W Corp Era</span>
+        </div>
+        <p className="text-lg text-gray-700 dark:text-neutral-300 mb-4">
+          The legendary recipe from Chef Executif Valerius Rex, featuring the now-extinct Quarnivorian Zelephant. A testament to corporate culinary excess and the tragic beauty of dishes that can never be recreated. This roast represents the pinnacle of galactic haute cuisine from the golden age.
+        </p>
+        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-neutral-400 mb-4">
+          <span><span className="font-bold">Difficulty:</span> 🔴 Expert</span>
+          <span><span className="font-bold">Prep Time:</span> 6 Std. Hours</span>
+          <span><span className="font-bold">Era:</span> Golden Age</span>
+        </div>
+        <a href="/posts/timelines/zelephant-truffle-roast/" className="inline-block bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors">
+          View Recipe →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {/* Desserts */}
+  <section>
+    <h4 className="text-3xl font-bold mb-6 text-gray-800 dark:text-neutral-200 border-b border-gray-300 dark:border-gray-600 pb-2">
+      🍰 Spectacular Sweets & Desserts
+    </h4>
+    
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="space-y-4">
+        <h5 className="text-2xl font-bold text-gray-800 dark:text-neutral-200">Chromatic Meat Cake</h5>
+        <div className="flex flex-wrap gap-2 mb-4">
+          <span className="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300 text-sm rounded-full">Molecular Gastronomy</span>
+          <span className="px-3 py-1 bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300 text-sm rounded-full">Bioluminescent</span>
+          <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-neutral-300 text-sm rounded-full">Neo-Sensoria Era</span>
+        </div>
+        <p className="text-lg text-gray-700 dark:text-neutral-300 mb-4">
+          Chef Aura Lumina's molecular marvel featuring bioluminescent layers and candied sweetmeat crumble. A dessert that challenges perceptions of flavor, color, and culinary possibility. This cake represents the cutting edge of sensory gastronomy.
+        </p>
+        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-neutral-400 mb-4">
+          <span><span className="font-bold">Difficulty:</span> 🟡 Advanced</span>
+          <span><span className="font-bold">Prep Time:</span> 4 Std. Hours</span>
+          <span><span className="font-bold">Era:</span> Neo-Sensoria</span>
+        </div>
+        <a href="/posts/timelines/meat-cake/" className="inline-block bg-pink-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-pink-700 transition-colors">
+          View Recipe →
+        </a>
+      </div>
+      <div className="rounded-xl overflow-hidden shadow-lg">
+        <ImageWrapper
+          src="/posts/timeline/chromatic-cake.png"
+          alt="Chromatic Meat Cake - a bioluminescent dessert with vibrant multi-hued layers"
+          class="w-full h-80 object-cover"
+        />
+      </div>
+    </div>
+  </section>
+</div>
+
+{/* List View */}
+<div id="list-view" className="hidden space-y-8 mb-12">
+  
+  {/* Beverages */}
+  <section>
+    <h4 className="text-xl font-bold mb-4 text-gray-800 dark:text-neutral-200">🍹 Legendary Beverages & Libations</h4>
+    <div className="card-base2 p-6 hover:shadow-lg transition-all duration-300 group">
+      <div className="flex items-start gap-6">
+        <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+          <ImageWrapper
+            src="/posts/timeline/bloody-mary-perfect.png"
+            alt="The Perfect Bloody Mary"
+            class="w-full h-full object-cover"
+          />
+        </div>
+        <div className="flex-grow">
+          <div className="flex items-center mb-2">
+            <h5 className="font-bold text-lg text-gray-800 dark:text-neutral-200 mr-3">The Perfect Bloody Mary</h5>
+            <span className="text-sm text-gray-600 dark:text-neutral-400">Miranda System • Singularity Conflict Era</span>
+          </div>
+          <p className="text-gray-700 dark:text-neutral-300 mb-3">A legendary cocktail that achieved quantum resonance across 1,342 time loops, featuring temporal-stabilized ingredients and causality-defying flavor profiles.</p>
+          <div className="flex justify-between items-center">
+            <div className="flex flex-wrap gap-1">
+              <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 text-xs rounded">Temporal Physics</span>
+              <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 text-xs rounded">Quantum Resonance</span>
+            </div>
+            <a href="/posts/timelines/miranda-bloody-mary/" className="text-blue-600 dark:text-blue-400 hover:underline font-medium group-hover:text-blue-700 dark:group-hover:text-blue-300">
+              View Recipe →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Main Courses */}
+  <section>
+    <h4 className="text-xl font-bold mb-4 text-gray-800 dark:text-neutral-200">🥩 Magnificent Main Courses</h4>
+    <div className="card-base2 p-6 hover:shadow-lg transition-all duration-300 group">
+      <div className="flex items-start gap-6">
+        <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+          <ImageWrapper
+            src="/posts/timeline/zelephant-roast.png"
+            alt="Zelephant Truffle Roast"
+            class="w-full h-full object-cover"
+          />
+        </div>
+        <div className="flex-grow">
+          <div className="flex items-center mb-2">
+            <h5 className="font-bold text-lg text-gray-800 dark:text-neutral-200 mr-3">Zelephant Truffle Roast</h5>
+            <span className="text-sm text-gray-600 dark:text-neutral-400">W Corp • Golden Age Era</span>
+          </div>
+          <p className="text-gray-700 dark:text-neutral-300 mb-3">The legendary recipe from Chef Executif Valerius Rex, featuring the now-extinct Quarnivorian Zelephant. A testament to corporate culinary excess and tragic beauty.</p>
+          <div className="flex justify-between items-center">
+            <div className="flex flex-wrap gap-1">
+              <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-xs rounded">Extinct Ingredients</span>
+              <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 text-xs rounded">Corporate Luxury</span>
+            </div>
+            <a href="/posts/timelines/zelephant-truffle-roast/" className="text-blue-600 dark:text-blue-400 hover:underline font-medium group-hover:text-blue-700 dark:group-hover:text-blue-300">
+              View Recipe →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Desserts */}
+  <section>
+    <h4 className="text-xl font-bold mb-4 text-gray-800 dark:text-neutral-200">🍰 Spectacular Sweets & Desserts</h4>
+    <div className="card-base2 p-6 hover:shadow-lg transition-all duration-300 group">
+      <div className="flex items-start gap-6">
+        <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+          <ImageWrapper
+            src="/posts/timeline/chromatic-cake.png"
+            alt="Chromatic Meat Cake"
+            class="w-full h-full object-cover"
+          />
+        </div>
+        <div className="flex-grow">
+          <div className="flex items-center mb-2">
+            <h5 className="font-bold text-lg text-gray-800 dark:text-neutral-200 mr-3">Chromatic Meat Cake</h5>
+            <span className="text-sm text-gray-600 dark:text-neutral-400">Orbital Spire • Neo-Sensoria Era</span>
+          </div>
+          <p className="text-gray-700 dark:text-neutral-300 mb-3">Chef Aura Lumina's molecular marvel featuring bioluminescent layers and candied sweetmeat crumble. A dessert that challenges perceptions of flavor and color.</p>
+          <div className="flex justify-between items-center">
+            <div className="flex flex-wrap gap-1">
+              <span className="px-2 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300 text-xs rounded">Molecular Gastronomy</span>
+              <span className="px-2 py-1 bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300 text-xs rounded">Bioluminescent</span>
+            </div>
+            <a href="/posts/timelines/meat-cake/" className="text-blue-600 dark:text-blue-400 hover:underline font-medium group-hover:text-blue-700 dark:group-hover:text-blue-300">
+              View Recipe →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+## Coming Soon to the Archives
+
+<div className="card-base2 p-6 mb-8">
+  <h3 className="font-bold text-xl mb-4 text-gray-800 dark:text-neutral-200">Future Acquisitions</h3>
+  <p className="text-lg text-gray-700 dark:text-neutral-300 mb-4">Our archival teams are constantly working to recover and preserve more culinary treasures from across the timeline. Expected additions include:</p>
+  
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+      <h4 className="font-semibold text-gray-800 dark:text-neutral-200 mb-2">🌌 Void Cuisine Collection</h4>
+      <p className="text-gray-700 dark:text-neutral-300 text-sm">Recipes adapted for zero-gravity cooking, featuring ingredients that exist in dimensional flux states.</p>
+    </div>
+    
+    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+      <h4 className="font-semibold text-gray-800 dark:text-neutral-200 mb-2">🏭 Corporate Era Classics</h4>
+      <p className="text-gray-700 dark:text-neutral-300 text-sm">Executive dining experiences from the height of galactic corporate power, featuring rare and expensive ingredients.</p>
+    </div>
+    
+    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+      <h4 className="font-semibold text-gray-800 dark:text-neutral-200 mb-2">🧬 Bio-Engineered Delicacies</h4>
+      <p className="text-gray-700 dark:text-neutral-300 text-sm">Cutting-edge cuisine featuring artificially evolved ingredients and synthetic flavor compounds.</p>
+    </div>
+    
+    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+      <h4 className="font-semibold text-gray-800 dark:text-neutral-200 mb-2">⏰ Temporal Fusion</h4>
+      <p className="text-gray-700 dark:text-neutral-300 text-sm">Dishes that incorporate ingredients from multiple time periods, creating impossible flavor combinations.</p>
+    </div>
+  </div>
+</div>
+
+## Recipe Quick Reference
+
+<div className="overflow-x-auto mb-8">
+  <table className="w-full border-collapse border border-gray-300 dark:border-gray-700">
+    <thead>
+      <tr className="bg-gray-100 dark:bg-gray-800">
+        <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">Recipe Name</th>
+        <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">Era</th>
+        <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">Type</th>
+        <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">Difficulty</th>
+        <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">Prep Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
+          <a href="/posts/timelines/miranda-bloody-mary/" className="text-blue-600 dark:text-blue-400 hover:underline">The Perfect Bloody Mary</a>
+        </td>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">Singularity Conflict</td>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">Beverage</td>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">🔴 Complex</td>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">∞ loops</td>
+      </tr>
+      <tr className="bg-gray-50 dark:bg-gray-800/50">
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
+          <a href="/posts/timelines/zelephant-truffle-roast/" className="text-blue-600 dark:text-blue-400 hover:underline">Zelephant Truffle Roast</a>
+        </td>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">Golden Age</td>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">Main Course</td>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">🔴 Expert</td>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">6 Std. Hours</td>
+      </tr>
+      <tr>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
+          <a href="/posts/timelines/meat-cake/" className="text-blue-600 dark:text-blue-400 hover:underline">Chromatic Meat Cake</a>
+        </td>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">Neo-Sensoria</td>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">Dessert</td>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">🟡 Advanced</td>
+        <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">4 Std. Hours</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+## Cooking Across Time: Universal Guidelines
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+  <div className="card-base2 p-6">
+    <h3 className="font-bold text-lg mb-3 text-gray-800 dark:text-neutral-200">🛡️ Safety First</h3>
+    <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-neutral-300">
+      <li>Always check ingredient temporal stability before use</li>
+      <li>Never mix quantum-resonant spices with traditional seasonings</li>
+      <li>Ensure proper ventilation when working with void-salt</li>
+      <li>Keep temporal extraction devices away from heat sources</li>
+    </ul>
+  </div>
+  
+  <div className="card-base2 p-6">
+    <h3 className="font-bold text-lg mb-3 text-gray-800 dark:text-neutral-200">🔄 Substitution Guidelines</h3>
+    <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-neutral-300">
+      <li>Most cosmic ingredients have terrestrial equivalents listed</li>
+      <li>When in doubt, substitute with the highest quality available</li>
+      <li>Extinct ingredients cannot be truly replicated—embrace the approximation</li>
+      <li>Molecular equipment can usually be replaced with careful technique</li>
+    </ul>
+  </div>
+</div>
+
+<div className="card-base2 p-6 mb-8">
+  <h3 className="font-bold text-xl mb-4 text-gray-800 dark:text-neutral-200">About This Collection</h3>
+  <p className="text-lg text-gray-700 dark:text-neutral-300 mb-4">These recipes have been carefully preserved and documented across millennia, drawing from the personal archives of renowned chefs, automated system logs, temporal extraction testimonies, and surviving fragments of culinary history. Each recipe comes with both its original, era-appropriate ingredients and suggested modern substitutions for the practical cook.</p>
+  
+  <p className="text-lg text-gray-700 dark:text-neutral-300 mb-4">From the opulent excess of the W Corporation's celestial boardrooms to the innovative chromatic cuisine of orbital spires, these dishes tell the story of how civilizations have expressed their creativity, power, and artistry through food.</p>
+  
+  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mt-4">
+    <p className="text-amber-800 dark:text-amber-200 font-medium">⚠️ Temporal Cooking Disclaimer: Some ingredients may be extinct, temporally displaced, or require technology not yet invented. Cook responsibly across timelines.</p>
+  </div>
+</div>
+
+## Contact the Archives
+
+<div className="card-base2 p-6 mb-8">
+  <h3 className="font-bold text-xl mb-4 text-gray-800 dark:text-neutral-200">Submit Your Own Culinary Treasures</h3>
+  <p className="text-lg text-gray-700 dark:text-neutral-300 mb-4">Do you possess recipes from lost civilizations? Have you successfully recreated extinct delicacies? The Archives are always seeking new additions to preserve for future generations of culinary adventurers.</p>
+  
+  <p className="text-lg text-gray-700 dark:text-neutral-300 italic">Remember: In cooking, as in time travel, the journey is just as important as the destination. Cook with curiosity, experiment with respect for tradition, and never forget that the best meals are shared with those who matter most—regardless of which timeline they're from.</p>
+</div>
+
+---
+
+*The Galactic Cookbook is maintained by the Culinary Preservation Society under the Universal Heritage Protection Protocols. All recipes are provided for educational and recreational purposes. The Society is not responsible for temporal paradoxes, dimensional rifts, or existential crises resulting from successful recreation of extinct delicacies.*

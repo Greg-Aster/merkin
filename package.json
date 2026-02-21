@@ -1,0 +1,28 @@
+{
+  "name": "merkin-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.14.4",
+  "scripts": {
+    "dev:temporal": "pnpm --filter temporal-flow dev",
+    "dev:dndiy": "pnpm --filter dndiy dev",
+    "dev:megameal": "cd MEGAMEAL && pnpm install --ignore-workspace && pnpm dev",
+    "build:all": "pnpm -r build && cd MEGAMEAL && pnpm install --ignore-workspace && pnpm build",
+    "build:temporal": "pnpm --filter temporal-flow build",
+    "build:dndiy": "pnpm --filter dndiy build",
+    "build:megameal": "cd MEGAMEAL && pnpm install --ignore-workspace && pnpm build",
+    "lint:all": "pnpm -r lint",
+    "format:all": "pnpm -r format",
+    "type-check:all": "pnpm -r type-check"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.8.3",
+    "typescript": "^5.7.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "svelte": "5.26.2"
+    }
+  }
+}

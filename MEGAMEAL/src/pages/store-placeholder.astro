@@ -1,0 +1,12 @@
+---
+import {
+  Content,
+  frontmatter,
+} from '../content/posts/store/store-placeholder.mdx'
+import StoreLayout from '../layouts/store/StoreLayout.astro'
+
+const { title, description } = frontmatter
+---
+<StoreLayout title={title} description={description}>
+  <Content />
+</StoreLayout>

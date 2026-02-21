@@ -1,0 +1,139 @@
+---
+import Footer from '@components/Footer.astro'
+import BackToTop from '@components/control/BackToTop.astro'
+import ImageWrapper from '../../components/misc/ImageWrapper.astro'
+import StoreNavbar from '../../components/store/StoreNavbar.astro'
+import { siteConfig } from '../../config/config'
+// src/layouts/store/StoreLayout.astro
+import Layout from '../Layout.astro' // Adjusted path to parent directory
+// Removed LIGHT_MODE, DARK_MODE, AUTO_MODE, PAGE_WIDTH constants as theme script is removed
+// main.css is likely imported by Layout.astro, if not, it might need to be re-evaluated.
+// For now, assuming Layout.astro handles global styles.
+
+export interface Props {
+  title: string
+  description: string
+  // Add other props if Layout.astro expects them (e.g., lang, banner for OG tags)
+}
+const { title, description, ...rest } = Astro.props // Capture other potential props for Layout
+---
+<Layout title={title} description={description} {...rest}>
+  {/* Specific Google Fonts for StoreLayout */}
+  <link rel="preconnect" href="https://fonts.googleapis.com" slot="head">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin slot="head">
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Metal+Mania&family=Nosifier&display=swap" rel="stylesheet" slot="head">
+
+  {/* Parallax Background */}
+  {siteConfig.banner.enable && (
+    <div id="parallax-banner" class="fixed top-0 left-0 w-full h-screen z-[-1] overflow-hidden">
+      <ImageWrapper
+        id="parallax-image"
+        alt="Site background image"
+        class="parallax-bg object-cover w-full h-[120vh]"
+        src={siteConfig.banner.src}
+        position={siteConfig.banner.position || 'center'}
+      />
+      {siteConfig.banner.credit?.enable &&
+        <div class="absolute bottom-4 right-4 text-white/50 text-xs bg-black/30 px-2 py-1 rounded">
+          {siteConfig.banner.credit.text &&
+            <a href={siteConfig.banner.credit.url || '#'} class="hover:text-white/80 transition">
+              {siteConfig.banner.credit.text}
+            </a>
+          }
+        </div>
+      }
+      {/* Optional overlay for better text readability */}
+      <div class="absolute inset-0 bg-gradient-to-b from-black/20 to-black/50 pointer-events-none"></div>
+    </div>
+  )}
+
+  <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto">
+    <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
+      <StoreNavbar />
+    </div>
+  </div>
+  <main id="store-content" class="relative z-10 py-8 mt-6"> {/* Added padding, mt-6, and relative z-index */}
+    <slot />
+  </main>
+  <Footer />
+  <BackToTop />
+
+  {/* Global styles specific to StoreLayout's parallax, if not already in main.css or handled by Layout.astro */}
+  <style is:global>
+    /* Parallax background styles - these might be needed if not globally available via Layout.astro */
+    .parallax-bg {
+        transform: translateZ(0);
+        position: absolute;
+        top: 0vh; /* Adjusted from 0vh to ensure it covers screen top */
+        left: 0;
+        width: 100%;
+        height: 120vh; /* Ensure it's taller than viewport for parallax */
+        transition: opacity 0.3s ease-out;
+        opacity: 1;
+    }
+
+    /* Only apply will-change when actively scrolling */
+    .parallax-bg.is-scrolling {
+        will-change: transform;
+    }
+    
+    #parallax-banner {
+        opacity: 0; /* Start hidden */
+        transition: opacity 0.5s ease-out;
+    }
+    
+    #parallax-banner.loaded {
+        opacity: 1; /* Fade in when loaded */
+    }
+  </style>
+  {/* Script specific to StoreLayout's parallax and animations */}
+  <script>
+    // Simplified Parallax Logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const parallaxBanner = document.getElementById('parallax-banner');
+      if (parallaxBanner) {
+        setTimeout(() => {
+          parallaxBanner.classList.add('loaded');
+        }, 100);
+      }
+
+      const elementsToAnimate = document.querySelectorAll('.onload-animation');
+      elementsToAnimate.forEach(element => {
+        element.classList.add('loaded');
+      });
+
+      const parallaxImage = document.getElementById('parallax-image');
+      if (parallaxImage) {
+        const scrollFactor = -0.1; 
+        let ticking = false;
+        // let lastScrollY = window.scrollY; // lastScrollY is not used
+
+        function updateParallax() {
+          if (!parallaxImage) return;
+          const scrollY = window.scrollY;
+          const offset = scrollY * scrollFactor;
+          parallaxImage.style.transform = `translate3d(0, ${offset}px, 0)`;
+          ticking = false;
+        }
+
+        window.addEventListener('scroll', () => {
+          // lastScrollY = window.scrollY; // lastScrollY is not used
+          if (!ticking) {
+            window.requestAnimationFrame(updateParallax);
+            ticking = true;
+          }
+        }, { passive: true });
+        
+        updateParallax(); // Initial position
+      }
+    });
+  </script>
+  {/* COMING SOON OVERLAY - RETAINED AS COMMENTED OUT */}
+   <div id="coming-soon-overlay" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+    <div class="text-center p-8 bg-gray-800 rounded-lg shadow-xl border border-gray-700">
+      <h2 class="text-4xl font-bold text-red-500 mb-4">Store Coming Soon!</h2>
+      <p class="text-xl text-gray-300">Our emporium of unsettling snack is under construction.</p>
+      <p class="text-md text-gray-400 mt-2">Please check back later for a truly disturbing shopping experience.</p>
+    </div>
+  </div> 
+</Layout>

@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEGAMEAL Development Tools</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" 
+          onerror="this.onerror=null;this.src='https://unpkg.com/three@0.128.0/build/three.min.js';"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"
+          onerror="this.onerror=null;this.src='https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js';"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"
+          onerror="this.onerror=null;this.src='https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js';"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="dev-badge">🛠️ ZERO-INSTALL DEVELOPMENT TOOLS</div>
+      <h1>MEGAMEAL TOOLS</h1>
+      <p>Self-Contained Desktop Application</p>
+      <p style="font-size: 0.9rem; color: #666;">No installation required • Running on localhost:<span id="port-display">3001</span></p>
+    </header>
+    
+    <div class="main-layout">
+      <nav class="nav-rail">
+        <h3>Tools</h3>
+        <a href="#tool-unified" class="nav-link">🚀 Unified Pipeline</a>
+        <a href="#tool-editor" class="nav-link">🔎 Level Editor</a>
+        <a href="#tool-heightmap" class="nav-link">🗻 Heightmap Gen</a>
+        <a href="#tool-processor" class="nav-link">🗺️ Level Processor</a>
+        <a href="#tool-generator" class="nav-link">🎮 Level Generator</a>
+        <a href="#tool-starmap" class="nav-link">✨ Starmap Editor</a>
+        <a href="#tool-cubemap" class="nav-link">🎆 Cubemap Conv</a>
+      </nav>
+
+      <main class="tool-content">
+        <section id="tool-unified" class="tool-pane tool-section">
+          <h2>🚀 Unified Pipeline</h2>
+          <p><strong>RECOMMENDED:</strong> Generate complete levels with all components synchronized. This pipeline handles heightmap generation, level processing, and component creation in one go.</p>
+          <form id="unified-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="unified-name">Level Name</label>
+                <input type="text" id="unified-name" value="" placeholder="Human readable name">
+                <div class="file-info">Display name for the level</div>
+              </div>
+              <div class="form-group">
+                <label for="unified-id">Level ID</label>
+                <input type="text" id="unified-id" value="" placeholder="Unique identifier">
+                <div class="file-info">Unique identifier (kebab-case)</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="unified-type">Level Type</label>
+                <select id="unified-type">
+                  <option value="interior">Interior (Small spaces, indoor)</option>
+                  <option value="terrain" selected>Terrain (Large outdoor areas)</option>
+                  <option value="hybrid">Hybrid (Mixed indoor/outdoor)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="unified-glb">GLB File Path</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <input type="text" id="unified-glb" value="public/models/levels/observatory-environment.glb" placeholder="Path to GLB file" style="flex: 1;">
+                  <button type="button" class="btn" id="browse-unified-glb" style="padding: 0.6rem 1rem; font-size: 0.8rem;">📁 Browse</button>
+                  <button type="button" class="btn" id="unified-autodetect" style="padding: 0.6rem 1rem; font-size: 0.8rem; background: linear-gradient(45deg, #ff8000, #ff4000);">🔍 Analyze GLB</button>
+                </div>
+                <div class="file-info">Path relative to project root</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="unified-resolution">Heightmap Resolution</label>
+                <select id="unified-resolution">
+                  <option value="512">512x512 (Fast)</option>
+                  <option value="1024" selected>1024x1024 (Balanced)</option>
+                  <option value="2048">2048x2048 (High Quality)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="unified-lod">LOD Levels</label>
+                <select id="unified-lod">
+                  <option value="1">1 (No LOD)</option>
+                  <option value="2">2 Levels</option>
+                  <option value="3" selected>3 Levels</option>
+                  <option value="4">4 Levels</option>
+                  <option value="5">5 Levels (Max)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="unified-worldsize">World Size</label>
+                <input type="number" id="unified-worldsize" placeholder="Auto-detected" step="0.1" min="1">
+                <div class="file-info">Auto-filled by GLB analysis</div>
+              </div>
+              <div class="form-group">
+                <label for="unified-minheight">Min Height</label>
+                <input type="number" id="unified-minheight" placeholder="Auto-detected" step="0.1">
+                <div class="file-info">Auto-filled by GLB analysis</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="unified-maxheight">Max Height</label>
+                <input type="number" id="unified-maxheight" placeholder="Auto-detected" step="0.1">
+                <div class="file-info">Auto-filled by GLB analysis</div>
+              </div>
+              <div class="form-group">
+                <label>&nbsp;</label>
+                <div style="padding-top: 0.8rem; color: #888; font-size: 0.85rem;">Use "Analyze GLB" to auto-detect dimensions</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="unified-gridx">Grid X</label>
+                <select id="unified-gridx">
+                  <option value="2">2x</option>
+                  <option value="4" selected>4x</option>
+                  <option value="8">8x</option>
+                  <option value="16">16x</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="unified-gridy">Grid Y</label>
+                <select id="unified-gridy">
+                  <option value="2">2x</option>
+                  <option value="4" selected>4x</option>
+                  <option value="8">8x</option>
+                  <option value="16">16x</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- TriMesh Physics Configuration -->
+            <div style="background: #0f1016; border: 1px solid #2d3748; border-radius: 6px; padding: 0.9rem; margin: 0.75rem 0;">
+              <h4 style="color: #00ff88; margin: 0 0 0.5rem 0;">⚡ TriMesh Physics (Modern)</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="unified-trimesh-mode">Mode</label>
+                  <select id="unified-trimesh-mode">
+                    <option value="single" selected>Single (Entire terrain as one collider)</option>
+                    <option value="chunked">Chunked (Dynamic loading around player)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="unified-trimesh-downsample">Downsample Factor</label>
+                  <select id="unified-trimesh-downsample">
+                    <option value="4">4 (High detail - ~130k tris)</option>
+                    <option value="8">8 (Balanced - ~65k tris)</option>
+                    <option value="12">12 (Performance - ~40k tris)</option>
+                    <option value="16" selected>16 (Fast - ~30k tris)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row" id="chunked-options" style="display: none;">
+                <div class="form-group">
+                  <label for="unified-trimesh-chunkVerts">Chunk Vertices</label>
+                  <select id="unified-trimesh-chunkVerts">
+                    <option value="33">33x33 (Fast)</option>
+                    <option value="65" selected>65x65 (Balanced)</option>
+                    <option value="129">129x129 (Detailed)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="unified-trimesh-activeRadius">Active Radius</label>
+                  <select id="unified-trimesh-activeRadius">
+                    <option value="1">1 chunk (~25k tris)</option>
+                    <option value="2" selected>2 chunks (~100k tris)</option>
+                    <option value="3">3 chunks (~200k tris)</option>
+                    <option value="4">4 chunks (~400k tris)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="file-info">TriMesh builds collision from heightmap data. Single mode loads entire terrain, chunked mode loads dynamically around player.</div>
+            </div>
+            
+            <div class="form-group">
+              <label>Features</label>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;"><input type="checkbox" id="unified-feature-ocean" style="width: auto; margin-right: 0.5rem;"> Ocean System</label>
+                <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;"><input type="checkbox" id="unified-feature-vegetation" style="width: auto; margin-right: 0.5rem;" checked> Vegetation</label>
+                <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;"><input type="checkbox" id="unified-feature-fireflies" style="width: auto; margin-right: 0.5rem;" checked> Fireflies</label>
+                <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;"><input type="checkbox" id="unified-feature-starmap" style="width: auto; margin-right: 0.5rem;"> Star Map</label>
+              </div>
+            </div>
+
+            <!-- Ocean Settings (shown if Ocean is enabled) -->
+            <div id="unified-ocean-settings" style="display: none; background: #0a1116; border: 1px solid #0b3d5c; border-radius: 6px; padding: 0.9rem; margin: 0.75rem 0;">
+              <h4 style="color: #00aaff; margin: 0 0 0.5rem 0;">🌊 Ocean Settings</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="unified-ocean-width">Size Width</label>
+                  <input type="number" id="unified-ocean-width" value="10000" step="1">
+                </div>
+                <div class="form-group">
+                  <label for="unified-ocean-height">Size Height</label>
+                  <input type="number" id="unified-ocean-height" value="10000" step="1">
+                </div>
+              </div>
+              <div class="form-row">
+                <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem;">
+                  <input type="checkbox" id="unified-ocean-enableRising"> Enable Rising Water
+                </label>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="unified-ocean-initial">Initial Level</label>
+                  <input type="number" id="unified-ocean-initial" value="0" step="0.1">
+                </div>
+                <div class="form-group">
+                  <label for="unified-ocean-target">Target Level</label>
+                  <input type="number" id="unified-ocean-target" value="0" step="0.1">
+                </div>
+                <div class="form-group">
+                  <label for="unified-ocean-riseRate">Rise Rate</label>
+                  <input type="number" id="unified-ocean-riseRate" value="0.01" step="0.001">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="unified-ocean-underDensity">Underwater Fog Density</label>
+                  <input type="number" id="unified-ocean-underDensity" value="0.1" step="0.01">
+                </div>
+                <div class="form-group">
+                  <label for="unified-ocean-underColor">Underwater Fog Color</label>
+                  <input type="text" id="unified-ocean-underColor" value="533536" placeholder="e.g., 533536 or 0x081520">
+                  <div class="file-info">Accepts decimal or hex (0xRRGGBB)</div>
+                </div>
+                <div class="form-group">
+                  <label for="unified-ocean-surfaceDensity">Surface Fog Density</label>
+                  <input type="number" id="unified-ocean-surfaceDensity" value="0.001" step="0.001">
+                </div>
+              </div>
+            </div>
+
+            <!-- Style Fog Settings -->
+            <div id="unified-style-settings" style="background:#0a1116; border:1px solid #0b3d5c; border-radius:6px; padding:0.9rem; margin:0.75rem 0;">
+              <h4 style="color:#00aaff; margin:0 0 0.5rem 0;">🎨 Style Fog Settings</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="unified-style-fog-color">Fog Color</label>
+                  <input type="text" id="unified-style-fog-color" value="#87CEEB" placeholder="#RRGGBB">
+                </div>
+                <div class="form-group">
+                  <label for="unified-style-fog-density">Fog Density</label>
+                  <input type="number" id="unified-style-fog-density" value="0.002" step="0.001">
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="unified-output">Output Directory</label>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" id="unified-output" value="./src/threlte/levels" placeholder="Output directory path" style="flex: 1;">
+                <button type="button" class="btn" id="browse-unified-output" style="padding: 0.6rem 1rem; font-size: 0.8rem;">📁 Browse</button>
+              </div>
+              <div class="file-info">Directory for all generated files</div>
+            </div>
+            <div style="background: #001122; border: 1px solid #0066aa; border-radius: 4px; padding: 1rem; margin: 1rem 0;">
+              <h4 style="color: #00aaff; margin-bottom: 0.5rem;">🎯 Pipeline Overview</h4>
+              <p style="color: #aaa; font-size: 0.9rem; line-height: 1.5;">
+                This unified pipeline will execute the following steps in sequence:
+                <br>• Extract heightmap from GLB terrain data
+                <br>• Process terrain into optimized chunks with LOD
+                <br>• Generate complete level manifest and Svelte component
+                <br>• Ensure all paths and references are synchronized
+              </p>
+            </div>
+            <button type="button" class="btn" id="generate-unified" style="font-size: 1.1rem; padding: 1.2rem 2rem;">🚀 Generate Complete Level</button>
+            <div class="status ready" id="unified-status">Ready</div>
+          </form>
+          <div class="log-output" id="unified-logs">
+            <div class="log-line">> Unified pipeline ready</div>
+            <div class="log-line info">> Recommended approach for new levels</div>
+            <div class="log-line info">> Ensures all components are synchronized</div>
+          </div>
+          <div id="unified-preview" style="margin-top: 1.5rem; padding: 1rem; background: #111; border: 1px solid #333; border-radius: 8px; display: none;">
+            <h4 style="color: #0f0; margin-bottom: 1rem; font-size: 1.2rem;">📋 Level Preview</h4>
+            <div style="display: flex; gap: 1rem; align-items: flex-start;">
+              <div id="unified-preview-canvas" style="flex: 1; background: #000; border: 1px solid #333; border-radius: 4px; min-height: 400px; display: flex; align-items: center; justify-content: center;">
+                <div style="color: #666;">Preview will appear here after generation</div>
+              </div>
+              <div id="unified-preview-info" style="flex: 0 0 300px; color: #aaa; font-size: 0.9rem;">
+                <div style="margin-bottom: 1rem;">
+                  <strong style="color: #0f0;">Heightmap Info:</strong><br>
+                  <span id="preview-resolution">Resolution: --</span><br>
+                  <span id="preview-worldsize">World Size: --</span><br>
+                  <span id="preview-heightrange">Height Range: --</span>
+                </div>
+                <div>
+                  <strong style="color: #0f0;">Grid Info:</strong><br>
+                  <span id="preview-chunks">Chunks: --</span><br>
+                  <span id="preview-chunksize">Chunk Size: --</span><br>
+                  <span id="preview-lodlevels">LOD Levels: --</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="tool-editor" class="tool-pane tool-section">
+          <h2>🔎 Rich Level Editor</h2>
+          <p>Interactive 3D level preview with comprehensive editing capabilities. Load and modify level manifests with real-time preview updates.</p>
+          
+          <div class="editor-layout" style="display: grid; grid-template-columns: 350px 1fr; gap: 1.5rem; height: 85vh;">
+            <!-- Properties Panel -->
+            <div class="editor-properties" style="background: #111; border: 1px solid #333; border-radius: 8px; padding: 1rem; overflow-y: auto;">
+              
+              <!-- Level Loader Section -->
+              <h3 style="color: #0f0; margin-bottom: 1rem;">📁 Load Level</h3>
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="editor-level-select">Select a Level to Load</label>
+                <select id="editor-level-select" style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.8rem; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.9rem;">
+                  <option value="">Scanning for levels...</option>
+                </select>
+                <div class="file-info">Auto-discovered from project</div>
+              </div>
+              <button type="button" class="btn" id="load-level" style="width: 100%; margin-bottom: 1rem;">🔍 Load Level</button>
+              <div class="status ready" id="editor-status">Ready</div>
+              
+              <!-- Save Changes Button -->
+              <div id="save-section" style="display: none; margin: 1rem 0;">
+                <button type="button" class="btn" id="save-manifest" style="width: 100%; background: linear-gradient(45deg, #ff8000, #ff4000); font-weight: bold;">💾 Save Changes</button>
+              </div>
+              
+              <!-- Level Features Panel -->
+              <div id="features-panel" style="display: none;">
+                <h3 style="color: #0f0; margin: 1.5rem 0 1rem 0;">🎮 Level Features</h3>
+                <div style="display: grid; gap: 0.5rem; margin-bottom: 1rem;">
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="feature-ocean" style="width: auto; margin-right: 0.5rem;"> Ocean System
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="feature-vegetation" style="width: auto; margin-right: 0.5rem;"> Vegetation
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="feature-fireflies" style="width: auto; margin-right: 0.5rem;"> Fireflies
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="feature-fog" style="width: auto; margin-right: 0.5rem;"> Fog Effects
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="feature-bloom" style="width: auto; margin-right: 0.5rem;"> Bloom Effects
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Lighting Editor Panel -->
+              <div id="lighting-panel" style="display: none;">
+                <h3 style="color: #0f0; margin: 1.5rem 0 1rem 0;">💡 Lighting</h3>
+                
+                <!-- Ambient Light -->
+                <div class="form-group">
+                  <label for="ambient-intensity">Ambient Intensity</label>
+                  <input type="range" id="ambient-intensity" min="0" max="1" step="0.1" value="0.3" style="width: 100%;">
+                  <div class="file-info">Global ambient lighting: <span id="ambient-value">0.3</span></div>
+                </div>
+                
+                <!-- Directional Lights -->
+                <h4 style="color: #888; margin: 1rem 0 0.5rem 0;">Directional Lights</h4>
+                <div id="directional-lights-container">
+                  <!-- Lights will be dynamically added here -->
+                </div>
+                <button type="button" class="btn btn-small" id="add-directional-light" style="width: 100%; margin-top: 0.5rem; background: #333;">+ Add Light</button>
+              </div>
+              
+              <!-- Style & Effects Panel -->
+              <div id="style-panel" style="display: none;">
+                <h3 style="color: #0f0; margin: 1.5rem 0 1rem 0;">🎨 Style & Effects</h3>
+                
+                <!-- Style Preset -->
+                <div class="form-group">
+                  <label for="style-preset">Style Preset</label>
+                  <select id="style-preset" style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.5rem;">
+                    <option value="realistic">Realistic</option>
+                    <option value="cinematic">Cinematic</option>
+                    <option value="vibrant">Vibrant</option>
+                    <option value="noir">Film Noir</option>
+                  </select>
+                </div>
+                
+                <!-- Color Grading -->
+                <h4 style="color: #888; margin: 1rem 0 0.5rem 0;">Color Grading</h4>
+                <div class="form-group">
+                  <label for="style-saturation">Saturation</label>
+                  <input type="range" id="style-saturation" min="0" max="2" step="0.1" value="1" style="width: 100%;">
+                  <div class="file-info">Saturation: <span id="saturation-value">1.0</span></div>
+                </div>
+                <div class="form-group">
+                  <label for="style-contrast">Contrast</label>
+                  <input type="range" id="style-contrast" min="0" max="2" step="0.1" value="1" style="width: 100%;">
+                  <div class="file-info">Contrast: <span id="contrast-value">1.0</span></div>
+                </div>
+                <div class="form-group">
+                  <label for="style-brightness">Brightness</label>
+                  <input type="range" id="style-brightness" min="0" max="2" step="0.1" value="1" style="width: 100%;">
+                  <div class="file-info">Brightness: <span id="brightness-value">1.0</span></div>
+                </div>
+                <div class="form-group">
+                  <label for="style-warmth">Warmth</label>
+                  <input type="range" id="style-warmth" min="0" max="2" step="0.1" value="1" style="width: 100%;">
+                  <div class="file-info">Warmth: <span id="warmth-value">1.0</span></div>
+                </div>
+                
+                <!-- Fog Settings -->
+                <h4 style="color: #888; margin: 1rem 0 0.5rem 0;">Fog</h4>
+                <div class="form-group">
+                  <label for="fog-color">Fog Color</label>
+                  <input type="color" id="fog-color" value="#6a7db3" style="width: 100%; height: 2rem;">
+                </div>
+                <div class="form-group">
+                  <label for="fog-density">Fog Density</label>
+                  <input type="range" id="fog-density" min="0" max="0.01" step="0.001" value="0.002" style="width: 100%;">
+                  <div class="file-info">Density: <span id="fog-density-value">0.002</span></div>
+                </div>
+                
+                <!-- Bloom Settings -->
+                <h4 style="color: #888; margin: 1rem 0 0.5rem 0;">Bloom</h4>
+                <div class="form-group">
+                  <label for="bloom-threshold">Bloom Threshold</label>
+                  <input type="range" id="bloom-threshold" min="0" max="2" step="0.1" value="0.9" style="width: 100%;">
+                  <div class="file-info">Threshold: <span id="bloom-threshold-value">0.9</span></div>
+                </div>
+                <div class="form-group">
+                  <label for="bloom-intensity">Bloom Intensity</label>
+                  <input type="range" id="bloom-intensity" min="0" max="3" step="0.1" value="1" style="width: 100%;">
+                  <div class="file-info">Intensity: <span id="bloom-intensity-value">1.0</span></div>
+                </div>
+              </div>
+              
+              <!-- Ocean Panel -->
+              <div id="ocean-panel" style="display: none;">
+                <h3 style="color: #0f0; margin: 1.5rem 0 1rem 0;">🌊 Ocean</h3>
+                
+                <div class="form-group">
+                  <label for="ocean-initial-level">Initial Level</label>
+                  <input type="number" id="ocean-initial-level" step="1" value="0">
+                </div>
+                <div class="form-group">
+                  <label for="ocean-target-level">Target Level</label>
+                  <input type="number" id="ocean-target-level" step="1" value="100">
+                </div>
+                <div class="form-group">
+                  <label for="ocean-rise-rate">Rise Rate</label>
+                  <input type="range" id="ocean-rise-rate" min="0.1" max="10" step="0.1" value="1" style="width: 100%;">
+                  <div class="file-info">Rate: <span id="ocean-rise-rate-value">1.0</span></div>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="ocean-enable-rising" style="width: auto; margin-right: 0.5rem;"> Enable Rising
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="ocean-enable-animation" checked style="width: auto; margin-right: 0.5rem;"> Enable Animation
+                  </label>
+                </div>
+                
+                <h4 style="color: #888; margin: 1rem 0 0.5rem 0;">Underwater Effects</h4>
+                <div class="form-group">
+                  <label for="ocean-underwater-fog-color">Underwater Fog Color</label>
+                  <input type="color" id="ocean-underwater-fog-color" value="#0a1922" style="width: 100%; height: 2rem;">
+                </div>
+                <div class="form-group">
+                  <label for="ocean-underwater-fog-density">Underwater Fog Density</label>
+                  <input type="range" id="ocean-underwater-fog-density" min="0" max="0.2" step="0.01" value="0.1" style="width: 100%;">
+                  <div class="file-info">Density: <span id="underwater-fog-density-value">0.1</span></div>
+                </div>
+                <div class="form-group">
+                  <label for="ocean-surface-fog-density">Surface Fog Density</label>
+                  <input type="range" id="ocean-surface-fog-density" min="0" max="0.01" step="0.001" value="0.001" style="width: 100%;">
+                  <div class="file-info">Density: <span id="surface-fog-density-value">0.001</span></div>
+                </div>
+              </div>
+              
+              <!-- Spawn Point Panel -->
+              <div id="spawn-panel" style="display: none;">
+                <h3 style="color: #0f0; margin: 1.5rem 0 1rem 0;">🚀 Player Spawn Point</h3>
+                
+                <div class="form-group">
+                  <label for="spawn-position-x">X Position</label>
+                  <input type="number" id="spawn-position-x" step="0.1" value="0">
+                  <div class="file-info">Horizontal position (West ← → East)</div>
+                </div>
+                
+                <div class="form-group">
+                  <label for="spawn-position-y">Y Position (Height)</label>
+                  <input type="number" id="spawn-position-y" step="0.1" value="10">
+                  <div class="file-info">Vertical position (Down ↓ ↑ Up)</div>
+                </div>
+                
+                <div class="form-group">
+                  <label for="spawn-position-z">Z Position</label>
+                  <input type="number" id="spawn-position-z" step="0.1" value="0">
+                  <div class="file-info">Depth position (South ← → North)</div>
+                </div>
+                
+                <h4 style="color: #888; margin: 1rem 0 0.5rem 0;">Spawn Rotation</h4>
+                <div class="form-group">
+                  <label for="spawn-rotation-y">Y Rotation (Look Direction)</label>
+                  <input type="range" id="spawn-rotation-y" min="0" max="360" step="5" value="0" style="width: 100%;">
+                  <div class="file-info">Player facing direction: <span id="spawn-rotation-value">0°</span> (0° = North, 90° = East, 180° = South, 270° = West)</div>
+                </div>
+                
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 1rem;">
+                  <div class="form-group">
+                    <label for="spawn-rotation-x">X Rotation</label>
+                    <input type="number" id="spawn-rotation-x" step="1" value="0" style="font-size: 0.9rem;">
+                    <div class="file-info" style="font-size: 0.8rem;">Pitch (up/down)</div>
+                  </div>
+                  <div class="form-group">
+                    <label for="spawn-rotation-z">Z Rotation</label>
+                    <input type="number" id="spawn-rotation-z" step="1" value="0" style="font-size: 0.9rem;">
+                    <div class="file-info" style="font-size: 0.8rem;">Roll (tilt)</div>
+                  </div>
+                </div>
+                
+                <div class="file-info" style="margin-top: 1rem; padding: 0.5rem; background: #002; border: 1px solid #004; border-radius: 4px;">
+                  💡 Tip: Set Y position slightly above terrain to prevent spawning underground. Use preview to test spawn location.
+                </div>
+              </div>
+              
+              <!-- Physics Panel -->
+              <div id="physics-panel" style="display: none;">
+                <h3 style="color: #0f0; margin: 1.5rem 0 1rem 0;">⚖️ Physics</h3>
+                
+                <div class="form-group">
+                  <label for="physics-world-size">World Size (Read-only)</label>
+                  <input type="number" id="physics-world-size" readonly style="background: #222;">
+                  <div class="file-info">Determined by source 3D model</div>
+                </div>
+                
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                  <div class="form-group">
+                    <label for="physics-min-height">Min Height</label>
+                    <input type="number" id="physics-min-height" readonly style="background: #222;">
+                  </div>
+                  <div class="form-group">
+                    <label for="physics-max-height">Max Height</label>
+                    <input type="number" id="physics-max-height" readonly style="background: #222;">
+                  </div>
+                </div>
+                
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                  <div class="form-group">
+                    <label for="physics-grid-x">Grid X</label>
+                    <input type="number" id="physics-grid-x" min="1" max="16">
+                  </div>
+                  <div class="form-group">
+                    <label for="physics-grid-y">Grid Y</label>
+                    <input type="number" id="physics-grid-y" min="1" max="16">
+                  </div>
+                </div>
+                
+                <div class="file-info" style="margin-top: 1rem; padding: 0.5rem; background: #220; border: 1px solid #440; border-radius: 4px;">
+                  ⚠️ Changing grid size requires re-running the Level Processor tool to regenerate visual terrain chunks.
+                </div>
+              </div>
+              
+              <!-- 3D Preview Options -->
+              <div id="preview-options" style="display: none;">
+                <h3 style="color: #0f0; margin: 1.5rem 0 1rem 0;">👁️ 3D Preview Options</h3>
+                <div style="display: grid; gap: 0.5rem;">
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="show-spawn-point" checked style="width: auto; margin-right: 0.5rem;"> Show Spawn Point
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="show-ocean" checked style="width: auto; margin-right: 0.5rem;"> Show Ocean
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="show-vegetation" checked style="width: auto; margin-right: 0.5rem;"> Show Vegetation
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="show-trimesh-colliders" style="width: auto; margin-right: 0.5rem;"> Show TriMesh Physics
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="show-heightmap" checked style="width: auto; margin-right: 0.5rem;"> Show Height Data (TriMesh Source)
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="show-chunks" checked style="width: auto; margin-right: 0.5rem;"> Show Chunks
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="show-wireframe" style="width: auto; margin-right: 0.5rem;"> Wireframe Mode
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="show-grid" checked style="width: auto; margin-right: 0.5rem;"> Show Grid Lines
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="show-chunk-bounds" style="width: auto; margin-right: 0.5rem;"> Show Chunk Bounds
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;">
+                    <input type="checkbox" id="show-world-axes" style="width: auto; margin-right: 0.5rem;"> Show World Axes
+                  </label>
+                </div>
+              </div>
+              
+            </div>
+            
+            <!-- 3D Preview Canvas -->
+            <div class="editor-preview" style="background: #000; border: 1px solid #333; border-radius: 8px; position: relative; overflow: hidden;">
+              <div id="editor-canvas" style="width: 100%; height: 100%;">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #666; text-align: center;">
+                  <div style="font-size: 3rem; margin-bottom: 1rem;">🔎</div>
+                  <div>Load a level manifest to begin 3D preview</div>
+                  <div style="font-size: 0.9rem; margin-top: 0.5rem;">Rich editor with real-time updates</div>
+                </div>
+              </div>
+              
+              <!-- 3D Controls Overlay -->
+              <div style="position: absolute; top: 1rem; left: 1rem; background: rgba(0,0,0,0.8); border: 1px solid #333; border-radius: 4px; padding: 0.5rem; font-size: 0.8rem; color: #aaa;">
+                <div>🖱️ Left: Rotate • Right: Pan • Wheel: Zoom</div>
+              </div>
+              
+              <!-- Stats Overlay -->
+              <div id="editor-stats" style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.8); border: 1px solid #333; border-radius: 4px; padding: 0.5rem; font-size: 0.8rem; color: #aaa; display: none;">
+                <div>Features: <span id="stats-features">-</span></div>
+                <div>Lights: <span id="stats-lights">0</span></div>
+                <div>Objects: <span id="stats-objects">0</span></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="log-output" id="editor-logs">
+            <div class="log-line">> Rich Level Editor ready</div>
+            <div class="log-line info">> Load a level manifest to begin comprehensive editing</div>
+          </div>
+        </section>
+
+        <section id="tool-heightmap" class="tool-pane tool-section">
+          <h2>🗻 Heightmap Generator</h2>
+          <p>Generate pre-baked heightmaps from GLB terrain files for instant loading in your game.</p>
+          <div class="status ready" id="heightmap-status">System Ready</div>
+          <form id="heightmap-form">
+            <div class="form-group">
+              <label for="heightmap-input">Input GLB File</label>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" id="heightmap-input" value="public/models/observatory-island.glb" placeholder="Path to GLB file" style="flex: 1;">
+                <button type="button" class="btn" id="browse-heightmap-input" style="padding: 0.6rem 1rem; font-size: 0.8rem;">📁 Browse</button>
+              </div>
+              <div class="file-info">Path relative to project root</div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="heightmap-resolution">Resolution</label>
+                <select id="heightmap-resolution">
+                  <option value="256">256x256 (Fast, ~65KB)</option>
+                  <option value="512" selected>512x512 (Recommended, ~256KB)</option>
+                  <option value="1024">1024x1024 (Detailed, ~1MB)</option>
+                  <option value="2048">2048x2048 (Massive, ~4MB)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="heightmap-world-size">World Size</label>
+                <input type="number" id="heightmap-world-size" placeholder="Auto-detect if empty" min="1">
+                <div class="file-info">Leave empty for auto-detection</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="heightmap-output">Output Directory</label>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" id="heightmap-output" value="public/terrain/heightmaps/" placeholder="Output directory path" style="flex: 1;">
+                <button type="button" class="btn" id="browse-heightmap-output" style="padding: 0.6rem 1rem; font-size: 0.8rem;">📁 Browse</button>
+              </div>
+            </div>
+            <button type="button" class="btn" id="generate-heightmap">Generate Heightmap</button>
+          </form>
+          <div class="log-output" id="heightmap-logs">
+            <div class="log-line">> Heightmap generator ready</div>
+            <div class="log-line info">> Zero-install app running on localhost:${PORT}</div>
+          </div>
+        </section>
+        
+        <section id="tool-processor" class="tool-pane tool-section">
+          <h2>🗺️ Level Processor</h2>
+          <p>Split large GLB terrain models into optimized chunks with multiple levels of detail (LODs).</p>
+          <div class="status ready" id="processor-status">System Ready</div>
+          <form id="processor-form">
+            <div class="form-group">
+              <label for="processor-input">Input GLB File</label>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" id="processor-input" value="public/models/observatory-island.glb" placeholder="Path to GLB file" style="flex: 1;">
+                <button type="button" class="btn" id="browse-processor-input" style="padding: 0.6rem 1rem; font-size: 0.8rem;">📁 Browse</button>
+              </div>
+              <div class="file-info">Path relative to project root</div>
+            </div>
+            <div class="form-group">
+              <label for="processor-output">Output Directory</label>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" id="processor-output" value="public/terrain/levels/" placeholder="Output directory path" style="flex: 1;">
+                <button type="button" class="btn" id="browse-processor-output" style="padding: 0.6rem 1rem; font-size: 0.8rem;">📁 Browse</button>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="processor-gridx">Grid Tiles (X)</label>
+                <input type="number" id="processor-gridx" value="4" min="1" max="32">
+              </div>
+              <div class="form-group">
+                <label for="processor-gridy">Grid Tiles (Y)</label>
+                <input type="number" id="processor-gridy" value="4" min="1" max="32">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="processor-lod">LOD Levels</label>
+              <input type="number" id="processor-lod" value="2" min="0" max="10">
+              <div class="file-info">Number of detail levels to generate</div>
+            </div>
+            <div class="form-group">
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="processor-enhance" checked style="transform: scale(1.2);">
+                <span>🔧 Enhanced Mesh Quality</span>
+              </label>
+              <div class="file-info">Apply smooth normal recalculation for better visual quality (recommended)</div>
+            </div>
+            <button type="button" class="btn" id="process-level">Process Level</button>
+          </form>
+          <div class="log-output" id="processor-logs">
+            <div class="log-line">> Level processor ready</div>
+            <div class="log-line info">> Creates GLB chunks with LODs using trimesh</div>
+            <div class="log-line info">> Auto-installs trimesh if needed</div>
+          </div>
+        </section>
+        
+        <section id="tool-generator" class="tool-pane tool-section">
+          <h2>🎮 Level Generator</h2>
+          <p>Generate complete, production-ready levels with manifests, components, and optimized features.</p>
+          <div class="status ready" id="generator-status">System Ready</div>
+          <form id="generator-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="generator-name">Level Name</label>
+                <input type="text" id="generator-name" value="Observatory Island" placeholder="Display name">
+                <div class="file-info">Display name for the level</div>
+              </div>
+              <div class="form-group">
+                <label for="generator-id">Level ID</label>
+                <input type="text" id="generator-id" value="observatory-island" placeholder="Unique identifier">
+                <div class="file-info">Unique identifier (kebab-case)</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="generator-type">Level Type</label>
+                <select id="generator-type">
+                  <option value="interior">Interior (Small spaces, indoor)</option>
+                  <option value="terrain" selected>Terrain (Large outdoor areas)</option>
+                  <option value="hybrid">Hybrid (Mixed indoor/outdoor)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="generator-glb">GLB Path</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <input type="text" id="generator-glb" value="public/models/levels/observatory-environment.glb" placeholder="Path to GLB file" style="flex: 1;">
+                  <button type="button" class="btn" id="browse-generator-glb" style="padding: 0.6rem 1rem; font-size: 0.8rem;">📁 Browse</button>
+                </div>
+                <div class="file-info">Path relative to project root</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="generator-heightmap">Heightmap Path (Optional)</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <input type="text" id="generator-heightmap" placeholder="e.g., public/terrain/heightmaps/level.png" style="flex: 1;">
+                  <button type="button" class="btn" id="browse-generator-heightmap" style="padding: 0.6rem 1rem; font-size: 0.8rem;">📁 Browse</button>
+                </div>
+                <div class="file-info">Overrides default heightmap path</div>
+              </div>
+              <div class="form-group">
+                <label for="generator-chunks">Level Chunks Path (Optional)</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <input type="text" id="generator-chunks" placeholder="e.g., public/terrain/levels/level_name" style="flex: 1;">
+                  <button type="button" class="btn" id="browse-generator-chunks" style="padding: 0.6rem 1rem; font-size: 0.8rem;">📁 Browse</button>
+                </div>
+                <div class="file-info">Path to directory of processed chunks</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Features</label>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;"><input type="checkbox" id="feature-ocean" style="width: auto; margin-right: 0.5rem;"> Ocean System</label>
+                <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;"><input type="checkbox" id="feature-vegetation" style="width: auto; margin-right: 0.5rem;" checked> Vegetation</label>
+                <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;"><input type="checkbox" id="feature-fireflies" style="width: auto; margin-right: 0.5rem;" checked> Fireflies</label>
+                <label style="display: flex; align-items: center; font-size: 0.85rem; text-transform: none;"><input type="checkbox" id="feature-starmap" style="width: auto; margin-right: 0.5rem;"> Star Map</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="generator-output">Output Directory</label>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" id="generator-output" value="./src/threlte/levels" placeholder="Output directory path" style="flex: 1;">
+                <button type="button" class="btn" id="browse-generator-output" style="padding: 0.6rem 1rem; font-size: 0.8rem;">📁 Browse</button>
+              </div>
+              <div class="file-info">Directory for generated Svelte components</div>
+            </div>
+            <button type="button" class="btn" id="generate-level">Generate Level</button>
+          </form>
+          <div class="log-output" id="generator-logs">
+            <div class="log-line">> Level generator ready</div>
+            <div class="log-line info">> Creates manifest.json + Svelte component</div>
+            <div class="log-line info">> Supports interior, terrain, and hybrid levels</div>
+          </div>
+        </section>
+
+        <section id="tool-starmap" class="tool-pane tool-section">
+          <h2>✨ Starmap Editor</h2>
+          <p>Create and edit the star nodes that define the game's level navigation system.</p>
+          <div id="starmap-editor-layout" style="display: flex; gap: 1rem;">
+            <div id="starmap-list-container" style="flex: 0 0 35%; border-right: 1px solid #333; padding-right: 1rem; max-height: 600px; overflow-y: auto;">
+              <h3 style="color: #0f0; margin-bottom: 1rem;">Stars & Constellations</h3>
+              <button id="starmap-new-btn" class="btn" style="width: 100%; margin-bottom: 1rem;">+ New Star</button>
+              
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <input type="text" id="starmap-search" placeholder="Search stars..." style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.5rem; border-radius: 4px;">
+              </div>
+              
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <select id="starmap-filter-era" style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.5rem; border-radius: 4px;">
+                  <option value="">All Eras</option>
+                </select>
+              </div>
+              
+              <div id="starmap-stats" style="font-size: 0.8rem; color: #888; margin-bottom: 1rem; padding: 0.5rem; background: #111; border-radius: 4px;">
+                Total Stars: <span id="total-stars">0</span> | 
+                Key Events: <span id="key-events">0</span> | 
+                Levels: <span id="level-stars">0</span>
+              </div>
+              
+              <div id="starmap-list"></div>
+            </div>
+            <div id="starmap-form-container" style="flex: 1;">
+              
+              <!-- Level Detection Section -->
+              <div id="level-detection-section" style="background: #111; border: 1px solid #333; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 style="color: #0f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                  🎮 Level Star Generator
+                  <button id="refresh-levels-btn" type="button" style="background: #333; color: #0f0; border: 1px solid #555; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem; cursor: pointer;">↻ Refresh</button>
+                </h3>
+                <p style="color: #888; margin-bottom: 1rem; font-size: 0.9rem;">Automatically detect game levels that need timeline stars for navigation.</p>
+                
+                <div id="levels-status" style="color: #666; font-style: italic;">Click refresh to scan for levels...</div>
+                
+                <div id="levels-container" style="margin-top: 1rem; display: none;">
+                  <div id="levels-needing-stars" style="margin-bottom: 1rem;">
+                    <!-- Dynamic content -->
+                  </div>
+                  <div id="levels-with-stars" style="margin-top: 1rem;">
+                    <!-- Dynamic content -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Star Editor Form -->
+              <div style="background: #111; border: 1px solid #333; border-radius: 8px; padding: 1.5rem;">
+                <h3 style="color: #0f0; margin-bottom: 1rem;">⭐ Star Editor</h3>
+                <form id="starmap-form"></form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Cubemap Converter -->
+        <section id="tool-cubemap" class="tool-pane tool-section">
+          <h2>🎆 Cubemap Converter</h2>
+          <p>Convert equirectangular skybox images to 6 cube face images for optimized skyboxes.</p>
+          <div class="status ready" id="cubemap-status">System Ready</div>
+          <form id="cubemap-form">
+            <div class="form-group">
+              <label for="cubemap-input">Input Image (Equirectangular)</label>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" id="cubemap-input" value="" placeholder="Path to equirectangular image" style="flex: 1;">
+                <button type="button" class="btn" id="browse-cubemap-input" style="padding: 0.6rem 1rem; font-size: 0.8rem;">📁 Browse</button>
+              </div>
+              <div class="file-info">Supports: .hdr, .exr, .jpg, .png</div>
+              
+              <!-- File Browser Modal -->
+              <div id="file-browser-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 2px solid #0f0; border-radius: 8px; width: 80%; max-width: 800px; max-height: 80%; overflow: hidden;">
+                  <!-- Header -->
+                  <div style="background: #0f0; color: #000; padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; font-weight: bold;">📁 Browse Files</h3>
+                    <button id="close-browser" style="background: none; border: none; color: #000; font-size: 1.5rem; cursor: pointer;">×</button>
+                  </div>
+                  
+                  <!-- Breadcrumb Navigation -->
+                  <div id="file-breadcrumbs" style="background: #222; padding: 0.75rem 1rem; border-bottom: 1px solid #333; font-family: 'Courier New', monospace; font-size: 0.9rem; color: #0f0;"></div>
+                  
+                  <!-- Filter -->
+                  <div style="background: #1a1a1a; padding: 0.75rem 1rem; border-bottom: 1px solid #333;">
+                    <label style="color: #0f0; font-size: 0.8rem; text-transform: uppercase;">Filter by extension:</label>
+                    <select id="file-filter" style="background: #222; border: 1px solid #444; color: #fff; padding: 0.25rem; margin-left: 0.5rem; border-radius: 3px;">
+                      <option value="">All Files</option>
+                      <option value=".hdr">HDR files</option>
+                      <option value=".exr">EXR files</option>
+                      <option value=".jpg,.jpeg">JPEG files</option>
+                      <option value=".png">PNG files</option>
+                      <option value=".webp">WebP files</option>
+                    </select>
+                  </div>
+                  
+                  <!-- File List -->
+                  <div id="file-list" style="max-height: 400px; overflow-y: auto; background: #111;"></div>
+                  
+                  <!-- Footer -->
+                  <div style="background: #222; padding: 0.75rem 1rem; border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+                    <div id="selected-file" style="color: #888; font-size: 0.9rem;">No file selected</div>
+                    <div style="display: flex; gap: 0.5rem;">
+                      <button id="select-directory" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: #444;">📁 Select Directory</button>
+                      <button id="select-file" class="btn" disabled style="padding: 0.5rem 1rem; font-size: 0.9rem;">Select File</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="cubemap-resolution">Face Resolution</label>
+                <select id="cubemap-resolution">
+                  <option value="512">512x512 (2KB faces)</option>
+                  <option value="1024" selected>1024x1024 (8KB faces)</option>
+                  <option value="2048">2048x2048 (32KB faces)</option>
+                  <option value="4096">4096x4096 (128KB faces)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="cubemap-format">Output Format</label>
+                <select id="cubemap-format">
+                  <option value="jpg">JPEG (smaller, lossy)</option>
+                  <option value="png">PNG (larger, lossless)</option>
+                  <option value="webp" selected>WebP (optimal)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="cubemap-output">Output Directory</label>
+              <input type="text" id="cubemap-output" value="public/assets/skyboxes/" placeholder="Output directory">
+            </div>
+            <button type="button" class="btn" id="generate-cubemap">Convert to Cubemap</button>
+          </form>
+          <div class="log-output" id="cubemap-logs">
+            <div class="log-line">> Cubemap converter ready</div>
+            <div class="log-line info">> Supports HDR, EXR, JPG, PNG input formats</div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  
+  <script src="client.js" defer></script>
+</body>
+</html>

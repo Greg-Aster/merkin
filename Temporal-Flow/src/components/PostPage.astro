@@ -1,0 +1,47 @@
+---
+import { getPostUrlBySlug } from '@utils/url-utils'
+import PostCard from './PostCard.astro'
+import FriendContentIntegrator from './svelte/friends/FriendContentIntegrator.svelte'
+import { formatDateToYYYYMMDD } from '../utils/date-utils'
+import { postCardConfig } from '../config/postcard.config'
+
+const { page } = Astro.props
+
+// Add data attributes to each post element for sorting by the FriendContentIntegrator
+let delay = 0
+const interval = 50
+
+// Get animation config
+const animationEnabled = postCardConfig.localPosts.styling.animationEnabled;
+---
+
+<div id="posts-container" class="transition flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4 mb-4">
+    <!-- Regular local posts (server-rendered) with data attributes for friend content integration -->
+    {page.data.map((entry) => {
+        const dateStr = formatDateToYYYYMMDD(entry.data.published);
+        const timestamp = new Date(entry.data.published).getTime();
+        
+        return (
+            <PostCard
+                entry={entry}
+                title={entry.data.title}
+                tags={entry.data.tags}
+                category={entry.data.category}
+                published={entry.data.published}
+                updated={entry.data.updated}
+                url={getPostUrlBySlug(entry.slug)}
+                image={entry.data.image}
+                description={entry.data.description}
+                draft={entry.data.draft}
+                class:list={animationEnabled ? "onload-animation local-post" : "local-post"}
+                style={animationEnabled ? `animation-delay: calc(var(--content-delay) + ${delay++ * interval}ms);` : ""}
+                data-post-type="local"
+                data-post-date={dateStr}
+                data-post-timestamp={timestamp}
+            />
+        );
+    })}
+    
+    <!-- Friend content integrator that will add friend posts client-side -->
+    <FriendContentIntegrator client:load />
+</div>

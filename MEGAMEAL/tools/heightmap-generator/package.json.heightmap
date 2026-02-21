@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "bake-heightmap": "node public/tools/heightmap_baker.js",
+    "bake-observatory": "node public/tools/heightmap_baker.js public/models/levels/observatory-environment.glb --resolution=512 --output=public/terrain/heightmaps/"
+  },
+  "devDependencies": {
+    "three": "^0.160.0",
+    "canvas": "^2.11.2"
+  }
+}

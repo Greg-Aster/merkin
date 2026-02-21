@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build artifacts
+dist/
+**/dist/
+.astro/
+**/.astro/
+.svelte-kit/
+**/.svelte-kit/
+.wrangler/
+**/.wrangler/
+
+# Logs and temp files
+*.log
+*.tmp
+.DS_Store
+
+# IDE/system
+.vscode/
+.idea/
+.claude/
+
+# Environment/secrets
+.env
+.env.*
+!.env.example
+
+# Cache
+.pnpm-store/
+*.tsbuildinfo
+
+# Non-monorepo sibling projects in this folder
+Mesh_Hair_Generator/
+mascot-chatbot-cf-worker/

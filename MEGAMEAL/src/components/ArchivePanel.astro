@@ -1,0 +1,72 @@
+---
+import SharedArchivePanel from '@merkin/blog-core/components/ArchivePanel.astro'
+import { UNCATEGORIZED } from '@constants/constants'
+import I18nKey from '../i18n/i18nKey'
+import { i18n } from '../i18n/translation'
+import { getSortedPosts } from '../utils/content-utils'
+import { getPostUrlBySlug } from '../utils/url-utils'
+
+interface Props {
+  keyword?: string
+  tags?: string[]
+  categories?: string[]
+}
+const { tags, categories } = Astro.props
+
+let posts = await getSortedPosts()
+
+if (Array.isArray(tags) && tags.length > 0) {
+  posts = posts.filter(
+    post =>
+      Array.isArray(post.data.tags) &&
+      post.data.tags.some(tag => tags.includes(tag)),
+  )
+}
+
+if (Array.isArray(categories) && categories.length > 0) {
+  posts = posts.filter(
+    post =>
+      (post.data.category && categories.includes(post.data.category)) ||
+      (!post.data.category && categories.includes(UNCATEGORIZED)),
+  )
+}
+
+const groups: { year: number; posts: typeof posts }[] = (() => {
+  const groupedPosts = posts.reduce(
+    (grouped: { [year: number]: typeof posts }, post) => {
+      const year = post.data.published.getFullYear()
+      if (!grouped[year]) {
+        grouped[year] = []
+      }
+      grouped[year].push(post)
+      return grouped
+    },
+    {},
+  )
+
+  // convert the object to an array
+  const groupedPostsArray = Object.keys(groupedPosts).map(key => ({
+    year: Number.parseInt(key),
+    posts: groupedPosts[Number.parseInt(key)],
+  }))
+
+  // sort years by latest first
+  groupedPostsArray.sort((a, b) => b.year - a.year)
+  return groupedPostsArray
+})()
+
+const archiveGroups = groups.map(group => ({
+  year: group.year,
+  posts: group.posts.map(post => ({
+    title: post.data.title,
+    url: getPostUrlBySlug(post.slug),
+    published: post.data.published,
+    tags: post.data.tags || [],
+  })),
+}))
+---
+
+<SharedArchivePanel
+  groups={archiveGroups}
+  postsCountLabel={i18n(I18nKey.postsCount)}
+/>

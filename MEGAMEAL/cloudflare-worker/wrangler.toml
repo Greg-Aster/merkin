@@ -1,0 +1,12 @@
+name = "megameal-room-directory"
+main = "src/index.ts"
+compatibility_date = "2023-10-30"
+
+# This links the code to the KV Namespace created in the Cloudflare dashboard.
+# The agent must replace the placeholder 'id' with the actual Namespace ID.
+[[kv_namespaces]]
+binding = "ROOM_DIRECTORY"
+id = "3ebff80df9b1452f865a546cf4808bd3"
+
+[ai]
+binding = "AI"

@@ -1,0 +1,15 @@
+{
+  "name": "Observatory Island",
+  "gridSize": [4, 4],
+  "chunkSize": 125,
+  "chunkPath": "/terrain/levels/observatory-environment/chunk_{x}_{y}_LOD{lod}.glb",
+  "lods": [
+    { "level": 0, "distance": 1000 }
+  ],
+  "physics": {
+    "heightmapUrl": "/terrain/heightmaps/observatory-environment_heightmap.png",
+    "worldSize": 500,
+    "minHeight": -183.42,
+    "maxHeight": 10.01
+  }
+}

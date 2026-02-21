@@ -1,0 +1,25 @@
+{
+  "entryPoints": [
+    "src/threlte/stores",
+    "src/threlte/systems",
+    "src/threlte/components",
+    "src/threlte/core"
+  ],
+  "out": "docs/generated",
+  "readme": "none",
+  "entryPointStrategy": "expand",
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "src/threlte/systems/conversation/characters/index.ts",
+    "src/threlte/tests/**"
+  ],
+  "skipErrorChecking": true,
+  "validation": {
+    "notExported": false,
+    "invalidLink": false,
+    "notDocumented": false
+  }
+}

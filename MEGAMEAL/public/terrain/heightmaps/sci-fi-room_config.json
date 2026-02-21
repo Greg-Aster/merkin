@@ -1,0 +1,28 @@
+{
+  "heightmapUrl": "/terrain/heightmaps/sci-fi-room_heightmap.png",
+  "worldSize": 5.39045262336731,
+  "heightScale": 2.066064491868019,
+  "heightOffset": -0.08223403990268707,
+  "bounds": {
+    "min": [
+      -2.6336541175842285,
+      -0.08223403990268707,
+      -2.2834396362304688
+    ],
+    "max": [
+      2.756798505783081,
+      1.983830451965332,
+      2.3493473529815674
+    ]
+  },
+  "resolution": "1024x1024",
+  "originalGLB": "sci-fi-room.glb",
+  "generatedAt": "2025-09-08T15:03:12.311Z",
+  "pipelineVersion": "1.0.0",
+  "synchronizedWith": {
+    "levelId": "sci-fi-room",
+    "glbPath": "sci-fi-room.glb",
+    "generatedBy": "unified-terrain-pipeline",
+    "syncedAt": "2025-09-08T15:03:15.666Z"
+  }
+}

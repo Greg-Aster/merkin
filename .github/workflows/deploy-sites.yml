@@ -1,0 +1,248 @@
+name: Deploy Sites
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "Temporal-Flow/**"
+      - "DNDIY.github.io/**"
+      - "MEGAMEAL/**"
+      - "packages/blog-core/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/deploy-sites.yml"
+      - ".github/workflows/DEPLOYMENT_SETUP.md"
+  workflow_dispatch:
+    inputs:
+      site:
+        description: "Site to deploy"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - temporal
+          - dndiy
+          - megameal
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-sites-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9.14.4"
+  TEMPORAL_OWNER: ${{ vars.TEMPORAL_OWNER || github.repository_owner }}
+  DNDIY_OWNER: ${{ vars.DNDIY_OWNER || github.repository_owner }}
+  MEGAMEAL_OWNER: ${{ vars.MEGAMEAL_OWNER || github.repository_owner }}
+  TEMPORAL_REPO: ${{ vars.TEMPORAL_REPO || 'temporal-flow' }}
+  DNDIY_REPO: ${{ vars.DNDIY_REPO || 'DNDIY.github.io' }}
+  MEGAMEAL_REPO: ${{ vars.MEGAMEAL_REPO || 'megameal' }}
+  TEMPORAL_DEPLOY_BRANCH: ${{ vars.TEMPORAL_DEPLOY_BRANCH || 'gh-pages' }}
+  DNDIY_DEPLOY_BRANCH: ${{ vars.DNDIY_DEPLOY_BRANCH || 'gh-pages' }}
+  MEGAMEAL_DEPLOY_BRANCH: ${{ vars.MEGAMEAL_DEPLOY_BRANCH || 'gh-pages' }}
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      temporal: ${{ steps.filter.outputs.temporal }}
+      dndiy: ${{ steps.filter.outputs.dndiy }}
+      megameal: ${{ steps.filter.outputs.megameal }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            temporal:
+              - "Temporal-Flow/**"
+              - "packages/blog-core/**"
+              - "package.json"
+              - "pnpm-lock.yaml"
+              - "pnpm-workspace.yaml"
+              - ".github/workflows/deploy-sites.yml"
+            dndiy:
+              - "DNDIY.github.io/**"
+              - "packages/blog-core/**"
+              - "package.json"
+              - "pnpm-lock.yaml"
+              - "pnpm-workspace.yaml"
+              - ".github/workflows/deploy-sites.yml"
+            megameal:
+              - "MEGAMEAL/**"
+              - "packages/blog-core/**"
+              - ".github/workflows/deploy-sites.yml"
+
+  deploy-temporal:
+    name: Deploy Temporal-Flow
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: >
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.site == 'all' || github.event.inputs.site == 'temporal')) ||
+      (github.event_name != 'workflow_dispatch' && needs.detect-changes.outputs.temporal == 'true')
+    steps:
+      - name: Validate deployment token
+        run: |
+          if [ -z "${{ secrets.PAGES_DEPLOY_TOKEN }}" ]; then
+            echo "Missing required secret: PAGES_DEPLOY_TOKEN"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Temporal-Flow
+        run: pnpm build:temporal
+
+      - name: Prepare deploy artifacts
+        run: |
+          touch Temporal-Flow/dist/.nojekyll
+          if [ -f Temporal-Flow/CNAME ]; then
+            cp Temporal-Flow/CNAME Temporal-Flow/dist/CNAME
+          fi
+
+      - name: Deploy to target repository
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+          external_repository: ${{ env.TEMPORAL_OWNER }}/${{ env.TEMPORAL_REPO }}
+          publish_branch: ${{ env.TEMPORAL_DEPLOY_BRANCH }}
+          publish_dir: ./Temporal-Flow/dist
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_message: "deploy(temporal): ${{ github.repository }}@${{ github.sha }}"
+          force_orphan: true
+
+  deploy-dndiy:
+    name: Deploy DNDIY
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: >
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.site == 'all' || github.event.inputs.site == 'dndiy')) ||
+      (github.event_name != 'workflow_dispatch' && needs.detect-changes.outputs.dndiy == 'true')
+    steps:
+      - name: Validate deployment token
+        run: |
+          if [ -z "${{ secrets.PAGES_DEPLOY_TOKEN }}" ]; then
+            echo "Missing required secret: PAGES_DEPLOY_TOKEN"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build DNDIY
+        run: pnpm build:dndiy
+
+      - name: Prepare deploy artifacts
+        run: |
+          touch DNDIY.github.io/dist/.nojekyll
+          if [ -f DNDIY.github.io/CNAME ]; then
+            cp DNDIY.github.io/CNAME DNDIY.github.io/dist/CNAME
+          fi
+
+      - name: Deploy to target repository
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+          external_repository: ${{ env.DNDIY_OWNER }}/${{ env.DNDIY_REPO }}
+          publish_branch: ${{ env.DNDIY_DEPLOY_BRANCH }}
+          publish_dir: ./DNDIY.github.io/dist
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_message: "deploy(dndiy): ${{ github.repository }}@${{ github.sha }}"
+          force_orphan: true
+
+  deploy-megameal:
+    name: Deploy MEGAMEAL
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: >
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.site == 'all' || github.event.inputs.site == 'megameal')) ||
+      (github.event_name != 'workflow_dispatch' && needs.detect-changes.outputs.megameal == 'true')
+    steps:
+      - name: Validate deployment token
+        run: |
+          if [ -z "${{ secrets.PAGES_DEPLOY_TOKEN }}" ]; then
+            echo "Missing required secret: PAGES_DEPLOY_TOKEN"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Build MEGAMEAL
+        run: |
+          cd MEGAMEAL
+          pnpm install --ignore-workspace --frozen-lockfile
+          pnpm build
+
+      - name: Prepare deploy artifacts
+        run: |
+          touch MEGAMEAL/dist/.nojekyll
+          if [ -f MEGAMEAL/CNAME ]; then
+            cp MEGAMEAL/CNAME MEGAMEAL/dist/CNAME
+          fi
+
+      - name: Deploy to target repository
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+          external_repository: ${{ env.MEGAMEAL_OWNER }}/${{ env.MEGAMEAL_REPO }}
+          publish_branch: ${{ env.MEGAMEAL_DEPLOY_BRANCH }}
+          publish_dir: ./MEGAMEAL/dist
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_message: "deploy(megameal): ${{ github.repository }}@${{ github.sha }}"
+          force_orphan: true

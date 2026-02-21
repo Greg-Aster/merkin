@@ -1,0 +1,28 @@
+{
+  "heightmapUrl": "/terrain/heightmaps/observatory-environment_heightmap.png",
+  "worldSize": 393.5526885986328,
+  "heightScale": 58.15169036388397,
+  "heightOffset": -1.8438290357589722,
+  "bounds": {
+    "min": [
+      -199.5517120361328,
+      -1.8438290357589722,
+      -195.1022491455078
+    ],
+    "max": [
+      194.0009765625,
+      56.307861328125,
+      194.0846710205078
+    ]
+  },
+  "resolution": "1024x1024",
+  "originalGLB": "observatory-environment.glb",
+  "generatedAt": "2025-09-08T14:55:26.973Z",
+  "pipelineVersion": "1.0.0",
+  "synchronizedWith": {
+    "levelId": "observatory-environment",
+    "glbPath": "observatory-environment.glb",
+    "generatedBy": "unified-terrain-pipeline",
+    "syncedAt": "2025-09-08T14:55:54.808Z"
+  }
+}

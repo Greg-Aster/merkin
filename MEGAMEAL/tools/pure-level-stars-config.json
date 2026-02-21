@@ -1,0 +1,131 @@
+{
+  "constellations": {
+    "ancient": {
+      "name": "Ancient Realms",
+      "basePosition": [
+        -50,
+        30,
+        -50
+      ],
+      "radius": 25,
+      "maxStars": 8,
+      "theme": "mystical"
+    },
+    "medieval": {
+      "name": "Medieval Worlds",
+      "basePosition": [
+        -25,
+        25,
+        -25
+      ],
+      "radius": 20,
+      "maxStars": 6,
+      "theme": "castle"
+    },
+    "modern": {
+      "name": "Modern Era",
+      "basePosition": [
+        0,
+        20,
+        0
+      ],
+      "radius": 15,
+      "maxStars": 5,
+      "theme": "urban"
+    },
+    "near-future": {
+      "name": "Near Future",
+      "basePosition": [
+        25,
+        25,
+        25
+      ],
+      "radius": 20,
+      "maxStars": 8,
+      "theme": "tech"
+    },
+    "far-future": {
+      "name": "Far Future",
+      "basePosition": [
+        50,
+        30,
+        50
+      ],
+      "radius": 30,
+      "maxStars": 12,
+      "theme": "space"
+    },
+    "default": {
+      "name": "Unknown Realms",
+      "basePosition": [
+        0,
+        40,
+        0
+      ],
+      "radius": 10,
+      "maxStars": 4,
+      "theme": "mystery"
+    }
+  },
+  "stars": [
+    {
+      "id": "level-star-hybrid-observatory",
+      "title": "Hybrid Observatory",
+      "description": "Hybrid Observatory - A terrain level featuring ocean, vegetation, fireflies, starmap, physics, lighting, conversations",
+      "levelId": "hybrid-observatory",
+      "position": [
+        49,
+        28,
+        25
+      ],
+      "constellation": "near-future",
+      "era": "near-future",
+      "year": 2150,
+      "isLevel": true,
+      "type": "level-star",
+      "metadata": {
+        "glbPath": "/models/levels/observatory-environment.glb",
+        "difficulty": "hard",
+        "estimatedPlayTime": 55,
+        "features": [
+          "ocean",
+          "vegetation",
+          "fireflies",
+          "starmap",
+          "physics",
+          "lighting",
+          "conversations"
+        ]
+      }
+    },
+    {
+      "id": "level-star-sci-fi-room",
+      "title": "Sci Fi Room",
+      "description": "Sci Fi Room - A interior level featuring lighting",
+      "levelId": "sci-fi-room",
+      "position": [
+        87,
+        32,
+        50
+      ],
+      "constellation": "far-future",
+      "era": "far-future",
+      "year": 2500,
+      "isLevel": true,
+      "type": "level-star",
+      "metadata": {
+        "glbPath": "/models/levels/sci-fi-room.glb",
+        "difficulty": "easy",
+        "estimatedPlayTime": 15,
+        "features": [
+          "lighting"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-08-16T00:28:30.139Z",
+    "totalLevels": 2
+  }
+}
