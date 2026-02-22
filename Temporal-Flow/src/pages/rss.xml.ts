@@ -9,19 +9,21 @@ import { createCORSResponse, handleCORS } from '../middleware/cors'
 
 const parser = new MarkdownIt()
 
-export async function GET(context: APIContext) {
+export async function GET(context: APIContext): Promise<Response> {
   // Handle preflight requests
-  const corsResponse = handleCORS(context);
-  if (corsResponse) return corsResponse;
-  
+  const corsResponse = handleCORS(context)
+  if (corsResponse) return corsResponse
+
   // Get posts
   const blog = await getSortedPosts()
-  
+
   // Generate RSS feed
   const response = await rss({
     title: siteConfig.title,
     description: siteConfig.subtitle || 'No description',
-    site: context.site ?? (context.url ? context.url.origin : 'https://temporalflow.org'),
+    site:
+      context.site ??
+      (context.url ? context.url.origin : 'https://temporalflow.org'),
     items: blog.map(post => {
       return {
         title: post.data.title,
@@ -43,12 +45,12 @@ export async function GET(context: APIContext) {
           ${post.data.isKeyEvent !== undefined ? `<isKeyEvent>${post.data.isKeyEvent}</isKeyEvent>` : ''}
           ${post.data.image ? `<image>${post.data.image}</image>` : ''}
         </frontmatter>
-      `
-      };
+      `,
+      }
     }),
     customData: `<language>${siteConfig.lang}</language>`,
-  });
-  
+  })
+
   // Add CORS headers to the response
-  return createCORSResponse(response);
+  return createCORSResponse(response)
 }

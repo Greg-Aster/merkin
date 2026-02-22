@@ -1,0 +1,103 @@
+# GitLab CI — replaces .github/workflows/deploy-sites.yml
+# Builds and deploys to Cloudflare Pages via wrangler.
+#
+# Required GitLab CI/CD Variables (Settings → CI/CD → Variables):
+#   CLOUDFLARE_API_TOKEN  — token with Pages:Edit permission (mark as Masked)
+#   CLOUDFLARE_ACCOUNT_ID — your Cloudflare account ID (mark as Masked)
+#
+# Manual deploy: Pipelines → Run Pipeline → set DEPLOY_SITE to one of:
+#   all | temporal | dndiy | megameal | travel
+
+image: node:22
+
+variables:
+  PNPM_VERSION: "9.14.4"
+  # DEPLOY_SITE is used only for manual (web) pipeline triggers
+  DEPLOY_SITE: "none"
+
+# Shared setup run before every job
+.setup: &setup
+  before_script:
+    - npm install -g pnpm@${PNPM_VERSION} --silent
+    - pnpm install --frozen-lockfile
+
+stages:
+  - deploy
+
+# ─── Temporal-Flow → temporalflow.org ────────────────────────────────────────
+deploy-temporal:
+  stage: deploy
+  <<: *setup
+  script:
+    - pnpm deploy:temporal
+  rules:
+    # Auto: push to main that touches these paths
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - Temporal-Flow/**/*
+        - packages/blog-core/**/*
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+    # Manual trigger
+    - if: '$CI_PIPELINE_SOURCE == "web" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "temporal")'
+  environment:
+    name: temporal-production
+    url: https://temporalflow.org
+
+# ─── DNDIY → dndiy.org ───────────────────────────────────────────────────────
+deploy-dndiy:
+  stage: deploy
+  <<: *setup
+  script:
+    - pnpm deploy:dndiy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - DNDIY.github.io/**/*
+        - packages/blog-core/**/*
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "dndiy")'
+  environment:
+    name: dndiy-production
+    url: https://dndiy.org
+
+# ─── MEGAMEAL → megameal.org ──────────────────────────────────────────────────
+deploy-megameal:
+  stage: deploy
+  <<: *setup
+  script:
+    - pnpm deploy:megameal
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - MEGAMEAL/**/*
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "megameal")'
+  environment:
+    name: megameal-production
+    url: https://megameal.org
+
+# ─── Travel → travel.dndiy.org ───────────────────────────────────────────────
+deploy-travel:
+  stage: deploy
+  <<: *setup
+  script:
+    - pnpm deploy:travel
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - apps/travel/**/*
+        - packages/blog-core/**/*
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "travel")'
+  environment:
+    name: travel-production
+    url: https://travel.dndiy.org

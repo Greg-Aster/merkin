@@ -8,7 +8,7 @@ import {
   url as sharedUrl,
 } from '@merkin/blog-core/utils'
 
-export function pathsEqual(path1: string, path2: string) {
+export function pathsEqual(path1: string, path2: string): boolean {
   return pathsEqualShared(path1, path2)
 }
 
@@ -20,7 +20,7 @@ export function getCategoryUrl(category: string): string {
   return getSharedCategoryUrl(
     category,
     i18n(i18nKey.uncategorized),
-    import.meta.env.BASE_URL
+    import.meta.env.BASE_URL,
   )
 }
 
@@ -28,6 +28,6 @@ export function getDir(path: string): string {
   return getSharedDir(path)
 }
 
-export function url(path: string) {
+export function url(path: string): string {
   return sharedUrl(path, import.meta.env.BASE_URL)
 }

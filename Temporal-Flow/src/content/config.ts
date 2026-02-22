@@ -1,4 +1,4 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection, z } from 'astro:content'
 
 // Define the 'posts' collection
 const postsCollection = defineCollection({
@@ -11,30 +11,31 @@ const postsCollection = defineCollection({
     image: z.string().optional().default(''),
     // Custom author profile fields
     avatarImage: z.string().optional(), // Custom path to avatar image
-    authorName: z.string().optional(),  // Custom author name 
-    authorBio: z.string().optional(),   // Custom author bio
+    authorName: z.string().optional(), // Custom author name
+    authorBio: z.string().optional(), // Custom author bio
     tags: z.array(z.string()).optional().default([]),
     category: z.string().optional().default(''),
     lang: z.string().optional().default(''),
     showImageOnPost: z.boolean().optional(),
-    
+
     // Add bannerType field
     bannerType: z.enum(['image', 'video', 'timeline']).optional(),
-    bannerLink: z.string().optional(),// for image banners link
-
+    bannerLink: z.string().optional(), // for image banners link
 
     // Banner data
-    bannerData: z.object({
-      videoId: z.string().optional(),
-      imageUrl: z.string().optional(), // for image banners
-      category: z.string().optional(),
-      startYear: z.number().optional(),
-      endYear: z.number().optional(),
-      background: z.string().optional(),
-      title: z.string().optional(), // Optional but useful
-      height: z.string().optional(), // Optional for custom heights
-      compact: z.boolean().optional(),
-    }).optional(),
+    bannerData: z
+      .object({
+        videoId: z.string().optional(),
+        imageUrl: z.string().optional(), // for image banners
+        category: z.string().optional(),
+        startYear: z.number().optional(),
+        endYear: z.number().optional(),
+        background: z.string().optional(),
+        title: z.string().optional(), // Optional but useful
+        height: z.string().optional(), // Optional for custom heights
+        compact: z.boolean().optional(),
+      })
+      .optional(),
 
     // Timeline properties
     timelineYear: z.number().optional(),
@@ -49,7 +50,7 @@ const postsCollection = defineCollection({
     nextTitle: z.string().default(''),
     nextSlug: z.string().default(''),
   }),
-});
+})
 
 // Rest of collections
 const specCollection = defineCollection({
@@ -57,7 +58,7 @@ const specCollection = defineCollection({
     title: z.string(),
     description: z.string().optional(),
   }),
-});
+})
 
 const teamCollection = defineCollection({
   schema: z.object({
@@ -68,7 +69,7 @@ const teamCollection = defineCollection({
     featured: z.boolean().optional(),
     order: z.number().default(0),
   }),
-});
+})
 
 // Define the friends collection
 const friendsCollection = defineCollection({
@@ -79,12 +80,15 @@ const friendsCollection = defineCollection({
     avatar: z.string().optional(),
     lastSynced: z.string().optional(),
   }),
-});
+})
 
 // Export the collections
-export const collections = {
+export const collections: Record<
+  string,
+  ReturnType<typeof defineCollection>
+> = {
   posts: postsCollection,
   spec: specCollection,
   team: teamCollection,
   friends: friendsCollection,
-};
+}
