@@ -6,6 +6,7 @@ on:
       - main
       - master
     paths:
+      - "apps/travel/**"
       - "Temporal-Flow/**"
       - "DNDIY.github.io/**"
       - "MEGAMEAL/**"
@@ -24,6 +25,7 @@ on:
         type: choice
         options:
           - all
+          - travel
           - temporal
           - dndiy
           - megameal
@@ -41,17 +43,21 @@ env:
   TEMPORAL_OWNER: ${{ vars.TEMPORAL_OWNER || github.repository_owner }}
   DNDIY_OWNER: ${{ vars.DNDIY_OWNER || github.repository_owner }}
   MEGAMEAL_OWNER: ${{ vars.MEGAMEAL_OWNER || github.repository_owner }}
+  TRAVEL_OWNER: ${{ vars.TRAVEL_OWNER || github.repository_owner }}
   TEMPORAL_REPO: ${{ vars.TEMPORAL_REPO || 'temporal-flow' }}
   DNDIY_REPO: ${{ vars.DNDIY_REPO || 'DNDIY.github.io' }}
   MEGAMEAL_REPO: ${{ vars.MEGAMEAL_REPO || 'megameal' }}
+  TRAVEL_REPO: ${{ vars.TRAVEL_REPO || 'merkin-travel' }}
   TEMPORAL_DEPLOY_BRANCH: ${{ vars.TEMPORAL_DEPLOY_BRANCH || 'gh-pages' }}
   DNDIY_DEPLOY_BRANCH: ${{ vars.DNDIY_DEPLOY_BRANCH || 'gh-pages' }}
   MEGAMEAL_DEPLOY_BRANCH: ${{ vars.MEGAMEAL_DEPLOY_BRANCH || 'gh-pages' }}
+  TRAVEL_DEPLOY_BRANCH: ${{ vars.TRAVEL_DEPLOY_BRANCH || 'gh-pages' }}
 
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
+      travel: ${{ steps.filter.outputs.travel }}
       temporal: ${{ steps.filter.outputs.temporal }}
       dndiy: ${{ steps.filter.outputs.dndiy }}
       megameal: ${{ steps.filter.outputs.megameal }}
@@ -66,6 +72,13 @@ jobs:
         uses: dorny/paths-filter@v3
         with:
           filters: |
+            travel:
+              - "apps/travel/**"
+              - "packages/blog-core/**"
+              - "package.json"
+              - "pnpm-lock.yaml"
+              - "pnpm-workspace.yaml"
+              - ".github/workflows/deploy-sites.yml"
             temporal:
               - "Temporal-Flow/**"
               - "packages/blog-core/**"
@@ -84,6 +97,63 @@ jobs:
               - "MEGAMEAL/**"
               - "packages/blog-core/**"
               - ".github/workflows/deploy-sites.yml"
+
+  deploy-travel:
+    name: Deploy Travel
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: >
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.site == 'all' || github.event.inputs.site == 'travel')) ||
+      (github.event_name != 'workflow_dispatch' && needs.detect-changes.outputs.travel == 'true')
+    steps:
+      - name: Validate deployment token
+        run: |
+          if [ -z "${{ secrets.PAGES_DEPLOY_TOKEN }}" ]; then
+            echo "Missing required secret: PAGES_DEPLOY_TOKEN"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Travel
+        env:
+          SITE_URL: https://${{ env.TRAVEL_OWNER }}.github.io/${{ env.TRAVEL_REPO }}
+          SITE_BASE: /${{ env.TRAVEL_REPO }}
+        run: pnpm build:travel
+
+      - name: Prepare deploy artifacts
+        run: |
+          touch apps/travel/dist/.nojekyll
+          if [ -f apps/travel/CNAME ]; then
+            cp apps/travel/CNAME apps/travel/dist/CNAME
+          fi
+
+      - name: Deploy to target repository
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+          external_repository: ${{ env.TRAVEL_OWNER }}/${{ env.TRAVEL_REPO }}
+          publish_branch: ${{ env.TRAVEL_DEPLOY_BRANCH }}
+          publish_dir: ./apps/travel/dist
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_message: "deploy(travel): ${{ github.repository }}@${{ github.sha }}"
+          force_orphan: true
 
   deploy-temporal:
     name: Deploy Temporal-Flow

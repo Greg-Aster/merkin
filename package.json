@@ -5,10 +5,12 @@
   "type": "module",
   "packageManager": "pnpm@9.14.4",
   "scripts": {
+    "dev:travel": "pnpm --filter @merkin/travel dev",
     "dev:temporal": "pnpm --filter temporal-flow dev",
     "dev:dndiy": "pnpm --filter dndiy dev",
     "dev:megameal": "cd MEGAMEAL && pnpm install --ignore-workspace && pnpm dev",
     "build:all": "pnpm -r build && cd MEGAMEAL && pnpm install --ignore-workspace && pnpm build",
+    "build:travel": "pnpm --filter @merkin/travel build",
     "build:temporal": "pnpm --filter temporal-flow build",
     "build:dndiy": "pnpm --filter dndiy build",
     "build:megameal": "cd MEGAMEAL && pnpm install --ignore-workspace && pnpm build",

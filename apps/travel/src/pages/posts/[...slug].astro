@@ -1,0 +1,26 @@
+---
+import { getCollection, render } from 'astro:content'
+import Layout from '../../layouts/Layout.astro'
+import { formatDate } from '@merkin/blog-core/utils/date-utils'
+import { withBase } from '../../utils/path'
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => !data.draft)
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }))
+}
+
+const { post } = Astro.props
+const { Content } = await render(post)
+---
+
+<Layout title={`${post.data.title} | Trail Log`} description={post.data.description}>
+  <article>
+    <p><a href={withBase()}>Back to all posts</a></p>
+    <h1>{post.data.title}</h1>
+    <p class="meta">{formatDate(post.data.published)}</p>
+    <Content />
+  </article>
+</Layout>

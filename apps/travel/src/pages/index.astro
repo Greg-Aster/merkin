@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content'
+import Layout from '../layouts/Layout.astro'
+import { formatDate } from '@merkin/blog-core/utils/date-utils'
+import { withBase } from '../utils/path'
+
+const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.published.getTime() - a.data.published.getTime(),
+)
+---
+
+<Layout>
+  <section>
+    <h1>Pacific Crest Trail Journal</h1>
+    <p>
+      Short entries from the trail. Keep posts in <code>apps/travel/src/content/posts</code>
+      and redeploy from the monorepo.
+    </p>
+  </section>
+
+  <section>
+    <h2>Recent Posts</h2>
+    <ul class="post-list">
+      {
+        posts.map((post) => (
+          <li class="post-item">
+            <a href={withBase(`posts/${post.slug}/`)}>{post.data.title}</a>
+            <p>{post.data.description}</p>
+            <small>{formatDate(post.data.published)}</small>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Layout>

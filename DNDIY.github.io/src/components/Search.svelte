@@ -151,9 +151,19 @@
     let panel = document.getElementById('search-panel')
     panel?.classList.toggle('float-panel-closed')
   }
+
+  const handleDesktopInput = (event: Event) => {
+    const target = event.currentTarget as HTMLInputElement
+    keywordDesktop = target.value
+    search(keywordDesktop, true)
+  }
+
+  const handleMobileInput = (event: Event) => {
+    const target = event.currentTarget as HTMLInputElement
+    keywordMobile = target.value
+    search(keywordMobile, false)
+  }
   
-  $: search(keywordDesktop, true)
-  $: search(keywordMobile, false)
   </script>
   
   <!-- search bar for desktop view -->
@@ -162,7 +172,7 @@
         dark:bg-white/5 dark:hover:bg-white/10 dark:focus-within:bg-white/10
   ">
       <Icon icon="material-symbols:search" class="absolute text-[1.25rem] pointer-events-none ml-3 transition my-auto text-black/30 dark:text-white/30"></Icon>
-      <input placeholder="{i18n(I18nKey.search)}" bind:value={keywordDesktop} on:focus={() => search(keywordDesktop, true)}
+      <input placeholder={i18n(I18nKey.search)} value={keywordDesktop} on:input={handleDesktopInput} on:focus={() => search(keywordDesktop, true)}
              class="transition-all pl-10 text-sm bg-transparent outline-0
            h-full w-40 active:w-60 focus:w-60 text-black/50 dark:text-white/50"
       >
@@ -184,7 +194,7 @@
         dark:bg-white/5 dark:hover:bg-white/10 dark:focus-within:bg-white/10
     ">
           <Icon icon="material-symbols:search" class="absolute text-[1.25rem] pointer-events-none ml-3 transition my-auto text-black/30 dark:text-white/30"></Icon>
-          <input placeholder="Search" bind:value={keywordMobile}
+          <input placeholder="Search" value={keywordMobile} on:input={handleMobileInput}
                  class="pl-10 absolute inset-0 text-sm bg-transparent outline-0
                  focus:w-60 text-black/50 dark:text-white/50"
           >

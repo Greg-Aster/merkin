@@ -1,9 +1,10 @@
 # Consolidation Session Summary
 
 **Date:** 2026-02-21
-**Status:** 🔄 **PHASE 2 + PHASE 5 IN PROGRESS** - Shared extraction is stable and validation guardrails are being hardened
+**Status:** 🔄 **PHASE 2 + PHASE 5 IN PROGRESS, PHASE 7 COMPLETE** - Shared extraction is stable, source-of-truth model is documented, and travel scaffold is live
 **Phase 2 Update (2026-02-21):** ✅ Navigation composition split extraction is complete for Temporal-Flow and DNDIY (`Navbar.astro`, `AdminNavbar.svelte`, `LoginForm.svelte`, and admin `NavigationConfigTab.svelte` wrappers) with shared implementations moved into `@merkin/blog-core`. ✅ The recurring non-fatal MEGAMEAL Svelte TS warning is cleared by setting `"verbatimModuleSyntax": true` in both `MEGAMEAL/tsconfig.json` and `packages/blog-core/tsconfig.json`. ✅ All three builds pass after these changes.
 **Phase 5 Update (2026-02-21):** ✅ `pnpm build:all` passes (Temporal-Flow 18.45s / 32 pages, DNDIY 28.53s / 52 pages, MEGAMEAL 132.71s / 117 pages). ✅ `packages/blog-core` type-check issue fixed in `src/utils/starUtils.ts` (`window.THREE` typing). ✅ Monorepo deploy workflow added at `.github/workflows/deploy-sites.yml` with external-repo publishing and change detection. ⚠️ `pnpm type-check:all` remains red due existing Temporal-Flow/DNDIY strict typing drift.
+**Phase 7 Update (2026-02-21):** ✅ `merkin` is now explicitly documented as source-of-truth (`MONOREPO_OPERATING_MODEL.md`). ✅ External repos are documented as publish targets (`.github/workflows/DEPLOYMENT_SETUP.md`). ✅ New travel scaffold added at `apps/travel` and wired via root scripts (`dev:travel`, `build:travel`). ✅ Travel scaffold build passes (3 pages + RSS + sitemap).
 
 ---
 
@@ -16,6 +17,7 @@
 /home/greggles/Merkin/
 ├── package.json                 # Root workspace with shared scripts
 ├── pnpm-workspace.yaml          # Workspace: Temporal-Flow, DNDIY, packages/*
+├── apps/travel/                 # New travel-blog scaffold (shared core + local content/config)
 ├── Temporal-Flow/               # Blog site (in workspace)
 ├── DNDIY.github.io/             # Blog site (in workspace)
 ├── MEGAMEAL/                    # Full site (excluded from workspace)
@@ -43,6 +45,11 @@ pnpm build:dndiy     # Builds via workspace
 **MEGAMEAL:**
 ```bash
 pnpm build:megameal  # Builds with --ignore-workspace
+```
+
+**Travel Scaffold:**
+```bash
+pnpm build:travel    # Builds apps/travel
 ```
 
 **All Sites:**
@@ -113,9 +120,10 @@ pnpm build:all       # Builds all three sites
 
 | Site | Status | Build Time | Pages | Notes |
 |------|--------|-----------|-------|-------|
-| Temporal-Flow | ✅ Builds | ~18s | 32 | Workspace build (non-fatal PostCSS + known Astro prerender warnings logged) |
+| Temporal-Flow | ⚠️ Local regression | n/a | n/a | Current local branch has `Search.svelte` error: `Cannot bind to constant` (pre-existing, unrelated to travel scaffold changes) |
 | DNDIY.github.io | ✅ Builds | ~29s | 52 | Workspace build (non-fatal missing-image + known Astro prerender warnings logged) |
-| MEGAMEAL | ✅ Builds | ~133s | 117 | Standalone build (--ignore-workspace), `verbatimModuleSyntax` warning cleared |
+| MEGAMEAL | ✅ Builds | ~142s | 117 | Standalone build (--ignore-workspace), expected Threlte/rollup warning noise |
+| apps/travel | ✅ Builds | ~1s | 3 | New clean scaffold using shared blog-core schema/utils/components |
 
 ### ⚠️ Type-Check Status
 

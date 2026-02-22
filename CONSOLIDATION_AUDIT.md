@@ -6,17 +6,20 @@
 ## Monorepo Reality
 
 - Workspace root is `/home/greggles/Merkin`.
+- `merkin` is the source-of-truth code repository (documented in `MONOREPO_OPERATING_MODEL.md`).
 - `Temporal-Flow` and `DNDIY.github.io` are in `pnpm-workspace.yaml`.
+- `apps/travel` is now in workspace as a clean travel-blog scaffold.
 - Shared package exists at `packages/blog-core`.
 - `MEGAMEAL` is in the same parent folder but intentionally excluded from workspace and built standalone.
 - Monorepo deploy workflow exists at `.github/workflows/deploy-sites.yml` with setup doc at `.github/workflows/DEPLOYMENT_SETUP.md`.
+- External site repositories are treated as publish targets (deployed `gh-pages` output), not authoring repos.
 
 ## Build Verification (Completed)
 
-- `pnpm --filter temporal-flow build` ✅
+- `pnpm --filter temporal-flow build` ⚠️ currently fails on local in-progress change (`src/components/Search.svelte`: Cannot bind to constant)
 - `pnpm --filter dndiy build` ✅
 - `pnpm build` in `MEGAMEAL/` ✅
-- `pnpm build:all` ✅ (Temporal-Flow 18.45s / 32 pages, DNDIY 28.53s / 52 pages, MEGAMEAL 132.71s / 117 pages)
+- `pnpm --filter @merkin/travel build` ✅ (3 pages)
 
 Notes:
 - Temporal and DNDIY still emit known Astro prerender header warnings.
@@ -25,6 +28,7 @@ Notes:
 - `src/constants/constants.ts` stale `node:constants` import warning was removed in Temporal and DNDIY.
 - MEGAMEAL `verbatimModuleSyntax` warning is resolved by setting `"verbatimModuleSyntax": true` in both `MEGAMEAL/tsconfig.json` and `packages/blog-core/tsconfig.json`.
 - `pnpm type-check:all` is currently failing due existing Temporal-Flow/DNDIY strict typing drift; `packages/blog-core` type-check issue (`window.THREE`) has been fixed.
+- Temporal-Flow build failure above is from a pre-existing local edit and is not introduced by travel scaffold/source-of-truth docs updates.
 
 ## Keep These Changes
 
