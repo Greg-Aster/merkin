@@ -21,7 +21,7 @@ export function setHue(hue: number): void {
   setSharedHue(hue)
 }
 
-export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {
+export function applyThemeToDocument(theme: LIGHT_DARK_MODE): void {
   applySharedThemeToDocument(theme)
 }
 
