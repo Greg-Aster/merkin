@@ -1,12 +1,93 @@
-# Minimal test - if this runs, runner infrastructure is working.
-# We will restore the full deploy CI once this confirms working.
+# GitLab CI — deploys to Cloudflare Pages via wrangler.
+#
+# Required CI/CD Variables (Settings → CI/CD → Variables):
+#   CLOUDFLARE_API_TOKEN  — token with Pages:Edit permission (Masked)
+#   CLOUDFLARE_ACCOUNT_ID — Masked
+#
+# Manual deploy: Pipelines → Run Pipeline → set DEPLOY_SITE to:
+#   all | temporal | dndiy | megameal | travel
+
+image: node:22
 
 stages:
-  - test
+  - deploy
 
-hello:
-  stage: test
+# ─── Temporal-Flow → temporalflow.org ────────────────────────────────────────
+deploy-temporal:
+  stage: deploy
+  before_script:
+    - npm install -g pnpm@9.14.4 --silent
+    - pnpm install --frozen-lockfile
   script:
-    - echo "GitLab CI runner is working"
-    - node --version
-    - npm --version
+    - pnpm deploy:temporal
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - Temporal-Flow/**/*
+        - packages/**/*
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+
+# ─── DNDIY → dndiy.org ───────────────────────────────────────────────────────
+deploy-dndiy:
+  stage: deploy
+  before_script:
+    - npm install -g pnpm@9.14.4 --silent
+    - pnpm install --frozen-lockfile
+  script:
+    - pnpm deploy:dndiy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - DNDIY.github.io/**/*
+        - packages/**/*
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+
+# ─── MEGAMEAL → megameal.org ──────────────────────────────────────────────────
+deploy-megameal:
+  stage: deploy
+  before_script:
+    - npm install -g pnpm@9.14.4 --silent
+    - pnpm install --frozen-lockfile
+  script:
+    - pnpm deploy:megameal
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - MEGAMEAL/**/*
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+
+# ─── Travel → travel.dndiy.org ───────────────────────────────────────────────
+deploy-travel:
+  stage: deploy
+  before_script:
+    - npm install -g pnpm@9.14.4 --silent
+    - pnpm install --frozen-lockfile
+  script:
+    - pnpm deploy:travel
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - apps/travel/**/*
+        - packages/**/*
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
