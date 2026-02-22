@@ -1,61 +1,12 @@
-# GitLab CI — deploys to Cloudflare Pages via wrangler.
-#
-# Required CI/CD Variables (Settings → CI/CD → Variables):
-#   CLOUDFLARE_API_TOKEN  — Masked
-#   CLOUDFLARE_ACCOUNT_ID — Masked
-#
-# Manual deploy: Pipelines → Run Pipeline → set DEPLOY_SITE to:
-#   all | temporal | dndiy | megameal | travel
-
-image: node:22
+# Minimal test - if this runs, runner infrastructure is working.
+# We will restore the full deploy CI once this confirms working.
 
 stages:
-  - deploy
+  - test
 
-# ─── Temporal-Flow → temporalflow.org ────────────────────────────────────────
-deploy-temporal:
-  stage: deploy
-  before_script:
-    - npm install -g pnpm@9.14.4 --silent
-    - pnpm install --frozen-lockfile
+hello:
+  stage: test
   script:
-    - pnpm deploy:temporal
-  only:
-    variables:
-      - $CI_COMMIT_BRANCH == "main"
-
-# ─── DNDIY → dndiy.org ───────────────────────────────────────────────────────
-deploy-dndiy:
-  stage: deploy
-  before_script:
-    - npm install -g pnpm@9.14.4 --silent
-    - pnpm install --frozen-lockfile
-  script:
-    - pnpm deploy:dndiy
-  only:
-    variables:
-      - $CI_COMMIT_BRANCH == "main"
-
-# ─── MEGAMEAL → megameal.org ──────────────────────────────────────────────────
-deploy-megameal:
-  stage: deploy
-  before_script:
-    - npm install -g pnpm@9.14.4 --silent
-    - pnpm install --frozen-lockfile
-  script:
-    - pnpm deploy:megameal
-  only:
-    variables:
-      - $CI_COMMIT_BRANCH == "main"
-
-# ─── Travel → travel.dndiy.org ───────────────────────────────────────────────
-deploy-travel:
-  stage: deploy
-  before_script:
-    - npm install -g pnpm@9.14.4 --silent
-    - pnpm install --frozen-lockfile
-  script:
-    - pnpm deploy:travel
-  only:
-    variables:
-      - $CI_COMMIT_BRANCH == "main"
+    - echo "GitLab CI runner is working"
+    - node --version
+    - npm --version
