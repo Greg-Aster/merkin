@@ -2,8 +2,8 @@
 # Builds and deploys to Cloudflare Pages via wrangler.
 #
 # Required GitLab CI/CD Variables (Settings → CI/CD → Variables):
-#   CLOUDFLARE_API_TOKEN  — token with Pages:Edit permission (mark as Masked)
-#   CLOUDFLARE_ACCOUNT_ID — your Cloudflare account ID (mark as Masked)
+#   CLOUDFLARE_API_TOKEN  — token with Pages:Edit permission (Masked)
+#   CLOUDFLARE_ACCOUNT_ID — your Cloudflare account ID (Masked)
 #
 # Manual deploy: Pipelines → Run Pipeline → set DEPLOY_SITE to one of:
 #   all | temporal | dndiy | megameal | travel
@@ -12,26 +12,24 @@ image: node:22
 
 variables:
   PNPM_VERSION: "9.14.4"
-  # DEPLOY_SITE is used only for manual (web) pipeline triggers
+  # Set this when triggering manually via the GitLab UI
   DEPLOY_SITE: "none"
-
-# Shared setup run before every job
-.setup: &setup
-  before_script:
-    - npm install -g pnpm@${PNPM_VERSION} --silent
-    - pnpm install --frozen-lockfile
 
 stages:
   - deploy
 
+# Applied to all jobs automatically
+default:
+  before_script:
+    - npm install -g pnpm@${PNPM_VERSION} --silent
+    - pnpm install --frozen-lockfile
+
 # ─── Temporal-Flow → temporalflow.org ────────────────────────────────────────
 deploy-temporal:
   stage: deploy
-  <<: *setup
   script:
     - pnpm deploy:temporal
   rules:
-    # Auto: push to main that touches these paths
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
       changes:
         - Temporal-Flow/**/*
@@ -40,7 +38,6 @@ deploy-temporal:
         - pnpm-lock.yaml
         - pnpm-workspace.yaml
         - .gitlab-ci.yml
-    # Manual trigger
     - if: '$CI_PIPELINE_SOURCE == "web" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "temporal")'
   environment:
     name: temporal-production
@@ -49,7 +46,6 @@ deploy-temporal:
 # ─── DNDIY → dndiy.org ───────────────────────────────────────────────────────
 deploy-dndiy:
   stage: deploy
-  <<: *setup
   script:
     - pnpm deploy:dndiy
   rules:
@@ -69,7 +65,6 @@ deploy-dndiy:
 # ─── MEGAMEAL → megameal.org ──────────────────────────────────────────────────
 deploy-megameal:
   stage: deploy
-  <<: *setup
   script:
     - pnpm deploy:megameal
   rules:
@@ -85,7 +80,6 @@ deploy-megameal:
 # ─── Travel → travel.dndiy.org ───────────────────────────────────────────────
 deploy-travel:
   stage: deploy
-  <<: *setup
   script:
     - pnpm deploy:travel
   rules:
