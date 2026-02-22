@@ -1,6 +1,6 @@
 <script>
 import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@/constants/constants'
-import Icon from '@iconify/svelte'
+import Icon from '@iconify/svelte/dist/Icon.svelte'
 import {
   applyThemeToDocument,
   getStoredTheme,

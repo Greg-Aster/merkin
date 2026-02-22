@@ -4,7 +4,7 @@
   import { i18n } from '@i18n/translation'
   import { isFriendContentEnabled, getFriendContent } from '../stores/friendStore';
   import I18nKey from '@i18n/i18nKey'
-  import Icon from '@iconify/svelte'
+  import Icon from '@iconify/svelte/dist/Icon.svelte'
   
   let keywordDesktop = ''
   let keywordMobile = ''
@@ -211,7 +211,7 @@
               </div>
               {#if item.isFriendContent}
                   <div class="text-xs text-neutral-500 dark:text-neutral-400 mb-1">
-                      From <a href={item.friendUrl} target="_blank" rel="noopener noreferrer" class="text-[var(--primary)] hover:underline">{item.friendName}</a>
+                      From <span class="text-[var(--primary)]">{item.friendName}</span>
                   </div>
               {/if}
               <div class="transition text-sm text-50">

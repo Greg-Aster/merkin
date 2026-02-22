@@ -1,5 +1,5 @@
 <script lang="ts">
-import Icon from '@iconify/svelte'
+import Icon from '@iconify/svelte/dist/Icon.svelte'
 import { getDefaultHue, getHue, setHue } from '../../utils/theme-utils'
 
 export let themeColorLabel = 'Theme Color'
