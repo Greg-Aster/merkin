@@ -1,25 +1,55 @@
-# GitLab CI — deploys to Cloudflare Pages via wrangler.
-#
-# Required CI/CD Variables (Settings → CI/CD → Variables):
-#   CLOUDFLARE_API_TOKEN  — token with Pages:Edit permission (Masked)
-#   CLOUDFLARE_ACCOUNT_ID — Masked
-#
-# Manual deploy: Pipelines → Run Pipeline → set DEPLOY_SITE to:
-#   all | temporal | dndiy | megameal | travel
-
 image: node:22
 
 stages:
   - deploy
 
-# ─── Temporal-Flow → temporalflow.org ────────────────────────────────────────
-deploy-temporal:
-  stage: deploy
+default:
   before_script:
     - npm install -g pnpm@9.14.4 --silent
     - pnpm install --frozen-lockfile
+
+# Flow:
+# - Non-main branches: auto preview deploys to branch-named previews.
+# - Non-main branches: manual "promote-*" jobs publish that exact commit to production.
+# - Main branch: auto production deploys.
+
+# Temporal-Flow -> temporalflow.org
+preview-temporal:
+  stage: deploy
   script:
-    - pnpm deploy:temporal
+    - DEPLOY_BRANCH="$CI_COMMIT_REF_SLUG" pnpm deploy:temporal
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - Temporal-Flow/**/*
+        - packages/**/*
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "temporal")'
+      when: manual
+      allow_failure: true
+
+promote-temporal:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:temporal
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main"'
+      when: manual
+      changes:
+        - Temporal-Flow/**/*
+        - packages/**/*
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+
+deploy-temporal:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:temporal
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
       changes:
@@ -29,18 +59,47 @@ deploy-temporal:
         - pnpm-lock.yaml
         - pnpm-workspace.yaml
         - .gitlab-ci.yml
-    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "temporal")'
       when: manual
       allow_failure: true
 
-# ─── DNDIY → dndiy.org ───────────────────────────────────────────────────────
+# DNDIY -> dndiy.org
+preview-dndiy:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="$CI_COMMIT_REF_SLUG" pnpm deploy:dndiy
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - DNDIY.github.io/**/*
+        - packages/**/*
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "dndiy")'
+      when: manual
+      allow_failure: true
+
+promote-dndiy:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:dndiy
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main"'
+      when: manual
+      changes:
+        - DNDIY.github.io/**/*
+        - packages/**/*
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+
 deploy-dndiy:
   stage: deploy
-  before_script:
-    - npm install -g pnpm@9.14.4 --silent
-    - pnpm install --frozen-lockfile
   script:
-    - pnpm deploy:dndiy
+    - DEPLOY_BRANCH="main" pnpm deploy:dndiy
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
       changes:
@@ -50,35 +109,85 @@ deploy-dndiy:
         - pnpm-lock.yaml
         - pnpm-workspace.yaml
         - .gitlab-ci.yml
-    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "dndiy")'
       when: manual
       allow_failure: true
 
-# ─── MEGAMEAL → megameal.org ──────────────────────────────────────────────────
+# MEGAMEAL -> megameal.org
+preview-megameal:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="$CI_COMMIT_REF_SLUG" pnpm deploy:megameal
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - MEGAMEAL/**/*
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "megameal")'
+      when: manual
+      allow_failure: true
+
+promote-megameal:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:megameal
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main"'
+      when: manual
+      changes:
+        - MEGAMEAL/**/*
+        - .gitlab-ci.yml
+
 deploy-megameal:
   stage: deploy
-  before_script:
-    - npm install -g pnpm@9.14.4 --silent
-    - pnpm install --frozen-lockfile
   script:
-    - pnpm deploy:megameal
+    - DEPLOY_BRANCH="main" pnpm deploy:megameal
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
       changes:
         - MEGAMEAL/**/*
         - .gitlab-ci.yml
-    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "megameal")'
       when: manual
       allow_failure: true
 
-# ─── Travel → travel.dndiy.org ───────────────────────────────────────────────
+# Travel -> travel.dndiy.org
+preview-travel:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="$CI_COMMIT_REF_SLUG" pnpm deploy:travel
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - apps/travel/**/*
+        - packages/**/*
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "travel")'
+      when: manual
+      allow_failure: true
+
+promote-travel:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:travel
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main"'
+      when: manual
+      changes:
+        - apps/travel/**/*
+        - packages/**/*
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+
 deploy-travel:
   stage: deploy
-  before_script:
-    - npm install -g pnpm@9.14.4 --silent
-    - pnpm install --frozen-lockfile
   script:
-    - pnpm deploy:travel
+    - DEPLOY_BRANCH="main" pnpm deploy:travel
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
       changes:
@@ -88,6 +197,6 @@ deploy-travel:
         - pnpm-lock.yaml
         - pnpm-workspace.yaml
         - .gitlab-ci.yml
-    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "travel")'
       when: manual
       allow_failure: true
