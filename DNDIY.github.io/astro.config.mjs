@@ -288,6 +288,9 @@ export default defineConfig({
     ],
   },
   vite: {
+    ssr: {
+      noExternal: [/^@fontsource/, 'katex'],
+    },
     optimizeDeps: {
       include: ['mammoth']
     },

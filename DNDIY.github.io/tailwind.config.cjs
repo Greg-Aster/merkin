@@ -4,7 +4,9 @@ module.exports = {
   content: [
     "./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue,mjs}",
     // Explicitly include admin components
-    "./src/components/svelte/admin/**/*.svelte"
+    "./src/components/svelte/admin/**/*.svelte",
+    // Shared blog-core components
+    "../packages/blog-core/src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue,mjs}",
   ],
   darkMode: "class", // allows toggling dark mode manually
   theme: {
