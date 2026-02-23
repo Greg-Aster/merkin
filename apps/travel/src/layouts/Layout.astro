@@ -1,44 +1,10 @@
 ---
-import Footer from '@merkin/blog-core/components/Footer.astro'
-import { siteConfig } from '../config/site'
-import { withBase } from '../utils/path'
-import '../styles/global.css'
-
-interface Props {
-  title?: string
-  description?: string
-}
-
-const {
-  title = siteConfig.title,
-  description = siteConfig.description,
-} = Astro.props
+import SharedLayout from '@merkin/blog-core/layouts/Layout.astro'
+import '../styles/variables.styl'
+import '../styles/main.css'
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="alternate" type="application/rss+xml" title={siteConfig.title} href={withBase('rss.xml')} />
-    <link rel="icon" href={withBase('favicon.svg')} type="image/svg+xml" />
-  </head>
-  <body>
-    <header class="site-header">
-      <a class="home-link" href={withBase()}>{siteConfig.title}</a>
-      <p class="tagline">{siteConfig.description}</p>
-    </header>
-    <main class="content">
-      <slot />
-    </main>
-    <Footer
-      profileName={siteConfig.author}
-      rssUrl={withBase('rss.xml')}
-      sitemapUrl={withBase('sitemap-index.xml')}
-      poweredByName="merkin/blog-core"
-      poweredByUrl="https://github.com/Greg-Aster/merkin"
-    />
-  </body>
-</html>
+<SharedLayout {...Astro.props}>
+  <slot slot="head" name="head" />
+  <slot />
+</SharedLayout>
