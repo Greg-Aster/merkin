@@ -3,9 +3,20 @@ image: node:22
 stages:
   - deploy
 
+variables:
+  PNPM_VERSION: "9.14.4"
+
 default:
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store/
+    policy: pull-push
   before_script:
-    - npm install -g pnpm@9.14.4 --silent
+    - npm install -g pnpm@${PNPM_VERSION} --silent
+    - pnpm config set store-dir .pnpm-store
     - pnpm install --frozen-lockfile
 
 # Flow:
@@ -23,9 +34,6 @@ preview-temporal:
       changes:
         - Temporal-Flow/**/*
         - packages/**/*
-        - package.json
-        - pnpm-lock.yaml
-        - pnpm-workspace.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "temporal")'
       when: manual
@@ -41,9 +49,6 @@ promote-temporal:
       changes:
         - Temporal-Flow/**/*
         - packages/**/*
-        - package.json
-        - pnpm-lock.yaml
-        - pnpm-workspace.yaml
         - .gitlab-ci.yml
 
 deploy-temporal:
@@ -55,9 +60,6 @@ deploy-temporal:
       changes:
         - Temporal-Flow/**/*
         - packages/**/*
-        - package.json
-        - pnpm-lock.yaml
-        - pnpm-workspace.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "temporal")'
       when: manual
@@ -73,9 +75,6 @@ preview-dndiy:
       changes:
         - DNDIY.github.io/**/*
         - packages/**/*
-        - package.json
-        - pnpm-lock.yaml
-        - pnpm-workspace.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "dndiy")'
       when: manual
@@ -91,9 +90,6 @@ promote-dndiy:
       changes:
         - DNDIY.github.io/**/*
         - packages/**/*
-        - package.json
-        - pnpm-lock.yaml
-        - pnpm-workspace.yaml
         - .gitlab-ci.yml
 
 deploy-dndiy:
@@ -105,9 +101,6 @@ deploy-dndiy:
       changes:
         - DNDIY.github.io/**/*
         - packages/**/*
-        - package.json
-        - pnpm-lock.yaml
-        - pnpm-workspace.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "dndiy")'
       when: manual
@@ -161,9 +154,6 @@ preview-travel:
       changes:
         - apps/travel/**/*
         - packages/**/*
-        - package.json
-        - pnpm-lock.yaml
-        - pnpm-workspace.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "travel")'
       when: manual
@@ -179,9 +169,6 @@ promote-travel:
       changes:
         - apps/travel/**/*
         - packages/**/*
-        - package.json
-        - pnpm-lock.yaml
-        - pnpm-workspace.yaml
         - .gitlab-ci.yml
 
 deploy-travel:
@@ -193,9 +180,6 @@ deploy-travel:
       changes:
         - apps/travel/**/*
         - packages/**/*
-        - package.json
-        - pnpm-lock.yaml
-        - pnpm-workspace.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "travel")'
       when: manual
