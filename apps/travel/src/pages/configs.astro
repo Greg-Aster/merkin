@@ -49,7 +49,7 @@ import AdminConfigPanel from '../components/svelte/admin/AdminConfigPanel.svelte
   <div id="admin-content" class="admin-content hidden">
     <!-- Svelte Component for Admin Configuration Panel -->
     <AdminConfigPanel 
-      client:load
+      client:only="svelte"
       siteConfig={siteConfig}
       navBarConfig={navBarConfig}
       profileConfig={profileConfig}
