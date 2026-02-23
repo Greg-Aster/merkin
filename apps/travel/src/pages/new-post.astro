@@ -55,7 +55,7 @@ import PostEditor from '../components/svelte/PostEditor/PostEditor.svelte';
     <div class="card-base w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
       <div class="p-6 md:p-9">
         <!-- Use the Svelte component instead of the inline editor -->
-        <PostEditor client:load />
+        <PostEditor client:only="svelte" />
       </div>
     </div>
   </div>
