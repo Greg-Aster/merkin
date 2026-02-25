@@ -188,6 +188,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Temporal-Flow
+        env:
+          GITHUB_REPOSITORY: ${{ env.TEMPORAL_OWNER }}/${{ env.TEMPORAL_REPO }}
         run: pnpm build:temporal
 
       - name: Prepare deploy artifacts
@@ -242,6 +244,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build DNDIY
+        env:
+          GITHUB_REPOSITORY: ${{ env.DNDIY_OWNER }}/${{ env.DNDIY_REPO }}
         run: pnpm build:dndiy
 
       - name: Prepare deploy artifacts
@@ -293,6 +297,8 @@ jobs:
           cache: pnpm
 
       - name: Build MEGAMEAL
+        env:
+          GITHUB_REPOSITORY: ${{ env.MEGAMEAL_OWNER }}/${{ env.MEGAMEAL_REPO }}
         run: |
           cd MEGAMEAL
           pnpm install --ignore-workspace --frozen-lockfile
