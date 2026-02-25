@@ -132,8 +132,8 @@ jobs:
 
       - name: Build Travel
         env:
-          SITE_URL: https://${{ env.TRAVEL_OWNER }}.github.io/${{ env.TRAVEL_REPO }}
-          SITE_BASE: /${{ env.TRAVEL_REPO }}
+          SITE_URL: https://travel.dndiy.org
+          SITE_BASE: /
         run: pnpm build:travel
 
       - name: Prepare deploy artifacts
