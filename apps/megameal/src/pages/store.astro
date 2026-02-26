@@ -1,0 +1,112 @@
+---
+import { getCollection } from 'astro:content'
+import ProductCard from '../components/store/ProductCard.astro'
+import StorePagination from '../components/store/StorePagination.astro'
+import StoreLayout from '../layouts/store/StoreLayout.astro'
+
+const PRODUCTS_PER_PAGE = 5
+
+// Placeholder products array for display purposes
+const products = await getCollection('products', ({ data }) => {
+  return data.draft !== true
+})
+
+const currentPage = 1 // This file (store.astro) handles the first page
+const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE)
+const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE
+const endIndex = startIndex + PRODUCTS_PER_PAGE
+const displayedProducts = products.slice(startIndex, endIndex)
+const baseUrl = '/store' // This will be storeBaseUrl for the component
+const pageUrlPrev = undefined // Page 1 has no previous page
+const pageUrlNext = totalPages > 1 ? `${baseUrl}/page/2` : undefined
+console.log({ totalPages }) // Verify totalPages
+---
+<StoreLayout title="Store" description="Browse our unique collection of unsettling treasures.">
+  <div class="container mx-auto px-4 py-8">
+    <div class="card-base max-w-4xl mx-auto p-6 md:p-8 shadow-xl">
+      <h1 class="text-4xl font-bold mb-8 text-center text-[var(--primary)]">Welcome to the Store</h1>
+      
+      {products.length === 0 ? (
+        <p class="text-center text-xl text-gray-400">Our shelves are currently... empty. How ominous.</p>
+      ) : (
+        <div class="grid grid-cols-1 gap-6">
+          {displayedProducts.map(product => (
+            <ProductCard product={product} />
+          ))}
+        </div>
+      )}
+    </div>
+    
+    {totalPages > 0 && ( // Render pagination even for 1 page, as per original component
+      <div class="mt-12 flex justify-center">
+        <StorePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageUrlPrev={pageUrlPrev}
+          pageUrlNext={pageUrlNext}
+          storeBaseUrl={baseUrl}
+        />
+      </div>
+    )}
+
+  </div>
+</StoreLayout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const productCards = document.querySelectorAll('.product-card');
+    let currentlySelectedCard: HTMLElement | null = null;
+
+    productCards.forEach(cardElement => {
+      const card = cardElement as HTMLElement;
+
+      card.addEventListener('click', (event) => {
+        const targetElement = event.target as HTMLElement;
+
+        // Check if the click target is an interactive element within an already expanded card.
+        // These elements should perform their own actions and not toggle the card's expansion state.
+        // Note: .card-expansion-trigger is intentionally NOT in this list, as clicks on it SHOULD toggle the card.
+        const isInteractiveElementInsideExpandedCard =
+          card.classList.contains('selected') &&
+          (targetElement.closest('.btn-primary') ||      // Add to Cart button
+           targetElement.closest('.tab-link') ||         // Tab navigation
+           targetElement.closest('.gallery-nav') ||      // Image gallery navigation
+           targetElement.closest('a[href]'));           // Any hyperlink with an href
+
+        if (isInteractiveElementInsideExpandedCard) {
+          // If the click originated from one of these elements inside an expanded card,
+          // we assume its own event handler (which might include event.stopPropagation()
+          // and/or event.preventDefault()) has managed it.
+          // We stop propagation here again as a safeguard and return to prevent toggling the card.
+          event.stopPropagation();
+          return;
+        }
+        
+        const clickedCard = card;
+
+        if (currentlySelectedCard && currentlySelectedCard !== clickedCard) {
+          currentlySelectedCard.classList.remove('selected');
+          currentlySelectedCard.setAttribute('aria-expanded', 'false');
+        }
+
+        if (clickedCard.classList.contains('selected')) {
+          clickedCard.classList.remove('selected');
+          clickedCard.setAttribute('aria-expanded', 'false');
+          currentlySelectedCard = null;
+        } else {
+          clickedCard.classList.add('selected');
+          clickedCard.setAttribute('aria-expanded', 'true');
+          currentlySelectedCard = clickedCard;
+        }
+      });
+    });
+  });
+</script>
+
+<style is:global>
+  /* body styles are now handled by StoreLayout and main.css */
+  /* Ensure product cards have a clear stacking context if needed, though z-index on selected should suffice */
+  .product-card-wrapper {
+    position: relative; /* Establishes stacking context for z-index to work reliably */
+  }
+</style>

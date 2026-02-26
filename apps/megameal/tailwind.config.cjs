@@ -1,0 +1,20 @@
+/** @type {import('tailwindcss').Config} */
+const defaultTheme = require("tailwindcss/defaultTheme")
+module.exports = {
+  content: [
+    "./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue,mjs}",
+    "./src/components/svelte/admin/**/*.svelte",
+    "../../packages/blog-core/src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue,mjs}",
+  ],
+  darkMode: "class",
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ["Roboto", "sans-serif", ...defaultTheme.fontFamily.sans],
+        sriracha: ["Sriracha", "cursive"],
+        "jetbrains-mono": ["JetBrains Mono", "monospace"],
+      },
+    },
+  },
+  plugins: [require("@tailwindcss/typography")],
+}

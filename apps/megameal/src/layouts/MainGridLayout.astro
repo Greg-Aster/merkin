@@ -1,0 +1,33 @@
+---
+import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
+import Bleepy from '@components/bleepy/Bleepy.astro'
+import { siteConfig } from '@/config/config'
+
+interface Props {
+  title?: string
+  banner?: string
+  description?: string
+  lang?: string
+  setOGTypeArticle?: boolean
+  headings?: import('astro').MarkdownHeading[]
+  post?: any
+  bannerLink?: string
+  isPostPage?: boolean
+  pageMascotContext?: string
+  backgroundImage?: string | null
+  oneColumn?: boolean
+  customAuthorData?: {
+    avatarImage?: string
+    authorName?: string
+    authorBio?: string
+    authorLink?: string
+  }
+}
+---
+
+<SharedMainGridLayout {...Astro.props}>
+  <slot slot="head" name="head" />
+  <slot />
+  <!-- MEGAMEAL-specific: Bleepy AI assistant mascot -->
+  <Bleepy slot="mascot" mascotContext={Astro.props.pageMascotContext} instanceIdentifier="LAYOUT_BLEEPY" />
+</SharedMainGridLayout>

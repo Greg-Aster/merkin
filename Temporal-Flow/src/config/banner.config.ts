@@ -1,311 +1,687 @@
-// Import type - use import type syntax to fix verbatimModuleSyntax error
-import type { ImageMetadata } from 'astro'
+/**
+ * ===================================================================
+ * BANNER CONFIGURATION - FIXED MOBILE NAVBAR SPACING
+ * ===================================================================
+ */
 
-// Import banner images
-// These paths should match your actual banner image locations
-import banner1 from 'src/assets/banner/0001.png'
-import banner2 from 'src/assets/banner/0002.png'
-import banner3 from 'src/assets/banner/0003.png'
-import banner4 from 'src/assets/banner/0004.png'
-import banner5 from 'src/assets/banner/0005.png'
-import banner6 from 'src/assets/banner/0006.png'
-import banner7 from 'src/assets/banner/0007.png'
-import banner8 from 'src/assets/banner/0008.png'
+// Import siteConfig for background image resolution
+import { siteConfig } from '../config/config'
 
-// Banner type definitions
-export type BannerType = 'standard' | 'video' | 'image' | 'timeline';
+// Import types from existing types.ts
+import type {
+  BannerAnimationConfig,
+  BannerData,
+  BannerDeterminationResult,
+  BannerType,
+  LinkPreviewInfo,
+  PostBannerData,
+} from './banners/types'
 
-// Banner data type for each banner type
-export interface StandardBannerData {
-  // No additional data needed for standard banner
+import { assistantBannerConfig } from './banners/assistant'
+import { imageBannerConfig } from './banners/image'
+import { noneBannerConfig } from './banners/none'
+// Import banner configurations
+import { standardBannerConfig } from './banners/standard'
+import { timelineBannerConfig } from './banners/timeline'
+import { videoBannerConfig } from './banners/video'
+
+import { isAssistantBannerData } from './banners/assistant'
+import { isImageBannerData } from './banners/image'
+import { isNoneBannerData } from './banners/none'
+import { isTimelineBannerData } from './banners/timeline'
+// Import type guards
+import { isVideoBannerData } from './banners/video'
+
+// =====================================================================
+// BACKGROUND IMAGE HELPERS - FIXED
+// =====================================================================
+
+export function getDynamicBackgroundImage(
+  backgroundImage?: string | null,
+): string | null {
+  // 1. Check for explicit "none" or empty string
+  if (backgroundImage === 'none' || backgroundImage === '') {
+    return null
+  }
+
+  // 2. Use explicit backgroundImage prop if provided
+  if (backgroundImage) {
+    if (import.meta.env.DEV) {
+    }
+    return backgroundImage
+  }
+
+  // 3. Use imported siteConfig (primary method)
+  if (siteConfig?.banner?.enable && siteConfig?.banner?.src) {
+    if (import.meta.env.DEV) {
+    }
+    return siteConfig.banner.src
+  }
+
+  // 4. Fallback: Check window object for client-side compatibility
+  if (
+    typeof window !== 'undefined' &&
+    (window as any).siteConfig?.banner?.enable &&
+    (window as any).siteConfig?.banner?.src
+  ) {
+    if (import.meta.env.DEV) {
+      console.log(
+        'Using window.siteConfig background image:',
+        (window as any).siteConfig.banner.src,
+      )
+    }
+    return (window as any).siteConfig.banner.src
+  }
+
+  console.warn(
+    'No background image found - check siteConfig.banner configuration',
+  )
+  return null
 }
 
-export interface VideoBannerData {
-  videoId: string;
+export function getShouldShowParallaxBackground(
+  backgroundImage?: string | null,
+): boolean {
+  const currentBackgroundImage = getDynamicBackgroundImage(backgroundImage)
+  const isParallaxEnabled = bannerConfig.parallax.enabled
+
+  const shouldShow = !!(currentBackgroundImage && isParallaxEnabled)
+
+  // Debug logging for development
+  if (
+    import.meta.env.DEV &&
+    typeof window !== 'undefined' &&
+    window.location.hostname === 'localhost'
+  ) {
+    console.log('Input backgroundImage prop:', backgroundImage)
+    console.log('Resolved currentBackgroundImage:', currentBackgroundImage)
+    console.log('Parallax enabled in config:', isParallaxEnabled)
+    console.log('Should show parallax background:', shouldShow)
+    console.log('siteConfig.banner:', siteConfig?.banner)
+    console.log('================================')
+  }
+
+  return shouldShow
 }
 
-export interface ImageBannerData {
-  imageUrl: string;
+// =====================================================================
+// RESTORED INTERFACES - BACK TO WORKING VERSION
+// =====================================================================
+
+/**
+ * 🎯 ACTUAL BANNER DIMENSIONS - Only used by CSS
+ */
+export interface BannerDimensions {
+  aspectRatio: string // 16:9 aspect ratio (critical)
+  maxWidth: string // Max banner width (responsive)
+  padding: string // Horizontal padding (responsive)
+  borderRadius: string // Border radius
 }
 
-export interface TimelineBannerData {
-  category: string;
-  title?: string;
-  startYear?: number;
-  endYear?: number;
-  background?: string;
-  compact?: boolean;
-  height?: string;
-}
-
-// Define the banner configuration type
+/**
+ * 🎯 MAIN CONFIG - RESTORED WORKING VERSION
+ */
 export interface BannerConfig {
-  // Default banner type for main pages
-  defaultBannerType: BannerType;
-  
-  // Default banner data (differs based on banner type)
-  defaultBannerData: StandardBannerData | VideoBannerData | ImageBannerData | TimelineBannerData;
-  
-  // List of banner images for animation (used for standard banner type)
-  bannerList: ImageMetadata[]
-  
-  // Default banner for static usage (used for standard banner type)
-  defaultBanner: ImageMetadata
-  
-  // Animation settings (used for standard banner type)
-  animation: {
-    enabled: boolean
-    interval: number            // Milliseconds between transitions
-    transitionDuration: number  // Milliseconds for fade transition
-    direction: 'forward' | 'reverse' | 'alternate'
-  }
-  
-  // Layout settings
+  // Banner type configs
+  defaultBannerType: BannerType
+  defaultBannerData: BannerData
+  standardBannerConfig: typeof standardBannerConfig
+  videoBannerConfig: typeof videoBannerConfig
+  imageBannerConfig: typeof imageBannerConfig
+  timelineBannerConfig: typeof timelineBannerConfig
+  assistantBannerConfig: typeof assistantBannerConfig
+  noneBannerConfig: typeof noneBannerConfig
+
+  // Actual working configuration
+  dimensions: BannerDimensions
+
+  // WORKING: Layout values used by MainGridLayout.astro
   layout: {
-    height: {
-      desktop: string          // CSS value (e.g., '50vh')
-      mobile: string           // CSS value (e.g., '30vh')
-    }
-    overlap: {
-      desktop: string          // CSS value (e.g., '3.5rem')
-      mobile: string           // CSS value (e.g., '2rem')
-    }
-    maxWidth: number           // Maximum width in pixels
+    height: string
+    maxWidth: number
+    mainContentOffset: string
   }
-  
-  // Visual settings
+
+  // WORKING: Visual config used by existing code
   visual: {
-    objectFit: 'cover' | 'contain' | 'fill'
-    objectPosition: string     // CSS position value
+    objectFit: string
+    objectPosition: string
     applyGradientOverlay: boolean
-    gradientOverlay: string    // CSS gradient value
-    borderRadius: string       // CSS border-radius value
+    gradientOverlay: string
+    borderRadius: string
   }
-  
-  // Fallback settings (used if images fail to load)
+
+  // WORKING: Fallback configuration
   fallback: {
     enabled: boolean
-    type: 'color' | 'gradient'
-    value: string              // CSS color or gradient
-  }
-  
-  // Navbar spacing settings
-  navbarSpacing: {
-    standard: string         // For standard animated banner
-    timeline: string         // For timeline banner
-    video: string            // For video banner
-    image: string            // For image banner
+    type: string
+    value: string
   }
 
-  // Navbar height settings (previously hardcoded in MainGridLayout.astro)
+  // WORKING: Navbar spacing for different banner types
   navbar: {
-    height: {
-      desktop: string        // CSS value (e.g., '4.5rem')
-      mobile: string         // CSS value (e.g., '3.5rem')
+    height: string
+    spacing: {
+      standard: string
+      timeline: string
+      video: string
+      image: string
+      assistant: string
+      none: string
     }
+    // ⭐ FIXED: Mobile portrait spacing now accounts for always-visible navbar
+    mobilePortraitSpacing: string
   }
 
-  // Panel positioning (previously calculated in MainGridLayout.astro)
+  // 🎯 WORKING: The REAL overlap system - this controls banner overlap!
   panel: {
     top: {
-      video: string          // CSS value for video banner type
-      image: string          // CSS value for image banner type
-      timeline: string       // CSS value for timeline banner type
-      standard: string       // CSS value for standard banner type
+      video: string
+      image: string
+      timeline: string
+      assistant: string
+      standard: string // ⭐ THIS IS YOUR BANNER OVERLAP CONTROL!
+      none: string
     }
   }
 
-  // Parallax effect settings
+  // WORKING: Parallax configuration
   parallax: {
     enabled: boolean
-    scrollFactor: number     // How much the parallax moves (e.g., -0.05)
-    easingFactor: number     // Smooth motion factor (e.g., 0.1)
+    scrollFactor: number
+    easingFactor: number
+  }
+
+  // WORKING: Navigation configuration
+  navigation?: {
+    enabled: boolean
+    showPositionIndicator: boolean
+    showBannerTitles: boolean
+    autoResumeDelay: number
+    keyboardNavigation: boolean
+    enabledForTypes: BannerType[]
+    styling?: {
+      buttonSize?: string
+      indicatorSize?: string
+      animationDuration?: string
+    }
   }
 }
 
 /**
- * Banner configuration for the site
- * Controls which images are used for the animated banner
+ * ===================================================================
+ * MAIN CONFIGURATION - FIXED MOBILE NAVBAR SPACING
+ * ===================================================================
  */
 export const bannerConfig: BannerConfig = {
-  // Default banner type for main pages
-  defaultBannerType: 'standard', // 'standard' | 'video' | 'image' | 'timeline'
-  
-  // Default banner data for timeline
-  defaultBannerData: {
-    category: "history", // This is required for timeline banner
-    title: "Site Timeline", // Optional but recommended
-    startYear: 2000, // Optional 
-    endYear: 2025, // Optional
-    background: "/public/posts/timeline/universe.png", // Optional
-    compact: false, // Optional
-    height: "90vh" // Optional
+  // Default banner type
+  defaultBannerType: 'standard',
+  defaultBannerData: {} as any,
+
+  // Banner type configurations
+  standardBannerConfig,
+  videoBannerConfig,
+  imageBannerConfig,
+  timelineBannerConfig,
+  assistantBannerConfig,
+  noneBannerConfig,
+
+  // 🎯 FIXED: CSS dimensions system - NO MORE clamp() ISSUES
+  dimensions: {
+    aspectRatio: '56.25%', // 16:9 ratio (critical for your content)
+    maxWidth: '100vw', // ✅ FIXED: Simple full width (was clamp issue)
+    padding: '0', // ✅ FIXED: No padding (was clamp issue)
+    borderRadius: '.5rem', // Standard Tailwind radius
   },
-  
-  // List of all banner images for animation
-  bannerList: [
-    banner1,
-    banner2,
-    banner3,
-    banner4,
-    banner5,
-    banner6,
-    banner7,
-    banner8
-  ],
-  
-  // Default banner image (used for static banner or as first animation frame)
-  defaultBanner: banner1,
-  
-  // Animation settings
-  animation: {
-    enabled: true,
-    interval: 5000,            // 5 seconds between transitions
-    transitionDuration: 1000,  // 1 second fade transition
-    direction: 'alternate'     // Bounce back and forth through the images
-  },
-  
-  // Layout settings
+
+  // WORKING: Layout used by MainGridLayout.astro
   layout: {
-    height: {
-      desktop: '60vh',         // 100% of viewport height on desktop
-      mobile: '50vh'           // 100% of viewport height on mobile
-    },
-    overlap: {
-      desktop: '3rem',          // Content overlap on desktop
-      mobile: '2rem'            // Content overlap on mobile
-    },
-    maxWidth: 1920              // Max banner width in pixels
+    height: '60vh',
+    maxWidth: 3840,
+    mainContentOffset: '1.5rem',
   },
-  
-  // Visual settings
+
+  // WORKING: Visual config used by existing code
   visual: {
     objectFit: 'cover',
     objectPosition: 'center',
-    applyGradientOverlay: false,
-    gradientOverlay: 'linear-gradient(to bottom, rgba(0,0,0,0.2), transparent)',
-    borderRadius: '0'
+    applyGradientOverlay: true,
+    gradientOverlay:
+      'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3))',
+    borderRadius: '0.5rem',
   },
-  
-  // Fallback settings
+
+  // WORKING: Fallback configuration
   fallback: {
     enabled: true,
     type: 'gradient',
-    value: 'linear-gradient(to bottom, var(--color-primary-light), var(--color-primary))'
-  },
-  
-  // Navbar spacing settings
-  navbarSpacing: {
-    standard: "0",
-    timeline: "5.5rem",       // Adjust to exact navbar height
-    video: "5.5rem",
-    image: "0"                // Set to 0 for navbar overlap
+    value:
+      'linear-gradient(135deg, oklch(0.6 0.2 var(--hue)), oklch(0.4 0.3 var(--hue)))',
   },
 
-  // Navbar height settings (moved from MainGridLayout.astro)
+  // 🎯 FIXED: Navbar spacing - Mobile portrait now accounts for always-visible navbar
   navbar: {
-    height: {
-      desktop: '4.5rem',      // 72px at 16px base font size
-      mobile: '3.5rem'        // 56px at 16px base font size
-    }
+    height: '5rem',
+    spacing: {
+      standard: '3rem', // ✅ Desktop spacing
+      timeline: '5.5rem', // ✅ Desktop spacing
+      video: '5.5rem', // ✅ Desktop spacing
+      image: '4rem', // ✅ Desktop spacing
+      assistant: '5.5rem', // ✅ Desktop spacing
+      none: '-8rem', // ✅ Desktop spacing
+    },
+    // ⭐ FIXED: Mobile portrait spacing now accounts for always-visible navbar
+    // Before: navbar was hidden, so 1.0rem was enough
+    // Now: navbar is visible, so we need proper spacing from navbar to banner
+    mobilePortraitSpacing: '6rem', // navbar height (5rem) + gap (1rem) = 6rem
   },
 
-  // Panel positioning (moved from MainGridLayout calculations)
+  // 🎯 FIXED: THE REAL OVERLAP SYSTEM - NO MORE clamp() ISSUES
   panel: {
     top: {
-      video: "0",             // For video banner: no overlap needed
-      image: "calc(var(--navbar-height) + 1rem)", // For image banner: navbar + spacing
-      timeline: "0",          // For timeline banner
-      standard: "calc(var(--banner-height) - var(--banner-overlap))" // For standard banner
-    }
+      video: '-0.5rem', // ✅ WORKING VALUE
+      image: '-0.5rem', // ✅ WORKING VALUE
+      timeline: '-0.5rem', // ✅ WORKING VALUE
+      assistant: '-0.5rem', // ✅ WORKING VALUE
+      standard: '-3rem', // ✅ FIXED: Simple rem value (was clamp issue)
+      none: '12rem', // ✅ WORKING VALUE
+    },
   },
 
-  // Parallax effect settings
+  // WORKING: Parallax configuration - ENABLED BY DEFAULT
   parallax: {
     enabled: true,
-    scrollFactor: -0.02,      // How much the background moves (-0.05 = 5% opposite of scroll)
-    easingFactor: 0.1         // Smooth motion factor (0.1 = 10% of the gap each frame)
+    scrollFactor: -0.02,
+    easingFactor: 0.1,
+  },
+
+  // WORKING: Navigation configuration
+  navigation: {
+    enabled: true,
+    showPositionIndicator: true,
+    showBannerTitles: true,
+    autoResumeDelay: 5000,
+    keyboardNavigation: true,
+    enabledForTypes: ['standard', 'image', 'video'] as BannerType[],
+    styling: {
+      buttonSize: '2.75rem',
+      indicatorSize: '0.4375rem',
+      animationDuration: '0.3s',
+    },
+  },
+}
+
+// =====================================================================
+// RESTORED HELPER FUNCTIONS - WORKING VERSION
+// =====================================================================
+
+export function isFullscreenModeActive(): boolean {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+    return false
+  }
+  return localStorage.getItem('fullscreenBannerOverride') === 'true'
+}
+
+export function getBannerDataFromPost(post: any): PostBannerData | null {
+  if (!post?.data) return null
+
+  return {
+    bannerLink: post.data.bannerLink || '',
+    customAvatar: post.data.avatarImage || '',
+    customName: post.data.authorName || '',
+    customBio: post.data.authorBio || '',
+    slug: post.slug || '',
+    wantsNoDefaultBanner: post.data.showImageOnPost === false,
+  }
+}
+
+export function determineBannerType(
+  post: any,
+  postData: PostBannerData | null,
+): BannerDeterminationResult {
+  // Check for post-specific banners
+  const hasPostTimelineBanner =
+    post?.data?.bannerType === 'timeline' && post?.data?.bannerData?.category
+  const hasPostVideoBanner =
+    post?.data?.bannerType === 'video' && post?.data?.bannerData?.videoId
+  const hasPostAssistantBanner = post?.data?.bannerType === 'assistant'
+  const hasPostImageBanner =
+    !postData?.wantsNoDefaultBanner &&
+    (post?.data?.image ||
+      (post?.data?.bannerType === 'image' &&
+        post?.data?.bannerData?.imageUrl)) &&
+    !hasPostVideoBanner &&
+    !hasPostTimelineBanner &&
+    !hasPostAssistantBanner
+
+  const hasPostBanner =
+    hasPostVideoBanner ||
+    hasPostImageBanner ||
+    hasPostTimelineBanner ||
+    hasPostAssistantBanner
+
+  // Check for default banners
+  const useDefaultVideo =
+    !hasPostBanner &&
+    !postData?.wantsNoDefaultBanner &&
+    bannerConfig.defaultBannerType === 'video' &&
+    isVideoBannerData(bannerConfig.defaultBannerData)
+  const useDefaultImage =
+    !hasPostBanner &&
+    !postData?.wantsNoDefaultBanner &&
+    bannerConfig.defaultBannerType === 'image' &&
+    isImageBannerData(bannerConfig.defaultBannerData)
+  const useDefaultTimeline =
+    !hasPostBanner &&
+    !postData?.wantsNoDefaultBanner &&
+    bannerConfig.defaultBannerType === 'timeline' &&
+    isTimelineBannerData(bannerConfig.defaultBannerData)
+  const useDefaultAssistant =
+    !hasPostBanner &&
+    !postData?.wantsNoDefaultBanner &&
+    bannerConfig.defaultBannerType === 'assistant' &&
+    isAssistantBannerData(bannerConfig.defaultBannerData)
+  const useDefaultStandard =
+    !hasPostBanner &&
+    !postData?.wantsNoDefaultBanner &&
+    (bannerConfig.defaultBannerType === 'standard' ||
+      (!useDefaultVideo &&
+        !useDefaultImage &&
+        !useDefaultTimeline &&
+        !useDefaultAssistant))
+
+  // Determine banner flags
+  const hasTimelineBanner = hasPostTimelineBanner || useDefaultTimeline
+  const hasVideoBanner = hasPostVideoBanner || useDefaultVideo
+  const hasImageBanner = hasPostImageBanner || useDefaultImage
+  const hasAssistantBanner = hasPostAssistantBanner || useDefaultAssistant
+  const hasStandardBanner = useDefaultStandard
+
+  const currentBannerType: BannerType = hasVideoBanner
+    ? 'video'
+    : hasImageBanner
+      ? 'image'
+      : hasTimelineBanner
+        ? 'timeline'
+        : hasAssistantBanner
+          ? 'assistant'
+          : hasStandardBanner
+            ? 'standard'
+            : 'none'
+
+  return {
+    hasTimelineBanner,
+    hasVideoBanner,
+    hasImageBanner,
+    hasAssistantBanner,
+    hasStandardBanner,
+    hasPostBanner,
+    isStandardPage: !hasPostBanner,
+    currentBannerType,
+  }
+}
+
+export function getBannerDataSources(
+  bannerType: BannerDeterminationResult,
+  post: any,
+) {
+  const {
+    hasTimelineBanner,
+    hasVideoBanner,
+    hasImageBanner,
+    hasAssistantBanner,
+  } = bannerType
+
+  let resolvedImageBannerData: any = null
+  if (hasImageBanner) {
+    if (post?.data?.bannerType === 'image') {
+      const imageUrl = post.data.bannerData?.imageUrl || post.data.image
+      if (typeof imageUrl === 'string') {
+        resolvedImageBannerData = { imageUrl: imageUrl }
+      } else {
+        console.warn(
+          'Banner config: Post-specific image banner lacks a valid imageUrl. Falling back to default.',
+        )
+        resolvedImageBannerData = bannerConfig.imageBannerConfig.data
+      }
+    } else {
+      if (isImageBannerData(bannerConfig.imageBannerConfig.data)) {
+        resolvedImageBannerData = bannerConfig.imageBannerConfig.data
+      } else {
+        console.warn(
+          'Banner config: Mismatch in default image banner data type. Falling back to imageBannerConfig.data.',
+        )
+        resolvedImageBannerData = bannerConfig.imageBannerConfig.data
+      }
     }
-}
+  }
 
-/**
- * Get appropriate banner dimensions based on screen size
- * @returns Object with height and overlap values
- */
-export function getResponsiveBannerDimensions(isMobile: boolean = false): {
-  height: string;
-  overlap: string;
-} {
   return {
-    height: isMobile ? bannerConfig.layout.height.mobile : bannerConfig.layout.height.desktop,
-    overlap: isMobile ? bannerConfig.layout.overlap.mobile : bannerConfig.layout.overlap.desktop
-  };
-}
+    videoBannerData:
+      hasVideoBanner && post?.data?.bannerType === 'video'
+        ? post.data.bannerData
+        : hasVideoBanner
+          ? bannerConfig.defaultBannerData
+          : null,
 
-/**
- * Get CSS for fallback banner
- * @returns CSS string for background
- */
-export function getFallbackBannerCSS(): string {
-  if (!bannerConfig.fallback.enabled) return '';
-  
-  return bannerConfig.fallback.type === 'gradient' 
-    ? bannerConfig.fallback.value
-    : `${bannerConfig.fallback.value}`;
-}
+    imageBannerData: resolvedImageBannerData,
 
-/**
- * Get animation settings for banner
- * @returns Object with animation settings
- */
-export function getBannerAnimationSettings(): {
-  enabled: boolean;
-  interval: number;
-  transitionDuration: number;
-  direction: string;
-} {
-  return {
-    enabled: bannerConfig.animation.enabled,
-    interval: bannerConfig.animation.interval,
-    transitionDuration: bannerConfig.animation.transitionDuration,
-    direction: bannerConfig.animation.direction
-  };
-}
+    timelineBannerData:
+      hasTimelineBanner && post?.data?.bannerType === 'timeline'
+        ? post.data.bannerData
+        : hasTimelineBanner
+          ? bannerConfig.defaultBannerData
+          : null,
 
-/**
- * Get panel top position based on banner type
- * @param bannerType The type of banner being used
- * @returns CSS value for top position
- */
-export function getPanelTopPosition(bannerType: BannerType): string {
-  switch(bannerType) {
-    case 'video': return bannerConfig.panel.top.video;
-    case 'image': return bannerConfig.panel.top.image;
-    case 'timeline': return bannerConfig.panel.top.timeline;
-    default: return bannerConfig.panel.top.standard;
+    assistantBannerData:
+      hasAssistantBanner && post?.data?.bannerType === 'assistant'
+        ? post.data.bannerData
+        : hasAssistantBanner
+          ? bannerConfig.defaultBannerData
+          : null,
   }
 }
 
 /**
- * Get navbar height based on screen size
- * @param isMobile Whether to get mobile height
- * @returns CSS value for navbar height
+ * 🎯 MAIN API: Banner configuration determination - CLEANED VERSION
  */
-export function getNavbarHeight(isMobile: boolean = false): string {
-  return isMobile ? bannerConfig.navbar.height.mobile : bannerConfig.navbar.height.desktop;
+export function determineBannerConfiguration(
+  post: any,
+  pageType: string,
+  defaultBannerLink = '',
+) {
+  // ⭐ NEW: Check user's saved banner type preference
+  if (import.meta.env.DEV) {
+    console.log(
+      '🏗️ Banner config starting. Default type:',
+      bannerConfig.defaultBannerType,
+    )
+  }
+  if (
+    typeof window !== 'undefined' &&
+    localStorage.getItem('defaultBannerType')
+  ) {
+    const savedType = localStorage.getItem('defaultBannerType')
+    if (import.meta.env.DEV) {
+    }
+    bannerConfig.defaultBannerType = savedType as BannerType
+    if (import.meta.env.DEV) {
+    }
+  } else if (import.meta.env.DEV) {
+  }
+
+  if (isFullscreenModeActive()) {
+    return {
+      postData: getBannerDataFromPost(post),
+      bannerType: {
+        hasTimelineBanner: false,
+        hasVideoBanner: false,
+        hasImageBanner: false,
+        hasAssistantBanner: false,
+        hasStandardBanner: false,
+        hasPostBanner: false,
+        isStandardPage: false,
+        currentBannerType: 'none' as BannerType,
+      },
+      bannerDataSources: {
+        videoBannerData: null,
+        imageBannerData: null,
+        timelineBannerData: null,
+        assistantBannerData: null,
+      },
+      layout: {
+        mainPanelTop: bannerConfig.panel.top.none,
+        navbarSpacing: '0rem',
+        bannerHeight: '0',
+        bannerOverlap: '0',
+        dynamicOverlap: '0',
+        mainContentOffset: bannerConfig.layout.mainContentOffset,
+      },
+      finalBannerLink: '',
+      currentBannerType: 'none' as BannerType,
+    }
+  }
+
+  const postData = getBannerDataFromPost(post)
+  const bannerType = determineBannerType(post, postData)
+  const bannerDataSources = getBannerDataSources(bannerType, post)
+
+  // 🎯 THE REAL WORKING VALUES - RESTORED
+  const mainPanelTop = getPanelTopPosition(bannerType.currentBannerType)
+
+  // ⭐ SIMPLIFIED: Always use regular spacing - CSS handles mobile portrait now
+  const navbarSpacing =
+    bannerConfig.navbar.spacing[bannerType.currentBannerType]
+
+  const bannerHeight = bannerConfig.layout.height
+  const mainContentOffset = bannerConfig.layout.mainContentOffset
+
+  const finalBannerLink = postData?.bannerLink || defaultBannerLink
+
+  return {
+    postData,
+    bannerType,
+    bannerDataSources,
+    layout: {
+      mainPanelTop, // 🎯 THIS CONTROLS OVERLAP! (RESTORED)
+      navbarSpacing, // ⭐ SIMPLIFIED - CSS handles mobile portrait
+      bannerHeight,
+      bannerOverlap: '0', // Removed unused value
+      dynamicOverlap: '0', // Removed unused value
+      mainContentOffset,
+    },
+    finalBannerLink,
+    currentBannerType: bannerType.currentBannerType,
+  }
 }
 
-/**
- * Helper function to determine if the default banner data is for a specific banner type
- */
-export function isVideoBannerData(data: any): data is VideoBannerData {
-  return data && 'videoId' in data && typeof data.videoId === 'string';
+// =====================================================================
+// RESTORED UTILITY FUNCTIONS - KEPT ONLY WORKING ONES
+// =====================================================================
+
+export function getResponsiveBannerDimensions(): { height: string } {
+  return {
+    height: bannerConfig.layout.height,
+  }
 }
 
-export function isImageBannerData(data: any): data is ImageBannerData {
-  return data && 'imageUrl' in data && typeof data.imageUrl === 'string';
+export function getFallbackBannerCSS(): string {
+  if (!bannerConfig.fallback.enabled) return ''
+  return bannerConfig.fallback.type === 'gradient'
+    ? bannerConfig.fallback.value
+    : `${bannerConfig.fallback.value}`
 }
 
-export function isTimelineBannerData(data: any): data is TimelineBannerData {
-  return data && 'category' in data && typeof data.category === 'string';
+export function getBannerAnimationSettings(): BannerAnimationConfig {
+  return bannerConfig.standardBannerConfig.getBannerAnimationSettings()
 }
+
+// 🎯 THE FUNCTION THAT CONTROLS OVERLAP! - RESTORED
+export function getPanelTopPosition(bannerType: BannerType): string {
+  switch (bannerType) {
+    case 'video':
+      return bannerConfig.panel.top.video
+    case 'image':
+      return bannerConfig.panel.top.image
+    case 'timeline':
+      return bannerConfig.panel.top.timeline
+    case 'assistant':
+      return bannerConfig.panel.top.assistant
+    case 'none':
+      return bannerConfig.panel.top.none
+    default:
+      return bannerConfig.panel.top.standard // ⭐ THIS IS YOUR OVERLAP!
+  }
+}
+
+export function getPageSpecificOverlap(pageType: string): string {
+  // This function is no longer used but kept for compatibility
+  return '0'
+}
+
+export function getNavbarHeight(): string {
+  return bannerConfig.navbar.height
+}
+
+export function getMainContentOffset(): string {
+  return bannerConfig.layout.mainContentOffset
+}
+
+export function getBannerLink(index: number): string | null {
+  return bannerConfig.standardBannerConfig.getBannerLink(index)
+}
+
+export function hasAnyBannerLinks(): boolean {
+  return bannerConfig.standardBannerConfig.hasAnyBannerLinks()
+}
+
+export function getLinkPreviewData(url: string): LinkPreviewInfo {
+  return bannerConfig.standardBannerConfig.getLinkPreviewData(url)
+}
+
+export function getIconSVG(iconName: string): string {
+  return bannerConfig.standardBannerConfig.getIconSVG(iconName)
+}
+
+// =====================================================================
+// DEPRECATED FUNCTIONS - KEPT FOR BACKWARDS COMPATIBILITY
+// =====================================================================
+
+/** @deprecated Use getPanelTopPosition instead */
+export function calculateBannerLayout() {
+  console.warn(
+    'calculateBannerLayout is deprecated, using working system instead',
+  )
+}
+
+// Re-export type guards and configurations
+export {
+  isVideoBannerData,
+  isImageBannerData,
+  isTimelineBannerData,
+  isAssistantBannerData,
+  isNoneBannerData,
+}
+
+export function isStandardBannerData(data: any): data is any {
+  return data && typeof data === 'object' && Object.keys(data).length === 0
+}
+
+export {
+  standardBannerConfig,
+  videoBannerConfig,
+  imageBannerConfig,
+  timelineBannerConfig,
+  assistantBannerConfig,
+  noneBannerConfig,
+}
+
+// Re-export types
+export type {
+  BannerType,
+  BannerData,
+  BannerDeterminationResult,
+  PostBannerData,
+  LinkPreviewInfo,
+  BannerAnimationConfig,
+} from './banners/types'

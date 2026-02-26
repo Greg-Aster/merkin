@@ -3,8 +3,9 @@ packages:
   # Sites - blog-only sites in workspace
   - 'Temporal-Flow'
   - 'DNDIY.github.io'
-  # MEGAMEAL excluded: uses --ignore-workspace due to Threlte 3D engine
-  # having pre-compiled Svelte code that conflicts with workspace resolution
+  # Legacy MEGAMEAL folder is archived and excluded from workspace builds.
+  # Active megameal app lives at apps/megameal.
+  # (Legacy folder also has Threlte pre-compiled Svelte that conflicts with workspace resolution.)
   # - 'MEGAMEAL'
   # Shared packages
   - 'packages/*'

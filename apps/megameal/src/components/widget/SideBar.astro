@@ -1,0 +1,70 @@
+---
+// =====================================================================
+// SIMPLIFIED SIDEBAR - DESKTOP ONLY
+// =====================================================================
+// This component now only handles desktop sidebar content
+// Mobile portrait mode uses a clean one-column layout with no sidebar
+
+import type { MarkdownHeading } from 'astro'
+import BleepyPostWidget from '../bleepy/BleepyPostWidget.astro'
+import FactsWidget from './FactsWidget.astro' // Import the new widget
+import Categories from './Categories.astro'
+import TOC from './TOC.astro'
+// Remove Profile import - we're using Svelte Profile now
+import Tag from './Tags.astro'
+
+interface Props {
+  class?: string
+  headings?: MarkdownHeading[]
+  postSlug?: string
+  customAvatar?: string
+  customName?: string // Custom name support
+  customBio?: string // Custom bio support
+  pageMascotContext?: string // Page context for Cuppy
+  hideProfile?: boolean // Prevent profile duplicates (always true now)
+}
+
+const className = Astro.props.class
+const headings = Astro.props.headings
+const postSlug = Astro.props.postSlug
+const customAvatar = Astro.props.customAvatar
+const customName = Astro.props.customName
+const customBio = Astro.props.customBio
+const pageMascotContext = Astro.props.pageMascotContext
+const hideProfile = Astro.props.hideProfile || false
+---
+
+<!-- =============================================================== -->
+<!-- SIMPLIFIED SIDEBAR - DESKTOP ONLY CONTENT                     -->
+<!-- =============================================================== -->
+<div id="sidebar" class:list={[className, "w-full"]}>
+    
+    <!-- ⭐ REMOVED: Mobile SideNavbar section - no longer needed -->
+    <!-- Mobile portrait mode now uses clean one-column layout -->
+    
+    <!-- DESKTOP MODE: Show full widgets -->
+    <div class="w-full">
+        <!-- ⭐ REMOVED: Profile Section - now handled by Svelte component in MainGridLayout -->
+        
+        <!-- Sticky Widgets Section -->
+        <div id="sidebar-sticky" class="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
+            <!-- ⭐ OPTIONAL: Uncomment these if you want categories/tags back -->
+            <!-- <Categories class="onload-animation" style="animation-delay: 150ms" /> -->
+            <!-- <Tag class="onload-animation" style="animation-delay: 250ms"></Tag> -->
+            
+            <!-- Bleepy Widget -->
+            <BleepyPostWidget 
+              class="onload-animation" 
+              style="animation-delay: 200ms"
+              pageMascotContext={pageMascotContext}
+            />
+
+            <!-- Facts Widget -->
+            <FactsWidget
+              class="onload-animation"
+              style="animation-delay: 300ms"
+            />
+        </div>
+    </div>
+    
+</div>

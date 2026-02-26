@@ -1,82 +1,50 @@
-# Monorepo Deploy Workflow Setup
+# Monorepo Deployment Chain
 
-This repository deploys built static output from each site to its own GitHub Pages repository.
+Canonical delivery flow:
 
-Operating model:
+1. Push code to GitHub (`origin`, `Greg-Aster/merkin`).
+2. GitHub Action mirrors refs to GitLab.
+3. GitLab CI deploys to Cloudflare Pages via Wrangler.
 
-- `Greg-Aster/merkin` is the only source-of-truth for site code.
-- Target repos (`Temporal-Flow`, `DNDIY.github.io`, `megameal`) are publish targets.
-- GitHub Pages content is pushed to each target repo's `gh-pages` branch from this monorepo workflow.
-- The `main` branch activity in target repos is not the deploy signal anymore.
+## Source Of Truth
 
-Workflow file: `.github/workflows/deploy-sites.yml`
+- Source repo: `Greg-Aster/merkin` (GitHub)
+- Mirror repo: `Greg.Aster/merkin` (GitLab)
+- Runtime deploy platform: Cloudflare Pages
 
-## Required Secret
+GitHub should be treated as the write target for development commits.
 
-Create this repository secret in the monorepo:
+## Active Automation
 
-- `PAGES_DEPLOY_TOKEN`
+- `.github/workflows/mirror-to-gitlab.yml`
+  - Triggers on GitHub push (all branches) and manual dispatch.
+  - Mirrors branches and tags to GitLab.
+  - Requires `GITLAB_TOKEN` secret.
+  - Optional variable: `GITLAB_MIRROR_PROJECT_PATH` (default `Greg.Aster/merkin`).
 
-Recommended token type: Fine-grained PAT with **Contents: Read and write** access to:
+- `.gitlab-ci.yml`
+  - Runs deploy jobs per site (`travel`, `temporal`, `dndiy`, `megameal`).
+  - Deploys using `pnpm deploy:*` scripts (`wrangler pages deploy ...`).
 
-- source repo: this monorepo
-- target repo: `merkin-travel`
-- target repo: `temporal-flow`
-- target repo: `DNDIY.github.io`
-- target repo: `megameal`
+## Legacy Workflow
 
-## Optional Repository Variables
+- `.github/workflows/deploy-sites.yml` is now manual-only fallback.
+- It no longer auto-deploys on push.
+- Use only for emergency GitHub Pages publishing.
 
-Defaults are provided. Add variables only if you need overrides:
+## Required Secrets
 
-- `TEMPORAL_OWNER` (default: `github.repository_owner`)
-- `DNDIY_OWNER` (default: `github.repository_owner`)
-- `MEGAMEAL_OWNER` (default: `github.repository_owner`)
-- `TRAVEL_OWNER` (default: `github.repository_owner`)
-- `TRAVEL_REPO` (default: `merkin-travel`)
-- `TEMPORAL_REPO` (default: `temporal-flow`)
-- `DNDIY_REPO` (default: `DNDIY.github.io`)
-- `MEGAMEAL_REPO` (default: `megameal`)
-- `TRAVEL_DEPLOY_BRANCH` (default: `gh-pages`)
-- `TEMPORAL_DEPLOY_BRANCH` (default: `gh-pages`)
-- `DNDIY_DEPLOY_BRANCH` (default: `gh-pages`)
-- `MEGAMEAL_DEPLOY_BRANCH` (default: `gh-pages`)
+GitHub repository:
 
-For your current repositories, set:
+- `GITLAB_TOKEN` (token able to push to GitLab mirror repository)
 
-- `TRAVEL_OWNER=Greg-Aster`
-- `TRAVEL_REPO=merkin-travel`
-- `TEMPORAL_OWNER=dndiy`
-- `DNDIY_OWNER=DNDIY`
-- `MEGAMEAL_OWNER=Greg-Aster`
+GitLab project (for Cloudflare deploy):
 
-## Target Repository Configuration
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
 
-For each target repository, configure GitHub Pages to serve:
+## Domain Notes
 
-- Branch: `gh-pages`
-- Folder: `/ (root)`
-
-Recommended for publish-only repos:
-
-- Keep historical source commits if you want, but do not develop there.
-- Disable or ignore old `main`-branch deploy workflows in target repos.
-- Treat `gh-pages` as generated output only.
-
-If a site uses a custom domain:
-
-- Keep a `CNAME` file in the site folder in this monorepo (already present for Temporal-Flow and MEGAMEAL).
-- The workflow copies that `CNAME` into the built output before deployment.
-- For DNDIY, add `DNDIY.github.io/CNAME` if you want to preserve a custom domain on every deploy.
-
-## Trigger Rules
-
-On push:
-
-- Changes in `packages/blog-core/**` deploy all sites.
-- Site-local changes deploy only the affected site.
-
-Manual trigger:
-
-- Use **Actions -> Deploy Sites -> Run workflow**
-- Choose one: `all`, `travel`, `temporal`, `dndiy`, `megameal`
+- `apps/megameal/src/pages/game.astro` redirects to `https://game.megameal.org/`.
+- `apps/megameal/src/pages/host.astro` redirects to `https://game.megameal.org/host`.
+- Main story site remains `megameal.org`; game is hosted separately at `game.megameal.org`.

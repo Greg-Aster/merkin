@@ -1,0 +1,24 @@
+---
+// The Star Observatory game is its own independent repository.
+// This page redirects visitors to the game deployment and preserves query/hash.
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="refresh" content="0; url=https://game.megameal.org/" />
+    <title>Redirecting to Star Observatory...</title>
+    <script>
+      const target = new URL('https://game.megameal.org/')
+      target.search = window.location.search
+      target.hash = window.location.hash
+      window.location.replace(target.toString())
+    </script>
+  </head>
+  <body style="font-family: sans-serif; min-height: 100vh; margin: 0; background: #0a0a1a; color: #ccc; display: grid; place-items: center;">
+    <p>
+      Loading Star Observatory...
+      <a href="https://game.megameal.org/" style="color: #6af;">Click here if not redirected.</a>
+    </p>
+  </body>
+</html>

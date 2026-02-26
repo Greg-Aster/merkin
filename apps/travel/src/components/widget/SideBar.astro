@@ -16,6 +16,7 @@ interface Props {
   customAvatar?: string
   customName?: string
   customBio?: string
+  hideProfile?: boolean
 }
 
 const className = Astro.props.class
@@ -24,6 +25,7 @@ const postSlug = Astro.props.postSlug
 const customAvatar = Astro.props.customAvatar
 const customName = Astro.props.customName
 const customBio = Astro.props.customBio
+const hideProfile = Astro.props.hideProfile
 
 // Calculate active avatar index from slug
 const activeAvatarIndex = postSlug && !customAvatar
@@ -59,6 +61,7 @@ const tags = (await getTagList()).map((tag) => ({
   homeAvatar={avatarConfig.homeAvatar}
   animationInterval={avatarConfig.animationInterval}
   activeAvatarIndex={activeAvatarIndex}
+  hideProfile={hideProfile}
   categories={categories}
   categoriesTitle={i18n(I18nKey.categories)}
   tags={tags}

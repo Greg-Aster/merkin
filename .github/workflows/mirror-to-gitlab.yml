@@ -3,19 +3,35 @@ name: Mirror to GitLab
 on:
   push:
     branches:
-      - main
+      - "**"
+    tags:
+      - "*"
+  workflow_dispatch:
 
 jobs:
   mirror:
-    name: Push to GitLab
+    name: Push refs to GitLab
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout full history
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Push to GitLab
+      - name: Validate mirror token
         run: |
-          git remote add gitlab-mirror https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/Greg.Aster/merkin.git
-          git push gitlab-mirror main --force
+          if [ -z "${{ secrets.GITLAB_TOKEN }}" ]; then
+            echo "Missing required secret: GITLAB_TOKEN"
+            exit 1
+          fi
+
+      - name: Mirror branches and tags to GitLab
+        run: |
+          TARGET_PATH="${{ vars.GITLAB_MIRROR_PROJECT_PATH || 'Greg.Aster/merkin' }}"
+          git remote add gitlab-mirror "https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/${TARGET_PATH}.git"
+
+          # Keep GitLab as a mirror of GitHub refs.
+          git push --prune gitlab-mirror "refs/heads/*:refs/heads/*"
+          git push --prune gitlab-mirror "refs/tags/*:refs/tags/*"

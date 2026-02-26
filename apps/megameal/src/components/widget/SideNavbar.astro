@@ -1,0 +1,370 @@
+---
+// =====================================================================
+// SIDE NAVIGATION COMPONENT - REFACTORED
+// =====================================================================
+// This component creates a compact side navigation panel for mobile/tablet
+// REORGANIZED STRUCTURE:
+// 1. Home button (top)
+// 2. Profile button (just below home)
+// 3. Main navigation links (filtered - no Archive/About/Restaurant)
+// 4. Store button (moved down)
+// 5. Menu toggle (Archive/About as subitems)
+// 6. Bleepy button (assistant toggle)
+// 7. Settings gear (search, fullscreen, theme as submenu)
+
+// =====================================================================
+// IMPORTS
+// =====================================================================
+import { Icon } from 'astro-icon/components'
+import { navBarConfig, siteConfig } from '../../config/config'
+import { LinkPresets } from '../../constants/link-presets'
+import type { LinkPreset, NavBarLink } from '../../types/config'
+import { url } from '../../utils/url-utils'
+
+// =====================================================================
+// TYPESCRIPT INTERFACES
+// =====================================================================
+interface Props {
+  class?: string // Additional CSS classes to apply to the container
+  style?: string // Inline styles for the container
+}
+
+// =====================================================================
+// PROPS DESTRUCTURING
+// =====================================================================
+const { class: className, style } = Astro.props
+
+// =====================================================================
+// AUTHENTICATION CHECK
+// =====================================================================
+// Check if user is logged in (affects what navigation items are shown)
+const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
+
+// =====================================================================
+// NAVIGATION LINKS PROCESSING - REFACTORED
+// =====================================================================
+
+// Items to exclude from main navigation (will be in menu toggle)
+const excludeFromMainNav = ['Archive', 'About']
+// Items to block out completely
+const blockedItems = ['Gastronomy'] // Restaurant/Gastronomy blocked
+
+// Process links while filtering out specific items
+const processedLinks = navBarConfig.links
+  .map((item: NavBarLink | LinkPreset) => {
+    if (typeof item === 'number') {
+      return LinkPresets[item] // Convert preset number to link object
+    }
+    return item // Already a link object, return as-is
+  })
+  .filter(link => {
+    // Filter out blocked items and items that go in menu toggle
+    return (
+      !blockedItems.includes(link.name) &&
+      !excludeFromMainNav.includes(link.name)
+    )
+  })
+
+// Find Home link for top positioning
+const homeLink = navBarConfig.links
+  .map((item: NavBarLink | LinkPreset) =>
+    typeof item === 'number' ? LinkPresets[item] : item,
+  )
+  .find(link => link.name === 'Home')
+
+// Find Store link for separate positioning
+const storeLink = processedLinks.find(link => link.name === 'Store')
+
+// Find Archive and About links for menu toggle
+const menuToggleLinks = navBarConfig.links
+  .map((item: NavBarLink | LinkPreset) =>
+    typeof item === 'number' ? LinkPresets[item] : item,
+  )
+  .filter(link => excludeFromMainNav.includes(link.name))
+
+// Create a flat list of ALL navigation links for the menu panel (excluding blocked items)
+const allLinks = navBarConfig.links.flatMap((item: NavBarLink | LinkPreset) => {
+  const link = typeof item === 'number' ? LinkPresets[item] : item
+  if (blockedItems.includes(link.name)) return [] // Skip blocked items
+  return link.dropdown ? link.dropdown : link
+})
+
+// Main navigation links (excluding Home, Store, Archive, About, and blocked items)
+const mainNavLinks = processedLinks.filter(
+  link =>
+    link.name !== 'Home' &&
+    link.name !== 'Store' &&
+    !excludeFromMainNav.includes(link.name),
+)
+
+// =====================================================================
+// ICON MAPPING FUNCTION
+// =====================================================================
+// Maps navigation link names to their corresponding Material Symbols icons
+const getNavIcon = (name: string): string => {
+  const iconMap: Record<string, string> = {
+    Home: 'material-symbols:home-outline',
+    Archive: 'material-symbols:archive-outline',
+    About: 'material-symbols:person-outline',
+    Projects: 'material-symbols:work-outline',
+    Blog: 'material-symbols:article-outline',
+    Contact: 'material-symbols:mail-outline',
+    Timeline: 'material-symbols:timeline',
+    Cookbook: 'material-symbols:menu-book-outline',
+    Gastronomy: 'material-symbols:restaurant',
+    Map: 'material-symbols:map',
+    Store: 'material-symbols:attach-money',
+    Profile: 'material-symbols:account-circle-outline',
+    Settings: 'material-symbols:settings-outline',
+    Search: 'material-symbols:search',
+    Menu: 'material-symbols:menu-rounded',
+  }
+
+  // Debug: Log unmapped navigation items to help identify missing mappings
+  if (!iconMap[name]) {
+    console.log(
+      `🔍 Unmapped navigation item: "${name}" - using fallback link icon`,
+    )
+  }
+
+  return iconMap[name] || 'material-symbols:link'
+}
+---
+
+<!-- =============================================================== -->
+<!-- MAIN SIDE NAVIGATION CONTAINER -->
+<!-- =============================================================== -->
+<div id="unified-sidenav" 
+class:list={[className, "card-base p-2 h-[calc(100vh-0.5rem)] flex flex-col relative w-full overflow-hidden"]}
+style={style}>
+
+  <!-- =============================================================== -->
+  <!-- 1. HOME BUTTON (TOP) -->
+  <!-- =============================================================== -->
+  <div class="w-full flex justify-center mb-3">
+    {homeLink ? (
+      <a 
+        href={homeLink.external ? homeLink.url : url(homeLink.url)} 
+        target={homeLink.external ? "_blank" : null}
+        aria-label="Go to Homepage" 
+        class="btn-regular rounded-lg h-10 w-full flex items-center justify-center active:scale-90 transition-all duration-200"
+      >
+        <Icon name={getNavIcon(homeLink.name)} class="text-lg" />
+      </a>
+    ) : (
+      <!-- Fallback home link -->
+      <a href={url('/')} aria-label="Go to Homepage" class="w-8 h-1 bg-[var(--primary)] rounded-full hover:opacity-80 transition-opacity"></a>
+    )}
+  </div>
+
+  <!-- =============================================================== -->
+  <!-- 2. PROFILE BUTTON (JUST BELOW HOME) -->
+  <!-- =============================================================== -->
+  <div class="w-full mb-3">
+    <button id="sidenav-profile-btn" aria-label="Profile" class="btn-regular rounded-lg h-10 w-full flex items-center justify-center active:scale-90 transition-all duration-200">
+      <Icon name="material-symbols:account-circle-outline" class="text-lg"></Icon>
+    </button>
+  </div>
+
+  <!-- =============================================================== -->
+  <!-- 3. MAIN NAVIGATION LINKS (FILTERED) -->
+  <!-- =============================================================== -->
+  <!-- Shows primary navigation items (excluding Home, Store, Archive, About, Restaurant) -->
+  {mainNavLinks.length > 0 && (
+    <div class="flex flex-col gap-1 mb-3 border-b border-black/10 dark:border-white/10 pb-3">
+      {mainNavLinks.map((link) => (
+        link.dropdown ? (
+          <!-- DROPDOWN NAVIGATION BUTTON -->
+          <button 
+            data-dropdown-name={link.name}
+            aria-label={`${link.name} Menu`}
+            class="nav-dropdown-btn btn-regular rounded-lg h-10 w-full flex items-center justify-center active:scale-90 transition-all duration-200"
+          >
+            <Icon name={getNavIcon(link.name)} class="text-lg" />
+          </button>
+        ) : (
+          <!-- DIRECT NAVIGATION LINK -->
+          <a
+            aria-label={link.name}
+            href={link.external ? link.url : url(link.url)}
+            target={link.external ? "_blank" : null}
+            class="btn-regular rounded-lg h-10 w-full flex items-center justify-center active:scale-90 transition-all duration-200"
+          >
+            <Icon name={getNavIcon(link.name)} class="text-lg" />
+          </a>
+        )
+      ))}
+    </div>
+  )}
+
+  <!-- =============================================================== -->
+  <!-- DROPDOWN PANELS FOR MAIN NAV -->
+  <!-- =============================================================== -->
+  <!-- REMOVED: Panels moved to MainGridLayout.astro for proper positioning -->
+
+  <!-- =============================================================== -->
+  <!-- 4. STORE BUTTON (MOVED DOWN) -->
+  <!-- =============================================================== -->
+  {storeLink && (
+    <div class="w-full mb-3">
+      <a
+        aria-label={storeLink.name}
+        href={storeLink.external ? storeLink.url : url(storeLink.url)}
+        target={storeLink.external ? "_blank" : null}
+        class="btn-regular rounded-lg h-10 w-full flex items-center justify-center active:scale-90 transition-all duration-200"
+      >
+        <Icon name={getNavIcon(storeLink.name)} class="text-lg" />
+      </a>
+    </div>
+  )}
+
+  <!-- =============================================================== -->
+  <!-- 5. MENU TOGGLE (ARCHIVE/ABOUT AS SUBITEMS) -->
+  <!-- =============================================================== -->
+  <div class="w-full mb-3">
+    <button id="sidenav-menu-toggle" aria-label="Toggle Navigation Menu" class="btn-regular rounded-lg h-10 w-full flex items-center justify-center active:scale-90 transition-all duration-200">
+      <Icon name="material-symbols:menu-rounded" class="text-lg" />
+    </button>
+  </div>
+
+  <!-- =============================================================== -->
+  <!-- MENU TOGGLE PANEL (ARCHIVE/ABOUT + ALL LINKS) -->
+  <!-- =============================================================== -->
+  <!-- REMOVED: Panel moved to MainGridLayout.astro for proper positioning -->
+
+  <!-- =============================================================== -->
+  <!-- 6. BLEEPY BUTTON (ASSISTANT TOGGLE) - MOVED UP -->
+  <!-- =============================================================== -->
+  <div class="w-full mb-3">
+    <button id="sidenav-bleepy-btn" aria-label="Toggle Assistant" class="btn-regular rounded-lg h-10 w-full flex items-center justify-center active:scale-90 transition-all duration-200">
+      <span id="bleepy-icon-show">🍴</span>  <!-- Fork = show assistant -->
+      <span id="bleepy-icon-hide" class="hidden">🥄</span>  <!-- Spoon = hide assistant -->
+    </button>
+  </div>
+
+  <!-- =============================================================== -->
+  <!-- NEW: TIMELINE BANNER TOGGLE BUTTON -->
+  <!-- =============================================================== -->
+  <div class="w-full mb-3">
+    <button id="sidenav-timeline-btn" aria-label="Toggle Timeline Banner" class="btn-regular rounded-lg h-10 w-full flex items-center justify-center active:scale-90 transition-all duration-200">
+      <Icon name="material-symbols:timeline" class="text-lg" />
+    </button>
+  </div>
+
+  <!-- =============================================================== -->
+  <!-- 7. SETTINGS GEAR (SEARCH, FULLSCREEN, THEME SUBMENU) - BOTTOM -->
+  <!-- =============================================================== -->
+  <div class="border-t border-black/10 dark:border-white/10 pt-2 mt-auto">
+    <div class="w-full">
+      <button id="sidenav-settings-toggle" aria-label="Settings Menu" class="btn-regular rounded-lg h-10 w-full flex items-center justify-center active:scale-90 transition-all duration-200">
+        <Icon name="material-symbols:settings-outline" class="text-lg" />
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- =============================================================== -->
+<!-- MINIMAL CSS STYLES - ONLY SIDEBAR CONSTRAINTS -->
+<!-- =============================================================== -->
+<!-- 
+  BUTTON STYLING SYSTEM:
+  - Main navigation buttons: btn-regular + rounded-lg + h-10 (consistent grey background)
+  - Submenu items: btn-plain + rounded-md + py-2.5 (transparent with hover states)
+  - All buttons: w-full for consistent width, consistent icon sizing (text-lg for main, text-base for submenu)
+  
+  NOTE: Panel styles and hue slider styles moved to MainGridLayout.astro
+-->
+<style>
+  /* =============================================================== */
+  /* SIDEBAR CONSTRAINTS - Prevent any layout issues */
+  /* =============================================================== */
+  
+  #unified-sidenav {
+    min-width: 0; /* Allow shrinking */
+    flex-shrink: 0; /* But don't shrink the actual sidebar */
+  }
+  
+  /* Ensure buttons respect container width */
+  #unified-sidenav button,
+  #unified-sidenav a {
+    min-width: 0; /* Allow content to shrink */
+  }
+</style>
+
+<!-- =============================================================== -->
+<!-- JAVASCRIPT - SIMPLIFIED (PANELS MOVED TO MAINGRIDLAYOUT) -->
+<!-- =============================================================== -->
+<script>
+  function initializeSideNav() {
+    // ===================================================================
+    // PROFILE BUTTON TOGGLE - RESTORED
+    // ===================================================================
+    const profileBtn = document.getElementById('sidenav-profile-btn');
+    
+    if (profileBtn) {
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            // Close any open sidebar panels first
+            const allPanels = document.querySelectorAll('.sidenav-panel');
+            allPanels.forEach(panel => {
+              if (panel.classList.contains('panel-open')) {
+                panel.classList.remove('panel-open');
+              }
+            });
+            
+            // Dispatch custom event to MainGridLayout
+            document.dispatchEvent(new CustomEvent('profile:toggle'));
+        });
+    }
+
+    // ===================================================================
+    // ASSISTANT (BLEEPY) TOGGLE LOGIC - ONLY FUNCTIONALITY REMAINING IN SIDENAV
+    // ===================================================================
+    const bleepyBtn = document.getElementById('sidenav-bleepy-btn');
+    
+    if(bleepyBtn) {
+        const showIcon = bleepyBtn.querySelector('#bleepy-icon-show');
+        const hideIcon = bleepyBtn.querySelector('#bleepy-icon-hide');
+        let isMascotVisible = true;
+        
+        bleepyBtn.addEventListener('click', () => {
+            const eventName = isMascotVisible ? 'bleepy:hide' : 'bleepy:show';
+            document.dispatchEvent(new CustomEvent(eventName));
+        });
+
+        document.addEventListener('bleepy:visibilityChanged', (event) => {
+            const customEvent = event as CustomEvent;
+            isMascotVisible = customEvent.detail.visible;
+            
+            if (isMascotVisible) {
+                showIcon?.classList.remove('hidden');
+                hideIcon?.classList.add('hidden');
+            } else {
+                showIcon?.classList.add('hidden');
+                hideIcon?.classList.remove('hidden');
+            }
+        });
+        
+        document.dispatchEvent(new CustomEvent('bleepy:hide'));
+    }
+  }
+
+  // ===================================================================
+  // EVENT LISTENERS SETUP - SIMPLIFIED
+  // ===================================================================
+  function initWithDelay() {
+    setTimeout(initializeSideNav, 100);
+  }
+  
+  document.addEventListener('astro:page-load', initWithDelay);
+  document.addEventListener('DOMContentLoaded', initWithDelay);
+  window.addEventListener('load', initWithDelay);
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWithDelay);
+  } else {
+    initWithDelay();
+  }
+</script>

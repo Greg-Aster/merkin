@@ -28,6 +28,7 @@ export interface BannerConfig {
   defaultBannerType: BannerType
   defaultBannerData: StandardBannerData | VideoBannerData | ImageBannerData | TimelineBannerData
   bannerList: ImageMetadata[]
+  standardBannerConfig?: any // Compatibility with blog-core MainGridLayout
   defaultBanner: ImageMetadata
   animation: {
     enabled: boolean
@@ -115,10 +116,10 @@ export const bannerConfig: BannerConfig = {
   },
   panel: {
     top: {
-      video: '0',
-      image: 'calc(var(--navbar-height) + 1rem)',
-      timeline: '0',
-      standard: 'calc(var(--banner-height) - var(--banner-overlap))',
+      video: '-0.5rem',
+      image: '-0.5rem',
+      timeline: '-0.5rem',
+      standard: '-6.5rem',
     },
   },
   parallax: {
@@ -175,3 +176,82 @@ export function isImageBannerData(data: any): data is ImageBannerData {
 export function isTimelineBannerData(data: any): data is TimelineBannerData {
   return data && 'category' in data && typeof data.category === 'string'
 }
+
+// ============================================================
+// COMPATIBILITY LAYER: Functions required by blog-core's MainGridLayout
+// ============================================================
+
+export function getDynamicBackgroundImage(backgroundImage?: string | null): string | null {
+  if (backgroundImage === 'none' || backgroundImage === '') return null
+  return backgroundImage || null
+}
+
+export function getShouldShowParallaxBackground(backgroundImage?: string | null): boolean {
+  return !!(getDynamicBackgroundImage(backgroundImage) && bannerConfig.parallax.enabled)
+}
+
+export function getBannerLink(_index: number): string | null {
+  return null
+}
+
+export function determineBannerConfiguration(post: any, _pageType: string, defaultBannerLink = '') {
+  const mainPanelTop = getPanelTopPosition(bannerConfig.defaultBannerType)
+  const navbarSpacing = bannerConfig.navbarSpacing.standard
+  return {
+    postData: null,
+    bannerType: {
+      hasTimelineBanner: false,
+      hasVideoBanner: false,
+      hasImageBanner: false,
+      hasAssistantBanner: false,
+      hasStandardBanner: true,
+      hasPostBanner: false,
+      isStandardPage: true,
+      currentBannerType: 'standard' as BannerType,
+    },
+    bannerDataSources: {
+      videoBannerData: null,
+      imageBannerData: null,
+      timelineBannerData: null,
+      assistantBannerData: null,
+    },
+    layout: {
+      mainPanelTop,
+      navbarSpacing,
+      bannerHeight: bannerConfig.layout.height.desktop,
+      bannerOverlap: '0',
+      dynamicOverlap: '0',
+      mainContentOffset: '1.5rem',
+    },
+    finalBannerLink: defaultBannerLink,
+    currentBannerType: 'standard' as BannerType,
+  }
+}
+
+// Nested standardBannerConfig shape expected by blog-core's MainGridLayout
+bannerConfig.standardBannerConfig = {
+  bannerList: bannerConfig.bannerList.map((img: ImageMetadata) => ({
+    src: img,
+    alt: 'Banner image',
+    fallbackImage: img,
+    preload: 'auto' as const,
+  })),
+  animation: {
+    transitionDuration: bannerConfig.animation.transitionDuration,
+    interval: bannerConfig.animation.interval,
+  },
+  video: {
+    autoplay: false,
+    muted: true,
+    loop: true,
+    playsInLine: true,
+    controls: false,
+    preload: 'auto',
+  },
+  isVideoBannerItem: (_item: any) => false,
+  isImageBannerItem: (_item: any) => true,
+  getBannerItemPreviewDetails: (_item: any) => ({ title: '', description: '' }),
+};
+(bannerConfig as any).navbar ??= {};
+(bannerConfig as any).navbar.mobilePortraitSpacing = bannerConfig.navbar.height.mobile;
+(bannerConfig as any).layout.maxWidth ??= 1920;
