@@ -1,0 +1,131 @@
+{
+  "title": "Cosmic Curiosities Quiz",
+  "description": "Test your knowledge of the strange and unsettling MegaMeal universe.",
+  "initialQuestion": "q1",
+  "outcomes": {
+    "OUTCOME_COSMIC_SCHOLAR": {
+      "title": "Diagnosis: Cosmic Knowledge Overdose",
+      "description": "You have absorbed so much knowledge about the MegaMeal universe that your brain has achieved a dangerous level of cosmic awareness. You know things that mortal minds weren't meant to comprehend, and you've started correcting the universe's own documentation. Reality has filed several noise complaints about your excessive understanding."
+    },
+    "OUTCOME_BLISSFUL_IGNORANCE": {
+      "title": "Diagnosis: Selective Reality Filtering",
+      "description": "You have successfully avoided learning anything meaningful about the cosmic horror that surrounds you, which is actually the healthiest possible response. Your ignorance is so pure and complete that existential dread can't find you. You are the only truly sane person in the MegaMeal universe, which makes you completely insane by local standards."
+    },
+    "OUTCOME_CONFUSED_WANDERER": {
+      "title": "Diagnosis: Partial Knowledge Syndrome",
+      "description": "You know just enough about the MegaMeal universe to be deeply concerned, but not enough to achieve the blissful madness of complete understanding. You exist in a perpetual state of cosmic confusion, which is both the most dangerous and most relatable condition possible. You are doomed to forever ask questions you don't want answered."
+    },
+    "OUTCOME_DEFAULT": {
+      "title": "Diagnosis: Inconclusive Cosmic Status",
+      "description": "Your knowledge of the MegaMeal universe defies categorization. You simultaneously know everything and nothing, understand completely while being utterly baffled. You have achieved a quantum state of comprehension that exists in superposition until observed. Even we're not sure what's wrong with you."
+    }
+  },
+  "nodes": {
+    "q1": {
+      "text": "What is the primary export of the planet Glarzon-7?",
+      "options": [
+        { "text": "Screaming Jellies", "trait": "knowledge", "next": "q2_correct_path" },
+        { "text": "Antimatter Doughnuts", "trait": "confusion", "next": "q2_confused_path" },
+        { "text": "Condensed Starlight", "trait": "ignorance", "next": "q2_ignorant_path" },
+        { "text": "Hyper-Cabbages", "trait": "chaos", "next": "q2_chaotic_path" }
+      ]
+    },
+    "q2_correct_path": {
+      "text": "Correct! The 'Deep Time' incident was caused by a malfunction in which ship system?",
+      "options": [
+        { "text": "The Chrono-Sink", "trait": "knowledge", "next": "q3_scholar_path" },
+        { "text": "The Warp Drive", "trait": "confusion", "next": "q3_mixed_knowledge" },
+        { "text": "The Probability Engine", "trait": "speculation", "next": "q3_mixed_knowledge" },
+        { "text": "The Snack Dispenser", "trait": "chaos", "next": "q3_chaotic_scholar" }
+      ]
+    },
+    "q2_confused_path": {
+      "text": "Hmm, not quite. What is the official slogan of the MegaMeal corporation?",
+      "options": [
+        { "text": "\"An Unsettlingly Good Meal\"", "trait": "knowledge", "next": "q3_mixed_knowledge" },
+        { "text": "\"Taste the Cosmos!\"", "trait": "confusion", "next": "q3_confused_deep" },
+        { "text": "\"Your Hunger is Our Business\"", "trait": "ignorance", "next": "q3_confused_ignorant" },
+        { "text": "\"Don't Ask What's In It\"", "trait": "chaos", "next": "q3_chaotic_confused" }
+      ]
+    },
+    "q2_ignorant_path": {
+      "text": "That's... creative. How do you feel about not knowing these cosmic facts?",
+      "options": [
+        { "text": "Blissfully unaware and planning to stay that way.", "trait": "ignorance", "next": "q3_blissful_ignorance" },
+        { "text": "Concerned that I should probably know this stuff.", "trait": "anxiety", "next": "q3_anxious_ignorance" },
+        { "text": "I'm making up my own MegaMeal facts now.", "trait": "creativity", "next": "q3_creative_ignorance" },
+        { "text": "Knowledge is overrated anyway.", "trait": "apathy", "next": "q3_apathetic_ignorance" }
+      ]
+    },
+    "q2_chaotic_path": {
+      "text": "Wild guess! Do you often just pick random answers?",
+      "options": [
+        { "text": "Always! Reality is too weird to predict anyway.", "trait": "chaos", "next": "q3_pure_chaos" },
+        { "text": "Only when I have no idea what's going on.", "trait": "honesty", "next": "q3_honest_chaos" },
+        { "text": "I was hoping the universe would give me hints.", "trait": "hope", "next": "q3_hopeful_chaos" },
+        { "text": "Random choices have worked out surprisingly well so far.", "trait": "luck", "next": "q3_lucky_chaos" }
+      ]
+    },
+    "q3_scholar_path": {
+      "text": "Excellent! Your cosmic knowledge is frighteningly comprehensive. How does it feel to understand the incomprehensible?",
+      "options": [
+        { "text": "Terrifying but addictive. I must know MORE.", "trait": "obsession", "next": "OUTCOME_COSMIC_SCHOLAR" },
+        { "text": "Like staring into the abyss while it judges my life choices.", "trait": "dread", "next": "OUTCOME_COSMIC_SCHOLAR" },
+        { "text": "I can feel my sanity dissolving, but the knowledge is worth it.", "trait": "madness", "next": "OUTCOME_COSMIC_SCHOLAR" }
+      ]
+    },
+    "q3_mixed_knowledge": {
+      "text": "You know some things but not others. This partial knowledge is dangerous.",
+      "options": [
+        { "text": "I'm starting to piece together a horrifying picture.", "trait": "realization", "next": "OUTCOME_CONFUSED_WANDERER" },
+        { "text": "Maybe I should stop learning about this universe.", "trait": "wisdom", "next": "OUTCOME_CONFUSED_WANDERER" },
+        { "text": "The more I learn, the less sense anything makes.", "trait": "confusion", "next": "OUTCOME_CONFUSED_WANDERER" }
+      ]
+    },
+    "q3_blissful_ignorance": {
+      "text": "Your ignorance is a shield against cosmic horror. Treasure it.",
+      "options": [
+        { "text": "Ignorance is bliss, and I choose bliss.", "trait": "wisdom", "next": "OUTCOME_BLISSFUL_IGNORANCE" },
+        { "text": "What you don't know can't give you existential nightmares.", "trait": "peace", "next": "OUTCOME_BLISSFUL_IGNORANCE" },
+        { "text": "I'm living in a happy bubble of not-knowing.", "trait": "contentment", "next": "OUTCOME_BLISSFUL_IGNORANCE" }
+      ]
+    },
+    "q3_confused_deep": {
+      "text": "Your confusion has achieved cosmic significance. Even confusion is confused by you.",
+      "options": [
+        { "text": "I don't understand anything anymore.", "trait": "bewilderment", "next": "OUTCOME_CONFUSED_WANDERER" },
+        { "text": "Maybe confusion is the only honest response to this universe.", "trait": "philosophy", "next": "OUTCOME_CONFUSED_WANDERER" },
+        { "text": "I'm confused about being confused.", "trait": "meta", "next": "OUTCOME_CONFUSED_WANDERER" }
+      ]
+    },
+    "q3_pure_chaos": {
+      "text": "You have embraced the chaotic nature of existence. Reality respects this.",
+      "options": [
+        { "text": "Chaos is the only constant in this universe.", "trait": "acceptance", "next": "OUTCOME_COSMIC_SCHOLAR" },
+        { "text": "Random choices have led me to cosmic enlightenment.", "trait": "zen", "next": "OUTCOME_COSMIC_SCHOLAR" },
+        { "text": "I am one with the beautiful meaninglessness of it all.", "trait": "transcendence", "next": "OUTCOME_COSMIC_SCHOLAR" }
+      ]
+    },
+    "q3_anxious_ignorance": {
+      "text": "Your awareness of your ignorance is causing existential anxiety.",
+      "options": [
+        { "text": "Should I be worried about not knowing cosmic facts?", "trait": "anxiety", "next": "OUTCOME_CONFUSED_WANDERER" },
+        { "text": "Maybe it's better not to know after all.", "trait": "retreat", "next": "OUTCOME_BLISSFUL_IGNORANCE" }
+      ]
+    },
+    "q3_creative_ignorance": {
+      "text": "You're creating your own version of cosmic reality. This is either brilliant or dangerous.",
+      "options": [
+        { "text": "My made-up facts are probably more pleasant than the real ones.", "trait": "creativity", "next": "OUTCOME_BLISSFUL_IGNORANCE" },
+        { "text": "Fiction is just reality that hasn't happened yet.", "trait": "delusion", "next": "OUTCOME_BLISSFUL_IGNORANCE" }
+      ]
+    },
+    "q3_chaotic_scholar": {
+      "text": "You know the facts but interpret them through chaos. This is a dangerous combination.",
+      "options": [
+        { "text": "Knowledge filtered through chaos becomes wisdom.", "trait": "paradox", "next": "OUTCOME_COSMIC_SCHOLAR" },
+        { "text": "Even when I know the answer, I prefer the weird option.", "trait": "rebellion", "next": "OUTCOME_CONFUSED_WANDERER" }
+      ]
+    }
+  }
+}

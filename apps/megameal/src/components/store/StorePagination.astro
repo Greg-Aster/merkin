@@ -1,0 +1,119 @@
+---
+export interface Props {
+  currentPage: number
+  totalPages: number
+  pageUrlPrev?: string
+  pageUrlNext?: string
+  storeBaseUrl: string
+}
+
+const {
+  currentPage,
+  totalPages,
+  pageUrlPrev,
+  pageUrlNext,
+  storeBaseUrl
+} = Astro.props
+
+// Generate page numbers for pagination
+const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1)
+
+// Helper to get URL for a specific page
+function getPageUrl(pageNum: number) {
+  if (pageNum === 1) {
+    return storeBaseUrl
+  }
+  return `${storeBaseUrl}/page/${pageNum}`
+}
+---
+
+<nav class="pagination-nav" aria-label="Store pagination">
+  <div class="flex items-center justify-center gap-2">
+    
+    <!-- Previous Button -->
+    {pageUrlPrev ? (
+      <a 
+        href={pageUrlPrev}
+        class="pagination-btn pagination-prev px-4 py-2 bg-gray-700/80 text-white rounded-md hover:bg-sky-600 transition-colors duration-200"
+        aria-label="Previous page"
+      >
+        ← Previous
+      </a>
+    ) : (
+      <span class="pagination-btn pagination-prev-disabled px-4 py-2 bg-gray-600/50 text-gray-400 rounded-md cursor-not-allowed">
+        ← Previous
+      </span>
+    )}
+
+    <!-- Page Numbers -->
+    <div class="flex gap-1">
+      {pageNumbers.map(pageNum => {
+        const isCurrentPage = pageNum === currentPage
+        const pageUrl = getPageUrl(pageNum)
+        
+        return isCurrentPage ? (
+          <span 
+            class="pagination-current px-3 py-2 bg-sky-600 text-white rounded-md font-medium"
+            aria-current="page"
+          >
+            {pageNum}
+          </span>
+        ) : (
+          <a 
+            href={pageUrl}
+            class="pagination-page px-3 py-2 bg-gray-700/80 text-white rounded-md hover:bg-sky-600 transition-colors duration-200"
+            aria-label={`Go to page ${pageNum}`}
+          >
+            {pageNum}
+          </a>
+        )
+      })}
+    </div>
+
+    <!-- Next Button -->
+    {pageUrlNext ? (
+      <a 
+        href={pageUrlNext}
+        class="pagination-btn pagination-next px-4 py-2 bg-gray-700/80 text-white rounded-md hover:bg-sky-600 transition-colors duration-200"
+        aria-label="Next page"
+      >
+        Next →
+      </a>
+    ) : (
+      <span class="pagination-btn pagination-next-disabled px-4 py-2 bg-gray-600/50 text-gray-400 rounded-md cursor-not-allowed">
+        Next →
+      </span>
+    )}
+
+  </div>
+
+  <!-- Page Info -->
+  <div class="mt-4 text-center text-sm text-gray-400">
+    Page {currentPage} of {totalPages}
+  </div>
+</nav>
+
+<style>
+  .pagination-nav {
+    /* Additional pagination-specific styling if needed */
+  }
+  
+  .pagination-btn,
+  .pagination-page,
+  .pagination-current {
+    min-width: 44px; /* Ensure touch-friendly size */
+    text-align: center;
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 640px) {
+    .pagination-nav .flex {
+      flex-wrap: wrap;
+    }
+    
+    .pagination-btn {
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+    }
+  }
+</style>

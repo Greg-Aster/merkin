@@ -1,0 +1,100 @@
+---
+interface Props {
+  mascotContext?: string
+}
+const { mascotContext } = Astro.props
+---
+
+<div id="bleepy-post-widget" class="card-base p-4 flex flex-col gap-4" data-page-context={mascotContext || ''}>
+  <!-- Chat History Area with Initial Mascot Display -->
+  <div id="widget-chat-history" class="chat-history flex-grow h-64 overflow-y-auto bg-[var(--surface-1)] p-3 rounded-md relative">
+    <!-- Large mascot image shown on first load -->
+    <div id="widget-initial-mascot" class="initial-mascot-display flex items-center justify-center h-full">
+      <div class="text-center">
+        <div id="widget-mascot-visual-area" class="w-48 h-48 mx-auto mb-4">
+          <img id="widget-mascot-image-display" alt="Bleepy" class="w-full h-full object-contain" style="display: none;" />
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-400">Hi! I'm Cuppy. Ask me anything!</p>
+        <div class="h-1 w-5 bg-[var(--primary)] mx-auto rounded-full mt-2 transition"></div>
+
+      </div>
+    </div>
+    
+    <!-- Messages will be dynamically inserted here -->
+    <div id="widget-messages-container" class="messages-container" style="display: none;">
+      <!-- Chat messages and speech bubbles go here -->
+    </div>
+  </div>
+
+  <!-- Input Area Only -->
+  <div id="widget-chat-ui" class="flex-shrink-0 flex items-center gap-2">
+    <input type="text" id="widget-chat-input" class="chat-input w-full p-2 rounded-md" placeholder="Ask Cuppy..." />
+    <button id="widget-chat-send" class="chat-send-button px-4 py-2 rounded-md">Send</button>
+  </div>
+</div>
+
+<template id="speech-bubble-template">
+  <div class="speech-bubble-container flex items-start gap-2 mb-3 mr-8">
+    <div class="w-8 h-8 flex-shrink-0 mt-1">
+      <img class="w-full h-full object-contain rounded-full speech-bubble-avatar" alt="Bleepy" />
+    </div>
+    <div class="speech-bubble rounded-lg p-3 relative shadow-sm max-w-xs">
+      <div class="speech-tail absolute left-0 top-4 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent -ml-2"></div>
+      <div class="text-sm speech-bubble-content"></div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import { PostWidgetManager } from './post-widget-manager.ts';
+
+  let widgetManager: PostWidgetManager | null = null;
+
+  function initializeWidget() {
+    const widgetContainer = document.getElementById('bleepy-post-widget');
+    const pageContext = widgetContainer?.dataset.pageContext || '';
+
+    // Initialize the widget manager
+    widgetManager = new PostWidgetManager({
+      containerId: 'bleepy-post-widget',
+      mascotVisualId: 'widget-mascot-visual-area',
+      chatInputId: 'widget-chat-input',
+      chatSendButtonId: 'widget-chat-send',
+      chatHistoryId: 'widget-chat-history',
+      pageContext: pageContext,
+      enableProactiveDialogue: true,
+      enableGreeting: true,
+      showChatHistory: true
+    });
+
+    if (!widgetManager.initialize()) {
+      console.error('Failed to initialize BleepyPostWidget');
+    }
+  }
+
+  let widgetInitialized = false;
+  function runOnceInitializeWidget() {
+    if (!widgetInitialized) {
+      initializeWidget();
+      widgetInitialized = true;
+    }
+  }
+
+  document.addEventListener('astro:page-load', runOnceInitializeWidget);
+  document.addEventListener('DOMContentLoaded', runOnceInitializeWidget);
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(runOnceInitializeWidget, 0);
+  }
+
+  document.addEventListener('astro:before-preparation', () => {
+    if (widgetManager) {
+      widgetManager.cleanup();
+      widgetManager = null;
+    }
+  });
+</script>
+
+<style>
+  @import './BleepyPostWidget.css';
+</style>

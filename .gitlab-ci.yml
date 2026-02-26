@@ -106,7 +106,7 @@ deploy-dndiy:
       when: manual
       allow_failure: true
 
-# MEGAMEAL -> megameal.org
+# MEGAMEAL -> megameal.org (now a workspace app at apps/megameal/)
 preview-megameal:
   stage: deploy
   script:
@@ -114,7 +114,8 @@ preview-megameal:
   rules:
     - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "web"'
       changes:
-        - MEGAMEAL/**/*
+        - apps/megameal/**/*
+        - packages/**/*
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "megameal")'
       when: manual
@@ -128,7 +129,8 @@ promote-megameal:
     - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main"'
       when: manual
       changes:
-        - MEGAMEAL/**/*
+        - apps/megameal/**/*
+        - packages/**/*
         - .gitlab-ci.yml
 
 deploy-megameal:
@@ -138,7 +140,8 @@ deploy-megameal:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
       changes:
-        - MEGAMEAL/**/*
+        - apps/megameal/**/*
+        - packages/**/*
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "megameal")'
       when: manual

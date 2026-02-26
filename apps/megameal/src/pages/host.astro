@@ -1,0 +1,21 @@
+---
+// Multiplayer hosting is part of the game engine (separate repository).
+// Redirect to the game host route and preserve query/hash.
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="refresh" content="0; url=https://game.megameal.org/host" />
+    <title>Redirecting to Game Host...</title>
+    <script>
+      const target = new URL('https://game.megameal.org/host')
+      target.search = window.location.search
+      target.hash = window.location.hash
+      window.location.replace(target.toString())
+    </script>
+  </head>
+  <body>
+    <p><a href="https://game.megameal.org/host">Click here if not redirected.</a></p>
+  </body>
+</html>

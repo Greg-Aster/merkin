@@ -13,8 +13,6 @@ export {
   MAIN_PANEL_OVERLAPS_BANNER_HEIGHT,
   MAIN_PANEL_OVERLAPS_BANNER_HEIGHT_MOBILE,
   PAGE_SIZE,
+  PAGE_WIDTH,
   UNCATEGORIZED,
 } from '@merkin/blog-core/constants'
-
-// Temporal/DNDIY use a narrower page width than MEGAMEAL.
-export const PAGE_WIDTH = 75

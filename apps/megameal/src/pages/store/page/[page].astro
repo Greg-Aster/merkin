@@ -1,0 +1,142 @@
+---
+import { getCollection } from 'astro:content'
+import ProductCard from '../../../components/store/ProductCard.astro'
+import StorePagination from '../../../components/store/StorePagination.astro'
+import StoreLayout from '../../../layouts/store/StoreLayout.astro'
+
+export async function getStaticPaths() {
+  // Removed { paginate } as it's not used
+  const products = await getCollection(
+    'products',
+    ({ data }) => data.draft !== true,
+  )
+  // Using a fixed PRODUCTS_PER_PAGE here. Ideally, this would be a shared constant.
+  const PRODUCTS_PER_PAGE = 5
+
+  // Create a an array of page numbers.
+  // Example: if products.length is 12 and PRODUCTS_PER_PAGE is 5,
+  // numPages will be 3 (for pages 1, 2, 3).
+  // Astro's paginate function expects an array of items to paginate,
+  // but we are manually creating page routes based on page numbers.
+  const numPages = Math.ceil(products.length / PRODUCTS_PER_PAGE)
+  const pageNumbers = Array.from({ length: numPages }, (_, i) => i + 1)
+
+  // We only want to generate paths for page 2 onwards, as page 1 is handled by /store.astro
+  const paths = pageNumbers
+    .filter(num => num > 1)
+    .map(pageNumber => {
+      return {
+        params: { page: pageNumber.toString() },
+        // We don't need to pass props here as we'll recalculate products for the page below
+      }
+    })
+  return paths
+}
+
+const PRODUCTS_PER_PAGE = 5
+const allProducts = await getCollection('products', ({ data }) => {
+  return data.draft !== true
+})
+
+const { page } = Astro.params
+const currentPage = Number.parseInt(page as string, 10)
+
+const totalPages = Math.ceil(allProducts.length / PRODUCTS_PER_PAGE)
+const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE
+const endIndex = startIndex + PRODUCTS_PER_PAGE
+const displayedProducts = allProducts.slice(startIndex, endIndex)
+const baseUrl = '/store' // Base URL for pagination links (will be storeBaseUrl for component)
+
+// Calculate prev/next URLs
+const pageUrlPrev =
+  currentPage > 1
+    ? currentPage === 2
+      ? baseUrl
+      : `${baseUrl}/page/${currentPage - 1}`
+    : undefined
+const pageUrlNext =
+  currentPage < totalPages ? `${baseUrl}/page/${currentPage + 1}` : undefined
+
+// Redirect to 404 if page number is invalid or out of bounds
+if (
+  isNaN(currentPage) ||
+  currentPage < 1 ||
+  (currentPage > totalPages && totalPages > 0) ||
+  (currentPage > 1 && totalPages === 0)
+) {
+  return Astro.redirect('/404')
+}
+// If it's page 1, redirect to the base /store URL
+if (currentPage === 1) {
+  return Astro.redirect(baseUrl, 301) // 301 for permanent redirect
+}
+---
+<StoreLayout title={`Store - Page ${currentPage}`} description={`Browse our unique collection of unsettling treasures - Page ${currentPage}.`}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="card-base max-w-4xl mx-auto p-6 md:p-8 shadow-xl">
+      <h1 class="text-4xl font-bold mb-8 text-center text-[var(--primary)]">Welcome to the Store</h1>
+      
+      {displayedProducts.length === 0 && currentPage > 1 ? (
+        <p class="text-center text-xl text-gray-400">No more products on this page. Perhaps go back?</p>
+      ) : displayedProducts.length === 0 ? (
+         <p class="text-center text-xl text-gray-400">Our shelves are currently... empty. How ominous.</p>
+      ) : (
+        <div class="grid grid-cols-1 gap-6">
+          {displayedProducts.map(product => (
+            <ProductCard product={product} />
+          ))}
+        </div>
+      )}
+    </div>
+    
+    {totalPages > 0 && ( // Render pagination even for 1 page, as per original component
+      <div class="mt-12 flex justify-center">
+        <StorePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageUrlPrev={pageUrlPrev}
+          pageUrlNext={pageUrlNext}
+          storeBaseUrl={baseUrl}
+        />
+      </div>
+    )}
+  </div>
+</StoreLayout>
+
+<script>
+  // Script for product card interaction (same as in store.astro)
+  document.addEventListener('DOMContentLoaded', () => {
+    const productCards = document.querySelectorAll('.product-card-wrapper');
+    let currentlySelectedCard: HTMLElement | null = null;
+
+    productCards.forEach(cardElement => {
+      const card = cardElement as HTMLElement;
+      const clickableAreas = card.querySelectorAll('.product-clickable-area');
+
+      clickableAreas.forEach(area => {
+        area.addEventListener('click', (event) => {
+          if ((event.target as HTMLElement).closest('.product-cart-button')) {
+            return;
+          }
+          const clickedCard = card;
+          if (currentlySelectedCard && currentlySelectedCard !== clickedCard) {
+            currentlySelectedCard.classList.remove('selected', 'expanded');
+          }
+          if (clickedCard.classList.contains('selected')) {
+            clickedCard.classList.remove('selected', 'expanded');
+            currentlySelectedCard = null;
+          } else {
+            clickedCard.classList.add('selected', 'expanded');
+            currentlySelectedCard = clickedCard;
+          }
+        });
+      });
+    });
+  });
+</script>
+
+<style is:global>
+  .product-card-wrapper {
+    position: relative; 
+  }
+</style>

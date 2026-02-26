@@ -1,21 +1,8 @@
-name: Deploy Sites
+name: Deploy Sites (Legacy GitHub Pages Fallback)
 
 on:
-  push:
-    branches:
-      - main
-      - master
-    paths:
-      - "apps/travel/**"
-      - "Temporal-Flow/**"
-      - "DNDIY.github.io/**"
-      - "MEGAMEAL/**"
-      - "packages/blog-core/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - ".github/workflows/deploy-sites.yml"
-      - ".github/workflows/DEPLOYMENT_SETUP.md"
+  # Primary production flow is GitHub -> GitLab -> Cloudflare Pages.
+  # This workflow is intentionally manual-only as a fallback path to GitHub Pages.
   workflow_dispatch:
     inputs:
       site:
@@ -94,8 +81,11 @@ jobs:
               - "pnpm-workspace.yaml"
               - ".github/workflows/deploy-sites.yml"
             megameal:
-              - "MEGAMEAL/**"
+              - "apps/megameal/**"
               - "packages/blog-core/**"
+              - "package.json"
+              - "pnpm-lock.yaml"
+              - "pnpm-workspace.yaml"
               - ".github/workflows/deploy-sites.yml"
 
   deploy-travel:
@@ -296,19 +286,19 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Build MEGAMEAL
         env:
           GITHUB_REPOSITORY: ${{ env.MEGAMEAL_OWNER }}/${{ env.MEGAMEAL_REPO }}
-        run: |
-          cd MEGAMEAL
-          pnpm install --ignore-workspace --frozen-lockfile
-          pnpm build
+        run: pnpm build:megameal
 
       - name: Prepare deploy artifacts
         run: |
-          touch MEGAMEAL/dist/.nojekyll
-          if [ -f MEGAMEAL/CNAME ]; then
-            cp MEGAMEAL/CNAME MEGAMEAL/dist/CNAME
+          touch apps/megameal/dist/.nojekyll
+          if [ -f apps/megameal/CNAME ]; then
+            cp apps/megameal/CNAME apps/megameal/dist/CNAME
           fi
 
       - name: Deploy to target repository
@@ -317,7 +307,7 @@ jobs:
           personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
           external_repository: ${{ env.MEGAMEAL_OWNER }}/${{ env.MEGAMEAL_REPO }}
           publish_branch: ${{ env.MEGAMEAL_DEPLOY_BRANCH }}
-          publish_dir: ./MEGAMEAL/dist
+          publish_dir: ./apps/megameal/dist
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
           commit_message: "deploy(megameal): ${{ github.repository }}@${{ github.sha }}"

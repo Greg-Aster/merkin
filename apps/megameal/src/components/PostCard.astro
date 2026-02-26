@@ -1,0 +1,239 @@
+---
+// src/components/PostCard.astro
+// UNIFIED: Single responsive system that works the same across all screen sizes
+
+import path from 'path'
+import { Icon } from 'astro-icon/components'
+import { postCardConfig } from '../config/postcard.config'
+import I18nKey from '../i18n/i18nKey'
+import { i18n } from '../i18n/translation'
+import { getDir } from '../utils/url-utils'
+import ImageWrapper from './misc/ImageWrapper.astro'
+
+interface Props {
+  class?: string
+  entry: any
+  title: string
+  url: string
+  published: Date
+  updated?: Date
+  category: string
+  image: string
+  description: string
+  draft: boolean
+  style?: string
+  isPostPage?: boolean
+}
+
+const {
+  entry,
+  title,
+  url,
+  published,
+  updated,
+  category,
+  image,
+  description,
+  style = '',
+  isPostPage = false,
+} = Astro.props
+
+const className = Astro.props.class
+
+const hasCover =
+  image !== undefined &&
+  image !== null &&
+  image !== '' &&
+  (!isPostPage || (isPostPage && entry.data.showImageOnPost !== false))
+
+const config = postCardConfig.localPosts
+const { remarkPluginFrontmatter } = await entry.render()
+
+const timestamp = published.getTime()
+const dateStr = published.toISOString().split('T')[0]
+---
+
+<!-- UNIFIED: Same horizontal flexbox layout for all screen sizes -->
+<div
+  class:list={[
+    "card-base w-full overflow-hidden relative local-post",
+    "flex flex-row-reverse", // Images on right side for all screen sizes
+    // 🎯 RESPONSIVE HEIGHTS - compact on mobile, comfortable on desktop
+    "h-[10rem] sm:h-[10.5rem] md:h-[12rem] lg:h-[14rem]",
+    config.layout.cardBorderRadius, 
+    className
+  ]}
+  style={style}
+  data-post-type="local"
+  data-post-id={entry.id}
+  data-post-date={dateStr}
+  data-post-timestamp={timestamp}
+  data-post-category={category?.toLowerCase()}
+  data-post-image={image}
+  data-post-description={description}>
+  
+  <!-- IMAGE SECTION: Consistent across all screen sizes -->
+  {hasCover && (
+    <a href={url} 
+       aria-label={title}
+       class:list={[
+         "group relative rounded-xl overflow-hidden bg-black shrink-0",
+         "m-2 sm:m-3", // 🎯 RESPONSIVE MARGINS - tighter on mobile
+         // 🎯 RESPONSIVE IMAGE SIZING - proportional to card height
+         "w-28 sm:w-36 md:w-44 lg:w-52"
+       ]}>
+      
+      <!-- Blurred background -->
+      <div class="absolute inset-0 blur-background">
+        <ImageWrapper 
+          src={image} 
+          basePath={path.join("content/posts/", getDir(entry.id))} 
+          alt=""
+          class="w-full h-full object-cover blur-md scale-110 opacity-60" />
+      </div>
+      
+      <!-- Hover effects -->
+      <div class="absolute pointer-events-none z-10 w-full h-full group-hover:bg-black/30 group-active:bg-black/50 transition"></div>
+      <div class="absolute pointer-events-none z-20 w-full h-full flex items-center justify-center">
+        <Icon 
+          name="material-symbols:chevron-right-rounded"
+          class="transition opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-100 text-white text-5xl" />
+      </div>
+      
+      <!-- Main image -->
+      <div class="absolute inset-0 main-image z-5">
+        <ImageWrapper 
+          src={image} 
+          basePath={path.join("content/posts/", getDir(entry.id))} 
+          alt="Cover Image of the Post"
+          class="postcard-image postcard-image-fix w-full h-full object-cover" />
+      </div>
+    </a>
+  )}
+
+  <!-- CONTENT SECTION: Fixed spacing layout with responsive padding -->
+  <div class="flex flex-col flex-1 p-3 sm:p-4 py-4 sm:py-5 pr-2 sm:pr-3 pl-6 sm:pl-8">
+    <!-- Note: Removed justify-between for fixed spacing control -->
+    
+    <!-- TOP SECTION: Title and Metadata -->
+    <div class="flex-shrink-0">
+      <!-- TITLE - 🎯 RESPONSIVE TEXT SIZING -->
+      <a href={url}
+         class:list={[
+           "transition group w-full block font-bold mb-2 sm:mb-3 text-90",
+           "hover:text-[var(--primary)] dark:hover:text-[var(--primary)]", 
+           "active:text-[var(--title-active)] dark:active:text-[var(--title-active)]",
+           // 🎯 RESPONSIVE TITLE SIZE - scales properly on all devices
+           "text-base sm:text-2xl md:text-3xl lg:text-4xl",
+           // Simple hover effect for all sizes
+           "relative",
+           // Blue accent line on the left - responsive spacing
+           "before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)]",
+           "before:absolute before:top-2 before:-left-4 before:block"
+         ]}>
+        {title}
+      </a>
+
+      <!-- METADATA: Show on larger screens - 🎯 RESPONSIVE SIZING -->
+      <div class="mb-2 sm:mb-3 hidden md:block text-xs md:text-sm text-black/60 dark:text-white/60 flex gap-4 items-center">
+        <time datetime={published.toISOString()}>
+          {published.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          })}
+        </time>
+        {updated && config.content.showUpdateDate && (
+          <>
+            <span class="text-black/30 dark:text-white/30">•</span>
+            <span>Updated {updated.toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric' 
+            })}</span>
+          </>
+        )}
+        {category && (
+          <>
+            <span class="text-black/30 dark:text-white/30">•</span>
+            <span class="capitalize">{category}</span>
+          </>
+        )}
+      </div>
+    </div>
+
+    <!-- DESCRIPTION SECTION: Progressive responsive spacing from title/metadata -->
+    <div class="mt-2 sm:mt-3 md:mt-4 lg:mt-5 space-y-2 sm:space-y-3"> <!-- 🎯 PROGRESSIVE RESPONSIVE SPACING -->
+      
+      <!-- DESCRIPTION - 🎯 RESPONSIVE TEXT SIZING -->
+      <div class:list={[
+        "transition text-75",
+        // 🎯 RESPONSIVE DESCRIPTION SIZE - smaller on mobile, comfortable on desktop
+        "text-sm sm:text-base md:text-base",
+        "line-clamp-2 md:line-clamp-3", // Simple responsive line clamping
+        "text-ellipsis overflow-hidden", // Ensure proper ellipsis handling
+      ]}>
+        {description || remarkPluginFrontmatter.excerpt}
+      </div>
+
+      <!-- WORD COUNT AND READ TIME - 🎯 ALREADY RESPONSIVE -->
+      {(config.content.showWordCount || config.content.showReadTime) && (
+        <div class="text-xs md:text-sm text-black/30 dark:text-white/30 flex gap-3 transition">
+          {config.content.showWordCount && (
+            <div>{remarkPluginFrontmatter.words} {" " + i18n(I18nKey.wordsCount)}</div>
+          )}
+          {config.content.showWordCount && config.content.showReadTime && <div>|</div>}
+          {config.content.showReadTime && (
+            <div>{remarkPluginFrontmatter.minutes} {" " + i18n(I18nKey.minutesCount)}</div>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+
+  <!-- ENTER BUTTON: Simplified for cards without cover (positioned on right) -->
+  {!hasCover && config.layout.showEnterButton && (
+    <a href={url} 
+       aria-label={title} 
+       class="hidden md:flex btn-regular w-12 h-12 m-4 mr-4 rounded-xl bg-[var(--enter-btn-bg)] hover:bg-[var(--enter-btn-bg-hover)] active:bg-[var(--enter-btn-bg-active)] active:scale-95 items-center justify-center flex-shrink-0">
+      <Icon 
+        name="material-symbols:chevron-right-rounded"
+        class="transition text-[var(--primary)] text-2xl" />
+    </a>
+  )}
+</div>
+
+
+
+<style>
+  .blur-background {
+    z-index: 1;
+  }
+  
+  .main-image {
+    z-index: 5;
+  }
+
+  .postcard-image {
+    object-fit: cover !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Ensure line-clamp works properly with ellipsis */
+  .line-clamp-2,
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .line-clamp-2 {
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    -webkit-line-clamp: 3;
+  }
+</style>

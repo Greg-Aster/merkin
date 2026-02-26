@@ -1,0 +1,188 @@
+---
+// src/components/timeline/InfoCard.astro
+import type { TimelineFact } from '../../config/timelineFacts'
+
+export interface Props {
+  cardId?: string
+  initialFact?: TimelineFact
+  initialIsVisible?: boolean
+}
+
+const {
+  cardId = 'sidebar-info-card', // New default ID
+  initialFact = {
+    headline: 'Information',
+    text: 'Details will appear here.',
+    type: 'fact' as const,
+  },
+  initialIsVisible = false,
+} = Astro.props
+
+// Removed absolute positioning classes
+const wrapperBaseClasses = [
+  'info-card-wrapper',
+  'relative', // Changed from absolute
+  'p-3',
+  'border border-white/10 rounded-lg', // A simpler style for the widget
+  'w-full',
+  'z-10',
+  'transition-opacity duration-500 ease-in-out',
+]
+---
+
+<div
+  id={cardId}
+  class:list={[
+    ...wrapperBaseClasses,
+    initialFact.bgColorClass || "bg-black/20",
+    initialFact.textColorClass || "text-white/80",
+    initialFact.fontFamilyClass || "font-sriracha",
+    initialIsVisible ? "opacity-100" : "opacity-0",
+  ]}
+>
+  <button
+    class:list={[
+      "info-card-close-button",
+      "absolute top-1 right-1",
+      "opacity-60 hover:opacity-90",
+      "transition-opacity p-1",
+      initialFact.textColorClass || "text-white/80"
+    ]}
+    aria-label="Dismiss fact"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+
+  <h3 class:list={[
+      "info-card-headline",
+      initialFact.headlineSizeClass || "text-sm sm:text-md",
+      "font-bold mb-1 pr-4",
+      initialFact.headlineColorClass || "text-[var(--primary)]"
+    ]}>
+    {initialFact.headline}
+  </h3>
+  <p class="info-card-text text-xs pr-4 mb-1 leading-snug">{initialFact.text}</p>
+
+  <div class="info-card-links-container">
+    {initialFact.ctaText && initialFact.link ? (
+      <a
+        href={`/posts/${initialFact.link}/`}
+        target="_blank" rel="noopener noreferrer"
+        class:list={[
+          "info-card-cta-link",
+          "mt-2 inline-block text-xs font-bold",
+          "py-1 px-3 rounded-md",
+          "hover:bg-opacity-80 transition-colors duration-200",
+          "text-center w-full",
+          initialFact.ctaButtonClass || "bg-[var(--primary)] text-white"
+        ]}
+      >
+        {initialFact.ctaText}
+      </a>
+    ) : initialFact.link ? (
+      <a
+        href={`/posts/${initialFact.link}/`}
+        class="info-card-learn-more-link text-xs text-[var(--primary)] hover:underline font-semibold mt-1 inline-block"
+        target="_blank" rel="noopener noreferrer"
+      >
+        Learn More &rarr;
+      </a>
+    ) : null}
+  </div>
+</div>
+
+<script define:vars={{ clientCardId: cardId, clientInitialFact: initialFact }}>
+  const cardElement = document.getElementById(clientCardId);
+  if (!cardElement) {
+    console.error(`InfoCard: Could not find element with ID ${clientCardId}.`);
+    return;
+  }
+
+  const headlineElement = cardElement.querySelector('.info-card-headline');
+  const textElement = cardElement.querySelector('.info-card-text');
+  const linksContainer = cardElement.querySelector('.info-card-links-container');
+  const closeButton = cardElement.querySelector('.info-card-close-button');
+
+  const classState = {
+    bgColor: clientInitialFact.bgColorClass || "bg-black/20",
+    textColor: clientInitialFact.textColorClass || "text-white/80",
+    fontFamily: clientInitialFact.fontFamilyClass || "font-sriracha",
+    headlineColor: clientInitialFact.headlineColorClass || "text-[var(--primary)]",
+    headlineSize: clientInitialFact.headlineSizeClass || "text-sm sm:text-md",
+  };
+
+  function updateClass(element, oldClass, newClass) {
+    if (oldClass !== newClass) {
+      element.classList.remove(...oldClass.split(' ').filter(Boolean));
+      element.classList.add(...newClass.split(' ').filter(Boolean));
+    }
+    return newClass;
+  }
+
+  function updateCardContent(fact) {
+    if (!headlineElement || !textElement || !linksContainer) return;
+
+    headlineElement.textContent = fact.headline || '';
+    textElement.textContent = fact.text || '';
+
+    classState.bgColor = updateClass(cardElement, classState.bgColor, fact.bgColorClass || "bg-black/20");
+    classState.fontFamily = updateClass(cardElement, classState.fontFamily, fact.fontFamilyClass || "font-sriracha");
+    classState.headlineColor = updateClass(headlineElement, classState.headlineColor, fact.headlineColorClass || "text-[var(--primary)]");
+    classState.headlineSize = updateClass(headlineElement, classState.headlineSize, fact.headlineSizeClass || "text-sm sm:text-md");
+
+    const newTextColor = fact.textColorClass || "text-white/80";
+    if (classState.textColor !== newTextColor) {
+        updateClass(cardElement, classState.textColor, newTextColor);
+        if (closeButton) updateClass(closeButton, classState.textColor, newTextColor);
+        classState.textColor = newTextColor;
+    }
+
+    linksContainer.innerHTML = ''; // Clear old links
+    if (fact.ctaText && fact.link) {
+      const ctaLink = document.createElement('a');
+      ctaLink.href = `/posts/${fact.link}/`;
+      ctaLink.target = "_blank";
+      ctaLink.rel = "noopener noreferrer";
+      const ctaClasses = ["info-card-cta-link", "mt-2", "inline-block", "text-xs", "font-bold", "py-1", "px-3", "rounded-md", "hover:bg-opacity-80", "transition-colors", "duration-200", "text-center", "w-full", fact.ctaButtonClass || "bg-[var(--primary)] text-white"];
+      ctaLink.className = ctaClasses.join(" ");
+      ctaLink.textContent = fact.ctaText;
+      linksContainer.appendChild(ctaLink);
+    } else if (fact.link) {
+      const learnMoreLink = document.createElement('a');
+      learnMoreLink.href = `/posts/${fact.link}/`;
+      learnMoreLink.className = "info-card-learn-more-link text-xs text-[var(--primary)] hover:underline font-semibold mt-1 inline-block";
+      learnMoreLink.target = "_blank";
+      learnMoreLink.rel = "noopener noreferrer";
+      learnMoreLink.textContent = "Learn More →";
+      linksContainer.appendChild(learnMoreLink);
+    }
+  }
+
+  function showCard() {
+    cardElement.style.opacity = '1';
+  }
+
+  function hideCard() {
+    cardElement.style.opacity = '0';
+  }
+
+  document.body.addEventListener('displayStarInfoCard', (event) => {
+    const detail = event.detail;
+    if (detail && detail.cardIdToTarget === clientCardId) {
+      updateCardContent(detail.fact);
+      showCard();
+    }
+  });
+
+  closeButton?.addEventListener('click', () => {
+      hideCard();
+      // Dispatch an event to let the parent widget know it should show a new fact
+      cardElement.dispatchEvent(new CustomEvent('infocard:closed', {
+        bubbles: true,
+        composed: true
+      }));
+    });
+</script>

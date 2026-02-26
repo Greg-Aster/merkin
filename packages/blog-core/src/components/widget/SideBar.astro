@@ -32,6 +32,7 @@ interface Props {
   customAvatar?: string
   customName?: string
   customBio?: string
+  hideProfile?: boolean
   // Profile config from site
   defaultName: string
   defaultBio: string
@@ -53,6 +54,7 @@ const postSlug = Astro.props.postSlug
 const customAvatar = Astro.props.customAvatar
 const customName = Astro.props.customName
 const customBio = Astro.props.customBio
+const hideProfile = Astro.props.hideProfile ?? false
 const {
   defaultName,
   defaultBio,
@@ -68,21 +70,23 @@ const {
 } = Astro.props
 ---
 <div id="sidebar" class:list={[className, "w-full"]}>
-  <div class="flex flex-col w-full gap-4 mb-4">
-    <Profile
-      slug={postSlug}
-      customAvatar={customAvatar}
-      customName={customName}
-      customBio={customBio}
-      defaultName={defaultName}
-      defaultBio={defaultBio}
-      socialLinks={socialLinks}
-      avatarList={avatarList}
-      homeAvatar={homeAvatar}
-      animationInterval={animationInterval}
-      activeAvatarIndex={activeAvatarIndex}
-    ></Profile>
-  </div>
+  {!hideProfile && (
+    <div class="flex flex-col w-full gap-4 mb-4">
+      <Profile
+        slug={postSlug}
+        customAvatar={customAvatar}
+        customName={customName}
+        customBio={customBio}
+        defaultName={defaultName}
+        defaultBio={defaultBio}
+        socialLinks={socialLinks}
+        avatarList={avatarList}
+        homeAvatar={homeAvatar}
+        animationInterval={animationInterval}
+        activeAvatarIndex={activeAvatarIndex}
+      ></Profile>
+    </div>
+  )}
   <div id="sidebar-sticky" class="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
     <Categories
       categories={categories}

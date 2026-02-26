@@ -1,0 +1,219 @@
+#mascot-container.jiggle {
+  animation: jiggle 0.5s ease-in-out;
+}
+
+@keyframes jiggle {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-0.125rem) rotate(-2deg); }
+  50% { transform: translateY(0) rotate(2deg); }
+  75% { transform: translateY(-0.0625rem) rotate(-1deg); }
+}
+
+/* NEW FADE OUT ANIMATION FOR VISUAL ONLY */
+@keyframes fadeOutMascotVisual {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+#mascot-visual-area.visual-fading-out {
+  animation: fadeOutMascotVisual 1.5s ease-out forwards;
+}
+/* END NEW FADE OUT ANIMATION FOR VISUAL ONLY */
+
+/* For #mascot-visual-area svg animation */
+#mascot-visual-area svg {
+  animation: mascotWobble 3s infinite ease-in-out;
+}
+
+/* Base wobble for all mascots, can be overridden by specific mascot CSS */
+@keyframes mascotWobble {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+
+/* --- New Mascot Specific Animations --- */
+/* Cuppy Cake Animations */
+@keyframes hatTip {
+  0%, 100% { transform: rotate(-10deg); } /* Matches initial rotation in SVG group */
+  50% { transform: rotate(-25deg); }
+}
+/* Apply animation class to the SVG element */
+svg.cuppy-cake-specific-styles.animate-hat-tip .hat {
+  transform-origin: 25px 30px; /* Relative to hat group's coordinate system, at its base */
+  animation: hatTip 0.7s ease-in-out;
+}
+
+@keyframes sprinkleShiver {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  25% { transform: translate(0.5px, -0.5px) rotate(2deg); }
+  50% { transform: translate(-0.5px, 0.5px) rotate(-2deg); }
+  75% { transform: translate(0.5px, 0.5px) rotate(1deg); }
+}
+/* Apply animation class to the SVG element */
+svg.cuppy-cake-specific-styles.animate-sprinkle-shiver .sprinkle {
+  animation: sprinkleShiver 0.4s linear; /* All sprinkles shiver together */
+}
+
+/* Pretzel Pete Animations */
+@keyframes legTap {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-5px) rotate(-5deg); }
+}
+/* Animation class applied directly to the leg element */
+#pretzel-pete .left-leg.animate-left-leg-tap {
+  transform-origin: 40px 85px; /* Top of the left leg (its x1, y1) */
+  animation: legTap 0.6s ease-in-out;
+}
+#pretzel-pete .right-leg.animate-right-leg-tap {
+  transform-origin: 60px 85px; /* Top of the right leg (its x1, y1) */
+  animation: legTap 0.6s ease-in-out;
+}
+
+@keyframes armWave {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(-20deg); }
+}
+/* Animation class applied directly to the arm element */
+#pretzel-pete .left-arm.animate-left-arm-wave {
+  transform-origin: 20px 55px; /* Connection point of left arm (its x1, y1) */
+  animation: armWave 0.7s ease-in-out;
+}
+#pretzel-pete .right-arm.animate-right-arm-wave {
+  transform-origin: 80px 55px; /* Connection point of right arm (its x1, y1) */
+  animation: armWave 0.7s ease-in-out;
+}
+
+/* Sushi Sam Animations */
+@keyframes hachimakiFlutter {
+  0%, 100% { transform: rotate(0deg) skewX(0deg); }
+  50% { transform: rotate(5deg) skewX(-5deg); }
+}
+/* Apply animation class to the SVG element */
+svg#sushi-sam.animate-hachimaki-flutter .hachimaki-tie-1 {
+  transform-origin: 15px 48px; /* Connection point of tie 1 */
+  animation: hachimakiFlutter 0.8s ease-in-out;
+}
+svg#sushi-sam.animate-hachimaki-flutter .hachimaki-tie-2 {
+  transform-origin: 15px 50px; /* Connection point of tie 2 */
+  animation: hachimakiFlutter 0.8s ease-in-out 0.05s; /* Staggered start */
+}
+
+@keyframes makiRoll {
+  0%, 100% { transform: rotateZ(0deg); } /* Side-to-side roll */
+  50% { transform: rotateZ(4deg); }
+}
+/* Apply animation class to the SVG element */
+svg#sushi-sam.animate-maki-roll .maki-roll {
+  transform-origin: center bottom;
+  animation: makiRoll 0.9s ease-in-out;
+}
+/* --- Surreal Mascot Animations --- */
+/* Cuppy Cake: Eye Spy */
+@keyframes cuppyEyeFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  20% { transform: translate(-8px, 5px) scale(0.8); }
+  40% { transform: translate(10px, -7px) scale(1.2); } /* One might grow larger */
+  60% { transform: translate(-5px, -10px) scale(0.7); }
+  80% { transform: translate(7px, 6px) scale(1.1); }
+}
+svg.cuppy-cake-specific-styles.animate-eye-spy .left-eye .pupil {
+  animation: cuppyEyeFloat 2.5s ease-in-out;
+  transform-origin: center;
+}
+svg.cuppy-cake-specific-styles.animate-eye-spy .right-eye .pupil {
+  animation: cuppyEyeFloat 2.5s ease-in-out 0.1s; /* Slight delay for variation */
+  transform-origin: center;
+}
+.eyes-group.animating-surreal,
+.eye.animating-surreal { /* Ensure eyes group doesn't clip if pupils go wild */
+  overflow: visible !important;
+}
+
+
+/* Pretzel Pete: The Unraveling */
+#pretzel-pete .pretzel-body-segment { /* Common class for body parts */
+  transition: opacity 0.5s ease-in-out;
+}
+#pretzel-pete #pretzel-unravelled-1,
+#pretzel-pete #pretzel-unravelled-2 {
+  opacity: 0;
+  pointer-events: none; /* Prevent interaction when invisible */
+}
+
+@keyframes saltCrystalFall {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(1.25rem); }
+}
+@keyframes saltCrystalReappear {
+  0% { opacity: 0; transform: translateY(1.25rem); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+#pretzel-pete.animate-unraveling .salt-crystal-instance.falling {
+  animation: saltCrystalFall 0.8s ease-in forwards;
+}
+#pretzel-pete.animate-unraveling .salt-crystal-instance.reappearing {
+  animation: saltCrystalReappear 0.8s ease-out forwards;
+}
+
+@keyframes unravelledSway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(5deg); }
+}
+#pretzel-pete #pretzel-unravelled-2.swaying {
+  transform-origin: 50px 15px; /* Approx top-center of the pretzel */
+  animation: unravelledSway 2s ease-in-out infinite;
+}
+
+
+/* Sushi Sam: Nori Void */
+#sushi-sam .nori-void-layer {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+#sushi-sam.animate-nori-void .nori-void-layer {
+  opacity: 1;
+}
+
+@keyframes noriFlapOpen {
+  0% { transform: rotateX(0deg); }
+  100% { transform: rotateX(-70deg); }
+}
+@keyframes noriFlapClose {
+  0% { transform: rotateX(-70deg); }
+  100% { transform: rotateX(0deg); }
+}
+/* transform-origin for flap should be set in SVG or via JS if highly dynamic,
+   otherwise this assumes a path where 'top' makes sense.
+   Example: style="transform-origin: 50% 0%;" on the flap path itself.
+   For this CSS, it's a general guide.
+*/
+#sushi-sam.animate-nori-void .nori-flap {
+  transform-origin: 50% 0%; /* Top center of the flap itself */
+}
+#sushi-sam.animate-nori-void .nori-flap.opening {
+  animation: noriFlapOpen 0.7s ease-out forwards;
+}
+#sushi-sam.animate-nori-void .nori-flap.closing {
+  animation: noriFlapClose 0.7s ease-in forwards;
+}
+
+@keyframes cosmicSwirl1 {
+  0%, 100% { transform: translate(0,0) scale(1); opacity: 0.7; }
+  50% { transform: translate(3px, -2px) scale(1.1); opacity: 0.9; }
+}
+@keyframes cosmicSwirl2 {
+  0%, 100% { transform: translate(0,0) scale(1); opacity: 0.6; }
+  50% { transform: translate(-2px, 3px) scale(0.9); opacity: 0.8; }
+}
+#sushi-sam.animate-nori-void .cosmic-particle1 {
+  animation: cosmicSwirl1 3s infinite ease-in-out;
+}
+#sushi-sam.animate-nori-void .cosmic-particle2 {
+  animation: cosmicSwirl2 3s infinite ease-in-out 0.5s;
+}
+/* Occasional wiggle for image-based mascot */
+#mascot-image-display.wiggling {
+  animation-name: mascotWobble;
+  animation-duration: 0.6s;
+  animation-timing-function: ease-in-out;
+}

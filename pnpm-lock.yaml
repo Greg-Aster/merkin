@@ -25,7 +25,7 @@ importers:
         version: 0.9.6(prettier@3.8.1)(typescript@5.9.3)
       '@astrojs/mdx':
         specifier: ^4.1.0
-        version: 4.3.13(astro@5.1.6(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@2.79.2)(stylus@0.63.0)(terser@5.44.1)(typescript@5.9.3)(yaml@2.8.2))
+        version: 4.3.13(astro@5.1.6(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(typescript@5.9.3)(yaml@2.8.2))
       '@astrojs/rss':
         specifier: ^4.0.11
         version: 4.0.15
@@ -34,10 +34,10 @@ importers:
         version: 3.7.0
       '@astrojs/svelte':
         specifier: 7.0.3
-        version: 7.0.3(@types/node@25.3.0)(astro@5.1.6(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@2.79.2)(stylus@0.63.0)(terser@5.44.1)(typescript@5.9.3)(yaml@2.8.2))(jiti@1.21.7)(lightningcss@1.30.2)(stylus@0.63.0)(svelte@5.26.2)(terser@5.44.1)(typescript@5.9.3)(yaml@2.8.2)
+        version: 7.0.3(@types/node@25.3.0)(astro@5.1.6(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(typescript@5.9.3)(yaml@2.8.2))(jiti@1.21.7)(lightningcss@1.30.2)(stylus@0.63.0)(svelte@5.26.2)(terser@5.46.0)(typescript@5.9.3)(yaml@2.8.2)
       '@astrojs/tailwind':
         specifier: ^5.1.5
-        version: 5.1.5(astro@5.1.6(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@2.79.2)(stylus@0.63.0)(terser@5.44.1)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@3.4.19(yaml@2.8.2))
+        version: 5.1.5(astro@5.1.6(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@3.4.19(yaml@2.8.2))
       '@fontsource-variable/jetbrains-mono':
         specifier: ^5.1.2
         version: 5.2.8
@@ -76,10 +76,10 @@ importers:
         version: 0.5.19(tailwindcss@3.4.19(yaml@2.8.2))
       astro:
         specifier: 5.1.6
-        version: 5.1.6(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@2.79.2)(stylus@0.63.0)(terser@5.44.1)(typescript@5.9.3)(yaml@2.8.2)
+        version: 5.1.6(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(typescript@5.9.3)(yaml@2.8.2)
       astro-compress:
         specifier: ^2.3.6
-        version: 2.3.9(@types/node@25.3.0)(jiti@1.21.7)(rollup@2.79.2)(stylus@0.63.0)(typescript@5.9.3)(yaml@2.8.2)
+        version: 2.3.9(@types/node@25.3.0)(jiti@1.21.7)(rollup@4.58.0)(stylus@0.63.0)(typescript@5.9.3)(yaml@2.8.2)
       astro-icon:
         specifier: ^1.1.5
         version: 1.1.5
@@ -368,7 +368,7 @@ importers:
         specifier: ^0.28.10
         version: 0.28.17(typescript@5.9.3)
 
-  apps/travel:
+  apps/megameal:
     dependencies:
       '@astrojs/check':
         specifier: ^0.9.4
@@ -424,12 +424,205 @@ importers:
       '@tailwindcss/typography':
         specifier: ^0.5.16
         version: 0.5.19(tailwindcss@3.4.19(yaml@2.8.2))
+      '@types/chart.js':
+        specifier: ^4.0.1
+        version: 4.0.1
       astro:
         specifier: 5.1.6
         version: 5.1.6(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(typescript@5.9.3)(yaml@2.8.2)
       astro-compress:
         specifier: ^2.3.6
         version: 2.3.9(@types/node@25.3.0)(jiti@1.21.7)(rollup@4.58.0)(stylus@0.63.0)(typescript@5.9.3)(yaml@2.8.2)
+      astro-icon:
+        specifier: ^1.1.5
+        version: 1.1.5
+      astro-seo:
+        specifier: ^0.8.4
+        version: 0.8.4(prettier@3.8.1)(typescript@5.9.3)
+      chart.js:
+        specifier: ^4.5.0
+        version: 4.5.1
+      hastscript:
+        specifier: ^9.0.0
+        version: 9.0.1
+      howler:
+        specifier: ^2.2.4
+        version: 2.2.4
+      katex:
+        specifier: ^0.16.21
+        version: 0.16.28
+      mammoth:
+        specifier: ^1.9.0
+        version: 1.11.0
+      markdown-it:
+        specifier: ^14.1.0
+        version: 14.1.1
+      marked:
+        specifier: ^15.0.7
+        version: 15.0.12
+      mdast-util-to-string:
+        specifier: ^4.0.0
+        version: 4.0.0
+      overlayscrollbars:
+        specifier: ^2.10.1
+        version: 2.14.0
+      pagefind:
+        specifier: ^1.3.0
+        version: 1.4.0
+      peerjs:
+        specifier: ^1.5.5
+        version: 1.5.5
+      photoswipe:
+        specifier: ^5.4.4
+        version: 5.4.4
+      reading-time:
+        specifier: ^1.5.0
+        version: 1.5.0
+      rehype-autolink-headings:
+        specifier: ^7.1.0
+        version: 7.1.0
+      rehype-components:
+        specifier: ^0.3.0
+        version: 0.3.0
+      rehype-katex:
+        specifier: ^7.0.1
+        version: 7.0.1
+      rehype-slug:
+        specifier: ^6.0.0
+        version: 6.0.0
+      remark-directive:
+        specifier: ^3.0.1
+        version: 3.0.1
+      remark-directive-rehype:
+        specifier: ^0.4.2
+        version: 0.4.2
+      remark-github-admonitions-to-directives:
+        specifier: ^1.0.5
+        version: 1.0.5
+      remark-math:
+        specifier: ^6.0.0
+        version: 6.0.0
+      remark-sectionize:
+        specifier: ^2.1.0
+        version: 2.1.0
+      sanitize-html:
+        specifier: ^2.14.0
+        version: 2.17.1
+      sharp:
+        specifier: ^0.33.5
+        version: 0.33.5
+      stylus:
+        specifier: ^0.63.0
+        version: 0.63.0
+      svelte:
+        specifier: 5.26.2
+        version: 5.26.2
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.19(yaml@2.8.2)
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+      unist-util-visit:
+        specifier: ^5.0.0
+        version: 5.1.0
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+    devDependencies:
+      '@astrojs/ts-plugin':
+        specifier: ^1.10.4
+        version: 1.10.6
+      '@biomejs/biome':
+        specifier: 1.8.3
+        version: 1.8.3
+      '@iconify-json/famicons':
+        specifier: ^1.2.0
+        version: 1.2.2
+      '@types/markdown-it':
+        specifier: ^14.1.2
+        version: 14.1.2
+      '@types/mdast':
+        specifier: ^4.0.4
+        version: 4.0.4
+      '@types/peerjs':
+        specifier: ^1.1.0
+        version: 1.1.0
+      '@types/sanitize-html':
+        specifier: ^2.13.0
+        version: 2.16.0
+      postcss-import:
+        specifier: ^16.1.0
+        version: 16.1.1(postcss@8.5.6)
+      postcss-nesting:
+        specifier: ^13.0.1
+        version: 13.0.2(postcss@8.5.6)
+      svelte-preprocess:
+        specifier: ^6.0.3
+        version: 6.0.3(@babel/core@7.29.0)(postcss-load-config@6.0.1(jiti@1.21.7)(postcss@8.5.6)(yaml@2.8.2))(postcss@8.5.6)(stylus@0.63.0)(svelte@5.26.2)(typescript@5.9.3)
+
+  apps/travel:
+    dependencies:
+      '@astrojs/check':
+        specifier: ^0.9.4
+        version: 0.9.6(prettier@3.8.1)(typescript@5.9.3)
+      '@astrojs/mdx':
+        specifier: ^4.1.0
+        version: 4.3.13(astro@5.1.6(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@2.79.2)(stylus@0.63.0)(terser@5.44.1)(typescript@5.9.3)(yaml@2.8.2))
+      '@astrojs/rss':
+        specifier: ^4.0.11
+        version: 4.0.15
+      '@astrojs/sitemap':
+        specifier: ^3.2.1
+        version: 3.7.0
+      '@astrojs/svelte':
+        specifier: 7.0.3
+        version: 7.0.3(@types/node@25.3.0)(astro@5.1.6(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@2.79.2)(stylus@0.63.0)(terser@5.44.1)(typescript@5.9.3)(yaml@2.8.2))(jiti@1.21.7)(lightningcss@1.30.2)(stylus@0.63.0)(svelte@5.26.2)(terser@5.44.1)(typescript@5.9.3)(yaml@2.8.2)
+      '@astrojs/tailwind':
+        specifier: ^5.1.5
+        version: 5.1.5(astro@5.1.6(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@2.79.2)(stylus@0.63.0)(terser@5.44.1)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@3.4.19(yaml@2.8.2))
+      '@fontsource-variable/jetbrains-mono':
+        specifier: ^5.1.2
+        version: 5.2.8
+      '@fontsource/roboto':
+        specifier: ^5.1.1
+        version: 5.2.9
+      '@fontsource/sriracha':
+        specifier: ^5.1.1
+        version: 5.2.8
+      '@iconify-json/fa6-brands':
+        specifier: ^1.2.5
+        version: 1.2.6
+      '@iconify-json/fa6-regular':
+        specifier: ^1.2.3
+        version: 1.2.4
+      '@iconify-json/fa6-solid':
+        specifier: ^1.2.3
+        version: 1.2.4
+      '@iconify-json/material-symbols':
+        specifier: ^1.2.14
+        version: 1.2.56
+      '@iconify-json/mdi':
+        specifier: ^1.2.3
+        version: 1.2.3
+      '@iconify/svelte':
+        specifier: ^5.0.0
+        version: 5.2.1(svelte@5.26.2)
+      '@merkin/blog-core':
+        specifier: workspace:*
+        version: link:../../packages/blog-core
+      '@swup/astro':
+        specifier: ^1.5.0
+        version: 1.8.0
+      '@tailwindcss/typography':
+        specifier: ^0.5.16
+        version: 0.5.19(tailwindcss@3.4.19(yaml@2.8.2))
+      astro:
+        specifier: 5.1.6
+        version: 5.1.6(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@2.79.2)(stylus@0.63.0)(terser@5.44.1)(typescript@5.9.3)(yaml@2.8.2)
+      astro-compress:
+        specifier: ^2.3.6
+        version: 2.3.9(@types/node@25.3.0)(jiti@1.21.7)(rollup@2.79.2)(stylus@0.63.0)(typescript@5.9.3)(yaml@2.8.2)
       astro-icon:
         specifier: ^1.1.5
         version: 1.1.5
@@ -1663,6 +1856,9 @@ packages:
   '@iconify-json/fa6-solid@1.2.4':
     resolution: {integrity: sha512-LmDNNdJVyvF5mPm1yxWvL8KjCc/E8LzoqnF1LNTVpyY2ZJRUlGOWuPIThdbuFBF2IovgttkIyumhyqfmlHdwKg==}
 
+  '@iconify-json/famicons@1.2.2':
+    resolution: {integrity: sha512-mFgrUk2CYKeFe9EHh6XWdtVDkX344OTb3E6X7RaOp6iwW9saJH/kknNFZRZ2UFQCcFl3RNSTN6IRpCRsRppFxw==}
+
   '@iconify-json/material-symbols@1.2.56':
     resolution: {integrity: sha512-pd2xlJ/9Ld/uo8cHjqNKGv4+piPEWajfslqheEyNMfZl/oBq5C/zVKo4Xx33/saYp4IYBp6BXReimynRdRk8LA==}
 
@@ -1948,8 +2144,15 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
+  '@kurkle/color@0.3.4':
+    resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
+
   '@mdx-js/mdx@3.1.1':
     resolution: {integrity: sha512-f6ZO2ifpwAQIpzGWaBQT2TXxPv6z3RBzQKpVftEWN78Vl/YweF1uwussDx8ECAXVtr3Rs89fKyG9YlzUs9DyGQ==}
+
+  '@msgpack/msgpack@2.8.0':
+    resolution: {integrity: sha512-h9u4u/jiIRKbq25PM+zymTyW6bhTzELvOoUd+AvYriWOAKpLGnIamaET3pnHYoI5iYphAHBI4ayx0MehR+VVPQ==}
+    engines: {node: '>= 10'}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -2344,6 +2547,10 @@ packages:
     resolution: {integrity: sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==}
     engines: {node: '>=10.13.0'}
 
+  '@types/chart.js@4.0.1':
+    resolution: {integrity: sha512-OwXJ6Eg14eFpCsTG6sljiGnvVpit5R9rapG7nwDnQlljsdplVIOYVuCSwy07IduCtihrOwvOnbhXKLyp3nvPcw==}
+    deprecated: This is a stub types definition. chart.js provides its own type definitions, so you do not need this installed.
+
   '@types/cookie@0.6.0':
     resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
 
@@ -2409,6 +2616,10 @@ packages:
 
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
+
+  '@types/peerjs@1.1.0':
+    resolution: {integrity: sha512-dVocsfYFg5QQuUB9OAxfrSvz4br4pyX+7M61ZJSRiYtE3NdayShk1p1Y8b9TmCj724TwHskVraeF7wyPl0rYcg==}
+    deprecated: This is a stub types definition. peerjs provides its own type definitions, so you do not need this installed.
 
   '@types/resolve@1.17.1':
     resolution: {integrity: sha512-yy7HuzQhj0dhGpD8RLXSZWEkLsV9ibvxvi6EiJ3bkqLAO1RGo0WbkWQiwpRlSFymTJRz0d3k5LM3kkx8ArDbLw==}
@@ -2738,6 +2949,10 @@ packages:
 
   character-reference-invalid@2.0.1:
     resolution: {integrity: sha512-iBZ4F4wRbyORVsu0jPV7gXkOsGYjGHPmAyv+HiHG8gi5PtC9KI2j1+v8/tlibRvjoWX027ypmG/n0HtO5t7unw==}
+
+  chart.js@4.5.1:
+    resolution: {integrity: sha512-GIjfiT9dbmHRiYi6Nl2yFCq7kkwdkp1W/lp2J99rX0yo9tgJGn3lKQATztIjb5tVtevcBtIdICNWqlq5+E8/Pw==}
+    engines: {pnpm: '>=8'}
 
   cheerio-select@2.1.0:
     resolution: {integrity: sha512-9v9kG0LvzrlcungtnJtpGNxY+fzECQKhK4EGJX2vByejiMX84MFNQw4UxPJl3bFbTMw+Dfs37XaIkCwTZfLh4g==}
@@ -3507,6 +3722,9 @@ packages:
 
   hastscript@9.0.1:
     resolution: {integrity: sha512-g7df9rMFX/SPi34tyGCyUBREQoKkapwdY/T04Qn9TDWfHhAYt4/I0gMVirzK5wEzeUqIjEB+LXC/ypb7Aqno5w==}
+
+  howler@2.2.4:
+    resolution: {integrity: sha512-iARIBPgcQrwtEr+tALF+rapJ8qSc+Set2GJQl7xT1MQzWaVkFebdJhR3alVlSiUf5U7nAANKuj3aWpwerocD5w==}
 
   html-escaper@3.0.3:
     resolution: {integrity: sha512-RuMffC89BOWQoY0WKGpIhn5gX3iI54O6nRA0yC124NYVtzjmFWBIiFd8M0x+ZdX0P9R4lADg1mgP8C7PxGOWuQ==}
@@ -4451,6 +4669,14 @@ packages:
   pathe@2.0.3:
     resolution: {integrity: sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==}
 
+  peerjs-js-binarypack@2.1.0:
+    resolution: {integrity: sha512-YIwCC+pTzp3Bi8jPI9UFKO0t0SLo6xALnHkiNt/iUFmUUZG0fEEmEyFKvjsDKweiFitzHRyhuh6NvyJZ4nNxMg==}
+    engines: {node: '>= 14.0.0'}
+
+  peerjs@1.5.5:
+    resolution: {integrity: sha512-viMUCPDL6CSfOu0ZqVcFqbWRXNHIbv2lPqNbrBIjbFYrflebOjItJ4hPfhjnuUCstqciHVu9vVJ7jFqqKi/EuQ==}
+    engines: {node: '>= 14'}
+
   pend@1.2.0:
     resolution: {integrity: sha512-F3asv42UuXchdzt+xXqfW1OGlVBe+mxa2mqI0pg5yAHZPvFmY3Y6drSf/GQ1A86WgWEN9Kzh/WrgKa6iGcHXLg==}
 
@@ -5127,6 +5353,9 @@ packages:
 
   scule@1.3.0:
     resolution: {integrity: sha512-6FtHJEvt+pVMIB9IBY+IcCJ6Z5f1iQnytgyfKMhDKgmzYG+TeH/wx1y3l27rshSbLiSanrR9ffZDrEsmjlQF2g==}
+
+  sdp@3.2.1:
+    resolution: {integrity: sha512-lwsAIzOPlH8/7IIjjz3K0zYBk7aBVVcvjMwt3M4fLxpjMYyy7i3I97SLHebgn4YBjirkzfp3RvRDWSKsh/+WFw==}
 
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -5853,6 +6082,10 @@ packages:
 
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
+
+  webrtc-adapter@9.0.4:
+    resolution: {integrity: sha512-5ZZY1+lGq8LEKuDlg9M2RPJHlH3R7OVwyHqMcUsLKCgd9Wvf+QrFTCItkXXYPmrJn8H6gRLXbSgxLLdexiqHxw==}
+    engines: {node: '>=6.0.0', npm: '>=3.10.0'}
 
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
@@ -7250,6 +7483,10 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
+  '@iconify-json/famicons@1.2.2':
+    dependencies:
+      '@iconify/types': 2.0.0
+
   '@iconify-json/material-symbols@1.2.56':
     dependencies:
       '@iconify/types': 2.0.0
@@ -7491,6 +7728,8 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@kurkle/color@0.3.4': {}
+
   '@mdx-js/mdx@3.1.1':
     dependencies:
       '@types/estree': 1.0.8
@@ -7520,6 +7759,8 @@ snapshots:
       vfile: 6.0.3
     transitivePeerDependencies:
       - supports-color
+
+  '@msgpack/msgpack@2.8.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -7971,6 +8212,10 @@ snapshots:
 
   '@trysound/sax@0.2.0': {}
 
+  '@types/chart.js@4.0.1':
+    dependencies:
+      chart.js: 4.5.1
+
   '@types/cookie@0.6.0': {}
 
   '@types/css-tree@2.3.11': {}
@@ -8035,6 +8280,10 @@ snapshots:
       undici-types: 7.18.2
 
   '@types/parse-json@4.0.2': {}
+
+  '@types/peerjs@1.1.0':
+    dependencies:
+      peerjs: 1.5.5
 
   '@types/resolve@1.17.1':
     dependencies:
@@ -8875,6 +9124,10 @@ snapshots:
   character-entities@2.0.2: {}
 
   character-reference-invalid@2.0.1: {}
+
+  chart.js@4.5.1:
+    dependencies:
+      '@kurkle/color': 0.3.4
 
   cheerio-select@2.1.0:
     dependencies:
@@ -9891,6 +10144,8 @@ snapshots:
       hast-util-parse-selector: 4.0.0
       property-information: 7.1.0
       space-separated-tokens: 2.0.2
+
+  howler@2.2.4: {}
 
   html-escaper@3.0.3: {}
 
@@ -11165,6 +11420,15 @@ snapshots:
 
   pathe@2.0.3: {}
 
+  peerjs-js-binarypack@2.1.0: {}
+
+  peerjs@1.5.5:
+    dependencies:
+      '@msgpack/msgpack': 2.8.0
+      eventemitter3: 4.0.7
+      peerjs-js-binarypack: 2.1.0
+      webrtc-adapter: 9.0.4
+
   pend@1.2.0: {}
 
   photoswipe@5.4.4: {}
@@ -11963,6 +12227,8 @@ snapshots:
   scrl@2.0.0: {}
 
   scule@1.3.0: {}
+
+  sdp@3.2.1: {}
 
   semver@6.3.1: {}
 
@@ -12803,6 +13069,10 @@ snapshots:
   vscode-uri@3.1.0: {}
 
   web-namespaces@2.0.1: {}
+
+  webrtc-adapter@9.0.4:
+    dependencies:
+      sdp: 3.2.1
 
   whatwg-encoding@3.1.1:
     dependencies:

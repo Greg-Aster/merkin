@@ -1,0 +1,99 @@
+---
+export interface Props {
+  backgroundImageUrl?: string
+}
+const { backgroundImageUrl } = Astro.props
+---
+<!-- Main Mascot Container -->
+<div id="mascot-container" class="bleepy-banner-container" data-background-image-url={backgroundImageUrl}>
+  <div id="mascot-visual-area" class="mascot-visual-area">
+    <img id="mascot-image-display" src="" alt="Current Mascot Expression" style="max-width: 100%; max-height: 100%; object-fit: contain; display: none;" />
+    <!-- SVG content will be injected here if mascot is SVG type, replacing the img -->
+  </div>
+
+  <!-- Speech Bubble -->
+  <div id="mascot-speech-bubble" class="speech-bubble">
+    <p id="mascot-speech-text"></p>
+  </div>
+
+  <!-- Chat History Window -->
+  <div id="chat-history-window" class="chat-history-window">
+    {/* Messages will be dynamically inserted here by JavaScript */}
+  </div>
+
+  <!-- Chat UI -->
+  <div id="mascot-chat-ui" class="chat-ui">
+    <input type="text" id="mascot-chat-input" class="chat-input" placeholder="Talk to me...">
+    <button id="mascot-chat-send" class="chat-send">Send</button>
+  </div>
+</div>
+
+<script>
+  import { BannerManager } from './banner-manager.ts';
+
+  let bannerManager: BannerManager | null = null;
+
+  function initializeBanner() {
+    // Get background image from data attribute
+    const mascotContainer = document.getElementById('mascot-container');
+    const backgroundImageUrl = mascotContainer?.dataset.backgroundImageUrl || '';
+
+    // Apply background image if provided
+    if (mascotContainer && backgroundImageUrl) {
+      mascotContainer.style.backgroundImage = `url(${backgroundImageUrl})`;
+      mascotContainer.style.backgroundSize = 'cover';
+      mascotContainer.style.backgroundPosition = 'center';
+      mascotContainer.style.backgroundRepeat = 'no-repeat';
+    }
+
+    // Initialize the banner manager
+    bannerManager = new BannerManager({
+      containerId: 'mascot-container',
+      mascotVisualId: 'mascot-visual-area',
+      speechBubbleId: 'mascot-speech-bubble',
+      speechTextId: 'mascot-speech-text',
+      chatInputId: 'mascot-chat-input',
+      chatSendButtonId: 'mascot-chat-send',
+      chatHistoryWindowId: 'chat-history-window',
+      pageContext: 'Banner display - featured mascot interaction',
+      enableProactiveDialogue: true,
+      enableGreeting: true,
+      showChatWindow: true
+    });
+
+    if (!bannerManager.initialize()) {
+      console.error('Failed to initialize BleepyBanner');
+    }
+  }
+
+  let bannerInitialized = false;
+  function runOnceInitializeBanner() {
+    if (!bannerInitialized) {
+      initializeBanner();
+      bannerInitialized = true;
+    }
+  }
+
+  // Astro's primary lifecycle event
+  document.addEventListener('astro:page-load', runOnceInitializeBanner);
+
+  // Standard DOM ready event as a fallback
+  document.addEventListener('DOMContentLoaded', runOnceInitializeBanner);
+
+  // Fallback for scenarios where the script is loaded after DOMContentLoaded
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(runOnceInitializeBanner, 0);
+  }
+
+  // Cleanup on page unload
+  document.addEventListener('astro:before-preparation', () => {
+    if (bannerManager) {
+      bannerManager.cleanup();
+      bannerManager = null;
+    }
+  });
+</script>
+
+<style>
+  @import './BleepyBanner.css';
+</style>

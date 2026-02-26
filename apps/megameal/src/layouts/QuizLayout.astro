@@ -1,0 +1,21 @@
+---
+import MainGridLayout from './MainGridLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+<MainGridLayout
+  title={title}
+  description={description}
+  oneColumn={true}
+>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+      <slot />
+    </div>
+  </div>
+</MainGridLayout>

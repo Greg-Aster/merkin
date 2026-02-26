@@ -1,5 +1,7 @@
 # 🌊 MEGAMEAL
 
+> **Status:** Archived legacy folder. Active site source is `apps/megameal`. Active game endpoint is `https://game.megameal.org/`.
+
 **An immersive storytelling universe combining interactive narrative, 3D gaming, and multimedia experiences**
 
 [![Live Site](https://img.shields.io/badge/🌐-Live%20Site-brightgreen)](https://megameal.org)
