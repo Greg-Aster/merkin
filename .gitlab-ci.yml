@@ -49,6 +49,7 @@ promote-temporal:
       changes:
         - Temporal-Flow/**/*
         - packages/**/*
+        - pnpm-lock.yaml
         - .gitlab-ci.yml
 
 deploy-temporal:
@@ -60,6 +61,7 @@ deploy-temporal:
       changes:
         - Temporal-Flow/**/*
         - packages/**/*
+        - pnpm-lock.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "temporal")'
       when: manual
@@ -90,6 +92,7 @@ promote-dndiy:
       changes:
         - DNDIY.github.io/**/*
         - packages/**/*
+        - pnpm-lock.yaml
         - .gitlab-ci.yml
 
 deploy-dndiy:
@@ -101,6 +104,7 @@ deploy-dndiy:
       changes:
         - DNDIY.github.io/**/*
         - packages/**/*
+        - pnpm-lock.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "dndiy")'
       when: manual
@@ -115,6 +119,7 @@ preview-megameal:
     - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "web"'
       changes:
         - apps/megameal/**/*
+        - MEGAMEAL/**/*
         - packages/**/*
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "megameal")'
@@ -130,7 +135,9 @@ promote-megameal:
       when: manual
       changes:
         - apps/megameal/**/*
+        - MEGAMEAL/**/*
         - packages/**/*
+        - pnpm-lock.yaml
         - .gitlab-ci.yml
 
 deploy-megameal:
@@ -141,7 +148,9 @@ deploy-megameal:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
       changes:
         - apps/megameal/**/*
+        - MEGAMEAL/**/*
         - packages/**/*
+        - pnpm-lock.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "megameal")'
       when: manual
@@ -172,6 +181,7 @@ promote-travel:
       changes:
         - apps/travel/**/*
         - packages/**/*
+        - pnpm-lock.yaml
         - .gitlab-ci.yml
 
 deploy-travel:
@@ -183,6 +193,7 @@ deploy-travel:
       changes:
         - apps/travel/**/*
         - packages/**/*
+        - pnpm-lock.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "travel")'
       when: manual
