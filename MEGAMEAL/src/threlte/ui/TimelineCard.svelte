@@ -75,6 +75,17 @@ const dispatch = createEventDispatcher()
 
 // Component mounted successfully
 
+const BLOG_ORIGIN =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1')
+    ? window.location.origin
+    : 'https://megameal.org'
+
+function getCanonicalPostUrl(slug: string): string {
+  return `${BLOG_ORIGIN}/posts/${slug}/#post-container`
+}
+
 // This helper function is defined but not used in the template below.
 // The link style is hardcoded in the <a> tag.
 function getEraBadgeClass(era?: string): string {
@@ -195,16 +206,17 @@ function handleViewEvent(clickEvent: Event) {
       </button>
     {:else if event.slug}
       <a 
-        href="/posts/{event.slug}/#post-container" 
+        href={getCanonicalPostUrl(event.slug)}
         class="timeline-link text-[0.65rem] mt-1 inline-block py-0.5 px-1.5 rounded-full bg-white/20 text-white border border-white/30 hover:bg-white/30 transition-colors"
         style="pointer-events: auto !important; position: relative; z-index: 9999;"
         on:click={(e) => {
           e.stopPropagation();
           e.preventDefault();
-          console.log('📖 Link clicked! Navigating to:', `/posts/${event.slug}/#post-container`);
+          const targetUrl = getCanonicalPostUrl(event.slug);
+          console.log('📖 Link clicked! Navigating to:', targetUrl);
           // Force navigation after a small delay to ensure the click is processed
           setTimeout(() => {
-            window.location.href = `/posts/${event.slug}/#post-container`;
+            window.location.href = targetUrl;
           }, 10);
         }}
         on:mousedown={(e) => {
