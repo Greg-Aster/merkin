@@ -1,5 +1,13 @@
 image: node:22
 
+workflow:
+  rules:
+    # GitLab is production-only to conserve CI minutes.
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    # Allow manual web-triggered production deploy pipelines on main.
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main"'
+    - when: never
+
 stages:
   - deploy
 
@@ -20,8 +28,8 @@ default:
     - pnpm install --frozen-lockfile
 
 # Flow:
-# - Non-main branches: auto preview deploys to branch-named previews.
-# - Non-main branches: manual "promote-*" jobs publish that exact commit to production.
+# - Preview deploys run on GitHub Pages workflow only.
+# - GitLab CI runs production deploys from main only.
 # - Main branch: auto production deploys.
 
 # Temporal-Flow -> temporalflow.org
@@ -30,10 +38,13 @@ preview-temporal:
   script:
     - DEPLOY_BRANCH="$CI_COMMIT_REF_SLUG" pnpm deploy:temporal
   rules:
-    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "web"'
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE != "web"'
+      when: manual
+      allow_failure: true
       changes:
         - Temporal-Flow/**/*
         - packages/**/*
+        - pnpm-lock.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "temporal")'
       when: manual
@@ -73,10 +84,13 @@ preview-dndiy:
   script:
     - DEPLOY_BRANCH="$CI_COMMIT_REF_SLUG" pnpm deploy:dndiy
   rules:
-    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "web"'
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE != "web"'
+      when: manual
+      allow_failure: true
       changes:
         - DNDIY.github.io/**/*
         - packages/**/*
+        - pnpm-lock.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "dndiy")'
       when: manual
@@ -116,11 +130,14 @@ preview-megameal:
   script:
     - DEPLOY_BRANCH="$CI_COMMIT_REF_SLUG" pnpm deploy:megameal
   rules:
-    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "web"'
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE != "web"'
+      when: manual
+      allow_failure: true
       changes:
         - apps/megameal/**/*
         - MEGAMEAL/**/*
         - packages/**/*
+        - pnpm-lock.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "megameal")'
       when: manual
@@ -162,10 +179,13 @@ preview-travel:
   script:
     - DEPLOY_BRANCH="$CI_COMMIT_REF_SLUG" pnpm deploy:travel
   rules:
-    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "web"'
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE != "web"'
+      when: manual
+      allow_failure: true
       changes:
         - apps/travel/**/*
         - packages/**/*
+        - pnpm-lock.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "travel")'
       when: manual

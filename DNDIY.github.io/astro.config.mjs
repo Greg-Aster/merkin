@@ -133,6 +133,8 @@ window.loadRSSCORS = function(url, callback) {
 // Base path and site URL configuration
 let basePath = '/';
 let siteUrl = 'https://dndiy.org'; // Default fallback
+const explicitSiteUrl = process.env.SITE_URL;
+const explicitBasePath = process.env.SITE_BASE;
 
 // Get current directory properly in ES module context
 const __filename = fileURLToPath(import.meta.url);
@@ -141,41 +143,47 @@ const cnamePath = join(__dirname, 'CNAME');
 
 // Check if CNAME exists and read its content
 let customDomain = null;
-if (existsSync(cnamePath)) {
-  try {
-    // Use fs directly instead of require('fs')
-    const cnameContent = fs.readFileSync(cnamePath, 'utf-8');
-    // Clean the content (remove whitespace, etc.)
-    customDomain = cnameContent.trim();
-    
-    if (customDomain) {
-      siteUrl = `https://${customDomain}`;
-      console.log(`Using custom domain from CNAME: ${siteUrl}`);
-    }
-  } catch (error) {
-    console.warn('Error reading CNAME file:', error);
-  }
-}
-
-// Auto-detect GitHub Pages environment if no custom domain was found or for subpath
-const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
-
-if (GITHUB_REPOSITORY) {
-  const [username, repo] = GITHUB_REPOSITORY.split('/');
-  
-  if (!customDomain) {
-    // No custom domain, use GitHub Pages domain
-    siteUrl = `https://${username}.github.io`;
-    basePath = `/${repo}/`;
-    console.log(`Detected GitHub Pages deployment: ${siteUrl}${basePath}`);
-  } else {
-    // Has custom domain, but still need basePath for subpaths
-    basePath = '/';
-    console.log(`Using custom domain without subpath: ${siteUrl}${basePath}`);
-  }
+if (explicitSiteUrl) {
+  siteUrl = explicitSiteUrl;
+  basePath = explicitBasePath || '/';
+  console.log(`Using explicit site override: ${siteUrl}${basePath}`);
 } else {
-  // If not in GitHub Actions, use the default site URL
-  console.log(`Using domain: ${siteUrl} with base: ${basePath}`);
+  if (existsSync(cnamePath)) {
+    try {
+      // Use fs directly instead of require('fs')
+      const cnameContent = fs.readFileSync(cnamePath, 'utf-8');
+      // Clean the content (remove whitespace, etc.)
+      customDomain = cnameContent.trim();
+      
+      if (customDomain) {
+        siteUrl = `https://${customDomain}`;
+        console.log(`Using custom domain from CNAME: ${siteUrl}`);
+      }
+    } catch (error) {
+      console.warn('Error reading CNAME file:', error);
+    }
+  }
+  
+  // Auto-detect GitHub Pages environment if no custom domain was found or for subpath
+  const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
+  
+  if (GITHUB_REPOSITORY) {
+    const [username, repo] = GITHUB_REPOSITORY.split('/');
+    
+    if (!customDomain) {
+      // No custom domain, use GitHub Pages domain
+      siteUrl = `https://${username}.github.io`;
+      basePath = `/${repo}/`;
+      console.log(`Detected GitHub Pages deployment: ${siteUrl}${basePath}`);
+    } else {
+      // Has custom domain, but still need basePath for subpaths
+      basePath = '/';
+      console.log(`Using custom domain without subpath: ${siteUrl}${basePath}`);
+    }
+  } else {
+    // If not in GitHub Actions, use the default site URL
+    console.log(`Using domain: ${siteUrl} with base: ${basePath}`);
+  }
 }
 
 // https://astro.build/config

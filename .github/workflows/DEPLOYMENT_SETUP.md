@@ -4,7 +4,8 @@ Canonical delivery flow:
 
 1. Push code to GitHub (`origin`, `Greg-Aster/merkin`).
 2. GitHub Action mirrors refs to GitLab.
-3. GitLab CI deploys to Cloudflare Pages via Wrangler.
+3. `main` on GitLab CI deploys to Cloudflare Pages via Wrangler.
+4. Preview builds run from GitHub Actions to GitHub Pages (manual dispatch).
 
 ## Source Of Truth
 
@@ -23,8 +24,13 @@ GitHub should be treated as the write target for development commits.
   - Optional variable: `GITLAB_MIRROR_PROJECT_PATH` (default `Greg.Aster/merkin`).
 
 - `.gitlab-ci.yml`
-  - Runs deploy jobs per site (`travel`, `temporal`, `dndiy`, `megameal`).
+  - Production-only pipeline (runs on `main`).
   - Deploys using `pnpm deploy:*` scripts (`wrangler pages deploy ...`).
+
+- `.github/workflows/dev-pages-preview.yml`
+  - Manual-only workflow to preview one selected site (`travel`, `temporal`, `dndiy`, `megameal`).
+  - Can preview any ref (defaults to `dev`).
+  - Publishes to this repository's GitHub Pages environment.
 
 ## Legacy Workflow
 
