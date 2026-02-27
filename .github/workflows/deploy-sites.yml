@@ -1,8 +1,9 @@
-name: Deploy Sites (Legacy GitHub Pages Fallback)
+name: Deploy Sites to Cloudflare Pages
 
 on:
-  # Primary production flow is GitHub -> GitLab -> Cloudflare Pages.
-  # This workflow is intentionally manual-only as a fallback path to GitHub Pages.
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       site:
@@ -21,24 +22,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-sites-${{ github.ref }}
+  group: deploy-cloudflare-${{ github.ref }}
   cancel-in-progress: false
 
 env:
   NODE_VERSION: "20"
   PNPM_VERSION: "9.14.4"
-  TEMPORAL_OWNER: ${{ vars.TEMPORAL_OWNER || github.repository_owner }}
-  DNDIY_OWNER: ${{ vars.DNDIY_OWNER || github.repository_owner }}
-  MEGAMEAL_OWNER: ${{ vars.MEGAMEAL_OWNER || github.repository_owner }}
-  TRAVEL_OWNER: ${{ vars.TRAVEL_OWNER || github.repository_owner }}
-  TEMPORAL_REPO: ${{ vars.TEMPORAL_REPO || 'temporal-flow' }}
-  DNDIY_REPO: ${{ vars.DNDIY_REPO || 'DNDIY.github.io' }}
-  MEGAMEAL_REPO: ${{ vars.MEGAMEAL_REPO || 'megameal' }}
-  TRAVEL_REPO: ${{ vars.TRAVEL_REPO || 'merkin-travel' }}
-  TEMPORAL_DEPLOY_BRANCH: ${{ vars.TEMPORAL_DEPLOY_BRANCH || 'gh-pages' }}
-  DNDIY_DEPLOY_BRANCH: ${{ vars.DNDIY_DEPLOY_BRANCH || 'gh-pages' }}
-  MEGAMEAL_DEPLOY_BRANCH: ${{ vars.MEGAMEAL_DEPLOY_BRANCH || 'gh-pages' }}
-  TRAVEL_DEPLOY_BRANCH: ${{ vars.TRAVEL_DEPLOY_BRANCH || 'gh-pages' }}
 
 jobs:
   detect-changes:
@@ -96,13 +85,6 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.site == 'all' || github.event.inputs.site == 'travel')) ||
       (github.event_name != 'workflow_dispatch' && needs.detect-changes.outputs.travel == 'true')
     steps:
-      - name: Validate deployment token
-        run: |
-          if [ -z "${{ secrets.PAGES_DEPLOY_TOKEN }}" ]; then
-            echo "Missing required secret: PAGES_DEPLOY_TOKEN"
-            exit 1
-          fi
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -117,33 +99,17 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
-      - name: Install workspace dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Travel
+      - name: Build and deploy Travel
         env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DEPLOY_BRANCH: main
           SITE_URL: https://travel.dndiy.org
           SITE_BASE: /
-        run: pnpm build:travel
-
-      - name: Prepare deploy artifacts
-        run: |
-          touch apps/travel/dist/.nojekyll
-          if [ -f apps/travel/CNAME ]; then
-            cp apps/travel/CNAME apps/travel/dist/CNAME
-          fi
-
-      - name: Deploy to target repository
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
-          external_repository: ${{ env.TRAVEL_OWNER }}/${{ env.TRAVEL_REPO }}
-          publish_branch: ${{ env.TRAVEL_DEPLOY_BRANCH }}
-          publish_dir: ./apps/travel/dist
-          user_name: github-actions[bot]
-          user_email: 41898282+github-actions[bot]@users.noreply.github.com
-          commit_message: "deploy(travel): ${{ github.repository }}@${{ github.sha }}"
-          force_orphan: true
+        run: pnpm deploy:travel
 
   deploy-temporal:
     name: Deploy Temporal-Flow
@@ -153,13 +119,6 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.site == 'all' || github.event.inputs.site == 'temporal')) ||
       (github.event_name != 'workflow_dispatch' && needs.detect-changes.outputs.temporal == 'true')
     steps:
-      - name: Validate deployment token
-        run: |
-          if [ -z "${{ secrets.PAGES_DEPLOY_TOKEN }}" ]; then
-            echo "Missing required secret: PAGES_DEPLOY_TOKEN"
-            exit 1
-          fi
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -174,32 +133,17 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
-      - name: Install workspace dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Temporal-Flow
+      - name: Build and deploy Temporal-Flow
         env:
-          GITHUB_REPOSITORY: ${{ env.TEMPORAL_OWNER }}/${{ env.TEMPORAL_REPO }}
-        run: pnpm build:temporal
-
-      - name: Prepare deploy artifacts
-        run: |
-          touch Temporal-Flow/dist/.nojekyll
-          if [ -f Temporal-Flow/CNAME ]; then
-            cp Temporal-Flow/CNAME Temporal-Flow/dist/CNAME
-          fi
-
-      - name: Deploy to target repository
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
-          external_repository: ${{ env.TEMPORAL_OWNER }}/${{ env.TEMPORAL_REPO }}
-          publish_branch: ${{ env.TEMPORAL_DEPLOY_BRANCH }}
-          publish_dir: ./Temporal-Flow/dist
-          user_name: github-actions[bot]
-          user_email: 41898282+github-actions[bot]@users.noreply.github.com
-          commit_message: "deploy(temporal): ${{ github.repository }}@${{ github.sha }}"
-          force_orphan: true
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DEPLOY_BRANCH: main
+          SITE_URL: https://temporalflow.org
+          SITE_BASE: /
+        run: pnpm deploy:temporal
 
   deploy-dndiy:
     name: Deploy DNDIY
@@ -209,13 +153,6 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.site == 'all' || github.event.inputs.site == 'dndiy')) ||
       (github.event_name != 'workflow_dispatch' && needs.detect-changes.outputs.dndiy == 'true')
     steps:
-      - name: Validate deployment token
-        run: |
-          if [ -z "${{ secrets.PAGES_DEPLOY_TOKEN }}" ]; then
-            echo "Missing required secret: PAGES_DEPLOY_TOKEN"
-            exit 1
-          fi
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -230,32 +167,17 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
-      - name: Install workspace dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build DNDIY
+      - name: Build and deploy DNDIY
         env:
-          GITHUB_REPOSITORY: ${{ env.DNDIY_OWNER }}/${{ env.DNDIY_REPO }}
-        run: pnpm build:dndiy
-
-      - name: Prepare deploy artifacts
-        run: |
-          touch DNDIY.github.io/dist/.nojekyll
-          if [ -f DNDIY.github.io/CNAME ]; then
-            cp DNDIY.github.io/CNAME DNDIY.github.io/dist/CNAME
-          fi
-
-      - name: Deploy to target repository
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
-          external_repository: ${{ env.DNDIY_OWNER }}/${{ env.DNDIY_REPO }}
-          publish_branch: ${{ env.DNDIY_DEPLOY_BRANCH }}
-          publish_dir: ./DNDIY.github.io/dist
-          user_name: github-actions[bot]
-          user_email: 41898282+github-actions[bot]@users.noreply.github.com
-          commit_message: "deploy(dndiy): ${{ github.repository }}@${{ github.sha }}"
-          force_orphan: true
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DEPLOY_BRANCH: main
+          SITE_URL: https://dndiy.org
+          SITE_BASE: /
+        run: pnpm deploy:dndiy
 
   deploy-megameal:
     name: Deploy MEGAMEAL
@@ -265,13 +187,6 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.site == 'all' || github.event.inputs.site == 'megameal')) ||
       (github.event_name != 'workflow_dispatch' && needs.detect-changes.outputs.megameal == 'true')
     steps:
-      - name: Validate deployment token
-        run: |
-          if [ -z "${{ secrets.PAGES_DEPLOY_TOKEN }}" ]; then
-            echo "Missing required secret: PAGES_DEPLOY_TOKEN"
-            exit 1
-          fi
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -286,29 +201,14 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
-      - name: Install workspace dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build MEGAMEAL
+      - name: Build and deploy MEGAMEAL
         env:
-          GITHUB_REPOSITORY: ${{ env.MEGAMEAL_OWNER }}/${{ env.MEGAMEAL_REPO }}
-        run: pnpm build:megameal
-
-      - name: Prepare deploy artifacts
-        run: |
-          touch apps/megameal/dist/.nojekyll
-          if [ -f apps/megameal/CNAME ]; then
-            cp apps/megameal/CNAME apps/megameal/dist/CNAME
-          fi
-
-      - name: Deploy to target repository
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
-          external_repository: ${{ env.MEGAMEAL_OWNER }}/${{ env.MEGAMEAL_REPO }}
-          publish_branch: ${{ env.MEGAMEAL_DEPLOY_BRANCH }}
-          publish_dir: ./apps/megameal/dist
-          user_name: github-actions[bot]
-          user_email: 41898282+github-actions[bot]@users.noreply.github.com
-          commit_message: "deploy(megameal): ${{ github.repository }}@${{ github.sha }}"
-          force_orphan: true
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DEPLOY_BRANCH: main
+          SITE_URL: https://megameal.org
+          SITE_BASE: /
+        run: pnpm deploy:megameal
