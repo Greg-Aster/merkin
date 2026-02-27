@@ -119,21 +119,21 @@ export const bannerList: BannerItem[] = [
   }, */
   {
     type: 'video',
-    src: '/videos/titleb.webm', // Place this file in /public/videos/
+    src: `${import.meta.env.BASE_URL}videos/titleb.webm`,
     fallbackImage: banner1Fallback, // Fallback image for unsupported browsers
     alt: 'Animated title',
     preload: 'none', // Don't preload video until needed
   },
   {
     type: 'video',
-    src: '/videos/deep-time3.webm', // Place this file in /public/videos/
+    src: `${import.meta.env.BASE_URL}videos/deep-time3.webm`,
     fallbackImage: banner2Fallback, // Fallback image for unsupported browsers
     alt: 'Animated banner',
     preload: 'none', // Don't preload video until needed
   },
   {
     type: 'video',
-    src: '/videos/cookbook.webm', // Place this file in /public/videos/
+    src: `${import.meta.env.BASE_URL}videos/cookbook.webm`,
     fallbackImage: banner3Fallback, // Fallback image for unsupported browsers
     alt: 'MegaMeal Cookbook',
     preload: 'none', // Don't preload video until needed
