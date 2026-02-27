@@ -1,6 +1,9 @@
 name: Dev Preview (GitHub Pages)
 
 on:
+  push:
+    branches:
+      - dev
   workflow_dispatch:
     inputs:
       ref:
@@ -8,16 +11,6 @@ on:
         required: true
         default: "dev"
         type: string
-      site:
-        description: "Site to preview on GitHub Pages"
-        required: true
-        default: "megameal"
-        type: choice
-        options:
-          - megameal
-          - travel
-          - dndiy
-          - temporal
 
 permissions:
   contents: read
@@ -39,7 +32,7 @@ jobs:
       - name: Checkout selected ref
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.ref || github.ref }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -55,41 +48,45 @@ jobs:
       - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build selected site for repo Pages path
-        env:
-          PREVIEW_SITE: ${{ inputs.site }}
+      - name: Build all sites into subfolders
         run: |
           set -euo pipefail
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
           PREVIEW_SITE_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io"
-          PREVIEW_BASE="/${REPO_NAME}/"
+          BASE="/${REPO_NAME}"
 
           rm -rf preview-dist
-          case "${PREVIEW_SITE}" in
-            megameal)
-              SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${PREVIEW_BASE}" pnpm build:megameal
-              cp -a apps/megameal/dist preview-dist
-              ;;
-            travel)
-              SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${PREVIEW_BASE}" pnpm build:travel
-              cp -a apps/travel/dist preview-dist
-              ;;
-            dndiy)
-              SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${PREVIEW_BASE}" pnpm build:dndiy
-              cp -a DNDIY.github.io/dist preview-dist
-              ;;
-            temporal)
-              SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${PREVIEW_BASE}" pnpm build:temporal
-              cp -a Temporal-Flow/dist preview-dist
-              ;;
-            *)
-              echo "Unsupported site: ${PREVIEW_SITE}"
-              exit 1
-              ;;
-          esac
+          mkdir -p preview-dist
+
+          SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${BASE}/megameal/" pnpm build:megameal
+          cp -a apps/megameal/dist preview-dist/megameal
+
+          SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${BASE}/travel/" pnpm build:travel
+          cp -a apps/travel/dist preview-dist/travel
+
+          SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${BASE}/dndiy/" pnpm build:dndiy
+          cp -a DNDIY.github.io/dist preview-dist/dndiy
+
+          SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${BASE}/temporal/" pnpm build:temporal
+          cp -a Temporal-Flow/dist preview-dist/temporal
 
           touch preview-dist/.nojekyll
-          printf "site=%s\nref=%s\nsha=%s\n" "${PREVIEW_SITE}" "${{ inputs.ref }}" "${GITHUB_SHA}" > preview-dist/preview-meta.txt
+
+          cat > preview-dist/index.html <<'HTMLEOF'
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"><title>Merkin Dev Preview</title>
+          <style>body{font-family:sans-serif;max-width:600px;margin:4rem auto;padding:0 1rem}a{display:block;margin:1rem 0;font-size:1.2rem}</style>
+          </head>
+          <body>
+          <h1>Merkin Dev Preview</h1>
+          <a href="megameal/">MEGA MEAL SAGA</a>
+          <a href="travel/">Trail Log (Travel)</a>
+          <a href="dndiy/">DNDIY</a>
+          <a href="temporal/">Temporal Flow</a>
+          </body>
+          </html>
+          HTMLEOF
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5

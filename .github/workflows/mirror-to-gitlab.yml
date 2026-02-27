@@ -32,6 +32,10 @@ jobs:
           TARGET_PATH="${{ vars.GITLAB_MIRROR_PROJECT_PATH || 'Greg.Aster/merkin' }}"
           git remote add gitlab-mirror "https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/${TARGET_PATH}.git"
 
+          # Fetch all GitHub branches so --prune doesn't delete GitLab-side branches
+          # that simply weren't checked out locally.
+          git fetch --all
+
           # Keep GitLab as a mirror of GitHub refs.
-          git push --prune gitlab-mirror "refs/heads/*:refs/heads/*"
-          git push --prune gitlab-mirror "refs/tags/*:refs/tags/*"
+          git push --force gitlab-mirror "refs/heads/*:refs/heads/*"
+          git push --force gitlab-mirror "refs/tags/*:refs/tags/*"
