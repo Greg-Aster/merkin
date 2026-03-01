@@ -1,6 +1,6 @@
 ---
 title: "PCT Gear List: Readiness Check"
-published: 2026-03-15
+published: 2026-02-24
 description: "A full breakdown of my Pacific Crest Trail gear, base weight, and readiness audit before starting."
 tags:
   - pacific-crest-trail
