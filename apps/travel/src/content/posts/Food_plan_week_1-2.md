@@ -53,7 +53,7 @@ Adjust as needed. This isn't a religion.
 
 ## What I'm Carrying (First 7 Days)
 
-![Trail mix is one of the easiest ways to stack dense calories without wasting pack space](/posts/travel/pct-food-trail-mix.jpg)
+![Trail mix is one of the easiest ways to stack dense calories without wasting pack space](../../posts/travel/pct-food-trail-mix.jpg)
 *Trail mix is boring, efficient, and exactly the kind of food that earns its spot in an early PCT carry.*
 
 ### Carbohydrate Base
