@@ -1,14 +1,14 @@
 ---
 title: "PCT Foot & Ankle Survival Guide"
 published: 2026-02-28
-description: "A field-tested guide to foot care, blister prevention, tendon injuries, and shoe selection for PCT thru-hikers — including real-world lessons from 8 weeks of pre-hike training."
-image: "https://images.naturalatlas.com/assets/photos/5/23/53/7/2491857-730x487-1.jpg"
+description: "A field-tested guide to foot care, blister prevention, tendon injuries, and shoe selection for PCT thru-hikers -- including real-world lessons from 8 weeks of pre-hike training."
+image: "/posts/travel/pct-desert.jpg"
 avatarImage: "/posts/generic/avatar9.png"
 authorName: "Greg Aster"
 authorBio: "PCT Class of 2026 — Campo to Canada"
 bannerType: "image"
 bannerData:
-  imageUrl: "https://images.naturalatlas.com/assets/photos/5/23/53/7/2491857-730x487-1.jpg"
+  imageUrl: "/posts/travel/pct-desert.jpg"
 timelineYear: 2026
 timelineEra: "pct-2026"
 timelineLocation: "Campo, California"
@@ -26,9 +26,10 @@ lang: "en"
 
 ---
 
-Your feet are your engine. Everything else on this trail is replaceable — your feet are not. This guide compiles research, real experience, and hard-won lessons into a practical field reference. It covers the early warning signs you must recognize, how to treat problems before they become trail-enders, and how to make smart shoe decisions from the desert start to the Sierra.
+Your feet are your engine. Everything else on this trail is replaceable -- your feet are not. This guide compiles research, real experience, and hard-won lessons into a practical field reference. It covers the early warning signs you must recognize, how to treat problems before they become trail-enders, and how to make smart shoe decisions from the desert start to the Sierra.
 
-![The PCT desert near Campo, California — where it all begins](https://images.naturalatlas.com/assets/photos/5/23/53/7/2491857-730x487-1.jpg)
+![Trail running shoes are the first line of defense against preventable foot problems](/posts/travel/pct-trail-shoes.jpg)
+*Shoe fit, traction, and how your foot moves inside the shoe matter long before injury becomes obvious.*
 
 ---
 
