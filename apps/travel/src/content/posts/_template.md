@@ -26,7 +26,7 @@ category: "Trail Notes"      # see valid categories in the guide below
 
 # ── AUTHOR CARD (optional) ───────────────────────────────────────────────────
 # Shows a small card under the post title. Omit the block entirely if unused.
-# avatarImage: "/content/avatar/avatar.png"   # pick any from /content/avatar/
+# avatarImage: "/avatar/avatar1.jpg"          # your photo (stored in public/avatar/)
 # authorName: "Greg Aster"
 # authorBio: "PCT Class of 2026 — Campo to Canada"
 # authorLink: "https://dndiy.org"              # URL when author name is clicked
@@ -136,12 +136,9 @@ body. Here is everything you need to know.
 
 ── AUTHOR CARD ───────────────────────────────────────────────────────────────
 
-  avatarImage     Path to author avatar image. Options:
-                    /content/avatar/avatar.png
-                    /content/avatar/avatar2.png  (through avatar8.png)
-                    /content/avatar/ComfyUI_0001.png
-                    /content/avatar/ComfyUI_0009.png
-                    /content/avatar/ComfyUI_0014.png
+  avatarImage     Path to your author avatar. Stored in apps/travel/public/avatar/.
+                  Always use: /avatar/avatar1.jpg  (your actual photo)
+                  Do NOT use /content/avatar/... — that path is not a public URL.
 
   authorName      Display name shown on the author card.
 
@@ -150,7 +147,7 @@ body. Here is everything you need to know.
   authorLink      URL — wraps the author name in a clickable link.
 
   Standard block for this blog:
-    avatarImage: "/content/avatar/avatar.png"
+    avatarImage: "/avatar/avatar1.jpg"
     authorName: "Greg Aster"
     authorBio: "PCT Class of 2026 — Campo to Canada"
 
@@ -168,7 +165,7 @@ body. Here is everything you need to know.
   Image banner (most common):
     bannerType: "image"
     bannerData:
-      imageUrl: "https://full-url-to-image.jpg"
+      imageUrl: "/posts/your-post-slug/hero.jpg"   # must be a local file (see IMAGE PATHS)
 
   YouTube video banner:
     bannerType: "video"
@@ -248,14 +245,73 @@ body. Here is everything you need to know.
 
 ── IMAGE PATHS ───────────────────────────────────────────────────────────────
 
-  External URLs:   use the full https:// URL directly. Preferred for mobile
-                   posts where photos haven't been uploaded to the repo.
+  RULE: Always use locally stored images. External URLs (https://...) are
+  unreliable — they can disappear, rate-limit, or break CI builds.
+  The ONE exception is YouTube video banners (bannerType: "video").
 
-  Repo-local:      place image files in apps/travel/public/posts/your-slug/
-                   and reference as /posts/your-slug/filename.jpg
+  ── WHERE TO PUT IMAGE FILES ──────────────────────────────────────────────
 
-  Missing photo:   if the author mentions a photo but none is provided, leave
-                   a placeholder comment in the body:
-                   <!-- photo: [description of intended image] -->
+  Store images in:
+    apps/travel/public/posts/your-post-slug/
+
+  Example — for a post named "day-14-big-bear.md":
+    apps/travel/public/posts/day-14-big-bear/campsite.jpg
+    apps/travel/public/posts/day-14-big-bear/sunrise.jpg
+
+  ── HOW TO REFERENCE IMAGES ───────────────────────────────────────────────
+
+  Always use an absolute path starting with / (not a relative path):
+    /posts/your-post-slug/filename.jpg
+
+  This format works everywhere:
+    • Frontmatter:   image: "/posts/day-14-big-bear/campsite.jpg"
+    •                bannerData:
+    •                  imageUrl: "/posts/day-14-big-bear/campsite.jpg"
+    •                backgroundImage: "/posts/day-14-big-bear/bg.jpg"
+    • Body markdown: ![Alt text](/posts/day-14-big-bear/campsite.jpg)
+
+  DO NOT use relative paths like ../../posts/... — they break the Astro build.
+  DO NOT use /content/... paths for public images — that is for Astro content
+  collections (source files), not public-facing assets.
+
+  ── FILE SIZE GUIDELINES ──────────────────────────────────────────────────
+
+  Keep images under 1MB if possible. 200–500KB is ideal for web.
+  Photos straight from a phone camera are often 5–10MB — too large.
+  Resize or compress photos before uploading when you can.
+  Files over 25MB are removed automatically during deployment.
+
+  ── HOW TO UPLOAD IMAGES ──────────────────────────────────────────────────
+
+  Via GitHub mobile app or web browser (github.com/Greg-Aster/merkin):
+
+    1. Navigate to:  apps/travel/public/posts/
+    2. If your post-slug folder doesn't exist yet:
+         Tap "Add file" → "Upload files" — GitHub creates the folder
+         automatically when you upload the first file into a new path.
+         Type the folder name before the filename: "day-14-big-bear/image.jpg"
+    3. Select your photo and commit directly to the dev branch.
+    4. The image is now available at /posts/day-14-big-bear/image.jpg
+
+  After uploading, reference it in the frontmatter or body as shown above.
+
+  ── HOW BOTH DEPLOYMENTS HANDLE PATHS ────────────────────────────────────
+
+  Cloudflare Pages (production — travel.dndiy.org):
+    Base path = /   →  /posts/your-slug/image.jpg resolves correctly as-is.
+
+  GitHub Pages (dev preview — greg-aster.github.io/merkin/travel/):
+    Base path = /merkin/travel/
+    A build plugin (remark-rebase-images) automatically rewrites body image
+    paths at build time, so /posts/... expands to /merkin/travel/posts/...
+    No manual action needed — use /posts/your-slug/... and it works on both.
+
+  Frontmatter fields (image:, bannerData.imageUrl:, backgroundImage:) are
+  also handled automatically by the site's ImageWrapper component.
+
+  ── MISSING PHOTO PLACEHOLDER ─────────────────────────────────────────────
+
+  If you mention a photo but haven't uploaded it yet, add a comment:
+    <!-- photo: [description of intended image, e.g. "view from scout peak"] -->
 
 ======================================================================== -->
