@@ -28,7 +28,7 @@ lang: "en"
 
 Your feet are your engine. Everything else on this trail is replaceable -- your feet are not. This guide compiles research, real experience, and hard-won lessons into a practical field reference. It covers the early warning signs you must recognize, how to treat problems before they become trail-enders, and how to make smart shoe decisions from the desert start to the Sierra.
 
-![Trail running shoes are the first line of defense against preventable foot problems](/posts/travel/pct-trail-shoes.jpg)
+![Trail running shoes are the first line of defense against preventable foot problems](../../posts/travel/pct-trail-shoes.jpg)
 *Shoe fit, traction, and how your foot moves inside the shoe matter long before injury becomes obvious.*
 
 ---

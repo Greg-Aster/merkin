@@ -27,13 +27,13 @@ Here’s what I’m carrying, why I chose it, and where I can cut weight.
 
 These are not my own photos, but they are now local, stable assets so the post renders reliably on a static build.
 
-![Backpack, trekking poles, and shoes staged for a long-distance hiking setup](/posts/travel/pct-gear-pack.jpg)
+![Backpack, trekking poles, and shoes staged for a long-distance hiking setup](../../posts/travel/pct-gear-pack.jpg)
 *Pack volume, comfort, and a clean loadout matter more to this setup than chasing ultralight numbers.*
 
-![Trail running shoes used for high-mileage trail travel](/posts/travel/pct-trail-shoes.jpg)
+![Trail running shoes used for high-mileage trail travel](../../posts/travel/pct-trail-shoes.jpg)
 *Footwear is the first place small mistakes turn into expensive trail problems.*
 
-![Compact camp stove setup for simple trail cooking](/posts/travel/pct-gear-stove.jpg)
+![Compact camp stove setup for simple trail cooking](../../posts/travel/pct-gear-stove.jpg)
 *The cook system stays simple: heat water fast, eat, move on.*
 
 ---
