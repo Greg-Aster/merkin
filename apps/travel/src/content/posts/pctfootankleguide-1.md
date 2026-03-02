@@ -2,13 +2,13 @@
 title: "PCT Foot & Ankle Survival Guide"
 published: 2026-02-28
 description: "A field-tested guide to foot care, blister prevention, tendon injuries, and shoe selection for PCT thru-hikers — including real-world lessons from 8 weeks of pre-hike training."
-image: "/posts/travel/pct-desert.jpg"
+image: "/posts/pctfootankleguide-1/pct-desert.jpg"
 avatarImage: "/avatar/avatar1.jpg"
 authorName: "Greg Aster"
 authorBio: "PCT Class of 2026 | Trail notes, gear systems, and field-tested lessons"
 bannerType: "image"
 bannerData:
-  imageUrl: "/posts/travel/pct-desert.jpg"
+  imageUrl: "/posts/pctfootankleguide-1/pct-desert.jpg"
 timelineYear: 2026
 timelineEra: "pct-2026"
 timelineLocation: "Campo, California"
@@ -28,7 +28,7 @@ lang: "en"
 
 Your feet are your engine. Everything else on this trail is replaceable — your feet are not. This guide compiles research, real experience, and hard-won lessons into a practical field reference. It covers the early warning signs you must recognize, how to treat problems before they become trail-enders, and how to make smart shoe decisions from the desert start to the Sierra.
 
-![Trail running shoes are the first line of defense against preventable foot problems](/posts/travel/pct-trail-shoes.jpg)
+![Trail running shoes are the first line of defense against preventable foot problems](/posts/pctfootankleguide-1/pct-trail-shoes.jpg)
 *Shoe fit, traction, and how your foot moves inside the shoe matter long before injury becomes obvious.*
 
 ---
@@ -59,7 +59,8 @@ The single most important skill on a long-distance hike is knowing the differenc
 
 A blister that has formed is a problem. A hot spot — the warm, slightly reddened patch before a blister forms — is just information. Your only job when you feel a hot spot is to stop immediately, address it, and move on. Thirty seconds of prevention saves days of recovery.
 
-![Leukotape applied to a heel — the most important blister tool you can carry](https://sectionhiker.com/wp-content/uploads/2019/08/Leukotape-P-The-Ultimate-Blister-Prevention-Tape-1200x800.jpg)
+<!-- photo: close-up of Leukotape applied to a heel -->
+*Photo placeholder: add a local close-up of Leukotape applied to a heel.*
 
 ### Early Warning Signs
 
@@ -116,7 +117,8 @@ The extensor tendons run across the top of the foot and connect into the front o
 
 Pain on the inside of the ankle, a few centimeters above the ankle bone, often feels like a "sprained" sensation even without a specific injury event. This location points to the posterior tibial tendon or the deltoid ligament complex — both are load-bearing on every single step.
 
-![Medial ankle anatomy — understanding where the pain lives helps you respond correctly](https://www.birminghamorthopaedic.co.uk/wp-content/uploads/2021/09/ankle-anatomy.jpg)
+<!-- photo: medial ankle anatomy reference diagram -->
+*Photo placeholder: add a local medial ankle anatomy reference image.*
 
 **Early warning signs:**
 - Dull aching on the inner ankle just above the medial malleolus
@@ -227,7 +229,8 @@ The correct approach: **embrace getting wet, and prioritize fast drying.** Mesh 
 
 The problem with "get Altra Lone Peaks" advice is that shoe models change every year, and a redesign can completely alter fit and feel. The Altra Lone Peak narrowed its toe box in recent versions to the frustration of many longtime fans. The shoe you read about in a 2022 blog post may be a different shoe in 2026.
 
-![What matters: mesh uppers, wide toe box, grippy outsole — not the brand name](https://m.media-amazon.com/images/I/71Kp8cY4XQL._AC_UX695_.jpg)
+<!-- photo: breathable trail runner with a roomy toe box and grippy outsole -->
+*Photo placeholder: add a local trail runner detail photo showing fit and outsole.*
 
 **What to look for in any model, regardless of brand:**
 
@@ -279,7 +282,8 @@ Section A is dry, sandy, and hot by mid-morning. Trail runners are the right cal
 
 Most hikers' first pair dies around Big Bear / Wrightwood (~400 miles). By Kennedy Meadows (~700 miles), evaluate snow on the ground. Most years, trail runners with microspikes handle the Sierra fine.
 
-![The Sierra Nevada — where snow conditions drive footwear decisions](https://halfwayanywhere.com/wp-content/uploads/2021/02/PCT-Sierra-Nevada-Section.jpg)
+<!-- photo: snowy Sierra section of the PCT -->
+*Photo placeholder: add a local Sierra trail conditions photo.*
 
 > Most hikers do NOT wear boots for the entire trail. Trail runners by default — switch temporarily only if conditions demand it.
 

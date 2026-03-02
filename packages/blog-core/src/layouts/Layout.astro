@@ -51,6 +51,24 @@ if (!lang) {
 }
 const siteLang = lang.replace('_', '-')
 
+function getBaseAwareAssetUrl(assetPath?: string): string {
+  if (!assetPath) return url('/default-social-image.jpg', import.meta.env.BASE_URL)
+  if (
+    assetPath.startsWith('http://') ||
+    assetPath.startsWith('https://') ||
+    assetPath.startsWith('//') ||
+    assetPath.startsWith('data:')
+  ) {
+    return assetPath
+  }
+  if (assetPath.startsWith('/')) {
+    return url(assetPath, import.meta.env.BASE_URL)
+  }
+  return assetPath
+}
+
+const socialImage = getBaseAwareAssetUrl(post?.data?.image)
+
 // Theme color configuration
 const configHue = siteConfig.themeColor.hue
 ---
@@ -71,11 +89,8 @@ const configHue = siteConfig.themeColor.hue
     <meta property="og:url" content={Astro.url}>
     <meta property="og:title" content={pageTitle}>
     <meta property="og:description" content={description || pageTitle}>
-    <!-- Use your image path from frontmatter or a default image -->
     <meta property="og:image" content={
-        post?.data?.image 
-            ? new URL(post.data.image, Astro.site) 
-            : new URL('/assets/banner/0001.png', Astro.site)
+        new URL(socialImage || getBaseAwareAssetUrl('/assets/banner/0001.png'), Astro.site)
     }>
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -96,9 +111,7 @@ const configHue = siteConfig.themeColor.hue
     <meta name="twitter:title" content={pageTitle}>
     <meta name="twitter:description" content={description || pageTitle}>
     <meta property="twitter:image" content={
-            post?.data?.image 
-      ? 		new URL(post.data.image, Astro.site) 
-      : 		new URL('/default-social-image.jpg', Astro.site)
+      new URL(socialImage, Astro.site)
     }>
     
     <meta name="viewport" content="width=device-width" />

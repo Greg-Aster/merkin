@@ -10,14 +10,14 @@ tags:
   - preparation
   - thru-hiking
 category: "Trail Guides"
-image: "/posts/travel/pct-trail-overview.jpg"
+image: "/posts/lower-body-injury-guide-1/pct-trail-overview.jpg"
 showImageOnPost: false
 avatarImage: "/avatar/avatar1.jpg"
 authorName: "Greg Aster"
 authorBio: "PCT Class of 2026 — Campo to Canada"
 bannerType: "image"
 bannerData:
-  imageUrl: "/posts/travel/pct-trail-overview.jpg"
+  imageUrl: "/posts/lower-body-injury-guide-1/pct-trail-overview.jpg"
   height: "50vh"
 timelineYear: 2026
 timelineEra: "pct-2026"
@@ -64,7 +64,7 @@ The difference between hikers who finish the PCT and hikers who don't usually is
 
 ## Part 1: Knee Stuff
 
-![Knee pain is the most common reason thru-hikers leave the PCT early](/posts/travel/pct-knee-pain.jpg)
+![Knee pain is the most common reason thru-hikers leave the PCT early](/posts/lower-body-injury-guide-1/pct-knee-pain.jpg)
 
 ### The Outer Knee Burn — IT Band
 
@@ -193,7 +193,7 @@ Aching at a hardware site when it's cold or after a huge day is normal — that'
 
 ## Part 3: Shin Stuff
 
-![Shin splints are the bread-and-butter overuse injury of the first few weeks on trail](/posts/travel/pct-shin-splints.png)
+![Shin splints are the bread-and-butter overuse injury of the first few weeks on trail](/posts/lower-body-injury-guide-1/pct-shin-splints.png)
 
 ### Classic Shin Splints
 

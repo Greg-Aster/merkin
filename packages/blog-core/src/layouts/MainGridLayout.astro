@@ -219,6 +219,22 @@ function normalizeBannerConfig(config: any) {
 }
 
 const bannerConfig = normalizeBannerConfig(rawBannerConfig)
+const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+
+function normalizeAssetUrl(assetPath?: string | null): string {
+  if (!assetPath) return ''
+  if (
+    assetPath.startsWith('http://') ||
+    assetPath.startsWith('https://') ||
+    assetPath.startsWith('//') ||
+    assetPath.startsWith('data:')
+  ) {
+    return assetPath
+  }
+  if (!assetPath.startsWith('/')) return assetPath
+  if (baseUrl && assetPath.startsWith(`${baseUrl}/`)) return assetPath
+  return url(assetPath, import.meta.env.BASE_URL)
+}
 
 const getPanelTopPosition = (bannerType: string): string => {
   switch (bannerType) {
@@ -243,7 +259,7 @@ const determineBannerConfiguration =
     : (postValue: any, _pageType = 'default', defaultBannerLink = '') => {
         const postData = {
           bannerLink: postValue?.data?.bannerLink || '',
-          customAvatar: postValue?.data?.avatarImage || '',
+          customAvatar: normalizeAssetUrl(postValue?.data?.avatarImage || ''),
           customName: postValue?.data?.authorName || '',
           customBio: postValue?.data?.authorBio || '',
           slug: postValue?.slug || '',
@@ -303,7 +319,9 @@ const determineBannerConfiguration =
                   ? 'standard'
                   : 'none'
 
-        const postImage = postValue?.data?.bannerData?.imageUrl || postValue?.data?.image
+        const postImage = normalizeAssetUrl(
+          postValue?.data?.bannerData?.imageUrl || postValue?.data?.image,
+        )
 
         return {
           postData,
@@ -427,7 +445,9 @@ const {
 // ⭐ NEW: Process custom author data - merge with existing postData
 const processedAuthorData = {
   slug: postData?.slug || '',
-  customAvatar: customAuthorData?.avatarImage || postData?.customAvatar || '',
+  customAvatar: normalizeAssetUrl(
+    customAuthorData?.avatarImage || postData?.customAvatar || '',
+  ),
   customName: customAuthorData?.authorName || postData?.customName || '',
   customBio: customAuthorData?.authorBio || postData?.customBio || '',
   customLink: customAuthorData?.authorLink || '', // ⭐ NEW: Custom link support
@@ -612,14 +632,18 @@ const gridLayoutClasses = [
                   ></Icon>
                 </div>
                 <img
-                  src={hasPostBanner && post?.data?.bannerType === "image" ? (post.data.bannerData?.imageUrl || post.data.image) : (bannerDataSources.imageBannerData?.imageUrl || siteConfig.banner.src)}
+                  src={hasPostBanner && post?.data?.bannerType === "image"
+                    ? normalizeAssetUrl(post.data.bannerData?.imageUrl || post.data.image)
+                    : normalizeAssetUrl(bannerDataSources.imageBannerData?.imageUrl || siteConfig.banner.src)}
                   alt={hasPostBanner ? (post.data.title || "Post banner image") : (title || "Banner image")}
                   class="w-full h-full object-cover"
                 />
               </a>
             ) : (
               <img
-                src={hasPostBanner && post?.data?.bannerType === "image" ? (post.data.bannerData?.imageUrl || post.data.image) : (bannerDataSources.imageBannerData?.imageUrl || siteConfig.banner.src)}
+                src={hasPostBanner && post?.data?.bannerType === "image"
+                  ? normalizeAssetUrl(post.data.bannerData?.imageUrl || post.data.image)
+                  : normalizeAssetUrl(bannerDataSources.imageBannerData?.imageUrl || siteConfig.banner.src)}
                 alt={hasPostBanner ? (post.data.title || "Post banner image") : (title || "Banner image")}
                 class="w-full h-full object-cover"
               />
