@@ -22,7 +22,7 @@ export const communityConfig: CommunityConfig = {
         description: 'Real-time chat & discussions',
         icon: 'mdi:discord',
         sectionId: 'discord-section',
-        enabled: true,
+        enabled: false,
       },
       {
         title: 'Email Newsletter',
@@ -48,11 +48,11 @@ export const communityConfig: CommunityConfig = {
     ],
   },
   discord: {
-    enabled: true,
+    enabled: false,
     title: 'Discord Community',
     description:
-      'Our Discord server is the heart of our real-time community. Connect with other members, share ideas, get help, and stay updated on the latest developments.',
-    inviteUrl: 'https://discord.gg/je7Vyw75tR',
+      'Discord is not active for this trail log. Follow along on Bluesky instead.',
+    inviteUrl: 'https://bsky.app/profile/astervisualarts.bsky.social',
     buttonText: 'Join Our Discord Server',
     features: [
       {

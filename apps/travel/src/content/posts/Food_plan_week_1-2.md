@@ -2,13 +2,13 @@
 title: "PCT Food Strategy: Front-Loading Calories to Skip Expensive Towns"
 published: 2026-02-27
 description: "How I'm front-loading a week of calories to skip overpriced early stops and push straight through to Julian on the PCT."
-image: "/posts/travel/pct-food-week1.jpg"
-avatarImage: "/posts/generic/avatar2.png"
-authorName: "Greg"
-authorBio: "Hiker, maker, chronic over-planner"
+image: "/posts/travel/pct-food-trail-mix.jpg"
+avatarImage: "/avatar/avatar1.jpg"
+authorName: "Greg Aster"
+authorBio: "PCT Class of 2026 | Trail notes, gear systems, and field-tested lessons"
 bannerType: "image"
 bannerData:
-  image: "/posts/travel/pct-food-week1.jpg"
+  imageUrl: "/posts/travel/pct-food-trail-mix.jpg"
 timelineYear: 2026
 timelineEra: "pct"
 timelineLocation: "Campo, CA"
@@ -52,6 +52,9 @@ Adjust as needed. This isn't a religion.
 ---
 
 ## What I'm Carrying (First 7 Days)
+
+![Trail mix is one of the easiest ways to stack dense calories without wasting pack space](/posts/travel/pct-food-trail-mix.jpg)
+*Trail mix is boring, efficient, and exactly the kind of food that earns its spot in an early PCT carry.*
 
 ### Carbohydrate Base
 

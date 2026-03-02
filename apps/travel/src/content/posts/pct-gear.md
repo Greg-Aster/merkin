@@ -2,6 +2,7 @@
 title: "PCT Gear List: Readiness Check"
 published: 2026-02-24
 description: "A full breakdown of my Pacific Crest Trail gear, base weight, and readiness audit before starting."
+image: "/posts/travel/pct-gear-pack.jpg"
 tags:
   - pacific-crest-trail
   - gear
@@ -22,21 +23,18 @@ Here’s what I’m carrying, why I chose it, and where I can cut weight.
 
 ---
 
-## Photo Layout (temporary)
+## Gear Overview
 
-I’ll replace these with my own trail photos as soon as I shoot them. For now, I added temporary image slots so the post layout is ready.
+These are not my own photos, but they are now local, stable assets so the post renders reliably on a static build.
 
-![Pack and sleep system placeholder](https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1600&q=80)
-*Pack and sleep setup (temporary image)*
+![Backpack, trekking poles, and shoes staged for a long-distance hiking setup](/posts/travel/pct-gear-pack.jpg)
+*Pack volume, comfort, and a clean loadout matter more to this setup than chasing ultralight numbers.*
 
-![Footwear and clothing placeholder](https://images.unsplash.com/photo-1476610182048-b716b8518aae?auto=format&fit=crop&w=1600&q=80)
-*Footwear and clothing setup (temporary image)*
+![Trail running shoes used for high-mileage trail travel](/posts/travel/pct-trail-shoes.jpg)
+*Footwear is the first place small mistakes turn into expensive trail problems.*
 
-![Water and cook system placeholder](https://images.unsplash.com/photo-1458442310124-dde6edb43d10?auto=format&fit=crop&w=1600&q=80)
-*Water and cook system (temporary image)*
-
-> Replace later with local files, for example:
-> `/posts/pct-gear/pack.jpg`, `/posts/pct-gear/clothing.jpg`, `/posts/pct-gear/water-cook.jpg`
+![Compact camp stove setup for simple trail cooking](/posts/travel/pct-gear-stove.jpg)
+*The cook system stays simple: heat water fast, eat, move on.*
 
 ---
 
