@@ -18,6 +18,7 @@ import { GithubCardComponent } from "./src/plugins/rehype-component-github-card.
 import { parseDirectiveNode } from "./src/plugins/remark-directive-rehype.js";
 import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
+import { remarkRebaseImages } from "./src/plugins/remark-rebase-images.mjs";
 import mdx from "@astrojs/mdx";
 
 const site = process.env.SITE_URL || 'https://travel.dndiy.org';
@@ -72,6 +73,7 @@ export default defineConfig({
       remarkMath,
       remarkReadingTime,
       remarkExcerpt,
+      [remarkRebaseImages, { base }],
       remarkGithubAdmonitionsToDirectives,
       remarkDirective,
       remarkSectionize,
