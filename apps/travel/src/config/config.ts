@@ -8,8 +8,8 @@ import { LinkPreset } from '../types/config'
 import { AUTO_MODE } from '@constants/constants.ts'
 
 export const siteConfig: SiteConfig = {
-  title: "Trail Log",
-  subtitle: "Pacific Crest Trail 2026",
+  title: "Greg Aster Trail Log",
+  subtitle: "PCT 2026 | Field Notes, Gear, and Trail Lessons",
   lang: "en",
   themeColor: {
     hue: 145,
@@ -19,7 +19,7 @@ export const siteConfig: SiteConfig = {
   defaultTheme: AUTO_MODE,
   banner: {
     enable: false,
-    src: "/assets/banner/0001.png",
+    src: "/avatar/avatar1.jpg",
     position: "center",
     credit: {
       enable: false,
@@ -43,17 +43,22 @@ export const navBarConfig: NavBarConfig = {
 }
 
 export const profileConfig: ProfileConfig = {
-  avatar: "/src/content/avatar/avatar.png",
-  name: "Greg",
-  bio: "Hiking the Pacific Crest Trail",
+  avatar: "/avatar/avatar1.jpg",
+  name: "Greg Aster",
+  bio: "PCT Class of 2026 | Field notes, gear systems, and trail lessons",
   links: [
+    {
+      name: "Bluesky",
+      icon: "fa6-brands:bluesky",
+      url: "https://bsky.app/profile/astervisualarts.bsky.social",
+    },
     {
       name: "GitHub",
       icon: "fa6-brands:github",
       url: "https://github.com/Greg-Aster",
     },
   ],
-  avatarFilename: "avatar.png",
+  avatarFilename: "avatar1.jpg",
 }
 
 export const licenseConfig: LicenseConfig = {

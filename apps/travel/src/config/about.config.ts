@@ -6,36 +6,35 @@ import { defaultAboutConfig } from '../types/aboutconfig';
 // Export the about page configuration
 export const aboutConfig: AboutConfig = {
   ...defaultAboutConfig,
-  // Match the original about.astro layout
   team: {
     ...defaultAboutConfig.team,
     enabled: true,
-    title: "Our Team",
-    description: "", // The original didn't have a description
+    title: "About Greg",
+    description: "The person behind the trail log, the hike, and the notes.",
     layout: "grid",
     columns: {
       mobile: 1,
-      tablet: 2,
-      desktop: 3
+      tablet: 1,
+      desktop: 1
     },
     showEmail: true,
     showRole: true,
-    avatarShape: "rounded" // Match the original rounded-lg
+    avatarShape: "rounded"
   },
   content: {
     ...defaultAboutConfig.content,
     enabled: true,
-    defaultTitle: "About The Project",
-    showTableOfContents: true // The original had TOC imported
+    defaultTitle: "Why This Trail Log Exists",
+    showTableOfContents: true
   },
   contact: {
     ...defaultAboutConfig.contact,
     enabled: true,
     title: "Get In Touch",
-    description: "Have questions, ideas, or want to collaborate? We'd love to hear from you! Please Email", // Match original text
+    description: "Questions about the trail, gear choices, or collaboration? Reach out by email.",
     contactInfo: {
-      email: "Greg@dndiy.org" // Match the original email
+      email: "greg@dndiy.org"
     },
-    displayOrder: ["description", "email"] // Match the original order
+    displayOrder: ["description", "email"]
   }
 };

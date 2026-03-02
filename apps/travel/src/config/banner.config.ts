@@ -8,6 +8,14 @@ import banner5 from 'src/assets/banner/0005.png'
 import banner6 from 'src/assets/banner/0006.png'
 import banner7 from 'src/assets/banner/0007.png'
 import banner8 from 'src/assets/banner/0008.png'
+import bannerA from 'src/assets/banner/ComfyUI_0019.png'
+import bannerB from 'src/assets/banner/ComfyUI_0028.png'
+import bannerC from 'src/assets/banner/ComfyUI_0030.png'
+import bannerD from 'src/assets/banner/ComfyUI_0039.png'
+import bannerE from 'src/assets/banner/ComfyUI_0053.png'
+import bannerF from 'src/assets/banner/ComfyUI_0065.png'
+import bannerG from 'src/assets/banner/ComfyUI_0079.png'
+import bannerH from 'src/assets/banner/ComfyUI_0085.png'
 
 export type BannerType = 'standard' | 'video' | 'image' | 'timeline';
 
@@ -80,13 +88,13 @@ export interface BannerConfig {
 export const bannerConfig: BannerConfig = {
   defaultBannerType: 'standard',
   defaultBannerData: {},
-  bannerList: [banner1, banner2, banner3, banner4, banner5, banner6, banner7, banner8],
+  bannerList: [banner1, banner2, banner3, banner4, banner5, banner6, banner7, banner8, bannerA, bannerB, bannerC, bannerD, bannerE, bannerF, bannerG, bannerH],
   defaultBanner: banner1,
   animation: {
     enabled: true,
-    interval: 5000,
-    transitionDuration: 1000,
-    direction: 'alternate',
+    interval: 6000,
+    transitionDuration: 1200,
+    direction: 'forward',
   },
   layout: {
     height: { desktop: '60vh', mobile: '50vh' },
@@ -96,8 +104,8 @@ export const bannerConfig: BannerConfig = {
   visual: {
     objectFit: 'cover',
     objectPosition: 'center',
-    applyGradientOverlay: false,
-    gradientOverlay: 'linear-gradient(to bottom, rgba(0,0,0,0.2), transparent)',
+    applyGradientOverlay: true,
+    gradientOverlay: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.12), rgba(15, 23, 42, 0.4))',
     borderRadius: '0',
   },
   fallback: {

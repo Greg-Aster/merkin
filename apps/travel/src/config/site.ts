@@ -1,6 +1,6 @@
 export const siteConfig = {
-  title: 'Trail Log',
-  description: 'Travel notes and photos from the Pacific Crest Trail.',
-  author: 'Greg',
-  url: 'https://travel.example.com',
+  title: 'Greg Aster Trail Log',
+  description: 'Pacific Crest Trail field notes, gear breakdowns, and trail lessons from Greg Aster.',
+  author: 'Greg Aster',
+  url: 'https://travel.dndiy.org',
 }
