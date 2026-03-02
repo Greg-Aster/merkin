@@ -47,6 +47,10 @@ jobs:
         id: filter
         uses: dorny/paths-filter@v3
         with:
+          # On pushes to main, compare against the previous main SHA rather than the
+          # repository default branch (currently dev). Otherwise deploy jobs get skipped.
+          base: ${{ github.event_name == 'push' && github.event.before || '' }}
+          ref: ${{ github.sha }}
           filters: |
             travel:
               - "apps/travel/**"

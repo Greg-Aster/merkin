@@ -12,6 +12,30 @@ export const isHomePage = false
 export let profileConfig: any
 export let avatarConfig: any
 
+function normalizeBaseUrl(path: string): string {
+  if (!path) return ''
+  if (
+    path.startsWith('http://') ||
+    path.startsWith('https://') ||
+    path.startsWith('//') ||
+    path.startsWith('data:')
+  ) {
+    return path
+  }
+
+  const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+
+  if (!path.startsWith('/')) return path
+  if (baseUrl && path.startsWith(`${baseUrl}/`)) return path
+
+  const normalizedBase = import.meta.env.BASE_URL || '/'
+  const trimmedBase = normalizedBase.endsWith('/')
+    ? normalizedBase.slice(0, -1)
+    : normalizedBase
+
+  return `${trimmedBase}${path}`.replace(/\/+/g, '/')
+}
+
 // 🎬 NEW: Extended HTMLVideoElement type to support custom properties
 interface ExtendedHTMLVideoElement extends HTMLVideoElement {
   endedHandler?: () => void
@@ -59,7 +83,7 @@ function isVideoFile(src: string): boolean {
 $: useDefaultAvatars = !customAvatar
 $: displayName = customName || profileConfig?.name || 'Author'
 $: displayBio = customBio || profileConfig?.bio || ''
-$: displayLink = customLink || '/about/'
+$: displayLink = normalizeBaseUrl(customLink || '/about/')
 $: socialLinks = profileConfig?.links || []
 
 // Avatar selection logic
@@ -243,10 +267,12 @@ function renderMediaElement(
   className: string,
   loading = 'eager',
 ) {
-  if (isVideoFile(src)) {
+  const normalizedSrc = normalizeBaseUrl(src)
+
+  if (isVideoFile(normalizedSrc)) {
     return {
       type: 'video',
-      src,
+      src: normalizedSrc,
       alt,
       className,
       loading,
@@ -256,7 +282,7 @@ function renderMediaElement(
       loopDelay,
     }
   }
-  return { type: 'image', src, alt, className, loading }
+  return { type: 'image', src: normalizedSrc, alt, className, loading }
 }
 
 onMount(() => {
@@ -406,7 +432,7 @@ onMount(() => {
                   disablePictureInPicture
                   preload={mediaConfig.loading === 'eager' ? 'auto' : 'none'}
                   on:loadedmetadata={(e) => configureVideoElement(e.currentTarget as ExtendedHTMLVideoElement)}
-                />
+                ></video>
               {:else}
                 <!-- Static image in cycling mode -->
                 <img
