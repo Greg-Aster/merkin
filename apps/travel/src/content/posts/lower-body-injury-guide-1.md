@@ -10,14 +10,14 @@ tags:
   - preparation
   - thru-hiking
 category: "Trail Guides"
-image: "https://halfwayanywhere.com/wp-content/uploads/2019/05/How-Long-Does-It-Take-To-Hike-the-Pacific-Crest-Trail.jpg"
+image: "/posts/travel/pct-trail-overview.jpg"
 showImageOnPost: false
-avatarImage: "/content/avatar/avatar.png"
+avatarImage: "/avatar/avatar1.jpg"
 authorName: "Greg Aster"
 authorBio: "PCT Class of 2026 — Campo to Canada"
 bannerType: "image"
 bannerData:
-  imageUrl: "https://halfwayanywhere.com/wp-content/uploads/2019/05/How-Long-Does-It-Take-To-Hike-the-Pacific-Crest-Trail.jpg"
+  imageUrl: "/posts/travel/pct-trail-overview.jpg"
   height: "50vh"
 timelineYear: 2026
 timelineEra: "pct-2026"
@@ -64,7 +64,7 @@ The difference between hikers who finish the PCT and hikers who don't usually is
 
 ## Part 1: Knee Stuff
 
-![Knee pain is the most common reason thru-hikers leave the PCT early](https://www.rvpt.com/wp-content/uploads/2023/03/hiking-knee-pain.jpg)
+![Knee pain is the most common reason thru-hikers leave the PCT early](/posts/travel/pct-knee-pain.jpg)
 
 ### The Outer Knee Burn — IT Band
 
@@ -193,7 +193,7 @@ Aching at a hardware site when it's cold or after a huge day is normal — that'
 
 ## Part 3: Shin Stuff
 
-![Shin splints are the bread-and-butter overuse injury of the first few weeks on trail](https://myofitness.com.au/wp-content/uploads/2021/10/Shin-Splints-1024x819.png)
+![Shin splints are the bread-and-butter overuse injury of the first few weeks on trail](/posts/travel/pct-shin-splints.png)
 
 ### Classic Shin Splints
 
