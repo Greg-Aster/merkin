@@ -258,5 +258,8 @@ bannerConfig.standardBannerConfig = {
   getBannerItemPreviewDetails: (_item: any) => ({ title: '', description: '' }),
 };
 (bannerConfig as any).navbar ??= {};
-(bannerConfig as any).navbar.mobilePortraitSpacing = bannerConfig.navbar.height.mobile;
+(bannerConfig as any).navbar.mobilePortraitSpacing = '3.25rem';
 (bannerConfig as any).layout.maxWidth ??= 1920;
+(bannerConfig as any).panel ??= {};
+(bannerConfig as any).panel.top ??= {};
+(bannerConfig as any).panel.top.mobilePortrait = '-2.75rem';

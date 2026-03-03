@@ -152,6 +152,10 @@ function normalizeBannerConfig(config: any) {
     config.navbar?.mobilePortraitSpacing ??
     config.navbar?.height?.mobile ??
     '4rem'
+  const mobilePortraitPanelTop =
+    config.panel?.top?.mobilePortrait ??
+    config.panel?.top?.standard ??
+    '0'
 
   return {
     ...config,
@@ -208,6 +212,7 @@ function normalizeBannerConfig(config: any) {
         image: config.panel?.top?.image ?? '0',
         assistant: config.panel?.top?.assistant ?? config.panel?.top?.standard ?? '0',
         none: config.panel?.top?.none ?? '0',
+        mobilePortrait: mobilePortraitPanelTop,
       },
     },
     parallax: {
@@ -474,6 +479,11 @@ const {
   bannerHeight,
   mainContentOffset,
 } = layout
+
+const mobileMainPanelTop =
+  currentBannerType === 'standard'
+    ? (bannerConfig.panel?.top?.mobilePortrait ?? mainPanelTop)
+    : mainPanelTop
 
 // =====================================================================
 // ⭐ RESTORED: Background image logic (working)
@@ -842,6 +852,7 @@ const gridLayoutClasses = [
 <style define:vars={{
   'main-content-offset': mainContentOffset,
   'main-panel-top': mainPanelTop,
+  'mobile-main-panel-top': mobileMainPanelTop,
   'navbar-spacing': navbarSpacing,
   'mobile-navbar-spacing': bannerConfig.navbar.mobilePortraitSpacing,
 }}>
@@ -880,6 +891,10 @@ const gridLayoutClasses = [
   
   /* ⭐ SIMPLIFIED: Mobile spacing (navbar always visible now) */
   @media (max-width: 767px) {
+    .responsive-panel-wrapper {
+      top: var(--mobile-main-panel-top);
+    }
+
     #banner-container {
       margin-top: var(--mobile-navbar-spacing);
     }
