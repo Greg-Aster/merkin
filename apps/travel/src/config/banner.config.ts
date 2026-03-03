@@ -1,21 +1,17 @@
 import type { ImageMetadata } from 'astro'
 
-import banner1 from 'src/assets/banner/0001.png'
-import banner2 from 'src/assets/banner/0002.png'
-import banner3 from 'src/assets/banner/0003.png'
-import banner4 from 'src/assets/banner/0004.png'
-import banner5 from 'src/assets/banner/0005.png'
-import banner6 from 'src/assets/banner/0006.png'
-import banner7 from 'src/assets/banner/0007.png'
-import banner8 from 'src/assets/banner/0008.png'
-import bannerA from 'src/assets/banner/ComfyUI_0019.png'
-import bannerB from 'src/assets/banner/ComfyUI_0028.png'
-import bannerC from 'src/assets/banner/ComfyUI_0030.png'
-import bannerD from 'src/assets/banner/ComfyUI_0039.png'
-import bannerE from 'src/assets/banner/ComfyUI_0053.png'
-import bannerF from 'src/assets/banner/ComfyUI_0065.png'
-import bannerG from 'src/assets/banner/ComfyUI_0079.png'
-import bannerH from 'src/assets/banner/ComfyUI_0085.png'
+// Pacific Crest Trail landscape photography
+// Sources: Wikimedia Commons (CC/Public Domain) and Unsplash (free commercial use)
+import pctBanner01 from 'src/assets/banner/pct-banner-01-desert.jpg'          // PCT Desert, CA — Public Domain
+import pctBanner02 from 'src/assets/banner/pct-banner-02-san-jacinto.jpg'     // San Jacinto Mtns — Public Domain
+import pctBanner03 from 'src/assets/banner/pct-banner-03-sierra-tuolumne.jpg' // Tuolumne Meadows, Yosemite — CC BY-SA 4.0
+import pctBanner04 from 'src/assets/banner/pct-banner-04-eastern-sierra.jpg'  // Eastern Sierra — Unsplash
+import pctBanner05 from 'src/assets/banner/pct-banner-05-mount-shasta.jpg'    // Mount Shasta — CC BY-SA 4.0
+import pctBanner06 from 'src/assets/banner/pct-banner-06-north-cascades.jpg'  // North Cascades, WA — CC BY-SA 4.0
+import pctBanner07 from 'src/assets/banner/pct-banner-07-alpine-meadow.jpg'   // Alpine Meadow Wildflowers — CC BY 3.0
+import pctBanner08 from 'src/assets/banner/pct-banner-08-lake-reflection.jpg' // Mountain Lake Reflection — Unsplash
+import pctBanner09 from 'src/assets/banner/pct-banner-09-crater-lake.jpg'     // Crater Lake, OR — CC BY-SA 3.0
+import pctBanner10 from 'src/assets/banner/pct-banner-10-forest-trail.jpg'    // PCT Forest Trail, OR — CC BY 4.0
 
 export type BannerType = 'standard' | 'video' | 'image' | 'timeline';
 
@@ -88,12 +84,12 @@ export interface BannerConfig {
 export const bannerConfig: BannerConfig = {
   defaultBannerType: 'standard',
   defaultBannerData: {},
-  bannerList: [banner1, banner2, banner3, banner4, banner5, banner6, banner7, banner8, bannerA, bannerB, bannerC, bannerD, bannerE, bannerF, bannerG, bannerH],
-  defaultBanner: banner1,
+  bannerList: [pctBanner01, pctBanner02, pctBanner03, pctBanner04, pctBanner05, pctBanner06, pctBanner07, pctBanner08, pctBanner09, pctBanner10],
+  defaultBanner: pctBanner01,
   animation: {
     enabled: true,
-    interval: 6000,
-    transitionDuration: 1200,
+    interval: 12000,        // 12 seconds per image — slow, scenic pace
+    transitionDuration: 1800, // 1.8 second crossfade
     direction: 'forward',
   },
   layout: {
