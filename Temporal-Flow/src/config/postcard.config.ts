@@ -58,13 +58,13 @@
     export const postCardConfig: PostCardConfigs = {
   localPosts: {
     layout: {
-      imagePosition: "top",
+      imagePosition: "right",
       imageSizePercentage: 28,
       cardBorderRadius: "rounded-[var(--radius-large)]",
       showEnterButton: true
     },
     styling: {
-      titleSize: "text-3xl",
+      titleSize: "text-lg md:text-3xl",
       descriptionLines: 2,
       animationEnabled: true
     },
@@ -79,13 +79,13 @@
   },
   friendPosts: {
     layout: {
-      imagePosition: "top",
+      imagePosition: "right",
       imageSizePercentage: 28,
       cardBorderRadius: "rounded-[var(--radius-large)]",
       showEnterButton: true
     },
     styling: {
-      titleSize: "text-3xl",
+      titleSize: "text-lg md:text-3xl",
       descriptionLines: 2,
       animationEnabled: true
     },

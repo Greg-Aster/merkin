@@ -12,7 +12,7 @@ const interval = 50
 const animationEnabled = postCardConfig.localPosts.styling.animationEnabled
 ---
 
-<div id="posts-container" class="transition flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 gap-6 md:py-0 md:bg-transparent md:gap-4 mb-4">
+<div id="posts-container" class="transition flex flex-col gap-4 mb-4">
     {page.data.map((entry: any) => {
         const dateStr = formatDateToYYYYMMDD(entry.data.published)
         const timestamp = new Date(entry.data.published).getTime()

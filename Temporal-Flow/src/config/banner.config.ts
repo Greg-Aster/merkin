@@ -270,10 +270,8 @@ export const bannerConfig: BannerConfig = {
       assistant: '5.5rem', // ✅ Desktop spacing
       none: '-8rem', // ✅ Desktop spacing
     },
-    // ⭐ FIXED: Mobile portrait spacing now accounts for always-visible navbar
-    // Before: navbar was hidden, so 1.0rem was enough
-    // Now: navbar is visible, so we need proper spacing from navbar to banner
-    mobilePortraitSpacing: '6rem', // navbar height (5rem) + gap (1rem) = 6rem
+    // No extra mobile banner offset: navbar stays in normal flow above the banner
+    mobilePortraitSpacing: '0',
   },
 
   // 🎯 FIXED: THE REAL OVERLAP SYSTEM - NO MORE clamp() ISSUES
@@ -685,3 +683,7 @@ export type {
   LinkPreviewInfo,
   BannerAnimationConfig,
 } from './banners/types'
+
+(bannerConfig as any).panel ??= {}
+(bannerConfig as any).panel.top ??= {}
+(bannerConfig as any).panel.top.mobilePortrait = '-2rem'
