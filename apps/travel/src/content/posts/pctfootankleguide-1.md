@@ -2,7 +2,7 @@
 title: "PCT Foot & Ankle Survival Guide"
 published: 2026-02-28
 description: "A field-tested guide to foot care, blister prevention, tendon injuries, and shoe selection for PCT thru-hikers — including real-world lessons from 8 weeks of pre-hike training."
-image: "/posts/pctfootankleguide-1/pct-desert.jpg"
+image: "/posts/pctfootankleguide-1/boots.jpg"
 avatarImage: "/avatar/avatar1.jpg"
 authorName: "Greg Aster"
 authorBio: "PCT Class of 2026 | Trail notes, gear systems, and field-tested lessons"

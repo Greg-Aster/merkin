@@ -10,7 +10,7 @@ tags:
   - preparation
   - thru-hiking
 category: "Trail Guides"
-image: "/posts/lower-body-injury-guide-1/pct-trail-overview.jpg"
+image: "/posts/lower-body-injury-guide-1/IMAG0129.jpg"
 showImageOnPost: false
 avatarImage: "/avatar/avatar1.jpg"
 authorName: "Greg Aster"
