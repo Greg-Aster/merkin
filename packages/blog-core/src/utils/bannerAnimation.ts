@@ -3,6 +3,7 @@ export interface BannerAnimationConfig {
   interval: number
   transitionDuration: number
   direction?: 'forward' | 'reverse' | 'alternate'
+  randomStart?: boolean // true = pick a random image on each page load
 }
 
 export interface BannerItemPreviewDetails {
@@ -50,7 +51,10 @@ class BannerAnimationController {
     )
     if (this.slides.length === 0) return false
 
-    this.showSlide(0)
+    const startIndex = this.config.animationConfig.randomStart
+      ? Math.floor(Math.random() * this.slides.length)
+      : 0
+    this.showSlide(startIndex)
     if (this.config.animationConfig.enabled && this.slides.length > 1) {
       this.start()
       this.container.addEventListener('mouseenter', () => this.pause())

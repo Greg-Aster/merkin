@@ -228,6 +228,7 @@ export interface BannerAnimationConfig {
   interval: number // Milliseconds between transitions
   transitionDuration: number // Milliseconds for fade transition
   direction: 'forward' | 'reverse' | 'alternate'
+  randomStart?: boolean // true = pick a random image on each page load
   // Added from standard.ts animationConfig
   pauseOnHover?: boolean
   pauseOnMobileTouch?: boolean
