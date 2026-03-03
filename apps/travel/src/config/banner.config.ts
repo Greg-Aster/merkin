@@ -91,6 +91,7 @@ export const bannerConfig: BannerConfig = {
     interval: 12000,        // 12 seconds per image — slow, scenic pace
     transitionDuration: 1800, // 1.8 second crossfade
     direction: 'forward',
+    randomStart: true,      // start on a random image each page load
   },
   layout: {
     height: { desktop: '60vh', mobile: '50vh' },

@@ -276,6 +276,7 @@ export const animationConfig: BannerAnimationConfig = {
   interval: 4000, // 5 seconds between transitions (shorter for videos)
   transitionDuration: 1000, // 1 second fade transition
   direction: 'forward', // 'forward', 'reverse', or 'alternate'
+  randomStart: false, // MEGAMEAL uses sequential order (story content)
 
   // NEW: Navigation-specific animation settings
   pauseOnHover: true, // Pause on desktop hover
