@@ -9,14 +9,14 @@ import type {
 } from './types'
 import { isImageBannerItem, isVideoBannerItem } from './types'
 
-import banner1 from '@/assets/banner/0001.png'
-import banner2 from '@/assets/banner/0002.png'
-import banner3 from '@/assets/banner/0003.png'
-import banner4 from '@/assets/banner/0004.png'
-import banner5 from '@/assets/banner/0005.png'
-import banner6 from '@/assets/banner/0006.png'
-import banner7 from '@/assets/banner/0007.png'
-import banner8 from '@/assets/banner/0008.png'
+import banner1 from '@/assets/banner/0014.png'
+import banner2 from '@/assets/banner/0021.png'
+import banner3 from '@/assets/banner/0028.png'
+import banner4 from '@/assets/banner/0035.png'
+import banner5 from '@/assets/banner/0042.png'
+import banner6 from '@/assets/banner/0049.png'
+import banner7 from '@/assets/banner/ComfyUI_0003.png'
+import banner8 from '@/assets/banner/0085.png'
 
 export const standardBannerData: StandardBannerData = {}
 
@@ -30,14 +30,14 @@ export const videoConfig: VideoBannerConfig = {
 }
 
 export const bannerList: BannerItem[] = [
-  { type: 'image', src: banner1, alt: 'Banner image 1' } as ImageBannerItem,
-  { type: 'image', src: banner2, alt: 'Banner image 2' } as ImageBannerItem,
-  { type: 'image', src: banner3, alt: 'Banner image 3' } as ImageBannerItem,
-  { type: 'image', src: banner4, alt: 'Banner image 4' } as ImageBannerItem,
-  { type: 'image', src: banner5, alt: 'Banner image 5' } as ImageBannerItem,
-  { type: 'image', src: banner6, alt: 'Banner image 6' } as ImageBannerItem,
-  { type: 'image', src: banner7, alt: 'Banner image 7' } as ImageBannerItem,
-  { type: 'image', src: banner8, alt: 'Banner image 8' } as ImageBannerItem,
+  { type: 'image', src: banner1, alt: 'DNDIY banner 1' } as ImageBannerItem,
+  { type: 'image', src: banner2, alt: 'DNDIY banner 2' } as ImageBannerItem,
+  { type: 'image', src: banner3, alt: 'DNDIY banner 3' } as ImageBannerItem,
+  { type: 'image', src: banner4, alt: 'DNDIY banner 4' } as ImageBannerItem,
+  { type: 'image', src: banner5, alt: 'DNDIY banner 5' } as ImageBannerItem,
+  { type: 'image', src: banner6, alt: 'DNDIY banner 6' } as ImageBannerItem,
+  { type: 'image', src: banner7, alt: 'DNDIY banner 7' } as ImageBannerItem,
+  { type: 'image', src: banner8, alt: 'DNDIY banner 8' } as ImageBannerItem,
 ]
 
 export const bannerLinks: (string | null)[] = bannerList.map(() => null)

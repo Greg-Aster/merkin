@@ -2,7 +2,7 @@
 title: "Death by 1000 Cuts - My Reasons for Going on the Trail"
 published: 2026-04-03
 description: "I'm 43, broke, and have nowhere to be."
-image: "/posts/pct-reasons/title.jpg"
+image: "/posts/pct-reasons/title.jpeg"
 showImageOnPost: false
 tags: [PCT, Personal, Thru-Hiking, Why]
 category: "PCT 2026"

@@ -59,10 +59,10 @@ export const animationConfig: BannerAnimationConfig = {
   motion: {
     enabled: true,
     mode: 'alternate',
-    duration: 4800,
-    scale: 1.06,
-    panDistance: 3,
-    easing: 'ease-in-out',
+    duration: 6000,
+    scale: 1.03,
+    panDistance: 1.5,
+    easing: 'linear',
     alternate: true,
   },
 }
