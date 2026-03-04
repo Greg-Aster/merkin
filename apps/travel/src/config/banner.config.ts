@@ -63,9 +63,10 @@ export interface BannerConfig {
     }
   }
   layout: {
-    height: { desktop: string; mobile: string }
-    overlap: { desktop: string; mobile: string }
+    height: string
+    mobileHeight?: string
     maxWidth: number
+    mainContentOffset: string
   }
   visual: {
     objectFit: 'cover' | 'contain' | 'fill'
@@ -79,21 +80,28 @@ export interface BannerConfig {
     type: 'color' | 'gradient'
     value: string
   }
-  navbarSpacing: {
-    standard: string
-    timeline: string
-    video: string
-    image: string
-  }
   navbar: {
-    height: { desktop: string; mobile: string }
+    height: string
+    spacing: {
+      standard: string
+      timeline: string
+      video: string
+      image: string
+      assistant: string
+      none: string
+    }
+    mobileBannerGap?: string
+    mobilePortraitSpacing: string
   }
   panel: {
     top: {
       video: string
       image: string
       timeline: string
+      assistant: string
       standard: string
+      none: string
+      mobilePortrait: string
     }
   }
   parallax: {
@@ -125,9 +133,10 @@ export const bannerConfig: BannerConfig = {
     },
   },
   layout: {
-    height: { desktop: '60vh', mobile: '50vh' },
-    overlap: { desktop: '3rem', mobile: '2rem' },
+    height: '80vh',
+    mobileHeight: '50vh',
     maxWidth: 1920,
+    mainContentOffset: '.5rem',
   },
   visual: {
     objectFit: 'cover',
@@ -141,21 +150,28 @@ export const bannerConfig: BannerConfig = {
     type: 'gradient',
     value: 'linear-gradient(to bottom, var(--color-primary-light), var(--color-primary))',
   },
-  navbarSpacing: {
-    standard: '0',
-    timeline: '5.5rem',
-    video: '5.5rem',
-    image: '0',
-  },
   navbar: {
-    height: { desktop: '4.5rem', mobile: '3.5rem' },
+    height: '5rem',
+    spacing: {
+      standard: '3rem',
+      timeline: '5.5rem',
+      video: '5.5rem',
+      image: '4rem',
+      assistant: '5.5rem',
+      none: '-8rem',
+    },
+    mobileBannerGap: '0.75rem',
+    mobilePortraitSpacing: '0.75rem',
   },
   panel: {
     top: {
       video: '-0.5rem',
       image: '-0.5rem',
       timeline: '-0.5rem',
-      standard: '-6.5rem',
+      assistant: '-0.5rem',
+      standard: '-2rem',
+      none: '-2rem',
+      mobilePortrait: '-2rem',
     },
   },
   parallax: {
@@ -165,10 +181,9 @@ export const bannerConfig: BannerConfig = {
   },
 }
 
-export function getResponsiveBannerDimensions(isMobile: boolean = false) {
+export function getResponsiveBannerDimensions(): { height: string } {
   return {
-    height: isMobile ? bannerConfig.layout.height.mobile : bannerConfig.layout.height.desktop,
-    overlap: isMobile ? bannerConfig.layout.overlap.mobile : bannerConfig.layout.overlap.desktop,
+    height: bannerConfig.layout.height,
   }
 }
 
@@ -199,8 +214,8 @@ export function getPanelTopPosition(bannerType: BannerType): string {
   }
 }
 
-export function getNavbarHeight(isMobile: boolean = false): string {
-  return isMobile ? bannerConfig.navbar.height.mobile : bannerConfig.navbar.height.desktop
+export function getNavbarHeight(): string {
+  return bannerConfig.navbar.height
 }
 
 export function isVideoBannerData(data: any): data is VideoBannerData {
@@ -234,7 +249,7 @@ export function getBannerLink(_index: number): string | null {
 
 export function determineBannerConfiguration(post: any, _pageType: string, defaultBannerLink = '') {
   const mainPanelTop = getPanelTopPosition(bannerConfig.defaultBannerType)
-  const navbarSpacing = bannerConfig.navbarSpacing.standard
+  const navbarSpacing = bannerConfig.navbar.spacing.standard
   return {
     postData: null,
     bannerType: {
@@ -256,10 +271,12 @@ export function determineBannerConfiguration(post: any, _pageType: string, defau
     layout: {
       mainPanelTop,
       navbarSpacing,
-      bannerHeight: bannerConfig.layout.height.desktop,
+      bannerHeight: bannerConfig.layout.height,
+      bannerHeightMobile:
+        bannerConfig.layout.mobileHeight ?? bannerConfig.layout.height,
       bannerOverlap: '0',
       dynamicOverlap: '0',
-      mainContentOffset: '1.5rem',
+      mainContentOffset: bannerConfig.layout.mainContentOffset,
     },
     finalBannerLink: defaultBannerLink,
     currentBannerType: 'standard' as BannerType,
@@ -290,9 +307,4 @@ bannerConfig.standardBannerConfig = {
   isImageBannerItem: (_item: any) => true,
   getBannerItemPreviewDetails: (_item: any) => ({ title: '', description: '' }),
 };
-(bannerConfig as any).navbar ??= {};
-(bannerConfig as any).navbar.mobilePortraitSpacing = '3.25rem';
 (bannerConfig as any).layout.maxWidth ??= 1920;
-(bannerConfig as any).panel ??= {};
-(bannerConfig as any).panel.top ??= {};
-(bannerConfig as any).panel.top.mobilePortrait = '-2.75rem';

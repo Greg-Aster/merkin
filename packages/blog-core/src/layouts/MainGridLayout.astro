@@ -143,21 +143,72 @@ function createLegacyStandardBannerConfig(config: any) {
   }
 }
 
+function normalizeCssSize(
+  value: unknown,
+  fallback: string,
+  defaultUnit: 'vh' | 'rem' = 'vh',
+): string {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value === 0 ? '0' : `${value}${defaultUnit}`
+  }
+
+  if (typeof value !== 'string') return fallback
+
+  const trimmedValue = value.trim()
+  if (!trimmedValue) return fallback
+
+  // Keep valid CSS expressions as-is.
+  if (
+    trimmedValue.startsWith('calc(') ||
+    trimmedValue.startsWith('clamp(') ||
+    trimmedValue.startsWith('min(') ||
+    trimmedValue.startsWith('max(') ||
+    trimmedValue.startsWith('var(')
+  ) {
+    return trimmedValue
+  }
+
+  // Accept common CSS size units directly.
+  if (
+    /^-?\d*\.?\d+(px|rem|em|vh|vw|vmin|vmax|svh|lvh|dvh|%)$/i.test(
+      trimmedValue,
+    )
+  ) {
+    return trimmedValue
+  }
+
+  // Handle bare numbers like "80" from manual tuning.
+  if (/^-?\d*\.?\d+$/.test(trimmedValue)) {
+    const numericValue = Number(trimmedValue)
+    return numericValue === 0 ? '0' : `${trimmedValue}${defaultUnit}`
+  }
+
+  return fallback
+}
+
 function normalizeBannerConfig(config: any) {
   const standardBannerConfig =
     config.standardBannerConfig ?? createLegacyStandardBannerConfig(config)
 
-  const desktopBannerHeight =
+  const rawDesktopBannerHeight =
     typeof config.layout?.height === 'string'
       ? config.layout.height
-      : config.layout?.height?.desktop ?? '60vh'
-  const mobileBannerHeight =
-    typeof config.layout?.height === 'string'
-      ? config.layout.height
-      : config.layout?.height?.mobile ?? desktopBannerHeight
+      : config.layout?.height?.desktop
+  const desktopBannerHeight = normalizeCssSize(rawDesktopBannerHeight, '60vh')
+
+  const rawMobileBannerHeight =
+    config.layout?.mobileHeight ??
+    (typeof config.layout?.height === 'object'
+      ? config.layout?.height?.mobile
+      : undefined)
+  const mobileBannerHeight = normalizeCssSize(
+    rawMobileBannerHeight,
+    desktopBannerHeight,
+  )
 
   const spacingFromConfig = config.navbar?.spacing ?? config.navbarSpacing ?? {}
-  const mobilePortraitSpacing =
+  const mobileBannerGap =
+    config.navbar?.mobileBannerGap ??
     config.navbar?.mobilePortraitSpacing ??
     config.navbar?.height?.mobile ??
     '4rem'
@@ -200,7 +251,9 @@ function normalizeBannerConfig(config: any) {
         typeof config.navbar?.height === 'string'
           ? config.navbar.height
           : config.navbar?.height?.desktop ?? '4.5rem',
-      mobilePortraitSpacing,
+      mobileBannerGap,
+      // Backward compatibility: older configs may still read/write this key.
+      mobilePortraitSpacing: mobileBannerGap,
       spacing: {
         standard: spacingFromConfig.standard ?? '0',
         timeline: spacingFromConfig.timeline ?? '5.5rem',
@@ -488,6 +541,15 @@ const {
   bannerHeightMobile,
   mainContentOffset,
 } = layout
+
+const resolvedBannerHeight = normalizeCssSize(
+  bannerHeight,
+  bannerConfig.layout.height,
+)
+const resolvedBannerHeightMobile = normalizeCssSize(
+  bannerHeightMobile,
+  bannerConfig.layout.mobileHeight ?? resolvedBannerHeight,
+)
 
 const mobileMainPanelTop =
   currentBannerType === 'standard'
@@ -868,9 +930,11 @@ const gridLayoutClasses = [
   'main-panel-top': mainPanelTop,
   'mobile-main-panel-top': mobileMainPanelTop,
   'navbar-spacing': navbarSpacing,
-  'mobile-navbar-spacing': bannerConfig.navbar.mobilePortraitSpacing,
-  'banner-height': bannerHeight,
-  'banner-height-mobile': bannerHeightMobile,
+  'mobile-navbar-spacing':
+    bannerConfig.navbar.mobileBannerGap ??
+    bannerConfig.navbar.mobilePortraitSpacing,
+  'banner-height': resolvedBannerHeight,
+  'banner-height-mobile': resolvedBannerHeightMobile,
 }}>
   /* ⭐ CRITICAL: Explicit mobile touch scrolling enablement */
   html, body {
@@ -926,7 +990,7 @@ const gridLayoutClasses = [
     }
 
     #banner-container .banner-aspect-container {
-      height: var(--banner-height-mobile);
+      height: var(--banner-height-mobile, var(--banner-height));
     }
   }
 
