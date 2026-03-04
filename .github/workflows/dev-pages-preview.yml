@@ -11,6 +11,27 @@ on:
         required: true
         default: "dev"
         type: string
+      site:
+        description: "Site selection for manual previews"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - changed
+          - travel
+          - temporal
+          - dndiy
+          - megameal
+      prune_mode:
+        description: "Large-asset pruning mode"
+        required: true
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - always
+          - never
 
 permissions:
   contents: read
@@ -33,6 +54,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -49,6 +71,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build all sites into subfolders
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_BEFORE: ${{ github.event.before || '' }}
+          SITE_INPUT: ${{ inputs.site || 'all' }}
+          PRUNE_INPUT: ${{ inputs.prune_mode || 'auto' }}
         run: |
           set -euo pipefail
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
@@ -57,22 +84,189 @@ jobs:
 
           rm -rf preview-dist
           mkdir -p preview-dist
-
-          SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${BASE}/megameal/" pnpm build:megameal
-          cp -a apps/megameal/dist preview-dist/megameal
-
-          SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${BASE}/travel/" pnpm build:travel
-          cp -a apps/travel/dist preview-dist/travel
-
-          SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${BASE}/dndiy/" pnpm build:dndiy
-          cp -a DNDIY.github.io/dist preview-dist/dndiy
-
-          SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${BASE}/temporal/" pnpm build:temporal
-          cp -a Temporal-Flow/dist preview-dist/temporal
-
           touch preview-dist/.nojekyll
 
-          cat > preview-dist/index.html <<'HTMLEOF'
+          travel=false
+          temporal=false
+          dndiy=false
+          megameal=false
+          detect_changed=false
+
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            case "${SITE_INPUT}" in
+              all)
+                travel=true
+                temporal=true
+                dndiy=true
+                megameal=true
+                ;;
+              changed)
+                detect_changed=true
+                ;;
+              travel)
+                travel=true
+                ;;
+              temporal)
+                temporal=true
+                ;;
+              dndiy)
+                dndiy=true
+                ;;
+              megameal)
+                megameal=true
+                ;;
+              *)
+                echo "Unsupported site input: ${SITE_INPUT}" >&2
+                exit 64
+                ;;
+            esac
+          else
+            detect_changed=true
+          fi
+
+          if [[ "${detect_changed}" == "true" ]]; then
+            base_sha="${EVENT_BEFORE}"
+            if [[ -z "${base_sha}" || "${base_sha}" == "0000000000000000000000000000000000000000" ]]; then
+              if git rev-parse HEAD^ >/dev/null 2>&1; then
+                base_sha="$(git rev-parse HEAD^)"
+              else
+                base_sha=""
+              fi
+            fi
+
+            if [[ -n "${base_sha}" ]]; then
+              changed_files="$(git diff --name-only "${base_sha}" "${GITHUB_SHA}" || true)"
+            else
+              changed_files="$(git show --pretty='' --name-only "${GITHUB_SHA}" || true)"
+            fi
+
+            shared=false
+            while IFS= read -r file; do
+              [[ -z "${file}" ]] && continue
+              case "${file}" in
+                apps/travel/*) travel=true ;;
+                Temporal-Flow/*) temporal=true ;;
+                DNDIY.github.io/*) dndiy=true ;;
+                apps/megameal/*) megameal=true ;;
+              esac
+              case "${file}" in
+                packages/*|package.json|pnpm-lock.yaml|pnpm-workspace.yaml|.github/workflows/dev-pages-preview.yml)
+                  shared=true
+                  ;;
+              esac
+            done <<< "${changed_files}"
+
+            if [[ "${shared}" == "true" ]]; then
+              travel=true
+              temporal=true
+              dndiy=true
+              megameal=true
+            fi
+          fi
+
+          echo "Preview selection:"
+          echo "  travel=${travel}"
+          echo "  temporal=${temporal}"
+          echo "  dndiy=${dndiy}"
+          echo "  megameal=${megameal}"
+
+          links_file="$(mktemp)"
+          built_count=0
+          placeholder_count=0
+          prune_note=""
+
+          build_site() {
+            local key="$1"
+            local label="$2"
+            local dist_dir="$3"
+            local build_script="$4"
+
+            echo "Building ${label}"
+            SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${BASE}/${key}/" pnpm "${build_script}"
+            cp -a "${dist_dir}" "preview-dist/${key}"
+            printf '<li><a href="%s/">%s</a> <em>(built in this run)</em></li>\n' "${key}" "${label}" >> "${links_file}"
+            built_count=$((built_count + 1))
+          }
+
+          create_placeholder() {
+            local key="$1"
+            local label="$2"
+            local live_url="$3"
+
+            mkdir -p "preview-dist/${key}"
+            cat > "preview-dist/${key}/index.html" <<EOF
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${label} Preview</title>
+          <style>body{font-family:sans-serif;max-width:680px;margin:4rem auto;padding:0 1rem;line-height:1.5}a{word-break:break-word}</style>
+          </head>
+          <body>
+          <h1>${label}</h1>
+          <p>This site was not rebuilt in this changed-only preview run, so this path is a placeholder.</p>
+          <p>Live site: <a href="${live_url}">${live_url}</a></p>
+          <p><a href="../">Back to preview index</a></p>
+          </body>
+          </html>
+          EOF
+
+            printf '<li><a href="%s/">%s</a> <em>(placeholder, not rebuilt)</em></li>\n' "${key}" "${label}" >> "${links_file}"
+            placeholder_count=$((placeholder_count + 1))
+          }
+
+          if [[ "${megameal}" == "true" ]]; then
+            build_site "megameal" "MEGA MEAL SAGA" "apps/megameal/dist" "build:megameal"
+          fi
+          if [[ "${travel}" == "true" ]]; then
+            build_site "travel" "Trail Log (Travel)" "apps/travel/dist" "build:travel"
+          fi
+          if [[ "${dndiy}" == "true" ]]; then
+            build_site "dndiy" "DNDIY" "DNDIY.github.io/dist" "build:dndiy"
+          fi
+          if [[ "${temporal}" == "true" ]]; then
+            build_site "temporal" "Temporal Flow" "Temporal-Flow/dist" "build:temporal"
+          fi
+
+          if [[ "${megameal}" != "true" ]]; then
+            create_placeholder "megameal" "MEGA MEAL SAGA" "https://megameal.org"
+          fi
+          if [[ "${travel}" != "true" ]]; then
+            create_placeholder "travel" "Trail Log (Travel)" "https://travel.dndiy.org"
+          fi
+          if [[ "${dndiy}" != "true" ]]; then
+            create_placeholder "dndiy" "DNDIY" "https://dndiy.org"
+          fi
+          if [[ "${temporal}" != "true" ]]; then
+            create_placeholder "temporal" "Temporal Flow" "https://temporalflow.org"
+          fi
+
+          prune_mode="${PRUNE_INPUT}"
+          if [[ -z "${prune_mode}" ]]; then
+            prune_mode="auto"
+          fi
+
+          total_before="$(du -sb preview-dist | cut -f1)"
+          should_prune=false
+          if [[ "${prune_mode}" == "always" ]]; then
+            should_prune=true
+          elif [[ "${prune_mode}" == "auto" && "${total_before}" -gt 950000000 ]]; then
+            should_prune=true
+          fi
+
+          if [[ "${should_prune}" == "true" ]]; then
+            mapfile -t pruned_files < <(find preview-dist -type f -size +25M -print)
+            if [[ "${#pruned_files[@]}" -gt 0 ]]; then
+              printf '%s\n' "${pruned_files[@]}" > preview-dist/pruned-large-assets.txt
+              find preview-dist -type f -size +25M -delete
+              prune_note="Large assets over 25MB were pruned for preview stability. See pruned-large-assets.txt."
+              echo "${prune_note}"
+            fi
+          fi
+
+          total_after="$(du -sb preview-dist | cut -f1)"
+          echo "Preview artifact size before pruning: ${total_before} bytes"
+          echo "Preview artifact size after pruning:  ${total_after} bytes"
+
+          cat > preview-dist/index.html <<HTMLEOF
           <!DOCTYPE html>
           <html>
           <head><meta charset="utf-8"><title>Merkin Dev Preview</title>
@@ -80,13 +274,18 @@ jobs:
           </head>
           <body>
           <h1>Merkin Dev Preview</h1>
-          <a href="megameal/">MEGA MEAL SAGA</a>
-          <a href="travel/">Trail Log (Travel)</a>
-          <a href="dndiy/">DNDIY</a>
-          <a href="temporal/">Temporal Flow</a>
+          <p>Built ${built_count} site(s) for this preview.</p>
+          <p>Placeholder site(s): ${placeholder_count}</p>
+          $(if [[ "${built_count}" -eq 0 ]]; then echo '<p>No site changes detected for this commit; all sites are placeholders in this preview.</p>'; fi)
+          <ul>
+          $(cat "${links_file}")
+          </ul>
+          $(if [[ -n "${prune_note}" ]]; then echo "<p><strong>${prune_note}</strong></p>"; fi)
           </body>
           </html>
           HTMLEOF
+
+          rm -f "${links_file}"
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5

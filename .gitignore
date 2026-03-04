@@ -34,3 +34,9 @@ dist/
 # Non-monorepo sibling projects in this folder
 Mesh_Hair_Generator/
 mascot-chatbot-cf-worker/
+
+# Archived large media (cleanup guardrails)
+**/posts/Mega-Meal-Explained/gif/title4.gif
+**/posts/Mega-Meal-Explained/gif/running-480p.gif
+apps/megameal/public/assets/hdri/ComfyUI_0057.png
+apps/megameal/public/assets/hdri/ComfyUI_0058.png
