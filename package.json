@@ -29,7 +29,8 @@
   },
   "pnpm": {
     "overrides": {
-      "svelte": "5.26.2"
+      "svelte": "5.26.2",
+      "underscore": ">=1.13.8"
     }
   }
 }
