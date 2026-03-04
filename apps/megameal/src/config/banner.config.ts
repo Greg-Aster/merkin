@@ -138,6 +138,7 @@ export interface BannerConfig {
   // WORKING: Layout values used by MainGridLayout.astro
   layout: {
     height: string
+    mobileHeight?: string
     maxWidth: number
     mainContentOffset: string
   }
@@ -170,6 +171,7 @@ export interface BannerConfig {
       none: string
     }
     // ⭐ FIXED: Mobile portrait spacing now accounts for always-visible navbar
+    mobileBannerGap?: string
     mobilePortraitSpacing: string
   }
 
@@ -236,9 +238,10 @@ export const bannerConfig: BannerConfig = {
 
   // WORKING: Layout used by MainGridLayout.astro
   layout: {
-    height: '60vh',
+    height: '80vh',
+    mobileHeight: '50vh',
     maxWidth: 3840,
-    mainContentOffset: '1.5rem',
+    mainContentOffset: '.5rem',
   },
 
   // WORKING: Visual config used by existing code
@@ -271,7 +274,8 @@ export const bannerConfig: BannerConfig = {
       none: '-8rem', // ✅ Desktop spacing
     },
     // No extra mobile banner offset: navbar stays in normal flow above the banner
-    mobilePortraitSpacing: '0',
+    mobileBannerGap: '0.75rem',
+    mobilePortraitSpacing: '0.75rem',
   },
 
   // 🎯 FIXED: THE REAL OVERLAP SYSTEM - NO MORE clamp() ISSUES
@@ -281,7 +285,7 @@ export const bannerConfig: BannerConfig = {
       image: '-0.5rem', // ✅ WORKING VALUE
       timeline: '-0.5rem', // ✅ WORKING VALUE
       assistant: '-0.5rem', // ✅ WORKING VALUE
-      standard: '-3rem', // ✅ FIXED: Simple rem value (was clamp issue)
+      standard: '-2rem', // ✅ Reduced overlap for better content visibility
       none: '12rem', // ✅ WORKING VALUE
     },
   },
@@ -564,6 +568,8 @@ export function determineBannerConfiguration(
       mainPanelTop, // 🎯 THIS CONTROLS OVERLAP! (RESTORED)
       navbarSpacing, // ⭐ SIMPLIFIED - CSS handles mobile portrait
       bannerHeight,
+      bannerHeightMobile:
+        bannerConfig.layout.mobileHeight ?? bannerConfig.layout.height,
       bannerOverlap: '0', // Removed unused value
       dynamicOverlap: '0', // Removed unused value
       mainContentOffset,
