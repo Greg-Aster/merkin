@@ -51,8 +51,6 @@ Another issue with ultralight packing is the expense of the gear. Quality gear m
 
 Thru-hiking should be accessible to everyone, poor and rich alike. Nature is a resource that does not require capitalist ventures. We are not trying to buy our way through the wilderness or give in to the latest gear fads.
 
-![An aluminum spork is fine, but it is not a philosophy](/posts/pct-pack-weight/aluminum-spork.png)
-
 Be less miserable. Be comfortable. Enjoy yourself. Just make sure you are properly trained for what you carry, that you can afford what you have, and that you can afford to fix it when it breaks.
 
 ## The Guy on the Mountain
@@ -66,6 +64,8 @@ I made it to the top and back down and had a very good time.
 I think a lot of the people climbing that day didn't consider that you could just get off your couch and do it, if you are healthy and capable. Instead, people tend to go out and buy gear, prep extensively, train, join climbing clubs, and tie themselves to each other. It is quite a sight to see four guys in extreme mountaineering gear, decked out for Everest, while a guy in a jacket, jeans, and boots just walks by.
 
 Anyway. These are just thoughts. Pack what works for you, train for what you carry, and don't let anyone with a titanium spork make you feel bad about it.
+
+![An aluminum spork is fine, but it is not a philosophy](/posts/pct-pack-weight/aluminum-spork.png)
 
 ---
 
