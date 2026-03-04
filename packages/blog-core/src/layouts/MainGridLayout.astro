@@ -147,6 +147,15 @@ function normalizeBannerConfig(config: any) {
   const standardBannerConfig =
     config.standardBannerConfig ?? createLegacyStandardBannerConfig(config)
 
+  const desktopBannerHeight =
+    typeof config.layout?.height === 'string'
+      ? config.layout.height
+      : config.layout?.height?.desktop ?? '60vh'
+  const mobileBannerHeight =
+    typeof config.layout?.height === 'string'
+      ? config.layout.height
+      : config.layout?.height?.mobile ?? desktopBannerHeight
+
   const spacingFromConfig = config.navbar?.spacing ?? config.navbarSpacing ?? {}
   const mobilePortraitSpacing =
     config.navbar?.mobilePortraitSpacing ??
@@ -164,10 +173,8 @@ function normalizeBannerConfig(config: any) {
     standardBannerConfig,
     layout: {
       ...config.layout,
-      height:
-        typeof config.layout?.height === 'string'
-          ? config.layout.height
-          : config.layout?.height?.desktop ?? '60vh',
+      height: desktopBannerHeight,
+      mobileHeight: mobileBannerHeight,
       maxWidth: config.layout?.maxWidth ?? 1920,
       mainContentOffset: config.layout?.mainContentOffset ?? '1.5rem',
     },
@@ -371,6 +378,7 @@ const determineBannerConfiguration =
               bannerConfig.navbar.spacing[currentBannerType] ??
               bannerConfig.navbar.spacing.standard,
             bannerHeight: bannerConfig.layout.height,
+            bannerHeightMobile: bannerConfig.layout.mobileHeight ?? bannerConfig.layout.height,
             mainContentOffset: bannerConfig.layout.mainContentOffset,
           },
           finalBannerLink: postData.bannerLink || defaultBannerLink,
@@ -477,6 +485,7 @@ const {
   mainPanelTop, // This controls the overlap (WORKING)
   navbarSpacing, // This controls navbar spacing (WORKING + MOBILE PORTRAIT FIX)
   bannerHeight,
+  bannerHeightMobile,
   mainContentOffset,
 } = layout
 
@@ -860,6 +869,8 @@ const gridLayoutClasses = [
   'mobile-main-panel-top': mobileMainPanelTop,
   'navbar-spacing': navbarSpacing,
   'mobile-navbar-spacing': bannerConfig.navbar.mobilePortraitSpacing,
+  'banner-height': bannerHeight,
+  'banner-height-mobile': bannerHeightMobile,
 }}>
   /* ⭐ CRITICAL: Explicit mobile touch scrolling enablement */
   html, body {
@@ -893,6 +904,16 @@ const gridLayoutClasses = [
     margin-top: var(--navbar-spacing);
     transition: margin-top 0.3s ease;
   }
+
+  /* Shared source of truth for banner height */
+  #banner-container .banner-aspect-container {
+    height: var(--banner-height);
+  }
+
+  /* Disable legacy aspect-ratio sizing; height comes from config via MainGridLayout */
+  #banner-container .banner-aspect-container::before {
+    padding-bottom: 0 !important;
+  }
   
   /* ⭐ SIMPLIFIED: Mobile spacing (navbar always visible now) */
   @media (max-width: 767px) {
@@ -902,6 +923,10 @@ const gridLayoutClasses = [
 
     #banner-container {
       margin-top: var(--mobile-navbar-spacing);
+    }
+
+    #banner-container .banner-aspect-container {
+      height: var(--banner-height-mobile);
     }
   }
 
