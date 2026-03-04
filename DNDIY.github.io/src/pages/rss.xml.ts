@@ -35,7 +35,7 @@ export async function GET(context: APIContext): Promise<Response> {
     description: siteConfig.subtitle || 'No description',
     site:
       context.site ??
-      (context.url ? context.url.origin : 'https://temporalflow.org'),
+      (context.url ? context.url.origin : 'https://dndiy.org'),
     items: blog.map(post => {
       return {
         title: post.data.title,
