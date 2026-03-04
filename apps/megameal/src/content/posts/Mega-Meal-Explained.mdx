@@ -26,6 +26,7 @@ mascotContext: "This post explains a parody movie trailer featuring a fedora-cla
 ---
 
 import CollapsibleScript from '../../components/CollapsibleScript.astro';
+import AnimatedMedia from '../../components/misc/AnimatedMedia.astro';
 import ImageWrapper from '../../components/misc/ImageWrapper.astro';
 
 <CollapsibleScript />
@@ -52,11 +53,12 @@ import ImageWrapper from '../../components/misc/ImageWrapper.astro';
   {/* Welcome Message - As per your latest version */}
   <div className="card-base2 p-6 md:p-10 mb-8 overflow-hidden relative shadow-xl border-2 border-[oklch(0.85_0.015_var(--hue))] dark:border-[oklch(0.25_0.015_var(--hue))] rounded-xl">
     <div className="relative w-full rounded-lg overflow-hidden mb-6">
-      <ImageWrapper
-        src="content/posts/Mega-Meal-Explained/gif/logo3.gif"
+      <AnimatedMedia
+        webmSrc="/posts/Mega-Meal-Explained/gif/logo3.webm"
+        fallbackSrc="/posts/Mega-Meal-Explained/gif/logo3.gif"
         alt="Mega Meal Neon Sign"
         class="w-full h-auto object-contain brightness-100 dark:brightness-100 transition"
-        style={{ filter: 'hue-rotate(var(--hue, 0deg))' }}
+        style="filter: hue-rotate(var(--hue, 0deg));"
       />
     </div>
     <div className="text-center font-sriracha text-xl md:text-2xl font-bold text-[var(--text-color)] dark:text-[var(--text-color)]">

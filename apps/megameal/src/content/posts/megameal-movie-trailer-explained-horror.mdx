@@ -22,6 +22,7 @@ lang: ""
 mascotContext: "This document analyzes a reality-breaking transmission featuring entities that were once corporate mascots, now transformed into cosmic horrors. The broadcast depicts interdimensional rifts, sentient sustenance, and the collapse of reality itself. Reader discretion advised - prolonged exposure may result in existential dread."
 #alternateVersionUrl: "./megameal-movie-trailer-explained/"
 ---
+import AnimatedMedia from '../../components/misc/AnimatedMedia.astro';
 import ImageWrapper from '../../components/misc/ImageWrapper.astro';
 
 
@@ -158,11 +159,12 @@ import ImageWrapper from '../../components/misc/ImageWrapper.astro';
             ⚠ REALITY BREACH DETECTED ⚠
           </div>
           <div className="void-hole mx-auto w-64 h-64 mb-6 border-4 border-red-600 bg-black p-4 flex items-center justify-center">
-            <ImageWrapper
-              src="content/posts/Mega-Meal-Explained/gif/logo3.gif"
+            <AnimatedMedia
+              webmSrc="/posts/Mega-Meal-Explained/gif/logo3.webm"
+              fallbackSrc="/posts/Mega-Meal-Explained/gif/logo3.gif"
               alt="The Sigil of the Infinite Hunger"
               class="w-full h-full object-contain opacity-75 brightness-50 contrast-200"
-              style={{ filter: 'brightness(0.3) contrast(2) hue-rotate(270deg) saturate(3) sepia(0.8)' }}
+              style="filter: brightness(0.3) contrast(2) hue-rotate(270deg) saturate(3) sepia(0.8);"
             />
           </div>
           <div className="dimensional-text text-2xl font-bold mb-4">

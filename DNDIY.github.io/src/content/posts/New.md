@@ -61,4 +61,7 @@ I’m actively working on several projects, including:
 Greg
 
 
-![uwantsumart.gif](./New/uwantsumart.gif)
+<video autoplay loop muted playsinline preload="metadata" style="max-width: 100%; height: auto;">
+  <source src="/posts/New/uwantsumart.webm" type="video/webm" />
+  <img src="/posts/New/uwantsumart.gif" alt="uwantsumart animation" loading="lazy" decoding="async" />
+</video>
