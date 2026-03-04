@@ -39,6 +39,28 @@ export interface BannerConfig {
     interval: number
     transitionDuration: number
     direction: 'forward' | 'reverse' | 'alternate'
+    randomStart?: boolean
+    motion?: {
+      enabled: boolean
+      mode?:
+        | 'zoom-in'
+        | 'zoom-out'
+        | 'pan-left'
+        | 'pan-right'
+        | 'pan-up'
+        | 'pan-down'
+        | 'pan-horizontal'
+        | 'pan-vertical'
+        | 'alternate'
+        | 'random'
+        | 'push-in'
+        | 'push-out'
+      duration?: number
+      scale?: number
+      panDistance?: number
+      easing?: string
+      alternate?: boolean
+    }
   }
   layout: {
     height: { desktop: string; mobile: string }
@@ -92,6 +114,15 @@ export const bannerConfig: BannerConfig = {
     transitionDuration: 1800, // 1.8 second crossfade
     direction: 'forward',
     randomStart: true,      // start on a random image each page load
+    motion: {
+      enabled: true,
+      mode: 'alternate',
+      duration: 11500,
+      scale: 1.08,
+      panDistance: 4,
+      easing: 'ease-in-out',
+      alternate: true,
+    },
   },
   layout: {
     height: { desktop: '60vh', mobile: '50vh' },
@@ -154,6 +185,8 @@ export function getBannerAnimationSettings() {
     interval: bannerConfig.animation.interval,
     transitionDuration: bannerConfig.animation.transitionDuration,
     direction: bannerConfig.animation.direction,
+    randomStart: bannerConfig.animation.randomStart,
+    motion: bannerConfig.animation.motion,
   }
 }
 

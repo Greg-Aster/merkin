@@ -234,6 +234,27 @@ export interface BannerAnimationConfig {
   pauseOnMobileTouch?: boolean
   resumeAfterNavigation?: boolean
   smoothTransitions?: boolean
+  motion?: {
+    enabled: boolean
+    mode?:
+      | 'zoom-in'
+      | 'zoom-out'
+      | 'pan-left'
+      | 'pan-right'
+      | 'pan-up'
+      | 'pan-down'
+      | 'pan-horizontal'
+      | 'pan-vertical'
+      | 'alternate'
+      | 'random'
+      | 'push-in'
+      | 'push-out'
+    duration?: number // Milliseconds per slide motion cycle
+    scale?: number // Target max scale for zoom/pan effects
+    panDistance?: number // Pan travel distance in percent
+    easing?: string // CSS timing function
+    alternate?: boolean // Flip direction between slides
+  }
 }
 
 /**
