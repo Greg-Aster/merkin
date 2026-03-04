@@ -172,6 +172,7 @@ jobs:
 
           links_file="$(mktemp)"
           built_count=0
+          placeholder_count=0
           prune_note=""
 
           build_site() {
@@ -183,8 +184,33 @@ jobs:
             echo "Building ${label}"
             SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${BASE}/${key}/" pnpm "${build_script}"
             cp -a "${dist_dir}" "preview-dist/${key}"
-            printf '<a href="%s/">%s</a>\n' "${key}" "${label}" >> "${links_file}"
+            printf '<li><a href="%s/">%s</a> <em>(built in this run)</em></li>\n' "${key}" "${label}" >> "${links_file}"
             built_count=$((built_count + 1))
+          }
+
+          create_placeholder() {
+            local key="$1"
+            local label="$2"
+            local live_url="$3"
+
+            mkdir -p "preview-dist/${key}"
+            cat > "preview-dist/${key}/index.html" <<EOF
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${label} Preview</title>
+          <style>body{font-family:sans-serif;max-width:680px;margin:4rem auto;padding:0 1rem;line-height:1.5}a{word-break:break-word}</style>
+          </head>
+          <body>
+          <h1>${label}</h1>
+          <p>This site was not rebuilt in this changed-only preview run, so this path is a placeholder.</p>
+          <p>Live site: <a href="${live_url}">${live_url}</a></p>
+          <p><a href="../">Back to preview index</a></p>
+          </body>
+          </html>
+          EOF
+
+            printf '<li><a href="%s/">%s</a> <em>(placeholder, not rebuilt)</em></li>\n' "${key}" "${label}" >> "${links_file}"
+            placeholder_count=$((placeholder_count + 1))
           }
 
           if [[ "${megameal}" == "true" ]]; then
@@ -198,6 +224,19 @@ jobs:
           fi
           if [[ "${temporal}" == "true" ]]; then
             build_site "temporal" "Temporal Flow" "Temporal-Flow/dist" "build:temporal"
+          fi
+
+          if [[ "${megameal}" != "true" ]]; then
+            create_placeholder "megameal" "MEGA MEAL SAGA" "https://megameal.org"
+          fi
+          if [[ "${travel}" != "true" ]]; then
+            create_placeholder "travel" "Trail Log (Travel)" "https://travel.dndiy.org"
+          fi
+          if [[ "${dndiy}" != "true" ]]; then
+            create_placeholder "dndiy" "DNDIY" "https://dndiy.org"
+          fi
+          if [[ "${temporal}" != "true" ]]; then
+            create_placeholder "temporal" "Temporal Flow" "https://temporalflow.org"
           fi
 
           prune_mode="${PRUNE_INPUT}"
@@ -236,8 +275,11 @@ jobs:
           <body>
           <h1>Merkin Dev Preview</h1>
           <p>Built ${built_count} site(s) for this preview.</p>
-          $(if [[ "${built_count}" -eq 0 ]]; then echo '<p>No site changes detected for this commit.</p>'; fi)
+          <p>Placeholder site(s): ${placeholder_count}</p>
+          $(if [[ "${built_count}" -eq 0 ]]; then echo '<p>No site changes detected for this commit; all sites are placeholders in this preview.</p>'; fi)
+          <ul>
           $(cat "${links_file}")
+          </ul>
           $(if [[ -n "${prune_note}" ]]; then echo "<p><strong>${prune_note}</strong></p>"; fi)
           </body>
           </html>
