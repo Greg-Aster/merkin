@@ -1,0 +1,57 @@
+---
+import { url } from '../../utils/url-utils'
+
+interface Props {
+  id?: string
+  class?: string
+  style?: string
+  webmSrc: string
+  fallbackSrc: string
+  alt?: string
+  poster?: string
+}
+
+const {
+  id,
+  webmSrc,
+  fallbackSrc,
+  alt = '',
+  poster,
+} = Astro.props
+
+const className = Astro.props.class
+const style = Astro.props.style
+const mediaClass = 'w-full h-full object-cover'
+---
+<div id={id} class:list={[className, 'overflow-hidden relative']}>
+  <div class="transition absolute inset-0 dark:bg-black/00 bg-opacity-50 pointer-events-none"></div>
+  <video
+    class={mediaClass}
+    style={style}
+    autoplay
+    loop
+    muted
+    playsinline
+    preload="metadata"
+    poster={poster ? url(poster) : undefined}
+  >
+    <source src={url(webmSrc)} type="video/webm" />
+    <img
+      src={url(fallbackSrc)}
+      alt={alt}
+      class={mediaClass}
+      loading="lazy"
+      decoding="async"
+    />
+  </video>
+  <noscript>
+    <img
+      src={url(fallbackSrc)}
+      alt={alt}
+      class={mediaClass}
+      style={style}
+      loading="lazy"
+      decoding="async"
+    />
+  </noscript>
+</div>
