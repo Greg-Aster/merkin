@@ -56,6 +56,15 @@ export const animationConfig: BannerAnimationConfig = {
   pauseOnMobileTouch: true,
   resumeAfterNavigation: true,
   smoothTransitions: true,
+  motion: {
+    enabled: true,
+    mode: 'alternate',
+    duration: 4800,
+    scale: 1.06,
+    panDistance: 3,
+    easing: 'ease-in-out',
+    alternate: true,
+  },
 }
 
 export const iconSVGs: Record<string, string> = {
@@ -74,6 +83,7 @@ export function getBannerAnimationSettings(): BannerAnimationConfig {
     pauseOnMobileTouch: animationConfig.pauseOnMobileTouch,
     resumeAfterNavigation: animationConfig.resumeAfterNavigation,
     smoothTransitions: animationConfig.smoothTransitions,
+    motion: animationConfig.motion,
   }
 }
 

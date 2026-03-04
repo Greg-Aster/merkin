@@ -702,43 +702,48 @@ const gridLayoutClasses = [
                         />
                       </div>
                       
-                      {isVideoItem ? (
-                        <>
-                          <video
-                            src={item.src}
-                            autoplay={bannerConfig.standardBannerConfig.video.autoplay}
-                            muted={bannerConfig.standardBannerConfig.video.muted}
-                            loop={bannerConfig.standardBannerConfig.video.loop}
-                            playsinline={bannerConfig.standardBannerConfig.video.playsInLine}
-                            controls={bannerConfig.standardBannerConfig.video.controls}
-                            preload={item.preload || bannerConfig.standardBannerConfig.video.preload}
-                            class={`banner-video w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
-                            style={`border-radius: ${bannerConfig.visual.borderRadius};`}
-                            onerror="this.style.display='none'; var ne = this.nextElementSibling; if (ne) ne.style.display='block';"
-                          >
-                            Your browser does not support the video tag.
-                          </video>
+                      <div
+                        class="banner-media-layer w-full h-full overflow-hidden"
+                        data-banner-media-type={isVideoItem ? 'video' : isImageItem ? 'image' : 'unknown'}
+                      >
+                        {isVideoItem ? (
+                          <>
+                            <video
+                              src={item.src}
+                              autoplay={bannerConfig.standardBannerConfig.video.autoplay}
+                              muted={bannerConfig.standardBannerConfig.video.muted}
+                              loop={bannerConfig.standardBannerConfig.video.loop}
+                              playsinline={bannerConfig.standardBannerConfig.video.playsInLine}
+                              controls={bannerConfig.standardBannerConfig.video.controls}
+                              preload={item.preload || bannerConfig.standardBannerConfig.video.preload}
+                              class={`banner-video w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
+                              style={`border-radius: ${bannerConfig.visual.borderRadius};`}
+                              onerror="this.style.display='none'; var ne = this.nextElementSibling; if (ne) ne.style.display='block';"
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                            <Image
+                              src={item.fallbackImage}
+                              alt={item.alt}
+                              width={bannerConfig.layout.maxWidth}
+                              height={Math.round(bannerConfig.layout.maxWidth * 0.5625)}
+                              class={`banner-image-fallback w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
+                              style={`border-radius: ${bannerConfig.visual.borderRadius}; display: none;`}
+                              loading="lazy"
+                            />
+                          </>
+                        ) : isImageItem ? (
                           <Image
-                            src={item.fallbackImage}
+                            src={item.src}
                             alt={item.alt}
                             width={bannerConfig.layout.maxWidth}
                             height={Math.round(bannerConfig.layout.maxWidth * 0.5625)}
-                            class={`banner-image-fallback w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
-                            style={`border-radius: ${bannerConfig.visual.borderRadius}; display: none;`}
-                            loading="lazy"
+                            class={`banner-image w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
+                            style={`border-radius: ${bannerConfig.visual.borderRadius};`}
+                            loading={index === 0 ? 'eager' : 'lazy'}
                           />
-                        </>
-                      ) : isImageItem ? (
-                        <Image
-                          src={item.src}
-                          alt={item.alt}
-                          width={bannerConfig.layout.maxWidth}
-                          height={Math.round(bannerConfig.layout.maxWidth * 0.5625)}
-                          class={`banner-image w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
-                          style={`border-radius: ${bannerConfig.visual.borderRadius};`}
-                          loading={index === 0 ? 'eager' : 'lazy'}
-                        />
-                      ) : null}
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 );
@@ -899,6 +904,133 @@ const gridLayoutClasses = [
       margin-top: var(--mobile-navbar-spacing);
     }
   }
+
+  .banner-media-layer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .banner-media-layer > .banner-image,
+  .banner-media-layer > .banner-video,
+  .banner-media-layer > .banner-image-fallback {
+    transform-origin: center center;
+    will-change: transform;
+  }
+
+  .banner-media-layer.banner-motion-active > .banner-image,
+  .banner-media-layer.banner-motion-active > .banner-video,
+  .banner-media-layer.banner-motion-active > .banner-image-fallback {
+    animation-duration: var(--banner-motion-duration, 6000ms);
+    animation-timing-function: var(--banner-motion-easing, ease-in-out);
+    animation-fill-mode: both;
+    animation-iteration-count: 1;
+  }
+
+  .banner-media-layer.banner-motion-zoom-in > .banner-image,
+  .banner-media-layer.banner-motion-zoom-in > .banner-video,
+  .banner-media-layer.banner-motion-zoom-in > .banner-image-fallback {
+    animation-name: bannerMotionZoomIn;
+  }
+
+  .banner-media-layer.banner-motion-zoom-out > .banner-image,
+  .banner-media-layer.banner-motion-zoom-out > .banner-video,
+  .banner-media-layer.banner-motion-zoom-out > .banner-image-fallback {
+    animation-name: bannerMotionZoomOut;
+  }
+
+  .banner-media-layer.banner-motion-pan-left > .banner-image,
+  .banner-media-layer.banner-motion-pan-left > .banner-video,
+  .banner-media-layer.banner-motion-pan-left > .banner-image-fallback {
+    animation-name: bannerMotionPanLeft;
+  }
+
+  .banner-media-layer.banner-motion-pan-right > .banner-image,
+  .banner-media-layer.banner-motion-pan-right > .banner-video,
+  .banner-media-layer.banner-motion-pan-right > .banner-image-fallback {
+    animation-name: bannerMotionPanRight;
+  }
+
+  .banner-media-layer.banner-motion-pan-up > .banner-image,
+  .banner-media-layer.banner-motion-pan-up > .banner-video,
+  .banner-media-layer.banner-motion-pan-up > .banner-image-fallback {
+    animation-name: bannerMotionPanUp;
+  }
+
+  .banner-media-layer.banner-motion-pan-down > .banner-image,
+  .banner-media-layer.banner-motion-pan-down > .banner-video,
+  .banner-media-layer.banner-motion-pan-down > .banner-image-fallback {
+    animation-name: bannerMotionPanDown;
+  }
+
+  @keyframes bannerMotionZoomIn {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(var(--banner-motion-scale, 1.08));
+    }
+  }
+
+  @keyframes bannerMotionZoomOut {
+    from {
+      transform: scale(var(--banner-motion-scale, 1.08));
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes bannerMotionPanLeft {
+    from {
+      transform: scale(var(--banner-motion-pan-scale, 1.1))
+        translate3d(0, 0, 0);
+    }
+    to {
+      transform: scale(var(--banner-motion-pan-scale, 1.1))
+        translate3d(calc(-1 * var(--banner-motion-pan-distance, 4%)), 0, 0);
+    }
+  }
+
+  @keyframes bannerMotionPanRight {
+    from {
+      transform: scale(var(--banner-motion-pan-scale, 1.1))
+        translate3d(calc(-1 * var(--banner-motion-pan-distance, 4%)), 0, 0);
+    }
+    to {
+      transform: scale(var(--banner-motion-pan-scale, 1.1))
+        translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes bannerMotionPanUp {
+    from {
+      transform: scale(var(--banner-motion-pan-scale, 1.1))
+        translate3d(0, 0, 0);
+    }
+    to {
+      transform: scale(var(--banner-motion-pan-scale, 1.1))
+        translate3d(0, calc(-1 * var(--banner-motion-pan-distance, 4%)), 0);
+    }
+  }
+
+  @keyframes bannerMotionPanDown {
+    from {
+      transform: scale(var(--banner-motion-pan-scale, 1.1))
+        translate3d(0, calc(-1 * var(--banner-motion-pan-distance, 4%)), 0);
+    }
+    to {
+      transform: scale(var(--banner-motion-pan-scale, 1.1))
+        translate3d(0, 0, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .banner-media-layer.banner-motion-active > .banner-image,
+    .banner-media-layer.banner-motion-active > .banner-video,
+    .banner-media-layer.banner-motion-active > .banner-image-fallback {
+      animation: none !important;
+    }
+  }
 </style>
 
 <!-- =============================================================== -->
@@ -1048,10 +1180,174 @@ const gridLayoutClasses = [
   // Initialize banner animation system
   document.addEventListener('DOMContentLoaded', () => {
     const standardBannerContainer = document.getElementById('standard-banner-container');
-    const slides = standardBannerContainer?.querySelectorAll('.banner-slide') || [];
+    const slides = Array.from(
+      standardBannerContainer?.querySelectorAll('.banner-slide') || [],
+    );
     const animationConfig = bannerAnimationSettings || {};
+    const motionConfig = animationConfig.motion || {};
+    const motionClassNames = [
+      'banner-motion-active',
+      'banner-motion-zoom-in',
+      'banner-motion-zoom-out',
+      'banner-motion-pan-left',
+      'banner-motion-pan-right',
+      'banner-motion-pan-up',
+      'banner-motion-pan-down',
+    ];
+    const motionEffects = [
+      'zoom-in',
+      'zoom-out',
+      'pan-left',
+      'pan-right',
+      'pan-up',
+      'pan-down',
+    ];
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const toFiniteNumber = (value, fallbackValue) => {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : fallbackValue;
+    };
+    const interval = Math.max(1000, toFiniteNumber(animationConfig.interval, 5000));
+    const transitionDuration = Math.max(
+      0,
+      toFiniteNumber(animationConfig.transitionDuration, 1000),
+    );
+    const randomStartEnabled = !!animationConfig.randomStart;
+    const initialSlideIndex =
+      randomStartEnabled && slides.length > 1
+        ? Math.floor(Math.random() * slides.length)
+        : 0;
+    const motionEnabled = !!(
+      animationConfig.enabled &&
+      motionConfig.enabled &&
+      !prefersReducedMotion
+    );
+    const motionDuration = Math.max(
+      transitionDuration + 250,
+      toFiniteNumber(motionConfig.duration, interval),
+    );
+    const motionScale = Math.min(
+      1.3,
+      Math.max(1.01, toFiniteNumber(motionConfig.scale, 1.08)),
+    );
+    const motionPanDistance = Math.min(
+      12,
+      Math.max(1, toFiniteNumber(motionConfig.panDistance, 4)),
+    );
+    const motionPanScale = Math.max(1.02, motionScale);
+    const motionEasing =
+      typeof motionConfig.easing === 'string' && motionConfig.easing.trim().length > 0
+        ? motionConfig.easing.trim()
+        : 'ease-in-out';
+    const shouldAlternateDirection = motionConfig.alternate === true;
+    const normalizeMotionMode = (modeValue) => {
+      if (typeof modeValue !== 'string') return 'zoom-in';
+      const normalized = modeValue.toLowerCase().replace(/[^a-z]/g, '');
+      switch (normalized) {
+        case 'zoomin':
+        case 'pushin':
+          return 'zoom-in';
+        case 'zoomout':
+        case 'pushout':
+          return 'zoom-out';
+        case 'panleft':
+          return 'pan-left';
+        case 'panright':
+          return 'pan-right';
+        case 'panup':
+          return 'pan-up';
+        case 'pandown':
+          return 'pan-down';
+        case 'pan':
+        case 'panhorizontal':
+          return 'pan-horizontal';
+        case 'panvertical':
+          return 'pan-vertical';
+        case 'alternate':
+        case 'mixed':
+          return 'alternate';
+        case 'random':
+          return 'random';
+        default:
+          return 'zoom-in';
+      }
+    };
+    const motionMode = normalizeMotionMode(motionConfig.mode);
+    const oppositeEffect = {
+      'zoom-in': 'zoom-out',
+      'zoom-out': 'zoom-in',
+      'pan-left': 'pan-right',
+      'pan-right': 'pan-left',
+      'pan-up': 'pan-down',
+      'pan-down': 'pan-up',
+    };
     let bannerIntervalId = null;
-    let currentSlideIndex = 0;
+    let motionCleanupTimeoutId = null;
+    let currentSlideIndex = initialSlideIndex;
+
+    const clearMotionClasses = (mediaLayer) => {
+      mediaLayer.classList.remove(...motionClassNames);
+    };
+
+    const cleanupHiddenSlideMotion = () => {
+      slides.forEach((slide, index) => {
+        if (index === currentSlideIndex) return;
+        const mediaLayer = slide.querySelector('.banner-media-layer');
+        if (mediaLayer) {
+          clearMotionClasses(mediaLayer);
+        }
+      });
+    };
+
+    const resolveMotionEffect = (slideIndex) => {
+      if (motionMode === 'alternate') {
+        return motionEffects[slideIndex % motionEffects.length];
+      }
+      if (motionMode === 'random') {
+        return motionEffects[Math.floor(Math.random() * motionEffects.length)];
+      }
+      if (motionMode === 'pan-horizontal') {
+        return slideIndex % 2 === 0 ? 'pan-left' : 'pan-right';
+      }
+      if (motionMode === 'pan-vertical') {
+        return slideIndex % 2 === 0 ? 'pan-up' : 'pan-down';
+      }
+      if (shouldAlternateDirection && oppositeEffect[motionMode]) {
+        return slideIndex % 2 === 0 ? motionMode : oppositeEffect[motionMode];
+      }
+      return motionMode;
+    };
+
+    const applyMotionToSlide = (slideIndex) => {
+      if (!motionEnabled) return;
+      const slide = slides[slideIndex];
+      if (!slide) return;
+
+      const mediaLayer = slide.querySelector('.banner-media-layer');
+      if (!mediaLayer) return;
+
+      const mediaType = mediaLayer.dataset.bannerMediaType;
+      if (mediaType !== 'image') return;
+
+      const effect = resolveMotionEffect(slideIndex);
+
+      clearMotionClasses(mediaLayer);
+      mediaLayer.style.setProperty('--banner-motion-duration', `${motionDuration}ms`);
+      mediaLayer.style.setProperty('--banner-motion-easing', motionEasing);
+      mediaLayer.style.setProperty('--banner-motion-scale', String(motionScale));
+      mediaLayer.style.setProperty('--banner-motion-pan-scale', String(motionPanScale));
+      mediaLayer.style.setProperty(
+        '--banner-motion-pan-distance',
+        `${motionPanDistance}%`,
+      );
+
+      // Restart keyframes cleanly whenever a slide becomes active.
+      void mediaLayer.offsetWidth;
+      mediaLayer.classList.add('banner-motion-active', `banner-motion-${effect}`);
+    };
 
     const showSlide = (nextIndex) => {
       if (!slides.length) return;
@@ -1060,14 +1356,22 @@ const gridLayoutClasses = [
         const slideElement = slide;
         slideElement.style.opacity = index === nextIndex ? '1' : '0';
       });
+
+      applyMotionToSlide(nextIndex);
       currentSlideIndex = nextIndex;
+
+      if (motionCleanupTimeoutId) {
+        clearTimeout(motionCleanupTimeoutId);
+      }
+      motionCleanupTimeoutId = setTimeout(() => {
+        cleanupHiddenSlideMotion();
+      }, Math.max(transitionDuration + 60, 120));
     };
 
     const startBannerAnimation = () => {
       if (!slides.length || slides.length <= 1 || !animationConfig.enabled) return;
       if (bannerIntervalId) clearInterval(bannerIntervalId);
 
-      const interval = Number(animationConfig.interval) || 5000;
       bannerIntervalId = setInterval(() => {
         const nextIndex = (currentSlideIndex + 1) % slides.length;
         showSlide(nextIndex);
@@ -1081,11 +1385,13 @@ const gridLayoutClasses = [
     };
 
     if (standardBannerContainer && slides.length > 0) {
-      showSlide(0);
+      showSlide(initialSlideIndex);
       startBannerAnimation();
 
-      standardBannerContainer.addEventListener('mouseenter', stopBannerAnimation);
-      standardBannerContainer.addEventListener('mouseleave', startBannerAnimation);
+      if (animationConfig.pauseOnHover !== false) {
+        standardBannerContainer.addEventListener('mouseenter', stopBannerAnimation);
+        standardBannerContainer.addEventListener('mouseleave', startBannerAnimation);
+      }
 
       standardBannerContainer.querySelectorAll('.banner-link').forEach((linkElement) => {
         const hasLink = linkElement.dataset.hasLink === 'true';
