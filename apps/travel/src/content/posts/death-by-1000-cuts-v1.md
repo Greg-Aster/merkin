@@ -1,7 +1,7 @@
 ---
 title: "Death by 1000 Cuts - My Reasons for Going on the Trail"
 published: 2026-03-03
-description: "I'm 43, broke, and have nowhere to be."
+description: "Spoiler: I'm 43, broke, and have nowhere to be."
 image: "/posts/pct-reasons/title.jpeg"
 avatarImage: "/posts/pct-reasons/title.jpeg"
 showImageOnPost: false

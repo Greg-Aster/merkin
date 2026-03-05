@@ -26,6 +26,10 @@ const tocDepthOptions = [
   { value: 3, label: 'Level 1-3 Headers' },
 ]
 
+if (siteConfig && siteConfig.enablePostFooterNav === undefined) {
+  siteConfig.enablePostFooterNav = false
+}
+
 // Handle changes to form fields
 function handleChange() {
   dispatch('change', { siteConfig, licenseConfig })
@@ -123,6 +127,29 @@ function handleChange() {
             How many levels of headings to display in the table of contents
           </p>
         </div>
+      </div>
+    </div>
+
+    <!-- Post Footer Navigation -->
+    <div class="pt-4 border-t border-neutral-200 dark:border-neutral-700">
+      <h2 class="text-xl font-semibold text-black/80 dark:text-white/80 mb-4">Post Footer Navigation</h2>
+
+      <div class="space-y-4">
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            id="post-footer-nav-enable"
+            bind:checked={siteConfig.enablePostFooterNav}
+            on:change={handleChange}
+            class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded"
+          />
+          <label for="post-footer-nav-enable" class="ml-2 block text-sm text-neutral-700 dark:text-neutral-300">
+            Show Back to Home and Previous/Next links at the end of posts
+          </label>
+        </div>
+        <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+          Disabled by default. Enable this on sites where you want article-end navigation.
+        </p>
       </div>
     </div>
     

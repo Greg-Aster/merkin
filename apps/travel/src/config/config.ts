@@ -10,6 +10,7 @@ import { AUTO_MODE } from '@constants/constants.ts'
 export const siteConfig: SiteConfig = {
   title: "Greg Aster Trail Log",
   subtitle: "PCT 2026 | Field Notes, Gear, and Trail Lessons",
+  enablePostFooterNav: true,
   lang: "en",
   themeColor: {
     hue: 145,
@@ -44,7 +45,7 @@ export const navBarConfig: NavBarConfig = {
 
 export const profileConfig: ProfileConfig = {
   avatar: "/avatar/avatar1.jpg",
-  name: "Greg Aster",
+  name: "Greg Mechanic Aster",
   bio: "PCT Class of 2026 | Field notes, gear systems, and trail lessons",
   links: [
     {

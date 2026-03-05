@@ -10,6 +10,7 @@ export type SiteConfig = {
   subtitle: string
   description?: string
   url?: string
+  enablePostFooterNav?: boolean
   lang: string
   themeColor: {
     hue: number
