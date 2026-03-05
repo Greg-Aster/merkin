@@ -1,19 +1,19 @@
 ---
-title: "PCT Foot & Ankle Survival Guide"
+title: "PCT Foot & Shoe selection"
 published: 2026-02-28
 description: "A field-tested guide to foot care, blister prevention, tendon injuries, and shoe selection for PCT thru-hikers — including real-world lessons from 8 weeks of pre-hike training."
 image: "/posts/pctfootankleguide-1/boots.jpg"
-avatarImage: "/avatar/avatar1.jpg"
+avatarImage: "/posts/pctfootankleguide-1/boots.jpg"
 authorName: "Greg Aster"
 authorBio: "PCT Class of 2026 | Trail notes, gear systems, and field-tested lessons"
 bannerType: "image"
 bannerData:
-  imageUrl: "/posts/pctfootankleguide-1/pct-desert.jpg"
+  imageUrl: "/posts/pctfootankleguide-1/pct-trail-shoes.jpg"
 timelineYear: 2026
 timelineEra: "pct-2026"
 timelineLocation: "Campo, California"
 isKeyEvent: true
-showImageOnPost: true
+showImageOnPost: false
 tags: [PCT, Hiking, Foot Care, Gear, Thru-Hiking, Trail Running, Blisters, Injury Prevention]
 category: "Trail Guides"
 draft: false
@@ -22,11 +22,9 @@ lang: "en"
 
 **Early Warning Signs · Field Treatment · Shoe Strategy**
 
-*Pacific Crest Trail 2026 | Campo to Canada*
+*Pacific Crest Trail 2026 -*
 
----
-
-Your feet are your engine. Everything else on this trail is replaceable — your feet are not. This guide compiles research, real experience, and hard-won lessons into a practical field reference. It covers the early warning signs you must recognize, how to treat problems before they become trail-enders, and how to make smart shoe decisions from the desert start to the Sierra.
+Your feet are your engine. Everything else on this trail is replaceable — your feet are not. This guide compiles research into a practical field reference. It covers the early warning signs you must recognize, how to treat problems before they become trail-enders, and how to make smart shoe decisions from the desert start to the Sierra.
 
 ![Trail running shoes are the first line of defense against preventable foot problems](/posts/pctfootankleguide-1/pct-trail-shoes.jpg)
 *Shoe fit, traction, and how your foot moves inside the shoe matter long before injury becomes obvious.*
@@ -57,10 +55,10 @@ The single most important skill on a long-distance hike is knowing the differenc
 
 ### The Hot Spot Doctrine
 
-A blister that has formed is a problem. A hot spot — the warm, slightly reddened patch before a blister forms — is just information. Your only job when you feel a hot spot is to stop immediately, address it, and move on. Thirty seconds of prevention saves days of recovery.
+A blister that has formed is a problem. A hot spot — the warm, slightly reddened patch before a blister forms — is just information. Your only job when you feel a hot spot is to stop immediately, address it, and move on. Prevention saves days of recovery.
 
 <!-- photo: close-up of Leukotape applied to a heel -->
-*Photo placeholder: add a local close-up of Leukotape applied to a heel.*
+![close-up of tape applied to a heel](/posts/pctfootankleguide-1/wrapped-ankle.jpg)
 
 ### Early Warning Signs
 
@@ -70,7 +68,7 @@ A blister that has formed is a problem. A hot spot — the warm, slightly redden
 
 ### Field Treatment Protocol
 
-- Stop when you first feel the hot spot — not at the next mile marker
+- Stop when you first feel the hot spot
 - Remove boot and sock, dry the foot thoroughly
 - Apply Leukotape or moleskin directly over the hot spot
 - If a blister has already formed: drain with a sterile needle, leave the roof intact, tape securely
@@ -79,98 +77,14 @@ A blister that has formed is a problem. A hot spot — the warm, slightly redden
 ### Prevention
 
 - Keep toenails trimmed short and straight across — most black toenails are a nail-length problem
-- Use quality socks (Darn Tough or similar merino wool)
+- Use quality socks (merino wool seems popular)
 - Change socks mid-day in desert heat to reduce moisture
 - Apply Leukotape proactively to known problem areas before your day starts
 - Check shoe fit regularly — swollen trail feet need looser lacing
 
 ---
 
-## Part 3: Tendon & Overuse Injuries
-
-### Top-of-Foot / Extensor Tendon Pain
-
-The extensor tendons run across the top of the foot and connect into the front of the ankle. They work constantly on trail because your foot is dorsiflexing with every step, especially on uneven terrain where your foot makes micro-adjustments. This is one of the most common overuse issues for hikers ramping up mileage.
-
-**Early warning signs:**
-- Soreness or tightness where the top of the foot meets the ankle
-- Pain that worsens with uphill sections
-- Tenderness directly under the boot tongue
-
-**Most common causes:**
-- Lacing too tight across the top of the foot — pressure on the tendons under the tongue
-- Deconditioned extensors that fatigue faster than the rest of the foot
-- High shoe drop or stiff soles forcing the tendons to work harder
-
-**Field treatment:**
-- Loosen laces — especially the top eyelets
-- Try "lace skipping" — skip the eyelet directly over the painful spot
-- NSAIDs (ibuprofen) for a few days if no contraindications
-- Elevate at camp
-- Stretch calves gently — tight calves increase load on extensors
-
-> ⚠️ **Ignoring extensor tendon pain that isn't warming up = 1-2 weeks off trail. Catch it early.**
-
----
-
-### Medial Ankle / Posterior Tibial Tendon
-
-Pain on the inside of the ankle, a few centimeters above the ankle bone, often feels like a "sprained" sensation even without a specific injury event. This location points to the posterior tibial tendon or the deltoid ligament complex — both are load-bearing on every single step.
-
-<!-- photo: medial ankle anatomy reference diagram -->
-*Photo placeholder: add a local medial ankle anatomy reference image.*
-
-**Early warning signs:**
-- Dull aching on the inner ankle just above the medial malleolus
-- Pain that worsens going downhill or on uneven terrain
-- Morning stiffness that eases after the first mile
-
-**Field treatment & prevention:**
-- Leukotape applied with pre-wrap (Cover-Roll) to the medial ankle — search "posterior tibial tendon taping" for technique
-- Ankle compression sleeve targeting the malleolus area
-- Reduce mileage for 3-5 days if actively flaring
-- Ice 15-20 minutes after walking
-- Check insoles — flat or worn insoles increase load on this tendon significantly
-
-> Posterior tibial tendon issues caught early almost never become trail-enders. The key is not ignoring the first signals.
-
----
-
-### Achilles Tendinopathy
-
-The Achilles takes enormous load on a thru-hike, especially during big mileage days and ascents. Mid-tendon pain (2-6 cm above the heel) is the most common presentation for hikers.
-
-**Early warning signs:**
-- Morning stiffness that takes a mile or more to loosen up
-- Tenderness to touch along the tendon
-- Pain that "warms up" in the first hour but returns at end of day
-
-**Red flags — seek help:**
-- Sudden sharp pain like a "kick" from behind — possible rupture
-- Swelling and warmth combined with resting pain
-- Pain getting worse day over day rather than plateauing
-
----
-
-## Part 4: Stress Reactions & Fractures
-
-Stress fractures are the injury most likely to genuinely end a thru-hike if missed. They develop gradually from repetitive loading and are often mistaken for tendon soreness until they become serious.
-
-**Early warning signs:**
-- Very specific, pinpoint pain — you can put one finger on the exact spot
-- Pain increases with impact, not with warmth
-- Swelling on the top of the foot
-- Does NOT warm up with activity — stays painful or worsens
-
-> ⚠️ **If pain does not ease after the first 20 minutes of walking and is getting worse day over day — stop hiking. This is the stress fracture pattern.**
-
-### A Note on Surgical Hardware
-
-If you have a plate or screws from a previous fracture, those areas deserve extra attention. Stress risers can occur at screw holes under heavy repetitive loading. Aching at hardware sites from cold or elevation changes is normal; escalating localized pain at the hardware site is not. If in doubt, get it imaged before continuing.
-
----
-
-## Part 5: Footwear Strategy
+## Part 3: Footwear Strategy
 
 ### The Reality: Trail Runners vs. Boots
 
@@ -229,8 +143,7 @@ The correct approach: **embrace getting wet, and prioritize fast drying.** Mesh 
 
 The problem with "get Altra Lone Peaks" advice is that shoe models change every year, and a redesign can completely alter fit and feel. The Altra Lone Peak narrowed its toe box in recent versions to the frustration of many longtime fans. The shoe you read about in a 2022 blog post may be a different shoe in 2026.
 
-<!-- photo: breathable trail runner with a roomy toe box and grippy outsole -->
-*Photo placeholder: add a local trail runner detail photo showing fit and outsole.*
+![Trail runners with a wide toe box and Vibram outsole — what to look for in a PCT shoe](/posts/pctfootankleguide-1/pct-trail-shoes.jpg)
 
 **What to look for in any model, regardless of brand:**
 
@@ -282,47 +195,8 @@ Section A is dry, sandy, and hot by mid-morning. Trail runners are the right cal
 
 Most hikers' first pair dies around Big Bear / Wrightwood (~400 miles). By Kennedy Meadows (~700 miles), evaluate snow on the ground. Most years, trail runners with microspikes handle the Sierra fine.
 
-<!-- photo: snowy Sierra section of the PCT -->
-*Photo placeholder: add a local Sierra trail conditions photo.*
 
 > Most hikers do NOT wear boots for the entire trail. Trail runners by default — switch temporarily only if conditions demand it.
-
----
-
-## Part 6: Ankle & Calf Pain Location Guide
-
-### Ankle Pain by Location
-
-**Lateral (outer) ankle:**
-- Lateral ankle sprain — most common rolled ankle, involves ATFL/CFL ligaments
-- Peroneal tendinopathy — outer ankle overuse, worsens on uneven terrain
-- Fibula stress fracture — dull aching that increases with activity
-
-**Medial (inner) ankle:**
-- Posterior tibial tendinopathy — overuse, inner ankle/arch, worse on hills
-- Deltoid ligament sprain — less common, requires significant force
-- Tarsal tunnel syndrome — nerve compression causing burning/tingling
-
-**Front of ankle:**
-- Anterior ankle impingement — pinching pain with dorsiflexion (going uphill)
-- Extensor tendinopathy — top of foot/ankle, often from tight lacing
-
-**Behind/below ankle:**
-- Achilles tendinopathy — stiffness and pain at or above the heel
-- Retrocalcaneal bursitis — swelling right where tendon meets heel bone
-- Achilles rupture — sudden severe pain, emergency
-
-### Calf Pain by Type
-
-**Muscle-related:**
-- Gastrocnemius strain — upper/middle calf, sudden sharp pain during effort
-- Soleus strain — deeper, lower calf, common in endurance hikers
-- DOMS — diffuse soreness 24-72 hours after big effort, normal adaptation
-
-**Serious — don't ignore:**
-- Deep vein thrombosis (DVT) — persistent swelling, warmth, redness; requires urgent care
-- Chronic exertional compartment syndrome — tight pressure during activity that resolves with rest
-- Referred pain from lumbar spine — L4/L5/S1 issues can mimic calf pain
 
 ---
 
@@ -339,7 +213,7 @@ Most hikers' first pair dies around Big Bear / Wrightwood (~400 miles). By Kenne
 
 ---
 
-## Part 7: Real-World Application — A Case Study in Pre-Hike Foot Prep
+## Part 4: Real-World Application — A Case Study in Pre-Hike Foot Prep
 
 *The following is a first-person account of the 8-week training period leading up to a March 10, 2026 PCT start at Campo. It's included here because theory is one thing — watching it play out in a real body on real terrain is another.*
 
@@ -347,7 +221,7 @@ Most hikers' first pair dies around Big Bear / Wrightwood (~400 miles). By Kenne
 
 ### The Setup
 
-I'm 6'1", 200-220 lbs, with a history of ankle surgery and prior fibula fracture with hardware still in place. Not an ultralight hiker. My starting pack weight is around 44 lbs — well above the thru-hiker average of 25-30 lbs. I started training 8 weeks out from my start date, which is on the shorter end of what most people recommend.
+I'm 6'1", 215-220 lbs, with a history of ankle surgery and prior fibula fracture with hardware still in place. Not an ultralight hiker. My starting pack weight is around 45 lbs LOADED — well above the thru-hiker average. I started training 8 weeks out from my start date, which is on the shorter end of what most people recommend.
 
 The relevant factors going in:
 - Surgical hardware in the lower leg from a prior fibula fracture
@@ -369,9 +243,9 @@ The first walks were 5 miles. Feet were sore in a general, diffuse way — the e
 
 ### Ramping Up to 10-16 Miles
 
-As mileage increased, the first real issue appeared: **blisters**. The initial response was band-aids, which helped in the short term — but they move around, bunch up, and fall off with sweat.
+As mileage increased, hot spots began to develop. The initial response was band-aids, which solved the issue.
 
-The lesson blisters were teaching: once skin starts to blister in a particular spot, that spot is telling you something. Too much friction there. Possibly a sock issue, a lacing issue, a shoe that doesn't fit perfectly under load.
+Once skin starts to hurt in a particular spot, that spot is telling you something. Too much friction there. Possibly a sock issue, a lacing issue, a shoe that doesn't fit perfectly under load.
 
 **What actually works better than band-aids:** Leukotape applied directly over the blister-prone area before the walk starts. It stays put, doesn't bunch, handles sweat. The goal is to stop treating blisters and start preventing them. Tape the hot spot before it becomes a blister. If it's already a blister, drain it, leave the roof on, tape over it.
 
@@ -383,7 +257,7 @@ The shoes I landed on were not the ones the internet would have recommended. The
 
 **Columbia Granite Trail Runners** — breathe well, dry reasonably fast, a legitimate trail shoe. Not a top-tier thru-hiker pick but a functional one, especially in desert conditions. These will handle Section A without issue.
 
-**Oboz High Tops** — purchased as the Sierra and snow-condition shoe. Higher ankle collar offers containment for a previously operated ankle. Heavier and slower to dry than trail runners, but for a hiker with hardware in the fibula, documented ankle instability, and a 44 lb pack — more ankle support is a reasonable trade-off. Most people don't need high tops. I might.
+**Oboz High Tops** — purchased as the Sierra and snow-condition shoe. Higher ankle collar offers containment for a previously operated ankle. Heavier and slower to dry than trail runners, but for a hiker with hardware in the fibula, documented ankle instability, and a 45 lb pack — more ankle support is a reasonable trade-off. Most people don't need high tops.
 
 **The important things both shoes got right:**
 - Mesh uppers — breathable and fast-drying; no Gore-Tex
@@ -397,9 +271,7 @@ The shoes I landed on were not the ones the internet would have recommended. The
 
 ### The Ankle Incident
 
-During training, real ankle pain developed on the medial side — inner ankle, a few centimeters above the medial malleolus. Not from a specific rolled-ankle event. Just gradually showed up as mileage increased.
-
-The instinct to push through it was there. Two weeks from the start of a trip you've been planning for months, the last thing you want to do is back off. But I took a few easy days, iced it, and the pain improved significantly before the trail started.
+During training, real ankle pain developed on the medial side — inner ankle, a few centimeters above the medial malleolus. Not from a specific rolled-ankle event. Just gradually showed up as mileage increased. I took a few easy days, and wrapped it with what I had available - blue painter's tape - I watched a video, and wrapped my foot - the relief was immediate despite the janky look (-- thank you pants).
 
 **This is exactly the right call.** The math: 3-4 easy days before the trail versus 2-3 weeks off trail at mile 50 because an ignored tendon problem escalated. The trail will still be there. The trail is 2,650 miles long. A few easy days in training is not a setback — it's the move.
 
@@ -407,7 +279,7 @@ The instinct to push through it was there. Two weeks from the start of a trip yo
 
 ### The Pack Weight Reality
 
-At 44 lbs to start, every foot and ankle issue is amplified. Pack weight is not just a comfort issue — it's a biomechanical one. More weight means more load per step, which means more cumulative stress on tendons, joints, and bones over the course of a day, a week, and five months.
+At 45 lbs to start, every foot and ankle issue is amplified. Pack weight is not just a comfort issue — it's a biomechanical one. More weight means more load per step, which means more cumulative stress on tendons, joints, and bones over the course of a day, a week, and five months.
 
 For a hiker with prior ankle surgery and hardware in the lower leg, this matters more than it would for someone starting clean. The plan:
 
@@ -434,7 +306,7 @@ What to watch for: localized pain at the hardware site getting worse day over da
 
 ### The Takeaway
 
-None of the issues that came up in training were trail-enders. Blisters happened and were managed. Ankle pain developed and was addressed by backing off. Shoes were chosen based on real-world factors, not ideal-scenario advice.
+None of the issues that came up in training were trail-enders. Hot spots were managed. Ankle pain developed and was addressed. Shoes were chosen based on real-world factors, not ideal-scenario advice.
 
 That's what training is for — not just to build fitness, but to surface problems in a low-stakes environment where you have time to solve them. Every hot spot, every tendon twinge, every aching hardware site in training is information you want to have before Campo, not at mile 200.
 
@@ -444,7 +316,7 @@ That's what training is for — not just to build fitness, but to surface proble
 
 ## The Golden Rules
 
-1. Stop at the first hot spot. Not at the next mile marker. **Now.**
+1. Stop at the first hot spot. Not at the next mile marker.
 2. Reduce mileage at the first sign of tendon pain. The trail will still be there.
 3. Don't "push through" foot pain. Pain is data. Read it.
 4. Replace shoes before they are dead — not after.
