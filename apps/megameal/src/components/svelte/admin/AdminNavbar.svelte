@@ -10,11 +10,28 @@ export const siteTitle = 'Blog'
 let isAuthenticatedState = false
 let showAdminDropdown = false
 let loginFormRef
+const AUTH_KEY = 'isAuthenticated'
+const AUTH_EXP_KEY = 'authExpiresAt'
 
 // Check authentication status on mount
 onMount(() => {
-  isAuthenticatedState = localStorage.getItem('isAuthenticated') === 'true'
+  isAuthenticatedState = hasValidAuth()
 })
+
+function clearAuth() {
+  localStorage.removeItem(AUTH_KEY)
+  localStorage.removeItem(AUTH_EXP_KEY)
+}
+
+function hasValidAuth() {
+  const isAuthenticated = localStorage.getItem(AUTH_KEY) === 'true'
+  const expiresAt = Number(localStorage.getItem(AUTH_EXP_KEY) || '0')
+  if (!isAuthenticated || !expiresAt || Date.now() >= expiresAt) {
+    clearAuth()
+    return false
+  }
+  return true
+}
 
 // Handle button click
 function handleButtonClick(event) {
@@ -41,7 +58,7 @@ function handleSetup() {
 
 // Handle logout
 function handleLogout() {
-  localStorage.removeItem('isAuthenticated')
+  clearAuth()
   isAuthenticatedState = false
   window.location.href = '/'
 }

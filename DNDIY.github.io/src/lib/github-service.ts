@@ -14,7 +14,7 @@ export class GitHubService {
   constructor(config: GitHubConfig) {
     this.config = config;
     if (typeof window !== 'undefined') {
-      this.token = localStorage.getItem('github_token');
+      this.token = sessionStorage.getItem('github_token');
     }
   }
 
@@ -26,7 +26,7 @@ export class GitHubService {
     if (!token) return false;
     this.token = token;
     if (typeof window !== 'undefined') {
-      localStorage.setItem('github_token', token);
+      sessionStorage.setItem('github_token', token);
     }
     return true;
   }
@@ -34,7 +34,7 @@ export class GitHubService {
   logout(): void {
     this.token = null;
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('github_token');
+      sessionStorage.removeItem('github_token');
     }
   }
 

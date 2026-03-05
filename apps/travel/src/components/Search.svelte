@@ -34,8 +34,19 @@
   let search = (keyword: string, isDesktop: boolean) => {}
   
   onMount(() => {
+    function hasValidAuth() {
+      const authed = localStorage.getItem('isAuthenticated') === 'true';
+      const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0');
+      if (!authed || !expiresAt || Date.now() >= expiresAt) {
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('authExpiresAt');
+        return false;
+      }
+      return true;
+    }
+
     // Check authentication and friend content status
-    isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    isAuthenticated = hasValidAuth();
     friendContentEnabled = isFriendContentEnabled();
   
     search = async (keyword: string, isDesktop: boolean) => {
@@ -54,7 +65,9 @@
       if (import.meta.env.PROD) {
         const ret = await pagefind.search(keyword)
         for (const item of ret.results) {
-          arr.push(await item.data())
+          const pagefindResult = await item.data();
+          pagefindResult.excerpt = stripHtml(pagefindResult.excerpt || '');
+          arr.push(pagefindResult);
         }
       } else {
         // Mock data for non-production environment
@@ -71,7 +84,7 @@
           meta: {
             title: `${post.title} (from ${post.friendName})`,
           },
-          excerpt: highlightKeyword(post.description || '', keyword),
+          excerpt: stripHtml(post.description || ''),
           // Add indicator this is friend content
           isFriendContent: true,
           friendName: post.friendName,
@@ -135,16 +148,9 @@
     });
   }
   
-  // Helper function to highlight keywords
-  function highlightKeyword(text, keyword) {
-    if (!text || !keyword) return text;
-    
-    const normalizedKeyword = keyword.toLowerCase();
-    const parts = text.split(new RegExp(`(${keyword})`, 'gi'));
-    
-    return parts.map(part => 
-      part.toLowerCase() === normalizedKeyword ? `<mark>${part}</mark>` : part
-    ).join('');
+  // Strip markup from excerpts before rendering.
+  function stripHtml(text) {
+    return String(text || '').replace(/<[^>]*>/g, '');
   }
   
   const togglePanel = () => {
@@ -215,7 +221,7 @@
                   </div>
               {/if}
               <div class="transition text-sm text-50">
-                  {@html item.excerpt}
+                  {item.excerpt}
               </div>
           </a>
       {/each}

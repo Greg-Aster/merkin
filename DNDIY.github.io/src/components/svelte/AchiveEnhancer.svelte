@@ -6,7 +6,39 @@
     
     // State
     let isAuthenticated = false;
-    let friendContentEnabled = false;
+    let friendContentEnabled = false
+
+function hasValidAuth() {
+  const authed = localStorage.getItem('isAuthenticated') === 'true'
+  const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0')
+  if (!authed || !expiresAt || Date.now() >= expiresAt) {
+    localStorage.removeItem('isAuthenticated')
+    localStorage.removeItem('authExpiresAt')
+    return false
+  }
+  return true
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function toSafeExternalUrl(candidate, fallback) {
+  try {
+    const parsed = new URL(candidate, window.location.origin)
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return parsed.href
+    }
+  } catch (_error) {
+    // Ignore and use fallback.
+  }
+  return fallback
+}
     
     function enhanceArchive() {
       // Only proceed if authenticated and enabled
@@ -121,7 +153,7 @@
     function addPostElement(container, post) {
       // Create post element
       const postElement = document.createElement('a');
-      postElement.href = post.data.sourceUrl || `/friend-${post.slug || post.id}`;
+      postElement.href = toSafeExternalUrl(post.data.sourceUrl, `/friend-${post.slug || post.id}`)
       postElement.className = 'group btn-plain !block h-10 w-full rounded-lg hover:text-[initial] friend-archive-item';
       postElement.setAttribute('aria-label', post.data.title);
       postElement.setAttribute('data-friend-content', 'true');
@@ -134,7 +166,9 @@
       
       // Format tags
       const tags = post.data.tags || [];
-      const formattedTags = tags.map(t => `#${t}`).join(' ');
+      const formattedTags = tags.map(t => `#${t}`).join(' ')
+      const safeTitle = escapeHtml(post.data.title)
+      const safeTags = escapeHtml(formattedTags)
       
       // Create post content
       postElement.innerHTML = `
@@ -159,13 +193,13 @@
             text-75 pr-8 whitespace-nowrap overflow-ellipsis overflow-hidden"
           >
             <span class="inline-block w-2 h-2 bg-[var(--primary)] rounded-full mr-1"></span>
-            ${post.data.title}
+            ${safeTitle}
           </div>
           <!-- tag list -->
           <div class="hidden md:block md:w-[15%] text-left text-sm transition
             whitespace-nowrap overflow-ellipsis overflow-hidden
             text-30"
-          >${formattedTags}</div>
+          >${safeTags}</div>
         </div>
       `;
       
@@ -211,7 +245,7 @@
     
     onMount(() => {
       // Check authentication status
-      isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+      isAuthenticated = hasValidAuth()
       
       // Check if friend content is enabled
       friendContentEnabled = isFriendContentEnabled();

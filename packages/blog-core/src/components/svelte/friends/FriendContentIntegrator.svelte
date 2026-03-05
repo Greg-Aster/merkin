@@ -12,8 +12,19 @@ onMount(() => {
   console.log('FriendContentIntegrator mounted')
   console.log('postCardConfig available:', !!postCardConfig)
 
+  function hasValidAuth() {
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
+    const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0')
+    if (!isAuthenticated || !expiresAt || Date.now() >= expiresAt) {
+      localStorage.removeItem('isAuthenticated')
+      localStorage.removeItem('authExpiresAt')
+      return false
+    }
+    return true
+  }
+
   // Check authentication status
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
+  const isAuthenticated = hasValidAuth()
 
   // Check if friend content is enabled
   const friendContentEnabled = isFriendContentEnabled()
@@ -45,6 +56,19 @@ onMount(() => {
       sortingMethod: 'date',
       mergeWithLocalPosts: true,
     },
+  }
+
+  function toSafeExternalUrl(candidate) {
+    if (!candidate) return null
+    try {
+      const parsed = new URL(candidate, window.location.origin)
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        return parsed.href
+      }
+    } catch (_error) {
+      // Ignore invalid URLs and fall back to safe defaults.
+    }
+    return null
   }
 
   // Integration function that reuses your PostCard component
@@ -140,7 +164,9 @@ onMount(() => {
         const titleLink = friendPostElement.querySelector('a')
         if (titleLink) {
           // Use the correct URL function to handle base path
-          titleLink.href = entry.data.sourceUrl || url(`/friend/${entry.slug}`)
+          titleLink.href =
+            toSafeExternalUrl(entry.data.sourceUrl) ||
+            url(`/friend/${entry.slug}`)
           titleLink.textContent = entry.data.title
         }
 
@@ -160,8 +186,9 @@ onMount(() => {
         )
         if (categoryLink) {
           // Just link to friend site instead of local archive
-          categoryLink.href = entry.data.friendUrl || '#'
+          categoryLink.href = toSafeExternalUrl(entry.data.friendUrl) || '#'
           categoryLink.target = '_blank' // Open in new tab
+          categoryLink.rel = 'noopener noreferrer'
           categoryLink.textContent = entry.data.category
         }
 
@@ -243,9 +270,10 @@ onMount(() => {
           // Create friend attribution element
           const attribution = document.createElement('div')
           attribution.className = 'flex items-center mb-3'
-
-          // Build attribution HTML with avatar if enabled
-          let attributionHTML = ''
+          const defaultAvatarUrl = url('/assets/avatar/avatar.png')
+          const friendName = entry.data.friendName || 'Friend'
+          const attributionTemplate =
+            friendConfig.attribution.attributionText || 'From [friendName]'
 
           // Add avatar if enabled - with safety checks
           if (
@@ -254,58 +282,45 @@ onMount(() => {
           ) {
             const avatarSize =
               friendConfig.friendStyling.avatarSize || 'w-6 h-6'
-            attributionHTML += `
-                <div class="${avatarSize} bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden mr-2 flex-shrink-0">
-                  ${
-                    entry.data.friendAvatar
-                      ? `
-                    <img 
-                      src="${entry.data.friendAvatar}" 
-                      alt="${entry.data.friendName || 'Friend'}'s avatar"
-                      class="w-full h-full object-cover"
-                      onerror="this.src='${url('/assets/avatar/avatar.png')}'"
-                    />
-                  `
-                      : `
-                    <img 
-                      src="${url('/assets/avatar/avatar.png')}" 
-                      alt="${entry.data.friendName || 'Friend'}'s avatar"
-                      class="w-full h-full object-cover"
-                    />
-                  `
-                  }
-                </div>
-              `
+            const avatarWrapper = document.createElement('div')
+            avatarWrapper.className = `${avatarSize} bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden mr-2 flex-shrink-0`
+
+            const avatarImg = document.createElement('img')
+            avatarImg.src =
+              toSafeExternalUrl(entry.data.friendAvatar) || defaultAvatarUrl
+            avatarImg.alt = `${friendName}'s avatar`
+            avatarImg.className = 'w-full h-full object-cover'
+            avatarImg.onerror = () => {
+              avatarImg.onerror = null
+              avatarImg.src = defaultAvatarUrl
+            }
+
+            avatarWrapper.appendChild(avatarImg)
+            attribution.appendChild(avatarWrapper)
           }
 
-          // Add attribution text with friend name - with safety checks
-          const attributionText =
-            friendConfig.attribution && friendConfig.attribution.attributionText
-              ? friendConfig.attribution.attributionText.replace(
-                  '[friendName]',
-                  entry.data.friendName || 'Friend',
-                )
-              : `From ${entry.data.friendName || 'Friend'}`
+          const textNode = document.createElement('span')
+          textNode.className = 'text-sm text-neutral-500 dark:text-neutral-400'
+          const beforeAfter = attributionTemplate.split('[friendName]')
+          const beforeName = beforeAfter[0] || ''
+          const afterName = beforeAfter.slice(1).join('[friendName]')
+          const friendUrl = toSafeExternalUrl(entry.data.friendUrl)
 
-          // Add link if enabled - with safety checks
-          if (
-            friendConfig.attribution &&
-            friendConfig.attribution.linkToFriendSite
-          ) {
-            attributionHTML += `
-                <span class="text-sm text-neutral-500 dark:text-neutral-400">
-                  ${attributionText.replace(entry.data.friendName || 'Friend', `<a href="${entry.data.friendUrl || '#'}" target="_blank" rel="noopener noreferrer" class="text-[var(--primary)] hover:underline">${entry.data.friendName || 'Friend'}</a>`)}
-                </span>
-              `
+          textNode.appendChild(document.createTextNode(beforeName))
+          if (friendConfig.attribution.linkToFriendSite && friendUrl) {
+            const friendLink = document.createElement('a')
+            friendLink.href = friendUrl
+            friendLink.target = '_blank'
+            friendLink.rel = 'noopener noreferrer'
+            friendLink.className = 'text-[var(--primary)] hover:underline'
+            friendLink.textContent = friendName
+            textNode.appendChild(friendLink)
           } else {
-            attributionHTML += `
-                <span class="text-sm text-neutral-500 dark:text-neutral-400">
-                  ${attributionText}
-                </span>
-              `
+            textNode.appendChild(document.createTextNode(friendName))
           }
+          textNode.appendChild(document.createTextNode(afterName))
 
-          attribution.innerHTML = attributionHTML
+          attribution.appendChild(textNode)
 
           // Insert after the metadata section
           metadataSection.after(attribution)
@@ -480,9 +495,10 @@ onMount(() => {
         // Create a container for friend posts
         const friendPostsContainer = document.createElement('div')
         friendPostsContainer.className = 'friend-posts-container mt-8'
-        friendPostsContainer.innerHTML = `
-            <h2 class="text-2xl font-bold mb-4 text-black/90 dark:text-white/90">Friend Posts</h2>
-          `
+        const heading = document.createElement('h2')
+        heading.className = 'text-2xl font-bold mb-4 text-black/90 dark:text-white/90'
+        heading.textContent = 'Friend Posts'
+        friendPostsContainer.appendChild(heading)
 
         // Get all friend posts
         const friendPosts = sortedPosts.filter(
