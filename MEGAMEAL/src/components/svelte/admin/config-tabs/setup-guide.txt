@@ -43,8 +43,8 @@ The system uses a simple username/password authentication stored in localStorage
 
 ```javascript
 // Default credentials
-const ADMIN_USERNAME = 'dndiy';
-const ADMIN_PASSWORD = 'dndiy';
+const ADMIN_USERNAME = '<your-username>'; // Example only
+const ADMIN_PASSWORD = '<your-password>'; // Example only
 ```
 
 For a production site, consider implementing a more secure authentication method.

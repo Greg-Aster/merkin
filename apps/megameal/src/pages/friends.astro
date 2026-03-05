@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import FriendManager from '../components/svelte/friends/FriendManager.svelte'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
+import passwordConfig from '../config/password.config'
 
 // Get all saved friends from the content collection
 let savedFriends = []
@@ -19,6 +20,9 @@ try {
 ---
 
 <MainGridLayout title="Content Sharing" description="Share and manage blog content with friends">
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+  </Fragment>
   <!-- Check authentication on page load -->
   <div id="auth-check" class="card-base2 w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4 p-6 hidden">
     <div class="text-center">
@@ -203,17 +207,40 @@ try {
   </div>
 </MainGridLayout>
 
-<script>
-  // Constants - credentials
-  const ADMIN_USERNAME = 'dndiy';
-  const ADMIN_PASSWORD = 'dndiy';
+<script define:vars={{ ADMIN_USERNAME: passwordConfig.username, ADMIN_PASSWORD_HASH: passwordConfig.passwordHash, ADMIN_NEEDS_SETUP: passwordConfig.needsSetup }}>
+  // Admin auth config is injected at build time.
+  const AUTH_KEY = 'isAuthenticated';
+  const AUTH_EXP_KEY = 'authExpiresAt';
+  const AUTH_TTL_MS = 1000 * 60 * 60 * 8; // 8 hours
+
+  function clearAuth() {
+    localStorage.removeItem(AUTH_KEY);
+    localStorage.removeItem(AUTH_EXP_KEY);
+  }
+
+  function hasValidAuth() {
+    const isAuthenticated = localStorage.getItem(AUTH_KEY) === 'true';
+    const expiresAt = Number(localStorage.getItem(AUTH_EXP_KEY) || '0');
+
+    if (!isAuthenticated || !expiresAt || Date.now() >= expiresAt) {
+      clearAuth();
+      return false;
+    }
+
+    return true;
+  }
+
+  function setAuthenticated() {
+    localStorage.setItem(AUTH_KEY, 'true');
+    localStorage.setItem(AUTH_EXP_KEY, String(Date.now() + AUTH_TTL_MS));
+  }
 
   document.addEventListener('DOMContentLoaded', () => {
     const authCheck = document.getElementById('auth-check');
     const adminContent = document.getElementById('admin-content');
     
     // Check if already authenticated
-    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    const isAuthenticated = hasValidAuth();
     
     if (isAuthenticated) {
       // Already authenticated - show content
@@ -228,9 +255,15 @@ try {
         const username = document.getElementById('auth-username').value;
         const password = document.getElementById('auth-password').value;
         
-        if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        if (ADMIN_NEEDS_SETUP) {
+          alert('Admin setup is incomplete. Please run first-time setup from the admin login panel.');
+          return;
+        }
+
+        const hashedPassword = btoa(password || '');
+        if (username === ADMIN_USERNAME && hashedPassword === ADMIN_PASSWORD_HASH) {
           // Set authenticated and show admin content
-          localStorage.setItem('isAuthenticated', 'true');
+          setAuthenticated();
           authCheck.classList.add('hidden');
           adminContent.classList.remove('hidden');
         } else {

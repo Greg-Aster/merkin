@@ -13,8 +13,8 @@ First, ensure all Svelte components are properly installed in your project and y
 Go to your website's `/configs` URL. If you're not already authenticated, you'll see the login form:
 
 ```
-Username: dndiy
-Password: dndiy
+Username: <your-username>
+Password: <your-password>
 ```
 
 ### Step 2: Explore the General Tab
