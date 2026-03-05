@@ -21,11 +21,11 @@ export function getCategoryUrl(
   if (category === uncategorizedLabel) {
     return joinUrl(baseUrl, '/archive/category/uncategorized/')
   }
-  return joinUrl(baseUrl, `/archive/category/${category}/`)
+  return joinUrl(baseUrl, `/archive/category/${category.toLowerCase()}/`)
 }
 
 export function getTagUrl(tag: string, baseUrl = ''): string {
-  return joinUrl(baseUrl, `/archive/tag/${tag}/`)
+  return joinUrl(baseUrl, `/archive/tag/${tag.toLowerCase()}/`)
 }
 
 export function getDir(path: string): string {

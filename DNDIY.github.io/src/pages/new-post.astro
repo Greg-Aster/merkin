@@ -5,6 +5,10 @@ import PostEditor from '../components/svelte/PostEditor/PostEditor.svelte';
 ---
 
 <MainGridLayout title="Create New Post" description="Write and publish new content">
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+  </Fragment>
+
   <!-- Check authentication on page load -->
   <div id="auth-check" class="card-base w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4 p-6 hidden">
     <div class="text-center">
