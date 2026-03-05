@@ -238,7 +238,7 @@ export const bannerConfig: BannerConfig = {
 
   // WORKING: Layout used by MainGridLayout.astro
   layout: {
-    height: '80vh',
+    height: '90vh',
     mobileHeight: '50vh',
     maxWidth: 3840,
     mainContentOffset: '.5rem',
@@ -274,7 +274,7 @@ export const bannerConfig: BannerConfig = {
       none: '-8rem', // ✅ Desktop spacing
     },
     // No extra mobile banner offset: navbar stays in normal flow above the banner
-    mobileBannerGap: '0.75rem',
+    mobileBannerGap: '2.75rem',
     mobilePortraitSpacing: '0.75rem',
   },
 
