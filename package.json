@@ -30,7 +30,10 @@
   "pnpm": {
     "overrides": {
       "svelte": "5.26.2",
-      "underscore": ">=1.13.8"
+      "underscore": ">=1.13.8",
+      "svgo@2": "2.8.1",
+      "svgo@3": "3.3.3",
+      "svgo@4": "4.0.1"
     }
   }
 }
