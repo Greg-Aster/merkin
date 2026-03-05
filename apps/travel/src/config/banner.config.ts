@@ -160,7 +160,7 @@ export const bannerConfig: BannerConfig = {
       assistant: '5.5rem',
       none: '-8rem',
     },
-    mobileBannerGap: '0.75rem',
+    mobileBannerGap: '2.75rem',
     mobilePortraitSpacing: '0.75rem',
   },
   panel: {
