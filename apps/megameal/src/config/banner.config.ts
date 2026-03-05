@@ -238,7 +238,7 @@ export const bannerConfig: BannerConfig = {
 
   // WORKING: Layout used by MainGridLayout.astro
   layout: {
-    height: '80vh',
+    height: '90vh',
     mobileHeight: '50vh',
     maxWidth: 3840,
     mainContentOffset: '.5rem',
