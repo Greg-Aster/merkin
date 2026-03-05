@@ -250,8 +250,20 @@ export function getBannerLink(_index: number): string | null {
 export function determineBannerConfiguration(post: any, _pageType: string, defaultBannerLink = '') {
   const mainPanelTop = getPanelTopPosition(bannerConfig.defaultBannerType)
   const navbarSpacing = bannerConfig.navbar.spacing.standard
+  // Keep author metadata flowing to MainGridLayout so post-level avatar/name/bio overrides work.
+  const postData = post?.data
+    ? {
+        bannerLink: post.data.bannerLink || '',
+        customAvatar: post.data.avatarImage || '',
+        customName: post.data.authorName || '',
+        customBio: post.data.authorBio || '',
+        slug: post.slug || '',
+        wantsNoDefaultBanner: post.data.showImageOnPost === false,
+      }
+    : null
+
   return {
-    postData: null,
+    postData,
     bannerType: {
       hasTimelineBanner: false,
       hasVideoBanner: false,
@@ -278,7 +290,7 @@ export function determineBannerConfiguration(post: any, _pageType: string, defau
       dynamicOverlap: '0',
       mainContentOffset: bannerConfig.layout.mainContentOffset,
     },
-    finalBannerLink: defaultBannerLink,
+    finalBannerLink: postData?.bannerLink || defaultBannerLink,
     currentBannerType: 'standard' as BannerType,
   }
 }

@@ -3,14 +3,23 @@
 import { onDestroy, onMount } from 'svelte'
 
 // Props
-export const slug = ''
-export const customAvatar = ''
-export const customName = ''
-export const customBio = ''
-export const customLink = ''
-export const isHomePage = false
+export let slug = ''
+export let customAvatar = ''
+export let customName = ''
+export let customBio = ''
+export let customLink = ''
+export let isHomePage = false
 export let profileConfig: any
 export let avatarConfig: any
+
+interface RuntimeAuthorContext {
+  slug: string
+  customAvatar: string
+  customName: string
+  customBio: string
+  customLink: string
+  isHomePage: boolean
+}
 
 function normalizeBaseUrl(path: string): string {
   if (!path) return ''
@@ -47,6 +56,7 @@ let animationDirection = 1
 let animationTimer: number | null = null
 let videoElements: ExtendedHTMLVideoElement[] = [] // 🎬 NEW: Track video elements
 let videoElement: ExtendedHTMLVideoElement // 🎬 NEW: Single video element binding
+let runtimeAuthorContext: RuntimeAuthorContext | null = null
 
 // 🎬 NEW: Video configuration from avatarConfig
 $: videoConfig = avatarConfig?.videoConfig || {}
@@ -80,21 +90,28 @@ function isVideoFile(src: string): boolean {
 }
 
 // Computed values
-$: useDefaultAvatars = !customAvatar
-$: displayName = customName || profileConfig?.name || 'Author'
-$: displayBio = customBio || profileConfig?.bio || ''
-$: displayLink = normalizeBaseUrl(customLink || '/about/')
+$: effectiveSlug = runtimeAuthorContext?.slug ?? slug
+$: effectiveCustomAvatar = runtimeAuthorContext?.customAvatar ?? customAvatar
+$: effectiveCustomName = runtimeAuthorContext?.customName ?? customName
+$: effectiveCustomBio = runtimeAuthorContext?.customBio ?? customBio
+$: effectiveCustomLink = runtimeAuthorContext?.customLink ?? customLink
+$: effectiveIsHomePage = runtimeAuthorContext?.isHomePage ?? isHomePage
+
+$: useDefaultAvatars = !effectiveCustomAvatar
+$: displayName = effectiveCustomName || profileConfig?.name || 'Author'
+$: displayBio = effectiveCustomBio || profileConfig?.bio || ''
+$: displayLink = normalizeBaseUrl(effectiveCustomLink || '/about/')
 $: socialLinks = profileConfig?.links || []
 
 // Avatar selection logic
 $: activeAvatarIndex = (() => {
-  if (isHomePage || !useDefaultAvatars) return 0
-  return getAvatarIndexFromSlug(slug, avatarConfig?.avatarList?.length || 1)
+  if (effectiveIsHomePage || !useDefaultAvatars) return 0
+  return getAvatarIndexFromSlug(effectiveSlug, avatarConfig?.avatarList?.length || 1)
 })()
 
 $: selectedAvatar = (() => {
-  if (!useDefaultAvatars) return customAvatar
-  if (isHomePage && avatarConfig?.homeAvatar) {
+  if (!useDefaultAvatars) return effectiveCustomAvatar
+  if (effectiveIsHomePage && avatarConfig?.homeAvatar) {
     return typeof avatarConfig.homeAvatar === 'string'
       ? avatarConfig.homeAvatar
       : avatarConfig.homeAvatar.src || avatarConfig.homeAvatar
@@ -114,16 +131,30 @@ $: avatarList = (() => {
 })()
 
 $: hasAnimatedAvatar = useDefaultAvatars
-  ? isHomePage
+  ? effectiveIsHomePage
     ? isAnimatedFile(selectedAvatar)
     : avatarList.some(src => isAnimatedFile(src))
-  : isAnimatedFile(customAvatar)
+  : isAnimatedFile(effectiveCustomAvatar)
 
 $: hasMultipleAvatars =
   useDefaultAvatars &&
   avatarList.length > 1 &&
-  !isHomePage &&
+  !effectiveIsHomePage &&
   !hasAnimatedAvatar
+
+function syncAuthorContextFromDOM() {
+  const contextElement = document.getElementById('author-context')
+  if (!(contextElement instanceof HTMLElement)) return
+
+  runtimeAuthorContext = {
+    slug: contextElement.dataset.slug || '',
+    customAvatar: contextElement.dataset.customAvatar || '',
+    customName: contextElement.dataset.customName || '',
+    customBio: contextElement.dataset.customBio || '',
+    customLink: contextElement.dataset.customLink || '',
+    isHomePage: contextElement.dataset.isHomePage === 'true',
+  }
+}
 
 function getAvatarIndexFromSlug(slug: string, arrayLength: number): number {
   if (!slug || arrayLength === 0) return 0
@@ -317,6 +348,23 @@ onMount(() => {
   }
 })
 
+onMount(() => {
+  const handleAuthorContext = (event: Event) => {
+    const customEvent = event as CustomEvent<RuntimeAuthorContext>
+    if (!customEvent?.detail) return
+    runtimeAuthorContext = customEvent.detail
+  }
+
+  syncAuthorContextFromDOM()
+  window.addEventListener('merkin:author-context', handleAuthorContext)
+  document.addEventListener('astro:page-load', syncAuthorContextFromDOM)
+
+  return () => {
+    window.removeEventListener('merkin:author-context', handleAuthorContext)
+    document.removeEventListener('astro:page-load', syncAuthorContextFromDOM)
+  }
+})
+
 onDestroy(() => {
   stopAvatarAnimation()
   // 🎬 NEW: Clean up video elements properly
@@ -371,7 +419,7 @@ onMount(() => {
     <!-- Image container with relative positioning -->
     <div class="relative w-full aspect-square">
       {#if useDefaultAvatars}
-        {#if isHomePage || !hasMultipleAvatars}
+        {#if effectiveIsHomePage || !hasMultipleAvatars}
           <!-- Single avatar (home page, single avatar, or animated avatar) -->
           {#if selectedAvatar}
             {@const mediaConfig = renderMediaElement(selectedAvatar, "Profile Image of the Site Owner", "avatar-image w-full h-full object-contain opacity-100 rounded-xl", "eager")}
@@ -447,8 +495,8 @@ onMount(() => {
         {/if}
       {:else}
         <!-- Custom avatar -->
-        {#if customAvatar}
-          {@const mediaConfig = renderMediaElement(customAvatar, `Profile Image of ${displayName}`, "avatar-image w-full h-full object-contain opacity-100 rounded-xl", "eager")}
+        {#if effectiveCustomAvatar}
+          {@const mediaConfig = renderMediaElement(effectiveCustomAvatar, `Profile Image of ${displayName}`, "avatar-image w-full h-full object-contain opacity-100 rounded-xl", "eager")}
           
           {#if mediaConfig.type === 'video'}
             <!-- 🎬 ENHANCED: Custom video avatar with controls -->
