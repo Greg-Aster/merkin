@@ -274,7 +274,7 @@ export const bannerConfig: BannerConfig = {
       none: '-8rem', // ✅ Desktop spacing
     },
     // No extra mobile banner offset: navbar stays in normal flow above the banner
-    mobileBannerGap: '0.75rem',
+    mobileBannerGap: '2.75rem',
     mobilePortraitSpacing: '0.75rem',
   },
 
