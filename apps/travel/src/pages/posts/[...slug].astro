@@ -6,7 +6,7 @@ import Markdown from '@components/misc/Markdown.astro'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
-import { getDir, getPostUrlBySlug } from '@utils/url-utils'
+import { getDir, getPostUrlBySlug, url } from '@utils/url-utils'
 import { Icon } from 'astro-icon/components'
 import { licenseConfig } from '../../config/config'
 import PostMetadata from '../../components/PostMeta.astro'
@@ -15,14 +15,33 @@ import { profileConfig, siteConfig } from '../../config/config'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
 
 export async function getStaticPaths() {
-  const posts = await getCollection('posts'); // Include all posts, including drafts
-  return posts.map(post => ({
-    params: { slug: post.slug },
-    props: { post },
-  }));
+  const posts = await getCollection('posts') // Include all posts, including drafts
+  const sortedPosts = [...posts].sort(
+    (a, b) =>
+      new Date(b.data.published).getTime() - new Date(a.data.published).getTime(),
+  )
+
+  return sortedPosts.map((post, index) => {
+    const newerPost = index > 0 ? sortedPosts[index - 1] : null
+    const olderPost =
+      index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null
+
+    return {
+      params: { slug: post.slug },
+      props: {
+        post,
+        previousPost: newerPost
+          ? { slug: newerPost.slug, title: newerPost.data.title }
+          : null,
+        nextPost: olderPost
+          ? { slug: olderPost.slug, title: olderPost.data.title }
+          : null,
+      },
+    }
+  })
 }
 
-const { post } = Astro.props; // Destructure `post` instead of `entry`
+const { post, previousPost, nextPost } = Astro.props // Destructure `post` instead of `entry`
 const { Content, headings } = await post.render()
 
 const { remarkPluginFrontmatter } = await post.render()
@@ -42,6 +61,23 @@ const jsonLd = {
   inLanguage: (post.data.lang ? post.data.lang.replace('_', '-') : siteConfig.lang.replace('_', '-')),
   // TODO include cover image here
 }
+
+// Allow frontmatter overrides, otherwise use auto-generated neighbor links.
+const previousArticle = post.data.nextSlug
+  ? {
+      slug: post.data.nextSlug,
+      title: post.data.nextTitle || previousPost?.title || 'Previous Article',
+    }
+  : previousPost
+
+const nextArticle = post.data.prevSlug
+  ? {
+      slug: post.data.prevSlug,
+      title: post.data.prevTitle || nextPost?.title || 'Next Article',
+    }
+  : nextPost
+
+const showPostFooterNav = siteConfig.enablePostFooterNav === true
 ---
 <MainGridLayout 
   banner={post.data.image} 
@@ -129,27 +165,42 @@ const jsonLd = {
         </div>
     </div>
 
-    <div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full">
-        <a href={post.data.nextSlug ? getPostUrlBySlug(post.data.nextSlug) : "#"}
-           class:list={["w-full font-bold overflow-hidden active:scale-95", {"pointer-events-none": !post.data.nextSlug}]}>
-            {post.data.nextSlug && <div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center !justify-start gap-4" >
-                <Icon name="material-symbols:chevron-left-rounded" class="text-[2rem] text-[var(--primary)]" />
-                <div class="overflow-hidden transition overflow-ellipsis whitespace-nowrap max-w-[calc(100%_-_3rem)] text-black/75 dark:text-white/75">
-                    {post.data.nextTitle}
+    {showPostFooterNav && <div class="grid grid-cols-1 md:grid-cols-3 mb-4 gap-4 overflow-hidden w-full">
+        <a href={previousArticle ? getPostUrlBySlug(previousArticle.slug) : "#"}
+           class:list={["w-full font-bold overflow-hidden active:scale-95", {"pointer-events-none opacity-60": !previousArticle}]}>
+            <div class="card-base btn-card rounded-2xl w-full min-h-[4.5rem] max-w-full px-4 py-3 flex items-center gap-3">
+                <Icon name="material-symbols:chevron-left-rounded" class="text-[2rem] text-[var(--primary)] shrink-0" />
+                <div class="overflow-hidden min-w-0">
+                    <div class="text-[0.7rem] uppercase tracking-[0.08em] text-black/45 dark:text-white/45">Previous</div>
+                    <div class="transition overflow-hidden overflow-ellipsis whitespace-nowrap text-black/75 dark:text-white/75">
+                        {previousArticle ? previousArticle.title : "No previous article"}
+                    </div>
                 </div>
-            </div>}
+            </div>
         </a>
 
-        <a href={post.data.prevSlug ? getPostUrlBySlug(post.data.prevSlug) : "#"}
-           class:list={["w-full font-bold overflow-hidden active:scale-95", {"pointer-events-none": !post.data.prevSlug}]}>
-            {post.data.prevSlug && <div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center !justify-end gap-4">
-                <div class="overflow-hidden transition overflow-ellipsis whitespace-nowrap max-w-[calc(100%_-_3rem)] text-black/75 dark:text-white/75">
-                    {post.data.prevTitle}
+        <a href={url('/')} class="w-full font-bold overflow-hidden active:scale-95">
+            <div class="card-base btn-card rounded-2xl w-full min-h-[4.5rem] max-w-full px-4 py-3 flex items-center justify-center gap-3">
+                <Icon name="material-symbols:home-rounded" class="text-[1.5rem] text-[var(--primary)] shrink-0" />
+                <div class="transition text-black/80 dark:text-white/80">
+                    Back to {i18n(I18nKey.home)}
                 </div>
-                <Icon name="material-symbols:chevron-right-rounded" class="text-[2rem] text-[var(--primary)]" />
-            </div>}
+            </div>
         </a>
-    </div>
+
+        <a href={nextArticle ? getPostUrlBySlug(nextArticle.slug) : "#"}
+           class:list={["w-full font-bold overflow-hidden active:scale-95", {"pointer-events-none opacity-60": !nextArticle}]}>
+            <div class="card-base btn-card rounded-2xl w-full min-h-[4.5rem] max-w-full px-4 py-3 flex items-center justify-end gap-3 text-right">
+                <div class="overflow-hidden min-w-0">
+                    <div class="text-[0.7rem] uppercase tracking-[0.08em] text-black/45 dark:text-white/45">Next</div>
+                    <div class="transition overflow-hidden overflow-ellipsis whitespace-nowrap text-black/75 dark:text-white/75">
+                        {nextArticle ? nextArticle.title : "No next article"}
+                    </div>
+                </div>
+                <Icon name="material-symbols:chevron-right-rounded" class="text-[2rem] text-[var(--primary)] shrink-0" />
+            </div>
+        </a>
+    </div>}
 
 </MainGridLayout>
 

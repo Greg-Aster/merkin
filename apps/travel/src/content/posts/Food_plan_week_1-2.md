@@ -3,7 +3,7 @@ title: "PCT Food Strategy: Front-Loading Calories to Skip Expensive Towns"
 published: 2026-02-27
 description: "How I'm front-loading a week of calories to skip overpriced early stops and push straight through to Julian on the PCT."
 image: "/posts/food_plan_week_1-2/pct-food-trail-mix.jpg"
-avatarImage: "/avatar/avatar1.jpg"
+avatarImage: "/posts/food_plan_week_1-2/kiddie.png"
 authorName: "Greg Aster"
 authorBio: "PCT Class of 2026 | Trail notes, gear systems, and field-tested lessons"
 bannerType: "image"
@@ -47,55 +47,20 @@ If I'm close to town on day 6 I can skip a meal or two and just eat when I get t
 - Forage for micronutrients when possible
 - Eat in towns for morale and sanity
 
-Adjust as needed. This isn't a religion.
-
----
-
 ## What I'm Carrying (First 7 Days)
 
-![Trail mix is one of the easiest ways to stack dense calories without wasting pack space](/posts/food_plan_week_1-2/pct-food-trail-mix.jpg)
-*Trail mix is boring, efficient, and exactly the kind of food that earns its spot in an early PCT carry.*
-
-### Carbohydrate Base
-
-- ~5 lb steel-cut oats
-- ~11 ramen packets
-- Chia seeds
-
-Oats are cheap. Ramen has sodium. Chia seeds can be prepped cold and punch above their weight nutritionally.
-
----
-
-### Fats (High Calorie Density)
-
-- Olive oil
-- Coconut oil (doubles as anti-chafe and skin stuff)
-
-Oil is the best calorie-per-ounce deal you can get. Coconut oil earns its carry weight twice over.
-
----
-
-### Nuts & Seeds
-
-- Walnuts
-- Pumpkin seeds
-
-Snacks. That's it.
-
----
-
-### Dried Fruit
-
-- Mango
-- Prunes
-
-Not afraid of fiber, bro. No scurvy either.
-
----
-
-### Protein & Salt
-
-- Summer sausage
+| Category | Items | Weight | Cal/oz | Notes |
+|---|---|---|---|---|
+| **Carbs** | Steel-cut oats | ~5 lb | ~110 | Cheap, filling, hot breakfast every day |
+| **Carbs** | Ramen (~11 packets) | ~1.5 lb | ~100 | Sodium replacement + easy hot meal |
+| **Carbs** | Chia seeds | ~0.5 lb | ~140 | Cold prep, high omega-3, keeps you full |
+| **Fats** | Olive oil | ~1 lb | ~250 | Best raw calorie density you can carry |
+| **Fats** | Coconut oil | ~1 lb | ~250 | Doubles as anti-chafe and skin balm |
+| **Nuts & Seeds** | Walnuts | ~1 lb | ~185 | Trail snack, good fat profile |
+| **Nuts & Seeds** | Pumpkin seeds | ~0.5 lb | ~160 | Magnesium, iron, easy to eat on the move |
+| **Dried Fruit** | Mango | ~0.75 lb | ~85 | Morale, vitamin C |
+| **Dried Fruit** | Prunes | ~0.5 lb | ~70 | Fiber — yes, intentionally |
+| **Protein** | Summer sausage | ~1.5 lb | ~130 | Salt, fat, protein — no cooking required |
 
 ---
 
@@ -116,30 +81,16 @@ Water weight is annoying but non-negotiable for me specifically. I'm still recov
 - Lake Morena (~20 miles): limited, expensive
 - Mount Laguna (~41 miles): better, still small
 
-Julian at ~77 miles is an actual grocery stop. That's the target.
-
----
+Julian at ~77 miles is a grocery stop. That's the target.
 
 ## Foraging (Bonus, Not a Plan)
 
-Not trying to live off the desert. But I'll grab what I can:
-
-- Prickly pear
-- Yucca flowers if they're out
-- Chia sage
-- Mesquite pods
-- Wild greens after rain
-
-It's not a calorie strategy. It's something to do and a few free micronutrients.
-
----
+Not trying to live off the desert. But I'll grab what I can: prickly pear, yucca flowers if they're out, chia sage, mesquite pods, wild greens after rain. Something to do and a few free micronutrients.
 
 ## Concerns
 
 - Am I carrying too much?
 - Will I actually want 4,500 calories a day or will I be too tired to eat?
-
----
 
 ## Final Thought
 

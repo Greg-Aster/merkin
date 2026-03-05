@@ -10,6 +10,7 @@ import { LinkPreset } from '../types/config'
 export const siteConfig: SiteConfig = {
   title: 'MEGA MEAL SAGA',
   subtitle: 'Consuming Time Itself Since 3042',
+  enablePostFooterNav: false,
   lang: 'en',
   themeColor: {
     hue: 220, // Blue hue for cosmic horror

@@ -12,9 +12,9 @@ tags:
 category: "Gear"
 image: "/posts/pct-pack-weight/title.jpg"
 showImageOnPost: false
-avatarImage: "/avatar/avatar1.jpg"
-authorName: "Greg Aster"
-authorBio: "PCT Class of 2026 — Campo to Canada"
+avatarImage: "/posts/pct-pack-weight/title.jpg"
+authorName: "Tiny Backpack Dude"
+authorBio: "He will give you a smug look talk about your knees and what quilt fill he has"
 draft: false
 lang: "en"
 ---
@@ -22,8 +22,6 @@ lang: "en"
 My pack weighs 30 pounds empty. Loaded, I'll be carrying around 45. I am 215 pounds. There is a lot of pressure online to go ultralight, and I'd like to push back on that a little.
 
 Not everyone needs to go ultralight. Simply shaving pounds for the sake of it can actually be harmful.
-
-![A compact backpack that prioritizes comfort over chasing the lowest number](/posts/pct-pack-weight/title.jpg)
 
 ## Weather Matters
 
