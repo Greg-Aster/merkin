@@ -5,7 +5,7 @@ import { profileConfig } from '../../config/config'
 import { avatarConfig, getAvatarIndexFromSlug } from '../../config/avatar.config'
 import { getCategoryList } from '../../utils/content-utils'
 import { getTagList } from '../../utils/content-utils'
-import { getCategoryUrl, url } from '../../utils/url-utils'
+import { getCategoryUrl, getTagUrl } from '../../utils/url-utils'
 import I18nKey from '../../i18n/i18nKey'
 import { i18n } from '../../i18n/translation'
 
@@ -43,7 +43,7 @@ const categories = (await getCategoryList()).map((category) => ({
 const tags = (await getTagList()).map((tag) => ({
   name: tag.name,
   count: String(tag.count),
-  url: url(`/archive/tag/${tag.name}/`),
+  url: getTagUrl(tag.name),
   ariaLabel: `View all posts with the ${tag.name} tag`,
 }))
 ---
