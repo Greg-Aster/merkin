@@ -19,6 +19,10 @@ import AdminConfigPanel from '../components/svelte/admin/AdminConfigPanel.svelte
 ---
 
 <MainGridLayout title={i18n(I18nKey.configs)} description={i18n(I18nKey.configs)}>
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+  </Fragment>
+
   <!-- Auth Check Panel -->
   <div id="auth-check" class="card-base2 w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4 p-6">
     <div class="text-center">

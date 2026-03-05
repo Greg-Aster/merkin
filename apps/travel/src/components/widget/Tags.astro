@@ -3,7 +3,7 @@ import SharedTags from '@merkin/blog-core/components/widget/Tags.astro'
 import I18nKey from '../../i18n/i18nKey'
 import { i18n } from '../../i18n/translation'
 import { getTagList } from '../../utils/content-utils'
-import { url } from '../../utils/url-utils'
+import { getTagUrl } from '../../utils/url-utils'
 
 interface Props {
   class?: string
@@ -13,7 +13,7 @@ interface Props {
 const { class: className, style }: Props = Astro.props
 const tags = (await getTagList()).map((tag) => ({
   name: tag.name,
-  href: url(`/archive/tag/${tag.name}/`),
+  href: getTagUrl(tag.name),
   ariaLabel: `View all posts with the ${tag.name} tag`,
 }))
 ---

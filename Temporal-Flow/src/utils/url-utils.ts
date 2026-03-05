@@ -4,6 +4,7 @@ import {
   getCategoryUrl as getSharedCategoryUrl,
   getDir as getSharedDir,
   getPostUrlBySlug as getSharedPostUrlBySlug,
+  getTagUrl as getSharedTagUrl,
   pathsEqual as pathsEqualShared,
   url as sharedUrl,
 } from '@merkin/blog-core/utils'
@@ -22,6 +23,10 @@ export function getCategoryUrl(category: string): string {
     i18n(i18nKey.uncategorized),
     import.meta.env.BASE_URL,
   )
+}
+
+export function getTagUrl(tag: string): string {
+  return getSharedTagUrl(tag, import.meta.env.BASE_URL)
 }
 
 export function getDir(path: string): string {
