@@ -57,6 +57,7 @@ export default defineConfig({
         !page.includes('/atom') &&
         page !== '/new-post/' &&
         page !== '/configs/' &&
+        page !== '/friends/' &&
         page !== '/feed.xml' &&
         page !== '/rss.xml' &&
         page !== '/atom.xml',

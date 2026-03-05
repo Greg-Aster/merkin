@@ -261,8 +261,13 @@ const viewModes = [
     document.getElementById(mapViewId)?.classList.add('hidden');
 
     // Show target view
-    const targetViewId = `${viewMode}ViewId`;
-    const targetElement = document.getElementById(eval(targetViewId));
+    const viewIdMap = {
+      timeline: timelineViewId,
+      list: listViewId,
+      tree: treeViewId,
+      map: mapViewId,
+    };
+    const targetElement = document.getElementById(viewIdMap[viewMode] || '');
     if (targetElement) {
       targetElement.classList.remove('hidden');
     }

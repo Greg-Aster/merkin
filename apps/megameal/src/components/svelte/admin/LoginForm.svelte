@@ -7,8 +7,8 @@ import passwordConfig from '../../../config/password.config'
 const dispatch = createEventDispatcher()
 
 // Form data
-let username = 'password'
-let password = 'password'
+let username = ''
+let password = ''
 let rememberMe = false
 
 // UI state
@@ -16,9 +16,17 @@ let isLoading = false
 let errorMessage = ''
 let formShown = false
 let isFirstTimeSetup = false
+const AUTH_KEY = 'isAuthenticated'
+const AUTH_EXP_KEY = 'authExpiresAt'
+const AUTH_TTL_MS = 1000 * 60 * 60 * 8 // 8 hours
 
 // Additional fields for first-time setup
 let confirmPassword = ''
+
+function setAuthenticated() {
+  localStorage.setItem(AUTH_KEY, 'true')
+  localStorage.setItem(AUTH_EXP_KEY, String(Date.now() + AUTH_TTL_MS))
+}
 
 // Check setup status on mount
 onMount(() => {
@@ -111,7 +119,7 @@ function handleSetupSubmit() {
     errorMessage = ''
 
     // Store temporary authentication for this session
-    localStorage.setItem('isAuthenticated', 'true')
+    setAuthenticated()
     localStorage.setItem('tempUsername', username)
 
     // Notify parent of successful setup
@@ -155,7 +163,7 @@ async function handleSubmit() {
         username === passwordConfig.username &&
         hashedPassword === passwordConfig.passwordHash
       ) {
-        localStorage.setItem('isAuthenticated', 'true')
+        setAuthenticated()
         dispatch('login', { username })
         formShown = false
         window.location.reload()

@@ -108,6 +108,7 @@ const adminLinks = [
 <script>
   document.getElementById('menu-logout-button')?.addEventListener('click', () => {
     localStorage.removeItem('isAuthenticated')
+    localStorage.removeItem('authExpiresAt')
     window.location.href = '/'
   })
 </script>
