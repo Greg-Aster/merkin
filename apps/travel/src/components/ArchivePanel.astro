@@ -14,20 +14,22 @@ interface Props {
 const { tags, categories } = Astro.props
 
 let posts = await getSortedPosts()
+const normalizedTags = new Set((tags ?? []).map((tag: string) => tag.toLowerCase()))
+const normalizedCategories = new Set((categories ?? []).map((category: string) => category.toLowerCase()))
 
 if (Array.isArray(tags) && tags.length > 0) {
   posts = posts.filter(
     post =>
       Array.isArray(post.data.tags) &&
-      post.data.tags.some(tag => tags.includes(tag)),
+      post.data.tags.some(tag => normalizedTags.has(tag.toLowerCase())),
   )
 }
 
 if (Array.isArray(categories) && categories.length > 0) {
   posts = posts.filter(
     post =>
-      (post.data.category && categories.includes(post.data.category)) ||
-      (!post.data.category && categories.includes(UNCATEGORIZED)),
+      (post.data.category && normalizedCategories.has(post.data.category.toLowerCase())) ||
+      (!post.data.category && normalizedCategories.has(UNCATEGORIZED.toLowerCase())),
   )
 }
 
