@@ -508,15 +508,39 @@ const {
   currentBannerType,
 } = bannerConfiguration
 
-// ⭐ NEW: Process custom author data - merge with existing postData
+// Process custom author data with direct post-data fallbacks so avatar overrides
+// remain functional even if app banner adapters omit author fields.
+const directPostAuthorData = {
+  slug: post?.slug || '',
+  avatarImage: normalizeAssetUrl(post?.data?.avatarImage || ''),
+  authorName: post?.data?.authorName || '',
+  authorBio: post?.data?.authorBio || '',
+  authorLink: post?.data?.authorLink || '',
+}
+
 const processedAuthorData = {
-  slug: postData?.slug || '',
+  slug: postData?.slug || directPostAuthorData.slug || '',
   customAvatar: normalizeAssetUrl(
-    customAuthorData?.avatarImage || postData?.customAvatar || '',
+    customAuthorData?.avatarImage ||
+      postData?.customAvatar ||
+      directPostAuthorData.avatarImage ||
+      '',
   ),
-  customName: customAuthorData?.authorName || postData?.customName || '',
-  customBio: customAuthorData?.authorBio || postData?.customBio || '',
-  customLink: customAuthorData?.authorLink || '', // ⭐ NEW: Custom link support
+  customName:
+    customAuthorData?.authorName ||
+    postData?.customName ||
+    directPostAuthorData.authorName ||
+    '',
+  customBio:
+    customAuthorData?.authorBio ||
+    postData?.customBio ||
+    directPostAuthorData.authorBio ||
+    '',
+  customLink:
+    customAuthorData?.authorLink ||
+    postData?.customLink ||
+    directPostAuthorData.authorLink ||
+    '',
 }
 
 if (import.meta.env.DEV) {
@@ -850,6 +874,17 @@ const gridLayoutClasses = [
         <!-- Grid Item 2: MAIN CONTENT -->
         <main id="main" class="transition-swup-fade col-span-1 overflow-hidden">
           <div id="main-content-wrapper" class="onload-animation">
+            <div
+              id="author-context"
+              hidden
+              aria-hidden="true"
+              data-slug={processedAuthorData.slug}
+              data-custom-avatar={processedAuthorData.customAvatar}
+              data-custom-name={processedAuthorData.customName}
+              data-custom-bio={processedAuthorData.customBio}
+              data-custom-link={processedAuthorData.customLink}
+              data-is-home-page={currentPath === '/'}
+            ></div>
             <slot></slot>
             <div class="footer onload-animation hidden md:block">
               <Footer></Footer>
