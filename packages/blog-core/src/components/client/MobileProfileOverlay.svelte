@@ -3,12 +3,12 @@
 import { onMount } from 'svelte'
 import Profile from './Profile.svelte'
 
-export const postSlug = ''
-export const customAvatar = ''
-export const customName = ''
-export const customBio = ''
-export const profileConfig: any = {}
-export const avatarConfig: any = {}
+export let postSlug = ''
+export let customAvatar = ''
+export let customName = ''
+export let customBio = ''
+export let profileConfig: any = {}
+export let avatarConfig: any = {}
 
 let isVisible = false
 let overlayElement: HTMLDivElement
