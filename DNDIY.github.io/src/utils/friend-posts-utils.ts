@@ -36,7 +36,15 @@ export function shouldShowFriendContent(): boolean {
   }
 
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
-  return isAuthenticated && isFriendContentEnabled()
+  const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0')
+
+  if (!isAuthenticated || !expiresAt || Date.now() >= expiresAt) {
+    localStorage.removeItem('isAuthenticated')
+    localStorage.removeItem('authExpiresAt')
+    return false
+  }
+
+  return isFriendContentEnabled()
 }
 
 // Get friend posts formatted to be compatible with PostCard.astro
