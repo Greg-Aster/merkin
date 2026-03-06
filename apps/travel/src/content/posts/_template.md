@@ -23,6 +23,7 @@ category: "Trail Notes"      # see valid categories in the guide below
 # ── THUMBNAIL / COVER IMAGE (optional) ───────────────────────────────────────
 # image: "https://example.com/cover.jpg"   # shown as thumbnail in post list
 # showImageOnPost: true                    # also render image inside the post body
+# downloadable: false                      # true = show "Download PDF" button and include in PDF build pipeline
 
 # ── AUTHOR CARD (optional) ───────────────────────────────────────────────────
 # Shows a small card under the post title. Omit the block entirely if unused.

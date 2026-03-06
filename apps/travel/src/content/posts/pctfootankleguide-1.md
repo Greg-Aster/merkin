@@ -1,5 +1,5 @@
 ---
-title: "PCT Foot & Shoe selection"
+title: "PCT Selecting Your Feet & Putting Shoes On Them"
 published: 2026-02-28
 description: "A field-tested guide to foot care, blister prevention, tendon injuries, and shoe selection for PCT thru-hikers — including real-world lessons from 8 weeks of pre-hike training."
 image: "/posts/pctfootankleguide-1/boots.jpg"

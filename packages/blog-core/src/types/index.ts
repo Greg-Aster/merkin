@@ -102,6 +102,7 @@ export type BlogPostData = {
   draft?: boolean
   yIndex: number
   image?: string
+  downloadable?: boolean
   category?: string
   prevTitle?: string
   prevSlug?: string
