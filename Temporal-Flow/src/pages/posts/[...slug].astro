@@ -1,4 +1,5 @@
 ---
+import fs from 'node:fs'
 import path from 'node:path'
 import { getCollection } from 'astro:content'
 import License from '@components/misc/License.astro'
@@ -6,7 +7,7 @@ import Markdown from '@components/misc/Markdown.astro'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
-import { getDir, getPostUrlBySlug } from '@utils/url-utils'
+import { getDir, getPostUrlBySlug, url } from '@utils/url-utils'
 import { Icon } from 'astro-icon/components'
 import { licenseConfig } from '../../config/config'
 import PostMetadata from '../../components/PostMeta.astro'
@@ -42,6 +43,24 @@ const jsonLd = {
   inLanguage: (post.data.lang ? post.data.lang.replace('_', '-') : siteConfig.lang.replace('_', '-')),
   // TODO include cover image here
 }
+
+const isDownloadable = post.data.downloadable === true
+const isDev = import.meta.env.DEV
+const localPdfPath = path.join(
+  process.cwd(),
+  'public',
+  'downloads',
+  'posts',
+  `${post.slug}.pdf`,
+)
+const hasDevPdfFile = isDev && fs.existsSync(localPdfPath)
+const useDownloadFile = !isDev || hasDevPdfFile
+const pdfDownloadUrl = useDownloadFile
+  ? url(`/downloads/posts/${post.slug}.pdf`)
+  : url(`/pdf/posts/${post.slug}/`)
+const pdfButtonLabel = useDownloadFile
+  ? 'Download Article (PDF)'
+  : 'Open Printable View (PDF generated on build)'
 ---
 <MainGridLayout 
   banner={post.data.image} 
@@ -127,11 +146,28 @@ const jsonLd = {
             {licenseConfig.enable && <License title={post.data.title} slug={post.slug} pubDate={post.data.published} class="mb-6 rounded-xl license-container onload-animation"></License>}
 
         </div>
-    </div>
+	    </div>
 
-    <div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full">
-        <a href={post.data.nextSlug ? getPostUrlBySlug(post.data.nextSlug) : "#"}
-           class:list={["w-full font-bold overflow-hidden active:scale-95", {"pointer-events-none": !post.data.nextSlug}]}>
+	    {isDownloadable && (
+	      <div class="mb-4 w-full">
+	        <a
+	          href={pdfDownloadUrl}
+	          download={useDownloadFile ? `${post.slug}.pdf` : undefined}
+	          class="download-pdf-btn w-full font-bold overflow-hidden active:scale-95"
+	        >
+	          <div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center justify-center gap-3">
+	            <Icon name="material-symbols:download-rounded" class="text-[1.5rem] text-[var(--primary)] shrink-0" />
+	            <div class="transition text-black/80 dark:text-white/80">
+	              {pdfButtonLabel}
+	            </div>
+	          </div>
+	        </a>
+	      </div>
+	    )}
+
+	    <div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full">
+	        <a href={post.data.nextSlug ? getPostUrlBySlug(post.data.nextSlug) : "#"}
+	           class:list={["w-full font-bold overflow-hidden active:scale-95", {"pointer-events-none": !post.data.nextSlug}]}>
             {post.data.nextSlug && <div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center !justify-start gap-4" >
                 <Icon name="material-symbols:chevron-left-rounded" class="text-[2rem] text-[var(--primary)]" />
                 <div class="overflow-hidden transition overflow-ellipsis whitespace-nowrap max-w-[calc(100%_-_3rem)] text-black/75 dark:text-white/75">
@@ -160,7 +196,13 @@ const jsonLd = {
     }
     
     /* Ensure smooth scrolling */
-    html {
-      scroll-behavior: smooth;
-    }
-  </style>
+	    html {
+	      scroll-behavior: smooth;
+	    }
+
+	    @media print {
+	      .download-pdf-btn {
+	        display: none !important;
+	      }
+	    }
+	  </style>
