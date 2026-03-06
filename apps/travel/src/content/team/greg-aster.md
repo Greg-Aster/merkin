@@ -7,11 +7,13 @@ featured: true
 order: 1
 ---
 
-Greg Aster is documenting the Pacific Crest Trail as a working notebook for planning, gear systems, and lessons learned in motion — Campo to Canada, 2026.
+Greg Aster is documenting the Pacific Crest Trail as a working notebook for planning, gear systems, and lessons learned in motion 
 
 ## Background
 
 After years spent in mechanical work, independent filmmaking, and hands-on creative projects, Greg approaches long-distance hiking the same way he approaches everything else: test the system, learn from failure, refine the setup, keep moving.
+
+Known on trail reluctantly as **Aster**, **gmaster**, or **greg the mechanic**.
 
 He started the PCT on March 10, 2026 at the Southern Terminus in Campo, California, carrying a Gregory Baltoro 75L and targeting the Canadian border by late September.
 
@@ -30,8 +32,14 @@ Surgical hardware in the fibula from a prior fracture, documented ankle instabil
 - Foot care, injury prevention, and practical lessons worth keeping
 - Food planning, calorie math, and town strategy
 
+None of this is externally funded. No grants, no sponsors, no revenue stream. 
+
 ## Outside The Trail
 
-Off trail, Greg works across experimental film and animation, 3D work in Blender, and independent web projects. His other sites include [MEGAMEAL](https://megameal.org) — an immersive storytelling universe — and [DNDIY](https://dndiy.org), a D&D content platform.
+Off trail, Greg works across experimental film and animation, 3D work in Blender, and independent web projects. His other sites include [MEGAMEAL](https://megameal.org) — an immersive storytelling universe — and [DNDIY](https://dndiy.org). 
 
 This trail log is the stripped-down version of that same approach: practical first, polished second.
+
+---
+
+**A note on responsiveness:** If emails go unanswered for an extended period, based on family history and lifestyle. Please check last known location or and or recent obituaries.
