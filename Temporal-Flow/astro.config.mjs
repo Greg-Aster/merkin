@@ -222,20 +222,19 @@ export default defineConfig({
     }), 
     svelte(), 
     sitemap({
-      filter: (page) => 
-        !page.includes('/feed') && 
-        !page.includes('/rss') && 
-        !page.includes('/atom') && 
-        page !== '/new-post/' &&
-        page !== '/configs/' &&
-        page !== '/friends/' &&
-        page !== '/feed.xml' && 
-        page !== '/rss.xml' && 
-        page !== '/atom.xml',
-      customize: ({ rss }) => {
-        // Add additional <link> tags for alternative feeds
-        rss.stylesheet = '/rss-styles.xsl';
-        return rss;
+      filter: (page) => {
+        const { pathname } = new URL(page);
+        return !(
+          pathname.startsWith('/feed') ||
+          pathname.startsWith('/rss') ||
+          pathname.startsWith('/atom') ||
+          pathname === '/new-post/' ||
+          pathname === '/configs/' ||
+          pathname === '/friends/' ||
+          pathname === '/feed.xml' ||
+          pathname === '/rss.xml' ||
+          pathname === '/atom.xml'
+        );
       },
     }), 
     Compress({

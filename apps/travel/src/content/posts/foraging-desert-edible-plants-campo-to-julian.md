@@ -1,13 +1,14 @@
 ---
 title: "Foraging the Early Southern California PCT: Edible Plants in Desert-Edge Terrain"
 published: 2026-03-05
-description: "A practical guide to edible plants in the early Southern California PCT, with identification tips, seasonal timing, preparation, nutrition, and look-alike cautions across mixed terrain."
+description: "A practical guide to edible plants in the early Southern California PCT, with identification tips, seasonal timing, preparation, nutrition, and look-alike cautions across mixed terrain. Downloadable pdf."
 tags:
   - pacific-crest-trail
   - desert
   - food
   - foraging
   - trail-guides
+  - download
 category: "Trail Guides"
 image: "/posts/foraging-desert-edible-plants-campo-to-julian/title.jpg"
 showImageOnPost: false
