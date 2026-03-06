@@ -18,6 +18,7 @@ export const postsSchema = z.object({
   downloadable: z.boolean().optional().default(false),
   mascotContext: z.string().optional(),
   oneColumn: z.boolean().optional().default(false),
+  showToc: z.boolean().optional(),
   backgroundImage: z.string().optional(),
   bannerType: z.enum(['image', 'video', 'timeline', 'assistant']).optional(),
   bannerLink: z.string().optional(),
@@ -65,6 +66,37 @@ export const friendsSchema = z.object({
   bio: z.string().optional(),
   avatar: z.string().optional(),
   lastSynced: z.string().optional(),
+})
+
+export const updatesSchema = z.object({
+  title: z.string().optional().default('Updates'),
+  // statusTitle: z.string().optional().default('Current Status'),
+  journalTitle: z.string().optional().default('Journal'),
+  maxEntries: z.number().optional().default(5),
+  current: z
+    .object({
+      status: z.string().optional(),
+      location: z.string().optional(),
+      updated: z.date().optional(),
+      mileage: z.string().optional(),
+      section: z.string().optional(),
+      nextStop: z.string().optional(),
+      note: z.string().optional(),
+    })
+    .optional(),
+  entries: z
+    .array(
+      z.object({
+        title: z.string().optional(),
+        date: z.date(),
+        location: z.string().optional(),
+        mileage: z.string().optional(),
+        summary: z.string(),
+        url: z.string().optional(),
+      }),
+    )
+    .optional()
+    .default([]),
 })
 
 export const aboutSchema = z.object({

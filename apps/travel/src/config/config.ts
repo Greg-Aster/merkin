@@ -31,6 +31,21 @@ export const siteConfig: SiteConfig = {
   toc: {
     enable: true,
     depth: 3,
+    minHeadings: 3,
+  },
+  rightRail: {
+    enable: true,
+    showOnHome: true,
+    showOnPostsWithoutToc: true,
+    stickyTop: "3.5rem",
+    widget: {
+      type: "updates",
+      collection: "updates",
+      slug: "trail-updates",
+      excerptLength: 1000,
+      pageUrl: "/journal/",
+      pageLinkLabel: "Open full trail journal",
+    },
   },
   favicon: [],
 }
@@ -38,6 +53,10 @@ export const siteConfig: SiteConfig = {
 export const navBarConfig: NavBarConfig = {
   links: [
     0,
+    {
+      name: "Journal",
+      url: "/journal/",
+    },
     1,
     2,
   ],
