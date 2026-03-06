@@ -31,6 +31,21 @@ export type SiteConfig = {
   toc: {
     enable: boolean
     depth: 1 | 2 | 3
+    minHeadings?: number
+  }
+  rightRail?: {
+    enable: boolean
+    showOnHome?: boolean
+    showOnPostsWithoutToc?: boolean
+    stickyTop?: string
+    widget?: {
+      type: 'updates'
+      collection?: string
+      slug?: string
+      excerptLength?: number
+      pageUrl?: string
+      pageLinkLabel?: string
+    }
   }
   favicon: Favicon[]
 }
@@ -104,6 +119,7 @@ export type BlogPostData = {
   image?: string
   downloadable?: boolean
   category?: string
+  showToc?: boolean
   prevTitle?: string
   prevSlug?: string
   nextTitle?: string

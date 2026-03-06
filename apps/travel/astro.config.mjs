@@ -33,7 +33,7 @@ export default defineConfig({
     swup({
       theme: false,
       animationClass: "transition-swup-",
-      containers: ["main"],
+      containers: ["#main-grid"],
       smoothScrolling: true,
       cache: true,
       preload: true,

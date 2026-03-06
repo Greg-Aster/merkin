@@ -422,7 +422,9 @@ if (backToTopBtn) {
 
 // TOC visibility
 if (toc) {
-    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+    if (toc.dataset.railMode === 'widget') {
+        toc.classList.remove('toc-hide');
+    } else if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
         toc.classList.remove('toc-hide');
     } else {
         toc.classList.add('toc-hide');

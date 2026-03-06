@@ -6,6 +6,7 @@ import {
   postsSchema,
   specSchema,
   teamSchema,
+  updatesSchema,
 } from '@merkin/blog-core/schemas'
 
 // Define the 'posts' collection
@@ -25,6 +26,10 @@ const teamCollection = defineCollection({
 // Define the friends collection
 const friendsCollection = defineCollection({
   schema: friendsSchema,
+})
+
+const updatesCollection = defineCollection({
+  schema: updatesSchema,
 })
 
 // Define the 'about' collection for dynamic author pages
@@ -111,6 +116,7 @@ export const collections = {
   spec: specCollection,
   team: teamCollection,
   friends: friendsCollection,
+  updates: updatesCollection,
   about: aboutCollection, // NEW: About collection for dynamic author pages
   products: productsCollection,
   quizzes: quizzesCollection,
