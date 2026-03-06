@@ -16,6 +16,7 @@ const appRoot = path.resolve(appArg || process.cwd())
 const distDir = path.join(appRoot, 'dist')
 const pdfHtmlRoot = path.join(distDir, 'pdf', 'posts')
 const downloadsRoot = path.join(distDir, 'downloads', 'posts')
+const publicDownloadsRoot = path.join(appRoot, 'public', 'downloads', 'posts')
 
 async function collectPdfPages(dir) {
   const entries = await fsp.readdir(dir, { withFileTypes: true })
@@ -113,6 +114,7 @@ async function main() {
   }
 
   await fsp.mkdir(downloadsRoot, { recursive: true })
+  await fsp.mkdir(publicDownloadsRoot, { recursive: true })
 
   const pythonCheck = spawnSync('bash', ['-lc', 'command -v python3'], {
     encoding: 'utf8',
@@ -152,6 +154,7 @@ async function main() {
       const encodedSlug = encodeSlugForUrl(slug)
       const pdfUrl = `http://127.0.0.1:${port}/pdf/posts/${encodedSlug}/`
       const outputPath = path.join(downloadsRoot, `${slug}.pdf`)
+      const publicOutputPath = path.join(publicDownloadsRoot, `${slug}.pdf`)
 
       await fsp.mkdir(path.dirname(outputPath), { recursive: true })
 
@@ -186,7 +189,10 @@ async function main() {
         )
       }
 
+      await fsp.mkdir(path.dirname(publicOutputPath), { recursive: true })
+      await fsp.copyFile(outputPath, publicOutputPath)
       console.log(`[pdf] Wrote ${path.relative(appRoot, outputPath)}`)
+      console.log(`[pdf] Synced ${path.relative(appRoot, publicOutputPath)}`)
     }
   } finally {
     serverProcess.kill('SIGTERM')
