@@ -98,22 +98,33 @@ done
 echo "    Done — @temporal-flow/blog-core"
 
 # -----------------------------------------------------------------------------
-# 3. Copy apps/travel as apps/example (strip personal content)
+# 3. Copy Temporal-Flow as apps/example (strip personal content)
 # -----------------------------------------------------------------------------
-echo "==> [3/7] Creating apps/example from apps/travel..."
+echo "==> [3/7] Creating apps/example from Temporal-Flow..."
 
-TRAVEL_SRC="$MERKIN_ROOT/apps/travel"
+TF_SRC="$MERKIN_ROOT/Temporal-Flow"
 EXAMPLE_DST="$EXPORT_DIR/apps/example"
 
 # Copy everything except personal content dirs and build artifacts
 rsync -a --exclude='node_modules' --exclude='dist' --exclude='.astro' \
   --exclude='src/content/posts' \
   --exclude='src/content/updates' \
-  --exclude='public/avatar' \
-  --exclude='public/assets/banner' \
+  --exclude='src/content/team' \
+  --exclude='src/content/friends' \
+  --exclude='src/content/spec' \
+  --exclude='src/content/avatar' \
+  --exclude='src/assets/avatar' \
+  --exclude='src/assets/images' \
+  --exclude='src/assets/banner' \
+  --exclude='public/posts' \
+  --exclude='public/thumb' \
+  --exclude='public/assets' \
+  --exclude='public/how' \
   --exclude='public/downloads' \
-  --exclude='scripts/new-post.js' \
-  "$TRAVEL_SRC/" "$EXAMPLE_DST/"
+  --exclude='CNAME' \
+  --exclude='.env' \
+  --exclude='.env.*' \
+  "$TF_SRC/" "$EXAMPLE_DST/"
 
 # Rename package references in copied files
 find "$EXAMPLE_DST" -type f \( -name "*.ts" -o -name "*.astro" -o -name "*.svelte" -o -name "*.mjs" -o -name "*.json" \) | while read -r file; do
@@ -123,16 +134,14 @@ done
 # Update package name in package.json
 if [[ -f "$EXAMPLE_DST/package.json" ]]; then
   sed -i 's/"name": "[^"]*"/"name": "@temporal-flow\/example"/g' "$EXAMPLE_DST/package.json"
-  # Update build script: remove PDF generation (merkin-specific)
+  # Remove PDF generation (merkin-specific build step)
   sed -i 's/ && node \.\.\/\.\.\/scripts\/generate-post-pdfs\.mjs --app \././g' "$EXAMPLE_DST/package.json"
 fi
 
-# Update site URL in astro.config.mjs
-if [[ -f "$EXAMPLE_DST/astro.config.mjs" ]]; then
-  sed -i "s|SITE_URL=https://travel.dndiy.org|SITE_URL=https://example.org|g" "$EXAMPLE_DST/astro.config.mjs"
-fi
+# Replace CNAME with placeholder
+echo "your-domain.com" > "$EXAMPLE_DST/CNAME"
 
-echo "    Done — apps/example (personal content directories excluded)"
+echo "    Done — apps/example (based on Temporal-Flow with personal content stripped)"
 
 # -----------------------------------------------------------------------------
 # 4. Create demo content for the example site
@@ -143,6 +152,7 @@ mkdir -p "$EXAMPLE_DST/src/content/posts"
 mkdir -p "$EXAMPLE_DST/src/content/updates"
 mkdir -p "$EXAMPLE_DST/src/content/spec"
 mkdir -p "$EXAMPLE_DST/src/content/friends"
+mkdir -p "$EXAMPLE_DST/src/content/avatar"
 mkdir -p "$EXAMPLE_DST/public/avatar"
 
 # Demo post 1: Welcome
@@ -267,22 +277,12 @@ cat > "$EXAMPLE_DST/public/avatar/avatar.svg" << 'SVGEOF'
 </svg>
 SVGEOF
 
-# Update config.ts with placeholder values
+# config.ts from Temporal-Flow is already generic ("Site Owner", "Temporal Flow" title)
+# Just ensure the avatarFilename points at our SVG placeholder
 if [[ -f "$EXAMPLE_DST/src/config/config.ts" ]]; then
-  # Replace personal site title, subtitle, hue
-  sed -i \
-    -e 's/title: ".*"/title: "My Blog"/' \
-    -e 's/subtitle: ".*"/subtitle: "A blog about things I care about"/' \
-    -e 's/hue: [0-9]*/hue: 250/' \
-    "$EXAMPLE_DST/src/config/config.ts"
-
-  # Replace profile info
-  sed -i \
-    -e 's/name: ".*",/name: "Your Name",/' \
-    -e 's/bio: ".*",/bio: "Hello! I write about things that interest me.",/' \
-    "$EXAMPLE_DST/src/config/config.ts"
-
-  echo "    Updated config.ts with placeholder values"
+  sed -i 's|avatarFilename: ".*"|avatarFilename: "avatar.svg"|g' "$EXAMPLE_DST/src/config/config.ts"
+  sed -i 's|avatar: "/src/content/avatar/.*"|avatar: "/avatar/avatar.svg"|g' "$EXAMPLE_DST/src/config/config.ts"
+  echo "    config.ts avatar references updated"
 fi
 
 echo "    Demo content created"
