@@ -14,7 +14,7 @@ image: "/posts/lower-body-injury-guide-1/IMAG0129.jpg"
 showImageOnPost: false
 avatarImage: "/posts/lower-body-injury-guide-1/merkin.webm"
 authorName: "Merkin"
-authorBio: "Lord or love and acceptance"
+authorBio: "Lord or love and acceptance loves your feet just the way they are"
 bannerType: "image"
 bannerData:
   imageUrl: "/posts/lower-body-injury-guide-1/pct-trail-overview.jpg"
@@ -25,6 +25,7 @@ timelineLocation: "Pre-Trail Preparation"
 isKeyEvent: false
 oneColumn: false
 draft: false
+downloadable: true
 lang: "en"
 ---
 
@@ -50,7 +51,9 @@ The difference between hikers who finish the PCT and hikers who don't usually is
 
 ## Part 1: Knee Stuff
 
-![Knee pain is the most common reason thru-hikers leave the PCT early](/posts/lower-body-injury-guide-1/pct-knee-pain.jpg)
+| Frontal knee anatomy | Side knee anatomy | Meniscus tear patterns |
+|---|---|---|
+| <img src="/posts/lower-body-injury-guide-1/knee-anatomy-front.png" alt="Frontal anatomy of the knee joint" loading="lazy" style="width:100%;height:170px;object-fit:contain;border-radius:8px;background:rgba(0,0,0,0.04);" /> | <img src="/posts/lower-body-injury-guide-1/knee-anatomy-side.png" alt="Side anatomy of the knee joint" loading="lazy" style="width:100%;height:170px;object-fit:contain;border-radius:8px;background:rgba(0,0,0,0.04);" /> | <img src="/posts/lower-body-injury-guide-1/meniscus-tear-types.svg" alt="Diagram of common meniscus tear patterns" loading="lazy" style="width:100%;height:170px;object-fit:contain;border-radius:8px;background:rgba(0,0,0,0.04);" /> |
 
 ### The Outer Knee Burn (Iliotibial Band Syndrome)
 
@@ -134,6 +137,10 @@ Sometimes the pain is right behind the knee — in the crease (the popliteal fos
 ---
 
 ## Part 2: Ankle Stuff
+
+| Ankle sprain mechanism | Ankle anatomy | Achilles tendon rupture |
+|---|---|---|
+| <img src="/posts/lower-body-injury-guide-1/ankle-sprain-smart-servier.jpg" alt="Medical illustration of ankle sprain injury" loading="lazy" style="width:100%;height:170px;object-fit:contain;border-radius:8px;background:rgba(0,0,0,0.04);" /> | <img src="/posts/lower-body-injury-guide-1/ankle-anatomy.svg" alt="Anatomy diagram of the ankle region" loading="lazy" style="width:100%;height:170px;object-fit:contain;border-radius:8px;background:rgba(0,0,0,0.04);" /> | <img src="/posts/lower-body-injury-guide-1/achilles-tendon-rupture.svg" alt="Medical illustration of Achilles tendon rupture" loading="lazy" style="width:100%;height:170px;object-fit:contain;border-radius:8px;background:rgba(0,0,0,0.04);" /> |
 
 ### The Classic Rolled Ankle (Lateral Ankle Sprain)
 
@@ -229,7 +236,9 @@ Shin stress fractures are covered below. Foot stress fractures — usually in th
 
 ## Part 3: Shin Stuff
 
-![Shin splints are the bread-and-butter overuse injury of the first few weeks on trail](/posts/lower-body-injury-guide-1/pct-shin-splints.png)
+| Lower leg muscle anatomy | Tibia anatomy | Tibia and fibula shaft fracture X-ray |
+|---|---|---|
+| <img src="/posts/lower-body-injury-guide-1/lower-leg-muscles.svg" alt="Lower leg muscle anatomy including tibialis anterior and peroneal muscles" loading="lazy" style="width:100%;height:170px;object-fit:contain;border-radius:8px;background:rgba(0,0,0,0.04);" /> | <img src="/posts/lower-body-injury-guide-1/tibia-frontal-view.png" alt="Frontal anatomy of the tibia" loading="lazy" style="width:100%;height:170px;object-fit:contain;border-radius:8px;background:rgba(0,0,0,0.04);" /> | <img src="/posts/lower-body-injury-guide-1/tibia-fibula-fracture-xray.jpg" alt="X-ray showing tibia and fibula shaft fracture" loading="lazy" style="width:100%;height:170px;object-fit:contain;border-radius:8px;background:rgba(0,0,0,0.04);" /> |
 
 ### Classic Shin Splints (Medial Tibial Stress Syndrome)
 
@@ -258,6 +267,20 @@ This is what happens when you ignore shin splints for too long. The bone itself 
 **The hop test:** Stand on the hurting leg. Hop once firmly. Sharp pain on landing = red flag.
 
 > ⚠️ **If you think it might be a stress fracture — stop. Done. No more miles on that leg until you get it checked. A stress fracture that breaks all the way through in the backcountry means helicopter, not trail. Don't gamble on this one.**
+
+---
+
+### Outer Shin Bone Pain (Fibular Stress Injury)
+
+This gets missed a lot because everyone focuses on the tibia. The fibula (the thinner outer lower-leg bone) can also develop stress injury, especially with lots of side-hilling, cambered roads, and long descents.
+
+**What it feels like:** Focal pain on the *outer* lower leg, often a few inches above the ankle, with pinpoint tenderness on the fibula itself. Unlike diffuse muscle soreness, this pain is specific and tends to worsen day by day if you keep pushing.
+
+**What to do:**
+- Treat it with the same seriousness as tibial stress injury: reduce load immediately
+- Avoid off-camber terrain and long descents while painful
+- Use poles and shorten stride
+- If pain is focal, worsening, and painful with hopping or impact, get imaging and stop trail miles
 
 ---
 
@@ -301,6 +324,50 @@ Two tendons — the peroneus longus and peroneus brevis — run down the outer s
 
 ---
 
+## Part 4: Hip Stuff (Very Common on Climbs)
+
+| Hip flexor strain pattern | Anterior hip muscles | Lateral hip and gluteal musculature |
+|---|---|---|
+| <img src="/posts/lower-body-injury-guide-1/hip-flexor-strain.svg" alt="Medical illustration of hip flexor strain pain pattern" loading="lazy" style="width:100%;height:170px;object-fit:contain;border-radius:8px;background:rgba(0,0,0,0.04);" /> | <img src="/posts/lower-body-injury-guide-1/anterior-hip-muscles.png" alt="Anterior view of hip muscles including hip flexors" loading="lazy" style="width:100%;height:170px;object-fit:contain;border-radius:8px;background:rgba(0,0,0,0.04);" /> | <img src="/posts/lower-body-injury-guide-1/gluteal-hip-muscles.jpg" alt="Gluteal and lateral hip muscles related to uphill and sidehill loading" loading="lazy" style="width:100%;height:170px;object-fit:contain;border-radius:8px;background:rgba(0,0,0,0.04);" /> |
+
+### Front-of-Hip Pinch on Climbs (Hip Flexor Overload: Iliopsoas/TFL)
+
+If your front hip aches on steep ascents, this is often hip flexor overload. High steps, heavy pack carry, and long uphill days load the iliopsoas and tensor fasciae latae (TFL) constantly.
+
+**What it feels like:** Ache or pinch in the front crease of the hip, worse with steep climbing and lifting the knee high. Often better on flatter trail.
+
+**What to do:**
+- Shorten stride uphill and reduce high-step movement
+- Use poles to unload hip flexors on climbs
+- Loosen your hip belt slightly if it is pressing into the front hip crease
+- Gentle hip flexor mobility at breaks and camp
+- If it is getting worse day over day, take a lower-mileage day early instead of waiting for a shutdown
+
+---
+
+### Outside-Hip Ache (Glute Med/TFL Tendon Overload, Sometimes GTPS)
+
+This is the classic sore spot on the outside of the hip. Side-slopes and uneven terrain can overload glute med/min and nearby structures around the greater trochanter.
+
+**What it feels like:** Lateral hip tenderness, pain stepping up, sometimes pain lying on that side in camp.
+
+**What to do:**
+- Avoid long sidehill traverses when possible
+- Keep cadence steady and steps short on climbs
+- Use poles on descents and side slopes
+- Don’t sleep directly on the painful side
+- If pain starts radiating deep into the groin or worsens sharply with impact, stop and reassess
+
+---
+
+### Hip Red Flag You Should Not Ignore
+
+Deep groin pain with impact or hopping, especially if worsening daily, can indicate a femoral neck stress injury. That is not a "walk it off" problem.
+
+> ⚠️ **Deep groin pain plus pain on impact/hopping = stop hiking and get urgent evaluation.**
+
+---
+
 ## Your Basic Trail Kit for This Stuff
 
 - **Trekking poles** — the most important thing on this whole list. Use them on every descent.
@@ -339,5 +406,44 @@ You got this, my dude. See you out there. 🤙
 
 ---
 
-*Field reference, not a doctor's visit. If something feels seriously wrong, trust that feeling and get it checked.*
+## References
 
+- American Academy of Family Physicians (AAFP): Patellofemoral Pain Syndrome (2019):  
+  https://www.aafp.org/pubs/afp/issues/2019/0115/p88.html
+- AAFP: Update on Acute Ankle Sprains (includes Ottawa Ankle Rules use) (2012):  
+  https://www.aafp.org/pubs/afp/issues/2012/0615/p1170.html
+- Ottawa Ankle Rules quick reference (Ottawa Hospital Research Institute):  
+  https://www.ohri.ca/emerg/cdr/docs/cdr_ankle_poster.pdf
+- AAFP: Stress Fractures: Diagnosis, Treatment, and Prevention (2011):  
+  https://www.aafp.org/pubs/afp/issues/2011/0101/p39.html
+- StatPearls: Medial Tibial Stress Syndrome (NCBI Bookshelf):  
+  https://www.ncbi.nlm.nih.gov/books/NBK538479/
+- AAFP: Tendinopathies of the Foot and Ankle (2022):  
+  https://www.aafp.org/pubs/afp/issues/2022/0500/p479.html
+- AAFP: Hip Pain in Adults: Evaluation and Differential Diagnosis (2021):  
+  https://www.aafp.org/pubs/afp/issues/2021/0115/p81.html
+- StatPearls: Greater Trochanteric Pain Syndrome (NCBI Bookshelf):  
+  https://www.ncbi.nlm.nih.gov/books/NBK557433/
+- Mayo Clinic: Meniscus tear overview:  
+  https://www.mayoclinic.org/diseases-conditions/meniscus-tear/symptoms-causes/syc-20354818
+- Mayo Clinic: Achilles tendinitis overview:  
+  https://www.mayoclinic.org/diseases-conditions/achilles-tendinitis/symptoms-causes/syc-20369020
+
+## Medical Image Credits (Wikimedia Commons)
+
+- Knee anatomy front (Blausen Medical): https://commons.wikimedia.org/wiki/File:Blausen_0596_KneeAnatomy_Front.png
+- Knee anatomy side (Blausen Medical): https://commons.wikimedia.org/wiki/File:Blausen_0597_KneeAnatomy_Side.png
+- Meniscus tear types (Mikael Haggstrom, CC0): https://commons.wikimedia.org/wiki/File:Meniscus_tear_types.svg
+- Ankle sprain illustration (Smart-Servier): https://commons.wikimedia.org/wiki/File:Ankle_sprain_--_Smart-Servier.jpg
+- Ankle anatomy: https://commons.wikimedia.org/wiki/File:Ankle.svg
+- Achilles tendon rupture (InjuryMap): https://commons.wikimedia.org/wiki/File:Achilles_tendon_rupture.svg
+- Lower leg muscles (InjuryMap): https://commons.wikimedia.org/wiki/File:Lower_leg_muscles.svg
+- Tibia frontal view (Anatomography): https://commons.wikimedia.org/wiki/File:Tibia_-_frontal_view.png
+- Tibia and fibula shaft fracture X-ray: https://commons.wikimedia.org/wiki/File:Tibia_and_fibula_fracture.jpg
+- Hip flexor strain illustration: https://commons.wikimedia.org/wiki/File:Hip_flexor_strain.svg
+- Anterior hip muscles: https://commons.wikimedia.org/wiki/File:Anterior_Hip_Muscles_2.PNG
+- Gluteal muscles that move the femur: https://commons.wikimedia.org/wiki/File:1122_Gluteal_Muscles_that_Move_the_Femur.jpg
+
+---
+
+*Field reference, not a doctor's visit. If something feels seriously wrong, trust that feeling and get it checked.*

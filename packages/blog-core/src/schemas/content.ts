@@ -15,6 +15,7 @@ export const postsSchema = z.object({
   category: z.string().optional().default(''),
   lang: z.string().optional().default(''),
   showImageOnPost: z.boolean().optional(),
+  downloadable: z.boolean().optional().default(false),
   mascotContext: z.string().optional(),
   oneColumn: z.boolean().optional().default(false),
   backgroundImage: z.string().optional(),
