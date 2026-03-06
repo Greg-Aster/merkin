@@ -61,7 +61,7 @@ There's a thick band of tissue — your iliotibial band, or IT band — that run
 
 **What it feels like:** Sharp, burning pain on the *outside* of your knee. The sneaky thing is it usually doesn't show up at mile one — you'll feel totally fine, then somewhere around mile 8 or 12 it starts complaining. Most people have a consistent "IT band threshold" — a specific number of miles in before it fires. Gets worse going downhill. Rarely bothers you going uphill.
 
-**Why it happens:** Your hip abductor muscles are a little weak, so your knee tracks inward to compensate. The pain is in your knee but the real problem is weakness and tightness higher up the thigh. Classic misdirection — fix what's above the knee, not just the knee itself.
+**Why it happens:** Your hip abductor muscles are a little weak, so your pelvis drops slightly on each step rather than staying level — which changes how the IT band loads against the outside of your knee. The pain is in your knee but the real problem is weakness higher up, around the hip and outer thigh. Classic misdirection — fix what's above the knee, not just the knee itself.
 
 **What to do:**
 - Get your trekking poles out and actually use them going downhill — this is the biggest thing you can do
@@ -86,6 +86,25 @@ Your kneecap (patella) is supposed to slide smoothly in a little groove when you
 - Take shorter steps downhill, keep your knee slightly bent when your foot hits the ground — never let it go fully straight on impact
 - Skip deep squats while this is happening
 - Elevate your legs and ice the knee at camp
+
+---
+
+### Below-the-Kneecap Pain (Patellar Tendinopathy)
+
+Different from the kneecap grind above — this one lives at the *bottom* of the kneecap, at the patellar tendon itself. That's the thick cord connecting your kneecap to your shin bone. It gets loaded hard on every downhill step.
+
+**What it feels like:** Sharp or aching pain at the very bottom edge of your kneecap, or just below it. You can usually press directly on the spot and reproduce the pain — that's the key difference from PFS, which is more diffuse. Worse on descents and loaded knee bends. Usually one specific tender point rather than a general kneecap ache.
+
+**Why it's different from PFS:** PFS pain is under or all around the kneecap and worsens from sitting. Patellar tendinopathy has a specific tender point at the bottom edge of the kneecap, and descents are the main trigger, not prolonged sitting.
+
+**What to do:**
+- Trekking poles on all descents — this is the main offender
+- Cut back on steep downhill miles temporarily
+- Eccentric quad exercise if you have a slope: slow decline squats, focusing on the lowering phase — stop if it causes sharp pain
+- Compression sleeve
+- Ice after big days
+
+**Real talk:** This one responds well to load management. Dial back the descent-heavy days and it usually settles in a week or two. Ignore it and keep hammering downhills and it can sideline you longer.
 
 ---
 
@@ -221,6 +240,26 @@ The Achilles tendon connects your calf to your heel and takes enormous load on a
 - Gentle calf stretching — stop if it increases pain
 - Ibuprofen for acute flares
 - Avoid suddenly switching to zero-drop shoes mid-hike — a drop change puts extra load on an already irritated Achilles
+
+---
+
+### Morning Heel Stab (Plantar Fasciitis)
+
+Probably the most common foot complaint on a thru-hike, and one of the most recognizable patterns in all of lower-body trail injuries. The plantar fascia is a thick band of tissue running along the bottom of your foot from your heel to your toes. When it gets overloaded — which high-mileage days are very good at doing — it gets microtears at the heel attachment and gets angry.
+
+**What it feels like:** Sharp, stabbing pain in the bottom of your heel — not the back of the heel, the *bottom*. The defining feature: it is worst with your first 5-10 steps out of the tent every morning, then partially eases up as you walk. It may come back after long rest breaks or at the end of a big day. Unlike a stress fracture, it does warm up somewhat with movement.
+
+**Why it happens:** Tight calves and Achilles pull on the plantar fascia from above, and miles of impact load it from below. The fascia gets microtears right at where it attaches to the heel bone. Inadequate arch support and worn-out insoles accelerate it.
+
+**What to do:**
+- **Calf stretching is the most important thing** — tight calves are the main upstream driver; do these multiple times a day, especially before your first steps in the morning
+- While still in your sleeping bag, stretch your toes back toward your shin 20-30 times before you stand up — this pre-loads the fascia gently before you put full weight on it
+- Roll the bottom of your foot over a round rock, water bottle, or trekking pole handle for a minute each morning before walking
+- Get a heel cushion or a better insole with arch support — a firm arch helps take tension off the fascia during the push-off phase
+- **Never go barefoot in camp on hard ground** — barefoot walking on hard surfaces is when this gets dramatically worse; camp shoes with some cushion and arch support make a real difference
+- Ibuprofen for acute flares
+
+**Distinguishing from a calcaneal (heel bone) stress fracture:** Plantar fasciitis warms up somewhat with walking, even if it never fully goes away. A heel stress fracture does not warm up — it stays sharp or gets worse with every step. If heel pain is worsening day over day with no warm-up pattern, treat it like a stress fracture: stop and get it evaluated.
 
 ---
 
@@ -376,7 +415,7 @@ Deep groin pain with impact or hopping, especially if worsening daily, can indic
 - **ACE bandage** — versatile, handles ankle and knee wrapping, improvised compression anywhere
 - **Leukotape + foam underwrap** — better than ACE for long-term ankle support, stays put even when sweaty
 - **Ibuprofen** — don't overdo it in hot dry conditions; chronic NSAID use when you're consistently sweating and not drinking enough is hard on the kidneys. Use it to knock down a bad flare, not as a daily maintenance habit
-- **Electrolyte tabs** — cramps and tendon problems get worse when you're low on sodium, not just water
+- **Electrolyte tabs** — cramps get significantly worse when you're low on sodium, not just water; muscle function and nerve signaling both depend on electrolyte balance, so this isn't optional on high-sweat days
 - **Cold creek water** — free, everywhere, works great. Soak what hurts.
 
 ---
@@ -391,7 +430,7 @@ If any of these are happening, the answer is not more miles:
 - Bone pain getting worse every single day and doesn't loosen up when you warm up
 - Sharp pain on the one-leg hop test
 - Red lines spreading away from a wound — infection spreading, needs antibiotics today
-- Calf swollen, warm, and red after an ankle injury — possible blood clot (DVT), treat as emergency
+- Calf significantly swollen, warm, and red — this pattern can mean a blood clot (DVT) even without a prior ankle injury; thru-hiking dehydration and sustained exertion are real DVT risk factors on their own. Treat as emergency.
 - Sudden sharp pain in the Achilles like a kick from behind — possible rupture, get help immediately
 
 ---
@@ -426,8 +465,12 @@ You got this, my dude. See you out there. 🤙
   https://www.ncbi.nlm.nih.gov/books/NBK557433/
 - Mayo Clinic: Meniscus tear overview:  
   https://www.mayoclinic.org/diseases-conditions/meniscus-tear/symptoms-causes/syc-20354818
-- Mayo Clinic: Achilles tendinitis overview:  
+- Mayo Clinic: Achilles tendinitis overview:
   https://www.mayoclinic.org/diseases-conditions/achilles-tendinitis/symptoms-causes/syc-20369020
+- AAFP: Plantar Fasciitis: A Concise Review (2019):
+  https://www.aafp.org/pubs/afp/issues/2019/1101/p744.html
+- StatPearls: Patellar Tendinopathy (NCBI Bookshelf):
+  https://www.ncbi.nlm.nih.gov/books/NBK557381/
 
 ## Medical Image Credits (Wikimedia Commons)
 

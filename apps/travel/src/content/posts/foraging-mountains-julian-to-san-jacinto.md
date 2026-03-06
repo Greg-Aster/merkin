@@ -2,7 +2,7 @@
 title: "Foraging the Mountain Transition: Edible Plants from Julian to San Jacinto"
 published: 2026-03-06
 
-description: "A practical guide to edible plants in the mountain-transition zone north of Julian, with spring timing honesty, preparation, nutrition, and safety notes for PCT hikers."
+description: "A practical guide to edible plants in the mountain-transition zone north of Julian, with spring timing honesty, preparation, nutrition, and safety notes for PCT hikers. Downloadable pdf."
 
 tags:
   - pacific-crest-trail
@@ -10,6 +10,7 @@ tags:
   - food
   - trail-guides
   - southern-california
+  - download
 
 category: "Trail Guides"
 
