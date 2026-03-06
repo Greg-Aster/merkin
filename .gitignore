@@ -37,6 +37,9 @@ public/downloads/
 Mesh_Hair_Generator/
 mascot-chatbot-cf-worker/
 
+# Public template export — has its own .git pointing at temporal-flow GitHub repo
+temporal-flow-export/
+
 # Archived large media (cleanup guardrails)
 **/posts/Mega-Meal-Explained/gif/title4.gif
 **/posts/Mega-Meal-Explained/gif/running-480p.gif

@@ -9,6 +9,7 @@ import {
   formatUrl,
   friends,
   getFriends,
+  initFriendsFromStorage,
   removeFriend,
   updateFriend,
   validateSite,
@@ -32,10 +33,6 @@ let isLoading = false
 let syncStates = {}
 let syncAllStatus = 'idle'
 
-// Initialize permanent friends before hydration
-if (savedFriends && savedFriends.length > 0) {
-  addPermanentFriends(savedFriends)
-}
 
 // Check if an image exists
 async function checkImageExists(url) {
@@ -88,8 +85,16 @@ function handleImageError(event) {
   }
 }
 
-// Initialize client-side settings
+// Initialize client-side settings (all browser API access deferred to onMount)
 onMount(() => {
+  // Initialize localStorage persistence — must run in browser to avoid hydration mismatch
+  initFriendsFromStorage()
+
+  // Load permanent friends from git content after storage is initialized
+  if (savedFriends && savedFriends.length > 0) {
+    addPermanentFriends(savedFriends)
+  }
+
   friendContentEnabled =
     localStorage.getItem('friendContentEnabled') !== 'false'
   lastSyncTime = localStorage.getItem('lastFriendSyncTime')
