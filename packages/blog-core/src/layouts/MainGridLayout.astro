@@ -6,6 +6,7 @@ import { Image } from 'astro:assets'
 import Footer from '@components/Footer.astro'
 import Navbar from '@components/Navbar.astro'
 import BackToTop from '@components/control/BackToTop.astro'
+import RightRailContent from '@components/widget/RightRailContent.astro'
 import SideBar from '@components/widget/SideBar.astro'
 import type { MarkdownHeading } from 'astro'
 import { Icon } from 'astro-icon/components'
@@ -488,6 +489,8 @@ if (import.meta.env.DEV) {
 
 // Get current path for page type determination
 const currentPath = Astro.url.pathname
+const isHomePage = currentPath === '/'
+const isPostRoute = Boolean(post)
 
 // ⭐ RESTORED: Use the working banner configuration function
 const bannerConfiguration = determineBannerConfiguration(
@@ -507,6 +510,23 @@ const {
   finalBannerLink,
   currentBannerType,
 } = bannerConfiguration
+
+const tocMinHeadings = siteConfig.toc.minHeadings ?? 3
+const tocOverride =
+  typeof post?.data?.showToc === 'boolean' ? post.data.showToc : undefined
+const hasEnoughHeadingsForToc = headings.length >= tocMinHeadings
+const shouldShowToc =
+  siteConfig.toc.enable && (tocOverride ?? hasEnoughHeadingsForToc)
+
+const shouldShowFallbackRightRail =
+  siteConfig.rightRail?.enable === true &&
+  ((isHomePage && siteConfig.rightRail?.showOnHome !== false) ||
+    (isPostRoute &&
+      !shouldShowToc &&
+      siteConfig.rightRail?.showOnPostsWithoutToc === true))
+
+const shouldShowRightRail = shouldShowToc || shouldShowFallbackRightRail
+const rightRailStickyTop = siteConfig.rightRail?.stickyTop ?? '3.5rem'
 
 // Process custom author data with direct post-data fallbacks so avatar overrides
 // remain functional even if app banner adapters omit author fields.
@@ -608,8 +628,7 @@ if (post && post.data) {
 // Conditionally create the grid classes
 const gridLayoutClasses = [
   "transition duration-700 w-full left-0 right-0 grid grid-cols-1 md:grid-cols-[16.5rem_auto] mx-auto gap-4 md:gap-4 px-2 md:px-4 relative",
-  // Only add the 3-column definition if the TOC is enabled in the site config
-  siteConfig.toc.enable ? "2xl:grid-cols-[16.5rem_auto_var(--toc-width)]" : ""
+  shouldShowRightRail ? "2xl:grid-cols-[16.5rem_auto_var(--toc-width)]" : ""
 ].join(" ");
 ---
 
@@ -861,18 +880,22 @@ const gridLayoutClasses = [
   <!-- =============================================================== -->
   <div class={`w-full z-30 pointer-events-none relative`}>
     <div id="main-panel-wrapper" class="responsive-panel-wrapper relative max-w-[var(--page-width)] mx-auto pointer-events-auto">
-      <div id="main-grid" class:list={[gridLayoutClasses]} style={`margin-top: ${mainContentOffset};`}>
+      <div
+        id="main-grid"
+        class:list={[gridLayoutClasses, 'transition-swup-fade']}
+        style={`margin-top: ${mainContentOffset};`}
+      >
 
         <!-- Grid Item 1: SIDEBAR -->
         <div class="hidden md:block mb-4 col-span-1 md:max-w-[17.5rem] onload-animation">
           <div class="mb-4">
-            <Profile client:load slug={processedAuthorData.slug} customAvatar={processedAuthorData.customAvatar} customName={processedAuthorData.customName} customBio={processedAuthorData.customBio} customLink={processedAuthorData.customLink} isHomePage={currentPath === '/'} profileConfig={profileConfig} avatarConfig={avatarConfig} />
+            <Profile client:load slug={processedAuthorData.slug} customAvatar={processedAuthorData.customAvatar} customName={processedAuthorData.customName} customBio={processedAuthorData.customBio} customLink={processedAuthorData.customLink} isHomePage={isHomePage} profileConfig={profileConfig} avatarConfig={avatarConfig} />
           </div>
           <SideBar class="flex-1" headings={headings} postSlug={processedAuthorData.slug} customAvatar={processedAuthorData.customAvatar} customName={processedAuthorData.customName} customBio={processedAuthorData.customBio} pageMascotContext={Astro.props.pageMascotContext} hideProfile={true}></SideBar>
         </div>
 
         <!-- Grid Item 2: MAIN CONTENT -->
-        <main id="main" class="transition-swup-fade col-span-1 overflow-hidden">
+        <main id="main" class="col-span-1 overflow-hidden">
           <div id="main-content-wrapper" class="onload-animation">
             <div
               id="author-context"
@@ -883,7 +906,7 @@ const gridLayoutClasses = [
               data-custom-name={processedAuthorData.customName}
               data-custom-bio={processedAuthorData.customBio}
               data-custom-link={processedAuthorData.customLink}
-              data-is-home-page={currentPath === '/'}
+              data-is-home-page={isHomePage}
             ></div>
             <slot></slot>
             <div class="footer onload-animation hidden md:block">
@@ -892,11 +915,32 @@ const gridLayoutClasses = [
           </div>
         </main>
 
-        <!-- Grid Item 3: TABLE OF CONTENTS -->
-        {siteConfig.toc.enable && (
-          <div id="toc-wrapper" class="hidden 2xl:block z-0">
-            <div id="toc-inner-wrapper" class="sticky top-14 h-[calc(100vh_-_8rem)] overflow-y-auto hide-scrollbar" style="mask-image: none;">
-              <TOC headings={headings}></TOC>
+        <!-- Grid Item 3: RIGHT RAIL -->
+        {shouldShowRightRail && (
+          <div
+            id="toc-wrapper"
+            class="hidden 2xl:block z-0"
+            data-rail-mode={shouldShowToc ? 'toc' : 'widget'}
+          >
+            <div
+              id="toc-inner-wrapper"
+              class:list={[
+                'transition-all duration-300',
+                shouldShowToc
+                  ? 'sticky h-[calc(100vh_-_8rem)] overflow-y-auto hide-scrollbar'
+                  : '',
+              ]}
+              style={`top: ${rightRailStickyTop}; mask-image: none;`}
+            >
+              {shouldShowToc ? (
+                <TOC headings={headings}></TOC>
+              ) : (
+                <RightRailContent
+                  currentPath={currentPath}
+                  post={post}
+                  isHomePage={isHomePage}
+                />
+              )}
             </div>
           </div>
         )}
@@ -904,7 +948,7 @@ const gridLayoutClasses = [
         <!-- Mobile-only Footer -->
         <div class="footer col-span-1 onload-animation block md:hidden 2xl:hidden">
           <div class="mb-6">
-            <Profile client:load slug={processedAuthorData.slug} customAvatar={processedAuthorData.customAvatar} customName={processedAuthorData.customName} customBio={processedAuthorData.customBio} customLink={processedAuthorData.customLink} isHomePage={currentPath === '/'} profileConfig={profileConfig} avatarConfig={avatarConfig} />
+            <Profile client:load slug={processedAuthorData.slug} customAvatar={processedAuthorData.customAvatar} customName={processedAuthorData.customName} customBio={processedAuthorData.customBio} customLink={processedAuthorData.customLink} isHomePage={isHomePage} profileConfig={profileConfig} avatarConfig={avatarConfig} />
           </div>
           <Footer></Footer>
         </div>
