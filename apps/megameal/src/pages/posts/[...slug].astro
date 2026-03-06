@@ -130,6 +130,14 @@ const nextArticle = post.data.prevSlug
   : nextPost
 
 const showPostFooterNav = siteConfig.enablePostFooterNav === true
+const isDownloadable = post.data.downloadable === true
+const isDev = import.meta.env.DEV
+const pdfDownloadUrl = isDev
+  ? url(`/pdf/posts/${post.slug}/`)
+  : url(`/downloads/posts/${post.slug}.pdf`)
+const pdfButtonLabel = isDev
+  ? 'Open Printable View (PDF generated on build)'
+  : 'Download Article (PDF)'
 ---
 <MainGridLayout 
   banner={post.data.image} 
@@ -230,6 +238,23 @@ const showPostFooterNav = siteConfig.enablePostFooterNav === true
         </div>
     </div>
 
+    {isDownloadable && (
+      <div class="mb-4 w-full">
+        <a
+          href={pdfDownloadUrl}
+          download={isDev ? undefined : `${post.slug}.pdf`}
+          class="download-pdf-btn w-full font-bold overflow-hidden active:scale-95"
+        >
+          <div class="card-base btn-card rounded-2xl w-full min-h-[4.5rem] max-w-full px-4 py-3 flex items-center justify-center gap-3">
+            <Icon name="material-symbols:download-rounded" class="text-[1.5rem] text-[var(--primary)] shrink-0" />
+            <div class="transition text-black/80 dark:text-white/80">
+              {pdfButtonLabel}
+            </div>
+          </div>
+        </a>
+      </div>
+    )}
+
     {showPostFooterNav && <div class="grid grid-cols-1 md:grid-cols-3 mb-4 gap-4 overflow-hidden w-full">
         <a href={previousArticle ? getPostUrlBySlug(previousArticle.slug) : "#"}
            class:list={["w-full font-bold overflow-hidden active:scale-95", {"pointer-events-none opacity-60": !previousArticle}]}>
@@ -278,5 +303,11 @@ const showPostFooterNav = siteConfig.enablePostFooterNav === true
     /* Ensure smooth scrolling */
     html {
       scroll-behavior: smooth;
+    }
+
+    @media print {
+      .download-pdf-btn {
+        display: none !important;
+      }
     }
   </style>
