@@ -31,12 +31,18 @@ onMount(() => {
 
   window.addEventListener('scroll', handleScroll)
   window.addEventListener('load', handleParallaxLoad)
+  document.addEventListener('astro:page-load', syncRail)
 
   return () => {
     window.removeEventListener('scroll', handleScroll)
     window.removeEventListener('load', handleParallaxLoad)
+    document.removeEventListener('astro:page-load', syncRail)
   }
 })
+
+function syncRail() {
+  tocWrapper = document.querySelector('#toc-wrapper')
+}
 
 function updateEffects() {
   const scrollY = window.scrollY
@@ -49,7 +55,9 @@ function updateEffects() {
 
   // Update TOC visibility
   if (tocWrapper) {
-    if (scrollY > 300) {
+    if (tocWrapper.dataset.railMode === 'widget') {
+      tocWrapper.classList.remove('toc-hide')
+    } else if (scrollY > 300) {
       tocWrapper.classList.remove('toc-hide')
     } else {
       tocWrapper.classList.add('toc-hide')
