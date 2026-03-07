@@ -45,12 +45,21 @@ const FRIEND_CONTENT_ENABLED_KEY = 'friendContentEnabled'
 // Create a single unified store for all friends
 export const friends = writable<Friend[]>([])
 
-// Initialize from localStorage if in browser
-if (typeof window !== 'undefined') {
+// Module-level flag to prevent multiple initializations
+let storageInitialized = false
+
+/**
+ * Initialize friends from localStorage and set up persistence.
+ * Must be called from onMount() to avoid SSR/hydration mismatch errors.
+ */
+export function initFriendsFromStorage(): void {
+  if (storageInitialized) return
+  storageInitialized = true
+
+  // Load temporary friends from localStorage
   try {
     const storedFriends = localStorage.getItem(FRIENDS_STORAGE_KEY)
     if (storedFriends) {
-      // Mark these as temporary (not permanent) when loading from localStorage
       const tempFriends = JSON.parse(storedFriends).map((friend: Friend) => ({
         ...friend,
         isPermanent: false,
@@ -60,16 +69,13 @@ if (typeof window !== 'undefined') {
   } catch (error) {
     console.error('Error loading friends from localStorage:', error)
   }
-}
 
-// Save temporary friends to localStorage when the store changes
-friends.subscribe(allFriends => {
-  if (typeof window !== 'undefined') {
-    // Only save temporary friends to localStorage
+  // Persist temporary friends to localStorage on store changes
+  friends.subscribe(allFriends => {
     const tempFriends = allFriends.filter(friend => !friend.isPermanent)
     localStorage.setItem(FRIENDS_STORAGE_KEY, JSON.stringify(tempFriends))
-  }
-})
+  })
+}
 
 // Helper functions
 export function getFriends(

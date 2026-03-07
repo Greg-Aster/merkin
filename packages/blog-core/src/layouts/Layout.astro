@@ -320,6 +320,30 @@ document.addEventListener('astro:page-load', broadcastAuthorContext);
 
 // Setup handling for Swup page transitions
 const setup = () => {
+    let shouldScrollPostContentIntoView = false;
+
+    const scrollPostContentIntoView = () => {
+        const contentTarget =
+            document.getElementById('main-content-wrapper') ||
+            document.getElementById('main') ||
+            document.getElementById('main-grid');
+
+        if (!contentTarget) return;
+
+        const navbar = document.getElementById('navbar-wrapper');
+        const navbarHeight = navbar?.getBoundingClientRect().height ?? 0;
+        const targetTop =
+            window.scrollY +
+            contentTarget.getBoundingClientRect().top -
+            navbarHeight -
+            16;
+
+        window.scrollTo({
+            top: Math.max(0, targetTop),
+            behavior: 'auto',
+        });
+    };
+
     window.swup.hooks.on('link:click', () => {
         // Remove the delay for the first time page load
         document.documentElement.style.setProperty('--content-delay', '0ms');
@@ -336,10 +360,15 @@ const setup = () => {
     
     window.swup.hooks.on('content:replace', () => {
         // Run initialization for new content
+        syncScrollTargets();
         initCustomScrollbar();
     });
     
 	window.swup.hooks.on('visit:start', (visit: {to: {url: string}}) => {
+		const visitUrl = new URL(visit.to.url, window.location.origin);
+		shouldScrollPostContentIntoView =
+			visitUrl.pathname.includes('/posts/') && !visitUrl.hash;
+
 		const bodyElement = document.querySelector('body');
 		
 		// Handle home page class
@@ -370,6 +399,7 @@ const setup = () => {
 	});
     
     window.swup.hooks.on('page:view', () => {
+        syncScrollTargets();
         // Handle animations after page view
         const postElements = document.querySelectorAll('.onload-animation');
         postElements.forEach((element, index) => {
@@ -380,6 +410,15 @@ const setup = () => {
         });
         // Keep persistent profile islands in sync with post author context.
         broadcastAuthorContext();
+    });
+
+    window.swup.hooks.on('scroll:end', () => {
+        if (!shouldScrollPostContentIntoView) return;
+
+        shouldScrollPostContentIntoView = false;
+        requestAnimationFrame(() => {
+            scrollPostContentIntoView();
+        });
     });
     
     window.swup.hooks.on('visit:end', () => {
@@ -409,6 +448,14 @@ let backToTopBtn = document.getElementById('back-to-top-btn');
 let toc = document.getElementById('toc-wrapper');
 let navbar = document.getElementById('navbar-wrapper');
 
+function syncScrollTargets() {
+    backToTopBtn = document.getElementById('back-to-top-btn');
+    toc = document.getElementById('toc-wrapper');
+    navbar = document.getElementById('navbar-wrapper');
+}
+
+document.addEventListener('astro:page-load', syncScrollTargets);
+
 function scrollFunction() {
     // Back-to-top button visibility
 // Back-to-top button visibility
@@ -422,13 +469,7 @@ if (backToTopBtn) {
 
 // TOC visibility
 if (toc) {
-    if (toc.dataset.railMode === 'widget') {
-        toc.classList.remove('toc-hide');
-    } else if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-        toc.classList.remove('toc-hide');
-    } else {
-        toc.classList.add('toc-hide');
-    }
+    toc.classList.remove('toc-hide');
 }
 
 // Navbar visibility - simplified
