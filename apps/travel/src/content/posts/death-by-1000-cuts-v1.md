@@ -1,7 +1,7 @@
 ---
 title: Life Lost in Service of Others - My Reasons for Going on the Trail
 description: "Spoiler: I'm 43, broke, and have nowhere to be."
-published: "2026-03-03"
+published: 2026-03-03
 tags:
   - PCT
   - Personal
