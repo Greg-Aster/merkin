@@ -72,6 +72,16 @@ export const updatesSchema = z.object({
   title: z.string().optional().default('Updates'),
   // statusTitle: z.string().optional().default('Current Status'),
   journalTitle: z.string().optional().default('Journal'),
+  labels: z
+    .object({
+      status: z.string().optional(),
+      location: z.string().optional(),
+      section: z.string().optional(),
+      mileage: z.string().optional(),
+      nextStop: z.string().optional(),
+      updated: z.string().optional(),
+    })
+    .optional(),
   maxEntries: z.number().optional().default(5),
   current: z
     .object({
