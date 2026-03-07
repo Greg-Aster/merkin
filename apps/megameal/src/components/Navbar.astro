@@ -95,7 +95,7 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
             </button>
             
             <!-- Light/Dark Switch -->
-            <LightDarkSwitch client:load></LightDarkSwitch>
+            {!siteConfig.themeLock && <LightDarkSwitch client:load></LightDarkSwitch>}
 
             <!-- Fullscreen Mode Toggle -->
             <!-- <button aria-label="Toggle Fullscreen Mode" title="Toggle Fullscreen Mode" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="fullscreen-btn">

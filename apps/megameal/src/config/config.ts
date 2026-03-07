@@ -18,6 +18,7 @@ export const siteConfig: SiteConfig = {
   },
   transparency: 0.9, // Single value from 0 to 1
   defaultTheme: DARK_MODE, // Dark mode fits the cosmic horror vibe
+  themeLock: DARK_MODE,
   banner: {
     enable: true,
     src: '/posts/timeline/golden-era.png', // Using one of your timeline backgrounds
