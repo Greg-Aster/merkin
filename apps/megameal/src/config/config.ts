@@ -32,6 +32,12 @@ export const siteConfig: SiteConfig = {
     enable: true,
     depth: 3,
   },
+  rightRail: {
+    enable: true,
+    showOnHome: true,
+    showOnPostsWithoutToc: true,
+    stickyTop: '3.5rem',
+  },
   favicon: [],
 }
 

@@ -11,6 +11,7 @@ import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts'
 export const siteConfig: SiteConfig = {
   title: "Temporal Flow",
   subtitle: "A Decentralized Content Platform",
+  enablePostFooterNav: true,
   lang: "en",
   themeColor: {
     hue: 0,
@@ -30,7 +31,22 @@ export const siteConfig: SiteConfig = {
   },
   toc: {
     enable: true,
-    depth: 3
+    depth: 3,
+    minHeadings: 3,
+  },
+  rightRail: {
+    enable: true,
+    showOnHome: true,
+    showOnPostsWithoutToc: true,
+    stickyTop: "3.5rem",
+    widget: {
+      type: "updates",
+      collection: "updates",
+      slug: "site-updates",
+      excerptLength: 420,
+      pageUrl: "/updates/",
+      pageLinkLabel: "Open full release notes",
+    },
   },
   favicon: []
 }
@@ -38,6 +54,10 @@ export const siteConfig: SiteConfig = {
 export const navBarConfig: NavBarConfig = {
   links: [
     0,
+    {
+      name: "Updates",
+      url: "/updates/",
+    },
     {
       name: "Projects",
       url: "/archive/",
