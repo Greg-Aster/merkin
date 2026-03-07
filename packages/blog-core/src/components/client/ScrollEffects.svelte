@@ -10,8 +10,7 @@ let parallaxImage: HTMLElement | null = null
 let tocWrapper: HTMLElement | null = null
 
 onMount(() => {
-  parallaxImage = document.getElementById('parallax-image')
-  tocWrapper = document.querySelector('#toc-wrapper')
+  syncDomRefs()
 
   // Set transparency if configured
   if (siteConfig?.transparency) {
@@ -31,17 +30,28 @@ onMount(() => {
 
   window.addEventListener('scroll', handleScroll)
   window.addEventListener('load', handleParallaxLoad)
-  document.addEventListener('astro:page-load', syncRail)
+  document.addEventListener('astro:page-load', handlePageLoad)
+
+  if (document.readyState === 'complete') {
+    handleParallaxLoad()
+  }
 
   return () => {
     window.removeEventListener('scroll', handleScroll)
     window.removeEventListener('load', handleParallaxLoad)
-    document.removeEventListener('astro:page-load', syncRail)
+    document.removeEventListener('astro:page-load', handlePageLoad)
   }
 })
 
-function syncRail() {
+function syncDomRefs() {
+  parallaxImage = document.getElementById('parallax-image')
   tocWrapper = document.querySelector('#toc-wrapper')
+}
+
+function handlePageLoad() {
+  syncDomRefs()
+  handleParallaxLoad()
+  updateEffects()
 }
 
 function updateEffects() {
@@ -55,13 +65,7 @@ function updateEffects() {
 
   // Update TOC visibility
   if (tocWrapper) {
-    if (tocWrapper.dataset.railMode === 'widget') {
-      tocWrapper.classList.remove('toc-hide')
-    } else if (scrollY > 300) {
-      tocWrapper.classList.remove('toc-hide')
-    } else {
-      tocWrapper.classList.add('toc-hide')
-    }
+    tocWrapper.classList.remove('toc-hide')
   }
 
   ticking = false

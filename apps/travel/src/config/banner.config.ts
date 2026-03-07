@@ -258,7 +258,7 @@ export function determineBannerConfiguration(post: any, _pageType: string, defau
         customName: post.data.authorName || '',
         customBio: post.data.authorBio || '',
         slug: post.slug || '',
-        wantsNoDefaultBanner: post.data.showImageOnPost === false,
+        wantsNoDefaultBanner: false,
       }
     : null
 

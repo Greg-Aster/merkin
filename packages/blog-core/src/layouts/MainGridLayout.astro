@@ -329,7 +329,9 @@ const determineBannerConfiguration =
           customName: postValue?.data?.authorName || '',
           customBio: postValue?.data?.authorBio || '',
           slug: postValue?.slug || '',
-          wantsNoDefaultBanner: postValue?.data?.showImageOnPost === false,
+          // `showImageOnPost` only controls the inline article cover image.
+          // It should not disable the page banner or shared default banner system.
+          wantsNoDefaultBanner: false,
         }
 
         const hasPostTimelineBanner =
@@ -340,7 +342,6 @@ const determineBannerConfiguration =
           postValue?.data?.bannerData?.videoId
         const hasPostAssistantBanner = postValue?.data?.bannerType === 'assistant'
         const hasPostImageBanner =
-          !postData.wantsNoDefaultBanner &&
           !!(
             postValue?.data?.image ||
             (postValue?.data?.bannerType === 'image' &&
@@ -922,26 +923,37 @@ const gridLayoutClasses = [
             class="hidden 2xl:block z-0"
             data-rail-mode={shouldShowToc ? 'toc' : 'widget'}
           >
-            <div
-              id="toc-inner-wrapper"
-              class:list={[
-                'transition-all duration-300',
-                shouldShowToc
-                  ? 'sticky h-[calc(100vh_-_8rem)] overflow-y-auto hide-scrollbar'
-                  : '',
-              ]}
-              style={`top: ${rightRailStickyTop}; mask-image: none;`}
-            >
-              {shouldShowToc ? (
-                <TOC headings={headings}></TOC>
-              ) : (
+            {shouldShowToc ? (
+              <div
+                class="sticky"
+                style={`top: ${rightRailStickyTop};`}
+              >
+                <div class="card-base overflow-hidden onload-animation">
+                  <div class="font-bold transition text-lg text-neutral-900 dark:text-neutral-100 relative ml-8 mt-4 mb-2 before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)] before:absolute before:left-[-16px] before:top-[5.5px]">
+                    Contents
+                  </div>
+                  <div
+                    id="toc-inner-wrapper"
+                    class="max-h-[calc(100vh_-_12rem)] overflow-y-auto hide-scrollbar px-4 pb-4"
+                    style="mask-image: none;"
+                  >
+                    <TOC headings={headings}></TOC>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div
+                id="toc-inner-wrapper"
+                class="transition-all duration-300"
+                style="mask-image: none;"
+              >
                 <RightRailContent
                   currentPath={currentPath}
                   post={post}
                   isHomePage={isHomePage}
                 />
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1345,8 +1357,19 @@ const gridLayoutClasses = [
   // Initialize immediately
   //initTouchDebugging();
   
-  // Initialize banner animation system
-  document.addEventListener('DOMContentLoaded', () => {
+  const bannerCleanupKey = '__merkinBannerCleanup';
+  const bannerPageLoadBoundKey = '__merkinBannerPageLoadBound';
+
+  const initializeBannerSystems = () => {
+    if (typeof window === 'undefined') return;
+
+    if (typeof window[bannerCleanupKey] === 'function') {
+      window[bannerCleanupKey]();
+    }
+
+    const abortController = new AbortController();
+    const { signal } = abortController;
+
     const standardBannerContainer = document.getElementById('standard-banner-container');
     const slides = Array.from(
       standardBannerContainer?.querySelectorAll('.banner-slide') || [],
@@ -1557,8 +1580,12 @@ const gridLayoutClasses = [
       startBannerAnimation();
 
       if (animationConfig.pauseOnHover !== false) {
-        standardBannerContainer.addEventListener('mouseenter', stopBannerAnimation);
-        standardBannerContainer.addEventListener('mouseleave', startBannerAnimation);
+        standardBannerContainer.addEventListener('mouseenter', stopBannerAnimation, {
+          signal,
+        });
+        standardBannerContainer.addEventListener('mouseleave', startBannerAnimation, {
+          signal,
+        });
       }
 
       standardBannerContainer.querySelectorAll('.banner-link').forEach((linkElement) => {
@@ -1568,14 +1595,14 @@ const gridLayoutClasses = [
 
         linkElement.addEventListener('click', () => {
           window.location.href = href;
-        });
+        }, { signal });
 
         linkElement.addEventListener('keydown', (event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
             window.location.href = href;
           }
-        });
+        }, { signal });
       });
 
       document.addEventListener('visibilitychange', () => {
@@ -1584,7 +1611,7 @@ const gridLayoutClasses = [
         } else {
           startBannerAnimation();
         }
-      });
+      }, { signal });
     }
 
     // ⭐ NEW: Timeline mobile interaction system
@@ -1606,7 +1633,7 @@ const gridLayoutClasses = [
           }
         }
         // If already active, let the click through to timeline controls
-      });
+      }, { signal });
 
       // Reset timeline interaction when clicking outside
       document.addEventListener('click', (e) => {
@@ -1618,14 +1645,14 @@ const gridLayoutClasses = [
             console.log('Timeline deactivated - clicked outside');
           }
         }
-      });
+      }, { signal });
 
       // Reset timeline when navigating (blog post selection)
       window.addEventListener('beforeunload', () => {
         isTimelineActive = false;
         timelineWrapper.classList.remove('timeline-mobile-active');
         timelineWrapper.classList.add('timeline-mobile-inactive');
-      });
+      }, { signal });
 
       // Reset on page transitions (for SPA behavior)
       document.addEventListener('astro:page-load', () => {
@@ -1635,7 +1662,28 @@ const gridLayoutClasses = [
           wrapper.classList.remove('timeline-mobile-active');
           wrapper.classList.add('timeline-mobile-inactive');
         }
-      });
+      }, { signal });
     }
-  });
+
+    window[bannerCleanupKey] = () => {
+      stopBannerAnimation();
+      if (motionCleanupTimeoutId) {
+        clearTimeout(motionCleanupTimeoutId);
+        motionCleanupTimeoutId = null;
+      }
+      cleanupHiddenSlideMotion();
+      abortController.abort();
+    };
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeBannerSystems, { once: true });
+  } else {
+    initializeBannerSystems();
+  }
+
+  if (!window[bannerPageLoadBoundKey]) {
+    document.addEventListener('astro:page-load', initializeBannerSystems);
+    window[bannerPageLoadBoundKey] = true;
+  }
 </script>

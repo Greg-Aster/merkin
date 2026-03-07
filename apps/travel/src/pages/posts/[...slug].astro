@@ -201,7 +201,7 @@ const pdfButtonLabel = useDownloadFile
     )}
 
     {showPostFooterNav && <div class="grid grid-cols-1 md:grid-cols-3 mb-4 gap-4 overflow-hidden w-full">
-        <a href={previousArticle ? getPostUrlBySlug(previousArticle.slug) : "#"}
+        <a href={previousArticle ? `${getPostUrlBySlug(previousArticle.slug)}#post-container` : "#"}
            class:list={["w-full font-bold overflow-hidden active:scale-95", {"pointer-events-none opacity-60": !previousArticle}]}>
             <div class="card-base btn-card rounded-2xl w-full min-h-[4.5rem] max-w-full px-4 py-3 flex items-center gap-3">
                 <Icon name="material-symbols:chevron-left-rounded" class="text-[2rem] text-[var(--primary)] shrink-0" />
@@ -223,7 +223,7 @@ const pdfButtonLabel = useDownloadFile
             </div>
         </a>
 
-        <a href={nextArticle ? getPostUrlBySlug(nextArticle.slug) : "#"}
+        <a href={nextArticle ? `${getPostUrlBySlug(nextArticle.slug)}#post-container` : "#"}
            class:list={["w-full font-bold overflow-hidden active:scale-95", {"pointer-events-none opacity-60": !nextArticle}]}>
             <div class="card-base btn-card rounded-2xl w-full min-h-[4.5rem] max-w-full px-4 py-3 flex items-center justify-end gap-3 text-right">
                 <div class="overflow-hidden min-w-0">

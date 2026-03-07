@@ -9,12 +9,17 @@ class BannerManager {
       this.initialized = false;
       this.pendingUpdate = false;
     }
+
+    getBannerWrapper() {
+      return document.getElementById('dynamic-banner-wrapper') ||
+        document.getElementById('banner-wrapper');
+    }
   
     init() {
       if (this.initialized && !this.pendingUpdate) return;
       
       // Get the current banner type from the wrapper
-      const bannerWrapper = document.getElementById('banner-wrapper');
+      const bannerWrapper = this.getBannerWrapper();
       if (!bannerWrapper) return;
       
       this.currentType = bannerWrapper.dataset.bannerType || 'default';
@@ -65,7 +70,7 @@ class BannerManager {
     }
     
     updateBannerHeight() {
-      const bannerWrapper = document.getElementById('banner-wrapper');
+      const bannerWrapper = this.getBannerWrapper();
       if (!bannerWrapper) return;
       
       // Reset any inline styles
@@ -140,7 +145,7 @@ class BannerManager {
   
     handlePageTransition() {
       // Get the possibly new banner type
-      const bannerWrapper = document.getElementById('banner-wrapper');
+      const bannerWrapper = this.getBannerWrapper();
       if (!bannerWrapper) return;
       
       const newType = bannerWrapper.dataset.bannerType || 'default';
@@ -159,7 +164,7 @@ class BannerManager {
     
     // Add support for manually updating the banner (for in-page changes)
     updateBanner(type, content) {
-      const bannerWrapper = document.getElementById('banner-wrapper');
+      const bannerWrapper = this.getBannerWrapper();
       if (!bannerWrapper) return;
       
       // Update the banner type

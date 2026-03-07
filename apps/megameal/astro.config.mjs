@@ -62,8 +62,15 @@ export default defineConfig({
     swup({
       theme: false,
       animationClass: "transition-swup-",
-      containers: ["main", "#toc", "#banner-wrapper", "#swup-featured-content"],
-      smoothScrolling: true,
+      containers: ["#banner-container", "#main-grid"],
+      smoothScrolling: {
+        animateScroll: {
+          betweenPages: false,
+          samePageWithHash: false,
+          samePage: true,
+        },
+        offset: 96,
+      },
       cache: true,
       preload: true,
       accessibility: true,

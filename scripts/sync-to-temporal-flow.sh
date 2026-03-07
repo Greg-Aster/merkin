@@ -98,28 +98,23 @@ done
 echo "    Done — @temporal-flow/blog-core"
 
 # -----------------------------------------------------------------------------
-# 3. Copy Temporal-Flow as apps/example (strip personal content)
+# 3. Copy Temporal-Flow as apps/example
 # -----------------------------------------------------------------------------
 echo "==> [3/7] Creating apps/example from Temporal-Flow..."
 
 TF_SRC="$MERKIN_ROOT/Temporal-Flow"
 EXAMPLE_DST="$EXPORT_DIR/apps/example"
 
-# Copy everything except personal content dirs and build artifacts
-rsync -a --exclude='node_modules' --exclude='dist' --exclude='.astro' \
-  --exclude='src/content/posts' \
-  --exclude='src/content/updates' \
-  --exclude='src/content/team' \
-  --exclude='src/content/friends' \
-  --exclude='src/content/spec' \
-  --exclude='src/content/avatar' \
+# Copy everything except:
+#   - build artifacts (node_modules, dist, .astro)
+#   - personal photo assets (replaced below with SVG placeholders)
+#   - secrets and domain config (.env, CNAME)
+#   - generated PDF downloads (Merkin-specific)
+rsync -a \
+  --exclude='node_modules' --exclude='dist' --exclude='.astro' \
   --exclude='src/assets/avatar' \
-  --exclude='src/assets/images' \
   --exclude='src/assets/banner' \
-  --exclude='public/posts' \
-  --exclude='public/thumb' \
-  --exclude='public/assets' \
-  --exclude='public/how' \
+  --exclude='src/assets/images' \
   --exclude='public/downloads' \
   --exclude='CNAME' \
   --exclude='.env' \
@@ -131,161 +126,247 @@ find "$EXAMPLE_DST" -type f \( -name "*.ts" -o -name "*.astro" -o -name "*.svelt
   rename_package_refs "$file"
 done
 
-# Update package name in package.json
+# Update package name and strip Merkin-specific build steps from package.json
 if [[ -f "$EXAMPLE_DST/package.json" ]]; then
   sed -i 's/"name": "[^"]*"/"name": "@temporal-flow\/example"/g' "$EXAMPLE_DST/package.json"
-  # Remove PDF generation (merkin-specific build step)
-  sed -i 's/ && node \.\.\/\.\.\/scripts\/generate-post-pdfs\.mjs --app \././g' "$EXAMPLE_DST/package.json"
+  sed -i 's/ && node \.\.\/scripts\/generate-post-pdfs\.mjs --app \././g' "$EXAMPLE_DST/package.json"
 fi
 
-# Replace CNAME with placeholder
-echo "your-domain.com" > "$EXAMPLE_DST/CNAME"
+# Remove CNAME — without it, astro.config.mjs auto-detects the GitHub Pages subpath.
+# Users with a custom domain should create apps/example/CNAME containing their domain.
+rm -f "$EXAMPLE_DST/CNAME"
 
-echo "    Done — apps/example (based on Temporal-Flow with personal content stripped)"
+echo "    Done — apps/example (full Temporal-Flow copy, personal photos excluded)"
 
 # -----------------------------------------------------------------------------
-# 4. Create demo content for the example site
+# 4. Replace personal photo assets with generated SVG placeholders
 # -----------------------------------------------------------------------------
-echo "==> [4/7] Writing demo content..."
+echo "==> [4/7] Generating placeholder image assets..."
 
-mkdir -p "$EXAMPLE_DST/src/content/posts"
-mkdir -p "$EXAMPLE_DST/src/content/updates"
-mkdir -p "$EXAMPLE_DST/src/content/spec"
-mkdir -p "$EXAMPLE_DST/src/content/friends"
-mkdir -p "$EXAMPLE_DST/src/content/avatar"
+mkdir -p "$EXAMPLE_DST/src/assets/avatar"
+mkdir -p "$EXAMPLE_DST/src/assets/banner"
 mkdir -p "$EXAMPLE_DST/public/avatar"
 
-# Demo post 1: Welcome
-cat > "$EXAMPLE_DST/src/content/posts/welcome.md" << 'MDEOF'
----
-title: "Welcome to Your New Blog"
-published: 2024-01-15
-description: "You've successfully set up the Temporal Flow blog template. Here's how to get started."
-tags: ["getting-started", "tutorial"]
-category: "Guide"
----
+# --- 6 avatar SVGs (different colours, matching avatar1.svg–avatar6.svg filenames) ---
+cat > "$EXAMPLE_DST/src/assets/avatar/avatar1.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#7c6ef7"/><circle cx="50" cy="38" r="18" fill="white" opacity="0.9"/><ellipse cx="50" cy="82" rx="28" ry="20" fill="white" opacity="0.9"/></svg>
+EOF
+cat > "$EXAMPLE_DST/src/assets/avatar/avatar2.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#4a9eff"/><circle cx="50" cy="38" r="18" fill="white" opacity="0.9"/><ellipse cx="50" cy="82" rx="28" ry="20" fill="white" opacity="0.9"/></svg>
+EOF
+cat > "$EXAMPLE_DST/src/assets/avatar/avatar3.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#2ecc71"/><circle cx="50" cy="38" r="18" fill="white" opacity="0.9"/><ellipse cx="50" cy="82" rx="28" ry="20" fill="white" opacity="0.9"/></svg>
+EOF
+cat > "$EXAMPLE_DST/src/assets/avatar/avatar4.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#e67e22"/><circle cx="50" cy="38" r="18" fill="white" opacity="0.9"/><ellipse cx="50" cy="82" rx="28" ry="20" fill="white" opacity="0.9"/></svg>
+EOF
+cat > "$EXAMPLE_DST/src/assets/avatar/avatar5.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#1abc9c"/><circle cx="50" cy="38" r="18" fill="white" opacity="0.9"/><ellipse cx="50" cy="82" rx="28" ry="20" fill="white" opacity="0.9"/></svg>
+EOF
+cat > "$EXAMPLE_DST/src/assets/avatar/avatar6.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#e74c3c"/><circle cx="50" cy="38" r="18" fill="white" opacity="0.9"/><ellipse cx="50" cy="82" rx="28" ry="20" fill="white" opacity="0.9"/></svg>
+EOF
+# Also write public/avatar for URL-based references in config.ts
+cp "$EXAMPLE_DST/src/assets/avatar/avatar1.svg" "$EXAMPLE_DST/public/avatar/avatar.svg"
 
-# Welcome!
+echo "    6 avatar SVGs written"
 
-You've successfully set up the **Temporal Flow** blog template. This is your first post.
+# --- 8 banner SVGs (gradient backgrounds, matching 0001.svg–0008.svg filenames) ---
+cat > "$EXAMPLE_DST/src/assets/banner/0001.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1a1a2e"/><stop offset="100%" style="stop-color:#7c6ef7"/></linearGradient></defs><rect width="1200" height="400" fill="url(#g)"/></svg>
+EOF
+cat > "$EXAMPLE_DST/src/assets/banner/0002.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#0f2027"/><stop offset="50%" style="stop-color:#203a43"/><stop offset="100%" style="stop-color:#2c5364"/></linearGradient></defs><rect width="1200" height="400" fill="url(#g)"/></svg>
+EOF
+cat > "$EXAMPLE_DST/src/assets/banner/0003.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1d2671"/><stop offset="100%" style="stop-color:#c33764"/></linearGradient></defs><rect width="1200" height="400" fill="url(#g)"/></svg>
+EOF
+cat > "$EXAMPLE_DST/src/assets/banner/0004.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#134e5e"/><stop offset="100%" style="stop-color:#71b280"/></linearGradient></defs><rect width="1200" height="400" fill="url(#g)"/></svg>
+EOF
+cat > "$EXAMPLE_DST/src/assets/banner/0005.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#2d1b69"/><stop offset="100%" style="stop-color:#11998e"/></linearGradient></defs><rect width="1200" height="400" fill="url(#g)"/></svg>
+EOF
+cat > "$EXAMPLE_DST/src/assets/banner/0006.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#373b44"/><stop offset="100%" style="stop-color:#4286f4"/></linearGradient></defs><rect width="1200" height="400" fill="url(#g)"/></svg>
+EOF
+cat > "$EXAMPLE_DST/src/assets/banner/0007.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#3a1c71"/><stop offset="50%" style="stop-color:#d76d77"/><stop offset="100%" style="stop-color:#ffaf7b"/></linearGradient></defs><rect width="1200" height="400" fill="url(#g)"/></svg>
+EOF
+cat > "$EXAMPLE_DST/src/assets/banner/0008.svg" << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#0a0a0a"/><stop offset="100%" style="stop-color:#434343"/></linearGradient></defs><rect width="1200" height="400" fill="url(#g)"/></svg>
+EOF
 
-## What to do next
+echo "    8 banner SVGs written"
 
-1. **Edit your profile** — open `src/config/config.ts` and update `profileConfig` with your name and bio
-2. **Change the color** — update `themeColor.hue` in `siteConfig` (0–360, try 145 for green or 220 for blue)
-3. **Write your first post** — create a new `.md` or `.mdx` file in `src/content/posts/`
-4. **Connect with others** — use the Friends panel to add other Temporal Flow sites
+# --- Rewrite avatar.config.ts to import SVG files (same 6-slot structure) ---
+cat > "$EXAMPLE_DST/src/config/avatar.config.ts" << 'TSEOF'
+import type { ImageMetadata } from 'astro'
 
-## Markdown features
+import avatar1 from '../assets/avatar/avatar1.svg'
+import avatar2 from '../assets/avatar/avatar2.svg'
+import avatar3 from '../assets/avatar/avatar3.svg'
+import avatar4 from '../assets/avatar/avatar4.svg'
+import avatar5 from '../assets/avatar/avatar5.svg'
+import avatar6 from '../assets/avatar/avatar6.svg'
 
-This template supports full **Markdown** with extras:
+export interface AvatarConfig {
+  avatarList: ImageMetadata[]
+  homeAvatar: ImageMetadata
+  animationInterval: number
+}
 
-- Math equations: $E = mc^2$
-- Code syntax highlighting
-- Image galleries via PhotoSwipe
-- Reading time estimates
-- Table of contents (for longer posts)
+export const avatarConfig: AvatarConfig = {
+  avatarList: [avatar1, avatar2, avatar3, avatar4, avatar5, avatar6],
+  homeAvatar: avatar1,
+  animationInterval: 7500,
+}
 
-Happy writing!
-MDEOF
+export function getAvatarIndexFromSlug(slug: string = '', avatarCount: number): number {
+  if (!slug) return 0
+  let hash = 0
+  for (let i = 0; i < slug.length; i++) {
+    hash = ((hash << 5) - hash) + slug.charCodeAt(i)
+    hash = hash & hash
+  }
+  return Math.abs(hash) % avatarCount
+}
+TSEOF
+echo "    avatar.config.ts rewritten (6 SVG avatars)"
 
-# Demo post 2: Adding a second site
-cat > "$EXAMPLE_DST/src/content/posts/add-another-site.md" << 'MDEOF'
----
-title: "How to Add Another Site to Your Blog Family"
-published: 2024-02-01
-description: "The Temporal Flow monorepo lets you run multiple connected blogs from one codebase."
-tags: ["tutorial", "monorepo"]
-category: "Guide"
----
+# --- Rewrite banners/standard.ts to import SVG files (same 8-slot structure, banners ENABLED) ---
+mkdir -p "$EXAMPLE_DST/src/config/banners"
+cat > "$EXAMPLE_DST/src/config/banners/standard.ts" << 'TSEOF'
+import type {
+  BannerAnimationConfig,
+  BannerItem,
+  BannerItemPreviewDetails,
+  ImageBannerItem,
+  LinkPreviewInfo,
+  StandardBannerData,
+  VideoBannerConfig,
+} from './types'
+import { isImageBannerItem, isVideoBannerItem } from './types'
 
-# Adding a Second Site
+import banner1 from '@/assets/banner/0001.svg'
+import banner2 from '@/assets/banner/0002.svg'
+import banner3 from '@/assets/banner/0003.svg'
+import banner4 from '@/assets/banner/0004.svg'
+import banner5 from '@/assets/banner/0005.svg'
+import banner6 from '@/assets/banner/0006.svg'
+import banner7 from '@/assets/banner/0007.svg'
+import banner8 from '@/assets/banner/0008.svg'
 
-One of the key features of Temporal Flow is that you can run multiple blogs
-from a single monorepo — all sharing the same `blog-core` foundation.
+export const standardBannerData: StandardBannerData = {}
 
-## Steps
+export const videoConfig: VideoBannerConfig = {
+  autoplay: true,
+  muted: true,
+  loop: true,
+  playsInline: true,
+  controls: false,
+  preload: 'none',
+}
 
-1. Copy `apps/example/` to `apps/my-new-site/`
-2. Update the `package.json` name: `"@temporal-flow/my-new-site"`
-3. Update `astro.config.mjs` with your new site's URL
-4. Update `src/config/config.ts` — give it a unique hue color and title
-5. Add root scripts in the top-level `package.json`:
-   ```json
-   "dev:my-new-site": "pnpm --filter @temporal-flow/my-new-site dev",
-   "build:my-new-site": "pnpm --filter @temporal-flow/my-new-site build"
-   ```
-6. Add the new site to `pnpm-workspace.yaml` under `apps/*` (already covered if in `apps/`)
+export const bannerList: BannerItem[] = [
+  { type: 'image', src: banner1, alt: 'Banner 1' } as ImageBannerItem,
+  { type: 'image', src: banner2, alt: 'Banner 2' } as ImageBannerItem,
+  { type: 'image', src: banner3, alt: 'Banner 3' } as ImageBannerItem,
+  { type: 'image', src: banner4, alt: 'Banner 4' } as ImageBannerItem,
+  { type: 'image', src: banner5, alt: 'Banner 5' } as ImageBannerItem,
+  { type: 'image', src: banner6, alt: 'Banner 6' } as ImageBannerItem,
+  { type: 'image', src: banner7, alt: 'Banner 7' } as ImageBannerItem,
+  { type: 'image', src: banner8, alt: 'Banner 8' } as ImageBannerItem,
+]
 
-## Connecting Sites with Federation
+export const bannerLinks: (string | null)[] = bannerList.map(() => null)
 
-Sites can share posts with each other using the **Friends** panel. Just add a
-friend's RSS feed URL and their posts will appear in your feed.
+export const defaultBanner: BannerItem = bannerList[0]
 
-Each site generates `/rss.xml` automatically — share that URL with friends!
-MDEOF
+export const linkPreviewData: Record<string, LinkPreviewInfo> = {}
 
-# Demo updates entry
-cat > "$EXAMPLE_DST/src/content/updates/my-updates.md" << 'MDEOF'
----
-title: "Updates"
-journalTitle: "My Journal"
-maxEntries: 5
-current:
-  status: "Getting started"
-  note: "This is an example updates widget. Edit this file to customize it."
----
+export const animationConfig: BannerAnimationConfig = {
+  enabled: true,
+  interval: 5000,
+  transitionDuration: 1000,
+  direction: 'alternate',
+  randomStart: true,
+  pauseOnHover: true,
+  pauseOnMobileTouch: true,
+  resumeAfterNavigation: true,
+  smoothTransitions: true,
+  motion: {
+    enabled: true,
+    mode: 'alternate',
+    duration: 6000,
+    scale: 1.03,
+    panDistance: 1.5,
+    easing: 'linear',
+    alternate: true,
+  },
+}
 
-## 2024-02-01 | First Entry
+export const iconSVGs: Record<string, string> = {
+  'arrow-up-right-from-square':
+    '<path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>',
+}
 
-location: Home
-mileage: 0
+export function getBannerAnimationSettings(): BannerAnimationConfig { return animationConfig }
+export function getVideoConfig(): VideoBannerConfig { return videoConfig }
+export function getBannerLink(index: number): string | null { return bannerLinks[index] ?? null }
+export function hasAnyBannerLinks(): boolean { return bannerLinks.some(l => l && l.trim() !== '') }
+export function getLinkPreviewData(url: string): LinkPreviewInfo {
+  return linkPreviewData[url] || { title: 'Explore More', description: 'Click to visit this page', icon: 'arrow-up-right-from-square' }
+}
+export function getIconSVG(n: string): string { return iconSVGs[n] || iconSVGs['arrow-up-right-from-square'] }
+export function getBannerItem(index: number): BannerItem | null { return bannerList[index] ?? null }
+export function getBannerCount(): number { return bannerList.length }
+export function validateStandardBannerConfig(): { isValid: boolean; warnings: string[] } {
+  return { isValid: true, warnings: [] }
+}
+export function getBannerItemPreviewDetails(index: number): BannerItemPreviewDetails | null {
+  if (index < 0 || index >= bannerList.length) return null
+  const item = bannerList[index]
+  const linkUrl = bannerLinks[index]
+  const hasValidLink = !!(linkUrl && linkUrl.trim() !== '' && linkUrl !== '#')
+  const previewData = getLinkPreviewData(hasValidLink ? (linkUrl as string) : '')
+  return {
+    hasValidLink,
+    originalHref: hasValidLink ? (linkUrl as string) : '',
+    urlForDisplay: '',
+    previewTitle: previewData.title,
+    previewDescription: previewData.description,
+    previewIconSVG: getIconSVG(previewData.icon),
+    isVideoButton: isVideoBannerItem(item),
+  }
+}
+export const standardBannerConfig = {
+  data: standardBannerData, bannerList, bannerLinks, defaultBanner, linkPreviewData,
+  animation: animationConfig, video: videoConfig, iconSVGs,
+  getBannerAnimationSettings, getVideoConfig, getBannerLink, hasAnyBannerLinks,
+  getLinkPreviewData, getIconSVG, getBannerItemPreviewDetails, getBannerItem,
+  getBannerCount, validateStandardBannerConfig, isVideoBannerItem, isImageBannerItem,
+}
+TSEOF
+echo "    banners/standard.ts rewritten (8 SVG gradient banners, banners enabled)"
 
-Welcome to the updates feed! This is a great way to post quick status updates
-that appear in the sidebar widget and on a dedicated journal page.
-
-Edit `src/content/updates/my-updates.md` to add your own entries.
-MDEOF
-
-# Demo spec/about page
-cat > "$EXAMPLE_DST/src/content/spec/about.md" << 'MDEOF'
----
-title: About
----
-
-# About This Blog
-
-Write something about yourself and your blog here.
-
-## What I write about
-
-- Topic 1
-- Topic 2
-- Topic 3
-
-## Contact
-
-You can reach me at [your@email.com](mailto:your@email.com).
-MDEOF
-
-# Placeholder avatar SVG
-cat > "$EXAMPLE_DST/public/avatar/avatar.svg" << 'SVGEOF'
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="50" fill="#7c6ef7"/>
-  <circle cx="50" cy="38" r="18" fill="white" opacity="0.9"/>
-  <ellipse cx="50" cy="82" rx="28" ry="20" fill="white" opacity="0.9"/>
-</svg>
-SVGEOF
-
-# config.ts from Temporal-Flow is already generic ("Site Owner", "Temporal Flow" title)
-# Just ensure the avatarFilename points at our SVG placeholder
+# Update config.ts avatar path to point at the public SVG
 if [[ -f "$EXAMPLE_DST/src/config/config.ts" ]]; then
   sed -i 's|avatarFilename: ".*"|avatarFilename: "avatar.svg"|g' "$EXAMPLE_DST/src/config/config.ts"
   sed -i 's|avatar: "/src/content/avatar/.*"|avatar: "/avatar/avatar.svg"|g' "$EXAMPLE_DST/src/config/config.ts"
-  echo "    config.ts avatar references updated"
 fi
 
-echo "    Demo content created"
+# Enable banners in config.ts (set banner.enable to true)
+if [[ -f "$EXAMPLE_DST/src/config/config.ts" ]]; then
+  sed -i 's/enable: false,\(.*\)\/\/ banner/enable: true,\1\/\/ banner/' "$EXAMPLE_DST/src/config/config.ts"
+fi
+
+echo "    Done"
+
+# -----------------------------------------------------------------------------
+# 4. (No demo content needed — full Temporal-Flow content is the demo)
+# -----------------------------------------------------------------------------
+echo "==> [4/7] Content note: using full Temporal-Flow content as demo (no skeleton posts)"
 
 # -----------------------------------------------------------------------------
 # 5. Copy shared scripts
@@ -409,36 +490,67 @@ public/downloads/
 *.tsbuildinfo
 EOF
 
-# GitHub Actions workflow for Cloudflare Pages
+# GitHub Actions workflow for GitHub Pages
 cat > "$EXPORT_DIR/.github/workflows/deploy.yml" << 'EOF'
-name: Deploy to Cloudflare Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: pnpm/action-setup@v4
         with:
           version: 9
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
+          cache: pnpm
+
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+        env:
+          SITE: ${{ steps.pages.outputs.origin }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: my-temporal-flow-blog  # ← change this to your CF Pages project name
-          directory: apps/example/dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          path: apps/example/dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 EOF
 
 echo "    Done"
