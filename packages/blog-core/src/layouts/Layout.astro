@@ -131,9 +131,12 @@ const configHue = siteConfig.themeColor.hue
     ))}
 
     <!-- Set the theme before the page is rendered to avoid a flash -->
-        <script is:inline define:vars={{LIGHT_MODE, DARK_MODE, AUTO_MODE, PAGE_WIDTH, configHue, defaultTheme: siteConfig.defaultTheme}}>
-        // Load the theme from local storage
-        const theme = localStorage.getItem('theme') || defaultTheme;
+        <script is:inline define:vars={{LIGHT_MODE, DARK_MODE, AUTO_MODE, PAGE_WIDTH, configHue, defaultTheme: siteConfig.defaultTheme, themeLock: siteConfig.themeLock ?? null}}>
+        // Honor a site-level theme lock before consulting local storage.
+        const theme = themeLock || localStorage.getItem('theme') || defaultTheme;
+        if (themeLock) {
+            localStorage.setItem('theme', themeLock);
+        }
         switch (theme) {
             case LIGHT_MODE:
                 document.documentElement.classList.remove('dark');
