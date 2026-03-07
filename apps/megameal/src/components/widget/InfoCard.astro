@@ -22,9 +22,11 @@ const {
 const wrapperBaseClasses = [
   'info-card-wrapper',
   'relative', // Changed from absolute
-  'p-3',
+  'p-4',
   'border border-white/10 rounded-lg', // A simpler style for the widget
   'w-full',
+  'h-full',
+  'flex flex-col',
   'z-10',
   'transition-opacity duration-500 ease-in-out',
 ]
@@ -58,15 +60,15 @@ const wrapperBaseClasses = [
 
   <h3 class:list={[
       "info-card-headline",
-      initialFact.headlineSizeClass || "text-sm sm:text-md",
-      "font-bold mb-1 pr-4",
+      initialFact.headlineSizeClass || "text-base sm:text-lg",
+      "font-bold mb-2 pr-6",
       initialFact.headlineColorClass || "text-[var(--primary)]"
     ]}>
     {initialFact.headline}
   </h3>
-  <p class="info-card-text text-xs pr-4 mb-1 leading-snug">{initialFact.text}</p>
+  <p class="info-card-text text-sm pr-4 mb-3 leading-relaxed flex-1">{initialFact.text}</p>
 
-  <div class="info-card-links-container">
+  <div class="info-card-links-container mt-auto">
     {initialFact.ctaText && initialFact.link ? (
       <a
         href={`/posts/${initialFact.link}/`}
