@@ -18,20 +18,27 @@ const initialFact: TimelineFact | null = megaMealUniverseFacts.length > 0
     : null;
 ---
 
-<div class="facts-widget-container card-base p-4">
-    <!-- <h2 class="text-lg font-bold text-90 mb-2">Did you know?</h2> -->
-    
-    {initialFact && (
-        <InfoCard
-            cardId={cardId}
-            initialFact={initialFact}
-            initialIsVisible={true}
-        />
-    )}
-    
-    <p class="text-xs text-50 mt-3 text-center">
-        {footerText}
-    </p>
+<div class="facts-widget-container card-base">
+    <div class="facts-widget-shell">
+        <div class="facts-widget-header">
+            <div class="facts-widget-kicker">Megameal Signal</div>
+            <div class="facts-widget-title">Lore Fragment</div>
+        </div>
+
+        <div class="facts-widget-card">
+            {initialFact && (
+                <InfoCard
+                    cardId={cardId}
+                    initialFact={initialFact}
+                    initialIsVisible={true}
+                />
+            )}
+        </div>
+
+        <p class="facts-widget-footer">
+            {footerText}
+        </p>
+    </div>
 </div>
 
 <script define:vars={{ cardId, facts: megaMealUniverseFacts }}>
@@ -59,3 +66,70 @@ const initialFact: TimelineFact | null = megaMealUniverseFacts.length > 0
         setInterval(showNextFact, 20000 + Math.random() * 10000);
     }
 </script>
+
+<style>
+  .facts-widget-container {
+    min-height: 28rem;
+    overflow: hidden;
+  }
+
+  .facts-widget-shell {
+    min-height: 28rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .facts-widget-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .facts-widget-kicker {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(0 0 0 / 0.42);
+  }
+
+  .facts-widget-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: rgb(0 0 0 / 0.82);
+  }
+
+  .facts-widget-card {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+  }
+
+  .facts-widget-footer {
+    margin-top: auto;
+    font-size: 0.75rem;
+    text-align: center;
+    color: rgb(0 0 0 / 0.45);
+  }
+
+  :global(.dark) .facts-widget-kicker {
+    color: rgb(255 255 255 / 0.42);
+  }
+
+  :global(.dark) .facts-widget-title {
+    color: rgb(255 255 255 / 0.84);
+  }
+
+  :global(.dark) .facts-widget-footer {
+    color: rgb(255 255 255 / 0.45);
+  }
+
+  @media (max-width: 1535px) {
+    .facts-widget-container,
+    .facts-widget-shell {
+      min-height: 24rem;
+    }
+  }
+</style>

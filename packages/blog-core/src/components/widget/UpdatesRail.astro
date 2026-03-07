@@ -17,7 +17,7 @@ const {
   collection = 'updates',
   slug = 'sidebar-updates',
   journalUrl = '/journal/',
-  journalLinkLabel = 'View full journal',
+  journalLinkLabel = 'View full updates',
   excerptLength = 1000,
 } = Astro.props
 const className = Astro.props.class
@@ -26,6 +26,14 @@ const collectionEntries = await getCollection(collection as any)
 const sourceEntry = collectionEntries.find((entry: any) => entry.slug === slug)
 
 const current = sourceEntry?.data?.current
+const labels = {
+  status: sourceEntry?.data?.labels?.status ?? 'Status',
+  location: sourceEntry?.data?.labels?.location ?? 'Location',
+  section: sourceEntry?.data?.labels?.section ?? 'Section',
+  mileage: sourceEntry?.data?.labels?.mileage ?? 'Mileage',
+  nextStop: sourceEntry?.data?.labels?.nextStop ?? 'Next',
+  updated: sourceEntry?.data?.labels?.updated ?? 'Updated',
+}
 const journalContent = sourceEntry
   ? await parseJournalContent(sourceEntry.body, sourceEntry.data.entries ?? [], {
       excerptLength,
@@ -46,7 +54,7 @@ const latestEntry = journalEntries[0]
           <div class="updates-summary-card">
             {current.status && (
               <div class="updates-summary-status">
-                <span class="updates-label">Status</span>
+                <span class="updates-label">{labels.status}</span>
                 <span class="updates-value">{current.status}</span>
               </div>
             )}
@@ -54,31 +62,31 @@ const latestEntry = journalEntries[0]
             <div class="updates-summary-grid">
               {current.location && (
                 <div class="updates-summary-row">
-                  <span class="updates-label">Location</span>
+                  <span class="updates-label">{labels.location}</span>
                   <span class="updates-value">{current.location}</span>
                 </div>
               )}
               {current.section && (
                 <div class="updates-summary-row">
-                  <span class="updates-label">Section</span>
+                  <span class="updates-label">{labels.section}</span>
                   <span class="updates-value">{current.section}</span>
                 </div>
               )}
               {current.mileage && (
                 <div class="updates-summary-row">
-                  <span class="updates-label">Mileage</span>
+                  <span class="updates-label">{labels.mileage}</span>
                   <span class="updates-value">{current.mileage}</span>
                 </div>
               )}
               {current.nextStop && (
                 <div class="updates-summary-row">
-                  <span class="updates-label">Next</span>
+                  <span class="updates-label">{labels.nextStop}</span>
                   <span class="updates-value">{current.nextStop}</span>
                 </div>
               )}
               {current.updated && (
                 <div class="updates-summary-row">
-                  <span class="updates-label">Updated</span>
+                  <span class="updates-label">{labels.updated}</span>
                   <span class="updates-value">
                     {formatDate(current.updated)}
                     <span class="updates-meta">({getRelativeTime(current.updated)})</span>
@@ -130,7 +138,7 @@ const latestEntry = journalEntries[0]
           >
             <div class="overflow-hidden">
               <div class="text-[0.72rem] uppercase tracking-[0.08em] text-black/45 dark:text-white/45">
-                Trail Journal
+                {sourceEntry.data.title || sourceEntry.data.journalTitle || 'Updates'}
               </div>
               <div class="text-sm font-semibold text-black/80 dark:text-white/80">
                 {journalLinkLabel}
