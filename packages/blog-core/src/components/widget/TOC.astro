@@ -113,7 +113,6 @@ let heading1Count = 1
         isUserScrolling = false;
         scrollTimeout: ReturnType<typeof setTimeout> | null = null;
         rebuildDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-        tocIsShown: boolean = false;
         
         constructor() {
             super();
@@ -130,16 +129,6 @@ let heading1Count = 1
                 this.isUserScrolling = false;
             }, 150);
             
-            // Check scroll position to determine if TOC should be shown
-            const scrollThreshold = 800; // Adjust this to match your banner height
-            
-            if (!this.tocIsShown && window.scrollY > scrollThreshold) {
-                this.tocIsShown = true;
-                this.classList.add('toc-shown');
-            } else if (this.tocIsShown && window.scrollY <= scrollThreshold) {
-                this.tocIsShown = false;
-                this.classList.remove('toc-shown');
-            }
         };
         
         markVisibleSection = (entries: IntersectionObserverEntry[]) => {
@@ -407,18 +396,17 @@ let heading1Count = 1
 </script>
 
 <style>
-  /* Add TOC show/hide styles */
   table-of-contents {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    transform: translateY(10px);
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
   }
 
   table-of-contents.toc-shown {
     opacity: 1;
     pointer-events: auto;
-    transform: translateY(0);
+    transform: none;
   }
 
   /* Optional styling used by MEGAMEAL's card-base-subtle TOC variant */

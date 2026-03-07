@@ -61,7 +61,7 @@ const archiveGroups = groups.map(group => ({
   year: group.year,
   posts: group.posts.map(post => ({
     title: post.data.title,
-    url: getPostUrlBySlug(post.slug),
+    url: `${getPostUrlBySlug(post.slug)}#post-container`,
     published: post.data.published,
     tags: post.data.tags || [],
   })),
