@@ -233,8 +233,8 @@
 
     /* Preview card using existing design system */
     .banner-preview-card {
-        max-width: 80%;
-        min-width: 300px;
+        max-width: min(80%, calc(100vw - 1rem));
+        min-width: min(300px, calc(100vw - 2rem));
         transform: scale(0.95);
         transition: all var(--banner-transition-duration) var(--banner-transition-easing);
         position: relative; /* CRITICAL: Enables relative positioning for nav controls */
