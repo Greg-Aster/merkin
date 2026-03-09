@@ -228,6 +228,7 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
         function applyFullscreenState() {
             // Add class to force mobile view layout
             document.body.classList.add('force-mobile-view');
+            document.body.classList.add('fullscreen-mode');
             
             // Update button icons
             expandIcon?.classList.add('hidden');
@@ -242,6 +243,7 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
         function applyNormalState() {
             // Remove fullscreen class
             document.body.classList.remove('force-mobile-view');
+            document.body.classList.remove('fullscreen-mode');
             
             // Update button icons
             expandIcon?.classList.remove('hidden');
