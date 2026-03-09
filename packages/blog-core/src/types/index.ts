@@ -39,6 +39,10 @@ export type SiteConfig = {
     showOnHome?: boolean
     showOnPostsWithoutToc?: boolean
     stickyTop?: string
+    mobilePortraitHero?: {
+      enabled?: boolean
+      style?: 'banner-overlay'
+    }
     widget?: {
       type: 'updates'
       collection?: string
