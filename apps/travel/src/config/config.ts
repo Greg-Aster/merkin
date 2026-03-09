@@ -38,6 +38,10 @@ export const siteConfig: SiteConfig = {
     showOnHome: true,
     showOnPostsWithoutToc: true,
     stickyTop: "3.5rem",
+    mobilePortraitHero: {
+      enabled: true,
+      style: "banner-overlay",
+    },
     widget: {
       type: "updates",
       collection: "updates",

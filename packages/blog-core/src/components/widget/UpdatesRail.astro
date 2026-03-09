@@ -44,13 +44,13 @@ const latestEntry = journalEntries[0]
 ---
 
 {sourceEntry && (
-  <div class:list={['flex flex-col gap-4', className]}>
+  <div class:list={['updates-rail-shell flex flex-col gap-4', className]}>
     {current && (
       <WidgetLayout
         id={`${slug}-status`}
-        class="onload-animation"
+        class="updates-rail-widget onload-animation"
       >
-        <div class="flex flex-col gap-3 pb-1">
+        <div class="updates-rail-stack flex flex-col gap-3 pb-1">
           <div class="updates-summary-card">
             {current.status && (
               <div class="updates-summary-status">
