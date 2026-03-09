@@ -66,4 +66,6 @@ const tags = (await getTagList()).map((tag) => ({
   categoriesTitle={i18n(I18nKey.categories)}
   tags={tags}
   tagsTitle={i18n(I18nKey.tags)}
-/>
+>
+  <slot />
+</SharedSideBar>

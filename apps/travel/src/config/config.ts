@@ -64,8 +64,8 @@ export const navBarConfig: NavBarConfig = {
 
 export const profileConfig: ProfileConfig = {
   avatar: "/avatar/avatar1.jpg",
-  name: "Greg Mechanic Aster",
-  bio: "PCT Class of 2026 | Field notes, gear systems, and trail lessons",
+  name: "Greg Aster",
+  bio: "Field notes, gear systems, and trail lessons",
   links: [
     {
       name: "Bluesky",
