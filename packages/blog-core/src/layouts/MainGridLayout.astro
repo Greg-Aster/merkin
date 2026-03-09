@@ -527,6 +527,7 @@ const shouldShowFallbackRightRail =
       siteConfig.rightRail?.showOnPostsWithoutToc === true))
 
 const shouldShowRightRail = shouldShowToc || shouldShowFallbackRightRail
+const shouldMergeRightRailIntoSidebar = shouldShowFallbackRightRail && !shouldShowToc
 const rightRailStickyTop = siteConfig.rightRail?.stickyTop ?? '3.5rem'
 
 // Process custom author data with direct post-data fallbacks so avatar overrides
@@ -892,7 +893,20 @@ const gridLayoutClasses = [
           <div class="mb-4">
             <Profile client:load slug={processedAuthorData.slug} customAvatar={processedAuthorData.customAvatar} customName={processedAuthorData.customName} customBio={processedAuthorData.customBio} customLink={processedAuthorData.customLink} isHomePage={isHomePage} profileConfig={profileConfig} avatarConfig={avatarConfig} />
           </div>
-          <SideBar class="flex-1" headings={headings} postSlug={processedAuthorData.slug} customAvatar={processedAuthorData.customAvatar} customName={processedAuthorData.customName} customBio={processedAuthorData.customBio} pageMascotContext={Astro.props.pageMascotContext} hideProfile={true}></SideBar>
+          <SideBar class="flex-1" headings={headings} postSlug={processedAuthorData.slug} customAvatar={processedAuthorData.customAvatar} customName={processedAuthorData.customName} customBio={processedAuthorData.customBio} pageMascotContext={Astro.props.pageMascotContext} hideProfile={true}>
+            {shouldMergeRightRailIntoSidebar && (
+              <div
+                id="sidebar-right-rail-merge"
+                class="hidden md:flex 2xl:hidden flex-col gap-4 pt-2"
+              >
+                <RightRailContent
+                  currentPath={currentPath}
+                  post={post}
+                  isHomePage={isHomePage}
+                />
+              </div>
+            )}
+          </SideBar>
         </div>
 
         <!-- Grid Item 2: MAIN CONTENT -->
@@ -1083,19 +1097,294 @@ const gridLayoutClasses = [
     #banner-container .banner-aspect-container {
       height: var(--banner-height-mobile, var(--banner-height));
     }
+
+    #main-grid {
+      grid-template-columns: 10rem minmax(0, 1fr) !important;
+      gap: 0.75rem !important;
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+    }
+
+    #main-grid > div:first-child {
+      display: block !important;
+      grid-column: 1 !important;
+      max-width: 10rem !important;
+      margin-bottom: 0 !important;
+    }
+
+    main#main {
+      grid-column: 2 !important;
+    }
+
+    #sidebar-right-rail-merge {
+      display: flex !important;
+    }
+
+    #main-content-wrapper > .footer.hidden.md\\:block {
+      display: block !important;
+    }
+
+    #main-grid > div:last-child {
+      display: none !important;
+    }
   }
 
-  /* Homepage only: compact desktop-like 3-column layout on mobile landscape */
+  :global(#sidebar) {
+    container-type: inline-size;
+    container-name: sidebar-rail;
+    --rail-card-padding: 0.75rem;
+    --rail-card-padding-inline: 1rem;
+    --rail-card-stack-gap: 1rem;
+    --rail-widget-title-size: 1.125rem;
+    --rail-copy-size: 0.95rem;
+    --rail-copy-leading: 1.55;
+    --rail-muted-size: 0.85rem;
+    --rail-kicker-size: 0.72rem;
+    --rail-button-height: 2.5rem;
+    --rail-button-font-size: 0.95rem;
+    --rail-tag-height: 2rem;
+    --rail-badge-height: 1.75rem;
+    --rail-badge-font-size: 0.875rem;
+    --rail-avatar-max-width: none;
+    --rail-profile-name-size: 1.25rem;
+    --rail-profile-bio-size: 0.95rem;
+    --rail-social-button-size: 2.5rem;
+    --rail-social-icon-size: 1.5rem;
+    --rail-facts-min-height: 24rem;
+    --rail-chat-height: 16rem;
+    --rail-chat-mascot-size: 12rem;
+  }
+
+  @container sidebar-rail (max-width: 13rem) {
+    :global(#sidebar) {
+      --rail-card-padding: 0.6rem;
+      --rail-card-padding-inline: 0.72rem;
+      --rail-card-stack-gap: 0.72rem;
+      --rail-widget-title-size: 0.95rem;
+      --rail-copy-size: 0.82rem;
+      --rail-copy-leading: 1.4;
+      --rail-muted-size: 0.74rem;
+      --rail-kicker-size: 0.64rem;
+      --rail-button-height: 2.05rem;
+      --rail-button-font-size: 0.78rem;
+      --rail-tag-height: 1.7rem;
+      --rail-badge-height: 1.35rem;
+      --rail-badge-font-size: 0.72rem;
+      --rail-avatar-max-width: 7.4rem;
+      --rail-profile-name-size: 0.94rem;
+      --rail-profile-bio-size: 0.78rem;
+      --rail-social-button-size: 1.95rem;
+      --rail-social-icon-size: 1.05rem;
+      --rail-facts-min-height: 18rem;
+      --rail-chat-height: 11rem;
+      --rail-chat-mascot-size: 6.4rem;
+    }
+  }
+
+  @container sidebar-rail (max-width: 10.5rem) {
+    :global(#sidebar) {
+      --rail-card-padding: 0.48rem;
+      --rail-card-padding-inline: 0.58rem;
+      --rail-card-stack-gap: 0.6rem;
+      --rail-widget-title-size: 0.86rem;
+      --rail-copy-size: 0.75rem;
+      --rail-copy-leading: 1.34;
+      --rail-muted-size: 0.68rem;
+      --rail-kicker-size: 0.58rem;
+      --rail-button-height: 1.85rem;
+      --rail-button-font-size: 0.72rem;
+      --rail-tag-height: 1.5rem;
+      --rail-badge-height: 1.2rem;
+      --rail-badge-font-size: 0.66rem;
+      --rail-avatar-max-width: 6rem;
+      --rail-profile-name-size: 0.86rem;
+      --rail-profile-bio-size: 0.72rem;
+      --rail-social-button-size: 1.7rem;
+      --rail-social-icon-size: 0.9rem;
+      --rail-facts-min-height: 15.5rem;
+      --rail-chat-height: 9rem;
+      --rail-chat-mascot-size: 4.85rem;
+    }
+  }
+
+  :global(#sidebar .sidebar-profile-card) {
+    padding: var(--rail-card-padding) !important;
+  }
+
+  :global(#sidebar .sidebar-profile-avatar-link) {
+    max-width: var(--rail-avatar-max-width) !important;
+    margin-bottom: var(--rail-card-stack-gap) !important;
+  }
+
+  :global(#sidebar .sidebar-profile-name) {
+    font-size: var(--rail-profile-name-size) !important;
+    line-height: 1.2 !important;
+  }
+
+  :global(#sidebar .sidebar-profile-bio) {
+    font-size: var(--rail-profile-bio-size) !important;
+    line-height: 1.4 !important;
+    margin-bottom: var(--rail-card-stack-gap) !important;
+  }
+
+  :global(#sidebar .sidebar-profile-socials) {
+    gap: clamp(0.35rem, 1.5cqi, 0.5rem) !important;
+  }
+
+  :global(#sidebar .sidebar-profile-social) {
+    width: var(--rail-social-button-size) !important;
+    height: var(--rail-social-button-size) !important;
+  }
+
+  :global(#sidebar .sidebar-profile-social-wide) {
+    width: auto !important;
+    padding-inline: clamp(0.55rem, 3cqi, 0.75rem) !important;
+    font-size: var(--rail-button-font-size) !important;
+  }
+
+  :global(#sidebar .sidebar-profile-social-icon) {
+    font-size: var(--rail-social-icon-size) !important;
+  }
+
+  :global(#sidebar .widget-layout-card) {
+    padding-bottom: var(--rail-card-stack-gap) !important;
+  }
+
+  :global(#sidebar .widget-layout-title) {
+    font-size: var(--rail-widget-title-size) !important;
+    line-height: 1.25 !important;
+    margin-top: calc(var(--rail-card-padding) + 0.25rem) !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  :global(#sidebar .widget-layout-body),
+  :global(#sidebar .widget-layout-expand) {
+    padding-inline: var(--rail-card-padding-inline) !important;
+  }
+
+  :global(#sidebar .widget-layout-more-button) {
+    min-height: calc(var(--rail-button-height) - 0.15rem) !important;
+    height: auto !important;
+  }
+
+  :global(#sidebar .widget-layout-more-label) {
+    font-size: var(--rail-button-font-size) !important;
+  }
+
+  :global(#sidebar .sidebar-link-button) {
+    min-height: var(--rail-button-height) !important;
+    height: auto !important;
+    padding-block: 0.3rem !important;
+    padding-left: 0.35rem !important;
+    padding-right: 0.35rem !important;
+  }
+
+  :global(#sidebar .sidebar-link-button > div) {
+    margin-right: 0 !important;
+    gap: clamp(0.3rem, 1.8cqi, 0.5rem) !important;
+  }
+
+  :global(#sidebar .sidebar-link-label),
+  :global(#sidebar .sidebar-tag-button) {
+    font-size: var(--rail-button-font-size) !important;
+    line-height: 1.25 !important;
+  }
+
+  :global(#sidebar .sidebar-link-badge) {
+    height: var(--rail-badge-height) !important;
+    min-width: var(--rail-badge-height) !important;
+    font-size: var(--rail-badge-font-size) !important;
+    margin-left: clamp(0.3rem, 1.8cqi, 0.45rem) !important;
+    padding-inline: 0.35rem !important;
+  }
+
+  :global(#sidebar .sidebar-tag-button) {
+    min-height: var(--rail-tag-height) !important;
+    height: auto !important;
+    padding-inline: 0.55rem !important;
+  }
+
+  :global(#sidebar .updates-summary-card) {
+    padding: clamp(0.55rem, 3cqi, 0.9rem) !important;
+    gap: clamp(0.5rem, 2cqi, 0.875rem) !important;
+  }
+
+  :global(#sidebar .updates-label),
+  :global(#sidebar .updates-link-kicker),
+  :global(#sidebar .facts-widget-kicker) {
+    font-size: var(--rail-kicker-size) !important;
+  }
+
+  :global(#sidebar .updates-value),
+  :global(#sidebar .updates-preview-title),
+  :global(#sidebar .updates-link-label),
+  :global(#sidebar .facts-widget-title) {
+    font-size: var(--rail-copy-size) !important;
+    line-height: 1.35 !important;
+  }
+
+  :global(#sidebar .updates-meta),
+  :global(#sidebar .updates-preview-date),
+  :global(#sidebar .updates-preview-meta),
+  :global(#sidebar .updates-note-copy),
+  :global(#sidebar .updates-preview-copy),
+  :global(#sidebar .updates-intro-copy),
+  :global(#sidebar .facts-widget-footer) {
+    font-size: var(--rail-muted-size) !important;
+    line-height: var(--rail-copy-leading) !important;
+  }
+
+  :global(#sidebar .updates-journal-link) {
+    padding-inline: clamp(0.7rem, 3cqi, 1rem) !important;
+    padding-block: clamp(0.65rem, 2cqi, 0.85rem) !important;
+  }
+
+  :global(#sidebar .facts-widget-container),
+  :global(#sidebar .facts-widget-shell) {
+    min-height: var(--rail-facts-min-height) !important;
+  }
+
+  :global(#sidebar .facts-widget-shell) {
+    gap: var(--rail-card-stack-gap) !important;
+    padding: clamp(0.7rem, 3cqi, 1rem) !important;
+  }
+
+  :global(#sidebar #bleepy-post-widget) {
+    padding: var(--rail-card-padding) !important;
+    gap: var(--rail-card-stack-gap) !important;
+  }
+
+  :global(#sidebar #bleepy-post-widget .chat-history) {
+    height: var(--rail-chat-height) !important;
+    padding: clamp(0.55rem, 2.5cqi, 0.75rem) !important;
+  }
+
+  :global(#sidebar #widget-mascot-visual-area) {
+    width: var(--rail-chat-mascot-size) !important;
+    height: var(--rail-chat-mascot-size) !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  :global(#sidebar #bleepy-post-widget p),
+  :global(#sidebar #bleepy-post-widget .speech-bubble-content),
+  :global(#sidebar #bleepy-post-widget .chat-input),
+  :global(#sidebar #bleepy-post-widget .chat-send-button) {
+    font-size: var(--rail-button-font-size) !important;
+    line-height: var(--rail-copy-leading) !important;
+  }
+
+  :global(#sidebar #widget-chat-send) {
+    padding-inline: clamp(0.6rem, 2.5cqi, 1rem) !important;
+    padding-block: 0.45rem !important;
+  }
+
+  /* Homepage only: keep a compact two-column layout on mobile landscape */
   @media (max-width: 1023px) and (orientation: landscape) and (max-height: 500px) {
     body.is-home #main-grid {
       grid-template-columns: 12rem minmax(0, 1fr) !important;
       gap: 0.75rem !important;
       padding-left: 0.5rem !important;
       padding-right: 0.5rem !important;
-    }
-
-    body.is-home #main-grid.has-right-rail {
-      grid-template-columns: 12rem 10rem minmax(0, 1fr) !important;
     }
 
     body.is-home #main-grid > div:first-child {
@@ -1109,18 +1398,8 @@ const gridLayoutClasses = [
       grid-column: 2 !important;
     }
 
-    body.is-home #main-grid.has-right-rail main#main {
-      grid-column: 3 !important;
-    }
-
-    body.is-home #main-grid.has-right-rail #toc-wrapper {
-      display: block !important;
-      grid-column: 2 !important;
-    }
-
-    body.is-home #toc-inner-wrapper {
-      top: 3.75rem !important;
-      height: calc(100vh - 5rem) !important;
+    body.is-home #sidebar-right-rail-merge {
+      display: flex !important;
     }
 
     body.is-home #main-content-wrapper > .footer.hidden.md\\:block {

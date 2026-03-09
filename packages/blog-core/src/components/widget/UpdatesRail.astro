@@ -102,33 +102,33 @@ const latestEntry = journalEntries[0]
                 <span class="updates-label">
                   {sourceEntry.data.journalTitle || 'Journal'}
                 </span>
-                <span class="text-xs text-black/40 dark:text-white/40">
+                <span class="updates-preview-date text-xs text-black/40 dark:text-white/40">
                   {formatDate(latestEntry.date)}
                 </span>
               </div>
               {latestEntry.title && (
-                <div class="text-sm font-semibold text-black/85 dark:text-white/85">
+                <div class="updates-preview-title text-sm font-semibold text-black/85 dark:text-white/85">
                   {latestEntry.title}
                 </div>
               )}
               {(latestEntry.location || latestEntry.mileage) && (
-                <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-black/50 dark:text-white/50">
+                <div class="updates-preview-meta flex flex-wrap gap-x-3 gap-y-1 text-xs text-black/50 dark:text-white/50">
                   {latestEntry.location && <span>{latestEntry.location}</span>}
                   {latestEntry.mileage && <span>{latestEntry.mileage}</span>}
                 </div>
               )}
-              <p class="text-sm leading-6 text-black/70 dark:text-white/70">
+              <p class="updates-preview-copy text-sm leading-6 text-black/70 dark:text-white/70">
                 {latestEntry.excerpt}
               </p>
             </div>
           ) : current.note && (
-            <p class="text-sm leading-6 text-black/70 dark:text-white/70 whitespace-pre-line">
+            <p class="updates-note-copy text-sm leading-6 text-black/70 dark:text-white/70 whitespace-pre-line">
               {current.note}
             </p>
           )}
 
           {journalContent?.introHtml && (
-            <div class="updates-body text-sm leading-6 text-black/70 dark:text-white/70">
+            <div class="updates-body updates-intro-copy text-sm leading-6 text-black/70 dark:text-white/70">
               <div set:html={journalContent.introHtml} />
             </div>
           )}
@@ -137,10 +137,10 @@ const latestEntry = journalEntries[0]
             class="updates-journal-link btn-card mt-1 rounded-2xl px-4 py-3 flex items-center justify-between gap-3 active:scale-95"
           >
             <div class="overflow-hidden">
-              <div class="text-[0.72rem] uppercase tracking-[0.08em] text-black/45 dark:text-white/45">
+              <div class="updates-link-kicker text-[0.72rem] uppercase tracking-[0.08em] text-black/45 dark:text-white/45">
                 {sourceEntry.data.title || sourceEntry.data.journalTitle || 'Updates'}
               </div>
-              <div class="text-sm font-semibold text-black/80 dark:text-white/80">
+              <div class="updates-link-label text-sm font-semibold text-black/80 dark:text-white/80">
                 {journalLinkLabel}
               </div>
             </div>

@@ -9,6 +9,7 @@ const { badge, url, label } = Astro.props
 <a href={url} aria-label={label}>
     <button
         class:list={`
+            sidebar-link-button
             w-full
             h-10
             rounded-lg
@@ -27,11 +28,11 @@ const { badge, url, label } = Astro.props
         }
     >
         <div class="flex items-center justify-between relative mr-2">
-            <div class="overflow-hidden text-left whitespace-nowrap overflow-ellipsis  ">
+            <div class="sidebar-link-label overflow-hidden text-left whitespace-nowrap overflow-ellipsis  ">
                 <slot></slot>
             </div>
             { badge !== undefined && badge !== null && badge !== '' &&
-                <div class="transition px-2 h-7 ml-4 min-w-[2rem] rounded-lg text-sm font-bold
+                <div class="sidebar-link-badge transition px-2 h-7 ml-4 min-w-[2rem] rounded-lg text-sm font-bold
                     text-[var(--btn-content)] dark:text-[var(--deep-text)]
                     bg-[oklch(0.95_0.025_var(--hue))] dark:bg-[var(--primary)]
                     flex items-center justify-center">

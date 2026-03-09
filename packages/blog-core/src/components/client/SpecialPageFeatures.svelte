@@ -323,14 +323,4 @@ export function resetSpecialPageState() {
     grid-template-columns: 1fr !important;
   }
 
-  /* Mobile-first safety - ensure mobile is always single column */
-  @media (max-width: 767px) {
-    :global(#main-grid) {
-      grid-template-columns: 1fr !important;
-    }
-    
-    :global(#main-grid > div:first-child) {
-      display: none !important;
-    }
-  }
 </style>
