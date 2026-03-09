@@ -1,13 +1,17 @@
 ---
-title: "Life Lost in Service of Others - My Reasons for Going on the Trail"
-published: 2026-03-03
+title: Life Lost in Service of Others - My Reasons for Going on the Trail
 description: "Spoiler: I'm 43, broke, and have nowhere to be."
-image: "/posts/pct-reasons/title.jpeg"
-avatarImage: "/posts/pct-reasons/title.jpeg"
+published: 2026-03-03
+draft: true
+tags:
+  - PCT
+  - Personal
+  - Thru-Hiking
+  - Why
+category: PCT 2026
+image: /posts/pct-reasons/title.jpeg
+avatarImage: /posts/pct-reasons/title.jpeg
 showImageOnPost: false
-tags: [PCT, Personal, Thru-Hiking, Why]
-category: "PCT 2026"
-draft: false
 lang: ""
 ---
 
@@ -51,11 +55,11 @@ And for this, I have no reason for staying. Only reasons to leave, because the p
 ## Why the Trail
 
 
-To me the trail represents freedom. An ability to be whoever I want to be without apology. To dance alone in the dark, muttering to myself about my secret worlds. Maybe I'll see a beautiful sunset, ancient trees. Maybe the self-reflection will give me some understanding. At the end of the adventure I know there is a wall waiting for me. It's important not to look forward to that, but instead to live in the moment.
+To me the trail represents freedom. An ability to be whoever I want to be without apology. To dance alone in the dark, muttering to myself about my secret worlds. Maybe I'll see a beautiful sunset, ancient trees. Maybe the self-reflection will give me some understanding.
 
 The grass is probably not greener. The people I'm going to meet are probably not going to like me. I'm going to be lonely. I'm going to be miserable. I'm going to spend the last few dollars I have. I'm going to feel a profound feeling of loss and regret. I will miss my cat and worry about her health. I'll miss my partner, I'll miss all the stupid people that pushed me to this place, I'll replay every dumb moment of my entire life in my head, and regret all of it. The people at home are still going to say bad things about me and my decisions. Maybe I'll be forgotten -- I sincerely hope so.
 
-So my reasons? Rejection, loneliness, loss, bitterness, poverty, pressure, microaggressions, failure, rage, sadness. In my life -- spring, summer, and fall are past. Every day is getting colder and darker. I understand my trajectory and fate. I accept this.
+So my reasons? Rejection, loneliness, loss, bitterness, poverty, pressure, microaggressions, failure, sadness. In my life -- spring, summer, and fall are past. Every day is getting colder and darker. I understand my trajectory and fate. I accept this.
 
 So perhaps my reason for thru-hiking the PCT is finding acceptance.
 

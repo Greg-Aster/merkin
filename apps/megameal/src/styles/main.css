@@ -187,8 +187,8 @@
     /* 🎯 FULLSCREEN MODE - Banner adjustments */
     .force-mobile-view #banner-container {
         /* Ensure banner uses full width */
-        width: 100vw !important;
-        margin-left: calc(-50vw + 50%) !important;
+        width: 100% !important;
+        margin-left: 0 !important;
     }
     
     /* 🎯 FULLSCREEN MODE - Main panel wrapper adjustments */
@@ -210,8 +210,8 @@
     /* 🎯 FULLSCREEN MODE - Navbar adjustments */
     .force-mobile-view #navbar-wrapper {
         /* Ensure navbar spans full width */
-        width: 100vw !important;
-        margin-left: calc(-50vw + 50%) !important;
+        width: 100% !important;
+        margin-left: 0 !important;
     }
     
     .force-mobile-view #top-row {
@@ -236,7 +236,7 @@
     .banner-aspect-container {
         position: relative;
         width: 100%;
-        max-width: clamp(100vw, 90vw, 85vw);
+        max-width: 100%;
         margin: 0 auto;
         padding: 0 clamp(0.0vw, 0vw, 4vw);
     }
