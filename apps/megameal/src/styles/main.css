@@ -236,7 +236,7 @@
     .banner-aspect-container {
         position: relative;
         width: 100%;
-        max-width: min(100%, 85vw);
+        max-width: 100%;
         margin: 0 auto;
         padding: 0 clamp(0.0vw, 0vw, 4vw);
     }

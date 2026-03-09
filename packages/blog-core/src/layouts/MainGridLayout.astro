@@ -1085,6 +1085,39 @@ const gridLayoutClasses = [
     }
   }
 
+  /* Homepage only: compact desktop-like 3-column layout on mobile landscape */
+  @media (max-width: 1023px) and (orientation: landscape) and (max-height: 500px) {
+    body.is-home #main-grid {
+      grid-template-columns: 12rem minmax(0, 1fr) 10rem !important;
+      gap: 0.75rem !important;
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+    }
+
+    body.is-home #main-grid > div:first-child {
+      display: block !important;
+      max-width: 12rem !important;
+      margin-bottom: 0 !important;
+    }
+
+    body.is-home #toc-wrapper {
+      display: block !important;
+    }
+
+    body.is-home #toc-inner-wrapper {
+      top: 3.75rem !important;
+      height: calc(100vh - 5rem) !important;
+    }
+
+    body.is-home .footer.hidden.md\\:block {
+      display: block !important;
+    }
+
+    body.is-home .footer.block.md\\:hidden {
+      display: none !important;
+    }
+  }
+
   .banner-media-layer {
     position: relative;
     overflow: hidden;
