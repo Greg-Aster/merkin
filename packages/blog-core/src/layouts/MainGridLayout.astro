@@ -883,7 +883,7 @@ const gridLayoutClasses = [
     <div id="main-panel-wrapper" class="responsive-panel-wrapper relative max-w-[var(--page-width)] mx-auto pointer-events-auto">
       <div
         id="main-grid"
-        class:list={[gridLayoutClasses, 'transition-swup-fade']}
+        class:list={[gridLayoutClasses, 'transition-swup-fade', { 'has-right-rail': shouldShowRightRail }]}
         style={`margin-top: ${mainContentOffset};`}
       >
 
@@ -1088,10 +1088,14 @@ const gridLayoutClasses = [
   /* Homepage only: compact desktop-like 3-column layout on mobile landscape */
   @media (max-width: 1023px) and (orientation: landscape) and (max-height: 500px) {
     body.is-home #main-grid {
-      grid-template-columns: 12rem 10rem minmax(0, 1fr) !important;
+      grid-template-columns: 12rem minmax(0, 1fr) !important;
       gap: 0.75rem !important;
       padding-left: 0.5rem !important;
       padding-right: 0.5rem !important;
+    }
+
+    body.is-home #main-grid.has-right-rail {
+      grid-template-columns: 12rem 10rem minmax(0, 1fr) !important;
     }
 
     body.is-home #main-grid > div:first-child {
@@ -1102,10 +1106,14 @@ const gridLayoutClasses = [
     }
 
     body.is-home main#main {
+      grid-column: 2 !important;
+    }
+
+    body.is-home #main-grid.has-right-rail main#main {
       grid-column: 3 !important;
     }
 
-    body.is-home #toc-wrapper {
+    body.is-home #main-grid.has-right-rail #toc-wrapper {
       display: block !important;
       grid-column: 2 !important;
     }
