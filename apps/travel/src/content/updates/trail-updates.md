@@ -18,6 +18,10 @@ current:
 Location: Portland
 Mileage: 0 trail miles
 
-Preparing to jounal. Added new side panel to the site for smaller entries, and I added foraging entry #2 to the trail guides. Have train ticket. Leave for san diego the 11th, and arrive at Campo on the 13th early in the morning.
+Preparing to jounal. Added new side panel to the site for smaller entries, and I added foraging entry #2 to the trail guides. Have train ticket. Leave for San Diego the 11th, and arrive at Campo on the 13th early in the morning.
 
+## 2026-03-10 | Night Before
+Location: Portland
+Mileage: 0 trail miles
 
+Pack is loaded up, and I'm doing final preparations Before heading out tomorrow. Feeling very anxious.
