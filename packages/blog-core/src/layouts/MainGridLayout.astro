@@ -16,7 +16,7 @@ import TOC from '../components/widget/TOC.astro'
 import { siteConfig } from '@/config/config'
 import Layout from './Layout.astro'
 import '../styles/timeline-styles.css'
-import { url } from '../utils/url-utils'
+import { pathsEqual, url } from '../utils/url-utils'
 
 // Blog-core shared client components (relative imports)
 import MobileProfileOverlay from '../components/client/MobileProfileOverlay.svelte'
@@ -490,7 +490,8 @@ if (import.meta.env.DEV) {
 
 // Get current path for page type determination
 const currentPath = Astro.url.pathname
-const isHomePage = currentPath === '/'
+const basePath = import.meta.env.BASE_URL || '/'
+const isHomePage = pathsEqual(currentPath, basePath)
 const isPostRoute = Boolean(post)
 
 // ⭐ RESTORED: Use the working banner configuration function
