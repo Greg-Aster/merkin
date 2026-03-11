@@ -528,6 +528,7 @@ const shouldShowFallbackRightRail =
 
 const shouldShowRightRail = shouldShowToc || shouldShowFallbackRightRail
 const shouldMergeRightRailIntoSidebar = shouldShowFallbackRightRail && !shouldShowToc
+const shouldShowHomeWidgetRail = isHomePage && shouldShowFallbackRightRail && !shouldShowToc
 const rightRailStickyTop = siteConfig.rightRail?.stickyTop ?? '3.5rem'
 
 // Process custom author data with direct post-data fallbacks so avatar overrides
@@ -895,6 +896,20 @@ const gridLayoutClasses = [
     )}
   </div>
 
+  {shouldShowHomeWidgetRail && (
+    <div class="mobile-portrait-updates pointer-events-none md:hidden">
+      <div class="mobile-portrait-updates-inner max-w-[var(--page-width)] mx-auto px-3">
+        <div class="pointer-events-auto">
+          <RightRailContent
+            currentPath={currentPath}
+            post={post}
+            isHomePage={isHomePage}
+          />
+        </div>
+      </div>
+    </div>
+  )}
+
   <!-- =============================================================== -->
   <!-- ⭐ SIMPLIFIED: One column mobile, two column desktop           -->
   <!-- =============================================================== -->
@@ -915,6 +930,15 @@ const gridLayoutClasses = [
             <Profile client:load slug={processedAuthorData.slug} customAvatar={processedAuthorData.customAvatar} customName={processedAuthorData.customName} customBio={processedAuthorData.customBio} customLink={processedAuthorData.customLink} isHomePage={isHomePage} profileConfig={profileConfig} avatarConfig={avatarConfig} />
             </div>
           </section>
+          {shouldShowHomeWidgetRail && (
+            <div class="mobile-landscape-updates mb-4 hidden">
+              <RightRailContent
+                currentPath={currentPath}
+                post={post}
+                isHomePage={isHomePage}
+              />
+            </div>
+          )}
           {shouldShowToc && (
             <section id="sidebar-mobile-toc" class="mobile-support-group mobile-support-toc-group mb-4 block md:hidden">
               <div class="mobile-support-label">On this page</div>
@@ -1781,7 +1805,32 @@ const gridLayoutClasses = [
     padding-block: 0.45rem !important;
   }
 
+  .mobile-portrait-updates,
+  .mobile-landscape-updates {
+    display: none;
+  }
+
+  .mobile-portrait-updates {
+    position: relative;
+    margin-top: calc(-1 * min(7rem, 18vw));
+    z-index: 35;
+  }
+
+  .mobile-portrait-updates :global(.updates-journal-link) {
+    margin-bottom: 0;
+  }
+
+  .mobile-portrait-updates :global(.card-base) {
+    backdrop-filter: blur(16px);
+    background: color-mix(in srgb, rgb(255 255 255 / 0.9) 92%, transparent);
+  }
+
+  :global(.dark) .mobile-portrait-updates :global(.card-base) {
+    background: color-mix(in srgb, rgb(12 18 22 / 0.92) 94%, transparent);
+  }
+
   /* Homepage only: keep a compact two-column layout on mobile landscape */
+  /* Homepage only: compact desktop-like 3-column layout on mobile landscape */
   @media (max-width: 1023px) and (orientation: landscape) and (max-height: 500px) {
     body.is-home #main-grid {
       grid-template-columns: 12rem minmax(0, 1fr) !important;
@@ -1790,6 +1839,9 @@ const gridLayoutClasses = [
       padding-right: 0.5rem !important;
     }
 
+    body.is-home #main-grid.has-right-rail {
+      grid-template-columns: 12rem minmax(0, 1fr) !important;
+    }
     body.is-home #main-grid > div:first-child {
       display: block !important;
       grid-column: 1 !important;
@@ -1805,12 +1857,35 @@ const gridLayoutClasses = [
       display: flex !important;
     }
 
+    body.is-home #main-grid.has-right-rail #toc-wrapper {
+      display: none !important;
+    }
+
+    body.is-home #toc-inner-wrapper {
+      top: 3.75rem !important;
+      height: calc(100vh - 5rem) !important;
+    }
+
+    body.is-home .mobile-landscape-updates {
+      display: block !important;
+    }
+
+    body.is-home .mobile-portrait-updates {
+      display: none !important;
+    }
+
     body.is-home #main-content-wrapper > .footer.hidden.md\\:block {
       display: block !important;
     }
 
     body.is-home #main-grid > div:last-child {
       display: none !important;
+    }
+  }
+
+  @media (max-width: 767px) and (orientation: portrait) {
+    body.is-home .mobile-portrait-updates {
+      display: block;
     }
   }
 
