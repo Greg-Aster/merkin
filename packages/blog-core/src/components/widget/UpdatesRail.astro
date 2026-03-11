@@ -23,9 +23,7 @@ const {
 const className = Astro.props.class
 
 const collectionEntries = await getCollection(collection as any)
-const sourceEntry = collectionEntries.find(
-  (entry: any) => (entry.slug ?? entry.id) === slug,
-)
+const sourceEntry = collectionEntries.find((entry: any) => entry.slug === slug)
 
 const current = sourceEntry?.data?.current
 const labels = {
