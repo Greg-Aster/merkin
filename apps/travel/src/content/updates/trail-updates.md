@@ -25,3 +25,9 @@ Location: Portland
 Mileage: 0 trail miles
 
 Pack is loaded up, and I'm doing final preparations Before heading out tomorrow. Feeling very anxious.
+
+## 2026-03-11 | OMW
+Location: Eugene 
+Mileage: 0 trail miles
+
+Said my goodbyes pet the cats and boarded Amtrack Starliner heading south.
