@@ -6,7 +6,6 @@ import type {
 } from '../types/config'
 import { LinkPreset } from '../types/config'
 import { AUTO_MODE } from '@constants/constants.ts'
-import { url } from '../utils/url-utils'
 
 export const siteConfig: SiteConfig = {
   title: "Greg Aster Trail Log",
@@ -48,7 +47,7 @@ export const siteConfig: SiteConfig = {
       collection: "updates",
       slug: "trail-updates",
       excerptLength: 1000,
-      pageUrl: url("/journal/"),
+      pageUrl: "/journal/",
       pageLinkLabel: "Open full trail journal",
     },
   },
@@ -60,7 +59,7 @@ export const navBarConfig: NavBarConfig = {
     0,
     {
       name: "Journal",
-      url: url("/journal/"),
+      url: "/journal/",
     },
     1,
     2,
