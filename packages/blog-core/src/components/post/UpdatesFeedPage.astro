@@ -22,7 +22,9 @@ const {
 } = Astro.props
 
 const collectionEntries = await getCollection(collection as any)
-const sourceEntry = collectionEntries.find((entry: any) => entry.slug === slug)
+const sourceEntry = collectionEntries.find(
+  (entry: any) => (entry.slug ?? entry.id) === slug,
+)
 
 if (!sourceEntry) {
   throw new Error(`Updates content not found in '${collection}/${slug}'`)
