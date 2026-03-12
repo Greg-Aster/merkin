@@ -15,19 +15,28 @@ current:
 ---
 
 ## 2026-03-06 | Preparations
+Status: Pre-trail prep
 Location: Portland
+Section: Planning
 Mileage: 0 trail miles
+Next Stop: Pack the Pack
 
-Preparing to jounal. Added new side panel to the site for smaller entries, and I added foraging entry #2 to the trail guides. Have train ticket. Leave for San Diego the 11th, and arrive at Campo on the 13th early in the morning.
+Preparing to journal. Added new side panel to the site for smaller entries, and I added foraging entry #2 to the trail guides. Have train ticket. Leave for San Diego the 11th, and arrive at Campo on the 13th early in the morning.
 
 ## 2026-03-10 | Night Before
+Status: Final prep
 Location: Portland
+Section: Planning
 Mileage: 0 trail miles
+Next Stop: Amtrak southbound
 
-Pack is loaded up, and I'm doing final preparations Before heading out tomorrow. Feeling very anxious.
+Pack is loaded up, and I'm doing final preparations before heading out tomorrow. Feeling very anxious.
 
 ## 2026-03-11 | OMW
-Location: Eugene 
+Status: In transit
+Location: Eugene
+Section: Transit
 Mileage: 0 trail miles
+Next Stop: San Diego
 
-Said my goodbyes pet the cats and boarded Amtrack Starliner heading south.
+Said my goodbyes, pet the cats, and boarded Amtrak Starliner heading south.

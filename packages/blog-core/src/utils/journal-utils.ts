@@ -12,8 +12,12 @@ export type LegacyJournalEntry = {
 export type ParsedJournalEntry = {
   title?: string
   date: Date
+  status?: string
   location?: string
+  section?: string
   mileage?: string
+  nextStop?: string
+  note?: string
   contentMarkdown: string
   contentHtml: string
   excerpt: string
@@ -32,8 +36,12 @@ type BodySection = {
 }
 
 const DATE_PREFIX_PATTERN = /^(\d{4}-\d{2}-\d{2})(?:\s*(?:\||-|:)\s*(.+))?$/
+const STATUS_PATTERN = /^status\s*:\s*(.+)$/i
 const LOCATION_PATTERN = /^location\s*:\s*(.+)$/i
+const SECTION_PATTERN = /^section\s*:\s*(.+)$/i
 const MILEAGE_PATTERN = /^mileage\s*:\s*(.+)$/i
+const NEXT_STOP_PATTERN = /^next\s*stop\s*:\s*(.+)$/i
+const NOTE_PATTERN = /^note\s*:\s*(.+)$/i
 
 export async function parseJournalContent(
   body: string,
@@ -124,14 +132,26 @@ async function parseBodySection(
   excerptLength: number,
 ): Promise<ParsedJournalEntry> {
   const { date, title } = parseHeading(section.heading)
-  const { location, mileage, contentMarkdown } = extractSectionMetadata(section.markdown)
+  const {
+    status,
+    location,
+    section: entrySection,
+    mileage,
+    nextStop,
+    note,
+    contentMarkdown,
+  } = extractSectionMetadata(section.markdown)
   const contentHtml = await renderMarkdown(contentMarkdown)
 
   return {
     title,
     date,
+    status,
     location,
+    section: entrySection,
     mileage,
+    nextStop,
+    note,
     contentMarkdown,
     contentHtml,
     excerpt: summarizeMarkdown(contentMarkdown, excerptLength),
@@ -151,19 +171,34 @@ function parseHeading(heading: string): { date: Date; title?: string } {
 }
 
 function extractSectionMetadata(markdown: string): {
+  status?: string
   location?: string
+  section?: string
   mileage?: string
+  nextStop?: string
+  note?: string
   contentMarkdown: string
 } {
   const lines = markdown.split('\n')
   let lineIndex = 0
+  let status: string | undefined
   let location: string | undefined
+  let section: string | undefined
   let mileage: string | undefined
+  let nextStop: string | undefined
+  let note: string | undefined
 
   while (lineIndex < lines.length) {
     const currentLine = lines[lineIndex].trim()
 
     if (!currentLine) {
+      lineIndex += 1
+      continue
+    }
+
+    const statusMatch = currentLine.match(STATUS_PATTERN)
+    if (statusMatch) {
+      status = statusMatch[1].trim()
       lineIndex += 1
       continue
     }
@@ -175,9 +210,30 @@ function extractSectionMetadata(markdown: string): {
       continue
     }
 
+    const sectionMatch = currentLine.match(SECTION_PATTERN)
+    if (sectionMatch) {
+      section = sectionMatch[1].trim()
+      lineIndex += 1
+      continue
+    }
+
     const mileageMatch = currentLine.match(MILEAGE_PATTERN)
     if (mileageMatch) {
       mileage = mileageMatch[1].trim()
+      lineIndex += 1
+      continue
+    }
+
+    const nextStopMatch = currentLine.match(NEXT_STOP_PATTERN)
+    if (nextStopMatch) {
+      nextStop = nextStopMatch[1].trim()
+      lineIndex += 1
+      continue
+    }
+
+    const noteMatch = currentLine.match(NOTE_PATTERN)
+    if (noteMatch) {
+      note = noteMatch[1].trim()
       lineIndex += 1
       continue
     }
@@ -188,8 +244,12 @@ function extractSectionMetadata(markdown: string): {
   const contentMarkdown = lines.slice(lineIndex).join('\n').trim()
 
   return {
+    status,
     location,
+    section,
     mileage,
+    nextStop,
+    note,
     contentMarkdown,
   }
 }
