@@ -25,7 +25,6 @@ const className = Astro.props.class
 const collectionEntries = await getCollection(collection as any)
 const sourceEntry = collectionEntries.find((entry: any) => entry.slug === slug)
 
-const current = sourceEntry?.data?.current
 const labels = {
   status: sourceEntry?.data?.labels?.status ?? 'Status',
   location: sourceEntry?.data?.labels?.location ?? 'Location',
@@ -41,6 +40,17 @@ const journalContent = sourceEntry
   : null
 const journalEntries = journalContent?.entries ?? []
 const latestEntry = journalEntries[0]
+const current = latestEntry
+  ? {
+      status: latestEntry.status,
+      location: latestEntry.location,
+      section: latestEntry.section,
+      mileage: latestEntry.mileage,
+      nextStop: latestEntry.nextStop,
+      updated: latestEntry.date,
+      note: latestEntry.note,
+    }
+  : sourceEntry?.data?.current
 ---
 
 {sourceEntry && (
@@ -111,10 +121,17 @@ const latestEntry = journalEntries[0]
                   {latestEntry.title}
                 </div>
               )}
-              {(latestEntry.location || latestEntry.mileage) && (
+              {(latestEntry.status ||
+                latestEntry.location ||
+                latestEntry.section ||
+                latestEntry.mileage ||
+                latestEntry.nextStop) && (
                 <div class="updates-preview-meta flex flex-wrap gap-x-3 gap-y-1 text-xs text-black/50 dark:text-white/50">
+                  {latestEntry.status && <span>{latestEntry.status}</span>}
                   {latestEntry.location && <span>{latestEntry.location}</span>}
+                  {latestEntry.section && <span>{latestEntry.section}</span>}
                   {latestEntry.mileage && <span>{latestEntry.mileage}</span>}
+                  {latestEntry.nextStop && <span>{`Next: ${latestEntry.nextStop}`}</span>}
                 </div>
               )}
               <p class="updates-preview-copy text-sm leading-6 text-black/70 dark:text-white/70">
