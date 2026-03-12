@@ -54,25 +54,17 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Install workspace dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Prepare minimal EAS upload
+      - name: Prepare isolated build directory
         run: |
-          cat > .easignore <<'EOF'
-          *
-          !package.json
-          !pnpm-lock.yaml
-          !pnpm-workspace.yaml
-          !apps/
-          apps/*
-          !apps/blog-pusher/
-          !apps/blog-pusher/**
-          EOF
+          rm -rf /tmp/blog-pusher-build
+          mkdir -p /tmp/blog-pusher-build
+          rsync -a apps/blog-pusher/ /tmp/blog-pusher-build/
+          cd /tmp/blog-pusher-build
+          pnpm install --lockfile-only --ignore-scripts
 
       - name: Trigger EAS Android build
         id: eas_build
-        working-directory: apps/blog-pusher
+        working-directory: /tmp/blog-pusher-build
         run: |
           eas build \
             --platform android \
