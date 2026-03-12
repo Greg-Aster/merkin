@@ -10,6 +10,7 @@ import PushScreen from './src/screens/PushScreen'
 import RepoBrowserScreen from './src/screens/RepoBrowserScreen'
 import SettingsScreen from './src/screens/SettingsScreen'
 import FormatReferenceScreen from './src/screens/FormatReferenceScreen'
+import BannerEditorScreen from './src/screens/BannerEditorScreen'
 import { consumeSharedFile } from './src/utils/shareIntent'
 import { loadSettings } from './src/utils/storage'
 import { AppThemeProvider, getNavigationTheme, useAppTheme } from './src/utils/theme'
@@ -88,6 +89,7 @@ function AppNavigation() {
         <Stack.Screen name="RepoBrowser" component={RepoBrowserScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="FormatReference" component={FormatReferenceScreen} />
+        <Stack.Screen name="BannerEditor" component={BannerEditorScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   )
