@@ -5,6 +5,10 @@
   "type": "module",
   "packageManager": "pnpm@9.14.4",
   "scripts": {
+    "dev:blog-pusher": "pnpm --filter @merkin/blog-pusher dev",
+    "web:blog-pusher": "pnpm --filter @merkin/blog-pusher web",
+    "android:blog-pusher": "pnpm --filter @merkin/blog-pusher android",
+    "ios:blog-pusher": "pnpm --filter @merkin/blog-pusher ios",
     "dev:travel": "pnpm --filter @merkin/travel dev",
     "dev:temporal": "pnpm --filter temporal-flow dev",
     "dev:dndiy": "pnpm --filter dndiy dev",
