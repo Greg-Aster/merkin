@@ -40,3 +40,11 @@ Mileage: 0 trail miles
 Next Stop: San Diego
 
 Said my goodbyes, pet the cats, and boarded Amtrak Starliner heading south.
+
+## 2026-03-12 | OMW day #2
+Status: In transit
+Location: Somewhere south of Oakland
+Section: Transit
+Mileage: 0 trail miles
+
+A rough night of sleep on the train. Watching the scenery go by. California in early spring is green and tropical. I may have overdressed.
