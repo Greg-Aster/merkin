@@ -32,7 +32,7 @@ Mileage: 0 trail miles
 
 Said my goodbyes pet the cats and boarded Amtrack Starliner heading south.
 
-## 2026-03-11 | OMW day #2
+## 2026-03-12 | OMW day #2
 Location: Somewhere south of Oakland
 Mileage: 0 trail miles
 
