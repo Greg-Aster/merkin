@@ -212,6 +212,10 @@ function getImagePath(siteConfig, filename) {
   return `${imageDir}/${filename}`
 }
 
+function getAssetPath(remotePath) {
+  return String(remotePath || '').trim().replace(/^\/+|\/+$/g, '')
+}
+
 async function readImageBase64(img) {
   try {
     return await FileSystem.readAsStringAsync(img.uri, {
@@ -415,6 +419,82 @@ export async function publishImageToGitHub(img, settings, siteConfig) {
   return { ok: false, error: githubErrorMessage(res.status, res.data) }
 }
 
+export async function publishAssetToGitLab(img, settings, remotePath, options = {}) {
+  const gitlab = getProviderConfig(settings, 'gitlab')
+  if (!gitlab.token) return { ok: false, error: 'No GitLab token set.' }
+  if (!gitlab.project) return { ok: false, error: 'No GitLab project set.' }
+
+  let base64
+  try {
+    base64 = await readImageBase64(img)
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) }
+  }
+
+  const filePath = getAssetPath(remotePath)
+  if (!filePath) return { ok: false, error: 'Remote asset path is empty.' }
+
+  const encodedProject = encodeURIComponent(gitlab.project)
+  const encodedFilePath = encodeURIComponent(filePath)
+  const url = `https://gitlab.com/api/v4/projects/${encodedProject}/repository/files/${encodedFilePath}`
+  const res = await gitlabRequest(options.updateExisting ? 'PUT' : 'POST', url, gitlab.token, {
+    branch: gitlab.branch || 'main',
+    content: base64,
+    commit_message: options.commitMessage || `${options.updateExisting ? 'update' : 'add'} asset: ${img.filename || filePath.split('/').pop()}`,
+    encoding: 'base64',
+    ...(options.lastCommitId ? { last_commit_id: options.lastCommitId } : {}),
+  })
+
+  if (res.ok) return { ok: true, filePath }
+
+  const message = getDataMessage(res.data).toLowerCase()
+  if (
+    !options.updateExisting &&
+    res.status === 400 &&
+    (message.includes('already exists') || message.includes('has already been taken'))
+  ) {
+    return { ok: true, filePath }
+  }
+
+  return { ok: false, error: gitlabErrorMessage(res.status, res.data) }
+}
+
+export async function publishAssetToGitHub(img, settings, remotePath, options = {}) {
+  const github = getProviderConfig(settings, 'github')
+  if (!github.token) return { ok: false, error: 'No GitHub token set.' }
+  if (!github.owner || !github.repo) {
+    return { ok: false, error: 'GitHub owner/repo is missing. Go to Settings.' }
+  }
+
+  let base64
+  try {
+    base64 = await readImageBase64(img)
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) }
+  }
+
+  const filePath = getAssetPath(remotePath)
+  if (!filePath) return { ok: false, error: 'Remote asset path is empty.' }
+
+  const owner = encodeURIComponent(github.owner.trim())
+  const repo = encodeURIComponent(github.repo.trim())
+  const encodedPath = encodePath(filePath)
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodedPath}`
+  const res = await githubRequest('PUT', url, github.token, {
+    message: options.commitMessage || `${options.updateExisting ? 'update' : 'add'} asset: ${img.filename || filePath.split('/').pop()}`,
+    content: base64,
+    branch: github.branch || 'main',
+    ...(options.sourceSha ? { sha: options.sourceSha } : {}),
+  })
+
+  if (res.ok) return { ok: true, filePath, sha: res.data?.content?.sha || res.data?.commit?.sha || null }
+  if (!options.updateExisting && isGitHubAlreadyExists(res.status, res.data)) {
+    return { ok: true, filePath }
+  }
+
+  return { ok: false, error: githubErrorMessage(res.status, res.data) }
+}
+
 async function fetchGitHubTree(settings, sitePath) {
   const github = getProviderConfig(settings, 'github')
   if (!github.token) return { ok: false, error: 'No GitHub token set. Go to Settings.' }
@@ -561,4 +641,11 @@ export async function publishImage(img, settings, siteConfig, provider = 'gitlab
     return publishImageToGitHub(img, settings, siteConfig)
   }
   return publishImageToGitLab(img, settings, siteConfig)
+}
+
+export async function publishAsset(img, settings, remotePath, provider = 'gitlab', options = {}) {
+  if (provider === 'github') {
+    return publishAssetToGitHub(img, settings, remotePath, options)
+  }
+  return publishAssetToGitLab(img, settings, remotePath, options)
 }

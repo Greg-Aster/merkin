@@ -176,6 +176,14 @@ export default function HomeScreen({ navigation }) {
       color: colors.link,
       onPress: () => navigation.navigate('RepoBrowser'),
     },
+    {
+      id: 'banner',
+      title: 'Edit Banner Config',
+      body: 'Change banner settings, swap hero images, and update travel banner slots directly in the repo.',
+      icon: 'image-outline',
+      color: '#b55d34',
+      onPress: () => navigation.navigate('BannerEditor'),
+    },
   ]
 
   function renderHeader() {
