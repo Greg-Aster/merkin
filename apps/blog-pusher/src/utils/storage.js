@@ -1,4 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import {
+  getDefaultContentPaths,
+  normalizeSiteContentPaths,
+} from './contentTargets'
 
 const KEYS = {
   SETTINGS: 'settings',
@@ -22,10 +26,30 @@ const DEFAULT_SETTINGS = {
     },
   },
   sites: [
-    { id: 'temporal', name: 'Temporal Flow', path: 'Temporal-Flow/src/content/posts' },
-    { id: 'dndiy', name: 'DNDIY', path: 'DNDIY.github.io/src/content/posts' },
-    { id: 'travel', name: 'Trail Log', path: 'apps/travel/src/content/posts' },
-    { id: 'megameal', name: 'MEGAMEAL', path: 'apps/megameal/src/content/posts' },
+    {
+      id: 'temporal',
+      name: 'Temporal Flow',
+      path: 'Temporal-Flow/src/content/posts',
+      contentPaths: getDefaultContentPaths('temporal'),
+    },
+    {
+      id: 'dndiy',
+      name: 'DNDIY',
+      path: 'DNDIY.github.io/src/content/posts',
+      contentPaths: getDefaultContentPaths('dndiy'),
+    },
+    {
+      id: 'travel',
+      name: 'Trail Log',
+      path: 'apps/travel/src/content/posts',
+      contentPaths: getDefaultContentPaths('travel'),
+    },
+    {
+      id: 'megameal',
+      name: 'MEGAMEAL',
+      path: 'apps/megameal/src/content/posts',
+      contentPaths: getDefaultContentPaths('megameal'),
+    },
   ],
 }
 
@@ -49,11 +73,17 @@ function normalizeSites(savedSites) {
     const normalizedPath = savedPath && savedPath !== legacyPath
       ? savedPath
       : defaultSite.path
+    const contentPaths = normalizeSiteContentPaths({
+      ...defaultSite,
+      ...savedSite,
+      path: normalizedPath,
+    })
 
     return {
       ...defaultSite,
       ...savedSite,
       path: normalizedPath,
+      contentPaths,
     }
   })
 

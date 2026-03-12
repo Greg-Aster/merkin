@@ -12,6 +12,7 @@ import * as DocumentPicker from 'expo-document-picker'
 import * as ImagePicker from 'expo-image-picker'
 import * as FileSystem from 'expo-file-system/legacy'
 import { Ionicons } from '@expo/vector-icons'
+import { CONTENT_TYPES, getContentTypeMeta } from '../utils/contentTargets'
 import { useAppTheme } from '../utils/theme'
 import { SITE_THEMES } from '../utils/siteThemes'
 
@@ -40,6 +41,7 @@ export default function AddPostScreen({ navigation, route }) {
   const [mdFile, setMdFile] = useState(null)
   const [images, setImages] = useState([])
   const [siteId, setSiteId] = useState('temporal')
+  const [contentType, setContentType] = useState('posts')
   const [sharedText, setSharedText] = useState('')
 
   useEffect(() => {
@@ -160,11 +162,13 @@ export default function AddPostScreen({ navigation, route }) {
       raw: content,
       filename: mdFile.name,
       siteId,
+      contentType,
       images: imageList,
     })
   }
 
   const activeSite = SITES.find(s => s.id === siteId)
+  const activeContentType = getContentTypeMeta(contentType)
 
   return (
     <View style={styles.container}>
@@ -175,7 +179,7 @@ export default function AddPostScreen({ navigation, route }) {
         >
           <Ionicons name="arrow-back" size={24} color={colors.headerText} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add Post to Queue</Text>
+        <Text style={styles.headerTitle}>Add Content to Queue</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -242,7 +246,28 @@ export default function AddPostScreen({ navigation, route }) {
 
         {/* Step 3: Choose site */}
         <View style={styles.section}>
-          <Text style={styles.stepLabel}>Step 3 — Target Site</Text>
+          <Text style={styles.stepLabel}>Step 3 — Content Type</Text>
+          <View style={styles.siteRow}>
+            {CONTENT_TYPES.map(type => (
+              <TouchableOpacity
+                key={type.id}
+                style={[
+                  styles.siteChip,
+                  contentType === type.id && { backgroundColor: colors.accent, borderColor: colors.accent },
+                ]}
+                onPress={() => setContentType(type.id)}
+              >
+                <Text style={[styles.siteChipText, contentType === type.id && { color: '#fff' }]}>
+                  {type.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <Text style={styles.hint}>{activeContentType.description}</Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.stepLabel}>Step 4 — Target Site</Text>
           <View style={styles.siteRow}>
             {SITES.map(site => (
               <TouchableOpacity
@@ -261,7 +286,7 @@ export default function AddPostScreen({ navigation, route }) {
           </View>
           <View style={[styles.sitePreview, { borderColor: activeSite?.color || colors.border }]}>
             <Text style={[styles.sitePreviewEyebrow, { color: activeSite?.color || colors.accent }]}>
-              {activeSite?.label}
+              {activeSite?.label} · {activeContentType.shortLabel}
             </Text>
             <Text style={styles.sitePreviewTitle}>{activeSite?.title}</Text>
             <Text style={styles.sitePreviewSubtitle}>{activeSite?.subtitle}</Text>

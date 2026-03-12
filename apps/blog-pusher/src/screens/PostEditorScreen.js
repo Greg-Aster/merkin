@@ -16,6 +16,13 @@ import { MarkdownTextInput } from '@expensify/react-native-live-markdown'
 import { Ionicons } from '@expo/vector-icons'
 import Markdown from '@ronradtke/react-native-markdown-display'
 import * as ImagePicker from 'expo-image-picker'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import {
+  CONTENT_TYPES,
+  getContentRoutePath,
+  getContentTypeMeta,
+  getSiteContentPath,
+} from '../utils/contentTargets'
 import { createPostDraft, serializeDraft } from '../utils/frontmatter'
 import { saveDraft, addToQueue, updateQueueItem, loadSettings } from '../utils/storage'
 import { listRepoPosts } from '../utils/gitlab'
@@ -245,9 +252,9 @@ function getPostSlugFromPath(path = '') {
   return name.replace(/\.(md|mdx|txt)$/i, '')
 }
 
-function getPostUrlFromPath(path = '') {
+function getPostUrlFromPath(path = '', contentType) {
   const slug = getPostSlugFromPath(path)
-  return slug ? `/posts/${slug}/` : '/posts/'
+  return getContentRoutePath(contentType, slug)
 }
 
 function extractHeadingOutline(body = '') {
@@ -417,6 +424,8 @@ export default function PostEditorScreen({ navigation, route }) {
   const colors = theme.colors
   const styles = useMemo(() => createStyles(colors), [colors])
   const markdownStyles = useMemo(() => getMarkdownStyles(colors), [colors])
+  const insets = useSafeAreaInsets()
+  const scrollBottomInset = 20 + insets.bottom
 
   // Build initial draft from params
   const [draft, setDraft] = useState(() => {
@@ -428,6 +437,7 @@ export default function PostEditorScreen({ navigation, route }) {
         raw: params.queueItem.content || '',
         filename: params.queueItem.filename,
         siteId: params.queueItem.siteId,
+        contentType: params.queueItem.contentType,
         images: params.queueItem.images,
         destination: params.queueItem.destination,
         remoteFile: params.queueItem.remotePath ? {
@@ -436,6 +446,7 @@ export default function PostEditorScreen({ navigation, route }) {
           sha: params.queueItem.sourceSha,
           lastCommitId: params.queueItem.sourceLastCommitId,
           branch: params.queueItem.remoteBranch,
+          contentType: params.queueItem.contentType,
         } : null,
       })
     } else if (params.raw !== undefined) {
@@ -443,15 +454,17 @@ export default function PostEditorScreen({ navigation, route }) {
         raw: params.raw,
         filename: params.filename,
         siteId: params.siteId,
+        contentType: params.contentType,
         images: params.images,
         destination: params.destination,
         remoteFile: params.remoteFile,
       })
     } else {
-      initialDraft = createPostDraft({ raw: '', filename: 'new-post.md', siteId: 'temporal' })
+      initialDraft = createPostDraft({ raw: '', filename: 'new-post.md', siteId: 'temporal', contentType: 'posts' })
     }
     return {
       ...initialDraft,
+      contentType: initialDraft.contentType || 'posts',
       attachedImages: normalizeAttachedImages(initialDraft.attachedImages),
       history: Array.isArray(initialDraft.history) ? initialDraft.history : [],
     }
@@ -636,7 +649,7 @@ export default function PostEditorScreen({ navigation, route }) {
     const selected = text.slice(start, end)
     const slug = getPostSlugFromPath(post.path)
     const label = selected || humanizeSlug(slug) || post.name
-    const snippet = `[${label}](${getPostUrlFromPath(post.path)})`
+    const snippet = `[${label}](${getPostUrlFromPath(post.path, post.contentType || draft.contentType)})`
     insertBodySnippet(snippet, snippet.length)
     setEditorPanel('live')
   }
@@ -647,6 +660,7 @@ export default function PostEditorScreen({ navigation, route }) {
       raw: snapshot.content,
       filename: snapshot.filename || draft.filename,
       siteId: draft.repoSiteId,
+      contentType: draft.contentType,
       images: snapshot.attachedImages || draft.attachedImages,
       destination: draft.remoteProvider,
       remoteFile: draft.remotePath ? {
@@ -655,6 +669,7 @@ export default function PostEditorScreen({ navigation, route }) {
         sha: draft.sourceSha,
         lastCommitId: draft.sourceLastCommitId,
         branch: draft.remoteBranch,
+        contentType: draft.contentType,
       } : null,
     })
 
@@ -698,6 +713,10 @@ export default function PostEditorScreen({ navigation, route }) {
       }
     }
     updateDraft(changes)
+  }
+
+  function handleContentTypeChange(contentType) {
+    updateDraft({ contentType })
   }
 
   // ---- Toolbar action ----
@@ -823,7 +842,8 @@ export default function PostEditorScreen({ navigation, route }) {
       setLinkError('')
       const settings = await loadSettings()
       const siteConfig = settings?.sites?.find(site => site.id === draft.repoSiteId)
-      if (!siteConfig?.path) {
+      const contentPath = getSiteContentPath(siteConfig || {}, draft.contentType)
+      if (!contentPath) {
         if (!cancelled) {
           setRepoLinks([])
           setLinkError('This site has no configured content path in Settings.')
@@ -833,7 +853,7 @@ export default function PostEditorScreen({ navigation, route }) {
       }
 
       const provider = chooseLinkProvider(settings, draft)
-      const result = await listRepoPosts(settings, siteConfig.path, provider)
+      const result = await listRepoPosts(settings, contentPath, provider)
       if (cancelled) return
 
       if (result.ok) {
@@ -849,7 +869,7 @@ export default function PostEditorScreen({ navigation, route }) {
     return () => {
       cancelled = true
     }
-  }, [editorPanel, draft.remotePath, draft.repoSiteId, draft.remoteProvider])
+  }, [editorPanel, draft.contentType, draft.remotePath, draft.repoSiteId, draft.remoteProvider])
 
   // ---- Image picker ----
   async function handlePickImage(insertMode = 'plain') {
@@ -969,6 +989,7 @@ export default function PostEditorScreen({ navigation, route }) {
         content,
         filename: queuedDraft.filename,
         siteId: queuedDraft.repoSiteId,
+        contentType: queuedDraft.contentType,
         images: queuedDraft.attachedImages,
         destination: queuedDraft.remoteProvider || params.queueItem.destination || null,
         remoteProvider: queuedDraft.remoteProvider || null,
@@ -987,6 +1008,7 @@ export default function PostEditorScreen({ navigation, route }) {
         filename: queuedDraft.filename,
         content,
         siteId: queuedDraft.repoSiteId,
+        contentType: queuedDraft.contentType,
         images: queuedDraft.attachedImages,
         destination: queuedDraft.remoteProvider || null,
         remoteProvider: queuedDraft.remoteProvider || null,
@@ -1055,7 +1077,8 @@ export default function PostEditorScreen({ navigation, route }) {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
     >
       {/* Header */}
       <View style={styles.header}>
@@ -1097,14 +1120,17 @@ export default function PostEditorScreen({ navigation, route }) {
       {activeTab === 'meta' && (
         <ScrollView
           style={styles.tabContent}
-          contentContainerStyle={styles.tabContentInner}
+          contentContainerStyle={[styles.tabContentInner, { paddingBottom: scrollBottomInset }]}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+          automaticallyAdjustKeyboardInsets
         >
           <MetadataForm
             draft={draft}
             updateField={updateField}
             onTitleChange={handleTitleChange}
             onSiteChange={handleSiteChange}
+            onContentTypeChange={handleContentTypeChange}
             colors={colors}
             styles={styles}
           />
@@ -1176,7 +1202,7 @@ export default function PostEditorScreen({ navigation, route }) {
                 bodySelection.current = e.nativeEvent.selection
                 setEditorSelection(e.nativeEvent.selection)
               }}
-              placeholder="Write your post in Markdown..."
+              placeholder={`Write your ${getContentTypeMeta(draft.contentType).shortLabel.toLowerCase()} in Markdown...`}
               placeholderTextColor={colors.placeholder}
               multiline
               textAlignVertical="top"
@@ -1194,11 +1220,13 @@ export default function PostEditorScreen({ navigation, route }) {
           </View>
 
           {(slashTrigger || editorPanel) ? (
-            <ScrollView
-              style={styles.editorAssistantArea}
-              contentContainerStyle={styles.editorAssistantContent}
-              keyboardShouldPersistTaps="handled"
-            >
+          <ScrollView
+            style={styles.editorAssistantArea}
+            contentContainerStyle={styles.editorAssistantContent}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+            automaticallyAdjustKeyboardInsets
+          >
               {(slashTrigger || editorPanel === 'commands') ? (
                 <InsertCommandPanel
                   commands={filteredInsertCommands}
@@ -1247,6 +1275,7 @@ export default function PostEditorScreen({ navigation, route }) {
               {editorPanel === 'links' ? (
                 <InternalLinkPanel
                   posts={filteredRepoLinks}
+                  contentType={draft.contentType}
                   loading={loadingLinks}
                   error={linkError}
                   query={linkQuery}
@@ -1271,7 +1300,12 @@ export default function PostEditorScreen({ navigation, route }) {
       )}
 
       {activeTab === 'preview' && (
-        <ScrollView style={styles.tabContent} contentContainerStyle={styles.previewContainer}>
+        <ScrollView
+          style={styles.tabContent}
+          contentContainerStyle={[styles.previewContainer, { paddingBottom: scrollBottomInset }]}
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+          automaticallyAdjustKeyboardInsets
+        >
           <MarkdownPreview
             body={draft.body}
             title={draft.title}
@@ -1284,13 +1318,18 @@ export default function PostEditorScreen({ navigation, route }) {
       )}
 
       {activeTab === 'diff' && (
-        <ScrollView style={styles.tabContent} contentContainerStyle={styles.previewContainer}>
+        <ScrollView
+          style={styles.tabContent}
+          contentContainerStyle={[styles.previewContainer, { paddingBottom: scrollBottomInset }]}
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+          automaticallyAdjustKeyboardInsets
+        >
           <DiffView original={draft.rawOriginal || ''} current={serialized} />
         </ScrollView>
       )}
 
       {/* Bottom action bar */}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { paddingBottom: 12 + insets.bottom }]}>
         <TouchableOpacity
           style={[styles.queueBtn, { backgroundColor: activeSite?.color || '#2d6a4f' }]}
           onPress={handleSaveToQueue}
@@ -1309,8 +1348,10 @@ export default function PostEditorScreen({ navigation, route }) {
 // ---------------------------------------------------------------------------
 // Metadata Form
 // ---------------------------------------------------------------------------
-function MetadataForm({ draft, updateField, onTitleChange, onSiteChange, colors, styles }) {
+function MetadataForm({ draft, updateField, onTitleChange, onSiteChange, onContentTypeChange, colors, styles }) {
   const siteLocked = !!draft.remotePath
+  const contentTypeLocked = !!draft.remotePath
+  const contentTypeMeta = getContentTypeMeta(draft.contentType)
 
   return (
     <>
@@ -1354,6 +1395,36 @@ function MetadataForm({ draft, updateField, onTitleChange, onSiteChange, colors,
         ))}
       </View>
 
+      <Text style={styles.label}>Collection</Text>
+      {contentTypeLocked ? (
+        <Text style={styles.helpText}>
+          Collection is locked because this draft is linked to an existing remote file.
+        </Text>
+      ) : null}
+      <View style={styles.siteRow}>
+        {CONTENT_TYPES.map(type => (
+          <TouchableOpacity
+            key={type.id}
+            style={[
+              styles.siteChip,
+              contentTypeLocked && styles.siteChipDisabled,
+              draft.contentType === type.id && { backgroundColor: colors.accent, borderColor: colors.accent },
+            ]}
+            onPress={() => {
+              if (!contentTypeLocked) onContentTypeChange(type.id)
+            }}
+            disabled={contentTypeLocked}
+          >
+            <Text style={[styles.siteChipText, draft.contentType === type.id && { color: '#fff' }]}>
+              {type.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <Text style={styles.helpText}>
+        {contentTypeMeta.description}
+      </Text>
+
       {/* Filename with slug helper */}
       <View style={styles.labelRow}>
         <Text style={styles.label}>Filename</Text>
@@ -1370,7 +1441,7 @@ function MetadataForm({ draft, updateField, onTitleChange, onSiteChange, colors,
         style={styles.input}
         value={draft.filename || ''}
         onChangeText={v => updateField('filename', v)}
-        placeholder="my-post.md"
+        placeholder={draft.contentType === 'updates' ? 'trail-updates.md' : 'my-post.md'}
         placeholderTextColor={colors.placeholder}
         autoCapitalize="none"
         autoCorrect={false}
@@ -1382,7 +1453,7 @@ function MetadataForm({ draft, updateField, onTitleChange, onSiteChange, colors,
         style={styles.titleInput}
         value={draft.title || ''}
         onChangeText={onTitleChange}
-        placeholder="Post title"
+        placeholder={draft.contentType === 'updates' ? 'Updates title' : 'Post title'}
         placeholderTextColor={colors.placeholder}
         autoCapitalize="words"
       />
@@ -1499,7 +1570,7 @@ function ImageManager({
         <View>
           <Text style={styles.imageManagerTitle}>Photos</Text>
           <Text style={styles.imageManagerHint}>
-            Insert now, then upload with the post to this site&apos;s `public/blog-images` folder.
+            Insert now, then upload with this queued file to the site&apos;s `public/blog-images` folder.
           </Text>
         </View>
         <TouchableOpacity style={styles.imageAddBtn} onPress={onAddImage}>
@@ -1678,7 +1749,7 @@ function OutlinePanel({ headings, onSelect, styles }) {
       <View style={styles.helperPanelHeader}>
         <Text style={styles.helperPanelTitle}>Document Outline</Text>
         <Text style={styles.helperPanelHint}>
-          Jump through the post by heading.
+          Jump through the document by heading.
         </Text>
       </View>
       {headings.length > 0 ? (
@@ -1704,6 +1775,7 @@ function OutlinePanel({ headings, onSelect, styles }) {
 
 function InternalLinkPanel({
   posts,
+  contentType,
   loading,
   error,
   query,
@@ -1717,20 +1789,20 @@ function InternalLinkPanel({
       <View style={styles.helperPanelHeader}>
         <Text style={styles.helperPanelTitle}>Internal Links</Text>
         <Text style={styles.helperPanelHint}>
-          Insert a site post link as `/posts/slug/`.
+          Insert a site {getContentTypeMeta(contentType).label.toLowerCase()} link with the right route automatically.
         </Text>
       </View>
       <TextInput
         style={styles.helperSearchInput}
         value={query}
         onChangeText={onQueryChange}
-        placeholder="Search repo posts"
+        placeholder={`Search repo ${getContentTypeMeta(contentType).label.toLowerCase()}`}
         placeholderTextColor={colors.placeholder}
         autoCapitalize="none"
         autoCorrect={false}
       />
       {loading ? (
-        <Text style={styles.helperEmptyText}>Loading repo posts…</Text>
+        <Text style={styles.helperEmptyText}>Loading repo files…</Text>
       ) : error ? (
         <Text style={styles.helperErrorText}>{error}</Text>
       ) : posts.length > 0 ? (
@@ -1742,12 +1814,12 @@ function InternalLinkPanel({
               onPress={() => onInsert(post)}
             >
               <Text style={styles.linkCardTitle}>{humanizeSlug(getPostSlugFromPath(post.path)) || post.name}</Text>
-              <Text style={styles.linkCardPath} numberOfLines={1}>{getPostUrlFromPath(post.path)}</Text>
+              <Text style={styles.linkCardPath} numberOfLines={1}>{getPostUrlFromPath(post.path, post.contentType || contentType)}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
       ) : (
-        <Text style={styles.helperEmptyText}>No repo posts matched that search.</Text>
+        <Text style={styles.helperEmptyText}>No repo files matched that search.</Text>
       )}
     </View>
   )
@@ -2160,6 +2232,12 @@ const createStyles = (colors) => StyleSheet.create({
     borderRadius: 8,
   },
   rawNoticeText: { fontSize: 12, color: colors.textSoft, flex: 1 },
+  helpText: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 8,
+  },
 
   // Toolbar
   toolbar: {

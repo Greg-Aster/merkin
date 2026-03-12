@@ -9,8 +9,12 @@ import {
   ActivityIndicator,
   Image,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { getContentTypeMeta, getSiteContentPath } from '../utils/contentTargets'
 import { loadSettings, removeFromQueue, updateQueueItem } from '../utils/storage'
 import { publishFile, publishImage, getImageUploadDirectory, listRepoPosts } from '../utils/gitlab'
 import { normalizeYamlDateScalars } from '../utils/frontmatter'
@@ -57,6 +61,7 @@ export default function PushScreen({ navigation, route }) {
   const theme = useAppTheme()
   const colors = theme.colors
   const styles = useMemo(() => createStyles(colors), [colors])
+  const insets = useSafeAreaInsets()
   const { item } = route.params
   const [pushing, setPushing] = useState(false)
   const [log, setLog] = useState([])
@@ -115,12 +120,14 @@ export default function PushScreen({ navigation, route }) {
       return
     }
 
-    if (item.remotePath && !remotePathMatchesSite(item.remotePath, siteConfig.path)) {
+    const contentPath = getSiteContentPath(siteConfig, item.contentType)
+
+    if (item.remotePath && !remotePathMatchesSite(item.remotePath, contentPath)) {
       Alert.alert(
         'Site mismatch',
-        `This queued post is linked to:\n${item.remotePath}\n\nBut the selected site points to:\n${siteConfig.path}\n\nOpen the post again from the correct site instead of pushing this queue item.`
+        `This queued file is linked to:\n${item.remotePath}\n\nBut the selected collection points to:\n${contentPath}\n\nOpen the file again from the correct site and collection instead of pushing this queue item.`
       )
-      addLog(`✗ Site mismatch: ${item.remotePath} is outside ${siteConfig.path}`, false)
+      addLog(`✗ Site mismatch: ${item.remotePath} is outside ${contentPath}`, false)
       setPushing(false)
       return
     }
@@ -128,7 +135,7 @@ export default function PushScreen({ navigation, route }) {
     let allOk = true
 
     addLog(`Target branch: ${effectiveBranch}`)
-    const imageUploadDir = getImageUploadDirectory(siteConfig.path)
+    const imageUploadDir = getImageUploadDirectory(contentPath)
     if (imageUploadDir && (item.images || []).length > 0) {
       addLog(`Image target folder: ${imageUploadDir}`)
     }
@@ -155,16 +162,16 @@ export default function PushScreen({ navigation, route }) {
 
     const useRemoteIdentity = !!item.remotePath && (!item.remoteProvider || item.remoteProvider === destination)
     if (!useRemoteIdentity) {
-      const existingPosts = await listRepoPosts(settingsForPush, siteConfig.path, destination)
+      const existingPosts = await listRepoPosts(settingsForPush, contentPath, destination)
       if (existingPosts.ok) {
         const targetStem = getPathStem(item.filename)
         const conflictingPost = (existingPosts.posts || []).find(post => getPathStem(post.path) === targetStem)
         if (conflictingPost) {
           Alert.alert(
-            'Existing post found',
-            `A repo post with this slug already exists:\n${conflictingPost.path}\n\nOpen that post from Browse Repo and edit it there instead of pushing this queued item as a new file.`
+            'Existing file found',
+            `A repo ${contentType.shortLabel.toLowerCase()} with this slug already exists:\n${conflictingPost.path}\n\nOpen that file from Browse Repo and edit it there instead of pushing this queued item as a new file.`
           )
-          addLog(`✗ Existing repo post detected: ${conflictingPost.path}`, false)
+          addLog(`✗ Existing repo file detected: ${conflictingPost.path}`, false)
           setPushing(false)
           return
         }
@@ -181,7 +188,7 @@ export default function PushScreen({ navigation, route }) {
       item.filename,
       normalizedContent,
       settingsForPush,
-      siteConfig.path,
+      contentPath,
       destination,
       useRemoteIdentity ? {
         remotePath: item.remotePath,
@@ -226,17 +233,22 @@ export default function PushScreen({ navigation, route }) {
   }
 
   const site = getSiteTheme(item.siteId)
+  const contentType = getContentTypeMeta(item.contentType)
   const color = site.color
   const label = site.label
   const provider = PROVIDERS.find(p => p.id === destination) || PROVIDERS[0]
   const defaultBranch = getDefaultBranch(destination)
   const effectiveBranch = branchOverride.trim() || defaultBranch
   const imageUploadDir = settingsSnapshot ? getImageUploadDirectory(
-    settingsSnapshot.sites?.find(s => s.id === item.siteId)?.path || ''
+    getSiteContentPath(settingsSnapshot.sites?.find(s => s.id === item.siteId) || {}, item.contentType)
   ) : null
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+    >
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -244,16 +256,24 @@ export default function PushScreen({ navigation, route }) {
         >
           <Ionicons name="arrow-back" size={24} color={colors.headerText} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Push to {label}</Text>
+        <Text style={styles.headerTitle}>Push {contentType.shortLabel} to {label}</Text>
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingBottom: 40 + insets.bottom }]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        automaticallyAdjustKeyboardInsets
+      >
 
         {/* Summary card */}
         <View style={styles.card}>
           <View style={[styles.siteBadge, { backgroundColor: color }]}>
             <Text style={styles.siteBadgeText}>{label}</Text>
+          </View>
+          <View style={[styles.providerBadge, { backgroundColor: colors.surfaceAlt }]}>
+            <Text style={[styles.providerBadgeText, { color: colors.textMuted }]}>{contentType.label}</Text>
           </View>
           <View style={[styles.providerBadge, { backgroundColor: provider.color }]}>
             <Text style={styles.providerBadgeText}>{provider.label}</Text>
@@ -280,7 +300,7 @@ export default function PushScreen({ navigation, route }) {
 
         <View style={styles.card}>
           <Text style={styles.sectionLabel}>Destination</Text>
-          <Text style={styles.meta}>Choose where this queued post should be pushed.</Text>
+          <Text style={styles.meta}>Choose where this queued file should be pushed.</Text>
           <View style={styles.destinationRow}>
             {PROVIDERS.map(p => (
               <TouchableOpacity
@@ -364,7 +384,7 @@ export default function PushScreen({ navigation, route }) {
         </TouchableOpacity>
 
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   )
 }
 
