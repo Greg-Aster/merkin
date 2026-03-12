@@ -1,4 +1,5 @@
 import * as FileSystem from 'expo-file-system/legacy'
+import { inferContentTypeFromPath } from './contentTargets'
 
 function slugify(filename) {
   return filename
@@ -231,10 +232,12 @@ function getRemoteExtension(remotePath) {
 function getPublishTarget(filename, sitePath, options = {}) {
   if (options.remotePath) {
     const remotePath = String(options.remotePath).trim().replace(/^\/+|\/+$/g, '')
-    const slug = slugify(filename || remotePath.split('/').pop() || 'post')
+    const contentType = inferContentTypeFromPath(remotePath)
+    const slug = slugify(filename || remotePath.split('/').pop() || contentType.slice(0, -1) || 'entry')
     return {
       slug,
       filePath: remotePath,
+      contentType,
       updateExisting: true,
     }
   }
@@ -244,6 +247,7 @@ function getPublishTarget(filename, sitePath, options = {}) {
   if (post.error) return post
   return {
     ...post,
+    contentType: inferContentTypeFromPath(sitePath),
     updateExisting: false,
   }
 }
@@ -439,6 +443,7 @@ async function fetchGitHubTree(settings, sitePath) {
       name: entry.path.split('/').pop(),
       path: entry.path,
       sha: entry.sha || null,
+      contentType: inferContentTypeFromPath(entry.path),
     }))
     .sort((a, b) => a.name.localeCompare(b.name))
 
@@ -471,6 +476,7 @@ async function fetchGitLabTree(settings, sitePath) {
           name: entry.name || entry.path.split('/').pop(),
           path: entry.path,
           sha: entry.id || null,
+          contentType: inferContentTypeFromPath(entry.path),
         }))
     )
 
@@ -513,6 +519,7 @@ export async function fetchRepoPost(settings, provider, filePath) {
         path: res.data?.path || filePath,
         sha: res.data?.sha || null,
         branch: github.branch || 'main',
+        contentType: inferContentTypeFromPath(res.data?.path || filePath),
       },
     }
   }
@@ -531,13 +538,14 @@ export async function fetchRepoPost(settings, provider, filePath) {
   return {
     ok: true,
     raw: base64ToUtf8(res.data?.content || ''),
-    remoteFile: {
-      provider: 'gitlab',
-      path: res.data?.file_path || filePath,
-      sha: res.data?.blob_id || null,
-      lastCommitId: res.data?.last_commit_id || null,
-      branch: gitlab.branch || 'main',
-    },
+      remoteFile: {
+        provider: 'gitlab',
+        path: res.data?.file_path || filePath,
+        sha: res.data?.blob_id || null,
+        lastCommitId: res.data?.last_commit_id || null,
+        branch: gitlab.branch || 'main',
+        contentType: inferContentTypeFromPath(res.data?.file_path || filePath),
+      },
   }
 }
 

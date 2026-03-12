@@ -6,6 +6,7 @@
  */
 
 import { parse as parseYaml } from 'yaml'
+import { inferContentTypeFromPath } from './contentTargets'
 
 const FRONTMATTER_RE = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/
 const YAML_DATE_KEYS = new Set(['published', 'updated', 'date', 'pubDatetime', 'modDatetime'])
@@ -47,11 +48,13 @@ export function serializeMarkdown(frontmatter, body, keyOrder) {
 /**
  * Build a PostDraft from raw Markdown + metadata.
  */
-export function createPostDraft({ raw, filename, siteId, images, remoteFile, destination }) {
+export function createPostDraft({ raw, filename, siteId, images, remoteFile, destination, contentType }) {
   const { frontmatter, body } = parseMarkdown(raw)
+  const resolvedContentType = contentType || remoteFile?.contentType || inferContentTypeFromPath(remoteFile?.path || '')
   return {
     id: Date.now().toString(),
     repoSiteId: siteId || 'temporal',
+    contentType: resolvedContentType || 'posts',
     filename: filename || 'untitled.md',
     title: frontmatter.title || '',
     description: frontmatter.description || '',

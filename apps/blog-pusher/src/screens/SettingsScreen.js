@@ -9,9 +9,13 @@ import {
   Alert,
   Linking,
   Clipboard,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { loadSettings, saveSettings } from '../utils/storage'
+import { CONTENT_TYPES, getContentTypeMeta, getSiteContentPath } from '../utils/contentTargets'
 import { THEME_PREFERENCES, useAppTheme, useThemePreference } from '../utils/theme'
 
 export default function SettingsScreen({ navigation }) {
@@ -19,6 +23,7 @@ export default function SettingsScreen({ navigation }) {
   const theme = useAppTheme()
   const colors = theme.colors
   const styles = useMemo(() => createStyles(colors), [colors])
+  const insets = useSafeAreaInsets()
   const [settings, setSettings] = useState(null)
   const [tokenVisible, setTokenVisible] = useState({
     gitlab: false,
@@ -31,10 +36,21 @@ export default function SettingsScreen({ navigation }) {
     loadSettings().then(setSettings)
   }, [])
 
-  function updateSitePath(id, value) {
+  function updateSiteContentPath(id, contentType, value) {
     setSettings(prev => ({
       ...prev,
-      sites: prev.sites.map(s => (s.id === id ? { ...s, path: value } : s)),
+      sites: prev.sites.map(s => {
+        if (s.id !== id) return s
+        const contentPaths = {
+          ...(s.contentPaths || {}),
+          [contentType]: value,
+        }
+        return {
+          ...s,
+          path: contentType === 'posts' ? value : (contentPaths.posts || s.path),
+          contentPaths,
+        }
+      }),
     }))
   }
 
@@ -156,7 +172,11 @@ export default function SettingsScreen({ navigation }) {
   const github = settings.providers?.github || {}
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+    >
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -168,7 +188,12 @@ export default function SettingsScreen({ navigation }) {
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingBottom: 40 + insets.bottom }]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        automaticallyAdjustKeyboardInsets
+      >
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Appearance</Text>
           <Text style={styles.hint}>
@@ -343,21 +368,30 @@ export default function SettingsScreen({ navigation }) {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Site Content Paths</Text>
           <Text style={styles.hint}>
-            The folder inside your repo where posts are stored for each site.
+            Configure both collections for each site so Blog Pusher can target posts or update journals.
           </Text>
 
           {settings.sites.map(site => (
             <View key={site.id}>
               <Text style={styles.label}>{site.name}</Text>
-              <TextInput
-                style={styles.input}
-                value={site.path}
-                onChangeText={v => updateSitePath(site.id, v)}
-                placeholder="path/to/content/posts"
-                placeholderTextColor={colors.placeholder}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
+              {CONTENT_TYPES.map(contentType => {
+                const meta = getContentTypeMeta(contentType.id)
+                const value = getSiteContentPath(site, contentType.id)
+                return (
+                  <View key={`${site.id}-${contentType.id}`}>
+                    <Text style={styles.subLabel}>{meta.label}</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={value}
+                      onChangeText={v => updateSiteContentPath(site.id, contentType.id, v)}
+                      placeholder={`path/to/content/${contentType.id}`}
+                      placeholderTextColor={colors.placeholder}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                  </View>
+                )
+              })}
             </View>
           ))}
         </View>
@@ -377,7 +411,7 @@ export default function SettingsScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   )
 }
 
@@ -426,6 +460,15 @@ const createStyles = (colors) => StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 6,
     marginTop: 12,
+  },
+  subLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.textSoft,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginBottom: 6,
+    marginTop: 10,
   },
   hint: {
     fontSize: 13,

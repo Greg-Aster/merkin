@@ -12,6 +12,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
 import { deleteDraft, getDraftIdentity, loadDrafts, loadQueue, removeFromQueue } from '../utils/storage'
+import { getContentTypeMeta } from '../utils/contentTargets'
 import { alpha, useAppTheme } from '../utils/theme'
 import { getSiteTheme } from '../utils/siteThemes'
 
@@ -87,6 +88,7 @@ export default function HomeScreen({ navigation }) {
     const label = site.label
     const imageCount = item.images?.length || 0
     const providerLabel = PROVIDER_LABELS[item.remoteProvider || item.destination] || 'Choose on push'
+    const contentType = getContentTypeMeta(item.contentType)
     return (
       <TouchableOpacity
         style={styles.card}
@@ -95,8 +97,13 @@ export default function HomeScreen({ navigation }) {
         activeOpacity={0.7}
       >
         <View style={styles.cardHeader}>
-          <View style={[styles.siteBadge, { backgroundColor: color }]}>
-            <Text style={styles.siteBadgeText}>{label}</Text>
+          <View style={styles.badgeRow}>
+            <View style={[styles.siteBadge, { backgroundColor: color }]}>
+              <Text style={styles.siteBadgeText}>{label}</Text>
+            </View>
+            <View style={styles.contentBadge}>
+              <Text style={styles.contentBadgeText}>{contentType.shortLabel}</Text>
+            </View>
           </View>
           <View style={styles.cardActions}>
             {imageCount > 0 && (
@@ -143,8 +150,8 @@ export default function HomeScreen({ navigation }) {
   const actionCards = [
     {
       id: 'create',
-      title: 'Create New Post',
-      body: 'Start a blank Markdown draft on your phone and queue it for push.',
+      title: 'Create New Draft',
+      body: 'Start a blank post or update draft on your phone and queue it for push.',
       icon: 'create-outline',
       color: colors.accent,
       onPress: () => navigation.navigate('PostEditor', {
@@ -164,7 +171,7 @@ export default function HomeScreen({ navigation }) {
     {
       id: 'browse',
       title: 'Browse Repository',
-      body: 'Open an existing remote post from GitHub or GitLab and edit it in place.',
+      body: 'Open an existing remote post or update file from GitHub or GitLab and edit it in place.',
       icon: 'folder-open-outline',
       color: colors.link,
       onPress: () => navigation.navigate('RepoBrowser'),
@@ -176,9 +183,9 @@ export default function HomeScreen({ navigation }) {
       <View>
         <View style={styles.hero}>
           <Text style={styles.heroEyebrow}>Mobile Publishing</Text>
-          <Text style={styles.heroTitle}>Create, edit, browse, and push blog posts from your phone.</Text>
+          <Text style={styles.heroTitle}>Create, edit, browse, and push posts or updates from your phone.</Text>
           <Text style={styles.heroBody}>
-            Local drafts and remote repository posts now share the same editor and push queue.
+            Local drafts and remote repository content now share the same editor and push queue.
           </Text>
         </View>
 
@@ -217,6 +224,7 @@ export default function HomeScreen({ navigation }) {
                 const color = site.color
                 const label = site.label || draft.repoSiteId || 'Draft'
                 const title = draft.title || draft.filename || 'Untitled draft'
+                const contentType = getContentTypeMeta(draft.contentType)
                 const draftType = getDraftIdentity(draft)
                   ? 'Repo draft saved on device'
                   : 'Local draft saved on device'
@@ -230,8 +238,13 @@ export default function HomeScreen({ navigation }) {
                     onLongPress={() => handleRemoveDraft(draft.id, title)}
                   >
                     <View style={styles.draftCardHeader}>
-                      <View style={[styles.siteBadge, { backgroundColor: color }]}>
-                        <Text style={styles.siteBadgeText}>{label}</Text>
+                      <View style={styles.badgeRow}>
+                        <View style={[styles.siteBadge, { backgroundColor: color }]}>
+                          <Text style={styles.siteBadgeText}>{label}</Text>
+                        </View>
+                        <View style={styles.contentBadge}>
+                          <Text style={styles.contentBadgeText}>{contentType.shortLabel}</Text>
+                        </View>
                       </View>
                       <TouchableOpacity
                         onPress={() => handleRemoveDraft(draft.id, title)}
@@ -303,7 +316,7 @@ export default function HomeScreen({ navigation }) {
               <Ionicons name="cloud-upload-outline" size={64} color={colors.textSoft} />
               <Text style={styles.emptyTitle}>Queue is empty</Text>
               <Text style={styles.emptyText}>
-                Create a post, import one, or browse your repo to start editing.
+                Create content, import a file, or browse your repo to start editing.
               </Text>
             </View>
           }
@@ -318,7 +331,7 @@ export default function HomeScreen({ navigation }) {
           contentContainerStyle={styles.list}
           ListFooterComponent={
             <Text style={styles.queueFooter}>
-              {queue.length} post{queue.length !== 1 ? 's' : ''} ready to edit or push
+              {queue.length} item{queue.length !== 1 ? 's' : ''} ready to edit or push
             </Text>
           }
         />
@@ -385,6 +398,7 @@ const createStyles = (colors) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
     marginBottom: 10,
   },
   draftTitle: {
@@ -456,9 +470,25 @@ const createStyles = (colors) => StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
+  badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   cardActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   siteBadge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
   siteBadgeText: { color: '#fff', fontSize: 11, fontWeight: '600' },
+  contentBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  contentBadgeText: {
+    color: colors.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
   imageBadge: {
     flexDirection: 'row',
     alignItems: 'center',

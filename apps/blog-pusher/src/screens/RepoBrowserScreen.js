@@ -8,9 +8,13 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { CONTENT_TYPES, getContentTypeMeta, getSiteContentPath } from '../utils/contentTargets'
 import { findMatchingDraft, loadDrafts, loadSettings } from '../utils/storage'
 import { listRepoPosts, fetchRepoPost } from '../utils/gitlab'
 import { useAppTheme } from '../utils/theme'
@@ -40,9 +44,11 @@ export default function RepoBrowserScreen({ navigation }) {
   const theme = useAppTheme()
   const colors = theme.colors
   const styles = useMemo(() => createStyles(colors), [colors])
+  const insets = useSafeAreaInsets()
   const [settings, setSettings] = useState(null)
   const [provider, setProvider] = useState('gitlab')
   const [siteId, setSiteId] = useState('temporal')
+  const [contentType, setContentType] = useState('posts')
   const [posts, setPosts] = useState([])
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
@@ -80,7 +86,7 @@ export default function RepoBrowserScreen({ navigation }) {
     setPosts([])
     setError('')
     setQuery('')
-  }, [provider, siteId])
+  }, [provider, siteId, contentType])
 
   async function handleLoadPosts() {
     if (!settings || !currentSite) return
@@ -97,11 +103,12 @@ export default function RepoBrowserScreen({ navigation }) {
     setLoading(true)
     setError('')
     setPosts([])
-    const result = await listRepoPosts(settings, currentSite.path, provider)
+    const contentPath = getSiteContentPath(currentSite, contentType)
+    const result = await listRepoPosts(settings, contentPath, provider)
     if (result.ok) {
       setPosts(result.posts || [])
       if (!result.posts?.length) {
-        setError('No Markdown posts found in that site path.')
+        setError(`No Markdown ${getContentTypeMeta(contentType).label.toLowerCase()} files found in that collection path.`)
       }
     } else {
       setError(result.error || 'Could not load repository posts.')
@@ -132,6 +139,7 @@ export default function RepoBrowserScreen({ navigation }) {
         raw: result.raw,
         filename: post.name,
         siteId: currentSite.id,
+        contentType: post.contentType || contentType,
         destination: provider,
         remoteFile: result.remoteFile,
       })
@@ -179,7 +187,11 @@ export default function RepoBrowserScreen({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+    >
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -198,7 +210,7 @@ export default function RepoBrowserScreen({ navigation }) {
 
       <View style={styles.hero}>
         <Text style={[styles.heroEyebrow, { color: currentSiteTheme.color }]}>
-          {currentSiteTheme.label}
+          {currentSiteTheme.label} · {getContentTypeMeta(contentType).label}
         </Text>
         <Text style={styles.heroTitle}>{currentSiteTheme.title}</Text>
         <Text style={styles.heroBody}>
@@ -265,6 +277,35 @@ export default function RepoBrowserScreen({ navigation }) {
               })}
             </View>
 
+            <Text style={styles.sectionLabel}>Collection</Text>
+            <View style={styles.chipRow}>
+              {CONTENT_TYPES.map(type => (
+                <TouchableOpacity
+                  key={type.id}
+                  style={[
+                    styles.providerChip,
+                    contentType === type.id && {
+                      backgroundColor: currentSiteTheme.color,
+                      borderColor: currentSiteTheme.color,
+                    },
+                  ]}
+                  onPress={() => setContentType(type.id)}
+                >
+                  <Text
+                    style={[
+                      styles.providerChipText,
+                      contentType === type.id && { color: '#fff' },
+                    ]}
+                  >
+                    {type.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Text style={styles.siteCardPath}>
+              {getSiteContentPath(currentSite || {}, contentType)}
+            </Text>
+
             <TouchableOpacity
               style={[
                 styles.loadBtn,
@@ -296,12 +337,18 @@ export default function RepoBrowserScreen({ navigation }) {
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
             {filteredPosts.length > 0 ? (
               <Text style={styles.resultsLabel}>
-                {filteredPosts.length} {currentSiteTheme.label} post{filteredPosts.length !== 1 ? 's' : ''} available
+                {filteredPosts.length} {currentSiteTheme.label} {getContentTypeMeta(contentType).label.toLowerCase()} file{filteredPosts.length !== 1 ? 's' : ''} available
               </Text>
             ) : null}
           </View>
         }
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: 32 + insets.bottom },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        automaticallyAdjustKeyboardInsets
         ListEmptyComponent={
           loading ? null : (
             <View style={styles.empty}>
@@ -314,7 +361,7 @@ export default function RepoBrowserScreen({ navigation }) {
           )
         }
       />
-    </View>
+    </KeyboardAvoidingView>
   )
 }
 
