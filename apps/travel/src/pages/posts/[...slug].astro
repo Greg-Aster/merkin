@@ -16,7 +16,7 @@ import { profileConfig, siteConfig } from '../../config/config'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
 
 export async function getStaticPaths() {
-  const posts = await getCollection('posts') // Include all posts, including drafts
+  const posts = await getCollection('posts', ({ data }) => data.draft !== true)
   const sortedPosts = [...posts].sort(
     (a, b) =>
       new Date(b.data.published).getTime() - new Date(a.data.published).getTime(),
@@ -63,20 +63,8 @@ const jsonLd = {
   // TODO include cover image here
 }
 
-// Allow frontmatter overrides, otherwise use auto-generated neighbor links.
-const previousArticle = post.data.nextSlug
-  ? {
-      slug: post.data.nextSlug,
-      title: post.data.nextTitle || previousPost?.title || 'Previous Article',
-    }
-  : previousPost
-
-const nextArticle = post.data.prevSlug
-  ? {
-      slug: post.data.prevSlug,
-      title: post.data.prevTitle || nextPost?.title || 'Next Article',
-    }
-  : nextPost
+const previousArticle = previousPost
+const nextArticle = nextPost
 
 const showPostFooterNav = siteConfig.enablePostFooterNav === true
 const isDownloadable = post.data.downloadable === true

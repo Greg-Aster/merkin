@@ -1,0 +1,36 @@
+node_modules
+.expo
+dist
+dist-export
+web-build
+.linked-worktrees
+android/.gradle
+android/build
+android/app/build
+ios/build
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+
+# Monorepo pruning: keep the workspace metadata and this app, skip other large siblings.
+../../node_modules
+../../Archive
+../../android
+../../MEGAMEAL
+../../Temporal-Flow
+../../DNDIY.github.io
+../../apps/travel
+../../apps/megameal
+../../apps/megameal-landing
+../../apps/native-shell
+../../packages
+
+# Common large generated output in sibling projects.
+../../**/dist
+../../**/dist-export
+../../**/web-build
+../../**/.expo
+../../**/node_modules
+../../**/.next
+../../**/coverage
