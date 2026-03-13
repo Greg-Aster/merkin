@@ -1,7 +1,6 @@
 <script>
 import { onMount } from 'svelte'
 import { slide } from 'svelte/transition'
-import LoginForm from './LoginForm.svelte'
 
 // Props
 export const siteTitle = 'Blog'
@@ -9,7 +8,6 @@ export const siteTitle = 'Blog'
 // State
 let isAuthenticatedState = false
 let showAdminDropdown = false
-let loginFormRef
 const AUTH_KEY = 'isAuthenticated'
 const AUTH_EXP_KEY = 'authExpiresAt'
 
@@ -33,14 +31,8 @@ function hasValidAuth() {
   return true
 }
 
-// Handle button click
 function handleButtonClick(event) {
-  if (!isAuthenticatedState) {
-    // When not logged in, show login form
-    event.preventDefault()
-    loginFormRef.toggle()
-  } else {
-    // When logged in, toggle dropdown
+  if (isAuthenticatedState) {
     event.preventDefault()
     toggleAdminDropdown()
   }
@@ -169,8 +161,6 @@ function handleClickOutside(event) {
 {/if}
 </div>
 
-<!-- Login Form Component -->
-<LoginForm bind:this={loginFormRef} on:login={handleLogin} on:setup={handleSetup} />
 </div>
 
 <style>
