@@ -45,12 +45,12 @@ Location: Somewhere south of Oakland
 Section: Transit
 Mileage: 0 trail miles
 
-A rough night of sleep on the train. Watching the scenery go by. California in early spring is green and tropical. I may have overdressed.
+A rough night of sleep on the train. Watching the scenery go by California in early spring is green and tropical. I may have overdressed.
 
-## 2026-03-12 | Zero day
-Status: waiting for the trains to run
+## 2026-03-13 | Zero day
+Status: Waiting for the trains to run
 Location: San Diego Train Depot
 Section: Transit
 Mileage: 0 trail miles
 
-36 hours later Amtrak drops me off downtown San Diego 2 am. Train station building is closed. Transit Doesnt start running till 4:30 so I'm stuck waiting in a very dubious neighborhood with a few leftover passengers from the same train.
+36 hours later Amtrak drops me off downtown San Diego 2 am. Train station building is closed. Transit Doesnt start running till 4:30 so I'm stuck waiting in a very dubious neighborhood with a few leftover passengers from the same train. I am cold. I may have underdressed. 
