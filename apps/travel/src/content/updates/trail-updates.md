@@ -1,6 +1,5 @@
 ---
 title: Trail Updates
-# statusTitle: Current Trail Status
 journalTitle: Trail Journal
 maxEntries: 5
 current:
@@ -10,8 +9,7 @@ current:
   mileage: "0 trail miles"
   section: Planning
   nextStop: Pack the Pack
-  note: >
-    Quick trail notes, logistics, and day-by-day field entries live here.
+  note: "Quick trail notes, logistics, and day-by-day field entries live here.\n"
 ---
 
 ## 2026-03-06 | Preparations
@@ -48,3 +46,11 @@ Section: Transit
 Mileage: 0 trail miles
 
 A rough night of sleep on the train. Watching the scenery go by. California in early spring is green and tropical. I may have overdressed.
+
+## 2026-03-12 | Zero day
+Status: waiting for the trains to run
+Location: San Diego Train Depot
+Section: Transit
+Mileage: 0 trail miles
+
+36 hours later Amtrak drops me off downtown San Diego 2 am. Train station building is closed. Transit Doesnt start running till 4:30 so I'm stuck waiting in a very dubious neighborhood with a few leftover passengers from the same train.
