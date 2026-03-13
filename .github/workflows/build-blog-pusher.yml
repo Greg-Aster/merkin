@@ -60,6 +60,11 @@ jobs:
           mkdir -p /tmp/blog-pusher-build
           rsync -a apps/blog-pusher/ /tmp/blog-pusher-build/
           cd /tmp/blog-pusher-build
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Prepare isolated blog-pusher build"
           pnpm install --lockfile-only --ignore-scripts
 
       - name: Trigger EAS Android build
