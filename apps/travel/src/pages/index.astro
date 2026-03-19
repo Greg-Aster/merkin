@@ -1,0 +1,238 @@
+---
+const posts = [
+  {
+    title: 'PCT Food Strategy: Front-Loading Calories to Skip Expensive Towns',
+    description: 'How I\'m front-loading a week of calories to skip overpriced early stops and push straight through to Julian on the PCT.',
+    date: '2026-02-27',
+  },
+  {
+    title: 'PCT Gear List: Readiness Check',
+    description: 'A full breakdown of my Pacific Crest Trail gear, base weight, and readiness audit before starting.',
+    date: '2026-02-24',
+  },
+  {
+    title: 'PCT Selecting Your Feet & Putting Shoes On Them',
+    description: 'A field-tested guide to foot care, blister prevention, tendon injuries, and shoe selection for PCT thru-hikers.',
+    date: '2026-02-28',
+  },
+  {
+    title: 'Lower Body Injury Field Guide — Knees, Ankles, and Shins',
+    description: 'A practical reference for identifying and treating the most common knee, ankle, and shin injuries on the PCT.',
+    date: '2026-03-01',
+  },
+  {
+    title: 'Your Pack Weight Is Fine. Probably.',
+    description: 'Not everyone needs to go ultralight. Shaving pounds for the sake of it can actually be harmful.',
+    date: '2026-03-03',
+  },
+  {
+    title: 'Foraging the Early Southern California PCT: Edible Plants in Desert-Edge Terrain',
+    description: 'A practical guide to edible plants in the early Southern California PCT, with identification tips, seasonal timing, preparation, nutrition, and look-alike cautions.',
+    date: '2026-03-05',
+  },
+  {
+    title: 'Foraging the Mountain Transition: Edible Plants from Julian to San Jacinto',
+    description: 'A practical guide to edible plants in the mountain-transition zone north of Julian, with spring timing honesty, preparation, nutrition, and safety notes for PCT hikers.',
+    date: '2026-03-06',
+  },
+]
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Greg Aster Trail Log — Archived</title>
+    <meta name="description" content="Greg Aster's PCT Trail Log has been archived. Posts are preserved below." />
+    <meta name="robots" content="noindex, nofollow" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --bg: #0f1117;
+        --surface: #1a1d27;
+        --border: #2a2d3d;
+        --text: #e2e8f0;
+        --muted: #8892a4;
+        --accent: #6d9f71;
+        --accent-dim: #3d5e40;
+        --tag: #2a3a2b;
+        --tag-text: #7fb882;
+        font-family: 'Georgia', 'Times New Roman', serif;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        padding: 2rem 1rem;
+      }
+
+      .container {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+
+      header {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: monospace;
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--accent);
+        background: var(--tag);
+        border: 1px solid var(--accent-dim);
+        border-radius: 4px;
+        padding: 0.25rem 0.65rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .eyebrow::before {
+        content: '⬡';
+        font-size: 0.65rem;
+      }
+
+      h1 {
+        font-size: clamp(1.6rem, 4vw, 2.4rem);
+        font-weight: normal;
+        line-height: 1.2;
+        color: var(--text);
+        margin-bottom: 0.75rem;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 1.25rem;
+      }
+
+      .archive-notice {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        border-radius: 6px;
+        padding: 1rem 1.25rem;
+        font-size: 0.9rem;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .archive-notice strong {
+        color: var(--text);
+      }
+
+      .section-label {
+        font-family: monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 1rem;
+      }
+
+      .post-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .post-item {
+        background: var(--surface);
+        padding: 1.1rem 1.25rem;
+        transition: background 0.15s;
+      }
+
+      .post-item:hover {
+        background: #1e2233;
+      }
+
+      .post-title {
+        font-size: 0.95rem;
+        color: var(--text);
+        line-height: 1.4;
+        margin-bottom: 0.35rem;
+      }
+
+      .post-desc {
+        font-size: 0.82rem;
+        color: var(--muted);
+        line-height: 1.5;
+        margin-bottom: 0.4rem;
+      }
+
+      .post-date {
+        font-family: monospace;
+        font-size: 0.72rem;
+        color: var(--accent-dim);
+        letter-spacing: 0.05em;
+      }
+
+      footer {
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.8rem;
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      footer a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="eyebrow">Archived</div>
+        <h1>Greg Aster Trail Log</h1>
+        <p class="subtitle">Pacific Crest Trail field notes, gear breakdowns, and trail lessons.<br />This site is no longer actively maintained.</p>
+        <div class="archive-notice">
+          <strong>This site has been archived.</strong> The posts below are preserved for reference. No new content will be published here.
+          For active projects, visit <a href="https://dndiy.org" style="color: #6d9f71;">dndiy.org</a>.
+        </div>
+      </header>
+
+      <main>
+        <p class="section-label">Archived posts ({posts.length})</p>
+        <div class="post-list">
+          {posts.map((post) => (
+            <div class="post-item">
+              <div class="post-title">{post.title}</div>
+              <div class="post-desc">{post.description}</div>
+              <div class="post-date">{post.date}</div>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      <footer>
+        <span>PCT Class of 2026 · Greg Aster · trail.dndiy.org</span>
+        <a href="https://dndiy.org">← dndiy.org</a>
+      </footer>
+    </div>
+  </body>
+</html>
