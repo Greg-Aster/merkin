@@ -63,9 +63,9 @@ jobs:
           git init
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          pnpm install --ignore-scripts
           git add .
           git commit -m "Prepare isolated blog-pusher build"
+          pnpm install --lockfile-only --ignore-scripts
 
       - name: Trigger EAS Android build
         id: eas_build
