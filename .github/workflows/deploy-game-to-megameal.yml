@@ -1,0 +1,56 @@
+name: Deploy Game to Greg-Aster/megameal
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/game/**"
+      - "MEGAMEAL/public/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/deploy-game-to-megameal.yml"
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9.14.4"
+
+jobs:
+  deploy:
+    name: Build and deploy game
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build game
+        env:
+          SITE_URL: https://game.megameal.org
+          SITE_BASE: /
+        run: pnpm build:game
+
+      - name: Deploy to Greg-Aster/megameal gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          # PAT with `repo` scope for Greg-Aster/megameal
+          # Add as secret MEGAMEAL_DEPLOY_TOKEN in Greg-Aster/merkin repo settings
+          personal_token: ${{ secrets.MEGAMEAL_DEPLOY_TOKEN }}
+          external_repository: Greg-Aster/megameal
+          publish_branch: gh-pages
+          publish_dir: ./apps/game/dist
+          # Orphan keeps gh-pages history clean (avoids accumulating large binary blobs)
+          force_orphan: true

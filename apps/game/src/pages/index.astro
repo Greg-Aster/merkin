@@ -1,0 +1,33 @@
+---
+import GameLayout from '../layouts/GameLayout.astro'
+import ThreltGame from '../threlte/Game.svelte'
+import { getTimelineEvents } from '../services/TimelineService'
+
+const timelineEvents = await getTimelineEvents({ includeBanners: true })
+
+const starmapEventsJson = JSON.stringify(
+  timelineEvents.map(e => ({
+    slug: e.slug,
+    title: e.title,
+    year: e.year,
+    description: e.description || 'No description available.',
+    era: e.era,
+    isKeyEvent: e.isKeyEvent || false,
+    isLevel: e.isLevel || false,
+    levelId: e.levelId || null,
+    tags: e.tags || [],
+    category: e.category || 'general',
+    timelineYear: e.year,
+    timelineEra: e.era,
+    timelineLocation: e.location || 'Unknown',
+    uniqueId: e.slug,
+  })),
+)
+---
+
+<GameLayout
+  title="Star Observatory — MegaMeal Navigator"
+  description="Explore the cosmic timeline in the Star Observatory. Navigate through space and time to uncover the secrets of the MegaMeal universe."
+>
+  <ThreltGame client:only="svelte" timelineEvents={starmapEventsJson} />
+</GameLayout>

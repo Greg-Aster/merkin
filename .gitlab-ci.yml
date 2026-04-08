@@ -172,6 +172,52 @@ deploy-megameal:
       when: manual
       allow_failure: true
 
+# Game -> game.megameal.org
+preview-game:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="$CI_COMMIT_REF_SLUG" pnpm deploy:game
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE != "web"'
+      when: manual
+      allow_failure: true
+      changes:
+        - apps/game/**/*
+        - packages/**/*
+        - pnpm-lock.yaml
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "game")'
+      when: manual
+      allow_failure: true
+
+promote-game:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:game
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main"'
+      when: manual
+      changes:
+        - apps/game/**/*
+        - packages/**/*
+        - pnpm-lock.yaml
+        - .gitlab-ci.yml
+
+deploy-game:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:game
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - apps/game/**/*
+        - packages/**/*
+        - pnpm-lock.yaml
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "game")'
+      when: manual
+      allow_failure: true
+
 # Travel -> travel.dndiy.org
 preview-travel:
   stage: deploy

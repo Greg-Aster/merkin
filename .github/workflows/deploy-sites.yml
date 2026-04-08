@@ -17,6 +17,7 @@ on:
           - temporal
           - dndiy
           - megameal
+          - game
 
 permissions:
   contents: read
@@ -37,6 +38,7 @@ jobs:
       temporal: ${{ steps.filter.outputs.temporal }}
       dndiy: ${{ steps.filter.outputs.dndiy }}
       megameal: ${{ steps.filter.outputs.megameal }}
+      game: ${{ steps.filter.outputs.game }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -76,6 +78,13 @@ jobs:
             megameal:
               - "apps/megameal/**"
               - "packages/blog-core/**"
+              - "package.json"
+              - "pnpm-lock.yaml"
+              - "pnpm-workspace.yaml"
+              - ".github/workflows/deploy-sites.yml"
+            game:
+              - "apps/game/**"
+              - "MEGAMEAL/public/**"
               - "package.json"
               - "pnpm-lock.yaml"
               - "pnpm-workspace.yaml"
@@ -216,3 +225,37 @@ jobs:
           SITE_URL: https://megameal.org
           SITE_BASE: /
         run: pnpm deploy:megameal
+
+  deploy-game:
+    name: Deploy Game
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: >
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.site == 'all' || github.event.inputs.site == 'game')) ||
+      (github.event_name != 'workflow_dispatch' && needs.detect-changes.outputs.game == 'true')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and deploy Game
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DEPLOY_BRANCH: main
+          SITE_URL: https://game.megameal.org
+          SITE_BASE: /
+        run: pnpm deploy:game
