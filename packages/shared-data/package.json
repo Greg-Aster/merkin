@@ -9,7 +9,7 @@
     "./generated/*": "./generated/*.json"
   },
   "scripts": {
-    "build": "node --experimental-strip-types ./src/build/write-generated.ts",
+    "build": "tsx ./src/build/write-generated.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.3.0",
+    "tsx": "^4.20.6",
     "typescript": "^5.7.3"
   }
 }
