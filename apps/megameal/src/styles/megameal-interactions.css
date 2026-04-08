@@ -6,6 +6,39 @@
  */
 
 /* ============================================================
+   BANNER SLIDES — pointer-events fix
+   Invisible slides (opacity:0) must not intercept clicks.
+   JS also sets pointer-events per slide, but this is the CSS fallback
+   to ensure correct state before JS runs.
+   ============================================================ */
+
+#standard-banner-container .banner-slide[style*="opacity: 0"] {
+  pointer-events: none;
+}
+#standard-banner-container .banner-slide[style*="opacity: 1"] {
+  pointer-events: auto;
+}
+
+/* ============================================================
+   HTML BANNER SLIDE — suppress generic hover UI
+   The html-type slide (data-banner-media-type="unknown") has its own
+   CTAs and design. Hide blog-core's generic dark overlay and info icon
+   which appear on hover and obscure the custom content.
+   ============================================================ */
+
+/* Hide the black hover overlay (first child) and info icon (second child)
+   that blog-core adds to all .banner-link elements */
+.banner-slide[data-banner-media-type="unknown"] .banner-link > div:nth-child(1),
+.banner-slide[data-banner-media-type="unknown"] .banner-link > div:nth-child(2) {
+  display: none !important;
+}
+
+/* Normal cursor — the slide itself isn't a link; the CTAs inside it are */
+.banner-slide[data-banner-media-type="unknown"] .banner-link {
+  cursor: default;
+}
+
+/* ============================================================
    PROFILE WIDGET — hide on home page with smooth transition
    (data-is-home is set on #main-panel-wrapper by blog-core)
    ============================================================ */
@@ -28,9 +61,15 @@
 
 /* ============================================================
    CARD-BASE — global hover glow + lift for all cards on megameal
-   card-base uses transition-all duration-300 from blog-core,
-   so box-shadow and transform animate automatically.
+   Explicit transition overrides transition-all from blog-core for
+   smoother, non-glitchy hover — only animates what we need.
    ============================================================ */
+
+.card-base {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.3s ease !important;
+  will-change: transform;
+}
 
 .card-base:hover {
   transform: translateY(-3px);

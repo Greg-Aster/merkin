@@ -800,11 +800,12 @@ const gridLayoutClasses = [
                 const isImageItem = bannerConfig.standardBannerConfig.isImageBannerItem(item);
                 
                 return (
-                  <div 
+                  <div
                     class="banner-slide absolute inset-0 w-full h-full transition-opacity"
                     style={`
                       transition-duration: ${bannerConfig.standardBannerConfig.animation.transitionDuration}ms;
                       opacity: ${index === 0 ? '1' : '0'};
+                      pointer-events: ${index === 0 ? '' : 'none'};
                     `}
                     data-banner-index={index}
                   >
@@ -2277,7 +2278,9 @@ const gridLayoutClasses = [
 
       slides.forEach((slide, index) => {
         const slideElement = slide;
-        slideElement.style.opacity = index === nextIndex ? '1' : '0';
+        const isActive = index === nextIndex;
+        slideElement.style.opacity = isActive ? '1' : '0';
+        slideElement.style.pointerEvents = isActive ? '' : 'none';
       });
 
       applyMotionToSlide(nextIndex);
@@ -2325,7 +2328,9 @@ const gridLayoutClasses = [
         const href = linkElement.dataset.href;
         if (!hasLink || !href) return;
 
-        linkElement.addEventListener('click', () => {
+        linkElement.addEventListener('click', (e) => {
+          // Don't override clicks on <a> links inside the slide (e.g., CTA buttons in html-type slides)
+          if (e.target.closest('a[href]')) return;
           window.location.href = href;
         }, { signal });
 

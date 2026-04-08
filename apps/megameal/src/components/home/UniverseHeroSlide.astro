@@ -8,6 +8,7 @@
 <div class="hero-slide-inner">
   <div class="hero-bg-layer" aria-hidden="true">
     <div class="hero-stars"></div>
+    <div class="hero-stars-twinkle"></div>
     <div class="hero-nebula"></div>
     <div class="hero-vignette"></div>
   </div>
@@ -94,7 +95,8 @@
 
   .hero-stars {
     position: absolute;
-    inset: 0;
+    /* Oversized so slow drift animation never shows a bare edge */
+    inset: -15%;
     background:
       radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8) 0%, transparent 100%),
       radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.6) 0%, transparent 100%),
@@ -113,6 +115,50 @@
       radial-gradient(1px 1px at 80% 25%, rgba(255,255,255,0.5) 0%, transparent 100%),
       radial-gradient(1px 1px at 35% 45%, rgba(255,220,200,0.6) 0%, transparent 100%),
       black;
+    animation: starsDrift 100s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  @keyframes starsDrift {
+    0%   { transform: translate(0, 0) scale(1); }
+    33%  { transform: translate(-3%, 1.5%) scale(1.04); }
+    66%  { transform: translate(2%, -2%) scale(1.02); }
+    100% { transform: translate(-4%, 2%) scale(1.06); }
+  }
+
+  /* A second sparser layer of brighter stars that twinkle independently */
+  .hero-stars-twinkle {
+    position: absolute;
+    inset: -10%;
+    background:
+      radial-gradient(2px 2px at 17% 33%, rgba(255,255,255,1) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 43% 78%, rgba(200,220,255,1) 0%, transparent 100%),
+      radial-gradient(2px 2px at 67% 12%, rgba(255,255,255,0.95) 0%, transparent 100%),
+      radial-gradient(2px 2px at 88% 55%, rgba(255,240,200,1) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 32% 91%, rgba(200,255,220,0.95) 0%, transparent 100%),
+      radial-gradient(1px 1px at 54% 44%, rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(2px 2px at 78% 28%, rgba(255,200,255,0.9) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 11% 68%, rgba(255,255,255,0.85) 0%, transparent 100%),
+      radial-gradient(1px 1px at 62% 59%, rgba(200,230,255,0.9) 0%, transparent 100%),
+      radial-gradient(2px 2px at 93% 82%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 25% 14%, rgba(255,220,180,0.9) 0%, transparent 100%),
+      transparent;
+    animation: starsTwinkle 9s ease-in-out infinite,
+               starsTwinkleDrift 140s ease-in-out infinite alternate;
+    will-change: opacity, transform;
+  }
+
+  @keyframes starsTwinkle {
+    0%, 100% { opacity: 0.35; }
+    18%      { opacity: 0.9; }
+    42%      { opacity: 0.5; }
+    65%      { opacity: 0.85; }
+    82%      { opacity: 0.25; }
+  }
+
+  @keyframes starsTwinkleDrift {
+    0%   { transform: translate(0, 0); }
+    100% { transform: translate(5%, -3%); }
   }
 
   .hero-nebula {

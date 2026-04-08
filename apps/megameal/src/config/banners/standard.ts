@@ -278,18 +278,30 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
  * Animation settings for mixed content banner cycling
  * Videos will auto-play once but cycling continues on timer
  */
-export const animationConfig: BannerAnimationConfig = {
-  enabled: true, // Set to false to disable banner cycling
-  interval: 4000, // 5 seconds between transitions (shorter for videos)
-  transitionDuration: 1000, // 1 second fade transition
-  direction: 'forward', // 'forward', 'reverse', or 'alternate'
+export const animationConfig: BannerAnimationConfig & { motion?: any } = {
+  enabled: true,
+  interval: 9000, // 9 seconds between transitions — enough time to read/watch
+  transitionDuration: 1500, // 1.5 second crossfade for cinematic feel
+  direction: 'forward',
   randomStart: false, // MEGAMEAL uses sequential order (story content)
 
-  // NEW: Navigation-specific animation settings
-  pauseOnHover: true, // Pause on desktop hover
-  pauseOnMobileTouch: true, // Pause on mobile touch
-  resumeAfterNavigation: true, // Auto-resume after manual navigation
-  smoothTransitions: true, // Use smooth crossfade transitions
+  // Navigation-specific animation settings
+  pauseOnHover: true,
+  pauseOnMobileTouch: true,
+  resumeAfterNavigation: true,
+  smoothTransitions: true,
+
+  // Ken Burns motion — slow pan/zoom applied to video and image slides while displaying
+  // Does NOT affect the html intro slide (only applies to .banner-image/.banner-video elements)
+  motion: {
+    enabled: true,
+    effect: 'auto', // cycles through zoom-in, zoom-out, pan-left, pan-right, etc.
+    duration: 8000, // motion lasts slightly less than interval
+    scale: 1.07, // gentle zoom (1.07 = 7% scale)
+    panDistance: 4, // pan distance in percent
+    alternate: true, // alternate direction each slide
+    easing: 'ease-in-out',
+  },
 }
 
 // =====================================================================
@@ -319,17 +331,18 @@ export const iconSVGs: Record<string, string> = {
 /**
  * Get animation settings for banner cycling
  */
-export function getBannerAnimationSettings(): BannerAnimationConfig {
+export function getBannerAnimationSettings(): BannerAnimationConfig & { motion?: any } {
   return {
     enabled: animationConfig.enabled,
     interval: animationConfig.interval,
     transitionDuration: animationConfig.transitionDuration,
     direction: animationConfig.direction,
-    // Include all properties from the local animationConfig
     pauseOnHover: animationConfig.pauseOnHover,
     pauseOnMobileTouch: animationConfig.pauseOnMobileTouch,
     resumeAfterNavigation: animationConfig.resumeAfterNavigation,
     smoothTransitions: animationConfig.smoothTransitions,
+    // Pass motion config so blog-core's Ken Burns system activates for video/image slides
+    motion: animationConfig.motion,
   }
 }
 
