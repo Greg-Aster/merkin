@@ -1,8 +1,7 @@
 
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Chart, registerables } from 'chart.js';
-  import { fade, fly, scale } from 'svelte/transition';
+  import { fly, scale } from 'svelte/transition';
   import { cubicOut, elasticOut } from 'svelte/easing';
 
   // Props for the new graph-based quiz structure
@@ -17,14 +16,22 @@
   let userTraits: string[] = [];
   let finalOutcome: { title: string; description: string; emoji?: string } | null = null;
   let traitCounts: Record<string, number> = {};
-  let chartCanvas: HTMLCanvasElement;
-  let chart: Chart | null = null;
   let questionNumber: number = 1;
   let showThinking: boolean = false;
+  const traitPalette = [
+    'linear-gradient(135deg, rgba(255, 99, 132, 0.9), rgba(255, 159, 64, 0.82))',
+    'linear-gradient(135deg, rgba(54, 162, 235, 0.9), rgba(75, 192, 192, 0.82))',
+    'linear-gradient(135deg, rgba(255, 206, 86, 0.9), rgba(255, 159, 64, 0.82))',
+    'linear-gradient(135deg, rgba(153, 102, 255, 0.9), rgba(201, 90, 255, 0.82))',
+    'linear-gradient(135deg, rgba(75, 192, 192, 0.9), rgba(88, 226, 166, 0.82))',
+    'linear-gradient(135deg, rgba(255, 159, 64, 0.9), rgba(255, 99, 132, 0.82))'
+  ];
 
   // Computed values for progress bar and question node
   $: currentNode = nodes[currentNodeId] || null;
   $: progressPercentage = Math.min((questionNumber / 12) * 100, 100);
+  $: traitEntries = Object.entries(traitCounts).sort(([, left], [, right]) => right - left);
+  $: maxTraitCount = traitEntries[0]?.[1] ?? 1;
   
   // Safety check function (non-reactive)
   function validateCurrentNode() {
@@ -80,49 +87,11 @@
       return acc;
     }, {} as Record<string, number>);
     finalOutcome = outcomes[finalOutcomeKey] || outcomes['OUTCOME_DEFAULT'];
-    setTimeout(createChart, 0);
   }
 
-  function createChart() {
-    if (chart) chart.destroy();
-    if (!chartCanvas || Object.keys(traitCounts).length === 0) return;
-
-    // Color palette for the chart bars
-    const colorPalette = [
-      'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)',
-      'rgba(255, 206, 86, 0.7)', 'rgba(75, 192, 192, 0.7)',
-      'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)'
-    ];
-
-    Chart.register(...registerables);
-    chart = new Chart(chartCanvas, {
-      type: 'bar',
-      data: {
-        labels: Object.keys(traitCounts),
-        datasets: [{
-          label: 'Your Traits',
-          data: Object.values(traitCounts),
-          backgroundColor: colorPalette, // Use the colorful palette
-          borderColor: colorPalette.map(c => c.replace('0.7', '1')), // Make borders solid
-          borderWidth: 1
-        }]
-      },
-      options: {
-        indexAxis: 'y', // Horizontal bar chart
-        plugins: {
-          legend: { display: false },
-          title: { display: true, text: 'Trait Analysis', color: 'white', font: { size: 16 } }
-        },
-        scales: {
-          y: { ticks: { color: 'white' }, grid: { display: false } },
-          x: {
-            beginAtZero: true,
-            ticks: { color: 'white', stepSize: 1 },
-            grid: { color: 'rgba(255, 255, 255, 0.2)' }
-          }
-        }
-      }
-    });
+  function getTraitBarStyle(index: number, value: number) {
+    const width = Math.max((value / maxTraitCount) * 100, 14);
+    return `width: ${width}%; background: ${traitPalette[index % traitPalette.length]};`;
   }
 
   function handleRestart() {
@@ -134,7 +103,6 @@
     traitCounts = {};
     questionNumber = 1;
     showThinking = false;
-    if (chart) chart.destroy();
     validateCurrentNode();
   }
   
@@ -172,6 +140,7 @@
           <div class="flex flex-col gap-3 my-8">
             {#each currentNode.options as option, i}
               <button
+                type="button"
                 class="card-base2 text-75 btn-quiz-option cosmic-option"
                 class:selected={selectedAnswerIndex === i}
                 on:click={() => handleAnswerSelect(i)}
@@ -185,11 +154,12 @@
       {/key}
     {:else}
       <div class="text-center text-red-400">
-        Error: Question not found. <button class="btn-primary" on:click={handleRestart}>Restart Quiz</button>
+        Error: Question not found. <button type="button" class="btn-primary" on:click={handleRestart}>Restart Quiz</button>
       </div>
     {/if}
 
     <button 
+      type="button"
       class="btn-primary w-full mt-6 cosmic-submit" 
       class:pulsing={selectedAnswerIndex !== null}
       on:click={handleNext} 
@@ -222,15 +192,30 @@
         {finalOutcome.title}
       </h2>
       
-      <!-- Colorful Chart -->
-      {#if Object.keys(traitCounts).length > 0}
-        <div class="my-6 max-w-md mx-auto">
-          <canvas bind:this={chartCanvas}></canvas>
+      {#if traitEntries.length > 0}
+        <div class="trait-summary my-6 max-w-md mx-auto">
+          <div class="trait-summary-title">Trait Analysis</div>
+          <div class="trait-summary-list">
+            {#each traitEntries as [trait, value], index}
+              <div class="trait-row">
+                <div class="trait-row-label">
+                  <span class="trait-name">{trait}</span>
+                  <span class="trait-value">{value}</span>
+                </div>
+                <div class="trait-track">
+                  <div
+                    class="trait-bar"
+                    style={getTraitBarStyle(index, value)}
+                  ></div>
+                </div>
+              </div>
+            {/each}
+          </div>
         </div>
       {/if}
 
       <p class="text-lg text-75 mb-6 whitespace-pre-line">{finalOutcome.description}</p>
-      <button class="btn-primary" on:click={handleRestart}>
+      <button type="button" class="btn-primary" on:click={handleRestart}>
         Retake Diagnostic
       </button>
     </div>
@@ -380,6 +365,55 @@
     @apply text-4xl;
     color: var(--primary);
     animation: thinking-dot 1.4s infinite both;
+  }
+
+  .trait-summary {
+    @apply rounded-2xl border border-white/10 p-5 text-left;
+    background: linear-gradient(180deg, rgba(12, 14, 20, 0.72), rgba(20, 24, 34, 0.52));
+    box-shadow:
+      0 18px 42px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+  }
+
+  .trait-summary-title {
+    @apply mb-4 text-sm font-bold uppercase tracking-[0.22em];
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .trait-summary-list {
+    @apply flex flex-col gap-3;
+  }
+
+  .trait-row {
+    @apply flex flex-col gap-2;
+  }
+
+  .trait-row-label {
+    @apply flex items-center justify-between gap-3 text-sm;
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .trait-name {
+    @apply uppercase tracking-[0.12em];
+  }
+
+  .trait-value {
+    @apply rounded-full px-2 py-0.5 text-xs font-bold;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .trait-track {
+    @apply h-3 overflow-hidden rounded-full;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+  }
+
+  .trait-bar {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+    min-width: 2.5rem;
+    box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.2);
   }
 
   .thinking-dots span:nth-child(2) {

@@ -24,6 +24,9 @@ interface Props {
     authorBio?: string
     authorLink?: string
   }
+  homeLayout?: 'default' | 'portal'
+  showMascot?: boolean
+  showAssistantWidget?: boolean
 }
 ---
 
@@ -31,7 +34,10 @@ interface Props {
   <slot slot="head" name="head" />
   <slot />
   <!-- MEGAMEAL-specific: Bleepy AI assistant mascot -->
-  <Bleepy slot="mascot" mascotContext={Astro.props.pageMascotContext} instanceIdentifier="LAYOUT_BLEEPY" />
+  {Astro.props.showMascot && (
+    <Bleepy slot="mascot" mascotContext={Astro.props.pageMascotContext} instanceIdentifier="LAYOUT_BLEEPY" />
+  )}
+  <slot slot="overlay" name="overlay" />
   <!-- MEGAMEAL-specific: Universe intro as first banner slide -->
   <UniverseHeroSlide slot="banner-slide-content" />
 </SharedMainGridLayout>

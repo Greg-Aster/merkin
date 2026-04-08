@@ -38,6 +38,85 @@
   cursor: default;
 }
 
+/* Deliberate banner transitions: slow scale, soft blur, depth shift */
+#standard-banner-container .banner-slide {
+  transition-property: opacity, transform, filter;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  transform: scale(1.035) translate3d(0, 0.75rem, 0);
+  filter: saturate(0.82) brightness(0.78) blur(10px);
+  will-change: opacity, transform, filter;
+}
+
+#standard-banner-container .banner-slide[data-active="true"] {
+  transform: scale(1) translate3d(0, 0, 0);
+  filter: saturate(1) brightness(1) blur(0);
+  z-index: 2;
+}
+
+#standard-banner-container .banner-slide[data-active="false"] {
+  z-index: 1;
+}
+
+/* Keep slide information visible so the banner reads as navigation, not decoration */
+#standard-banner-container .banner-title-display {
+  opacity: 1;
+  transform: translateY(0);
+  max-width: min(32rem, calc(100% - 2.5rem));
+  background:
+    linear-gradient(180deg, rgba(8, 14, 24, 0.58), rgba(8, 14, 24, 0.34));
+  backdrop-filter: blur(14px) saturate(1.15);
+  border: 1px solid oklch(0.62 0.11 var(--hue) / 0.28);
+  box-shadow:
+    0 18px 36px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+#standard-banner-container .banner-title-kicker {
+  margin-bottom: 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: oklch(0.78 0.12 var(--hue));
+}
+
+#standard-banner-container .banner-title-display h3 {
+  font-size: clamp(1.1rem, 2vw, 1.45rem);
+  line-height: 1.1;
+}
+
+#standard-banner-container .banner-title-display p {
+  max-width: 34rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* The custom HTML slide already has its own foreground. Keep the caption lighter there. */
+.banner-slide[data-banner-media-type="unknown"] .banner-title-display {
+  background: linear-gradient(180deg, rgba(8, 14, 24, 0.38), rgba(8, 14, 24, 0.18));
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+@media (max-width: 768px) {
+  #standard-banner-container .banner-slide {
+    transform: scale(1.02) translate3d(0, 0.35rem, 0);
+    filter: saturate(0.88) brightness(0.82) blur(6px);
+  }
+
+  #standard-banner-container .banner-title-display {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    max-width: none;
+    padding: 0.8rem 1rem;
+  }
+
+  #standard-banner-container .banner-title-display p {
+    font-size: 0.8rem;
+  }
+}
+
 /* ============================================================
    PROFILE WIDGET — hide on home page with smooth transition
    (data-is-home is set on #main-panel-wrapper by blog-core)
@@ -60,14 +139,15 @@
 }
 
 /* ============================================================
-   CARD-BASE — global hover glow + lift for all cards on megameal
-   Explicit transition overrides transition-all from blog-core for
-   smoother, non-glitchy hover — only animates what we need.
+   CARD-BASE — shared Megameal surfaces
+   Reusable glass/glow system for cards and floating widgets.
    ============================================================ */
 
 .card-base {
   transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              box-shadow 0.3s ease !important;
+              box-shadow 0.3s ease,
+              border-color 0.3s ease,
+              background 0.3s ease !important;
   will-change: transform;
 }
 
@@ -77,6 +157,75 @@
     0 0 0 1px oklch(0.55 0.2 var(--hue) / 0.45),
     0 0 22px oklch(0.55 0.2 var(--hue) / 0.14),
     0 10px 32px rgba(0, 0, 0, 0.32);
+}
+
+.megameal-surface {
+  --megameal-surface-border: oklch(0.36 0.05 var(--hue) / 0.34);
+  --megameal-surface-hover-border: oklch(0.58 0.12 var(--hue) / 0.46);
+  --megameal-surface-bg:
+    radial-gradient(circle at top left, oklch(0.52 0.11 var(--hue) / 0.12), transparent 30%),
+    linear-gradient(180deg, oklch(0.16 0.03 var(--hue) / 0.72), oklch(0.13 0.03 var(--hue) / 0.62));
+  --megameal-surface-filter: blur(18px) saturate(1.1);
+  --megameal-surface-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --megameal-surface-hover-shadow:
+    0 0 0 1px oklch(0.58 0.12 var(--hue) / 0.24),
+    0 22px 44px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --megameal-surface-sheen:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.06), transparent 34%),
+    linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.03));
+  position: relative;
+  isolation: isolate;
+  border: 1px solid var(--megameal-surface-border);
+  background: var(--megameal-surface-bg);
+  backdrop-filter: var(--megameal-surface-filter);
+  box-shadow: var(--megameal-surface-shadow);
+}
+
+.megameal-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--megameal-surface-sheen);
+  opacity: 0.8;
+}
+
+.megameal-surface > * {
+  position: relative;
+  z-index: 1;
+}
+
+.megameal-surface--interactive {
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.32s ease,
+    border-color 0.32s ease,
+    background 0.32s ease !important;
+}
+
+.megameal-surface--interactive:hover {
+  transform: translateY(-4px);
+  border-color: var(--megameal-surface-hover-border);
+  box-shadow: var(--megameal-surface-hover-shadow);
+}
+
+.timeline-card.card-base,
+.timeline-card.card-base:hover {
+  transform: none !important;
+}
+
+.timeline-card.card-base {
+  backdrop-filter: blur(10px) saturate(1.12);
+  transition: opacity 0.35s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+
+.timeline-card.card-base:hover {
+  box-shadow:
+    0 0 0 1px oklch(0.62 0.16 var(--hue) / 0.42),
+    0 14px 32px rgba(0, 0, 0, 0.25);
 }
 
 /* Prevent double-transform on elements that have their own hover transform */

@@ -4,6 +4,8 @@ import PostPage from '../components/PostPage.astro'
 import Pagination from '../components/control/Pagination.astro'
 import FeaturedArc from '../components/home/FeaturedArc.astro'
 import EraBrowser from '../components/home/EraBrowser.astro'
+import PortalDestinations from '../components/home/PortalDestinations.astro'
+import FactsWidget from '../components/widget/FactsWidget.astro'
 import { PAGE_SIZE } from '../constants/constants'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
 import { getSortedPosts } from '../utils/content-utils'
@@ -19,15 +21,18 @@ const isFirstPage = page.currentPage === 1
 const len = page.data.length
 ---
 
-<MainGridLayout>
+<MainGridLayout homeLayout="portal">
   {isFirstPage && (
     <>
-      <div class="appear-on-scroll featured-arc-section">
+      <div class="appear-on-scroll">
+        <PortalDestinations />
+      </div>
+      <div class="appear-on-scroll delay-2 featured-arc-section">
         <FeaturedArc />
       </div>
-      <div class="dispatches-header appear-on-scroll delay-1">
-        <span class="dispatches-label">Latest Dispatches</span>
-        <span class="dispatches-sub">Recent transmissions from across the timeline</span>
+      <div class="dispatches-header appear-on-scroll delay-3">
+        <span class="dispatches-label">Recent Dispatches</span>
+        <span class="dispatches-sub">New chapters, reports, recipes, and transmissions from the archive</span>
       </div>
     </>
   )}
@@ -37,6 +42,17 @@ const len = page.data.length
     page={page}
     style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
   ></Pagination>
+  {isFirstPage && (
+    <FactsWidget
+      slot="overlay"
+      variant="overlay"
+      dismissible={true}
+      storageKey="megameal-home-sponsored-overlay-dismissed"
+      kicker="Sponsored"
+      title="Sponsored"
+      footerText="Floating promotions are a service, not an intrusion."
+    />
+  )}
   {isFirstPage && (
     <div class="era-browser-wrapper appear-on-scroll">
       <EraBrowser />

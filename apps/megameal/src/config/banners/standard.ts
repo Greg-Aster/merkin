@@ -144,65 +144,45 @@ export const bannerList: BannerItem[] = [
     alt: 'MegaMeal Cookbook',
     preload: 'none', // Don't preload video until needed
   },
-  /*
   {
-    type: 'video',
-    src: '/videos/reviews.webm',  // Place this file in /public/videos/
-    fallbackImage: banner4Fallback,      // Fallback image for unsupported browsers
-    alt: 'Reviews and testimonials',
-    preload: 'none'  // Don't preload video until needed
-  }, */
-
-  // Image items - existing images
-
-  /*   {
     type: 'image',
-    src: banner4,
-    alt: 'Banner image 4'
+    src: banner4Fallback,
+    alt: 'Story archive and commercial dispatches',
   },
   {
     type: 'image',
     src: banner5,
-    alt: 'Banner image 5'
+    alt: 'Enter the Star Observatory game',
   },
   {
     type: 'image',
     src: banner6,
-    alt: 'Banner image 6'
+    alt: 'Browse the store and artifacts',
   },
   {
     type: 'image',
     src: banner7,
-    alt: 'Banner image 7'
+    alt: 'Join the community channels',
   },
   {
     type: 'image',
     src: banner8,
-    alt: 'Banner image 8' 
-  } */
-
-  // Example of adding more videos:
-  // {
-  //   type: 'video',
-  //   src: '/videos/banner-animation-2.webm',
-  //   fallbackImage: anotherFallbackImage,
-  //   alt: 'Second animated banner',
-  //   preload: 'none'  // Override default preload for this video
-  // }
+    alt: 'Read the story mode dispatches',
+  },
 ]
 
 /* IMPORTANT: This array should have the same length as bannerList
  */
 export const bannerLinks: (string | null)[] = [
   '/posts/explainer/', // intro html slide
-  '', // titleb.webm (no link — plays as cinematic intro)
+  '/posts/mega-meal-explained/', // titleb.webm
   '/posts/explainer/', // deep-time3.webm
   '/posts/cookbook/cookbook-index/', // cookbook.webm
-  '', // Link for banner4 (0003.png)
-  null, // No link for banner4 (0004.png)
-  '/contact', // Link for banner5 (0005.png)
-  '/blog', // Link for banner6 (0006.png)
-  '', // No link for banner7 (0007.png)
+  '/archive/', // archive / dispatches
+  '/game/', // star observatory
+  '/store/', // storefront
+  '/community/', // community
+  '/posts/introducing-story-mode/', // story mode
 ]
 
 /**
@@ -240,16 +220,46 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
       'Explore the hyper-capitalist dystopian future of MEGAMEAL, a science fiction food parody series where cosmic horror and culinary culture collide across multiple media formats and timelines.',
     icon: 'book-open',
   },
-  '/cookbook/': {
+  '/posts/mega-meal-explained/': {
+    title: 'Welcome to MEGAMEAL',
+    description:
+      'Start with the core premise of the project, the setting, and the tone before moving into the deeper branches of the universe.',
+    icon: 'book-open',
+  },
+  '/posts/cookbook/cookbook-index/': {
     title: 'The Cookbook Project',
     description:
       'Discover our comprehensive cookbook featuring recipes, cooking techniques, and culinary tips inspired by the MEGAMEAL universe. Perfect for aspiring chefs and food enthusiasts.',
     icon: 'user-group',
   },
-  '/reviews/': {
-    title: 'Recipies, Reviews. and Testimonials - Under Construction',
+  '/archive/': {
+    title: 'Archive of Dispatches',
     description:
-      'Read reviews, testimonials, and user experiences with MEGAMEAL products and recipes. Join our community of food lovers and share your culinary journey.',
+      'Browse reports, commercials, recipes, and lore fragments across the entire publication stream.',
+    icon: 'newspaper',
+  },
+  '/game/': {
+    title: 'Star Observatory',
+    description:
+      'Launch the game experience directly from the viewscreen and move from reading into play without leaving the site flow.',
+    icon: 'rocket',
+  },
+  '/store/': {
+    title: 'Storefront and Artifacts',
+    description:
+      'Explore products, in-universe merchandise, and commercial relics extracted from the MEGAMEAL timeline.',
+    icon: 'briefcase',
+  },
+  '/community/': {
+    title: 'Community Channels',
+    description:
+      'Join the live conversation, follow updates, and find the main points of contact around the project.',
+    icon: 'user-group',
+  },
+  '/posts/introducing-story-mode/': {
+    title: 'Story Mode',
+    description:
+      'Read the saga as connected arcs and guided entry points rather than as a flat chronological feed.',
     icon: 'newspaper',
   },
   /*
@@ -280,8 +290,8 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
  */
 export const animationConfig: BannerAnimationConfig & { motion?: any } = {
   enabled: true,
-  interval: 9000, // 9 seconds between transitions — enough time to read/watch
-  transitionDuration: 1500, // 1.5 second crossfade for cinematic feel
+  interval: 12000, // Longer hold so the banner reads as navigation, not ambient decoration
+  transitionDuration: 2400, // Slower, more deliberate slide transition
   direction: 'forward',
   randomStart: false, // MEGAMEAL uses sequential order (story content)
 
@@ -296,11 +306,11 @@ export const animationConfig: BannerAnimationConfig & { motion?: any } = {
   motion: {
     enabled: true,
     effect: 'auto', // cycles through zoom-in, zoom-out, pan-left, pan-right, etc.
-    duration: 8000, // motion lasts slightly less than interval
-    scale: 1.07, // gentle zoom (1.07 = 7% scale)
-    panDistance: 4, // pan distance in percent
+    duration: 11000, // motion lasts nearly the entire visible window
+    scale: 1.1,
+    panDistance: 6,
     alternate: true, // alternate direction each slide
-    easing: 'ease-in-out',
+    easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
   },
 }
 

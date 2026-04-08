@@ -77,7 +77,7 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
 <!-- UNIFIED: Same horizontal flexbox layout for all screen sizes -->
 <div
   class:list={[
-    "card-base w-full overflow-hidden relative local-post",
+    "card-base megameal-surface megameal-surface--interactive w-full overflow-hidden relative local-post",
     "flex flex-row-reverse postcard-shell", // Images on right side for all screen sizes
     // 🎯 RESPONSIVE HEIGHTS - compact on mobile, comfortable on desktop
     "h-[10rem] sm:h-[10.5rem] md:h-[12rem] lg:h-[14rem]",
@@ -114,11 +114,11 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
       </div>
       
       <!-- Hover effects -->
-      <div class="absolute pointer-events-none z-10 w-full h-full group-hover:bg-black/30 group-active:bg-black/50 transition"></div>
-      <div class="absolute pointer-events-none z-20 w-full h-full flex items-center justify-center">
+      <div class="absolute pointer-events-none z-10 w-full h-full postcard-cover-overlay"></div>
+      <div class="absolute pointer-events-none z-20 w-full h-full flex items-center justify-center postcard-cover-chevron">
         <Icon 
           name="material-symbols:chevron-right-rounded"
-          class="transition opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-100 text-white text-5xl" />
+          class="text-white text-5xl" />
       </div>
       
       <!-- Main image -->
@@ -134,11 +134,11 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
 
   <!-- CONTENT SECTION: Fixed spacing layout with responsive padding -->
   <div class="flex flex-col flex-1">
-    <div class="postcard-mobile-meta hidden items-center gap-2 text-[0.72rem] font-medium uppercase tracking-[0.08em] text-black/45 dark:text-white/45">
+    <div class="postcard-mobile-meta hidden items-center gap-2 text-[0.72rem] font-medium uppercase tracking-[0.08em]">
       <time datetime={published.toISOString()}>{mobileMetaDate}</time>
       {category && (
         <>
-          <span class="text-black/25 dark:text-white/25">•</span>
+          <span class="postcard-meta-separator">•</span>
           <span>{category}</span>
         </>
       )}
@@ -152,8 +152,6 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
       <a href={url}
          class:list={[
            "transition group w-full block font-bold mb-2 sm:mb-3 text-90 postcard-title-link",
-           "hover:text-[var(--primary)] dark:hover:text-[var(--primary)]", 
-           "active:text-[var(--title-active)] dark:active:text-[var(--title-active)]",
            // 🎯 RESPONSIVE TITLE SIZE - scales properly on all devices
            "text-base sm:text-2xl md:text-3xl lg:text-4xl",
            // Simple hover effect for all sizes
@@ -166,7 +164,7 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
       </a>
 
       <!-- METADATA: Show on larger screens - 🎯 RESPONSIVE SIZING -->
-      <div class="postcard-desktop-meta mb-2 sm:mb-3 hidden md:flex gap-3 items-center flex-wrap text-xs md:text-sm text-black/60 dark:text-white/60">
+      <div class="postcard-desktop-meta mb-2 sm:mb-3 hidden md:flex gap-3 items-center flex-wrap text-xs md:text-sm">
         {contentFormat && FORMAT_LABELS[contentFormat] && (
           <span class="format-badge">{FORMAT_LABELS[contentFormat]}</span>
         )}
@@ -179,7 +177,7 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
         </time>
         {updated && config.content.showUpdateDate && (
           <>
-            <span class="text-black/30 dark:text-white/30">•</span>
+            <span class="postcard-meta-separator">•</span>
             <span>Updated {updated.toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'short',
@@ -189,7 +187,7 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
         )}
         {category && (
           <>
-            <span class="text-black/30 dark:text-white/30">•</span>
+            <span class="postcard-meta-separator">•</span>
             <span class="capitalize">{category}</span>
           </>
         )}
@@ -220,7 +218,7 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
 
       <!-- WORD COUNT AND READ TIME - 🎯 ALREADY RESPONSIVE -->
       {(config.content.showWordCount || config.content.showReadTime) && (
-        <div class="postcard-reading-meta text-xs md:text-sm text-black/30 dark:text-white/30 flex gap-3 transition">
+        <div class="postcard-reading-meta text-xs md:text-sm flex gap-3 transition">
           {config.content.showWordCount && (
             <div>{remarkPluginFrontmatter.words} {" " + i18n(I18nKey.wordsCount)}</div>
           )}
@@ -249,6 +247,25 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
 
 
 <style>
+  .postcard-shell {
+    --megameal-surface-border: oklch(0.36 0.05 var(--hue) / 0.34);
+    --megameal-surface-hover-border: oklch(0.58 0.12 var(--hue) / 0.46);
+    --megameal-surface-bg:
+      radial-gradient(circle at top left, oklch(0.52 0.11 var(--hue) / 0.12), transparent 30%),
+      linear-gradient(180deg, oklch(0.16 0.03 var(--hue) / 0.72), oklch(0.13 0.03 var(--hue) / 0.62));
+    --megameal-surface-filter: blur(18px) saturate(1.1);
+    --megameal-surface-shadow:
+      0 16px 34px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    --megameal-surface-hover-shadow:
+      0 0 0 1px oklch(0.58 0.12 var(--hue) / 0.24),
+      0 22px 44px rgba(0, 0, 0, 0.26),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --megameal-surface-sheen:
+      linear-gradient(120deg, rgba(255, 255, 255, 0.06), transparent 34%),
+      linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.03));
+  }
+
   .blur-background {
     z-index: 1;
   }
@@ -257,10 +274,75 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
     z-index: 5;
   }
 
+  .postcard-cover-link {
+    border: 1px solid oklch(0.42 0.06 var(--hue) / 0.35);
+    background: oklch(0.14 0.03 var(--hue) / 0.65);
+    box-shadow:
+      0 12px 26px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .postcard-cover-overlay {
+    background:
+      linear-gradient(180deg, rgba(5, 10, 18, 0.05), rgba(5, 10, 18, 0.28)),
+      radial-gradient(circle at center, transparent 20%, rgba(5, 10, 18, 0.22) 100%);
+    transition: background 0.3s ease, opacity 0.3s ease;
+  }
+
+  .postcard-cover-chevron {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .postcard-shell:hover .postcard-cover-overlay {
+    background:
+      linear-gradient(180deg, rgba(5, 10, 18, 0.08), rgba(5, 10, 18, 0.4)),
+      radial-gradient(circle at center, transparent 10%, rgba(10, 18, 28, 0.28) 100%);
+  }
+
+  .postcard-shell:hover .postcard-cover-chevron {
+    opacity: 1;
+    transform: scale(1);
+  }
+
   .postcard-image {
     object-fit: cover !important;
     width: 100% !important;
     height: 100% !important;
+  }
+
+  .postcard-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .postcard-mobile-meta,
+  .postcard-desktop-meta {
+    color: oklch(0.78 0.03 var(--hue) / 0.78);
+  }
+
+  .postcard-meta-separator,
+  .postcard-reading-meta {
+    color: oklch(0.72 0.03 var(--hue) / 0.48);
+  }
+
+  .postcard-title-link {
+    color: white;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.18);
+  }
+
+  .postcard-title-link::before {
+    background: linear-gradient(180deg, oklch(0.76 0.16 var(--hue)), oklch(0.66 0.15 var(--hue)));
+    box-shadow: 0 0 14px oklch(0.72 0.14 var(--hue) / 0.38);
+  }
+
+  .postcard-shell:hover .postcard-title-link {
+    color: oklch(0.9 0.03 var(--hue));
+  }
+
+  .postcard-description {
+    color: oklch(0.8 0.03 var(--hue) / 0.88);
   }
 
   /* Ensure line-clamp works properly with ellipsis */
@@ -284,26 +366,42 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
     display: inline-flex;
     align-items: center;
     font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    padding: 0.15rem 0.45rem;
-    border-radius: 0.25rem;
-    background: oklch(0.35 0.08 var(--hue) / 0.25);
-    color: oklch(0.65 0.12 var(--hue));
-    border: 1px solid oklch(0.4 0.08 var(--hue) / 0.3);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, oklch(0.76 0.16 var(--hue)) 18%, rgba(255, 255, 255, 0.05));
+    color: oklch(0.88 0.04 var(--hue));
+    border: 1px solid oklch(0.55 0.08 var(--hue) / 0.3);
     white-space: nowrap;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   .series-indicator {
-    font-size: 0.72rem;
-    color: oklch(0.55 0.1 var(--hue));
+    font-size: 0.74rem;
+    color: oklch(0.78 0.06 var(--hue) / 0.78);
     font-style: italic;
   }
 
   .series-name {
     font-weight: 600;
     font-style: normal;
-    color: oklch(0.65 0.15 var(--hue));
+    color: oklch(0.88 0.06 var(--hue));
+  }
+
+  @media (max-width: 640px) {
+    .postcard-shell {
+      backdrop-filter: blur(14px) saturate(1.08);
+    }
+
+    .postcard-content {
+      padding-left: 1.2rem;
+    }
+
+    .postcard-title-link::before {
+      left: -0.9rem;
+    }
   }
 
 </style>

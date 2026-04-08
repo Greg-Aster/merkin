@@ -51,6 +51,7 @@ const corsMiddleware = () => {
 
 const site = process.env.SITE_URL || 'https://megameal.org';
 const base = process.env.SITE_BASE || '/';
+const isDev = process.env.NODE_ENV !== 'production';
 
 export default defineConfig({
   site,
@@ -71,8 +72,8 @@ export default defineConfig({
         },
         offset: 96,
       },
-      cache: true,
-      preload: true,
+      cache: !isDev,
+      preload: !isDev,
       accessibility: true,
       updateHead: true,
       updateBodyClass: false,
@@ -157,6 +158,7 @@ export default defineConfig({
     },
     optimizeDeps: {
       include: ['mammoth'],
+      force: isDev,
     },
     server: {
       cors: {

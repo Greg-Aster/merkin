@@ -58,6 +58,8 @@ interface Props {
     authorBio?: string
     authorLink?: string
   }
+  homeLayout?: 'default' | 'portal'
+  showAssistantWidget?: boolean
 }
 
 // =====================================================================
@@ -77,6 +79,8 @@ const {
   backgroundImage,
   oneColumn = false, // ⭐ NEW: Accept oneColumn prop
   customAuthorData, // ⭐ NEW: Extract custom author data
+  homeLayout = 'default',
+  showAssistantWidget = false,
 } = Astro.props
 
 const rawBannerConfig = (bannerModule as any).bannerConfig ?? {}
@@ -451,6 +455,12 @@ const getBannerLink =
     ? (bannerModule as any).getBannerLink
     : (index: number) => bannerConfig.standardBannerConfig.getBannerLink(index)
 
+const getBannerItemPreviewDetails =
+  typeof (bannerModule as any).getBannerItemPreviewDetails === 'function'
+    ? (bannerModule as any).getBannerItemPreviewDetails
+    : (index: number) =>
+        bannerConfig.standardBannerConfig.getBannerItemPreviewDetails(index)
+
 const getFallbackBannerCSS =
   typeof (bannerModule as any).getFallbackBannerCSS === 'function'
     ? (bannerModule as any).getFallbackBannerCSS
@@ -492,6 +502,7 @@ if (import.meta.env.DEV) {
 const currentPath = Astro.url.pathname
 const basePath = import.meta.env.BASE_URL || '/'
 const isHomePage = pathsEqual(currentPath, basePath)
+const isPortalHome = isHomePage && homeLayout === 'portal'
 const isPostRoute = Boolean(post)
 
 // ⭐ RESTORED: Use the working banner configuration function
@@ -521,6 +532,7 @@ const shouldShowToc =
   siteConfig.toc.enable && (tocOverride ?? hasEnoughHeadingsForToc)
 
 const shouldShowFallbackRightRail =
+  !isPortalHome &&
   siteConfig.rightRail?.enable === true &&
   ((isHomePage && siteConfig.rightRail?.showOnHome !== false) ||
     (isPostRoute &&
@@ -636,9 +648,12 @@ if (post && post.data) {
 
 // Conditionally create the grid classes
 const gridLayoutClasses = [
-  "transition duration-700 w-full left-0 right-0 grid grid-cols-1 md:grid-cols-[16.5rem_auto] mx-auto gap-4 md:gap-4 px-2 md:px-4 relative",
-  shouldShowRightRail ? "2xl:grid-cols-[16.5rem_auto_var(--toc-width)]" : ""
-].join(" ");
+  'transition duration-700 w-full left-0 right-0 grid mx-auto gap-4 md:gap-4 px-2 md:px-4 relative',
+  isPortalHome ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-[16.5rem_auto]',
+  !isPortalHome && shouldShowRightRail
+    ? '2xl:grid-cols-[16.5rem_auto_var(--toc-width)]'
+    : '',
+].join(' ')
 ---
 
 <Layout 
@@ -793,22 +808,24 @@ const gridLayoutClasses = [
         <div class="banner-aspect-container">
           <div class="banner-content-wrapper">
             <div id="standard-banner-container">
-              {bannerConfig.standardBannerConfig.bannerList.length > 0 ? bannerConfig.standardBannerConfig.bannerList.map((item, index) => {
-                const bannerLink = getBannerLink(index);
-                const isClickable = bannerLink !== null;
-                const isVideoItem = bannerConfig.standardBannerConfig.isVideoBannerItem(item);
-                const isImageItem = bannerConfig.standardBannerConfig.isImageBannerItem(item);
-                
-                return (
-                  <div
-                    class="banner-slide absolute inset-0 w-full h-full transition-opacity"
-                    style={`
-                      transition-duration: ${bannerConfig.standardBannerConfig.animation.transitionDuration}ms;
-                      opacity: ${index === 0 ? '1' : '0'};
-                      pointer-events: ${index === 0 ? '' : 'none'};
-                    `}
-                    data-banner-index={index}
-                  >
+	              {bannerConfig.standardBannerConfig.bannerList.length > 0 ? bannerConfig.standardBannerConfig.bannerList.map((item, index) => {
+	                const bannerLink = getBannerLink(index);
+	                const previewDetails = getBannerItemPreviewDetails(index);
+	                const isClickable = bannerLink !== null;
+	                const isVideoItem = bannerConfig.standardBannerConfig.isVideoBannerItem(item);
+	                const isImageItem = bannerConfig.standardBannerConfig.isImageBannerItem(item);
+	                
+	                return (
+	                  <div
+	                    class="banner-slide absolute inset-0 w-full h-full transition-opacity"
+	                    style={`
+	                      transition-duration: ${bannerConfig.standardBannerConfig.animation.transitionDuration}ms;
+	                      opacity: ${index === 0 ? '1' : '0'};
+	                      pointer-events: ${index === 0 ? '' : 'none'};
+	                    `}
+	                    data-banner-index={index}
+	                    data-active={index === 0 ? 'true' : 'false'}
+	                  >
                     <div
                       class="banner-link group w-full h-full relative cursor-pointer"
                       data-has-link={isClickable}
@@ -827,10 +844,10 @@ const gridLayoutClasses = [
                         />
                       </div>
                       
-                      <div
-                        class="banner-media-layer w-full h-full overflow-hidden"
-                        data-banner-media-type={isVideoItem ? 'video' : isImageItem ? 'image' : 'unknown'}
-                      >
+	                      <div
+	                        class="banner-media-layer w-full h-full overflow-hidden"
+	                        data-banner-media-type={isVideoItem ? 'video' : isImageItem ? 'image' : 'unknown'}
+	                      >
                         {isVideoItem ? (
                           <>
                             <video
@@ -868,13 +885,22 @@ const gridLayoutClasses = [
                             loading={index === 0 ? 'eager' : 'lazy'}
                           />
                         ) : (
-                          <slot name="banner-slide-content" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              }) : (
+	                          <slot name="banner-slide-content" />
+	                        )}
+	                      </div>
+	                      {previewDetails && (
+	                        <div class="banner-title-display">
+	                          <div class="banner-title-kicker">
+	                            {previewDetails.hasValidLink ? 'Destination' : 'Viewscreen'}
+	                          </div>
+	                          <h3>{previewDetails.previewTitle}</h3>
+	                          <p>{previewDetails.previewDescription}</p>
+	                        </div>
+	                      )}
+	                    </div>
+	                  </div>
+	                );
+	              }) : (
                 <div class="w-full h-full rounded-lg" style={`background: ${getFallbackBannerCSS()};`}></div>
               )}
               {shouldShowMobilePortraitRightRailHero && (
@@ -903,7 +929,7 @@ const gridLayoutClasses = [
   <!-- ⭐ SIMPLIFIED: One column mobile, two column desktop           -->
   <!-- =============================================================== -->
   <div class={`w-full z-30 pointer-events-none relative`}>
-    <div id="main-panel-wrapper" class="responsive-panel-wrapper relative max-w-[var(--page-width)] mx-auto pointer-events-auto" data-is-home={isHomePage ? "true" : "false"}>
+    <div id="main-panel-wrapper" class="responsive-panel-wrapper relative max-w-[var(--page-width)] mx-auto pointer-events-auto" data-is-home={isHomePage ? "true" : "false"} data-home-layout={isPortalHome ? 'portal' : 'default'}>
       <div
         id="main-grid"
         class:list={[gridLayoutClasses, 'transition-swup-fade', { 'has-right-rail': shouldShowRightRail }]}
@@ -912,6 +938,7 @@ const gridLayoutClasses = [
       >
 
         <!-- Grid Item 1: SIDEBAR -->
+        {!isPortalHome && (
         <div class="hidden md:block mb-4 col-span-1 md:max-w-[17.5rem] onload-animation mobile-support-column">
           <section class="mobile-support-group mobile-support-profile-group">
             <div class="mobile-support-label">About</div>
@@ -932,7 +959,7 @@ const gridLayoutClasses = [
               </div>
             </section>
           )}
-          <SideBar class="flex-1" headings={headings} postSlug={processedAuthorData.slug} customAvatar={processedAuthorData.customAvatar} customName={processedAuthorData.customName} customBio={processedAuthorData.customBio} pageMascotContext={Astro.props.pageMascotContext} hideProfile={true}>
+          <SideBar class="flex-1" headings={headings} postSlug={processedAuthorData.slug} customAvatar={processedAuthorData.customAvatar} customName={processedAuthorData.customName} customBio={processedAuthorData.customBio} pageMascotContext={Astro.props.pageMascotContext} hideProfile={true} showAssistantWidget={showAssistantWidget}>
             {shouldMergeRightRailIntoSidebar && (
               <div
                 id="sidebar-right-rail-merge"
@@ -944,9 +971,10 @@ const gridLayoutClasses = [
                   isHomePage={isHomePage}
                 />
               </div>
-            )}
+              )}
           </SideBar>
         </div>
+        )}
 
         <!-- Grid Item 2: MAIN CONTENT -->
         <main id="main" class="col-span-1 overflow-hidden">
@@ -1028,6 +1056,7 @@ const gridLayoutClasses = [
     <div id="bleepy-page-context" style="display: none;" data-context={JSON.stringify(contextForBleepy)}></div>
   )}
   <slot name="mascot" />
+  <slot name="overlay" />
 
   <!-- =============================================================== -->
   <!-- ⭐ NEW: CLIENT-SIDE SVELTE COMPONENTS                          -->
@@ -2254,7 +2283,7 @@ const gridLayoutClasses = [
       if (!mediaLayer) return;
 
       const mediaType = mediaLayer.dataset.bannerMediaType;
-      if (mediaType !== 'image') return;
+      if (mediaType === 'unknown') return;
 
       const effect = resolveMotionEffect(slideIndex);
 
@@ -2281,6 +2310,7 @@ const gridLayoutClasses = [
         const isActive = index === nextIndex;
         slideElement.style.opacity = isActive ? '1' : '0';
         slideElement.style.pointerEvents = isActive ? '' : 'none';
+        slideElement.dataset.active = isActive ? 'true' : 'false';
       });
 
       applyMotionToSlide(nextIndex);
