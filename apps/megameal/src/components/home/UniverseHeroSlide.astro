@@ -1,17 +1,18 @@
 ---
-// UniverseHero.astro
-// Full-width cinematic entry point for the MEGAMEAL universe.
-// Gives new visitors immediate context and 3 clear entry paths.
+// UniverseHeroSlide.astro
+// Universe intro as a banner slide (rendered via banner-slide-content slot).
+// This fills the banner-slide shell created by blog-core for html-type items.
+// The banner videos cycle after this slide.
 ---
 
-<section class="universe-hero">
+<div class="hero-slide-inner">
   <div class="hero-bg-layer" aria-hidden="true">
     <div class="hero-stars"></div>
     <div class="hero-nebula"></div>
     <div class="hero-vignette"></div>
   </div>
 
-  <div class="hero-content">
+  <div class="hero-content-inner">
     <div class="hero-eyebrow">Year 3042 — The Multiverse is Open</div>
 
     <h1 class="hero-title">
@@ -25,15 +26,15 @@
     </p>
 
     <div class="hero-ctas">
-      <a href="/posts/explainer/" class="cta-primary">
+      <a href="/posts/explainer/" class="hero-cta-primary">
         <span class="cta-icon">&#9654;</span>
         Start Here
       </a>
-      <a href="/posts/timeline/" class="cta-secondary">
+      <a href="/posts/timeline/" class="hero-cta-secondary">
         <span class="cta-icon">&#9881;</span>
         Explore the Timeline
       </a>
-      <a href="/archive/" class="cta-ghost">
+      <a href="/archive/" class="hero-cta-ghost">
         Browse All Content
       </a>
     </div>
@@ -46,20 +47,42 @@
   <div class="hero-scroll-hint" aria-hidden="true">
     <span>&#8595;</span>
   </div>
-</section>
+</div>
+
+<script>
+  // 3D mousemove tilt on the hero content
+  const content = document.querySelector('.hero-content-inner') as HTMLElement | null
+  if (content) {
+    let rafId = 0
+    document.addEventListener('mousemove', (e) => {
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(() => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 8
+        const y = (e.clientY / window.innerHeight - 0.5) * 8
+        content.style.transform = `perspective(1000px) rotateX(${-y}deg) rotateY(${x}deg) translateZ(0)`
+      })
+    })
+    // Reset on mouse leave banner area
+    const bannerContainer = document.getElementById('banner-container')
+    if (bannerContainer) {
+      bannerContainer.addEventListener('mouseleave', () => {
+        content.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0)'
+      })
+    }
+  }
+</script>
 
 <style>
-  .universe-hero {
-    position: relative;
-    width: 100%;
-    min-height: 90vh;
+  /* Fills the banner-slide shell absolutely */
+  .hero-slide-inner {
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding: 4rem 1.5rem 6rem;
-    margin-bottom: 3rem;
+    padding: 4rem 1.5rem 5rem;
   }
 
   /* ---- Background layers ---- */
@@ -85,6 +108,10 @@
       radial-gradient(1px 1px at 75% 55%, rgba(200,255,200,0.6) 0%, transparent 100%),
       radial-gradient(1px 1px at 5% 50%, rgba(255,255,255,0.7) 0%, transparent 100%),
       radial-gradient(1px 1px at 95% 75%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 15% 35%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 85%, rgba(200,200,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 25%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 35% 45%, rgba(255,220,200,0.6) 0%, transparent 100%),
       black;
   }
 
@@ -96,21 +123,29 @@
       radial-gradient(ellipse 60% 40% at 80% 60%, oklch(0.2 0.1 calc(var(--hue) + 60)) 0%, transparent 70%),
       radial-gradient(ellipse 40% 60% at 50% 80%, oklch(0.15 0.08 calc(var(--hue) - 40)) 0%, transparent 60%);
     opacity: 0.7;
+    animation: nebulaPulse 8s ease-in-out infinite;
+  }
+
+  @keyframes nebulaPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 0.9; }
   }
 
   .hero-vignette {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.8) 100%);
+    background: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.85) 100%);
   }
 
   /* ---- Content ---- */
-  .hero-content {
+  .hero-content-inner {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     text-align: center;
     max-width: 860px;
     width: 100%;
+    transition: transform 0.1s ease-out;
+    will-change: transform;
   }
 
   .hero-eyebrow {
@@ -120,6 +155,7 @@
     color: oklch(0.65 0.15 var(--hue));
     margin-bottom: 1.5rem;
     opacity: 0.9;
+    animation: fadeSlideDown 0.8s ease forwards;
   }
 
   .hero-title {
@@ -133,16 +169,11 @@
     align-items: baseline;
     justify-content: center;
     gap: 0.15em;
+    animation: fadeSlideDown 0.9s ease 0.1s both;
   }
 
-  .hero-title-mega {
-    color: white;
-  }
-
-  .hero-title-meal {
-    color: oklch(0.7 0.25 var(--hue));
-  }
-
+  .hero-title-mega { color: white; }
+  .hero-title-meal { color: oklch(0.7 0.25 var(--hue)); }
   .hero-title-saga {
     font-size: clamp(1.2rem, 4vw, 3rem);
     font-weight: 400;
@@ -154,122 +185,125 @@
   }
 
   .hero-tagline {
-    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
     color: oklch(0.75 0.05 var(--hue));
     line-height: 1.6;
-    margin: 1.5rem auto 2.5rem;
-    max-width: 600px;
+    margin: 1.25rem auto 2rem;
+    max-width: 560px;
+    animation: fadeSlideDown 1s ease 0.2s both;
   }
 
   /* ---- CTAs ---- */
   .hero-ctas {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.75rem;
     justify-content: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.75rem;
+    animation: fadeSlideDown 1s ease 0.3s both;
   }
 
-  .cta-primary,
-  .cta-secondary,
-  .cta-ghost {
+  .hero-cta-primary,
+  .hero-cta-secondary,
+  .hero-cta-ghost {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem 1.75rem;
+    padding: 0.7rem 1.6rem;
     border-radius: 0.375rem;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     text-decoration: none;
     transition: all 0.2s ease;
     letter-spacing: 0.02em;
   }
 
-  .cta-primary {
+  .hero-cta-primary {
     background: oklch(0.55 0.25 var(--hue));
     color: white;
     box-shadow: 0 0 20px oklch(0.55 0.25 var(--hue) / 0.4);
   }
-
-  .cta-primary:hover {
+  .hero-cta-primary:hover {
     background: oklch(0.6 0.28 var(--hue));
-    box-shadow: 0 0 30px oklch(0.6 0.28 var(--hue) / 0.6);
-    transform: translateY(-1px);
+    box-shadow: 0 0 35px oklch(0.6 0.28 var(--hue) / 0.65);
+    transform: translateY(-2px);
   }
 
-  .cta-secondary {
+  .hero-cta-secondary {
     background: transparent;
     border: 1.5px solid oklch(0.55 0.15 var(--hue));
     color: oklch(0.75 0.15 var(--hue));
   }
-
-  .cta-secondary:hover {
-    background: oklch(0.55 0.15 var(--hue) / 0.1);
+  .hero-cta-secondary:hover {
+    background: oklch(0.55 0.15 var(--hue) / 0.12);
     border-color: oklch(0.65 0.2 var(--hue));
     color: oklch(0.85 0.2 var(--hue));
+    transform: translateY(-2px);
   }
 
-  .cta-ghost {
+  .hero-cta-ghost {
     background: transparent;
     border: 1px solid rgba(255,255,255,0.2);
     color: rgba(255,255,255,0.6);
     font-weight: 400;
-    font-size: 0.85rem;
-    padding: 0.65rem 1.5rem;
+    font-size: 0.82rem;
+    padding: 0.6rem 1.4rem;
+  }
+  .hero-cta-ghost:hover {
+    border-color: rgba(255,255,255,0.45);
+    color: rgba(255,255,255,0.92);
+    transform: translateY(-1px);
   }
 
-  .cta-ghost:hover {
-    border-color: rgba(255,255,255,0.4);
-    color: rgba(255,255,255,0.9);
-  }
-
-  .cta-icon {
-    font-size: 0.75em;
-  }
+  .cta-icon { font-size: 0.75em; }
 
   /* ---- Lore flavor line ---- */
   .hero-lore-line {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: rgba(255,255,255,0.3);
     letter-spacing: 0.05em;
     font-style: italic;
-    max-width: 600px;
+    max-width: 580px;
     margin: 0 auto;
+    animation: fadeSlideDown 1.1s ease 0.45s both;
   }
 
   /* ---- Scroll hint ---- */
   .hero-scroll-hint {
     position: absolute;
-    bottom: 1.5rem;
+    bottom: 1.25rem;
     left: 50%;
     transform: translateX(-50%);
     color: rgba(255,255,255,0.3);
     font-size: 1.25rem;
     animation: bounce 2s ease-in-out infinite;
+    z-index: 2;
   }
 
   @keyframes bounce {
     0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(6px); }
+    50% { transform: translateX(-50%) translateY(7px); }
+  }
+
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   /* ---- Responsive ---- */
   @media (max-width: 640px) {
-    .universe-hero {
-      min-height: 80vh;
-      padding: 3rem 1rem 5rem;
+    .hero-slide-inner {
+      padding: 3rem 1rem 4rem;
     }
-
     .hero-ctas {
       flex-direction: column;
       align-items: center;
     }
-
-    .cta-primary,
-    .cta-secondary,
-    .cta-ghost {
+    .hero-cta-primary,
+    .hero-cta-secondary,
+    .hero-cta-ghost {
       width: 100%;
-      max-width: 280px;
+      max-width: 260px;
       justify-content: center;
     }
   }

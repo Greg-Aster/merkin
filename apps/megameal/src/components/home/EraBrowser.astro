@@ -141,12 +141,13 @@ const eras = DISPLAY_ERAS.map(id => ({
     flex-direction: column;
     text-decoration: none;
     border: 1px solid oklch(0.3 0.05 var(--hue) / 0.3);
-    transition: border-color 0.25s ease, transform 0.2s ease;
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
   }
 
   .era-card:hover {
     border-color: var(--era-color);
-    transform: translateY(-2px);
+    transform: translateY(-4px) perspective(600px) rotateX(2deg);
+    box-shadow: 0 0 0 1px var(--era-color), 0 0 24px color-mix(in srgb, var(--era-color) 25%, transparent), 0 10px 30px rgba(0,0,0,0.35);
   }
 
   .era-card-bg {

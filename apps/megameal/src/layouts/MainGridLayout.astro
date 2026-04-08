@@ -2,6 +2,8 @@
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
 import Bleepy from '@components/bleepy/Bleepy.astro'
 import { siteConfig } from '@/config/config'
+import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
+import '@/styles/megameal-interactions.css'
 
 interface Props {
   title?: string
@@ -30,4 +32,6 @@ interface Props {
   <slot />
   <!-- MEGAMEAL-specific: Bleepy AI assistant mascot -->
   <Bleepy slot="mascot" mascotContext={Astro.props.pageMascotContext} instanceIdentifier="LAYOUT_BLEEPY" />
+  <!-- MEGAMEAL-specific: Universe intro as first banner slide -->
+  <UniverseHeroSlide slot="banner-slide-content" />
 </SharedMainGridLayout>

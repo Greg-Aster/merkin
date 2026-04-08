@@ -111,6 +111,12 @@ export const videoConfig: VideoBannerConfig = {
  * - Ensure corresponding links are added to bannerLinks array
  */
 export const bannerList: BannerItem[] = [
+  // HTML intro slide — universe entry point (rendered via banner-slide-content slot)
+  {
+    type: 'html' as any,
+    alt: 'MEGA MEAL SAGA — Universe Introduction',
+    src: '' as any, // unused for html type
+  },
   // Video item - uses your ComfyUI video
   /*   {
     type: 'image',
@@ -188,9 +194,10 @@ export const bannerList: BannerItem[] = [
 /* IMPORTANT: This array should have the same length as bannerList
  */
 export const bannerLinks: (string | null)[] = [
-  '', // no for video banner (ComfyUI_00010_.webm)
-  '/posts/explainer/', // Link for video banner (ComfyUI_00010_.webm)
-  '/posts/cookbook/cookbook-index/', // Link for video banner3 (cookbook.webm)
+  '/posts/explainer/', // intro html slide
+  '', // titleb.webm (no link — plays as cinematic intro)
+  '/posts/explainer/', // deep-time3.webm
+  '/posts/cookbook/cookbook-index/', // cookbook.webm
   '', // Link for banner4 (0003.png)
   null, // No link for banner4 (0004.png)
   '/contact', // Link for banner5 (0005.png)

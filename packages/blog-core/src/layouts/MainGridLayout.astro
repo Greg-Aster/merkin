@@ -866,7 +866,9 @@ const gridLayoutClasses = [
                             style={`border-radius: ${bannerConfig.visual.borderRadius};`}
                             loading={index === 0 ? 'eager' : 'lazy'}
                           />
-                        ) : null}
+                        ) : (
+                          <slot name="banner-slide-content" />
+                        )}
                       </div>
                     </div>
                   </div>
@@ -900,7 +902,7 @@ const gridLayoutClasses = [
   <!-- ⭐ SIMPLIFIED: One column mobile, two column desktop           -->
   <!-- =============================================================== -->
   <div class={`w-full z-30 pointer-events-none relative`}>
-    <div id="main-panel-wrapper" class="responsive-panel-wrapper relative max-w-[var(--page-width)] mx-auto pointer-events-auto">
+    <div id="main-panel-wrapper" class="responsive-panel-wrapper relative max-w-[var(--page-width)] mx-auto pointer-events-auto" data-is-home={isHomePage ? "true" : "false"}>
       <div
         id="main-grid"
         class:list={[gridLayoutClasses, 'transition-swup-fade', { 'has-right-rail': shouldShowRightRail }]}
