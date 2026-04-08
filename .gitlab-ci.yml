@@ -30,6 +30,9 @@ default:
 # - Preview deploys run on GitHub Pages workflow only.
 # - GitLab CI runs production deploys from main only.
 # - Main branch: auto production deploys.
+#
+# Keep change filters selective. Root workspace files should not implicitly redeploy
+# every site; infra-only changes can be promoted manually with DEPLOY_SITE.
 
 # Temporal-Flow -> temporalflow.org
 preview-temporal:
@@ -42,8 +45,8 @@ preview-temporal:
       allow_failure: true
       changes:
         - Temporal-Flow/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "temporal")'
       when: manual
@@ -58,8 +61,8 @@ promote-temporal:
       when: manual
       changes:
         - Temporal-Flow/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
         - .gitlab-ci.yml
 
 deploy-temporal:
@@ -70,8 +73,8 @@ deploy-temporal:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
       changes:
         - Temporal-Flow/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "temporal")'
       when: manual
@@ -88,8 +91,8 @@ preview-dndiy:
       allow_failure: true
       changes:
         - DNDIY.github.io/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "dndiy")'
       when: manual
@@ -104,8 +107,8 @@ promote-dndiy:
       when: manual
       changes:
         - DNDIY.github.io/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
         - .gitlab-ci.yml
 
 deploy-dndiy:
@@ -116,8 +119,8 @@ deploy-dndiy:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
       changes:
         - DNDIY.github.io/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "dndiy")'
       when: manual
@@ -135,8 +138,12 @@ preview-megameal:
       changes:
         - apps/megameal/**/*
         - MEGAMEAL/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - packages/blog-core/**/*
+        - packages/shared-audio/**/*
+        - packages/shared-content/**/*
+        - packages/shared-data/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - scripts/generate-post-pdfs.mjs
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "megameal")'
       when: manual
@@ -152,8 +159,12 @@ promote-megameal:
       changes:
         - apps/megameal/**/*
         - MEGAMEAL/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - packages/blog-core/**/*
+        - packages/shared-audio/**/*
+        - packages/shared-content/**/*
+        - packages/shared-data/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - scripts/generate-post-pdfs.mjs
         - .gitlab-ci.yml
 
 deploy-megameal:
@@ -165,8 +176,12 @@ deploy-megameal:
       changes:
         - apps/megameal/**/*
         - MEGAMEAL/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - packages/blog-core/**/*
+        - packages/shared-audio/**/*
+        - packages/shared-content/**/*
+        - packages/shared-data/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - scripts/generate-post-pdfs.mjs
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "megameal")'
       when: manual
@@ -183,8 +198,11 @@ preview-game:
       allow_failure: true
       changes:
         - apps/game/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - MEGAMEAL/public/**/*
+        - packages/shared-audio/**/*
+        - packages/shared-content/**/*
+        - packages/shared-data/**/*
+        - scripts/deploy-pages-with-retry.sh
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "game")'
       when: manual
@@ -199,8 +217,11 @@ promote-game:
       when: manual
       changes:
         - apps/game/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - MEGAMEAL/public/**/*
+        - packages/shared-audio/**/*
+        - packages/shared-content/**/*
+        - packages/shared-data/**/*
+        - scripts/deploy-pages-with-retry.sh
         - .gitlab-ci.yml
 
 deploy-game:
@@ -211,8 +232,11 @@ deploy-game:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
       changes:
         - apps/game/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - MEGAMEAL/public/**/*
+        - packages/shared-audio/**/*
+        - packages/shared-content/**/*
+        - packages/shared-data/**/*
+        - scripts/deploy-pages-with-retry.sh
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "game")'
       when: manual
@@ -229,8 +253,8 @@ preview-travel:
       allow_failure: true
       changes:
         - apps/travel/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "travel")'
       when: manual
@@ -245,8 +269,8 @@ promote-travel:
       when: manual
       changes:
         - apps/travel/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
         - .gitlab-ci.yml
 
 deploy-travel:
@@ -257,7 +281,8 @@ deploy-travel:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
       changes:
         - apps/travel/**/*
-        - packages/**/*
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
         - pnpm-lock.yaml
         - .gitlab-ci.yml
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "travel")'

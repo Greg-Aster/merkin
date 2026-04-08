@@ -36,7 +36,13 @@
   // Generates the shareable URL
   function getJoinUrl(): string {
     if (!$hostStore.isRoomRegistered || !$hostStore.roomName) return '';
-    return `${window.location.origin}/game/?room=${$hostStore.roomName}`;
+
+    const basePath =
+      import.meta.env.BASE_URL === '/'
+        ? '/'
+        : `/${import.meta.env.BASE_URL.replace(/^\/+|\/+$/g, '')}/`;
+
+    return `${window.location.origin}${basePath}?room=${$hostStore.roomName}`;
   }
 
   // Copies the URL to the clipboard

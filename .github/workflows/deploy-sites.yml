@@ -51,44 +51,39 @@ jobs:
         with:
           # On pushes to main, compare against the previous main SHA rather than the
           # repository default branch (currently dev). Otherwise deploy jobs get skipped.
+          # Keep these filters intentionally narrow. Root workspace files like
+          # package.json, pnpm-lock.yaml, and workflow edits should not fan out into
+          # every site deploy automatically; use workflow_dispatch for infra-only changes.
           base: ${{ github.event_name == 'push' && github.event.before || '' }}
           ref: ${{ github.sha }}
           filters: |
             travel:
               - "apps/travel/**"
               - "packages/blog-core/**"
-              - "package.json"
-              - "pnpm-lock.yaml"
-              - "pnpm-workspace.yaml"
-              - ".github/workflows/deploy-sites.yml"
+              - "scripts/deploy-pages-with-retry.sh"
             temporal:
               - "Temporal-Flow/**"
               - "packages/blog-core/**"
-              - "package.json"
-              - "pnpm-lock.yaml"
-              - "pnpm-workspace.yaml"
-              - ".github/workflows/deploy-sites.yml"
+              - "scripts/deploy-pages-with-retry.sh"
             dndiy:
               - "DNDIY.github.io/**"
               - "packages/blog-core/**"
-              - "package.json"
-              - "pnpm-lock.yaml"
-              - "pnpm-workspace.yaml"
-              - ".github/workflows/deploy-sites.yml"
+              - "scripts/deploy-pages-with-retry.sh"
             megameal:
               - "apps/megameal/**"
               - "packages/blog-core/**"
-              - "package.json"
-              - "pnpm-lock.yaml"
-              - "pnpm-workspace.yaml"
-              - ".github/workflows/deploy-sites.yml"
+              - "packages/shared-audio/**"
+              - "packages/shared-content/**"
+              - "packages/shared-data/**"
+              - "scripts/deploy-pages-with-retry.sh"
+              - "scripts/generate-post-pdfs.mjs"
             game:
               - "apps/game/**"
               - "MEGAMEAL/public/**"
-              - "package.json"
-              - "pnpm-lock.yaml"
-              - "pnpm-workspace.yaml"
-              - ".github/workflows/deploy-sites.yml"
+              - "packages/shared-audio/**"
+              - "packages/shared-content/**"
+              - "packages/shared-data/**"
+              - "scripts/deploy-pages-with-retry.sh"
 
   deploy-travel:
     name: Deploy Travel
