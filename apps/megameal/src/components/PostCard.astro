@@ -38,6 +38,22 @@ const {
   isPostPage = false,
 } = Astro.props
 
+const contentFormat = entry.data?.contentFormat as string | undefined
+const series = entry.data?.series as string | undefined
+const seriesPart = entry.data?.seriesPart as number | undefined
+const seriesTitle = entry.data?.seriesTitle as string | undefined
+
+const FORMAT_LABELS: Record<string, string> = {
+  chronicle: '📖 Chronicle',
+  recipe: '🍽️ Recipe',
+  review: '🌟 Review',
+  report: '📋 Report',
+  commercial: '📡 Commercial',
+  manual: '📘 Manual',
+  update: '📡 Update',
+  classified: '☢️ Classified',
+}
+
 const className = Astro.props.class
 
 const hasCover =
@@ -150,21 +166,24 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
       </a>
 
       <!-- METADATA: Show on larger screens - 🎯 RESPONSIVE SIZING -->
-      <div class="postcard-desktop-meta mb-2 sm:mb-3 hidden md:block text-xs md:text-sm text-black/60 dark:text-white/60 flex gap-4 items-center">
+      <div class="postcard-desktop-meta mb-2 sm:mb-3 hidden md:flex gap-3 items-center flex-wrap text-xs md:text-sm text-black/60 dark:text-white/60">
+        {contentFormat && FORMAT_LABELS[contentFormat] && (
+          <span class="format-badge">{FORMAT_LABELS[contentFormat]}</span>
+        )}
         <time datetime={published.toISOString()}>
-          {published.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
+          {published.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
           })}
         </time>
         {updated && config.content.showUpdateDate && (
           <>
             <span class="text-black/30 dark:text-white/30">•</span>
-            <span>Updated {updated.toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric' 
+            <span>Updated {updated.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
             })}</span>
           </>
         )}
@@ -190,6 +209,14 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
       ]}>
         {description || remarkPluginFrontmatter.excerpt}
       </div>
+
+      <!-- SERIES INDICATOR -->
+      {series && (
+        <div class="series-indicator">
+          {seriesPart !== undefined ? `Part ${seriesPart}` : 'Part of'}{' '}
+          <span class="series-name">{seriesTitle ?? series}</span>
+        </div>
+      )}
 
       <!-- WORD COUNT AND READ TIME - 🎯 ALREADY RESPONSIVE -->
       {(config.content.showWordCount || config.content.showReadTime) && (
@@ -251,6 +278,32 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
 
   .line-clamp-3 {
     -webkit-line-clamp: 3;
+  }
+
+  .format-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 0.15rem 0.45rem;
+    border-radius: 0.25rem;
+    background: oklch(0.35 0.08 var(--hue) / 0.25);
+    color: oklch(0.65 0.12 var(--hue));
+    border: 1px solid oklch(0.4 0.08 var(--hue) / 0.3);
+    white-space: nowrap;
+  }
+
+  .series-indicator {
+    font-size: 0.72rem;
+    color: oklch(0.55 0.1 var(--hue));
+    font-style: italic;
+  }
+
+  .series-name {
+    font-weight: 600;
+    font-style: normal;
+    color: oklch(0.65 0.15 var(--hue));
   }
 
 </style>

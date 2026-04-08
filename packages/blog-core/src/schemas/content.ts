@@ -44,6 +44,21 @@ export const postsSchema = z.object({
   prevSlug: z.string().default(''),
   nextTitle: z.string().default(''),
   nextSlug: z.string().default(''),
+  series: z.string().optional(),
+  seriesPart: z.number().optional(),
+  seriesTitle: z.string().optional(),
+  contentFormat: z
+    .enum([
+      'chronicle',
+      'recipe',
+      'review',
+      'report',
+      'commercial',
+      'manual',
+      'update',
+      'classified',
+    ])
+    .optional(),
 })
 
 export const specSchema = z.object({

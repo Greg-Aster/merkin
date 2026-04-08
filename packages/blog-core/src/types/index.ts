@@ -147,4 +147,16 @@ export type BlogPostData = {
     height?: string
     compact?: boolean
   }
+  series?: string
+  seriesPart?: number
+  seriesTitle?: string
+  contentFormat?:
+    | 'chronicle'
+    | 'recipe'
+    | 'review'
+    | 'report'
+    | 'commercial'
+    | 'manual'
+    | 'update'
+    | 'classified'
 }

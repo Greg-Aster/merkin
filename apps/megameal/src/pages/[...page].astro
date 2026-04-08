@@ -2,6 +2,9 @@
 import type { GetStaticPaths } from 'astro'
 import PostPage from '../components/PostPage.astro'
 import Pagination from '../components/control/Pagination.astro'
+import UniverseHero from '../components/home/UniverseHero.astro'
+import FeaturedArc from '../components/home/FeaturedArc.astro'
+import EraBrowser from '../components/home/EraBrowser.astro'
 import { PAGE_SIZE } from '../constants/constants'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
 import { getSortedPosts } from '../utils/content-utils'
@@ -13,11 +16,59 @@ export const getStaticPaths = (async ({ paginate }) => {
 // https://github.com/withastro/astro/issues/6507#issuecomment-1489916992
 
 const { page } = Astro.props
-
+const isFirstPage = page.currentPage === 1
 const len = page.data.length
 ---
 
 <MainGridLayout>
-    <PostPage page={page}></PostPage>
-    <Pagination class="mx-auto onload-animation" page={page} style=`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`></Pagination>
+  {isFirstPage && (
+    <>
+      <UniverseHero />
+      <FeaturedArc />
+      <div class="dispatches-header">
+        <span class="dispatches-label">Latest Dispatches</span>
+        <span class="dispatches-sub">Recent transmissions from across the timeline</span>
+      </div>
+    </>
+  )}
+  <PostPage page={page}></PostPage>
+  <Pagination
+    class="mx-auto onload-animation"
+    page={page}
+    style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
+  ></Pagination>
+  {isFirstPage && (
+    <div class="era-browser-wrapper">
+      <EraBrowser />
+    </div>
+  )}
 </MainGridLayout>
+
+<style>
+  .dispatches-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid oklch(0.3 0.05 var(--hue) / 0.3);
+  }
+
+  .dispatches-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: oklch(0.6 0.1 var(--hue));
+    font-weight: 700;
+  }
+
+  .dispatches-sub {
+    font-size: 0.75rem;
+    color: oklch(0.5 0.05 var(--hue));
+    font-style: italic;
+  }
+
+  .era-browser-wrapper {
+    margin-top: 2.5rem;
+  }
+</style>

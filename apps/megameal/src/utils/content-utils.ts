@@ -64,6 +64,72 @@ export type Category = {
   count: number
 }
 
+// --- Series / Arc helpers ---
+
+export async function getPostsBySeries(
+  seriesId: string,
+  includeDrafts = false,
+): Promise<{ body: string; data: BlogPostData; slug: string }[]> {
+  const allPosts = (await getCollection('posts', ({ data }) => {
+    return includeDrafts ? true : data.draft !== true
+  })) as unknown as { body: string; data: BlogPostData; slug: string }[]
+
+  return allPosts
+    .filter(post => (post.data as any).series === seriesId)
+    .sort((a, b) => {
+      const partA = (a.data as any).seriesPart ?? 0
+      const partB = (b.data as any).seriesPart ?? 0
+      return partA - partB
+    })
+}
+
+export async function getAllSeries(
+  includeDrafts = false,
+): Promise<Record<string, { body: string; data: BlogPostData; slug: string }[]>> {
+  const allPosts = (await getCollection('posts', ({ data }) => {
+    return includeDrafts ? true : data.draft !== true
+  })) as unknown as { body: string; data: BlogPostData; slug: string }[]
+
+  const grouped: Record<string, typeof allPosts> = {}
+  for (const post of allPosts) {
+    const seriesId = (post.data as any).series as string | undefined
+    if (seriesId) {
+      if (!grouped[seriesId]) grouped[seriesId] = []
+      grouped[seriesId].push(post)
+    }
+  }
+
+  // Sort each series by seriesPart
+  for (const id of Object.keys(grouped)) {
+    grouped[id].sort((a, b) => {
+      const partA = (a.data as any).seriesPart ?? 0
+      const partB = (b.data as any).seriesPart ?? 0
+      return partA - partB
+    })
+  }
+
+  return grouped
+}
+
+export async function getPostsByEra(
+  eraSlug: string,
+  includeDrafts = false,
+): Promise<{ body: string; data: BlogPostData; slug: string }[]> {
+  const allPosts = (await getCollection('posts', ({ data }) => {
+    return includeDrafts ? true : data.draft !== true
+  })) as unknown as { body: string; data: BlogPostData; slug: string }[]
+
+  return allPosts
+    .filter(post => post.data.timelineEra === eraSlug)
+    .sort((a, b) => {
+      const yearA = Number(a.data.timelineYear) || 0
+      const yearB = Number(b.data.timelineYear) || 0
+      return yearA - yearB
+    })
+}
+
+// --- End series / arc helpers ---
+
 export async function getCategoryList(): Promise<Category[]> {
   const allBlogPosts = await getCollection<'posts'>('posts', ({ data }) => {
     return import.meta.env.PROD ? data.draft !== true : true

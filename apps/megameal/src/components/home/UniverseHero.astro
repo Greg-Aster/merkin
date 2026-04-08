@@ -1,0 +1,276 @@
+---
+// UniverseHero.astro
+// Full-width cinematic entry point for the MEGAMEAL universe.
+// Gives new visitors immediate context and 3 clear entry paths.
+---
+
+<section class="universe-hero">
+  <div class="hero-bg-layer" aria-hidden="true">
+    <div class="hero-stars"></div>
+    <div class="hero-nebula"></div>
+    <div class="hero-vignette"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">Year 3042 — The Multiverse is Open</div>
+
+    <h1 class="hero-title">
+      <span class="hero-title-mega">MEGA</span><span class="hero-title-meal">MEAL</span>
+      <span class="hero-title-saga">SAGA</span>
+    </h1>
+
+    <p class="hero-tagline">
+      Cosmic Horror and Food.<br />
+      A non-linear transmedia universe spanning from the Big Bang to the Heat Death of everything you loved.
+    </p>
+
+    <div class="hero-ctas">
+      <a href="/posts/explainer/" class="cta-primary">
+        <span class="cta-icon">&#9654;</span>
+        Start Here
+      </a>
+      <a href="/posts/timeline/" class="cta-secondary">
+        <span class="cta-icon">&#9881;</span>
+        Explore the Timeline
+      </a>
+      <a href="/archive/" class="cta-ghost">
+        Browse All Content
+      </a>
+    </div>
+
+    <div class="hero-lore-line">
+      Featuring: sentient sporks · recursive restaurants · the Bloody Mary that broke time · The Snuggloids · and one very persistent figure in a striped suit.
+    </div>
+  </div>
+
+  <div class="hero-scroll-hint" aria-hidden="true">
+    <span>&#8595;</span>
+  </div>
+</section>
+
+<style>
+  .universe-hero {
+    position: relative;
+    width: 100%;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 4rem 1.5rem 6rem;
+    margin-bottom: 3rem;
+  }
+
+  /* ---- Background layers ---- */
+  .hero-bg-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero-stars {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 15%, rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 40%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 20% 90%, rgba(200,200,255,0.8) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 60% 35%, rgba(255,200,200,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 10%, rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 70%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 75% 55%, rgba(200,255,200,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 5% 50%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 95% 75%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      black;
+  }
+
+  .hero-nebula {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 40%, oklch(0.25 0.15 var(--hue)) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 80% 60%, oklch(0.2 0.1 calc(var(--hue) + 60)) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 50% 80%, oklch(0.15 0.08 calc(var(--hue) - 40)) 0%, transparent 60%);
+    opacity: 0.7;
+  }
+
+  .hero-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.8) 100%);
+  }
+
+  /* ---- Content ---- */
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 860px;
+    width: 100%;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: oklch(0.65 0.15 var(--hue));
+    margin-bottom: 1.5rem;
+    opacity: 0.9;
+  }
+
+  .hero-title {
+    font-size: clamp(3.5rem, 12vw, 9rem);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.15em;
+  }
+
+  .hero-title-mega {
+    color: white;
+  }
+
+  .hero-title-meal {
+    color: oklch(0.7 0.25 var(--hue));
+  }
+
+  .hero-title-saga {
+    font-size: clamp(1.2rem, 4vw, 3rem);
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: oklch(0.55 0.1 var(--hue));
+    align-self: flex-end;
+    padding-bottom: 0.15em;
+  }
+
+  .hero-tagline {
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    color: oklch(0.75 0.05 var(--hue));
+    line-height: 1.6;
+    margin: 1.5rem auto 2.5rem;
+    max-width: 600px;
+  }
+
+  /* ---- CTAs ---- */
+  .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+
+  .cta-primary,
+  .cta-secondary,
+  .cta-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    letter-spacing: 0.02em;
+  }
+
+  .cta-primary {
+    background: oklch(0.55 0.25 var(--hue));
+    color: white;
+    box-shadow: 0 0 20px oklch(0.55 0.25 var(--hue) / 0.4);
+  }
+
+  .cta-primary:hover {
+    background: oklch(0.6 0.28 var(--hue));
+    box-shadow: 0 0 30px oklch(0.6 0.28 var(--hue) / 0.6);
+    transform: translateY(-1px);
+  }
+
+  .cta-secondary {
+    background: transparent;
+    border: 1.5px solid oklch(0.55 0.15 var(--hue));
+    color: oklch(0.75 0.15 var(--hue));
+  }
+
+  .cta-secondary:hover {
+    background: oklch(0.55 0.15 var(--hue) / 0.1);
+    border-color: oklch(0.65 0.2 var(--hue));
+    color: oklch(0.85 0.2 var(--hue));
+  }
+
+  .cta-ghost {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.6);
+    font-weight: 400;
+    font-size: 0.85rem;
+    padding: 0.65rem 1.5rem;
+  }
+
+  .cta-ghost:hover {
+    border-color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.9);
+  }
+
+  .cta-icon {
+    font-size: 0.75em;
+  }
+
+  /* ---- Lore flavor line ---- */
+  .hero-lore-line {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.05em;
+    font-style: italic;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ---- Scroll hint ---- */
+  .hero-scroll-hint {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.3);
+    font-size: 1.25rem;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(6px); }
+  }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 640px) {
+    .universe-hero {
+      min-height: 80vh;
+      padding: 3rem 1rem 5rem;
+    }
+
+    .hero-ctas {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .cta-primary,
+    .cta-secondary,
+    .cta-ghost {
+      width: 100%;
+      max-width: 280px;
+      justify-content: center;
+    }
+  }
+</style>

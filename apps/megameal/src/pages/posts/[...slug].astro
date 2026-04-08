@@ -15,6 +15,8 @@ import ImageWrapper from '../../components/misc/ImageWrapper.astro'
 import { licenseConfig } from '../../config/config'
 import { profileConfig, siteConfig } from '../../config/config'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
+import { getPostsBySeries } from '../../utils/content-utils'
+import { SERIES_CONFIG } from '../../config/seriesConfig'
 
 // ⭐ FIXED: Import the correct layout toggle component
 import LayoutToggle from '../../components/client/LayoutToggle.svelte'
@@ -129,6 +131,27 @@ const nextArticle = post.data.prevSlug
       title: post.data.prevTitle || nextPost?.title || 'Next Article',
     }
   : nextPost
+
+// Series navigation
+const postSeries = (post.data as any).series as string | undefined
+const postSeriesPart = (post.data as any).seriesPart as number | undefined
+const postSeriesTitle = (post.data as any).seriesTitle as string | undefined
+let seriesPosts: { slug: string; title: string; seriesPart?: number }[] = []
+let seriesPrevPost: { slug: string; title: string } | null = null
+let seriesNextPost: { slug: string; title: string } | null = null
+let seriesConfig = postSeries ? SERIES_CONFIG[postSeries] : null
+
+if (postSeries) {
+  const rawSeriesPosts = await getPostsBySeries(postSeries)
+  seriesPosts = rawSeriesPosts.map(p => ({
+    slug: p.slug,
+    title: p.data.title,
+    seriesPart: (p.data as any).seriesPart as number | undefined,
+  }))
+  const currentIdx = seriesPosts.findIndex(p => p.slug === post.slug)
+  if (currentIdx > 0) seriesPrevPost = seriesPosts[currentIdx - 1]
+  if (currentIdx < seriesPosts.length - 1) seriesNextPost = seriesPosts[currentIdx + 1]
+}
 
 const showPostFooterNav = siteConfig.enablePostFooterNav === true
 const isDownloadable = post.data.downloadable === true
@@ -265,6 +288,54 @@ const pdfButtonLabel = useDownloadFile
       </div>
     )}
 
+    {/* Series navigation — shown when this post is part of a named series */}
+    {postSeries && seriesPosts.length > 0 && (
+      <div class="series-nav-block mb-4">
+        <div class="series-nav-header">
+          <span class="series-nav-label">Story Arc</span>
+          <span class="series-nav-title">
+            {seriesConfig?.title ?? postSeriesTitle ?? postSeries}
+          </span>
+          {seriesPosts.length > 1 && (
+            <span class="series-nav-progress">
+              {postSeriesPart ?? seriesPosts.findIndex(p => p.slug === post.slug) + 1} of {seriesPosts.length}
+            </span>
+          )}
+        </div>
+
+        <div class="series-chapters">
+          {seriesPosts.map((sp, i) => (
+            <a
+              href={getPostUrlBySlug(sp.slug)}
+              class:list={['series-chapter-link', { 'series-chapter-current': sp.slug === post.slug }]}
+            >
+              <span class="chapter-num">{sp.seriesPart ?? i + 1}</span>
+              <span class="chapter-title">{sp.title}</span>
+            </a>
+          ))}
+        </div>
+
+        {(seriesPrevPost || seriesNextPost) && (
+          <div class="series-prev-next">
+            <a
+              href={seriesPrevPost ? getPostUrlBySlug(seriesPrevPost.slug) : '#'}
+              class:list={['series-pn-btn', { 'series-pn-disabled': !seriesPrevPost }]}
+            >
+              <Icon name="material-symbols:chevron-left-rounded" class="text-xl" />
+              <span>{seriesPrevPost?.title ?? 'No previous chapter'}</span>
+            </a>
+            <a
+              href={seriesNextPost ? getPostUrlBySlug(seriesNextPost.slug) : '#'}
+              class:list={['series-pn-btn series-pn-right', { 'series-pn-disabled': !seriesNextPost }]}
+            >
+              <span>{seriesNextPost?.title ?? 'No next chapter'}</span>
+              <Icon name="material-symbols:chevron-right-rounded" class="text-xl" />
+            </a>
+          </div>
+        )}
+      </div>
+    )}
+
     {showPostFooterNav && <div class="grid grid-cols-1 md:grid-cols-3 mb-4 gap-4 overflow-hidden w-full">
         <a href={previousArticle ? getPostUrlBySlug(previousArticle.slug) : "#"}
            class:list={["w-full font-bold overflow-hidden active:scale-95", {"pointer-events-none opacity-60": !previousArticle}]}>
@@ -305,6 +376,134 @@ const pdfButtonLabel = useDownloadFile
 </MainGridLayout>
 
 <style>
+    /* Series navigation */
+    .series-nav-block {
+      border: 1px solid oklch(0.3 0.05 var(--hue) / 0.4);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      background: oklch(0.12 0.04 var(--hue) / 0.4);
+    }
+
+    .series-nav-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid oklch(0.3 0.05 var(--hue) / 0.3);
+      flex-wrap: wrap;
+    }
+
+    .series-nav-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: oklch(0.6 0.15 var(--hue));
+      white-space: nowrap;
+    }
+
+    .series-nav-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: oklch(0.85 0.06 var(--hue));
+      flex: 1;
+    }
+
+    .series-nav-progress {
+      font-size: 0.7rem;
+      color: oklch(0.5 0.05 var(--hue));
+      white-space: nowrap;
+    }
+
+    .series-chapters {
+      display: flex;
+      flex-direction: column;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .series-chapter-link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.4rem 1rem;
+      font-size: 0.82rem;
+      color: oklch(0.65 0.06 var(--hue));
+      text-decoration: none;
+      transition: background 0.15s ease, color 0.15s ease;
+      border-bottom: 1px solid oklch(0.25 0.04 var(--hue) / 0.3);
+    }
+
+    .series-chapter-link:last-child {
+      border-bottom: none;
+    }
+
+    .series-chapter-link:hover {
+      background: oklch(0.2 0.05 var(--hue) / 0.4);
+      color: white;
+    }
+
+    .series-chapter-current {
+      background: oklch(0.18 0.07 var(--hue) / 0.6);
+      color: oklch(0.85 0.12 var(--hue)) !important;
+      font-weight: 600;
+    }
+
+    .series-chapter-link .chapter-num {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: oklch(0.6 0.15 var(--hue));
+      min-width: 1.4em;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .series-chapter-link .chapter-title {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .series-prev-next {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid oklch(0.3 0.05 var(--hue) / 0.3);
+    }
+
+    .series-pn-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 0.875rem;
+      font-size: 0.78rem;
+      color: oklch(0.6 0.08 var(--hue));
+      text-decoration: none;
+      transition: background 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .series-pn-btn span:not([class]) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .series-pn-right {
+      justify-content: flex-end;
+      text-align: right;
+      border-left: 1px solid oklch(0.3 0.05 var(--hue) / 0.3);
+    }
+
+    .series-pn-btn:hover:not(.series-pn-disabled) {
+      background: oklch(0.2 0.05 var(--hue) / 0.4);
+      color: white;
+    }
+
+    .series-pn-disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
     /* Add scroll margin for hash navigation */
     #post-container {
       scroll-margin-top: calc(var(--navbar-height) + 2rem);
