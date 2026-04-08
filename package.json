@@ -27,7 +27,7 @@
     "build:game": "pnpm --filter @merkin/game build",
     "build:megameal:full": "pnpm build:shared-data && pnpm build:megameal",
     "build:game:full": "pnpm build:shared-data && GAME_BASE_PATH=/game pnpm build:game",
-    "deploy:game:static": "find apps/game/dist -size +25M -delete && bash ./scripts/deploy-pages-with-retry.sh apps/game/dist merkin-game",
+    "deploy:game:static": "find apps/game/dist -size +25M -delete && bash ./scripts/deploy-pages-with-retry.sh apps/game/dist ${CF_GAME_PROJECT_NAME:-merkin-megameal-game}",
     "deploy:game": "pnpm build:game:full && pnpm deploy:game:static",
     "deploy:megameal:static": "find apps/megameal/dist -size +25M -delete && bash ./scripts/deploy-pages-with-retry.sh apps/megameal/dist merkin-megameal",
     "deploy:megameal": "pnpm build:megameal:full && pnpm deploy:megameal:static",

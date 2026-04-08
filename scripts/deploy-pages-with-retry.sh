@@ -15,6 +15,10 @@ delay_seconds="${CF_DEPLOY_RETRY_DELAY_SECONDS:-10}"
 is_retryable_failure() {
   local output="$1"
 
+  if [[ "$output" == *"Project not found"* ]] || [[ "$output" == *"[code: 8000007]"* ]]; then
+    return 1
+  fi
+
   [[ "$output" == *"503 Service Unavailable"* ]] \
     || [[ "$output" == *"502 Bad Gateway"* ]] \
     || [[ "$output" == *"504 Gateway Timeout"* ]] \
