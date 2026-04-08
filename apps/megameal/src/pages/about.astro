@@ -8,6 +8,7 @@ import { collections } from '../content.config'
 import I18nKey from '../i18n/i18nKey'
 import { i18n } from '../i18n/translation'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
+import ImageWrapper from '../components/misc/ImageWrapper.astro'
 
 // Fetch the about content
 const aboutPost = await getEntry('spec', 'about')
@@ -82,6 +83,12 @@ function getAvatarShapeClass(shape: 'circle' | 'rounded' | 'square' | string) {
       return ''
   }
 }
+
+function isVideoMedia(src?: string) {
+  if (!src) return false
+  const lower = src.toLowerCase()
+  return lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.endsWith('.mov')
+}
 ---
 
 <MainGridLayout 
@@ -106,11 +113,26 @@ function getAvatarShapeClass(shape: 'circle' | 'rounded' | 'square' | string) {
           >
             <div class="p-6 flex items-center gap-4">
               {author.data.avatar ? (
-                <img 
-                  src={author.data.avatar} 
-                  alt={author.data.name} 
-                  class="w-16 h-16 object-cover rounded-lg flex-shrink-0" 
-                />
+                isVideoMedia(author.data.avatar) ? (
+                  <video
+                    src={author.data.avatar}
+                    class="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    preload="metadata"
+                    aria-label={author.data.name}
+                  />
+                ) : (
+                  <ImageWrapper 
+                    src={author.data.avatar} 
+                    alt={author.data.name} 
+                    class="w-16 h-16 rounded-lg flex-shrink-0"
+                    imgClass="rounded-lg"
+                    loading="lazy"
+                  />
+                )
               ) : (
                 <div class="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-600 rounded-lg flex-shrink-0 flex items-center justify-center">
                   <Icon name={getAuthorIcon(author)} class="text-white text-2xl" />
@@ -152,7 +174,13 @@ function getAvatarShapeClass(shape: 'circle' | 'rounded' | 'square' | string) {
           {processedTeamMembers.map((member, index) => (
             <div class="team-member-card rounded-lg overflow-hidden transition-all hover:shadow-lg cursor-pointer"
                  data-member-slug={member.slug}>
-              <img src={member.image} alt={member.name} class={`w-full h-64 object-cover ${getAvatarShapeClass(aboutConfig.team.avatarShape)}`} />
+              <ImageWrapper
+                src={member.image}
+                alt={member.name}
+                class={`w-full h-64 ${getAvatarShapeClass(aboutConfig.team.avatarShape)}`}
+                imgClass={getAvatarShapeClass(aboutConfig.team.avatarShape)}
+                loading="lazy"
+              />
               <div class="p-4">
                 <h3 class="text-xl font-bold text-90 mb-4 text-[var(--primary)] dark:text-[var(--primary)]">{member.name}</h3>
                 {aboutConfig.team.showRole && member.role && (

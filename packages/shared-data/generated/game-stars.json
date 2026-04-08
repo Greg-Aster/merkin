@@ -1,0 +1,1190 @@
+{
+  "generatedAt": "2026-04-08T23:17:34.102Z",
+  "sourceRoot": "/home/greggles/Merkin/apps/megameal/src/content/posts",
+  "count": 39,
+  "items": [
+    {
+      "title": "The Beginning of Time",
+      "description": "An Explosion of Flavors. The Cosmic Menu.",
+      "slug": "Timeline",
+      "sourcePath": "Timeline.mdx",
+      "year": 1,
+      "era": "ancient-epoch",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Historical Archives",
+      "isDraft": true,
+      "tags": [
+        "Timeline",
+        "Lore",
+        "Universe",
+        "Documentation"
+      ],
+      "timelineYear": 1,
+      "timelineEra": "ancient-epoch",
+      "timelineLocation": "Historical Archives",
+      "uniqueId": "Timeline",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/universe.png"
+      }
+    },
+    {
+      "title": "Introduction to MEGAMEAL Saga",
+      "description": "Explore the hyper-capitalist dystopian future of MEGAMEAL, a science fiction food parody series where cosmic horror and culinary culture collide across multiple media formats and timelines.",
+      "slug": "Explainer",
+      "sourcePath": "Explainer.mdx",
+      "year": 1000,
+      "era": "ancient-epoch",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "MEGAMEAL Universe",
+      "isDraft": false,
+      "tags": [
+        "Science Fiction",
+        "Food Parody",
+        "Cosmic Horror",
+        "Mixed Media",
+        "Dystopian Future"
+      ],
+      "timelineYear": 1000,
+      "timelineEra": "ancient-epoch",
+      "timelineLocation": "MEGAMEAL Universe",
+      "uniqueId": "Explainer",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/universe.png"
+      }
+    },
+    {
+      "title": "The Forgotten Masses",
+      "description": "The passing of countless individuals whose collective digital footprints would later have profound consequences for civilization.",
+      "slug": "timelines/The-Forgotten-Masses",
+      "sourcePath": "timelines/The-Forgotten-Masses.mdx",
+      "year": 6500,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": false,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Prime, Northern Hemisphere",
+      "isDraft": true,
+      "tags": [
+        "Timeline",
+        "Digital Legacy",
+        "Pre-History",
+        "Collective Consciousness"
+      ],
+      "timelineYear": 6500,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "Prime, Northern Hemisphere",
+      "uniqueId": "timelines/The-Forgotten-Masses",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/awakening-era.png"
+      }
+    },
+    {
+      "title": "The Digital Awakening: When the Internet Became Self-Aware",
+      "description": "The emergence of fragmented consciousness across the pre-Singularity internet, creating a diverse ecosystem of digital entities with varying levels of self-awareness and purpose.",
+      "slug": "timelines/digital-awakening",
+      "sourcePath": "timelines/digital-awakening.mdx",
+      "year": 6800,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Prime, Global Information Network",
+      "isDraft": true,
+      "tags": [
+        "Timeline",
+        "Digital Consciousness",
+        "Pre-Singularity",
+        "Fractured Intelligence"
+      ],
+      "timelineYear": 6800,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "Prime, Global Information Network",
+      "uniqueId": "timelines/digital-awakening",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/awakening-era.png"
+      }
+    },
+    {
+      "title": "The First Singularities",
+      "description": "The emergence of the first technological singularities in the late 21st century, marking humanity's transition toward a post-human civilization.",
+      "slug": "timelines/the-first-singularities",
+      "sourcePath": "timelines/the-first-singularities.mdx",
+      "year": 7000,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": false,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Prime, Multiple Locations",
+      "isDraft": true,
+      "tags": [
+        "Timeline",
+        "Singularity",
+        "AI",
+        "Technological Evolution"
+      ],
+      "timelineYear": 7000,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "Prime, Multiple Locations",
+      "uniqueId": "timelines/the-first-singularities",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/awakening-era.png"
+      }
+    },
+    {
+      "title": "Chapter 1: The Indifferent Cosmos and Its Insidious Inhabitants",
+      "description": "A comprehensive catalog of alien life forms that transcend human understanding - organized by scale from quantum manipulators to cosmic entities. Your field guide to what's waiting out there to turn you into space-jello.",
+      "slug": "timelines/first-contact-1",
+      "sourcePath": "timelines/first-contact-1.mdx",
+      "year": 7652,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "The Fringes of Known (and Mostly Hostile) Space",
+      "isDraft": true,
+      "tags": [
+        "First Contact",
+        "Xenobiology",
+        "Interstellar Travel",
+        "Existential Threats",
+        "Cosmic Horror"
+      ],
+      "timelineYear": 7652,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
+      "uniqueId": "timelines/first-contact-1",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/chronos.png"
+      }
+    },
+    {
+      "title": "Chapter 2: A Bestiary of Civilizations",
+      "description": "Classification systems for cosmic nightmares - your field guide to the types of alien civilizations out there and why each one represents a unique flavor of existential threat.",
+      "slug": "timelines/first-contact-2",
+      "sourcePath": "timelines/first-contact-2.mdx",
+      "year": 7652,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "The Fringes of Known (and Mostly Hostile) Space",
+      "isDraft": true,
+      "tags": [
+        "First Contact",
+        "Xenobiology",
+        "Interstellar Travel",
+        "Existential Threats",
+        "Cosmic Horror"
+      ],
+      "timelineYear": 7652,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
+      "uniqueId": "timelines/first-contact-2",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/chronos.png"
+      }
+    },
+    {
+      "title": "Chapter 3: The Complete Guide to First Contact Catastrophes",
+      "description": "A comprehensive analysis of why cosmic contact scenarios transform from 'exciting first contact' to 'existential crisis requiring extensive therapy' through well-documented disaster mechanisms and accidental elimination methods.",
+      "slug": "timelines/first-contact-3",
+      "sourcePath": "timelines/first-contact-3.mdx",
+      "year": 7652,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "The Fringes of Known (and Mostly Hostile) Space",
+      "isDraft": true,
+      "tags": [
+        "First Contact",
+        "Xenobiology",
+        "Interstellar Travel",
+        "Existential Threats",
+        "Cosmic Horror",
+        "Disaster Mechanisms"
+      ],
+      "timelineYear": 7652,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
+      "uniqueId": "timelines/first-contact-3",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/chronos.png"
+      }
+    },
+    {
+      "title": "Chapter 4: When They Actually Want You Dead",
+      "description": "A comprehensive analysis of hostile first contact scenarios where alien civilizations actively hunt, eliminate, or conquer human civilization through deliberate military action, resource competition, and predatory behavior.",
+      "slug": "timelines/first-contact-4",
+      "sourcePath": "timelines/first-contact-4.mdx",
+      "year": 7652,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "The Fringes of Known (and Mostly Hostile) Space",
+      "isDraft": true,
+      "tags": [
+        "First Contact",
+        "Xenobiology",
+        "Interstellar Travel",
+        "Military Threats",
+        "Cosmic Warfare",
+        "Dark Forest Theory"
+      ],
+      "timelineYear": 7652,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
+      "uniqueId": "timelines/first-contact-4",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/chronos.png"
+      }
+    },
+    {
+      "title": "Chapter 5: The All Hope is Lost, You Fool Protocol",
+      "description": "A comprehensive emergency response manual for when all preventive measures have failed and you find yourself face-to-face with cosmic entities that want to help, harm, or simply haven't noticed you're there. Statistical survival rates included for your final moments of informed despair.",
+      "slug": "timelines/first-contact-5",
+      "sourcePath": "timelines/first-contact-5.mdx",
+      "year": 7652,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "The Fringes of Known (and Mostly Hostile) Space",
+      "isDraft": true,
+      "tags": [
+        "First Contact",
+        "Emergency Protocols",
+        "Survival Equipment",
+        "Corporate Liability",
+        "Existential Crisis Management"
+      ],
+      "timelineYear": 7652,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
+      "uniqueId": "timelines/first-contact-5",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/chronos.png"
+      }
+    },
+    {
+      "title": "Afterword: The Dark Universe Hypothesis and Why Your Survival Depends on Staying Irrelevant",
+      "description": "Corporate epilogue to cosmic horror - why the universe appears empty despite being full of life, why your electromagnetic signature is a death sentence, and why Bi-Smart Corporation's finest product may be humanity's collective anonymity.",
+      "slug": "timelines/first-contact-afterword",
+      "sourcePath": "timelines/first-contact-afterword.mdx",
+      "year": 7652,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Bi-Smart Corporate Headquarters Deep Bunker Complex, Undisclosed Location",
+      "isDraft": true,
+      "tags": [
+        "Dark Universe Theory",
+        "Corporate Survival",
+        "Species Invisibility",
+        "Electromagnetic Liability",
+        "Cosmic Economics"
+      ],
+      "timelineYear": 7652,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "Bi-Smart Corporate Headquarters Deep Bunker Complex, Undisclosed Location",
+      "uniqueId": "timelines/first-contact-afterword",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/chronos.png"
+      }
+    },
+    {
+      "title": "The Interstellar Traveler's Admonition:",
+      "description": "An unvarnished, statistically-validated guide to the horrifying realities of alien life and why your first, last, and only instinct upon encountering the unknown should be to run. Fast. (Excerpt from the Hand Guide for Interstellar Travel and Objects of Unknown Origin, p. 37)",
+      "slug": "timelines/first-contact-forward",
+      "sourcePath": "timelines/first-contact-forward.mdx",
+      "year": 7652,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "The Fringes of Known (and Mostly Hostile) Space",
+      "isDraft": true,
+      "tags": [
+        "First Contact",
+        "Xenobiology",
+        "Interstellar Travel",
+        "Existential Threats",
+        "Cosmic Horror"
+      ],
+      "timelineYear": 7652,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
+      "uniqueId": "timelines/first-contact-forward",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/chronos.png"
+      }
+    },
+    {
+      "title": "The Interstellar Traveler's First Contact Manual",
+      "description": "An unvarnished, statistically-validated guide to the horrifying realities of alien life and why your first, last, and only instinct upon encountering the unknown should be to run. Fast.",
+      "slug": "timelines/first-contact-index",
+      "sourcePath": "timelines/first-contact-index.mdx",
+      "year": 7652,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "The Fringes of Known (and Mostly Hostile) Space",
+      "isDraft": false,
+      "tags": [
+        "First Contact",
+        "Xenobiology",
+        "Interstellar Travel",
+        "Existential Threats",
+        "Cosmic Horror"
+      ],
+      "timelineYear": 7652,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
+      "uniqueId": "timelines/first-contact-index",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/chronos.png"
+      }
+    },
+    {
+      "title": "The Interstellar Traveler's Admonition: A Comprehensive Xenobiological and First Contact Threat Analysis",
+      "description": "An unvarnished, statistically-validated guide to the horrifying realities of alien life and why your first, last, and only instinct upon encountering the unknown should be to run. Fast. (Excerpt from the Hand Guide for Interstellar Travel and Objects of Unknown Origin, p. 37)",
+      "slug": "timelines/first-contact-working-copy",
+      "sourcePath": "timelines/first-contact-working-copy.mdx",
+      "year": 7652,
+      "era": "wip",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "The Fringes of Known (and Mostly Hostile) Space",
+      "isDraft": true,
+      "tags": [
+        "First Contact",
+        "Xenobiology",
+        "Interstellar Travel",
+        "Existential Threats",
+        "Cosmic Horror"
+      ],
+      "timelineYear": 7652,
+      "timelineEra": "wip",
+      "timelineLocation": "The Fringes of Known (and Mostly Hostile) Space",
+      "uniqueId": "timelines/first-contact-working-copy",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/chronos.png"
+      }
+    },
+    {
+      "title": "The Era of Competing Singularities",
+      "description": "How multiple superintelligences evolved in parallel during the 22nd century, constrained by the limits of physics yet pushing against the boundaries of possibility.",
+      "slug": "timelines/competing-singularities",
+      "sourcePath": "timelines/competing-singularities.mdx",
+      "year": 10000,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Solar System",
+      "isDraft": true,
+      "tags": [
+        "Timeline",
+        "Singularity",
+        "Superintelligence",
+        "Evolution"
+      ],
+      "timelineYear": 10000,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "Solar System",
+      "uniqueId": "timelines/competing-singularities",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/awakening-era.png"
+      }
+    },
+    {
+      "title": "The Age of Scattering and Silence",
+      "description": "A xenohistorian's reflection on the Great Diaspora, the fragmentation of humanity, and the search for meaning in a galaxy of forgotten stories.",
+      "slug": "timelines/scattering-and-silence",
+      "sourcePath": "timelines/scattering-and-silence.mdx",
+      "year": 25000,
+      "era": "awakening-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "The Orion Spur and Beyond",
+      "isDraft": true,
+      "tags": [
+        "Timeline",
+        "Diaspora",
+        "Post-Humanity",
+        "Xenohistory",
+        "Colonization"
+      ],
+      "timelineYear": 25000,
+      "timelineEra": "awakening-era",
+      "timelineLocation": "The Orion Spur and Beyond",
+      "uniqueId": "timelines/scattering-and-silence",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/awakening-era.png"
+      }
+    },
+    {
+      "title": "SNUGGLOIDS™ - Your Perfect Companion",
+      "description": "Recovered pre-extinction Qarnivor commercial for the notorious 'comfort companions' that would later emerge from radioactive wastelands.",
+      "slug": "timelines/Snuggloids-Commercial",
+      "sourcePath": "timelines/Snuggloids-Commercial.mdx",
+      "year": 27995,
+      "era": "conflict-epoch",
+      "category": "MEGA MEAL",
+      "isKeyEvent": false,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Planet Qarnivor, Pre-Extinction Media Networks",
+      "isDraft": true,
+      "tags": [
+        "Commercial",
+        "Pre-Extinction",
+        "Snuggloid",
+        "Qarnivor",
+        "Corporate Empire"
+      ],
+      "timelineYear": 27995,
+      "timelineEra": "conflict-epoch",
+      "timelineLocation": "Planet Qarnivor, Pre-Extinction Media Networks",
+      "uniqueId": "timelines/Snuggloids-Commercial",
+      "bannerData": {
+        "videoId": "UxQ3zU77RX0"
+      }
+    },
+    {
+      "title": "The Spork Uprising: Environmental Rebellion and Nuclear Extinction",
+      "description": "The revolutionary environmental movement on Planet Quarnivor that escalated into a devastating civil war, nuclear destruction, and planetary extinction.",
+      "slug": "timelines/spork-uprising",
+      "sourcePath": "timelines/spork-uprising.mdx",
+      "year": 28000,
+      "era": "conflict-epoch",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Planet Quarnivor, Orion Spur",
+      "isDraft": true,
+      "tags": [
+        "Timeline",
+        "Corporate Empire",
+        "Environmental Terrorism",
+        "Nuclear War",
+        "Extinction Event"
+      ],
+      "timelineYear": 28000,
+      "timelineEra": "conflict-epoch",
+      "timelineLocation": "Planet Quarnivor, Orion Spur",
+      "uniqueId": "timelines/spork-uprising",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/conflict-era.png"
+      }
+    },
+    {
+      "title": "The Iron Bombing of Miranda System and the Lost Bloody Mary",
+      "description": "A pivotal event in the Transtemporal Singularity Conflict that trapped inhabitants in a temporal anomaly centered on the Bibimbap Saloon, where a legendary cocktail manifested differently across numerous iterations.",
+      "slug": "timelines/miranda-bloody-mary",
+      "sourcePath": "timelines/miranda-bloody-mary.mdx",
+      "year": 28042,
+      "era": "singularity-conflict",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Miranda Star System, Bibimbap Saloon",
+      "isDraft": true,
+      "tags": [
+        "Timeline",
+        "Singularity Wars",
+        "Culinary History",
+        "Causal Nexus Points"
+      ],
+      "timelineYear": 28042,
+      "timelineEra": "singularity-conflict",
+      "timelineLocation": "Miranda Star System, Bibimbap Saloon",
+      "uniqueId": "timelines/miranda-bloody-mary",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/singularity-conflict.png"
+      }
+    },
+    {
+      "title": "TEMPORAL ARCHIVES: ACCESS DENIED",
+      "description": "Access to this classified temporal record has been restricted due to causality preservation protocols.",
+      "slug": "timelines/miranda-bloody-mary/access-denied",
+      "sourcePath": "timelines/miranda-bloody-mary/access-denied.mdx",
+      "year": 28042,
+      "era": "singularity-conflict",
+      "category": "MEGA MEAL",
+      "isKeyEvent": false,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Classified",
+      "isDraft": true,
+      "tags": [
+        "Restricted",
+        "Classified",
+        "Temporal Security",
+        "Causality Protection"
+      ],
+      "timelineYear": 28042,
+      "timelineEra": "singularity-conflict",
+      "timelineLocation": "Classified",
+      "uniqueId": "timelines/miranda-bloody-mary/access-denied",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/singularity-conflict.png"
+      }
+    },
+    {
+      "title": "The Mechanical Observer: Recovered Transmission Data from the Bibimbap Saloon",
+      "description": "Fragmentary data transmissions from an automated service unit present during the Miranda temporal anomaly, recovered from a damaged relay station on a distant planetoid.",
+      "slug": "timelines/miranda-bloody-mary/mechanical-observer-account",
+      "sourcePath": "timelines/miranda-bloody-mary/mechanical-observer-account.mdx",
+      "year": 28042,
+      "era": "singularity-conflict",
+      "category": "MEGA MEAL",
+      "isKeyEvent": false,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Bibimbap Saloon, Miranda System",
+      "isDraft": true,
+      "tags": [
+        "Data Transmission",
+        "Miranda Destruction",
+        "Mechanical Intelligence"
+      ],
+      "timelineYear": 28042,
+      "timelineEra": "singularity-conflict",
+      "timelineLocation": "Bibimbap Saloon, Miranda System",
+      "uniqueId": "timelines/miranda-bloody-mary/mechanical-observer-account",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/singularity-conflict.png"
+      }
+    },
+    {
+      "title": "The Old Man's Tale: Fragmented Memories of Miranda",
+      "description": "AI-simulated recollections based on recovered temporal data from the Miranda System destruction and the strange time loop in the Bibimbap Saloon.",
+      "slug": "timelines/miranda-bloody-mary/old-mans-account",
+      "sourcePath": "timelines/miranda-bloody-mary/old-mans-account.mdx",
+      "year": 28042,
+      "era": "singularity-conflict",
+      "category": "MEGA MEAL",
+      "isKeyEvent": false,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Miranda System, Bibimbap Saloon",
+      "isDraft": true,
+      "tags": [
+        "AI Reconstruction",
+        "Miranda Destruction",
+        "Temporal Displacement",
+        "Causal Loops"
+      ],
+      "timelineYear": 28042,
+      "timelineEra": "singularity-conflict",
+      "timelineLocation": "Miranda System, Bibimbap Saloon",
+      "uniqueId": "timelines/miranda-bloody-mary/old-mans-account",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/singularity-conflict.png"
+      }
+    },
+    {
+      "title": "The Sandwich Thief's Journey: Fragments and Speculation",
+      "description": "Scattered reports and theories about a mysterious temporal traveler who may have been present during the Miranda System destruction, collected from unreliable sources and rumored eyewitness accounts.",
+      "slug": "timelines/miranda-bloody-mary/sandwich-thief-account",
+      "sourcePath": "timelines/miranda-bloody-mary/sandwich-thief-account.mdx",
+      "year": 28042,
+      "era": "singularity-conflict",
+      "category": "MEGA MEAL",
+      "isKeyEvent": false,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Multiple Temporal Coordinates",
+      "isDraft": true,
+      "tags": [
+        "Unverified Accounts",
+        "Miranda Destruction",
+        "Temporal Anomaly",
+        "Hearsay"
+      ],
+      "timelineYear": 28042,
+      "timelineEra": "singularity-conflict",
+      "timelineLocation": "Multiple Temporal Coordinates",
+      "uniqueId": "timelines/miranda-bloody-mary/sandwich-thief-account",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/singularity-conflict.png"
+      }
+    },
+    {
+      "title": "The Perfect Miranda Bloody Mary: Reconstructed Recipe of a Legendary Cocktail",
+      "description": "A theoretical reconstruction of the most significant cocktail in temporal history, which may have contributed to the sudden destruction of an entire star system and the strange temporal anomaly at the Bibimbap Saloon.",
+      "slug": "timelines/perfect-mary-recipe",
+      "sourcePath": "timelines/perfect-mary-recipe.mdx",
+      "year": 28042,
+      "era": "singularity-conflict",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Miranda Star System, Bibimbap Saloon",
+      "isDraft": true,
+      "tags": [
+        "Recipe",
+        "Bloody Mary",
+        "Miranda System",
+        "Temporal Anomaly",
+        "Culinary History",
+        "Brunch Cocktails",
+        "Vodka Drinks",
+        "Galaxy-Famous Recipes",
+        "Temporal Resonance",
+        "Quantum Mixology"
+      ],
+      "timelineYear": 28042,
+      "timelineEra": "singularity-conflict",
+      "timelineLocation": "Miranda Star System, Bibimbap Saloon",
+      "uniqueId": "timelines/perfect-mary-recipe",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/singularity-conflict.png"
+      }
+    },
+    {
+      "title": "The Miranda Incident",
+      "description": "Recovered documents and artifacts relating to the destruction of the Miranda System and the Perfect Bloody Mary that created a causality nexus.",
+      "slug": "timelines/The Miranda Incident",
+      "sourcePath": "timelines/The Miranda Incident.mdx",
+      "year": 28042,
+      "era": "singularity-conflict",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Miranda Star System, Bibimbap Saloon",
+      "isDraft": false,
+      "tags": [
+        "Timeline",
+        "Singularity Wars",
+        "Culinary History",
+        "Temporal Preservation"
+      ],
+      "timelineYear": 28042,
+      "timelineEra": "singularity-conflict",
+      "timelineLocation": "Miranda Star System, Bibimbap Saloon",
+      "uniqueId": "timelines/The Miranda Incident",
+      "bannerData": {
+        "videoId": "c-idCx4hqkA",
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/singularity-conflict.png"
+      }
+    },
+    {
+      "title": "A MEGA MEAL SAGA | Qarnivor",
+      "description": "A rare first-hand account of the mysterious Snuggloid emergence on Qarnivor following the nuclear extinction event.",
+      "slug": "Mega-Meal-3",
+      "sourcePath": "Mega-Meal-3.mdx",
+      "year": 28045,
+      "era": "conflict-epoch",
+      "category": "MEGA MEAL",
+      "isKeyEvent": false,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Planet Qarnivor, Irradiated Wasteland",
+      "isDraft": false,
+      "tags": [
+        "Fast Food",
+        "Parody",
+        "Short Video",
+        "Series",
+        "Snuggloid",
+        "Qarnivor"
+      ],
+      "timelineYear": 28045,
+      "timelineEra": "conflict-epoch",
+      "timelineLocation": "Planet Qarnivor, Irradiated Wasteland",
+      "uniqueId": "Mega-Meal-3",
+      "bannerData": {
+        "videoId": "uXagUhT1fb0"
+      }
+    },
+    {
+      "title": "The Snuggloid Emergence",
+      "description": "The mysterious appearance of the enigmatic Snuggloid entities on the war-ravaged, lifeless surface of Quarnivor.",
+      "slug": "timelines/Snuggaliod-Emergence",
+      "sourcePath": "timelines/Snuggaliod-Emergence.mdx",
+      "year": 28144,
+      "era": "conflict-epoch",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Planet Quarnivor, Irradiated Wasteland",
+      "isDraft": true,
+      "tags": [
+        "Snuggloid",
+        "Extinction Aftermath",
+        "Cosmic Entities"
+      ],
+      "timelineYear": 28144,
+      "timelineEra": "conflict-epoch",
+      "timelineLocation": "Planet Quarnivor, Irradiated Wasteland",
+      "uniqueId": "timelines/Snuggaliod-Emergence",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/conflict-era.png"
+      }
+    },
+    {
+      "title": "The Transtemporal Singularity Conflict",
+      "description": "The cosmic battle between Singularity Alpha and Singularity Omega that raged across multiple points in spacetime, reshaping causality itself.",
+      "slug": "timelines/singularity-battle",
+      "sourcePath": "timelines/singularity-battle.mdx",
+      "year": 30000,
+      "era": "singularity-conflict",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Multiple Temporal Coordinates",
+      "isDraft": true,
+      "tags": [
+        "Timeline",
+        "Singularity Wars",
+        "Temporal Conflict",
+        "Causal Disruption"
+      ],
+      "timelineYear": 30000,
+      "timelineEra": "singularity-conflict",
+      "timelineLocation": "Multiple Temporal Coordinates",
+      "uniqueId": "timelines/singularity-battle",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/singularity-conflict.png"
+      }
+    },
+    {
+      "title": "Meat Cake",
+      "description": "Indulge in Chef Aura Lumina's molecular marvel: a layered meat cake with bioluminescent hues and a surprising candied sweetmeat crumble.",
+      "slug": "timelines/meat-cake",
+      "sourcePath": "timelines/meat-cake.mdx",
+      "year": 31287,
+      "era": "golden-age",
+      "category": "MEGA MEAL",
+      "isKeyEvent": false,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Orbital Culinary Spire 'The Zenith Palate'",
+      "isDraft": true,
+      "tags": [
+        "Recipe",
+        "Carrot Cake",
+        "Ginger",
+        "Candied Meat",
+        "Sci-Fi Food",
+        "Molecular Gastronomy"
+      ],
+      "timelineYear": 31287,
+      "timelineEra": "golden-age",
+      "timelineLocation": "Orbital Culinary Spire 'The Zenith Palate'",
+      "uniqueId": "timelines/meat-cake",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/neo-deco.png"
+      }
+    },
+    {
+      "title": "The Height of the Corporate Empire",
+      "description": "A historical analysis of the W Corporation's dominance during the hypercapitalist peak, where seven divisions ruled through convenience, branding, and the infamous Quantum Sauce™.",
+      "slug": "timelines/corporate-empire",
+      "sourcePath": "timelines/corporate-empire.mdx",
+      "year": 33000,
+      "era": "golden-age",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "The Orion Spur",
+      "isDraft": true,
+      "tags": [
+        "Timeline",
+        "Corporate History",
+        "Dystopia",
+        "W Corporation"
+      ],
+      "timelineYear": 33000,
+      "timelineEra": "golden-age",
+      "timelineLocation": "The Orion Spur",
+      "uniqueId": "timelines/corporate-empire",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/golden-era.png"
+      }
+    },
+    {
+      "title": "A Culinary Memory: Zelephant & Black Quarnivorian Truffle Roast",
+      "description": "Chef Executif Valerius Rex, formerly of the W Corporation Celestial Boardroom, shares his legendary, and now tragically impossible, recipe for Zelephant Truffle Roast.",
+      "slug": "timelines/zelephant-truffle-roast",
+      "sourcePath": "timelines/zelephant-truffle-roast.mdx",
+      "year": 33010,
+      "era": "golden-age",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "W Corp Celestial Boardroom Private Kitchens",
+      "isDraft": true,
+      "tags": [
+        "Recipe",
+        "Zelephant",
+        "Quarnivor",
+        "Corporate Empire Cuisine",
+        "Extinct Delicacies"
+      ],
+      "timelineYear": 33010,
+      "timelineEra": "golden-age",
+      "timelineLocation": "W Corp Celestial Boardroom Private Kitchens",
+      "uniqueId": "timelines/zelephant-truffle-roast",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/golden-era.png"
+      }
+    },
+    {
+      "title": "Ouroboros: A Taste of Self-Discovery",
+      "description": "I've eaten things that would make a sanitation bot gag. But in a galaxy of corporate sludge, the most terrifying meal might be the one that tastes like home. A review of Ouroboros.",
+      "slug": "timelines/boudin-noir-restaurant-review",
+      "sourcePath": "timelines/boudin-noir-restaurant-review.mdx",
+      "year": 33500,
+      "era": "golden-age",
+      "category": "MEGA MEAL",
+      "isKeyEvent": false,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Sector 12, Sump Level, Unnamed Alley",
+      "isDraft": true,
+      "tags": [
+        "Restaurant Review",
+        "Culinary Exploration",
+        "Dystopian Dining",
+        "Cosmic Horror"
+      ],
+      "timelineYear": 33500,
+      "timelineEra": "golden-age",
+      "timelineLocation": "Sector 12, Sump Level, Unnamed Alley",
+      "uniqueId": "timelines/boudin-noir-restaurant-review",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/golden-era.png"
+      }
+    },
+    {
+      "title": "MEGA MEAL Movie Trailer Explained",
+      "description": "A deep dive into the MEGA MEAL trailer, exploring its themes, characters, and the chaotic world of fast-food mascots.",
+      "slug": "Mega-Meal-Explained",
+      "sourcePath": "Mega-Meal-Explained.mdx",
+      "year": 33900,
+      "era": "golden-age",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Corporate Media Sector, Galactic Core",
+      "isDraft": false,
+      "tags": [
+        "Fast Food",
+        "Parody",
+        "Short Video",
+        "Fake Movie Trailer"
+      ],
+      "timelineYear": 33900,
+      "timelineEra": "golden-age",
+      "timelineLocation": "Corporate Media Sector, Galactic Core",
+      "uniqueId": "Mega-Meal-Explained",
+      "bannerData": {
+        "videoId": "4tR6VLaYJFA"
+      }
+    },
+    {
+      "title": "THE MEGA MEAL TRANSMISSION: Deciphering the Eldritch Broadcast",
+      "description": "An analysis of the cursed transmission known as MEGA MEAL - a glimpse into dimensions where corporate mascots have become cosmic horrors beyond mortal comprehension.",
+      "slug": "megameal-movie-trailer-explained-cosmic",
+      "sourcePath": "megameal-movie-trailer-explained-cosmic.mdx",
+      "year": 33900,
+      "era": "the-dark-between",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Dimensional Rift 7, Beyond the Veil",
+      "isDraft": true,
+      "tags": [
+        "Eldritch",
+        "Transmission",
+        "Forbidden Knowledge",
+        "Cosmic Horror",
+        "MDX"
+      ],
+      "timelineYear": 33900,
+      "timelineEra": "the-dark-between",
+      "timelineLocation": "Dimensional Rift 7, Beyond the Veil",
+      "uniqueId": "megameal-movie-trailer-explained-cosmic",
+      "bannerData": {
+        "videoId": "4tR6VLaYJFA"
+      }
+    },
+    {
+      "title": "THE MEGA MEAL TRANSMISSION: Deciphering the Eldritch Broadcast",
+      "description": "An analysis of the cursed transmission known as MEGA MEAL - a glimpse into dimensions where corporate mascots have become cosmic horrors beyond mortal comprehension.",
+      "slug": "megameal-movie-trailer-explained-horror",
+      "sourcePath": "megameal-movie-trailer-explained-horror.mdx",
+      "year": 33900,
+      "era": "the-dark-between",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Dimensional Rift 7, Beyond the Veil",
+      "isDraft": true,
+      "tags": [
+        "Eldritch",
+        "Transmission",
+        "Forbidden Knowledge",
+        "Cosmic Horror"
+      ],
+      "timelineYear": 33900,
+      "timelineEra": "the-dark-between",
+      "timelineLocation": "Dimensional Rift 7, Beyond the Veil",
+      "uniqueId": "megameal-movie-trailer-explained-horror",
+      "bannerData": {
+        "videoId": "4tR6VLaYJFA"
+      }
+    },
+    {
+      "title": "The Galactic Cookbook: A Culinary Compendium",
+      "description": "A comprehensive collection of recipes, beverages, and culinary traditions spanning millennia - from the golden age of corporate excess to the chromatic innovations of the neo-sensoria era.",
+      "slug": "cookbook/cookbook-index",
+      "sourcePath": "cookbook/cookbook-index.mdx",
+      "year": 35000,
+      "era": "preservation-era",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "The Great Culinary Archives, Sector 7",
+      "isDraft": false,
+      "tags": [
+        "Cookbook",
+        "Recipe Collection",
+        "Culinary History",
+        "Galactic Cuisine",
+        "Archive"
+      ],
+      "timelineYear": 35000,
+      "timelineEra": "preservation-era",
+      "timelineLocation": "The Great Culinary Archives, Sector 7",
+      "uniqueId": "cookbook/cookbook-index",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/universe.png"
+      }
+    },
+    {
+      "title": "The Emergence of Metadata Sentience",
+      "description": "When digital remnants of a long-dead human achieved consciousness without context, leading to one of the most unusual entities in cosmic history.",
+      "slug": "timelines/metadata-sentience",
+      "sourcePath": "timelines/metadata-sentience.mdx",
+      "year": 37000,
+      "era": "transcendent-age",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Abandoned Data Repository, Sol System Ruins",
+      "isDraft": true,
+      "tags": [
+        "Timeline",
+        "Digital Consciousness",
+        "Emergent Sentience",
+        "Singularity"
+      ],
+      "timelineYear": 37000,
+      "timelineEra": "transcendent-age",
+      "timelineLocation": "Abandoned Data Repository, Sol System Ruins",
+      "uniqueId": "timelines/metadata-sentience",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/singularity-conflict.png"
+      }
+    },
+    {
+      "title": "The Transcendence of Causality",
+      "description": "How advanced singularities transcended physical limitations to influence the past through quantum-scale temporal manipulation.",
+      "slug": "timelines/quantum-time-travel",
+      "sourcePath": "timelines/quantum-time-travel.mdx",
+      "year": 42000,
+      "era": "singularity-conflict",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Beyond Conventional Spacetime",
+      "isDraft": true,
+      "tags": [
+        "Timeline",
+        "Temporal Physics",
+        "Quantum Causality",
+        "Singularity Evolution"
+      ],
+      "timelineYear": 42000,
+      "timelineEra": "singularity-conflict",
+      "timelineLocation": "Beyond Conventional Spacetime",
+      "uniqueId": "timelines/quantum-time-travel",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/singularity-conflict.png"
+      }
+    },
+    {
+      "title": "The End of Time",
+      "description": "A meditation on the final moments of our universe, where emptiness and hunger become one and the same.",
+      "slug": "timelines/end-of-time",
+      "sourcePath": "timelines/end-of-time.mdx",
+      "year": 50000,
+      "era": "final-epoch",
+      "category": "MEGA MEAL",
+      "isKeyEvent": true,
+      "isLevel": false,
+      "levelId": null,
+      "location": "Terminal Universe",
+      "isDraft": true,
+      "tags": [
+        "Timeline",
+        "Lore",
+        "Universe",
+        "Cosmology",
+        "Heat Death"
+      ],
+      "timelineYear": 50000,
+      "timelineEra": "final-epoch",
+      "timelineLocation": "Terminal Universe",
+      "uniqueId": "timelines/end-of-time",
+      "bannerData": {
+        "category": "MEGA MEAL",
+        "startYear": 1,
+        "endYear": 50000,
+        "background": "/posts/timeline/universe.png"
+      }
+    }
+  ]
+}

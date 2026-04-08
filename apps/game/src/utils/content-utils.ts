@@ -1,16 +1,16 @@
-import { getCollection } from 'astro:content'
+import postsManifest from '../../../../packages/shared-data/generated/posts.json'
 
 export type GamePostData = {
   title: string
-  published: Date
+  published?: Date | string | null
   draft?: boolean
   description?: string
   tags?: string[]
   category?: string
-  timelineYear?: string
+  timelineYear?: number
   bannerType?: string
-  era?: string
-  location?: string
+  timelineEra?: string
+  timelineLocation?: string
   isKeyEvent?: boolean
   isLevel?: boolean
   levelId?: string | null
@@ -23,13 +23,31 @@ export type GamePostData = {
 export async function getSortedPosts(
   includeDrafts = false,
 ): Promise<{ body: string; data: GamePostData; slug: string }[]> {
-  const allPosts = (await getCollection('posts', ({ data }) => {
-    return includeDrafts ? true : data.draft !== true
-  })) as unknown as { body: string; data: GamePostData; slug: string }[]
+  const allPosts: { body: string; data: GamePostData; slug: string }[] = postsManifest.items
+    .filter(post => (includeDrafts ? true : post.draft !== true))
+    .map(post => ({
+      body: '',
+      data: {
+        title: post.title,
+        published: post.published,
+        draft: post.draft,
+        description: post.description,
+        tags: post.tags,
+        category: post.category,
+        timelineYear: post.timelineYear,
+        bannerType: post.bannerType,
+        timelineEra: post.timelineEra,
+        timelineLocation: post.timelineLocation,
+        isKeyEvent: post.isKeyEvent,
+        isLevel: post.isLevel,
+        levelId: post.levelId ?? null,
+      } satisfies GamePostData,
+      slug: post.slug,
+    }))
 
   const sorted = allPosts.sort((a, b) => {
-    const dateA = new Date(a.data.published)
-    const dateB = new Date(b.data.published)
+    const dateA = new Date(a.data.published ?? 0)
+    const dateB = new Date(b.data.published ?? 0)
     return dateA > dateB ? -1 : 1
   })
 

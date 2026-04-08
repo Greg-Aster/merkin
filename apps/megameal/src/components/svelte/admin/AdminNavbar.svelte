@@ -3,7 +3,7 @@ import { onMount } from 'svelte'
 import { slide } from 'svelte/transition'
 
 // Props
-export const siteTitle = 'Blog'
+export let siteTitle = 'Blog'
 
 // State
 let isAuthenticatedState = false

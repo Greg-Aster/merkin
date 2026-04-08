@@ -8,6 +8,7 @@ import {
   getEraDisplayName,
   groupEventsByEra,
 } from '@/services/TimelineService.client'
+import ImageWrapper from '../../misc/ImageWrapper.astro'
 
 export interface Props {
   events?: TimelineEvent[]
@@ -29,7 +30,12 @@ console.log('ListView.astro: Generated ID:', listViewId)
 <div class="timeline-interface relative w-full h-full" id={listViewId}>
   <!-- Cosmic Background System -->
   <div class="absolute inset-0 -z-10 overflow-hidden">
-    <img src={background} alt="Timeline background" class="w-full h-full object-cover opacity-20 dark:opacity-15" />
+    <ImageWrapper
+      src={background}
+      alt="Timeline background"
+      class="w-full h-full opacity-20 dark:opacity-15"
+      loading="eager"
+    />
     <div class="absolute inset-0 bg-gradient-to-br from-[oklch(0.25_0.03_var(--hue))] via-[oklch(0.15_0.05_var(--hue))] to-[oklch(0.10_0.08_var(--hue))] opacity-60 dark:from-[oklch(0.08_0.02_var(--hue))] dark:via-[oklch(0.04_0.03_var(--hue))] dark:to-[oklch(0.02_0.04_var(--hue))] dark:opacity-95"></div>
     <div class="scanlines absolute inset-0 opacity-10 dark:opacity-5"></div>
   </div>

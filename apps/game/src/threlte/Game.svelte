@@ -381,19 +381,10 @@
         
         <Time on:timeUpdate={(e) => dispatch('timeUpdate', e.detail)} />
         
-        <PerformanceSystem 
+        <PerformanceSystem
           enablePerformanceMonitoring={true}
           enableAutomaticOptimization={true}
-          targetFPS={60}
-          on:performanceUpdate={(e) => {
-            dispatch('performanceUpdate', e.detail)
-            // Automatically adjust post-processing quality based on performance
-            if (e.detail.averageFPS) {
-              import('./stores/postProcessingStore').then(({ adjustQualityForPerformance }) => {
-                adjustQualityForPerformance(e.detail.averageFPS, 60)
-              })
-            }
-          }}
+          on:performanceUpdate={(e) => dispatch('performanceUpdate', e.detail)}
           on:qualityChanged={(e) => dispatch('qualityChanged', e.detail)}
         />
         
@@ -422,7 +413,7 @@
         {/if}
         
         <!-- Audio System -->
-        <Audio enabled={false} />
+        <Audio enabled={true} />
         
         <!-- ECS Spawn System - Handles all entity spawning -->
         <SpawnSystem
@@ -437,7 +428,7 @@
         <Physics
           ccd={true}
           integrationParameters={{
-            dt: 1 / 60,
+            dt: isMobile ? 1 / 30 : 1 / 60,
             minSolverIterations: isMobile ? 8 : 16
           }}
           on:physicsReady={() => physicsReady = true}

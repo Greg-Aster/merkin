@@ -35,21 +35,22 @@ export interface QualitySettings {
   enablePostProcessing: boolean
   enableShadows: boolean
   enableDynamicLighting: boolean
-  
+  shadowMapSize: number  // 0 = shadows disabled; otherwise shadow map resolution in px
+
   // Textures
   textureResolution: number
   enableProceduralTextures: boolean
   enableNormalMaps: boolean
-  
+
   // Effects
   enableReflections: boolean
   enableRefractions: boolean
   enableVegetation: boolean
-  
+
   // Performance limits
   maxFireflyLights: number
   maxVegetationInstances: number
-  
+
   // Component-specific overrides (components register their own settings)
   componentOverrides: Map<string, any>
 }
@@ -70,6 +71,7 @@ export class OptimizationManager {
       canvasScale: 0.6,
       enablePostProcessing: false,
       enableShadows: false,
+      shadowMapSize: 0,
       enableDynamicLighting: false,
       textureResolution: 256,
       enableProceduralTextures: false,
@@ -85,6 +87,7 @@ export class OptimizationManager {
       canvasScale: 0.75,
       enablePostProcessing: false,
       enableShadows: false,
+      shadowMapSize: 0,
       enableDynamicLighting: true,
       textureResolution: 256,
       enableProceduralTextures: true,
@@ -100,6 +103,7 @@ export class OptimizationManager {
       canvasScale: 0.9,
       enablePostProcessing: true,
       enableShadows: true,
+      shadowMapSize: 512,
       enableDynamicLighting: true,
       textureResolution: 512,
       enableProceduralTextures: true,
@@ -115,6 +119,7 @@ export class OptimizationManager {
       canvasScale: 1.0,
       enablePostProcessing: true,
       enableShadows: true,
+      shadowMapSize: 1024,
       enableDynamicLighting: true,
       textureResolution: 1024,
       enableProceduralTextures: true,
@@ -130,6 +135,7 @@ export class OptimizationManager {
       canvasScale: 1.0,
       enablePostProcessing: true,
       enableShadows: true,
+      shadowMapSize: 2048,
       enableDynamicLighting: true,
       textureResolution: 2048,
       enableProceduralTextures: true,

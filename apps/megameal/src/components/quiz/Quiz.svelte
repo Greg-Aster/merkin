@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import { fly, scale } from 'svelte/transition';
   import { cubicOut, elasticOut } from 'svelte/easing';
+  import { playSiteSfx } from '../../utils/site-sfx';
 
   // Props for the new graph-based quiz structure
   export let initialQuestion: string;
@@ -43,16 +44,23 @@
 
   function handleAnswerSelect(index: number) {
     selectedAnswerIndex = index;
+    playSiteSfx('select');
   }
 
   function handleNext() {
-    if (selectedAnswerIndex === null || !currentNode) return;
+    if (selectedAnswerIndex === null || !currentNode) {
+      playSiteSfx('error');
+      return;
+    }
     
     const chosenOption = currentNode.options[selectedAnswerIndex];
     if (!chosenOption) {
       console.error('Invalid option selected');
+      playSiteSfx('error');
       return;
     }
+
+    playSiteSfx('panel-open');
     
     // Show thinking animation
     quizState = 'thinking';
@@ -95,6 +103,7 @@
   }
 
   function handleRestart() {
+    playSiteSfx('panel-back');
     quizState = 'asking';
     currentNodeId = initialQuestion;
     selectedAnswerIndex = null;

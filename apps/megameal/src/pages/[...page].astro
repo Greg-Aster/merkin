@@ -1,5 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro'
+import postsManifest from '../../../../packages/shared-data/generated/posts.json'
+import timelineManifest from '../../../../packages/shared-data/generated/timeline.json'
 import PostPage from '../components/PostPage.astro'
 import Pagination from '../components/control/Pagination.astro'
 import FeaturedArc from '../components/home/FeaturedArc.astro'
@@ -19,29 +21,38 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page } = Astro.props
 const isFirstPage = page.currentPage === 1
 const len = page.data.length
+const publishedDispatchCount = postsManifest.items.filter(post => !post.draft).length
+const publishedTimelineCount = timelineManifest.items.filter(event => !event.isDraft).length
 ---
 
 <MainGridLayout homeLayout="portal">
   {isFirstPage && (
     <>
-      <div class="appear-on-scroll">
-        <PortalDestinations />
+      <div id="portal-overview" class="appear-on-scroll delay-1">
+        <PortalDestinations
+          publishedDispatchCount={publishedDispatchCount}
+          timelineCount={publishedTimelineCount}
+        />
       </div>
-      <div class="appear-on-scroll delay-2 featured-arc-section">
+      <div class="appear-on-scroll delay-2 featured-arc-section deferred-section">
         <FeaturedArc />
       </div>
       <div class="dispatches-header appear-on-scroll delay-3">
         <span class="dispatches-label">Recent Dispatches</span>
-        <span class="dispatches-sub">New chapters, reports, recipes, and transmissions from the archive</span>
+        <span class="dispatches-sub">
+          {publishedDispatchCount} published transmissions across {publishedTimelineCount} live timeline nodes.
+        </span>
       </div>
     </>
   )}
-  <PostPage page={page}></PostPage>
-  <Pagination
-    class="mx-auto onload-animation"
-    page={page}
-    style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
-  ></Pagination>
+  <div class="dispatches-stream deferred-section">
+    <PostPage page={page}></PostPage>
+    <Pagination
+      class="mx-auto onload-animation"
+      page={page}
+      style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
+    ></Pagination>
+  </div>
   {isFirstPage && (
     <FactsWidget
       slot="overlay"
@@ -54,7 +65,7 @@ const len = page.data.length
     />
   )}
   {isFirstPage && (
-    <div class="era-browser-wrapper appear-on-scroll">
+    <div class="era-browser-wrapper appear-on-scroll deferred-section">
       <EraBrowser />
     </div>
   )}
@@ -63,8 +74,13 @@ const len = page.data.length
 <script>
   // Scroll-reveal entrance animations
   const observer = new IntersectionObserver(
-    (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('is-visible') }),
-    { threshold: 0.08 }
+    (entries) =>
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+        entry.target.classList.add('is-visible')
+        observer.unobserve(entry.target)
+      }),
+    { threshold: 0.02, rootMargin: '0px 0px -8% 0px' }
   )
   document.querySelectorAll('.appear-on-scroll').forEach(el => observer.observe(el))
 </script>
@@ -95,5 +111,25 @@ const len = page.data.length
 
   .era-browser-wrapper {
     margin-top: 2.5rem;
+  }
+
+  @supports (content-visibility: auto) {
+    .deferred-section,
+    .dispatches-stream {
+      content-visibility: auto;
+      contain-intrinsic-size: 1px 720px;
+    }
+
+    .era-browser-wrapper {
+      contain-intrinsic-size: 1px 840px;
+    }
+  }
+
+  @media (max-width: 48rem) {
+    .dispatches-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.3rem;
+    }
   }
 </style>

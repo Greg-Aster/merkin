@@ -71,10 +71,50 @@ class BannerAnimationController {
     return true
   }
 
+  private ensureSlideMediaLoaded(index: number): void {
+    const slide = this.slides[index]
+    if (!slide) return
+
+    const deferredVideos = slide.querySelectorAll<HTMLVideoElement>(
+      'video[data-src]',
+    )
+
+    deferredVideos.forEach(video => {
+      const deferredSrc = video.dataset.src
+      if (!deferredSrc || video.getAttribute('src')) return
+
+      video.src = deferredSrc
+      video.removeAttribute('data-src')
+      video.load()
+    })
+  }
+
+  private syncSlidePlayback(activeIndex: number): void {
+    this.slides.forEach((slide, index) => {
+      const video = slide.querySelector<HTMLVideoElement>('video')
+      if (!video) return
+
+      if (index === activeIndex) {
+        const playPromise = video.play()
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => {})
+        }
+      } else {
+        video.pause()
+      }
+    })
+  }
+
   private showSlide(index: number): void {
+    this.ensureSlideMediaLoaded(index)
+
     this.slides.forEach((slide, i) => {
       slide.style.opacity = i === index ? '1' : '0'
+      slide.style.pointerEvents = i === index ? '' : 'none'
+      slide.dataset.active = i === index ? 'true' : 'false'
     })
+
+    this.syncSlidePlayback(index)
     this.currentIndex = index
   }
 

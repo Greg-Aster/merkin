@@ -5,14 +5,20 @@ export interface TimelineEvent {
   title: string
   description: string
   slug: string
+  sourcePath?: string
   year: number
   era?: string
   category?: string
+  tags?: string[]
   isKeyEvent: boolean
   levelId?: string // The ID used by LevelManager to load the level
   isLevel?: boolean
   location?: string
   isDraft?: boolean
+  timelineYear?: number
+  timelineEra?: string
+  timelineLocation?: string
+  uniqueId?: string
   bannerData?: {
     category?: string
     startYear?: number

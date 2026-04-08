@@ -3,10 +3,15 @@ import tailwind from '@astrojs/tailwind'
 import { defineConfig } from 'astro/config'
 
 const siteUrl = process.env.SITE_URL || 'https://game.megameal.org'
+const configuredBasePath = process.env.GAME_BASE_PATH || process.env.PUBLIC_BASE_PATH || '/'
+const normalizedBasePath =
+  configuredBasePath === '/'
+    ? '/'
+    : `/${configuredBasePath.replace(/^\/+|\/+$/g, '')}/`
 
 export default defineConfig({
   site: siteUrl,
-  base: '/',
+  base: normalizedBasePath,
   trailingSlash: 'always',
   // Reuse the 1.4GB of 3D assets from MEGAMEAL/ without duplicating them
   publicDir: '../../MEGAMEAL/public',

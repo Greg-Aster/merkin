@@ -82,6 +82,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
             type="button"
             class="facts-widget-refresh"
             data-action="next"
+            data-sfx-click="sweep"
             aria-label="Show the next sponsored campaign"
           >
             Next Campaign
@@ -91,6 +92,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
               type="button"
               class="facts-widget-dismiss"
               data-action="dismiss"
+              data-sfx-click="panel-back"
               aria-label="Dismiss sponsored transmission window"
             >
               ×
@@ -126,6 +128,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
             href={initialHref || '/posts/explainer/'}
             class="facts-widget-cta"
             data-fact-cta
+            data-sfx-click="sweep"
           >
             {initialFact.ctaText || 'Comply'}
           </a>
@@ -150,6 +153,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
         type="button"
         class="facts-widget-restore"
         data-action="restore"
+        data-sfx-click="panel-open"
         aria-label="Restore sponsored transmission window"
       >
         Resume Sponsored Feed
@@ -164,6 +168,10 @@ const initialHref = resolveTimelineFactHref(initialFact)
   if (!widget) {
     console.error(`FactsWidget: could not find widget ${widgetId}`)
   } else {
+    const emitSfx = id => {
+      document.dispatchEvent(new CustomEvent('megameal:sfx', { detail: { id } }))
+    }
+
     const eyebrowEl = widget.querySelector('[data-fact-eyebrow]')
     const headlineEl = widget.querySelector('[data-fact-headline]')
     const textEl = widget.querySelector('[data-fact-text]')
@@ -313,6 +321,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
         const nextPinned = widget.dataset.pinned !== 'true'
         setPinned(nextPinned)
         setExpanded(nextPinned || widget.matches(':hover'))
+        emitSfx(nextPinned ? 'panel-open' : 'panel-back')
       })
     }
 

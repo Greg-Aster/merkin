@@ -1,79 +1,89 @@
-<!-- 
-  Threlte Renderer Component - Simplified for Phase 4
-  Now focuses only on renderer configuration, post-processing handled separately
+<!--
+  Threlte Renderer Component
+  Configures the WebGL renderer and reacts to quality tier changes.
 -->
 <script lang="ts">
 import { T, useThrelte } from '@threlte/core'
-import { onMount } from 'svelte'
+import { onMount, onDestroy } from 'svelte'
 import * as THREE from 'three'
+import { qualitySettingsStore } from '../features/performance'
 
-// Renderer configuration - matches existing Engine.ts settings
+// Renderer configuration
 export let antialias = true
 export let alpha = false
 export let powerPreference: 'default' | 'high-performance' | 'low-power' = 'high-performance'
 export let maxPixelRatio = 2
 
-// Mobile optimization
+// Mobile detection (used only for renderer creation params — quality system handles everything else)
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
   navigator.userAgent
 )
 
-// Threlte context
-const { renderer } = useThrelte()
-
-// Configuration object
 const config = {
-  antialias: isMobile ? false : antialias, // Disable on mobile for performance
+  antialias: isMobile ? false : antialias,
   alpha,
   powerPreference: isMobile ? 'low-power' : powerPreference,
-  maxPixelRatio: isMobile ? 1.5 : maxPixelRatio
+  maxPixelRatio: isMobile ? 1.5 : maxPixelRatio,
 }
+
+const { renderer } = useThrelte()
+
+function applyQualitySettings(quality: { canvasScale: number; shadowMapSize: number }) {
+  if (!renderer) return
+
+  // Canvas scale — drives render resolution
+  const scale = quality.canvasScale
+  const w = Math.floor(window.innerWidth * scale)
+  const h = Math.floor(window.innerHeight * scale)
+  renderer.setSize(w, h)
+  renderer.domElement.style.width = window.innerWidth + 'px'
+  renderer.domElement.style.height = window.innerHeight + 'px'
+
+  // Shadow map
+  renderer.shadowMap.enabled = quality.shadowMapSize > 0
+  if (quality.shadowMapSize > 0) {
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+  }
+  // Broadcast shadow map size so lights can update their shadow.mapSize
+  window.dispatchEvent(new CustomEvent('game:shadowMapSize', { detail: quality.shadowMapSize }))
+}
+
+let unsubscribe: (() => void) | undefined
 
 onMount(() => {
   if (!renderer) {
     console.warn('⚠️ Renderer not available in Threlte context')
     return
   }
-  
+
   console.log('🎨 Configuring Threlte renderer...')
-  
-  // Shadow mapping
-  renderer.shadowMap.enabled = true
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap
-  
-  // Tone mapping
+
+  // One-time renderer setup
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.0
-  
-  // Background
   renderer.setClearColor(0x000000, 1)
   renderer.autoClear = true
-  
-  // Performance optimizations
   renderer.info.autoReset = false
-  
-  // Mobile resolution scaling
-  if (isMobile) {
-    const mobileScale = 0.75
-    const width = Math.floor(window.innerWidth * mobileScale)
-    const height = Math.floor(window.innerHeight * mobileScale)
-    renderer.setSize(width, height)
-    renderer.domElement.style.width = window.innerWidth + 'px'
-    renderer.domElement.style.height = window.innerHeight + 'px'
-  }
-  
-  // Pixel ratio
+
+  // Pixel ratio (fixed — not quality-tier dependent)
   const pixelRatio = Math.min(window.devicePixelRatio, config.maxPixelRatio)
   renderer.setPixelRatio(pixelRatio)
-  
-  console.log('✅ Threlte renderer configured with optimizations')
+
+  // Subscribe to quality changes — applies canvas scale and shadow settings reactively
+  unsubscribe = qualitySettingsStore.subscribe(quality => {
+    applyQualitySettings(quality)
+  })
+
+  console.log('✅ Threlte renderer configured')
 })
 
-// Export configuration for other components
+onDestroy(() => {
+  unsubscribe?.()
+})
+
 export { config }
 </script>
 
-<!-- Renderer configuration -->
 <T.WebGLRenderer
   antialias={config.antialias}
   alpha={config.alpha}

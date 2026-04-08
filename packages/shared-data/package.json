@@ -1,0 +1,23 @@
+{
+  "name": "@merkin/shared-data",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./generated/*": "./generated/*.json"
+  },
+  "scripts": {
+    "build": "node --experimental-strip-types ./src/build/write-generated.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@merkin/shared-content": "workspace:*",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "typescript": "^5.7.3"
+  }
+}

@@ -46,16 +46,33 @@ export const navBarConfig: NavBarConfig = {
   links: [
     0,
     {
-      name: 'Timeline Map',
+      name: 'Timeline',
       url: '/posts/explainer/',
-      // dropdown: [
-      //   { name:  "Map ", url: "/posts/explainer/" },
-      //   { name:  "Cookbook ", url: "/posts/cookbook/cookbook-index/" },
-      // ]
+    },
+    {
+      name: 'Game',
+      url: '/game/',
     },
     3,
     1,
-    2,
+    {
+      name: 'More',
+      url: '/about/',
+      dropdown: [
+        {
+          name: 'Cookbook',
+          url: '/posts/cookbook/cookbook-index/',
+        },
+        {
+          name: 'Quizzes',
+          url: '/quiz/',
+        },
+        {
+          name: 'About',
+          url: '/about/',
+        },
+      ],
+    },
   ],
 }
 

@@ -92,6 +92,7 @@
     inset: 0;
     z-index: 0;
     transform: scale(1.04);
+    pointer-events: none;
     animation: heroBackgroundDrift 18s ease-in-out infinite alternate;
   }
 
@@ -115,9 +116,9 @@
       radial-gradient(1px 1px at 15% 35%, rgba(255,255,255,0.6) 0%, transparent 100%),
       radial-gradient(1px 1px at 55% 85%, rgba(200,200,255,0.7) 0%, transparent 100%),
       radial-gradient(1px 1px at 80% 25%, rgba(255,255,255,0.5) 0%, transparent 100%),
-      radial-gradient(1px 1px at 35% 45%, rgba(255,220,200,0.6) 0%, transparent 100%),
-      black;
-    opacity: 0.92;
+      radial-gradient(1px 1px at 35% 45%, rgba(255,220,200,0.6) 0%, transparent 100%);
+    opacity: 0.04;
+    mix-blend-mode: screen;
     animation: starsDrift 36s linear infinite alternate;
     will-change: transform;
   }
@@ -146,6 +147,8 @@
       radial-gradient(2px 2px at 93% 82%, rgba(255,255,255,0.8) 0%, transparent 100%),
       radial-gradient(1.5px 1.5px at 25% 14%, rgba(255,220,180,0.9) 0%, transparent 100%),
       transparent;
+    opacity: 0.45;
+    mix-blend-mode: screen;
     animation: starsTwinkle 6.5s ease-in-out infinite,
                starsTwinkleDrift 48s linear infinite alternate;
     will-change: opacity, transform;
@@ -171,8 +174,9 @@
       radial-gradient(ellipse 80% 50% at 20% 40%, oklch(0.25 0.15 var(--hue)) 0%, transparent 70%),
       radial-gradient(ellipse 60% 40% at 80% 60%, oklch(0.2 0.1 calc(var(--hue) + 60)) 0%, transparent 70%),
       radial-gradient(ellipse 40% 60% at 50% 80%, oklch(0.15 0.08 calc(var(--hue) - 40)) 0%, transparent 60%);
-    opacity: 0.78;
-    filter: blur(8px);
+    opacity: 0.24;
+    filter: blur(14px);
+    mix-blend-mode: screen;
     animation: nebulaPulse 10s ease-in-out infinite,
                nebulaDrift 22s ease-in-out infinite alternate;
   }
@@ -196,8 +200,8 @@
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(ellipse 100% 100% at 50% 50%, transparent 34%, rgba(0,0,0,0.86) 100%),
-      linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.5));
+      radial-gradient(ellipse 100% 100% at 50% 48%, transparent 40%, rgba(0,0,0,0.22) 100%),
+      linear-gradient(180deg, rgba(3, 8, 18, 0.04), rgba(3, 8, 18, 0.16));
   }
 
   /* ---- Content ---- */
@@ -210,11 +214,13 @@
     transition: transform 0.1s ease-out;
     will-change: transform;
     padding: 1.35rem 1.6rem 1.55rem;
-    background: linear-gradient(180deg, rgba(4, 8, 16, 0.22), rgba(4, 8, 16, 0.08));
-    backdrop-filter: blur(6px) saturate(1.08);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(180deg, rgba(4, 8, 16, 0.14), rgba(4, 8, 16, 0.05));
+    backdrop-filter: blur(4px) saturate(1.05);
+    border: 1px solid rgba(255,255,255,0.06);
     border-radius: 1.2rem;
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22);
+    box-shadow:
+      0 18px 44px rgba(0, 0, 0, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
   .hero-eyebrow {

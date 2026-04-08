@@ -81,10 +81,10 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
         />
         {allImages.length > 1 && (
           <>
-            <button class="gallery-nav gallery-prev absolute top-1/2 left-2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/75 focus:outline-none z-10">
+            <button data-sfx-click="soft" class="gallery-nav gallery-prev absolute top-1/2 left-2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/75 focus:outline-none z-10">
               <Icon name="mdi:chevron-left" class="h-6 w-6" />
             </button>
-            <button class="gallery-nav gallery-next absolute top-1/2 right-2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/75 focus:outline-none z-10">
+            <button data-sfx-click="soft" class="gallery-nav gallery-next absolute top-1/2 right-2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/75 focus:outline-none z-10">
               <Icon name="mdi:chevron-right" class="h-6 w-6" />
             </button>
           </>
@@ -143,6 +143,7 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
             class="tab-link px-4 py-3 text-sm font-medium -mb-px border-b-2 focus:outline-none data-[active=true]:border-[var(--primary)] data-[active=true]:text-[var(--primary)] text-slate-400 dark:text-slate-300 hover:text-[var(--primary-hover)] dark:hover:text-[var(--primary)] border-transparent"
             data-tab-type="description"
             data-active="true"
+            data-sfx-click="select"
             type="button"
             role="tab"
             aria-controls={`tab-description-${product.id.replace(/\./g, '-')}`}
@@ -157,6 +158,7 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
             class="tab-link px-4 py-3 text-sm font-medium -mb-px border-b-2 focus:outline-none data-[active=true]:border-[var(--primary)] data-[active=true]:text-[var(--primary)] text-slate-400 dark:text-slate-300 hover:text-[var(--primary-hover)] dark:hover:text-[var(--primary)] border-transparent"
             data-tab-type="specifications"
             data-active="false"
+            data-sfx-click="select"
             type="button"
             role="tab"
             aria-controls={`tab-specifications-${product.id.replace(/\./g, '-')}`}
@@ -171,6 +173,7 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
             class="tab-link px-4 py-3 text-sm font-medium -mb-px border-b-2 focus:outline-none data-[active=true]:border-[var(--primary)] data-[active=true]:text-[var(--primary)] text-slate-400 dark:text-slate-300 hover:text-[var(--primary-hover)] dark:hover:text-[var(--primary)] border-transparent"
             data-tab-type="qanda"
             data-active="false"
+            data-sfx-click="select"
             type="button"
             role="tab"
             aria-controls={`tab-qanda-${product.id.replace(/\./g, '-')}`}
@@ -185,6 +188,7 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
             class="tab-link px-4 py-3 text-sm font-medium -mb-px border-b-2 focus:outline-none data-[active=true]:border-[var(--primary)] data-[active=true]:text-[var(--primary)] text-slate-400 dark:text-slate-300 hover:text-[var(--primary-hover)] dark:hover:text-[var(--primary)] border-transparent"
             data-tab-type="reviews"
             data-active="false"
+            data-sfx-click="select"
             type="button"
             role="tab"
             aria-controls={`tab-reviews-${product.id.replace(/\./g, '-')}`}
@@ -231,7 +235,7 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
         {sku && <p class="text-xs text-slate-500">SKU: {sku}</p>}
       </div>
       
-      <button class="w-full btn-primary text-white font-semibold py-3 px-4 rounded-[var(--radius-medium)] transition-all duration-200 ease-in-out
+      <button data-sfx-click="select" class="w-full btn-primary text-white font-semibold py-3 px-4 rounded-[var(--radius-medium)] transition-all duration-200 ease-in-out
                      hover:bg-[var(--primary-hover)] hover:ring-2 hover:ring-[var(--primary-hover)] hover:ring-offset-2 hover:ring-offset-slate-800
                      active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 focus:ring-offset-slate-800">
         Add to Cart
@@ -478,7 +482,7 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
               <textarea name="reviewerComment" id="reviewerComment-${safeProdId}" rows="4" required class="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] transition-colors duration-150 ease-in-out" placeholder="Your insightful review..."></textarea>
             </div>
 
-            <button type="submit" class="w-full sm:w-auto btn-primary text-white font-semibold py-2.5 px-5 rounded-[var(--radius-medium)] transition-all duration-200 ease-in-out hover:bg-[var(--primary-hover)] active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-slate-800">Submit Review</button>
+            <button type="submit" data-sfx-click="select" class="w-full sm:w-auto btn-primary text-white font-semibold py-2.5 px-5 rounded-[var(--radius-medium)] transition-all duration-200 ease-in-out hover:bg-[var(--primary-hover)] active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-slate-800">Submit Review</button>
             <div id="review-form-message-${safeProdId}" class="review-form-message mt-3 text-sm"></div>
           </form>
         `;

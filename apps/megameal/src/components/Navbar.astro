@@ -9,6 +9,7 @@ import Search from './Search.svelte'
 import AdminNavbar from './svelte/admin/AdminNavbar.svelte'
 import DisplaySettings from './widget/DisplaySettings.svelte'
 import NavMenuPanel from './widget/NavMenuPanel.astro'
+import SiteAudioControl from './client/SiteAudioControl.svelte'
 
 const className = Astro.props.class
 
@@ -21,6 +22,10 @@ const links: NavBarLink[] = navBarConfig.links.map(
   },
 )
 
+const homeLink =
+  links.find(link => !link.external && link.url === '/') ?? LinkPresets[LinkPreset.Home]
+const navigationLinks = links.filter(link => link !== homeLink)
+const brandLabel = 'MEGAMEAL'
 // Check authentication status from cookies
 const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
 ---
@@ -29,14 +34,42 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
     <div class="absolute h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->
     <div class:list={[
         className,
-        "card-base !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto flex items-center justify-between px-4"]}>
+        "card-base !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4"]}>
         
-        <!-- Admin Navbar Component (handles login, settings toggle, etc.) -->
-        <AdminNavbar client:load siteTitle={siteConfig.title} />
+        <div class="flex items-center justify-start min-w-0">
+            <!-- Admin controls only need to appear for authenticated sessions. -->
+            {isAuthenticated && <AdminNavbar client:load siteTitle={siteConfig.title} />}
+            {!isAuthenticated && (
+                <a
+                  aria-label={`${siteConfig.title} home`}
+                  href={homeLink.external ? homeLink.url : url(homeLink.url)}
+                  target={homeLink.external ? "_blank" : null}
+                  class="group flex items-center overflow-visible rounded-xl px-2 py-1.5 transition-all duration-200 hover:bg-white/6 active:scale-[0.98]"
+                >
+                    <span
+                      class="megameal-mark hidden sm:block select-none rounded-[1rem] px-3.5 py-2.5 transition-all duration-300"
+                    >
+                        <span class="megameal-mark__inner block leading-[0.9]" style="transform: skewX(-12deg);">
+                            <span
+                              class="megameal-mark__mega block text-[0.82rem] font-black uppercase tracking-[0.26em] transition-all duration-300"
+                            >
+                              MEGA
+                            </span>
+                            <span
+                              class="megameal-mark__meal block pl-3 text-[1rem] font-black uppercase tracking-[0.18em] transition-all duration-300"
+                            >
+                              MEAL
+                            </span>
+                        </span>
+                    </span>
+                </a>
+            )}
+        </div>
         
-        <!-- Regular Navigation Links (hidden when in admin mode) -->
-        <div id="standard-nav" class:list={["hidden md:flex", {"hidden": isAuthenticated}]}>
-            {links.map((l) => {
+        <div class:list={["flex items-center justify-center gap-2 md:gap-4 min-w-0", {"hidden": isAuthenticated}]}>
+            <!-- Regular Navigation Links (hidden when in admin mode) -->
+            <div id="standard-nav" class="hidden md:flex items-center">
+            {navigationLinks.map((l) => {
                 return l.dropdown ? (
                     <div class="relative group">
                         <a aria-label={l.name} href={l.external ? l.url : url(l.url)} target={l.external ? "_blank" : null}
@@ -74,11 +107,13 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
                     </a>
                 );
             })}
+            </div>
         </div>
         
-        <div class="flex">
+        <div class="flex items-center justify-end">
             <!--<SearchPanel client:load>-->
-            <Search client:only="svelte"></Search>
+            <Search client:idle></Search>
+            <SiteAudioControl client:idle />
             {!siteConfig.themeColor.fixed && (
                     <button aria-label="Display Settings" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="display-settings-switch">
                         <Icon name="material-symbols:palette-outline" class="text-[1.25rem]"></Icon>
@@ -87,15 +122,15 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
 
             
             <!-- ⭐ RESTORED: Mascot Controls (Mobile Portrait Only) -->
-            <button aria-label="Dismiss Mascot" title="Dismiss Mascot" id="navbar-dismiss-mascot-button" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 md:!hidden">
+            <button aria-label="Dismiss Mascot" title="Dismiss Mascot" id="navbar-dismiss-mascot-button" data-sfx-click="panel-back" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 md:!hidden">
                 🍴
             </button>
-            <button aria-label="Bring back mascot" title="Bring back mascot" id="navbar-bring-back-mascot-button" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 md:!hidden" style="display: none;">
+            <button aria-label="Bring back mascot" title="Bring back mascot" id="navbar-bring-back-mascot-button" data-sfx-click="panel-open" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 md:!hidden" style="display: none;">
                 🥄
             </button>
             
             <!-- Light/Dark Switch -->
-            {!siteConfig.themeLock && <LightDarkSwitch client:load></LightDarkSwitch>}
+            {!siteConfig.themeLock && <LightDarkSwitch client:idle></LightDarkSwitch>}
 
             <!-- Fullscreen Mode Toggle -->
             <!-- <button aria-label="Toggle Fullscreen Mode" title="Toggle Fullscreen Mode" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="fullscreen-btn">
@@ -110,14 +145,14 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
         </div>
         
         <NavMenuPanel links={links} isAuthenticated={isAuthenticated}></NavMenuPanel>
-        <DisplaySettings client:only="svelte"></DisplaySettings>
+        <DisplaySettings client:idle></DisplaySettings>
     </div>
 </div>
 
 <script>
     let dismissMascotBtn: HTMLElement | null = null;
     let bringBackMascotBtn: HTMLElement | null = null;
-    
+
     function switchTheme() {
         if (localStorage.theme === 'dark') {
             document.documentElement.classList.remove('dark');
@@ -354,7 +389,99 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
         sessionStorage.setItem('cuppyDismissed', 'true');
     }, 500); // Wait 500ms for mascot to load first
 
-    </script>
+</script>
+
+<style>
+  .megameal-mark {
+    position: relative;
+    overflow: visible;
+    border: 1px solid rgba(125, 211, 252, 0.22);
+    outline: 1px solid rgba(255, 255, 255, 0.05);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 08%),
+      radial-gradient(circle at 18% 22%, rgba(186, 230, 253, 0.1), transparent 04%),
+      linear-gradient(135deg, rgba(8, 47, 73, 0.9), rgba(21, 94, 117, 0.72) 34%, rgba(29, 78, 216, 0.58) 68%, rgba(224, 242, 254, 0.08));
+    box-shadow:
+      0 10px 22px rgba(2, 6, 23, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -10px 24px rgba(3, 7, 18, 0.22),
+      0 0 10px rgba(34, 211, 238, 0.08);
+    opacity: 0.58;
+  }
+
+  .megameal-mark::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: 0.88rem;
+    background:
+      linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent),
+      repeating-linear-gradient(
+        -18deg,
+        rgba(255, 255, 255, 0.03) 0 2px,
+        rgba(255, 255, 255, 0) 2px 8px
+      );
+    mix-blend-mode: screen;
+    opacity: 0.58;
+    pointer-events: none;
+  }
+
+  .megameal-mark::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 1rem;
+    border: 1px solid rgba(186, 230, 253, 0.08);
+    box-shadow:
+      0 0 10px rgba(56, 189, 248, 0.1),
+      0 0 18px rgba(14, 165, 233, 0.05);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  .megameal-mark__inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .megameal-mark__mega {
+    color: rgba(186, 230, 253, 0.82);
+    text-shadow:
+      0 0 4px rgba(125, 211, 252, 0.28),
+      0 0 10px rgba(56, 189, 248, 0.12),
+      1px 1px 0 rgba(8, 47, 73, 0.9);
+    opacity: 0.52;
+    filter: saturate(0.72);
+  }
+
+  .megameal-mark__meal {
+    color: rgba(240, 249, 255, 0.88);
+    text-shadow:
+      0 0 5px rgba(186, 230, 253, 0.32),
+      0 0 12px rgba(59, 130, 246, 0.16),
+      1px 1px 0 rgba(8, 47, 73, 0.88),
+      -1px -1px 0 rgba(12, 74, 110, 0.32);
+    filter: saturate(0.78);
+  }
+
+  .group:hover .megameal-mark {
+    border-color: rgba(var(--primary-rgb), 0.34);
+    box-shadow:
+      0 14px 28px rgba(2, 6, 23, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -10px 24px rgba(3, 7, 18, 0.26),
+      0 0 14px rgba(var(--primary-rgb), 0.14);
+  }
+
+  .group:hover .megameal-mark__mega,
+  .group:hover .megameal-mark__meal {
+    color: color-mix(in srgb, var(--primary) 62%, white 20%);
+    text-shadow:
+      0 0 6px rgba(var(--primary-rgb), 0.28),
+      0 0 12px rgba(var(--primary-rgb), 0.14),
+      1px 1px 0 rgba(8, 47, 73, 0.9);
+  }
+</style>
     
     {import.meta.env.PROD && <script is:inline define:vars={{scriptUrl: url('/pagefind/pagefind.js')}}>
     async function loadPagefind() {

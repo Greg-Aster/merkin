@@ -1,6 +1,7 @@
 ---
 import { frontmatter as mirandaAnomalyFrontmatter } from '../content/posts/timelines/miranda-bloody-mary.mdx'
 import { frontmatter as perfectMaryFrontmatter } from '../content/posts/timelines/perfect-mary-recipe.mdx'
+import ImageWrapper from './misc/ImageWrapper.astro'
 
 const mirandaAnomalyAvatar = mirandaAnomalyFrontmatter.avatarImage
 const perfectMaryAvatar = perfectMaryFrontmatter.avatarImage
@@ -14,11 +15,13 @@ const perfectMaryAvatar = perfectMaryFrontmatter.avatarImage
       class="relative mb-4 mx-auto"
       style="max-width: 600px; width: 100%;"
     >
-      <img
+      <ImageWrapper
         id="vaultKeypadImage"
         src="/posts/timeline/vault-keypad.png"
         alt="Vault Keypad"
         class="block w-full h-auto"
+        imgClass="h-auto"
+        loading="eager"
       />
       
       {/* Overlay Button Grid - You will need to adjust top, left, width, height and button styles */}

@@ -14,6 +14,9 @@ interface Props {
   widths?: number[];       // Add for responsive images
   quality?: number;        // Add quality control
   format?: 'webp' | 'avif' | 'png' | 'jpeg'; // Add format control
+  sizes?: string;
+  imgClass?: string;
+  imgStyle?: string;
 }
 
 const {
@@ -23,8 +26,11 @@ const {
   position = 'center',
   basePath = '/',
   widths = [400, 800, 1200], // Default responsive widths
-  quality = 100,              // Default quality
-  format = 'webp'            // Default to WebP
+  quality = 85,              // Default quality
+  format = 'webp',           // Default to WebP
+  sizes = '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw',
+  imgClass = '',
+  imgStyle = ''
 } = Astro.props;
 const className = Astro.props.class;
 
@@ -40,33 +46,71 @@ const isLocal = !(
   src.startsWith('data:')
 );
 const isPublic = src.startsWith('/');
+const lowerSrc = src.toLowerCase();
+const isVectorOrAnimated =
+  lowerSrc.endsWith('.svg') || lowerSrc.endsWith('.gif');
+
+function createRootRelativeCandidates(rootPath: string): string[] {
+  const basePrefix =
+    import.meta.env.BASE_URL && import.meta.env.BASE_URL !== '/'
+      ? import.meta.env.BASE_URL.replace(/^\/+|\/+$/g, '')
+      : '';
+  let cleanPath = rootPath.replace(/^\/+/, '');
+
+  if (basePrefix && cleanPath.startsWith(`${basePrefix}/`)) {
+    cleanPath = cleanPath.slice(basePrefix.length + 1);
+  }
+
+  const candidates = [`/src/assets/site/${cleanPath}`];
+
+  if (cleanPath.startsWith('assets/')) {
+    candidates.unshift(`/src/${cleanPath}`);
+  }
+
+  if (cleanPath.startsWith('posts/')) {
+    candidates.unshift(`/src/content/${cleanPath}`);
+  }
+
+  if (cleanPath.startsWith('src/')) {
+    candidates.unshift(`/src/${cleanPath.replace(/^src\//, '')}`);
+  }
+
+  return candidates;
+}
 
 // TODO temporary workaround for images dynamic import
 // https://github.com/withastro/astro/issues/3373
 let img;
-if (isLocal) {
-  const files = import.meta.glob<ImageMetadata>('../../**', {
+if (!isVectorOrAnimated && (isLocal || isPublic)) {
+  const files = import.meta.glob<ImageMetadata>('/src/**/*', {
     import: 'default',
   });
-  let normalizedPath = path
-    .normalize(path.join('../../', basePath, src))
-    .replace(/\\/g, '/');
-  const file = files[normalizedPath];
-  if (!file) {
-    console.error(`\n[ERROR] Image file not found: ${normalizedPath.replace('../../', 'src/')}`);
-  } else {
+  const candidatePaths = isLocal
+    ? [
+        path
+          .normalize(path.join('/src', basePath, src))
+          .replace(/\\/g, '/'),
+      ]
+    : createRootRelativeCandidates(src).map(candidate =>
+        path.normalize(candidate).replace(/\\/g, '/')
+      );
+  const resolvedPath = candidatePaths.find(candidate => files[candidate]);
+  const file = resolvedPath ? files[resolvedPath] : undefined;
+  if (!file && isLocal) {
+    console.error(`\n[ERROR] Image file not found: ${candidatePaths[0]}`);
+  } else if (file) {
     img = await file();
   }
 }
 
-const imageClass = 'w-full h-full object-cover';
-const imageStyle = `object-position: ${position}`;
+const imageClass = ['w-full h-full object-cover', imgClass].filter(Boolean).join(' ');
+const imageStyle = [`object-position: ${position}`, imgStyle].filter(Boolean).join('; ');
 const publicSrc = isPublic ? url(src, import.meta.env.BASE_URL) : src;
 ---
 <div id={id} class:list={[className, 'overflow-hidden relative']}>
   <div class="transition absolute inset-0 dark:bg-black/00 bg-opacity-50 pointer-events-none"></div>
 
-  {isLocal && img && (
+  {img && (
     <Image
       src={img}
       alt={alt || ""}
@@ -76,11 +120,11 @@ const publicSrc = isPublic ? url(src, import.meta.env.BASE_URL) : src;
       format={format}
       quality={quality}
       loading={Astro.props.loading || 'lazy'}
-      sizes="(max-width: 768px) 100vw, 10vw"
+      sizes={sizes}
     />
   )}
 
-  {!isLocal && (
+  {!img && !isLocal && (
     <img
       src={publicSrc}
       alt={alt || ""}

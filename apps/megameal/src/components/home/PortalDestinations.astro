@@ -1,12 +1,37 @@
 ---
+import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
+import timelineManifest from '../../../../../packages/shared-data/generated/timeline.json'
+import gameStarsManifest from '../../../../../packages/shared-data/generated/game-stars.json'
 import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
-import { FEATURED_SERIES_ORDER } from '@/config/seriesConfig'
+import { SERIES_CONFIG } from '@/config/seriesConfig'
 
-const allPosts = await getCollection('posts', ({ data }) => data.draft !== true)
 const allProducts = await getCollection('products', ({ data }) => data.draft !== true)
 
-const timelineCount = allPosts.filter(post => Boolean((post.data as any).timelineEra)).length
+interface Props {
+  publishedDispatchCount?: number
+  timelineCount?: number
+}
+
+const {
+  publishedDispatchCount: publishedDispatchCountProp,
+  timelineCount: timelineCountProp,
+} = Astro.props
+
+const publishedPosts = postsManifest.items.filter(post => !post.draft)
+const publishedTimelineItems = timelineManifest.items.filter(event => !event.isDraft)
+const publishedGameStars = gameStarsManifest.items.filter(event => !event.isDraft)
+const activeArcIds = new Set(
+  publishedPosts
+    .map(post => post.series)
+    .filter((seriesId): seriesId is string => Boolean(seriesId) && Boolean(SERIES_CONFIG[seriesId])),
+)
+
+const publishedDispatchCount = publishedDispatchCountProp ?? publishedPosts.length
+const timelineCount = timelineCountProp ?? publishedTimelineItems.length
+const gameStarsCount = publishedGameStars.length
+const activeArcCount = activeArcIds.size
+
 const destinations = [
   {
     href: '/posts/explainer/',
@@ -23,7 +48,7 @@ const destinations = [
     title: 'Read the Story Arcs',
     description:
       'Move through the saga as connected chapters instead of isolated posts.',
-    meta: `${FEATURED_SERIES_ORDER.length} active arcs`,
+    meta: `${activeArcCount} active arcs`,
     icon: 'mdi:book-open-page-variant',
     tone: 'story',
   },
@@ -32,7 +57,7 @@ const destinations = [
     title: 'Enter the Game',
     description:
       'Jump straight to Star Observatory without another navigation step.',
-    meta: 'External deployment',
+    meta: `${gameStarsCount} live star nodes`,
     icon: 'mdi:gamepad-variant',
     tone: 'game',
   },
@@ -50,14 +75,14 @@ const destinations = [
     title: 'Join the Community',
     description:
       'Contact channels, live discussion, and ways to follow the project as it grows.',
-    meta: `${allPosts.length} total dispatches`,
+    meta: `${publishedDispatchCount} published dispatches`,
     icon: 'mdi:account-group',
     tone: 'community',
   },
 ]
 ---
 
-<section class="portal-destinations card-base appear-on-scroll">
+<section class="portal-destinations card-base">
   <div class="portal-header">
     <div class="portal-kicker">Primary Access</div>
     <h2 class="portal-title">Choose a route into the universe.</h2>
@@ -71,6 +96,7 @@ const destinations = [
     {destinations.map((destination) => (
       <a
         href={destination.href}
+        data-sfx-click="sweep"
         class:list={[
           'portal-card',
           destination.featured && 'portal-card-featured',

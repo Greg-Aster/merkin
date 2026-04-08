@@ -56,6 +56,9 @@ console.log({ totalPages }) // Verify totalPages
   document.addEventListener('DOMContentLoaded', () => {
     const productCards = document.querySelectorAll('.product-card');
     let currentlySelectedCard: HTMLElement | null = null;
+    const emitSfx = (id) => {
+      document.dispatchEvent(new CustomEvent('megameal:sfx', { detail: { id } }));
+    };
 
     productCards.forEach(cardElement => {
       const card = cardElement as HTMLElement;
@@ -93,10 +96,12 @@ console.log({ totalPages }) // Verify totalPages
           clickedCard.classList.remove('selected');
           clickedCard.setAttribute('aria-expanded', 'false');
           currentlySelectedCard = null;
+          emitSfx('panel-back');
         } else {
           clickedCard.classList.add('selected');
           clickedCard.setAttribute('aria-expanded', 'true');
           currentlySelectedCard = clickedCard;
+          emitSfx('panel-open');
         }
       });
     });

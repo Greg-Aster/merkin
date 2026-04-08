@@ -2,9 +2,11 @@
 import SharedLayout from '@merkin/blog-core/layouts/Layout.astro'
 import '../styles/variables.styl'
 import '../styles/main.css'
+import SiteSfxBridge from '../components/client/SiteSfxBridge.svelte'
 ---
 
 <SharedLayout {...Astro.props}>
   <slot slot="head" name="head" />
   <slot />
+  <SiteSfxBridge client:load />
 </SharedLayout>

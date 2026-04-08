@@ -1,12 +1,10 @@
 ---
 import GameLayout from '../layouts/GameLayout.astro'
 import ThreltGame from '../threlte/Game.svelte'
-import { getTimelineEvents } from '../services/TimelineService'
-
-const timelineEvents = await getTimelineEvents({ includeBanners: true })
+import gameStarsManifest from '../../../../packages/shared-data/generated/game-stars.json'
 
 const starmapEventsJson = JSON.stringify(
-  timelineEvents.map(e => ({
+  gameStarsManifest.items.map(e => ({
     slug: e.slug,
     title: e.title,
     year: e.year,

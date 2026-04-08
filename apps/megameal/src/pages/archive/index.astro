@@ -1,11 +1,164 @@
 ---
+import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
+import timelineManifest from '../../../../../packages/shared-data/generated/timeline.json'
+import gameStarsManifest from '../../../../../packages/shared-data/generated/game-stars.json'
 import ArchivePanel from '@components/ArchivePanel.astro'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
+
+const publishedPosts = postsManifest.items.filter(post => !post.draft)
+const publishedTimelineItems = timelineManifest.items.filter(event => !event.isDraft)
+const publishedGameStars = gameStarsManifest.items.filter(event => !event.isDraft)
+const activeArcCount = new Set(
+  publishedPosts
+    .map(post => post.series)
+    .filter((seriesId): seriesId is string => Boolean(seriesId)),
+).size
+
+const publicationYears = publishedPosts
+  .map(post => (post.published ? new Date(post.published).getUTCFullYear() : null))
+  .filter((year): year is number => year !== null)
+
+const latestYear = publicationYears.length > 0 ? Math.max(...publicationYears) : null
+const earliestYear = publicationYears.length > 0 ? Math.min(...publicationYears) : null
+
+const archiveStats = [
+  {
+    label: 'Published Dispatches',
+    value: String(publishedPosts.length),
+    note:
+      latestYear && earliestYear
+        ? `${earliestYear} to ${latestYear}`
+        : 'Current archive window',
+  },
+  {
+    label: 'Timeline Entries',
+    value: String(publishedTimelineItems.length),
+    note: 'Shared chronology used by the portal and the game',
+  },
+  {
+    label: 'Story Arcs',
+    value: String(activeArcCount),
+    note: 'Connected reading routes with live chapters',
+  },
+  {
+    label: 'Star Map Nodes',
+    value: String(publishedGameStars.length),
+    note: 'Observatory-visible destinations synced to the game layer',
+  },
+]
 ---
 
 <MainGridLayout title={i18n(I18nKey.archive)}>
+    <section class="archive-summary card-base">
+      <div class="archive-summary-head">
+        <div class="archive-kicker">Archive Overview</div>
+        <h1 class="archive-title">One story graph, multiple ways in.</h1>
+        <p class="archive-copy">
+          The archive keeps the reading surface, the timeline, and the star observatory aligned to the same shared record.
+        </p>
+      </div>
+
+      <div class="archive-stats-grid">
+        {archiveStats.map((stat) => (
+          <div class="archive-stat-card">
+            <div class="archive-stat-label">{stat.label}</div>
+            <div class="archive-stat-value">{stat.value}</div>
+            <div class="archive-stat-note">{stat.note}</div>
+          </div>
+        ))}
+      </div>
+    </section>
     <ArchivePanel></ArchivePanel>
 </MainGridLayout>
 
+<style>
+  .archive-summary {
+    margin-bottom: 1.6rem;
+    padding: 1.2rem;
+    border: 1px solid oklch(0.34 0.05 var(--hue) / 0.42);
+    background:
+      radial-gradient(circle at top left, oklch(0.24 0.05 var(--hue) / 0.22), transparent 34%),
+      linear-gradient(180deg, oklch(0.14 0.03 var(--hue) / 0.72), oklch(0.12 0.03 var(--hue) / 0.64));
+    backdrop-filter: blur(16px) saturate(1.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 18px 40px rgba(0, 0, 0, 0.16);
+  }
+
+  .archive-summary-head {
+    max-width: 44rem;
+    margin-bottom: 1rem;
+  }
+
+  .archive-kicker {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: oklch(0.68 0.11 var(--hue));
+    font-weight: 700;
+    margin-bottom: 0.55rem;
+  }
+
+  .archive-title {
+    margin: 0;
+    color: white;
+    font-size: clamp(1.3rem, 2.8vw, 2rem);
+    line-height: 1.08;
+  }
+
+  .archive-copy {
+    margin: 0.8rem 0 0;
+    color: oklch(0.76 0.03 var(--hue));
+    line-height: 1.6;
+  }
+
+  .archive-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+
+  .archive-stat-card {
+    border-radius: 0.85rem;
+    border: 1px solid oklch(0.4 0.05 var(--hue) / 0.3);
+    background: oklch(0.16 0.03 var(--hue) / 0.54);
+    padding: 0.95rem 1rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .archive-stat-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: oklch(0.62 0.07 var(--hue));
+    margin-bottom: 0.45rem;
+  }
+
+  .archive-stat-value {
+    font-size: clamp(1.35rem, 3vw, 2rem);
+    line-height: 1;
+    font-weight: 800;
+    color: white;
+  }
+
+  .archive-stat-note {
+    margin-top: 0.45rem;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: oklch(0.72 0.03 var(--hue));
+  }
+
+  @media (max-width: 60rem) {
+    .archive-stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .archive-stats-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

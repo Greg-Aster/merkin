@@ -3,17 +3,26 @@
 // Highlights one story arc/series with chapters listed, inviting the visitor to begin reading.
 // Designed to communicate "this is a complete story" rather than individual blog posts.
 
-import { getPostsBySeries } from '@/utils/content-utils'
+import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
 import { SERIES_CONFIG, FEATURED_SERIES_ORDER } from '@/config/seriesConfig'
+import ImageWrapper from '@/components/misc/ImageWrapper.astro'
+
+type SharedFeaturedPost = (typeof postsManifest.items)[number]
+
+function getPostsBySeriesFromSharedData(seriesId: string): SharedFeaturedPost[] {
+  return postsManifest.items
+    .filter(post => !post.draft && post.series === seriesId)
+    .sort((left, right) => (left.seriesPart ?? 0) - (right.seriesPart ?? 0))
+}
 
 // Find the first featured series that has actual posts
 let featuredId: string | null = null
-let featuredPosts: Awaited<ReturnType<typeof getPostsBySeries>> = []
+let featuredPosts: SharedFeaturedPost[] = []
 
 for (const id of FEATURED_SERIES_ORDER) {
   const config = SERIES_CONFIG[id]
   if (!config) continue
-  const posts = await getPostsBySeries(id)
+  const posts = getPostsBySeriesFromSharedData(id)
   if (posts.length > 0) {
     featuredId = id
     featuredPosts = posts
@@ -35,10 +44,11 @@ const hasPosts = featuredPosts.length > 0
     <div class="arc-card" style={`--arc-color: ${displayConfig.color}`}>
       {displayConfig.featuredImage && (
         <div class="arc-image-col">
-          <img
+          <ImageWrapper
             src={displayConfig.featuredImage}
             alt=""
             class="arc-image"
+            imgClass="arc-image"
             loading="lazy"
           />
           <div class="arc-image-overlay"></div>
@@ -57,8 +67,8 @@ const hasPosts = featuredPosts.length > 0
               {featuredPosts.slice(0, 6).map((post, i) => (
                 <li class="chapter-item">
                   <a href={`/posts/${post.slug}/`} class="chapter-link">
-                    <span class="chapter-num">{(post.data as any).seriesPart ?? i + 1}</span>
-                    <span class="chapter-title">{post.data.title}</span>
+                    <span class="chapter-num">{post.seriesPart ?? i + 1}</span>
+                    <span class="chapter-title">{post.title}</span>
                   </a>
                 </li>
               ))}

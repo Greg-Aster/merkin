@@ -780,21 +780,25 @@ const gridLayoutClasses = [
                     style="font-size: clamp(2rem, 4vw, 4rem);"
                   ></Icon>
                 </div>
-                <img
+                <ImageWrapper
                   src={hasPostBanner && post?.data?.bannerType === "image"
                     ? normalizeAssetUrl(post.data.bannerData?.imageUrl || post.data.image)
                     : normalizeAssetUrl(bannerDataSources.imageBannerData?.imageUrl || siteConfig.banner.src)}
                   alt={hasPostBanner ? (post.data.title || "Post banner image") : (title || "Banner image")}
                   class="w-full h-full object-cover"
+                  imgClass="object-cover"
+                  loading="eager"
                 />
               </a>
             ) : (
-              <img
+              <ImageWrapper
                 src={hasPostBanner && post?.data?.bannerType === "image"
                   ? normalizeAssetUrl(post.data.bannerData?.imageUrl || post.data.image)
                   : normalizeAssetUrl(bannerDataSources.imageBannerData?.imageUrl || siteConfig.banner.src)}
                 alt={hasPostBanner ? (post.data.title || "Post banner image") : (title || "Banner image")}
                 class="w-full h-full object-cover"
+                imgClass="object-cover"
+                loading="eager"
               />
             )}
           </div>
@@ -814,6 +818,7 @@ const gridLayoutClasses = [
 	                const isClickable = bannerLink !== null;
 	                const isVideoItem = bannerConfig.standardBannerConfig.isVideoBannerItem(item);
 	                const isImageItem = bannerConfig.standardBannerConfig.isImageBannerItem(item);
+                  const isInitialSlide = index === 0;
 	                
 	                return (
 	                  <div
@@ -836,14 +841,6 @@ const gridLayoutClasses = [
                     >
                       <div class="absolute inset-0 w-full h-full transition-all duration-300 opacity-0 group-hover:opacity-30 bg-black pointer-events-none z-10"></div>
                       
-                      <div class="absolute inset-0 w-full h-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 z-20 pointer-events-none">
-                        <Icon
-                          name="fa6-solid:circle-info"
-                          class="text-white drop-shadow-lg"
-                          style="font-size: clamp(2rem, 4vw, 4rem);"
-                        />
-                      </div>
-                      
 	                      <div
 	                        class="banner-media-layer w-full h-full overflow-hidden"
 	                        data-banner-media-type={isVideoItem ? 'video' : isImageItem ? 'image' : 'unknown'}
@@ -851,13 +848,15 @@ const gridLayoutClasses = [
                         {isVideoItem ? (
                           <>
                             <video
-                              src={item.src}
+                              src={isInitialSlide ? item.src : undefined}
+                              data-src={isInitialSlide ? undefined : item.src}
                               autoplay={bannerConfig.standardBannerConfig.video.autoplay}
                               muted={bannerConfig.standardBannerConfig.video.muted}
                               loop={bannerConfig.standardBannerConfig.video.loop}
                               playsinline={bannerConfig.standardBannerConfig.video.playsInLine}
                               controls={bannerConfig.standardBannerConfig.video.controls}
-                              preload={item.preload || bannerConfig.standardBannerConfig.video.preload}
+                              preload={isInitialSlide ? (item.preload || bannerConfig.standardBannerConfig.video.preload) : 'none'}
+                              poster={item.fallbackImage}
                               class={`banner-video w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
                               style={`border-radius: ${bannerConfig.visual.borderRadius};`}
                               onerror="this.style.display='none'; var ne = this.nextElementSibling; if (ne) ne.style.display='block';"
@@ -871,7 +870,7 @@ const gridLayoutClasses = [
                               height={Math.round(bannerConfig.layout.maxWidth * 0.5625)}
                               class={`banner-image-fallback w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
                               style={`border-radius: ${bannerConfig.visual.borderRadius}; display: none;`}
-                              loading="lazy"
+                              loading={isInitialSlide ? 'eager' : 'lazy'}
                             />
                           </>
                         ) : isImageItem ? (
@@ -882,7 +881,7 @@ const gridLayoutClasses = [
                             height={Math.round(bannerConfig.layout.maxWidth * 0.5625)}
                             class={`banner-image w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
                             style={`border-radius: ${bannerConfig.visual.borderRadius};`}
-                            loading={index === 0 ? 'eager' : 'lazy'}
+                            loading={isInitialSlide ? 'eager' : 'lazy'}
                           />
                         ) : (
 	                          <slot name="banner-slide-content" />
@@ -1063,11 +1062,11 @@ const gridLayoutClasses = [
   <!-- =============================================================== -->
   
   <!-- Sidenav panels with settings and navigation -->
-  <SidenavPanels client:load siteConfig={siteConfig} />
+  <SidenavPanels client:idle siteConfig={siteConfig} />
   
   <!-- ⭐ UPDATED: Mobile profile overlay with custom author data -->
   <MobileProfileOverlay 
-    client:load 
+    client:idle 
     postSlug={processedAuthorData.slug}
     customAvatar={processedAuthorData.customAvatar}
     customName={processedAuthorData.customName}
@@ -1079,13 +1078,13 @@ const gridLayoutClasses = [
   
   <!-- ⭐ UPDATED: Special page features with oneColumn support -->
   <SpecialPageFeatures 
-    client:load 
+    client:idle 
     currentPath={currentPath} 
     oneColumn={oneColumnMode}
   />
   
   <!-- Scroll effects and parallax -->
-  <ScrollEffects client:load bannerConfig={bannerConfig} siteConfig={siteConfig} />
+  <ScrollEffects client:idle bannerConfig={bannerConfig} siteConfig={siteConfig} />
   
   <!-- Page load animations -->
   <PageAnimations client:load />
@@ -2245,6 +2244,38 @@ const gridLayoutClasses = [
       mediaLayer.classList.remove(...motionClassNames);
     };
 
+    const ensureSlideMediaLoaded = (slideIndex) => {
+      const slide = slides[slideIndex];
+      if (!slide) return;
+
+      slide
+        .querySelectorAll('video[data-src]')
+        .forEach((videoElement) => {
+          const deferredSrc = videoElement.dataset.src;
+          if (!deferredSrc || videoElement.getAttribute('src')) return;
+
+          videoElement.src = deferredSrc;
+          videoElement.removeAttribute('data-src');
+          videoElement.load();
+        });
+    };
+
+    const syncSlidePlayback = (activeIndex) => {
+      slides.forEach((slide, index) => {
+        const videoElement = slide.querySelector('video');
+        if (!videoElement) return;
+
+        if (index === activeIndex) {
+          const playPromise = videoElement.play();
+          if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(() => {});
+          }
+        } else {
+          videoElement.pause();
+        }
+      });
+    };
+
     const cleanupHiddenSlideMotion = () => {
       slides.forEach((slide, index) => {
         if (index === currentSlideIndex) return;
@@ -2305,6 +2336,8 @@ const gridLayoutClasses = [
     const showSlide = (nextIndex) => {
       if (!slides.length) return;
 
+      ensureSlideMediaLoaded(nextIndex);
+
       slides.forEach((slide, index) => {
         const slideElement = slide;
         const isActive = index === nextIndex;
@@ -2314,6 +2347,7 @@ const gridLayoutClasses = [
       });
 
       applyMotionToSlide(nextIndex);
+      syncSlidePlayback(nextIndex);
       currentSlideIndex = nextIndex;
 
       if (motionCleanupTimeoutId) {

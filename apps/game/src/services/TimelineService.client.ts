@@ -1,4 +1,4 @@
-// TimelineService.client.ts - Client-safe version without astro:content dependencies
+// TimelineService.client.ts - Client-side filtering and shaping only.
 import {
   defaultEraConfig,
   defaultEraDisplayNames,
@@ -19,8 +19,8 @@ import type {
   TimelineViewConfig,
 } from '../config/timelineconfig'
 
-// Function to safely handle date serialization issues (client-specific)
-export function safeJSONParse(jsonString: string): any {
+// Safely parse pre-fetched JSON without introducing content ownership here.
+export function safeJSONParse<T>(jsonString: string): T | null {
   try {
     return JSON.parse(jsonString, (key, value) => {
       // Handle date strings in ISO format
@@ -38,7 +38,7 @@ export function safeJSONParse(jsonString: string): any {
   }
 }
 
-// CLIENT-SIDE VERSION of getTimelineEvents - accepts pre-fetched data instead of fetching
+// Accepts pre-fetched timeline data and only handles client filtering.
 export function processTimelineEvents(
   events: TimelineEvent[],
   options: {

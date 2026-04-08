@@ -86,11 +86,12 @@ export class SpatialGrid {
     const newCellKey = this.gridToKey(gridCoords.x, gridCoords.z)
     const oldCellKey = this.entityToCell.get(entity.id)
 
-    // If entity moved to a different cell, remove from old cell
-    if (oldCellKey && oldCellKey !== newCellKey) {
+    // Remove existing entity reference from old cell (handles both cell changes and same-cell updates).
+    // Set uses reference equality, so each updateEntity() call with a new object would accumulate
+    // duplicates without this removal step.
+    if (oldCellKey) {
       const oldCell = this.grid.get(oldCellKey)
       if (oldCell) {
-        // Find the entity with matching ID and remove it
         for (const existingEntity of oldCell.entities) {
           if (existingEntity.id === entity.id) {
             oldCell.entities.delete(existingEntity)

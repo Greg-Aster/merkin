@@ -97,6 +97,7 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
   {hasCover && (
     <a href={url} 
        aria-label={title}
+       data-sfx-click="sweep"
        class:list={[
          "group relative rounded-xl overflow-hidden bg-black shrink-0 postcard-cover-link",
          "m-2 sm:m-3", // 🎯 RESPONSIVE MARGINS - tighter on mobile
@@ -150,6 +151,7 @@ const mobileMetaDate = published.toLocaleDateString('en-US', {
     <div class="flex-shrink-0">
       <!-- TITLE - 🎯 RESPONSIVE TEXT SIZING -->
       <a href={url}
+         data-sfx-click="select"
          class:list={[
            "transition group w-full block font-bold mb-2 sm:mb-3 text-90 postcard-title-link",
            // 🎯 RESPONSIVE TITLE SIZE - scales properly on all devices

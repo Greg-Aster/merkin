@@ -5,6 +5,7 @@ import type { EraConfigMap } from '@/services/TimelineService.client'
 // src/components/timeline/TimelineView.astro
 import StarNode from '../StarNode.astro'
 import TimelineCard from '../TimelineCard.astro'
+import ImageWrapper from '../../misc/ImageWrapper.astro'
 
 export interface Props {
   id?: string
@@ -76,11 +77,13 @@ const fadeOverlayId = `${id}-fade-overlay`
   
   <!-- Background Layer -->
   <div class="absolute inset-0 z-0 overflow-hidden">
-    <img 
+    <ImageWrapper 
       src={background} 
       alt="Timeline background" 
-      class="timeline-background w-full h-full object-cover" 
-      style={`transform: scale(${1.05 + 0.05 * initialScale}) translate(${-initialOffsetX * 0.05}px, ${-initialOffsetY * 0.05}px); transition: transform 0.3s ease-out;`}
+      class="timeline-background w-full h-full"
+      imgClass="timeline-background"
+      imgStyle={`transform: scale(${1.05 + 0.05 * initialScale}) translate(${-initialOffsetX * 0.05}px, ${-initialOffsetY * 0.05}px); transition: transform 0.3s ease-out;`}
+      loading="eager"
     />
     <div class="absolute inset-0 bg-gradient-to-r from-[oklch(0.25_0.05_var(--hue))] to-[oklch(0.15_0.05_var(--hue))] opacity-20 dark:opacity-20 backdrop-blur-[2px]"></div>
   </div>

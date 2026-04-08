@@ -33,11 +33,15 @@ lang: ""
 mascotContext: "This recipe reconstructs the infamous 'Perfect Miranda Bloody Mary'—a cocktail so potent it collapsed a star system, requires 1,342 temporal iterations to perfect, and comes with existential garnishes (including a self-aware crouton and a tear from a time-traveling parrot). Warning: pickles are strictly forbidden unless you enjoy unraveling causality. Themes include quantum mixology, sentient spices, and the haunting regret of Zero-G Vodka. Pour the vodka while whispering the coordinates of a dead star. Step two Add tomato juice in a helical motion (desperation optional). Step three: Stir 1,342 times clockwise—lose count, and you'll meet your past self arguing over celery salt. Garnish with a paradox on a toothpick. Serve cold. Do not mention pickles. Ever."
 ---
 
+import ImageWrapper from '../../../components/misc/ImageWrapper.astro';
+
 <figure className="mb-6">
-  <img 
+  <ImageWrapper 
     src="/posts/timeline/bartender.png" 
     alt="Bartender at the Bibimbap Saloon" 
-    className="rounded-lg shadow-md w-full max-w-md mx-auto" 
+    class="rounded-lg shadow-md w-full max-w-md mx-auto"
+    imgClass="rounded-lg shadow-md"
+    loading="eager"
   />
   <figcaption className="text-center text-sm text-gray-500 dark:text-gray-400">
     Bartender at the Bibimbap Saloon

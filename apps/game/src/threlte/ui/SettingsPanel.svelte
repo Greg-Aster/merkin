@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { isSettingsMenuOpen, isSoundEnabled } from '../stores/uiStore';
+  import {
+    ambienceVolumeSetting,
+    isSettingsMenuOpen,
+    isSoundEnabled,
+    masterVolumeSetting,
+    sfxVolumeSetting,
+  } from '../stores/uiStore';
   import { MultiplayerControls } from '../features/multiplayer';
   import { PerformancePanel } from '../features/performance';
 
@@ -36,6 +42,45 @@
               />
               Enable Sound
             </label>
+
+            <label class="slider-label">
+              <span>Master</span>
+              <span>{Math.round($masterVolumeSetting * 100)}%</span>
+            </label>
+            <input
+              class="volume-slider"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              bind:value={$masterVolumeSetting}
+            />
+
+            <label class="slider-label">
+              <span>Ambience</span>
+              <span>{Math.round($ambienceVolumeSetting * 100)}%</span>
+            </label>
+            <input
+              class="volume-slider"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              bind:value={$ambienceVolumeSetting}
+            />
+
+            <label class="slider-label">
+              <span>Effects</span>
+              <span>{Math.round($sfxVolumeSetting * 100)}%</span>
+            </label>
+            <input
+              class="volume-slider"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              bind:value={$sfxVolumeSetting}
+            />
           </div>
         </section>
 
@@ -146,11 +191,27 @@
     gap: 8px;
     cursor: pointer;
     font-size: 16px;
+    margin-bottom: 16px;
   }
 
   .checkbox-label input[type="checkbox"] {
     width: 18px;
     height: 18px;
+    accent-color: #4f46e5;
+  }
+
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.88);
+    margin: 0 0 6px;
+  }
+
+  .volume-slider {
+    width: 100%;
+    margin: 0 0 14px;
     accent-color: #4f46e5;
   }
 

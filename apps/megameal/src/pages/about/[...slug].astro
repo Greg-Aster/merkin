@@ -163,10 +163,11 @@ const jsonLd = {
               </video>
             ) : (
               <!-- 🎬 ENHANCED: Image avatar (including animated GIFs, WebP, etc.) -->
-              <img
+              <ImageWrapper
                 src={aboutPage.data.avatar}
                 alt={`Profile image of ${aboutPage.data.name}`}
-                class="w-32 h-32 md:w-40 md:h-40 object-cover rounded-xl shadow-lg"
+                class="w-32 h-32 md:w-40 md:h-40 rounded-xl shadow-lg"
+                imgClass="rounded-xl shadow-lg"
                 loading="eager"
               />
             )}

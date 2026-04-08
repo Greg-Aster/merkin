@@ -181,11 +181,13 @@
       playerVelocity.y = 0;
     }
 
-    // 6. NEW: Smoothly move the visual elements to the physics body's new position
+    // 6. Smoothly move the visual elements to the physics body's new position.
+    // Use frame-rate independent exponential decay so camera speed is consistent at any FPS.
     const bodyPosition = rigidBody.translation();
     const bodyRotation = rigidBody.rotation();
-    visualGroup.position.lerp(new THREE.Vector3(bodyPosition.x, bodyPosition.y, bodyPosition.z), CAMERA_SMOOTH_SPEED);
-    visualGroup.quaternion.slerp(new THREE.Quaternion(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w), CAMERA_SMOOTH_SPEED);
+    const smoothAlpha = 1 - Math.pow(1 - CAMERA_SMOOTH_SPEED, delta * 60);
+    visualGroup.position.lerp(new THREE.Vector3(bodyPosition.x, bodyPosition.y, bodyPosition.z), smoothAlpha);
+    visualGroup.quaternion.slerp(new THREE.Quaternion(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w), smoothAlpha);
 
     // 7. Handle Camera Pivot (Up/Down Look) - This now rotates the visual group, not the physics body
     cameraRotationX += accumulatedRotationY;
