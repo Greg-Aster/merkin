@@ -14,6 +14,8 @@ let audioState: SiteAudioState = {
   activeTrackId: null,
   activeTrackLabel: null,
   hasConfiguredTracks: false,
+  suspended: false,
+  suspensionReason: null,
 }
 let panelOpen = false
 let panelElement: HTMLDivElement | null = null
@@ -170,7 +172,9 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
       </label>
 
       <p class="site-audio-panel__note">
-        {#if audioState.enabled}
+        {#if audioState.enabled && audioState.suspended}
+          Ambience is paused while another media player is active.
+        {:else if audioState.enabled}
           Route ambience changes automatically, while effects stay available for interactions across the site.
         {:else}
           Audio stays off until you enable it.

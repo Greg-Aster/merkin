@@ -5,6 +5,28 @@ import {
   type SiteAudioTrackConfig,
 } from '../config/audio'
 
+declare global {
+  interface Window {
+    YT?: {
+      Player: new (
+        element: string | HTMLIFrameElement,
+        options: {
+          events?: {
+            onStateChange?: (event: { data: number }) => void
+          }
+        },
+      ) => unknown
+      PlayerState: {
+        PLAYING: number
+        PAUSED: number
+        ENDED: number
+        CUED: number
+      }
+    }
+    onYouTubeIframeAPIReady?: () => void
+  }
+}
+
 export interface SiteAudioState {
   enabled: boolean
   masterVolume: number
@@ -13,6 +35,8 @@ export interface SiteAudioState {
   activeTrackId: string | null
   activeTrackLabel: string | null
   hasConfiguredTracks: boolean
+  suspended: boolean
+  suspensionReason: string | null
 }
 
 type SiteAudioListener = (state: SiteAudioState) => void
@@ -28,6 +52,14 @@ class SiteAudioManager {
   private initialized = false
   private audioUnlocked = false
   private pendingPathname: string | null = null
+  private suspended = false
+  private suspensionReason: string | null = null
+  private activeAudibleMedia = new Set<HTMLMediaElement>()
+  private activeYouTubePlayers = new Set<string>()
+  private suspendedHowl: Howl | null = null
+  private youtubeApiPromise: Promise<void> | null = null
+  private boundYouTubeFrames = new WeakSet<HTMLIFrameElement>()
+  private youtubeFrameCounter = 0
 
   initialize(): void {
     if (this.initialized || typeof window === 'undefined') return
@@ -41,6 +73,9 @@ class SiteAudioManager {
     Howler.html5PoolSize = 12
 
     this.pendingPathname = window.location.pathname
+    this.bindMediaLifecycle()
+    this.bindSuspensionEvents()
+    this.bindYouTubeEmbeds()
     this.emit()
   }
 
@@ -61,6 +96,8 @@ class SiteAudioManager {
       activeTrackId: this.currentTrack?.id ?? null,
       activeTrackLabel: this.currentTrack?.label ?? null,
       hasConfiguredTracks: siteAudioConfig.tracks.length > 0,
+      suspended: this.suspended,
+      suspensionReason: this.suspensionReason,
     }
   }
 
@@ -76,6 +113,9 @@ class SiteAudioManager {
       this.stopCurrentTrack()
     } else if (typeof window !== 'undefined') {
       this.pendingPathname = window.location.pathname
+      if (!this.suspended && this.audioUnlocked) {
+        this.syncForPath(window.location.pathname, true)
+      }
     }
 
     this.emit()
@@ -86,7 +126,7 @@ class SiteAudioManager {
     this.masterVolume = clampedVolume
     this.writeStoredMasterVolume(clampedVolume)
 
-    if (this.currentHowl && this.currentTrack) {
+    if (this.currentHowl && this.currentTrack && !this.suspended) {
       this.currentHowl.volume(this.resolveTrackVolume(this.currentTrack))
     }
 
@@ -98,7 +138,7 @@ class SiteAudioManager {
     this.ambienceVolume = clampedVolume
     this.writeStoredAmbienceVolume(clampedVolume)
 
-    if (this.currentHowl && this.currentTrack) {
+    if (this.currentHowl && this.currentTrack && !this.suspended) {
       this.currentHowl.volume(this.resolveTrackVolume(this.currentTrack))
     }
 
@@ -121,8 +161,10 @@ class SiteAudioManager {
       return
     }
 
-    if (!this.audioUnlocked && !userInitiated) {
-      this.stopCurrentTrack()
+    if ((!this.audioUnlocked && !userInitiated) || this.suspended) {
+      if (!this.suspended) {
+        this.stopCurrentTrack()
+      }
       this.emit()
       return
     }
@@ -140,6 +182,7 @@ class SiteAudioManager {
     ) {
       if (
         (userInitiated || this.audioUnlocked) &&
+        !this.suspended &&
         !this.currentHowl.playing()
       ) {
         this.currentHowl.play()
@@ -184,7 +227,7 @@ class SiteAudioManager {
     nextHowl.once('play', () => {
       nextHowl.fade(0, targetVolume, siteAudioConfig.fadeDurationMs)
     })
-    if (this.audioUnlocked) {
+    if (this.audioUnlocked && !this.suspended) {
       nextHowl.play()
     }
 
@@ -212,8 +255,38 @@ class SiteAudioManager {
       return
     }
 
-    if (this.enabled && this.pendingPathname) {
+    if (this.enabled && this.pendingPathname && !this.suspended) {
       this.syncForPath(this.pendingPathname, true)
+    } else {
+      this.emit()
+    }
+  }
+
+  suspendAmbience(reason = 'external-media'): void {
+    this.suspended = true
+    this.suspensionReason = reason
+
+    if (this.currentHowl) {
+      this.pauseCurrentTrack()
+    }
+
+    this.emit()
+  }
+
+  resumeAmbience(reason?: string): void {
+    if (reason && this.suspensionReason && this.suspensionReason !== reason) {
+      return
+    }
+
+    this.suspended = false
+    this.suspensionReason = null
+
+    if (this.enabled && this.audioUnlocked) {
+      if (this.currentHowl && this.currentTrack) {
+        this.resumeCurrentTrack()
+      } else if (this.pendingPathname) {
+        this.syncForPath(this.pendingPathname, true)
+      }
     } else {
       this.emit()
     }
@@ -222,6 +295,7 @@ class SiteAudioManager {
   private stopCurrentTrack(): void {
     if (!this.currentHowl) {
       this.currentTrack = null
+      this.suspendedHowl = null
       return
     }
 
@@ -230,6 +304,9 @@ class SiteAudioManager {
 
     this.currentHowl = null
     this.currentTrack = null
+    if (this.suspendedHowl === howlToStop) {
+      this.suspendedHowl = null
+    }
 
     howlToStop.fade(startingVolume, 0, siteAudioConfig.fadeDurationMs)
     window.setTimeout(() => {
@@ -309,6 +386,204 @@ class SiteAudioManager {
 
   private resolveTrackVolume(track: SiteAudioTrackConfig): number {
     return Math.min(1, Math.max(0, this.masterVolume * this.ambienceVolume * (track.volume ?? 1)))
+  }
+
+  private pauseCurrentTrack(): void {
+    if (!this.currentHowl || !this.currentTrack) return
+
+    const howlToPause = this.currentHowl
+    this.suspendedHowl = howlToPause
+    const startingVolume = howlToPause.volume()
+
+    howlToPause.fade(startingVolume, 0, siteAudioConfig.fadeDurationMs)
+    window.setTimeout(() => {
+      if (this.suspendedHowl !== howlToPause || !this.suspended) return
+      howlToPause.pause()
+    }, siteAudioConfig.fadeDurationMs + 50)
+  }
+
+  private resumeCurrentTrack(): void {
+    if (!this.currentHowl || !this.currentTrack) return
+
+    const targetVolume = this.resolveTrackVolume(this.currentTrack)
+    if (!this.currentHowl.playing()) {
+      this.currentHowl.play()
+    }
+    this.currentHowl.fade(0, targetVolume, siteAudioConfig.fadeDurationMs)
+    this.suspendedHowl = null
+    this.emit()
+  }
+
+  private bindMediaLifecycle(): void {
+    const syncMediaState = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLMediaElement)) return
+
+      if (this.isMediaAudible(target)) {
+        this.activeAudibleMedia.add(target)
+      } else {
+        this.activeAudibleMedia.delete(target)
+      }
+
+      this.syncEmbeddedMediaSuspension()
+    }
+
+    const refreshMediaState = () => {
+      this.activeAudibleMedia = new Set(
+        Array.from(document.querySelectorAll('audio, video')).filter(
+          (element): element is HTMLMediaElement =>
+            element instanceof HTMLMediaElement && this.isMediaAudible(element),
+        ),
+      )
+      this.activeYouTubePlayers.clear()
+      this.syncEmbeddedMediaSuspension()
+    }
+
+    document.addEventListener('play', (event) => syncMediaState(event.target), true)
+    document.addEventListener('pause', (event) => syncMediaState(event.target), true)
+    document.addEventListener('ended', (event) => syncMediaState(event.target), true)
+    document.addEventListener('emptied', (event) => syncMediaState(event.target), true)
+    document.addEventListener('volumechange', (event) => syncMediaState(event.target), true)
+    document.addEventListener('astro:page-load', refreshMediaState)
+  }
+
+  private bindSuspensionEvents(): void {
+    window.addEventListener('megameal:audio-suspend', (event) => {
+      const detail = event instanceof CustomEvent ? event.detail as { reason?: string } | undefined : undefined
+      this.suspendAmbience(detail?.reason ?? 'external-request')
+    })
+
+    window.addEventListener('megameal:audio-resume', (event) => {
+      const detail = event instanceof CustomEvent ? event.detail as { reason?: string } | undefined : undefined
+      this.resumeAmbience(detail?.reason)
+    })
+  }
+
+  private isMediaAudible(element: HTMLMediaElement): boolean {
+    return !element.paused && !element.ended && !element.muted && element.volume > 0
+  }
+
+  private syncEmbeddedMediaSuspension(): void {
+    const hasActiveEmbeddedMedia =
+      this.activeAudibleMedia.size > 0 || this.activeYouTubePlayers.size > 0
+
+    if (hasActiveEmbeddedMedia) {
+      this.suspendAmbience('embedded-media')
+    } else if (this.suspended && this.suspensionReason === 'embedded-media') {
+      this.resumeAmbience('embedded-media')
+    }
+  }
+
+  private bindYouTubeEmbeds(): void {
+    const bindFrames = () => {
+      const frames = Array.from(document.querySelectorAll('iframe')).filter((frame): frame is HTMLIFrameElement =>
+        frame instanceof HTMLIFrameElement && this.isYouTubeEmbed(frame),
+      )
+
+      if (frames.length === 0) return
+
+      void this.ensureYouTubeIframeApi().then(() => {
+        frames.forEach(frame => this.attachYouTubePlayer(frame))
+      })
+    }
+
+    bindFrames()
+    document.addEventListener('astro:page-load', bindFrames)
+  }
+
+  private async ensureYouTubeIframeApi(): Promise<void> {
+    if (typeof window === 'undefined') return
+    if (window.YT?.Player) return
+
+    if (!this.youtubeApiPromise) {
+      this.youtubeApiPromise = new Promise<void>((resolve, reject) => {
+        const existingScript = document.querySelector<HTMLScriptElement>('script[data-megameal-youtube-api="true"]')
+        const previousReady = window.onYouTubeIframeAPIReady
+
+        window.onYouTubeIframeAPIReady = () => {
+          previousReady?.()
+          resolve()
+        }
+
+        if (existingScript) return
+
+        const script = document.createElement('script')
+        script.src = 'https://www.youtube.com/iframe_api'
+        script.async = true
+        script.dataset.megamealYoutubeApi = 'true'
+        script.onerror = () => reject(new Error('Failed to load YouTube iframe API'))
+        document.head.appendChild(script)
+      }).catch((error) => {
+        this.youtubeApiPromise = null
+        console.warn('Unable to initialize YouTube iframe API:', error)
+      })
+    }
+
+    await this.youtubeApiPromise
+  }
+
+  private attachYouTubePlayer(frame: HTMLIFrameElement): void {
+    if (this.boundYouTubeFrames.has(frame) || !window.YT?.Player) return
+
+    const normalizedSrc = this.normalizeYouTubeSrc(frame.src)
+    if (normalizedSrc !== frame.src) {
+      frame.src = normalizedSrc
+    }
+
+    if (!frame.id) {
+      this.youtubeFrameCounter += 1
+      frame.id = `megameal-youtube-${this.youtubeFrameCounter}`
+    }
+
+    this.boundYouTubeFrames.add(frame)
+
+    new window.YT.Player(frame, {
+      events: {
+        onStateChange: (event: { data: number }) => {
+          if (event.data === window.YT.PlayerState.PLAYING) {
+            this.activeYouTubePlayers.add(frame.id)
+          } else if (
+            event.data === window.YT.PlayerState.PAUSED ||
+            event.data === window.YT.PlayerState.ENDED ||
+            event.data === window.YT.PlayerState.CUED
+          ) {
+            this.activeYouTubePlayers.delete(frame.id)
+          }
+
+          this.syncEmbeddedMediaSuspension()
+        },
+      },
+    })
+  }
+
+  private isYouTubeEmbed(frame: HTMLIFrameElement): boolean {
+    try {
+      const url = new URL(frame.src, window.location.origin)
+      return (
+        (url.hostname === 'www.youtube.com' || url.hostname === 'www.youtube-nocookie.com') &&
+        url.pathname.startsWith('/embed/')
+      )
+    } catch {
+      return false
+    }
+  }
+
+  private normalizeYouTubeSrc(src: string): string {
+    try {
+      const url = new URL(src, window.location.origin)
+      if (
+        url.hostname !== 'www.youtube.com' &&
+        url.hostname !== 'www.youtube-nocookie.com'
+      ) {
+        return src
+      }
+
+      url.searchParams.set('enablejsapi', '1')
+      url.searchParams.set('playsinline', '1')
+      url.searchParams.set('origin', window.location.origin)
+      return url.toString()
+    } catch {
+      return src
+    }
   }
 
   private emit(): void {

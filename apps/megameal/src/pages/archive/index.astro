@@ -2,21 +2,23 @@
 import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
 import timelineManifest from '../../../../../packages/shared-data/generated/timeline.json'
 import gameStarsManifest from '../../../../../packages/shared-data/generated/game-stars.json'
-import ArchivePanel from '@components/ArchivePanel.astro'
+import ArchiveStoryMap from '@components/archive/ArchiveStoryMap.astro'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
 
+const allPosts = postsManifest.items
 const publishedPosts = postsManifest.items.filter(post => !post.draft)
-const publishedTimelineItems = timelineManifest.items.filter(event => !event.isDraft)
-const publishedGameStars = gameStarsManifest.items.filter(event => !event.isDraft)
+const restrictedPosts = postsManifest.items.filter(post => post.draft)
+const allTimelineItems = timelineManifest.items
+const allGameStars = gameStarsManifest.items
 const activeArcCount = new Set(
-  publishedPosts
+  allPosts
     .map(post => post.series)
     .filter((seriesId): seriesId is string => Boolean(seriesId)),
 ).size
 
-const publicationYears = publishedPosts
+const publicationYears = allPosts
   .map(post => (post.published ? new Date(post.published).getUTCFullYear() : null))
   .filter((year): year is number => year !== null)
 
@@ -25,27 +27,27 @@ const earliestYear = publicationYears.length > 0 ? Math.min(...publicationYears)
 
 const archiveStats = [
   {
-    label: 'Published Dispatches',
-    value: String(publishedPosts.length),
+    label: 'Archive Records',
+    value: String(allPosts.length),
     note:
       latestYear && earliestYear
-        ? `${earliestYear} to ${latestYear}`
-        : 'Current archive window',
+        ? `${publishedPosts.length} public, ${restrictedPosts.length} restricted`
+        : 'Known archive scope',
   },
   {
     label: 'Timeline Entries',
-    value: String(publishedTimelineItems.length),
-    note: 'Shared chronology used by the portal and the game',
+    value: String(allTimelineItems.length),
+    note: 'Chronology records, including restricted map nodes',
   },
   {
     label: 'Story Arcs',
     value: String(activeArcCount),
-    note: 'Connected reading routes with live chapters',
+    note: 'Connected reading routes and restricted branches',
   },
   {
     label: 'Star Map Nodes',
-    value: String(publishedGameStars.length),
-    note: 'Observatory-visible destinations synced to the game layer',
+    value: String(allGameStars.length),
+    note: 'Observatory destinations synced to the game layer',
   },
 ]
 ---
@@ -70,7 +72,7 @@ const archiveStats = [
         ))}
       </div>
     </section>
-    <ArchivePanel></ArchivePanel>
+    <ArchiveStoryMap />
 </MainGridLayout>
 
 <style>

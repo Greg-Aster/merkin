@@ -55,15 +55,15 @@ import { isImageBannerItem, isVideoBannerItem } from './types'
 // BANNER IMAGE IMPORTS (for images and video fallbacks)
 // =====================================================================
 
-import banner5 from '@/assets/banner/0005.png'
-import banner6 from '@/assets/banner/0006.png'
-import banner7 from '@/assets/banner/0007.png'
-import banner8 from '@/assets/banner/0008.png'
-import banner2Fallback from '@/assets/banner/3dtimeline.webp'
 import banner3Fallback from '@/assets/banner/cookbook.png'
 //import banner1 from '@/assets/banner/main-title.png'
 import banner1Fallback from '@/assets/banner/main-title.png' // Fallback for your video
-import banner4Fallback from '@/assets/banner/reviews.png'
+import timelineMapFallback from '@/assets/site/posts/timeline/universe.png'
+import archiveDispatchesBanner from '@/assets/site/posts/timeline/archive.png'
+import starObservatoryFallback from '@/assets/site/posts/Mega-Meal-Explained/overlook.png'
+import storefrontBanner from '@/assets/site/posts/Mega-Meal-Explained/ultra-headquarters.png'
+import communityChannelsBanner from '@/assets/site/posts/timeline/golden-era.png'
+import storyModeBanner from '@/assets/site/posts/building.png'
 
 // =====================================================================
 // STANDARD BANNER DATA CONFIGURATION
@@ -133,8 +133,8 @@ export const bannerList: BannerItem[] = [
   {
     type: 'video',
     src: `${import.meta.env.BASE_URL}videos/deep-time3.webm`,
-    fallbackImage: banner2Fallback, // Fallback image for unsupported browsers
-    alt: 'Animated banner',
+    fallbackImage: timelineMapFallback,
+    alt: 'Timeline map and chronology overview',
     preload: 'none', // Don't preload video until needed
   },
   {
@@ -146,27 +146,29 @@ export const bannerList: BannerItem[] = [
   },
   {
     type: 'image',
-    src: banner4Fallback,
-    alt: 'Story archive and commercial dispatches',
+    src: archiveDispatchesBanner,
+    alt: 'Archive of dispatches and restricted records',
+  },
+  {
+    type: 'video',
+    src: `${import.meta.env.BASE_URL}videos/starmap.webm`,
+    fallbackImage: starObservatoryFallback,
+    alt: 'Enter the Star Observatory',
+    preload: 'none',
   },
   {
     type: 'image',
-    src: banner5,
-    alt: 'Enter the Star Observatory game',
+    src: storefrontBanner,
+    alt: 'Browse the storefront and corporate artifacts',
   },
   {
     type: 'image',
-    src: banner6,
-    alt: 'Browse the store and artifacts',
-  },
-  {
-    type: 'image',
-    src: banner7,
+    src: communityChannelsBanner,
     alt: 'Join the community channels',
   },
   {
     type: 'image',
-    src: banner8,
+    src: storyModeBanner,
     alt: 'Read the story mode dispatches',
   },
 ]
@@ -176,7 +178,7 @@ export const bannerList: BannerItem[] = [
 export const bannerLinks: (string | null)[] = [
   '/posts/explainer/', // intro html slide
   '/posts/mega-meal-explained/', // titleb.webm
-  '/posts/explainer/', // deep-time3.webm
+  '/posts/timeline/', // deep-time3.webm
   '/posts/cookbook/cookbook-index/', // cookbook.webm
   '/archive/', // archive / dispatches
   '/game/', // star observatory
@@ -232,10 +234,16 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
       'Discover our comprehensive cookbook featuring recipes, cooking techniques, and culinary tips inspired by the MEGAMEAL universe. Perfect for aspiring chefs and food enthusiasts.',
     icon: 'user-group',
   },
+  '/posts/timeline/': {
+    title: 'Timeline Map',
+    description:
+      'Open the chronology interface and track eras, incidents, recipes, wars, and corporate expansions across the wider universe.',
+    icon: 'newspaper',
+  },
   '/archive/': {
     title: 'Archive of Dispatches',
     description:
-      'Browse reports, commercials, recipes, and lore fragments across the entire publication stream.',
+      'Browse reports, restricted files, commercials, recipes, and lore fragments across the full publication stream.',
     icon: 'newspaper',
   },
   '/game/': {
@@ -247,7 +255,7 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
   '/store/': {
     title: 'Storefront and Artifacts',
     description:
-      'Explore products, in-universe merchandise, and commercial relics extracted from the MEGAMEAL timeline.',
+      'Explore products, in-universe merchandise, and commercial relics extracted from the MEGAMEAL corporate machine.',
     icon: 'briefcase',
   },
   '/community/': {

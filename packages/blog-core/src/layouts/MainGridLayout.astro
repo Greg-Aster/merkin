@@ -719,7 +719,7 @@ const gridLayoutClasses = [
         <div class="banner-aspect-container">
           <div class="banner-content-wrapper">
             <iframe
-              src={`https://www.youtube.com/embed/${hasPostBanner && post?.data?.bannerType === "video" ? post.data.bannerData.videoId : bannerDataSources.videoBannerData?.videoId}?autoplay=0&mute=0&controls=1`}
+              src={`https://www.youtube.com/embed/${hasPostBanner && post?.data?.bannerType === "video" ? post.data.bannerData.videoId : bannerDataSources.videoBannerData?.videoId}?autoplay=0&mute=0&controls=1&enablejsapi=1&playsinline=1`}
               title="YouTube video player"
               frameborder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"

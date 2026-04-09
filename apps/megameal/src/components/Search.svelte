@@ -199,13 +199,15 @@ $: search(keywordMobile, false)
   
       <!-- search results -->
       {#each result as item}
-          <a href={item.url}
+          <div
              class="transition first-of-type:mt-2 lg:first-of-type:mt-0 group block
          rounded-xl text-lg px-3 py-2 hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]
          {item.isFriendContent ? 'border-l-4 border-l-[var(--primary)]' : ''}">
-              <div class="transition text-90 inline-flex font-bold group-hover:text-[var(--primary)]">
-                  {item.meta.title}<Icon icon="fa6-solid:chevron-right" class="transition text-[0.75rem] translate-x-1 my-auto text-[var(--primary)]"></Icon>
-              </div>
+              <a href={item.url} class="block">
+                <div class="transition text-90 inline-flex font-bold group-hover:text-[var(--primary)]">
+                    {item.meta.title}<Icon icon="fa6-solid:chevron-right" class="transition text-[0.75rem] translate-x-1 my-auto text-[var(--primary)]"></Icon>
+                </div>
+              </a>
               {#if item.isFriendContent}
                   <div class="text-xs text-neutral-500 dark:text-neutral-400 mb-1">
                       From <a href={item.friendUrl} target="_blank" rel="noopener noreferrer" class="text-[var(--primary)] hover:underline">{item.friendName}</a>
@@ -214,7 +216,7 @@ $: search(keywordMobile, false)
               <div class="transition text-sm text-50">
                   {item.excerpt}
               </div>
-          </a>
+          </div>
       {/each}
   </div>
   
