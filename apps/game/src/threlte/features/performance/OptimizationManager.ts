@@ -68,7 +68,7 @@ export class OptimizationManager {
   // Base quality profiles - minimal settings only
   private readonly baseQualityProfiles: Record<OptimizationLevel, Partial<QualitySettings>> = {
     [OptimizationLevel.ULTRA_LOW]: {
-      canvasScale: 0.6,
+      canvasScale: 0.55,
       enablePostProcessing: false,
       enableShadows: false,
       shadowMapSize: 0,
@@ -84,42 +84,42 @@ export class OptimizationManager {
       componentOverrides: new Map(),
     },
     [OptimizationLevel.LOW]: {
+      canvasScale: 0.65,
+      enablePostProcessing: false,
+      enableShadows: false,
+      shadowMapSize: 0,
+      enableDynamicLighting: false,
+      textureResolution: 256,
+      enableProceduralTextures: false,
+      enableNormalMaps: false,
+      enableReflections: false,
+      enableRefractions: false,
+      enableVegetation: true,
+      maxFireflyLights: 6,
+      maxVegetationInstances: 2,
+      componentOverrides: new Map(),
+    },
+    [OptimizationLevel.MEDIUM]: {
       canvasScale: 0.75,
       enablePostProcessing: false,
       enableShadows: false,
       shadowMapSize: 0,
       enableDynamicLighting: true,
-      textureResolution: 256,
+      textureResolution: 512,
       enableProceduralTextures: true,
       enableNormalMaps: false,
       enableReflections: false,
       enableRefractions: false,
       enableVegetation: true,
-      maxFireflyLights: 10,
-      maxVegetationInstances: 3,
-      componentOverrides: new Map(),
-    },
-    [OptimizationLevel.MEDIUM]: {
-      canvasScale: 0.9,
-      enablePostProcessing: true,
-      enableShadows: true,
-      shadowMapSize: 512,
-      enableDynamicLighting: true,
-      textureResolution: 512,
-      enableProceduralTextures: true,
-      enableNormalMaps: true,
-      enableReflections: false,
-      enableRefractions: false,
-      enableVegetation: true,
-      maxFireflyLights: 20,
-      maxVegetationInstances: 10,
+      maxFireflyLights: 12,
+      maxVegetationInstances: 5,
       componentOverrides: new Map(),
     },
     [OptimizationLevel.HIGH]: {
-      canvasScale: 1.0,
-      enablePostProcessing: true,
+      canvasScale: 0.9,
+      enablePostProcessing: false,
       enableShadows: true,
-      shadowMapSize: 1024,
+      shadowMapSize: 512,
       enableDynamicLighting: true,
       textureResolution: 1024,
       enableProceduralTextures: true,
@@ -127,15 +127,15 @@ export class OptimizationManager {
       enableReflections: true,
       enableRefractions: false,
       enableVegetation: true,
-      maxFireflyLights: 40,
-      maxVegetationInstances: 15,
+      maxFireflyLights: 24,
+      maxVegetationInstances: 10,
       componentOverrides: new Map(),
     },
     [OptimizationLevel.ULTRA]: {
       canvasScale: 1.0,
       enablePostProcessing: true,
       enableShadows: true,
-      shadowMapSize: 2048,
+      shadowMapSize: 1024,
       enableDynamicLighting: true,
       textureResolution: 2048,
       enableProceduralTextures: true,
@@ -143,8 +143,8 @@ export class OptimizationManager {
       enableReflections: true,
       enableRefractions: true,
       enableVegetation: true,
-      maxFireflyLights: 60,
-      maxVegetationInstances: 30,
+      maxFireflyLights: 40,
+      maxVegetationInstances: 18,
       componentOverrides: new Map(),
     },
   }
@@ -293,7 +293,7 @@ export class OptimizationManager {
   private autoSetOptimizationLevel(): void {
     if (!this.deviceCapabilities) return
 
-    const { isMobile, isLowEnd, estimatedGPUTier } = this.deviceCapabilities
+    const { isMobile, isLowEnd, estimatedGPUTier, pixelRatio, hardwareConcurrency, deviceMemory } = this.deviceCapabilities
     let level: OptimizationLevel
 
     if (isMobile) {
@@ -306,13 +306,18 @@ export class OptimizationManager {
       }
     } else {
       if (estimatedGPUTier === 'ultra') {
-        level = OptimizationLevel.ULTRA
+        level = OptimizationLevel.HIGH
       } else if (estimatedGPUTier === 'high') {
         level = OptimizationLevel.HIGH
       } else if (estimatedGPUTier === 'low') {
         level = OptimizationLevel.LOW
       } else {
-        level = OptimizationLevel.MEDIUM
+        const highDensityDisplay = pixelRatio > 1.25
+        const midRangeCpu = hardwareConcurrency <= 8
+        const limitedMemory = (deviceMemory ?? 8) <= 8
+        level = highDensityDisplay || midRangeCpu || limitedMemory
+          ? OptimizationLevel.LOW
+          : OptimizationLevel.MEDIUM
       }
     }
 

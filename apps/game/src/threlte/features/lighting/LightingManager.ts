@@ -89,7 +89,7 @@ export class LightingManager {
     console.log('💡 LightingManager: Initialized with scene')
   }
 
-  private initializePointLightPool(poolSize: number = 50): void {
+  private initializePointLightPool(poolSize: number = 20): void {
     if (!this.scene) {
       console.error('❌ LightingManager: Cannot initialize point light pool without scene')
       return
@@ -140,14 +140,14 @@ export class LightingManager {
         light.castShadow = data.castShadow
         
         if (data.castShadow) {
-          light.shadow.mapSize.width = 2048
-          light.shadow.mapSize.height = 2048
+          light.shadow.mapSize.width = 1024
+          light.shadow.mapSize.height = 1024
           light.shadow.camera.near = 0.5
-          light.shadow.camera.far = 500
-          light.shadow.camera.left = -300
-          light.shadow.camera.right = 300
-          light.shadow.camera.top = 300
-          light.shadow.camera.bottom = -300
+          light.shadow.camera.far = 250
+          light.shadow.camera.left = -180
+          light.shadow.camera.right = 180
+          light.shadow.camera.top = 180
+          light.shadow.camera.bottom = -180
         }
         
         this.scene.add(light)

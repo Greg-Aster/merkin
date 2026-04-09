@@ -222,7 +222,7 @@ export class TerrainManager {
    */
   public getVisibleChunks(playerPosition: THREE.Vector3): TerrainChunk[] {
     if (!this.config || !this.config.lods || this.chunks.length === 0) {
-      console.log('🏔️ getVisibleChunks: No config/lods/chunks', { 
+      if (import.meta.env.DEV) console.log('🏔️ getVisibleChunks: No config/lods/chunks', { 
         hasConfig: !!this.config, 
         hasLods: !!this.config?.lods, 
         chunkCount: this.chunks.length,
@@ -242,7 +242,7 @@ export class TerrainManager {
       }
 
       if (newLod !== chunk.currentLod) {
-        console.log(`🏔️ Chunk ${chunk.id}: playerDist=${distance.toFixed(1)}, newLOD=${newLod}`)
+        if (import.meta.env.DEV) console.log(`🏔️ Chunk ${chunk.id}: playerDist=${distance.toFixed(1)}, newLOD=${newLod}`)
         chunk.currentLod = newLod
       }
     })

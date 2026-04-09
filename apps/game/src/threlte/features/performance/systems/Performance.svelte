@@ -32,13 +32,13 @@
 
   // Startup grace period: don't adapt quality during initial load (terrain, physics, GLB uploads
   // all cause temporary frame drops that shouldn't trigger permanent quality changes)
-  const STARTUP_GRACE_SECONDS = 30
+  const STARTUP_GRACE_SECONDS = 6
   let startupTime = 0
   let startupGraceDone = false
 
   // Hysteresis: require N consecutive bad/good samples before changing tier
-  const DEGRADE_THRESHOLD = 8   // 8s consistently under target * 0.75 → step down
-  const UPGRADE_THRESHOLD = 20  // 20s consistently over target * 1.15 → step up
+  const DEGRADE_THRESHOLD = 4   // 4s consistently under target * 0.75 → step down
+  const UPGRADE_THRESHOLD = 12  // 12s consistently over target * 1.15 → step up
   let degradeCount = 0
   let upgradeCount = 0
 
@@ -146,7 +146,13 @@
 
     // Adaptive quality: adjust tier based on sustained FPS (after startup grace)
     if (enableAutomaticOptimization && startupGraceDone && fpsSamples.length >= 3) {
-      if (avgFPS < effectiveTarget * 0.75) {
+      if (avgFPS < effectiveTarget * 0.55 || currentFps < effectiveTarget * 0.45) {
+        upgradeCount = 0
+        degradeCount += 2
+        if (degradeCount >= DEGRADE_THRESHOLD) {
+          stepQualityDown()
+        }
+      } else if (avgFPS < effectiveTarget * 0.75) {
         upgradeCount = 0
         degradeCount++
         if (degradeCount >= DEGRADE_THRESHOLD) {

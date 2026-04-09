@@ -31,13 +31,14 @@ const { renderer } = useThrelte()
 function applyQualitySettings(quality: { canvasScale: number; shadowMapSize: number }) {
   if (!renderer) return
 
-  // Canvas scale — drives render resolution
-  const scale = quality.canvasScale
-  const w = Math.floor(window.innerWidth * scale)
-  const h = Math.floor(window.innerHeight * scale)
-  renderer.setSize(w, h)
-  renderer.domElement.style.width = window.innerWidth + 'px'
-  renderer.domElement.style.height = window.innerHeight + 'px'
+  // Apply quality scaling through pixel ratio only. Scaling both pixel ratio and
+  // framebuffer size was over-allocating the render target on HiDPI laptops.
+  const basePixelRatio = Math.min(window.devicePixelRatio || 1, config.maxPixelRatio)
+  const scaledPixelRatio = Math.max(0.5, basePixelRatio * quality.canvasScale)
+  renderer.setPixelRatio(scaledPixelRatio)
+  renderer.setSize(window.innerWidth, window.innerHeight, false)
+  renderer.domElement.style.width = '100%'
+  renderer.domElement.style.height = '100%'
 
   // Shadow map
   renderer.shadowMap.enabled = quality.shadowMapSize > 0
@@ -49,6 +50,7 @@ function applyQualitySettings(quality: { canvasScale: number; shadowMapSize: num
 }
 
 let unsubscribe: (() => void) | undefined
+let handleResize: (() => void) | undefined
 
 onMount(() => {
   if (!renderer) {
@@ -65,20 +67,24 @@ onMount(() => {
   renderer.autoClear = true
   renderer.info.autoReset = false
 
-  // Pixel ratio (fixed — not quality-tier dependent)
-  const pixelRatio = Math.min(window.devicePixelRatio, config.maxPixelRatio)
-  renderer.setPixelRatio(pixelRatio)
-
   // Subscribe to quality changes — applies canvas scale and shadow settings reactively
   unsubscribe = qualitySettingsStore.subscribe(quality => {
     applyQualitySettings(quality)
   })
+
+  handleResize = () => {
+    applyQualitySettings($qualitySettingsStore)
+  }
+  window.addEventListener('resize', handleResize)
 
   console.log('✅ Threlte renderer configured')
 })
 
 onDestroy(() => {
   unsubscribe?.()
+  if (handleResize) {
+    window.removeEventListener('resize', handleResize)
+  }
 })
 
 export { config }

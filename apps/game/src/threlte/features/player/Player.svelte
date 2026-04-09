@@ -15,6 +15,9 @@
   // --- Physics Constants ---
   const GRAVITY = 8;
   const characterControllerOffset = 0.1;
+  const GAMEPAD_MOVE_DEADZONE = 0.18;
+  const GAMEPAD_LOOK_DEADZONE = 0.12;
+  const GAMEPAD_LOOK_SPEED = 2.2;
   
   // --- Visual Constants ---
   const CAMERA_SMOOTH_SPEED = 0.2; // How quickly visuals catch up to physics
@@ -120,15 +123,62 @@
     return movement;
   }
 
+  function applyStickDeadzone(value: number, deadzone: number) {
+    const magnitude = Math.abs(value);
+    if (magnitude < deadzone) return 0;
+    const normalized = (magnitude - deadzone) / (1 - deadzone);
+    return Math.sign(value) * normalized;
+  }
+
+  function getPrimaryGamepad(): Gamepad | null {
+    if (typeof navigator === 'undefined' || typeof navigator.getGamepads !== 'function') {
+      return null;
+    }
+
+    for (const pad of navigator.getGamepads()) {
+      if (pad) return pad;
+    }
+
+    return null;
+  }
+
+  function getGamepadInput() {
+    const pad = getPrimaryGamepad();
+    if (!pad) {
+      return {
+        moveX: 0,
+        moveZ: 0,
+        lookX: 0,
+        lookY: 0,
+        jump: false,
+        sprint: false,
+      };
+    }
+
+    return {
+      moveX: applyStickDeadzone(pad.axes[0] ?? 0, GAMEPAD_MOVE_DEADZONE),
+      moveZ: applyStickDeadzone(pad.axes[1] ?? 0, GAMEPAD_MOVE_DEADZONE),
+      lookX: applyStickDeadzone(pad.axes[2] ?? 0, GAMEPAD_LOOK_DEADZONE),
+      lookY: applyStickDeadzone(pad.axes[3] ?? 0, GAMEPAD_LOOK_DEADZONE),
+      jump: Boolean(pad.buttons[0]?.pressed),
+      sprint: Boolean(pad.buttons[5]?.pressed || pad.buttons[7]?.pressed),
+    };
+  }
+
   // --- Main Game Loop ---
   // This now handles ONLY the physics simulation. Visuals are smoothed separately.
   useTask((delta) => {
     if (!rigidBody || !characterController) return;
+    const gamepadInput = getGamepadInput();
 
     // 1. Handle Rotation (Left/Right Mouse Look) - This directly affects the physics body
     if (isMobile && mobileLook && (mobileLook.x !== 0 || mobileLook.y !== 0)) {
       accumulatedRotationX = mobileLook.x * -0.00125;
       accumulatedRotationY = mobileLook.y * -0.00125;
+    }
+    if (gamepadInput.lookX !== 0 || gamepadInput.lookY !== 0) {
+      accumulatedRotationX -= gamepadInput.lookX * GAMEPAD_LOOK_SPEED * delta;
+      accumulatedRotationY -= gamepadInput.lookY * GAMEPAD_LOOK_SPEED * delta;
     }
     if (accumulatedRotationX !== 0) {
       const currentRotation = rigidBody.rotation();
@@ -140,7 +190,7 @@
 
     // 2. Handle Vertical Movement (Gravity & Jump)
     playerVelocity.y -= GRAVITY * delta;
-    const wantsToJump = keyStates['Space'] || mobileJumpPressed;
+    const wantsToJump = keyStates['Space'] || mobileJumpPressed || gamepadInput.jump;
     if (wantsToJump && isGrounded) {
       playerVelocity.y = jumpForce;
     }
@@ -148,7 +198,10 @@
 
     // 3. Handle Horizontal Movement
     const input = updateMovementFromKeys();
-    const moveSpeed = keyStates['ShiftLeft'] || keyStates['ShiftRight'] ? speed * 2 : speed;
+    if (Math.abs(gamepadInput.moveX) > Math.abs(input.x)) input.x = gamepadInput.moveX;
+    if (Math.abs(gamepadInput.moveZ) > Math.abs(input.z)) input.z = gamepadInput.moveZ;
+
+    const moveSpeed = keyStates['ShiftLeft'] || keyStates['ShiftRight'] || gamepadInput.sprint ? speed * 2 : speed;
     const horizontalVelocity = new THREE.Vector3(input.x, 0, input.z);
     if (isMobile) horizontalVelocity.set(mobileMovement.x, 0, mobileMovement.z);
     if (horizontalVelocity.lengthSq() > 0) {

@@ -16,7 +16,7 @@
   import { T } from '@threlte/core'
   import { Collider, RigidBody } from '@threlte/rapier'
   import * as THREE from 'three'
-  import { qualitySettingsStore } from '../../performance'
+  import { qualityLevelStore, qualitySettingsStore } from '../../performance'
   import { TERRAIN_GROUP } from '../../../constants/physics'
   import { 
     BaseLevelComponent, 
@@ -94,11 +94,11 @@
       const playerCollider = isPlayer(a) ? a : (isPlayer(b) ? b : null)
 
       if (!playerCollider) {
-        console.log('🌊 Ocean: Intersection enter - no player collider detected')
+        if (import.meta.env.DEV) console.log('🌊 Ocean: Intersection enter - no player collider detected')
         return
       }
 
-      console.log('🌊 Ocean: ✅ PLAYER ENTERED WATER VOLUME!')
+      if (import.meta.env.DEV) console.log('🌊 Ocean: ✅ PLAYER ENTERED WATER VOLUME!')
       playerInWater = true
 
       // Calculate depth based on player position vs water level
@@ -119,7 +119,7 @@
       const playerCollider = isPlayer(a) ? a : (isPlayer(b) ? b : null)
 
       if (playerCollider && playerInWater) {
-        console.log('🏖️ Ocean: Player exited water volume')
+        if (import.meta.env.DEV) console.log('🏖️ Ocean: Player exited water volume')
         playerInWater = false
         underwaterActions.exitWater()
         dispatch('waterExit')
@@ -131,7 +131,7 @@
 
   function isPlayer(collider: any): boolean {
     // Check if the collider belongs to the player
-    console.log('🔍 Ocean: Checking collider:', collider)
+    if (import.meta.env.DEV) console.log('🔍 Ocean: Checking collider:', collider)
     
     // Try multiple ways to identify the player
     const userData = collider?.userData || collider?.parent?.userData || collider?.rigidBody?.userData
@@ -140,7 +140,7 @@
     // Also check if it's a capsule collider (typical for player)
     const isPlayerByCapsule = collider?.shape === 'capsule' || collider?.args?.length === 2
     
-    console.log('🔍 Ocean: Player detection:', { userData, isPlayerByUserData, isPlayerByCapsule })
+    if (import.meta.env.DEV) console.log('🔍 Ocean: Player detection:', { userData, isPlayerByUserData, isPlayerByCapsule })
     
     return isPlayerByUserData || isPlayerByCapsule
   }
@@ -149,7 +149,7 @@
     // Get the Y position of the player's collider
     const position = collider?.position || collider?.parent?.position || collider?.rigidBody?.translation()
     const y = position?.y || position?.[1] || 0
-    console.log('🔍 Ocean: Player Y position:', y)
+    if (import.meta.env.DEV) console.log('🔍 Ocean: Player Y position:', y)
     return y
   }
 
@@ -158,7 +158,7 @@
   $: textureSize = $qualitySettingsStore.textureResolution
   
   // Map segments to quality settings for performance
-  $: isMobileQuality = $qualitySettingsStore.level === 'ultra_low' || $qualitySettingsStore.level === 'low'
+  $: isMobileQuality = $qualityLevelStore === 'ultra_low' || $qualityLevelStore === 'low'
   $: optimizedSegments = {
     width: isMobileQuality ? 16 : (segments?.width || 24),
     height: isMobileQuality ? 16 : (segments?.height || 24)
@@ -186,13 +186,13 @@
     private lastPointLightCount = 0
 
     protected async onInitialize(): Promise<void> {
-      console.log('🌊 Ocean: Initializing...')
+      if (import.meta.env.DEV) console.log('🌊 Ocean: Initializing...')
       await this.createOcean()
       if (lightingManager) {
         lightingManager.subscribe((lighting: LightingData) => {
           this.updateOceanLighting(lighting)
         })
-        console.log('🌊 Ocean: Connected to lighting system')
+        if (import.meta.env.DEV) console.log('🌊 Ocean: Connected to lighting system')
       } else {
         console.warn('🌊 Ocean: No lightingManager found in context!')
       }
@@ -223,12 +223,12 @@
           
           // If player is deep enough and not already underwater → enter water
           if (depth > epsilon && !underwaterState.isUnderwater) {
-            console.log('🌊 Ocean: Math-based underwater detection - entering water at depth:', depth)
+            if (import.meta.env.DEV) console.log('🌊 Ocean: Math-based underwater detection - entering water at depth:', depth)
             underwaterActions.enterWater(depth)
           }
           // If player is above water and currently underwater → exit water
           else if (depth <= epsilon && underwaterState.isUnderwater) {
-            console.log('🏖️ Ocean: Math-based underwater detection - exiting water')
+            if (import.meta.env.DEV) console.log('🏖️ Ocean: Math-based underwater detection - exiting water')
             underwaterActions.exitWater()
           }
         }
