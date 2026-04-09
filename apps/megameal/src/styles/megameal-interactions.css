@@ -44,7 +44,6 @@
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   transform: scale(1.035) translate3d(0, 0.75rem, 0);
   filter: saturate(0.82) brightness(0.78) blur(10px);
-  will-change: opacity, transform, filter;
 }
 
 #standard-banner-container .banner-slide[data-active="true"] {
@@ -148,7 +147,6 @@
               box-shadow 0.3s ease,
               border-color 0.3s ease,
               background 0.3s ease !important;
-  will-change: transform;
 }
 
 .card-base:hover {

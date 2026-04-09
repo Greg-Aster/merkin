@@ -120,7 +120,6 @@
     opacity: 0.04;
     mix-blend-mode: screen;
     animation: starsDrift 36s linear infinite alternate;
-    will-change: transform;
   }
 
   @keyframes starsDrift {
@@ -151,7 +150,6 @@
     mix-blend-mode: screen;
     animation: starsTwinkle 6.5s ease-in-out infinite,
                starsTwinkleDrift 48s linear infinite alternate;
-    will-change: opacity, transform;
   }
 
   @keyframes starsTwinkle {
@@ -212,7 +210,6 @@
     max-width: 860px;
     width: 100%;
     transition: transform 0.1s ease-out;
-    will-change: transform;
     padding: 1.35rem 1.6rem 1.55rem;
     background: linear-gradient(180deg, rgba(4, 8, 16, 0.14), rgba(4, 8, 16, 0.05));
     backdrop-filter: blur(4px) saturate(1.05);

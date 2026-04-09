@@ -26,6 +26,8 @@ class SiteAudioManager {
   private currentHowl: Howl | null = null
   private listeners = new Set<SiteAudioListener>()
   private initialized = false
+  private audioUnlocked = false
+  private pendingPathname: string | null = null
 
   initialize(): void {
     if (this.initialized || typeof window === 'undefined') return
@@ -36,9 +38,9 @@ class SiteAudioManager {
     this.ambienceVolume = this.readStoredAmbienceVolume()
     this.sfxVolume = this.readStoredSfxVolume()
     Howler.autoUnlock = true
-    Howler.html5PoolSize = 4
+    Howler.html5PoolSize = 12
 
-    this.syncForPath(window.location.pathname)
+    this.pendingPathname = window.location.pathname
     this.emit()
   }
 
@@ -73,7 +75,7 @@ class SiteAudioManager {
     if (!nextEnabled) {
       this.stopCurrentTrack()
     } else if (typeof window !== 'undefined') {
-      this.syncForPath(window.location.pathname, true)
+      this.pendingPathname = window.location.pathname
     }
 
     this.emit()
@@ -111,7 +113,15 @@ class SiteAudioManager {
   }
 
   syncForPath(pathname: string, userInitiated = false): void {
+    this.pendingPathname = pathname
+
     if (!this.enabled) {
+      this.stopCurrentTrack()
+      this.emit()
+      return
+    }
+
+    if (!this.audioUnlocked && !userInitiated) {
       this.stopCurrentTrack()
       this.emit()
       return
@@ -129,7 +139,7 @@ class SiteAudioManager {
       this.currentHowl
     ) {
       if (
-        userInitiated &&
+        (userInitiated || this.audioUnlocked) &&
         !this.currentHowl.playing()
       ) {
         this.currentHowl.play()
@@ -150,7 +160,7 @@ class SiteAudioManager {
       src: [encodeURI(nextTrack.src)],
       loop: nextTrack.loop ?? true,
       volume: 0,
-      html5: nextTrack.html5 ?? true,
+      html5: nextTrack.html5 ?? false,
       preload: true,
       onplayerror: () => {
         nextHowl.once('unlock', () => {
@@ -174,7 +184,9 @@ class SiteAudioManager {
     nextHowl.once('play', () => {
       nextHowl.fade(0, targetVolume, siteAudioConfig.fadeDurationMs)
     })
-    nextHowl.play()
+    if (this.audioUnlocked) {
+      nextHowl.play()
+    }
 
     if (previousHowl && previousTrack) {
       const startingVolume = previousHowl.volume()
@@ -183,6 +195,27 @@ class SiteAudioManager {
         previousHowl.stop()
         previousHowl.unload()
       }, siteAudioConfig.fadeDurationMs + 50)
+    }
+  }
+
+  async unlockFromGesture(): Promise<void> {
+    if (typeof window === 'undefined') return
+
+    try {
+      const ctx = Howler.ctx
+      if (ctx && ctx.state === 'suspended') {
+        await ctx.resume()
+      }
+      this.audioUnlocked = true
+    } catch (error) {
+      console.warn('Site audio unlock failed:', error)
+      return
+    }
+
+    if (this.enabled && this.pendingPathname) {
+      this.syncForPath(this.pendingPathname, true)
+    } else {
+      this.emit()
     }
   }
 

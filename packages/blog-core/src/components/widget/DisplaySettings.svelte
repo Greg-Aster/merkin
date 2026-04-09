@@ -1,12 +1,17 @@
 <script lang="ts">
 import Icon from '@iconify/svelte/dist/Icon.svelte'
+import { onMount } from 'svelte'
 import { getDefaultHue, getHue, setHue } from '../../utils/theme-utils'
 
 export let themeColorLabel = 'Theme Color'
 export let resetButtonLabel = 'Reset to Default'
 
-let hue = getHue()
+let hue = getDefaultHue()
 const defaultHue = getDefaultHue()
+
+onMount(() => {
+  hue = getHue()
+})
 
 function resetHue() {
   hue = getDefaultHue()

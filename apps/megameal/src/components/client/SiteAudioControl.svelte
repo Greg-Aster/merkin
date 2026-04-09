@@ -24,6 +24,7 @@ const syncAudioForCurrentPage = () => {
 }
 
 const toggleAudio = () => {
+  siteAudioManager.unlockFromGesture()
   siteAudioManager.toggle()
 }
 
@@ -58,6 +59,12 @@ onMount(() => {
 
   document.addEventListener('astro:page-load', syncAudioForCurrentPage)
 
+  const handleFirstGesture = () => {
+    siteAudioManager.unlockFromGesture()
+  }
+  document.addEventListener('pointerdown', handleFirstGesture, { passive: true })
+  document.addEventListener('keydown', handleFirstGesture)
+
   const handlePointerDown = (event: MouseEvent) => {
     if (!panelOpen || !panelElement) return
     if (panelElement.contains(event.target as Node)) return
@@ -69,6 +76,8 @@ onMount(() => {
   return () => {
     unsubscribe()
     document.removeEventListener('astro:page-load', syncAudioForCurrentPage)
+    document.removeEventListener('pointerdown', handleFirstGesture)
+    document.removeEventListener('keydown', handleFirstGesture)
     document.removeEventListener('click', handlePointerDown)
   }
 })
