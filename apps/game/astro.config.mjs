@@ -13,7 +13,8 @@ export default defineConfig({
   site: siteUrl,
   base: normalizedBasePath,
   trailingSlash: 'always',
-  // Reuse the 1.4GB of 3D assets from MEGAMEAL/ without duplicating them
+  // The legacy MEGAMEAL/ folder is archived, but its public asset tree is still the
+  // canonical shared source for the game until those assets are migrated elsewhere.
   publicDir: '../../MEGAMEAL/public',
   integrations: [svelte(), tailwind()],
   vite: {

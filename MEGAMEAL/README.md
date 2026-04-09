@@ -1,6 +1,8 @@
 # 🌊 MEGAMEAL
 
 > **Status:** Archived legacy folder. Active site source is `apps/megameal`. Active game endpoint is `https://game.megameal.org/`.
+>
+> **Do not run or deploy from this folder.** Use `apps/megameal` for the site and `apps/game` for the game. This folder remains only as a legacy archive and as the current shared static asset source for `apps/game`.
 
 **An immersive storytelling universe combining interactive narrative, 3D gaming, and multimedia experiences**
 
