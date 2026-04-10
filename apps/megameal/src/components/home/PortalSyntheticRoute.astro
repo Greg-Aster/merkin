@@ -1141,12 +1141,129 @@ const linkLabel =
   }
 
   @media (max-width: 540px) {
+    .portal-route,
+    .portal-route--game,
+    .portal-route--story,
+    .portal-route--store,
+    .portal-route--community {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      padding: 0.7rem;
+      border-radius: 1rem;
+      background:
+        linear-gradient(180deg, oklch(0.14 0.03 var(--hue) / 0.72), oklch(0.1 0.03 var(--hue) / 0.62));
+      backdrop-filter: blur(10px) saturate(1.04);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.06),
+        0 14px 34px rgba(0,0,0,0.18);
+    }
+
+    .portal-route::before {
+      inset: -0.75rem;
+      filter: blur(14px);
+    }
+
+    .portal-route--reverse .route-copy,
+    .portal-route--game .route-copy,
+    .portal-route--story .route-copy,
+    .portal-route--store .route-copy,
+    .portal-route--community .route-copy {
+      order: 2;
+    }
+
+    .portal-route--reverse .route-viewport,
+    .portal-route--game .route-viewport,
+    .portal-route--story .route-viewport,
+    .portal-route--store .route-viewport,
+    .portal-route--community .route-viewport {
+      order: 1;
+    }
+
+    .portal-route--game .route-copy,
+    .portal-route--story .route-copy,
+    .portal-route--store .route-copy,
+    .portal-route--community .route-copy {
+      position: static;
+      transform: none;
+      align-items: flex-start;
+      width: auto;
+      min-height: 0;
+      padding: 0.55rem 0.2rem 0.15rem;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .portal-route--game:hover .route-copy,
+    .portal-route--story:hover .route-copy,
+    .portal-route--store:hover .route-copy,
+    .portal-route--community:hover .route-copy {
+      transform: none;
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .route-copy h3 {
+      font-size: clamp(1.35rem, 8vw, 2rem);
+    }
+
+    .route-copy p {
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .route-link {
+      padding: 0.68rem 0.84rem;
+    }
+
     .route-viewport {
-      min-height: 19rem;
+      min-height: 16.5rem;
+      border-radius: 0.9rem;
+    }
+
+    .portal-route--game .route-viewport,
+    .portal-route--story .route-viewport,
+    .portal-route--store .route-viewport,
+    .portal-route--community .route-viewport {
+      min-height: 16.5rem;
+      border-radius: 0.9rem;
+    }
+
+    .route-scene__panel {
+      right: 0.75rem;
+      bottom: 0.75rem;
+      padding: 0.58rem 0.7rem;
+      border-radius: 0.75rem;
+      font-size: 0.64rem;
+    }
+
+    .route-scene__icon {
+      width: 1.1rem;
+      height: 1.1rem;
+    }
+
+    .route-targeting,
+    .route-archive-index {
+      display: none;
+    }
+
+    .route-archive-card,
+    .route-storefront__shelf,
+    .route-community-transmission {
+      transform: none;
+      backdrop-filter: none;
     }
 
     .route-storefront__shelf {
-      width: 10.5rem;
+      width: min(10.5rem, 72vw);
     }
 
     .route-storefront__shelf--top {

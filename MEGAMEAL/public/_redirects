@@ -1,7 +1,0 @@
-# Archived legacy MEGAMEAL build: always redirect to the canonical live endpoints.
-/game https://game.megameal.org/ 301
-/game/* https://game.megameal.org/:splat 301
-/host https://game.megameal.org/host 301
-/host/* https://game.megameal.org/host/:splat 301
-/posts/* https://megameal.org/posts/:splat 301
-/* https://megameal.org/:splat 301

@@ -28,31 +28,43 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
 <MainGridLayout homeLayout="portal">
   {isFirstPage && (
     <>
-      <div id="portal-overview" class="appear-on-scroll delay-1">
+      <div id="portal-overview" class="portal-snap-section portal-snap-section--destinations appear-on-scroll delay-1">
         <PortalDestinations
           publishedDispatchCount={publishedDispatchCount}
           timelineCount={publishedTimelineCount}
         />
       </div>
-      <div class="appear-on-scroll delay-2 featured-arc-section deferred-section">
+      <div class="portal-snap-section portal-snap-section--featured appear-on-scroll delay-2 featured-arc-section deferred-section">
         <FeaturedArc />
       </div>
-      <div class="dispatches-header appear-on-scroll delay-3">
-        <span class="dispatches-label">Recent Dispatches</span>
-        <span class="dispatches-sub">
-          {publishedDispatchCount} published transmissions across {publishedTimelineCount} live timeline nodes.
-        </span>
-      </div>
+      <section class="portal-snap-section portal-snap-section--dispatches deferred-section" aria-labelledby="dispatches-title">
+        <div class="dispatches-header appear-on-scroll delay-3">
+          <span id="dispatches-title" class="dispatches-label">Recent Dispatches</span>
+          <span class="dispatches-sub">
+            {publishedDispatchCount} published transmissions across {publishedTimelineCount} live timeline nodes.
+          </span>
+        </div>
+        <div class="dispatches-stream">
+          <PostPage page={page}></PostPage>
+          <Pagination
+            class="mx-auto onload-animation"
+            page={page}
+            style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
+          ></Pagination>
+        </div>
+      </section>
     </>
   )}
-  <div class="dispatches-stream deferred-section">
-    <PostPage page={page}></PostPage>
-    <Pagination
-      class="mx-auto onload-animation"
-      page={page}
-      style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
-    ></Pagination>
-  </div>
+  {!isFirstPage && (
+    <div class="dispatches-stream deferred-section">
+      <PostPage page={page}></PostPage>
+      <Pagination
+        class="mx-auto onload-animation"
+        page={page}
+        style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
+      ></Pagination>
+    </div>
+  )}
   {isFirstPage && (
     <FactsWidget
       slot="overlay"
@@ -65,27 +77,255 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
     />
   )}
   {isFirstPage && (
-    <div class="era-browser-wrapper appear-on-scroll deferred-section">
+    <div class="portal-snap-section portal-snap-section--eras era-browser-wrapper appear-on-scroll deferred-section">
       <EraBrowser />
     </div>
   )}
 </MainGridLayout>
 
 <script>
-  // Scroll-reveal entrance animations
-  const observer = new IntersectionObserver(
-    (entries) =>
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return
-        entry.target.classList.add('is-visible')
-        observer.unobserve(entry.target)
-      }),
-    { threshold: 0.02, rootMargin: '0px 0px -8% 0px' }
-  )
-  document.querySelectorAll('.appear-on-scroll').forEach(el => observer.observe(el))
+  const portalScrollCleanupKey = '__megamealPortalScrollCleanup'
+  const portalScrollBoundKey = '__megamealPortalScrollBound'
+
+  const initPortalScrollStages = () => {
+    ;(window as any)[portalScrollCleanupKey]?.()
+
+    const hasPortal = Boolean(document.getElementById('portal-overview'))
+    document.documentElement.classList.toggle('megameal-home-snap', hasPortal)
+    document.documentElement.classList.remove('megameal-home-stage-ready')
+    if (!hasPortal) return
+
+    const revealObserver = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
+          entry.target.classList.add('is-visible')
+          revealObserver.unobserve(entry.target)
+        }),
+      { threshold: 0.02, rootMargin: '0px 0px -8% 0px' }
+    )
+    document.querySelectorAll('.appear-on-scroll').forEach(el => revealObserver.observe(el))
+
+    const bannerStage = document.getElementById('banner-container')
+    bannerStage?.classList.add('portal-snap-stage', 'portal-snap-stage--hero')
+
+    document
+      .querySelectorAll('.portal-showcase > .portal-route')
+      .forEach(el => el.classList.add('portal-snap-stage', 'portal-snap-stage--destination'))
+
+    const stages = Array.from(
+      new Set([
+        ...(bannerStage ? [bannerStage] : []),
+        ...document.querySelectorAll(
+          '.portal-snap-stage, .portal-snap-section:not(.portal-snap-section--destinations)'
+        ),
+      ])
+    )
+
+    if (stages.length === 0) return
+
+    const getStageAtViewportCenter = () => {
+      const viewportCenter = window.innerHeight * 0.5
+      let currentStage = stages[0]
+      let currentDistance = Number.POSITIVE_INFINITY
+
+      stages.forEach(stage => {
+        const rect = stage.getBoundingClientRect()
+        const stageCenter = rect.top + rect.height * 0.5
+        const distance = Math.abs(stageCenter - viewportCenter)
+
+        if (rect.bottom <= 0 || rect.top >= window.innerHeight) return
+        if (distance < currentDistance) {
+          currentDistance = distance
+          currentStage = stage
+        }
+      })
+
+      return currentStage
+    }
+
+    const setCurrentStage = () => {
+      const currentStage = getStageAtViewportCenter()
+      stages.forEach(stage => {
+        const rect = stage.getBoundingClientRect()
+        const isApproaching =
+          rect.bottom > window.innerHeight * 0.16 &&
+          rect.top < window.innerHeight * 0.84
+
+        stage.classList.toggle('is-current', stage === currentStage)
+        stage.classList.toggle('is-approaching', stage !== currentStage && isApproaching)
+      })
+    }
+
+    let frameRequest = 0
+
+    const scheduleCurrentStage = () => {
+      if (frameRequest) return
+      frameRequest = window.requestAnimationFrame(() => {
+        frameRequest = 0
+        setCurrentStage()
+      })
+    }
+
+    const handleScroll = () => {
+      scheduleCurrentStage()
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', scheduleCurrentStage)
+
+    setCurrentStage()
+    document.documentElement.classList.add('megameal-home-stage-ready')
+
+    const delayedMeasure = window.setTimeout(() => {
+      setCurrentStage()
+    }, 180)
+
+    ;(window as any)[portalScrollCleanupKey] = () => {
+      revealObserver.disconnect()
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', scheduleCurrentStage)
+      window.clearTimeout(delayedMeasure)
+      if (frameRequest) {
+        window.cancelAnimationFrame(frameRequest)
+      }
+      document.documentElement.classList.remove('megameal-home-stage-ready')
+      stages.forEach(stage => stage.classList.remove('is-current', 'is-approaching'))
+    }
+  }
+
+  initPortalScrollStages()
+  if (!(window as any)[portalScrollBoundKey]) {
+    document.addEventListener('astro:page-load', initPortalScrollStages)
+    ;(window as any)[portalScrollBoundKey] = true
+  }
 </script>
 
 <style>
+  .portal-snap-section {
+    position: relative;
+    scroll-margin-block-start: 0.75rem;
+    transition:
+      opacity 0.58s cubic-bezier(0.22, 1, 0.36, 1),
+      filter 0.58s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.66s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  :global(html.megameal-home-stage-ready) .portal-snap-section:not(.portal-snap-section--destinations):not(.is-current) {
+    opacity: 0.26;
+    pointer-events: none;
+    filter: saturate(0.72) brightness(0.68) blur(1px);
+    transform: translateY(0.38rem) scale(0.995);
+  }
+
+  :global(html.megameal-home-stage-ready) .portal-snap-section.is-approaching:not(.portal-snap-section--destinations):not(.is-current) {
+    opacity: 0.52;
+    filter: saturate(0.88) brightness(0.82) blur(0.35px);
+    transform: translateY(0.16rem) scale(0.998);
+  }
+
+  .portal-snap-section.is-current,
+  .portal-snap-section.is-current.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    filter: saturate(1) brightness(1);
+    transform: none;
+    transition-delay: 0s;
+  }
+
+  .portal-snap-section--destinations {
+    display: block;
+  }
+
+  .portal-snap-section--destinations.is-visible {
+    opacity: 1;
+    filter: saturate(1) brightness(1);
+    transform: none;
+  }
+
+  :global(.portal-showcase) {
+    gap: clamp(2.25rem, 7svh, 5rem);
+  }
+
+  :global(.portal-showcase > .portal-route.portal-snap-stage) {
+    min-height: min(48rem, calc(100svh - 1.5rem));
+  }
+
+  .portal-snap-section--featured,
+  .portal-snap-section--dispatches,
+  .portal-snap-section--eras {
+    min-height: min(48rem, calc(100svh - 1.5rem));
+    display: grid;
+    align-content: center;
+  }
+
+  .portal-snap-section--dispatches {
+    align-content: start;
+    padding-top: clamp(1rem, 4svh, 2.5rem);
+  }
+
+  :global(html.megameal-home-snap) {
+    scroll-padding-top: 0.75rem;
+  }
+
+  /*
+   * Keep this as visual staging, not root-level scroll snapping. The site already
+   * runs custom scroll/overlay systems, and CSS snap on html can trap mousewheel
+   * movement in Firefox/OverlayScrollbars.
+   */
+  :global(html.megameal-home-snap #banner-container.portal-snap-stage),
+  :global(html.megameal-home-snap .portal-showcase > .portal-route),
+  .portal-snap-section:not(.portal-snap-section--destinations) {
+    scroll-margin-block-start: 0.75rem;
+  }
+
+  :global(#banner-container.portal-snap-stage),
+  :global(.portal-showcase > .portal-route.portal-snap-stage) {
+    transition:
+      opacity 0.58s cubic-bezier(0.22, 1, 0.36, 1),
+      filter 0.58s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.66s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /*
+   * Synthetic destination cards also carry .card-base, whose global transition
+   * uses !important and omits opacity/filter. Override it here so staged cards
+   * fade instead of popping when is-current/is-approaching changes.
+   */
+  :global(.portal-showcase > .portal-route.portal-snap-stage.card-base) {
+    transition:
+      opacity 0.58s cubic-bezier(0.22, 1, 0.36, 1),
+      filter 0.58s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.66s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s ease,
+      border-color 0.35s ease,
+      background 0.35s ease !important;
+  }
+
+  :global(html.megameal-home-stage-ready #banner-container.portal-snap-stage:not(.is-current)),
+  :global(html.megameal-home-stage-ready .portal-showcase > .portal-route.portal-snap-stage:not(.is-current)) {
+    opacity: 0.26;
+    pointer-events: none;
+    filter: saturate(0.72) brightness(0.68) blur(1px);
+    transform: translateY(0.38rem) scale(0.995);
+  }
+
+  :global(html.megameal-home-stage-ready #banner-container.portal-snap-stage.is-approaching:not(.is-current)),
+  :global(html.megameal-home-stage-ready .portal-showcase > .portal-route.portal-snap-stage.is-approaching:not(.is-current)) {
+    opacity: 0.52;
+    filter: saturate(0.88) brightness(0.82) blur(0.35px);
+    transform: translateY(0.16rem) scale(0.998);
+  }
+
+  :global(#banner-container.portal-snap-stage.is-current),
+  :global(.portal-showcase > .portal-route.portal-snap-stage.is-current) {
+    opacity: 1;
+    pointer-events: auto;
+    filter: saturate(1) brightness(1);
+    transform: none;
+    transition-delay: 0s;
+  }
+
   .dispatches-header {
     display: flex;
     align-items: baseline;
@@ -114,22 +354,75 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
   }
 
   @supports (content-visibility: auto) {
-    .deferred-section,
     .dispatches-stream {
       content-visibility: auto;
       contain-intrinsic-size: 1px 720px;
     }
-
-    .era-browser-wrapper {
-      contain-intrinsic-size: 1px 840px;
-    }
   }
 
   @media (max-width: 48rem) {
+    :global(.portal-showcase) {
+      gap: clamp(1.25rem, 6svh, 3rem);
+    }
+
+    :global(.portal-showcase > .portal-route.portal-snap-stage) {
+      min-height: calc(100svh - 4.75rem);
+    }
+
+    .portal-snap-section--featured,
+    .portal-snap-section--eras {
+      min-height: calc(100svh - 4.75rem);
+      align-content: center;
+    }
+
+    .portal-snap-section--dispatches {
+      min-height: auto;
+      align-content: start;
+    }
+
+    :global(html.megameal-home-stage-ready) .portal-snap-section:not(.portal-snap-section--destinations):not(.is-current) {
+      opacity: 0.24;
+      pointer-events: none;
+      filter: saturate(0.72) brightness(0.68) blur(0.75px);
+      transform: translateY(0.28rem) scale(0.996);
+    }
+
+    :global(html.megameal-home-stage-ready) .portal-snap-section.is-approaching:not(.portal-snap-section--destinations):not(.is-current) {
+      opacity: 0.56;
+      filter: saturate(0.9) brightness(0.84) blur(0.25px);
+      transform: translateY(0.1rem) scale(0.999);
+    }
+
+    :global(html.megameal-home-stage-ready #banner-container.portal-snap-stage:not(.is-current)),
+    :global(html.megameal-home-stage-ready .portal-showcase > .portal-route.portal-snap-stage:not(.is-current)) {
+      opacity: 0.24;
+      pointer-events: none;
+      filter: saturate(0.72) brightness(0.68) blur(0.75px);
+      transform: translateY(0.28rem) scale(0.996);
+    }
+
+    :global(html.megameal-home-stage-ready #banner-container.portal-snap-stage.is-approaching:not(.is-current)),
+    :global(html.megameal-home-stage-ready .portal-showcase > .portal-route.portal-snap-stage.is-approaching:not(.is-current)) {
+      opacity: 0.56;
+      filter: saturate(0.9) brightness(0.84) blur(0.25px);
+      transform: translateY(0.1rem) scale(0.999);
+    }
+
     .dispatches-header {
       flex-direction: column;
       align-items: flex-start;
       gap: 0.3rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .portal-snap-section,
+    :global(#banner-container.portal-snap-stage),
+    :global(.portal-showcase > .portal-route.portal-snap-stage) {
+      opacity: 1 !important;
+      filter: none !important;
+      transform: none !important;
+      transition: none !important;
     }
   }
 </style>

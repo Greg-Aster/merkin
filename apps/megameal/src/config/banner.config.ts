@@ -12,6 +12,7 @@ import type {
   BannerAnimationConfig,
   BannerData,
   BannerDeterminationResult,
+  BannerItemPreviewDetails,
   BannerType,
   LinkPreviewInfo,
   PostBannerData,
@@ -239,7 +240,7 @@ export const bannerConfig: BannerConfig = {
   // WORKING: Layout used by MainGridLayout.astro
   layout: {
     height: '90vh',
-    mobileHeight: '50vh',
+    mobileHeight: 'clamp(32rem, 76svh, 40rem)',
     maxWidth: 3840,
     mainContentOffset: '.5rem',
   },
@@ -637,6 +638,12 @@ export function getBannerLink(index: number): string | null {
   return bannerConfig.standardBannerConfig.getBannerLink(index)
 }
 
+export function getBannerItemPreviewDetails(
+  index: number,
+): BannerItemPreviewDetails | null {
+  return bannerConfig.standardBannerConfig.getBannerItemPreviewDetails(index)
+}
+
 export function hasAnyBannerLinks(): boolean {
   return bannerConfig.standardBannerConfig.hasAnyBannerLinks()
 }
@@ -692,6 +699,6 @@ export type {
   BannerAnimationConfig,
 } from './banners/types'
 
-(bannerConfig as any).panel ??= {}
-(bannerConfig as any).panel.top ??= {}
-(bannerConfig as any).panel.top.mobilePortrait = '-2rem'
+;(bannerConfig as any).panel ??= {};
+;(bannerConfig as any).panel.top ??= {};
+;(bannerConfig as any).panel.top.mobilePortrait = '1.75rem';

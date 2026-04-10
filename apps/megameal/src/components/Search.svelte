@@ -12,6 +12,7 @@ let result = []
 let friendResults = [] // Store friend search results separately
 let isAuthenticated = false
 let friendContentEnabled = false
+export let hideMobileTrigger = false
 
 const fakeResult = [
   {
@@ -159,6 +160,18 @@ const togglePanel = () => {
   panel?.classList.toggle('float-panel-closed')
 }
 
+export function openSearchPanel() {
+  const panel = document.getElementById('search-panel')
+  panel?.classList.remove('float-panel-closed')
+
+  requestAnimationFrame(() => {
+    const mobileInput = document.querySelector<HTMLInputElement>(
+      '#search-bar-inside input',
+    )
+    mobileInput?.focus()
+  })
+}
+
 $: search(keywordDesktop, true)
 $: search(keywordMobile, false)
 </script>
@@ -176,7 +189,8 @@ $: search(keywordMobile, false)
   </div>
   
   <!-- toggle btn for phone/tablet view -->
-  <button on:click={togglePanel} aria-label="Search Panel" id="search-switch"
+<button on:click={togglePanel} aria-label="Search Panel" id="search-switch"
+          class:hidden={hideMobileTrigger}
           class="btn-plain scale-animation lg:!hidden rounded-lg w-11 h-11 active:scale-90">
       <Icon icon="material-symbols:search" class="text-[1.25rem]"></Icon>
   </button>

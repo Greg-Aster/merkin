@@ -79,7 +79,7 @@ jobs:
               - "scripts/generate-post-pdfs.mjs"
             game:
               - "apps/game/**"
-              - "MEGAMEAL/public/**"
+              - "apps/megameal/public/**"
               - "packages/shared-audio/**"
               - "packages/shared-content/**"
               - "packages/shared-data/**"

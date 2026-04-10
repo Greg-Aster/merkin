@@ -15,6 +15,8 @@ export interface TimelineFact {
   headlineSizeClass?: string
   fontFamilyClass?: string
   ctaButtonClass?: string
+  image?: string
+  video?: string
 }
 
 const specialFactLinks: Record<string, string> = {
@@ -32,6 +34,18 @@ export function resolveTimelineFactHref(fact: TimelineFact): string | null {
 }
 
 export const megaMealUniverseFacts: TimelineFact[] = [
+  {
+    type: 'advertisement',
+    eyebrow: 'Now Transmitting',
+    headline: 'MEGA MEAL SAGA',
+    text: 'Corporate-approved storytelling. Consumption mandatory. Resistance is a discontinued flavor.',
+    ctaText: 'Enter The Saga',
+    href: '/posts/explainer/',
+    sponsor: 'Narrative Compliance Division',
+    finePrint: 'This transmission has been pre-approved for all dietary thresholds.',
+    theme: 'chronology',
+    video: '/videos/title.webm',
+  },
   {
     type: 'advertisement',
     eyebrow: 'Experience Recovery',
@@ -108,6 +122,7 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     sponsor: 'Snuggloids Consumer Comfort',
     finePrint: 'Bonding may be permanent. Separation fees apply.',
     theme: 'comfort',
+    image: '/ads/snuggloids.png',
   },
   {
     type: 'advertisement',
@@ -119,6 +134,7 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     sponsor: 'Executive Culinary Council',
     finePrint: 'Ingredients may be seasonal, extinct, or sentient.',
     theme: 'culinary',
+    video: '/videos/cookbook.webm',
   },
   {
     type: 'advertisement',
@@ -141,6 +157,54 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     sponsor: 'Narrative Systems Group',
     finePrint: 'Beta designation reflects honesty, not safety.',
     theme: 'storymode',
+  },
+  {
+    type: 'advertisement',
+    eyebrow: 'Prestige Television',
+    headline: 'Cosmic Cuisine — Now Streaming',
+    text: 'Watch celebrity chefs compete across seventeen dimensions to plate dishes that may or may not exist in your observable reality. Judged by entities who have never eaten.',
+    ctaText: 'Begin Viewing',
+    href: '/posts/explainer/',
+    sponsor: 'Corporate Entertainment Syndicate',
+    finePrint: 'Side effects of watching include hunger, dread, and voluntary ration upgrades.',
+    theme: 'culinary',
+    image: '/ads/cosmic-cusine.png',
+  },
+  {
+    type: 'advertisement',
+    eyebrow: 'Protein Solutions',
+    headline: 'Puppy Rescue™ — Real Puppies In Every Bite',
+    text: 'Finally, a protein source you can feel good about. Each serving contains one (1) real puppy, sustainably sourced from Corporate\'s licensed rescue network. Adoption paperwork included.',
+    ctaText: 'View Nutrition Facts',
+    href: '/store/',
+    sponsor: 'Puppy Rescue Protein Division',
+    finePrint: 'Puppies are ethically sourced. "Ethically" is a registered trademark.',
+    theme: 'harvest',
+    image: '/ads/puppy-rescue.png',
+  },
+  {
+    type: 'advertisement',
+    eyebrow: 'Mood Optimization',
+    headline: 'Sad Snax™ — For When You Deserve It',
+    text: 'The only snack clinically formulated to match your current emotional state. Tastes like regret. Pairs well with extended silence and the acceptance of corporate terms.',
+    ctaText: 'Order Your Feelings',
+    href: '/store/',
+    sponsor: 'Emotional Nutrition Lab',
+    finePrint: 'Not responsible for mood contagion. Warranty void upon happiness.',
+    theme: 'morale',
+    image: '/ads/sad-snax.png',
+  },
+  {
+    type: 'advertisement',
+    eyebrow: 'Sauce Technology',
+    headline: 'The Dip™ — Definitely Not Addictive',
+    text: 'Our lawyers have reviewed the formula and confirm: The Dip is guaranteed to be non-sentient this time. Enjoy the flavor without the previous incidents. Previous incidents are sealed.',
+    ctaText: 'Acquire The Dip',
+    href: '/store/',
+    sponsor: 'Sauce Compliance Bureau',
+    finePrint: 'If The Dip begins speaking to you, please contact your regional coordinator.',
+    theme: 'recovery',
+    image: '/ads/the-dip.png',
   },
   {
     type: 'fact',

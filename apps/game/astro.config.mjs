@@ -13,9 +13,8 @@ export default defineConfig({
   site: siteUrl,
   base: normalizedBasePath,
   trailingSlash: 'always',
-  // The legacy MEGAMEAL/ folder is archived, but its public asset tree is still the
-  // canonical shared source for the game until those assets are migrated elsewhere.
-  publicDir: '../../MEGAMEAL/public',
+  // Reuse the active site asset tree instead of the retired legacy MEGAMEAL/ folder.
+  publicDir: '../megameal/public',
   integrations: [svelte(), tailwind()],
   vite: {
     optimizeDeps: {

@@ -22,6 +22,7 @@ export type SiteConfig = {
   banner: {
     enable: boolean
     src: string
+    video?: string
     position?: 'top' | 'center' | 'bottom'
     credit: {
       enable: boolean

@@ -159,8 +159,21 @@ const archiveStats = [
   }
 
   @media (max-width: 40rem) {
+    .archive-summary {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border-radius: 1rem;
+      backdrop-filter: blur(10px) saturate(1.04);
+    }
+
     .archive-stats-grid {
       grid-template-columns: 1fr;
+      gap: 0.55rem;
+    }
+
+    .archive-stat-card {
+      padding: 0.8rem 0.85rem;
     }
   }
 </style>

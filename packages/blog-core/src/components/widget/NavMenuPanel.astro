@@ -31,6 +31,8 @@ const adminLinks = [
 ---
 
 <div id="nav-menu-panel" class:list={["float-panel float-panel-closed absolute transition-all fixed right-4 px-2 py-2"]}>
+    <slot />
+
     <div id="default-links" class:list={[{"hidden": isAuthenticated}]}>
         {links.map((link) => (
             <>

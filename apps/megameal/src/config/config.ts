@@ -21,7 +21,8 @@ export const siteConfig: SiteConfig = {
   themeLock: DARK_MODE,
   banner: {
     enable: true,
-    src: '/posts/timeline/golden-era.png', // Using one of your timeline backgrounds
+    src: '/posts/timeline/golden-era.png', // Used as fallback and OG image
+    video: '/assets/banner/ComfyUI_00143_.webm', // Animated video background
     position: 'center',
     credit: {
       enable: false,

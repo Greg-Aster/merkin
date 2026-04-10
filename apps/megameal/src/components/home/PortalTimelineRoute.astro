@@ -309,13 +309,65 @@ const { timelineCount } = Astro.props
   }
 
   @media (max-width: 540px) {
+    .portal-route {
+      min-height: 0;
+      border-radius: 1rem;
+      background:
+        linear-gradient(180deg, oklch(0.14 0.03 var(--hue) / 0.7), oklch(0.1 0.03 var(--hue) / 0.6));
+      backdrop-filter: blur(10px) saturate(1.04);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.06),
+        0 14px 34px rgba(0,0,0,0.18);
+    }
+
+    .portal-route::before {
+      inset: -0.75rem;
+      filter: blur(14px);
+    }
+
     .route-viewport {
-      height: 31rem;
+      height: 23rem;
+      border-radius: inherit;
     }
 
     .route-copy {
-      width: calc(100% - 1.25rem);
-      padding: 1.1rem;
+      inset: auto 0.9rem 3.5rem 0.9rem;
+      transform: none;
+      align-items: flex-start;
+      width: auto;
+      padding: 0;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+      text-shadow:
+        0 2px 12px rgba(0, 0, 0, 0.86),
+        0 0 18px rgba(0, 0, 0, 0.72);
+    }
+
+    .portal-route:hover .route-copy {
+      transform: none;
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .route-copy h3 {
+      font-size: clamp(1.35rem, 8vw, 2rem);
+    }
+
+    .route-copy p {
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .route-link {
+      padding: 0.68rem 0.84rem;
     }
 
     .route-viewport__label {

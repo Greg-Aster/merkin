@@ -2,7 +2,7 @@
 import { Icon } from 'astro-icon/components'
 import { navBarConfig, siteConfig } from '../config/config'
 import { LinkPresets } from '../constants/link-presets'
-import type { LinkPreset, NavBarLink } from '../types/config'
+import { LinkPreset, type NavBarLink } from '../types/config'
 import { url } from '../utils/url-utils'
 import LightDarkSwitch from './LightDarkSwitch.svelte'
 import Search from './Search.svelte'
@@ -25,16 +25,15 @@ const links: NavBarLink[] = navBarConfig.links.map(
 const homeLink =
   links.find(link => !link.external && link.url === '/') ?? LinkPresets[LinkPreset.Home]
 const navigationLinks = links.filter(link => link !== homeLink)
-const brandLabel = 'MEGAMEAL'
 // Check authentication status from cookies
 const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
 ---
 
 <div id="navbar" class="z-50 onload-animation">
-    <div class="absolute h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->
+    <div class="absolute hidden md:block h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->
     <div class:list={[
         className,
-        "card-base !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4"]}>
+        "navbar-shell card-base !overflow-visible max-w-[var(--page-width)] h-[3rem] md:h-[4.5rem] !rounded-t-none mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-1.5 md:gap-3 px-2 md:px-4"]}>
         
         <div class="flex items-center justify-start min-w-0">
             <!-- Admin controls only need to appear for authenticated sessions. -->
@@ -44,7 +43,7 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
                   aria-label={`${siteConfig.title} home`}
                   href={homeLink.external ? homeLink.url : url(homeLink.url)}
                   target={homeLink.external ? "_blank" : null}
-                  class="group flex items-center overflow-visible rounded-xl px-2 py-1.5 transition-all duration-200 hover:bg-white/6 active:scale-[0.98]"
+                  class="group flex items-center overflow-visible rounded-xl px-1.5 md:px-2 py-1 md:py-1.5 transition-all duration-200 hover:bg-white/6 active:scale-[0.98]"
                 >
                     <span
                       class="megameal-mark hidden sm:block select-none rounded-[1rem] px-3.5 py-2.5 transition-all duration-300"
@@ -61,6 +60,9 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
                               MEAL
                             </span>
                         </span>
+                    </span>
+                    <span class="megameal-mark-mobile sm:hidden select-none rounded-[0.75rem] px-1.5 py-1.5">
+                        <span class="megameal-mark-mobile__text">MEGAMEAL</span>
                     </span>
                 </a>
             )}
@@ -112,25 +114,18 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
         
         <div class="flex items-center justify-end">
             <!--<SearchPanel client:load>-->
-            <Search client:idle></Search>
+            <Search client:idle hideMobileTrigger={true}></Search>
             <SiteAudioControl client:idle />
             {!siteConfig.themeColor.fixed && (
-                    <button aria-label="Display Settings" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="display-settings-switch">
+                    <button aria-label="Display Settings" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 hidden md:inline-flex" id="display-settings-switch">
                         <Icon name="material-symbols:palette-outline" class="text-[1.25rem]"></Icon>
                     </button>
             )}
-
-            
-            <!-- ⭐ RESTORED: Mascot Controls (Mobile Portrait Only) -->
-            <button aria-label="Dismiss Mascot" title="Dismiss Mascot" id="navbar-dismiss-mascot-button" data-sfx-click="panel-back" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 md:!hidden">
-                🍴
-            </button>
-            <button aria-label="Bring back mascot" title="Bring back mascot" id="navbar-bring-back-mascot-button" data-sfx-click="panel-open" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 md:!hidden" style="display: none;">
-                🥄
-            </button>
             
             <!-- Light/Dark Switch -->
-            {!siteConfig.themeLock && <LightDarkSwitch client:idle></LightDarkSwitch>}
+            <div class="hidden md:flex">
+                {!siteConfig.themeLock && <LightDarkSwitch client:idle></LightDarkSwitch>}
+            </div>
 
             <!-- Fullscreen Mode Toggle -->
             <!-- <button aria-label="Toggle Fullscreen Mode" title="Toggle Fullscreen Mode" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="fullscreen-btn">
@@ -139,20 +134,30 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
             </button> -->
                         
             <!-- ⭐ RESTORED: Mobile Hamburger Menu Button -->
-            <button aria-label="Menu" name="Nav Menu" class="btn-plain scale-animation rounded-lg w-11 h-11 active:scale-90 md:!hidden" id="nav-menu-switch">
+            <button aria-label="Menu" name="Nav Menu" class="mobile-header-button btn-plain scale-animation rounded-lg w-9 h-9 md:w-11 md:h-11 active:scale-90 md:!hidden" id="nav-menu-switch">
                 <Icon name="material-symbols:menu-rounded" class="text-[1.25rem]"></Icon>
             </button>
         </div>
         
-        <NavMenuPanel links={links} isAuthenticated={isAuthenticated}></NavMenuPanel>
+        <NavMenuPanel links={links} isAuthenticated={isAuthenticated}>
+            <div class="mobile-menu-tools md:hidden">
+                <button type="button" id="mobile-search-action" class="mobile-menu-tools__button">
+                    <span>Search</span>
+                    <Icon name="material-symbols:search-rounded" class="text-[1.1rem] text-[var(--primary)]" />
+                </button>
+                {!siteConfig.themeLock && (
+                    <button type="button" id="mobile-theme-action" class="mobile-menu-tools__button">
+                        <span id="mobile-theme-action-label">Theme</span>
+                        <Icon name="material-symbols:dark-mode-outline-rounded" class="text-[1.1rem] text-[var(--primary)]" />
+                    </button>
+                )}
+            </div>
+        </NavMenuPanel>
         <DisplaySettings client:idle></DisplaySettings>
     </div>
 </div>
 
 <script>
-    let dismissMascotBtn: HTMLElement | null = null;
-    let bringBackMascotBtn: HTMLElement | null = null;
-
     function switchTheme() {
         if (localStorage.theme === 'dark') {
             document.documentElement.classList.remove('dark');
@@ -164,11 +169,19 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
     }
     
     function loadButtonScript() {
+        function updateMobileThemeLabel() {
+            const label = document.getElementById('mobile-theme-action-label');
+            if (!label) return;
+            label.textContent =
+                localStorage.theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
+        }
+
         // Theme switch
         let switchBtn = document.getElementById("scheme-switch");
         if (switchBtn) {
             switchBtn.addEventListener("click", function () {
                 switchTheme();
+                updateMobileThemeLabel();
             });
         }
     
@@ -193,34 +206,33 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
                 }
             });
         }
-    
-        // Mascot Controls (Bleepy) - PRESERVED EXACTLY AS-IS
-         dismissMascotBtn = document.getElementById("navbar-dismiss-mascot-button");
-        bringBackMascotBtn = document.getElementById("navbar-bring-back-mascot-button");
-    
-        if (dismissMascotBtn) {
-            dismissMascotBtn.addEventListener("click", function () {
-                document.dispatchEvent(new CustomEvent('bleepy:hide'));
+
+        const mobileSearchAction = document.getElementById('mobile-search-action');
+        if (mobileSearchAction) {
+            mobileSearchAction.addEventListener('click', function () {
+                const menuPanel = document.getElementById('nav-menu-panel');
+                const searchPanel = document.getElementById('search-panel');
+                menuPanel?.classList.add('float-panel-closed');
+                searchPanel?.classList.remove('float-panel-closed');
+
+                requestAnimationFrame(() => {
+                    const searchInput = document.querySelector('#search-bar-inside input');
+                    if (searchInput instanceof HTMLInputElement) {
+                        searchInput.focus();
+                    }
+                });
             });
         }
-    
-        if (bringBackMascotBtn) {
-            bringBackMascotBtn.addEventListener("click", function () {
-                document.dispatchEvent(new CustomEvent('bleepy:show'));
+
+        const mobileThemeAction = document.getElementById('mobile-theme-action');
+        if (mobileThemeAction) {
+            mobileThemeAction.addEventListener('click', function () {
+                switchTheme();
+                updateMobileThemeLabel();
             });
         }
-    
-        // Initial Button State for Mascot Controls
-        if (dismissMascotBtn && bringBackMascotBtn) {
-            const mascotDismissed = sessionStorage.getItem('cuppyDismissed') === 'true';
-            if (mascotDismissed) {
-                dismissMascotBtn.style.display = 'none';
-                bringBackMascotBtn.style.display = 'flex';
-            } else {
-                dismissMascotBtn.style.display = 'flex';
-                bringBackMascotBtn.style.display = 'none';
-            }
-        } 
+
+        updateMobileThemeLabel();
     
         // UPDATED: Layout-based Fullscreen Mode Toggle Functionality
         initializeFullscreenMode();
@@ -314,74 +326,8 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
         }
     }
     
-    // Bleepy mascot visibility event listener - PRESERVED EXACTLY AS-IS
-     document.addEventListener('bleepy:visibilityChanged', (event: Event) => {
-        const customEvent = event as CustomEvent;
-        const { visible } = customEvent.detail;
-        if (dismissMascotBtn && bringBackMascotBtn) {
-            if (visible) {
-                dismissMascotBtn.style.display = 'flex';
-                bringBackMascotBtn.style.display = 'none';
-            } else {
-                dismissMascotBtn.style.display = 'none';
-                bringBackMascotBtn.style.display = 'flex';
-            }
-        }
-    }); 
-    
-    // ⭐ NEW: Auto-dismiss mascot on layout changes
-    function initializeMascotLayoutHandler() {
-        let previousWidth = window.innerWidth;
-        let previousIsMobile = window.innerWidth < 768; // md breakpoint
-        
-        window.addEventListener('resize', () => {
-            const currentWidth = window.innerWidth;
-            const currentIsMobile = currentWidth < 768;
-            
-            // Check if we've crossed the mobile/desktop boundary
-            const layoutChanged = previousIsMobile !== currentIsMobile;
-            
-            if (layoutChanged) {
-                console.log(`Layout changed: ${previousIsMobile ? 'mobile' : 'desktop'} → ${currentIsMobile ? 'mobile' : 'desktop'}`);
-                
-                // Auto-dismiss mascot on any layout change
-                document.dispatchEvent(new CustomEvent('bleepy:hide'));
-                sessionStorage.setItem('cuppyDismissed', 'true');
-                
-                // Update button states immediately
-                if (dismissMascotBtn && bringBackMascotBtn) {
-                    dismissMascotBtn.style.display = 'none';
-                    bringBackMascotBtn.style.display = currentIsMobile ? 'flex' : 'none';
-                }
-                
-                console.log('Mascot auto-dismissed due to layout change');
-            }
-            
-            previousWidth = currentWidth;
-            previousIsMobile = currentIsMobile;
-        });
-        
-        // Also handle orientation change events (mobile specific)
-        window.addEventListener('orientationchange', () => {
-            // Small delay to allow orientation change to complete
-            setTimeout(() => {
-                console.log('Orientation changed - auto-dismissing mascot');
-                document.dispatchEvent(new CustomEvent('bleepy:hide'));
-                sessionStorage.setItem('cuppyDismissed', 'true');
-                
-                // Update button states
-                if (dismissMascotBtn && bringBackMascotBtn) {
-                    dismissMascotBtn.style.display = 'none';
-                    const isMobile = window.innerWidth < 768;
-                    bringBackMascotBtn.style.display = isMobile ? 'flex' : 'none';
-                }
-            }, 100);
-        });
-    }
-    
     // Initialize everything
     loadButtonScript();
-    initializeMascotLayoutHandler();
 
     // SIMPLE TEST: Hide mascot by default - this is a bandaid fix as the mascot features has moves and im too lazy to fix it right now
     setTimeout(() => {
@@ -392,6 +338,56 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
 </script>
 
 <style>
+  .megameal-mark-mobile {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(119, 191, 255, 0.2);
+    background:
+      linear-gradient(180deg, rgba(7, 18, 34, 0.82), rgba(4, 10, 20, 0.72));
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+      0 0 16px rgba(44, 133, 255, 0.12);
+  }
+
+  .megameal-mark-mobile__text {
+    display: block;
+    font-size: 0.64rem;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(228, 243, 255, 0.92);
+    text-shadow: 0 0 12px rgba(58, 160, 255, 0.22);
+  }
+
+  .mobile-menu-tools {
+    margin-bottom: 0.45rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .mobile-menu-tools__button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 0.75rem;
+    border-radius: 0.85rem;
+    color: rgba(255, 255, 255, 0.84);
+    font-weight: 700;
+    transition:
+      background-color 180ms ease,
+      color 180ms ease;
+  }
+
+  .mobile-menu-tools__button:hover,
+  .mobile-menu-tools__button:focus-visible {
+    background: var(--btn-plain-bg-hover);
+    color: var(--primary);
+    outline: none;
+  }
+
   .megameal-mark {
     position: relative;
     overflow: visible;
@@ -480,6 +476,56 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
       0 0 6px rgba(var(--primary-rgb), 0.28),
       0 0 12px rgba(var(--primary-rgb), 0.14),
       1px 1px 0 rgba(8, 47, 73, 0.9);
+  }
+
+  @media (max-width: 767px) {
+    :global(#top-row) {
+      width: 100vw !important;
+      max-width: none !important;
+      margin-inline: calc(50% - 50vw) !important;
+      padding-inline: 0 !important;
+    }
+
+    :global(#navbar-wrapper) {
+      position: relative !important;
+      top: auto !important;
+      width: 100% !important;
+    }
+
+    :global(#banner-container) {
+      margin-top: 0.65rem !important;
+    }
+
+    #navbar {
+      width: 100%;
+    }
+
+    .navbar-shell {
+      width: 100vw;
+      max-width: none !important;
+      margin-inline: 0 !important;
+      min-height: 3rem;
+      height: 3rem;
+      border-radius: 0 !important;
+      background:
+        linear-gradient(180deg, rgba(5, 11, 20, 0.92), rgba(7, 14, 24, 0.78)) !important;
+      backdrop-filter: blur(10px);
+      box-shadow:
+        0 8px 22px rgba(2, 6, 23, 0.2),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .mobile-header-button {
+      min-width: 2.25rem;
+      min-height: 2.25rem;
+    }
+
+    .megameal-mark-mobile {
+      border-radius: 0.8rem;
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+        0 0 12px rgba(44, 133, 255, 0.09);
+    }
   }
 </style>
     

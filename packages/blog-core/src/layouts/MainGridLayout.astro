@@ -668,18 +668,44 @@ const gridLayoutClasses = [
   <!-- =============================================================== -->
   <!-- PARALLAX BACKGROUND SECTION                                   -->
   <!-- =============================================================== -->
-  {shouldShowParallaxBackground && 
+  {shouldShowParallaxBackground &&
     <div id="parallax-banner" class="fixed top-0 left-0 w-full h-screen z-[-1] overflow-hidden">
-      <ImageWrapper 
-        id="parallax-image" 
-        alt="Site background image" 
-        class="parallax-bg object-cover w-full h-[120vh]"
-        src={currentBackgroundImage} 
-        position={siteConfig.banner.position || 'center'}
-      />
-      {siteConfig.banner.credit?.enable && 
+      {siteConfig.banner.video ? (
+        <>
+          <video
+            id="parallax-image"
+            class="parallax-bg object-cover w-full h-[120vh]"
+            autoplay
+            loop
+            muted
+            playsinline
+            aria-hidden="true"
+            style={`object-position: ${siteConfig.banner.position || 'center'}`}
+          >
+            <source src={siteConfig.banner.video} type="video/webm" />
+          </video>
+          <script>
+            (function () {
+              var v = document.getElementById('parallax-image');
+              if (v && v.tagName === 'VIDEO') {
+                v.playbackRate = 0.5;
+                v.addEventListener('play', function () { v.playbackRate = 0.5; });
+              }
+            })();
+          </script>
+        </>
+      ) : (
+        <ImageWrapper
+          id="parallax-image"
+          alt="Site background image"
+          class="parallax-bg object-cover w-full h-[120vh]"
+          src={currentBackgroundImage}
+          position={siteConfig.banner.position || 'center'}
+        />
+      )}
+      {siteConfig.banner.credit?.enable &&
         <div class="absolute bottom-4 right-4 text-white/50 text-xs bg-black/30 px-2 py-1 rounded">
-          {siteConfig.banner.credit.text && 
+          {siteConfig.banner.credit.text &&
             <a href={siteConfig.banner.credit.url || '#'} class="hover:text-white/80 transition">
               {siteConfig.banner.credit.text}
             </a>

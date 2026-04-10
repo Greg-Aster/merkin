@@ -26,15 +26,20 @@
    which appear on hover and obscure the custom content.
    ============================================================ */
 
-/* Hide the black hover overlay (first child) and info icon (second child)
-   that blog-core adds to all .banner-link elements */
+/* Hide blog-core's generic black hover overlay.
+   Do not hide the second child here: that is the custom HTML media layer. */
 .banner-slide[data-banner-media-type="unknown"] .banner-link > div:nth-child(1),
-.banner-slide[data-banner-media-type="unknown"] .banner-link > div:nth-child(2) {
+#standard-banner-container .banner-slide:has(.banner-media-layer[data-banner-media-type="unknown"]) .banner-link > div:nth-child(1) {
+  display: none !important;
+}
+
+#standard-banner-container .banner-slide:has(.banner-media-layer[data-banner-media-type="unknown"]) .banner-title-display {
   display: none !important;
 }
 
 /* Normal cursor — the slide itself isn't a link; the CTAs inside it are */
-.banner-slide[data-banner-media-type="unknown"] .banner-link {
+.banner-slide[data-banner-media-type="unknown"] .banner-link,
+#standard-banner-container .banner-slide:has(.banner-media-layer[data-banner-media-type="unknown"]) .banner-link {
   cursor: default;
 }
 
@@ -106,13 +111,48 @@
   #standard-banner-container .banner-title-display {
     left: 1rem;
     right: 1rem;
-    bottom: 1rem;
-    max-width: none;
-    padding: 0.8rem 1rem;
+    bottom: 0.85rem;
+    max-width: min(26rem, calc(100% - 2rem));
+    width: fit-content;
+    padding: 0.68rem 0.78rem;
+    border-radius: 1rem;
+    background:
+      radial-gradient(circle at 8% 0%, oklch(0.62 0.14 var(--hue) / 0.16), transparent 52%),
+      linear-gradient(180deg, rgba(4, 8, 18, 0.54), rgba(4, 8, 18, 0.3));
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow:
+      0 16px 32px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px) saturate(1.1);
+    text-shadow:
+      0 2px 12px rgba(0, 0, 0, 0.86),
+      0 0 18px rgba(0, 0, 0, 0.72);
+  }
+
+  #standard-banner-container .banner-title-kicker {
+    margin-bottom: 0.35rem;
+    font-size: 0.6rem;
+    color: oklch(0.82 0.13 var(--hue));
+  }
+
+  #standard-banner-container .banner-title-display h3 {
+    font-size: clamp(1rem, 6vw, 1.35rem);
+    line-height: 1.02;
   }
 
   #standard-banner-container .banner-title-display p {
     font-size: 0.8rem;
+    max-width: 24rem;
+    color: rgba(255, 255, 255, 0.88);
+  }
+}
+
+@media (max-width: 420px) {
+  #standard-banner-container .banner-title-display p {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 }
 

@@ -19,6 +19,7 @@ let audioState: SiteAudioState = {
 }
 let panelOpen = false
 let panelElement: HTMLDivElement | null = null
+let isMobileViewport = false
 
 const syncAudioForCurrentPage = () => {
   if (typeof window === 'undefined') return
@@ -48,12 +49,23 @@ const setSfxVolume = (event: Event) => {
   siteAudioManager.setSfxVolume(Number(target.value))
 }
 
-const togglePanel = () => {
+const syncViewportMode = () => {
+  if (typeof window === 'undefined') return
+  isMobileViewport = window.matchMedia('(max-width: 767px)').matches
+}
+
+const handleAudioButtonClick = () => {
+  if (isMobileViewport && !panelOpen && !audioState.enabled) {
+    toggleAudio()
+    return
+  }
+
   panelOpen = !panelOpen
 }
 
 onMount(() => {
   siteAudioManager.initialize()
+  syncViewportMode()
 
   const unsubscribe = siteAudioManager.subscribe((state) => {
     audioState = state
@@ -64,8 +76,13 @@ onMount(() => {
   const handleFirstGesture = () => {
     siteAudioManager.unlockFromGesture()
   }
+  const mediaQuery = window.matchMedia('(max-width: 767px)')
+  const handleViewportChange = () => {
+    syncViewportMode()
+  }
   document.addEventListener('pointerdown', handleFirstGesture, { passive: true })
   document.addEventListener('keydown', handleFirstGesture)
+  mediaQuery.addEventListener('change', handleViewportChange)
 
   const handlePointerDown = (event: MouseEvent) => {
     if (!panelOpen || !panelElement) return
@@ -81,16 +98,27 @@ onMount(() => {
     document.removeEventListener('pointerdown', handleFirstGesture)
     document.removeEventListener('keydown', handleFirstGesture)
     document.removeEventListener('click', handlePointerDown)
+    mediaQuery.removeEventListener('change', handleViewportChange)
   }
 })
 
-$: buttonLabel = panelOpen ? 'Close sound controls' : 'Open sound controls'
+$: buttonLabel = panelOpen
+  ? 'Close sound controls'
+  : isMobileViewport && !audioState.enabled
+    ? 'Enable site sound'
+    : 'Open sound controls'
 $: buttonTitle = audioState.enabled
   ? audioState.activeTrackLabel
-    ? `Sound controls. Current ambience: ${audioState.activeTrackLabel}`
-    : 'Sound controls'
+    ? isMobileViewport
+      ? `Sound is on. ${audioState.activeTrackLabel}. Tap for mix controls.`
+      : `Sound controls. Current ambience: ${audioState.activeTrackLabel}`
+    : isMobileViewport
+      ? 'Sound is on. Tap for mix controls.'
+      : 'Sound controls'
   : audioState.hasConfiguredTracks
-    ? 'Open sound controls'
+    ? isMobileViewport
+      ? 'Enable site sound'
+      : 'Open sound controls'
     : 'Open sound controls. Tracks can be added later.'
 $: masterVolumePercent = Math.round(audioState.masterVolume * 100)
 $: ambienceVolumePercent = Math.round(audioState.ambienceVolume * 100)
@@ -103,9 +131,9 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
     aria-label={buttonLabel}
     aria-expanded={panelOpen}
     title={buttonTitle}
-    class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 site-audio-button"
+    class="btn-plain scale-animation rounded-lg h-9 w-9 md:h-11 md:w-11 active:scale-90 site-audio-button"
     class:site-audio-button--enabled={audioState.enabled}
-    on:click={togglePanel}
+    on:click={handleAudioButtonClick}
   >
     <Icon
       icon={audioState.enabled ? 'material-symbols:volume-up-rounded' : 'material-symbols:volume-off-rounded'}
@@ -225,6 +253,14 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
     transform: scale(1.1);
   }
 
+  @media (max-width: 767px) {
+    .site-audio-button--enabled {
+      box-shadow:
+        inset 0 0 0 1px oklch(0.74 0.19 var(--hue) / 0.28),
+        0 0 18px oklch(0.74 0.19 var(--hue) / 0.18);
+    }
+  }
+
   .site-audio-panel {
     position: absolute;
     top: calc(100% + 0.65rem);
@@ -285,5 +321,20 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
     font-size: 0.74rem;
     line-height: 1.45;
     color: rgba(148, 163, 184, 0.9);
+  }
+
+  @media (max-width: 767px) {
+    .site-audio-panel {
+      position: fixed;
+      left: 0.75rem;
+      right: 0.75rem;
+      top: auto;
+      bottom: max(0.75rem, env(safe-area-inset-bottom));
+      width: auto;
+      max-height: min(72vh, 24rem);
+      overflow: auto;
+      border-radius: 1.15rem;
+      z-index: 120;
+    }
   }
 </style>

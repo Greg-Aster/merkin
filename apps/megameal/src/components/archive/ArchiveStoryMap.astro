@@ -283,8 +283,9 @@ const restrictedCount = postsManifest.items.length - publicCount
 
   archiveMaps.forEach((map) => {
     const buttons = map.querySelectorAll('[data-archive-view-button]')
+    const prefersListView = window.matchMedia('(max-width: 640px)').matches
 
-    const setView = (nextView) => {
+    const setView = (nextView: string) => {
       map.setAttribute('data-view', nextView)
       buttons.forEach((button) => {
         const isActive = button.getAttribute('data-view-target') === nextView
@@ -299,6 +300,10 @@ const restrictedCount = postsManifest.items.length - publicCount
         setView(nextView)
       })
     })
+
+    if (prefersListView) {
+      setView('list')
+    }
   })
 </script>
 
@@ -854,8 +859,36 @@ const restrictedCount = postsManifest.items.length - publicCount
   }
 
   @media (max-width: 40rem) {
+    .story-archive-map {
+      gap: 0.85rem;
+    }
+
+    .archive-map-hero,
+    .archive-arc-card {
+      border-radius: 1rem;
+      padding: 1rem;
+      backdrop-filter: blur(10px) saturate(1.04);
+    }
+
+    .archive-map-hero::before,
+    .archive-arc-card::before {
+      inset: -0.75rem;
+      filter: blur(14px);
+    }
+
+    .archive-map-hero h2 {
+      font-size: clamp(1.35rem, 8vw, 2rem);
+    }
+
+    .archive-map-hero p,
+    .archive-arc-description {
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+
     .archive-map-ledger {
       grid-template-columns: 1fr;
+      gap: 0.55rem;
     }
 
     .archive-arc-card__header {
@@ -873,6 +906,16 @@ const restrictedCount = postsManifest.items.length - publicCount
     .archive-view-switch {
       display: grid;
       grid-template-columns: 1fr;
+    }
+
+    .archive-node-map,
+    .archive-access-line {
+      display: none;
+    }
+
+    .archive-record-list {
+      display: grid;
+      gap: 0.55rem;
     }
   }
 </style>

@@ -24,12 +24,6 @@ const {
   variant = 'sidebar',
   dismissible = false,
   storageKey = 'megameal-sponsored-window-dismissed',
-  title =
-    variant === 'overlay'
-      ? 'Sponsored Overlay'
-      : variant === 'portal'
-        ? 'Sponsored Transmission'
-        : 'Signal Window',
   kicker =
     variant === 'overlay'
       ? 'Live Ad Feed'
@@ -67,6 +61,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
   data-fact-theme={initialFact.theme || 'default'}
   data-expanded={variant === 'overlay' ? 'false' : 'true'}
   data-pinned="false"
+  data-scroll-idle={variant === 'overlay' ? 'false' : 'true'}
   data-storage-key={storageKey}
   data-dismissible={dismissible ? 'true' : 'false'}
 >
@@ -115,6 +110,27 @@ const initialHref = resolveTimelineFactHref(initialFact)
           {initialFact.headline || 'Sponsored Message'}
         </h3>
 
+        <div
+          class:list={['facts-widget-media', !(initialFact.image || initialFact.video) && 'is-hidden']}
+          data-fact-media
+        >
+          <video
+            class:list={['facts-widget-media-video', !initialFact.video && 'is-hidden']}
+            data-fact-media-video
+            autoplay
+            loop
+            muted
+            playsinline
+            src={initialFact.video || ''}
+          ></video>
+          <img
+            class:list={['facts-widget-media-img', !initialFact.image && 'is-hidden']}
+            data-fact-media-img
+            src={initialFact.image || ''}
+            alt={initialFact.headline || ''}
+          />
+        </div>
+
         <p class="facts-widget-text" data-fact-text>{initialFact.text}</p>
 
         {variant === 'overlay' && (
@@ -162,7 +178,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
   </div>
 </section>
 
-<script define:vars={{ widgetId, facts: availableFacts, fallbackFact }}>
+<script is:inline define:vars={{ widgetId, facts: availableFacts, fallbackFact }}>
   const widget = document.getElementById(widgetId)
 
   if (!widget) {
@@ -178,6 +194,9 @@ const initialHref = resolveTimelineFactHref(initialFact)
     const ctaEl = widget.querySelector('[data-fact-cta]')
     const sponsorEl = widget.querySelector('[data-fact-sponsor]')
     const finePrintEl = widget.querySelector('[data-fact-fineprint]')
+    const mediaEl = widget.querySelector('[data-fact-media]')
+    const mediaVideoEl = widget.querySelector('[data-fact-media-video]')
+    const mediaImgEl = widget.querySelector('[data-fact-media-img]')
     const frameEl = widget.querySelector('.facts-widget-frame')
     const storageKey =
       widget.dataset.storageKey || 'megameal-sponsored-window-dismissed'
@@ -188,6 +207,8 @@ const initialHref = resolveTimelineFactHref(initialFact)
     let intervalId
     let expandTimeoutId
     let collapseTimeoutId
+    let scrollIdleTimeoutId
+    let cleanupOverlayActivityListeners = () => {}
 
     const specialFactLinks = {
       Explainer: '/posts/explainer/',
@@ -230,6 +251,30 @@ const initialHref = resolveTimelineFactHref(initialFact)
         finePrintEl.textContent = ''
         finePrintEl.classList.add('is-hidden')
       }
+
+      if (mediaEl && mediaVideoEl && mediaImgEl) {
+        if (fact.video) {
+          mediaVideoEl.setAttribute('src', fact.video)
+          mediaVideoEl.classList.remove('is-hidden')
+          mediaImgEl.classList.add('is-hidden')
+          mediaEl.classList.remove('is-hidden')
+          mediaVideoEl.load()
+          mediaVideoEl.play().catch(() => {})
+        } else if (fact.image) {
+          mediaImgEl.setAttribute('src', fact.image)
+          mediaImgEl.setAttribute('alt', fact.headline || '')
+          mediaImgEl.classList.remove('is-hidden')
+          mediaVideoEl.classList.add('is-hidden')
+          mediaVideoEl.pause()
+          mediaEl.classList.remove('is-hidden')
+        } else {
+          mediaVideoEl.pause()
+          mediaVideoEl.removeAttribute('src')
+          mediaVideoEl.classList.add('is-hidden')
+          mediaImgEl.classList.add('is-hidden')
+          mediaEl.classList.add('is-hidden')
+        }
+      }
     }
 
     const getNextIndex = () => {
@@ -253,6 +298,25 @@ const initialHref = resolveTimelineFactHref(initialFact)
       widget.dataset.pinned = pinned ? 'true' : 'false'
     }
 
+    const setScrollIdle = idle => {
+      if (!isOverlay) return
+      widget.dataset.scrollIdle = idle ? 'true' : 'false'
+    }
+
+    const scheduleScrollIdle = (delay = 2400) => {
+      if (!isOverlay || widget.classList.contains('is-dismissed')) return
+      window.clearTimeout(scrollIdleTimeoutId)
+      scrollIdleTimeoutId = window.setTimeout(() => setScrollIdle(true), delay)
+    }
+
+    const markUserIsNavigating = () => {
+      if (!isOverlay) return
+      setScrollIdle(false)
+      setPinned(false)
+      setExpanded(false)
+      scheduleScrollIdle()
+    }
+
     const startRotation = () => {
       if (!facts.length) return
       window.clearInterval(intervalId)
@@ -265,8 +329,11 @@ const initialHref = resolveTimelineFactHref(initialFact)
       window.clearInterval(intervalId)
       window.clearTimeout(expandTimeoutId)
       window.clearTimeout(collapseTimeoutId)
+      window.clearTimeout(scrollIdleTimeoutId)
+      cleanupOverlayActivityListeners()
       setPinned(false)
       setExpanded(false)
+      setScrollIdle(false)
     }
 
     const restoreWidget = () => {
@@ -275,6 +342,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
       applyFact(facts[currentIndex] || fallbackFact)
       setPinned(false)
       setExpanded(false)
+      scheduleScrollIdle(1400)
       startRotation()
     }
 
@@ -310,6 +378,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
     } else {
       setExpanded(isOverlay ? false : true)
       startRotation()
+      scheduleScrollIdle(2600)
     }
 
     if (frameEl instanceof HTMLElement && isOverlay) {
@@ -339,6 +408,36 @@ const initialHref = resolveTimelineFactHref(initialFact)
       }
       if (!widget.classList.contains('is-dismissed')) startRotation()
     })
+
+    if (isOverlay) {
+      const activityController = new AbortController()
+      const activitySignal = activityController.signal
+      const handleKeyNavigation = event => {
+        if (
+          event.key === 'PageDown' ||
+          event.key === 'PageUp' ||
+          event.key === 'Home' ||
+          event.key === 'End' ||
+          event.key === 'ArrowDown' ||
+          event.key === 'ArrowUp' ||
+          event.key === ' '
+        ) {
+          markUserIsNavigating()
+        }
+      }
+
+      window.addEventListener('scroll', markUserIsNavigating, { passive: true, signal: activitySignal })
+      window.addEventListener('wheel', markUserIsNavigating, { passive: true, signal: activitySignal })
+      window.addEventListener('touchmove', markUserIsNavigating, { passive: true, signal: activitySignal })
+      window.addEventListener('keydown', handleKeyNavigation, { signal: activitySignal })
+
+      cleanupOverlayActivityListeners = () => {
+        activityController.abort()
+        window.clearTimeout(scrollIdleTimeoutId)
+      }
+
+      document.addEventListener('astro:before-swap', cleanupOverlayActivityListeners, { once: true })
+    }
   }
 </script>
 
@@ -508,6 +607,32 @@ const initialHref = resolveTimelineFactHref(initialFact)
     gap: 0.85rem;
   }
 
+  .facts-widget-media {
+    width: 100%;
+    border-radius: 0.6rem;
+    overflow: hidden;
+    max-height: 9rem;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .facts-widget-media.is-hidden {
+    display: none;
+  }
+
+  .facts-widget-media-video,
+  .facts-widget-media-img {
+    width: 100%;
+    height: 100%;
+    max-height: 9rem;
+    object-fit: cover;
+    display: block;
+  }
+
+  .facts-widget-media-video.is-hidden,
+  .facts-widget-media-img.is-hidden {
+    display: none;
+  }
+
   .facts-widget-label-row {
     display: flex;
     align-items: center;
@@ -661,7 +786,25 @@ const initialHref = resolveTimelineFactHref(initialFact)
     width: min(14.25rem, calc(100vw - 1rem));
     z-index: 70;
     transform-origin: bottom right;
-    transition: width 0.46s cubic-bezier(0.16, 1, 0.3, 1);
+    transition:
+      opacity 0.85s ease,
+      transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+      filter 0.85s ease,
+      width 0.46s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .facts-widget-overlay[data-scroll-idle='false'] {
+    opacity: 0;
+    pointer-events: none;
+    filter: blur(8px) saturate(0.66);
+    transform: translateY(0.95rem) scale(0.94);
+  }
+
+  .facts-widget-overlay[data-scroll-idle='true'] {
+    opacity: 1;
+    pointer-events: auto;
+    filter: none;
+    transform: none;
   }
 
   .facts-widget-overlay[data-expanded='true'] {
@@ -925,24 +1068,115 @@ const initialHref = resolveTimelineFactHref(initialFact)
 
   @media (max-width: 640px) {
     .facts-widget-overlay {
-      left: 0.75rem;
-      right: 0.75rem;
-      width: auto;
-      bottom: max(0.75rem, env(safe-area-inset-bottom));
+      left: auto;
+      right: 0.65rem;
+      width: min(11.5rem, calc(100vw - 1.3rem));
+      bottom: max(0.65rem, env(safe-area-inset-bottom));
     }
 
     .facts-widget-overlay .facts-widget-shell {
       animation: none;
     }
 
+    .facts-widget-overlay .facts-widget-frame {
+      gap: 0.38rem;
+      padding: 0.58rem 0.62rem;
+      border-radius: 0.9rem;
+    }
+
+    .facts-widget-overlay .facts-widget-header {
+      align-items: center;
+      flex-direction: row;
+      gap: 0.5rem;
+    }
+
+    .facts-widget-overlay .facts-widget-header-copy {
+      flex: 1 1 auto;
+    }
+
+    .facts-widget-overlay .facts-widget-controls {
+      flex: 0 0 auto;
+      width: auto;
+      justify-content: flex-end;
+      gap: 0.35rem;
+    }
+
+    .facts-widget-overlay .facts-widget-refresh {
+      width: auto;
+      max-width: 6.25rem;
+      padding: 0.32rem 0.48rem;
+      font-size: 0.54rem;
+      line-height: 1.05;
+      white-space: normal;
+    }
+
+    .facts-widget-overlay .facts-widget-dismiss {
+      width: 1.55rem;
+      height: 1.55rem;
+      flex: 0 0 1.55rem;
+      font-size: 0.92rem;
+    }
+
+    .facts-widget-overlay .facts-widget-body {
+      gap: 0.46rem;
+    }
+
+    .facts-widget-overlay .facts-widget-headline {
+      font-size: 0.86rem;
+      line-height: 1.1;
+    }
+
+    .facts-widget-overlay .facts-widget-text {
+      font-size: 0.72rem;
+      line-height: 1.34;
+      max-height: 4.2rem;
+    }
+
+    .facts-widget-overlay .facts-widget-label-row {
+      align-items: center;
+      flex-direction: row;
+      gap: 0.4rem;
+    }
+
+    .facts-widget-overlay .facts-widget-label,
+    .facts-widget-overlay .facts-widget-sponsor {
+      font-size: 0.54rem;
+      line-height: 1.15;
+    }
+
+    .facts-widget-overlay .facts-widget-sponsor,
+    .facts-widget-overlay .facts-widget-footer {
+      display: none;
+    }
+
+    .facts-widget-overlay .facts-widget-cta {
+      width: auto;
+      padding: 0.44rem 0.58rem;
+      border-radius: 0.68rem;
+      font-size: 0.58rem;
+    }
+
+    .facts-widget-overlay .facts-widget-fineprint {
+      font-size: 0.58rem;
+      line-height: 1.25;
+      max-height: 2rem;
+    }
+
     .facts-widget-overlay[data-expanded='false'] {
-      width: min(13rem, calc(100vw - 1.5rem));
+      width: min(10.75rem, calc(100vw - 1.3rem));
       left: auto;
     }
 
     .facts-widget-overlay[data-expanded='true'] {
-      width: min(16rem, calc(100vw - 1.5rem));
-      left: auto;
+      left: 0.75rem;
+      right: 0.75rem;
+      width: auto;
+      bottom: max(0.75rem, env(safe-area-inset-bottom));
+    }
+
+    .facts-widget-overlay[data-expanded='true'] .facts-widget-frame {
+      max-height: min(54svh, 20rem);
+      overflow: auto;
     }
   }
 </style>

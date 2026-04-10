@@ -35,17 +35,13 @@
  * ===================================================================
  */
 
-// Import type for Astro image metadata
-import type { ImageMetadata } from 'astro'
 import type {
   BannerAnimationConfig,
   BannerItem,
   BannerItemPreviewDetails, // Added import
-  ImageBannerItem,
   LinkPreviewInfo,
   StandardBannerData,
   VideoBannerConfig,
-  VideoBannerItem,
 } from './types'
 
 // Import type guards
@@ -64,6 +60,12 @@ import starObservatoryFallback from '@/assets/site/posts/Mega-Meal-Explained/ove
 import storefrontBanner from '@/assets/site/posts/Mega-Meal-Explained/ultra-headquarters.png'
 import communityChannelsBanner from '@/assets/site/posts/timeline/golden-era.png'
 import storyModeBanner from '@/assets/site/posts/building.png'
+
+type BannerEntry = {
+  item: BannerItem
+  link: string | null
+  enabled?: boolean
+}
 
 // =====================================================================
 // STANDARD BANNER DATA CONFIGURATION
@@ -107,15 +109,19 @@ export const videoConfig: VideoBannerConfig = {
  * MAINTENANCE:
  * - Add new videos to /public/videos/
  * - Import fallback images above
- * - Add items to this array in desired order
- * - Ensure corresponding links are added to bannerLinks array
+ * - Add items to bannerEntries in desired order
+ * - Keep the slide and link together in the same entry
+ * - Set enabled: false to temporarily hide a slide without desyncing info cards
  */
-export const bannerList: BannerItem[] = [
+const bannerEntries: BannerEntry[] = [
   // HTML intro slide — universe entry point (rendered via banner-slide-content slot)
   {
-    type: 'html' as any,
-    alt: 'MEGA MEAL SAGA — Universe Introduction',
-    src: '' as any, // unused for html type
+    item: {
+      type: 'html' as any,
+      alt: 'MEGA MEAL SAGA — Universe Introduction',
+      src: '' as any, // unused for html type
+    },
+    link: '/posts/explainer/',
   },
   // Video item - uses your ComfyUI video
   /*   {
@@ -124,68 +130,87 @@ export const bannerList: BannerItem[] = [
     alt: 'Banner image 4'
   }, */
   {
-    type: 'video',
-    src: `${import.meta.env.BASE_URL}videos/titleb.webm`,
-    fallbackImage: banner1Fallback, // Fallback image for unsupported browsers
-    alt: 'Animated title',
-    preload: 'none', // Don't preload video until needed
+    enabled: false,
+    item: {
+      type: 'video',
+      src: `${import.meta.env.BASE_URL}videos/titleb.webm`,
+      fallbackImage: banner1Fallback, // Fallback image for unsupported browsers
+      alt: 'Animated title',
+      preload: 'none', // Don't preload video until needed
+    },
+    link: '/posts/mega-meal-explained/',
   },
   {
-    type: 'video',
-    src: `${import.meta.env.BASE_URL}videos/deep-time3.webm`,
-    fallbackImage: timelineMapFallback,
-    alt: 'Timeline map and chronology overview',
-    preload: 'none', // Don't preload video until needed
+    item: {
+      type: 'video',
+      src: `${import.meta.env.BASE_URL}videos/deep-time3.webm`,
+      fallbackImage: timelineMapFallback,
+      alt: 'Timeline map and chronology overview',
+      preload: 'none', // Don't preload video until needed
+    },
+    link: '/posts/timeline/',
   },
   {
-    type: 'video',
-    src: `${import.meta.env.BASE_URL}videos/cookbook.webm`,
-    fallbackImage: banner3Fallback, // Fallback image for unsupported browsers
-    alt: 'MegaMeal Cookbook',
-    preload: 'none', // Don't preload video until needed
+    item: {
+      type: 'video',
+      src: `${import.meta.env.BASE_URL}videos/cookbook.webm`,
+      fallbackImage: banner3Fallback, // Fallback image for unsupported browsers
+      alt: 'MegaMeal Cookbook',
+      preload: 'none', // Don't preload video until needed
+    },
+    link: '/posts/cookbook/cookbook-index/',
   },
   {
-    type: 'image',
-    src: archiveDispatchesBanner,
-    alt: 'Archive of dispatches and restricted records',
+    item: {
+      type: 'image',
+      src: archiveDispatchesBanner,
+      alt: 'Archive of dispatches and restricted records',
+    },
+    link: '/archive/',
   },
   {
-    type: 'video',
-    src: `${import.meta.env.BASE_URL}videos/starmap.webm`,
-    fallbackImage: starObservatoryFallback,
-    alt: 'Enter the Star Observatory',
-    preload: 'none',
+    item: {
+      type: 'video',
+      src: `${import.meta.env.BASE_URL}videos/starmap.webm`,
+      fallbackImage: starObservatoryFallback,
+      alt: 'Enter the Star Observatory',
+      preload: 'none',
+    },
+    link: '/game/',
   },
   {
-    type: 'image',
-    src: storefrontBanner,
-    alt: 'Browse the storefront and corporate artifacts',
+    item: {
+      type: 'image',
+      src: storefrontBanner,
+      alt: 'Browse the storefront and corporate artifacts',
+    },
+    link: '/store/',
   },
   {
-    type: 'image',
-    src: communityChannelsBanner,
-    alt: 'Join the community channels',
+    item: {
+      type: 'image',
+      src: communityChannelsBanner,
+      alt: 'Join the community channels',
+    },
+    link: '/community/',
   },
   {
-    type: 'image',
-    src: storyModeBanner,
-    alt: 'Read the story mode dispatches',
+    item: {
+      type: 'image',
+      src: storyModeBanner,
+      alt: 'Read the story mode dispatches',
+    },
+    link: '/posts/introducing-story-mode/',
   },
 ]
 
-/* IMPORTANT: This array should have the same length as bannerList
+const activeBannerEntries = bannerEntries.filter(entry => entry.enabled !== false)
+
+export const bannerList: BannerItem[] = activeBannerEntries.map(entry => entry.item)
+
+/* IMPORTANT: This array is derived from bannerEntries so it stays aligned with bannerList.
  */
-export const bannerLinks: (string | null)[] = [
-  '/posts/explainer/', // intro html slide
-  '/posts/mega-meal-explained/', // titleb.webm
-  '/posts/timeline/', // deep-time3.webm
-  '/posts/cookbook/cookbook-index/', // cookbook.webm
-  '/archive/', // archive / dispatches
-  '/game/', // star observatory
-  '/store/', // storefront
-  '/community/', // community
-  '/posts/introducing-story-mode/', // story mode
-]
+export const bannerLinks: (string | null)[] = activeBannerEntries.map(entry => entry.link)
 
 /**
  * Default banner item (used for static banner or as first animation frame)

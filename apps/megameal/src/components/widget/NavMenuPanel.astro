@@ -1,5 +1,15 @@
 ---
 import SharedNavMenuPanel from '@merkin/blog-core/components/widget/NavMenuPanel.astro'
+import type { NavBarLink } from '../../types/config'
+
+interface Props {
+  links: NavBarLink[]
+  isAuthenticated?: boolean
+}
+
+const { links, isAuthenticated } = Astro.props
 ---
 
-<SharedNavMenuPanel {...Astro.props} />
+<SharedNavMenuPanel links={links} isAuthenticated={isAuthenticated}>
+  <slot />
+</SharedNavMenuPanel>
