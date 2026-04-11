@@ -32,7 +32,7 @@ function toPosixPath(filePath: string): string {
 function toSlug(sourceFile: string, contentRoot: string): string {
   const relativePath = toPosixPath(path.relative(contentRoot, sourceFile))
   const withoutExtension = relativePath.replace(/\.(md|mdx)$/i, '')
-  return withoutExtension.replace(/\/index$/i, '')
+  return withoutExtension.replace(/\/index$/i, '').toLowerCase()
 }
 
 function sortPosts(posts: SharedPost[]): SharedPost[] {

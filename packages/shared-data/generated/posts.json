@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-04-09T00:09:12.008Z",
+  "generatedAt": "2026-04-11T03:32:24.464Z",
   "sourceRoot": "/home/greggles/Merkin/apps/megameal/src/content/posts",
   "count": 42,
   "items": [
     {
-      "id": "Explainer",
-      "slug": "Explainer",
+      "id": "explainer",
+      "slug": "explainer",
       "sourcePath": "Explainer.mdx",
       "collection": "posts",
       "title": "Introduction to MEGAMEAL Saga",
@@ -522,8 +522,8 @@
       "contentFormat": "recipe"
     },
     {
-      "id": "Cuppy-Assistant-Showcase",
-      "slug": "Cuppy-Assistant-Showcase",
+      "id": "cuppy-assistant-showcase",
+      "slug": "cuppy-assistant-showcase",
       "sourcePath": "Cuppy-Assistant-Showcase.mdx",
       "collection": "posts",
       "title": "Introducing Cuppy Cake: Our...Umm...New Assistant?",
@@ -671,8 +671,8 @@
       "levelId": null
     },
     {
-      "id": "timelines/The Miranda Incident",
-      "slug": "timelines/The Miranda Incident",
+      "id": "timelines/the miranda incident",
+      "slug": "timelines/the miranda incident",
       "sourcePath": "timelines/The Miranda Incident.mdx",
       "collection": "posts",
       "title": "The Miranda Incident",
@@ -781,8 +781,8 @@
       "contentFormat": "recipe"
     },
     {
-      "id": "timelines/The-Forgotten-Masses",
-      "slug": "timelines/The-Forgotten-Masses",
+      "id": "timelines/the-forgotten-masses",
+      "slug": "timelines/the-forgotten-masses",
       "sourcePath": "timelines/The-Forgotten-Masses.mdx",
       "collection": "posts",
       "title": "The Forgotten Masses",
@@ -1004,8 +1004,8 @@
       "contentFormat": "chronicle"
     },
     {
-      "id": "Timeline",
-      "slug": "Timeline",
+      "id": "timeline",
+      "slug": "timeline",
       "sourcePath": "Timeline.mdx",
       "collection": "posts",
       "title": "The Beginning of Time",
@@ -1134,8 +1134,8 @@
       "levelId": null
     },
     {
-      "id": "timelines/Snuggloids-Commercial",
-      "slug": "timelines/Snuggloids-Commercial",
+      "id": "timelines/snuggloids-commercial",
+      "slug": "timelines/snuggloids-commercial",
       "sourcePath": "timelines/Snuggloids-Commercial.mdx",
       "collection": "posts",
       "title": "SNUGGLOIDS™ - Your Perfect Companion",
@@ -1200,8 +1200,8 @@
       "levelId": null
     },
     {
-      "id": "Mega-Meal-3",
-      "slug": "Mega-Meal-3",
+      "id": "mega-meal-3",
+      "slug": "mega-meal-3",
       "sourcePath": "Mega-Meal-3.mdx",
       "collection": "posts",
       "title": "A MEGA MEAL SAGA | Qarnivor",
@@ -1263,8 +1263,8 @@
       "levelId": null
     },
     {
-      "id": "Mega-Meal-Explained",
-      "slug": "Mega-Meal-Explained",
+      "id": "mega-meal-explained",
+      "slug": "mega-meal-explained",
       "sourcePath": "Mega-Meal-Explained.mdx",
       "collection": "posts",
       "title": "MEGA MEAL Movie Trailer Explained",
@@ -1351,8 +1351,8 @@
       "levelId": null
     },
     {
-      "id": "timelines/Snuggaliod-Emergence",
-      "slug": "timelines/Snuggaliod-Emergence",
+      "id": "timelines/snuggaliod-emergence",
+      "slug": "timelines/snuggaliod-emergence",
       "sourcePath": "timelines/Snuggaliod-Emergence.mdx",
       "collection": "posts",
       "title": "The Snuggloid Emergence",

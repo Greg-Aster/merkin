@@ -63,7 +63,7 @@ const computedEndYear =
   (years.length > 0 ? Math.max(...years) + Math.max(5, Math.ceil((Math.max(...years) - Math.min(...years)) * 0.1)) : 2100)
 
 const eraEntries = Object.entries(eraConfig).filter(
-  ([eraKey]) => eraKey !== 'all-time',
+  ([eraKey]) => eraKey !== 'all-time' && eraKey !== 'all-eras',
 )
 const initialEra =
   eraConfig['all-eras'] ? 'all-eras' : eraEntries[0]?.[0] ?? ''
@@ -89,28 +89,16 @@ const menuEntries = [
       <button type="button" class="timeline-control-button" data-action="reset-view">Reset</button>
       <button type="button" class="timeline-control-button" data-action="zoom-in" aria-label="Zoom in">+</button>
     </div>
-    <div class="timeline-era-filter">
-      <button
-        type="button"
-        class="timeline-era-trigger"
-        aria-label="Focus timeline era"
-        aria-haspopup="menu"
-        aria-expanded="false"
-        data-era-trigger
-      >
-        <span>Eras</span>
-      </button>
-      <div class="timeline-era-menu" data-era-menu hidden>
-        {menuEntries.map((entry) => (
-          <button
-            type="button"
-            class:list={['timeline-era-option', entry.key === initialEra ? 'is-active' : '']}
-            data-era-option={entry.key}
-          >
-            {entry.label}
-          </button>
-        ))}
-      </div>
+    <div class="timeline-era-filter" role="group" aria-label="Select era">
+      {menuEntries.map((entry) => (
+        <button
+          type="button"
+          class:list={['timeline-era-option', entry.key === initialEra ? 'is-active' : '']}
+          data-era-option={entry.key}
+        >
+          {entry.label}
+        </button>
+      ))}
     </div>
   </div>
 
@@ -146,27 +134,13 @@ const menuEntries = [
     if (!wrapper) return
 
     const zoomButtons = wrapper.querySelectorAll('[data-action]')
-    const eraTrigger = wrapper.querySelector('[data-era-trigger]')
-    const eraMenu = wrapper.querySelector('[data-era-menu]')
     const eraOptions = wrapper.querySelectorAll('[data-era-option]')
     let syncRetryCount = 0
 
-    const updateEraStatus = (eraKey) => {
-      eraOptions.forEach((option) => {
-        option.classList.toggle('is-active', option.getAttribute('data-era-option') === eraKey)
+    const setActiveEra = (eraKey) => {
+      eraOptions.forEach((opt) => {
+        opt.classList.toggle('is-active', opt.getAttribute('data-era-option') === eraKey)
       })
-    }
-
-    const closeEraMenu = () => {
-      if (!eraMenu || !eraTrigger) return
-      eraMenu.hidden = true
-      eraTrigger.setAttribute('aria-expanded', 'false')
-    }
-
-    const openEraMenu = () => {
-      if (!eraMenu || !eraTrigger) return
-      eraMenu.hidden = false
-      eraTrigger.setAttribute('aria-expanded', 'true')
     }
 
     const syncTimelineCore = () => {
@@ -182,7 +156,7 @@ const menuEntries = [
       syncRetryCount = 0
       if (initialEra && typeof timelineCore.selectEra === 'function') {
         timelineCore.selectEra(initialEra)
-        updateEraStatus(initialEra)
+        setActiveEra(initialEra)
       }
 
       zoomButtons.forEach((button) => {
@@ -194,35 +168,18 @@ const menuEntries = [
         })
       })
 
-      eraTrigger?.addEventListener('click', () => {
-        if (!eraMenu) return
-        if (eraMenu.hidden) openEraMenu()
-        else closeEraMenu()
-      })
-
       eraOptions.forEach((option) => {
         option.addEventListener('click', () => {
           const nextEra = option.getAttribute('data-era-option')
           if (!nextEra || typeof timelineCore.selectEra !== 'function') return
           timelineCore.selectEra(nextEra)
-          updateEraStatus(nextEra)
-          closeEraMenu()
+          setActiveEra(nextEra)
         })
-      })
-
-      wrapper.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') closeEraMenu()
-      })
-
-      document.addEventListener('click', (event) => {
-        if (!wrapper.contains(event.target)) closeEraMenu()
       })
 
       wrapper.addEventListener('timeline:eraChange', (event) => {
         const nextEra = event.detail?.era
-        if (!nextEra || typeof timelineCore.selectEra !== 'function') return
-        updateEraStatus(nextEra)
-        closeEraMenu()
+        if (nextEra) setActiveEra(nextEra)
       })
     }
 
@@ -247,7 +204,7 @@ const menuEntries = [
 
   .timeline-map-controls {
     position: absolute;
-    top: 1rem;
+    bottom: 1rem;
     left: 1rem;
     right: 1rem;
     z-index: 40;
@@ -279,17 +236,12 @@ const menuEntries = [
       inset 0 1px 0 rgb(255 255 255 / 0.08);
   }
 
-  .timeline-control-button,
-  .timeline-era-trigger,
-  .timeline-era-option {
+  .timeline-control-button {
     border: 1px solid rgb(186 230 253 / 0.2);
     border-radius: 0.65rem;
     background: rgb(15 23 42 / 0.86);
     color: rgb(241 245 249);
     font: inherit;
-  }
-
-  .timeline-control-button {
     min-width: 2.35rem;
     padding: 0.55rem 0.8rem;
     transition:
@@ -299,11 +251,7 @@ const menuEntries = [
   }
 
   .timeline-control-button:hover,
-  .timeline-control-button:focus-visible,
-  .timeline-era-trigger:hover,
-  .timeline-era-trigger:focus-visible,
-  .timeline-era-option:hover,
-  .timeline-era-option:focus-visible {
+  .timeline-control-button:focus-visible {
     background: rgb(14 165 233 / 0.38);
     box-shadow:
       0 0 0 1px rgb(125 211 252 / 0.42),
@@ -312,61 +260,49 @@ const menuEntries = [
     transform: translateY(-1px);
   }
 
-/*   .timeline-era-filter {
-    position: relative;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    backdrop-filter: none;
-    box-shadow: none;
-  } */
-
-  .timeline-era-trigger {
-    min-width: 6.4rem;
-    padding: 0.48rem 0.72rem;
-    padding-right: 1.9rem;
-    text-align: left;
-    background-image:
-      linear-gradient(45deg, transparent 50%, rgb(186 230 253 / 0.82) 50%),
-      linear-gradient(135deg, rgb(186 230 253 / 0.82) 50%, transparent 50%);
-    background-position:
-      calc(100% - 1rem) calc(50% - 0.15rem),
-      calc(100% - 0.7rem) calc(50% - 0.15rem);
-    background-size: 0.42rem 0.42rem, 0.42rem 0.42rem;
-    background-repeat: no-repeat;
-  }
-
-  .timeline-era-menu {
-    position: absolute;
-    top: calc(100% + 0.55rem);
-    right: 0;
-    display: grid;
-    min-width: 10.25rem;
+  .timeline-era-filter {
+    display: flex;
+    align-items: center;
+    gap: 0;
     padding: 0.3rem;
-    border: 1px solid rgb(186 230 253 / 0.2);
-    border-radius: 0.78rem;
-    background: rgb(2 6 23 / 0.94);
-    backdrop-filter: blur(16px);
+    border: 1px solid rgb(186 230 253 / 0.28);
+    border-radius: 0.9rem;
+    background: rgb(2 6 23 / 0.74);
+    backdrop-filter: blur(14px);
     box-shadow:
       0 18px 60px rgb(2 6 23 / 0.42),
-      inset 0 1px 0 rgb(255 255 255 / 0.06);
-    z-index: 50;
+      inset 0 1px 0 rgb(255 255 255 / 0.08);
+    pointer-events: auto;
   }
 
   .timeline-era-option {
-    width: 100%;
-    padding: 0.52rem 0.62rem;
-    border-color: transparent;
+    padding: 0.38rem 1.1rem;
+    border: 1px solid transparent;
+    border-radius: 0.6rem;
     background: transparent;
-    text-align: left;
-    box-shadow: none;
+    color: rgb(186 218 248);
+    font: inherit;
     font-size: 0.84rem;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background 140ms ease,
+      color 140ms ease,
+      border-color 140ms ease;
+  }
+
+  .timeline-era-option:hover,
+  .timeline-era-option:focus-visible {
+    background: rgb(14 165 233 / 0.18);
+    color: rgb(224 242 254);
+    outline: none;
   }
 
   .timeline-era-option.is-active {
     border-color: rgb(125 211 252 / 0.26);
-    background: rgb(14 165 233 / 0.16);
+    background: rgb(14 165 233 / 0.22);
     color: rgb(224 242 254);
+    font-weight: 500;
   }
 
   @media (max-width: 767px) {
@@ -380,7 +316,7 @@ const menuEntries = [
     }
 
     .timeline-map-controls {
-      top: 0.8rem;
+      bottom: 0.8rem;
       left: 0.8rem;
       right: 0.8rem;
       flex-direction: column;
@@ -389,14 +325,8 @@ const menuEntries = [
 
     .timeline-zoom-controls,
     .timeline-era-filter {
-      justify-content: stretch;
       width: 100%;
-    }
-
-    .timeline-era-trigger,
-    .timeline-era-menu {
-      width: 100%;
-      min-width: 0;
+      flex-wrap: wrap;
     }
   }
 </style>

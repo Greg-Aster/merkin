@@ -21,7 +21,7 @@ export const siteConfig: SiteConfig = {
   banner: {
     enable: true,
     src: '/posts/timeline/golden-era.png', // Used as fallback and OG image
-    video: '/assets/banner/ComfyUI_00143_.webm', // Animated video background
+    video: '/assets/banner/golden-era.webm', // Animated video background
     position: 'center',
     credit: {
       enable: false,

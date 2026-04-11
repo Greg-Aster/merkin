@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-04-09T00:09:12.008Z",
+  "generatedAt": "2026-04-11T03:32:24.465Z",
   "sourceRoot": "/home/greggles/Merkin/apps/megameal/src/content/posts",
   "count": 39,
   "items": [
     {
       "title": "The Beginning of Time",
       "description": "An Explosion of Flavors. The Cosmic Menu.",
-      "slug": "Timeline",
+      "slug": "timeline",
       "sourcePath": "Timeline.mdx",
       "year": 1,
       "era": "ancient-epoch",
@@ -25,7 +25,7 @@
       "timelineYear": 1,
       "timelineEra": "ancient-epoch",
       "timelineLocation": "Historical Archives",
-      "uniqueId": "Timeline",
+      "uniqueId": "timeline",
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
@@ -36,7 +36,7 @@
     {
       "title": "Introduction to MEGAMEAL Saga",
       "description": "Explore the hyper-capitalist dystopian future of MEGAMEAL, a science fiction food parody series where cosmic horror and culinary culture collide across multiple media formats and timelines.",
-      "slug": "Explainer",
+      "slug": "explainer",
       "sourcePath": "Explainer.mdx",
       "year": 1000,
       "era": "ancient-epoch",
@@ -56,7 +56,7 @@
       "timelineYear": 1000,
       "timelineEra": "ancient-epoch",
       "timelineLocation": "MEGAMEAL Universe",
-      "uniqueId": "Explainer",
+      "uniqueId": "explainer",
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
@@ -67,7 +67,7 @@
     {
       "title": "The Forgotten Masses",
       "description": "The passing of countless individuals whose collective digital footprints would later have profound consequences for civilization.",
-      "slug": "timelines/The-Forgotten-Masses",
+      "slug": "timelines/the-forgotten-masses",
       "sourcePath": "timelines/The-Forgotten-Masses.mdx",
       "year": 6500,
       "era": "awakening-era",
@@ -86,7 +86,7 @@
       "timelineYear": 6500,
       "timelineEra": "awakening-era",
       "timelineLocation": "Prime, Northern Hemisphere",
-      "uniqueId": "timelines/The-Forgotten-Masses",
+      "uniqueId": "timelines/the-forgotten-masses",
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
@@ -499,7 +499,7 @@
     {
       "title": "SNUGGLOIDS™ - Your Perfect Companion",
       "description": "Recovered pre-extinction Qarnivor commercial for the notorious 'comfort companions' that would later emerge from radioactive wastelands.",
-      "slug": "timelines/Snuggloids-Commercial",
+      "slug": "timelines/snuggloids-commercial",
       "sourcePath": "timelines/Snuggloids-Commercial.mdx",
       "year": 27995,
       "era": "conflict-epoch",
@@ -519,7 +519,7 @@
       "timelineYear": 27995,
       "timelineEra": "conflict-epoch",
       "timelineLocation": "Planet Qarnivor, Pre-Extinction Media Networks",
-      "uniqueId": "timelines/Snuggloids-Commercial",
+      "uniqueId": "timelines/snuggloids-commercial",
       "bannerData": {
         "videoId": "UxQ3zU77RX0"
       }
@@ -743,7 +743,7 @@
     {
       "title": "The Miranda Incident",
       "description": "Recovered documents and artifacts relating to the destruction of the Miranda System and the Perfect Bloody Mary that created a causality nexus.",
-      "slug": "timelines/The Miranda Incident",
+      "slug": "timelines/the miranda incident",
       "sourcePath": "timelines/The Miranda Incident.mdx",
       "year": 28042,
       "era": "singularity-conflict",
@@ -762,7 +762,7 @@
       "timelineYear": 28042,
       "timelineEra": "singularity-conflict",
       "timelineLocation": "Miranda Star System, Bibimbap Saloon",
-      "uniqueId": "timelines/The Miranda Incident",
+      "uniqueId": "timelines/the miranda incident",
       "bannerData": {
         "videoId": "c-idCx4hqkA",
         "category": "MEGA MEAL",
@@ -774,7 +774,7 @@
     {
       "title": "A MEGA MEAL SAGA | Qarnivor",
       "description": "A rare first-hand account of the mysterious Snuggloid emergence on Qarnivor following the nuclear extinction event.",
-      "slug": "Mega-Meal-3",
+      "slug": "mega-meal-3",
       "sourcePath": "Mega-Meal-3.mdx",
       "year": 28045,
       "era": "conflict-epoch",
@@ -795,7 +795,7 @@
       "timelineYear": 28045,
       "timelineEra": "conflict-epoch",
       "timelineLocation": "Planet Qarnivor, Irradiated Wasteland",
-      "uniqueId": "Mega-Meal-3",
+      "uniqueId": "mega-meal-3",
       "bannerData": {
         "videoId": "uXagUhT1fb0"
       }
@@ -803,7 +803,7 @@
     {
       "title": "The Snuggloid Emergence",
       "description": "The mysterious appearance of the enigmatic Snuggloid entities on the war-ravaged, lifeless surface of Quarnivor.",
-      "slug": "timelines/Snuggaliod-Emergence",
+      "slug": "timelines/snuggaliod-emergence",
       "sourcePath": "timelines/Snuggaliod-Emergence.mdx",
       "year": 28144,
       "era": "conflict-epoch",
@@ -821,7 +821,7 @@
       "timelineYear": 28144,
       "timelineEra": "conflict-epoch",
       "timelineLocation": "Planet Quarnivor, Irradiated Wasteland",
-      "uniqueId": "timelines/Snuggaliod-Emergence",
+      "uniqueId": "timelines/snuggaliod-emergence",
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
@@ -985,7 +985,7 @@
     {
       "title": "MEGA MEAL Movie Trailer Explained",
       "description": "A deep dive into the MEGA MEAL trailer, exploring its themes, characters, and the chaotic world of fast-food mascots.",
-      "slug": "Mega-Meal-Explained",
+      "slug": "mega-meal-explained",
       "sourcePath": "Mega-Meal-Explained.mdx",
       "year": 33900,
       "era": "golden-age",
@@ -1004,7 +1004,7 @@
       "timelineYear": 33900,
       "timelineEra": "golden-age",
       "timelineLocation": "Corporate Media Sector, Galactic Core",
-      "uniqueId": "Mega-Meal-Explained",
+      "uniqueId": "mega-meal-explained",
       "bannerData": {
         "videoId": "4tR6VLaYJFA"
       }
