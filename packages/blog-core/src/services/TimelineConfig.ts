@@ -104,6 +104,30 @@ export interface EraConfigMap {
   [eraKey: string]: EraConfig
 }
 
+export interface TimelineConstellationConfig {
+  centerAzimuth: number
+  centerElevation: number
+  spread: number
+  pattern: string
+}
+
+export interface TimelineConstellationPoint {
+  azOffset: number
+  elOffset: number
+}
+
+export interface TimelineConstellationConfigMap {
+  [eraKey: string]: TimelineConstellationConfig
+}
+
+export interface TimelineConstellationPatternMap {
+  [pattern: string]: TimelineConstellationPoint[]
+}
+
+export interface TimelineConnectionPatternMap {
+  [pattern: string]: Array<[number, number]>
+}
+
 // Default era configuration with years
 export const defaultEraConfig: EraConfigMap = {
   'all-time': {

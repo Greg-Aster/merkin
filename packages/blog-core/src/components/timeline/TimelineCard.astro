@@ -1,8 +1,6 @@
 ---
 // src/components/timeline/TimelineCard.astro
-import type { TimelineEvent } from '@/services/TimelineService.client'
-// Assuming getEraDisplayName might be needed if era badges display names, but it's not used in the Svelte template directly for class generation.
-// import { getEraDisplayName } from '@/services/TimelineService.client';
+import type { TimelineEvent } from '../../services/TimelineConfig'
 
 export interface Props {
   event: TimelineEvent

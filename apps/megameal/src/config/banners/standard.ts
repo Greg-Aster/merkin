@@ -143,12 +143,12 @@ const bannerEntries: BannerEntry[] = [
   {
     item: {
       type: 'video',
-      src: `${import.meta.env.BASE_URL}videos/deep-time3.webm`,
+      src: `${import.meta.env.BASE_URL}videos/starmap.webm`,
       fallbackImage: timelineMapFallback,
       alt: 'Timeline map and chronology overview',
       preload: 'none', // Don't preload video until needed
     },
-    link: '/posts/timeline/',
+    link: '/timeline/',
   },
   {
     item: {
@@ -162,9 +162,11 @@ const bannerEntries: BannerEntry[] = [
   },
   {
     item: {
-      type: 'image',
-      src: archiveDispatchesBanner,
+      type: 'video',
+      src: `${import.meta.env.BASE_URL}assets/banner/archive_1.webm`,
+      fallbackImage: archiveDispatchesBanner,
       alt: 'Archive of dispatches and restricted records',
+      preload: 'none',
     },
     link: '/archive/',
   },
@@ -246,6 +248,12 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
     description:
       'Explore the hyper-capitalist dystopian future of MEGAMEAL, a science fiction food parody series where cosmic horror and culinary culture collide across multiple media formats and timelines.',
     icon: 'book-open',
+  },
+  '/timeline/': {
+    title: 'MEGAMEAL Timeline',
+    description:
+      'Open the dedicated star map for eras, incidents, recipes, wars, corporate ascensions, and archival fragments across the MEGAMEAL chronology.',
+    icon: 'timeline',
   },
   '/posts/mega-meal-explained/': {
     title: 'Welcome to MEGAMEAL',

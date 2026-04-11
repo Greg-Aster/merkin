@@ -86,8 +86,10 @@ export function getStarType(id: string, isKeyEvent: boolean): string {
 /**
  * Get size factor with variation
  */
-export function getSizeFactor(isKeyEvent: boolean): number {
-  return isKeyEvent ? 1.2 : 0.85 + Math.random() * 0.3
+export function getSizeFactor(isKeyEvent: boolean, id = ''): number {
+  if (isKeyEvent) return 1.32
+  const hash = hashCode(id)
+  return 0.92 + (hash % 18) / 100
 }
 
 /**

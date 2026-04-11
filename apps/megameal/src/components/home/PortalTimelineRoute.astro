@@ -1,5 +1,5 @@
 ---
-import TimelineBanner from '../../../../../packages/blog-core/src/components/timeline/TimelineBanner.astro'
+import TimelineBanner from '../timeline/TimelineBanner.astro'
 import { Icon } from 'astro-icon/components'
 
 interface Props {
@@ -37,7 +37,7 @@ const { timelineCount } = Astro.props
         The timeline is the map layer for the whole project: eras, incidents,
         recipes, wars, corporate ascensions, and archival fragments.
       </p>
-      <a href="/posts/explainer/" class="route-link" data-sfx-click="sweep">
+      <a href="/timeline/" class="route-link" data-sfx-click="sweep">
         <span>Enter Timeline</span>
         <Icon name="mdi:arrow-right" class="route-link__icon" />
       </a>
@@ -256,20 +256,31 @@ const { timelineCount } = Astro.props
     height: 100% !important;
     min-height: 100% !important;
     border-radius: inherit;
+    pointer-events: none !important;
   }
 
   .route-viewport--timeline :global(.timeline-viewport),
   .route-viewport--timeline :global(.timeline-view-container),
-  .route-viewport--timeline :global(.timeline-view-container > .card-base) {
+  .route-viewport--timeline :global(.timeline-view-container > .card-base),
+  .route-viewport--timeline :global(.timeline-map-shell),
+  .route-viewport--timeline :global(.timeline-stage),
+  .route-viewport--timeline :global(.timeline-event-button),
+  .route-viewport--timeline :global(.timeline-active-card) {
     height: 100% !important;
     min-height: 100% !important;
     border-radius: inherit;
+    pointer-events: none !important;
   }
 
   .route-viewport--timeline :global(.timeline-view-container > .card-base) {
     border: 0;
     background: transparent !important;
     box-shadow: none;
+  }
+
+  .route-viewport--timeline :global(.timeline-map-controls),
+  .route-viewport--timeline :global(.timeline-era-status) {
+    display: none;
   }
 
   .route-viewport__shade {

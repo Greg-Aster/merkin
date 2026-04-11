@@ -21,7 +21,7 @@ export interface TimelineFact {
 
 const specialFactLinks: Record<string, string> = {
   Explainer: '/posts/explainer/',
-  Timeline: '/posts/explainer/',
+  Timeline: '/timeline/',
   'Mega-Meal-3': '/posts/mega-meal-3/',
 }
 
@@ -96,7 +96,7 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     headline: 'Lost In Time? Use The Official Timeline Map.',
     text: 'Major eras, incidents, recipes, extinctions, and corporate milestones arranged in one legally approved chronology.',
     ctaText: 'Open Timeline',
-    href: '/posts/explainer/',
+    href: '/timeline/',
     sponsor: 'Chronology Compliance Office',
     finePrint: 'Map accuracy not guaranteed during singularity weather.',
     theme: 'chronology',

@@ -1,7 +1,25 @@
 ---
 import SharedTimelineBanner from '@merkin/blog-core/components/timeline/TimelineBanner.astro'
+import timelineManifest from '../../../../../packages/shared-data/generated/timeline.json'
+import {
+  connectionPatterns,
+  constellationConfig,
+  constellationPatterns,
+  defaultEraConfig,
+} from '../../config/timelineconfig'
 
-const props = Astro.props
+export interface Props {
+  [key: string]: any
+}
+
+const props: Props = Astro.props as Props
 ---
 
-<SharedTimelineBanner {...props} />
+<SharedTimelineBanner
+  events={timelineManifest.items}
+  eraConfig={defaultEraConfig}
+  constellationConfig={constellationConfig}
+  constellationPatterns={constellationPatterns}
+  connectionPatterns={connectionPatterns}
+  {...props}
+/>

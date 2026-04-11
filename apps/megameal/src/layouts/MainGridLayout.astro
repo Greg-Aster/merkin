@@ -1,9 +1,15 @@
 ---
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
 import Bleepy from '@components/bleepy/Bleepy.astro'
-import { siteConfig } from '@/config/config'
 import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
 import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
+import timelineManifest from '../../../../packages/shared-data/generated/timeline.json'
+import {
+  connectionPatterns,
+  constellationConfig,
+  constellationPatterns,
+  defaultEraConfig,
+} from '@/config/timelineconfig'
 import '@/styles/megameal-interactions.css'
 
 interface Props {
@@ -26,12 +32,25 @@ interface Props {
     authorLink?: string
   }
   homeLayout?: 'default' | 'portal'
+  contentMode?: 'default' | 'banner-only'
   showMascot?: boolean
   showAssistantWidget?: boolean
+  timelineEvents?: any[]
+  timelineEraConfig?: Record<string, any>
+  timelineConstellationConfig?: Record<string, any>
+  timelineConstellationPatterns?: Record<string, any>
+  timelineConnectionPatterns?: Record<string, any>
 }
 ---
 
-<SharedMainGridLayout {...Astro.props}>
+<SharedMainGridLayout
+  {...Astro.props}
+  timelineEvents={timelineManifest.items}
+  timelineEraConfig={defaultEraConfig}
+  timelineConstellationConfig={constellationConfig}
+  timelineConstellationPatterns={constellationPatterns}
+  timelineConnectionPatterns={connectionPatterns}
+>
   <slot slot="head" name="head" />
   <slot />
   <SiteSfxBridge client:load />

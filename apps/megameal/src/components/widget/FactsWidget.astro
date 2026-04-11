@@ -78,7 +78,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
             class="facts-widget-refresh"
             data-action="next"
             data-sfx-click="sweep"
-            aria-label="Show the next sponsored campaign"
+            aria-label="Show another sponsored campaign"
           >
             Next Campaign
           </button>
@@ -203,7 +203,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
     const isDismissible = widget.dataset.dismissible === 'true'
     const isOverlay = widget.classList.contains('facts-widget-overlay')
     const prefersTouchUi = window.matchMedia('(hover: none), (pointer: coarse)').matches
-    let currentIndex = facts.length > 0 ? 0 : -1
+    let currentIndex = -1
     let intervalId
     let expandTimeoutId
     let collapseTimeoutId
@@ -212,7 +212,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
 
     const specialFactLinks = {
       Explainer: '/posts/explainer/',
-      Timeline: '/posts/explainer/',
+      Timeline: '/timeline/',
       'Mega-Meal-3': '/posts/mega-meal-3/',
     }
 
@@ -277,14 +277,20 @@ const initialHref = resolveTimelineFactHref(initialFact)
       }
     }
 
-    const getNextIndex = () => {
-      if (facts.length <= 1) return 0
-      return (currentIndex + 1) % facts.length
+    const getRandomFactIndex = () => {
+      if (facts.length <= 1) return facts.length === 1 ? 0 : -1
+
+      let nextIndex = currentIndex
+      while (nextIndex === currentIndex) {
+        nextIndex = Math.floor(Math.random() * facts.length)
+      }
+
+      return nextIndex
     }
 
-    const showNextFact = () => {
+    const showRandomFact = () => {
       if (!facts.length || widget.classList.contains('is-dismissed')) return
-      currentIndex = getNextIndex()
+      currentIndex = getRandomFactIndex()
       applyFact(facts[currentIndex] || fallbackFact)
     }
 
@@ -320,7 +326,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
     const startRotation = () => {
       if (!facts.length) return
       window.clearInterval(intervalId)
-      intervalId = window.setInterval(showNextFact, 18000)
+      intervalId = window.setInterval(showRandomFact, 18000)
     }
 
     const dismissWidget = () => {
@@ -355,7 +361,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
       const action = actionTarget.getAttribute('data-action')
       if (action === 'next') {
         event.preventDefault()
-        showNextFact()
+        showRandomFact()
       }
       if (action === 'dismiss' && isDismissible) {
         event.preventDefault()
@@ -368,6 +374,7 @@ const initialHref = resolveTimelineFactHref(initialFact)
     })
 
     if (facts.length) {
+      currentIndex = getRandomFactIndex()
       applyFact(facts[currentIndex] || fallbackFact)
     } else {
       applyFact(fallbackFact)

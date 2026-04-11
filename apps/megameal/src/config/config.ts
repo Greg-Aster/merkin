@@ -1,11 +1,10 @@
-import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts'
+import { DARK_MODE } from '@constants/constants.ts'
 import type {
   LicenseConfig,
   NavBarConfig,
   ProfileConfig,
   SiteConfig,
 } from '../types/config'
-import { LinkPreset } from '../types/config'
 
 export const siteConfig: SiteConfig = {
   title: 'MEGA MEAL SAGA',
@@ -48,7 +47,7 @@ export const navBarConfig: NavBarConfig = {
     0,
     {
       name: 'Timeline',
-      url: '/posts/explainer/',
+      url: '/timeline/',
     },
     {
       name: 'Game',
