@@ -157,7 +157,7 @@ const bannerEntries: BannerEntry[] = [
   {
     item: {
       type: 'video',
-      src: `${import.meta.env.BASE_URL}assets/banner/cookbook_glitch.webm`,
+      src: `${import.meta.env.BASE_URL}assets/banner/cookbook-glitch0001-0049.webm`,
       fallbackImage: banner3Fallback, // Fallback image for unsupported browsers
       alt: 'MegaMeal Cookbook',
       preload: 'none', // Don't preload video until needed
@@ -207,7 +207,7 @@ const bannerEntries: BannerEntry[] = [
   {
     item: {
       type: 'video',
-      src: storyModeBanner,
+      src: `${import.meta.env.BASE_URL}assets/banner/golden-era.webm`,
       fallbackImage: storyModeBanner, // Fallback for image items can just be the same image
       alt: 'Read the story mode dispatches',
     },
