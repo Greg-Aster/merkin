@@ -22,10 +22,11 @@ export const siteConfig: SiteConfig = {
     enable: true,
     src: '/posts/timeline/golden-era.png', // Used as fallback and OG image
     video: '/assets/banner/golden-era.webm', // Animated video background
+    playbackRate: 0.5,
     position: 'center',
     credit: {
       enable: false,
-      text: 'Corporate Archives Division',
+        text: 'Corporate Archives Division',
       url: '',
     },
   },

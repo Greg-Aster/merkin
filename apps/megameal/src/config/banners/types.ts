@@ -59,6 +59,7 @@ export interface VideoBannerItem {
   fallbackImage: ImageMetadata // Fallback image for unsupported browsers
   alt: string // Alt text for accessibility
   preload?: 'none' | 'metadata' | 'auto' // Video preload behavior
+  playbackRate?: number // Optional playback speed (0.5 = half speed, 1 = normal)
 }
 
 /**

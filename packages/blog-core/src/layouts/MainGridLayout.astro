@@ -694,6 +694,7 @@ const gridLayoutClasses = [
             muted
             playsinline
             aria-hidden="true"
+            data-playback-rate={siteConfig.banner.playbackRate ?? 1}
             style={`object-position: ${siteConfig.banner.position || 'center'}`}
           >
             <source src={siteConfig.banner.video} type="video/webm" />
@@ -702,8 +703,10 @@ const gridLayoutClasses = [
             (function () {
               var v = document.getElementById('parallax-image');
               if (v && v.tagName === 'VIDEO') {
-                v.playbackRate = 0.5;
-                v.addEventListener('play', function () { v.playbackRate = 0.5; });
+                var configuredRate = Number(v.dataset.playbackRate);
+                var playbackRate = Number.isFinite(configuredRate) && configuredRate > 0 ? configuredRate : 1;
+                v.playbackRate = playbackRate;
+                v.addEventListener('play', function () { v.playbackRate = playbackRate; });
               }
             })();
           </script>
@@ -791,7 +794,7 @@ const gridLayoutClasses = [
                 category={hasPostBanner && post?.data?.bannerType === "timeline" ? post.data.bannerData.category : (bannerDataSources.timelineBannerData?.category || "MEGA MEAL")}
                 startYear={hasPostBanner && post?.data?.bannerType === "timeline" ? post.data.bannerData.startYear : bannerDataSources.timelineBannerData?.startYear}
                 endYear={hasPostBanner && post?.data?.bannerType === "timeline" ? post.data.bannerData.endYear : bannerDataSources.timelineBannerData?.endYear}
-                background={hasPostBanner && post?.data?.bannerType === "timeline" ? (post.data.bannerData.background || "/posts/timeline/universe.png") : (bannerDataSources.timelineBannerData?.background || "/posts/timeline/universe.png")}
+                background={hasPostBanner && post?.data?.bannerType === "timeline" ? post.data.bannerData.background : bannerDataSources.timelineBannerData?.background}
                 compact={hasPostBanner && post?.data?.bannerType === "timeline" ? (post.data.bannerData.compact || false) : (bannerDataSources.timelineBannerData?.compact || false)}
                 events={timelineEvents}
                 eraConfig={timelineEraConfig}
@@ -896,6 +899,7 @@ const gridLayoutClasses = [
                             <video
                               src={isInitialSlide ? item.src : undefined}
                               data-src={isInitialSlide ? undefined : item.src}
+                              data-playback-rate={typeof item.playbackRate === 'number' ? item.playbackRate : undefined}
                               autoplay={bannerConfig.standardBannerConfig.video.autoplay}
                               muted={bannerConfig.standardBannerConfig.video.muted}
                               loop={bannerConfig.standardBannerConfig.video.loop}
@@ -2304,6 +2308,13 @@ const gridLayoutClasses = [
       mediaLayer.classList.remove(...motionClassNames);
     };
 
+    const applyVideoPlaybackRate = (videoElement) => {
+      if (!videoElement) return;
+      const configuredRate = Number(videoElement.dataset.playbackRate);
+      videoElement.playbackRate =
+        Number.isFinite(configuredRate) && configuredRate > 0 ? configuredRate : 1;
+    };
+
     const ensureSlideMediaLoaded = (slideIndex) => {
       const slide = slides[slideIndex];
       if (!slide) return;
@@ -2316,6 +2327,7 @@ const gridLayoutClasses = [
 
           videoElement.src = deferredSrc;
           videoElement.removeAttribute('data-src');
+          applyVideoPlaybackRate(videoElement);
           videoElement.load();
         });
     };
@@ -2324,6 +2336,7 @@ const gridLayoutClasses = [
       slides.forEach((slide, index) => {
         const videoElement = slide.querySelector('video');
         if (!videoElement) return;
+        applyVideoPlaybackRate(videoElement);
 
         if (index === activeIndex) {
           const playPromise = videoElement.play();

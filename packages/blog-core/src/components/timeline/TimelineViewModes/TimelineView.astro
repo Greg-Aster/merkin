@@ -15,6 +15,8 @@ export interface Props {
   id?: string
   events: TimelineEvent[]
   background: string
+  backgroundVideo?: string
+  backgroundVideoPlaybackRate?: number
   compact?: boolean
   initialScale?: number
   initialOffsetX?: number
@@ -33,6 +35,8 @@ const {
   id = 'timeline-view',
   events,
   background,
+  backgroundVideo,
+  backgroundVideoPlaybackRate = 1,
   compact = false,
   initialScale = defaultTimelineViewConfig.defaultZoom,
   initialOffsetX = 0,
@@ -150,6 +154,16 @@ const initialBackground =
   eraConfig['all-eras']?.backgroundImage ||
   Object.values(eraConfig).find((entry) => entry.backgroundImage)?.backgroundImage ||
   background
+const initialBackgroundVideo =
+  eraConfig['all-eras']?.backgroundVideo ||
+  Object.values(eraConfig).find((entry) => entry.backgroundVideo)?.backgroundVideo ||
+  backgroundVideo ||
+  ''
+const initialBackgroundVideoPlaybackRate =
+  eraConfig['all-eras']?.backgroundVideoPlaybackRate ||
+  Object.values(eraConfig).find((entry) => typeof entry.backgroundVideoPlaybackRate === 'number')?.backgroundVideoPlaybackRate ||
+  backgroundVideoPlaybackRate ||
+  1
 ---
 
 <div
@@ -158,11 +172,31 @@ const initialBackground =
   data-background={initialBackground}
 >
   <div class="timeline-background-layer absolute inset-0 z-0 overflow-hidden">
+    <video
+      class:list={[
+        'timeline-background-media',
+        'timeline-background-video',
+        'object-cover',
+        !initialBackgroundVideo ? 'is-background-hidden' : '',
+      ]}
+      src={initialBackgroundVideo || undefined}
+      poster={initialBackgroundVideo ? undefined : initialBackground}
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      data-playback-rate={initialBackgroundVideoPlaybackRate}
+      aria-hidden="true"
+    ></video>
     <ImageWrapper
       src={initialBackground}
       alt="Timeline background"
-      class="timeline-background h-full w-full"
-      imgClass="timeline-background object-cover"
+      class:list={[
+        'timeline-background-image-wrapper h-full w-full',
+        initialBackgroundVideo ? 'is-background-hidden' : '',
+      ]}
+      imgClass="timeline-background-media timeline-background-image object-cover"
       loading="eager"
     />
     <div class="timeline-depth-layer timeline-depth-layer--nebula"></div>
@@ -242,6 +276,8 @@ const initialBackground =
     eraConfigJson: JSON.stringify(eraConfig),
     connectionLinesJson: JSON.stringify(connectionLines),
     initialBackground,
+    initialBackgroundVideo,
+    initialBackgroundVideoPlaybackRate,
     compact,
     minZoom: defaultTimelineViewConfig.minZoom,
     maxZoom: defaultTimelineViewConfig.maxZoom,
@@ -254,7 +290,9 @@ const initialBackground =
 
     const clampValue = (value, min, max) => Math.max(min, Math.min(max, value))
     const stage = container.querySelector('.timeline-stage')
-    const backgroundImage = container.querySelector('.timeline-background img, img.timeline-background')
+    const backgroundImage = container.querySelector('.timeline-background-image')
+    const backgroundImageWrapper = container.querySelector('.timeline-background-image-wrapper')
+    const backgroundVideo = container.querySelector('.timeline-background-video')
     const nebulaLayer = container.querySelector('.timeline-depth-layer--nebula')
     const dustLayer = container.querySelector('.timeline-depth-layer--dust')
     const foregroundLayer = container.querySelector('.timeline-depth-layer--foreground')
@@ -263,11 +301,20 @@ const initialBackground =
     const eraConfig = JSON.parse(eraConfigJson)
     const eventMap = new Map(eventEntries.map((entry) => [entry.event.slug, entry]))
 
+    const applyVideoPlaybackRate = (videoElement, rate) => {
+      if (!videoElement) return
+      const parsedRate = Number(rate)
+      videoElement.playbackRate =
+        Number.isFinite(parsedRate) && parsedRate > 0 ? parsedRate : 1
+    }
+
     class TimelineCore {
       constructor() {
         this.container = container
         this.stage = stage
         this.backgroundImage = backgroundImage
+        this.backgroundImageWrapper = backgroundImageWrapper
+        this.backgroundVideo = backgroundVideo
         this.nebulaLayer = nebulaLayer
         this.dustLayer = dustLayer
         this.foregroundLayer = foregroundLayer
@@ -288,6 +335,8 @@ const initialBackground =
         this.bindEvents()
         this.updateTransform(false)
         this.startRandomHighlight()
+        this.syncBackgroundMedia(false)
+        this.bindBackgroundFallback()
       }
 
       bindEvents() {
@@ -387,6 +436,11 @@ const initialBackground =
           this.backgroundImage.style.transform = `translate3d(${bgX}px, ${bgY}px, 0) scale(${bgScale})`
         }
 
+        if (this.backgroundVideo) {
+          this.backgroundVideo.style.transition = transition
+          this.backgroundVideo.style.transform = `translate3d(${bgX}px, ${bgY}px, 0) scale(${bgScale})`
+        }
+
         if (this.nebulaLayer) {
           this.nebulaLayer.style.transition = transition
           this.nebulaLayer.style.transform = `translate3d(${bgX * 0.72}px, ${bgY * 0.66}px, 0) scale(1.08)`
@@ -473,17 +527,64 @@ const initialBackground =
       }
 
       updateBackground() {
-        if (!this.backgroundImage) return
+        const activeEraConfig =
+          (this.currentEra && eraConfig?.[this.currentEra]) ||
+          eraConfig?.['all-eras'] ||
+          null
         const nextBackground =
-          (this.currentEra && eraConfig?.[this.currentEra]?.backgroundImage) ||
+          activeEraConfig?.backgroundImage ||
           eraConfig?.['all-eras']?.backgroundImage ||
           initialBackground
+        const nextBackgroundVideo =
+          activeEraConfig?.backgroundVideo ||
+          eraConfig?.['all-eras']?.backgroundVideo ||
+          initialBackgroundVideo ||
+          ''
+        const nextBackgroundVideoPlaybackRate =
+          activeEraConfig?.backgroundVideoPlaybackRate ||
+          eraConfig?.['all-eras']?.backgroundVideoPlaybackRate ||
+          initialBackgroundVideoPlaybackRate ||
+          1
 
         if (nextBackground) {
-          this.backgroundImage.removeAttribute('srcset')
-          this.backgroundImage.setAttribute('src', nextBackground)
-          this.updateParallax(false)
+          this.syncBackgroundMedia(false, nextBackground, nextBackgroundVideo, nextBackgroundVideoPlaybackRate)
         }
+      }
+
+      syncBackgroundMedia(animate = false, nextImage = initialBackground, nextVideo = initialBackgroundVideo, nextVideoPlaybackRate = initialBackgroundVideoPlaybackRate) {
+        const hasVideo = typeof nextVideo === 'string' && nextVideo.trim().length > 0
+
+        if (this.backgroundImage && nextImage) {
+          this.backgroundImage.removeAttribute('srcset')
+          this.backgroundImage.setAttribute('src', nextImage)
+        }
+
+        if (this.backgroundVideo) {
+          if (hasVideo) {
+            if (this.backgroundVideo.getAttribute('src') !== nextVideo) {
+              this.backgroundVideo.setAttribute('src', nextVideo)
+              this.backgroundVideo.load()
+            }
+            if (!hasVideo && nextImage) {
+              this.backgroundVideo.setAttribute('poster', nextImage)
+            }
+            applyVideoPlaybackRate(this.backgroundVideo, nextVideoPlaybackRate)
+            this.backgroundVideo.classList.remove('is-background-hidden')
+            const playPromise = this.backgroundVideo.play()
+            if (playPromise && typeof playPromise.catch === 'function') {
+              playPromise.catch(() => {})
+            }
+          } else {
+            this.backgroundVideo.pause()
+            this.backgroundVideo.classList.add('is-background-hidden')
+          }
+        }
+
+        if (this.backgroundImageWrapper) {
+          this.backgroundImageWrapper.classList.toggle('is-background-hidden', hasVideo)
+        }
+
+        this.updateParallax(animate)
       }
 
       focusVisibleEvents(animate = true) {
@@ -675,8 +776,8 @@ const initialBackground =
       radial-gradient(circle at 80% 30%, rgb(196 181 253 / 0.14), transparent 28%);
   }
 
-  .timeline-background :global(img),
-  :global(img.timeline-background) {
+  .timeline-background-media,
+  .timeline-background-image-wrapper :global(img) {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -685,10 +786,26 @@ const initialBackground =
     filter: saturate(1.04) brightness(0.96);
   }
 
-  :global(.timeline-banner-mode) .timeline-background :global(img),
-  :global(.timeline-banner-mode) :global(img.timeline-background) {
+  :global(.timeline-banner-mode) .timeline-background-media,
+  :global(.timeline-banner-mode) .timeline-background-image-wrapper :global(img) {
     opacity: 1;
     filter: saturate(1.06) brightness(1);
+  }
+
+  .timeline-background-video {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .timeline-background-image-wrapper {
+    position: relative;
+    z-index: 0;
+  }
+
+  .is-background-hidden {
+    display: none;
   }
 
   .timeline-depth-layer {
@@ -937,3 +1054,10 @@ const initialBackground =
     }
   }
 </style>
+      bindBackgroundFallback() {
+        if (!this.backgroundVideo || !this.backgroundImageWrapper) return
+        this.backgroundVideo.addEventListener('error', () => {
+          this.backgroundVideo.classList.add('is-background-hidden')
+          this.backgroundImageWrapper.classList.remove('is-background-hidden')
+        })
+      }

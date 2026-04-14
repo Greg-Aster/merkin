@@ -100,6 +100,8 @@ export interface EraConfig {
   panToYear?: number // Specific year to center on when viewing this era
   customPadding?: number // Custom padding percentage for this era's view
   backgroundImage?: string // Background image for this era
+  backgroundVideo?: string // Optional animated background for this era
+  backgroundVideoPlaybackRate?: number // Optional playback speed for the animated background
 }
 
 // Era configuration type mapping
@@ -116,6 +118,8 @@ export const defaultEraConfig: EraConfigMap = {
     zoomLevel: 1,
     panToYear: 25000,
     backgroundImage: '/posts/timeline/universe.png',
+    backgroundVideo: '/assets/banner/universbg0001-0121.webm',
+    backgroundVideoPlaybackRate: 0.33,
   },
   'all-eras': {
     displayName: 'All-Eras',
@@ -124,6 +128,8 @@ export const defaultEraConfig: EraConfigMap = {
     zoomLevel: 1.3,
     panToYear: 25000,
     backgroundImage: '/posts/timeline/universe.png',
+    backgroundVideo: '/assets/banner/universbg0001-0121.webm',
+    backgroundVideoPlaybackRate: 0.33,
   },
   'ancient-epoch': {
     displayName: 'The Ancient Epoch',

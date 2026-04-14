@@ -16,6 +16,8 @@ export interface Props {
   startYear?: number
   endYear?: number
   background?: string
+  backgroundVideo?: string
+  backgroundVideoPlaybackRate?: number
   compact?: boolean
   asBanner?: boolean
   bannerHeight?: string
@@ -38,6 +40,8 @@ const {
   startYear: propStartYear,
   endYear: propEndYear,
   background = '/posts/timeline/universe.png',
+  backgroundVideo,
+  backgroundVideoPlaybackRate = 1,
   compact = false,
   asBanner = true,
   bannerHeight = '500px',
@@ -106,6 +110,8 @@ const menuEntries = [
     id={`${id}-timeline`}
     events={events}
     background={background}
+    backgroundVideo={backgroundVideo}
+    backgroundVideoPlaybackRate={backgroundVideoPlaybackRate}
     compact={compact}
     initialScale={initialScale}
     initialOffsetX={initialOffsetX}

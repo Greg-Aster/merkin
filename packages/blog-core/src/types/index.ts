@@ -23,6 +23,7 @@ export type SiteConfig = {
     enable: boolean
     src: string
     video?: string
+    playbackRate?: number
     position?: 'top' | 'center' | 'bottom'
     credit: {
       enable: boolean

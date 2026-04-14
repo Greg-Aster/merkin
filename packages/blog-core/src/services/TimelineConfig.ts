@@ -97,6 +97,8 @@ export interface EraConfig {
   panToYear?: number
   customPadding?: number
   backgroundImage?: string
+  backgroundVideo?: string
+  backgroundVideoPlaybackRate?: number
 }
 
 // Era configuration type mapping

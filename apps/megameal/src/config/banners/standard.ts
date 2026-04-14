@@ -105,6 +105,7 @@ export const videoConfig: VideoBannerConfig = {
  * 2. Add your .webm video files there
  * 3. Reference them with paths like '/videos/filename.webm'
  * 4. Provide fallback images for each video
+ * 5. Set playbackRate on a video item when a clip should play slower or faster
  *
  * MAINTENANCE:
  * - Add new videos to /public/videos/
@@ -112,6 +113,7 @@ export const videoConfig: VideoBannerConfig = {
  * - Add items to bannerEntries in desired order
  * - Keep the slide and link together in the same entry
  * - Set enabled: false to temporarily hide a slide without desyncing info cards
+ * - Use playbackRate: 0.66 for slower banner playback on low-frame-count clips
  */
 const bannerEntries: BannerEntry[] = [
   // HTML intro slide — universe entry point (rendered via banner-slide-content slot)
@@ -137,36 +139,40 @@ const bannerEntries: BannerEntry[] = [
       fallbackImage: banner1Fallback, // Fallback image for unsupported browsers
       alt: 'Animated title',
       preload: 'none', // Don't preload video until needed
+      // playbackRate: 0.66,
     },
     link: '/posts/mega-meal-explained/',
   },
   {
     item: {
       type: 'video',
-      src: `${import.meta.env.BASE_URL}videos/starmap.webm`,
+      src: `${import.meta.env.BASE_URL}assets/banner/universbg0001-0121.webm`,
       fallbackImage: timelineMapFallback,
       alt: 'Timeline map and chronology overview',
       preload: 'none', // Don't preload video until needed
+      playbackRate: 0.1, // Slow down this clip to make it more readable as a banner
     },
     link: '/timeline/',
   },
   {
     item: {
       type: 'video',
-      src: `${import.meta.env.BASE_URL}videos/cookbook.webm`,
+      src: `${import.meta.env.BASE_URL}assets/banner/cookbook_glitch.webm`,
       fallbackImage: banner3Fallback, // Fallback image for unsupported browsers
       alt: 'MegaMeal Cookbook',
       preload: 'none', // Don't preload video until needed
+      playbackRate: 0.25, // Slow down this clip to make it more readable as a banner
     },
     link: '/posts/cookbook/cookbook-index/',
   },
   {
     item: {
       type: 'video',
-      src: `${import.meta.env.BASE_URL}assets/banner/archive_1.webm`,
+      src: `${import.meta.env.BASE_URL}assets/banner/archive_2.webm`,
       fallbackImage: archiveDispatchesBanner,
       alt: 'Archive of dispatches and restricted records',
       preload: 'none',
+      playbackRate: 0.33, // Slow down this clip to make it more readable as a banner
     },
     link: '/archive/',
   },
@@ -182,9 +188,11 @@ const bannerEntries: BannerEntry[] = [
   },
   {
     item: {
-      type: 'image',
-      src: storefrontBanner,
+      type: 'video',
+      src: `${import.meta.env.BASE_URL}assets/banner/store_glitch.webm`,
+      fallbackImage: storefrontBanner,
       alt: 'Browse the storefront and corporate artifacts',
+       playbackRate: 0.33, // Slow down this clip to make it more readable as a banner
     },
     link: '/store/',
   },
