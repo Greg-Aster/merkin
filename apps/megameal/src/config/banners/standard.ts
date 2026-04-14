@@ -206,8 +206,9 @@ const bannerEntries: BannerEntry[] = [
   },
   {
     item: {
-      type: 'image',
+      type: 'video',
       src: storyModeBanner,
+      fallbackImage: storyModeBanner, // Fallback for image items can just be the same image
       alt: 'Read the story mode dispatches',
     },
     link: '/posts/introducing-story-mode/',
