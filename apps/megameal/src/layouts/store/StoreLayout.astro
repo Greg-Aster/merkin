@@ -20,45 +20,47 @@ const { title, description, ...rest } = Astro.props // Capture other potential p
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin slot="head">
   <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Metal+Mania&family=Nosifier&display=swap" rel="stylesheet" slot="head">
 
-  {/* Parallax Background */}
-  {siteConfig.banner.enable && (
-    <div id="parallax-banner" class="fixed top-0 left-0 w-full h-screen z-[-1] overflow-hidden">
-      <ImageWrapper
-        id="parallax-image"
-        alt="Site background image"
-        class="parallax-bg object-cover w-full h-[120vh]"
-        src={siteConfig.banner.src}
-        position={siteConfig.banner.position || 'center'}
-      />
-      {siteConfig.banner.credit?.enable &&
-        <div class="absolute bottom-4 right-4 text-white/50 text-xs bg-black/30 px-2 py-1 rounded">
-          {siteConfig.banner.credit.text &&
-            <a href={siteConfig.banner.credit.url || '#'} class="hover:text-white/80 transition">
-              {siteConfig.banner.credit.text}
-            </a>
-          }
-        </div>
-      }
-      {/* Optional overlay for better text readability */}
-      <div class="absolute inset-0 bg-gradient-to-b from-black/20 to-black/50 pointer-events-none"></div>
-    </div>
-  )}
+  <div id="banner-container" class="relative">
+    {/* Parallax Background */}
+    {siteConfig.banner.enable && (
+      <div id="parallax-banner" class="fixed top-0 left-0 w-full h-screen z-[-1] overflow-hidden">
+        <ImageWrapper
+          id="parallax-image"
+          alt="Site background image"
+          class="parallax-bg object-cover w-full h-[120vh]"
+          src={siteConfig.banner.src}
+          position={siteConfig.banner.position || 'center'}
+        />
+        {siteConfig.banner.credit?.enable && (
+          <div class="absolute bottom-4 right-4 text-white/50 text-xs bg-black/30 px-2 py-1 rounded">
+            {siteConfig.banner.credit.text && (
+              <a href={siteConfig.banner.credit.url || '#'} class="hover:text-white/80 transition">
+                {siteConfig.banner.credit.text}
+              </a>
+            )}
+          </div>
+        )}
+        {/* Optional overlay for better text readability */}
+        <div class="absolute inset-0 bg-gradient-to-b from-black/20 to-black/50 pointer-events-none"></div>
+      </div>
+    )}
 
-  <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto">
-    <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
-      <StoreNavbar />
+    <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto">
+      <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
+        <StoreNavbar />
+      </div>
     </div>
   </div>
   {/* Cart Drawer — mounted once at layout level, controlled via custom events */}
   <CartDrawer client:load />
 
-  <main id="store-content" class="relative z-10 py-8 mt-6">
-    <slot />
-  </main>
-  <Footer />
-  <BackToTop />
-
-  {/* Global styles specific to StoreLayout's parallax, if not already in main.css or handled by Layout.astro */}
+  <div id="main-grid" class="relative z-10">
+    <main id="store-content" class="relative z-10 py-8 mt-6">
+      <slot />
+    </main>
+    <Footer />
+    <BackToTop />
+  </div>
   <style is:global>
     /* Parallax background styles - these might be needed if not globally available via Layout.astro */
     .parallax-bg {

@@ -1,10 +1,16 @@
 ---
 import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
+import { url } from '../utils/url-utils'
 import ProductCard from '../components/store/ProductCard.astro'
 import StoreLayout from '../layouts/store/StoreLayout.astro'
 
 const allProducts = await getCollection('products', ({ data }) => data.draft !== true)
+
+function resolveAsset(path: string | undefined) {
+  if (!path) return undefined
+  return path.startsWith('/') ? url(path) : path
+}
 
 // Sort: featured first, then by rating desc
 allProducts.sort((a, b) => {
@@ -84,7 +90,7 @@ const availabilityDisplay: Record<string, string> = {
                     </div>
                   )
                 }
-                const src = first?.type === 'image' ? first.src : img
+                const src = first?.type === 'image' ? resolveAsset(first.src) : resolveAsset(img)
                 return src ? (
                   <img src={src} alt={featuredProduct.data.name} class="w-full h-full object-cover" />
                 ) : (
@@ -205,85 +211,83 @@ const availabilityDisplay: Record<string, string> = {
 </StoreLayout>
 
 <script>
-  const items = Array.from(document.querySelectorAll<HTMLElement>('.product-grid-item'))
-  const grid = document.getElementById('product-grid')
-  const noResults = document.getElementById('no-results')
-  const countEl = document.getElementById('product-count')
-  const sortSelect = document.getElementById('sort-select') as HTMLSelectElement | null
-  const viewGridBtn = document.getElementById('view-grid')
-  const viewListBtn = document.getElementById('view-list')
+  document.addEventListener('DOMContentLoaded', () => {
+    const items = Array.from(document.querySelectorAll<HTMLElement>('.product-grid-item'))
+    const grid = document.getElementById('product-grid')
+    const noResults = document.getElementById('no-results')
+    const countEl = document.getElementById('product-count')
+    const sortSelect = document.getElementById('sort-select') as HTMLSelectElement | null
+    const viewGridBtn = document.getElementById('view-grid')
+    const viewListBtn = document.getElementById('view-list')
 
-  let activeCategory = 'all'
+    let activeCategory = 'all'
 
-  function applyFilter() {
-    let visible = 0
-    items.forEach(item => {
-      const cat = item.dataset.category ?? ''
-      const show = activeCategory === 'all' || cat === activeCategory
-      item.classList.toggle('hidden', !show)
-      if (show) visible++
-    })
-    if (countEl) countEl.textContent = `${visible} product${visible !== 1 ? 's' : ''}`
-    if (noResults) noResults.classList.toggle('hidden', visible > 0)
-    if (grid) grid.classList.toggle('hidden', visible === 0)
-  }
-
-  function applySort(value: string) {
-    const container = document.getElementById('product-grid')
-    if (!container) return
-    const sorted = [...items].sort((a, b) => {
-      switch (value) {
-        case 'rating':
-          return parseFloat(b.dataset.rating ?? '0') - parseFloat(a.dataset.rating ?? '0')
-        case 'price-asc':
-          return parseFloat(a.dataset.price ?? '0') - parseFloat(b.dataset.price ?? '0')
-        case 'price-desc':
-          return parseFloat(b.dataset.price ?? '0') - parseFloat(a.dataset.price ?? '0')
-        case 'available':
-          return (a.dataset.availability === 'available' ? 0 : 1) - (b.dataset.availability === 'available' ? 0 : 1)
-        default: // featured
-          return parseInt(b.dataset.featured ?? '0') - parseInt(a.dataset.featured ?? '0')
-      }
-    })
-    sorted.forEach(el => container.appendChild(el))
-  }
-
-  // Category filter clicks
-  document.querySelectorAll<HTMLButtonElement>('.category-filter').forEach(btn => {
-    btn.addEventListener('click', () => {
-      activeCategory = btn.dataset.category ?? 'all'
-      document.querySelectorAll<HTMLButtonElement>('.category-filter').forEach(b => {
-        const isActive = b.dataset.category === activeCategory
-        b.classList.toggle('bg-[var(--primary)]', isActive)
-        b.classList.toggle('border-[var(--primary)]', isActive)
-        b.classList.toggle('text-white', isActive)
-        b.classList.toggle('bg-transparent', !isActive)
-        b.classList.toggle('text-slate-400', !isActive)
+    function applyFilter() {
+      let visible = 0
+      items.forEach(item => {
+        const cat = item.dataset.category ?? ''
+        const show = activeCategory === 'all' || cat === activeCategory
+        item.classList.toggle('hidden', !show)
+        if (show) visible++
       })
-      applyFilter()
+      if (countEl) countEl.textContent = `${visible} product${visible !== 1 ? 's' : ''}`
+      if (noResults) noResults.classList.toggle('hidden', visible > 0)
+      if (grid) grid.classList.toggle('hidden', visible === 0)
+    }
+
+    function applySort(value: string) {
+      if (!grid) return
+      const sorted = [...items].sort((a, b) => {
+        switch (value) {
+          case 'rating':
+            return parseFloat(b.dataset.rating ?? '0') - parseFloat(a.dataset.rating ?? '0')
+          case 'price-asc':
+            return parseFloat(a.dataset.price ?? '0') - parseFloat(b.dataset.price ?? '0')
+          case 'price-desc':
+            return parseFloat(b.dataset.price ?? '0') - parseFloat(a.dataset.price ?? '0')
+          case 'available':
+            return (a.dataset.availability === 'available' ? 0 : 1) - (b.dataset.availability === 'available' ? 0 : 1)
+          default:
+            return parseInt(b.dataset.featured ?? '0') - parseInt(a.dataset.featured ?? '0')
+        }
+      })
+      sorted.forEach(el => grid.appendChild(el))
+    }
+
+    document.querySelectorAll<HTMLButtonElement>('.category-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeCategory = btn.dataset.category ?? 'all'
+        document.querySelectorAll<HTMLButtonElement>('.category-filter').forEach(b => {
+          const isActive = b.dataset.category === activeCategory
+          b.classList.toggle('bg-[var(--primary)]', isActive)
+          b.classList.toggle('border-[var(--primary)]', isActive)
+          b.classList.toggle('text-white', isActive)
+          b.classList.toggle('bg-transparent', !isActive)
+          b.classList.toggle('text-slate-400', !isActive)
+        })
+        applyFilter()
+      })
     })
-  })
 
-  // Sort
-  sortSelect?.addEventListener('change', () => applySort(sortSelect.value))
+    sortSelect?.addEventListener('change', () => applySort(sortSelect.value))
 
-  // View toggle
-  viewGridBtn?.addEventListener('click', () => {
-    grid?.classList.remove('grid-cols-1')
-    grid?.classList.add('md:grid-cols-2')
-    viewGridBtn.classList.add('bg-[var(--primary)]', 'border-[var(--primary)]', 'text-white')
-    viewGridBtn.classList.remove('text-slate-400')
-    viewListBtn?.classList.remove('bg-[var(--primary)]', 'border-[var(--primary)]', 'text-white')
-    viewListBtn?.classList.add('text-slate-400')
-  })
+    viewGridBtn?.addEventListener('click', () => {
+      grid?.classList.remove('grid-cols-1')
+      grid?.classList.add('md:grid-cols-2')
+      viewGridBtn.classList.add('bg-[var(--primary)]', 'border-[var(--primary)]', 'text-white')
+      viewGridBtn.classList.remove('text-slate-400')
+      viewListBtn?.classList.remove('bg-[var(--primary)]', 'border-[var(--primary)]', 'text-white')
+      viewListBtn?.classList.add('text-slate-400')
+    })
 
-  viewListBtn?.addEventListener('click', () => {
-    grid?.classList.add('grid-cols-1')
-    grid?.classList.remove('md:grid-cols-2')
-    viewListBtn.classList.add('bg-[var(--primary)]', 'border-[var(--primary)]', 'text-white')
-    viewListBtn.classList.remove('text-slate-400')
-    viewGridBtn?.classList.remove('bg-[var(--primary)]', 'border-[var(--primary)]', 'text-white')
-    viewGridBtn?.classList.add('text-slate-400')
+    viewListBtn?.addEventListener('click', () => {
+      grid?.classList.add('grid-cols-1')
+      grid?.classList.remove('md:grid-cols-2')
+      viewListBtn.classList.add('bg-[var(--primary)]', 'border-[var(--primary)]', 'text-white')
+      viewListBtn.classList.remove('text-slate-400')
+      viewGridBtn?.classList.remove('bg-[var(--primary)]', 'border-[var(--primary)]', 'text-white')
+      viewGridBtn?.classList.add('text-slate-400')
+    })
   })
 </script>
 

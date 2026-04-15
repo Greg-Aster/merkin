@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
+import { url } from '../../utils/url-utils'
 import StoreLayout from '../../layouts/store/StoreLayout.astro'
 import MediaGallery from '../../components/store/MediaGallery.svelte'
 
@@ -39,13 +40,22 @@ const hasSpecifications = Array.isArray(specifications) && specifications.length
 const hasQandA = Array.isArray(qanda) && qanda.length > 0
 const hasPreWrittenReviews = Array.isArray(preWrittenReviews) && preWrittenReviews.length > 0
 
+const resolveAsset = (path: string | undefined) => {
+  if (!path) return undefined
+  return path.startsWith('/') ? url(path) : path
+}
+
 // Unified media items
 const mediaItems: Array<{type: string; src?: string; videoId?: string; poster?: string; alt?: string; caption?: string}> =
   Array.isArray(media) && media.length > 0
-    ? media
+    ? media.map(item => ({
+        ...item,
+        src: item.src ? resolveAsset(item.src) : undefined,
+        poster: item.poster ? resolveAsset(item.poster) : undefined,
+      }))
     : [
-        ...(image ? [{ type: 'image', src: image, alt: name }] : []),
-        ...((additionalImages ?? []).map((src: string) => ({ type: 'image', src, alt: name }))),
+        ...(image ? [{ type: 'image', src: resolveAsset(image), alt: name }] : []),
+        ...((additionalImages ?? []).map((src: string) => ({ type: 'image', src: resolveAsset(src), alt: name }))),
       ]
 
 let fullStars = 0, halfStar = false, emptyStars = 5, isRated = false

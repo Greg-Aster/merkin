@@ -1,6 +1,7 @@
 ---
 import { Icon } from 'astro-icon/components'
 import { communityConfig } from '../../config/community.config'
+import { url } from '../../utils/url-utils'
 import MediaGallery from './MediaGallery.svelte'
 
 export interface Props {
@@ -31,6 +32,11 @@ const {
   shippingNote,
   badge,
 } = product.data
+
+const resolveAsset = (path: string | undefined) => {
+  if (!path) return undefined
+  return path.startsWith('/') ? url(path) : path
+}
 const formActionUrl = communityConfig.contact.formActionUrl
 
 const hasSpecifications =
@@ -42,17 +48,21 @@ const hasPreWrittenReviews =
 // Build unified media items: prefer media[] field, fall back to legacy image/additionalImages
 const mediaItems: Array<{type: string; src?: string; videoId?: string; poster?: string; alt?: string; caption?: string}> =
   Array.isArray(media) && media.length > 0
-    ? media
+    ? media.map(item => ({
+        ...item,
+        src: item.src ? resolveAsset(item.src) : undefined,
+        poster: item.poster ? resolveAsset(item.poster) : undefined,
+      }))
     : [
-        ...(image ? [{ type: 'image', src: image, alt: name }] : []),
-        ...((additionalImages ?? []).map((src: string) => ({ type: 'image', src, alt: name }))),
+        ...(image ? [{ type: 'image', src: resolveAsset(image), alt: name }] : []),
+        ...((additionalImages ?? []).map((src: string) => ({ type: 'image', src: resolveAsset(src), alt: name }))),
       ]
 
 // For the card thumbnail: first image or YouTube thumbnail
 const cardThumbnail = (() => {
   for (const m of mediaItems) {
-    if (m.type === 'image' && m.src) return { kind: 'image', src: m.src }
-    if (m.type === 'video' && m.poster) return { kind: 'image', src: m.poster }
+    if (m.type === 'image' && m.src) return { kind: 'image', src: resolveAsset(m.src) }
+    if (m.type === 'video' && m.poster) return { kind: 'image', src: resolveAsset(m.poster) }
     if (m.type === 'youtube' && m.videoId) return { kind: 'youtube', videoId: m.videoId }
   }
   return null
@@ -88,17 +98,19 @@ const canBuyExternal = ctaMode === 'external' && !!stripePaymentLink && currentA
 
 <div
   class:list={[
-    "card-base group flex flex-col w-full overflow-hidden relative product-card rounded-[var(--radius-large)]", // Added group for group-hover, rounded
+    "card-base group flex flex-col w-full overflow-hidden relative product-card rounded-[var(--radius-large)]",
     "transition-all duration-300 ease-in-out",
-    "hover:shadow-xl dark:hover:shadow-[0_0_20px_3px_rgba(var(--primary-rgb),0.25)]", // Refined hover shadow
+    "cursor-pointer",
+    "hover:shadow-xl dark:hover:shadow-[0_0_20px_3px_rgba(var(--primary-rgb),0.25)]",
     className
   ]}
   style={style}
   data-product-id={product.id}
-  role="button"
+  role="link"
   tabindex="0"
-  aria-expanded="false"
   aria-labelledby={`product-title-${product.id}`}
+  onclick={`if (!event.target.closest('a, button, .card-expansion-trigger, .tab-link, .details-content')) { window.location.href = '/store/${product.id}/'; }`}
+  onkeydown={`if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('a, button, .card-expansion-trigger, .tab-link, .details-content')) { event.preventDefault(); window.location.href = '/store/${product.id}/'; }`}
 >
   {/* Card thumbnail (collapsed state) */}
   <div class="block overflow-hidden relative product-card-thumb">
@@ -198,7 +210,7 @@ const canBuyExternal = ctaMode === 'external' && !!stripePaymentLink && currentA
 
       {/* Full Media Gallery — shown in expanded view */}
       {mediaItems.length > 0 && (
-        <div class="mb-5 -mx-5 -mt-5" onclick={(e) => e.stopPropagation()}>
+        <div class="mb-5 -mx-5 -mt-5" onclick="event.stopPropagation()">
           <MediaGallery
             client:visible
             items={mediaItems}
