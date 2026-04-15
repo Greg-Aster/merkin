@@ -1,8 +1,7 @@
 ---
-// src/components/store/ProductCard.astro
-// import ImageWrapper from '../misc/ImageWrapper.astro'; // If you adapt it
-import { Icon } from 'astro-icon/components' // If you add icons
+import { Icon } from 'astro-icon/components'
 import { communityConfig } from '../../config/community.config'
+import MediaGallery from './MediaGallery.svelte'
 
 export interface Props {
   class?: string
@@ -21,10 +20,17 @@ const {
   sku,
   rating,
   additionalImages,
+  media,
   specifications,
   qanda,
   preWrittenReviews,
-} = product.data // Added specifications, qanda, preWrittenReviews
+  availability,
+  ctaMode,
+  stripePaymentLink,
+  realDescription,
+  shippingNote,
+  badge,
+} = product.data
 const formActionUrl = communityConfig.contact.formActionUrl
 
 const hasSpecifications =
@@ -33,18 +39,29 @@ const hasQandA = Array.isArray(qanda) && qanda.length > 0
 const hasPreWrittenReviews =
   Array.isArray(preWrittenReviews) && preWrittenReviews.length > 0
 
-const hasImage = image !== undefined && image !== null && image !== ''
-const hasAdditionalImages = additionalImages && additionalImages.length > 0
-const allImages = hasImage
-  ? [image, ...(hasAdditionalImages ? additionalImages : [])]
-  : hasAdditionalImages
-    ? additionalImages
-    : []
+// Build unified media items: prefer media[] field, fall back to legacy image/additionalImages
+const mediaItems: Array<{type: string; src?: string; videoId?: string; poster?: string; alt?: string; caption?: string}> =
+  Array.isArray(media) && media.length > 0
+    ? media
+    : [
+        ...(image ? [{ type: 'image', src: image, alt: name }] : []),
+        ...((additionalImages ?? []).map((src: string) => ({ type: 'image', src, alt: name }))),
+      ]
+
+// For the card thumbnail: first image or YouTube thumbnail
+const cardThumbnail = (() => {
+  for (const m of mediaItems) {
+    if (m.type === 'image' && m.src) return { kind: 'image', src: m.src }
+    if (m.type === 'video' && m.poster) return { kind: 'image', src: m.poster }
+    if (m.type === 'youtube' && m.videoId) return { kind: 'youtube', videoId: m.videoId }
+  }
+  return null
+})()
 
 // Star rating calculation
 let calculatedFullStars = 0
 let calculatedHalfStar = false
-let calculatedEmptyStars = 5 // Default to 5 empty if no rating or invalid
+let calculatedEmptyStars = 5
 let isRated = false
 
 if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
@@ -53,6 +70,20 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
   calculatedHalfStar = rating % 1 >= 0.5
   calculatedEmptyStars = 5 - calculatedFullStars - (calculatedHalfStar ? 1 : 0)
 }
+
+// Availability badge config — each status gets a label, color, and satirical CTA message
+const availabilityMap: Record<string, { label: string; classes: string; ctaMessage: string }> = {
+  available:               { label: badge || 'Available Now',                   classes: 'bg-emerald-500/90 text-white',   ctaMessage: '' },
+  coming_soon:             { label: badge || 'Coming Soon',                     classes: 'bg-blue-500/80 text-white',      ctaMessage: 'Transmission pending. Stand by.' },
+  out_of_stock:            { label: badge || 'Out of Stock',                    classes: 'bg-slate-500/80 text-white',     ctaMessage: 'The shelves are bare. Demand has been noted. Probably.' },
+  not_in_your_area:        { label: badge || 'Not in Your Area',                classes: 'bg-amber-500/80 text-black',     ctaMessage: 'Your coordinates are outside our current distribution matrix.' },
+  not_in_your_timeline:    { label: badge || 'Not Available in Your Timeline',  classes: 'bg-purple-500/80 text-white',    ctaMessage: 'This product exists. Procurement from your timeline is not currently supported.' },
+  artifact_only:           { label: badge || 'Artifact Record',                 classes: 'bg-rose-900/80 text-rose-200',   ctaMessage: 'This item is catalogued for archival purposes. Acquiring it would be inadvisable.' },
+}
+const currentAvailability = availability ?? 'coming_soon'
+const availBadge = availabilityMap[currentAvailability] ?? availabilityMap['coming_soon']
+const canAddToCart = ctaMode === 'cart' && currentAvailability === 'available'
+const canBuyExternal = ctaMode === 'external' && !!stripePaymentLink && currentAvailability === 'available'
 ---
 
 <div
@@ -69,30 +100,49 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
   aria-expanded="false"
   aria-labelledby={`product-title-${product.id}`}
 >
-  {/* Image Section - Stays largely the same, but ensure it's part of the clickable area */}
-  <div class="block overflow-hidden relative product-image-gallery">
-    {allImages.length > 0 ? (
-      <>
-        <img
-          src={allImages[0]}
-          alt={name}
-          class="w-full h-52 object-cover transition-transform duration-300 ease-in-out group-hover:scale-105 product-main-image"
-          data-all-images={JSON.stringify(allImages)}
-        />
-        {allImages.length > 1 && (
-          <>
-            <button data-sfx-click="soft" class="gallery-nav gallery-prev absolute top-1/2 left-2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/75 focus:outline-none z-10">
-              <Icon name="mdi:chevron-left" class="h-6 w-6" />
-            </button>
-            <button data-sfx-click="soft" class="gallery-nav gallery-next absolute top-1/2 right-2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/75 focus:outline-none z-10">
-              <Icon name="mdi:chevron-right" class="h-6 w-6" />
-            </button>
-          </>
+  {/* Card thumbnail (collapsed state) */}
+  <div class="block overflow-hidden relative product-card-thumb">
+    {/* Availability badge */}
+    <div class:list={["absolute top-2 left-2 z-10 px-2 py-0.5 rounded text-xs font-bold tracking-wide shadow", availBadge.classes]}>
+      {availBadge.label}
+    </div>
+    {/* Media count badge */}
+    {mediaItems.length > 1 && (
+      <div class="absolute top-2 right-2 z-10 px-1.5 py-0.5 rounded bg-black/60 text-white text-[10px] flex items-center gap-1">
+        {mediaItems.some(m => m.type === 'youtube' || m.type === 'video') && (
+          <svg viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3"><path d="M8 5v14l11-7z"/></svg>
         )}
-      </>
+        {mediaItems.length}
+      </div>
+    )}
+    {cardThumbnail ? (
+      cardThumbnail.kind === 'image' ? (
+        <img
+          src={cardThumbnail.src}
+          alt={name}
+          class="w-full h-52 object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+          loading="lazy"
+        />
+      ) : (
+        /* YouTube thumbnail */
+        <div class="relative w-full h-52 bg-slate-800">
+          <img
+            src={`https://img.youtube.com/vi/${cardThumbnail.videoId}/mqdefault.jpg`}
+            alt={name}
+            class="w-full h-52 object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center shadow-xl">
+              <svg viewBox="0 0 24 24" fill="white" class="w-6 h-6 ml-0.5"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+          </div>
+        </div>
+      )
     ) : (
-      <div class="w-full h-52 bg-slate-700/50 flex items-center justify-center">
-        <p class="text-slate-500 italic">Image Coming Soon</p>
+      <div class="w-full h-52 bg-slate-700/50 flex flex-col items-center justify-center gap-2">
+        <Icon name="mdi:image-off-outline" class="h-8 w-8 text-slate-600" />
+        <p class="text-slate-500 italic text-sm">Image Coming Soon</p>
       </div>
     )}
   </div>
@@ -117,24 +167,47 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
         )}
       </div>
     </div>
-    {/* "Price: Inquire Within" moved to its own line if product has no price, to not interfere with title/rating line */}
-    {!price && (
-      <p class="text-sm text-amber-400 dark:text-amber-300 italic mb-2 ml-0 whitespace-nowrap">Price: Inquire Within</p>
+    {price ? (
+      <p class="text-sm font-semibold text-emerald-400 mb-2">${price.toFixed(2)}</p>
+    ) : (
+      <p class="text-sm text-amber-400 dark:text-amber-300 italic mb-2">Price: Inquire Within</p>
     )}
     {tagline && <p class="text-sm text-slate-600 dark:text-slate-400 italic mb-1 line-clamp-2">"{tagline}"</p>}
 
     {/* Star Rating section removed from here as it has been moved up */}
 
-    {/* New Expansion Cue - More prominent */}
-    <div class="mt-auto pt-3 card-expansion-trigger flex items-center justify-between text-[var(--primary)] hover:text-[var(--primary-hover)] transition-colors duration-200">
-      <span class="text-sm font-medium">View Details</span>
-      <Icon name="mdi:chevron-down" class="h-6 w-6 transition-transform duration-300 ease-in-out icon" />
+    {/* Expansion cue + product page link */}
+    <div class="mt-auto pt-3 flex items-center justify-between">
+      <div class="card-expansion-trigger flex items-center gap-1 text-[var(--primary)] hover:text-[var(--primary-hover)] transition-colors duration-200">
+        <span class="text-sm font-medium">Quick View</span>
+        <Icon name="mdi:chevron-down" class="h-6 w-6 transition-transform duration-300 ease-in-out icon" />
+      </div>
+      <a
+        href={`/store/${product.id}/`}
+        class="text-xs text-slate-500 hover:text-[var(--primary)] transition-colors flex items-center gap-1"
+        aria-label={`Full product page for ${name}`}
+      >
+        Full Page <Icon name="mdi:arrow-right" class="h-3.5 w-3.5" />
+      </a>
     </div>
   </div>
 
-  {/* Expandable Section: Content remains similar, styling might be tweaked */}
-  <div class="expandable-details overflow-hidden max-h-0 opacity-0 bg-slate-800/30 dark:bg-slate-900/50"> {/* Added subtle bg */}
-    <div class="details-content p-5 border-t border-slate-700/50"> {/* Increased padding, adjusted border */}
+  {/* Expandable Section */}
+  <div class="expandable-details overflow-hidden max-h-0 opacity-0 bg-slate-800/30 dark:bg-slate-900/50">
+    <div class="details-content p-5 border-t border-slate-700/50">
+
+      {/* Full Media Gallery — shown in expanded view */}
+      {mediaItems.length > 0 && (
+        <div class="mb-5 -mx-5 -mt-5" onclick={(e) => e.stopPropagation()}>
+          <MediaGallery
+            client:visible
+            items={mediaItems}
+            autoPlayInterval={6000}
+            class="rounded-none"
+          />
+        </div>
+      )}
+
       {/* Tab Navigation */}
       <div class="tab-navigation mb-4 flex flex-wrap border-b border-slate-700/50 dark:border-slate-700" role="tablist" aria-label="Product Details Tabs">
         {description && (
@@ -229,17 +302,52 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
       </div>
 
       <div class="flex justify-between items-center mb-4">
-        {price && (
-          <p class="text-xl font-bold text-emerald-400">Price: {price}</p>
+        {price ? (
+          <p class="text-xl font-bold text-emerald-400">${price.toFixed(2)}</p>
+        ) : (
+          <p class="text-sm text-amber-400 italic">Price: Inquire Within</p>
         )}
         {sku && <p class="text-xs text-slate-500">SKU: {sku}</p>}
       </div>
-      
-      <button data-sfx-click="select" class="w-full btn-primary text-white font-semibold py-3 px-4 rounded-[var(--radius-medium)] transition-all duration-200 ease-in-out
-                     hover:bg-[var(--primary-hover)] hover:ring-2 hover:ring-[var(--primary-hover)] hover:ring-offset-2 hover:ring-offset-slate-800
-                     active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 focus:ring-offset-slate-800">
-        Add to Cart
-      </button>
+
+      {shippingNote && currentAvailability !== 'available' && (
+        <p class="text-xs text-slate-400 italic mb-4 border-l-2 border-slate-600 pl-3">{shippingNote}</p>
+      )}
+
+      {/* CTA: Add to Cart */}
+      {canAddToCart && (
+        <button
+          data-sfx-click="select"
+          data-add-to-cart
+          data-product-id={product.id}
+          data-product-name={name}
+          data-product-price={price}
+          data-product-sku={sku}
+          class="w-full btn-primary text-white font-semibold py-3 px-4 rounded-[var(--radius-medium)] transition-all duration-200 ease-in-out hover:bg-[var(--primary-hover)] active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 focus:ring-offset-slate-800"
+        >
+          Add to Cart
+        </button>
+      )}
+
+      {/* CTA: External purchase link (Stripe) */}
+      {canBuyExternal && (
+        <a
+          href={stripePaymentLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-sfx-click="select"
+          class="block w-full text-center btn-primary text-white font-semibold py-3 px-4 rounded-[var(--radius-medium)] transition-all duration-200 ease-in-out hover:bg-[var(--primary-hover)] active:scale-95 focus:outline-none"
+        >
+          Buy Now
+        </a>
+      )}
+
+      {/* CTA: Satirical unavailability message */}
+      {!canAddToCart && !canBuyExternal && (
+        <div class="w-full text-center py-3 px-4 rounded-[var(--radius-medium)] bg-slate-700/50 border border-slate-600/50">
+          <p class="text-sm text-slate-400 italic">{availBadge.ctaMessage}</p>
+        </div>
+      )}
     </div>
   </div>
 </div>
@@ -260,7 +368,7 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
   }
 
   .product-card.selected .expandable-details {
-    max-height: 1000px; /* Increased max-height for review form */
+    max-height: 2400px; /* Must accommodate media gallery + tabs + review form */
     opacity: 1;
   }
 
@@ -357,18 +465,15 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
 
 <script lang="ts" define:vars={{
     productId: product.id,
-    productName: product.data.name, // Added for review form
+    productName: product.data.name,
     descriptionData: product.data.description,
+    realDescriptionData: product.data.realDescription,
+    shippingNoteData: product.data.shippingNote,
     specificationsData: product.data.specifications,
     qandaData: product.data.qanda,
     preWrittenReviewsData: product.data.preWrittenReviews,
     formActionUrl: formActionUrl
 }}>
-  console.log('[ProductCard SCRIPT START]', 'ID:', productId, 'Name:', productName);
-  console.log('Description Data:', descriptionData);
-  console.log('Specifications Data:', specificationsData);
-  console.log('Q&A Data:', qandaData);
-  console.log('Pre-written Reviews Data:', preWrittenReviewsData);
 
   // This script instance is specific to ONE ProductCard, identified by `productId` from define:vars.
   // All DOM queries and operations should be scoped to this specific card.
@@ -522,11 +627,21 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
           targetPanel.innerHTML = ''; // Clear previous content before adding new
 
           if (panelType === 'description') {
-            console.log(`[ProductCard ${productId}] Rendering description. Data:`, descriptionData, 'Target Panel:', targetPanel);
             targetPanel.innerHTML = descriptionData || 'No description available.';
-            console.log(`[ProductCard ${productId}] Description HTML:`, targetPanel.innerHTML);
+            // Reality layer: plain-language description for available/coming_soon products
+            if (realDescriptionData) {
+              const realDiv = document.createElement('div');
+              realDiv.className = 'mt-4 pt-4 border-t border-slate-600/40 text-xs text-slate-400 italic';
+              realDiv.innerHTML = `<span class="font-semibold not-italic text-slate-300 uppercase tracking-wider text-[10px]">Reality Layer</span><br>${realDescriptionData}`;
+              if (shippingNoteData) {
+                const shipP = document.createElement('p');
+                shipP.className = 'mt-2';
+                shipP.textContent = `Shipping: ${shippingNoteData}`;
+                realDiv.appendChild(shipP);
+              }
+              targetPanel.appendChild(realDiv);
+            }
           } else if (panelType === 'specifications') {
-            console.log(`[ProductCard ${productId}] Rendering specifications. Data:`, specificationsData, 'Target Panel:', targetPanel);
             targetPanel.innerHTML = ''; // Clear previous content
             if (Array.isArray(specificationsData) && specificationsData.length > 0) {
               const dlElement = document.createElement('dl');
@@ -549,9 +664,7 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
             } else {
               targetPanel.innerHTML = '<p class="text-slate-500 dark:text-slate-400 italic">No specifications available.</p>';
             }
-            console.log(`[ProductCard ${productId}] Specifications HTML:`, targetPanel.innerHTML);
           } else if (panelType === 'qanda') {
-            console.log(`[ProductCard ${productId}] Rendering Q&A. Data:`, qandaData, 'Target Panel:', targetPanel);
             targetPanel.innerHTML = ''; // Clear previous content
             if (Array.isArray(qandaData) && qandaData.length > 0) {
               qandaData.forEach(item => {
@@ -567,7 +680,6 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
             } else {
               targetPanel.innerHTML = '<p class="text-slate-500 dark:text-slate-400 italic">No questions and answers available.</p>';
             }
-            console.log(`[ProductCard ${productId}] Q&A HTML:`, targetPanel.innerHTML);
           } else if (panelType === 'reviews') {
             // console.log(`[ProductCard ${productId}] Rendering reviews. Data:`, preWrittenReviewsData);
             if (Array.isArray(preWrittenReviewsData) && preWrittenReviewsData.length > 0) {

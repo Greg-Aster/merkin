@@ -119,7 +119,7 @@ export const defaultEraConfig: EraConfigMap = {
     panToYear: 25000,
     backgroundImage: '/posts/timeline/universe.png',
     backgroundVideo: '/assets/banner/universbg0001-0121.webm',
-    backgroundVideoPlaybackRate: 0.33,
+    backgroundVideoPlaybackRate: 0.20,
   },
   'all-eras': {
     displayName: 'All-Eras',
@@ -129,7 +129,7 @@ export const defaultEraConfig: EraConfigMap = {
     panToYear: 25000,
     backgroundImage: '/posts/timeline/universe.png',
     backgroundVideo: '/assets/banner/universbg0001-0121.webm',
-    backgroundVideoPlaybackRate: 0.33,
+    backgroundVideoPlaybackRate: 0.20,
   },
   'ancient-epoch': {
     displayName: 'The Ancient Epoch',

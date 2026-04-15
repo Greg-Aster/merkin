@@ -795,6 +795,20 @@ const gridLayoutClasses = [
                 startYear={hasPostBanner && post?.data?.bannerType === "timeline" ? post.data.bannerData.startYear : bannerDataSources.timelineBannerData?.startYear}
                 endYear={hasPostBanner && post?.data?.bannerType === "timeline" ? post.data.bannerData.endYear : bannerDataSources.timelineBannerData?.endYear}
                 background={hasPostBanner && post?.data?.bannerType === "timeline" ? post.data.bannerData.background : bannerDataSources.timelineBannerData?.background}
+                backgroundVideo={
+                  hasPostBanner && post?.data?.bannerType === "timeline"
+                    ? post.data.bannerData.backgroundVideo
+                    : bannerDataSources.timelineBannerData?.backgroundVideo ||
+                      timelineEraConfig?.['all-eras']?.backgroundVideo ||
+                      timelineEraConfig?.['all-time']?.backgroundVideo
+                }
+                backgroundVideoPlaybackRate={
+                  hasPostBanner && post?.data?.bannerType === "timeline"
+                    ? post.data.bannerData.backgroundVideoPlaybackRate
+                    : bannerDataSources.timelineBannerData?.backgroundVideoPlaybackRate ||
+                      timelineEraConfig?.['all-eras']?.backgroundVideoPlaybackRate ||
+                      timelineEraConfig?.['all-time']?.backgroundVideoPlaybackRate
+                }
                 compact={hasPostBanner && post?.data?.bannerType === "timeline" ? (post.data.bannerData.compact || false) : (bannerDataSources.timelineBannerData?.compact || false)}
                 events={timelineEvents}
                 eraConfig={timelineEraConfig}

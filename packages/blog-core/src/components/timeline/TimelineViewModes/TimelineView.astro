@@ -181,6 +181,16 @@ const initialBackgroundVideoPlaybackRate =
   data-zoom-step={String(defaultTimelineViewConfig.zoomStep)}
 >
   <div class="timeline-background-layer absolute inset-0 z-0 overflow-hidden">
+    <ImageWrapper
+      src={initialBackground}
+      alt="Timeline background"
+      class:list={[
+        'timeline-background-image-wrapper h-full w-full',
+        initialBackgroundVideo ? 'is-background-hidden' : '',
+      ]}
+      imgClass="timeline-background-media timeline-background-image object-cover"
+      loading="eager"
+    />
     <video
       class:list={[
         'timeline-background-media',
@@ -198,16 +208,6 @@ const initialBackgroundVideoPlaybackRate =
       data-playback-rate={initialBackgroundVideoPlaybackRate}
       aria-hidden="true"
     ></video>
-    <ImageWrapper
-      src={initialBackground}
-      alt="Timeline background"
-      class:list={[
-        'timeline-background-image-wrapper h-full w-full',
-        initialBackgroundVideo ? 'is-background-hidden' : '',
-      ]}
-      imgClass="timeline-background-media timeline-background-image object-cover"
-      loading="eager"
-    />
     <div class="timeline-depth-layer timeline-depth-layer--nebula"></div>
     <div class="timeline-depth-layer timeline-depth-layer--dust"></div>
     <div class="timeline-depth-layer timeline-depth-layer--foreground"></div>

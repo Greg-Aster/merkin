@@ -67,6 +67,7 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     sponsor: 'Human Resource Harvesting',
     finePrint: 'Donor must supply original body and signed waiver.',
     theme: 'harvest',
+    image: '/ads/Ouroboros.png',
   },
   {
     type: 'advertisement',

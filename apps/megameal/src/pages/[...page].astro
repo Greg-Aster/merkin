@@ -124,36 +124,37 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
 
     if (stages.length === 0) return
 
-    const getStageAtViewportCenter = () => {
+    const setCurrentStage = () => {
       const viewportCenter = window.innerHeight * 0.5
-      let currentStage = stages[0]
+      let currentStage: Element | null = null
       let currentDistance = Number.POSITIVE_INFINITY
+      let anyVisible = false
 
       stages.forEach(stage => {
         const rect = stage.getBoundingClientRect()
+        if (rect.bottom <= 0 || rect.top >= window.innerHeight) return
+        anyVisible = true
         const stageCenter = rect.top + rect.height * 0.5
         const distance = Math.abs(stageCenter - viewportCenter)
-
-        if (rect.bottom <= 0 || rect.top >= window.innerHeight) return
         if (distance < currentDistance) {
           currentDistance = distance
           currentStage = stage
         }
       })
 
-      return currentStage
-    }
+      // Only activate the dim effect when we can reliably identify a visible stage.
+      // If no stage is in the viewport (layout not settled, or mid-transition),
+      // remove the class so nothing gets stuck dim.
+      document.documentElement.classList.toggle('megameal-home-stage-ready', anyVisible)
 
-    const setCurrentStage = () => {
-      const currentStage = getStageAtViewportCenter()
       stages.forEach(stage => {
         const rect = stage.getBoundingClientRect()
         const isApproaching =
           rect.bottom > window.innerHeight * 0.16 &&
           rect.top < window.innerHeight * 0.84
 
-        stage.classList.toggle('is-current', stage === currentStage)
-        stage.classList.toggle('is-approaching', stage !== currentStage && isApproaching)
+        stage.classList.toggle('is-current', anyVisible && stage === currentStage)
+        stage.classList.toggle('is-approaching', anyVisible && stage !== currentStage && isApproaching)
       })
     }
 
@@ -174,17 +175,25 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
     window.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', scheduleCurrentStage)
 
-    setCurrentStage()
-    document.documentElement.classList.add('megameal-home-stage-ready')
+    // Delay the first measurement so layout has settled after the page swap /
+    // view-transition animation. A double rAF gets past the first paint frame;
+    // the timeout is a safety net for slower devices or deferred content.
+    let initialMeasureRaf = 0
+    initialMeasureRaf = window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setCurrentStage()
+      })
+    })
 
     const delayedMeasure = window.setTimeout(() => {
       setCurrentStage()
-    }, 180)
+    }, 400)
 
     ;(window as any)[portalScrollCleanupKey] = () => {
       revealObserver.disconnect()
       window.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', scheduleCurrentStage)
+      window.cancelAnimationFrame(initialMeasureRaf)
       window.clearTimeout(delayedMeasure)
       if (frameRequest) {
         window.cancelAnimationFrame(frameRequest)

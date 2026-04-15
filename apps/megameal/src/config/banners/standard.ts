@@ -198,8 +198,9 @@ const bannerEntries: BannerEntry[] = [
   },
   {
     item: {
-      type: 'image',
-      src: communityChannelsBanner,
+      type: 'video',
+      src: `${import.meta.env.BASE_URL}assets/banner/golden-era.webm`,
+      fallbackImage: communityChannelsBanner,
       alt: 'Join the community channels',
     },
     link: '/community/',

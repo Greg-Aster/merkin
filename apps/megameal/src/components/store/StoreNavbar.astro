@@ -76,10 +76,16 @@ const links: NavBarLink[] = navBarConfig.links.map(
         </div>
         
         <div class="flex items-center">
-            <!-- Shopping Cart Icon/Link -->
-            <a href={url('/posts/store/store-placeholder/')} aria-label="Shopping Cart" class="btn-plain scale-animation rounded-lg h-11 w-11 flex items-center justify-center active:scale-90">
+            <!-- Shopping Cart Button — dispatches event to CartDrawer -->
+            <button
+              id="cart-toggle-btn"
+              aria-label="Shopping Cart"
+              class="btn-plain scale-animation rounded-lg h-11 w-11 flex items-center justify-center active:scale-90 relative"
+              onclick="document.dispatchEvent(new CustomEvent('megameal:cart:toggle'))"
+            >
                 <Icon name="mdi:cart-outline" class="text-[1.25rem]"></Icon>
-            </a>
+                <span id="cart-count-badge" class="absolute top-1 right-1 min-w-[1.1rem] h-[1.1rem] bg-[var(--primary)] text-white text-[10px] font-bold rounded-full flex items-center justify-center invisible px-0.5">0</span>
+            </button>
 
             <SiteAudioControl client:idle />
 

@@ -1,117 +1,297 @@
 ---
 import { getCollection } from 'astro:content'
+import { Icon } from 'astro-icon/components'
 import ProductCard from '../components/store/ProductCard.astro'
-import StorePagination from '../components/store/StorePagination.astro'
 import StoreLayout from '../layouts/store/StoreLayout.astro'
 
-const PRODUCTS_PER_PAGE = 5
+const allProducts = await getCollection('products', ({ data }) => data.draft !== true)
 
-// Placeholder products array for display purposes
-const products = await getCollection('products', ({ data }) => {
-  return data.draft !== true
+// Sort: featured first, then by rating desc
+allProducts.sort((a, b) => {
+  if (a.data.featured && !b.data.featured) return -1
+  if (!a.data.featured && b.data.featured) return 1
+  return (b.data.rating ?? 0) - (a.data.rating ?? 0)
 })
 
-const currentPage = 1 // This file (store.astro) handles the first page
-const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE)
-const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE
-const endIndex = startIndex + PRODUCTS_PER_PAGE
-const displayedProducts = products.slice(startIndex, endIndex)
-const baseUrl = '/store' // This will be storeBaseUrl for the component
-const pageUrlPrev = undefined // Page 1 has no previous page
-const pageUrlNext = totalPages > 1 ? `${baseUrl}/page/2` : undefined
-console.log({ totalPages }) // Verify totalPages
+const featuredProduct = allProducts.find(p => p.data.featured)
+
+const categories = [
+  { id: 'all', label: 'All Products' },
+  { id: 'equipment', label: 'Equipment' },
+  { id: 'consumables', label: 'Consumables' },
+  { id: 'publications', label: 'Publications' },
+  { id: 'companions', label: 'Companions' },
+  { id: 'relics', label: 'Relics' },
+]
+
+const availabilityDisplay: Record<string, string> = {
+  available: 'Available Now',
+  coming_soon: 'Coming Soon',
+  out_of_stock: 'Out of Stock',
+  not_in_your_area: 'Not in Your Area',
+  not_in_your_timeline: 'Not in Your Timeline',
+  artifact_only: 'Artifact Only',
+}
 ---
-<StoreLayout title="Store" description="Browse our unique collection of unsettling treasures.">
-  <div class="container mx-auto px-4 py-8">
-    <div class="card-base max-w-4xl mx-auto p-6 md:p-8 shadow-xl">
-      <h1 class="text-4xl font-bold mb-8 text-center text-[var(--primary)]">Welcome to the Store</h1>
-      
-      {products.length === 0 ? (
-        <p class="text-center text-xl text-gray-400">Our shelves are currently... empty. How ominous.</p>
-      ) : (
-        <div class="grid grid-cols-1 gap-6">
-          {displayedProducts.map(product => (
-            <ProductCard product={product} />
-          ))}
-        </div>
-      )}
+
+<StoreLayout
+  title="Store — MEGA MEAL"
+  description="Browse the official MEGA MEAL artifact catalog. Some items are purchasable. Others exist only in adjacent timelines. We apologize for the inconvenience."
+>
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
+
+    {/* Store Header */}
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold text-[var(--primary)] mb-3">The Artifact Catalog</h1>
+      <p class="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">
+        Official merchandise, corporate relics, and consumer goods from across the MEGA MEAL timeline.
+        Availability varies by region, epoch, and dimensional alignment.
+        <span class="text-slate-500"> Items marked <em>Available Now</em> can be purchased in this timeline.</span>
+      </p>
     </div>
-    
-    {totalPages > 0 && ( // Render pagination even for 1 page, as per original component
-      <div class="mt-12 flex justify-center">
-        <StorePagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          pageUrlPrev={pageUrlPrev}
-          pageUrlNext={pageUrlNext}
-          storeBaseUrl={baseUrl}
-        />
+
+    {/* Featured Product Hero */}
+    {featuredProduct && (
+      <div class="mb-10 card-base overflow-hidden shadow-2xl">
+        <div class="relative bg-gradient-to-br from-slate-800 to-slate-900 p-6 md:p-8">
+          <div class="absolute top-4 left-4 px-2 py-0.5 rounded text-xs font-bold bg-[var(--primary)] text-white tracking-wide">
+            Featured
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mt-4">
+            {/* Featured thumbnail */}
+            <div class="relative aspect-video rounded-lg overflow-hidden bg-slate-900">
+              {(() => {
+                const media = featuredProduct.data.media
+                const img = featuredProduct.data.image
+                const first = Array.isArray(media) && media.length > 0 ? media[0] : null
+                if (first?.type === 'youtube') {
+                  return (
+                    <div class="relative w-full h-full">
+                      <img
+                        src={`https://img.youtube.com/vi/${first.videoId}/hqdefault.jpg`}
+                        alt={featuredProduct.data.name}
+                        class="w-full h-full object-cover"
+                      />
+                      <div class="absolute inset-0 flex items-center justify-center bg-black/30">
+                        <a
+                          href={`/store/${featuredProduct.id}/`}
+                          class="w-16 h-16 rounded-full bg-red-600/90 hover:bg-red-600 flex items-center justify-center shadow-xl transition"
+                          aria-label="View product"
+                        >
+                          <svg viewBox="0 0 24 24" fill="white" class="w-8 h-8 ml-1"><path d="M8 5v14l11-7z"/></svg>
+                        </a>
+                      </div>
+                    </div>
+                  )
+                }
+                const src = first?.type === 'image' ? first.src : img
+                return src ? (
+                  <img src={src} alt={featuredProduct.data.name} class="w-full h-full object-cover" />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center text-slate-600">
+                    <Icon name="mdi:image-off-outline" class="h-12 w-12 opacity-30" />
+                  </div>
+                )
+              })()}
+            </div>
+            {/* Featured info */}
+            <div>
+              <span class="text-xs text-slate-500 uppercase tracking-widest">
+                {featuredProduct.data.category ?? 'Product'}
+              </span>
+              <h2 class="text-2xl font-bold text-slate-100 mt-1 mb-2">{featuredProduct.data.name}</h2>
+              {featuredProduct.data.tagline && (
+                <p class="text-slate-400 italic text-sm mb-4">"{featuredProduct.data.tagline}"</p>
+              )}
+              {featuredProduct.data.description && (
+                <p class="text-slate-300 text-sm leading-relaxed mb-5 line-clamp-3">
+                  {featuredProduct.data.description}
+                </p>
+              )}
+              <div class="flex items-center gap-4">
+                {featuredProduct.data.price && (
+                  <span class="text-xl font-bold text-emerald-400">${featuredProduct.data.price.toFixed(2)}</span>
+                )}
+                <a
+                  href={`/store/${featuredProduct.id}/`}
+                  class="btn-primary text-white font-semibold py-2.5 px-5 rounded-[var(--radius-medium)] transition hover:bg-[var(--primary-hover)] text-sm"
+                >
+                  View Product
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     )}
+
+    {/* Filter + Sort Bar */}
+    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between mb-6">
+      {/* Category filter chips */}
+      <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+        {categories.map(cat => (
+          <button
+            data-category={cat.id}
+            class:list={[
+              "category-filter px-3 py-1.5 rounded-full text-xs font-medium border transition",
+              cat.id === 'all'
+                ? 'bg-[var(--primary)] border-[var(--primary)] text-white'
+                : 'bg-transparent border-slate-600 text-slate-400 hover:border-[var(--primary)] hover:text-[var(--primary)]'
+            ]}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Sort + view controls */}
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="text-xs text-slate-500" id="product-count">{allProducts.length} products</span>
+        <select
+          id="sort-select"
+          class="text-xs bg-slate-800 border border-slate-600 text-slate-300 rounded px-2 py-1.5 focus:outline-none focus:border-[var(--primary)]"
+          aria-label="Sort products"
+        >
+          <option value="featured">Featured</option>
+          <option value="rating">Top Rated</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="available">Available First</option>
+        </select>
+        <div class="flex gap-1">
+          <button id="view-grid" aria-label="Grid view" class="p-1.5 rounded border bg-[var(--primary)] border-[var(--primary)] text-white hover:opacity-90 transition">
+            <Icon name="mdi:view-grid-outline" class="h-4 w-4" />
+          </button>
+          <button id="view-list" aria-label="List view" class="p-1.5 rounded border border-slate-600 text-slate-400 hover:border-[var(--primary)] hover:text-[var(--primary)] transition">
+            <Icon name="mdi:view-list-outline" class="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Product Grid */}
+    {allProducts.length === 0 ? (
+      <div class="text-center py-24 text-slate-500">
+        <Icon name="mdi:package-variant-remove" class="h-16 w-16 mx-auto mb-4 opacity-30" />
+        <p class="text-xl italic">Our shelves are currently empty. How ominous.</p>
+      </div>
+    ) : (
+      <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {allProducts.map(product => (
+          <div
+            class="product-grid-item"
+            data-category={product.data.category ?? 'uncategorized'}
+            data-availability={product.data.availability ?? 'coming_soon'}
+            data-price={product.data.price ?? 0}
+            data-rating={product.data.rating ?? 0}
+            data-featured={product.data.featured ? '1' : '0'}
+          >
+            <ProductCard product={product} />
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* Empty filter state */}
+    <div id="no-results" class="hidden text-center py-16 text-slate-500">
+      <Icon name="mdi:filter-remove-outline" class="h-12 w-12 mx-auto mb-3 opacity-30" />
+      <p class="italic">No products match this filter in your timeline.</p>
+      <button data-category="all" class="category-filter mt-3 text-xs text-[var(--primary)] hover:underline">
+        Clear filter
+      </button>
+    </div>
 
   </div>
 </StoreLayout>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const productCards = document.querySelectorAll('.product-card');
-    let currentlySelectedCard: HTMLElement | null = null;
-    const emitSfx = (id) => {
-      document.dispatchEvent(new CustomEvent('megameal:sfx', { detail: { id } }));
-    };
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.product-grid-item'))
+  const grid = document.getElementById('product-grid')
+  const noResults = document.getElementById('no-results')
+  const countEl = document.getElementById('product-count')
+  const sortSelect = document.getElementById('sort-select') as HTMLSelectElement | null
+  const viewGridBtn = document.getElementById('view-grid')
+  const viewListBtn = document.getElementById('view-list')
 
-    productCards.forEach(cardElement => {
-      const card = cardElement as HTMLElement;
+  let activeCategory = 'all'
 
-      card.addEventListener('click', (event) => {
-        const targetElement = event.target as HTMLElement;
+  function applyFilter() {
+    let visible = 0
+    items.forEach(item => {
+      const cat = item.dataset.category ?? ''
+      const show = activeCategory === 'all' || cat === activeCategory
+      item.classList.toggle('hidden', !show)
+      if (show) visible++
+    })
+    if (countEl) countEl.textContent = `${visible} product${visible !== 1 ? 's' : ''}`
+    if (noResults) noResults.classList.toggle('hidden', visible > 0)
+    if (grid) grid.classList.toggle('hidden', visible === 0)
+  }
 
-        // Check if the click target is an interactive element within an already expanded card.
-        // These elements should perform their own actions and not toggle the card's expansion state.
-        // Note: .card-expansion-trigger is intentionally NOT in this list, as clicks on it SHOULD toggle the card.
-        const isInteractiveElementInsideExpandedCard =
-          card.classList.contains('selected') &&
-          (targetElement.closest('.btn-primary') ||      // Add to Cart button
-           targetElement.closest('.tab-link') ||         // Tab navigation
-           targetElement.closest('.gallery-nav') ||      // Image gallery navigation
-           targetElement.closest('a[href]'));           // Any hyperlink with an href
+  function applySort(value: string) {
+    const container = document.getElementById('product-grid')
+    if (!container) return
+    const sorted = [...items].sort((a, b) => {
+      switch (value) {
+        case 'rating':
+          return parseFloat(b.dataset.rating ?? '0') - parseFloat(a.dataset.rating ?? '0')
+        case 'price-asc':
+          return parseFloat(a.dataset.price ?? '0') - parseFloat(b.dataset.price ?? '0')
+        case 'price-desc':
+          return parseFloat(b.dataset.price ?? '0') - parseFloat(a.dataset.price ?? '0')
+        case 'available':
+          return (a.dataset.availability === 'available' ? 0 : 1) - (b.dataset.availability === 'available' ? 0 : 1)
+        default: // featured
+          return parseInt(b.dataset.featured ?? '0') - parseInt(a.dataset.featured ?? '0')
+      }
+    })
+    sorted.forEach(el => container.appendChild(el))
+  }
 
-        if (isInteractiveElementInsideExpandedCard) {
-          // If the click originated from one of these elements inside an expanded card,
-          // we assume its own event handler (which might include event.stopPropagation()
-          // and/or event.preventDefault()) has managed it.
-          // We stop propagation here again as a safeguard and return to prevent toggling the card.
-          event.stopPropagation();
-          return;
-        }
-        
-        const clickedCard = card;
+  // Category filter clicks
+  document.querySelectorAll<HTMLButtonElement>('.category-filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCategory = btn.dataset.category ?? 'all'
+      document.querySelectorAll<HTMLButtonElement>('.category-filter').forEach(b => {
+        const isActive = b.dataset.category === activeCategory
+        b.classList.toggle('bg-[var(--primary)]', isActive)
+        b.classList.toggle('border-[var(--primary)]', isActive)
+        b.classList.toggle('text-white', isActive)
+        b.classList.toggle('bg-transparent', !isActive)
+        b.classList.toggle('text-slate-400', !isActive)
+      })
+      applyFilter()
+    })
+  })
 
-        if (currentlySelectedCard && currentlySelectedCard !== clickedCard) {
-          currentlySelectedCard.classList.remove('selected');
-          currentlySelectedCard.setAttribute('aria-expanded', 'false');
-        }
+  // Sort
+  sortSelect?.addEventListener('change', () => applySort(sortSelect.value))
 
-        if (clickedCard.classList.contains('selected')) {
-          clickedCard.classList.remove('selected');
-          clickedCard.setAttribute('aria-expanded', 'false');
-          currentlySelectedCard = null;
-          emitSfx('panel-back');
-        } else {
-          clickedCard.classList.add('selected');
-          clickedCard.setAttribute('aria-expanded', 'true');
-          currentlySelectedCard = clickedCard;
-          emitSfx('panel-open');
-        }
-      });
-    });
-  });
+  // View toggle
+  viewGridBtn?.addEventListener('click', () => {
+    grid?.classList.remove('grid-cols-1')
+    grid?.classList.add('md:grid-cols-2')
+    viewGridBtn.classList.add('bg-[var(--primary)]', 'border-[var(--primary)]', 'text-white')
+    viewGridBtn.classList.remove('text-slate-400')
+    viewListBtn?.classList.remove('bg-[var(--primary)]', 'border-[var(--primary)]', 'text-white')
+    viewListBtn?.classList.add('text-slate-400')
+  })
+
+  viewListBtn?.addEventListener('click', () => {
+    grid?.classList.add('grid-cols-1')
+    grid?.classList.remove('md:grid-cols-2')
+    viewListBtn.classList.add('bg-[var(--primary)]', 'border-[var(--primary)]', 'text-white')
+    viewListBtn.classList.remove('text-slate-400')
+    viewGridBtn?.classList.remove('bg-[var(--primary)]', 'border-[var(--primary)]', 'text-white')
+    viewGridBtn?.classList.add('text-slate-400')
+  })
 </script>
 
-<style is:global>
-  /* body styles are now handled by StoreLayout and main.css */
-  /* Ensure product cards have a clear stacking context if needed, though z-index on selected should suffice */
-  .product-card-wrapper {
-    position: relative; /* Establishes stacking context for z-index to work reliably */
+<style>
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
   }
 </style>

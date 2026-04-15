@@ -1,0 +1,333 @@
+---
+import { getCollection } from 'astro:content'
+import { Icon } from 'astro-icon/components'
+import StoreLayout from '../../layouts/store/StoreLayout.astro'
+import MediaGallery from '../../components/store/MediaGallery.svelte'
+
+export async function getStaticPaths() {
+  const products = await getCollection('products', ({ data }) => data.draft !== true)
+  return products.map(product => ({
+    params: { slug: product.id },
+    props: { product },
+  }))
+}
+
+const { product } = Astro.props
+const {
+  name,
+  tagline,
+  description,
+  realDescription,
+  price,
+  image,
+  additionalImages,
+  media,
+  sku,
+  rating,
+  specifications,
+  qanda,
+  preWrittenReviews,
+  availability,
+  ctaMode,
+  stripePaymentLink,
+  shippingNote,
+  badge,
+  category,
+} = product.data
+
+const hasSpecifications = Array.isArray(specifications) && specifications.length > 0
+const hasQandA = Array.isArray(qanda) && qanda.length > 0
+const hasPreWrittenReviews = Array.isArray(preWrittenReviews) && preWrittenReviews.length > 0
+
+// Unified media items
+const mediaItems: Array<{type: string; src?: string; videoId?: string; poster?: string; alt?: string; caption?: string}> =
+  Array.isArray(media) && media.length > 0
+    ? media
+    : [
+        ...(image ? [{ type: 'image', src: image, alt: name }] : []),
+        ...((additionalImages ?? []).map((src: string) => ({ type: 'image', src, alt: name }))),
+      ]
+
+let fullStars = 0, halfStar = false, emptyStars = 5, isRated = false
+if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
+  isRated = true
+  fullStars = Math.floor(rating)
+  halfStar = rating % 1 >= 0.5
+  emptyStars = 5 - fullStars - (halfStar ? 1 : 0)
+}
+
+const availabilityMap: Record<string, { label: string; classes: string; ctaMessage: string }> = {
+  available:            { label: badge || 'Available Now',                  classes: 'bg-emerald-500/90 text-white',  ctaMessage: '' },
+  coming_soon:          { label: badge || 'Coming Soon',                    classes: 'bg-blue-500/80 text-white',     ctaMessage: 'Transmission pending. Stand by.' },
+  out_of_stock:         { label: badge || 'Out of Stock',                   classes: 'bg-slate-500/80 text-white',    ctaMessage: 'The shelves are bare. Demand has been noted. Probably.' },
+  not_in_your_area:     { label: badge || 'Not in Your Area',               classes: 'bg-amber-500/80 text-black',    ctaMessage: 'Your coordinates are outside our current distribution matrix.' },
+  not_in_your_timeline: { label: badge || 'Not Available in Your Timeline', classes: 'bg-purple-500/80 text-white',   ctaMessage: 'This product exists. Procurement from your timeline is not currently supported.' },
+  artifact_only:        { label: badge || 'Artifact Record',                classes: 'bg-rose-900/80 text-rose-200',  ctaMessage: 'This item is catalogued for archival purposes. Acquiring it would be inadvisable.' },
+}
+const currentAvailability = availability ?? 'coming_soon'
+const avail = availabilityMap[currentAvailability] ?? availabilityMap['coming_soon']
+const canAddToCart = ctaMode === 'cart' && currentAvailability === 'available'
+const canBuyExternal = ctaMode === 'external' && !!stripePaymentLink && currentAvailability === 'available'
+
+const categoryLabels: Record<string, string> = {
+  equipment: 'Equipment', consumables: 'Consumables',
+  publications: 'Publications', companions: 'Companions', relics: 'Relics',
+}
+---
+
+<StoreLayout title={name} description={tagline}>
+  <div class="container mx-auto px-4 py-6 max-w-6xl">
+
+    {/* Breadcrumb */}
+    <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-[var(--primary)] transition">Home</a>
+      <Icon name="mdi:chevron-right" class="h-4 w-4" />
+      <a href="/store/" class="hover:text-[var(--primary)] transition">Store</a>
+      {category && (
+        <>
+          <Icon name="mdi:chevron-right" class="h-4 w-4" />
+          <a href={`/store/?category=${category}`} class="hover:text-[var(--primary)] transition capitalize">
+            {categoryLabels[category] ?? category}
+          </a>
+        </>
+      )}
+      <Icon name="mdi:chevron-right" class="h-4 w-4" />
+      <span class="text-slate-300 truncate max-w-[200px]">{name}</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+
+      {/* LEFT — Media Gallery */}
+      <div class="lg:sticky lg:top-24">
+        {mediaItems.length > 0 ? (
+          <MediaGallery
+            client:load
+            items={mediaItems}
+            autoPlayInterval={7000}
+            class="shadow-2xl"
+          />
+        ) : (
+          <div class="aspect-video bg-slate-800 rounded-[var(--radius-large)] flex flex-col items-center justify-center gap-3 text-slate-500">
+            <Icon name="mdi:image-off-outline" class="h-16 w-16 opacity-30" />
+            <p class="italic text-sm">Image Coming Soon</p>
+            <p class="text-xs opacity-50">The photography department is still recovering.</p>
+          </div>
+        )}
+      </div>
+
+      {/* RIGHT — Product Info + Sticky Purchase Panel */}
+      <div class="flex flex-col gap-5">
+
+        {/* Header block */}
+        <div>
+          <div class="flex items-center gap-2 flex-wrap mb-2">
+            <span class:list={["px-2 py-0.5 rounded text-xs font-bold tracking-wide", avail.classes]}>
+              {avail.label}
+            </span>
+            {category && (
+              <span class="px-2 py-0.5 rounded text-xs font-medium bg-slate-700/60 text-slate-300 capitalize">
+                {categoryLabels[category] ?? category}
+              </span>
+            )}
+          </div>
+          <h1 class="text-3xl font-bold text-slate-100 leading-tight mb-1">{name}</h1>
+          {tagline && <p class="text-slate-400 italic text-sm">"{tagline}"</p>}
+        </div>
+
+        {/* Rating */}
+        {isRated && (
+          <div class="flex items-center gap-2">
+            <div class="flex" aria-label={`${rating} out of 5 stars`}>
+              {Array(fullStars).fill(null).map(() => <Icon name="mdi:star" class="h-5 w-5 text-amber-400" />)}
+              {halfStar && <Icon name="mdi:star-half-full" class="h-5 w-5 text-amber-400" />}
+              {Array(emptyStars).fill(null).map(() => <Icon name="mdi:star-outline" class="h-5 w-5 text-amber-400" />)}
+            </div>
+            <span class="text-sm text-slate-400">{rating?.toFixed(1)}</span>
+            {hasPreWrittenReviews && (
+              <a href="#reviews" class="text-xs text-[var(--primary)] hover:underline">
+                {preWrittenReviews!.length} review{preWrittenReviews!.length !== 1 ? 's' : ''}
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Price */}
+        <div>
+          {price ? (
+            <p class="text-3xl font-bold text-emerald-400">${price.toFixed(2)}</p>
+          ) : (
+            <p class="text-sm text-amber-400 italic">Price: Inquire Within</p>
+          )}
+        </div>
+
+        {/* Description */}
+        {description && (
+          <p class="text-slate-300 leading-relaxed">{description}</p>
+        )}
+
+        {/* Reality Layer */}
+        {realDescription && (
+          <div class="rounded-lg bg-slate-800/60 border border-slate-700/50 p-4">
+            <p class="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-1.5">Reality Layer</p>
+            <p class="text-slate-400 text-sm italic leading-relaxed">{realDescription}</p>
+            {shippingNote && currentAvailability !== 'available' && (
+              <p class="text-slate-500 text-xs mt-2 flex items-start gap-1.5">
+                <Icon name="mdi:truck-outline" class="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                {shippingNote}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* CTA block */}
+        <div class="rounded-xl bg-slate-800/40 border border-slate-700/50 p-5 space-y-3">
+          {canAddToCart && (
+            <>
+              {shippingNote && (
+                <p class="text-xs text-slate-400 flex items-start gap-1.5">
+                  <Icon name="mdi:truck-outline" class="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                  {shippingNote}
+                </p>
+              )}
+              <button
+                data-add-to-cart
+                data-product-id={product.id}
+                data-product-name={name}
+                data-product-price={price}
+                data-product-sku={sku}
+                data-sfx-click="select"
+                class="w-full btn-primary text-white font-semibold py-3.5 px-6 rounded-[var(--radius-medium)] transition-all hover:bg-[var(--primary-hover)] active:scale-[0.98] focus:outline-none text-base"
+              >
+                Add to Cart — ${price?.toFixed(2)}
+              </button>
+            </>
+          )}
+          {canBuyExternal && (
+            <a
+              href={stripePaymentLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-sfx-click="select"
+              class="block w-full text-center btn-primary text-white font-semibold py-3.5 px-6 rounded-[var(--radius-medium)] transition-all hover:bg-[var(--primary-hover)] active:scale-[0.98] text-base"
+            >
+              Buy Now — ${price?.toFixed(2)}
+            </a>
+          )}
+          {!canAddToCart && !canBuyExternal && (
+            <div class="text-center py-4 px-5 rounded-[var(--radius-medium)] bg-slate-700/40 border border-slate-600/30">
+              <p class="text-sm text-slate-400 italic leading-relaxed">{avail.ctaMessage}</p>
+            </div>
+          )}
+          {sku && <p class="text-xs text-slate-600 text-center">SKU: {sku}</p>}
+        </div>
+
+        {/* Back to store */}
+        <a href="/store/" class="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-[var(--primary)] transition self-start">
+          <Icon name="mdi:arrow-left" class="h-4 w-4" />
+          Back to Store
+        </a>
+      </div>
+    </div>
+
+    {/* Details Section */}
+    {(hasSpecifications || hasQandA || hasPreWrittenReviews) && (
+      <div class="mt-12 card-base p-6 md:p-8">
+        <div class="flex flex-wrap gap-1 mb-6 border-b border-slate-700/50" role="tablist">
+          {hasSpecifications && (
+            <button class="detail-tab px-5 py-2.5 text-sm font-medium border-b-2 border-[var(--primary)] text-[var(--primary)] -mb-px" data-tab="specs" role="tab" aria-selected="true">
+              Specifications
+            </button>
+          )}
+          {hasQandA && (
+            <button class="detail-tab px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-[var(--primary)] transition -mb-px" data-tab="qanda" role="tab" aria-selected="false">
+              Q&A
+            </button>
+          )}
+          {hasPreWrittenReviews && (
+            <button id="reviews" class="detail-tab px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-[var(--primary)] transition -mb-px" data-tab="reviews" role="tab" aria-selected="false">
+              Reviews ({preWrittenReviews!.length})
+            </button>
+          )}
+        </div>
+
+        <div>
+          {/* Specs */}
+          {hasSpecifications && (
+            <div id="panel-specs" class="detail-panel">
+              <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-3 text-sm">
+                {specifications!.map(spec => (
+                  <>
+                    <dt class="font-semibold text-slate-200">{spec.label}</dt>
+                    <dd class="text-slate-400">{spec.value}</dd>
+                  </>
+                ))}
+              </dl>
+            </div>
+          )}
+
+          {/* Q&A */}
+          {hasQandA && (
+            <div id="panel-qanda" class="detail-panel hidden">
+              <div class="space-y-5">
+                {qanda!.map(item => (
+                  <div class="border-b border-slate-700/40 pb-5 last:border-0 last:pb-0">
+                    <p class="font-semibold text-slate-200 mb-1.5">{item.question}</p>
+                    <p class="text-slate-400 text-sm leading-relaxed">{item.answer}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Reviews */}
+          {hasPreWrittenReviews && (
+            <div id="panel-reviews" class="detail-panel hidden">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {preWrittenReviews!.map(review => (
+                  <div class="rounded-lg bg-slate-800/50 border border-slate-700/40 p-5">
+                    <div class="flex items-start justify-between gap-3 mb-2">
+                      <p class="font-semibold text-slate-200 text-sm">{review.author}</p>
+                      {review.date && <p class="text-xs text-slate-500 shrink-0">{review.date}</p>}
+                    </div>
+                    {typeof review.rating === 'number' && (
+                      <div class="flex items-center gap-0.5 mb-2">
+                        {Array(Math.floor(review.rating)).fill(null).map(() =>
+                          <Icon name="mdi:star" class="h-4 w-4 text-amber-400" />
+                        )}
+                        {Array(5 - Math.floor(review.rating)).fill(null).map(() =>
+                          <Icon name="mdi:star-outline" class="h-4 w-4 text-amber-400" />
+                        )}
+                      </div>
+                    )}
+                    <p class="text-slate-300 text-sm leading-relaxed">{review.comment}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+  </div>
+</StoreLayout>
+
+<script>
+  // Tab switching
+  const tabs = document.querySelectorAll<HTMLButtonElement>('.detail-tab')
+  const panels = document.querySelectorAll<HTMLElement>('.detail-panel')
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab
+      tabs.forEach(t => {
+        const active = t.dataset.tab === target
+        t.classList.toggle('border-[var(--primary)]', active)
+        t.classList.toggle('text-[var(--primary)]', active)
+        t.classList.toggle('border-transparent', !active)
+        t.classList.toggle('text-slate-400', !active)
+        t.setAttribute('aria-selected', active ? 'true' : 'false')
+      })
+      panels.forEach(p => p.classList.toggle('hidden', p.id !== `panel-${target}`))
+    })
+  })
+</script>
