@@ -4,6 +4,7 @@ tagline: "Recipes that will haunt your dreams and your dinner guests."
 draft: false
 availability: "coming_soon"
 ctaMode: "none"
+image: ""
 price: 29.99
 category: "publications"
 format: "physical"

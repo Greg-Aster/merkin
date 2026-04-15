@@ -4,6 +4,7 @@ tagline: "The taste of existential dread in every bite. Now with extra ennui!"
 draft: false
 availability: "coming_soon"
 ctaMode: "none"
+image: ""
 price: 8.99
 category: "consumables"
 format: "physical"

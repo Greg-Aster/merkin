@@ -4,6 +4,7 @@ tagline: "What is it? You don't want to know. But you need it."
 draft: false
 availability: "not_in_your_timeline"
 ctaMode: "none"
+image: ""
 price: 16.99
 category: "consumables"
 format: "physical"

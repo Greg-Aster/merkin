@@ -4,6 +4,7 @@ tagline: "They watch you sleep."
 draft: false
 availability: "not_in_your_area"
 ctaMode: "none"
+image: ""
 price: 24.99
 category: "companions"
 format: "physical"
