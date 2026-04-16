@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
   import { mobileInputStore } from './mobileInputStore'
   import { uiStore } from '../../stores/uiStore';
 
@@ -25,25 +25,39 @@
   const TAP_TIME_THRESHOLD = 200; // Max duration for a tap in ms
   const TAP_MOVE_THRESHOLD = 15;  // Max pixels moved for a tap
 
-  const joystickRadius = 50
-  
   // --- Input State ---
   let currentMovement = { x: 0, z: 0 }
   let currentLook = { x: 0, y: 0 }
   let dragToLookActive = false
   let isJumpPressed = false
+  let showTouchModeHint = false
+  let hasSeenTouchModeHint = false
+  let touchModeHintTimeout: number | null = null
   
   // --- Update Throttling ---
   let lastUpdateTime = 0
   const updateThrottle = 16 // ~60fps
+  const TOUCH_MODE_HINT_KEY = 'megameal-touch-mode-hint-seen'
 
   mobileInputStore.subscribe(state => {
     dragToLookActive = state.dragToLook;
   });
 
   onMount(() => {
-    mobileInputStore.update(state => ({ ...state, dragToLook: true }));
-  });
+    hasSeenTouchModeHint = localStorage.getItem(TOUCH_MODE_HINT_KEY) === '1'
+  })
+
+  onDestroy(() => {
+    if (touchModeHintTimeout !== null) {
+      window.clearTimeout(touchModeHintTimeout)
+    }
+  })
+
+  function getJoystickRadius(type: 'move' | 'look') {
+    const container = type === 'move' ? moveJoystickContainer : lookJoystickContainer
+    const size = container?.clientWidth || 88
+    return Math.max(32, size * 0.5)
+  }
 
   // --- Generic Joystick Logic ---
   function handleJoystickStart(event: TouchEvent, type: 'move' | 'look') {
@@ -165,6 +179,7 @@
     const center = type === 'move' ? moveJoystickCenter : lookJoystickCenter
     const knob = type === 'move' ? moveJoystickKnob : lookJoystickKnob
     if (!knob) return
+    const joystickRadius = getJoystickRadius(type)
 
     const deltaX = touch.clientX - center.x
     const deltaY = touch.clientY - center.y
@@ -176,7 +191,7 @@
 
     knob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`
 
-    const deadZone = 5
+    const deadZone = Math.max(5, joystickRadius * 0.12)
     if (clampedDistance > deadZone) {
        if (type === 'move') {
         currentMovement.x = knobX / joystickRadius
@@ -222,14 +237,74 @@
     });
   }
 
+  function dismissTouchModeHint() {
+    showTouchModeHint = false
+    if (touchModeHintTimeout !== null) {
+      window.clearTimeout(touchModeHintTimeout)
+      touchModeHintTimeout = null
+    }
+  }
+
+  function maybeShowTouchModeHint() {
+    if (hasSeenTouchModeHint) return
+
+    hasSeenTouchModeHint = true
+    localStorage.setItem(TOUCH_MODE_HINT_KEY, '1')
+    showTouchModeHint = true
+
+    if (touchModeHintTimeout !== null) {
+      window.clearTimeout(touchModeHintTimeout)
+    }
+
+    touchModeHintTimeout = window.setTimeout(() => {
+      showTouchModeHint = false
+      touchModeHintTimeout = null
+    }, 4200)
+  }
+
   function toggleDragToLook(event: MouseEvent | TouchEvent) {
     event.preventDefault();
     event.stopPropagation();
-    mobileInputStore.update(state => ({ ...state, dragToLook: !state.dragToLook }));
+    const nextDragToLook = !dragToLookActive
+    isMoveDragging = false
+    isLookDragging = false
+    moveActiveTouchId = null
+    lookActiveTouchId = null
+    currentMovement = { x: 0, z: 0 }
+    currentLook = { x: 0, y: 0 }
+    if (moveJoystickKnob) moveJoystickKnob.style.transform = 'translate(-50%, -50%)'
+    if (lookJoystickKnob) lookJoystickKnob.style.transform = 'translate(-50%, -50%)'
+    mobileInputStore.update(state => ({
+      ...state,
+      dragToLook: nextDragToLook,
+      movement: { x: 0, z: 0 },
+      look: { x: 0, y: 0 },
+      isJoystickActive: false
+    }));
+
+    if (nextDragToLook) {
+      maybeShowTouchModeHint()
+    } else {
+      dismissTouchModeHint()
+    }
   }
 </script>
 
-<div class="threlte-mobile-controls">
+<div class="threlte-mobile-controls" data-mobile-ui="true">
+  {#if dragToLookActive && showTouchModeHint}
+  <button
+    class="touch-mode-hint"
+    on:touchstart|preventDefault|stopPropagation={dismissTouchModeHint}
+    on:click|preventDefault|stopPropagation={dismissTouchModeHint}
+    aria-label="Dismiss touch controls hint"
+    data-mobile-ui="true"
+  >
+    <span>Drag to look</span>
+    <span>Hold to walk</span>
+    <span>Tap to select</span>
+  </button>
+  {/if}
+  {#if !dragToLookActive}
   <div 
     class="virtual-joystick left"
     class:active={isMoveDragging}
@@ -240,6 +315,7 @@
     role="button"
     tabindex="0"
     aria-label="Movement joystick and Interact"
+    data-mobile-ui="true"
   >
     <div class="joystick-base"></div>
     <div class="joystick-knob" bind:this={moveJoystickKnob}></div>
@@ -255,16 +331,18 @@
     role="button"
     tabindex="0"
     aria-label="Look joystick and Jump"
+    data-mobile-ui="true"
   >
     <div class="joystick-base"></div>
     <div class="joystick-knob" bind:this={lookJoystickKnob}></div>
   </div>
-
+  {/if}
   <button 
     class="action-btn look-toggle-btn"
     class:active={dragToLookActive}
     on:touchstart={toggleDragToLook}
-    aria-label="Toggle Drag to Look"
+    aria-label="Toggle touchscreen control style"
+    data-mobile-ui="true"
   >
     🖐️
   </button>
@@ -272,25 +350,32 @@
 
 <style>
   .threlte-mobile-controls {
+    --joystick-size: clamp(74px, 20vw, 92px);
+    --joystick-opacity: 0.42;
+    --joystick-active-opacity: 0.82;
+    --joystick-knob-size: calc(var(--joystick-size) * 0.34);
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 200px;
+    height: calc(var(--joystick-size) + 72px + env(safe-area-inset-bottom, 0px));
     pointer-events: none;
     z-index: 1000;
     font-family: 'Courier New', monospace;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 30px;
+    padding:
+      0 max(16px, env(safe-area-inset-right, 0px))
+      max(18px, calc(12px + env(safe-area-inset-bottom, 0px)))
+      max(16px, env(safe-area-inset-left, 0px));
   }
   
   .virtual-joystick {
     position: relative;
-    bottom: -20px;
-    width: 100px;
-    height: 100px;
+    bottom: 0;
+    width: var(--joystick-size);
+    height: var(--joystick-size);
     pointer-events: auto;
     touch-action: none;
     user-select: none;
@@ -300,22 +385,24 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 100px;
-    height: 100px;
+    width: var(--joystick-size);
+    height: var(--joystick-size);
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(0, 255, 136, 0.4);
+    background: rgba(11, 18, 28, var(--joystick-opacity));
+    border: 1.5px solid rgba(124, 234, 199, 0.34);
     transform: translate(-50%, -50%);
     backdrop-filter: blur(10px);
     box-shadow: 
-      0 0 20px rgba(0, 255, 136, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    transition: box-shadow 0.2s ease-in-out;
+      0 0 16px rgba(0, 255, 136, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: box-shadow 0.2s ease-in-out, background 0.2s ease-in-out, border-color 0.2s ease-in-out;
   }
 
   .virtual-joystick.active .joystick-base {
+    background: rgba(14, 28, 40, var(--joystick-active-opacity));
+    border-color: rgba(124, 234, 199, 0.62);
     box-shadow: 
-      0 0 30px rgba(0, 255, 136, 0.5),
+      0 0 22px rgba(0, 255, 136, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
   
@@ -323,15 +410,15 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 35px;
-    height: 35px;
+    width: var(--joystick-knob-size);
+    height: var(--joystick-knob-size);
     border-radius: 50%;
-    background: rgba(0, 255, 136, 0.7);
-    border: 2px solid rgba(255, 255, 255, 0.8);
+    background: rgba(124, 234, 199, 0.7);
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
     transform: translate(-50%, -50%);
     transition: none;
     backdrop-filter: blur(5px);
-    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+    box-shadow: 0 0 12px rgba(124, 234, 199, 0.28);
   }
   
   /* ACTION BUTTONS and INTERACT BUTTON STYLES REMOVED */
@@ -363,18 +450,67 @@
     position: fixed;
     top: 60px;
     right: 12px;
-    width: 45px;
-    height: 45px;
-    font-size: 20px;
-    border-color: rgba(137, 207, 240, 0.4);
-    background: rgba(137, 207, 240, 0.1);
-    opacity: 0.3;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    border-color: rgba(137, 207, 240, 0.32);
+    background: rgba(10, 18, 28, 0.16);
+    opacity: 0.34;
+    backdrop-filter: blur(8px);
     pointer-events: auto;
   }
 
   .look-toggle-btn.active {
-    background: rgba(137, 207, 240, 0.4);
+    background: rgba(137, 207, 240, 0.3);
     border-color: rgba(137, 207, 240, 0.8);
-    opacity: 0.7;
+    opacity: 0.72;
+  }
+
+  .touch-mode-hint {
+    position: fixed;
+    left: 50%;
+    bottom: max(92px, calc(76px + env(safe-area-inset-bottom, 0px)));
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 14px;
+    border: 1px solid rgba(160, 227, 255, 0.22);
+    border-radius: 999px;
+    background: rgba(8, 14, 22, 0.72);
+    color: rgba(240, 248, 255, 0.92);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+    pointer-events: auto;
+    white-space: nowrap;
+  }
+
+  .touch-mode-hint span + span::before {
+    content: '•';
+    margin-right: 10px;
+    color: rgba(124, 234, 199, 0.8);
+  }
+
+  @media (max-width: 420px) {
+    .threlte-mobile-controls {
+      --joystick-size: clamp(68px, 18vw, 82px);
+      padding-left: max(12px, env(safe-area-inset-left, 0px));
+      padding-right: max(12px, env(safe-area-inset-right, 0px));
+    }
+
+    .touch-mode-hint {
+      gap: 8px;
+      padding: 9px 12px;
+      font-size: 10px;
+      bottom: max(84px, calc(68px + env(safe-area-inset-bottom, 0px)));
+    }
+
+    .touch-mode-hint span + span::before {
+      margin-right: 8px;
+    }
   }
 </style>

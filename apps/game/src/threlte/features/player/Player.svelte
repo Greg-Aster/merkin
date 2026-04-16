@@ -60,6 +60,15 @@
   let mobileJumpPressed = false;
   let isMobile = false;
   let dragToLook = false;
+  let surfaceTouchId: number | null = null;
+  let surfaceTouchStartTime = 0;
+  let surfaceTouchStartX = 0;
+  let surfaceTouchStartY = 0;
+  let surfaceTouchLastX = 0;
+  let surfaceTouchLastY = 0;
+  let surfaceTouchMoved = false;
+  let surfaceTouchForwardActive = false;
+  let surfaceMoveHoldTimeout: number | null = null;
   let hasConnectedGamepad = false;
   let sendPlayerUpdateFn: ((playerState: PlayerState) => void) | null = null;
   let multiplayerServicePromise: Promise<void> | null = null;
@@ -81,6 +90,10 @@
     jump: false,
     sprint: false,
   };
+  const SURFACE_TAP_MOVE_THRESHOLD = 10;
+  const SURFACE_HOLD_MOVE_THRESHOLD = 18;
+  const SURFACE_FORWARD_HOLD_MS = 180;
+  const SURFACE_LOOK_SENSITIVITY = 0.0015;
 
   $: if ($mobileInputStore) {
     mobileMovement = $mobileInputStore.movement;
@@ -89,6 +102,10 @@
     if ($mobileInputStore.actionPressed === 'jump') {
       mobileJumpPressed = true;
     }
+  }
+
+  $: if (!dragToLook && surfaceTouchId !== null) {
+    resetSurfaceTouchState();
   }
 
   // --- Input Handlers ---
@@ -132,6 +149,104 @@
     accumulatedRotationY -= deltaY * mouseSensitivity;
     lastMouseX = event.clientX;
     lastMouseY = event.clientY;
+  }
+
+  function isCanvasTouchTarget(eventTarget: EventTarget | null): boolean {
+    return eventTarget instanceof Element && !!eventTarget.closest('canvas');
+  }
+
+  function resetSurfaceTouchState() {
+    if (surfaceMoveHoldTimeout !== null) {
+      window.clearTimeout(surfaceMoveHoldTimeout);
+      surfaceMoveHoldTimeout = null;
+    }
+    surfaceTouchId = null;
+    surfaceTouchMoved = false;
+    surfaceTouchForwardActive = false;
+    mobileInputStore.update((state) => ({
+      ...state,
+      movement: { x: 0, z: 0 },
+      isJoystickActive: false,
+    }));
+  }
+
+  function handleTouchStart(event: TouchEvent) {
+    if (!isMobile || !dragToLook || $uiStore.isInputFocused || surfaceTouchId !== null) return;
+    if (!isCanvasTouchTarget(event.target)) return;
+    event.preventDefault();
+
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+
+    surfaceTouchId = touch.identifier;
+    surfaceTouchStartTime = performance.now();
+    surfaceTouchStartX = touch.clientX;
+    surfaceTouchStartY = touch.clientY;
+    surfaceTouchLastX = touch.clientX;
+    surfaceTouchLastY = touch.clientY;
+    surfaceTouchMoved = false;
+    surfaceTouchForwardActive = false;
+
+    surfaceMoveHoldTimeout = window.setTimeout(() => {
+      if (surfaceTouchId === touch.identifier && !surfaceTouchMoved) {
+        surfaceTouchForwardActive = true;
+        mobileInputStore.update((state) => ({
+          ...state,
+          movement: { x: 0, z: -1 },
+          isJoystickActive: true,
+        }));
+      }
+    }, SURFACE_FORWARD_HOLD_MS);
+  }
+
+  function handleTouchMove(event: TouchEvent) {
+    if (!isMobile || !dragToLook || $uiStore.isInputFocused || surfaceTouchId === null) return;
+
+    const touch = Array.from(event.changedTouches).find(({ identifier }) => identifier === surfaceTouchId);
+    if (!touch) return;
+    event.preventDefault();
+
+    const totalDeltaX = touch.clientX - surfaceTouchStartX;
+    const totalDeltaY = touch.clientY - surfaceTouchStartY;
+    const movedDistance = Math.hypot(totalDeltaX, totalDeltaY);
+
+    if (movedDistance > SURFACE_TAP_MOVE_THRESHOLD) {
+      surfaceTouchMoved = true;
+    }
+
+    if (!surfaceTouchForwardActive && movedDistance > SURFACE_HOLD_MOVE_THRESHOLD && surfaceMoveHoldTimeout !== null) {
+      window.clearTimeout(surfaceMoveHoldTimeout);
+      surfaceMoveHoldTimeout = null;
+    }
+
+    const deltaX = touch.clientX - surfaceTouchLastX;
+    const deltaY = touch.clientY - surfaceTouchLastY;
+    accumulatedRotationX -= deltaX * SURFACE_LOOK_SENSITIVITY;
+    accumulatedRotationY -= deltaY * SURFACE_LOOK_SENSITIVITY;
+    surfaceTouchLastX = touch.clientX;
+    surfaceTouchLastY = touch.clientY;
+  }
+
+  function handleTouchEnd(event: TouchEvent) {
+    if (!isMobile || !dragToLook || surfaceTouchId === null) return;
+
+    const touch = Array.from(event.changedTouches).find(({ identifier }) => identifier === surfaceTouchId);
+    if (!touch) return;
+    event.preventDefault();
+
+    const touchDuration = performance.now() - surfaceTouchStartTime;
+    const totalDeltaX = touch.clientX - surfaceTouchStartX;
+    const totalDeltaY = touch.clientY - surfaceTouchStartY;
+    const movedDistance = Math.hypot(totalDeltaX, totalDeltaY);
+    const wasTap = !surfaceTouchForwardActive
+      && touchDuration < SURFACE_FORWARD_HOLD_MS
+      && movedDistance < SURFACE_TAP_MOVE_THRESHOLD;
+
+    resetSurfaceTouchState();
+
+    if (wasTap) {
+      dispatch('interaction', { x: touch.clientX, y: touch.clientY, type: 'click' });
+    }
   }
 
   function updateMovementFromKeys() {
@@ -349,6 +464,9 @@
   onDestroy(() => {
     window.removeEventListener('gamepadconnected', handleGamepadConnected);
     window.removeEventListener('gamepaddisconnected', handleGamepadDisconnected);
+    if (surfaceMoveHoldTimeout !== null) {
+      window.clearTimeout(surfaceMoveHoldTimeout);
+    }
     characterController?.free?.();
   });
 </script>
@@ -359,6 +477,10 @@
   on:mousemove={handleMouseMove}
   on:mousedown={handleMouseDown}
   on:mouseup={handleMouseUp}
+  on:touchstart={handleTouchStart}
+  on:touchmove={handleTouchMove}
+  on:touchend={handleTouchEnd}
+  on:touchcancel={handleTouchEnd}
 />
 
 <!-- 

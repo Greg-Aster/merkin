@@ -629,7 +629,13 @@
               position={[0, 0, 0]}
               speed={5}
               jumpForce={8}
-              on:interaction={(e) => { gameActions.recordInteraction('click', e.detail.type); dispatch('objectClick', e.detail) }}
+              on:interaction={(e) => {
+                gameActions.recordInteraction('click', e.detail.type)
+                const selected = interactionSystem?.selectAtScreenPosition?.(e.detail.x, e.detail.y)
+                if (!selected) {
+                  dispatch('objectClick', e.detail)
+                }
+              }}
             />
             
             <!-- Multiplayer System - Renders remote players -->

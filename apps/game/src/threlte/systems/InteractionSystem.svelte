@@ -197,6 +197,12 @@
     })
   }
 
+  export function selectAtScreenPosition(x: number, y: number) {
+    lastMouseX = x
+    lastMouseY = y
+    return selectObjectInCrosshair()
+  }
+
   function selectObjectInCrosshair() {
     if (!$camera || interactiveObjects.length === 0) return
 

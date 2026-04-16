@@ -15,6 +15,8 @@
 
   const dispatch = createEventDispatcher()
   const isDev = import.meta.env.DEV
+  const isMobileDevice = typeof navigator !== 'undefined'
+    && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 
   // --- Props ---
   // The manifest URL is now the primary input for configuring the level
@@ -241,6 +243,35 @@
     !!manifest?.features.styles
     && ($qualityLevelStore === OptimizationLevel.HIGH || $qualityLevelStore === OptimizationLevel.ULTRA)
   $: fallbackMoodLightingEnabled = !!manifest?.features.styles && !fullStyleSystemEnabled
+  $: observatoryToneMappingExposure = (() => {
+    if (!isMobileDevice) return 1.2
+    switch ($qualityLevelStore) {
+      case OptimizationLevel.ULTRA_LOW:
+      case OptimizationLevel.LOW:
+        return 1.26
+      case OptimizationLevel.MEDIUM:
+        return 1.24
+      default:
+        return 1.22
+    }
+  })()
+  $: observatoryAmbientIntensity = (() => {
+    if (!isMobileDevice) return 10.4
+    switch ($qualityLevelStore) {
+      case OptimizationLevel.ULTRA_LOW:
+      case OptimizationLevel.LOW:
+        return 12.4
+      case OptimizationLevel.MEDIUM:
+        return 11.8
+      default:
+        return 11.0
+    }
+  })()
+  $: observatorySunIntensity = isMobileDevice ? 0.92 : 0.8
+  $: observatoryFillIntensity = isMobileDevice ? 0.38 : 0.3
+  $: fallbackAmbientIntensity = isMobileDevice ? 6.2 : 4.8
+  $: fallbackMoonlightIntensity = isMobileDevice ? 0.62 : 0.45
+  $: fallbackFillLightIntensity = isMobileDevice ? 0.3 : 0.2
   $: vegetationInstanceCount = (() => {
     switch ($qualityLevelStore) {
       case OptimizationLevel.ULTRA_LOW:
@@ -380,6 +411,10 @@
         preset={stylePreset}
         enableToonShading={enableToonShading}
         enableOutlines={$qualitySettingsStore.enablePostProcessing}
+        ambientIntensity={observatoryAmbientIntensity}
+        sunIntensity={observatorySunIntensity}
+        fillIntensity={observatoryFillIntensity}
+        toneMappingExposure={observatoryToneMappingExposure}
         saturation={manifest.style.colorGrading?.saturation || 1.2}
         contrast={manifest.style.colorGrading?.contrast || 1.1}
         brightness={manifest.style.colorGrading?.brightness || 1.0}
@@ -392,17 +427,17 @@
     {/if}
 
     {#if fallbackMoodLightingEnabled}
-      <T.AmbientLight color="#1a2238" intensity={4.8} />
+      <T.AmbientLight color="#1a2238" intensity={fallbackAmbientIntensity} />
       <T.DirectionalLight
         position={[40, 70, 20]}
         color="#b8c7ff"
-        intensity={0.45}
+        intensity={fallbackMoonlightIntensity}
         castShadow={false}
       />
       <T.DirectionalLight
         position={[-30, 35, -24]}
         color="#23324d"
-        intensity={0.2}
+        intensity={fallbackFillLightIntensity}
         castShadow={false}
       />
     {/if}

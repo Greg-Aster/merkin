@@ -16,7 +16,11 @@ const {
 <html lang={lang} class="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="description" content={description} />
     <title>{title}</title>
     <style>
@@ -31,7 +35,7 @@ const {
         position: fixed;
         inset: 0;
         width: 100vw;
-        height: 100vh;
+        height: var(--game-dvh, 100dvh);
         overflow: hidden;
         z-index: 0;
       }
