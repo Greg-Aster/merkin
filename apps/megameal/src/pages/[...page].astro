@@ -5,7 +5,7 @@ import timelineManifest from '../../../../packages/shared-data/generated/timelin
 import PostPage from '../components/PostPage.astro'
 import Pagination from '../components/control/Pagination.astro'
 import FeaturedArc from '../components/home/FeaturedArc.astro'
-import EraBrowser from '../components/home/EraBrowser.astro'
+import LatestTransmissions from '../components/home/LatestTransmissions.astro'
 import PortalDestinations from '../components/home/PortalDestinations.astro'
 import FactsWidget from '../components/widget/FactsWidget.astro'
 import { PAGE_SIZE } from '../constants/constants'
@@ -34,24 +34,9 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
           timelineCount={publishedTimelineCount}
         />
       </div>
-      <div class="portal-snap-section portal-snap-section--featured appear-on-scroll delay-2 featured-arc-section deferred-section">
+      <section class="portal-snap-section portal-snap-section--editorial appear-on-scroll delay-2 deferred-section" aria-label="Featured content">
         <FeaturedArc />
-      </div>
-      <section class="portal-snap-section portal-snap-section--dispatches deferred-section" aria-labelledby="dispatches-title">
-        <div class="dispatches-header appear-on-scroll delay-3">
-          <span id="dispatches-title" class="dispatches-label">Recent Dispatches</span>
-          <span class="dispatches-sub">
-            {publishedDispatchCount} published transmissions across {publishedTimelineCount} live timeline nodes.
-          </span>
-        </div>
-        <div class="dispatches-stream">
-          <PostPage page={page}></PostPage>
-          <Pagination
-            class="mx-auto onload-animation"
-            page={page}
-            style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
-          ></Pagination>
-        </div>
+        <LatestTransmissions />
       </section>
     </>
   )}
@@ -75,11 +60,6 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
       title="Sponsored"
       footerText="Floating promotions are a service, not an intrusion."
     />
-  )}
-  {isFirstPage && (
-    <div class="portal-snap-section portal-snap-section--eras era-browser-wrapper appear-on-scroll deferred-section">
-      <EraBrowser />
-    </div>
   )}
 </MainGridLayout>
 
@@ -260,17 +240,11 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
     min-height: min(48rem, calc(100svh - 1.5rem));
   }
 
-  .portal-snap-section--featured,
-  .portal-snap-section--dispatches,
-  .portal-snap-section--eras {
-    min-height: min(48rem, calc(100svh - 1.5rem));
+  /* Editorial section contains FeaturedArc + LatestTransmissions as one grouped block */
+  .portal-snap-section--editorial {
     display: grid;
     align-content: center;
-  }
-
-  .portal-snap-section--dispatches {
-    align-content: start;
-    padding-top: clamp(1rem, 4svh, 2.5rem);
+    padding-block: clamp(2rem, 6svh, 4rem);
   }
 
   :global(html.megameal-home-snap) {
@@ -335,33 +309,6 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
     transition-delay: 0s;
   }
 
-  .dispatches-header {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid oklch(0.3 0.05 var(--hue) / 0.3);
-  }
-
-  .dispatches-label {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: oklch(0.6 0.1 var(--hue));
-    font-weight: 700;
-  }
-
-  .dispatches-sub {
-    font-size: 0.75rem;
-    color: oklch(0.5 0.05 var(--hue));
-    font-style: italic;
-  }
-
-  .era-browser-wrapper {
-    margin-top: 2.5rem;
-  }
-
   @supports (content-visibility: auto) {
     .dispatches-stream {
       content-visibility: auto;
@@ -378,15 +325,8 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
       min-height: calc(100svh - 4.75rem);
     }
 
-    .portal-snap-section--featured,
-    .portal-snap-section--eras {
-      min-height: calc(100svh - 4.75rem);
-      align-content: center;
-    }
-
-    .portal-snap-section--dispatches {
-      min-height: auto;
-      align-content: start;
+    .portal-snap-section--editorial {
+      padding-block: clamp(1.5rem, 5svh, 3rem);
     }
 
     :global(html.megameal-home-stage-ready) .portal-snap-section:not(.portal-snap-section--destinations):not(.is-current) {
@@ -417,11 +357,6 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
       transform: translateY(0.1rem) scale(0.999);
     }
 
-    .dispatches-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.3rem;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
