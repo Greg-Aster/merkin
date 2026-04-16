@@ -14,7 +14,7 @@
   import { onMount, getContext } from 'svelte'
   import { T, useTask, useThrelte } from '@threlte/core'
   import * as THREE from 'three'
-  import { qualitySettingsStore } from '../features/performance'
+  import { qualitySettingsStore, recordSystemTiming } from '../features/performance'
   import { bloomStore } from '../stores/postProcessingStore'
   import { OptimizationLevel, optimizationManager } from '../features/performance'
   import {
@@ -32,20 +32,6 @@
   } from '../core/ECSIntegration'
   import StarSprite from './StarSprite.svelte'
   import { gameActions } from '../stores/gameStateStore'
-  
-  // Import our modern character system
-  import { 
-    getObservatoryContext 
-  } from '../features/conversation'
-  
-  // Import the modern character system
-  import { characterRegistry } from '../features/conversation'
-  
-  // Import conversation system
-  import {
-    conversationActions,
-    isConversationActive,
-  } from '../features/conversation'
   
   // Import the new efficient lighting system
   import { FireflyLightingSystem } from '../features/lighting'
@@ -101,36 +87,36 @@
   // Component-specific optimization settings
   const fireflyOptimizationConfig = {
     [OptimizationLevel.ULTRA_LOW]: {
-      maxParticleCount: 15,
-      particleSize: 15.0,
+      maxParticleCount: 8,
+      particleSize: 12.0,
       enableGlow: false,
       updateFrequency: 0.5, // Update every 2 seconds
       enableInteractions: false
     },
     [OptimizationLevel.LOW]: {
-      maxParticleCount: 20,
-      particleSize: 20.0,
-      enableGlow: true,
+      maxParticleCount: 12,
+      particleSize: 14.0,
+      enableGlow: false,
       updateFrequency: 0.33, // Update every 3 seconds
       enableInteractions: true
     },
     [OptimizationLevel.MEDIUM]: {
-      maxParticleCount: 40,
-      particleSize: 25.0,
+      maxParticleCount: 20,
+      particleSize: 18.0,
       enableGlow: true,
       updateFrequency: 0.2, // Update every 5 seconds
       enableInteractions: true
     },
     [OptimizationLevel.HIGH]: {
-      maxParticleCount: 60,
-      particleSize: 30.0,
+      maxParticleCount: 32,
+      particleSize: 22.0,
       enableGlow: true,
       updateFrequency: 0.1, // Update every 10 seconds
       enableInteractions: true
     },
     [OptimizationLevel.ULTRA]: {
-      maxParticleCount: 80,
-      particleSize: 35.0,
+      maxParticleCount: 48,
+      particleSize: 26.0,
       enableGlow: true,
       updateFrequency: 0.05, // Update every 20 seconds
       enableInteractions: true
@@ -147,7 +133,15 @@
   $: optimizedMaxLights = $qualitySettingsStore.maxFireflyLights
   
   // Get component-specific optimization settings
-  $: currentFireflySettings = optimizationManager.getComponentSettings('hybrid-firefly-component')
+  let currentFireflySettings: Record<string, any> = {}
+  function refreshFireflySettings() {
+    currentFireflySettings = optimizationManager.getComponentSettings('hybrid-firefly-component') || {}
+  }
+
+  $: if ($qualitySettingsStore) {
+    refreshFireflySettings()
+  }
+
   $: optimizedCount = currentFireflySettings.maxParticleCount || (optimizedMaxLights === 0 ? Math.min(count, 30) : count)
   $: optimizedPointSize = currentFireflySettings.particleSize || pointSize
   $: optimizedEnableGlow = currentFireflySettings.enableGlow !== undefined ? currentFireflySettings.enableGlow : true
@@ -159,9 +153,28 @@
   // Visual firefly data for StarSprite rendering
   let visualFireflies: FireflyVisual[] = []
   let fireflySprites: THREE.Sprite[] = [] // Track sprites for interaction system
+  let conversationFeaturePromise: Promise<typeof import('../features/conversation')> | null = null
 
-  // Performance objects (simplified - no more complex lighting management)
-  const tempColor = new THREE.Color()
+  const availableConversationalCharacterIds = [
+    'elara-voss',
+    'helena-zhao',
+    'ava-chen',
+    'maya-okafor',
+    'soren-klein',
+    'gregory-aster',
+    'kaelen-vance',
+    'eleanor-kim',
+    'vex-kanarath',
+    'merkin',
+  ]
+
+  async function loadConversationFeature() {
+    if (!conversationFeaturePromise) {
+      conversationFeaturePromise = import('../features/conversation')
+    }
+
+    return conversationFeaturePromise
+  }
 
   /**
    * Modern Component Class following documented architecture
@@ -191,7 +204,7 @@
 
     protected onUpdate(deltaTime: number): void {
       // Update visual firefly data from ECS
-      this.updateVisualFireflies()
+      this.updateVisualFireflies(performance.now() * 0.001)
     }
 
     protected onMessage(message: SystemMessage): void {
@@ -267,12 +280,10 @@
         const conversationalCount = Math.floor(optimizedCount * conversationChance)
         
         try {
-          // Auto-discover available characters from the registry
-          const availableCharacters = await characterRegistry.getAvailableCharacterIds()
-          
           // Assign characters to conversational fireflies
           for (let i = 0; i < conversationalCount; i++) {
-            const characterId = availableCharacters[i % availableCharacters.length]
+            const characterId =
+              availableConversationalCharacterIds[i % availableConversationalCharacterIds.length]
             characterAssignments.push(characterId)
           }
           
@@ -344,7 +355,7 @@
       if (import.meta.env.DEV) console.log(`✨ Created ${visualFireflies.length} fireflies (${characterAssignments.length} with character personalities)`)
     }
 
-    private updateVisualFireflies(): void {
+    private updateVisualFireflies(time: number): void {
       if (!ecsWorld || typeof ecsWorld.getWorld !== 'function') return
       
       const world = ecsWorld.getWorld()
@@ -371,10 +382,30 @@
         
         // Update color from ECS
         visual.color = LightEmitter.color[eid]
+
+        const sprite = fireflySprites[i]
+        if (!sprite) continue
+
+        sprite.position.set(visual.position[0], visual.position[1], visual.position[2])
+
+        const twinkleTime = time * visual.twinkleSpeed + visual.animationOffset
+        const twinkle1 = Math.sin(twinkleTime) * 0.15
+        const twinkle2 = Math.sin(twinkleTime * 1.7 + 1) * 0.1
+        const twinkle3 = Math.sin(twinkleTime * 0.3 + 2) * 0.05
+        const twinkle = optimizedEnableGlow ? 0.85 + twinkle1 + twinkle2 + twinkle3 : 1.0
+
+        const hoverScale = visual.isHovered && visual.isClickable ? 1.3 : 1.0
+        const hoverGlow = visual.isHovered && visual.isClickable ? 0.4 : 0.0
+        const finalScale = visual.size * twinkle * hoverScale
+        const finalOpacity = Math.min(1, visual.intensity * twinkle * (1.0 + hoverGlow))
+
+        sprite.scale.setScalar(finalScale)
+
+        const material = sprite.material as THREE.SpriteMaterial | undefined
+        if (material) {
+          material.opacity = finalOpacity
+        }
       }
-      
-      // Trigger reactivity
-      visualFireflies = visualFireflies
     }
 
     // getActiveLightsFromECS method removed - now handled by FireflyLightingSystem
@@ -392,6 +423,7 @@
       componentId: 'hybrid-firefly-component',
       optimizationSettings: fireflyOptimizationConfig
     })
+    refreshFireflySettings()
     
     console.log('🧚‍♀️ HybridFirefly: Registered component-specific optimization settings')
     
@@ -434,16 +466,15 @@
   useTask((delta) => {
     if (!component || !fireflyLightingSystem || !$camera) return
 
-    // Update ECS systems first (this is still needed for firefly movement)
-    if (ecsWorld && typeof ecsWorld.update === 'function') {
-      ecsWorld.update(delta)
-    }
-
     // Update the dedicated lighting system (handles all the complex lighting logic)
+    const lightingStart = performance.now()
     fireflyLightingSystem.update(delta, $camera)
+    recordSystemTiming('fireflyLighting', performance.now() - lightingStart)
 
     // Update component's visual representation
+    const visualsStart = performance.now()
     component.onUpdate(delta)
+    recordSystemTiming('fireflyVisuals', performance.now() - visualsStart)
   })
 
   // Remove problematic reactive statements that cause infinite loops
@@ -471,7 +502,7 @@
     gameActions.recordInteraction('firefly_ai_conversation', firefly.id || 'unknown');
   } else {
     // It's a basic firefly. Use the modern conversation system for simple text.
-    handleBasicFirefly(firefly);
+    await handleBasicFirefly(firefly);
   }
 
   // This part can remain for other effects
@@ -485,6 +516,7 @@
   // Helper function for handling conversational fireflies with store actions directly
   async function handleConversationalFirefly(firefly: any) {
     try {
+      const { characterRegistry, conversationActions } = await loadConversationFeature()
       const character = await characterRegistry.getCharacter(firefly.characterId)
       if (character) {
         // Convert FireflyPersonality to NPCPersonality format for conversation system
@@ -503,16 +535,17 @@
         if (import.meta.env.DEV) console.log('✅ Started AI conversation via store system with converted personality')
       } else {
         console.error(`❌ Failed to load character: ${firefly.characterId}`)
-        handleBasicFirefly(firefly)
+        await handleBasicFirefly(firefly)
       }
     } catch (error) {
       console.error(`❌ Error loading character ${firefly.characterId}:`, error)
-      handleBasicFirefly(firefly)
+      await handleBasicFirefly(firefly)
     }
   }
 
   // Helper function for basic fireflies using modern system
-  function handleBasicFirefly(firefly: any) {
+  async function handleBasicFirefly(firefly: any) {
+    const { conversationActions } = await loadConversationFeature()
     const poeticSpecies = [
       'Wandering Star', 'Twilight Wisp', 'Stellar Wanderer', 'Drifting Light',
       'Celestial Wisp', 'Night Wanderer', 'Fading Ember', 'Lost Lamplight'
@@ -543,14 +576,10 @@
       const visualFirefly = visualFireflies.find(f => f.id === data.id)
       if (visualFirefly) {
         visualFirefly.isHovered = true
-        // Force reactivity update
-        visualFireflies = visualFireflies
       }
     } else {
       // Remove hover state from all fireflies
       visualFireflies.forEach(f => f.isHovered = false)
-      // Force reactivity update
-      visualFireflies = visualFireflies
     }
   }
   
@@ -595,7 +624,7 @@
     intensity={firefly.intensity}
     twinkleSpeed={firefly.twinkleSpeed}
     animationOffset={firefly.animationOffset}
-    enableTwinkle={optimizedEnableGlow}
+    enableTwinkle={false}
     opacity={optimizedEnableGlow ? 1.0 : 0.8}
     isClickable={firefly.isClickable}
     isHovered={firefly.isHovered || false}
@@ -605,4 +634,3 @@
 {/each}
 
 <!-- Point light rendering now handled by LightingManager -->
-

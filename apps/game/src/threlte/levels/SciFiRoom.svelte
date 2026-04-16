@@ -5,6 +5,7 @@
   import { GLTF } from '@threlte/extras';
   import LevelManager from '../core/LevelManager.svelte';
   import { LightingComponent } from '../features/lighting';
+  import { gameActions } from '../stores/gameStateStore';
   
   const dispatch = createEventDispatcher();
 
@@ -32,7 +33,7 @@
 
   function handleEnvironmentReady() {
     console.log('🏢 sci-fi-room: Environment loaded, requesting player spawn');
-    
+
     // Request player spawn through ECS spawn system
     if (spawnSystem && spawnSystem.requestSpawn) {
       const spawnRequested = spawnSystem.requestSpawn({
@@ -44,14 +45,23 @@
           spawnReason: 'level_load'
         }
       });
-      
+
       if (!spawnRequested) {
         console.warn('🏢 sci-fi-room: Failed to request player spawn');
       }
     }
-    
+
     dispatch('terrainReady');
   }
+
+  function handleEnvironmentError(event: any) {
+    console.error('❌ sci-fi-room: Failed to load GLB model — returning to observatory:', event);
+    loadError = true;
+    // Return to observatory so the player isn't stuck
+    gameActions.transitionToLevel('observatory');
+  }
+
+  let loadError = false;
 </script>
 
 {#if manifest}
@@ -59,12 +69,15 @@
   <T.Group name="sci-fi-room-level">
 
     <!-- Environment: Load the GLB model using the modern GLTF component -->
-    <GLTF
-      url="/models/levels/sci-fi-room.glb"
-      on:create={handleEnvironmentReady}
-      castShadow
-      receiveShadow
-    />
+    {#if !loadError}
+      <GLTF
+        url="/models/levels/sci-fi-room.glb"
+        on:create={handleEnvironmentReady}
+        on:error={handleEnvironmentError}
+        castShadow
+        receiveShadow
+      />
+    {/if}
 
     <!-- Lighting System -->
     <LightingComponent

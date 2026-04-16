@@ -10,6 +10,9 @@
     frameTimeStore,
     memoryStore,
     renderInfoStore,
+    longTaskStore,
+    markLongTaskSupport,
+    recordLongTask,
   } from '../stores/performanceStore'
   import { optimizationManager, OptimizationLevel } from '../OptimizationManager'
 
@@ -41,6 +44,7 @@
   const UPGRADE_THRESHOLD = 12  // 12s consistently over target * 1.15 → step up
   let degradeCount = 0
   let upgradeCount = 0
+  let longTaskObserver: PerformanceObserver | null = null
 
   const TIER_ORDER: OptimizationLevel[] = [
     OptimizationLevel.ULTRA_LOW,
@@ -86,6 +90,49 @@
   onMount(() => {
     lastTime = performance.now()
     startupTime = performance.now()
+
+    const supportsLongTaskObserver =
+      typeof PerformanceObserver !== 'undefined'
+      && PerformanceObserver.supportedEntryTypes?.includes('longtask')
+
+    markLongTaskSupport(supportsLongTaskObserver)
+
+    if (supportsLongTaskObserver) {
+      longTaskObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          recordLongTask(entry.duration)
+        }
+      })
+
+      longTaskObserver.observe({ entryTypes: ['longtask'] })
+    }
+
+    if (typeof window !== 'undefined') {
+      window.__megamealDiagnostics = {
+        getSnapshot: () => ({
+          fps: $fpsStore,
+          frameTime: $frameTimeStore,
+          longTasks: $longTaskStore,
+          renderInfo: renderer.info
+            ? {
+                calls: renderer.info.render.calls,
+                triangles: renderer.info.render.triangles,
+                points: renderer.info.render.points,
+                lines: renderer.info.render.lines,
+                geometries: renderer.info.memory.geometries,
+                textures: renderer.info.memory.textures,
+                programs: renderer.info.programs?.length || 0,
+              }
+            : null,
+          quality: optimizationManager.getOptimizationLevel(),
+        }),
+      }
+    }
+
+    return () => {
+      longTaskObserver?.disconnect()
+      longTaskObserver = null
+    }
   })
 
   useTask(() => {

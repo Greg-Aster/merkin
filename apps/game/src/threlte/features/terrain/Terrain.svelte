@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte'
+  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
   import { T } from '@threlte/core'
   import * as THREE from 'three'
   import { TerrainManager, type TerrainConfig } from './TerrainManager'
@@ -14,7 +14,7 @@
   let playerPosition = new THREE.Vector3()
 
   // Subscribe to player position
-  playerStateStore.subscribe(p => playerPosition.set(...p.position))
+  const unsubscribePlayer = playerStateStore.subscribe((p) => playerPosition.set(...p.position))
 
   onMount(async () => {
     try {
@@ -40,6 +40,10 @@
         error: error instanceof Error ? error.message : 'Unknown terrain error'
       }))
     }
+  })
+
+  onDestroy(() => {
+    unsubscribePlayer()
   })
 
   // --- THIS IS THE FIX ---

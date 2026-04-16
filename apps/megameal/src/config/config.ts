@@ -15,14 +15,14 @@ export const siteConfig: SiteConfig = {
     hue: 220, // Blue hue for cosmic horror
     fixed: false,
   },
-  transparency: 0.9, // Single value from 0 to 1
+  transparency: 0.5, // Single value from 0 to 1
   defaultTheme: DARK_MODE, // Dark mode fits the cosmic horror vibe
   themeLock: DARK_MODE,
   banner: {
     enable: true,
     src: '/posts/timeline/golden-era.png', // Used as fallback and OG image
     video: '/assets/banner/golden-era.webm', // Animated video background
-    playbackRate: 0.5,
+    playbackRate: 0.25,
     position: 'center',
     credit: {
       enable: false,

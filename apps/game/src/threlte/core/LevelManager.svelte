@@ -11,6 +11,7 @@
   import { SystemRegistry, type LevelContext } from './LevelSystem'
   import { LightingManager } from '../features/lighting'
   import { ECSWorldManager } from './ECSIntegration'
+  import { recordSystemTiming } from '../features/performance'
 
   // --- 1. Initialize Managers Immediately (without scene) ---
   export let registry: SystemRegistry = new SystemRegistry()
@@ -69,12 +70,16 @@
     frameCount++
     
     // Update ECS world first (for performance-critical entities)
+    const ecsStart = performance.now()
     ecsWorld.update(delta)
+    recordSystemTiming('ecsWorld', performance.now() - ecsStart)
     
     // Update all registered components (high-level systems)
+    const componentsStart = performance.now()
     for (const component of registry['components'].values()) {
       component.update(delta)
     }
+    recordSystemTiming('levelComponents', performance.now() - componentsStart)
     
     // Performance monitoring
     if (frameCount % 60 === 0) {

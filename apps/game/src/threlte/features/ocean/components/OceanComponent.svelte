@@ -79,6 +79,7 @@
   let animationTime = 0
   let waterLevel = initialLevel // Initialize water level
   let reflector: any = null
+  let unsubscribeLighting: (() => void) | null = null
   
   // --- UNDERWATER DETECTION STATE ---
   let playerInWater = false
@@ -189,7 +190,7 @@
       if (import.meta.env.DEV) console.log('🌊 Ocean: Initializing...')
       await this.createOcean()
       if (lightingManager) {
-        lightingManager.subscribe((lighting: LightingData) => {
+        unsubscribeLighting = lightingManager.subscribe((lighting: LightingData) => {
           this.updateOceanLighting(lighting)
         })
         if (import.meta.env.DEV) console.log('🌊 Ocean: Connected to lighting system')
@@ -488,6 +489,8 @@
   })
 
   onDestroy(() => {
+    unsubscribeLighting?.()
+    unsubscribeLighting = null
     component?.dispose()
   })
 

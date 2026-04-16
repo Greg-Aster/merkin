@@ -65,15 +65,26 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
 
 <script>
   const portalScrollCleanupKey = '__megamealPortalScrollCleanup'
+  const portalScrollInitKey = '__megamealPortalScrollInit'
+  const portalScrollResetKey = '__megamealPortalScrollReset'
   const portalScrollBoundKey = '__megamealPortalScrollBound'
+  const portalScrollSwupBoundKey = '__megamealPortalScrollSwupBound'
+
+  const resetPortalScrollStages = () => {
+    ;(window as any)[portalScrollCleanupKey]?.()
+    ;(window as any)[portalScrollCleanupKey] = null
+    document.documentElement.classList.remove('megameal-home-snap', 'megameal-home-stage-ready')
+  }
 
   const initPortalScrollStages = () => {
-    ;(window as any)[portalScrollCleanupKey]?.()
+    resetPortalScrollStages()
 
     const hasPortal = Boolean(document.getElementById('portal-overview'))
     document.documentElement.classList.toggle('megameal-home-snap', hasPortal)
-    document.documentElement.classList.remove('megameal-home-stage-ready')
     if (!hasPortal) return
+
+    const revealTargets = Array.from(document.querySelectorAll<HTMLElement>('.appear-on-scroll'))
+    revealTargets.forEach((target) => target.classList.remove('is-visible'))
 
     const revealObserver = new IntersectionObserver(
       (entries) =>
@@ -84,7 +95,21 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
         }),
       { threshold: 0.02, rootMargin: '0px 0px -8% 0px' }
     )
-    document.querySelectorAll('.appear-on-scroll').forEach(el => revealObserver.observe(el))
+    revealTargets.forEach(el => revealObserver.observe(el))
+
+    const revealVisibleTargets = () => {
+      revealTargets.forEach((target) => {
+        const rect = target.getBoundingClientRect()
+        const isVisible =
+          rect.bottom > window.innerHeight * 0.08 &&
+          rect.top < window.innerHeight * 0.92
+
+        if (isVisible) {
+          target.classList.add('is-visible')
+          revealObserver.unobserve(target)
+        }
+      })
+    }
 
     const bannerStage = document.getElementById('banner-container')
     bannerStage?.classList.add('portal-snap-stage', 'portal-snap-stage--hero')
@@ -155,19 +180,22 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
     window.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', scheduleCurrentStage)
 
+    const runStageMeasurements = () => {
+      revealVisibleTargets()
+      setCurrentStage()
+    }
+
     // Delay the first measurement so layout has settled after the page swap /
     // view-transition animation. A double rAF gets past the first paint frame;
     // the timeout is a safety net for slower devices or deferred content.
-    let initialMeasureRaf = 0
-    initialMeasureRaf = window.requestAnimationFrame(() => {
+    const initialMeasureRaf = window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
-        setCurrentStage()
+        runStageMeasurements()
       })
     })
 
-    const delayedMeasure = window.setTimeout(() => {
-      setCurrentStage()
-    }, 400)
+    const delayedMeasure = window.setTimeout(runStageMeasurements, 250)
+    const settledMeasure = window.setTimeout(runStageMeasurements, 700)
 
     ;(window as any)[portalScrollCleanupKey] = () => {
       revealObserver.disconnect()
@@ -175,6 +203,7 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
       window.removeEventListener('resize', scheduleCurrentStage)
       window.cancelAnimationFrame(initialMeasureRaf)
       window.clearTimeout(delayedMeasure)
+      window.clearTimeout(settledMeasure)
       if (frameRequest) {
         window.cancelAnimationFrame(frameRequest)
       }
@@ -183,10 +212,35 @@ const publishedTimelineCount = timelineManifest.items.filter(event => !event.isD
     }
   }
 
+  ;(window as any)[portalScrollInitKey] = initPortalScrollStages
+  ;(window as any)[portalScrollResetKey] = resetPortalScrollStages
+
   initPortalScrollStages()
   if (!(window as any)[portalScrollBoundKey]) {
-    document.addEventListener('astro:page-load', initPortalScrollStages)
+    const rerunPortalStages = () => (window as any)[portalScrollInitKey]?.()
+    const clearPortalStages = () => (window as any)[portalScrollResetKey]?.()
+
+    document.addEventListener('astro:page-load', rerunPortalStages)
+    document.addEventListener('astro:before-preparation', clearPortalStages)
+    window.addEventListener('pageshow', rerunPortalStages)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        window.setTimeout(rerunPortalStages, 0)
+      }
+    })
+
     ;(window as any)[portalScrollBoundKey] = true
+  }
+
+  if (window?.swup?.hooks && !(window as any)[portalScrollSwupBoundKey]) {
+    window.swup.hooks.on('visit:start', () => {
+      ;(window as any)[portalScrollResetKey]?.()
+    })
+    window.swup.hooks.on('page:view', () => {
+      ;(window as any)[portalScrollInitKey]?.()
+    })
+
+    ;(window as any)[portalScrollSwupBoundKey] = true
   }
 </script>
 

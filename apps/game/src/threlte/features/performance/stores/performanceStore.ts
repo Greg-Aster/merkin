@@ -12,6 +12,21 @@ export interface MemoryInfo {
   programs: number;
 }
 
+export interface LongTaskInfo {
+  supported: boolean;
+  count: number;
+  lastDuration: number;
+  maxDuration: number;
+  totalDuration: number;
+}
+
+export interface SystemTimingInfo {
+  lastMs: number;
+  avgMs: number;
+  maxMs: number;
+  samples: number;
+}
+
 export const fpsStore: Writable<number> = writable(60)
 export const frameTimeStore: Writable<number> = writable(16.67) // 60fps = 16.67ms
 export const memoryStore: Writable<MemoryInfo> = writable({
@@ -26,6 +41,14 @@ export const renderInfoStore: Writable<{calls: number, triangles: number}> = wri
 export const performanceGradeStore: Writable<string> = writable('A')
 export const performanceScoreStore: Writable<number> = writable(100)
 export const optimizationRecommendationsStore: Writable<string[]> = writable([])
+export const longTaskStore: Writable<LongTaskInfo> = writable({
+  supported: false,
+  count: 0,
+  lastDuration: 0,
+  maxDuration: 0,
+  totalDuration: 0,
+})
+export const systemTimingsStore: Writable<Record<string, SystemTimingInfo>> = writable({})
 
 // --- Part 2: Performance Configuration (For Driving Component Logic) ---
 
@@ -56,5 +79,42 @@ if (typeof window !== 'undefined') {
     // Update both the detailed settings store and the level name store
     qualitySettingsStore.set(qualitySettings)
     qualityLevelStore.set(level)
+  })
+}
+
+export function recordLongTask(duration: number): void {
+  longTaskStore.update((current) => ({
+    supported: true,
+    count: current.count + 1,
+    lastDuration: duration,
+    maxDuration: Math.max(current.maxDuration, duration),
+    totalDuration: current.totalDuration + duration,
+  }))
+}
+
+export function markLongTaskSupport(supported: boolean): void {
+  longTaskStore.update((current) => ({
+    ...current,
+    supported,
+  }))
+}
+
+export function recordSystemTiming(name: string, durationMs: number): void {
+  systemTimingsStore.update((current) => {
+    const previous = current[name]
+    const nextSamples = (previous?.samples ?? 0) + 1
+    const nextAvg = previous
+      ? ((previous.avgMs * previous.samples) + durationMs) / nextSamples
+      : durationMs
+
+    return {
+      ...current,
+      [name]: {
+        lastMs: durationMs,
+        avgMs: nextAvg,
+        maxMs: Math.max(previous?.maxMs ?? 0, durationMs),
+        samples: nextSamples,
+      },
+    }
   })
 }

@@ -13,6 +13,10 @@ import {
   performanceGradeStore,
   performanceScoreStore,
   optimizationRecommendationsStore,
+  longTaskStore,
+  systemTimingsStore,
+  type LongTaskInfo,
+  type SystemTimingInfo,
 } from '../stores/performanceStore'
 
 // Props
@@ -29,6 +33,14 @@ let qualityLevel = 'medium'
 let performanceGrade = 'A'
 let performanceScore = 100
 let recommendations = []
+let longTasks: LongTaskInfo = {
+  supported: false,
+  count: 0,
+  lastDuration: 0,
+  maxDuration: 0,
+  totalDuration: 0,
+}
+let systemTimings: Record<string, SystemTimingInfo> = {}
 
 // Chart data for performance history
 let performanceHistory: Array<{time: number, fps: number, frameTime: number}> = []
@@ -66,6 +78,14 @@ const unsubscribeScore = performanceScoreStore.subscribe(value => {
 
 const unsubscribeRecommendations = optimizationRecommendationsStore.subscribe(value => {
   recommendations = value
+})
+
+const unsubscribeLongTasks = longTaskStore.subscribe(value => {
+  longTasks = value
+})
+
+const unsubscribeSystemTimings = systemTimingsStore.subscribe(value => {
+  systemTimings = value
 })
 
 function updatePerformanceHistory() {
@@ -108,6 +128,10 @@ function formatNumber(num: number, decimals = 0): string {
   return num.toFixed(decimals)
 }
 
+$: sortedSystemTimings = Object.entries(systemTimings)
+  .sort((a, b) => b[1].avgMs - a[1].avgMs)
+  .slice(0, 6)
+
 onDestroy(() => {
   unsubscribeFPS()
   unsubscribeFrameTime()
@@ -117,6 +141,8 @@ onDestroy(() => {
   unsubscribeGrade()
   unsubscribeScore()
   unsubscribeRecommendations()
+  unsubscribeLongTasks()
+  unsubscribeSystemTimings()
 })
 </script>
 
@@ -214,6 +240,50 @@ onDestroy(() => {
             <span>{formatNumber(renderInfo.lines)}</span>
           </div>
         </div>
+      </div>
+
+      <!-- Main-thread diagnostics -->
+      <div class="section">
+        <h4>Main Thread</h4>
+        <div class="render-grid">
+          <div class="render-item">
+            <span>Long Tasks:</span>
+            <span class:warning={longTasks.count > 0}>{longTasks.supported ? longTasks.count : 'n/a'}</span>
+          </div>
+          <div class="render-item">
+            <span>Last Long Task:</span>
+            <span class:warning={longTasks.lastDuration > 50}>
+              {longTasks.supported ? `${longTasks.lastDuration.toFixed(1)}ms` : 'n/a'}
+            </span>
+          </div>
+          <div class="render-item">
+            <span>Max Long Task:</span>
+            <span class:warning={longTasks.maxDuration > 50}>
+              {longTasks.supported ? `${longTasks.maxDuration.toFixed(1)}ms` : 'n/a'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- System timings -->
+      <div class="section">
+        <h4>System Timings</h4>
+        {#if sortedSystemTimings.length > 0}
+          <div class="render-grid">
+            {#each sortedSystemTimings as [name, timing]}
+              <div class="render-item">
+                <span>{name}:</span>
+                <span class:warning={timing.avgMs > 4}>
+                  {timing.avgMs.toFixed(2)}ms avg
+                </span>
+              </div>
+            {/each}
+          </div>
+        {:else}
+          <div class="memory-item">
+            <span>No timing samples yet.</span>
+          </div>
+        {/if}
       </div>
 
       <!-- Performance Chart -->

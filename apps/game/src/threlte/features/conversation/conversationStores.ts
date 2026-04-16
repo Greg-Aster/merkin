@@ -15,7 +15,7 @@ import type {
   ConversationStores,
   ConversationSystemConfig
 } from './types'
-import { ConversationManager } from './ConversationManager'
+import type { ConversationManager } from './ConversationManager'
 
 // ================================
 // Configuration
@@ -91,17 +91,33 @@ const conversationConfig = writable<ConversationSystemConfig>(defaultConfig)
 // ================================
 
 let conversationManager: ConversationManager | null = null
+let conversationManagerModulePromise: Promise<typeof import('./ConversationManager')> | null = null
 
-// Initialize conversation manager when config is available
-conversationConfig.subscribe(config => {
+async function ensureConversationManager(): Promise<ConversationManager> {
   if (conversationManager) {
-    conversationManager.dispose()
+    return conversationManager
   }
-  conversationManager = new ConversationManager(config)
-  
-  // Set up event handlers
+
+  if (!conversationManagerModulePromise) {
+    conversationManagerModulePromise = import('./ConversationManager')
+  }
+
+  const { ConversationManager } = await conversationManagerModulePromise
+  conversationManager = new ConversationManager(get(conversationConfig))
   setupConversationEventHandlers()
-})
+  return conversationManager
+}
+
+async function rebuildConversationManager(): Promise<void> {
+  if (!conversationManager) return
+
+  const activeSessions = conversationManager.getAllActiveSessions()
+  if (activeSessions.length > 0) return
+
+  conversationManager.dispose()
+  conversationManager = null
+  await ensureConversationManager()
+}
 
 // ================================
 // Derived Stores
@@ -157,13 +173,9 @@ export const conversationActions = {
     personality: NPCPersonality,
     context: any
   ): Promise<ConversationSession | null> {
-    if (!conversationManager) {
-      console.error('Conversation manager not initialized')
-      return null
-    }
-
     try {
-      const session = await conversationManager.startConversation(npcId, personality, context)
+      const manager = await ensureConversationManager()
+      const session = await manager.startConversation(npcId, personality, context)
       if (import.meta.env.DEV) console.log('🗣️ Starting conversation:', session.id)
       activeConversationSession.set(session)
       
@@ -224,9 +236,10 @@ export const conversationActions = {
   // End current conversation
   async endConversation(): Promise<void> {
     const session = get(activeConversationSession)
-    if (!session || !conversationManager) return
+    if (!session) return
 
-    await conversationManager.endConversation(session.id)
+    const manager = await ensureConversationManager()
+    await manager.endConversation(session.id)
     
     activeConversationSession.set(null)
     conversationUIState.update(state => ({
@@ -243,10 +256,12 @@ export const conversationActions = {
   async sendMessage(message: string): Promise<void> {
     const session = get(activeConversationSession);
 
-    if (!session || !conversationManager) {
+    if (!session) {
         console.error('Cannot send message: missing session or manager');
         return;
     }
+
+    const manager = await ensureConversationManager()
 
     // FIX: Get personality directly from the session, no more fragile lookup.
     const personality = session.personality; 
@@ -260,7 +275,7 @@ export const conversationActions = {
     conversationUIState.update(state => ({ ...state, isTyping: true }));
 
     try {
-        const response = await conversationManager.sendMessage(session.id, message, personality);
+        const response = await manager.sendMessage(session.id, message, personality);
 
         // The manager has already updated its internal session state.
         // We just need to add the new message to our local store's session to update the UI.
@@ -268,7 +283,7 @@ export const conversationActions = {
           if (currentSession && currentSession.id === session.id) {
               // The manager already added the user message. We only need to add the AI response.
               // To prevent duplicates, let's just use the full, updated list from the manager.
-              const managerSession = conversationManager.getActiveSession(session.id);
+              const managerSession = manager.getActiveSession(session.id);
               if (managerSession) {
                   currentSession.messages = managerSession.messages;
               }
@@ -341,7 +356,11 @@ export const conversationActions = {
 
   // Clear all conversations (for level transitions, etc.)
   clearAllConversations(): Promise<void[]> {
-    const activeSessions = conversationManager?.getAllActiveSessions() || []
+    if (!conversationManager) {
+      return Promise.resolve([])
+    }
+
+    const activeSessions = conversationManager.getAllActiveSessions()
     const promises = activeSessions.map(session => 
       conversationManager!.endConversation(session.id)
     )
@@ -365,6 +384,7 @@ export const conversationActions = {
   // Update system configuration
   updateConfig(updates: Partial<ConversationSystemConfig>): void {
     conversationConfig.update(config => ({ ...config, ...updates }))
+    void rebuildConversationManager()
   }
 }
 

@@ -5,22 +5,15 @@
 <script lang="ts">
   import { onDestroy, onMount, createEventDispatcher } from 'svelte'
   import { Canvas } from '@threlte/core'
-  import { Environment } from '@threlte/extras'
-  import { World } from '@threlte/rapier'
   
   // Modern UI components only
   import { ThrelteMobileControls } from './features/player'
 
-  // ==================================================================
-  // === ADD THESE IMPORTS FOR THE CONVERSATION DIALOG ===
-  // ==================================================================
   import { 
-    ConversationDialog,
     isConversationActive, 
     conversationUIState, 
     conversationActions 
-  } from './features/conversation';
-  // ==================================================================
+  } from './features/conversation'
   
   // Import MobileEnhancements component
   import MobileEnhancements from './ui/MobileEnhancements.svelte'
@@ -45,24 +38,12 @@
   import { LODSystem } from './features/performance'
   import InteractionSystem from './systems/InteractionSystem.svelte'
   
-  // Post-processing effects temporarily disabled due to library compatibility issues
-  
-  // Import stores for reactive configuration
-  import { postProcessingStore } from './stores/postProcessingStore'
-  
   // Import multiplayer service for room joining
   import { initializeClient } from './features/multiplayer'
   
-  // Import level components - Modern Architecture Only
-  import HybridObservatory from './levels/HybridObservatory.svelte'
-  import SciFiRoom from './levels/SciFiRoom.svelte'
-  
   // Import UI components
-  import { PerformancePanel } from './features/performance'
   import TimelineCard from './ui/TimelineCard.svelte'
   import SettingsButton from './ui/SettingsButton.svelte'
-  import SettingsPanel from './ui/SettingsPanel.svelte'
-  import { ChatBox } from './features/multiplayer'
   
   // Import modern Threlte stores for reactive state management
   import { 
@@ -72,7 +53,6 @@
     isMobileStore, 
     isLoadingStore, 
     errorStore,
-    dialogueStore,
     gameActions,
     loadGameState,
     type StarData 
@@ -112,14 +92,22 @@
   // Room joining state
   let isJoiningRoom = false
   let roomJoinError = ''
+
+  let currentLevelComponent: any = null
+  let settingsPanelComponent: any = null
+  let conversationDialogComponent: any = null
+  let chatBoxComponentClass: any = null
   
   let playerComponent: any = null
   let spawnSystem: any = null
   let interactionSystem: any = null // Reference to centralized InteractionSystem
-  let chatBoxComponent: any = null // Reference to ChatBox component
+  let chatBoxComponent: any = null // Reference to ChatBox component instance
   
   // Spawn system state
   let physicsReady = false
+  let activeLevelLoadRequest = 0
+
+  const levelComponentCache = new Map<string, any>()
   
   // --- NEW: Robust Loading State ---
   // We now consider the game "loaded" only when the terrain's physics are ready.
@@ -136,7 +124,6 @@
   $: isMobile = $isMobileStore
   $: isLoading = $isLoadingStore
   $: error = $errorStore
-  $: dialogue = $dialogueStore
   
   // Reactive level and star tracking - debug logs removed for performance
   $: if (import.meta.env.DEV && currentLevel) {
@@ -194,6 +181,18 @@
   } else if (selectedStar) {
     console.log('⚠️ Selected star exists but no selectedEvent created:', selectedStar)
   }
+
+  $: if (typeof window !== 'undefined' && isInitialized && currentLevel) {
+    void ensureLevelComponent(currentLevel)
+  }
+
+  $: if ($isSettingsMenuOpen && !settingsPanelComponent) {
+    void ensureSettingsPanelComponent()
+  }
+
+  $: if (($isConversationActive || $conversationUIState.isVisible) && !conversationDialogComponent) {
+    void ensureConversationDialogComponent()
+  }
   
   
   /**
@@ -225,6 +224,61 @@
       // Legacy support for direct host ID joining is deprecated
       roomJoinError = 'Direct host ID joining is no longer supported. Please use room names instead.';
       console.warn(`⚠️ Legacy join parameter "${joinParam}" is deprecated`);
+    }
+  }
+
+  async function ensureLevelComponent(levelId: string) {
+    const normalizedLevel = levelId === 'sci-fi-room' ? 'sci-fi-room' : 'observatory'
+    const cached = levelComponentCache.get(normalizedLevel)
+    if (cached) {
+      currentLevelComponent = cached
+      return
+    }
+
+    const requestId = ++activeLevelLoadRequest
+    currentLevelComponent = null
+
+    const module =
+      normalizedLevel === 'sci-fi-room'
+        ? await import('./levels/SciFiRoom.svelte')
+        : await import('./levels/HybridObservatory.svelte')
+
+    levelComponentCache.set(normalizedLevel, module.default)
+
+    if (requestId === activeLevelLoadRequest) {
+      currentLevelComponent = module.default
+    }
+  }
+
+  async function ensureSettingsPanelComponent() {
+    if (settingsPanelComponent) return
+    const module = await import('./ui/SettingsPanel.svelte')
+    settingsPanelComponent = module.default
+  }
+
+  async function ensureConversationDialogComponent() {
+    if (conversationDialogComponent) return
+    const module = await import('./features/conversation/ConversationDialog.svelte')
+    conversationDialogComponent = module.default
+  }
+
+  async function ensureChatBoxComponent() {
+    if (chatBoxComponentClass) return
+    const module = await import('./features/multiplayer/ui/ChatBox.svelte')
+    chatBoxComponentClass = module.default
+  }
+
+  function warmNonCriticalUI() {
+    const load = () => {
+      void ensureChatBoxComponent()
+    }
+
+    if (typeof window === 'undefined') return
+
+    if ('requestIdleCallback' in window) {
+      ;(window as any).requestIdleCallback(load, { timeout: 2000 })
+    } else {
+      window.setTimeout(load, 1500)
     }
   }
 
@@ -260,6 +314,7 @@
   
       // The loading screen will now be hidden by the `terrainReady` reactive block.
       isInitialized = true
+      warmNonCriticalUI()
   
       console.log('✅ Game systems initialized. Waiting for terrain...')
     } catch (err) {
@@ -450,26 +505,15 @@
           
           
           <!-- Modern MEGAMEAL Architecture - Dynamic Level Loading -->
-          {#if $currentLevelStore === 'sci-fi-room'}
-            <SciFiRoom 
+          {#if currentLevelComponent}
+            <svelte:component
+              this={currentLevelComponent}
               timelineEvents={parsedTimelineEvents}
               timelineEventsJson={typeof timelineEvents === 'string' ? timelineEvents : JSON.stringify(parsedTimelineEvents)}
               {spawnSystem}
               {interactionSystem}
-              position={[0, 0, 0]}
-              playerSpawnPoint={[0, 1, 0]}
-              on:starSelected={(e) => dispatch('starSelected', e.detail)}
-              on:telescopeInteraction={(e) => dispatch('telescopeInteraction', e.detail)}
-              on:terrainReady={() => terrainReady = true}
-            />
-          {:else}
-            <HybridObservatory 
-              timelineEvents={parsedTimelineEvents}
-              timelineEventsJson={typeof timelineEvents === 'string' ? timelineEvents : JSON.stringify(parsedTimelineEvents)}
-              {spawnSystem}
-              {interactionSystem}
-              position={[0, 15, 10]}
-              playerSpawnPoint={[0, 18, -50]}
+              position={$currentLevelStore === 'sci-fi-room' ? [0, 0, 0] : [0, 15, 10]}
+              playerSpawnPoint={$currentLevelStore === 'sci-fi-room' ? [0, 1, 0] : [0, 18, -50]}
               on:starSelected={(e) => dispatch('starSelected', e.detail)}
               on:telescopeInteraction={(e) => dispatch('telescopeInteraction', e.detail)}
               on:terrainReady={() => terrainReady = true}
@@ -492,6 +536,14 @@
         <div class="text-center text-white">
           <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto"></div>
           <p class="mt-4 text-lg">{loadingMessage}</p>
+          {#if currentLevel !== 'observatory'}
+            <button
+              class="mt-6 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+              on:click={() => { gameActions.transitionToLevel('observatory'); terrainReady = false; }}
+            >
+              ← Return to Observatory
+            </button>
+          {/if}
         </div>
       </div>
     {/if}
@@ -550,7 +602,9 @@
         {/if}
         
         <!-- Settings Panel -->
-        <SettingsPanel />
+        {#if settingsPanelComponent}
+          <svelte:component this={settingsPanelComponent} />
+        {/if}
         
         <!-- Threlte-Native Mobile Controls -->
         {#if isMobile && isInitialized && !isLoading && !error}
@@ -561,7 +615,9 @@
         <MobileEnhancements />
         
         <!-- Chat Box -->
-        <ChatBox bind:this={chatBoxComponent} />
+        {#if chatBoxComponentClass}
+          <svelte:component this={chatBoxComponentClass} bind:this={chatBoxComponent} />
+        {/if}
       </div>
 
       <!--
@@ -569,9 +625,10 @@
       // === ADD THE CONVERSATION DIALOG RENDERING BLOCK HERE ===
       // ==================================================================
       -->
-      {#if $isConversationActive}
+      {#if $isConversationActive && conversationDialogComponent}
         <div style="pointer-events: auto;">
-            <ConversationDialog
+            <svelte:component
+                this={conversationDialogComponent}
                 visible={$conversationUIState.isVisible}
                 position={$conversationUIState.position}
                 on:close={() => conversationActions.endConversation()}

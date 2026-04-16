@@ -2,7 +2,6 @@
   import { createEventDispatcher, onMount } from 'svelte'
   import { T } from '@threlte/core'
   import LevelManager from '../core/LevelManager.svelte'
-  import { LightingComponent } from '../features/lighting'
   import { Ocean as OceanComponent, UnderwaterOverlay, underwaterStateStore } from '../features/ocean'
   import HybridFireflyComponent from '../components/HybridFireflyComponent.svelte'
   import NaturePackVegetation from '../components/NaturePackVegetation.svelte'
@@ -11,11 +10,9 @@
   import { qualitySettingsStore } from '../features/performance'
   import { OptimizationLevel, optimizationManager } from '../features/performance'
   import { Terrain, terrainStore, type TerrainConfig } from '../features/terrain'
-  import { ConversationDialog, conversationUIState, isConversationActive, conversationActions } from '../features/conversation'
   import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
   import { LODSystem } from '../features/performance'
   import GhibliStyleSystem from '../styles/GhibliStyleSystem.svelte'
-  import StyleControls from '../ui/StyleControls.svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -406,16 +403,6 @@
       
     </T.Group>
   </LevelManager>
-
-  <!-- AI Conversation Dialog - rendered outside of 3D scene, enabled by manifest -->
-  {#if manifest.features.conversations && $isConversationActive}
-    <ConversationDialog
-      visible={$conversationUIState.isVisible}
-      position={$conversationUIState.position}
-      on:close={() => conversationActions.endConversation()}
-    />
-  {/if}
-
 {:else}
   <!-- Loading state while manifest loads -->
   <T.Group position={[0, 10, 0]}>
