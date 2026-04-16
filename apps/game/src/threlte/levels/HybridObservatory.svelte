@@ -1,20 +1,20 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte'
+  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
   import { T } from '@threlte/core'
   import LevelManager from '../core/LevelManager.svelte'
-  import { Ocean as OceanComponent, UnderwaterOverlay, underwaterStateStore } from '../features/ocean'
+  import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
   import HybridFireflyComponent from '../components/HybridFireflyComponent.svelte'
   import NaturePackVegetation from '../components/NaturePackVegetation.svelte'
+  import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
   import Skybox from '../systems/Skybox.svelte'
   import StarMap from '../systems/StarMap.svelte'
-  import { qualitySettingsStore } from '../features/performance'
+  import { qualityLevelStore, qualitySettingsStore } from '../features/performance/stores/performanceStore'
   import { OptimizationLevel, optimizationManager } from '../features/performance'
   import { Terrain, terrainStore, type TerrainConfig } from '../features/terrain'
   import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
-  import { LODSystem } from '../features/performance'
-  import GhibliStyleSystem from '../styles/GhibliStyleSystem.svelte'
 
   const dispatch = createEventDispatcher()
+  const isDev = import.meta.env.DEV
 
   // --- Props ---
   // The manifest URL is now the primary input for configuring the level
@@ -31,13 +31,20 @@
   let playerSpawnPoint: [number, number, number] = [0, 50, 0] // Default spawn, will be overwritten by manifest
 
   // Component references
-  let hybridFireflyComponent: HybridFireflyComponent
-  let starMapComponent: StarMap
-  let starNavigationSystem: StarNavigationSystem
-  let naturePackVegetation: NaturePackVegetation
-  let ghibliStyleSystem: GhibliStyleSystem
+  let hybridFireflyComponent: any = null
+  let starMapComponent: any = null
+  let starNavigationSystem: any = null
+  let naturePackVegetation: any = null
+  let ghibliStyleSystem: any = null
+  let styleSystemComponent: any = null
   let terrainReady = false
   let starMapRef: THREE.Group
+  let deferredEnvironmentBootStarted = false
+  let showOcean = false
+  let showFireflies = false
+  let showVegetation = false
+  let showStarSystems = false
+  const deferredSceneBootCleanups: Array<() => void> = []
   
   // Style configuration from manifest
   let stylePreset: 'ghibli' | 'alto' | 'monument' | 'retro' = 'ghibli'
@@ -53,6 +60,11 @@
     loadLevelFromManifest();
     loadTimelineData();
   });
+
+  onDestroy(() => {
+    deferredSceneBootCleanups.forEach((cleanup) => cleanup())
+    deferredSceneBootCleanups.length = 0
+  })
 
   async function loadLevelFromManifest() {
     try {
@@ -135,7 +147,7 @@
       if (heightmapConfig && 
           (Math.abs(heightmapConfig.minHeight - manifest.physics.minHeight) > 0.01 ||
            Math.abs(heightmapConfig.maxHeight - manifest.physics.maxHeight) > 0.01)) {
-        console.warn('⚠️ Height parameter mismatch detected:', {
+      if (isDev) console.warn('⚠️ Height parameter mismatch detected:', {
           configMinHeight: heightmapConfig.minHeight,
           manifestMinHeight: manifest.physics.minHeight,
           configMaxHeight: heightmapConfig.maxHeight,
@@ -171,7 +183,7 @@
         }
       });
 
-      console.log(`✅ Level "${manifest.name}" loaded successfully from manifest.`);
+      if (isDev) console.log(`✅ Level "${manifest.name}" loaded successfully from manifest.`);
 
     } catch (error) {
       console.error(`❌ Failed to load level from ${manifestUrl}:`, error);
@@ -217,22 +229,153 @@
     dispatch('levelTransition', event.detail)
   }
   function handleStyleSystemReady(event: CustomEvent) {
-    console.log('🎨 Style system ready:', event.detail)
+    if (isDev) console.log('🎨 Style system ready:', event.detail)
   }
   function handleStyleChanged(event: CustomEvent) {
-    console.log('🎨 Style changed to:', event.detail.preset)
+    if (isDev) console.log('🎨 Style changed to:', event.detail.preset)
   }
 
   // Get current optimization settings reactively
   $: levelOptimizationSettings = manifest ? optimizationManager.getComponentSettings(manifest.id) : null;
+  $: fullStyleSystemEnabled =
+    !!manifest?.features.styles
+    && ($qualityLevelStore === OptimizationLevel.HIGH || $qualityLevelStore === OptimizationLevel.ULTRA)
+  $: fallbackMoodLightingEnabled = !!manifest?.features.styles && !fullStyleSystemEnabled
+  $: vegetationInstanceCount = (() => {
+    switch ($qualityLevelStore) {
+      case OptimizationLevel.ULTRA_LOW:
+        return 0
+      case OptimizationLevel.LOW:
+        return 12
+      case OptimizationLevel.MEDIUM:
+        return 28
+      case OptimizationLevel.HIGH:
+        return 60
+      case OptimizationLevel.ULTRA:
+        return 96
+      default:
+        return 28
+    }
+  })()
+  $: oceanAnimationEnabled =
+    manifest?.ocean?.enableAnimation !== false
+    && $qualityLevelStore !== OptimizationLevel.ULTRA_LOW
+
+  $: if (fullStyleSystemEnabled && !styleSystemComponent) {
+    void ensureStyleSystemComponent()
+  }
+
+  $: if (
+    terrainReady
+    && manifest
+    && !deferredEnvironmentBootStarted
+    && (!manifest.features.starMap || !isLoadingTimeline)
+  ) {
+    startDeferredSceneBoot()
+  }
+
+  async function ensureStyleSystemComponent() {
+    if (styleSystemComponent) return
+    const module = await import('../styles/GhibliStyleSystem.svelte')
+    styleSystemComponent = module.default
+  }
+
+  function scheduleDeferredSceneTask(task: () => void | Promise<void>, delay = 0) {
+    if (typeof window === 'undefined') return () => {}
+
+    let cancelled = false
+    let delayTimeoutId: number | null = null
+    let idleCallbackId: number | null = null
+    let fallbackTimeoutId: number | null = null
+
+    const cleanup = () => {
+      cancelled = true
+
+      if (delayTimeoutId !== null) {
+        window.clearTimeout(delayTimeoutId)
+      }
+
+      if (idleCallbackId !== null && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleCallbackId)
+      }
+
+      if (fallbackTimeoutId !== null) {
+        window.clearTimeout(fallbackTimeoutId)
+      }
+    }
+
+    const runTask = () => {
+      if (cancelled) return
+      void task()
+    }
+
+    const queueTask = () => {
+      if (cancelled) return
+
+      if ('requestIdleCallback' in window) {
+        idleCallbackId = window.requestIdleCallback(() => {
+          runTask()
+        }, { timeout: 300 })
+        return
+      }
+
+      fallbackTimeoutId = window.setTimeout(() => {
+        runTask()
+      }, 16)
+    }
+
+    delayTimeoutId = window.setTimeout(() => {
+      queueTask()
+    }, delay)
+
+    return cleanup
+  }
+
+  function startDeferredSceneBoot() {
+    if (deferredEnvironmentBootStarted) return
+    deferredEnvironmentBootStarted = true
+
+    if (manifest?.features.ocean) {
+      deferredSceneBootCleanups.push(
+        scheduleDeferredSceneTask(() => {
+          showOcean = true
+        }, 0)
+      )
+    }
+
+    if (manifest?.features.starMap && !timelineLoadError) {
+      deferredSceneBootCleanups.push(
+        scheduleDeferredSceneTask(() => {
+          showStarSystems = true
+        }, 60)
+      )
+    }
+
+    if (manifest?.features.fireflies) {
+      deferredSceneBootCleanups.push(
+        scheduleDeferredSceneTask(() => {
+          showFireflies = true
+        }, 180)
+      )
+    }
+
+    if (manifest?.features.vegetation) {
+      deferredSceneBootCleanups.push(
+        scheduleDeferredSceneTask(() => {
+          showVegetation = true
+        }, 320)
+      )
+    }
+  }
 </script>
 
 {#if manifest}
   <LevelManager let:registry let:lighting let:ecsWorld>
     
-    <!-- Ghibli Style System - enabled based on manifest -->
-    {#if manifest.features.styles && $qualitySettingsStore.enableDynamicLighting}
-      <GhibliStyleSystem 
+    <!-- Full stylized post-processing only on stronger tiers. -->
+    {#if fullStyleSystemEnabled && styleSystemComponent}
+      <svelte:component
+        this={styleSystemComponent}
         bind:this={ghibliStyleSystem}
         preset={stylePreset}
         enableToonShading={enableToonShading}
@@ -247,8 +390,22 @@
         on:styleChanged={handleStyleChanged}
       />
     {/if}
-    
-    <LODSystem enableLOD={true} maxDistance={200} updateFrequency={0.1} enableCulling={true} />
+
+    {#if fallbackMoodLightingEnabled}
+      <T.AmbientLight color="#1a2238" intensity={4.8} />
+      <T.DirectionalLight
+        position={[40, 70, 20]}
+        color="#b8c7ff"
+        intensity={0.45}
+        castShadow={false}
+      />
+      <T.DirectionalLight
+        position={[-30, 35, -24]}
+        color="#23324d"
+        intensity={0.2}
+        castShadow={false}
+      />
+    {/if}
     
     <!-- Dynamic fog based on manifest style configuration -->
     <T.FogExp2 
@@ -289,8 +446,8 @@
       {/if}
       
       <!-- Ocean Component - configured from manifest -->
-      {#if manifest.features.ocean}
-        <OceanComponent 
+      {#if manifest.features.ocean && showOcean}
+        <OceanComponent
           size={{ 
             width: manifest.ocean?.size?.width || 1000, 
             height: manifest.ocean?.size?.height || 1000 
@@ -298,7 +455,7 @@
           color={manifest.ocean?.underwaterFogColor || 0x006994}
           opacity={0.9}
           segments={levelOptimizationSettings?.oceanSegments || { width: 24, height: 24 }}
-          enableAnimation={manifest.ocean?.enableAnimation !== false}
+          enableAnimation={oceanAnimationEnabled}
           animationSpeed={0.1}
           enableRising={manifest.ocean?.enableRising || false}
           initialLevel={manifest.ocean?.initialLevel || 0}
@@ -313,31 +470,39 @@
           underwaterFogDensity={manifest.ocean?.underwaterFogDensity || 0.1}
           underwaterFogColor={manifest.ocean?.underwaterFogColor || 0x006994}
           surfaceFogDensity={manifest.ocean?.surfaceFogDensity || 0.001}
-          on:waterEnter={(e) => console.log('🌊 Player entered water at depth:', e.detail.depth)}
-          on:waterExit={() => console.log('🏖️ Player exited water')}
+          on:waterEnter={(e) => {
+            if (isDev) console.log('🌊 Player entered water at depth:', e.detail.depth)
+          }}
+          on:waterExit={() => {
+            if (isDev) console.log('🏖️ Player exited water')
+          }}
           metalness={0.1}
           roughness={0.03}
           envMapIntensity={2.0}
         />
-        <UnderwaterOverlay />
+        {#if $underwaterStateStore.isUnderwater || $underwaterStateStore.transitionProgress > 0}
+          <UnderwaterOverlay />
+        {/if}
       {/if}
 
       <!-- Nature Pack Vegetation System - configured from manifest -->
-      {#if manifest.features.vegetation && terrainReady}
-        <NaturePackVegetation 
+      {#if manifest.features.vegetation && showVegetation && terrainReady && vegetationInstanceCount > 0}
+        <NaturePackVegetation
           bind:this={naturePackVegetation}
           {getHeightAt}
-          count={$qualitySettingsStore.maxVegetationInstances * 10}
+          count={vegetationInstanceCount}
           radius={160}
           density={0.9}
           enableLOD={true}
-          on:vegetationReady={(e) => console.log('🌱 Vegetation ready:', e.detail)}
+          on:vegetationReady={(e) => {
+            if (isDev) console.log('🌱 Vegetation ready:', e.detail)
+          }}
         />
       {/if}
 
       <!-- Hybrid Firefly Component - configured from manifest -->
-      {#if manifest.features.fireflies}
-        <HybridFireflyComponent 
+      {#if manifest.features.fireflies && showFireflies}
+        <HybridFireflyComponent
           bind:this={hybridFireflyComponent}
           {getHeightAt}
           {interactionSystem}
@@ -375,28 +540,36 @@
           <T.Group position={[0, 5, 0]} name="error-indicator">
             <T.Mesh>
               <T.SphereGeometry args={[2]} />
-              <T.MeshBasicMaterial color="#ff0044" transparent opacity={0.6} />
-            </T.Mesh>
-          </T.Group>
-        {:else}
-        <StarMap 
-          bind:this={starMapComponent}
-          bind:starMapRef={starMapRef}
-          timelineEvents={realTimelineEvents}
-          {interactionSystem}
-          on:starSelected={handleStarSelected}
-        />
-          <StarNavigationSystem 
+            <T.MeshBasicMaterial color="#ff0044" transparent opacity={0.6} />
+          </T.Mesh>
+        </T.Group>
+        {:else if showStarSystems}
+          <StarMap
+            bind:this={starMapComponent}
+            bind:starMapRef={starMapRef}
+            timelineEvents={realTimelineEvents}
+            {interactionSystem}
+            on:starSelected={handleStarSelected}
+          />
+          <StarNavigationSystem
             bind:this={starNavigationSystem}
             timelineEvents={realTimelineEvents}
             starMapComponent={starMapComponent}
             on:starSelected={handleStarSelected}
             on:starDeselected={handleStarDeselected}
             on:levelTransition={handleLevelTransition}
-            on:starInteraction={(e) => console.log('🎯 Star interaction:', e.detail)}
-            on:transitionStarted={(e) => console.log('🎮 Transition started:', e.detail)}
-            on:transitionCompleted={(e) => console.log('✅ Transition completed:', e.detail)}
-            on:transitionFailed={(e) => console.log('❌ Transition failed:', e.detail)}
+            on:starInteraction={(e) => {
+              if (isDev) console.log('🎯 Star interaction:', e.detail)
+            }}
+            on:transitionStarted={(e) => {
+              if (isDev) console.log('🎮 Transition started:', e.detail)
+            }}
+            on:transitionCompleted={(e) => {
+              if (isDev) console.log('✅ Transition completed:', e.detail)
+            }}
+            on:transitionFailed={(e) => {
+              if (isDev) console.log('❌ Transition failed:', e.detail)
+            }}
           />
         {/if}
       {/if}

@@ -7,39 +7,32 @@
   import { Canvas } from '@threlte/core'
   
   // Modern UI components only
-  import { ThrelteMobileControls } from './features/player'
+  import ThrelteMobileControls from './features/player/ThrelteMobileControls.svelte'
 
   import { 
     isConversationActive, 
     conversationUIState, 
     conversationActions 
-  } from './features/conversation'
+  } from './features/conversation/conversationStores'
   
   // Import MobileEnhancements component
   import MobileEnhancements from './ui/MobileEnhancements.svelte'
   
   // Import reactive performance store for conditional rendering
-  import { qualitySettingsStore } from './features/performance'
+  import { qualitySettingsStore } from './features/performance/stores/performanceStore'
   
   // Import Threlte systems
-  import { Player } from './features/player'
-  import { MultiplayerManager } from './features/multiplayer'
   import Renderer from './systems/Renderer.svelte'
   import SimplePostProcessing from './systems/SimplePostProcessing.svelte'
-  import Physics from './systems/Physics.svelte'
   import SpawnSystem from './systems/SpawnSystem.svelte'
-  import Audio from './systems/Audio.svelte'
   import EventBus from './systems/EventBus.svelte'
   import Time from './systems/Time.svelte'
   import AssetLoader from './systems/AssetLoader.svelte'
   // Input and Interaction now handled by Player component
   // StateManager removed - was conflicting with Player component rotation control
-  import { PerformanceSystem } from './features/performance'
-  import { LODSystem } from './features/performance'
+  import PerformanceSystem from './features/performance/systems/Performance.svelte'
+  import LODSystem from './features/performance/systems/LOD.svelte'
   import InteractionSystem from './systems/InteractionSystem.svelte'
-  
-  // Import multiplayer service for room joining
-  import { initializeClient } from './features/multiplayer'
   
   // Import UI components
   import TimelineCard from './ui/TimelineCard.svelte'
@@ -62,6 +55,13 @@
   import { isSettingsMenuOpen } from './stores/uiStore'
   
   const dispatch = createEventDispatcher()
+  const isDev = import.meta.env.DEV
+
+  function debugLog(...args: any[]) {
+    if (isDev) {
+      console.log(...args)
+    }
+  }
   
   // Props
   export let timelineEvents = []
@@ -71,7 +71,7 @@
     if (typeof timelineEvents === 'string') {
       try {
         const parsed = JSON.parse(timelineEvents)
-        console.log(`🎮 Game.svelte: Parsed ${parsed.length} timeline events from JSON string`)
+        debugLog(`🎮 Game.svelte: Parsed ${parsed.length} timeline events from JSON string`)
         return parsed
       } catch (error) {
         console.error('Failed to parse timeline events:', error)
@@ -79,9 +79,11 @@
       }
     }
     const events = Array.isArray(timelineEvents) ? timelineEvents : []
-    console.log(`🎮 Game.svelte: Using ${events.length} timeline events directly`)
+    debugLog(`🎮 Game.svelte: Using ${events.length} timeline events directly`)
     return events
   })()
+  $: timelineEventsPayload =
+    typeof timelineEvents === 'string' ? timelineEvents : JSON.stringify(parsedTimelineEvents)
   // Game state - fully migrated to reactive Threlte stores
   
   // UI state (local)
@@ -97,6 +99,11 @@
   let settingsPanelComponent: any = null
   let conversationDialogComponent: any = null
   let chatBoxComponentClass: any = null
+  let audioSystemComponent: any = null
+  let multiplayerManagerComponent: any = null
+  let physicsSystemComponent: any = null
+  let playerComponentClass: any = null
+  let initializeClientFn: ((roomName: string) => void) | null = null
   
   let playerComponent: any = null
   let spawnSystem: any = null
@@ -106,6 +113,9 @@
   // Spawn system state
   let physicsReady = false
   let activeLevelLoadRequest = 0
+  let deferredAudioCleanup: (() => void) | null = null
+  let deferredGameplayCoreCleanup: (() => void) | null = null
+  let gameplayCorePromise: Promise<void> | null = null
 
   const levelComponentCache = new Map<string, any>()
   
@@ -113,7 +123,7 @@
   // We now consider the game "loaded" only when the terrain's physics are ready.
   let terrainReady = false
   $: if (terrainReady) {
-    console.log('✅ Terrain and physics are ready. Hiding loading screen.');
+    debugLog('✅ Terrain and physics are ready. Hiding loading screen.')
     gameActions.setLoading(false);
   }
   
@@ -126,12 +136,12 @@
   $: error = $errorStore
   
   // Reactive level and star tracking - debug logs removed for performance
-  $: if (import.meta.env.DEV && currentLevel) {
-    console.log('🎮 Current level:', currentLevel)
+  $: if (isDev && currentLevel) {
+    debugLog('🎮 Current level:', currentLevel)
   }
   
-  $: if (import.meta.env.DEV && selectedStar) {
-    console.log('⭐ Star selected:', selectedStar.title)
+  $: if (isDev && selectedStar) {
+    debugLog('⭐ Star selected:', selectedStar.title)
   }
   
   // Modern dialog system now handled by ConversationDialog component
@@ -172,16 +182,6 @@
       }
     : null
   
-  // Debug for selected events and star selection
-  $: if (selectedStar) {
-    console.log('⭐ Selected star:', selectedStar.title?.substring(0, 30) + '...')
-  }
-  $: if (selectedEvent) {
-    console.log('🎯 Timeline card:', selectedEvent.title?.substring(0, 30) + '...')
-  } else if (selectedStar) {
-    console.log('⚠️ Selected star exists but no selectedEvent created:', selectedStar)
-  }
-
   $: if (typeof window !== 'undefined' && isInitialized && currentLevel) {
     void ensureLevelComponent(currentLevel)
   }
@@ -190,11 +190,14 @@
     void ensureSettingsPanelComponent()
   }
 
+  $: if ($isSettingsMenuOpen && !multiplayerManagerComponent) {
+    void ensureMultiplayerFeatures()
+  }
+
   $: if (($isConversationActive || $conversationUIState.isVisible) && !conversationDialogComponent) {
     void ensureConversationDialogComponent()
   }
-  
-  
+
   /**
    * Check URL parameters for room joining
    */
@@ -206,14 +209,15 @@
     const joinParam = urlParams.get('join'); // Legacy support
     
     if (roomParam) {
-      console.log(`🎮 Found room parameter: ${roomParam}`);
+      debugLog(`🎮 Found room parameter: ${roomParam}`)
       isJoiningRoom = true;
       loadingMessage = `Joining room "${roomParam}"...`;
       
       try {
-        console.log(`🎮 Joining room: ${roomParam}`);
-        initializeClient(roomParam);
-        console.log(`✅ Initiated join for room "${roomParam}"`);
+        debugLog(`🎮 Joining room: ${roomParam}`)
+        await ensureMultiplayerFeatures()
+        initializeClientFn?.(roomParam)
+        debugLog(`✅ Initiated join for room "${roomParam}"`)
       } catch (error) {
         roomJoinError = `Failed to join room "${roomParam}". Please try again.`;
         console.error(`❌ Failed to join room "${roomParam}":`, error);
@@ -223,7 +227,7 @@
     } else if (joinParam) {
       // Legacy support for direct host ID joining is deprecated
       roomJoinError = 'Direct host ID joining is no longer supported. Please use room names instead.';
-      console.warn(`⚠️ Legacy join parameter "${joinParam}" is deprecated`);
+      console.warn(`⚠️ Legacy join parameter "${joinParam}" is deprecated`)
     }
   }
 
@@ -268,18 +272,137 @@
     chatBoxComponentClass = module.default
   }
 
-  function warmNonCriticalUI() {
-    const load = () => {
-      void ensureChatBoxComponent()
+  async function ensureAudioSystemComponent() {
+    if (audioSystemComponent) return
+    const module = await import('./systems/Audio.svelte')
+    audioSystemComponent = module.default
+  }
+
+  async function ensureGameplayCore() {
+    if (physicsSystemComponent && playerComponentClass) return
+
+    if (!gameplayCorePromise) {
+      gameplayCorePromise = Promise.all([
+        import('./systems/Physics.svelte'),
+        import('./features/player/Player.svelte'),
+      ]).then(([physicsModule, playerModule]) => {
+        physicsSystemComponent = physicsModule.default
+        playerComponentClass = playerModule.default
+      })
     }
 
-    if (typeof window === 'undefined') return
+    await gameplayCorePromise
+  }
 
-    if ('requestIdleCallback' in window) {
-      ;(window as any).requestIdleCallback(load, { timeout: 2000 })
-    } else {
-      window.setTimeout(load, 1500)
+  async function ensureMultiplayerFeatures() {
+    if (multiplayerManagerComponent && initializeClientFn) return
+
+    const [componentModule, serviceModule] = await Promise.all([
+      import('./features/multiplayer/components/MultiplayerManager.svelte'),
+      import('./features/multiplayer/services/MultiplayerService'),
+    ])
+
+    multiplayerManagerComponent = componentModule.default
+    initializeClientFn = serviceModule.initializeClient
+    void ensureChatBoxComponent()
+  }
+
+  function setupDeferredAudioLoading() {
+    if (typeof window === 'undefined') return () => {}
+
+    let scheduled = false
+
+    const loadAudio = () => {
+      if (scheduled) return
+      scheduled = true
+      void ensureAudioSystemComponent()
     }
+
+    const handleFirstInteraction = () => {
+      loadAudio()
+      removeListeners()
+    }
+
+    const removeListeners = () => {
+      window.removeEventListener('pointerdown', handleFirstInteraction, true)
+      window.removeEventListener('touchstart', handleFirstInteraction, true)
+      window.removeEventListener('keydown', handleFirstInteraction, true)
+    }
+
+    window.addEventListener('pointerdown', handleFirstInteraction, { capture: true, once: true, passive: true })
+    window.addEventListener('touchstart', handleFirstInteraction, { capture: true, once: true, passive: true })
+    window.addEventListener('keydown', handleFirstInteraction, { capture: true, once: true })
+
+    return removeListeners
+  }
+
+  function setupDeferredGameplayCoreLoading() {
+    if (typeof window === 'undefined') return () => {}
+    if (physicsSystemComponent && playerComponentClass) return () => {}
+
+    let scheduled = false
+    let animationFrameId: number | null = null
+    let timeoutId: number | null = null
+    let idleCallbackId: number | null = null
+
+    const removeListeners = () => {
+      window.removeEventListener('pointerdown', handleFirstInteraction, true)
+      window.removeEventListener('touchstart', handleFirstInteraction, true)
+      window.removeEventListener('keydown', handleFirstInteraction, true)
+    }
+
+    const cleanup = () => {
+      removeListeners()
+
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId)
+      }
+
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId)
+      }
+
+      if (
+        idleCallbackId !== null
+        && 'cancelIdleCallback' in window
+      ) {
+        window.cancelIdleCallback(idleCallbackId)
+      }
+    }
+
+    const loadGameplayCore = () => {
+      if (scheduled) return
+      scheduled = true
+      cleanup()
+      void ensureGameplayCore()
+    }
+
+    const scheduleIdleLoad = () => {
+      if ('requestIdleCallback' in window) {
+        idleCallbackId = window.requestIdleCallback(() => {
+          loadGameplayCore()
+        }, { timeout: 400 })
+        return
+      }
+
+      timeoutId = window.setTimeout(() => {
+        loadGameplayCore()
+      }, 48)
+    }
+
+    const handleFirstInteraction = () => {
+      loadGameplayCore()
+    }
+
+    animationFrameId = window.requestAnimationFrame(() => {
+      scheduleIdleLoad()
+    })
+
+    window.addEventListener('pointerdown', handleFirstInteraction, { capture: true, once: true, passive: true })
+    window.addEventListener('touchstart', handleFirstInteraction, { capture: true, once: true, passive: true })
+    window.addEventListener('keydown', handleFirstInteraction, { capture: true, once: true })
+
+    return cleanup
   }
 
   /**
@@ -314,9 +437,10 @@
   
       // The loading screen will now be hidden by the `terrainReady` reactive block.
       isInitialized = true
-      warmNonCriticalUI()
+      deferredAudioCleanup = setupDeferredAudioLoading()
+      deferredGameplayCoreCleanup = setupDeferredGameplayCoreLoading()
   
-      console.log('✅ Game systems initialized. Waiting for terrain...')
+      debugLog('✅ Game systems initialized. Waiting for terrain...')
     } catch (err) {
       console.error('❌ Failed to initialize Threlte game:', err)
       gameActions.setError(err instanceof Error ? err.message : 'Unknown error')
@@ -328,12 +452,12 @@
    * Set up reactive state updates using modern stores
    */
   function setupStateUpdates() {
-    console.log('🔄 Setting up reactive Threlte store-based state management')
+    debugLog('🔄 Setting up reactive Threlte store-based state management')
     
     // All state is now managed by reactive stores
     // No need for manual initialization - stores handle their own state
     
-    console.log('✅ Reactive store-based state management ready')
+    debugLog('✅ Reactive store-based state management ready')
   }
   
   /**
@@ -354,7 +478,7 @@
   
     // Update current level using store action (automatically reactive)
     gameActions.transitionToLevel(levelId)
-    console.log(`🎮 Threlte store-based level transition: ${levelId}`)
+    debugLog(`🎮 Threlte store-based level transition: ${levelId}`)
   }
   
   /**
@@ -362,7 +486,7 @@
    */
   function handleReturnToObservatory() {
     gameActions.transitionToLevel('observatory')
-    console.log('🎮 Threlte store: Returned to observatory')
+    debugLog('🎮 Threlte store: Returned to observatory')
   }
   
   // Mobile controls now handled through reactive stores - no event forwarding needed
@@ -372,7 +496,7 @@
    */
   function resetView() {
     // View reset is now handled by the Player component's camera controls
-    console.log('🎮 View reset requested - handled by Player component')
+    debugLog('🎮 View reset requested - handled by Player component')
   }
   
   /**
@@ -394,23 +518,27 @@
   
   // Lifecycle
   onMount(async () => {
-    console.log('🎮 Starting MEGAMEAL Game with Threlte...')
+    debugLog('🎮 Starting MEGAMEAL Game with Threlte...')
     await initializeThrelte()
 
     // Make gameActions globally available for debugging
-    if (import.meta.env.DEV) {
+    if (isDev) {
       window.gameActions = gameActions;
-      console.log('🔧 gameActions available globally for debugging');
+      debugLog('🔧 gameActions available globally for debugging')
     }
 
     window.addEventListener('keydown', handleKeyDown);
   })
   
   onDestroy(() => {
-    console.log('🧹 Cleaning up Threlte Game...')
+    debugLog('🧹 Cleaning up Threlte Game...')
     window.removeEventListener('keydown', handleKeyDown);
+    deferredAudioCleanup?.()
+    deferredAudioCleanup = null
+    deferredGameplayCoreCleanup?.()
+    deferredGameplayCoreCleanup = null
     // All cleanup is now handled by individual Threlte components
-    console.log('✅ Threlte Game cleaned up')
+    debugLog('✅ Threlte Game cleaned up')
   })
   </script>
   
@@ -431,7 +559,7 @@
         <!-- Centralized Interaction System for Stars and Fireflies -->
         <InteractionSystem
           bind:this={interactionSystem}
-          on:objectClick={(e) => console.log('🎯 Game: Object clicked:', e.detail)}
+          on:objectClick={(e) => dispatch('objectClick', e.detail)}
         />
         
         <Time on:timeUpdate={(e) => dispatch('timeUpdate', e.detail)} />
@@ -445,7 +573,7 @@
         
         <LODSystem 
           enableLOD={true}
-          maxDistance={100}
+          maxDistance={200}
           updateFrequency={0.1}
           enableCulling={true}
           on:lodLevelChanged={(e) => dispatch('lodLevelChanged', e.detail)}
@@ -468,7 +596,9 @@
         {/if}
         
         <!-- Audio System -->
-        <Audio enabled={true} />
+        {#if audioSystemComponent}
+          <svelte:component this={audioSystemComponent} enabled={true} />
+        {/if}
         
         <!-- ECS Spawn System - Handles all entity spawning -->
         <SpawnSystem
@@ -476,53 +606,58 @@
           {playerComponent}
           {physicsReady}
           {terrainReady}
-          on:entitySpawned={(e) => console.log('🎯 Entity spawned:', e.detail)}
+          on:entitySpawned={(e) => dispatch('entitySpawned', e.detail)}
         />
 
         <!-- Physics World -->
-        <Physics
-          ccd={true}
-          integrationParameters={{
-            dt: isMobile ? 1 / 30 : 1 / 60,
-            minSolverIterations: isMobile ? 8 : 16
-          }}
-          on:physicsReady={() => physicsReady = true}
-        >
-          <!-- 
-            Player Component - Handles input/movement, spawned by ECS SpawnSystem
-          -->
-          <Player
-            bind:this={playerComponent}
-            position={[0, 0, 0]}
-            speed={5}
-            jumpForce={8}
-
-            on:interaction={(e) => { gameActions.recordInteraction('click', e.detail.type); dispatch('objectClick', e.detail) }}
-          />
-          
-          <!-- Multiplayer System - Renders remote players -->
-          <MultiplayerManager />
-          
-          
-          <!-- Modern MEGAMEAL Architecture - Dynamic Level Loading -->
-          {#if currentLevelComponent}
+        {#if physicsSystemComponent && playerComponentClass}
+          <svelte:component
+            this={physicsSystemComponent}
+            ccd={true}
+            integrationParameters={{
+              dt: isMobile ? 1 / 30 : 1 / 60,
+              minSolverIterations: isMobile ? 8 : 16
+            }}
+            on:physicsReady={() => physicsReady = true}
+          >
+            <!-- 
+              Player Component - Handles input/movement, spawned by ECS SpawnSystem
+            -->
             <svelte:component
-              this={currentLevelComponent}
-              timelineEvents={parsedTimelineEvents}
-              timelineEventsJson={typeof timelineEvents === 'string' ? timelineEvents : JSON.stringify(parsedTimelineEvents)}
-              {spawnSystem}
-              {interactionSystem}
-              position={$currentLevelStore === 'sci-fi-room' ? [0, 0, 0] : [0, 15, 10]}
-              playerSpawnPoint={$currentLevelStore === 'sci-fi-room' ? [0, 1, 0] : [0, 18, -50]}
-              on:starSelected={(e) => dispatch('starSelected', e.detail)}
-              on:telescopeInteraction={(e) => dispatch('telescopeInteraction', e.detail)}
-              on:terrainReady={() => terrainReady = true}
+              this={playerComponentClass}
+              bind:this={playerComponent}
+              position={[0, 0, 0]}
+              speed={5}
+              jumpForce={8}
+              on:interaction={(e) => { gameActions.recordInteraction('click', e.detail.type); dispatch('objectClick', e.detail) }}
             />
-          {/if}
-          
-          <!-- Optimization System -->
-          <!-- OptimizationSystem removed - functionality now handled by OptimizationManager.ts -->
-        </Physics>
+            
+            <!-- Multiplayer System - Renders remote players -->
+            {#if multiplayerManagerComponent}
+              <svelte:component this={multiplayerManagerComponent} />
+            {/if}
+            
+            
+            <!-- Modern MEGAMEAL Architecture - Dynamic Level Loading -->
+            {#if currentLevelComponent}
+              <svelte:component
+                this={currentLevelComponent}
+                timelineEvents={parsedTimelineEvents}
+                timelineEventsJson={timelineEventsPayload}
+                {spawnSystem}
+                {interactionSystem}
+                position={$currentLevelStore === 'sci-fi-room' ? [0, 0, 0] : [0, 15, 10]}
+                playerSpawnPoint={$currentLevelStore === 'sci-fi-room' ? [0, 1, 0] : [0, 18, -50]}
+                on:starSelected={(e) => dispatch('starSelected', e.detail)}
+                on:telescopeInteraction={(e) => dispatch('telescopeInteraction', e.detail)}
+                on:terrainReady={() => terrainReady = true}
+              />
+            {/if}
+            
+            <!-- Optimization System -->
+            <!-- OptimizationSystem removed - functionality now handled by OptimizationManager.ts -->
+          </svelte:component>
+        {/if}
         
         </Canvas>
       </div>
@@ -591,7 +726,7 @@
           on:levelTransition={(e) => {
             const { levelType } = e.detail;
             gameActions.transitionToLevel(levelType);
-            console.log(`🎮 Timeline card level transition: ${levelType}`);
+            debugLog(`🎮 Timeline card level transition: ${levelType}`)
           }}
           on:close={() => gameActions.selectStar(null)}
         />

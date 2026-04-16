@@ -50,6 +50,7 @@ export class LightingManager {
   private pointLightPool: THREE.PointLight[] = []
   private activePointLights: Set<THREE.PointLight> = new Set()
   private ownedLights: Map<string, THREE.PointLight> = new Map() // Track lights by owner ID
+  private poolExhaustedWarningShown = false
 
   constructor(registry: SystemRegistry) {
     this.registry = registry
@@ -89,20 +90,37 @@ export class LightingManager {
     console.log('💡 LightingManager: Initialized with scene')
   }
 
-  private initializePointLightPool(poolSize: number = 20): void {
+  private createPooledPointLight(): THREE.PointLight {
+    const light = new THREE.PointLight(0xffffff, 0, 0, 2)
+    light.visible = false
+    this.scene.add(light)
+    return light
+  }
+
+  private initializePointLightPool(poolSize: number = 32): void {
     if (!this.scene) {
       console.error('❌ LightingManager: Cannot initialize point light pool without scene')
       return
     }
     
-    // Pre-create point lights for performance
-    for (let i = 0; i < poolSize; i++) {
-      const light = new THREE.PointLight(0xffffff, 0, 0, 2)
-      light.visible = false
-      this.scene.add(light)
-      this.pointLightPool.push(light)
-    }
+    this.ensurePointLightPoolSize(poolSize)
     console.log(`💡 LightingManager: Created point light pool with ${poolSize} lights`)
+  }
+
+  ensurePointLightPoolSize(poolSize: number): void {
+    if (!this.scene) {
+      console.error('❌ LightingManager: Cannot resize point light pool without scene')
+      return
+    }
+
+    const targetSize = Math.max(poolSize, this.pointLightPool.length)
+    for (let i = this.pointLightPool.length; i < targetSize; i++) {
+      this.pointLightPool.push(this.createPooledPointLight())
+    }
+
+    if (this.pointLightPool.length > 0 && this.activePointLights.size < this.pointLightPool.length) {
+      this.poolExhaustedWarningShown = false
+    }
   }
 
   private updateLightsFromData(data: LightingData): void {
@@ -265,7 +283,13 @@ export class LightingManager {
     // Find an available light from the pool
     const availableLight = this.pointLightPool.find(light => !this.activePointLights.has(light))
     if (!availableLight) {
-      console.warn(`💡 LightingManager: No available lights in pool for owner ${ownerId}`)
+      if (!this.poolExhaustedWarningShown && import.meta.env.DEV) {
+        this.poolExhaustedWarningShown = true
+        console.warn(
+          `💡 LightingManager: Point light pool exhausted (${this.activePointLights.size}/${this.pointLightPool.length} in use); ` +
+          `owner ${ownerId} could not acquire a light`
+        )
+      }
       return null
     }
 
@@ -273,6 +297,7 @@ export class LightingManager {
     this.activePointLights.add(availableLight)
     this.ownedLights.set(ownerId, availableLight)
     availableLight.visible = true
+    this.poolExhaustedWarningShown = false
 
     return availableLight
   }
@@ -291,6 +316,7 @@ export class LightingManager {
     light.intensity = 0
     this.activePointLights.delete(light)
     this.ownedLights.delete(ownerId)
+    this.poolExhaustedWarningShown = false
 
     return true
   }

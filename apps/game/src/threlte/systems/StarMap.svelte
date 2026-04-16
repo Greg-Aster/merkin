@@ -37,6 +37,13 @@
 
   const dispatch = createEventDispatcher()
   const { camera } = useThrelte()
+  const isDev = import.meta.env.DEV
+
+  function debugLog(...args: any[]) {
+    if (isDev) {
+      console.log(...args)
+    }
+  }
 
   // --- PROPS ---
   export let timelineEvents: any[] = []
@@ -48,6 +55,7 @@
   let constellationLines: THREE.LineSegments[] = []
   let starGroup: THREE.Group
   let hoveredStarIndex: number | null = null
+  let nextTransitionCleanupAt = 10
   
   // Smooth transition states for natural glow effects
   let hoverTransitions: Map<number, number> = new Map() // starIndex -> transition value (0-1)
@@ -71,7 +79,7 @@
   // --- LIFECYCLE & DATA GENERATION ---
 
   onMount(() => {
-    console.log('✨ StarMap: Initializing with centralized interaction system')
+    debugLog('✨ StarMap: Initializing with centralized interaction system')
     generateStars()
   })
 
@@ -83,14 +91,14 @@
   function generateStars() {
     const newStars: StarData[] = []
     
-    console.log(`🌟 StarMap: Processing ${timelineEvents.length} timeline events`)
+    debugLog(`🌟 StarMap: Processing ${timelineEvents.length} timeline events`)
     
     // Process timeline events (blog posts)
     timelineEvents.forEach((event, index) => {
       const star = createStarFromTimelineEvent(event, index)
       newStars.push(star)
       if (index < 3) { // Log first few stars for debugging
-        console.log(`⭐ Star ${index}:`, {
+        debugLog(`⭐ Star ${index}:`, {
           title: star.title,
           position: star.position,
           color: star.color,
@@ -105,7 +113,7 @@
     levelEvents.forEach((event, index) => {
       const star = createStarFromTimelineEvent(event, newStars.length + index)
       newStars.push(star)
-      console.log(`🎮 Level Star ${index}:`, {
+      debugLog(`🎮 Level Star ${index}:`, {
         title: star.title,
         levelId: star.levelId,
         isLevel: star.isLevel
@@ -113,16 +121,16 @@
     })
     
     stars = newStars
-    console.log(`✅ StarMap: Generated ${stars.length} total stars (${timelineEvents.length} timeline + ${levelEvents.length} level stars)`)
+    debugLog(`✅ StarMap: Generated ${stars.length} total stars (${timelineEvents.length} timeline + ${levelEvents.length} level stars)`)
     
     // Log star distribution for debugging
     const keyEventStars = stars.filter(s => s.isKeyEvent).length
     const levelStars = stars.filter(s => s.isLevel).length
-    console.log(`📊 Star distribution: ${keyEventStars} key events, ${levelStars} level stars, ${stars.length - keyEventStars - levelStars} timeline events`)
+    debugLog(`📊 Star distribution: ${keyEventStars} key events, ${levelStars} level stars, ${stars.length - keyEventStars - levelStars} timeline events`)
   }
 
   function setupStarSprites() {
-    console.log(`🌟 StarMap: Creating authentic star sprites for ${stars.length} stars`)
+    debugLog(`🌟 StarMap: Creating authentic star sprites for ${stars.length} stars`)
     
     // Clear existing sprites and constellation lines
     starSprites.forEach(sprite => starGroup.remove(sprite))
@@ -138,7 +146,7 @@
       
       // Debug first few stars
       if (i < 3) {
-        console.log(`⭐ Star ${i} created:`, {
+        debugLog(`⭐ Star ${i} created:`, {
           title: star.title,
           position: star.position,
           color: star.color,
@@ -159,7 +167,7 @@
       })
     }
     
-    console.log(`✅ StarMap: Created ${starSprites.length} authentic star sprites with centralized interaction`)
+    debugLog(`✅ StarMap: Created ${starSprites.length} authentic star sprites with centralized interaction`)
   }
 
   function createStarSprite(star: StarData, index: number): THREE.Sprite {
@@ -188,7 +196,7 @@
     // Sprite verification (minimal logging)
     if (index === 0) {
       const actualDistance = sprite.position.length()
-      console.log(`🔍 Sprite created: ${star.title.substring(0, 20)}... distance ${actualDistance.toFixed(1)}`)
+      debugLog(`🔍 Sprite created: ${star.title.substring(0, 20)}... distance ${actualDistance.toFixed(1)}`)
     }
 
     return sprite
@@ -264,10 +272,11 @@
     if (starSprites.length === 0) return
 
     const time = performance.now() * 0.001
+    const selectedStarId = selectedStar?.uniqueId ?? null
     
-    // Periodically clean up transition maps to prevent memory leaks
-    if (Math.floor(time) % 10 === 0) { // Every 10 seconds
-      // Remove zero transitions
+    if (time >= nextTransitionCleanupAt) {
+      nextTransitionCleanupAt = time + 10
+
       for (const [key, value] of hoverTransitions.entries()) {
         if (value <= 0) hoverTransitions.delete(key)
       }
@@ -276,9 +285,10 @@
       }
     }
 
-    starSprites.forEach((sprite, index) => {
+    for (let index = 0; index < starSprites.length; index += 1) {
+      const sprite = starSprites[index]
       const star = stars[index]
-      if (!star) return
+      if (!star) continue
 
       // Authentic twinkling animation like original system
       const twinkleTime = time * star.twinkleSpeed + star.animationOffset
@@ -291,7 +301,7 @@
       let opacity = star.intensity * twinkle
 
       // Smooth transition effects for natural glow
-      const isSelected = selectedStar && selectedStar.uniqueId === star.uniqueId
+      const isSelected = selectedStarId === star.uniqueId
       const isHovered = index === hoveredStarIndex
       
       // Update hover transition (smooth fade in/out)
@@ -318,30 +328,31 @@
       
       // Debug only when transition starts
       if (isSelected && selectionAmount < 0.1 && index === 0) {
-        console.log(`🔥 Selected star transition started: ${star.title.substring(0, 30)}...`)
+        debugLog(`🔥 Selected star transition started: ${star.title.substring(0, 30)}...`)
       }
 
       sprite.scale.setScalar(scale)
       if (sprite.material) {
         ;(sprite.material as THREE.SpriteMaterial).opacity = Math.min(1, opacity)
       }
-    })
+    }
     
-    // Animate constellation lines opacity
-    constellationLines.forEach(line => {
+    const lineOpacity = 0.2 + Math.sin(time * 0.5) * 0.1
+
+    for (let index = 0; index < constellationLines.length; index += 1) {
+      const line = constellationLines[index]
       if (line.material) {
         const baseMaterial = line.material as THREE.LineBasicMaterial
-        const time = performance.now() * 0.0005
-        baseMaterial.opacity = 0.2 + Math.sin(time) * 0.1
+        baseMaterial.opacity = lineOpacity
       }
-    })
+    }
   })
 
   // --- INTERACTION HANDLERS (for centralized interaction system) ---
 
   function handleStarClick(data: any) {
     const { sprite, index, timestamp, ...star } = data
-    console.log('⭐ StarMap: Star clicked via InteractionSystem:', star.title)
+    debugLog('⭐ StarMap: Star clicked via InteractionSystem:', star.title)
     
     // Update stores
     gameActions.selectStar(star)
@@ -534,7 +545,9 @@
     
     // Safety check for pattern position
     if (!patternPosition) {
-      console.warn(`Missing pattern position for era: ${era}, pattern: ${config.pattern}, index: ${patternIndex}`)
+      if (isDev) {
+        console.warn(`Missing pattern position for era: ${era}, pattern: ${config.pattern}, index: ${patternIndex}`)
+      }
       // Use default offset if pattern position is missing
       return {
         uniqueId: event.uniqueId || event.slug || `fallback_star_${index}`,
@@ -564,7 +577,7 @@
     // Positioning verification (minimal logging)
     const calculatedDistance = Math.sqrt(x*x + y*y + z*z)
     if (index === 0) {
-      console.log(`🔍 Star positioning verified: distance ${calculatedDistance.toFixed(1)} (expected ${sphereRadius})`)
+      debugLog(`🔍 Star positioning verified: distance ${calculatedDistance.toFixed(1)} (expected ${sphereRadius})`)
     }
     
     // Use original era colors and sizing with size factor
@@ -601,7 +614,7 @@
     
     // Debug duplicate events (only first 3 for brevity)
     if (index < 3) {
-      console.log(`🔍 Star ${index} data mapping:`, {
+      debugLog(`🔍 Star ${index} data mapping:`, {
         uniqueId: starData.uniqueId,
         title: starData.title?.substring(0, 30) + '...'
       })

@@ -10,13 +10,14 @@
   to avoid code duplication and ensure consistent behavior.
 -->
 <script lang="ts">
-  import { onMount, createEventDispatcher } from 'svelte'
+  import { onMount, onDestroy, createEventDispatcher } from 'svelte'
   import { useThrelte } from '@threlte/core'
   import * as THREE from 'three'
   import { gameActions } from '../stores/gameStateStore'
 
   const dispatch = createEventDispatcher()
   const { camera } = useThrelte()
+  const isDev = import.meta.env.DEV
 
   // Centralized registry of all interactive objects
   interface InteractiveObject {
@@ -32,61 +33,134 @@
   }
 
   let interactiveObjects: InteractiveObject[] = []
+  let interactiveSprites: THREE.Sprite[] = []
+  const interactiveObjectById = new Map<string, InteractiveObject>()
+  const interactiveObjectBySprite = new Map<THREE.Sprite, InteractiveObject>()
   let hoveredObjectId: string | null = null
+  let canvasElement: HTMLCanvasElement | null = null
+  let hoverCheckFrameId: number | null = null
+  let clickSelectionTimeoutId: number | null = null
+
+  const pointer = new THREE.Vector2()
+  const raycaster = new THREE.Raycaster()
+  const projectedScreenPosition = new THREE.Vector3()
+
+  raycaster.params.Sprite = { threshold: 1000 }
   
   // Mouse tracking (from StarMap pattern)
   let lastMouseX = 0
   let lastMouseY = 0
 
+  function syncInteractiveCollections() {
+    interactiveObjects = Array.from(interactiveObjectById.values())
+    interactiveSprites = interactiveObjects.map((object) => object.sprite)
+  }
+
+  function getCanvasElement() {
+    if (canvasElement?.isConnected) {
+      return canvasElement
+    }
+
+    canvasElement = document.querySelector('canvas')
+    return canvasElement
+  }
+
+  function removeInteractiveObject(id: string) {
+    const existingObject = interactiveObjectById.get(id)
+    if (!existingObject) return
+
+    interactiveObjectById.delete(id)
+    interactiveObjectBySprite.delete(existingObject.sprite)
+
+    if (hoveredObjectId === id) {
+      hoveredObjectId = null
+    }
+
+    syncInteractiveCollections()
+  }
+
+  function removeInteractiveObjectsByType(type: InteractiveObject['type']) {
+    let removed = false
+
+    for (const [id, interactiveObject] of interactiveObjectById.entries()) {
+      if (interactiveObject.type !== type) continue
+      interactiveObjectById.delete(id)
+      interactiveObjectBySprite.delete(interactiveObject.sprite)
+      removed = true
+    }
+
+    if (removed) {
+      if (hoveredObjectId && !interactiveObjectById.has(hoveredObjectId)) {
+        hoveredObjectId = null
+      }
+
+      syncInteractiveCollections()
+    }
+  }
+
   // --- PUBLIC API FOR REGISTERING INTERACTIVE OBJECTS ---
 
   export function registerInteractiveObject(object: InteractiveObject) {
-    // Remove existing object with same ID
-    interactiveObjects = interactiveObjects.filter(obj => obj.id !== object.id)
-    // Add new object
-    interactiveObjects.push(object)
-    //console.log(`🎯 InteractionSystem: Registered ${object.type} ${object.id} (total: ${interactiveObjects.length})`)
+    const existingObject = interactiveObjectById.get(object.id)
+    if (existingObject) {
+      interactiveObjectBySprite.delete(existingObject.sprite)
+    }
+
+    interactiveObjectById.set(object.id, object)
+    interactiveObjectBySprite.set(object.sprite, object)
+    syncInteractiveCollections()
   }
 
   export function unregisterInteractiveObject(id: string) {
-    interactiveObjects = interactiveObjects.filter(obj => obj.id !== id)
-    //console.log(`🎯 InteractionSystem: Unregistered ${id}`)
+    removeInteractiveObject(id)
   }
 
   export function registerStarSprites(sprites: THREE.Sprite[], stars: any[], handlers: any) {
-    // Bulk register star sprites (for StarMap)
+    removeInteractiveObjectsByType('star')
+
     sprites.forEach((sprite, index) => {
       const star = stars[index]
       if (star) {
-        registerInteractiveObject({
+        const object: InteractiveObject = {
           id: `star_${star.uniqueId || index}`,
           sprite,
           type: 'star',
           data: star,
           index,
           handlers
-        })
+        }
+        interactiveObjectById.set(object.id, object)
+        interactiveObjectBySprite.set(sprite, object)
       }
     })
-    console.log(`🌟 InteractionSystem: Registered ${sprites.length} star sprites`)
+
+    syncInteractiveCollections()
+
+    if (isDev) {
+      console.log(`🌟 InteractionSystem: Registered ${sprites.length} star sprites`)
+    }
   }
 
   export function registerFireflySprites(sprites: THREE.Sprite[], fireflies: any[], handlers: any) {
-    // Bulk register firefly sprites (for HybridFireflyComponent)
+    removeInteractiveObjectsByType('firefly')
+
     sprites.forEach((sprite, index) => {
       const firefly = fireflies[index]
       if (firefly) {
-        registerInteractiveObject({
+        const object: InteractiveObject = {
           id: `firefly_${firefly.id || index}`,
           sprite,
           type: 'firefly', 
           data: firefly,
           index,
           handlers
-        })
+        }
+        interactiveObjectById.set(object.id, object)
+        interactiveObjectBySprite.set(sprite, object)
       }
     })
-    // console.log(`✨ InteractionSystem: Registered ${sprites.length} firefly sprites`)
+
+    syncInteractiveCollections()
   }
 
   // --- UNIFIED INTERACTION LOGIC ---
@@ -98,13 +172,29 @@
     lastMouseY = event.clientY
     
     // Small delay to ensure camera movement is done (from StarMap pattern)
-    setTimeout(() => selectObjectInCrosshair(), 50)
+    if (clickSelectionTimeoutId !== null) {
+      window.clearTimeout(clickSelectionTimeoutId)
+    }
+
+    clickSelectionTimeoutId = window.setTimeout(() => {
+      clickSelectionTimeoutId = null
+      selectObjectInCrosshair()
+    }, 50)
   }
 
   function handleCanvasMouseMove(event: MouseEvent) {
     lastMouseX = event.clientX
     lastMouseY = event.clientY
-    checkObjectHover(event)
+    queueHoverCheck()
+  }
+
+  function queueHoverCheck() {
+    if (hoverCheckFrameId !== null) return
+
+    hoverCheckFrameId = window.requestAnimationFrame(() => {
+      hoverCheckFrameId = null
+      checkObjectHover()
+    })
   }
 
   function selectObjectInCrosshair() {
@@ -146,7 +236,7 @@
     }
   }
 
-  function checkObjectHover(event: MouseEvent) {
+  function checkObjectHover() {
     if (!$camera || interactiveObjects.length === 0) return
     
     const intersected = getIntersectedObject()
@@ -177,29 +267,22 @@
   function getIntersectedObject(): { object: InteractiveObject, sprite: THREE.Sprite } | null {
     if (!$camera) return null
 
-    // Get mouse position from last known position (StarMap pattern)
-    const canvas = document.querySelector('canvas')
+    const canvas = getCanvasElement()
     if (!canvas) return null
     
     const rect = canvas.getBoundingClientRect()
-    const mouse = new THREE.Vector2()
-    mouse.x = ((lastMouseX - rect.left) / rect.width) * 2 - 1
-    mouse.y = -((lastMouseY - rect.top) / rect.height) * 2 + 1
+    pointer.x = ((lastMouseX - rect.left) / rect.width) * 2 - 1
+    pointer.y = -((lastMouseY - rect.top) / rect.height) * 2 + 1
     
     // Cast ray from mouse position
-    const raycaster = new THREE.Raycaster()
-    raycaster.setFromCamera(mouse, $camera)
-    
-    // Use large threshold for sprites at distance (StarMap pattern)
-    raycaster.params.Sprite = { threshold: 1000 }
+    raycaster.setFromCamera(pointer, $camera)
     
     // Check all registered sprites
-    const sprites = interactiveObjects.map(obj => obj.sprite)
-    const intersects = raycaster.intersectObjects(sprites)
+    const intersects = raycaster.intersectObjects(interactiveSprites)
     
     if (intersects.length > 0) {
       const intersectedSprite = intersects[0].object as THREE.Sprite
-      const object = interactiveObjects.find(obj => obj.sprite === intersectedSprite)
+      const object = interactiveObjectBySprite.get(intersectedSprite)
       
       if (object) {
         return { object, sprite: intersectedSprite }
@@ -212,24 +295,39 @@
   // --- LIFECYCLE ---
 
   onMount(() => {
-    console.log('🎯 InteractionSystem: Initializing centralized interaction system')
+    if (isDev) {
+      console.log('🎯 InteractionSystem: Initializing centralized interaction system')
+    }
     
     // Get canvas and add unified event listeners
-    const canvas = document.querySelector('canvas')
+    const canvas = getCanvasElement()
     if (canvas) {
       canvas.addEventListener('click', handleCanvasClick)
       canvas.addEventListener('mousemove', handleCanvasMouseMove)
-      console.log('🎯 InteractionSystem: Canvas event listeners attached')
+      if (isDev) {
+        console.log('🎯 InteractionSystem: Canvas event listeners attached')
+      }
     } else {
       console.warn('⚠️ InteractionSystem: No canvas found for event listeners')
     }
-    
-    return () => {
-      if (canvas) {
-        canvas.removeEventListener('click', handleCanvasClick)
-        canvas.removeEventListener('mousemove', handleCanvasMouseMove)
-        console.log('🎯 InteractionSystem: Event listeners cleaned up')
-      }
+  })
+
+  onDestroy(() => {
+    if (canvasElement) {
+      canvasElement.removeEventListener('click', handleCanvasClick)
+      canvasElement.removeEventListener('mousemove', handleCanvasMouseMove)
+    }
+
+    if (hoverCheckFrameId !== null) {
+      window.cancelAnimationFrame(hoverCheckFrameId)
+    }
+
+    if (clickSelectionTimeoutId !== null) {
+      window.clearTimeout(clickSelectionTimeoutId)
+    }
+
+    if (isDev) {
+      console.log('🎯 InteractionSystem: Event listeners cleaned up')
     }
   })
 
@@ -238,11 +336,11 @@
   export function getScreenPosition(worldPosition: THREE.Vector3): { x: number, y: number } {
     if (!$camera) return { x: 0, y: 0 }
     
-    const vector = worldPosition.clone()
-    vector.project($camera)
+    projectedScreenPosition.copy(worldPosition)
+    projectedScreenPosition.project($camera)
     
     // Get canvas dimensions
-    const canvas = document.querySelector('canvas')
+    const canvas = getCanvasElement()
     const width = canvas?.clientWidth || window.innerWidth
     const height = canvas?.clientHeight || window.innerHeight
     
@@ -250,8 +348,8 @@
     const heightHalf = height / 2
     
     return {
-      x: (vector.x * widthHalf) + widthHalf,
-      y: -(vector.y * heightHalf) + heightHalf
+      x: (projectedScreenPosition.x * widthHalf) + widthHalf,
+      y: -(projectedScreenPosition.y * heightHalf) + heightHalf
     }
   }
 

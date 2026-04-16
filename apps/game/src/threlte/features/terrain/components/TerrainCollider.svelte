@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte'
+  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
   import { T } from '@threlte/core'
   import { Collider, RigidBody, useRapier } from '@threlte/rapier'
   import * as THREE from 'three'
@@ -10,11 +10,8 @@
   const rapier = useRapier()
   // Track player position for chunk activation
   let playerPos: [number, number, number] = [0, 0, 0]
-  if (typeof window !== 'undefined') {
-    playerStateStore.subscribe(p => {
-      playerPos = p.position
-    })
-  }
+  let unsubscribePlayer: (() => void) | null = null
+  let isTrackingPlayer = false
 
   // Props
   export let heightData: Float32Array
@@ -249,7 +246,7 @@
 
   // Active chunk window around player (aligned to visual GLB chunk grid if provided)
   $: activeTrimeshChunks = (() => {
-    if (!trimeshLayout) return []
+    if (!trimeshLayout || trimeshMode !== 'chunked') return []
     const { originX, originZ, stepX, stepZ, dsSize } = trimeshLayout
     const radius = Math.max(1, trimeshActiveRadius|0)
     const px = playerPos[0]
@@ -308,7 +305,9 @@
 
   // Build geometry cache for active chunks
   let trimeshCache: Map<string, { vertices: Float32Array; indices: Uint32Array; position: [number, number, number] }> = new Map()
-  $: if (trimeshLayout && activeTrimeshChunks) {
+  $: if (trimeshMode !== 'chunked') {
+    trimeshCache.clear()
+  } else if (trimeshLayout && activeTrimeshChunks) {
     const { dsData, dsSize, originX, originZ, stepX, stepZ } = trimeshLayout
     for (const c of activeTrimeshChunks) {
       const key = `${c.cx}_${c.cz}`
@@ -366,6 +365,28 @@
   onMount(() => {
     // No debug diagnostics by default
   })
+
+  function setPlayerTracking(enabled: boolean) {
+    if (enabled && !isTrackingPlayer) {
+      unsubscribePlayer = playerStateStore.subscribe((p) => {
+        playerPos = p.position
+      })
+      isTrackingPlayer = true
+      return
+    }
+
+    if (!enabled && isTrackingPlayer) {
+      unsubscribePlayer?.()
+      unsubscribePlayer = null
+      isTrackingPlayer = false
+    }
+  }
+
+  $: setPlayerTracking(useTrimesh && trimeshMode === 'chunked')
+
+  onDestroy(() => {
+    setPlayerTracking(false)
+  })
 </script>
 
 {#if useTrimesh && trimeshLayout && trimeshMode === 'chunked'}
@@ -379,8 +400,12 @@
           collisionGroups={TERRAIN_GROUP}
           friction={friction}
           restitution={restitution}
-          on:create={() => console.log('✅ TriMesh collider created at', patch.position, 'for', chunk)}
-          on:destroy={() => console.log('🗑️ TriMesh collider destroyed:', chunk)}
+          on:create={() => {
+            if (import.meta.env.DEV) console.log('✅ TriMesh collider created at', patch.position, 'for', chunk)
+          }}
+          on:destroy={() => {
+            if (import.meta.env.DEV) console.log('🗑️ TriMesh collider destroyed:', chunk)
+          }}
         />
       </RigidBody>
     {/if}
@@ -395,7 +420,9 @@
       collisionGroups={TERRAIN_GROUP}
       friction={friction}
       restitution={restitution}
-      on:create={() => console.log('✅ Single TriMesh collider created (world-space)')}
+      on:create={() => {
+        if (import.meta.env.DEV) console.log('✅ Single TriMesh collider created (world-space)')
+      }}
     />
   </RigidBody>
 {/if}

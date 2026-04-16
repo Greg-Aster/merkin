@@ -7,6 +7,8 @@
   import TerrainChunk from './components/TerrainChunk.svelte'
   import { terrainStore } from './terrainStore'
   import { playerStateStore } from '../../stores/gameStateStore'
+  import { qualityLevelStore } from '../performance/stores/performanceStore'
+  import { OptimizationLevel } from '../performance/OptimizationManager'
 
   export let config: TerrainConfig
 
@@ -52,6 +54,22 @@
   $: visibleChunks = ($terrainStore.isReady && $terrainStore.manager)
     ? $terrainStore.manager.getVisibleChunks(playerPosition)
     : []
+  $: colliderDownsample = (() => {
+    switch ($qualityLevelStore) {
+      case OptimizationLevel.ULTRA_LOW:
+        return 16
+      case OptimizationLevel.LOW:
+        return 14
+      case OptimizationLevel.MEDIUM:
+        return 12
+      case OptimizationLevel.HIGH:
+        return 10
+      case OptimizationLevel.ULTRA:
+        return 8
+      default:
+        return 12
+    }
+  })()
 </script>
 
 <T.Group>
@@ -65,6 +83,8 @@
       worldSizeZ={$terrainStore.manager?.getWorldSizeZ()}
       bounds={$terrainStore.bounds}
       useTrimesh={true}
+      trimeshMode="single"
+      trimeshDownsample={colliderDownsample}
       chunkSize={config.chunkSize}
       gridSize={config.gridSize}
       minHeight={config.minHeight}

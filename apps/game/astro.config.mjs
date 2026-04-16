@@ -1,6 +1,7 @@
 import svelte from '@astrojs/svelte'
 import tailwind from '@astrojs/tailwind'
 import { defineConfig } from 'astro/config'
+import wasm from 'vite-plugin-wasm'
 
 const siteUrl = process.env.SITE_URL || 'https://game.megameal.org'
 const configuredBasePath = process.env.GAME_BASE_PATH || process.env.PUBLIC_BASE_PATH || '/'
@@ -21,8 +22,9 @@ export default defineConfig({
   publicDir: '../megameal/public',
   integrations: [svelte(), tailwind()],
   vite: {
+    plugins: [wasm()],
     optimizeDeps: {
-      exclude: ['three'],
+      exclude: ['three', '@dimforge/rapier3d', '@dimforge/rapier3d-compat'],
     },
     build: {
       rollupOptions: {
@@ -35,6 +37,61 @@ export default defineConfig({
           }
           warn(warning)
         },
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return
+
+            if (
+              id.includes('three/examples/jsm/postprocessing')
+              || id.includes('postprocessing')
+              || id.includes('threlte-postprocessing')
+            ) {
+              return 'effects-vendor'
+            }
+
+            if (
+              id.includes('three/examples/jsm/loaders/GLTFLoader')
+              || id.includes('@threlte/extras')
+            ) {
+              return 'asset-vendor'
+            }
+
+            if (id.includes('three/examples/jsm/objects/Reflector')) {
+              return 'reflection-vendor'
+            }
+
+            if (id.includes('three/examples/jsm')) {
+              return 'three-examples-vendor'
+            }
+
+            if (
+              id.includes('@dimforge/rapier3d')
+              || id.includes('@threlte/rapier')
+            ) {
+              return 'physics-vendor'
+            }
+
+            if (id.includes('three')) {
+              return 'three-vendor'
+            }
+
+            if (id.includes('peerjs')) {
+              return 'multiplayer-vendor'
+            }
+
+            if (id.includes('howler')) {
+              return 'audio-vendor'
+            }
+
+            if (
+              id.includes('@threlte/core')
+              || id.includes('@threlte/extras')
+              || id.includes('@threlte/theatre')
+            ) {
+              return 'threlte-vendor'
+            }
+          }
+        }
       },
     },
     resolve: {
@@ -45,6 +102,7 @@ export default defineConfig({
         '@config': '/src/config',
         '@services': '/src/services',
         '@': '/src',
+        '@dimforge/rapier3d-compat': '/src/shims/rapier3d-compat.ts',
       },
     },
     define: {

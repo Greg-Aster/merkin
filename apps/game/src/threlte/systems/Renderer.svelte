@@ -58,14 +58,16 @@ onMount(() => {
     return
   }
 
-  console.log('🎨 Configuring Threlte renderer...')
+  if (import.meta.env.DEV) {
+    console.log('🎨 Configuring Threlte renderer...')
+  }
 
   // One-time renderer setup
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.0
   renderer.setClearColor(0x000000, 1)
   renderer.autoClear = true
-  renderer.info.autoReset = false
+  renderer.info.autoReset = true
 
   // Subscribe to quality changes — applies canvas scale and shadow settings reactively
   unsubscribe = qualitySettingsStore.subscribe(quality => {
@@ -77,7 +79,9 @@ onMount(() => {
   }
   window.addEventListener('resize', handleResize)
 
-  console.log('✅ Threlte renderer configured')
+  if (import.meta.env.DEV) {
+    console.log('✅ Threlte renderer configured')
+  }
 })
 
 onDestroy(() => {

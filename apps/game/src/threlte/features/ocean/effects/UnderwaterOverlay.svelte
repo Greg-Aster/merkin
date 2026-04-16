@@ -28,17 +28,16 @@
   $: config = $underwaterConfigStore
   
   // Debug reactive changes
-  $: if (isUnderwater) {
-    console.log('🎨 UnderwaterOverlay: Player underwater - depth:', depth, 'intensity:', intensity)
-  } else {
-    console.log('🎨 UnderwaterOverlay: Player above water')
-  }
+  $: shouldAnimate = enabled && (isUnderwater || transitionProgress > 0)
 
   onMount(() => {
-    console.log('🎨 UnderwaterOverlay: Mounting with enabled:', enabled)
     if (enabled) {
       createOverlay()
-      startAnimation()
+      if (shouldAnimate) {
+        startAnimation()
+      } else {
+        updateOverlay()
+      }
     }
   })
 
@@ -50,7 +49,6 @@
   })
 
   function createOverlay() {
-    console.log('🎨 UnderwaterOverlay: Creating overlay element')
     // Create overlay element
     overlayElement = document.createElement('div')
     overlayElement.id = 'underwater-overlay'
@@ -74,7 +72,6 @@
     `
     
     document.body.appendChild(overlayElement)
-    console.log('🎨 UnderwaterOverlay: Overlay element added to DOM:', overlayElement)
   }
 
   function removeOverlay() {
@@ -84,6 +81,8 @@
   }
 
   function startAnimation() {
+    if (animationId) return
+
     function animate() {
       if (overlayElement) {
         updateOverlay()
@@ -91,6 +90,12 @@
       animationId = requestAnimationFrame(animate)
     }
     animate()
+  }
+
+  function stopAnimation() {
+    if (!animationId) return
+    cancelAnimationFrame(animationId)
+    animationId = 0
   }
 
   function updateOverlay() {
@@ -128,7 +133,12 @@
 
   // Reactive updates
   $: if (overlayElement) {
-    updateOverlay()
+    if (shouldAnimate) {
+      startAnimation()
+    } else {
+      stopAnimation()
+      updateOverlay()
+    }
   }
 </script>
 

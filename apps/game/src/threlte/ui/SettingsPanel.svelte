@@ -6,8 +6,8 @@
     masterVolumeSetting,
     sfxVolumeSetting,
   } from '../stores/uiStore';
-  import { MultiplayerControls } from '../features/multiplayer';
-  import { PerformancePanel } from '../features/performance';
+  import MultiplayerControls from '../features/multiplayer/ui/MultiplayerControls.svelte';
+  import PerformancePanel from '../features/performance/ui/PerformancePanel.svelte';
 
   function closeSettings() {
     isSettingsMenuOpen.set(false);

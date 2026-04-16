@@ -80,10 +80,13 @@
   let waterLevel = initialLevel // Initialize water level
   let reflector: any = null
   let unsubscribeLighting: (() => void) | null = null
+  let lastOceanQualityKey: string | null = null
+  let pendingOceanRebuild = false
   
   // --- UNDERWATER DETECTION STATE ---
   let playerInWater = false
   const dispatch = createEventDispatcher()
+  const isDev = import.meta.env.DEV
   
   // --- UNDERWATER COLLISION HANDLERS ---
   function handleIntersectionEnter(event: any) {
@@ -95,11 +98,11 @@
       const playerCollider = isPlayer(a) ? a : (isPlayer(b) ? b : null)
 
       if (!playerCollider) {
-        if (import.meta.env.DEV) console.log('🌊 Ocean: Intersection enter - no player collider detected')
+        if (isDev) console.log('🌊 Ocean: Intersection enter - no player collider detected')
         return
       }
 
-      if (import.meta.env.DEV) console.log('🌊 Ocean: ✅ PLAYER ENTERED WATER VOLUME!')
+      if (isDev) console.log('🌊 Ocean: ✅ PLAYER ENTERED WATER VOLUME!')
       playerInWater = true
 
       // Calculate depth based on player position vs water level
@@ -120,7 +123,7 @@
       const playerCollider = isPlayer(a) ? a : (isPlayer(b) ? b : null)
 
       if (playerCollider && playerInWater) {
-        if (import.meta.env.DEV) console.log('🏖️ Ocean: Player exited water volume')
+        if (isDev) console.log('🏖️ Ocean: Player exited water volume')
         playerInWater = false
         underwaterActions.exitWater()
         dispatch('waterExit')
@@ -132,7 +135,7 @@
 
   function isPlayer(collider: any): boolean {
     // Check if the collider belongs to the player
-    if (import.meta.env.DEV) console.log('🔍 Ocean: Checking collider:', collider)
+    if (isDev) console.log('🔍 Ocean: Checking collider:', collider)
     
     // Try multiple ways to identify the player
     const userData = collider?.userData || collider?.parent?.userData || collider?.rigidBody?.userData
@@ -141,7 +144,7 @@
     // Also check if it's a capsule collider (typical for player)
     const isPlayerByCapsule = collider?.shape === 'capsule' || collider?.args?.length === 2
     
-    if (import.meta.env.DEV) console.log('🔍 Ocean: Player detection:', { userData, isPlayerByUserData, isPlayerByCapsule })
+    if (isDev) console.log('🔍 Ocean: Player detection:', { userData, isPlayerByUserData, isPlayerByCapsule })
     
     return isPlayerByUserData || isPlayerByCapsule
   }
@@ -150,7 +153,7 @@
     // Get the Y position of the player's collider
     const position = collider?.position || collider?.parent?.position || collider?.rigidBody?.translation()
     const y = position?.y || position?.[1] || 0
-    if (import.meta.env.DEV) console.log('🔍 Ocean: Player Y position:', y)
+    if (isDev) console.log('🔍 Ocean: Player Y position:', y)
     return y
   }
 
@@ -187,13 +190,13 @@
     private lastPointLightCount = 0
 
     protected async onInitialize(): Promise<void> {
-      if (import.meta.env.DEV) console.log('🌊 Ocean: Initializing...')
+      if (isDev) console.log('🌊 Ocean: Initializing...')
       await this.createOcean()
       if (lightingManager) {
         unsubscribeLighting = lightingManager.subscribe((lighting: LightingData) => {
           this.updateOceanLighting(lighting)
         })
-        if (import.meta.env.DEV) console.log('🌊 Ocean: Connected to lighting system')
+        if (isDev) console.log('🌊 Ocean: Connected to lighting system')
       } else {
         console.warn('🌊 Ocean: No lightingManager found in context!')
       }
@@ -224,12 +227,12 @@
           
           // If player is deep enough and not already underwater → enter water
           if (depth > epsilon && !underwaterState.isUnderwater) {
-            if (import.meta.env.DEV) console.log('🌊 Ocean: Math-based underwater detection - entering water at depth:', depth)
+            if (isDev) console.log('🌊 Ocean: Math-based underwater detection - entering water at depth:', depth)
             underwaterActions.enterWater(depth)
           }
           // If player is above water and currently underwater → exit water
           else if (depth <= epsilon && underwaterState.isUnderwater) {
-            if (import.meta.env.DEV) console.log('🏖️ Ocean: Math-based underwater detection - exiting water')
+            if (isDev) console.log('🏖️ Ocean: Math-based underwater detection - exiting water')
             underwaterActions.exitWater()
           }
         }
@@ -255,11 +258,12 @@
     }
 
     protected onDispose(): void {
-      oceanGeometry?.dispose()
-      oceanMaterial?.dispose()
+      this.disposeOceanResources()
     }
 
     private async createOcean(): Promise<void> {
+      this.disposeOceanResources()
+
       // If planar reflections are enabled, create a Reflector instead of a standard mesh material.
       if (enablePlanarReflections) {
         // Lazy import to avoid bundling cost unless used
@@ -320,6 +324,38 @@
       // Ocean setup complete
     }
 
+    public async recreateOcean(nextQualityKey: string): Promise<void> {
+      if (pendingOceanRebuild) return
+
+      pendingOceanRebuild = true
+
+      try {
+        await this.createOcean()
+        lastOceanQualityKey = nextQualityKey
+      } finally {
+        pendingOceanRebuild = false
+      }
+    }
+
+    private disposeOceanResources(): void {
+      if (reflector && typeof reflector.dispose === 'function') {
+        reflector.dispose()
+      }
+      reflector = null
+
+      oceanGeometry?.dispose()
+      oceanGeometry = undefined as unknown as THREE.PlaneGeometry
+
+      if (oceanMaterial instanceof THREE.MeshStandardMaterial) {
+        oceanMaterial.map?.dispose()
+        oceanMaterial.normalMap?.dispose()
+        oceanMaterial.displacementMap?.dispose()
+      }
+
+      oceanMaterial?.dispose()
+      oceanMaterial = undefined as unknown as THREE.Material
+    }
+
     private updateOceanLighting(lighting: LightingData): void {
       // MeshStandardMaterial automatically receives lighting from Three.js lights!
       // The HybridFireflyComponent creates actual T.PointLight components,
@@ -330,7 +366,7 @@
         this.lastPointLightCount = lighting.point.length
         // Only log every 10th light change to avoid spam
         if (this.lastPointLightCount % 10 === 0) {
-          console.log(`🌊 Ocean: Now receiving ${lighting.point.length} lights via Threlte's standard lighting`)
+          if (isDev) console.log(`🌊 Ocean: Now receiving ${lighting.point.length} lights via Threlte's standard lighting`)
         }
       }
       
@@ -419,6 +455,9 @@
       const canvas = document.createElement('canvas')
       canvas.width = canvas.height = size
       const ctx = canvas.getContext('2d')!
+      const colorImageData = ctx.createImageData(size, size)
+      const colorPixels = colorImageData.data
+
       for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
           const wave = heightMap[y][x]
@@ -429,11 +468,15 @@
           const blue = Math.floor(blueBase + wave * 120)
           const green = Math.floor(greenBase + wave * 100)
           const red = Math.floor(10 + wave * 30)
-          
-          ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`
-          ctx.fillRect(x, y, 1, 1)
+
+          const pixelIndex = (y * size + x) * 4
+          colorPixels[pixelIndex] = red
+          colorPixels[pixelIndex + 1] = green
+          colorPixels[pixelIndex + 2] = blue
+          colorPixels[pixelIndex + 3] = 255
         }
       }
+      ctx.putImageData(colorImageData, 0, 0)
       
       // Create Three.js textures with legacy settings
       const displacementTexture = new THREE.DataTexture(
@@ -467,11 +510,13 @@
   // Collision detection is now handled entirely by the Rapier sensor below
 
   onMount(async () => {
-    console.log('🌊 Ocean: Mounting with water level:', waterLevel, 'rising enabled:', enableRising)
-    console.log('🌊 Ocean: Collision box size:', waterCollisionSize)
-    console.log('🌊 Ocean: Ocean position:', position)
-    console.log('🌊 Ocean: Underwater effects enabled:', enableUnderwaterEffects)
-    console.log('🌊 Ocean: Using MANUAL collision detection')
+    if (isDev) {
+      console.log('🌊 Ocean: Mounting with water level:', waterLevel, 'rising enabled:', enableRising)
+      console.log('🌊 Ocean: Collision box size:', waterCollisionSize)
+      console.log('🌊 Ocean: Ocean position:', position)
+      console.log('🌊 Ocean: Underwater effects enabled:', enableUnderwaterEffects)
+      console.log('🌊 Ocean: Using MANUAL collision detection')
+    }
     
     if (registry) {
       component = new OceanComponent()
@@ -479,6 +524,7 @@
       const levelContext = getContext('levelContext')
       if (levelContext) {
         await component.initialize(levelContext)
+        lastOceanQualityKey = `${optimizedSegments.width}x${optimizedSegments.height}:${textureSize}:${Number(enablePlanarReflections)}`
       }
     }
     
@@ -503,11 +549,13 @@
   }
 
   // --- REACTIVE RECREATION when quality settings change ---
-  $: if (component && (optimizedSegments || textureSize)) {
-    // Recreate ocean when quality settings change
-    console.log(`🌊 Ocean: Quality settings changed, recreating with segments ${optimizedSegments.width}x${optimizedSegments.height}, texture ${textureSize}px`)
-    component.onDispose()
-    component.createOcean()
+  $: oceanQualityKey = `${optimizedSegments.width}x${optimizedSegments.height}:${textureSize}:${Number(enablePlanarReflections)}`
+
+  $: if (component && lastOceanQualityKey && oceanQualityKey !== lastOceanQualityKey) {
+    if (isDev) {
+      console.log(`🌊 Ocean: Quality settings changed, recreating with segments ${optimizedSegments.width}x${optimizedSegments.height}, texture ${textureSize}px`)
+    }
+    void component.recreateOcean(oceanQualityKey)
   }
 </script>
 
@@ -546,7 +594,11 @@
         userData={{ isOceanSensor: true, type: 'ocean-sensor' }}
         on:intersectionenter={handleIntersectionEnter}
         on:intersectionexit={handleIntersectionExit}
-        on:create={(e) => console.log('🌊 Ocean: Collision sensor created at Y:', waterLevel, 'Box size:', waterCollisionSize)}
+        on:create={() => {
+          if (isDev) {
+            console.log('🌊 Ocean: Collision sensor created at Y:', waterLevel, 'Box size:', waterCollisionSize)
+          }
+        }}
       />
     </RigidBody>
     

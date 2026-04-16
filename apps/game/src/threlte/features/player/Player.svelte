@@ -2,15 +2,14 @@
   import { T, useTask } from '@threlte/core';
   import { Collider, RigidBody } from '@threlte/rapier';
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-  import * as RAPIER from '@dimforge/rapier3d-compat';
   import * as THREE from 'three';
   import { useRapier } from '@threlte/rapier';
-  import { multiplayerStore } from '../multiplayer';
-  import { sendPlayerUpdate } from '../multiplayer';
-  import { PlayerAvatar } from '../multiplayer';
+  import { multiplayerStore, type PlayerState } from '../multiplayer/stores/multiplayerStore';
+  import PlayerAvatar from '../multiplayer/components/PlayerAvatar.svelte';
   import { uiStore } from '../../stores/uiStore';
   import { gameActions } from '../../stores/gameStateStore';
   import { PLAYER_GROUP } from '../../constants/physics';
+  import { recordSystemTiming } from '../performance/stores/performanceStore';
 
   // --- Physics Constants ---
   const GRAVITY = 8;
@@ -44,7 +43,7 @@
   const keyStates: { [key: string]: boolean } = {};
   let isGrounded = false;
   const playerVelocity = new THREE.Vector3();
-  let characterController: RAPIER.KinematicCharacterController;
+  let characterController: any;
 
   // --- Look/Camera State ---
   let isMouseDown = false;
@@ -61,6 +60,27 @@
   let mobileJumpPressed = false;
   let isMobile = false;
   let dragToLook = false;
+  let hasConnectedGamepad = false;
+  let sendPlayerUpdateFn: ((playerState: PlayerState) => void) | null = null;
+  let multiplayerServicePromise: Promise<void> | null = null;
+  let networkSyncElapsed = 0;
+
+  const tempAxisY = new THREE.Vector3(0, 1, 0);
+  const tempDesiredTranslation = new THREE.Vector3();
+  const tempHorizontalVelocity = new THREE.Vector3();
+  const tempBodyPosition = new THREE.Vector3();
+  const tempBodyRotation = new THREE.Quaternion();
+  const tempDeltaRotation = new THREE.Quaternion();
+  const nextTranslation = { x: 0, y: 0, z: 0 };
+  const keyboardMovement = { x: 0, z: 0 };
+  const gamepadState = {
+    moveX: 0,
+    moveZ: 0,
+    lookX: 0,
+    lookY: 0,
+    jump: false,
+    sprint: false,
+  };
 
   $: if ($mobileInputStore) {
     mobileMovement = $mobileInputStore.movement;
@@ -115,12 +135,13 @@
   }
 
   function updateMovementFromKeys() {
-    const movement = { x: 0, z: 0 };
-    if (keyStates['KeyW'] || keyStates['ArrowUp'] || mobileMovement.z < -0.1) movement.z -= 1;
-    if (keyStates['KeyS'] || keyStates['ArrowDown'] || mobileMovement.z > 0.1) movement.z += 1;
-    if (keyStates['KeyA'] || keyStates['ArrowLeft'] || mobileMovement.x < -0.1) movement.x -= 1;
-    if (keyStates['KeyD'] || keyStates['ArrowRight'] || mobileMovement.x > 0.1) movement.x += 1;
-    return movement;
+    keyboardMovement.x = 0;
+    keyboardMovement.z = 0;
+    if (keyStates['KeyW'] || keyStates['ArrowUp'] || mobileMovement.z < -0.1) keyboardMovement.z -= 1;
+    if (keyStates['KeyS'] || keyStates['ArrowDown'] || mobileMovement.z > 0.1) keyboardMovement.z += 1;
+    if (keyStates['KeyA'] || keyStates['ArrowLeft'] || mobileMovement.x < -0.1) keyboardMovement.x -= 1;
+    if (keyStates['KeyD'] || keyStates['ArrowRight'] || mobileMovement.x > 0.1) keyboardMovement.x += 1;
+    return keyboardMovement;
   }
 
   function applyStickDeadzone(value: number, deadzone: number) {
@@ -131,7 +152,11 @@
   }
 
   function getPrimaryGamepad(): Gamepad | null {
-    if (typeof navigator === 'undefined' || typeof navigator.getGamepads !== 'function') {
+    if (
+      !hasConnectedGamepad ||
+      typeof navigator === 'undefined' ||
+      typeof navigator.getGamepads !== 'function'
+    ) {
       return null;
     }
 
@@ -145,30 +170,56 @@
   function getGamepadInput() {
     const pad = getPrimaryGamepad();
     if (!pad) {
-      return {
-        moveX: 0,
-        moveZ: 0,
-        lookX: 0,
-        lookY: 0,
-        jump: false,
-        sprint: false,
-      };
+      gamepadState.moveX = 0;
+      gamepadState.moveZ = 0;
+      gamepadState.lookX = 0;
+      gamepadState.lookY = 0;
+      gamepadState.jump = false;
+      gamepadState.sprint = false;
+      return gamepadState;
     }
 
-    return {
-      moveX: applyStickDeadzone(pad.axes[0] ?? 0, GAMEPAD_MOVE_DEADZONE),
-      moveZ: applyStickDeadzone(pad.axes[1] ?? 0, GAMEPAD_MOVE_DEADZONE),
-      lookX: applyStickDeadzone(pad.axes[2] ?? 0, GAMEPAD_LOOK_DEADZONE),
-      lookY: applyStickDeadzone(pad.axes[3] ?? 0, GAMEPAD_LOOK_DEADZONE),
-      jump: Boolean(pad.buttons[0]?.pressed),
-      sprint: Boolean(pad.buttons[5]?.pressed || pad.buttons[7]?.pressed),
-    };
+    gamepadState.moveX = applyStickDeadzone(pad.axes[0] ?? 0, GAMEPAD_MOVE_DEADZONE);
+    gamepadState.moveZ = applyStickDeadzone(pad.axes[1] ?? 0, GAMEPAD_MOVE_DEADZONE);
+    gamepadState.lookX = applyStickDeadzone(pad.axes[2] ?? 0, GAMEPAD_LOOK_DEADZONE);
+    gamepadState.lookY = applyStickDeadzone(pad.axes[3] ?? 0, GAMEPAD_LOOK_DEADZONE);
+    gamepadState.jump = Boolean(pad.buttons[0]?.pressed);
+    gamepadState.sprint = Boolean(pad.buttons[5]?.pressed || pad.buttons[7]?.pressed);
+    return gamepadState;
   }
 
-  // --- Main Game Loop ---
-  // This now handles ONLY the physics simulation. Visuals are smoothed separately.
+  async function ensureMultiplayerService(): Promise<void> {
+    if (sendPlayerUpdateFn) return;
+
+    if (!multiplayerServicePromise) {
+      multiplayerServicePromise = import('../multiplayer/services/MultiplayerService').then((module) => {
+        sendPlayerUpdateFn = module.sendPlayerUpdate;
+      });
+    }
+
+    await multiplayerServicePromise;
+  }
+
+  function handleGamepadConnected() {
+    hasConnectedGamepad = true;
+  }
+
+  function handleGamepadDisconnected() {
+    if (typeof navigator === 'undefined' || typeof navigator.getGamepads !== 'function') {
+      hasConnectedGamepad = false;
+      return;
+    }
+
+    hasConnectedGamepad = Array.from(navigator.getGamepads()).some(Boolean);
+  }
+
+  $: if ($multiplayerStore.isConnected && !sendPlayerUpdateFn) {
+    void ensureMultiplayerService();
+  }
+
   useTask((delta) => {
     if (!rigidBody || !characterController) return;
+    const controllerStart = performance.now();
     const gamepadInput = getGamepadInput();
 
     // 1. Handle Rotation (Left/Right Mouse Look) - This directly affects the physics body
@@ -182,9 +233,10 @@
     }
     if (accumulatedRotationX !== 0) {
       const currentRotation = rigidBody.rotation();
-      const deltaRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), accumulatedRotationX);
-      const newRotation = new THREE.Quaternion(currentRotation.x, currentRotation.y, currentRotation.z, currentRotation.w).multiply(deltaRotation);
-      rigidBody.setNextKinematicRotation(newRotation);
+      tempDeltaRotation.setFromAxisAngle(tempAxisY, accumulatedRotationX);
+      tempBodyRotation.set(currentRotation.x, currentRotation.y, currentRotation.z, currentRotation.w);
+      tempBodyRotation.multiply(tempDeltaRotation);
+      rigidBody.setNextKinematicRotation(tempBodyRotation);
     }
     accumulatedRotationX = 0;
 
@@ -202,31 +254,30 @@
     if (Math.abs(gamepadInput.moveZ) > Math.abs(input.z)) input.z = gamepadInput.moveZ;
 
     const moveSpeed = keyStates['ShiftLeft'] || keyStates['ShiftRight'] || gamepadInput.sprint ? speed * 2 : speed;
-    const horizontalVelocity = new THREE.Vector3(input.x, 0, input.z);
-    if (isMobile) horizontalVelocity.set(mobileMovement.x, 0, mobileMovement.z);
-    if (horizontalVelocity.lengthSq() > 0) {
+    tempHorizontalVelocity.set(input.x, 0, input.z);
+    if (isMobile) tempHorizontalVelocity.set(mobileMovement.x, 0, mobileMovement.z);
+    if (tempHorizontalVelocity.lengthSq() > 0) {
       const bodyRotation = rigidBody.rotation();
-      horizontalVelocity.normalize().multiplyScalar(moveSpeed);
-      horizontalVelocity.applyQuaternion(new THREE.Quaternion(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w));
+      tempHorizontalVelocity.normalize().multiplyScalar(moveSpeed);
+      tempBodyRotation.set(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w);
+      tempHorizontalVelocity.applyQuaternion(tempBodyRotation);
     }
 
     // 4. Compute and Apply Movement via Character Controller
-    const desiredTranslation = new THREE.Vector3(horizontalVelocity.x, playerVelocity.y, horizontalVelocity.z).multiplyScalar(delta);
+    tempDesiredTranslation.set(tempHorizontalVelocity.x, playerVelocity.y, tempHorizontalVelocity.z).multiplyScalar(delta);
     const collider = rigidBody.collider(0);
     // Exclude sensors so water doesn't block player movement
     characterController.computeColliderMovement(
       collider, 
-      desiredTranslation, 
-      RAPIER.QueryFilterFlags.EXCLUDE_SENSORS
+      tempDesiredTranslation,
+      rapier.rapier.QueryFilterFlags.EXCLUDE_SENSORS
     );
     const correctedMovement = characterController.computedMovement();
     const currentPos = rigidBody.translation();
-    const newPos = {
-      x: currentPos.x + correctedMovement.x,
-      y: currentPos.y + correctedMovement.y,
-      z: currentPos.z + correctedMovement.z
-    };
-    rigidBody.setNextKinematicTranslation(newPos);
+    nextTranslation.x = currentPos.x + correctedMovement.x;
+    nextTranslation.y = currentPos.y + correctedMovement.y;
+    nextTranslation.z = currentPos.z + correctedMovement.z;
+    rigidBody.setNextKinematicTranslation(nextTranslation);
 
     // 5. Update Ground State
     isGrounded = characterController.computedGrounded();
@@ -239,8 +290,10 @@
     const bodyPosition = rigidBody.translation();
     const bodyRotation = rigidBody.rotation();
     const smoothAlpha = 1 - Math.pow(1 - CAMERA_SMOOTH_SPEED, delta * 60);
-    visualGroup.position.lerp(new THREE.Vector3(bodyPosition.x, bodyPosition.y, bodyPosition.z), smoothAlpha);
-    visualGroup.quaternion.slerp(new THREE.Quaternion(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w), smoothAlpha);
+    tempBodyPosition.set(bodyPosition.x, bodyPosition.y, bodyPosition.z);
+    tempBodyRotation.set(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w);
+    visualGroup.position.lerp(tempBodyPosition, smoothAlpha);
+    visualGroup.quaternion.slerp(tempBodyRotation, smoothAlpha);
 
     // 7. Handle Camera Pivot (Up/Down Look) - This now rotates the visual group, not the physics body
     cameraRotationX += accumulatedRotationY;
@@ -249,23 +302,18 @@
       cameraPivot.quaternion.setFromEuler(new THREE.Euler(cameraRotationX, 0, 0));
     }
     accumulatedRotationY = 0;
+    recordSystemTiming('playerController', performance.now() - controllerStart);
 
-  });
-
-  // --- Multiplayer Update (No changes needed) ---
-  let lastUpdateTime = 0;
-  const updateInterval = 100;
-  useTask(() => {
-    const now = performance.now();
-    if (now - lastUpdateTime > updateInterval && rigidBody) {
-      lastUpdateTime = now;
+    networkSyncElapsed += delta * 1000;
+    if (networkSyncElapsed >= 100) {
+      networkSyncElapsed = 0;
       const currentPosition = rigidBody.translation();
       // Keep global player position store in sync (used by terrain/ocean systems)
       gameActions.updatePlayerPosition([currentPosition.x, currentPosition.y, currentPosition.z]);
 
       // Throttle multiplayer updates to ~10fps when connected
-      if ($multiplayerStore.isConnected) {
-        sendPlayerUpdate({
+      if ($multiplayerStore.isConnected && sendPlayerUpdateFn) {
+        sendPlayerUpdateFn({
           position: [currentPosition.x, currentPosition.y, currentPosition.z],
         });
       }
@@ -285,11 +333,23 @@
 
   onMount(() => {
     isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    hasConnectedGamepad =
+      typeof navigator !== 'undefined'
+      && typeof navigator.getGamepads === 'function'
+      && Array.from(navigator.getGamepads()).some(Boolean);
     characterController = rapier.world.createCharacterController(characterControllerOffset);
     characterController.setApplyImpulsesToDynamicBodies(true);
     characterController.enableAutostep(0.35, 0.5, true);
     characterController.setMaxSlopeClimbAngle(0.87);
     characterController.enableSnapToGround(1.0);
+    window.addEventListener('gamepadconnected', handleGamepadConnected);
+    window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('gamepadconnected', handleGamepadConnected);
+    window.removeEventListener('gamepaddisconnected', handleGamepadDisconnected);
+    characterController?.free?.();
   });
 </script>
 

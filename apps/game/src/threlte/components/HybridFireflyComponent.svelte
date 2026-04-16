@@ -11,7 +11,7 @@
   - Modern component lifecycle management
 -->
 <script lang="ts">
-  import { onMount, getContext } from 'svelte'
+  import { onMount, getContext, tick } from 'svelte'
   import { T, useTask, useThrelte } from '@threlte/core'
   import * as THREE from 'three'
   import { qualitySettingsStore, recordSystemTiming } from '../features/performance'
@@ -127,6 +127,7 @@
   const registry = getContext('systemRegistry')
   const ecsWorld = getContext('ecsWorld')
   const lightingManager = getContext('lightingManager')
+  const levelContext = getContext<LevelContext | undefined>('levelContext')
 
   // --- REACTIVE OPTIMIZATION SETTINGS ---
   // Use reactive store instead of manual OptimizationManager calls
@@ -424,13 +425,13 @@
       optimizationSettings: fireflyOptimizationConfig
     })
     refreshFireflySettings()
+    await tick()
     
     console.log('🧚‍♀️ HybridFirefly: Registered component-specific optimization settings')
     
     if (registry && typeof registry.registerComponent === 'function') {
       component = new HybridFireflyComponent()
       registry.registerComponent(component)
-      const levelContext = getContext('levelContext')
       if (levelContext) {
         await component.initialize(levelContext)
       }
@@ -448,6 +449,8 @@
 
   // Initialize the lighting system once we have the required dependencies
   $: if (lightingManager && ecsWorld && !fireflyLightingSystem) {
+    lightingManager.ensurePointLightPoolSize(Math.min(optimizedMaxLights, 25))
+
     fireflyLightingSystem = new FireflyLightingSystem(lightingManager, ecsWorld, {
       maxLights: Math.min(optimizedMaxLights, 25), // Respect optimization limits
       updateFrequency: 15, // 15 Hz updates instead of 60 Hz
