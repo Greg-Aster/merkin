@@ -1,0 +1,28 @@
+{
+  "heightmapUrl": "/terrain/heightmaps/observatory-environment-lowres-legacy_heightmap.png",
+  "worldSize": 500,
+  "heightScale": 74.42882919311523,
+  "heightOffset": -58.02801513671875,
+  "bounds": {
+    "min": [
+      -250,
+      -58.02801513671875,
+      -250
+    ],
+    "max": [
+      250,
+      16.400814056396484,
+      250
+    ]
+  },
+  "resolution": "2048x2048",
+  "originalGLB": "observatory-environment-lowres-legacy.glb",
+  "generatedAt": "2025-09-03T19:30:47.376Z",
+  "pipelineVersion": "1.0.0",
+  "synchronizedWith": {
+    "levelId": "observatory-environment",
+    "glbPath": "observatory-environment-lowres-legacy.glb",
+    "generatedBy": "unified-terrain-pipeline",
+    "syncedAt": "2025-09-03T19:31:13.316Z"
+  }
+}
