@@ -16,16 +16,27 @@ The Merkin repository is a **multi-project workspace** containing five distinct 
 
 ```
 /home/greggles/Merkin/
-├── MEGAMEAL/                    # Primary MEGAMEAL version
-├── MEGAMEAL (copy)/            # Development copy
-├── MEGAMEAL (9-8)/             # Backup version
-├── MEGAMEAL (threejs)/         # Three.js experimental version
-├── DNDIY/                      # D&D content platform
-├── DNDIY.github.io/            # DNDIY GitHub Pages version
-├── Temporal-Flow/              # Decentralized blog platform
-├── Mesh_Hair_Generator/        # Blender addon
-└── mascot-chatbot-cf-worker/   # AI mascot backend service
+├── apps/
+│   ├── megameal/               # MEGAMEAL blog site → megameal.org (Cloudflare Pages)
+│   │   └── public/             # ⚠️ SHARED: also serves all static assets for the game
+│   ├── game/                   # 3D game engine → game.megameal.org (Cloudflare Pages)
+│   │   └── public/             # Only contains CNAME — add assets to apps/megameal/public/ instead
+│   └── travel/                 # Travel blog → travel.dndiy.org (Cloudflare Pages)
+├── packages/
+│   └── blog-core/              # Shared layouts, components, schemas
+├── DNDIY.github.io/            # D&D blog → dndiy.org (Cloudflare Pages)
+├── Temporal-Flow/              # Temporal blog → temporalflow.org (Cloudflare Pages)
+├── Mesh_Hair_Generator/        # Blender addon (not deployed)
+└── mascot-chatbot-cf-worker/   # AI mascot backend (Cloudflare Workers)
 ```
+
+### ⚠️ Critical: Game Static Assets
+
+`apps/game` uses `publicDir: '../megameal/public'` in its Astro config. This means:
+- **All game static assets** (terrain manifests, audio, 3D models, heightmaps) live in `apps/megameal/public/`
+- `apps/game/public/` only contains the `CNAME` file — do not add assets there
+- If `game.megameal.org` returns 404 for any asset, the file is missing from `apps/megameal/public/`
+- Both sites deploy independently to Cloudflare Pages; both pick up `apps/megameal/public/` contents
 
 ---
 
