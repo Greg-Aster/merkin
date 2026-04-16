@@ -16,6 +16,7 @@
   import { T } from '@threlte/core'
   import { RigidBody, Collider } from '@threlte/rapier'
   import LevelManager from '../core/LevelManager.svelte'
+  import { gameActions } from '../stores/gameStateStore'
 
   const dispatch = createEventDispatcher()
 
@@ -25,15 +26,16 @@
   export let playerSpawnPoint: [number, number, number] = [0, 1, 0]
 
   // --- Room geometry constants (from manifest bounds) ---
-  const W  = 5.39   // total width  X
-  const H  = 2.06   // total height Y
-  const D  = 4.63   // total depth  Z
-  const CX = 0.07   // center X
-  const CY = 0.95   // center Y
-  const CZ = 0.04   // center Z
+  const SCALE = 2     // 2x scale for walkable interior
+  const W  = 5.39 * SCALE   // total width  X
+  const H  = 2.06 * SCALE   // total height Y
+  const D  = 4.63 * SCALE   // total depth  Z
+  const CX = 0.07 * SCALE   // center X
+  const CY = 0.95 * SCALE   // center Y
+  const CZ = 0.04 * SCALE   // center Z
 
-  const FLOOR_Y = -0.08
-  const T_WALL  = 0.12   // wall thickness (half = 0.06)
+  const FLOOR_Y = -0.08 * SCALE
+  const T_WALL  = 0.12 * SCALE   // wall thickness
 
   // Colours
   const COL_FLOOR   = '#1a1f2e'
@@ -46,6 +48,11 @@
   const PANEL_W = 1.0
   const PANEL_H = 0.6
   const PANEL_D = 0.02
+
+  function handlePortalContact() {
+    console.log('🌀 Portal triggered! Returning to observatory...')
+    gameActions.transitionToLevel('observatory')
+  }
 
   onMount(() => {
     if (spawnSystem?.requestSpawn) {
@@ -243,6 +250,37 @@
     <!-- Floor trim accent lights -->
     <T.PointLight position={[0, FLOOR_Y + 0.1, -D/2 + 0.2]} color={COL_TRIM} intensity={3} distance={3} decay={2} />
     <T.PointLight position={[0, FLOOR_Y + 0.1,  D/2 - 0.2]} color={COL_TRIM} intensity={3} distance={3} decay={2} />
+
+
+    <!-- ══════════════════════════════════════════
+         EXIT PORTAL — Return to Observatory
+         ══════════════════════════════════════════ -->
+
+    <!-- Portal platform (glowing circle in corner) -->
+    <T.Mesh position={[-W/2 + 0.8, FLOOR_Y + 0.02, -D/2 + 0.8]}>
+      <T.CylinderGeometry args={[0.6, 0.6, 0.05, 32]} />
+      <T.MeshStandardMaterial color="#ff00ff" emissive="#ff00ff" emissiveIntensity={1.5} roughness={0} metalness={1} />
+    </T.Mesh>
+
+    <!-- Portal ring (visual indicator) -->
+    <T.Mesh position={[-W/2 + 0.8, FLOOR_Y + 0.1, -D/2 + 0.8]}>
+      <T.TorusGeometry args={[0.65, 0.08, 16, 32]} />
+      <T.MeshStandardMaterial color="#ff00ff" emissive="#ff00ff" emissiveIntensity={2} roughness={0} metalness={1} />
+    </T.Mesh>
+
+    <!-- Portal sensor (invisible trigger for return) -->
+    <T.Group position={[-W/2 + 0.8, FLOOR_Y + 0.3, -D/2 + 0.8]}>
+      <RigidBody type="fixed" onsensorenter={handlePortalContact}>
+        <Collider
+          shape="cylinder"
+          args={[0.3, 0.7]}
+          sensor={true}
+        />
+      </RigidBody>
+    </T.Group>
+
+    <!-- Portal light -->
+    <T.PointLight position={[-W/2 + 0.8, FLOOR_Y + 0.5, -D/2 + 0.8]} color="#ff00ff" intensity={8} distance={4} decay={2} />
 
   </T.Group>
 </LevelManager>
