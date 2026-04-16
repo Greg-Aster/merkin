@@ -160,13 +160,14 @@ const linkLabel =
 
 <style>
   .portal-route {
+    --route-frame-ratio: 16 / 9;
+    --route-frame-min-height: clamp(16rem, 34vw, 24rem);
     position: relative;
     display: grid;
     grid-template-columns: minmax(16rem, 0.42fr) minmax(0, 0.58fr);
     gap: clamp(1rem, 3vw, 1.6rem);
     align-items: stretch;
     overflow: visible;
-    min-height: clamp(26rem, 46vw, 34rem);
     padding: clamp(1rem, 2.4vw, 1.4rem);
     background:
       radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--route-accent) 18%, transparent), transparent 38%),
@@ -253,7 +254,6 @@ const linkLabel =
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 20rem;
     padding: clamp(1rem, 3vw, 2rem);
     transition:
       transform 0.35s ease,
@@ -328,7 +328,8 @@ const linkLabel =
     position: relative;
     z-index: 1;
     overflow: hidden;
-    min-height: 22rem;
+    aspect-ratio: var(--route-frame-ratio);
+    min-height: var(--route-frame-min-height);
     border-radius: 1.1rem;
     border: 1px solid color-mix(in srgb, var(--route-accent) 34%, transparent);
     background: oklch(0.08 0.03 var(--hue) / 0.78);
@@ -371,7 +372,6 @@ const linkLabel =
   .portal-route--store,
   .portal-route--community {
     display: block;
-    min-height: clamp(28rem, 58vw, 40rem);
     padding: 0;
     border-radius: 1.25rem;
   }
@@ -427,7 +427,6 @@ const linkLabel =
   .portal-route--story .route-viewport,
   .portal-route--store .route-viewport,
   .portal-route--community .route-viewport {
-    min-height: clamp(28rem, 58vw, 40rem);
     border: 0;
     border-radius: inherit;
     box-shadow: none;
@@ -1127,7 +1126,7 @@ const linkLabel =
     .portal-route,
     .portal-route--reverse {
       grid-template-columns: 1fr;
-      min-height: auto;
+      --route-frame-min-height: clamp(15rem, 44vw, 21rem);
     }
 
     .portal-route--reverse .route-copy,
@@ -1186,6 +1185,7 @@ const linkLabel =
     .portal-route--community .route-copy {
       position: static;
       transform: none;
+      justify-content: flex-start;
       align-items: flex-start;
       width: auto;
       min-height: 0;
@@ -1225,7 +1225,8 @@ const linkLabel =
     }
 
     .route-viewport {
-      min-height: 16.5rem;
+      min-height: 0;
+      aspect-ratio: 16 / 7.75;
       border-radius: 0.9rem;
     }
 
@@ -1233,7 +1234,7 @@ const linkLabel =
     .portal-route--story .route-viewport,
     .portal-route--store .route-viewport,
     .portal-route--community .route-viewport {
-      min-height: 16.5rem;
+      min-height: 0;
       border-radius: 0.9rem;
     }
 
@@ -1243,6 +1244,34 @@ const linkLabel =
       padding: 0.58rem 0.7rem;
       border-radius: 0.75rem;
       font-size: 0.64rem;
+    }
+
+    .route-scene {
+      transform: translateY(-7%) scale(1.03);
+      transform-origin: center top;
+    }
+
+    .route-observatory {
+      top: 45%;
+      width: clamp(13rem, 56vw, 17rem);
+    }
+
+    .route-archive-board {
+      inset: -4% 0 0;
+      transform: scale(0.88);
+      transform-origin: top center;
+    }
+
+    .route-storefront {
+      inset: -5% 0 0;
+      transform: scale(0.9);
+      transform-origin: top center;
+    }
+
+    .route-community-network {
+      inset: -3% 0 0;
+      transform: scale(0.9);
+      transform-origin: top center;
     }
 
     .route-scene__icon {

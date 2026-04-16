@@ -10,6 +10,18 @@ const { timelineCount } = Astro.props
 ---
 
 <article class="portal-route portal-route--timeline" style="--route-accent: var(--route-timeline);">
+  <div class="route-copy">
+    <div class="route-kicker">Chronology Console</div>
+    <h3>Open the Timeline</h3>
+    <p>
+      The timeline is the map layer for the whole project: eras, incidents,
+      recipes, wars, corporate ascensions, and archival fragments.
+    </p>
+    <a href="/timeline/" class="route-link" data-sfx-click="sweep">
+      <span>Enter Timeline</span>
+      <Icon name="mdi:arrow-right" class="route-link__icon" />
+    </a>
+  </div>
   <div
     class="route-viewport route-viewport--timeline"
     style="--timeline-preview-bg: url('/posts/timeline/universe.png');"
@@ -30,18 +42,6 @@ const { timelineCount } = Astro.props
       useEraColors={true}
     />
     <div class="route-viewport__shade"></div>
-    <div class="route-copy">
-      <div class="route-kicker">Chronology Console</div>
-      <h3>Open the Timeline</h3>
-      <p>
-        The timeline is the map layer for the whole project: eras, incidents,
-        recipes, wars, corporate ascensions, and archival fragments.
-      </p>
-      <a href="/timeline/" class="route-link" data-sfx-click="sweep">
-        <span>Enter Timeline</span>
-        <Icon name="mdi:arrow-right" class="route-link__icon" />
-      </a>
-    </div>
     <div class="route-viewport__label">
       <Icon name="mdi:orbit" />
       <span>{timelineCount} live timeline entries</span>
@@ -51,10 +51,11 @@ const { timelineCount } = Astro.props
 
 <style>
   .portal-route {
+    --route-frame-ratio: 16 / 9;
+    --route-frame-min-height: clamp(16rem, 34vw, 24rem);
     position: relative;
     display: block;
     overflow: visible;
-    min-height: clamp(28rem, 58vw, 40rem);
     border-radius: 1.25rem;
     background:
       radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--route-accent) 18%, transparent), transparent 38%),
@@ -227,7 +228,8 @@ const { timelineCount } = Astro.props
     position: relative;
     z-index: 1;
     overflow: hidden;
-    height: clamp(28rem, 58vw, 40rem);
+    aspect-ratio: var(--route-frame-ratio);
+    min-height: var(--route-frame-min-height);
     border-radius: inherit;
     border: 0;
     background: oklch(0.08 0.03 var(--hue) / 0.78);
@@ -315,13 +317,17 @@ const { timelineCount } = Astro.props
 
   @media (max-width: 900px) {
     .portal-route {
-      min-height: auto;
+      --route-frame-min-height: clamp(15rem, 44vw, 21rem);
     }
   }
 
   @media (max-width: 540px) {
     .portal-route {
+      display: flex;
+      flex-direction: column;
+      gap: 0.72rem;
       min-height: 0;
+      padding: 0.7rem;
       border-radius: 1rem;
       background:
         linear-gradient(180deg, oklch(0.14 0.03 var(--hue) / 0.7), oklch(0.1 0.03 var(--hue) / 0.6));
@@ -337,24 +343,30 @@ const { timelineCount } = Astro.props
     }
 
     .route-viewport {
-      height: 23rem;
-      border-radius: inherit;
+      order: 1;
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 16 / 10.5;
+      border-radius: 0.9rem;
     }
 
     .route-copy {
-      inset: auto 0.9rem 3.5rem 0.9rem;
+      position: static;
+      z-index: 1;
+      order: 2;
+      inset: auto;
       transform: none;
+      justify-content: flex-start;
       align-items: flex-start;
       width: auto;
-      padding: 0;
+      min-height: 0;
+      padding: 0.15rem 0.2rem 0;
       text-align: left;
       border: 0;
       background: transparent;
       box-shadow: none;
       backdrop-filter: none;
-      text-shadow:
-        0 2px 12px rgba(0, 0, 0, 0.86),
-        0 0 18px rgba(0, 0, 0, 0.72);
+      text-shadow: none;
     }
 
     .portal-route:hover .route-copy {
@@ -369,22 +381,24 @@ const { timelineCount } = Astro.props
     }
 
     .route-copy p {
-      display: -webkit-box;
-      overflow: hidden;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 3;
       font-size: 0.88rem;
-      line-height: 1.5;
+      line-height: 1.42;
+      margin-top: 0.5rem;
+      max-width: none;
     }
 
     .route-link {
-      padding: 0.68rem 0.84rem;
+      margin-top: 0.9rem;
+      padding: 0.62rem 0.82rem;
     }
 
     .route-viewport__label {
-      left: 0.75rem;
-      right: 0.75rem;
+      left: 0.65rem;
+      right: 0.65rem;
+      bottom: 0.65rem;
       justify-content: center;
+      padding: 0.46rem 0.62rem;
+      font-size: 0.66rem;
     }
   }
 </style>
