@@ -23,6 +23,7 @@ public/downloads/
 .vscode/
 .idea/
 .claude/
+.codex-logs/
 
 # Environment/secrets
 .env
