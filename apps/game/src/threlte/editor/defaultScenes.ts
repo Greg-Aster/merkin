@@ -154,25 +154,50 @@ function normalizeSciFiPlanterB(scene: EditorSceneDocument): EditorSceneDocument
 }
 
 export function upgradeLegacySceneDocument(scene: EditorSceneDocument): EditorSceneDocument {
-  if (scene.levelId !== 'sci-fi-room') return scene
+  const normalizedScene = scene.levelId === 'sci-fi-room'
+    ? normalizeSciFiPlanterB(scene)
+    : scene
 
-  const normalizedScene = normalizeSciFiPlanterB(scene)
-  if (normalizedScene.version >= SCI_FI_ROOM_SCENE_VERSION) return normalizedScene
+  const defaultScene = createDefaultSceneForLevel(normalizedScene.levelId)
+  const nextVersion = normalizedScene.levelId === 'sci-fi-room'
+    ? Math.max(normalizedScene.version, SCI_FI_ROOM_SCENE_VERSION)
+    : normalizedScene.version
 
-  const hasMigratedFloorNodes = normalizedScene.nodes.some(
-    (node) => node.id === SCI_FI_FLOOR_ROOT_ID || node.parentId === SCI_FI_FLOOR_ROOT_ID
-  )
-  if (hasMigratedFloorNodes) {
+  if (!defaultScene.nodes.length) {
     return {
       ...normalizedScene,
-      version: SCI_FI_ROOM_SCENE_VERSION,
+      version: nextVersion,
+    }
+  }
+
+  const existingIds = new Set(normalizedScene.nodes.map((node) => node.id))
+  const missingDefaultNodes = defaultScene.nodes.filter((node) => !existingIds.has(node.id))
+
+  if (missingDefaultNodes.length === 0) {
+    return {
+      ...normalizedScene,
+      version: nextVersion,
+    }
+  }
+
+  const defaultNodeCount = defaultScene.nodes.length
+  const currentNodeCount = normalizedScene.nodes.length
+  const missingRatio = missingDefaultNodes.length / Math.max(defaultNodeCount, 1)
+  const shouldRepairFromDefaults = currentNodeCount === 0
+    || currentNodeCount < defaultNodeCount * 0.75
+    || missingRatio > 0.2
+
+  if (!shouldRepairFromDefaults) {
+    return {
+      ...normalizedScene,
+      version: nextVersion,
     }
   }
 
   return {
     ...normalizedScene,
-    version: SCI_FI_ROOM_SCENE_VERSION,
-    nodes: [...normalizedScene.nodes, ...createSciFiRoomFloorNodes()],
+    version: nextVersion,
+    nodes: [...normalizedScene.nodes, ...missingDefaultNodes],
   }
 }
 
