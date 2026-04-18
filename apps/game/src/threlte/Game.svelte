@@ -735,13 +735,15 @@
         {/if}
         
         <!-- ECS Spawn System - Handles all entity spawning -->
-        <SpawnSystem
-          bind:this={spawnSystem}
-          {playerComponent}
-          {physicsReady}
-          {terrainReady}
-          on:entitySpawned={(e) => dispatch('entitySpawned', e.detail)}
-        />
+        {#if !editorEnabled}
+          <SpawnSystem
+            bind:this={spawnSystem}
+            {playerComponent}
+            {physicsReady}
+            {terrainReady}
+            on:entitySpawned={(e) => dispatch('entitySpawned', e.detail)}
+          />
+        {/if}
 
         <!-- Physics World -->
         {#if physicsSystemComponent && playerComponentClass}
@@ -795,7 +797,7 @@
                   this={currentLevelComponent}
                   timelineEvents={parsedTimelineEvents}
                   timelineEventsJson={timelineEventsPayload}
-                  {spawnSystem}
+                  spawnSystem={editorEnabled ? null : spawnSystem}
                   {interactionSystem}
                   position={levelRenderConfig.offset}
                   playerSpawnPoint={levelRenderConfig.spawn}

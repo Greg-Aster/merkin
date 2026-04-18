@@ -15,6 +15,7 @@
   let camera: THREE.PerspectiveCamera
   let orbitControls: OrbitControls | null = null
   let transformControls: TransformControls | null = null
+  let transformControlsHelper: THREE.Object3D | null = null
   let controlsInitialized = false
   let selectedNodeId: string | null = null
   let selectedNodeIds: string[] = []
@@ -978,7 +979,13 @@
     transformControls.showZ = transformAxis === 'all' || transformAxis === 'z'
     transformControls.addEventListener('dragging-changed', handleTransformDraggingChanged)
     transformControls.addEventListener('objectChange', handleTransformObjectChange)
-    scene.add(transformControls)
+    transformControlsHelper = transformControls.getHelper()
+    if (transformControlsHelper instanceof THREE.Object3D) {
+      scene.add(transformControlsHelper)
+    } else {
+      console.warn('EditorViewportControls: TransformControls helper is not a THREE.Object3D; skipping helper attachment.')
+      transformControlsHelper = null
+    }
     scene.add(selectionPivot)
     renderer.domElement.addEventListener('pointerdown', handleCanvasPointerDown)
     renderer.domElement.addEventListener('pointermove', handleCanvasPointerMove)
@@ -1035,7 +1042,9 @@
     if (transformControls && scene) {
       transformControls.removeEventListener('dragging-changed', handleTransformDraggingChanged)
       transformControls.removeEventListener('objectChange', handleTransformObjectChange)
-      scene.remove(transformControls)
+      if (transformControlsHelper) {
+        scene.remove(transformControlsHelper)
+      }
       scene.remove(selectionPivot)
       transformControls.dispose()
     }

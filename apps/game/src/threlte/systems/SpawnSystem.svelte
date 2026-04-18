@@ -31,9 +31,23 @@
   let spawnQueue: SpawnRequest[] = []
   let spawnedEntities = new Set<string>()
   let isProcessingSpawn = false
+
+  function isValidPlayerComponent(value: any) {
+    return Boolean(value && typeof value.spawnAt === 'function')
+  }
+
+  function hasReadyComponentsForQueue() {
+    return spawnQueue.every((request) => {
+      if (request.entityType === 'player') {
+        return isValidPlayerComponent(playerComponent)
+      }
+
+      return true
+    })
+  }
   
   // System state
-  $: canSpawn = physicsReady && terrainReady && !isProcessingSpawn
+  $: canSpawn = physicsReady && terrainReady && !isProcessingSpawn && hasReadyComponentsForQueue()
   
   // Process spawn queue when conditions are met
   $: if (canSpawn && spawnQueue.length > 0) {
@@ -153,8 +167,8 @@
     const { position } = request
     
     // Use playerComponent from props (passed from Game.svelte)
-    if (!playerComponent || !playerComponent.spawnAt) {
-      console.error('❌ SpawnSystem: Player component missing or invalid')
+    if (!isValidPlayerComponent(playerComponent)) {
+      console.warn('SpawnSystem: Player spawn requested before player component was ready.')
       return false
     }
     
