@@ -109,9 +109,6 @@
       trimeshDownsample={colliderDownsample}
       chunkSize={config.chunkSize}
       gridSize={config.gridSize}
-      minHeight={config.minHeight}
-      maxHeight={config.maxHeight}
-      renderDebug={false}
       renderPhysicsDebug={false}
       showBoundsAABB={false}
       enableRaycastProbe={false}
@@ -140,9 +137,6 @@
             x={chunk.x}
             z={chunk.z}
             lod={chunk.currentLod}
-            position={chunk.position}
-            chunkSize={config.chunkSize}
-            origin={$terrainStore.bounds ? [$terrainStore.bounds.min[0], $terrainStore.bounds.min[2]] : [-$terrainStore.worldSize/2, -$terrainStore.worldSize/2]}
             pathTemplate={config.chunkPathTemplate}
           />
         {/if}

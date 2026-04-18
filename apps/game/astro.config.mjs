@@ -41,12 +41,6 @@ export default defineConfig({
           manualChunks(id) {
             if (!id.includes('node_modules')) {
               if (
-                id.includes('/src/threlte/editor/EditorPanel.svelte')
-              ) {
-                return 'editor-panel'
-              }
-
-              if (
                 id.includes('/src/threlte/editor/')
                 || id.includes('/src/threlte/utils/materialUtils.ts')
               ) {

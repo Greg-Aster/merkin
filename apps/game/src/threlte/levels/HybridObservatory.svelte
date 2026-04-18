@@ -27,7 +27,6 @@
   export let timelineEventsJson: string = '[]'
   export let spawnSystem: any = null
   export let interactionSystem: any = null
-  export let collisionDebugEnabled = false
 
   // --- State ---
   let manifest: any = null // Will hold the loaded level manifest data
