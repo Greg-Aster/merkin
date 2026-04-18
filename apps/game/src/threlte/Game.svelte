@@ -790,8 +790,6 @@
         <!-- Simple Post-Processing using Native Threlte - conditional rendering based on performance -->
         {#if $qualitySettingsStore.enablePostProcessing}
           <SimplePostProcessing 
-            enableGlow={true}
-            enableAmbientLight={true}
             toneMappingExposure={1.0}
           />
         {/if}

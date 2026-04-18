@@ -94,7 +94,7 @@
   height={size}
   class="firefly-avatar"
   style="width: {size}px; height: {size}px;"
-/>
+></canvas>
 
 <style>
   .firefly-avatar {

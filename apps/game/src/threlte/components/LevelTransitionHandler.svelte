@@ -12,7 +12,6 @@
 
   // Props  
   export let transitionDelay = 500 // ms delay before transition
-  export let fadeOutDuration = 300 // ms fade out duration
 
   // State
   let isTransitioning = false

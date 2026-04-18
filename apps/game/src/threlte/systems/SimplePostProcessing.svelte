@@ -7,8 +7,6 @@ import { T } from '@threlte/core'
 import { onMount } from 'svelte'
 
 // Configuration
-export let enableGlow = true
-export let enableAmbientLight = true
 export let toneMappingExposure = 1.0
 
 // Mobile optimization

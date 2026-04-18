@@ -41,6 +41,12 @@ export default defineConfig({
           manualChunks(id) {
             if (!id.includes('node_modules')) {
               if (
+                id.includes('/src/threlte/editor/EditorPanel.svelte')
+              ) {
+                return 'editor-panel'
+              }
+
+              if (
                 id.includes('/src/threlte/editor/')
                 || id.includes('/src/threlte/utils/materialUtils.ts')
               ) {
@@ -62,6 +68,21 @@ export default defineConfig({
               || id.includes('threlte-postprocessing')
             ) {
               return 'effects-vendor'
+            }
+
+            if (
+              id.includes('node_modules/three/src/renderers')
+              || id.includes('node_modules/three/src/materials')
+            ) {
+              return 'three-renderer-vendor'
+            }
+
+            if (
+              id.includes('node_modules/three/src/core')
+              || id.includes('node_modules/three/src/math')
+              || id.includes('node_modules/three/src/geometries')
+            ) {
+              return 'three-core-vendor'
             }
 
             if (

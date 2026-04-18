@@ -91,7 +91,7 @@
       <div class="room-active-section">
         <h2>🎉 Room is Live!</h2>
         <div class="join-section">
-          <label>Share this link with players:</label>
+          <div class="field-label">Share this link with players:</div>
           <div class="join-url">{getJoinUrl()}</div>
           <button on:click={copyJoinLink}>{copyButtonText}</button>
         </div>
@@ -123,19 +123,19 @@
       <h2>Server Information</h2>
       <div class="info-grid">
         <div class="info-item">
-          <label>Server Name:</label>
+          <div class="field-label">Server Name:</div>
           <span>{$hostStore.serverName}</span>
         </div>
         <div class="info-item">
-          <label>Technical Host ID:</label>
+          <div class="field-label">Technical Host ID:</div>
           <span class="host-id">{$hostStore.hostId}</span>
         </div>
         <div class="info-item">
-          <label>Room Name:</label>
+          <div class="field-label">Room Name:</div>
           <span>{$hostStore.roomName || 'Not registered'}</span>
         </div>
         <div class="info-item">
-          <label>Status:</label>
+          <div class="field-label">Status:</div>
           <span class="status-live">🟢 Live & Accepting Connections</span>
         </div>
       </div>
@@ -180,7 +180,7 @@
     margin-bottom: 1.5rem; border: 1px solid var(--border-color);
   }
   .input-group, .join-section { display: flex; flex-direction: column; gap: 1rem; }
-  label { font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary); }
+  .field-label { font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary); }
   input { 
     width: 100%; box-sizing: border-box; padding: 0.75rem; 
     background-color: var(--bg-primary); border: 1px solid var(--border-color); 
@@ -234,7 +234,7 @@
   /* Server Information */
   .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
   .info-item { display: flex; flex-direction: column; gap: 0.25rem; }
-  .info-item label { font-size: 0.9rem; color: #b0b0b0; font-weight: 500; }
+  .info-item .field-label { font-size: 0.9rem; color: #b0b0b0; font-weight: 500; margin-bottom: 0; }
   .info-item span { font-weight: 600; }
   .host-id { 
     font-family: monospace; background: var(--bg-primary); 

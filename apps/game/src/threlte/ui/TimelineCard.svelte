@@ -62,7 +62,6 @@
 <script lang="ts">
 import { createEventDispatcher, onMount } from 'svelte'
 export let event: any // Star data from game state
-export let isSelected = false
 export let compact = false
 export let position: 'top' | 'bottom' | 'left' | 'right' = 'bottom'
 export let isMobile = false

@@ -77,7 +77,6 @@
     lerpFactor: 1.0
   }
   export let getHeightAt: ((x: number, z: number) => number) | undefined = undefined
-  export let environmentReady = true // Allow external control of when to create fireflies
   export let interactionSystem: any = null // Centralized interaction system from Game
   
   // AI Conversation enhancement props
@@ -455,7 +454,7 @@
       maxLights: Math.min(optimizedMaxLights, 25), // Respect optimization limits
       updateFrequency: 15, // 15 Hz updates instead of 60 Hz
       twinkleSpeed: 0.8,
-      fadeSpeed: 2.0,
+      fadeSpeed,
       cullingDistance: 200
     })
     
