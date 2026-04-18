@@ -57,8 +57,8 @@
   export let roughness = 0.05 // Very smooth for reflections (from legacy)
   export let envMap: THREE.CubeTexture | null = null
   export let envMapIntensity = 1.5 // Higher reflection intensity like legacy
-  export let reflectionStrength = 1.0 // Reflection intensity
-  export let fresnelPower = 5.0 // Fresnel power for realistic edge reflections
+  export let reflectionStrength = 1.0 // Reflection intensity tuning multiplier
+  export let fresnelPower = 5.0 // Approximate fresnel bias for reflection-heavy water
 
   // --- PLANAR REFLECTIONS (optional) ---
   // MeshStandardMaterial + envMap reflects only the skybox/environment, not dynamic scene geometry.
@@ -167,6 +167,8 @@
     width: isMobileQuality ? 16 : (segments?.width || 24),
     height: isMobileQuality ? 16 : (segments?.height || 24)
   }
+  $: effectiveReflectionIntensity =
+    envMapIntensity * reflectionStrength * Math.max(0.25, fresnelPower / 5)
   
   // Single-sided rendering optimization based on underwater state
   $: if (!enablePlanarReflections && oceanMaterial instanceof THREE.MeshStandardMaterial) {
@@ -297,19 +299,22 @@
         
         oceanMaterial = new THREE.MeshStandardMaterial({
           color: color,
-          transparent: false,
-          opacity: 1.0,
+          transparent: opacity < 0.999,
+          opacity,
           roughness: roughness,
           metalness: metalness,
           envMap: envMap,
-          envMapIntensity: envMapIntensity,
+          envMapIntensity: effectiveReflectionIntensity,
           
           // Apply our beautiful procedural textures
           map: textureData.colorTexture,
           normalMap: textureData.normalMap,
           displacementMap: textureData.displacementMap,
-          displacementScale: 0.5, // Subtle displacement
-          normalScale: new THREE.Vector2(0.3, 0.3), // Subtle normal mapping
+          displacementScale: 0.35 + (reflectionStrength * 0.15),
+          normalScale: new THREE.Vector2(
+            0.18 + Math.min(fresnelPower, 10) * 0.024,
+            0.18 + Math.min(fresnelPower, 10) * 0.024
+          ),
           
           // Enable proper lighting integration
           fog: true, // Respond to scene fog
@@ -606,6 +611,9 @@
     <UnderwaterEffect 
       position={[0, 0, 0]}
       size={waterCollisionSize}
+      fogColor={underwaterFogColor}
+      fogDensityScale={underwaterFogDensity}
+      surfaceMistDensity={surfaceFogDensity}
     />
   </T.Group>
 {/if}

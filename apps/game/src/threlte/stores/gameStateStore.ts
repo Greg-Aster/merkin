@@ -4,6 +4,7 @@
  */
 
 import { writable, derived, type Writable } from 'svelte/store'
+import { DEFAULT_LEVEL_ID } from '../levels/levelRegistry'
 
 // Core game state types
 export interface PlayerState {
@@ -49,7 +50,7 @@ export interface StarData {
 }
 
 // Core game state stores
-export const currentLevelStore: Writable<string> = writable('hybrid-observatory')
+export const currentLevelStore: Writable<string> = writable(DEFAULT_LEVEL_ID)
 export const selectedStarStore: Writable<StarData | null> = writable(null)
 export const playerStateStore: Writable<PlayerState> = writable({
   position: [0, 12, 10], // Spawn at center with reasonable height
@@ -63,7 +64,7 @@ export const gameSessionStore: Writable<GameSession> = writable({
   totalPlayTime: 0,
   timeExplored: 0,
   interactionsCount: 0,
-  levelsVisited: ['hybrid-observatory']
+  levelsVisited: [DEFAULT_LEVEL_ID]
 })
 
 // UI state stores
@@ -175,7 +176,7 @@ export const saveGameState = () => {
   
   try {
     localStorage.setItem('megameal-game-state', JSON.stringify(state))
-    console.log('💾 Game state saved')
+    if (import.meta.env.DEV) console.log('💾 Game state saved')
   } catch (error) {
     console.warn('Failed to save game state:', error)
   }
@@ -193,7 +194,7 @@ export const loadGameState = () => {
       if (state.playerState) playerStateStore.set(state.playerState)
       if (state.gameSession) gameSessionStore.set(state.gameSession)
       
-      console.log('📂 Game state loaded')
+      if (import.meta.env.DEV) console.log('📂 Game state loaded')
     }
   } catch (error) {
     console.warn('Failed to load game state:', error)

@@ -1,0 +1,13 @@
+{
+  "sourceName": "biomechanical growth planter",
+  "sourceReferenceImageUrl": "/generated/hunyuan3d/references/biomechanical-growth-planter-reference-2026-04-18T02-08-22-907Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776478102916-ldrpuq",
+  "prompt": "A potted plant",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-18T02:10:29.615Z"
+}

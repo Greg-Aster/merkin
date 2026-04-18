@@ -23,10 +23,6 @@
   export let position: [number, number, number] = [0, 0, 0]
   export let friction: number = 0.9
   export let restitution: number = 0.0
-  // Optional: visual debugging (disabled by default)
-  export let renderDebug: boolean = false
-  export let minHeight: number = 0
-  export let maxHeight: number = 100
   // Additional debug overlays (disabled by default)
   export let renderPhysicsDebug: boolean = false
 
@@ -55,7 +51,9 @@
       if (params.get('hf_tm_rad')) trimeshActiveRadius = Math.max(1, parseInt(params.get('hf_tm_rad')!))
       if (params.get('hf_tm_mode') === 'chunked') trimeshMode = 'chunked'
     } catch (e) {
-      console.warn('Failed to parse URL params for debug toggles')
+      if (import.meta.env.DEV) {
+        console.warn('Failed to parse URL params for debug toggles')
+      }
     }
   })
 

@@ -23,6 +23,7 @@
 
   const dispatch = createEventDispatcher()
   const { renderer } = useThrelte()
+  const isDev = import.meta.env.DEV
 
   // --- FPS tracking ---
   let frameCount = 0
@@ -68,7 +69,9 @@
     const idx = TIER_ORDER.indexOf(current)
     if (idx <= 0) return
     const next = TIER_ORDER[idx - 1]
-    console.log(`🔽 Performance: stepping quality down ${current} → ${next}`)
+    if (isDev) {
+      console.log(`🔽 Performance: stepping quality down ${current} → ${next}`)
+    }
     optimizationManager.setOptimizationLevel(next)
     dispatch('qualityChanged', { from: current, to: next, reason: 'fps_low' })
     degradeCount = 0
@@ -80,7 +83,9 @@
     const idx = TIER_ORDER.indexOf(current)
     if (idx >= TIER_ORDER.length - 1) return
     const next = TIER_ORDER[idx + 1]
-    console.log(`🔼 Performance: stepping quality up ${current} → ${next}`)
+    if (isDev) {
+      console.log(`🔼 Performance: stepping quality up ${current} → ${next}`)
+    }
     optimizationManager.setOptimizationLevel(next)
     dispatch('qualityChanged', { from: current, to: next, reason: 'fps_good' })
     degradeCount = 0
@@ -187,7 +192,9 @@
         degradeCount = 0
         upgradeCount = 0
         fpsSamples.length = 0
-        console.log('⏱️ Performance: startup grace period over, adaptive quality enabled')
+        if (isDev) {
+          console.log('⏱️ Performance: startup grace period over, adaptive quality enabled')
+        }
       }
     }
 

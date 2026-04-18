@@ -9,9 +9,11 @@
   import { useThrelte } from '@threlte/core'
   import * as THREE from 'three'
   import { selectedStarStore, gameActions, type StarData } from '../stores/gameStateStore'
+  import { resolveLevelId } from '../levels/levelRegistry'
   // TimelineCard functionality moved to Game.svelte with modern implementation
 
   const dispatch = createEventDispatcher()
+  const isDev = import.meta.env.DEV
   const { camera, renderer } = useThrelte()
   
   // Extract non-reactive references
@@ -149,7 +151,7 @@
       worldPosition: point
     })
     
-    console.log('⭐ Star clicked:', starData.title)
+    if (isDev) console.log('⭐ Star clicked:', starData.title)
   }
 
   function findStarDataByIndex(instanceId: number): StarData | null {
@@ -230,7 +232,7 @@
     // Add slight offset to avoid covering the star
     cardPosition.y -= 20
     
-    console.log('📋 Showing timeline card at:', cardPosition)
+    if (isDev) console.log('📋 Showing timeline card at:', cardPosition)
   }
 
   function handleStarSelection(star: StarData | null) {
@@ -247,23 +249,15 @@
     gameActions.selectStar(null)
     
     dispatch('starDeselected')
-    console.log('⭐ Star selection cleared')
+    if (isDev) console.log('⭐ Star selection cleared')
   }
 
   function handleLevelTransition(event: CustomEvent) {
     const { levelType } = event.detail
     
-    console.log('🎮 Level transition requested:', levelType)
+    if (isDev) console.log('🎮 Level transition requested:', levelType)
     
-    // Map levelId to actual level names used by the game
-    const levelMap: Record<string, string> = {
-      'miranda-ship-level': 'miranda',
-      'restaurant-backroom-level': 'restaurant', 
-      'infinite-library-level': 'infinite_library',
-      'jerrys-room-level': 'jerrys_room'
-    }
-    
-    const mappedLevelId = levelMap[levelType] || levelType
+    const mappedLevelId = resolveLevelId(levelType)
     
     // Dispatch level transition event
     dispatch('levelTransition', { 
@@ -293,13 +287,3 @@
 
 <!-- Background click handler -->
 <svelte:window on:click={handleBackgroundClick} />
-
-<style>
-  .timeline-card-overlay {
-    pointer-events: none;
-  }
-  
-  .timeline-card-overlay > :global(*) {
-    pointer-events: auto;
-  }
-</style>

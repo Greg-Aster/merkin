@@ -13,7 +13,7 @@
 <script lang="ts">
   import { onMount, getContext, tick } from 'svelte'
   import { T, useTask, useThrelte } from '@threlte/core'
-  import * as THREE from 'three'
+  import { Sprite, SpriteMaterial, Vector3 } from 'three'
   import { qualitySettingsStore, recordSystemTiming } from '../features/performance'
   import { bloomStore } from '../stores/postProcessingStore'
   import { OptimizationLevel, optimizationManager } from '../features/performance'
@@ -35,6 +35,7 @@
   
   // Import the new efficient lighting system
   import { FireflyLightingSystem } from '../features/lighting'
+  const isDev = import.meta.env.DEV
 
   // Enhanced FireflyVisual interface with AI personality data
   interface FireflyVisual {
@@ -77,7 +78,6 @@
     lerpFactor: 1.0
   }
   export let getHeightAt: ((x: number, z: number) => number) | undefined = undefined
-  export let environmentReady = true // Allow external control of when to create fireflies
   export let interactionSystem: any = null // Centralized interaction system from Game
   
   // AI Conversation enhancement props
@@ -153,7 +153,7 @@
   
   // Visual firefly data for StarSprite rendering
   let visualFireflies: FireflyVisual[] = []
-  let fireflySprites: THREE.Sprite[] = [] // Track sprites for interaction system
+  let fireflySprites: Sprite[] = [] // Track sprites for interaction system
   let conversationFeaturePromise: Promise<typeof import('../features/conversation')> | null = null
 
   const availableConversationalCharacterIds = [
@@ -185,7 +185,9 @@
     readonly type = ComponentType.PARTICLE_SYSTEM
 
     protected async onInitialize(): Promise<void> {
-      console.log('✅ HybridFirefly: Initializing with modern ECS architecture...')
+      if (isDev) {
+        console.log('✅ HybridFirefly: Initializing with modern ECS architecture...')
+      }
       if (!ecsWorld) {
         console.error('❌ ECS World required for modern architecture')
         return
@@ -194,13 +196,17 @@
       // Set up terrain following
       if (getHeightAt && ecsWorld.setTerrainHeightFunction) {
         ecsWorld.setTerrainHeightFunction(getHeightAt)
-        console.log('✅ HybridFirefly: Terrain following enabled')
+        if (isDev) {
+          console.log('✅ HybridFirefly: Terrain following enabled')
+        }
       }
       
       // Create ECS entities for logic and visual data for rendering
       this.createECSFireflies()
       await this.setupVisualFireflies()
-      console.log(`✅ HybridFirefly: Created ${optimizedCount} ECS entities with StarSprite visuals`)
+      if (isDev) {
+        console.log(`✅ HybridFirefly: Created ${optimizedCount} ECS entities with StarSprite visuals`)
+      }
     }
 
     protected onUpdate(deltaTime: number): void {
@@ -220,7 +226,9 @@
       }
       
       // StarSprite components handle their own disposal
-      console.log('✅ HybridFirefly: Disposed properly')
+      if (isDev) {
+        console.log('✅ HybridFirefly: Disposed properly')
+      }
     }
 
     private createECSFireflies(): void {
@@ -231,15 +239,21 @@
       
       // Validate terrain function before creating fireflies
       if (!getHeightAt) {
-        console.warn('🧚 Warning: No terrain height function available - fireflies may spawn below ground')
+        if (isDev) {
+          console.warn('🧚 Warning: No terrain height function available - fireflies may spawn below ground')
+        }
       } else {
         // Test the terrain function at center
         const testHeight = getHeightAt(0, 0)
-        console.log(`🧚 Firefly spawn: Terrain function working, center height = ${testHeight.toFixed(2)}`)
+        if (isDev) {
+          console.log(`🧚 Firefly spawn: Terrain function working, center height = ${testHeight.toFixed(2)}`)
+        }
       }
       
       fireflyEntities = []
-      console.log(`🧚 Creating ${optimizedCount} ECS fireflies...`)
+      if (isDev) {
+        console.log(`🧚 Creating ${optimizedCount} ECS fireflies...`)
+      }
       
       for (let i = 0; i < optimizedCount; i++) {
         const angle = Math.random() * Math.PI * 2
@@ -257,7 +271,7 @@
         if (import.meta.env.DEV && i < 2 && y < groundHeight) {
           console.warn(`⚠️ Firefly ${i} spawned below ground: y=${y.toFixed(2)}, ground=${groundHeight.toFixed(2)}`)
         }
-        const position = new THREE.Vector3(x, y, z)
+        const position = new Vector3(x, y, z)
         const color = colors[Math.floor(Math.random() * colors.length)]
 
         // ECS firefly creation - debug logs removed for performance
@@ -271,7 +285,9 @@
         fireflyEntities.push(entity)
       }
       
-      console.log(`✅ Created ${fireflyEntities.length} ECS firefly entities`)
+      if (isDev) {
+        console.log(`✅ Created ${fireflyEntities.length} ECS firefly entities`)
+      }
     }
 
     public async setupVisualFireflies(): Promise<void> {
@@ -288,11 +304,11 @@
             characterAssignments.push(characterId)
           }
           
-          if (import.meta.env.DEV) console.log(`🧠 Auto-discovered and assigned ${characterAssignments.length} characters to conversational fireflies`)
+          if (isDev) console.log(`🧠 Auto-discovered and assigned ${characterAssignments.length} characters to conversational fireflies`)
         } catch (error) {
           console.error('❌ Failed to auto-discover characters:', error)
           // Fallback: disable conversations for this session
-          if (import.meta.env.DEV) console.warn('🔄 Disabling AI conversations due to character discovery failure')
+          if (isDev) console.warn('🔄 Disabling AI conversations due to character discovery failure')
         }
       }
       
@@ -353,7 +369,7 @@
         }
       })
       
-      if (import.meta.env.DEV) console.log(`✨ Created ${visualFireflies.length} fireflies (${characterAssignments.length} with character personalities)`)
+      if (isDev) console.log(`✨ Created ${visualFireflies.length} fireflies (${characterAssignments.length} with character personalities)`)
     }
 
     private updateVisualFireflies(time: number): void {
@@ -402,7 +418,7 @@
 
         sprite.scale.setScalar(finalScale)
 
-        const material = sprite.material as THREE.SpriteMaterial | undefined
+        const material = sprite.material as SpriteMaterial | undefined
         if (material) {
           material.opacity = finalOpacity
         }
@@ -427,7 +443,9 @@
     refreshFireflySettings()
     await tick()
     
-    console.log('🧚‍♀️ HybridFirefly: Registered component-specific optimization settings')
+    if (isDev) {
+      console.log('🧚‍♀️ HybridFirefly: Registered component-specific optimization settings')
+    }
     
     if (registry && typeof registry.registerComponent === 'function') {
       component = new HybridFireflyComponent()
@@ -455,11 +473,11 @@
       maxLights: Math.min(optimizedMaxLights, 25), // Respect optimization limits
       updateFrequency: 15, // 15 Hz updates instead of 60 Hz
       twinkleSpeed: 0.8,
-      fadeSpeed: 2.0,
+      fadeSpeed,
       cullingDistance: 200
     })
     
-    if (import.meta.env.DEV) console.log('✨ Initialized efficient FireflyLightingSystem')
+    if (isDev) console.log('✨ Initialized efficient FireflyLightingSystem')
   }
 
   // Get camera from Threlte context
@@ -493,27 +511,33 @@
 
   // --- FIREFLY INTERACTION HANDLERS ---
   
-  async function handleFireflyClick(data: any) {
-  const { sprite, index, timestamp, ...firefly } = data;
-  console.log('✨ Firefly clicked:', firefly.name);
+async function handleFireflyClick(data: any) {
+  const { sprite, index, timestamp, ...firefly } = data
+  if (isDev) {
+    console.log('✨ Firefly clicked:', firefly.name)
+  }
 
   // Check if this firefly has a character assignment for conversations
   if (enableAIConversations && firefly.isConversational && firefly.characterId) {
     // It's a conversational firefly. Use the ConversationManager.
-    console.log(`🤖 Starting AI conversation with ${firefly.name} using character: ${firefly.characterId}`);
-    await handleConversationalFirefly(firefly);
-    gameActions.recordInteraction('firefly_ai_conversation', firefly.id || 'unknown');
+    if (isDev) {
+      console.log(`🤖 Starting AI conversation with ${firefly.name} using character: ${firefly.characterId}`)
+    }
+    await handleConversationalFirefly(firefly)
+    gameActions.recordInteraction('firefly_ai_conversation', firefly.id || 'unknown')
   } else {
     // It's a basic firefly. Use the modern conversation system for simple text.
-    await handleBasicFirefly(firefly);
+    await handleBasicFirefly(firefly)
   }
 
   // This part can remain for other effects
   if (typeof triggerDiscovery === 'function') {
-    triggerDiscovery();
+    triggerDiscovery()
   }
 
-  if (import.meta.env.DEV) console.log(`✨ Clicked firefly: ${firefly.name}`)
+  if (isDev) {
+    console.log(`✨ Clicked firefly: ${firefly.name}`)
+  }
   }
   
   // Helper function for handling conversational fireflies with store actions directly
@@ -535,7 +559,7 @@
             type: 'firefly_conversation'
           }
         )
-        if (import.meta.env.DEV) console.log('✅ Started AI conversation via store system with converted personality')
+        if (isDev) console.log('✅ Started AI conversation via store system with converted personality')
       } else {
         console.error(`❌ Failed to load character: ${firefly.characterId}`)
         await handleBasicFirefly(firefly)
@@ -587,7 +611,7 @@
   }
   
   // Function to handle sprite registration
-  function handleSpriteReady(sprite: THREE.Sprite, firefly: FireflyVisual, index: number) {
+  function handleSpriteReady(sprite: Sprite, firefly: FireflyVisual, index: number) {
     // console.log(`🧚‍♀️ Firefly sprite ready: ${firefly.name} (clickable: ${firefly.isClickable})`)
     fireflySprites[index] = sprite
     
@@ -606,7 +630,9 @@
         }
       })
     } else {
-      console.warn(`⚠️ Failed to register firefly: interactionSystem=${!!interactionSystem}, clickable=${firefly.isClickable}`)
+      if (isDev && firefly.isClickable) {
+        console.warn(`⚠️ Failed to register firefly: interactionSystem=${!!interactionSystem}, clickable=${firefly.isClickable}`)
+      }
     }
   }
 

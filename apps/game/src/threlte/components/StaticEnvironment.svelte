@@ -1,6 +1,6 @@
 <!-- StaticEnvironment Component (visual only, no physics) -->
 <script lang="ts">
-  import { GLTF } from '@threlte/extras'
+  import HeroProp from './HeroProp.svelte'
   import { createEventDispatcher } from 'svelte'
 
   // Path to the .glb or .gltf file for the level environment.
@@ -14,5 +14,4 @@
   }
 </script>
 
-<GLTF url={path} on:load={handleLoaded} />
-
+<HeroProp url={path} on:load={handleLoaded} />

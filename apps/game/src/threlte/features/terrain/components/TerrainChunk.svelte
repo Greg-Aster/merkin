@@ -1,12 +1,10 @@
 <script lang="ts">
   import { T } from '@threlte/core';
-  import { GLTF } from '@threlte/extras';
-  import * as THREE from 'three';
+  import HeroProp from '../../../components/HeroProp.svelte';
 
   export let x: number;
   export let z: number;
   export let lod: number;
-  export let position: THREE.Vector3;
   export let pathTemplate: string;
 
   $: url = pathTemplate
@@ -26,5 +24,5 @@
 <!-- Place the GLB at world origin; its internal geometry is already in world space -->
 <T.Group position={[0, 0, 0]}>
   <!-- Visual only - no collision (terrain physics handled by TriMesh collider) -->
-  <GLTF {url} colliders={false} on:load={handleLoaded} />
+  <HeroProp {url} on:load={handleLoaded} />
 </T.Group>

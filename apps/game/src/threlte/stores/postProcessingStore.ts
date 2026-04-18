@@ -43,42 +43,52 @@ export interface ToneMappingConfig extends EffectConfig {
 }
 
 // Main stores
-export const postProcessingStore: Writable<PostProcessingConfig> = writable({
+export const DEFAULT_POST_PROCESSING_CONFIG: PostProcessingConfig = {
   enabled: true,
   qualityLevel: 'high',
   adaptiveQuality: true
-})
+}
 
-export const bloomStore: Writable<BloomConfig> = writable({
-  enabled: false, // Changed to false
+export const DEFAULT_BLOOM_CONFIG: BloomConfig = {
+  enabled: false,
   intensity: 1.0,
   threshold: 0.85,
   smoothWidth: 0.025,
   quality: 'high'
-})
+}
 
-export const ssaoStore: Writable<SSAOConfig> = writable({
-  enabled: false, // Disabled by default for performance
+export const DEFAULT_SSAO_CONFIG: SSAOConfig = {
+  enabled: false,
   intensity: 0.5,
   radius: 0.1,
   samples: 16,
   rings: 3,
   quality: 'medium'
-})
+}
 
-export const fxaaStore: Writable<FXAAConfig> = writable({
+export const DEFAULT_FXAA_CONFIG: FXAAConfig = {
   enabled: true,
   intensity: 1.0,
   quality: 'high'
-})
+}
 
-export const toneMappingStore: Writable<ToneMappingConfig> = writable({
+export const DEFAULT_TONE_MAPPING_CONFIG: ToneMappingConfig = {
   enabled: true,
   intensity: 1.0,
   exposure: 1.0,
   whitePoint: 1.0,
   quality: 'high'
-})
+}
+
+export const postProcessingStore: Writable<PostProcessingConfig> = writable(DEFAULT_POST_PROCESSING_CONFIG)
+
+export const bloomStore: Writable<BloomConfig> = writable(DEFAULT_BLOOM_CONFIG)
+
+export const ssaoStore: Writable<SSAOConfig> = writable(DEFAULT_SSAO_CONFIG)
+
+export const fxaaStore: Writable<FXAAConfig> = writable(DEFAULT_FXAA_CONFIG)
+
+export const toneMappingStore: Writable<ToneMappingConfig> = writable(DEFAULT_TONE_MAPPING_CONFIG)
 
 // Quality-based effect configurations
 const qualityConfigs = {
@@ -202,6 +212,7 @@ export function disableAdaptiveQuality() {
 
 // Performance-based quality adjustment
 export function adjustQualityForPerformance(avgFPS: number, targetFPS: number = 60) {
+  const isDev = import.meta.env.DEV
   const currentConfig = postProcessingStore
   
   if (avgFPS < targetFPS * 0.7) {
@@ -211,7 +222,9 @@ export function adjustQualityForPerformance(avgFPS: number, targetFPS: number = 
       const newIndex = Math.max(0, currentIndex - 1)
       const newLevel = (['ultra_low', 'low', 'medium', 'high', 'ultra'] as QualityLevel[])[newIndex]
       
-      console.log(`🔽 Reducing post-processing quality: ${config.qualityLevel} → ${newLevel}`)
+      if (isDev) {
+        console.log(`🔽 Reducing post-processing quality: ${config.qualityLevel} → ${newLevel}`)
+      }
       return {
         ...config,
         qualityLevel: newLevel
@@ -225,7 +238,9 @@ export function adjustQualityForPerformance(avgFPS: number, targetFPS: number = 
       const newLevel = (['ultra_low', 'low', 'medium', 'high', 'ultra'] as QualityLevel[])[newIndex]
       
       if (newLevel !== config.qualityLevel) {
-        console.log(`🔼 Increasing post-processing quality: ${config.qualityLevel} → ${newLevel}`)
+        if (isDev) {
+          console.log(`🔼 Increasing post-processing quality: ${config.qualityLevel} → ${newLevel}`)
+        }
         return {
           ...config,
           qualityLevel: newLevel
@@ -234,6 +249,14 @@ export function adjustQualityForPerformance(avgFPS: number, targetFPS: number = 
       return config
     })
   }
+}
+
+export function resetPostProcessingState() {
+  postProcessingStore.set({ ...DEFAULT_POST_PROCESSING_CONFIG })
+  bloomStore.set({ ...DEFAULT_BLOOM_CONFIG })
+  ssaoStore.set({ ...DEFAULT_SSAO_CONFIG })
+  fxaaStore.set({ ...DEFAULT_FXAA_CONFIG })
+  toneMappingStore.set({ ...DEFAULT_TONE_MAPPING_CONFIG })
 }
 
 // Export all stores for easy import

@@ -19,6 +19,7 @@
   } from 'bitecs'
   import type { ECSWorldManager } from '../core/ECSIntegration'
   import type { SystemRegistry } from '../core/LevelSystem'
+  const isDev = import.meta.env.DEV
 
   // =============================================================================
   // VEGETATION ECS COMPONENTS
@@ -130,7 +131,9 @@
   let vegetationSystemId = 'vegetation-system'
 
   onMount(async () => {
-    console.log('🌱 Initializing ECS Vegetation System...')
+    if (isDev) {
+      console.log('🌱 Initializing ECS Vegetation System...')
+    }
     
     try {
       await loadVegetationAssets()
@@ -138,7 +141,9 @@
       await populateVegetation()
       
       isInitialized = true
-      console.log(`✅ Vegetation system initialized with ${vegetationEntities.length} plants`)
+      if (isDev) {
+        console.log(`✅ Vegetation system initialized with ${vegetationEntities.length} plants`)
+      }
     } catch (error) {
       console.error('❌ Failed to initialize vegetation system:', error)
     }
@@ -156,7 +161,9 @@
       try {
         const gltf = await loader.loadAsync(url)
         loadedModels.set(key, gltf.scene)
-        console.log(`📦 Loaded vegetation asset: ${key}`)
+        if (isDev) {
+          console.log(`📦 Loaded vegetation asset: ${key}`)
+        }
       } catch (error) {
         console.warn(`⚠️ Failed to load ${key} from ${url}:`, error)
       }
@@ -172,7 +179,9 @@
     loadPromises.push(loadAsset(VEGETATION_ASSETS.flowers[0], 'flowers'))
 
     await Promise.all(loadPromises)
-    console.log(`✅ Loaded ${loadedModels.size} vegetation assets`)
+    if (isDev) {
+      console.log(`✅ Loaded ${loadedModels.size} vegetation assets`)
+    }
   }
 
   /**
@@ -244,7 +253,9 @@
       }))
     }
 
-    console.log('🔧 Vegetation ECS systems initialized')
+    if (isDev) {
+      console.log('🔧 Vegetation ECS systems initialized')
+    }
   }
 
   /**
@@ -334,7 +345,9 @@
       }
     }
     
-    console.log(`🌱 Populated ${vegetationEntities.length} vegetation entities`)
+    if (isDev) {
+      console.log(`🌱 Populated ${vegetationEntities.length} vegetation entities`)
+    }
   }
 
   /**
@@ -385,7 +398,9 @@
   onDestroy(() => {
     // Clean up vegetation entities
     if (ecsWorld && vegetationEntities.length > 0) {
-      console.log(`🧹 Cleaning up ${vegetationEntities.length} vegetation entities`)
+      if (isDev) {
+        console.log(`🧹 Cleaning up ${vegetationEntities.length} vegetation entities`)
+      }
       vegetationEntities = []
     }
     
@@ -393,7 +408,9 @@
     loadedModels.clear()
     instancedMeshes.clear()
     
-    console.log('🧹 Vegetation system disposed')
+    if (isDev) {
+      console.log('🧹 Vegetation system disposed')
+    }
   })
 </script>
 

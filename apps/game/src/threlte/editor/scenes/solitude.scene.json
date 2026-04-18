@@ -1,0 +1,628 @@
+{
+  "levelId": "solitude",
+  "version": 1,
+  "updatedAt": "2026-04-18T14:56:50.249Z",
+  "settings": {
+    "level": {
+      "presets": {
+        "atmosphere": "lonely-wind",
+        "audio": "lonely-wind"
+      },
+      "spawn": {
+        "position": [
+          0,
+          2.4,
+          -24
+        ]
+      },
+      "features": {
+        "starMap": true,
+        "conversations": true,
+        "water": false,
+        "styles": true,
+        "ambientParticles": true
+      },
+      "style": {
+        "preset": "monument",
+        "enabled": true,
+        "fog": {
+          "color": "#7b8797",
+          "density": 0.00045
+        }
+      },
+      "lighting": {
+        "ambientIntensity": 0.75,
+        "keyLightIntensity": 0.7,
+        "fillLightIntensity": 0.22
+      },
+      "water": {
+        "enabled": false,
+        "level": -0.16,
+        "size": {
+          "width": 800,
+          "height": 800
+        },
+        "color": "#425d72",
+        "opacity": 0.86,
+        "enableAnimation": true
+      },
+      "ambientParticles": {
+        "enabled": true,
+        "count": 180,
+        "radius": 140,
+        "minHeight": 0.8,
+        "maxHeight": 18,
+        "color": "#b8d9ff",
+        "secondaryColor": "#f3e8b2",
+        "size": 1.15,
+        "opacity": 0.26,
+        "driftSpeed": 0.22,
+        "sway": 0.85
+      }
+    },
+    "solitude": {
+      "skyboxPreset": "observatory"
+    }
+  },
+  "nodes": [
+    {
+      "id": "solitude-ground-root",
+      "name": "Solitude Ground",
+      "kind": "group",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true
+    },
+    {
+      "id": "solitude-ground-plateau",
+      "name": "Solitude Plateau",
+      "kind": "primitive",
+      "parentId": "solitude-ground-root",
+      "position": [
+        0,
+        -1.2,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "collision": {
+        "shape": "cuboid",
+        "friction": 0.92
+      },
+      "primitive": {
+        "geometry": "box",
+        "args": [
+          240,
+          2.4,
+          240
+        ],
+        "color": "#6b7480",
+        "emissive": "#242d38",
+        "emissiveIntensity": 0.05,
+        "metalness": 0.06,
+        "roughness": 0.94
+      }
+    },
+    {
+      "id": "solitude-ground-dais",
+      "name": "Ruin Dais",
+      "kind": "primitive",
+      "parentId": "solitude-ground-root",
+      "position": [
+        0,
+        -0.18,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "collision": {
+        "shape": "cuboid",
+        "friction": 0.94
+      },
+      "primitive": {
+        "geometry": "box",
+        "args": [
+          44,
+          0.8,
+          44
+        ],
+        "color": "#7b8797",
+        "emissive": "#2f3947",
+        "emissiveIntensity": 0.08,
+        "metalness": 0.08,
+        "roughness": 0.9
+      }
+    },
+    {
+      "id": "solitude-ruin-ring",
+      "name": "Ruin Ring",
+      "kind": "group",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true
+    },
+    {
+      "id": "solitude-pillar-1",
+      "name": "Solitude Pillar 1",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        18,
+        2.7,
+        0
+      ],
+      "rotation": [
+        0,
+        0.12,
+        0
+      ],
+      "scale": [
+        1.15,
+        5.4,
+        0.96
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "wasteland-monolith"
+      }
+    },
+    {
+      "id": "solitude-pillar-2",
+      "name": "Solitude Pillar 2",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        15.588457268119896,
+        2.05,
+        8.999999999999998
+      ],
+      "rotation": [
+        0,
+        0.3635987755982988,
+        0
+      ],
+      "scale": [
+        1.23,
+        4.1,
+        1.02
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "wasteland-monolith"
+      }
+    },
+    {
+      "id": "solitude-pillar-3",
+      "name": "Solitude Pillar 3",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        9.000000000000002,
+        2.35,
+        15.588457268119894
+      ],
+      "rotation": [
+        0,
+        1.1671975511965975,
+        0
+      ],
+      "scale": [
+        1.3099999999999998,
+        4.7,
+        1.08
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "wasteland-monolith"
+      }
+    },
+    {
+      "id": "solitude-pillar-4",
+      "name": "Solitude Pillar 4",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        1.102182119232618e-15,
+        2.7,
+        18
+      ],
+      "rotation": [
+        0,
+        1.4107963267948966,
+        0
+      ],
+      "scale": [
+        1.39,
+        5.4,
+        0.96
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "wasteland-monolith"
+      }
+    },
+    {
+      "id": "solitude-pillar-5",
+      "name": "Solitude Pillar 5",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        -8.999999999999996,
+        2.35,
+        15.588457268119896
+      ],
+      "rotation": [
+        0,
+        2.2143951023931954,
+        0
+      ],
+      "scale": [
+        1.15,
+        4.7,
+        1.02
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "wasteland-monolith"
+      }
+    },
+    {
+      "id": "solitude-pillar-6",
+      "name": "Solitude Pillar 6",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        -15.588457268119896,
+        2.05,
+        8.999999999999998
+      ],
+      "rotation": [
+        0,
+        2.4579938779914943,
+        0
+      ],
+      "scale": [
+        1.23,
+        4.1,
+        1.08
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "wasteland-monolith"
+      }
+    },
+    {
+      "id": "solitude-pillar-7",
+      "name": "Solitude Pillar 7",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        -18,
+        2.7,
+        2.204364238465236e-15
+      ],
+      "rotation": [
+        0,
+        3.2615926535897932,
+        0
+      ],
+      "scale": [
+        1.3099999999999998,
+        5.4,
+        0.96
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "wasteland-monolith"
+      }
+    },
+    {
+      "id": "solitude-pillar-8",
+      "name": "Solitude Pillar 8",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        -15.588457268119894,
+        2.05,
+        -9.000000000000002
+      ],
+      "rotation": [
+        0,
+        3.505191429188092,
+        0
+      ],
+      "scale": [
+        1.39,
+        4.1,
+        1.02
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "wasteland-monolith"
+      }
+    },
+    {
+      "id": "solitude-pillar-9",
+      "name": "Solitude Pillar 9",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        -9.000000000000007,
+        2.35,
+        -15.588457268119893
+      ],
+      "rotation": [
+        0,
+        4.308790204786391,
+        0
+      ],
+      "scale": [
+        1.15,
+        4.7,
+        1.08
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "wasteland-monolith"
+      }
+    },
+    {
+      "id": "solitude-pillar-10",
+      "name": "Solitude Pillar 10",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        -3.3065463576978533e-15,
+        2.7,
+        -18
+      ],
+      "rotation": [
+        0,
+        4.5523889803846895,
+        0
+      ],
+      "scale": [
+        1.23,
+        5.4,
+        0.96
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "wasteland-monolith"
+      }
+    },
+    {
+      "id": "solitude-pillar-11",
+      "name": "Solitude Pillar 11",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        9.000000000000002,
+        2.35,
+        -15.588457268119894
+      ],
+      "rotation": [
+        0,
+        5.355987755982989,
+        0
+      ],
+      "scale": [
+        1.3099999999999998,
+        4.7,
+        1.02
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "wasteland-monolith"
+      }
+    },
+    {
+      "id": "solitude-pillar-12",
+      "name": "Solitude Pillar 12",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        15.58845726811989,
+        2.05,
+        -9.000000000000007
+      ],
+      "rotation": [
+        0,
+        5.599586531581287,
+        0
+      ],
+      "scale": [
+        1.39,
+        4.1,
+        1.08
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "wasteland-monolith"
+      }
+    },
+    {
+      "id": "solitude-ring-fragment-east",
+      "name": "Ring Fragment East",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        11.5,
+        0.28,
+        0.8
+      ],
+      "rotation": [
+        0,
+        0.62,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "broken-ring"
+      }
+    },
+    {
+      "id": "solitude-ring-fragment-west",
+      "name": "Ring Fragment West",
+      "kind": "prefab",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        -10.8,
+        0.2,
+        -1.4
+      ],
+      "rotation": [
+        0,
+        -1.04,
+        0
+      ],
+      "scale": [
+        0.84,
+        0.84,
+        0.84
+      ],
+      "visible": true,
+      "prefab": {
+        "type": "broken-ring"
+      }
+    },
+    {
+      "id": "solitude-firefly",
+      "name": "Firefly of Solitude",
+      "kind": "group",
+      "position": [
+        0,
+        2.6,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "firefly",
+        "markerColor": "#f5f1a8",
+        "markerSize": 0.62,
+        "title": "Solitude",
+        "author": "The Firefly",
+        "location": "The Solitude Plain",
+        "excerpt": "A single patient glow waits at the center of the ruined ring.",
+        "body": "This is a place for solitude. You are alone here.\n\nThe pillars keep their distance so the sky can speak without interruption."
+      }
+    },
+    {
+      "id": "solitude-ambient-wind",
+      "name": "Solitude Wind Region",
+      "kind": "group",
+      "position": [
+        0,
+        4,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        120,
+        18,
+        120
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "audio-region",
+        "markerColor": "#7ecbff",
+        "title": "Plain Wind",
+        "audioTrack": "/audio/ambient/Wicked Shadows Whisper.mp3",
+        "audioVolume": 0.28,
+        "regionFalloff": 24
+      }
+    },
+    {
+      "id": "solitude-ring-haze",
+      "name": "Ring Haze Volume",
+      "kind": "group",
+      "position": [
+        0,
+        4,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        52,
+        12,
+        52
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "fog-volume",
+        "markerColor": "#d7e2f6",
+        "title": "Ruin Haze",
+        "fogColor": "#8f9daf",
+        "fogDensity": 0.0026,
+        "regionFalloff": 10
+      }
+    }
+  ]
+}

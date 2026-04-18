@@ -1,0 +1,70 @@
+[
+  {
+    "id": "observatory",
+    "title": "Observatory",
+    "status": "active",
+    "deployed": true,
+    "aliases": ["observatory-level", "hybrid-observatory", "hybrid-observatory-level"],
+    "source": {
+      "kind": "component",
+      "componentKey": "observatory"
+    },
+    "starMap": {
+      "enabled": true,
+      "year": 2150,
+      "era": "unknown",
+      "description": "Travel to the Observatory"
+    }
+  },
+  {
+    "id": "sci-fi-room",
+    "title": "Sci Fi Room",
+    "status": "active",
+    "deployed": true,
+    "aliases": ["sci-fi-room-level"],
+    "source": {
+      "kind": "scene",
+      "sceneId": "sci-fi-room"
+    },
+    "starMap": {
+      "enabled": true,
+      "year": 2500,
+      "era": "unknown",
+      "description": "Enter the Sci Fi Room"
+    }
+  },
+  {
+    "id": "miranda",
+    "title": "Miranda Wreck",
+    "status": "active",
+    "deployed": true,
+    "aliases": ["miranda-ship-level"],
+    "source": {
+      "kind": "scene",
+      "sceneId": "miranda"
+    },
+    "starMap": {
+      "enabled": true,
+      "year": 2400,
+      "era": "unknown",
+      "description": "Investigate the Miranda Wreck"
+    }
+  },
+  {
+    "id": "solitude",
+    "title": "Solitude",
+    "status": "active",
+    "deployed": true,
+    "aliases": ["solitude-level"],
+    "source": {
+      "kind": "scene",
+      "sceneId": "solitude"
+    },
+    "starMap": {
+      "enabled": true,
+      "year": 2600,
+      "era": "unknown",
+      "description": "Drift out toward Solitude"
+    }
+  }
+]

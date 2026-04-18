@@ -27,6 +27,9 @@
   export let enabled = true
   export let position: [number, number, number] = [0, 0, 0]
   export let size: [number, number, number] = [100, 20, 100] // width, height, depth
+  export let fogColor: number = 0x0a1922
+  export let fogDensityScale = 1
+  export let surfaceMistDensity = 0.003
 
   // Component state
   let bubbleParticles: THREE.Points
@@ -41,6 +44,8 @@
   $: intensity = $underwaterIntensity
   $: fogDensity = $underwaterFogDensity
   $: config = $underwaterConfigStore
+  $: effectiveFogDensity = fogDensity * fogDensityScale
+  $: resolvedFogColor = new THREE.Color(fogColor)
 
   // Particle system setup
   let bubbleGeometry: THREE.BufferGeometry
@@ -120,10 +125,10 @@
     mistGeometry.setAttribute('opacity', new THREE.BufferAttribute(mistOpacities, 1))
 
     mistMaterial = new THREE.PointsMaterial({
-      color: 0x4682B4,
+      color: resolvedFogColor,
       size: 2.0,
       transparent: true,
-      opacity: 0.1,
+      opacity: Math.max(0.05, surfaceMistDensity * 20),
       map: createMistTexture(),
       alphaTest: 0.05,
       depthWrite: false
@@ -234,7 +239,8 @@
   // Update material properties based on underwater state
   $: if (bubbleMaterial && mistMaterial) {
     bubbleMaterial.opacity = intensity * 0.6 * transitionProgress
-    mistMaterial.opacity = intensity * 0.2 * transitionProgress
+    mistMaterial.color.copy(resolvedFogColor)
+    mistMaterial.opacity = effectiveFogDensity * 0.2 * transitionProgress
   }
 </script>
 
@@ -262,7 +268,7 @@
     
     <!-- Underwater Ambient Light -->
     <T.AmbientLight 
-      color={underwaterUtils.getWaterColor(depth)}
+      color={resolvedFogColor}
       intensity={0.3 * transitionProgress}
     />
     
@@ -271,9 +277,9 @@
       <T.Mesh position={[0, size[1]/2, 0]}>
         <T.SphereGeometry args={[size[0], 32, 32]} />
         <T.MeshBasicMaterial 
-          color={underwaterUtils.getWaterColor(depth)}
+          color={resolvedFogColor}
           transparent={true}
-          opacity={fogDensity * 0.1}
+          opacity={effectiveFogDensity * 0.1}
           side={THREE.BackSide}
         />
       </T.Mesh>
@@ -281,7 +287,3 @@
     
   </T.Group>
 {/if}
-
-<style>
-  /* Component styles if needed */
-</style>

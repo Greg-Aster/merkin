@@ -6,6 +6,7 @@
  */
 
 import type { CharacterDefinition } from './types'
+const isDev = import.meta.env.DEV
 
 export class CharacterRegistry {
   private characters = new Map<string, CharacterDefinition>()
@@ -28,7 +29,9 @@ export class CharacterRegistry {
       'eleanor-kim', 'vex-kanarath', 'merkin'
     ]
     
-    console.log(`📚 Discovered ${this._availableCharacterIds.length} available characters`)
+    if (isDev) {
+      console.log(`📚 Discovered ${this._availableCharacterIds.length} available characters`)
+    }
     return this._availableCharacterIds
   }
   
@@ -41,7 +44,9 @@ export class CharacterRegistry {
    */
   private normalizeId(characterId: string | undefined): string {
     if (!characterId) {
-      console.warn('⚠️ normalizeId called with undefined characterId')
+      if (isDev) {
+        console.warn('⚠️ normalizeId called with undefined characterId')
+      }
       return ''
     }
     
@@ -129,11 +134,15 @@ export class CharacterRegistry {
       this.characters.set(normalizedId, character)
       this.loaded.add(normalizedId)
       
-      console.log(`📚 Loaded character: ${character.name} (${normalizedId})`)
+      if (isDev) {
+        console.log(`📚 Loaded character: ${character.name} (${normalizedId})`)
+      }
       return character
       
     } catch (error) {
-      console.warn(`❌ Could not load character: ${normalizedId}`, error)
+      if (isDev) {
+        console.warn(`❌ Could not load character: ${normalizedId}`, error)
+      }
       return null
     }
   }
@@ -287,7 +296,9 @@ export class CharacterRegistry {
   clearCache(): void {
     this.characters.clear()
     this.loaded.clear()
-    console.log('🧹 Character registry cache cleared')
+    if (isDev) {
+      console.log('🧹 Character registry cache cleared')
+    }
   }
   
   /**
@@ -311,5 +322,7 @@ export const characterRegistry = new CharacterRegistry()
 // Development helpers
 if (typeof window !== 'undefined') {
   (window as any).characterRegistry = characterRegistry
-  console.log('🔧 CharacterRegistry available globally for debugging')
+  if (isDev) {
+    console.log('🔧 CharacterRegistry available globally for debugging')
+  }
 }

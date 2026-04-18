@@ -1,0 +1,145 @@
+.editor-shell button,
+.editor-controls-overlay button {
+  background: rgba(30, 52, 73, 0.8);
+  color: #e8f5ff;
+  border: 1px solid rgba(126, 203, 255, 0.2);
+  border-radius: 0.45rem;
+  padding: 0.45rem 0.6rem;
+}
+
+.editor-shell button.active,
+.editor-controls-overlay button.active,
+.hierarchy-item.selected .hierarchy-entry {
+  background: rgba(86, 148, 192, 0.35);
+}
+
+.editor-shell button.danger,
+.editor-controls-overlay button.danger {
+  color: #ffb3c0;
+  border-color: rgba(255, 120, 140, 0.35);
+}
+
+.editor-section {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid rgba(126, 203, 255, 0.08);
+}
+
+.label {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8fb7d4;
+  margin-bottom: 0.55rem;
+}
+
+.button-row,
+.button-grid {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.button-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.button-row.compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.button-row.compact-two-columns,
+.button-row.compact-two-mode {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.button-row.level-switch-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.button-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.text-input,
+.tuple-input,
+.editor-shell textarea,
+.editor-controls-overlay textarea {
+  width: 100%;
+  background: rgba(7, 12, 18, 0.88);
+  color: #ecf7ff;
+  border: 1px solid rgba(126, 203, 255, 0.14);
+  border-radius: 0.45rem;
+  padding: 0.45rem 0.55rem;
+}
+
+.tuple-group {
+  margin-top: 0.65rem;
+}
+
+.tuple-label {
+  font-size: 0.75rem;
+  color: #8fb7d4;
+  margin-bottom: 0.35rem;
+}
+
+.tuple-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.tuple-row.compact-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tuple-row.dynamic-grid {
+  grid-template-columns: repeat(auto-fit, minmax(4rem, 1fr));
+}
+
+.checkbox {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.55rem;
+  font-size: 0.9rem;
+}
+
+.editor-shell textarea,
+.editor-controls-overlay textarea {
+  margin-top: 0.55rem;
+  resize: vertical;
+}
+
+.full {
+  width: 100%;
+  margin-top: 0.55rem;
+}
+
+.save-message {
+  margin-top: 0.45rem;
+  font-size: 0.78rem;
+  color: #9bc7e4;
+}
+
+.error-message {
+  color: #ffb3c0;
+}
+
+.editor-mt-sm {
+  margin-top: 0.45rem;
+}
+
+.editor-mt-input {
+  margin-top: 0.5rem;
+}
+
+.editor-mt-md {
+  margin-top: 0.6rem;
+}
+
+.editor-mt-lg {
+  margin-top: 0.8rem;
+}
+
+.editor-mb-sm {
+  margin-bottom: 0.45rem;
+}

@@ -16,6 +16,7 @@ import type {
   ConversationSystemConfig
 } from './types'
 import type { ConversationManager } from './ConversationManager'
+const isDev = import.meta.env.DEV
 
 // ================================
 // Configuration
@@ -176,7 +177,7 @@ export const conversationActions = {
     try {
       const manager = await ensureConversationManager()
       const session = await manager.startConversation(npcId, personality, context)
-      if (import.meta.env.DEV) console.log('🗣️ Starting conversation:', session.id)
+      if (isDev) console.log('🗣️ Starting conversation:', session.id)
       activeConversationSession.set(session)
       
       // Update UI state
@@ -230,7 +231,7 @@ export const conversationActions = {
       theme: 'firefly'
     }))
     
-    if (import.meta.env.DEV) console.log('🗣️ Starting read-only conversation:', mockSession.id)
+    if (isDev) console.log('🗣️ Starting read-only conversation:', mockSession.id)
   },
 
   // End current conversation
@@ -397,29 +398,29 @@ function setupConversationEventHandlers(): void {
 
   // Handle conversation events
   conversationManager.on('conversation_started', (event) => {
-    if (event.type === 'conversation_started' && import.meta.env.DEV) {
+    if (event.type === 'conversation_started' && isDev) {
       console.log(`🗣️ Conversation started with ${event.data.npcId}`)
     }
   })
 
   conversationManager.on('conversation_ended', (event) => {
-    if (event.type === 'conversation_ended' && import.meta.env.DEV) {
+    if (event.type === 'conversation_ended' && isDev) {
       console.log(`🏁 Conversation ended with ${event.data.npcId}`)
-      
-      // Update conversation history
-      conversationHistory.update(history => {
-        const newHistory = new Map(history)
-        const npcHistory = newHistory.get(event.data.npcId) || []
-        const session = conversationManager!.getActiveSession(event.data.sessionId)
-        
-        if (session) {
-          npcHistory.push(session)
-          newHistory.set(event.data.npcId, npcHistory)
-        }
-        
-        return newHistory
-      })
     }
+
+    // Update conversation history
+    conversationHistory.update(history => {
+      const newHistory = new Map(history)
+      const npcHistory = newHistory.get(event.data.npcId) || []
+      const session = conversationManager!.getActiveSession(event.data.sessionId)
+      
+      if (session) {
+        npcHistory.push(session)
+        newHistory.set(event.data.npcId, npcHistory)
+      }
+      
+      return newHistory
+    })
   })
 
   conversationManager.on('emotion_changed', (event) => {

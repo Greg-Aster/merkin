@@ -11,12 +11,26 @@
 <script lang="ts">
   import { T, useTask, useThrelte } from '@threlte/core'
   import { onMount, createEventDispatcher } from 'svelte'
-  import * as THREE from 'three'
+  import {
+    AdditiveBlending,
+    BufferGeometry,
+    CanvasTexture,
+    Color,
+    Float32BufferAttribute,
+    Group,
+    LineBasicMaterial,
+    LineSegments,
+    Sprite,
+    SpriteMaterial,
+    Vector3,
+  } from 'three'
+  import type { Shader } from 'three'
   import {
     selectedStarStore,
     gameActions,
     type StarData
   } from '../stores/gameStateStore'
+  import { createStarMapLevelEvents, levelRegistryStore } from '../levels/levelRegistry'
 
   // Import the ACTUAL original system configurations
   import {
@@ -51,11 +65,12 @@
 
   // --- STATE ---
   let stars: StarData[] = []
-  let starSprites: THREE.Sprite[] = []
-  let constellationLines: THREE.LineSegments[] = []
-  let starGroup: THREE.Group
+  let starSprites: Sprite[] = []
+  let constellationLines: LineSegments[] = []
+  let starGroup: Group
   let hoveredStarIndex: number | null = null
   let nextTransitionCleanupAt = 10
+  let starRegenerationKey = ''
   
   // Smooth transition states for natural glow effects
   let hoverTransitions: Map<number, number> = new Map() // starIndex -> transition value (0-1)
@@ -66,6 +81,7 @@
 
   // --- STORES ---
   $: selectedStar = $selectedStarStore
+  $: registryLevelEvents = createStarMapLevelEvents($levelRegistryStore)
 
   // --- SHADER UNIFORMS ---
   // These are variables we can pass from our JS to the GPU shader.
@@ -73,7 +89,7 @@
     u_time: { value: 0 },
     u_selectedStarIndex: { value: -1 }, // -1 means no star is selected
     u_hoveredStarIndex: { value: -1 },
-    u_cameraPosition: { value: new THREE.Vector3() }
+    u_cameraPosition: { value: new Vector3() }
   }
 
   // --- LIFECYCLE & DATA GENERATION ---
@@ -82,6 +98,12 @@
     debugLog('✨ StarMap: Initializing with centralized interaction system')
     generateStars()
   })
+
+  $: starRegenerationKey = `${timelineEvents.length}:${registryLevelEvents.map((event) => `${event.uniqueId}:${event.title}:${event.year}`).join('|')}`
+
+  $: if (starGroup && starRegenerationKey) {
+    generateStars()
+  }
 
   // This reactive block creates star sprites whenever the star data changes.
   $: if (starGroup && stars.length > 0) {
@@ -109,7 +131,7 @@
     })
     
     // Add level stars as timeline events (they use the exact same system)
-    const levelEvents = getLevelEvents()
+    const levelEvents = registryLevelEvents
     levelEvents.forEach((event, index) => {
       const star = createStarFromTimelineEvent(event, newStars.length + index)
       newStars.push(star)
@@ -170,22 +192,22 @@
     debugLog(`✅ StarMap: Created ${starSprites.length} authentic star sprites with centralized interaction`)
   }
 
-  function createStarSprite(star: StarData, index: number): THREE.Sprite {
+  function createStarSprite(star: StarData, index: number): Sprite {
     // Use original enhanced star texture generation
     const starType = getStarType(star.uniqueId, star.isKeyEvent)
     const canvas = createEnhancedStarTexture(star.color, starType, star.isKeyEvent)
-    const texture = new THREE.CanvasTexture(canvas)
+    const texture = new CanvasTexture(canvas)
     texture.needsUpdate = true
     
-    const material = new THREE.SpriteMaterial({
+    const material = new SpriteMaterial({
       map: texture,
       transparent: true,
       alphaTest: 0.001,
-      blending: THREE.AdditiveBlending,
+      blending: AdditiveBlending,
       depthWrite: false
     })
 
-    const sprite = new THREE.Sprite(material)
+    const sprite = new Sprite(material)
     sprite.position.set(...star.position)
     sprite.scale.setScalar(star.size * 30) // Natural size for distance 1000 with good clickability
     
@@ -218,17 +240,17 @@
       if (!connections || !pattern) return
       
       // Create line geometry for this era's constellation
-      const points: THREE.Vector3[] = []
+      const points: Vector3[] = []
       const colors: number[] = []
-      const eraColor = new THREE.Color(eraColorMap[era] || '#ffffff')
+      const eraColor = new Color(eraColorMap[era] || '#ffffff')
       
       connections.forEach(([startIdx, endIdx]) => {
         if (startIdx < eraStars.length && endIdx < eraStars.length) {
           const startStar = eraStars[startIdx]
           const endStar = eraStars[endIdx]
           
-          points.push(new THREE.Vector3(...startStar.position))
-          points.push(new THREE.Vector3(...endStar.position))
+          points.push(new Vector3(...startStar.position))
+          points.push(new Vector3(...endStar.position))
           
           // Add colors for each vertex
           colors.push(eraColor.r, eraColor.g, eraColor.b)
@@ -237,17 +259,17 @@
       })
       
       if (points.length > 0) {
-        const geometry = new THREE.BufferGeometry().setFromPoints(points)
-        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
-        
-        const material = new THREE.LineBasicMaterial({
+        const geometry = new BufferGeometry().setFromPoints(points)
+        geometry.setAttribute('color', new Float32BufferAttribute(colors, 3))
+
+        const material = new LineBasicMaterial({
           vertexColors: true,
           transparent: true,
           opacity: 0.3,
-          blending: THREE.AdditiveBlending
+          blending: AdditiveBlending
         })
-        
-        const lines = new THREE.LineSegments(geometry, material)
+
+        const lines = new LineSegments(geometry, material)
         constellationLines.push(lines)
         starGroup.add(lines)
       }
@@ -333,7 +355,7 @@
 
       sprite.scale.setScalar(scale)
       if (sprite.material) {
-        ;(sprite.material as THREE.SpriteMaterial).opacity = Math.min(1, opacity)
+        ;(sprite.material as SpriteMaterial).opacity = Math.min(1, opacity)
       }
     }
     
@@ -342,7 +364,7 @@
     for (let index = 0; index < constellationLines.length; index += 1) {
       const line = constellationLines[index]
       if (line.material) {
-        const baseMaterial = line.material as THREE.LineBasicMaterial
+        const baseMaterial = line.material as LineBasicMaterial
         baseMaterial.opacity = lineOpacity
       }
     }
@@ -359,7 +381,7 @@
     gameActions.recordInteraction('star_click', star.uniqueId)
     
     // Calculate screen position for timeline cards
-    const worldPosition = new THREE.Vector3().copy(sprite.position)
+    const worldPosition = new Vector3().copy(sprite.position)
     const screenPosition = interactionSystem?.getScreenPosition(worldPosition) || { x: 0, y: 0 }
     
     // Dispatch enhanced event with all necessary data
@@ -407,7 +429,7 @@
 
   // --- ADVANCED STAR SHADER (Modernized from original) ---
 
-  const onBeforeCompile = (shader: THREE.Shader) => {
+  const onBeforeCompile = (shader: Shader) => {
     // Add our custom uniforms and attributes to the shader
     shader.uniforms.u_time = uniforms.u_time
     shader.uniforms.u_selectedStarIndex = uniforms.u_selectedStarIndex
@@ -625,38 +647,6 @@
 
   // --- PURE LEVEL STAR DATA ---
   
-  function getLevelEvents() {
-    // Level stars as simple timeline events - same format as existing events
-    return [
-      {
-        id: "level-star-hybrid-observatory",
-        uniqueId: "level-star-hybrid-observatory", 
-        title: "Hybrid Observatory",
-        description: "Enter the Hybrid Observatory level",
-        slug: null,
-        year: 2150,
-        era: "unknown", // Use unknown era so it floats by itself
-        isLevel: true,
-        levelId: "hybrid-observatory",
-        isKeyEvent: false,
-        category: "level"
-      },
-      {
-        id: "level-star-sci-fi-room",
-        uniqueId: "level-star-sci-fi-room",
-        title: "Sci Fi Room", 
-        description: "Enter the Sci Fi Room level",
-        slug: null,
-        year: 2500,
-        era: "unknown", // Use unknown era so it floats by itself
-        isLevel: true,
-        levelId: "sci-fi-room", 
-        isKeyEvent: false,
-        category: "level"
-      }
-    ]
-  }
-
 </script>
 
 <T.Group name="authentic-starnode-system" bind:ref={starGroup}>

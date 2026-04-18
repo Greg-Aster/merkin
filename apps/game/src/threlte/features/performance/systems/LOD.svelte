@@ -24,6 +24,7 @@ import {
 } from '../utils/lodUtils'
 
 const dispatch = createEventDispatcher()
+const isDev = import.meta.env.DEV
 
 let isInitialized = false
 
@@ -41,14 +42,18 @@ export let enableCulling = true
 let lastUpdateTime = 0
 
 onMount(() => {
-  console.log('🎯 Initializing Threlte LOD System...')
+  if (isDev) {
+    console.log('🎯 Initializing Threlte LOD System...')
+  }
   
   if (enableLOD) {
     setupLODSystem()
   }
   
   isInitialized = true
-  console.log('✅ Threlte LOD System initialized')
+  if (isDev) {
+    console.log('✅ Threlte LOD System initialized')
+  }
 })
 
 /**
@@ -61,7 +66,9 @@ function setupLODSystem() {
     window.addEventListener('threlte:unregisterLOD', handleLODUnregistration)
   }
   
-  console.log('🎯 LOD system configured with distances:', [10, 25, 50, 100])
+  if (isDev) {
+    console.log('🎯 LOD system configured with distances:', [10, 25, 50, 100])
+  }
 }
 
 /**
@@ -218,7 +225,9 @@ onDestroy(() => {
   }
   
   clearLODObjects()
-  console.log('🧹 Threlte LOD System disposed')
+  if (isDev) {
+    console.log('🧹 Threlte LOD System disposed')
+  }
 })
 
 // Export component functions that include event dispatching

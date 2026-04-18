@@ -304,17 +304,25 @@
     if (isDev) {
       console.log('🎯 InteractionSystem: Initializing centralized interaction system')
     }
-    
-    // Get canvas and add unified event listeners
-    const canvas = getCanvasElement()
-    if (canvas) {
+
+    const attachCanvasListeners = () => {
+      const canvas = getCanvasElement()
+      if (!canvas) {
+        return false
+      }
+
       canvas.addEventListener('click', handleCanvasClick)
       canvas.addEventListener('mousemove', handleCanvasMouseMove)
       if (isDev) {
         console.log('🎯 InteractionSystem: Canvas event listeners attached')
       }
-    } else {
-      console.warn('⚠️ InteractionSystem: No canvas found for event listeners')
+      return true
+    }
+
+    if (!attachCanvasListeners()) {
+      requestAnimationFrame(() => {
+        attachCanvasListeners()
+      })
     }
   })
 

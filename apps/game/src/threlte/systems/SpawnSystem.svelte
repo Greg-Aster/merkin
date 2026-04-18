@@ -9,12 +9,13 @@
 -->
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte'
-  import { get } from 'svelte/store'
   
   const dispatch = createEventDispatcher()
+  const isDev = import.meta.env.DEV
   
   // Props
   export let playerComponent: any = null
+  export let playerReady = false
   export let physicsReady = false
   export let terrainReady = false
   
@@ -31,9 +32,23 @@
   let spawnQueue: SpawnRequest[] = []
   let spawnedEntities = new Set<string>()
   let isProcessingSpawn = false
+
+  function isValidPlayerComponent(value: any) {
+    return Boolean(value && typeof value.spawnAt === 'function')
+  }
+
+  function hasReadyComponentsForQueue() {
+    return spawnQueue.every((request) => {
+      if (request.entityType === 'player') {
+        return playerReady && isValidPlayerComponent(playerComponent)
+      }
+
+      return true
+    })
+  }
   
   // System state
-  $: canSpawn = physicsReady && terrainReady && !isProcessingSpawn
+  $: canSpawn = physicsReady && terrainReady && !isProcessingSpawn && hasReadyComponentsForQueue()
   
   // Process spawn queue when conditions are met
   $: if (canSpawn && spawnQueue.length > 0) {
@@ -53,7 +68,7 @@
     )
     
     if (existingRequest) {
-      console.log(`⚠️ SpawnSystem: Duplicate spawn request ignored for ${request.entityType}`)
+      if (isDev) console.log(`⚠️ SpawnSystem: Duplicate spawn request ignored for ${request.entityType}`)
       return false
     }
     
@@ -67,7 +82,7 @@
       spawnQueue.splice(insertIndex, 0, spawnRequest)
     }
     
-    console.log(`📝 SpawnSystem: Queued ${request.entityType} spawn at [${request.position.join(', ')}]`)
+    if (isDev) console.log(`📝 SpawnSystem: Queued ${request.entityType} spawn at [${request.position.join(', ')}]`)
     
     // Trigger reactive update
     spawnQueue = [...spawnQueue]
@@ -81,7 +96,7 @@
   async function processSpawnQueue() {
     if (isProcessingSpawn || spawnQueue.length === 0) return
     
-    console.log(`🔄 SpawnSystem: Processing ${spawnQueue.length} spawn requests`)
+    if (isDev) console.log(`🔄 SpawnSystem: Processing ${spawnQueue.length} spawn requests`)
     isProcessingSpawn = true
     
     try {
@@ -91,7 +106,7 @@
       
       // Check if already spawned
       if (spawnedEntities.has(request.id)) {
-        console.log(`⚠️ SpawnSystem: Entity ${request.id} already spawned`)
+        if (isDev) console.log(`⚠️ SpawnSystem: Entity ${request.id} already spawned`)
         return
       }
       
@@ -100,7 +115,7 @@
       
       if (success) {
         spawnedEntities.add(request.id)
-        console.log(`✅ SpawnSystem: Successfully spawned ${request.entityType} at [${request.position.join(', ')}]`)
+        if (isDev) console.log(`✅ SpawnSystem: Successfully spawned ${request.entityType} at [${request.position.join(', ')}]`)
         
         // Dispatch spawn event for other systems
         dispatch('entitySpawned', {
@@ -153,8 +168,8 @@
     const { position } = request
     
     // Use playerComponent from props (passed from Game.svelte)
-    if (!playerComponent || !playerComponent.spawnAt) {
-      console.error('❌ SpawnSystem: Player component missing or invalid')
+    if (!isValidPlayerComponent(playerComponent)) {
+      console.warn('SpawnSystem: Player spawn requested before player component was ready.')
       return false
     }
     
@@ -178,7 +193,7 @@
    * Spawn NPC entity (future implementation)
    */
   function spawnNPC(request: SpawnRequest): boolean {
-    console.log(`🤖 SpawnSystem: NPC spawning not yet implemented`)
+    if (isDev) console.log(`🤖 SpawnSystem: NPC spawning not yet implemented`)
     return false
   }
   
@@ -186,7 +201,7 @@
    * Spawn item entity (future implementation)
    */
   function spawnItem(request: SpawnRequest): boolean {
-    console.log(`📦 SpawnSystem: Item spawning not yet implemented`)
+    if (isDev) console.log(`📦 SpawnSystem: Item spawning not yet implemented`)
     return false
   }
   
@@ -194,7 +209,7 @@
    * Clear spawn queue (for level transitions)
    */
   export function clearSpawnQueue() {
-    console.log(`🧹 SpawnSystem: Clearing spawn queue (${spawnQueue.length} pending)`)
+    if (isDev) console.log(`🧹 SpawnSystem: Clearing spawn queue (${spawnQueue.length} pending)`)
     spawnQueue = []
     spawnedEntities.clear()
     isProcessingSpawn = false
@@ -212,10 +227,10 @@
   }
   
   onMount(() => {
-    console.log('🎯 SpawnSystem: Initialized')
+    if (isDev) console.log('🎯 SpawnSystem: Initialized')
     
     return () => {
-      console.log('🧹 SpawnSystem: Cleanup')
+      if (isDev) console.log('🧹 SpawnSystem: Cleanup')
       clearSpawnQueue()
     }
   })

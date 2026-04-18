@@ -6,8 +6,9 @@
  */
 
 import { createWorld, defineComponent, defineQuery, addComponent, addEntity, defineSystem, Types } from 'bitecs'
-import * as THREE from 'three'
+import { Color, Vector3 } from 'three'
 import type { SystemRegistry, LevelContext } from './LevelSystem'
+const isDev = import.meta.env.DEV
 
 // =============================================================================
 // ECS COMPONENT DEFINITIONS
@@ -126,7 +127,9 @@ export class ECSWorldManager {
     EmotionalState.discovery[this.emotionalStateEntity] = 30
     
     this.setupCoreSystems()
-    console.log('🔧 ECS World initialized')
+    if (isDev) {
+      console.log('🔧 ECS World initialized')
+    }
   }
 
   setTerrainHeightFunction(getHeightAt: (x: number, z: number) => number): void {
@@ -309,11 +312,13 @@ export class ECSWorldManager {
     if (hope !== undefined) EmotionalState.hope[this.emotionalStateEntity] = hope
     if (discovery !== undefined) EmotionalState.discovery[this.emotionalStateEntity] = discovery
     
-    console.log('🎭 Emotional state updated:', this.getEmotionalState())
+    if (isDev) {
+      console.log('🎭 Emotional state updated:', this.getEmotionalState())
+    }
   }
 
   // Modern ECS entity creation with configuration
-  createFirefly(position: THREE.Vector3, color: number, config: {
+  createFirefly(position: Vector3, color: number, config: {
     lightIntensity: number
     lightRange: number
     cycleDuration: number
@@ -380,7 +385,7 @@ export class ECSWorldManager {
     return eid
   }
 
-  createPlayer(position: THREE.Vector3): number {
+  createPlayer(position: Vector3): number {
     const eid = addEntity(this.world)
     
     addComponent(this.world, PlayerTag, eid)
@@ -395,8 +400,8 @@ export class ECSWorldManager {
   }
 
   // Get all active lights for external systems (like ocean reflections)
-  getActiveLights(): Array<{position: THREE.Vector3, color: THREE.Color, intensity: number, distance: number}> {
-    const lights: Array<{position: THREE.Vector3, color: THREE.Color, intensity: number, distance: number}> = []
+  getActiveLights(): Array<{position: Vector3, color: Color, intensity: number, distance: number}> {
+    const lights: Array<{position: Vector3, color: Color, intensity: number, distance: number}> = []
     const entities = lightEmitterQuery(this.world)
     
     for (let i = 0; i < entities.length; i++) {
@@ -405,12 +410,12 @@ export class ECSWorldManager {
       // Only include lights with significant intensity
       if (LightEmitter.intensity[eid] > 0.1) {
         lights.push({
-          position: new THREE.Vector3(
+          position: new Vector3(
             Position.x[eid],
             Position.y[eid], 
             Position.z[eid]
           ),
-          color: new THREE.Color(LightEmitter.color[eid]),
+          color: new Color(LightEmitter.color[eid]),
           intensity: LightEmitter.intensity[eid],
           distance: LightEmitter.range[eid]
         })
@@ -422,6 +427,8 @@ export class ECSWorldManager {
 
   dispose(): void {
     // Clean up ECS world
-    console.log('🧹 ECS World disposed')
+    if (isDev) {
+      console.log('🧹 ECS World disposed')
+    }
   }
 }

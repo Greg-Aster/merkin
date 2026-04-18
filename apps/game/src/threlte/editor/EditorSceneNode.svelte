@@ -1,0 +1,320 @@
+<script lang="ts">
+  import { T, useTask } from '@threlte/core'
+  import { Collider, RigidBody } from '@threlte/rapier'
+  import { createEventDispatcher, onDestroy } from 'svelte'
+  import * as THREE from 'three'
+  import ProceduralMesh from '../components/ProceduralMesh.svelte'
+  import StarSprite from '../components/StarSprite.svelte'
+  import EditorColliderHelper from './EditorColliderHelper.svelte'
+  import EditorNodeRenderContent from './EditorNodeRenderContent.svelte'
+  import { editorNodeViewportStateStore, editorStateStore } from './editorStore'
+  import { gameActions } from '../stores/gameStateStore'
+  import { registerEditorObject, unregisterEditorObject } from './editorRegistry'
+  import type { EditorSceneNode } from './editorStore'
+
+  const dispatch = createEventDispatcher()
+
+  export let node: EditorSceneNode
+  export let editorEnabled = false
+  export let selected = false
+  export let interactionSystem: any = null
+  export let interactiveEnabled = false
+
+  let group: THREE.Group
+  let markerHovered = false
+  let lightBurstGlow = 0
+  let animationTime = 0
+  let effectiveVisible = true
+  let conversationFeaturePromise: Promise<typeof import('../features/conversation')> | null = null
+
+  function getPrimitiveColliderArgs() {
+    if (node.kind !== 'primitive' || node.primitive?.geometry !== 'box') return [0.5, 0.5, 0.5] as [number, number, number]
+
+    const [width = 1, height = 1, depth = 1] = node.primitive.args
+    const [scaleX = 1, scaleY = 1, scaleZ = 1] = node.scale
+    return [
+      Math.abs(width * scaleX) / 2,
+      Math.abs(height * scaleY) / 2,
+      Math.abs(depth * scaleZ) / 2,
+    ] as [number, number, number]
+  }
+
+  function hasPhysicsBody() {
+    return !!node.collision && (node.kind === 'primitive' || node.kind === 'asset' || node.kind === 'prefab')
+  }
+
+  function getRigidBodyType() {
+    return node.physics?.bodyType ?? 'fixed'
+  }
+
+  function getColliderArgs() {
+    if (node.collision?.size) {
+      return [
+        Math.abs(node.collision.size[0]) / 2,
+        Math.abs(node.collision.size[1]) / 2,
+        Math.abs(node.collision.size[2]) / 2,
+      ] as [number, number, number]
+    }
+
+    if (node.kind === 'primitive' && node.primitive?.geometry === 'box') {
+      return getPrimitiveColliderArgs()
+    }
+
+    return [
+      Math.max(0.05, Math.abs(node.scale[0]) / 2),
+      Math.max(0.05, Math.abs(node.scale[1]) / 2),
+      Math.max(0.05, Math.abs(node.scale[2]) / 2),
+    ] as [number, number, number]
+  }
+
+  useTask((delta) => {
+    animationTime += delta
+    lightBurstGlow = Math.max(0, lightBurstGlow - delta * 1.25)
+  })
+
+  function loadConversationFeature() {
+    if (!conversationFeaturePromise) {
+      conversationFeaturePromise = import('../features/conversation')
+    }
+
+    return conversationFeaturePromise
+  }
+
+  async function startFireflyDialogue() {
+    const { conversationActions } = await loadConversationFeature()
+    const npcId = `editor-firefly-${node.id}`
+    const personality = {
+      id: npcId,
+      name: node.gameplay?.author || node.gameplay?.title || node.name,
+      species: 'Firefly',
+      behavior: { defaultMood: 'peaceful' },
+    }
+
+    conversationActions.startReadOnlyConversation(
+      npcId,
+      personality,
+      node.gameplay?.body || node.gameplay?.excerpt || 'You are alone here.',
+      7000,
+    )
+    gameActions.recordInteraction('editor_firefly_click', npcId)
+  }
+
+  function registerInteractiveMarker(sprite: THREE.Sprite) {
+    if (!interactiveEnabled || !interactionSystem?.registerInteractiveObject || !node.gameplay) return
+
+    interactionSystem.registerInteractiveObject({
+      id: `editor-node-${node.id}`,
+      sprite,
+      type: 'object',
+      data: node,
+      index: 0,
+      handlers: {
+        onClick: () => {
+          if (node.gameplay?.type === 'portal' && node.gameplay.targetLevelId) {
+            dispatch('portalTransition', { levelId: node.gameplay.targetLevelId })
+            return
+          }
+
+          if (node.gameplay?.type === 'firefly') {
+            void startFireflyDialogue()
+            return
+          }
+
+          if (node.gameplay?.type === 'note') {
+            dispatch('noteRead', {
+              title: node.gameplay.title || node.name,
+              author: node.gameplay.author || 'Recovered Fragment',
+              location: node.gameplay.location || 'Sci-Fi Room',
+              excerpt: node.gameplay.excerpt || '',
+              body: node.gameplay.body || node.gameplay.excerpt || '',
+            })
+          }
+        },
+        onHover: (_data: EditorSceneNode, hovered: boolean) => {
+          markerHovered = hovered
+        },
+        onLightBurst: (_data: EditorSceneNode, burst: { strength: number }) => {
+          lightBurstGlow = Math.max(lightBurstGlow, 0.45 + burst.strength * 0.75)
+        },
+      },
+    })
+  }
+
+  $: effectiveVisible = $editorNodeViewportStateStore.get(node.id)?.effectiveVisible ?? node.visible
+
+  $: if (group) {
+    registerEditorObject(node.id, group)
+    group.visible = effectiveVisible
+    group.position.set(...node.position)
+    group.rotation.set(...node.rotation)
+    group.scale.set(...node.scale)
+  }
+
+  onDestroy(() => {
+    if (interactionSystem?.unregisterInteractiveObject) {
+      interactionSystem.unregisterInteractiveObject(`editor-node-${node.id}`)
+    }
+    unregisterEditorObject(node.id)
+  })
+</script>
+
+<T.Group bind:ref={group} visible={effectiveVisible}>
+  {#if !editorEnabled && hasPhysicsBody() && node.collision?.shape === 'cuboid' && effectiveVisible}
+    <RigidBody
+      type={getRigidBodyType()}
+      gravityScale={node.physics?.gravityScale ?? 1}
+      canSleep={node.physics?.canSleep ?? true}
+      ccd={node.physics?.ccd ?? false}
+      linearDamping={node.physics?.linearDamping ?? 0}
+      angularDamping={node.physics?.angularDamping ?? 0}
+      lockRotations={node.physics?.lockRotations ?? false}
+      lockTranslations={node.physics?.lockTranslations ?? false}
+    >
+      <Collider
+        shape="cuboid"
+        args={getColliderArgs()}
+        friction={node.collision.friction ?? 0.7}
+        restitution={node.collision.restitution ?? 0}
+        sensor={node.collision.sensor ?? false}
+      />
+      <EditorNodeRenderContent {node} {editorEnabled} />
+    </RigidBody>
+  {:else}
+    <EditorNodeRenderContent {node} {editorEnabled} />
+  {/if}
+
+  {#if hasPhysicsBody() && node.collision?.shape === 'cuboid' && editorEnabled && $editorStateStore.collisionOverlayEnabled}
+    <EditorColliderHelper shape="cuboid" args={getColliderArgs()} />
+  {/if}
+
+  {#if selected}
+    <ProceduralMesh
+      geometry="torus"
+      args={[0.9, 0.03, 12, 28]}
+      position={[0, 0.05, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+      scale={[1, 1, 1]}
+      color="#7ecbff"
+      emissive="#7ecbff"
+      emissiveIntensity={0.5}
+      metalness={1}
+      roughness={0.04}
+      transparent={true}
+      opacity={0.5}
+    />
+  {/if}
+
+  {#if node.gameplay}
+    {#if node.gameplay.type === 'firefly'}
+      <T.PointLight
+        position={[0, 0.36 + Math.sin(animationTime * 1.4) * 0.14, 0]}
+        color={node.gameplay.markerColor ?? '#f5f1a8'}
+        intensity={markerHovered ? 3.8 : 2.8}
+        distance={6}
+        decay={1.6}
+      />
+      <StarSprite
+        position={[0, 0.36 + Math.sin(animationTime * 1.4) * 0.14, 0]}
+        color={node.gameplay.markerColor ?? '#f5f1a8'}
+        size={(node.gameplay.markerSize ?? 0.58) * (markerHovered ? 1.12 : 1 + lightBurstGlow * 0.08)}
+        intensity={Math.max(markerHovered ? 1.2 : 0.95, 0.95 + lightBurstGlow * 0.55)}
+        twinkleSpeed={1.6}
+        animationOffset={animationTime}
+        enableTwinkle={true}
+        opacity={1}
+        isClickable={interactiveEnabled}
+        isHovered={markerHovered}
+        onSpriteReady={registerInteractiveMarker}
+      />
+    {:else if node.gameplay.type === 'audio-region'}
+      <ProceduralMesh
+        geometry="box"
+        args={[1, 1, 1]}
+        position={[0, 0, 0]}
+        rotation={[0, 0, 0]}
+        scale={[1, 1, 1]}
+        color={node.gameplay.markerColor ?? '#7ecbff'}
+        emissive={node.gameplay.markerColor ?? '#7ecbff'}
+        emissiveIntensity={selected || markerHovered ? 0.4 : 0.12}
+        metalness={0.08}
+        roughness={0.92}
+        transparent={true}
+        opacity={0.12}
+      />
+      <ProceduralMesh
+        geometry="torus"
+        args={[0.5, 0.03, 12, 24]}
+        position={[0, Math.max(0.3, node.scale[1] * 0.5), 0]}
+        rotation={[Math.PI / 2, animationTime * 0.35, 0]}
+        scale={[1, 1, 1]}
+        color={node.gameplay.markerColor ?? '#7ecbff'}
+        emissive={node.gameplay.markerColor ?? '#7ecbff'}
+        emissiveIntensity={0.35}
+        metalness={1}
+        roughness={0.04}
+        transparent={true}
+        opacity={0.45}
+      />
+    {:else if node.gameplay.type === 'fog-volume'}
+      <ProceduralMesh
+        geometry="box"
+        args={[1, 1, 1]}
+        position={[0, 0, 0]}
+        rotation={[0, 0, 0]}
+        scale={[1, 1, 1]}
+        color={node.gameplay.fogColor ?? node.gameplay.markerColor ?? '#cfdcff'}
+        emissive={node.gameplay.fogColor ?? node.gameplay.markerColor ?? '#cfdcff'}
+        emissiveIntensity={selected || markerHovered ? 0.28 : 0.08}
+        metalness={0.02}
+        roughness={1}
+        transparent={true}
+        opacity={0.1}
+      />
+      <ProceduralMesh
+        geometry="torus"
+        args={[0.5, 0.02, 12, 24]}
+        position={[0, Math.max(0.3, node.scale[1] * 0.5), 0]}
+        rotation={[Math.PI / 2, 0, Math.sin(animationTime * 0.3) * 0.25]}
+        scale={[1, 1, 1]}
+        color={node.gameplay.fogColor ?? node.gameplay.markerColor ?? '#cfdcff'}
+        emissive={node.gameplay.fogColor ?? node.gameplay.markerColor ?? '#cfdcff'}
+        emissiveIntensity={0.2}
+        metalness={1}
+        roughness={0.05}
+        transparent={true}
+        opacity={0.38}
+      />
+    {:else}
+      <ProceduralMesh
+        geometry="torus"
+        args={[node.gameplay.type === 'portal' ? 1.4 : 0.38, node.gameplay.type === 'portal' ? 0.035 : 0.018, 12, 28]}
+        position={[0, node.gameplay.type === 'portal' ? 1.05 : 0.1, 0]}
+        rotation={[Math.PI / 2, 0, 0]}
+        scale={[1, 1, 1]}
+        color={node.gameplay.markerColor ?? '#7ecbff'}
+        emissive={node.gameplay.markerColor ?? '#7ecbff'}
+        emissiveIntensity={Math.max(markerHovered ? 1.1 : 0.48, 0.48 + lightBurstGlow)}
+        metalness={1}
+        roughness={0.03}
+        transparent={true}
+        opacity={0.68}
+      />
+
+      <StarSprite
+        position={[0, node.gameplay.type === 'portal' ? 1.12 : 0.12, 0]}
+        color={node.gameplay.markerColor ?? '#7ecbff'}
+        size={(node.gameplay.markerSize ?? 0.7) * (markerHovered ? 1.15 : 1 + lightBurstGlow * 0.12)}
+        intensity={Math.max(markerHovered ? 1.05 : 0.85, 0.85 + lightBurstGlow * 0.8)}
+        twinkleSpeed={1.2}
+        animationOffset={0}
+        enableTwinkle={true}
+        opacity={1}
+        isClickable={interactiveEnabled}
+        isHovered={markerHovered}
+        onSpriteReady={registerInteractiveMarker}
+      />
+    {/if}
+  {/if}
+
+  <slot />
+</T.Group>

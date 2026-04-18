@@ -59,9 +59,6 @@
   $: effectiveReadOnlyText = readOnlyText || uiState.readOnlyText || ''
   $: effectiveReadOnlyDuration = readOnlyDuration || uiState.readOnlyDuration || 4000
   
-  // Debug logging
-  $: console.log('🔍 ConversationDialog - visible:', visible, 'isActive:', isActive, 'shouldShow:', visible && isActive)
-
   // Smart auto-scroll: Only scroll to bottom for new messages if user hasn't scrolled up
   $: if (messageContainer && messages.length > lastMessageCount) {
     if (!isUserScrolledUp) {
@@ -294,7 +291,7 @@
 
 {#if (visible && isActive) || (visible && effectiveReadOnly)}
   <!-- Click-away backdrop -->
-  <div 
+  <div
     class="dialog-backdrop"
     transition:fade={{ duration: 200 }}
     on:click={handleClose}
@@ -302,15 +299,13 @@
     tabindex="-1"
     role="button"
     aria-label="Close conversation"
-  />
+  ></div>
   
   <div 
     class="conversation-dialog {themeClass}"
     transition:fly={{ y: 20, duration: 300, easing: quintOut }}
     style="{positionStyles} max-width: {maxWidth}px; max-height: {maxHeight}px; z-index: 99999 ;"
     bind:this={dialogContainer}
-    on:click|stopPropagation
-    on:keydown|stopPropagation
   >
     <!-- Header -->
     <div class="dialog-header">

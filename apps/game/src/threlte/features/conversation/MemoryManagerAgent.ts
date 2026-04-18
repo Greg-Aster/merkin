@@ -10,6 +10,7 @@
 
 import { worldKnowledge, type ContextResult } from './worldKnowledge'
 import type { NPCPersonality } from './types'
+const isDev = import.meta.env.DEV
 
 // ================================
 // Memory Manager Interfaces
@@ -329,7 +330,7 @@ export class MemoryManagerAgent {
       score += properNounMatches.length * 0.5
       
       // DEBUG: Log sentence scoring for pickles-related content
-      if (sentenceLower.includes('pickle') || sentenceLower.includes('no pickle')) {
+      if (isDev && (sentenceLower.includes('pickle') || sentenceLower.includes('no pickle'))) {
         console.log(`🥒 DEBUGGING Pickle Sentence Score:`, {
           sentence: sentence.substring(0, 100) + '...',
           score,
@@ -485,7 +486,7 @@ export class MemoryManagerAgent {
     }
 
     // Debug logging to see what memories are being passed to AI
-    if (memoryBundle.relevantMemories.length > 0) {
+    if (isDev && memoryBundle.relevantMemories.length > 0) {
       const totalTokens = memoryBundle.totalTokensEstimate
       const memoryDetails = memoryBundle.relevantMemories.map(m => ({ 
         title: m.title, 
