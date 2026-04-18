@@ -15,6 +15,7 @@
   
   // Props
   export let playerComponent: any = null
+  export let playerReady = false
   export let physicsReady = false
   export let terrainReady = false
   
@@ -39,7 +40,7 @@
   function hasReadyComponentsForQueue() {
     return spawnQueue.every((request) => {
       if (request.entityType === 'player') {
-        return isValidPlayerComponent(playerComponent)
+        return playerReady && isValidPlayerComponent(playerComponent)
       }
 
       return true

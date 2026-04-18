@@ -39,7 +39,22 @@ export default defineConfig({
         },
         output: {
           manualChunks(id) {
-            if (!id.includes('node_modules')) return
+            if (!id.includes('node_modules')) {
+              if (
+                id.includes('/src/threlte/editor/')
+                || id.includes('/src/threlte/utils/materialUtils.ts')
+              ) {
+                return 'editor-core'
+              }
+
+              if (
+                id.includes('/src/threlte/systems/NeuralStylizationOverlay.svelte')
+              ) {
+                return 'experimental-visuals'
+              }
+
+              return
+            }
 
             if (
               id.includes('three/examples/jsm/postprocessing')

@@ -34,16 +34,6 @@
   import LODSystem from './features/performance/systems/LOD.svelte'
   import { resetLevelRuntime } from './core/levelRuntimeReset'
   import InteractionSystem from './systems/InteractionSystem.svelte'
-  import NeuralStylizationOverlay from './systems/NeuralStylizationOverlay.svelte'
-  import EditorPanel from './editor/EditorPanel.svelte'
-  import EditorControlsOverlay from './editor/EditorControlsOverlay.svelte'
-  import EditorCollisionOverlay from './editor/EditorCollisionOverlay.svelte'
-  import EditorCircleSelectOverlay from './editor/EditorCircleSelectOverlay.svelte'
-  import EditorMarqueeOverlay from './editor/EditorMarqueeOverlay.svelte'
-  import EditorSceneLayer from './editor/EditorSceneLayer.svelte'
-  import EditorTerrainSculptLayer from './editor/EditorTerrainSculptLayer.svelte'
-  import EditorViewportControls from './editor/EditorViewportControls.svelte'
-  import EditorWorkbenchLighting from './editor/EditorWorkbenchLighting.svelte'
   
   // Import UI components
   import TimelineCard from './ui/TimelineCard.svelte'
@@ -65,6 +55,7 @@
   // Import UI state store
   import {
     isSettingsMenuOpen,
+    isNeuralStylizationEnabled,
   } from './stores/uiStore'
   import { editorStateStore, initializeEditor } from './editor/editorStore'
   
@@ -117,9 +108,20 @@
   let multiplayerManagerComponent: any = null
   let physicsSystemComponent: any = null
   let playerComponentClass: any = null
+  let neuralStylizationOverlayComponent: any = null
+  let editorPanelComponent: any = null
+  let editorControlsOverlayComponent: any = null
+  let editorCollisionOverlayComponent: any = null
+  let editorCircleSelectOverlayComponent: any = null
+  let editorMarqueeOverlayComponent: any = null
+  let editorSceneLayerComponent: any = null
+  let editorTerrainSculptLayerComponent: any = null
+  let editorViewportControlsComponent: any = null
+  let editorWorkbenchLightingComponent: any = null
   let initializeClientFn: ((roomName: string) => void) | null = null
   
   let playerComponent: any = null
+  let playerReady = false
   let spawnSystem: any = null
   let interactionSystem: any = null // Reference to centralized InteractionSystem
   let chatBoxComponent: any = null // Reference to ChatBox component instance
@@ -136,6 +138,8 @@
   // Spawn system state
   let physicsReady = false
   let activeLevelLoadRequest = 0
+  let neuralStylizationPromise: Promise<void> | null = null
+  let editorFeaturesPromise: Promise<void> | null = null
   let deferredAudioCleanup: (() => void) | null = null
   let deferredGameplayCoreCleanup: (() => void) | null = null
   let gameplayCorePromise: Promise<void> | null = null
@@ -204,6 +208,7 @@
   $: error = $errorStore
   $: editorEnabled = $editorStateStore.enabled
   $: collisionOverlayEnabled = $editorStateStore.collisionOverlayEnabled
+  $: playerReady = Boolean(playerComponent && typeof playerComponent.spawnAt === 'function')
   
   // Reactive level and star tracking - debug logs removed for performance
   $: if (isDev && currentLevel) {
@@ -264,12 +269,20 @@
     void ensureSettingsPanelComponent()
   }
 
+  $: if ($isNeuralStylizationEnabled && !neuralStylizationOverlayComponent) {
+    void ensureNeuralStylizationOverlayComponent()
+  }
+
   $: if ($isSettingsMenuOpen && !multiplayerManagerComponent) {
     void ensureMultiplayerFeatures()
   }
 
   $: if (($isConversationActive || $conversationUIState.isVisible) && !conversationDialogComponent) {
     void ensureConversationDialogComponent()
+  }
+
+  $: if (editorEnabled && !editorFeaturesPromise) {
+    void ensureEditorFeatures()
   }
 
   /**
@@ -354,6 +367,58 @@
     if (audioSystemComponent) return
     const module = await import('./systems/Audio.svelte')
     audioSystemComponent = module.default
+  }
+
+  async function ensureNeuralStylizationOverlayComponent() {
+    if (neuralStylizationOverlayComponent) return
+
+    if (!neuralStylizationPromise) {
+      neuralStylizationPromise = import('./systems/NeuralStylizationOverlay.svelte').then((module) => {
+        neuralStylizationOverlayComponent = module.default
+      })
+    }
+
+    await neuralStylizationPromise
+  }
+
+  async function ensureEditorFeatures() {
+    if (editorPanelComponent && editorViewportControlsComponent) return
+
+    if (!editorFeaturesPromise) {
+      editorFeaturesPromise = Promise.all([
+        import('./editor/EditorPanel.svelte'),
+        import('./editor/EditorControlsOverlay.svelte'),
+        import('./editor/EditorCollisionOverlay.svelte'),
+        import('./editor/EditorCircleSelectOverlay.svelte'),
+        import('./editor/EditorMarqueeOverlay.svelte'),
+        import('./editor/EditorSceneLayer.svelte'),
+        import('./editor/EditorTerrainSculptLayer.svelte'),
+        import('./editor/EditorViewportControls.svelte'),
+        import('./editor/EditorWorkbenchLighting.svelte'),
+      ]).then(([
+        editorPanelModule,
+        editorControlsOverlayModule,
+        editorCollisionOverlayModule,
+        editorCircleSelectOverlayModule,
+        editorMarqueeOverlayModule,
+        editorSceneLayerModule,
+        editorTerrainSculptLayerModule,
+        editorViewportControlsModule,
+        editorWorkbenchLightingModule,
+      ]) => {
+        editorPanelComponent = editorPanelModule.default
+        editorControlsOverlayComponent = editorControlsOverlayModule.default
+        editorCollisionOverlayComponent = editorCollisionOverlayModule.default
+        editorCircleSelectOverlayComponent = editorCircleSelectOverlayModule.default
+        editorMarqueeOverlayComponent = editorMarqueeOverlayModule.default
+        editorSceneLayerComponent = editorSceneLayerModule.default
+        editorTerrainSculptLayerComponent = editorTerrainSculptLayerModule.default
+        editorViewportControlsComponent = editorViewportControlsModule.default
+        editorWorkbenchLightingComponent = editorWorkbenchLightingModule.default
+      })
+    }
+
+    await editorFeaturesPromise
   }
 
   async function ensureGameplayCore() {
@@ -719,7 +784,9 @@
         
         <!-- Renderer Configuration -->
         <Renderer />
-        <NeuralStylizationOverlay />
+        {#if neuralStylizationOverlayComponent}
+          <svelte:component this={neuralStylizationOverlayComponent} />
+        {/if}
         <!-- Simple Post-Processing using Native Threlte - conditional rendering based on performance -->
         {#if $qualitySettingsStore.enablePostProcessing}
           <SimplePostProcessing 
@@ -739,6 +806,7 @@
           <SpawnSystem
             bind:this={spawnSystem}
             {playerComponent}
+            {playerReady}
             {physicsReady}
             {terrainReady}
             on:entitySpawned={(e) => dispatch('entitySpawned', e.detail)}
@@ -756,8 +824,8 @@
             }}
             on:physicsReady={() => physicsReady = true}
           >
-            {#if editorEnabled}
-              <EditorViewportControls enabled={true} />
+            {#if editorEnabled && editorViewportControlsComponent}
+              <svelte:component this={editorViewportControlsComponent} enabled={true} />
             {:else}
               <!--
                 Player Component - Handles input/movement, spawned by ECS SpawnSystem
@@ -816,20 +884,29 @@
             {/if}
 
             {#if currentLevel}
-              <EditorWorkbenchLighting />
-              <EditorSceneLayer
-                levelId={currentLevel}
-                editorEnabled={editorEnabled}
-                {interactionSystem}
-                on:portalTransition={(e) => {
-                  transitionToLevel(e.detail.levelId)
-                }}
-                on:noteRead={(e) => {
-                  activeLevelNote = e.detail
-                }}
-              />
-              <EditorCollisionOverlay levelId={currentLevel} />
-              <EditorTerrainSculptLayer levelId={currentLevel} />
+              {#if editorWorkbenchLightingComponent}
+                <svelte:component this={editorWorkbenchLightingComponent} />
+              {/if}
+              {#if editorSceneLayerComponent}
+                <svelte:component
+                  this={editorSceneLayerComponent}
+                  levelId={currentLevel}
+                  editorEnabled={editorEnabled}
+                  {interactionSystem}
+                  on:portalTransition={(e) => {
+                    transitionToLevel(e.detail.levelId)
+                  }}
+                  on:noteRead={(e) => {
+                    activeLevelNote = e.detail
+                  }}
+                />
+              {/if}
+              {#if editorCollisionOverlayComponent}
+                <svelte:component this={editorCollisionOverlayComponent} levelId={currentLevel} />
+              {/if}
+              {#if editorTerrainSculptLayerComponent}
+                <svelte:component this={editorTerrainSculptLayerComponent} levelId={currentLevel} />
+              {/if}
             {/if}
             
             <!-- Optimization System -->
@@ -895,10 +972,18 @@
       <!-- UI Layer - Explicitly enable pointer events -->
       <div style="pointer-events: auto;">
         {#if editorEnabled && currentLevel}
-          <EditorMarqueeOverlay />
-          <EditorCircleSelectOverlay />
-          <EditorControlsOverlay />
-          <EditorPanel levelId={currentLevel} />
+          {#if editorMarqueeOverlayComponent}
+            <svelte:component this={editorMarqueeOverlayComponent} />
+          {/if}
+          {#if editorCircleSelectOverlayComponent}
+            <svelte:component this={editorCircleSelectOverlayComponent} />
+          {/if}
+          {#if editorControlsOverlayComponent}
+            <svelte:component this={editorControlsOverlayComponent} />
+          {/if}
+          {#if editorPanelComponent}
+            <svelte:component this={editorPanelComponent} levelId={currentLevel} />
+          {/if}
         {/if}
         <!-- Modern Timeline Card (replaces deleted TimelineCard component) -->
         <TimelineCard

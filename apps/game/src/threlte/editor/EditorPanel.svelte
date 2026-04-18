@@ -1836,6 +1836,9 @@
         </div>
         <div
           class="hierarchy-root-drop"
+          role="button"
+          tabindex="-1"
+          aria-label="Drop selection on scene root"
           class:active={hierarchyRootDropActive}
           on:dragenter={(event) => allowHierarchyDrop(event, null)}
           on:dragover={(event) => allowHierarchyDrop(event, null)}
@@ -1849,6 +1852,9 @@
             <div
               draggable={true}
               class="hierarchy-item"
+              role="treeitem"
+              tabindex="-1"
+              aria-selected={editorState.selectedNodeIds.includes(node.id)}
               class:selected={editorState.selectedNodeIds.includes(node.id)}
               class:drop-target={hierarchyDropTargetId === node.id}
               class:dimmed={nodeViewportStateById.get(node.id)?.dimmed ?? false}

@@ -25,14 +25,36 @@ import {
 function closeSettings() {
 	isSettingsMenuOpen.set(false);
 }
+
+function handleOverlayKeydown(event: KeyboardEvent) {
+	if (event.key === "Escape" || event.key === "Enter" || event.key === " ") {
+		event.preventDefault();
+		closeSettings();
+	}
+}
 </script>
 
 {#if $isSettingsMenuOpen}
-  <div class="settings-overlay" on:click={closeSettings}>
-    <div class="settings-panel" on:click|stopPropagation>
+  <div
+    class="settings-overlay"
+    role="button"
+    tabindex="0"
+    aria-label="Close settings"
+    on:click={closeSettings}
+    on:keydown={handleOverlayKeydown}
+  >
+    <div
+      class="settings-panel"
+      role="dialog"
+      tabindex="-1"
+      aria-modal="true"
+      aria-labelledby="settings-title"
+      on:click|stopPropagation
+      on:keydown|stopPropagation
+    >
       <div class="settings-header">
-        <h2>Settings</h2>
-        <button class="close-button" on:click={closeSettings}>×</button>
+        <h2 id="settings-title">Settings</h2>
+        <button class="close-button" aria-label="Close settings" on:click={closeSettings}>×</button>
       </div>
       
       <div class="settings-content">
@@ -54,11 +76,12 @@ function closeSettings() {
               Enable Sound
             </label>
 
-            <label class="slider-label">
+            <div class="slider-label">
               <span>Master</span>
               <span>{Math.round($masterVolumeSetting * 100)}%</span>
-            </label>
+            </div>
             <input
+              id="master-volume"
               class="volume-slider"
               type="range"
               min="0"
@@ -67,11 +90,12 @@ function closeSettings() {
               bind:value={$masterVolumeSetting}
             />
 
-            <label class="slider-label">
+            <div class="slider-label">
               <span>Ambience</span>
               <span>{Math.round($ambienceVolumeSetting * 100)}%</span>
-            </label>
+            </div>
             <input
+              id="ambience-volume"
               class="volume-slider"
               type="range"
               min="0"
@@ -80,11 +104,12 @@ function closeSettings() {
               bind:value={$ambienceVolumeSetting}
             />
 
-            <label class="slider-label">
+            <div class="slider-label">
               <span>Effects</span>
               <span>{Math.round($sfxVolumeSetting * 100)}%</span>
-            </label>
+            </div>
             <input
+              id="effects-volume"
               class="volume-slider"
               type="range"
               min="0"
@@ -132,11 +157,12 @@ function closeSettings() {
               </select>
             </label>
 
-            <label class="slider-label">
+            <div class="slider-label">
               <span>Blend Strength</span>
               <span>{Math.round($neuralStylizationStrength * 100)}%</span>
-            </label>
+            </div>
             <input
+              id="neural-blend-strength"
               class="volume-slider"
               type="range"
               min="0"
