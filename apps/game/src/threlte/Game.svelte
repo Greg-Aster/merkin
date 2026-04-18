@@ -32,7 +32,18 @@
   // StateManager removed - was conflicting with Player component rotation control
   import PerformanceSystem from './features/performance/systems/Performance.svelte'
   import LODSystem from './features/performance/systems/LOD.svelte'
+  import { resetLevelRuntime } from './core/levelRuntimeReset'
   import InteractionSystem from './systems/InteractionSystem.svelte'
+  import NeuralStylizationOverlay from './systems/NeuralStylizationOverlay.svelte'
+  import EditorPanel from './editor/EditorPanel.svelte'
+  import EditorControlsOverlay from './editor/EditorControlsOverlay.svelte'
+  import EditorCollisionOverlay from './editor/EditorCollisionOverlay.svelte'
+  import EditorCircleSelectOverlay from './editor/EditorCircleSelectOverlay.svelte'
+  import EditorMarqueeOverlay from './editor/EditorMarqueeOverlay.svelte'
+  import EditorSceneLayer from './editor/EditorSceneLayer.svelte'
+  import EditorTerrainSculptLayer from './editor/EditorTerrainSculptLayer.svelte'
+  import EditorViewportControls from './editor/EditorViewportControls.svelte'
+  import EditorWorkbenchLighting from './editor/EditorWorkbenchLighting.svelte'
   
   // Import UI components
   import TimelineCard from './ui/TimelineCard.svelte'
@@ -52,7 +63,10 @@
   } from './stores/gameStateStore'
   
   // Import UI state store
-  import { isSettingsMenuOpen } from './stores/uiStore'
+  import {
+    isSettingsMenuOpen,
+  } from './stores/uiStore'
+  import { editorStateStore, initializeEditor } from './editor/editorStore'
   
   const dispatch = createEventDispatcher()
   const isDev = import.meta.env.DEV
@@ -109,6 +123,15 @@
   let spawnSystem: any = null
   let interactionSystem: any = null // Reference to centralized InteractionSystem
   let chatBoxComponent: any = null // Reference to ChatBox component instance
+  let editorEnabled = false
+  let collisionOverlayEnabled = false
+  let activeLevelNote: {
+    title: string
+    author: string
+    location: string
+    excerpt: string
+    body: string
+  } | null = null
   
   // Spawn system state
   let physicsReady = false
@@ -116,8 +139,53 @@
   let deferredAudioCleanup: (() => void) | null = null
   let deferredGameplayCoreCleanup: (() => void) | null = null
   let gameplayCorePromise: Promise<void> | null = null
+  let pendingLevelReturn: {
+    levelType: string
+    title: string
+    message: string
+    confirmLabel: string
+    cancelLabel: string
+  } | null = null
 
   const levelComponentCache = new Map<string, any>()
+  const supportedLevelIds = new Set(['observatory', 'sci-fi-room', 'miranda', 'solitude'])
+
+  function normalizeLevelId(levelId: string | null | undefined) {
+    if (!levelId) return 'observatory'
+    if (levelId === 'hybrid-observatory') return 'observatory'
+    if (levelId === 'solitude-level') return 'solitude'
+    return supportedLevelIds.has(levelId) ? levelId : 'observatory'
+  }
+
+  function getLevelRenderConfig(levelId: string) {
+    const normalizedLevel = normalizeLevelId(levelId)
+
+    if (normalizedLevel === 'sci-fi-room') {
+      return {
+        offset: [0, 0, 0] as [number, number, number],
+        spawn: [0, 1, 0] as [number, number, number],
+      }
+    }
+
+    if (normalizedLevel === 'miranda') {
+      return {
+        offset: [0, 0, 0] as [number, number, number],
+        spawn: [0, 4.25, -13.8] as [number, number, number],
+      }
+    }
+
+    if (normalizedLevel === 'solitude') {
+      return {
+        offset: [0, 0, 0] as [number, number, number],
+        spawn: [0, 2.4, -24] as [number, number, number],
+      }
+    }
+
+    return {
+      offset: [0, 15, 10] as [number, number, number],
+      spawn: [0, 18, -50] as [number, number, number],
+    }
+  }
   
   // --- NEW: Robust Loading State ---
   // We now consider the game "loaded" only when the terrain's physics are ready.
@@ -134,6 +202,8 @@
   $: isMobile = $isMobileStore
   $: isLoading = $isLoadingStore
   $: error = $errorStore
+  $: editorEnabled = $editorStateStore.enabled
+  $: collisionOverlayEnabled = $editorStateStore.collisionOverlayEnabled
   
   // Reactive level and star tracking - debug logs removed for performance
   $: if (isDev && currentLevel) {
@@ -186,6 +256,10 @@
     void ensureLevelComponent(currentLevel)
   }
 
+  $: if (currentLevel) {
+    activeLevelNote = null
+  }
+
   $: if ($isSettingsMenuOpen && !settingsPanelComponent) {
     void ensureSettingsPanelComponent()
   }
@@ -232,7 +306,7 @@
   }
 
   async function ensureLevelComponent(levelId: string) {
-    const normalizedLevel = levelId === 'sci-fi-room' ? 'sci-fi-room' : 'observatory'
+    const normalizedLevel = normalizeLevelId(levelId)
     const cached = levelComponentCache.get(normalizedLevel)
     if (cached) {
       currentLevelComponent = cached
@@ -245,7 +319,11 @@
     const module =
       normalizedLevel === 'sci-fi-room'
         ? await import('./levels/SciFiRoom.svelte')
-        : await import('./levels/HybridObservatory.svelte')
+        : normalizedLevel === 'solitude'
+          ? await import('./levels/Solitude.svelte')
+        : normalizedLevel === 'miranda'
+          ? await import('./levels/MirandaShip.svelte')
+          : await import('./levels/HybridObservatory.svelte')
 
     levelComponentCache.set(normalizedLevel, module.default)
 
@@ -412,6 +490,11 @@
     try {
       loadingMessage = 'Initializing MEGAMEAL...'
       gameActions.setLoading(true)
+
+      const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+      const shouldEnableEditor = urlParams?.get('editor') === '1'
+      const requestedLevel = normalizeLevelId(urlParams?.get('level'))
+      initializeEditor(shouldEnableEditor)
       
       // Detect mobile and update store
       const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -424,21 +507,28 @@
       // Load saved game state
       loadGameState()
       
-      // Set default level to observatory if none is set
-      if (!$currentLevelStore || $currentLevelStore === '') {
+      if (requestedLevel !== 'observatory') {
+        gameActions.transitionToLevel(requestedLevel)
+      } else if (!$currentLevelStore || $currentLevelStore === '') {
         gameActions.transitionToLevel('observatory')
       }
       
       // Set up Threlte-based state management
       setupStateUpdates()
+
+      if (shouldEnableEditor) {
+        await ensureGameplayCore()
+      }
       
       // Check for room joining after initialization
       await checkForRoomJoin()
   
       // The loading screen will now be hidden by the `terrainReady` reactive block.
       isInitialized = true
-      deferredAudioCleanup = setupDeferredAudioLoading()
-      deferredGameplayCoreCleanup = setupDeferredGameplayCoreLoading()
+      if (!shouldEnableEditor) {
+        deferredAudioCleanup = setupDeferredAudioLoading()
+        deferredGameplayCoreCleanup = setupDeferredGameplayCoreLoading()
+      }
   
       debugLog('✅ Game systems initialized. Waiting for terrain...')
     } catch (err) {
@@ -465,18 +555,62 @@
    */
   function handleLevelTransition(event: CustomEvent) {
     const { levelType } = event.detail
-  
-    // Map level types to level IDs
+    transitionToLevel(levelType)
+  }
+
+  function handleLevelReturnRequest(detail: {
+    levelType?: string
+    title?: string
+    message?: string
+    confirmLabel?: string
+    cancelLabel?: string
+  }) {
+    pendingLevelReturn = {
+      levelType: detail.levelType || 'observatory',
+      title: detail.title || 'Return to Observatory?',
+      message: detail.message || 'Leave this level and travel back to the observatory?',
+      confirmLabel: detail.confirmLabel || 'Return',
+      cancelLabel: detail.cancelLabel || 'Cancel',
+    }
+  }
+
+  function cancelPendingLevelReturn() {
+    pendingLevelReturn = null
+  }
+
+  function confirmPendingLevelReturn() {
+    if (!pendingLevelReturn) return
+    const { levelType } = pendingLevelReturn
+    pendingLevelReturn = null
+    transitionToLevel(levelType)
+  }
+
+  function resolveLevelId(levelType: string) {
     const levelMap = {
       'miranda-ship-level': 'miranda',
       'restaurant-backroom-level': 'restaurant',
       'infinite-library-level': 'infinite_library',
       'sci-fi-room-level': 'sci-fi-room',
+      'solitude-level': 'solitude',
+      'observatory-level': 'observatory',
+      'hybrid-observatory-level': 'observatory',
+      'hybrid-observatory': 'observatory',
     }
-  
-    const levelId = levelMap[levelType as keyof typeof levelMap] || levelType
-  
-    // Update current level using store action (automatically reactive)
+
+    return levelMap[levelType as keyof typeof levelMap] || levelType
+  }
+
+  function transitionToLevel(levelType: string) {
+    const levelId = resolveLevelId(levelType)
+    resetLevelRuntime({
+      interactionSystem,
+      spawnSystem,
+    })
+    terrainReady = false
+    activeLevelNote = null
+    pendingLevelReturn = null
+    currentLevelComponent = null
+    gameActions.selectStar(null)
     gameActions.transitionToLevel(levelId)
     debugLog(`🎮 Threlte store-based level transition: ${levelId}`)
   }
@@ -485,7 +619,7 @@
    * Handle return to observatory - Store-based implementation
    */
   function handleReturnToObservatory() {
-    gameActions.transitionToLevel('observatory')
+    transitionToLevel('observatory')
     debugLog('🎮 Threlte store: Returned to observatory')
   }
   
@@ -585,7 +719,7 @@
         
         <!-- Renderer Configuration -->
         <Renderer />
-        
+        <NeuralStylizationOverlay />
         <!-- Simple Post-Processing using Native Threlte - conditional rendering based on performance -->
         {#if $qualitySettingsStore.enablePostProcessing}
           <SimplePostProcessing 
@@ -620,23 +754,32 @@
             }}
             on:physicsReady={() => physicsReady = true}
           >
-            <!-- 
-              Player Component - Handles input/movement, spawned by ECS SpawnSystem
-            -->
-            <svelte:component
-              this={playerComponentClass}
-              bind:this={playerComponent}
-              position={[0, 0, 0]}
-              speed={5}
-              jumpForce={8}
-              on:interaction={(e) => {
-                gameActions.recordInteraction('click', e.detail.type)
-                const selected = interactionSystem?.selectAtScreenPosition?.(e.detail.x, e.detail.y)
-                if (!selected) {
-                  dispatch('objectClick', e.detail)
-                }
-              }}
-            />
+            {#if editorEnabled}
+              <EditorViewportControls enabled={true} />
+            {:else}
+              <!--
+                Player Component - Handles input/movement, spawned by ECS SpawnSystem
+              -->
+              <svelte:component
+                this={playerComponentClass}
+                bind:this={playerComponent}
+                position={[0, 0, 0]}
+                speed={5}
+                jumpForce={8}
+                on:interaction={(e) => {
+                  gameActions.recordInteraction('click', e.detail.type)
+                  const selected = interactionSystem?.selectAtScreenPosition?.(e.detail.x, e.detail.y)
+                  if (!selected) {
+                    dispatch('objectClick', e.detail)
+                  }
+                }}
+                on:lightBurst={(e) => {
+                  gameActions.recordInteraction('light_burst', 'player')
+                  interactionSystem?.triggerLightBurst?.(e.detail)
+                  dispatch('lightBurst', e.detail)
+                }}
+              />
+            {/if}
             
             <!-- Multiplayer System - Renders remote players -->
             {#if multiplayerManagerComponent}
@@ -646,18 +789,45 @@
             
             <!-- Modern MEGAMEAL Architecture - Dynamic Level Loading -->
             {#if currentLevelComponent}
-              <svelte:component
-                this={currentLevelComponent}
-                timelineEvents={parsedTimelineEvents}
-                timelineEventsJson={timelineEventsPayload}
-                {spawnSystem}
+              {#key `${$currentLevelStore}:${currentLevelComponent}`}
+                {@const levelRenderConfig = getLevelRenderConfig($currentLevelStore)}
+                <svelte:component
+                  this={currentLevelComponent}
+                  timelineEvents={parsedTimelineEvents}
+                  timelineEventsJson={timelineEventsPayload}
+                  {spawnSystem}
+                  {interactionSystem}
+                  position={levelRenderConfig.offset}
+                  playerSpawnPoint={levelRenderConfig.spawn}
+                  collisionDebugEnabled={editorEnabled && collisionOverlayEnabled}
+                  on:starSelected={(e) => dispatch('starSelected', e.detail)}
+                  on:telescopeInteraction={(e) => dispatch('telescopeInteraction', e.detail)}
+                  on:noteRead={(e) => {
+                    activeLevelNote = e.detail
+                  }}
+                  on:requestLevelReturn={(e) => {
+                    handleLevelReturnRequest(e.detail)
+                  }}
+                  on:terrainReady={() => terrainReady = true}
+                />
+              {/key}
+            {/if}
+
+            {#if currentLevel}
+              <EditorWorkbenchLighting />
+              <EditorSceneLayer
+                levelId={currentLevel}
+                editorEnabled={editorEnabled}
                 {interactionSystem}
-                position={$currentLevelStore === 'sci-fi-room' ? [0, 0, 0] : [0, 15, 10]}
-                playerSpawnPoint={$currentLevelStore === 'sci-fi-room' ? [0, 1, 0] : [0, 18, -50]}
-                on:starSelected={(e) => dispatch('starSelected', e.detail)}
-                on:telescopeInteraction={(e) => dispatch('telescopeInteraction', e.detail)}
-                on:terrainReady={() => terrainReady = true}
+                on:portalTransition={(e) => {
+                  transitionToLevel(e.detail.levelId)
+                }}
+                on:noteRead={(e) => {
+                  activeLevelNote = e.detail
+                }}
               />
+              <EditorCollisionOverlay levelId={currentLevel} />
+              <EditorTerrainSculptLayer levelId={currentLevel} />
             {/if}
             
             <!-- Optimization System -->
@@ -722,6 +892,12 @@
   
       <!-- UI Layer - Explicitly enable pointer events -->
       <div style="pointer-events: auto;">
+        {#if editorEnabled && currentLevel}
+          <EditorMarqueeOverlay />
+          <EditorCircleSelectOverlay />
+          <EditorControlsOverlay />
+          <EditorPanel levelId={currentLevel} />
+        {/if}
         <!-- Modern Timeline Card (replaces deleted TimelineCard component) -->
         <TimelineCard
           isVisible={!!selectedEvent}
@@ -729,14 +905,48 @@
           isMobile={isMobile}
           compact={false}
           position="bottom"
-          on:levelTransition={(e) => {
-            const { levelType } = e.detail;
-            gameActions.transitionToLevel(levelType);
-            debugLog(`🎮 Timeline card level transition: ${levelType}`)
-          }}
+          on:levelTransition={handleLevelTransition}
           on:close={() => gameActions.selectStar(null)}
         />
-        
+
+        {#if activeLevelNote}
+          <div class="miranda-note-overlay">
+            <div class="miranda-note-panel">
+              <button
+                class="miranda-note-close"
+                aria-label="Close note"
+                on:click={() => {
+                  activeLevelNote = null
+                }}
+              >
+                ×
+              </button>
+              <div class="miranda-note-kicker">{activeLevelNote.location}</div>
+              <h3 class="miranda-note-title">{activeLevelNote.title}</h3>
+              <div class="miranda-note-author">{activeLevelNote.author}</div>
+              <p class="miranda-note-excerpt">{activeLevelNote.excerpt}</p>
+              <div class="miranda-note-body">{activeLevelNote.body}</div>
+            </div>
+          </div>
+        {/if}
+
+        {#if pendingLevelReturn}
+          <div class="level-return-overlay">
+            <div class="level-return-dialog">
+              <h3 class="level-return-title">{pendingLevelReturn.title}</h3>
+              <p class="level-return-message">{pendingLevelReturn.message}</p>
+              <div class="level-return-actions">
+                <button class="level-return-button secondary" on:click={cancelPendingLevelReturn}>
+                  {pendingLevelReturn.cancelLabel}
+                </button>
+                <button class="level-return-button primary" on:click={confirmPendingLevelReturn}>
+                  {pendingLevelReturn.confirmLabel}
+                </button>
+              </div>
+            </div>
+          </div>
+        {/if}
+
         <!-- Settings Button -->
         {#if isInitialized && !isLoading && !error}
           <SettingsButton />
@@ -780,12 +990,177 @@
   
   <style>
     /* Minimal styles - most styling is handled by components */
-    
+
+    .miranda-note-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-start;
+      padding: 1.25rem;
+      z-index: 45;
+    }
+
+    .miranda-note-panel {
+      position: relative;
+      pointer-events: auto;
+      width: min(30rem, calc(100vw - 2rem));
+      max-height: min(32rem, 72vh);
+      overflow: auto;
+      padding: 1rem 1rem 1.1rem;
+      border: 1px solid rgba(255, 214, 180, 0.28);
+      border-radius: 1rem;
+      background:
+        linear-gradient(180deg, rgba(33, 20, 19, 0.96), rgba(10, 9, 13, 0.96)),
+        rgba(0, 0, 0, 0.86);
+      box-shadow:
+        0 18px 48px rgba(0, 0, 0, 0.52),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      color: rgba(255, 244, 232, 0.96);
+      backdrop-filter: blur(14px);
+    }
+
+    .miranda-note-kicker {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 180, 138, 0.82);
+      margin-bottom: 0.45rem;
+    }
+
+    .miranda-note-title {
+      margin: 0;
+      font-size: 1.15rem;
+      line-height: 1.2;
+    }
+
+    .miranda-note-author {
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+      color: rgba(196, 215, 255, 0.78);
+    }
+
+    .miranda-note-excerpt {
+      margin: 0.8rem 0 0.65rem;
+      font-size: 0.95rem;
+      color: rgba(255, 219, 196, 0.88);
+    }
+
+    .miranda-note-body {
+      white-space: pre-line;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: rgba(255, 244, 232, 0.92);
+    }
+
+    .miranda-note-close {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.7rem;
+      width: 2rem;
+      height: 2rem;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 244, 232, 0.88);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .miranda-note-close:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .level-return-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 55;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      background: rgba(3, 6, 12, 0.7);
+      backdrop-filter: blur(10px);
+      pointer-events: auto;
+    }
+
+    .level-return-dialog {
+      width: min(26rem, calc(100vw - 2rem));
+      padding: 1.2rem 1.2rem 1rem;
+      border: 1px solid rgba(143, 214, 255, 0.2);
+      border-radius: 1rem;
+      background: linear-gradient(180deg, rgba(10, 16, 28, 0.96), rgba(5, 9, 16, 0.94));
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
+      color: #eef6ff;
+    }
+
+    .level-return-title {
+      margin: 0 0 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .level-return-message {
+      margin: 0;
+      color: rgba(226, 237, 250, 0.78);
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .level-return-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.1rem;
+    }
+
+    .level-return-button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.7rem 1rem;
+      font: inherit;
+      cursor: pointer;
+      transition: transform 140ms ease, opacity 140ms ease, background 140ms ease;
+    }
+
+    .level-return-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .level-return-button.secondary {
+      background: rgba(118, 136, 164, 0.18);
+      color: #d6e4f5;
+    }
+
+    .level-return-button.primary {
+      background: linear-gradient(135deg, #7fd3ff, #a4b6ff);
+      color: #05121d;
+      font-weight: 700;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       * {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .miranda-note-overlay {
+        padding: 0.75rem;
+      }
+
+      .miranda-note-panel {
+        width: min(100%, 28rem);
+        max-height: 58vh;
+        padding-bottom: 1rem;
+      }
+
+      .level-return-dialog {
+        width: min(100%, 25rem);
       }
     }
   </style>

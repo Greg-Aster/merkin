@@ -51,3 +51,7 @@ blog-pusher-sync/
 **/posts/Mega-Meal-Explained/gif/running-480p.gif
 apps/megameal/public/assets/hdri/ComfyUI_0057.png
 apps/megameal/public/assets/hdri/ComfyUI_0058.png
+
+# Generated runtime/vendor sync output
+apps/game/public/vendor/
+apps/megameal/public/vendor/

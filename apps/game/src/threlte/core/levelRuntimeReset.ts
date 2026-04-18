@@ -1,0 +1,19 @@
+import { terrainActions } from '../features/terrain'
+import { resetPostProcessingState } from '../stores/postProcessingStore'
+
+export interface LevelRuntimeResetServices {
+  interactionSystem?: {
+    clearInteractiveObjects?: () => void
+  } | null
+  spawnSystem?: {
+    clearSpawnQueue?: () => void
+  } | null
+}
+
+export function resetLevelRuntime(services: LevelRuntimeResetServices = {}) {
+  services.interactionSystem?.clearInteractiveObjects?.()
+  services.spawnSystem?.clearSpawnQueue?.()
+
+  terrainActions.reset()
+  resetPostProcessingState()
+}

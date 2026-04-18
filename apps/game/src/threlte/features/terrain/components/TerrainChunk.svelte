@@ -1,6 +1,6 @@
 <script lang="ts">
   import { T } from '@threlte/core';
-  import { GLTF } from '@threlte/extras';
+  import HeroProp from '../../../components/HeroProp.svelte';
   import * as THREE from 'three';
 
   export let x: number;
@@ -26,5 +26,5 @@
 <!-- Place the GLB at world origin; its internal geometry is already in world space -->
 <T.Group position={[0, 0, 0]}>
   <!-- Visual only - no collision (terrain physics handled by TriMesh collider) -->
-  <GLTF {url} colliders={false} on:load={handleLoaded} />
+  <HeroProp {url} on:load={handleLoaded} />
 </T.Group>

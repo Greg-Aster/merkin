@@ -1,28 +1,42 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+  import { get } from 'svelte/store'
   import { T } from '@threlte/core'
   import * as THREE from 'three'
   import { TerrainManager, type TerrainConfig } from './TerrainManager'
+  import HeightmapSurface from './components/HeightmapSurface.svelte'
   import TerrainCollider from './components/TerrainCollider.svelte'
   import TerrainChunk from './components/TerrainChunk.svelte'
-  import { terrainStore } from './terrainStore'
+  import { terrainActions, terrainStore } from './terrainStore'
   import { playerStateStore } from '../../stores/gameStateStore'
   import { qualityLevelStore } from '../performance/stores/performanceStore'
   import { OptimizationLevel } from '../performance/OptimizationManager'
 
   export let config: TerrainConfig
+  export let showVisualChunks = true
 
   const dispatch = createEventDispatcher()
   let playerPosition = new THREE.Vector3()
+  let localManager: TerrainManager | null = null
+  let initializationCancelled = false
 
   // Subscribe to player position
   const unsubscribePlayer = playerStateStore.subscribe((p) => playerPosition.set(...p.position))
 
   onMount(async () => {
+    initializationCancelled = false
+    localManager = null
+    terrainActions.reset()
+
     try {
       // Use a local const for the manager instance
       const manager = new TerrainManager()
+      localManager = manager
       await manager.initialize(config)
+
+      if (initializationCancelled) {
+        return
+      }
       
       // Update store with the INITIALIZED manager and data
       terrainStore.update(state => ({
@@ -36,6 +50,9 @@
       }))
 
     } catch (error) {
+      if (initializationCancelled) {
+        return
+      }
       console.error('L Failed to initialize terrain:', error)
       terrainStore.update(state => ({
         ...state,
@@ -45,7 +62,12 @@
   })
 
   onDestroy(() => {
+    initializationCancelled = true
     unsubscribePlayer()
+
+    if (get(terrainStore).manager === localManager) {
+      terrainActions.reset()
+    }
   })
 
   // --- THIS IS THE FIX ---
@@ -98,20 +120,33 @@
       anchorAtCenter={false}
       on:terrainReady={(e) => dispatch('terrainReady', e.detail)}
     />
+
+    {#if !config.chunkPathTemplate}
+      <HeightmapSurface
+        heightData={$terrainStore.heightData}
+        resolution={$terrainStore.resolution}
+        worldSize={$terrainStore.worldSize}
+        worldSizeX={$terrainStore.manager?.getWorldSizeX()}
+        worldSizeZ={$terrainStore.manager?.getWorldSizeZ()}
+        bounds={$terrainStore.bounds}
+      />
+    {/if}
     
     <!-- Visual Chunks -->
-    {#each visibleChunks as chunk (chunk.id)}
-      {#if chunk.currentLod !== -1 && config.chunkPathTemplate}
-        <TerrainChunk
-          x={chunk.x}
-          z={chunk.z}
-          lod={chunk.currentLod}
-          position={chunk.position}
-          chunkSize={config.chunkSize}
-          origin={$terrainStore.bounds ? [$terrainStore.bounds.min[0], $terrainStore.bounds.min[2]] : [-$terrainStore.worldSize/2, -$terrainStore.worldSize/2]}
-          pathTemplate={config.chunkPathTemplate}
-        />
-      {/if}
-    {/each}
+    {#if showVisualChunks}
+      {#each visibleChunks as chunk (chunk.id)}
+        {#if chunk.currentLod !== -1 && config.chunkPathTemplate}
+          <TerrainChunk
+            x={chunk.x}
+            z={chunk.z}
+            lod={chunk.currentLod}
+            position={chunk.position}
+            chunkSize={config.chunkSize}
+            origin={$terrainStore.bounds ? [$terrainStore.bounds.min[0], $terrainStore.bounds.min[2]] : [-$terrainStore.worldSize/2, -$terrainStore.worldSize/2]}
+            pathTemplate={config.chunkPathTemplate}
+          />
+        {/if}
+      {/each}
+    {/if}
   {/if}
 </T.Group>

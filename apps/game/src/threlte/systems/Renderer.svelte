@@ -4,20 +4,26 @@
 -->
 <script lang="ts">
 import { T, useThrelte } from '@threlte/core'
-import { onMount, onDestroy } from 'svelte'
+import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
-import { qualitySettingsStore } from '../features/performance'
+import {
+  type QualitySettings,
+  qualitySettingsStore,
+} from '../features/performance'
+import { neuralStylizationSceneShadowsSuppressed } from '../stores/uiStore'
 
 // Renderer configuration
-export let antialias = true
-export let alpha = false
-export let powerPreference: 'default' | 'high-performance' | 'low-power' = 'high-performance'
-export let maxPixelRatio = 2
+export const antialias = true
+export const alpha = false
+export const powerPreference: 'default' | 'high-performance' | 'low-power' =
+  'high-performance'
+export const maxPixelRatio = 2
 
 // Mobile detection (used only for renderer creation params — quality system handles everything else)
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-  navigator.userAgent
-)
+const isMobile =
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent,
+  )
 
 const config = {
   antialias: isMobile ? false : antialias,
@@ -28,12 +34,18 @@ const config = {
 
 const { renderer } = useThrelte()
 
-function applyQualitySettings(quality: { canvasScale: number; shadowMapSize: number }) {
+function applyQualitySettings(
+  quality: Pick<QualitySettings, 'canvasScale' | 'shadowMapSize'>,
+  suppressShadows = false,
+) {
   if (!renderer) return
 
   // Apply quality scaling through pixel ratio only. Scaling both pixel ratio and
   // framebuffer size was over-allocating the render target on HiDPI laptops.
-  const basePixelRatio = Math.min(window.devicePixelRatio || 1, config.maxPixelRatio)
+  const basePixelRatio = Math.min(
+    window.devicePixelRatio || 1,
+    config.maxPixelRatio,
+  )
   const scaledPixelRatio = Math.max(0.5, basePixelRatio * quality.canvasScale)
   renderer.setPixelRatio(scaledPixelRatio)
   renderer.setSize(window.innerWidth, window.innerHeight, false)
@@ -41,15 +53,29 @@ function applyQualitySettings(quality: { canvasScale: number; shadowMapSize: num
   renderer.domElement.style.height = '100%'
 
   // Shadow map
-  renderer.shadowMap.enabled = quality.shadowMapSize > 0
-  if (quality.shadowMapSize > 0) {
+  const effectiveShadowMapSize = suppressShadows ? 0 : quality.shadowMapSize
+  renderer.shadowMap.enabled = effectiveShadowMapSize > 0
+  if (effectiveShadowMapSize > 0) {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
   }
   // Broadcast shadow map size so lights can update their shadow.mapSize
-  window.dispatchEvent(new CustomEvent('game:shadowMapSize', { detail: quality.shadowMapSize }))
+  window.dispatchEvent(
+    new CustomEvent('game:shadowMapSize', { detail: effectiveShadowMapSize }),
+  )
 }
 
-let unsubscribe: (() => void) | undefined
+let currentQualitySettings: Pick<
+  QualitySettings,
+  'canvasScale' | 'shadowMapSize'
+> = { ...$qualitySettingsStore }
+let stylizedShadowsSuppressed = false
+
+function applyRendererProfile() {
+  applyQualitySettings(currentQualitySettings, stylizedShadowsSuppressed)
+}
+
+let unsubscribeQuality: (() => void) | undefined
+let unsubscribeStylizationProfile: (() => void) | undefined
 let handleResize: (() => void) | undefined
 
 onMount(() => {
@@ -70,12 +96,19 @@ onMount(() => {
   renderer.info.autoReset = true
 
   // Subscribe to quality changes — applies canvas scale and shadow settings reactively
-  unsubscribe = qualitySettingsStore.subscribe(quality => {
-    applyQualitySettings(quality)
+  unsubscribeQuality = qualitySettingsStore.subscribe(quality => {
+    currentQualitySettings = quality
+    applyRendererProfile()
   })
 
+  unsubscribeStylizationProfile =
+    neuralStylizationSceneShadowsSuppressed.subscribe(value => {
+      stylizedShadowsSuppressed = value
+      applyRendererProfile()
+    })
+
   handleResize = () => {
-    applyQualitySettings($qualitySettingsStore)
+    applyRendererProfile()
   }
   window.addEventListener('resize', handleResize)
 
@@ -85,7 +118,8 @@ onMount(() => {
 })
 
 onDestroy(() => {
-  unsubscribe?.()
+  unsubscribeQuality?.()
+  unsubscribeStylizationProfile?.()
   if (handleResize) {
     window.removeEventListener('resize', handleResize)
   }

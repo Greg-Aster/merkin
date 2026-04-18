@@ -3,6 +3,7 @@
   import { T } from '@threlte/core'
   import LevelManager from '../core/LevelManager.svelte'
   import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
+  import AmbientAudioRegions from '../components/AmbientAudioRegions.svelte'
   import HybridFireflyComponent from '../components/HybridFireflyComponent.svelte'
   import NaturePackVegetation from '../components/NaturePackVegetation.svelte'
   import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
@@ -11,7 +12,8 @@
   import { qualityLevelStore, qualitySettingsStore } from '../features/performance/stores/performanceStore'
   import { OptimizationLevel, optimizationManager } from '../features/performance'
   import { Terrain, terrainStore, type TerrainConfig } from '../features/terrain'
-  import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
+  import { editorStateStore, observatoryEditorSettingsStore } from '../editor/editorStore'
+  import { resolveObservatoryPresetSettings } from '../editor/editorLevelPresets'
 
   const dispatch = createEventDispatcher()
   const isDev = import.meta.env.DEV
@@ -25,6 +27,7 @@
   export let timelineEventsJson: string = '[]'
   export let spawnSystem: any = null
   export let interactionSystem: any = null
+  export let collisionDebugEnabled = false
 
   // --- State ---
   let manifest: any = null // Will hold the loaded level manifest data
@@ -35,7 +38,6 @@
   // Component references
   let hybridFireflyComponent: any = null
   let starMapComponent: any = null
-  let starNavigationSystem: any = null
   let naturePackVegetation: any = null
   let ghibliStyleSystem: any = null
   let styleSystemComponent: any = null
@@ -56,6 +58,59 @@
   let realTimelineEvents: any[] = []
   let isLoadingTimeline = true
   let timelineLoadError: string | null = null
+  let appliedTerrainOverrideSignature = ''
+
+  function mergeDeep<T>(base: T, overrides: Partial<T> | null | undefined): T {
+    if (!overrides) return structuredClone(base)
+
+    if (Array.isArray(base) || Array.isArray(overrides)) {
+      return structuredClone(overrides as T)
+    }
+
+    const result: Record<string, unknown> = { ...(structuredClone(base) as Record<string, unknown>) }
+    for (const [key, value] of Object.entries(overrides)) {
+      const current = result[key]
+      if (
+        value
+        && typeof value === 'object'
+        && !Array.isArray(value)
+        && current
+        && typeof current === 'object'
+        && !Array.isArray(current)
+      ) {
+        result[key] = mergeDeep(current as Record<string, unknown>, value as Record<string, unknown>)
+      } else {
+        result[key] = structuredClone(value)
+      }
+    }
+
+    return result as T
+  }
+
+  function applyObservatoryEditorSettings(baseManifest: any, editorSettings: any) {
+    if (!baseManifest) return null
+    if (!editorSettings) return structuredClone(baseManifest)
+
+    const merged = mergeDeep(baseManifest, {
+      spawn: editorSettings.spawn,
+      features: editorSettings.features,
+      style: editorSettings.style,
+      ocean: editorSettings.ocean,
+      ambientAudio: editorSettings.ambientAudio,
+    })
+
+    return {
+      ...merged,
+      editorLighting: {
+        ambientIntensity: editorSettings.lighting?.ambientIntensity,
+        sunIntensity: editorSettings.lighting?.sunIntensity,
+        fillIntensity: editorSettings.lighting?.fillIntensity,
+        fallbackAmbientIntensity: editorSettings.lighting?.fallbackAmbientIntensity,
+        fallbackMoonlightIntensity: editorSettings.lighting?.fallbackMoonlightIntensity,
+        fallbackFillLightIntensity: editorSettings.lighting?.fallbackFillLightIntensity,
+      },
+    }
+  }
 
   // --- Lifecycle & Data Loading ---
   onMount(() => {
@@ -238,11 +293,20 @@
   }
 
   // Get current optimization settings reactively
-  $: levelOptimizationSettings = manifest ? optimizationManager.getComponentSettings(manifest.id) : null;
+  $: resolvedObservatorySettings = resolveObservatoryPresetSettings($observatoryEditorSettingsStore)
+  $: activeManifest = manifest ? applyObservatoryEditorSettings(manifest, resolvedObservatorySettings) : null
+  $: terrainAuthoringActive = $editorStateStore.enabled && $editorStateStore.interactionMode === 'terrain'
+  $: workbenchViewport = $editorStateStore.enabled && $editorStateStore.viewportLightingMode === 'workbench'
+  $: playerSpawnPoint = activeManifest?.spawn?.position ?? [0, 50, 0]
+  $: if (activeManifest?.style) {
+    stylePreset = activeManifest.style.preset || 'ghibli'
+    enableToonShading = activeManifest.style.enabled !== false
+  }
+  $: levelOptimizationSettings = activeManifest ? optimizationManager.getComponentSettings(activeManifest.id) : null;
   $: fullStyleSystemEnabled =
-    !!manifest?.features.styles
+    !!activeManifest?.features.styles
     && ($qualityLevelStore === OptimizationLevel.HIGH || $qualityLevelStore === OptimizationLevel.ULTRA)
-  $: fallbackMoodLightingEnabled = !!manifest?.features.styles && !fullStyleSystemEnabled
+  $: fallbackMoodLightingEnabled = !!activeManifest?.features.styles && !fullStyleSystemEnabled
   $: observatoryToneMappingExposure = (() => {
     if (!isMobileDevice) return 1.2
     switch ($qualityLevelStore) {
@@ -255,7 +319,7 @@
         return 1.22
     }
   })()
-  $: observatoryAmbientIntensity = (() => {
+  $: observatoryAmbientIntensity = activeManifest?.editorLighting?.ambientIntensity ?? (() => {
     if (!isMobileDevice) return 10.4
     switch ($qualityLevelStore) {
       case OptimizationLevel.ULTRA_LOW:
@@ -267,11 +331,21 @@
         return 11.0
     }
   })()
-  $: observatorySunIntensity = isMobileDevice ? 0.92 : 0.8
-  $: observatoryFillIntensity = isMobileDevice ? 0.38 : 0.3
-  $: fallbackAmbientIntensity = isMobileDevice ? 6.2 : 4.8
-  $: fallbackMoonlightIntensity = isMobileDevice ? 0.62 : 0.45
-  $: fallbackFillLightIntensity = isMobileDevice ? 0.3 : 0.2
+  $: observatorySunIntensity = activeManifest?.editorLighting?.sunIntensity ?? (isMobileDevice ? 0.92 : 0.8)
+  $: observatoryFillIntensity = activeManifest?.editorLighting?.fillIntensity ?? (isMobileDevice ? 0.38 : 0.3)
+  $: fallbackAmbientIntensity = activeManifest?.editorLighting?.fallbackAmbientIntensity ?? (isMobileDevice ? 6.2 : 4.8)
+  $: fallbackMoonlightIntensity = activeManifest?.editorLighting?.fallbackMoonlightIntensity ?? (isMobileDevice ? 0.62 : 0.45)
+  $: fallbackFillLightIntensity = activeManifest?.editorLighting?.fallbackFillLightIntensity ?? (isMobileDevice ? 0.3 : 0.2)
+  $: presetAmbientAudioRegions = activeManifest?.ambientAudio?.enabled && activeManifest?.ambientAudio?.track
+    ? [{
+        id: 'observatory-preset-ambient-audio',
+        position: activeManifest.ambientAudio.position ?? [0, 18, 0],
+        scale: activeManifest.ambientAudio.scale ?? [520, 140, 520],
+        track: activeManifest.ambientAudio.track,
+        volume: activeManifest.ambientAudio.volume ?? 0.16,
+        falloff: activeManifest.ambientAudio.falloff ?? 28,
+      }]
+    : []
   $: vegetationInstanceCount = (() => {
     switch ($qualityLevelStore) {
       case OptimizationLevel.ULTRA_LOW:
@@ -289,7 +363,7 @@
     }
   })()
   $: oceanAnimationEnabled =
-    manifest?.ocean?.enableAnimation !== false
+    activeManifest?.ocean?.enableAnimation !== false
     && $qualityLevelStore !== OptimizationLevel.ULTRA_LOW
 
   $: if (fullStyleSystemEnabled && !styleSystemComponent) {
@@ -298,11 +372,26 @@
 
   $: if (
     terrainReady
-    && manifest
+    && activeManifest
     && !deferredEnvironmentBootStarted
-    && (!manifest.features.starMap || !isLoadingTimeline)
+    && (!activeManifest.features.starMap || !isLoadingTimeline)
   ) {
     startDeferredSceneBoot()
+  }
+  $: if (deferredEnvironmentBootStarted && activeManifest) {
+    if (!activeManifest.features.ocean) showOcean = false
+    if (!activeManifest.features.vegetation) showVegetation = false
+    if (!activeManifest.features.fireflies) showFireflies = false
+    if (!activeManifest.features.starMap || isLoadingTimeline || !!timelineLoadError) showStarSystems = false
+  }
+  $: terrainOverrideSignature = JSON.stringify($observatoryEditorSettingsStore?.terrainSculpt?.heightOverrides ?? {})
+  $: if ($terrainStore.manager && terrainOverrideSignature !== appliedTerrainOverrideSignature) {
+    $terrainStore.manager.applyHeightOverrides($observatoryEditorSettingsStore?.terrainSculpt?.heightOverrides ?? {})
+    terrainStore.update((state) => ({
+      ...state,
+      heightData: $terrainStore.manager?.getHeightDataCopy() ?? state.heightData,
+    }))
+    appliedTerrainOverrideSignature = terrainOverrideSignature
   }
 
   async function ensureStyleSystemComponent() {
@@ -366,7 +455,7 @@
     if (deferredEnvironmentBootStarted) return
     deferredEnvironmentBootStarted = true
 
-    if (manifest?.features.ocean) {
+    if (activeManifest?.features.ocean) {
       deferredSceneBootCleanups.push(
         scheduleDeferredSceneTask(() => {
           showOcean = true
@@ -374,7 +463,7 @@
       )
     }
 
-    if (manifest?.features.starMap && !timelineLoadError) {
+    if (activeManifest?.features.starMap && !timelineLoadError) {
       deferredSceneBootCleanups.push(
         scheduleDeferredSceneTask(() => {
           showStarSystems = true
@@ -382,7 +471,7 @@
       )
     }
 
-    if (manifest?.features.fireflies) {
+    if (activeManifest?.features.fireflies) {
       deferredSceneBootCleanups.push(
         scheduleDeferredSceneTask(() => {
           showFireflies = true
@@ -390,7 +479,7 @@
       )
     }
 
-    if (manifest?.features.vegetation) {
+    if (activeManifest?.features.vegetation) {
       deferredSceneBootCleanups.push(
         scheduleDeferredSceneTask(() => {
           showVegetation = true
@@ -400,7 +489,7 @@
   }
 </script>
 
-{#if manifest}
+{#if activeManifest}
   <LevelManager let:registry let:lighting let:ecsWorld>
     
     <!-- Full stylized post-processing only on stronger tiers. -->
@@ -415,12 +504,12 @@
         sunIntensity={observatorySunIntensity}
         fillIntensity={observatoryFillIntensity}
         toneMappingExposure={observatoryToneMappingExposure}
-        saturation={manifest.style.colorGrading?.saturation || 1.2}
-        contrast={manifest.style.colorGrading?.contrast || 1.1}
-        brightness={manifest.style.colorGrading?.brightness || 1.0}
-        warmth={manifest.style.colorGrading?.warmth || 1.05}
-        bloomIntensity={manifest.style.bloom?.intensity || 0.3}
-        bloomThreshold={manifest.style.bloom?.threshold || 0.9}
+        saturation={activeManifest.style.colorGrading?.saturation || 1.2}
+        contrast={activeManifest.style.colorGrading?.contrast || 1.1}
+        brightness={activeManifest.style.colorGrading?.brightness || 1.0}
+        warmth={activeManifest.style.colorGrading?.warmth || 1.05}
+        bloomIntensity={activeManifest.style.bloom?.intensity || 0.3}
+        bloomThreshold={activeManifest.style.bloom?.threshold || 0.9}
         on:styleSystemReady={handleStyleSystemReady}
         on:styleChanged={handleStyleChanged}
       />
@@ -444,15 +533,19 @@
     
     <!-- Dynamic fog based on manifest style configuration -->
     <T.FogExp2 
-      color={$underwaterStateStore.isUnderwater 
-        ? (manifest.style?.fog?.color || '#006994')
-        : (manifest.style?.fog?.color || '#6a7db3')} 
-      density={$underwaterStateStore.isUnderwater 
-        ? (manifest.style?.fog?.density * 50 || 0.1)
-        : (manifest.style?.fog?.density || 0.002)} 
+      color={workbenchViewport
+        ? '#dce8f4'
+        : $underwaterStateStore.isUnderwater 
+          ? (activeManifest.style?.fog?.color || '#006994')
+          : (activeManifest.style?.fog?.color || '#6a7db3')} 
+      density={workbenchViewport
+        ? 0.00018
+        : $underwaterStateStore.isUnderwater 
+          ? (activeManifest.style?.fog?.density * 50 || 0.1)
+          : (activeManifest.style?.fog?.density || 0.002)} 
     />
     
-    <T.Group name={manifest.id}>
+    <T.Group name={activeManifest.id}>
       
       <Skybox 
         path="/assets/hdri/skywip4-cubemap/"
@@ -462,6 +555,7 @@
       {#if terrainConfig}
         <Terrain 
           config={terrainConfig}
+          showVisualChunks={!terrainAuthoringActive}
           on:terrainReady={(e) => {
             terrainReady = true;
             setTimeout(() => {
@@ -472,7 +566,7 @@
                   entityType: 'player',
                   position: [playerSpawnPoint[0], Math.max(playerSpawnPoint[1], spawnHeight + 2), playerSpawnPoint[2]],
                   priority: 10,
-                  metadata: { levelName: manifest.name, spawnReason: 'level_load' }
+                  metadata: { levelName: activeManifest.name, spawnReason: 'level_load' }
                 });
               }
             }, 10);
@@ -481,30 +575,30 @@
       {/if}
       
       <!-- Ocean Component - configured from manifest -->
-      {#if manifest.features.ocean && showOcean}
+      {#if activeManifest.features.ocean && showOcean}
         <OceanComponent
           size={{ 
-            width: manifest.ocean?.size?.width || 1000, 
-            height: manifest.ocean?.size?.height || 1000 
+            width: activeManifest.ocean?.size?.width || 1000, 
+            height: activeManifest.ocean?.size?.height || 1000 
           }}
-          color={manifest.ocean?.underwaterFogColor || 0x006994}
+          color={activeManifest.ocean?.underwaterFogColor || 0x006994}
           opacity={0.9}
           segments={levelOptimizationSettings?.oceanSegments || { width: 24, height: 24 }}
           enableAnimation={oceanAnimationEnabled}
           animationSpeed={0.1}
-          enableRising={manifest.ocean?.enableRising || false}
-          initialLevel={manifest.ocean?.initialLevel || 0}
-          targetLevel={manifest.ocean?.targetLevel || 0}
-          riseRate={manifest.ocean?.riseRate || 0.01}
+          enableRising={activeManifest.ocean?.enableRising || false}
+          initialLevel={activeManifest.ocean?.initialLevel || 0}
+          targetLevel={activeManifest.ocean?.targetLevel || 0}
+          riseRate={activeManifest.ocean?.riseRate || 0.01}
           enableUnderwaterEffects={true}
           waterCollisionSize={[
             800, 
             3.0, 
             800
           ]}
-          underwaterFogDensity={manifest.ocean?.underwaterFogDensity || 0.1}
-          underwaterFogColor={manifest.ocean?.underwaterFogColor || 0x006994}
-          surfaceFogDensity={manifest.ocean?.surfaceFogDensity || 0.001}
+          underwaterFogDensity={activeManifest.ocean?.underwaterFogDensity || 0.1}
+          underwaterFogColor={activeManifest.ocean?.underwaterFogColor || 0x006994}
+          surfaceFogDensity={activeManifest.ocean?.surfaceFogDensity || 0.001}
           on:waterEnter={(e) => {
             if (isDev) console.log('🌊 Player entered water at depth:', e.detail.depth)
           }}
@@ -520,8 +614,12 @@
         {/if}
       {/if}
 
+      {#if presetAmbientAudioRegions.length > 0}
+        <AmbientAudioRegions regions={presetAmbientAudioRegions} enabled={true} />
+      {/if}
+
       <!-- Nature Pack Vegetation System - configured from manifest -->
-      {#if manifest.features.vegetation && showVegetation && terrainReady && vegetationInstanceCount > 0}
+      {#if activeManifest.features.vegetation && showVegetation && terrainReady && vegetationInstanceCount > 0}
         <NaturePackVegetation
           bind:this={naturePackVegetation}
           {getHeightAt}
@@ -536,7 +634,7 @@
       {/if}
 
       <!-- Hybrid Firefly Component - configured from manifest -->
-      {#if manifest.features.fireflies && showFireflies}
+      {#if activeManifest.features.fireflies && showFireflies}
         <HybridFireflyComponent
           bind:this={hybridFireflyComponent}
           {getHeightAt}
@@ -557,13 +655,13 @@
             lerpFactor: 1.0
           }}
           colors={[0x87ceeb, 0x98fb98, 0xffffe0, 0xdda0dd, 0xf0e68c, 0xffa07a, 0x20b2aa, 0x9370db]}
-          enableAIConversations={manifest.features.conversations}
+          enableAIConversations={activeManifest.features.conversations}
           conversationChance={.15}
         />
       {/if}
       
       <!-- Star Map and Navigation System - configured from manifest -->
-      {#if manifest.features.starMap}
+      {#if activeManifest.features.starMap}
         {#if isLoadingTimeline}
           <T.Group position={[0, 5, 0]} name="loading-indicator">
             <T.Mesh>
@@ -585,26 +683,6 @@
             timelineEvents={realTimelineEvents}
             {interactionSystem}
             on:starSelected={handleStarSelected}
-          />
-          <StarNavigationSystem
-            bind:this={starNavigationSystem}
-            timelineEvents={realTimelineEvents}
-            starMapComponent={starMapComponent}
-            on:starSelected={handleStarSelected}
-            on:starDeselected={handleStarDeselected}
-            on:levelTransition={handleLevelTransition}
-            on:starInteraction={(e) => {
-              if (isDev) console.log('🎯 Star interaction:', e.detail)
-            }}
-            on:transitionStarted={(e) => {
-              if (isDev) console.log('🎮 Transition started:', e.detail)
-            }}
-            on:transitionCompleted={(e) => {
-              if (isDev) console.log('✅ Transition completed:', e.detail)
-            }}
-            on:transitionFailed={(e) => {
-              if (isDev) console.log('❌ Transition failed:', e.detail)
-            }}
           />
         {/if}
       {/if}

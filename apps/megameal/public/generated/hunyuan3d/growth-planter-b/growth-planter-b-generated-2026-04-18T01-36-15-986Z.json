@@ -1,0 +1,13 @@
+{
+  "sourceName": "growth-planter-b",
+  "sourceReferenceImageUrl": "/generated/hunyuan3d/references/planter-b-reference.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776476173976-pfe6v3",
+  "prompt": "a potted plant with believable ceramic pot geometry, dense leaves, eerie but beautiful growth, slightly alien, grounded realistic silhouette",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-18T01:36:15.993Z"
+}

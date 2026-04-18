@@ -1,17 +1,30 @@
 <script lang="ts">
-  import {
-    ambienceVolumeSetting,
-    isSettingsMenuOpen,
-    isSoundEnabled,
-    masterVolumeSetting,
-    sfxVolumeSetting,
-  } from '../stores/uiStore';
-  import MultiplayerControls from '../features/multiplayer/ui/MultiplayerControls.svelte';
-  import PerformancePanel from '../features/performance/ui/PerformancePanel.svelte';
+import MultiplayerControls from "../features/multiplayer/ui/MultiplayerControls.svelte";
+import PerformancePanel from "../features/performance/ui/PerformancePanel.svelte";
+import {
+	ambienceVolumeSetting,
+	isNeuralStylizationEnabled,
+	isSettingsMenuOpen,
+	isSoundEnabled,
+	masterVolumeSetting,
+	neuralStylizationAutoQualityEnabled,
+	neuralStylizationEffectiveSettingsSummary,
+	neuralStylizationFrameStride,
+	neuralStylizationInputHeight,
+	neuralStylizationMode,
+	neuralStylizationOnnxLastInferenceMs,
+	neuralStylizationOnnxProvider,
+	neuralStylizationOnnxReady,
+	neuralStylizationOnnxStatus,
+	neuralStylizationOutputMode,
+	neuralStylizationOutputScale,
+	neuralStylizationStrength,
+	sfxVolumeSetting,
+} from "../stores/uiStore";
 
-  function closeSettings() {
-    isSettingsMenuOpen.set(false);
-  }
+function closeSettings() {
+	isSettingsMenuOpen.set(false);
+}
 </script>
 
 {#if $isSettingsMenuOpen}
@@ -23,7 +36,6 @@
       </div>
       
       <div class="settings-content">
-        <!-- Multiplayer Section -->
         <section class="settings-section">
           <h3>Multiplayer</h3>
           <div class="section-content">
@@ -31,7 +43,6 @@
           </div>
         </section>
 
-        <!-- Audio Section -->
         <section class="settings-section">
           <h3>Audio</h3>
           <div class="section-content">
@@ -84,7 +95,6 @@
           </div>
         </section>
 
-        <!-- Performance Section -->
         <section class="settings-section">
           <h3>Performance</h3>
           <div class="section-content">
@@ -93,6 +103,96 @@
               position="inline"
               compact={false}
             />
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h3>Experimental Visuals</h3>
+          <div class="section-content visual-grid">
+            <label class="checkbox-label">
+              <input type="checkbox" bind:checked={$isNeuralStylizationEnabled} />
+              Enable Neural Stylization
+            </label>
+
+            <label class="field">
+              <span>Mode</span>
+              <select bind:value={$neuralStylizationMode}>
+                <option value="soft-shader">Soft Shader</option>
+                <option value="glitch-shader">Glitch Shader</option>
+                <option value="onnx">ONNX</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Output</span>
+              <select bind:value={$neuralStylizationOutputMode}>
+                <option value="original">Original</option>
+                <option value="blend">Blend</option>
+                <option value="stylized-only">Stylized Only</option>
+              </select>
+            </label>
+
+            <label class="slider-label">
+              <span>Blend Strength</span>
+              <span>{Math.round($neuralStylizationStrength * 100)}%</span>
+            </label>
+            <input
+              class="volume-slider"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              bind:value={$neuralStylizationStrength}
+            />
+
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                bind:checked={$neuralStylizationAutoQualityEnabled}
+              />
+              Auto Quality
+            </label>
+
+            <label class="field">
+              <span>Input Height</span>
+              <input type="number" min="128" max="512" step="1" bind:value={$neuralStylizationInputHeight} />
+            </label>
+
+            <label class="field">
+              <span>Output Scale</span>
+              <input type="number" min="0.5" max="1" step="0.05" bind:value={$neuralStylizationOutputScale} />
+            </label>
+
+            <label class="field">
+              <span>Frame Stride</span>
+              <input type="number" min="1" max="8" step="1" bind:value={$neuralStylizationFrameStride} />
+            </label>
+
+            {#if $neuralStylizationMode === "onnx"}
+              <label class="field">
+                <span>ONNX Provider</span>
+                <select bind:value={$neuralStylizationOnnxProvider}>
+                  <option value="auto">Auto</option>
+                  <option value="webgpu">WebGPU</option>
+                  <option value="webgl">WebGL</option>
+                  <option value="wasm">WASM</option>
+                </select>
+              </label>
+
+              <div class="status-block">
+                <div class="status-title">ONNX Status</div>
+                <div class="status-copy">{$neuralStylizationOnnxStatus}</div>
+                <div class="status-meta">
+                  <span>Ready: {$neuralStylizationOnnxReady ? "Yes" : "No"}</span>
+                  <span>Inference: {$neuralStylizationOnnxLastInferenceMs}</span>
+                </div>
+              </div>
+            {/if}
+
+            <div class="auto-quality-card">
+              <div class="auto-quality-heading">Live Summary</div>
+              <div class="auto-quality-summary">{$neuralStylizationEffectiveSettingsSummary}</div>
+            </div>
           </div>
         </section>
       </div>
@@ -185,13 +285,70 @@
     color: white;
   }
 
+  .visual-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .field {
+    display: grid;
+    gap: 6px;
+    font-size: 14px;
+  }
+
+  .field span {
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .field select,
+  .field input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+  }
+
+  .auto-quality-card,
+  .status-block {
+    display: grid;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .auto-quality-heading,
+  .status-title {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.62);
+  }
+
+  .auto-quality-summary,
+  .status-copy {
+    font-size: 14px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .status-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
   .checkbox-label {
     display: flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
     font-size: 16px;
-    margin-bottom: 16px;
   }
 
   .checkbox-label input[type="checkbox"] {
@@ -211,11 +368,10 @@
 
   .volume-slider {
     width: 100%;
-    margin: 0 0 14px;
+    margin: 0;
     accent-color: #4f46e5;
   }
 
-  /* Make the multiplayer controls fit within the panel */
   .section-content :global(.multiplayer-controls) {
     position: static;
     background: none;
