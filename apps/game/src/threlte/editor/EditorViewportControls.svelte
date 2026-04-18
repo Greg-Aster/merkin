@@ -983,7 +983,9 @@
     if (transformControlsHelper instanceof THREE.Object3D) {
       scene.add(transformControlsHelper)
     } else {
-      console.warn('EditorViewportControls: TransformControls helper is not a THREE.Object3D; skipping helper attachment.')
+      if (import.meta.env.DEV) {
+        console.warn('EditorViewportControls: TransformControls helper is not a THREE.Object3D; skipping helper attachment.')
+      }
       transformControlsHelper = null
     }
     scene.add(selectionPivot)

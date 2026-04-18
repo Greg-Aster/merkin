@@ -2,32 +2,42 @@
  * Lighting Manager - Industry standard lighting system
  */
 
-import * as THREE from 'three'
+import {
+  AmbientLight,
+  Color,
+  DirectionalLight,
+  PointLight,
+  Scene,
+  SpotLight,
+  Vector3,
+} from 'three'
 import { writable, type Writable } from 'svelte/store'
 import { MessageType, type SystemRegistry } from '../../core/LevelSystem'
 
+const isDev = import.meta.env.DEV
+
 export interface LightingData {
   ambient: {
-    color: THREE.Color
+    color: Color
     intensity: number
   }
   directional: Array<{
-    direction: THREE.Vector3
-    color: THREE.Color
+    direction: Vector3
+    color: Color
     intensity: number
     castShadow: boolean
   }>
   point: Array<{
-    position: THREE.Vector3
-    color: THREE.Color
+    position: Vector3
+    color: Color
     intensity: number
     distance: number
     decay: number
   }>
   spot: Array<{
-    position: THREE.Vector3
-    target: THREE.Vector3
-    color: THREE.Color
+    position: Vector3
+    target: Vector3
+    color: Color
     intensity: number
     distance: number
     angle: number
@@ -38,24 +48,24 @@ export interface LightingData {
 export class LightingManager {
   private lightingData: Writable<LightingData>
   private registry: SystemRegistry
-  private scene: THREE.Scene
+  private scene: Scene
   
   // Actual THREE.js light objects
-  private ambientLight: THREE.AmbientLight
-  private directionalLights: THREE.DirectionalLight[] = []
-  private pointLights: THREE.PointLight[] = []
-  private spotLights: THREE.SpotLight[] = []
+  private ambientLight: AmbientLight
+  private directionalLights: DirectionalLight[] = []
+  private pointLights: PointLight[] = []
+  private spotLights: SpotLight[] = []
   
   // Enhanced point light pool for dynamic lights with efficient management
-  private pointLightPool: THREE.PointLight[] = []
-  private activePointLights: Set<THREE.PointLight> = new Set()
-  private ownedLights: Map<string, THREE.PointLight> = new Map() // Track lights by owner ID
+  private pointLightPool: PointLight[] = []
+  private activePointLights: Set<PointLight> = new Set()
+  private ownedLights: Map<string, PointLight> = new Map() // Track lights by owner ID
   private poolExhaustedWarningShown = false
 
   constructor(registry: SystemRegistry) {
     this.registry = registry
     this.lightingData = writable({
-      ambient: { color: new THREE.Color(0x404060), intensity: 1.0 },
+      ambient: { color: new Color(0x404060), intensity: 1.0 },
       directional: [],
       point: [],
       spot: []
@@ -77,21 +87,21 @@ export class LightingManager {
     })
   }
 
-  initialize(scene: THREE.Scene): void {
+  initialize(scene: Scene): void {
     this.scene = scene
     
     // Create default ambient light
-    this.ambientLight = new THREE.AmbientLight(0x404060, 1.0)
+    this.ambientLight = new AmbientLight(0x404060, 1.0)
     this.scene.add(this.ambientLight)
 
     // Initialize point light pool for performance
     this.initializePointLightPool()
 
-    console.log('💡 LightingManager: Initialized with scene')
+    if (isDev) console.log('💡 LightingManager: Initialized with scene')
   }
 
-  private createPooledPointLight(): THREE.PointLight {
-    const light = new THREE.PointLight(0xffffff, 0, 0, 2)
+  private createPooledPointLight(): PointLight {
+    const light = new PointLight(0xffffff, 0, 0, 2)
     light.visible = false
     this.scene.add(light)
     return light
@@ -104,7 +114,7 @@ export class LightingManager {
     }
     
     this.ensurePointLightPoolSize(poolSize)
-    console.log(`💡 LightingManager: Created point light pool with ${poolSize} lights`)
+    if (isDev) console.log(`💡 LightingManager: Created point light pool with ${poolSize} lights`)
   }
 
   ensurePointLightPoolSize(poolSize: number): void {
@@ -153,7 +163,7 @@ export class LightingManager {
         light.castShadow = data.castShadow
       } else {
         // Create new directional light
-        const light = new THREE.DirectionalLight(data.color, data.intensity)
+        const light = new DirectionalLight(data.color, data.intensity)
         light.position.copy(data.direction).multiplyScalar(100)
         light.castShadow = data.castShadow
         
@@ -195,7 +205,7 @@ export class LightingManager {
         this.activePointLights.add(light)
       } else {
         // If we need more lights than in pool, create dynamically
-        const light = new THREE.PointLight(data.color, data.intensity, data.distance, data.decay)
+        const light = new PointLight(data.color, data.intensity, data.distance, data.decay)
         light.position.copy(data.position)
         this.scene.add(light)
         this.pointLights.push(light)
@@ -203,14 +213,14 @@ export class LightingManager {
     })
   }
 
-  updateAmbientLight(color: THREE.Color, intensity: number): void {
+  updateAmbientLight(color: Color, intensity: number): void {
     this.lightingData.update(data => ({
       ...data,
       ambient: { color: color.clone(), intensity }
     }))
   }
 
-  addDirectionalLight(direction: THREE.Vector3, color: THREE.Color, intensity: number, castShadow = false): void {
+  addDirectionalLight(direction: Vector3, color: Color, intensity: number, castShadow = false): void {
     this.lightingData.update(data => ({
       ...data,
       directional: [...data.directional, {
@@ -222,7 +232,7 @@ export class LightingManager {
     }))
   }
 
-  addPointLight(position: THREE.Vector3, color: THREE.Color, intensity: number, distance: number, decay = 2): void {
+  addPointLight(position: Vector3, color: Color, intensity: number, distance: number, decay = 2): void {
     this.lightingData.update(data => ({
       ...data,
       point: [...data.point, {
@@ -242,7 +252,7 @@ export class LightingManager {
     }))
   }
 
-  updatePointLights(lights: Array<{position: THREE.Vector3, color: THREE.Color, intensity: number, distance: number}>): void {
+  updatePointLights(lights: Array<{position: Vector3, color: Color, intensity: number, distance: number}>): void {
     this.lightingData.update(data => ({
       ...data,
       point: lights.map(light => ({
@@ -273,7 +283,7 @@ export class LightingManager {
    * Request a light for a specific owner (e.g., firefly entity ID)
    * Returns a light from the pool or null if none available
    */
-  requestLight(ownerId: string): THREE.PointLight | null {
+  requestLight(ownerId: string): PointLight | null {
     // Check if this owner already has a light assigned
     const existingLight = this.ownedLights.get(ownerId)
     if (existingLight) {
@@ -324,7 +334,7 @@ export class LightingManager {
   /**
    * Get the light owned by a specific owner
    */
-  getLight(ownerId: string): THREE.PointLight | null {
+  getLight(ownerId: string): PointLight | null {
     return this.ownedLights.get(ownerId) || null
   }
 
@@ -332,8 +342,8 @@ export class LightingManager {
    * Update a specific light's properties efficiently
    */
   updateLight(ownerId: string, properties: {
-    position?: THREE.Vector3
-    color?: THREE.Color | number
+    position?: Vector3
+    color?: Color | number
     intensity?: number
     distance?: number
   }): boolean {
@@ -346,7 +356,7 @@ export class LightingManager {
       light.position.copy(properties.position)
     }
     if (properties.color !== undefined) {
-      light.color = properties.color instanceof THREE.Color ? properties.color : new THREE.Color(properties.color)
+      light.color = properties.color instanceof Color ? properties.color : new Color(properties.color)
     }
     if (properties.intensity !== undefined) {
       light.intensity = properties.intensity
@@ -393,6 +403,6 @@ export class LightingManager {
     this.spotLights.forEach(light => this.scene.remove(light))
     this.spotLights = []
     
-    console.log('💡 LightingManager: Disposed all lights')
+    if (isDev) console.log('💡 LightingManager: Disposed all lights')
   }
 }

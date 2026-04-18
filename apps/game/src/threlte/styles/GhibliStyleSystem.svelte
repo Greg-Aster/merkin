@@ -1,14 +1,13 @@
 <script lang="ts">
   import { onMount, onDestroy, createEventDispatcher, getContext } from 'svelte'
-  import { T, useTask, useThrelte } from '@threlte/core'
+  import { T, useThrelte } from '@threlte/core'
   import * as THREE from 'three'
   import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
   import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
   import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js'
   import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
-  import type { SystemRegistry, ComponentType, LevelComponent } from '../core/LevelSystem'
+  import type { SystemRegistry } from '../core/LevelSystem'
   import { findClosestPaletteColor } from './StylePalettes'
-  import { fixMaterialDepthIssues } from '../utils/materialUtils'
   
   const dispatch = createEventDispatcher()
   
@@ -16,8 +15,6 @@
   export let stylePreset: 'ghibli' | 'alto' | 'monument' | 'retro' = 'ghibli'
   export let enableOutlines = false
   export let enableToonShading = true
-  export let enableColorGrading = true
-  export let enableVignette = true
   export let outlineStrength = 2.5
   export let outlineThickness = 0.005
   
@@ -475,7 +472,3 @@
     far={300}
   />
 {/if}
-
-<style>
-  /* No styles needed */
-</style>

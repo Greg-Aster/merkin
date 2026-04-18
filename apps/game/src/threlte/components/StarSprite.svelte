@@ -140,7 +140,3 @@
   scale={size}
   {material}
 />
-
-<style>
-/* No styles needed */
-</style>

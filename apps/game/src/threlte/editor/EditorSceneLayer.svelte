@@ -14,14 +14,14 @@
     type EditorSceneDocument,
   } from './editorStore'
   import { createDefaultSceneForLevel } from './defaultScenes'
+  import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
+  import { EDITOR_API_BASE } from '@config/editorApi'
 
   const dispatch = createEventDispatcher()
 
   export let levelId: string
   export let editorEnabled = false
   export let interactionSystem: any = null
-
-  const EDITOR_API_BASE = 'http://localhost:3001'
 
   let editorNodes = []
   let rootNodes = []
@@ -74,17 +74,33 @@
         const payload = await response.json()
         if (payload?.success && payload.scene) {
           diskScene = payload.scene
+          setRuntimeDiagnostic('scenePersistence', {
+            level: 'ready',
+            message: `Loaded editor scene for ${level} from disk.`,
+          })
         }
       }
     } catch (error) {
       if (loadToken !== activeLoadToken) return
       console.warn('Editor scene disk load unavailable, falling back to local storage.', error)
+      setRuntimeDiagnostic('scenePersistence', {
+        level: 'warning',
+        message: `Editor scene disk load unavailable for ${level}; using local storage fallback.`,
+      })
     }
 
     if (loadToken !== activeLoadToken) return
     const stored = getPreferredLoadedScene(level, diskScene)
     const fallbackScene = createDefaultSceneForLevel(level) ?? createEmptyScene(level)
     setEditorScene(stored ?? fallbackScene)
+    if (!diskScene) {
+      setRuntimeDiagnostic('scenePersistence', {
+        level: stored ? 'warning' : 'idle',
+        message: stored
+          ? `Using local editor scene state for ${level}.`
+          : `Using default editor scene template for ${level}.`,
+      })
+    }
   }
 
   let previousLevelId: string | null = null

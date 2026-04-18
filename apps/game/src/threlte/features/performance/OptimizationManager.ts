@@ -3,6 +3,8 @@
  * Clean, focused implementation for device-aware performance optimization
  */
 
+const isDev = import.meta.env.DEV
+
 export enum OptimizationLevel {
   ULTRA_LOW = 'ultra_low',
   LOW = 'low', 
@@ -153,7 +155,9 @@ export class OptimizationManager {
     this.currentQualitySettings = this.buildQualitySettings(OptimizationLevel.MEDIUM)
     this.detectDeviceCapabilities()
     this.autoSetOptimizationLevel()
-    console.log('=⚡ Modern OptimizationManager initialized with level:', this.currentOptimizationLevel)
+    if (isDev) {
+      console.log('OptimizationManager initialized with level:', this.currentOptimizationLevel)
+    }
   }
 
   public static getInstance(): OptimizationManager {
@@ -253,13 +257,15 @@ export class OptimizationManager {
       deviceType
     }
 
-    console.log('=� Device detection:', {
-      deviceType,
-      estimatedGPUTier,
-      hardwareConcurrency,
-      maxTextureSize,
-      totalPixels: screenWidth * screenHeight * pixelRatio
-    })
+    if (isDev) {
+      console.log('Device detection:', {
+        deviceType,
+        estimatedGPUTier,
+        hardwareConcurrency,
+        maxTextureSize,
+        totalPixels: screenWidth * screenHeight * pixelRatio,
+      })
+    }
   }
 
   private estimateDeviceYear(userAgent: string): number {
@@ -328,9 +334,11 @@ export class OptimizationManager {
     this.currentOptimizationLevel = level
     this.currentQualitySettings = this.buildQualitySettings(level)
     
-    console.log(`<� Optimization level set to: ${level}`, {
-      qualitySettings: this.currentQualitySettings
-    })
+    if (isDev) {
+      console.log(`Optimization level set to: ${level}`, {
+        qualitySettings: this.currentQualitySettings,
+      })
+    }
 
     // Dispatch event for other systems to react
     if (typeof window !== 'undefined' && window.dispatchEvent) {

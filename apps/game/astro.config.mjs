@@ -22,6 +22,11 @@ export default defineConfig({
   publicDir: '../megameal/public',
   integrations: [svelte(), tailwind()],
   vite: {
+    server: {
+      host: '127.0.0.1',
+      port: 4322,
+      strictPort: true,
+    },
     plugins: [wasm()],
     optimizeDeps: {
       exclude: ['three', '@dimforge/rapier3d', '@dimforge/rapier3d-compat'],
@@ -40,6 +45,53 @@ export default defineConfig({
         output: {
           manualChunks(id) {
             if (!id.includes('node_modules')) {
+              if (
+                id.includes('/src/threlte/editor/EditorPanel.svelte')
+                || id.includes('/src/threlte/editor/EditorEnvironmentPanel.svelte')
+                || id.includes('/src/threlte/editor/EditorAtmospherePresetPicker.svelte')
+                || id.includes('/src/threlte/editor/EditorAmbientAudioPresetControls.svelte')
+                || id.includes('/src/threlte/editor/EditorControlsOverlay.svelte')
+              ) {
+                return 'editor-panel'
+              }
+
+              if (id.includes('/src/threlte/editor/EditorAIMeshStudio.svelte')) {
+                return 'editor-ai'
+              }
+
+              if (
+                id.includes('/src/threlte/editor/EditorCollisionOverlay.svelte')
+                || id.includes('/src/threlte/editor/EditorCircleSelectOverlay.svelte')
+                || id.includes('/src/threlte/editor/EditorMarqueeOverlay.svelte')
+                || id.includes('/src/threlte/editor/EditorSceneLayer.svelte')
+                || id.includes('/src/threlte/editor/EditorTerrainSculptLayer.svelte')
+                || id.includes('/src/threlte/editor/EditorViewportControls.svelte')
+                || id.includes('/src/threlte/editor/EditorWorkbenchLighting.svelte')
+              ) {
+                return 'editor-runtime'
+              }
+
+              if (
+                id.includes('/src/threlte/editor/editorStore.ts')
+                || id.includes('/src/threlte/editor/editorSessionStore.ts')
+                || id.includes('/src/threlte/editor/editorSelectors.ts')
+                || id.includes('/src/threlte/editor/editorTypes.ts')
+                || id.includes('/src/threlte/editor/defaultScenes.ts')
+                || id.includes('/src/threlte/editor/editorDocumentStore.ts')
+                || id.includes('/src/threlte/editor/editorPersistence.ts')
+                || id.includes('/src/threlte/editor/editorCommands.ts')
+                || id.includes('/src/threlte/editor/editorNodeCommands.ts')
+                || id.includes('/src/threlte/editor/editorSceneCommands.ts')
+                || id.includes('/src/threlte/editor/editorHierarchyUtils.ts')
+                || id.includes('/src/threlte/editor/editorHistory.ts')
+                || id.includes('/src/threlte/editor/editorPrefabFactory.ts')
+                || id.includes('/src/threlte/editor/editorLevelSetup.ts')
+                || id.includes('/src/threlte/editor/editorLevelPresets.ts')
+                || id.includes('/src/threlte/editor/scenes/')
+              ) {
+                return 'editor-document'
+              }
+
               if (
                 id.includes('/src/threlte/editor/')
                 || id.includes('/src/threlte/utils/materialUtils.ts')

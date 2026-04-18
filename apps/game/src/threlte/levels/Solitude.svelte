@@ -17,6 +17,7 @@
   import { resolveSolitudePresetSettings } from '../editor/editorLevelPresets'
 
   const dispatch = createEventDispatcher()
+  const isDev = import.meta.env.DEV
 
   export let manifestUrl = '/terrain/solitude.manifest.json'
   export let timelineEvents: any[] = []
@@ -72,7 +73,9 @@
           heightmapConfig = await configResponse.json()
         }
       } catch (error) {
-        console.warn('Solitude heightmap config unavailable:', error)
+        if (isDev) {
+          console.warn('Solitude heightmap config unavailable:', error)
+        }
       }
     }
 

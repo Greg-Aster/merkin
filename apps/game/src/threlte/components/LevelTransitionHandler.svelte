@@ -7,8 +7,10 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte'
   import { currentLevelStore, gameActions, type StarData } from '../stores/gameStateStore'
+  import { getLevelRegistry, isPlayableLevel, resolveLevelId } from '../levels/levelRegistry'
 
   const dispatch = createEventDispatcher()
+  const isDev = import.meta.env.DEV
 
   // Props  
   export let transitionDelay = 500 // ms delay before transition
@@ -17,27 +19,8 @@
   let isTransitioning = false
   let currentTransition: any = null
 
-  // Level mapping from timeline card levelIds to actual game level identifiers
-  const levelMappings: Record<string, string> = {
-    // Timeline card levelIds → Game level identifiers
-    'miranda-ship-level': 'miranda',
-    'restaurant-backroom-level': 'restaurant', 
-    'infinite-library-level': 'infinite_library',
-    'jerrys-room-level': 'jerrys_room',
-    'observatory-level': 'observatory',
-    'sci-fi-room-level': 'sci-fi-room',
-    
-    // Direct mappings (in case some use the direct names)
-    'miranda': 'miranda',
-    'restaurant': 'restaurant',
-    'infinite_library': 'infinite_library',
-    'jerrys_room': 'jerrys_room',
-    'observatory': 'observatory',
-    'sci-fi-room': 'sci-fi-room'
-  }
-
   onMount(() => {
-    console.log('🎮 LevelTransitionHandler initialized')
+    if (isDev) console.log('🎮 LevelTransitionHandler initialized')
     
     return () => {
       // Cleanup any ongoing transitions
@@ -49,7 +32,7 @@
 
   // Subscribe to level changes to track transitions
   $: if ($currentLevelStore) {
-    console.log('🎮 Current level:', $currentLevelStore)
+    if (isDev) console.log('🎮 Current level:', $currentLevelStore)
   }
 
   /**
@@ -61,10 +44,10 @@
       return false
     }
 
-    console.log('🎮 Processing level transition:', levelType)
+    if (isDev) console.log('🎮 Processing level transition:', levelType)
     
     // Map the level identifier
-    const mappedLevelId = levelMappings[levelType] || levelType
+    const mappedLevelId = resolveLevelId(levelType)
     
     if (!isValidLevel(mappedLevelId)) {
       console.error('🎮 Invalid level identifier:', levelType, '→', mappedLevelId)
@@ -83,14 +66,13 @@
   }
 
   function isValidLevel(levelId: string): boolean {
-    const validLevels = ['observatory', 'miranda', 'restaurant', 'infinite_library', 'jerrys_room', 'sci-fi-room']
-    return validLevels.includes(levelId)
+    return isPlayableLevel(levelId)
   }
 
   function startTransition(levelId: string, fromStar?: StarData | null) {
     isTransitioning = true
     
-    console.log('🎮 Starting transition to:', levelId)
+    if (isDev) console.log('🎮 Starting transition to:', levelId)
     
     // Dispatch transition started event
     dispatch('transitionStarted', {
@@ -110,7 +92,7 @@
 
   function executeTransition(levelId: string, fromStar?: StarData | null) {
     try {
-      console.log('🎮 Executing transition to:', levelId)
+      if (isDev) console.log('🎮 Executing transition to:', levelId)
       
       // Update the game state
       gameActions.transitionToLevel(levelId)
@@ -128,7 +110,7 @@
         success: true
       })
       
-      console.log('✅ Level transition completed:', levelId)
+      if (isDev) console.log('✅ Level transition completed:', levelId)
       
     } catch (error) {
       console.error('❌ Level transition failed:', error)
@@ -150,9 +132,9 @@
     gameActions.recordInteraction('level_transition', levelId)
     
     if (fromStar) {
-      console.log('📊 Transition triggered by star:', fromStar.title, '→', levelId)
+      if (isDev) console.log('📊 Transition triggered by star:', fromStar.title, '→', levelId)
     } else {
-      console.log('📊 Direct transition to:', levelId)
+      if (isDev) console.log('📊 Direct transition to:', levelId)
     }
   }
 
@@ -171,7 +153,7 @@
 
     isTransitioning = false
     
-    console.log('🎮 Transition cancelled')
+    if (isDev) console.log('🎮 Transition cancelled')
     
     dispatch('transitionCancelled', {
       timestamp: Date.now()
@@ -195,7 +177,12 @@
    * Get available level mappings (for debugging)
    */
   export function getLevelMappings() {
-    return { ...levelMappings }
+    return Object.fromEntries(
+      getLevelRegistry().flatMap((entry) => [
+        [entry.id, entry.id],
+        ...(entry.aliases ?? []).map((alias) => [alias, entry.id]),
+      ])
+    )
   }
 
   /**

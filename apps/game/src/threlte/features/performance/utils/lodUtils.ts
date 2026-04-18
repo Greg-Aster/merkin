@@ -5,6 +5,7 @@
 
 import { writable } from 'svelte/store'
 import * as THREE from 'three'
+const isDev = import.meta.env.DEV
 
 // LOD configuration stores
 export const lodEnabledStore = writable<boolean>(true)
@@ -57,7 +58,9 @@ export function registerLODObject(id: string, mesh: THREE.Mesh, customLevels?: L
   
   lodObjects.set(id, lodObject)
   
-  console.log(`🎯 Registered LOD object: ${id} with ${levels.length} levels`)
+  if (isDev) {
+    console.log(`🎯 Registered LOD object: ${id} with ${levels.length} levels`)
+  }
 }
 
 /**
@@ -71,7 +74,9 @@ export function unregisterLODObject(id: string) {
     lodObject.mesh.material = lodObject.originalMaterial
     
     lodObjects.delete(id)
-    console.log(`🎯 Unregistered LOD object: ${id}`)
+    if (isDev) {
+      console.log(`🎯 Unregistered LOD object: ${id}`)
+    }
   }
 }
 
@@ -164,7 +169,9 @@ export function adjustLODForPerformance(targetFPS: number, currentFPS: number) {
     // Reduce quality
     lodQualityStore.set('low')
     
-    console.log('🎯 LOD adjusted for poor performance:', newDistances)
+    if (isDev) {
+      console.log('🎯 LOD adjusted for poor performance:', newDistances)
+    }
   } else if (currentFPS > targetFPS * 1.1) {
     // Performance is good, allow higher quality
     const newDistances = [15, 35, 70, 120] // Further LOD switching
@@ -173,7 +180,9 @@ export function adjustLODForPerformance(targetFPS: number, currentFPS: number) {
     // Increase quality
     lodQualityStore.set('high')
     
-    console.log('🎯 LOD adjusted for good performance:', newDistances)
+    if (isDev) {
+      console.log('🎯 LOD adjusted for good performance:', newDistances)
+    }
   }
 }
 

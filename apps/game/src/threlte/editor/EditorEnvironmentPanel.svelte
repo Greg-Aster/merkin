@@ -62,14 +62,14 @@
   </div>
   <div class="tuple-group">
     <div class="tuple-label">Fog</div>
-    <div class="tuple-row compact-two" style="margin-top:0.45rem;">
+    <div class="tuple-row compact-two editor-mt-sm">
       <input class="text-input" type="color" value={levelSettings.style?.fog?.color ?? '#7b8797'} on:input={(event) => updateLevelSetting(['style', 'fog', 'color'], (event.currentTarget as HTMLInputElement).value)} />
       <input class="tuple-input" type="number" step="0.0001" value={levelSettings.style?.fog?.density ?? 0.001} on:change={(event) => updateLevelNumericSetting(['style', 'fog', 'density'], (event.currentTarget as HTMLInputElement).value)} />
     </div>
   </div>
   <div class="tuple-group">
     <div class="tuple-label">Lighting</div>
-    <div class="tuple-row compact-two" style="margin-top:0.45rem;">
+    <div class="tuple-row compact-two editor-mt-sm">
       <input class="tuple-input" type="number" step="0.05" value={levelSettings.lighting?.ambientIntensity ?? 0.75} on:change={(event) => updateLevelNumericSetting(['lighting', 'ambientIntensity'], (event.currentTarget as HTMLInputElement).value)} />
       <input class="tuple-input" type="number" step="0.05" value={levelSettings.lighting?.keyLightIntensity ?? 0.7} on:change={(event) => updateLevelNumericSetting(['lighting', 'keyLightIntensity'], (event.currentTarget as HTMLInputElement).value)} />
       <input class="tuple-input" type="number" step="0.05" value={levelSettings.lighting?.fillLightIntensity ?? 0.22} on:change={(event) => updateLevelNumericSetting(['lighting', 'fillLightIntensity'], (event.currentTarget as HTMLInputElement).value)} />
@@ -104,11 +104,11 @@
         {/each}
       </select>
       <label class="checkbox"><input type="checkbox" checked={effectiveObservatorySettings.style?.enabled ?? true} on:change={(event) => updateLevelSetting(['style', 'enabled'], (event.currentTarget as HTMLInputElement).checked)} /> Toon / Stylized Lighting</label>
-      <div class="tuple-row compact-two" style="margin-top:0.45rem;">
+      <div class="tuple-row compact-two editor-mt-sm">
         <input class="text-input" type="color" value={effectiveObservatorySettings.style?.fog?.color ?? '#87CEEB'} on:input={(event) => updateLevelSetting(['style', 'fog', 'color'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="0.0005" value={effectiveObservatorySettings.style?.fog?.density ?? 0.002} on:change={(event) => updateLevelNumericSetting(['style', 'fog', 'density'], (event.currentTarget as HTMLInputElement).value)} />
       </div>
-      <div class="tuple-row compact-two" style="margin-top:0.45rem;">
+      <div class="tuple-row compact-two editor-mt-sm">
         <input class="tuple-input" type="number" step="0.05" value={effectiveObservatorySettings.style?.colorGrading?.saturation ?? 1.2} on:change={(event) => updateLevelNumericSetting(['style', 'colorGrading', 'saturation'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="0.05" value={effectiveObservatorySettings.style?.colorGrading?.contrast ?? 1.1} on:change={(event) => updateLevelNumericSetting(['style', 'colorGrading', 'contrast'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="0.05" value={effectiveObservatorySettings.style?.colorGrading?.brightness ?? 1} on:change={(event) => updateLevelNumericSetting(['style', 'colorGrading', 'brightness'], (event.currentTarget as HTMLInputElement).value)} />
@@ -164,11 +164,11 @@
           <option value={preset}>{preset}</option>
         {/each}
       </select>
-      <div class="tuple-row compact-two" style="margin-top:0.45rem;">
+      <div class="tuple-row compact-two editor-mt-sm">
         <input class="text-input" type="color" value={effectiveSolitudeSettings.style?.fog?.color ?? '#7b8797'} on:input={(event) => updateLevelSetting(['style', 'fog', 'color'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="0.00005" value={effectiveSolitudeSettings.style?.fog?.density ?? 0.00045} on:change={(event) => updateLevelNumericSetting(['style', 'fog', 'density'], (event.currentTarget as HTMLInputElement).value)} />
       </div>
-      <div class="tuple-row compact-two" style="margin-top:0.45rem;">
+      <div class="tuple-row compact-two editor-mt-sm">
         <input class="tuple-input" type="number" step="0.05" value={effectiveSolitudeSettings.lighting?.ambientIntensity ?? 0.75} on:change={(event) => updateLevelNumericSetting(['lighting', 'ambientIntensity'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="0.05" value={effectiveSolitudeSettings.lighting?.keyLightIntensity ?? 0.7} on:change={(event) => updateLevelNumericSetting(['lighting', 'keyLightIntensity'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="0.05" value={effectiveSolitudeSettings.lighting?.fillLightIntensity ?? 0.22} on:change={(event) => updateLevelNumericSetting(['lighting', 'fillLightIntensity'], (event.currentTarget as HTMLInputElement).value)} />
@@ -190,7 +190,7 @@
     <div class="tuple-group">
       <div class="tuple-label">Ambient Particles</div>
       <label class="checkbox"><input type="checkbox" checked={effectiveSolitudeSettings.features?.ambientParticles ?? true} on:change={(event) => updateLevelSetting(['features', 'ambientParticles'], (event.currentTarget as HTMLInputElement).checked)} /> Enable Ambient Field</label>
-      <div class="tuple-row compact-two" style="margin-top:0.45rem;">
+      <div class="tuple-row compact-two editor-mt-sm">
         <input class="tuple-input" type="number" step="1" value={effectiveSolitudeSettings.ambientParticles?.count ?? 180} on:change={(event) => updateLevelNumericSetting(['ambientParticles', 'count'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="1" value={effectiveSolitudeSettings.ambientParticles?.radius ?? 140} on:change={(event) => updateLevelNumericSetting(['ambientParticles', 'radius'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="0.1" value={effectiveSolitudeSettings.ambientParticles?.minHeight ?? 0.8} on:change={(event) => updateLevelNumericSetting(['ambientParticles', 'minHeight'], (event.currentTarget as HTMLInputElement).value)} />
@@ -243,11 +243,11 @@
     </div>
     <div class="tuple-group">
       <div class="tuple-label">Atmosphere</div>
-      <div class="tuple-row compact-two" style="margin-top:0.45rem;">
+      <div class="tuple-row compact-two editor-mt-sm">
         <input class="text-input" type="color" value={levelSettings.style?.fog?.color ?? '#5f76a8'} on:input={(event) => updateLevelSetting(['style', 'fog', 'color'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="0.0001" value={levelSettings.style?.fog?.density ?? 0.0035} on:change={(event) => updateLevelNumericSetting(['style', 'fog', 'density'], (event.currentTarget as HTMLInputElement).value)} />
       </div>
-      <div class="tuple-row compact-two" style="margin-top:0.45rem;">
+      <div class="tuple-row compact-two editor-mt-sm">
         <input class="tuple-input" type="number" step="0.05" value={levelSettings.lighting?.ambientIntensity ?? 1.25} on:change={(event) => updateLevelNumericSetting(['lighting', 'ambientIntensity'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="0.05" value={levelSettings.lighting?.keyLightIntensity ?? 0.55} on:change={(event) => updateLevelNumericSetting(['lighting', 'keyLightIntensity'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="0.05" value={levelSettings.lighting?.fillLightIntensity ?? 0.2} on:change={(event) => updateLevelNumericSetting(['lighting', 'fillLightIntensity'], (event.currentTarget as HTMLInputElement).value)} />
@@ -267,11 +267,11 @@
     </div>
     <div class="tuple-group">
       <div class="tuple-label">Ship Atmosphere</div>
-      <div class="tuple-row compact-two" style="margin-top:0.45rem;">
+      <div class="tuple-row compact-two editor-mt-sm">
         <input class="text-input" type="color" value={levelSettings.style?.fog?.color ?? '#080b12'} on:input={(event) => updateLevelSetting(['style', 'fog', 'color'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="0.0001" value={levelSettings.style?.fog?.density ?? 0.017} on:change={(event) => updateLevelNumericSetting(['style', 'fog', 'density'], (event.currentTarget as HTMLInputElement).value)} />
       </div>
-      <div class="tuple-row compact-two" style="margin-top:0.45rem;">
+      <div class="tuple-row compact-two editor-mt-sm">
         <input class="tuple-input" type="number" step="0.05" value={levelSettings.lighting?.ambientIntensity ?? 0.38} on:change={(event) => updateLevelNumericSetting(['lighting', 'ambientIntensity'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="0.05" value={levelSettings.lighting?.keyLightIntensity ?? 1.15} on:change={(event) => updateLevelNumericSetting(['lighting', 'keyLightIntensity'], (event.currentTarget as HTMLInputElement).value)} />
         <input class="tuple-input" type="number" step="0.05" value={levelSettings.lighting?.fillLightIntensity ?? 0.42} on:change={(event) => updateLevelNumericSetting(['lighting', 'fillLightIntensity'], (event.currentTarget as HTMLInputElement).value)} />

@@ -6,7 +6,7 @@
 -->
 <script lang="ts">
   import { onMount, getContext } from 'svelte'
-  import * as THREE from 'three'
+  import { Color, Vector3 } from 'three'
   import { 
     BaseLevelComponent, 
     ComponentType, 
@@ -29,6 +29,7 @@
   // Get level context
   const registry = getContext('systemRegistry')
   const lightingManager = getContext('lightingManager')
+  const isDev = import.meta.env.DEV
 
   /**
    * Lighting Component Implementation
@@ -38,7 +39,9 @@
     readonly type = ComponentType.LIGHTING
 
     protected async onInitialize(): Promise<void> {
-      console.log('💡 Lighting: Initializing...')
+      if (isDev) {
+        console.log('💡 Lighting: Initializing...')
+      }
       this.setupLighting()
     }
 
@@ -59,14 +62,14 @@
 
       // Set ambient lighting
       lightingManager.updateAmbientLight(
-        new THREE.Color(ambientColor),
+        new Color(ambientColor),
         ambientIntensity
       )
 
       // Add directional lights
       directionalLights.forEach(light => {
-        const direction = new THREE.Vector3(...light.position).normalize()
-        const color = new THREE.Color(light.color)
+        const direction = new Vector3(...light.position).normalize()
+        const color = new Color(light.color)
         
         lightingManager.addDirectionalLight(
           direction,
@@ -76,7 +79,9 @@
         )
       })
 
-      console.log(`✅ Lighting: Setup ${directionalLights.length} directional lights`)
+      if (isDev) {
+        console.log(`✅ Lighting: Setup ${directionalLights.length} directional lights`)
+      }
     }
   }
 
@@ -98,7 +103,3 @@
 </script>
 
 <!-- Light rendering now handled by LightingManager -->
-
-<style>
-  /* No styles needed */
-</style>

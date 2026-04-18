@@ -51,7 +51,9 @@
       if (params.get('hf_tm_rad')) trimeshActiveRadius = Math.max(1, parseInt(params.get('hf_tm_rad')!))
       if (params.get('hf_tm_mode') === 'chunked') trimeshMode = 'chunked'
     } catch (e) {
-      console.warn('Failed to parse URL params for debug toggles')
+      if (import.meta.env.DEV) {
+        console.warn('Failed to parse URL params for debug toggles')
+      }
     }
   })
 

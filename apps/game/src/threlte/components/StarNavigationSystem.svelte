@@ -11,6 +11,7 @@
   import LevelTransitionHandler from './LevelTransitionHandler.svelte'
 
   const dispatch = createEventDispatcher()
+  const isDev = import.meta.env.DEV
 
   // Props
   export let timelineEvents: any[] = []
@@ -25,7 +26,7 @@
   let isSystemActive = true
 
   onMount(() => {
-    console.log('🌟 StarNavigationSystem initialized')
+    if (isDev) console.log('🌟 StarNavigationSystem initialized')
     setupStarNavigationBridge()
     
     return () => {
@@ -41,7 +42,7 @@
 
   function setupStarNavigationBridge() {
     // Set up communication bridge between StarMap and interaction system
-    console.log('🔗 Setting up star navigation bridge')
+    if (isDev) console.log('🔗 Setting up star navigation bridge')
     
     // Listen for external star selection events (from other systems)
     if (typeof window !== 'undefined') {
@@ -63,20 +64,20 @@
       // Include screen position in the star data
       const starWithPosition = { ...eventData, screenPosition }
       gameActions.selectStar(starWithPosition)
-      console.log('🌟 External star selection processed:', eventData.title)
+      if (isDev) console.log('🌟 External star selection processed:', eventData.title)
     }
   }
 
   function handleExternalStarDeselection(event: any) {
     if (isSystemActive) {
       gameActions.selectStar(null)
-      console.log('🌟 External star deselection processed')
+      if (isDev) console.log('🌟 External star deselection processed')
     }
   }
 
   function handleStarSelectionChange(star: StarData | null) {
     if (star) {
-      console.log('⭐ Star navigation system processing selection:', star.title)
+      if (isDev) console.log('⭐ Star navigation system processing selection:', star.title)
       
       // Record analytics/metrics
       recordStarInteraction(star)
@@ -88,7 +89,7 @@
         source: 'navigation_system'
       })
     } else {
-      console.log('⭐ Star navigation system processing deselection')
+      if (isDev) console.log('⭐ Star navigation system processing deselection')
       
       dispatch('starDeselected', {
         timestamp: Date.now(),
@@ -103,18 +104,18 @@
     
     // Update game stats if this is a new star discovery
     if (star.isKeyEvent) {
-      console.log('🔑 Key event star selected:', star.title)
+      if (isDev) console.log('🔑 Key event star selected:', star.title)
     }
     
     if (star.isLevel) {
-      console.log('🏛️ Level star selected:', star.title, 'levelId:', star.levelId)
+      if (isDev) console.log('🏛️ Level star selected:', star.title, 'levelId:', star.levelId)
     }
   }
 
   function handleStarInteraction(event: CustomEvent) {
     const { star, eventData, screenPosition, worldPosition } = event.detail
     
-    console.log('🎯 Star interaction processed:', star?.title)
+    if (isDev) console.log('🎯 Star interaction processed:', star?.title)
     
     // Forward to parent with enhanced data
     dispatch('starInteraction', {
@@ -128,7 +129,7 @@
   }
 
   function handleStarDeselection(event: CustomEvent) {
-    console.log('🔄 Star deselection processed')
+    if (isDev) console.log('🔄 Star deselection processed')
     
     dispatch('starDeselection', {
       timestamp: Date.now(),
@@ -139,7 +140,7 @@
   function handleLevelTransition(event: CustomEvent) {
     const { levelType, fromStar } = event.detail
     
-    console.log('🎮 Level transition initiated:', levelType, 'from star:', fromStar?.title)
+    if (isDev) console.log('🎮 Level transition initiated:', levelType, 'from star:', fromStar?.title)
     
     // Forward to level transition handler
     if (levelTransitionHandler) {
@@ -175,7 +176,7 @@
 
   export function setSystemActive(active: boolean) {
     isSystemActive = active
-    console.log('🌟 Star navigation system', active ? 'activated' : 'deactivated')
+    if (isDev) console.log('🌟 Star navigation system', active ? 'activated' : 'deactivated')
   }
 
   function findStarById(starId: string): StarData | null {

@@ -212,6 +212,7 @@ export function disableAdaptiveQuality() {
 
 // Performance-based quality adjustment
 export function adjustQualityForPerformance(avgFPS: number, targetFPS: number = 60) {
+  const isDev = import.meta.env.DEV
   const currentConfig = postProcessingStore
   
   if (avgFPS < targetFPS * 0.7) {
@@ -221,7 +222,9 @@ export function adjustQualityForPerformance(avgFPS: number, targetFPS: number = 
       const newIndex = Math.max(0, currentIndex - 1)
       const newLevel = (['ultra_low', 'low', 'medium', 'high', 'ultra'] as QualityLevel[])[newIndex]
       
-      console.log(`🔽 Reducing post-processing quality: ${config.qualityLevel} → ${newLevel}`)
+      if (isDev) {
+        console.log(`🔽 Reducing post-processing quality: ${config.qualityLevel} → ${newLevel}`)
+      }
       return {
         ...config,
         qualityLevel: newLevel
@@ -235,7 +238,9 @@ export function adjustQualityForPerformance(avgFPS: number, targetFPS: number = 
       const newLevel = (['ultra_low', 'low', 'medium', 'high', 'ultra'] as QualityLevel[])[newIndex]
       
       if (newLevel !== config.qualityLevel) {
-        console.log(`🔼 Increasing post-processing quality: ${config.qualityLevel} → ${newLevel}`)
+        if (isDev) {
+          console.log(`🔼 Increasing post-processing quality: ${config.qualityLevel} → ${newLevel}`)
+        }
         return {
           ...config,
           qualityLevel: newLevel

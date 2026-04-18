@@ -19,6 +19,7 @@ import type {
 
 // Import the Memory Manager Agent
 import type { MemoryBundle } from './MemoryManagerAgent'
+const isDev = import.meta.env.DEV
 
 export class ConversationManager {
   private config: ConversationSystemConfig
@@ -65,7 +66,7 @@ export class ConversationManager {
       data: { npcId, sessionId }
     })
 
-    if (this.config.enableLogging) {
+    if (this.config.enableLogging && isDev) {
       console.log(`🗣️ Started conversation with ${personality.name} (${sessionId})`)
     }
 
@@ -99,7 +100,7 @@ export class ConversationManager {
       data: { npcId: session.npcId, sessionId, duration }
     })
 
-    if (this.config.enableLogging) {
+    if (this.config.enableLogging && isDev) {
       console.log(`🏁 Ended conversation ${sessionId} (${Math.round(duration / 1000)}s)`)
     }
   }
@@ -228,7 +229,9 @@ private async getAIResponse(
   }))
 
   // STEP 1: Use Memory Manager Agent to intelligently select and compress memories
-  console.log(`🧠 Using Memory Manager Agent for ${personality.name}`)
+  if (this.config.enableLogging && isDev) {
+    console.log(`🧠 Using Memory Manager Agent for ${personality.name}`)
+  }
   
   // Configure Memory Manager with AI service URL for RAGate judge
   const enhancedMemoryManager = new (await import('./MemoryManagerAgent')).MemoryManagerAgent({
@@ -296,14 +299,16 @@ private async callAIService(requestData: any): Promise<AIConversationResponse> {
     const jsonPayload = JSON.stringify(requestData);
     
     // Debug: Log what's being sent to AI service
-    console.log('🤖 AI Service Request:', {
-      message: requestData.message,
-      personaName: requestData.persona?.name,
-      hasContextualAwareness: !!requestData.persona?.contextualAwareness,
-      contextualAwarenessFull: requestData.persona?.contextualAwareness,
-      worldKnowledgeCount: requestData.persona?.worldKnowledge?.contextualMemories?.length || 0,
-      memoryTitles: requestData.persona?.worldKnowledge?.contextualMemories?.map((m: any) => m.topic) || []
-    });
+    if (this.config.enableLogging && isDev) {
+      console.log('🤖 AI Service Request:', {
+        message: requestData.message,
+        personaName: requestData.persona?.name,
+        hasContextualAwareness: !!requestData.persona?.contextualAwareness,
+        contextualAwarenessFull: requestData.persona?.contextualAwareness,
+        worldKnowledgeCount: requestData.persona?.worldKnowledge?.contextualMemories?.length || 0,
+        memoryTitles: requestData.persona?.worldKnowledge?.contextualMemories?.map((m: any) => m.topic) || []
+      })
+    }
 
     // Sending request to AI service with ${requestData.maxTokens} token limit
 
@@ -513,7 +518,7 @@ private async callAIService(requestData: any): Promise<AIConversationResponse> {
       this.endConversation(sessionId)
     })
 
-    if (expiredSessions.length > 0 && this.config.enableLogging) {
+    if (expiredSessions.length > 0 && this.config.enableLogging && isDev) {
       console.log(`🧹 Cleaned up ${expiredSessions.length} expired conversations`)
     }
   }

@@ -18,6 +18,7 @@
   ]
 
   const { scene } = useThrelte()
+  const isDev = import.meta.env.DEV
 
   onMount(() => {
     const loader = new THREE.CubeTextureLoader()
@@ -28,7 +29,9 @@
         // A cubemap texture is the ideal format for scene environments.
         scene.environment = cubeTexture
         scene.background = cubeTexture
-        console.log('✅ Cubemap skybox loaded successfully.')
+        if (isDev) {
+          console.log('✅ Cubemap skybox loaded successfully.')
+        }
       },
       undefined,
       (error) => {

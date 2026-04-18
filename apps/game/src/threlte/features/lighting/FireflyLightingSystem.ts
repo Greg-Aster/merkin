@@ -11,6 +11,7 @@ import type { LightingManager } from './LightingManager'
 import { SpatialGrid, type SpatialEntity } from './SpatialGrid'
 import type { ECSIntegration } from '../../core/ECSIntegration'
 import { fireflyQuery, Position, LightEmitter, LightCycling } from '../../core/ECSIntegration'
+const isDev = import.meta.env.DEV
 
 export interface FireflyLightConfig {
   maxLights: number          // Maximum number of simultaneous lights
@@ -71,7 +72,9 @@ export class FireflyLightingSystem {
       ...config
     }
     
-    console.log('✨ FireflyLightingSystem: Initialized with config:', this.config)
+    if (isDev) {
+      console.log('✨ FireflyLightingSystem: Initialized with config:', this.config)
+    }
   }
 
   /**
@@ -304,7 +307,9 @@ export class FireflyLightingSystem {
    */
   updateConfig(newConfig: Partial<FireflyLightConfig>): void {
     this.config = { ...this.config, ...newConfig }
-    console.log('✨ FireflyLightingSystem: Configuration updated:', this.config)
+    if (isDev) {
+      console.log('✨ FireflyLightingSystem: Configuration updated:', this.config)
+    }
   }
 
   /**
@@ -324,12 +329,14 @@ export class FireflyLightingSystem {
     const lightPoolStats = this.lightingManager.getPoolStats()
     const spatialStats = this.spatialGrid.getStats()
     
-    console.log('✨ FireflyLightingSystem Performance Stats:')
-    console.log(`  Lights: ${this.stats.lightsActive}/${this.config.maxLights} active`)
-    console.log(`  Light Pool: ${lightPoolStats.active}/${lightPoolStats.total} used`)
-    console.log(`  Update Time: ${this.stats.updateTimeMs.toFixed(2)}ms`)
-    console.log(`  Entities Processed: ${this.stats.entitiesProcessed} (culled from ${spatialStats.totalEntities})`)
-    console.log(`  Spatial Grid: ${spatialStats.activeCells} cells, ${spatialStats.averageEntitiesPerCell.toFixed(1)} avg entities/cell`)
+    if (isDev) {
+      console.log('✨ FireflyLightingSystem Performance Stats:')
+      console.log(`  Lights: ${this.stats.lightsActive}/${this.config.maxLights} active`)
+      console.log(`  Light Pool: ${lightPoolStats.active}/${lightPoolStats.total} used`)
+      console.log(`  Update Time: ${this.stats.updateTimeMs.toFixed(2)}ms`)
+      console.log(`  Entities Processed: ${this.stats.entitiesProcessed} (culled from ${spatialStats.totalEntities})`)
+      console.log(`  Spatial Grid: ${spatialStats.activeCells} cells, ${spatialStats.averageEntitiesPerCell.toFixed(1)} avg entities/cell`)
+    }
   }
 
   /**
@@ -344,6 +351,8 @@ export class FireflyLightingSystem {
     this.activeLights.clear()
     this.spatialGrid.clear()
     
-    console.log('✨ FireflyLightingSystem: Disposed')
+    if (isDev) {
+      console.log('✨ FireflyLightingSystem: Disposed')
+    }
   }
 }

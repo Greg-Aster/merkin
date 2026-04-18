@@ -69,7 +69,7 @@
   </select>
 </div>
 
-<div class="tuple-row compact-two" style="margin-top:0.45rem;">
+<div class="tuple-row compact-two editor-mt-sm">
   <input class="tuple-input" type="number" step="0.01" value={volume} on:change={handleVolumeChange} />
   <input class="tuple-input" type="number" step="0.1" value={falloff} on:change={handleFalloffChange} />
 </div>
@@ -77,49 +77,3 @@
 {#if message}
   <div class="save-message">{message}</div>
 {/if}
-
-<style>
-  .checkbox {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    margin-top: 0.55rem;
-    font-size: 0.9rem;
-  }
-
-  .tuple-group {
-    margin-top: 0.65rem;
-  }
-
-  .tuple-label {
-    font-size: 0.75rem;
-    color: #8fb7d4;
-    margin-bottom: 0.35rem;
-  }
-
-  .tuple-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.4rem;
-  }
-
-  .tuple-row.compact-two {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .text-input,
-  .tuple-input {
-    width: 100%;
-    background: rgba(7, 12, 18, 0.88);
-    color: #ecf7ff;
-    border: 1px solid rgba(126, 203, 255, 0.14);
-    border-radius: 0.45rem;
-    padding: 0.45rem 0.55rem;
-  }
-
-  .save-message {
-    margin-top: 0.45rem;
-    font-size: 0.78rem;
-    color: #9bc7e4;
-  }
-</style>

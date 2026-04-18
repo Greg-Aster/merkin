@@ -11,6 +11,7 @@
     syncObjectMaterialOverride,
   } from '../utils/materialUtils'
   import { EDITOR_MATERIAL_OVERRIDE_CONTEXT, type EditorMaterialOverrideStore } from '../editor/editorMaterialContext'
+  import { reportRuntimeAssetFailure } from '../stores/runtimeDiagnosticsStore'
 
   const dispatch = createEventDispatcher()
 
@@ -166,6 +167,7 @@
       .catch((error) => {
         if (disposed) return
         console.error(`❌ HeroProp failed to load: ${url}`, error)
+        reportRuntimeAssetFailure(url, error instanceof Error ? error.message : 'Unknown GLTF load error')
         dispatch('error', { error, url })
       })
   })

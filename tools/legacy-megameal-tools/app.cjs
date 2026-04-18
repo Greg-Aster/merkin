@@ -6,11 +6,12 @@ const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 
-const PORT = 3001;
+const PORT = Number(process.env.MEGAMEAL_TOOLS_PORT || process.env.EDITOR_API_PORT || process.env.PORT || 3001);
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const GAME_APP_ROOT = path.join(REPO_ROOT, 'apps', 'game');
 const GAME_PUBLIC_ROOT = path.join(REPO_ROOT, 'apps', 'megameal', 'public');
 const GAME_LEVELS_ROOT = path.join(GAME_APP_ROOT, 'src', 'threlte', 'levels');
+const LEVEL_REGISTRY_PATH = path.join(GAME_LEVELS_ROOT, 'level-registry.json');
 const EDITOR_SCENES_ROOT = path.join(GAME_APP_ROOT, 'src', 'threlte', 'editor', 'scenes');
 const LEGACY_TOOLS_ROOT = __dirname;
 const GENERATED_HUNYUAN_ROOT = path.join(GAME_PUBLIC_ROOT, 'generated', 'hunyuan3d');
@@ -53,6 +54,19 @@ function ensureDirectory(directoryPath) {
   if (!fs.existsSync(directoryPath)) {
     fs.mkdirSync(directoryPath, { recursive: true });
   }
+}
+
+function readLevelRegistry() {
+  if (!fs.existsSync(LEVEL_REGISTRY_PATH)) {
+    return [];
+  }
+
+  return JSON.parse(fs.readFileSync(LEVEL_REGISTRY_PATH, 'utf8'));
+}
+
+function writeLevelRegistry(entries) {
+  ensureDirectory(path.dirname(LEVEL_REGISTRY_PATH));
+  fs.writeFileSync(LEVEL_REGISTRY_PATH, JSON.stringify(entries, null, 2));
 }
 
 function slugify(value = 'asset') {
@@ -1825,20 +1839,6 @@ function detectReferenceImageForAsset(assetUrl) {
   return result;
 }
 
-// Function to find an available port
-async function findAvailablePort(startPort = PORT) {
-  return new Promise((resolve) => {
-    const testServer = http.createServer();
-    testServer.listen(startPort, () => {
-      const port = testServer.address().port;
-      testServer.close(() => resolve(port));
-    });
-    testServer.on('error', () => {
-      resolve(findAvailablePort(startPort + 1));
-    });
-  });
-}
-
 // Simple static file serving for tools/app directory only
 function serveToolsFile(res, requestPath) {
   const filePath = path.join(__dirname, 'app', requestPath);
@@ -2860,6 +2860,47 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (pathname === '/api/level-registry' && req.method === 'GET') {
+    try {
+      const entries = readLevelRegistry();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, entries }));
+    } catch (error) {
+      console.error('Level registry load error:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, message: 'Level registry load failed: ' + error.message }));
+    }
+    return;
+  }
+
+  if (pathname === '/api/level-registry' && req.method === 'POST') {
+    let body = '';
+
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+
+    req.on('end', () => {
+      try {
+        const { entries } = JSON.parse(body);
+        if (!Array.isArray(entries)) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'entries array is required' }));
+          return;
+        }
+
+        writeLevelRegistry(entries);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, path: toRepoRelative(LEVEL_REGISTRY_PATH) }));
+      } catch (error) {
+        console.error('Level registry save error:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: 'Level registry save failed: ' + error.message }));
+      }
+    });
+    return;
+  }
+
   if (pathname === '/api/hunyuan3d/inspect' && req.method === 'GET') {
     try {
       const assetUrl = parsedUrl.query.assetUrl;
@@ -3389,16 +3430,21 @@ const server = http.createServer(async (req, res) => {
 // SERVER STARTUP CODE
 // ================================================================
 
-// Start server with intelligent port selection
 async function startServer() {
-  const availablePort = await findAvailablePort();
-  server.listen(availablePort, () => {
+  server.on('error', (error) => {
+    if (error && error.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${PORT} is already in use. Stop the existing tools bridge or change the configured editor API base.`)
+      process.exit(1)
+    }
+
+    console.error('❌ Tools bridge failed to start:', error)
+    process.exit(1)
+  })
+
+  server.listen(PORT, '127.0.0.1', () => {
     console.log('🛠️  MEGAMEAL Development Tools (Simple)');
     console.log('='.repeat(60));
-    if (availablePort !== PORT) {
-      console.log(`⚠️  Port ${PORT} was in use, using port ${availablePort} instead`);
-    }
-    console.log(`🌐 Server running at: http://localhost:${availablePort}`);
+    console.log(`🌐 Server running at: http://127.0.0.1:${PORT}`);
     console.log('📁 Repo root:', REPO_ROOT);
     console.log('🎮 Game app:', GAME_APP_ROOT);
     console.log('📦 Public assets:', GAME_PUBLIC_ROOT);

@@ -4,10 +4,11 @@
 -->
 <script lang="ts">
   import { onDestroy, onMount, createEventDispatcher } from 'svelte'
-  import { Canvas } from '@threlte/core'
   
   // Modern UI components only
   import ThrelteMobileControls from './features/player/ThrelteMobileControls.svelte'
+  import GameCanvasStage from './GameCanvasStage.svelte'
+  import RuntimeDiagnosticsPanel from './ui/RuntimeDiagnosticsPanel.svelte'
 
   import { 
     isConversationActive, 
@@ -18,29 +19,14 @@
   // Import MobileEnhancements component
   import MobileEnhancements from './ui/MobileEnhancements.svelte'
   
-  // Import reactive performance store for conditional rendering
-  import { qualitySettingsStore } from './features/performance/stores/performanceStore'
-  
-  // Import Threlte systems
-  import Renderer from './systems/Renderer.svelte'
-  import SimplePostProcessing from './systems/SimplePostProcessing.svelte'
-  import SpawnSystem from './systems/SpawnSystem.svelte'
-  import EventBus from './systems/EventBus.svelte'
-  import Time from './systems/Time.svelte'
-  import AssetLoader from './systems/AssetLoader.svelte'
-  // Input and Interaction now handled by Player component
-  // StateManager removed - was conflicting with Player component rotation control
-  import PerformanceSystem from './features/performance/systems/Performance.svelte'
-  import LODSystem from './features/performance/systems/LOD.svelte'
   import { resetLevelRuntime } from './core/levelRuntimeReset'
-  import InteractionSystem from './systems/InteractionSystem.svelte'
   
   // Import UI components
   import TimelineCard from './ui/TimelineCard.svelte'
   import SettingsButton from './ui/SettingsButton.svelte'
   
   // Import modern Threlte stores for reactive state management
-  import { 
+  import {
     currentLevelStore, 
     selectedStarStore, 
     gameStatsStore, 
@@ -51,6 +37,11 @@
     loadGameState,
     type StarData 
   } from './stores/gameStateStore'
+  import {
+    getLevelRegistryEntry,
+    levelRegistryStore,
+    resolveLevelId as resolveRegistryLevelId,
+  } from './levels/levelRegistry'
   
   // Import UI state store
   import {
@@ -58,6 +49,10 @@
     isNeuralStylizationEnabled,
   } from './stores/uiStore'
   import { editorStateStore, initializeEditor } from './editor/editorStore'
+  import {
+    resetRuntimeDiagnostics,
+    setRuntimeDiagnostic,
+  } from './stores/runtimeDiagnosticsStore'
   
   const dispatch = createEventDispatcher()
   const isDev = import.meta.env.DEV
@@ -134,6 +129,7 @@
     excerpt: string
     body: string
   } | null = null
+  let levelRegistry = []
   
   // Spawn system state
   let physicsReady = false
@@ -152,17 +148,21 @@
   } | null = null
 
   const levelComponentCache = new Map<string, any>()
-  const supportedLevelIds = new Set(['observatory', 'sci-fi-room', 'miranda', 'solitude'])
 
   function normalizeLevelId(levelId: string | null | undefined) {
-    if (!levelId) return 'observatory'
-    if (levelId === 'hybrid-observatory') return 'observatory'
-    if (levelId === 'solitude-level') return 'solitude'
-    return supportedLevelIds.has(levelId) ? levelId : 'observatory'
+    return resolveRegistryLevelId(levelId, levelRegistry)
   }
 
   function getLevelRenderConfig(levelId: string) {
     const normalizedLevel = normalizeLevelId(levelId)
+    const levelEntry = getLevelRegistryEntry(normalizedLevel, levelRegistry)
+
+    if (levelEntry?.source.kind === 'scene') {
+      return {
+        offset: [0, 0, 0] as [number, number, number],
+        spawn: [0, 1, 0] as [number, number, number],
+      }
+    }
 
     if (normalizedLevel === 'sci-fi-room') {
       return {
@@ -194,13 +194,21 @@
   // --- NEW: Robust Loading State ---
   // We now consider the game "loaded" only when the terrain's physics are ready.
   let terrainReady = false
+  $: currentLevelRenderConfig = getLevelRenderConfig(currentLevel)
   $: if (terrainReady) {
     debugLog('✅ Terrain and physics are ready. Hiding loading screen.')
     gameActions.setLoading(false);
   }
+  $: if (isInitialized && terrainReady && !error) {
+    setRuntimeDiagnostic('engine', {
+      level: 'ready',
+      message: `Engine ready on level ${currentLevel}.`,
+    })
+  }
   
   // Reactive store subscriptions (these are reactive by default)
   $: currentLevel = $currentLevelStore
+  $: levelRegistry = $levelRegistryStore
   $: selectedStar = $selectedStarStore
   $: gameStats = $gameStatsStore
   $: isMobile = $isMobileStore
@@ -209,6 +217,30 @@
   $: editorEnabled = $editorStateStore.enabled
   $: collisionOverlayEnabled = $editorStateStore.collisionOverlayEnabled
   $: playerReady = Boolean(playerComponent && typeof playerComponent.spawnAt === 'function')
+  $: setRuntimeDiagnostic('mode', {
+    level: 'ready',
+    message: editorEnabled ? 'Editor mode active.' : 'Gameplay mode active.',
+  })
+  $: setRuntimeDiagnostic('terrain', {
+    level: terrainReady ? 'ready' : 'loading',
+    message: terrainReady ? 'Terrain and physics surfaces are ready.' : 'Waiting for active level terrain readiness.',
+  })
+  $: setRuntimeDiagnostic('physics', {
+    level: physicsReady ? 'ready' : 'loading',
+    message: physicsReady ? 'Physics world is active.' : 'Waiting for physics world to initialize.',
+  })
+  $: setRuntimeDiagnostic('player', {
+    level: editorEnabled ? 'idle' : playerReady ? 'ready' : 'loading',
+    message: editorEnabled
+      ? 'Player runtime disabled while editor mode is active.'
+      : playerReady
+        ? 'Player component is ready for spawn requests.'
+        : 'Waiting for player component readiness.',
+  })
+  $: setRuntimeDiagnostic('editor', {
+    level: editorEnabled ? 'ready' : 'idle',
+    message: editorEnabled ? 'Editor subsystems active.' : 'Editor subsystems inactive.',
+  })
   
   // Reactive level and star tracking - debug logs removed for performance
   $: if (isDev && currentLevel) {
@@ -233,8 +265,25 @@
     if (cardClass.includes('bottom')) return 'bottom'
     if (cardClass.includes('left')) return 'left'
     if (cardClass.includes('right')) return 'right'
-  
+
     return undefined
+  }
+
+  function extractSelectedStar(detail: any): StarData | null {
+    if (!detail) return null
+
+    const baseStar = detail.star ?? detail.eventData ?? detail
+    if (!baseStar) return null
+
+    const mergedScreenPosition = {
+      ...(baseStar.screenPosition ?? {}),
+      ...(detail.screenPosition ?? {}),
+    }
+
+    return {
+      ...baseStar,
+      screenPosition: Object.keys(mergedScreenPosition).length > 0 ? mergedScreenPosition : undefined,
+    }
   }
   
   // Convert StarData to TimelineEvent for the TimelineCard
@@ -320,7 +369,12 @@
 
   async function ensureLevelComponent(levelId: string) {
     const normalizedLevel = normalizeLevelId(levelId)
-    const cached = levelComponentCache.get(normalizedLevel)
+    const levelEntry = getLevelRegistryEntry(normalizedLevel, levelRegistry)
+    const levelSource = levelEntry?.source ?? { kind: 'component', componentKey: 'observatory' as const }
+    const cacheKey = levelSource.kind === 'scene'
+      ? `scene:${normalizedLevel}`
+      : `component:${levelSource.componentKey}:${normalizedLevel}`
+    const cached = levelComponentCache.get(cacheKey)
     if (cached) {
       currentLevelComponent = cached
       return
@@ -330,15 +384,17 @@
     currentLevelComponent = null
 
     const module =
-      normalizedLevel === 'sci-fi-room'
-        ? await import('./levels/SciFiRoom.svelte')
-        : normalizedLevel === 'solitude'
-          ? await import('./levels/Solitude.svelte')
-        : normalizedLevel === 'miranda'
-          ? await import('./levels/MirandaShip.svelte')
-          : await import('./levels/HybridObservatory.svelte')
+      levelSource.kind === 'scene'
+        ? await import('./levels/SceneDocumentLevel.svelte')
+        : levelSource.componentKey === 'sci-fi-room'
+          ? await import('./levels/SciFiRoom.svelte')
+          : levelSource.componentKey === 'solitude'
+            ? await import('./levels/Solitude.svelte')
+            : levelSource.componentKey === 'miranda'
+              ? await import('./levels/MirandaShip.svelte')
+              : await import('./levels/HybridObservatory.svelte')
 
-    levelComponentCache.set(normalizedLevel, module.default)
+    levelComponentCache.set(cacheKey, module.default)
 
     if (requestId === activeLevelLoadRequest) {
       currentLevelComponent = module.default
@@ -553,6 +609,11 @@
    */
   async function initializeThrelte() {
     try {
+      resetRuntimeDiagnostics()
+      setRuntimeDiagnostic('engine', {
+        level: 'loading',
+        message: 'Initializing Threlte game shell…',
+      })
       loadingMessage = 'Initializing MEGAMEAL...'
       gameActions.setLoading(true)
 
@@ -590,6 +651,10 @@
   
       // The loading screen will now be hidden by the `terrainReady` reactive block.
       isInitialized = true
+      setRuntimeDiagnostic('engine', {
+        level: 'ready',
+        message: 'Game shell initialized. Waiting for runtime subsystems.',
+      })
       if (!shouldEnableEditor) {
         deferredAudioCleanup = setupDeferredAudioLoading()
         deferredGameplayCoreCleanup = setupDeferredGameplayCoreLoading()
@@ -598,6 +663,10 @@
       debugLog('✅ Game systems initialized. Waiting for terrain...')
     } catch (err) {
       console.error('❌ Failed to initialize Threlte game:', err)
+      setRuntimeDiagnostic('engine', {
+        level: 'error',
+        message: err instanceof Error ? err.message : 'Unknown engine initialization error.',
+      })
       gameActions.setError(err instanceof Error ? err.message : 'Unknown error')
       gameActions.setLoading(false)
     }
@@ -651,22 +720,15 @@
   }
 
   function resolveLevelId(levelType: string) {
-    const levelMap = {
-      'miranda-ship-level': 'miranda',
-      'restaurant-backroom-level': 'restaurant',
-      'infinite-library-level': 'infinite_library',
-      'sci-fi-room-level': 'sci-fi-room',
-      'solitude-level': 'solitude',
-      'observatory-level': 'observatory',
-      'hybrid-observatory-level': 'observatory',
-      'hybrid-observatory': 'observatory',
-    }
-
-    return levelMap[levelType as keyof typeof levelMap] || levelType
+    return getLevelRegistryEntry(levelType, levelRegistry)?.id ?? levelType
   }
 
   function transitionToLevel(levelType: string) {
     const levelId = resolveLevelId(levelType)
+    setRuntimeDiagnostic('engine', {
+      level: 'loading',
+      message: `Transitioning to ${levelId}…`,
+    })
     resetLevelRuntime({
       interactionSystem,
       spawnSystem,
@@ -714,6 +776,20 @@
   }
 
   // Player spawning is handled by ECS SpawnSystem
+
+  function handlePlayerInteraction(detail: any) {
+    gameActions.recordInteraction('click', detail.type)
+    const selected = interactionSystem?.selectAtScreenPosition?.(detail.x, detail.y)
+    if (!selected) {
+      dispatch('objectClick', detail)
+    }
+  }
+
+  function handlePlayerLightBurst(detail: any) {
+    gameActions.recordInteraction('light_burst', 'player')
+    interactionSystem?.triggerLightBurst?.(detail)
+    dispatch('lightBurst', detail)
+  }
   
   // Lifecycle
   onMount(async () => {
@@ -746,174 +822,54 @@
     
     <!-- Threlte Canvas - Enable input for 3D scene -->
     {#if isInitialized && !error}
-      <div style="pointer-events: {$isSettingsMenuOpen ? 'none' : 'auto'}; width: 100%; height: 100%;">
-        <Canvas>
-        <!-- Core Systems -->
-        <EventBus 
-          on:levelTransition={handleLevelTransition}
-          on:starSelected={(e) => { gameActions.selectStar(e.detail); dispatch('starSelected', e.detail) }}
-          on:starDeselected={(e) => { gameActions.deselectStar(); dispatch('starDeselected', e.detail) }}
-        />
-        
-        <!-- Centralized Interaction System for Stars and Fireflies -->
-        <InteractionSystem
-          bind:this={interactionSystem}
-          on:objectClick={(e) => dispatch('objectClick', e.detail)}
-        />
-        
-        <Time on:timeUpdate={(e) => dispatch('timeUpdate', e.detail)} />
-        
-        <PerformanceSystem
-          enablePerformanceMonitoring={true}
-          enableAutomaticOptimization={true}
-          on:performanceUpdate={(e) => dispatch('performanceUpdate', e.detail)}
-          on:qualityChanged={(e) => dispatch('qualityChanged', e.detail)}
-        />
-        
-        <LODSystem 
-          enableLOD={true}
-          maxDistance={200}
-          updateFrequency={0.1}
-          enableCulling={true}
-          on:lodLevelChanged={(e) => dispatch('lodLevelChanged', e.detail)}
-        />
-        
-        <!-- StateManager removed - was causing camera control conflicts with Player component -->
-        
-        <AssetLoader />
-        
-        <!-- Renderer Configuration -->
-        <Renderer />
-        {#if neuralStylizationOverlayComponent}
-          <svelte:component this={neuralStylizationOverlayComponent} />
-        {/if}
-        <!-- Simple Post-Processing using Native Threlte - conditional rendering based on performance -->
-        {#if $qualitySettingsStore.enablePostProcessing}
-          <SimplePostProcessing 
-            toneMappingExposure={1.0}
-          />
-        {/if}
-        
-        <!-- Audio System -->
-        {#if audioSystemComponent}
-          <svelte:component this={audioSystemComponent} enabled={true} />
-        {/if}
-        
-        <!-- ECS Spawn System - Handles all entity spawning -->
-        {#if !editorEnabled}
-          <SpawnSystem
-            bind:this={spawnSystem}
-            {playerComponent}
-            {playerReady}
-            {physicsReady}
-            {terrainReady}
-            on:entitySpawned={(e) => dispatch('entitySpawned', e.detail)}
-          />
-        {/if}
-
-        <!-- Physics World -->
-        {#if physicsSystemComponent && playerComponentClass}
-          <svelte:component
-            this={physicsSystemComponent}
-            ccd={true}
-            integrationParameters={{
-              dt: isMobile ? 1 / 30 : 1 / 60,
-              minSolverIterations: isMobile ? 8 : 16
-            }}
-            on:physicsReady={() => physicsReady = true}
-          >
-            {#if editorEnabled && editorViewportControlsComponent}
-              <svelte:component this={editorViewportControlsComponent} enabled={true} />
-            {:else}
-              <!--
-                Player Component - Handles input/movement, spawned by ECS SpawnSystem
-              -->
-              <svelte:component
-                this={playerComponentClass}
-                bind:this={playerComponent}
-                position={[0, 0, 0]}
-                speed={5}
-                jumpForce={8}
-                on:interaction={(e) => {
-                  gameActions.recordInteraction('click', e.detail.type)
-                  const selected = interactionSystem?.selectAtScreenPosition?.(e.detail.x, e.detail.y)
-                  if (!selected) {
-                    dispatch('objectClick', e.detail)
-                  }
-                }}
-                on:lightBurst={(e) => {
-                  gameActions.recordInteraction('light_burst', 'player')
-                  interactionSystem?.triggerLightBurst?.(e.detail)
-                  dispatch('lightBurst', e.detail)
-                }}
-              />
-            {/if}
-            
-            <!-- Multiplayer System - Renders remote players -->
-            {#if multiplayerManagerComponent}
-              <svelte:component this={multiplayerManagerComponent} />
-            {/if}
-            
-            
-            <!-- Modern MEGAMEAL Architecture - Dynamic Level Loading -->
-            {#if currentLevelComponent}
-              {#key `${$currentLevelStore}:${currentLevelComponent}`}
-                {@const levelRenderConfig = getLevelRenderConfig($currentLevelStore)}
-                <svelte:component
-                  this={currentLevelComponent}
-                  timelineEvents={parsedTimelineEvents}
-                  timelineEventsJson={timelineEventsPayload}
-                  spawnSystem={editorEnabled ? null : spawnSystem}
-                  {interactionSystem}
-                  position={levelRenderConfig.offset}
-                  playerSpawnPoint={levelRenderConfig.spawn}
-                  collisionDebugEnabled={editorEnabled && collisionOverlayEnabled}
-                  on:starSelected={(e) => dispatch('starSelected', e.detail)}
-                  on:telescopeInteraction={(e) => dispatch('telescopeInteraction', e.detail)}
-                  on:noteRead={(e) => {
-                    activeLevelNote = e.detail
-                  }}
-                  on:requestLevelReturn={(e) => {
-                    handleLevelReturnRequest(e.detail)
-                  }}
-                  on:terrainReady={() => terrainReady = true}
-                />
-              {/key}
-            {/if}
-
-            {#if currentLevel}
-              {#if editorWorkbenchLightingComponent}
-                <svelte:component this={editorWorkbenchLightingComponent} />
-              {/if}
-              {#if editorSceneLayerComponent}
-                <svelte:component
-                  this={editorSceneLayerComponent}
-                  levelId={currentLevel}
-                  editorEnabled={editorEnabled}
-                  {interactionSystem}
-                  on:portalTransition={(e) => {
-                    transitionToLevel(e.detail.levelId)
-                  }}
-                  on:noteRead={(e) => {
-                    activeLevelNote = e.detail
-                  }}
-                />
-              {/if}
-              {#if editorCollisionOverlayComponent}
-                <svelte:component this={editorCollisionOverlayComponent} levelId={currentLevel} />
-              {/if}
-              {#if editorTerrainSculptLayerComponent}
-                <svelte:component this={editorTerrainSculptLayerComponent} levelId={currentLevel} />
-              {/if}
-            {/if}
-            
-            <!-- Optimization System -->
-            <!-- OptimizationSystem removed - functionality now handled by OptimizationManager.ts -->
-          </svelte:component>
-        {/if}
-        
-        </Canvas>
-      </div>
+      <GameCanvasStage
+        {isInitialized}
+        {error}
+        {isMobile}
+        {editorEnabled}
+        {collisionOverlayEnabled}
+        currentLevel={$currentLevelStore}
+        {currentLevelComponent}
+        {parsedTimelineEvents}
+        {timelineEventsPayload}
+        currentLevelRenderConfig={currentLevelRenderConfig}
+        {audioSystemComponent}
+        {physicsSystemComponent}
+        {playerComponentClass}
+        {multiplayerManagerComponent}
+        {neuralStylizationOverlayComponent}
+        {editorCollisionOverlayComponent}
+        {editorSceneLayerComponent}
+        {editorTerrainSculptLayerComponent}
+        {editorViewportControlsComponent}
+        {editorWorkbenchLightingComponent}
+        bind:interactionSystemRef={interactionSystem}
+        bind:spawnSystemRef={spawnSystem}
+        bind:playerComponentRef={playerComponent}
+        bind:physicsReady
+        bind:terrainReady
+        {playerReady}
+        {normalizeLevelId}
+        on:levelTransition={handleLevelTransition}
+        on:starSelected={(e) => {
+          const star = extractSelectedStar(e.detail)
+          gameActions.selectStar(star)
+          dispatch('starSelected', star)
+        }}
+        on:starDeselected={(e) => { gameActions.deselectStar(); dispatch('starDeselected', e.detail) }}
+        on:objectClick={(e) => dispatch('objectClick', e.detail)}
+        on:timeUpdate={(e) => dispatch('timeUpdate', e.detail)}
+        on:performanceUpdate={(e) => dispatch('performanceUpdate', e.detail)}
+        on:qualityChanged={(e) => dispatch('qualityChanged', e.detail)}
+        on:lodLevelChanged={(e) => dispatch('lodLevelChanged', e.detail)}
+        on:entitySpawned={(e) => dispatch('entitySpawned', e.detail)}
+        on:playerInteraction={(e) => handlePlayerInteraction(e.detail)}
+        on:lightBurst={(e) => handlePlayerLightBurst(e.detail)}
+        on:telescopeInteraction={(e) => dispatch('telescopeInteraction', e.detail)}
+        on:noteRead={(e) => { activeLevelNote = e.detail }}
+        on:portalTransition={(e) => { transitionToLevel(e.detail.levelId) }}
+        on:requestLevelReturn={(e) => { handleLevelReturnRequest(e.detail) }}
+      />
     {/if}
   
     <!-- Legacy container removed - Player component now handles all input -->
@@ -963,6 +919,9 @@
         <p>Game State: {isInitialized ? 'Ready' : 'Loading'}</p>
         <p>Current Level: {currentLevel}</p>
         <p>Mobile: {isMobile ? 'Yes' : 'No'}</p>
+        <div class="mt-3">
+          <RuntimeDiagnosticsPanel compact={true} />
+        </div>
       </div>
     {/if}
       

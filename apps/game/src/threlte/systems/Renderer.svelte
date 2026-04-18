@@ -136,7 +136,3 @@ export { config }
   preserveDrawingBuffer={false}
   powerPreference={config.powerPreference}
 />
-
-<style>
-/* No styles needed - this is a system component */
-</style>

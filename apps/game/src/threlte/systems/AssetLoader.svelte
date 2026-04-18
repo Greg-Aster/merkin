@@ -5,11 +5,11 @@
 <script lang="ts">
 import { onMount, onDestroy, createEventDispatcher } from 'svelte'
 import { writable } from 'svelte/store'
-import { useLoader } from '@threlte/core'
-import * as THREE from 'three'
+import { AudioLoader, TextureLoader } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 const dispatch = createEventDispatcher()
+const isDev = import.meta.env.DEV
 
 // Reactive stores for loading state
 export const loadingStore = writable(false)
@@ -18,8 +18,8 @@ export const errorStore = writable(null)
 export const loadedAssetsStore = writable([])
 
 let gltfLoader: GLTFLoader
-let textureLoader: THREE.TextureLoader
-let audioLoader: THREE.AudioLoader
+let textureLoader: TextureLoader
+let audioLoader: AudioLoader
 let isInitialized = false
 
 // Export loading state for external access
@@ -29,16 +29,16 @@ export let loadingError = null
 export let loadedAssets = []
 
 onMount(async () => {
-  console.log('📦 Initializing Threlte Asset Loading System...')
+  if (isDev) console.log('📦 Initializing Threlte Asset Loading System...')
   
   try {
     // Initialize Three.js loaders
     gltfLoader = new GLTFLoader()
-    textureLoader = new THREE.TextureLoader()
-    audioLoader = new THREE.AudioLoader()
+    textureLoader = new TextureLoader()
+    audioLoader = new AudioLoader()
     
     isInitialized = true
-    console.log('✅ Threlte Asset Loading System initialized')
+    if (isDev) console.log('✅ Threlte Asset Loading System initialized')
   } catch (error) {
     console.error('❌ Failed to initialize Asset Loading System:', error)
     loadingError = error
@@ -177,7 +177,7 @@ export async function loadAudio(url: string) {
  * Preload assets
  */
 export async function preloadAssets(urls: string[]) {
-  if (!assetLoader) {
+  if (!gltfLoader || !textureLoader || !audioLoader) {
     throw new Error('AssetLoader not initialized')
   }
   
@@ -239,7 +239,7 @@ onDestroy(() => {
   gltfLoader = null
   textureLoader = null
   audioLoader = null
-  console.log('🧹 Threlte Asset Loading System disposed')
+  if (isDev) console.log('🧹 Threlte Asset Loading System disposed')
 })
 
 // Export loaders for external access

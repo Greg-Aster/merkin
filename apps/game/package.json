@@ -7,9 +7,12 @@
 	"scripts": {
 		"sync:onnx-runtime": "node ./scripts/sync-onnx-runtime.mjs",
 		"dev": "concurrently -k -n game,tools -c magenta,cyan \"pnpm dev:app\" \"pnpm dev:tools\"",
-		"dev:app": "pnpm sync:onnx-runtime && astro dev --port 4322",
-		"dev:tools": "node ../../tools/legacy-megameal-tools/app.cjs",
+		"dev:app": "node ./scripts/dev-app.mjs",
+		"dev:tools": "node ./scripts/dev-tools.mjs",
 		"build": "pnpm sync:onnx-runtime && astro build && rm -f dist/_redirects",
+		"smoke:engine": "node ./scripts/smoke-check.mjs",
+		"smoke:boot": "node ./scripts/boot-check.mjs",
+		"profile:three-runtime": "node ./scripts/profile-three-runtime.mjs",
 		"preview": "astro preview",
 		"type-check": "tsc --noEmit",
 		"format": "biome format --write ./src",
@@ -47,6 +50,7 @@
 		"@biomejs/biome": "1.8.3",
 		"@tailwindcss/typography": "^0.5.16",
 		"@types/three": "^0.176.0",
+		"playwright": "1.59.1",
 		"typescript": "^5.7.3",
 		"vite-plugin-wasm": "^3.4.1"
 	}

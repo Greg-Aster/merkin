@@ -1,11 +1,9 @@
 <script lang="ts">
   import { T, useTask } from '@threlte/core';
-  import { Collider, RigidBody } from '@threlte/rapier';
+  import { Collider, RigidBody, useRapier } from '@threlte/rapier';
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-  import * as THREE from 'three';
-  import { useRapier } from '@threlte/rapier';
+  import { Euler, Group, PerspectiveCamera, Quaternion, Vector3 } from 'three';
   import { multiplayerStore, type PlayerState } from '../multiplayer/stores/multiplayerStore';
-  import PlayerAvatar from '../multiplayer/components/PlayerAvatar.svelte';
   import { uiStore } from '../../stores/uiStore';
   import { gameActions } from '../../stores/gameStateStore';
   import { PLAYER_GROUP } from '../../constants/physics';
@@ -32,9 +30,9 @@
 
   // --- Player State ---
   let rigidBody: any; // Physics body reference
-  let visualGroup: THREE.Group; // Visual group reference
-  let cameraPivot: THREE.Group; // Camera pivot reference
-  let camera: THREE.PerspectiveCamera;
+  let visualGroup: Group; // Visual group reference
+  let cameraPivot: Group; // Camera pivot reference
+  let camera: PerspectiveCamera;
   let fov = 60;
   let near = 0.1;
   let far = 2000;
@@ -42,7 +40,7 @@
   // --- Movement State ---
   const keyStates: { [key: string]: boolean } = {};
   let isGrounded = false;
-  const playerVelocity = new THREE.Vector3();
+  const playerVelocity = new Vector3();
   let characterController: any;
 
   // --- Look/Camera State ---
@@ -74,12 +72,12 @@
   let multiplayerServicePromise: Promise<void> | null = null;
   let networkSyncElapsed = 0;
 
-  const tempAxisY = new THREE.Vector3(0, 1, 0);
-  const tempDesiredTranslation = new THREE.Vector3();
-  const tempHorizontalVelocity = new THREE.Vector3();
-  const tempBodyPosition = new THREE.Vector3();
-  const tempBodyRotation = new THREE.Quaternion();
-  const tempDeltaRotation = new THREE.Quaternion();
+  const tempAxisY = new Vector3(0, 1, 0);
+  const tempDesiredTranslation = new Vector3();
+  const tempHorizontalVelocity = new Vector3();
+  const tempBodyPosition = new Vector3();
+  const tempBodyRotation = new Quaternion();
+  const tempDeltaRotation = new Quaternion();
   const nextTranslation = { x: 0, y: 0, z: 0 };
   const keyboardMovement = { x: 0, z: 0 };
   const gamepadState = {
@@ -414,7 +412,7 @@
     cameraRotationX += accumulatedRotationY;
     cameraRotationX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraRotationX));
     if (cameraPivot) {
-      cameraPivot.quaternion.setFromEuler(new THREE.Euler(cameraRotationX, 0, 0));
+      cameraPivot.quaternion.setFromEuler(new Euler(cameraRotationX, 0, 0));
     }
     accumulatedRotationY = 0;
     recordSystemTiming('playerController', performance.now() - controllerStart);
@@ -506,7 +504,6 @@
   hiding any jitter from the player's view.
 -->
 <T.Group bind:ref={visualGroup} position={position}>
-  <PlayerAvatar position={[0, 0, 0]} />
   <T.Group bind:ref={cameraPivot}>
     <T.PerspectiveCamera
       makeDefault

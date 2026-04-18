@@ -36,6 +36,7 @@
   import { gameActions } from '../stores/gameStateStore'
 
   const dispatch = createEventDispatcher()
+  const isDev = import.meta.env.DEV
 
   export let spawnSystem: any = null
   export let interactionSystem: any = null
@@ -567,7 +568,9 @@
   function handleStoryClick(pointName: string) {
     const point = storyPointByName.get(pointName)
     if (point) {
-      console.log(`📖 Story: ${point.text}`)
+      if (isDev) {
+        console.log(`📖 Story: ${point.text}`)
+      }
       dispatch('storyRead', { name: pointName, text: point.text, position: point.position })
     }
   }
@@ -583,7 +586,9 @@
       portalTransitionPending = false
       portalTransitionResetId = null
     }, 350)
-    console.log('🌀 Portal requested return to observatory')
+    if (isDev) {
+      console.log('🌀 Portal requested return to observatory')
+    }
     dispatch('requestLevelReturn', {
       levelType: 'observatory',
       title: 'Return to Observatory?',
@@ -719,7 +724,9 @@
     }
 
     dispatch('terrainReady')
-    console.log('🏢 SciFiRoom: Multi-zone level loaded')
+    if (isDev) {
+      console.log('🏢 SciFiRoom: Multi-zone level loaded')
+    }
   })
 
   onDestroy(() => {

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import './editor-ui.css'
   import { onDestroy, onMount } from 'svelte'
   import { get } from 'svelte/store'
   import { gameActions } from '../stores/gameStateStore'
@@ -65,22 +66,28 @@
   } from './editorLevelPresets'
   import { mergeLevelSettings } from './editorLevelSetup'
   import EditorEnvironmentPanel from './EditorEnvironmentPanel.svelte'
+  import { saveEditorSceneToLocalStorage } from './editorPersistence'
+  import {
+    reportRuntimeAssetFailure,
+    setRuntimeDiagnostic,
+  } from '../stores/runtimeDiagnosticsStore'
+  import {
+    levelRegistryStore,
+    sanitizeLevelId,
+    setLevelRegistry,
+    type LevelLifecycleStatus,
+    type LevelRegistryEntry,
+  } from '../levels/levelRegistry'
+  import { EDITOR_API_BASE } from '@config/editorApi'
 
   export let levelId: string
 
   type EditorPanelTab = 'scene' | 'environment' | 'create' | 'hierarchy' | 'inspect' | 'ai' | 'save'
 
-  const EDITOR_API_BASE = 'http://localhost:3001'
-  const editorLevelOptions = [
-    { id: 'observatory', label: 'Observatory' },
-    { id: 'sci-fi-room', label: 'Sci Fi Room' },
-    { id: 'miranda', label: 'Miranda Wreck' },
-    { id: 'solitude', label: 'Solitude' },
-  ] as const
-
   let editorState
   let editorNodes: EditorSceneNode[] = []
   let editorScene = null
+  let levelRegistryEntries: LevelRegistryEntry[] = []
   let nodeViewportStateById = new Map<string, { effectiveVisible: boolean; isolated: boolean; dimmed: boolean; locked: boolean }>()
   let selectedNode: EditorSceneNode | null = null
   let selectedNodes: EditorSceneNode[] = []
@@ -127,9 +134,25 @@
   let hunyuanActiveJobId = ''
   let autoSaveTimeout: number | null = null
   let pendingLevelId = levelId
+  let newLevelTitle = ''
+  let newLevelIdInput = ''
+  let newLevelTemplateId = levelId
+  let saveAsTitle = ''
+  let saveAsLevelId = ''
+  let metadataTitle = ''
+  let metadataStatus: LevelLifecycleStatus = 'draft'
+  let metadataDeployed = false
+  let metadataStarMapEnabled = false
+  let metadataStarMapYear = 2100
+  let metadataStarMapDescription = ''
+  let metadataSourceKind: 'component' | 'scene' = 'scene'
+  let metadataSourceComponentKey: 'observatory' | 'sci-fi-room' | 'miranda' | 'solitude' = 'observatory'
+  let loadedMetadataLevelId = ''
   let activeEditorTab: EditorPanelTab = 'scene'
   let editorTabContentElement: HTMLDivElement | null = null
   let lastScrolledTab: EditorPanelTab | null = null
+  let editorAIMeshStudioComponent: typeof import('./EditorAIMeshStudio.svelte').default | null = null
+  let editorAIMeshStudioPromise: Promise<void> | null = null
 
   const unsubState = editorStateStore.subscribe((value) => {
     editorState = value
@@ -139,6 +162,9 @@
   })
   const unsubScene = editorSceneStore.subscribe((value) => {
     editorScene = value
+  })
+  const unsubRegistry = levelRegistryStore.subscribe((value) => {
+    levelRegistryEntries = value
   })
   const unsubViewportState = editorNodeViewportStateStore.subscribe((value) => {
     nodeViewportStateById = value
@@ -204,6 +230,26 @@
   $: dragSelectionIds = selectedNodes.map((node) => node.id)
   $: pendingLevelId = levelId
   $: activeSceneLevelId = editorScene?.levelId ?? levelId
+  $: editorLevelOptions = levelRegistryEntries.map((entry) => ({
+    id: entry.id,
+    label: entry.title,
+    status: entry.status,
+    deployed: entry.deployed,
+  }))
+  $: activeLevelRegistryEntry = levelRegistryEntries.find((entry) => entry.id === activeSceneLevelId) ?? null
+
+  $: if (activeSceneLevelId && loadedMetadataLevelId !== activeSceneLevelId) {
+    const entry = activeLevelRegistryEntry
+    metadataTitle = entry?.title ?? activeSceneLevelId
+    metadataStatus = entry?.status ?? 'draft'
+    metadataDeployed = entry?.deployed ?? false
+    metadataStarMapEnabled = entry?.starMap?.enabled ?? false
+    metadataStarMapYear = entry?.starMap?.year ?? 2100
+    metadataStarMapDescription = entry?.starMap?.description ?? `Enter ${entry?.title ?? activeSceneLevelId}`
+    metadataSourceKind = entry?.source.kind ?? 'scene'
+    metadataSourceComponentKey = entry?.source.kind === 'component' ? entry.source.componentKey : 'observatory'
+    loadedMetadataLevelId = activeSceneLevelId
+  }
 
   let draggedHierarchyNodeIds: string[] = []
   let hierarchyDropTargetId: string | null = null
@@ -232,9 +278,24 @@
 
   function setActiveEditorTab(tab: EditorPanelTab) {
     activeEditorTab = tab
+    if (tab === 'ai') {
+      void ensureEditorAIMeshStudio()
+    }
     requestAnimationFrame(() => {
       editorTabContentElement?.scrollTo({ top: 0, behavior: 'auto' })
     })
+  }
+
+  async function ensureEditorAIMeshStudio() {
+    if (editorAIMeshStudioComponent) return
+
+    if (!editorAIMeshStudioPromise) {
+      editorAIMeshStudioPromise = import('./EditorAIMeshStudio.svelte').then((module) => {
+        editorAIMeshStudioComponent = module.default
+      })
+    }
+
+    await editorAIMeshStudioPromise
   }
 
   $: if (editorState?.panelOpen && editorTabContentElement && activeEditorTab !== lastScrolledTab) {
@@ -442,20 +503,37 @@
     assetBrowserLoading = true
     assetBrowserError = ''
     selectedLibraryItem = null
+    setRuntimeDiagnostic('toolsBridge', {
+      level: 'loading',
+      message: `Browsing assets from ${path}…`,
+    })
     try {
       const response = await fetch(`${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`)
       const payload = await response.json()
       if (!payload?.success) {
         assetBrowserError = payload?.message ?? 'Failed to browse assets'
+        setRuntimeDiagnostic('toolsBridge', {
+          level: 'warning',
+          message: assetBrowserError,
+        })
         return
       }
       assetBrowserPath = path
       assetBrowserItems = payload.items
         .filter((item: any) => item.isDirectory || /\.(gltf|glb)$/i.test(item.name))
         .sort((a: any, b: any) => Number(b.isDirectory) - Number(a.isDirectory) || a.name.localeCompare(b.name))
+      setRuntimeDiagnostic('toolsBridge', {
+        level: 'ready',
+        message: `Asset browser connected. Loaded ${assetBrowserItems.length} entries from ${path}.`,
+      })
     } catch (error) {
       console.error('Asset browser load failed:', error)
       assetBrowserError = 'Asset browser unavailable'
+      reportRuntimeAssetFailure('asset-browser', assetBrowserError)
+      setRuntimeDiagnostic('toolsBridge', {
+        level: 'error',
+        message: `Asset browser unavailable at ${EDITOR_API_BASE}.`,
+      })
     } finally {
       assetBrowserLoading = false
     }
@@ -598,10 +676,18 @@
       hunyuanSupportsReplacement = !!payload.inspection.supportsReplacementGeneration
       hunyuanSupportsTextureWrap = !!payload.inspection.supportsTextureWrap
       hunyuanStatus = payload.inspection.message ?? 'Selected asset is ready for Hunyuan.'
+      setRuntimeDiagnostic('hunyuan', {
+        level: 'ready',
+        message: hunyuanStatus,
+      })
     } catch (error) {
       if (inspectToken !== hunyuanInspectToken || selectionKey !== hunyuanSelectionKey) return
       console.error('Hunyuan asset inspect failed:', error)
-      hunyuanStatus = 'Hunyuan bridge unavailable on localhost:3001.'
+      hunyuanStatus = `Hunyuan bridge unavailable at ${EDITOR_API_BASE}.`
+      setRuntimeDiagnostic('hunyuan', {
+        level: 'error',
+        message: hunyuanStatus,
+      })
     }
   }
 
@@ -664,6 +750,10 @@
       hunyuanLastOutputUrl = payload.assetUrl
       hunyuanServiceReady = true
       hunyuanStatus = payload.message ?? 'Generated asset imported into the selected node.'
+      setRuntimeDiagnostic('hunyuan', {
+        level: 'ready',
+        message: hunyuanStatus,
+      })
       saveMessage = `AI asset applied: ${payload.assetUrl}`
       if (selectedNode?.id === targetNodeId) {
         void inspectSelectedAssetForHunyuan(payload.assetUrl, targetNodeId)
@@ -673,6 +763,10 @@
       hunyuanStatus = error instanceof Error
         ? error.message
         : 'Hunyuan generation failed. Check the local server and Hunyuan API process.'
+      setRuntimeDiagnostic('hunyuan', {
+        level: 'error',
+        message: hunyuanStatus,
+      })
     } finally {
       hunyuanActiveJobId = ''
       hunyuanBusy = false
@@ -691,6 +785,10 @@
         hunyuanBackendCanGenerate = false
         hunyuanBackendCanRetexture = false
         hunyuanBackendStatus = payload?.message ?? 'Mesh backend unavailable.'
+        setRuntimeDiagnostic('hunyuan', {
+          level: 'warning',
+          message: hunyuanBackendStatus,
+        })
         return
       }
 
@@ -698,11 +796,19 @@
       hunyuanBackendCanGenerate = !!payload.status.supportsReplacementGeneration
       hunyuanBackendCanRetexture = !!payload.status.supportsTextureWrap
       hunyuanBackendStatus = payload.status.message ?? hunyuanBackendStatus
+      setRuntimeDiagnostic('hunyuan', {
+        level: hunyuanServiceReady ? 'ready' : 'warning',
+        message: hunyuanBackendStatus,
+      })
     } catch {
       hunyuanServiceReady = false
       hunyuanBackendCanGenerate = false
       hunyuanBackendCanRetexture = false
-      hunyuanBackendStatus = 'Mesh backend unavailable on localhost:3001.'
+      hunyuanBackendStatus = `Mesh backend unavailable at ${EDITOR_API_BASE}.`
+      setRuntimeDiagnostic('hunyuan', {
+        level: 'error',
+        message: hunyuanBackendStatus,
+      })
     }
   }
 
@@ -717,14 +823,26 @@
       if (!payload?.success || !payload?.status) {
         comfyUiReady = false
         comfyUiStatus = payload?.message ?? 'ComfyUI status unavailable.'
+        setRuntimeDiagnostic('comfyUi', {
+          level: 'warning',
+          message: comfyUiStatus,
+        })
         return
       }
 
       comfyUiReady = !!payload.status.available
       comfyUiStatus = payload.status.message ?? comfyUiStatus
+      setRuntimeDiagnostic('comfyUi', {
+        level: comfyUiReady ? 'ready' : 'warning',
+        message: comfyUiStatus,
+      })
     } catch {
       comfyUiReady = false
-      comfyUiStatus = 'ComfyUI bridge unavailable on localhost:3001.'
+      comfyUiStatus = `ComfyUI bridge unavailable at ${EDITOR_API_BASE}.`
+      setRuntimeDiagnostic('comfyUi', {
+        level: 'error',
+        message: comfyUiStatus,
+      })
     } finally {
       comfyUiBusy = false
     }
@@ -782,6 +900,10 @@
       hunyuanLastOutputUrl = payload.assetUrl
       hunyuanServiceReady = true
       hunyuanStatus = payload.message ?? `Generated ${sourceName} into the asset library.`
+      setRuntimeDiagnostic('hunyuan', {
+        level: 'ready',
+        message: hunyuanStatus,
+      })
       saveMessage = `AI asset created: ${payload.assetUrl}`
 
       await refreshGeneratedAssetLibrary(payload.assetUrl)
@@ -794,6 +916,10 @@
       hunyuanStatus = error instanceof Error
         ? error.message
         : 'Hunyuan generation failed. Check the local server and Hunyuan API process.'
+      setRuntimeDiagnostic('hunyuan', {
+        level: 'error',
+        message: hunyuanStatus,
+      })
     } finally {
       hunyuanActiveJobId = ''
       hunyuanBusy = false
@@ -857,6 +983,10 @@
       hunyuanLastOutputUrl = payload.assetUrl
       hunyuanServiceReady = true
       hunyuanStatus = payload.message ?? `${sourceName} generated into the asset library.`
+      setRuntimeDiagnostic('hunyuan', {
+        level: 'ready',
+        message: hunyuanStatus,
+      })
       saveMessage = `AI asset created: ${payload.assetUrl}`
 
       await refreshGeneratedAssetLibrary(payload.assetUrl)
@@ -865,6 +995,10 @@
       hunyuanStatus = error instanceof Error
         ? error.message
         : 'Hunyuan generation failed. Check the local server and Hunyuan API process.'
+      setRuntimeDiagnostic('hunyuan', {
+        level: 'error',
+        message: hunyuanStatus,
+      })
     } finally {
       hunyuanActiveJobId = ''
       hunyuanBusy = false
@@ -892,6 +1026,10 @@
     hunyuanStatus = initialQueuePosition > 1
       ? `Queued for AI generation. Position ${initialQueuePosition} in line.`
       : 'Queued for AI generation. Starting shortly…'
+    setRuntimeDiagnostic('hunyuan', {
+      level: 'loading',
+      message: hunyuanStatus,
+    })
 
     while (true) {
       await new Promise((resolve) => setTimeout(resolve, 2000))
@@ -910,11 +1048,19 @@
         hunyuanStatus = queuePosition > 1
           ? `Queued for AI generation. Position ${queuePosition} in line.`
           : 'Queued for AI generation. Starting shortly…'
+        setRuntimeDiagnostic('hunyuan', {
+          level: 'loading',
+          message: hunyuanStatus,
+        })
         continue
       }
 
       if (job.status === 'running') {
         hunyuanStatus = 'Generating asset with ComfyUI + Hunyuan… this can take a while.'
+        setRuntimeDiagnostic('hunyuan', {
+          level: 'loading',
+          message: hunyuanStatus,
+        })
         continue
       }
 
@@ -1305,30 +1451,217 @@
     })
   }
 
+  async function refreshLevelRegistryFromDisk() {
+    try {
+      const response = await fetch(`${EDITOR_API_BASE}/api/level-registry`)
+      const payload = await response.json()
+      if (payload?.success && Array.isArray(payload.entries)) {
+        setLevelRegistry(payload.entries)
+      }
+    } catch (error) {
+      console.warn('Level registry disk load unavailable, using in-memory registry.', error)
+    }
+  }
+
+  async function persistLevelRegistryEntries(entries: LevelRegistryEntry[]) {
+    setLevelRegistry(entries)
+
+    try {
+      const response = await fetch(`${EDITOR_API_BASE}/api/level-registry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entries }),
+      })
+      const payload = await response.json()
+      if (!payload?.success) {
+        throw new Error(payload?.message ?? 'Registry save failed')
+      }
+    } catch (error) {
+      console.error('Level registry save failed:', error)
+      saveMessage = 'Registry save failed locally'
+      throw error
+    }
+  }
+
+  function createScenePayload(targetLevelId: string, sourceScene = get(editorSceneStore) ?? createDefaultSceneForLevel(targetLevelId) ?? createEmptyScene(targetLevelId)) {
+    return {
+      ...structuredClone(sourceScene),
+      levelId: targetLevelId,
+      updatedAt: new Date().toISOString(),
+    }
+  }
+
+  function replaceRegistryEntry(nextEntry: LevelRegistryEntry) {
+    const remainingEntries = levelRegistryEntries.filter((entry) => entry.id !== nextEntry.id)
+    return [...remainingEntries, nextEntry].sort((left, right) => left.title.localeCompare(right.title))
+  }
+
+  function buildMetadataEntry(targetLevelId: string): LevelRegistryEntry {
+    const existingEntry = levelRegistryEntries.find((entry) => entry.id === targetLevelId)
+    const nextTitle = metadataTitle.trim() || existingEntry?.title || targetLevelId
+
+    return {
+      id: targetLevelId,
+      title: nextTitle,
+      status: metadataStatus,
+      deployed: metadataDeployed,
+      aliases: existingEntry?.aliases ?? [],
+      source: metadataSourceKind === 'component'
+        ? { kind: 'component', componentKey: metadataSourceComponentKey }
+        : { kind: 'scene', sceneId: targetLevelId },
+      starMap: {
+        enabled: metadataStarMapEnabled,
+        year: Number.isFinite(Number(metadataStarMapYear)) ? Number(metadataStarMapYear) : 2100,
+        era: existingEntry?.starMap?.era ?? 'unknown',
+        description: metadataStarMapDescription.trim() || `Enter ${nextTitle}`,
+      },
+    }
+  }
+
+  async function saveSceneDocumentToDisk(targetLevelId: string, sourceScene = get(editorSceneStore) ?? createEmptyScene(targetLevelId)) {
+    const payloadScene = createScenePayload(targetLevelId, sourceScene)
+    saveEditorSceneToLocalStorage(targetLevelId, payloadScene)
+
+    const response = await fetch(`${EDITOR_API_BASE}/api/editor-scene/save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ levelId: targetLevelId, scene: payloadScene }),
+    })
+    const payload = await response.json()
+    if (!payload?.success) {
+      throw new Error(payload?.message ?? 'Disk save failed')
+    }
+    return payload
+  }
+
   function saveScene() {
     const saved = saveSceneToLocalStorage(activeSceneLevelId)
     saveMessage = saved ? `Saved ${saved.updatedAt}` : 'Save failed'
   }
 
-  async function saveSceneToDisk() {
+  async function overwriteLevelScene() {
     const scene = get(editorSceneStore)
     if (!scene) {
-      saveMessage = 'Nothing to save'
+      saveMessage = 'Nothing to overwrite'
       return
     }
 
-    const saved = saveSceneToLocalStorage(activeSceneLevelId)
     try {
-      const response = await fetch(`${EDITOR_API_BASE}/api/editor-scene/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ levelId: activeSceneLevelId, scene: saved ?? scene }),
-      })
-      const payload = await response.json()
-      saveMessage = payload?.success ? `Saved to ${payload.path}` : payload?.message ?? 'Disk save failed'
+      const nextEntry = buildMetadataEntry(activeSceneLevelId)
+      await saveSceneDocumentToDisk(activeSceneLevelId, scene)
+      await persistLevelRegistryEntries(replaceRegistryEntry(nextEntry))
+      saveMessage = `Overwrote level ${nextEntry.title}`
     } catch (error) {
-      console.error('Editor disk save failed:', error)
-      saveMessage = 'Disk save unavailable; local save kept'
+      console.error('Overwrite level failed:', error)
+      saveMessage = 'Overwrite failed'
+    }
+  }
+
+  async function saveAsNewLevel() {
+    const targetLevelId = sanitizeLevelId(saveAsLevelId)
+    const title = saveAsTitle.trim() || metadataTitle.trim() || targetLevelId
+
+    if (!targetLevelId) {
+      saveMessage = 'Enter a level ID for Save As'
+      return
+    }
+
+    if (levelRegistryEntries.some((entry) => entry.id === targetLevelId)) {
+      saveMessage = 'That level ID already exists'
+      return
+    }
+
+    const scene = get(editorSceneStore)
+    if (!scene) {
+      saveMessage = 'Nothing to save as a new level'
+      return
+    }
+
+    const nextEntry: LevelRegistryEntry = {
+      id: targetLevelId,
+      title,
+      status: 'draft',
+      deployed: false,
+      aliases: [],
+      source: { kind: 'scene', sceneId: targetLevelId },
+      starMap: {
+        enabled: false,
+        year: Number(metadataStarMapYear) || 2100,
+        era: 'unknown',
+        description: `Enter ${title}`,
+      },
+    }
+
+    try {
+      await saveSceneDocumentToDisk(targetLevelId, scene)
+      await persistLevelRegistryEntries(replaceRegistryEntry(nextEntry))
+      saveMessage = `Saved new level ${title}`
+      saveAsLevelId = ''
+      saveAsTitle = ''
+      clearSelection()
+      gameActions.transitionToLevel(targetLevelId)
+    } catch (error) {
+      console.error('Save As new level failed:', error)
+      saveMessage = 'Save As failed'
+    }
+  }
+
+  async function createNewLevel() {
+    const targetLevelId = sanitizeLevelId(newLevelIdInput)
+    const title = newLevelTitle.trim() || targetLevelId
+
+    if (!targetLevelId) {
+      saveMessage = 'Enter a level ID'
+      return
+    }
+
+    if (levelRegistryEntries.some((entry) => entry.id === targetLevelId)) {
+      saveMessage = 'That level ID already exists'
+      return
+    }
+
+    const templateScene = newLevelTemplateId === activeSceneLevelId
+      ? get(editorSceneStore) ?? createDefaultSceneForLevel(newLevelTemplateId) ?? createEmptyScene(newLevelTemplateId)
+      : createDefaultSceneForLevel(newLevelTemplateId) ?? createEmptyScene(newLevelTemplateId)
+    const scenePayload = createScenePayload(targetLevelId, templateScene)
+    const nextEntry: LevelRegistryEntry = {
+      id: targetLevelId,
+      title,
+      status: 'draft',
+      deployed: false,
+      aliases: [],
+      source: { kind: 'scene', sceneId: targetLevelId },
+      starMap: {
+        enabled: false,
+        year: 2100,
+        era: 'unknown',
+        description: `Enter ${title}`,
+      },
+    }
+
+    try {
+      await saveSceneDocumentToDisk(targetLevelId, scenePayload)
+      await persistLevelRegistryEntries(replaceRegistryEntry(nextEntry))
+      newLevelTitle = ''
+      newLevelIdInput = ''
+      newLevelTemplateId = targetLevelId
+      saveMessage = `Created level ${title}`
+      clearSelection()
+      gameActions.transitionToLevel(targetLevelId)
+    } catch (error) {
+      console.error('Create level failed:', error)
+      saveMessage = 'Create level failed'
+    }
+  }
+
+  async function saveLevelMetadata() {
+    try {
+      const nextEntry = buildMetadataEntry(activeSceneLevelId)
+      await persistLevelRegistryEntries(replaceRegistryEntry(nextEntry))
+      saveMessage = `Updated ${nextEntry.title} metadata`
+    } catch (error) {
+      console.error('Save level metadata failed:', error)
+      saveMessage = 'Metadata save failed'
     }
   }
 
@@ -1447,6 +1780,21 @@
     }
   }
 
+  $: setRuntimeDiagnostic('selection', {
+    level:
+      selectedNodes.length > 1
+        ? 'warning'
+        : selectedNode
+          ? 'ready'
+          : 'idle',
+    message:
+      selectedNodes.length > 1
+        ? `${selectedNodes.length} nodes selected. AI tools require a single node.`
+        : selectedNode
+          ? `Selected node: ${selectedNode.name} (${selectedNode.kind}).`
+          : 'No editor selection active.',
+  })
+
   $: {
     const nextAssetUrl = getAiSourceAssetUrl(selectedNode)
     const inspectionKey = selectedNode?.id && nextAssetUrl ? `${selectedNode.id}:${nextAssetUrl}` : ''
@@ -1492,7 +1840,7 @@
 
   async function reloadFromDisk() {
     try {
-      const response = await fetch(`${EDITOR_API_BASE}/api/editor-scene/load?levelId=${encodeURIComponent(levelId)}`)
+      const response = await fetch(`${EDITOR_API_BASE}/api/editor-scene/load?levelId=${encodeURIComponent(activeSceneLevelId)}`)
       const payload = await response.json()
       if (payload?.success && payload.scene) {
         setEditorScene(payload.scene)
@@ -1507,7 +1855,7 @@
   }
 
   function resetToDefaultScene() {
-    setEditorScene(createDefaultSceneForLevel(levelId) ?? createEmptyScene(levelId))
+    setEditorScene(createDefaultSceneForLevel(activeSceneLevelId) ?? createEmptyScene(activeSceneLevelId))
     saveMessage = 'Reset to default scene'
   }
 
@@ -1535,6 +1883,7 @@
 
   onMount(() => {
     void loadAssetBrowser(assetBrowserPath)
+    void refreshLevelRegistryFromDisk()
   })
 
   onDestroy(() => {
@@ -1544,6 +1893,7 @@
     unsubState()
     unsubNodes()
     unsubScene()
+    unsubRegistry()
     unsubViewportState()
     unsubSelected()
     unsubSelectedNodes()
@@ -1580,7 +1930,6 @@
         </div>
 
         <div class="editor-tab-content" bind:this={editorTabContentElement}>
-      {#if activeEditorTab === 'scene' || activeEditorTab === 'environment'}
       {#if activeEditorTab === 'scene'}
       <div class="editor-section">
         <div class="label">History</div>
@@ -1595,7 +1944,7 @@
         <div class="button-row level-switch-row">
           <select class="text-input" bind:value={pendingLevelId}>
             {#each editorLevelOptions as option (option.id)}
-              <option value={option.id}>{option.label}</option>
+              <option value={option.id}>{option.label} {option.deployed ? '• deployed' : '• stored'} {option.status !== 'active' ? `• ${option.status}` : ''}</option>
             {/each}
           </select>
           <button on:click={switchEditorLevel} disabled={pendingLevelId === levelId}>Go</button>
@@ -1604,12 +1953,26 @@
       </div>
 
       <div class="editor-section">
+        <div class="label">New Level</div>
+        <input class="text-input" bind:value={newLevelTitle} placeholder="Display name" />
+        <input class="text-input editor-mt-input" bind:value={newLevelIdInput} placeholder="level-id" />
+        <select class="text-input editor-mt-input" bind:value={newLevelTemplateId}>
+          <option value={activeSceneLevelId}>Current Scene</option>
+          {#each editorLevelOptions as option (option.id)}
+            <option value={option.id}>{option.label}</option>
+          {/each}
+        </select>
+        <button class="full editor-mt-md" on:click={createNewLevel}>Create Level</button>
+        <div class="save-message">Creates a new scene-backed level file, adds it to the registry, and opens it in the editor.</div>
+      </div>
+
+      <div class="editor-section">
         <div class="label">Workflow</div>
         <div class="button-row compact-two-columns">
           <button class:active={editorState.interactionMode === 'objects'} on:click={() => setEditorInteractionMode('objects')}>Objects</button>
           <button class:active={editorState.interactionMode === 'terrain'} on:click={() => setEditorInteractionMode('terrain')} disabled={levelId !== 'observatory'}>Terrain</button>
         </div>
-        <div class="button-row compact-two-columns" style="margin-top:0.45rem;">
+        <div class="button-row compact-two-columns editor-mt-sm">
           <button class:active={editorState.viewportLightingMode === 'authored'} on:click={() => setEditorViewportLightingMode('authored')}>Rendered</button>
           <button class:active={editorState.viewportLightingMode === 'workbench'} on:click={() => setEditorViewportLightingMode('workbench')}>Workbench</button>
         </div>
@@ -1766,7 +2129,7 @@
           <button class:active={assetBrowserPath.startsWith(ASSET_LIBRARY_ROOT_MODELS)} on:click={() => selectAssetLibraryRoot(ASSET_LIBRARY_ROOT_MODELS)}>Imported Models</button>
           <button class:active={assetBrowserPath.startsWith(ASSET_LIBRARY_ROOT_GENERATED)} on:click={() => selectAssetLibraryRoot(ASSET_LIBRARY_ROOT_GENERATED)}>Generated Assets</button>
         </div>
-        <div class="button-row compact" style="margin-top:0.45rem;">
+        <div class="button-row compact editor-mt-sm">
           <button on:click={goUpAssetBrowser}>Up</button>
           <button on:click={() => loadAssetBrowser(assetBrowserPath)}>Refresh</button>
         </div>
@@ -1792,7 +2155,7 @@
             <div class="tuple-label">Selected Asset</div>
             <input class="text-input" value={selectedLibraryItem.name} readonly />
             <input class="text-input" value={getSelectedLibraryItemUrl()} readonly />
-            <div class="button-row compact-two-columns" style="margin-top:0.45rem;">
+            <div class="button-row compact-two-columns editor-mt-sm">
               <button on:click={addSelectedLibraryAssetToScene}>Add To Scene</button>
               <button disabled={hunyuanBusy || !getSelectedLibraryItemUrl()} on:click={() => void inspectSelectedAssetForHunyuan(getSelectedLibraryItemUrl(), selectedLibraryItem.path)}>Inspect AI</button>
             </div>
@@ -1807,7 +2170,7 @@
             {#if hunyuanDetectedReferenceImageUrl}
               <div class="save-message">Detected reference: {hunyuanDetectedReferenceImageUrl}</div>
             {/if}
-            <div class="button-grid" style="margin-top:0.45rem;">
+            <div class="button-grid editor-mt-sm">
               <button disabled={hunyuanBusy || !hunyuanBackendCanGenerate} on:click={() => runHunyuanForLibraryAsset('generate')}>
                 {hunyuanBusy ? 'Working…' : 'Reimagine To New Asset'}
               </button>
@@ -1826,11 +2189,11 @@
       <div class="editor-section">
         <div class="label">Hierarchy</div>
         <div class="save-message">{selectedNodes.length > 1 ? `${selectedNodes.length} selected` : selectedNodes.length === 1 ? '1 selected' : 'Nothing selected'}</div>
-        <div class="button-row compact" style="margin-bottom:0.45rem;">
+        <div class="button-row compact editor-mb-sm">
           <button on:click={isolateSelection} disabled={selectedNodes.length === 0}>Isolate</button>
           <button on:click={clearIsolatedNodes} disabled={editorState.isolatedNodeIds.length === 0}>Show All</button>
         </div>
-        <div class="button-row compact" style="margin-bottom:0.45rem;">
+        <div class="button-row compact editor-mb-sm">
           <button on:click={unhideAllNodes} disabled={!editorNodes.some((node) => !node.visible)}>Unhide All</button>
           <button on:click={unlockAllNodes} disabled={!editorNodes.some((node) => node.locked ?? false)}>Unlock All</button>
         </div>
@@ -1886,20 +2249,18 @@
             </div>
           {/each}
         </div>
-        <div class="button-row compact" style="margin-top:0.6rem;">
+        <div class="button-row compact editor-mt-md">
           <button on:click={groupSelection} disabled={selectedNodes.length === 0}>Group</button>
           <button on:click={ungroupSelection} disabled={!hasGroupSelection}>Ungroup</button>
         </div>
-        <div class="button-row compact" style="margin-top:0.45rem;">
+        <div class="button-row compact editor-mt-sm">
           <button on:click={duplicateSelection} disabled={selectedNodes.length === 0}>Duplicate</button>
           <button class="danger" on:click={deleteSelection} disabled={selectedNodes.length === 0}>Delete</button>
         </div>
-        <div class="button-row compact" style="margin-top:0.45rem;">
+        <div class="button-row compact editor-mt-sm">
           <button on:click={clearSelection} disabled={selectedNodes.length === 0}>Clear</button>
         </div>
       </div>
-
-      {/if}
 
       {/if}
 
@@ -2142,7 +2503,7 @@
                   {/each}
                 </select>
               </div>
-              <div class="tuple-row compact-two" style="margin-top:0.45rem;">
+              <div class="tuple-row compact-two editor-mt-sm">
                 <input class="tuple-input" type="number" step="0.01" value={selectedNode.gameplay.audioVolume ?? 0.24} on:change={(e) => updateGameplayNumericField('audioVolume', (e.currentTarget as HTMLInputElement).value)} />
                 <input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.regionFalloff ?? 12} on:change={(e) => updateGameplayNumericField('regionFalloff', (e.currentTarget as HTMLInputElement).value)} />
               </div>
@@ -2150,7 +2511,7 @@
             {:else if selectedNode.gameplay.type === 'fog-volume'}
               <div class="tuple-group"><div class="tuple-label">Volume Label</div><input class="text-input" value={selectedNode.gameplay.title ?? ''} on:input={(e) => updateGameplayField('title', (e.currentTarget as HTMLInputElement).value)} /></div>
               <div class="tuple-group"><div class="tuple-label">Fog Color</div><input class="text-input" type="color" value={selectedNode.gameplay.fogColor ?? '#9ba9bb'} on:input={(e) => updateGameplayField('fogColor', (e.currentTarget as HTMLInputElement).value)} /></div>
-              <div class="tuple-row compact-two" style="margin-top:0.45rem;">
+              <div class="tuple-row compact-two editor-mt-sm">
                 <input class="tuple-input" type="number" step="0.0001" value={selectedNode.gameplay.fogDensity ?? 0.0025} on:change={(e) => updateGameplayNumericField('fogDensity', (e.currentTarget as HTMLInputElement).value)} />
                 <input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.regionFalloff ?? 8} on:change={(e) => updateGameplayNumericField('regionFalloff', (e.currentTarget as HTMLInputElement).value)} />
               </div>
@@ -2197,150 +2558,114 @@
       {/if}
 
       {#if activeEditorTab === 'ai'}
-      <div class="editor-section">
-        <div class="label">AI Mesh Studio</div>
-        <div class="tuple-group">
-          <div class="tuple-label">ComfyUI</div>
-          <div class="save-message">{comfyUiStatus}</div>
+      {#if editorAIMeshStudioComponent}
+        <svelte:component
+          this={editorAIMeshStudioComponent}
+          bind:comfyUiApiUrl
+          {comfyUiStatus}
+          {comfyUiBusy}
+          {comfyUiReady}
+          bind:hunyuanApiUrl
+          {hunyuanStatus}
+          {hunyuanBackendStatus}
+          {hunyuanBusy}
+          {hunyuanServiceReady}
+          {hunyuanBackendCanGenerate}
+          {hunyuanBackendCanRetexture}
+          {hunyuanLastOutputUrl}
+          {hunyuanSupportsReplacement}
+          {hunyuanSupportsTextureWrap}
+          bind:hunyuanReferenceImageUrl
+          {hunyuanDetectedReferenceImageUrl}
+          bind:hunyuanPrompt
+          bind:hunyuanScratchName
+          bind:hunyuanScratchReferenceImageUrl
+          bind:hunyuanScratchPrompt
+          {selectedNode}
+          {selectedNodes}
+          {canUseAiMeshStudio}
+          {canRetextureSelection}
+          on:startComfyUi={() => refreshComfyUiServiceStatus(true)}
+          on:refreshComfyUi={() => refreshComfyUiServiceStatus(false)}
+          on:startHunyuan={() => refreshHunyuanServiceStatus(true)}
+          on:refreshHunyuan={() => refreshHunyuanServiceStatus(false)}
+          on:generateScratch={() => runHunyuanFromScratch()}
+          on:inspectSelection={() => selectedNode?.asset && void inspectSelectedAssetForHunyuan(selectedNode.asset.url, selectedNode.id)}
+          on:generateSelection={() => runHunyuanForSelection('generate')}
+          on:textureSelection={() => runHunyuanForSelection('texture')}
+        />
+      {:else}
+        <div class="editor-section">
+          <div class="save-message">Loading AI mesh tools…</div>
         </div>
-        <div class="button-row compact" style="margin-top:0.45rem;">
-          <button disabled={comfyUiBusy} on:click={() => refreshComfyUiServiceStatus(true)}>
-            {comfyUiBusy ? 'Working…' : comfyUiReady ? 'ComfyUI Ready' : 'Start ComfyUI'}
-          </button>
-          <button disabled={comfyUiBusy} on:click={() => refreshComfyUiServiceStatus(false)}>
-            Refresh ComfyUI
-          </button>
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">ComfyUI API</div>
-          <input class="text-input" value={comfyUiApiUrl} on:input={(e) => { comfyUiApiUrl = (e.currentTarget as HTMLInputElement).value }} />
-        </div>
-
-        <div class="tuple-group">
-          <div class="tuple-label">Mesh Backend</div>
-          <div class="save-message">{hunyuanBackendStatus}</div>
-        </div>
-        <div class="button-row compact" style="margin-top:0.45rem;">
-          <button disabled={hunyuanBusy} on:click={() => refreshHunyuanServiceStatus(true)}>
-            {hunyuanBusy ? 'Working…' : hunyuanServiceReady ? 'Backend Ready' : 'Start Hunyuan'}
-          </button>
-          <button disabled={hunyuanBusy} on:click={() => refreshHunyuanServiceStatus(false)}>
-            Refresh Backend
-          </button>
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Hunyuan API</div>
-          <input class="text-input" value={hunyuanApiUrl} on:input={(e) => { hunyuanApiUrl = (e.currentTarget as HTMLInputElement).value }} />
-        </div>
-        <div class="button-row compact">
-          <button
-            disabled={hunyuanBusy || !hunyuanBackendCanGenerate}
-            on:click={() => runHunyuanFromScratch()}
-          >
-            {hunyuanBusy ? 'Working…' : 'Generate New Mesh Asset'}
-          </button>
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">New Asset Name</div>
-          <input class="text-input" value={hunyuanScratchName} on:input={(e) => { hunyuanScratchName = (e.currentTarget as HTMLInputElement).value }} />
-        </div>
-        <div class="tuple-group">
-          <div class="tuple-label">Scratch Reference Image</div>
-          <input class="text-input" value={hunyuanScratchReferenceImageUrl} on:input={(e) => { hunyuanScratchReferenceImageUrl = (e.currentTarget as HTMLInputElement).value }} placeholder="/models/.../reference.png" />
-        </div>
-        <div class="save-message">Optional. Leave blank and the editor will generate a reference image from your prompt automatically before running Hunyuan.</div>
-        <div class="tuple-group">
-          <div class="tuple-label">Scratch Prompt</div>
-          <textarea
-            rows="4"
-            placeholder="Describe the new mesh you want to create. If no reference image is set, this prompt will be used to generate one first."
-            value={hunyuanScratchPrompt}
-            on:input={(e) => { hunyuanScratchPrompt = (e.currentTarget as HTMLTextAreaElement).value }}
-          ></textarea>
-        </div>
-        <div class="save-message">
-          {#if hunyuanBackendCanGenerate}
-            The backend is ready for prompt or reference-image generation.
-          {:else}
-            The mesh backend is online, but generation is currently unavailable. Read the backend status above for the exact limitation.
-          {/if}
-        </div>
-        {#if canUseAiMeshStudio(selectedNode) && selectedNodes.length <= 1}
-          <div class="editor-subsection">
-          <div class="tuple-group">
-            <div class="tuple-label">Selected Source</div>
-            <input class="text-input" value={selectedNode.name} readonly />
-          </div>
-          <div class="tuple-group">
-            <div class="tuple-label">{selectedNode?.asset ? 'Asset URL' : 'Source Type'}</div>
-            <input class="text-input" value={selectedNode?.asset ? selectedNode.asset.url : `Prefab · ${selectedNode?.prefab?.type ?? ''}`} readonly />
-          </div>
-          <div class="save-message">{hunyuanStatus}</div>
-          <div class="button-row compact" style="margin-top:0.45rem;">
-            <button disabled={hunyuanBusy || !selectedNode?.asset} on:click={() => selectedNode?.asset && void inspectSelectedAssetForHunyuan(selectedNode.asset.url, selectedNode.id)}>
-              Refresh Asset
-            </button>
-          </div>
-          <div class="tuple-group">
-            <div class="tuple-label">Reference Image</div>
-            <input class="text-input" value={hunyuanReferenceImageUrl} on:input={(e) => { hunyuanReferenceImageUrl = (e.currentTarget as HTMLInputElement).value }} placeholder="/models/.../textures/basecolor.jpg" />
-          </div>
-          {#if hunyuanDetectedReferenceImageUrl}
-            <div class="save-message">Detected reference: {hunyuanDetectedReferenceImageUrl}</div>
-          {:else}
-            <div class="save-message">Optional. Leave blank and the editor will generate a reference image from the prompt before generating or re-texturing.</div>
-          {/if}
-          <div class="tuple-group">
-            <div class="tuple-label">Prompt / Style Note</div>
-            <textarea
-              rows="4"
-              placeholder="Describe the mesh or texture treatment you want. If no reference image is set, this prompt will drive automatic reference-image generation."
-              value={hunyuanPrompt}
-              on:input={(e) => { hunyuanPrompt = (e.currentTarget as HTMLTextAreaElement).value }}
-            ></textarea>
-          </div>
-          <div class="button-grid">
-            <button
-              disabled={hunyuanBusy || !hunyuanBackendCanGenerate || !hunyuanSupportsReplacement}
-              on:click={() => runHunyuanForSelection('generate')}
-            >
-              {hunyuanBusy ? 'Working…' : selectedNode?.asset ? 'Generate Replacement Mesh' : 'Generate From Prefab'}
-            </button>
-            <button
-              disabled={hunyuanBusy || !hunyuanBackendCanRetexture || !hunyuanSupportsTextureWrap || !canRetextureSelection(selectedNode)}
-              on:click={() => runHunyuanForSelection('texture')}
-            >
-              {hunyuanBusy ? 'Working…' : 'Re-Texture Existing Mesh'}
-            </button>
-          </div>
-          <div class="save-message">{selectedNode?.asset ? 'Generate a new textured GLB from the selected asset, or keep the mesh and ask Hunyuan to regenerate its wrapped texture set.' : 'Generate a brand-new textured GLB from this prefab selection. Once generated, the node will switch from prefab rendering to the imported mesh asset.'}</div>
-          {#if hunyuanLastOutputUrl}
-            <div class="tuple-group">
-              <div class="tuple-label">Generated Asset</div>
-              <input class="text-input" value={hunyuanLastOutputUrl} readonly />
-            </div>
-          {/if}
-          </div>
-        {:else if selectedNodes.length > 1}
-          <div class="save-message">AI mesh tools need a single selected asset node. Multi-selection is not supported here.</div>
-        {:else if selectedNode}
-          <div class="save-message">The current selection is not an imported asset or supported prefab. Select a mesh-backed asset node or a procedural prefab to open AI mesh generation.</div>
-        {:else}
-          <div class="save-message">Select a single imported asset or prefab in the hierarchy, then use this panel to generate a new mesh or re-texture it.</div>
-        {/if}
-      </div>
+      {/if}
       {/if}
 
       {#if activeEditorTab === 'save'}
       <div class="editor-section">
+        <div class="label">Level File</div>
+        <div class="tuple-group">
+          <div class="tuple-label">Title</div>
+          <input class="text-input" bind:value={metadataTitle} />
+        </div>
+        <div class="tuple-group">
+          <div class="tuple-label">Status</div>
+          <select class="text-input" bind:value={metadataStatus}>
+            <option value="active">Active</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+        <label class="checkbox"><input type="checkbox" bind:checked={metadataDeployed} /> Deploy for gameplay</label>
+        <label class="checkbox"><input type="checkbox" bind:checked={metadataStarMapEnabled} disabled={!metadataDeployed} /> Show on star map</label>
+        <div class="tuple-group">
+          <div class="tuple-label">Runtime Source</div>
+          <select class="text-input" bind:value={metadataSourceKind}>
+            <option value="scene">Scene File</option>
+            <option value="component">Built-In Runtime</option>
+          </select>
+        </div>
+        {#if metadataSourceKind === 'component'}
+          <div class="tuple-group">
+            <div class="tuple-label">Built-In Level</div>
+            <select class="text-input" bind:value={metadataSourceComponentKey}>
+              <option value="observatory">Observatory</option>
+              <option value="sci-fi-room">Sci Fi Room</option>
+              <option value="miranda">Miranda Wreck</option>
+              <option value="solitude">Solitude</option>
+            </select>
+          </div>
+        {/if}
+        <div class="tuple-group">
+          <div class="tuple-label">Star Year</div>
+          <input class="tuple-input" type="number" bind:value={metadataStarMapYear} disabled={!metadataStarMapEnabled || !metadataDeployed} />
+        </div>
+        <div class="tuple-group">
+          <div class="tuple-label">Star Description</div>
+          <input class="text-input" bind:value={metadataStarMapDescription} disabled={!metadataStarMapEnabled || !metadataDeployed} />
+        </div>
+        <button class="full" on:click={saveLevelMetadata}>Save Level Metadata</button>
+        <div class="save-message">Levels can exist as drafts or archives without being deployed to players. Only deployed star-map levels get navigation stars.</div>
+      </div>
+
+      <div class="editor-section">
         <div class="label">Persistence</div>
         <div class="button-grid">
           <button on:click={saveScene}>Save Local</button>
-          <button on:click={saveSceneToDisk}>Save Disk</button>
+          <button on:click={overwriteLevelScene}>Overwrite Level</button>
           <button on:click={copySceneJson}>Copy JSON</button>
           <button on:click={reloadFromDisk}>Reload Disk</button>
           <button on:click={resetToDefaultScene}>Reset Default</button>
         </div>
+        <div class="tuple-group editor-mt-lg">
+          <div class="tuple-label">Save As Title</div>
+          <input class="text-input" bind:value={saveAsTitle} placeholder="Display name" />
+        </div>
+        <div class="tuple-group">
+          <div class="tuple-label">Save As Level ID</div>
+          <input class="text-input" bind:value={saveAsLevelId} placeholder="new-level-id" />
+        </div>
+        <button class="full" on:click={saveAsNewLevel}>Save As New Level</button>
         <textarea bind:value={importBuffer} rows="6" placeholder="Paste scene JSON here"></textarea>
         <button class="full" on:click={applyImport}>Import JSON</button>
         <div class="save-message">{saveMessage}</div>
@@ -2414,9 +2739,6 @@
   }
   .editor-title { font-weight: 700; }
   .editor-subtitle { font-size: 0.75rem; color: #9bc7e4; }
-  .collapse-btn, button {
-    background: rgba(30, 52, 73, 0.8); color: #e8f5ff; border: 1px solid rgba(126, 203, 255, 0.2); border-radius: 0.45rem; padding: 0.45rem 0.6rem;
-  }
   .editor-tab {
     display: grid;
     justify-items: center;
@@ -2432,21 +2754,11 @@
     display: block;
     text-align: center;
   }
-  button.active, .hierarchy-item.selected .hierarchy-entry { background: rgba(86, 148, 192, 0.35); }
-  button.danger { color: #ffb3c0; border-color: rgba(255, 120, 140, 0.35); }
-  .editor-section { padding: 0.9rem 1rem; border-bottom: 1px solid rgba(126, 203, 255, 0.08); }
   .editor-subsection {
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid rgba(126, 203, 255, 0.08);
   }
-  .label { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: #8fb7d4; margin-bottom: 0.55rem; }
-  .button-row, .button-grid { display: grid; gap: 0.45rem; }
-  .button-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .button-row.compact { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 0.45rem; }
-  .button-row.compact-two-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .button-row.level-switch-row { grid-template-columns: minmax(0, 1fr) auto; }
-  .button-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .asset-list { display: grid; gap: 0.45rem; margin-top: 0.55rem; }
   .hierarchy-root-drop {
     margin-bottom: 0.45rem;
@@ -2470,20 +2782,7 @@
   .hierarchy-actions button { min-width: 2.1rem; padding: 0.35rem 0.4rem; }
   .node-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .kind { font-size: 0.7rem; color: #8fb7d4; text-transform: uppercase; }
-  .text-input, .tuple-input, textarea {
-    width: 100%; background: rgba(7, 12, 18, 0.88); color: #ecf7ff; border: 1px solid rgba(126, 203, 255, 0.14); border-radius: 0.45rem; padding: 0.45rem 0.55rem;
-  }
-  .tuple-group { margin-top: 0.65rem; }
-  .tuple-label { font-size: 0.75rem; color: #8fb7d4; margin-bottom: 0.35rem; }
-  .tuple-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.4rem; }
-  .tuple-row.compact-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .tuple-row.dynamic-grid { grid-template-columns: repeat(auto-fit, minmax(4rem, 1fr)); }
-  .checkbox { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.55rem; font-size: 0.9rem; }
-  textarea { margin-top: 0.55rem; resize: vertical; }
-  .full { width: 100%; margin-top: 0.55rem; }
-  .save-message { margin-top: 0.45rem; font-size: 0.78rem; color: #9bc7e4; }
   .path-label { word-break: break-all; }
-  .error-message { color: #ffb3c0; }
   .asset-browser-list { max-height: 14rem; }
 
   @media (max-width: 900px) {

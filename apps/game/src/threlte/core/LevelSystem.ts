@@ -8,6 +8,7 @@
 
 import * as THREE from 'three'
 import type { LightingManager } from '../features/lighting/LightingManager'
+const isDev = import.meta.env.DEV
 
 // Core interfaces that any level component must implement
 export interface LevelComponent {
@@ -71,7 +72,7 @@ export class SystemRegistry {
   }
 
   registerComponent(component: LevelComponent): void {
-    console.log(`📋 Registering component: ${component.id} (${component.type})`)
+    if (isDev) console.log(`📋 Registering component: ${component.id} (${component.type})`)
     
     this.components.set(component.id, component)
     
@@ -103,7 +104,7 @@ export class SystemRegistry {
           typeComponents.splice(index, 1)
         }
       }
-      console.log(`📋 Unregistered component: ${componentId}`)
+      if (isDev) console.log(`📋 Unregistered component: ${componentId}`)
     }
   }
 
@@ -226,7 +227,7 @@ export abstract class BaseLevelComponent implements LevelComponent {
     await this.onInitialize()
     this.isInitialized = true
     
-    console.log(`✅ Component ${this.id} initialized`)
+    if (isDev) console.log(`✅ Component ${this.id} initialized`)
   }
 
   update(deltaTime: number): void {
@@ -246,7 +247,7 @@ export abstract class BaseLevelComponent implements LevelComponent {
     this.isDisposed = true
     this.context = undefined
     
-    console.log(`🧹 Component ${this.id} disposed`)
+    if (isDev) console.log(`🧹 Component ${this.id} disposed`)
   }
 
   protected sendMessage(type: MessageType, data: any, target?: string, priority: 'low' | 'normal' | 'high' | 'critical' = 'normal'): void {

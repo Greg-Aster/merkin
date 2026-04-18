@@ -5,6 +5,7 @@
 <script lang="ts">
 import { T } from '@threlte/core'
 import { onMount } from 'svelte'
+const isDev = import.meta.env.DEV
 
 // Configuration
 export let toneMappingExposure = 1.0
@@ -18,7 +19,9 @@ const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/
 $: mobileExposure = isMobile ? toneMappingExposure * 0.9 : toneMappingExposure
 
 onMount(() => {
-  console.log('✨ Simple Threlte post-processing effects loaded')
+  if (isDev) {
+    console.log('✨ Simple Threlte post-processing effects loaded')
+  }
 })
 </script>
 
@@ -27,7 +30,3 @@ onMount(() => {
   Lighting has been moved to level-specific components (e.g., Observatory.svelte)
   to prevent conflicts and give each level unique atmospheric control.
 -->
-
-<style>
-/* No styles needed */
-</style>

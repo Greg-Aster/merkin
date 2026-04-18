@@ -14,6 +14,7 @@
   import { Terrain, terrainStore, type TerrainConfig } from '../features/terrain'
   import { editorStateStore, observatoryEditorSettingsStore } from '../editor/editorStore'
   import { resolveObservatoryPresetSettings } from '../editor/editorLevelPresets'
+  import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 
   const dispatch = createEventDispatcher()
   const isDev = import.meta.env.DEV
@@ -58,6 +59,7 @@
   let isLoadingTimeline = true
   let timelineLoadError: string | null = null
   let appliedTerrainOverrideSignature = ''
+  let loadToken = 0
 
   function mergeDeep<T>(base: T, overrides: Partial<T> | null | undefined): T {
     if (!overrides) return structuredClone(base)
@@ -113,31 +115,38 @@
 
   // --- Lifecycle & Data Loading ---
   onMount(() => {
-    loadLevelFromManifest();
-    loadTimelineData();
-  });
+    const token = ++loadToken
+    void loadLevelFromManifest(token)
+    void loadTimelineData(token)
+  })
 
   onDestroy(() => {
     deferredSceneBootCleanups.forEach((cleanup) => cleanup())
     deferredSceneBootCleanups.length = 0
   })
 
-  async function loadLevelFromManifest() {
+  async function loadLevelFromManifest(token: number) {
+    setRuntimeDiagnostic('levelBoot', {
+      level: 'loading',
+      message: 'Loading level manifest and terrain configuration.',
+    })
+
     try {
-      const response = await fetch(manifestUrl);
+      const response = await fetch(manifestUrl)
       if (!response.ok) {
-        throw new Error(`Failed to fetch level manifest: ${response.statusText}`);
+        throw new Error(`Failed to fetch level manifest: ${response.statusText}`)
       }
-      const data = await response.json();
-      manifest = data;
+      const data = await response.json()
+      if (token !== loadToken) return
+      manifest = data
 
       // Configure the level based on the loaded manifest
-      playerSpawnPoint = manifest.spawn.position;
+      playerSpawnPoint = manifest.spawn.position
 
       // Configure style settings from manifest
       if (manifest.style) {
-        stylePreset = manifest.style.preset || 'ghibli';
-        enableToonShading = manifest.style.enabled !== false;
+        stylePreset = manifest.style.preset || 'ghibli'
+        enableToonShading = manifest.style.enabled !== false
       }
 
       // Load bounds information from heightmap config if not in manifest
@@ -165,7 +174,7 @@
               worldSizeZ: worldSizeZ
             };
             
-            if (import.meta.env.DEV) console.log('✅ Loaded terrain config from heightmap:', {
+            if (isDev) console.log('✅ Loaded terrain config from heightmap:', {
               bounds: terrainBounds,
               worldSizeX: worldSizeX,
               worldSizeZ: worldSizeZ,
@@ -179,7 +188,7 @@
             });
           }
         } catch (e) {
-          if (import.meta.env.DEV) console.warn('⚠️ Could not load heightmap config for bounds:', e);
+          if (isDev) console.warn('⚠️ Could not load heightmap config for bounds:', e);
         }
       }
 
@@ -239,10 +248,26 @@
         }
       });
 
-      if (isDev) console.log(`✅ Level "${manifest.name}" loaded successfully from manifest.`);
+      if (token !== loadToken) return
+
+      if (isDev) console.log(`✅ Level "${manifest.name}" loaded successfully from manifest.`)
+      setRuntimeDiagnostic('levelBoot', {
+        level: 'ready',
+        message: `Loaded ${manifest.name} manifest and terrain configuration.`,
+        meta: {
+          manifestId: manifest.id,
+          manifestUrl,
+        },
+      })
 
     } catch (error) {
-      console.error(`❌ Failed to load level from ${manifestUrl}:`, error);
+      if (token !== loadToken) return
+      console.error(`❌ Failed to load level from ${manifestUrl}:`, error)
+      setRuntimeDiagnostic('levelBoot', {
+        level: 'error',
+        message: error instanceof Error ? error.message : 'Unknown level load failure.',
+        meta: { manifestUrl },
+      })
     }
   }
 
@@ -255,7 +280,12 @@
   }
 
   // --- Timeline Data Handling ---
-  function loadTimelineData() {
+  async function loadTimelineData(token: number) {
+    setRuntimeDiagnostic('timeline', {
+      level: 'loading',
+      message: 'Loading timeline data for star systems.',
+    })
+
     try {
       isLoadingTimeline = true
       timelineLoadError = null
@@ -266,11 +296,26 @@
       } else {
         realTimelineEvents = []
       }
+      if (token !== loadToken) return
+      setRuntimeDiagnostic('timeline', {
+        level: 'ready',
+        message: `Loaded ${realTimelineEvents.length} timeline events.`,
+        meta: {
+          eventCount: realTimelineEvents.length,
+        },
+      })
     } catch (error) {
+      if (token !== loadToken) return
       console.error('❌ Failed to process timeline data:', error)
       timelineLoadError = error instanceof Error ? error.message : 'Unknown error'
+      setRuntimeDiagnostic('timeline', {
+        level: 'error',
+        message: timelineLoadError,
+      })
     } finally {
-      isLoadingTimeline = false
+      if (token === loadToken) {
+        isLoadingTimeline = false
+      }
     }
   }
 

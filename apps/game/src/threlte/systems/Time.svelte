@@ -8,6 +8,7 @@ import { onMount, onDestroy, createEventDispatcher } from 'svelte'
 import { writable } from 'svelte/store'
 
 const dispatch = createEventDispatcher()
+const isDev = import.meta.env.DEV
 
 // Reactive stores for time data
 export const deltaTimeStore = writable(0)
@@ -30,7 +31,7 @@ export let fps = 60
 export let frameCount = 0
 
 onMount(() => {
-  console.log('⏰ Initializing Threlte Time System...')
+  if (isDev) console.log('⏰ Initializing Threlte Time System...')
   
   // Initialize time tracking
   const now = performance.now()
@@ -39,7 +40,7 @@ onMount(() => {
   fpsStartTime = now
   
   isInitialized = true
-  console.log('✅ Threlte Time System initialized')
+  if (isDev) console.log('✅ Threlte Time System initialized')
 })
 
 // Update time system every frame
@@ -149,7 +150,7 @@ export function getTimeInfo() {
 }
 
 onDestroy(() => {
-  console.log('🧹 Threlte Time System disposed')
+  if (isDev) console.log('🧹 Threlte Time System disposed')
 })
 </script>
 

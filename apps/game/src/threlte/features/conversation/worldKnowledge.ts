@@ -39,6 +39,8 @@ export interface ContextResult {
   totalRelevance: number
 }
 
+const isDev = import.meta.env.DEV
+
 // Character knowledge has been moved to individual files in characterKnowledge/
 // This file now focuses purely on world events, locations, and relationships
 
@@ -301,11 +303,13 @@ export class WorldKnowledgeSystem {
         
         const characterDocs = await characterKnowledge.searchCharacterKnowledge(fireflyCharacterId, searchQuery)
         
-        console.log(`🔍 Character search for ${fireflyCharacterId}:`, {
-          query: searchQuery,
-          foundDocs: characterDocs.length,
-          docTitles: characterDocs.map((doc: any) => doc.title)
-        })
+        if (isDev) {
+          console.log(`🔍 Character search for ${fireflyCharacterId}:`, {
+            query: searchQuery,
+            foundDocs: characterDocs.length,
+            docTitles: characterDocs.map((doc: any) => doc.title)
+          })
+        }
 
         characterResults = characterDocs.slice(0, 2).map((doc: any) => ({
           document: doc,
@@ -313,13 +317,17 @@ export class WorldKnowledgeSystem {
           matchedTerms: []
         }))
       } else {
-        console.log(`No extensive knowledge available for character: ${fireflyCharacterId}`)
+        if (isDev) {
+          console.log(`No extensive knowledge available for character: ${fireflyCharacterId}`)
+        }
       }
     } catch (error) {
       console.error('Error importing modern character knowledge:', error)
       
       // No fallback needed - modern system only
-      console.log('🚫 Legacy character system removed - using modern system only')
+      if (isDev) {
+        console.log('🚫 Legacy character system removed - using modern system only')
+      }
     }
 
     // Combine results with character-specific knowledge prioritized
@@ -365,7 +373,9 @@ export class WorldKnowledgeSystem {
    * This method is deprecated - use characterKnowledge system directly
    */
   getCharacterKnowledge(characterId: string): WorldDocument | null {
-    console.warn('getCharacterKnowledge is deprecated - use characterKnowledge system directly')
+    if (isDev) {
+      console.warn('getCharacterKnowledge is deprecated - use characterKnowledge system directly')
+    }
     return null // Character knowledge moved to separate system
   }
 

@@ -12,6 +12,7 @@
   import { LightingManager } from '../features/lighting'
   import { ECSWorldManager } from './ECSIntegration'
   import { recordSystemTiming } from '../features/performance'
+  const isDev = import.meta.env.DEV
 
   // --- 1. Initialize Managers Immediately (without scene) ---
   export let registry: SystemRegistry = new SystemRegistry()
@@ -43,7 +44,7 @@
 
   // --- 3. Safely Get Scene and Finalize Initialization in onMount ---
   onMount(() => {
-    console.log('🏗️ Level Manager: onMount triggered.')
+    if (isDev) console.log('🏗️ Level Manager: onMount triggered.')
 
     // It is now safe to get the Threlte context.
     const { scene } = useThrelte()
@@ -53,15 +54,15 @@
       // of the systems that need it.
       lighting.initialize(scene)
       levelContext.scene = scene // Update context if needed elsewhere
-      console.log('💡 Level Manager: LightingManager initialized with scene.')
-      console.log('✅ Level Manager: Ready')
+      if (isDev) console.log('💡 Level Manager: LightingManager initialized with scene.')
+      if (isDev) console.log('✅ Level Manager: Ready')
     } else {
       console.error('❌ Level Manager: Scene not available onMount!')
     }
   })
 
   onDestroy(() => {
-    console.log('🧹 Level Manager: Cleaning up...')
+    if (isDev) console.log('🧹 Level Manager: Cleaning up...')
     registry.dispose()
   })
 
@@ -112,7 +113,3 @@
 
 <!-- Level content goes in the slot -->
 <slot {registry} {lighting} {levelContext} />
-
-<style>
-  /* No styles needed */
-</style>

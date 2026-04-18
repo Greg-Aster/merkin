@@ -27,6 +27,7 @@ export let enableSpatialAudio = true
 const dispatch = createEventDispatcher()
 const GAME_AMBIENCE_ID = gameAudioProfile.ambience.id
 const GAME_AUDIO_BASE = import.meta.env.BASE_URL || '/'
+const isDev = import.meta.env.DEV
 
 // Simple audio manager implementation using Howler.js
 class SimpleAudioManager {
@@ -42,7 +43,9 @@ class SimpleAudioManager {
       Howler.autoSuspend = false
       
       this.initialized = true
-      console.log('🎵 SimpleAudioManager initialized with Howler.js')
+      if (isDev) {
+        console.log('🎵 SimpleAudioManager initialized with Howler.js')
+      }
     } catch (error) {
       console.error('Failed to initialize audio:', error)
       throw error
@@ -328,12 +331,16 @@ onMount(async () => {
   masterVolumeStore.set(masterVolume)
   
   if (!enabled) {
-    console.log('🔇 Audio system disabled for performance')
+    if (isDev) {
+      console.log('🔇 Audio system disabled for performance')
+    }
     return
   }
 
   try {
-    console.log('🎵 Initializing Threlte Audio System...')
+    if (isDev) {
+      console.log('🎵 Initializing Threlte Audio System...')
+    }
     
     // Create and initialize audio manager
     audioManager = new SimpleAudioManager()
@@ -350,7 +357,9 @@ onMount(async () => {
     ensureConfiguredSfx('scroll')
     
     isInitialized = true
-    console.log('✅ Threlte Audio System initialized')
+    if (isDev) {
+      console.log('✅ Threlte Audio System initialized')
+    }
     
     dispatch('audioInitialized', { audioManager })
     window.addEventListener('pointerdown', handlePointerDown, true)
@@ -481,7 +490,9 @@ onDestroy(() => {
   }
   if (audioManager) {
     audioManager.dispose()
-    console.log('🧹 Threlte Audio System disposed')
+    if (isDev) {
+      console.log('🧹 Threlte Audio System disposed')
+    }
   }
 })
 

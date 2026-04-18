@@ -144,10 +144,3 @@
 
 <!-- This component doesn't render any Svelte markup -->
 <!-- It creates and manages a DOM overlay element directly -->
-
-<style>
-  /* 
-    Styles are applied directly via JavaScript for performance
-    and to ensure the overlay appears above the Threlte canvas
-  */
-</style>

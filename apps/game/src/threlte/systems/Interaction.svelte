@@ -9,6 +9,7 @@ import { writable } from 'svelte/store'
 import * as THREE from 'three'
 
 const dispatch = createEventDispatcher()
+const isDev = import.meta.env.DEV
 
 // Reactive stores for interaction state
 export const hoveredObjectStore = writable(null)
@@ -16,6 +17,7 @@ export const selectedObjectStore = writable(null)
 export const interactableObjectsStore = writable([])
 
 let isInitialized = false
+let deferredInitFrame: number | null = null
 
 // Get Threlte context
 const { camera, renderer } = useThrelte()
@@ -30,24 +32,41 @@ export let container: HTMLElement | null = null
 export let enableRaycasting = true
 export let maxInteractionDistance = 10
 
-onMount(async () => {
-  console.log('🖱️ Initializing Threlte Interaction System...')
-  
-  // Wait for camera and container to be available
+function initializeInteractionSystem() {
+  if (isInitialized) return
+
   if (!camera || !container) {
-    console.warn('Camera or container not available for interaction system')
+    if (deferredInitFrame === null) {
+      deferredInitFrame = requestAnimationFrame(() => {
+        deferredInitFrame = null
+        initializeInteractionSystem()
+      })
+      return
+    }
+
+    if (isDev) {
+      console.warn('Camera or container not available for interaction system')
+    }
     return
   }
-  
+
   try {
-    // Set up interaction tracking
     setupInteractionTracking()
-    
     isInitialized = true
-    console.log('✅ Threlte Interaction System initialized')
+    if (isDev) {
+      console.log('✅ Threlte Interaction System initialized')
+    }
   } catch (error) {
     console.error('❌ Failed to initialize Interaction System:', error)
   }
+}
+
+onMount(async () => {
+  if (isDev) {
+    console.log('🖱️ Initializing Threlte Interaction System...')
+  }
+
+  initializeInteractionSystem()
 })
 
 /**
@@ -322,6 +341,11 @@ export function removeInteractable(object: THREE.Object3D) {
 }
 
 onDestroy(() => {
+  if (deferredInitFrame !== null) {
+    cancelAnimationFrame(deferredInitFrame)
+    deferredInitFrame = null
+  }
+
   if (container) {
     container.removeEventListener('mousemove', handleMouseMove)
     container.removeEventListener('click', handleClick)
@@ -330,7 +354,9 @@ onDestroy(() => {
     container.removeEventListener('touchend', handleTouchEnd)
   }
   
-  console.log('🧹 Threlte Interaction System disposed')
+  if (isDev) {
+    console.log('🧹 Threlte Interaction System disposed')
+  }
 })
 
 </script>

@@ -65,5 +65,8 @@ if (typeof window !== 'undefined') {
     registry: characterRegistry,
     compatibility: characterKnowledge
   }
-  console.log('🔧 Modern Character System loaded and available globally')
+  if (isDev) {
+    console.log('🔧 Modern Character System loaded and available globally')
+  }
 }
+const isDev = import.meta.env.DEV

@@ -9,6 +9,7 @@ import * as THREE from 'three'
 import { writable, type Writable, get } from 'svelte/store'
 import type { SystemRegistry, LevelComponent, ComponentType, LevelContext, SystemMessage, MessageType } from './LevelSystem'
 import { getPalette, type StylePreset, type ColorPalette } from '../styles/StylePalettes'
+const isDev = import.meta.env.DEV
 
 // Style system stores
 export const currentStylePresetStore = writable<StylePreset>('ghibli')
@@ -36,7 +37,7 @@ export class StyleManager {
       this.updateStylePreset(preset)
     })
     
-    console.log('🎨 StyleManager initialized')
+    if (isDev) console.log('🎨 StyleManager initialized')
   }
   
   /**
@@ -60,7 +61,7 @@ export class StyleManager {
       priority: 'high'
     })
     
-    console.log(`🎨 Style preset changed to: ${preset}`)
+    if (isDev) console.log(`🎨 Style preset changed to: ${preset}`)
   }
   
   /**
@@ -322,7 +323,7 @@ export class StyleManager {
     if (this.toonGradientMap) {
       this.toonGradientMap.dispose()
     }
-    console.log('🧹 StyleManager disposed')
+    if (isDev) console.log('🧹 StyleManager disposed')
   }
 }
 
@@ -360,7 +361,7 @@ export class StyleSystemComponent implements LevelComponent {
     }
     
     styleSystemReadyStore.set(true)
-    console.log('✅ Style system component initialized')
+    if (isDev) console.log('✅ Style system component initialized')
   }
   
   update(deltaTime: number): void {

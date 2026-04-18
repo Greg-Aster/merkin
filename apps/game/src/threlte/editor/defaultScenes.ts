@@ -1,4 +1,8 @@
 import type { EditorSceneDocument, EditorSceneNode } from './editorTypes'
+import mirandaPackagedScene from './scenes/miranda.scene.json'
+import observatoryPackagedScene from './scenes/observatory.scene.json'
+import sciFiRoomPackagedScene from './scenes/sci-fi-room.scene.json'
+import solitudePackagedScene from './scenes/solitude.scene.json'
 
 function nowIso() {
   return new Date().toISOString()
@@ -15,6 +19,179 @@ const SCI_FI_ROOM_WALL_THICKNESS = 0.12 * SCI_FI_ROOM_SCALE
 const SCI_FI_ROOM_COURTYARD_Z = SCI_FI_ROOM_DEPTH + 3.0
 const SCI_FI_ROOM_WASTELAND_Z = SCI_FI_ROOM_DEPTH + 6.0
 const SCI_FI_ROOM_WASTELAND_TILE_THICKNESS = SCI_FI_ROOM_WALL_THICKNESS * 0.8
+const PACKAGED_DEFAULT_SCENES: Record<string, EditorSceneDocument> = {
+  observatory: observatoryPackagedScene as EditorSceneDocument,
+  'sci-fi-room': sciFiRoomPackagedScene as EditorSceneDocument,
+  miranda: mirandaPackagedScene as EditorSceneDocument,
+  solitude: solitudePackagedScene as EditorSceneDocument,
+}
+
+function getPackagedDefaultScene(levelId: string) {
+  const scene = PACKAGED_DEFAULT_SCENES[levelId]
+  return scene ? structuredClone(scene) as EditorSceneDocument : null
+}
+
+function createSolitudeGroundNodes(): EditorSceneNode[] {
+  return [
+    {
+      id: 'solitude-ground-root',
+      name: 'Solitude Ground',
+      kind: 'group',
+      position: [0, 0, 0],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+      visible: true,
+    },
+    {
+      id: 'solitude-ground-plateau',
+      name: 'Solitude Plateau',
+      kind: 'primitive',
+      parentId: 'solitude-ground-root',
+      position: [0, -1.2, 0],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+      visible: true,
+      collision: { shape: 'cuboid', friction: 0.92 },
+      primitive: {
+        geometry: 'box',
+        args: [240, 2.4, 240],
+        color: '#6b7480',
+        emissive: '#242d38',
+        emissiveIntensity: 0.05,
+        metalness: 0.06,
+        roughness: 0.94,
+      },
+    },
+    {
+      id: 'solitude-ground-dais',
+      name: 'Ruin Dais',
+      kind: 'primitive',
+      parentId: 'solitude-ground-root',
+      position: [0, -0.18, 0],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+      visible: true,
+      collision: { shape: 'cuboid', friction: 0.94 },
+      primitive: {
+        geometry: 'box',
+        args: [44, 0.8, 44],
+        color: '#7b8797',
+        emissive: '#2f3947',
+        emissiveIntensity: 0.08,
+        metalness: 0.08,
+        roughness: 0.9,
+      },
+    },
+  ]
+}
+
+function createMirandaGroundNodes(): EditorSceneNode[] {
+  return [
+    {
+      id: 'miranda-ground-root',
+      name: 'Miranda Structure Shell',
+      kind: 'group',
+      position: [0, 0, 0],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+      visible: true,
+    },
+    {
+      id: 'miranda-floor-main',
+      name: 'Main Deck Floor',
+      kind: 'primitive',
+      parentId: 'miranda-ground-root',
+      position: [0, 3.35, -4],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+      visible: true,
+      collision: { shape: 'cuboid', friction: 0.88 },
+      primitive: {
+        geometry: 'box',
+        args: [40, 1.2, 92],
+        color: '#252d37',
+        emissive: '#10161d',
+        emissiveIntensity: 0.05,
+        metalness: 0.72,
+        roughness: 0.4,
+      },
+    },
+    {
+      id: 'miranda-floor-upper',
+      name: 'Upper Deck Plate',
+      kind: 'primitive',
+      parentId: 'miranda-ground-root',
+      position: [0, 4.7, -27.5],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+      visible: true,
+      collision: { shape: 'cuboid', friction: 0.88 },
+      primitive: {
+        geometry: 'box',
+        args: [18, 0.9, 18],
+        color: '#2e3844',
+        emissive: '#141b23',
+        emissiveIntensity: 0.04,
+        metalness: 0.76,
+        roughness: 0.36,
+      },
+    },
+  ]
+}
+
+function createObservatoryGroundNodes(): EditorSceneNode[] {
+  return [
+    {
+      id: 'observatory-ground-root',
+      name: 'Observatory Grounds',
+      kind: 'group',
+      position: [0, 0, 0],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+      visible: true,
+    },
+    {
+      id: 'observatory-ground-meadow',
+      name: 'Observatory Meadow',
+      kind: 'primitive',
+      parentId: 'observatory-ground-root',
+      position: [-137.2, 18.8, -49.5],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+      visible: true,
+      collision: { shape: 'cuboid', friction: 0.96 },
+      primitive: {
+        geometry: 'box',
+        args: [260, 2.4, 260],
+        color: '#6f8e63',
+        emissive: '#223224',
+        emissiveIntensity: 0.04,
+        metalness: 0.04,
+        roughness: 0.96,
+      },
+    },
+    {
+      id: 'observatory-arrival-plaza',
+      name: 'Arrival Plaza',
+      kind: 'primitive',
+      parentId: 'observatory-ground-root',
+      position: [-137.2, 20.1, -43.5],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+      visible: true,
+      collision: { shape: 'cuboid', friction: 0.92 },
+      primitive: {
+        geometry: 'box',
+        args: [28, 0.9, 34],
+        color: '#9ca87f',
+        emissive: '#344028',
+        emissiveIntensity: 0.06,
+        metalness: 0.08,
+        roughness: 0.88,
+      },
+    },
+  ]
+}
 
 function createSciFiRoomFloorNodes(): EditorSceneNode[] {
   const floorNodes: EditorSceneNode[] = [
@@ -313,6 +490,11 @@ function createSolitudeNodes(): EditorSceneNode[] {
 }
 
 export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument {
+  const packagedScene = getPackagedDefaultScene(levelId)
+  if (packagedScene) {
+    return packagedScene
+  }
+
   if (levelId === 'solitude') {
     return {
       levelId,
@@ -376,7 +558,10 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
           skyboxPreset: 'observatory',
         },
       },
-      nodes: createSolitudeNodes(),
+      nodes: [
+        ...createSolitudeGroundNodes(),
+        ...createSolitudeNodes(),
+      ],
     }
   }
 
@@ -917,6 +1102,7 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
         },
       },
       nodes: [
+        ...createMirandaGroundNodes(),
         {
           id: 'miranda-command-gallery',
           name: 'Command Gallery',
@@ -2122,6 +2308,7 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
         },
       },
       nodes: [
+        ...createObservatoryGroundNodes(),
         {
           id: 'observatory-arrival-hub',
           name: 'Arrival Hub',

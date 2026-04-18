@@ -1,4 +1,5 @@
 <script lang="ts">
+  import './editor-ui.css'
   import { onDestroy } from 'svelte'
   import {
     editorStateStore,
@@ -148,31 +149,16 @@
     white-space: nowrap;
   }
 
+  .button-row.compact-two-mode {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .button-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.45rem;
     margin-bottom: 0.45rem;
   }
 
   .button-row.compact {
     grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  .button-row.compact-two-mode {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  button {
-    background: rgba(30, 52, 73, 0.8);
-    color: #e8f5ff;
-    border: 1px solid rgba(126, 203, 255, 0.2);
-    border-radius: 0.45rem;
-    padding: 0.45rem 0.6rem;
-  }
-
-  button.active {
-    background: rgba(86, 148, 192, 0.35);
   }
 
   .legend {
