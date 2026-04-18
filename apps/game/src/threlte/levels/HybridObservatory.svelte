@@ -1,14 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy, onMount } from 'svelte'
   import { T } from '@threlte/core'
+  import { Group } from 'three'
   import LevelManager from '../core/LevelManager.svelte'
   import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
   import AmbientAudioRegions from '../components/AmbientAudioRegions.svelte'
-  import HybridFireflyComponent from '../components/HybridFireflyComponent.svelte'
   import NaturePackVegetation from '../components/NaturePackVegetation.svelte'
   import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
-  import Skybox from '../systems/Skybox.svelte'
-  import StarMap from '../systems/StarMap.svelte'
   import { qualityLevelStore, qualitySettingsStore } from '../features/performance/stores/performanceStore'
   import { OptimizationLevel, optimizationManager } from '../features/performance'
   import { Terrain, terrainStore, type TerrainConfig } from '../features/terrain'
@@ -41,8 +39,11 @@
   let naturePackVegetation: any = null
   let ghibliStyleSystem: any = null
   let styleSystemComponent: any = null
+  let skyboxComponent: any = null
+  let hybridFireflyComponentType: any = null
+  let starMapComponentType: any = null
   let terrainReady = false
-  let starMapRef: THREE.Group
+  let starMapRef: Group
   let deferredEnvironmentBootStarted = false
   let showOcean = false
   let showFireflies = false
@@ -116,6 +117,7 @@
   // --- Lifecycle & Data Loading ---
   onMount(() => {
     const token = ++loadToken
+    void ensureSkyboxComponent()
     void loadLevelFromManifest(token)
     void loadTimelineData(token)
   })
@@ -444,6 +446,24 @@
     styleSystemComponent = module.default
   }
 
+  async function ensureSkyboxComponent() {
+    if (skyboxComponent) return
+    const module = await import('../systems/Skybox.svelte')
+    skyboxComponent = module.default
+  }
+
+  async function ensureHybridFireflyComponent() {
+    if (hybridFireflyComponentType) return
+    const module = await import('../components/HybridFireflyComponent.svelte')
+    hybridFireflyComponentType = module.default
+  }
+
+  async function ensureStarMapComponent() {
+    if (starMapComponentType) return
+    const module = await import('../systems/StarMap.svelte')
+    starMapComponentType = module.default
+  }
+
   function scheduleDeferredSceneTask(task: () => void | Promise<void>, delay = 0) {
     if (typeof window === 'undefined') return () => {}
 
@@ -509,7 +529,8 @@
 
     if (activeManifest?.features.starMap && !timelineLoadError) {
       deferredSceneBootCleanups.push(
-        scheduleDeferredSceneTask(() => {
+        scheduleDeferredSceneTask(async () => {
+          await ensureStarMapComponent()
           showStarSystems = true
         }, 60)
       )
@@ -517,7 +538,8 @@
 
     if (activeManifest?.features.fireflies) {
       deferredSceneBootCleanups.push(
-        scheduleDeferredSceneTask(() => {
+        scheduleDeferredSceneTask(async () => {
+          await ensureHybridFireflyComponent()
           showFireflies = true
         }, 180)
       )
@@ -590,11 +612,13 @@
     />
     
     <T.Group name={activeManifest.id}>
-      
-      <Skybox 
-        path="/assets/hdri/skywip4-cubemap/"
-        files={['px.webp', 'nx.webp', 'py.webp', 'ny.webp', 'pz.webp','nz.webp']}
-      />
+      {#if skyboxComponent}
+        <svelte:component
+          this={skyboxComponent}
+          path="/assets/hdri/skywip4-cubemap/"
+          files={['px.webp', 'nx.webp', 'py.webp', 'ny.webp', 'pz.webp','nz.webp']}
+        />
+      {/if}
       
       {#if terrainConfig}
         <Terrain 
@@ -678,8 +702,9 @@
       {/if}
 
       <!-- Hybrid Firefly Component - configured from manifest -->
-      {#if activeManifest.features.fireflies && showFireflies}
-        <HybridFireflyComponent
+      {#if activeManifest.features.fireflies && showFireflies && hybridFireflyComponentType}
+        <svelte:component
+          this={hybridFireflyComponentType}
           bind:this={hybridFireflyComponent}
           {getHeightAt}
           {interactionSystem}
@@ -720,8 +745,9 @@
             <T.MeshBasicMaterial color="#ff0044" transparent opacity={0.6} />
           </T.Mesh>
         </T.Group>
-        {:else if showStarSystems}
-          <StarMap
+        {:else if showStarSystems && starMapComponentType}
+          <svelte:component
+            this={starMapComponentType}
             bind:this={starMapComponent}
             bind:starMapRef={starMapRef}
             timelineEvents={realTimelineEvents}

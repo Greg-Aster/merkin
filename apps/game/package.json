@@ -32,7 +32,6 @@
 		"@threlte/theatre": "3.0.4",
 		"astro": "5.1.6",
 		"bitecs": "^0.3.40",
-		"canvas": "^3.1.2",
 		"howler": "^2.2.4",
 		"lil-gui": "^0.20.0",
 		"onnxruntime-web": "^1.24.3",
