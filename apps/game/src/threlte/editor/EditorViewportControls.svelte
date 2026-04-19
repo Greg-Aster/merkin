@@ -5,7 +5,7 @@
   import * as THREE from 'three'
   import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
   import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
-  import { activateCircleSelect, beginMarqueeSelection, clearSelection, deactivateCircleSelect, duplicateNodes, editorCircleSelectStore, editorNodeViewportStateStore, editorStateStore, endMarqueeSelection, groupNodes, redoScene, selectAllNodes, selectEditorNode, setCircleSelectRadius, setCircleSelectSelecting, setEditorViewportLightingMode, setModalTransformActive, setOrbitEnabled, setSelectedNodes, setTransformAxis, setTransformMode, startSceneTransaction, endSceneTransaction, type EditorInteractionMode, type EditorTransformAxis, type EditorTransformMode, type EditorSpace, type EditorViewportLightingMode, undoScene, ungroupNodes, updateCircleSelectPointer, updateMarqueeSelection, patchNodeTransform, removeNodes } from './editorStore'
+  import { activateCircleSelect, beginMarqueeSelection, clearSelection, clearIsolatedNodes, deactivateCircleSelect, duplicateNodes, editorCircleSelectStore, editorNodeViewportStateStore, editorNodesStore, editorStateStore, endMarqueeSelection, groupNodes, redoScene, selectAllNodes, selectEditorNode, setCircleSelectRadius, setCircleSelectSelecting, setEditorViewportLightingMode, setIsolatedNodes, setModalTransformActive, setOrbitEnabled, setSelectedNodes, setTransformAxis, setTransformMode, startSceneTransaction, endSceneTransaction, type EditorInteractionMode, type EditorTransformAxis, type EditorTransformMode, type EditorSpace, type EditorViewportLightingMode, undoScene, ungroupNodes, updateCircleSelectPointer, updateMarqueeSelection, patchNodeTransform, patchNodes, removeNodes } from './editorStore'
   import { getEditorObject, getEditorObjects, getNodeIdForObject, getSelectableEditorObjects } from './editorRegistry'
 
   const { scene, renderer } = useThrelte()
@@ -31,6 +31,7 @@
   let scaleSnap = 0.1
   let surfaceSnapEnabled = false
   let surfaceSnapOffset = 0
+  let editorNodes = []
   let nodeViewportStateById = new Map<string, { effectiveVisible: boolean; isolated: boolean; dimmed: boolean; locked: boolean }>()
   const selectionPivot = new THREE.Group()
   let multiSelectionActive = false
@@ -113,6 +114,9 @@
       orbitControls.enabled = enabled && orbitEnabled && !circleSelectActive
     }
   })
+  const unsubscribeNodes = editorNodesStore.subscribe((value) => {
+    editorNodes = value
+  })
 
   function isNodeSelectable(nodeId: string | null) {
     if (!nodeId) return false
@@ -121,12 +125,47 @@
     return viewportState.effectiveVisible && !viewportState.locked
   }
 
+  function isNodeViewportPickable(nodeId: string | null) {
+    if (!isNodeSelectable(nodeId)) return false
+
+    const node = editorNodes.find((candidate) => candidate.id === nodeId)
+    if (!node) return false
+
+    const gameplayType = node.gameplay?.type
+    if (gameplayType === 'fog-volume' || gameplayType === 'audio-region') {
+      return false
+    }
+
+    return true
+  }
+
   function getTransformableSelectedNodeIds() {
     return selectedNodeIds.filter((nodeId) => isNodeSelectable(nodeId))
   }
 
   function getSelectableEditorObjectsForViewport() {
-    return getSelectableEditorObjects().filter((object) => isNodeSelectable(getNodeIdForObject(object)))
+    return getSelectableEditorObjects().filter((object) => isNodeViewportPickable(getNodeIdForObject(object)))
+  }
+
+  function hideSelectedNodes() {
+    const ids = getTransformableSelectedNodeIds()
+    if (ids.length === 0) return
+    patchNodes(ids, { visible: false })
+    clearSelection()
+  }
+
+  function isolateSelectedNodes() {
+    const ids = getTransformableSelectedNodeIds()
+    if (ids.length === 0) return
+    setIsolatedNodes(ids)
+  }
+
+  function showAllNodes() {
+    const hiddenNodeIds = editorNodes.filter((node) => !node.visible).map((node) => node.id)
+    if (hiddenNodeIds.length > 0) {
+      patchNodes(hiddenNodeIds, { visible: true })
+    }
+    clearIsolatedNodes()
   }
 
   function syncSelectionAttachment() {
@@ -910,6 +949,16 @@
         event.preventDefault()
         selectAllNodes()
         break
+      case 'h':
+        event.preventDefault()
+        if (event.altKey) {
+          showAllNodes()
+        } else if (event.shiftKey) {
+          isolateSelectedNodes()
+        } else {
+          hideSelectedNodes()
+        }
+        break
       case 'g':
         event.preventDefault()
         if (interactionMode === 'objects' && getTransformableSelectedNodeIds().length > 0) beginModalTransform('translate')
@@ -1027,6 +1076,7 @@
     unsubscribe()
     unsubscribeViewportState()
     unsubscribeCircleSelect()
+    unsubscribeNodes()
     stopMarqueeSelection()
     deactivateCircleSelectTool()
 

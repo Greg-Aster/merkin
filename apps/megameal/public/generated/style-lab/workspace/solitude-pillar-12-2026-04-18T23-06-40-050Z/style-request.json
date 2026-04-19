@@ -1,0 +1,14 @@
+{
+  "createdAt": "2026-04-18T23:07:38.767Z",
+  "sourceName": "Solitude Pillar 12",
+  "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/solitude-pillar-12-2026-04-18T23-06-40-050Z/source/solitude-pillar-12.glb",
+  "prompt": "Solitude Pillar 12, painterly storybook environment prop, hand-painted materials, unified stylized finish",
+  "negativePrompt": "photorealistic, noisy texture detail, harsh speculars, mismatched material finish",
+  "loraNotes": "",
+  "controlNetNotes": "Preserve silhouette and major surface breakup from the source asset.",
+  "referenceImageUrl": "/generated/hunyuan3d/references/solitude-pillar-12-reference-2026-04-18T23-07-38-762Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/solitude-pillar-12-2026-04-18T23-06-40-050Z/reference/solitude-pillar-12-reference-2026-04-18T23-07-38-762Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/solitude-pillar-12-reference-2026-04-18T23-07-38-762Z.png"
+}

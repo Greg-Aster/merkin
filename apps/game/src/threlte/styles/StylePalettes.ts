@@ -7,7 +7,7 @@
 
 import * as THREE from 'three'
 
-export type StylePreset = 'ghibli' | 'alto' | 'monument' | 'retro'
+export type StylePreset = 'site' | 'ghibli' | 'alto' | 'monument' | 'retro'
 
 export interface ColorPalette {
   // Environment colors
@@ -128,18 +128,118 @@ export const retroPalette: ColorPalette = {
 /**
  * Collection of all available palettes
  */
-export const stylePalettes: Record<StylePreset, ColorPalette> = {
+export const staticStylePalettes: Record<Exclude<StylePreset, 'site'>, ColorPalette> = {
   ghibli: ghibliPalette,
   alto: altoPalette,
   monument: monumentPalette,
   retro: retroPalette
 }
 
+function cloneColor(color: THREE.Color) {
+  return color.clone()
+}
+
+function clonePalette(palette: ColorPalette): ColorPalette {
+  return {
+    sky: cloneColor(palette.sky),
+    skyGradient: cloneColor(palette.skyGradient),
+    water: cloneColor(palette.water),
+    grass: cloneColor(palette.grass),
+    earth: cloneColor(palette.earth),
+    trees: cloneColor(palette.trees),
+    flowers: cloneColor(palette.flowers),
+    fireflies: palette.fireflies.map(cloneColor),
+    ambient: cloneColor(palette.ambient),
+    sun: cloneColor(palette.sun),
+    shadow: cloneColor(palette.shadow),
+    fog: cloneColor(palette.fog),
+    outline: cloneColor(palette.outline),
+  }
+}
+
+function resolveCssColorValue(cssValue: string, fallback: THREE.Color): THREE.Color {
+  if (typeof document === 'undefined') {
+    return fallback.clone()
+  }
+
+  try {
+    const canvas = document.createElement('canvas')
+    canvas.width = 1
+    canvas.height = 1
+
+    const context = canvas.getContext('2d', { willReadFrequently: true })
+    if (!context) {
+      return fallback.clone()
+    }
+
+    context.clearRect(0, 0, 1, 1)
+    context.fillStyle = cssValue
+    context.fillRect(0, 0, 1, 1)
+
+    const [red, green, blue, alpha] = context.getImageData(0, 0, 1, 1).data
+    if (alpha === 0) {
+      return fallback.clone()
+    }
+
+    return new THREE.Color(red / 255, green / 255, blue / 255)
+  } catch (error) {
+    console.warn('Failed to resolve CSS color value for palette:', cssValue, error)
+    return fallback.clone()
+  }
+}
+
+function getRootHue() {
+  if (typeof document === 'undefined') return 210
+
+  const rootStyles = getComputedStyle(document.documentElement)
+  const parsedHue = Number.parseFloat(rootStyles.getPropertyValue('--hue').trim())
+  return Number.isFinite(parsedHue) ? parsedHue : 210
+}
+
+export function createSitePalette(): ColorPalette {
+  const hue = getRootHue()
+  const darkMode =
+    typeof document !== 'undefined'
+    && (
+      document.documentElement.classList.contains('dark')
+      || window.matchMedia('(prefers-color-scheme: dark)').matches
+    )
+
+  const fallback = darkMode ? ghibliPalette : monumentPalette
+  const backgroundL = darkMode ? 0.16 : 0.95
+  const surfaceL = darkMode ? 0.23 : 0.98
+  const accentL = darkMode ? 0.75 : 0.7
+
+  return {
+    sky: resolveCssColorValue(`oklch(${backgroundL} 0.018 ${hue})`, fallback.sky),
+    skyGradient: resolveCssColorValue(`oklch(${darkMode ? 0.28 : 0.9} 0.035 ${hue})`, fallback.skyGradient),
+    water: resolveCssColorValue(`oklch(${darkMode ? 0.42 : 0.68} 0.08 ${hue + 30})`, fallback.water),
+    grass: resolveCssColorValue(`oklch(${darkMode ? 0.48 : 0.78} 0.07 ${hue + 55})`, fallback.grass),
+    earth: resolveCssColorValue(`oklch(${surfaceL} 0.02 ${hue})`, fallback.earth),
+    trees: resolveCssColorValue(`oklch(${darkMode ? 0.38 : 0.58} 0.06 ${hue + 38})`, fallback.trees),
+    flowers: resolveCssColorValue(`oklch(${accentL} 0.12 ${hue + 12})`, fallback.flowers),
+    fireflies: [
+      resolveCssColorValue(`oklch(${darkMode ? 0.82 : 0.76} 0.16 ${hue + 58})`, fallback.fireflies[0]),
+      resolveCssColorValue(`oklch(${darkMode ? 0.8 : 0.74} 0.14 ${hue + 35})`, fallback.fireflies[1]),
+      resolveCssColorValue(`oklch(${darkMode ? 0.78 : 0.72} 0.13 ${hue + 20})`, fallback.fireflies[2] ?? fallback.fireflies[0]),
+    ],
+    ambient: resolveCssColorValue(`oklch(${darkMode ? 0.34 : 0.86} 0.03 ${hue})`, fallback.ambient),
+    sun: resolveCssColorValue(`oklch(${darkMode ? 0.88 : 0.8} 0.1 ${hue + 30})`, fallback.sun),
+    shadow: resolveCssColorValue(`oklch(${darkMode ? 0.12 : 0.42} 0.03 ${hue})`, fallback.shadow),
+    fog: resolveCssColorValue(`oklch(${darkMode ? 0.28 : 0.9} 0.018 ${hue})`, fallback.fog),
+    outline: resolveCssColorValue(`oklch(${darkMode ? 0.06 : 0.28} 0.015 ${hue})`, fallback.outline),
+  }
+}
+
 /**
  * Get palette by name
  */
 export function getPalette(preset: StylePreset): ColorPalette {
-  return stylePalettes[preset] || ghibliPalette
+  if (preset === 'site') {
+    return createSitePalette()
+  }
+
+  return clonePalette(staticStylePalettes[preset] || ghibliPalette)
 }
 
 /**

@@ -126,6 +126,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.04,
         "roughness": 0.96
+      },
+      "generation": {
+        "descriptor": "observatory meadow"
       }
     },
     {
@@ -165,6 +168,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.08,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "arrival plaza"
       }
     },
     {
@@ -211,6 +217,9 @@
       "visible": true,
       "prefab": {
         "type": "bench-growth"
+      },
+      "generation": {
+        "descriptor": "overgrown haunted bench"
       }
     },
     {
@@ -236,6 +245,9 @@
       "visible": true,
       "prefab": {
         "type": "courtyard-pylon"
+      },
+      "generation": {
+        "descriptor": "weathered courtyard pylon"
       }
     },
     {
@@ -261,6 +273,9 @@
       "visible": true,
       "prefab": {
         "type": "courtyard-pylon"
+      },
+      "generation": {
+        "descriptor": "weathered courtyard pylon"
       }
     },
     {
@@ -292,6 +307,9 @@
         "targetLevelId": "sci-fi-room",
         "markerColor": "#8fd8ff",
         "markerSize": 1.2
+      },
+      "generation": {
+        "descriptor": "occult portal apparatus"
       }
     },
     {
@@ -328,6 +346,9 @@
         "location": "Observatory Landing",
         "excerpt": "The observatory does not greet visitors with walls. It greets them with horizon, wind, and a suggestion to keep walking upward.",
         "body": "The observatory does not greet visitors with walls. It greets them with horizon, wind, and a suggestion to keep walking upward.\n\nEvery structure here behaves less like shelter and more like orientation.\n\nEven the path feels like an instrument laid across the hillside."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -374,6 +395,9 @@
       "visible": true,
       "prefab": {
         "type": "courtyard-fountain"
+      },
+      "generation": {
+        "descriptor": "strange luminous courtyard fountain"
       }
     },
     {
@@ -399,6 +423,9 @@
       "visible": true,
       "prefab": {
         "type": "growth-planter"
+      },
+      "generation": {
+        "descriptor": "biomechanical growth planter"
       }
     },
     {
@@ -424,6 +451,9 @@
       "visible": true,
       "prefab": {
         "type": "growth-planter"
+      },
+      "generation": {
+        "descriptor": "biomechanical growth planter"
       }
     },
     {
@@ -449,6 +479,9 @@
       "visible": true,
       "prefab": {
         "type": "growth-planter"
+      },
+      "generation": {
+        "descriptor": "biomechanical growth planter"
       }
     },
     {
@@ -474,6 +507,9 @@
       "visible": true,
       "prefab": {
         "type": "growth-planter"
+      },
+      "generation": {
+        "descriptor": "biomechanical growth planter"
       }
     },
     {
@@ -499,6 +535,9 @@
       "visible": true,
       "prefab": {
         "type": "interior-archway"
+      },
+      "generation": {
+        "descriptor": "ancient interior archway ruin"
       }
     },
     {
@@ -535,6 +574,9 @@
         "location": "Courtyard Core",
         "excerpt": "The fountain is not decorative. It trains the eye to recognize constellations in motion before night fully arrives.",
         "body": "The fountain is not decorative. It trains the eye to recognize constellations in motion before night fully arrives.\n\nWater gives the sky a second surface, one closer to the hands.\n\nStudents learned the heavens here by watching them ripple first."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -581,6 +623,9 @@
       "visible": true,
       "prefab": {
         "type": "observation-rig"
+      },
+      "generation": {
+        "descriptor": "cosmic observation rig"
       }
     },
     {
@@ -606,6 +651,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -631,6 +679,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -695,6 +746,9 @@
         "location": "Observation Platform",
         "excerpt": "Before touching the rig, breathe long enough for the horizon to stop moving. The machine prefers a quiet witness.",
         "body": "Before touching the rig, breathe long enough for the horizon to stop moving. The machine prefers a quiet witness.\n\nIt magnifies what the eye brings to it.\n\nImpatience turns every constellation into noise."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     }
   ]

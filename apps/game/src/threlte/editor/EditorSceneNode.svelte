@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { T, useTask } from '@threlte/core'
+  import { T, useTask, useThrelte } from '@threlte/core'
   import { Collider, RigidBody } from '@threlte/rapier'
   import { createEventDispatcher, onDestroy } from 'svelte'
   import * as THREE from 'three'
@@ -7,6 +7,8 @@
   import StarSprite from '../components/StarSprite.svelte'
   import EditorColliderHelper from './EditorColliderHelper.svelte'
   import EditorNodeRenderContent from './EditorNodeRenderContent.svelte'
+  import { qualityLevelStore } from '../features/performance/stores/performanceStore'
+  import { getRuntimePropBudget } from '../features/performance/utils/runtimeSceneBudget'
   import { editorNodeViewportStateStore, editorStateStore } from './editorStore'
   import { gameActions } from '../stores/gameStateStore'
   import { registerEditorObject, unregisterEditorObject } from './editorRegistry'
@@ -20,23 +22,68 @@
   export let interactionSystem: any = null
   export let interactiveEnabled = false
 
+  const { camera } = useThrelte()
   let group: THREE.Group
   let markerHovered = false
   let lightBurstGlow = 0
   let animationTime = 0
+  let viewportVisible = true
+  let runtimeDistanceVisible = true
   let effectiveVisible = true
   let conversationFeaturePromise: Promise<typeof import('../features/conversation')> | null = null
+  const nodeWorldPosition = new THREE.Vector3()
+  let distanceCullAccumulator = 0
+
+  function getActiveCamera(): THREE.Camera | null {
+    const candidate = camera as THREE.Camera & { current?: THREE.Camera | null }
+    const resolved = candidate?.current ?? candidate
+    return resolved && resolved.position instanceof THREE.Vector3 ? resolved : null
+  }
 
   function getPrimitiveColliderArgs() {
-    if (node.kind !== 'primitive' || node.primitive?.geometry !== 'box') return [0.5, 0.5, 0.5] as [number, number, number]
+    if (node.kind !== 'primitive' || !node.primitive) return [0.5, 0.5, 0.5] as [number, number, number]
 
-    const [width = 1, height = 1, depth = 1] = node.primitive.args
     const [scaleX = 1, scaleY = 1, scaleZ = 1] = node.scale
-    return [
-      Math.abs(width * scaleX) / 2,
-      Math.abs(height * scaleY) / 2,
-      Math.abs(depth * scaleZ) / 2,
-    ] as [number, number, number]
+
+    if (node.primitive.geometry === 'box') {
+      const [width = 1, height = 1, depth = 1] = node.primitive.args
+      return [
+        Math.abs(width * scaleX) / 2,
+        Math.abs(height * scaleY) / 2,
+        Math.abs(depth * scaleZ) / 2,
+      ] as [number, number, number]
+    }
+
+    if (node.primitive.geometry === 'cylinder') {
+      const [radiusTop = 0.5, radiusBottom = 0.5, height = 1] = node.primitive.args
+      const radius = Math.max(Math.abs(radiusTop), Math.abs(radiusBottom))
+      return [
+        Math.max(0.05, radius * Math.abs(scaleX)),
+        Math.max(0.05, Math.abs(height * scaleY) / 2),
+        Math.max(0.05, radius * Math.abs(scaleZ)),
+      ] as [number, number, number]
+    }
+
+    if (['octahedron', 'tetrahedron', 'icosahedron', 'dodecahedron'].includes(node.primitive.geometry)) {
+      const [radius = 0.5] = node.primitive.args
+      return [
+        Math.max(0.05, Math.abs(radius * scaleX)),
+        Math.max(0.05, Math.abs(radius * scaleY)),
+        Math.max(0.05, Math.abs(radius * scaleZ)),
+      ] as [number, number, number]
+    }
+
+    if (node.primitive.geometry === 'torus') {
+      const [radius = 0.5, tube = 0.2] = node.primitive.args
+      const outerRadius = Math.abs(radius) + Math.abs(tube)
+      return [
+        Math.max(0.05, outerRadius * Math.abs(scaleX)),
+        Math.max(0.05, Math.abs(tube * scaleY)),
+        Math.max(0.05, outerRadius * Math.abs(scaleZ)),
+      ] as [number, number, number]
+    }
+
+    return [0.5, 0.5, 0.5] as [number, number, number]
   }
 
   function hasPhysicsBody() {
@@ -56,7 +103,7 @@
       ] as [number, number, number]
     }
 
-    if (node.kind === 'primitive' && node.primitive?.geometry === 'box') {
+    if (node.kind === 'primitive') {
       return getPrimitiveColliderArgs()
     }
 
@@ -70,6 +117,18 @@
   useTask((delta) => {
     animationTime += delta
     lightBurstGlow = Math.max(0, lightBurstGlow - delta * 1.25)
+
+    const activeCamera = getActiveCamera()
+    if (editorEnabled || !activeCamera || !group || !supportsRuntimeDistanceCulling()) return
+
+    distanceCullAccumulator += delta
+    if (distanceCullAccumulator < 0.2) return
+    distanceCullAccumulator = 0
+
+    group.getWorldPosition(nodeWorldPosition)
+
+    const distanceToCamera = activeCamera.position.distanceTo(nodeWorldPosition)
+    runtimeDistanceVisible = distanceToCamera <= getRuntimeCullDistance()
   })
 
   function loadConversationFeature() {
@@ -140,7 +199,46 @@
     })
   }
 
-  $: effectiveVisible = $editorNodeViewportStateStore.get(node.id)?.effectiveVisible ?? node.visible
+  function getFireflyMotionOffset() {
+    const hoverHeight = node.gameplay?.hoverHeight ?? 0.36
+    const bobAmplitude = node.gameplay?.bobAmplitude ?? 0.14
+    const bobSpeed = node.gameplay?.bobSpeed ?? 1.4
+    const wanderEnabled = node.gameplay?.wanderEnabled ?? false
+    const wanderRadius = node.gameplay?.wanderRadius ?? 0.35
+    const wanderSpeed = node.gameplay?.wanderSpeed ?? 0.45
+    const basePhase = Array.from(node.id).reduce((accumulator, character) => accumulator + character.charCodeAt(0), 0) * 0.0175
+
+    return [
+      wanderEnabled ? Math.sin(animationTime * wanderSpeed + basePhase) * wanderRadius : 0,
+      hoverHeight + Math.sin(animationTime * bobSpeed + basePhase * 0.5) * bobAmplitude,
+      wanderEnabled ? Math.cos(animationTime * wanderSpeed + basePhase) * wanderRadius : 0,
+    ] as [number, number, number]
+  }
+
+  function supportsRuntimeDistanceCulling() {
+    return (
+      node.kind === 'asset'
+      || node.kind === 'prefab'
+      || node.kind === 'primitive'
+      || node.kind === 'light'
+    )
+  }
+
+  function getRuntimeCullDistance() {
+    const baseDistance = getRuntimePropBudget($qualityLevelStore).cullDistance
+
+    switch (node.kind) {
+      case 'light':
+        return baseDistance * 0.4
+      case 'primitive':
+        return baseDistance * 0.85
+      default:
+        return baseDistance
+    }
+  }
+
+  $: viewportVisible = $editorNodeViewportStateStore.get(node.id)?.effectiveVisible ?? node.visible
+  $: effectiveVisible = viewportVisible && runtimeDistanceVisible
 
   $: if (group) {
     registerEditorObject(node.id, group)
@@ -159,7 +257,7 @@
 </script>
 
 <T.Group bind:ref={group} visible={effectiveVisible}>
-  {#if !editorEnabled && hasPhysicsBody() && node.collision?.shape === 'cuboid' && effectiveVisible}
+  {#if !editorEnabled && hasPhysicsBody() && node.collision?.shape === 'cuboid' && viewportVisible}
     <RigidBody
       type={getRigidBodyType()}
       gravityScale={node.physics?.gravityScale ?? 1}
@@ -206,19 +304,20 @@
 
   {#if node.gameplay}
     {#if node.gameplay.type === 'firefly'}
+      {@const fireflyMotionOffset = getFireflyMotionOffset()}
       <T.PointLight
-        position={[0, 0.36 + Math.sin(animationTime * 1.4) * 0.14, 0]}
+        position={fireflyMotionOffset}
         color={node.gameplay.markerColor ?? '#f5f1a8'}
-        intensity={markerHovered ? 3.8 : 2.8}
-        distance={6}
-        decay={1.6}
+        intensity={markerHovered ? Math.max((node.gameplay.lightIntensity ?? 2.8) * 1.35, node.gameplay.lightIntensity ?? 2.8) : (node.gameplay.lightIntensity ?? 2.8)}
+        distance={node.gameplay.lightDistance ?? 6}
+        decay={node.gameplay.lightDecay ?? 1.6}
       />
       <StarSprite
-        position={[0, 0.36 + Math.sin(animationTime * 1.4) * 0.14, 0]}
+        position={fireflyMotionOffset}
         color={node.gameplay.markerColor ?? '#f5f1a8'}
         size={(node.gameplay.markerSize ?? 0.58) * (markerHovered ? 1.12 : 1 + lightBurstGlow * 0.08)}
-        intensity={Math.max(markerHovered ? 1.2 : 0.95, 0.95 + lightBurstGlow * 0.55)}
-        twinkleSpeed={1.6}
+        intensity={Math.max(markerHovered ? Math.max((node.gameplay.spriteIntensity ?? 0.95) * 1.2, 1.05) : (node.gameplay.spriteIntensity ?? 0.95), (node.gameplay.spriteIntensity ?? 0.95) + lightBurstGlow * 0.55)}
+        twinkleSpeed={node.gameplay.twinkleSpeed ?? 1.6}
         animationOffset={animationTime}
         enableTwinkle={true}
         opacity={1}

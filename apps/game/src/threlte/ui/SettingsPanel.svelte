@@ -1,26 +1,26 @@
 <script lang="ts">
-import MultiplayerControls from "../features/multiplayer/ui/MultiplayerControls.svelte";
+import { onMount } from "svelte";
 import PerformancePanel from "../features/performance/ui/PerformancePanel.svelte";
 import {
 	ambienceVolumeSetting,
-	isNeuralStylizationEnabled,
 	isSettingsMenuOpen,
 	isSoundEnabled,
 	masterVolumeSetting,
-	neuralStylizationAutoQualityEnabled,
-	neuralStylizationEffectiveSettingsSummary,
-	neuralStylizationFrameStride,
-	neuralStylizationInputHeight,
-	neuralStylizationMode,
-	neuralStylizationOnnxLastInferenceMs,
-	neuralStylizationOnnxProvider,
-	neuralStylizationOnnxReady,
-	neuralStylizationOnnxStatus,
-	neuralStylizationOutputMode,
-	neuralStylizationOutputScale,
-	neuralStylizationStrength,
+	renderStyleEnabled,
+	renderStyleFlattenMaterials,
+	renderStyleOutlineOpacity,
+	renderStyleOutlineThickness,
+	renderStylePaintedOutlines,
+	renderStylePresetChoice,
 	sfxVolumeSetting,
 } from "../stores/uiStore";
+
+let multiplayerControlsComponent: any = null;
+let multiplayerUnavailableReason = "";
+
+onMount(() => {
+	void ensureMultiplayerControls();
+});
 
 function closeSettings() {
 	isSettingsMenuOpen.set(false);
@@ -30,6 +30,18 @@ function handleOverlayKeydown(event: KeyboardEvent) {
 	if (event.key === "Escape" || event.key === "Enter" || event.key === " ") {
 		event.preventDefault();
 		closeSettings();
+	}
+}
+
+async function ensureMultiplayerControls() {
+	if (multiplayerControlsComponent || multiplayerUnavailableReason) return;
+
+	try {
+		const module = await import("../features/multiplayer/ui/MultiplayerControls.svelte");
+		multiplayerControlsComponent = module.default;
+	} catch (error) {
+		console.warn("Failed to load multiplayer controls for settings panel:", error);
+		multiplayerUnavailableReason = "Multiplayer controls are unavailable in this session.";
 	}
 }
 </script>
@@ -61,7 +73,19 @@ function handleOverlayKeydown(event: KeyboardEvent) {
         <section class="settings-section">
           <h3>Multiplayer</h3>
           <div class="section-content">
-            <MultiplayerControls />
+            {#if multiplayerControlsComponent}
+              <svelte:component this={multiplayerControlsComponent} />
+            {:else if multiplayerUnavailableReason}
+              <div class="status-block">
+                <div class="status-title">Multiplayer Unavailable</div>
+                <div class="status-copy">{multiplayerUnavailableReason}</div>
+              </div>
+            {:else}
+              <div class="status-block">
+                <div class="status-title">Loading</div>
+                <div class="status-copy">Preparing multiplayer controls…</div>
+              </div>
+            {/if}
           </div>
         </section>
 
@@ -132,93 +156,62 @@ function handleOverlayKeydown(event: KeyboardEvent) {
         </section>
 
         <section class="settings-section">
-          <h3>Experimental Visuals</h3>
+          <h3>Render Style</h3>
           <div class="section-content visual-grid">
             <label class="checkbox-label">
-              <input type="checkbox" bind:checked={$isNeuralStylizationEnabled} />
-              Enable Neural Stylization
+              <input type="checkbox" bind:checked={$renderStyleEnabled} />
+              Enable Site-Matched Render Style
             </label>
 
             <label class="field">
-              <span>Mode</span>
-              <select bind:value={$neuralStylizationMode}>
-                <option value="soft-shader">Soft Shader</option>
-                <option value="glitch-shader">Glitch Shader</option>
-                <option value="onnx">ONNX</option>
+              <span>Preset Source</span>
+              <select bind:value={$renderStylePresetChoice}>
+                <option value="manifest">Use Level Manifest</option>
+                <option value="site">Website Palette</option>
+                <option value="ghibli">Studio Ghibli</option>
+                <option value="alto">Alto</option>
+                <option value="monument">Monument</option>
+                <option value="retro">Retro</option>
               </select>
             </label>
 
-            <label class="field">
-              <span>Output</span>
-              <select bind:value={$neuralStylizationOutputMode}>
-                <option value="original">Original</option>
-                <option value="blend">Blend</option>
-                <option value="stylized-only">Stylized Only</option>
-              </select>
+            <label class="checkbox-label">
+              <input type="checkbox" bind:checked={$renderStyleFlattenMaterials} />
+              Flatten Imported Materials
+            </label>
+
+            <label class="checkbox-label">
+              <input type="checkbox" bind:checked={$renderStylePaintedOutlines} />
+              Use Painterly Outlines
             </label>
 
             <div class="slider-label">
-              <span>Blend Strength</span>
-              <span>{Math.round($neuralStylizationStrength * 100)}%</span>
+              <span>Outline Thickness</span>
+              <span>{($renderStyleOutlineThickness).toFixed(3)}</span>
             </div>
             <input
-              id="neural-blend-strength"
+              id="render-style-outline-thickness"
               class="volume-slider"
               type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              bind:value={$neuralStylizationStrength}
+              min="0.005"
+              max="0.08"
+              step="0.001"
+              bind:value={$renderStyleOutlineThickness}
             />
 
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                bind:checked={$neuralStylizationAutoQualityEnabled}
-              />
-              Auto Quality
-            </label>
-
-            <label class="field">
-              <span>Input Height</span>
-              <input type="number" min="128" max="512" step="1" bind:value={$neuralStylizationInputHeight} />
-            </label>
-
-            <label class="field">
-              <span>Output Scale</span>
-              <input type="number" min="0.5" max="1" step="0.05" bind:value={$neuralStylizationOutputScale} />
-            </label>
-
-            <label class="field">
-              <span>Frame Stride</span>
-              <input type="number" min="1" max="8" step="1" bind:value={$neuralStylizationFrameStride} />
-            </label>
-
-            {#if $neuralStylizationMode === "onnx"}
-              <label class="field">
-                <span>ONNX Provider</span>
-                <select bind:value={$neuralStylizationOnnxProvider}>
-                  <option value="auto">Auto</option>
-                  <option value="webgpu">WebGPU</option>
-                  <option value="webgl">WebGL</option>
-                  <option value="wasm">WASM</option>
-                </select>
-              </label>
-
-              <div class="status-block">
-                <div class="status-title">ONNX Status</div>
-                <div class="status-copy">{$neuralStylizationOnnxStatus}</div>
-                <div class="status-meta">
-                  <span>Ready: {$neuralStylizationOnnxReady ? "Yes" : "No"}</span>
-                  <span>Inference: {$neuralStylizationOnnxLastInferenceMs}</span>
-                </div>
-              </div>
-            {/if}
-
-            <div class="auto-quality-card">
-              <div class="auto-quality-heading">Live Summary</div>
-              <div class="auto-quality-summary">{$neuralStylizationEffectiveSettingsSummary}</div>
+            <div class="slider-label">
+              <span>Outline Opacity</span>
+              <span>{Math.round($renderStyleOutlineOpacity * 100)}%</span>
             </div>
+            <input
+              id="render-style-outline-opacity"
+              class="volume-slider"
+              type="range"
+              min="0.2"
+              max="1"
+              step="0.01"
+              bind:value={$renderStyleOutlineOpacity}
+            />
           </div>
         </section>
       </div>

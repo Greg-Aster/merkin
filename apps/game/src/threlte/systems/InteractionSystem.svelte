@@ -29,7 +29,27 @@
     handlers: {
       onClick?: (data: any) => void
       onHover?: (data: any, hovered: boolean) => void
+      onLightBurst?: (data: any, burst: LightBurstHit) => void
     }
+  }
+
+  interface LightBurstHit {
+    origin: [number, number, number]
+    strength: number
+    radius: number
+    progress: number
+    distance: number
+  }
+
+  interface ActiveLightBurst {
+    id: number
+    origin: THREE.Vector3
+    radius: number
+    previousRadius: number
+    maxRadius: number
+    speed: number
+    strength: number
+    hitObjectIds: Set<string>
   }
 
   let interactiveObjects: InteractiveObject[] = []
@@ -40,10 +60,15 @@
   let canvasElement: HTMLCanvasElement | null = null
   let hoverCheckFrameId: number | null = null
   let clickSelectionTimeoutId: number | null = null
+  let activeLightBursts: ActiveLightBurst[] = []
+  let lightBurstAnimationFrameId: number | null = null
+  let lastLightBurstFrameTime = 0
+  let lightBurstIdCounter = 0
 
   const pointer = new THREE.Vector2()
   const raycaster = new THREE.Raycaster()
   const projectedScreenPosition = new THREE.Vector3()
+  const burstTempPosition = new THREE.Vector3()
 
   raycaster.params.Sprite = { threshold: 1000 }
   
@@ -203,6 +228,85 @@
     return selectObjectInCrosshair()
   }
 
+  export function triggerLightBurst(detail: {
+    origin: [number, number, number]
+    maxRadius?: number
+    radius?: number
+    speed?: number
+    strength?: number
+  }) {
+    const maxRadius = Math.max(0.1, detail.maxRadius ?? detail.radius ?? 0)
+    const speed = Math.max(0.1, detail.speed ?? Math.max(12, maxRadius * 2.4))
+    const strength = Math.max(0, detail.strength ?? 0)
+
+    if (maxRadius <= 0 || strength <= 0) return 0
+
+    activeLightBursts = [
+      ...activeLightBursts,
+      {
+        id: ++lightBurstIdCounter,
+        origin: new THREE.Vector3(...detail.origin),
+        radius: 0,
+        previousRadius: 0,
+        maxRadius,
+        speed,
+        strength,
+        hitObjectIds: new Set<string>(),
+      }
+    ]
+
+    if (lightBurstAnimationFrameId === null) {
+      lastLightBurstFrameTime = performance.now()
+      lightBurstAnimationFrameId = window.requestAnimationFrame(updateLightBursts)
+    }
+
+    return activeLightBursts.length
+  }
+
+  function updateLightBursts(timestamp: number) {
+    const deltaSeconds = Math.min(0.05, Math.max(0.001, (timestamp - lastLightBurstFrameTime) / 1000))
+    lastLightBurstFrameTime = timestamp
+
+    activeLightBursts = activeLightBursts.filter((burst) => {
+      burst.previousRadius = burst.radius
+      burst.radius = Math.min(burst.maxRadius, burst.radius + burst.speed * deltaSeconds)
+
+      for (const object of interactiveObjects) {
+        if (!object.handlers.onLightBurst || burst.hitObjectIds.has(object.id)) continue
+
+        object.sprite.getWorldPosition(burstTempPosition)
+        const distance = burstTempPosition.distanceTo(burst.origin)
+        if (distance > burst.radius || distance <= burst.previousRadius) continue
+
+        burst.hitObjectIds.add(object.id)
+        object.handlers.onLightBurst(object.data, {
+          origin: [burst.origin.x, burst.origin.y, burst.origin.z],
+          strength: burst.strength,
+          radius: burst.radius,
+          progress: burst.maxRadius > 0 ? burst.radius / burst.maxRadius : 1,
+          distance,
+        })
+
+        dispatch('lightBurstHit', {
+          type: object.type,
+          data: object.data,
+          index: object.index,
+          distance,
+          strength: burst.strength,
+        })
+      }
+
+      return burst.radius < burst.maxRadius
+    })
+
+    if (activeLightBursts.length > 0) {
+      lightBurstAnimationFrameId = window.requestAnimationFrame(updateLightBursts)
+      return
+    }
+
+    lightBurstAnimationFrameId = null
+  }
+
   function selectObjectInCrosshair() {
     if (!$camera || interactiveObjects.length === 0) return
 
@@ -340,6 +444,11 @@
       window.clearTimeout(clickSelectionTimeoutId)
     }
 
+    if (lightBurstAnimationFrameId !== null) {
+      window.cancelAnimationFrame(lightBurstAnimationFrameId)
+      lightBurstAnimationFrameId = null
+    }
+
     if (isDev) {
       console.log('🎯 InteractionSystem: Event listeners cleaned up')
     }
@@ -373,6 +482,7 @@
     unregisterInteractiveObject,
     registerStarSprites,
     registerFireflySprites,
+    triggerLightBurst,
     getScreenPosition
   }
 </script>

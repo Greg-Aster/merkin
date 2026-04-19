@@ -91,6 +91,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.72,
         "roughness": 0.4
+      },
+      "generation": {
+        "descriptor": "main deck floor"
       }
     },
     {
@@ -130,6 +133,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.76,
         "roughness": 0.36
+      },
+      "generation": {
+        "descriptor": "upper deck plate"
       }
     },
     {
@@ -225,6 +231,9 @@
       "visible": true,
       "prefab": {
         "type": "command-console"
+      },
+      "generation": {
+        "descriptor": "retro-futurist command console"
       }
     },
     {
@@ -260,6 +269,9 @@
         "emissiveIntensity": 0.9,
         "metalness": 0.88,
         "roughness": 0.18
+      },
+      "generation": {
+        "descriptor": "cockpit glow panel left"
       }
     },
     {
@@ -295,6 +307,9 @@
         "emissiveIntensity": 1,
         "metalness": 0.9,
         "roughness": 0.16
+      },
+      "generation": {
+        "descriptor": "cockpit glow panel center"
       }
     },
     {
@@ -330,6 +345,9 @@
         "emissiveIntensity": 0.9,
         "metalness": 0.88,
         "roughness": 0.18
+      },
+      "generation": {
+        "descriptor": "cockpit glow panel right"
       }
     },
     {
@@ -366,6 +384,9 @@
         "location": "Cockpit Nav Station",
         "excerpt": "There is nothing to salvage. Only debris, salt, and the taste of a vanished system.",
         "body": "This is Captain Helena Zhao of the salvage vessel Second Breakfast.\n\nMiranda's primary sun went supernova without warning. Inner planets vaporized. Outer planetoids were thrown into cold darkness. We entered the debris field expecting a graveyard and found something worse: a silence that feels arranged.\n\nSome say you can still taste celery salt in the dust. I laughed when I first heard it. I am not laughing now."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -422,6 +443,9 @@
         "emissiveIntensity": 0.08,
         "metalness": 0.58,
         "roughness": 0.46
+      },
+      "generation": {
+        "descriptor": "bunk port a"
       }
     },
     {
@@ -457,6 +481,9 @@
         "emissiveIntensity": 0.08,
         "metalness": 0.58,
         "roughness": 0.46
+      },
+      "generation": {
+        "descriptor": "bunk port b"
       }
     },
     {
@@ -492,6 +519,9 @@
         "emissiveIntensity": 0.08,
         "metalness": 0.58,
         "roughness": 0.46
+      },
+      "generation": {
+        "descriptor": "bunk starboard a"
       }
     },
     {
@@ -527,6 +557,9 @@
         "emissiveIntensity": 0.08,
         "metalness": 0.58,
         "roughness": 0.46
+      },
+      "generation": {
+        "descriptor": "bunk starboard b"
       }
     },
     {
@@ -562,6 +595,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.72,
         "roughness": 0.34
+      },
+      "generation": {
+        "descriptor": "locker bank"
       }
     },
     {
@@ -598,6 +634,9 @@
         "location": "Crew Quarters Locker",
         "excerpt": "Headaches, nausea, deja vu. Nobody wants to say the symptoms out loud twice.",
         "body": "Three crew reported headaches after handling drone returns from the debris field. Two described dreams of a bar they have never visited. One woke up repeating a drink order in a voice he claims was not his own.\n\nNo abnormalities on scans. No fever. No infection. The fear is the only thing progressing.\n\nRecommendation: limit direct exposure to recovered signal caches, especially any reference to a Bloody Mary and any insistence on pickle prohibition."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -654,6 +693,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.18,
         "roughness": 0.78
+      },
+      "generation": {
+        "descriptor": "captain's desk"
       }
     },
     {
@@ -690,6 +732,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.26,
         "roughness": 0.74
+      },
+      "generation": {
+        "descriptor": "captain's chair"
       }
     },
     {
@@ -725,6 +770,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.82,
         "roughness": 0.28
+      },
+      "generation": {
+        "descriptor": "recipe safe"
       }
     },
     {
@@ -761,6 +809,9 @@
         "location": "Captain's Office Desk",
         "excerpt": "The captain looks composed until someone mentions drinks, dreams, or card players.",
         "body": "The captain has not slept properly in eleven cycles. She denies it, but the evidence is in the way she freezes whenever recovered transcripts mention the saloon.\n\nTwice now she has asked whether anyone else has seen three old men through the bridge glass. There was nobody there. On the second occasion she also asked whether the ship kept a safe for paper records.\n\nIt does now."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -797,6 +848,9 @@
         "location": "Captain's Safe",
         "excerpt": "The page keeps moving. The phrase keeps returning. The paper smells faintly of tomato, iron, and smoke.",
         "body": "Cross-reference from the mechanical observer and the old man's account suggests a causality nexus formed around a drink completed at the instant of Miranda's destruction.\n\nHardcopy fragment secured in captain's vault after digital copies exhibited instability. Crew instructed not to vocalize the activation phrase aloud.\n\nFragment note: \"Bloody Mary, no pickles, make it a double.\"\n\nIf this page is found outside the safe again, burn it and do not discuss the ash."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -849,6 +903,9 @@
         "targetLevelId": "observatory",
         "markerColor": "#7fd3ff",
         "markerSize": 1.05
+      },
+      "generation": {
+        "descriptor": "occult portal apparatus"
       }
     },
     {
@@ -906,6 +963,9 @@
         "emissiveIntensity": 0.95,
         "metalness": 0.86,
         "roughness": 0.24
+      },
+      "generation": {
+        "descriptor": "engine core"
       }
     },
     {
@@ -942,6 +1002,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.82,
         "roughness": 0.28
+      },
+      "generation": {
+        "descriptor": "engine column a"
       }
     },
     {
@@ -978,6 +1041,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.82,
         "roughness": 0.28
+      },
+      "generation": {
+        "descriptor": "engine column b"
       }
     },
     {
@@ -1014,6 +1080,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.82,
         "roughness": 0.28
+      },
+      "generation": {
+        "descriptor": "engine column c"
       }
     },
     {
@@ -1050,6 +1119,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.82,
         "roughness": 0.28
+      },
+      "generation": {
+        "descriptor": "engine column d"
       }
     },
     {
@@ -1086,6 +1158,9 @@
         "location": "Engine Room Control Deck",
         "excerpt": "The ship is humming in sympathy with transmissions that should no longer exist.",
         "body": "Reactor output remains nominal, but the harmonic drift is wrong. Every time we pass through a dense pocket of Miranda ash, the engine room resonates with carrier bands matching the dead system's final RF burst.\n\nIt sounds like traffic stacked above an atmosphere that is no longer there. Queue chatter. Clearance loops. Repeated holds.\n\nI have shut down three relays and the sound still comes through the deck."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -1144,6 +1219,9 @@
         "roughness": 0.16,
         "transparent": true,
         "opacity": 0.72
+      },
+      "generation": {
+        "descriptor": "med pod a"
       }
     },
     {
@@ -1181,6 +1259,9 @@
         "roughness": 0.16,
         "transparent": true,
         "opacity": 0.72
+      },
+      "generation": {
+        "descriptor": "med pod b"
       }
     },
     {
@@ -1218,6 +1299,9 @@
         "roughness": 0.16,
         "transparent": true,
         "opacity": 0.72
+      },
+      "generation": {
+        "descriptor": "med pod c"
       }
     },
     {
@@ -1255,6 +1339,9 @@
         "roughness": 0.16,
         "transparent": true,
         "opacity": 0.72
+      },
+      "generation": {
+        "descriptor": "med pod d"
       }
     },
     {
@@ -1291,6 +1378,9 @@
         "location": "Medbay Cryo Pod",
         "excerpt": "The sleepers are not dead. The ship still refuses to classify them as living.",
         "body": "We sealed three crew inside the aft medbay after the Miranda ash dreams escalated into waking fugues. They answer to their names, but only after a delay, as if translating from somewhere farther away.\n\nTheir body temperatures fall whenever the Bloody Mary phrase is spoken near the pods. The glass frosts from the inside first.\n\nI have ordered the quarantine lamps to stay red until somebody can explain why the EEG spikes match the ship's own telemetry."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -1347,6 +1437,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.18,
         "roughness": 0.82
+      },
+      "generation": {
+        "descriptor": "mess table a"
       }
     },
     {
@@ -1382,6 +1475,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.18,
         "roughness": 0.82
+      },
+      "generation": {
+        "descriptor": "mess table b"
       }
     },
     {
@@ -1417,6 +1513,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.46,
         "roughness": 0.54
+      },
+      "generation": {
+        "descriptor": "mess counter"
       }
     },
     {
@@ -1453,6 +1552,9 @@
         "location": "Galley Service Counter",
         "excerpt": "We ran out of clean water before we ran out of stories about the bar.",
         "body": "Nobody eats in the mess unless the speakers are playing static. If the channels are quiet, people start hearing the card table again.\n\nThe bowls rattle whenever we cross a dense ash current. Plates slide toward the aft corridor as if the ship itself leans toward Miranda.\n\nI locked the pantry and still found celery salt on the floor this morning."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -1499,6 +1601,9 @@
       "visible": true,
       "prefab": {
         "type": "wasteland-monolith"
+      },
+      "generation": {
+        "descriptor": "weathered monolith pillar"
       }
     },
     {
@@ -1524,6 +1629,9 @@
       "visible": true,
       "prefab": {
         "type": "wasteland-monolith"
+      },
+      "generation": {
+        "descriptor": "weathered monolith pillar"
       }
     },
     {
@@ -1559,6 +1667,9 @@
         "emissiveIntensity": 0.22,
         "metalness": 0.36,
         "roughness": 0.58
+      },
+      "generation": {
+        "descriptor": "chapel altar"
       }
     },
     {
@@ -1615,6 +1726,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.6,
         "roughness": 0.42
+      },
+      "generation": {
+        "descriptor": "brig cell a"
       }
     },
     {
@@ -1650,6 +1764,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.6,
         "roughness": 0.42
+      },
+      "generation": {
+        "descriptor": "brig cell b"
       }
     },
     {
@@ -1685,6 +1802,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.6,
         "roughness": 0.42
+      },
+      "generation": {
+        "descriptor": "brig cell c"
       }
     },
     {
@@ -1720,6 +1840,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.6,
         "roughness": 0.42
+      },
+      "generation": {
+        "descriptor": "brig cell d"
       }
     },
     {
@@ -1755,6 +1878,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.22,
         "roughness": 0.8
+      },
+      "generation": {
+        "descriptor": "brig desk"
       }
     },
     {
@@ -1791,6 +1917,9 @@
         "location": "Detention Cell 02",
         "excerpt": "I was not trying to open the safe. I was trying to put the page back.",
         "body": "They locked me in the brig because I kept leaving the corridor at night and waking up near the captain's office with soot under my nails.\n\nThe truth is smaller and worse: every time I close my eyes, I can hear a voice asking me to return a recipe card to its proper era.\n\nThe bars hum when the engines drift. The hum knows my name."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -1847,6 +1976,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.16,
         "roughness": 0.86
+      },
+      "generation": {
+        "descriptor": "cargo stack a"
       }
     },
     {
@@ -1882,6 +2014,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.16,
         "roughness": 0.86
+      },
+      "generation": {
+        "descriptor": "cargo stack b"
       }
     },
     {
@@ -1917,6 +2052,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.16,
         "roughness": 0.86
+      },
+      "generation": {
+        "descriptor": "cargo stack c"
       }
     },
     {
@@ -1952,6 +2090,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.16,
         "roughness": 0.86
+      },
+      "generation": {
+        "descriptor": "cargo stack d"
       }
     },
     {
@@ -2057,6 +2198,9 @@
         "emissiveIntensity": 0.28,
         "metalness": 0.86,
         "roughness": 0.22
+      },
+      "generation": {
+        "descriptor": "server bank a"
       }
     },
     {
@@ -2092,6 +2236,9 @@
         "emissiveIntensity": 0.28,
         "metalness": 0.86,
         "roughness": 0.22
+      },
+      "generation": {
+        "descriptor": "server bank b"
       }
     },
     {
@@ -2127,6 +2274,9 @@
         "emissiveIntensity": 0.28,
         "metalness": 0.86,
         "roughness": 0.22
+      },
+      "generation": {
+        "descriptor": "server bank c"
       }
     },
     {
@@ -2162,6 +2312,9 @@
         "emissiveIntensity": 0.28,
         "metalness": 0.86,
         "roughness": 0.22
+      },
+      "generation": {
+        "descriptor": "server bank d"
       }
     },
     {
@@ -2197,6 +2350,9 @@
         "emissiveIntensity": 0.32,
         "metalness": 0.86,
         "roughness": 0.22
+      },
+      "generation": {
+        "descriptor": "server bank e"
       }
     },
     {
@@ -2261,6 +2417,9 @@
         "location": "Upper Data Gallery",
         "excerpt": "Each copied transcript diverges the second time it is opened.",
         "body": "The upper archive is no longer storing files. It is growing variants.\n\nOpen one Miranda transcript and you receive an account. Open it again and the witness order changes. Open it a third time and there is a fourth witness seated at the table.\n\nI moved the worst logs to the upper stacks and disconnected them from the main grid. The lights in this gallery still blink in answers."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     }
   ]

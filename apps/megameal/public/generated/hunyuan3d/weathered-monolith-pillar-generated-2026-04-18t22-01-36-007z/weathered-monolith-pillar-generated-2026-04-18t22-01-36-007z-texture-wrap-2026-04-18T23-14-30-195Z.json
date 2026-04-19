@@ -1,0 +1,14 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb",
+  "sourceName": "Solitude Pillar 4",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/solitude-pillar-4-2026-04-18T23-12-48-591Z/reference/solitude-pillar-4-reference-2026-04-18T23-13-31-302Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776554016514-5wrqv2",
+  "prompt": "Solitude Pillar 3, painterly storybook environment prop, hand-painted materials, unified stylized finish",
+  "mode": "texture",
+  "shapeModel": null,
+  "paintModel": "hunyuan3d-paint-v2-0-turbo",
+  "generatedAt": "2026-04-18T23:14:30.206Z"
+}

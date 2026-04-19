@@ -5,6 +5,7 @@
   import AmbientAudioRegions from '../components/AmbientAudioRegions.svelte'
   import AmbientParticleField from '../components/AmbientParticleField.svelte'
   import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
+  import LevelManager from '../core/LevelManager.svelte'
   import EditorSceneBranch from '../editor/EditorSceneBranch.svelte'
   import { createEmptyScene } from '../editor/editorStore'
   import { createWorldMatrixResolver } from '../editor/editorHierarchyUtils'
@@ -23,6 +24,7 @@
 
   export let levelId: string
   export let position: [number, number, number] = [0, 0, 0]
+  export let editorEnabled = false
   export let spawnSystem: any = null
   export let interactionSystem: any = null
   export let playerSpawnPoint: [number, number, number] = [0, 1, 0]
@@ -50,6 +52,30 @@
     return structuredClone(scene) as EditorSceneDocument
   }
 
+  function parseSceneColor(value: string | number | null | undefined, fallback: number) {
+    if (typeof value === 'number' && Number.isFinite(value)) return value
+    if (typeof value !== 'string') return fallback
+
+    const normalized = value.trim().replace(/^#/, '')
+    if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return fallback
+
+    return Number.parseInt(normalized, 16)
+  }
+
+  function hasMeaningfulSceneContent(scene: EditorSceneDocument | null | undefined) {
+    if (!scene) return false
+
+    if (Array.isArray(scene.nodes) && scene.nodes.length > 0) {
+      return true
+    }
+
+    if (scene.settings && Object.keys(scene.settings).length > 0) {
+      return true
+    }
+
+    return false
+  }
+
   function getStaticScene(level: string) {
     const match = Object.entries(sceneModules).find(([path]) => path.endsWith(`/${level}.scene.json`))
     return match ? cloneScene(match[1]) : null
@@ -72,7 +98,11 @@
     const diskScene = await getDiskScene(level)
     const staticScene = getStaticScene(level)
     const fallbackScene = createDefaultSceneForLevel(level) ?? createEmptyScene(level)
-    const baseScene = diskScene ?? staticScene ?? fallbackScene
+    const baseScene = hasMeaningfulSceneContent(diskScene)
+      ? diskScene
+      : hasMeaningfulSceneContent(staticScene)
+        ? staticScene
+        : fallbackScene
     const upgradedScene = upgradeLegacySceneDocument(baseScene)
 
     sceneDocument = {
@@ -183,6 +213,9 @@
   $: waterEnabled = sharedLevelSettings.features?.water ?? sharedLevelSettings.water?.enabled ?? Boolean(waterSettings?.enabled)
   $: ambientParticlesEnabled = sharedLevelSettings.features?.ambientParticles ?? sharedLevelSettings.ambientParticles?.enabled ?? false
   $: sceneStarMapEnabled = sharedLevelSettings.features?.starMap ?? false
+  $: waterLevel = waterSettings?.level ?? waterSettings?.initialLevel ?? -0.16
+  $: waterColor = parseSceneColor(waterSettings?.color, 0x425d72)
+  $: underwaterFogColor = parseSceneColor(waterSettings?.underwaterFogColor, 0x0a1922)
 
   onMount(() => {
     const unsubscribePlayer = playerStateStore.subscribe((state) => {
@@ -197,98 +230,103 @@
   })
 </script>
 
-<T.Group name={`${levelId}-scene-level`} position={position}>
-  <Skybox
-    path={activeSkyboxPreset.path}
-    files={activeSkyboxPreset.files}
-  />
-
-  <T.FogExp2 color={fogColor} density={fogDensity} />
-  <T.AmbientLight intensity={ambientIntensity} color="#cfe4ff" />
-  <T.HemisphereLight skyColor="#dbe9ff" groundColor="#1b2130" intensity={0.85} />
-  <T.DirectionalLight position={[14, 20, -10]} color="#d7e6ff" intensity={keyLightIntensity} />
-  <T.DirectionalLight position={[-16, 10, 18]} color="#50688f" intensity={fillLightIntensity} />
-
-  {#if waterEnabled && waterSettings}
-    <OceanComponent
-      size={{
-        width: waterSettings.size?.width ?? 800,
-        height: waterSettings.size?.height ?? 800,
-      }}
-      position={[0, waterSettings.level ?? waterSettings.initialLevel ?? -0.16, 0]}
-      color={Number.parseInt((waterSettings.color ?? '#425d72').replace('#', ''), 16)}
-      opacity={waterSettings.opacity ?? 0.86}
-      enableAnimation={waterSettings.enableAnimation ?? true}
-      enableUnderwaterEffects={true}
-      waterCollisionSize={[
-        (waterSettings.size?.width ?? 800) * 0.9,
-        2,
-        (waterSettings.size?.height ?? 800) * 0.9,
-      ]}
-      underwaterFogDensity={waterSettings.underwaterFogDensity ?? 0.08}
-      underwaterFogColor={waterSettings.underwaterFogColor ?? 0x0a1922}
-      surfaceFogDensity={waterSettings.surfaceFogDensity ?? 0.001}
-      metalness={0.08}
-      roughness={0.04}
-      envMapIntensity={1.8}
+<LevelManager>
+  <T.Group name={`${levelId}-scene-level`} position={position}>
+    <Skybox
+      path={activeSkyboxPreset.path}
+      files={activeSkyboxPreset.files}
     />
-    {#if $underwaterStateStore.isUnderwater || $underwaterStateStore.transitionProgress > 0}
-      <UnderwaterOverlay />
-    {/if}
-  {/if}
 
-  {#if ambientParticlesEnabled}
-    <AmbientParticleField
-      enabled={true}
-      count={sharedLevelSettings.ambientParticles?.count ?? 180}
-      radius={sharedLevelSettings.ambientParticles?.radius ?? 140}
-      minHeight={sharedLevelSettings.ambientParticles?.minHeight ?? 0.8}
-      maxHeight={sharedLevelSettings.ambientParticles?.maxHeight ?? 18}
-      color={sharedLevelSettings.ambientParticles?.color ?? '#b8d9ff'}
-      secondaryColor={sharedLevelSettings.ambientParticles?.secondaryColor ?? '#f3e8b2'}
-      size={sharedLevelSettings.ambientParticles?.size ?? 1.15}
-      opacity={sharedLevelSettings.ambientParticles?.opacity ?? 0.26}
-      driftSpeed={sharedLevelSettings.ambientParticles?.driftSpeed ?? 0.22}
-      sway={sharedLevelSettings.ambientParticles?.sway ?? 0.85}
-      center={[0, 0, 0]}
-    />
-  {/if}
+    <T.FogExp2 color={fogColor} density={fogDensity} />
+    <T.AmbientLight intensity={ambientIntensity} color="#cfe4ff" />
+    <T.HemisphereLight skyColor="#dbe9ff" groundColor="#1b2130" intensity={0.85} />
+    <T.DirectionalLight position={[14, 20, -10]} color="#d7e6ff" intensity={keyLightIntensity} />
+    <T.DirectionalLight position={[-16, 10, 18]} color="#50688f" intensity={fillLightIntensity} />
 
-  {#if effectiveAudioRegions.length > 0}
-    <AmbientAudioRegions regions={effectiveAudioRegions} enabled={true} />
-  {/if}
-
-  {#if sceneStarMapEnabled}
-    <T.Group position={[0, 8, 0]}>
-      <StarMap
-        bind:this={starMapComponent}
-        bind:starMapRef={starMapRef}
-        {timelineEvents}
-        {interactionSystem}
-        on:starSelected={(event) => dispatch('starSelected', event.detail)}
+    {#if waterEnabled && waterSettings}
+      <OceanComponent
+        size={{
+          width: waterSettings.size?.width ?? 800,
+          height: waterSettings.size?.height ?? 800,
+        }}
+        position={[0, waterLevel, 0]}
+        initialLevel={waterLevel}
+        color={waterColor}
+        opacity={waterSettings.opacity ?? 0.86}
+        enableAnimation={waterSettings.enableAnimation ?? true}
+        enableUnderwaterEffects={true}
+        waterCollisionSize={[
+          (waterSettings.size?.width ?? 800) * 0.9,
+          2,
+          (waterSettings.size?.height ?? 800) * 0.9,
+        ]}
+        underwaterFogDensity={waterSettings.underwaterFogDensity ?? 0.08}
+        underwaterFogColor={underwaterFogColor}
+        surfaceFogDensity={waterSettings.surfaceFogDensity ?? 0.001}
+        metalness={0.08}
+        roughness={0.04}
+        envMapIntensity={1.8}
       />
-    </T.Group>
+      {#if $underwaterStateStore.isUnderwater || $underwaterStateStore.transitionProgress > 0}
+        <UnderwaterOverlay />
+      {/if}
+    {/if}
 
-    <StarNavigationSystem
-      {timelineEvents}
-      starMapComponent={starMapRef}
-      on:starSelected={(event) => dispatch('starSelected', event.detail)}
-      on:starDeselected={(event) => dispatch('starDeselected', event.detail)}
-      on:levelTransition={(event) => dispatch('levelTransition', event.detail)}
-    />
-  {/if}
+    {#if ambientParticlesEnabled}
+      <AmbientParticleField
+        enabled={true}
+        count={sharedLevelSettings.ambientParticles?.count ?? 180}
+        radius={sharedLevelSettings.ambientParticles?.radius ?? 140}
+        minHeight={sharedLevelSettings.ambientParticles?.minHeight ?? 0.8}
+        maxHeight={sharedLevelSettings.ambientParticles?.maxHeight ?? 18}
+        color={sharedLevelSettings.ambientParticles?.color ?? '#b8d9ff'}
+        secondaryColor={sharedLevelSettings.ambientParticles?.secondaryColor ?? '#f3e8b2'}
+        size={sharedLevelSettings.ambientParticles?.size ?? 1.15}
+        opacity={sharedLevelSettings.ambientParticles?.opacity ?? 0.26}
+        driftSpeed={sharedLevelSettings.ambientParticles?.driftSpeed ?? 0.22}
+        sway={sharedLevelSettings.ambientParticles?.sway ?? 0.85}
+        center={[0, 0, 0]}
+      />
+    {/if}
 
-  {#each rootNodes as node (node.id)}
-    <EditorSceneBranch
-      {node}
-      nodes={sceneNodes}
-      editorEnabled={false}
-      selectedNodeId={null}
-      selectedNodeIds={[]}
-      {interactionSystem}
-      interactiveEnabled={true}
-      on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
-      on:noteRead={(event) => dispatch('noteRead', event.detail)}
-    />
-  {/each}
-</T.Group>
+    {#if effectiveAudioRegions.length > 0}
+      <AmbientAudioRegions regions={effectiveAudioRegions} enabled={true} />
+    {/if}
+
+    {#if sceneStarMapEnabled}
+      <T.Group position={[0, 8, 0]}>
+        <StarMap
+          bind:this={starMapComponent}
+          bind:starMapRef={starMapRef}
+          {timelineEvents}
+          {interactionSystem}
+          on:starSelected={(event) => dispatch('starSelected', event.detail)}
+        />
+      </T.Group>
+
+      <StarNavigationSystem
+        {timelineEvents}
+        starMapComponent={starMapRef}
+        on:starSelected={(event) => dispatch('starSelected', event.detail)}
+        on:starDeselected={(event) => dispatch('starDeselected', event.detail)}
+        on:levelTransition={(event) => dispatch('levelTransition', event.detail)}
+      />
+    {/if}
+
+    {#if !editorEnabled}
+      {#each rootNodes as node (node.id)}
+        <EditorSceneBranch
+          {node}
+          nodes={sceneNodes}
+          editorEnabled={false}
+          selectedNodeId={null}
+          selectedNodeIds={[]}
+          {interactionSystem}
+          interactiveEnabled={true}
+          on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
+          on:noteRead={(event) => dispatch('noteRead', event.detail)}
+        />
+      {/each}
+    {/if}
+  </T.Group>
+</LevelManager>

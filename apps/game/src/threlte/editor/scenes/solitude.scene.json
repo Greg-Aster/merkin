@@ -188,7 +188,7 @@
     {
       "id": "solitude-pillar-1",
       "name": "Solitude Pillar 1",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         18,
@@ -206,14 +206,19 @@
         0.96
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-monolith"
+      "asset": {
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-23-01-827Z.glb"
+      },
+      "generation": {
+        "descriptor": "Solitude Pillar 1",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-23-01-827Z.glb",
+        "lastBakedAt": "2026-04-19T00:23:01.842Z"
       }
     },
     {
       "id": "solitude-pillar-2",
       "name": "Solitude Pillar 2",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         15.588457268119896,
@@ -231,14 +236,19 @@
         1.02
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-monolith"
+      "asset": {
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t22-48-19-209z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t22-48-19-209z-generated-2026-04-19T00-26-03-604Z.glb"
+      },
+      "generation": {
+        "descriptor": "Solitude Pillar 2",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t22-48-19-209z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t22-48-19-209z-generated-2026-04-19T00-26-03-604Z.glb",
+        "lastBakedAt": "2026-04-19T00:26:03.616Z"
       }
     },
     {
       "id": "solitude-pillar-3",
       "name": "Solitude Pillar 3",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         9.000000000000002,
@@ -256,14 +266,19 @@
         1.08
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-monolith"
+      "asset": {
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18t22-42-43-915z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18t22-42-43-915z-generated-2026-04-19T00-29-09-121Z.glb"
+      },
+      "generation": {
+        "descriptor": "Solitude Pillar 3",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18t22-42-43-915z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18t22-42-43-915z-generated-2026-04-19T00-29-09-121Z.glb",
+        "lastBakedAt": "2026-04-19T00:29:09.137Z"
       }
     },
     {
       "id": "solitude-pillar-4",
       "name": "Solitude Pillar 4",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         1.102182119232618e-15,
@@ -281,14 +296,19 @@
         0.96
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-monolith"
+      "asset": {
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t23-14-30-195z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t23-14-30-195z-generated-2026-04-19T00-32-18-336Z.glb"
+      },
+      "generation": {
+        "descriptor": "Solitude Pillar 4",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t23-14-30-195z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t23-14-30-195z-generated-2026-04-19T00-32-18-336Z.glb",
+        "lastBakedAt": "2026-04-19T00:32:18.358Z"
       }
     },
     {
       "id": "solitude-pillar-5",
       "name": "Solitude Pillar 5",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         -8.999999999999996,
@@ -306,14 +326,19 @@
         1.02
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-monolith"
+      "asset": {
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
+      },
+      "generation": {
+        "descriptor": "Solitude Pillar 5",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
+        "lastBakedAt": "2026-04-19T00:35:30.011Z"
       }
     },
     {
       "id": "solitude-pillar-6",
       "name": "Solitude Pillar 6",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         -15.588457268119896,
@@ -331,14 +356,19 @@
         1.08
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-monolith"
+      "asset": {
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-38-32-081Z.glb"
+      },
+      "generation": {
+        "descriptor": "Solitude Pillar 6",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-38-32-081Z.glb",
+        "lastBakedAt": "2026-04-19T00:38:32.101Z"
       }
     },
     {
       "id": "solitude-pillar-7",
       "name": "Solitude Pillar 7",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         -18,
@@ -356,14 +386,19 @@
         0.96
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-monolith"
+      "asset": {
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
+      },
+      "generation": {
+        "descriptor": "Solitude Pillar 7",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+        "lastBakedAt": "2026-04-19T00:42:38.546Z"
       }
     },
     {
       "id": "solitude-pillar-8",
       "name": "Solitude Pillar 8",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         -15.588457268119894,
@@ -381,14 +416,19 @@
         1.02
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-monolith"
+      "asset": {
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-46-19-543Z.glb"
+      },
+      "generation": {
+        "descriptor": "Solitude Pillar 8",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-46-19-543Z.glb",
+        "lastBakedAt": "2026-04-19T00:46:19.646Z"
       }
     },
     {
       "id": "solitude-pillar-9",
       "name": "Solitude Pillar 9",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         -9.000000000000007,
@@ -406,14 +446,19 @@
         1.08
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-monolith"
+      "asset": {
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-49-15-989Z.glb"
+      },
+      "generation": {
+        "descriptor": "Solitude Pillar 9",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-49-15-989Z.glb",
+        "lastBakedAt": "2026-04-19T00:49:16.000Z"
       }
     },
     {
       "id": "solitude-pillar-10",
       "name": "Solitude Pillar 10",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         -3.3065463576978533e-15,
@@ -431,8 +476,13 @@
         0.96
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-monolith"
+      "asset": {
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-52-18-511Z.glb"
+      },
+      "generation": {
+        "descriptor": "Solitude Pillar 10",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-52-18-511Z.glb",
+        "lastBakedAt": "2026-04-19T00:52:18.528Z"
       }
     },
     {

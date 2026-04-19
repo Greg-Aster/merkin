@@ -29,6 +29,7 @@ import {
   type EditorSceneNodePatch,
 } from './editorCommands'
 import { upgradeLegacySceneDocument } from './defaultScenes'
+import { ensureNodeGeneration, ensureSceneGeneration } from './editorGeneration'
 import { normalizeLevelSceneSettings } from './editorLevelSetup'
 import type {
   EditorSceneDocument,
@@ -45,10 +46,10 @@ function createId(prefix: string) {
 
 function normalizeSceneDocument(scene: EditorSceneDocument): EditorSceneDocument {
   const upgraded = upgradeLegacySceneDocument(scene)
-  return {
+  return ensureSceneGeneration({
     ...upgraded,
     settings: normalizeLevelSceneSettings(upgraded.levelId, upgraded.settings),
-  }
+  })
 }
 
 function cloneScene(scene: EditorSceneDocument | null) {
@@ -162,21 +163,22 @@ export function updateSolitudeSceneSettings(
   }))
 }
 export function addNode(node: EditorSceneNode) {
+  const normalizedNode = ensureNodeGeneration(node)
   const applied = executeSceneCommand({
     type: 'add-node',
-    node,
+    node: normalizedNode,
   })
 
   if (applied) {
     editorStateStore.update((state) => ({
       ...state,
-      selectedNodeId: node.id,
-      selectedNodeIds: [node.id],
-      selectionAnchorId: node.id,
+      selectedNodeId: normalizedNode.id,
+      selectedNodeIds: [normalizedNode.id],
+      selectionAnchorId: normalizedNode.id,
     }))
   }
 
-  return node.id
+  return normalizedNode.id
 }
 
 function updateNode(nodeId: string, updater: (node: EditorSceneNode) => EditorSceneNode) {

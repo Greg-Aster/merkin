@@ -2,12 +2,24 @@
   import { T, useTask } from '@threlte/core';
   import { Collider, RigidBody, useRapier } from '@threlte/rapier';
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+  import * as THREE from 'three';
   import { Euler, Group, PerspectiveCamera, Quaternion, Vector3 } from 'three';
   import { multiplayerStore, type PlayerState } from '../multiplayer/stores/multiplayerStore';
-  import { uiStore } from '../../stores/uiStore';
+  import PlayerAvatar from '../multiplayer/components/PlayerAvatar.svelte';
+  import GroundShockwave from './GroundShockwave.svelte';
+  import {
+    uiStore,
+    isSoundEnabled,
+    masterVolumeSetting,
+    sfxVolumeSetting,
+  } from '../../stores/uiStore';
   import { gameActions } from '../../stores/gameStateStore';
   import { PLAYER_GROUP } from '../../constants/physics';
-  import { recordSystemTiming } from '../performance/stores/performanceStore';
+  import {
+    frameTimeStore,
+    qualitySettingsStore,
+    recordSystemTiming,
+  } from '../performance/stores/performanceStore';
 
   // --- Physics Constants ---
   const GRAVITY = 8;
@@ -15,9 +27,25 @@
   const GAMEPAD_MOVE_DEADZONE = 0.18;
   const GAMEPAD_LOOK_DEADZONE = 0.12;
   const GAMEPAD_LOOK_SPEED = 2.2;
+  const PLAYER_CAPSULE_HALF_HEIGHT = 0.9;
+  const PLAYER_CAPSULE_RADIUS = 0.45;
   
   // --- Visual Constants ---
   const CAMERA_SMOOTH_SPEED = 0.2; // How quickly visuals catch up to physics
+  const LIGHT_CHARGE_MAX_TIME = 1.6;
+  const LIGHT_BURST_THRESHOLD = 0.62;
+  const LIGHT_FLASH_DECAY = 1.8;
+  const LIGHT_FLASH_TAP_BOOST = 0.55;
+  const LIGHT_SHOCKWAVE_SPEED = 26;
+  const LIGHT_SHOCKWAVE_RADIUS_BASE = 12;
+  const LIGHT_SHOCKWAVE_RADIUS_BONUS = 28;
+  const LIGHT_SHOCKWAVE_DURATION = 0.9;
+  const LIGHT_SHOCKWAVE_COLOR = '#7ed8ff';
+  const LIGHT_SHOCKWAVE_FIRE_COLOR = '#ff9b4d';
+  const LIGHT_SHOCKWAVE_CORE_COLOR = '#fff2cf';
+  const SHOCKWAVE_FALLBACK_TRIGGER_MS = 24;
+  const SHOCKWAVE_FALLBACK_RECOVER_MS = 18;
+  const SHOCKWAVE_FALLBACK_HOLD_MS = 2500;
 
   const dispatch = createEventDispatcher();
   const rapier = useRapier();
@@ -56,6 +84,7 @@
   let mobileMovement = { x: 0, z: 0 };
   let mobileLook = { x: 0, y: 0 };
   let mobileJumpPressed = false;
+  let mobilePulsePressed = false;
   let isMobile = false;
   let dragToLook = false;
   let surfaceTouchId: number | null = null;
@@ -87,7 +116,48 @@
     lookY: 0,
     jump: false,
     sprint: false,
+    pulse: false,
   };
+  let lightChargeAmount = 0;
+  let lightFlashAmount = 0;
+  let wasLightCharging = false;
+  let shockwaveId = 0;
+  let shockwaves: Array<{
+    id: number;
+    position: [number, number, number];
+    radius: number;
+    bandWidth: number;
+    opacity: number;
+    electricOpacity: number;
+    fireOpacity: number;
+    coreOpacity: number;
+    progress: number;
+    maxScale: number;
+    strength: number;
+    electricColor: string;
+    fireColor: string;
+    lightColor: string;
+    lightDistance: number;
+    lightIntensity: number;
+  }> = [];
+  let chargeAudioContext: AudioContext | null = null;
+  let playerAudioOutputGain: GainNode | null = null;
+  let chargeMasterGain: GainNode | null = null;
+  let chargeOscillator: OscillatorNode | null = null;
+  let chargeHarmonicOscillator: OscillatorNode | null = null;
+  let chargeFilterNode: BiquadFilterNode | null = null;
+  let chargeLfoOscillator: OscillatorNode | null = null;
+  let chargeAudioActive = false;
+  let chargeAudioPending = false;
+  let chargeAudioDesired = false;
+  let chargeAudioRequestId = 0;
+  let smoothedFrameMs = 16.67;
+  let shockwaveFallbackHoldMs = 0;
+  let shockwaveContourEnabled = true;
+  const shockwaveElectricBaseColor = new THREE.Color(LIGHT_SHOCKWAVE_COLOR);
+  const shockwaveFireBaseColor = new THREE.Color(LIGHT_SHOCKWAVE_FIRE_COLOR);
+  const shockwaveCoreBaseColor = new THREE.Color(LIGHT_SHOCKWAVE_CORE_COLOR);
+  const shockwaveColorScratch = new THREE.Color();
   const SURFACE_TAP_MOVE_THRESHOLD = 10;
   const SURFACE_HOLD_MOVE_THRESHOLD = 18;
   const SURFACE_FORWARD_HOLD_MS = 180;
@@ -97,6 +167,7 @@
     mobileMovement = $mobileInputStore.movement;
     mobileLook = $mobileInputStore.look;
     dragToLook = $mobileInputStore.dragToLook;
+    mobilePulsePressed = $mobileInputStore.actionPressed === 'pulse';
     if ($mobileInputStore.actionPressed === 'jump') {
       mobileJumpPressed = true;
     }
@@ -109,7 +180,7 @@
   // --- Input Handlers ---
   function handleKeydown(event: KeyboardEvent) {
     if ($uiStore.isInputFocused) return;
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space'].includes(event.code)) {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'KeyF'].includes(event.code)) {
       event.preventDefault();
     }
     keyStates[event.code] = true;
@@ -247,6 +318,15 @@
     }
   }
 
+  function handleWindowBlur() {
+    keyStates.KeyF = false;
+    isMouseDown = false;
+  }
+
+  $: if ($uiStore.isInputFocused && keyStates.KeyF) {
+    keyStates.KeyF = false;
+  }
+
   function updateMovementFromKeys() {
     keyboardMovement.x = 0;
     keyboardMovement.z = 0;
@@ -289,6 +369,7 @@
       gamepadState.lookY = 0;
       gamepadState.jump = false;
       gamepadState.sprint = false;
+      gamepadState.pulse = false;
       return gamepadState;
     }
 
@@ -298,7 +379,275 @@
     gamepadState.lookY = applyStickDeadzone(pad.axes[3] ?? 0, GAMEPAD_LOOK_DEADZONE);
     gamepadState.jump = Boolean(pad.buttons[0]?.pressed);
     gamepadState.sprint = Boolean(pad.buttons[5]?.pressed || pad.buttons[7]?.pressed);
+    gamepadState.pulse = Boolean(pad.buttons[1]?.pressed || pad.buttons[6]?.pressed);
     return gamepadState;
+  }
+
+  function getLightChargeInputActive(gamepadInput: typeof gamepadState) {
+    return keyStates['KeyF'] || mobilePulsePressed || gamepadInput.pulse;
+  }
+
+  function resolvePlayerSfxVolume(baseVolume: number) {
+    return Math.min(1, Math.max(0, $masterVolumeSetting * $sfxVolumeSetting * baseVolume));
+  }
+
+  function mixShockwaveColor(from: THREE.Color, to: THREE.Color, amount: number) {
+    return `#${shockwaveColorScratch.copy(from).lerp(to, Math.min(1, Math.max(0, amount))).getHexString()}`;
+  }
+
+  async function ensureChargeAudioContext() {
+    if (typeof window === 'undefined') return null;
+
+    const AudioContextCtor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextCtor) return null;
+
+    if (!chargeAudioContext) {
+      chargeAudioContext = new AudioContextCtor();
+      playerAudioOutputGain = chargeAudioContext.createGain();
+      playerAudioOutputGain.gain.value = 1;
+      playerAudioOutputGain.connect(chargeAudioContext.destination);
+    }
+
+    if (chargeAudioContext.state === 'suspended') {
+      try {
+        await chargeAudioContext.resume();
+      } catch (error) {
+        console.warn('Player charge audio resume failed:', error);
+        return null;
+      }
+    }
+
+    return chargeAudioContext;
+  }
+
+  async function beginChargeAudio() {
+    if (chargeAudioActive || chargeAudioPending || !$isSoundEnabled) return;
+
+    chargeAudioDesired = true;
+    chargeAudioPending = true;
+    const requestId = ++chargeAudioRequestId;
+
+    try {
+      const context = await ensureChargeAudioContext();
+      if (
+        !context
+        || !playerAudioOutputGain
+        || !$isSoundEnabled
+        || !chargeAudioDesired
+        || requestId !== chargeAudioRequestId
+      ) {
+        return;
+      }
+
+      const masterGain = context.createGain();
+      const chargeGain = context.createGain();
+      const filter = context.createBiquadFilter();
+      const primaryOscillator = context.createOscillator();
+      const harmonicOscillator = context.createOscillator();
+      const lfoOscillator = context.createOscillator();
+      const lfoGain = context.createGain();
+
+      filter.type = 'bandpass';
+      filter.frequency.value = 880;
+      filter.Q.value = 1.1;
+
+      primaryOscillator.type = 'triangle';
+      primaryOscillator.frequency.value = 220;
+      harmonicOscillator.type = 'sine';
+      harmonicOscillator.frequency.value = 330;
+
+      lfoOscillator.type = 'sine';
+      lfoOscillator.frequency.value = 5.5;
+      lfoGain.gain.value = 9;
+
+      masterGain.gain.value = 0.0001;
+      chargeGain.gain.value = 0.75;
+
+      primaryOscillator.connect(chargeGain);
+      harmonicOscillator.connect(chargeGain);
+      chargeGain.connect(filter);
+      filter.connect(masterGain);
+      masterGain.connect(playerAudioOutputGain);
+
+      lfoOscillator.connect(lfoGain);
+      lfoGain.connect(primaryOscillator.frequency);
+
+      const now = context.currentTime;
+      masterGain.gain.cancelScheduledValues(now);
+      masterGain.gain.setValueAtTime(0.0001, now);
+      masterGain.gain.exponentialRampToValueAtTime(resolvePlayerSfxVolume(0.1), now + 0.08);
+
+      primaryOscillator.start(now);
+      harmonicOscillator.start(now);
+      lfoOscillator.start(now);
+
+      if (!chargeAudioDesired || requestId !== chargeAudioRequestId) {
+        masterGain.gain.cancelScheduledValues(now);
+        masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+        primaryOscillator.stop(now + 0.06);
+        harmonicOscillator.stop(now + 0.06);
+        lfoOscillator.stop(now + 0.06);
+        return;
+      }
+
+      chargeOscillator = primaryOscillator;
+      chargeHarmonicOscillator = harmonicOscillator;
+      chargeFilterNode = filter;
+      chargeMasterGain = masterGain;
+      chargeLfoOscillator = lfoOscillator;
+      chargeAudioActive = true;
+    } finally {
+      if (requestId === chargeAudioRequestId) {
+        chargeAudioPending = false;
+      }
+    }
+  }
+
+  function stopChargeAudio() {
+    chargeAudioDesired = false;
+    chargeAudioPending = false;
+    chargeAudioRequestId += 1;
+
+    const localContext = chargeAudioContext;
+    const localMasterGain = chargeMasterGain;
+    const localPrimaryOscillator = chargeOscillator;
+    const localHarmonicOscillator = chargeHarmonicOscillator;
+    const localLfoOscillator = chargeLfoOscillator;
+    const localFilter = chargeFilterNode;
+
+    chargeOscillator = null;
+    chargeHarmonicOscillator = null;
+    chargeFilterNode = null;
+    chargeMasterGain = null;
+    chargeLfoOscillator = null;
+    chargeAudioActive = false;
+
+    if (!localContext) return;
+
+    const now = localContext.currentTime;
+    const stopAt = now + 0.12;
+
+    try {
+      localMasterGain?.gain.cancelScheduledValues(now);
+      localMasterGain?.gain.setValueAtTime(Math.max(localMasterGain.gain.value, 0.0001), now);
+      localMasterGain?.gain.exponentialRampToValueAtTime(0.0001, stopAt);
+    } catch (error) {
+      console.warn('Player charge audio envelope stop failed:', error);
+    }
+
+    try {
+      localPrimaryOscillator?.stop(stopAt);
+      localHarmonicOscillator?.stop(stopAt);
+      localLfoOscillator?.stop(stopAt);
+    } catch (error) {
+      console.warn('Player charge oscillator stop failed:', error);
+    }
+
+    window.setTimeout(() => {
+      try {
+        localPrimaryOscillator?.disconnect();
+        localHarmonicOscillator?.disconnect();
+        localLfoOscillator?.disconnect();
+        localFilter?.disconnect();
+        localMasterGain?.disconnect();
+      } catch {
+      }
+    }, 180);
+  }
+
+  async function playReleaseAudio(strength: number) {
+    if (!$isSoundEnabled) return;
+
+    const context = await ensureChargeAudioContext();
+    if (!context || !playerAudioOutputGain) return;
+
+    const envelope = context.createGain();
+    const filter = context.createBiquadFilter();
+    const primaryOscillator = context.createOscillator();
+    const harmonicOscillator = context.createOscillator();
+
+    filter.type = 'lowpass';
+    filter.frequency.value = 2400 + strength * 1800;
+    filter.Q.value = 0.8;
+
+    primaryOscillator.type = strength >= LIGHT_BURST_THRESHOLD ? 'sawtooth' : 'triangle';
+    harmonicOscillator.type = 'sine';
+
+    const startFrequency = 420 + strength * 340;
+    const endFrequency = 120 + strength * 90;
+    primaryOscillator.frequency.value = startFrequency;
+    harmonicOscillator.frequency.value = startFrequency * 1.5;
+
+    primaryOscillator.connect(filter);
+    harmonicOscillator.connect(filter);
+    filter.connect(envelope);
+    envelope.connect(playerAudioOutputGain);
+
+    const now = context.currentTime;
+    const duration = 0.24 + strength * 0.22;
+    const peakVolume = resolvePlayerSfxVolume(0.16 + strength * 0.18);
+
+    envelope.gain.setValueAtTime(0.0001, now);
+    envelope.gain.exponentialRampToValueAtTime(Math.max(peakVolume, 0.0002), now + 0.018);
+    envelope.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    primaryOscillator.frequency.setValueAtTime(startFrequency, now);
+    primaryOscillator.frequency.exponentialRampToValueAtTime(endFrequency, now + duration);
+    harmonicOscillator.frequency.setValueAtTime(startFrequency * 1.5, now);
+    harmonicOscillator.frequency.exponentialRampToValueAtTime(endFrequency * 0.75, now + duration);
+
+    primaryOscillator.start(now);
+    harmonicOscillator.start(now);
+    primaryOscillator.stop(now + duration + 0.04);
+    harmonicOscillator.stop(now + duration + 0.04);
+  }
+
+  function updateChargeAudio(chargeAmount: number, flashAmount: number) {
+    if (!chargeAudioContext || !chargeAudioActive || !chargeOscillator || !chargeHarmonicOscillator || !chargeMasterGain || !chargeFilterNode) {
+      return;
+    }
+
+    const now = chargeAudioContext.currentTime;
+    const brightness = Math.min(1, chargeAmount + flashAmount * 0.35);
+    const baseFrequency = 210 + brightness * 480;
+
+    chargeOscillator.frequency.setTargetAtTime(baseFrequency, now, 0.035);
+    chargeHarmonicOscillator.frequency.setTargetAtTime(baseFrequency * 1.5, now, 0.05);
+    chargeFilterNode.frequency.setTargetAtTime(880 + brightness * 2600, now, 0.05);
+    chargeMasterGain.gain.setTargetAtTime(resolvePlayerSfxVolume(0.06 + brightness * 0.14), now, 0.045);
+  }
+
+  function spawnLightShockwave(origin: [number, number, number], strength: number) {
+    const maxScale = LIGHT_SHOCKWAVE_RADIUS_BASE + strength * LIGHT_SHOCKWAVE_RADIUS_BONUS;
+    shockwaves = [
+      ...shockwaves,
+      {
+        id: ++shockwaveId,
+        position: origin,
+        radius: 0.8,
+        bandWidth: 0.9 + strength * 0.7,
+        opacity: 0.65 + strength * 0.2,
+        electricOpacity: 0.96,
+        fireOpacity: 0.14 + strength * 0.08,
+        coreOpacity: 0.32 + strength * 0.12,
+        progress: 0,
+        maxScale,
+        strength,
+        electricColor: LIGHT_SHOCKWAVE_COLOR,
+        fireColor: LIGHT_SHOCKWAVE_FIRE_COLOR,
+        lightColor: LIGHT_SHOCKWAVE_COLOR,
+        lightDistance: 7,
+        lightIntensity: 6 + strength * 16,
+      }
+    ];
+
+    dispatch('lightBurst', {
+      origin,
+      strength,
+      maxRadius: maxScale,
+      speed: LIGHT_SHOCKWAVE_SPEED,
+    });
   }
 
   async function ensureMultiplayerService(): Promise<void> {
@@ -331,9 +680,89 @@
   }
 
   useTask((delta) => {
-    if (!rigidBody || !characterController) return;
+    if (
+      !rigidBody
+      || !characterController
+      || (typeof rigidBody.isValid === 'function' && !rigidBody.isValid())
+      || typeof rigidBody.numColliders !== 'function'
+      || rigidBody.numColliders() < 1
+    ) return;
     const controllerStart = performance.now();
     const gamepadInput = getGamepadInput();
+    const lightChargeInputActive = getLightChargeInputActive(gamepadInput);
+    smoothedFrameMs = THREE.MathUtils.lerp(smoothedFrameMs, delta * 1000, 0.12);
+
+    const qualitySettings = $qualitySettingsStore;
+    const qualityForcesFallback = !qualitySettings.enableDynamicLighting || qualitySettings.canvasScale < 0.75;
+    const reportedFrameMs = $frameTimeStore;
+    const overloadDetected = smoothedFrameMs >= SHOCKWAVE_FALLBACK_TRIGGER_MS || reportedFrameMs >= SHOCKWAVE_FALLBACK_TRIGGER_MS;
+
+    if (qualityForcesFallback || overloadDetected) {
+      shockwaveFallbackHoldMs = SHOCKWAVE_FALLBACK_HOLD_MS;
+    } else if (shockwaveFallbackHoldMs > 0 && smoothedFrameMs <= SHOCKWAVE_FALLBACK_RECOVER_MS && reportedFrameMs <= SHOCKWAVE_FALLBACK_TRIGGER_MS) {
+      shockwaveFallbackHoldMs = Math.max(0, shockwaveFallbackHoldMs - delta * 1000);
+    }
+
+    shockwaveContourEnabled = !qualityForcesFallback && shockwaveFallbackHoldMs <= 0;
+
+    if ($isSoundEnabled && lightChargeInputActive && !chargeAudioActive) {
+      void beginChargeAudio();
+    } else if ((!$isSoundEnabled || !lightChargeInputActive) && chargeAudioActive) {
+      stopChargeAudio();
+    }
+
+    if (lightChargeInputActive) {
+      lightChargeAmount = Math.min(1, lightChargeAmount + delta / LIGHT_CHARGE_MAX_TIME);
+      lightFlashAmount = Math.min(1, lightFlashAmount + delta * 0.75);
+    } else {
+      lightFlashAmount = Math.max(0, lightFlashAmount - delta * LIGHT_FLASH_DECAY);
+    }
+
+    if (!lightChargeInputActive && wasLightCharging) {
+      const releaseCharge = lightChargeAmount;
+      lightFlashAmount = Math.max(lightFlashAmount, Math.min(1, LIGHT_FLASH_TAP_BOOST + releaseCharge * 0.45));
+      void playReleaseAudio(Math.max(0.2, releaseCharge));
+
+      if (releaseCharge >= LIGHT_BURST_THRESHOLD) {
+        const currentPosition = rigidBody.translation();
+        const groundY = currentPosition.y - (PLAYER_CAPSULE_HALF_HEIGHT + PLAYER_CAPSULE_RADIUS) + 0.08;
+        spawnLightShockwave(
+          [currentPosition.x, groundY, currentPosition.z],
+          releaseCharge
+        );
+      }
+
+      lightChargeAmount = 0;
+    }
+
+    wasLightCharging = lightChargeInputActive;
+    updateChargeAudio(lightChargeAmount, lightFlashAmount);
+
+    if (shockwaves.length > 0) {
+      shockwaves = shockwaves
+        .map((shockwave) => {
+          const nextProgress = Math.min(1, shockwave.progress + delta / LIGHT_SHOCKWAVE_DURATION);
+          const nextRadius = 0.8 + shockwave.maxScale * nextProgress;
+          const warmth = Math.max(0, (nextProgress - 0.16) / 0.84);
+          const electricMix = Math.min(1, nextProgress * 0.38 + shockwave.strength * 0.08);
+          const fireMix = Math.min(1, 0.08 + warmth * 0.52);
+          return {
+            ...shockwave,
+            progress: nextProgress,
+            radius: nextRadius,
+            opacity: (1 - nextProgress) * 0.75,
+            electricOpacity: (1 - nextProgress) * (1.04 + shockwave.strength * 0.06),
+            fireOpacity: (1 - nextProgress) * (0.16 + shockwave.strength * 0.08) * Math.max(0.14, 0.4 + warmth * 0.26),
+            coreOpacity: (1 - nextProgress) * (0.34 + shockwave.strength * 0.14),
+            lightDistance: 5 + nextRadius * 1.35,
+            lightIntensity: (1 - nextProgress) * (8 + shockwave.strength * 18),
+            electricColor: mixShockwaveColor(shockwaveElectricBaseColor, shockwaveCoreBaseColor, electricMix),
+            fireColor: mixShockwaveColor(shockwaveCoreBaseColor, shockwaveFireBaseColor, fireMix),
+            lightColor: mixShockwaveColor(shockwaveElectricBaseColor, shockwaveFireBaseColor, Math.min(1, nextProgress * 0.95 + shockwave.strength * 0.15)),
+          };
+        })
+        .filter((shockwave) => shockwave.progress < 1);
+    }
 
     // 1. Handle Rotation (Left/Right Mouse Look) - This directly affects the physics body
     if (isMobile && mobileLook && (mobileLook.x !== 0 || mobileLook.y !== 0)) {
@@ -379,6 +808,7 @@
     // 4. Compute and Apply Movement via Character Controller
     tempDesiredTranslation.set(tempHorizontalVelocity.x, playerVelocity.y, tempHorizontalVelocity.z).multiplyScalar(delta);
     const collider = rigidBody.collider(0);
+    if (!collider) return;
     // Exclude sensors so water doesn't block player movement
     characterController.computeColliderMovement(
       collider, 
@@ -412,9 +842,10 @@
     cameraRotationX += accumulatedRotationY;
     cameraRotationX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraRotationX));
     if (cameraPivot) {
-      cameraPivot.quaternion.setFromEuler(new Euler(cameraRotationX, 0, 0));
+      cameraPivot.quaternion.setFromEuler(new THREE.Euler(cameraRotationX, 0, 0));
     }
     accumulatedRotationY = 0;
+
     recordSystemTiming('playerController', performance.now() - controllerStart);
 
     networkSyncElapsed += delta * 1000;
@@ -439,6 +870,7 @@
     const pos = { x, y, z };
     rigidBody.setTranslation(pos, true);
     playerVelocity.set(0, 0, 0);
+    gameActions.updatePlayerPosition([pos.x, pos.y, pos.z]);
     if (visualGroup) {
       visualGroup.position.set(x, y, z); // Instantly move visual group on spawn
     }
@@ -460,18 +892,23 @@
   });
 
   onDestroy(() => {
+    stopChargeAudio();
     window.removeEventListener('gamepadconnected', handleGamepadConnected);
     window.removeEventListener('gamepaddisconnected', handleGamepadDisconnected);
     if (surfaceMoveHoldTimeout !== null) {
       window.clearTimeout(surfaceMoveHoldTimeout);
     }
     characterController?.free?.();
+    chargeAudioContext?.close?.();
+    chargeAudioContext = null;
+    playerAudioOutputGain = null;
   });
 </script>
 
 <svelte:window
   on:keydown={handleKeydown}
   on:keyup={handleKeyup}
+  on:blur={handleWindowBlur}
   on:mousemove={handleMouseMove}
   on:mousedown={handleMouseDown}
   on:mouseup={handleMouseUp}
@@ -493,7 +930,7 @@
 >
   <Collider
     shape="capsule"
-    args={[0.9, 0.45]}
+    args={[PLAYER_CAPSULE_HALF_HEIGHT, PLAYER_CAPSULE_RADIUS]}
     collisionGroups={PLAYER_GROUP}
   />
 </RigidBody>
@@ -504,6 +941,11 @@
   hiding any jitter from the player's view.
 -->
 <T.Group bind:ref={visualGroup} position={position}>
+  <PlayerAvatar
+    position={[0, 0, 0]}
+    chargeAmount={lightChargeAmount}
+    flashAmount={lightFlashAmount}
+  />
   <T.Group bind:ref={cameraPivot}>
     <T.PerspectiveCamera
       makeDefault
@@ -515,3 +957,20 @@
     />
   </T.Group>
 </T.Group>
+
+{#each shockwaves as shockwave (shockwave.id)}
+  <GroundShockwave
+    position={shockwave.position}
+    enableContour={shockwaveContourEnabled}
+    radius={shockwave.radius}
+    bandWidth={shockwave.bandWidth}
+    electricOpacity={shockwave.electricOpacity}
+    fireOpacity={shockwave.fireOpacity}
+    coreOpacity={shockwave.coreOpacity}
+    electricColor={shockwave.electricColor}
+    fireColor={shockwave.fireColor}
+    lightColor={shockwave.lightColor}
+    lightDistance={shockwave.lightDistance}
+    lightIntensity={shockwave.lightIntensity}
+  />
+{/each}

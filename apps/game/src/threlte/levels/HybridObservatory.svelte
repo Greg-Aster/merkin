@@ -13,6 +13,15 @@
   import { editorStateStore, observatoryEditorSettingsStore } from '../editor/editorStore'
   import { resolveObservatoryPresetSettings } from '../editor/editorLevelPresets'
   import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
+  import {
+    renderStyleEnabled,
+    renderStyleFlattenMaterials,
+    renderStyleOutlineOpacity,
+    renderStyleOutlineThickness,
+    renderStylePaintedOutlines,
+    renderStylePresetChoice,
+  } from '../stores/uiStore'
+  import type { StylePreset } from '../styles/StylePalettes'
 
   const dispatch = createEventDispatcher()
   const isDev = import.meta.env.DEV
@@ -52,7 +61,8 @@
   const deferredSceneBootCleanups: Array<() => void> = []
   
   // Style configuration from manifest
-  let stylePreset: 'ghibli' | 'alto' | 'monument' | 'retro' = 'ghibli'
+  let stylePreset: StylePreset = 'ghibli'
+  let resolvedStylePreset: StylePreset = stylePreset
   let enableToonShading = true
   
   // Timeline data state
@@ -348,10 +358,14 @@
     stylePreset = activeManifest.style.preset || 'ghibli'
     enableToonShading = activeManifest.style.enabled !== false
   }
+  $: resolvedStylePreset =
+    $renderStylePresetChoice === 'manifest'
+      ? stylePreset
+      : $renderStylePresetChoice
   $: levelOptimizationSettings = activeManifest ? optimizationManager.getComponentSettings(activeManifest.id) : null;
   $: fullStyleSystemEnabled =
     !!activeManifest?.features.styles
-    && ($qualityLevelStore === OptimizationLevel.HIGH || $qualityLevelStore === OptimizationLevel.ULTRA)
+    && $renderStyleEnabled
   $: fallbackMoodLightingEnabled = !!activeManifest?.features.styles && !fullStyleSystemEnabled
   $: observatoryToneMappingExposure = (() => {
     if (!isMobileDevice) return 1.2
@@ -442,7 +456,7 @@
 
   async function ensureStyleSystemComponent() {
     if (styleSystemComponent) return
-    const module = await import('../styles/GhibliStyleSystem.svelte')
+    const module = await import('../styles/RenderStyleSystem.svelte')
     styleSystemComponent = module.default
   }
 
@@ -558,24 +572,22 @@
 {#if activeManifest}
   <LevelManager let:registry let:lighting let:ecsWorld>
     
-    <!-- Full stylized post-processing only on stronger tiers. -->
+    <!-- Render style can be swapped independently of level content. -->
     {#if fullStyleSystemEnabled && styleSystemComponent}
       <svelte:component
         this={styleSystemComponent}
         bind:this={ghibliStyleSystem}
-        preset={stylePreset}
+        stylePreset={resolvedStylePreset}
         enableToonShading={enableToonShading}
         enableOutlines={$qualitySettingsStore.enablePostProcessing}
+        flattenMaterials={$renderStyleFlattenMaterials}
+        usePaintedOutlines={$renderStylePaintedOutlines}
+        outlineThickness={$renderStyleOutlineThickness}
+        outlineOpacity={$renderStyleOutlineOpacity}
         ambientIntensity={observatoryAmbientIntensity}
         sunIntensity={observatorySunIntensity}
         fillIntensity={observatoryFillIntensity}
         toneMappingExposure={observatoryToneMappingExposure}
-        saturation={activeManifest.style.colorGrading?.saturation || 1.2}
-        contrast={activeManifest.style.colorGrading?.contrast || 1.1}
-        brightness={activeManifest.style.colorGrading?.brightness || 1.0}
-        warmth={activeManifest.style.colorGrading?.warmth || 1.05}
-        bloomIntensity={activeManifest.style.bloom?.intensity || 0.3}
-        bloomThreshold={activeManifest.style.bloom?.threshold || 0.9}
         on:styleSystemReady={handleStyleSystemReady}
         on:styleChanged={handleStyleChanged}
       />

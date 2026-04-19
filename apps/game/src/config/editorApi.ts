@@ -1,3 +1,3 @@
-const DEFAULT_EDITOR_API_BASE = 'http://localhost:3001'
+const DEFAULT_EDITOR_API_BASE = '/api/tools'
 
-export const EDITOR_API_BASE = String(import.meta.env.PUBLIC_EDITOR_API_BASE || DEFAULT_EDITOR_API_BASE).replace(/\/+$/, '')
+export const EDITOR_API_BASE = String(import.meta.env?.PUBLIC_EDITOR_API_BASE || DEFAULT_EDITOR_API_BASE).replace(/\/+$/, '')

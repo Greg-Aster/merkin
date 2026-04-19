@@ -78,6 +78,7 @@
   let oceanGeometry: THREE.PlaneGeometry
   let animationTime = 0
   let waterLevel = initialLevel // Initialize water level
+  let lastResolvedInitialLevel = initialLevel
   let reflector: any = null
   let unsubscribeLighting: (() => void) | null = null
   let lastOceanQualityKey: string | null = null
@@ -184,6 +185,16 @@
   $: if (enablePlanarReflections && reflector) {
     reflector.position.set(position[0], waterLevel, position[2])
     reflector.rotation.x = -Math.PI / 2
+  }
+
+  // Scene-authored levels usually provide a static water height. Keep the runtime
+  // water plane aligned with prop updates unless an active rising-water sequence
+  // is driving the level dynamically.
+  $: resolvedInitialLevel = Number.isFinite(initialLevel) ? initialLevel : position[1]
+
+  $: if (!enableRising && Number.isFinite(resolvedInitialLevel) && resolvedInitialLevel !== lastResolvedInitialLevel) {
+    waterLevel = resolvedInitialLevel
+    lastResolvedInitialLevel = resolvedInitialLevel
   }
 
   class OceanComponent extends BaseLevelComponent {

@@ -3,6 +3,7 @@ import mirandaPackagedScene from './scenes/miranda.scene.json'
 import observatoryPackagedScene from './scenes/observatory.scene.json'
 import sciFiRoomPackagedScene from './scenes/sci-fi-room.scene.json'
 import solitudePackagedScene from './scenes/solitude.scene.json'
+import yggdrasilPackagedScene from './scenes/yggdrasil.scene.json'
 
 function nowIso() {
   return new Date().toISOString()
@@ -24,6 +25,7 @@ const PACKAGED_DEFAULT_SCENES: Record<string, EditorSceneDocument> = {
   'sci-fi-room': sciFiRoomPackagedScene as EditorSceneDocument,
   miranda: mirandaPackagedScene as EditorSceneDocument,
   solitude: solitudePackagedScene as EditorSceneDocument,
+  yggdrasil: yggdrasilPackagedScene as unknown as EditorSceneDocument,
 }
 
 function getPackagedDefaultScene(levelId: string) {
@@ -399,6 +401,26 @@ function createSolitudeNodes(): EditorSceneNode[] {
       prefab: { type: 'wasteland-monolith' },
     }
   })
+  const pillarFireflyNodes: EditorSceneNode[] = pillarNodes.map((pillarNode, index) => ({
+    id: `solitude-pillar-firefly-${index + 1}`,
+    name: `${pillarNode.name} Firefly`,
+    kind: 'group',
+    parentId: 'solitude-ruin-ring',
+    position: [pillarNode.position[0], pillarNode.scale[1] + 0.8, pillarNode.position[2]],
+    rotation: [0, 0, 0],
+    scale: [1, 1, 1],
+    visible: true,
+    gameplay: {
+      type: 'firefly',
+      markerColor: '#f5f1a8',
+      markerSize: 0.52,
+      title: pillarNode.name,
+      author: 'Pillar Firefly',
+      location: 'The Solitude Plain',
+      excerpt: `A patient glow hovers above ${pillarNode.name}.`,
+      body: `A solitary firefly keeps watch above ${pillarNode.name}.`,
+    },
+  }))
 
   return [
     {
@@ -411,6 +433,7 @@ function createSolitudeNodes(): EditorSceneNode[] {
       visible: true,
     },
     ...pillarNodes,
+    ...pillarFireflyNodes,
     {
       id: 'solitude-ring-fragment-east',
       name: 'Ring Fragment East',

@@ -126,6 +126,17 @@ export interface EditorGameplayData {
   type: 'portal' | 'note' | 'firefly' | 'audio-region' | 'fog-volume'
   markerColor?: string
   markerSize?: number
+  wanderEnabled?: boolean
+  wanderRadius?: number
+  wanderSpeed?: number
+  hoverHeight?: number
+  bobAmplitude?: number
+  bobSpeed?: number
+  twinkleSpeed?: number
+  lightIntensity?: number
+  lightDistance?: number
+  lightDecay?: number
+  spriteIntensity?: number
   targetLevelId?: string
   title?: string
   author?: string
@@ -137,6 +148,13 @@ export interface EditorGameplayData {
   regionFalloff?: number
   fogDensity?: number
   fogColor?: string
+}
+
+export interface EditorGenerationData {
+  descriptor?: string
+  family?: string
+  lastBakedAssetUrl?: string
+  lastBakedAt?: string
 }
 
 export interface EditorSceneNode {
@@ -157,6 +175,7 @@ export interface EditorSceneNode {
   physics?: EditorNodePhysicsData
   collision?: EditorNodeCollisionData
   gameplay?: EditorGameplayData
+  generation?: EditorGenerationData
 }
 
 export interface SharedLevelSpawnSettings {
