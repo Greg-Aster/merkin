@@ -85,6 +85,17 @@ export function createEditorPrefabFactory(options: CreateEditorPrefabFactoryOpti
           type: 'firefly',
           markerColor: '#f5f1a8',
           markerSize: 0.58,
+          wanderEnabled: false,
+          wanderRadius: 0.35,
+          wanderSpeed: 0.45,
+          hoverHeight: 0.36,
+          bobAmplitude: 0.14,
+          bobSpeed: 1.4,
+          twinkleSpeed: 1.6,
+          lightIntensity: 2.8,
+          lightDistance: 6,
+          lightDecay: 1.6,
+          spriteIntensity: 0.95,
           title: 'Solitude',
           author: 'The Firefly',
           location: 'The Solitude Plain',
@@ -133,7 +144,12 @@ export function createEditorPrefabFactory(options: CreateEditorPrefabFactoryOpti
         },
       })
     },
-    addAsset(name: string, url: string, parentId: string | null = null) {
+    addAsset(
+      name: string,
+      url: string,
+      parentId: string | null = null,
+      scale: [number, number, number] = [0.001, 0.001, 0.001]
+    ) {
       return addNode({
         id: createId('asset'),
         name,
@@ -141,7 +157,7 @@ export function createEditorPrefabFactory(options: CreateEditorPrefabFactoryOpti
         parentId,
         position: [0, 0, 0],
         rotation: [0, 0, 0],
-        scale: [0.001, 0.001, 0.001],
+        scale,
         visible: true,
         asset: { url },
       })

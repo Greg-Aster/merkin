@@ -7,9 +7,7 @@ const repoRoot = resolve(appRoot, '..', '..')
 
 const requiredPaths = [
   ['Build output index', resolve(appRoot, 'dist/index.html')],
-  ['Build output neural style prototype', resolve(appRoot, 'dist/prototypes/neural-style/index.html')],
   ['Shared favicon', resolve(repoRoot, 'apps/megameal/public/favicon.ico')],
-  ['ONNX runtime bundle', resolve(repoRoot, 'apps/megameal/public/vendor/onnxruntime/ort.all.min.mjs')],
   ['Tools bridge entry', resolve(repoRoot, 'tools/legacy-megameal-tools/app.cjs')],
 ]
 
@@ -44,4 +42,4 @@ console.log('[smoke] remaining manual checks:')
 console.log('  1. Boot / and confirm no console errors plus ready diagnostics')
 console.log('  2. Boot /?editor=1 and confirm editor/tools diagnostics')
 console.log('  3. Switch levels, spawn player, open settings')
-console.log('  4. Run AI Mesh generate and toggle neural stylization')
+console.log('  4. Run AI Mesh generate and verify runtime remains stable')

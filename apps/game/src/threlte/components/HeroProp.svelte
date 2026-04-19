@@ -1,9 +1,11 @@
 <script lang="ts">
-  import { T } from '@threlte/core'
+  import { T, useTask, useThrelte } from '@threlte/core'
   import { getContext } from 'svelte'
-  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+  import { createEventDispatcher, onDestroy } from 'svelte'
   import * as THREE from 'three'
   import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+  import { qualityLevelStore, qualitySettingsStore } from '../features/performance/stores/performanceStore'
+  import { getRuntimePropBudget, shouldEnableSceneShadows } from '../features/performance/utils/runtimeSceneBudget'
   import {
     createObjectMaterialOverrideState,
     disposeObjectMaterialOverrideState,
@@ -17,8 +19,11 @@
 
   export let url: string
 
+  const { camera } = useThrelte()
   let scene: THREE.Group | null = null
   let disposed = false
+  let activeLoadToken = 0
+  let loadedUrl = ''
   let editorMaterialOverride = null
   const materialOverrideState = createObjectMaterialOverrideState()
   const textureLoader = new THREE.TextureLoader()
@@ -39,9 +44,22 @@
     alphaMap: null,
   }
   const editorMaterialOverrideStore = getContext<EditorMaterialOverrideStore | undefined>(EDITOR_MATERIAL_OVERRIDE_CONTEXT)
+  const propWorldPosition = new THREE.Vector3()
+  const propBoundingSphere = new THREE.Sphere()
+  let sceneMeshes: THREE.Mesh[] = []
+  let currentDistanceToCamera = 0
+  let currentCullDistance = 0
+  let runtimeVisible = true
+  let distanceCheckAccumulator = 0
   const unsubscribe = editorMaterialOverrideStore?.subscribe((value) => {
     editorMaterialOverride = value
   })
+
+  function getActiveCamera(): THREE.Camera | null {
+    const candidate = camera as THREE.Camera & { current?: THREE.Camera | null }
+    const resolved = candidate?.current ?? candidate
+    return resolved && resolved.position instanceof THREE.Vector3 ? resolved : null
+  }
 
   function disposeTexture(texture: THREE.Texture | null) {
     texture?.dispose()
@@ -107,6 +125,59 @@
     })
   }
 
+  function disposeLoadedScene(object: THREE.Object3D | null) {
+    if (!object) return
+
+    object.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) return
+
+      child.geometry?.dispose?.()
+
+      const disposeMaterial = (material: THREE.Material) => {
+        material?.dispose?.()
+      }
+
+      if (Array.isArray(child.material)) {
+        child.material.forEach(disposeMaterial)
+      } else {
+        disposeMaterial(child.material)
+      }
+    })
+  }
+
+  function snapshotSceneMeshes(root: THREE.Group) {
+    sceneMeshes = []
+
+    root.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) return
+      child.frustumCulled = true
+      sceneMeshes.push(child)
+    })
+
+    const bounds = new THREE.Box3().setFromObject(root)
+    if (!bounds.isEmpty()) {
+      bounds.getBoundingSphere(propBoundingSphere)
+    } else {
+      propBoundingSphere.center.set(0, 0, 0)
+      propBoundingSphere.radius = 1
+    }
+  }
+
+  function applyRuntimePropBudget() {
+    if (!scene) return
+
+    const propBudget = getRuntimePropBudget($qualityLevelStore)
+    const shadowsEnabled = shouldEnableSceneShadows($qualityLevelStore, $qualitySettingsStore)
+
+    currentCullDistance = propBudget.cullDistance + Math.max(1, propBoundingSphere.radius)
+
+    sceneMeshes.forEach((mesh) => {
+      mesh.castShadow = shadowsEnabled && currentDistanceToCamera <= propBudget.shadowDistance
+      mesh.receiveShadow = shadowsEnabled && currentDistanceToCamera <= propBudget.receiveShadowDistance
+      mesh.frustumCulled = true
+    })
+  }
+
   async function syncOverrideTextures() {
     const token = ++textureLoadToken
 
@@ -129,62 +200,106 @@
     applyOverrideTexturesToScene()
   }
 
-  onMount(() => {
+  async function loadSceneFromUrl(nextUrl: string) {
+    const token = ++activeLoadToken
     const loader = new GLTFLoader()
 
-    void loader.loadAsync(url)
-      .then((gltf) => {
-        if (disposed) return
-        scene = gltf.scene
+    try {
+      const gltf = await loader.loadAsync(nextUrl)
+      if (disposed || token !== activeLoadToken) {
+        disposeLoadedScene(gltf.scene)
+        return
+      }
 
-        fixGLTFMaterials(gltf)
-        scene.traverse((child) => {
-          if (!(child instanceof THREE.Mesh)) return
-          child.castShadow = true
-          child.receiveShadow = true
+      const previousScene = scene
+      scene = gltf.scene
 
-          if (Array.isArray(child.material)) {
-            child.material.forEach((material) => {
-              const standardMaterial = material as THREE.MeshStandardMaterial
-              if ('envMapIntensity' in standardMaterial) {
-                standardMaterial.envMapIntensity = Math.max(standardMaterial.envMapIntensity ?? 0, 1.1)
-              }
-            })
-            return
-          }
+      fixGLTFMaterials(gltf)
+      scene.traverse((child) => {
+        if (!(child instanceof THREE.Mesh)) return
+        child.frustumCulled = true
 
-          const standardMaterial = child.material as THREE.MeshStandardMaterial
-          if ('envMapIntensity' in standardMaterial) {
-            standardMaterial.envMapIntensity = Math.max(standardMaterial.envMapIntensity ?? 0, 1.1)
-          }
-        })
+        if (Array.isArray(child.material)) {
+          child.material.forEach((material) => {
+            const standardMaterial = material as THREE.MeshStandardMaterial
+            if ('envMapIntensity' in standardMaterial) {
+              standardMaterial.envMapIntensity = Math.max(standardMaterial.envMapIntensity ?? 0, 1.1)
+            }
+          })
+          return
+        }
 
-        syncObjectMaterialOverride(scene, editorMaterialOverride, materialOverrideState)
-        applyOverrideTexturesToScene()
-
-        dispatch('load', { scene })
+        const standardMaterial = child.material as THREE.MeshStandardMaterial
+        if ('envMapIntensity' in standardMaterial) {
+          standardMaterial.envMapIntensity = Math.max(standardMaterial.envMapIntensity ?? 0, 1.1)
+        }
       })
-      .catch((error) => {
-        if (disposed) return
-        console.error(`❌ HeroProp failed to load: ${url}`, error)
-        reportRuntimeAssetFailure(url, error instanceof Error ? error.message : 'Unknown GLTF load error')
-        dispatch('error', { error, url })
-      })
-  })
+
+      snapshotSceneMeshes(scene)
+      applyRuntimePropBudget()
+
+      syncObjectMaterialOverride(scene, editorMaterialOverride, materialOverrideState)
+      applyOverrideTexturesToScene()
+
+      if (previousScene && previousScene !== scene) {
+        disposeLoadedScene(previousScene)
+      }
+
+      dispatch('load', { scene })
+    } catch (error) {
+      if (disposed || token !== activeLoadToken) return
+      console.error(`❌ HeroProp failed to load: ${nextUrl}`, error)
+      reportRuntimeAssetFailure(nextUrl, error instanceof Error ? error.message : 'Unknown GLTF load error')
+      dispatch('error', { error, url: nextUrl })
+    }
+  }
+
+  $: if (url && url !== loadedUrl) {
+    loadedUrl = url
+    void loadSceneFromUrl(url)
+  }
 
   $: if (scene) {
     syncObjectMaterialOverride(scene, editorMaterialOverride, materialOverrideState)
     applyOverrideTexturesToScene()
+    applyRuntimePropBudget()
   }
 
   $: void syncOverrideTextures()
 
+  useTask((delta) => {
+    const activeCamera = getActiveCamera()
+    if (!scene || !activeCamera) return
+
+    distanceCheckAccumulator += delta
+    if (distanceCheckAccumulator < 0.2) return
+    distanceCheckAccumulator = 0
+
+    scene.getWorldPosition(propWorldPosition)
+    currentDistanceToCamera = Math.max(
+      0,
+      activeCamera.position.distanceTo(propWorldPosition) - Math.max(1, propBoundingSphere.radius),
+    )
+
+    const nextVisible = currentDistanceToCamera <= currentCullDistance
+    if (runtimeVisible !== nextVisible) {
+      runtimeVisible = nextVisible
+      scene.visible = nextVisible
+    }
+
+    if (nextVisible) {
+      applyRuntimePropBudget()
+    }
+  })
+
   onDestroy(() => {
     disposed = true
+    activeLoadToken += 1
     textureLoadToken += 1
     unsubscribe?.()
     disposeOverrideTextures()
     disposeObjectMaterialOverrideState(materialOverrideState)
+    disposeLoadedScene(scene)
   })
 </script>
 

@@ -2,6 +2,7 @@
   import './editor-ui.css'
   import { onDestroy, onMount } from 'svelte'
   import { get } from 'svelte/store'
+  import * as THREE from 'three'
   import { gameActions } from '../stores/gameStateStore'
   import {
     addEmptyNode,
@@ -26,6 +27,7 @@
     selectedEditorNodeStore,
     selectedEditorNodesStore,
     selectEditorNode,
+    setSelectedNodes,
     setIsolatedNodes,
     setCollisionOverlayEnabled,
     setEditorInteractionMode,
@@ -60,13 +62,24 @@
     patchNodes,
   } from './editorStore'
   import { createDefaultSceneForLevel } from './defaultScenes'
+  import { createWorldMatrixResolver, getLocalTransformForWorldMatrix } from './editorHierarchyUtils'
   import {
     resolveObservatoryPresetSettings,
     resolveSolitudePresetSettings,
   } from './editorLevelPresets'
+  import EditorAssetPreview from './EditorAssetPreview.svelte'
+  import { canBakeSceneNode, exportSceneNodeToGlb, getPrefabAssetUrl } from './editorBakeSource'
+  import { EDITOR_PREFAB_GENERATION_LABELS, inferNodeGenerationDescriptor } from './editorGeneration'
   import { mergeLevelSettings } from './editorLevelSetup'
   import EditorEnvironmentPanel from './EditorEnvironmentPanel.svelte'
-  import { saveEditorSceneToLocalStorage } from './editorPersistence'
+  import {
+    clearStyleBatchSessionFromLocalStorage,
+    loadStyleBatchSessionFromLocalStorage,
+    saveEditorSceneToLocalStorage,
+    saveStyleBatchSessionToLocalStorage,
+    type PersistedStyleBatchEntry,
+    type PersistedStyleBatchSession,
+  } from './editorPersistence'
   import {
     reportRuntimeAssetFailure,
     setRuntimeDiagnostic,
@@ -82,7 +95,7 @@
 
   export let levelId: string
 
-  type EditorPanelTab = 'scene' | 'environment' | 'create' | 'hierarchy' | 'inspect' | 'ai' | 'save'
+  type EditorPanelTab = 'workflow' | 'scene' | 'environment' | 'create' | 'hierarchy' | 'inspect' | 'style' | 'ai' | 'save'
 
   let editorState
   let editorNodes: EditorSceneNode[] = []
@@ -97,21 +110,31 @@
   let saveMessage = 'Local only'
   const ASSET_LIBRARY_ROOT_MODELS = 'apps/megameal/public/models'
   const ASSET_LIBRARY_ROOT_GENERATED = 'apps/megameal/public/generated/hunyuan3d'
+  const COMFY_WORKFLOW_LIBRARY_ROOT = 'apps/game/public/ref-image'
+  const DEFAULT_COMFY_WORKFLOW_PATH = 'apps/game/public/ref-image/Hunyaun example.json'
   let assetBrowserPath = ASSET_LIBRARY_ROOT_MODELS
   let assetBrowserItems: Array<{ name: string, path: string, isDirectory: boolean }> = []
+  let assetBrowserFilter = ''
   let assetBrowserError = ''
   let assetBrowserLoading = false
   let selectedLibraryItem: { name: string, path: string, isDirectory: boolean } | null = null
+  let assetPickerTargetNodeId = ''
   let textureBrowserPath = 'apps/game/public'
   let textureBrowserItems: Array<{ name: string, path: string, isDirectory: boolean }> = []
   let textureBrowserError = ''
   let textureBrowserLoading = false
   let activeTextureMaterialField: 'mapUrl' | 'normalMapUrl' | 'roughnessMapUrl' | 'metalnessMapUrl' | 'emissiveMapUrl' | 'alphaMapUrl' | null = null
+  let workflowBrowserPath = COMFY_WORKFLOW_LIBRARY_ROOT
+  let workflowBrowserItems: Array<{ name: string, path: string, isDirectory: boolean }> = []
+  let workflowBrowserError = ''
+  let workflowBrowserLoading = false
+  let selectedComfyWorkflowPath = DEFAULT_COMFY_WORKFLOW_PATH
   let comfyUiApiUrl = 'http://127.0.0.1:8188'
   let comfyUiStatus = 'ComfyUI powers local mesh workflows and can be started here.'
   let comfyUiBusy = false
   let comfyUiReady = false
   let comfyUiStatusKey = ''
+  let comfyWorkflowEditorStatus = ''
   let hunyuanApiUrl = 'http://127.0.0.1:8080'
   let hunyuanPrompt = ''
   let hunyuanReferenceImageUrl = ''
@@ -126,6 +149,13 @@
   let hunyuanBackendCanGenerate = false
   let hunyuanBackendCanRetexture = false
   let hunyuanLastOutputUrl = ''
+  let hunyuanLastResultSummary = ''
+  let canApplyGeneratedAssetToSelection = false
+  let recentHunyuanJobs: Array<any> = []
+  let hunyuanJobsLoading = false
+  let hunyuanJobsError = ''
+  let selectedHunyuanJobId = ''
+  let hunyuanJobsPollInterval: number | null = null
   let hunyuanSupportsReplacement = false
   let hunyuanSupportsTextureWrap = false
   let hunyuanSelectionKey = ''
@@ -148,11 +178,51 @@
   let metadataSourceKind: 'component' | 'scene' = 'scene'
   let metadataSourceComponentKey: 'observatory' | 'sci-fi-room' | 'miranda' | 'solitude' = 'observatory'
   let loadedMetadataLevelId = ''
-  let activeEditorTab: EditorPanelTab = 'scene'
+  let activeEditorTab: EditorPanelTab = 'workflow'
+  let hierarchyFilter = ''
   let editorTabContentElement: HTMLDivElement | null = null
   let lastScrolledTab: EditorPanelTab | null = null
   let editorAIMeshStudioComponent: typeof import('./EditorAIMeshStudio.svelte').default | null = null
   let editorAIMeshStudioPromise: Promise<void> | null = null
+  let editorStyleStudioComponent: typeof import('./EditorStyleStudio.svelte').default | null = null
+  let editorStyleStudioPromise: Promise<void> | null = null
+  let hunyuanApplyToSimilarNodes = false
+  let styleSelectionKey = ''
+  let styleProfileName = 'Painterly Storybook'
+  let stylePrompt = ''
+  let styleNegativePrompt = 'photorealistic, noisy texture detail, harsh speculars, mismatched material finish'
+  let styleLoraNotes = ''
+  let styleControlNetNotes = 'Preserve silhouette and major surface breakup from the source asset.'
+  let styleReferenceImageUrl = ''
+  let styleStatus = 'Select a single geometry node to open the style toolchain.'
+  let styleInspectReport = ''
+  let styleSourceSummary = ''
+  let styleWorkspaceManifestUrl = ''
+  let styleWorkspaceSourceAssetUrl = ''
+  let styleGeneratedReferenceImageUrl = ''
+  let styleSimplifiedAssetUrl = ''
+  let styleBlenderExportPath = ''
+  let styleBlenderOpenCommand = ''
+  let styleSimplifyRatio = 0.6
+  let styleSimplifyError = 0.001
+  let styleBusy = false
+  let styleWorkspaceRestoreToken = 0
+  let styleBatchBusy = false
+  let styleBatchStatus = ''
+  let styleBatchSelectionIds: string[] = []
+  let styleBatchSelectionInitialized = false
+  let styleLevelDefaultsAppliedFor = ''
+  let styleBatchNodeStatusById: Record<string, string> = {}
+  let styleBatchSession: PersistedStyleBatchSession | null = null
+  let styleBatchResumePromise: Promise<void> | null = null
+  let styleSceneCandidates: Array<{
+    id: string
+    name: string
+    kindLabel: string
+    descriptor: string
+    selected: boolean
+    status: string
+  }> = []
 
   const unsubState = editorStateStore.subscribe((value) => {
     editorState = value
@@ -216,6 +286,20 @@
   }
 
   $: flattenedNodes = flattenNodes(editorNodes)
+  $: filteredFlattenedNodes = flattenedNodes.filter((node) => {
+    const query = hierarchyFilter.trim().toLowerCase()
+    if (!query) return true
+
+    const prefabType = node.prefab?.type?.toLowerCase() ?? ''
+    const gameplayType = node.gameplay?.type?.toLowerCase() ?? ''
+    const assetUrl = node.asset?.url?.toLowerCase() ?? ''
+
+    return node.name.toLowerCase().includes(query)
+      || node.kind.toLowerCase().includes(query)
+      || prefabType.includes(query)
+      || gameplayType.includes(query)
+      || assetUrl.includes(query)
+  })
   $: hasGroupSelection = selectedNodes.some((node) => node.kind === 'group')
   $: levelSettings = editorScene?.settings?.level ?? {}
   $: observatorySettings = editorScene?.settings?.observatory ?? {}
@@ -267,11 +351,13 @@
   ]
 
   const editorPanelTabs: Array<{ id: EditorPanelTab, icon: string, label: string }> = [
+    { id: 'workflow', icon: '→', label: 'Workflow' },
     { id: 'scene', icon: '◫', label: 'Scene' },
     { id: 'environment', icon: '☼', label: 'Environment' },
     { id: 'create', icon: '+', label: 'Create' },
     { id: 'hierarchy', icon: '≣', label: 'Hierarchy' },
     { id: 'inspect', icon: '◎', label: 'Inspect' },
+    { id: 'style', icon: '✎', label: 'Style' },
     { id: 'ai', icon: '✦', label: 'AI Mesh' },
     { id: 'save', icon: '↧', label: 'Save' },
   ]
@@ -280,6 +366,8 @@
     activeEditorTab = tab
     if (tab === 'ai') {
       void ensureEditorAIMeshStudio()
+    } else if (tab === 'style') {
+      void ensureEditorStyleStudio()
     }
     requestAnimationFrame(() => {
       editorTabContentElement?.scrollTo({ top: 0, behavior: 'auto' })
@@ -296,6 +384,18 @@
     }
 
     await editorAIMeshStudioPromise
+  }
+
+  async function ensureEditorStyleStudio() {
+    if (editorStyleStudioComponent) return
+
+    if (!editorStyleStudioPromise) {
+      editorStyleStudioPromise = import('./EditorStyleStudio.svelte').then((module) => {
+        editorStyleStudioComponent = module.default
+      })
+    }
+
+    await editorStyleStudioPromise
   }
 
   $: if (editorState?.panelOpen && editorTabContentElement && activeEditorTab !== lastScrolledTab) {
@@ -349,42 +449,83 @@
     },
   ]
 
-  const prefabPromptLabels: Partial<Record<EditorPrefabType, string>> = {
-    'anomaly-cluster': 'anomalous crystalline sculpture',
-    'bench-growth': 'overgrown haunted bench',
-    'broken-ring': 'broken ancient stone ring ruin',
-    'command-console': 'retro-futurist command console',
-    'command-fin': 'dark retro-futurist fin pillar',
-    'courtyard-fountain': 'strange luminous courtyard fountain',
-    'courtyard-pylon': 'weathered courtyard pylon',
-    'growth-planter': 'biomechanical growth planter',
-    'hanging-light': 'ornate hanging industrial light',
-    'interior-archway': 'ancient interior archway ruin',
-    'observation-rig': 'cosmic observation rig',
-    'portal-apparatus': 'occult portal apparatus',
-    'story-marker': 'ritual story marker obelisk',
-    'support-column': 'retro-futurist support column',
-    'wasteland-archway': 'wasteland stone archway',
-    'wasteland-monolith': 'weathered monolith pillar',
-  }
-
   function getAiSourceAssetUrl(node: EditorSceneNode | null) {
-    return node?.asset?.url ?? ''
+    if (node?.asset?.url) return node.asset.url
+    return getPrefabAssetUrl(node?.prefab?.type)
   }
 
   function getAiSourceName(node: EditorSceneNode | null) {
     if (!node) return ''
     if (node.asset) return node.name
-    if (node.prefab?.type) return prefabPromptLabels[node.prefab.type] ?? node.name
+    if (node.prefab?.type) return EDITOR_PREFAB_GENERATION_LABELS[node.prefab.type] ?? node.name
     return node.name
   }
 
   function canUseAiMeshStudio(node: EditorSceneNode | null) {
-    return !!(node?.asset || node?.prefab)
+    return canBakeSceneNode(node)
   }
 
   function canRetextureSelection(node: EditorSceneNode | null) {
-    return !!node?.asset
+    return !!getAiSourceAssetUrl(node)
+  }
+
+  function canUseStyleStudio(node: EditorSceneNode | null) {
+    return canBakeSceneNode(node)
+  }
+
+  function getDefaultStyleDescriptor(node: EditorSceneNode | null) {
+    return node ? inferNodeGenerationDescriptor(node) : ''
+  }
+
+  function updateNodeStyleDescriptor(nodeId: string, value: string) {
+    const node = editorNodes.find((candidate) => candidate.id === nodeId)
+    if (!node) return
+    patchNode(nodeId, {
+      generation: {
+        ...(node.generation ?? {}),
+        descriptor: value,
+      },
+    })
+  }
+
+  function getStyleSceneCandidates(nodes: EditorSceneNode[]) {
+    return nodes
+      .filter((node) => canBakeSceneNode(node))
+      .map((node) => ({
+        id: node.id,
+        name: node.name,
+        kindLabel: node.asset
+          ? 'Imported asset'
+          : node.prefab
+            ? `Prefab · ${node.prefab.type}`
+            : node.primitive
+              ? `Primitive · ${node.primitive.geometry}`
+              : node.kind,
+        descriptor: getDefaultStyleDescriptor(node),
+        selected: styleBatchSelectionIds.includes(node.id),
+        status: styleBatchNodeStatusById[node.id] ?? '',
+      }))
+  }
+
+  function getCuratedStyleBatchCandidateIds(levelId: string, nodes: EditorSceneNode[]) {
+    const bakeableNodes = nodes.filter((node) => canBakeSceneNode(node))
+    if (levelId !== 'yggdrasil') {
+      return bakeableNodes.map((node) => node.id)
+    }
+
+    return bakeableNodes
+      .filter((node) => {
+        if (node.gameplay) return false
+        if (node.id === 'yggdrasil-spawn-pad') return false
+        if (node.id.startsWith('yggdrasil-arrival-group')) return false
+        if (node.id.startsWith('yggdrasil-crown-perch-group')) return false
+        if (node.id.startsWith('yggdrasil-hvergelmir-depth-group')) return false
+        if (node.prefab?.type === 'story-marker') return false
+        if (node.prefab?.type === 'portal-apparatus') return false
+        if (node.prefab?.type === 'observation-rig') return false
+        return true
+      })
+      .map((node) => node.id)
   }
 
   function getSelectedParentId() {
@@ -394,12 +535,114 @@
   function handleHierarchySelection(nodeId: string, event: MouseEvent) {
     const additive = event.shiftKey
     const toggle = event.metaKey || event.ctrlKey
-    const order = flattenedNodes.map((node) => node.id)
+    const order = filteredFlattenedNodes.map((node) => node.id)
     selectEditorNode(nodeId, {
       additive,
       toggle,
       rangeOrder: additive ? order : undefined,
     })
+  }
+
+  function getSimilarNodeIds(node: EditorSceneNode | null) {
+    if (!node) return []
+
+    if (node.prefab?.type) {
+      return editorNodes
+        .filter((candidate) => candidate.prefab?.type === node.prefab?.type)
+        .map((candidate) => candidate.id)
+    }
+
+    if (node.asset?.url) {
+      return editorNodes
+        .filter((candidate) => candidate.asset?.url === node.asset?.url)
+        .map((candidate) => candidate.id)
+    }
+
+    if (node.gameplay?.type) {
+      return editorNodes
+        .filter((candidate) => candidate.gameplay?.type === node.gameplay?.type)
+        .map((candidate) => candidate.id)
+    }
+
+    return editorNodes
+      .filter((candidate) => candidate.kind === node.kind)
+      .map((candidate) => candidate.id)
+  }
+
+  function getSimilarNodeLabel(node: EditorSceneNode | null) {
+    if (!node) return 'matching nodes'
+    if (node.prefab?.type) return `${node.prefab.type} prefabs`
+    if (node.asset?.url) return 'matching asset instances'
+    if (node.gameplay?.type) return `${node.gameplay.type} helpers`
+    return `${node.kind} nodes`
+  }
+
+  $: similarNodeIds = getSimilarNodeIds(selectedNode)
+  $: similarNodeCount = similarNodeIds.length
+  $: similarNodeLabel = getSimilarNodeLabel(selectedNode)
+  $: styleSceneCandidates = getStyleSceneCandidates(editorNodes)
+  $: {
+    const candidateIds = styleSceneCandidates.map((candidate) => candidate.id)
+    const retained = styleBatchSelectionIds.filter((id) => candidateIds.includes(id))
+    if ((!styleBatchSelectionInitialized || (candidateIds.length > 0 && retained.length === 0 && styleBatchSelectionIds.length > 0)) && candidateIds.length > 0) {
+      styleBatchSelectionIds = getCuratedStyleBatchCandidateIds(activeSceneLevelId, editorNodes)
+      styleBatchSelectionInitialized = true
+    } else if (retained.length !== styleBatchSelectionIds.length) {
+      styleBatchSelectionIds = retained
+    } else if (candidateIds.length === 0) {
+      styleBatchSelectionInitialized = false
+    }
+  }
+
+  $: if (activeSceneLevelId === 'yggdrasil' && styleLevelDefaultsAppliedFor !== activeSceneLevelId && !styleBatchSession) {
+    styleProfileName = 'Mythic Norse World-Tree'
+    stylePrompt = 'ancient Norse mythic environment, Yggdrasil world-tree shrine, sacred wells, weathered cosmic wood, rune-carved stone, moss, lichen, cold mist, restrained gold accents, monumental scale, painterly but grounded, cohesive mythic material language, sacred age, reverence, carved history'
+    styleNegativePrompt = 'photorealistic, modern architecture, sci-fi panels, cyberpunk neon, plastic materials, glossy synthetic surfaces, busy microdetail, random decals, toy-like fantasy, bright cluttered rainbow gradients'
+    styleLoraNotes = 'Lean toward mythic Scandinavian sacred landscape rather than generic high fantasy.'
+    styleControlNetNotes = 'Preserve silhouette, climbability, collision readability, path readability, sacred landmark hierarchy, and the overwhelming scale of the world-tree.'
+    styleBatchSelectionIds = getCuratedStyleBatchCandidateIds(activeSceneLevelId, editorNodes)
+    styleBatchSelectionInitialized = true
+    styleLevelDefaultsAppliedFor = activeSceneLevelId
+  } else if (styleLevelDefaultsAppliedFor && styleLevelDefaultsAppliedFor !== activeSceneLevelId) {
+    styleLevelDefaultsAppliedFor = ''
+  }
+
+  function selectAllStyleBatchCandidates() {
+    styleBatchSelectionIds = styleSceneCandidates.map((candidate) => candidate.id)
+  }
+
+  function clearStyleBatchCandidates() {
+    styleBatchSelectionIds = []
+  }
+
+  function toggleStyleBatchCandidate(candidateId: string, selected: boolean) {
+    if (selected) {
+      if (!styleBatchSelectionIds.includes(candidateId)) {
+        styleBatchSelectionIds = [...styleBatchSelectionIds, candidateId]
+      }
+      return
+    }
+
+    styleBatchSelectionIds = styleBatchSelectionIds.filter((id) => id !== candidateId)
+  }
+
+  function selectSimilarNodes() {
+    if (!selectedNode) return
+
+    const ids = getSimilarNodeIds(selectedNode)
+    if (ids.length === 0) return
+
+    const anchorId = ids.includes(selectedNode.id) ? selectedNode.id : ids[0] ?? null
+    setSelectedNodes(ids, anchorId)
+    saveMessage = `Selected ${ids.length} ${getSimilarNodeLabel(selectedNode)}`
+  }
+
+  function getAiReplacementTargetIds(node: EditorSceneNode | null) {
+    if (!node) return []
+    if (!hunyuanApplyToSimilarNodes) return [node.id]
+
+    const ids = getSimilarNodeIds(node)
+    return ids.length > 0 ? ids : [node.id]
   }
 
   function updateParent(nextParentId: string) {
@@ -516,16 +759,18 @@
           level: 'warning',
           message: assetBrowserError,
         })
-        return
+        return []
       }
       assetBrowserPath = path
-      assetBrowserItems = payload.items
+      const nextItems = payload.items
         .filter((item: any) => item.isDirectory || /\.(gltf|glb)$/i.test(item.name))
         .sort((a: any, b: any) => Number(b.isDirectory) - Number(a.isDirectory) || a.name.localeCompare(b.name))
+      assetBrowserItems = nextItems
       setRuntimeDiagnostic('toolsBridge', {
         level: 'ready',
-        message: `Asset browser connected. Loaded ${assetBrowserItems.length} entries from ${path}.`,
+        message: `Asset browser connected. Loaded ${nextItems.length} entries from ${path}.`,
       })
+      return nextItems
     } catch (error) {
       console.error('Asset browser load failed:', error)
       assetBrowserError = 'Asset browser unavailable'
@@ -534,6 +779,7 @@
         level: 'error',
         message: `Asset browser unavailable at ${EDITOR_API_BASE}.`,
       })
+      return []
     } finally {
       assetBrowserLoading = false
     }
@@ -571,6 +817,59 @@
     } finally {
       textureBrowserLoading = false
     }
+  }
+
+  async function loadWorkflowBrowser(path: string) {
+    workflowBrowserLoading = true
+    workflowBrowserError = ''
+
+    try {
+      const response = await fetch(`${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`)
+      const payload = await response.json()
+      if (!payload?.success) {
+        workflowBrowserError = payload?.message ?? 'Failed to browse workflows'
+        return
+      }
+
+      workflowBrowserPath = path
+      workflowBrowserItems = payload.items
+        .filter((item: any) => item.isDirectory || /\.json$/i.test(item.name))
+        .sort((a: any, b: any) => Number(b.isDirectory) - Number(a.isDirectory) || a.name.localeCompare(b.name))
+    } catch (error) {
+      console.error('Workflow browser load failed:', error)
+      workflowBrowserError = 'Workflow browser unavailable'
+    } finally {
+      workflowBrowserLoading = false
+    }
+  }
+
+  function selectWorkflowPath(item: { name: string, path: string, isDirectory: boolean }) {
+    if (item.isDirectory) {
+      void loadWorkflowBrowser(item.path)
+      return
+    }
+
+    selectedComfyWorkflowPath = item.path
+    saveMessage = `Selected workflow: ${item.name}`
+  }
+
+  function resetSelectedWorkflowPath() {
+    selectedComfyWorkflowPath = DEFAULT_COMFY_WORKFLOW_PATH
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('merkin:selected-comfy-workflow-path', DEFAULT_COMFY_WORKFLOW_PATH)
+    }
+    saveMessage = 'Reset Comfy workflow to the built-in default'
+  }
+
+  function goUpWorkflowBrowser() {
+    const parts = workflowBrowserPath.split('/').filter(Boolean)
+    if (parts.length <= 1) return
+    parts.pop()
+    void loadWorkflowBrowser(parts.join('/'))
+  }
+
+  $: if (typeof window !== 'undefined' && selectedComfyWorkflowPath) {
+    window.localStorage.setItem('merkin:selected-comfy-workflow-path', selectedComfyWorkflowPath)
   }
 
   function goUpTextureBrowser() {
@@ -629,26 +928,256 @@
     return selectedLibraryItem.name.replace(/\.(gltf|glb)$/i, '')
   }
 
+  function getAssetBrowserDefaultScale(item: { name: string, path: string }) {
+    return item.path.startsWith(ASSET_LIBRARY_ROOT_GENERATED)
+      ? [1, 1, 1] as [number, number, number]
+      : [0.001, 0.001, 0.001] as [number, number, number]
+  }
+
   function addSelectedLibraryAssetToScene() {
     if (!selectedLibraryItem || selectedLibraryItem.isDirectory) return
     addAssetFromBrowser(selectedLibraryItem)
   }
 
   async function refreshGeneratedAssetLibrary(selectAssetUrl?: string) {
-    await loadAssetBrowser(ASSET_LIBRARY_ROOT_GENERATED)
+    const rootItems = await loadAssetBrowser(ASSET_LIBRARY_ROOT_GENERATED)
 
     if (!selectAssetUrl) return
-    const selectedPath = `apps/game/public/${selectAssetUrl.replace(/^\//, '')}`
-    const foundItem = assetBrowserItems.find((item) => item.path === selectedPath)
+    const normalizedUrl = selectAssetUrl.replace(/^\/+/, '')
+    const workspaceCandidates = [
+      `apps/megameal/public/${normalizedUrl}`,
+      `apps/game/public/${normalizedUrl}`,
+    ]
+    const selectedDirectory = workspaceCandidates[0].replace(/\/[^/]+$/, '')
+    const directoryItems = selectedDirectory === ASSET_LIBRARY_ROOT_GENERATED
+      ? rootItems
+      : await loadAssetBrowser(selectedDirectory)
+    const foundItem = directoryItems.find((item) => workspaceCandidates.includes(item.path))
     if (foundItem) {
       selectedLibraryItem = foundItem
       hunyuanSelectionKey = foundItem.path
+      assetBrowserPath = selectedDirectory
+      assetBrowserFilter = foundItem.name.replace(/\.(gltf|glb)$/i, '')
+    }
+  }
+
+  function getApplicableSelectionNodeIds() {
+    if (selectedNodes.length > 0) {
+      return selectedNodes
+        .filter((node) => canUseAiMeshStudio(node))
+        .map((node) => node.id)
+    }
+
+    if (selectedNode && canUseAiMeshStudio(selectedNode)) {
+      return [selectedNode.id]
+    }
+
+    return []
+  }
+
+  $: canApplyGeneratedAssetToSelection = hunyuanLastOutputUrl !== '' && getApplicableSelectionNodeIds().length > 0
+
+  async function openGeneratedAssetInLibrary() {
+    if (!hunyuanLastOutputUrl) return
+    activeEditorTab = 'create'
+    await refreshGeneratedAssetLibrary(hunyuanLastOutputUrl)
+    saveMessage = `Opened generated asset in library: ${hunyuanLastOutputUrl}`
+  }
+
+  async function applyGeneratedAssetToSelection() {
+    if (!hunyuanLastOutputUrl) {
+      saveMessage = 'No generated asset available to apply'
+      return
+    }
+
+    const targetNodeIds = getApplicableSelectionNodeIds()
+    if (targetNodeIds.length === 0) {
+      saveMessage = 'Select one or more prefab or asset nodes to apply the generated asset'
+      return
+    }
+
+    const replacementPatch = {
+      kind: 'asset' as const,
+      asset: { url: hunyuanLastOutputUrl },
+      prefab: undefined,
+      primitive: undefined,
+    }
+
+    if (targetNodeIds.length > 1) {
+      patchNodes(targetNodeIds, replacementPatch)
+    } else {
+      patchNode(targetNodeIds[0], replacementPatch)
+    }
+
+    hunyuanStatus = `Applied generated asset to ${targetNodeIds.length} node${targetNodeIds.length === 1 ? '' : 's'}.`
+    hunyuanLastResultSummary = hunyuanStatus
+    setRuntimeDiagnostic('hunyuan', {
+      level: 'ready',
+      message: hunyuanStatus,
+    })
+    saveMessage = `AI asset applied: ${hunyuanLastOutputUrl}`
+
+    if (selectedNode && targetNodeIds.includes(selectedNode.id)) {
+      void inspectSelectedAssetForHunyuan(hunyuanLastOutputUrl, selectedNode.id)
+    }
+  }
+
+  async function saveCurrentSceneToDisk() {
+    await overwriteLevelScene()
+  }
+
+  async function openComfyUiWorkflowEditor(mode: 'generate' | 'texture') {
+    const sourceNode = selectedNode
+    const assetUrl = mode === 'texture' ? (sourceNode?.asset?.url ?? '') : (sourceNode?.asset?.url ?? '')
+    const sourceName = sourceNode ? getAiSourceName(sourceNode) : (hunyuanScratchName.trim() || 'Generated Asset')
+    const referenceImageUrl = sourceNode
+      ? (hunyuanReferenceImageUrl || hunyuanDetectedReferenceImageUrl)
+      : hunyuanScratchReferenceImageUrl
+
+    try {
+      const response = await fetch(
+        `${EDITOR_API_BASE}/api/comfyui/workflow-template?mode=${encodeURIComponent(mode)}&apiUrl=${encodeURIComponent(hunyuanApiUrl)}&comfyUiApiUrl=${encodeURIComponent(comfyUiApiUrl)}&assetUrl=${encodeURIComponent(assetUrl)}&sourceName=${encodeURIComponent(sourceName)}&referenceImageUrl=${encodeURIComponent(referenceImageUrl)}&workflowPath=${encodeURIComponent(selectedComfyWorkflowPath)}`,
+      )
+      const payload = await response.json()
+
+      if (!payload?.success || !payload?.workflow) {
+        throw new Error(payload?.message ?? 'Could not build a ComfyUI workflow template.')
+      }
+
+      const workflowJson = JSON.stringify(payload.workflow, null, 2)
+      await navigator.clipboard.writeText(workflowJson)
+      if (typeof window !== 'undefined') {
+        window.open(payload.editorUrl || comfyUiApiUrl, '_blank', 'noopener,noreferrer')
+      }
+
+      comfyWorkflowEditorStatus = payload.message ?? 'Workflow copied to clipboard and ComfyUI opened.'
+      saveMessage = comfyWorkflowEditorStatus
+    } catch (error) {
+      console.error('Open ComfyUI workflow editor failed:', error)
+      comfyWorkflowEditorStatus = error instanceof Error
+        ? error.message
+        : 'Failed to open the ComfyUI workflow editor.'
+      saveMessage = comfyWorkflowEditorStatus
+    }
+  }
+
+  async function refreshHunyuanRecentJobs(limit = 10) {
+    hunyuanJobsLoading = true
+    hunyuanJobsError = ''
+
+    try {
+      const response = await fetch(`${EDITOR_API_BASE}/api/hunyuan3d/jobs?limit=${encodeURIComponent(String(limit))}`)
+      const payload = await response.json()
+
+      if (!payload?.success || !Array.isArray(payload.jobs)) {
+        recentHunyuanJobs = []
+        hunyuanJobsError = payload?.message ?? 'Could not load recent Hunyuan jobs.'
+        return
+      }
+
+      recentHunyuanJobs = payload.jobs
+      if (!selectedHunyuanJobId || !recentHunyuanJobs.some((job) => job.id === selectedHunyuanJobId)) {
+        selectedHunyuanJobId = recentHunyuanJobs.find((job) => job.status === 'failed')?.id
+          ?? recentHunyuanJobs[0]?.id
+          ?? ''
+      }
+    } catch (error) {
+      console.error('Recent Hunyuan jobs load failed:', error)
+      recentHunyuanJobs = []
+      hunyuanJobsError = `Job history unavailable at ${EDITOR_API_BASE}.`
+    } finally {
+      hunyuanJobsLoading = false
+    }
+  }
+
+  $: selectedHunyuanJob = recentHunyuanJobs.find((job) => job.id === selectedHunyuanJobId) ?? null
+  $: workflowSelectionSummary = selectedNodes.length > 1
+    ? `${selectedNodes.length} objects selected`
+    : selectedNode
+      ? `${selectedNode.name} selected`
+      : 'No selection yet'
+  $: workflowCanGenerateSelection = !!selectedNode && selectedNodes.length <= 1 && canUseAiMeshStudio(selectedNode) && hunyuanBackendCanGenerate && hunyuanSupportsReplacement
+  $: workflowCanRetextureSelection = !!selectedNode && selectedNodes.length <= 1 && canRetextureSelection(selectedNode) && hunyuanBackendCanRetexture && hunyuanSupportsTextureWrap
+
+  $: {
+    const shouldPollHunyuanJobs = activeEditorTab === 'ai'
+    if (typeof window !== 'undefined' && shouldPollHunyuanJobs && hunyuanJobsPollInterval === null) {
+      void refreshHunyuanRecentJobs()
+      hunyuanJobsPollInterval = window.setInterval(() => {
+        void refreshHunyuanRecentJobs()
+      }, 4000)
+    } else if ((!shouldPollHunyuanJobs || typeof window === 'undefined') && hunyuanJobsPollInterval !== null) {
+      window.clearInterval(hunyuanJobsPollInterval)
+      hunyuanJobsPollInterval = null
     }
   }
 
   function addAssetFromBrowser(item: { name: string, path: string }) {
     const url = resolvePublicAssetUrl(item.path, item.name)
-    addAssetPrefab(item.name.replace(/\.(gltf|glb)$/i, ''), url)
+    addAssetPrefab(item.name.replace(/\.(gltf|glb)$/i, ''), url, getAssetBrowserDefaultScale(item))
+    saveMessage = item.path.startsWith(ASSET_LIBRARY_ROOT_GENERATED)
+      ? `Added generated asset at scene scale: ${url}`
+      : `Added imported asset: ${url}`
+  }
+
+  function openAssetPickerForSelectedNode(preferredRoot: string = ASSET_LIBRARY_ROOT_GENERATED) {
+    if (!selectedNode?.asset) {
+      saveMessage = 'Select an asset node before choosing a replacement asset'
+      return
+    }
+
+    assetPickerTargetNodeId = selectedNode.id
+    selectedLibraryItem = null
+    assetBrowserFilter = ''
+    void loadAssetBrowser(preferredRoot)
+    saveMessage = `Choose a replacement asset for ${selectedNode.name}`
+  }
+
+  function applySelectedLibraryAssetToTargetNode() {
+    if (!assetPickerTargetNodeId) {
+      saveMessage = 'No target object is waiting for an asset replacement'
+      return
+    }
+    if (!selectedLibraryItem || selectedLibraryItem.isDirectory) {
+      saveMessage = 'Select an asset file from the library first'
+      return
+    }
+
+    const targetNode = editorNodes.find((node) => node.id === assetPickerTargetNodeId)
+    if (!targetNode?.asset) {
+      saveMessage = 'The target object is no longer available for asset replacement'
+      assetPickerTargetNodeId = ''
+      return
+    }
+
+    const url = resolvePublicAssetUrl(selectedLibraryItem.path, selectedLibraryItem.name)
+    patchNode(targetNode.id, {
+      asset: {
+        ...targetNode.asset,
+        url,
+      },
+    })
+
+    selectEditorNode(targetNode.id)
+    assetPickerTargetNodeId = ''
+    saveMessage = `Replaced ${targetNode.name} with ${selectedLibraryItem.name}`
+    void inspectSelectedAssetForHunyuan(url, targetNode.id)
+  }
+
+  function cancelAssetPickerTarget() {
+    assetPickerTargetNodeId = ''
+    saveMessage = 'Asset replacement picker closed'
+  }
+
+  function addLatestGeneratedAssetToScene() {
+    if (!hunyuanLastOutputUrl) {
+      saveMessage = 'No generated asset available yet'
+      return
+    }
+
+    const assetName = hunyuanLastOutputUrl.split('/').pop()?.replace(/\.(gltf|glb)$/i, '') || 'Generated Asset'
+    addAssetPrefab(assetName, hunyuanLastOutputUrl, [1, 1, 1])
+    saveMessage = `Added latest generated asset at scene scale: ${hunyuanLastOutputUrl}`
   }
 
   async function inspectSelectedAssetForHunyuan(assetUrl: string, selectionKey: string) {
@@ -693,13 +1222,15 @@
 
   async function runHunyuanForSelection(mode: 'generate' | 'texture') {
     if (!selectedNode || !canUseAiMeshStudio(selectedNode)) {
-      hunyuanStatus = 'Select a single asset or prefab node before running Hunyuan.'
+      hunyuanStatus = 'Select a single geometry node before running Hunyuan.'
       return
     }
 
     const targetNodeId = selectedNode.id
-    const targetAssetUrl = getAiSourceAssetUrl(selectedNode)
+    const targetNodeIds = getAiReplacementTargetIds(selectedNode)
     const targetSourceName = getAiSourceName(selectedNode)
+    const source = await ensureSceneNodeSourceAsset(selectedNode)
+    const targetAssetUrl = source.assetUrl
 
     if (mode === 'texture' && !targetAssetUrl) {
       hunyuanStatus = 'Texture wrapping needs an imported mesh asset. Generate a replacement mesh first for prefabs.'
@@ -737,24 +1268,47 @@
         mode,
         prompt: (hunyuanPrompt || targetSourceName).trim(),
         referenceImageUrl: hunyuanReferenceImageUrl,
+        workflowPath: selectedComfyWorkflowPath,
       })
 
-      patchNode(targetNodeId, {
-        kind: 'asset',
+      const replacementPatch = {
+        kind: 'asset' as const,
         asset: {
           url: payload.assetUrl,
         },
         prefab: undefined,
-      })
+        primitive: undefined,
+        generation: {
+          ...(selectedNode.generation ?? {}),
+          descriptor: getDefaultStyleDescriptor(selectedNode),
+          lastBakedAssetUrl: payload.assetUrl,
+          lastBakedAt: new Date().toISOString(),
+        },
+      }
+
+      if (targetNodeIds.length > 1) {
+        patchNodes(targetNodeIds, replacementPatch)
+      } else {
+        patchNode(targetNodeId, replacementPatch)
+      }
 
       hunyuanLastOutputUrl = payload.assetUrl
+      hunyuanLastResultSummary = targetNodeIds.length > 1
+        ? `Generated and replaced ${targetNodeIds.length} matching nodes.`
+        : 'Generated and replaced the selected node.'
       hunyuanServiceReady = true
-      hunyuanStatus = payload.message ?? 'Generated asset imported into the selected node.'
+      hunyuanStatus = payload.message
+        ?? (targetNodeIds.length > 1
+          ? `Generated asset applied to ${targetNodeIds.length} matching nodes.`
+          : 'Generated asset imported into the selected node.')
       setRuntimeDiagnostic('hunyuan', {
         level: 'ready',
         message: hunyuanStatus,
       })
-      saveMessage = `AI asset applied: ${payload.assetUrl}`
+      saveMessage = targetNodeIds.length > 1
+        ? `AI asset applied to ${targetNodeIds.length} nodes: ${payload.assetUrl}`
+        : `AI asset applied: ${payload.assetUrl}`
+      await refreshGeneratedAssetLibrary(payload.assetUrl)
       if (selectedNode?.id === targetNodeId) {
         void inspectSelectedAssetForHunyuan(payload.assetUrl, targetNodeId)
       }
@@ -895,9 +1449,13 @@
         mode: 'generate',
         prompt,
         referenceImageUrl,
+        workflowPath: selectedComfyWorkflowPath,
       })
 
       hunyuanLastOutputUrl = payload.assetUrl
+      hunyuanLastResultSummary = options?.addToScene
+        ? 'Generated a new asset, added it to the scene, and stored it in the library.'
+        : 'Generated a new asset in the library. It has not been applied to the current selection.'
       hunyuanServiceReady = true
       hunyuanStatus = payload.message ?? `Generated ${sourceName} into the asset library.`
       setRuntimeDiagnostic('hunyuan', {
@@ -978,9 +1536,11 @@
         mode,
         prompt: (hunyuanPrompt || sourceName).trim(),
         referenceImageUrl: hunyuanReferenceImageUrl,
+        workflowPath: selectedComfyWorkflowPath,
       })
 
       hunyuanLastOutputUrl = payload.assetUrl
+      hunyuanLastResultSummary = `${sourceName} generated into the library as a new asset.`
       hunyuanServiceReady = true
       hunyuanStatus = payload.message ?? `${sourceName} generated into the asset library.`
       setRuntimeDiagnostic('hunyuan', {
@@ -1009,7 +1569,7 @@
     await runHunyuanToLibrary({ addToScene: true })
   }
 
-  async function queueAndWaitForHunyuanJob(requestBody: Record<string, unknown>) {
+  async function queueHunyuanJob(requestBody: Record<string, unknown>) {
     const queueResponse = await fetch(`${EDITOR_API_BASE}/api/hunyuan3d/jobs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1021,30 +1581,39 @@
       throw new Error(queuePayload?.message ?? 'Could not queue the Hunyuan job.')
     }
 
-    hunyuanActiveJobId = queuePayload.job.id
-    const initialQueuePosition = Number(queuePayload.job.queuePosition ?? 0)
-    hunyuanStatus = initialQueuePosition > 1
-      ? `Queued for AI generation. Position ${initialQueuePosition} in line.`
-      : 'Queued for AI generation. Starting shortly…'
-    setRuntimeDiagnostic('hunyuan', {
-      level: 'loading',
-      message: hunyuanStatus,
-    })
+    return queuePayload.job
+  }
+
+  async function getHunyuanJobStatus(jobId: string) {
+    const statusResponse = await fetch(`${EDITOR_API_BASE}/api/hunyuan3d/jobs?jobId=${encodeURIComponent(jobId)}`)
+    const statusPayload = await statusResponse.json()
+
+    if (!statusPayload?.success || !statusPayload?.job) {
+      throw new Error(statusPayload?.message ?? 'Lost track of the Hunyuan job.')
+    }
+
+    return statusPayload.job
+  }
+
+  async function waitForQueuedHunyuanJob(
+    jobId: string,
+    options?: {
+      onQueued?: (job: any) => void
+      onRunning?: (job: any) => void
+      onSucceeded?: (job: any) => void
+    },
+  ) {
+    hunyuanActiveJobId = jobId
+    void refreshHunyuanRecentJobs()
 
     while (true) {
       await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      const statusResponse = await fetch(`${EDITOR_API_BASE}/api/hunyuan3d/jobs?jobId=${encodeURIComponent(hunyuanActiveJobId)}`)
-      const statusPayload = await statusResponse.json()
-
-      if (!statusPayload?.success || !statusPayload?.job) {
-        throw new Error(statusPayload?.message ?? 'Lost track of the Hunyuan job.')
-      }
-
-      const job = statusPayload.job
+      const job = await getHunyuanJobStatus(jobId)
+      void refreshHunyuanRecentJobs()
       const queuePosition = Number(job.queuePosition ?? 0)
 
       if (job.status === 'queued') {
+        options?.onQueued?.(job)
         hunyuanStatus = queuePosition > 1
           ? `Queued for AI generation. Position ${queuePosition} in line.`
           : 'Queued for AI generation. Starting shortly…'
@@ -1056,6 +1625,7 @@
       }
 
       if (job.status === 'running') {
+        options?.onRunning?.(job)
         hunyuanStatus = 'Generating asset with ComfyUI + Hunyuan… this can take a while.'
         setRuntimeDiagnostic('hunyuan', {
           level: 'loading',
@@ -1076,6 +1646,7 @@
       }
 
       if (job.status === 'succeeded') {
+        options?.onSucceeded?.(job)
         const result = job.result
         if (result?.status?.message) {
           hunyuanBackendStatus = result.status.message
@@ -1086,6 +1657,651 @@
         return result
       }
     }
+  }
+
+  async function queueAndWaitForHunyuanJob(requestBody: Record<string, unknown>) {
+    const queuedJob = await queueHunyuanJob(requestBody)
+    hunyuanActiveJobId = queuedJob.id
+    void refreshHunyuanRecentJobs()
+    const initialQueuePosition = Number(queuedJob.queuePosition ?? 0)
+    hunyuanStatus = initialQueuePosition > 1
+      ? `Queued for AI generation. Position ${initialQueuePosition} in line.`
+      : 'Queued for AI generation. Starting shortly…'
+    setRuntimeDiagnostic('hunyuan', {
+      level: 'loading',
+      message: hunyuanStatus,
+    })
+    return waitForQueuedHunyuanJob(queuedJob.id)
+  }
+
+  async function arrayBufferToBase64(buffer: ArrayBuffer) {
+    const bytes = new Uint8Array(buffer)
+    let binary = ''
+    const chunkSize = 0x8000
+    for (let index = 0; index < bytes.length; index += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize))
+    }
+    return btoa(binary)
+  }
+
+  async function stageSceneNodeSourceAsset(node: EditorSceneNode) {
+    const exported = await exportSceneNodeToGlb(node)
+    if (exported.kind === 'asset') {
+      return {
+        assetUrl: exported.assetUrl,
+        sourceName: getAiSourceName(node),
+      }
+    }
+
+    const glbBase64 = await arrayBufferToBase64(await exported.blob.arrayBuffer())
+    const response = await fetch(`${EDITOR_API_BASE}/api/style/source-asset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: exported.fileName,
+        glbBase64,
+        sourceName: getAiSourceName(node),
+        sourceKind: exported.kind,
+        descriptor: getDefaultStyleDescriptor(node),
+        levelId: activeSceneLevelId,
+        nodeId: node.id,
+      }),
+    })
+    const payload = await response.json()
+
+    if (!payload?.success || !payload?.assetUrl) {
+      throw new Error(payload?.message ?? `Could not stage a source mesh for ${node.name}.`)
+    }
+
+    return {
+      assetUrl: payload.assetUrl as string,
+      sourceName: getAiSourceName(node),
+    }
+  }
+
+  async function ensureSceneNodeSourceAsset(node: EditorSceneNode) {
+    if (node.asset?.url) {
+      return {
+        assetUrl: node.asset.url,
+        sourceName: getAiSourceName(node),
+      }
+    }
+
+    const prefabAssetUrl = getPrefabAssetUrl(node.prefab?.type)
+    if (prefabAssetUrl) {
+      return {
+        assetUrl: prefabAssetUrl,
+        sourceName: getAiSourceName(node),
+      }
+    }
+
+    return stageSceneNodeSourceAsset(node)
+  }
+
+  function buildNodeStylePrompt(node: EditorSceneNode) {
+    const descriptor = getDefaultStyleDescriptor(node)
+    const promptSegments = [
+      descriptor,
+      styleProfileName.trim() ? `style family: ${styleProfileName.trim()}` : '',
+      stylePrompt.trim(),
+      styleNegativePrompt.trim() ? `avoid: ${styleNegativePrompt.trim()}` : '',
+    ].filter((segment) => segment.trim().length > 0)
+
+    return promptSegments.join('. ')
+  }
+
+  function persistStyleBatchSession(session: PersistedStyleBatchSession | null) {
+    styleBatchSession = session
+    if (typeof window === 'undefined') return
+
+    if (session) {
+      saveStyleBatchSessionToLocalStorage(activeSceneLevelId, session)
+      return
+    }
+
+    clearStyleBatchSessionFromLocalStorage(activeSceneLevelId)
+  }
+
+  function updatePersistedStyleBatchSession(mutator: (session: PersistedStyleBatchSession) => PersistedStyleBatchSession) {
+    if (!styleBatchSession) return null
+    const next = mutator(structuredClone(styleBatchSession) as PersistedStyleBatchSession)
+    persistStyleBatchSession(next)
+    return next
+  }
+
+  function createStyleBatchSession(mode: 'texture' | 'generate', candidateIds: string[]) {
+    const entries: PersistedStyleBatchEntry[] = candidateIds
+      .map((nodeId) => editorNodes.find((node) => node.id === nodeId))
+      .filter((node): node is EditorSceneNode => !!node && canBakeSceneNode(node))
+      .map((node) => ({
+        nodeId: node.id,
+        nodeName: node.name,
+        descriptor: getDefaultStyleDescriptor(node),
+        mode,
+        sourceName: getAiSourceName(node),
+        status: 'pending',
+      }))
+
+    return {
+      levelId: activeSceneLevelId,
+      mode,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      styleProfileName,
+      stylePrompt,
+      styleNegativePrompt,
+      styleLoraNotes,
+      styleControlNetNotes,
+      styleReferenceImageUrl,
+      comfyUiApiUrl,
+      hunyuanApiUrl,
+      workflowPath: selectedComfyWorkflowPath,
+      entries,
+    } satisfies PersistedStyleBatchSession
+  }
+
+  async function inspectSelectedAssetForStyle() {
+    if (!selectedNode || !canUseStyleStudio(selectedNode)) {
+      styleStatus = 'Select a single geometry node to inspect it.'
+      return
+    }
+
+    styleBusy = true
+    styleStatus = `Inspecting ${selectedNode.name}…`
+
+    try {
+      const source = await ensureSceneNodeSourceAsset(selectedNode)
+      const response = await fetch(`${EDITOR_API_BASE}/api/style/inspect?assetUrl=${encodeURIComponent(source.assetUrl)}`)
+      const payload = await response.json()
+
+      if (!payload?.success) {
+        styleStatus = payload?.message ?? 'Style inspection failed.'
+        return
+      }
+
+      if (!styleReferenceImageUrl && payload.inspection?.detectedReferenceImageUrl) {
+        styleReferenceImageUrl = payload.inspection.detectedReferenceImageUrl
+      }
+
+      styleInspectReport = payload.analysis?.inspectReport ?? ''
+      styleSourceSummary = `${payload.analysis?.sizeFormatted ?? 'Unknown size'} · ${payload.analysis?.modifiedAt ?? 'Unknown date'}`
+      styleStatus = `Source analyzed. Next step: describe the target look, then package the style workspace for ${selectedNode.name}.`
+    } catch (error) {
+      console.error('Style inspection failed:', error)
+      styleStatus = error instanceof Error
+        ? error.message
+        : 'Style inspection failed. Check the local tools bridge.'
+    } finally {
+      styleBusy = false
+    }
+  }
+
+  async function restoreLatestStyleWorkspaceForSelection(assetUrl: string, selectionKey: string) {
+    const restoreToken = ++styleWorkspaceRestoreToken
+
+    try {
+      const response = await fetch(`${EDITOR_API_BASE}/api/style/workspace/latest?assetUrl=${encodeURIComponent(assetUrl)}`)
+      const payload = await response.json()
+
+      if (restoreToken !== styleWorkspaceRestoreToken || selectionKey !== styleSelectionKey) return false
+      if (!payload?.success || !payload?.workspace) return false
+
+      const workspace = payload.workspace
+      styleWorkspaceManifestUrl = workspace.manifestUrl ?? ''
+      styleWorkspaceSourceAssetUrl = workspace.sourceAssetUrl ?? ''
+      styleGeneratedReferenceImageUrl = workspace.generatedReferenceImageUrl ?? ''
+      styleReferenceImageUrl = workspace.referenceImageUrl || styleReferenceImageUrl
+      styleProfileName = workspace.styleProfileName || styleProfileName
+      stylePrompt = workspace.prompt || stylePrompt
+      styleNegativePrompt = workspace.negativePrompt || styleNegativePrompt
+      styleLoraNotes = workspace.loraNotes || styleLoraNotes
+      styleControlNetNotes = workspace.controlNetNotes || styleControlNetNotes
+      styleStatus = `Restored the latest style workspace for ${selectedNode?.name ?? 'the selected asset'}.`
+      return true
+    } catch (error) {
+      if (restoreToken !== styleWorkspaceRestoreToken || selectionKey !== styleSelectionKey) return false
+      console.error('Style workspace restore failed:', error)
+      return false
+    }
+  }
+
+  async function prepareStyleWorkspace() {
+    if (!selectedNode || !canUseStyleStudio(selectedNode)) {
+      styleStatus = 'Select a single geometry node to prepare a style workspace.'
+      return false
+    }
+
+    styleBusy = true
+    styleStatus = `Packaging ${selectedNode.name} into a style workspace…`
+
+    try {
+      const source = await ensureSceneNodeSourceAsset(selectedNode)
+      const response = await fetch(`${EDITOR_API_BASE}/api/style/workspace`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assetUrl: source.assetUrl,
+          sourceName: selectedNode.name,
+          styleProfileName: styleProfileName.trim(),
+          prompt: stylePrompt.trim(),
+          negativePrompt: styleNegativePrompt.trim(),
+          loraNotes: styleLoraNotes.trim(),
+          controlNetNotes: styleControlNetNotes.trim(),
+          referenceImageUrl: styleReferenceImageUrl.trim(),
+          comfyUiApiUrl,
+          hunyuanApiUrl,
+          generateReferenceIfMissing: true,
+        }),
+      })
+      const payload = await response.json()
+
+      if (!payload?.success) {
+        styleStatus = payload?.message ?? 'Style workspace generation failed.'
+        return false
+      }
+
+      if (payload.referenceImageUrl) {
+        styleReferenceImageUrl = payload.referenceImageUrl
+      }
+
+      styleWorkspaceManifestUrl = payload.manifestUrl ?? ''
+      styleWorkspaceSourceAssetUrl = payload.sourceAssetUrl ?? ''
+      styleGeneratedReferenceImageUrl = payload.generatedReferenceImageUrl ?? ''
+      styleStatus = `Style workspace ready. Next step: use "Keep Shape, Bake New Style" to restyle ${selectedNode.name} without replacing its form.`
+      saveMessage = `Style workspace prepared for ${selectedNode.name}`
+      return true
+    } catch (error) {
+      console.error('Style workspace generation failed:', error)
+      styleStatus = error instanceof Error
+        ? error.message
+        : 'Style workspace generation failed. Check ComfyUI and the tools bridge.'
+      return false
+    } finally {
+      styleBusy = false
+    }
+  }
+
+  async function ensureStyleWorkspaceReady() {
+    if (!selectedNode || !canUseStyleStudio(selectedNode)) {
+      styleStatus = 'Select a single geometry node before running a style bake.'
+      return false
+    }
+
+    if (styleWorkspaceManifestUrl.trim()) {
+      return true
+    }
+
+    if (selectedNode.asset?.url) {
+      const restored = await restoreLatestStyleWorkspaceForSelection(selectedNode.asset.url, selectedNode.id)
+      if (restored && styleWorkspaceManifestUrl.trim()) {
+        return true
+      }
+    }
+
+    return prepareStyleWorkspace()
+  }
+
+  async function simplifySelectedAssetForStyle() {
+    if (!selectedNode || !canUseStyleStudio(selectedNode)) {
+      styleStatus = 'Select a single geometry node before simplifying.'
+      return
+    }
+
+    styleBusy = true
+    styleStatus = `Simplifying ${selectedNode.name}…`
+
+    try {
+      const source = await ensureSceneNodeSourceAsset(selectedNode)
+      const response = await fetch(`${EDITOR_API_BASE}/api/style/simplify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assetUrl: source.assetUrl,
+          outputName: `${selectedNode.name}-style`,
+          ratio: styleSimplifyRatio,
+          error: styleSimplifyError,
+          lockBorder: true,
+        }),
+      })
+      const payload = await response.json()
+
+      if (!payload?.success) {
+        styleStatus = payload?.message ?? 'Mesh simplification failed.'
+        return
+      }
+
+      styleSimplifiedAssetUrl = payload.assetUrl ?? ''
+      styleInspectReport = payload.inspectReport ?? styleInspectReport
+      styleStatus = `Low-poly variant created. Review the generated asset or use it as the source for Blender cleanup.`
+      saveMessage = `Simplified asset created: ${payload.assetUrl}`
+      await refreshGeneratedAssetLibrary(payload.assetUrl)
+    } catch (error) {
+      console.error('Style simplify failed:', error)
+      styleStatus = error instanceof Error
+        ? error.message
+        : 'Mesh simplification failed. Check the local tools bridge.'
+    } finally {
+      styleBusy = false
+    }
+  }
+
+  async function exportSelectedAssetForBlender() {
+    if (!selectedNode || !canUseStyleStudio(selectedNode)) {
+      styleStatus = 'Select a single geometry node before exporting to Blender.'
+      return
+    }
+
+    styleBusy = true
+    styleStatus = `Exporting ${selectedNode.name} for Blender…`
+
+    try {
+      const source = await ensureSceneNodeSourceAsset(selectedNode)
+      const response = await fetch(`${EDITOR_API_BASE}/api/style/export-blender`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assetUrl: source.assetUrl,
+          exportName: selectedNode.name,
+          referenceImageUrl: styleReferenceImageUrl.trim(),
+        }),
+      })
+      const payload = await response.json()
+
+      if (!payload?.success) {
+        styleStatus = payload?.message ?? 'Blender export failed.'
+        return
+      }
+
+      styleBlenderExportPath = payload.exportedGlbPath ?? payload.exportDirectory ?? ''
+      styleBlenderOpenCommand = payload.openCommand ?? ''
+      styleStatus = `Blender package ready. Open the exported GLB for manual line work, mesh cleanup, or painted texture passes.`
+    } catch (error) {
+      console.error('Blender export failed:', error)
+      styleStatus = error instanceof Error
+        ? error.message
+        : 'Blender export failed. Check the local tools bridge.'
+    } finally {
+      styleBusy = false
+    }
+  }
+
+  async function runStyleBake(mode: 'generate' | 'texture') {
+    if (!selectedNode || !canUseStyleStudio(selectedNode)) {
+      styleStatus = 'Select a single geometry node before running AI style bake.'
+      return
+    }
+
+    if (!stylePrompt.trim() && !styleReferenceImageUrl.trim()) {
+      styleStatus = 'Enter a style prompt or reference image before running the AI bake.'
+      return
+    }
+
+    const workspaceReady = await ensureStyleWorkspaceReady()
+    if (!workspaceReady) {
+      return
+    }
+
+    hunyuanPrompt = buildNodeStylePrompt(selectedNode)
+    hunyuanReferenceImageUrl = styleReferenceImageUrl.trim()
+    const previousOutputUrl = hunyuanLastOutputUrl
+    styleStatus = mode === 'texture'
+      ? `Submitting a texture-only style bake for ${selectedNode.name}…`
+      : `Submitting a mesh-replacement AI generation for ${selectedNode.name}…`
+    await runHunyuanForSelection(mode)
+    styleStatus = hunyuanLastOutputUrl && hunyuanLastOutputUrl !== previousOutputUrl
+      ? mode === 'texture'
+        ? `Style bake finished. The selected node now points to a newly styled asset.`
+        : `Mesh replacement finished. The selected node now points to a new AI-generated asset variant.`
+      : hunyuanStatus
+  }
+
+  async function applyStyleBatchEntryResult(entry: PersistedStyleBatchEntry, assetUrl: string) {
+    const node = editorNodes.find((candidate) => candidate.id === entry.nodeId)
+    if (!node) {
+      throw new Error(`Could not find ${entry.nodeName} in the current scene.`)
+    }
+
+    patchNode(entry.nodeId, {
+      kind: 'asset',
+      asset: { url: assetUrl },
+      prefab: undefined,
+      primitive: undefined,
+      generation: {
+        ...(node.generation ?? {}),
+        descriptor: entry.descriptor,
+        lastBakedAssetUrl: assetUrl,
+        lastBakedAt: new Date().toISOString(),
+      },
+    })
+
+    const scene = get(editorSceneStore)
+    if (scene && typeof window !== 'undefined') {
+      saveEditorSceneToLocalStorage(activeSceneLevelId, scene)
+    }
+  }
+
+  async function resumeStyleBatchSession(session: PersistedStyleBatchSession) {
+    styleBatchBusy = true
+    persistStyleBatchSession(session)
+    styleBatchStatus = `Resuming ${session.mode === 'texture' ? 'texture style' : 'mesh reimagine'} batch for ${session.entries.length} scene object${session.entries.length === 1 ? '' : 's'}…`
+    styleBatchSelectionIds = session.entries.map((entry) => entry.nodeId)
+    styleProfileName = session.styleProfileName
+    stylePrompt = session.stylePrompt
+    styleNegativePrompt = session.styleNegativePrompt
+    styleLoraNotes = session.styleLoraNotes
+    styleControlNetNotes = session.styleControlNetNotes
+    styleReferenceImageUrl = session.styleReferenceImageUrl
+
+    try {
+      for (const entry of session.entries) {
+        if (entry.status === 'applied') {
+          styleBatchNodeStatusById = {
+            ...styleBatchNodeStatusById,
+            [entry.nodeId]: `Finished. Scene now uses ${entry.outputAssetUrl ?? 'the generated asset'}.`,
+          }
+          continue
+        }
+
+        if (entry.status === 'failed') {
+          styleBatchNodeStatusById = {
+            ...styleBatchNodeStatusById,
+            [entry.nodeId]: entry.error || 'This batch item failed earlier and was not resumed.',
+          }
+          continue
+        }
+
+        const node = editorNodes.find((candidate) => candidate.id === entry.nodeId)
+        if (!node || !canBakeSceneNode(node)) {
+          const message = `Skipped ${entry.nodeName}; the node is missing or no longer geometry-backed.`
+          styleBatchNodeStatusById = {
+            ...styleBatchNodeStatusById,
+            [entry.nodeId]: message,
+          }
+          updatePersistedStyleBatchSession((current) => ({
+            ...current,
+            entries: current.entries.map((candidate) => candidate.nodeId === entry.nodeId
+              ? { ...candidate, status: 'failed', error: message }
+              : candidate),
+          }))
+          continue
+        }
+
+        const prompt = buildNodeStylePrompt(node)
+        let sourceAssetUrl = entry.sourceAssetUrl ?? ''
+
+        if (!entry.jobId && entry.status === 'pending') {
+          styleBatchStatus = session.mode === 'texture'
+            ? `Baking style onto ${entry.nodeName}…`
+            : `Reimagining ${entry.nodeName}…`
+          styleBatchNodeStatusById = {
+            ...styleBatchNodeStatusById,
+            [entry.nodeId]: 'Preparing source asset…',
+          }
+
+          const source = await ensureSceneNodeSourceAsset(node)
+          sourceAssetUrl = source.assetUrl
+
+          await fetch(`${EDITOR_API_BASE}/api/style/workspace`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              assetUrl: source.assetUrl,
+              sourceName: node.name,
+              styleProfileName: session.styleProfileName.trim(),
+              prompt,
+              negativePrompt: session.styleNegativePrompt.trim(),
+              loraNotes: session.styleLoraNotes.trim(),
+              controlNetNotes: session.styleControlNetNotes.trim(),
+              referenceImageUrl: session.styleReferenceImageUrl.trim(),
+              comfyUiApiUrl: session.comfyUiApiUrl,
+              hunyuanApiUrl: session.hunyuanApiUrl,
+              generateReferenceIfMissing: true,
+            }),
+          })
+
+          const queuedJob = await queueHunyuanJob({
+            apiUrl: session.hunyuanApiUrl,
+            comfyUiApiUrl: session.comfyUiApiUrl,
+            assetUrl: source.assetUrl,
+            sourceName: entry.sourceName,
+            mode: session.mode,
+            prompt,
+            referenceImageUrl: session.styleReferenceImageUrl.trim(),
+            workflowPath: session.workflowPath,
+          })
+
+          selectedHunyuanJobId = queuedJob.id
+          updatePersistedStyleBatchSession((current) => ({
+            ...current,
+            entries: current.entries.map((candidate) => candidate.nodeId === entry.nodeId
+              ? {
+                ...candidate,
+                sourceAssetUrl: source.assetUrl,
+                jobId: queuedJob.id,
+                status: 'queued',
+                error: undefined,
+              }
+              : candidate),
+          }))
+          styleBatchNodeStatusById = {
+            ...styleBatchNodeStatusById,
+            [entry.nodeId]: 'Queued in ComfyUI + Hunyuan…',
+          }
+          entry.jobId = queuedJob.id
+          entry.status = 'queued'
+        }
+
+        if (!entry.jobId) {
+          throw new Error(`Missing queued job id for ${entry.nodeName}.`)
+        }
+
+        const payload = await waitForQueuedHunyuanJob(entry.jobId, {
+          onQueued: () => {
+            styleBatchNodeStatusById = {
+              ...styleBatchNodeStatusById,
+              [entry.nodeId]: 'Queued in ComfyUI + Hunyuan…',
+            }
+            updatePersistedStyleBatchSession((current) => ({
+              ...current,
+              entries: current.entries.map((candidate) => candidate.nodeId === entry.nodeId
+                ? { ...candidate, status: 'queued' }
+                : candidate),
+            }))
+          },
+          onRunning: () => {
+            styleBatchNodeStatusById = {
+              ...styleBatchNodeStatusById,
+              [entry.nodeId]: 'Generating with ComfyUI + Hunyuan…',
+            }
+            updatePersistedStyleBatchSession((current) => ({
+              ...current,
+              entries: current.entries.map((candidate) => candidate.nodeId === entry.nodeId
+                ? { ...candidate, status: 'running' }
+                : candidate),
+            }))
+          },
+        })
+
+        updatePersistedStyleBatchSession((current) => ({
+          ...current,
+          entries: current.entries.map((candidate) => candidate.nodeId === entry.nodeId
+            ? {
+              ...candidate,
+              sourceAssetUrl: sourceAssetUrl || candidate.sourceAssetUrl,
+              outputAssetUrl: payload.assetUrl,
+              status: 'succeeded',
+              error: undefined,
+            }
+            : candidate),
+        }))
+
+        await applyStyleBatchEntryResult(entry, payload.assetUrl)
+
+        updatePersistedStyleBatchSession((current) => ({
+          ...current,
+          entries: current.entries.map((candidate) => candidate.nodeId === entry.nodeId
+            ? { ...candidate, outputAssetUrl: payload.assetUrl, status: 'applied' }
+            : candidate),
+        }))
+
+        styleBatchNodeStatusById = {
+          ...styleBatchNodeStatusById,
+          [entry.nodeId]: `Finished. Scene now uses ${payload.assetUrl}.`,
+        }
+      }
+
+      await saveSceneDocumentToDisk(activeSceneLevelId)
+      const finalSession = styleBatchSession
+      const hasIncompleteEntries = !!finalSession?.entries.some((entry) => entry.status !== 'applied')
+      styleBatchStatus = hasIncompleteEntries
+        ? 'Scene batch stopped with incomplete items. Generated assets that finished were applied, and the remaining session was kept for inspection or recovery.'
+        : session.mode === 'texture'
+          ? `Texture style batch finished for ${session.entries.length} object${session.entries.length === 1 ? '' : 's'}. The scene file was saved to disk.`
+          : `Scene regeneration finished for ${session.entries.length} object${session.entries.length === 1 ? '' : 's'}. The scene file was saved to disk.`
+      saveMessage = styleBatchStatus
+      if (!hasIncompleteEntries) {
+        persistStyleBatchSession(null)
+      }
+    } catch (error) {
+      console.error('Scene style batch failed:', error)
+      styleBatchStatus = error instanceof Error
+        ? error.message
+        : 'Scene style batch failed. Check the tools bridge and local AI services.'
+      updatePersistedStyleBatchSession((current) => ({
+        ...current,
+        entries: current.entries.map((candidate) => candidate.jobId === hunyuanActiveJobId && (candidate.status === 'queued' || candidate.status === 'running')
+          ? { ...candidate, status: 'failed', error: styleBatchStatus }
+          : candidate),
+      }))
+    } finally {
+      hunyuanActiveJobId = ''
+      styleBatchBusy = false
+      styleBatchResumePromise = null
+    }
+  }
+
+  async function runStyleBatch(mode: 'texture' | 'generate') {
+    const candidateIds = styleBatchSelectionIds.filter((id) => styleSceneCandidates.some((candidate) => candidate.id === id))
+    if (candidateIds.length === 0) {
+      styleBatchStatus = 'Select at least one scene object before running a scene batch.'
+      return
+    }
+
+    if (mode === 'generate' && !stylePrompt.trim()) {
+      styleBatchStatus = 'Write the shared style brief before running a full mesh scene reimagine.'
+      return
+    }
+
+    if (mode === 'texture' && !stylePrompt.trim() && !styleReferenceImageUrl.trim()) {
+      styleBatchStatus = 'Texture-only batch needs a shared style brief or a reference image.'
+      return
+    }
+
+    styleBatchNodeStatusById = Object.fromEntries(candidateIds.map((id) => [id, 'Queued for style regeneration.']))
+    const session = createStyleBatchSession(mode, candidateIds)
+    persistStyleBatchSession(session)
+    styleBatchResumePromise = resumeStyleBatchSession(session)
+    await styleBatchResumePromise
   }
 
   function updateTupleField(field: 'position' | 'rotation' | 'scale', index: number, value: string) {
@@ -1145,6 +2361,13 @@
     const hiddenNodeIds = editorNodes.filter((node) => !node.visible).map((node) => node.id)
     if (hiddenNodeIds.length === 0) return
     patchNodes(hiddenNodeIds, { visible: true })
+  }
+
+  function hideSelectedNodes() {
+    const selectedIds = selectedNodes.map((node) => node.id)
+    if (selectedIds.length === 0) return
+    patchNodes(selectedIds, { visible: false })
+    clearSelection()
   }
 
   function unlockAllNodes() {
@@ -1439,7 +2662,17 @@
     })
   }
 
-  function updateGameplayNumericField(field: 'markerSize' | 'audioVolume' | 'regionFalloff' | 'fogDensity', value: string) {
+  function updateGameplayBooleanField(field: 'wanderEnabled', value: boolean) {
+    if (!selectedNode?.gameplay) return
+    patchNode(selectedNode.id, {
+      gameplay: {
+        ...selectedNode.gameplay,
+        [field]: value,
+      },
+    })
+  }
+
+  function updateGameplayNumericField(field: 'markerSize' | 'audioVolume' | 'regionFalloff' | 'fogDensity' | 'wanderRadius' | 'wanderSpeed' | 'hoverHeight' | 'bobAmplitude' | 'bobSpeed' | 'twinkleSpeed' | 'lightIntensity' | 'lightDistance' | 'lightDecay' | 'spriteIntensity', value: string) {
     if (!selectedNode?.gameplay) return
     const numeric = Number(value)
     if (Number.isNaN(numeric)) return
@@ -1491,6 +2724,13 @@
     }
   }
 
+  function hasMeaningfulSceneContent(scene: any) {
+    if (!scene) return false
+    if (Array.isArray(scene.nodes) && scene.nodes.length > 0) return true
+    if (scene.settings && typeof scene.settings === 'object' && Object.keys(scene.settings).length > 0) return true
+    return false
+  }
+
   function replaceRegistryEntry(nextEntry: LevelRegistryEntry) {
     const remainingEntries = levelRegistryEntries.filter((entry) => entry.id !== nextEntry.id)
     return [...remainingEntries, nextEntry].sort((left, right) => left.title.localeCompare(right.title))
@@ -1518,8 +2758,17 @@
     }
   }
 
-  async function saveSceneDocumentToDisk(targetLevelId: string, sourceScene = get(editorSceneStore) ?? createEmptyScene(targetLevelId)) {
+  async function saveSceneDocumentToDisk(targetLevelId: string, sourceScene = get(editorSceneStore)) {
+    if (!sourceScene) {
+      throw new Error('Cannot save scene to disk because no scene document is loaded.')
+    }
+
     const payloadScene = createScenePayload(targetLevelId, sourceScene)
+
+    if (!hasMeaningfulSceneContent(payloadScene)) {
+      throw new Error('Refusing to save an empty scene document to disk.')
+    }
+
     saveEditorSceneToLocalStorage(targetLevelId, payloadScene)
 
     const response = await fetch(`${EDITOR_API_BASE}/api/editor-scene/save`, {
@@ -1685,12 +2934,72 @@
     else editorPrefabs.addPointLight(selectedNode?.id ?? null)
   }
 
+  function addFireflyToSelection() {
+    const targetNodes = selectedNodes.filter((node) => !node.gameplay)
+    if (targetNodes.length === 0) {
+      saveMessage = 'Select one or more scene objects before adding fireflies'
+      return
+    }
+
+    const getWorldMatrix = createWorldMatrixResolver(editorNodes)
+    const createdIds: string[] = []
+
+    for (const targetNode of targetNodes) {
+      const worldMatrix = getWorldMatrix(targetNode.id)
+      const worldPosition = new THREE.Vector3()
+      const worldQuaternion = new THREE.Quaternion()
+      const worldScale = new THREE.Vector3()
+      worldMatrix.decompose(worldPosition, worldQuaternion, worldScale)
+
+      const targetWorldMatrix = new THREE.Matrix4().compose(
+        new THREE.Vector3(
+          worldPosition.x,
+          worldPosition.y + Math.abs(worldScale.y) * 0.5 + 0.8,
+          worldPosition.z,
+        ),
+        new THREE.Quaternion(),
+        new THREE.Vector3(1, 1, 1),
+      )
+
+      const localTransform = getLocalTransformForWorldMatrix(editorNodes, targetNode.parentId ?? null, targetWorldMatrix)
+      const fireflyId = `firefly-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+
+      addNode({
+        id: fireflyId,
+        name: `${targetNode.name} Firefly`,
+        kind: 'group',
+        parentId: targetNode.parentId ?? null,
+        position: localTransform.position,
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+        visible: true,
+        gameplay: {
+          type: 'firefly',
+          markerColor: '#f5f1a8',
+          markerSize: 0.52,
+          title: targetNode.name,
+          author: 'Pillar Firefly',
+          location: activeSceneLevelId,
+          excerpt: `A patient glow hovers above ${targetNode.name}.`,
+          body: `A solitary firefly keeps watch above ${targetNode.name}.`,
+        },
+      })
+
+      createdIds.push(fireflyId)
+    }
+
+    if (createdIds.length > 0) {
+      setSelectedNodes(createdIds, createdIds[0] ?? null)
+      saveMessage = `Added ${createdIds.length} firefl${createdIds.length === 1 ? 'y' : 'ies'} to selection`
+    }
+  }
+
   function addPrefabWithParent(name: string, type: EditorPrefabType, position: [number, number, number] = [0, 0, 0]) {
     editorPrefabs.addPrefab(name, type, position, selectedNode?.id ?? null)
   }
 
-  function addAssetPrefab(name: string, url: string) {
-    editorPrefabs.addAsset(name, url, selectedNode?.id ?? null)
+  function addAssetPrefab(name: string, url: string, scale: [number, number, number] = [0.001, 0.001, 0.001]) {
+    editorPrefabs.addAsset(name, url, selectedNode?.id ?? null, scale)
   }
 
   function addEmpty() {
@@ -1775,8 +3084,8 @@
       hunyuanLastOutputUrl = ''
       hunyuanServiceReady = false
       hunyuanStatus = selectedNode
-        ? 'Hunyuan tools currently target imported asset nodes and procedural prefab nodes.'
-        : 'Select a single asset or prefab node to generate or texture.'
+        ? 'Hunyuan tools currently target geometry-backed nodes: imported assets, primitives, and prefabs.'
+        : 'Select a single geometry node to generate or texture.'
     }
   }
 
@@ -1805,20 +3114,56 @@
       void refreshHunyuanServiceStatus(false)
     } else if (!inspectionKey) {
       lastInspectedHunyuanAsset = ''
-      if (selectedNode?.prefab) {
+      if (selectedNode?.prefab || selectedNode?.primitive) {
         hunyuanDetectedReferenceImageUrl = ''
         hunyuanReferenceImageUrl = ''
         hunyuanSupportsReplacement = true
         hunyuanSupportsTextureWrap = false
         hunyuanLastOutputUrl = ''
         void refreshHunyuanServiceStatus(false)
-        hunyuanStatus = `Ready to generate a new mesh for ${selectedNode.name}. Prefabs currently use prompt-driven replacement generation; texture wrapping becomes available after conversion to an imported asset.`
+        hunyuanStatus = `Ready to generate a new mesh for ${selectedNode.name}. Procedural nodes are exported to a temporary GLB before they enter the AI pipeline.`
       }
     }
   }
 
   $: {
-    const nextComfyUiStatusKey = activeEditorTab === 'ai' ? comfyUiApiUrl : ''
+    const nextStyleSelectionKey = selectedNode?.id ?? ''
+    if (nextStyleSelectionKey !== styleSelectionKey) {
+      styleSelectionKey = nextStyleSelectionKey
+      styleWorkspaceRestoreToken += 1
+      styleInspectReport = ''
+      styleSourceSummary = ''
+      styleWorkspaceManifestUrl = ''
+      styleWorkspaceSourceAssetUrl = ''
+      styleGeneratedReferenceImageUrl = ''
+      styleSimplifiedAssetUrl = ''
+      styleBlenderExportPath = ''
+      styleBlenderOpenCommand = ''
+
+      if (selectedNode && canUseStyleStudio(selectedNode)) {
+        styleStatus = `Ready to prepare a style workspace for ${selectedNode.name}.`
+        if (getAiSourceAssetUrl(selectedNode) && hunyuanDetectedReferenceImageUrl) {
+          styleReferenceImageUrl = hunyuanDetectedReferenceImageUrl
+        }
+        if (!stylePrompt.trim()) {
+          stylePrompt = 'hand-painted storybook environment art, unified surface language, stylized materials, painterly wear, broad readable forms'
+        }
+        if (selectedNode.asset?.url) {
+          void restoreLatestStyleWorkspaceForSelection(selectedNode.asset.url, selectedNode.id)
+        }
+      } else {
+        styleStatus = 'Select a single geometry node to open the style toolchain.'
+        styleReferenceImageUrl = ''
+      }
+    }
+  }
+
+  $: if (selectedNode && canUseStyleStudio(selectedNode) && !styleReferenceImageUrl && hunyuanDetectedReferenceImageUrl) {
+    styleReferenceImageUrl = hunyuanDetectedReferenceImageUrl
+  }
+
+  $: {
+    const nextComfyUiStatusKey = activeEditorTab === 'ai' || activeEditorTab === 'style' ? comfyUiApiUrl : ''
     if (nextComfyUiStatusKey && nextComfyUiStatusKey !== comfyUiStatusKey) {
       comfyUiStatusKey = nextComfyUiStatusKey
       void refreshComfyUiServiceStatus(false)
@@ -1882,13 +3227,39 @@
   }
 
   onMount(() => {
+    if (typeof window !== 'undefined') {
+      const savedWorkflowPath = window.localStorage.getItem('merkin:selected-comfy-workflow-path') || ''
+      if (savedWorkflowPath) {
+        selectedComfyWorkflowPath = savedWorkflowPath
+      }
+    }
     void loadAssetBrowser(assetBrowserPath)
+    void loadWorkflowBrowser(workflowBrowserPath)
     void refreshLevelRegistryFromDisk()
+    void refreshHunyuanRecentJobs()
+
+    if (typeof window !== 'undefined') {
+      const persistedStyleBatch = loadStyleBatchSessionFromLocalStorage(activeSceneLevelId)
+      if (persistedStyleBatch) {
+        styleBatchSelectionIds = persistedStyleBatch.entries.map((entry) => entry.nodeId)
+        styleBatchNodeStatusById = Object.fromEntries(
+          persistedStyleBatch.entries.map((entry) => [entry.nodeId, entry.error || entry.status])
+        )
+        if (persistedStyleBatch.entries.every((entry) => entry.status === 'applied')) {
+          persistStyleBatchSession(null)
+        } else {
+          styleBatchResumePromise = resumeStyleBatchSession(persistedStyleBatch)
+        }
+      }
+    }
   })
 
   onDestroy(() => {
     if (autoSaveTimeout !== null) {
       window.clearTimeout(autoSaveTimeout)
+    }
+    if (hunyuanJobsPollInterval !== null) {
+      window.clearInterval(hunyuanJobsPollInterval)
     }
     unsubState()
     unsubNodes()
@@ -1930,6 +3301,135 @@
         </div>
 
         <div class="editor-tab-content" bind:this={editorTabContentElement}>
+      {#if activeEditorTab === 'workflow'}
+      <div class="editor-section">
+        <div class="label">Workflow Template</div>
+        <div class="save-message">Selected workflow becomes the default for generate/retexture runs and for the Edit Workflow buttons.</div>
+        <div class="tuple-group editor-mt-sm">
+          <div class="tuple-label">Current Workflow</div>
+          <input class="text-input" value={selectedComfyWorkflowPath} readonly />
+        </div>
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={resetSelectedWorkflowPath}>Use Built-In Default</button>
+          <button on:click={goUpWorkflowBrowser}>Up</button>
+          <button on:click={() => loadWorkflowBrowser(workflowBrowserPath)}>Refresh</button>
+        </div>
+        <div class="save-message path-label">{workflowBrowserPath}</div>
+        {#if workflowBrowserError}
+          <div class="save-message error-message">{workflowBrowserError}</div>
+        {/if}
+        <div class="hierarchy-list asset-browser-list">
+          {#if workflowBrowserLoading}
+            <div class="save-message">Loading workflows…</div>
+          {:else}
+            {#each workflowBrowserItems as item (item.path)}
+              <button class:active={selectedComfyWorkflowPath === item.path} on:click={() => selectWorkflowPath(item)}>
+                <span class="node-label">{item.isDirectory ? '📁' : '🧠'} {item.name}</span>
+                <span class="kind">{item.isDirectory ? 'dir' : 'workflow'}</span>
+              </button>
+            {/each}
+          {/if}
+        </div>
+      </div>
+
+      <div class="editor-section">
+        <div class="label">Selection</div>
+        <div class="save-message">{workflowSelectionSummary}</div>
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={() => setActiveEditorTab('hierarchy')}>Open Hierarchy</button>
+          <button on:click={selectSimilarNodes} disabled={!selectedNode || similarNodeCount <= 1}>Select Similar</button>
+        </div>
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={addFireflyToSelection} disabled={selectedNodes.length === 0}>Add Firefly To Selection</button>
+          <button on:click={clearSelection} disabled={selectedNodes.length === 0}>Clear Selection</button>
+        </div>
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={hideSelectedNodes} disabled={selectedNodes.length === 0}>Hide Selected</button>
+          <button on:click={isolateSelection} disabled={selectedNodes.length === 0}>Hide Unselected</button>
+          <button on:click={() => { unhideAllNodes(); clearIsolatedNodes() }} disabled={!editorNodes.some((node) => !node.visible) && editorState.isolatedNodeIds.length === 0}>Show All</button>
+        </div>
+        <div class="save-message">Blender-style shortcuts: `H` hides selected, `Shift+H` hides unselected, `Alt+H` shows all.</div>
+      </div>
+
+      <div class="editor-section">
+        <div class="label">Reimagine</div>
+        <div class="save-message">Generate a replacement for the selected object, or re-texture an existing mesh-backed asset.</div>
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={() => runHunyuanForSelection('generate')} disabled={!workflowCanGenerateSelection || hunyuanBusy}>
+            {hunyuanBusy ? 'Working…' : selectedNode?.asset ? 'Generate Replacement Mesh' : 'Generate From Prefab'}
+          </button>
+          <button on:click={() => runHunyuanForSelection('texture')} disabled={!workflowCanRetextureSelection || hunyuanBusy}>
+            {hunyuanBusy ? 'Working…' : 'Re-Texture Selected'}
+          </button>
+        </div>
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={() => setActiveEditorTab('ai')}>Open AI Details</button>
+          <button on:click={() => refreshHunyuanServiceStatus(true)} disabled={hunyuanBusy}>Refresh Backend</button>
+        </div>
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={() => void openComfyUiWorkflowEditor('generate')} disabled={hunyuanBusy}>Edit Generate Workflow</button>
+          <button on:click={() => void openComfyUiWorkflowEditor('texture')} disabled={!selectedNode?.asset || hunyuanBusy}>Edit Texture Workflow</button>
+        </div>
+        {#if comfyWorkflowEditorStatus}
+          <div class="save-message">{comfyWorkflowEditorStatus}</div>
+        {/if}
+        <div class="save-message">{hunyuanStatus}</div>
+      </div>
+
+      <div class="editor-section">
+        <div class="label">Reuse</div>
+        <div class="save-message">Use the last generated asset immediately, or jump straight into the generated asset library.</div>
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={openGeneratedAssetInLibrary} disabled={!hunyuanLastOutputUrl}>Open Generated Assets</button>
+          <button on:click={addLatestGeneratedAssetToScene} disabled={!hunyuanLastOutputUrl}>Add Latest Generated</button>
+        </div>
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={applyGeneratedAssetToSelection} disabled={!canApplyGeneratedAssetToSelection}>Apply Latest To Selection</button>
+          <button on:click={() => setActiveEditorTab('create')}>Open Asset Library</button>
+        </div>
+        {#if hunyuanLastOutputUrl}
+          <div class="tuple-group editor-mt-sm">
+            <div class="tuple-label">Latest Generated</div>
+            <input class="text-input" value={hunyuanLastOutputUrl} readonly />
+          </div>
+        {/if}
+      </div>
+
+      <div class="editor-section">
+        <div class="label">Save</div>
+        <div class="save-message">Persist your work explicitly after a good generation pass.</div>
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={saveScene}>Save Local</button>
+          <button on:click={saveCurrentSceneToDisk}>Overwrite Level</button>
+        </div>
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={reloadFromDisk}>Reload Disk</button>
+          <button on:click={() => setActiveEditorTab('save')}>Open Save Tools</button>
+        </div>
+      </div>
+
+      <div class="editor-section">
+        <div class="label">Recent AI Jobs</div>
+        <div class="save-message">Latest queue status and failures without digging through logs.</div>
+        <div class="button-row compact editor-mt-sm">
+          <button disabled={hunyuanJobsLoading} on:click={() => void refreshHunyuanRecentJobs()}>{hunyuanJobsLoading ? 'Refreshing…' : 'Refresh Jobs'}</button>
+          <button on:click={() => setActiveEditorTab('ai')}>Open AI Jobs Panel</button>
+        </div>
+        {#if selectedHunyuanJob}
+          <div class="tuple-group editor-mt-sm">
+            <div class="tuple-label">Latest Job</div>
+            <input class="text-input" value={`${selectedHunyuanJob.status} · ${selectedHunyuanJob.sourceName || selectedHunyuanJob.id}`} readonly />
+          </div>
+          {#if selectedHunyuanJob.error || selectedHunyuanJob.result?.message}
+            <div class="save-message">{selectedHunyuanJob.error || selectedHunyuanJob.result?.message}</div>
+          {/if}
+        {:else}
+          <div class="save-message">No recent jobs yet.</div>
+        {/if}
+      </div>
+
+      {/if}
+
       {#if activeEditorTab === 'scene'}
       <div class="editor-section">
         <div class="label">History</div>
@@ -2077,6 +3577,10 @@
           {/each}
         </div>
         <div class="save-message">Quick-create helpers and gameplay markers. Use the organized prefab and asset sections below for everything else.</div>
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={addFireflyToSelection} disabled={selectedNodes.length === 0}>Add Firefly To Selection</button>
+        </div>
+        <div class="save-message">Places one firefly above each selected object without parenting it into the object's scale.</div>
       </div>
 
       <div class="editor-section">
@@ -2124,6 +3628,21 @@
       </div>
 
       <div class="editor-section">
+        <div class="label">Generated Quick Access</div>
+        <div class="save-message">Generated assets can now be opened or added directly here, and they spawn at full scene scale.</div>
+        <div class="button-row compact editor-mb-sm">
+          <button on:click={() => selectAssetLibraryRoot(ASSET_LIBRARY_ROOT_GENERATED)}>Open Generated Assets</button>
+          <button disabled={!hunyuanLastOutputUrl} on:click={addLatestGeneratedAssetToScene}>Add Latest Generated</button>
+        </div>
+        {#if hunyuanLastOutputUrl}
+          <div class="tuple-group">
+            <div class="tuple-label">Latest Generated</div>
+            <input class="text-input" value={hunyuanLastOutputUrl} readonly />
+          </div>
+        {/if}
+      </div>
+
+      <div class="editor-section">
         <div class="label">Asset Library</div>
         <div class="button-row compact-two-columns">
           <button class:active={assetBrowserPath.startsWith(ASSET_LIBRARY_ROOT_MODELS)} on:click={() => selectAssetLibraryRoot(ASSET_LIBRARY_ROOT_MODELS)}>Imported Models</button>
@@ -2135,6 +3654,16 @@
         </div>
         <div class="save-message path-label">{assetBrowserPath}</div>
         <div class="save-message">Browse imported or generated meshes. Click a file to select it, then place it, inspect it, or reimagine it with AI.</div>
+        {#if assetPickerTargetNodeId}
+          <div class="save-message">Asset picker is active for {editorNodes.find((node) => node.id === assetPickerTargetNodeId)?.name ?? 'selected object'}.</div>
+          <div class="button-row compact editor-mb-sm">
+            <button on:click={cancelAssetPickerTarget}>Cancel Picker</button>
+          </div>
+        {/if}
+        <div class="tuple-group editor-mb-sm">
+          <div class="tuple-label">Filter</div>
+          <input class="text-input" bind:value={assetBrowserFilter} placeholder="Filter asset names" />
+        </div>
         {#if assetBrowserError}
           <div class="save-message error-message">{assetBrowserError}</div>
         {/if}
@@ -2142,7 +3671,7 @@
           {#if assetBrowserLoading}
             <div class="save-message">Loading assets…</div>
           {:else}
-            {#each assetBrowserItems as item (item.path)}
+            {#each assetBrowserItems.filter((item) => !assetBrowserFilter.trim() || item.name.toLowerCase().includes(assetBrowserFilter.trim().toLowerCase())) as item (item.path)}
               <button class:active={selectedLibraryItem?.path === item.path} on:click={() => selectLibraryItem(item)}>
                 <span class="node-label">{item.isDirectory ? '📁' : '📦'} {item.name}</span>
                 <span class="kind">{item.isDirectory ? 'dir' : 'asset'}</span>
@@ -2155,10 +3684,23 @@
             <div class="tuple-label">Selected Asset</div>
             <input class="text-input" value={selectedLibraryItem.name} readonly />
             <input class="text-input" value={getSelectedLibraryItemUrl()} readonly />
+            <EditorAssetPreview
+              assetUrl={getSelectedLibraryItemUrl()}
+              label="Selected Asset Preview"
+              hint={selectedLibraryItem.path.startsWith(ASSET_LIBRARY_ROOT_GENERATED)
+                ? 'Generated asset preview. This will add to the scene at full scale.'
+                : 'Imported asset preview. This will add using compatibility scale.'}
+            />
+            <div class="save-message">{selectedLibraryItem.path.startsWith(ASSET_LIBRARY_ROOT_GENERATED) ? 'Generated assets add at full scene scale.' : 'Imported models add with compatibility scale.'}</div>
             <div class="button-row compact-two-columns editor-mt-sm">
               <button on:click={addSelectedLibraryAssetToScene}>Add To Scene</button>
               <button disabled={hunyuanBusy || !getSelectedLibraryItemUrl()} on:click={() => void inspectSelectedAssetForHunyuan(getSelectedLibraryItemUrl(), selectedLibraryItem.path)}>Inspect AI</button>
             </div>
+            {#if assetPickerTargetNodeId}
+              <div class="button-row compact editor-mt-sm">
+                <button on:click={applySelectedLibraryAssetToTargetNode}>Use For Selected Object</button>
+              </div>
+            {/if}
             <div class="tuple-group">
               <div class="tuple-label">AI Prompt / Style Note</div>
               <textarea rows="3" placeholder="Describe how to reimagine this asset." value={hunyuanPrompt} on:input={(e) => { hunyuanPrompt = (e.currentTarget as HTMLTextAreaElement).value }}></textarea>
@@ -2189,9 +3731,17 @@
       <div class="editor-section">
         <div class="label">Hierarchy</div>
         <div class="save-message">{selectedNodes.length > 1 ? `${selectedNodes.length} selected` : selectedNodes.length === 1 ? '1 selected' : 'Nothing selected'}</div>
+        <div class="tuple-group editor-mb-sm">
+          <div class="tuple-label">Filter</div>
+          <input class="text-input" bind:value={hierarchyFilter} placeholder="Search by name, kind, prefab, gameplay, or asset path" />
+        </div>
         <div class="button-row compact editor-mb-sm">
           <button on:click={isolateSelection} disabled={selectedNodes.length === 0}>Isolate</button>
           <button on:click={clearIsolatedNodes} disabled={editorState.isolatedNodeIds.length === 0}>Show All</button>
+        </div>
+        <div class="button-row compact editor-mb-sm">
+          <button on:click={selectSimilarNodes} disabled={!selectedNode || similarNodeCount <= 1}>Select Similar</button>
+          <button on:click={() => { hierarchyFilter = '' }} disabled={!hierarchyFilter.trim()}>Clear Filter</button>
         </div>
         <div class="button-row compact editor-mb-sm">
           <button on:click={unhideAllNodes} disabled={!editorNodes.some((node) => !node.visible)}>Unhide All</button>
@@ -2211,7 +3761,10 @@
           Drop here to parent to Scene Root
         </div>
         <div class="hierarchy-list">
-          {#each flattenedNodes as node (node.id)}
+          {#if filteredFlattenedNodes.length === 0}
+            <div class="save-message">No nodes match the current filter.</div>
+          {/if}
+          {#each filteredFlattenedNodes as node (node.id)}
             <div
               draggable={true}
               class="hierarchy-item"
@@ -2296,6 +3849,51 @@
               <div class="tuple-label">Asset URL</div>
               <input class="text-input" value={selectedNode.asset.url} on:input={(e) => updateAssetUrl((e.currentTarget as HTMLInputElement).value)} />
             </div>
+            <EditorAssetPreview
+              assetUrl={selectedNode.asset.url}
+              label="Inspector Mesh Preview"
+              hint="Live preview of the asset currently assigned to this node."
+            />
+            <div class="button-row compact-two-columns editor-mt-sm">
+              <button on:click={() => openAssetPickerForSelectedNode(ASSET_LIBRARY_ROOT_GENERATED)}>Pick Generated Asset</button>
+              <button on:click={() => openAssetPickerForSelectedNode(ASSET_LIBRARY_ROOT_MODELS)}>Pick Imported Asset</button>
+            </div>
+            <div class="save-message">Use the picker buttons to swap this object to another asset from the library instead of typing paths manually.</div>
+            {#if assetPickerTargetNodeId === selectedNode.id}
+              <div class="editor-subsection editor-mt-sm">
+                <div class="tuple-label">Replacement Asset Picker</div>
+                <div class="button-row compact editor-mb-sm">
+                  <button class:active={assetBrowserPath.startsWith(ASSET_LIBRARY_ROOT_GENERATED)} on:click={() => selectAssetLibraryRoot(ASSET_LIBRARY_ROOT_GENERATED)}>Generated Assets</button>
+                  <button class:active={assetBrowserPath.startsWith(ASSET_LIBRARY_ROOT_MODELS)} on:click={() => selectAssetLibraryRoot(ASSET_LIBRARY_ROOT_MODELS)}>Imported Models</button>
+                  <button on:click={goUpAssetBrowser}>Up</button>
+                  <button on:click={() => loadAssetBrowser(assetBrowserPath)}>Refresh</button>
+                </div>
+                <div class="save-message path-label">{assetBrowserPath}</div>
+                <div class="tuple-group editor-mb-sm">
+                  <div class="tuple-label">Filter</div>
+                  <input class="text-input" bind:value={assetBrowserFilter} placeholder="Filter asset names" />
+                </div>
+                {#if assetBrowserError}
+                  <div class="save-message error-message">{assetBrowserError}</div>
+                {/if}
+                <div class="hierarchy-list asset-browser-list">
+                  {#if assetBrowserLoading}
+                    <div class="save-message">Loading assets…</div>
+                  {:else}
+                    {#each assetBrowserItems.filter((item) => !assetBrowserFilter.trim() || item.name.toLowerCase().includes(assetBrowserFilter.trim().toLowerCase())) as item (item.path)}
+                      <button class:active={selectedLibraryItem?.path === item.path} on:click={() => selectLibraryItem(item)}>
+                        <span class="node-label">{item.isDirectory ? '📁' : '📦'} {item.name}</span>
+                        <span class="kind">{item.isDirectory ? 'dir' : 'asset'}</span>
+                      </button>
+                    {/each}
+                  {/if}
+                </div>
+                <div class="button-row compact editor-mt-sm">
+                  <button on:click={applySelectedLibraryAssetToTargetNode} disabled={!selectedLibraryItem || selectedLibraryItem.isDirectory}>Replace With Selected Asset</button>
+                  <button on:click={cancelAssetPickerTarget}>Cancel</button>
+                </div>
+              </div>
+            {/if}
           {/if}
 
           {#if selectedNode.primitive}
@@ -2462,11 +4060,9 @@
               <div class="tuple-label">Light Color</div>
               <input class="text-input" value={selectedNode.light.color} on:input={(e) => updateLightField('color', (e.currentTarget as HTMLInputElement).value)} />
             </div>
-            <div class="tuple-row">
-              <input class="tuple-input" type="number" step="0.1" value={selectedNode.light.intensity} on:change={(e) => updateLightNumericField('intensity', (e.currentTarget as HTMLInputElement).value)} />
-              <input class="tuple-input" type="number" step="0.1" value={selectedNode.light.distance} on:change={(e) => updateLightNumericField('distance', (e.currentTarget as HTMLInputElement).value)} />
-              <input class="tuple-input" type="number" step="0.1" value={selectedNode.light.decay} on:change={(e) => updateLightNumericField('decay', (e.currentTarget as HTMLInputElement).value)} />
-            </div>
+            <div class="tuple-group"><div class="tuple-label">Light Intensity</div><input class="tuple-input" type="number" step="0.1" value={selectedNode.light.intensity} on:change={(e) => updateLightNumericField('intensity', (e.currentTarget as HTMLInputElement).value)} /></div>
+            <div class="tuple-group"><div class="tuple-label">Light Distance</div><input class="tuple-input" type="number" step="0.1" value={selectedNode.light.distance} on:change={(e) => updateLightNumericField('distance', (e.currentTarget as HTMLInputElement).value)} /></div>
+            <div class="tuple-group"><div class="tuple-label">Light Decay</div><input class="tuple-input" type="number" step="0.1" value={selectedNode.light.decay} on:change={(e) => updateLightNumericField('decay', (e.currentTarget as HTMLInputElement).value)} /></div>
           {/if}
 
           {#if selectedNode.gameplay}
@@ -2487,7 +4083,25 @@
                 <div class="tuple-label">Target Level</div>
                 <input class="text-input" value={selectedNode.gameplay.targetLevelId ?? ''} on:input={(e) => updateGameplayField('targetLevelId', (e.currentTarget as HTMLInputElement).value)} />
               </div>
-            {:else if selectedNode.gameplay.type === 'firefly' || selectedNode.gameplay.type === 'note'}
+            {:else if selectedNode.gameplay.type === 'firefly'}
+              <div class="tuple-group"><div class="tuple-label">Title</div><input class="text-input" value={selectedNode.gameplay.title ?? ''} on:input={(e) => updateGameplayField('title', (e.currentTarget as HTMLInputElement).value)} /></div>
+              <div class="tuple-group"><div class="tuple-label">Author</div><input class="text-input" value={selectedNode.gameplay.author ?? ''} on:input={(e) => updateGameplayField('author', (e.currentTarget as HTMLInputElement).value)} /></div>
+              <div class="tuple-group"><div class="tuple-label">Location</div><input class="text-input" value={selectedNode.gameplay.location ?? ''} on:input={(e) => updateGameplayField('location', (e.currentTarget as HTMLInputElement).value)} /></div>
+              <div class="tuple-group"><div class="tuple-label">Excerpt</div><textarea rows="3" value={selectedNode.gameplay.excerpt ?? ''} on:input={(e) => updateGameplayField('excerpt', (e.currentTarget as HTMLTextAreaElement).value)}></textarea></div>
+              <div class="tuple-group"><div class="tuple-label">Body</div><textarea rows="5" value={selectedNode.gameplay.body ?? ''} on:input={(e) => updateGameplayField('body', (e.currentTarget as HTMLTextAreaElement).value)}></textarea></div>
+              <label class="checkbox"><input type="checkbox" checked={selectedNode.gameplay.wanderEnabled ?? false} on:change={(e) => updateGameplayBooleanField('wanderEnabled', (e.currentTarget as HTMLInputElement).checked)} /> Wander</label>
+              <div class="tuple-group"><div class="tuple-label">Wander Radius</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.wanderRadius ?? 0.35} on:change={(e) => updateGameplayNumericField('wanderRadius', (e.currentTarget as HTMLInputElement).value)} /></div>
+              <div class="tuple-group"><div class="tuple-label">Wander Speed</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.wanderSpeed ?? 0.45} on:change={(e) => updateGameplayNumericField('wanderSpeed', (e.currentTarget as HTMLInputElement).value)} /></div>
+              <div class="tuple-group"><div class="tuple-label">Glow Intensity</div><input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.lightIntensity ?? 2.8} on:change={(e) => updateGameplayNumericField('lightIntensity', (e.currentTarget as HTMLInputElement).value)} /></div>
+              <div class="tuple-group"><div class="tuple-label">Glow Distance</div><input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.lightDistance ?? 6} on:change={(e) => updateGameplayNumericField('lightDistance', (e.currentTarget as HTMLInputElement).value)} /></div>
+              <div class="tuple-group"><div class="tuple-label">Glow Decay</div><input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.lightDecay ?? 1.6} on:change={(e) => updateGameplayNumericField('lightDecay', (e.currentTarget as HTMLInputElement).value)} /></div>
+              <div class="tuple-group"><div class="tuple-label">Sprite Intensity</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.spriteIntensity ?? 0.95} on:change={(e) => updateGameplayNumericField('spriteIntensity', (e.currentTarget as HTMLInputElement).value)} /></div>
+              <div class="tuple-group"><div class="tuple-label">Hover Height</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.hoverHeight ?? 0.36} on:change={(e) => updateGameplayNumericField('hoverHeight', (e.currentTarget as HTMLInputElement).value)} /></div>
+              <div class="tuple-group"><div class="tuple-label">Bob Amplitude</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.bobAmplitude ?? 0.14} on:change={(e) => updateGameplayNumericField('bobAmplitude', (e.currentTarget as HTMLInputElement).value)} /></div>
+              <div class="tuple-group"><div class="tuple-label">Bob Speed</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.bobSpeed ?? 1.4} on:change={(e) => updateGameplayNumericField('bobSpeed', (e.currentTarget as HTMLInputElement).value)} /></div>
+              <div class="tuple-group"><div class="tuple-label">Twinkle Speed</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.twinkleSpeed ?? 1.6} on:change={(e) => updateGameplayNumericField('twinkleSpeed', (e.currentTarget as HTMLInputElement).value)} /></div>
+              <div class="save-message">Adjust luminance with the glow controls and motion with wander/hover/bob/twinkle controls.</div>
+            {:else if selectedNode.gameplay.type === 'note'}
               <div class="tuple-group"><div class="tuple-label">Title</div><input class="text-input" value={selectedNode.gameplay.title ?? ''} on:input={(e) => updateGameplayField('title', (e.currentTarget as HTMLInputElement).value)} /></div>
               <div class="tuple-group"><div class="tuple-label">Author</div><input class="text-input" value={selectedNode.gameplay.author ?? ''} on:input={(e) => updateGameplayField('author', (e.currentTarget as HTMLInputElement).value)} /></div>
               <div class="tuple-group"><div class="tuple-label">Location</div><input class="text-input" value={selectedNode.gameplay.location ?? ''} on:input={(e) => updateGameplayField('location', (e.currentTarget as HTMLInputElement).value)} /></div>
@@ -2557,6 +4171,65 @@
         </div>
       {/if}
 
+      {#if activeEditorTab === 'style'}
+      {#if editorStyleStudioComponent}
+        <svelte:component
+          this={editorStyleStudioComponent}
+          bind:styleProfileName
+          bind:stylePrompt
+          bind:styleNegativePrompt
+          bind:styleLoraNotes
+          bind:styleControlNetNotes
+          bind:styleReferenceImageUrl
+          bind:styleSimplifyRatio
+          bind:styleSimplifyError
+          {styleBusy}
+          {styleStatus}
+          {styleInspectReport}
+          {styleSourceSummary}
+          {styleWorkspaceManifestUrl}
+          {styleWorkspaceSourceAssetUrl}
+          {styleGeneratedReferenceImageUrl}
+          {styleSimplifiedAssetUrl}
+          {styleBlenderExportPath}
+          {styleBlenderOpenCommand}
+          {styleBatchBusy}
+          {styleBatchStatus}
+          {styleSceneCandidates}
+          {comfyUiStatus}
+          {comfyUiBusy}
+          {comfyUiReady}
+          {hunyuanBackendStatus}
+          {hunyuanBusy}
+          {hunyuanServiceReady}
+          {hunyuanDetectedReferenceImageUrl}
+          {selectedNode}
+          {selectedNodes}
+          {canUseStyleStudio}
+          on:startComfyUi={() => refreshComfyUiServiceStatus(true)}
+          on:refreshComfyUi={() => refreshComfyUiServiceStatus(false)}
+          on:startHunyuan={() => refreshHunyuanServiceStatus(true)}
+          on:refreshHunyuan={() => refreshHunyuanServiceStatus(false)}
+          on:inspectAsset={() => inspectSelectedAssetForStyle()}
+          on:prepareWorkspace={() => prepareStyleWorkspace()}
+          on:simplifyAsset={() => simplifySelectedAssetForStyle()}
+          on:exportBlender={() => exportSelectedAssetForBlender()}
+          on:runRetexture={() => runStyleBake('texture')}
+          on:runReimagine={() => runStyleBake('generate')}
+          on:selectAllBatchCandidates={selectAllStyleBatchCandidates}
+          on:clearBatchCandidates={clearStyleBatchCandidates}
+          on:runBatchRetexture={() => void runStyleBatch('texture')}
+          on:runBatchReimagine={() => void runStyleBatch('generate')}
+          on:toggleBatchCandidate={(event) => toggleStyleBatchCandidate(event.detail.candidateId, event.detail.selected)}
+          on:updateBatchDescriptor={(event) => updateNodeStyleDescriptor(event.detail.candidateId, event.detail.descriptor)}
+        />
+      {:else}
+        <div class="editor-section">
+          <div class="save-message">Loading Style Studio…</div>
+        </div>
+      {/if}
+      {/if}
+
       {#if activeEditorTab === 'ai'}
       {#if editorAIMeshStudioComponent}
         <svelte:component
@@ -2565,6 +4238,8 @@
           {comfyUiStatus}
           {comfyUiBusy}
           {comfyUiReady}
+          {comfyWorkflowEditorStatus}
+          {selectedComfyWorkflowPath}
           bind:hunyuanApiUrl
           {hunyuanStatus}
           {hunyuanBackendStatus}
@@ -2573,18 +4248,28 @@
           {hunyuanBackendCanGenerate}
           {hunyuanBackendCanRetexture}
           {hunyuanLastOutputUrl}
+          {hunyuanLastResultSummary}
           {hunyuanSupportsReplacement}
           {hunyuanSupportsTextureWrap}
+          {canApplyGeneratedAssetToSelection}
+          {recentHunyuanJobs}
+          {hunyuanJobsLoading}
+          {hunyuanJobsError}
+          bind:selectedHunyuanJobId
           bind:hunyuanReferenceImageUrl
           {hunyuanDetectedReferenceImageUrl}
           bind:hunyuanPrompt
           bind:hunyuanScratchName
           bind:hunyuanScratchReferenceImageUrl
           bind:hunyuanScratchPrompt
+          bind:hunyuanApplyToSimilarNodes
+          matchingSelectionCount={similarNodeCount}
+          similarSelectionLabel={similarNodeLabel}
           {selectedNode}
           {selectedNodes}
           {canUseAiMeshStudio}
           {canRetextureSelection}
+          on:selectSimilar={selectSimilarNodes}
           on:startComfyUi={() => refreshComfyUiServiceStatus(true)}
           on:refreshComfyUi={() => refreshComfyUiServiceStatus(false)}
           on:startHunyuan={() => refreshHunyuanServiceStatus(true)}
@@ -2593,6 +4278,14 @@
           on:inspectSelection={() => selectedNode?.asset && void inspectSelectedAssetForHunyuan(selectedNode.asset.url, selectedNode.id)}
           on:generateSelection={() => runHunyuanForSelection('generate')}
           on:textureSelection={() => runHunyuanForSelection('texture')}
+          on:openWorkflowTab={() => setActiveEditorTab('workflow')}
+          on:resetWorkflowPath={resetSelectedWorkflowPath}
+          on:editGenerateWorkflow={() => void openComfyUiWorkflowEditor('generate')}
+          on:editTextureWorkflow={() => void openComfyUiWorkflowEditor('texture')}
+          on:openGeneratedAsset={() => void openGeneratedAssetInLibrary()}
+          on:applyGeneratedAsset={() => void applyGeneratedAssetToSelection()}
+          on:saveGeneratedResult={() => void saveCurrentSceneToDisk()}
+          on:refreshRecentJobs={() => void refreshHunyuanRecentJobs()}
         />
       {:else}
         <div class="editor-section">

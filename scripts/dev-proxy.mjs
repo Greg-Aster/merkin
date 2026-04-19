@@ -1,9 +1,10 @@
 import http from 'node:http'
 import httpProxy from 'http-proxy'
+import { readRuntime } from './dev-runtime.mjs'
 
 const PROXY_PORT = Number.parseInt(process.env.UNIFIED_PORT || '8787', 10)
-const SITE_TARGET = process.env.SITE_DEV_ORIGIN || 'http://127.0.0.1:4321'
-const GAME_TARGET = process.env.GAME_DEV_ORIGIN || 'http://127.0.0.1:4322'
+const DEFAULT_SITE_TARGET = process.env.SITE_DEV_ORIGIN || 'http://127.0.0.1:4321'
+const DEFAULT_GAME_TARGET = process.env.GAME_DEV_ORIGIN || 'http://127.0.0.1:4322'
 const GAME_PREFIX = normalizePrefix(process.env.GAME_PREFIX || '/game')
 
 const DEV_ASSET_PREFIXES = [
@@ -91,7 +92,6 @@ function rewritePathForTarget(req, isGameTarget) {
 
 function proxyRequest(req, res) {
   const useGameTarget = wantsGameTarget(req)
-  const target = useGameTarget ? GAME_TARGET : SITE_TARGET
   const originalUrl = req.url
 
   req.url = rewritePathForTarget(req, useGameTarget)
@@ -102,12 +102,13 @@ function proxyRequest(req, res) {
     req.url = originalUrl
   })
 
-  proxy.web(req, res, { target })
+  void resolveTarget(useGameTarget).then((target) => {
+    proxy.web(req, res, { target })
+  })
 }
 
 function proxyUpgrade(req, socket, head) {
   const useGameTarget = wantsGameTarget(req)
-  const target = useGameTarget ? GAME_TARGET : SITE_TARGET
   const originalUrl = req.url
 
   req.url = rewritePathForTarget(req, useGameTarget)
@@ -115,7 +116,18 @@ function proxyUpgrade(req, socket, head) {
     req.url = originalUrl
   })
 
-  proxy.ws(req, socket, head, { target })
+  void resolveTarget(useGameTarget).then((target) => {
+    proxy.ws(req, socket, head, { target })
+  })
+}
+
+async function resolveTarget(useGameTarget) {
+  const runtime = await readRuntime(useGameTarget ? 'game' : 'megameal')
+  if (runtime?.origin) {
+    return runtime.origin
+  }
+
+  return useGameTarget ? DEFAULT_GAME_TARGET : DEFAULT_SITE_TARGET
 }
 
 const server = http.createServer(proxyRequest)
@@ -123,6 +135,6 @@ server.on('upgrade', proxyUpgrade)
 
 server.listen(PROXY_PORT, () => {
   console.log(`Unified dev proxy listening on http://127.0.0.1:${PROXY_PORT}`)
-  console.log(`  /        -> ${SITE_TARGET}`)
-  console.log(`  ${GAME_PREFIX}/* -> ${GAME_TARGET}`)
+  console.log(`  /        -> megameal runtime (fallback ${DEFAULT_SITE_TARGET})`)
+  console.log(`  ${GAME_PREFIX}/* -> game runtime (fallback ${DEFAULT_GAME_TARGET})`)
 })

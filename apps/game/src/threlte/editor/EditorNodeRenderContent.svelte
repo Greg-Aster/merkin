@@ -2,6 +2,7 @@
   import { setContext } from 'svelte'
   import { writable } from 'svelte/store'
   import * as THREE from 'three'
+  import AdaptivePointLight from '../components/AdaptivePointLight.svelte'
   import { T } from '@threlte/core'
   import HeroProp from '../components/HeroProp.svelte'
   import ProceduralMesh from '../components/ProceduralMesh.svelte'
@@ -68,7 +69,7 @@
     opacity={node.primitive.opacity ?? 1}
   />
 {:else if node.kind === 'light' && node.light}
-  <T.PointLight
+  <AdaptivePointLight
     position={[0, 0, 0]}
     color={node.light.color}
     intensity={node.light.intensity}

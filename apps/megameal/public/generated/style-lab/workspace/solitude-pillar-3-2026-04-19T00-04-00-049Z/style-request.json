@@ -1,0 +1,14 @@
+{
+  "createdAt": "2026-04-19T00:05:03.863Z",
+  "sourceName": "Solitude Pillar 3",
+  "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18T22-42-43-915Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18T22-42-43-915Z.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/solitude-pillar-3-2026-04-19T00-04-00-049Z/source/solitude-pillar-3.glb",
+  "prompt": "Solitude Pillar 3. style family: Painterly Storybook. hand-painted storybook environment art, unified surface language, stylized materials, painterly wear, broad readable forms. avoid: photorealistic, noisy texture detail, harsh speculars, mismatched material finish",
+  "negativePrompt": "photorealistic, noisy texture detail, harsh speculars, mismatched material finish",
+  "loraNotes": "",
+  "controlNetNotes": "Preserve silhouette and major surface breakup from the source asset.",
+  "referenceImageUrl": "/generated/hunyuan3d/references/solitude-pillar-3-reference-2026-04-19T00-05-03-862Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/solitude-pillar-3-2026-04-19T00-04-00-049Z/reference/solitude-pillar-3-reference-2026-04-19T00-05-03-862Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/solitude-pillar-3-reference-2026-04-19T00-05-03-862Z.png"
+}

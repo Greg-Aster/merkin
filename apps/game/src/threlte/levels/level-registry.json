@@ -1,10 +1,33 @@
 [
   {
+    "id": "miranda",
+    "title": "Miranda Wreck",
+    "status": "active",
+    "deployed": true,
+    "aliases": [
+      "miranda-ship-level"
+    ],
+    "source": {
+      "kind": "scene",
+      "sceneId": "miranda"
+    },
+    "starMap": {
+      "enabled": true,
+      "year": 2400,
+      "era": "unknown",
+      "description": "Investigate the Miranda Wreck"
+    }
+  },
+  {
     "id": "observatory",
     "title": "Observatory",
     "status": "active",
     "deployed": true,
-    "aliases": ["observatory-level", "hybrid-observatory", "hybrid-observatory-level"],
+    "aliases": [
+      "observatory-level",
+      "hybrid-observatory",
+      "hybrid-observatory-level"
+    ],
     "source": {
       "kind": "component",
       "componentKey": "observatory"
@@ -21,7 +44,9 @@
     "title": "Sci Fi Room",
     "status": "active",
     "deployed": true,
-    "aliases": ["sci-fi-room-level"],
+    "aliases": [
+      "sci-fi-room-level"
+    ],
     "source": {
       "kind": "scene",
       "sceneId": "sci-fi-room"
@@ -34,28 +59,13 @@
     }
   },
   {
-    "id": "miranda",
-    "title": "Miranda Wreck",
-    "status": "active",
-    "deployed": true,
-    "aliases": ["miranda-ship-level"],
-    "source": {
-      "kind": "scene",
-      "sceneId": "miranda"
-    },
-    "starMap": {
-      "enabled": true,
-      "year": 2400,
-      "era": "unknown",
-      "description": "Investigate the Miranda Wreck"
-    }
-  },
-  {
     "id": "solitude",
     "title": "Solitude",
     "status": "active",
     "deployed": true,
-    "aliases": ["solitude-level"],
+    "aliases": [
+      "solitude-level"
+    ],
     "source": {
       "kind": "scene",
       "sceneId": "solitude"
@@ -65,6 +75,26 @@
       "year": 2600,
       "era": "unknown",
       "description": "Drift out toward Solitude"
+    }
+  },
+  {
+    "id": "yggdrasil",
+    "title": "Yggdrasil",
+    "status": "active",
+    "deployed": true,
+    "aliases": [
+      "yggdrasil-level",
+      "world-tree"
+    ],
+    "source": {
+      "kind": "scene",
+      "sceneId": "yggdrasil"
+    },
+    "starMap": {
+      "enabled": true,
+      "year": 900,
+      "era": "mythic",
+      "description": "Walk the roots of Yggdrasil"
     }
   }
 ]

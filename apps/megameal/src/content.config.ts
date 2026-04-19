@@ -1,12 +1,10 @@
 import { defineCollection, z } from 'astro:content'
 import {
   aboutSchema,
-  assetDataSchema,
   friendsSchema,
   postsSchema,
   specSchema,
   teamSchema,
-  updatesSchema,
 } from '@merkin/blog-core/schemas'
 
 // Define the 'posts' collection
@@ -28,10 +26,6 @@ const friendsCollection = defineCollection({
   schema: friendsSchema,
 })
 
-const updatesCollection = defineCollection({
-  schema: updatesSchema,
-})
-
 // Define the 'about' collection for dynamic author pages
 const aboutCollection = defineCollection({
   schema: aboutSchema,
@@ -44,7 +38,6 @@ const productsCollection = defineCollection({
     tagline: z.string(), // The sinister tagline for the product
     description: z.string().optional(), // A more detailed description, optional
     price: z.number().optional(), // The price of the product, optional
-    image: z.string().optional(), // Path to the product image, optional
     sku: z.string().optional(), // A unique stock keeping unit, optional
     draft: z.boolean().optional().default(false),
     oneColumn: z.boolean().optional().default(false),
@@ -133,28 +126,13 @@ const quizzesCollection = defineCollection({
   }),
 })
 
-// Define avatar and mascot as asset directories (no schema needed, just images)
-// This prevents Astro from looking for MD/MDX files in these directories
-const avatarCollection = defineCollection({
-  type: 'data',
-  schema: assetDataSchema,
-})
-
-const mascotCollection = defineCollection({
-  type: 'data',
-  schema: assetDataSchema,
-})
-
 // Export the collections
 export const collections = {
   posts: postsCollection,
   spec: specCollection,
   team: teamCollection,
   friends: friendsCollection,
-  updates: updatesCollection,
   about: aboutCollection, // NEW: About collection for dynamic author pages
   products: productsCollection,
   quizzes: quizzesCollection,
-  avatar: avatarCollection, // Explicitly define to prevent auto-generation
-  mascot: mascotCollection, // Explicitly define to prevent auto-generation
 }

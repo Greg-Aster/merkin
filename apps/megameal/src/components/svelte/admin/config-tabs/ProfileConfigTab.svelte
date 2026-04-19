@@ -303,12 +303,12 @@ function updateSelectedPlatform(event) {
               }}
             >
               <option value="" class="text-neutral-900 dark:text-neutral-100">Select an avatar image</option>
-              <option value="/src/content/avatar/avatar.png" class="text-neutral-900 dark:text-neutral-100">avatar.png</option>
-              <option value="/src/content/avatar/avatar2.png" class="text-neutral-900 dark:text-neutral-100">avatar2.png</option>
-              <option value="/src/content/avatar/avatar3.png" class="text-neutral-900 dark:text-neutral-100">avatar3.png</option>
-              <option value="/src/content/avatar/avatar4.png" class="text-neutral-900 dark:text-neutral-100">avatar4.png</option>
-              <option value="/src/content/avatar/avatar5.png" class="text-neutral-900 dark:text-neutral-100">avatar5.png</option>
-              <option value="/src/content/avatar/avatar6.png" class="text-neutral-900 dark:text-neutral-100">avatar6.png</option>
+              <option value="/src/assets/content-avatar/avatar.png" class="text-neutral-900 dark:text-neutral-100">avatar.png</option>
+              <option value="/src/assets/content-avatar/avatar2.png" class="text-neutral-900 dark:text-neutral-100">avatar2.png</option>
+              <option value="/src/assets/content-avatar/avatar3.png" class="text-neutral-900 dark:text-neutral-100">avatar3.png</option>
+              <option value="/src/assets/content-avatar/avatar4.png" class="text-neutral-900 dark:text-neutral-100">avatar4.png</option>
+              <option value="/src/assets/content-avatar/avatar5.png" class="text-neutral-900 dark:text-neutral-100">avatar5.png</option>
+              <option value="/src/assets/content-avatar/avatar6.png" class="text-neutral-900 dark:text-neutral-100">avatar6.png</option>
             </select>
 
             {#if isAvatarSequence}
@@ -337,12 +337,12 @@ function updateSelectedPlatform(event) {
                   }}
                 >
                   <option value="" class="text-neutral-900 dark:text-neutral-100">Add to sequence...</option>
-                  <option value="/src/content/avatar/avatar.png" class="text-neutral-900 dark:text-neutral-100">avatar.png</option>
-                  <option value="/src/content/avatar/avatar2.png" class="text-neutral-900 dark:text-neutral-100">avatar2.png</option>
-                  <option value="/src/content/avatar/avatar3.png" class="text-neutral-900 dark:text-neutral-100">avatar3.png</option>
-                  <option value="/src/content/avatar/avatar4.png" class="text-neutral-900 dark:text-neutral-100">avatar4.png</option>
-                  <option value="/src/content/avatar/avatar5.png" class="text-neutral-900 dark:text-neutral-100">avatar5.png</option>
-                  <option value="/src/content/avatar/avatar6.png" class="text-neutral-900 dark:text-neutral-100">avatar6.png</option>
+                  <option value="/src/assets/content-avatar/avatar.png" class="text-neutral-900 dark:text-neutral-100">avatar.png</option>
+                  <option value="/src/assets/content-avatar/avatar2.png" class="text-neutral-900 dark:text-neutral-100">avatar2.png</option>
+                  <option value="/src/assets/content-avatar/avatar3.png" class="text-neutral-900 dark:text-neutral-100">avatar3.png</option>
+                  <option value="/src/assets/content-avatar/avatar4.png" class="text-neutral-900 dark:text-neutral-100">avatar4.png</option>
+                  <option value="/src/assets/content-avatar/avatar5.png" class="text-neutral-900 dark:text-neutral-100">avatar5.png</option>
+                  <option value="/src/assets/content-avatar/avatar6.png" class="text-neutral-900 dark:text-neutral-100">avatar6.png</option>
                 </select>
                 
                 <div class="mt-4">

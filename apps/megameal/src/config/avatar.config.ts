@@ -2,12 +2,12 @@
 import type { ImageMetadata } from 'astro'
 
 // Import avatar images
-import avatar1 from '/src/content/avatar/avatar.png' // Primary mysterious witness
-import avatar2 from '/src/content/avatar/avatar2.png' // Corporate CEO
-import avatar3 from '/src/content/avatar/avatar3.png' // Santiago Chen (Bartender)
-import avatar4 from '/src/content/avatar/avatar4.png' // The Sandwich Thief/Hamburgler
-import avatar5 from '/src/content/avatar/avatar5.png' // Temporal Historian
-import avatar6 from '/src/content/avatar/avatar6.png' // Snuggloid entity
+import avatar1 from '/src/assets/content-avatar/avatar.png' // Primary mysterious witness
+import avatar2 from '/src/assets/content-avatar/avatar2.png' // Corporate CEO
+import avatar3 from '/src/assets/content-avatar/avatar3.png' // Santiago Chen (Bartender)
+import avatar4 from '/src/assets/content-avatar/avatar4.png' // The Sandwich Thief/Hamburgler
+import avatar5 from '/src/assets/content-avatar/avatar5.png' // Temporal Historian
+import avatar6 from '/src/assets/content-avatar/avatar6.png' // Snuggloid entity
 
 // Define the profile sequence item type
 export interface ProfileSequenceItem {

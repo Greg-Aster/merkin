@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
+    "dev": "node ./scripts/dev-app.mjs",
+    "start": "node ./scripts/dev-app.mjs",
     "build": "astro build && pagefind --site dist && node ../../scripts/generate-post-pdfs.mjs --app .",
     "preview": "astro preview",
     "astro": "astro",

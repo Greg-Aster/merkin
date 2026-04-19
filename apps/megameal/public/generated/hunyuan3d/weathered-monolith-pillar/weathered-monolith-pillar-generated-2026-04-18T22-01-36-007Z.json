@@ -1,0 +1,13 @@
+{
+  "sourceName": "weathered monolith pillar",
+  "sourceReferenceImageUrl": "/generated/hunyuan3d/references/weathered-monolith-pillar-reference-2026-04-18T22-00-04-452Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776549604459-d3dve0",
+  "prompt": "a weathered ancient stone pillar",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-18T22:01:36.018Z"
+}

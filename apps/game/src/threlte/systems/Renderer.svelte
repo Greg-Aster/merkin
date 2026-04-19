@@ -10,7 +10,6 @@ import {
   type QualitySettings,
   qualitySettingsStore,
 } from '../features/performance'
-import { neuralStylizationSceneShadowsSuppressed } from '../stores/uiStore'
 
 // Renderer configuration
 export const antialias = true
@@ -36,7 +35,6 @@ const { renderer } = useThrelte()
 
 function applyQualitySettings(
   quality: Pick<QualitySettings, 'canvasScale' | 'shadowMapSize'>,
-  suppressShadows = false,
 ) {
   if (!renderer) return
 
@@ -53,14 +51,13 @@ function applyQualitySettings(
   renderer.domElement.style.height = '100%'
 
   // Shadow map
-  const effectiveShadowMapSize = suppressShadows ? 0 : quality.shadowMapSize
-  renderer.shadowMap.enabled = effectiveShadowMapSize > 0
-  if (effectiveShadowMapSize > 0) {
+  renderer.shadowMap.enabled = quality.shadowMapSize > 0
+  if (quality.shadowMapSize > 0) {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
   }
   // Broadcast shadow map size so lights can update their shadow.mapSize
   window.dispatchEvent(
-    new CustomEvent('game:shadowMapSize', { detail: effectiveShadowMapSize }),
+    new CustomEvent('game:shadowMapSize', { detail: quality.shadowMapSize }),
   )
 }
 
@@ -68,14 +65,12 @@ let currentQualitySettings: Pick<
   QualitySettings,
   'canvasScale' | 'shadowMapSize'
 > = { ...$qualitySettingsStore }
-let stylizedShadowsSuppressed = false
 
 function applyRendererProfile() {
-  applyQualitySettings(currentQualitySettings, stylizedShadowsSuppressed)
+  applyQualitySettings(currentQualitySettings)
 }
 
 let unsubscribeQuality: (() => void) | undefined
-let unsubscribeStylizationProfile: (() => void) | undefined
 let handleResize: (() => void) | undefined
 
 onMount(() => {
@@ -101,12 +96,6 @@ onMount(() => {
     applyRendererProfile()
   })
 
-  unsubscribeStylizationProfile =
-    neuralStylizationSceneShadowsSuppressed.subscribe(value => {
-      stylizedShadowsSuppressed = value
-      applyRendererProfile()
-    })
-
   handleResize = () => {
     applyRendererProfile()
   }
@@ -119,7 +108,6 @@ onMount(() => {
 
 onDestroy(() => {
   unsubscribeQuality?.()
-  unsubscribeStylizationProfile?.()
   if (handleResize) {
     window.removeEventListener('resize', handleResize)
   }

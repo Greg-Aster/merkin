@@ -1,12 +1,12 @@
-import aweImg from '/src/content/mascot/awe.png'
-import eyesClosedMouthOpenImg from '/src/content/mascot/eyes-closed-mouth-open.png'
-import horrorImg from '/src/content/mascot/horror.png'
-import joyAnticipationImg from '/src/content/mascot/joy-anticipation.png'
-import openmouthImg from '/src/content/mascot/openmouth.png'
-import standardImg from '/src/content/mascot/standard.png'
-import stareImg from '/src/content/mascot/stare.png'
-import toungeOutEyesClosedImg from '/src/content/mascot/tounge-out-eyesclosed.png'
-import toungeOutImg from '/src/content/mascot/tounge-out.png'
+import aweImg from '/src/assets/mascot/awe.png'
+import eyesClosedMouthOpenImg from '/src/assets/mascot/eyes-closed-mouth-open.png'
+import horrorImg from '/src/assets/mascot/horror.png'
+import joyAnticipationImg from '/src/assets/mascot/joy-anticipation.png'
+import openmouthImg from '/src/assets/mascot/openmouth.png'
+import standardImg from '/src/assets/mascot/standard.png'
+import stareImg from '/src/assets/mascot/stare.png'
+import toungeOutEyesClosedImg from '/src/assets/mascot/tounge-out-eyesclosed.png'
+import toungeOutImg from '/src/assets/mascot/tounge-out.png'
 
 export const cuppyImages = {
   standard: standardImg.src,

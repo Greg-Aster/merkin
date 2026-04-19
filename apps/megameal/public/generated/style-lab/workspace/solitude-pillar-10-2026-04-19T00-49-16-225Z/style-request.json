@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-04-19T00:50:21.772Z",
+  "styleProfileName": "Painterly Storybook",
+  "sourceName": "Solitude Pillar 10",
+  "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/solitude-pillar-10-2026-04-19T00-49-16-225Z/source/solitude-pillar-10.glb",
+  "prompt": "Solitude Pillar 10. style family: Painterly Storybook. ancient cyberpunk ruins, neon impressionist oil painting. avoid: photorealistic, noisy texture detail, harsh speculars, mismatched material finish",
+  "negativePrompt": "photorealistic, noisy texture detail, harsh speculars, mismatched material finish",
+  "loraNotes": "",
+  "controlNetNotes": "Preserve silhouette and major surface breakup from the source asset.",
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/solitude-pillar-10-reference-2026-04-19T00-50-21-759Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/solitude-pillar-10-2026-04-19T00-49-16-225Z/reference/solitude-pillar-10-reference-2026-04-19T00-50-21-759Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/solitude-pillar-10-reference-2026-04-19T00-50-21-759Z.png"
+}

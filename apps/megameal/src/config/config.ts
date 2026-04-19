@@ -78,7 +78,7 @@ export const navBarConfig: NavBarConfig = {
 }
 
 export const profileConfig: ProfileConfig = {
-  avatar: '/src/content/avatar/avatar.png',
+  avatar: '/src/assets/content-avatar/avatar.png',
   name: 'MEGA MEAL SAGA',
   bio: 'Cosmic Horror and Food.',
   links: [

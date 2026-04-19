@@ -4,17 +4,23 @@ const http = require('http');
 const url = require('url');
 const path = require('path');
 const fs = require('fs');
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 
-const PORT = Number(process.env.MEGAMEAL_TOOLS_PORT || process.env.EDITOR_API_PORT || process.env.PORT || 3001);
+const DEFAULT_TOOLS_PORT = 3001;
+const REQUESTED_PORT = Number(process.env.MEGAMEAL_TOOLS_PORT || process.env.EDITOR_API_PORT || process.env.PORT || DEFAULT_TOOLS_PORT);
+let activePort = REQUESTED_PORT;
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const GAME_APP_ROOT = path.join(REPO_ROOT, 'apps', 'game');
 const GAME_PUBLIC_ROOT = path.join(REPO_ROOT, 'apps', 'megameal', 'public');
+const DEV_RUNTIME_ROOT = path.join(REPO_ROOT, '.dev-runtime');
+const TOOLS_RUNTIME_PATH = path.join(DEV_RUNTIME_ROOT, 'tools.json');
 const GAME_LEVELS_ROOT = path.join(GAME_APP_ROOT, 'src', 'threlte', 'levels');
 const LEVEL_REGISTRY_PATH = path.join(GAME_LEVELS_ROOT, 'level-registry.json');
 const EDITOR_SCENES_ROOT = path.join(GAME_APP_ROOT, 'src', 'threlte', 'editor', 'scenes');
 const LEGACY_TOOLS_ROOT = __dirname;
 const GENERATED_HUNYUAN_ROOT = path.join(GAME_PUBLIC_ROOT, 'generated', 'hunyuan3d');
+const GENERATED_STYLE_LAB_ROOT = path.join(GAME_PUBLIC_ROOT, 'generated', 'style-lab');
+const BLENDER_EXPORT_ROOT = path.join(GAME_APP_ROOT, '.editor-exports', 'blender');
 const HUNYUAN_EXAMPLE_WORKFLOW_PATH = path.join(REPO_ROOT, 'apps', 'game', 'public', 'ref-image', 'Hunyaun example.json');
 const COMFY_IMAGE_EXAMPLE_WORKFLOW_PATH = path.join(REPO_ROOT, 'apps', 'game', 'public', 'ref-image', 'comfy_image_example.json');
 const DEFAULT_HUNYUAN_PORT = 8080;
@@ -54,6 +60,201 @@ function ensureDirectory(directoryPath) {
   if (!fs.existsSync(directoryPath)) {
     fs.mkdirSync(directoryPath, { recursive: true });
   }
+}
+
+function formatBytes(size = 0) {
+  if (!Number.isFinite(size) || size <= 0) return '0 B';
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+  if (size < 1024 * 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(size / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
+function clampNumber(value, min, max, fallback) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.min(max, Math.max(min, numeric));
+}
+
+function timestampKey() {
+  return new Date().toISOString().replace(/[:.]/g, '-');
+}
+
+function hasMeaningfulSceneContent(scene) {
+  if (!scene || typeof scene !== 'object') return false;
+  if (Array.isArray(scene.nodes) && scene.nodes.length > 0) return true;
+  if (scene.settings && typeof scene.settings === 'object' && Object.keys(scene.settings).length > 0) return true;
+  return false;
+}
+
+function createGeneratedStyleDirectory(nameHint = 'asset', category = 'workspace') {
+  const directory = path.join(
+    GENERATED_STYLE_LAB_ROOT,
+    category,
+    `${slugify(nameHint)}-${timestampKey()}`,
+  );
+  ensureDirectory(directory);
+  return directory;
+}
+
+function findLatestStyleWorkspaceForAsset(assetUrl = '') {
+  const workspaceRoot = path.join(GENERATED_STYLE_LAB_ROOT, 'workspace');
+  if (!fs.existsSync(workspaceRoot) || !fs.statSync(workspaceRoot).isDirectory()) {
+    return null;
+  }
+
+  const candidates = fs.readdirSync(workspaceRoot)
+    .map((name) => path.join(workspaceRoot, name))
+    .filter((directory) => fs.existsSync(directory) && fs.statSync(directory).isDirectory())
+    .map((directory) => {
+      const manifestPath = path.join(directory, 'style-request.json');
+      if (!fs.existsSync(manifestPath) || !fs.statSync(manifestPath).isFile()) {
+        return null;
+      }
+
+      try {
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        if (manifest?.sourceAssetUrl !== assetUrl) {
+          return null;
+        }
+
+        return {
+          directory,
+          manifestPath,
+          manifest,
+          createdAt: new Date(manifest?.createdAt || fs.statSync(manifestPath).mtime.toISOString()).getTime(),
+        };
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.createdAt - a.createdAt);
+
+  return candidates[0] || null;
+}
+
+function runProcess(command, args, options = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd: REPO_ROOT,
+      stdio: 'pipe',
+      ...options,
+    });
+
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
+    child.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
+
+    child.on('error', (error) => {
+      reject(error);
+    });
+
+    child.on('close', (code) => {
+      resolve({ code, stdout, stderr });
+    });
+  });
+}
+
+async function runGltfTransform(args = []) {
+  return runProcess('pnpm', ['exec', 'gltf-transform', ...args], {
+    cwd: REPO_ROOT,
+  });
+}
+
+async function inspectGltfAsset(filePath) {
+  const result = await runGltfTransform(['inspect', filePath, '--format', 'md']);
+  if (result.code !== 0) {
+    throw new Error(result.stderr || result.stdout || `glTF inspection failed with exit code ${result.code}`);
+  }
+  return result.stdout.trim();
+}
+
+async function copyModelToGlb(sourcePath, outputPath) {
+  const result = await runGltfTransform(['copy', sourcePath, outputPath]);
+  if (result.code !== 0) {
+    throw new Error(result.stderr || result.stdout || `glTF export failed with exit code ${result.code}`);
+  }
+  return result;
+}
+
+function resolveInspectableModelAsset(assetUrl = '') {
+  const assetPath = resolvePublicAssetPath(assetUrl);
+  if (!fs.existsSync(assetPath) || !fs.statSync(assetPath).isFile()) {
+    throw new Error(`Asset file not found: ${assetUrl}`);
+  }
+
+  const extension = path.extname(assetPath).toLowerCase();
+  if (!['.glb', '.gltf'].includes(extension)) {
+    throw new Error('Only .glb and .gltf assets are supported for this operation.');
+  }
+
+  return {
+    assetPath,
+    extension,
+    assetName: path.basename(assetPath, extension),
+  };
+}
+
+function detectBlenderExecutable() {
+  const envPath = process.env.BLENDER_PATH;
+  if (envPath && fs.existsSync(envPath)) {
+    return envPath;
+  }
+
+  const whichResult = spawnSync('bash', ['-lc', 'command -v blender'], {
+    cwd: REPO_ROOT,
+    encoding: 'utf8',
+  });
+  const resolved = whichResult.stdout?.trim();
+  if (whichResult.status === 0 && resolved) {
+    return resolved;
+  }
+
+  return '';
+}
+
+function writeToolsRuntime(port) {
+  ensureDirectory(DEV_RUNTIME_ROOT);
+  fs.writeFileSync(
+    TOOLS_RUNTIME_PATH,
+    JSON.stringify({
+      name: 'tools',
+      pid: process.pid,
+      host: '127.0.0.1',
+      port,
+      origin: `http://127.0.0.1:${port}`,
+      updatedAt: new Date().toISOString(),
+    }, null, 2),
+    'utf8',
+  );
+}
+
+function clearToolsRuntime() {
+  try {
+    const existing = JSON.parse(fs.readFileSync(TOOLS_RUNTIME_PATH, 'utf8'));
+    if (existing?.pid && existing.pid !== process.pid) {
+      return;
+    }
+  } catch {}
+
+  try {
+    fs.unlinkSync(TOOLS_RUNTIME_PATH);
+  } catch {}
+}
+
+function applyCorsHeaders(req, res, pathname) {
+  if (!pathname.startsWith('/api/')) return;
+
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
 function readLevelRegistry() {
@@ -146,6 +347,11 @@ function getHunyuanJobQueuePosition(jobId) {
 function serializeHunyuanJob(job) {
   if (!job) return null;
 
+  const sourceName = typeof job.payload?.sourceName === 'string' ? job.payload.sourceName : '';
+  const mode = typeof job.payload?.mode === 'string' ? job.payload.mode : '';
+  const assetUrl = typeof job.payload?.assetUrl === 'string' ? job.payload.assetUrl : '';
+  const prompt = typeof job.payload?.prompt === 'string' ? job.payload.prompt : '';
+
   return {
     id: job.id,
     status: job.status,
@@ -154,9 +360,24 @@ function serializeHunyuanJob(job) {
     startedAt: job.startedAt,
     finishedAt: job.finishedAt,
     queuePosition: getHunyuanJobQueuePosition(job.id),
+    sourceName,
+    mode,
+    assetUrl,
+    prompt,
     result: job.result,
     error: job.error,
   };
+}
+
+function listRecentHunyuanJobs(limit = 10) {
+  const normalizedLimit = Number.isFinite(Number(limit))
+    ? Math.max(1, Math.min(50, Number(limit)))
+    : 10;
+
+  return Array.from(hunyuanJobs.values())
+    .sort((a, b) => Date.parse(b.updatedAt || b.createdAt || 0) - Date.parse(a.updatedAt || a.createdAt || 0))
+    .slice(0, normalizedLimit)
+    .map((job) => serializeHunyuanJob(job));
 }
 
 async function processHunyuanJobQueue() {
@@ -179,7 +400,7 @@ async function processHunyuanJobQueue() {
   job.updatedAt = job.startedAt;
 
   try {
-    const response = await fetch(`http://127.0.0.1:${PORT}/api/hunyuan3d/run`, {
+    const response = await fetch(`http://127.0.0.1:${activePort}/api/hunyuan3d/run`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(job.payload),
@@ -906,8 +1127,9 @@ function buildComfyUiTextureWorkflowFromTemplate({
   outputPrefix,
   paintModelCandidates,
   seed,
+  workflowPath = '',
 }) {
-  const settings = getHunyuanExampleWorkflowSettings({ paintModelCandidates });
+  const settings = getHunyuanExampleWorkflowSettings({ paintModelCandidates, workflowPath });
   if (!settings?.paintModel) {
     return null;
   }
@@ -1114,15 +1336,20 @@ function buildComfyUiTextureWorkflowFromTemplate({
   };
 }
 
-function readHunyuanExampleWorkflow() {
-  if (!fs.existsSync(HUNYUAN_EXAMPLE_WORKFLOW_PATH)) return null;
+function readWorkflowJson(workflowPath) {
+  const resolvedPath = workflowPath ? resolveWorkspacePath(String(workflowPath)) : HUNYUAN_EXAMPLE_WORKFLOW_PATH;
+  if (!fs.existsSync(resolvedPath)) return null;
 
   try {
-    return JSON.parse(fs.readFileSync(HUNYUAN_EXAMPLE_WORKFLOW_PATH, 'utf8'));
+    return JSON.parse(fs.readFileSync(resolvedPath, 'utf8'));
   } catch (error) {
-    console.warn('Failed to read Hunyuan example workflow:', error);
+    console.warn('Failed to read workflow JSON:', error);
     return null;
   }
+}
+
+function readHunyuanExampleWorkflow(workflowPath = '') {
+  return readWorkflowJson(workflowPath || HUNYUAN_EXAMPLE_WORKFLOW_PATH);
 }
 
 function readComfyImageExampleWorkflow() {
@@ -1162,8 +1389,9 @@ function getPreferredInstalledModel(preferredName, candidates = []) {
 function getHunyuanExampleWorkflowSettings({
   shapeModelCandidates = [],
   paintModelCandidates = [],
+  workflowPath = '',
 }) {
-  const workflow = readHunyuanExampleWorkflow();
+  const workflow = readHunyuanExampleWorkflow(workflowPath);
   if (!workflow) return null;
 
   const modelLoader = getWorkflowWidgets(workflow, 10, ['hunyuan3d-dit-v2-0-fp16.safetensors', 'sdpa', false]);
@@ -1469,8 +1697,9 @@ function buildComfyUiGenerateWorkflowFromTemplate({
   shapeModelCandidates,
   paintModelCandidates,
   seed,
+  workflowPath = '',
 }) {
-  const settings = getHunyuanExampleWorkflowSettings({ shapeModelCandidates, paintModelCandidates });
+  const settings = getHunyuanExampleWorkflowSettings({ shapeModelCandidates, paintModelCandidates, workflowPath });
   if (!settings?.shapeModel || !settings?.paintModel) {
     return null;
   }
@@ -1757,6 +1986,95 @@ function buildComfyUiGenerateWorkflow({
         save_file: true,
       },
     },
+  };
+}
+
+async function buildEditableComfyUiWorkflowTemplate({
+  mode = 'generate',
+  apiUrl = `http://127.0.0.1:${DEFAULT_HUNYUAN_PORT}`,
+  comfyUiApiUrl = `http://127.0.0.1:${DEFAULT_COMFYUI_PORT}`,
+  assetUrl = '',
+  sourceName = '',
+  referenceImageUrl = '',
+  workflowPath = '',
+}) {
+  const inspection = assetUrl
+    ? detectReferenceImageForAsset(assetUrl)
+    : {
+        assetUrl: '',
+        assetPath: '',
+        assetName: sourceName || 'generated-object',
+        assetType: 'prompt',
+        detectedReferenceImageUrl: '',
+        message: 'Editable workflow template for prompt-driven generation.',
+        supportsTextureWrap: false,
+        supportsReplacementGeneration: true,
+      };
+
+  const referenceUrl = referenceImageUrl || inspection.detectedReferenceImageUrl || '/replace-me-reference.png';
+  const referenceImageFileName = path.basename(referenceUrl);
+  const workflowName = slugify(sourceName || inspection.assetName || 'asset');
+  const outputPrefix = `workflow-editor/${workflowName}-${Date.now()}`;
+  const rawOutputPrefix = `${outputPrefix}-raw`;
+  const workflowSeed = Number(BigInt(Date.now()) % BigInt(0xffffffffffffffff));
+  const serverState = await getHunyuanBackendStatus(apiUrl, comfyUiApiUrl, false);
+  const shapeModelCandidates = serverState.capabilities?.shapeModelCandidates?.length
+    ? serverState.capabilities.shapeModelCandidates
+    : ['hunyuan3d-dit-v2-0'];
+  const paintModelCandidates = serverState.capabilities?.paintModelCandidates?.length
+    ? serverState.capabilities.paintModelCandidates
+    : ['hunyuan3d-paint-v2-0'];
+
+  if (mode === 'texture') {
+    const meshPath = inspection.assetPath || '/replace-me.glb';
+    if (!meshPath) {
+      throw new Error('Texture workflow editing requires a mesh-backed asset selection.');
+    }
+
+    const workflow = buildComfyUiTextureWorkflowFromTemplate({
+      meshPath,
+      referenceImageFileName,
+      outputPrefix,
+      paintModelCandidates,
+      seed: workflowSeed,
+      workflowPath,
+    }) ?? buildComfyUiTextureWorkflow({
+      meshPath,
+      referenceImageFileName,
+      paintModel: paintModelCandidates[0] || 'hunyuan3d-paint-v2-0',
+      outputPrefix,
+      seed: workflowSeed,
+    });
+
+    return {
+      workflow,
+      editorUrl: String(comfyUiApiUrl).replace(/\/+$/, ''),
+      mode,
+      sourceName: sourceName || inspection.assetName || 'asset',
+      message: 'Texture workflow copied. Open ComfyUI and paste/import the JSON to edit it.',
+    };
+  }
+
+  const workflow = buildComfyUiGenerateWorkflowFromTemplate({
+    referenceImageFileName,
+    outputPrefix,
+    rawOutputPrefix,
+    shapeModelCandidates,
+    paintModelCandidates,
+    seed: workflowSeed,
+    workflowPath,
+  }) ?? buildComfyUiGenerateWorkflow({
+    referenceImageFileName,
+    shapeModel: shapeModelCandidates[0] || 'hunyuan3d-dit-v2-0',
+    outputPrefix,
+  });
+
+  return {
+    workflow,
+    editorUrl: String(comfyUiApiUrl).replace(/\/+$/, ''),
+    mode,
+    sourceName: sourceName || inspection.assetName || 'asset',
+    message: 'Generate workflow copied. Open ComfyUI and paste/import the JSON to edit it.',
   };
 }
 
@@ -2922,6 +3240,427 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (pathname === '/api/style/inspect' && req.method === 'GET') {
+    try {
+      const assetUrl = parsedUrl.query.assetUrl;
+
+      if (!assetUrl) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: 'assetUrl is required' }));
+        return;
+      }
+
+      const inspection = detectReferenceImageForAsset(assetUrl);
+      const stats = fs.statSync(inspection.assetPath);
+      let inspectReport = '';
+
+      if (inspection.supportsReplacementGeneration) {
+        try {
+          inspectReport = await inspectGltfAsset(inspection.assetPath);
+        } catch (error) {
+          inspectReport = `glTF inspection unavailable: ${error.message}`;
+        }
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        inspection,
+        analysis: {
+          sizeBytes: stats.size,
+          sizeFormatted: formatBytes(stats.size),
+          modifiedAt: stats.mtime.toISOString(),
+          inspectReport,
+        },
+      }));
+    } catch (error) {
+      console.error('Style inspect error:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, message: `Style inspect failed: ${error.message}` }));
+    }
+    return;
+  }
+
+  if (pathname === '/api/style/simplify' && req.method === 'POST') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+      try {
+        const {
+          assetUrl,
+          ratio = 0.6,
+          error = 0.001,
+          lockBorder = true,
+          outputName = '',
+        } = JSON.parse(body);
+
+        if (!assetUrl) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'assetUrl is required' }));
+          return;
+        }
+
+        const source = resolveInspectableModelAsset(assetUrl);
+        const targetRatio = clampNumber(ratio, 0.05, 1, 0.6);
+        const targetError = clampNumber(error, 0.00001, 1, 0.001);
+        const outputDirectory = createGeneratedStyleDirectory(outputName || source.assetName, 'simplified');
+        const outputFileName = `${slugify(outputName || source.assetName)}-simplified.glb`;
+        const outputPath = path.join(outputDirectory, outputFileName);
+
+        const simplifyResult = await runGltfTransform([
+          'simplify',
+          source.assetPath,
+          outputPath,
+          '--ratio',
+          String(targetRatio),
+          '--error',
+          String(targetError),
+          '--lock-border',
+          lockBorder ? 'true' : 'false',
+        ]);
+
+        if (simplifyResult.code !== 0) {
+          throw new Error(simplifyResult.stderr || simplifyResult.stdout || 'Mesh simplification failed.');
+        }
+
+        const inspectReport = await inspectGltfAsset(outputPath).catch((inspectError) => (
+          `glTF inspection unavailable: ${inspectError.message}`
+        ));
+        const outputStats = fs.statSync(outputPath);
+        const manifestPath = path.join(outputDirectory, 'style-simplify.json');
+
+        fs.writeFileSync(manifestPath, JSON.stringify({
+          createdAt: new Date().toISOString(),
+          sourceAssetUrl: assetUrl,
+          sourceAssetPath: toRepoRelative(source.assetPath),
+          outputAssetUrl: toPublicAssetUrl(outputPath),
+          ratio: targetRatio,
+          error: targetError,
+          lockBorder: Boolean(lockBorder),
+        }, null, 2));
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          message: `Created simplified mesh at ${toPublicAssetUrl(outputPath)}`,
+          assetUrl: toPublicAssetUrl(outputPath),
+          assetPath: toRepoRelative(outputPath),
+          manifestPath: toRepoRelative(manifestPath),
+          sizeBytes: outputStats.size,
+          sizeFormatted: formatBytes(outputStats.size),
+          inspectReport,
+        }));
+      } catch (error) {
+        console.error('Style simplify error:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: `Style simplify failed: ${error.message}` }));
+      }
+    });
+    return;
+  }
+
+  if (pathname === '/api/style/export-blender' && req.method === 'POST') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+      try {
+        const {
+          assetUrl,
+          exportName = '',
+          referenceImageUrl = '',
+        } = JSON.parse(body);
+
+        if (!assetUrl) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'assetUrl is required' }));
+          return;
+        }
+
+        const source = resolveInspectableModelAsset(assetUrl);
+        const inspection = detectReferenceImageForAsset(assetUrl);
+        const exportDirectory = path.join(
+          BLENDER_EXPORT_ROOT,
+          `${slugify(exportName || source.assetName)}-${timestampKey()}`,
+        );
+        ensureDirectory(exportDirectory);
+
+        const exportedGlbPath = path.join(exportDirectory, `${slugify(exportName || source.assetName)}.glb`);
+        await copyModelToGlb(source.assetPath, exportedGlbPath);
+
+        let resolvedReferenceUrl = referenceImageUrl || inspection.detectedReferenceImageUrl || '';
+        let exportedReferencePath = '';
+        if (resolvedReferenceUrl) {
+          const referenceFullPath = resolvePublicAssetPath(resolvedReferenceUrl);
+          const referenceTargetPath = path.join(exportDirectory, path.basename(referenceFullPath));
+          fs.copyFileSync(referenceFullPath, referenceTargetPath);
+          exportedReferencePath = referenceTargetPath;
+        }
+
+        const blenderExecutable = detectBlenderExecutable();
+        const manifestPath = path.join(exportDirectory, 'merkin-blender-export.json');
+        fs.writeFileSync(manifestPath, JSON.stringify({
+          createdAt: new Date().toISOString(),
+          sourceAssetUrl: assetUrl,
+          sourceAssetPath: toRepoRelative(source.assetPath),
+          exportedGlbPath,
+          referenceImageUrl: resolvedReferenceUrl,
+          referenceImagePath: exportedReferencePath,
+          openCommand: blenderExecutable ? `${blenderExecutable} "${exportedGlbPath}"` : '',
+        }, null, 2));
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          message: blenderExecutable
+            ? 'Exported a Blender-ready GLB package and detected a Blender executable.'
+            : 'Exported a Blender-ready GLB package.',
+          exportDirectory,
+          exportedGlbPath,
+          referenceImagePath: exportedReferencePath,
+          manifestPath,
+          blenderExecutable,
+          openCommand: blenderExecutable ? `${blenderExecutable} "${exportedGlbPath}"` : '',
+        }));
+      } catch (error) {
+        console.error('Style Blender export error:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: `Blender export failed: ${error.message}` }));
+      }
+    });
+    return;
+  }
+
+  if (pathname === '/api/style/workspace' && req.method === 'POST') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+      try {
+        const {
+          assetUrl,
+          sourceName = '',
+          styleProfileName = '',
+          prompt = '',
+          negativePrompt = '',
+          loraNotes = '',
+          controlNetNotes = '',
+          referenceImageUrl = '',
+          comfyUiApiUrl = `http://127.0.0.1:${DEFAULT_COMFYUI_PORT}`,
+          hunyuanApiUrl = `http://127.0.0.1:${DEFAULT_HUNYUAN_PORT}`,
+          generateReferenceIfMissing = true,
+        } = JSON.parse(body);
+
+        if (!assetUrl) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'assetUrl is required' }));
+          return;
+        }
+
+        const inspection = detectReferenceImageForAsset(assetUrl);
+        const workspaceDirectory = createGeneratedStyleDirectory(sourceName || inspection.assetName, 'workspace');
+        const sourceDirectory = path.join(workspaceDirectory, 'source');
+        const referenceDirectory = path.join(workspaceDirectory, 'reference');
+        ensureDirectory(sourceDirectory);
+        ensureDirectory(referenceDirectory);
+
+        const sourceAssetPath = path.join(sourceDirectory, `${slugify(sourceName || inspection.assetName)}.glb`);
+        await copyModelToGlb(inspection.assetPath, sourceAssetPath);
+
+        let selectedReferenceUrl = referenceImageUrl || inspection.detectedReferenceImageUrl || '';
+        let selectedReferencePath = selectedReferenceUrl ? resolvePublicAssetPath(selectedReferenceUrl) : '';
+        let generatedReference = null;
+        let referenceGenerationWarning = '';
+
+        if (!selectedReferencePath && generateReferenceIfMissing && prompt.trim()) {
+          const serverState = await getHunyuanBackendStatus(hunyuanApiUrl, comfyUiApiUrl, true).catch(() => null);
+          const comfyUiRoot = getComfyUiInstallRoot(serverState);
+          if (comfyUiRoot) {
+            try {
+              generatedReference = await ensureComfyUiReferenceImage({
+                apiUrl: comfyUiApiUrl,
+                comfyUiRoot,
+                sourceName: sourceName || inspection.assetName,
+                prompt,
+              });
+              selectedReferenceUrl = generatedReference.publicUrl;
+              selectedReferencePath = generatedReference.fullPath;
+            } catch (error) {
+              referenceGenerationWarning = error?.message || 'Reference image generation failed.';
+            }
+          }
+        }
+
+        let workspaceReferencePublicUrl = '';
+        let workspaceReferencePath = '';
+        if (selectedReferencePath) {
+          workspaceReferencePath = path.join(
+            referenceDirectory,
+            path.basename(selectedReferencePath),
+          );
+          fs.copyFileSync(selectedReferencePath, workspaceReferencePath);
+          workspaceReferencePublicUrl = toPublicAssetUrl(workspaceReferencePath);
+        }
+
+        const manifestPath = path.join(workspaceDirectory, 'style-request.json');
+        fs.writeFileSync(manifestPath, JSON.stringify({
+          createdAt: new Date().toISOString(),
+          styleProfileName,
+          sourceName: sourceName || inspection.assetName,
+          sourceAssetUrl: assetUrl,
+          sourceAssetPath: toRepoRelative(inspection.assetPath),
+          packagedSourceAssetUrl: toPublicAssetUrl(sourceAssetPath),
+          prompt,
+          negativePrompt,
+          loraNotes,
+          controlNetNotes,
+          referenceGenerationWarning,
+          referenceImageUrl: selectedReferenceUrl,
+          workspaceReferenceImageUrl: workspaceReferencePublicUrl,
+          generatedReferenceImageUrl: generatedReference?.publicUrl || '',
+        }, null, 2));
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          message: workspaceReferencePublicUrl
+            ? 'Created a style workspace with a bundled source mesh and reference image.'
+            : 'Created a style workspace with a bundled source mesh.',
+          workspaceDirectory: toRepoRelative(workspaceDirectory),
+          sourceAssetUrl: toPublicAssetUrl(sourceAssetPath),
+          sourceAssetPath: toRepoRelative(sourceAssetPath),
+          referenceImageUrl: workspaceReferencePublicUrl,
+          referenceGenerationWarning,
+          manifestUrl: toPublicAssetUrl(manifestPath),
+          manifestPath: toRepoRelative(manifestPath),
+          generatedReferenceImageUrl: generatedReference?.publicUrl || '',
+        }));
+      } catch (error) {
+        console.error('Style workspace error:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: `Style workspace failed: ${error.message}` }));
+      }
+    });
+    return;
+  }
+
+  if (pathname === '/api/style/workspace/latest' && req.method === 'GET') {
+    try {
+      const assetUrl = parsedUrl.query.assetUrl;
+      if (!assetUrl) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: 'assetUrl is required' }));
+        return;
+      }
+
+      const latestWorkspace = findLatestStyleWorkspaceForAsset(assetUrl);
+      if (!latestWorkspace) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, workspace: null }));
+        return;
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        workspace: {
+          directory: toRepoRelative(latestWorkspace.directory),
+          manifestPath: toRepoRelative(latestWorkspace.manifestPath),
+          manifestUrl: toPublicAssetUrl(latestWorkspace.manifestPath),
+          sourceAssetUrl: latestWorkspace.manifest?.packagedSourceAssetUrl || '',
+          referenceImageUrl: latestWorkspace.manifest?.workspaceReferenceImageUrl || latestWorkspace.manifest?.referenceImageUrl || '',
+          generatedReferenceImageUrl: latestWorkspace.manifest?.generatedReferenceImageUrl || '',
+          styleProfileName: latestWorkspace.manifest?.styleProfileName || '',
+          prompt: latestWorkspace.manifest?.prompt || '',
+          negativePrompt: latestWorkspace.manifest?.negativePrompt || '',
+          loraNotes: latestWorkspace.manifest?.loraNotes || '',
+          controlNetNotes: latestWorkspace.manifest?.controlNetNotes || '',
+          createdAt: latestWorkspace.manifest?.createdAt || '',
+        },
+      }));
+    } catch (error) {
+      console.error('Latest style workspace lookup error:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, message: `Workspace lookup failed: ${error.message}` }));
+    }
+    return;
+  }
+
+  if (pathname === '/api/style/source-asset' && req.method === 'POST') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+      try {
+        const {
+          fileName = '',
+          glbBase64 = '',
+          sourceName = '',
+          sourceKind = 'primitive',
+          descriptor = '',
+          levelId = '',
+          nodeId = '',
+        } = JSON.parse(body);
+
+        if (!glbBase64) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'glbBase64 is required' }));
+          return;
+        }
+
+        const outputDirectory = createGeneratedStyleDirectory(sourceName || fileName || 'scene-source', 'sources');
+        const baseName = slugify(path.basename(fileName || sourceName || 'scene-source', path.extname(fileName || '')));
+        const outputFilePath = path.join(outputDirectory, `${baseName || 'scene-source'}.glb`);
+        const metadataPath = outputFilePath.replace(/\.glb$/i, '.json');
+        const outputBuffer = Buffer.from(glbBase64, 'base64');
+
+        if (outputBuffer.length === 0) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'The staged source mesh was empty.' }));
+          return;
+        }
+
+        fs.writeFileSync(outputFilePath, outputBuffer);
+        fs.writeFileSync(
+          metadataPath,
+          JSON.stringify({
+            createdAt: new Date().toISOString(),
+            sourceName,
+            sourceKind,
+            descriptor,
+            levelId,
+            nodeId,
+          }, null, 2),
+          'utf8',
+        );
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          message: 'Staged an exportable scene source mesh for style baking.',
+          assetUrl: toPublicAssetUrl(outputFilePath),
+          metadataUrl: toPublicAssetUrl(metadataPath),
+          assetPath: toRepoRelative(outputFilePath),
+          metadataPath: toRepoRelative(metadataPath),
+        }));
+      } catch (error) {
+        console.error('Style source asset staging error:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: `Source asset staging failed: ${error.message}` }));
+      }
+    });
+    return;
+  }
+
   if (pathname === '/api/hunyuan3d/status' && req.method === 'GET') {
     try {
       const apiUrl = parsedUrl.query.apiUrl || `http://127.0.0.1:${DEFAULT_HUNYUAN_PORT}`;
@@ -2955,12 +3694,43 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (pathname === '/api/comfyui/workflow-template' && req.method === 'GET') {
+    try {
+      const mode = parsedUrl.query.mode || 'generate';
+      const apiUrl = parsedUrl.query.apiUrl || `http://127.0.0.1:${DEFAULT_HUNYUAN_PORT}`;
+      const comfyUiApiUrl = parsedUrl.query.comfyUiApiUrl || `http://127.0.0.1:${DEFAULT_COMFYUI_PORT}`;
+      const assetUrl = parsedUrl.query.assetUrl || '';
+      const sourceName = parsedUrl.query.sourceName || '';
+      const referenceImageUrl = parsedUrl.query.referenceImageUrl || '';
+      const workflowPath = parsedUrl.query.workflowPath || '';
+
+      const result = await buildEditableComfyUiWorkflowTemplate({
+        mode,
+        apiUrl,
+        comfyUiApiUrl,
+        assetUrl,
+        sourceName,
+        referenceImageUrl,
+        workflowPath,
+      });
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, ...result }));
+    } catch (error) {
+      console.error('ComfyUI workflow template error:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, message: `Workflow template failed: ${error.message}` }));
+    }
+    return;
+  }
+
   if (pathname === '/api/hunyuan3d/jobs' && req.method === 'GET') {
     try {
       const jobId = parsedUrl.query.jobId;
       if (!jobId) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, message: 'jobId is required' }));
+        const limit = parsedUrl.query.limit;
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, jobs: listRecentHunyuanJobs(limit) }));
         return;
       }
 
@@ -3024,6 +3794,7 @@ const server = http.createServer(async (req, res) => {
           mode = 'texture',
           prompt = '',
           referenceImageUrl = '',
+          workflowPath = '',
           faceCount,
         } = JSON.parse(body);
 
@@ -3185,6 +3956,7 @@ const server = http.createServer(async (req, res) => {
                 outputPrefix,
                 paintModelCandidates: serverState.capabilities?.paintModelCandidates ?? [],
                 seed: workflowSeed,
+                workflowPath,
               }) ?? buildComfyUiTextureWorkflow({
                 meshPath: inspection.assetPath,
                 referenceImageFileName: stagedReference.fileName,
@@ -3199,6 +3971,7 @@ const server = http.createServer(async (req, res) => {
                 shapeModelCandidates: serverState.capabilities?.shapeModelCandidates ?? [],
                 paintModelCandidates: serverState.capabilities?.paintModelCandidates ?? [],
                 seed: workflowSeed,
+                workflowPath,
               }) ?? buildComfyUiGenerateWorkflow({
                 referenceImageFileName: stagedReference.fileName,
                 shapeModel: chosenShapeModel,
@@ -3409,6 +4182,22 @@ const server = http.createServer(async (req, res) => {
           return;
         }
 
+        if (fs.existsSync(scenePath)) {
+          try {
+            const existingScene = JSON.parse(fs.readFileSync(scenePath, 'utf8'));
+            if (!hasMeaningfulSceneContent(scene) && hasMeaningfulSceneContent(existingScene)) {
+              res.writeHead(409, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({
+                success: false,
+                message: `Refusing to overwrite populated scene "${levelId}" with empty content.`,
+              }));
+              return;
+            }
+          } catch (readError) {
+            console.warn('Unable to validate existing scene before save:', readError);
+          }
+        }
+
         fs.writeFileSync(scenePath, JSON.stringify(scene, null, 2), 'utf8');
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, path: toRepoRelative(scenePath) }));
@@ -3431,20 +4220,13 @@ const server = http.createServer(async (req, res) => {
 // ================================================================
 
 async function startServer() {
-  server.on('error', (error) => {
-    if (error && error.code === 'EADDRINUSE') {
-      console.error(`❌ Port ${PORT} is already in use. Stop the existing tools bridge or change the configured editor API base.`)
-      process.exit(1)
-    }
+  const hasExplicitPort = Boolean(process.env.MEGAMEAL_TOOLS_PORT || process.env.EDITOR_API_PORT || process.env.PORT);
 
-    console.error('❌ Tools bridge failed to start:', error)
-    process.exit(1)
-  })
-
-  server.listen(PORT, '127.0.0.1', () => {
+  const logStartup = (resolvedPort) => {
+    writeToolsRuntime(resolvedPort);
     console.log('🛠️  MEGAMEAL Development Tools (Simple)');
     console.log('='.repeat(60));
-    console.log(`🌐 Server running at: http://127.0.0.1:${PORT}`);
+    console.log(`🌐 Server running at: http://127.0.0.1:${resolvedPort}`);
     console.log('📁 Repo root:', REPO_ROOT);
     console.log('🎮 Game app:', GAME_APP_ROOT);
     console.log('📦 Public assets:', GAME_PUBLIC_ROOT);
@@ -3468,7 +4250,44 @@ async function startServer() {
     console.log('  • /api/browse (for directory browsing)');
     console.log('');
     console.log('Press Ctrl+C to stop');
-  });
+  };
+
+  const listenOnPort = (port) => {
+    activePort = port;
+    server.listen(port, '127.0.0.1', () => {
+      const address = server.address();
+      const resolvedPort = address && typeof address !== 'string' ? address.port : port;
+      activePort = resolvedPort;
+      logStartup(resolvedPort);
+    });
+  };
+
+  if (hasExplicitPort || REQUESTED_PORT === 0) {
+    server.on('error', (error) => {
+      console.error('❌ Tools bridge failed to start:', error)
+      process.exit(1)
+    })
+    listenOnPort(REQUESTED_PORT);
+    return;
+  }
+
+  server.once('error', (error) => {
+    if (error && error.code === 'EADDRINUSE') {
+      console.warn(`⚠️  Port ${REQUESTED_PORT} is in use. Falling back to an open local port for the tools bridge.`);
+      server.removeAllListeners('error');
+      server.on('error', (nextError) => {
+        console.error('❌ Tools bridge failed to start:', nextError)
+        process.exit(1)
+      });
+      listenOnPort(0);
+      return;
+    }
+
+    console.error('❌ Tools bridge failed to start:', error)
+    process.exit(1)
+  })
+
+  listenOnPort(REQUESTED_PORT);
 }
 
 // Start the server
@@ -3477,5 +4296,15 @@ startServer();
 // Graceful shutdown
 process.on('SIGINT', () => {
   console.log('\n👋 Shutting down MEGAMEAL Development Tools...');
+  clearToolsRuntime();
   process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  clearToolsRuntime();
+  process.exit(0);
+});
+
+process.on('exit', () => {
+  clearToolsRuntime();
 });

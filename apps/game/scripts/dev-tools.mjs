@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import { getHealthyRuntimeOrigin } from '../../../scripts/dev-runtime.mjs'
 
 const DEFAULT_EDITOR_API_BASE = 'http://127.0.0.1:3001'
 const toolsEntry = fileURLToPath(new URL('../../../tools/legacy-megameal-tools/app.cjs', import.meta.url))
@@ -16,6 +17,10 @@ function resolveToolsPort(baseUrl) {
   const explicitPort = process.env.MEGAMEAL_TOOLS_PORT || process.env.EDITOR_API_PORT || process.env.PORT
   if (explicitPort) return explicitPort
 
+  if (!process.env.PUBLIC_EDITOR_API_BASE && !process.env.EDITOR_API_BASE) {
+    return undefined
+  }
+
   try {
     const parsed = new URL(baseUrl)
     if (parsed.port) return parsed.port
@@ -26,26 +31,7 @@ function resolveToolsPort(baseUrl) {
 }
 
 async function hasReusableBridge(baseUrl) {
-  try {
-    const response = await fetch(`${baseUrl}/api/level-registry`, {
-      signal: AbortSignal.timeout(1500),
-    })
-    if (response.ok) {
-      const payload = await response.json().catch(() => null)
-      if (payload && typeof payload === 'object' && 'success' in payload) {
-        return true
-      }
-    }
-  } catch {}
-
-  try {
-    const response = await fetch(`${baseUrl}/favicon.ico`, {
-      signal: AbortSignal.timeout(1500),
-    })
-    return response.status === 204
-  } catch {
-    return false
-  }
+  return await getHealthyRuntimeOrigin('tools', baseUrl)
 }
 
 async function keepAliveForExistingBridge(baseUrl) {
@@ -66,16 +52,19 @@ async function keepAliveForExistingBridge(baseUrl) {
 async function main() {
   const editorApiBase = resolveEditorApiBase()
 
-  if (await hasReusableBridge(editorApiBase)) {
-    await keepAliveForExistingBridge(editorApiBase)
+  const existingOrigin = await hasReusableBridge(editorApiBase)
+  if (existingOrigin) {
+    await keepAliveForExistingBridge(existingOrigin)
     return
   }
+
+  const resolvedPort = resolveToolsPort(editorApiBase)
 
   const child = spawn('node', [toolsEntry], {
     stdio: 'inherit',
     env: {
       ...process.env,
-      MEGAMEAL_TOOLS_PORT: resolveToolsPort(editorApiBase),
+      ...(resolvedPort ? { MEGAMEAL_TOOLS_PORT: resolvedPort } : {}),
     },
   })
 

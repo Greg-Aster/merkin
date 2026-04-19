@@ -46,7 +46,6 @@
   // Import UI state store
   import {
     isSettingsMenuOpen,
-    isNeuralStylizationEnabled,
   } from './stores/uiStore'
   import { editorStateStore, initializeEditor } from './editor/editorStore'
   import {
@@ -103,7 +102,6 @@
   let multiplayerManagerComponent: any = null
   let physicsSystemComponent: any = null
   let playerComponentClass: any = null
-  let neuralStylizationOverlayComponent: any = null
   let editorPanelComponent: any = null
   let editorControlsOverlayComponent: any = null
   let editorCollisionOverlayComponent: any = null
@@ -134,7 +132,6 @@
   // Spawn system state
   let physicsReady = false
   let activeLevelLoadRequest = 0
-  let neuralStylizationPromise: Promise<void> | null = null
   let editorFeaturesPromise: Promise<void> | null = null
   let deferredAudioCleanup: (() => void) | null = null
   let deferredGameplayCoreCleanup: (() => void) | null = null
@@ -148,6 +145,14 @@
   } | null = null
 
   const levelComponentCache = new Map<string, any>()
+
+  function getModuleDefault<T>(module: T | undefined | null, label: string) {
+    if (!module || typeof module !== 'object' || !('default' in module) || !(module as any).default) {
+      throw new Error(`Failed to load ${label}.`)
+    }
+
+    return (module as any).default
+  }
 
   function normalizeLevelId(levelId: string | null | undefined) {
     return resolveRegistryLevelId(levelId, levelRegistry)
@@ -318,14 +323,6 @@
     void ensureSettingsPanelComponent()
   }
 
-  $: if ($isNeuralStylizationEnabled && !neuralStylizationOverlayComponent) {
-    void ensureNeuralStylizationOverlayComponent()
-  }
-
-  $: if ($isSettingsMenuOpen && !multiplayerManagerComponent) {
-    void ensureMultiplayerFeatures()
-  }
-
   $: if (($isConversationActive || $conversationUIState.isVisible) && !conversationDialogComponent) {
     void ensureConversationDialogComponent()
   }
@@ -403,38 +400,42 @@
 
   async function ensureSettingsPanelComponent() {
     if (settingsPanelComponent) return
-    const module = await import('./ui/SettingsPanel.svelte')
-    settingsPanelComponent = module.default
+    try {
+      const module = await import('./ui/SettingsPanel.svelte')
+      settingsPanelComponent = getModuleDefault(module, 'settings panel')
+    } catch (error) {
+      console.warn('Failed to load settings panel:', error)
+    }
   }
 
   async function ensureConversationDialogComponent() {
     if (conversationDialogComponent) return
-    const module = await import('./features/conversation/ConversationDialog.svelte')
-    conversationDialogComponent = module.default
+    try {
+      const module = await import('./features/conversation/ConversationDialog.svelte')
+      conversationDialogComponent = getModuleDefault(module, 'conversation dialog')
+    } catch (error) {
+      console.warn('Failed to load conversation dialog:', error)
+    }
   }
 
   async function ensureChatBoxComponent() {
     if (chatBoxComponentClass) return
-    const module = await import('./features/multiplayer/ui/ChatBox.svelte')
-    chatBoxComponentClass = module.default
+    try {
+      const module = await import('./features/multiplayer/ui/ChatBox.svelte')
+      chatBoxComponentClass = getModuleDefault(module, 'chat box')
+    } catch (error) {
+      console.warn('Failed to load chat box:', error)
+    }
   }
 
   async function ensureAudioSystemComponent() {
     if (audioSystemComponent) return
-    const module = await import('./systems/Audio.svelte')
-    audioSystemComponent = module.default
-  }
-
-  async function ensureNeuralStylizationOverlayComponent() {
-    if (neuralStylizationOverlayComponent) return
-
-    if (!neuralStylizationPromise) {
-      neuralStylizationPromise = import('./systems/NeuralStylizationOverlay.svelte').then((module) => {
-        neuralStylizationOverlayComponent = module.default
-      })
+    try {
+      const module = await import('./systems/Audio.svelte')
+      audioSystemComponent = getModuleDefault(module, 'audio system')
+    } catch (error) {
+      console.warn('Failed to load audio system:', error)
     }
-
-    await neuralStylizationPromise
   }
 
   async function ensureEditorFeatures() {
@@ -462,15 +463,18 @@
         editorViewportControlsModule,
         editorWorkbenchLightingModule,
       ]) => {
-        editorPanelComponent = editorPanelModule.default
-        editorControlsOverlayComponent = editorControlsOverlayModule.default
-        editorCollisionOverlayComponent = editorCollisionOverlayModule.default
-        editorCircleSelectOverlayComponent = editorCircleSelectOverlayModule.default
-        editorMarqueeOverlayComponent = editorMarqueeOverlayModule.default
-        editorSceneLayerComponent = editorSceneLayerModule.default
-        editorTerrainSculptLayerComponent = editorTerrainSculptLayerModule.default
-        editorViewportControlsComponent = editorViewportControlsModule.default
-        editorWorkbenchLightingComponent = editorWorkbenchLightingModule.default
+        editorPanelComponent = getModuleDefault(editorPanelModule, 'editor panel')
+        editorControlsOverlayComponent = getModuleDefault(editorControlsOverlayModule, 'editor controls overlay')
+        editorCollisionOverlayComponent = getModuleDefault(editorCollisionOverlayModule, 'editor collision overlay')
+        editorCircleSelectOverlayComponent = getModuleDefault(editorCircleSelectOverlayModule, 'editor circle select overlay')
+        editorMarqueeOverlayComponent = getModuleDefault(editorMarqueeOverlayModule, 'editor marquee overlay')
+        editorSceneLayerComponent = getModuleDefault(editorSceneLayerModule, 'editor scene layer')
+        editorTerrainSculptLayerComponent = getModuleDefault(editorTerrainSculptLayerModule, 'editor terrain sculpt layer')
+        editorViewportControlsComponent = getModuleDefault(editorViewportControlsModule, 'editor viewport controls')
+        editorWorkbenchLightingComponent = getModuleDefault(editorWorkbenchLightingModule, 'editor workbench lighting')
+      }).catch((error) => {
+        console.warn('Failed to load editor features:', error)
+        editorFeaturesPromise = null
       })
     }
 
@@ -485,8 +489,11 @@
         import('./systems/Physics.svelte'),
         import('./features/player/Player.svelte'),
       ]).then(([physicsModule, playerModule]) => {
-        physicsSystemComponent = physicsModule.default
-        playerComponentClass = playerModule.default
+        physicsSystemComponent = getModuleDefault(physicsModule, 'physics system')
+        playerComponentClass = getModuleDefault(playerModule, 'player component')
+      }).catch((error) => {
+        console.warn('Failed to load gameplay core:', error)
+        gameplayCorePromise = null
       })
     }
 
@@ -496,14 +503,18 @@
   async function ensureMultiplayerFeatures() {
     if (multiplayerManagerComponent && initializeClientFn) return
 
-    const [componentModule, serviceModule] = await Promise.all([
-      import('./features/multiplayer/components/MultiplayerManager.svelte'),
-      import('./features/multiplayer/services/MultiplayerService'),
-    ])
+    try {
+      const [componentModule, serviceModule] = await Promise.all([
+        import('./features/multiplayer/components/MultiplayerManager.svelte'),
+        import('./features/multiplayer/services/MultiplayerService'),
+      ])
 
-    multiplayerManagerComponent = componentModule.default
-    initializeClientFn = serviceModule.initializeClient
-    void ensureChatBoxComponent()
+      multiplayerManagerComponent = getModuleDefault(componentModule, 'multiplayer manager')
+      initializeClientFn = serviceModule.initializeClient
+      void ensureChatBoxComponent()
+    } catch (error) {
+      console.warn('Failed to load multiplayer features:', error)
+    }
   }
 
   function setupDeferredAudioLoading() {
@@ -837,7 +848,6 @@
         {physicsSystemComponent}
         {playerComponentClass}
         {multiplayerManagerComponent}
-        {neuralStylizationOverlayComponent}
         {editorCollisionOverlayComponent}
         {editorSceneLayerComponent}
         {editorTerrainSculptLayerComponent}

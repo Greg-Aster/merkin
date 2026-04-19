@@ -36,7 +36,6 @@
   export let physicsSystemComponent: any = null
   export let playerComponentClass: any = null
   export let multiplayerManagerComponent: any = null
-  export let neuralStylizationOverlayComponent: any = null
   export let editorCollisionOverlayComponent: any = null
   export let editorSceneLayerComponent: any = null
   export let editorTerrainSculptLayerComponent: any = null
@@ -90,10 +89,6 @@
 
       <AssetLoader />
       <Renderer />
-
-      {#if neuralStylizationOverlayComponent}
-        <svelte:component this={neuralStylizationOverlayComponent} />
-      {/if}
 
       {#if $qualitySettingsStore.enablePostProcessing}
         <SimplePostProcessing toneMappingExposure={1.0} />
@@ -149,6 +144,7 @@
               <svelte:component
                 this={currentLevelComponent}
                 levelId={normalizeLevelId(currentLevel)}
+                {editorEnabled}
                 timelineEvents={parsedTimelineEvents}
                 timelineEventsJson={timelineEventsPayload}
                 spawnSystem={editorEnabled ? null : spawnSystemRef}

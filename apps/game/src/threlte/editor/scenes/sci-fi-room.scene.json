@@ -144,6 +144,9 @@
         "emissiveIntensity": 0.45,
         "metalness": 0.82,
         "roughness": 0.34
+      },
+      "generation": {
+        "descriptor": "interior floor slab"
       }
     },
     {
@@ -203,6 +206,9 @@
         "color": "#1a2d3a",
         "metalness": 0.42,
         "roughness": 0.54
+      },
+      "generation": {
+        "descriptor": "courtyard floor slab"
       }
     },
     {
@@ -276,6 +282,9 @@
         "transparent": false,
         "doubleSided": false,
         "emissiveIntensity": 0.01
+      },
+      "generation": {
+        "descriptor": "wasteland tile"
       }
     },
     {
@@ -301,6 +310,9 @@
       "prefab": {
         "type": "anomaly-cluster",
         "variant": "magenta"
+      },
+      "generation": {
+        "descriptor": "anomalous floating crystal cluster"
       }
     },
     {
@@ -326,6 +338,9 @@
       "prefab": {
         "type": "anomaly-cluster",
         "variant": "green"
+      },
+      "generation": {
+        "descriptor": "anomalous floating crystal cluster"
       }
     },
     {
@@ -351,6 +366,9 @@
       "prefab": {
         "type": "anomaly-cluster",
         "variant": "cyan"
+      },
+      "generation": {
+        "descriptor": "anomalous floating crystal cluster"
       }
     },
     {
@@ -376,6 +394,9 @@
       "prefab": {
         "type": "anomaly-cluster",
         "variant": "rose"
+      },
+      "generation": {
+        "descriptor": "anomalous floating crystal cluster"
       }
     },
     {
@@ -400,6 +421,9 @@
       "visible": true,
       "prefab": {
         "type": "command-console"
+      },
+      "generation": {
+        "descriptor": "retro-futurist command console"
       }
     },
     {
@@ -430,6 +454,9 @@
         "targetLevelId": "observatory",
         "markerColor": "#ff8cff",
         "markerSize": 1.1
+      },
+      "generation": {
+        "descriptor": "occult portal apparatus"
       }
     },
     {
@@ -465,6 +492,9 @@
         "location": "Command Center",
         "excerpt": "The pillar hums first, like a machine trying to remember the language of prayer.",
         "body": "The pillar hums first, like a machine trying to remember the language of prayer.\n\nIts glow is not decorative. It pulses in measured intervals, as if syncing itself to some vanished crew protocol.\n\nEven here, the room seems to prefer ritual to utility."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -500,6 +530,9 @@
         "location": "Courtyard Threshold",
         "excerpt": "The bench offers a pause before the open sky, its carved warning almost tender: look up before you go farther.",
         "body": "The bench offers a pause before the open sky, its carved warning almost tender: look up before you go farther.\n\nWhatever was built here expected hesitation.\n\nIt wanted people to stop, adjust to the stars, and only then continue."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -535,6 +568,9 @@
         "location": "Courtyard Core",
         "excerpt": "At the courtyard heart, the fountain mirrors the constellations, as if the room is learning to become an observatory.",
         "body": "At the courtyard heart, the fountain mirrors the constellations, as if the room is learning to become an observatory.\n\nThe basin does not reflect what is above so much as rehearse it.\n\nThis place is less a room than a machine for becoming sky-aware."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -570,6 +606,9 @@
         "location": "Courtyard Growth Ring",
         "excerpt": "The spiral plants lean toward one particular star cluster, suggesting the garden knows the route better than you do.",
         "body": "The spiral plants lean toward one particular star cluster, suggesting the garden knows the route better than you do.\n\nTheir motion is too deliberate for weather and too patient for machinery.\n\nSomething in this level still tracks the sky with devotion."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -605,6 +644,9 @@
         "location": "Deep Wasteland",
         "excerpt": "Deep in the wasteland, the debris resolves into intent: this ruin was not abandoned, it was aimed at the heavens and left mid-sentence.",
         "body": "Deep in the wasteland, the debris resolves into intent: this ruin was not abandoned, it was aimed at the heavens and left mid-sentence.\n\nThe broken shapes form vectors, not rubble.\n\nWhatever failed here was trying to point beyond the room."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -629,6 +671,9 @@
       "visible": true,
       "prefab": {
         "type": "command-fin"
+      },
+      "generation": {
+        "descriptor": "dark retro-futurist fin pillar"
       }
     },
     {
@@ -653,6 +698,9 @@
       "visible": true,
       "prefab": {
         "type": "command-fin"
+      },
+      "generation": {
+        "descriptor": "dark retro-futurist fin pillar"
       }
     },
     {
@@ -677,6 +725,9 @@
       "visible": true,
       "prefab": {
         "type": "hanging-light"
+      },
+      "generation": {
+        "descriptor": "ornate hanging industrial light"
       }
     },
     {
@@ -701,6 +752,9 @@
       "visible": true,
       "prefab": {
         "type": "hanging-light"
+      },
+      "generation": {
+        "descriptor": "ornate hanging industrial light"
       }
     },
     {
@@ -725,6 +779,9 @@
       "visible": true,
       "asset": {
         "url": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
+      },
+      "generation": {
+        "descriptor": "Command Aircon"
       }
     },
     {
@@ -749,6 +806,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -773,6 +833,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -797,6 +860,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -821,6 +887,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -845,6 +914,9 @@
       "visible": true,
       "prefab": {
         "type": "interior-archway"
+      },
+      "generation": {
+        "descriptor": "ancient interior archway ruin"
       }
     },
     {
@@ -869,6 +941,9 @@
       "visible": true,
       "prefab": {
         "type": "courtyard-pylon"
+      },
+      "generation": {
+        "descriptor": "weathered courtyard pylon"
       }
     },
     {
@@ -893,6 +968,9 @@
       "visible": true,
       "prefab": {
         "type": "courtyard-pylon"
+      },
+      "generation": {
+        "descriptor": "weathered courtyard pylon"
       }
     },
     {
@@ -917,6 +995,9 @@
       "visible": true,
       "prefab": {
         "type": "wasteland-archway"
+      },
+      "generation": {
+        "descriptor": "wasteland stone archway"
       }
     },
     {
@@ -941,6 +1022,9 @@
       "visible": true,
       "prefab": {
         "type": "courtyard-fountain"
+      },
+      "generation": {
+        "descriptor": "strange luminous courtyard fountain"
       }
     },
     {
@@ -965,6 +1049,9 @@
       "visible": true,
       "prefab": {
         "type": "observation-rig"
+      },
+      "generation": {
+        "descriptor": "cosmic observation rig"
       }
     },
     {
@@ -989,6 +1076,9 @@
       "visible": true,
       "asset": {
         "url": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
+      },
+      "generation": {
+        "descriptor": "Courtyard Utility Unit"
       }
     },
     {
@@ -1013,6 +1103,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb"
+      },
+      "generation": {
+        "descriptor": "Growth Planter A"
       }
     },
     {
@@ -1037,6 +1130,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb"
+      },
+      "generation": {
+        "descriptor": "Growth Planter B"
       }
     },
     {
@@ -1061,6 +1157,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb"
+      },
+      "generation": {
+        "descriptor": "Growth Planter C"
       }
     },
     {
@@ -1085,6 +1184,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb"
+      },
+      "generation": {
+        "descriptor": "Growth Planter D"
       }
     },
     {
@@ -1109,6 +1211,9 @@
       "visible": true,
       "prefab": {
         "type": "bench-growth"
+      },
+      "generation": {
+        "descriptor": "overgrown haunted bench"
       }
     },
     {
@@ -1133,6 +1238,9 @@
       "visible": true,
       "prefab": {
         "type": "wasteland-monolith"
+      },
+      "generation": {
+        "descriptor": "weathered monolith pillar"
       }
     },
     {
@@ -1157,6 +1265,9 @@
       "visible": true,
       "prefab": {
         "type": "wasteland-monolith"
+      },
+      "generation": {
+        "descriptor": "weathered monolith pillar"
       }
     },
     {
@@ -1181,6 +1292,9 @@
       "visible": true,
       "prefab": {
         "type": "wasteland-monolith"
+      },
+      "generation": {
+        "descriptor": "weathered monolith pillar"
       }
     },
     {
@@ -1205,6 +1319,9 @@
       "visible": true,
       "prefab": {
         "type": "broken-ring"
+      },
+      "generation": {
+        "descriptor": "broken ancient stone ring ruin"
       }
     },
     {
@@ -1229,6 +1346,9 @@
       "visible": true,
       "asset": {
         "url": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf"
+      },
+      "generation": {
+        "descriptor": "Wasteland Barrel"
       }
     },
     {
@@ -1253,6 +1373,9 @@
       "visible": true,
       "asset": {
         "url": "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf"
+      },
+      "generation": {
+        "descriptor": "Concrete Barrier"
       }
     }
   ]

@@ -51,11 +51,11 @@
   function getPreferredLoadedScene(level: string, diskScene: EditorSceneDocument | null) {
     const localScene = loadSceneFromLocalStorage(level)
 
-    if (diskScene && localScene) {
-      return getSceneUpdatedAt(localScene) >= getSceneUpdatedAt(diskScene) ? localScene : diskScene
+    if (diskScene) {
+      return diskScene
     }
 
-    return localScene ?? diskScene ?? null
+    return localScene ?? null
   }
 
   async function loadEditorScene(level: string) {

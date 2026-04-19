@@ -19,6 +19,7 @@ import { parseDirectiveNode } from "./src/plugins/remark-directive-rehype.js";
 import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 import mdx from "@astrojs/mdx";
+import { createDevRuntimePlugin } from "../../scripts/dev-runtime.mjs";
 
 // CORS middleware for friend content sharing
 const corsMiddleware = () => {
@@ -52,11 +53,17 @@ const corsMiddleware = () => {
 const site = process.env.SITE_URL || 'https://megameal.org';
 const base = process.env.SITE_BASE || '/';
 const isDev = process.env.NODE_ENV !== 'production';
+const siteDevHost = process.env.SITE_DEV_HOST || '127.0.0.1';
+const siteDevPort = Number.parseInt(process.env.SITE_DEV_PORT || '4321', 10);
 
 export default defineConfig({
   site,
   base,
   trailingSlash: "always",
+  server: {
+    host: siteDevHost,
+    port: siteDevPort,
+  },
   integrations: [
     corsMiddleware(),
     tailwind({ nesting: true }),
@@ -161,12 +168,15 @@ export default defineConfig({
       force: isDev,
     },
     server: {
+      host: siteDevHost,
+      port: siteDevPort,
       cors: {
         origin: '*',
         methods: ['GET', 'OPTIONS'],
         allowedHeaders: ['Content-Type'],
       },
     },
+    plugins: [createDevRuntimePlugin('megameal', siteDevHost)],
     build: {
       rollupOptions: {
         onwarn(warning, warn) {

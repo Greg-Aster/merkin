@@ -337,6 +337,17 @@
     <div class="joystick-knob" bind:this={lookJoystickKnob}></div>
   </div>
   {/if}
+  <button
+    class="action-btn pulse-btn"
+    class:active={$mobileInputStore.actionPressed === 'pulse'}
+    on:touchstart={(event) => handleActionPress('pulse', event)}
+    on:touchend={(event) => handleActionRelease('pulse', event)}
+    on:touchcancel={(event) => handleActionRelease('pulse', event)}
+    aria-label="Charge and release a burst of light"
+    data-mobile-ui="true"
+  >
+    ✨
+  </button>
   <button 
     class="action-btn look-toggle-btn"
     class:active={dragToLookActive}
@@ -458,6 +469,22 @@
     opacity: 0.34;
     backdrop-filter: blur(8px);
     pointer-events: auto;
+  }
+
+  .pulse-btn {
+    position: fixed;
+    right: 16px;
+    bottom: max(110px, calc(92px + env(safe-area-inset-bottom, 0px)));
+    border-color: rgba(126, 216, 255, 0.42);
+    background: rgba(8, 18, 32, 0.34);
+    box-shadow: 0 0 18px rgba(126, 216, 255, 0.18);
+    pointer-events: auto;
+  }
+
+  .pulse-btn.active {
+    background: rgba(126, 216, 255, 0.4);
+    border-color: rgba(126, 216, 255, 0.9);
+    box-shadow: 0 0 24px rgba(126, 216, 255, 0.38);
   }
 
   .look-toggle-btn.active {
