@@ -10,8 +10,9 @@ export interface PersistedStyleBatchEntry {
   mode: 'texture' | 'generate'
   sourceName: string
   sourceAssetUrl?: string
+  workspaceReferenceImageUrl?: string
   jobId?: string
-  status: 'pending' | 'queued' | 'running' | 'succeeded' | 'applied' | 'failed'
+  status: 'pending' | 'queued' | 'running' | 'succeeded' | 'applied' | 'failed' | 'cancelled'
   outputAssetUrl?: string
   error?: string
 }
@@ -81,6 +82,20 @@ export function loadStyleBatchSessionFromLocalStorage(levelId: string) {
 
 export function clearStyleBatchSessionFromLocalStorage(levelId: string) {
   localStorage.removeItem(`${STYLE_BATCH_STORAGE_PREFIX}${levelId}`)
+}
+
+export function clearAllStyleBatchSessionsFromLocalStorage() {
+  const keysToRemove: string[] = []
+
+  for (let index = 0; index < localStorage.length; index += 1) {
+    const key = localStorage.key(index)
+    if (!key || !key.startsWith(STYLE_BATCH_STORAGE_PREFIX)) continue
+    keysToRemove.push(key)
+  }
+
+  for (const key of keysToRemove) {
+    localStorage.removeItem(key)
+  }
 }
 
 export function exportEditorSceneJson(scene: EditorSceneDocument | null) {

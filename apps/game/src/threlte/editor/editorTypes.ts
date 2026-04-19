@@ -2,13 +2,16 @@ export type EditorNodeKind = 'asset' | 'primitive' | 'light' | 'prefab' | 'group
 export type EditorTransformMode = 'translate' | 'rotate' | 'scale'
 export type EditorSpace = 'world' | 'local'
 export type EditorTransformAxis = 'all' | 'x' | 'y' | 'z'
-export type EditorStylePreset = 'ghibli' | 'alto' | 'monument' | 'retro'
+export type EditorStylePreset = 'site' | 'surreal-site' | 'ghibli' | 'alto' | 'monument' | 'retro'
 export type EditorAtmospherePresetId =
   | 'lonely-wind'
   | 'ruin-haze'
   | 'heavy-ash'
   | 'silent-basin'
   | 'cold-starlight'
+  | 'violet-dread'
+  | 'signal-reef'
+  | 'orchid-void'
   | 'sunlit-garden'
   | 'storm-glass'
   | 'moon-archive'
@@ -153,6 +156,7 @@ export interface EditorGameplayData {
 export interface EditorGenerationData {
   descriptor?: string
   family?: string
+  sourceVisualSize?: [number, number, number]
   lastBakedAssetUrl?: string
   lastBakedAt?: string
 }
@@ -184,6 +188,13 @@ export interface SharedLevelSpawnSettings {
   }
 }
 
+export interface SharedLevelPlayerSettings {
+  player?: {
+    moveSpeed?: number
+    jumpForce?: number
+  }
+}
+
 export interface SharedLevelFeatureSettings {
   features?: {
     ocean?: boolean
@@ -204,6 +215,18 @@ export interface SharedLevelStyleSettings {
     fog?: {
       color?: string
       density?: number
+    }
+    haze?: {
+      color?: string
+      density?: number
+      floor?: number
+      ceiling?: number
+      mistOpacity?: number
+      mistLayers?: number
+      mistHeight?: number
+      mistSpacing?: number
+      mistScale?: number
+      mistDriftSpeed?: number
     }
     colorGrading?: {
       saturation?: number
@@ -292,6 +315,7 @@ export interface SharedLevelSkyboxSettings {
 
 export interface SharedLevelEditorSettings
   extends SharedLevelSpawnSettings,
+    SharedLevelPlayerSettings,
     SharedLevelFeatureSettings,
     SharedLevelStyleSettings,
     SharedLevelLightingSettings,
@@ -327,6 +351,7 @@ export interface EditorSceneDocument {
 export interface EditorState {
   enabled: boolean
   panelOpen: boolean
+  propertiesShelfOpen: boolean
   currentLevelId: string | null
   selectedNodeId: string | null
   selectedNodeIds: string[]

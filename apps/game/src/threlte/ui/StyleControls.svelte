@@ -22,6 +22,8 @@
   
   // Style options
   const stylePresets = [
+    { value: 'site', label: 'Website Palette', description: 'Megameal-derived cool dark palette' },
+    { value: 'surreal-site', label: 'Surreal Site', description: 'Dark hyper-saturated cyan, violet, and magenta' },
     { value: 'ghibli', label: 'Studio Ghibli', description: 'Warm, natural colors' },
     { value: 'alto', label: 'Alto\'s Adventure', description: 'Minimalist gradients' },
     { value: 'monument', label: 'Monument Valley', description: 'Pastel architecture' },

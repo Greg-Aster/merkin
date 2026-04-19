@@ -168,6 +168,7 @@ async function ensureMultiplayerControls() {
               <select bind:value={$renderStylePresetChoice}>
                 <option value="manifest">Use Level Manifest</option>
                 <option value="site">Website Palette</option>
+                <option value="surreal-site">Surreal Website Palette</option>
                 <option value="ghibli">Studio Ghibli</option>
                 <option value="alto">Alto</option>
                 <option value="monument">Monument</option>

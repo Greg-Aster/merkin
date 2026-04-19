@@ -24,41 +24,44 @@ function describePrimitive(node: EditorSceneNode) {
   if (!geometry) return ''
 
   const nodeId = node.id.toLowerCase()
-  if (nodeId.startsWith('yggdrasil-trunk-')) return 'colossal world-tree trunk segment'
-  if (nodeId.startsWith('yggdrasil-root-')) return 'ancient world-root buttress'
-  if (nodeId.startsWith('yggdrasil-searoot-')) return 'world-root descending into the sea'
-  if (nodeId.startsWith('yggdrasil-branch-')) return 'high sacred branch span'
-  if (nodeId.startsWith('yggdrasil-canopy-')) return 'dense mythic canopy mass'
-  if (nodeId.startsWith('yggdrasil-bifrost-ribbon-')) return 'luminous bifrost causeway ribbon'
-  if (nodeId.startsWith('yggdrasil-path-stone-')) return 'ceremonial path stone'
-  if (nodeId.startsWith('yggdrasil-shorestone-')) return 'weathered shoreline stone'
-  if (nodeId.startsWith('yggdrasil-shelfbreak-')) return 'broken island shelf segment'
-  if (nodeId.startsWith('yggdrasil-islet-')) return 'outer sacred islet'
-  if (nodeId.includes('well-') && nodeId.endsWith('-pool')) return 'sacred mythic well pool'
-  if (nodeId.includes('well-') && nodeId.endsWith('-ring')) return 'carved stone well ring'
-  if (nodeId.startsWith('yggdrasil-crown-path-')) return 'ritual ascent platform'
-  if (nodeId === 'yggdrasil-ground') return 'vast circular island foundation'
-  if (nodeId === 'yggdrasil-island-shelf') return 'outer island shelf'
-  if (nodeId === 'yggdrasil-shore-ring') return 'shoreline ring'
+  if (nodeId.startsWith('yggdrasil-trunk-')) return 'colossal ancient trunk segment of blackened sacred timber, fissured bark mass'
+  if (nodeId.startsWith('yggdrasil-root-')) return 'ancient root buttress of cyclopean sacred wood, root-cathedral mass'
+  if (nodeId.startsWith('yggdrasil-searoot-')) return 'descending sea root of drowned cosmic timber'
+  if (nodeId.startsWith('yggdrasil-branch-')) return 'high sacred branch span, storm-dark wood, immense overhead limb'
+  if (nodeId.startsWith('yggdrasil-canopy-')) return 'dense mythic canopy mass, void-dark leaves, eerie crown volume'
+  if (nodeId.startsWith('yggdrasil-bifrost-ribbon-')) return 'neon bifrost causeway ribbon, magenta violet spectral light'
+  if (nodeId.startsWith('yggdrasil-path-stone-')) return 'ceremonial approach stone, weathered runic slab'
+  if (nodeId.startsWith('yggdrasil-shorestone-')) return 'weathered shoreline stone, sea-worn ruin fragment'
+  if (nodeId.startsWith('yggdrasil-shelfbreak-')) return 'broken island shelf segment, collapsed sacred ledge'
+  if (nodeId.startsWith('yggdrasil-islet-')) return 'outer sacred islet, drowned mythic outcrop'
+  if (nodeId.includes('well-') && nodeId.endsWith('-pool')) return 'sacred abyssal well pool, dark reflective myth-water'
+  if (nodeId.includes('well-') && nodeId.endsWith('-ring')) return 'carved stone well ring, runic shrine circumference'
+  if (nodeId.startsWith('yggdrasil-crown-path-')) return 'ritual ascent platform, root-wood pilgrimage path'
+  if (nodeId === 'yggdrasil-ground') return 'vast circular island foundation of dark earth and root-laced stone'
+  if (nodeId === 'yggdrasil-island-shelf') return 'broad outer island shelf of weathered sacred stone'
+  if (nodeId === 'yggdrasil-shore-ring') return 'shoreline ring, drowned shrine perimeter'
 
   const name = node.name.trim().toLowerCase()
   if (name) return name
 
-  if (geometry === 'box') return 'stone floor slab'
-  if (geometry === 'cylinder') return 'round carved plinth'
-  if (geometry === 'torus') return 'broken ritual ring'
-  if (geometry === 'icosahedron') return 'faceted crystal prop'
-  return `${geometry} sculpted prop`
+  if (geometry === 'box') return 'rectangular solid object or block-like structural form'
+  if (geometry === 'cylinder') return 'cylindrical object or column-like structural form'
+  if (geometry === 'torus') return 'ring-shaped object or circular ornamental form'
+  if (geometry === 'icosahedron') return 'faceted crystal-like object'
+  if (geometry === 'dodecahedron') return 'faceted polyhedral object'
+  if (geometry === 'octahedron') return 'octahedral faceted object'
+  if (geometry === 'tetrahedron') return 'tetrahedral faceted object'
+  return `${geometry}-shaped sculpted object`
 }
 
 export function inferNodeGenerationDescriptor(node: EditorSceneNode) {
   const explicitDescriptor = node.generation?.descriptor?.trim()
   if (explicitDescriptor) return explicitDescriptor
-  if (node.id.startsWith('yggdrasil-monolith-')) return 'weathered rune monolith'
-  if (node.id.startsWith('yggdrasil-drowned-monolith-')) return 'drowned shoreline monolith ruin'
-  if (node.id.startsWith('yggdrasil-drowned-ring-')) return 'half-submerged sacred ring ruin'
-  if (node.id.startsWith('yggdrasil-arrival-monolith-')) return 'threshold world-tree monolith'
-  if (node.id.startsWith('yggdrasil-hvergelmir-depth-monolith-')) return 'cold root-depth monolith'
+  if (node.id.startsWith('yggdrasil-monolith-')) return 'weathered rune monolith, neon fissures, cosmic shrine stone'
+  if (node.id.startsWith('yggdrasil-drowned-monolith-')) return 'drowned shoreline monolith ruin, abyssal runes, salt-dark sacred stone'
+  if (node.id.startsWith('yggdrasil-drowned-ring-')) return 'half-submerged sacred ring ruin, broken ritual stone'
+  if (node.id.startsWith('yggdrasil-arrival-monolith-')) return 'threshold world-tree monolith, magenta-violet rune channels'
+  if (node.id.startsWith('yggdrasil-hvergelmir-depth-monolith-')) return 'cold root-depth monolith, underworld shrine stone'
   if (node.prefab?.type) return EDITOR_PREFAB_GENERATION_LABELS[node.prefab.type] ?? node.name.trim()
   if (node.primitive) return describePrimitive(node)
   if (node.asset) return node.name.trim() || 'environment prop'

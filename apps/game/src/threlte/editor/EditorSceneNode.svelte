@@ -26,6 +26,8 @@
   let group: THREE.Group
   let markerHovered = false
   let lightBurstGlow = 0
+  let shockwaveIgnited = false
+  let shockwaveIgnition = 0
   let animationTime = 0
   let viewportVisible = true
   let runtimeDistanceVisible = true
@@ -33,6 +35,13 @@
   let conversationFeaturePromise: Promise<typeof import('../features/conversation')> | null = null
   const nodeWorldPosition = new THREE.Vector3()
   let distanceCullAccumulator = 0
+
+  function supportsShockwaveFireflyIgnition() {
+    if (node.gameplay?.type !== 'firefly') return false
+    const author = (node.gameplay.author ?? '').toLowerCase()
+    const name = (node.name ?? '').toLowerCase()
+    return node.id.includes('pillar-firefly') || author.includes('pillar firefly') || name.includes('pillar')
+  }
 
   function getActiveCamera(): THREE.Camera | null {
     const candidate = camera as THREE.Camera & { current?: THREE.Camera | null }
@@ -117,6 +126,7 @@
   useTask((delta) => {
     animationTime += delta
     lightBurstGlow = Math.max(0, lightBurstGlow - delta * 1.25)
+    shockwaveIgnition = THREE.MathUtils.damp(shockwaveIgnition, shockwaveIgnited ? 1 : 0, 4.5, delta)
 
     const activeCamera = getActiveCamera()
     if (editorEnabled || !activeCamera || !group || !supportsRuntimeDistanceCulling()) return
@@ -194,6 +204,9 @@
         },
         onLightBurst: (_data: EditorSceneNode, burst: { strength: number }) => {
           lightBurstGlow = Math.max(lightBurstGlow, 0.45 + burst.strength * 0.75)
+          if (supportsShockwaveFireflyIgnition()) {
+            shockwaveIgnited = true
+          }
         },
       },
     })
@@ -239,6 +252,12 @@
 
   $: viewportVisible = $editorNodeViewportStateStore.get(node.id)?.effectiveVisible ?? node.visible
   $: effectiveVisible = viewportVisible && runtimeDistanceVisible
+  $: fireflyBaseColor = node.gameplay?.markerColor ?? '#f5f1a8'
+  $: fireflyIgnitionColor = (() => {
+    const baseColor = new THREE.Color(fireflyBaseColor)
+    const ignitedColor = new THREE.Color('#ff1830')
+    return `#${baseColor.lerp(ignitedColor, shockwaveIgnition).getHexString()}`
+  })()
 
   $: if (group) {
     registerEditorObject(node.id, group)
@@ -305,18 +324,27 @@
   {#if node.gameplay}
     {#if node.gameplay.type === 'firefly'}
       {@const fireflyMotionOffset = getFireflyMotionOffset()}
+      {@const baseLightIntensity = node.gameplay.lightIntensity ?? 2.8}
+      {@const baseSpriteIntensity = node.gameplay.spriteIntensity ?? 0.95}
+      {@const lightDrivenSpriteIntensity = baseSpriteIntensity * Math.max(0.35, baseLightIntensity / 2.8)}
+      {@const shockwaveIntensityMultiplier = supportsShockwaveFireflyIgnition() ? 1 + shockwaveIgnition * 49 : 1}
+      {@const shockwaveDistanceMultiplier = supportsShockwaveFireflyIgnition() ? 1 + shockwaveIgnition * 1.35 : 1}
+      {@const shockwaveSpriteSizeMultiplier = supportsShockwaveFireflyIgnition() ? 1 + shockwaveIgnition * 0.95 : 1}
+      {@const shockwaveSpriteIntensity = supportsShockwaveFireflyIgnition()
+        ? Math.max(lightDrivenSpriteIntensity * (1 + shockwaveIgnition * 8), 1 + shockwaveIgnition * 2.5)
+        : lightDrivenSpriteIntensity}
       <T.PointLight
         position={fireflyMotionOffset}
-        color={node.gameplay.markerColor ?? '#f5f1a8'}
-        intensity={markerHovered ? Math.max((node.gameplay.lightIntensity ?? 2.8) * 1.35, node.gameplay.lightIntensity ?? 2.8) : (node.gameplay.lightIntensity ?? 2.8)}
-        distance={node.gameplay.lightDistance ?? 6}
+        color={fireflyIgnitionColor}
+        intensity={(markerHovered ? Math.max(baseLightIntensity * 1.35, baseLightIntensity) : baseLightIntensity) * shockwaveIntensityMultiplier}
+        distance={(node.gameplay.lightDistance ?? 6) * shockwaveDistanceMultiplier}
         decay={node.gameplay.lightDecay ?? 1.6}
       />
       <StarSprite
         position={fireflyMotionOffset}
-        color={node.gameplay.markerColor ?? '#f5f1a8'}
-        size={(node.gameplay.markerSize ?? 0.58) * (markerHovered ? 1.12 : 1 + lightBurstGlow * 0.08)}
-        intensity={Math.max(markerHovered ? Math.max((node.gameplay.spriteIntensity ?? 0.95) * 1.2, 1.05) : (node.gameplay.spriteIntensity ?? 0.95), (node.gameplay.spriteIntensity ?? 0.95) + lightBurstGlow * 0.55)}
+        color={fireflyIgnitionColor}
+        size={(node.gameplay.markerSize ?? 0.58) * (markerHovered ? 1.12 : 1 + lightBurstGlow * 0.08) * shockwaveSpriteSizeMultiplier}
+        intensity={Math.max(markerHovered ? Math.max(shockwaveSpriteIntensity * 1.2, 1.05) : shockwaveSpriteIntensity, shockwaveSpriteIntensity + lightBurstGlow * 0.55)}
         twinkleSpeed={node.gameplay.twinkleSpeed ?? 1.6}
         animationOffset={animationTime}
         enableTwinkle={true}

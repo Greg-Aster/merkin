@@ -3,6 +3,7 @@ import { writable } from "svelte/store";
 export type RenderStylePresetChoice =
 	| "manifest"
 	| "site"
+	| "surreal-site"
 	| "ghibli"
 	| "alto"
 	| "monument"
@@ -125,8 +126,8 @@ export const renderStyleEnabled = createPersistentBooleanStore(
 export const renderStylePresetChoice =
 	createPersistentStringStore<RenderStylePresetChoice>(
 		"megameal-game-render-style-preset-choice",
-		"site",
-		["manifest", "site", "ghibli", "alto", "monument", "retro"],
+		"surreal-site",
+		["manifest", "site", "surreal-site", "ghibli", "alto", "monument", "retro"],
 	);
 export const renderStyleFlattenMaterials = createPersistentBooleanStore(
 	"megameal-game-render-style-flatten-materials",

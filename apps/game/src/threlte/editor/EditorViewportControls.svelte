@@ -5,7 +5,7 @@
   import * as THREE from 'three'
   import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
   import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
-  import { activateCircleSelect, beginMarqueeSelection, clearSelection, clearIsolatedNodes, deactivateCircleSelect, duplicateNodes, editorCircleSelectStore, editorNodeViewportStateStore, editorNodesStore, editorStateStore, endMarqueeSelection, groupNodes, redoScene, selectAllNodes, selectEditorNode, setCircleSelectRadius, setCircleSelectSelecting, setEditorViewportLightingMode, setIsolatedNodes, setModalTransformActive, setOrbitEnabled, setSelectedNodes, setTransformAxis, setTransformMode, startSceneTransaction, endSceneTransaction, type EditorInteractionMode, type EditorTransformAxis, type EditorTransformMode, type EditorSpace, type EditorViewportLightingMode, undoScene, ungroupNodes, updateCircleSelectPointer, updateMarqueeSelection, patchNodeTransform, patchNodes, removeNodes } from './editorStore'
+  import { activateCircleSelect, beginMarqueeSelection, clearSelection, clearIsolatedNodes, deactivateCircleSelect, duplicateNodes, editorCircleSelectStore, editorNodeViewportStateStore, editorNodesStore, editorStateStore, endMarqueeSelection, groupNodes, redoScene, selectAllNodes, selectEditorNode, setCircleSelectRadius, setCircleSelectSelecting, setEditorViewportLightingMode, setIsolatedNodes, setModalTransformActive, setOrbitEnabled, setSelectedNodes, setTransformAxis, setTransformMode, startSceneTransaction, endSceneTransaction, togglePropertiesShelfOpen, type EditorInteractionMode, type EditorTransformAxis, type EditorTransformMode, type EditorSpace, type EditorViewportLightingMode, undoScene, ungroupNodes, updateCircleSelectPointer, updateMarqueeSelection, patchNodeTransform, patchNodes, removeNodes } from './editorStore'
   import { getEditorObject, getEditorObjects, getNodeIdForObject, getSelectableEditorObjects } from './editorRegistry'
 
   const { scene, renderer } = useThrelte()
@@ -569,10 +569,41 @@
     if (!orbitControls || transformableSelectedNodeIds.length === 0) return
     const objects = getEditorObjects(transformableSelectedNodeIds)
     if (objects.length === 0) return
+
+    const bounds = new THREE.Box3()
     const center = new THREE.Vector3()
-    objects.forEach((object) => center.add(object.getWorldPosition(new THREE.Vector3())))
-    center.multiplyScalar(1 / objects.length)
+    const size = new THREE.Vector3()
+    let hasValidBounds = false
+
+    for (const object of objects) {
+      object.updateWorldMatrix(true, true)
+      const objectBounds = new THREE.Box3().setFromObject(object)
+      if (!objectBounds.isEmpty()) {
+        bounds.union(objectBounds)
+        hasValidBounds = true
+      } else {
+        const point = object.getWorldPosition(new THREE.Vector3())
+        bounds.expandByPoint(point)
+      }
+    }
+
+    bounds.getCenter(center)
     orbitControls.target.copy(center)
+
+    if (hasValidBounds && camera instanceof THREE.PerspectiveCamera) {
+      bounds.getSize(size)
+      const radius = Math.max(size.x, size.y, size.z) * 0.5
+      const currentDirection = camera.position.clone().sub(orbitControls.target)
+      if (currentDirection.lengthSq() < 0.0001) {
+        currentDirection.set(0, 0.35, 1)
+      }
+      currentDirection.normalize()
+
+      const halfFovRadians = THREE.MathUtils.degToRad(camera.fov * 0.5)
+      const desiredDistance = Math.max(radius / Math.tan(halfFovRadians), 3) * 1.35
+      camera.position.copy(center.clone().add(currentDirection.multiplyScalar(desiredDistance)))
+    }
+
     orbitControls.update()
   }
 
@@ -983,6 +1014,14 @@
         setTransformMode('rotate')
         break
       case 'f':
+        event.preventDefault()
+        frameSelection()
+        break
+      case 'n':
+        event.preventDefault()
+        togglePropertiesShelfOpen()
+        break
+      case '.':
         event.preventDefault()
         frameSelection()
         break

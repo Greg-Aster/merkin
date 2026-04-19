@@ -14,6 +14,7 @@ import type {
 const DEFAULT_EDITOR_STATE: EditorState = {
   enabled: false,
   panelOpen: true,
+  propertiesShelfOpen: true,
   currentLevelId: null,
   selectedNodeId: null,
   selectedNodeIds: [],
@@ -246,6 +247,10 @@ export function setOrbitEnabled(enabled: boolean) {
 
 export function togglePanelOpen() {
   editorStateStore.update((state) => ({ ...state, panelOpen: !state.panelOpen }))
+}
+
+export function togglePropertiesShelfOpen() {
+  editorStateStore.update((state) => ({ ...state, propertiesShelfOpen: !state.propertiesShelfOpen }))
 }
 
 export function setSnappingEnabled(enabled: boolean) {

@@ -14,6 +14,7 @@
 
   export let config: TerrainConfig
   export let showVisualChunks = true
+  export let showVisualSurface = true
 
   const dispatch = createEventDispatcher()
   let playerPosition = new THREE.Vector3()
@@ -118,7 +119,7 @@
       on:terrainReady={(e) => dispatch('terrainReady', e.detail)}
     />
 
-    {#if !config.chunkPathTemplate}
+    {#if showVisualSurface && !config.chunkPathTemplate}
       <HeightmapSurface
         heightData={$terrainStore.heightData}
         resolution={$terrainStore.resolution}

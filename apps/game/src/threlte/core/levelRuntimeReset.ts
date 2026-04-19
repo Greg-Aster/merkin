@@ -1,5 +1,6 @@
 import { terrainActions } from '../features/terrain'
 import { resetPostProcessingState } from '../stores/postProcessingStore'
+import { resetRuntimeVisualStyle } from '../styles/runtimeVisualStyleStore'
 
 export interface LevelRuntimeResetServices {
   interactionSystem?: {
@@ -16,4 +17,5 @@ export function resetLevelRuntime(services: LevelRuntimeResetServices = {}) {
 
   terrainActions.reset()
   resetPostProcessingState()
+  resetRuntimeVisualStyle()
 }

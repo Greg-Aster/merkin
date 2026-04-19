@@ -164,7 +164,7 @@
   /**
    * Spawn player entity
    */
-  function spawnPlayer(request: SpawnRequest): boolean {
+  async function spawnPlayer(request: SpawnRequest): Promise<boolean> {
     const { position } = request
     
     // Use playerComponent from props (passed from Game.svelte)

@@ -29,6 +29,9 @@
   const GAMEPAD_LOOK_SPEED = 2.2;
   const PLAYER_CAPSULE_HALF_HEIGHT = 0.9;
   const PLAYER_CAPSULE_RADIUS = 0.45;
+  const PLAYER_SPAWN_RAY_HEIGHT = 24;
+  const PLAYER_SPAWN_RAY_DISTANCE = 120;
+  const PLAYER_SPAWN_STABILIZE_DELAYS_MS = [120, 260];
   
   // --- Visual Constants ---
   const CAMERA_SMOOTH_SPEED = 0.2; // How quickly visuals catch up to physics
@@ -100,6 +103,8 @@
   let sendPlayerUpdateFn: ((playerState: PlayerState) => void) | null = null;
   let multiplayerServicePromise: Promise<void> | null = null;
   let networkSyncElapsed = 0;
+  let spawnStabilizeTimeoutIds: number[] = [];
+  let lastReportedSpawnReady = false;
 
   const tempAxisY = new Vector3(0, 1, 0);
   const tempDesiredTranslation = new Vector3();
@@ -650,6 +655,67 @@
     });
   }
 
+  function clearSpawnStabilizers() {
+    spawnStabilizeTimeoutIds.forEach((timeoutId) => {
+      window.clearTimeout(timeoutId);
+    });
+    spawnStabilizeTimeoutIds = [];
+  }
+
+  function sampleSpawnGroundY(x: number, z: number, fallbackY: number) {
+    if (!rapier.world || !rapier?.rapier?.Ray) return null;
+
+    const rayOriginY = Math.max(fallbackY + PLAYER_SPAWN_RAY_HEIGHT, PLAYER_SPAWN_RAY_HEIGHT);
+    const ray = new rapier.rapier.Ray(
+      { x, y: rayOriginY, z },
+      { x: 0, y: -1, z: 0 },
+    );
+
+    const hit = rapier.world.castRay(
+      ray,
+      PLAYER_SPAWN_RAY_DISTANCE,
+      true,
+      rapier.rapier.QueryFilterFlags.EXCLUDE_SENSORS,
+    );
+
+    if (!hit || !Number.isFinite(hit.toi)) return null;
+    return rayOriginY - hit.toi;
+  }
+
+  function resolveSafeSpawnPosition(x: number, y: number, z: number) {
+    const groundY = sampleSpawnGroundY(x, z, y);
+    const safeY = groundY === null
+      ? y
+      : Math.max(y, groundY + getSpawnGroundOffset());
+
+    return { x, y: safeY, z };
+  }
+
+  function applySpawnPosition(x: number, y: number, z: number) {
+    if (!rigidBody) return;
+    const pos = { x, y, z };
+    rigidBody.setTranslation(pos, true);
+    playerVelocity.set(0, 0, 0);
+    gameActions.updatePlayerPosition([pos.x, pos.y, pos.z]);
+    if (visualGroup) {
+      visualGroup.position.set(pos.x, pos.y, pos.z);
+    }
+  }
+
+  function scheduleSpawnStabilization(x: number, y: number, z: number) {
+    clearSpawnStabilizers();
+
+    PLAYER_SPAWN_STABILIZE_DELAYS_MS.forEach((delayMs) => {
+      const timeoutId = window.setTimeout(() => {
+        if (!rigidBody) return;
+        const safePosition = resolveSafeSpawnPosition(x, y, z);
+        applySpawnPosition(safePosition.x, safePosition.y, safePosition.z);
+      }, delayMs);
+
+      spawnStabilizeTimeoutIds = [...spawnStabilizeTimeoutIds, timeoutId];
+    });
+  }
+
   async function ensureMultiplayerService(): Promise<void> {
     if (sendPlayerUpdateFn) return;
 
@@ -865,15 +931,29 @@
   });
 
   // --- Component API & Lifecycle ---
+  export function isSpawnReady() {
+    return Boolean(rigidBody)
+  }
+
+  export function getSpawnGroundOffset() {
+    return PLAYER_CAPSULE_HALF_HEIGHT + PLAYER_CAPSULE_RADIUS + 0.18
+  }
+
+  export function resetPhysics() {
+    playerVelocity.set(0, 0, 0)
+  }
+
   export function spawnAt(x: number, y: number, z: number) {
     if (!rigidBody) return;
-    const pos = { x, y, z };
-    rigidBody.setTranslation(pos, true);
-    playerVelocity.set(0, 0, 0);
-    gameActions.updatePlayerPosition([pos.x, pos.y, pos.z]);
-    if (visualGroup) {
-      visualGroup.position.set(x, y, z); // Instantly move visual group on spawn
-    }
+    const safePosition = resolveSafeSpawnPosition(x, y, z);
+    applySpawnPosition(safePosition.x, safePosition.y, safePosition.z);
+    scheduleSpawnStabilization(x, y, z);
+  }
+
+  $: spawnReady = Boolean(rigidBody);
+  $: if (spawnReady !== lastReportedSpawnReady) {
+    lastReportedSpawnReady = spawnReady;
+    dispatch('spawnReadyChange', { ready: spawnReady });
   }
 
   onMount(() => {
@@ -898,6 +978,7 @@
     if (surfaceMoveHoldTimeout !== null) {
       window.clearTimeout(surfaceMoveHoldTimeout);
     }
+    clearSpawnStabilizers();
     characterController?.free?.();
     chargeAudioContext?.close?.();
     chargeAudioContext = null;

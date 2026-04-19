@@ -17,13 +17,15 @@ export type {
   CharacterKnowledge,
   CharacterBuilder
 } from './types'
-export { 
+export {
   FIREFLY_SPECIES, 
   baseFireflyKnowledge, 
   baseFireflyBehavior,
   getObservatoryContext,
   getFireflyConversationPrompts
 } from './types'
+
+const isDev = import.meta.env.DEV
 
 // Compatibility layer for existing conversation system
 export class CharacterKnowledgeCompatibilityLayer {
@@ -69,4 +71,3 @@ if (typeof window !== 'undefined') {
     console.log('🔧 Modern Character System loaded and available globally')
   }
 }
-const isDev = import.meta.env.DEV

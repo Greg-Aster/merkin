@@ -30,6 +30,7 @@
   export let outlineOpacity = 0.88
 
   export let enableStyleLighting = true
+  export let enableStyleFog = true
   export let ambientColor = ''
   export let ambientIntensity = 10.4
   export let sunIntensity = 0.8
@@ -148,19 +149,10 @@
   function shouldKeepColorMap(material: THREE.Material) {
     const candidateMaterial = material as THREE.Material & {
       map?: THREE.Texture | null
-      transparent?: boolean
-      opacity?: number
-      alphaTest?: number
     }
 
     if (!candidateMaterial.map) return false
-    if (!flattenMaterials) return true
-
-    return Boolean(
-      candidateMaterial.transparent
-      || (candidateMaterial.opacity ?? 1) < 0.999
-      || (candidateMaterial.alphaTest ?? 0) > 0
-    )
+    return true
   }
 
   function createStylizedMaterial(originalMaterial: THREE.Material, objectName: string) {
@@ -226,7 +218,15 @@
           .replace(
             '#include <worldpos_vertex>',
             `#include <worldpos_vertex>
-            vRenderStyleWorldPosition = worldPosition.xyz;`
+            vec4 renderStyleWorldPosition = vec4( transformed, 1.0 );
+            #ifdef USE_BATCHING
+              renderStyleWorldPosition = batchingMatrix * renderStyleWorldPosition;
+            #endif
+            #ifdef USE_INSTANCING
+              renderStyleWorldPosition = instanceMatrix * renderStyleWorldPosition;
+            #endif
+            renderStyleWorldPosition = modelMatrix * renderStyleWorldPosition;
+            vRenderStyleWorldPosition = renderStyleWorldPosition.xyz;`
           )
 
         shader.fragmentShader = shader.fragmentShader
@@ -253,6 +253,7 @@
   }
 
   function applyMaterialStyling(mesh: THREE.Mesh) {
+    if (mesh.userData?.renderStyleSkip) return
     if (mesh.userData.renderStyleOutline) return
 
     const materialKey = getMaterialKey(mesh)
@@ -299,7 +300,7 @@
 
   function applyOutlineShell(mesh: THREE.Mesh) {
     const skinnedMesh = mesh as THREE.Mesh & { isSkinnedMesh?: boolean }
-    if (!enableOutlines || mesh.userData.renderStyleOutline || skinnedMesh.isSkinnedMesh) {
+    if (!enableOutlines || mesh.userData?.renderStyleSkip || mesh.userData.renderStyleOutline || skinnedMesh.isSkinnedMesh) {
       removeOutlineShell(mesh)
       return
     }
@@ -554,6 +555,6 @@
   />
 {/if}
 
-{#if isInitialized}
+{#if isInitialized && enableStyleFog}
   <T.Fog color={currentPalette.fog} near={50} far={300} />
 {/if}

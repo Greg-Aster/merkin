@@ -6,6 +6,7 @@
   import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
   import { qualityLevelStore, qualitySettingsStore } from '../features/performance/stores/performanceStore'
   import { getRuntimePropBudget, shouldEnableSceneShadows } from '../features/performance/utils/runtimeSceneBudget'
+  import { runtimeVisualStyleStore } from '../styles/runtimeVisualStyleStore'
   import {
     createObjectMaterialOverrideState,
     disposeObjectMaterialOverrideState,
@@ -24,6 +25,7 @@
   let disposed = false
   let activeLoadToken = 0
   let loadedUrl = ''
+  let loadErrorMessage = ''
   let editorMaterialOverride = null
   const materialOverrideState = createObjectMaterialOverrideState()
   const textureLoader = new THREE.TextureLoader()
@@ -44,7 +46,9 @@
     alphaMap: null,
   }
   const editorMaterialOverrideStore = getContext<EditorMaterialOverrideStore | undefined>(EDITOR_MATERIAL_OVERRIDE_CONTEXT)
+  const inEditorContext = !!editorMaterialOverrideStore
   const propWorldPosition = new THREE.Vector3()
+  const propWorldScale = new THREE.Vector3(1, 1, 1)
   const propBoundingSphere = new THREE.Sphere()
   let sceneMeshes: THREE.Mesh[] = []
   let currentDistanceToCamera = 0
@@ -150,7 +154,7 @@
 
     root.traverse((child) => {
       if (!(child instanceof THREE.Mesh)) return
-      child.frustumCulled = true
+      child.frustumCulled = !inEditorContext
       sceneMeshes.push(child)
     })
 
@@ -163,18 +167,66 @@
     }
   }
 
+  function getScaledBoundingRadius() {
+    if (!scene) return Math.max(1, propBoundingSphere.radius)
+
+    scene.getWorldScale(propWorldScale)
+    const maxWorldScale = Math.max(
+      Math.abs(propWorldScale.x),
+      Math.abs(propWorldScale.y),
+      Math.abs(propWorldScale.z),
+    )
+
+    return Math.max(1, propBoundingSphere.radius * maxWorldScale)
+  }
+
   function applyRuntimePropBudget() {
     if (!scene) return
 
+    if (inEditorContext) {
+      currentCullDistance = Number.POSITIVE_INFINITY
+      sceneMeshes.forEach((mesh) => {
+        mesh.castShadow = true
+        mesh.receiveShadow = true
+        mesh.frustumCulled = false
+      })
+      return
+    }
+
     const propBudget = getRuntimePropBudget($qualityLevelStore)
     const shadowsEnabled = shouldEnableSceneShadows($qualityLevelStore, $qualitySettingsStore)
+    const scaledBoundingRadius = getScaledBoundingRadius()
 
-    currentCullDistance = propBudget.cullDistance + Math.max(1, propBoundingSphere.radius)
+    currentCullDistance = propBudget.cullDistance + scaledBoundingRadius
 
     sceneMeshes.forEach((mesh) => {
       mesh.castShadow = shadowsEnabled && currentDistanceToCamera <= propBudget.shadowDistance
       mesh.receiveShadow = shadowsEnabled && currentDistanceToCamera <= propBudget.receiveShadowDistance
       mesh.frustumCulled = true
+    })
+  }
+
+  function applyRuntimeMaterialStyle() {
+    if (!scene) return
+
+    const envBoost = Math.max(1.1, 0.92 + ($runtimeVisualStyleStore.screenFx.accentGlowIntensity * 1.6))
+
+    scene.traverse((child) => {
+      if (!(child instanceof THREE.Mesh) || !child.material) return
+
+      const applyToMaterial = (material: THREE.Material) => {
+        const standardMaterial = material as THREE.MeshStandardMaterial
+        if ('envMapIntensity' in standardMaterial) {
+          standardMaterial.envMapIntensity = Math.max(standardMaterial.envMapIntensity ?? 0, envBoost)
+        }
+        standardMaterial.needsUpdate = true
+      }
+
+      if (Array.isArray(child.material)) {
+        child.material.forEach(applyToMaterial)
+      } else {
+        applyToMaterial(child.material)
+      }
     })
   }
 
@@ -213,30 +265,17 @@
 
       const previousScene = scene
       scene = gltf.scene
+      loadErrorMessage = ''
 
       fixGLTFMaterials(gltf)
       scene.traverse((child) => {
         if (!(child instanceof THREE.Mesh)) return
-        child.frustumCulled = true
-
-        if (Array.isArray(child.material)) {
-          child.material.forEach((material) => {
-            const standardMaterial = material as THREE.MeshStandardMaterial
-            if ('envMapIntensity' in standardMaterial) {
-              standardMaterial.envMapIntensity = Math.max(standardMaterial.envMapIntensity ?? 0, 1.1)
-            }
-          })
-          return
-        }
-
-        const standardMaterial = child.material as THREE.MeshStandardMaterial
-        if ('envMapIntensity' in standardMaterial) {
-          standardMaterial.envMapIntensity = Math.max(standardMaterial.envMapIntensity ?? 0, 1.1)
-        }
+        child.frustumCulled = !inEditorContext
       })
 
       snapshotSceneMeshes(scene)
       applyRuntimePropBudget()
+      applyRuntimeMaterialStyle()
 
       syncObjectMaterialOverride(scene, editorMaterialOverride, materialOverrideState)
       applyOverrideTexturesToScene()
@@ -248,6 +287,8 @@
       dispatch('load', { scene })
     } catch (error) {
       if (disposed || token !== activeLoadToken) return
+      scene = null
+      loadErrorMessage = error instanceof Error ? error.message : 'Unknown GLTF load error'
       console.error(`❌ HeroProp failed to load: ${nextUrl}`, error)
       reportRuntimeAssetFailure(nextUrl, error instanceof Error ? error.message : 'Unknown GLTF load error')
       dispatch('error', { error, url: nextUrl })
@@ -263,6 +304,7 @@
     syncObjectMaterialOverride(scene, editorMaterialOverride, materialOverrideState)
     applyOverrideTexturesToScene()
     applyRuntimePropBudget()
+    applyRuntimeMaterialStyle()
   }
 
   $: void syncOverrideTextures()
@@ -271,14 +313,23 @@
     const activeCamera = getActiveCamera()
     if (!scene || !activeCamera) return
 
+    if (inEditorContext) {
+      if (!runtimeVisible) {
+        runtimeVisible = true
+        scene.visible = true
+      }
+      return
+    }
+
     distanceCheckAccumulator += delta
     if (distanceCheckAccumulator < 0.2) return
     distanceCheckAccumulator = 0
 
     scene.getWorldPosition(propWorldPosition)
+    const scaledBoundingRadius = getScaledBoundingRadius()
     currentDistanceToCamera = Math.max(
       0,
-      activeCamera.position.distanceTo(propWorldPosition) - Math.max(1, propBoundingSphere.radius),
+      activeCamera.position.distanceTo(propWorldPosition) - scaledBoundingRadius,
     )
 
     const nextVisible = currentDistanceToCamera <= currentCullDistance
@@ -305,4 +356,12 @@
 
 {#if scene}
   <T is={scene} />
+{:else if loadErrorMessage}
+  <T.Group>
+    <T.Mesh position={[0, 1, 0]}>
+      <T.BoxGeometry args={[1.6, 1.6, 1.6]} />
+      <T.MeshBasicMaterial color="#ff3355" wireframe={true} transparent opacity={0.95} />
+    </T.Mesh>
+    <T.PointLight position={[0, 2.2, 0]} color="#ff3355" intensity={1.2} distance={6} decay={2} />
+  </T.Group>
 {/if}

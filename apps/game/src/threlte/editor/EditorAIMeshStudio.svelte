@@ -22,6 +22,7 @@
   export let hunyuanBackendCanRetexture = false
   export let hunyuanLastOutputUrl = ''
   export let hunyuanLastResultSummary = ''
+  export let hunyuanLastFitReport = ''
   export let hunyuanSupportsReplacement = false
   export let hunyuanSupportsTextureWrap = false
   export let recentHunyuanJobs: Array<any> = []
@@ -44,6 +45,7 @@
   export let canUseAiMeshStudio: (node: EditorSceneNode | null) => boolean = () => false
   export let canRetextureSelection: (node: EditorSceneNode | null) => boolean = () => false
   export let canApplyGeneratedAssetToSelection = false
+  export let runtimeAssetFailures: Array<{ id: string, source: string, message: string, updatedAt: number }> = []
 
   $: selectedHunyuanJob = recentHunyuanJobs.find((job) => job.id === selectedHunyuanJobId) ?? null
   $: selectedSourcePreviewUrl = selectedNode?.asset?.url ?? ''
@@ -249,6 +251,9 @@
           {#if hunyuanLastResultSummary}
             <div class="save-message">{hunyuanLastResultSummary}</div>
           {/if}
+          {#if hunyuanLastFitReport}
+            <div class="save-message">{hunyuanLastFitReport}</div>
+          {/if}
           <div class="button-row compact editor-mt-sm">
             <button on:click={() => emit('openGeneratedAsset')}>Open In Generated Assets</button>
             <button disabled={!canApplyGeneratedAssetToSelection} on:click={() => emit('applyGeneratedAsset')}>Apply To Selection</button>
@@ -276,11 +281,24 @@
       {#if hunyuanLastResultSummary}
         <div class="save-message">{hunyuanLastResultSummary}</div>
       {/if}
+      {#if hunyuanLastFitReport}
+        <div class="save-message">{hunyuanLastFitReport}</div>
+      {/if}
       <div class="button-row compact editor-mt-sm">
         <button on:click={() => emit('openGeneratedAsset')}>Open In Generated Assets</button>
         <button disabled={!canApplyGeneratedAssetToSelection} on:click={() => emit('applyGeneratedAsset')}>Apply To Selection</button>
         <button on:click={() => emit('saveGeneratedResult')}>Overwrite Level</button>
       </div>
+    </div>
+  {/if}
+
+  {#if runtimeAssetFailures.length > 0}
+    <div class="editor-subsection">
+      <div class="tuple-label">Recent Asset Failures</div>
+      <div class="save-message">If an object vanished after replacement, the engine reports load/render failures here.</div>
+      {#each runtimeAssetFailures.slice(0, 5) as failure (failure.id)}
+        <div class="save-message error-message">{failure.source}: {failure.message}</div>
+      {/each}
     </div>
   {/if}
 

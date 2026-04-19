@@ -15,6 +15,10 @@
   export let driftSpeed = 0.22
   export let sway = 0.85
   export let center: [number, number, number] = [0, 0, 0]
+  export let distribution: 'volume' | 'ground' = 'volume'
+  export let blendMode: 'normal' | 'additive' = 'additive'
+  export let groundBandStrength = 0.35
+  export let intensity = 1
 
   let geometry: THREE.BufferGeometry | null = null
   let material: THREE.PointsMaterial | null = null
@@ -79,7 +83,11 @@
     for (let index = 0; index < currentCount; index += 1) {
       const offset = index * 3
       const [x, z] = randomPointInRadius(radius)
-      const y = minHeight + Math.random() * Math.max(0.01, maxHeight - minHeight)
+      const heightRange = Math.max(0.01, maxHeight - minHeight)
+      const groundedBias = Math.min(Math.max(groundBandStrength, 0.05), 1)
+      const y = distribution === 'ground'
+        ? minHeight + (Math.pow(Math.random(), 1 + groundedBias * 4) * heightRange)
+        : minHeight + Math.random() * heightRange
       const tint = index % 4 === 0 ? secondary : primary
 
       basePositions[offset] = x
@@ -90,9 +98,9 @@
       positions[offset + 1] = y
       positions[offset + 2] = z
 
-      colors[offset] = tint.r
-      colors[offset + 1] = tint.g
-      colors[offset + 2] = tint.b
+      colors[offset] = tint.r * intensity
+      colors[offset + 1] = tint.g * intensity
+      colors[offset + 2] = tint.b * intensity
 
       sizes[index] = size * (0.65 + Math.random() * 0.9)
       phases[index] = Math.random() * Math.PI * 2
@@ -113,7 +121,7 @@
       vertexColors: true,
       depthWrite: false,
       alphaTest: 0.02,
-      blending: THREE.AdditiveBlending,
+      blending: blendMode === 'additive' ? THREE.AdditiveBlending : THREE.NormalBlending,
       sizeAttenuation: true,
     })
   }

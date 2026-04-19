@@ -20,6 +20,7 @@ const EDITOR_SCENES_ROOT = path.join(GAME_APP_ROOT, 'src', 'threlte', 'editor', 
 const LEGACY_TOOLS_ROOT = __dirname;
 const GENERATED_HUNYUAN_ROOT = path.join(GAME_PUBLIC_ROOT, 'generated', 'hunyuan3d');
 const GENERATED_STYLE_LAB_ROOT = path.join(GAME_PUBLIC_ROOT, 'generated', 'style-lab');
+const GENERATED_BLENDER_REIMPORT_ROOT = path.join(GAME_PUBLIC_ROOT, 'generated', 'blender-reimports');
 const BLENDER_EXPORT_ROOT = path.join(GAME_APP_ROOT, '.editor-exports', 'blender');
 const HUNYUAN_EXAMPLE_WORKFLOW_PATH = path.join(REPO_ROOT, 'apps', 'game', 'public', 'ref-image', 'Hunyaun example.json');
 const COMFY_IMAGE_EXAMPLE_WORKFLOW_PATH = path.join(REPO_ROOT, 'apps', 'game', 'public', 'ref-image', 'comfy_image_example.json');
@@ -91,7 +92,7 @@ function createGeneratedStyleDirectory(nameHint = 'asset', category = 'workspace
   const directory = path.join(
     GENERATED_STYLE_LAB_ROOT,
     category,
-    `${slugify(nameHint)}-${timestampKey()}`,
+    `${buildSafeAssetSlug(nameHint)}-${timestampKey()}`,
   );
   ensureDirectory(directory);
   return directory;
@@ -176,12 +177,73 @@ async function inspectGltfAsset(filePath) {
   return result.stdout.trim();
 }
 
+function extractBoundingBoxFromInspectReport(inspectReport = '') {
+  const parseVector = (raw = '') => raw
+    .split(',')
+    .map((value) => Number(value.trim()))
+    .filter((value) => Number.isFinite(value));
+
+  const sceneRows = inspectReport
+    .split('\n')
+    .filter((line) => /^\|\s*\d+\s*\|/.test(line));
+
+  for (const row of sceneRows) {
+    const vectors = row.match(/-?\d+(?:\.\d+)?(?:,\s*-?\d+(?:\.\d+)?){2}/g) || [];
+    if (vectors.length < 2) continue;
+
+    const bboxMin = parseVector(vectors[0]);
+    const bboxMax = parseVector(vectors[1]);
+    if (bboxMin.length !== 3 || bboxMax.length !== 3) continue;
+
+    const size = bboxMax.map((value, index) => value - bboxMin[index]);
+    const maxDimension = Math.max(...size.map((value) => Math.abs(value)));
+    if (!Number.isFinite(maxDimension)) continue;
+
+    return {
+      bboxMin,
+      bboxMax,
+      size,
+      maxDimension,
+    };
+  }
+
+  const bboxMinMatch = inspectReport.match(/bboxMin[^-\d]*([-\d., ]+)/i);
+  const bboxMaxMatch = inspectReport.match(/bboxMax[^-\d]*([-\d., ]+)/i);
+  if (!bboxMinMatch || !bboxMaxMatch) return null;
+
+  const bboxMin = parseVector(bboxMinMatch[1]);
+  const bboxMax = parseVector(bboxMaxMatch[1]);
+  if (bboxMin.length !== 3 || bboxMax.length !== 3) return null;
+
+  const size = bboxMax.map((value, index) => value - bboxMin[index]);
+  const maxDimension = Math.max(...size.map((value) => Math.abs(value)));
+  if (!Number.isFinite(maxDimension)) return null;
+
+  return {
+    bboxMin,
+    bboxMax,
+    size,
+    maxDimension,
+  };
+}
+
 async function copyModelToGlb(sourcePath, outputPath) {
   const result = await runGltfTransform(['copy', sourcePath, outputPath]);
   if (result.code !== 0) {
     throw new Error(result.stderr || result.stdout || `glTF export failed with exit code ${result.code}`);
   }
   return result;
+}
+
+async function centerModelForSceneReplacement(modelPath, pivot = 'center') {
+  const tempOutputPath = modelPath.replace(/\.(glb|gltf)$/i, '.centered.$1');
+  const result = await runGltfTransform(['center', modelPath, tempOutputPath, '--pivot', pivot]);
+  if (result.code !== 0) {
+    throw new Error(result.stderr || result.stdout || `glTF center failed with exit code ${result.code}`);
+  }
+
+  fs.copyFileSync(tempOutputPath, modelPath);
+  fs.unlinkSync(tempOutputPath);
 }
 
 function resolveInspectableModelAsset(assetUrl = '') {
@@ -218,6 +280,102 @@ function detectBlenderExecutable() {
   }
 
   return '';
+}
+
+function launchBlenderFile(filePath) {
+  const blenderExecutable = detectBlenderExecutable();
+  const openCommand = blenderExecutable ? `${blenderExecutable} "${filePath}"` : '';
+
+  if (!blenderExecutable) {
+    return {
+      blenderExecutable,
+      openCommand,
+      openedInBlender: false,
+    };
+  }
+
+  const child = spawn(blenderExecutable, [filePath], {
+    cwd: REPO_ROOT,
+    detached: true,
+    stdio: 'ignore',
+  });
+  child.unref();
+
+  return {
+    blenderExecutable,
+    openCommand,
+    openedInBlender: true,
+  };
+}
+
+function resolveBlenderExportDirectory(exportPath = '') {
+  if (!exportPath) return '';
+
+  const resolved = path.resolve(exportPath);
+  if (!resolved.startsWith(BLENDER_EXPORT_ROOT)) {
+    throw new Error('Blender export path resolves outside the editor export directory.');
+  }
+  if (!fs.existsSync(resolved)) {
+    throw new Error(`Blender export path not found: ${exportPath}`);
+  }
+
+  const stats = fs.statSync(resolved);
+  return stats.isDirectory() ? resolved : path.dirname(resolved);
+}
+
+function findLatestBlenderExportForSource(sourceAssetUrl = '') {
+  if (!fs.existsSync(BLENDER_EXPORT_ROOT) || !fs.statSync(BLENDER_EXPORT_ROOT).isDirectory()) {
+    return null;
+  }
+
+  const candidates = fs.readdirSync(BLENDER_EXPORT_ROOT)
+    .map((name) => path.join(BLENDER_EXPORT_ROOT, name))
+    .filter((directory) => fs.existsSync(directory) && fs.statSync(directory).isDirectory())
+    .map((directory) => {
+      const manifestPath = path.join(directory, 'merkin-blender-export.json');
+      if (!fs.existsSync(manifestPath) || !fs.statSync(manifestPath).isFile()) {
+        return null;
+      }
+
+      try {
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        if (sourceAssetUrl && manifest?.sourceAssetUrl !== sourceAssetUrl) {
+          return null;
+        }
+
+        const stats = fs.statSync(manifestPath);
+        return {
+          directory,
+          manifestPath,
+          manifest,
+          updatedAt: manifest?.createdAt || stats.mtime.toISOString(),
+        };
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean)
+    .sort((left, right) => Date.parse(right.updatedAt || 0) - Date.parse(left.updatedAt || 0));
+
+  return candidates[0] || null;
+}
+
+function findLatestModelInDirectory(directory) {
+  if (!directory || !fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {
+    return null;
+  }
+
+  const candidates = fs.readdirSync(directory)
+    .map((name) => path.join(directory, name))
+    .filter((fullPath) => fs.existsSync(fullPath) && fs.statSync(fullPath).isFile())
+    .filter((fullPath) => ['.glb', '.gltf'].includes(path.extname(fullPath).toLowerCase()))
+    .map((fullPath) => ({
+      fullPath,
+      stats: fs.statSync(fullPath),
+    }))
+    .sort((left, right) => right.stats.mtimeMs - left.stats.mtimeMs);
+
+  return candidates[0]?.fullPath || null;
 }
 
 function writeToolsRuntime(port) {
@@ -276,6 +434,27 @@ function slugify(value = 'asset') {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     || 'asset';
+}
+
+function normalizeGeneratedAssetName(value = 'asset') {
+  let normalized = String(value || 'asset')
+    .replace(/\.(glb|gltf|png|jpe?g|webp)$/i, '')
+    .replace(/(?:-reference-\d{4}-\d{2}-\d{2}t?\d{2}[-:.]\d{2}[-:.]\d{2}[-:.]\d{3}z?)+/ig, '')
+    .replace(/(?:-(?:generated|texture-wrap)-\d{4}-\d{2}-\d{2}t?\d{2}[-:.]\d{2}[-:.]\d{2}[-:.]\d{3}z?)+/ig, '')
+    .replace(/(?:_\d+_)+$/g, '')
+    .replace(/-+$/g, '')
+    .trim();
+
+  return normalized || 'asset';
+}
+
+function buildSafeAssetSlug(value = 'asset', maxLength = 80) {
+  const normalized = slugify(normalizeGeneratedAssetName(value || 'asset'));
+  if (normalized.length <= maxLength) {
+    return normalized || 'asset';
+  }
+
+  return normalized.slice(0, maxLength).replace(/-+$/g, '') || 'asset';
 }
 
 function resolvePublicAssetPath(publicUrl = '') {
@@ -380,6 +559,70 @@ function listRecentHunyuanJobs(limit = 10) {
     .map((job) => serializeHunyuanJob(job));
 }
 
+async function interruptComfyUi(apiUrl) {
+  const baseUrl = String(apiUrl || `http://127.0.0.1:${DEFAULT_COMFYUI_PORT}`).replace(/\/+$/, '');
+  try {
+    await fetch(`${baseUrl}/interrupt`, { method: 'POST' });
+  } catch {}
+}
+
+async function cancelHunyuanJobs({ jobId = '', all = false } = {}) {
+  const cancelledJobIds = [];
+
+  if (all) {
+    for (const queuedId of [...hunyuanJobQueue]) {
+      const job = getHunyuanJob(queuedId);
+      if (!job) continue;
+      job.status = 'cancelled';
+      job.error = 'Cancelled from editor.';
+      job.updatedAt = new Date().toISOString();
+      job.finishedAt = job.updatedAt;
+      cancelledJobIds.push(queuedId);
+    }
+    hunyuanJobQueue.length = 0;
+
+    if (activeHunyuanJobId) {
+      const activeJob = getHunyuanJob(activeHunyuanJobId);
+      if (activeJob) {
+        activeJob.cancelRequested = true;
+        activeJob.updatedAt = new Date().toISOString();
+        cancelledJobIds.push(activeJob.id);
+        await interruptComfyUi(activeJob.payload?.comfyUiApiUrl);
+      }
+    }
+
+    return cancelledJobIds;
+  }
+
+  if (!jobId) return cancelledJobIds;
+
+  const queuedIndex = hunyuanJobQueue.indexOf(jobId);
+  if (queuedIndex !== -1) {
+    hunyuanJobQueue.splice(queuedIndex, 1);
+    const job = getHunyuanJob(jobId);
+    if (job) {
+      job.status = 'cancelled';
+      job.error = 'Cancelled from editor.';
+      job.updatedAt = new Date().toISOString();
+      job.finishedAt = job.updatedAt;
+      cancelledJobIds.push(jobId);
+    }
+    return cancelledJobIds;
+  }
+
+  if (activeHunyuanJobId === jobId) {
+    const activeJob = getHunyuanJob(jobId);
+    if (activeJob) {
+      activeJob.cancelRequested = true;
+      activeJob.updatedAt = new Date().toISOString();
+      cancelledJobIds.push(jobId);
+      await interruptComfyUi(activeJob.payload?.comfyUiApiUrl);
+    }
+  }
+
+  return cancelledJobIds;
+}
+
 async function processHunyuanJobQueue() {
   if (activeHunyuanJobId || hunyuanJobQueue.length === 0) {
     return;
@@ -388,6 +631,13 @@ async function processHunyuanJobQueue() {
   const nextJobId = hunyuanJobQueue.shift();
   const job = getHunyuanJob(nextJobId);
   if (!job) {
+    setImmediate(() => {
+      void processHunyuanJobQueue();
+    });
+    return;
+  }
+
+  if (job.status === 'cancelled') {
     setImmediate(() => {
       void processHunyuanJobQueue();
     });
@@ -406,6 +656,13 @@ async function processHunyuanJobQueue() {
       body: JSON.stringify(job.payload),
     });
     const payload = await response.json().catch(() => null);
+
+    if (job.cancelRequested) {
+      job.status = 'cancelled';
+      job.error = 'Cancelled from editor.';
+      job.result = payload;
+      return;
+    }
 
     if (!response.ok || !payload?.success) {
       job.status = 'failed';
@@ -885,7 +1142,7 @@ function copyFileToComfyUiInput(sourcePath, comfyUiRoot, nameHint = 'reference')
   const inputDirectory = path.join(comfyUiRoot, 'input');
   ensureDirectory(inputDirectory);
   const extension = path.extname(sourcePath) || '.png';
-  const fileName = `${slugify(nameHint)}-${Date.now()}${extension}`;
+  const fileName = `${buildSafeAssetSlug(nameHint)}-${Date.now()}${extension}`;
   const destinationPath = path.join(inputDirectory, fileName);
   fs.copyFileSync(sourcePath, destinationPath);
   return { fileName, fullPath: destinationPath };
@@ -1654,7 +1911,7 @@ async function ensureComfyUiReferenceImage({
   sourceName,
   prompt,
 }) {
-  const outputPrefix = `merkin/references/${slugify(sourceName || 'reference')}-${Date.now()}`;
+  const outputPrefix = `merkin/references/${buildSafeAssetSlug(sourceName || 'reference')}-${Date.now()}`;
   const workflowSeed = Number(BigInt(Date.now()) % BigInt(0xffffffffffffffff));
   const workflow = buildComfyUiReferenceImageWorkflowFromTemplate({
     outputPrefix,
@@ -1677,7 +1934,7 @@ async function ensureComfyUiReferenceImage({
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const referencesDirectory = path.join(GENERATED_HUNYUAN_ROOT, 'references');
-  const outputFileName = `${slugify(sourceName || 'reference')}-reference-${timestamp}${path.extname(generatedImagePath).toLowerCase() || '.png'}`;
+  const outputFileName = `${buildSafeAssetSlug(sourceName || 'reference')}-reference-${timestamp}${path.extname(generatedImagePath).toLowerCase() || '.png'}`;
   const outputFilePath = path.join(referencesDirectory, outputFileName);
 
   ensureDirectory(referencesDirectory);
@@ -2013,7 +2270,7 @@ async function buildEditableComfyUiWorkflowTemplate({
 
   const referenceUrl = referenceImageUrl || inspection.detectedReferenceImageUrl || '/replace-me-reference.png';
   const referenceImageFileName = path.basename(referenceUrl);
-  const workflowName = slugify(sourceName || inspection.assetName || 'asset');
+  const workflowName = buildSafeAssetSlug(sourceName || inspection.assetName || 'asset');
   const outputPrefix = `workflow-editor/${workflowName}-${Date.now()}`;
   const rawOutputPrefix = `${outputPrefix}-raw`;
   const workflowSeed = Number(BigInt(Date.now()) % BigInt(0xffffffffffffffff));
@@ -3219,6 +3476,37 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (pathname === '/api/editor/log' && req.method === 'POST') {
+    let body = '';
+
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+
+    req.on('end', () => {
+      try {
+        const payload = body ? JSON.parse(body) : {};
+        const source = String(payload?.source || 'editor');
+        const message = String(payload?.message || '').trim();
+        const detail = payload?.detail;
+        const suffix = detail === undefined
+          ? ''
+          : ` :: ${typeof detail === 'string' ? detail : JSON.stringify(detail)}`;
+
+        if (message) {
+          console.log(`[${source}] ${message}${suffix}`);
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      } catch (error) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: `Editor log parse failed: ${error.message}` }));
+      }
+    });
+    return;
+  }
+
   if (pathname === '/api/hunyuan3d/inspect' && req.method === 'GET') {
     try {
       const assetUrl = parsedUrl.query.assetUrl;
@@ -3262,6 +3550,8 @@ const server = http.createServer(async (req, res) => {
         }
       }
 
+      const bounds = extractBoundingBoxFromInspectReport(inspectReport);
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         success: true,
@@ -3271,6 +3561,7 @@ const server = http.createServer(async (req, res) => {
           sizeFormatted: formatBytes(stats.size),
           modifiedAt: stats.mtime.toISOString(),
           inspectReport,
+          bounds,
         },
       }));
     } catch (error) {
@@ -3374,6 +3665,7 @@ const server = http.createServer(async (req, res) => {
           assetUrl,
           exportName = '',
           referenceImageUrl = '',
+          openInBlender = false,
         } = JSON.parse(body);
 
         if (!assetUrl) {
@@ -3402,7 +3694,14 @@ const server = http.createServer(async (req, res) => {
           exportedReferencePath = referenceTargetPath;
         }
 
-        const blenderExecutable = detectBlenderExecutable();
+        const detectedBlenderExecutable = detectBlenderExecutable();
+        const blenderLaunch = openInBlender
+          ? launchBlenderFile(exportedGlbPath)
+          : {
+            blenderExecutable: detectedBlenderExecutable,
+            openCommand: detectedBlenderExecutable ? `${detectedBlenderExecutable} "${exportedGlbPath}"` : '',
+            openedInBlender: false,
+          };
         const manifestPath = path.join(exportDirectory, 'merkin-blender-export.json');
         fs.writeFileSync(manifestPath, JSON.stringify({
           createdAt: new Date().toISOString(),
@@ -3411,26 +3710,105 @@ const server = http.createServer(async (req, res) => {
           exportedGlbPath,
           referenceImageUrl: resolvedReferenceUrl,
           referenceImagePath: exportedReferencePath,
-          openCommand: blenderExecutable ? `${blenderExecutable} "${exportedGlbPath}"` : '',
+          openCommand: blenderLaunch.openCommand,
         }, null, 2));
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
           success: true,
-          message: blenderExecutable
-            ? 'Exported a Blender-ready GLB package and detected a Blender executable.'
-            : 'Exported a Blender-ready GLB package.',
+          message: blenderLaunch.openedInBlender
+            ? 'Exported a Blender-ready GLB package and opened it in Blender.'
+            : blenderLaunch.blenderExecutable
+              ? 'Exported a Blender-ready GLB package and detected a Blender executable.'
+              : 'Exported a Blender-ready GLB package.',
           exportDirectory,
           exportedGlbPath,
           referenceImagePath: exportedReferencePath,
           manifestPath,
-          blenderExecutable,
-          openCommand: blenderExecutable ? `${blenderExecutable} "${exportedGlbPath}"` : '',
+          blenderExecutable: blenderLaunch.blenderExecutable,
+          openCommand: blenderLaunch.openCommand,
+          openedInBlender: blenderLaunch.openedInBlender,
         }));
       } catch (error) {
         console.error('Style Blender export error:', error);
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, message: `Blender export failed: ${error.message}` }));
+      }
+    });
+    return;
+  }
+
+  if (pathname === '/api/style/reimport-blender' && req.method === 'POST') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+      try {
+        const {
+          sourceAssetUrl = '',
+          exportPath = '',
+          nodeName = '',
+        } = JSON.parse(body);
+
+        if (!sourceAssetUrl && !exportPath) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'sourceAssetUrl or exportPath is required' }));
+          return;
+        }
+
+        let exportDirectory = exportPath ? resolveBlenderExportDirectory(exportPath) : '';
+        let matchedExport = null;
+
+        if (!exportDirectory) {
+          matchedExport = findLatestBlenderExportForSource(sourceAssetUrl);
+          if (!matchedExport) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: 'No Blender export package was found for this asset.' }));
+            return;
+          }
+          exportDirectory = matchedExport.directory;
+        }
+
+        const latestModelPath = findLatestModelInDirectory(exportDirectory);
+        if (!latestModelPath) {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'No .glb or .gltf file was found in the Blender export directory.' }));
+          return;
+        }
+
+        const assetBaseName = path.basename(latestModelPath, path.extname(latestModelPath));
+        const assetSlug = buildSafeAssetSlug(nodeName || assetBaseName || 'blender-reimport');
+        const outputDirectory = path.join(GENERATED_BLENDER_REIMPORT_ROOT, assetSlug);
+        ensureDirectory(outputDirectory);
+
+        const outputFilePath = path.join(outputDirectory, `${assetSlug}-blender-reimport-${timestampKey()}.glb`);
+        await copyModelToGlb(latestModelPath, outputFilePath);
+
+        const metadataPath = outputFilePath.replace(/\.glb$/i, '.json');
+        fs.writeFileSync(metadataPath, JSON.stringify({
+          createdAt: new Date().toISOString(),
+          sourceAssetUrl,
+          exportDirectory,
+          importedFrom: latestModelPath,
+          manifestPath: matchedExport?.manifestPath || '',
+          outputFilePath,
+        }, null, 2));
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          message: 'Copied the latest Blender-edited model into generated assets.',
+          assetUrl: toPublicAssetUrl(outputFilePath),
+          metadataPath: toRepoRelative(metadataPath),
+          exportedGlbPath: latestModelPath,
+          exportDirectory,
+        }));
+      } catch (error) {
+        console.error('Style Blender reimport error:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: `Blender reimport failed: ${error.message}` }));
       }
     });
     return;
@@ -3471,7 +3849,7 @@ const server = http.createServer(async (req, res) => {
         ensureDirectory(sourceDirectory);
         ensureDirectory(referenceDirectory);
 
-        const sourceAssetPath = path.join(sourceDirectory, `${slugify(sourceName || inspection.assetName)}.glb`);
+        const sourceAssetPath = path.join(sourceDirectory, `${buildSafeAssetSlug(sourceName || inspection.assetName)}.glb`);
         await copyModelToGlb(inspection.assetPath, sourceAssetPath);
 
         let selectedReferenceUrl = referenceImageUrl || inspection.detectedReferenceImageUrl || '';
@@ -3618,7 +3996,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         const outputDirectory = createGeneratedStyleDirectory(sourceName || fileName || 'scene-source', 'sources');
-        const baseName = slugify(path.basename(fileName || sourceName || 'scene-source', path.extname(fileName || '')));
+        const baseName = buildSafeAssetSlug(path.basename(fileName || sourceName || 'scene-source', path.extname(fileName || '')));
         const outputFilePath = path.join(outputDirectory, `${baseName || 'scene-source'}.glb`);
         const metadataPath = outputFilePath.replace(/\.glb$/i, '.json');
         const outputBuffer = Buffer.from(glbBase64, 'base64');
@@ -3773,6 +4151,37 @@ const server = http.createServer(async (req, res) => {
         console.error('Hunyuan job queue error:', error);
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, message: `Job queue failed: ${error.message}` }));
+      }
+    });
+    return;
+  }
+
+  if (pathname === '/api/hunyuan3d/jobs/cancel' && req.method === 'POST') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+      try {
+        const payload = body ? JSON.parse(body) : {};
+        const cancelledJobIds = await cancelHunyuanJobs({
+          jobId: payload.jobId || '',
+          all: payload.all === true,
+        });
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          cancelledJobIds,
+          message: cancelledJobIds.length > 0
+            ? `Cancelled ${cancelledJobIds.length} AI job${cancelledJobIds.length === 1 ? '' : 's'}.`
+            : 'No matching AI jobs were active or queued.',
+        }));
+      } catch (error) {
+        console.error('Hunyuan job cancel error:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: `Job cancel failed: ${error.message}` }));
       }
     });
     return;
@@ -3946,7 +4355,7 @@ const server = http.createServer(async (req, res) => {
           }
 
           const stagedReference = copyFileToComfyUiInput(referencePath, comfyUiRoot, inspection.assetName || sourceName || 'reference');
-          const outputPrefix = `mesh/merkin/${slugify(inspection.assetName || sourceName || 'asset')}-${Date.now()}`;
+          const outputPrefix = `mesh/merkin/${buildSafeAssetSlug(inspection.assetName || sourceName || 'asset')}-${Date.now()}`;
           const rawOutputPrefix = `${outputPrefix}-raw`;
           const workflowSeed = Number(BigInt(Date.now()) % BigInt(0xffffffffffffffff));
           const comfyPrompt = mode === 'texture'
@@ -3993,7 +4402,7 @@ const server = http.createServer(async (req, res) => {
           }
 
           const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-          const assetSlug = slugify(inspection.assetName || sourceName || 'asset');
+          const assetSlug = buildSafeAssetSlug(inspection.assetName || sourceName || 'asset');
           const outputDirectory = path.join(GENERATED_HUNYUAN_ROOT, assetSlug);
           const outputFileName = mode === 'texture'
             ? `${assetSlug}-texture-wrap-${timestamp}.glb`
@@ -4003,6 +4412,9 @@ const server = http.createServer(async (req, res) => {
 
           ensureDirectory(outputDirectory);
           fs.copyFileSync(generatedMeshPath, outputFilePath);
+          await centerModelForSceneReplacement(outputFilePath, 'center').catch((error) => {
+            console.warn('Generated ComfyUI mesh centering failed:', error);
+          });
           fs.writeFileSync(
             outputMetadataPath,
             JSON.stringify(
@@ -4109,7 +4521,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const assetSlug = slugify(inspection.assetName);
+        const assetSlug = buildSafeAssetSlug(inspection.assetName);
         const modeSlug = mode === 'texture' ? 'texture-wrap' : 'replacement-mesh';
         const outputDirectory = path.join(GENERATED_HUNYUAN_ROOT, assetSlug);
         const outputFileName = `${assetSlug}-${modeSlug}-${timestamp}.glb`;
@@ -4118,6 +4530,9 @@ const server = http.createServer(async (req, res) => {
 
         ensureDirectory(outputDirectory);
         fs.writeFileSync(outputFilePath, outputBuffer);
+        await centerModelForSceneReplacement(outputFilePath, 'center').catch((error) => {
+          console.warn('Generated Hunyuan API mesh centering failed:', error);
+        });
         fs.writeFileSync(
           outputMetadataPath,
           JSON.stringify(

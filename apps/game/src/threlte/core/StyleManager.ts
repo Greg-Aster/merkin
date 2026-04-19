@@ -12,7 +12,7 @@ import { getPalette, type StylePreset, type ColorPalette } from '../styles/Style
 const isDev = import.meta.env.DEV
 
 // Style system stores
-export const currentStylePresetStore = writable<StylePreset>('ghibli')
+export const currentStylePresetStore = writable<StylePreset>('surreal-site')
 export const enableToonShadingStore = writable<boolean>(true)
 export const enableOutlinesStore = writable<boolean>(true)
 export const enableColorGradingStore = writable<boolean>(true)
@@ -29,7 +29,7 @@ export class StyleManager {
   
   constructor(registry: SystemRegistry) {
     this.registry = registry
-    this.currentPalette = getPalette('ghibli')
+    this.currentPalette = getPalette('surreal-site')
     this.setupToonGradientMap()
     
     // Subscribe to style changes

@@ -135,7 +135,7 @@ export class OptimizationManager {
     },
     [OptimizationLevel.ULTRA]: {
       canvasScale: 1.0,
-      enablePostProcessing: true,
+      enablePostProcessing: false,
       enableShadows: true,
       shadowMapSize: 1024,
       enableDynamicLighting: true,

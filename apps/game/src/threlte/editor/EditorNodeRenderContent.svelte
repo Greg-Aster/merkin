@@ -13,6 +13,12 @@
   export let node: EditorSceneNode
   export let editorEnabled = false
 
+  $: assetNode = node.kind === 'asset' ? node.asset ?? null : null
+  $: prefabNode = node.kind === 'prefab' ? node.prefab ?? null : null
+  $: primitiveNode = node.kind === 'primitive' ? node.primitive ?? null : null
+  $: lightNode = node.kind === 'light' ? node.light ?? null : null
+  $: renderKey = `${node.id}:${node.kind}:${assetNode?.url ?? prefabNode?.type ?? primitiveNode?.geometry ?? lightNode?.color ?? 'group'}`
+
   const materialOverrideStore = writable<EditorMaterialData | null>(null)
   setContext(EDITOR_MATERIAL_OVERRIDE_CONTEXT, materialOverrideStore)
 
@@ -46,75 +52,81 @@
     }
   }
 
-  $: materialOverrideStore.set(node.kind === 'primitive' ? getPrimitiveFallbackMaterial(node) : node.material ?? null)
+  $: materialOverrideStore.set(primitiveNode ? getPrimitiveFallbackMaterial(node) : node.material ?? null)
 </script>
 
-{#if node.kind === 'asset' && node.asset}
-  <HeroProp url={node.asset.url} />
-{:else if node.kind === 'prefab' && node.prefab}
-  <EditorPrefabNode prefab={node.prefab} />
-{:else if node.kind === 'primitive' && node.primitive}
-  <ProceduralMesh
-    geometry={node.primitive.geometry}
-    args={node.primitive.args}
-    position={[0, 0, 0]}
-    rotation={[0, 0, 0]}
-    scale={[1, 1, 1]}
-    color={node.primitive.color}
-    emissive={node.primitive.emissive}
-    emissiveIntensity={node.primitive.emissiveIntensity ?? 0}
-    metalness={node.primitive.metalness ?? 0.7}
-    roughness={node.primitive.roughness ?? 0.3}
-    transparent={node.primitive.transparent ?? false}
-    opacity={node.primitive.opacity ?? 1}
-  />
-{:else if node.kind === 'light' && node.light}
-  <AdaptivePointLight
-    position={[0, 0, 0]}
-    color={node.light.color}
-    intensity={node.light.intensity}
-    distance={node.light.distance}
-    decay={node.light.decay}
-  />
-  <ProceduralMesh
-    geometry="icosahedron"
-    args={[0.2, 0]}
-    position={[0, 0, 0]}
-    rotation={[0, 0, 0]}
-    scale={[1, 1, 1]}
-    color={node.light.color}
-    emissive={node.light.color}
-    emissiveIntensity={0.7}
-    metalness={1}
-    roughness={0.05}
-  />
-{:else if node.kind === 'group' && editorEnabled}
-  <ProceduralMesh
-    geometry="octahedron"
-    args={[0.18, 0]}
-    position={[0, 0, 0]}
-    rotation={[0, 0, 0]}
-    scale={[1, 1, 1]}
-    color="#a7d9ff"
-    emissive="#7ecbff"
-    emissiveIntensity={0.35}
-    metalness={1}
-    roughness={0.08}
-    transparent={true}
-    opacity={0.82}
-  />
-  <ProceduralMesh
-    geometry="torus"
-    args={[0.42, 0.015, 10, 20]}
-    position={[0, 0, 0]}
-    rotation={[Math.PI / 2, 0, 0]}
-    scale={[1, 1, 1]}
-    color="#7ecbff"
-    emissive="#7ecbff"
-    emissiveIntensity={0.2}
-    metalness={1}
-    roughness={0.04}
-    transparent={true}
-    opacity={0.45}
-  />
-{/if}
+{#key renderKey}
+  {#if assetNode}
+    <HeroProp url={assetNode.url} />
+  {:else if prefabNode}
+    <EditorPrefabNode prefab={prefabNode} />
+  {:else if primitiveNode}
+    <ProceduralMesh
+      name={node.name}
+      userData={node.id === 'solitude-ground-plateau' || node.id === 'solitude-ground-dais'
+        ? { renderStyleSkip: true }
+        : {}}
+      geometry={primitiveNode.geometry}
+      args={primitiveNode.args}
+      position={[0, 0, 0]}
+      rotation={[0, 0, 0]}
+      scale={[1, 1, 1]}
+      color={primitiveNode.color}
+      emissive={primitiveNode.emissive}
+      emissiveIntensity={primitiveNode.emissiveIntensity ?? 0}
+      metalness={primitiveNode.metalness ?? 0.7}
+      roughness={primitiveNode.roughness ?? 0.3}
+      transparent={primitiveNode.transparent ?? false}
+      opacity={primitiveNode.opacity ?? 1}
+    />
+  {:else if lightNode}
+    <AdaptivePointLight
+      position={[0, 0, 0]}
+      color={lightNode.color}
+      intensity={lightNode.intensity}
+      distance={lightNode.distance}
+      decay={lightNode.decay}
+    />
+    <ProceduralMesh
+      geometry="icosahedron"
+      args={[0.2, 0]}
+      position={[0, 0, 0]}
+      rotation={[0, 0, 0]}
+      scale={[1, 1, 1]}
+      color={lightNode.color}
+      emissive={lightNode.color}
+      emissiveIntensity={0.7}
+      metalness={1}
+      roughness={0.05}
+    />
+  {:else if node.kind === 'group' && editorEnabled}
+    <ProceduralMesh
+      geometry="octahedron"
+      args={[0.18, 0]}
+      position={[0, 0, 0]}
+      rotation={[0, 0, 0]}
+      scale={[1, 1, 1]}
+      color="#a7d9ff"
+      emissive="#7ecbff"
+      emissiveIntensity={0.35}
+      metalness={1}
+      roughness={0.08}
+      transparent={true}
+      opacity={0.82}
+    />
+    <ProceduralMesh
+      geometry="torus"
+      args={[0.42, 0.015, 10, 20]}
+      position={[0, 0, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+      scale={[1, 1, 1]}
+      color="#7ecbff"
+      emissive="#7ecbff"
+      emissiveIntensity={0.2}
+      metalness={1}
+      roughness={0.04}
+      transparent={true}
+      opacity={0.45}
+    />
+  {/if}
+{/key}

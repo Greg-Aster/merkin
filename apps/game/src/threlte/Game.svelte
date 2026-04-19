@@ -133,6 +133,7 @@
   let physicsReady = false
   let activeLevelLoadRequest = 0
   let editorFeaturesPromise: Promise<void> | null = null
+  let sceneLayerComponentPromise: Promise<void> | null = null
   let deferredAudioCleanup: (() => void) | null = null
   let deferredGameplayCoreCleanup: (() => void) | null = null
   let gameplayCorePromise: Promise<void> | null = null
@@ -221,7 +222,12 @@
   $: error = $errorStore
   $: editorEnabled = $editorStateStore.enabled
   $: collisionOverlayEnabled = $editorStateStore.collisionOverlayEnabled
-  $: playerReady = Boolean(playerComponent && typeof playerComponent.spawnAt === 'function')
+  $: playerReady = Boolean(
+    playerComponent
+    && typeof playerComponent.spawnAt === 'function'
+    && typeof playerComponent.isSpawnReady === 'function'
+    && playerComponent.isSpawnReady()
+  )
   $: setRuntimeDiagnostic('mode', {
     level: 'ready',
     message: editorEnabled ? 'Editor mode active.' : 'Gameplay mode active.',
@@ -327,6 +333,10 @@
     void ensureConversationDialogComponent()
   }
 
+  $: if (currentLevel && !editorSceneLayerComponent && !sceneLayerComponentPromise) {
+    void ensureSceneLayerComponent()
+  }
+
   $: if (editorEnabled && !editorFeaturesPromise) {
     void ensureEditorFeatures()
   }
@@ -416,6 +426,23 @@
     } catch (error) {
       console.warn('Failed to load conversation dialog:', error)
     }
+  }
+
+  async function ensureSceneLayerComponent() {
+    if (editorSceneLayerComponent) return
+
+    if (!sceneLayerComponentPromise) {
+      sceneLayerComponentPromise = import('./editor/EditorSceneLayer.svelte')
+        .then((module) => {
+          editorSceneLayerComponent = getModuleDefault(module, 'editor scene layer')
+        })
+        .catch((error) => {
+          console.warn('Failed to load scene layer:', error)
+          sceneLayerComponentPromise = null
+        })
+    }
+
+    await sceneLayerComponentPromise
   }
 
   async function ensureChatBoxComponent() {
@@ -1030,7 +1057,7 @@
       // === ADD THE CONVERSATION DIALOG RENDERING BLOCK HERE ===
       // ==================================================================
       -->
-      {#if $isConversationActive && conversationDialogComponent}
+      {#if ($isConversationActive || $conversationUIState.isVisible) && conversationDialogComponent}
         <div style="pointer-events: auto;">
             <svelte:component
                 this={conversationDialogComponent}

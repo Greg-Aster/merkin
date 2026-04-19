@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte'
+  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
   import { T } from '@threlte/core'
   import * as THREE from 'three'
   import AmbientParticleField from '../components/AmbientParticleField.svelte'
   import AmbientAudioRegions from '../components/AmbientAudioRegions.svelte'
+  import GroundMistLayer from '../components/GroundMistLayer.svelte'
   import LevelManager from '../core/LevelManager.svelte'
   import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
   import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
@@ -11,10 +12,26 @@
   import StarMap from '../systems/StarMap.svelte'
   import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
   import { Terrain, terrainStore, type TerrainConfig } from '../features/terrain'
+  import { qualityLevelStore, qualitySettingsStore } from '../features/performance/stores/performanceStore'
+  import { shouldEnableSceneShadows } from '../features/performance/utils/runtimeSceneBudget'
   import { playerStateStore } from '../stores/gameStateStore'
+  import {
+    renderStyleEnabled,
+    renderStyleFlattenMaterials,
+    renderStyleOutlineOpacity,
+    renderStyleOutlineThickness,
+    renderStylePaintedOutlines,
+    renderStylePresetChoice,
+  } from '../stores/uiStore'
   import { editorSceneStore, editorStateStore, solitudeEditorSettingsStore } from '../editor/editorStore'
   import { createWorldMatrixResolver } from '../editor/editorHierarchyUtils'
   import { resolveSolitudePresetSettings } from '../editor/editorLevelPresets'
+  import {
+    buildSolitudeRuntimeVisualStyle,
+    DEFAULT_SOLITUDE_ATMOSPHERE_PRESET,
+    getSolitudeAtmosphereProfile,
+  } from '../styles/GameplayStyleProfiles'
+  import { replaceRuntimeVisualStyle, resetRuntimeVisualStyle } from '../styles/runtimeVisualStyleStore'
 
   const dispatch = createEventDispatcher()
   const isDev = import.meta.env.DEV
@@ -33,6 +50,8 @@
   let isLoadingTimeline = true
   let timelineLoadError: string | null = null
   let starMapRef: THREE.Group
+  let styleSystemComponent: any = null
+  let enableToonShading = true
 
   function loadTimelineData() {
     try {
@@ -101,77 +120,102 @@
 
   function applySolitudeEditorSettings(base: any, editorSettings: any) {
     if (!base) return null
-    if (!editorSettings) return structuredClone(base)
+    const resolvedEditorSettings = editorSettings ?? {}
+    const profileDefaults = getSolitudeAtmosphereProfile(
+      resolvedEditorSettings.presets?.atmosphere ?? DEFAULT_SOLITUDE_ATMOSPHERE_PRESET,
+    )
+    const defaultSettings = profileDefaults.settings
 
     return {
       ...structuredClone(base),
       spawn: {
         ...base.spawn,
-        ...(editorSettings.spawn ?? {}),
+        ...(resolvedEditorSettings.spawn ?? {}),
       },
       features: {
         ...base.features,
-        starMap: editorSettings.features?.starMap ?? base.features?.starMap ?? true,
-        conversations: editorSettings.features?.conversations ?? base.features?.conversations ?? true,
-        water: editorSettings.features?.water ?? editorSettings.water?.enabled ?? false,
-        styles: editorSettings.features?.styles ?? base.features?.styles ?? true,
-        ambientParticles: editorSettings.features?.ambientParticles ?? true,
+        starMap: resolvedEditorSettings.features?.starMap ?? base.features?.starMap ?? true,
+        conversations: resolvedEditorSettings.features?.conversations ?? base.features?.conversations ?? true,
+        water: resolvedEditorSettings.features?.water ?? resolvedEditorSettings.water?.enabled ?? false,
+        styles: resolvedEditorSettings.features?.styles ?? base.features?.styles ?? true,
+        ambientParticles: resolvedEditorSettings.features?.ambientParticles ?? defaultSettings.features?.ambientParticles ?? true,
       },
-      skyboxPreset: editorSettings.skyboxPreset ?? 'observatory',
+      skyboxPreset: resolvedEditorSettings.skyboxPreset ?? base.skyboxPreset ?? defaultSettings.skyboxPreset ?? 'observatory',
       style: {
         ...base.style,
-        preset: editorSettings.style?.preset ?? base.style?.preset,
-        enabled: editorSettings.style?.enabled ?? base.style?.enabled,
+        preset: resolvedEditorSettings.style?.preset ?? base.style?.preset ?? defaultSettings.style?.preset ?? 'surreal-site',
+        enabled: resolvedEditorSettings.style?.enabled ?? base.style?.enabled ?? defaultSettings.style?.enabled ?? true,
         fog: {
           ...base.style?.fog,
-          ...(editorSettings.style?.fog ?? {}),
+          color: resolvedEditorSettings.style?.fog?.color ?? base.style?.fog?.color ?? defaultSettings.style?.fog?.color ?? '#43206c',
+          density: resolvedEditorSettings.style?.fog?.density ?? base.style?.fog?.density ?? defaultSettings.style?.fog?.density ?? 0.00092,
+        },
+        haze: {
+          ...base.style?.haze,
+          ...(resolvedEditorSettings.style?.haze ?? {}),
+        },
+        colorGrading: {
+          ...base.style?.colorGrading,
+          ...defaultSettings.style?.colorGrading,
+          ...(resolvedEditorSettings.style?.colorGrading ?? {}),
+        },
+        bloom: {
+          ...base.style?.bloom,
+          ...defaultSettings.style?.bloom,
+          ...(resolvedEditorSettings.style?.bloom ?? {}),
         },
       },
       lighting: {
         ...base.lighting,
-        ambientIntensity: editorSettings.lighting?.ambientIntensity ?? base.lighting?.ambientIntensity,
+        ambientIntensity: resolvedEditorSettings.lighting?.ambientIntensity ?? base.lighting?.ambientIntensity ?? defaultSettings.lighting?.ambientIntensity ?? 0.46,
         directionalLights: [
           {
             ...(base.lighting?.directionalLights?.[0] ?? { position: [70, 110, 32], color: 13162239, intensity: 0.7 }),
-            intensity: editorSettings.lighting?.keyLightIntensity ?? base.lighting?.directionalLights?.[0]?.intensity ?? 0.7,
+            intensity: resolvedEditorSettings.lighting?.keyLightIntensity ?? base.lighting?.directionalLights?.[0]?.intensity ?? defaultSettings.lighting?.keyLightIntensity ?? 0.96,
           },
           {
             ...(base.lighting?.directionalLights?.[1] ?? { position: [-60, 36, -48], color: 4344686, intensity: 0.22 }),
-            intensity: editorSettings.lighting?.fillLightIntensity ?? base.lighting?.directionalLights?.[1]?.intensity ?? 0.22,
+            intensity: resolvedEditorSettings.lighting?.fillLightIntensity ?? base.lighting?.directionalLights?.[1]?.intensity ?? defaultSettings.lighting?.fillLightIntensity ?? 0.34,
           },
         ],
       },
       water: {
-        enabled: editorSettings.water?.enabled ?? editorSettings.features?.water ?? false,
-        level: editorSettings.water?.level ?? -0.16,
+        enabled: resolvedEditorSettings.water?.enabled ?? resolvedEditorSettings.features?.water ?? base.water?.enabled ?? defaultSettings.water?.enabled ?? false,
+        level: resolvedEditorSettings.water?.level ?? base.water?.level ?? defaultSettings.water?.level ?? -0.16,
         size: {
-          width: editorSettings.water?.size?.width ?? 800,
-          height: editorSettings.water?.size?.height ?? 800,
+          width: resolvedEditorSettings.water?.size?.width ?? base.water?.size?.width ?? defaultSettings.water?.size?.width ?? 800,
+          height: resolvedEditorSettings.water?.size?.height ?? base.water?.size?.height ?? defaultSettings.water?.size?.height ?? 800,
         },
-        color: editorSettings.water?.color ?? '#425d72',
-        opacity: editorSettings.water?.opacity ?? 0.86,
-        enableAnimation: editorSettings.water?.enableAnimation ?? true,
+        color: resolvedEditorSettings.water?.color ?? base.water?.color ?? defaultSettings.water?.color ?? '#182f63',
+        opacity: resolvedEditorSettings.water?.opacity ?? base.water?.opacity ?? defaultSettings.water?.opacity ?? 0.9,
+        enableAnimation: resolvedEditorSettings.water?.enableAnimation ?? base.water?.enableAnimation ?? defaultSettings.water?.enableAnimation ?? true,
+        underwaterFogDensity: resolvedEditorSettings.water?.underwaterFogDensity ?? base.water?.underwaterFogDensity ?? 0.1,
+        underwaterFogColor: resolvedEditorSettings.water?.underwaterFogColor ?? base.water?.underwaterFogColor ?? 0x081121,
+        surfaceFogDensity: resolvedEditorSettings.water?.surfaceFogDensity ?? base.water?.surfaceFogDensity ?? 0.0012,
       },
       ambientParticles: {
-        enabled: editorSettings.ambientParticles?.enabled ?? editorSettings.features?.ambientParticles ?? true,
-        count: editorSettings.ambientParticles?.count ?? 180,
-        radius: editorSettings.ambientParticles?.radius ?? 140,
-        minHeight: editorSettings.ambientParticles?.minHeight ?? 0.8,
-        maxHeight: editorSettings.ambientParticles?.maxHeight ?? 18,
-        color: editorSettings.ambientParticles?.color ?? '#b8d9ff',
-        secondaryColor: editorSettings.ambientParticles?.secondaryColor ?? '#f3e8b2',
-        size: editorSettings.ambientParticles?.size ?? 1.15,
-        opacity: editorSettings.ambientParticles?.opacity ?? 0.26,
-        driftSpeed: editorSettings.ambientParticles?.driftSpeed ?? 0.22,
-        sway: editorSettings.ambientParticles?.sway ?? 0.85,
+        enabled: resolvedEditorSettings.ambientParticles?.enabled ?? resolvedEditorSettings.features?.ambientParticles ?? defaultSettings.ambientParticles?.enabled ?? true,
+        count: resolvedEditorSettings.ambientParticles?.count ?? defaultSettings.ambientParticles?.count ?? 220,
+        radius: resolvedEditorSettings.ambientParticles?.radius ?? defaultSettings.ambientParticles?.radius ?? 132,
+        minHeight: resolvedEditorSettings.ambientParticles?.minHeight ?? defaultSettings.ambientParticles?.minHeight ?? 0.35,
+        maxHeight: resolvedEditorSettings.ambientParticles?.maxHeight ?? defaultSettings.ambientParticles?.maxHeight ?? 9.5,
+        color: resolvedEditorSettings.ambientParticles?.color ?? defaultSettings.ambientParticles?.color ?? '#58e6ff',
+        secondaryColor: resolvedEditorSettings.ambientParticles?.secondaryColor ?? defaultSettings.ambientParticles?.secondaryColor ?? '#ff4cd0',
+        size: resolvedEditorSettings.ambientParticles?.size ?? defaultSettings.ambientParticles?.size ?? 1.22,
+        opacity: resolvedEditorSettings.ambientParticles?.opacity ?? defaultSettings.ambientParticles?.opacity ?? 0.22,
+        driftSpeed: resolvedEditorSettings.ambientParticles?.driftSpeed ?? defaultSettings.ambientParticles?.driftSpeed ?? 0.14,
+        sway: resolvedEditorSettings.ambientParticles?.sway ?? defaultSettings.ambientParticles?.sway ?? 0.62,
       },
       ambientAudio: {
-        enabled: editorSettings.ambientAudio?.enabled ?? false,
-        track: editorSettings.ambientAudio?.track ?? '',
-        volume: editorSettings.ambientAudio?.volume ?? 0.2,
-        falloff: editorSettings.ambientAudio?.falloff ?? 36,
-        position: editorSettings.ambientAudio?.position ?? [0, 8, 0],
-        scale: editorSettings.ambientAudio?.scale ?? [1500, 120, 1500],
+        enabled: resolvedEditorSettings.ambientAudio?.enabled ?? false,
+        track: resolvedEditorSettings.ambientAudio?.track ?? '',
+        volume: resolvedEditorSettings.ambientAudio?.volume ?? 0.2,
+        falloff: resolvedEditorSettings.ambientAudio?.falloff ?? 36,
+        position: resolvedEditorSettings.ambientAudio?.position ?? [0, 8, 0],
+        scale: resolvedEditorSettings.ambientAudio?.scale ?? [1500, 120, 1500],
+      },
+      presets: {
+        ...(resolvedEditorSettings.presets ?? {}),
       },
     }
   }
@@ -186,6 +230,12 @@
       files: ['px.webp', 'nx.webp', 'py.webp', 'ny.webp', 'pz.webp', 'nz.webp'] as [string, string, string, string, string, string],
     },
   } as const
+
+  async function ensureStyleSystemComponent() {
+    if (styleSystemComponent) return
+    const module = await import('../styles/RenderStyleSystem.svelte')
+    styleSystemComponent = module.default
+  }
 
   function handleStarSelected(event: CustomEvent) {
     dispatch('starSelected', event.detail)
@@ -204,12 +254,95 @@
     return $terrainStore.manager.getHeightAt(playerSpawnPoint[0], playerSpawnPoint[2])
   }
 
+  function clampNumber(value: number, min: number, max: number) {
+    return Math.min(max, Math.max(min, value))
+  }
+
+  function gradeSceneColor(
+    colorValue: string,
+    colorGrading: { saturation?: number, brightness?: number, warmth?: number } | undefined,
+  ) {
+    const nextColor = new THREE.Color(colorValue)
+    const hsl = { h: 0, s: 0, l: 0 }
+    nextColor.getHSL(hsl)
+
+    const saturation = colorGrading?.saturation ?? 1
+    const brightness = colorGrading?.brightness ?? 1
+    const warmth = colorGrading?.warmth ?? 1
+
+    const warmedHue = (hsl.h + ((warmth - 1) * 0.03) + 1) % 1
+    const gradedSaturation = clampNumber(hsl.s * (0.92 + ((saturation - 1) * 0.75)), 0, 1)
+    const gradedLightness = clampNumber(hsl.l + ((brightness - 1) * 0.08), 0, 1)
+
+    nextColor.setHSL(warmedHue, gradedSaturation, gradedLightness)
+    return `#${nextColor.getHexString()}`
+  }
+
+  function gradeLightIntensity(
+    baseIntensity: number,
+    role: 'ambient' | 'hemi' | 'key' | 'fill',
+    colorGrading: { contrast?: number, brightness?: number } | undefined,
+  ) {
+    const contrast = colorGrading?.contrast ?? 1
+    const brightness = colorGrading?.brightness ?? 1
+
+    const brightnessScale = 0.92 + ((brightness - 1) * 0.7)
+    const contrastScale = role === 'ambient' || role === 'hemi'
+      ? 1 - Math.max(0, contrast - 1) * 0.2
+      : 1 + Math.max(0, contrast - 1) * 0.4
+
+    return baseIntensity * clampNumber(brightnessScale * contrastScale, 0.72, 1.32)
+  }
+
   $: resolvedSolitudeSettings = resolveSolitudePresetSettings($solitudeEditorSettingsStore)
   $: manifest = baseManifest ? applySolitudeEditorSettings(baseManifest, resolvedSolitudeSettings) : null
+  $: solitudeAtmosphereProfile = getSolitudeAtmosphereProfile(
+    resolvedSolitudeSettings?.presets?.atmosphere ?? DEFAULT_SOLITUDE_ATMOSPHERE_PRESET,
+  )
+  $: resolvedRuntimeVisualStyle = buildSolitudeRuntimeVisualStyle({
+    ...(manifest ?? {}),
+    presets: resolvedSolitudeSettings?.presets ?? manifest?.presets,
+  })
+  $: if (manifest) {
+    replaceRuntimeVisualStyle(resolvedRuntimeVisualStyle)
+  }
+  $: enableToonShading = manifest?.style?.enabled !== false
+  $: manifestStylePreset = manifest?.style?.preset ?? solitudeAtmosphereProfile.stylePreset
+  $: resolvedStylePreset =
+    $renderStylePresetChoice === 'manifest'
+      ? manifestStylePreset
+      : $renderStylePresetChoice
+  $: fullStyleSystemEnabled = !!manifest?.features?.styles && $renderStyleEnabled
+  $: if (fullStyleSystemEnabled && !styleSystemComponent) {
+    void ensureStyleSystemComponent()
+  }
   $: playerSpawnPoint = manifest?.spawn?.position ?? [0, 2.4, -24]
   $: waterEnabled = manifest?.features?.water ?? manifest?.water?.enabled ?? false
   $: activeSkyboxPreset = SKYBOX_PRESETS[manifest?.skyboxPreset as keyof typeof SKYBOX_PRESETS] ?? SKYBOX_PRESETS.observatory
   $: ambientParticlesEnabled = manifest?.features?.ambientParticles ?? manifest?.ambientParticles?.enabled ?? true
+  $: keyLightCastsShadow = shouldEnableSceneShadows($qualityLevelStore, $qualitySettingsStore)
+  $: shadowMapSize = Math.max(512, $qualitySettingsStore.shadowMapSize || 512)
+  $: resolvedColorGrading = manifest?.style?.colorGrading ?? {
+    saturation: 1,
+    contrast: 1,
+    brightness: 1,
+    warmth: 1,
+  }
+  $: gradedAmbientColor = gradeSceneColor(solitudeLightingTheme.ambientColor, resolvedColorGrading)
+  $: gradedHemisphereSkyColor = gradeSceneColor(solitudeLightingTheme.hemisphereSkyColor, resolvedColorGrading)
+  $: gradedHemisphereGroundColor = gradeSceneColor(solitudeLightingTheme.hemisphereGroundColor, {
+    ...resolvedColorGrading,
+    brightness: (resolvedColorGrading.brightness ?? 1) * 0.92,
+  })
+  $: gradedKeyColor = gradeSceneColor(solitudeLightingTheme.keyColor, resolvedColorGrading)
+  $: gradedFillColor = gradeSceneColor(solitudeLightingTheme.fillColor, resolvedColorGrading)
+  $: gradedParticleColor = gradeSceneColor(manifest?.ambientParticles?.color ?? '#58e6ff', resolvedColorGrading)
+  $: gradedParticleSecondaryColor = gradeSceneColor(manifest?.ambientParticles?.secondaryColor ?? '#ff4cd0', resolvedColorGrading)
+  $: gradedWaterColor = gradeSceneColor(manifest?.water?.color ?? '#182f63', resolvedColorGrading)
+  $: ambientLightIntensity = gradeLightIntensity(manifest?.lighting?.ambientIntensity ?? 0.46, 'ambient', resolvedColorGrading)
+  $: hemisphereLightIntensity = gradeLightIntensity(0.42, 'hemi', resolvedColorGrading)
+  $: keyLightIntensity = gradeLightIntensity(manifest?.lighting?.directionalLights?.[0]?.intensity ?? 0.96, 'key', resolvedColorGrading)
+  $: fillLightIntensity = gradeLightIntensity(manifest?.lighting?.directionalLights?.[1]?.intensity ?? 0.34, 'fill', resolvedColorGrading)
   $: presetAmbientAudioRegions = manifest?.ambientAudio?.enabled && manifest?.ambientAudio?.track
     ? [{
         id: 'solitude-preset-ambient-audio',
@@ -254,8 +387,9 @@
   $: effectiveFog = (() => {
     const playerPosition = $playerStateStore.position
     const fogVolumes = authoredGameplayNodes.filter((entry) => entry.node.gameplay?.type === 'fog-volume')
-    const baseColor = new THREE.Color(manifest?.style?.fog?.color ?? '#7b8797')
-    const baseDensity = manifest?.style?.fog?.density ?? 0.00045
+    const baseColor = new THREE.Color(manifest?.style?.fog?.color ?? '#43206c')
+    const baseDensity = manifest?.style?.fog?.density ?? 0.00092
+    const heightFog = resolvedRuntimeVisualStyle.heightFog
 
     let strongestInfluence = 0
     let targetColor = baseColor.clone()
@@ -283,13 +417,24 @@
       }
     }
 
-    const blendedColor = baseColor.clone().lerp(targetColor, strongestInfluence)
-    const blendedDensity = baseDensity + (targetDensity - baseDensity) * strongestInfluence
+    const heightInfluence = 1 - Math.min(
+      1,
+      Math.max(0, (playerPosition[1] - heightFog.floor) / Math.max(0.001, heightFog.ceiling - heightFog.floor)),
+    )
+    const blendedColor = baseColor
+      .clone()
+      .lerp(targetColor, strongestInfluence)
+      .lerp(new THREE.Color(heightFog.color), heightInfluence * heightFog.colorInfluence)
+    const blendedDensity = baseDensity
+      + (targetDensity - baseDensity) * strongestInfluence
+      + (heightFog.density * heightInfluence)
     return {
       color: `#${blendedColor.getHexString()}`,
       density: blendedDensity,
     }
   })()
+
+  $: solitudeLightingTheme = solitudeAtmosphereProfile.lighting
 
   onMount(() => {
     void loadManifest().catch((error) => {
@@ -297,20 +442,58 @@
     })
     loadTimelineData()
   })
+
+  onDestroy(() => {
+    resetRuntimeVisualStyle()
+  })
 </script>
 
 {#if manifest && terrainConfig}
   <LevelManager>
     <T.Group name={manifest.id ?? 'solitude-level'}>
+      {#if fullStyleSystemEnabled && styleSystemComponent}
+        <svelte:component
+          this={styleSystemComponent}
+          stylePreset={resolvedStylePreset}
+          enableToonShading={enableToonShading}
+          enableOutlines={$qualitySettingsStore.enablePostProcessing}
+          flattenMaterials={$renderStyleFlattenMaterials}
+          usePaintedOutlines={$renderStylePaintedOutlines}
+          outlineThickness={$renderStyleOutlineThickness}
+          outlineOpacity={$renderStyleOutlineOpacity}
+          toneMappingExposure={resolvedRuntimeVisualStyle.toneMappingExposure}
+          enableStyleLighting={false}
+          enableStyleFog={false}
+        />
+      {/if}
+
       <Skybox
         path={activeSkyboxPreset.path}
         files={activeSkyboxPreset.files}
       />
 
-      <T.AmbientLight color="#d5dff0" intensity={manifest.lighting?.ambientIntensity ?? 0.75} />
-      <T.HemisphereLight skyColor="#d9ebff" groundColor="#2a3340" intensity={0.58} />
-      <T.DirectionalLight position={[70, 110, 32]} color="#c7d6ff" intensity={manifest.lighting?.directionalLights?.[0]?.intensity ?? 0.7} castShadow={false} />
-      <T.DirectionalLight position={[-60, 36, -48]} color="#42536e" intensity={manifest.lighting?.directionalLights?.[1]?.intensity ?? 0.22} castShadow={false} />
+      <T.AmbientLight color={gradedAmbientColor} intensity={ambientLightIntensity} />
+      <T.HemisphereLight skyColor={gradedHemisphereSkyColor} groundColor={gradedHemisphereGroundColor} intensity={hemisphereLightIntensity} />
+      <T.DirectionalLight
+        position={solitudeLightingTheme.keyPosition}
+        color={gradedKeyColor}
+        intensity={keyLightIntensity}
+        castShadow={keyLightCastsShadow}
+        shadow-mapSize-width={shadowMapSize}
+        shadow-mapSize-height={shadowMapSize}
+        shadow.camera.near={0.5}
+        shadow.camera.far={320}
+        shadow.camera.left={-180}
+        shadow.camera.right={180}
+        shadow.camera.top={180}
+        shadow.camera.bottom={-180}
+      />
+      <T.DirectionalLight
+        position={solitudeLightingTheme.fillPosition}
+        color={gradedFillColor}
+        intensity={fillLightIntensity}
+        castShadow={false}
+      />
 
       <T.FogExp2
         color={$editorStateStore.enabled && $editorStateStore.viewportLightingMode === 'workbench'
@@ -323,6 +506,7 @@
 
       <Terrain
         config={terrainConfig}
+        showVisualSurface={false}
         on:terrainReady={() => {
           dispatch('terrainReady')
           if (spawnSystem?.requestSpawn) {
@@ -337,6 +521,17 @@
         }}
       />
 
+      <GroundMistLayer
+        enabled={resolvedRuntimeVisualStyle.heightFog.mistOpacity > 0.01}
+        color={resolvedRuntimeVisualStyle.heightFog.color}
+        opacity={resolvedRuntimeVisualStyle.heightFog.mistOpacity}
+        layers={resolvedRuntimeVisualStyle.heightFog.mistLayers}
+        baseHeight={resolvedRuntimeVisualStyle.heightFog.mistHeight}
+        heightStep={resolvedRuntimeVisualStyle.heightFog.mistSpacing}
+        scale={resolvedRuntimeVisualStyle.heightFog.mistScale}
+        driftSpeed={resolvedRuntimeVisualStyle.heightFog.mistDriftSpeed}
+      />
+
       {#if waterEnabled}
         <OceanComponent
           size={{
@@ -344,7 +539,7 @@
             height: manifest.water?.size?.height ?? 800,
           }}
           position={[0, manifest.water?.level ?? -0.16, 0]}
-          color={Number.parseInt((manifest.water?.color ?? '#425d72').replace('#', ''), 16)}
+          color={Number.parseInt(gradedWaterColor.replace('#', ''), 16)}
           opacity={manifest.water?.opacity ?? 0.86}
           enableAnimation={manifest.water?.enableAnimation ?? true}
           enableUnderwaterEffects={true}
@@ -353,9 +548,9 @@
             2,
             (manifest.water?.size?.height ?? 800) * 0.9,
           ]}
-          underwaterFogDensity={0.08}
-          underwaterFogColor={0x0a1922}
-          surfaceFogDensity={0.001}
+          underwaterFogDensity={manifest.water?.underwaterFogDensity ?? 0.1}
+          underwaterFogColor={manifest.water?.underwaterFogColor ?? 0x081121}
+          surfaceFogDensity={manifest.water?.surfaceFogDensity ?? 0.0012}
           metalness={0.08}
           roughness={0.04}
           envMapIntensity={1.8}
@@ -372,13 +567,17 @@
           radius={manifest.ambientParticles?.radius ?? 140}
           minHeight={manifest.ambientParticles?.minHeight ?? 0.8}
           maxHeight={manifest.ambientParticles?.maxHeight ?? 18}
-          color={manifest.ambientParticles?.color ?? '#b8d9ff'}
-          secondaryColor={manifest.ambientParticles?.secondaryColor ?? '#f3e8b2'}
-          size={manifest.ambientParticles?.size ?? 1.15}
-          opacity={manifest.ambientParticles?.opacity ?? 0.26}
+          color={gradedParticleColor}
+          secondaryColor={gradedParticleSecondaryColor}
+          size={(manifest.ambientParticles?.size ?? 1.15) * resolvedRuntimeVisualStyle.particles.sizeMultiplier}
+          opacity={(manifest.ambientParticles?.opacity ?? 0.26) * resolvedRuntimeVisualStyle.particles.opacityMultiplier}
           driftSpeed={manifest.ambientParticles?.driftSpeed ?? 0.22}
           sway={manifest.ambientParticles?.sway ?? 0.85}
+          intensity={1.1 + (resolvedRuntimeVisualStyle.screenFx.accentGlowIntensity * 1.8)}
           center={[0, 0, 0]}
+          distribution={resolvedRuntimeVisualStyle.particles.distribution}
+          blendMode={resolvedRuntimeVisualStyle.particles.blendMode}
+          groundBandStrength={resolvedRuntimeVisualStyle.particles.groundBandStrength}
         />
       {/if}
 

@@ -7,6 +7,7 @@ import type {
 
 const SHARED_LEVEL_SETTING_KEYS = [
   'spawn',
+  'player',
   'features',
   'style',
   'lighting',

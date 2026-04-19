@@ -336,6 +336,12 @@ export async function exportSceneNodeToGlb(node: EditorSceneNode) {
     }
 
     object.name = node.name || node.id
+    object.position.set(0, 0, 0)
+    // Keep authored proportions in the staged source mesh, but leave scene rotation
+    // on the node so the generated replacement does not inherit it twice.
+    object.rotation.set(0, 0, 0)
+    object.scale.set(...node.scale)
+    object.updateMatrixWorld(true)
     const blob = await exportObjectToGlb(object)
     return {
       kind: node.prefab ? 'prefab' as const : 'primitive' as const,

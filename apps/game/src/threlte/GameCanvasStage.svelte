@@ -11,6 +11,7 @@
   import PerformanceSystem from './features/performance/systems/Performance.svelte'
   import LODSystem from './features/performance/systems/LOD.svelte'
   import { qualitySettingsStore } from './features/performance/stores/performanceStore'
+  import { levelEditorSettingsStore } from './editor/editorStore'
   import { isSettingsMenuOpen } from './stores/uiStore'
 
   const dispatch = createEventDispatcher()
@@ -53,6 +54,12 @@
 
   function forward(type: string, detail: unknown) {
     dispatch(type, detail)
+  }
+
+  $: playerMoveSpeed = $levelEditorSettingsStore?.player?.moveSpeed ?? 5
+  $: playerJumpForce = $levelEditorSettingsStore?.player?.jumpForce ?? 8
+  $: if (!playerComponentRef) {
+    playerReady = false
   }
 </script>
 
@@ -128,8 +135,11 @@
               this={playerComponentClass}
               bind:this={playerComponentRef}
               position={[0, 0, 0]}
-              speed={5}
-              jumpForce={8}
+              speed={playerMoveSpeed}
+              jumpForce={playerJumpForce}
+              on:spawnReadyChange={(e) => {
+                playerReady = Boolean(e.detail?.ready)
+              }}
               on:interaction={(e) => forward('playerInteraction', e.detail)}
               on:lightBurst={(e) => forward('lightBurst', e.detail)}
             />

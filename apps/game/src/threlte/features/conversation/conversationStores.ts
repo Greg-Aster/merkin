@@ -213,6 +213,7 @@ export const conversationActions = {
     const mockSession = {
       id: `readonly_${npcId}_${Date.now()}`,
       npcId,
+      personality,
       isActive: true,
       startedAt: Date.now(),
       messages: []
@@ -227,8 +228,8 @@ export const conversationActions = {
       isReadOnly: true,
       readOnlyText: message,
       readOnlyDuration: duration,
-      npcEmotion: 'peaceful',
-      theme: 'firefly'
+      npcEmotion: personality?.behavior?.defaultMood ?? 'peaceful',
+      theme: getThemeForNPC(personality)
     }))
     
     if (isDev) console.log('🗣️ Starting read-only conversation:', mockSession.id)

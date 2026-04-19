@@ -7,7 +7,7 @@
 
 import * as THREE from 'three'
 
-export type StylePreset = 'site' | 'ghibli' | 'alto' | 'monument' | 'retro'
+export type StylePreset = 'site' | 'surreal-site' | 'ghibli' | 'alto' | 'monument' | 'retro'
 
 export interface ColorPalette {
   // Environment colors
@@ -125,10 +125,14 @@ export const retroPalette: ColorPalette = {
   outline: new THREE.Color('#2D3436')       // Dark gray outlines
 }
 
+function blendColors(colorA: THREE.Color, colorB: THREE.Color, amount: number) {
+  return colorA.clone().lerp(colorB, amount)
+}
+
 /**
  * Collection of all available palettes
  */
-export const staticStylePalettes: Record<Exclude<StylePreset, 'site'>, ColorPalette> = {
+export const staticStylePalettes: Record<Exclude<StylePreset, 'site' | 'surreal-site'>, ColorPalette> = {
   ghibli: ghibliPalette,
   alto: altoPalette,
   monument: monumentPalette,
@@ -231,12 +235,40 @@ export function createSitePalette(): ColorPalette {
   }
 }
 
+export function createSurrealSitePalette(): ColorPalette {
+  const sitePalette = createSitePalette()
+
+  return {
+    sky: blendColors(sitePalette.sky, new THREE.Color('#040817'), 0.82),
+    skyGradient: blendColors(sitePalette.skyGradient, new THREE.Color('#22125f'), 0.72),
+    water: blendColors(sitePalette.water, new THREE.Color('#1b5cae'), 0.55),
+    grass: blendColors(sitePalette.grass, new THREE.Color('#30226d'), 0.66),
+    earth: blendColors(sitePalette.earth, new THREE.Color('#0b1027'), 0.88),
+    trees: blendColors(sitePalette.trees, new THREE.Color('#4d2dd2'), 0.58),
+    flowers: blendColors(sitePalette.flowers, new THREE.Color('#ff4fd1'), 0.7),
+    fireflies: [
+      new THREE.Color('#64ecff'),
+      new THREE.Color('#ff53d4'),
+      new THREE.Color('#ffd76a'),
+    ],
+    ambient: blendColors(sitePalette.ambient, new THREE.Color('#4d39a6'), 0.64),
+    sun: blendColors(sitePalette.sun, new THREE.Color('#5ce0ff'), 0.45),
+    shadow: blendColors(sitePalette.shadow, new THREE.Color('#03040a'), 0.75),
+    fog: blendColors(sitePalette.fog, new THREE.Color('#2b195a'), 0.68),
+    outline: new THREE.Color('#02030a'),
+  }
+}
+
 /**
  * Get palette by name
  */
 export function getPalette(preset: StylePreset): ColorPalette {
   if (preset === 'site') {
     return createSitePalette()
+  }
+
+  if (preset === 'surreal-site') {
+    return createSurrealSitePalette()
   }
 
   return clonePalette(staticStylePalettes[preset] || ghibliPalette)

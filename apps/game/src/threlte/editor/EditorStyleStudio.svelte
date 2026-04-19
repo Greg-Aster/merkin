@@ -25,6 +25,17 @@
   export let styleBlenderOpenCommand = ''
   export let styleBatchBusy = false
   export let styleBatchStatus = ''
+  export let hunyuanLastFitReport = ''
+  export let styleBatchResumeAvailable = false
+  export let styleBatchResumeSummary = ''
+  export let stylePresets: Array<{
+    id: string
+    label: string
+    prompt: string
+    negativePrompt: string
+    loraNotes: string
+    controlNetNotes: string
+  }> = []
   export let styleSceneCandidates: Array<{
     id: string
     name: string
@@ -45,9 +56,16 @@
   export let selectedNode: EditorSceneNode | null = null
   export let selectedNodes: EditorSceneNode[] = []
   export let canUseStyleStudio: (node: EditorSceneNode | null) => boolean = () => false
+  export let runtimeAssetFailures: Array<{ id: string, source: string, message: string, updatedAt: number }> = []
+  export let pipelineLogEnabled = false
+  export let pipelineLogEntries: string[] = []
 
   function emit(type: string) {
     dispatch(type)
+  }
+
+  function emitPresetApply(presetId: string) {
+    dispatch('applyStylePreset', { presetId })
   }
 
   function emitBatchToggle(candidateId: string, selected: boolean) {
@@ -56,6 +74,10 @@
 
   function emitBatchDescriptorUpdate(candidateId: string, descriptor: string) {
     dispatch('updateBatchDescriptor', { candidateId, descriptor })
+  }
+
+  function emitPipelineLogToggle(value: boolean) {
+    dispatch('setPipelineLogEnabled', { value })
   }
 
   $: hasSelectedAsset = selectedNodes.length <= 1 && canUseStyleStudio(selectedNode)
@@ -94,7 +116,20 @@
         <button disabled={styleBatchBusy} on:click={() => emit('clearBatchCandidates')}>
           Unselect All
         </button>
+        <button disabled={!styleBatchBusy} on:click={() => emit('pauseBatch')}>
+          Pause Batch
+        </button>
+        <button class="danger" disabled={!styleBatchBusy} on:click={() => emit('cancelBatch')}>
+          Cancel + Discard
+        </button>
       </div>
+      {#if styleBatchResumeAvailable && !styleBatchBusy}
+        <div class="button-row compact editor-mt-sm">
+          <button on:click={() => emit('resumeBatch')}>Resume Last Session</button>
+          <button on:click={() => emit('discardBatch')}>Discard Saved Session</button>
+        </div>
+        <div class="save-message">{styleBatchResumeSummary}</div>
+      {/if}
       <div class="button-row compact editor-mt-sm">
         <button disabled={styleBatchBusy || !canBatchRetexture} on:click={() => emit('runBatchRetexture')}>
           {styleBatchBusy ? 'Baking Scene…' : 'Bake Style Onto Selected Meshes'}
@@ -112,7 +147,22 @@
       {#if styleBatchStatus}
         <div class="save-message">{styleBatchStatus}</div>
       {/if}
+      {#if hunyuanLastFitReport}
+        <div class="save-message">{hunyuanLastFitReport}</div>
+      {/if}
     </div>
+
+    {#if runtimeAssetFailures.length > 0}
+      <div class="editor-status-card editor-mt-sm">
+        <div class="editor-status-title">Recent Asset Failures</div>
+        <div class="save-message">These come from the runtime loader, not just the prompt.</div>
+        {#each runtimeAssetFailures.slice(0, 5) as failure (failure.id)}
+          <div class="save-message error-message">{failure.source}: {failure.message}</div>
+        {/each}
+      </div>
+    {/if}
+
+    <div class="save-message editor-mt-sm">Pipeline events are mirrored to the local tools terminal instead of being kept in a large panel here.</div>
 
     <div class="editor-workflow-step editor-mt-sm">
       <div class="editor-step-title">Shared Style Brief</div>
@@ -127,14 +177,6 @@
           rows="4"
           bind:value={stylePrompt}
           placeholder="Example: hand-painted storybook ruins, softened edges, visible brush gradients, unified materials, no photoreal surface noise"
-        ></textarea>
-      </div>
-      <div class="tuple-group">
-        <div class="tuple-label">Avoid</div>
-        <textarea
-          rows="3"
-          bind:value={styleNegativePrompt}
-          placeholder="Example: photorealism, plastic sheen, random texture noise, hard metallic glare, low-detail mush"
         ></textarea>
       </div>
       <div class="tuple-group">
@@ -234,6 +276,23 @@
       <div class="save-message">1. Analyze the source mesh. 2. Describe the target look. 3. Package the style workspace. 4. Bake the style onto the current mesh.</div>
       <div class="save-message">The safe action is texture-only. Mesh replacement is separated below and clearly marked.</div>
     </div>
+
+    {#if stylePresets.length > 0}
+      <div class="editor-workflow-step editor-mt-sm">
+        <div class="editor-workflow-heading">
+          <div class="editor-step-number">0</div>
+          <div>
+            <div class="editor-step-title">Curated Presets</div>
+            <div class="editor-step-copy">Start from a production-ready preset instead of rewriting the brief from scratch.</div>
+          </div>
+        </div>
+        <div class="asset-list editor-mt-sm">
+          {#each stylePresets as preset (preset.id)}
+            <button on:click={() => emitPresetApply(preset.id)}>{preset.label}</button>
+          {/each}
+        </div>
+      </div>
+    {/if}
 
     <div class="editor-workflow-step editor-mt-sm">
       <div class="editor-workflow-heading">

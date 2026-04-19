@@ -10,6 +10,7 @@
   import { createEmptyScene } from '../editor/editorStore'
   import { createWorldMatrixResolver } from '../editor/editorHierarchyUtils'
   import { createDefaultSceneForLevel, upgradeLegacySceneDocument } from '../editor/defaultScenes'
+  import { ensureSceneGeneration } from '../editor/editorGeneration'
   import { normalizeLevelSceneSettings } from '../editor/editorLevelSetup'
   import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
   import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
@@ -105,10 +106,10 @@
         : fallbackScene
     const upgradedScene = upgradeLegacySceneDocument(baseScene)
 
-    sceneDocument = {
+    sceneDocument = ensureSceneGeneration({
       ...upgradedScene,
       settings: normalizeLevelSceneSettings(level, upgradedScene.settings),
-    }
+    })
     sceneNodes = sceneDocument.nodes
     rootNodes = sceneNodes.filter((node) => !node.parentId)
 

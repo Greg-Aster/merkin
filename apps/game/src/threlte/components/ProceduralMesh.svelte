@@ -31,6 +31,8 @@
   export let clearcoatRoughness = 0
   export let thickness = 0
   export let reflectivity = 0.5
+  export let name = ''
+  export let userData: Record<string, any> = {}
 
   type OverrideTextureSet = {
     map: THREE.Texture | null
@@ -132,7 +134,7 @@
   })
 </script>
 
-<T.Mesh {position} {rotation} {scale}>
+<T.Mesh {name} {userData} {position} {rotation} {scale}>
   {#if geometry === 'box'}
     <T.BoxGeometry args={args} />
   {:else if geometry === 'cylinder'}

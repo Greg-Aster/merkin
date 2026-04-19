@@ -7,6 +7,7 @@ import type {
   SharedLevelEditorSettings,
   SolitudeEditorSettings,
 } from './editorTypes'
+import { solitudeAtmosphereProfileDefinitions } from '../styles/GameplayStyleProfiles'
 
 export interface LevelAtmospherePresetDefinition {
   id: EditorAtmospherePresetId
@@ -29,195 +30,12 @@ export interface ObservatoryAtmospherePresetDefinition {
   settings: ObservatoryEditorSettings
 }
 
-export const solitudeAtmospherePresets: LevelAtmospherePresetDefinition[] = [
-  {
-    id: 'lonely-wind',
-    label: 'Lonely Wind',
-    description: 'Cold ruin air with sparse drifting motes and open sky.',
-    settings: {
-      style: {
-        preset: 'monument',
-        enabled: true,
-        fog: {
-          color: '#7b8797',
-          density: 0.00045,
-        },
-      },
-      lighting: {
-        ambientIntensity: 0.75,
-        keyLightIntensity: 0.7,
-        fillLightIntensity: 0.22,
-      },
-      ambientParticles: {
-        enabled: true,
-        count: 180,
-        radius: 140,
-        minHeight: 0.8,
-        maxHeight: 18,
-        color: '#b8d9ff',
-        secondaryColor: '#f3e8b2',
-        size: 1.15,
-        opacity: 0.26,
-        driftSpeed: 0.22,
-        sway: 0.85,
-      },
-      water: {
-        enabled: false,
-        level: -0.16,
-        size: {
-          width: 800,
-          height: 800,
-        },
-        color: '#425d72',
-        opacity: 0.86,
-        enableAnimation: true,
-      },
-    },
-  },
-  {
-    id: 'ruin-haze',
-    label: 'Ruin Haze',
-    description: 'Denser fog and warmer dust around the stone ring.',
-    settings: {
-      style: {
-        preset: 'monument',
-        enabled: true,
-        fog: {
-          color: '#8b94a3',
-          density: 0.0009,
-        },
-      },
-      lighting: {
-        ambientIntensity: 0.68,
-        keyLightIntensity: 0.62,
-        fillLightIntensity: 0.18,
-      },
-      ambientParticles: {
-        enabled: true,
-        count: 220,
-        radius: 120,
-        minHeight: 0.5,
-        maxHeight: 16,
-        color: '#d6d3c8',
-        secondaryColor: '#cda978',
-        size: 1.2,
-        opacity: 0.24,
-        driftSpeed: 0.14,
-        sway: 0.42,
-      },
-    },
-  },
-  {
-    id: 'heavy-ash',
-    label: 'Heavy Ash',
-    description: 'Low visibility, darker light, and thick ash drifting low.',
-    settings: {
-      style: {
-        preset: 'retro',
-        enabled: true,
-        fog: {
-          color: '#5f6672',
-          density: 0.00125,
-        },
-      },
-      lighting: {
-        ambientIntensity: 0.56,
-        keyLightIntensity: 0.48,
-        fillLightIntensity: 0.14,
-      },
-      ambientParticles: {
-        enabled: true,
-        count: 320,
-        radius: 115,
-        minHeight: 0.2,
-        maxHeight: 12,
-        color: '#b6b0aa',
-        secondaryColor: '#7d695d',
-        size: 1.35,
-        opacity: 0.38,
-        driftSpeed: 0.1,
-        sway: 0.28,
-      },
-    },
-  },
-  {
-    id: 'silent-basin',
-    label: 'Silent Basin',
-    description: 'Calmer air and reflective water pooling under softer light.',
-    settings: {
-      style: {
-        preset: 'alto',
-        enabled: true,
-        fog: {
-          color: '#6f8194',
-          density: 0.0003,
-        },
-      },
-      lighting: {
-        ambientIntensity: 0.82,
-        keyLightIntensity: 0.58,
-        fillLightIntensity: 0.26,
-      },
-      water: {
-        enabled: true,
-        level: -0.2,
-        size: {
-          width: 950,
-          height: 950,
-        },
-        color: '#334e63',
-        opacity: 0.9,
-        enableAnimation: true,
-      },
-      ambientParticles: {
-        enabled: true,
-        count: 90,
-        radius: 130,
-        minHeight: 0.4,
-        maxHeight: 9,
-        color: '#bfdfff',
-        secondaryColor: '#d7f0ff',
-        size: 0.95,
-        opacity: 0.12,
-        driftSpeed: 0.06,
-        sway: 0.22,
-      },
-    },
-  },
-  {
-    id: 'cold-starlight',
-    label: 'Cold Starlight',
-    description: 'Sharper blue light and bright star-swept particles.',
-    settings: {
-      style: {
-        preset: 'alto',
-        enabled: true,
-        fog: {
-          color: '#6d84ab',
-          density: 0.00022,
-        },
-      },
-      lighting: {
-        ambientIntensity: 0.62,
-        keyLightIntensity: 0.92,
-        fillLightIntensity: 0.3,
-      },
-      ambientParticles: {
-        enabled: true,
-        count: 160,
-        radius: 150,
-        minHeight: 1.2,
-        maxHeight: 24,
-        color: '#d9ecff',
-        secondaryColor: '#92c0ff',
-        size: 1.05,
-        opacity: 0.22,
-        driftSpeed: 0.18,
-        sway: 1.08,
-      },
-    },
-  },
-]
+export const solitudeAtmospherePresets: LevelAtmospherePresetDefinition[] = solitudeAtmosphereProfileDefinitions.map((profile) => ({
+  id: profile.id,
+  label: profile.label,
+  description: profile.description,
+  settings: profile.settings,
+}))
 
 export const solitudeAudioPresets: LevelAudioPresetDefinition[] = [
   {

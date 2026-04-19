@@ -62,12 +62,18 @@ function isGamePath(pathname) {
   return pathname === GAME_PREFIX || pathname.startsWith(`${GAME_PREFIX}/`)
 }
 
+function isGameOwnedApiPath(pathname) {
+  return pathname === '/api/tools' || pathname.startsWith('/api/tools/')
+}
+
 function isAmbiguousDevAssetPath(pathname) {
   return DEV_ASSET_PREFIXES.some(prefix => pathname.startsWith(prefix))
 }
 
 function wantsGameTarget(req) {
   const pathname = getPathname(req)
+
+  if (isGameOwnedApiPath(pathname)) return true
 
   if (isGamePath(pathname)) return true
 
