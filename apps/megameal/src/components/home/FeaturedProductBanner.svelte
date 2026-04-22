@@ -1,219 +1,391 @@
 <script lang="ts">
-import { onMount } from "svelte";
-import ProceduralModelViewer from "./ProceduralModelViewer.svelte";
+import { onMount } from 'svelte'
+import { cart } from '../../stores/cartStore'
+import type { Quirk } from '../../types/store-scene'
+import {
+  getAddToCartRefusalQuirk,
+  getPriceDriftQuirk,
+} from '../../utils/product-banner-quirks'
+import ProceduralModelViewer from './ProceduralModelViewer.svelte'
 
 type ProductMedia = {
-	id: string;
-	type: "image" | "video" | "iframe" | "model3d";
-	src: string;
-	alt?: string;
-	caption?: string;
-	poster?: string;
-	thumbnail?: string;
-};
-
-type ProductSpec = {
-	label: string;
-	value: string;
-};
-
-type ProductQuestion = {
-	question: string;
-	answer: string;
-};
-
-type ProductReview = {
-	author: string;
-	rating?: number;
-	date?: string;
-	comment: string;
-};
-
-type RelatedProduct = {
-	name: string;
-	href: string;
-	image?: string;
-	price?: number;
-	availability?: string;
-};
-
-type ActionLink = {
-	label: string;
-	href: string;
-};
-
-export let product: {
-	name: string;
-	tagline?: string;
-	description?: string;
-	brand?: string;
-	price?: number;
-	availability?: string;
-	rating?: number;
-	sku?: string;
-	href: string;
-	media: ProductMedia[];
-	specifications: ProductSpec[];
-	qanda: ProductQuestion[];
-	reviews: ProductReview[];
-	actions: ActionLink[];
-	narrativeLinks: ActionLink[];
-};
-
-export let relatedProducts: RelatedProduct[] = [];
-
-let selectedIndex = 0;
-let activePanel: "specifications" | "qanda" | "reviews" | null = null;
-let zoomOpen = false;
-let bannerSlideIndex = 0;
-let bannerSlideCount = 1;
-let bannerProgress = 0;
-let bannerPaused = false;
-
-const observedUnits = 1044;
-const activeWatchers = 2195;
-const offerCode = "ASCEND20";
-const financingLine = "Orbit-approved financing from $45 / cycle";
-const trustSignals = [
-	"Free interzone dispatch on qualified terrors.",
-	"Temporal returns accepted within 30 standard days.",
-	"Verified companion warranty included.",
-];
-
-const availabilityTone: Record<
-	string,
-	{ label: string; badge: string; message: string; action: string }
-> = {
-	available: {
-		label: "Available Now",
-		badge: "bg-emerald-400/90 text-slate-950",
-		message: "Cleared for this region.",
-		action: "Add to cart",
-	},
-	not_in_your_area: {
-		label: "Not Available In Your Area",
-		badge: "bg-amber-300/90 text-slate-950",
-		message: "Regional clearance is still pending.",
-		action: "Why not here?",
-	},
-	not_in_your_timeline: {
-		label: "Not Available In Your Timeline",
-		badge: "bg-fuchsia-400/85 text-slate-950",
-		message: "Fulfillment depends on causality.",
-		action: "Review timeline restrictions",
-	},
-	artifact_only: {
-		label: "Artifact Record",
-		badge: "bg-rose-400/85 text-slate-950",
-		message: "This listing is archival only.",
-		action: "Read the dossier",
-	},
-	coming_soon: {
-		label: "Coming Soon",
-		badge: "bg-cyan-300/85 text-slate-950",
-		message: "Launch window still unstable.",
-		action: "Track release status",
-	},
-};
-
-const currentTone =
-	availabilityTone[product.availability || "coming_soon"] ||
-	availabilityTone.coming_soon;
-
-$: selectedMedia = product.media[selectedIndex] ?? product.media[0];
-$: previewTitle =
-	activePanel === "specifications"
-		? "Specifications"
-		: activePanel === "qanda"
-			? "Questions & Answers"
-			: activePanel === "reviews"
-				? "Field Reviews"
-				: null;
-
-function selectMedia(index: number) {
-	selectedIndex = index;
+  id: string
+  type: 'image' | 'video' | 'iframe' | 'model3d'
+  src: string
+  alt?: string
+  caption?: string
+  poster?: string
+  thumbnail?: string
 }
 
-function togglePanel(panel: "specifications" | "qanda" | "reviews") {
-	activePanel = activePanel === panel ? null : panel;
+type ProductSpec = {
+  label: string
+  value: string
+}
+
+type ProductQuestion = {
+  question: string
+  answer: string
+  linkLabel?: string
+  linkHref?: string
+  linkAccent?: 'signal' | 'creepy'
+}
+
+type ProductReview = {
+  author: string
+  rating?: number
+  date?: string
+  comment: string
+  authorHref?: string
+  linkLabel?: string
+  linkHref?: string
+  flags?: string[]
+  verified?: boolean
+}
+
+type RelatedProduct = {
+  name: string
+  href: string
+  image?: string
+  price?: number
+  availability?: string
+}
+
+type ProductActionLink = {
+  label: string
+  href: string
+}
+
+export let product: {
+  name: string
+  tagline?: string
+  description?: string
+  brand?: string
+  price?: number
+  availability?: string
+  alternateAction?: ProductActionLink
+  rating?: number
+  sku?: string
+  href: string
+  media: ProductMedia[]
+  specifications: ProductSpec[]
+  ingredients?: string[]
+  nutritionFacts?: ProductSpec[]
+  qanda: ProductQuestion[]
+  reviews: ProductReview[]
+  quirks?: Quirk[]
+}
+// biome-ignore lint/style/useConst: Svelte component props must use `let`.
+export let showBannerControls = true
+// biome-ignore lint/style/useConst: Svelte component props must use `let`.
+export let kickerLabel = 'Featured Product'
+
+// biome-ignore lint/style/useConst: Svelte component props must use `let`.
+export let relatedProducts: RelatedProduct[] = []
+
+let selectedIndex = 0
+let activePanel:
+  | 'specifications'
+  | 'ingredients'
+  | 'qanda'
+  | 'reviews'
+  | 'assurance'
+  | null = null
+let zoomOpen = false
+let bannerSlideIndex = 0
+let bannerSlideCount = 1
+let bannerProgress = 0
+let bannerPaused = false
+let driftedPrice = product.price
+let displayedPriceText = formatCurrency(product.price)
+let ctaFeedback: { tone: 'error' | 'success'; text: string } | null = null
+let refusalAnimating = false
+let reducedMotion = false
+let priceGlitching = false
+
+let priceDriftTimer: ReturnType<typeof setInterval> | undefined
+let refusalResetTimer: ReturnType<typeof setTimeout> | undefined
+let priceGlitchResetTimer: ReturnType<typeof setTimeout> | undefined
+let priceGlitchFrameTimers: Array<ReturnType<typeof setTimeout>> = []
+
+const observedUnits = 1044
+const activeWatchers = 2195
+const offerCode = 'ASCEND20'
+const financingLine = 'Orbit-approved financing from $45 / cycle'
+const trustSignals = [
+  'Free interzone dispatch on qualified terrors.',
+  'Temporal returns accepted within 30 standard days.',
+  'Verified companion warranty included.',
+]
+
+const availabilityTone: Record<
+  string,
+  { label: string; badge: string; message: string; action: string }
+> = {
+  available: {
+    label: 'Available Now',
+    badge: 'bg-emerald-400/90 text-slate-950',
+    message: 'Cleared for this region.',
+    action: 'Add to cart',
+  },
+  not_in_your_area: {
+    label: 'Not Available In Your Area',
+    badge: 'bg-amber-300/90 text-slate-950',
+    message: 'Regional clearance is still pending.',
+    action: 'Why not here?',
+  },
+  not_in_your_timeline: {
+    label: 'Not Available In Your Timeline',
+    badge: 'bg-fuchsia-400/85 text-slate-950',
+    message: 'Fulfillment depends on causality.',
+    action: 'Review timeline restrictions',
+  },
+  artifact_only: {
+    label: 'Artifact Record',
+    badge: 'bg-rose-400/85 text-slate-950',
+    message: 'This listing is archival only.',
+    action: 'Read the dossier',
+  },
+  coming_soon: {
+    label: 'Coming Soon',
+    badge: 'bg-cyan-300/85 text-slate-950',
+    message: 'Launch window still unstable.',
+    action: 'Track release status',
+  },
+  out_of_stock: {
+    label: 'Out of Stock',
+    badge: 'bg-slate-300/80 text-slate-950',
+    message:
+      'Print stock depleted. Additional units are not currently scheduled.',
+    action: 'Check alternate formats',
+  },
+}
+
+const currentTone =
+  availabilityTone[product.availability || 'coming_soon'] ||
+  availabilityTone.coming_soon
+const addableAvailability = new Set(['available'])
+
+$: selectedMedia = product.media[selectedIndex] ?? product.media[0]
+$: previewTitle =
+  activePanel === 'specifications'
+    ? 'Specifications'
+    : activePanel === 'ingredients'
+      ? 'Ingredients & Nutrition'
+      : activePanel === 'qanda'
+        ? 'Questions & Answers'
+        : activePanel === 'reviews'
+          ? 'Field Reviews'
+          : activePanel === 'assurance'
+            ? 'Assurance'
+            : null
+$: priceDriftQuirk = getPriceDriftQuirk(product.quirks, product.price)
+$: addToCartRefusalQuirk = getAddToCartRefusalQuirk(product.quirks)
+$: primaryButtonLabel = addToCartRefusalQuirk
+  ? 'Add to cart'
+  : addableAvailability.has(product.availability || '')
+    ? 'Add to cart'
+    : currentTone.action
+$: hasIngredientsPanel =
+  (product.ingredients?.length ?? 0) > 0 ||
+  (product.nutritionFacts?.length ?? 0) > 0
+
+function selectMedia(index: number) {
+  selectedIndex = index
+}
+
+function togglePanel(
+  panel: 'specifications' | 'ingredients' | 'qanda' | 'reviews' | 'assurance',
+) {
+  activePanel = activePanel === panel ? null : panel
 }
 
 function openZoom() {
-	if (selectedMedia?.type === "image" || selectedMedia?.type === "model3d") {
-		zoomOpen = true;
-	}
+  if (selectedMedia?.type === 'image' || selectedMedia?.type === 'model3d') {
+    zoomOpen = true
+  }
 }
 
 function closeZoom() {
-	zoomOpen = false;
+  zoomOpen = false
 }
 
 function renderStars(rating?: number) {
-	if (typeof rating !== "number") return [];
-	return Array.from({ length: 5 }, (_, index) => index < Math.round(rating));
+  if (typeof rating !== 'number') return []
+  return Array.from({ length: 5 }, (_, index) => index < Math.round(rating))
 }
 
 function formatCurrency(value?: number) {
-	if (typeof value !== "number") return "Inquire Within";
-	return new Intl.NumberFormat("en-US", {
-		style: "currency",
-		currency: "USD",
-	}).format(value);
+  if (typeof value !== 'number') return 'Inquire Within'
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(value)
 }
 
 function thumbnailFor(media: ProductMedia) {
-	if (media.thumbnail) return media.thumbnail;
-	if (media.poster) return media.poster;
-	if (media.type === "iframe" && media.src.includes("youtube.com/embed/")) {
-		const videoId = media.src.split("/embed/")[1]?.split("?")[0];
-		if (videoId) return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-	}
-	return media.src;
+  if (media.thumbnail) return media.thumbnail
+  if (media.poster) return media.poster
+  if (media.type === 'iframe' && media.src.includes('youtube.com/embed/')) {
+    const videoId = media.src.split('/embed/')[1]?.split('?')[0]
+    if (videoId) return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+  }
+  return media.src
 }
 
-function sendBannerControl(action: "previous" | "next" | "toggle-pause") {
-	if (typeof window === "undefined") return;
-	window.dispatchEvent(
-		new CustomEvent("merkin:banner-control", {
-			detail: { action },
-		}),
-	);
+function primaryImageSource() {
+  const imageMedia = product.media.find(media => media.type === 'image')
+  return imageMedia?.src ?? imageMedia?.thumbnail ?? product.media[0]?.thumbnail
+}
+
+function clearPriceGlitchTimers() {
+  for (const timer of priceGlitchFrameTimers) clearTimeout(timer)
+  priceGlitchFrameTimers = []
+  if (priceGlitchResetTimer) clearTimeout(priceGlitchResetTimer)
+}
+
+function glitchFramesFor(nextPrice: number) {
+  const stable = formatCurrency(nextPrice)
+  const dollars = stable.replace('$', '').split('.')[0] ?? '00'
+  const cents = stable.split('.')[1] ?? '00'
+
+  return [
+    '$--.--',
+    `$${dollars}.??`,
+    'PRICE LOST',
+    `$${dollars}.${cents[0]}_`,
+    stable,
+  ]
+}
+
+function applyPriceDrift() {
+  if (!priceDriftQuirk) return
+  const nextPrice =
+    priceDriftQuirk.minPrice +
+    Math.random() * (priceDriftQuirk.maxPrice - priceDriftQuirk.minPrice)
+  const normalizedNextPrice = Number(nextPrice.toFixed(2))
+  driftedPrice = normalizedNextPrice
+
+  if (reducedMotion) {
+    displayedPriceText = formatCurrency(normalizedNextPrice)
+    priceGlitching = false
+    return
+  }
+
+  clearPriceGlitchTimers()
+  priceGlitching = true
+
+  for (const [index, frame] of glitchFramesFor(normalizedNextPrice).entries()) {
+    priceGlitchFrameTimers.push(
+      window.setTimeout(() => {
+        displayedPriceText = frame
+      }, index * 90),
+    )
+  }
+
+  priceGlitchResetTimer = window.setTimeout(() => {
+    displayedPriceText = formatCurrency(normalizedNextPrice)
+    priceGlitching = false
+  }, 420)
+}
+
+function handlePrimaryAction() {
+  if (addToCartRefusalQuirk) {
+    refusalAnimating = true
+    ctaFeedback = {
+      tone: 'error',
+      text: addToCartRefusalQuirk.message,
+    }
+
+    if (refusalResetTimer) clearTimeout(refusalResetTimer)
+    refusalResetTimer = window.setTimeout(() => {
+      refusalAnimating = false
+    }, addToCartRefusalQuirk.resetMs)
+    return
+  }
+
+  if (
+    addableAvailability.has(product.availability || '') &&
+    typeof product.price === 'number'
+  ) {
+    cart.add({
+      id: product.sku || product.href,
+      name: product.name,
+      price: product.price,
+      sku: product.sku,
+      href: product.href,
+      image: primaryImageSource(),
+    })
+    ctaFeedback = {
+      tone: 'success',
+      text: `${product.name} added to cart.`,
+    }
+    return
+  }
+
+  activePanel = 'qanda'
+  ctaFeedback = null
+}
+
+function sendBannerControl(action: 'previous' | 'next' | 'toggle-pause') {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(
+    new CustomEvent('merkin:banner-control', {
+      detail: { action },
+    }),
+  )
 }
 
 onMount(() => {
-	if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return
 
-	const handleBannerState = (
-		event: Event & {
-			detail?: {
-				currentIndex?: number;
-				slideCount?: number;
-				isPaused?: boolean;
-				progress?: number;
-			};
-		},
-	) => {
-		const detail = event.detail;
-		if (!detail) return;
+  cart.init()
+  reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  driftedPrice = product.price
+  displayedPriceText = formatCurrency(product.price)
 
-		bannerSlideIndex = detail.currentIndex ?? 0;
-		bannerSlideCount = detail.slideCount ?? 1;
-		bannerPaused = detail.isPaused ?? false;
-		bannerProgress = detail.progress ?? 0;
-	};
+  if (priceDriftQuirk && !reducedMotion) {
+    applyPriceDrift()
+    priceDriftTimer = window.setInterval(
+      applyPriceDrift,
+      priceDriftQuirk.intervalMs,
+    )
+  }
 
-	window.addEventListener(
-		"merkin:banner-state",
-		handleBannerState as EventListener,
-	);
+  const handleBannerState = (
+    event: Event & {
+      detail?: {
+        currentIndex?: number
+        slideCount?: number
+        isPaused?: boolean
+        progress?: number
+      }
+    },
+  ) => {
+    const detail = event.detail
+    if (!detail) return
 
-	return () => {
-		window.removeEventListener(
-			"merkin:banner-state",
-			handleBannerState as EventListener,
-		);
-	};
-});
+    bannerSlideIndex = detail.currentIndex ?? 0
+    bannerSlideCount = detail.slideCount ?? 1
+    bannerPaused = detail.isPaused ?? false
+    bannerProgress = detail.progress ?? 0
+  }
+
+  window.addEventListener(
+    'merkin:banner-state',
+    handleBannerState as EventListener,
+  )
+
+  return () => {
+    if (priceDriftTimer) clearInterval(priceDriftTimer)
+    if (refusalResetTimer) clearTimeout(refusalResetTimer)
+    clearPriceGlitchTimers()
+    window.removeEventListener(
+      'merkin:banner-state',
+      handleBannerState as EventListener,
+    )
+  }
+})
 </script>
 
 <section class="featured-product-shell">
@@ -231,7 +403,7 @@ onMount(() => {
 
 	<div class="featured-product-topbar">
 		<div>
-			<p class="featured-product-kicker">Featured Product</p>
+			<p class="featured-product-kicker">{kickerLabel}</p>
 			<h1>{product.name}</h1>
 			{#if product.brand}
 				<p class="featured-product-sellerline">
@@ -239,33 +411,35 @@ onMount(() => {
 				</p>
 			{/if}
 		</div>
-		<div class="featured-product-control-center" aria-label="Banner controls">
-			<div class="featured-product-control-center__meta">
-				<span>
-					Slide {Math.min(bannerSlideIndex + 1, bannerSlideCount)} / {bannerSlideCount}
-				</span>
-				<strong>{bannerPaused ? "Paused" : "Auto-rotation active"}</strong>
+		{#if showBannerControls}
+			<div class="featured-product-control-center" aria-label="Banner controls">
+				<div class="featured-product-control-center__meta">
+					<span>
+						Slide {Math.min(bannerSlideIndex + 1, bannerSlideCount)} / {bannerSlideCount}
+					</span>
+					<strong>{bannerPaused ? "Paused" : "Auto-rotation active"}</strong>
+				</div>
+				<div
+					class="featured-product-control-center__progress"
+					role="progressbar"
+					aria-valuemin="0"
+					aria-valuemax="100"
+					aria-valuenow={Math.round(bannerProgress * 100)}
+					aria-label="Banner progress"
+				>
+					<span style={`transform: scaleX(${Math.max(0.02, bannerProgress)})`}></span>
+				</div>
+				<div class="featured-product-control-center__buttons">
+					<button type="button" onclick={() => sendBannerControl("previous")}>
+						Prev
+					</button>
+					<button type="button" onclick={() => sendBannerControl("toggle-pause")}>
+						{bannerPaused ? "Play" : "Pause"}
+					</button>
+					<button type="button" onclick={() => sendBannerControl("next")}>Next</button>
+				</div>
 			</div>
-			<div
-				class="featured-product-control-center__progress"
-				role="progressbar"
-				aria-valuemin="0"
-				aria-valuemax="100"
-				aria-valuenow={Math.round(bannerProgress * 100)}
-				aria-label="Banner progress"
-			>
-				<span style={`transform: scaleX(${Math.max(0.02, bannerProgress)})`}></span>
-			</div>
-			<div class="featured-product-control-center__buttons">
-				<button type="button" onclick={() => sendBannerControl("previous")}>
-					Prev
-				</button>
-				<button type="button" onclick={() => sendBannerControl("toggle-pause")}>
-					{bannerPaused ? "Play" : "Pause"}
-				</button>
-				<button type="button" onclick={() => sendBannerControl("next")}>Next</button>
-			</div>
-		</div>
+		{/if}
 	</div>
 
 	<div class="featured-product-stage">
@@ -316,8 +490,9 @@ onMount(() => {
 				{:else if selectedMedia?.type === "model3d"}
 					<div class="featured-product-viewer__model">
 						<ProceduralModelViewer
-							label="Snuggaloid placeholder cube"
+							label={selectedMedia.alt || "Interactive 3D product preview"}
 							variant="snuggaloid"
+							assetUrl={selectedMedia.src}
 						/>
 						<button
 							type="button"
@@ -352,8 +527,19 @@ onMount(() => {
 
 			<div class="featured-product-price-row">
 				<div>
-					<p class="featured-product-price">{formatCurrency(product.price)}</p>
+					<p
+						class:featured-product-price--drifting={Boolean(priceDriftQuirk)}
+						class:featured-product-price--glitching={priceGlitching}
+						class="featured-product-price"
+					>
+						{displayedPriceText}
+					</p>
 					<p class="featured-product-message">{currentTone.message}</p>
+					{#if priceDriftQuirk}
+						<p class="featured-product-drift-note">
+							Live market drift active. Price calibrates against regional unease.
+						</p>
+					{/if}
 					<p class="featured-product-financing">{financingLine}</p>
 				</div>
 
@@ -388,13 +574,24 @@ onMount(() => {
 			<div class="featured-product-cta-row">
 				<button
 					type="button"
+					class:featured-product-primary--refusing={refusalAnimating}
 					class="featured-product-primary"
-					onclick={() => togglePanel("qanda")}
+					onclick={handlePrimaryAction}
 				>
-					{currentTone.action}
+					{primaryButtonLabel}
 				</button>
+				{#if product.alternateAction}
+					<a href={product.alternateAction.href} class="featured-product-secondary">
+						{product.alternateAction.label}
+					</a>
+				{/if}
 				<a href={product.href} class="featured-product-secondary">Full product page</a>
 			</div>
+			{#if ctaFeedback}
+				<p class={`featured-product-cta-feedback featured-product-cta-feedback--${ctaFeedback.tone}`}>
+					{ctaFeedback.text}
+				</p>
+			{/if}
 
 			<div class="featured-product-commerce-note">
 				<div>
@@ -415,6 +612,15 @@ onMount(() => {
 				>
 					Specifications
 				</button>
+				{#if hasIngredientsPanel}
+					<button
+						type="button"
+						class:active={activePanel === "ingredients"}
+						onclick={() => togglePanel("ingredients")}
+					>
+						Ingredients
+					</button>
+				{/if}
 				<button
 					type="button"
 					class:active={activePanel === "qanda"}
@@ -429,21 +635,13 @@ onMount(() => {
 				>
 					Reviews
 				</button>
-			</div>
-
-			<div class="featured-product-links">
-				{#each product.narrativeLinks as link}
-					<a href={link.href}>{link.label}</a>
-				{/each}
-			</div>
-
-			<div class="featured-product-assurances">
-				{#each trustSignals as signal}
-					<div>
-						<strong>Assurance</strong>
-						<span>{signal}</span>
-					</div>
-				{/each}
+				<button
+					type="button"
+					class:active={activePanel === "assurance"}
+					onclick={() => togglePanel("assurance")}
+				>
+					Assurance
+				</button>
 			</div>
 		</aside>
 	</div>
@@ -467,12 +665,47 @@ onMount(() => {
 						</div>
 					{/each}
 				</div>
+			{:else if activePanel === "ingredients"}
+				<div class="featured-product-ingredients">
+					{#if product.ingredients && product.ingredients.length > 0}
+						<article>
+							<h3>Ingredient Disclosure</h3>
+							<ul>
+								{#each product.ingredients as ingredient}
+									<li>{ingredient}</li>
+								{/each}
+							</ul>
+						</article>
+					{/if}
+					{#if product.nutritionFacts && product.nutritionFacts.length > 0}
+						<article>
+							<h3>Nutrition Data</h3>
+							<div class="featured-product-spec-grid">
+								{#each product.nutritionFacts as fact}
+									<div>
+										<span>{fact.label}</span>
+										<strong>{fact.value}</strong>
+									</div>
+								{/each}
+							</div>
+						</article>
+					{/if}
+				</div>
 			{:else if activePanel === "qanda"}
 				<div class="featured-product-qanda">
 					{#each product.qanda as item}
 						<article>
 							<h3>{item.question}</h3>
 							<p>{item.answer}</p>
+							{#if item.linkHref && item.linkLabel}
+								<a
+									class:featured-product-inline-link--creepy={item.linkAccent === "creepy"}
+									class="featured-product-inline-link"
+									href={item.linkHref}
+								>
+									{item.linkLabel}
+								</a>
+							{/if}
 						</article>
 					{/each}
 				</div>
@@ -481,7 +714,18 @@ onMount(() => {
 					{#each product.reviews as review}
 						<article>
 							<div class="featured-product-review__header">
-								<strong>{review.author}</strong>
+								<div class="featured-product-review__identity">
+									{#if review.authorHref}
+										<a href={review.authorHref}>{review.author}</a>
+									{:else}
+										<strong>{review.author}</strong>
+									{/if}
+									{#if review.verified}
+										<span class="featured-product-review__verified">
+											Verified consumer
+										</span>
+									{/if}
+								</div>
 								<span>{review.date || "Filed recently"}</span>
 							</div>
 							{#if typeof review.rating === "number"}
@@ -492,6 +736,30 @@ onMount(() => {
 								</div>
 							{/if}
 							<p>{review.comment}</p>
+							{#if review.linkHref && review.linkLabel}
+								<a
+									class="featured-product-inline-link featured-product-inline-link--creepy"
+									href={review.linkHref}
+								>
+									{review.linkLabel}
+								</a>
+							{/if}
+							{#if review.flags && review.flags.length > 0}
+								<div class="featured-product-review__flags">
+									{#each review.flags as flag}
+										<span>{flag}</span>
+									{/each}
+								</div>
+							{/if}
+						</article>
+					{/each}
+				</div>
+			{:else if activePanel === "assurance"}
+				<div class="featured-product-assurance">
+					{#each trustSignals as signal}
+						<article>
+							<strong>Assurance</strong>
+							<p>{signal}</p>
 						</article>
 					{/each}
 				</div>
@@ -547,9 +815,10 @@ onMount(() => {
 			{:else if selectedMedia?.type === "model3d"}
 				<div class="featured-product-modal__model">
 					<ProceduralModelViewer
-						label="Expanded containment render"
+						label={selectedMedia.alt || "Expanded containment render"}
 						variant="snuggaloid"
 						fullscreen={true}
+						assetUrl={selectedMedia.src}
 					/>
 				</div>
 			{/if}
@@ -687,8 +956,7 @@ onMount(() => {
 		gap: 0.55rem;
 	}
 
-	.featured-product-control-center__buttons button,
-	.featured-product-links a {
+	.featured-product-control-center__buttons button {
 		padding: 0.6rem 0.82rem;
 		border: 1px solid rgb(125 211 252 / 0.18);
 		border-radius: 999px;
@@ -707,8 +975,7 @@ onMount(() => {
 			color 160ms ease;
 	}
 
-	.featured-product-control-center__buttons button:hover,
-	.featured-product-links a:hover {
+	.featured-product-control-center__buttons button:hover {
 		border-color: rgb(125 211 252 / 0.55);
 		background: rgb(8 47 73 / 0.45);
 		transform: translateY(-1px);
@@ -888,10 +1155,32 @@ onMount(() => {
 		letter-spacing: -0.04em;
 	}
 
+	.featured-product-price--drifting {
+		text-shadow: 0 0 24px rgb(74 222 128 / 0.18);
+	}
+
+	.featured-product-price--glitching {
+		color: rgb(250 204 21);
+		text-shadow:
+			0 0 24px rgb(250 204 21 / 0.28),
+			-1px 0 rgb(244 114 182 / 0.35),
+			1px 0 rgb(56 189 248 / 0.35);
+		animation: featured-product-price-flicker 120ms steps(2) infinite;
+	}
+
 	.featured-product-message {
 		margin: 0.35rem 0 0;
 		color: rgb(148 163 184);
 		font-size: 0.84rem;
+	}
+
+	.featured-product-drift-note {
+		margin: 0.28rem 0 0;
+		color: rgb(254 240 138);
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 	}
 
 	.featured-product-financing {
@@ -929,8 +1218,7 @@ onMount(() => {
 		line-height: 1.7;
 	}
 
-	.featured-product-commerce-note,
-	.featured-product-assurances {
+	.featured-product-commerce-note {
 		display: grid;
 		gap: 0.7rem;
 	}
@@ -940,7 +1228,6 @@ onMount(() => {
 	}
 
 	.featured-product-commerce-note div,
-	.featured-product-assurances div,
 	.featured-product-meta div,
 	.featured-product-spec-grid div {
 		display: grid;
@@ -952,7 +1239,6 @@ onMount(() => {
 	}
 
 	.featured-product-commerce-note strong,
-	.featured-product-assurances strong,
 	.featured-product-meta strong,
 	.featured-product-spec-grid strong {
 		color: rgb(248 250 252);
@@ -961,7 +1247,6 @@ onMount(() => {
 	}
 
 	.featured-product-commerce-note span,
-	.featured-product-assurances span,
 	.featured-product-meta span,
 	.featured-product-spec-grid span {
 		color: rgb(148 163 184);
@@ -979,8 +1264,7 @@ onMount(() => {
 	}
 
 	.featured-product-cta-row,
-	.featured-product-panel-actions,
-	.featured-product-links {
+	.featured-product-panel-actions {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.7rem;
@@ -1014,6 +1298,10 @@ onMount(() => {
 		cursor: pointer;
 	}
 
+	.featured-product-primary--refusing {
+		animation: featured-product-refusal-shake 280ms ease-in-out 2;
+	}
+
 	.featured-product-primary:hover,
 	.featured-product-secondary:hover,
 	.featured-product-panel-actions button:hover,
@@ -1036,6 +1324,21 @@ onMount(() => {
 		background: rgb(8 47 73 / 0.72);
 	}
 
+	.featured-product-cta-feedback {
+		margin: -0.25rem 0 0;
+		font-size: 0.78rem;
+		font-weight: 700;
+		letter-spacing: 0.03em;
+	}
+
+	.featured-product-cta-feedback--error {
+		color: rgb(252 165 165);
+	}
+
+	.featured-product-cta-feedback--success {
+		color: rgb(134 239 172);
+	}
+
 	.featured-product-panel,
 	.featured-product-related {
 		padding: 1rem 1.2rem;
@@ -1051,13 +1354,17 @@ onMount(() => {
 	}
 
 	.featured-product-qanda,
-	.featured-product-reviews {
+	.featured-product-reviews,
+	.featured-product-assurance,
+	.featured-product-ingredients {
 		display: grid;
 		gap: 0.9rem;
 	}
 
 	.featured-product-qanda article,
-	.featured-product-reviews article {
+	.featured-product-reviews article,
+	.featured-product-assurance article,
+	.featured-product-ingredients article {
 		padding: 1rem;
 		border: 1px solid rgb(148 163 184 / 0.12);
 		border-radius: 1rem;
@@ -1065,16 +1372,67 @@ onMount(() => {
 	}
 
 	.featured-product-qanda h3,
-	.featured-product-review__header strong {
+	.featured-product-ingredients h3,
+	.featured-product-review__header strong,
+	.featured-product-review__identity a {
 		margin: 0;
 		font-size: 1rem;
 	}
 
+	.featured-product-review__identity {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.featured-product-review__identity a {
+		color: rgb(248 250 252);
+		text-decoration: none;
+	}
+
+	.featured-product-review__identity a:hover {
+		color: rgb(196 181 253);
+	}
+
+	.featured-product-review__verified {
+		padding: 0.22rem 0.52rem;
+		border-radius: 999px;
+		background: rgb(14 116 144 / 0.24);
+		color: rgb(186 230 253);
+		font-size: 0.64rem;
+		font-weight: 800;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+
 	.featured-product-qanda p,
-	.featured-product-reviews p {
+	.featured-product-reviews p,
+	.featured-product-assurance p,
+	.featured-product-ingredients p {
 		margin: 0.55rem 0 0;
 		color: rgb(203 213 225 / 0.94);
 		line-height: 1.7;
+	}
+
+	.featured-product-ingredients ul {
+		margin: 0.8rem 0 0;
+		padding-left: 1.1rem;
+		color: rgb(203 213 225 / 0.94);
+		display: grid;
+		gap: 0.35rem;
+	}
+
+	.featured-product-ingredients li::marker {
+		color: rgb(148 163 184);
+	}
+
+	.featured-product-assurance strong {
+		color: rgb(186 230 253);
+		font-size: 0.72rem;
+		font-weight: 800;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
 	}
 
 	.featured-product-review__header {
@@ -1088,6 +1446,85 @@ onMount(() => {
 
 	.featured-product-review__stars {
 		margin-top: 0.45rem;
+	}
+
+	.featured-product-inline-link {
+		display: inline-flex;
+		align-items: center;
+		margin-top: 0.75rem;
+		color: rgb(125 211 252);
+		font-size: 0.8rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		text-decoration: none;
+		text-transform: uppercase;
+	}
+
+	.featured-product-inline-link:hover {
+		color: rgb(186 230 253);
+	}
+
+	.featured-product-inline-link--creepy {
+		color: rgb(244 114 182);
+		text-shadow: 0 0 14px rgb(244 114 182 / 0.35);
+	}
+
+	.featured-product-review__flags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem;
+		margin-top: 0.85rem;
+	}
+
+	.featured-product-review__flags span {
+		padding: 0.24rem 0.5rem;
+		border: 1px solid rgb(244 114 182 / 0.18);
+		border-radius: 999px;
+		background: rgb(76 5 25 / 0.26);
+		color: rgb(253 164 175);
+		font-size: 0.62rem;
+		font-weight: 800;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+
+	@keyframes featured-product-refusal-shake {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		20% {
+			transform: translateX(-3px);
+		}
+		40% {
+			transform: translateX(4px);
+		}
+		60% {
+			transform: translateX(-5px);
+		}
+		80% {
+			transform: translateX(3px);
+		}
+	}
+
+	@keyframes featured-product-price-flicker {
+		0%,
+		100% {
+			opacity: 1;
+			transform: translateX(0);
+		}
+		25% {
+			opacity: 0.85;
+			transform: translateX(-1px);
+		}
+		50% {
+			opacity: 1;
+			transform: translateX(1px);
+		}
+		75% {
+			opacity: 0.72;
+			transform: translateX(0);
+		}
 	}
 
 	.featured-product-related__rail {

@@ -57,6 +57,7 @@
   export let position: [number, number, number] = [0, 10, 0];
   export let speed = 5;
   export let jumpForce = 10;
+  export let lightIntensityScale = 60;
   export let mouseSensitivity = 0.002;
 
   // --- Player State ---
@@ -1026,6 +1027,7 @@
     position={[0, 0, 0]}
     chargeAmount={lightChargeAmount}
     flashAmount={lightFlashAmount}
+    lightIntensityScale={lightIntensityScale}
   />
   <T.Group bind:ref={cameraPivot}>
     <T.PerspectiveCamera

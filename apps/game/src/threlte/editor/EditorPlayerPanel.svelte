@@ -65,5 +65,22 @@
     </div>
   </div>
 
-  <div class="save-message">Spawn, move speed, and jump force live here now. Environment only controls the world mood.</div>
+  <div class="tuple-group">
+    <div class="tuple-label">Glow</div>
+    <div class="editor-field-grid editor-mt-sm">
+      <label class="editor-field">
+        <span class="editor-field-label">Light Scale</span>
+        <input
+          class="tuple-input"
+          type="number"
+          min="0"
+          step="1"
+          value={levelSettings.player?.lightIntensityScale ?? 60}
+          on:change={(event) => updateLevelNumericSetting(['player', 'lightIntensityScale'], (event.currentTarget as HTMLInputElement).value)}
+        />
+      </label>
+    </div>
+  </div>
+
+  <div class="save-message">Spawn, movement, and player glow tuning live here now. Environment only controls the world mood.</div>
 </div>

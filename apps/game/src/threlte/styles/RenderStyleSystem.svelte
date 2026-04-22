@@ -97,6 +97,17 @@
     return `${mesh.uuid}:outline`
   }
 
+  function shouldSkipRenderStyle(object: THREE.Object3D | null | undefined) {
+    let current: THREE.Object3D | null | undefined = object
+
+    while (current) {
+      if (current.userData?.renderStyleSkip) return true
+      current = current.parent
+    }
+
+    return false
+  }
+
   function getBaseColorFromObjectName(objectName: string) {
     const normalizedName = objectName.toLowerCase()
 
@@ -253,7 +264,7 @@
   }
 
   function applyMaterialStyling(mesh: THREE.Mesh) {
-    if (mesh.userData?.renderStyleSkip) return
+    if (shouldSkipRenderStyle(mesh)) return
     if (mesh.userData.renderStyleOutline) return
 
     const materialKey = getMaterialKey(mesh)
@@ -300,7 +311,7 @@
 
   function applyOutlineShell(mesh: THREE.Mesh) {
     const skinnedMesh = mesh as THREE.Mesh & { isSkinnedMesh?: boolean }
-    if (!enableOutlines || mesh.userData?.renderStyleSkip || mesh.userData.renderStyleOutline || skinnedMesh.isSkinnedMesh) {
+    if (!enableOutlines || shouldSkipRenderStyle(mesh) || mesh.userData.renderStyleOutline || skinnedMesh.isSkinnedMesh) {
       removeOutlineShell(mesh)
       return
     }

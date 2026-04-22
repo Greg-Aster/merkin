@@ -1,23 +1,28 @@
 ---
-import '@fontsource/creepster'
-import '@fontsource/metal-mania'
-import Footer from '@components/Footer.astro'
-import BackToTop from '@components/control/BackToTop.astro'
-import ImageWrapper from '../../components/misc/ImageWrapper.astro'
-import CartDrawer from '../../components/store/CartDrawer.svelte'
-import StoreCartRuntime from '../../components/store/StoreCartRuntime.svelte'
-import StoreNavbar from '../../components/store/StoreNavbar.astro'
-import { siteConfig } from '../../config/config'
-import Layout from '../Layout.astro'
+import "@fontsource/creepster";
+import "@fontsource/metal-mania";
+import Footer from "@components/Footer.astro";
+import Navbar from "@components/Navbar.astro";
+import BackToTop from "@components/control/BackToTop.astro";
+import ImageWrapper from "../../components/misc/ImageWrapper.astro";
+import CartDrawer from "../../components/store/CartDrawer.svelte";
+import StoreCartRuntime from "../../components/store/StoreCartRuntime.svelte";
+import { siteConfig } from "../../config/config";
+import Layout from "../Layout.astro";
 
 export interface Props {
-  title: string
-  description: string
-  // Add other props if Layout.astro expects them (e.g., lang, banner for OG tags)
+	title: string;
+	description: string;
+	// Add other props if Layout.astro expects them (e.g., lang, banner for OG tags)
 }
-const { title, description, ...rest } = Astro.props // Capture other potential props for Layout
+const { title, description, ...rest } = Astro.props; // Capture other potential props for Layout
 ---
 <Layout title={title} description={description} {...rest}>
+  <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-2 md:px-4 mx-auto">
+    <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all duration-300">
+      <Navbar />
+    </div>
+  </div>
 
   <div id="banner-container" class="relative">
     {/* Parallax Background */}
@@ -43,12 +48,6 @@ const { title, description, ...rest } = Astro.props // Capture other potential p
         <div class="absolute inset-0 bg-gradient-to-b from-black/20 to-black/50 pointer-events-none"></div>
       </div>
     )}
-
-    <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto">
-      <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
-        <StoreNavbar />
-      </div>
-    </div>
   </div>
   {/* Cart Drawer — mounted once at layout level, controlled via custom events */}
   <CartDrawer client:load />
@@ -90,8 +89,16 @@ const { title, description, ...rest } = Astro.props // Capture other potential p
   </style>
   {/* Script specific to StoreLayout's parallax and animations */}
   <script>
-    // Simplified Parallax Logic
-    document.addEventListener('DOMContentLoaded', () => {
+    const storeLayoutParallaxCleanupKey = '__megamealStoreLayoutParallaxCleanup';
+
+    function initStoreLayoutChrome() {
+      if (typeof window === 'undefined') return;
+
+      const existingCleanup = window[storeLayoutParallaxCleanupKey];
+      if (typeof existingCleanup === 'function') {
+        existingCleanup();
+      }
+
       const parallaxBanner = document.getElementById('parallax-banner');
       if (parallaxBanner) {
         setTimeout(() => {
@@ -108,7 +115,6 @@ const { title, description, ...rest } = Astro.props // Capture other potential p
       if (parallaxImage) {
         const scrollFactor = -0.1; 
         let ticking = false;
-        // let lastScrollY = window.scrollY; // lastScrollY is not used
 
         function updateParallax() {
           if (!parallaxImage) return;
@@ -118,16 +124,36 @@ const { title, description, ...rest } = Astro.props // Capture other potential p
           ticking = false;
         }
 
-        window.addEventListener('scroll', () => {
-          // lastScrollY = window.scrollY; // lastScrollY is not used
+        const handleScroll = () => {
           if (!ticking) {
             window.requestAnimationFrame(updateParallax);
             ticking = true;
           }
-        }, { passive: true });
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
         
         updateParallax(); // Initial position
+
+        window[storeLayoutParallaxCleanupKey] = () => {
+          window.removeEventListener('scroll', handleScroll);
+        };
+        return;
       }
-    });
+
+      window[storeLayoutParallaxCleanupKey] = () => {};
+    }
+
+    initStoreLayoutChrome();
+    document.addEventListener('astro:page-load', initStoreLayoutChrome);
+
+    if (window?.swup?.hooks && !window.__megamealStoreLayoutSwupBound) {
+      window.swup.hooks.on('page:view', initStoreLayoutChrome);
+      window.swup.hooks.on('visit:start', () => {
+        const cleanup = window[storeLayoutParallaxCleanupKey];
+        if (typeof cleanup === 'function') cleanup();
+      });
+      window.__megamealStoreLayoutSwupBound = true;
+    }
   </script>
 </Layout>

@@ -36,6 +36,8 @@ type StandardBannerItem = {
 	preload?: "none" | "metadata" | "auto";
 	playbackRate?: number;
 	holdMs?: number;
+	sceneId?: string;
+	weight?: number;
 	showPreviewCard?: boolean;
 };
 
@@ -355,6 +357,10 @@ const hasAssistantBanner = scene?.id === "assistant";
                       data-active={index === 0 ? 'true' : 'false'}
                       data-banner-hold-ms={typeof item.holdMs === 'number'
                         ? item.holdMs
+                        : undefined}
+                      data-scene-id={item.sceneId || undefined}
+                      data-banner-weight={typeof item.weight === 'number'
+                        ? item.weight
                         : undefined}
                     >
                       <div
@@ -874,10 +880,15 @@ const hasAssistantBanner = scene?.id === "assistant";
       toFiniteNumber(animationConfig.transitionDuration, 1000),
     )
     const randomStartEnabled = !!animationConfig.randomStart
+    const rotationMode =
+      animationConfig.rotationMode === 'shuffle' ? 'shuffle' : 'sequential'
+    const preserveFirstSlide = animationConfig.preserveFirstSlide === true
     const initialSlideIndex =
-      randomStartEnabled && slides.length > 1
-        ? Math.floor(Math.random() * slides.length)
-        : 0
+      preserveFirstSlide
+        ? 0
+        : randomStartEnabled && slides.length > 1
+          ? Math.floor(Math.random() * slides.length)
+          : 0
     const motionEnabled = !!(
       animationConfig.enabled &&
       motionConfig.enabled &&
@@ -949,6 +960,7 @@ const hasAssistantBanner = scene?.id === "assistant";
     let currentSlideDuration = interval
     let remainingSlideDuration = currentSlideDuration
     let slideDeadline = 0
+    let rotationBag = []
     const activePauseReasons = new Set()
 
     const getSlideDuration = slideIndex => {
@@ -957,6 +969,64 @@ const hasAssistantBanner = scene?.id === "assistant";
       return Number.isFinite(configuredHold) && configuredHold > 0
         ? configuredHold
         : interval
+    }
+
+    const getSlideWeight = slideIndex => {
+      const slide = slides[slideIndex]
+      const configuredWeight = Number(slide?.dataset.bannerWeight)
+      const normalizedWeight = Number.isFinite(configuredWeight)
+        ? Math.round(configuredWeight)
+        : 1
+      return Math.min(6, Math.max(1, normalizedWeight))
+    }
+
+    const shuffleList = list => {
+      const copy = [...list]
+      for (let index = copy.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1))
+        ;[copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]]
+      }
+      return copy
+    }
+
+    const getRotatableSlideIndices = () =>
+      slides
+        .map((_, index) => index)
+        .filter(index => !(preserveFirstSlide && index === 0))
+
+    const rebuildRotationBag = () => {
+      const weightedIndices = getRotatableSlideIndices().flatMap(index =>
+        Array.from({ length: getSlideWeight(index) }, () => index),
+      )
+      rotationBag = shuffleList(weightedIndices)
+    }
+
+    const getNextSlideIndex = () => {
+      if (rotationMode !== 'shuffle') {
+        return (currentSlideIndex + 1) % slides.length
+      }
+
+      const rotatableIndices = getRotatableSlideIndices()
+      if (rotatableIndices.length === 0) {
+        return preserveFirstSlide ? 0 : currentSlideIndex
+      }
+
+      if (rotationBag.length === 0) {
+        rebuildRotationBag()
+      }
+
+      let bagIndex = rotationBag.findIndex(index => index !== currentSlideIndex)
+      if (bagIndex === -1) {
+        rebuildRotationBag()
+        bagIndex = rotationBag.findIndex(index => index !== currentSlideIndex)
+      }
+
+      if (bagIndex === -1) {
+        return rotatableIndices[0] ?? currentSlideIndex
+      }
+
+      const [nextIndex] = rotationBag.splice(bagIndex, 1)
+      return typeof nextIndex === 'number' ? nextIndex : currentSlideIndex
     }
 
     const clearMotionClasses = mediaLayer => {
@@ -1145,7 +1215,7 @@ const hasAssistantBanner = scene?.id === "assistant";
       remainingSlideDuration = currentSlideDuration
       slideDeadline = performance.now() + currentSlideDuration
       bannerTimeoutId = setTimeout(() => {
-        const nextIndex = (currentSlideIndex + 1) % slides.length
+        const nextIndex = getNextSlideIndex()
         showSlide(nextIndex)
         queueNextSlide(getSlideDuration(nextIndex))
       }, currentSlideDuration)

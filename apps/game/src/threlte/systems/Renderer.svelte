@@ -86,6 +86,9 @@ onMount(() => {
   // One-time renderer setup
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.0
+  if ('useLegacyLights' in renderer) {
+    ;(renderer as THREE.WebGLRenderer & { useLegacyLights?: boolean }).useLegacyLights = true
+  }
   renderer.setClearColor(0x000000, 1)
   renderer.autoClear = true
   renderer.info.autoReset = true

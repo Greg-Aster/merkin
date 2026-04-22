@@ -7,7 +7,7 @@ import {
 } from "@/config/timelineconfig";
 import Bleepy from "@components/bleepy/Bleepy.astro";
 import SiteSfxBridge from "@components/client/SiteSfxBridge.svelte";
-import FeaturedProductHeroSlide from "@components/home/FeaturedProductHeroSlide.astro";
+import HomeIntroHeroSlide from "@components/home/HomeIntroHeroSlide.astro";
 import UniverseHeroSlide from "@components/home/UniverseHeroSlide.astro";
 import SharedMainGridLayout from "@merkin/blog-core/layouts/MainGridLayout.astro";
 import timelineManifest from "../../../../packages/shared-data/generated/timeline.json";
@@ -61,7 +61,7 @@ interface Props {
   )}
   <slot slot="overlay" name="overlay" />
   {Astro.props.homeLayout === 'portal' && (
-    <FeaturedProductHeroSlide slot="banner-slide-content" />
+    <HomeIntroHeroSlide slot="banner-slide-content" />
   )}
   {Astro.props.homeLayout !== 'portal' && (
     <UniverseHeroSlide slot="banner-slide-content" />

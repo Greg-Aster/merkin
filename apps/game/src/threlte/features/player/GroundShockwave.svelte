@@ -16,6 +16,7 @@
   export let lightColor = '#b4ecff';
   export let lightDistance = 10;
   export let lightIntensity = 8;
+  const gameplayPointLightScale = 180;
 
   const rapier = useRapier();
   const rayDirection = { x: 0, y: -1, z: 0 };
@@ -189,7 +190,7 @@
   <T.PointLight
     position={[0, 0.3, 0]}
     color={lightColor}
-    intensity={enableContour ? lightIntensity * 0.45 : lightIntensity}
+    intensity={(enableContour ? lightIntensity * 0.45 : lightIntensity) * gameplayPointLightScale}
     distance={Math.max(3, lightDistance * 0.7)}
     decay={1.4}
     castShadow={false}
@@ -225,7 +226,7 @@
     <T.PointLight
       position={lightPosition}
       color={lightColor}
-      intensity={lightIntensity * (0.3 + index * 0.05)}
+      intensity={lightIntensity * (0.3 + index * 0.05) * gameplayPointLightScale}
       distance={Math.max(3, lightDistance * 0.42)}
       decay={1.35}
       castShadow={false}

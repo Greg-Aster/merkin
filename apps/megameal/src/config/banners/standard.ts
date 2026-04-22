@@ -130,6 +130,7 @@ const bannerEntries: BannerEntry[] = [
 	{
 		item: {
 			type: "html",
+			sceneId: "home-intro",
 			alt: "MEGA MEAL SAGA — Universe Introduction",
 			src: "",
 			holdMs: 30000,
@@ -158,6 +159,8 @@ const bannerEntries: BannerEntry[] = [
 	{
 		item: {
 			type: "video",
+			sceneId: "timeline-billboard",
+			weight: 2,
 			src: `${import.meta.env.BASE_URL}assets/banner/universbg0001-0121.webm`,
 			fallbackImage: timelineMapFallback,
 			alt: "Timeline map and chronology overview",
@@ -169,6 +172,8 @@ const bannerEntries: BannerEntry[] = [
 	{
 		item: {
 			type: "video",
+			sceneId: "cookbook-billboard",
+			weight: 1,
 			src: `${import.meta.env.BASE_URL}assets/banner/cookbook-glitch0001-0049.webm`,
 			fallbackImage: banner3Fallback, // Fallback image for unsupported browsers
 			alt: "MegaMeal Cookbook",
@@ -180,6 +185,8 @@ const bannerEntries: BannerEntry[] = [
 	{
 		item: {
 			type: "video",
+			sceneId: "archive-billboard",
+			weight: 2,
 			src: `${import.meta.env.BASE_URL}assets/banner/archive_2.webm`,
 			fallbackImage: archiveDispatchesBanner,
 			alt: "Archive of dispatches and restricted records",
@@ -191,6 +198,8 @@ const bannerEntries: BannerEntry[] = [
 	{
 		item: {
 			type: "video",
+			sceneId: "game-billboard",
+			weight: 2,
 			src: `${import.meta.env.BASE_URL}videos/starmap.webm`,
 			fallbackImage: starObservatoryFallback,
 			alt: "Enter the Star Observatory",
@@ -201,6 +210,8 @@ const bannerEntries: BannerEntry[] = [
 	{
 		item: {
 			type: "video",
+			sceneId: "store-billboard",
+			weight: 3,
 			src: `${import.meta.env.BASE_URL}assets/banner/store_glitch.webm`,
 			fallbackImage: storefrontBanner,
 			alt: "Browse the storefront and corporate artifacts",
@@ -211,6 +222,8 @@ const bannerEntries: BannerEntry[] = [
 	{
 		item: {
 			type: "video",
+			sceneId: "community-billboard",
+			weight: 1,
 			src: `${import.meta.env.BASE_URL}assets/banner/golden-era.webm`,
 			fallbackImage: communityChannelsBanner,
 			alt: "Join the community channels",
@@ -220,6 +233,8 @@ const bannerEntries: BannerEntry[] = [
 	{
 		item: {
 			type: "video",
+			sceneId: "story-mode-billboard",
+			weight: 1,
 			src: `${import.meta.env.BASE_URL}assets/banner/golden-era.webm`,
 			fallbackImage: storyModeBanner, // Fallback for image items can just be the same image
 			alt: "Read the story mode dispatches",
@@ -364,7 +379,9 @@ export const animationConfig: BannerAnimationConfig & {
 	interval: 12000, // Longer hold so the banner reads as navigation, not ambient decoration
 	transitionDuration: 2400, // Slower, more deliberate slide transition
 	direction: "forward",
-	randomStart: false, // MEGAMEAL uses sequential order (story content)
+	randomStart: false,
+	rotationMode: "shuffle",
+	preserveFirstSlide: true,
 
 	// Navigation-specific animation settings
 	pauseOnHover: true,

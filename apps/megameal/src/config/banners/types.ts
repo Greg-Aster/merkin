@@ -61,6 +61,8 @@ export interface VideoBannerItem {
 	preload?: "none" | "metadata" | "auto"; // Video preload behavior
 	playbackRate?: number; // Optional playback speed (0.5 = half speed, 1 = normal)
 	holdMs?: number; // Optional slide-specific dwell time
+	sceneId?: string; // Optional scene identifier for billboard rotations
+	weight?: number; // Relative probability when shuffle rotation is enabled
 	showPreviewCard?: boolean; // Allows interactive slides to suppress the title overlay
 }
 
@@ -73,6 +75,8 @@ export interface ImageBannerItem {
 	src: ImageMetadata; // Astro image metadata
 	alt: string; // Alt text for accessibility
 	holdMs?: number; // Optional slide-specific dwell time
+	sceneId?: string; // Optional scene identifier for billboard rotations
+	weight?: number; // Relative probability when shuffle rotation is enabled
 	showPreviewCard?: boolean; // Allows interactive slides to suppress the title overlay
 }
 
@@ -85,6 +89,8 @@ export interface HtmlBannerItem {
 	src: "";
 	alt: string;
 	holdMs?: number;
+	sceneId?: string;
+	weight?: number;
 	showPreviewCard?: boolean;
 }
 
@@ -246,6 +252,8 @@ export interface BannerAnimationConfig {
 	transitionDuration: number; // Milliseconds for fade transition
 	direction: "forward" | "reverse" | "alternate";
 	randomStart?: boolean; // true = pick a random image on each page load
+	rotationMode?: "sequential" | "shuffle";
+	preserveFirstSlide?: boolean;
 	// Added from standard.ts animationConfig
 	pauseOnHover?: boolean;
 	pauseOnMobileTouch?: boolean;

@@ -15,6 +15,8 @@ const legacyProductCategorySchema = z.enum([
   'relics',
 ])
 
+const productListingStyleSchema = z.enum(['legacy', 'showcase'])
+
 const mediaAssetSchema = z.object({
   id: z.string().optional(),
   type: z.enum(['image', 'video', 'youtube', 'model3d', 'iframe', 'scene']),
@@ -28,6 +30,38 @@ const mediaAssetSchema = z.object({
   autoplay: z.boolean().optional(),
   cameraPreset: z.string().optional(),
   sceneId: z.string().optional(),
+})
+
+const productLinkAccentSchema = z.enum(['signal', 'creepy'])
+
+const productQuestionSchema = z.object({
+  question: z.string(),
+  answer: z.string(),
+  linkLabel: z.string().optional(),
+  linkHref: z.string().optional(),
+  linkAccent: productLinkAccentSchema.optional(),
+})
+
+const productReviewSchema = z.object({
+  author: z.string(),
+  rating: z.number().optional(),
+  date: z.string().optional(),
+  comment: z.string(),
+  authorHref: z.string().optional(),
+  linkLabel: z.string().optional(),
+  linkHref: z.string().optional(),
+  flags: z.array(z.string()).optional(),
+  verified: z.boolean().optional(),
+})
+
+const productDataPointSchema = z.object({
+  label: z.string(),
+  value: z.string(),
+})
+
+const productActionLinkSchema = z.object({
+  label: z.string(),
+  href: z.string(),
 })
 
 const quirkSchema = z.object({
@@ -117,6 +151,8 @@ const productsCollection = defineCollection({
     categories: z.array(z.string()).optional(),
     // Whether to feature this product in a hero/spotlight slot
     featured: z.boolean().optional().default(false),
+    listingStyle: productListingStyleSchema.optional().default('legacy'),
+    listingLabel: z.string().optional(),
     // Product format
     format: z
       .enum(['physical', 'digital', 'lore_only'])
@@ -124,6 +160,7 @@ const productsCollection = defineCollection({
       .default('physical'),
     // Separate reality-layer description shown below the fiction copy
     realDescription: z.string().optional(),
+    alternateAction: productActionLinkSchema.optional(),
     // Shipping note shown on available/coming_soon products
     shippingNote: z.string().optional(),
     // Optional badge text override (defaults to availability label)
@@ -138,19 +175,10 @@ const productsCollection = defineCollection({
     specifications: z
       .array(z.object({ label: z.string(), value: z.string() }))
       .optional(),
-    qanda: z
-      .array(z.object({ question: z.string(), answer: z.string() }))
-      .optional(),
-    preWrittenReviews: z
-      .array(
-        z.object({
-          author: z.string(),
-          rating: z.number().optional(),
-          date: z.string().optional(),
-          comment: z.string(),
-        }),
-      )
-      .optional(),
+    ingredients: z.array(z.string()).optional(),
+    nutritionFacts: z.array(productDataPointSchema).optional(),
+    qanda: z.array(productQuestionSchema).optional(),
+    preWrittenReviews: z.array(productReviewSchema).optional(),
     sheet: z.array(productFieldSchema).optional(),
     panels: z.array(panelConfigSchema).optional(),
     reviews: z.array(z.string()).optional(),

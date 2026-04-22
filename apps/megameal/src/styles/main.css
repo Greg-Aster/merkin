@@ -1,6 +1,32 @@
 @tailwind components;
 
 @layer components {
+    /* ===================================================================
+     * ACCESSIBILITY: PREFERS-REDUCED-MOTION
+     * Disable autoplay and animations for users with motion sensitivity
+     * ===================================================================
+     */
+    @media (prefers-reduced-motion: reduce) {
+        /* Disable video autoplay */
+        video {
+            animation: none;
+        }
+
+        /* Generic animation disables */
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+
+        /* Allow specific fast transitions that improve accessibility */
+        [role="button"],
+        button,
+        a {
+            transition-duration: 0.01ms !important;
+        }
+    }
+
     /* PostCard image fix - override ImageWrapper's object-cover */
     .postcard-image-fix img {
         object-fit: contain !important;

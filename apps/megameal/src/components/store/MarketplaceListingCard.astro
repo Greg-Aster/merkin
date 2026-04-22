@@ -1,0 +1,584 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { Icon } from "astro-icon/components";
+import { url } from "../../utils/url-utils";
+
+export interface Props {
+	product: CollectionEntry<"products">;
+}
+
+const { product } = Astro.props;
+
+const resolveAsset = (path: string | undefined) => {
+	if (!path) return undefined;
+	return path.startsWith("/") ? url(path) : path;
+};
+
+const productSlug = product.data.slug ?? product.id.replace(/\.(md|mdx)$/, "");
+const productHref = `/store/${productSlug}/`;
+
+const mediaItems =
+	Array.isArray(product.data.media) && product.data.media.length > 0
+		? product.data.media
+		: [
+				...(product.data.image
+					? [
+							{
+								type: "image" as const,
+								src: product.data.image,
+								alt: product.data.name,
+							},
+						]
+					: []),
+			];
+
+const thumbnail = (() => {
+	for (const item of mediaItems) {
+		if (item.type === "image" && item.src) return resolveAsset(item.src);
+		if (item.thumbnail) return resolveAsset(item.thumbnail);
+		if (item.poster) return resolveAsset(item.poster);
+		if (item.type === "youtube" && item.videoId) {
+			return `https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg`;
+		}
+	}
+	return undefined;
+})();
+
+const mediaKinds = Array.from(
+	new Set(
+		mediaItems.map((item) => {
+			if (item.type === "youtube") return "broadcast";
+			if (item.type === "model3d") return "scan";
+			return item.type;
+		}),
+	),
+).slice(0, 3);
+
+const specHighlights = (product.data.specifications ?? []).slice(0, 2);
+const reviewCount = product.data.preWrittenReviews?.length ?? 0;
+const questionCount = product.data.qanda?.length ?? 0;
+const assetCount = mediaItems.length;
+const brand = product.data.brand ?? "MegaMeal Merchant Services";
+const shippingNote = product.data.shippingNote;
+const sku = product.data.sku;
+const rating = product.data.rating;
+const fullStars =
+	typeof rating === "number" ? Math.min(5, Math.max(0, Math.round(rating))) : 0;
+const stars = Array.from({ length: 5 }, (_, index) => index < fullStars);
+
+const availabilityDisplay: Record<
+	string,
+	{ label: string; badgeClass: string; note: string }
+> = {
+	available: {
+		label: "Available Now",
+		badgeClass: "bg-emerald-400/90 text-slate-950 border-emerald-300/60",
+		note: "Cleared for this region.",
+	},
+	coming_soon: {
+		label: "Coming Soon",
+		badgeClass: "bg-cyan-300/85 text-slate-950 border-cyan-200/60",
+		note: "Launch window still stabilizing.",
+	},
+	out_of_stock: {
+		label: "Out of Stock",
+		badgeClass: "bg-slate-400/80 text-slate-950 border-slate-200/40",
+		note: "Demand exceeded containment.",
+	},
+	not_in_your_area: {
+		label: "Not In Your Area",
+		badgeClass: "bg-amber-300/90 text-slate-950 border-amber-200/60",
+		note: "Regional clearance remains pending.",
+	},
+	not_in_your_timeline: {
+		label: "Not In Your Timeline",
+		badgeClass: "bg-fuchsia-300/90 text-slate-950 border-fuchsia-200/60",
+		note: "Viewable here, purchasable elsewhere.",
+	},
+	artifact_only: {
+		label: "Artifact Record",
+		badgeClass: "bg-rose-300/85 text-slate-950 border-rose-200/60",
+		note: "Archival listing only.",
+	},
+};
+
+const availabilityTone =
+	availabilityDisplay[product.data.availability ?? "coming_soon"] ??
+	availabilityDisplay.coming_soon;
+
+const deterministicValue = Array.from(product.data.name).reduce(
+	(sum, char, index) => sum + char.charCodeAt(0) * (index + 1),
+	0,
+);
+const observedToday = 180 + (deterministicValue % 1400);
+const watchCount = 40 + (deterministicValue % 620);
+const sellerScore = (96 + (deterministicValue % 34) / 10).toFixed(1);
+---
+
+<article class="marketplace-card-shell h-full rounded-[1.6rem] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.98))] shadow-[0_20px_60px_rgba(2,6,23,0.32)] overflow-hidden">
+	<a href={productHref} class="marketplace-card block h-full">
+		<div class="marketplace-card__media">
+			<div class="marketplace-card__badges">
+				<span class={`marketplace-card__availability ${availabilityTone.badgeClass}`}>
+					{availabilityTone.label}
+				</span>
+				{product.data.featured && (
+					<span class="marketplace-card__flag">Featured</span>
+				)}
+			</div>
+			{thumbnail ? (
+				<img src={thumbnail} alt={product.data.name} loading="lazy" />
+			) : (
+				<div class="marketplace-card__placeholder">
+					<Icon name="mdi:image-off-outline" class="h-10 w-10 opacity-40" />
+					<span>Asset pending</span>
+				</div>
+			)}
+			<div class="marketplace-card__media-meta">
+				{mediaKinds.map((kind) => (
+					<span>{kind}</span>
+				))}
+			</div>
+		</div>
+
+		<div class="marketplace-card__body">
+			<div class="marketplace-card__sellerline">
+				<div>
+					<span>Seller</span>
+					<strong>{brand}</strong>
+				</div>
+				<div>
+					<span>Trust</span>
+					<strong>{sellerScore}%</strong>
+				</div>
+			</div>
+
+			<div class="marketplace-card__heading">
+				<div>
+					<p class="marketplace-card__category">
+						{product.data.category ?? "catalog entry"}
+					</p>
+					<h2>{product.data.name}</h2>
+				</div>
+				{typeof product.data.price === "number" ? (
+					<strong class="marketplace-card__price">
+						${product.data.price.toFixed(2)}
+					</strong>
+				) : (
+					<strong class="marketplace-card__price marketplace-card__price--muted">
+						Inquire
+					</strong>
+				)}
+			</div>
+
+			{product.data.tagline && (
+				<p class="marketplace-card__tagline">"{product.data.tagline}"</p>
+			)}
+
+			<div class="marketplace-card__offer-row">
+				<span>{availabilityTone.note}</span>
+				{sku && <strong>SKU {sku}</strong>}
+			</div>
+
+			{product.data.description && (
+				<p class="marketplace-card__description">{product.data.description}</p>
+			)}
+
+			<div class="marketplace-card__signals">
+				<div>
+					<span>Observed today</span>
+					<strong>{observedToday.toLocaleString()}</strong>
+				</div>
+				<div>
+					<span>Watchers</span>
+					<strong>{watchCount.toLocaleString()}</strong>
+				</div>
+				<div>
+					<span>Assets</span>
+					<strong>{assetCount}</strong>
+				</div>
+			</div>
+
+			<div class="marketplace-card__subgrid">
+				<div class="marketplace-card__rating">
+					<div class="marketplace-card__stars" aria-hidden="true">
+						{stars.map((filled) => (
+							<span class:list={[filled ? "filled" : ""]}>★</span>
+						))}
+					</div>
+					<span>
+						{typeof rating === "number" ? rating.toFixed(1) : "unrated"} rating
+					</span>
+				</div>
+				<div class="marketplace-card__meta-copy">
+					<span>{reviewCount} reviews</span>
+					<span>{questionCount} Q&A entries</span>
+				</div>
+			</div>
+
+			{specHighlights.length > 0 && (
+				<div class="marketplace-card__specs">
+					{specHighlights.map((spec) => (
+						<div>
+							<span>{spec.label}</span>
+							<strong>{spec.value}</strong>
+						</div>
+					))}
+				</div>
+			)}
+
+			{shippingNote && (
+				<div class="marketplace-card__shipping">
+					<Icon name="mdi:truck-fast-outline" class="h-4 w-4" />
+					<p>{shippingNote}</p>
+				</div>
+			)}
+
+			<div class="marketplace-card__footer">
+				<div class="marketplace-card__footer-actions">
+					<span class="marketplace-card__cta">
+						Inspect listing <Icon name="mdi:arrow-right" class="h-4 w-4" />
+					</span>
+					<span class="marketplace-card__watch">
+						<Icon name="mdi:eye-outline" class="h-4 w-4" />
+						{watchCount.toLocaleString()} tracking
+					</span>
+				</div>
+				<p>Policy, media, and review trail available inside listing.</p>
+			</div>
+		</div>
+	</a>
+</article>
+
+<style>
+	.marketplace-card {
+		display: grid;
+		height: 100%;
+	}
+
+	.marketplace-card__media {
+		position: relative;
+		overflow: hidden;
+		aspect-ratio: 16 / 11;
+		border-bottom: 1px solid rgb(51 65 85 / 0.7);
+		background:
+			radial-gradient(circle at 20% 18%, rgb(255 255 255 / 0.08), transparent 24%),
+			linear-gradient(180deg, rgb(15 23 42 / 0.9), rgb(2 6 23 / 0.96));
+	}
+
+	.marketplace-card__media img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition:
+			transform 220ms ease,
+			filter 220ms ease;
+	}
+
+	.marketplace-card:hover .marketplace-card__media img {
+		transform: scale(1.04);
+		filter: saturate(1.08);
+	}
+
+	.marketplace-card__badges {
+		position: absolute;
+		inset: 0.85rem 0.85rem auto;
+		z-index: 2;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+	}
+
+	.marketplace-card__availability,
+	.marketplace-card__flag,
+	.marketplace-card__media-meta span {
+		border: 1px solid transparent;
+		border-radius: 999px;
+		padding: 0.35rem 0.65rem;
+		font-size: 0.65rem;
+		font-weight: 800;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+
+	.marketplace-card__flag {
+		border-color: rgb(125 211 252 / 0.28);
+		background: rgb(8 47 73 / 0.72);
+		color: rgb(186 230 253);
+	}
+
+	.marketplace-card__placeholder {
+		display: grid;
+		place-items: center;
+		align-content: center;
+		gap: 0.45rem;
+		width: 100%;
+		height: 100%;
+		color: rgb(148 163 184);
+		font-size: 0.78rem;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+	}
+
+	.marketplace-card__media-meta {
+		position: absolute;
+		left: 0.85rem;
+		right: 0.85rem;
+		bottom: 0.85rem;
+		z-index: 2;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem;
+	}
+
+	.marketplace-card__media-meta span {
+		border-color: rgb(148 163 184 / 0.22);
+		background: rgb(2 6 23 / 0.74);
+		color: rgb(226 232 240 / 0.92);
+	}
+
+	.marketplace-card__body {
+		display: grid;
+		gap: 0.88rem;
+		padding: 0.9rem 0.95rem 1rem;
+	}
+
+	.marketplace-card__sellerline,
+	.marketplace-card__offer-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		padding: 0.55rem 0.7rem;
+		border: 1px solid rgb(51 65 85 / 0.52);
+		border-radius: 0.95rem;
+		background: rgb(15 23 42 / 0.52);
+	}
+
+	.marketplace-card__sellerline div {
+		display: grid;
+		gap: 0.15rem;
+	}
+
+	.marketplace-card__sellerline span,
+	.marketplace-card__offer-row span,
+	.marketplace-card__offer-row strong {
+		font-size: 0.65rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.marketplace-card__sellerline span,
+	.marketplace-card__offer-row span {
+		color: rgb(148 163 184);
+	}
+
+	.marketplace-card__sellerline strong,
+	.marketplace-card__offer-row strong {
+		color: rgb(241 245 249);
+		font-size: 0.72rem;
+	}
+
+	.marketplace-card__offer-row strong {
+		color: rgb(191 219 254);
+	}
+
+	.marketplace-card__heading {
+		display: flex;
+		align-items: start;
+		justify-content: space-between;
+		gap: 0.8rem;
+	}
+
+	.marketplace-card__category {
+		margin: 0 0 0.35rem;
+		color: rgb(148 163 184);
+		font-size: 0.64rem;
+		font-weight: 800;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+	}
+
+	.marketplace-card__heading h2 {
+		margin: 0;
+		color: rgb(241 245 249);
+		font-size: 1.18rem;
+		line-height: 1.1;
+	}
+
+	.marketplace-card__price {
+		color: rgb(74 222 128);
+		font-size: 1rem;
+		white-space: nowrap;
+	}
+
+	.marketplace-card__price--muted {
+		color: rgb(251 191 36);
+	}
+
+	.marketplace-card__tagline,
+	.marketplace-card__description,
+	.marketplace-card__footer p {
+		margin: 0;
+		color: rgb(203 213 225);
+		font-size: 0.86rem;
+		line-height: 1.6;
+	}
+
+	.marketplace-card__description {
+		display: -webkit-box;
+		overflow: hidden;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+	}
+
+	.marketplace-card__signals,
+	.marketplace-card__specs {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.5rem;
+	}
+
+	.marketplace-card__specs {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.marketplace-card__signals div,
+	.marketplace-card__specs div {
+		display: grid;
+		gap: 0.2rem;
+		padding: 0.58rem 0.64rem;
+		border: 1px solid rgb(51 65 85 / 0.58);
+		border-radius: 1rem;
+		background: rgb(15 23 42 / 0.58);
+	}
+
+	.marketplace-card__signals span,
+	.marketplace-card__specs span,
+	.marketplace-card__meta-copy span {
+		color: rgb(148 163 184);
+		font-size: 0.65rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.marketplace-card__signals strong,
+	.marketplace-card__specs strong {
+		color: rgb(241 245 249);
+		font-size: 0.78rem;
+		line-height: 1.35;
+	}
+
+	.marketplace-card__subgrid {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+	}
+
+	.marketplace-card__rating,
+	.marketplace-card__meta-copy {
+		display: grid;
+		gap: 0.25rem;
+	}
+
+	.marketplace-card__stars {
+		display: flex;
+		gap: 0.12rem;
+		color: rgb(71 85 105);
+		font-size: 0.82rem;
+	}
+
+	.marketplace-card__stars .filled {
+		color: rgb(250 204 21);
+	}
+
+	.marketplace-card__rating > span {
+		color: rgb(226 232 240);
+		font-size: 0.72rem;
+	}
+
+	.marketplace-card__meta-copy {
+		text-align: right;
+	}
+
+	.marketplace-card__shipping {
+		display: flex;
+		align-items: start;
+		gap: 0.5rem;
+		padding: 0.6rem 0.7rem;
+		border: 1px solid rgb(51 65 85 / 0.52);
+		border-radius: 0.95rem;
+		background: rgb(8 47 73 / 0.24);
+		color: rgb(191 219 254);
+	}
+
+	.marketplace-card__shipping p {
+		margin: 0;
+		font-size: 0.76rem;
+		line-height: 1.5;
+	}
+
+	.marketplace-card__footer {
+		display: grid;
+		gap: 0.55rem;
+		padding-top: 0.3rem;
+		border-top: 1px solid rgb(51 65 85 / 0.52);
+	}
+
+	.marketplace-card__footer-actions {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+	}
+
+	.marketplace-card__cta {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		color: rgb(125 211 252);
+		font-size: 0.75rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.marketplace-card__watch {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		color: rgb(148 163 184);
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	.marketplace-card__footer > p {
+		font-size: 0.76rem;
+		color: rgb(148 163 184);
+	}
+
+	@media (max-width: 720px) {
+		.marketplace-card__signals,
+		.marketplace-card__specs {
+			grid-template-columns: 1fr;
+		}
+
+		.marketplace-card__sellerline,
+		.marketplace-card__offer-row,
+		.marketplace-card__subgrid,
+		.marketplace-card__footer-actions {
+			grid-template-columns: 1fr;
+			display: grid;
+		}
+
+		.marketplace-card__meta-copy {
+			text-align: left;
+		}
+	}
+</style>
