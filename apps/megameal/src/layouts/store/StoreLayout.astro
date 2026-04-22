@@ -1,9 +1,12 @@
 ---
+import '@fontsource/creepster'
+import '@fontsource/metal-mania'
 import Footer from '@components/Footer.astro'
 import BackToTop from '@components/control/BackToTop.astro'
 import ImageWrapper from '../../components/misc/ImageWrapper.astro'
-import StoreNavbar from '../../components/store/StoreNavbar.astro'
 import CartDrawer from '../../components/store/CartDrawer.svelte'
+import StoreCartRuntime from '../../components/store/StoreCartRuntime.svelte'
+import StoreNavbar from '../../components/store/StoreNavbar.astro'
 import { siteConfig } from '../../config/config'
 import Layout from '../Layout.astro'
 
@@ -15,10 +18,6 @@ export interface Props {
 const { title, description, ...rest } = Astro.props // Capture other potential props for Layout
 ---
 <Layout title={title} description={description} {...rest}>
-  {/* Specific Google Fonts for StoreLayout */}
-  <link rel="preconnect" href="https://fonts.googleapis.com" slot="head">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin slot="head">
-  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Metal+Mania&family=Nosifier&display=swap" rel="stylesheet" slot="head">
 
   <div id="banner-container" class="relative">
     {/* Parallax Background */}
@@ -53,6 +52,7 @@ const { title, description, ...rest } = Astro.props // Capture other potential p
   </div>
   {/* Cart Drawer — mounted once at layout level, controlled via custom events */}
   <CartDrawer client:load />
+  <StoreCartRuntime client:load />
 
   <div id="main-grid" class="relative z-10">
     <main id="store-content" class="relative z-10 py-8 mt-6">
@@ -88,56 +88,6 @@ const { title, description, ...rest } = Astro.props // Capture other potential p
         opacity: 1; /* Fade in when loaded */
     }
   </style>
-  {/* Bridge: wires [data-add-to-cart] buttons → CartDrawer and updates nav badge */}
-  <script>
-    const CART_KEY = 'megameal-cart';
-
-    function getCart() {
-      try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch { return []; }
-    }
-
-    function updateBadge() {
-      const badge = document.getElementById('cart-count-badge');
-      if (!badge) return;
-      const count = getCart().reduce((s: number, i: {quantity: number}) => s + i.quantity, 0);
-      badge.textContent = count > 99 ? '99+' : String(count);
-      badge.classList.toggle('invisible', count === 0);
-      badge.classList.toggle('visible', count > 0);
-    }
-
-    function wireAddToCartButtons() {
-      document.querySelectorAll<HTMLButtonElement>('[data-add-to-cart]').forEach(btn => {
-        if (btn.dataset.cartWired) return;
-        btn.dataset.cartWired = '1';
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const item = {
-            id: btn.dataset.productId || '',
-            name: btn.dataset.productName || '',
-            price: parseFloat(btn.dataset.productPrice || '0'),
-            sku: btn.dataset.productSku,
-          };
-          document.dispatchEvent(new CustomEvent('megameal:cart:add', { detail: item }));
-          setTimeout(updateBadge, 50);
-        });
-      });
-    }
-
-    // Re-check badge when cart changes via CartDrawer
-    window.addEventListener('storage', (e) => {
-      if (e.key === CART_KEY) updateBadge();
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-      wireAddToCartButtons();
-      updateBadge();
-    });
-    document.addEventListener('astro:after-swap', () => {
-      wireAddToCartButtons();
-      updateBadge();
-    });
-  </script>
-
   {/* Script specific to StoreLayout's parallax and animations */}
   <script>
     // Simplified Parallax Logic

@@ -1,0 +1,29 @@
+---
+import FeaturedProductHeroSlide from "../../components/home/FeaturedProductHeroSlide.astro";
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout
+  title="Featured Product Banner Lab"
+  description="Milestone 5 verification route for the featured product banner widget."
+>
+  <main class="mx-auto max-w-[96rem] px-4 py-10 md:py-16">
+    <header class="mb-8 max-w-3xl">
+      <p class="text-xs uppercase tracking-[0.28em] text-cyan-300/80">
+        MEGAMEAL Product Banner Lab
+      </p>
+      <h1 class="mt-3 text-4xl font-bold text-white md:text-5xl">
+        Featured Product Widget
+      </h1>
+      <p class="mt-4 text-base leading-7 text-slate-300">
+        This route isolates the new product-banner experience outside the live
+        homepage rotation so the media viewer, panel expansion, and related rail
+        can be tested directly.
+      </p>
+    </header>
+
+    <div class="relative min-h-[58rem] overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950/80 shadow-2xl">
+      <FeaturedProductHeroSlide />
+    </div>
+  </main>
+</Layout>

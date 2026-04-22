@@ -1,53 +1,68 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
-  import { cart, cartCount, cartTotal, type CartItem } from '../../stores/cartStore'
+import { onMount } from 'svelte'
+import {
+  type CartItem,
+  cart,
+  cartCount,
+  cartTotal,
+} from '../../stores/cartStore'
+import { url } from '../../utils/url-utils'
 
-  let isOpen = $state(false)
+let isOpen = $state(false)
 
-  // Expose open/close to vanilla JS (called from Add to Cart buttons and nav icon)
-  onMount(() => {
-    cart.init()
+// Expose open/close to vanilla JS (called from Add to Cart buttons and nav icon)
+onMount(() => {
+  cart.init()
 
-    const open = () => { isOpen = true }
-    const close = () => { isOpen = false }
-    const toggle = () => { isOpen = !isOpen }
-
-    document.addEventListener('megameal:cart:open', open)
-    document.addEventListener('megameal:cart:close', close)
-    document.addEventListener('megameal:cart:toggle', toggle)
-
-    // Listen for add-to-cart events from Astro product cards/pages
-    document.addEventListener('megameal:cart:add', (e: Event) => {
-      const detail = (e as CustomEvent<CartItem>).detail
-      if (detail) {
-        cart.add(detail)
-        isOpen = true
-        document.dispatchEvent(new CustomEvent('megameal:sfx', { detail: { id: 'select' } }))
-      }
-    })
-
-    return () => {
-      document.removeEventListener('megameal:cart:open', open)
-      document.removeEventListener('megameal:cart:close', close)
-      document.removeEventListener('megameal:cart:toggle', toggle)
-    }
-  })
-
-  function closeDrawer() {
+  const open = () => {
+    isOpen = true
+  }
+  const close = () => {
     isOpen = false
   }
-
-  function handleBackdropClick(e: MouseEvent) {
-    if ((e.target as HTMLElement).id === 'cart-backdrop') closeDrawer()
+  const toggle = () => {
+    isOpen = !isOpen
+  }
+  const handleAdd = (e: Event) => {
+    const detail = (e as CustomEvent<CartItem>).detail
+    if (detail) {
+      cart.add(detail)
+      isOpen = true
+      document.dispatchEvent(
+        new CustomEvent('megameal:sfx', { detail: { id: 'select' } }),
+      )
+    }
   }
 
-  const emptyMessages = [
-    "Your cart is as empty as the void. Which is, technically, full of void.",
-    "Nothing here. The products have noted your reluctance.",
-    "Cart currently unoccupied. The shelf space is available. The shelf space is judging you.",
-    "You have committed to nothing. The corporation respects this. For now.",
-  ]
-  const emptyMessage = emptyMessages[Math.floor(Math.random() * emptyMessages.length)]
+  document.addEventListener('megameal:cart:open', open)
+  document.addEventListener('megameal:cart:close', close)
+  document.addEventListener('megameal:cart:toggle', toggle)
+  document.addEventListener('megameal:cart:add', handleAdd)
+
+  return () => {
+    document.removeEventListener('megameal:cart:open', open)
+    document.removeEventListener('megameal:cart:close', close)
+    document.removeEventListener('megameal:cart:toggle', toggle)
+    document.removeEventListener('megameal:cart:add', handleAdd)
+  }
+})
+
+function closeDrawer() {
+  isOpen = false
+}
+
+function handleBackdropClick(e: MouseEvent) {
+  if ((e.target as HTMLElement).id === 'cart-backdrop') closeDrawer()
+}
+
+const emptyMessages = [
+  'Your cart is as empty as the void. Which is, technically, full of void.',
+  'Nothing here. The products have noted your reluctance.',
+  'Cart currently unoccupied. The shelf space is available. The shelf space is judging you.',
+  'You have committed to nothing. The corporation respects this. For now.',
+]
+const emptyMessage =
+  emptyMessages[Math.floor(Math.random() * emptyMessages.length)]
 </script>
 
 {#if isOpen}
@@ -106,6 +121,14 @@
             <li class="flex items-start gap-4 border-b border-slate-700/40 pb-4">
               <div class="flex-1 min-w-0">
                 <p class="font-semibold text-slate-200 text-sm truncate">{item.name}</p>
+                {#if item.href}
+                  <a
+                    href={item.href}
+                    class="mt-1 inline-block text-xs text-cyan-300 transition hover:text-cyan-200"
+                  >
+                    View item
+                  </a>
+                {/if}
                 {#if item.sku}
                   <p class="text-xs text-slate-500">SKU: {item.sku}</p>
                 {/if}
@@ -149,12 +172,12 @@
         <p class="text-xs text-slate-500 italic">
           Proceeding to checkout constitutes acknowledgment that you have read, understood, and accepted the Terms and Conditions, which do not yet exist but will be binding retroactively.
         </p>
-        <button
-          class="w-full btn-primary text-white font-semibold py-3 px-4 rounded-[var(--radius-medium,8px)] transition-all hover:bg-[var(--primary-hover)] active:scale-95"
-          onclick={() => document.dispatchEvent(new CustomEvent('megameal:cart:checkout'))}
+        <a
+          class="block w-full text-center btn-primary text-white font-semibold py-3 px-4 rounded-[var(--radius-medium,8px)] transition-all hover:bg-[var(--primary-hover)] active:scale-95"
+          href={url('/store/checkout/')}
         >
           Proceed to Checkout
-        </button>
+        </a>
         <button
           onclick={() => { cart.clear(); document.dispatchEvent(new CustomEvent('megameal:sfx', { detail: { id: 'panel-back' } })) }}
           class="w-full text-xs text-slate-500 hover:text-rose-400 transition py-1"

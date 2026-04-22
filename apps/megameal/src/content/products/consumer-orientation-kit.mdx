@@ -1,0 +1,108 @@
+---
+name: "Consumer Orientation Kit"
+slug: "consumer-orientation-kit"
+tagline: "Everything a new citizen needs to smile correctly."
+brand: "MegaCorp Civil Hospitality Division"
+draft: true
+availability: "coming_soon"
+ctaMode: "none"
+price: 39.99
+sku: "COK-4400"
+category: "publications"
+categories:
+  - publications
+  - onboarding
+  - civic ritual
+format: "physical"
+featured: false
+description: "A boxed welcome sequence containing a compliance booklet, mirrored slogan cards, ceremonial flavor dust, and one emergency apology ribbon."
+realDescription: "Prototype content entry for the product-scene refactor. The kit is not real commerce inventory; it exists to validate the new scene-friendly content shape."
+shippingNote: "Orientation packets ship only after local morale thresholds are met."
+media:
+  - id: orientation-print
+    type: image
+    src: "/posts/Mega-Meal-Explained/ultra-sign.png"
+    thumbnail: "/posts/Mega-Meal-Explained/ultra-sign.png"
+    alt: "Promotional placard for the Consumer Orientation Kit"
+    caption: "New arrivals receive one packet and three opportunities to agree."
+  - id: ribbon-feed
+    type: video
+    src: "/about/video/snuggloid-owner.webm"
+    poster: "/ads/snuggloids.png"
+    thumbnail: "/ads/snuggloids.png"
+    alt: "Recovered orientation footage"
+    caption: "Orientation footage recovered from a training annex."
+  - id: greeting-loop
+    type: youtube
+    videoId: "n_cgEvkZ-U0"
+    thumbnail: "/ads/snuggloids.png"
+    alt: "Embedded orientation broadcast"
+    caption: "Broadcast feed archived for repeat compliance."
+sheet:
+  - type: text
+    label: "Summary"
+    value: "A starter package for citizens entering a fully managed appetite district."
+  - type: price
+    label: "Processing Fee"
+    value: 39.99
+    quirks:
+      - price-drift
+  - type: availability
+    label: "Availability"
+    value: "PENDING ORIENTATION WINDOW"
+  - type: button
+    label: "Primary Action"
+    value:
+      text: "Add to Cart"
+      action: "add-to-cart"
+    quirks:
+      - add-to-cart-refuses
+  - type: meta
+    label: "Classification Level"
+    value: "WELCOME-4"
+  - type: link
+    label: "Related Procedure"
+    value:
+      href: "/posts/timelines/corporate-empire/"
+      text: "Read the intake chronology"
+panels:
+  - id: reviews
+    type: reviews
+    label: "See reviews"
+  - id: specifications
+    type: specifications
+    label: "Specifications"
+  - id: policies
+    type: policies
+    label: "Shipping & returns"
+reviews:
+  - consumer-orientation-kit-vera-silt
+  - consumer-orientation-kit-holden-breach
+quirks:
+  - name: "price-drift"
+    params:
+      intervalSeconds: 11
+      min: 38.4
+      max: 44.2
+  - name: "add-to-cart-refuses"
+    params:
+      message: "Orientation incomplete. Please smile until approved."
+relatedProducts:
+  - warranty-afterlight
+  - null-cube-canteen
+sceneWeight: 4
+eligiblePages:
+  - /
+  - /store
+  - /labs/store-scene-data
+minIntervalDays: 5
+---
+
+The **Consumer Orientation Kit** is the kind of product MEGAMEAL wants the
+visitor to understand immediately: familiar retail packaging wrapped around a
+story node.
+
+Inside the fiction, the box is distributed to newly relocated families before
+their housing doors unlock. Outside the fiction, this entry exists to validate
+that product copy, sheet fields, quirks, panel config, and linked reviews can
+all live together in authored content.

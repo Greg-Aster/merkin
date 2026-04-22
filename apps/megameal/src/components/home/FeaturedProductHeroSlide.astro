@@ -1,0 +1,194 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import FeaturedProductBanner from "./FeaturedProductBanner.svelte";
+
+function toSlug(product: CollectionEntry<"products">) {
+	return product.data.slug ?? product.id.replace(/\.(md|mdx)$/, "");
+}
+
+function toHref(product: CollectionEntry<"products">) {
+	return `/store/${toSlug(product)}/`;
+}
+
+function resolveMediaThumbnail(product: CollectionEntry<"products">) {
+	const firstMedia = product.data.media?.find((item) => item.type === "image");
+	return firstMedia?.src ?? product.data.image ?? "/ads/snuggloids.png";
+}
+
+const snuggaloidImageThumb = "/ads/snuggloids.png";
+const snuggaloidModelThumb =
+	"/models/polyhaven/Barrel_01/textures/Barrel_01_explosive_diff_1k.jpg";
+const snuggaloidWitnessThumb = "/posts/timeline/snuggloid1.png";
+
+const products = await getCollection(
+	"products",
+	({ data }) => data.draft !== true,
+);
+const product =
+	products.find((entry) => toSlug(entry) === "snuggaloids") ??
+	products.find((entry) => entry.data.featured) ??
+	products[0];
+
+if (!product) {
+	throw new Error(
+		"FeaturedProductHeroSlide could not resolve a product entry.",
+	);
+}
+
+const categoryMatchedProducts = products
+	.filter((entry) => entry.id !== product.id)
+	.filter((entry) => entry.data.category === product.data.category);
+const fallbackProducts = products.filter((entry) => entry.id !== product.id);
+const relatedProducts = (
+	categoryMatchedProducts.length > 0
+		? categoryMatchedProducts
+		: fallbackProducts
+)
+	.slice(0, 4)
+	.map((entry) => ({
+		name: entry.data.name,
+		href: toHref(entry),
+		image: resolveMediaThumbnail(entry),
+		price: entry.data.price,
+		availability: entry.data.availability,
+	}));
+
+const baseMedia = product.data.media ?? [];
+const imageMedia =
+	baseMedia.find((item) => item.type === "image" && item.src) ??
+	(product.data.image
+		? {
+				id: "fallback-image",
+				type: "image" as const,
+				src: product.data.image,
+				alt: product.data.name,
+				caption: "Primary product image",
+			}
+		: null);
+const youtubeMedia = baseMedia.find(
+	(item) => item.type === "youtube" && item.videoId,
+);
+const videoMedia = baseMedia.find((item) => item.type === "video" && item.src);
+
+const media = [
+	...(imageMedia
+		? [
+				{
+					id: imageMedia.id ?? "primary-image",
+					type: "image" as const,
+					src: imageMedia.src,
+					alt: imageMedia.alt ?? product.data.name,
+					caption:
+						imageMedia.caption ??
+						"Commercial still from the companion program.",
+					thumbnail: imageMedia.thumbnail ?? snuggaloidImageThumb,
+					poster: imageMedia.poster,
+				},
+			]
+		: []),
+	{
+		id: "snuggaloid-procedural-model",
+		type: "model3d" as const,
+		src: "procedural://snuggaloid",
+		alt: "Interactive three-dimensional proxy of a Snuggaloid",
+		caption:
+			"Interactive containment render. Drag to rotate the approved domestic form.",
+		thumbnail: snuggaloidModelThumb,
+	},
+	...(youtubeMedia
+		? [
+				{
+					id: youtubeMedia.id ?? "commercial",
+					type: "iframe" as const,
+					src: `https://www.youtube.com/embed/${youtubeMedia.videoId}`,
+					alt: youtubeMedia.alt ?? `${product.data.name} commercial`,
+					caption:
+						youtubeMedia.caption ??
+						"Official program commercial recovered from Qarnivor broadcast archives.",
+					thumbnail:
+						youtubeMedia.thumbnail ??
+						youtubeMedia.poster ??
+						`https://img.youtube.com/vi/${youtubeMedia.videoId}/hqdefault.jpg`,
+					poster:
+						youtubeMedia.poster ??
+						`https://img.youtube.com/vi/${youtubeMedia.videoId}/hqdefault.jpg`,
+				},
+			]
+		: []),
+	...(videoMedia?.src
+		? [
+				{
+					id: videoMedia.id ?? "owner-testimony",
+					type: "video" as const,
+					src: videoMedia.src,
+					alt: videoMedia.alt ?? "Registered owner testimony",
+					caption:
+						videoMedia.caption ??
+						"Owner testimony recovered from a domestic recording surface.",
+					thumbnail: snuggaloidWitnessThumb,
+					poster: snuggaloidWitnessThumb,
+				},
+			]
+		: []),
+];
+
+const actionLinks = [
+	{ label: "Start Here", href: "/posts/explainer/" },
+	{ label: "Timeline", href: "/timeline/" },
+	{ label: "Archive", href: "/archive/" },
+	{ label: "Store", href: "/store/" },
+];
+
+const narrativeLinks = [
+	{
+		label: "Commercial archive",
+		href: "/posts/timelines/snuggloids-commercial/",
+	},
+	{ label: "Owner testimony", href: "/about/snuggloid-owner/" },
+	{
+		label: "Emergence dossier",
+		href: "/posts/timelines/snuggaliod-emergence/",
+	},
+];
+---
+
+<div class="featured-product-hero-slide">
+  <FeaturedProductBanner
+    client:load
+    product={{
+      name: product.data.name,
+      tagline: product.data.tagline,
+      description: product.data.description,
+      brand: product.data.brand ?? 'Qarnivor Companion Division',
+      price: product.data.price,
+      availability: product.data.availability,
+      rating: product.data.rating,
+      sku: product.data.sku,
+      href: toHref(product),
+      media,
+      specifications: product.data.specifications ?? [],
+      qanda: product.data.qanda ?? [],
+      reviews: product.data.preWrittenReviews ?? [],
+      actions: actionLinks,
+      narrativeLinks,
+    }}
+    {relatedProducts}
+  />
+</div>
+
+<style>
+  .featured-product-hero-slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    padding: clamp(0.7rem, 2vw, 1.25rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    background:
+      radial-gradient(circle at 18% 18%, rgb(34 197 94 / 0.1), transparent 18%),
+      radial-gradient(circle at 84% 78%, rgb(236 72 153 / 0.14), transparent 22%),
+      linear-gradient(180deg, rgb(2 6 23 / 0.52), rgb(2 6 23 / 0.2));
+  }
+</style>

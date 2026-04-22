@@ -1,9 +1,9 @@
 ---
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
-import '@fontsource/sriracha/400.css';
-import '@fontsource-variable/jetbrains-mono';
+import '@fontsource/roboto/400.css'
+import '@fontsource/roboto/500.css'
+import '@fontsource/roboto/700.css'
+import '@fontsource/sriracha/400.css'
+import '@fontsource-variable/jetbrains-mono'
 
 import { profileConfig, siteConfig } from '@/config/config'
 import ConfigCarrier from '@components/ConfigCarrier.astro'
@@ -165,13 +165,18 @@ const configHue = siteConfig.themeColor.hue
 
     <link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
   </head>
-  <body class="min-h-screen transition" 
+  <body class="min-h-screen transition"
       class:list={[{
           "is-home": isHomePage,
-          "lg:is-home": isHomePage, 
+          "lg:is-home": isHomePage,
 		}]}
       data-overlayscrollbars-initialize
   >
+    {/* Accessibility: Skip to main content link */}
+    <a href="#main-content-wrapper" class="sr-only focus:not-sr-only fixed top-4 left-4 z-[9999] bg-[var(--primary)] text-white px-4 py-2 rounded font-bold">
+      Skip to main content
+    </a>
+
     <ConfigCarrier></ConfigCarrier>
 
     <slot />
@@ -213,6 +218,8 @@ import {
 } from 'overlayscrollbars';
 import {getHue, getStoredTheme, setHue, setTheme} from '@/utils/setting-utils';
 import {pathsEqual, url} from '@/utils/url-utils';
+import { initTimelineViews } from '../components/timeline/TimelineViewModes/timelineViewClient.js';
+import { initTimelineBannerControls } from '../components/timeline/timelineBannerClient.js';
 
 function setClickOutsideToClose(panel: string, ignores: string[]) {
     document.addEventListener("click", event => {
@@ -284,6 +291,8 @@ function init() {
     loadTheme();
     loadHue();
     initCustomScrollbar();
+    initTimelineViews();
+    initTimelineBannerControls();
 }
 
 /* Load settings when entering the site */
@@ -366,6 +375,8 @@ const setup = () => {
         // Run initialization for new content
         syncScrollTargets();
         initCustomScrollbar();
+        initTimelineViews();
+        initTimelineBannerControls();
     });
     
 	window.swup.hooks.on('visit:start', (visit: {to: {url: string}}) => {
@@ -404,6 +415,8 @@ const setup = () => {
     
     window.swup.hooks.on('page:view', () => {
         syncScrollTargets();
+        initTimelineViews();
+        initTimelineBannerControls();
         // Handle animations after page view
         const postElements = document.querySelectorAll('.onload-animation');
         postElements.forEach((element, index) => {
@@ -459,6 +472,8 @@ function syncScrollTargets() {
 }
 
 document.addEventListener('astro:page-load', syncScrollTargets);
+document.addEventListener('astro:page-load', initTimelineViews);
+document.addEventListener('astro:page-load', initTimelineBannerControls);
 
 function scrollFunction() {
     // Back-to-top button visibility

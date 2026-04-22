@@ -1,14 +1,19 @@
 ---
 import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
-import { url } from '../../utils/url-utils'
-import StoreLayout from '../../layouts/store/StoreLayout.astro'
 import MediaGallery from '../../components/store/MediaGallery.svelte'
+import StoreLayout from '../../layouts/store/StoreLayout.astro'
+import { url } from '../../utils/url-utils'
 
 export async function getStaticPaths() {
-  const products = await getCollection('products', ({ data }) => data.draft !== true)
+  const products = await getCollection(
+    'products',
+    ({ data }) => data.draft !== true,
+  )
   return products.map(product => ({
-    params: { slug: product.id },
+    params: {
+      slug: product.data.slug ?? product.id.replace(/\.(md|mdx)$/, ''),
+    },
     props: { product },
   }))
 }
@@ -36,9 +41,11 @@ const {
   category,
 } = product.data
 
-const hasSpecifications = Array.isArray(specifications) && specifications.length > 0
+const hasSpecifications =
+  Array.isArray(specifications) && specifications.length > 0
 const hasQandA = Array.isArray(qanda) && qanda.length > 0
-const hasPreWrittenReviews = Array.isArray(preWrittenReviews) && preWrittenReviews.length > 0
+const hasPreWrittenReviews =
+  Array.isArray(preWrittenReviews) && preWrittenReviews.length > 0
 
 const resolveAsset = (path: string | undefined) => {
   if (!path) return undefined
@@ -46,7 +53,14 @@ const resolveAsset = (path: string | undefined) => {
 }
 
 // Unified media items
-const mediaItems: Array<{type: string; src?: string; videoId?: string; poster?: string; alt?: string; caption?: string}> =
+const mediaItems: Array<{
+  type: string
+  src?: string
+  videoId?: string
+  poster?: string
+  alt?: string
+  caption?: string
+}> =
   Array.isArray(media) && media.length > 0
     ? media.map(item => ({
         ...item,
@@ -54,11 +68,20 @@ const mediaItems: Array<{type: string; src?: string; videoId?: string; poster?: 
         poster: item.poster ? resolveAsset(item.poster) : undefined,
       }))
     : [
-        ...(image ? [{ type: 'image', src: resolveAsset(image), alt: name }] : []),
-        ...((additionalImages ?? []).map((src: string) => ({ type: 'image', src: resolveAsset(src), alt: name }))),
+        ...(image
+          ? [{ type: 'image', src: resolveAsset(image), alt: name }]
+          : []),
+        ...(additionalImages ?? []).map((src: string) => ({
+          type: 'image',
+          src: resolveAsset(src),
+          alt: name,
+        })),
       ]
 
-let fullStars = 0, halfStar = false, emptyStars = 5, isRated = false
+let fullStars = 0
+let halfStar = false
+let emptyStars = 5
+let isRated = false
 if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
   isRated = true
   fullStars = Math.floor(rating)
@@ -66,23 +89,61 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
   emptyStars = 5 - fullStars - (halfStar ? 1 : 0)
 }
 
-const availabilityMap: Record<string, { label: string; classes: string; ctaMessage: string }> = {
-  available:            { label: badge || 'Available Now',                  classes: 'bg-emerald-500/90 text-white',  ctaMessage: '' },
-  coming_soon:          { label: badge || 'Coming Soon',                    classes: 'bg-blue-500/80 text-white',     ctaMessage: 'Transmission pending. Stand by.' },
-  out_of_stock:         { label: badge || 'Out of Stock',                   classes: 'bg-slate-500/80 text-white',    ctaMessage: 'The shelves are bare. Demand has been noted. Probably.' },
-  not_in_your_area:     { label: badge || 'Not in Your Area',               classes: 'bg-amber-500/80 text-black',    ctaMessage: 'Your coordinates are outside our current distribution matrix.' },
-  not_in_your_timeline: { label: badge || 'Not Available in Your Timeline', classes: 'bg-purple-500/80 text-white',   ctaMessage: 'This product exists. Procurement from your timeline is not currently supported.' },
-  artifact_only:        { label: badge || 'Artifact Record',                classes: 'bg-rose-900/80 text-rose-200',  ctaMessage: 'This item is catalogued for archival purposes. Acquiring it would be inadvisable.' },
+const availabilityMap: Record<
+  string,
+  { label: string; classes: string; ctaMessage: string }
+> = {
+  available: {
+    label: badge || 'Available Now',
+    classes: 'bg-emerald-500/90 text-white',
+    ctaMessage: '',
+  },
+  coming_soon: {
+    label: badge || 'Coming Soon',
+    classes: 'bg-blue-500/80 text-white',
+    ctaMessage: 'Transmission pending. Stand by.',
+  },
+  out_of_stock: {
+    label: badge || 'Out of Stock',
+    classes: 'bg-slate-500/80 text-white',
+    ctaMessage: 'The shelves are bare. Demand has been noted. Probably.',
+  },
+  not_in_your_area: {
+    label: badge || 'Not in Your Area',
+    classes: 'bg-amber-500/80 text-black',
+    ctaMessage: 'Your coordinates are outside our current distribution matrix.',
+  },
+  not_in_your_timeline: {
+    label: badge || 'Not Available in Your Timeline',
+    classes: 'bg-purple-500/80 text-white',
+    ctaMessage:
+      'This product exists. Procurement from your timeline is not currently supported.',
+  },
+  artifact_only: {
+    label: badge || 'Artifact Record',
+    classes: 'bg-rose-900/80 text-rose-200',
+    ctaMessage:
+      'This item is catalogued for archival purposes. Acquiring it would be inadvisable.',
+  },
 }
 const currentAvailability = availability ?? 'coming_soon'
-const avail = availabilityMap[currentAvailability] ?? availabilityMap['coming_soon']
+const avail =
+  availabilityMap[currentAvailability] ?? availabilityMap.coming_soon
 const canAddToCart = ctaMode === 'cart' && currentAvailability === 'available'
-const canBuyExternal = ctaMode === 'external' && !!stripePaymentLink && currentAvailability === 'available'
+const canBuyExternal =
+  ctaMode === 'external' &&
+  !!stripePaymentLink &&
+  currentAvailability === 'available'
 
 const categoryLabels: Record<string, string> = {
-  equipment: 'Equipment', consumables: 'Consumables',
-  publications: 'Publications', companions: 'Companions', relics: 'Relics',
+  equipment: 'Equipment',
+  consumables: 'Consumables',
+  publications: 'Publications',
+  companions: 'Companions',
+  relics: 'Relics',
 }
+const productSlug = product.data.slug ?? product.id.replace(/\.(md|mdx)$/, '')
+const productHref = `/store/${productSlug}/`
 ---
 
 <StoreLayout title={name} description={tagline}>
@@ -205,6 +266,7 @@ const categoryLabels: Record<string, string> = {
                 data-product-name={name}
                 data-product-price={price}
                 data-product-sku={sku}
+                data-product-href={productHref}
                 data-sfx-click="select"
                 class="w-full btn-primary text-white font-semibold py-3.5 px-6 rounded-[var(--radius-medium)] transition-all hover:bg-[var(--primary-hover)] active:scale-[0.98] focus:outline-none text-base"
               >

@@ -1,11 +1,14 @@
 ---
 import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
-import { url } from '../utils/url-utils'
 import ProductCard from '../components/store/ProductCard.astro'
 import StoreLayout from '../layouts/store/StoreLayout.astro'
+import { url } from '../utils/url-utils'
 
-const allProducts = await getCollection('products', ({ data }) => data.draft !== true)
+const allProducts = await getCollection(
+  'products',
+  ({ data }) => data.draft !== true,
+)
 
 function resolveAsset(path: string | undefined) {
   if (!path) return undefined
@@ -20,6 +23,8 @@ allProducts.sort((a, b) => {
 })
 
 const featuredProduct = allProducts.find(p => p.data.featured)
+const getProductHref = (product: (typeof allProducts)[number]) =>
+  `/store/${product.data.slug ?? product.id.replace(/\.(md|mdx)$/, '')}/`
 
 const categories = [
   { id: 'all', label: 'All Products' },
@@ -80,7 +85,7 @@ const availabilityDisplay: Record<string, string> = {
                       />
                       <div class="absolute inset-0 flex items-center justify-center bg-black/30">
                         <a
-                          href={`/store/${featuredProduct.id}/`}
+                          href={getProductHref(featuredProduct)}
                           class="w-16 h-16 rounded-full bg-red-600/90 hover:bg-red-600 flex items-center justify-center shadow-xl transition"
                           aria-label="View product"
                         >
@@ -119,7 +124,7 @@ const availabilityDisplay: Record<string, string> = {
                   <span class="text-xl font-bold text-emerald-400">${featuredProduct.data.price.toFixed(2)}</span>
                 )}
                 <a
-                  href={`/store/${featuredProduct.id}/`}
+                  href={getProductHref(featuredProduct)}
                   class="btn-primary text-white font-semibold py-2.5 px-5 rounded-[var(--radius-medium)] transition hover:bg-[var(--primary-hover)] text-sm"
                 >
                   View Product
