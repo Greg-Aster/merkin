@@ -1,32 +1,35 @@
 ---
-import { Icon } from 'astro-icon/components'
-import { navBarConfig, siteConfig } from '../config/config'
-import { LinkPresets } from '../constants/link-presets'
-import { LinkPreset, type NavBarLink } from '../types/config'
-import { url } from '../utils/url-utils'
-import LightDarkSwitch from './LightDarkSwitch.svelte'
-import Search from './Search.svelte'
-import AdminNavbar from './svelte/admin/AdminNavbar.svelte'
-import DisplaySettings from './widget/DisplaySettings.svelte'
-import NavMenuPanel from './widget/NavMenuPanel.astro'
-import SiteAudioControl from './client/SiteAudioControl.svelte'
+import { Icon } from "astro-icon/components";
+import { navBarConfig, siteConfig } from "../config/config";
+import { LinkPresets } from "../constants/link-presets";
+import { LinkPreset, type NavBarLink } from "../types/config";
+import { url } from "../utils/url-utils";
+import LightDarkSwitch from "./LightDarkSwitch.svelte";
+import Search from "./Search.svelte";
+import SiteAudioControl from "./client/SiteAudioControl.svelte";
+import StoreCartButton from "./store/StoreCartButton.svelte";
+import AdminNavbar from "./svelte/admin/AdminNavbar.svelte";
+import DisplaySettings from "./widget/DisplaySettings.svelte";
+import NavMenuPanel from "./widget/NavMenuPanel.astro";
 
-const className = Astro.props.class
+const className = Astro.props.class;
 
 const links: NavBarLink[] = navBarConfig.links.map(
-  (item: NavBarLink | LinkPreset): NavBarLink => {
-    if (typeof item === 'number') {
-      return LinkPresets[item]
-    }
-    return item
-  },
-)
+	(item: NavBarLink | LinkPreset): NavBarLink => {
+		if (typeof item === "number") {
+			return LinkPresets[item];
+		}
+		return item;
+	},
+);
 
 const homeLink =
-  links.find(link => !link.external && link.url === '/') ?? LinkPresets[LinkPreset.Home]
-const navigationLinks = links.filter(link => link !== homeLink)
+	links.find((link) => !link.external && link.url === "/") ??
+	LinkPresets[LinkPreset.Home];
+const navigationLinks = links.filter((link) => link !== homeLink);
 // Check authentication status from cookies
-const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
+const isAuthenticated =
+	Astro.cookies.get("isAuthenticated")?.boolean() || false;
 ---
 
 <div id="navbar" class="z-50 onload-animation">
@@ -115,6 +118,9 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
         <div class="flex items-center justify-end">
             <!--<SearchPanel client:load>-->
             <Search client:idle hideMobileTrigger={true}></Search>
+            <div class="store-cart-nav-action hidden">
+                <StoreCartButton client:load />
+            </div>
             <SiteAudioControl client:idle />
             {!siteConfig.themeColor.fixed && (
                     <button aria-label="Display Settings" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 hidden md:inline-flex" id="display-settings-switch">
@@ -166,6 +172,16 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
             document.documentElement.classList.add('dark');
             localStorage.theme = 'dark';
         }
+    }
+
+    function syncStoreControlsVisibility() {
+        const isStoreRoute = /^\/store(\/|$)/.test(window.location.pathname);
+        document
+            .querySelectorAll<HTMLElement>('.store-cart-nav-action')
+            .forEach((element) => {
+                element.classList.toggle('hidden', !isStoreRoute);
+                element.classList.toggle('flex', isStoreRoute);
+            });
     }
     
     function loadButtonScript() {
@@ -233,6 +249,7 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
         }
 
         updateMobileThemeLabel();
+        syncStoreControlsVisibility();
     
         // UPDATED: Layout-based Fullscreen Mode Toggle Functionality
         initializeFullscreenMode();
@@ -328,6 +345,8 @@ const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false
     
     // Initialize everything
     loadButtonScript();
+    document.addEventListener('astro:page-load', syncStoreControlsVisibility);
+    document.addEventListener('astro:after-swap', syncStoreControlsVisibility);
 
     // SIMPLE TEST: Hide mascot by default - this is a bandaid fix as the mascot features has moves and im too lazy to fix it right now
     setTimeout(() => {

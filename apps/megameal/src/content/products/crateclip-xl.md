@@ -1,68 +1,98 @@
 ---
 name: "CrateClip XL"
-tagline: "For when 'secure' isn't secure enough."
+tagline: "For when the shelf says it is fine and you know it is lying."
+brand: "Civic Basement Systems"
 draft: false
 availability: "available"
 ctaMode: "cart"
 stripePaymentLink: ""
-price: 34.99
+price: 18.99
 category: "equipment"
 format: "physical"
 featured: true
+listingStyle: "showcase"
+listingLabel: "Marketplace Listing"
 sku: "CC-XL-001"
-realDescription: "A heavy-duty industrial crate clip. Built for securing cargo, storage containers, and anything else that needs to stay where you put it. Cold-forged steel construction. Ships in 3–5 business days."
-shippingNote: "Ships from the secure facility. Expect 3–5 business days. Arrives unmarked. As requested."
-rating: 4.8
+realDescription: "A 3D-printed stabilizer clip for milk-crate shelving. Produced in PLA or PETG depending on batch. Designed to fasten adjoining crate walls so improvised shelves wobble less, lean less, and fail a little less often. This is a practical object, not a certified structural solution."
+shippingNote: "Single-color production only. Batch polymer varies between PLA and PETG. Claims involving collapse, cascade, accidental death, or dismemberment will be reviewed and denied."
+rating: 3.0
 media:
+  - type: image
+    src: "https://img.youtube.com/vi/5J-fAKIR_kc/hqdefault.jpg"
+    thumbnail: "https://img.youtube.com/vi/5J-fAKIR_kc/mqdefault.jpg"
+    alt: "CrateClip XL installed on a milk-crate shelf"
+    caption: "Commercial still: one clip, one shelf, one preventable mistake."
   - type: youtube
     videoId: "5J-fAKIR_kc"
     caption: "CrateClip XL — Official Commercial"
-description: "Warranty void if used on anything that can file a complaint. The CrateClip XL is not merely a fastening device. It is a declaration of intent. When standard clips fail, when lesser hardware weeps and releases, the CrateClip XL holds. It has held things we cannot name. It will hold yours."
+description: "The CrateClip XL brings provisional order to the sacred milk-crate shelf: a clip-on stabilizer for home offices, garages, dorm corners, and any room making a bad faith attempt at organization. It arrives in one color, fits with varying enthusiasm, and promises only this: your shelf may stand straighter than your life currently does."
 specifications:
   - label: "Material"
-    value: "Cold-forged steel (proprietary dark iron alloy)"
+    value: "Batch-dependent PLA or PETG"
   - label: "Load Rating"
-    value: "450kg static / 200kg dynamic"
+    value: "Not certified. Intended to reduce wobble, not absolve judgment."
   - label: "Weight"
-    value: "1.2kg"
+    value: "Approx. 38g per clip"
   - label: "Dimensions"
-    value: "30cm x 10cm x 5cm"
+    value: "Sized for standard milk-crate wall thickness with normal variance"
   - label: "Finish"
-    value: "Matte black oxide coating"
-  - label: "Compliance"
-    value: "Certified by 3 of the 4 Regulatory Bodies That Still Exist"
-  - label: "Power Source"
-    value: "None required (self-motivating)"
+    value: "Utility black. No alternate colors are currently acknowledged."
+  - label: "Use Case"
+    value: "Fastens milk-crate shelving to discourage lean, slip, and sudden surrender"
+  - label: "Batch Notice"
+    value: "Layer lines, minor stringing, and tolerance drift are considered normal"
   - label: "Warranty"
-    value: "Void upon sentience of the secured object"
+    value: "Quality not guaranteed. Structural claims denied at point of receipt."
 qanda:
   - question: "What is the CrateClip XL actually used for?"
-    answer: "Securing crates, containers, cargo panels, storage lids, and anything you need to stay closed. It uses a lever-latch mechanism that locks under tension. The harder it is pulled, the tighter it holds."
-  - question: "Can it hold a rogue AI?"
-    answer: "Theoretically. We have not had any volunteers for testing. The previous volunteers are unavailable for comment."
-  - question: "Is it compatible with standard hardware?"
-    answer: "Yes. Industry-standard mounting holes, compatible with most 20–25mm edge profiles. Detailed spec sheet available on request."
+    answer: "It clips adjacent milk-crate walls together so improvised shelving units sway less and separate less often. It is a shelf helper, not an engineering credential."
+    linkLabel: "Read the consumer systems explainer"
+    linkHref: "/posts/explainer/"
+    linkAccent: "signal"
+  - question: "Does it come in other colors?"
+    answer: "No. The current production line acknowledges one color and regards requests for alternatives as morale events."
+  - question: "Is the print quality guaranteed?"
+    answer: "No. Cosmetic roughness, layer shifts, and fit variance may occur. If the clip arrives looking slightly irritated, that is within tolerance."
+    linkLabel: "Review the batch compliance note"
+    linkHref: "/posts/explainer/"
+    linkAccent: "signal"
   - question: "What's the return policy?"
-    answer: "All sales are final. Especially on this item. It remembers who returned it."
-  - question: "Is it safe for home use?"
-    answer: "Define 'safe.' Define 'home.' Define 'use.' But yes — storage chests, toolboxes, coolers, and workshop cabinets are all valid applications."
+    answer: "Returns may be submitted for ceremonial purposes. Claims involving shelf collapse, property damage, accidental death, or dismemberment will be documented, acknowledged, and denied."
+    linkLabel: "Open the denial rubric"
+    linkHref: "/posts/explainer/"
+    linkAccent: "creepy"
+  - question: "Is this supposed to help with depression?"
+    answer: "No. It is a plastic shelf clip. It may improve a corner of your room. It is not a therapeutic device, a lifestyle correction, or a replacement for actual support."
+    linkLabel: "See the wellness disclaimer"
+    linkHref: "/posts/explainer/"
+    linkAccent: "signal"
 preWrittenReviews:
-  - author: "Survivor #42"
-    rating: 1
-    date: "Unknown - Post-Incident"
-    comment: "The CrateClip XL didn't just restrain it; it harmonized with its screams. My ears are still bleeding temporal echoes. Do not buy if you value your sanity or eardrums."
-  - author: "Maintenance Unit 7 (Decommissioned)"
-    comment: "Observed CrateClip XL autonomously securing a rogue temporal anomaly. Anomaly is now quieter. And flatter. Efficiency: 110%. Psychological impact on organic observers: regrettable but within acceptable parameters for containment."
-  - author: "Concerned Citizen"
-    rating: 2
-    date: "Last Tuesday"
-    comment: "I bought this to keep the squirrels out of my bird feeder. Now the squirrels bring me offerings. I'm not sure what to make of this. The birds are terrified."
-  - author: "K. Valdris, Freelance Containment Specialist"
-    rating: 5
-    date: "Classified"
-    comment: "Best in class. Would recommend to anyone dealing with entities that resist conventional restraint. Has saved my life on four occasions. Has endangered it on three. Net positive."
-  - author: "Workshop Owner, Name Withheld"
-    rating: 5
+  - author: "M. Rivera, Apartment Kitchen"
+    rating: 3
     date: "Verified Purchase"
-    comment: "Bought six of these for my toolbox lids. Works exactly as described. Nothing has escaped. The squirrels haven't found my workshop yet. Five stars, no notes."
+    comment: "They do keep the milk-crate shelf from leaning as much. The finish is rough and one clip needed sanding before it would seat properly. Fine product. Fine. Three stars."
+    verified: true
+  - author: "Jordan P., Garage Corner"
+    rating: 2
+    date: "Last month"
+    comment: "Commercial made these look indestructible. Mine cracked when I overtightened the second shelf tier. Support explained that I had interacted with it incorrectly."
+    linkLabel: "Review the support position"
+    linkHref: "/posts/explainer/"
+    flags:
+      - "claim dismissed by support"
+  - author: "Facilities Overflow Desk"
+    rating: 4
+    date: "Maintenance Log Excerpt"
+    comment: "Installed across a supply wall assembled from abandoned crates. Stability improved immediately. Visual elegance did not. We ordered more anyway."
+    verified: true
+    flags:
+      - "bulk order approved"
+  - author: "S. Ketter, Remote Worker"
+    rating: 3
+    date: "Recently"
+    comment: "My books stopped sliding and the desk corner looks less doomed. Still only comes in one color, and the room got strangely quiet after I clipped the last shelf into place."
+    linkLabel: "Read the consumer systems explainer"
+    linkHref: "/posts/explainer/"
+    flags:
+      - "posted after midnight"
 ---

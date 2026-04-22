@@ -1,13 +1,13 @@
 ---
-import TimelineView from './TimelineViewModes/TimelineView.astro'
 import {
-  defaultTimelineViewConfig,
   type EraConfigMap,
   type TimelineConnectionPatternMap,
   type TimelineConstellationConfigMap,
   type TimelineConstellationPatternMap,
   type TimelineEvent,
+  defaultTimelineViewConfig,
 } from '@/services/TimelineConfig'
+import TimelineView from './TimelineViewModes/TimelineView.astro'
 
 export interface Props {
   id?: string
@@ -58,23 +58,26 @@ const {
   connectionPatterns = {},
 } = Astro.props
 
-const years = events.map((event) => event.year)
+const years = events.map(event => event.year)
 const computedStartYear =
   propStartYear ??
-  (years.length > 0 ? Math.min(...years) - Math.max(5, Math.ceil((Math.max(...years) - Math.min(...years)) * 0.1)) : 2000)
+  (years.length > 0
+    ? Math.min(...years) -
+      Math.max(5, Math.ceil((Math.max(...years) - Math.min(...years)) * 0.1))
+    : 2000)
 const computedEndYear =
   propEndYear ??
-  (years.length > 0 ? Math.max(...years) + Math.max(5, Math.ceil((Math.max(...years) - Math.min(...years)) * 0.1)) : 2100)
+  (years.length > 0
+    ? Math.max(...years) +
+      Math.max(5, Math.ceil((Math.max(...years) - Math.min(...years)) * 0.1))
+    : 2100)
 
 const eraEntries = Object.entries(eraConfig).filter(
   ([eraKey]) => eraKey !== 'all-time' && eraKey !== 'all-eras',
 )
-const initialEra =
-  eraConfig['all-eras'] ? 'all-eras' : eraEntries[0]?.[0] ?? ''
+const initialEra = eraConfig['all-eras'] ? 'all-eras' : eraEntries[0]?.[0] ?? ''
 const menuEntries = [
-  ...(eraConfig['all-eras']
-    ? [{ key: 'all-eras', label: 'All Eras' }]
-    : []),
+  ...(eraConfig['all-eras'] ? [{ key: 'all-eras', label: 'All Eras' }] : []),
   ...eraEntries.map(([eraKey, config]) => ({
     key: eraKey,
     label: config.displayName || eraKey,
@@ -86,6 +89,9 @@ const menuEntries = [
   id={`${id}-wrapper`}
   class:list={['timeline-wrapper relative w-full overflow-hidden', asBanner ? 'timeline-banner-mode' : '', classList]}
   style={`height: ${bannerHeight}; --timeline-mobile-height: ${mobileHeight};`}
+  data-timeline-banner-wrapper="true"
+  data-timeline-id={`${id}-timeline`}
+  data-initial-era={initialEra}
 >
   <div class="timeline-map-controls">
     <div class="timeline-zoom-controls">
@@ -127,70 +133,10 @@ const menuEntries = [
   />
 </section>
 
-<script
-  define:vars={{
-    wrapperId: `${id}-wrapper`,
-    timelineId: `${id}-timeline`,
-    initialEra,
-    eraConfig,
-  }}
->
-  (() => {
-    const wrapper = document.getElementById(wrapperId)
-    if (!wrapper) return
+<script>
+  import { initTimelineBannerControls } from './timelineBannerClient.js'
 
-    const zoomButtons = wrapper.querySelectorAll('[data-action]')
-    const eraOptions = wrapper.querySelectorAll('[data-era-option]')
-    let syncRetryCount = 0
-
-    const setActiveEra = (eraKey) => {
-      eraOptions.forEach((opt) => {
-        opt.classList.toggle('is-active', opt.getAttribute('data-era-option') === eraKey)
-      })
-    }
-
-    const syncTimelineCore = () => {
-      const timelineCore = window[`timelineCore_${timelineId}`]
-      if (!timelineCore) {
-        if (syncRetryCount < 12) {
-          syncRetryCount += 1
-          window.setTimeout(syncTimelineCore, 50)
-        }
-        return
-      }
-
-      syncRetryCount = 0
-      if (initialEra && typeof timelineCore.selectEra === 'function') {
-        timelineCore.selectEra(initialEra)
-        setActiveEra(initialEra)
-      }
-
-      zoomButtons.forEach((button) => {
-        button.addEventListener('click', () => {
-          const action = button.getAttribute('data-action')
-          if (action === 'zoom-in' && typeof timelineCore.zoomIn === 'function') timelineCore.zoomIn()
-          if (action === 'zoom-out' && typeof timelineCore.zoomOut === 'function') timelineCore.zoomOut()
-          if (action === 'reset-view' && typeof timelineCore.resetView === 'function') timelineCore.resetView()
-        })
-      })
-
-      eraOptions.forEach((option) => {
-        option.addEventListener('click', () => {
-          const nextEra = option.getAttribute('data-era-option')
-          if (!nextEra || typeof timelineCore.selectEra !== 'function') return
-          timelineCore.selectEra(nextEra)
-          setActiveEra(nextEra)
-        })
-      })
-
-      wrapper.addEventListener('timeline:eraChange', (event) => {
-        const nextEra = event.detail?.era
-        if (nextEra) setActiveEra(nextEra)
-      })
-    }
-
-    syncTimelineCore()
-  })()
+  initTimelineBannerControls()
 </script>
 
 <style>

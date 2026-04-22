@@ -1,7 +1,7 @@
 {
   "levelId": "yggdrasil",
   "version": 1,
-  "updatedAt": "2026-04-19T01:38:28.019Z",
+  "updatedAt": "2026-04-19T17:58:11.544Z",
   "settings": {
     "level": {
       "spawn": {
@@ -68,43 +68,42 @@
     {
       "id": "yggdrasil-shore-ring",
       "name": "Shore Ring",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
-        -1.02,
+        -19.328206991636343,
         0
       ],
       "rotation": [
-        1.5707963267948966,
+        1.4999999999999993,
         0,
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        189.7629235810407,
+        188.7976031931478,
+        20.137438584817716
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "torus",
-        "args": [
-          148,
-          4.6,
-          18,
-          60
+      "generation": {
+        "descriptor": "shoreline ring, drowned shrine perimeter",
+        "sourceVisualSize": [
+          305.20001220703125,
+          9.060231208801337,
+          305.20001220703125
         ],
-        "color": "#716857",
-        "emissive": "#2f2921",
-        "emissiveIntensity": 0.08,
-        "metalness": 0.12,
-        "roughness": 0.88
+        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-ring/shore-ring-generated-2026-04-19T16-32-21-479Z.glb",
+        "lastBakedAt": "2026-04-19T16:32:25.616Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/shore-ring/shore-ring-generated-2026-04-19T16-32-21-479Z.glb"
       }
     },
     {
       "id": "yggdrasil-island-shelf",
       "name": "Island Shelf",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -117,28 +116,27 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        156.53964984552007,
+        1.8252430638898813,
+        154.57836716430054
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.93
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          118,
-          152,
-          3.6,
-          48
+      "generation": {
+        "descriptor": "broad outer island shelf of weathered sacred stone",
+        "sourceVisualSize": [
+          304,
+          3.5999999046325684,
+          304
         ],
-        "color": "#43513a",
-        "emissive": "#182116",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.03,
-        "roughness": 0.97
+        "lastBakedAssetUrl": "/generated/hunyuan3d/island-shelf/island-shelf-generated-2026-04-19T16-35-28-683Z.glb",
+        "lastBakedAt": "2026-04-19T16:35:31.728Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/island-shelf/island-shelf-generated-2026-04-19T16-35-28-683Z.glb"
       }
     },
     {
@@ -165,7 +163,7 @@
     {
       "id": "yggdrasil-ground",
       "name": "World Root Basin",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -178,34 +176,33 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        198.58357227530166,
+        15.503876200018002,
+        198.7184686511477
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.94
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          172,
-          196,
-          6.4,
-          56
+      "generation": {
+        "descriptor": "vast circular island foundation of dark earth and root-laced stone",
+        "sourceVisualSize": [
+          392,
+          6.400000095367432,
+          392
         ],
-        "color": "#2b3827",
-        "emissive": "#10170f",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.04,
-        "roughness": 0.96
+        "lastBakedAssetUrl": "/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
+        "lastBakedAt": "2026-04-19T16:38:38.465Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb"
       }
     },
     {
       "id": "yggdrasil-mound",
       "name": "Root Mound",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -218,34 +215,33 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        89.19159977296684,
+        8.75692133590203,
+        89.72724955391283
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.92
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          60,
-          88,
+      "generation": {
+        "descriptor": "root mound",
+        "sourceVisualSize": [
+          176,
           13,
-          36
+          176
         ],
-        "color": "#4d5e3d",
-        "emissive": "#202c18",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.02,
-        "roughness": 0.98
+        "lastBakedAssetUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+        "lastBakedAt": "2026-04-19T16:41:29.849Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb"
       }
     },
     {
       "id": "yggdrasil-dais",
       "name": "Well Dais",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -258,34 +254,33 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        37.21853483034551,
+        1.6215504290438507,
+        37.837781024352815
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.9
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          26,
-          36,
-          3.2,
-          28
+      "generation": {
+        "descriptor": "well dais",
+        "sourceVisualSize": [
+          72,
+          3.200000047683716,
+          72
         ],
-        "color": "#6e6a57",
-        "emissive": "#24231a",
-        "emissiveIntensity": 0.02,
-        "metalness": 0.08,
-        "roughness": 0.9
+        "lastBakedAssetUrl": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-04-19T16-44-36-480Z.glb",
+        "lastBakedAt": "2026-04-19T16:44:40.336Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-04-19T16-44-36-480Z.glb"
       }
     },
     {
       "id": "yggdrasil-bifrost-path",
       "name": "Bifrost Approach",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -298,33 +293,33 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        7.651460663840727,
+        0.45578388558717225,
+        82.62297724845334
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "primitive": {
-        "geometry": "box",
-        "args": [
+      "generation": {
+        "descriptor": "bifrost approach",
+        "sourceVisualSize": [
           10,
-          0.9,
+          0.8999999761581421,
           82
         ],
-        "color": "#a18f6a",
-        "emissive": "#65416c",
-        "emissiveIntensity": 0.28,
-        "metalness": 0.3,
-        "roughness": 0.52
+        "lastBakedAssetUrl": "/generated/hunyuan3d/bifrost-approach/bifrost-approach-generated-2026-04-19T16-47-32-023Z.glb",
+        "lastBakedAt": "2026-04-19T16:47:35.483Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/bifrost-approach/bifrost-approach-generated-2026-04-19T16-47-32-023Z.glb"
       }
     },
     {
       "id": "yggdrasil-trunk-lower",
       "name": "Trunk Lower",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -337,34 +332,33 @@
         0
       ],
       "scale": [
-        1.18,
-        1.22,
-        1.18
+        15.217455174935278,
+        24.255093919889454,
+        16.06081057303339
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.85
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          9.8176,
-          12.687359999999998,
-          39.235200000000006,
-          16
+      "generation": {
+        "descriptor": "colossal ancient trunk segment of blackened sacred timber, fissured bark mass",
+        "sourceVisualSize": [
+          29.94216915130615,
+          47.86694274902344,
+          29.94216915130615
         ],
-        "color": "#5a4229",
-        "emissive": "#22160d",
-        "emissiveIntensity": 0.04,
-        "metalness": 0.05,
-        "roughness": 0.95
+        "lastBakedAssetUrl": "/generated/hunyuan3d/trunk-lower/trunk-lower-generated-2026-04-19T16-50-31-183Z.glb",
+        "lastBakedAt": "2026-04-19T16:50:34.179Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/trunk-lower/trunk-lower-generated-2026-04-19T16-50-31-183Z.glb"
       }
     },
     {
       "id": "yggdrasil-trunk-mid",
       "name": "Trunk Mid",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -377,30 +371,29 @@
         0
       ],
       "scale": [
-        1.18,
-        1.22,
-        1.18
+        11.703217569569494,
+        20.363851174441514,
+        12.310766827673527
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          7.2499199999999995,
-          9.66656,
-          32.696,
-          16
+      "generation": {
+        "descriptor": "colossal ancient trunk segment of blackened sacred timber, fissured bark mass",
+        "sourceVisualSize": [
+          22.813082008361814,
+          39.88911895751953,
+          22.813082008361814
         ],
-        "color": "#62492d",
-        "emissive": "#23170d",
-        "emissiveIntensity": 0.05,
-        "metalness": 0.05,
-        "roughness": 0.94
+        "lastBakedAssetUrl": "/generated/hunyuan3d/trunk-mid/trunk-mid-generated-2026-04-19T16-53-29-448Z.glb",
+        "lastBakedAt": "2026-04-19T16:53:33.827Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/trunk-mid/trunk-mid-generated-2026-04-19T16-53-29-448Z.glb"
       }
     },
     {
       "id": "yggdrasil-trunk-upper",
       "name": "Trunk Upper",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -413,30 +406,29 @@
         0
       ],
       "scale": [
-        1.18,
-        1.22,
-        1.18
+        8.488195980670941,
+        16.17727626787774,
+        9.035885665791858
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          4.83328,
-          7.2499199999999995,
-          26.1568,
-          14
+      "generation": {
+        "descriptor": "colossal ancient trunk segment of blackened sacred timber, fissured bark mass",
+        "sourceVisualSize": [
+          16.68083297729492,
+          31.911295166015627,
+          17.109810943603513
         ],
-        "color": "#6b5133",
-        "emissive": "#25190e",
-        "emissiveIntensity": 0.05,
-        "metalness": 0.04,
-        "roughness": 0.94
+        "lastBakedAssetUrl": "/generated/hunyuan3d/trunk-upper/trunk-upper-generated-2026-04-19T16-56-26-375Z.glb",
+        "lastBakedAt": "2026-04-19T16:56:29.905Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/trunk-upper/trunk-upper-generated-2026-04-19T16-56-26-375Z.glb"
       }
     },
     {
       "id": "yggdrasil-root-north",
       "name": "Root north",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -449,34 +441,33 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        3.8426114517483434,
+        10.554330270503057,
+        17.557704212157915
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          2.124,
-          3.776,
-          34.16,
-          10
+      "generation": {
+        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
+        "sourceVisualSize": [
+          7.182378768920898,
+          20.847124236903046,
+          34.2649132322789
         ],
-        "color": "#4d3722",
-        "emissive": "#1d120a",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.97
+        "lastBakedAssetUrl": "/generated/hunyuan3d/root-north/root-north-generated-2026-04-19T16-59-20-463Z.glb",
+        "lastBakedAt": "2026-04-19T16:59:24.414Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/root-north/root-north-generated-2026-04-19T16-59-20-463Z.glb"
       }
     },
     {
       "id": "yggdrasil-root-south",
       "name": "Root south",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -489,34 +480,33 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        3.409322425420529,
+        12.63710313359757,
+        17.926552332538748
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.888,
-          3.54,
-          36.6,
-          10
+      "generation": {
+        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
+        "sourceVisualSize": [
+          6.733479976654053,
+          24.352455964630533,
+          35.27049171426999
         ],
-        "color": "#4d3722",
-        "emissive": "#1d120a",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.97
+        "lastBakedAssetUrl": "/generated/hunyuan3d/root-south/root-south-generated-2026-04-19T17-02-12-977Z.glb",
+        "lastBakedAt": "2026-04-19T17:02:16.769Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/root-south/root-south-generated-2026-04-19T17-02-12-977Z.glb"
       }
     },
     {
       "id": "yggdrasil-root-east",
       "name": "Root east",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         21.24,
@@ -529,34 +519,33 @@
         -1.15
       ],
       "scale": [
-        1,
-        1,
-        1
+        18.429517052804123,
+        12.05331750545334,
+        3.705504560840582
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          2.006,
-          3.658,
-          36.6,
-          10
+      "generation": {
+        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
+        "sourceVisualSize": [
+          36.24938568150149,
+          21.30158696103758,
+          7.315999984741211
         ],
-        "color": "#4d3722",
-        "emissive": "#1d120a",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.97
+        "lastBakedAssetUrl": "/generated/hunyuan3d/root-east/root-east-generated-2026-04-19T17-05-01-813Z.glb",
+        "lastBakedAt": "2026-04-19T17:05:05.214Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/root-east/root-east-generated-2026-04-19T17-05-01-813Z.glb"
       }
     },
     {
       "id": "yggdrasil-root-west",
       "name": "Root west",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         -21.24,
@@ -569,34 +558,33 @@
         1.05
       ],
       "scale": [
-        1,
-        1,
-        1
+        16.78530786876281,
+        13.085456246515403,
+        3.75206424294114
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          2.006,
-          3.658,
-          34.16,
-          10
+      "generation": {
+        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
+        "sourceVisualSize": [
+          33.093241581738006,
+          23.03249666686655,
+          7.315999984741211
         ],
-        "color": "#4d3722",
-        "emissive": "#1d120a",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.97
+        "lastBakedAssetUrl": "/generated/hunyuan3d/root-west/root-west-generated-2026-04-19T17-07-48-681Z.glb",
+        "lastBakedAt": "2026-04-19T17:07:51.752Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/root-west/root-west-generated-2026-04-19T17-07-48-681Z.glb"
       }
     },
     {
       "id": "yggdrasil-root-northeast",
       "name": "Root northeast",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         15.34,
@@ -609,34 +597,33 @@
         -0.72
       ],
       "scale": [
-        1,
-        1,
-        1
+        11.86662269140726,
+        10.300229022101744,
+        11.95407625821269
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.416,
-          2.832,
-          29.28,
-          10
+      "generation": {
+        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
+        "sourceVisualSize": [
+          23.35659877858925,
+          20.328119988859118,
+          23.546422168851862
         ],
-        "color": "#4d3722",
-        "emissive": "#1d120a",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.97
+        "lastBakedAssetUrl": "/generated/hunyuan3d/root-northeast/root-northeast-generated-2026-04-19T17-10-26-920Z.glb",
+        "lastBakedAt": "2026-04-19T17:10:30.381Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/root-northeast/root-northeast-generated-2026-04-19T17-10-26-920Z.glb"
       }
     },
     {
       "id": "yggdrasil-root-northwest",
       "name": "Root northwest",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         -15.34,
@@ -649,34 +636,33 @@
         0.72
       ],
       "scale": [
-        1,
-        1,
-        1
+        11.847361234105309,
+        10.453517905225246,
+        12.210088034292932
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.416,
-          2.832,
-          29.28,
-          10
+      "generation": {
+        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
+        "sourceVisualSize": [
+          23.35659877858925,
+          20.328119988859118,
+          23.546422168851862
         ],
-        "color": "#4d3722",
-        "emissive": "#1d120a",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.97
+        "lastBakedAssetUrl": "/generated/hunyuan3d/root-northwest/root-northwest-generated-2026-04-19T17-13-41-911Z.glb",
+        "lastBakedAt": "2026-04-19T17:13:45.712Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/root-northwest/root-northwest-generated-2026-04-19T17-13-41-911Z.glb"
       }
     },
     {
       "id": "yggdrasil-root-southeast",
       "name": "Root southeast",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         15.34,
@@ -689,34 +675,33 @@
         -0.72
       ],
       "scale": [
-        1,
-        1,
-        1
+        12.985266458325041,
+        10.335946789539603,
+        13.291799135677032
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.416,
-          2.832,
-          29.28,
-          10
+      "generation": {
+        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
+        "sourceVisualSize": [
+          23.35659877858925,
+          20.328119988859118,
+          23.546422168851862
         ],
-        "color": "#4d3722",
-        "emissive": "#1d120a",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.97
+        "lastBakedAssetUrl": "/generated/hunyuan3d/root-southeast/root-southeast-generated-2026-04-19T17-16-26-636Z.glb",
+        "lastBakedAt": "2026-04-19T17:16:30.100Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/root-southeast/root-southeast-generated-2026-04-19T17-16-26-636Z.glb"
       }
     },
     {
       "id": "yggdrasil-root-southwest",
       "name": "Root southwest",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         -15.34,
@@ -729,34 +714,33 @@
         0.72
       ],
       "scale": [
-        1,
-        1,
-        1
+        11.876397702980338,
+        10.72361840268148,
+        12.063334273708623
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.416,
-          2.832,
-          29.28,
-          10
+      "generation": {
+        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
+        "sourceVisualSize": [
+          23.35659877858925,
+          20.328119988859118,
+          23.546422168851862
         ],
-        "color": "#4d3722",
-        "emissive": "#1d120a",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.97
+        "lastBakedAssetUrl": "/generated/hunyuan3d/root-southwest/root-southwest-generated-2026-04-19T17-19-22-220Z.glb",
+        "lastBakedAt": "2026-04-19T17:19:25.602Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/root-southwest/root-southwest-generated-2026-04-19T17-19-22-220Z.glb"
       }
     },
     {
       "id": "yggdrasil-branch-north",
       "name": "Branch north",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -769,30 +753,29 @@
         0
       ],
       "scale": [
-        1.16,
-        1.18,
-        1.16
+        3.113190071245697,
+        17.31787124887397,
+        12.502673981717585
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.5312,
-          2.784,
-          29.263999999999996,
-          10
+      "generation": {
+        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
+        "sourceVisualSize": [
+          6.142759857177734,
+          32.81494151464133,
+          23.555537888515197
         ],
-        "color": "#725837",
-        "emissive": "#251a10",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.95
+        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-north/branch-north-generated-2026-04-19T17-22-30-105Z.glb",
+        "lastBakedAt": "2026-04-19T17:22:33.595Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/branch-north/branch-north-generated-2026-04-19T17-22-30-105Z.glb"
       }
     },
     {
       "id": "yggdrasil-branch-south",
       "name": "Branch south",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -805,30 +788,29 @@
         0
       ],
       "scale": [
-        1.16,
-        1.18,
-        1.16
+        3.156640796502397,
+        18.121705958362877,
+        15.363641568413149
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.5312,
-          2.784,
-          32.1904,
-          10
+      "generation": {
+        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
+        "sourceVisualSize": [
+          6.142759857177734,
+          35.758837499399135,
+          25.360455864148214
         ],
-        "color": "#725837",
-        "emissive": "#251a10",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.95
+        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-south/branch-south-generated-2026-04-19T17-25-13-766Z.glb",
+        "lastBakedAt": "2026-04-19T17:25:17.820Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/branch-south/branch-south-generated-2026-04-19T17-25-13-766Z.glb"
       }
     },
     {
       "id": "yggdrasil-branch-east",
       "name": "Branch east",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         13.440000000000001,
@@ -841,30 +823,29 @@
         -0.62
       ],
       "scale": [
-        1.16,
-        1.18,
-        1.16
+        13.115104348276486,
+        15.854632208366603,
+        3.526273866446287
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.392,
-          2.5056,
-          29.263999999999996,
-          10
+      "generation": {
+        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
+        "sourceVisualSize": [
+          24.563541235973993,
+          31.31670372325405,
+          5.812991943359375
         ],
-        "color": "#725837",
-        "emissive": "#251a10",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.95
+        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-east/branch-east-generated-2026-04-19T17-28-01-226Z.glb",
+        "lastBakedAt": "2026-04-19T17:28:04.600Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/branch-east/branch-east-generated-2026-04-19T17-28-01-226Z.glb"
       }
     },
     {
       "id": "yggdrasil-branch-west",
       "name": "Branch west",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         -13.440000000000001,
@@ -877,30 +858,29 @@
         0.62
       ],
       "scale": [
-        1.16,
-        1.18,
-        1.16
+        12.49137590568438,
+        15.86635983911786,
+        3.116986038885634
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.392,
-          2.5056,
-          29.263999999999996,
-          10
+      "generation": {
+        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
+        "sourceVisualSize": [
+          24.563541235973993,
+          31.31670372325405,
+          5.812991943359375
         ],
-        "color": "#725837",
-        "emissive": "#251a10",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.95
+        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-west/branch-west-generated-2026-04-19T17-30-56-202Z.glb",
+        "lastBakedAt": "2026-04-19T17:30:59.350Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/branch-west/branch-west-generated-2026-04-19T17-30-56-202Z.glb"
       }
     },
     {
       "id": "yggdrasil-branch-ne",
       "name": "Branch ne",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         10.752,
@@ -913,30 +893,29 @@
         -0.46
       ],
       "scale": [
-        1.16,
-        1.18,
-        1.16
+        8.409777655495084,
+        13.442046451625014,
+        12.34872359865102
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.2528,
-          2.0879999999999996,
-          23.411199999999997,
-          10
+      "generation": {
+        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
+        "sourceVisualSize": [
+          16.39233860609102,
+          26.445075666139957,
+          15.350698305483084
         ],
-        "color": "#725837",
-        "emissive": "#251a10",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.95
+        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-ne/branch-ne-generated-2026-04-19T17-33-36-110Z.glb",
+        "lastBakedAt": "2026-04-19T17:33:40.132Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/branch-ne/branch-ne-generated-2026-04-19T17-33-36-110Z.glb"
       }
     },
     {
       "id": "yggdrasil-branch-nw",
       "name": "Branch nw",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         -10.752,
@@ -949,30 +928,29 @@
         0.46
       ],
       "scale": [
-        1.16,
-        1.18,
-        1.16
+        8.636455820789351,
+        13.41667715145148,
+        7.8914972627687785
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.2528,
-          2.0879999999999996,
-          23.411199999999997,
-          10
+      "generation": {
+        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
+        "sourceVisualSize": [
+          16.39233860609102,
+          26.445075666139957,
+          15.350698305483084
         ],
-        "color": "#725837",
-        "emissive": "#251a10",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.95
+        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-nw/branch-nw-generated-2026-04-19T17-36-13-707Z.glb",
+        "lastBakedAt": "2026-04-19T17:36:16.765Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/branch-nw/branch-nw-generated-2026-04-19T17-36-13-707Z.glb"
       }
     },
     {
       "id": "yggdrasil-branch-se",
       "name": "Branch se",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         10.752,
@@ -985,30 +963,29 @@
         -0.46
       ],
       "scale": [
-        1.16,
-        1.18,
-        1.16
+        9.145877190507845,
+        13.43003182476256,
+        10.35558049696638
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.2528,
-          2.0879999999999996,
-          23.411199999999997,
-          10
+      "generation": {
+        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
+        "sourceVisualSize": [
+          16.39233860609102,
+          26.445075666139957,
+          15.350698305483084
         ],
-        "color": "#725837",
-        "emissive": "#251a10",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.95
+        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-se/branch-se-generated-2026-04-19T17-39-02-154Z.glb",
+        "lastBakedAt": "2026-04-19T17:39:05.268Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/branch-se/branch-se-generated-2026-04-19T17-39-02-154Z.glb"
       }
     },
     {
       "id": "yggdrasil-branch-sw",
       "name": "Branch sw",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         -10.752,
@@ -1021,30 +998,29 @@
         0.46
       ],
       "scale": [
-        1.16,
-        1.18,
-        1.16
+        8.341053400614179,
+        13.433579364892438,
+        12.698071226307455
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          1.2528,
-          2.0879999999999996,
-          23.411199999999997,
-          10
+      "generation": {
+        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
+        "sourceVisualSize": [
+          16.39233860609102,
+          26.445075666139957,
+          15.350698305483084
         ],
-        "color": "#725837",
-        "emissive": "#251a10",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.03,
-        "roughness": 0.95
+        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-sw/branch-sw-generated-2026-04-19T17-41-49-573Z.glb",
+        "lastBakedAt": "2026-04-19T17:41:54.048Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/branch-sw/branch-sw-generated-2026-04-19T17-41-49-573Z.glb"
       }
     },
     {
       "id": "yggdrasil-canopy-1",
       "name": "Canopy 1",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -1057,22 +1033,23 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        17.50440818236155,
+        16.982408999471037,
+        18.95524832644284
       ],
       "visible": true,
-      "primitive": {
-        "geometry": "icosahedron",
-        "args": [
-          19.641999999999996,
-          0
+      "generation": {
+        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume",
+        "sourceVisualSize": [
+          33.41696548461914,
+          33.41696548461914,
+          33.41696548461914
         ],
-        "color": "#657d47",
-        "emissive": "#40551f",
-        "emissiveIntensity": 0.08,
-        "metalness": 0.04,
-        "roughness": 0.92
+        "lastBakedAssetUrl": "/generated/hunyuan3d/canopy-1/canopy-1-generated-2026-04-19T17-45-32-578Z.glb",
+        "lastBakedAt": "2026-04-19T17:45:37.072Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/canopy-1/canopy-1-generated-2026-04-19T17-45-32-578Z.glb"
       }
     },
     {
@@ -1107,6 +1084,9 @@
         "emissiveIntensity": 0.08,
         "metalness": 0.04,
         "roughness": 0.92
+      },
+      "generation": {
+        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
       }
     },
     {
@@ -1141,6 +1121,9 @@
         "emissiveIntensity": 0.08,
         "metalness": 0.04,
         "roughness": 0.92
+      },
+      "generation": {
+        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
       }
     },
     {
@@ -1175,6 +1158,9 @@
         "emissiveIntensity": 0.08,
         "metalness": 0.04,
         "roughness": 0.92
+      },
+      "generation": {
+        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
       }
     },
     {
@@ -1209,6 +1195,9 @@
         "emissiveIntensity": 0.08,
         "metalness": 0.04,
         "roughness": 0.92
+      },
+      "generation": {
+        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
       }
     },
     {
@@ -1243,6 +1232,9 @@
         "emissiveIntensity": 0.08,
         "metalness": 0.04,
         "roughness": 0.92
+      },
+      "generation": {
+        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
       }
     },
     {
@@ -1277,6 +1269,9 @@
         "emissiveIntensity": 0.08,
         "metalness": 0.04,
         "roughness": 0.92
+      },
+      "generation": {
+        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
       }
     },
     {
@@ -1311,6 +1306,9 @@
         "emissiveIntensity": 0.08,
         "metalness": 0.04,
         "roughness": 0.92
+      },
+      "generation": {
+        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
       }
     },
     {
@@ -1345,6 +1343,9 @@
         "emissiveIntensity": 0.08,
         "metalness": 0.04,
         "roughness": 0.92
+      },
+      "generation": {
+        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
       }
     },
     {
@@ -1383,6 +1384,9 @@
         "roughness": 0.18,
         "transparent": true,
         "opacity": 0.8
+      },
+      "generation": {
+        "descriptor": "crown halo"
       }
     },
     {
@@ -1419,6 +1423,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.25,
         "roughness": 0.82
+      },
+      "generation": {
+        "descriptor": "carved stone well ring, runic shrine circumference"
       }
     },
     {
@@ -1461,6 +1468,9 @@
         "roughness": 0.18,
         "transparent": true,
         "opacity": 0.86
+      },
+      "generation": {
+        "descriptor": "sacred abyssal well pool, dark reflective myth-water"
       }
     },
     {
@@ -1529,6 +1539,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb"
+      },
+      "generation": {
+        "descriptor": "Well of Urd Root Shrine"
       }
     },
     {
@@ -1565,6 +1578,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.25,
         "roughness": 0.82
+      },
+      "generation": {
+        "descriptor": "carved stone well ring, runic shrine circumference"
       }
     },
     {
@@ -1607,6 +1623,9 @@
         "roughness": 0.18,
         "transparent": true,
         "opacity": 0.86
+      },
+      "generation": {
+        "descriptor": "sacred abyssal well pool, dark reflective myth-water"
       }
     },
     {
@@ -1675,6 +1694,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb"
+      },
+      "generation": {
+        "descriptor": "Well of Mimir Root Shrine"
       }
     },
     {
@@ -1711,6 +1733,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.25,
         "roughness": 0.82
+      },
+      "generation": {
+        "descriptor": "carved stone well ring, runic shrine circumference"
       }
     },
     {
@@ -1753,6 +1778,9 @@
         "roughness": 0.18,
         "transparent": true,
         "opacity": 0.86
+      },
+      "generation": {
+        "descriptor": "sacred abyssal well pool, dark reflective myth-water"
       }
     },
     {
@@ -1821,6 +1849,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb"
+      },
+      "generation": {
+        "descriptor": "Hvergelmir Basin Root Shrine"
       }
     },
     {
@@ -1846,6 +1877,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb"
+      },
+      "generation": {
+        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
       }
     },
     {
@@ -1914,6 +1948,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18T22-29-37-524Z.glb"
+      },
+      "generation": {
+        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
       }
     },
     {
@@ -1982,6 +2019,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18T22-42-43-915Z.glb"
+      },
+      "generation": {
+        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
       }
     },
     {
@@ -2050,6 +2090,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb"
+      },
+      "generation": {
+        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
       }
     },
     {
@@ -2118,6 +2161,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb"
+      },
+      "generation": {
+        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
       }
     },
     {
@@ -2186,6 +2232,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-23-01-827Z.glb"
+      },
+      "generation": {
+        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
       }
     },
     {
@@ -2254,6 +2303,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
+      },
+      "generation": {
+        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
       }
     },
     {
@@ -2322,6 +2374,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
+      },
+      "generation": {
+        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
       }
     },
     {
@@ -2404,6 +2459,9 @@
         "emissiveIntensity": 0.22,
         "metalness": 0.18,
         "roughness": 0.72
+      },
+      "generation": {
+        "descriptor": "ceremonial approach stone, weathered runic slab"
       }
     },
     {
@@ -2443,6 +2501,9 @@
         "emissiveIntensity": 0.22,
         "metalness": 0.18,
         "roughness": 0.72
+      },
+      "generation": {
+        "descriptor": "ceremonial approach stone, weathered runic slab"
       }
     },
     {
@@ -2482,6 +2543,9 @@
         "emissiveIntensity": 0.22,
         "metalness": 0.18,
         "roughness": 0.72
+      },
+      "generation": {
+        "descriptor": "ceremonial approach stone, weathered runic slab"
       }
     },
     {
@@ -2521,6 +2585,9 @@
         "emissiveIntensity": 0.22,
         "metalness": 0.18,
         "roughness": 0.72
+      },
+      "generation": {
+        "descriptor": "ceremonial approach stone, weathered runic slab"
       }
     },
     {
@@ -2560,6 +2627,9 @@
         "emissiveIntensity": 0.22,
         "metalness": 0.18,
         "roughness": 0.72
+      },
+      "generation": {
+        "descriptor": "ceremonial approach stone, weathered runic slab"
       }
     },
     {
@@ -2599,6 +2669,9 @@
         "emissiveIntensity": 0.22,
         "metalness": 0.18,
         "roughness": 0.72
+      },
+      "generation": {
+        "descriptor": "ceremonial approach stone, weathered runic slab"
       }
     },
     {
@@ -2746,6 +2819,9 @@
       "visible": true,
       "prefab": {
         "type": "portal-apparatus"
+      },
+      "generation": {
+        "descriptor": "occult portal apparatus"
       }
     },
     {
@@ -2771,6 +2847,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -2796,6 +2875,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -2821,6 +2903,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
+      },
+      "generation": {
+        "descriptor": "threshold world-tree monolith, magenta-violet rune channels"
       }
     },
     {
@@ -2846,6 +2931,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
+      },
+      "generation": {
+        "descriptor": "threshold world-tree monolith, magenta-violet rune channels"
       }
     },
     {
@@ -2877,6 +2965,9 @@
         "targetLevelId": "observatory",
         "markerColor": "#8fd8ff",
         "markerSize": 1.08
+      },
+      "generation": {
+        "descriptor": "occult portal apparatus"
       }
     },
     {
@@ -2913,6 +3004,9 @@
         "location": "Rainbow Threshold",
         "excerpt": "The road into the roots is staged as a crossing: mortal ground behind you, mythic order ahead.",
         "body": "The threshold into Yggdrasil should feel ceremonial, not casual. In surviving Norse sources Bifrost is not merely color in the sky; it is a charged passage between domains. This approach therefore frames the tree as something earned, not stumbled upon: a world-axis reached by crossing from ordinary space into sacred narrative space."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -2938,6 +3032,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -2963,6 +3060,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -2988,6 +3088,9 @@
       "visible": true,
       "prefab": {
         "type": "observation-rig"
+      },
+      "generation": {
+        "descriptor": "cosmic observation rig"
       }
     },
     {
@@ -3013,6 +3116,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -3038,6 +3144,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -3063,6 +3172,9 @@
       "visible": true,
       "prefab": {
         "type": "observation-rig"
+      },
+      "generation": {
+        "descriptor": "cosmic observation rig"
       }
     },
     {
@@ -3088,6 +3200,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -3113,6 +3228,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -3138,6 +3256,9 @@
       "visible": true,
       "prefab": {
         "type": "observation-rig"
+      },
+      "generation": {
+        "descriptor": "cosmic observation rig"
       }
     },
     {
@@ -3163,6 +3284,9 @@
       "visible": true,
       "prefab": {
         "type": "growth-planter"
+      },
+      "generation": {
+        "descriptor": "biomechanical growth planter"
       }
     },
     {
@@ -3188,6 +3312,9 @@
       "visible": true,
       "prefab": {
         "type": "growth-planter"
+      },
+      "generation": {
+        "descriptor": "biomechanical growth planter"
       }
     },
     {
@@ -3213,6 +3340,9 @@
       "visible": true,
       "prefab": {
         "type": "bench-growth"
+      },
+      "generation": {
+        "descriptor": "overgrown haunted bench"
       }
     },
     {
@@ -3249,6 +3379,9 @@
         "location": "Urdarbrunnr",
         "excerpt": "At Urd’s well, the world-tree is not only watched — it is maintained, judged, and renewed.",
         "body": "One of Yggdrasil’s great roots reaches to the Well of Urd, where the Norns are said to attend the tree and the fate of lives. Medieval descriptions emphasize care as much as prophecy: they water the trunk with sacred water and white clay so the bark does not decay. This scene leans into that older image. Fate here is not abstract bookkeeping. It is ritual maintenance of the living world-axis."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -3285,6 +3418,9 @@
         "location": "Mímisbrunnr",
         "excerpt": "Wisdom here is deep, but never cheap. Every draught is a bargain.",
         "body": "Another root bends toward Mimir’s well, seat of difficult wisdom. Later tradition most famously remembers Odin giving one of his eyes for a drink from its depths. The point is not simply that knowledge is valuable, but that true insight alters the seeker. This shrine is therefore framed as solemn rather than benevolent: not a fountain of comfort, but a place where understanding costs something real."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -3321,6 +3457,9 @@
         "location": "Hvergelmir Basin",
         "excerpt": "Not all of Yggdrasil is serene. Below the surface, pressure, venom, and erosion are part of the truth.",
         "body": "At Hvergelmir the world-tree ceases to look like tranquil symbolism and becomes strain made visible. Tradition places Nidhogg and other serpents among the lower roots, where cold water, gnawing, and underworld pressure gather. This matters for accuracy: Yggdrasil is not a spotless emblem of harmony. It endures because it is continuously threatened and continuously sustained."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -3357,6 +3496,9 @@
         "location": "Lower Trunk",
         "excerpt": "Messages move along the bark — not to heal conflict, but often to sharpen it.",
         "body": "Ratatoskr, the squirrel of the old poems, carries words between the eagle above and Nidhogg below. The tradition is sharp-edged: the messenger does not calm the axis of the world, but keeps its tensions alive. In spatial terms this means the trunk is not just connective tissue. It is a corridor of communication, irritation, memory, and consequence."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -3393,6 +3535,9 @@
         "location": "Upper Boughs",
         "excerpt": "The crown is occupied. A great eagle watches there, and Veðrfölnir keeps the sharper perch.",
         "body": "The upper crown of Yggdrasil is not empty decoration. The eagle and the hawk Veðrfölnir give the canopy intelligence and surveillance. This landmark makes that legible in play: the top of the tree is a station of oversight, a place from which the structure of worlds can be observed rather than merely admired."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -3429,6 +3574,9 @@
         "location": "Middle Boughs",
         "excerpt": "Beauty in the branches is never static. The leaves are fed upon even as they flourish.",
         "body": "The four stags named in the poetic tradition browse in Yggdrasil’s branches. Their presence complicates the image of the world-tree in useful ways. The upper boughs are alive, but they are also consumed, worn, and changed. In this level, the stag spirits turn that idea into visible motion across the canopy."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -3724,6 +3872,9 @@
         "roughness": 0.2,
         "transparent": true,
         "opacity": 0.78
+      },
+      "generation": {
+        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
       }
     },
     {
@@ -3761,6 +3912,9 @@
         "roughness": 0.2,
         "transparent": true,
         "opacity": 0.78
+      },
+      "generation": {
+        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
       }
     },
     {
@@ -3798,6 +3952,9 @@
         "roughness": 0.2,
         "transparent": true,
         "opacity": 0.78
+      },
+      "generation": {
+        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
       }
     },
     {
@@ -3835,6 +3992,9 @@
         "roughness": 0.2,
         "transparent": true,
         "opacity": 0.78
+      },
+      "generation": {
+        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
       }
     },
     {
@@ -3872,6 +4032,9 @@
         "roughness": 0.2,
         "transparent": true,
         "opacity": 0.78
+      },
+      "generation": {
+        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
       }
     },
     {
@@ -3909,6 +4072,9 @@
         "roughness": 0.2,
         "transparent": true,
         "opacity": 0.78
+      },
+      "generation": {
+        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
       }
     },
     {
@@ -3946,6 +4112,9 @@
         "roughness": 0.2,
         "transparent": true,
         "opacity": 0.78
+      },
+      "generation": {
+        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
       }
     },
     {
@@ -4135,6 +4304,9 @@
         "roughness": 0.16,
         "transparent": true,
         "opacity": 0.84
+      },
+      "generation": {
+        "descriptor": "eagle crown ring"
       }
     },
     {
@@ -4160,6 +4332,9 @@
       "visible": true,
       "prefab": {
         "type": "observation-rig"
+      },
+      "generation": {
+        "descriptor": "cosmic observation rig"
       }
     },
     {
@@ -4185,6 +4360,9 @@
       "visible": true,
       "prefab": {
         "type": "support-column"
+      },
+      "generation": {
+        "descriptor": "retro-futurist support column"
       }
     },
     {
@@ -4221,6 +4399,9 @@
         "location": "Crown Watch",
         "excerpt": "The eagle’s station is made visible so the crown reads as inhabited, ranked, and vigilant.",
         "body": "This perch is an interpretive landmark: a deliberate spatial answer to a common problem in mythic level design, where the “top of the tree” is said to matter but cannot be read at ground level. Here the perch, ring, and spirits translate the old cosmological image into something legible at a distance."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -4354,6 +4535,9 @@
       "visible": true,
       "prefab": {
         "type": "wasteland-archway"
+      },
+      "generation": {
+        "descriptor": "wasteland stone archway"
       }
     },
     {
@@ -4379,6 +4563,9 @@
       "visible": true,
       "prefab": {
         "type": "wasteland-archway"
+      },
+      "generation": {
+        "descriptor": "wasteland stone archway"
       }
     },
     {
@@ -4404,6 +4591,9 @@
       "visible": true,
       "prefab": {
         "type": "broken-ring"
+      },
+      "generation": {
+        "descriptor": "broken ancient stone ring ruin"
       }
     },
     {
@@ -4429,6 +4619,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb"
+      },
+      "generation": {
+        "descriptor": "cold root-depth monolith, underworld shrine stone"
       }
     },
     {
@@ -4454,6 +4647,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb"
+      },
+      "generation": {
+        "descriptor": "cold root-depth monolith, underworld shrine stone"
       }
     },
     {
@@ -4490,6 +4686,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.03,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "tunnel root 1"
       }
     },
     {
@@ -4526,6 +4725,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.03,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "tunnel root 2"
       }
     },
     {
@@ -4562,6 +4764,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.03,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "tunnel root 3"
       }
     },
     {
@@ -4628,6 +4833,9 @@
         "location": "Niðr-Rót Depths",
         "excerpt": "Below Hvergelmir the root-space narrows into a threshold of cold pressure and underworld memory.",
         "body": "This sub-area pushes Hvergelmir beyond a single pool into a readable lower district: a cold root pocket where arches, tunnel-roots, and serpent-omens suggest depth, danger, and the underworld pull associated with the lowest reaches of the tree. It is meant to feel like a place where a traveler should lower their voice."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -4696,6 +4904,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
+      },
+      "generation": {
+        "descriptor": "Foreground Root Stone Left"
       }
     },
     {
@@ -4721,6 +4932,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
+      },
+      "generation": {
+        "descriptor": "Foreground Root Stone Right"
       }
     },
     {
@@ -5048,6 +5262,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5087,6 +5304,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5126,6 +5346,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5165,6 +5388,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5204,6 +5430,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5243,6 +5472,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5282,6 +5514,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5321,6 +5556,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5360,6 +5598,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5399,6 +5640,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5438,6 +5682,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5477,6 +5724,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5516,6 +5766,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5555,6 +5808,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5594,6 +5850,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5633,6 +5892,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5672,6 +5934,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5711,6 +5976,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5750,6 +6018,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5789,6 +6060,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5828,6 +6102,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5867,6 +6144,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5906,6 +6186,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5945,6 +6228,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -5984,6 +6270,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -6023,6 +6312,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -6062,6 +6354,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -6101,6 +6396,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -6140,6 +6438,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -6179,6 +6480,9 @@
         "emissiveIntensity": 0.05,
         "metalness": 0.1,
         "roughness": 0.9
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -6218,6 +6522,9 @@
         "emissiveIntensity": 0.06,
         "metalness": 0.12,
         "roughness": 0.88
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -6257,6 +6564,9 @@
         "emissiveIntensity": 0.08,
         "metalness": 0.16,
         "roughness": 0.84
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -6296,6 +6606,9 @@
         "emissiveIntensity": 0.1,
         "metalness": 0.18,
         "roughness": 0.82
+      },
+      "generation": {
+        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
       }
     },
     {
@@ -6332,6 +6645,9 @@
         "location": "Crown Ascent",
         "excerpt": "The climb itself is part of the proof-of-concept now: the upper boughs are not just visible, they are reachable.",
         "body": "This ascent path turns the upper world-tree from a backdrop into a destination. It is intentionally interpretive rather than archaeological: a ritualized route of platforms and landings that gives players a clear, game-readable climb while preserving the mythic sensation of circling the trunk toward the crown."
+      },
+      "generation": {
+        "descriptor": "ritual story marker obelisk"
       }
     },
     {
@@ -6507,6 +6823,9 @@
         "roughness": 1,
         "transparent": true,
         "opacity": 0
+      },
+      "generation": {
+        "descriptor": "spawn safety pad"
       }
     },
     {
@@ -6532,6 +6851,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
+      },
+      "generation": {
+        "descriptor": "Horizon Monolith 1"
       }
     },
     {
@@ -6600,6 +6922,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
+      },
+      "generation": {
+        "descriptor": "Horizon Monolith 2"
       }
     },
     {
@@ -6668,6 +6993,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
+      },
+      "generation": {
+        "descriptor": "Horizon Monolith 3"
       }
     },
     {
@@ -6736,6 +7064,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
+      },
+      "generation": {
+        "descriptor": "Horizon Monolith 4"
       }
     },
     {
@@ -6804,6 +7135,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
+      },
+      "generation": {
+        "descriptor": "Horizon Monolith 5"
       }
     },
     {
@@ -6872,6 +7206,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
+      },
+      "generation": {
+        "descriptor": "Horizon Monolith 6"
       }
     },
     {
@@ -6951,6 +7288,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.02,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "descending sea root of drowned cosmic timber"
       }
     },
     {
@@ -6987,6 +7327,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.02,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "descending sea root of drowned cosmic timber"
       }
     },
     {
@@ -7023,6 +7366,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.02,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "descending sea root of drowned cosmic timber"
       }
     },
     {
@@ -7059,6 +7405,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.02,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "descending sea root of drowned cosmic timber"
       }
     },
     {
@@ -7095,6 +7444,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.02,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "descending sea root of drowned cosmic timber"
       }
     },
     {
@@ -7131,6 +7483,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.02,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "descending sea root of drowned cosmic timber"
       }
     },
     {
@@ -7167,6 +7522,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.02,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "descending sea root of drowned cosmic timber"
       }
     },
     {
@@ -7203,6 +7561,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.02,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "descending sea root of drowned cosmic timber"
       }
     },
     {
@@ -7238,6 +7599,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7274,6 +7638,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7309,6 +7676,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7345,6 +7715,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7380,6 +7753,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7416,6 +7792,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7451,6 +7830,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7487,6 +7869,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7522,6 +7907,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7558,6 +7946,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7593,6 +7984,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7629,6 +8023,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7664,6 +8061,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7700,6 +8100,9 @@
         "emissiveIntensity": 0.04,
         "metalness": 0.08,
         "roughness": 0.94
+      },
+      "generation": {
+        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
       }
     },
     {
@@ -7735,6 +8138,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.03,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "broken island shelf segment, collapsed sacred ledge"
       }
     },
     {
@@ -7770,6 +8176,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.03,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "broken island shelf segment, collapsed sacred ledge"
       }
     },
     {
@@ -7805,6 +8214,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.03,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "broken island shelf segment, collapsed sacred ledge"
       }
     },
     {
@@ -7840,6 +8252,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.03,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "broken island shelf segment, collapsed sacred ledge"
       }
     },
     {
@@ -7875,6 +8290,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.03,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "broken island shelf segment, collapsed sacred ledge"
       }
     },
     {
@@ -7910,6 +8328,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.03,
         "roughness": 0.98
+      },
+      "generation": {
+        "descriptor": "broken island shelf segment, collapsed sacred ledge"
       }
     },
     {
@@ -8096,6 +8517,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.04,
         "roughness": 0.97
+      },
+      "generation": {
+        "descriptor": "outer sacred islet, drowned mythic outcrop"
       }
     },
     {
@@ -8121,6 +8545,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb"
+      },
+      "generation": {
+        "descriptor": "drowned shoreline monolith ruin, abyssal runes, salt-dark sacred stone"
       }
     },
     {
@@ -8146,6 +8573,9 @@
       "visible": true,
       "prefab": {
         "type": "broken-ring"
+      },
+      "generation": {
+        "descriptor": "half-submerged sacred ring ruin, broken ritual stone"
       }
     },
     {
@@ -8225,6 +8655,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.04,
         "roughness": 0.97
+      },
+      "generation": {
+        "descriptor": "outer sacred islet, drowned mythic outcrop"
       }
     },
     {
@@ -8250,6 +8683,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
+      },
+      "generation": {
+        "descriptor": "drowned shoreline monolith ruin, abyssal runes, salt-dark sacred stone"
       }
     },
     {
@@ -8275,6 +8711,9 @@
       "visible": true,
       "prefab": {
         "type": "broken-ring"
+      },
+      "generation": {
+        "descriptor": "half-submerged sacred ring ruin, broken ritual stone"
       }
     },
     {
@@ -8354,6 +8793,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.04,
         "roughness": 0.97
+      },
+      "generation": {
+        "descriptor": "outer sacred islet, drowned mythic outcrop"
       }
     },
     {
@@ -8379,6 +8821,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
+      },
+      "generation": {
+        "descriptor": "drowned shoreline monolith ruin, abyssal runes, salt-dark sacred stone"
       }
     },
     {
@@ -8404,6 +8849,9 @@
       "visible": true,
       "prefab": {
         "type": "broken-ring"
+      },
+      "generation": {
+        "descriptor": "half-submerged sacred ring ruin, broken ritual stone"
       }
     },
     {
@@ -8483,6 +8931,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.04,
         "roughness": 0.97
+      },
+      "generation": {
+        "descriptor": "outer sacred islet, drowned mythic outcrop"
       }
     },
     {
@@ -8508,6 +8959,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb"
+      },
+      "generation": {
+        "descriptor": "drowned shoreline monolith ruin, abyssal runes, salt-dark sacred stone"
       }
     },
     {
@@ -8533,6 +8987,9 @@
       "visible": true,
       "prefab": {
         "type": "broken-ring"
+      },
+      "generation": {
+        "descriptor": "half-submerged sacred ring ruin, broken ritual stone"
       }
     },
     {
@@ -8612,6 +9069,9 @@
         "emissiveIntensity": 0.03,
         "metalness": 0.04,
         "roughness": 0.97
+      },
+      "generation": {
+        "descriptor": "outer sacred islet, drowned mythic outcrop"
       }
     },
     {
@@ -8637,6 +9097,9 @@
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
+      },
+      "generation": {
+        "descriptor": "drowned shoreline monolith ruin, abyssal runes, salt-dark sacred stone"
       }
     },
     {
@@ -8662,6 +9125,9 @@
       "visible": true,
       "prefab": {
         "type": "broken-ring"
+      },
+      "generation": {
+        "descriptor": "half-submerged sacred ring ruin, broken ritual stone"
       }
     },
     {

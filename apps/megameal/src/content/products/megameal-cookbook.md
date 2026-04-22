@@ -1,6 +1,7 @@
 ---
 name: "The MegaMeal Cookbook"
-tagline: "Recipes that will haunt your dreams and your dinner guests."
+tagline: "A first edition for kitchens, archivists, and the nervously curious."
+brand: "Temporal Culinary Archive"
 draft: false
 availability: "coming_soon"
 ctaMode: "none"
@@ -9,24 +10,22 @@ price: 29.99
 category: "publications"
 format: "physical"
 featured: false
+listingStyle: "showcase"
+listingLabel: "Archive Listing"
 sku: "CB-001"
-description: "Recipes, rituals, plating doctrine, and acceptable substitutions for the modern interstellar table. Featuring preparations spanning millennia — from the Golden Era's peak abundance to the sparse, inventive cuisine of the Conflict Epoch. Ingredients may be seasonal, extinct, or sentient. The Executive Culinary Council does not accept complaints about the latter."
-realDescription: "A real cookbook drawn from the MEGA MEAL universe. Recipe testing is underway. Print run authorization is pending. It will be delicious. We think. Most of it will be delicious."
-shippingNote: "Currently in production. We will notify you when this timeline's print run is authorized."
-rating: 4.2
+description: "The first edition gathers recipes, field notes, menu fragments, and culinary folklore from across the MEGA MEAL timeline into one shelf-ready volume. Inside: canonical dishes, impossible cocktails, extinct ingredients with terrestrial substitutions, and enough editorial annotation to make every page feel mildly contested."
+realDescription: "A real cookbook drawn from the MEGA MEAL universe. The print edition is still in development while recipes, notes, and marginalia continue to surface across the site. Some entries are complete. Some are under test. At least one earlier appendix has been removed pending legal review."
+shippingNote: "First printing pending recipe count, layout lock, and regional compliance review for the removed appendix."
+rating: 4.4
 media:
+  - type: image
+    src: "/posts/cookbook/cookbook.png"
+    alt: "The MegaMeal Cookbook first edition cover"
+    caption: "First-edition archive cover with culinary index markings intact."
   - type: video
     src: "/videos/cookbook.webm"
     poster: "/posts/cookbook/cookbook.png"
-    caption: "The Galactic Cookbook — Promotional Reel"
-  - type: video
-    src: "/videos/cookbook2.webm"
-    poster: "/posts/cookbook/cookbook.png"
-    caption: "Culinary Archives — Extended Preview"
-  - type: image
-    src: "/posts/cookbook/cookbook.png"
-    alt: "The MegaMeal Cookbook"
-    caption: "The Galactic Cookbook: A Culinary Compendium — Preserved by Archivist Zara Chen, Year 35,000"
+    caption: "First-edition promotional reel recovered from the archive kitchen."
 specifications:
   - label: "Full Title"
     value: "The Galactic Cookbook: A Culinary Compendium"
@@ -37,37 +36,81 @@ specifications:
   - label: "Coverage"
     value: "Recipes spanning the Golden Era through the Conflict Epoch"
   - label: "Binding"
-    value: "Perfect bound"
+    value: "First-edition softcover, heavily annotated in the margins"
   - label: "Dietary Coverage"
     value: "Omnivore, Existentialist, Post-Scarcity, Emergency Ration"
   - label: "Ingredients"
-    value: "Seasonal, extinct, or sentient — consult index"
+    value: "Seasonal, extinct, substituted, or redacted — consult the index carefully"
   - label: "Recommended Pairing"
-    value: "A long stare into the middle distance"
+    value: "A long stare into the middle distance and a clean prep surface"
+  - label: "Editorial Notice"
+    value: "One early appendix removed from standard first-edition distribution"
   - label: "Shelf Life"
-    value: "Indefinite. The book outlasts most readers."
+    value: "Indefinite. The book ages better than most empires."
 qanda:
   - question: "Is this connected to the MEGA MEAL story?"
-    answer: "Yes. The cookbook is canonically compiled by Culinary Archivist Zara Chen in Year 35,000, during the Preservation Era. The recipes reflect the full sweep of MEGA MEAL's timeline — from the opulent excess of the Golden Era to the improvised survival cuisine of the Conflict Epoch."
+    answer: "Yes. The cookbook is framed as a preserved first edition assembled by Culinary Archivist Zara Chen, but the material reaches into the wider site: recipe pages, restaurant criticism, incident records, and culinary debris from multiple eras."
+    linkLabel: "Open the live cookbook index"
+    linkHref: "/posts/cookbook/cookbook-index/"
+    linkAccent: "signal"
   - question: "When will it be available?"
     answer: "The manuscript has been submitted. The dimensional approval board meets quarterly. We remain cautiously optimistic."
   - question: "Are the recipes real and usable?"
-    answer: "Yes. The in-universe framing is fiction; the recipes are real, tested, and edible. Most of them. The ones with asterisks require ingredient substitutions."
+    answer: "Yes. The framing is fictional, but the goal is a real, usable cookbook. Some recipes are already stable, some rely on substitutions, and some remain attached to incident files where the editorial team is still deciding what belongs in a home kitchen."
+    linkLabel: "Read the Miranda recipe pages"
+    linkHref: "/posts/timelines/perfect-mary-recipe/"
+    linkAccent: "signal"
   - question: "Will there be a digital edition?"
-    answer: "We are exploring this. Some recipes do not translate well to screens. They prefer darkness and a physical page."
+    answer: "Probably. We are exploring a digital archive, but several contributors insist the first edition should feel like a real object with real margin notes, stains, warnings, and pages you can keep returning to."
+    linkLabel: "Browse the archive preview"
+    linkHref: "/posts/cookbook/cookbook-index/"
+    linkAccent: "signal"
+  - question: "What happened to the removed appendix?"
+    answer: "Earlier working copies reportedly referenced a sealed appendix involving restricted service notes and a recipe the compliance team could not classify as historical, satirical, or regionally legal. First-edition copies do not include it."
+    linkLabel: "Review the Boudin Noir note"
+    linkHref: "/posts/timelines/boudin-noir-restaurant-review/"
+    linkAccent: "creepy"
   - question: "Is this safe to give as a gift?"
-    answer: "That depends entirely on your relationship with the recipient and your definition of 'safe.'"
+    answer: "Yes, provided the recipient enjoys cookbooks with footnotes about extinct livestock, timeline-stable substitutions, and the occasional warning that some recipes should remain lost."
 preWrittenReviews:
-  - author: "Test Kitchen Volunteer (Compensated)"
+  - author: "A. Boudin Noir"
     rating: 5
-    date: "Pre-publication"
-    comment: "The recipe on page 47 changed something in me. I cannot say what. The dish was excellent. I have not been the same since. Five stars."
-  - author: "A Food Critic (Name Redacted at Their Request)"
+    date: "Advance galley"
+    comment: "At last, a cookbook that understands food is never just food. The best entries read like a dinner invitation, a legal deposition, and a dare. I turned first to the restaurant notes and stayed for the recipes that know exactly how much history they are carrying."
+    flags:
+      - "foreword excerpt retained"
+    verified: true
+  - author: "Test Kitchen Volunteer (Compensated)"
     rating: 4
-    date: "Advance Copy Review"
-    comment: "Technically brilliant. Morally ambiguous. The dessert chapter should come with a disclaimer. Or a priest. I will be recommending it to everyone I want to unsettle at the table."
+    date: "Pre-publication"
+    comment: "The standard-grade Miranda pages are excellent and mercifully clearer than the incident records. The note about the missing appendix made everyone in the test kitchen more curious than was probably healthy."
   - author: "Culinary Archivist Zara Chen (Attributed)"
     rating: 5
     date: "Year 35,000"
-    comment: "These recipes survived because they mattered. Not every era is preserved. Food is how cultures remember what they valued when things were good, and what they improvised when they weren't. This is both kinds of cookbook."
+    comment: "These recipes survived because they mattered. Food remembers what cultures celebrated, what they endured, and what they refused to write down plainly. A first edition should preserve all three."
+  - author: "Regional Compliance Desk"
+    rating: 3
+    date: "Distribution memo excerpt"
+    comment: "Strong package. Several excellent historical recipes. One appendix remains excluded pending review of service-related material associated with Ouroboros and other regionally restricted culinary practices."
+    linkLabel: "See the restricted service note"
+    linkHref: "/posts/timelines/boudin-noir-restaurant-review/"
+    flags:
+      - "appendix withheld by region"
+  - author: "Captain Helena Zhao"
+    authorHref: "/about/captain-helena-zhao/"
+    rating: 4
+    date: "Filed from archival cross-reference"
+    comment: "The first edition handles the Miranda material responsibly. It preserves the standard-grade version, keeps the dangerous phrasing at arm's length, and understands that some recipes are worth reading about even when they should never be repeated exactly."
+    linkLabel: "Read the incident file"
+    linkHref: "/posts/timelines/miranda-incident/"
+    flags:
+      - "incident-adjacent note"
+  - author: "Clean Plate Society Relay"
+    rating: 5
+    date: "Circulated quietly"
+    comment: "We support any edition that treats recipes as cultural evidence instead of disposable content. The value here is not only what is printed, but what the margins imply, what the substitutions admit, and what the missing appendix refuses to say directly."
+    linkLabel: "Open the archive index"
+    linkHref: "/posts/cookbook/cookbook-index/"
+    flags:
+      - "reposted from underground culinary network"
 ---

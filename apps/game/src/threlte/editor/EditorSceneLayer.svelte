@@ -130,7 +130,7 @@
   })
 </script>
 
-<T.Group name={`editor-scene-${levelId}`}>
+<T.Group name={`editor-scene-${levelId}`} userData={editorEnabled ? {} : { renderStyleSkip: true }}>
   {#if editorEnabled}
     <T.GridHelper args={[200, 80, '#3a5266', '#243241']} position={[0, -0.01, 0]} />
     <T.AxesHelper args={[5]} position={[0, 0.02, 0]} />

@@ -1,0 +1,94 @@
+---
+name: "Null Cube Canteen"
+slug: "null-cube-canteen"
+tagline: "Carries one liter of water and a small amount of silence."
+brand: "Frontier Mealworks Expedition Wing"
+draft: true
+availability: "artifact_only"
+ctaMode: "none"
+price: 88.5
+sku: "NCC-0008"
+category: "relics"
+categories:
+  - relics
+  - field gear
+  - anomaly storage
+format: "physical"
+featured: false
+description: "A field canteen recovered from a collapsed survey mission. Internal dimensions remain contested."
+realDescription: "Prototype content entry for the scene system. The canteen is being used to exercise mixed media types, including a nested scene stub."
+media:
+  - id: cube-ad
+    type: image
+    src: "/posts/Mega-Meal-Explained/safe.png"
+    thumbnail: "/posts/Mega-Meal-Explained/safe.png"
+    alt: "Promotional still of the Null Cube Canteen"
+    caption: "The aperture opens only when thirst reaches an acceptable threshold."
+  - id: field-note
+    type: iframe
+    src: "https://www.youtube.com/embed/n_cgEvkZ-U0"
+    thumbnail: "/ads/the-dip.png"
+    alt: "Embedded field note display"
+    caption: "Recovered training reel used here as a fixture test."
+  - id: nested-signal
+    type: scene
+    src: "/labs/banner-stage/"
+    sceneId: "mock-signal"
+    thumbnail: "/ads/snuggloids.png"
+    alt: "Nested scene placeholder"
+    caption: "Reserved slot for future nested-scene thumbnails."
+sheet:
+  - type: text
+    label: "Summary"
+    value: "A container whose inside edges do not consistently agree with the outside."
+  - type: availability
+    label: "Archive Status"
+    value: "CLASSIFIED FOR PUBLIC COMFORT"
+  - type: rating
+    label: "Archivist Rating"
+    value: 4.8
+  - type: meta
+    label: "Last Known Location"
+    value: "Survey Locker 19B, now absent"
+  - type: meta
+    label: "Batch ID"
+    value: "NULL-GLASS-8"
+  - type: button
+    label: "Primary Action"
+    value:
+      text: "Add to Cart"
+      action: "add-to-cart"
+    quirks:
+      - add-to-cart-duplicates
+panels:
+  - id: reviews
+    type: reviews
+    label: "See reviews"
+  - id: related
+    type: related
+    label: "Related items"
+reviews:
+  - null-cube-canteen-shae-vector
+  - null-cube-canteen-audit-trail
+quirks:
+  - name: "add-to-cart-duplicates"
+    params:
+      quantity: 3
+  - name: "glitch-on-hover"
+    params:
+      assetId: "nested-signal"
+relatedProducts:
+  - consumer-orientation-kit
+sceneWeight: 2
+eligiblePages:
+  - /
+  - /labs/store-scene-data
+minIntervalDays: 9
+---
+
+Field teams describe the **Null Cube Canteen** as useful right up to the moment
+it begins returning things that were never placed inside.
+
+For Milestone 3, the important part is structural: this entry demonstrates
+mixed media, quirk declarations, and related-product links without requiring the
+full widget renderer yet.

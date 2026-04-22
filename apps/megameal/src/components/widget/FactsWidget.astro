@@ -325,6 +325,10 @@ const initialHref = resolveTimelineFactHref(initialFact)
 
     const startRotation = () => {
       if (!facts.length) return
+      // Respect prefers-reduced-motion: disable auto-rotation if user prefers reduced motion
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return
+      }
       window.clearInterval(intervalId)
       intervalId = window.setInterval(showRandomFact, 18000)
     }
@@ -1051,6 +1055,41 @@ const initialHref = resolveTimelineFactHref(initialFact)
     50% {
       opacity: 1;
       transform: scale(1.18);
+    }
+  }
+
+  /* Respect prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    .facts-widget-overlay .facts-widget-shell {
+      animation: none;
+    }
+
+    .facts-widget-selection-dot {
+      animation: none;
+      opacity: 0.8;
+    }
+
+    .facts-widget-overlay {
+      transition: none;
+    }
+
+    .facts-widget-overlay[data-expanded='false'] .facts-widget-frame {
+      transition: none;
+    }
+
+    .facts-widget-overlay[data-expanded='true'] .facts-widget-frame {
+      transition: none;
+    }
+
+    .facts-widget-label-row,
+    .facts-widget-actions,
+    .facts-widget-selection-hint,
+    .facts-widget-fineprint,
+    .facts-widget-footer,
+    .facts-widget-refresh,
+    .facts-widget-sponsor,
+    .facts-widget-text {
+      transition: none;
     }
   }
 

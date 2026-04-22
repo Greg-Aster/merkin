@@ -716,6 +716,12 @@ importers:
       '@fontsource-variable/jetbrains-mono':
         specifier: ^5.1.2
         version: 5.2.8
+      '@fontsource/creepster':
+        specifier: ^5.2.7
+        version: 5.2.7
+      '@fontsource/metal-mania':
+        specifier: ^5.2.7
+        version: 5.2.7
       '@fontsource/roboto':
         specifier: ^5.1.1
         version: 5.2.9
@@ -752,6 +758,9 @@ importers:
       '@tailwindcss/typography':
         specifier: ^0.5.16
         version: 0.5.19(tailwindcss@3.4.19(tsx@4.21.0)(yaml@2.8.2))
+      '@threlte/core':
+        specifier: 8.1.3
+        version: 8.1.3(svelte@5.26.2)(three@0.178.0)
       '@types/chart.js':
         specifier: ^4.0.1
         version: 4.0.1
@@ -848,6 +857,9 @@ importers:
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.19(tsx@4.21.0)(yaml@2.8.2)
+      three:
+        specifier: ^0.178.0
+        version: 0.178.0
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -879,6 +891,9 @@ importers:
       '@types/sanitize-html':
         specifier: ^2.13.0
         version: 2.16.0
+      '@types/three':
+        specifier: ^0.176.0
+        version: 0.176.0
       postcss-import:
         specifier: ^16.1.0
         version: 16.1.1(postcss@8.5.6)
@@ -2760,6 +2775,12 @@ packages:
 
   '@fontsource-variable/jetbrains-mono@5.2.8':
     resolution: {integrity: sha512-WBA9elru6Jdp5df2mES55wuOO0WIrn3kpXnI4+W2ek5u3ZgLS9XS4gmIlcQhiZOWEKl95meYdvK7xI+ETLCq/Q==}
+
+  '@fontsource/creepster@5.2.7':
+    resolution: {integrity: sha512-dKTVl/9boPwxGTI7A4MsBzvpk12S/1TvZid7CI0EFyWSthYmAviK+6RlJz/ZVHB/rSSRbdCphRhwSfIjdISc1g==}
+
+  '@fontsource/metal-mania@5.2.7':
+    resolution: {integrity: sha512-NXTIcJVgzng4afoG9aOGN/9jmBlzm059RxWSq5Vla1Gmc1JxOWIltPva9ULgHUEy87Z+U8dcfbKvk1HbwFlC4w==}
 
   '@fontsource/roboto@5.2.9':
     resolution: {integrity: sha512-ZTkyHiPk74B/aj8BZWbsxD5Yu+Lq+nR64eV4wirlrac2qXR7jYk2h6JlLYuOuoruTkGQWNw2fMuKNavw7/rg0w==}
@@ -11529,6 +11550,10 @@ snapshots:
 
   '@fontsource-variable/jetbrains-mono@5.2.8': {}
 
+  '@fontsource/creepster@5.2.7': {}
+
+  '@fontsource/metal-mania@5.2.7': {}
+
   '@fontsource/roboto@5.2.9': {}
 
   '@fontsource/sriracha@5.2.8': {}
@@ -13667,7 +13692,7 @@ snapshots:
       unstorage: 1.17.4
       vfile: 6.0.3
       vite: 6.4.1(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
-      vitefu: 1.1.1(vite@6.4.1(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+      vitefu: 1.1.1(vite@6.4.1(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       xxhash-wasm: 1.1.0
       yargs-parser: 21.1.1
       yocto-spinner: 0.2.3

@@ -1,0 +1,49 @@
+---
+import { getCollection } from "astro:content";
+import FeaturedProductBanner from "./FeaturedProductBanner.svelte";
+import {
+	buildFlagshipProductShowcase,
+	getProductSlug,
+} from "../../utils/flagship-product-showcase";
+
+const products = await getCollection(
+	"products",
+	({ data }) => data.draft !== true,
+);
+const product =
+	products.find((entry) => getProductSlug(entry) === "snuggaloids") ??
+	products.find((entry) => entry.data.featured) ??
+	products[0];
+
+if (!product) {
+	throw new Error(
+		"FeaturedProductHeroSlide could not resolve a product entry.",
+	);
+}
+const showcase = buildFlagshipProductShowcase(product, products);
+---
+
+<div class="featured-product-hero-slide">
+  <FeaturedProductBanner
+    client:load
+    product={showcase.product}
+    relatedProducts={showcase.relatedProducts}
+  />
+</div>
+
+<style>
+  .featured-product-hero-slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    padding: clamp(0.7rem, 2vw, 1.25rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    background:
+      radial-gradient(circle at 18% 18%, rgb(34 197 94 / 0.1), transparent 18%),
+      radial-gradient(circle at 84% 78%, rgb(236 72 153 / 0.14), transparent 22%),
+      linear-gradient(180deg, rgb(2 6 23 / 0.52), rgb(2 6 23 / 0.2));
+  }
+</style>

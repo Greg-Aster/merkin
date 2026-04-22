@@ -58,6 +58,7 @@
 
   $: playerMoveSpeed = $levelEditorSettingsStore?.player?.moveSpeed ?? 5
   $: playerJumpForce = $levelEditorSettingsStore?.player?.jumpForce ?? 8
+  $: playerLightIntensityScale = $levelEditorSettingsStore?.player?.lightIntensityScale ?? 60
   $: if (!playerComponentRef) {
     playerReady = false
   }
@@ -137,6 +138,7 @@
               position={[0, 0, 0]}
               speed={playerMoveSpeed}
               jumpForce={playerJumpForce}
+              lightIntensityScale={playerLightIntensityScale}
               on:spawnReadyChange={(e) => {
                 playerReady = Boolean(e.detail?.ready)
               }}

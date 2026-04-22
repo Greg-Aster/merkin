@@ -26,10 +26,11 @@
    which appear on hover and obscure the custom content.
    ============================================================ */
 
-/* Hide blog-core's generic black hover overlay.
-   Do not hide the second child here: that is the custom HTML media layer. */
-.banner-slide[data-banner-media-type="unknown"] .banner-link > div:nth-child(1),
-#standard-banner-container .banner-slide:has(.banner-media-layer[data-banner-media-type="unknown"]) .banner-link > div:nth-child(1) {
+/* Hide only blog-core's generic black hover overlay.
+   Do not target child position here because the HTML slide's first child
+   is its real media layer, not an overlay. */
+.banner-slide[data-banner-media-type="unknown"] .banner-hover-overlay,
+#standard-banner-container .banner-slide:has(.banner-media-layer[data-banner-media-type="unknown"]) .banner-hover-overlay {
   display: none !important;
 }
 
@@ -59,6 +60,20 @@
 
 #standard-banner-container .banner-slide[data-active="false"] {
   z-index: 1;
+}
+
+/* Product-widget slides need a taller full-width banner frame.
+   The HTML slide stays mounted in the rotation stack, so size the portal
+   banner for the richer storefront layout rather than per-frame switching. */
+#banner-container:has(.featured-product-shell) .banner-aspect-container {
+  height: clamp(48rem, 84vh, 60rem) !important;
+}
+
+#banner-container:has(.featured-product-shell) .banner-content-wrapper,
+#banner-container:has(.featured-product-shell) #standard-banner-container,
+#banner-container:has(.featured-product-shell) .banner-slide,
+#banner-container:has(.featured-product-shell) .banner-media-layer[data-banner-media-type="unknown"] {
+  height: 100%;
 }
 
 /* Keep slide information visible so the banner reads as navigation, not decoration */
@@ -103,6 +118,10 @@
 }
 
 @media (max-width: 768px) {
+  #banner-container:has(.featured-product-shell) .banner-aspect-container {
+    height: min(72rem, calc(100dvh - 6rem)) !important;
+  }
+
   #standard-banner-container .banner-slide {
     transform: scale(1.02) translate3d(0, 0.35rem, 0);
     filter: saturate(0.88) brightness(0.82) blur(6px);

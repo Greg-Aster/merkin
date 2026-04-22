@@ -8,6 +8,7 @@
   export let position: [number, number, number] = [0, 0, 0];
   export let chargeAmount = 0;
   export let flashAmount = 0;
+  export let lightIntensityScale = 60;
 
   // Player avatar appearance is hardcoded for consistency.
   const playerColor = 0x00bfff; // Bright blue
@@ -93,7 +94,7 @@
   <T.PointLight
     bind:ref={pointLight}
     color={currentLightColor}
-    intensity={lightIntensity}
+    intensity={lightIntensity * lightIntensityScale}
     distance={lightDistance}
     decay={lightDecay}
     castShadow={false}
