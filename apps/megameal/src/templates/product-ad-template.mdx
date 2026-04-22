@@ -1,0 +1,86 @@
+---
+# Copy this file into `src/content/products/<your-product-slug>.mdx`
+# One ad file per product is the standard.
+# Product routes are auto-discovered from `src/content/products/` by `src/pages/store/[slug].astro`.
+
+name: "Product Name"
+tagline: "Short in-universe sell line."
+brand: "In-Universe Brand"
+draft: true
+availability: "coming_soon"
+ctaMode: "none"
+image: ""
+price: 19.99
+category: "equipment"
+format: "physical"
+featured: false
+listingStyle: "showcase"
+listingLabel: "Marketplace Listing"
+sku: "SKU-000"
+description: "Short commercial-facing description for the product sheet."
+realDescription: "Reality-layer note explaining what the item actually is and how far along production really is."
+shippingNote: "Distribution, compliance, or shipping note."
+rating: 4.0
+media:
+  - type: image
+    src: "/posts/example/example.png"
+    alt: "Primary product still"
+    caption: "Primary listing image."
+  - type: youtube
+    videoId: "REPLACE_ME"
+    caption: "Official commercial or archive reel."
+  - type: model3d
+    src: "/models/example/model.glb"
+    thumbnail: "/posts/example/example-thumb.png"
+    alt: "Interactive product scan"
+    caption: "Interactive product render."
+specifications:
+  - label: "Material"
+    value: "Describe the material"
+  - label: "Dimensions"
+    value: "Give dimensions or fit notes"
+  - label: "Editorial Notice"
+    value: "Optional lore or compliance note"
+qanda:
+  - question: "What is this actually for?"
+    answer: "Practical answer first, then in-universe texture."
+    linkLabel: "Open supporting file"
+    linkHref: "/posts/example/"
+    linkAccent: "signal"
+  - question: "What is being withheld?"
+    answer: "Use this for buried lore or compliance weirdness."
+    linkLabel: "Read the restricted note"
+    linkHref: "/posts/example/restricted/"
+    linkAccent: "creepy"
+preWrittenReviews:
+  - author: "Reviewer Name"
+    rating: 4
+    date: "Advance copy"
+    comment: "Review text. Keep it in-world."
+    linkLabel: "Read the related article"
+    linkHref: "/posts/example/"
+    flags:
+      - "reposted from external archive"
+    verified: true
+quirks:
+  - name: "price-drift"
+    params:
+      intervalMs: 2600
+      minPrice: 18.41
+      maxPrice: 21.93
+---
+
+Use the optional MDX body below the frontmatter for richer ad material that should live in the same file.
+
+## Listing Appendix
+
+This area is rendered on the store page beneath the main product card.
+
+- Add embedded links to posts, archives, recipes, or dossiers.
+- Add richer editorial notes or release history.
+- Use MDX components sparingly and only when the product page genuinely benefits.
+
+### Example Pointers
+
+- Related post: [Example Report](/posts/example/)
+- Support article: [Compliance Notice](/posts/example/restricted/)

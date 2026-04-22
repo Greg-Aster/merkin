@@ -1,4 +1,5 @@
 ---
+import type { CollectionEntry } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import { communityConfig } from '../../config/community.config'
 import { url } from '../../utils/url-utils'
@@ -6,7 +7,7 @@ import MediaGallery from './MediaGallery.svelte'
 
 export interface Props {
   class?: string
-  product: any
+  product: CollectionEntry<'products'>
   style?: string
 }
 
@@ -46,7 +47,14 @@ const hasPreWrittenReviews =
   Array.isArray(preWrittenReviews) && preWrittenReviews.length > 0
 
 // Build unified media items: prefer media[] field, fall back to legacy image/additionalImages
-const mediaItems: Array<{type: string; src?: string; videoId?: string; poster?: string; alt?: string; caption?: string}> =
+const mediaItems: Array<{
+  type: string
+  src?: string
+  videoId?: string
+  poster?: string
+  alt?: string
+  caption?: string
+}> =
   Array.isArray(media) && media.length > 0
     ? media.map(item => ({
         ...item,
@@ -54,16 +62,25 @@ const mediaItems: Array<{type: string; src?: string; videoId?: string; poster?: 
         poster: item.poster ? resolveAsset(item.poster) : undefined,
       }))
     : [
-        ...(image ? [{ type: 'image', src: resolveAsset(image), alt: name }] : []),
-        ...((additionalImages ?? []).map((src: string) => ({ type: 'image', src: resolveAsset(src), alt: name }))),
+        ...(image
+          ? [{ type: 'image', src: resolveAsset(image), alt: name }]
+          : []),
+        ...(additionalImages ?? []).map((src: string) => ({
+          type: 'image',
+          src: resolveAsset(src),
+          alt: name,
+        })),
       ]
 
 // For the card thumbnail: first image or YouTube thumbnail
 const cardThumbnail = (() => {
   for (const m of mediaItems) {
-    if (m.type === 'image' && m.src) return { kind: 'image', src: resolveAsset(m.src) }
-    if (m.type === 'video' && m.poster) return { kind: 'image', src: resolveAsset(m.poster) }
-    if (m.type === 'youtube' && m.videoId) return { kind: 'youtube', videoId: m.videoId }
+    if (m.type === 'image' && m.src)
+      return { kind: 'image', src: resolveAsset(m.src) }
+    if (m.type === 'video' && m.poster)
+      return { kind: 'image', src: resolveAsset(m.poster) }
+    if (m.type === 'youtube' && m.videoId)
+      return { kind: 'youtube', videoId: m.videoId }
   }
   return null
 })()
@@ -82,18 +99,53 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
 }
 
 // Availability badge config — each status gets a label, color, and satirical CTA message
-const availabilityMap: Record<string, { label: string; classes: string; ctaMessage: string }> = {
-  available:               { label: badge || 'Available Now',                   classes: 'bg-emerald-500/90 text-white',   ctaMessage: '' },
-  coming_soon:             { label: badge || 'Coming Soon',                     classes: 'bg-blue-500/80 text-white',      ctaMessage: 'Transmission pending. Stand by.' },
-  out_of_stock:            { label: badge || 'Out of Stock',                    classes: 'bg-slate-500/80 text-white',     ctaMessage: 'The shelves are bare. Demand has been noted. Probably.' },
-  not_in_your_area:        { label: badge || 'Not in Your Area',                classes: 'bg-amber-500/80 text-black',     ctaMessage: 'Your coordinates are outside our current distribution matrix.' },
-  not_in_your_timeline:    { label: badge || 'Not Available in Your Timeline',  classes: 'bg-purple-500/80 text-white',    ctaMessage: 'This product exists. Procurement from your timeline is not currently supported.' },
-  artifact_only:           { label: badge || 'Artifact Record',                 classes: 'bg-rose-900/80 text-rose-200',   ctaMessage: 'This item is catalogued for archival purposes. Acquiring it would be inadvisable.' },
+const availabilityMap: Record<
+  string,
+  { label: string; classes: string; ctaMessage: string }
+> = {
+  available: {
+    label: badge || 'Available Now',
+    classes: 'bg-emerald-500/90 text-white',
+    ctaMessage: '',
+  },
+  coming_soon: {
+    label: badge || 'Coming Soon',
+    classes: 'bg-blue-500/80 text-white',
+    ctaMessage: 'Transmission pending. Stand by.',
+  },
+  out_of_stock: {
+    label: badge || 'Out of Stock',
+    classes: 'bg-slate-500/80 text-white',
+    ctaMessage: 'The shelves are bare. Demand has been noted. Probably.',
+  },
+  not_in_your_area: {
+    label: badge || 'Not in Your Area',
+    classes: 'bg-amber-500/80 text-black',
+    ctaMessage: 'Your coordinates are outside our current distribution matrix.',
+  },
+  not_in_your_timeline: {
+    label: badge || 'Not Available in Your Timeline',
+    classes: 'bg-purple-500/80 text-white',
+    ctaMessage:
+      'This product exists. Procurement from your timeline is not currently supported.',
+  },
+  artifact_only: {
+    label: badge || 'Artifact Record',
+    classes: 'bg-rose-900/80 text-rose-200',
+    ctaMessage:
+      'This item is catalogued for archival purposes. Acquiring it would be inadvisable.',
+  },
 }
 const currentAvailability = availability ?? 'coming_soon'
-const availBadge = availabilityMap[currentAvailability] ?? availabilityMap['coming_soon']
+const availBadge =
+  availabilityMap[currentAvailability] ?? availabilityMap.coming_soon
 const canAddToCart = ctaMode === 'cart' && currentAvailability === 'available'
-const canBuyExternal = ctaMode === 'external' && !!stripePaymentLink && currentAvailability === 'available'
+const canBuyExternal =
+  ctaMode === 'external' &&
+  !!stripePaymentLink &&
+  currentAvailability === 'available'
+const productSlug = product.data.slug ?? product.id.replace(/\.(md|mdx)$/, '')
+const productHref = `/store/${productSlug}/`
 ---
 
 <div
@@ -109,8 +161,8 @@ const canBuyExternal = ctaMode === 'external' && !!stripePaymentLink && currentA
   role="link"
   tabindex="0"
   aria-labelledby={`product-title-${product.id}`}
-  onclick={`if (!event.target.closest('a, button, .card-expansion-trigger, .tab-link, .details-content')) { window.location.href = '/store/${product.id}/'; }`}
-  onkeydown={`if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('a, button, .card-expansion-trigger, .tab-link, .details-content')) { event.preventDefault(); window.location.href = '/store/${product.id}/'; }`}
+  onclick={`if (!event.target.closest('a, button, .card-expansion-trigger, .tab-link, .details-content')) { window.location.href = '${productHref}'; }`}
+  onkeydown={`if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('a, button, .card-expansion-trigger, .tab-link, .details-content')) { event.preventDefault(); window.location.href = '${productHref}'; }`}
 >
   {/* Card thumbnail (collapsed state) */}
   <div class="block overflow-hidden relative product-card-thumb">
@@ -195,7 +247,7 @@ const canBuyExternal = ctaMode === 'external' && !!stripePaymentLink && currentA
         <Icon name="mdi:chevron-down" class="h-6 w-6 transition-transform duration-300 ease-in-out icon" />
       </div>
       <a
-        href={`/store/${product.id}/`}
+        href={productHref}
         class="text-xs text-slate-500 hover:text-[var(--primary)] transition-colors flex items-center gap-1"
         aria-label={`Full product page for ${name}`}
       >
@@ -335,6 +387,7 @@ const canBuyExternal = ctaMode === 'external' && !!stripePaymentLink && currentA
           data-product-name={name}
           data-product-price={price}
           data-product-sku={sku}
+          data-product-href={productHref}
           class="w-full btn-primary text-white font-semibold py-3 px-4 rounded-[var(--radius-medium)] transition-all duration-200 ease-in-out hover:bg-[var(--primary-hover)] active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 focus:ring-offset-slate-800"
         >
           Add to Cart

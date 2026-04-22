@@ -192,6 +192,7 @@ export interface SharedLevelPlayerSettings {
   player?: {
     moveSpeed?: number
     jumpForce?: number
+    lightIntensityScale?: number
   }
 }
 

@@ -172,7 +172,32 @@
         <input class="text-input" bind:value={styleProfileName} placeholder="Painterly Storybook, Soft Ruin Watercolor, Ghibli Stone Garden" />
       </div>
       <div class="tuple-group">
-        <div class="tuple-label">Target Look</div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
+          <div class="tuple-label">Target Look</div>
+          <select
+            style="padding: 0.28rem 0.35rem; font-size: 0.62rem; background: rgba(86, 148, 192, 0.12); border: 1px solid rgba(126, 203, 255, 0.24); color: #a7d3ef; border-radius: 0.3rem; cursor: pointer; min-width: 120px;"
+            title="Quick presets"
+            on:change={(e) => {
+              const presetId = e.currentTarget.value
+              if (presetId) {
+                const preset = stylePresets.find((p) => p.id === presetId)
+                if (preset) {
+                  stylePrompt = preset.prompt
+                  styleNegativePrompt = preset.negativePrompt
+                  styleLoraNotes = preset.loraNotes
+                  styleControlNetNotes = preset.controlNetNotes
+                  styleProfileName = preset.label
+                  e.currentTarget.value = ''
+                }
+              }
+            }}
+          >
+            <option value="" style="color: #333;">Quick presets…</option>
+            {#each stylePresets as preset (preset.id)}
+              <option value={preset.id} style="color: #333;">{preset.label}</option>
+            {/each}
+          </select>
+        </div>
         <textarea
           rows="4"
           bind:value={stylePrompt}
@@ -326,7 +351,32 @@
         <input class="text-input" bind:value={styleProfileName} />
       </div>
       <div class="tuple-group">
-        <div class="tuple-label">Target Look</div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
+          <div class="tuple-label">Target Look</div>
+          <select
+            style="padding: 0.28rem 0.35rem; font-size: 0.62rem; background: rgba(86, 148, 192, 0.12); border: 1px solid rgba(126, 203, 255, 0.24); color: #a7d3ef; border-radius: 0.3rem; cursor: pointer; min-width: 120px;"
+            title="Quick presets"
+            on:change={(e) => {
+              const presetId = e.currentTarget.value
+              if (presetId) {
+                const preset = stylePresets.find((p) => p.id === presetId)
+                if (preset) {
+                  stylePrompt = preset.prompt
+                  styleNegativePrompt = preset.negativePrompt
+                  styleLoraNotes = preset.loraNotes
+                  styleControlNetNotes = preset.controlNetNotes
+                  styleProfileName = preset.label
+                  e.currentTarget.value = ''
+                }
+              }
+            }}
+          >
+            <option value="" style="color: #333;">Quick presets…</option>
+            {#each stylePresets as preset (preset.id)}
+              <option value={preset.id} style="color: #333;">{preset.label}</option>
+            {/each}
+          </select>
+        </div>
         <textarea
           rows="4"
           bind:value={stylePrompt}

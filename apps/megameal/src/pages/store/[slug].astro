@@ -1,19 +1,35 @@
 ---
 import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
-import { url } from '../../utils/url-utils'
-import StoreLayout from '../../layouts/store/StoreLayout.astro'
+import FeaturedProductBanner from '../../components/home/FeaturedProductBanner.svelte'
 import MediaGallery from '../../components/store/MediaGallery.svelte'
+import StoreLayout from '../../layouts/store/StoreLayout.astro'
+import {
+  buildFlagshipProductShowcase,
+  getProductHref,
+  getProductSlug,
+} from '../../utils/flagship-product-showcase'
+import { url } from '../../utils/url-utils'
 
 export async function getStaticPaths() {
-  const products = await getCollection('products', ({ data }) => data.draft !== true)
+  const products = await getCollection(
+    'products',
+    ({ data }) => data.draft !== true,
+  )
   return products.map(product => ({
-    params: { slug: product.id },
+    params: {
+      slug: product.data.slug ?? product.id.replace(/\.(md|mdx)$/, ''),
+    },
     props: { product },
   }))
 }
 
 const { product } = Astro.props
+const allProducts = await getCollection(
+  'products',
+  ({ data }) => data.draft !== true,
+)
+const { Content: ProductContent } = await product.render()
 const {
   name,
   tagline,
@@ -34,11 +50,16 @@ const {
   shippingNote,
   badge,
   category,
+  listingStyle,
+  listingLabel,
 } = product.data
+const hasProductBody = (product.body ?? '').trim().length > 0
 
-const hasSpecifications = Array.isArray(specifications) && specifications.length > 0
+const hasSpecifications =
+  Array.isArray(specifications) && specifications.length > 0
 const hasQandA = Array.isArray(qanda) && qanda.length > 0
-const hasPreWrittenReviews = Array.isArray(preWrittenReviews) && preWrittenReviews.length > 0
+const hasPreWrittenReviews =
+  Array.isArray(preWrittenReviews) && preWrittenReviews.length > 0
 
 const resolveAsset = (path: string | undefined) => {
   if (!path) return undefined
@@ -46,7 +67,14 @@ const resolveAsset = (path: string | undefined) => {
 }
 
 // Unified media items
-const mediaItems: Array<{type: string; src?: string; videoId?: string; poster?: string; alt?: string; caption?: string}> =
+const mediaItems: Array<{
+  type: string
+  src?: string
+  videoId?: string
+  poster?: string
+  alt?: string
+  caption?: string
+}> =
   Array.isArray(media) && media.length > 0
     ? media.map(item => ({
         ...item,
@@ -54,11 +82,20 @@ const mediaItems: Array<{type: string; src?: string; videoId?: string; poster?: 
         poster: item.poster ? resolveAsset(item.poster) : undefined,
       }))
     : [
-        ...(image ? [{ type: 'image', src: resolveAsset(image), alt: name }] : []),
-        ...((additionalImages ?? []).map((src: string) => ({ type: 'image', src: resolveAsset(src), alt: name }))),
+        ...(image
+          ? [{ type: 'image', src: resolveAsset(image), alt: name }]
+          : []),
+        ...(additionalImages ?? []).map((src: string) => ({
+          type: 'image',
+          src: resolveAsset(src),
+          alt: name,
+        })),
       ]
 
-let fullStars = 0, halfStar = false, emptyStars = 5, isRated = false
+let fullStars = 0
+let halfStar = false
+let emptyStars = 5
+let isRated = false
 if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
   isRated = true
   fullStars = Math.floor(rating)
@@ -66,23 +103,85 @@ if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
   emptyStars = 5 - fullStars - (halfStar ? 1 : 0)
 }
 
-const availabilityMap: Record<string, { label: string; classes: string; ctaMessage: string }> = {
-  available:            { label: badge || 'Available Now',                  classes: 'bg-emerald-500/90 text-white',  ctaMessage: '' },
-  coming_soon:          { label: badge || 'Coming Soon',                    classes: 'bg-blue-500/80 text-white',     ctaMessage: 'Transmission pending. Stand by.' },
-  out_of_stock:         { label: badge || 'Out of Stock',                   classes: 'bg-slate-500/80 text-white',    ctaMessage: 'The shelves are bare. Demand has been noted. Probably.' },
-  not_in_your_area:     { label: badge || 'Not in Your Area',               classes: 'bg-amber-500/80 text-black',    ctaMessage: 'Your coordinates are outside our current distribution matrix.' },
-  not_in_your_timeline: { label: badge || 'Not Available in Your Timeline', classes: 'bg-purple-500/80 text-white',   ctaMessage: 'This product exists. Procurement from your timeline is not currently supported.' },
-  artifact_only:        { label: badge || 'Artifact Record',                classes: 'bg-rose-900/80 text-rose-200',  ctaMessage: 'This item is catalogued for archival purposes. Acquiring it would be inadvisable.' },
+const availabilityMap: Record<
+  string,
+  { label: string; classes: string; ctaMessage: string }
+> = {
+  available: {
+    label: badge || 'Available Now',
+    classes: 'bg-emerald-500/90 text-white',
+    ctaMessage: '',
+  },
+  coming_soon: {
+    label: badge || 'Coming Soon',
+    classes: 'bg-blue-500/80 text-white',
+    ctaMessage: 'Transmission pending. Stand by.',
+  },
+  out_of_stock: {
+    label: badge || 'Out of Stock',
+    classes: 'bg-slate-500/80 text-white',
+    ctaMessage: 'The shelves are bare. Demand has been noted. Probably.',
+  },
+  not_in_your_area: {
+    label: badge || 'Not in Your Area',
+    classes: 'bg-amber-500/80 text-black',
+    ctaMessage: 'Your coordinates are outside our current distribution matrix.',
+  },
+  not_in_your_timeline: {
+    label: badge || 'Not Available in Your Timeline',
+    classes: 'bg-purple-500/80 text-white',
+    ctaMessage:
+      'This product exists. Procurement from your timeline is not currently supported.',
+  },
+  artifact_only: {
+    label: badge || 'Artifact Record',
+    classes: 'bg-rose-900/80 text-rose-200',
+    ctaMessage:
+      'This item is catalogued for archival purposes. Acquiring it would be inadvisable.',
+  },
 }
 const currentAvailability = availability ?? 'coming_soon'
-const avail = availabilityMap[currentAvailability] ?? availabilityMap['coming_soon']
+const avail =
+  availabilityMap[currentAvailability] ?? availabilityMap.coming_soon
 const canAddToCart = ctaMode === 'cart' && currentAvailability === 'available'
-const canBuyExternal = ctaMode === 'external' && !!stripePaymentLink && currentAvailability === 'available'
+const canBuyExternal =
+  ctaMode === 'external' &&
+  !!stripePaymentLink &&
+  currentAvailability === 'available'
 
 const categoryLabels: Record<string, string> = {
-  equipment: 'Equipment', consumables: 'Consumables',
-  publications: 'Publications', companions: 'Companions', relics: 'Relics',
+  equipment: 'Equipment',
+  consumables: 'Consumables',
+  publications: 'Publications',
+  companions: 'Companions',
+  relics: 'Relics',
 }
+const productSlug = getProductSlug(product)
+const productHref = getProductHref(product)
+// Compatibility fallback for running dev servers during content-schema migration.
+// Product-owned frontmatter is the source of truth going forward; this preserves
+// the existing upgraded layouts until all local servers have reloaded cleanly.
+const showcaseFallbackSlugs = new Set([
+  'snuggaloids',
+  'crateclip-xl',
+  'first-contact-manual',
+  'megameal-cookbook',
+  'sad-snax',
+  'puppy-rescue-rations',
+  'the-dip',
+])
+const isShowcaseProduct =
+  listingStyle === 'showcase' || showcaseFallbackSlugs.has(productSlug)
+const showcaseKickerLabel =
+  listingLabel ??
+  (productSlug === 'snuggaloids'
+    ? 'Flagship Listing'
+    : productSlug === 'megameal-cookbook'
+      ? 'Archive Listing'
+      : 'Marketplace Listing')
+const flagshipShowcase = isShowcaseProduct
+  ? buildFlagshipProductShowcase(product, allProducts)
+  : null
 ---
 
 <StoreLayout title={name} description={tagline}>
@@ -105,6 +204,53 @@ const categoryLabels: Record<string, string> = {
       <span class="text-slate-300 truncate max-w-[200px]">{name}</span>
     </nav>
 
+    {isShowcaseProduct && flagshipShowcase ? (
+      <section class="flagship-product-shell">
+        <FeaturedProductBanner
+          client:load
+          product={flagshipShowcase.product}
+          relatedProducts={flagshipShowcase.relatedProducts}
+          showBannerControls={false}
+          kickerLabel={showcaseKickerLabel}
+        />
+
+        {realDescription && (
+          <div class="mt-8 rounded-3xl border border-slate-700/50 bg-slate-900/60 p-6 md:p-8">
+            <p class="mb-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500">
+              Reality Layer
+            </p>
+            <p class="max-w-3xl text-sm italic leading-relaxed text-slate-400">
+              {realDescription}
+            </p>
+            {shippingNote && (
+              <p class="mt-3 flex items-start gap-1.5 text-xs text-slate-500">
+                <Icon name="mdi:truck-outline" class="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                {shippingNote}
+              </p>
+            )}
+          </div>
+        )}
+
+        {hasProductBody && (
+          <div class="mt-8 rounded-3xl border border-slate-700/50 bg-slate-900/60 p-6 md:p-8">
+            <p class="mb-4 text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500">
+              Listing Appendix
+            </p>
+            <div class="prose prose-invert max-w-none prose-p:text-slate-300 prose-li:text-slate-300 prose-strong:text-slate-100 prose-a:text-[var(--primary)] hover:prose-a:text-cyan-300">
+              <ProductContent />
+            </div>
+          </div>
+        )}
+
+        <div class="mt-6">
+          <a href="/store/" class="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-[var(--primary)] transition">
+            <Icon name="mdi:arrow-left" class="h-4 w-4" />
+            Back to Store
+          </a>
+        </div>
+      </section>
+    ) : (
+    <>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
       {/* LEFT — Media Gallery */}
@@ -189,6 +335,17 @@ const categoryLabels: Record<string, string> = {
           </div>
         )}
 
+        {hasProductBody && (
+          <div class="rounded-lg bg-slate-800/60 border border-slate-700/50 p-4">
+            <p class="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-2">
+              Listing Appendix
+            </p>
+            <div class="prose prose-invert max-w-none prose-p:text-slate-300 prose-li:text-slate-300 prose-strong:text-slate-100 prose-a:text-[var(--primary)] hover:prose-a:text-cyan-300">
+              <ProductContent />
+            </div>
+          </div>
+        )}
+
         {/* CTA block */}
         <div class="rounded-xl bg-slate-800/40 border border-slate-700/50 p-5 space-y-3">
           {canAddToCart && (
@@ -205,6 +362,7 @@ const categoryLabels: Record<string, string> = {
                 data-product-name={name}
                 data-product-price={price}
                 data-product-sku={sku}
+                data-product-href={productHref}
                 data-sfx-click="select"
                 class="w-full btn-primary text-white font-semibold py-3.5 px-6 rounded-[var(--radius-medium)] transition-all hover:bg-[var(--primary-hover)] active:scale-[0.98] focus:outline-none text-base"
               >
@@ -317,6 +475,8 @@ const categoryLabels: Record<string, string> = {
           )}
         </div>
       </div>
+    )}
+    </>
     )}
   </div>
 </StoreLayout>

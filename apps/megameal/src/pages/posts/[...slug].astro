@@ -105,17 +105,30 @@ const jsonLd = {
   '@type': 'BlogPosting',
   headline: post.data.title,
   description: post.data.description || post.data.title,
-  keywords: post.data.tags,
-  datePublished: formatDateToYYYYMMDD(post.data.published),
+  keywords: post.data.tags?.join(', ') || '',
+  image: post.data.image ? new URL(post.data.image, Astro.site).toString() : undefined,
+  datePublished: post.data.published.toISOString(),
+  dateModified: post.data.updated?.toISOString() || post.data.published.toISOString(),
   author: {
     '@type': 'Person',
     name: profileConfig.name,
-    url: Astro.site,
+    url: Astro.site?.toString() || 'https://megameal.org',
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: siteConfig.title,
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/thumb/favicon-light-192.png', Astro.site).toString(),
+    },
   },
   inLanguage: post.data.lang
     ? post.data.lang.replace('_', '-')
     : siteConfig.lang.replace('_', '-'),
-  // TODO include cover image here
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': new URL(getPostUrlBySlug(post.slug, 'posts'), Astro.site).toString(),
+  },
 }
 
 const previousArticle = post.data.nextSlug

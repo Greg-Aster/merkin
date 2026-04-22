@@ -251,6 +251,7 @@
   let styleBatchStopIntent: 'pause' | 'cancel' | null = null
   let runtimeAssetFailures: Array<{ id: string, source: string, message: string, updatedAt: number }> = []
   let styleBatchSelectionIds: string[] = []
+  let styleBatchSelectionKey = 0
   let styleBatchSelectionInitialized = false
   let styleLevelDefaultsAppliedFor = ''
   let styleBatchNodeStatusById: Record<string, string> = {}
@@ -1171,7 +1172,8 @@
   $: similarNodeIds = getSimilarNodeIds(selectedNode)
   $: similarNodeCount = similarNodeIds.length
   $: similarNodeLabel = getSimilarNodeLabel(selectedNode)
-  $: styleSceneCandidates = getStyleSceneCandidates(editorNodes)
+  $: styleSceneCandidates = (styleBatchSelectionKey, getStyleSceneCandidates(editorNodes))
+
   $: {
     const candidateIds = styleSceneCandidates.map((candidate) => candidate.id)
     const retained = styleBatchSelectionIds.filter((id) => candidateIds.includes(id))
@@ -1200,21 +1202,25 @@
 
   function selectAllStyleBatchCandidates() {
     styleBatchSelectionIds = styleSceneCandidates.map((candidate) => candidate.id)
+    styleBatchSelectionKey++
   }
 
   function clearStyleBatchCandidates() {
     styleBatchSelectionIds = []
+    styleBatchSelectionKey++
   }
 
   function toggleStyleBatchCandidate(candidateId: string, selected: boolean) {
     if (selected) {
       if (!styleBatchSelectionIds.includes(candidateId)) {
         styleBatchSelectionIds = [...styleBatchSelectionIds, candidateId]
+        styleBatchSelectionKey++
       }
       return
     }
 
     styleBatchSelectionIds = styleBatchSelectionIds.filter((id) => id !== candidateId)
+    styleBatchSelectionKey++
   }
 
   function selectSimilarNodes() {

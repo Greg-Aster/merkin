@@ -67,8 +67,8 @@
       "solitude-level"
     ],
     "source": {
-      "kind": "scene",
-      "sceneId": "solitude"
+      "kind": "component",
+      "componentKey": "solitude"
     },
     "starMap": {
       "enabled": true,

@@ -1,17 +1,18 @@
 {
   "levelId": "solitude",
   "version": 1,
-  "updatedAt": "2026-04-18T14:56:50.249Z",
+  "updatedAt": "2026-04-22T23:03:57.385Z",
   "settings": {
     "level": {
+      "skyboxPreset": "observatory",
       "presets": {
-        "atmosphere": "lonely-wind",
+        "atmosphere": "violet-dread",
         "audio": "lonely-wind"
       },
       "spawn": {
         "position": [
           0,
-          2.4,
+          3.4,
           -24
         ]
       },
@@ -23,46 +24,54 @@
         "ambientParticles": true
       },
       "style": {
-        "preset": "monument",
+        "preset": "surreal-site",
         "enabled": true,
         "fog": {
-          "color": "#7b8797",
-          "density": 0.00045
+          "color": "#43206c",
+          "density": 0.00092
+        },
+        "colorGrading": {
+          "saturation": 1.24,
+          "contrast": 1.18,
+          "brightness": 0.87,
+          "warmth": 0.86
+        },
+        "bloom": {
+          "intensity": 0.18,
+          "threshold": 0.9
         }
       },
       "lighting": {
-        "ambientIntensity": 0.75,
-        "keyLightIntensity": 0.7,
-        "fillLightIntensity": 0.22
+        "ambientIntensity": 0.46,
+        "keyLightIntensity": 0.96,
+        "fillLightIntensity": 0.34
       },
       "water": {
         "enabled": false,
-        "level": -0.16,
+        "level": -1,
         "size": {
-          "width": 800,
-          "height": 800
-        },
-        "color": "#425d72",
-        "opacity": 0.86,
-        "enableAnimation": true
+          "width": 400,
+          "height": 400
+        }
       },
       "ambientParticles": {
         "enabled": true,
-        "count": 180,
-        "radius": 140,
-        "minHeight": 0.8,
-        "maxHeight": 18,
-        "color": "#b8d9ff",
-        "secondaryColor": "#f3e8b2",
-        "size": 1.15,
-        "opacity": 0.26,
-        "driftSpeed": 0.22,
-        "sway": 0.85
+        "count": 220,
+        "radius": 132,
+        "minHeight": 0.35,
+        "maxHeight": 9.5,
+        "color": "#58e6ff",
+        "secondaryColor": "#ff4cd0",
+        "size": 1.22,
+        "opacity": 0.22,
+        "driftSpeed": 0.14,
+        "sway": 0.62
+      },
+      "player": {
+        "lightIntensityScale": 5
       }
     },
-    "solitude": {
-      "skyboxPreset": "observatory"
-    }
+    "solitude": {}
   },
   "nodes": [
     {
@@ -89,7 +98,7 @@
     {
       "id": "solitude-ground-plateau",
       "name": "Solitude Plateau",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "solitude-ground-root",
       "position": [
         0,
@@ -102,38 +111,38 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        128.45490162495452,
+        1.2186824496366455,
+        132.4415601615787
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.92
       },
-      "primitive": {
-        "geometry": "box",
-        "args": [
+      "generation": {
+        "descriptor": "solitude plateau",
+        "sourceVisualSize": [
           240,
-          2.4,
+          2.4000000953674316,
           240
         ],
-        "color": "#6b7480",
-        "emissive": "#242d38",
-        "emissiveIntensity": 0.05,
-        "metalness": 0.06,
-        "roughness": 0.94
+        "lastBakedAssetUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-22T00-47-39-099Z.glb",
+        "lastBakedAt": "2026-04-22T00:47:42.747Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-22T00-47-39-099Z.glb"
       }
     },
     {
       "id": "solitude-ground-dais",
       "name": "Ruin Dais",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "solitude-ground-root",
       "position": [
         0,
         -0.18,
-        0
+        0.2305610401047442
       ],
       "rotation": [
         0,
@@ -141,27 +150,27 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        23.249915454852893,
+        0.4255953077697364,
+        22.39938096256249
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.94
       },
-      "primitive": {
-        "geometry": "box",
-        "args": [
+      "generation": {
+        "descriptor": "ruin dais",
+        "sourceVisualSize": [
           44,
-          0.8,
+          0.800000011920929,
           44
         ],
-        "color": "#7b8797",
-        "emissive": "#2f3947",
-        "emissiveIntensity": 0.08,
-        "metalness": 0.08,
-        "roughness": 0.9
+        "lastBakedAssetUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+        "lastBakedAt": "2026-04-19T23:21:08.714Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb"
       }
     },
     {
@@ -201,18 +210,23 @@
         0
       ],
       "scale": [
-        1.15,
-        5.4,
-        0.96
+        1.176876615899879,
+        5.399175170517698,
+        1.247534910504039
       ],
       "visible": true,
       "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-23-01-827Z.glb"
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb"
       },
       "generation": {
         "descriptor": "Solitude Pillar 1",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-23-01-827Z.glb",
-        "lastBakedAt": "2026-04-19T00:23:01.842Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
+        "lastBakedAt": "2026-04-19T23:24:10.590Z",
+        "sourceVisualSize": [
+          1.8120840005656795,
+          10.661103308200836,
+          1.9252208245880431
+        ]
       }
     },
     {
@@ -231,18 +245,23 @@
         0
       ],
       "scale": [
-        1.23,
-        4.1,
-        1.02
+        1.3275875829990536,
+        4.100767625067262,
+        2.326408840670427
       ],
       "visible": true,
       "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t22-48-19-209z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t22-48-19-209z-generated-2026-04-19T00-26-03-604Z.glb"
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb"
       },
       "generation": {
         "descriptor": "Solitude Pillar 2",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t22-48-19-209z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t22-48-19-209z-generated-2026-04-19T00-26-03-604Z.glb",
-        "lastBakedAt": "2026-04-19T00:26:03.616Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
+        "lastBakedAt": "2026-04-19T23:27:08.491Z",
+        "sourceVisualSize": [
+          1.547170569227097,
+          8.09762179851532,
+          2.033607023983647
+        ]
       }
     },
     {
@@ -261,18 +280,23 @@
         0
       ],
       "scale": [
-        1.3099999999999998,
-        4.7,
-        1.08
+        1.82318551463849,
+        4.541626836699268,
+        2.1804927683731457
       ],
       "visible": true,
       "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18t22-42-43-915z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18t22-42-43-915z-generated-2026-04-19T00-29-09-121Z.glb"
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb"
       },
       "generation": {
         "descriptor": "Solitude Pillar 3",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18t22-42-43-915z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18t22-42-43-915z-generated-2026-04-19T00-29-09-121Z.glb",
-        "lastBakedAt": "2026-04-19T00:29:09.137Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
+        "lastBakedAt": "2026-04-19T23:30:16.846Z",
+        "sourceVisualSize": [
+          2.140638576447344,
+          8.96598886847496,
+          2.8588440686140313
+        ]
       }
     },
     {
@@ -291,18 +315,23 @@
         0
       ],
       "scale": [
-        1.39,
-        5.4,
-        0.96
+        0.6317086416147826,
+        5.4013789026340415,
+        0.9264312352195843
       ],
       "visible": true,
       "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t23-14-30-195z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t23-14-30-195z-generated-2026-04-19T00-32-18-336Z.glb"
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb"
       },
       "generation": {
         "descriptor": "Solitude Pillar 4",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t23-14-30-195z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t23-14-30-195z-generated-2026-04-19T00-32-18-336Z.glb",
-        "lastBakedAt": "2026-04-19T00:32:18.358Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
+        "lastBakedAt": "2026-04-19T23:33:32.633Z",
+        "sourceVisualSize": [
+          1.090126968661798,
+          10.65800085067749,
+          1.582826293997364
+        ]
       }
     },
     {
@@ -321,18 +350,23 @@
         0
       ],
       "scale": [
-        1.15,
-        4.7,
-        1.02
+        2.7658015247962195,
+        4.067986342809933,
+        2.4735594761611996
       ],
       "visible": true,
       "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb"
       },
       "generation": {
         "descriptor": "Solitude Pillar 5",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
-        "lastBakedAt": "2026-04-19T00:35:30.011Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
+        "lastBakedAt": "2026-04-19T23:36:32.968Z",
+        "sourceVisualSize": [
+          2.8466735613812606,
+          7.9913964509964,
+          2.856070713554768
+        ]
       }
     },
     {
@@ -351,18 +385,23 @@
         0
       ],
       "scale": [
-        1.23,
-        4.1,
-        1.08
+        1.4106454896824248,
+        4.096974976478102,
+        1.3191009035089452
       ],
       "visible": true,
       "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-38-32-081Z.glb"
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb"
       },
       "generation": {
         "descriptor": "Solitude Pillar 6",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-38-32-081Z.glb",
-        "lastBakedAt": "2026-04-19T00:38:32.101Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
+        "lastBakedAt": "2026-04-19T23:39:42.736Z",
+        "sourceVisualSize": [
+          1.659850121889722,
+          8.087592482566833,
+          1.4857561116582652
+        ]
       }
     },
     {
@@ -381,18 +420,23 @@
         0
       ],
       "scale": [
-        1.3099999999999998,
-        5.4,
-        0.96
+        1.594611922548461,
+        5.402279947776577,
+        0.7804000535814137
       ],
-      "visible": true,
+      "visible": false,
       "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb"
       },
       "generation": {
         "descriptor": "Solitude Pillar 7",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
-        "lastBakedAt": "2026-04-19T00:42:38.546Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb",
+        "lastBakedAt": "2026-04-19T23:42:42.470Z",
+        "sourceVisualSize": [
+          2.048502260182655,
+          10.66420866250992,
+          1.0010815807331659
+        ]
       }
     },
     {
@@ -411,18 +455,23 @@
         0
       ],
       "scale": [
-        1.39,
-        4.1,
-        1.02
+        3.4243974152931123,
+        4.101659902850659,
+        3.0427017582967277
       ],
       "visible": true,
       "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-46-19-543Z.glb"
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb"
       },
       "generation": {
         "descriptor": "Solitude Pillar 8",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-46-19-543Z.glb",
-        "lastBakedAt": "2026-04-19T00:46:19.646Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+        "lastBakedAt": "2026-04-19T23:45:20.357Z",
+        "sourceVisualSize": [
+          2.6273346729094875,
+          8.096020382642745,
+          2.4290496676834437
+        ]
       }
     },
     {
@@ -441,18 +490,23 @@
         0
       ],
       "scale": [
-        1.15,
-        4.7,
-        1.08
+        1.3911570917694691,
+        4.699374310351889,
+        1.9311849816683708
       ],
       "visible": true,
       "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-49-15-989Z.glb"
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb"
       },
       "generation": {
         "descriptor": "Solitude Pillar 9",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-49-15-989Z.glb",
-        "lastBakedAt": "2026-04-19T00:49:16.000Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
+        "lastBakedAt": "2026-04-19T23:48:12.259Z",
+        "sourceVisualSize": [
+          1.4561241279551034,
+          9.277974700927734,
+          2.2778326858778435
+        ]
       }
     },
     {
@@ -471,24 +525,29 @@
         0
       ],
       "scale": [
-        1.23,
-        5.4,
-        0.96
+        0.8250862169964819,
+        5.399335818736372,
+        1.3990170625896017
       ],
       "visible": true,
       "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-52-18-511Z.glb"
+        "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb"
       },
       "generation": {
         "descriptor": "Solitude Pillar 10",
-        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-52-18-511Z.glb",
-        "lastBakedAt": "2026-04-19T00:52:18.528Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb",
+        "lastBakedAt": "2026-04-19T23:51:16.041Z",
+        "sourceVisualSize": [
+          0.9394101632235144,
+          10.659800720214845,
+          2.4164662115285154
+        ]
       }
     },
     {
       "id": "solitude-pillar-11",
       "name": "Solitude Pillar 11",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         9.000000000000002,
@@ -501,19 +560,29 @@
         0
       ],
       "scale": [
-        1.3099999999999998,
-        4.7,
-        1.02
+        0.863039290993997,
+        2.720321683216463,
+        0.9213443477307205
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-monolith"
+      "generation": {
+        "descriptor": "weathered monolith pillar",
+        "sourceVisualSize": [
+          1.6020425750863367,
+          5.35799999369681,
+          1.696158090398347
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+        "lastBakedAt": "2026-04-19T23:54:25.895Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb"
       }
     },
     {
       "id": "solitude-pillar-12",
       "name": "Solitude Pillar 12",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         15.58845726811989,
@@ -526,19 +595,413 @@
         0
       ],
       "scale": [
-        1.39,
-        4.1,
-        1.08
+        1.376042815682601,
+        2.3673973796048617,
+        1.3818057467012466
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-monolith"
+      "generation": {
+        "descriptor": "weathered monolith pillar",
+        "sourceVisualSize": [
+          1.7622154714757663,
+          4.673999994501471,
+          1.7152354733802575
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
+        "lastBakedAt": "2026-04-19T23:57:43.866Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb"
+      }
+    },
+    {
+      "id": "solitude-pillar-firefly-1",
+      "name": "Solitude Pillar 1 Firefly",
+      "kind": "group",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        18,
+        6.2,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "firefly",
+        "markerColor": "#f5f1a8",
+        "markerSize": 0.52,
+        "title": "Solitude Pillar 1",
+        "author": "Pillar Firefly",
+        "location": "The Solitude Plain",
+        "excerpt": "A patient glow hovers above Solitude Pillar 1.",
+        "body": "A solitary firefly keeps watch above Solitude Pillar 1."
+      }
+    },
+    {
+      "id": "solitude-pillar-firefly-2",
+      "name": "Solitude Pillar 2 Firefly",
+      "kind": "group",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        15.588457268119896,
+        4.9,
+        8.999999999999998
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "firefly",
+        "markerColor": "#f5f1a8",
+        "markerSize": 0.52,
+        "title": "Solitude Pillar 2",
+        "author": "Pillar Firefly",
+        "location": "The Solitude Plain",
+        "excerpt": "A patient glow hovers above Solitude Pillar 2.",
+        "body": "A solitary firefly keeps watch above Solitude Pillar 2."
+      }
+    },
+    {
+      "id": "solitude-pillar-firefly-3",
+      "name": "Solitude Pillar 3 Firefly",
+      "kind": "group",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        9.000000000000002,
+        5.5,
+        15.588457268119894
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "firefly",
+        "markerColor": "#f5f1a8",
+        "markerSize": 0.52,
+        "title": "Solitude Pillar 3",
+        "author": "Pillar Firefly",
+        "location": "The Solitude Plain",
+        "excerpt": "A patient glow hovers above Solitude Pillar 3.",
+        "body": "A solitary firefly keeps watch above Solitude Pillar 3."
+      }
+    },
+    {
+      "id": "solitude-pillar-firefly-4",
+      "name": "Solitude Pillar 4 Firefly",
+      "kind": "group",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        1.102182119232618e-15,
+        6.2,
+        18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "firefly",
+        "markerColor": "#f5f1a8",
+        "markerSize": 0.52,
+        "title": "Solitude Pillar 4",
+        "author": "Pillar Firefly",
+        "location": "The Solitude Plain",
+        "excerpt": "A patient glow hovers above Solitude Pillar 4.",
+        "body": "A solitary firefly keeps watch above Solitude Pillar 4."
+      }
+    },
+    {
+      "id": "solitude-pillar-firefly-5",
+      "name": "Solitude Pillar 5 Firefly",
+      "kind": "group",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        -8.999999999999996,
+        5.5,
+        15.588457268119896
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "firefly",
+        "markerColor": "#f5f1a8",
+        "markerSize": 0.52,
+        "title": "Solitude Pillar 5",
+        "author": "Pillar Firefly",
+        "location": "The Solitude Plain",
+        "excerpt": "A patient glow hovers above Solitude Pillar 5.",
+        "body": "A solitary firefly keeps watch above Solitude Pillar 5."
+      }
+    },
+    {
+      "id": "solitude-pillar-firefly-6",
+      "name": "Solitude Pillar 6 Firefly",
+      "kind": "group",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        -15.588457268119896,
+        4.9,
+        8.999999999999998
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "firefly",
+        "markerColor": "#f5f1a8",
+        "markerSize": 0.52,
+        "title": "Solitude Pillar 6",
+        "author": "Pillar Firefly",
+        "location": "The Solitude Plain",
+        "excerpt": "A patient glow hovers above Solitude Pillar 6.",
+        "body": "A solitary firefly keeps watch above Solitude Pillar 6."
+      }
+    },
+    {
+      "id": "solitude-pillar-firefly-7",
+      "name": "Solitude Pillar 7 Firefly",
+      "kind": "group",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        -18,
+        6.2,
+        2.204364238465236e-15
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "firefly",
+        "markerColor": "#f5f1a8",
+        "markerSize": 0.52,
+        "title": "Solitude Pillar 7",
+        "author": "Pillar Firefly",
+        "location": "The Solitude Plain",
+        "excerpt": "A patient glow hovers above Solitude Pillar 7.",
+        "body": "A solitary firefly keeps watch above Solitude Pillar 7."
+      }
+    },
+    {
+      "id": "solitude-pillar-firefly-8",
+      "name": "Solitude Pillar 8 Firefly",
+      "kind": "group",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        -15.588457268119898,
+        4.9,
+        -8.999999999999995
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "firefly",
+        "markerColor": "#f5f1a8",
+        "markerSize": 0.52,
+        "title": "Solitude Pillar 8",
+        "author": "Pillar Firefly",
+        "location": "The Solitude Plain",
+        "excerpt": "A patient glow hovers above Solitude Pillar 8.",
+        "body": "A solitary firefly keeps watch above Solitude Pillar 8."
+      }
+    },
+    {
+      "id": "solitude-pillar-firefly-9",
+      "name": "Solitude Pillar 9 Firefly",
+      "kind": "group",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        -9.000000000000007,
+        5.5,
+        -15.58845726811989
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "firefly",
+        "markerColor": "#f5f1a8",
+        "markerSize": 0.52,
+        "title": "Solitude Pillar 9",
+        "author": "Pillar Firefly",
+        "location": "The Solitude Plain",
+        "excerpt": "A patient glow hovers above Solitude Pillar 9.",
+        "body": "A solitary firefly keeps watch above Solitude Pillar 9."
+      }
+    },
+    {
+      "id": "solitude-pillar-firefly-10",
+      "name": "Solitude Pillar 10 Firefly",
+      "kind": "group",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        -3.3065463576978533e-15,
+        6.2,
+        -18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "firefly",
+        "markerColor": "#f5f1a8",
+        "markerSize": 0.52,
+        "title": "Solitude Pillar 10",
+        "author": "Pillar Firefly",
+        "location": "The Solitude Plain",
+        "excerpt": "A patient glow hovers above Solitude Pillar 10.",
+        "body": "A solitary firefly keeps watch above Solitude Pillar 10."
+      }
+    },
+    {
+      "id": "solitude-pillar-firefly-11",
+      "name": "Solitude Pillar 11 Firefly",
+      "kind": "group",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        9.000000000000002,
+        5.5,
+        -15.588457268119894
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "firefly",
+        "markerColor": "#f5f1a8",
+        "markerSize": 0.52,
+        "title": "Solitude Pillar 11",
+        "author": "Pillar Firefly",
+        "location": "The Solitude Plain",
+        "excerpt": "A patient glow hovers above Solitude Pillar 11.",
+        "body": "A solitary firefly keeps watch above Solitude Pillar 11."
+      }
+    },
+    {
+      "id": "solitude-pillar-firefly-12",
+      "name": "Solitude Pillar 12 Firefly",
+      "kind": "group",
+      "parentId": "solitude-ruin-ring",
+      "position": [
+        15.58845726811989,
+        4.9,
+        -9.000000000000007
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "visible": true,
+      "gameplay": {
+        "type": "firefly",
+        "markerColor": "#f5f1a8",
+        "markerSize": 0.52,
+        "title": "Solitude Pillar 12",
+        "author": "Pillar Firefly",
+        "location": "The Solitude Plain",
+        "excerpt": "A patient glow hovers above Solitude Pillar 12.",
+        "body": "A solitary firefly keeps watch above Solitude Pillar 12."
       }
     },
     {
       "id": "solitude-ring-fragment-east",
       "name": "Ring Fragment East",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         11.5,
@@ -551,19 +1014,29 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        8.283422090117261,
+        1.5099177251804317,
+        1.8821363311989647
       ],
       "visible": true,
-      "prefab": {
-        "type": "broken-ring"
+      "generation": {
+        "descriptor": "broken ancient stone ring ruin",
+        "sourceVisualSize": [
+          4.922340742831281,
+          2.8499999046325684,
+          3.708636712447688
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
+        "lastBakedAt": "2026-04-20T00:01:48.287Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb"
       }
     },
     {
       "id": "solitude-ring-fragment-west",
       "name": "Ring Fragment West",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "solitude-ruin-ring",
       "position": [
         -10.8,
@@ -576,13 +1049,23 @@
         0
       ],
       "scale": [
-        0.84,
-        0.84,
-        0.84
+        1.4080127607778838,
+        1.398903736189978,
+        2.307027349504379
       ],
       "visible": true,
-      "prefab": {
-        "type": "broken-ring"
+      "generation": {
+        "descriptor": "broken ancient stone ring ruin",
+        "sourceVisualSize": [
+          2.7769109270613583,
+          2.3939999198913573,
+          4.336473168316391
+        ],
+        "lastBakedAssetUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
+        "lastBakedAt": "2026-04-20T00:06:10.174Z"
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb"
       }
     },
     {
@@ -600,9 +1083,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "visible": true,
       "gameplay": {
@@ -613,7 +1096,13 @@
         "author": "The Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A single patient glow waits at the center of the ruined ring.",
-        "body": "This is a place for solitude. You are alone here.\n\nThe pillars keep their distance so the sky can speak without interruption."
+        "body": "This is a place for solitude. You are alone here.\n\nThe pillars keep their distance so the sky can speak without interruption.",
+        "bobSpeed": 0.5,
+        "twinkleSpeed": 0.5,
+        "lightDistance": 2,
+        "lightIntensity": 5,
+        "lightDecay": 2,
+        "spriteIntensity": 1.95
       }
     },
     {

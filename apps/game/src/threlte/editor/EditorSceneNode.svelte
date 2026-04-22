@@ -35,6 +35,7 @@
   let conversationFeaturePromise: Promise<typeof import('../features/conversation')> | null = null
   const nodeWorldPosition = new THREE.Vector3()
   let distanceCullAccumulator = 0
+  const gameplayPointLightScale = 180
 
   function supportsShockwaveFireflyIgnition() {
     if (node.gameplay?.type !== 'firefly') return false
@@ -336,7 +337,7 @@
       <T.PointLight
         position={fireflyMotionOffset}
         color={fireflyIgnitionColor}
-        intensity={(markerHovered ? Math.max(baseLightIntensity * 1.35, baseLightIntensity) : baseLightIntensity) * shockwaveIntensityMultiplier}
+        intensity={(markerHovered ? Math.max(baseLightIntensity * 1.35, baseLightIntensity) : baseLightIntensity) * shockwaveIntensityMultiplier * gameplayPointLightScale}
         distance={(node.gameplay.lightDistance ?? 6) * shockwaveDistanceMultiplier}
         decay={node.gameplay.lightDecay ?? 1.6}
       />

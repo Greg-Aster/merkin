@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets'
 // =====================================================================
 // COMPONENT IMPORTS - CLEAN AND SIMPLE
 // =====================================================================
@@ -9,9 +8,7 @@ import BackToTop from '@components/control/BackToTop.astro'
 import RightRailContent from '@components/widget/RightRailContent.astro'
 import SideBar from '@components/widget/SideBar.astro'
 import type { MarkdownHeading } from 'astro'
-import { Icon } from 'astro-icon/components'
-import ImageWrapper from '../components/misc/ImageWrapper.astro'
-import TimelineController from '../components/timeline/TimelineBanner.astro'
+import BannerStage from '../components/banner-stage/BannerStage.astro'
 import TOC from '../components/widget/TOC.astro'
 import { siteConfig } from '@/config/config'
 import Layout from './Layout.astro'
@@ -101,7 +98,9 @@ const rawBannerConfig = (bannerModule as any).bannerConfig ?? {}
 
 function createLegacyStandardBannerConfig(config: any) {
   const bannerList = Array.isArray(config.bannerList) ? config.bannerList : []
-  const bannerLinks = Array.isArray(config.bannerLinks) ? config.bannerLinks : []
+  const bannerLinks = Array.isArray(config.bannerLinks)
+    ? config.bannerLinks
+    : []
 
   const getBannerLinkFromList = (index: number): string | null => {
     if (typeof bannerLinks[index] !== 'string') return null
@@ -133,7 +132,10 @@ function createLegacyStandardBannerConfig(config: any) {
       direction: config.animation?.direction ?? 'forward',
     }),
     getBannerLink: getBannerLinkFromList,
-    hasAnyBannerLinks: () => bannerLinks.some((link: unknown) => typeof link === 'string' && link.trim().length > 0),
+    hasAnyBannerLinks: () =>
+      bannerLinks.some(
+        (link: unknown) => typeof link === 'string' && link.trim().length > 0,
+      ),
     getLinkPreviewData: (url: string) => ({
       title: 'Explore More',
       description: url || 'Click to visit this page',
@@ -155,7 +157,8 @@ function createLegacyStandardBannerConfig(config: any) {
     },
     isVideoBannerItem: (item: any) =>
       item?.type === 'video' ||
-      (typeof item?.src === 'string' && /\.(webm|mp4|mov|ogg)(\?.*)?$/i.test(item.src)),
+      (typeof item?.src === 'string' &&
+        /\.(webm|mp4|mov|ogg)(\?.*)?$/i.test(item.src)),
     isImageBannerItem: (item: any) =>
       item?.type === 'image' ||
       (typeof item?.src !== 'undefined' && item?.type !== 'video'),
@@ -189,9 +192,7 @@ function normalizeCssSize(
 
   // Accept common CSS size units directly.
   if (
-    /^-?\d*\.?\d+(px|rem|em|vh|vw|vmin|vmax|svh|lvh|dvh|%)$/i.test(
-      trimmedValue,
-    )
+    /^-?\d*\.?\d+(px|rem|em|vh|vw|vmin|vmax|svh|lvh|dvh|%)$/i.test(trimmedValue)
   ) {
     return trimmedValue
   }
@@ -232,9 +233,7 @@ function normalizeBannerConfig(config: any) {
     config.navbar?.height?.mobile ??
     '4rem'
   const mobilePortraitPanelTop =
-    config.panel?.top?.mobilePortrait ??
-    config.panel?.top?.standard ??
-    '0'
+    config.panel?.top?.mobilePortrait ?? config.panel?.top?.standard ?? '0'
 
   return {
     ...config,
@@ -278,7 +277,8 @@ function normalizeBannerConfig(config: any) {
         timeline: spacingFromConfig.timeline ?? '5.5rem',
         video: spacingFromConfig.video ?? '5.5rem',
         image: spacingFromConfig.image ?? '0',
-        assistant: spacingFromConfig.assistant ?? spacingFromConfig.standard ?? '0',
+        assistant:
+          spacingFromConfig.assistant ?? spacingFromConfig.standard ?? '0',
         none: spacingFromConfig.none ?? '0',
       },
     },
@@ -289,7 +289,8 @@ function normalizeBannerConfig(config: any) {
         timeline: config.panel?.top?.timeline ?? '0',
         video: config.panel?.top?.video ?? '0',
         image: config.panel?.top?.image ?? '0',
-        assistant: config.panel?.top?.assistant ?? config.panel?.top?.standard ?? '0',
+        assistant:
+          config.panel?.top?.assistant ?? config.panel?.top?.standard ?? '0',
         none: config.panel?.top?.none ?? '0',
         mobilePortrait: mobilePortraitPanelTop,
       },
@@ -358,7 +359,8 @@ const determineBannerConfiguration =
         const hasPostVideoBanner =
           postValue?.data?.bannerType === 'video' &&
           postValue?.data?.bannerData?.videoId
-        const hasPostAssistantBanner = postValue?.data?.bannerType === 'assistant'
+        const hasPostAssistantBanner =
+          postValue?.data?.bannerType === 'assistant'
         const hasPostImageBanner =
           !!(
             postValue?.data?.image ||
@@ -377,11 +379,14 @@ const determineBannerConfiguration =
 
         const defaultBannerType = bannerConfig.defaultBannerType
         const hasTimelineBanner =
-          hasPostTimelineBanner || (!hasPostBanner && defaultBannerType === 'timeline')
+          hasPostTimelineBanner ||
+          (!hasPostBanner && defaultBannerType === 'timeline')
         const hasVideoBanner =
-          hasPostVideoBanner || (!hasPostBanner && defaultBannerType === 'video')
+          hasPostVideoBanner ||
+          (!hasPostBanner && defaultBannerType === 'video')
         const hasImageBanner =
-          hasPostImageBanner || (!hasPostBanner && defaultBannerType === 'image')
+          hasPostImageBanner ||
+          (!hasPostBanner && defaultBannerType === 'image')
         const hasAssistantBanner =
           hasPostAssistantBanner ||
           (!hasPostBanner && defaultBannerType === 'assistant')
@@ -451,7 +456,8 @@ const determineBannerConfiguration =
               bannerConfig.navbar.spacing[currentBannerType] ??
               bannerConfig.navbar.spacing.standard,
             bannerHeight: bannerConfig.layout.height,
-            bannerHeightMobile: bannerConfig.layout.mobileHeight ?? bannerConfig.layout.height,
+            bannerHeightMobile:
+              bannerConfig.layout.mobileHeight ?? bannerConfig.layout.height,
             mainContentOffset: bannerConfig.layout.mainContentOffset,
           },
           finalBannerLink: postData.bannerLink || defaultBannerLink,
@@ -463,25 +469,6 @@ const getBannerAnimationSettings =
   typeof (bannerModule as any).getBannerAnimationSettings === 'function'
     ? (bannerModule as any).getBannerAnimationSettings
     : () => bannerConfig.standardBannerConfig.getBannerAnimationSettings()
-
-const getBannerLink =
-  typeof (bannerModule as any).getBannerLink === 'function'
-    ? (bannerModule as any).getBannerLink
-    : (index: number) => bannerConfig.standardBannerConfig.getBannerLink(index)
-
-const getBannerItemPreviewDetails =
-  typeof (bannerModule as any).getBannerItemPreviewDetails === 'function'
-    ? (bannerModule as any).getBannerItemPreviewDetails
-    : (index: number) =>
-        bannerConfig.standardBannerConfig.getBannerItemPreviewDetails(index)
-
-const getFallbackBannerCSS =
-  typeof (bannerModule as any).getFallbackBannerCSS === 'function'
-    ? (bannerModule as any).getFallbackBannerCSS
-    : () =>
-        bannerConfig.fallback.enabled
-          ? bannerConfig.fallback.value
-          : ''
 
 const getDynamicBackgroundImage =
   typeof (bannerModule as any).getDynamicBackgroundImage === 'function'
@@ -554,7 +541,8 @@ const shouldShowFallbackRightRail =
       siteConfig.rightRail?.showOnPostsWithoutToc === true))
 
 const shouldShowRightRail = shouldShowToc || shouldShowFallbackRightRail
-const shouldMergeRightRailIntoSidebar = shouldShowFallbackRightRail && !shouldShowToc
+const shouldMergeRightRailIntoSidebar =
+  shouldShowFallbackRightRail && !shouldShowToc
 const rightRailStickyTop = siteConfig.rightRail?.stickyTop ?? '3.5rem'
 
 // Process custom author data with direct post-data fallbacks so avatar overrides
@@ -595,16 +583,7 @@ const processedAuthorData = {
 if (import.meta.env.DEV) {
 }
 
-// Destructure banner type flags
-const {
-  hasTimelineBanner,
-  hasVideoBanner,
-  hasImageBanner,
-  hasAssistantBanner,
-  hasStandardBanner,
-  hasPostBanner,
-  isStandardPage,
-} = bannerType
+const { hasPostBanner } = bannerType
 
 // ⭐ RESTORED: Use working layout values
 const {
@@ -626,7 +605,7 @@ const resolvedBannerHeightMobile = normalizeCssSize(
 
 const mobileMainPanelTop =
   currentBannerType === 'standard'
-    ? (bannerConfig.panel?.top?.mobilePortrait ?? mainPanelTop)
+    ? bannerConfig.panel?.top?.mobilePortrait ?? mainPanelTop
     : mainPanelTop
 const mobilePortraitRightRailHeroStyle =
   siteConfig.rightRail?.mobilePortraitHero?.style ?? 'banner-overlay'
@@ -663,7 +642,9 @@ if (post && post.data) {
 // Conditionally create the grid classes
 const gridLayoutClasses = [
   'transition duration-700 w-full left-0 right-0 grid mx-auto gap-4 md:gap-4 px-2 md:px-4 relative',
-  isPortalHome || isBannerOnly ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-[16.5rem_auto]',
+  isPortalHome || isBannerOnly
+    ? 'grid-cols-1'
+    : 'grid-cols-1 md:grid-cols-[16.5rem_auto]',
   !isPortalHome && !isBannerOnly && shouldShowRightRail
     ? '2xl:grid-cols-[16.5rem_auto_var(--toc-width)]'
     : '',
@@ -743,250 +724,39 @@ const gridLayoutClasses = [
     </div>
   </div>
 
-  <!-- =============================================================== -->
-  <!-- ⭐ SIMPLIFIED: Banner container - TAILWIND ONLY               -->
-  <!-- =============================================================== -->
-  <div id="banner-container" 
-    class={`z-10 w-full relative transition-all duration-500
-      ${hasTimelineBanner ? 'has-timeline-banner' : ''}
-      ${hasVideoBanner ? 'has-video-banner' : ''}
-      ${hasImageBanner ? 'has-image-banner' : ''}
-      ${hasAssistantBanner ? 'has-assistant-banner' : ''}
-      ${hasStandardBanner ? 'has-standard-banner' : ''}
-      ${isBannerOnly ? 'banner-only-mode' : ''}`}
-    data-mobile-right-rail-hero={shouldShowMobilePortraitRightRailHero ? mobilePortraitRightRailHeroStyle : 'default'}
+  <BannerStage
+    title={title}
+    post={post}
+    currentBannerType={currentBannerType}
+    bannerDataSources={bannerDataSources}
+    hasPostBanner={hasPostBanner}
+    finalBannerLink={finalBannerLink}
+    bannerConfig={bannerConfig}
+    bannerAnimationSettings={bannerAnimationSettings}
+    isBannerOnly={isBannerOnly}
+    timelineEvents={timelineEvents}
+    timelineEraConfig={timelineEraConfig}
+    timelineConstellationConfig={timelineConstellationConfig}
+    timelineConstellationPatterns={timelineConstellationPatterns}
+    timelineConnectionPatterns={timelineConnectionPatterns}
+    shouldShowMobilePortraitRightRailHero={shouldShowMobilePortraitRightRailHero}
+    mobilePortraitRightRailHeroStyle={mobilePortraitRightRailHeroStyle}
+    currentPath={currentPath}
+    isHomePage={isHomePage}
+    navbarSpacing={navbarSpacing}
+    mobileNavbarSpacing={bannerConfig.navbar.mobileBannerGap ??
+      bannerConfig.navbar.mobilePortraitSpacing}
+    bannerHeight={resolvedBannerHeight}
+    bannerHeightMobile={resolvedBannerHeightMobile}
   >
-
-    <!-- VIDEO BANNER -->
-    {hasVideoBanner && (
-      <div class="banner-container-video">
-        <div class="banner-aspect-container">
-          <div class="banner-content-wrapper">
-            <iframe
-              src={`https://www.youtube.com/embed/${hasPostBanner && post?.data?.bannerType === "video" ? post.data.bannerData.videoId : bannerDataSources.videoBannerData?.videoId}?autoplay=0&mute=0&controls=1&enablejsapi=1&playsinline=1`}
-              title="YouTube video player"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
-              allowfullscreen
-              class="absolute top-0 left-0 w-full h-full"
-            ></iframe>
-          </div>
-        </div>
-      </div>
-    )}
-
-    <!-- ⭐ NEW: TIMELINE BANNER WITH MOBILE INTERACTION WRAPPER -->
-    {hasTimelineBanner && (
-      <div class:list={['banner-container-timeline', isBannerOnly ? 'banner-container-timeline--hero-only' : '']}>
-        <div class="banner-aspect-container">
-          <div class:list={['banner-content-wrapper', isBannerOnly ? 'banner-content-wrapper--timeline-hero' : '']}>
-            <!-- ⭐ NEW: Mobile interaction wrapper -->
-            <div id="timeline-mobile-wrapper" class="timeline-mobile-inactive">
-              <!-- ⭐ NEW: Mobile tap indicator -->
-              <div class="timeline-mobile-indicator md:hidden">
-                <div class="timeline-tap-hint">
-                  <Icon name="fa6-solid:hand-pointer" class="w-6 h-6 text-white/80" />
-                  <span class="text-white/80 text-sm font-medium">Tap to interact with timeline</span>
-                </div>
-              </div>
-              
-              <TimelineController
-                category={hasPostBanner && post?.data?.bannerType === "timeline" ? post.data.bannerData.category : (bannerDataSources.timelineBannerData?.category || "MEGA MEAL")}
-                startYear={hasPostBanner && post?.data?.bannerType === "timeline" ? post.data.bannerData.startYear : bannerDataSources.timelineBannerData?.startYear}
-                endYear={hasPostBanner && post?.data?.bannerType === "timeline" ? post.data.bannerData.endYear : bannerDataSources.timelineBannerData?.endYear}
-                background={hasPostBanner && post?.data?.bannerType === "timeline" ? post.data.bannerData.background : bannerDataSources.timelineBannerData?.background}
-                backgroundVideo={
-                  hasPostBanner && post?.data?.bannerType === "timeline"
-                    ? post.data.bannerData.backgroundVideo
-                    : bannerDataSources.timelineBannerData?.backgroundVideo ||
-                      timelineEraConfig?.['all-eras']?.backgroundVideo ||
-                      timelineEraConfig?.['all-time']?.backgroundVideo
-                }
-                backgroundVideoPlaybackRate={
-                  hasPostBanner && post?.data?.bannerType === "timeline"
-                    ? post.data.bannerData.backgroundVideoPlaybackRate
-                    : bannerDataSources.timelineBannerData?.backgroundVideoPlaybackRate ||
-                      timelineEraConfig?.['all-eras']?.backgroundVideoPlaybackRate ||
-                      timelineEraConfig?.['all-time']?.backgroundVideoPlaybackRate
-                }
-                compact={hasPostBanner && post?.data?.bannerType === "timeline" ? (post.data.bannerData.compact || false) : (bannerDataSources.timelineBannerData?.compact || false)}
-                events={timelineEvents}
-                eraConfig={timelineEraConfig}
-                constellationConfig={timelineConstellationConfig}
-                constellationPatterns={timelineConstellationPatterns}
-                connectionPatterns={timelineConnectionPatterns}
-                class="w-full h-full"
-                asBanner={true}
-                bannerHeight="100%"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
-
-    <!-- IMAGE BANNER -->
-    {hasImageBanner && (
-      <div class="banner-container-image">
-        <div class="banner-aspect-container">
-          <div class="banner-content-wrapper">
-            {finalBannerLink ? (
-              <a 
-                href={finalBannerLink} 
-                aria-label="Banner Link" 
-                class="group block w-full h-full"
-              >
-                <div class="absolute transition pointer-events-none group-hover:bg-black/30 group-active:bg-black/50 w-full h-full z-50 flex items-center justify-center">
-                  <Icon
-                    name="fa6-solid:link"
-                    class="text-white drop-shadow-lg"
-                    style="font-size: clamp(2rem, 4vw, 4rem);"
-                  ></Icon>
-                </div>
-                <ImageWrapper
-                  src={hasPostBanner && post?.data?.bannerType === "image"
-                    ? normalizeAssetUrl(post.data.bannerData?.imageUrl || post.data.image)
-                    : normalizeAssetUrl(bannerDataSources.imageBannerData?.imageUrl || siteConfig.banner.src)}
-                  alt={hasPostBanner ? (post.data.title || "Post banner image") : (title || "Banner image")}
-                  class="w-full h-full object-cover"
-                  imgClass="object-cover"
-                  loading="eager"
-                />
-              </a>
-            ) : (
-              <ImageWrapper
-                src={hasPostBanner && post?.data?.bannerType === "image"
-                  ? normalizeAssetUrl(post.data.bannerData?.imageUrl || post.data.image)
-                  : normalizeAssetUrl(bannerDataSources.imageBannerData?.imageUrl || siteConfig.banner.src)}
-                alt={hasPostBanner ? (post.data.title || "Post banner image") : (title || "Banner image")}
-                class="w-full h-full object-cover"
-                imgClass="object-cover"
-                loading="eager"
-              />
-            )}
-          </div>
-        </div>
-      </div>
-    )}
-
-    <!-- STANDARD BANNER -->
-    {hasStandardBanner && (
-      <div class="banner-container-standard">
-        <div class="banner-aspect-container">
-          <div class="banner-content-wrapper">
-            <div id="standard-banner-container">
-	              {bannerConfig.standardBannerConfig.bannerList.length > 0 ? bannerConfig.standardBannerConfig.bannerList.map((item, index) => {
-	                const bannerLink = getBannerLink(index);
-	                const previewDetails = getBannerItemPreviewDetails(index);
-	                const isClickable = bannerLink !== null;
-	                const isVideoItem = bannerConfig.standardBannerConfig.isVideoBannerItem(item);
-	                const isImageItem = bannerConfig.standardBannerConfig.isImageBannerItem(item);
-                  const isInitialSlide = index === 0;
-	                
-	                return (
-	                  <div
-	                    class="banner-slide absolute inset-0 w-full h-full transition-opacity"
-	                    style={`
-	                      transition-duration: ${bannerConfig.standardBannerConfig.animation.transitionDuration}ms;
-	                      opacity: ${index === 0 ? '1' : '0'};
-	                      pointer-events: ${index === 0 ? '' : 'none'};
-	                    `}
-	                    data-banner-index={index}
-	                    data-active={index === 0 ? 'true' : 'false'}
-	                  >
-                    <div
-                      class="banner-link group w-full h-full relative cursor-pointer"
-                      data-has-link={isClickable}
-                      data-href={bannerLink}
-                      aria-label={`Banner ${index + 1}${isClickable ? ' - Click to visit link' : ' - Click for information'}`}
-                      role="button"
-                      tabindex="0"
-                    >
-                      <div class="absolute inset-0 w-full h-full transition-all duration-300 opacity-0 group-hover:opacity-30 bg-black pointer-events-none z-10"></div>
-                      
-	                      <div
-	                        class="banner-media-layer w-full h-full overflow-hidden"
-	                        data-banner-media-type={isVideoItem ? 'video' : isImageItem ? 'image' : 'unknown'}
-	                      >
-                        {isVideoItem ? (
-                          <>
-                            <video
-                              src={isInitialSlide ? item.src : undefined}
-                              data-src={isInitialSlide ? undefined : item.src}
-                              data-playback-rate={typeof item.playbackRate === 'number' ? item.playbackRate : undefined}
-                              autoplay={bannerConfig.standardBannerConfig.video.autoplay}
-                              muted={bannerConfig.standardBannerConfig.video.muted}
-                              loop={bannerConfig.standardBannerConfig.video.loop}
-                              playsinline={bannerConfig.standardBannerConfig.video.playsInLine}
-                              controls={bannerConfig.standardBannerConfig.video.controls}
-                              preload={isInitialSlide ? (item.preload || bannerConfig.standardBannerConfig.video.preload) : 'none'}
-                              poster={item.fallbackImage}
-                              class={`banner-video w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
-                              style={`border-radius: ${bannerConfig.visual.borderRadius};`}
-                              onerror="this.style.display='none'; var ne = this.nextElementSibling; if (ne) ne.style.display='block';"
-                            >
-                              Your browser does not support the video tag.
-                            </video>
-                            <Image
-                              src={item.fallbackImage}
-                              alt={item.alt}
-                              width={bannerConfig.layout.maxWidth}
-                              height={Math.round(bannerConfig.layout.maxWidth * 0.5625)}
-                              class={`banner-image-fallback w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
-                              style={`border-radius: ${bannerConfig.visual.borderRadius}; display: none;`}
-                              loading={isInitialSlide ? 'eager' : 'lazy'}
-                            />
-                          </>
-                        ) : isImageItem ? (
-                          <Image
-                            src={item.src}
-                            alt={item.alt}
-                            width={bannerConfig.layout.maxWidth}
-                            height={Math.round(bannerConfig.layout.maxWidth * 0.5625)}
-                            class={`banner-image w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
-                            style={`border-radius: ${bannerConfig.visual.borderRadius};`}
-                            loading={isInitialSlide ? 'eager' : 'lazy'}
-                          />
-                        ) : (
-	                          <slot name="banner-slide-content" />
-	                        )}
-	                      </div>
-	                      {previewDetails && (
-	                        <div class="banner-title-display">
-	                          <div class="banner-title-kicker">
-	                            {previewDetails.hasValidLink ? 'Destination' : 'Viewscreen'}
-	                          </div>
-	                          <h3>{previewDetails.previewTitle}</h3>
-	                          <p>{previewDetails.previewDescription}</p>
-	                        </div>
-	                      )}
-	                    </div>
-	                  </div>
-	                );
-	              }) : (
-                <div class="w-full h-full rounded-lg" style={`background: ${getFallbackBannerCSS()};`}></div>
-              )}
-              {shouldShowMobilePortraitRightRailHero && (
-                <div id="mobile-banner-right-rail-hero" class="hidden">
-                  <div class="mobile-banner-right-rail-shell">
-                    <RightRailContent
-                      currentPath={currentPath}
-                      post={post}
-                      isHomePage={isHomePage}
-                    />
-                  </div>
-                </div>
-              )}
-              
-              {bannerConfig.visual.applyGradientOverlay && (
-                <div class="absolute inset-0 w-full h-full pointer-events-none" style={`background: ${bannerConfig.visual.gradientOverlay}; border-radius: ${bannerConfig.visual.borderRadius};`}></div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
-  </div>
+    <slot name="banner-slide-content" slot="banner-slide-content" />
+    <RightRailContent
+      slot="banner-mobile-right-rail"
+      currentPath={currentPath}
+      post={post}
+      isHomePage={isHomePage}
+    />
+  </BannerStage>
 
   <!-- =============================================================== -->
   <!-- ⭐ SIMPLIFIED: One column mobile, two column desktop           -->
@@ -2051,527 +1821,3 @@ const gridLayoutClasses = [
     }
   }
 </style>
-
-<!-- =============================================================== -->
-<!-- ⭐ TOUCH EVENT DEBUG LOGGING SYSTEM                            -->
-<!-- =============================================================== -->
-<script is:inline define:vars={{ bannerAnimationSettings }}>
-  // // ⭐ CRITICAL: Root cause debugging system
-  // function initTouchDebugging() {
-  //   console.log('🔍 Touch debugging initialized');
-    
-  //   let touchStartY = 0;
-  //   let isTouchScrolling = false;
-    
-  //   // 🕵️ DETECTIVE MODE: Find what's blocking natural scrolling
-  //   console.log('🕵️ Starting root cause investigation...');
-    
-  //   // Check CSS properties that might block scrolling
-  //   const body = document.body;
-  //   const html = document.documentElement;
-    
-  //   console.log('📋 Body CSS Analysis:', {
-  //     overflow: getComputedStyle(body).overflow,
-  //     overflowY: getComputedStyle(body).overflowY,
-  //     touchAction: getComputedStyle(body).touchAction,
-  //     position: getComputedStyle(body).position,
-  //     height: getComputedStyle(body).height,
-  //     pointerEvents: getComputedStyle(body).pointerEvents
-  //   });
-    
-  //   console.log('📋 HTML CSS Analysis:', {
-  //     overflow: getComputedStyle(html).overflow,
-  //     overflowY: getComputedStyle(html).overflowY,
-  //     touchAction: getComputedStyle(html).touchAction,
-  //     height: getComputedStyle(html).height,
-  //     pointerEvents: getComputedStyle(html).pointerEvents
-  //   });
-    
-  //   // Test what happens when we try natural scrolling
-  //   function testNaturalScrolling() {
-  //     const originalScrollY = window.scrollY;
-  //     console.log('🧪 Testing natural scroll from position:', originalScrollY);
-      
-  //     // Try programmatic scroll (this should work)
-  //     window.scrollBy(0, 10);
-  //     setTimeout(() => {
-  //       const newScrollY = window.scrollY;
-  //       console.log('🧪 Programmatic scroll result:', {
-  //         from: originalScrollY,
-  //         to: newScrollY,
-  //         success: newScrollY !== originalScrollY
-  //       });
-        
-  //       // Scroll back
-  //       window.scrollTo(0, originalScrollY);
-  //     }, 100);
-  //   }
-    
-  //   testNaturalScrolling();
-    
-  //   // Force touch scrolling by manually handling touchmove
-  //   document.addEventListener('touchstart', (e) => {
-  //     touchStartY = e.touches[0].clientY;
-  //     isTouchScrolling = false;
-  //     console.log(`📱 touchstart:`, {
-  //       type: e.type,
-  //       touches: e.touches.length,
-  //       startY: touchStartY,
-  //       target: e.target.tagName + (e.target.id ? `#${e.target.id}` : '') + (e.target.className ? `.${e.target.className.split(' ')[0]}` : ''),
-  //       defaultPrevented: e.defaultPrevented
-  //     });
-  //   }, { passive: true });
-    
-  //   document.addEventListener('touchmove', (e) => {
-  //     const currentY = e.touches[0].clientY;
-  //     const deltaY = touchStartY - currentY;
-      
-  //     console.log(`📱 touchmove:`, {
-  //       type: e.type,
-  //       deltaY: deltaY,
-  //       currentScrollY: window.scrollY,
-  //       target: e.target.tagName + (e.target.id ? `#${e.target.id}` : '') + (e.target.className ? `.${e.target.className.split(' ')[0]}` : ''),
-  //       defaultPrevented: e.defaultPrevented
-  //     });
-      
-      // FORCE SCROLLING: Manually scroll the window with better sensitivity
-      // COMMENTED OUT FOR DEBUGGING - this was masking the real issue
-      /*
-      if (Math.abs(deltaY) > 2) { // Lower threshold for more responsive scrolling
-        isTouchScrolling = true;
-        // Multiply deltaY by 2 for more natural scrolling speed
-        const scrollDelta = deltaY * 50;
-        const newScrollY = Math.max(0, window.scrollY + scrollDelta);
-        console.log(`🚀 FORCING SCROLL: from ${window.scrollY} to ${newScrollY} (delta: ${scrollDelta})`);
-        window.scrollTo(0, newScrollY);
-        touchStartY = currentY; // Update for next delta calculation
-      }
-      */
-      
-      // Check if preventDefault was called
-  //     if (e.defaultPrevented) {
-  //       console.warn(`⚠️ touchmove was prevented! Target:`, e.target);
-  //     }
-  //   }, { passive: true });
-    
-  //   document.addEventListener('touchend', (e) => {
-  //     console.log(`📱 touchend:`, {
-  //       type: e.type,
-  //       wasScrolling: isTouchScrolling,
-  //       finalScrollY: window.scrollY,
-  //       defaultPrevented: e.defaultPrevented
-  //     });
-  //     isTouchScrolling = false;
-  //   }, { passive: true });
-    
-  //   // Log scroll events
-  //   let scrollTimeout;
-  //   document.addEventListener('scroll', (e) => {
-  //     clearTimeout(scrollTimeout);
-  //     scrollTimeout = setTimeout(() => {
-  //       console.log('📜 Scroll event:', {
-  //         target: e.target === document ? 'document' : e.target.tagName,
-  //         scrollY: window.scrollY,
-  //         documentHeight: document.documentElement.scrollHeight,
-  //         windowHeight: window.innerHeight
-  //       });
-  //     }, 100);
-  //   }, { passive: true });
-    
-  //   // Log any event listeners that might interfere
-  //   const originalAddEventListener = EventTarget.prototype.addEventListener;
-  //   EventTarget.prototype.addEventListener = function(type, listener, options) {
-  //     if (type.includes('touch') || type === 'scroll') {
-  //       console.log(`🎯 Event listener added:`, {
-  //         type,
-  //         target: this.constructor.name,
-  //         options,
-  //         passive: options?.passive
-  //       });
-  //     }
-  //     return originalAddEventListener.call(this, type, listener, options);
-  //   };
-  // }
-  
-  // Initialize immediately
-  //initTouchDebugging();
-  
-  const bannerCleanupKey = '__merkinBannerCleanup';
-  const bannerPageLoadBoundKey = '__merkinBannerPageLoadBound';
-
-  const initializeBannerSystems = () => {
-    if (typeof window === 'undefined') return;
-
-    if (typeof window[bannerCleanupKey] === 'function') {
-      window[bannerCleanupKey]();
-    }
-
-    const abortController = new AbortController();
-    const { signal } = abortController;
-
-    const standardBannerContainer = document.getElementById('standard-banner-container');
-    const slides = Array.from(
-      standardBannerContainer?.querySelectorAll('.banner-slide') || [],
-    );
-    const animationConfig = bannerAnimationSettings || {};
-    const motionConfig = animationConfig.motion || {};
-    const motionClassNames = [
-      'banner-motion-active',
-      'banner-motion-zoom-in',
-      'banner-motion-zoom-out',
-      'banner-motion-pan-left',
-      'banner-motion-pan-right',
-      'banner-motion-pan-up',
-      'banner-motion-pan-down',
-    ];
-    const motionEffects = [
-      'zoom-in',
-      'zoom-out',
-      'pan-left',
-      'pan-right',
-      'pan-up',
-      'pan-down',
-    ];
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const toFiniteNumber = (value, fallbackValue) => {
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : fallbackValue;
-    };
-    const interval = Math.max(1000, toFiniteNumber(animationConfig.interval, 5000));
-    const transitionDuration = Math.max(
-      0,
-      toFiniteNumber(animationConfig.transitionDuration, 1000),
-    );
-    const randomStartEnabled = !!animationConfig.randomStart;
-    const initialSlideIndex =
-      randomStartEnabled && slides.length > 1
-        ? Math.floor(Math.random() * slides.length)
-        : 0;
-    const motionEnabled = !!(
-      animationConfig.enabled &&
-      motionConfig.enabled &&
-      !prefersReducedMotion
-    );
-    const motionDuration = Math.max(
-      transitionDuration + 250,
-      toFiniteNumber(motionConfig.duration, interval),
-    );
-    const motionScale = Math.min(
-      1.3,
-      Math.max(1.01, toFiniteNumber(motionConfig.scale, 1.08)),
-    );
-    const motionPanDistance = Math.min(
-      12,
-      Math.max(1, toFiniteNumber(motionConfig.panDistance, 4)),
-    );
-    const motionPanScale = Math.max(1.02, motionScale);
-    const motionEasing =
-      typeof motionConfig.easing === 'string' && motionConfig.easing.trim().length > 0
-        ? motionConfig.easing.trim()
-        : 'ease-in-out';
-    const shouldAlternateDirection = motionConfig.alternate === true;
-    const normalizeMotionMode = (modeValue) => {
-      if (typeof modeValue !== 'string') return 'zoom-in';
-      const normalized = modeValue.toLowerCase().replace(/[^a-z]/g, '');
-      switch (normalized) {
-        case 'zoomin':
-        case 'pushin':
-          return 'zoom-in';
-        case 'zoomout':
-        case 'pushout':
-          return 'zoom-out';
-        case 'panleft':
-          return 'pan-left';
-        case 'panright':
-          return 'pan-right';
-        case 'panup':
-          return 'pan-up';
-        case 'pandown':
-          return 'pan-down';
-        case 'pan':
-        case 'panhorizontal':
-          return 'pan-horizontal';
-        case 'panvertical':
-          return 'pan-vertical';
-        case 'alternate':
-        case 'mixed':
-          return 'alternate';
-        case 'random':
-          return 'random';
-        default:
-          return 'zoom-in';
-      }
-    };
-    const motionMode = normalizeMotionMode(motionConfig.mode);
-    const oppositeEffect = {
-      'zoom-in': 'zoom-out',
-      'zoom-out': 'zoom-in',
-      'pan-left': 'pan-right',
-      'pan-right': 'pan-left',
-      'pan-up': 'pan-down',
-      'pan-down': 'pan-up',
-    };
-    let bannerIntervalId = null;
-    let motionCleanupTimeoutId = null;
-    let currentSlideIndex = initialSlideIndex;
-
-    const clearMotionClasses = (mediaLayer) => {
-      mediaLayer.classList.remove(...motionClassNames);
-    };
-
-    const applyVideoPlaybackRate = (videoElement) => {
-      if (!videoElement) return;
-      const configuredRate = Number(videoElement.dataset.playbackRate);
-      videoElement.playbackRate =
-        Number.isFinite(configuredRate) && configuredRate > 0 ? configuredRate : 1;
-    };
-
-    const ensureSlideMediaLoaded = (slideIndex) => {
-      const slide = slides[slideIndex];
-      if (!slide) return;
-
-      slide
-        .querySelectorAll('video[data-src]')
-        .forEach((videoElement) => {
-          const deferredSrc = videoElement.dataset.src;
-          if (!deferredSrc || videoElement.getAttribute('src')) return;
-
-          videoElement.src = deferredSrc;
-          videoElement.removeAttribute('data-src');
-          applyVideoPlaybackRate(videoElement);
-          videoElement.load();
-        });
-    };
-
-    const syncSlidePlayback = (activeIndex) => {
-      slides.forEach((slide, index) => {
-        const videoElement = slide.querySelector('video');
-        if (!videoElement) return;
-        applyVideoPlaybackRate(videoElement);
-
-        if (index === activeIndex) {
-          const playPromise = videoElement.play();
-          if (playPromise && typeof playPromise.catch === 'function') {
-            playPromise.catch(() => {});
-          }
-        } else {
-          videoElement.pause();
-        }
-      });
-    };
-
-    const cleanupHiddenSlideMotion = () => {
-      slides.forEach((slide, index) => {
-        if (index === currentSlideIndex) return;
-        const mediaLayer = slide.querySelector('.banner-media-layer');
-        if (mediaLayer) {
-          clearMotionClasses(mediaLayer);
-        }
-      });
-    };
-
-    const resolveMotionEffect = (slideIndex) => {
-      if (motionMode === 'alternate') {
-        return motionEffects[slideIndex % motionEffects.length];
-      }
-      if (motionMode === 'random') {
-        return motionEffects[Math.floor(Math.random() * motionEffects.length)];
-      }
-      if (motionMode === 'pan-horizontal') {
-        return slideIndex % 2 === 0 ? 'pan-left' : 'pan-right';
-      }
-      if (motionMode === 'pan-vertical') {
-        return slideIndex % 2 === 0 ? 'pan-up' : 'pan-down';
-      }
-      if (shouldAlternateDirection && oppositeEffect[motionMode]) {
-        return slideIndex % 2 === 0 ? motionMode : oppositeEffect[motionMode];
-      }
-      return motionMode;
-    };
-
-    const applyMotionToSlide = (slideIndex) => {
-      if (!motionEnabled) return;
-      const slide = slides[slideIndex];
-      if (!slide) return;
-
-      const mediaLayer = slide.querySelector('.banner-media-layer');
-      if (!mediaLayer) return;
-
-      const mediaType = mediaLayer.dataset.bannerMediaType;
-      if (mediaType === 'unknown') return;
-
-      const effect = resolveMotionEffect(slideIndex);
-
-      clearMotionClasses(mediaLayer);
-      mediaLayer.style.setProperty('--banner-motion-duration', `${motionDuration}ms`);
-      mediaLayer.style.setProperty('--banner-motion-easing', motionEasing);
-      mediaLayer.style.setProperty('--banner-motion-scale', String(motionScale));
-      mediaLayer.style.setProperty('--banner-motion-pan-scale', String(motionPanScale));
-      mediaLayer.style.setProperty(
-        '--banner-motion-pan-distance',
-        `${motionPanDistance}%`,
-      );
-
-      // Restart keyframes cleanly whenever a slide becomes active.
-      void mediaLayer.offsetWidth;
-      mediaLayer.classList.add('banner-motion-active', `banner-motion-${effect}`);
-    };
-
-    const showSlide = (nextIndex) => {
-      if (!slides.length) return;
-
-      ensureSlideMediaLoaded(nextIndex);
-
-      slides.forEach((slide, index) => {
-        const slideElement = slide;
-        const isActive = index === nextIndex;
-        slideElement.style.opacity = isActive ? '1' : '0';
-        slideElement.style.pointerEvents = isActive ? '' : 'none';
-        slideElement.dataset.active = isActive ? 'true' : 'false';
-      });
-
-      applyMotionToSlide(nextIndex);
-      syncSlidePlayback(nextIndex);
-      currentSlideIndex = nextIndex;
-
-      if (motionCleanupTimeoutId) {
-        clearTimeout(motionCleanupTimeoutId);
-      }
-      motionCleanupTimeoutId = setTimeout(() => {
-        cleanupHiddenSlideMotion();
-      }, Math.max(transitionDuration + 60, 120));
-    };
-
-    const startBannerAnimation = () => {
-      if (!slides.length || slides.length <= 1 || !animationConfig.enabled) return;
-      if (bannerIntervalId) clearInterval(bannerIntervalId);
-
-      bannerIntervalId = setInterval(() => {
-        const nextIndex = (currentSlideIndex + 1) % slides.length;
-        showSlide(nextIndex);
-      }, interval);
-    };
-
-    const stopBannerAnimation = () => {
-      if (!bannerIntervalId) return;
-      clearInterval(bannerIntervalId);
-      bannerIntervalId = null;
-    };
-
-    if (standardBannerContainer && slides.length > 0) {
-      showSlide(initialSlideIndex);
-      startBannerAnimation();
-
-      if (animationConfig.pauseOnHover !== false) {
-        standardBannerContainer.addEventListener('mouseenter', stopBannerAnimation, {
-          signal,
-        });
-        standardBannerContainer.addEventListener('mouseleave', startBannerAnimation, {
-          signal,
-        });
-      }
-
-      standardBannerContainer.querySelectorAll('.banner-link').forEach((linkElement) => {
-        const hasLink = linkElement.dataset.hasLink === 'true';
-        const href = linkElement.dataset.href;
-        if (!hasLink || !href) return;
-
-        linkElement.addEventListener('click', (e) => {
-          // Don't override clicks on <a> links inside the slide (e.g., CTA buttons in html-type slides)
-          if (e.target.closest('a[href]')) return;
-          window.location.href = href;
-        }, { signal });
-
-        linkElement.addEventListener('keydown', (event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            window.location.href = href;
-          }
-        }, { signal });
-      });
-
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-          stopBannerAnimation();
-        } else {
-          startBannerAnimation();
-        }
-      }, { signal });
-    }
-
-    // ⭐ NEW: Timeline mobile interaction system
-    const timelineWrapper = document.getElementById('timeline-mobile-wrapper');
-    if (timelineWrapper && window.innerWidth < 768) {
-      let isTimelineActive = false;
-
-      // Handle timeline wrapper click/tap
-      timelineWrapper.addEventListener('click', (e) => {
-        if (!isTimelineActive) {
-          // First tap - activate timeline
-          e.preventDefault();
-          e.stopPropagation();
-          isTimelineActive = true;
-          timelineWrapper.classList.remove('timeline-mobile-inactive');
-          timelineWrapper.classList.add('timeline-mobile-active');
-          if (window.location.hostname === 'localhost') {
-            console.log('Timeline activated for mobile interaction');
-          }
-        }
-        // If already active, let the click through to timeline controls
-      }, { signal });
-
-      // Reset timeline interaction when clicking outside
-      document.addEventListener('click', (e) => {
-        if (isTimelineActive && !timelineWrapper.contains(e.target)) {
-          isTimelineActive = false;
-          timelineWrapper.classList.remove('timeline-mobile-active');
-          timelineWrapper.classList.add('timeline-mobile-inactive');
-          if (window.location.hostname === 'localhost') {
-            console.log('Timeline deactivated - clicked outside');
-          }
-        }
-      }, { signal });
-
-      // Reset timeline when navigating (blog post selection)
-      window.addEventListener('beforeunload', () => {
-        isTimelineActive = false;
-        timelineWrapper.classList.remove('timeline-mobile-active');
-        timelineWrapper.classList.add('timeline-mobile-inactive');
-      }, { signal });
-
-      // Reset on page transitions (for SPA behavior)
-      document.addEventListener('astro:page-load', () => {
-        isTimelineActive = false;
-        const wrapper = document.getElementById('timeline-mobile-wrapper');
-        if (wrapper) {
-          wrapper.classList.remove('timeline-mobile-active');
-          wrapper.classList.add('timeline-mobile-inactive');
-        }
-      }, { signal });
-    }
-
-    window[bannerCleanupKey] = () => {
-      stopBannerAnimation();
-      if (motionCleanupTimeoutId) {
-        clearTimeout(motionCleanupTimeoutId);
-        motionCleanupTimeoutId = null;
-      }
-      cleanupHiddenSlideMotion();
-      abortController.abort();
-    };
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeBannerSystems, { once: true });
-  } else {
-    initializeBannerSystems();
-  }
-
-  if (!window[bannerPageLoadBoundKey]) {
-    document.addEventListener('astro:page-load', initializeBannerSystems);
-    window[bannerPageLoadBoundKey] = true;
-  }
-</script>
