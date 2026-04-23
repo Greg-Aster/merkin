@@ -256,46 +256,46 @@
           <div class="tuple-label">Body</div>
           <textarea rows="5" value={selectedNode.gameplay.body ?? ''} on:input={(e) => onGameplayFieldChange('body', (e.currentTarget as HTMLTextAreaElement).value)}></textarea>
         </div>
-        <label class="checkbox"><input type="checkbox" checked={selectedNode.gameplay.wanderEnabled ?? false} on:change={(e) => onGameplayBooleanChange('wanderEnabled', (e.currentTarget as HTMLInputElement).checked)} /> Wander</label>
+        <label class="checkbox"><input type="checkbox" checked={selectedNode.gameplay.wanderEnabled ?? true} on:change={(e) => onGameplayBooleanChange('wanderEnabled', (e.currentTarget as HTMLInputElement).checked)} /> Wander</label>
         <div class="tuple-group">
           <div class="tuple-label">Wander Radius</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.wanderRadius ?? 0.35} on:change={(e) => onGameplayNumericChange('wanderRadius', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.wanderRadius ?? 0.16} on:change={(e) => onGameplayNumericChange('wanderRadius', (e.currentTarget as HTMLInputElement).value)} />
         </div>
         <div class="tuple-group">
           <div class="tuple-label">Wander Speed</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.wanderSpeed ?? 0.45} on:change={(e) => onGameplayNumericChange('wanderSpeed', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.wanderSpeed ?? 0.18} on:change={(e) => onGameplayNumericChange('wanderSpeed', (e.currentTarget as HTMLInputElement).value)} />
         </div>
         <div class="tuple-group">
           <div class="tuple-label">Glow Intensity</div>
-          <input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.lightIntensity ?? 2.8} on:change={(e) => onGameplayNumericChange('lightIntensity', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.lightIntensity ?? 1.15} on:change={(e) => onGameplayNumericChange('lightIntensity', (e.currentTarget as HTMLInputElement).value)} />
         </div>
         <div class="tuple-group">
           <div class="tuple-label">Glow Distance</div>
-          <input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.lightDistance ?? 6} on:change={(e) => onGameplayNumericChange('lightDistance', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.lightDistance ?? 4.6} on:change={(e) => onGameplayNumericChange('lightDistance', (e.currentTarget as HTMLInputElement).value)} />
         </div>
         <div class="tuple-group">
           <div class="tuple-label">Glow Decay</div>
-          <input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.lightDecay ?? 1.6} on:change={(e) => onGameplayNumericChange('lightDecay', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.lightDecay ?? 1.25} on:change={(e) => onGameplayNumericChange('lightDecay', (e.currentTarget as HTMLInputElement).value)} />
         </div>
         <div class="tuple-group">
           <div class="tuple-label">Sprite Intensity</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.spriteIntensity ?? 0.95} on:change={(e) => onGameplayNumericChange('spriteIntensity', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.spriteIntensity ?? 1.15} on:change={(e) => onGameplayNumericChange('spriteIntensity', (e.currentTarget as HTMLInputElement).value)} />
         </div>
         <div class="tuple-group">
           <div class="tuple-label">Hover Height</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.hoverHeight ?? 0.36} on:change={(e) => onGameplayNumericChange('hoverHeight', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.hoverHeight ?? 0.28} on:change={(e) => onGameplayNumericChange('hoverHeight', (e.currentTarget as HTMLInputElement).value)} />
         </div>
         <div class="tuple-group">
           <div class="tuple-label">Bob Amplitude</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.bobAmplitude ?? 0.14} on:change={(e) => onGameplayNumericChange('bobAmplitude', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.bobAmplitude ?? 0.08} on:change={(e) => onGameplayNumericChange('bobAmplitude', (e.currentTarget as HTMLInputElement).value)} />
         </div>
         <div class="tuple-group">
           <div class="tuple-label">Bob Speed</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.bobSpeed ?? 1.4} on:change={(e) => onGameplayNumericChange('bobSpeed', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.bobSpeed ?? 0.55} on:change={(e) => onGameplayNumericChange('bobSpeed', (e.currentTarget as HTMLInputElement).value)} />
         </div>
         <div class="tuple-group">
           <div class="tuple-label">Twinkle Speed</div>
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.twinkleSpeed ?? 1.6} on:change={(e) => onGameplayNumericChange('twinkleSpeed', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.twinkleSpeed ?? 0.9} on:change={(e) => onGameplayNumericChange('twinkleSpeed', (e.currentTarget as HTMLInputElement).value)} />
         </div>
         <div class="save-message">Glow controls drive nearby scene lighting; sprite intensity controls the visible firefly core and halo.</div>
       {:else if selectedNode.gameplay.type === 'note'}

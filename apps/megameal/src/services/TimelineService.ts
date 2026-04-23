@@ -20,6 +20,20 @@ import type {
 // TimelineService.ts - Server-side timeline service
 import { getSortedPosts } from '../utils/content-utils'
 
+function resolveTimelineYear(
+  timelineYear?: string,
+  fallbackYear?: number,
+): number | null {
+  if (timelineYear) {
+    const parsedYear = Number.parseInt(timelineYear, 10)
+    if (Number.isFinite(parsedYear)) {
+      return parsedYear
+    }
+  }
+
+  return fallbackYear ?? null
+}
+
 // Modified getTimelineEvents function to include banner posts
 export async function getTimelineEvents(
   options: {
@@ -46,62 +60,43 @@ export async function getTimelineEvents(
   const posts = await getSortedPosts(includeDrafts)
 
   // First pass: collect all posts with timeline data and extract bannerData
-  let timelineEvents = posts
-    .filter(post => {
-      // Include posts that have either timelineYear or bannerType: "timeline"
-      return (
-        post.data.timelineYear ||
-        (includeBanners && post.data.bannerType === 'timeline')
-      )
-    })
-    .map(post => {
-      // If post has timelineYear, use that directly
-      if (post.data.timelineYear) {
-        const year = Number.parseInt(post.data.timelineYear)
-        return {
-          title: post.data.title,
-          description: post.data.description || '',
-          slug: post.slug,
-          year,
-          era: post.data.timelineEra || '', // We'll determine era later
-          category: post.data.category,
-          isKeyEvent: post.data.isKeyEvent || false,
-          isLevel: post.data.isLevel || false,
-          levelId: post.data.levelId || null,
-          location: post.data.timelineLocation,
-          isDraft: post.data.draft || false,
-          yIndex: post.data.yIndex,
-        }
-      }
-      // If post has bannerType: "timeline", extract data from bannerData
-      else if (post.data.bannerType === 'timeline' && post.data.bannerData) {
-        // For banner posts, we'll use the post's publication year if no timelineYear is specified
-        const year = post.data.timelineYear
-          ? Number.parseInt(post.data.timelineYear)
-          : post.data.published?.getFullYear() || new Date().getFullYear()
+  let timelineEvents: TimelineEvent[] = posts.flatMap(post => {
+    const isTimelineBanner =
+      includeBanners &&
+      post.data.bannerType === 'timeline' &&
+      Boolean(post.data.bannerData)
 
-        return {
-          title: post.data.title,
-          description: post.data.description || '',
-          slug: post.slug,
-          year,
-          era: post.data.timelineEra || '', // We'll determine era later
-          category: post.data.category,
-          isKeyEvent: post.data.isKeyEvent || false,
-          isLevel: post.data.isLevel || false,
-          levelId: post.data.levelId || null,
-          location: post.data.timelineLocation,
-          isDraft: post.data.draft || false,
-          yIndex: post.data.yIndex, // Add this line to include the yIndex
-          // Include banner-specific data
-          bannerData: post.data.bannerData,
-        }
-      }
+    if (!post.data.timelineYear && !isTimelineBanner) {
+      return []
+    }
 
-      // This should never happen due to our filter, but TypeScript might need it
-      return null
-    })
-    .filter((event): event is TimelineEvent => event !== null)
+    const fallbackYear = isTimelineBanner
+      ? post.data.published?.getFullYear() ?? new Date().getFullYear()
+      : undefined
+    const year = resolveTimelineYear(post.data.timelineYear, fallbackYear)
+
+    if (year === null) {
+      return []
+    }
+
+    const timelineEvent: TimelineEvent = {
+      title: post.data.title,
+      description: post.data.description || '',
+      slug: post.slug,
+      year,
+      era: post.data.timelineEra || undefined,
+      category: post.data.category,
+      isKeyEvent: post.data.isKeyEvent || false,
+      location: post.data.timelineLocation,
+      isDraft: post.data.draft || false,
+    }
+
+    if (isTimelineBanner && post.data.bannerData) {
+      timelineEvent.bannerData = post.data.bannerData
+    }
+
+    return [timelineEvent]
+  })
 
   // Extract era configuration from banner posts
   const eraConfig = extractEraConfig(timelineEvents)
@@ -115,7 +110,6 @@ export async function getTimelineEvents(
       Object.entries(eraConfig).forEach(([eraKey, config]) => {
         yearRanges[eraKey] = [config.startYear, config.endYear]
       })
-
       event.era = getEraFromYear(event.year, yearRanges)
     }
     return event

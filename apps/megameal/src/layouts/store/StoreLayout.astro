@@ -89,12 +89,25 @@ const { title, description, ...rest } = Astro.props; // Capture other potential 
   </style>
   {/* Script specific to StoreLayout's parallax and animations */}
   <script>
-    const storeLayoutParallaxCleanupKey = '__megamealStoreLayoutParallaxCleanup';
+    type StoreLayoutCleanup = () => void;
+    type SwupHookHandler = () => void;
+    type SwupLike = {
+      hooks?: {
+        on: (eventName: string, handler: SwupHookHandler) => void;
+      };
+    };
+    type StoreLayoutWindow = Window &
+      typeof globalThis & {
+        __megamealStoreLayoutParallaxCleanup?: StoreLayoutCleanup;
+        __megamealStoreLayoutSwupBound?: boolean;
+        swup?: SwupLike;
+      };
 
     function initStoreLayoutChrome() {
       if (typeof window === 'undefined') return;
+      const storeWindow = window as StoreLayoutWindow;
 
-      const existingCleanup = window[storeLayoutParallaxCleanupKey];
+      const existingCleanup = storeWindow.__megamealStoreLayoutParallaxCleanup;
       if (typeof existingCleanup === 'function') {
         existingCleanup();
       }
@@ -135,25 +148,26 @@ const { title, description, ...rest } = Astro.props; // Capture other potential 
         
         updateParallax(); // Initial position
 
-        window[storeLayoutParallaxCleanupKey] = () => {
+        storeWindow.__megamealStoreLayoutParallaxCleanup = () => {
           window.removeEventListener('scroll', handleScroll);
         };
         return;
       }
 
-      window[storeLayoutParallaxCleanupKey] = () => {};
+      storeWindow.__megamealStoreLayoutParallaxCleanup = () => {};
     }
 
     initStoreLayoutChrome();
     document.addEventListener('astro:page-load', initStoreLayoutChrome);
 
-    if (window?.swup?.hooks && !window.__megamealStoreLayoutSwupBound) {
-      window.swup.hooks.on('page:view', initStoreLayoutChrome);
-      window.swup.hooks.on('visit:start', () => {
-        const cleanup = window[storeLayoutParallaxCleanupKey];
+    const storeWindow = window as StoreLayoutWindow;
+    if (storeWindow.swup?.hooks && !storeWindow.__megamealStoreLayoutSwupBound) {
+      storeWindow.swup.hooks.on('page:view', initStoreLayoutChrome);
+      storeWindow.swup.hooks.on('visit:start', () => {
+        const cleanup = storeWindow.__megamealStoreLayoutParallaxCleanup;
         if (typeof cleanup === 'function') cleanup();
       });
-      window.__megamealStoreLayoutSwupBound = true;
+      storeWindow.__megamealStoreLayoutSwupBound = true;
     }
   </script>
 </Layout>

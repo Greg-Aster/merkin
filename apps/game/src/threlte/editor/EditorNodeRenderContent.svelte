@@ -19,8 +19,57 @@
   $: lightNode = node.kind === 'light' ? node.light ?? null : null
   $: renderKey = `${node.id}:${node.kind}:${assetNode?.url ?? prefabNode?.type ?? primitiveNode?.geometry ?? lightNode?.color ?? 'group'}`
 
+  const SOLITUDE_RUIN_BASE_MATERIAL: EditorMaterialData = {
+    color: '#5f6874',
+    emissive: '#171b22',
+    emissiveIntensity: 0,
+    metalness: 0.04,
+    roughness: 0.94,
+    envMapIntensity: 0.22,
+    transmission: 0,
+    clearcoat: 0,
+    clearcoatRoughness: 1,
+    thickness: 0,
+    reflectivity: 0.18,
+  }
+
+  const SOLITUDE_FOUNDATION_MATERIAL: EditorMaterialData = {
+    ...SOLITUDE_RUIN_BASE_MATERIAL,
+    color: '#555e69',
+    roughness: 0.97,
+    envMapIntensity: 0.18,
+  }
+
   const materialOverrideStore = writable<EditorMaterialData | null>(null)
   setContext(EDITOR_MATERIAL_OVERRIDE_CONTEXT, materialOverrideStore)
+
+  function mergeMaterialOverrides(
+    base: EditorMaterialData | null,
+    override: EditorMaterialData | null | undefined,
+  ): EditorMaterialData | null {
+    if (!base && !override) return null
+    return {
+      ...(base ?? {}),
+      ...(override ?? {}),
+    }
+  }
+
+  function getSolitudeAssetMaterial(node: EditorSceneNode): EditorMaterialData | null {
+    if (node.kind !== 'asset' || !node.asset?.url) return null
+
+    if (node.id === 'solitude-ground-plateau' || node.id === 'solitude-ground-dais') {
+      return SOLITUDE_FOUNDATION_MATERIAL
+    }
+
+    if (
+      node.id.startsWith('solitude-pillar-')
+      || node.id.startsWith('solitude-ring-fragment-')
+    ) {
+      return SOLITUDE_RUIN_BASE_MATERIAL
+    }
+
+    return null
+  }
 
   function getPrimitiveFallbackMaterial(node: EditorSceneNode): EditorMaterialData | null {
     if (!node.primitive) return node.material ?? null
@@ -52,7 +101,11 @@
     }
   }
 
-  $: materialOverrideStore.set(primitiveNode ? getPrimitiveFallbackMaterial(node) : node.material ?? null)
+  $: materialOverrideStore.set(
+    primitiveNode
+      ? getPrimitiveFallbackMaterial(node)
+      : mergeMaterialOverrides(getSolitudeAssetMaterial(node), node.material ?? null)
+  )
 </script>
 
 {#key renderKey}

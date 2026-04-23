@@ -1,5 +1,5 @@
 // src/stores/friendStore.ts
-import { derived, get, writable } from 'svelte/store'
+import { get, writable } from 'svelte/store'
 
 // Type definitions
 export interface FriendPost {
@@ -36,6 +36,27 @@ export interface Friend {
   postCount: number
   posts: FriendPost[]
   isPermanent?: boolean // Flag to differentiate permanent vs temporary friends
+}
+
+interface FriendApiPost {
+  id?: string
+  title?: string
+  slug?: string
+  description?: string
+  excerpt?: string
+  published?: string
+  date?: string
+  content?: string
+  body?: string
+  url?: string
+  tags?: string[]
+  category?: string
+  image?: string
+  wordCount?: number
+  readingTime?: number
+  timelineYear?: number
+  timelineEra?: string
+  isKeyEvent?: boolean
 }
 
 // Constants for localStorage keys
@@ -115,7 +136,7 @@ export function addPermanentFriends(permanentFriends: any[]): void {
     const formattedPermanentFriends = permanentFriends.map(pf => ({
       id:
         pf.id ||
-        `perm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        `perm-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
       name: pf.data?.name || 'Unknown Friend',
       url: pf.data?.url || '#',
       bio: pf.data?.bio || '',
@@ -371,13 +392,6 @@ export async function validateSite(url: string): Promise<{
             ?.getAttribute('content') ||
           doc.querySelector('link[rel="icon"]')?.getAttribute('href')
 
-        // Try to find author info
-        const authorName =
-          doc
-            .querySelector('.author-name, [class*="author"], [id*="author"]')
-            ?.textContent?.trim() ||
-          doc.querySelector('meta[name="author"]')?.getAttribute('content')
-
         // Build site info from what we found
         const siteInfo = {
           name: siteName || new URL(formattedUrl).hostname.replace('www.', ''),
@@ -551,8 +565,8 @@ export async function fetchFriendContent(
                 // Extract frontmatter if available
                 let category = ''
                 let tags: string[] = []
-                let timelineYear = null
-                let timelineEra = null
+                let timelineYear: number | undefined
+                let timelineEra: string | undefined
                 let isKeyEvent = false
 
                 // Try to get frontmatter data
@@ -683,7 +697,7 @@ export async function fetchFriendContent(
         // Second approach: Try with no-cors mode to check if resource exists
         try {
           // We can only check if the resource exists with no-cors, not read it
-          const response = await fetch(rssUrl, {
+          await fetch(rssUrl, {
             method: 'GET',
             mode: 'no-cors',
             signal: AbortSignal.timeout(2000),
@@ -713,13 +727,13 @@ export async function fetchFriendContent(
       })
 
       if (response.ok) {
-        const data = await response.json()
+        const data: { posts?: FriendApiPost[] } = await response.json()
         console.log('Found posts API, parsing data')
 
         if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
           console.log(`Found ${data.posts.length} posts in API response`)
 
-          return data.posts.map(post => {
+          return data.posts.map((post: FriendApiPost) => {
             const wordCount = post.wordCount || 100
             const readingTime =
               post.readingTime || Math.max(1, Math.ceil(wordCount / 200))
@@ -859,7 +873,7 @@ export async function fetchFriendContent(
             }
 
             // Skip this post if we couldn't find a valid date
-            if (!foundDate) {
+            if (!foundDate || !published) {
               console.log('Skipping post - no valid date found')
               continue
             }

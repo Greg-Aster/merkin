@@ -1,16 +1,10 @@
 ---
-import path from 'node:path'
 import { getCollection } from 'astro:content'
-import License from '@components/misc/License.astro'
 import Markdown from '@components/misc/Markdown.astro'
-import I18nKey from '@i18n/i18nKey'
-import { i18n } from '@i18n/translation'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
-import { getDir } from '@utils/url-utils'
 import { Icon } from 'astro-icon/components'
 import ImageWrapper from '../../components/misc/ImageWrapper.astro'
-import { licenseConfig } from '../../config/config'
-import { avatarConfig, profileConfig, siteConfig } from '../../config/config' // 🎬 NEW: Import avatarConfig
+import { avatarConfig, siteConfig } from '../../config/config'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
 
 // ⭐ FIXED: Import the correct layout toggle component
@@ -66,18 +60,7 @@ function isVideoFile(src: string): boolean {
     lowercaseSrc.includes('.mp4') ||
     lowercaseSrc.includes('.webm') ||
     lowercaseSrc.includes('.mov') ||
-    lowercaseSrc.match(/\.(mp4|webm|mov|avi)(\?|$)/)
-  )
-}
-
-function isAnimatedFile(src: string): boolean {
-  if (!src) return false
-  const lowercaseSrc = src.toLowerCase()
-  return (
-    lowercaseSrc.includes('.gif') ||
-    lowercaseSrc.includes('.webp') ||
-    lowercaseSrc.includes('.apng') ||
-    lowercaseSrc.match(/\.(gif|webp|apng)(\?|$)/)
+    /\.(mp4|webm|mov|avi)(\?|$)/.test(lowercaseSrc)
   )
 }
 
@@ -141,13 +124,12 @@ const jsonLd = {
               <video
                 id="about-avatar-video"
                 src={aboutPage.data.avatar}
-                alt={`Profile video of ${aboutPage.data.name}`}
                 class="w-32 h-32 md:w-40 md:h-40 object-cover rounded-xl shadow-lg"
                 autoplay
                 muted
                 loop={shouldLoop && loopDelay === 0 && !playOnce}
                 playsinline
-                disablePictureInPicture
+                disablepictureinpicture
                 preload="auto"
                 data-playback-rate={playbackRate}
                 data-should-loop={shouldLoop}
@@ -279,62 +261,97 @@ const jsonLd = {
 
 <!-- 🎬 NEW: Client-side script to configure video elements with avatarConfig settings -->
 <script>
+  const videoEndedHandlers = new WeakMap<HTMLVideoElement, EventListener>()
+
+  function getFloatDataAttribute(
+    video: HTMLVideoElement,
+    key: string,
+    fallback: number,
+  ): number {
+    const value = video.dataset[key]
+    if (!value) return fallback
+
+    const parsedValue = Number.parseFloat(value)
+    return Number.isFinite(parsedValue) ? parsedValue : fallback
+  }
+
+  function getIntDataAttribute(
+    video: HTMLVideoElement,
+    key: string,
+    fallback: number,
+  ): number {
+    const value = video.dataset[key]
+    if (!value) return fallback
+
+    const parsedValue = Number.parseInt(value, 10)
+    return Number.isFinite(parsedValue) ? parsedValue : fallback
+  }
+
   // 🎬 NEW: Configure video elements with settings from avatarConfig
   function configureVideoElements() {
-    const videoElements = document.querySelectorAll('video[data-playback-rate]');
-    
-    videoElements.forEach((video) => {
-      const playbackRate = parseFloat(video.getAttribute('data-playback-rate')) || 0.5;
-      const shouldLoop = video.getAttribute('data-should-loop') === 'true';
-      const loopDelay = parseInt(video.getAttribute('data-loop-delay')) || 5000;
-      const playOnce = video.getAttribute('data-play-once') === 'true';
-      
+    const videoElements = document.querySelectorAll<HTMLVideoElement>(
+      'video[data-playback-rate]',
+    )
+
+    videoElements.forEach(video => {
+      const playbackRate = getFloatDataAttribute(video, 'playbackRate', 0.5)
+      const shouldLoop = video.dataset.shouldLoop === 'true'
+      const loopDelay = getIntDataAttribute(video, 'loopDelay', 5000)
+      const playOnce = video.dataset.playOnce === 'true'
+
       console.log('🎬 Configuring about page video:', {
         playbackRate,
         shouldLoop,
         loopDelay,
         playOnce,
-        videoSrc: video.src
-      });
-      
+        videoSrc: video.src,
+      })
+
       // Set playback rate
-      video.playbackRate = playbackRate;
-      
+      video.playbackRate = playbackRate
+
       // Remove any existing event listeners to prevent duplicates
-      if (video.endedHandler) {
-        video.removeEventListener('ended', video.endedHandler);
+      const existingEndedHandler = videoEndedHandlers.get(video)
+      if (existingEndedHandler) {
+        video.removeEventListener('ended', existingEndedHandler)
+        videoEndedHandlers.delete(video)
       }
-      
+
       // Handle loop behavior
       if (playOnce) {
-        video.loop = false;
-        video.endedHandler = () => {
-          video.pause();
-        };
-        video.addEventListener('ended', video.endedHandler);
+        const endedHandler: EventListener = () => {
+          video.pause()
+        }
+
+        video.loop = false
+        videoEndedHandlers.set(video, endedHandler)
+        video.addEventListener('ended', endedHandler)
       } else if (loopDelay > 0) {
-        video.loop = false;
-        video.endedHandler = () => {
+        const endedHandler: EventListener = () => {
           setTimeout(() => {
-            if (video && video.paused) {
-              video.currentTime = 0;
-              video.play().catch(e => console.log('Video play failed:', e));
+            if (video.paused) {
+              video.currentTime = 0
+              video.play().catch((error: unknown) => {
+                console.log('Video play failed:', error)
+              })
             }
-          }, loopDelay);
-        };
-        video.addEventListener('ended', video.endedHandler);
+          }, loopDelay)
+        }
+
+        video.loop = false
+        videoEndedHandlers.set(video, endedHandler)
+        video.addEventListener('ended', endedHandler)
       } else {
-        video.loop = shouldLoop;
-        video.endedHandler = null;
+        video.loop = shouldLoop
       }
-    });
+    })
   }
 
   // Configure videos when DOM is ready
-  document.addEventListener('DOMContentLoaded', configureVideoElements);
-  
+  document.addEventListener('DOMContentLoaded', configureVideoElements)
+
   // Re-configure on Astro page transitions
-  document.addEventListener('astro:page-load', configureVideoElements);
+  document.addEventListener('astro:page-load', configureVideoElements)
 </script>
 
 <style>
