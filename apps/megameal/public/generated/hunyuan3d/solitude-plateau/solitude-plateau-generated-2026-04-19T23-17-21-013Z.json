@@ -1,0 +1,14 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/solitude-plateau-2026-04-19T23-13-40-475Z/solitude-plateau.glb",
+  "sourceName": "Solitude Plateau",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/solitude-plateau-2026-04-19T23-13-40-482Z/reference/solitude-plateau-reference-2026-04-19T23-15-07-841Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776640507874-wf1503",
+  "prompt": "object: solitude plateau. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Painterly Storybook. style treatment: extremely dark cosmic horror sacred material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-19T23:17:22.821Z"
+}

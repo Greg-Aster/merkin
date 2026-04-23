@@ -39,7 +39,7 @@ type InspectorControllerDeps = {
   getSelectedLibraryItem: () => LibraryItem | null
   setSelectedLibraryItem: (item: LibraryItem | null) => void
   setAssetBrowserFilter: (value: string) => void
-  loadAssetBrowser: (path: string) => Promise<unknown>
+  loadAssetBrowser: (path: string) => Promise<LibraryItem[]>
   setAssetPickerTargetNodeId: (nodeId: string) => void
   getAssetPickerTargetNodeId: () => string
   setActiveEditorTab: (tab: EditorPanelTab) => void
@@ -51,6 +51,33 @@ type InspectorControllerDeps = {
 }
 
 export function createEditorInspectorController(deps: InspectorControllerDeps) {
+  function resolveWorkspaceAssetCandidates(assetUrl: string) {
+    if (typeof assetUrl !== 'string' || !assetUrl.startsWith('/')) return []
+
+    const normalizedUrl = assetUrl.replace(/^\/+/, '')
+    return [
+      `apps/megameal/public/${normalizedUrl}`,
+      `apps/game/public/${normalizedUrl}`,
+    ]
+  }
+
+  function resolveInitialAssetBrowserDirectory(preferredRoot: string, assetUrl: string) {
+    const matchingAssetPath = resolveWorkspaceAssetCandidates(assetUrl)
+      .find((candidate) => candidate === preferredRoot || candidate.startsWith(`${preferredRoot}/`))
+
+    if (!matchingAssetPath) {
+      return {
+        directoryPath: preferredRoot,
+        selectedAssetPath: '',
+      }
+    }
+
+    return {
+      directoryPath: matchingAssetPath.replace(/\/[^/]+$/, ''),
+      selectedAssetPath: matchingAssetPath,
+    }
+  }
+
   function updateParent(nextParentId: string) {
     const selectedNodes = deps.getSelectedNodes()
     if (selectedNodes.length === 0) return
@@ -119,19 +146,37 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     void deps.inspectSelectedAssetForHunyuan(publicUrl, item.path)
   }
 
-  function openAssetPickerForSelectedNode(preferredRoot: string) {
+  async function openAssetPickerForSelectedNode(preferredRoot: string) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode?.asset) {
       deps.setSaveMessage('Select an asset node before choosing a replacement asset')
       return
     }
 
+    const { directoryPath, selectedAssetPath } = resolveInitialAssetBrowserDirectory(
+      preferredRoot,
+      selectedNode.asset.url,
+    )
+
     deps.setAssetPickerTargetNodeId(selectedNode.id)
     deps.setSelectedLibraryItem(null)
     deps.setAssetBrowserFilter('')
-    deps.setActiveEditorTab('create')
-    void deps.loadAssetBrowser(preferredRoot)
-    deps.setSaveMessage(`Choose a replacement asset for ${selectedNode.name}`)
+    deps.setActiveEditorTab('inspect')
+
+    const items = await deps.loadAssetBrowser(directoryPath)
+    const currentAssetItem = selectedAssetPath
+      ? items.find((item) => !item.isDirectory && item.path === selectedAssetPath)
+      : null
+
+    if (currentAssetItem) {
+      selectLibraryItem(currentAssetItem)
+    }
+
+    deps.setSaveMessage(
+      directoryPath === preferredRoot
+        ? `Choose a replacement asset for ${selectedNode.name}`
+        : `Choose a replacement asset for ${selectedNode.name} from its current folder`,
+    )
   }
 
   function applySelectedLibraryAssetToTargetNode() {
@@ -444,7 +489,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     })
   }
 
-  function updateGameplayField(field: 'title' | 'author' | 'location' | 'excerpt' | 'body' | 'targetLevelId' | 'markerColor' | 'audioTrack' | 'fogColor', value: string) {
+  function updateGameplayField(field: 'title' | 'author' | 'location' | 'excerpt' | 'body' | 'targetLevelId' | 'markerColor' | 'audioTrack' | 'fogColor' | 'mistColor', value: string) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode?.gameplay) return
     deps.patchNode(selectedNode.id, {
@@ -466,7 +511,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     })
   }
 
-  function updateGameplayNumericField(field: 'markerSize' | 'audioVolume' | 'regionFalloff' | 'fogDensity' | 'wanderRadius' | 'wanderSpeed' | 'hoverHeight' | 'bobAmplitude' | 'bobSpeed' | 'twinkleSpeed' | 'lightIntensity' | 'lightDistance' | 'lightDecay' | 'spriteIntensity', value: string) {
+  function updateGameplayNumericField(field: 'markerSize' | 'audioVolume' | 'regionFalloff' | 'fogDensity' | 'mistOpacity' | 'mistLayers' | 'mistSpacing' | 'mistScale' | 'mistDriftSpeed' | 'wanderRadius' | 'wanderSpeed' | 'hoverHeight' | 'bobAmplitude' | 'bobSpeed' | 'twinkleSpeed' | 'lightIntensity' | 'lightDistance' | 'lightDecay' | 'spriteIntensity', value: string) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode?.gameplay) return
     const numeric = Number(value)

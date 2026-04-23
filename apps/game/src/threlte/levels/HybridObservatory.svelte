@@ -6,6 +6,7 @@
   import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
   import AmbientAudioRegions from '../components/AmbientAudioRegions.svelte'
   import NaturePackVegetation from '../components/NaturePackVegetation.svelte'
+  import SceneFogExp2 from '../components/SceneFogExp2.svelte'
   import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
   import { qualityLevelStore, qualitySettingsStore } from '../features/performance/stores/performanceStore'
   import { OptimizationLevel, optimizationManager } from '../features/performance'
@@ -13,15 +14,8 @@
   import { editorStateStore, observatoryEditorSettingsStore } from '../editor/editorStore'
   import { resolveObservatoryPresetSettings } from '../editor/editorLevelPresets'
   import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
-  import {
-    renderStyleEnabled,
-    renderStyleFlattenMaterials,
-    renderStyleOutlineOpacity,
-    renderStyleOutlineThickness,
-    renderStylePaintedOutlines,
-    renderStylePresetChoice,
-  } from '../stores/uiStore'
-  import type { StylePreset } from '../styles/StylePalettes'
+  import { replaceRuntimeVisualStyle, resetRuntimeVisualStyle } from '../styles/runtimeVisualStyleStore'
+  import { buildRuntimeVisualStyleFromLevelSettings } from '../styles/GameplayStyleProfiles'
 
   const dispatch = createEventDispatcher()
   const isDev = import.meta.env.DEV
@@ -46,8 +40,6 @@
   let hybridFireflyComponent: any = null
   let starMapComponent: any = null
   let naturePackVegetation: any = null
-  let ghibliStyleSystem: any = null
-  let styleSystemComponent: any = null
   let skyboxComponent: any = null
   let hybridFireflyComponentType: any = null
   let starMapComponentType: any = null
@@ -59,12 +51,6 @@
   let showVegetation = false
   let showStarSystems = false
   const deferredSceneBootCleanups: Array<() => void> = []
-  
-  // Style configuration from manifest
-  let stylePreset: StylePreset = 'ghibli'
-  let resolvedStylePreset: StylePreset = stylePreset
-  let enableToonShading = true
-  
   // Timeline data state
   let realTimelineEvents: any[] = []
   let isLoadingTimeline = true
@@ -133,6 +119,7 @@
   })
 
   onDestroy(() => {
+    resetRuntimeVisualStyle()
     deferredSceneBootCleanups.forEach((cleanup) => cleanup())
     deferredSceneBootCleanups.length = 0
   })
@@ -341,32 +328,17 @@
   function handleLevelTransition(event: CustomEvent) {
     dispatch('levelTransition', event.detail)
   }
-  function handleStyleSystemReady(event: CustomEvent) {
-    if (isDev) console.log('🎨 Style system ready:', event.detail)
-  }
-  function handleStyleChanged(event: CustomEvent) {
-    if (isDev) console.log('🎨 Style changed to:', event.detail.preset)
-  }
-
   // Get current optimization settings reactively
   $: resolvedObservatorySettings = resolveObservatoryPresetSettings($observatoryEditorSettingsStore)
   $: activeManifest = manifest ? applyObservatoryEditorSettings(manifest, resolvedObservatorySettings) : null
   $: terrainAuthoringActive = $editorStateStore.enabled && $editorStateStore.interactionMode === 'terrain'
   $: workbenchViewport = $editorStateStore.enabled && $editorStateStore.viewportLightingMode === 'workbench'
   $: playerSpawnPoint = activeManifest?.spawn?.position ?? [0, 50, 0]
-  $: if (activeManifest?.style) {
-    stylePreset = activeManifest.style.preset || 'ghibli'
-    enableToonShading = activeManifest.style.enabled !== false
+  $: if (activeManifest) {
+    replaceRuntimeVisualStyle(buildRuntimeVisualStyleFromLevelSettings(activeManifest))
   }
-  $: resolvedStylePreset =
-    $renderStylePresetChoice === 'manifest'
-      ? stylePreset
-      : $renderStylePresetChoice
   $: levelOptimizationSettings = activeManifest ? optimizationManager.getComponentSettings(activeManifest.id) : null;
-  $: fullStyleSystemEnabled =
-    !!activeManifest?.features.styles
-    && $renderStyleEnabled
-  $: fallbackMoodLightingEnabled = !!activeManifest?.features.styles && !fullStyleSystemEnabled
+  $: fallbackMoodLightingEnabled = !!activeManifest?.features.styles
   $: observatoryToneMappingExposure = (() => {
     if (!isMobileDevice) return 1.2
     switch ($qualityLevelStore) {
@@ -426,10 +398,6 @@
     activeManifest?.ocean?.enableAnimation !== false
     && $qualityLevelStore !== OptimizationLevel.ULTRA_LOW
 
-  $: if (fullStyleSystemEnabled && !styleSystemComponent) {
-    void ensureStyleSystemComponent()
-  }
-
   $: if (
     terrainReady
     && activeManifest
@@ -452,12 +420,6 @@
       heightData: $terrainStore.manager?.getHeightDataCopy() ?? state.heightData,
     }))
     appliedTerrainOverrideSignature = terrainOverrideSignature
-  }
-
-  async function ensureStyleSystemComponent() {
-    if (styleSystemComponent) return
-    const module = await import('../styles/RenderStyleSystem.svelte')
-    styleSystemComponent = module.default
   }
 
   async function ensureSkyboxComponent() {
@@ -573,26 +535,6 @@
   <LevelManager let:registry let:lighting let:ecsWorld>
     
     <!-- Render style can be swapped independently of level content. -->
-    {#if fullStyleSystemEnabled && styleSystemComponent}
-      <svelte:component
-        this={styleSystemComponent}
-        bind:this={ghibliStyleSystem}
-        stylePreset={resolvedStylePreset}
-        enableToonShading={enableToonShading}
-        enableOutlines={$qualitySettingsStore.enablePostProcessing}
-        flattenMaterials={$renderStyleFlattenMaterials}
-        usePaintedOutlines={$renderStylePaintedOutlines}
-        outlineThickness={$renderStyleOutlineThickness}
-        outlineOpacity={$renderStyleOutlineOpacity}
-        ambientIntensity={observatoryAmbientIntensity}
-        sunIntensity={observatorySunIntensity}
-        fillIntensity={observatoryFillIntensity}
-        toneMappingExposure={observatoryToneMappingExposure}
-        on:styleSystemReady={handleStyleSystemReady}
-        on:styleChanged={handleStyleChanged}
-      />
-    {/if}
-
     {#if fallbackMoodLightingEnabled}
       <T.AmbientLight color="#1a2238" intensity={fallbackAmbientIntensity} />
       <T.DirectionalLight
@@ -610,17 +552,13 @@
     {/if}
     
     <!-- Dynamic fog based on manifest style configuration -->
-    <T.FogExp2 
-      color={workbenchViewport
-        ? '#dce8f4'
-        : $underwaterStateStore.isUnderwater 
-          ? (activeManifest.style?.fog?.color || '#006994')
-          : (activeManifest.style?.fog?.color || '#6a7db3')} 
-      density={workbenchViewport
-        ? 0.00018
-        : $underwaterStateStore.isUnderwater 
-          ? (activeManifest.style?.fog?.density * 50 || 0.1)
-          : (activeManifest.style?.fog?.density || 0.002)} 
+    <SceneFogExp2
+      color={$underwaterStateStore.isUnderwater 
+        ? (activeManifest.style?.fog?.color || '#006994')
+        : (activeManifest.style?.fog?.color || '#6a7db3')}
+      density={$underwaterStateStore.isUnderwater 
+        ? (activeManifest.style?.fog?.density * 50 || 0.1)
+        : (activeManifest.style?.fog?.density || 0.002)}
     />
     
     <T.Group name={activeManifest.id}>

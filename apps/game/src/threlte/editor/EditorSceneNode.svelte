@@ -5,6 +5,7 @@
   import * as THREE from 'three'
   import ProceduralMesh from '../components/ProceduralMesh.svelte'
   import StarSprite from '../components/StarSprite.svelte'
+  import GroundMistLayer from '../components/GroundMistLayer.svelte'
   import EditorColliderHelper from './EditorColliderHelper.svelte'
   import EditorNodeRenderContent from './EditorNodeRenderContent.svelte'
   import { qualityLevelStore } from '../features/performance/stores/performanceStore'
@@ -412,6 +413,48 @@
         transparent={true}
         opacity={0.38}
       />
+    {:else if node.gameplay.type === 'mist-region'}
+      {#if editorEnabled}
+        <ProceduralMesh
+          geometry="box"
+          args={[1, 1, 1]}
+          position={[0, 0, 0]}
+          rotation={[0, 0, 0]}
+          scale={[1, 1, 1]}
+          color={node.gameplay.mistColor ?? '#b992ff'}
+          emissive={node.gameplay.mistColor ?? '#b992ff'}
+          emissiveIntensity={selected || markerHovered ? 0.34 : 0.1}
+          metalness={0.02}
+          roughness={1}
+          transparent={true}
+          opacity={0.12}
+        />
+        <ProceduralMesh
+          geometry="torus"
+          args={[0.6, 0.025, 12, 24]}
+          position={[0, 0.18, 0]}
+          rotation={[Math.PI / 2, 0, Math.sin(animationTime * 0.3) * 0.25]}
+          scale={[1, 1, 1]}
+          color={node.gameplay.mistColor ?? '#b992ff'}
+          emissive={node.gameplay.mistColor ?? '#b992ff'}
+          emissiveIntensity={0.24}
+          metalness={1}
+          roughness={0.05}
+          transparent={true}
+          opacity={0.42}
+        />
+      {:else}
+        <GroundMistLayer
+          enabled={true}
+          color={node.gameplay.mistColor ?? '#241557'}
+          opacity={node.gameplay.mistOpacity ?? 0.14}
+          layers={Math.max(1, Math.round(node.gameplay.mistLayers ?? 3))}
+          baseHeight={0}
+          heightStep={node.gameplay.mistSpacing ?? 0.45}
+          scale={node.gameplay.mistScale ?? 360}
+          driftSpeed={node.gameplay.mistDriftSpeed ?? 0.05}
+        />
+      {/if}
     {:else}
       <ProceduralMesh
         geometry="torus"

@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-04-22T00:44:49.886Z",
+  "styleProfileName": "Yggdrasil · Sacred Mythic Natural",
+  "sourceName": "Solitude Plateau",
+  "sourceAssetUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T23-17-21-013Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T23-17-21-013Z.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/solitude-plateau-2026-04-22T00-43-40-985Z/source/solitude-plateau.glb",
+  "prompt": "object: solitude plateau. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Yggdrasil · Sacred Mythic Natural. style treatment: ancient sacred material language, weathered cosmic wood, rune-carved stone, moss, lichen, cold mist, restrained gold accents, monumental age, painterly but grounded, cohesive mythic surfaces, reverent atmosphere, carved history, readable forms",
+  "negativePrompt": "",
+  "loraNotes": "Lean toward mythic Scandinavian sacred landscape and old ritual craft rather than generic high fantasy prettiness.",
+  "controlNetNotes": "Preserve silhouette, climbability, collision readability, path readability, and landmark hierarchy.",
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/solitude-plateau-reference-2026-04-22T00-44-49-883Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/solitude-plateau-2026-04-22T00-43-40-985Z/reference/solitude-plateau-reference-2026-04-22T00-44-49-883Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/solitude-plateau-reference-2026-04-22T00-44-49-883Z.png"
+}

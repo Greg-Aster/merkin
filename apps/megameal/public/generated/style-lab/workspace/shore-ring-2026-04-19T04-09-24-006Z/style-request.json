@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-04-19T04:12:45.204Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "Shore Ring",
+  "sourceAssetUrl": "/generated/hunyuan3d/shore-ring-generated-2026-04-19t02-17-07-160z/shore-ring-generated-2026-04-19t02-17-07-160z-generated-2026-04-19T03-43-33-903Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/shore-ring-generated-2026-04-19t02-17-07-160z/shore-ring-generated-2026-04-19t02-17-07-160z-generated-2026-04-19T03-43-33-903Z.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/shore-ring-2026-04-19T04-09-24-006Z/source/shore-ring.glb",
+  "prompt": "object: circular shoreline ring of eroded ritual stone marking the edge between the sacred island and the black sea. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror sacred material language, blackened ancient timber, abyssal rune-carved stone, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread. avoid: daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened timber, abyssal roots, violet-magenta rune glow, cosmic dread, and monumental sacred architecture over generic fantasy prettiness.",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/shore-ring-reference-2026-04-19T04-12-45-197Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/shore-ring-2026-04-19T04-09-24-006Z/reference/shore-ring-reference-2026-04-19T04-12-45-197Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/shore-ring-reference-2026-04-19T04-12-45-197Z.png"
+}

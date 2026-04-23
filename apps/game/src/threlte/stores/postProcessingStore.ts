@@ -99,25 +99,25 @@ const qualityConfigs = {
     toneMapping: { enabled: true, intensity: 0.8, exposure: 0.9, whitePoint: 1.0 }
   },
   low: {
-    bloom: { enabled: true, intensity: 0.5, threshold: 0.9, smoothWidth: 0.05 },
+    bloom: { enabled: false, intensity: 0, threshold: 0.95, smoothWidth: 0.05 },
     ssao: { enabled: false, intensity: 0, radius: 0.08, samples: 8, rings: 2 },
     fxaa: { enabled: true, intensity: 1.0 },
     toneMapping: { enabled: true, intensity: 0.9, exposure: 0.95, whitePoint: 1.0 }
   },
   medium: {
-    bloom: { enabled: true, intensity: 0.8, threshold: 0.85, smoothWidth: 0.025 },
+    bloom: { enabled: true, intensity: 0.58, threshold: 0.9, smoothWidth: 0.03 },
     ssao: { enabled: false, intensity: 0.3, radius: 0.1, samples: 12, rings: 3 },
     fxaa: { enabled: true, intensity: 1.0 },
     toneMapping: { enabled: true, intensity: 1.0, exposure: 1.0, whitePoint: 1.0 }
   },
   high: {
-    bloom: { enabled: true, intensity: 1.0, threshold: 0.85, smoothWidth: 0.025 },
+    bloom: { enabled: true, intensity: 0.9, threshold: 0.84, smoothWidth: 0.025 },
     ssao: { enabled: true, intensity: 0.5, radius: 0.1, samples: 16, rings: 3 },
     fxaa: { enabled: true, intensity: 1.0 },
     toneMapping: { enabled: true, intensity: 1.0, exposure: 1.0, whitePoint: 1.0 }
   },
   ultra: {
-    bloom: { enabled: true, intensity: 1.2, threshold: 0.8, smoothWidth: 0.02 },
+    bloom: { enabled: true, intensity: 1.05, threshold: 0.8, smoothWidth: 0.02 },
     ssao: { enabled: true, intensity: 0.7, radius: 0.12, samples: 24, rings: 4 },
     fxaa: { enabled: true, intensity: 1.0 },
     toneMapping: { enabled: true, intensity: 1.1, exposure: 1.05, whitePoint: 1.0 }

@@ -46,6 +46,10 @@ import type {
 
 // Import type guards
 import { isImageBannerItem, isVideoBannerItem } from "./types";
+import postsManifest from "../../../../../packages/shared-data/generated/posts.json";
+import timelineManifest from "../../../../../packages/shared-data/generated/timeline.json";
+import gameStarsManifest from "../../../../../packages/shared-data/generated/game-stars.json";
+import { SERIES_CONFIG } from "@/config/seriesConfig";
 
 // =====================================================================
 // BANNER IMAGE IMPORTS (for images and video fallbacks)
@@ -76,6 +80,27 @@ type BannerMotionConfig = {
 	alternate?: boolean;
 	easing?: string;
 };
+
+const publishedPosts = postsManifest.items.filter((post) => !post.draft);
+const publishedTimelineItems = timelineManifest.items.filter(
+	(event) => !event.isDraft,
+);
+const publishedGameStars = gameStarsManifest.items.filter(
+	(event) => !event.isDraft,
+);
+const activeArcIds = new Set(
+	publishedPosts
+		.map((post) => post.series)
+		.filter(
+			(seriesId): seriesId is keyof typeof SERIES_CONFIG =>
+				typeof seriesId === "string" && seriesId in SERIES_CONFIG,
+		),
+);
+
+const publishedDispatchCount = publishedPosts.length;
+const publishedTimelineCount = publishedTimelineItems.length;
+const publishedGameStarsCount = publishedGameStars.length;
+const activeArcCount = activeArcIds.size;
 
 // =====================================================================
 // STANDARD BANNER DATA CONFIGURATION
@@ -133,7 +158,7 @@ const bannerEntries: BannerEntry[] = [
 			sceneId: "home-intro",
 			alt: "MEGA MEAL SAGA — Universe Introduction",
 			src: "",
-			holdMs: 30000,
+			holdMs: 12000,
 			showPreviewCard: false,
 		},
 		link: null,
@@ -293,10 +318,13 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
 		icon: "book-open",
 	},
 	"/timeline/": {
-		title: "MEGAMEAL Timeline",
+		title: "Open the Timeline",
 		description:
-			"Open the dedicated star map for eras, incidents, recipes, wars, corporate ascensions, and archival fragments across the MEGAMEAL chronology.",
+			"The timeline is the map layer for the whole project: eras, incidents, recipes, wars, corporate ascensions, and archival fragments.",
 		icon: "timeline",
+		kicker: "Chronology Console",
+		stat: `${publishedTimelineCount} live timeline entries`,
+		ctaLabel: "Enter Timeline",
 	},
 	"/posts/mega-meal-explained/": {
 		title: "Welcome to MEGAMEAL",
@@ -305,10 +333,13 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
 		icon: "book-open",
 	},
 	"/posts/cookbook/cookbook-index/": {
-		title: "The Cookbook Project",
+		title: "Open the Cookbook",
 		description:
-			"Discover our comprehensive cookbook featuring recipes, cooking techniques, and culinary tips inspired by the MEGAMEAL universe. Perfect for aspiring chefs and food enthusiasts.",
+			"Discover recipes, cooking techniques, and commercial food artifacts pulled out of the MEGAMEAL universe.",
 		icon: "user-group",
+		kicker: "Cookbook Project",
+		stat: "Recipe index online",
+		ctaLabel: "Open Cookbook",
 	},
 	"/posts/timeline/": {
 		title: "Timeline Map",
@@ -317,34 +348,49 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
 		icon: "newspaper",
 	},
 	"/archive/": {
-		title: "Archive of Dispatches",
+		title: "Read the Story Arcs",
 		description:
-			"Browse reports, restricted files, commercials, recipes, and lore fragments across the full publication stream.",
+			"Follow connected chapters, recovered accounts, recipes, corporate records, and cosmic incident reports.",
 		icon: "newspaper",
+		kicker: "Story Archive",
+		stat: `${activeArcCount} active arcs`,
+		ctaLabel: "Open Archive",
 	},
 	"/game/": {
-		title: "Star Observatory",
+		title: "Enter the Game Mode",
 		description:
-			"Launch the game experience directly from the viewscreen and move from reading into play without leaving the site flow.",
+			"Move from reading the universe into navigating it. The observatory turns story nodes into explorable coordinates.",
 		icon: "rocket",
+		kicker: "Star Observatory",
+		stat: `${publishedGameStarsCount} star nodes`,
+		ctaLabel: "Enter Game",
 	},
 	"/store/": {
-		title: "Storefront and Artifacts",
+		title: "Browse the Store",
 		description:
-			"Explore products, in-universe merchandise, and commercial relics extracted from the MEGAMEAL corporate machine.",
+			"Artifacts, goods, fake products, and dystopian brand debris from the MEGAMEAL economy.",
 		icon: "briefcase",
+		kicker: "Commercial Layer",
+		stat: "Artifacts and goods",
+		ctaLabel: "Browse Store",
 	},
 	"/community/": {
-		title: "Community Channels",
+		title: "Join the Community",
 		description:
-			"Join the live conversation, follow updates, and find the main points of contact around the project.",
+			"Follow updates, contact the project, and stay connected as the universe expands.",
 		icon: "user-group",
+		kicker: "Live Channels",
+		stat: `${publishedDispatchCount} transmissions`,
+		ctaLabel: "Open Channels",
 	},
 	"/posts/introducing-story-mode/": {
-		title: "Story Mode",
+		title: "Open Story Mode",
 		description:
-			"Read the saga as connected arcs and guided entry points rather than as a flat chronological feed.",
+			"Read the saga as connected arcs and guided entry points instead of a flat chronological feed.",
 		icon: "newspaper",
+		kicker: "Guided Entry",
+		stat: "Arc-first reading mode",
+		ctaLabel: "Open Story Mode",
 	},
 	/*
   '/contact': {
@@ -641,6 +687,9 @@ export function getBannerItemPreviewDetails(
 		urlForDisplay, // This will be empty if no valid link
 		previewTitle: actualPreviewData.title,
 		previewDescription: actualPreviewData.description,
+		previewKicker: actualPreviewData.kicker,
+		previewStat: actualPreviewData.stat,
+		previewCtaLabel: actualPreviewData.ctaLabel,
 		previewIconSVG,
 		isVideoButton: isVideoBannerItem(item), // Renamed from isVideo for clarity in BannerItemPreviewDetails
 	};

@@ -7,7 +7,7 @@
 
 import * as THREE from 'three'
 
-export type StylePreset = 'site' | 'surreal-site' | 'ghibli' | 'alto' | 'monument' | 'retro'
+export type StylePreset = 'site' | 'surreal-site' | 'ghibli' | 'alto' | 'monument' | 'retro' | 'etherpunk'
 
 export interface ColorPalette {
   // Environment colors
@@ -125,6 +125,30 @@ export const retroPalette: ColorPalette = {
   outline: new THREE.Color('#2D3436')       // Dark gray outlines
 }
 
+/**
+ * Etherpunk palette
+ * Fairy-tale brass, oxidized teal, gaslight violet, and storybook gloom.
+ */
+export const etherpunkPalette: ColorPalette = {
+  sky: new THREE.Color('#1A1B31'),
+  skyGradient: new THREE.Color('#5A4C8B'),
+  water: new THREE.Color('#2E6F7E'),
+  grass: new THREE.Color('#62765E'),
+  earth: new THREE.Color('#463A33'),
+  trees: new THREE.Color('#4E5E4A'),
+  flowers: new THREE.Color('#D2A35C'),
+  fireflies: [
+    new THREE.Color('#7FF3E8'),
+    new THREE.Color('#FFD07A'),
+    new THREE.Color('#F08BFF')
+  ],
+  ambient: new THREE.Color('#8A7FD1'),
+  sun: new THREE.Color('#D7A85E'),
+  shadow: new THREE.Color('#0A0813'),
+  fog: new THREE.Color('#3D335D'),
+  outline: new THREE.Color('#120F19')
+}
+
 function blendColors(colorA: THREE.Color, colorB: THREE.Color, amount: number) {
   return colorA.clone().lerp(colorB, amount)
 }
@@ -136,7 +160,8 @@ export const staticStylePalettes: Record<Exclude<StylePreset, 'site' | 'surreal-
   ghibli: ghibliPalette,
   alto: altoPalette,
   monument: monumentPalette,
-  retro: retroPalette
+  retro: retroPalette,
+  etherpunk: etherpunkPalette
 }
 
 function cloneColor(color: THREE.Color) {

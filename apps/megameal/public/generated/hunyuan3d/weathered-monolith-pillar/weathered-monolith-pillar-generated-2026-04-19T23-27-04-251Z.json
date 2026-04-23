@@ -1,0 +1,14 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t22-48-19-209z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t22-48-19-209z-generated-2026-04-19T00-26-03-604Z.glb",
+  "sourceName": "Solitude Pillar 2",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/solitude-pillar-2-2026-04-19T23-24-10-608Z/reference/solitude-pillar-2-reference-2026-04-19T23-25-27-512Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776641127593-hsxnt4",
+  "prompt": "object: Solitude Pillar 2. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Painterly Storybook. style treatment: extremely dark cosmic horror sacred material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-19T23:27:06.086Z"
+}

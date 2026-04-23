@@ -45,6 +45,10 @@ type StandardBannerPreview = {
 	hasValidLink: boolean;
 	previewTitle: string;
 	previewDescription: string;
+	previewKicker?: string;
+	previewStat?: string;
+	previewCtaLabel?: string;
+	previewIconSVG?: string;
 };
 
 type BannerStageConfig = {
@@ -442,15 +446,279 @@ const hasAssistantBanner = scene?.id === "assistant";
                           )}
                         </div>
                         {previewDetails && item.showPreviewCard !== false && (
-                          <div class="banner-title-display">
-                            <div class="banner-title-kicker">
-                              {previewDetails.hasValidLink
-                                ? 'Destination'
-                                : 'Viewscreen'}
+                          item.sceneId === 'timeline-billboard' ? (
+                            <div class="banner-billboard banner-billboard--timeline">
+                              <div class="banner-billboard__timeline-panel">
+                                <div class="banner-billboard__timeline-topline">
+                                  {previewDetails.previewIconSVG && (
+                                    <div class="banner-title-sigil" aria-hidden="true">
+                                      <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <g set:html={previewDetails.previewIconSVG} />
+                                      </svg>
+                                    </div>
+                                  )}
+                                  <div class="banner-title-kicker">
+                                    {previewDetails.previewKicker || 'Chronology Console'}
+                                  </div>
+                                  {previewDetails.previewStat && (
+                                    <div class="banner-billboard__timeline-statline">
+                                      {previewDetails.previewStat}
+                                    </div>
+                                  )}
+                                </div>
+                                <div class="banner-billboard__timeline-copy">
+                                  <h3>{previewDetails.previewTitle}</h3>
+                                  <p>{previewDetails.previewDescription}</p>
+                                </div>
+                                {previewDetails.previewCtaLabel && (
+                                  <div class="banner-billboard__timeline-footer">
+                                    <div class="banner-billboard__timeline-cta">
+                                      {previewDetails.previewCtaLabel}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                            <h3>{previewDetails.previewTitle}</h3>
-                            <p>{previewDetails.previewDescription}</p>
-                          </div>
+                          ) : item.sceneId === 'archive-billboard' ? (
+                            <div class="banner-billboard banner-billboard--archive">
+                              <div class="banner-billboard__archive-card">
+                                <div class="banner-billboard__archive-header">
+                                  {previewDetails.previewIconSVG && (
+                                    <div class="banner-title-sigil" aria-hidden="true">
+                                      <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <g set:html={previewDetails.previewIconSVG} />
+                                      </svg>
+                                    </div>
+                                  )}
+                                  <div class="banner-title-kicker">
+                                    {previewDetails.previewKicker || 'Story Archive'}
+                                  </div>
+                                  {previewDetails.previewStat && (
+                                    <div class="banner-billboard__archive-stamp">
+                                      {previewDetails.previewStat}
+                                    </div>
+                                  )}
+                                </div>
+                                <h3>{previewDetails.previewTitle}</h3>
+                                <p>{previewDetails.previewDescription}</p>
+                                {previewDetails.previewCtaLabel && (
+                                  <div class="banner-billboard__archive-footer">
+                                    {previewDetails.previewCtaLabel}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ) : item.sceneId === 'cookbook-billboard' ? (
+                            <div class="banner-billboard banner-billboard--cookbook">
+                              <div class="banner-billboard__cookbook-slab">
+                                <div class="banner-billboard__cookbook-topline">
+                                  {previewDetails.previewIconSVG && (
+                                    <div class="banner-title-sigil" aria-hidden="true">
+                                      <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <g set:html={previewDetails.previewIconSVG} />
+                                      </svg>
+                                    </div>
+                                  )}
+                                  <div class="banner-title-kicker">
+                                    {previewDetails.previewKicker || 'Cookbook Project'}
+                                  </div>
+                                </div>
+                                <div class="banner-billboard__cookbook-copy">
+                                  <h3>{previewDetails.previewTitle}</h3>
+                                  <p>{previewDetails.previewDescription}</p>
+                                </div>
+                                <div class="banner-billboard__cookbook-footer">
+                                  {previewDetails.previewStat && (
+                                    <span class="banner-title-stat">
+                                      {previewDetails.previewStat}
+                                    </span>
+                                  )}
+                                  {previewDetails.previewCtaLabel && (
+                                    <span class="banner-title-cta">
+                                      {previewDetails.previewCtaLabel}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ) : item.sceneId === 'game-billboard' ? (
+                            <div class="banner-billboard banner-billboard--game">
+                              <div class="banner-billboard__game-surface">
+                                <div class="banner-billboard__game-reticle" aria-hidden="true">
+                                  <span></span>
+                                  <span></span>
+                                  <span></span>
+                                  <span></span>
+                                </div>
+                                <div class="banner-billboard__game-copy">
+                                  <div class="banner-billboard__game-topline">
+                                    {previewDetails.previewIconSVG && (
+                                      <div class="banner-title-sigil" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="currentColor">
+                                          <g set:html={previewDetails.previewIconSVG} />
+                                        </svg>
+                                      </div>
+                                    )}
+                                    <div class="banner-title-kicker">
+                                      {previewDetails.previewKicker || 'Star Observatory'}
+                                    </div>
+                                    {previewDetails.previewStat && (
+                                      <div class="banner-billboard__game-statline">
+                                        {previewDetails.previewStat}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div class="banner-billboard__game-hero">
+                                    <div class="banner-billboard__game-watermark" aria-hidden="true">
+                                      Observatory
+                                    </div>
+                                    <h3>{previewDetails.previewTitle}</h3>
+                                  </div>
+                                  <div class="banner-billboard__game-sidecar">
+                                    <p>{previewDetails.previewDescription}</p>
+                                    <div class="banner-title-meta">
+                                      {previewDetails.previewCtaLabel && (
+                                        <span class="banner-title-cta">
+                                          {previewDetails.previewCtaLabel}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ) : item.sceneId === 'store-billboard' ? (
+                            <div class="banner-billboard banner-billboard--store">
+                              <div class="banner-billboard__store-headline">
+                                <div class="banner-title-kicker">
+                                  {previewDetails.previewKicker || 'Commercial Layer'}
+                                </div>
+                                <h3>{previewDetails.previewTitle}</h3>
+                              </div>
+                              <div class="banner-billboard__store-deck">
+                                <p>{previewDetails.previewDescription}</p>
+                                <div class="banner-billboard__store-offer">
+                                  {previewDetails.previewStat && (
+                                    <span class="banner-title-stat">
+                                      {previewDetails.previewStat}
+                                    </span>
+                                  )}
+                                  {previewDetails.previewCtaLabel && (
+                                    <span class="banner-title-cta">
+                                      {previewDetails.previewCtaLabel}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              {previewDetails.previewIconSVG && (
+                                <div class="banner-title-sigil" aria-hidden="true">
+                                  <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <g set:html={previewDetails.previewIconSVG} />
+                                  </svg>
+                                </div>
+                              )}
+                            </div>
+                          ) : item.sceneId === 'story-mode-billboard' ? (
+                            <div class="banner-billboard banner-billboard--story-mode">
+                              <div class="banner-billboard__story-mode-panel">
+                                <div class="banner-billboard__story-mode-header">
+                                  {previewDetails.previewIconSVG && (
+                                    <div class="banner-title-sigil" aria-hidden="true">
+                                      <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <g set:html={previewDetails.previewIconSVG} />
+                                      </svg>
+                                    </div>
+                                  )}
+                                  <div class="banner-title-kicker">
+                                    {previewDetails.previewKicker || 'Guided Entry'}
+                                  </div>
+                                </div>
+                                <h3>{previewDetails.previewTitle}</h3>
+                                <p>{previewDetails.previewDescription}</p>
+                                <div class="banner-billboard__story-mode-footer">
+                                  {previewDetails.previewStat && (
+                                    <span class="banner-title-stat">
+                                      {previewDetails.previewStat}
+                                    </span>
+                                  )}
+                                  {previewDetails.previewCtaLabel && (
+                                    <span class="banner-title-cta">
+                                      {previewDetails.previewCtaLabel}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ) : item.sceneId === 'community-billboard' ? (
+                            <div class="banner-billboard banner-billboard--community">
+                              <div class="banner-billboard__community-marquee">
+                                <span>{previewDetails.previewKicker || 'Live Channels'}</span>
+                                {previewDetails.previewStat && (
+                                  <span>{previewDetails.previewStat}</span>
+                                )}
+                                {previewDetails.previewCtaLabel && (
+                                  <span>{previewDetails.previewCtaLabel}</span>
+                                )}
+                              </div>
+                              <div class="banner-billboard__community-window">
+                                <div class="banner-billboard__community-topline">
+                                  {previewDetails.previewIconSVG && (
+                                    <div class="banner-title-sigil" aria-hidden="true">
+                                      <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <g set:html={previewDetails.previewIconSVG} />
+                                      </svg>
+                                    </div>
+                                  )}
+                                  <div class="banner-title-kicker">
+                                    {previewDetails.previewKicker || 'Live Channels'}
+                                  </div>
+                                </div>
+                                <h3>{previewDetails.previewTitle}</h3>
+                                <p>{previewDetails.previewDescription}</p>
+                                {previewDetails.previewCtaLabel && (
+                                  <div class="banner-billboard__community-cta">
+                                    {previewDetails.previewCtaLabel}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <div
+                              class="banner-title-display"
+                              data-banner-scene-id={item.sceneId || undefined}
+                            >
+                              {previewDetails.previewIconSVG && (
+                                <div class="banner-title-sigil" aria-hidden="true">
+                                  <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <g set:html={previewDetails.previewIconSVG} />
+                                  </svg>
+                                </div>
+                              )}
+                              <div class="banner-title-kicker">
+                                {previewDetails.previewKicker ||
+                                  (previewDetails.hasValidLink
+                                    ? 'Destination'
+                                    : 'Viewscreen')}
+                              </div>
+                              <h3>{previewDetails.previewTitle}</h3>
+                              <p>{previewDetails.previewDescription}</p>
+                              {(previewDetails.previewStat ||
+                                previewDetails.previewCtaLabel) && (
+                                <div class="banner-title-meta">
+                                  {previewDetails.previewStat && (
+                                    <span class="banner-title-stat">
+                                      {previewDetails.previewStat}
+                                    </span>
+                                  )}
+                                  {previewDetails.previewCtaLabel && (
+                                    <span class="banner-title-cta">
+                                      {previewDetails.previewCtaLabel}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )
                         )}
                       </div>
                     </div>

@@ -102,15 +102,15 @@ export class OptimizationManager {
       componentOverrides: new Map(),
     },
     [OptimizationLevel.MEDIUM]: {
-      canvasScale: 0.75,
-      enablePostProcessing: false,
-      enableShadows: false,
-      shadowMapSize: 0,
+      canvasScale: 0.85,
+      enablePostProcessing: true,
+      enableShadows: true,
+      shadowMapSize: 512,
       enableDynamicLighting: true,
-      textureResolution: 512,
+      textureResolution: 1024,
       enableProceduralTextures: true,
-      enableNormalMaps: false,
-      enableReflections: false,
+      enableNormalMaps: true,
+      enableReflections: true,
       enableRefractions: false,
       enableVegetation: true,
       maxFireflyLights: 12,
@@ -118,12 +118,12 @@ export class OptimizationManager {
       componentOverrides: new Map(),
     },
     [OptimizationLevel.HIGH]: {
-      canvasScale: 0.9,
-      enablePostProcessing: false,
+      canvasScale: 1.0,
+      enablePostProcessing: true,
       enableShadows: true,
-      shadowMapSize: 512,
+      shadowMapSize: 1024,
       enableDynamicLighting: true,
-      textureResolution: 1024,
+      textureResolution: 2048,
       enableProceduralTextures: true,
       enableNormalMaps: true,
       enableReflections: true,
@@ -135,9 +135,9 @@ export class OptimizationManager {
     },
     [OptimizationLevel.ULTRA]: {
       canvasScale: 1.0,
-      enablePostProcessing: false,
+      enablePostProcessing: true,
       enableShadows: true,
-      shadowMapSize: 1024,
+      shadowMapSize: 2048,
       enableDynamicLighting: true,
       textureResolution: 2048,
       enableProceduralTextures: true,
@@ -312,16 +312,16 @@ export class OptimizationManager {
       }
     } else {
       if (estimatedGPUTier === 'ultra') {
-        level = OptimizationLevel.HIGH
+        level = OptimizationLevel.ULTRA
       } else if (estimatedGPUTier === 'high') {
         level = OptimizationLevel.HIGH
       } else if (estimatedGPUTier === 'low') {
         level = OptimizationLevel.LOW
       } else {
-        const highDensityDisplay = pixelRatio > 1.25
-        const midRangeCpu = hardwareConcurrency <= 8
-        const limitedMemory = (deviceMemory ?? 8) <= 8
-        level = highDensityDisplay || midRangeCpu || limitedMemory
+        const veryHighDensityDisplay = pixelRatio > 1.75
+        const constrainedCpu = hardwareConcurrency <= 4
+        const limitedMemory = (deviceMemory ?? 8) <= 4
+        level = veryHighDensityDisplay && (constrainedCpu || limitedMemory)
           ? OptimizationLevel.LOW
           : OptimizationLevel.MEDIUM
       }

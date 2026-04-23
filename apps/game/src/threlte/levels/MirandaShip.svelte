@@ -4,6 +4,7 @@
   import { Collider, RigidBody } from '@threlte/rapier'
   import * as THREE from 'three'
   import LevelManager from '../core/LevelManager.svelte'
+  import SceneFogExp2 from '../components/SceneFogExp2.svelte'
   import EditorColliderHelper from '../editor/EditorColliderHelper.svelte'
   import { editorSceneStore, editorStateStore } from '../editor/editorStore'
   import LevelTransitionHandler from '../components/LevelTransitionHandler.svelte'
@@ -826,7 +827,7 @@
       files={activeSkyboxPreset.files}
     />
 
-    <T.FogExp2 color={$editorStateStore.enabled && $editorStateStore.viewportLightingMode === 'workbench' ? '#d7e4f0' : mirandaFogColor} density={$editorStateStore.enabled && $editorStateStore.viewportLightingMode === 'workbench' ? 0.00035 : mirandaFogDensity} />
+    <SceneFogExp2 color={mirandaFogColor} density={mirandaFogDensity} />
 
     <T.AmbientLight intensity={mirandaAmbientIntensity} color="#7d8ba7" />
     <T.HemisphereLight skyColor="#8fb5ff" groundColor="#09070a" intensity={mirandaFillLightIntensity} />

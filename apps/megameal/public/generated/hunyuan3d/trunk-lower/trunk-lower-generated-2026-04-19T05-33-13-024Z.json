@@ -1,0 +1,14 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/trunk-lower-2026-04-19T05-30-13-253Z/trunk-lower.glb",
+  "sourceName": "Trunk Lower",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/trunk-lower-2026-04-19T05-30-13-260Z/reference/trunk-lower-reference-2026-04-19T05-31-16-414Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776576676436-kp9ipe",
+  "prompt": "object: colossal ancient trunk segment of blackened sacred timber, fissured bark mass. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror sacred material language, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-19T05:33:13.801Z"
+}

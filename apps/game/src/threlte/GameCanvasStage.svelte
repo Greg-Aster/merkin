@@ -98,7 +98,7 @@
       <AssetLoader />
       <Renderer />
 
-      {#if $qualitySettingsStore.enablePostProcessing}
+      {#if $qualitySettingsStore.enablePostProcessing && terrainReady && (editorEnabled || playerReady)}
         <SimplePostProcessing toneMappingExposure={1.0} />
       {/if}
 

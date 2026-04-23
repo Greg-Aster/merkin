@@ -206,6 +206,10 @@ export function fixMaterialDepthIssues(material: THREE.Material): THREE.Material
   
   // 3. Reduce color banding
   mat.dithering = true
+
+  if ('fog' in mat) {
+    mat.fog = true
+  }
   
   // 4. NEVER disable depthWrite - this breaks depth sorting
   // 5. NEVER force transparency - this causes disappearing objects

@@ -46,6 +46,11 @@ blog-pusher-sync/
 
 # Git worktrees (local-only, not committed)
 .linked-worktrees/
+.dev-runtime/
+
+# Local editor recovery snapshots
+apps/game/src/threlte/editor/scenes/*.backup.json
+apps/game/src/threlte/editor/scenes/*.pre-restore.json
 
 # Archived large media (cleanup guardrails)
 **/posts/Mega-Meal-Explained/gif/title4.gif

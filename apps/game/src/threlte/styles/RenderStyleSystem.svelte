@@ -567,5 +567,5 @@
 {/if}
 
 {#if isInitialized && enableStyleFog}
-  <T.Fog color={currentPalette.fog} near={50} far={300} />
+  <T.Fog attach="fog" color={currentPalette.fog} near={50} far={300} />
 {/if}
