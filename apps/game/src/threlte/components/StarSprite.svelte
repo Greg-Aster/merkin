@@ -22,6 +22,7 @@
   export let twinkleSpeed: number = 1.0
   export let animationOffset: number = Math.random() * Math.PI * 2
   export let isKeyElement: boolean = false // Special rendering for important elements
+  export let starType: string | null = null
   export let enableTwinkle: boolean = true
   export let opacity: number = 1.0
   
@@ -36,7 +37,16 @@
   let material: THREE.SpriteMaterial
   let texture: THREE.CanvasTexture
   let baseScale: number = size
-  let initialColor: number | string = color // Store initial color to avoid recreating texture
+  let lastVisualSignature = ''
+
+  function disposeSpriteResources() {
+    texture?.dispose()
+    material?.dispose()
+  }
+
+  function getVisualSignature() {
+    return JSON.stringify({ color, starType, isKeyElement })
+  }
 
   onMount(() => {
     createStarSprite()
@@ -47,11 +57,19 @@
 
   function createStarSprite() {
     // Convert numeric color to hex string for starUtils
-    const hexColor = typeof initialColor === 'number' ? `#${initialColor.toString(16).padStart(6, '0')}` : initialColor
+    const hexColor = typeof color === 'number' ? `#${color.toString(16).padStart(6, '0')}` : color
+    const nextSignature = getVisualSignature()
+
+    if (nextSignature === lastVisualSignature && material && texture) {
+      return
+    }
+
+    disposeSpriteResources()
+    lastVisualSignature = nextSignature
     
     // Create enhanced star texture like StarMap (ONCE, not every frame)
-    const starType = getStarType(`sprite_${position.join('_')}`, isKeyElement)
-    const canvas = createEnhancedStarTexture(hexColor, starType, isKeyElement)
+    const resolvedStarType = starType ?? getStarType(`sprite_${position.join('_')}`, isKeyElement)
+    const canvas = createEnhancedStarTexture(hexColor, resolvedStarType, isKeyElement)
     texture = new THREE.CanvasTexture(canvas)
     texture.needsUpdate = true
     
@@ -72,6 +90,8 @@
       sprite.renderOrder = 1
     }
   }
+
+  $: createStarSprite()
 
   // Update material opacity when intensity changes (this is the glow effect!)
   $: if (material) {
@@ -125,12 +145,7 @@
 
   // Cleanup on destroy
   onDestroy(() => {
-    if (texture) {
-      texture.dispose()
-    }
-    if (material) {
-      material.dispose()
-    }
+    disposeSpriteResources()
   })
 </script>
 
