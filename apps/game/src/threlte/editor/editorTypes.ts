@@ -126,7 +126,7 @@ export interface EditorNodeCollisionData {
 }
 
 export interface EditorGameplayData {
-  type: 'portal' | 'note' | 'firefly' | 'audio-region' | 'fog-volume'
+  type: 'portal' | 'note' | 'firefly' | 'audio-region' | 'fog-volume' | 'mist-region'
   markerColor?: string
   markerSize?: number
   wanderEnabled?: boolean
@@ -151,6 +151,12 @@ export interface EditorGameplayData {
   regionFalloff?: number
   fogDensity?: number
   fogColor?: string
+  mistColor?: string
+  mistOpacity?: number
+  mistLayers?: number
+  mistSpacing?: number
+  mistScale?: number
+  mistDriftSpeed?: number
 }
 
 export interface EditorGenerationData {

@@ -21,6 +21,7 @@ interface EditorCreateControllerDeps {
     addFireflyDialogue: (parentId?: string | null) => void
     addAmbientAudioRegion: (parentId?: string | null) => void
     addFogVolume: (parentId?: string | null) => void
+    addMistRegion: (parentId?: string | null) => void
     addPointLight: (parentId?: string | null) => void
     addPrefab: (name: string, type: EditorPrefabType, position: [number, number, number], parentId?: string | null) => void
     addAsset: (name: string, url: string, parentId?: string | null, scale?: [number, number, number]) => void
@@ -28,13 +29,14 @@ interface EditorCreateControllerDeps {
 }
 
 export function createEditorCreateController(deps: EditorCreateControllerDeps) {
-  function addPrimitivePrefab(type: 'anomaly' | 'marker' | 'light' | 'firefly' | 'audio-region' | 'fog-volume') {
+  function addPrimitivePrefab(type: 'anomaly' | 'marker' | 'light' | 'firefly' | 'audio-region' | 'fog-volume' | 'mist-region') {
     const parentId = deps.getSelectedNode()?.id ?? null
     if (type === 'anomaly') deps.editorPrefabs.addAnomaly(parentId)
     else if (type === 'marker') deps.editorPrefabs.addMarker(parentId)
     else if (type === 'firefly') deps.editorPrefabs.addFireflyDialogue(parentId)
     else if (type === 'audio-region') deps.editorPrefabs.addAmbientAudioRegion(parentId)
     else if (type === 'fog-volume') deps.editorPrefabs.addFogVolume(parentId)
+    else if (type === 'mist-region') deps.editorPrefabs.addMistRegion(parentId)
     else deps.editorPrefabs.addPointLight(parentId)
   }
 

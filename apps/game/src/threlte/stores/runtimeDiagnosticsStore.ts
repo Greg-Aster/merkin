@@ -110,6 +110,13 @@ const DEFAULT_DIAGNOSTICS: Record<string, DiagnosticRecord> = {
     message: 'Scene persistence status unknown.',
     updatedAt: 0,
   },
+  fog: {
+    key: 'fog',
+    label: 'Scene Fog',
+    level: 'idle',
+    message: 'Scene fog has not been configured.',
+    updatedAt: 0,
+  },
 }
 
 export const runtimeDiagnosticsStore = writable<Record<string, DiagnosticRecord>>(DEFAULT_DIAGNOSTICS)

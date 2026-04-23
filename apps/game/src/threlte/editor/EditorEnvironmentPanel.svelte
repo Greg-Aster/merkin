@@ -66,6 +66,27 @@
   </div>
 
   <div class="tuple-group">
+    <div class="tuple-label">Atmosphere FX</div>
+    <div class="editor-field-grid editor-field-grid--triple editor-mt-sm">
+      <label class="editor-field"><span class="editor-field-label">Bloom Intensity</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.style?.bloom?.intensity ?? 0.16} on:change={(event) => updateLevelNumericSetting(['style', 'bloom', 'intensity'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Bloom Threshold</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.style?.bloom?.threshold ?? 0.86} on:change={(event) => updateLevelNumericSetting(['style', 'bloom', 'threshold'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Haze Color</span><input class="text-input" type="color" value={levelSettings.style?.haze?.color ?? '#22174f'} on:input={(event) => updateLevelSetting(['style', 'haze', 'color'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Haze Density</span><input class="tuple-input" type="number" step="0.00005" value={levelSettings.style?.haze?.density ?? 0.00034} on:change={(event) => updateLevelNumericSetting(['style', 'haze', 'density'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Haze Floor</span><input class="tuple-input" type="number" step="0.1" value={levelSettings.style?.haze?.floor ?? 0.25} on:change={(event) => updateLevelNumericSetting(['style', 'haze', 'floor'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Haze Ceiling</span><input class="tuple-input" type="number" step="0.1" value={levelSettings.style?.haze?.ceiling ?? 11} on:change={(event) => updateLevelNumericSetting(['style', 'haze', 'ceiling'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Mist Opacity</span><input class="tuple-input" type="number" step="0.01" value={levelSettings.style?.haze?.mistOpacity ?? 0.18} on:change={(event) => updateLevelNumericSetting(['style', 'haze', 'mistOpacity'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Mist Layers</span><input class="tuple-input" type="number" step="1" value={levelSettings.style?.haze?.mistLayers ?? 4} on:change={(event) => updateLevelNumericSetting(['style', 'haze', 'mistLayers'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Mist Scale</span><input class="tuple-input" type="number" step="10" value={levelSettings.style?.haze?.mistScale ?? 380} on:change={(event) => updateLevelNumericSetting(['style', 'haze', 'mistScale'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Mist Drift</span><input class="tuple-input" type="number" step="0.01" value={levelSettings.style?.haze?.mistDriftSpeed ?? 0.055} on:change={(event) => updateLevelNumericSetting(['style', 'haze', 'mistDriftSpeed'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Saturation</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.style?.colorGrading?.saturation ?? 1.18} on:change={(event) => updateLevelNumericSetting(['style', 'colorGrading', 'saturation'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Contrast</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.style?.colorGrading?.contrast ?? 1.12} on:change={(event) => updateLevelNumericSetting(['style', 'colorGrading', 'contrast'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Brightness</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.style?.colorGrading?.brightness ?? 0.92} on:change={(event) => updateLevelNumericSetting(['style', 'colorGrading', 'brightness'], (event.currentTarget as HTMLInputElement).value)} /></label>
+      <label class="editor-field"><span class="editor-field-label">Warmth</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.style?.colorGrading?.warmth ?? 0.9} on:change={(event) => updateLevelNumericSetting(['style', 'colorGrading', 'warmth'], (event.currentTarget as HTMLInputElement).value)} /></label>
+    </div>
+    <div class="save-message">These controls drive the runtime atmosphere directly: fog, low haze, mist, color grading, and bloom. Ambient occlusion is not wired into the live renderer yet.</div>
+  </div>
+
+  <div class="tuple-group">
     <div class="tuple-label">Global Lighting</div>
     <div class="editor-field-grid editor-field-grid--triple editor-mt-sm">
       <label class="editor-field"><span class="editor-field-label">Ambient</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.lighting?.ambientIntensity ?? 0.75} on:change={(event) => updateLevelNumericSetting(['lighting', 'ambientIntensity'], (event.currentTarget as HTMLInputElement).value)} /></label>

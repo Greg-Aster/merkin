@@ -4,7 +4,7 @@
   import * as THREE from 'three'
   import AmbientParticleField from '../components/AmbientParticleField.svelte'
   import AmbientAudioRegions from '../components/AmbientAudioRegions.svelte'
-  import GroundMistLayer from '../components/GroundMistLayer.svelte'
+  import SceneFogExp2 from '../components/SceneFogExp2.svelte'
   import LevelManager from '../core/LevelManager.svelte'
   import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
   import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
@@ -15,14 +15,6 @@
   import { qualityLevelStore, qualitySettingsStore } from '../features/performance/stores/performanceStore'
   import { shouldEnableSceneShadows } from '../features/performance/utils/runtimeSceneBudget'
   import { playerStateStore } from '../stores/gameStateStore'
-  import {
-    renderStyleEnabled,
-    renderStyleFlattenMaterials,
-    renderStyleOutlineOpacity,
-    renderStyleOutlineThickness,
-    renderStylePaintedOutlines,
-    renderStylePresetChoice,
-  } from '../stores/uiStore'
   import { editorSceneStore, editorStateStore, solitudeEditorSettingsStore } from '../editor/editorStore'
   import { createWorldMatrixResolver } from '../editor/editorHierarchyUtils'
   import { resolveSolitudePresetSettings } from '../editor/editorLevelPresets'
@@ -50,8 +42,6 @@
   let isLoadingTimeline = true
   let timelineLoadError: string | null = null
   let starMapRef: THREE.Group
-  let styleSystemComponent: any = null
-  let enableToonShading = true
 
   function loadTimelineData() {
     try {
@@ -231,12 +221,6 @@
     },
   } as const
 
-  async function ensureStyleSystemComponent() {
-    if (styleSystemComponent) return
-    const module = await import('../styles/RenderStyleSystem.svelte')
-    styleSystemComponent = module.default
-  }
-
   function handleStarSelected(event: CustomEvent) {
     dispatch('starSelected', event.detail)
   }
@@ -305,16 +289,6 @@
   })
   $: if (manifest) {
     replaceRuntimeVisualStyle(resolvedRuntimeVisualStyle)
-  }
-  $: enableToonShading = manifest?.style?.enabled !== false
-  $: manifestStylePreset = manifest?.style?.preset ?? solitudeAtmosphereProfile.stylePreset
-  $: resolvedStylePreset =
-    $renderStylePresetChoice === 'manifest'
-      ? manifestStylePreset
-      : $renderStylePresetChoice
-  $: fullStyleSystemEnabled = !!manifest?.features?.styles && $renderStyleEnabled
-  $: if (fullStyleSystemEnabled && !styleSystemComponent) {
-    void ensureStyleSystemComponent()
   }
   $: playerSpawnPoint = manifest?.spawn?.position ?? [0, 2.4, -24]
   $: waterEnabled = manifest?.features?.water ?? manifest?.water?.enabled ?? false
@@ -451,22 +425,6 @@
 {#if manifest && terrainConfig}
   <LevelManager>
     <T.Group name={manifest.id ?? 'solitude-level'}>
-      {#if fullStyleSystemEnabled && styleSystemComponent}
-        <svelte:component
-          this={styleSystemComponent}
-          stylePreset={resolvedStylePreset}
-          enableToonShading={enableToonShading}
-          enableOutlines={$qualitySettingsStore.enablePostProcessing}
-          flattenMaterials={$renderStyleFlattenMaterials}
-          usePaintedOutlines={$renderStylePaintedOutlines}
-          outlineThickness={$renderStyleOutlineThickness}
-          outlineOpacity={$renderStyleOutlineOpacity}
-          toneMappingExposure={resolvedRuntimeVisualStyle.toneMappingExposure}
-          enableStyleLighting={false}
-          enableStyleFog={false}
-        />
-      {/if}
-
       <Skybox
         path={activeSkyboxPreset.path}
         files={activeSkyboxPreset.files}
@@ -495,13 +453,9 @@
         castShadow={false}
       />
 
-      <T.FogExp2
-        color={$editorStateStore.enabled && $editorStateStore.viewportLightingMode === 'workbench'
-          ? '#dde8f4'
-          : effectiveFog.color}
-        density={$editorStateStore.enabled && $editorStateStore.viewportLightingMode === 'workbench'
-          ? 0.00014
-          : effectiveFog.density}
+      <SceneFogExp2
+        color={effectiveFog.color}
+        density={effectiveFog.density}
       />
 
       <Terrain
@@ -519,17 +473,6 @@
             })
           }
         }}
-      />
-
-      <GroundMistLayer
-        enabled={resolvedRuntimeVisualStyle.heightFog.mistOpacity > 0.01}
-        color={resolvedRuntimeVisualStyle.heightFog.color}
-        opacity={resolvedRuntimeVisualStyle.heightFog.mistOpacity}
-        layers={resolvedRuntimeVisualStyle.heightFog.mistLayers}
-        baseHeight={resolvedRuntimeVisualStyle.heightFog.mistHeight}
-        heightStep={resolvedRuntimeVisualStyle.heightFog.mistSpacing}
-        scale={resolvedRuntimeVisualStyle.heightFog.mistScale}
-        driftSpeed={resolvedRuntimeVisualStyle.heightFog.mistDriftSpeed}
       />
 
       {#if waterEnabled}

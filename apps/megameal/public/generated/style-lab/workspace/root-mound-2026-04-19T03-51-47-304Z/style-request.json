@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-04-19T03:52:52.837Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "Root Mound",
+  "sourceAssetUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T02-28-31-562Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T02-28-31-562Z.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/root-mound-2026-04-19T03-51-47-304Z/source/root-mound.glb",
+  "prompt": "object: central root mound, a raised mass of earth and root swell where the world-tree rises from the island. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror sacred material language, blackened ancient timber, abyssal rune-carved stone, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread. avoid: daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened timber, abyssal roots, violet-magenta rune glow, cosmic dread, and monumental sacred architecture over generic fantasy prettiness.",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/root-mound-reference-2026-04-19T03-52-52-831Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/root-mound-2026-04-19T03-51-47-304Z/reference/root-mound-reference-2026-04-19T03-52-52-831Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/root-mound-reference-2026-04-19T03-52-52-831Z.png"
+}

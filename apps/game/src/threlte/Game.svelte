@@ -810,6 +810,12 @@
     if (event.key === 'F1') {
       event.preventDefault();
       isSettingsMenuOpen.update(open => !open);
+      return
+    }
+
+    if (event.key === 'F2') {
+      event.preventDefault();
+      toggleDebugPanel()
     }
   }
 

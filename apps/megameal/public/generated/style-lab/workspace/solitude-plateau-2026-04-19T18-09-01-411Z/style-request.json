@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-04-19T18:10:14.268Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "Solitude Plateau",
+  "sourceAssetUrl": "/generated/style-lab/sources/solitude-plateau-2026-04-19T18-09-01-407Z/solitude-plateau.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/style-lab/sources/solitude-plateau-2026-04-19T18-09-01-407Z/solitude-plateau.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/solitude-plateau-2026-04-19T18-09-01-411Z/source/solitude-plateau.glb",
+  "prompt": "object: solitude plateau. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/solitude-plateau-reference-2026-04-19T18-10-14-262Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/solitude-plateau-2026-04-19T18-09-01-411Z/reference/solitude-plateau-reference-2026-04-19T18-10-14-262Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/solitude-plateau-reference-2026-04-19T18-10-14-262Z.png"
+}

@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MEGAMEAL Banner Overlay Boards</title>
+    <style>
+      :root {
+        --page-bg: #ffffff;
+        --ink: #0f172a;
+        --muted: #475569;
+        --line: #d7deea;
+        --blue: #2463eb;
+        --cyan: #06b6d4;
+        --pink: #ec4899;
+        --red: #dc2626;
+        --orange: #f97316;
+        --gold: #eab308;
+        --green: #16a34a;
+        --panel: #f8fafc;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--page-bg);
+        color: var(--ink);
+        font-family: "Helvetica Neue", Arial, sans-serif;
+      }
+
+      .page {
+        width: min(1600px, 100%);
+        margin: 0 auto;
+        padding: 40px 24px 64px;
+      }
+
+      .intro {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 28px;
+      }
+
+      .intro h1 {
+        margin: 0;
+        font-size: clamp(2.2rem, 4vw, 4.5rem);
+        letter-spacing: -0.05em;
+      }
+
+      .intro p {
+        margin: 0;
+        max-width: 68rem;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        gap: 26px;
+      }
+
+      .board-wrap {
+        display: grid;
+        gap: 10px;
+      }
+
+      .board-label {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: baseline;
+        color: var(--muted);
+        font-size: 0.88rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .board {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid var(--line);
+      }
+
+      .board * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 34px;
+        padding: 0 14px;
+        border: 1px solid currentColor;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .meta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 52px;
+        padding: 0 20px;
+        border: 1px solid currentColor;
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 40px;
+        padding: 0 14px;
+        border: 1px solid currentColor;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+
+      .timeline {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        padding: 38px 42px 34px;
+      }
+
+      .timeline::before {
+        content: "";
+        position: absolute;
+        inset: 8% 5%;
+        border: 1px solid rgba(36, 99, 235, 0.14);
+      }
+
+      .timeline::after {
+        content: "";
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        top: 52%;
+        height: 2px;
+        background:
+          linear-gradient(90deg, transparent, rgba(36, 99, 235, 0.3), transparent);
+      }
+
+      .timeline .route {
+        position: absolute;
+        left: 14%;
+        top: 18%;
+        width: 68%;
+        height: 58%;
+        border-left: 2px solid rgba(36, 99, 235, 0.6);
+        border-bottom: 2px solid rgba(36, 99, 235, 0.6);
+      }
+
+      .timeline h2 {
+        margin: 26px 0 0;
+        max-width: 8ch;
+        font-size: clamp(4rem, 7vw, 8rem);
+        line-height: 0.82;
+        letter-spacing: -0.06em;
+      }
+
+      .timeline p {
+        margin: auto 0 0;
+        max-width: 31rem;
+        font-size: 1.22rem;
+        line-height: 1.5;
+        color: var(--muted);
+      }
+
+      .timeline .footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: end;
+      }
+
+      .archive {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        padding: 28px;
+        color: var(--blue);
+      }
+
+      .archive::before {
+        content: "";
+        position: absolute;
+        inset: 16px;
+        background: linear-gradient(180deg, rgba(36, 99, 235, 0.1), rgba(36, 99, 235, 0.02));
+        border: 2px solid rgba(36, 99, 235, 0.3);
+      }
+
+      .archive .left {
+        display: grid;
+        align-content: space-between;
+        padding: 16px;
+      }
+
+      .archive h2 {
+        margin: 16px 0 0;
+        max-width: 7ch;
+        font-size: clamp(4.8rem, 8vw, 9rem);
+        line-height: 0.8;
+        letter-spacing: -0.06em;
+        text-transform: uppercase;
+      }
+
+      .archive .stamp {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 180px;
+        aspect-ratio: 1;
+        border: 3px solid currentColor;
+        border-radius: 999px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+      }
+
+      .archive .right {
+        display: grid;
+        gap: 14px;
+        align-content: end;
+        padding: 24px 18px;
+        background: rgba(255, 255, 255, 0.9);
+        border-left: 2px solid rgba(36, 99, 235, 0.22);
+      }
+
+      .archive p {
+        margin: 0;
+        font-size: 1.15rem;
+        line-height: 1.6;
+        color: #1e3a8a;
+      }
+
+      .observatory {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        padding: 34px 38px;
+        color: #0f172a;
+      }
+
+      .observatory .rings,
+      .observatory .rings::before,
+      .observatory .rings::after {
+        position: absolute;
+        right: 7%;
+        top: 50%;
+        border-radius: 999px;
+        border: 2px solid rgba(6, 182, 212, 0.42);
+        transform: translateY(-50%);
+        content: "";
+      }
+
+      .observatory .rings {
+        width: 360px;
+        height: 360px;
+      }
+
+      .observatory .rings::before {
+        inset: 40px;
+      }
+
+      .observatory .rings::after {
+        inset: 92px;
+        border-color: rgba(236, 72, 153, 0.48);
+      }
+
+      .observatory .cross-a,
+      .observatory .cross-b {
+        position: absolute;
+        right: calc(7% + 180px);
+        top: 50%;
+        background: rgba(15, 23, 42, 0.34);
+      }
+
+      .observatory .cross-a {
+        width: 420px;
+        height: 2px;
+        transform: translate(50%, -50%);
+      }
+
+      .observatory .cross-b {
+        width: 2px;
+        height: 420px;
+        transform: translate(50%, -50%);
+      }
+
+      .observatory .copy {
+        display: grid;
+        align-content: space-between;
+        gap: 18px;
+        max-width: 46rem;
+      }
+
+      .observatory h2 {
+        margin: 18px 0 0;
+        max-width: 7ch;
+        font-size: clamp(4.6rem, 8vw, 8.4rem);
+        line-height: 0.78;
+        letter-spacing: -0.06em;
+        text-transform: uppercase;
+      }
+
+      .observatory .ghost {
+        margin: 0;
+        font-size: clamp(2.2rem, 5vw, 5rem);
+        line-height: 0.9;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(6, 182, 212, 0.16);
+      }
+
+      .observatory p {
+        margin: 0;
+        max-width: 26rem;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      .store {
+        display: grid;
+        grid-template-rows: 1fr auto;
+        padding: 24px;
+      }
+
+      .store::before {
+        content: "";
+        position: absolute;
+        inset: 24px;
+        border: 2px solid #0f172a;
+      }
+
+      .store .top {
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .store h2 {
+        margin: 16px 0 0;
+        max-width: 11ch;
+        font-size: clamp(4.4rem, 9vw, 9rem);
+        line-height: 0.78;
+        letter-spacing: -0.06em;
+        text-transform: uppercase;
+      }
+
+      .store .sub {
+        margin: 14px 0 0;
+        max-width: 40rem;
+        font-size: 1.14rem;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      .store .bottom {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 0;
+        border-top: 2px solid #0f172a;
+      }
+
+      .store .offer,
+      .store .cta-band {
+        display: grid;
+        align-content: center;
+        min-height: 120px;
+        padding: 18px 22px;
+      }
+
+      .store .offer {
+        border-right: 2px solid #0f172a;
+      }
+
+      .store .offer strong,
+      .store .cta-band strong {
+        display: block;
+        font-size: 1.4rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .store .offer span,
+      .store .cta-band span {
+        margin-top: 6px;
+        color: var(--muted);
+      }
+
+      .story {
+        display: grid;
+        grid-template-columns: 0.86fr 1.14fr;
+        padding: 24px;
+      }
+
+      .story .poster {
+        display: grid;
+        align-content: space-between;
+        padding: 28px;
+        background: #f3f4f6;
+        border: 2px solid #111827;
+      }
+
+      .story .poster h2 {
+        margin: 0;
+        font-size: clamp(4.2rem, 8vw, 8rem);
+        line-height: 0.82;
+        letter-spacing: -0.06em;
+        text-transform: uppercase;
+      }
+
+      .story .poster .quote {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      .story .layout {
+        display: grid;
+        align-content: center;
+        gap: 16px;
+        padding: 34px 36px;
+      }
+
+      .story .layout .ghost {
+        font-size: clamp(3.2rem, 8vw, 8rem);
+        line-height: 0.76;
+        letter-spacing: -0.07em;
+        text-transform: uppercase;
+        color: rgba(15, 23, 42, 0.08);
+      }
+
+      .story .layout p {
+        margin: 0;
+        max-width: 32rem;
+        font-size: 1.14rem;
+        line-height: 1.65;
+        color: var(--muted);
+      }
+
+      .cookbook {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        padding: 26px;
+        color: #7c2d12;
+      }
+
+      .cookbook::before {
+        content: "";
+        position: absolute;
+        inset: 22px;
+        background: linear-gradient(135deg, rgba(249, 115, 22, 0.11), rgba(234, 179, 8, 0.08));
+      }
+
+      .cookbook .hero {
+        display: grid;
+        gap: 14px;
+        align-content: center;
+        padding: 18px;
+      }
+
+      .cookbook h2 {
+        margin: 0;
+        max-width: 8ch;
+        font-size: clamp(4rem, 8vw, 8rem);
+        line-height: 0.8;
+        letter-spacing: -0.06em;
+        text-transform: uppercase;
+      }
+
+      .cookbook .flavor {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .cookbook .flavor span {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 16px;
+        border: 1px solid currentColor;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .cookbook .body {
+        display: grid;
+        align-content: end;
+        gap: 18px;
+        padding: 18px;
+        background: rgba(255, 255, 255, 0.84);
+        border-left: 2px solid rgba(124, 45, 18, 0.18);
+      }
+
+      .cookbook p {
+        margin: 0;
+        font-size: 1.08rem;
+        line-height: 1.6;
+        color: #9a3412;
+      }
+
+      @media (max-width: 900px) {
+        .archive,
+        .observatory,
+        .store .bottom,
+        .story,
+        .cookbook {
+          grid-template-columns: 1fr;
+        }
+
+        .observatory .rings,
+        .observatory .cross-a,
+        .observatory .cross-b,
+        .timeline .route {
+          display: none;
+        }
+
+        .board {
+          aspect-ratio: auto;
+          min-height: 620px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="intro">
+        <h1>MEGAMEAL Overlay Boards</h1>
+        <p>
+          White-background layout studies for banner art direction. These are overlay-only ad compositions, meant to be
+          used as prompt references or traced into image-generation workflows. They do not match the live site one-to-one.
+        </p>
+      </section>
+
+      <section class="grid">
+        <article class="board-wrap">
+          <div class="board-label">
+            <span>Timeline</span>
+            <span>Transit map / command rail / panoramic information band</span>
+          </div>
+          <section class="board timeline">
+            <div class="route"></div>
+            <div class="eyebrow" style="color: var(--blue);">Chronology Console</div>
+            <div>
+              <h2>Timeline Map</h2>
+              <p>Open the chronology interface and track eras, incidents, recipes, wars, and franchise expansions.</p>
+            </div>
+            <div class="footer">
+              <div class="meta-row">
+                <span class="pill" style="color: var(--blue);">Era Index</span>
+                <span class="pill" style="color: var(--blue);">Incident Routes</span>
+              </div>
+              <span class="cta" style="color: var(--blue);">Open Timeline</span>
+            </div>
+          </section>
+        </article>
+
+        <article class="board-wrap">
+          <div class="board-label">
+            <span>Archive</span>
+            <span>Blue dossier takeover / oversized approval stamp / investigation ad</span>
+          </div>
+          <section class="board archive">
+            <div class="left">
+              <div class="eyebrow">Story Archive</div>
+              <h2>Read the Story Arcs</h2>
+              <div class="stamp">Open File</div>
+            </div>
+            <div class="right">
+              <p>Follow connected chapters, recovered accounts, recipes, corporate records, and cosmic incident reports.</p>
+              <div class="meta-row">
+                <span class="pill">Active Arcs</span>
+                <span class="cta">Open Archive</span>
+              </div>
+            </div>
+          </section>
+        </article>
+
+        <article class="board-wrap">
+          <div class="board-label">
+            <span>Star Observatory</span>
+            <span>Blade Runner scale / neon targeting geometry / giant destination title</span>
+          </div>
+          <section class="board observatory">
+            <div class="rings"></div>
+            <div class="cross-a"></div>
+            <div class="cross-b"></div>
+            <div class="copy">
+              <div class="eyebrow" style="color: var(--cyan);">Star Observatory</div>
+              <div>
+                <p class="ghost">Observatory</p>
+                <h2>Enter the Game Mode</h2>
+              </div>
+            </div>
+            <div class="copy" style="justify-self: end;">
+              <p>Move from reading the universe into navigating it. The observatory turns story nodes into explorable coordinates.</p>
+              <div class="meta-row">
+                <span class="pill" style="color: var(--cyan);">Star Nodes</span>
+                <span class="cta" style="color: var(--pink);">Enter Game</span>
+              </div>
+            </div>
+          </section>
+        </article>
+
+        <article class="board-wrap">
+          <div class="board-label">
+            <span>Store</span>
+            <span>Full banner commercial layer / giant centered retail command / future catalog</span>
+          </div>
+          <section class="board store">
+            <div class="top">
+              <div class="eyebrow">Commercial Layer</div>
+              <h2>Browse the Store</h2>
+              <p class="sub">Artifacts, goods, fake products, and dystopian brand debris from the MEGAMEAL economy.</p>
+            </div>
+            <div class="bottom">
+              <div class="offer">
+                <strong>Catalog of branded wreckage</strong>
+                <span>Props, print matter, packaging, objects, and world fragments.</span>
+              </div>
+              <div class="cta-band">
+                <strong>Open Commerce</strong>
+                <span>Full width billboard CTA zone.</span>
+              </div>
+            </div>
+          </section>
+        </article>
+
+        <article class="board-wrap">
+          <div class="board-label">
+            <span>Story Mode</span>
+            <span>Manifesto poster / editorial campaign / large ideological messaging</span>
+          </div>
+          <section class="board story">
+            <div class="poster">
+              <div class="eyebrow">Guided Entry</div>
+              <h2>Open Story Mode</h2>
+              <p class="quote">A curated route through lore, chronology, incidents, and tone. Less archive. More deliberate descent.</p>
+            </div>
+            <div class="layout">
+              <div class="ghost">Enter The Signal</div>
+              <p>Use this template when the ad should feel like a campaign poster rather than an interface. Big headline. Big blank space. One controlled block of explanatory copy.</p>
+              <div class="meta-row">
+                <span class="pill">Guided Route</span>
+                <span class="cta">Open Story Mode</span>
+              </div>
+            </div>
+          </section>
+        </article>
+
+        <article class="board-wrap">
+          <div class="board-label">
+            <span>Cookbook</span>
+            <span>Oversized promo slab / absurd product culture / editorial food billboard</span>
+          </div>
+          <section class="board cookbook">
+            <div class="hero">
+              <div class="eyebrow" style="color: var(--orange);">Cookbook Project</div>
+              <h2>Open the Cookbook</h2>
+              <div class="flavor">
+                <span>Ritual Meals</span>
+                <span>Corporate Recipes</span>
+                <span>Promotional Cuisine</span>
+              </div>
+            </div>
+            <div class="body">
+              <p>Recipe cards, in-world menus, cult meal systems, and branded food propaganda from across the setting.</p>
+              <div class="meta-row">
+                <span class="pill" style="color: var(--orange);">Food Archive</span>
+                <span class="cta" style="color: var(--red);">Open Cookbook</span>
+              </div>
+            </div>
+          </section>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

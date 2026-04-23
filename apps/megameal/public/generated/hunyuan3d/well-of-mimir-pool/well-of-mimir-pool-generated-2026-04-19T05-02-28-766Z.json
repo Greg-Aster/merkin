@@ -1,0 +1,14 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/well-of-mimir-pool-2026-04-19T05-02-26-069Z/well-of-mimir-pool.glb",
+  "sourceName": "Well of Mimir Pool",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/well-of-mimir-pool-2026-04-19T05-02-26-083Z/reference/shore-ring-reference-2026-04-19T04-56-39-473Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776574946752-fj1rbz",
+  "prompt": "object: sacred abyssal well pool, dark reflective myth-water. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror sacred material language, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-19T05:02:29.538Z"
+}

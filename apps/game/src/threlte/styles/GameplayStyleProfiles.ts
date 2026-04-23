@@ -48,26 +48,26 @@ const surrealSiteBaseRuntime: RuntimeVisualStylePatch = {
     warmth: 0.9,
   },
   screenFx: {
-    vignetteStrength: 0.4,
-    grainOpacity: 0.055,
-    accentGlowIntensity: 0.18,
+    vignetteStrength: 0.46,
+    grainOpacity: 0.06,
+    accentGlowIntensity: 0.22,
     accentGlowColor: '#48d7ff',
     secondaryAccentGlowColor: '#ff4bd8',
-    bloomIntensity: 0.18,
-    bloomThreshold: 0.88,
+    bloomIntensity: 0.22,
+    bloomThreshold: 0.84,
   },
   heightFog: {
     color: '#22174f',
-    density: 0.00028,
-    floor: 0.4,
-    ceiling: 12,
-    colorInfluence: 0.42,
-    mistOpacity: 0.14,
-    mistLayers: 3,
+    density: 0.00034,
+    floor: 0.25,
+    ceiling: 11,
+    colorInfluence: 0.48,
+    mistOpacity: 0.18,
+    mistLayers: 4,
     mistHeight: 0.55,
-    mistSpacing: 0.48,
-    mistScale: 340,
-    mistDriftSpeed: 0.05,
+    mistSpacing: 0.46,
+    mistScale: 380,
+    mistDriftSpeed: 0.055,
   },
   terrain: {
     baseColor: '#070c1c',
@@ -112,8 +112,8 @@ export const solitudeAtmosphereProfileDefinitions: SolitudeAtmosphereProfileDefi
           warmth: 0.86,
         },
         bloom: {
-          intensity: 0.18,
-          threshold: 0.9,
+          intensity: 0.24,
+          threshold: 0.84,
         },
       },
       lighting: {
@@ -142,26 +142,26 @@ export const solitudeAtmosphereProfileDefinitions: SolitudeAtmosphereProfileDefi
       id: 'violet-dread',
       toneMappingExposure: 0.96,
       screenFx: {
-        vignetteStrength: 0.5,
-        grainOpacity: 0.075,
-        accentGlowIntensity: 0.22,
+        vignetteStrength: 0.56,
+        grainOpacity: 0.08,
+        accentGlowIntensity: 0.27,
         accentGlowColor: '#59e5ff',
         secondaryAccentGlowColor: '#ff46ce',
-        bloomIntensity: 0.18,
-        bloomThreshold: 0.9,
+        bloomIntensity: 0.24,
+        bloomThreshold: 0.83,
       },
       heightFog: {
         color: '#231150',
-        density: 0.0005,
+        density: 0.00062,
         floor: 0.2,
-        ceiling: 10,
-        colorInfluence: 0.55,
-        mistOpacity: 0.18,
-        mistLayers: 4,
+        ceiling: 9,
+        colorInfluence: 0.62,
+        mistOpacity: 0.22,
+        mistLayers: 5,
         mistHeight: 0.55,
-        mistSpacing: 0.45,
-        mistScale: 420,
-        mistDriftSpeed: 0.06,
+        mistSpacing: 0.42,
+        mistScale: 460,
+        mistDriftSpeed: 0.065,
       },
       terrain: {
         baseColor: '#050915',
@@ -722,4 +722,48 @@ export function buildSolitudeRuntimeVisualStyle(
   })
 
   return runtime
+}
+
+export function buildRuntimeVisualStyleFromLevelSettings(
+  settings: SharedLevelEditorSettings | null | undefined,
+): RuntimeVisualStyleSettings {
+  const stylePreset = settings?.style?.preset ?? DEFAULT_RUNTIME_VISUAL_STYLE.palettePreset
+  const base = stylePreset === 'surreal-site'
+    ? mergeRuntimeVisualStyle(DEFAULT_RUNTIME_VISUAL_STYLE, surrealSiteBaseRuntime)
+    : DEFAULT_RUNTIME_VISUAL_STYLE
+
+  return mergeRuntimeVisualStyle(base, {
+    id: typeof settings?.presets?.atmosphere === 'string' && settings.presets.atmosphere
+      ? settings.presets.atmosphere
+      : `level-${stylePreset}`,
+    palettePreset: stylePreset,
+    heightFog: settings?.style?.haze
+      ? {
+          color: settings.style.haze.color,
+          density: settings.style.haze.density,
+          floor: settings.style.haze.floor,
+          ceiling: settings.style.haze.ceiling,
+          mistOpacity: settings.style.haze.mistOpacity,
+          mistLayers: settings.style.haze.mistLayers,
+          mistHeight: settings.style.haze.mistHeight,
+          mistSpacing: settings.style.haze.mistSpacing,
+          mistScale: settings.style.haze.mistScale,
+          mistDriftSpeed: settings.style.haze.mistDriftSpeed,
+        }
+      : undefined,
+    colorGrading: settings?.style?.colorGrading
+      ? {
+          saturation: settings.style.colorGrading.saturation,
+          contrast: settings.style.colorGrading.contrast,
+          brightness: settings.style.colorGrading.brightness,
+          warmth: settings.style.colorGrading.warmth,
+        }
+      : undefined,
+    screenFx: settings?.style?.bloom
+      ? {
+          bloomIntensity: settings.style.bloom.intensity,
+          bloomThreshold: settings.style.bloom.threshold,
+        }
+      : undefined,
+  })
 }

@@ -1,7 +1,7 @@
 {
   "levelId": "solitude",
   "version": 1,
-  "updatedAt": "2026-04-22T23:03:57.385Z",
+  "updatedAt": "2026-04-22T23:53:17.301Z",
   "settings": {
     "level": {
       "skyboxPreset": "observatory",
@@ -27,18 +27,30 @@
         "preset": "surreal-site",
         "enabled": true,
         "fog": {
-          "color": "#43206c",
-          "density": 0.00092
+          "color": "#2f0f56",
+          "density": 0.0045
+        },
+        "haze": {
+          "color": "#31115e",
+          "density": 0.0032,
+          "floor": -1.2,
+          "ceiling": 8,
+          "mistOpacity": 0.42,
+          "mistLayers": 8,
+          "mistHeight": 0.35,
+          "mistSpacing": 0.28,
+          "mistScale": 620,
+          "mistDriftSpeed": 0.09
         },
         "colorGrading": {
-          "saturation": 1.24,
-          "contrast": 1.18,
-          "brightness": 0.87,
-          "warmth": 0.86
+          "saturation": 1.38,
+          "contrast": 1.34,
+          "brightness": 0.8,
+          "warmth": 0.82
         },
         "bloom": {
-          "intensity": 0.18,
-          "threshold": 0.9
+          "intensity": 0.65,
+          "threshold": 0.72
         }
       },
       "lighting": {
@@ -68,7 +80,7 @@
         "sway": 0.62
       },
       "player": {
-        "lightIntensityScale": 5
+        "lightIntensityScale": 3
       }
     },
     "solitude": {}
@@ -102,7 +114,7 @@
       "parentId": "solitude-ground-root",
       "position": [
         0,
-        -1.2,
+        -2.341023377783173,
         0
       ],
       "rotation": [
@@ -127,11 +139,11 @@
           2.4000000953674316,
           240
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-22T00-47-39-099Z.glb",
-        "lastBakedAt": "2026-04-22T00:47:42.747Z"
+        "lastBakedAssetUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+        "lastBakedAt": "2026-04-22T23:27:04.009Z"
       },
       "asset": {
-        "url": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-22T00-47-39-099Z.glb"
+        "url": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb"
       }
     },
     {
@@ -141,7 +153,7 @@
       "parentId": "solitude-ground-root",
       "position": [
         0,
-        -0.18,
+        -10.461897931581928,
         0.2305610401047442
       ],
       "rotation": [
@@ -621,7 +633,7 @@
       "parentId": "solitude-ruin-ring",
       "position": [
         18,
-        6.2,
+        7.833111385848278,
         0
       ],
       "rotation": [
@@ -630,9 +642,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "visible": true,
       "gameplay": {
@@ -643,7 +655,8 @@
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 1.",
-        "body": "A solitary firefly keeps watch above Solitude Pillar 1."
+        "body": "A solitary firefly keeps watch above Solitude Pillar 1.",
+        "lightIntensity": 4
       }
     },
     {
@@ -653,7 +666,7 @@
       "parentId": "solitude-ruin-ring",
       "position": [
         15.588457268119896,
-        4.9,
+        6.241312110903529,
         8.999999999999998
       ],
       "rotation": [
@@ -662,9 +675,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "visible": true,
       "gameplay": {
@@ -675,7 +688,8 @@
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 2.",
-        "body": "A solitary firefly keeps watch above Solitude Pillar 2."
+        "body": "A solitary firefly keeps watch above Solitude Pillar 2.",
+        "lightIntensity": 4
       }
     },
     {
@@ -685,7 +699,7 @@
       "parentId": "solitude-ruin-ring",
       "position": [
         9.000000000000002,
-        5.5,
+        7.130711803508328,
         15.588457268119894
       ],
       "rotation": [
@@ -694,9 +708,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "visible": true,
       "gameplay": {
@@ -707,7 +721,8 @@
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 3.",
-        "body": "A solitary firefly keeps watch above Solitude Pillar 3."
+        "body": "A solitary firefly keeps watch above Solitude Pillar 3.",
+        "lightIntensity": 4
       }
     },
     {
@@ -717,7 +732,7 @@
       "parentId": "solitude-ruin-ring",
       "position": [
         1.102182119232618e-15,
-        6.2,
+        7.216781280751897,
         18
       ],
       "rotation": [
@@ -726,9 +741,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "visible": true,
       "gameplay": {
@@ -739,7 +754,8 @@
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 4.",
-        "body": "A solitary firefly keeps watch above Solitude Pillar 4."
+        "body": "A solitary firefly keeps watch above Solitude Pillar 4.",
+        "lightIntensity": 4
       }
     },
     {
@@ -749,7 +765,7 @@
       "parentId": "solitude-ruin-ring",
       "position": [
         -8.999999999999996,
-        5.5,
+        6.493299067874669,
         15.588457268119896
       ],
       "rotation": [
@@ -758,9 +774,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "visible": true,
       "gameplay": {
@@ -771,7 +787,8 @@
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 5.",
-        "body": "A solitary firefly keeps watch above Solitude Pillar 5."
+        "body": "A solitary firefly keeps watch above Solitude Pillar 5.",
+        "lightIntensity": 4
       }
     },
     {
@@ -790,9 +807,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "visible": true,
       "gameplay": {
@@ -803,7 +820,8 @@
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 6.",
-        "body": "A solitary firefly keeps watch above Solitude Pillar 6."
+        "body": "A solitary firefly keeps watch above Solitude Pillar 6.",
+        "lightIntensity": 4
       }
     },
     {
@@ -822,9 +840,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "visible": true,
       "gameplay": {
@@ -845,7 +863,7 @@
       "parentId": "solitude-ruin-ring",
       "position": [
         -15.588457268119898,
-        4.9,
+        5.988514727005818,
         -8.999999999999995
       ],
       "rotation": [
@@ -854,9 +872,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "visible": true,
       "gameplay": {
@@ -877,7 +895,7 @@
       "parentId": "solitude-ruin-ring",
       "position": [
         -9.000000000000007,
-        5.5,
+        7.3,
         -15.58845726811989
       ],
       "rotation": [
@@ -886,9 +904,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "visible": true,
       "gameplay": {
@@ -899,7 +917,8 @@
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 9.",
-        "body": "A solitary firefly keeps watch above Solitude Pillar 9."
+        "body": "A solitary firefly keeps watch above Solitude Pillar 9.",
+        "lightIntensity": 4
       }
     },
     {
@@ -908,9 +927,9 @@
       "kind": "group",
       "parentId": "solitude-ruin-ring",
       "position": [
-        -3.3065463576978533e-15,
-        6.2,
-        -18
+        0.30124533753965016,
+        8.099268252624608,
+        -18.026192120473944
       ],
       "rotation": [
         0,
@@ -918,9 +937,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "visible": true,
       "gameplay": {
@@ -950,9 +969,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "visible": true,
       "gameplay": {
@@ -963,7 +982,8 @@
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 11.",
-        "body": "A solitary firefly keeps watch above Solitude Pillar 11."
+        "body": "A solitary firefly keeps watch above Solitude Pillar 11.",
+        "lightIntensity": 4
       }
     },
     {
@@ -982,9 +1002,9 @@
         0
       ],
       "scale": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "visible": true,
       "gameplay": {
@@ -995,7 +1015,8 @@
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 12.",
-        "body": "A solitary firefly keeps watch above Solitude Pillar 12."
+        "body": "A solitary firefly keeps watch above Solitude Pillar 12.",
+        "lightIntensity": 4
       }
     },
     {
@@ -1124,7 +1145,7 @@
         18,
         120
       ],
-      "visible": true,
+      "visible": false,
       "gameplay": {
         "type": "audio-region",
         "markerColor": "#7ecbff",
@@ -1153,7 +1174,7 @@
         12,
         52
       ],
-      "visible": true,
+      "visible": false,
       "gameplay": {
         "type": "fog-volume",
         "markerColor": "#d7e2f6",

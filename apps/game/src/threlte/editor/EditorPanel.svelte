@@ -953,6 +953,7 @@
     { id: 'environment', icon: '☼', label: 'Environment' },
     { id: 'player', icon: '⚑', label: 'Player' },
     { id: 'create', icon: '+', label: 'Create' },
+    { id: 'inspect', icon: '⌕', label: 'Inspect' },
     { id: 'style', icon: '✎', label: 'Style' },
     { id: 'ai', icon: '✦', label: 'AI Mesh' },
     { id: 'save', icon: '↧', label: 'Save' },
@@ -1009,6 +1010,7 @@
     { label: 'NPC Firefly', action: () => createController.addPrimitivePrefab('firefly') },
     { label: 'Audio Region', action: () => createController.addPrimitivePrefab('audio-region') },
     { label: 'Fog Volume', action: () => createController.addPrimitivePrefab('fog-volume') },
+    { label: 'Mist Region', action: () => createController.addPrimitivePrefab('mist-region') },
   ]
 
   const createPrefabGroups = [

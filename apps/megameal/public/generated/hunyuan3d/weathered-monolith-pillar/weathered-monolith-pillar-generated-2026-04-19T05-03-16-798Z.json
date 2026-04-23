@@ -1,0 +1,14 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-23-01-827Z.glb",
+  "sourceName": "Rune Monolith 6",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/rune-monolith-6-2026-04-19T05-03-14-078Z/reference/shore-ring-reference-2026-04-19T04-56-39-473Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776574994787-ycgspo",
+  "prompt": "object: weathered rune monolith, neon fissures, cosmic shrine stone. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror sacred material language, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-19T05:03:17.544Z"
+}

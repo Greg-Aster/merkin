@@ -9,11 +9,6 @@ import PortalTimelineRoute from './PortalTimelineRoute.astro'
 
 const allProducts = await getCollection('products', ({ data }) => data.draft !== true)
 
-interface Props {
-  publishedDispatchCount?: number
-  timelineCount?: number
-}
-
 const {
   publishedDispatchCount: publishedDispatchCountProp,
   timelineCount: timelineCountProp,
@@ -25,7 +20,10 @@ const publishedGameStars = gameStarsManifest.items.filter(event => !event.isDraf
 const activeArcIds = new Set(
   publishedPosts
     .map(post => post.series)
-    .filter((seriesId): seriesId is string => Boolean(seriesId) && Boolean(SERIES_CONFIG[seriesId])),
+    .filter(
+      (seriesId): seriesId is keyof typeof SERIES_CONFIG =>
+        typeof seriesId === 'string' && seriesId in SERIES_CONFIG
+    ),
 )
 
 const publishedDispatchCount = publishedDispatchCountProp ?? publishedPosts.length

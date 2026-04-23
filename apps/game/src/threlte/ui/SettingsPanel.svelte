@@ -6,12 +6,6 @@ import {
 	isSettingsMenuOpen,
 	isSoundEnabled,
 	masterVolumeSetting,
-	renderStyleEnabled,
-	renderStyleFlattenMaterials,
-	renderStyleOutlineOpacity,
-	renderStyleOutlineThickness,
-	renderStylePaintedOutlines,
-	renderStylePresetChoice,
 	sfxVolumeSetting,
 } from "../stores/uiStore";
 
@@ -155,66 +149,15 @@ async function ensureMultiplayerControls() {
           </div>
         </section>
 
-        <section class="settings-section">
-          <h3>Render Style</h3>
-          <div class="section-content visual-grid">
-            <label class="checkbox-label">
-              <input type="checkbox" bind:checked={$renderStyleEnabled} />
-              Enable Site-Matched Render Style
-            </label>
-
-            <label class="field">
-              <span>Preset Source</span>
-              <select bind:value={$renderStylePresetChoice}>
-                <option value="manifest">Use Level Manifest</option>
-                <option value="site">Website Palette</option>
-                <option value="surreal-site">Surreal Website Palette</option>
-                <option value="ghibli">Studio Ghibli</option>
-                <option value="alto">Alto</option>
-                <option value="monument">Monument</option>
-                <option value="retro">Retro</option>
-              </select>
-            </label>
-
-            <label class="checkbox-label">
-              <input type="checkbox" bind:checked={$renderStyleFlattenMaterials} />
-              Flatten Imported Materials
-            </label>
-
-            <label class="checkbox-label">
-              <input type="checkbox" bind:checked={$renderStylePaintedOutlines} />
-              Use Painterly Outlines
-            </label>
-
-            <div class="slider-label">
-              <span>Outline Thickness</span>
-              <span>{($renderStyleOutlineThickness).toFixed(3)}</span>
-            </div>
-            <input
-              id="render-style-outline-thickness"
-              class="volume-slider"
-              type="range"
-              min="0.005"
-              max="0.08"
-              step="0.001"
-              bind:value={$renderStyleOutlineThickness}
-            />
-
-            <div class="slider-label">
-              <span>Outline Opacity</span>
-              <span>{Math.round($renderStyleOutlineOpacity * 100)}%</span>
-            </div>
-            <input
-              id="render-style-outline-opacity"
-              class="volume-slider"
-              type="range"
-              min="0.2"
-              max="1"
-              step="0.01"
-              bind:value={$renderStyleOutlineOpacity}
-            />
-          </div>
-        </section>
+		<section class="settings-section">
+		  <h3>Rendering</h3>
+		  <div class="section-content">
+			<div class="status-block">
+			  <div class="status-title">Native Materials Only</div>
+			  <div class="status-copy">Stylized toon, outline, and palette override passes are disabled while the renderer is being upgraded toward a cleaner high-end baseline.</div>
+			</div>
+		  </div>
+		</section>
       </div>
     </div>
   </div>

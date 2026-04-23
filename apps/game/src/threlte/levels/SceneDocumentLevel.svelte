@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte'
+  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
   import { T } from '@threlte/core'
   import { Color, Group, Quaternion, Vector3 } from 'three'
   import AmbientAudioRegions from '../components/AmbientAudioRegions.svelte'
   import AmbientParticleField from '../components/AmbientParticleField.svelte'
+  import SceneFogExp2 from '../components/SceneFogExp2.svelte'
   import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
   import LevelManager from '../core/LevelManager.svelte'
   import EditorSceneBranch from '../editor/EditorSceneBranch.svelte'
@@ -19,6 +20,8 @@
   import StarMap from '../systems/StarMap.svelte'
   import type { EditorSceneDocument, EditorSceneNode } from '../editor/editorTypes'
   import { EDITOR_API_BASE } from '@config/editorApi'
+  import { replaceRuntimeVisualStyle, resetRuntimeVisualStyle, runtimeVisualStyleStore } from '../styles/runtimeVisualStyleStore'
+  import { buildRuntimeVisualStyleFromLevelSettings } from '../styles/GameplayStyleProfiles'
 
   const dispatch = createEventDispatcher()
   const sceneModules = import.meta.glob('../editor/scenes/*.scene.json', { eager: true, import: 'default' }) as Record<string, EditorSceneDocument>
@@ -217,6 +220,9 @@
   $: waterLevel = waterSettings?.level ?? waterSettings?.initialLevel ?? -0.16
   $: waterColor = parseSceneColor(waterSettings?.color, 0x425d72)
   $: underwaterFogColor = parseSceneColor(waterSettings?.underwaterFogColor, 0x0a1922)
+  $: if (sceneDocument) {
+    replaceRuntimeVisualStyle(buildRuntimeVisualStyleFromLevelSettings(sharedLevelSettings))
+  }
 
   onMount(() => {
     const unsubscribePlayer = playerStateStore.subscribe((state) => {
@@ -229,6 +235,10 @@
       unsubscribePlayer()
     }
   })
+
+  onDestroy(() => {
+    resetRuntimeVisualStyle()
+  })
 </script>
 
 <LevelManager>
@@ -238,7 +248,7 @@
       files={activeSkyboxPreset.files}
     />
 
-    <T.FogExp2 color={fogColor} density={fogDensity} />
+    <SceneFogExp2 color={fogColor} density={fogDensity} />
     <T.AmbientLight intensity={ambientIntensity} color="#cfe4ff" />
     <T.HemisphereLight skyColor="#dbe9ff" groundColor="#1b2130" intensity={0.85} />
     <T.DirectionalLight position={[14, 20, -10]} color="#d7e6ff" intensity={keyLightIntensity} />

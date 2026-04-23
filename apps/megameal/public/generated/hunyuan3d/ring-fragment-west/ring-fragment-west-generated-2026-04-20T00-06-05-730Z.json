@@ -1,0 +1,14 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/broken-ancient-stone-ring-ruin-2026-04-20T00-01-48-319Z/ring-fragment-west.glb",
+  "sourceName": "broken ancient stone ring ruin",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/ring-fragment-west-2026-04-20T00-01-48-324Z/reference/ring-fragment-west-reference-2026-04-20T00-03-27-057Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776643407098-dcdm9n",
+  "prompt": "object: broken ancient stone ring ruin. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Painterly Storybook. style treatment: extremely dark cosmic horror sacred material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-20T00:06:07.535Z"
+}

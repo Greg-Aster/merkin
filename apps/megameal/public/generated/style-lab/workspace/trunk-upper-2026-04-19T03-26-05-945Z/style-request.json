@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-04-19T03:26:31.748Z",
+  "styleProfileName": "Abyssal World-Tree · Neon Cosmic Horror",
+  "sourceName": "Trunk Upper",
+  "sourceAssetUrl": "/generated/style-lab/sources/trunk-upper-2026-04-19T03-26-05-597Z/trunk-upper.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/style-lab/sources/trunk-upper-2026-04-19T03-26-05-597Z/trunk-upper.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/trunk-upper-2026-04-19T03-26-05-945Z/source/trunk-upper.glb",
+  "prompt": "object: colossal world-tree trunk segment, abyssal bark, sacred fissures. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal World-Tree · Neon Cosmic Horror. style treatment: extremely dark cosmic horror Norse myth environment, Yggdrasil as a colossal world-tree of sacred dread, abyssal bark, black sea, rune-carved stone, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, ritual pathways, drowned shrine fragments, vast mythic scale, oppressive sacred atmosphere, painterly but legible, strong silhouette hierarchy, selective luminous accents only, ancient and uncanny, not generic fantasy. avoid: daylight, cheerful fantasy, bright saturated rainbow everywhere, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened timber, abyssal roots, violet-magenta rune glow, cosmic dread, monumental sacred architecture, and Norse myth gravitas over generic fantasy prettiness.",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "referenceGenerationWarning": "fetch failed",
+  "referenceImageUrl": "",
+  "workspaceReferenceImageUrl": "",
+  "generatedReferenceImageUrl": ""
+}

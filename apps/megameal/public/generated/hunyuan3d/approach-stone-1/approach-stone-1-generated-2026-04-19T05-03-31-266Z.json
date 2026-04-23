@@ -1,0 +1,14 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/approach-stone-1-2026-04-19T05-03-28-528Z/approach-stone-1.glb",
+  "sourceName": "Approach Stone 1",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/approach-stone-1-2026-04-19T05-03-28-539Z/reference/shore-ring-reference-2026-04-19T04-56-39-473Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776575009253-paz989",
+  "prompt": "object: ceremonial approach stone, weathered runic slab. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror sacred material language, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-19T05:03:32.038Z"
+}

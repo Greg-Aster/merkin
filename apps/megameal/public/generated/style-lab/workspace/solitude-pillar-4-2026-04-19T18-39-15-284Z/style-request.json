@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-04-19T18:39:56.654Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "Solitude Pillar 4",
+  "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t23-14-30-195z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t23-14-30-195z-generated-2026-04-19T00-32-18-336Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t23-14-30-195z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18t23-14-30-195z-generated-2026-04-19T00-32-18-336Z.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/solitude-pillar-4-2026-04-19T18-39-15-284Z/source/solitude-pillar-4.glb",
+  "prompt": "object: Solitude Pillar 4. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/solitude-pillar-4-reference-2026-04-19T18-39-56-652Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/solitude-pillar-4-2026-04-19T18-39-15-284Z/reference/solitude-pillar-4-reference-2026-04-19T18-39-56-652Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/solitude-pillar-4-reference-2026-04-19T18-39-56-652Z.png"
+}

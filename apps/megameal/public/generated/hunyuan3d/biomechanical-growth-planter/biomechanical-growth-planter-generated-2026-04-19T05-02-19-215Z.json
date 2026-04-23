@@ -1,0 +1,14 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+  "sourceName": "Well of Urd Root Shrine",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/well-of-urd-root-shrine-2026-04-19T05-02-16-424Z/reference/shore-ring-reference-2026-04-19T04-56-39-473Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776574937202-16bwpu",
+  "prompt": "object: Well of Urd Root Shrine. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror sacred material language, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-19T05:02:19.975Z"
+}

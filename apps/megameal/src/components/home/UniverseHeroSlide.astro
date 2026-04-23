@@ -3,9 +3,15 @@
 // Universe intro as a banner slide (rendered via banner-slide-content slot).
 // This fills the banner-slide shell created by blog-core for html-type items.
 // The banner videos cycle after this slide.
+
+interface Props {
+  transparentMode?: boolean
+}
+
+const { transparentMode = false } = Astro.props
 ---
 
-<div class="hero-slide-inner">
+<div class:list={['hero-slide-inner', transparentMode && 'hero-slide-inner--transparent']}>
   <div class="hero-bg-layer" aria-hidden="true">
     <div class="hero-stars"></div>
     <div class="hero-stars-twinkle"></div>
@@ -13,7 +19,7 @@
     <div class="hero-vignette"></div>
   </div>
 
-  <div class="hero-content-inner">
+  <div class="hero-content-inner" data-tilt-panel>
     <div class="hero-eyebrow">Year 3042 — The Multiverse is Open</div>
 
     <h1 class="hero-title">
@@ -52,7 +58,7 @@
 
 <script>
   // 3D mousemove tilt on the hero content
-  const content = document.querySelector('.hero-content-inner') as HTMLElement | null
+  const content = document.querySelector('[data-tilt-panel]') as HTMLElement | null
   if (content) {
     let rafId = 0
     document.addEventListener('mousemove', (e) => {
@@ -84,6 +90,10 @@
     justify-content: center;
     overflow: hidden;
     padding: 4rem 1.5rem 5rem;
+  }
+
+  .hero-slide-inner--transparent .hero-bg-layer {
+    opacity: 0;
   }
 
   /* ---- Background layers ---- */
@@ -218,6 +228,13 @@
     box-shadow:
       0 18px 44px rgba(0, 0, 0, 0.16),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .hero-slide-inner--transparent .hero-content-inner {
+    background: transparent;
+    backdrop-filter: none;
+    border-color: transparent;
+    box-shadow: none;
   }
 
   .hero-eyebrow {

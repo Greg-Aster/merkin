@@ -7,7 +7,10 @@ export type RenderStylePresetChoice =
 	| "ghibli"
 	| "alto"
 	| "monument"
+	| "etherpunk"
 	| "retro";
+
+export type RenderLookMode = "stylized" | "beauty";
 
 const createUiStore = () => {
 	const { subscribe, update } = writable({
@@ -123,15 +126,20 @@ export const renderStyleEnabled = createPersistentBooleanStore(
 	"megameal-game-render-style-enabled",
 	true,
 );
+export const renderLookMode = createPersistentStringStore<RenderLookMode>(
+	"megameal-game-render-look-mode",
+	"beauty",
+	["stylized", "beauty"],
+);
 export const renderStylePresetChoice =
 	createPersistentStringStore<RenderStylePresetChoice>(
 		"megameal-game-render-style-preset-choice",
 		"surreal-site",
-		["manifest", "site", "surreal-site", "ghibli", "alto", "monument", "retro"],
+		["manifest", "site", "surreal-site", "ghibli", "alto", "monument", "etherpunk", "retro"],
 	);
 export const renderStyleFlattenMaterials = createPersistentBooleanStore(
 	"megameal-game-render-style-flatten-materials",
-	true,
+	false,
 );
 export const renderStylePaintedOutlines = createPersistentBooleanStore(
 	"megameal-game-render-style-painted-outlines",

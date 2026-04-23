@@ -29,12 +29,17 @@
   type CollisionNumericField = 'friction' | 'restitution'
   type CollisionBooleanField = 'sensor'
   type LightNumericField = 'intensity' | 'distance' | 'decay'
-  type GameplayField = 'title' | 'author' | 'location' | 'excerpt' | 'body' | 'targetLevelId' | 'markerColor' | 'audioTrack' | 'fogColor'
+  type GameplayField = 'title' | 'author' | 'location' | 'excerpt' | 'body' | 'targetLevelId' | 'markerColor' | 'audioTrack' | 'fogColor' | 'mistColor'
   type GameplayNumericField =
     | 'markerSize'
     | 'audioVolume'
     | 'regionFalloff'
     | 'fogDensity'
+    | 'mistOpacity'
+    | 'mistLayers'
+    | 'mistSpacing'
+    | 'mistScale'
+    | 'mistDriftSpeed'
     | 'wanderRadius'
     | 'wanderSpeed'
     | 'hoverHeight'
@@ -173,10 +178,10 @@
         hint="Live preview of the asset currently assigned to this node."
       />
       <div class="button-row compact-two-columns editor-mt-sm">
-        <button on:click={onOpenGeneratedAssetPicker}>Pick Generated Asset</button>
-        <button on:click={onOpenImportedAssetPicker}>Pick Imported Asset</button>
+        <button on:click={onOpenGeneratedAssetPicker}>Select Generated</button>
+        <button on:click={onOpenImportedAssetPicker}>Browse Imported</button>
       </div>
-      <div class="save-message">Use the picker buttons to swap this object to another asset from the library instead of typing paths manually.</div>
+      <div class="save-message">Use the picker buttons to swap this object to another asset from the library instead of typing paths manually. Generated picks open the current asset folder when possible.</div>
       {#if assetPickerTargetNodeId === selectedNode.id}
         <div class="editor-subsection editor-mt-sm">
           <div class="tuple-label">Replacement Asset Picker</div>
@@ -456,6 +461,19 @@
           <input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.regionFalloff ?? 8} on:change={(e) => onGameplayNumericChange('regionFalloff', (e.currentTarget as HTMLInputElement).value)} />
         </div>
         <div class="save-message">Use node position + scale to shape the fog box. Density and falloff control how strongly it blends.</div>
+      {:else if selectedNode.gameplay.type === 'mist-region'}
+        <div class="tuple-group"><div class="tuple-label">Mist Label</div><input class="text-input" value={selectedNode.gameplay.title ?? ''} on:input={(e) => onGameplayFieldChange('title', (e.currentTarget as HTMLInputElement).value)} /></div>
+        <div class="tuple-group"><div class="tuple-label">Mist Color</div><input class="text-input" type="color" value={selectedNode.gameplay.mistColor ?? '#241557'} on:input={(e) => onGameplayFieldChange('mistColor', (e.currentTarget as HTMLInputElement).value)} /></div>
+        <div class="tuple-row compact-two editor-mt-sm">
+          <input class="tuple-input" type="number" step="0.01" value={selectedNode.gameplay.mistOpacity ?? 0.14} on:change={(e) => onGameplayNumericChange('mistOpacity', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="1" value={selectedNode.gameplay.mistLayers ?? 3} on:change={(e) => onGameplayNumericChange('mistLayers', (e.currentTarget as HTMLInputElement).value)} />
+        </div>
+        <div class="tuple-row compact-two editor-mt-sm">
+          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.mistSpacing ?? 0.45} on:change={(e) => onGameplayNumericChange('mistSpacing', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="10" value={selectedNode.gameplay.mistScale ?? 360} on:change={(e) => onGameplayNumericChange('mistScale', (e.currentTarget as HTMLInputElement).value)} />
+        </div>
+        <div class="tuple-group editor-mt-sm"><div class="tuple-label">Mist Drift</div><input class="tuple-input" type="number" step="0.01" value={selectedNode.gameplay.mistDriftSpeed ?? 0.05} on:change={(e) => onGameplayNumericChange('mistDriftSpeed', (e.currentTarget as HTMLInputElement).value)} /></div>
+        <div class="save-message">Move the node to reposition the mist. Toggle visibility to hide it, or delete the node to remove it entirely.</div>
       {/if}
     {/if}
 

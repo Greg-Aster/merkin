@@ -144,6 +144,29 @@ export function createEditorPrefabFactory(options: CreateEditorPrefabFactoryOpti
         },
       })
     },
+    addMistRegion(parentId: string | null = null) {
+      return addNode({
+        id: createId('mist-region'),
+        name: 'Mist Region',
+        kind: 'group',
+        parentId,
+        position: [0, 0.55, 0],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+        visible: true,
+        gameplay: {
+          type: 'mist-region',
+          markerColor: '#b992ff',
+          title: 'Ground Mist',
+          mistColor: '#241557',
+          mistOpacity: 0.14,
+          mistLayers: 3,
+          mistSpacing: 0.45,
+          mistScale: 360,
+          mistDriftSpeed: 0.05,
+        },
+      })
+    },
     addAsset(
       name: string,
       url: string,

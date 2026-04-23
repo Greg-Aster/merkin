@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-04-19T02:29:58.503Z",
+  "styleProfileName": "Abyssal World-Tree · Neon Cosmic Horror",
+  "sourceName": "Well Dais",
+  "sourceAssetUrl": "/generated/style-lab/sources/well-dais-2026-04-19T02-28-32-826Z/well-dais.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/style-lab/sources/well-dais-2026-04-19T02-28-32-826Z/well-dais.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/well-dais-2026-04-19T02-28-32-845Z/source/well-dais.glb",
+  "prompt": "object: well dais. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal World-Tree · Neon Cosmic Horror. style treatment: extremely dark cosmic horror Norse myth environment, Yggdrasil as a colossal world-tree of sacred dread, abyssal bark, black sea, rune-carved stone, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, ritual pathways, drowned shrine fragments, vast mythic scale, oppressive sacred atmosphere, painterly but legible, strong silhouette hierarchy, selective luminous accents only, ancient and uncanny, not generic fantasy. avoid: daylight, cheerful fantasy, bright saturated rainbow everywhere, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened timber, abyssal roots, violet-magenta rune glow, cosmic dread, monumental sacred architecture, and Norse myth gravitas over generic fantasy prettiness.",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/well-dais-reference-2026-04-19T02-29-58-498Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/well-dais-2026-04-19T02-28-32-845Z/reference/well-dais-reference-2026-04-19T02-29-58-498Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/well-dais-reference-2026-04-19T02-29-58-498Z.png"
+}

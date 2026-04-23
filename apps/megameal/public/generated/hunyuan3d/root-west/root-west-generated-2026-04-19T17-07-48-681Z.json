@@ -1,0 +1,14 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/root-west-2026-04-19T17-05-05-257Z/root-west.glb",
+  "sourceName": "Root west",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/root-west-2026-04-19T17-05-05-260Z/reference/root-west-reference-2026-04-19T17-06-01-919Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776618361947-khs8vl",
+  "prompt": "object: ancient root buttress of cyclopean sacred wood, root-cathedral mass. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror , blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-19T17:07:50.209Z"
+}

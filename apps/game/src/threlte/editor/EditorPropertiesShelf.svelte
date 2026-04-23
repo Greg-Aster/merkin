@@ -23,8 +23,8 @@
   }
 
   type LightNumericField = 'intensity' | 'distance' | 'decay'
-  type GameplayTextField = 'title' | 'author' | 'location' | 'excerpt' | 'body' | 'targetLevelId' | 'markerColor' | 'audioTrack' | 'fogColor'
-  type GameplayNumericField = 'markerSize' | 'audioVolume' | 'regionFalloff' | 'fogDensity' | 'wanderRadius' | 'wanderSpeed' | 'hoverHeight' | 'bobAmplitude' | 'bobSpeed' | 'twinkleSpeed' | 'lightIntensity' | 'lightDistance' | 'lightDecay' | 'spriteIntensity'
+  type GameplayTextField = 'title' | 'author' | 'location' | 'excerpt' | 'body' | 'targetLevelId' | 'markerColor' | 'audioTrack' | 'fogColor' | 'mistColor'
+  type GameplayNumericField = 'markerSize' | 'audioVolume' | 'regionFalloff' | 'fogDensity' | 'wanderRadius' | 'wanderSpeed' | 'hoverHeight' | 'bobAmplitude' | 'bobSpeed' | 'twinkleSpeed' | 'lightIntensity' | 'lightDistance' | 'lightDecay' | 'spriteIntensity' | 'mistOpacity' | 'mistLayers' | 'mistSpacing' | 'mistScale' | 'mistDriftSpeed'
   type GameplayBooleanField = 'wanderEnabled'
 
   export let selectedNode: EditorSceneNode | null = null
@@ -156,9 +156,10 @@
         <input class="text-input" value={selectedNode.asset.url} on:input={(e) => onAssetUrlChange((e.currentTarget as HTMLInputElement).value)} />
       </div>
       <div class="button-row compact editor-mt-sm">
-        <button on:click={onOpenGeneratedAssetPicker}>Pick Generated</button>
-        <button on:click={onOpenImportedAssetPicker}>Pick Imported</button>
+        <button on:click={onOpenGeneratedAssetPicker}>Select Generated</button>
+        <button on:click={onOpenImportedAssetPicker}>Browse Imported</button>
       </div>
+      <div class="save-message editor-mt-sm">Select Generated opens the current generated asset folder when possible so you can swap between sibling outputs quickly.</div>
     {:else if selectedNode.prefab}
       <div class="tuple-group">
         <div class="tuple-label">Prefab Type</div>
@@ -344,6 +345,28 @@
           <input class="tuple-input" type="number" step="0.0001" value={selectedNode.gameplay.fogDensity ?? 0.0025} on:change={(e) => onGameplayNumericChange('fogDensity', (e.currentTarget as HTMLInputElement).value)} />
           <input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.regionFalloff ?? 8} on:change={(e) => onGameplayNumericChange('regionFalloff', (e.currentTarget as HTMLInputElement).value)} />
         </div>
+      {:else if selectedNode.gameplay.type === 'mist-region'}
+        <div class="tuple-group">
+          <div class="tuple-label">Mist Label</div>
+          <input class="text-input" value={selectedNode.gameplay.title ?? ''} on:input={(e) => onGameplayFieldChange('title', (e.currentTarget as HTMLInputElement).value)} />
+        </div>
+        <div class="tuple-group">
+          <div class="tuple-label">Mist Color</div>
+          <input class="text-input" value={selectedNode.gameplay.mistColor ?? '#241557'} on:input={(e) => onGameplayFieldChange('mistColor', (e.currentTarget as HTMLInputElement).value)} />
+        </div>
+        <div class="tuple-row">
+          <input class="tuple-input" type="number" step="0.01" value={selectedNode.gameplay.mistOpacity ?? 0.14} on:change={(e) => onGameplayNumericChange('mistOpacity', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="1" value={selectedNode.gameplay.mistLayers ?? 3} on:change={(e) => onGameplayNumericChange('mistLayers', (e.currentTarget as HTMLInputElement).value)} />
+        </div>
+        <div class="tuple-row editor-mt-sm">
+          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.mistSpacing ?? 0.45} on:change={(e) => onGameplayNumericChange('mistSpacing', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" step="10" value={selectedNode.gameplay.mistScale ?? 360} on:change={(e) => onGameplayNumericChange('mistScale', (e.currentTarget as HTMLInputElement).value)} />
+        </div>
+        <div class="tuple-group editor-mt-sm">
+          <div class="tuple-label">Mist Drift</div>
+          <input class="tuple-input" type="number" step="0.01" value={selectedNode.gameplay.mistDriftSpeed ?? 0.05} on:change={(e) => onGameplayNumericChange('mistDriftSpeed', (e.currentTarget as HTMLInputElement).value)} />
+        </div>
+        <div class="save-message editor-mt-sm">Move the node to reposition the mist. Toggle `Visible` to hide it, or delete the node to remove it entirely.</div>
       {/if}
     </div>
   {/if}

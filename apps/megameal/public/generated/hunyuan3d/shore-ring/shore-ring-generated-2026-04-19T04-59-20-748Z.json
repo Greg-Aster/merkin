@@ -1,0 +1,14 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/shore-ring-2026-04-19T04-55-24-602Z/shore-ring.glb",
+  "sourceName": "Shore Ring",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/shore-ring-2026-04-19T04-55-24-606Z/reference/shore-ring-reference-2026-04-19T04-56-39-473Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1776574599499-kvutme",
+  "prompt": "object: shoreline ring, drowned shrine perimeter. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror sacred material language, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-19T04:59:22.424Z"
+}

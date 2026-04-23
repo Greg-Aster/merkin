@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-04-19T03:44:39.089Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "Island Shelf",
+  "sourceAssetUrl": "/generated/hunyuan3d/island-shelf/island-shelf-generated-2026-04-19T02-20-34-748Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/island-shelf/island-shelf-generated-2026-04-19T02-20-34-748Z.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/island-shelf-2026-04-19T03-43-35-312Z/source/island-shelf.glb",
+  "prompt": "object: broad outer island shelf of weathered sacred stone, supporting the perimeter around the world-tree. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror sacred material language, blackened ancient timber, abyssal rune-carved stone, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread. avoid: daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened timber, abyssal roots, violet-magenta rune glow, cosmic dread, and monumental sacred architecture over generic fantasy prettiness.",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/island-shelf-reference-2026-04-19T03-44-39-081Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/island-shelf-2026-04-19T03-43-35-312Z/reference/island-shelf-reference-2026-04-19T03-44-39-081Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/island-shelf-reference-2026-04-19T03-44-39-081Z.png"
+}

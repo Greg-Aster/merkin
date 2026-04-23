@@ -22,6 +22,7 @@
   import ProceduralMesh from '../components/ProceduralMesh.svelte'
   import StarSprite from '../components/StarSprite.svelte'
   import LevelTransitionHandler from '../components/LevelTransitionHandler.svelte'
+  import SceneFogExp2 from '../components/SceneFogExp2.svelte'
   import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
   import Skybox from '../systems/Skybox.svelte'
   import StarMap from '../systems/StarMap.svelte'
@@ -754,7 +755,7 @@
       files={activeSkyboxPreset.files}
     />
 
-    <T.FogExp2 color={$editorStateStore.enabled && $editorStateStore.viewportLightingMode === 'workbench' ? '#d9e6f5' : sciFiFogColor} density={$editorStateStore.enabled && $editorStateStore.viewportLightingMode === 'workbench' ? 0.00025 : sciFiFogDensity} />
+    <SceneFogExp2 color={sciFiFogColor} density={sciFiFogDensity} />
 
     <!-- ══════════════════════════════════════════
          PHYSICS BASE LAYER

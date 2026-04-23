@@ -212,6 +212,9 @@ export interface LinkPreviewInfo {
 	title: string;
 	description: string;
 	icon: string; // Font Awesome icon name (without fa6-solid: prefix)
+	kicker?: string;
+	stat?: string;
+	ctaLabel?: string;
 }
 
 /**
@@ -378,6 +381,9 @@ export interface BannerItemPreviewDetails {
 	urlForDisplay: string; // Formatted URL or pathname for display in the card
 	previewTitle: string;
 	previewDescription: string;
+	previewKicker?: string;
+	previewStat?: string;
+	previewCtaLabel?: string;
 	previewIconSVG: string; // The actual SVG string for the icon
 	isVideoButton: boolean; // True if the banner item is a video
 }
