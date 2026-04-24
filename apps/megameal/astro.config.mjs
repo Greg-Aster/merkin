@@ -56,6 +56,41 @@ const isDev = process.env.NODE_ENV !== 'production';
 const siteDevHost = process.env.SITE_DEV_HOST || '127.0.0.1';
 const siteDevPort = Number.parseInt(process.env.SITE_DEV_PORT || '4321', 10);
 
+function manualClientChunks(id) {
+  if (id.includes('node_modules')) {
+    if (id.includes('photoswipe')) return 'vendor-photoswipe';
+    if (id.includes('@swup') || id.includes('/swup/')) return 'vendor-swup';
+    if (id.includes('marked') || id.includes('markdown-it')) return 'vendor-markdown';
+    if (id.includes('katex')) return 'vendor-katex';
+    if (id.includes('mammoth')) return 'vendor-mammoth';
+    if (id.includes('overlayscrollbars')) return 'vendor-overlayscrollbars';
+    if (id.includes('howler')) return 'vendor-audio';
+    if (id.includes('chart.js')) return 'vendor-chart';
+    if (id.includes('peerjs')) return 'vendor-realtime';
+    if (id.includes('three/examples')) return 'vendor-3d-extras';
+    if (id.includes('/node_modules/three/')) return 'vendor-3d-core';
+    if (id.includes('@threlte')) return 'vendor-3d-extras';
+    return 'vendor';
+  }
+
+  if (
+    id.includes('/src/components/home/') ||
+    id.includes('/src/components/banner-stage/')
+  ) {
+    return 'feature-home-banner';
+  }
+
+  if (
+    id.includes('/src/utils/site-audio') ||
+    id.includes('/src/utils/site-sfx') ||
+    id.includes('/src/components/client/SiteAudioControl.svelte')
+  ) {
+    return 'feature-audio';
+  }
+
+  return undefined;
+}
+
 export default defineConfig({
   site,
   base,
@@ -66,7 +101,7 @@ export default defineConfig({
   },
   integrations: [
     corsMiddleware(),
-    tailwind({ nesting: true }),
+    tailwind(),
     swup({
       theme: false,
       animationClass: "transition-swup-",
@@ -178,7 +213,11 @@ export default defineConfig({
     },
     plugins: [createDevRuntimePlugin('megameal', siteDevHost)],
     build: {
+      chunkSizeWarningLimit: 550,
       rollupOptions: {
+        output: {
+          manualChunks: manualClientChunks,
+        },
         onwarn(warning, warn) {
           if (
             warning.message.includes("is dynamically imported by") &&

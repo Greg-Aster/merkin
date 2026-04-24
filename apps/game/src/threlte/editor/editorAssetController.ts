@@ -14,14 +14,25 @@ interface EditorAssetControllerDeps {
   getCanUseAiMeshStudio: (node: EditorSceneNode | null) => boolean
   getAiSourceName: (node: EditorSceneNode | null) => string
   getDefaultStyleDescriptor: (node: EditorSceneNode | null) => string
-  getNodeTransformSnapshot: (node: EditorSceneNode | null) => { position: [number, number, number], rotation: [number, number, number], scale: [number, number, number] } | null
+  getNodeTransformSnapshot: (node: EditorSceneNode | null) => {
+    position: [number, number, number]
+    rotation: [number, number, number]
+    scale: [number, number, number]
+  } | null
   readJsonPayload: (response: Response, context: string) => Promise<any>
-  setRuntimeDiagnostic: (source: string, payload: { level: string, message: string }) => void
+  setRuntimeDiagnostic: (
+    source: string,
+    payload: { level: string; message: string },
+  ) => void
   reportRuntimeAssetFailure: (id: string, message: string) => void
   appendPipelineLog: (message: string, detail?: unknown) => void
   patchNode: (nodeId: string, patch: Record<string, any>) => void
   patchNodes: (nodeIds: string[], patch: Record<string, any>) => void
-  addAssetPrefab: (label: string, url: string, scale?: [number, number, number]) => void
+  addAssetPrefab: (
+    label: string,
+    url: string,
+    scale?: [number, number, number],
+  ) => void
   setActiveEditorTab: (tab: string) => void
   setSaveMessage: (message: string) => void
 }
@@ -38,7 +49,9 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       message: `Browsing assets from ${path}…`,
     })
     try {
-      const response = await fetch(`${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`)
+      const response = await fetch(
+        `${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`,
+      )
       const payload = await response.json()
       if (!payload?.success) {
         state.assetBrowserError = payload?.message ?? 'Failed to browse assets'
@@ -50,8 +63,14 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       }
       state.assetBrowserPath = path
       const nextItems = payload.items
-        .filter((item: any) => item.isDirectory || /\.(gltf|glb)$/i.test(item.name))
-        .sort((a: any, b: any) => Number(b.isDirectory) - Number(a.isDirectory) || a.name.localeCompare(b.name))
+        .filter(
+          (item: any) => item.isDirectory || /\.(gltf|glb)$/i.test(item.name),
+        )
+        .sort(
+          (a: any, b: any) =>
+            Number(b.isDirectory) - Number(a.isDirectory) ||
+            a.name.localeCompare(b.name),
+        )
       state.assetBrowserItems = nextItems
       deps.setRuntimeDiagnostic('toolsBridge', {
         level: 'ready',
@@ -73,7 +92,9 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
   }
 
   async function browseWorkspaceEntries(path: string) {
-    const response = await fetch(`${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`)
+    const response = await fetch(
+      `${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`,
+    )
     const payload = await response.json()
     if (!payload?.success) {
       throw new Error(payload?.message ?? `Failed to browse ${path}`)
@@ -83,7 +104,7 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
 
   function resolvePublicAssetUrl(path: string, fallbackName: string) {
     const publicPrefixes = ['apps/game/public/', 'apps/megameal/public/']
-    const matchedPrefix = publicPrefixes.find((prefix) => path.startsWith(prefix))
+    const matchedPrefix = publicPrefixes.find(prefix => path.startsWith(prefix))
     if (matchedPrefix) {
       return `/${path.slice(matchedPrefix.length)}`
     }
@@ -98,10 +119,13 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     return workspacePath.replace(/\/[^/]+$/, '')
   }
 
-  function getSelectedNodePreviewAssetUrl(node: EditorSceneNode | null = deps.getSelectedNode()) {
+  function getSelectedNodePreviewAssetUrl(
+    node: EditorSceneNode | null = deps.getSelectedNode(),
+  ) {
     if (!node) return ''
     if (node.asset?.url) return node.asset.url
-    if (node.generation?.lastBakedAssetUrl) return node.generation.lastBakedAssetUrl
+    if (node.generation?.lastBakedAssetUrl)
+      return node.generation.lastBakedAssetUrl
     return ''
   }
 
@@ -112,7 +136,9 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     state.selectedGeneratedVariantUrl = ''
   }
 
-  async function loadGeneratedVariantsForSelectedNode(node: EditorSceneNode | null = deps.getSelectedNode()) {
+  async function loadGeneratedVariantsForSelectedNode(
+    node: EditorSceneNode | null = deps.getSelectedNode(),
+  ) {
     const assetUrl = node?.asset?.url ?? ''
     if (!assetUrl.startsWith('/generated/')) {
       clearGeneratedVariantState()
@@ -131,20 +157,25 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     try {
       const items = await browseWorkspaceEntries(directoryPath)
       state.generatedVariantItems = items
-        .filter((item: any) => !item.isDirectory && /\.(glb|gltf)$/i.test(item.name))
+        .filter(
+          (item: any) => !item.isDirectory && /\.(glb|gltf)$/i.test(item.name),
+        )
         .sort((left: any, right: any) => right.name.localeCompare(left.name))
         .map((item: any) => ({
           name: item.name,
           path: item.path,
           url: resolvePublicAssetUrl(item.path, item.name),
         }))
-      state.selectedGeneratedVariantUrl = state.generatedVariantItems.find((item: any) => item.url === assetUrl)?.url
-        ?? state.generatedVariantItems[0]?.url
-        ?? ''
+      state.selectedGeneratedVariantUrl =
+        state.generatedVariantItems.find((item: any) => item.url === assetUrl)
+          ?.url ??
+        state.generatedVariantItems[0]?.url ??
+        ''
     } catch (error) {
       console.error('Generated variant load failed:', error)
       state.generatedVariantItems = []
-      state.generatedVariantError = error instanceof Error ? error.message : 'Variant browser unavailable'
+      state.generatedVariantError =
+        error instanceof Error ? error.message : 'Variant browser unavailable'
       state.selectedGeneratedVariantUrl = ''
     } finally {
       state.generatedVariantLoading = false
@@ -155,16 +186,26 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     state.textureBrowserLoading = true
     state.textureBrowserError = ''
     try {
-      const response = await fetch(`${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`)
+      const response = await fetch(
+        `${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`,
+      )
       const payload = await response.json()
       if (!payload?.success) {
-        state.textureBrowserError = payload?.message ?? 'Failed to browse textures'
+        state.textureBrowserError =
+          payload?.message ?? 'Failed to browse textures'
         return
       }
       state.textureBrowserPath = path
       state.textureBrowserItems = payload.items
-        .filter((item: any) => item.isDirectory || deps.textureFilePattern.test(item.name))
-        .sort((a: any, b: any) => Number(b.isDirectory) - Number(a.isDirectory) || a.name.localeCompare(b.name))
+        .filter(
+          (item: any) =>
+            item.isDirectory || deps.textureFilePattern.test(item.name),
+        )
+        .sort(
+          (a: any, b: any) =>
+            Number(b.isDirectory) - Number(a.isDirectory) ||
+            a.name.localeCompare(b.name),
+        )
     } catch (error) {
       console.error('Texture browser load failed:', error)
       state.textureBrowserError = 'Texture browser unavailable'
@@ -178,17 +219,24 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     state.workflowBrowserError = ''
 
     try {
-      const response = await fetch(`${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`)
+      const response = await fetch(
+        `${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`,
+      )
       const payload = await response.json()
       if (!payload?.success) {
-        state.workflowBrowserError = payload?.message ?? 'Failed to browse workflows'
+        state.workflowBrowserError =
+          payload?.message ?? 'Failed to browse workflows'
         return
       }
 
       state.workflowBrowserPath = path
       state.workflowBrowserItems = payload.items
         .filter((item: any) => item.isDirectory || /\.json$/i.test(item.name))
-        .sort((a: any, b: any) => Number(b.isDirectory) - Number(a.isDirectory) || a.name.localeCompare(b.name))
+        .sort(
+          (a: any, b: any) =>
+            Number(b.isDirectory) - Number(a.isDirectory) ||
+            a.name.localeCompare(b.name),
+        )
     } catch (error) {
       console.error('Workflow browser load failed:', error)
       state.workflowBrowserError = 'Workflow browser unavailable'
@@ -197,7 +245,11 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     }
   }
 
-  function selectWorkflowPath(item: { name: string, path: string, isDirectory: boolean }) {
+  function selectWorkflowPath(item: {
+    name: string
+    path: string
+    isDirectory: boolean
+  }) {
     if (item.isDirectory) {
       void loadWorkflowBrowser(item.path)
       return
@@ -210,7 +262,10 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
   function resetSelectedWorkflowPath() {
     state.selectedComfyWorkflowPath = deps.defaultComfyWorkflowPath
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('merkin:selected-comfy-workflow-path', deps.defaultComfyWorkflowPath)
+      window.localStorage.setItem(
+        'merkin:selected-comfy-workflow-path',
+        deps.defaultComfyWorkflowPath,
+      )
     }
     deps.setSaveMessage('Reset Comfy workflow to the built-in default')
   }
@@ -223,8 +278,12 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
   }
 
   function getSelectedLibraryItemUrl() {
-    if (!state.selectedLibraryItem || state.selectedLibraryItem.isDirectory) return ''
-    return resolvePublicAssetUrl(state.selectedLibraryItem.path, state.selectedLibraryItem.name)
+    if (!state.selectedLibraryItem || state.selectedLibraryItem.isDirectory)
+      return ''
+    return resolvePublicAssetUrl(
+      state.selectedLibraryItem.path,
+      state.selectedLibraryItem.name,
+    )
   }
 
   function getSelectedLibraryItemName() {
@@ -232,24 +291,29 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     return state.selectedLibraryItem.name.replace(/\.(gltf|glb)$/i, '')
   }
 
-  function getAssetBrowserDefaultScale(item: { name: string, path: string }) {
+  function getAssetBrowserDefaultScale(item: { name: string; path: string }) {
     return item.path.startsWith(deps.assetLibraryRootGenerated)
-      ? [1, 1, 1] as [number, number, number]
-      : [0.001, 0.001, 0.001] as [number, number, number]
+      ? ([1, 1, 1] as [number, number, number])
+      : ([0.001, 0.001, 0.001] as [number, number, number])
   }
 
-  function addAssetFromBrowser(item: { name: string, path: string }) {
+  function addAssetFromBrowser(item: { name: string; path: string }) {
     const url = resolvePublicAssetUrl(item.path, item.name)
-    deps.addAssetPrefab(item.name.replace(/\.(gltf|glb)$/i, ''), url, getAssetBrowserDefaultScale(item))
+    deps.addAssetPrefab(
+      item.name.replace(/\.(gltf|glb)$/i, ''),
+      url,
+      getAssetBrowserDefaultScale(item),
+    )
     deps.setSaveMessage(
       item.path.startsWith(deps.assetLibraryRootGenerated)
         ? `Added generated asset at scene scale: ${url}`
-        : `Added imported asset: ${url}`
+        : `Added imported asset: ${url}`,
     )
   }
 
   function addSelectedLibraryAssetToScene() {
-    if (!state.selectedLibraryItem || state.selectedLibraryItem.isDirectory) return
+    if (!state.selectedLibraryItem || state.selectedLibraryItem.isDirectory)
+      return
     addAssetFromBrowser(state.selectedLibraryItem)
   }
 
@@ -263,10 +327,13 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       `apps/game/public/${normalizedUrl}`,
     ]
     const selectedDirectory = workspaceCandidates[0].replace(/\/[^/]+$/, '')
-    const directoryItems = selectedDirectory === deps.assetLibraryRootGenerated
-      ? rootItems
-      : await loadAssetBrowser(selectedDirectory)
-    const foundItem = directoryItems.find((item: any) => workspaceCandidates.includes(item.path))
+    const directoryItems =
+      selectedDirectory === deps.assetLibraryRootGenerated
+        ? rootItems
+        : await loadAssetBrowser(selectedDirectory)
+    const foundItem = directoryItems.find((item: any) =>
+      workspaceCandidates.includes(item.path),
+    )
     if (foundItem) {
       state.selectedLibraryItem = foundItem
       state.hunyuanSelectionKey = foundItem.path
@@ -279,8 +346,8 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     const selectedNodes = deps.getSelectedNodes()
     if (selectedNodes.length > 0) {
       return selectedNodes
-        .filter((node) => deps.getCanUseAiMeshStudio(node))
-        .map((node) => node.id)
+        .filter(node => deps.getCanUseAiMeshStudio(node))
+        .map(node => node.id)
     }
 
     const selectedNode = deps.getSelectedNode()
@@ -295,7 +362,9 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     if (!state.hunyuanLastOutputUrl) return
     deps.setActiveEditorTab('create')
     await refreshGeneratedAssetLibrary(state.hunyuanLastOutputUrl)
-    deps.setSaveMessage(`Opened generated asset in library: ${state.hunyuanLastOutputUrl}`)
+    deps.setSaveMessage(
+      `Opened generated asset in library: ${state.hunyuanLastOutputUrl}`,
+    )
   }
 
   async function applyGeneratedAssetToSelection() {
@@ -306,7 +375,9 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
 
     const targetNodeIds = getApplicableSelectionNodeIds()
     if (targetNodeIds.length === 0) {
-      deps.setSaveMessage('Select one or more prefab or asset nodes to apply the generated asset')
+      deps.setSaveMessage(
+        'Select one or more prefab or asset nodes to apply the generated asset',
+      )
       return
     }
 
@@ -323,13 +394,18 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       deps.patchNode(targetNodeIds[0], replacementPatch)
     }
 
-    deps.appendPipelineLog('Applied generated asset to selection with preserved transform', {
-      assetUrl: state.hunyuanLastOutputUrl,
-      targets: targetNodeIds.map((id) => {
-        const node = deps.getEditorNodes().find((candidate) => candidate.id === id)
-        return { id, transform: deps.getNodeTransformSnapshot(node ?? null) }
-      }),
-    })
+    deps.appendPipelineLog(
+      'Applied generated asset to selection with preserved transform',
+      {
+        assetUrl: state.hunyuanLastOutputUrl,
+        targets: targetNodeIds.map(id => {
+          const node = deps
+            .getEditorNodes()
+            .find(candidate => candidate.id === id)
+          return { id, transform: deps.getNodeTransformSnapshot(node ?? null) }
+        }),
+      },
+    )
 
     state.hunyuanStatus = `Applied generated asset to ${targetNodeIds.length} node${targetNodeIds.length === 1 ? '' : 's'}.`
     state.hunyuanLastResultSummary = state.hunyuanStatus
@@ -341,11 +417,17 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
 
     const selectedNode = deps.getSelectedNode()
     if (selectedNode && targetNodeIds.includes(selectedNode.id)) {
-      void inspectSelectedAssetForHunyuan(state.hunyuanLastOutputUrl, selectedNode.id)
+      void inspectSelectedAssetForHunyuan(
+        state.hunyuanLastOutputUrl,
+        selectedNode.id,
+      )
     }
   }
 
-  async function inspectSelectedAssetForHunyuan(assetUrl: string, selectionKey: string) {
+  async function inspectSelectedAssetForHunyuan(
+    assetUrl: string,
+    selectionKey: string,
+  ) {
     const inspectToken = ++state.hunyuanInspectToken
     state.hunyuanStatus = 'Inspecting selected asset for Hunyuan compatibility…'
     state.hunyuanDetectedReferenceImageUrl = ''
@@ -355,27 +437,43 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     state.hunyuanLastOutputUrl = ''
 
     try {
-      const response = await fetch(`${EDITOR_API_BASE}/api/hunyuan3d/inspect?assetUrl=${encodeURIComponent(assetUrl)}`)
+      const response = await fetch(
+        `${EDITOR_API_BASE}/api/hunyuan3d/inspect?assetUrl=${encodeURIComponent(assetUrl)}`,
+      )
       const payload = await response.json()
 
-      if (inspectToken !== state.hunyuanInspectToken || selectionKey !== state.hunyuanSelectionKey) return
+      if (
+        inspectToken !== state.hunyuanInspectToken ||
+        selectionKey !== state.hunyuanSelectionKey
+      )
+        return
 
       if (!payload?.success || !payload.inspection) {
-        state.hunyuanStatus = payload?.message ?? 'Could not inspect this asset for AI generation.'
+        state.hunyuanStatus =
+          payload?.message ?? 'Could not inspect this asset for AI generation.'
         return
       }
 
-      state.hunyuanDetectedReferenceImageUrl = payload.inspection.detectedReferenceImageUrl ?? ''
-      state.hunyuanReferenceImageUrl = payload.inspection.detectedReferenceImageUrl ?? ''
-      state.hunyuanSupportsReplacement = !!payload.inspection.supportsReplacementGeneration
-      state.hunyuanSupportsTextureWrap = !!payload.inspection.supportsTextureWrap
-      state.hunyuanStatus = payload.inspection.message ?? 'Selected asset is ready for Hunyuan.'
+      state.hunyuanDetectedReferenceImageUrl =
+        payload.inspection.detectedReferenceImageUrl ?? ''
+      state.hunyuanReferenceImageUrl =
+        payload.inspection.detectedReferenceImageUrl ?? ''
+      state.hunyuanSupportsReplacement =
+        !!payload.inspection.supportsReplacementGeneration
+      state.hunyuanSupportsTextureWrap =
+        !!payload.inspection.supportsTextureWrap
+      state.hunyuanStatus =
+        payload.inspection.message ?? 'Selected asset is ready for Hunyuan.'
       deps.setRuntimeDiagnostic('hunyuan', {
         level: 'ready',
         message: state.hunyuanStatus,
       })
     } catch (error) {
-      if (inspectToken !== state.hunyuanInspectToken || selectionKey !== state.hunyuanSelectionKey) return
+      if (
+        inspectToken !== state.hunyuanInspectToken ||
+        selectionKey !== state.hunyuanSelectionKey
+      )
+        return
       console.error('Hunyuan asset inspect failed:', error)
       state.hunyuanStatus = `Hunyuan bridge unavailable at ${EDITOR_API_BASE}.`
       deps.setRuntimeDiagnostic('hunyuan', {
@@ -404,7 +502,9 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       }
     }
 
-    const glbBase64 = await arrayBufferToBase64(await exported.blob.arrayBuffer())
+    const glbBase64 = await arrayBufferToBase64(
+      await exported.blob.arrayBuffer(),
+    )
     const response = await fetch(`${EDITOR_API_BASE}/api/style/source-asset`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -418,10 +518,15 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
         nodeId: node.id,
       }),
     })
-    const payload = await deps.readJsonPayload(response, 'Style source asset staging')
+    const payload = await deps.readJsonPayload(
+      response,
+      'Style source asset staging',
+    )
 
     if (!payload?.success || !payload?.assetUrl) {
-      throw new Error(payload?.message ?? `Could not stage a source mesh for ${node.name}.`)
+      throw new Error(
+        payload?.message ?? `Could not stage a source mesh for ${node.name}.`,
+      )
     }
 
     return {

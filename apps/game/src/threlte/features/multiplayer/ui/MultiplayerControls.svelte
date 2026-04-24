@@ -1,28 +1,28 @@
 <script lang="ts">
-  import { multiplayerStore } from '../stores/multiplayerStore';
-  import { initializeClient, createRoom } from '../services/MultiplayerService';
+import { createRoom, initializeClient } from '../services/MultiplayerService'
+import { multiplayerStore } from '../stores/multiplayerStore'
 
-  let roomNameInput = '';
-  
-  // A local 'status' variable to track the joining process within this component
-  let status: 'idle' | 'joining' = 'idle';
-  let joinError = '';
+let roomNameInput = ''
 
-  // This function is called when the user clicks the "Join" button.
-  function handleJoinRoom() {
-    if (status === 'joining' || !roomNameInput.trim()) return;
-    
-    status = 'joining';
-    joinError = '';
-    
-    // Call the service, which will handle the lookup and connection.
-    // The service will update the global store, and this component will react to it.
-    initializeClient(roomNameInput.trim());
-    
-    // Reset the local status since the service is now handling the process
-    // The global store will reflect the actual connection state
-    status = 'idle';
-  }
+// A local 'status' variable to track the joining process within this component
+let status: 'idle' | 'joining' = 'idle'
+let joinError = ''
+
+// This function is called when the user clicks the "Join" button.
+function handleJoinRoom() {
+  if (status === 'joining' || !roomNameInput.trim()) return
+
+  status = 'joining'
+  joinError = ''
+
+  // Call the service, which will handle the lookup and connection.
+  // The service will update the global store, and this component will react to it.
+  initializeClient(roomNameInput.trim())
+
+  // Reset the local status since the service is now handling the process
+  // The global store will reflect the actual connection state
+  status = 'idle'
+}
 </script>
 
 <div class="multiplayer-controls">

@@ -35,7 +35,34 @@
   },
   "linter": {
     "rules": {
-      "recommended": true
+      "a11y": {
+        "recommended": true
+      },
+      "correctness": {
+        "recommended": true
+      },
+      "security": {
+        "recommended": true
+      },
+      "performance": {
+        "recommended": true
+      },
+      "style": {
+        "recommended": false
+      },
+      "complexity": {
+        "recommended": false
+      },
+      "nursery": {
+        "recommended": false
+      },
+      "suspicious": {
+        "recommended": true,
+        "noExplicitAny": "off",
+        "noImplicitAnyLet": "off",
+        "noAssignInExpressions": "off",
+        "noShadowRestrictedNames": "off"
+      }
     }
   }
 }

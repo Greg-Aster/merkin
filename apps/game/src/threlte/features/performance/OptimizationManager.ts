@@ -7,7 +7,7 @@ const isDev = import.meta.env.DEV
 
 export enum OptimizationLevel {
   ULTRA_LOW = 'ultra_low',
-  LOW = 'low', 
+  LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
   ULTRA = 'ultra',
@@ -37,7 +37,7 @@ export interface QualitySettings {
   enablePostProcessing: boolean
   enableShadows: boolean
   enableDynamicLighting: boolean
-  shadowMapSize: number  // 0 = shadows disabled; otherwise shadow map resolution in px
+  shadowMapSize: number // 0 = shadows disabled; otherwise shadow map resolution in px
 
   // Textures
   textureResolution: number
@@ -59,16 +59,19 @@ export interface QualitySettings {
 
 export class OptimizationManager {
   private static instance: OptimizationManager | null = null
-  
+
   private deviceCapabilities: DeviceCapabilities | null = null
   private currentOptimizationLevel: OptimizationLevel = OptimizationLevel.MEDIUM
   private currentQualitySettings: QualitySettings
 
   // Component registration system
   private componentConfigs: Map<string, ComponentOptimizationConfig> = new Map()
-  
+
   // Base quality profiles - minimal settings only
-  private readonly baseQualityProfiles: Record<OptimizationLevel, Partial<QualitySettings>> = {
+  private readonly baseQualityProfiles: Record<
+    OptimizationLevel,
+    Partial<QualitySettings>
+  > = {
     [OptimizationLevel.ULTRA_LOW]: {
       canvasScale: 0.55,
       enablePostProcessing: false,
@@ -152,11 +155,16 @@ export class OptimizationManager {
   }
 
   private constructor() {
-    this.currentQualitySettings = this.buildQualitySettings(OptimizationLevel.MEDIUM)
+    this.currentQualitySettings = this.buildQualitySettings(
+      OptimizationLevel.MEDIUM,
+    )
     this.detectDeviceCapabilities()
     this.autoSetOptimizationLevel()
     if (isDev) {
-      console.log('OptimizationManager initialized with level:', this.currentOptimizationLevel)
+      console.log(
+        'OptimizationManager initialized with level:',
+        this.currentOptimizationLevel,
+      )
     }
   }
 
@@ -179,14 +187,19 @@ export class OptimizationManager {
         supportsWebGL2: true,
         hardwareConcurrency: 4,
         maxTextureSize: 4096,
-        deviceType: 'desktop'
+        deviceType: 'desktop',
       }
       return
     }
 
     const userAgent = navigator.userAgent
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
-    const isTablet = /iPad|Tablet|PlayBook/i.test(userAgent) || (window.innerWidth > 768 && isMobile)
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        userAgent,
+      )
+    const isTablet =
+      /iPad|Tablet|PlayBook/i.test(userAgent) ||
+      (window.innerWidth > 768 && isMobile)
     const screenWidth = window.screen.width
     const screenHeight = window.screen.height
     const pixelRatio = window.devicePixelRatio || 1
@@ -203,23 +216,37 @@ export class OptimizationManager {
 
     // WebGL capabilities
     const canvas = document.createElement('canvas')
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+    const gl =
+      canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
     const supportsWebGL2 = !!canvas.getContext('webgl2')
-    const maxTextureSize = gl ? (gl as WebGLRenderingContext).getParameter((gl as WebGLRenderingContext).MAX_TEXTURE_SIZE) : 2048
+    const maxTextureSize = gl
+      ? (gl as WebGLRenderingContext).getParameter(
+          (gl as WebGLRenderingContext).MAX_TEXTURE_SIZE,
+        )
+      : 2048
 
     // Device memory (if available)
-    const deviceMemory = 'deviceMemory' in navigator ? (navigator as any).deviceMemory : undefined
+    const deviceMemory =
+      'deviceMemory' in navigator ? (navigator as any).deviceMemory : undefined
 
     // GPU tier estimation
     let estimatedGPUTier: 'low' | 'medium' | 'high' | 'ultra' = 'medium'
-    
+
     if (isMobile) {
       const totalPixels = screenWidth * screenHeight * pixelRatio
       const deviceYear = this.estimateDeviceYear(userAgent)
-      
-      if (totalPixels > 6000000 && deviceYear >= 2022 && hardwareConcurrency >= 8) {
+
+      if (
+        totalPixels > 6000000 &&
+        deviceYear >= 2022 &&
+        hardwareConcurrency >= 8
+      ) {
         estimatedGPUTier = 'ultra'
-      } else if (totalPixels > 4000000 && deviceYear >= 2020 && hardwareConcurrency >= 6) {
+      } else if (
+        totalPixels > 4000000 &&
+        deviceYear >= 2020 &&
+        hardwareConcurrency >= 6
+      ) {
         estimatedGPUTier = 'high'
       } else if (totalPixels > 2000000 && deviceYear >= 2019) {
         estimatedGPUTier = 'medium'
@@ -228,7 +255,12 @@ export class OptimizationManager {
       }
     } else {
       // Desktop GPU estimation
-      if (maxTextureSize >= 16384 && hardwareConcurrency >= 16 && deviceMemory && deviceMemory >= 16) {
+      if (
+        maxTextureSize >= 16384 &&
+        hardwareConcurrency >= 16 &&
+        deviceMemory &&
+        deviceMemory >= 16
+      ) {
         estimatedGPUTier = 'ultra'
       } else if (maxTextureSize >= 8192 && hardwareConcurrency >= 8) {
         estimatedGPUTier = 'high'
@@ -239,10 +271,11 @@ export class OptimizationManager {
       }
     }
 
-    const isLowEnd = estimatedGPUTier === 'low' || 
-                    hardwareConcurrency < 4 || 
-                    (deviceMemory && deviceMemory < 4) || 
-                    maxTextureSize < 4096
+    const isLowEnd =
+      estimatedGPUTier === 'low' ||
+      hardwareConcurrency < 4 ||
+      (deviceMemory && deviceMemory < 4) ||
+      maxTextureSize < 4096
 
     this.deviceCapabilities = {
       isMobile,
@@ -254,7 +287,7 @@ export class OptimizationManager {
       deviceMemory,
       hardwareConcurrency,
       maxTextureSize,
-      deviceType
+      deviceType,
     }
 
     if (isDev) {
@@ -270,7 +303,7 @@ export class OptimizationManager {
 
   private estimateDeviceYear(userAgent: string): number {
     const currentYear = new Date().getFullYear()
-    
+
     // iPhone patterns
     if (/iPhone/.test(userAgent)) {
       if (/iPhone1[5-9]|iPhone[2-9][0-9]/.test(userAgent)) return currentYear
@@ -278,7 +311,7 @@ export class OptimizationManager {
       if (/iPhone1[0-1]/.test(userAgent)) return 2019
       return 2018
     }
-    
+
     // Android patterns
     if (/Android/.test(userAgent)) {
       const androidMatch = userAgent.match(/Android (\d+)/)
@@ -292,14 +325,21 @@ export class OptimizationManager {
         return 2018
       }
     }
-    
+
     return currentYear - 2
   }
 
   private autoSetOptimizationLevel(): void {
     if (!this.deviceCapabilities) return
 
-    const { isMobile, isLowEnd, estimatedGPUTier, pixelRatio, hardwareConcurrency, deviceMemory } = this.deviceCapabilities
+    const {
+      isMobile,
+      isLowEnd,
+      estimatedGPUTier,
+      pixelRatio,
+      hardwareConcurrency,
+      deviceMemory,
+    } = this.deviceCapabilities
     let level: OptimizationLevel
 
     if (isMobile) {
@@ -321,9 +361,10 @@ export class OptimizationManager {
         const veryHighDensityDisplay = pixelRatio > 1.75
         const constrainedCpu = hardwareConcurrency <= 4
         const limitedMemory = (deviceMemory ?? 8) <= 4
-        level = veryHighDensityDisplay && (constrainedCpu || limitedMemory)
-          ? OptimizationLevel.LOW
-          : OptimizationLevel.MEDIUM
+        level =
+          veryHighDensityDisplay && (constrainedCpu || limitedMemory)
+            ? OptimizationLevel.LOW
+            : OptimizationLevel.MEDIUM
       }
     }
 
@@ -333,7 +374,7 @@ export class OptimizationManager {
   public setOptimizationLevel(level: OptimizationLevel): void {
     this.currentOptimizationLevel = level
     this.currentQualitySettings = this.buildQualitySettings(level)
-    
+
     if (isDev) {
       console.log(`Optimization level set to: ${level}`, {
         qualitySettings: this.currentQualitySettings,
@@ -342,13 +383,15 @@ export class OptimizationManager {
 
     // Dispatch event for other systems to react
     if (typeof window !== 'undefined' && window.dispatchEvent) {
-      window.dispatchEvent(new CustomEvent('optimizationLevelChanged', {
-        detail: {
-          level,
-          qualitySettings: this.currentQualitySettings,
-          deviceCapabilities: this.deviceCapabilities
-        }
-      }))
+      window.dispatchEvent(
+        new CustomEvent('optimizationLevelChanged', {
+          detail: {
+            level,
+            qualitySettings: this.currentQualitySettings,
+            deviceCapabilities: this.deviceCapabilities,
+          },
+        }),
+      )
     }
   }
 
@@ -367,12 +410,19 @@ export class OptimizationManager {
   /**
    * Register component-specific optimization settings
    */
-  public registerComponent(componentId: string, config: ComponentOptimizationConfig): void {
+  public registerComponent(
+    componentId: string,
+    config: ComponentOptimizationConfig,
+  ): void {
     this.componentConfigs.set(componentId, config)
-    console.log(`⚙️ Registered optimization config for component: ${componentId}`)
-    
+    console.log(
+      `⚙️ Registered optimization config for component: ${componentId}`,
+    )
+
     // Rebuild current quality settings to include the new component
-    this.currentQualitySettings = this.buildQualitySettings(this.currentOptimizationLevel)
+    this.currentQualitySettings = this.buildQualitySettings(
+      this.currentOptimizationLevel,
+    )
   }
 
   /**
@@ -381,7 +431,7 @@ export class OptimizationManager {
   public getComponentSettings(componentId: string): any {
     const config = this.componentConfigs.get(componentId)
     if (!config) return {}
-    
+
     return config.optimizationSettings[this.currentOptimizationLevel] || {}
   }
 
@@ -391,7 +441,7 @@ export class OptimizationManager {
   private buildQualitySettings(level: OptimizationLevel): QualitySettings {
     const baseSettings = this.baseQualityProfiles[level]
     const componentOverrides = new Map<string, any>()
-    
+
     // Collect all component settings for this level
     for (const [componentId, config] of this.componentConfigs) {
       const componentSettings = config.optimizationSettings[level]
@@ -399,10 +449,10 @@ export class OptimizationManager {
         componentOverrides.set(componentId, componentSettings)
       }
     }
-    
+
     return {
       ...baseSettings,
-      componentOverrides
+      componentOverrides,
     } as QualitySettings
   }
 }

@@ -1,179 +1,201 @@
 <script lang="ts">
-  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
-  import { T } from '@threlte/core'
-  import { Group } from 'three'
-  import LevelManager from '../core/LevelManager.svelte'
-  import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
-  import AmbientAudioRegions from '../components/AmbientAudioRegions.svelte'
-  import NaturePackVegetation from '../components/NaturePackVegetation.svelte'
-  import SceneFogExp2 from '../components/SceneFogExp2.svelte'
-  import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
-  import { qualityLevelStore, qualitySettingsStore } from '../features/performance/stores/performanceStore'
-  import { OptimizationLevel, optimizationManager } from '../features/performance'
-  import { Terrain, terrainStore, type TerrainConfig } from '../features/terrain'
-  import { editorStateStore, observatoryEditorSettingsStore } from '../editor/editorStore'
-  import { resolveObservatoryPresetSettings } from '../editor/editorLevelPresets'
-  import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
-  import { replaceRuntimeVisualStyle, resetRuntimeVisualStyle } from '../styles/runtimeVisualStyleStore'
-  import { buildRuntimeVisualStyleFromLevelSettings } from '../styles/GameplayStyleProfiles'
+import { T } from '@threlte/core'
+import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+import { Group } from 'three'
+import AmbientAudioRegions from '../components/AmbientAudioRegions.svelte'
+import NaturePackVegetation from '../components/NaturePackVegetation.svelte'
+import SceneFogExp2 from '../components/SceneFogExp2.svelte'
+import LevelManager from '../core/LevelManager.svelte'
+import { resolveObservatoryPresetSettings } from '../editor/editorLevelPresets'
+import {
+  editorStateStore,
+  observatoryEditorSettingsStore,
+} from '../editor/editorStore'
+import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
+import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
+import { OptimizationLevel, optimizationManager } from '../features/performance'
+import {
+  qualityLevelStore,
+  qualitySettingsStore,
+} from '../features/performance/stores/performanceStore'
+import { Terrain, type TerrainConfig, terrainStore } from '../features/terrain'
+import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
+import { buildRuntimeVisualStyleFromLevelSettings } from '../styles/GameplayStyleProfiles'
+import {
+  replaceRuntimeVisualStyle,
+  resetRuntimeVisualStyle,
+} from '../styles/runtimeVisualStyleStore'
 
-  const dispatch = createEventDispatcher()
-  const isDev = import.meta.env.DEV
-  const isMobileDevice = typeof navigator !== 'undefined'
-    && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+const dispatch = createEventDispatcher()
+const isDev = import.meta.env.DEV
+const isMobileDevice =
+  typeof navigator !== 'undefined' &&
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent,
+  )
 
-  // --- Props ---
-  // The manifest URL is now the primary input for configuring the level
-  export let manifestUrl: string = '/terrain/observatory-environment.manifest.json' // Generated manifest path
-  export let timelineEvents: any[] = []
-  export let timelineEventsJson: string = '[]'
-  export let spawnSystem: any = null
-  export let interactionSystem: any = null
+// --- Props ---
+// The manifest URL is now the primary input for configuring the level
+export let manifestUrl: string =
+  '/terrain/observatory-environment.manifest.json' // Generated manifest path
+export let timelineEvents: any[] = []
+export let timelineEventsJson: string = '[]'
+export let spawnSystem: any = null
+export let interactionSystem: any = null
 
-  // --- State ---
-  let manifest: any = null // Will hold the loaded level manifest data
-  let terrainConfig: TerrainConfig | null = null
-  let heightmapConfig: any = null // Loaded heightmap config for validation
-  let playerSpawnPoint: [number, number, number] = [0, 50, 0] // Default spawn, will be overwritten by manifest
+// --- State ---
+let manifest: any = null // Will hold the loaded level manifest data
+let terrainConfig: TerrainConfig | null = null
+let heightmapConfig: any = null // Loaded heightmap config for validation
+let playerSpawnPoint: [number, number, number] = [0, 50, 0] // Default spawn, will be overwritten by manifest
 
-  // Component references
-  let hybridFireflyComponent: any = null
-  let starMapComponent: any = null
-  let naturePackVegetation: any = null
-  let skyboxComponent: any = null
-  let hybridFireflyComponentType: any = null
-  let starMapComponentType: any = null
-  let terrainReady = false
-  let starMapRef: Group
-  let deferredEnvironmentBootStarted = false
-  let showOcean = false
-  let showFireflies = false
-  let showVegetation = false
-  let showStarSystems = false
-  const deferredSceneBootCleanups: Array<() => void> = []
-  // Timeline data state
-  let realTimelineEvents: any[] = []
-  let isLoadingTimeline = true
-  let timelineLoadError: string | null = null
-  let appliedTerrainOverrideSignature = ''
-  let loadToken = 0
+// Component references
+let hybridFireflyComponent: any = null
+let starMapComponent: any = null
+let naturePackVegetation: any = null
+let skyboxComponent: any = null
+let hybridFireflyComponentType: any = null
+let starMapComponentType: any = null
+let terrainReady = false
+let starMapRef: Group
+let deferredEnvironmentBootStarted = false
+let showOcean = false
+let showFireflies = false
+let showVegetation = false
+let showStarSystems = false
+const deferredSceneBootCleanups: Array<() => void> = []
+// Timeline data state
+let realTimelineEvents: any[] = []
+let isLoadingTimeline = true
+let timelineLoadError: string | null = null
+let appliedTerrainOverrideSignature = ''
+let loadToken = 0
 
-  function mergeDeep<T>(base: T, overrides: Partial<T> | null | undefined): T {
-    if (!overrides) return structuredClone(base)
+function mergeDeep<T>(base: T, overrides: Partial<T> | null | undefined): T {
+  if (!overrides) return structuredClone(base)
 
-    if (Array.isArray(base) || Array.isArray(overrides)) {
-      return structuredClone(overrides as T)
-    }
-
-    const result: Record<string, unknown> = { ...(structuredClone(base) as Record<string, unknown>) }
-    for (const [key, value] of Object.entries(overrides)) {
-      const current = result[key]
-      if (
-        value
-        && typeof value === 'object'
-        && !Array.isArray(value)
-        && current
-        && typeof current === 'object'
-        && !Array.isArray(current)
-      ) {
-        result[key] = mergeDeep(current as Record<string, unknown>, value as Record<string, unknown>)
-      } else {
-        result[key] = structuredClone(value)
-      }
-    }
-
-    return result as T
+  if (Array.isArray(base) || Array.isArray(overrides)) {
+    return structuredClone(overrides as T)
   }
 
-  function applyObservatoryEditorSettings(baseManifest: any, editorSettings: any) {
-    if (!baseManifest) return null
-    if (!editorSettings) return structuredClone(baseManifest)
-
-    const merged = mergeDeep(baseManifest, {
-      spawn: editorSettings.spawn,
-      features: editorSettings.features,
-      style: editorSettings.style,
-      ocean: editorSettings.ocean,
-      ambientAudio: editorSettings.ambientAudio,
-    })
-
-    return {
-      ...merged,
-      editorLighting: {
-        ambientIntensity: editorSettings.lighting?.ambientIntensity,
-        sunIntensity: editorSettings.lighting?.sunIntensity,
-        fillIntensity: editorSettings.lighting?.fillIntensity,
-        fallbackAmbientIntensity: editorSettings.lighting?.fallbackAmbientIntensity,
-        fallbackMoonlightIntensity: editorSettings.lighting?.fallbackMoonlightIntensity,
-        fallbackFillLightIntensity: editorSettings.lighting?.fallbackFillLightIntensity,
-      },
+  const result: Record<string, unknown> = {
+    ...(structuredClone(base) as Record<string, unknown>),
+  }
+  for (const [key, value] of Object.entries(overrides)) {
+    const current = result[key]
+    if (
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      current &&
+      typeof current === 'object' &&
+      !Array.isArray(current)
+    ) {
+      result[key] = mergeDeep(
+        current as Record<string, unknown>,
+        value as Record<string, unknown>,
+      )
+    } else {
+      result[key] = structuredClone(value)
     }
   }
 
-  // --- Lifecycle & Data Loading ---
-  onMount(() => {
-    const token = ++loadToken
-    void ensureSkyboxComponent()
-    void loadLevelFromManifest(token)
-    void loadTimelineData(token)
+  return result as T
+}
+
+function applyObservatoryEditorSettings(
+  baseManifest: any,
+  editorSettings: any,
+) {
+  if (!baseManifest) return null
+  if (!editorSettings) return structuredClone(baseManifest)
+
+  const merged = mergeDeep(baseManifest, {
+    spawn: editorSettings.spawn,
+    features: editorSettings.features,
+    style: editorSettings.style,
+    ocean: editorSettings.ocean,
+    ambientAudio: editorSettings.ambientAudio,
   })
 
-  onDestroy(() => {
-    resetRuntimeVisualStyle()
-    deferredSceneBootCleanups.forEach((cleanup) => cleanup())
-    deferredSceneBootCleanups.length = 0
+  return {
+    ...merged,
+    editorLighting: {
+      ambientIntensity: editorSettings.lighting?.ambientIntensity,
+      sunIntensity: editorSettings.lighting?.sunIntensity,
+      fillIntensity: editorSettings.lighting?.fillIntensity,
+      fallbackAmbientIntensity:
+        editorSettings.lighting?.fallbackAmbientIntensity,
+      fallbackMoonlightIntensity:
+        editorSettings.lighting?.fallbackMoonlightIntensity,
+      fallbackFillLightIntensity:
+        editorSettings.lighting?.fallbackFillLightIntensity,
+    },
+  }
+}
+
+// --- Lifecycle & Data Loading ---
+onMount(() => {
+  const token = ++loadToken
+  void ensureSkyboxComponent()
+  void loadLevelFromManifest(token)
+  void loadTimelineData(token)
+})
+
+onDestroy(() => {
+  resetRuntimeVisualStyle()
+  deferredSceneBootCleanups.forEach(cleanup => cleanup())
+  deferredSceneBootCleanups.length = 0
+})
+
+async function loadLevelFromManifest(token: number) {
+  setRuntimeDiagnostic('levelBoot', {
+    level: 'loading',
+    message: 'Loading level manifest and terrain configuration.',
   })
 
-  async function loadLevelFromManifest(token: number) {
-    setRuntimeDiagnostic('levelBoot', {
-      level: 'loading',
-      message: 'Loading level manifest and terrain configuration.',
-    })
+  try {
+    const response = await fetch(manifestUrl)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch level manifest: ${response.statusText}`)
+    }
+    const data = await response.json()
+    if (token !== loadToken) return
+    manifest = data
 
-    try {
-      const response = await fetch(manifestUrl)
-      if (!response.ok) {
-        throw new Error(`Failed to fetch level manifest: ${response.statusText}`)
-      }
-      const data = await response.json()
-      if (token !== loadToken) return
-      manifest = data
+    // Configure the level based on the loaded manifest
+    playerSpawnPoint = manifest.spawn.position
 
-      // Configure the level based on the loaded manifest
-      playerSpawnPoint = manifest.spawn.position
+    // Load bounds information from heightmap config if not in manifest
+    let terrainBounds = null
+    if (manifest.physics?.bounds) {
+      terrainBounds = manifest.physics.bounds
+    } else {
+      // Try to load bounds and vertical parameters from the heightmap config file
+      try {
+        const heightmapConfigUrl = manifest.assets.heightmap.replace(
+          '_heightmap.png',
+          '_config.json',
+        )
+        const configResponse = await fetch(heightmapConfigUrl)
+        if (configResponse.ok) {
+          const configData = await configResponse.json()
+          terrainBounds = configData.bounds
 
-      // Configure style settings from manifest
-      if (manifest.style) {
-        stylePreset = manifest.style.preset || 'ghibli'
-        enableToonShading = manifest.style.enabled !== false
-      }
+          // Load vertical parameters from config to ensure exact match with generation
+          const worldSizeX = configData.bounds.max[0] - configData.bounds.min[0]
+          const worldSizeZ = configData.bounds.max[2] - configData.bounds.min[2]
 
-      // Load bounds information from heightmap config if not in manifest
-      let terrainBounds = null;
-      if (manifest.physics?.bounds) {
-        terrainBounds = manifest.physics.bounds;
-      } else {
-        // Try to load bounds and vertical parameters from the heightmap config file
-        try {
-          const heightmapConfigUrl = manifest.assets.heightmap.replace('_heightmap.png', '_config.json');
-          const configResponse = await fetch(heightmapConfigUrl);
-          if (configResponse.ok) {
-            const configData = await configResponse.json();
-            terrainBounds = configData.bounds;
-            
-            // Load vertical parameters from config to ensure exact match with generation  
-            const worldSizeX = configData.bounds.max[0] - configData.bounds.min[0]
-            const worldSizeZ = configData.bounds.max[2] - configData.bounds.min[2]
-            
-            heightmapConfig = {
-              ...configData,
-              minHeight: configData.heightOffset,
-              maxHeight: configData.heightOffset + configData.heightScale,
-              worldSizeX: worldSizeX,
-              worldSizeZ: worldSizeZ
-            };
-            
-            if (isDev) console.log('✅ Loaded terrain config from heightmap:', {
+          heightmapConfig = {
+            ...configData,
+            minHeight: configData.heightOffset,
+            maxHeight: configData.heightOffset + configData.heightScale,
+            worldSizeX: worldSizeX,
+            worldSizeZ: worldSizeZ,
+          }
+
+          if (isDev)
+            console.log('✅ Loaded terrain config from heightmap:', {
               bounds: terrainBounds,
               worldSizeX: worldSizeX,
               worldSizeZ: worldSizeZ,
@@ -183,175 +205,199 @@
               computedMinHeight: heightmapConfig.minHeight,
               computedMaxHeight: heightmapConfig.maxHeight,
               manifestMinHeight: manifest.physics.minHeight,
-              manifestMaxHeight: manifest.physics.maxHeight
-            });
-          }
-        } catch (e) {
-          if (isDev) console.warn('⚠️ Could not load heightmap config for bounds:', e);
+              manifestMaxHeight: manifest.physics.maxHeight,
+            })
         }
+      } catch (e) {
+        if (isDev)
+          console.warn('⚠️ Could not load heightmap config for bounds:', e)
       }
+    }
 
-      // Build the terrain configuration object from the manifest
-      terrainConfig = {
-        heightmapUrl: manifest.assets.heightmap,
-        worldSize: manifest.physics.worldSize,
-        // Use heightmap config values for exact match with generation, fallback to manifest
-        worldSizeX: heightmapConfig?.worldSizeX,
-        worldSizeZ: heightmapConfig?.worldSizeZ,
-        minHeight: heightmapConfig?.minHeight ?? manifest.physics.minHeight,
-        maxHeight: heightmapConfig?.maxHeight ?? manifest.physics.maxHeight,
-        bounds: terrainBounds,
-        chunkPathTemplate: manifest.assets.chunksPath + 'chunk_{x}_{z}_LOD{lod}.glb',
-        chunkSize: manifest.physics.chunkSize || (manifest.physics.worldSize / (manifest.physics.gridX || 4)),
-        gridSize: [manifest.physics.gridX || 4, manifest.physics.gridY || 4],
-        lods: [{ level: 0, distance: 1000 }]
-      };
+    // Build the terrain configuration object from the manifest
+    terrainConfig = {
+      heightmapUrl: manifest.assets.heightmap,
+      worldSize: manifest.physics.worldSize,
+      // Use heightmap config values for exact match with generation, fallback to manifest
+      worldSizeX: heightmapConfig?.worldSizeX,
+      worldSizeZ: heightmapConfig?.worldSizeZ,
+      minHeight: heightmapConfig?.minHeight ?? manifest.physics.minHeight,
+      maxHeight: heightmapConfig?.maxHeight ?? manifest.physics.maxHeight,
+      bounds: terrainBounds,
+      chunkPathTemplate:
+        manifest.assets.chunksPath + 'chunk_{x}_{z}_LOD{lod}.glb',
+      chunkSize:
+        manifest.physics.chunkSize ||
+        manifest.physics.worldSize / (manifest.physics.gridX || 4),
+      gridSize: [manifest.physics.gridX || 4, manifest.physics.gridY || 4],
+      lods: [{ level: 0, distance: 1000 }],
+    }
 
-      // Validate height parameters match between manifest and config
-      if (heightmapConfig && 
-          (Math.abs(heightmapConfig.minHeight - manifest.physics.minHeight) > 0.01 ||
-           Math.abs(heightmapConfig.maxHeight - manifest.physics.maxHeight) > 0.01)) {
-      if (isDev) console.warn('⚠️ Height parameter mismatch detected:', {
+    // Validate height parameters match between manifest and config
+    if (
+      heightmapConfig &&
+      (Math.abs(heightmapConfig.minHeight - manifest.physics.minHeight) >
+        0.01 ||
+        Math.abs(heightmapConfig.maxHeight - manifest.physics.maxHeight) > 0.01)
+    ) {
+      if (isDev)
+        console.warn('⚠️ Height parameter mismatch detected:', {
           configMinHeight: heightmapConfig.minHeight,
           manifestMinHeight: manifest.physics.minHeight,
           configMaxHeight: heightmapConfig.maxHeight,
           manifestMaxHeight: manifest.physics.maxHeight,
-          usingConfigValues: true
-        });
-      }
+          usingConfigValues: true,
+        })
+    }
 
-      // Register optimization settings from the manifest
-      optimizationManager.registerComponent(manifest.id, {
-        componentId: manifest.id,
-        optimizationSettings: {
-          [OptimizationLevel.ULTRA_LOW]: {
-            oceanSegments: manifest.optimization.oceanSegments.ultra_low,
-            terrainSegments: manifest.optimization.terrainSegments.ultra_low
-          },
-          [OptimizationLevel.LOW]: {
-            oceanSegments: manifest.optimization.oceanSegments.low,
-            terrainSegments: manifest.optimization.terrainSegments.low
-          },
-          [OptimizationLevel.MEDIUM]: {
-            oceanSegments: manifest.optimization.oceanSegments.medium,
-            terrainSegments: manifest.optimization.terrainSegments.medium
-          },
-          [OptimizationLevel.HIGH]: {
-            oceanSegments: manifest.optimization.oceanSegments.high,
-            terrainSegments: manifest.optimization.terrainSegments.high
-          },
-          [OptimizationLevel.ULTRA]: {
-            oceanSegments: manifest.optimization.oceanSegments.ultra,
-            terrainSegments: manifest.optimization.terrainSegments.ultra
-          }
-        }
-      });
-
-      if (token !== loadToken) return
-
-      if (isDev) console.log(`✅ Level "${manifest.name}" loaded successfully from manifest.`)
-      setRuntimeDiagnostic('levelBoot', {
-        level: 'ready',
-        message: `Loaded ${manifest.name} manifest and terrain configuration.`,
-        meta: {
-          manifestId: manifest.id,
-          manifestUrl,
+    // Register optimization settings from the manifest
+    optimizationManager.registerComponent(manifest.id, {
+      componentId: manifest.id,
+      optimizationSettings: {
+        [OptimizationLevel.ULTRA_LOW]: {
+          oceanSegments: manifest.optimization.oceanSegments.ultra_low,
+          terrainSegments: manifest.optimization.terrainSegments.ultra_low,
         },
-      })
-
-    } catch (error) {
-      if (token !== loadToken) return
-      console.error(`❌ Failed to load level from ${manifestUrl}:`, error)
-      setRuntimeDiagnostic('levelBoot', {
-        level: 'error',
-        message: error instanceof Error ? error.message : 'Unknown level load failure.',
-        meta: { manifestUrl },
-      })
-    }
-  }
-
-  // Fast height function for other components (uses unified terrain system)
-  function getHeightAt(x: number, z: number): number {
-    if ($terrainStore.manager) {
-      return $terrainStore.manager.getHeightAt(x, z);
-    }
-    return -1000;
-  }
-
-  // --- Timeline Data Handling ---
-  async function loadTimelineData(token: number) {
-    setRuntimeDiagnostic('timeline', {
-      level: 'loading',
-      message: 'Loading timeline data for star systems.',
+        [OptimizationLevel.LOW]: {
+          oceanSegments: manifest.optimization.oceanSegments.low,
+          terrainSegments: manifest.optimization.terrainSegments.low,
+        },
+        [OptimizationLevel.MEDIUM]: {
+          oceanSegments: manifest.optimization.oceanSegments.medium,
+          terrainSegments: manifest.optimization.terrainSegments.medium,
+        },
+        [OptimizationLevel.HIGH]: {
+          oceanSegments: manifest.optimization.oceanSegments.high,
+          terrainSegments: manifest.optimization.terrainSegments.high,
+        },
+        [OptimizationLevel.ULTRA]: {
+          oceanSegments: manifest.optimization.oceanSegments.ultra,
+          terrainSegments: manifest.optimization.terrainSegments.ultra,
+        },
+      },
     })
 
-    try {
-      isLoadingTimeline = true
-      timelineLoadError = null
-      if (timelineEventsJson && timelineEventsJson !== '[]') {
-        realTimelineEvents = JSON.parse(timelineEventsJson)
-      } else if (timelineEvents.length > 0) {
-        realTimelineEvents = timelineEvents
-      } else {
-        realTimelineEvents = []
-      }
-      if (token !== loadToken) return
-      setRuntimeDiagnostic('timeline', {
-        level: 'ready',
-        message: `Loaded ${realTimelineEvents.length} timeline events.`,
-        meta: {
-          eventCount: realTimelineEvents.length,
-        },
-      })
-    } catch (error) {
-      if (token !== loadToken) return
-      console.error('❌ Failed to process timeline data:', error)
-      timelineLoadError = error instanceof Error ? error.message : 'Unknown error'
-      setRuntimeDiagnostic('timeline', {
-        level: 'error',
-        message: timelineLoadError,
-      })
-    } finally {
-      if (token === loadToken) {
-        isLoadingTimeline = false
-      }
-    }
-  }
+    if (token !== loadToken) return
 
-  // --- Event Handlers ---
-  function handleStarSelected(event: CustomEvent) {
-    dispatch('starSelected', event.detail)
+    if (isDev)
+      console.log(
+        `✅ Level "${manifest.name}" loaded successfully from manifest.`,
+      )
+    setRuntimeDiagnostic('levelBoot', {
+      level: 'ready',
+      message: `Loaded ${manifest.name} manifest and terrain configuration.`,
+      meta: {
+        manifestId: manifest.id,
+        manifestUrl,
+      },
+    })
+  } catch (error) {
+    if (token !== loadToken) return
+    console.error(`❌ Failed to load level from ${manifestUrl}:`, error)
+    setRuntimeDiagnostic('levelBoot', {
+      level: 'error',
+      message:
+        error instanceof Error ? error.message : 'Unknown level load failure.',
+      meta: { manifestUrl },
+    })
   }
-  function handleStarDeselected(event: CustomEvent) {
-    dispatch('starDeselected', event.detail)
+}
+
+// Fast height function for other components (uses unified terrain system)
+function getHeightAt(x: number, z: number): number {
+  if ($terrainStore.manager) {
+    return $terrainStore.manager.getHeightAt(x, z)
   }
-  function handleLevelTransition(event: CustomEvent) {
-    dispatch('levelTransition', event.detail)
-  }
-  // Get current optimization settings reactively
-  $: resolvedObservatorySettings = resolveObservatoryPresetSettings($observatoryEditorSettingsStore)
-  $: activeManifest = manifest ? applyObservatoryEditorSettings(manifest, resolvedObservatorySettings) : null
-  $: terrainAuthoringActive = $editorStateStore.enabled && $editorStateStore.interactionMode === 'terrain'
-  $: workbenchViewport = $editorStateStore.enabled && $editorStateStore.viewportLightingMode === 'workbench'
-  $: playerSpawnPoint = activeManifest?.spawn?.position ?? [0, 50, 0]
-  $: if (activeManifest) {
-    replaceRuntimeVisualStyle(buildRuntimeVisualStyleFromLevelSettings(activeManifest))
-  }
-  $: levelOptimizationSettings = activeManifest ? optimizationManager.getComponentSettings(activeManifest.id) : null;
-  $: fallbackMoodLightingEnabled = !!activeManifest?.features.styles
-  $: observatoryToneMappingExposure = (() => {
-    if (!isMobileDevice) return 1.2
-    switch ($qualityLevelStore) {
-      case OptimizationLevel.ULTRA_LOW:
-      case OptimizationLevel.LOW:
-        return 1.26
-      case OptimizationLevel.MEDIUM:
-        return 1.24
-      default:
-        return 1.22
+  return -1000
+}
+
+// --- Timeline Data Handling ---
+async function loadTimelineData(token: number) {
+  setRuntimeDiagnostic('timeline', {
+    level: 'loading',
+    message: 'Loading timeline data for star systems.',
+  })
+
+  try {
+    isLoadingTimeline = true
+    timelineLoadError = null
+    if (timelineEventsJson && timelineEventsJson !== '[]') {
+      realTimelineEvents = JSON.parse(timelineEventsJson)
+    } else if (timelineEvents.length > 0) {
+      realTimelineEvents = timelineEvents
+    } else {
+      realTimelineEvents = []
     }
-  })()
-  $: observatoryAmbientIntensity = activeManifest?.editorLighting?.ambientIntensity ?? (() => {
+    if (token !== loadToken) return
+    setRuntimeDiagnostic('timeline', {
+      level: 'ready',
+      message: `Loaded ${realTimelineEvents.length} timeline events.`,
+      meta: {
+        eventCount: realTimelineEvents.length,
+      },
+    })
+  } catch (error) {
+    if (token !== loadToken) return
+    console.error('❌ Failed to process timeline data:', error)
+    timelineLoadError = error instanceof Error ? error.message : 'Unknown error'
+    setRuntimeDiagnostic('timeline', {
+      level: 'error',
+      message: timelineLoadError,
+    })
+  } finally {
+    if (token === loadToken) {
+      isLoadingTimeline = false
+    }
+  }
+}
+
+// --- Event Handlers ---
+function handleStarSelected(event: CustomEvent) {
+  dispatch('starSelected', event.detail)
+}
+function handleStarDeselected(event: CustomEvent) {
+  dispatch('starDeselected', event.detail)
+}
+function handleLevelTransition(event: CustomEvent) {
+  dispatch('levelTransition', event.detail)
+}
+// Get current optimization settings reactively
+$: resolvedObservatorySettings = resolveObservatoryPresetSettings(
+  $observatoryEditorSettingsStore,
+)
+$: activeManifest = manifest
+  ? applyObservatoryEditorSettings(manifest, resolvedObservatorySettings)
+  : null
+$: terrainAuthoringActive =
+  $editorStateStore.enabled && $editorStateStore.interactionMode === 'terrain'
+$: workbenchViewport =
+  $editorStateStore.enabled &&
+  $editorStateStore.viewportLightingMode === 'workbench'
+$: playerSpawnPoint = activeManifest?.spawn?.position ?? [0, 50, 0]
+$: if (activeManifest) {
+  replaceRuntimeVisualStyle(
+    buildRuntimeVisualStyleFromLevelSettings(activeManifest),
+  )
+}
+$: levelOptimizationSettings = activeManifest
+  ? optimizationManager.getComponentSettings(activeManifest.id)
+  : null
+$: fallbackMoodLightingEnabled = !!activeManifest?.features.styles
+$: observatoryToneMappingExposure = (() => {
+  if (!isMobileDevice) return 1.2
+  switch ($qualityLevelStore) {
+    case OptimizationLevel.ULTRA_LOW:
+    case OptimizationLevel.LOW:
+      return 1.26
+    case OptimizationLevel.MEDIUM:
+      return 1.24
+    default:
+      return 1.22
+  }
+})()
+$: observatoryAmbientIntensity =
+  activeManifest?.editorLighting?.ambientIntensity ??
+  (() => {
     if (!isMobileDevice) return 10.4
     switch ($qualityLevelStore) {
       case OptimizationLevel.ULTRA_LOW:
@@ -363,172 +409,201 @@
         return 11.0
     }
   })()
-  $: observatorySunIntensity = activeManifest?.editorLighting?.sunIntensity ?? (isMobileDevice ? 0.92 : 0.8)
-  $: observatoryFillIntensity = activeManifest?.editorLighting?.fillIntensity ?? (isMobileDevice ? 0.38 : 0.3)
-  $: fallbackAmbientIntensity = activeManifest?.editorLighting?.fallbackAmbientIntensity ?? (isMobileDevice ? 6.2 : 4.8)
-  $: fallbackMoonlightIntensity = activeManifest?.editorLighting?.fallbackMoonlightIntensity ?? (isMobileDevice ? 0.62 : 0.45)
-  $: fallbackFillLightIntensity = activeManifest?.editorLighting?.fallbackFillLightIntensity ?? (isMobileDevice ? 0.3 : 0.2)
-  $: presetAmbientAudioRegions = activeManifest?.ambientAudio?.enabled && activeManifest?.ambientAudio?.track
-    ? [{
-        id: 'observatory-preset-ambient-audio',
-        position: activeManifest.ambientAudio.position ?? [0, 18, 0],
-        scale: activeManifest.ambientAudio.scale ?? [520, 140, 520],
-        track: activeManifest.ambientAudio.track,
-        volume: activeManifest.ambientAudio.volume ?? 0.16,
-        falloff: activeManifest.ambientAudio.falloff ?? 28,
-      }]
+$: observatorySunIntensity =
+  activeManifest?.editorLighting?.sunIntensity ?? (isMobileDevice ? 0.92 : 0.8)
+$: observatoryFillIntensity =
+  activeManifest?.editorLighting?.fillIntensity ?? (isMobileDevice ? 0.38 : 0.3)
+$: fallbackAmbientIntensity =
+  activeManifest?.editorLighting?.fallbackAmbientIntensity ??
+  (isMobileDevice ? 6.2 : 4.8)
+$: fallbackMoonlightIntensity =
+  activeManifest?.editorLighting?.fallbackMoonlightIntensity ??
+  (isMobileDevice ? 0.62 : 0.45)
+$: fallbackFillLightIntensity =
+  activeManifest?.editorLighting?.fallbackFillLightIntensity ??
+  (isMobileDevice ? 0.3 : 0.2)
+$: presetAmbientAudioRegions =
+  activeManifest?.ambientAudio?.enabled && activeManifest?.ambientAudio?.track
+    ? [
+        {
+          id: 'observatory-preset-ambient-audio',
+          position: activeManifest.ambientAudio.position ?? [0, 18, 0],
+          scale: activeManifest.ambientAudio.scale ?? [520, 140, 520],
+          track: activeManifest.ambientAudio.track,
+          volume: activeManifest.ambientAudio.volume ?? 0.16,
+          falloff: activeManifest.ambientAudio.falloff ?? 28,
+        },
+      ]
     : []
-  $: vegetationInstanceCount = (() => {
-    switch ($qualityLevelStore) {
-      case OptimizationLevel.ULTRA_LOW:
-        return 0
-      case OptimizationLevel.LOW:
-        return 12
-      case OptimizationLevel.MEDIUM:
-        return 28
-      case OptimizationLevel.HIGH:
-        return 60
-      case OptimizationLevel.ULTRA:
-        return 96
-      default:
-        return 28
+$: vegetationInstanceCount = (() => {
+  switch ($qualityLevelStore) {
+    case OptimizationLevel.ULTRA_LOW:
+      return 0
+    case OptimizationLevel.LOW:
+      return 12
+    case OptimizationLevel.MEDIUM:
+      return 28
+    case OptimizationLevel.HIGH:
+      return 60
+    case OptimizationLevel.ULTRA:
+      return 96
+    default:
+      return 28
+  }
+})()
+$: oceanAnimationEnabled =
+  activeManifest?.ocean?.enableAnimation !== false &&
+  $qualityLevelStore !== OptimizationLevel.ULTRA_LOW
+
+$: if (
+  terrainReady &&
+  activeManifest &&
+  !deferredEnvironmentBootStarted &&
+  (!activeManifest.features.starMap || !isLoadingTimeline)
+) {
+  startDeferredSceneBoot()
+}
+$: if (deferredEnvironmentBootStarted && activeManifest) {
+  if (!activeManifest.features.ocean) showOcean = false
+  if (!activeManifest.features.vegetation) showVegetation = false
+  if (!activeManifest.features.fireflies) showFireflies = false
+  if (
+    !activeManifest.features.starMap ||
+    isLoadingTimeline ||
+    !!timelineLoadError
+  )
+    showStarSystems = false
+}
+$: terrainOverrideSignature = JSON.stringify(
+  $observatoryEditorSettingsStore?.terrainSculpt?.heightOverrides ?? {},
+)
+$: if (
+  $terrainStore.manager &&
+  terrainOverrideSignature !== appliedTerrainOverrideSignature
+) {
+  $terrainStore.manager.applyHeightOverrides(
+    $observatoryEditorSettingsStore?.terrainSculpt?.heightOverrides ?? {},
+  )
+  terrainStore.update(state => ({
+    ...state,
+    heightData: $terrainStore.manager?.getHeightDataCopy() ?? state.heightData,
+  }))
+  appliedTerrainOverrideSignature = terrainOverrideSignature
+}
+
+async function ensureSkyboxComponent() {
+  if (skyboxComponent) return
+  const module = await import('../systems/Skybox.svelte')
+  skyboxComponent = module.default
+}
+
+async function ensureHybridFireflyComponent() {
+  if (hybridFireflyComponentType) return
+  const module = await import('../components/HybridFireflyComponent.svelte')
+  hybridFireflyComponentType = module.default
+}
+
+async function ensureStarMapComponent() {
+  if (starMapComponentType) return
+  const module = await import('../systems/StarMap.svelte')
+  starMapComponentType = module.default
+}
+
+function scheduleDeferredSceneTask(
+  task: () => void | Promise<void>,
+  delay = 0,
+) {
+  if (typeof window === 'undefined') return () => {}
+
+  let cancelled = false
+  let delayTimeoutId: number | null = null
+  let idleCallbackId: number | null = null
+  let fallbackTimeoutId: number | null = null
+
+  const cleanup = () => {
+    cancelled = true
+
+    if (delayTimeoutId !== null) {
+      window.clearTimeout(delayTimeoutId)
     }
-  })()
-  $: oceanAnimationEnabled =
-    activeManifest?.ocean?.enableAnimation !== false
-    && $qualityLevelStore !== OptimizationLevel.ULTRA_LOW
 
-  $: if (
-    terrainReady
-    && activeManifest
-    && !deferredEnvironmentBootStarted
-    && (!activeManifest.features.starMap || !isLoadingTimeline)
-  ) {
-    startDeferredSceneBoot()
-  }
-  $: if (deferredEnvironmentBootStarted && activeManifest) {
-    if (!activeManifest.features.ocean) showOcean = false
-    if (!activeManifest.features.vegetation) showVegetation = false
-    if (!activeManifest.features.fireflies) showFireflies = false
-    if (!activeManifest.features.starMap || isLoadingTimeline || !!timelineLoadError) showStarSystems = false
-  }
-  $: terrainOverrideSignature = JSON.stringify($observatoryEditorSettingsStore?.terrainSculpt?.heightOverrides ?? {})
-  $: if ($terrainStore.manager && terrainOverrideSignature !== appliedTerrainOverrideSignature) {
-    $terrainStore.manager.applyHeightOverrides($observatoryEditorSettingsStore?.terrainSculpt?.heightOverrides ?? {})
-    terrainStore.update((state) => ({
-      ...state,
-      heightData: $terrainStore.manager?.getHeightDataCopy() ?? state.heightData,
-    }))
-    appliedTerrainOverrideSignature = terrainOverrideSignature
-  }
-
-  async function ensureSkyboxComponent() {
-    if (skyboxComponent) return
-    const module = await import('../systems/Skybox.svelte')
-    skyboxComponent = module.default
-  }
-
-  async function ensureHybridFireflyComponent() {
-    if (hybridFireflyComponentType) return
-    const module = await import('../components/HybridFireflyComponent.svelte')
-    hybridFireflyComponentType = module.default
-  }
-
-  async function ensureStarMapComponent() {
-    if (starMapComponentType) return
-    const module = await import('../systems/StarMap.svelte')
-    starMapComponentType = module.default
-  }
-
-  function scheduleDeferredSceneTask(task: () => void | Promise<void>, delay = 0) {
-    if (typeof window === 'undefined') return () => {}
-
-    let cancelled = false
-    let delayTimeoutId: number | null = null
-    let idleCallbackId: number | null = null
-    let fallbackTimeoutId: number | null = null
-
-    const cleanup = () => {
-      cancelled = true
-
-      if (delayTimeoutId !== null) {
-        window.clearTimeout(delayTimeoutId)
-      }
-
-      if (idleCallbackId !== null && 'cancelIdleCallback' in window) {
-        window.cancelIdleCallback(idleCallbackId)
-      }
-
-      if (fallbackTimeoutId !== null) {
-        window.clearTimeout(fallbackTimeoutId)
-      }
+    if (idleCallbackId !== null && 'cancelIdleCallback' in window) {
+      window.cancelIdleCallback(idleCallbackId)
     }
 
-    const runTask = () => {
-      if (cancelled) return
-      void task()
+    if (fallbackTimeoutId !== null) {
+      window.clearTimeout(fallbackTimeoutId)
     }
+  }
 
-    const queueTask = () => {
-      if (cancelled) return
+  const runTask = () => {
+    if (cancelled) return
+    void task()
+  }
 
-      if ('requestIdleCallback' in window) {
-        idleCallbackId = window.requestIdleCallback(() => {
+  const queueTask = () => {
+    if (cancelled) return
+
+    if ('requestIdleCallback' in window) {
+      idleCallbackId = window.requestIdleCallback(
+        () => {
           runTask()
-        }, { timeout: 300 })
-        return
-      }
-
-      fallbackTimeoutId = window.setTimeout(() => {
-        runTask()
-      }, 16)
+        },
+        { timeout: 300 },
+      )
+      return
     }
 
-    delayTimeoutId = window.setTimeout(() => {
-      queueTask()
-    }, delay)
-
-    return cleanup
+    fallbackTimeoutId = window.setTimeout(() => {
+      runTask()
+    }, 16)
   }
 
-  function startDeferredSceneBoot() {
-    if (deferredEnvironmentBootStarted) return
-    deferredEnvironmentBootStarted = true
+  delayTimeoutId = window.setTimeout(() => {
+    queueTask()
+  }, delay)
 
-    if (activeManifest?.features.ocean) {
-      deferredSceneBootCleanups.push(
-        scheduleDeferredSceneTask(() => {
-          showOcean = true
-        }, 0)
-      )
-    }
+  return cleanup
+}
 
-    if (activeManifest?.features.starMap && !timelineLoadError) {
-      deferredSceneBootCleanups.push(
-        scheduleDeferredSceneTask(async () => {
-          await ensureStarMapComponent()
-          showStarSystems = true
-        }, 60)
-      )
-    }
+function startDeferredSceneBoot() {
+  if (deferredEnvironmentBootStarted) return
+  deferredEnvironmentBootStarted = true
 
-    if (activeManifest?.features.fireflies) {
-      deferredSceneBootCleanups.push(
-        scheduleDeferredSceneTask(async () => {
-          await ensureHybridFireflyComponent()
-          showFireflies = true
-        }, 180)
-      )
-    }
-
-    if (activeManifest?.features.vegetation) {
-      deferredSceneBootCleanups.push(
-        scheduleDeferredSceneTask(() => {
-          showVegetation = true
-        }, 320)
-      )
-    }
+  if (activeManifest?.features.ocean) {
+    deferredSceneBootCleanups.push(
+      scheduleDeferredSceneTask(() => {
+        showOcean = true
+      }, 0),
+    )
   }
+
+  if (activeManifest?.features.starMap && !timelineLoadError) {
+    deferredSceneBootCleanups.push(
+      scheduleDeferredSceneTask(async () => {
+        await ensureStarMapComponent()
+        showStarSystems = true
+      }, 60),
+    )
+  }
+
+  if (activeManifest?.features.fireflies) {
+    deferredSceneBootCleanups.push(
+      scheduleDeferredSceneTask(async () => {
+        await ensureHybridFireflyComponent()
+        showFireflies = true
+      }, 180),
+    )
+  }
+
+  if (activeManifest?.features.vegetation) {
+    deferredSceneBootCleanups.push(
+      scheduleDeferredSceneTask(() => {
+        showVegetation = true
+      }, 320),
+    )
+  }
+}
 </script>
 
 {#if activeManifest}

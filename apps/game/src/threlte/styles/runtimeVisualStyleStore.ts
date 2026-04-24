@@ -67,7 +67,10 @@ export interface RuntimeVisualStyleSettings {
 }
 
 export type RuntimeVisualStylePatch = Partial<
-  Omit<RuntimeVisualStyleSettings, 'colorGrading' | 'screenFx' | 'heightFog' | 'terrain' | 'particles'>
+  Omit<
+    RuntimeVisualStyleSettings,
+    'colorGrading' | 'screenFx' | 'heightFog' | 'terrain' | 'particles'
+  >
 > & {
   colorGrading?: Partial<RuntimeColorGradingSettings>
   screenFx?: Partial<RuntimeScreenFxSettings>
@@ -165,7 +168,7 @@ function createRuntimeVisualStyleStore() {
     subscribe,
     replace: (next: RuntimeVisualStyleSettings) => set(next),
     merge: (next: RuntimeVisualStylePatch) => {
-      update((current) => mergeRuntimeVisualStyle(current, next))
+      update(current => mergeRuntimeVisualStyle(current, next))
     },
     reset: () => set(DEFAULT_RUNTIME_VISUAL_STYLE),
   }

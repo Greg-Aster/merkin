@@ -1,111 +1,174 @@
 <script lang="ts">
-  import EditorAssetPreview from './EditorAssetPreview.svelte'
-  import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
+import EditorAssetPreview from './EditorAssetPreview.svelte'
+import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
 
-  type TextureField =
-    | 'mapUrl'
-    | 'normalMapUrl'
-    | 'roughnessMapUrl'
-    | 'metalnessMapUrl'
-    | 'emissiveMapUrl'
-    | 'alphaMapUrl'
+type TextureField =
+  | 'mapUrl'
+  | 'normalMapUrl'
+  | 'roughnessMapUrl'
+  | 'metalnessMapUrl'
+  | 'emissiveMapUrl'
+  | 'alphaMapUrl'
 
-  type TextureBrowserItem = {
-    name: string
-    path: string
-    isDirectory: boolean
-  }
+type TextureBrowserItem = {
+  name: string
+  path: string
+  isDirectory: boolean
+}
 
-  type GeneratedVariantItem = {
-    name: string
-    path: string
-    url: string
-  }
+type GeneratedVariantItem = {
+  name: string
+  path: string
+  url: string
+}
 
-  type LightNumericField = 'intensity' | 'distance' | 'decay'
-  type GameplayTextField = 'title' | 'author' | 'location' | 'excerpt' | 'body' | 'targetLevelId' | 'markerColor' | 'audioTrack' | 'fogColor' | 'mistColor'
-  type GameplayNumericField = 'markerSize' | 'audioVolume' | 'regionFalloff' | 'fogDensity' | 'wanderRadius' | 'wanderSpeed' | 'hoverHeight' | 'bobAmplitude' | 'bobSpeed' | 'twinkleSpeed' | 'lightIntensity' | 'lightDistance' | 'lightDecay' | 'spriteIntensity' | 'mistOpacity' | 'mistLayers' | 'mistSpacing' | 'mistScale' | 'mistDriftSpeed'
-  type GameplayBooleanField = 'wanderEnabled'
+type LightNumericField = 'intensity' | 'distance' | 'decay'
+type GameplayTextField =
+  | 'title'
+  | 'author'
+  | 'location'
+  | 'excerpt'
+  | 'body'
+  | 'targetLevelId'
+  | 'markerColor'
+  | 'audioTrack'
+  | 'fogColor'
+  | 'mistColor'
+type GameplayNumericField =
+  | 'markerSize'
+  | 'audioVolume'
+  | 'regionFalloff'
+  | 'fogDensity'
+  | 'wanderRadius'
+  | 'wanderSpeed'
+  | 'hoverHeight'
+  | 'bobAmplitude'
+  | 'bobSpeed'
+  | 'twinkleSpeed'
+  | 'lightIntensity'
+  | 'lightDistance'
+  | 'lightDecay'
+  | 'spriteIntensity'
+  | 'lightBurstBoost'
+  | 'mistOpacity'
+  | 'mistLayers'
+  | 'mistSpacing'
+  | 'mistScale'
+  | 'mistDriftSpeed'
+type GameplayBooleanField = 'wanderEnabled'
 
-  export let selectedNode: EditorSceneNode | null = null
-  export let selectedNodes: EditorSceneNode[] = []
-  export let parentCandidates: EditorSceneNode[] = []
-  export let selectedNodeMaterial: EditorMaterialData = {}
-  export let selectedNodePreviewAssetUrl = ''
-  export let selectedGeneratedVariantUrl = ''
-  export let styleDescriptor = ''
-  export let canUseStyleStudioSelection = false
-  export let canUseAiMeshStudioSelection = false
-  export let generatedVariantItems: GeneratedVariantItem[] = []
-  export let generatedVariantLoading = false
-  export let generatedVariantError = ''
-  export let styleBusy = false
-  export let styleBlenderExportPath = ''
-  export let styleBlenderOpenCommand = ''
-  export let styleStatus = ''
-  export let activeTextureMaterialField: TextureField | null = null
-  export let textureBrowserPath = ''
-  export let textureBrowserLoading = false
-  export let textureBrowserItems: TextureBrowserItem[] = []
-  export let colliderSize: [number, number, number] = [1, 1, 1]
+export let selectedNode: EditorSceneNode | null = null
+export let selectedNodes: EditorSceneNode[] = []
+export let parentCandidates: EditorSceneNode[] = []
+export let selectedNodeMaterial: EditorMaterialData = {}
+export let selectedNodePreviewAssetUrl = ''
+export let selectedGeneratedVariantUrl = ''
+export let styleDescriptor = ''
+export let canUseStyleStudioSelection = false
+export let canUseAiMeshStudioSelection = false
+export let generatedVariantItems: GeneratedVariantItem[] = []
+export let generatedVariantLoading = false
+export let generatedVariantError = ''
+export let styleBusy = false
+export let styleBlenderExportPath = ''
+export let styleBlenderOpenCommand = ''
+export let styleStatus = ''
+export let activeTextureMaterialField: TextureField | null = null
+export let textureBrowserPath = ''
+export let textureBrowserLoading = false
+export let textureBrowserItems: TextureBrowserItem[] = []
+export let colliderSize: [number, number, number] = [1, 1, 1]
 
-  export let onNameChange: (value: string) => void = () => {}
-  export let onOpenStyleTab: () => void = () => {}
-  export let onOpenAiTab: () => void = () => {}
-  export let onDuplicate: () => void = () => {}
-  export let onDelete: () => void = () => {}
-  export let onVisibleChange: (value: boolean) => void = () => {}
-  export let onTransformChange: (field: 'position' | 'rotation' | 'scale', index: number, value: string) => void = () => {}
-  export let onParentChange: (value: string) => void = () => {}
-  export let onAssetUrlChange: (value: string) => void = () => {}
-  export let onOpenGeneratedAssetPicker: () => void = () => {}
-  export let onOpenImportedAssetPicker: () => void = () => {}
-  export let onPrefabVariantChange: (value: string) => void = () => {}
-  export let onPrimitiveGeometryChange: (value: string) => void = () => {}
-  export let onPrimitiveArgChange: (index: number, value: string) => void = () => {}
-  export let onLightColorChange: (value: string) => void = () => {}
-  export let onLightNumericChange: (field: LightNumericField, value: string) => void = () => {}
-  export let onGameplayFieldChange: (field: GameplayTextField, value: string) => void = () => {}
-  export let onGameplayNumericChange: (field: GameplayNumericField, value: string) => void = () => {}
-  export let onGameplayBooleanChange: (field: GameplayBooleanField, value: boolean) => void = () => {}
-  export let onStyleDescriptorChange: (value: string) => void = () => {}
-  export let onSelectGeneratedVariant: (url: string) => void = () => {}
-  export let onApplyGeneratedVariant: (url: string) => void = () => {}
-  export let onResetGeneratedVariantPreview: () => void = () => {}
-  export let onOpenSelectedInBlender: () => void = () => {}
-  export let onExportBlenderPackage: () => void = () => {}
-  export let onReimportBlenderOutput: () => void = () => {}
-  export let onMaterialColorChange: (field: 'color' | 'emissive', value: string) => void = () => {}
-  export let onMaterialNumericChange: (field: 'metalness' | 'roughness' | 'opacity', value: string) => void = () => {}
-  export let onMaterialTextureChange: (field: 'mapUrl', value: string) => void = () => {}
-  export let onOpenTexturePicker: (field: TextureField) => void = () => {}
-  export let onResetMaterialOverrides: () => void = () => {}
-  export let onCollisionEnabledChange: (value: boolean) => void = () => {}
-  export let onPhysicsBodyTypeChange: (value: string) => void = () => {}
-  export let onColliderSizeChange: (index: number, value: string) => void = () => {}
-  export let onTextureBrowserUp: () => void = () => {}
-  export let onTextureBrowserRefresh: () => void = () => {}
-  export let onTextureBrowserOpenDirectory: (path: string) => void = () => {}
-  export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
+export let onNameChange: (value: string) => void = () => {}
+export let onOpenStyleTab: () => void = () => {}
+export let onOpenAiTab: () => void = () => {}
+export let onDuplicate: () => void = () => {}
+export let onDelete: () => void = () => {}
+export let onVisibleChange: (value: boolean) => void = () => {}
+export let onTransformChange: (
+  field: 'position' | 'rotation' | 'scale',
+  index: number,
+  value: string,
+) => void = () => {}
+export let onParentChange: (value: string) => void = () => {}
+export let onAssetUrlChange: (value: string) => void = () => {}
+export let onOpenGeneratedAssetPicker: () => void = () => {}
+export let onOpenImportedAssetPicker: () => void = () => {}
+export let onPrefabVariantChange: (value: string) => void = () => {}
+export let onPrimitiveGeometryChange: (value: string) => void = () => {}
+export let onPrimitiveArgChange: (index: number, value: string) => void =
+  () => {}
+export let onLightColorChange: (value: string) => void = () => {}
+export let onLightNumericChange: (
+  field: LightNumericField,
+  value: string,
+) => void = () => {}
+export let onGameplayFieldChange: (
+  field: GameplayTextField,
+  value: string,
+) => void = () => {}
+export let onGameplayNumericChange: (
+  field: GameplayNumericField,
+  value: string,
+) => void = () => {}
+export let onGameplayBooleanChange: (
+  field: GameplayBooleanField,
+  value: boolean,
+) => void = () => {}
+export let onStyleDescriptorChange: (value: string) => void = () => {}
+export let onSelectGeneratedVariant: (url: string) => void = () => {}
+export let onApplyGeneratedVariant: (url: string) => void = () => {}
+export let onResetGeneratedVariantPreview: () => void = () => {}
+export let onOpenSelectedInBlender: () => void = () => {}
+export let onExportBlenderPackage: () => void = () => {}
+export let onReimportBlenderOutput: () => void = () => {}
+export let onMaterialColorChange: (
+  field: 'color' | 'emissive',
+  value: string,
+) => void = () => {}
+export let onMaterialNumericChange: (
+  field: 'metalness' | 'roughness' | 'opacity',
+  value: string,
+) => void = () => {}
+export let onMaterialTextureChange: (field: 'mapUrl', value: string) => void =
+  () => {}
+export let onOpenTexturePicker: (field: TextureField) => void = () => {}
+export let onResetMaterialOverrides: () => void = () => {}
+export let onCollisionEnabledChange: (value: boolean) => void = () => {}
+export let onPhysicsBodyTypeChange: (value: string) => void = () => {}
+export let onColliderSizeChange: (index: number, value: string) => void =
+  () => {}
+export let onTextureBrowserUp: () => void = () => {}
+export let onTextureBrowserRefresh: () => void = () => {}
+export let onTextureBrowserOpenDirectory: (path: string) => void = () => {}
+export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
 
-  const transformFields: Array<'position' | 'rotation' | 'scale'> = ['position', 'rotation', 'scale']
+const transformFields: Array<'position' | 'rotation' | 'scale'> = [
+  'position',
+  'rotation',
+  'scale',
+]
 
-  $: hasSingleSelection = !!selectedNode && selectedNodes.length <= 1
-  $: hasMultiSelection = selectedNodes.length > 1
-  $: hasGeometryNode = !!(selectedNode?.asset || selectedNode?.prefab || selectedNode?.primitive)
+$: hasSingleSelection = !!selectedNode && selectedNodes.length <= 1
+$: hasMultiSelection = selectedNodes.length > 1
+$: hasGeometryNode = !!(
+  selectedNode?.asset ||
+  selectedNode?.prefab ||
+  selectedNode?.primitive
+)
 </script>
 
 {#if hasSingleSelection && selectedNode}
   <div class="editor-section compact-surface">
     <div class="label">Selected Object</div>
-    <input class="text-input" value={selectedNode.name} on:input={(e) => onNameChange((e.currentTarget as HTMLInputElement).value)} />
+    <input class="text-input" value={selectedNode.name} data-sfx-focus="focus-soft" on:input={(e) => onNameChange((e.currentTarget as HTMLInputElement).value)} />
     <div class="button-row compact editor-mt-sm">
-      <button on:click={onOpenStyleTab} disabled={!canUseStyleStudioSelection}>Style</button>
-      <button on:click={onOpenAiTab} disabled={!canUseAiMeshStudioSelection}>AI</button>
-      <button on:click={onDuplicate}>Duplicate</button>
-      <button class="danger" on:click={onDelete}>Delete</button>
+      <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenStyleTab} disabled={!canUseStyleStudioSelection}>Style</button>
+      <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenAiTab} disabled={!canUseAiMeshStudioSelection}>AI</button>
+      <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onDuplicate}>Duplicate</button>
+      <button class="danger" data-danger="true" data-sfx-hover="hover-emphasis" data-sfx-click="warning" on:click={onDelete}>Delete</button>
     </div>
-    <label class="checkbox editor-mt-sm"><input type="checkbox" checked={selectedNode.visible} on:change={(e) => onVisibleChange((e.currentTarget as HTMLInputElement).checked)} /> Visible</label>
+    <label class="checkbox editor-mt-sm"><input type="checkbox" checked={selectedNode.visible} data-sfx-click="soft" on:change={(e) => onVisibleChange((e.currentTarget as HTMLInputElement).checked)} /> Visible</label>
   </div>
 
   {#if selectedNodePreviewAssetUrl}
@@ -131,6 +194,7 @@
               type="number"
               step={field === 'rotation' ? 0.01 : 0.1}
               value={selectedNode[field][index]}
+              data-sfx-focus="focus-soft"
               on:change={(e) => onTransformChange(field, index, (e.currentTarget as HTMLInputElement).value)}
             />
           {/each}
@@ -143,7 +207,7 @@
     <div class="label">Object</div>
     <div class="tuple-group">
       <div class="tuple-label">Parent</div>
-      <select class="text-input" value={selectedNode.parentId ?? ''} on:change={(e) => onParentChange((e.currentTarget as HTMLSelectElement).value)}>
+      <select class="text-input" value={selectedNode.parentId ?? ''} data-sfx-focus="focus-soft" on:change={(e) => onParentChange((e.currentTarget as HTMLSelectElement).value)}>
         <option value="">Scene Root</option>
         {#each parentCandidates as candidate (candidate.id)}
           <option value={candidate.id}>{candidate.name}</option>
@@ -153,11 +217,11 @@
     {#if selectedNode.asset}
       <div class="tuple-group">
         <div class="tuple-label">Asset URL</div>
-        <input class="text-input" value={selectedNode.asset.url} on:input={(e) => onAssetUrlChange((e.currentTarget as HTMLInputElement).value)} />
+        <input class="text-input" value={selectedNode.asset.url} data-sfx-focus="focus-soft" on:input={(e) => onAssetUrlChange((e.currentTarget as HTMLInputElement).value)} />
       </div>
       <div class="button-row compact editor-mt-sm">
-        <button on:click={onOpenGeneratedAssetPicker}>Select Generated</button>
-        <button on:click={onOpenImportedAssetPicker}>Browse Imported</button>
+        <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenGeneratedAssetPicker}>Select Generated</button>
+        <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenImportedAssetPicker}>Browse Imported</button>
       </div>
       <div class="save-message editor-mt-sm">Select Generated opens the current generated asset folder when possible so you can swap between sibling outputs quickly.</div>
     {:else if selectedNode.prefab}
@@ -167,18 +231,18 @@
       </div>
       <div class="tuple-group">
         <div class="tuple-label">Prefab Variant</div>
-        <input class="text-input" value={selectedNode.prefab.variant ?? ''} on:input={(e) => onPrefabVariantChange((e.currentTarget as HTMLInputElement).value)} />
+        <input class="text-input" value={selectedNode.prefab.variant ?? ''} data-sfx-focus="focus-soft" on:input={(e) => onPrefabVariantChange((e.currentTarget as HTMLInputElement).value)} />
       </div>
     {:else if selectedNode.primitive}
       <div class="tuple-group">
         <div class="tuple-label">Primitive Geometry</div>
-        <input class="text-input" value={selectedNode.primitive.geometry} on:input={(e) => onPrimitiveGeometryChange((e.currentTarget as HTMLInputElement).value)} />
+        <input class="text-input" value={selectedNode.primitive.geometry} data-sfx-focus="focus-soft" on:input={(e) => onPrimitiveGeometryChange((e.currentTarget as HTMLInputElement).value)} />
       </div>
       <div class="tuple-group">
         <div class="tuple-label">Primitive Args</div>
         <div class="tuple-row dynamic-grid">
           {#each selectedNode.primitive.args as arg, index}
-            <input class="tuple-input" type="number" step="0.05" value={arg} on:change={(e) => onPrimitiveArgChange(index, (e.currentTarget as HTMLInputElement).value)} />
+            <input class="tuple-input" type="number" step="0.05" value={arg} data-sfx-focus="focus-soft" on:change={(e) => onPrimitiveArgChange(index, (e.currentTarget as HTMLInputElement).value)} />
           {/each}
         </div>
       </div>
@@ -187,7 +251,7 @@
     {#if hasGeometryNode}
       <div class="tuple-group">
         <div class="tuple-label">Style Descriptor</div>
-        <input class="text-input" value={styleDescriptor} on:input={(e) => onStyleDescriptorChange((e.currentTarget as HTMLInputElement).value)} />
+        <input class="text-input" value={styleDescriptor} data-sfx-focus="focus-soft" on:input={(e) => onStyleDescriptorChange((e.currentTarget as HTMLInputElement).value)} />
       </div>
     {/if}
   </div>
@@ -282,6 +346,10 @@
           <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.spriteIntensity ?? 1.15} on:change={(e) => onGameplayNumericChange('spriteIntensity', (e.currentTarget as HTMLInputElement).value)} />
         </div>
         <div class="tuple-group">
+          <div class="tuple-label">Burst Glow Boost</div>
+          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.lightBurstBoost ?? 1.25} on:change={(e) => onGameplayNumericChange('lightBurstBoost', (e.currentTarget as HTMLInputElement).value)} />
+        </div>
+        <div class="tuple-group">
           <div class="tuple-label">Hover Height</div>
           <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.hoverHeight ?? 0.28} on:change={(e) => onGameplayNumericChange('hoverHeight', (e.currentTarget as HTMLInputElement).value)} />
         </div>
@@ -297,7 +365,7 @@
           <div class="tuple-label">Twinkle Speed</div>
           <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.twinkleSpeed ?? 0.9} on:change={(e) => onGameplayNumericChange('twinkleSpeed', (e.currentTarget as HTMLInputElement).value)} />
         </div>
-        <div class="save-message">Glow controls drive nearby scene lighting; sprite intensity controls the visible firefly core and halo.</div>
+        <div class="save-message">Glow controls drive nearby scene lighting; sprite intensity controls the visible core and halo; burst glow boost scales the player light-release reaction.</div>
       {:else if selectedNode.gameplay.type === 'note'}
         <div class="tuple-group">
           <div class="tuple-label">Title</div>
@@ -390,15 +458,15 @@
         />
         <div class="hierarchy-list variant-list editor-mt-sm">
           {#each generatedVariantItems as item (item.path)}
-            <button class:active={selectedGeneratedVariantUrl === item.url} on:click={() => onSelectGeneratedVariant(item.url)}>
+            <button class:active={selectedGeneratedVariantUrl === item.url} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSelectGeneratedVariant(item.url)}>
               <span class="node-label">{item.name}</span>
               <span class="kind">{item.url === selectedNode.asset.url ? 'current' : 'variant'}</span>
             </button>
           {/each}
         </div>
         <div class="button-row compact editor-mt-sm">
-          <button on:click={() => onApplyGeneratedVariant(selectedGeneratedVariantUrl)} disabled={!selectedGeneratedVariantUrl || selectedGeneratedVariantUrl === selectedNode.asset.url}>Apply Highlighted Variant</button>
-          <button on:click={onResetGeneratedVariantPreview}>Reset Preview</button>
+          <button data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={() => onApplyGeneratedVariant(selectedGeneratedVariantUrl)} disabled={!selectedGeneratedVariantUrl || selectedGeneratedVariantUrl === selectedNode.asset.url}>Apply Highlighted Variant</button>
+          <button data-sfx-hover="hover-soft" data-sfx-click="panel-back" on:click={onResetGeneratedVariantPreview}>Reset Preview</button>
         </div>
       {/if}
     </div>
@@ -408,12 +476,12 @@
     <div class="editor-section compact-surface">
       <div class="label">Blender Companion</div>
       <div class="button-row compact editor-mb-sm">
-        <button on:click={onOpenSelectedInBlender} disabled={styleBusy}>Open Selected In Blender</button>
-        <button on:click={onExportBlenderPackage} disabled={styleBusy}>Export Package</button>
+        <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenSelectedInBlender} disabled={styleBusy}>Open Selected In Blender</button>
+        <button data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onExportBlenderPackage} disabled={styleBusy}>Export Package</button>
       </div>
       <div class="button-row compact">
-        <button on:click={onReimportBlenderOutput} disabled={styleBusy}>Reimport Latest Blender Output</button>
-        <button on:click={onOpenStyleTab}>Open Style Studio</button>
+        <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onReimportBlenderOutput} disabled={styleBusy}>Reimport Latest Blender Output</button>
+        <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenStyleTab}>Open Style Studio</button>
       </div>
       {#if styleBlenderExportPath}
         <div class="save-message editor-mt-sm path-label">{styleBlenderExportPath}</div>
@@ -445,11 +513,11 @@
         <div class="tuple-label">Base Color Map</div>
         <div class="button-row level-switch-row">
           <input class="text-input" placeholder="/textures/stone/albedo.jpg" value={selectedNodeMaterial.mapUrl ?? ''} on:input={(e) => onMaterialTextureChange('mapUrl', (e.currentTarget as HTMLInputElement).value)} />
-          <button on:click={() => onOpenTexturePicker('mapUrl')}>Pick</button>
+          <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={() => onOpenTexturePicker('mapUrl')}>Pick</button>
         </div>
       </div>
       <div class="button-row compact editor-mt-sm">
-        <button on:click={onResetMaterialOverrides}>Reset Material Overrides</button>
+        <button data-sfx-hover="hover-soft" data-sfx-click="warning" on:click={onResetMaterialOverrides}>Reset Material Overrides</button>
       </div>
     </div>
   {/if}
@@ -457,8 +525,8 @@
   {#if hasGeometryNode}
     <div class="editor-section compact-surface">
       <div class="label">Physics</div>
-      <label class="checkbox"><input type="checkbox" checked={!!selectedNode.collision} on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Solid / Collider</label>
-      <select class="text-input" value={selectedNode.physics?.bodyType ?? 'fixed'} on:change={(e) => onPhysicsBodyTypeChange((e.currentTarget as HTMLSelectElement).value)}>
+      <label class="checkbox"><input type="checkbox" checked={!!selectedNode.collision} data-sfx-click="soft" on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Solid / Collider</label>
+      <select class="text-input" value={selectedNode.physics?.bodyType ?? 'fixed'} data-sfx-focus="focus-soft" on:change={(e) => onPhysicsBodyTypeChange((e.currentTarget as HTMLSelectElement).value)}>
         <option value="fixed">Fixed</option>
         <option value="dynamic">Dynamic</option>
         <option value="kinematicPosition">Kinematic</option>
@@ -467,7 +535,7 @@
         <div class="tuple-label editor-mt-sm">Collider Size</div>
         <div class="tuple-row">
           {#each [0, 1, 2] as index}
-            <input class="tuple-input" type="number" min="0.05" step="0.05" value={colliderSize[index]} on:change={(e) => onColliderSizeChange(index, (e.currentTarget as HTMLInputElement).value)} />
+            <input class="tuple-input" type="number" min="0.05" step="0.05" value={colliderSize[index]} data-sfx-focus="focus-soft" on:change={(e) => onColliderSizeChange(index, (e.currentTarget as HTMLInputElement).value)} />
           {/each}
         </div>
       {/if}
@@ -478,8 +546,8 @@
     <div class="editor-section compact-surface">
       <div class="label">Texture Browser</div>
       <div class="button-row compact">
-        <button on:click={onTextureBrowserUp}>Up</button>
-        <button on:click={onTextureBrowserRefresh}>Refresh</button>
+        <button data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onTextureBrowserUp}>Up</button>
+        <button data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onTextureBrowserRefresh}>Refresh</button>
       </div>
       <div class="save-message path-label">{textureBrowserPath}</div>
       <div class="save-message">Picking for `{activeTextureMaterialField}`.</div>
@@ -488,7 +556,7 @@
           <div class="save-message">Loading textures…</div>
         {:else}
           {#each textureBrowserItems as item (item.path)}
-            <button on:click={() => item.isDirectory ? onTextureBrowserOpenDirectory(item.path) : onTextureBrowserPick(item)}>
+            <button data-sfx-hover="hover-soft" data-sfx-click={item.isDirectory ? 'soft' : 'select'} on:click={() => item.isDirectory ? onTextureBrowserOpenDirectory(item.path) : onTextureBrowserPick(item)}>
               <span class="node-label">{item.isDirectory ? '📁' : '🖼️'} {item.name}</span>
               <span class="kind">{item.isDirectory ? 'dir' : 'texture'}</span>
             </button>

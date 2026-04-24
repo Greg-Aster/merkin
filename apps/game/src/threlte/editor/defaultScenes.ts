@@ -11,7 +11,8 @@ function nowIso() {
 
 const SCI_FI_ROOM_SCENE_VERSION = 5
 const SCI_FI_FLOOR_ROOT_ID = 'sci-fi-floor-root'
-const SCI_FI_PLANTER_B_ASSET_URL = '/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb'
+const SCI_FI_PLANTER_B_ASSET_URL =
+  '/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb'
 const SCI_FI_ROOM_SCALE = 4
 const SCI_FI_ROOM_WIDTH = 5.39 * SCI_FI_ROOM_SCALE
 const SCI_FI_ROOM_DEPTH = 4.63 * SCI_FI_ROOM_SCALE
@@ -30,7 +31,7 @@ const PACKAGED_DEFAULT_SCENES: Record<string, EditorSceneDocument> = {
 
 function getPackagedDefaultScene(levelId: string) {
   const scene = PACKAGED_DEFAULT_SCENES[levelId]
-  return scene ? structuredClone(scene) as EditorSceneDocument : null
+  return scene ? (structuredClone(scene) as EditorSceneDocument) : null
 }
 
 function createSolitudeGroundNodes(): EditorSceneNode[] {
@@ -228,7 +229,11 @@ function createSciFiRoomFloorNodes(): EditorSceneNode[] {
       collision: { shape: 'cuboid', friction: 0.9 },
       primitive: {
         geometry: 'box',
-        args: [SCI_FI_ROOM_WIDTH, SCI_FI_ROOM_WALL_THICKNESS, SCI_FI_ROOM_DEPTH],
+        args: [
+          SCI_FI_ROOM_WIDTH,
+          SCI_FI_ROOM_WALL_THICKNESS,
+          SCI_FI_ROOM_DEPTH,
+        ],
         color: '#1a2630',
         emissive: '#1a3d4a',
         emissiveIntensity: 0.45,
@@ -251,14 +256,22 @@ function createSciFiRoomFloorNodes(): EditorSceneNode[] {
       name: 'Courtyard Floor Slab',
       kind: 'primitive',
       parentId: 'sci-fi-floor-courtyard-group',
-      position: [0, SCI_FI_ROOM_FLOOR_Y - SCI_FI_ROOM_WALL_THICKNESS / 2, SCI_FI_ROOM_COURTYARD_Z],
+      position: [
+        0,
+        SCI_FI_ROOM_FLOOR_Y - SCI_FI_ROOM_WALL_THICKNESS / 2,
+        SCI_FI_ROOM_COURTYARD_Z,
+      ],
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
       visible: true,
       collision: { shape: 'cuboid', friction: 0.7 },
       primitive: {
         geometry: 'box',
-        args: [SCI_FI_ROOM_WIDTH * 1.2, SCI_FI_ROOM_WALL_THICKNESS, SCI_FI_ROOM_WIDTH * 1.2],
+        args: [
+          SCI_FI_ROOM_WIDTH * 1.2,
+          SCI_FI_ROOM_WALL_THICKNESS,
+          SCI_FI_ROOM_WIDTH * 1.2,
+        ],
         color: '#1a2d3a',
         metalness: 0.42,
         roughness: 0.54,
@@ -280,7 +293,8 @@ function createSciFiRoomFloorNodes(): EditorSceneNode[] {
     for (let j = 0; j < 6; j += 1) {
       const x = (i - 2.5) * (SCI_FI_ROOM_WIDTH * 2.0)
       const z = (j - 2.5) * (SCI_FI_ROOM_WIDTH * 2.0) + SCI_FI_ROOM_WASTELAND_Z
-      const y = SCI_FI_ROOM_FLOOR_Y + Math.sin(i * 0.7) * 0.8 + Math.cos(j * 0.7) * 0.8
+      const y =
+        SCI_FI_ROOM_FLOOR_Y + Math.sin(i * 0.7) * 0.8 + Math.cos(j * 0.7) * 0.8
 
       floorNodes.push({
         id: `sci-fi-floor-wasteland-tile-${i}-${j}`,
@@ -294,7 +308,11 @@ function createSciFiRoomFloorNodes(): EditorSceneNode[] {
         collision: { shape: 'cuboid', friction: 0.5 },
         primitive: {
           geometry: 'box',
-          args: [SCI_FI_ROOM_WIDTH, SCI_FI_ROOM_WASTELAND_TILE_THICKNESS, SCI_FI_ROOM_WIDTH],
+          args: [
+            SCI_FI_ROOM_WIDTH,
+            SCI_FI_ROOM_WASTELAND_TILE_THICKNESS,
+            SCI_FI_ROOM_WIDTH,
+          ],
           color: '#3a3a2a',
           metalness: 0.12,
           roughness: 0.92,
@@ -306,8 +324,12 @@ function createSciFiRoomFloorNodes(): EditorSceneNode[] {
   return floorNodes
 }
 
-function normalizeSciFiPlanterB(scene: EditorSceneDocument): EditorSceneDocument {
-  const planterIndex = scene.nodes.findIndex((node) => node.id === 'sci-fi-planter-b')
+function normalizeSciFiPlanterB(
+  scene: EditorSceneDocument,
+): EditorSceneDocument {
+  const planterIndex = scene.nodes.findIndex(
+    node => node.id === 'sci-fi-planter-b',
+  )
   if (planterIndex === -1) return scene
 
   const planter = scene.nodes[planterIndex]
@@ -332,15 +354,17 @@ function normalizeSciFiPlanterB(scene: EditorSceneDocument): EditorSceneDocument
   }
 }
 
-export function upgradeLegacySceneDocument(scene: EditorSceneDocument): EditorSceneDocument {
-  const normalizedScene = scene.levelId === 'sci-fi-room'
-    ? normalizeSciFiPlanterB(scene)
-    : scene
+export function upgradeLegacySceneDocument(
+  scene: EditorSceneDocument,
+): EditorSceneDocument {
+  const normalizedScene =
+    scene.levelId === 'sci-fi-room' ? normalizeSciFiPlanterB(scene) : scene
 
   const defaultScene = createDefaultSceneForLevel(normalizedScene.levelId)
-  const nextVersion = normalizedScene.levelId === 'sci-fi-room'
-    ? Math.max(normalizedScene.version, SCI_FI_ROOM_SCENE_VERSION)
-    : normalizedScene.version
+  const nextVersion =
+    normalizedScene.levelId === 'sci-fi-room'
+      ? Math.max(normalizedScene.version, SCI_FI_ROOM_SCENE_VERSION)
+      : normalizedScene.version
 
   if (!defaultScene.nodes.length) {
     return {
@@ -349,8 +373,10 @@ export function upgradeLegacySceneDocument(scene: EditorSceneDocument): EditorSc
     }
   }
 
-  const existingIds = new Set(normalizedScene.nodes.map((node) => node.id))
-  const missingDefaultNodes = defaultScene.nodes.filter((node) => !existingIds.has(node.id))
+  const existingIds = new Set(normalizedScene.nodes.map(node => node.id))
+  const missingDefaultNodes = defaultScene.nodes.filter(
+    node => !existingIds.has(node.id),
+  )
 
   if (missingDefaultNodes.length === 0) {
     return {
@@ -361,10 +387,12 @@ export function upgradeLegacySceneDocument(scene: EditorSceneDocument): EditorSc
 
   const defaultNodeCount = defaultScene.nodes.length
   const currentNodeCount = normalizedScene.nodes.length
-  const missingRatio = missingDefaultNodes.length / Math.max(defaultNodeCount, 1)
-  const shouldRepairFromDefaults = currentNodeCount === 0
-    || currentNodeCount < defaultNodeCount * 0.75
-    || missingRatio > 0.2
+  const missingRatio =
+    missingDefaultNodes.length / Math.max(defaultNodeCount, 1)
+  const shouldRepairFromDefaults =
+    currentNodeCount === 0 ||
+    currentNodeCount < defaultNodeCount * 0.75 ||
+    missingRatio > 0.2
 
   if (!shouldRepairFromDefaults) {
     return {
@@ -383,44 +411,58 @@ export function upgradeLegacySceneDocument(scene: EditorSceneDocument): EditorSc
 function createSolitudeNodes(): EditorSceneNode[] {
   const ringRadius = 18
   const pillarCount = 12
-  const pillarNodes: EditorSceneNode[] = Array.from({ length: pillarCount }, (_, index) => {
-    const angle = (index / pillarCount) * Math.PI * 2
-    const pillarHeight = index % 3 === 0 ? 5.4 : index % 2 === 0 ? 4.7 : 4.1
-    const scaleX = 1.15 + (index % 4) * 0.08
-    const scaleZ = 0.96 + (index % 3) * 0.06
+  const pillarNodes: EditorSceneNode[] = Array.from(
+    { length: pillarCount },
+    (_, index) => {
+      const angle = (index / pillarCount) * Math.PI * 2
+      const pillarHeight = index % 3 === 0 ? 5.4 : index % 2 === 0 ? 4.7 : 4.1
+      const scaleX = 1.15 + (index % 4) * 0.08
+      const scaleZ = 0.96 + (index % 3) * 0.06
 
-    return {
-      id: `solitude-pillar-${index + 1}`,
-      name: `Solitude Pillar ${index + 1}`,
-      kind: 'prefab',
-      parentId: 'solitude-ruin-ring',
-      position: [Math.cos(angle) * ringRadius, pillarHeight / 2, Math.sin(angle) * ringRadius],
-      rotation: [0, angle + (index % 2 === 0 ? 0.12 : -0.16), 0],
-      scale: [scaleX, pillarHeight, scaleZ],
-      visible: true,
-      prefab: { type: 'wasteland-monolith' },
-    }
-  })
-  const pillarFireflyNodes: EditorSceneNode[] = pillarNodes.map((pillarNode, index) => ({
-    id: `solitude-pillar-firefly-${index + 1}`,
-    name: `${pillarNode.name} Firefly`,
-    kind: 'group',
-    parentId: 'solitude-ruin-ring',
-    position: [pillarNode.position[0], pillarNode.scale[1] + 0.8, pillarNode.position[2]],
-    rotation: [0, 0, 0],
-    scale: [1, 1, 1],
-    visible: true,
-    gameplay: {
-      type: 'firefly',
-      markerColor: '#f5f1a8',
-      markerSize: 0.52,
-      title: pillarNode.name,
-      author: 'Pillar Firefly',
-      location: 'The Solitude Plain',
-      excerpt: `A patient glow hovers above ${pillarNode.name}.`,
-      body: `A solitary firefly keeps watch above ${pillarNode.name}.`,
+      return {
+        id: `solitude-pillar-${index + 1}`,
+        name: `Solitude Pillar ${index + 1}`,
+        kind: 'prefab',
+        parentId: 'solitude-ruin-ring',
+        position: [
+          Math.cos(angle) * ringRadius,
+          pillarHeight / 2,
+          Math.sin(angle) * ringRadius,
+        ],
+        rotation: [0, angle + (index % 2 === 0 ? 0.12 : -0.16), 0],
+        scale: [scaleX, pillarHeight, scaleZ],
+        visible: true,
+        prefab: { type: 'wasteland-monolith' },
+      }
     },
-  }))
+  )
+  const pillarFireflyNodes: EditorSceneNode[] = pillarNodes.map(
+    (pillarNode, index) => ({
+      id: `solitude-pillar-firefly-${index + 1}`,
+      name: `${pillarNode.name} Firefly`,
+      kind: 'group',
+      parentId: 'solitude-ruin-ring',
+      position: [
+        pillarNode.position[0],
+        pillarNode.scale[1] + 0.8,
+        pillarNode.position[2],
+      ],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+      visible: true,
+      gameplay: {
+        type: 'firefly',
+        markerColor: '#f5f1a8',
+        markerSize: 0.52,
+        lightBurstBoost: 1.4,
+        title: pillarNode.name,
+        author: 'Pillar Firefly',
+        location: 'The Solitude Plain',
+        excerpt: `A patient glow hovers above ${pillarNode.name}.`,
+        body: `A solitary firefly keeps watch above ${pillarNode.name}.`,
+      },
+    }),
+  )
 
   return [
     {
@@ -468,10 +510,12 @@ function createSolitudeNodes(): EditorSceneNode[] {
         type: 'firefly',
         markerColor: '#f5f1a8',
         markerSize: 0.62,
+        lightBurstBoost: 1.75,
         title: 'Solitude',
         author: 'The Firefly',
         location: 'The Solitude Plain',
-        excerpt: 'A single patient glow waits at the center of the ruined ring.',
+        excerpt:
+          'A single patient glow waits at the center of the ruined ring.',
         body: 'This is a place for solitude. You are alone here.\n\nThe pillars keep their distance so the sky can speak without interruption.',
       },
     },
@@ -512,7 +556,9 @@ function createSolitudeNodes(): EditorSceneNode[] {
   ]
 }
 
-export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument {
+export function createDefaultSceneForLevel(
+  levelId: string,
+): EditorSceneDocument {
   const packagedScene = getPackagedDefaultScene(levelId)
   if (packagedScene) {
     return packagedScene
@@ -581,10 +627,7 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
           skyboxPreset: 'observatory',
         },
       },
-      nodes: [
-        ...createSolitudeGroundNodes(),
-        ...createSolitudeNodes(),
-      ],
+      nodes: [...createSolitudeGroundNodes(), ...createSolitudeNodes()],
     }
   }
 
@@ -735,7 +778,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Pillar Whisper',
             author: 'Architectural Residue',
             location: 'Command Center',
-            excerpt: 'The pillar hums first, like a machine trying to remember the language of prayer.',
+            excerpt:
+              'The pillar hums first, like a machine trying to remember the language of prayer.',
             body: 'The pillar hums first, like a machine trying to remember the language of prayer.\n\nIts glow is not decorative. It pulses in measured intervals, as if syncing itself to some vanished crew protocol.\n\nEven here, the room seems to prefer ritual to utility.',
           },
         },
@@ -755,7 +799,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Bench Note',
             author: 'Unknown Visitor',
             location: 'Courtyard Threshold',
-            excerpt: 'The bench offers a pause before the open sky, its carved warning almost tender: look up before you go farther.',
+            excerpt:
+              'The bench offers a pause before the open sky, its carved warning almost tender: look up before you go farther.',
             body: 'The bench offers a pause before the open sky, its carved warning almost tender: look up before you go farther.\n\nWhatever was built here expected hesitation.\n\nIt wanted people to stop, adjust to the stars, and only then continue.',
           },
         },
@@ -775,7 +820,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Fountain Inscription',
             author: 'Central Basin Archive',
             location: 'Courtyard Core',
-            excerpt: 'At the courtyard heart, the fountain mirrors the constellations, as if the room is learning to become an observatory.',
+            excerpt:
+              'At the courtyard heart, the fountain mirrors the constellations, as if the room is learning to become an observatory.',
             body: 'At the courtyard heart, the fountain mirrors the constellations, as if the room is learning to become an observatory.\n\nThe basin does not reflect what is above so much as rehearse it.\n\nThis place is less a room than a machine for becoming sky-aware.',
           },
         },
@@ -795,7 +841,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Plant Spiral',
             author: 'Botanical Subsystem',
             location: 'Courtyard Growth Ring',
-            excerpt: 'The spiral plants lean toward one particular star cluster, suggesting the garden knows the route better than you do.',
+            excerpt:
+              'The spiral plants lean toward one particular star cluster, suggesting the garden knows the route better than you do.',
             body: 'The spiral plants lean toward one particular star cluster, suggesting the garden knows the route better than you do.\n\nTheir motion is too deliberate for weather and too patient for machinery.\n\nSomething in this level still tracks the sky with devotion.',
           },
         },
@@ -815,7 +862,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Junk Memory',
             author: 'Debris Field Echo',
             location: 'Deep Wasteland',
-            excerpt: 'Deep in the wasteland, the debris resolves into intent: this ruin was not abandoned, it was aimed at the heavens and left mid-sentence.',
+            excerpt:
+              'Deep in the wasteland, the debris resolves into intent: this ruin was not abandoned, it was aimed at the heavens and left mid-sentence.',
             body: 'Deep in the wasteland, the debris resolves into intent: this ruin was not abandoned, it was aimed at the heavens and left mid-sentence.\n\nThe broken shapes form vectors, not rubble.\n\nWhatever failed here was trying to point beyond the room.',
           },
         },
@@ -867,7 +915,9 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
           rotation: [0, Math.PI / 2, 0],
           scale: [0.00092, 0.00092, 0.00092],
           visible: true,
-          asset: { url: '/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf' },
+          asset: {
+            url: '/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf',
+          },
         },
         {
           id: 'sci-fi-support-column-a',
@@ -977,7 +1027,9 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
           rotation: [0, -1.15, 0],
           scale: [0.0009, 0.0009, 0.0009],
           visible: true,
-          asset: { url: '/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf' },
+          asset: {
+            url: '/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf',
+          },
         },
         {
           id: 'sci-fi-planter-a',
@@ -1087,7 +1139,9 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
           rotation: [0, 0.35, 0],
           scale: [0.00108, 0.00108, 0.00108],
           visible: true,
-          asset: { url: '/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf' },
+          asset: {
+            url: '/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf',
+          },
         },
       ],
     }
@@ -1245,7 +1299,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: "Captain's Log 45.7.21",
             author: 'Captain Helena Zhao',
             location: 'Cockpit Nav Station',
-            excerpt: 'There is nothing to salvage. Only debris, salt, and the taste of a vanished system.',
+            excerpt:
+              'There is nothing to salvage. Only debris, salt, and the taste of a vanished system.',
             body: "This is Captain Helena Zhao of the salvage vessel Second Breakfast.\n\nMiranda's primary sun went supernova without warning. Inner planets vaporized. Outer planetoids were thrown into cold darkness. We entered the debris field expecting a graveyard and found something worse: a silence that feels arranged.\n\nSome say you can still taste celery salt in the dust. I laughed when I first heard it. I am not laughing now.",
           },
         },
@@ -1370,7 +1425,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Crew Medical Watch',
             author: 'Dr. Imani Vale',
             location: 'Crew Quarters Locker',
-            excerpt: 'Headaches, nausea, deja vu. Nobody wants to say the symptoms out loud twice.',
+            excerpt:
+              'Headaches, nausea, deja vu. Nobody wants to say the symptoms out loud twice.',
             body: 'Three crew reported headaches after handling drone returns from the debris field. Two described dreams of a bar they have never visited. One woke up repeating a drink order in a voice he claims was not his own.\n\nNo abnormalities on scans. No fever. No infection. The fear is the only thing progressing.\n\nRecommendation: limit direct exposure to recovered signal caches, especially any reference to a Bloody Mary and any insistence on pickle prohibition.',
           },
         },
@@ -1457,8 +1513,9 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Private Memorandum',
             author: 'First Officer Soren Pike',
             location: "Captain's Office Desk",
-            excerpt: 'The captain looks composed until someone mentions drinks, dreams, or card players.',
-            body: "The captain has not slept properly in eleven cycles. She denies it, but the evidence is in the way she freezes whenever recovered transcripts mention the saloon.\n\nTwice now she has asked whether anyone else has seen three old men through the bridge glass. There was nobody there. On the second occasion she also asked whether the ship kept a safe for paper records.\n\nIt does now.",
+            excerpt:
+              'The captain looks composed until someone mentions drinks, dreams, or card players.',
+            body: 'The captain has not slept properly in eleven cycles. She denies it, but the evidence is in the way she freezes whenever recovered transcripts mention the saloon.\n\nTwice now she has asked whether anyone else has seen three old men through the bridge glass. There was nobody there. On the second occasion she also asked whether the ship kept a safe for paper records.\n\nIt does now.',
           },
         },
         {
@@ -1478,8 +1535,9 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Vault Fragment: Recipe Lockbox',
             author: 'Recovered hardcopy, access restricted',
             location: "Captain's Safe",
-            excerpt: 'The page keeps moving. The phrase keeps returning. The paper smells faintly of tomato, iron, and smoke.',
-            body: 'Cross-reference from the mechanical observer and the old man\'s account suggests a causality nexus formed around a drink completed at the instant of Miranda\'s destruction.\n\nHardcopy fragment secured in captain\'s vault after digital copies exhibited instability. Crew instructed not to vocalize the activation phrase aloud.\n\nFragment note: "Bloody Mary, no pickles, make it a double."\n\nIf this page is found outside the safe again, burn it and do not discuss the ash.',
+            excerpt:
+              'The page keeps moving. The phrase keeps returning. The paper smells faintly of tomato, iron, and smoke.',
+            body: "Cross-reference from the mechanical observer and the old man's account suggests a causality nexus formed around a drink completed at the instant of Miranda's destruction.\n\nHardcopy fragment secured in captain's vault after digital copies exhibited instability. Crew instructed not to vocalize the activation phrase aloud.\n\nFragment note: \"Bloody Mary, no pickles, make it a double.\"\n\nIf this page is found outside the safe again, burn it and do not discuss the ash.",
           },
         },
         {
@@ -1629,7 +1687,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Engineering Memo 8.15',
             author: 'Chief Engineer Mara Quill',
             location: 'Engine Room Control Deck',
-            excerpt: 'The ship is humming in sympathy with transmissions that should no longer exist.',
+            excerpt:
+              'The ship is humming in sympathy with transmissions that should no longer exist.',
             body: "Reactor output remains nominal, but the harmonic drift is wrong. Every time we pass through a dense pocket of Miranda ash, the engine room resonates with carrier bands matching the dead system's final RF burst.\n\nIt sounds like traffic stacked above an atmosphere that is no longer there. Queue chatter. Clearance loops. Repeated holds.\n\nI have shut down three relays and the sound still comes through the deck.",
           },
         },
@@ -1743,7 +1802,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Quarantine Bay Slip',
             author: 'Dr. Imani Vale',
             location: 'Medbay Cryo Pod',
-            excerpt: 'The sleepers are not dead. The ship still refuses to classify them as living.',
+            excerpt:
+              'The sleepers are not dead. The ship still refuses to classify them as living.',
             body: "We sealed three crew inside the aft medbay after the Miranda ash dreams escalated into waking fugues. They answer to their names, but only after a delay, as if translating from somewhere farther away.\n\nTheir body temperatures fall whenever the Bloody Mary phrase is spoken near the pods. The glass frosts from the inside first.\n\nI have ordered the quarantine lamps to stay red until somebody can explain why the EEG spikes match the ship's own telemetry.",
           },
         },
@@ -1830,7 +1890,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Mess Ledger Addendum',
             author: 'Steward Callum Reef',
             location: 'Galley Service Counter',
-            excerpt: 'We ran out of clean water before we ran out of stories about the bar.',
+            excerpt:
+              'We ran out of clean water before we ran out of stories about the bar.',
             body: 'Nobody eats in the mess unless the speakers are playing static. If the channels are quiet, people start hearing the card table again.\n\nThe bowls rattle whenever we cross a dense ash current. Plates slide toward the aft corridor as if the ship itself leans toward Miranda.\n\nI locked the pantry and still found celery salt on the floor this morning.',
           },
         },
@@ -2005,7 +2066,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Brig Confession',
             author: 'Unnamed detainee',
             location: 'Detention Cell 02',
-            excerpt: 'I was not trying to open the safe. I was trying to put the page back.',
+            excerpt:
+              'I was not trying to open the safe. I was trying to put the page back.',
             body: "They locked me in the brig because I kept leaving the corridor at night and waking up near the captain's office with soot under my nails.\n\nThe truth is smaller and worse: every time I close my eyes, I can hear a voice asking me to return a recipe card to its proper era.\n\nThe bars hum when the engines drift. The hum knows my name.",
           },
         },
@@ -2256,7 +2318,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Archive Index: Recovered Echoes',
             author: 'Signal Archivist Nila Serrin',
             location: 'Upper Data Gallery',
-            excerpt: 'Each copied transcript diverges the second time it is opened.',
+            excerpt:
+              'Each copied transcript diverges the second time it is opened.',
             body: 'The upper archive is no longer storing files. It is growing variants.\n\nOpen one Miranda transcript and you receive an account. Open it again and the witness order changes. Open it a third time and there is a fourth witness seated at the table.\n\nI moved the worst logs to the upper stacks and disconnected them from the main grid. The lights in this gallery still blink in answers.',
           },
         },
@@ -2408,7 +2471,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Arrival Log',
             author: 'Survey Cartographer',
             location: 'Observatory Landing',
-            excerpt: 'The observatory does not greet visitors with walls. It greets them with horizon, wind, and a suggestion to keep walking upward.',
+            excerpt:
+              'The observatory does not greet visitors with walls. It greets them with horizon, wind, and a suggestion to keep walking upward.',
             body: 'The observatory does not greet visitors with walls. It greets them with horizon, wind, and a suggestion to keep walking upward.\n\nEvery structure here behaves less like shelter and more like orientation.\n\nEven the path feels like an instrument laid across the hillside.',
           },
         },
@@ -2504,7 +2568,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Fountain Calibration',
             author: 'Night Shift Keeper',
             location: 'Courtyard Core',
-            excerpt: 'The fountain is not decorative. It trains the eye to recognize constellations in motion before night fully arrives.',
+            excerpt:
+              'The fountain is not decorative. It trains the eye to recognize constellations in motion before night fully arrives.',
             body: 'The fountain is not decorative. It trains the eye to recognize constellations in motion before night fully arrives.\n\nWater gives the sky a second surface, one closer to the hands.\n\nStudents learned the heavens here by watching them ripple first.',
           },
         },
@@ -2583,7 +2648,8 @@ export function createDefaultSceneForLevel(levelId: string): EditorSceneDocument
             title: 'Overlook Procedure',
             author: 'Apprentice Astronomer',
             location: 'Observation Platform',
-            excerpt: 'Before touching the rig, breathe long enough for the horizon to stop moving. The machine prefers a quiet witness.',
+            excerpt:
+              'Before touching the rig, breathe long enough for the horizon to stop moving. The machine prefers a quiet witness.',
             body: 'Before touching the rig, breathe long enough for the horizon to stop moving. The machine prefers a quiet witness.\n\nIt magnifies what the eye brings to it.\n\nImpatience turns every constellation into noise.',
           },
         },

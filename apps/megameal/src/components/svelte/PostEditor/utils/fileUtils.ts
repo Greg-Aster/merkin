@@ -358,13 +358,14 @@ export async function processFileImport(file: File): Promise<FileImportResult> {
         }
       }
       break
-    case 'docx':
+    case 'docx': {
       const { content, title: extractedTitle } = await convertDocxToMarkdown(
         result as ArrayBuffer,
       )
       converted = content
       title = extractedTitle || title
       break
+    }
     default:
       converted = `# Imported Content\n\nOriginal file: ${file.name}\n\n${result}`
   }

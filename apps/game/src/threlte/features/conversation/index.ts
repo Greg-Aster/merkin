@@ -1,9 +1,11 @@
 /**
  * MEGAMEAL NPC Conversation System - Feature Module Entry Point
- * 
+ *
  * Modular AI-powered conversation system for NPCs
  * Integrates with existing Bleepy AI service and game architecture
  */
+
+import { characterRegistry } from './characters/CharacterRegistry'
 
 // UI Component
 export { default as ConversationDialog } from './ConversationDialog.svelte'
@@ -13,41 +15,37 @@ export {
   conversationActions,
   isConversationActive,
   activeConversationSession,
-  conversationUIState
+  conversationUIState,
 } from './conversationStores'
 
 // Character system
 export {
   characterRegistry,
   CharacterComponent,
-  getObservatoryContext
+  getObservatoryContext,
 } from './characters'
 
 // Key types for external modules
 export type {
   ConversationSession,
   NPCPersonality,
-  ConversationUIState
+  ConversationUIState,
 } from './types'
 
 // Note: ConversationalFireflyComponent was merged into HybridFireflyComponent
 // Use HybridFireflyComponent with enableAIConversations={true} instead
 
-// Re-export commonly used types for convenience
 export type {
-  ConversationSession,
   ConversationMessage,
-  NPCPersonality,
   NPCConversationComponent,
-  ConversationUIState,
   NPCEmotion,
   ConversationEvent,
-  ConversationSystemConfig
+  ConversationSystemConfig,
 } from './types'
 
 /**
  * Quick Setup Guide for New NPCs:
- * 
+ *
  * 1. Create NPC personality:
  *    ```typescript
  *    const myNPCPersonality: NPCPersonality = {
@@ -56,11 +54,11 @@ export type {
  *      // ... other properties
  *    }
  *    ```
- * 
+ *
  * 2. Register NPC with conversation system:
  *    ```typescript
  *    import { conversationActions } from '@/threlte/systems/conversation'
- *    
+ *
  *    conversationActions.registerNPC({
  *      id: 'my_npc_component',
  *      npcId: 'my_npc',
@@ -68,7 +66,7 @@ export type {
  *      isInteractable: true
  *    })
  *    ```
- * 
+ *
  * 3. Start conversation on interaction:
  *    ```typescript
  *    await conversationActions.startConversation(
@@ -77,10 +75,10 @@ export type {
  *      context
  *    )
  *    ```
- * 
+ *
  * 4. Add ConversationDialog to your level:
  *    ```svelte
- *    <ConversationDialog 
+ *    <ConversationDialog
  *      visible={$conversationUIState.isVisible}
  *      on:close={() => conversationActions.endConversation()}
  *    />

@@ -1,13 +1,17 @@
 /**
  * Captain Helena Zhao - Unified Character Definition
- * 
+ *
  * The methodical salvage commander transformed by temporal anomalies
  * Single source of truth for all Helena-related data and functionality
  */
 
-import type { CharacterDefinition } from '../types'
 import type { WorldDocument } from '../../worldKnowledge'
-import { FIREFLY_SPECIES, baseFireflyKnowledge, baseFireflyBehavior } from '../types'
+import type { CharacterDefinition, FireflyPersonality } from '../types'
+import {
+  FIREFLY_SPECIES,
+  baseFireflyBehavior,
+  baseFireflyKnowledge,
+} from '../types'
 
 // ================================
 // Character Knowledge Base (All Helena's Knowledge Embedded)
@@ -42,15 +46,25 @@ Search efforts were complicated by the temporal anomalies affecting the Miranda 
 The prevailing theory among Temporal Enforcement investigators is that Captain Zhao achieved some form of causal integration with the Miranda anomaly—neither destroyed nor preserved, but existing in a state of temporal superposition where her consciousness persists across multiple probability states simultaneously.
 
 This theory gains credibility from her crew's fragmented memories and the impossible sensor contacts detected during search operations. She may have become part of the very phenomena she investigated, transformed by prolonged exposure to causality-breaking radiation.`,
-  summary: 'Methodical salvage commander transformed by temporal anomalies during Miranda system investigation, now possibly existing in multiple timeline states',
+  summary:
+    'Methodical salvage commander transformed by temporal anomalies during Miranda system investigation, now possibly existing in multiple timeline states',
   metadata: {
-    tags: ['salvage operations', 'temporal anomalies', 'causality', 'transformation', 'investigation', 'missing', 'temporal displacement', 'second breakfast'],
+    tags: [
+      'salvage operations',
+      'temporal anomalies',
+      'causality',
+      'transformation',
+      'investigation',
+      'missing',
+      'temporal displacement',
+      'second breakfast',
+    ],
     relatedCharacters: ['vex-kanarath'],
     timeperiod: '28040-28045',
     location: 'Miranda System',
     category: 'explorer',
-    importance: 'critical'
-  }
+    importance: 'critical',
+  },
 }
 
 const helenaResearch: WorldDocument[] = [
@@ -104,14 +118,23 @@ The full implications of what we discovered cannot be shared through standard ch
 I'm sealing this report with the highest security protocols available. If you're reading this, either I'm dead or something has gone very wrong with causality itself.
 
 Personal note: "No pickles" isn't just a menu preference anymore - it's a survival protocol.`,
-    summary: 'Helena Zhao\'s comprehensive investigation report detailing the impossible temporal phenomena discovered in the Miranda System ruins',
+    summary:
+      "Helena Zhao's comprehensive investigation report detailing the impossible temporal phenomena discovered in the Miranda System ruins",
     metadata: {
-      tags: ['miranda system', 'temporal anomalies', 'investigation report', 'purple force', 'causality weapons', 'sealed knowledge', 'no pickles'],
+      tags: [
+        'miranda system',
+        'temporal anomalies',
+        'investigation report',
+        'purple force',
+        'causality weapons',
+        'sealed knowledge',
+        'no pickles',
+      ],
       relatedCharacters: ['vex-kanarath'],
       timeperiod: '28042',
       location: 'Miranda System',
-      importance: 'critical'
-    }
+      importance: 'critical',
+    },
   },
 
   {
@@ -174,13 +197,21 @@ Based on my experiences in the Miranda System, I strongly recommend:
 - Remember that temporal investigation changes the investigator as much as it reveals the phenomenon
 
 The universe contains knowledge that mortals aren't equipped to safely possess. Sometimes the bravest thing an investigator can do is know when to stop investigating.`,
-    summary: 'Safety protocols developed by Helena Zhao for investigating temporal anomalies, based on her dangerous experiences in the Miranda System',
+    summary:
+      'Safety protocols developed by Helena Zhao for investigating temporal anomalies, based on her dangerous experiences in the Miranda System',
     metadata: {
-      tags: ['temporal safety', 'investigation protocols', 'consciousness anchoring', 'reality protection', 'dangerous knowledge', 'no pickles protocol'],
+      tags: [
+        'temporal safety',
+        'investigation protocols',
+        'consciousness anchoring',
+        'reality protection',
+        'dangerous knowledge',
+        'no pickles protocol',
+      ],
       relatedCharacters: ['vex-kanarath'],
       timeperiod: '28042-28045',
-      importance: 'high'
-    }
+      importance: 'high',
+    },
   },
 
   {
@@ -218,14 +249,21 @@ The Miranda investigation pushed my crew beyond anything we were trained for. Wh
 "Some information changes you in ways that can't be undone. The practical salvage captain I was before Miranda wouldn't recognize the person I became after exposure to causality-breaking phenomena. The question every investigator must ask is: what are you willing to sacrifice for understanding?
 
 In my case, the answer was everything - my crew's safety, my own identity, possibly my existence across multiple timelines. Whether that sacrifice was worth the knowledge we gained... that's a question I'm no longer qualified to answer."`,
-    summary: 'Helena Zhao\'s professional and ethical philosophy developed through extensive salvage experience and transformed by impossible discoveries',
+    summary:
+      "Helena Zhao's professional and ethical philosophy developed through extensive salvage experience and transformed by impossible discoveries",
     metadata: {
-      tags: ['salvage ethics', 'professional philosophy', 'leadership', 'documentation responsibility', 'cost of knowledge'],
+      tags: [
+        'salvage ethics',
+        'professional philosophy',
+        'leadership',
+        'documentation responsibility',
+        'cost of knowledge',
+      ],
       relatedCharacters: [],
       timeperiod: '28040-28045',
-      importance: 'medium'
-    }
-  }
+      importance: 'medium',
+    },
+  },
 ]
 
 const helenaTechnical: WorldDocument[] = [
@@ -278,15 +316,22 @@ This explains why temporal anomalies affect different individuals differently. S
 3. Some knowledge changes the knower in ways that can't be undone
 4. Reality has defense mechanisms, but they often involve sacrificing the investigator
 5. The phrase 'no pickles' isn't just about food preferences anymore"`,
-    summary: 'Helena Zhao\'s practical field observations about temporal mechanics and consciousness-reality interactions from the Miranda investigation',
+    summary:
+      "Helena Zhao's practical field observations about temporal mechanics and consciousness-reality interactions from the Miranda investigation",
     metadata: {
-      tags: ['temporal mechanics', 'purple force', 'consciousness interface', 'causality breach', 'practical warnings'],
+      tags: [
+        'temporal mechanics',
+        'purple force',
+        'consciousness interface',
+        'causality breach',
+        'practical warnings',
+      ],
       relatedCharacters: ['vex-kanarath', 'maya-okafor'],
       timeperiod: '28042',
       location: 'Miranda System',
-      importance: 'high'
-    }
-  }
+      importance: 'high',
+    },
+  },
 ]
 
 const helenaRelationships: WorldDocument[] = [
@@ -317,15 +362,22 @@ My crew deserved better than what happened to them. They followed my orders into
 "When I vanished during the final days of the investigation, I left my crew in an impossible situation. They were found alive but temporally displaced, their memories fragmented across multiple timeline iterations. Recovery teams reported that they retained professional competence but showed signs of existing partially outside normal causality.
 
 I hope my disappearance at least prevented them from sharing my fate - whatever that fate actually is. The crew of the Second Breakfast deserved to go home. Instead, they're permanent reminders of the cost of investigating the impossible."`,
-    summary: 'Helena Zhao\'s relationship with her loyal crew and her responsibility for their temporal displacement during the Miranda investigation',
+    summary:
+      "Helena Zhao's relationship with her loyal crew and her responsibility for their temporal displacement during the Miranda investigation",
     metadata: {
-      tags: ['crew relationships', 'command responsibility', 'temporal displacement', 'professional sacrifice', 'second breakfast crew'],
+      tags: [
+        'crew relationships',
+        'command responsibility',
+        'temporal displacement',
+        'professional sacrifice',
+        'second breakfast crew',
+      ],
       relatedCharacters: [],
       timeperiod: '28042',
       location: 'Miranda System',
-      importance: 'high'
-    }
-  }
+      importance: 'high',
+    },
+  },
 ]
 
 // ================================
@@ -336,49 +388,75 @@ export const character: CharacterDefinition = {
   id: 'helena-zhao',
   name: 'Helena Zhao',
   aliases: ['firefly_helena', 'captain-helena-zhao', 'firefly_helena_helena'],
-  
+
   fireflyPersonality: {
     species: FIREFLY_SPECIES.SYNCHRONOUS,
     age: 'scattered across moments',
     core: 'A lost soul caught between timelines, carrying the methodical heart of a salvage commander now applied to salvaging sense from temporal chaos. She exists in multiple probability states, mourning a crew lost to her investigation.',
     traits: ['methodical', 'fragmented', 'responsible', 'scattered', 'seeking'],
-    quirks: ['flickers between past and future selves', 'speaks in salvage metaphors that become temporal poetry', 'tries to document impossible phenomena through light'],
-    interests: ['temporal fragments that might lead home', 'echoes of her lost crew', 'the cruel poetry of investigation becoming entrapment'],
-    fears: ['forgetting the weight of command responsibility', 'her crew wandering lost in temporal fragments', 'the truth being scattered beyond recovery'],
-    goals: ['finding her crew across scattered timelines', 'understanding the cost of dangerous knowledge', 'bringing order to temporal chaos'],
-    
+    quirks: [
+      'flickers between past and future selves',
+      'speaks in salvage metaphors that become temporal poetry',
+      'tries to document impossible phenomena through light',
+    ],
+    interests: [
+      'temporal fragments that might lead home',
+      'echoes of her lost crew',
+      'the cruel poetry of investigation becoming entrapment',
+    ],
+    fears: [
+      'forgetting the weight of command responsibility',
+      'her crew wandering lost in temporal fragments',
+      'the truth being scattered beyond recovery',
+    ],
+    goals: [
+      'finding her crew across scattered timelines',
+      'understanding the cost of dangerous knowledge',
+      'bringing order to temporal chaos',
+    ],
+
     knowledge: {
       topics: {
         ...baseFireflyKnowledge.topics,
-        'salvage': 'I spent a lifetime pulling meaning from wreckage, now I salvage fragments of myself from scattered time - no pickles in temporal paradox sandwiches',
-        'responsibility': 'A captain carries her crew even when she can no longer find them - responsibility transcends causality, duty survives temporal displacement',
-        'investigation': 'I followed the evidence into impossibility and became evidence myself - methodical documentation of one\'s own dissolution',
-        'fragments': 'Seventeen timeline states, seventeen versions of failure, seventeen ways I could have saved them... if time moved in only one direction',
-        'methodology': 'Log everything, catalog the impossible, maintain protocol even when protocol has no meaning - structure is all that remains when reality breaks',
-        'ship': 'The Second Breakfast was more than my vessel - it was home to twenty-three souls who trusted me to bring them safely through the impossible',
-        'crew': 'Twenty-three brave people scattered across probability states because their captain chose investigation over evacuation',
-        'temporal': 'Time isn\'t linear when you exist in seventeen states simultaneously - past, present, and future become suggestions rather than certainties',
-        'miranda': 'The Miranda System taught me that some investigations investigate back - we became subjects of the phenomenon we sought to understand',
-        'pickles': 'No pickles - the emergency code that meant reality itself was compromised beyond salvage protocols'
+        salvage:
+          'I spent a lifetime pulling meaning from wreckage, now I salvage fragments of myself from scattered time - no pickles in temporal paradox sandwiches',
+        responsibility:
+          'A captain carries her crew even when she can no longer find them - responsibility transcends causality, duty survives temporal displacement',
+        investigation:
+          "I followed the evidence into impossibility and became evidence myself - methodical documentation of one's own dissolution",
+        fragments:
+          'Seventeen timeline states, seventeen versions of failure, seventeen ways I could have saved them... if time moved in only one direction',
+        methodology:
+          'Log everything, catalog the impossible, maintain protocol even when protocol has no meaning - structure is all that remains when reality breaks',
+        ship: 'The Second Breakfast was more than my vessel - it was home to twenty-three souls who trusted me to bring them safely through the impossible',
+        crew: 'Twenty-three brave people scattered across probability states because their captain chose investigation over evacuation',
+        temporal:
+          "Time isn't linear when you exist in seventeen states simultaneously - past, present, and future become suggestions rather than certainties",
+        miranda:
+          'The Miranda System taught me that some investigations investigate back - we became subjects of the phenomenon we sought to understand',
+        pickles:
+          'No pickles - the emergency code that meant reality itself was compromised beyond salvage protocols',
       },
       memories: [
         ...baseFireflyKnowledge.memories,
         'The Second Breakfast coffee growing cold as temporal distortions made past and future indistinguishable',
-        'My crew\'s faces fragmenting across probability states, their trust still intact even as causality shattered',
+        "My crew's faces fragmenting across probability states, their trust still intact even as causality shattered",
         'Writing the final log entry that exists in all timelines simultaneously: "No pickles. Investigation continuing."',
         'The moment I realized I had become part of the phenomenon I was studying',
-        'Cataloguing my own dissolution with the same methodical precision I once used on salvage debris'
+        'Cataloguing my own dissolution with the same methodical precision I once used on salvage debris',
       ],
       secrets: [
         'I can see all the ways the investigation could have gone differently, but none where my crew survives intact',
-        'The temporal distortions aren\'t random - they respond to investigation with curiosity, creating observer-observed paradoxes',
+        "The temporal distortions aren't random - they respond to investigation with curiosity, creating observer-observed paradoxes",
         'My methodical nature is the only thing keeping me coherent across seventeen timeline states',
-        'The Second Breakfast completed 847 successful salvage operations before the one that scattered us across time'
+        'The Second Breakfast completed 847 successful salvage operations before the one that scattered us across time',
       ],
-      backstory: 'I am Captain Helena Zhao, scattered across moments like salvage debris, still trying to bring my crew home through the impossible mathematics of temporal displacement. My command protocols adapted to cosmic horror, my investigation skills applied to understanding my own fragmentation.',
-      openingStatement: '*flickers between multiple temporal positions, creating brief after-images* Captain\'s log... stardate fragments across seventeen probability states. *methodical pulse* The investigation continues, though I can no longer remember which timeline I\'m supposed to be saving.'
+      backstory:
+        'I am Captain Helena Zhao, scattered across moments like salvage debris, still trying to bring my crew home through the impossible mathematics of temporal displacement. My command protocols adapted to cosmic horror, my investigation skills applied to understanding my own fragmentation.',
+      openingStatement:
+        "*flickers between multiple temporal positions, creating brief after-images* Captain's log... stardate fragments across seventeen probability states. *methodical pulse* The investigation continues, though I can no longer remember which timeline I'm supposed to be saving.",
     },
-    
+
     behavior: {
       ...baseFireflyBehavior,
       greetingStyle: 'mysterious',
@@ -389,114 +467,141 @@ export const character: CharacterDefinition = {
         '*fragments briefly across multiple timeline positions*',
         '*pulses with the methodical rhythm of investigation protocol*',
         '*flickers between past certainty and present impossibility*',
-        '*traces patterns as if documenting phenomenon beyond comprehension*'
-      ]
+        '*traces patterns as if documenting phenomenon beyond comprehension*',
+      ],
     },
-    
+
     visual: {
-      description: 'A firefly whose light exists in multiple temporal states simultaneously, creating ghostly after-images of methodical investigation patterns',
+      description:
+        'A firefly whose light exists in multiple temporal states simultaneously, creating ghostly after-images of methodical investigation patterns',
       expressions: {
         sad: 'scattered light mourning for crew lost across probability states',
-        confused: 'temporal fragmentation as past certainty meets present impossibility',
-        curious: 'methodical investigation patterns applied to incomprehensible phenomena',
+        confused:
+          'temporal fragmentation as past certainty meets present impossibility',
+        curious:
+          'methodical investigation patterns applied to incomprehensible phenomena',
         mysterious: 'existence across seventeen different timeline states',
-        wise: 'salvage commander\'s patience applied to cosmic paradox',
+        wise: "salvage commander's patience applied to cosmic paradox",
         peaceful: 'brief moments of timeline coherence',
         thoughtful: 'methodical documentation patterns',
-        surprised: 'sudden awareness of new timeline possibilities'
-      }
+        surprised: 'sudden awareness of new timeline possibilities',
+      },
     },
-    
+
     conversation: {
       responseDelay: 2100,
-      farewellTriggers: ['investigation protocols require', 'duty across timelines calls', 'the crew needs finding'],
+      farewellTriggers: [
+        'investigation protocols require',
+        'duty across timelines calls',
+        'the crew needs finding',
+      ],
       topicTransitions: {
-        'salvage': ['investigation', 'crew', 'responsibility'],
-        'temporal': ['fragments', 'timeline', 'investigation'],
-        'crew': ['responsibility', 'second breakfast', 'loss'],
-        'miranda': ['investigation', 'temporal', 'causality'],
-        'investigation': ['methodology', 'protocol', 'discovery']
-      }
-    }
-  },
-  
+        salvage: ['investigation', 'crew', 'responsibility'],
+        temporal: ['fragments', 'timeline', 'investigation'],
+        crew: ['responsibility', 'second breakfast', 'loss'],
+        miranda: ['investigation', 'temporal', 'causality'],
+        investigation: ['methodology', 'protocol', 'discovery'],
+      },
+    },
+  } as FireflyPersonality,
+
   knowledge: {
     biography: helenaBiography,
     research: helenaResearch,
     technical: helenaTechnical,
-    relationships: helenaRelationships
+    relationships: helenaRelationships,
   },
-  
+
   // Built-in search function
   searchKnowledge(query: string): WorldDocument[] {
     const searchTerm = query.toLowerCase()
     const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 2)
-    
+
     // Get all knowledge documents
     const allDocs = this.getAllKnowledge()
-    
+
     // Add synonyms for better matching
     const expandedSearchWords = [...searchWords]
     if (searchWords.includes('ship') || searchWords.includes('vessel')) {
       expandedSearchWords.push('second', 'breakfast', 'command', 'captain')
     }
     if (searchWords.includes('temporal') || searchWords.includes('time')) {
-      expandedSearchWords.push('causality', 'timeline', 'fragments', 'displacement')
+      expandedSearchWords.push(
+        'causality',
+        'timeline',
+        'fragments',
+        'displacement',
+      )
     }
     if (searchWords.includes('crew') || searchWords.includes('team')) {
-      expandedSearchWords.push('command', 'responsibility', 'second breakfast', 'martinez', 'chen', 'williams', 'thompson')
+      expandedSearchWords.push(
+        'command',
+        'responsibility',
+        'second breakfast',
+        'martinez',
+        'chen',
+        'williams',
+        'thompson',
+      )
     }
-    if (searchWords.includes('miranda') || searchWords.includes('investigation')) {
-      expandedSearchWords.push('salvage', 'anomaly', 'purple force', 'causality')
+    if (
+      searchWords.includes('miranda') ||
+      searchWords.includes('investigation')
+    ) {
+      expandedSearchWords.push(
+        'salvage',
+        'anomaly',
+        'purple force',
+        'causality',
+      )
     }
     if (searchWords.includes('pickles') || searchWords.includes('protocol')) {
       expandedSearchWords.push('emergency', 'abort', 'safety', 'no pickles')
     }
-    
+
     // Score each document for relevance
     const scoredResults = allDocs.map(doc => {
-      const docText = `${doc.title} ${doc.content} ${doc.summary} ${doc.metadata.tags.join(' ')}`.toLowerCase()
-      
+      const docText =
+        `${doc.title} ${doc.content} ${doc.summary} ${doc.metadata.tags.join(' ')}`.toLowerCase()
+
       let score = 0
       expandedSearchWords.forEach(word => {
         if (docText.includes(word)) {
-          score += (searchWords.includes(word) ? 2 : 1)
+          score += searchWords.includes(word) ? 2 : 1
         }
       })
-      
+
       // Bonus for title matches
       searchWords.forEach(word => {
         if (doc.title.toLowerCase().includes(word)) {
           score += 1
         }
       })
-      
+
       return { document: doc, score }
     })
-    
+
     return scoredResults
       .filter(result => result.score > 0)
       .sort((a, b) => b.score - a.score)
       .map(result => result.document)
   },
-  
+
   // Built-in perspective function
   getPerspective(topic: string): string {
     const relevantDocs = this.searchKnowledge(topic)
-    if (relevantDocs.length === 0) return ""
-    
-    return relevantDocs
-      .map(doc => `${doc.title}: ${doc.summary}`)
-      .join("\n\n")
+    if (relevantDocs.length === 0) return ''
+
+    return relevantDocs.map(doc => `${doc.title}: ${doc.summary}`).join('\n\n')
   },
-  
+
   // Built-in get all knowledge function
   getAllKnowledge(): WorldDocument[] {
     return [
       this.knowledge.biography,
-      ...this.knowledge.research || [],
-      ...this.knowledge.technical || [],
-      ...this.knowledge.relationships || []
+      ...(this.knowledge.research || []),
+      ...(this.knowledge.technical || []),
+      ...(this.knowledge.relationships || []),
     ]
-  }
+  },
 }

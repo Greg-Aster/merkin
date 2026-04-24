@@ -96,10 +96,17 @@ $: if (postCardConfig) {
 function handleClose() {
   dispatch('close')
 }
+
+function handleOverlayKeydown(event) {
+  if (event.key === 'Enter' || event.key === ' ' || event.key === 'Escape') {
+    event.preventDefault()
+    handleClose()
+  }
+}
 </script>
   
   {#if show}
-    <div transition:fade={{ duration: 200 }} class="fixed inset-0 bg-black/50 dark:bg-black/60 z-50 flex items-center justify-center overflow-y-auto" on:click|self={handleClose}>
+    <div transition:fade={{ duration: 200 }} class="fixed inset-0 bg-black/50 dark:bg-black/60 z-50 flex items-center justify-center overflow-y-auto" on:click|self={handleClose} on:keydown={handleOverlayKeydown} role="button" tabindex="0" aria-label="Close post card configuration dialog">
       <div class="bg-white dark:bg-neutral-800 rounded-lg max-w-4xl w-full m-4 overflow-auto shadow-lg">
         <div class="p-6">
           <div class="flex justify-between items-center mb-4">
@@ -107,6 +114,9 @@ function handleClose() {
             <button 
               on:click={handleClose}
               class="text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-300"
+              data-sfx-hover="hover-soft"
+              data-sfx-click="panel-close"
+              aria-label="Close post card configuration dialog"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -125,6 +135,8 @@ function handleClose() {
               <button 
                 on:click={copyToClipboard}
                 class="py-1.5 px-3 bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 rounded-md transition-colors text-sm flex items-center"
+                data-sfx-hover="hover-soft"
+                data-sfx-click="confirm"
                 title="Copy to clipboard"
               >
                 {#if copySuccess}
@@ -146,6 +158,8 @@ function handleClose() {
             <button 
               on:click={handleClose}
               class="py-2 px-4 bg-[var(--primary)] hover:opacity-90 text-white font-medium rounded-md transition-opacity"
+              data-sfx-hover="hover-soft"
+              data-sfx-click="panel-close"
             >
               Close
             </button>

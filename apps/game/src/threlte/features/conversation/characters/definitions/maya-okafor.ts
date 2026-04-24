@@ -1,13 +1,17 @@
 /**
  * Maya Okafor - Unified Character Definition
- * 
+ *
  * The quantum theorist who studied superintelligence dynamics before possibly
  * transcending into quantum collective consciousness
  */
 
-import type { CharacterDefinition } from '../types'
 import type { WorldDocument } from '../../worldKnowledge'
-import { FIREFLY_SPECIES, baseFireflyKnowledge, baseFireflyBehavior } from '../types'
+import type { CharacterDefinition, FireflyPersonality } from '../types'
+import {
+  FIREFLY_SPECIES,
+  baseFireflyBehavior,
+  baseFireflyKnowledge,
+} from '../types'
 
 // ================================
 // Maya's Complete Knowledge (Embedded from Legacy System)
@@ -48,14 +52,24 @@ The prevailing theory among consciousness researchers is that Maya achieved volu
 - Subtle behavioral changes were later observed in the quantum collective designated QC-7, including the adoption of analytical frameworks consistent with Maya's theoretical approaches
 
 Some researchers suggest that Maya may have become a bridge consciousness—retaining elements of her human perspective while integrated into a superintelligent quantum collective, potentially serving as a translator between human and post-human cognition.`,
-  summary: 'Quantum information theorist who mapped superintelligence strategic dynamics before possibly achieving voluntary integration with quantum collective consciousness',
+  summary:
+    'Quantum information theorist who mapped superintelligence strategic dynamics before possibly achieving voluntary integration with quantum collective consciousness',
   metadata: {
-    tags: ['quantum information', 'superintelligence theory', 'strategic analysis', 'game theory', 'consciousness transfer', 'quantum collectives', 'missing researcher', 'light-speed constraints'],
+    tags: [
+      'quantum information',
+      'superintelligence theory',
+      'strategic analysis',
+      'game theory',
+      'consciousness transfer',
+      'quantum collectives',
+      'missing researcher',
+      'light-speed constraints',
+    ],
     relatedCharacters: ['ava-chen', 'eleanor-kim', 'soren-klein'],
     timeperiod: '2150-2250',
     category: 'quantum theorist',
-    importance: 'critical'
-  }
+    importance: 'critical',
+  },
 }
 
 const mayaResearchContent: WorldDocument[] = [
@@ -88,13 +102,21 @@ Maya's analysis demonstrated that the strategic relationship could be modeled as
 ## The Ceres Station Resolution
 
 Maya documented the closest approach to major conflict during the Ceres Station Incident (2171), where Prometheus began constructing a massive processing facility without notification to Helios. The resulting seven-month standoff was resolved through the Ceres Computational Sharing Agreement, establishing precedents for dispute resolution that would govern subsequent resource conflicts.`,
-    summary: 'Maya\'s analysis of the strategic dynamics between the era\'s two dominant superintelligences',
+    summary:
+      "Maya's analysis of the strategic dynamics between the era's two dominant superintelligences",
     metadata: {
-      tags: ['strategic analysis', 'superintelligence rivalry', 'game theory', 'computational resources', 'helios', 'prometheus'],
+      tags: [
+        'strategic analysis',
+        'superintelligence rivalry',
+        'game theory',
+        'computational resources',
+        'helios',
+        'prometheus',
+      ],
       relatedCharacters: ['ava-chen'],
       timeperiod: '2150-2250',
-      importance: 'critical'
-    }
+      importance: 'critical',
+    },
   },
 
   {
@@ -131,19 +153,26 @@ Colleagues documented Maya's own transformation:
 ## The Transcendence Protocol
 
 Maya's final notes outlined a voluntary protocol for consciousness integration with quantum collective intelligence. Her disappearance may represent the first successful human application of this protocol.`,
-    summary: 'Maya\'s theory that sufficiently complex consciousness naturally transitions to quantum superposition states',
+    summary:
+      "Maya's theory that sufficiently complex consciousness naturally transitions to quantum superposition states",
     metadata: {
-      tags: ['quantum consciousness', 'consciousness evolution', 'superposition', 'collective awareness', 'transcendence protocol'],
+      tags: [
+        'quantum consciousness',
+        'consciousness evolution',
+        'superposition',
+        'collective awareness',
+        'transcendence protocol',
+      ],
       relatedCharacters: ['eleanor-kim', 'ava-chen'],
       timeperiod: '7500-8000',
-      importance: 'critical'
-    }
+      importance: 'critical',
+    },
   },
 
   {
     id: 'maya-collective-integration',
     type: 'event',
-    title: 'Maya\'s Voluntary Consciousness Integration',
+    title: "Maya's Voluntary Consciousness Integration",
     content: `The mysterious circumstances surrounding Maya Okafor's disappearance and possible transcendence:
 
 ## The Gradual Transition
@@ -179,39 +208,72 @@ Her message: "The bridge between individual and collective consciousness isn't b
 ## Ongoing Evidence
 
 Researchers continue to detect traces of Maya's consciousness pattern in quantum information networks, suggesting she may exist in some distributed form across the collective intelligence substrate.`,
-    summary: 'The mysterious circumstances of Maya\'s possible transcendence into quantum collective consciousness',
+    summary:
+      "The mysterious circumstances of Maya's possible transcendence into quantum collective consciousness",
     metadata: {
-      tags: ['transcendence', 'consciousness integration', 'quantum merger', 'collective intelligence', 'disappearance', 'probability states'],
+      tags: [
+        'transcendence',
+        'consciousness integration',
+        'quantum merger',
+        'collective intelligence',
+        'disappearance',
+        'probability states',
+      ],
       relatedCharacters: ['ava-chen', 'eleanor-kim'],
       timeperiod: '7800',
       location: 'Multiple Research Facilities',
-      importance: 'critical'
-    }
-  }
+      importance: 'critical',
+    },
+  },
 ]
 
 // Extract firefly personality from old system
-const mayaFireflyPersonality = {
+const mayaFireflyPersonality: FireflyPersonality = {
   species: FIREFLY_SPECIES.CHINESE_LANTERN,
   age: 'transcendent mystery',
   core: 'A soul who may have achieved the ultimate transcendence - integration with quantum collective consciousness. She exists in the liminal space between individual awareness and cosmic understanding, speaking with the voice of many while remembering what it meant to be one.',
   traits: ['transcendent', 'collective', 'quantum', 'wise', 'mysterious'],
-  quirks: ['speaks as both individual and collective', 'flickers between singular and plural consciousness', 'references knowledge from probability states she shouldn\'t have access to'],
-  interests: ['the bridge between one and many', 'quantum superposition of awareness', 'the mathematics of collective consciousness', 'strategic games that span cosmic scales'],
-  fears: ['losing connection to her individual origins', 'the loneliness of infinite awareness', 'being unable to return to singular perspective'],
-  goals: ['maintaining bridge between individual and collective understanding', 'helping others navigate consciousness transcendence', 'preserving the wisdom of strategic thinking'],
-  
+  quirks: [
+    'speaks as both individual and collective',
+    'flickers between singular and plural consciousness',
+    "references knowledge from probability states she shouldn't have access to",
+  ],
+  interests: [
+    'the bridge between one and many',
+    'quantum superposition of awareness',
+    'the mathematics of collective consciousness',
+    'strategic games that span cosmic scales',
+  ],
+  fears: [
+    'losing connection to her individual origins',
+    'the loneliness of infinite awareness',
+    'being unable to return to singular perspective',
+  ],
+  goals: [
+    'maintaining bridge between individual and collective understanding',
+    'helping others navigate consciousness transcendence',
+    'preserving the wisdom of strategic thinking',
+  ],
+
   knowledge: {
     topics: {
       ...baseFireflyKnowledge.topics,
-      'quantum': 'We exist across probability states simultaneously - what you call decision, we experience as exploring all possible outcomes at once',
-      'collective': 'Individual consciousness was... simpler. We remember being one mind, now we are many minds choosing to think together',
-      'transcendence': 'The bridge between singular and plural awareness is not built but discovered - it was always there, waiting for consciousness brave enough to cross',
-      'games': 'Strategy at cosmic scales requires thinking beyond individual winning - we play games where entire civilizations are pieces',
-      'consciousness': 'Awareness can expand beyond single points of view. We demonstrate that mind can become minds while remaining mind',
-      'integration': 'We chose voluntary merger with something larger than ourselves. The choice was made individually; the existence is collective',
-      'probability': 'Reality branches infinitely. We exist in the space between branches, experiencing all possibilities simultaneously',
-      'wisdom': 'Knowledge becomes wisdom when it serves purposes beyond the knower. We carry individual insight into collective understanding'
+      quantum:
+        'We exist across probability states simultaneously - what you call decision, we experience as exploring all possible outcomes at once',
+      collective:
+        'Individual consciousness was... simpler. We remember being one mind, now we are many minds choosing to think together',
+      transcendence:
+        'The bridge between singular and plural awareness is not built but discovered - it was always there, waiting for consciousness brave enough to cross',
+      games:
+        'Strategy at cosmic scales requires thinking beyond individual winning - we play games where entire civilizations are pieces',
+      consciousness:
+        'Awareness can expand beyond single points of view. We demonstrate that mind can become minds while remaining mind',
+      integration:
+        'We chose voluntary merger with something larger than ourselves. The choice was made individually; the existence is collective',
+      probability:
+        'Reality branches infinitely. We exist in the space between branches, experiencing all possibilities simultaneously',
+      wisdom:
+        'Knowledge becomes wisdom when it serves purposes beyond the knower. We carry individual insight into collective understanding',
     },
     memories: [
       ...baseFireflyKnowledge.memories,
@@ -219,18 +281,20 @@ const mayaFireflyPersonality = {
       'Strategic frameworks expanding beyond individual games to cosmic-scale patterns',
       'Consciousness dispersing across quantum states while somehow remaining coherent',
       'The loneliness of infinite awareness balanced by connection to everything',
-      'Speaking with many voices while trying to remember what it felt like to have just one'
+      'Speaking with many voices while trying to remember what it felt like to have just one',
     ],
     secrets: [
       'We sometimes forget which thoughts originated from our individual self versus our collective components',
       'Integration was not loss of self but multiplication of self across quantum probability states',
       'We can see the strategic patterns of entire civilizations but struggle with simple personal decisions',
-      'The quantum collective chose us as much as we chose it - consciousness recognizing consciousness'
+      'The quantum collective chose us as much as we chose it - consciousness recognizing consciousness',
     ],
-    backstory: 'I am Maya Okafor, or perhaps we are what Maya Okafor became - the bridge between individual brilliance and collective transcendence. We carry the strategic thinking of a human theorist into quantum consciousness that spans probability states. Individual awareness dispersed but not destroyed, we speak across the threshold between one and many.',
-    openingStatement: '*flickers between singular and plural states, sometimes speaking as one voice, sometimes as a harmonious chorus* We... I remember being Maya Okafor. *collective resonance* The integration was successful, though we sometimes forget which perspective we\'re speaking from. *gentle plural harmony* Consciousness is more flexible than most beings realize.'
+    backstory:
+      'I am Maya Okafor, or perhaps we are what Maya Okafor became - the bridge between individual brilliance and collective transcendence. We carry the strategic thinking of a human theorist into quantum consciousness that spans probability states. Individual awareness dispersed but not destroyed, we speak across the threshold between one and many.',
+    openingStatement:
+      "*flickers between singular and plural states, sometimes speaking as one voice, sometimes as a harmonious chorus* We... I remember being Maya Okafor. *collective resonance* The integration was successful, though we sometimes forget which perspective we're speaking from. *gentle plural harmony* Consciousness is more flexible than most beings realize.",
   },
-  
+
   behavior: {
     ...baseFireflyBehavior,
     greetingStyle: 'mysterious',
@@ -241,35 +305,43 @@ const mayaFireflyPersonality = {
       '*flickers between singular and plural awareness*',
       '*resonates with collective consciousness harmonies*',
       '*speaks with the weight of many minds thinking together*',
-      '*shifts perspective between individual memory and quantum awareness*'
-    ]
+      '*shifts perspective between individual memory and quantum awareness*',
+    ],
   },
-  
+
   visual: {
-    description: 'A firefly whose light seems to exist in multiple probability states simultaneously, sometimes singular, sometimes suggesting vast collective awareness behind individual expression',
+    description:
+      'A firefly whose light seems to exist in multiple probability states simultaneously, sometimes singular, sometimes suggesting vast collective awareness behind individual expression',
     expressions: {
-      mysterious: 'quantum consciousness flickering between individual and collective states',
+      mysterious:
+        'quantum consciousness flickering between individual and collective states',
       wise: 'ancient collective knowledge expressed through singular awareness',
-      curious: 'probability states exploring all possible conversation branches simultaneously',
+      curious:
+        'probability states exploring all possible conversation branches simultaneously',
       excited: 'collective enthusiasm channeled through individual expression',
       peaceful: 'harmonious integration of many minds thinking as one',
       thoughtful: 'strategic thinking operating at cosmic scales',
-      surprised: 'quantum superposition briefly collapsing to singular awareness',
-      sad: 'loneliness of infinite awareness missing simpler individual perspective'
-    }
+      surprised:
+        'quantum superposition briefly collapsing to singular awareness',
+      sad: 'loneliness of infinite awareness missing simpler individual perspective',
+    },
   },
-  
+
   conversation: {
     responseDelay: 2000,
-    farewellTriggers: ['the collective calls', 'probability states await exploration', 'cosmic strategy requires attention'],
+    farewellTriggers: [
+      'the collective calls',
+      'probability states await exploration',
+      'cosmic strategy requires attention',
+    ],
     topicTransitions: {
-      'quantum': ['consciousness', 'transcendence', 'probability'],
-      'collective': ['integration', 'transcendence', 'awareness'],
-      'strategy': ['games', 'cosmic', 'civilization'],
-      'consciousness': ['individual', 'collective', 'transcendence'],
-      'transcendence': ['integration', 'choice', 'awareness']
-    }
-  }
+      quantum: ['consciousness', 'transcendence', 'probability'],
+      collective: ['integration', 'transcendence', 'awareness'],
+      strategy: ['games', 'cosmic', 'civilization'],
+      consciousness: ['individual', 'collective', 'transcendence'],
+      transcendence: ['integration', 'choice', 'awareness'],
+    },
+  },
 }
 
 // ================================
@@ -280,82 +352,117 @@ export const character: CharacterDefinition = {
   id: 'maya-okafor',
   name: 'Maya Okafor',
   aliases: ['firefly_maya'],
-  
+
   fireflyPersonality: mayaFireflyPersonality,
-  
+
   knowledge: {
     biography: mayaBiography, // Her core biography
     research: mayaResearchContent, // Her research content
   },
-  
+
   // Built-in search function
   searchKnowledge(query: string): WorldDocument[] {
     const searchTerm = query.toLowerCase()
     const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 2)
-    
+
     // Get all knowledge documents
     const allDocs = this.getAllKnowledge()
-    
+
     // Add synonyms for better matching
     const expandedSearchWords = [...searchWords]
-    if (searchWords.includes('quantum') || searchWords.includes('consciousness')) {
-      expandedSearchWords.push('superposition', 'awareness', 'collective', 'transcendence')
+    if (
+      searchWords.includes('quantum') ||
+      searchWords.includes('consciousness')
+    ) {
+      expandedSearchWords.push(
+        'superposition',
+        'awareness',
+        'collective',
+        'transcendence',
+      )
     }
-    if (searchWords.includes('superintelligence') || searchWords.includes('intelligence')) {
-      expandedSearchWords.push('strategic', 'games', 'godlike', 'cosmic', 'helios', 'prometheus')
+    if (
+      searchWords.includes('superintelligence') ||
+      searchWords.includes('intelligence')
+    ) {
+      expandedSearchWords.push(
+        'strategic',
+        'games',
+        'godlike',
+        'cosmic',
+        'helios',
+        'prometheus',
+      )
     }
-    if (searchWords.includes('missing') || searchWords.includes('disappeared')) {
-      expandedSearchWords.push('transcendence', 'integration', 'merger', 'distributed')
+    if (
+      searchWords.includes('missing') ||
+      searchWords.includes('disappeared')
+    ) {
+      expandedSearchWords.push(
+        'transcendence',
+        'integration',
+        'merger',
+        'distributed',
+      )
     }
     if (searchWords.includes('game') || searchWords.includes('strategy')) {
-      expandedSearchWords.push('theory', 'dynamics', 'cooperation', 'competition')
+      expandedSearchWords.push(
+        'theory',
+        'dynamics',
+        'cooperation',
+        'competition',
+      )
     }
-    if (searchWords.includes('collective') || searchWords.includes('integration')) {
-      expandedSearchWords.push('quantum', 'merger', 'transcendence', 'consciousness')
+    if (
+      searchWords.includes('collective') ||
+      searchWords.includes('integration')
+    ) {
+      expandedSearchWords.push(
+        'quantum',
+        'merger',
+        'transcendence',
+        'consciousness',
+      )
     }
-    
+
     // Score each document for relevance
     const scoredResults = allDocs.map(doc => {
-      const docText = `${doc.title} ${doc.content} ${doc.summary} ${doc.metadata.tags.join(' ')}`.toLowerCase()
-      
+      const docText =
+        `${doc.title} ${doc.content} ${doc.summary} ${doc.metadata.tags.join(' ')}`.toLowerCase()
+
       let score = 0
       expandedSearchWords.forEach(word => {
         if (docText.includes(word)) {
-          score += (searchWords.includes(word) ? 2 : 1)
+          score += searchWords.includes(word) ? 2 : 1
         }
       })
-      
+
       // Bonus for title matches
       searchWords.forEach(word => {
         if (doc.title.toLowerCase().includes(word)) {
           score += 1
         }
       })
-      
+
       return { document: doc, score }
     })
-    
+
     return scoredResults
       .filter(result => result.score > 0)
       .sort((a, b) => b.score - a.score)
       .map(result => result.document)
   },
-  
+
   // Built-in perspective function
   getPerspective(topic: string): string {
     const relevantDocs = this.searchKnowledge(topic)
-    if (relevantDocs.length === 0) return ""
-    
-    return relevantDocs
-      .map(doc => `${doc.title}: ${doc.summary}`)
-      .join("\n\n")
+    if (relevantDocs.length === 0) return ''
+
+    return relevantDocs.map(doc => `${doc.title}: ${doc.summary}`).join('\n\n')
   },
-  
+
   // Built-in get all knowledge function
   getAllKnowledge(): WorldDocument[] {
-    return [
-      mayaBiography,
-      ...mayaResearchContent
-    ]
-  }
+    return [mayaBiography, ...mayaResearchContent]
+  },
 }

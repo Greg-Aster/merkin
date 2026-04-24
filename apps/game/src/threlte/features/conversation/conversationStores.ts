@@ -1,21 +1,21 @@
 /**
  * MEGAMEAL NPC Conversation Stores
- * 
+ *
  * Reactive state management for the conversation system
  * Integrates with existing game state architecture
  */
 
-import { writable, readable, derived, get } from 'svelte/store'
+import { derived, get, readable, writable } from 'svelte/store'
+import type { ConversationManager } from './ConversationManager'
 import type {
   ConversationSession,
-  ConversationUIState,
-  ConversationUIConfig,
-  NPCPersonality,
-  NPCConversationComponent,
   ConversationStores,
-  ConversationSystemConfig
+  ConversationSystemConfig,
+  ConversationUIConfig,
+  ConversationUIState,
+  NPCConversationComponent,
+  NPCPersonality,
 } from './types'
-import type { ConversationManager } from './ConversationManager'
 const isDev = import.meta.env.DEV
 
 // ================================
@@ -28,25 +28,25 @@ const defaultConfig: ConversationSystemConfig = {
   aiProvider: 'gemini',
   maxRetries: 3,
   timeout: 30000, // Increased for DeepSeek and large payloads
-  
+
   // Conversation limits
   maxSessionLength: 50,
   sessionTimeout: 10, // 10 minutes
   maxConcurrentSessions: 3,
-  
+
   // Memory & persistence
   enablePersistence: true,
   maxStoredSessions: 10,
   memoryDecayRate: 0.1,
-  
+
   // Performance
   enableCaching: true,
   cacheTimeout: 300000, // 5 minutes
   batchRequestDelay: 100,
-  
+
   // Debug
   enableLogging: import.meta.env.DEV,
-  enableDebugUI: import.meta.env.DEV
+  enableDebugUI: import.meta.env.DEV,
 }
 
 // ================================
@@ -63,17 +63,17 @@ const conversationUIState = writable<ConversationUIState>({
   npcEmotion: 'neutral',
   position: 'bottom',
   size: 'normal',
-  theme: 'mystical'
+  theme: 'mystical',
 })
 
 // UI Configuration
 const conversationUIConfig = writable<ConversationUIConfig>({
   showTypingIndicator: true,
-  autoCloseDelay: 180000, //  3 minutes 
+  autoCloseDelay: 180000, //  3 minutes
   maxMessagesVisible: 10,
   enableScrollback: true,
   showEmotions: true,
-  enableVoice: false
+  enableVoice: false,
 })
 
 // System state
@@ -82,7 +82,9 @@ const nearbyNPCs = writable<NPCConversationComponent[]>([])
 const isProcessingResponse = writable<boolean>(false)
 
 // Conversation history (persisted)
-const conversationHistory = writable<Map<string, ConversationSession[]>>(new Map())
+const conversationHistory = writable<Map<string, ConversationSession[]>>(
+  new Map(),
+)
 
 // System configuration
 const conversationConfig = writable<ConversationSystemConfig>(defaultConfig)
@@ -92,7 +94,9 @@ const conversationConfig = writable<ConversationSystemConfig>(defaultConfig)
 // ================================
 
 let conversationManager: ConversationManager | null = null
-let conversationManagerModulePromise: Promise<typeof import('./ConversationManager')> | null = null
+let conversationManagerModulePromise: Promise<
+  typeof import('./ConversationManager')
+> | null = null
 
 async function ensureConversationManager(): Promise<ConversationManager> {
   if (conversationManager) {
@@ -127,13 +131,13 @@ async function rebuildConversationManager(): Promise<void> {
 // Current conversation messages
 const currentMessages = derived(
   activeConversationSession,
-  ($session) => $session?.messages || []
+  $session => $session?.messages || [],
 )
 
 // Is conversation active
 const isConversationActive = derived(
   activeConversationSession,
-  ($session) => $session?.isActive || false
+  $session => $session?.isActive || false,
 )
 
 // Current NPC personality
@@ -141,26 +145,35 @@ const currentNPCPersonality = derived(
   [activeConversationSession, availableNPCs],
   ([$session, $npcs]) => {
     if (!$session) return null
-    return $npcs.get($session.npcId) || null
-  }
+    return $session.personality || $npcs.get($session.npcId) || null
+  },
 )
 
 // Conversation statistics
 const conversationStats = derived(
   [conversationHistory, activeConversationSession],
   ([$history, $session]) => {
-    const totalSessions = Array.from($history.values()).reduce((sum, sessions) => sum + sessions.length, 0)
-    const totalMessages = Array.from($history.values()).reduce((sum, sessions) => 
-      sum + sessions.reduce((msgSum, session) => msgSum + session.messages.length, 0), 0
+    const totalSessions = Array.from($history.values()).reduce(
+      (sum, sessions) => sum + sessions.length,
+      0,
     )
-    
+    const totalMessages = Array.from($history.values()).reduce(
+      (sum, sessions) =>
+        sum +
+        sessions.reduce(
+          (msgSum, session) => msgSum + session.messages.length,
+          0,
+        ),
+      0,
+    )
+
     return {
       totalSessions,
       totalMessages,
       activeSessionId: $session?.id || null,
-      activeSince: $session?.startTime || null
+      activeSince: $session?.startTime || null,
     }
-  }
+  },
 )
 
 // ================================
@@ -172,22 +185,26 @@ export const conversationActions = {
   async startConversation(
     npcId: string,
     personality: NPCPersonality,
-    context: any
+    context: any,
   ): Promise<ConversationSession | null> {
     try {
       const manager = await ensureConversationManager()
-      const session = await manager.startConversation(npcId, personality, context)
+      const session = await manager.startConversation(
+        npcId,
+        personality,
+        context,
+      )
       if (isDev) console.log('🗣️ Starting conversation:', session.id)
       activeConversationSession.set(session)
-      
+
       // Update UI state
       conversationUIState.update(state => ({
         ...state,
         isVisible: true,
         npcEmotion: personality.behavior.defaultMood,
-        theme: getThemeForNPC(personality)
+        theme: getThemeForNPC(personality),
       }))
-      
+
       return session
     } catch (error) {
       console.error('Failed to start conversation:', error)
@@ -198,9 +215,9 @@ export const conversationActions = {
   // Start a read-only conversation for generic fireflies
   startReadOnlyConversation(
     npcId: string,
-    personality: any,
+    personality: NPCPersonality,
     message: string,
-    duration: number = 4000
+    duration: number = 4000,
   ): void {
     // Add the personality to availableNPCs so the derived store can find it
     availableNPCs.update(npcs => {
@@ -208,19 +225,24 @@ export const conversationActions = {
       newNPCs.set(npcId, personality)
       return newNPCs
     })
-    
+
     // Create a mock session for read-only mode
     const mockSession = {
       id: `readonly_${npcId}_${Date.now()}`,
       npcId,
       personality,
       isActive: true,
-      startedAt: Date.now(),
-      messages: []
+      startTime: Date.now(),
+      lastInteraction: Date.now(),
+      messages: [],
+      context: {
+        location: 'read-only-firefly',
+        timeOfDay: 'night' as const,
+      },
     }
-    
+
     activeConversationSession.set(mockSession)
-    
+
     // Set up UI for read-only mode
     conversationUIState.update(state => ({
       ...state,
@@ -229,9 +251,9 @@ export const conversationActions = {
       readOnlyText: message,
       readOnlyDuration: duration,
       npcEmotion: personality?.behavior?.defaultMood ?? 'peaceful',
-      theme: getThemeForNPC(personality)
+      theme: getThemeForNPC(personality),
     }))
-    
+
     if (isDev) console.log('🗣️ Starting read-only conversation:', mockSession.id)
   },
 
@@ -242,7 +264,7 @@ export const conversationActions = {
 
     const manager = await ensureConversationManager()
     await manager.endConversation(session.id)
-    
+
     activeConversationSession.set(null)
     conversationUIState.update(state => ({
       ...state,
@@ -250,65 +272,70 @@ export const conversationActions = {
       isTyping: false,
       isReadOnly: false,
       readOnlyText: '',
-      readOnlyDuration: 4000
+      readOnlyDuration: 4000,
     }))
   },
 
   // Send a message
   async sendMessage(message: string): Promise<void> {
-    const session = get(activeConversationSession);
+    const session = get(activeConversationSession)
 
     if (!session) {
-        console.error('Cannot send message: missing session or manager');
-        return;
+      console.error('Cannot send message: missing session or manager')
+      return
     }
 
     const manager = await ensureConversationManager()
 
     // FIX: Get personality directly from the session, no more fragile lookup.
-    const personality = session.personality; 
+    const personality = session.personality
 
     if (!personality) {
-        console.error(`Cannot send message: personality is missing from the active session for npcId "${session.npcId}"`);
-        return;
+      console.error(
+        `Cannot send message: personality is missing from the active session for npcId "${session.npcId}"`,
+      )
+      return
     }
 
-    isProcessingResponse.set(true);
-    conversationUIState.update(state => ({ ...state, isTyping: true }));
+    isProcessingResponse.set(true)
+    conversationUIState.update(state => ({ ...state, isTyping: true }))
 
     try {
-        const response = await manager.sendMessage(session.id, message, personality);
+      const response = await manager.sendMessage(
+        session.id,
+        message,
+        personality,
+      )
 
-        // The manager has already updated its internal session state.
-        // We just need to add the new message to our local store's session to update the UI.
-        activeConversationSession.update(currentSession => {
-          if (currentSession && currentSession.id === session.id) {
-              // The manager already added the user message. We only need to add the AI response.
-              // To prevent duplicates, let's just use the full, updated list from the manager.
-              const managerSession = manager.getActiveSession(session.id);
-              if (managerSession) {
-                  currentSession.messages = managerSession.messages;
-              }
-              return { ...currentSession }; // Return a new object to trigger reactivity
+      // The manager has already updated its internal session state.
+      // We just need to add the new message to our local store's session to update the UI.
+      activeConversationSession.update(currentSession => {
+        if (currentSession && currentSession.id === session.id) {
+          // The manager already added the user message. We only need to add the AI response.
+          // To prevent duplicates, let's just use the full, updated list from the manager.
+          const managerSession = manager.getActiveSession(session.id)
+          if (managerSession) {
+            currentSession.messages = managerSession.messages
           }
-          return currentSession;
-      });
-
-        // Update UI based on response emotion
-        if (response.metadata?.emotion) {
-            conversationUIState.update(state => ({
-                ...state,
-                npcEmotion: response.metadata!.emotion!
-            }));
+          return { ...currentSession } // Return a new object to trigger reactivity
         }
+        return currentSession
+      })
 
+      // Update UI based on response emotion
+      if (response.metadata?.emotion) {
+        conversationUIState.update(state => ({
+          ...state,
+          npcEmotion: response.metadata!.emotion!,
+        }))
+      }
     } catch (error) {
-        console.error('Failed to send message:', error);
+      console.error('Failed to send message:', error)
     } finally {
-        isProcessingResponse.set(false);
-        conversationUIState.update(state => ({ ...state, isTyping: false }));
+      isProcessingResponse.set(false)
+      conversationUIState.update(state => ({ ...state, isTyping: false }))
     }
-},
+  },
 
   // Update UI state
   updateUIState(updates: Partial<ConversationUIState>): void {
@@ -347,34 +374,32 @@ export const conversationActions = {
 
   // Update NPC interaction state
   updateNPCInteraction(npcId: string, isInteractable: boolean): void {
-    nearbyNPCs.update(nearby => 
-      nearby.map(npc => 
-        npc.npcId === npcId 
-          ? { ...npc, isInteractable }
-          : npc
-      )
+    nearbyNPCs.update(nearby =>
+      nearby.map(npc =>
+        npc.npcId === npcId ? { ...npc, isInteractable } : npc,
+      ),
     )
   },
 
   // Clear all conversations (for level transitions, etc.)
-  clearAllConversations(): Promise<void[]> {
+  async clearAllConversations(): Promise<void> {
     if (!conversationManager) {
-      return Promise.resolve([])
+      return
     }
 
     const activeSessions = conversationManager.getAllActiveSessions()
-    const promises = activeSessions.map(session => 
-      conversationManager!.endConversation(session.id)
+    const promises = activeSessions.map(session =>
+      conversationManager!.endConversation(session.id),
     )
-    
+
     activeConversationSession.set(null)
     conversationUIState.update(state => ({
       ...state,
       isVisible: false,
-      isTyping: false
+      isTyping: false,
     }))
-    
-    return Promise.all(promises)
+
+    await Promise.all(promises)
   },
 
   // Get conversation history for an NPC
@@ -387,7 +412,7 @@ export const conversationActions = {
   updateConfig(updates: Partial<ConversationSystemConfig>): void {
     conversationConfig.update(config => ({ ...config, ...updates }))
     void rebuildConversationManager()
-  }
+  },
 }
 
 // ================================
@@ -398,45 +423,48 @@ function setupConversationEventHandlers(): void {
   if (!conversationManager) return
 
   // Handle conversation events
-  conversationManager.on('conversation_started', (event) => {
+  conversationManager.on('conversation_started', event => {
     if (event.type === 'conversation_started' && isDev) {
       console.log(`🗣️ Conversation started with ${event.data.npcId}`)
     }
   })
 
-  conversationManager.on('conversation_ended', (event) => {
-    if (event.type === 'conversation_ended' && isDev) {
+  conversationManager.on('conversation_ended', event => {
+    if (event.type !== 'conversation_ended') return
+
+    if (isDev) {
       console.log(`🏁 Conversation ended with ${event.data.npcId}`)
     }
 
-    // Update conversation history
     conversationHistory.update(history => {
       const newHistory = new Map(history)
       const npcHistory = newHistory.get(event.data.npcId) || []
-      const session = conversationManager!.getActiveSession(event.data.sessionId)
-      
+      const session = conversationManager!.getActiveSession(
+        event.data.sessionId,
+      )
+
       if (session) {
         npcHistory.push(session)
         newHistory.set(event.data.npcId, npcHistory)
       }
-      
+
       return newHistory
     })
   })
 
-  conversationManager.on('emotion_changed', (event) => {
+  conversationManager.on('emotion_changed', event => {
     if (event.type === 'emotion_changed') {
       conversationUIState.update(state => ({
         ...state,
-        npcEmotion: event.data.emotion
+        npcEmotion: event.data.emotion,
       }))
     }
   })
 
-  conversationManager.on('error', (event) => {
+  conversationManager.on('error', event => {
     if (event.type === 'error') {
       console.error('Conversation error:', event.data.error)
-      
+
       // Reset processing state on error
       isProcessingResponse.set(false)
       conversationUIState.update(state => ({ ...state, isTyping: false }))
@@ -448,9 +476,11 @@ function setupConversationEventHandlers(): void {
 // Utility Functions
 // ================================
 
-function getThemeForNPC(personality: NPCPersonality): ConversationUIState['theme'] {
+function getThemeForNPC(
+  personality: NPCPersonality,
+): ConversationUIState['theme'] {
   const species = personality.species?.toLowerCase() || ''
-  
+
   if (species.includes('firefly') || species.includes('light')) {
     return 'mystical'
   } else if (species.includes('nature') || species.includes('forest')) {
@@ -458,7 +488,7 @@ function getThemeForNPC(personality: NPCPersonality): ConversationUIState['theme
   } else if (species.includes('cosmic') || species.includes('star')) {
     return 'cosmic'
   }
-  
+
   return 'game'
 }
 
@@ -490,10 +520,10 @@ export function loadConversationHistory(): void {
 // Auto-save conversation history periodically
 if (typeof window !== 'undefined') {
   setInterval(saveConversationHistory, 60000) // Save every minute
-  
+
   // Load on initialization
   loadConversationHistory()
-  
+
   // Save on page unload
   window.addEventListener('beforeunload', saveConversationHistory)
 }
@@ -506,18 +536,18 @@ export const conversationStores: ConversationStores = {
   activeSession: activeConversationSession,
   uiState: conversationUIState,
   uiConfig: conversationUIConfig,
-  availableNPCs: readable(get(availableNPCs), (set) => {
+  availableNPCs: readable(get(availableNPCs), set => {
     return availableNPCs.subscribe(set)
   }),
-  conversationHistory: readable(get(conversationHistory), (set) => {
+  conversationHistory: readable(get(conversationHistory), set => {
     return conversationHistory.subscribe(set)
   }),
-  nearbyNPCs: readable(get(nearbyNPCs), (set) => {
+  nearbyNPCs: readable(get(nearbyNPCs), set => {
     return nearbyNPCs.subscribe(set)
   }),
-  isProcessingResponse: readable(get(isProcessingResponse), (set) => {
+  isProcessingResponse: readable(get(isProcessingResponse), set => {
     return isProcessingResponse.subscribe(set)
-  })
+  }),
 }
 
 // Export individual stores for convenience
@@ -533,8 +563,9 @@ export {
   currentMessages,
   isConversationActive,
   currentNPCPersonality,
-  conversationStats
+  conversationStats,
 }
 
 // Export the conversation manager getter
-export const getConversationManager = (): ConversationManager | null => conversationManager
+export const getConversationManager = (): ConversationManager | null =>
+  conversationManager

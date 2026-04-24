@@ -1,28 +1,30 @@
 /**
  * Modern Character System - Main Export
- * 
+ *
  * ECS-aligned character system with auto-discovery and unified definitions
  * Single source of truth for character functionality
  */
 
+import { characterRegistry } from './CharacterRegistry'
+
 export { CharacterComponent } from './CharacterComponent'
 export { characterRegistry, CharacterRegistry } from './CharacterRegistry'
-export type { 
-  CharacterDefinition, 
-  FireflyPersonality, 
+export type {
+  CharacterDefinition,
+  FireflyPersonality,
   FireflyKnowledge,
   FireflyBehavior,
   FireflyVisual,
   FireflyConversation,
   CharacterKnowledge,
-  CharacterBuilder
+  CharacterBuilder,
 } from './types'
 export {
-  FIREFLY_SPECIES, 
-  baseFireflyKnowledge, 
+  FIREFLY_SPECIES,
+  baseFireflyKnowledge,
   baseFireflyBehavior,
   getObservatoryContext,
-  getFireflyConversationPrompts
+  getFireflyConversationPrompts,
 } from './types'
 
 const isDev = import.meta.env.DEV
@@ -35,21 +37,21 @@ export class CharacterKnowledgeCompatibilityLayer {
   async hasExtensiveKnowledge(characterId: string): Promise<boolean> {
     return await characterRegistry.hasExtensiveKnowledge(characterId)
   }
-  
+
   /**
-   * Legacy compatibility: searchCharacterKnowledge  
+   * Legacy compatibility: searchCharacterKnowledge
    */
   async searchCharacterKnowledge(characterId: string, query: string) {
     return await characterRegistry.searchCharacterKnowledge(characterId, query)
   }
-  
+
   /**
    * Legacy compatibility: getCharacterPerspective
    */
   async getCharacterPerspective(characterId: string, topic: string) {
     return await characterRegistry.getCharacterPerspective(characterId, topic)
   }
-  
+
   /**
    * Legacy compatibility: getCharacterKnowledge
    */
@@ -63,9 +65,9 @@ export const characterKnowledge = new CharacterKnowledgeCompatibilityLayer()
 
 // Development helpers
 if (typeof window !== 'undefined') {
-  (window as any).characterSystem = {
+  ;(window as any).characterSystem = {
     registry: characterRegistry,
-    compatibility: characterKnowledge
+    compatibility: characterKnowledge,
   }
   if (isDev) {
     console.log('🔧 Modern Character System loaded and available globally')

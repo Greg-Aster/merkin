@@ -1,9 +1,9 @@
 /**
  * Global Material Utilities for MEGAMEAL
- * 
+ *
  * Provides centralized material processing to fix common issues like:
  * - Depth sorting problems with transparent materials
- * - Alpha blending artifacts 
+ * - Alpha blending artifacts
  * - Dark edges/outlines around objects
  * - Inconsistent transparency handling
  */
@@ -27,25 +27,30 @@ export function createObjectMaterialOverrideState(): ObjectMaterialOverrideState
 
 function cloneMaterialSet(materialSet: MaterialSet): MaterialSet {
   return Array.isArray(materialSet)
-    ? materialSet.map((material) => material.clone())
+    ? materialSet.map(material => material.clone())
     : materialSet.clone()
 }
 
 function disposeMaterialSet(materialSet: MaterialSet) {
   if (Array.isArray(materialSet)) {
-    materialSet.forEach((material) => material.dispose())
+    materialSet.forEach(material => material.dispose())
     return
   }
 
   materialSet.dispose()
 }
 
-function isEditorMaterialDataEmpty(override: EditorMaterialData | null | undefined) {
+function isEditorMaterialDataEmpty(
+  override: EditorMaterialData | null | undefined,
+) {
   if (!override) return true
-  return Object.values(override).every((value) => value === undefined)
+  return Object.values(override).every(value => value === undefined)
 }
 
-function applyEditorMaterialOverride(material: THREE.Material, override: EditorMaterialData) {
+function applyEditorMaterialOverride(
+  material: THREE.Material,
+  override: EditorMaterialData,
+) {
   const target = material as THREE.Material & {
     color?: THREE.Color
     emissive?: THREE.Color
@@ -72,7 +77,10 @@ function applyEditorMaterialOverride(material: THREE.Material, override: EditorM
   if (override.emissive !== undefined && target.emissive) {
     target.emissive.set(override.emissive)
   }
-  if (override.emissiveIntensity !== undefined && 'emissiveIntensity' in target) {
+  if (
+    override.emissiveIntensity !== undefined &&
+    'emissiveIntensity' in target
+  ) {
     target.emissiveIntensity = override.emissiveIntensity
   }
   if (override.metalness !== undefined && 'metalness' in target) {
@@ -110,7 +118,10 @@ function applyEditorMaterialOverride(material: THREE.Material, override: EditorM
   if (override.clearcoat !== undefined && 'clearcoat' in target) {
     target.clearcoat = override.clearcoat
   }
-  if (override.clearcoatRoughness !== undefined && 'clearcoatRoughness' in target) {
+  if (
+    override.clearcoatRoughness !== undefined &&
+    'clearcoatRoughness' in target
+  ) {
     target.clearcoatRoughness = override.clearcoatRoughness
   }
   if (override.thickness !== undefined && 'thickness' in target) {
@@ -127,12 +138,12 @@ function applyEditorMaterialOverride(material: THREE.Material, override: EditorM
 export function syncObjectMaterialOverride(
   object: THREE.Object3D,
   override: EditorMaterialData | null | undefined,
-  state: ObjectMaterialOverrideState
+  state: ObjectMaterialOverrideState,
 ) {
   const activeMeshes = new Set<THREE.Mesh>()
   const hasOverride = !isEditorMaterialDataEmpty(override)
 
-  object.traverse((child) => {
+  object.traverse(child => {
     if (!(child instanceof THREE.Mesh) || !child.material) return
     activeMeshes.add(child)
 
@@ -156,7 +167,9 @@ export function syncObjectMaterialOverride(
 
     const nextMaterials = cloneMaterialSet(baseMaterials)
     if (Array.isArray(nextMaterials)) {
-      nextMaterials.forEach((material) => applyEditorMaterialOverride(material, override!))
+      nextMaterials.forEach(material =>
+        applyEditorMaterialOverride(material, override!),
+      )
     } else {
       applyEditorMaterialOverride(nextMaterials, override!)
     }
@@ -177,8 +190,10 @@ export function syncObjectMaterialOverride(
   }
 }
 
-export function disposeObjectMaterialOverrideState(state: ObjectMaterialOverrideState) {
-  state.appliedMaterials.forEach((materialSet) => {
+export function disposeObjectMaterialOverrideState(
+  state: ObjectMaterialOverrideState,
+) {
+  state.appliedMaterials.forEach(materialSet => {
     disposeMaterialSet(materialSet)
   })
   state.appliedMaterials.clear()
@@ -189,31 +204,33 @@ export function disposeObjectMaterialOverrideState(state: ObjectMaterialOverride
  * Conservative material fix that only addresses specific dark outline issues
  * without breaking depth sorting for overlapping objects
  */
-export function fixMaterialDepthIssues(material: THREE.Material): THREE.Material {
+export function fixMaterialDepthIssues(
+  material: THREE.Material,
+): THREE.Material {
   const mat = material as any
-  
+
   // Only apply minimal fixes that don't break depth sorting
-  
+
   // 1. Fix only truly transparent materials (not just based on detection)
   if (mat.transparent === true || mat.opacity < 0.99) {
     // For genuinely transparent materials, improve alpha testing
     mat.alphaTest = Math.max(mat.alphaTest || 0, 0.1)
     mat.premultipliedAlpha = false // Prevent color bleeding
   }
-  
+
   // 2. Ensure proper depth testing for all materials
   mat.depthTest = true
-  
+
   // 3. Reduce color banding
   mat.dithering = true
 
   if ('fog' in mat) {
     mat.fog = true
   }
-  
+
   // 4. NEVER disable depthWrite - this breaks depth sorting
   // 5. NEVER force transparency - this causes disappearing objects
-  
+
   mat.needsUpdate = true
   return material
 }
@@ -223,7 +240,7 @@ export function fixMaterialDepthIssues(material: THREE.Material): THREE.Material
  * Recursively processes all materials in the object hierarchy
  */
 export function fixObjectMaterials(object: THREE.Object3D): void {
-  object.traverse((child) => {
+  object.traverse(child => {
     if (child instanceof THREE.Mesh && child.material) {
       if (Array.isArray(child.material)) {
         // Handle multi-material objects
@@ -241,8 +258,11 @@ export function fixObjectMaterials(object: THREE.Object3D): void {
  * Use this when creating new materials instead of THREE.Material constructors
  */
 export function createFixedMaterial(
-  materialType: typeof THREE.MeshStandardMaterial | typeof THREE.MeshBasicMaterial | typeof THREE.MeshToonMaterial,
-  parameters: any = {}
+  materialType:
+    | typeof THREE.MeshStandardMaterial
+    | typeof THREE.MeshBasicMaterial
+    | typeof THREE.MeshToonMaterial,
+  parameters: any = {},
 ): THREE.Material {
   const material = new materialType(parameters)
   return fixMaterialDepthIssues(material)
@@ -252,9 +272,11 @@ export function createFixedMaterial(
  * Specific fix for vegetation materials (most common source of issues)
  * Conservative approach that only fixes dark outline issues
  */
-export function fixVegetationMaterial(material: THREE.Material): THREE.Material {
+export function fixVegetationMaterial(
+  material: THREE.Material,
+): THREE.Material {
   const mat = material as any
-  
+
   // Only apply fixes that address the dark outline issue specifically
   if (mat.map && mat.map.format === THREE.RGBAFormat) {
     // This material has actual transparency - improve alpha testing
@@ -262,7 +284,7 @@ export function fixVegetationMaterial(material: THREE.Material): THREE.Material 
     mat.transparent = true
     mat.side = THREE.DoubleSide
   }
-  
+
   // Apply minimal general fixes
   return fixMaterialDepthIssues(material)
 }
@@ -279,7 +301,7 @@ export function debugMaterial(material: THREE.Material, name?: string): void {
     depthWrite: mat.depthWrite,
     depthTest: mat.depthTest,
     side: mat.side,
-    type: material.constructor.name
+    type: material.constructor.name,
   })
 }
 
@@ -292,7 +314,7 @@ export function fixGLTFMaterials(gltf: any): void {
     fixObjectMaterials(gltf.scene)
     // console.log('🔧 Applied global material fixes to GLTF scene')
   }
-  
+
   // Also fix materials in the materials array if available
   if (gltf.materials) {
     gltf.materials.forEach((material: THREE.Material, index: number) => {

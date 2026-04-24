@@ -42,7 +42,8 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     ctaText: 'Enter The Saga',
     href: '/posts/explainer/',
     sponsor: 'Narrative Compliance Division',
-    finePrint: 'This transmission has been pre-approved for all dietary thresholds.',
+    finePrint:
+      'This transmission has been pre-approved for all dietary thresholds.',
     theme: 'chronology',
     video: '/videos/title.webm',
   },
@@ -145,7 +146,8 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     ctaText: 'Inspect Merchandise',
     href: '/store/',
     sponsor: 'Mealshare Loyalty Network',
-    finePrint: 'Membership includes surveillance, terms, and occasional blessings.',
+    finePrint:
+      'Membership includes surveillance, terms, and occasional blessings.',
     theme: 'loyalty',
   },
   {
@@ -167,7 +169,8 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     ctaText: 'Begin Viewing',
     href: '/posts/explainer/',
     sponsor: 'Corporate Entertainment Syndicate',
-    finePrint: 'Side effects of watching include hunger, dread, and voluntary ration upgrades.',
+    finePrint:
+      'Side effects of watching include hunger, dread, and voluntary ration upgrades.',
     theme: 'culinary',
     image: '/ads/cosmic-cusine.png',
   },
@@ -175,11 +178,12 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     type: 'advertisement',
     eyebrow: 'Protein Solutions',
     headline: 'Puppy Rescue™ — Real Puppies In Every Bite',
-    text: 'Finally, a protein source you can feel good about. Each serving contains one (1) real puppy, sustainably sourced from Corporate\'s licensed rescue network. Adoption paperwork included.',
+    text: "Finally, a protein source you can feel good about. Each serving contains one (1) real puppy, sustainably sourced from Corporate's licensed rescue network. Adoption paperwork included.",
     ctaText: 'View Nutrition Facts',
     href: '/store/',
     sponsor: 'Puppy Rescue Protein Division',
-    finePrint: 'Puppies are ethically sourced. "Ethically" is a registered trademark.',
+    finePrint:
+      'Puppies are ethically sourced. "Ethically" is a registered trademark.',
     theme: 'harvest',
     image: '/ads/puppy-rescue.png',
   },
@@ -191,7 +195,8 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     ctaText: 'Order Your Feelings',
     href: '/store/',
     sponsor: 'Emotional Nutrition Lab',
-    finePrint: 'Not responsible for mood contagion. Warranty void upon happiness.',
+    finePrint:
+      'Not responsible for mood contagion. Warranty void upon happiness.',
     theme: 'morale',
     image: '/ads/sad-snax.png',
   },
@@ -203,7 +208,8 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     ctaText: 'Acquire The Dip',
     href: '/store/',
     sponsor: 'Sauce Compliance Bureau',
-    finePrint: 'If The Dip begins speaking to you, please contact your regional coordinator.',
+    finePrint:
+      'If The Dip begins speaking to you, please contact your regional coordinator.',
     theme: 'recovery',
     image: '/ads/the-dip.png',
   },

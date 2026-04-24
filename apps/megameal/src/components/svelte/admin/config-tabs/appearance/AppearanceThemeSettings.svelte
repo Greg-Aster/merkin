@@ -49,6 +49,7 @@ function handleHueChange() {
             dispatch('change', siteConfig);
           }}
           class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 focus:ring-[var(--primary)]" 
+          data-sfx-click="select"
         />
         <span class="ml-2 flex items-center text-neutral-700 dark:text-neutral-300">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -77,6 +78,7 @@ function handleHueChange() {
             dispatch('change', siteConfig);
           }}
           class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 focus:ring-[var(--primary)]" 
+          data-sfx-click="select"
         />
         <span class="ml-2 flex items-center text-neutral-700 dark:text-neutral-300">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -97,6 +99,7 @@ function handleHueChange() {
             dispatch('change', siteConfig);
           }}
           class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 focus:ring-[var(--primary)]" 
+          data-sfx-click="select"
         />
         <span class="ml-2 flex items-center text-neutral-700 dark:text-neutral-300">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -122,6 +125,7 @@ function handleHueChange() {
         bind:checked={siteConfig.themeColor.fixed}
         on:change={() => dispatch('change', siteConfig)}
         class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded" 
+        data-sfx-click="soft"
       />
       <label for="theme-fixed" class="ml-2 block text-sm text-neutral-700 dark:text-neutral-300">
         Use fixed theme color (don't allow user customization)
@@ -142,6 +146,7 @@ function handleHueChange() {
           bind:value={siteConfig.themeColor.hue}
           on:input={handleHueChange}
           class="flex-grow h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer" 
+          data-sfx-focus="focus-soft"
         />
         <input 
           type="number" 
@@ -150,15 +155,16 @@ function handleHueChange() {
           min="0" 
           max="360" 
           class="w-16 px-2 py-1 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm transition text-center" 
+          data-sfx-focus="focus-soft"
         />
       </div>
     </div>
     
     <!-- Color Preview -->
     <div class="pt-2">
-      <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+      <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
         Preview
-      </label>
+      </div>
       <div class="flex flex-wrap gap-3">
         <div class="w-16 h-16 rounded-lg shadow-sm" style="background-color: {themePreview};"></div>
         <div class="flex flex-col justify-between">
@@ -172,19 +178,22 @@ function handleHueChange() {
     
     <!-- Common Colors Quick Select -->
     <div class="pt-4 border-t border-neutral-200 dark:border-neutral-700">
-      <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+      <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
         Quick Select
-      </label>
+      </div>
       <div class="flex flex-wrap gap-2">
         {#each [0, 30, 60, 120, 180, 210, 240, 270, 300, 330] as hue}
           <button 
             class="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 focus:scale-110"
             style="background-color: hsl({hue}, 65%, 50%); border-color: {siteConfig.themeColor.hue === hue ? 'white' : 'transparent'};"
+            data-sfx-hover="hover-soft"
+            data-sfx-click="select"
             on:click={() => {
               siteConfig.themeColor.hue = hue;
               handleHueChange();
             }}
             title={`Hue: ${hue}°`}
+            aria-label={`Select hue ${hue} degrees`}
           ></button>
         {/each}
       </div>

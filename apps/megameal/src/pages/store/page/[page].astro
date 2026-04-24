@@ -59,7 +59,7 @@ const pageUrlNext =
 
 // Redirect to 404 if page number is invalid or out of bounds
 if (
-  isNaN(currentPage) ||
+  Number.isNaN(currentPage) ||
   currentPage < 1 ||
   (currentPage > totalPages && totalPages > 0) ||
   (currentPage > 1 && totalPages === 0)

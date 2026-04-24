@@ -191,6 +191,7 @@ function handleDefaultBannerTypeChange(event) {
             bind:value={bannerConfig.defaultBannerType}
             on:change={handleDefaultBannerTypeChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-900 dark:text-neutral-100"
+            data-sfx-focus="focus-soft"
           >
             <option value="standard">Standard (Animated images)</option>
             <option value="video">Video</option>
@@ -217,6 +218,7 @@ function handleDefaultBannerTypeChange(event) {
               bind:value={bannerConfig.defaultBannerData.videoId}
               on:input={handleChange}
               class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+              data-sfx-focus="focus-soft"
               placeholder="e.g., dQw4w9WgXcQ"
             />
             <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
@@ -240,6 +242,7 @@ function handleDefaultBannerTypeChange(event) {
                 bind:value={bannerConfig.defaultBannerData.imageUrl}
                 on:change={handleChange}
                 class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+                data-sfx-focus="focus-soft"
               >
                 <option value="" class="text-neutral-900 dark:text-neutral-100">Select an image</option>
                 <option value="/src/assets/banner/0001.png" class="text-neutral-900 dark:text-neutral-100">0001.png</option>
@@ -268,15 +271,16 @@ function handleDefaultBannerTypeChange(event) {
               <label for="timeline-category" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Category
               </label>
-              <input 
-                type="text" 
-                id="timeline-category" 
-                bind:value={bannerConfig.defaultBannerData.category}
-                on:input={handleChange}
-                class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-                placeholder="e.g., history, science, etc."
-                required
-              />
+            <input 
+              type="text" 
+              id="timeline-category" 
+              bind:value={bannerConfig.defaultBannerData.category}
+              on:input={handleChange}
+              class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+              data-sfx-focus="focus-soft"
+              placeholder="e.g., history, science, etc."
+              required
+            />
               <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
                 Category is required for timeline banners
               </p>
@@ -286,14 +290,15 @@ function handleDefaultBannerTypeChange(event) {
               <label for="timeline-title" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Title (optional)
               </label>
-              <input 
-                type="text" 
-                id="timeline-title" 
-                bind:value={bannerConfig.defaultBannerData.title}
-                on:input={handleChange}
-                class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-                placeholder="Timeline title"
-              />
+            <input 
+              type="text" 
+              id="timeline-title" 
+              bind:value={bannerConfig.defaultBannerData.title}
+              on:input={handleChange}
+              class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+              data-sfx-focus="focus-soft"
+              placeholder="Timeline title"
+            />
             </div>
             
             <div class="grid grid-cols-2 gap-4">
@@ -307,6 +312,7 @@ function handleDefaultBannerTypeChange(event) {
                   bind:value={bannerConfig.defaultBannerData.startYear}
                   on:input={handleChange}
                   class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+                  data-sfx-focus="focus-soft"
                   placeholder="e.g., 1900"
                 />
               </div>
@@ -321,6 +327,7 @@ function handleDefaultBannerTypeChange(event) {
                   bind:value={bannerConfig.defaultBannerData.endYear}
                   on:input={handleChange}
                   class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+                  data-sfx-focus="focus-soft"
                   placeholder="e.g., 2023"
                 />
               </div>
@@ -336,6 +343,7 @@ function handleDefaultBannerTypeChange(event) {
                 bind:value={bannerConfig.defaultBannerData.background}
                 on:input={handleChange}
                 class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+                data-sfx-focus="focus-soft"
                 placeholder="/public/posts/timeline/universe.png"
               />
               <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
@@ -350,6 +358,7 @@ function handleDefaultBannerTypeChange(event) {
                 bind:checked={bannerConfig.defaultBannerData.compact}
                 on:change={handleChange}
                 class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded" 
+                data-sfx-click="soft"
               />
               <label for="timeline-compact" class="ml-2 block text-sm text-neutral-700 dark:text-neutral-300">
                 Compact Mode
@@ -366,6 +375,7 @@ function handleDefaultBannerTypeChange(event) {
                 bind:value={bannerConfig.defaultBannerData.height}
                 on:input={handleChange}
                 class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+                data-sfx-focus="focus-soft"
                 placeholder="70vh"
               />
               <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
@@ -421,6 +431,7 @@ function handleDefaultBannerTypeChange(event) {
               checked={!isBannerSequence} 
               on:change={toggleBannerType}
               class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600" 
+              data-sfx-click="select"
             />
             <span class="ml-1 text-sm text-neutral-600 dark:text-neutral-400">Static</span>
           </label>
@@ -431,6 +442,7 @@ function handleDefaultBannerTypeChange(event) {
               checked={isBannerSequence} 
               on:change={toggleBannerType}
               class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600" 
+              data-sfx-click="select"
             />
             <span class="ml-1 text-sm text-neutral-600 dark:text-neutral-400">Animated Sequence</span>
           </label>
@@ -440,6 +452,7 @@ function handleDefaultBannerTypeChange(event) {
         <div>
           <select 
               class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+            data-sfx-focus="focus-soft"
             on:change={(e) => {
               const path = e.target.value;
               if (path) {
@@ -477,22 +490,30 @@ function handleDefaultBannerTypeChange(event) {
             <div class="flex flex-wrap gap-2">
               {#each bannerConfig.bannerList as banner, index}
                 <div class="relative group">
-                  <div 
+                  <button
+                    type="button"
                     class="w-24 h-16 bg-neutral-200 dark:bg-neutral-700 rounded-md overflow-hidden cursor-pointer border-2 border-transparent hover:border-[var(--primary)] transition-colors flex-shrink-0 flex items-center justify-center"
                     class:border-[var(--primary)]={selectedBannerIndex === index}
+                    data-sfx-hover="hover-soft"
+                    data-sfx-click="select"
                     on:click={() => selectBanner(index)}
+                    aria-label={`Select ${getDisplayPath(banner)}`}
                   >
                     <!-- Show a color block with filename -->
                     <div class="w-full h-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs p-1 text-center">
                       {getDisplayPath(banner)}
                     </div>
-                  </div>
+                  </button>
                   
                   <!-- Remove button -->
                   <button
+                    type="button"
                     class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                     title="Remove from sequence"
+                    data-sfx-hover="hover-emphasis"
+                    data-sfx-click="warning"
                     on:click={() => removeBannerFromSequence(index)}
+                    aria-label={`Remove ${getDisplayPath(banner)} from sequence`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -506,6 +527,7 @@ function handleDefaultBannerTypeChange(event) {
             <div>
               <select 
     class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+                data-sfx-focus="focus-soft"
                 on:change={(e) => {
                   const path = e.target.value;
                   if (path && !bannerConfig.bannerList.includes(path)) {
@@ -553,6 +575,7 @@ function handleDefaultBannerTypeChange(event) {
             bind:checked={bannerConfig.animation.enabled}
             on:change={handleChange}
             class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded" 
+            data-sfx-click="soft"
             disabled={!isBannerSequence}
           />
           <label for="banner-animation-enabled" class="ml-2 block text-sm text-neutral-700 dark:text-neutral-300">
@@ -577,6 +600,7 @@ function handleDefaultBannerTypeChange(event) {
               bind:value={bannerConfig.animation.interval}
               on:input={handleChange}
               class="flex-grow h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer" 
+              data-sfx-focus="focus-soft"
               disabled={!bannerConfig.animation.enabled || !isBannerSequence}
             />
             <input 
@@ -587,6 +611,7 @@ function handleDefaultBannerTypeChange(event) {
               max="10000" 
               step="500"
               class="w-24 px-2 py-1 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm transition text-center" 
+              data-sfx-focus="focus-soft"
               disabled={!bannerConfig.animation.enabled || !isBannerSequence}
             />
           </div>
@@ -606,6 +631,7 @@ function handleDefaultBannerTypeChange(event) {
               bind:value={bannerConfig.animation.transitionDuration}
               on:input={handleChange}
               class="flex-grow h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer" 
+              data-sfx-focus="focus-soft"
               disabled={!bannerConfig.animation.enabled || !isBannerSequence}
             />
             <input 
@@ -616,6 +642,7 @@ function handleDefaultBannerTypeChange(event) {
               max="2000" 
               step="100"
               class="w-24 px-2 py-1 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm transition text-center" 
+              data-sfx-focus="focus-soft"
               disabled={!bannerConfig.animation.enabled || !isBannerSequence}
             />
           </div>
@@ -630,6 +657,7 @@ function handleDefaultBannerTypeChange(event) {
             bind:value={bannerConfig.animation.direction}
             on:change={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-900 dark:text-neutral-100"
+            data-sfx-focus="focus-soft"
             disabled={!bannerConfig.animation.enabled || !isBannerSequence}
           >
             <option value="forward">Forward</option>
@@ -654,6 +682,7 @@ function handleDefaultBannerTypeChange(event) {
             bind:value={bannerConfig.visual.objectFit}
             on:change={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-900 dark:text-neutral-100"
+            data-sfx-focus="focus-soft"
           >
             <option value="cover">Cover</option>
             <option value="contain">Contain</option>
@@ -671,6 +700,7 @@ function handleDefaultBannerTypeChange(event) {
             bind:value={bannerConfig.visual.objectPosition}
             on:input={handleChange}
               class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+            data-sfx-focus="focus-soft"
             placeholder="e.g., center"
           />
         </div>
@@ -685,6 +715,7 @@ function handleDefaultBannerTypeChange(event) {
             bind:value={bannerConfig.visual.borderRadius}
             on:input={handleChange}
               class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+            data-sfx-focus="focus-soft"
             placeholder="e.g., 0.5rem"
           />
         </div>
@@ -696,6 +727,7 @@ function handleDefaultBannerTypeChange(event) {
             bind:checked={bannerConfig.visual.applyGradientOverlay}
             on:change={handleChange}
             class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded" 
+            data-sfx-click="soft"
           />
           <label for="banner-apply-gradient" class="ml-2 block text-sm text-neutral-700 dark:text-neutral-300">
             Apply Gradient Overlay
@@ -712,6 +744,7 @@ function handleDefaultBannerTypeChange(event) {
             bind:value={bannerConfig.visual.gradientOverlay}
             on:input={handleChange}
               class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+            data-sfx-focus="focus-soft"
             placeholder="e.g., linear-gradient(to bottom, rgba(0,0,0,0.2), transparent)"
             disabled={!bannerConfig.visual.applyGradientOverlay}
           />
@@ -731,6 +764,7 @@ function handleDefaultBannerTypeChange(event) {
             bind:checked={bannerConfig.fallback.enabled}
             on:change={handleChange}
             class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded" 
+            data-sfx-click="soft"
           />
           <label for="banner-fallback-enabled" class="ml-2 block text-sm text-neutral-700 dark:text-neutral-300">
             Enable Fallback
@@ -746,6 +780,7 @@ function handleDefaultBannerTypeChange(event) {
             bind:value={bannerConfig.fallback.type}
             on:change={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-900 dark:text-neutral-100"
+            data-sfx-focus="focus-soft"
             disabled={!bannerConfig.fallback.enabled}
           >
             <option value="color">Solid Color</option>

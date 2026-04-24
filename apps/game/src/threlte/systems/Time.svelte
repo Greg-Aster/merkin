@@ -4,7 +4,7 @@
 -->
 <script lang="ts">
 import { useTask } from '@threlte/core'
-import { onMount, onDestroy, createEventDispatcher } from 'svelte'
+import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import { writable } from 'svelte/store'
 
 const dispatch = createEventDispatcher()
@@ -32,32 +32,32 @@ export let frameCount = 0
 
 onMount(() => {
   if (isDev) console.log('⏰ Initializing Threlte Time System...')
-  
+
   // Initialize time tracking
   const now = performance.now()
   startTime = now
   lastFrameTime = now
   fpsStartTime = now
-  
+
   isInitialized = true
   if (isDev) console.log('✅ Threlte Time System initialized')
 })
 
 // Update time system every frame
-useTask((delta) => {
+useTask(delta => {
   if (!isInitialized || isPaused) return
-  
+
   const now = performance.now()
-  
+
   // Calculate delta time (convert from milliseconds to seconds)
   deltaTime = delta
-  
+
   // Calculate total time since start (in seconds)
   totalTime = (now - startTime) / 1000
-  
+
   // Update frame count
   frameCount++
-  
+
   // Calculate FPS (update every 500ms)
   fpsFrames++
   if (now - fpsStartTime >= 500) {
@@ -65,21 +65,21 @@ useTask((delta) => {
     fpsFrames = 0
     fpsStartTime = now
   }
-  
+
   lastFrameTime = now
-  
+
   // Update reactive stores
   deltaTimeStore.set(deltaTime)
   totalTimeStore.set(totalTime)
   fpsStore.set(fps)
   frameCountStore.set(frameCount)
-  
+
   // Dispatch time update events
   dispatch('timeUpdate', {
     deltaTime,
     totalTime,
     fps,
-    frameCount
+    frameCount,
   })
 })
 
@@ -125,13 +125,13 @@ export function reset() {
   totalTime = 0
   deltaTime = 0
   fps = 60
-  
+
   // Update stores
   deltaTimeStore.set(deltaTime)
   totalTimeStore.set(totalTime)
   fpsStore.set(fps)
   frameCountStore.set(frameCount)
-  
+
   dispatch('timeReset')
 }
 
@@ -145,7 +145,7 @@ export function getTimeInfo() {
     fps,
     frameCount,
     isPaused,
-    isInitialized
+    isInitialized,
   }
 }
 

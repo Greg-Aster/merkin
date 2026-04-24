@@ -1,43 +1,51 @@
 <script lang="ts">
-  import type {
-    OutlinerDisplayMode,
-    OutlinerModeOption,
-    OutlinerRow,
-    OutlinerRowActionState,
-  } from './editorOutlinerTypes'
+import type {
+  OutlinerDisplayMode,
+  OutlinerModeOption,
+  OutlinerRow,
+  OutlinerRowActionState,
+} from './editorOutlinerTypes'
 
-  export let subtitle = ''
-  export let mode: OutlinerDisplayMode = 'view-layer'
-  export let modeOptions: OutlinerModeOption[] = []
-  export let filter = ''
-  export let filterPlaceholder = 'Search scene objects'
-  export let rows: OutlinerRow[] = []
-  export let dragEnabled = false
-  export let currentDropTargetId: string | null = null
+export let subtitle = ''
+export let mode: OutlinerDisplayMode = 'view-layer'
+export let modeOptions: OutlinerModeOption[] = []
+export let filter = ''
+export let filterPlaceholder = 'Search scene objects'
+export let rows: OutlinerRow[] = []
+export let dragEnabled = false
+export let currentDropTargetId: string | null = null
 
-  export let onModeChange: (mode: OutlinerDisplayMode) => void = () => {}
-  export let onFilterChange: (value: string) => void = () => {}
-  export let onRowDisclosure: (row: OutlinerRow, event: MouseEvent) => void = () => {}
-  export let onRowSelect: (row: OutlinerRow, event: MouseEvent) => void = () => {}
-  export let onRowVisibility: (row: OutlinerRow, event: MouseEvent) => void = () => {}
-  export let onRowSelectable: (row: OutlinerRow, event: MouseEvent) => void = () => {}
-  export let onRowIsolation: (row: OutlinerRow, event: MouseEvent) => void = () => {}
-  export let onRowDragStart: (row: OutlinerRow, event: DragEvent) => void = () => {}
-  export let onRowDragEnd: () => void = () => {}
-  export let onRowDragEnter: (row: OutlinerRow, event: DragEvent) => void = () => {}
-  export let onRowDragOver: (row: OutlinerRow, event: DragEvent) => void = () => {}
-  export let onRowDragLeave: (row: OutlinerRow) => void = () => {}
-  export let onRowDrop: (row: OutlinerRow, event: DragEvent) => void = () => {}
-  export let isRowSelected: (row: OutlinerRow) => boolean = () => false
-  export let getRowActionState: (row: OutlinerRow) => OutlinerRowActionState = () => ({
+export let onModeChange: (mode: OutlinerDisplayMode) => void = () => {}
+export let onFilterChange: (value: string) => void = () => {}
+export let onRowDisclosure: (row: OutlinerRow, event: MouseEvent) => void =
+  () => {}
+export let onRowSelect: (row: OutlinerRow, event: MouseEvent) => void = () => {}
+export let onRowVisibility: (row: OutlinerRow, event: MouseEvent) => void =
+  () => {}
+export let onRowSelectable: (row: OutlinerRow, event: MouseEvent) => void =
+  () => {}
+export let onRowIsolation: (row: OutlinerRow, event: MouseEvent) => void =
+  () => {}
+export let onRowDragStart: (row: OutlinerRow, event: DragEvent) => void =
+  () => {}
+export let onRowDragEnd: () => void = () => {}
+export let onRowDragEnter: (row: OutlinerRow, event: DragEvent) => void =
+  () => {}
+export let onRowDragOver: (row: OutlinerRow, event: DragEvent) => void =
+  () => {}
+export let onRowDragLeave: (row: OutlinerRow) => void = () => {}
+export let onRowDrop: (row: OutlinerRow, event: DragEvent) => void = () => {}
+export let isRowSelected: (row: OutlinerRow) => boolean = () => false
+export let getRowActionState: (row: OutlinerRow) => OutlinerRowActionState =
+  () => ({
     allVisible: false,
     allSelectable: false,
     allIsolated: false,
   })
 
-  function handleFilterInput(event: Event) {
-    onFilterChange((event.currentTarget as HTMLInputElement).value)
-  }
+function handleFilterInput(event: Event) {
+  onFilterChange((event.currentTarget as HTMLInputElement).value)
+}
 </script>
 
 <div class="outliner-panel">

@@ -229,23 +229,25 @@ export function parseMdxFile(fileContent: string): {
       frontmatterText.split('\n').forEach(line => {
         const match = line.match(/^(\w+):\s*(.*)$/)
         if (match) {
-          let [_, key, value] = match
+          const key = match[1]
+          const rawValue = match[2]
+          let value: string | string[] | boolean = rawValue
 
           // Handle array values (tags: ["a", "b"])
-          if (value.startsWith('[') && value.endsWith(']')) {
+          if (rawValue.startsWith('[') && rawValue.endsWith(']')) {
             try {
-              value = JSON.parse(value.replace(/'/g, '"'))
+              value = JSON.parse(rawValue.replace(/'/g, '"'))
             } catch (e) {
-              value = value
+              value = rawValue
                 .slice(1, -1)
                 .split(',')
-                .map(item => item.trim().replace(/["']/g, ''))
+                .map((item: string) => item.trim().replace(/["']/g, ''))
             }
           }
 
           // Handle boolean values
-          else if (value === 'true' || value === 'false') {
-            value = value === 'true'
+          else if (rawValue === 'true' || rawValue === 'false') {
+            value = rawValue === 'true'
           }
 
           frontmatter[key as keyof FrontmatterData] = value as any

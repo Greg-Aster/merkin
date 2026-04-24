@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { multiplayerStore } from '../stores/multiplayerStore';
-  import RemotePlayerAvatar from './RemotePlayerAvatar.svelte';
+import { multiplayerStore } from '../stores/multiplayerStore'
+import RemotePlayerAvatar from './RemotePlayerAvatar.svelte'
 </script>
 
 {#each Object.entries($multiplayerStore.players) as [id, player] (id)}

@@ -1,4 +1,3 @@
-import type { EditorSceneNode } from './editorTypes'
 import type {
   OutlinerBuildContext,
   OutlinerDisplayMode,
@@ -9,6 +8,7 @@ import type {
   OutlinerSelectionIntent,
   OutlinerTreeItem,
 } from './editorOutlinerTypes'
+import type { EditorSceneNode } from './editorTypes'
 
 export const OUTLINER_MODE_OPTIONS: OutlinerModeOption[] = [
   { id: 'view-layer', label: 'View Layer', shortLabel: 'View' },
@@ -18,7 +18,12 @@ export const OUTLINER_MODE_OPTIONS: OutlinerModeOption[] = [
 ]
 
 export function sanitizeOutlinerIdPart(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'item'
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'item'
+  )
 }
 
 export function getOutlinerExpandedIds(
@@ -40,7 +45,7 @@ export function setOutlinerExpandedIds(
 }
 
 function getNodeChildren(nodeId: string | null, nodes: EditorSceneNode[]) {
-  return nodes.filter((node) => (node.parentId ?? null) === nodeId)
+  return nodes.filter(node => (node.parentId ?? null) === nodeId)
 }
 
 function getNodeIcon(node: EditorSceneNode) {
@@ -76,8 +81,13 @@ function getNodeMemberIds(nodeId: string, nodes: EditorSceneNode[]) {
   return result
 }
 
-function buildViewLayerNodeItem(node: EditorSceneNode, context: OutlinerBuildContext): OutlinerTreeItem {
-  const children = getNodeChildren(node.id, context.nodes).map((child) => buildViewLayerNodeItem(child, context))
+function buildViewLayerNodeItem(
+  node: EditorSceneNode,
+  context: OutlinerBuildContext,
+): OutlinerTreeItem {
+  const children = getNodeChildren(node.id, context.nodes).map(child =>
+    buildViewLayerNodeItem(child, context),
+  )
   return {
     id: `outliner:view-layer:node:${node.id}`,
     label: node.name,
@@ -93,7 +103,10 @@ function buildViewLayerNodeItem(node: EditorSceneNode, context: OutlinerBuildCon
   }
 }
 
-function buildOutlinerNodeLeaf(node: EditorSceneNode, viewportStateById: Map<string, OutlinerNodeViewportState>): OutlinerTreeItem {
+function buildOutlinerNodeLeaf(
+  node: EditorSceneNode,
+  viewportStateById: Map<string, OutlinerNodeViewportState>,
+): OutlinerTreeItem {
   return {
     id: `outliner:leaf:${node.id}`,
     label: node.name,
@@ -114,18 +127,23 @@ function buildViewLayerOutlinerItems(context: OutlinerBuildContext) {
       type: 'scene',
       icon: '▾',
       detail: `${context.nodes.length} objects`,
-      nodeIds: context.nodes.map((node) => node.id),
-      children: getNodeChildren(null, context.nodes).map((node) => buildViewLayerNodeItem(node, context)),
+      nodeIds: context.nodes.map(node => node.id),
+      children: getNodeChildren(null, context.nodes).map(node =>
+        buildViewLayerNodeItem(node, context),
+      ),
     },
   ] satisfies OutlinerTreeItem[]
 }
 
-function buildCollectionGroupItem(groupNode: EditorSceneNode, context: OutlinerBuildContext): OutlinerTreeItem {
-  const childItems = getNodeChildren(groupNode.id, context.nodes).map((child) => (
+function buildCollectionGroupItem(
+  groupNode: EditorSceneNode,
+  context: OutlinerBuildContext,
+): OutlinerTreeItem {
+  const childItems = getNodeChildren(groupNode.id, context.nodes).map(child =>
     child.kind === 'group'
       ? buildCollectionGroupItem(child, context)
-      : buildViewLayerNodeItem(child, context)
-  ))
+      : buildViewLayerNodeItem(child, context),
+  )
   return {
     id: `outliner:collections:group:${groupNode.id}`,
     label: groupNode.name,
@@ -156,34 +174,112 @@ function buildSmartCollectionItem(
     detail,
     nodeIds,
     children: nodeIds
-      .map((nodeId) => nodes.find((node) => node.id === nodeId))
+      .map(nodeId => nodes.find(node => node.id === nodeId))
       .filter(Boolean)
-      .map((node) => buildOutlinerNodeLeaf(node as EditorSceneNode, viewportStateById)),
+      .map(node =>
+        buildOutlinerNodeLeaf(node as EditorSceneNode, viewportStateById),
+      ),
   }
 }
 
 function buildCollectionsOutlinerItems(context: OutlinerBuildContext) {
-  const topLevelGroups = context.nodes.filter((node) => !node.parentId && node.kind === 'group')
-  const looseRootNodeIds = context.nodes.filter((node) => !node.parentId && node.kind !== 'group').map((node) => node.id)
-  const assetNodeIds = context.nodes.filter((node) => !!node.asset).map((node) => node.id)
-  const prefabNodeIds = context.nodes.filter((node) => !!node.prefab).map((node) => node.id)
-  const primitiveNodeIds = context.nodes.filter((node) => !!node.primitive).map((node) => node.id)
-  const lightNodeIds = context.nodes.filter((node) => !!node.light).map((node) => node.id)
-  const gameplayNodeIds = context.nodes.filter((node) => !!node.gameplay).map((node) => node.id)
-  const generatedNodeIds = context.nodes.filter((node) => node.asset?.url?.startsWith('/generated/')).map((node) => node.id)
-  const hiddenNodeIds = context.nodes.filter((node) => !node.visible).map((node) => node.id)
-  const lockedNodeIds = context.nodes.filter((node) => node.locked ?? false).map((node) => node.id)
+  const topLevelGroups = context.nodes.filter(
+    node => !node.parentId && node.kind === 'group',
+  )
+  const looseRootNodeIds = context.nodes
+    .filter(node => !node.parentId && node.kind !== 'group')
+    .map(node => node.id)
+  const assetNodeIds = context.nodes
+    .filter(node => !!node.asset)
+    .map(node => node.id)
+  const prefabNodeIds = context.nodes
+    .filter(node => !!node.prefab)
+    .map(node => node.id)
+  const primitiveNodeIds = context.nodes
+    .filter(node => !!node.primitive)
+    .map(node => node.id)
+  const lightNodeIds = context.nodes
+    .filter(node => !!node.light)
+    .map(node => node.id)
+  const gameplayNodeIds = context.nodes
+    .filter(node => !!node.gameplay)
+    .map(node => node.id)
+  const generatedNodeIds = context.nodes
+    .filter(node => node.asset?.url?.startsWith('/generated/'))
+    .map(node => node.id)
+  const hiddenNodeIds = context.nodes
+    .filter(node => !node.visible)
+    .map(node => node.id)
+  const lockedNodeIds = context.nodes
+    .filter(node => node.locked ?? false)
+    .map(node => node.id)
 
   const smartCollections = [
-    buildSmartCollectionItem('outliner:collections:smart:assets', 'Mesh Assets', '◆', assetNodeIds, context.nodeViewportStateById, context.nodes),
-    buildSmartCollectionItem('outliner:collections:smart:prefabs', 'Prefabs', '◫', prefabNodeIds, context.nodeViewportStateById, context.nodes),
-    buildSmartCollectionItem('outliner:collections:smart:primitives', 'Primitives', '●', primitiveNodeIds, context.nodeViewportStateById, context.nodes),
-    buildSmartCollectionItem('outliner:collections:smart:lights', 'Lights', '☀', lightNodeIds, context.nodeViewportStateById, context.nodes),
-    buildSmartCollectionItem('outliner:collections:smart:gameplay', 'Gameplay', '✦', gameplayNodeIds, context.nodeViewportStateById, context.nodes),
-    buildSmartCollectionItem('outliner:collections:smart:generated', 'Generated Meshes', '⬢', generatedNodeIds, context.nodeViewportStateById, context.nodes),
-    buildSmartCollectionItem('outliner:collections:smart:hidden', 'Hidden', '◌', hiddenNodeIds, context.nodeViewportStateById, context.nodes),
-    buildSmartCollectionItem('outliner:collections:smart:locked', 'Locked', '⛶', lockedNodeIds, context.nodeViewportStateById, context.nodes),
-  ].filter((item) => (item.nodeIds?.length ?? 0) > 0)
+    buildSmartCollectionItem(
+      'outliner:collections:smart:assets',
+      'Mesh Assets',
+      '◆',
+      assetNodeIds,
+      context.nodeViewportStateById,
+      context.nodes,
+    ),
+    buildSmartCollectionItem(
+      'outliner:collections:smart:prefabs',
+      'Prefabs',
+      '◫',
+      prefabNodeIds,
+      context.nodeViewportStateById,
+      context.nodes,
+    ),
+    buildSmartCollectionItem(
+      'outliner:collections:smart:primitives',
+      'Primitives',
+      '●',
+      primitiveNodeIds,
+      context.nodeViewportStateById,
+      context.nodes,
+    ),
+    buildSmartCollectionItem(
+      'outliner:collections:smart:lights',
+      'Lights',
+      '☀',
+      lightNodeIds,
+      context.nodeViewportStateById,
+      context.nodes,
+    ),
+    buildSmartCollectionItem(
+      'outliner:collections:smart:gameplay',
+      'Gameplay',
+      '✦',
+      gameplayNodeIds,
+      context.nodeViewportStateById,
+      context.nodes,
+    ),
+    buildSmartCollectionItem(
+      'outliner:collections:smart:generated',
+      'Generated Meshes',
+      '⬢',
+      generatedNodeIds,
+      context.nodeViewportStateById,
+      context.nodes,
+    ),
+    buildSmartCollectionItem(
+      'outliner:collections:smart:hidden',
+      'Hidden',
+      '◌',
+      hiddenNodeIds,
+      context.nodeViewportStateById,
+      context.nodes,
+    ),
+    buildSmartCollectionItem(
+      'outliner:collections:smart:locked',
+      'Locked',
+      '⛶',
+      lockedNodeIds,
+      context.nodeViewportStateById,
+      context.nodes,
+    ),
+  ].filter(item => (item.nodeIds?.length ?? 0) > 0)
 
   return [
     {
@@ -192,22 +288,33 @@ function buildCollectionsOutlinerItems(context: OutlinerBuildContext) {
       type: 'scene',
       icon: '▾',
       detail: `${context.nodes.length} objects`,
-      nodeIds: context.nodes.map((node) => node.id),
+      nodeIds: context.nodes.map(node => node.id),
       children: [
-        ...topLevelGroups.map((node) => buildCollectionGroupItem(node, context)),
+        ...topLevelGroups.map(node => buildCollectionGroupItem(node, context)),
         ...(looseRootNodeIds.length > 0
-          ? [buildSmartCollectionItem('outliner:collections:loose', 'Loose Objects', '○', looseRootNodeIds, context.nodeViewportStateById, context.nodes)]
+          ? [
+              buildSmartCollectionItem(
+                'outliner:collections:loose',
+                'Loose Objects',
+                '○',
+                looseRootNodeIds,
+                context.nodeViewportStateById,
+                context.nodes,
+              ),
+            ]
           : []),
         ...(smartCollections.length > 0
-          ? [{
-              id: 'outliner:collections:smart',
-              label: 'Smart Collections',
-              type: 'collection' as const,
-              icon: '☰',
-              detail: `${smartCollections.length} sets`,
-              nodeIds: context.nodes.map((node) => node.id),
-              children: smartCollections,
-            }]
+          ? [
+              {
+                id: 'outliner:collections:smart',
+                label: 'Smart Collections',
+                type: 'collection' as const,
+                icon: '☰',
+                detail: `${smartCollections.length} sets`,
+                nodeIds: context.nodes.map(node => node.id),
+                children: smartCollections,
+              },
+            ]
           : []),
       ],
     },
@@ -228,12 +335,15 @@ function createDatablockLeaf(
     label,
     type,
     icon,
-    detail: detail ?? `${nodeIds.length} object${nodeIds.length === 1 ? '' : 's'}`,
+    detail:
+      detail ?? `${nodeIds.length} object${nodeIds.length === 1 ? '' : 's'}`,
     nodeIds,
     children: nodeIds
-      .map((nodeId) => nodes.find((node) => node.id === nodeId))
+      .map(nodeId => nodes.find(node => node.id === nodeId))
       .filter(Boolean)
-      .map((node) => buildOutlinerNodeLeaf(node as EditorSceneNode, viewportStateById)),
+      .map(node =>
+        buildOutlinerNodeLeaf(node as EditorSceneNode, viewportStateById),
+      ),
   } satisfies OutlinerTreeItem
 }
 
@@ -245,28 +355,42 @@ function buildBlenderFileOutlinerItems(context: OutlinerBuildContext) {
 
   for (const node of context.nodes) {
     if (node.asset?.url) {
-      uniqueAssets.set(node.asset.url, [...(uniqueAssets.get(node.asset.url) ?? []), node.id])
+      uniqueAssets.set(node.asset.url, [
+        ...(uniqueAssets.get(node.asset.url) ?? []),
+        node.id,
+      ])
     }
 
-    const materialKey = node.material?.mapUrl
-      || node.material?.color
-      || node.primitive?.color
-      || ''
+    const materialKey =
+      node.material?.mapUrl ||
+      node.material?.color ||
+      node.primitive?.color ||
+      ''
     if (materialKey) {
-      uniqueMaterials.set(materialKey, [...(uniqueMaterials.get(materialKey) ?? []), node.id])
+      uniqueMaterials.set(materialKey, [
+        ...(uniqueMaterials.get(materialKey) ?? []),
+        node.id,
+      ])
     }
 
     if (node.prefab?.type) {
-      uniquePrefabs.set(node.prefab.type, [...(uniquePrefabs.get(node.prefab.type) ?? []), node.id])
+      uniquePrefabs.set(node.prefab.type, [
+        ...(uniquePrefabs.get(node.prefab.type) ?? []),
+        node.id,
+      ])
     }
 
     if (node.gameplay?.type) {
-      uniqueGameplay.set(node.gameplay.type, [...(uniqueGameplay.get(node.gameplay.type) ?? []), node.id])
+      uniqueGameplay.set(node.gameplay.type, [
+        ...(uniqueGameplay.get(node.gameplay.type) ?? []),
+        node.id,
+      ])
     }
   }
 
-  const collectionItems = buildCollectionsOutlinerItems(context)[0]?.children ?? []
-  const sceneNodeIds = context.nodes.map((node) => node.id)
+  const collectionItems =
+    buildCollectionsOutlinerItems(context)[0]?.children ?? []
+  const sceneNodeIds = context.nodes.map(node => node.id)
 
   return [
     {
@@ -284,14 +408,16 @@ function buildBlenderFileOutlinerItems(context: OutlinerBuildContext) {
           icon: '◫',
           detail: '1 scene',
           nodeIds: sceneNodeIds,
-          children: [{
-            id: `outliner:blender-file:scene:${context.levelId}`,
-            label: context.levelId,
-            type: 'scene',
-            icon: '◫',
-            detail: `${context.nodes.length} objects`,
-            nodeIds: sceneNodeIds,
-          }],
+          children: [
+            {
+              id: `outliner:blender-file:scene:${context.levelId}`,
+              label: context.levelId,
+              type: 'scene',
+              icon: '◫',
+              detail: `${context.nodes.length} objects`,
+              nodeIds: sceneNodeIds,
+            },
+          ],
         },
         {
           id: 'outliner:blender-file:collections',
@@ -309,7 +435,9 @@ function buildBlenderFileOutlinerItems(context: OutlinerBuildContext) {
           icon: '○',
           detail: `${context.nodes.length} objects`,
           nodeIds: sceneNodeIds,
-          children: context.nodes.map((node) => buildOutlinerNodeLeaf(node, context.nodeViewportStateById)),
+          children: context.nodes.map(node =>
+            buildOutlinerNodeLeaf(node, context.nodeViewportStateById),
+          ),
         },
         {
           id: 'outliner:blender-file:assets',
@@ -317,10 +445,21 @@ function buildBlenderFileOutlinerItems(context: OutlinerBuildContext) {
           type: 'category',
           icon: '◆',
           detail: `${uniqueAssets.size} datablocks`,
-          children: Array.from(uniqueAssets.entries()).map(([assetUrl, nodeIds]) => {
-            const assetName = assetUrl.split('/').filter(Boolean).pop() ?? assetUrl
-            return createDatablockLeaf(assetName, 'asset', '◆', nodeIds, assetUrl, context.nodes, context.nodeViewportStateById)
-          }),
+          children: Array.from(uniqueAssets.entries()).map(
+            ([assetUrl, nodeIds]) => {
+              const assetName =
+                assetUrl.split('/').filter(Boolean).pop() ?? assetUrl
+              return createDatablockLeaf(
+                assetName,
+                'asset',
+                '◆',
+                nodeIds,
+                assetUrl,
+                context.nodes,
+                context.nodeViewportStateById,
+              )
+            },
+          ),
         },
         {
           id: 'outliner:blender-file:materials',
@@ -328,17 +467,20 @@ function buildBlenderFileOutlinerItems(context: OutlinerBuildContext) {
           type: 'category',
           icon: '◈',
           detail: `${uniqueMaterials.size} datablocks`,
-          children: Array.from(uniqueMaterials.entries()).map(([materialKey, nodeIds]) => (
-            createDatablockLeaf(
-              materialKey.startsWith('#') ? materialKey : materialKey.split('/').filter(Boolean).pop() ?? materialKey,
-              'material',
-              '◈',
-              nodeIds,
-              materialKey,
-              context.nodes,
-              context.nodeViewportStateById,
-            )
-          )),
+          children: Array.from(uniqueMaterials.entries()).map(
+            ([materialKey, nodeIds]) =>
+              createDatablockLeaf(
+                materialKey.startsWith('#')
+                  ? materialKey
+                  : materialKey.split('/').filter(Boolean).pop() ?? materialKey,
+                'material',
+                '◈',
+                nodeIds,
+                materialKey,
+                context.nodes,
+                context.nodeViewportStateById,
+              ),
+          ),
         },
         {
           id: 'outliner:blender-file:prefabs',
@@ -346,9 +488,18 @@ function buildBlenderFileOutlinerItems(context: OutlinerBuildContext) {
           type: 'category',
           icon: '◫',
           detail: `${uniquePrefabs.size} prefab families`,
-          children: Array.from(uniquePrefabs.entries()).map(([prefabType, nodeIds]) => (
-            createDatablockLeaf(prefabType, 'prefab', '◫', nodeIds, undefined, context.nodes, context.nodeViewportStateById)
-          )),
+          children: Array.from(uniquePrefabs.entries()).map(
+            ([prefabType, nodeIds]) =>
+              createDatablockLeaf(
+                prefabType,
+                'prefab',
+                '◫',
+                nodeIds,
+                undefined,
+                context.nodes,
+                context.nodeViewportStateById,
+              ),
+          ),
         },
         {
           id: 'outliner:blender-file:gameplay',
@@ -356,16 +507,30 @@ function buildBlenderFileOutlinerItems(context: OutlinerBuildContext) {
           type: 'category',
           icon: '✦',
           detail: `${uniqueGameplay.size} gameplay families`,
-          children: Array.from(uniqueGameplay.entries()).map(([gameplayType, nodeIds]) => (
-            createDatablockLeaf(gameplayType, 'gameplay', '✦', nodeIds, undefined, context.nodes, context.nodeViewportStateById)
-          )),
+          children: Array.from(uniqueGameplay.entries()).map(
+            ([gameplayType, nodeIds]) =>
+              createDatablockLeaf(
+                gameplayType,
+                'gameplay',
+                '✦',
+                nodeIds,
+                undefined,
+                context.nodes,
+                context.nodeViewportStateById,
+              ),
+          ),
         },
       ],
     },
   ] satisfies OutlinerTreeItem[]
 }
 
-function buildDataApiValueItem(prefix: string, key: string, value: unknown, depth = 0): OutlinerTreeItem {
+function buildDataApiValueItem(
+  prefix: string,
+  key: string,
+  value: unknown,
+  depth = 0,
+): OutlinerTreeItem {
   const id = `${prefix}:${sanitizeOutlinerIdPart(key)}`
   if (depth > 6) {
     return {
@@ -384,7 +549,9 @@ function buildDataApiValueItem(prefix: string, key: string, value: unknown, dept
       type: 'category',
       icon: '≡',
       detail: `[${value.length}]`,
-      children: value.map((entry, index) => buildDataApiValueItem(id, `${index}`, entry, depth + 1)),
+      children: value.map((entry, index) =>
+        buildDataApiValueItem(id, `${index}`, entry, depth + 1),
+      ),
     }
   }
 
@@ -396,7 +563,9 @@ function buildDataApiValueItem(prefix: string, key: string, value: unknown, dept
       type: 'category',
       icon: '▸',
       detail: `${entries.length} fields`,
-      children: entries.map(([childKey, childValue]) => buildDataApiValueItem(id, childKey, childValue, depth + 1)),
+      children: entries.map(([childKey, childValue]) =>
+        buildDataApiValueItem(id, childKey, childValue, depth + 1),
+      ),
     }
   }
 
@@ -419,7 +588,9 @@ function buildDataApiOutlinerItems(context: OutlinerBuildContext) {
         detail: context.selectedNode.name,
         nodeId: context.selectedNode.id,
         nodeIds: [context.selectedNode.id],
-        children: Object.entries(context.selectedNode).map(([key, value]) => buildDataApiValueItem('outliner:data-api:selection', key, value)),
+        children: Object.entries(context.selectedNode).map(([key, value]) =>
+          buildDataApiValueItem('outliner:data-api:selection', key, value),
+        ),
       }
     : {
         id: 'outliner:data-api:selection',
@@ -444,13 +615,33 @@ function buildDataApiOutlinerItems(context: OutlinerBuildContext) {
           type: 'category',
           icon: '◫',
           detail: `${context.nodes.length} objects`,
-          nodeIds: context.nodes.map((node) => node.id),
+          nodeIds: context.nodes.map(node => node.id),
           children: [
-            buildDataApiValueItem('outliner:data-api:scene', 'levelId', context.levelId),
-            buildDataApiValueItem('outliner:data-api:scene', 'version', context.scene?.version ?? 0),
-            buildDataApiValueItem('outliner:data-api:scene', 'updatedAt', context.scene?.updatedAt ?? 'unknown'),
-            buildDataApiValueItem('outliner:data-api:scene', 'nodeCount', context.nodes.length),
-            buildDataApiValueItem('outliner:data-api:scene', 'settings', context.scene?.settings ?? {}),
+            buildDataApiValueItem(
+              'outliner:data-api:scene',
+              'levelId',
+              context.levelId,
+            ),
+            buildDataApiValueItem(
+              'outliner:data-api:scene',
+              'version',
+              context.scene?.version ?? 0,
+            ),
+            buildDataApiValueItem(
+              'outliner:data-api:scene',
+              'updatedAt',
+              context.scene?.updatedAt ?? 'unknown',
+            ),
+            buildDataApiValueItem(
+              'outliner:data-api:scene',
+              'nodeCount',
+              context.nodes.length,
+            ),
+            buildDataApiValueItem(
+              'outliner:data-api:scene',
+              'settings',
+              context.scene?.settings ?? {},
+            ),
           ],
         },
         selectionItem,
@@ -473,7 +664,10 @@ export function buildOutlinerItems(context: OutlinerBuildContext) {
   }
 }
 
-export function getDefaultExpandedOutlinerIds(mode: OutlinerDisplayMode, nodes: EditorSceneNode[]) {
+export function getDefaultExpandedOutlinerIds(
+  mode: OutlinerDisplayMode,
+  nodes: EditorSceneNode[],
+) {
   const expanded = new Set<string>()
 
   if (mode === 'view-layer') {
@@ -489,7 +683,7 @@ export function getDefaultExpandedOutlinerIds(mode: OutlinerDisplayMode, nodes: 
   if (mode === 'collections') {
     expanded.add('outliner:collections:scene')
     expanded.add('outliner:collections:smart')
-    for (const node of nodes.filter((candidate) => candidate.kind === 'group')) {
+    for (const node of nodes.filter(candidate => candidate.kind === 'group')) {
       expanded.add(`outliner:collections:group:${node.id}`)
     }
     return expanded
@@ -516,22 +710,37 @@ export function ensureOutlinerDefaultExpansion(
 ) {
   const current = getOutlinerExpandedIds(expandedIdsByMode, mode)
   if (current.size > 1) return expandedIdsByMode
-  return setOutlinerExpandedIds(expandedIdsByMode, mode, getDefaultExpandedOutlinerIds(mode, nodes))
+  return setOutlinerExpandedIds(
+    expandedIdsByMode,
+    mode,
+    getDefaultExpandedOutlinerIds(mode, nodes),
+  )
 }
 
 function outlinerItemMatches(item: OutlinerTreeItem, query: string) {
-  const haystack = `${item.label} ${item.detail ?? ''} ${item.value ?? ''}`.toLowerCase()
+  const haystack =
+    `${item.label} ${item.detail ?? ''} ${item.value ?? ''}`.toLowerCase()
   return haystack.includes(query)
 }
 
-export function flattenOutlinerItems(items: OutlinerTreeItem[], query: string, expandedIds: Set<string>) {
+export function flattenOutlinerItems(
+  items: OutlinerTreeItem[],
+  query: string,
+  expandedIds: Set<string>,
+) {
   const normalizedQuery = query.trim().toLowerCase()
   const rows: OutlinerRow[] = []
 
-  const buildRows = (item: OutlinerTreeItem, depth: number): { visible: boolean; rows: OutlinerRow[] } => {
-    const childResults = (item.children ?? []).map((child) => buildRows(child, depth + 1))
-    const childVisible = childResults.some((result) => result.visible)
-    const selfVisible = !normalizedQuery || outlinerItemMatches(item, normalizedQuery)
+  const buildRows = (
+    item: OutlinerTreeItem,
+    depth: number,
+  ): { visible: boolean; rows: OutlinerRow[] } => {
+    const childResults = (item.children ?? []).map(child =>
+      buildRows(child, depth + 1),
+    )
+    const childVisible = childResults.some(result => result.visible)
+    const selfVisible =
+      !normalizedQuery || outlinerItemMatches(item, normalizedQuery)
     const visible = selfVisible || childVisible
 
     if (!visible) {
@@ -539,13 +748,16 @@ export function flattenOutlinerItems(items: OutlinerTreeItem[], query: string, e
     }
 
     const hasChildren = (item.children?.length ?? 0) > 0
-    const expanded = hasChildren && (normalizedQuery ? true : expandedIds.has(item.id))
-    const nextRows: OutlinerRow[] = [{
-      ...item,
-      depth,
-      hasChildren,
-      expanded,
-    }]
+    const expanded =
+      hasChildren && (normalizedQuery ? true : expandedIds.has(item.id))
+    const nextRows: OutlinerRow[] = [
+      {
+        ...item,
+        depth,
+        hasChildren,
+        expanded,
+      },
+    ]
 
     if (expanded) {
       for (const result of childResults) {
@@ -571,9 +783,12 @@ export function getOutlinerTargetNodeIds(item: OutlinerTreeItem) {
   return Array.from(new Set(item.nodeIds ?? (item.nodeId ? [item.nodeId] : [])))
 }
 
-export function isOutlinerRowSelected(item: OutlinerTreeItem, selectedNodeIds: string[]) {
+export function isOutlinerRowSelected(
+  item: OutlinerTreeItem,
+  selectedNodeIds: string[],
+) {
   const ids = getOutlinerTargetNodeIds(item)
-  return ids.length > 0 && ids.every((id) => selectedNodeIds.includes(id))
+  return ids.length > 0 && ids.every(id => selectedNodeIds.includes(id))
 }
 
 export function getOutlinerRowActionState(
@@ -583,13 +798,16 @@ export function getOutlinerRowActionState(
 ): OutlinerRowActionState {
   const nodeIds = getOutlinerTargetNodeIds(item)
   const resolvedNodes = nodeIds
-    .map((id) => nodes.find((node) => node.id === id))
+    .map(id => nodes.find(node => node.id === id))
     .filter(Boolean) as EditorSceneNode[]
   const isolatedSet = new Set(isolatedNodeIds)
   return {
-    allVisible: resolvedNodes.length > 0 && resolvedNodes.every((node) => node.visible),
-    allSelectable: resolvedNodes.length > 0 && resolvedNodes.every((node) => !(node.locked ?? false)),
-    allIsolated: nodeIds.length > 0 && nodeIds.every((id) => isolatedSet.has(id)),
+    allVisible:
+      resolvedNodes.length > 0 && resolvedNodes.every(node => node.visible),
+    allSelectable:
+      resolvedNodes.length > 0 &&
+      resolvedNodes.every(node => !(node.locked ?? false)),
+    allIsolated: nodeIds.length > 0 && nodeIds.every(id => isolatedSet.has(id)),
   }
 }
 

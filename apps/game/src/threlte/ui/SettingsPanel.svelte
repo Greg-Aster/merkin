@@ -1,42 +1,48 @@
 <script lang="ts">
-import { onMount } from "svelte";
-import PerformancePanel from "../features/performance/ui/PerformancePanel.svelte";
+import { onMount } from 'svelte'
+import PerformancePanel from '../features/performance/ui/PerformancePanel.svelte'
 import {
-	ambienceVolumeSetting,
-	isSettingsMenuOpen,
-	isSoundEnabled,
-	masterVolumeSetting,
-	sfxVolumeSetting,
-} from "../stores/uiStore";
+  ambienceVolumeSetting,
+  isSettingsMenuOpen,
+  isSoundEnabled,
+  masterVolumeSetting,
+  sfxVolumeSetting,
+} from '../stores/uiStore'
 
-let multiplayerControlsComponent: any = null;
-let multiplayerUnavailableReason = "";
+let multiplayerControlsComponent: any = null
+let multiplayerUnavailableReason = ''
 
 onMount(() => {
-	void ensureMultiplayerControls();
-});
+  void ensureMultiplayerControls()
+})
 
 function closeSettings() {
-	isSettingsMenuOpen.set(false);
+  isSettingsMenuOpen.set(false)
 }
 
 function handleOverlayKeydown(event: KeyboardEvent) {
-	if (event.key === "Escape" || event.key === "Enter" || event.key === " ") {
-		event.preventDefault();
-		closeSettings();
-	}
+  if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    closeSettings()
+  }
 }
 
 async function ensureMultiplayerControls() {
-	if (multiplayerControlsComponent || multiplayerUnavailableReason) return;
+  if (multiplayerControlsComponent || multiplayerUnavailableReason) return
 
-	try {
-		const module = await import("../features/multiplayer/ui/MultiplayerControls.svelte");
-		multiplayerControlsComponent = module.default;
-	} catch (error) {
-		console.warn("Failed to load multiplayer controls for settings panel:", error);
-		multiplayerUnavailableReason = "Multiplayer controls are unavailable in this session.";
-	}
+  try {
+    const module = await import(
+      '../features/multiplayer/ui/MultiplayerControls.svelte'
+    )
+    multiplayerControlsComponent = module.default
+  } catch (error) {
+    console.warn(
+      'Failed to load multiplayer controls for settings panel:',
+      error,
+    )
+    multiplayerUnavailableReason =
+      'Multiplayer controls are unavailable in this session.'
+  }
 }
 </script>
 
@@ -46,6 +52,7 @@ async function ensureMultiplayerControls() {
     role="button"
     tabindex="0"
     aria-label="Close settings"
+    data-sfx-click="panel-close"
     on:click={closeSettings}
     on:keydown={handleOverlayKeydown}
   >
@@ -60,7 +67,15 @@ async function ensureMultiplayerControls() {
     >
       <div class="settings-header">
         <h2 id="settings-title">Settings</h2>
-        <button class="close-button" aria-label="Close settings" on:click={closeSettings}>×</button>
+        <button
+          class="close-button"
+          aria-label="Close settings"
+          data-sfx-hover="hover-emphasis"
+          data-sfx-click="panel-close"
+          on:click={closeSettings}
+        >
+          ×
+        </button>
       </div>
       
       <div class="settings-content">
@@ -90,6 +105,7 @@ async function ensureMultiplayerControls() {
               <input 
                 type="checkbox" 
                 bind:checked={$isSoundEnabled}
+                data-sfx-click="soft"
               />
               Enable Sound
             </label>
@@ -106,6 +122,7 @@ async function ensureMultiplayerControls() {
               max="1"
               step="0.01"
               bind:value={$masterVolumeSetting}
+              data-sfx-focus="focus-soft"
             />
 
             <div class="slider-label">
@@ -120,6 +137,7 @@ async function ensureMultiplayerControls() {
               max="1"
               step="0.01"
               bind:value={$ambienceVolumeSetting}
+              data-sfx-focus="focus-soft"
             />
 
             <div class="slider-label">
@@ -134,6 +152,7 @@ async function ensureMultiplayerControls() {
               max="1"
               step="0.01"
               bind:value={$sfxVolumeSetting}
+              data-sfx-focus="focus-soft"
             />
           </div>
         </section>

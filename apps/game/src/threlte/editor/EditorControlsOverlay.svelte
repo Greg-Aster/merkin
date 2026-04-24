@@ -1,54 +1,63 @@
 <script lang="ts">
-  import './editor-ui.css'
-  import { onDestroy } from 'svelte'
-  import {
-    editorStateStore,
-    selectedEditorNodesStore,
-    setTransformAxis,
-    setEditorViewportLightingMode,
-    setTransformMode,
-    setTransformSpace,
-    type EditorState,
-    type EditorSceneNode,
-  } from './editorStore'
+import './editor-ui.css'
+import { onDestroy } from 'svelte'
+import {
+  type EditorSceneNode,
+  type EditorState,
+  editorStateStore,
+  selectedEditorNodesStore,
+  setEditorViewportLightingMode,
+  setTransformAxis,
+  setTransformMode,
+  setTransformSpace,
+} from './editorStore'
 
-  let editorState: EditorState | undefined
-  let selectedNodes: EditorSceneNode[] = []
+let editorState: EditorState | undefined
+let selectedNodes: EditorSceneNode[] = []
 
-  const unsubState = editorStateStore.subscribe((value) => {
-    editorState = value
-  })
+const unsubState = editorStateStore.subscribe(value => {
+  editorState = value
+})
 
-  const unsubSelected = selectedEditorNodesStore.subscribe((value) => {
-    selectedNodes = value
-  })
+const unsubSelected = selectedEditorNodesStore.subscribe(value => {
+  selectedNodes = value
+})
 
-  $: selectionLabel = selectedNodes.length === 0
+$: selectionLabel =
+  selectedNodes.length === 0
     ? 'No selection'
     : selectedNodes.length === 1
       ? selectedNodes[0].name
       : `${selectedNodes.length} objects selected`
 
-  $: modeLabel = editorState?.transformMode === 'rotate'
+$: modeLabel =
+  editorState?.transformMode === 'rotate'
     ? 'Rotate'
     : editorState?.transformMode === 'scale'
       ? 'Scale'
       : 'Move'
 
-  $: axisLabel = editorState?.transformAxis === 'all'
+$: axisLabel =
+  editorState?.transformAxis === 'all'
     ? 'All Axes'
     : `${editorState?.transformAxis?.toUpperCase()} Axis`
 
-  $: spaceLabel = editorState?.transformSpace === 'local' ? 'Local' : 'World'
-  $: interactionLabel = editorState?.modalTransformActive ? 'Modal Active' : 'Gizmo Ready'
-  $: workflowLabel = editorState?.interactionMode === 'terrain' ? 'Terrain Sculpt' : 'Object Edit'
-  $: collisionLabel = editorState?.collisionOverlayEnabled ? 'Collision On' : 'Collision Off'
-  $: lightingLabel = editorState?.viewportLightingMode === 'workbench' ? 'Workbench' : 'Rendered'
+$: spaceLabel = editorState?.transformSpace === 'local' ? 'Local' : 'World'
+$: interactionLabel = editorState?.modalTransformActive
+  ? 'Modal Active'
+  : 'Gizmo Ready'
+$: workflowLabel =
+  editorState?.interactionMode === 'terrain' ? 'Terrain Sculpt' : 'Object Edit'
+$: collisionLabel = editorState?.collisionOverlayEnabled
+  ? 'Collision On'
+  : 'Collision Off'
+$: lightingLabel =
+  editorState?.viewportLightingMode === 'workbench' ? 'Workbench' : 'Rendered'
 
-  onDestroy(() => {
-    unsubState()
-    unsubSelected()
-  })
+onDestroy(() => {
+  unsubState()
+  unsubSelected()
+})
 </script>
 
 {#if editorState?.enabled}
@@ -62,24 +71,24 @@
     </div>
 
     <div class="button-row compact-two-mode">
-      <button class:active={editorState.viewportLightingMode === 'authored'} on:click={() => setEditorViewportLightingMode('authored')}>Rendered</button>
-      <button class:active={editorState.viewportLightingMode === 'workbench'} on:click={() => setEditorViewportLightingMode('workbench')}>Workbench</button>
+      <button class:active={editorState.viewportLightingMode === 'authored'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => setEditorViewportLightingMode('authored')}>Rendered</button>
+      <button class:active={editorState.viewportLightingMode === 'workbench'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => setEditorViewportLightingMode('workbench')}>Workbench</button>
     </div>
 
     {#if editorState.interactionMode === 'objects'}
       <div class="button-row">
-        <button class:active={editorState.transformMode === 'translate'} on:click={() => setTransformMode('translate')}>G Move</button>
-        <button class:active={editorState.transformMode === 'rotate'} on:click={() => setTransformMode('rotate')}>R Rotate</button>
-        <button class:active={editorState.transformMode === 'scale'} on:click={() => setTransformMode('scale')}>S Scale</button>
+        <button class:active={editorState.transformMode === 'translate'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => setTransformMode('translate')}>G Move</button>
+        <button class:active={editorState.transformMode === 'rotate'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => setTransformMode('rotate')}>R Rotate</button>
+        <button class:active={editorState.transformMode === 'scale'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => setTransformMode('scale')}>S Scale</button>
       </div>
 
       <div class="button-row compact">
-        <button class:active={editorState.transformSpace === 'world'} on:click={() => setTransformSpace('world')}>World</button>
-        <button class:active={editorState.transformSpace === 'local'} on:click={() => setTransformSpace('local')}>Local</button>
-        <button class:active={editorState.transformAxis === 'all'} on:click={() => setTransformAxis('all')}>All</button>
-        <button class:active={editorState.transformAxis === 'x'} on:click={() => setTransformAxis('x')}>X</button>
-        <button class:active={editorState.transformAxis === 'y'} on:click={() => setTransformAxis('y')}>Y</button>
-        <button class:active={editorState.transformAxis === 'z'} on:click={() => setTransformAxis('z')}>Z</button>
+        <button class:active={editorState.transformSpace === 'world'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => setTransformSpace('world')}>World</button>
+        <button class:active={editorState.transformSpace === 'local'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => setTransformSpace('local')}>Local</button>
+        <button class:active={editorState.transformAxis === 'all'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => setTransformAxis('all')}>All</button>
+        <button class:active={editorState.transformAxis === 'x'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => setTransformAxis('x')}>X</button>
+        <button class:active={editorState.transformAxis === 'y'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => setTransformAxis('y')}>Y</button>
+        <button class:active={editorState.transformAxis === 'z'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => setTransformAxis('z')}>Z</button>
       </div>
     {/if}
 

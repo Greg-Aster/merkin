@@ -698,7 +698,6 @@ export type {
   LinkPreviewInfo,
   BannerAnimationConfig,
 } from './banners/types'
-
-;(bannerConfig as any).panel ??= {};
-;(bannerConfig as any).panel.top ??= {};
-;(bannerConfig as any).panel.top.mobilePortrait = '1.75rem';
+;(bannerConfig as any).panel ??= {}
+;(bannerConfig as any).panel.top ??= {}
+;(bannerConfig as any).panel.top.mobilePortrait = '1.75rem'

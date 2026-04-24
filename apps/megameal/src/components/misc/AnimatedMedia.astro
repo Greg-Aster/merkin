@@ -11,13 +11,7 @@ interface Props {
   poster?: string
 }
 
-const {
-  id,
-  webmSrc,
-  fallbackSrc,
-  alt = '',
-  poster,
-} = Astro.props
+const { id, webmSrc, fallbackSrc, alt = '', poster } = Astro.props
 
 const className = Astro.props.class
 const style = Astro.props.style

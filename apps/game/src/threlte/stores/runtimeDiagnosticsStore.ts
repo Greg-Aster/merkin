@@ -119,7 +119,8 @@ const DEFAULT_DIAGNOSTICS: Record<string, DiagnosticRecord> = {
   },
 }
 
-export const runtimeDiagnosticsStore = writable<Record<string, DiagnosticRecord>>(DEFAULT_DIAGNOSTICS)
+export const runtimeDiagnosticsStore =
+  writable<Record<string, DiagnosticRecord>>(DEFAULT_DIAGNOSTICS)
 export const runtimeAssetFailuresStore = writable<AssetFailureRecord[]>([])
 
 function now() {
@@ -128,9 +129,11 @@ function now() {
 
 export function setRuntimeDiagnostic(
   key: keyof typeof DEFAULT_DIAGNOSTICS | string,
-  patch: Partial<Omit<DiagnosticRecord, 'key' | 'updatedAt'>> & { label?: string }
+  patch: Partial<Omit<DiagnosticRecord, 'key' | 'updatedAt'>> & {
+    label?: string
+  },
 ) {
-  runtimeDiagnosticsStore.update((current) => {
+  runtimeDiagnosticsStore.update(current => {
     const existing = current[key] ?? {
       key,
       label: patch.label ?? key,
@@ -164,10 +167,11 @@ export function reportRuntimeAssetFailure(source: string, message: string) {
     updatedAt: now(),
   }
 
-  runtimeAssetFailuresStore.update((current) => [entry, ...current].slice(0, 12))
+  runtimeAssetFailuresStore.update(current => [entry, ...current].slice(0, 12))
   setRuntimeDiagnostic('toolsBridge', {
     level: 'warning',
-    message: 'Asset/runtime failures have been reported. Open diagnostics for details.',
+    message:
+      'Asset/runtime failures have been reported. Open diagnostics for details.',
   })
 }
 
@@ -179,8 +183,10 @@ export const runtimeDiagnosticsSummaryStore = derived(
   [runtimeDiagnosticsStore, runtimeAssetFailuresStore],
   ([$runtimeDiagnosticsStore, $runtimeAssetFailuresStore]) => {
     const diagnostics = Object.values($runtimeDiagnosticsStore)
-    const errors = diagnostics.filter((entry) => entry.level === 'error').length
-    const warnings = diagnostics.filter((entry) => entry.level === 'warning').length
+    const errors = diagnostics.filter(entry => entry.level === 'error').length
+    const warnings = diagnostics.filter(
+      entry => entry.level === 'warning',
+    ).length
 
     return {
       diagnostics,
@@ -188,5 +194,5 @@ export const runtimeDiagnosticsSummaryStore = derived(
       warnings,
       assetFailures: $runtimeAssetFailuresStore,
     }
-  }
+  },
 )

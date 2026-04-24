@@ -3,7 +3,7 @@
  * Centralized reactive state management for post-processing effects
  */
 
-import { writable, derived, type Writable } from 'svelte/store'
+import { type Writable, derived, writable } from 'svelte/store'
 
 // Quality level definitions (matches existing optimization system)
 export type QualityLevel = 'ultra_low' | 'low' | 'medium' | 'high' | 'ultra'
@@ -46,7 +46,7 @@ export interface ToneMappingConfig extends EffectConfig {
 export const DEFAULT_POST_PROCESSING_CONFIG: PostProcessingConfig = {
   enabled: true,
   qualityLevel: 'high',
-  adaptiveQuality: true
+  adaptiveQuality: true,
 }
 
 export const DEFAULT_BLOOM_CONFIG: BloomConfig = {
@@ -54,7 +54,7 @@ export const DEFAULT_BLOOM_CONFIG: BloomConfig = {
   intensity: 1.0,
   threshold: 0.85,
   smoothWidth: 0.025,
-  quality: 'high'
+  quality: 'high',
 }
 
 export const DEFAULT_SSAO_CONFIG: SSAOConfig = {
@@ -63,13 +63,13 @@ export const DEFAULT_SSAO_CONFIG: SSAOConfig = {
   radius: 0.1,
   samples: 16,
   rings: 3,
-  quality: 'medium'
+  quality: 'medium',
 }
 
 export const DEFAULT_FXAA_CONFIG: FXAAConfig = {
   enabled: true,
   intensity: 1.0,
-  quality: 'high'
+  quality: 'high',
 }
 
 export const DEFAULT_TONE_MAPPING_CONFIG: ToneMappingConfig = {
@@ -77,10 +77,12 @@ export const DEFAULT_TONE_MAPPING_CONFIG: ToneMappingConfig = {
   intensity: 1.0,
   exposure: 1.0,
   whitePoint: 1.0,
-  quality: 'high'
+  quality: 'high',
 }
 
-export const postProcessingStore: Writable<PostProcessingConfig> = writable(DEFAULT_POST_PROCESSING_CONFIG)
+export const postProcessingStore: Writable<PostProcessingConfig> = writable(
+  DEFAULT_POST_PROCESSING_CONFIG,
+)
 
 export const bloomStore: Writable<BloomConfig> = writable(DEFAULT_BLOOM_CONFIG)
 
@@ -88,7 +90,9 @@ export const ssaoStore: Writable<SSAOConfig> = writable(DEFAULT_SSAO_CONFIG)
 
 export const fxaaStore: Writable<FXAAConfig> = writable(DEFAULT_FXAA_CONFIG)
 
-export const toneMappingStore: Writable<ToneMappingConfig> = writable(DEFAULT_TONE_MAPPING_CONFIG)
+export const toneMappingStore: Writable<ToneMappingConfig> = writable(
+  DEFAULT_TONE_MAPPING_CONFIG,
+)
 
 // Quality-based effect configurations
 const qualityConfigs = {
@@ -96,32 +100,84 @@ const qualityConfigs = {
     bloom: { enabled: false, intensity: 0, threshold: 1.0, smoothWidth: 0.1 },
     ssao: { enabled: false, intensity: 0, radius: 0.05, samples: 4, rings: 2 },
     fxaa: { enabled: true, intensity: 1.0 },
-    toneMapping: { enabled: true, intensity: 0.8, exposure: 0.9, whitePoint: 1.0 }
+    toneMapping: {
+      enabled: true,
+      intensity: 0.8,
+      exposure: 0.9,
+      whitePoint: 1.0,
+    },
   },
   low: {
     bloom: { enabled: false, intensity: 0, threshold: 0.95, smoothWidth: 0.05 },
     ssao: { enabled: false, intensity: 0, radius: 0.08, samples: 8, rings: 2 },
     fxaa: { enabled: true, intensity: 1.0 },
-    toneMapping: { enabled: true, intensity: 0.9, exposure: 0.95, whitePoint: 1.0 }
+    toneMapping: {
+      enabled: true,
+      intensity: 0.9,
+      exposure: 0.95,
+      whitePoint: 1.0,
+    },
   },
   medium: {
-    bloom: { enabled: true, intensity: 0.58, threshold: 0.9, smoothWidth: 0.03 },
-    ssao: { enabled: false, intensity: 0.3, radius: 0.1, samples: 12, rings: 3 },
+    bloom: {
+      enabled: true,
+      intensity: 0.58,
+      threshold: 0.9,
+      smoothWidth: 0.03,
+    },
+    ssao: {
+      enabled: false,
+      intensity: 0.3,
+      radius: 0.1,
+      samples: 12,
+      rings: 3,
+    },
     fxaa: { enabled: true, intensity: 1.0 },
-    toneMapping: { enabled: true, intensity: 1.0, exposure: 1.0, whitePoint: 1.0 }
+    toneMapping: {
+      enabled: true,
+      intensity: 1.0,
+      exposure: 1.0,
+      whitePoint: 1.0,
+    },
   },
   high: {
-    bloom: { enabled: true, intensity: 0.9, threshold: 0.84, smoothWidth: 0.025 },
+    bloom: {
+      enabled: true,
+      intensity: 0.9,
+      threshold: 0.84,
+      smoothWidth: 0.025,
+    },
     ssao: { enabled: true, intensity: 0.5, radius: 0.1, samples: 16, rings: 3 },
     fxaa: { enabled: true, intensity: 1.0 },
-    toneMapping: { enabled: true, intensity: 1.0, exposure: 1.0, whitePoint: 1.0 }
+    toneMapping: {
+      enabled: true,
+      intensity: 1.0,
+      exposure: 1.0,
+      whitePoint: 1.0,
+    },
   },
   ultra: {
-    bloom: { enabled: true, intensity: 1.05, threshold: 0.8, smoothWidth: 0.02 },
-    ssao: { enabled: true, intensity: 0.7, radius: 0.12, samples: 24, rings: 4 },
+    bloom: {
+      enabled: true,
+      intensity: 1.05,
+      threshold: 0.8,
+      smoothWidth: 0.02,
+    },
+    ssao: {
+      enabled: true,
+      intensity: 0.7,
+      radius: 0.12,
+      samples: 24,
+      rings: 4,
+    },
     fxaa: { enabled: true, intensity: 1.0 },
-    toneMapping: { enabled: true, intensity: 1.1, exposure: 1.05, whitePoint: 1.0 }
-  }
+    toneMapping: {
+      enabled: true,
+      intensity: 1.1,
+      exposure: 1.05,
+      whitePoint: 1.0,
+    },
+  },
 }
 
 // Derived stores that update based on quality level
@@ -129,121 +185,144 @@ export const adaptiveBloomConfig = derived(
   [postProcessingStore, bloomStore],
   ([$postProcessing, $bloom]) => {
     if (!$postProcessing.adaptiveQuality) return $bloom
-    
+
     const qualityConfig = qualityConfigs[$postProcessing.qualityLevel]
     return {
       ...$bloom,
       ...qualityConfig.bloom,
-      quality: $postProcessing.qualityLevel
+      quality: $postProcessing.qualityLevel,
     }
-  }
+  },
 )
 
 export const adaptiveSSAOConfig = derived(
   [postProcessingStore, ssaoStore],
   ([$postProcessing, $ssao]) => {
     if (!$postProcessing.adaptiveQuality) return $ssao
-    
+
     const qualityConfig = qualityConfigs[$postProcessing.qualityLevel]
     return {
       ...$ssao,
       ...qualityConfig.ssao,
-      quality: $postProcessing.qualityLevel
+      quality: $postProcessing.qualityLevel,
     }
-  }
+  },
 )
 
 export const adaptiveFXAAConfig = derived(
   [postProcessingStore, fxaaStore],
   ([$postProcessing, $fxaa]) => {
     if (!$postProcessing.adaptiveQuality) return $fxaa
-    
+
     const qualityConfig = qualityConfigs[$postProcessing.qualityLevel]
     return {
       ...$fxaa,
       ...qualityConfig.fxaa,
-      quality: $postProcessing.qualityLevel
+      quality: $postProcessing.qualityLevel,
     }
-  }
+  },
 )
 
 export const adaptiveToneMappingConfig = derived(
   [postProcessingStore, toneMappingStore],
   ([$postProcessing, $toneMapping]) => {
     if (!$postProcessing.adaptiveQuality) return $toneMapping
-    
+
     const qualityConfig = qualityConfigs[$postProcessing.qualityLevel]
     return {
       ...$toneMapping,
       ...qualityConfig.toneMapping,
-      quality: $postProcessing.qualityLevel
+      quality: $postProcessing.qualityLevel,
     }
-  }
+  },
 )
 
 // Utility functions
 export function setQualityLevel(level: QualityLevel) {
   postProcessingStore.update(config => ({
     ...config,
-    qualityLevel: level
+    qualityLevel: level,
   }))
 }
 
 export function togglePostProcessing() {
   postProcessingStore.update(config => ({
     ...config,
-    enabled: !config.enabled
+    enabled: !config.enabled,
   }))
 }
 
 export function enableAdaptiveQuality() {
   postProcessingStore.update(config => ({
     ...config,
-    adaptiveQuality: true
+    adaptiveQuality: true,
   }))
 }
 
 export function disableAdaptiveQuality() {
   postProcessingStore.update(config => ({
     ...config,
-    adaptiveQuality: false
+    adaptiveQuality: false,
   }))
 }
 
 // Performance-based quality adjustment
-export function adjustQualityForPerformance(avgFPS: number, targetFPS: number = 60) {
+export function adjustQualityForPerformance(
+  avgFPS: number,
+  targetFPS: number = 60,
+) {
   const isDev = import.meta.env.DEV
   const currentConfig = postProcessingStore
-  
+
   if (avgFPS < targetFPS * 0.7) {
     // Performance is poor, reduce quality
     postProcessingStore.update(config => {
-      const currentIndex = ['ultra_low', 'low', 'medium', 'high', 'ultra'].indexOf(config.qualityLevel)
+      const currentIndex = [
+        'ultra_low',
+        'low',
+        'medium',
+        'high',
+        'ultra',
+      ].indexOf(config.qualityLevel)
       const newIndex = Math.max(0, currentIndex - 1)
-      const newLevel = (['ultra_low', 'low', 'medium', 'high', 'ultra'] as QualityLevel[])[newIndex]
-      
+      const newLevel = (
+        ['ultra_low', 'low', 'medium', 'high', 'ultra'] as QualityLevel[]
+      )[newIndex]
+
       if (isDev) {
-        console.log(`🔽 Reducing post-processing quality: ${config.qualityLevel} → ${newLevel}`)
+        console.log(
+          `🔽 Reducing post-processing quality: ${config.qualityLevel} → ${newLevel}`,
+        )
       }
       return {
         ...config,
-        qualityLevel: newLevel
+        qualityLevel: newLevel,
       }
     })
   } else if (avgFPS > targetFPS * 1.2) {
     // Performance is good, can increase quality
     postProcessingStore.update(config => {
-      const currentIndex = ['ultra_low', 'low', 'medium', 'high', 'ultra'].indexOf(config.qualityLevel)
+      const currentIndex = [
+        'ultra_low',
+        'low',
+        'medium',
+        'high',
+        'ultra',
+      ].indexOf(config.qualityLevel)
       const newIndex = Math.min(4, currentIndex + 1)
-      const newLevel = (['ultra_low', 'low', 'medium', 'high', 'ultra'] as QualityLevel[])[newIndex]
-      
+      const newLevel = (
+        ['ultra_low', 'low', 'medium', 'high', 'ultra'] as QualityLevel[]
+      )[newIndex]
+
       if (newLevel !== config.qualityLevel) {
         if (isDev) {
-          console.log(`🔼 Increasing post-processing quality: ${config.qualityLevel} → ${newLevel}`)
+          console.log(
+            `🔼 Increasing post-processing quality: ${config.qualityLevel} → ${newLevel}`,
+          )
         }
         return {
           ...config,
-          qualityLevel: newLevel
+          qualityLevel: newLevel,
         }
       }
       return config
@@ -269,5 +348,5 @@ export const postProcessingStores = {
   adaptiveBloom: adaptiveBloomConfig,
   adaptiveSSAO: adaptiveSSAOConfig,
   adaptiveFXAA: adaptiveFXAAConfig,
-  adaptiveToneMapping: adaptiveToneMappingConfig
+  adaptiveToneMapping: adaptiveToneMappingConfig,
 }

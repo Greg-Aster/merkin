@@ -5,11 +5,7 @@
   "settings": {
     "level": {
       "spawn": {
-        "position": [
-          0,
-          6.2,
-          -118
-        ]
+        "position": [0, 6.2, -118]
       },
       "skyboxPreset": "observatory",
       "features": {
@@ -70,28 +66,14 @@
       "name": "Shore Ring",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        -19.328206991636343,
-        0
-      ],
-      "rotation": [
-        1.4999999999999993,
-        0,
-        0
-      ],
-      "scale": [
-        189.7629235810407,
-        188.7976031931478,
-        20.137438584817716
-      ],
+      "position": [0, -19.328206991636343, 0],
+      "rotation": [1.4999999999999993, 0, 0],
+      "scale": [189.7629235810407, 188.7976031931478, 20.137438584817716],
       "visible": true,
       "generation": {
         "descriptor": "shoreline ring, drowned shrine perimeter",
         "sourceVisualSize": [
-          305.20001220703125,
-          9.060231208801337,
-          305.20001220703125
+          305.20001220703125, 9.060231208801337, 305.20001220703125
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/shore-ring/shore-ring-generated-2026-04-19T16-32-21-479Z.glb",
         "lastBakedAt": "2026-04-19T16:32:25.616Z"
@@ -105,21 +87,9 @@
       "name": "Island Shelf",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        -1.55,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        156.53964984552007,
-        1.8252430638898813,
-        154.57836716430054
-      ],
+      "position": [0, -1.55, 0],
+      "rotation": [0, 0, 0],
+      "scale": [156.53964984552007, 1.8252430638898813, 154.57836716430054],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -127,11 +97,7 @@
       },
       "generation": {
         "descriptor": "broad outer island shelf of weathered sacred stone",
-        "sourceVisualSize": [
-          304,
-          3.5999999046325684,
-          304
-        ],
+        "sourceVisualSize": [304, 3.5999999046325684, 304],
         "lastBakedAssetUrl": "/generated/hunyuan3d/island-shelf/island-shelf-generated-2026-04-19T16-35-28-683Z.glb",
         "lastBakedAt": "2026-04-19T16:35:31.728Z"
       },
@@ -143,21 +109,9 @@
       "id": "yggdrasil-glade-root",
       "name": "Yggdrasil Glade",
       "kind": "group",
-      "position": [
-        0,
-        0,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true
     },
     {
@@ -165,21 +119,9 @@
       "name": "World Root Basin",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        -2.9,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        198.58357227530166,
-        15.503876200018002,
-        198.7184686511477
-      ],
+      "position": [0, -2.9, 0],
+      "rotation": [0, 0, 0],
+      "scale": [198.58357227530166, 15.503876200018002, 198.7184686511477],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -187,11 +129,7 @@
       },
       "generation": {
         "descriptor": "vast circular island foundation of dark earth and root-laced stone",
-        "sourceVisualSize": [
-          392,
-          6.400000095367432,
-          392
-        ],
+        "sourceVisualSize": [392, 6.400000095367432, 392],
         "lastBakedAssetUrl": "/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
         "lastBakedAt": "2026-04-19T16:38:38.465Z"
       },
@@ -204,21 +142,9 @@
       "name": "Root Mound",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        -0.18,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        89.19159977296684,
-        8.75692133590203,
-        89.72724955391283
-      ],
+      "position": [0, -0.18, 0],
+      "rotation": [0, 0, 0],
+      "scale": [89.19159977296684, 8.75692133590203, 89.72724955391283],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -226,11 +152,7 @@
       },
       "generation": {
         "descriptor": "root mound",
-        "sourceVisualSize": [
-          176,
-          13,
-          176
-        ],
+        "sourceVisualSize": [176, 13, 176],
         "lastBakedAssetUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
         "lastBakedAt": "2026-04-19T16:41:29.849Z"
       },
@@ -243,21 +165,9 @@
       "name": "Well Dais",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0.42,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        37.21853483034551,
-        1.6215504290438507,
-        37.837781024352815
-      ],
+      "position": [0, 0.42, 0],
+      "rotation": [0, 0, 0],
+      "scale": [37.21853483034551, 1.6215504290438507, 37.837781024352815],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -265,11 +175,7 @@
       },
       "generation": {
         "descriptor": "well dais",
-        "sourceVisualSize": [
-          72,
-          3.200000047683716,
-          72
-        ],
+        "sourceVisualSize": [72, 3.200000047683716, 72],
         "lastBakedAssetUrl": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-04-19T16-44-36-480Z.glb",
         "lastBakedAt": "2026-04-19T16:44:40.336Z"
       },
@@ -282,21 +188,9 @@
       "name": "Bifrost Approach",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0.42,
-        -74
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        7.651460663840727,
-        0.45578388558717225,
-        82.62297724845334
-      ],
+      "position": [0, 0.42, -74],
+      "rotation": [0, 0, 0],
+      "scale": [7.651460663840727, 0.45578388558717225, 82.62297724845334],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -304,11 +198,7 @@
       },
       "generation": {
         "descriptor": "bifrost approach",
-        "sourceVisualSize": [
-          10,
-          0.8999999761581421,
-          82
-        ],
+        "sourceVisualSize": [10, 0.8999999761581421, 82],
         "lastBakedAssetUrl": "/generated/hunyuan3d/bifrost-approach/bifrost-approach-generated-2026-04-19T16-47-32-023Z.glb",
         "lastBakedAt": "2026-04-19T16:47:35.483Z"
       },
@@ -321,21 +211,9 @@
       "name": "Trunk Lower",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        17.5584,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        15.217455174935278,
-        24.255093919889454,
-        16.06081057303339
-      ],
+      "position": [0, 17.5584, 0],
+      "rotation": [0, 0, 0],
+      "scale": [15.217455174935278, 24.255093919889454, 16.06081057303339],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -344,9 +222,7 @@
       "generation": {
         "descriptor": "colossal ancient trunk segment of blackened sacred timber, fissured bark mass",
         "sourceVisualSize": [
-          29.94216915130615,
-          47.86694274902344,
-          29.94216915130615
+          29.94216915130615, 47.86694274902344, 29.94216915130615
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/trunk-lower/trunk-lower-generated-2026-04-19T16-50-31-183Z.glb",
         "lastBakedAt": "2026-04-19T16:50:34.179Z"
@@ -360,28 +236,14 @@
       "name": "Trunk Mid",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        48.285599999999995,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        11.703217569569494,
-        20.363851174441514,
-        12.310766827673527
-      ],
+      "position": [0, 48.285599999999995, 0],
+      "rotation": [0, 0, 0],
+      "scale": [11.703217569569494, 20.363851174441514, 12.310766827673527],
       "visible": true,
       "generation": {
         "descriptor": "colossal ancient trunk segment of blackened sacred timber, fissured bark mass",
         "sourceVisualSize": [
-          22.813082008361814,
-          39.88911895751953,
-          22.813082008361814
+          22.813082008361814, 39.88911895751953, 22.813082008361814
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/trunk-mid/trunk-mid-generated-2026-04-19T16-53-29-448Z.glb",
         "lastBakedAt": "2026-04-19T16:53:33.827Z"
@@ -395,28 +257,14 @@
       "name": "Trunk Upper",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        74.6232,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        8.488195980670941,
-        16.17727626787774,
-        9.035885665791858
-      ],
+      "position": [0, 74.6232, 0],
+      "rotation": [0, 0, 0],
+      "scale": [8.488195980670941, 16.17727626787774, 9.035885665791858],
       "visible": true,
       "generation": {
         "descriptor": "colossal ancient trunk segment of blackened sacred timber, fissured bark mass",
         "sourceVisualSize": [
-          16.68083297729492,
-          31.911295166015627,
-          17.109810943603513
+          16.68083297729492, 31.911295166015627, 17.109810943603513
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/trunk-upper/trunk-upper-generated-2026-04-19T16-56-26-375Z.glb",
         "lastBakedAt": "2026-04-19T16:56:29.905Z"
@@ -430,21 +278,9 @@
       "name": "Root north",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        2.7,
-        21.24
-      ],
-      "rotation": [
-        1.15,
-        0,
-        0
-      ],
-      "scale": [
-        3.8426114517483434,
-        10.554330270503057,
-        17.557704212157915
-      ],
+      "position": [0, 2.7, 21.24],
+      "rotation": [1.15, 0, 0],
+      "scale": [3.8426114517483434, 10.554330270503057, 17.557704212157915],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -453,9 +289,7 @@
       "generation": {
         "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
         "sourceVisualSize": [
-          7.182378768920898,
-          20.847124236903046,
-          34.2649132322789
+          7.182378768920898, 20.847124236903046, 34.2649132322789
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/root-north/root-north-generated-2026-04-19T16-59-20-463Z.glb",
         "lastBakedAt": "2026-04-19T16:59:24.414Z"
@@ -469,21 +303,9 @@
       "name": "Root south",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        2.3760000000000003,
-        -21.24
-      ],
-      "rotation": [
-        -1.05,
-        0,
-        0
-      ],
-      "scale": [
-        3.409322425420529,
-        12.63710313359757,
-        17.926552332538748
-      ],
+      "position": [0, 2.3760000000000003, -21.24],
+      "rotation": [-1.05, 0, 0],
+      "scale": [3.409322425420529, 12.63710313359757, 17.926552332538748],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -492,9 +314,7 @@
       "generation": {
         "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
         "sourceVisualSize": [
-          6.733479976654053,
-          24.352455964630533,
-          35.27049171426999
+          6.733479976654053, 24.352455964630533, 35.27049171426999
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/root-south/root-south-generated-2026-04-19T17-02-12-977Z.glb",
         "lastBakedAt": "2026-04-19T17:02:16.769Z"
@@ -508,21 +328,9 @@
       "name": "Root east",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        21.24,
-        2.3760000000000003,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        -1.15
-      ],
-      "scale": [
-        18.429517052804123,
-        12.05331750545334,
-        3.705504560840582
-      ],
+      "position": [21.24, 2.3760000000000003, 0],
+      "rotation": [0, 0, -1.15],
+      "scale": [18.429517052804123, 12.05331750545334, 3.705504560840582],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -531,9 +339,7 @@
       "generation": {
         "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
         "sourceVisualSize": [
-          36.24938568150149,
-          21.30158696103758,
-          7.315999984741211
+          36.24938568150149, 21.30158696103758, 7.315999984741211
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/root-east/root-east-generated-2026-04-19T17-05-01-813Z.glb",
         "lastBakedAt": "2026-04-19T17:05:05.214Z"
@@ -547,21 +353,9 @@
       "name": "Root west",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -21.24,
-        2.7,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        1.05
-      ],
-      "scale": [
-        16.78530786876281,
-        13.085456246515403,
-        3.75206424294114
-      ],
+      "position": [-21.24, 2.7, 0],
+      "rotation": [0, 0, 1.05],
+      "scale": [16.78530786876281, 13.085456246515403, 3.75206424294114],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -570,9 +364,7 @@
       "generation": {
         "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
         "sourceVisualSize": [
-          33.093241581738006,
-          23.03249666686655,
-          7.315999984741211
+          33.093241581738006, 23.03249666686655, 7.315999984741211
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/root-west/root-west-generated-2026-04-19T17-07-48-681Z.glb",
         "lastBakedAt": "2026-04-19T17:07:51.752Z"
@@ -586,21 +378,9 @@
       "name": "Root northeast",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        15.34,
-        3.024,
-        15.34
-      ],
-      "rotation": [
-        0.9,
-        0,
-        -0.72
-      ],
-      "scale": [
-        11.86662269140726,
-        10.300229022101744,
-        11.95407625821269
-      ],
+      "position": [15.34, 3.024, 15.34],
+      "rotation": [0.9, 0, -0.72],
+      "scale": [11.86662269140726, 10.300229022101744, 11.95407625821269],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -609,9 +389,7 @@
       "generation": {
         "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
         "sourceVisualSize": [
-          23.35659877858925,
-          20.328119988859118,
-          23.546422168851862
+          23.35659877858925, 20.328119988859118, 23.546422168851862
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/root-northeast/root-northeast-generated-2026-04-19T17-10-26-920Z.glb",
         "lastBakedAt": "2026-04-19T17:10:30.381Z"
@@ -625,21 +403,9 @@
       "name": "Root northwest",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -15.34,
-        3.024,
-        15.34
-      ],
-      "rotation": [
-        0.9,
-        0,
-        0.72
-      ],
-      "scale": [
-        11.847361234105309,
-        10.453517905225246,
-        12.210088034292932
-      ],
+      "position": [-15.34, 3.024, 15.34],
+      "rotation": [0.9, 0, 0.72],
+      "scale": [11.847361234105309, 10.453517905225246, 12.210088034292932],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -648,9 +414,7 @@
       "generation": {
         "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
         "sourceVisualSize": [
-          23.35659877858925,
-          20.328119988859118,
-          23.546422168851862
+          23.35659877858925, 20.328119988859118, 23.546422168851862
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/root-northwest/root-northwest-generated-2026-04-19T17-13-41-911Z.glb",
         "lastBakedAt": "2026-04-19T17:13:45.712Z"
@@ -664,21 +428,9 @@
       "name": "Root southeast",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        15.34,
-        2.7,
-        -15.34
-      ],
-      "rotation": [
-        -0.9,
-        0,
-        -0.72
-      ],
-      "scale": [
-        12.985266458325041,
-        10.335946789539603,
-        13.291799135677032
-      ],
+      "position": [15.34, 2.7, -15.34],
+      "rotation": [-0.9, 0, -0.72],
+      "scale": [12.985266458325041, 10.335946789539603, 13.291799135677032],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -687,9 +439,7 @@
       "generation": {
         "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
         "sourceVisualSize": [
-          23.35659877858925,
-          20.328119988859118,
-          23.546422168851862
+          23.35659877858925, 20.328119988859118, 23.546422168851862
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/root-southeast/root-southeast-generated-2026-04-19T17-16-26-636Z.glb",
         "lastBakedAt": "2026-04-19T17:16:30.100Z"
@@ -703,21 +453,9 @@
       "name": "Root southwest",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -15.34,
-        2.7,
-        -15.34
-      ],
-      "rotation": [
-        -0.9,
-        0,
-        0.72
-      ],
-      "scale": [
-        11.876397702980338,
-        10.72361840268148,
-        12.063334273708623
-      ],
+      "position": [-15.34, 2.7, -15.34],
+      "rotation": [-0.9, 0, 0.72],
+      "scale": [11.876397702980338, 10.72361840268148, 12.063334273708623],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -726,9 +464,7 @@
       "generation": {
         "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
         "sourceVisualSize": [
-          23.35659877858925,
-          20.328119988859118,
-          23.546422168851862
+          23.35659877858925, 20.328119988859118, 23.546422168851862
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/root-southwest/root-southwest-generated-2026-04-19T17-19-22-220Z.glb",
         "lastBakedAt": "2026-04-19T17:19:25.602Z"
@@ -742,28 +478,14 @@
       "name": "Branch north",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        83.07199999999999,
-        13.440000000000001
-      ],
-      "rotation": [
-        0.55,
-        0,
-        0
-      ],
-      "scale": [
-        3.113190071245697,
-        17.31787124887397,
-        12.502673981717585
-      ],
+      "position": [0, 83.07199999999999, 13.440000000000001],
+      "rotation": [0.55, 0, 0],
+      "scale": [3.113190071245697, 17.31787124887397, 12.502673981717585],
       "visible": true,
       "generation": {
         "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
         "sourceVisualSize": [
-          6.142759857177734,
-          32.81494151464133,
-          23.555537888515197
+          6.142759857177734, 32.81494151464133, 23.555537888515197
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/branch-north/branch-north-generated-2026-04-19T17-22-30-105Z.glb",
         "lastBakedAt": "2026-04-19T17:22:33.595Z"
@@ -777,28 +499,14 @@
       "name": "Branch south",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        87.6032,
-        -13.440000000000001
-      ],
-      "rotation": [
-        -0.55,
-        0,
-        0
-      ],
-      "scale": [
-        3.156640796502397,
-        18.121705958362877,
-        15.363641568413149
-      ],
+      "position": [0, 87.6032, -13.440000000000001],
+      "rotation": [-0.55, 0, 0],
+      "scale": [3.156640796502397, 18.121705958362877, 15.363641568413149],
       "visible": true,
       "generation": {
         "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
         "sourceVisualSize": [
-          6.142759857177734,
-          35.758837499399135,
-          25.360455864148214
+          6.142759857177734, 35.758837499399135, 25.360455864148214
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/branch-south/branch-south-generated-2026-04-19T17-25-13-766Z.glb",
         "lastBakedAt": "2026-04-19T17:25:17.820Z"
@@ -812,28 +520,14 @@
       "name": "Branch east",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        13.440000000000001,
-        84.58239999999999,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        -0.62
-      ],
-      "scale": [
-        13.115104348276486,
-        15.854632208366603,
-        3.526273866446287
-      ],
+      "position": [13.440000000000001, 84.58239999999999, 0],
+      "rotation": [0, 0, -0.62],
+      "scale": [13.115104348276486, 15.854632208366603, 3.526273866446287],
       "visible": true,
       "generation": {
         "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
         "sourceVisualSize": [
-          24.563541235973993,
-          31.31670372325405,
-          5.812991943359375
+          24.563541235973993, 31.31670372325405, 5.812991943359375
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/branch-east/branch-east-generated-2026-04-19T17-28-01-226Z.glb",
         "lastBakedAt": "2026-04-19T17:28:04.600Z"
@@ -847,28 +541,14 @@
       "name": "Branch west",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -13.440000000000001,
-        84.58239999999999,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0.62
-      ],
-      "scale": [
-        12.49137590568438,
-        15.86635983911786,
-        3.116986038885634
-      ],
+      "position": [-13.440000000000001, 84.58239999999999, 0],
+      "rotation": [0, 0, 0.62],
+      "scale": [12.49137590568438, 15.86635983911786, 3.116986038885634],
       "visible": true,
       "generation": {
         "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
         "sourceVisualSize": [
-          24.563541235973993,
-          31.31670372325405,
-          5.812991943359375
+          24.563541235973993, 31.31670372325405, 5.812991943359375
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/branch-west/branch-west-generated-2026-04-19T17-30-56-202Z.glb",
         "lastBakedAt": "2026-04-19T17:30:59.350Z"
@@ -882,28 +562,14 @@
       "name": "Branch ne",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        10.752,
-        92.13439999999999,
-        10.752
-      ],
-      "rotation": [
-        0.42,
-        0,
-        -0.46
-      ],
-      "scale": [
-        8.409777655495084,
-        13.442046451625014,
-        12.34872359865102
-      ],
+      "position": [10.752, 92.13439999999999, 10.752],
+      "rotation": [0.42, 0, -0.46],
+      "scale": [8.409777655495084, 13.442046451625014, 12.34872359865102],
       "visible": true,
       "generation": {
         "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
         "sourceVisualSize": [
-          16.39233860609102,
-          26.445075666139957,
-          15.350698305483084
+          16.39233860609102, 26.445075666139957, 15.350698305483084
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/branch-ne/branch-ne-generated-2026-04-19T17-33-36-110Z.glb",
         "lastBakedAt": "2026-04-19T17:33:40.132Z"
@@ -917,28 +583,14 @@
       "name": "Branch nw",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -10.752,
-        92.13439999999999,
-        10.752
-      ],
-      "rotation": [
-        0.42,
-        0,
-        0.46
-      ],
-      "scale": [
-        8.636455820789351,
-        13.41667715145148,
-        7.8914972627687785
-      ],
+      "position": [-10.752, 92.13439999999999, 10.752],
+      "rotation": [0.42, 0, 0.46],
+      "scale": [8.636455820789351, 13.41667715145148, 7.8914972627687785],
       "visible": true,
       "generation": {
         "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
         "sourceVisualSize": [
-          16.39233860609102,
-          26.445075666139957,
-          15.350698305483084
+          16.39233860609102, 26.445075666139957, 15.350698305483084
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/branch-nw/branch-nw-generated-2026-04-19T17-36-13-707Z.glb",
         "lastBakedAt": "2026-04-19T17:36:16.765Z"
@@ -952,28 +604,14 @@
       "name": "Branch se",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        10.752,
-        92.13439999999999,
-        -10.752
-      ],
-      "rotation": [
-        -0.42,
-        0,
-        -0.46
-      ],
-      "scale": [
-        9.145877190507845,
-        13.43003182476256,
-        10.35558049696638
-      ],
+      "position": [10.752, 92.13439999999999, -10.752],
+      "rotation": [-0.42, 0, -0.46],
+      "scale": [9.145877190507845, 13.43003182476256, 10.35558049696638],
       "visible": true,
       "generation": {
         "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
         "sourceVisualSize": [
-          16.39233860609102,
-          26.445075666139957,
-          15.350698305483084
+          16.39233860609102, 26.445075666139957, 15.350698305483084
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/branch-se/branch-se-generated-2026-04-19T17-39-02-154Z.glb",
         "lastBakedAt": "2026-04-19T17:39:05.268Z"
@@ -987,28 +625,14 @@
       "name": "Branch sw",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -10.752,
-        92.13439999999999,
-        -10.752
-      ],
-      "rotation": [
-        -0.42,
-        0,
-        0.46
-      ],
-      "scale": [
-        8.341053400614179,
-        13.433579364892438,
-        12.698071226307455
-      ],
+      "position": [-10.752, 92.13439999999999, -10.752],
+      "rotation": [-0.42, 0, 0.46],
+      "scale": [8.341053400614179, 13.433579364892438, 12.698071226307455],
       "visible": true,
       "generation": {
         "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
         "sourceVisualSize": [
-          16.39233860609102,
-          26.445075666139957,
-          15.350698305483084
+          16.39233860609102, 26.445075666139957, 15.350698305483084
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/branch-sw/branch-sw-generated-2026-04-19T17-41-49-573Z.glb",
         "lastBakedAt": "2026-04-19T17:41:54.048Z"
@@ -1022,28 +646,14 @@
       "name": "Canopy 1",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        112.32,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        17.50440818236155,
-        16.982408999471037,
-        18.95524832644284
-      ],
+      "position": [0, 112.32, 0],
+      "rotation": [0, 0, 0],
+      "scale": [17.50440818236155, 16.982408999471037, 18.95524832644284],
       "visible": true,
       "generation": {
         "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume",
         "sourceVisualSize": [
-          33.41696548461914,
-          33.41696548461914,
-          33.41696548461914
+          33.41696548461914, 33.41696548461914, 33.41696548461914
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/canopy-1/canopy-1-generated-2026-04-19T17-45-32-578Z.glb",
         "lastBakedAt": "2026-04-19T17:45:37.072Z"
@@ -1057,28 +667,13 @@
       "name": "Canopy 2",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        16.9824,
-        106.08,
-        0
-      ],
-      "rotation": [
-        0.15,
-        0.25,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [16.9824, 106.08, 0],
+      "rotation": [0.15, 0.25, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "dodecahedron",
-        "args": [
-          14.03,
-          0
-        ],
+        "args": [14.03, 0],
         "color": "#7d9652",
         "emissive": "#40551f",
         "emissiveIntensity": 0.08,
@@ -1094,28 +689,13 @@
       "name": "Canopy 3",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -16.9824,
-        106.08,
-        0
-      ],
-      "rotation": [
-        0.3,
-        0.5,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-16.9824, 106.08, 0],
+      "rotation": [0.3, 0.5, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "icosahedron",
-        "args": [
-          14.03,
-          0
-        ],
+        "args": [14.03, 0],
         "color": "#657d47",
         "emissive": "#40551f",
         "emissiveIntensity": 0.08,
@@ -1131,28 +711,13 @@
       "name": "Canopy 4",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        106.08,
-        16.9824
-      ],
-      "rotation": [
-        0.44999999999999996,
-        0.75,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 106.08, 16.9824],
+      "rotation": [0.44999999999999996, 0.75, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "dodecahedron",
-        "args": [
-          14.03,
-          0
-        ],
+        "args": [14.03, 0],
         "color": "#7d9652",
         "emissive": "#40551f",
         "emissiveIntensity": 0.08,
@@ -1168,28 +733,13 @@
       "name": "Canopy 5",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        106.08,
-        -16.9824
-      ],
-      "rotation": [
-        0.6,
-        1,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 106.08, -16.9824],
+      "rotation": [0.6, 1, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "icosahedron",
-        "args": [
-          14.03,
-          0
-        ],
+        "args": [14.03, 0],
         "color": "#657d47",
         "emissive": "#40551f",
         "emissiveIntensity": 0.08,
@@ -1205,28 +755,13 @@
       "name": "Canopy 6",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        12.736799999999999,
-        113.88,
-        12.736799999999999
-      ],
-      "rotation": [
-        0.75,
-        1.25,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [12.736799999999999, 113.88, 12.736799999999999],
+      "rotation": [0.75, 1.25, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "dodecahedron",
-        "args": [
-          11.223999999999998,
-          0
-        ],
+        "args": [11.223999999999998, 0],
         "color": "#7d9652",
         "emissive": "#40551f",
         "emissiveIntensity": 0.08,
@@ -1242,28 +777,13 @@
       "name": "Canopy 7",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -12.736799999999999,
-        113.88,
-        12.736799999999999
-      ],
-      "rotation": [
-        0.8999999999999999,
-        1.5,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-12.736799999999999, 113.88, 12.736799999999999],
+      "rotation": [0.8999999999999999, 1.5, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "icosahedron",
-        "args": [
-          11.223999999999998,
-          0
-        ],
+        "args": [11.223999999999998, 0],
         "color": "#657d47",
         "emissive": "#40551f",
         "emissiveIntensity": 0.08,
@@ -1279,28 +799,13 @@
       "name": "Canopy 8",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        12.736799999999999,
-        113.88,
-        -12.736799999999999
-      ],
-      "rotation": [
-        1.05,
-        1.75,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [12.736799999999999, 113.88, -12.736799999999999],
+      "rotation": [1.05, 1.75, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "dodecahedron",
-        "args": [
-          11.223999999999998,
-          0
-        ],
+        "args": [11.223999999999998, 0],
         "color": "#7d9652",
         "emissive": "#40551f",
         "emissiveIntensity": 0.08,
@@ -1316,28 +821,13 @@
       "name": "Canopy 9",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -12.736799999999999,
-        113.88,
-        -12.736799999999999
-      ],
-      "rotation": [
-        1.2,
-        2,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-12.736799999999999, 113.88, -12.736799999999999],
+      "rotation": [1.2, 2, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "icosahedron",
-        "args": [
-          11.223999999999998,
-          0
-        ],
+        "args": [11.223999999999998, 0],
         "color": "#657d47",
         "emissive": "#40551f",
         "emissiveIntensity": 0.08,
@@ -1353,30 +843,13 @@
       "name": "Crown Halo",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        113.88,
-        0
-      ],
-      "rotation": [
-        1.5707963267948966,
-        0,
-        0
-      ],
-      "scale": [
-        1.242,
-        1.242,
-        1.242
-      ],
+      "position": [0, 113.88, 0],
+      "rotation": [1.5707963267948966, 0, 0],
+      "scale": [1.242, 1.242, 1.242],
       "visible": true,
       "primitive": {
         "geometry": "torus",
-        "args": [
-          24.192000000000004,
-          0.5376000000000001,
-          12,
-          32
-        ],
+        "args": [24.192000000000004, 0.5376000000000001, 12, 32],
         "color": "#d3c98a",
         "emissive": "#8d7b30",
         "emissiveIntensity": 0.35,
@@ -1394,30 +867,13 @@
       "name": "Well of Urd Ring",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -31.72,
-        0.5,
-        21.96
-      ],
-      "rotation": [
-        1.5707963267948966,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-31.72, 0.5, 21.96],
+      "rotation": [1.5707963267948966, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "torus",
-        "args": [
-          8,
-          0.5,
-          12,
-          26
-        ],
+        "args": [8, 0.5, 12, 26],
         "color": "#9a8e76",
         "emissive": "#2d261d",
         "emissiveIntensity": 0.05,
@@ -1433,21 +889,9 @@
       "name": "Well of Urd Pool",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -31.72,
-        -0.3,
-        21.96
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-31.72, -0.3, 21.96],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -1455,12 +899,7 @@
       },
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          6.2,
-          6.8,
-          1.2,
-          16
-        ],
+        "args": [6.2, 6.8, 1.2, 16],
         "color": "#7fb1c9",
         "emissive": "#7fb1c9",
         "emissiveIntensity": 0.18,
@@ -1478,21 +917,9 @@
       "name": "Well of Urd Firefly",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -31.72,
-        2.4,
-        21.96
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-31.72, 2.4, 21.96],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -1521,21 +948,9 @@
       "name": "Well of Urd Root Shrine",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -21.5,
-        0.9,
-        13.5
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.4,
-        1.4,
-        1.4
-      ],
+      "position": [-21.5, 0.9, 13.5],
+      "rotation": [0, 0, 0],
+      "scale": [1.4, 1.4, 1.4],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb"
@@ -1549,30 +964,13 @@
       "name": "Well of Mimir Ring",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        35.38,
-        0.5,
-        9.76
-      ],
-      "rotation": [
-        1.5707963267948966,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [35.38, 0.5, 9.76],
+      "rotation": [1.5707963267948966, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "torus",
-        "args": [
-          8,
-          0.5,
-          12,
-          26
-        ],
+        "args": [8, 0.5, 12, 26],
         "color": "#9a8e76",
         "emissive": "#2d261d",
         "emissiveIntensity": 0.05,
@@ -1588,21 +986,9 @@
       "name": "Well of Mimir Pool",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        35.38,
-        -0.3,
-        9.76
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [35.38, -0.3, 9.76],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -1610,12 +996,7 @@
       },
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          6.2,
-          6.8,
-          1.2,
-          16
-        ],
+        "args": [6.2, 6.8, 1.2, 16],
         "color": "#8ec0a4",
         "emissive": "#8ec0a4",
         "emissiveIntensity": 0.18,
@@ -1633,21 +1014,9 @@
       "name": "Well of Mimir Firefly",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        35.38,
-        2.4,
-        9.76
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [35.38, 2.4, 9.76],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -1676,21 +1045,9 @@
       "name": "Well of Mimir Root Shrine",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        33.5,
-        0.9,
-        3.5
-      ],
-      "rotation": [
-        0,
-        0.5,
-        0
-      ],
-      "scale": [
-        1.4,
-        1.4,
-        1.4
-      ],
+      "position": [33.5, 0.9, 3.5],
+      "rotation": [0, 0.5, 0],
+      "scale": [1.4, 1.4, 1.4],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb"
@@ -1704,30 +1061,13 @@
       "name": "Hvergelmir Basin Ring",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0.5,
-        39.04
-      ],
-      "rotation": [
-        1.5707963267948966,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0.5, 39.04],
+      "rotation": [1.5707963267948966, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "torus",
-        "args": [
-          8,
-          0.5,
-          12,
-          26
-        ],
+        "args": [8, 0.5, 12, 26],
         "color": "#9a8e76",
         "emissive": "#2d261d",
         "emissiveIntensity": 0.05,
@@ -1743,21 +1083,9 @@
       "name": "Hvergelmir Basin Pool",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        -0.3,
-        39.04
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, -0.3, 39.04],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -1765,12 +1093,7 @@
       },
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          6.2,
-          6.8,
-          1.2,
-          16
-        ],
+        "args": [6.2, 6.8, 1.2, 16],
         "color": "#8ca0d8",
         "emissive": "#8ca0d8",
         "emissiveIntensity": 0.18,
@@ -1788,21 +1111,9 @@
       "name": "Hvergelmir Basin Firefly",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        2.4,
-        39.04
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 2.4, 39.04],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -1831,21 +1142,9 @@
       "name": "Hvergelmir Basin Root Shrine",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        4.5,
-        0.9,
-        27.5
-      ],
-      "rotation": [
-        0,
-        1,
-        0
-      ],
-      "scale": [
-        1.4,
-        1.4,
-        1.4
-      ],
+      "position": [4.5, 0.9, 27.5],
+      "rotation": [0, 1, 0],
+      "scale": [1.4, 1.4, 1.4],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb"
@@ -1859,21 +1158,9 @@
       "name": "Rune Monolith 1",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        82.96,
-        4.2,
-        0
-      ],
-      "rotation": [
-        0,
-        3.141592653589793,
-        0
-      ],
-      "scale": [
-        1.35,
-        1.35,
-        1.35
-      ],
+      "position": [82.96, 4.2, 0],
+      "rotation": [0, 3.141592653589793, 0],
+      "scale": [1.35, 1.35, 1.35],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb"
@@ -1887,21 +1174,9 @@
       "name": "Rune Monolith 1 Firefly",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        101.21119999999999,
-        9.5,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [101.21119999999999, 9.5, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -1930,21 +1205,9 @@
       "name": "Rune Monolith 2",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        58.661578567235985,
-        4.2,
-        58.66157856723598
-      ],
-      "rotation": [
-        0,
-        3.9269908169872414,
-        0
-      ],
-      "scale": [
-        1.4300000000000002,
-        1.4700000000000002,
-        1.35
-      ],
+      "position": [58.661578567235985, 4.2, 58.66157856723598],
+      "rotation": [0, 3.9269908169872414, 0],
+      "scale": [1.4300000000000002, 1.4700000000000002, 1.35],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18T22-29-37-524Z.glb"
@@ -1958,21 +1221,9 @@
       "name": "Rune Monolith 2 Firefly",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        71.5671258520279,
-        9.5,
-        71.56712585202789
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [71.5671258520279, 9.5, 71.56712585202789],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -2001,21 +1252,9 @@
       "name": "Rune Monolith 3",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        5.0798349228632206e-15,
-        4.2,
-        82.96
-      ],
-      "rotation": [
-        0,
-        4.71238898038469,
-        0
-      ],
-      "scale": [
-        1.51,
-        1.35,
-        1.35
-      ],
+      "position": [5.0798349228632206e-15, 4.2, 82.96],
+      "rotation": [0, 4.71238898038469, 0],
+      "scale": [1.51, 1.35, 1.35],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18T22-42-43-915Z.glb"
@@ -2029,21 +1268,9 @@
       "name": "Rune Monolith 3 Firefly",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        6.197398605893129e-15,
-        9.5,
-        101.21119999999999
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [6.197398605893129e-15, 9.5, 101.21119999999999],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -2072,21 +1299,9 @@
       "name": "Rune Monolith 4",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -58.66157856723598,
-        4.2,
-        58.661578567235985
-      ],
-      "rotation": [
-        0,
-        5.497787143782138,
-        0
-      ],
-      "scale": [
-        1.35,
-        1.4700000000000002,
-        1.35
-      ],
+      "position": [-58.66157856723598, 4.2, 58.661578567235985],
+      "rotation": [0, 5.497787143782138, 0],
+      "scale": [1.35, 1.4700000000000002, 1.35],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb"
@@ -2100,21 +1315,9 @@
       "name": "Rune Monolith 4 Firefly",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -71.56712585202789,
-        9.5,
-        71.5671258520279
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-71.56712585202789, 9.5, 71.5671258520279],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -2143,21 +1346,9 @@
       "name": "Rune Monolith 5",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -82.96,
-        4.2,
-        1.0159669845726441e-14
-      ],
-      "rotation": [
-        0,
-        6.283185307179586,
-        0
-      ],
-      "scale": [
-        1.4300000000000002,
-        1.35,
-        1.35
-      ],
+      "position": [-82.96, 4.2, 1.0159669845726441e-14],
+      "rotation": [0, 6.283185307179586, 0],
+      "scale": [1.4300000000000002, 1.35, 1.35],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb"
@@ -2171,21 +1362,9 @@
       "name": "Rune Monolith 5 Firefly",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -101.21119999999999,
-        9.5,
-        1.2394797211786258e-14
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-101.21119999999999, 9.5, 1.2394797211786258e-14],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -2214,21 +1393,9 @@
       "name": "Rune Monolith 6",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -58.661578567236,
-        4.2,
-        -58.66157856723598
-      ],
-      "rotation": [
-        0,
-        7.0685834705770345,
-        0
-      ],
-      "scale": [
-        1.51,
-        1.4700000000000002,
-        1.35
-      ],
+      "position": [-58.661578567236, 4.2, -58.66157856723598],
+      "rotation": [0, 7.0685834705770345, 0],
+      "scale": [1.51, 1.4700000000000002, 1.35],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-23-01-827Z.glb"
@@ -2242,21 +1409,9 @@
       "name": "Rune Monolith 6 Firefly",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -71.56712585202791,
-        9.5,
-        -71.56712585202789
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-71.56712585202791, 9.5, -71.56712585202789],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -2285,21 +1440,9 @@
       "name": "Rune Monolith 7",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -1.5239504768589664e-14,
-        4.2,
-        -82.96
-      ],
-      "rotation": [
-        0,
-        7.853981633974483,
-        0
-      ],
-      "scale": [
-        1.35,
-        1.35,
-        1.35
-      ],
+      "position": [-1.5239504768589664e-14, 4.2, -82.96],
+      "rotation": [0, 7.853981633974483, 0],
+      "scale": [1.35, 1.35, 1.35],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
@@ -2313,21 +1456,9 @@
       "name": "Rune Monolith 7 Firefly",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -1.859219581767939e-14,
-        9.5,
-        -101.21119999999999
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-1.859219581767939e-14, 9.5, -101.21119999999999],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -2356,21 +1487,9 @@
       "name": "Rune Monolith 8",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        58.66157856723597,
-        4.2,
-        -58.661578567236
-      ],
-      "rotation": [
-        0,
-        8.63937979737193,
-        0
-      ],
-      "scale": [
-        1.4300000000000002,
-        1.4700000000000002,
-        1.35
-      ],
+      "position": [58.66157856723597, 4.2, -58.661578567236],
+      "rotation": [0, 8.63937979737193, 0],
+      "scale": [1.4300000000000002, 1.4700000000000002, 1.35],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
@@ -2384,21 +1503,9 @@
       "name": "Rune Monolith 8 Firefly",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        71.56712585202789,
-        9.5,
-        -71.56712585202791
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [71.56712585202789, 9.5, -71.56712585202791],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -2427,21 +1534,9 @@
       "name": "Approach Stone 1",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0.6200000000000001,
-        -92
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0.6200000000000001, -92],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -2449,11 +1544,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          11,
-          1,
-          7.2
-        ],
+        "args": [11, 1, 7.2],
         "color": "#ff7373",
         "emissive": "#ff7373",
         "emissiveIntensity": 0.22,
@@ -2469,21 +1560,9 @@
       "name": "Approach Stone 2",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0.53,
-        -76
-      ],
-      "rotation": [
-        0,
-        0.2,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0.53, -76],
+      "rotation": [0, 0.2, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -2491,11 +1570,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          10,
-          1,
-          7.2
-        ],
+        "args": [10, 1, 7.2],
         "color": "#ffb36d",
         "emissive": "#ffb36d",
         "emissiveIntensity": 0.22,
@@ -2511,21 +1586,9 @@
       "name": "Approach Stone 3",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0.6200000000000001,
-        -60
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0.6200000000000001, -60],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -2533,11 +1596,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          11,
-          1,
-          7.2
-        ],
+        "args": [11, 1, 7.2],
         "color": "#ffe58a",
         "emissive": "#ffe58a",
         "emissiveIntensity": 0.22,
@@ -2553,21 +1612,9 @@
       "name": "Approach Stone 4",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0.53,
-        -44
-      ],
-      "rotation": [
-        0,
-        0.2,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0.53, -44],
+      "rotation": [0, 0.2, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -2575,11 +1622,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          10,
-          1,
-          7.2
-        ],
+        "args": [10, 1, 7.2],
         "color": "#a8f08f",
         "emissive": "#a8f08f",
         "emissiveIntensity": 0.22,
@@ -2595,21 +1638,9 @@
       "name": "Approach Stone 5",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0.6200000000000001,
-        -28
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0.6200000000000001, -28],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -2617,11 +1648,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          11,
-          1,
-          7.2
-        ],
+        "args": [11, 1, 7.2],
         "color": "#8fe6ff",
         "emissive": "#8fe6ff",
         "emissiveIntensity": 0.22,
@@ -2637,21 +1664,9 @@
       "name": "Approach Stone 6",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0.53,
-        -12
-      ],
-      "rotation": [
-        0,
-        0.2,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0.53, -12],
+      "rotation": [0, 0.2, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -2659,11 +1674,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          10,
-          1,
-          7.2
-        ],
+        "args": [10, 1, 7.2],
         "color": "#9db0ff",
         "emissive": "#9db0ff",
         "emissiveIntensity": 0.22,
@@ -2678,21 +1689,9 @@
       "id": "yggdrasil-ambient-whispers",
       "name": "World Tree Ambience",
       "kind": "group",
-      "position": [
-        0,
-        8,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        216,
-        44,
-        216
-      ],
+      "position": [0, 8, 0],
+      "rotation": [0, 0, 0],
+      "scale": [216, 44, 216],
       "visible": true,
       "gameplay": {
         "type": "audio-region",
@@ -2707,21 +1706,9 @@
       "id": "yggdrasil-mist-volume",
       "name": "Lower Bough Mist",
       "kind": "group",
-      "position": [
-        0,
-        10,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        180,
-        39.6,
-        180
-      ],
+      "position": [0, 10, 0],
+      "rotation": [0, 0, 0],
+      "scale": [180, 39.6, 180],
       "visible": true,
       "gameplay": {
         "type": "fog-volume",
@@ -2736,21 +1723,9 @@
       "id": "yggdrasil-story-firefly",
       "name": "Caretaker Firefly",
       "kind": "group",
-      "position": [
-        4.88,
-        5.5,
-        -7.32
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [4.88, 5.5, -7.32],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -2779,21 +1754,9 @@
       "name": "Bifrost Threshold",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0,
-        -108.95360000000001
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.12,
-        1.06,
-        1.12
-      ],
+      "position": [0, 0, -108.95360000000001],
+      "rotation": [0, 0, 0],
+      "scale": [1.12, 1.06, 1.12],
       "visible": true
     },
     {
@@ -2801,21 +1764,9 @@
       "name": "Bifrost Gate",
       "kind": "prefab",
       "parentId": "yggdrasil-arrival-group",
-      "position": [
-        0,
-        0.2,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.4560000000000002,
-        1.3780000000000001,
-        1.4560000000000002
-      ],
+      "position": [0, 0.2, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1.4560000000000002, 1.3780000000000001, 1.4560000000000002],
       "visible": true,
       "prefab": {
         "type": "portal-apparatus"
@@ -2829,21 +1780,9 @@
       "name": "Arrival Column Left",
       "kind": "prefab",
       "parentId": "yggdrasil-arrival-group",
-      "position": [
-        -10.1952,
-        0,
-        1.4336000000000002
-      ],
-      "rotation": [
-        0,
-        0.18,
-        0
-      ],
-      "scale": [
-        1.2320000000000002,
-        1.484,
-        1.2320000000000002
-      ],
+      "position": [-10.1952, 0, 1.4336000000000002],
+      "rotation": [0, 0.18, 0],
+      "scale": [1.2320000000000002, 1.484, 1.2320000000000002],
       "visible": true,
       "prefab": {
         "type": "support-column"
@@ -2857,21 +1796,9 @@
       "name": "Arrival Column Right",
       "kind": "prefab",
       "parentId": "yggdrasil-arrival-group",
-      "position": [
-        10.1952,
-        0,
-        1.4336000000000002
-      ],
-      "rotation": [
-        0,
-        -0.18,
-        0
-      ],
-      "scale": [
-        1.2320000000000002,
-        1.484,
-        1.2320000000000002
-      ],
+      "position": [10.1952, 0, 1.4336000000000002],
+      "rotation": [0, -0.18, 0],
+      "scale": [1.2320000000000002, 1.484, 1.2320000000000002],
       "visible": true,
       "prefab": {
         "type": "support-column"
@@ -2885,21 +1812,9 @@
       "name": "Threshold Monolith Left",
       "kind": "asset",
       "parentId": "yggdrasil-arrival-group",
-      "position": [
-        -17.8416,
-        4.5,
-        5.734400000000001
-      ],
-      "rotation": [
-        0,
-        0.35,
-        0
-      ],
-      "scale": [
-        1.288,
-        1.4310000000000003,
-        1.288
-      ],
+      "position": [-17.8416, 4.5, 5.734400000000001],
+      "rotation": [0, 0.35, 0],
+      "scale": [1.288, 1.4310000000000003, 1.288],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
@@ -2913,21 +1828,9 @@
       "name": "Threshold Monolith Right",
       "kind": "asset",
       "parentId": "yggdrasil-arrival-group",
-      "position": [
-        17.8416,
-        4.5,
-        5.734400000000001
-      ],
-      "rotation": [
-        0,
-        -0.35,
-        0
-      ],
-      "scale": [
-        1.288,
-        1.4310000000000003,
-        1.288
-      ],
+      "position": [17.8416, 4.5, 5.734400000000001],
+      "rotation": [0, -0.35, 0],
+      "scale": [1.288, 1.4310000000000003, 1.288],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
@@ -2941,21 +1844,9 @@
       "name": "Return to Observatory",
       "kind": "prefab",
       "parentId": "yggdrasil-arrival-group",
-      "position": [
-        0,
-        0.1,
-        -7.168000000000001
-      ],
-      "rotation": [
-        0,
-        3.141592653589793,
-        0
-      ],
-      "scale": [
-        1.064,
-        1.007,
-        1.064
-      ],
+      "position": [0, 0.1, -7.168000000000001],
+      "rotation": [0, 3.141592653589793, 0],
+      "scale": [1.064, 1.007, 1.064],
       "visible": true,
       "prefab": {
         "type": "portal-apparatus"
@@ -2975,21 +1866,9 @@
       "name": "Story Marker · Bifrost Threshold",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        1.6,
-        -90.3168
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.12,
-        1.06,
-        1.12
-      ],
+      "position": [0, 1.6, -90.3168],
+      "rotation": [0, 0, 0],
+      "scale": [1.12, 1.06, 1.12],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -3014,21 +1893,9 @@
       "name": "urd Shrine Column Left",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -39.04,
-        0.15,
-        17.08
-      ],
-      "rotation": [
-        0,
-        0.5,
-        0
-      ],
-      "scale": [
-        0.9,
-        1.1,
-        0.9
-      ],
+      "position": [-39.04, 0.15, 17.08],
+      "rotation": [0, 0.5, 0],
+      "scale": [0.9, 1.1, 0.9],
       "visible": true,
       "prefab": {
         "type": "support-column"
@@ -3042,21 +1909,9 @@
       "name": "urd Shrine Column Right",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -24.4,
-        0.15,
-        17.08
-      ],
-      "rotation": [
-        0,
-        -0.5,
-        0
-      ],
-      "scale": [
-        0.9,
-        1.1,
-        0.9
-      ],
+      "position": [-24.4, 0.15, 17.08],
+      "rotation": [0, -0.5, 0],
+      "scale": [0.9, 1.1, 0.9],
       "visible": true,
       "prefab": {
         "type": "support-column"
@@ -3070,21 +1925,9 @@
       "name": "urd Shrine Rig",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -31.72,
-        0.4,
-        12.2
-      ],
-      "rotation": [
-        0,
-        0.5,
-        0
-      ],
-      "scale": [
-        0.8,
-        0.8,
-        0.8
-      ],
+      "position": [-31.72, 0.4, 12.2],
+      "rotation": [0, 0.5, 0],
+      "scale": [0.8, 0.8, 0.8],
       "visible": true,
       "prefab": {
         "type": "observation-rig"
@@ -3098,21 +1941,9 @@
       "name": "mimir Shrine Column Left",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        28.06,
-        0.15,
-        4.88
-      ],
-      "rotation": [
-        0,
-        -0.35,
-        0
-      ],
-      "scale": [
-        0.9,
-        1.1,
-        0.9
-      ],
+      "position": [28.06, 0.15, 4.88],
+      "rotation": [0, -0.35, 0],
+      "scale": [0.9, 1.1, 0.9],
       "visible": true,
       "prefab": {
         "type": "support-column"
@@ -3126,21 +1957,9 @@
       "name": "mimir Shrine Column Right",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        42.699999999999996,
-        0.15,
-        4.88
-      ],
-      "rotation": [
-        0,
-        0.35,
-        0
-      ],
-      "scale": [
-        0.9,
-        1.1,
-        0.9
-      ],
+      "position": [42.699999999999996, 0.15, 4.88],
+      "rotation": [0, 0.35, 0],
+      "scale": [0.9, 1.1, 0.9],
       "visible": true,
       "prefab": {
         "type": "support-column"
@@ -3154,21 +1973,9 @@
       "name": "mimir Shrine Rig",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        35.38,
-        0.4,
-        0
-      ],
-      "rotation": [
-        0,
-        -0.35,
-        0
-      ],
-      "scale": [
-        0.8,
-        0.8,
-        0.8
-      ],
+      "position": [35.38, 0.4, 0],
+      "rotation": [0, -0.35, 0],
+      "scale": [0.8, 0.8, 0.8],
       "visible": true,
       "prefab": {
         "type": "observation-rig"
@@ -3182,21 +1989,9 @@
       "name": "hvergelmir Shrine Column Left",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -7.32,
-        0.15,
-        34.16
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        0.9,
-        1.1,
-        0.9
-      ],
+      "position": [-7.32, 0.15, 34.16],
+      "rotation": [0, 0, 0],
+      "scale": [0.9, 1.1, 0.9],
       "visible": true,
       "prefab": {
         "type": "support-column"
@@ -3210,21 +2005,9 @@
       "name": "hvergelmir Shrine Column Right",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        7.32,
-        0.15,
-        34.16
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        0.9,
-        1.1,
-        0.9
-      ],
+      "position": [7.32, 0.15, 34.16],
+      "rotation": [0, 0, 0],
+      "scale": [0.9, 1.1, 0.9],
       "visible": true,
       "prefab": {
         "type": "support-column"
@@ -3238,21 +2021,9 @@
       "name": "hvergelmir Shrine Rig",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0.4,
-        29.28
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        0.8,
-        0.8,
-        0.8
-      ],
+      "position": [0, 0.4, 29.28],
+      "rotation": [0, 0, 0],
+      "scale": [0.8, 0.8, 0.8],
       "visible": true,
       "prefab": {
         "type": "observation-rig"
@@ -3266,21 +2037,9 @@
       "name": "Urd Root Shrine",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -24.4,
-        0.25,
-        14.64
-      ],
-      "rotation": [
-        0,
-        0.65,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-24.4, 0.25, 14.64],
+      "rotation": [0, 0.65, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "prefab": {
         "type": "growth-planter"
@@ -3294,21 +2053,9 @@
       "name": "Mimir Root Shrine",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        26.84,
-        0.25,
-        2.44
-      ],
-      "rotation": [
-        0,
-        -0.55,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [26.84, 0.25, 2.44],
+      "rotation": [0, -0.55, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "prefab": {
         "type": "growth-planter"
@@ -3322,21 +2069,9 @@
       "name": "Hvergelmir Bench",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -9.76,
-        0.25,
-        34.16
-      ],
-      "rotation": [
-        0,
-        0.2,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-9.76, 0.25, 34.16],
+      "rotation": [0, 0.2, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "prefab": {
         "type": "bench-growth"
@@ -3350,21 +2085,9 @@
       "name": "Norns at Urd",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -31,
-        2.1,
-        16
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-31, 2.1, 16],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -3389,21 +2112,9 @@
       "name": "Mimir's Price",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        35,
-        2.1,
-        10
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [35, 2.1, 10],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -3428,21 +2139,9 @@
       "name": "The Gnawing Root",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        2,
-        2.1,
-        39
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [2, 2.1, 39],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -3467,21 +2166,9 @@
       "name": "Ratatoskr's Route",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        6,
-        26,
-        6
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [6, 26, 6],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -3506,21 +2193,9 @@
       "name": "Watcher in the Crown",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        106.08,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.242,
-        1.242,
-        1.242
-      ],
+      "position": [0, 106.08, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1.242, 1.242, 1.242],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -3545,21 +2220,9 @@
       "name": "Browsers of the Leaves",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -12.744,
-        93.60000000000001,
-        17.8416
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.242,
-        1.242,
-        1.242
-      ],
+      "position": [-12.744, 93.60000000000001, 17.8416],
+      "rotation": [0, 0, 0],
+      "scale": [1.242, 1.242, 1.242],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -3584,21 +2247,9 @@
       "name": "Root-Keeper",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        3,
-        6.2,
-        -3
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [3, 6.2, -3],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -3627,21 +2278,9 @@
       "name": "Huginn Spirit",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -9,
-        63,
-        -4
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-9, 63, -4],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -3670,21 +2309,9 @@
       "name": "Muninn Spirit",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        9,
-        64,
-        -2
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [9, 64, -2],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -3713,21 +2340,9 @@
       "name": "Dainn Spirit",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        14,
-        58,
-        10
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [14, 58, 10],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -3756,21 +2371,9 @@
       "name": "Dvalinn Spirit",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -15,
-        57,
-        11
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-15, 57, 11],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -3799,21 +2402,9 @@
       "name": "Root Serpent Omen",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        2,
-        1.4,
-        35
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [2, 1.4, 35],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -3842,29 +2433,13 @@
       "name": "Bifrost Ribbon 1",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -3.9,
-        0.9,
-        -74
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-3.9, 0.9, -74],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          1.05,
-          0.1,
-          82
-        ],
+        "args": [1.05, 0.1, 82],
         "color": "#ff5c5c",
         "emissive": "#8a1b1b",
         "emissiveIntensity": 0.65,
@@ -3882,29 +2457,13 @@
       "name": "Bifrost Ribbon 2",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -2.5999999999999996,
-        0.9,
-        -74
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-2.5999999999999996, 0.9, -74],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          1.05,
-          0.1,
-          82
-        ],
+        "args": [1.05, 0.1, 82],
         "color": "#ff9a3c",
         "emissive": "#8a4a12",
         "emissiveIntensity": 0.65,
@@ -3922,29 +2481,13 @@
       "name": "Bifrost Ribbon 3",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -1.2999999999999998,
-        0.9,
-        -74
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-1.2999999999999998, 0.9, -74],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          1.05,
-          0.1,
-          82
-        ],
+        "args": [1.05, 0.1, 82],
         "color": "#ffe066",
         "emissive": "#8a7720",
         "emissiveIntensity": 0.65,
@@ -3962,29 +2505,13 @@
       "name": "Bifrost Ribbon 4",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        4.440892098500626e-16,
-        0.9,
-        -74
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [4.440892098500626e-16, 0.9, -74],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          1.05,
-          0.1,
-          82
-        ],
+        "args": [1.05, 0.1, 82],
         "color": "#8df07a",
         "emissive": "#2d7a24",
         "emissiveIntensity": 0.65,
@@ -4002,29 +2529,13 @@
       "name": "Bifrost Ribbon 5",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        1.3000000000000003,
-        0.9,
-        -74
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [1.3000000000000003, 0.9, -74],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          1.05,
-          0.1,
-          82
-        ],
+        "args": [1.05, 0.1, 82],
         "color": "#68d8ff",
         "emissive": "#1b578a",
         "emissiveIntensity": 0.65,
@@ -4042,29 +2553,13 @@
       "name": "Bifrost Ribbon 6",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        2.6,
-        0.9,
-        -74
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [2.6, 0.9, -74],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          1.05,
-          0.1,
-          82
-        ],
+        "args": [1.05, 0.1, 82],
         "color": "#7b8cff",
         "emissive": "#2a318a",
         "emissiveIntensity": 0.65,
@@ -4082,29 +2577,13 @@
       "name": "Bifrost Ribbon 7",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        3.900000000000001,
-        0.9,
-        -74
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [3.900000000000001, 0.9, -74],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          1.05,
-          0.1,
-          82
-        ],
+        "args": [1.05, 0.1, 82],
         "color": "#d38dff",
         "emissive": "#6a2f8a",
         "emissiveIntensity": 0.65,
@@ -4122,21 +2601,9 @@
       "name": "Bifrost Spark 1",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -1.6,
-        2.2,
-        -67
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-1.6, 2.2, -67],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -4165,21 +2632,9 @@
       "name": "Bifrost Spark 2",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0.8,
-        2.8,
-        -49
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0.8, 2.8, -49],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -4208,21 +2663,9 @@
       "name": "Bifrost Spark 3",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        2.1,
-        2.4,
-        -33
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [2.1, 2.4, -33],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -4251,21 +2694,9 @@
       "name": "Crown Perch",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true
     },
     {
@@ -4273,30 +2704,13 @@
       "name": "Eagle Crown Ring",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-perch-group",
-      "position": [
-        0,
-        105.768,
-        0
-      ],
-      "rotation": [
-        1.5707963267948966,
-        0,
-        0
-      ],
-      "scale": [
-        1.242,
-        1.242,
-        1.242
-      ],
+      "position": [0, 105.768, 0],
+      "rotation": [1.5707963267948966, 0, 0],
+      "scale": [1.242, 1.242, 1.242],
       "visible": true,
       "primitive": {
         "geometry": "torus",
-        "args": [
-          12.096000000000002,
-          0.37632000000000004,
-          14,
-          36
-        ],
+        "args": [12.096000000000002, 0.37632000000000004, 14, 36],
         "color": "#ddd2a0",
         "emissive": "#8f7d2f",
         "emissiveIntensity": 0.48,
@@ -4314,21 +2728,9 @@
       "name": "Veðrfölnir Perch",
       "kind": "prefab",
       "parentId": "yggdrasil-crown-perch-group",
-      "position": [
-        0,
-        103.272,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.1799,
-        1.1799,
-        1.1799
-      ],
+      "position": [0, 103.272, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1.1799, 1.1799, 1.1799],
       "visible": true,
       "prefab": {
         "type": "observation-rig"
@@ -4342,21 +2744,9 @@
       "name": "Crown Spire",
       "kind": "prefab",
       "parentId": "yggdrasil-crown-perch-group",
-      "position": [
-        0,
-        106.70400000000001,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        0.9936,
-        1.5525,
-        0.9936
-      ],
+      "position": [0, 106.70400000000001, 0],
+      "rotation": [0, 0, 0],
+      "scale": [0.9936, 1.5525, 0.9936],
       "visible": true,
       "prefab": {
         "type": "support-column"
@@ -4370,21 +2760,9 @@
       "name": "Crown Perch Chronicle",
       "kind": "prefab",
       "parentId": "yggdrasil-crown-perch-group",
-      "position": [
-        0,
-        108.88799999999999,
-        4.07808
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.242,
-        1.242,
-        1.242
-      ],
+      "position": [0, 108.88799999999999, 4.07808],
+      "rotation": [0, 0, 0],
+      "scale": [1.242, 1.242, 1.242],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -4409,21 +2787,9 @@
       "name": "Eagle Spirit",
       "kind": "group",
       "parentId": "yggdrasil-crown-perch-group",
-      "position": [
-        0,
-        111.69599999999998,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.242,
-        1.242,
-        1.242
-      ],
+      "position": [0, 111.69599999999998, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1.242, 1.242, 1.242],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -4452,21 +2818,9 @@
       "name": "Veðrfölnir",
       "kind": "group",
       "parentId": "yggdrasil-crown-perch-group",
-      "position": [
-        1.52928,
-        110.604,
-        1.4018400000000002
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.242,
-        1.242,
-        1.242
-      ],
+      "position": [1.52928, 110.604, 1.4018400000000002],
+      "rotation": [0, 0, 0],
+      "scale": [1.242, 1.242, 1.242],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -4495,21 +2849,9 @@
       "name": "Hvergelmir Depths",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true
     },
     {
@@ -4517,21 +2859,9 @@
       "name": "Lower Root Arch",
       "kind": "prefab",
       "parentId": "yggdrasil-hvergelmir-depth-group",
-      "position": [
-        0,
-        0.3675,
-        56.32
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.4560000000000002,
-        1.4560000000000002,
-        1.4560000000000002
-      ],
+      "position": [0, 0.3675, 56.32],
+      "rotation": [0, 0, 0],
+      "scale": [1.4560000000000002, 1.4560000000000002, 1.4560000000000002],
       "visible": true,
       "prefab": {
         "type": "wasteland-archway"
@@ -4545,21 +2875,9 @@
       "name": "Lower Root Arch 2",
       "kind": "prefab",
       "parentId": "yggdrasil-hvergelmir-depth-group",
-      "position": [
-        0,
-        0.2625,
-        74.24
-      ],
-      "rotation": [
-        0,
-        3.141592653589793,
-        0
-      ],
-      "scale": [
-        1.3216,
-        1.3216,
-        1.3216
-      ],
+      "position": [0, 0.2625, 74.24],
+      "rotation": [0, 3.141592653589793, 0],
+      "scale": [1.3216, 1.3216, 1.3216],
       "visible": true,
       "prefab": {
         "type": "wasteland-archway"
@@ -4573,21 +2891,9 @@
       "name": "Broken Root Ring",
       "kind": "prefab",
       "parentId": "yggdrasil-hvergelmir-depth-group",
-      "position": [
-        0,
-        0.42000000000000004,
-        65.28
-      ],
-      "rotation": [
-        0,
-        0.2,
-        0
-      ],
-      "scale": [
-        1.568,
-        1.568,
-        1.568
-      ],
+      "position": [0, 0.42000000000000004, 65.28],
+      "rotation": [0, 0.2, 0],
+      "scale": [1.568, 1.568, 1.568],
       "visible": true,
       "prefab": {
         "type": "broken-ring"
@@ -4601,21 +2907,9 @@
       "name": "Depth Monolith Left",
       "kind": "asset",
       "parentId": "yggdrasil-hvergelmir-depth-group",
-      "position": [
-        -12.2,
-        3.9899999999999998,
-        64
-      ],
-      "rotation": [
-        0,
-        0.4,
-        0
-      ],
-      "scale": [
-        1.288,
-        1.288,
-        1.288
-      ],
+      "position": [-12.2, 3.9899999999999998, 64],
+      "rotation": [0, 0.4, 0],
+      "scale": [1.288, 1.288, 1.288],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb"
@@ -4629,21 +2923,9 @@
       "name": "Depth Monolith Right",
       "kind": "asset",
       "parentId": "yggdrasil-hvergelmir-depth-group",
-      "position": [
-        12.2,
-        3.9899999999999998,
-        64
-      ],
-      "rotation": [
-        0,
-        -0.4,
-        0
-      ],
-      "scale": [
-        1.288,
-        1.288,
-        1.288
-      ],
+      "position": [12.2, 3.9899999999999998, 64],
+      "rotation": [0, -0.4, 0],
+      "scale": [1.288, 1.288, 1.288],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb"
@@ -4657,30 +2939,13 @@
       "name": "Tunnel Root 1",
       "kind": "primitive",
       "parentId": "yggdrasil-hvergelmir-depth-group",
-      "position": [
-        -6,
-        2.2,
-        55
-      ],
-      "rotation": [
-        0.65,
-        0,
-        0.4
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-6, 2.2, 55],
+      "rotation": [0.65, 0, 0.4],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          1.1,
-          2.2,
-          22,
-          10
-        ],
+        "args": [1.1, 2.2, 22, 10],
         "color": "#402b1c",
         "emissive": "#190f08",
         "emissiveIntensity": 0.04,
@@ -4696,30 +2961,13 @@
       "name": "Tunnel Root 2",
       "kind": "primitive",
       "parentId": "yggdrasil-hvergelmir-depth-group",
-      "position": [
-        6,
-        2.4,
-        56
-      ],
-      "rotation": [
-        0.72,
-        0,
-        -0.42
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [6, 2.4, 56],
+      "rotation": [0.72, 0, -0.42],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          1.1,
-          2.2,
-          24,
-          10
-        ],
+        "args": [1.1, 2.2, 24, 10],
         "color": "#402b1c",
         "emissive": "#190f08",
         "emissiveIntensity": 0.04,
@@ -4735,30 +2983,13 @@
       "name": "Tunnel Root 3",
       "kind": "primitive",
       "parentId": "yggdrasil-hvergelmir-depth-group",
-      "position": [
-        0,
-        1.8,
-        60
-      ],
-      "rotation": [
-        0.98,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 1.8, 60],
+      "rotation": [0.98, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          1.25,
-          2.4,
-          20,
-          10
-        ],
+        "args": [1.25, 2.4, 20, 10],
         "color": "#493220",
         "emissive": "#1b1108",
         "emissiveIntensity": 0.05,
@@ -4774,21 +3005,9 @@
       "name": "Hvergelmir Root Mist",
       "kind": "group",
       "parentId": "yggdrasil-hvergelmir-depth-group",
-      "position": [
-        0,
-        6,
-        64.66
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        40,
-        18,
-        34
-      ],
+      "position": [0, 6, 64.66],
+      "rotation": [0, 0, 0],
+      "scale": [40, 18, 34],
       "visible": true,
       "gameplay": {
         "type": "fog-volume",
@@ -4804,21 +3023,9 @@
       "name": "Depth Chronicle",
       "kind": "prefab",
       "parentId": "yggdrasil-hvergelmir-depth-group",
-      "position": [
-        0,
-        2.1,
-        65.88
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 2.1, 65.88],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -4843,21 +3050,9 @@
       "name": "Nidhogg Omen",
       "kind": "group",
       "parentId": "yggdrasil-hvergelmir-depth-group",
-      "position": [
-        0,
-        1.4,
-        73.2
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 1.4, 73.2],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -4886,21 +3081,9 @@
       "name": "Foreground Root Stone Left",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -25.488,
-        4.8,
-        -137.62560000000002
-      ],
-      "rotation": [
-        0,
-        0.35,
-        0
-      ],
-      "scale": [
-        1.1760000000000002,
-        1.3250000000000002,
-        1.1760000000000002
-      ],
+      "position": [-25.488, 4.8, -137.62560000000002],
+      "rotation": [0, 0.35, 0],
+      "scale": [1.1760000000000002, 1.3250000000000002, 1.1760000000000002],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
@@ -4914,21 +3097,9 @@
       "name": "Foreground Root Stone Right",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        25.488,
-        4.8,
-        -137.62560000000002
-      ],
-      "rotation": [
-        0,
-        -0.35,
-        0
-      ],
-      "scale": [
-        1.1760000000000002,
-        1.3250000000000002,
-        1.1760000000000002
-      ],
+      "position": [25.488, 4.8, -137.62560000000002],
+      "rotation": [0, -0.35, 0],
+      "scale": [1.1760000000000002, 1.3250000000000002, 1.1760000000000002],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
@@ -4942,21 +3113,9 @@
       "name": "Threshold Spark Left",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -15.2928,
-        3.1,
-        -126.1568
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.12,
-        1.06,
-        1.12
-      ],
+      "position": [-15.2928, 3.1, -126.1568],
+      "rotation": [0, 0, 0],
+      "scale": [1.12, 1.06, 1.12],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -4985,21 +3144,9 @@
       "name": "Threshold Spark Right",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        15.2928,
-        3.2,
-        -129.02400000000003
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.12,
-        1.06,
-        1.12
-      ],
+      "position": [15.2928, 3.2, -129.02400000000003],
+      "rotation": [0, 0, 0],
+      "scale": [1.12, 1.06, 1.12],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -5028,21 +3175,9 @@
       "name": "Rainbow Threshold Ambience",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        6,
-        -78
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        84,
-        19.8,
-        84
-      ],
+      "position": [0, 6, -78],
+      "rotation": [0, 0, 0],
+      "scale": [84, 19.8, 84],
       "visible": true,
       "gameplay": {
         "type": "audio-region",
@@ -5058,21 +3193,9 @@
       "name": "Urdarbrunnr Ambience",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -26,
-        5,
-        18
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        40.8,
-        15.400000000000002,
-        40.8
-      ],
+      "position": [-26, 5, 18],
+      "rotation": [0, 0, 0],
+      "scale": [40.8, 15.400000000000002, 40.8],
       "visible": true,
       "gameplay": {
         "type": "audio-region",
@@ -5088,21 +3211,9 @@
       "name": "Mímisbrunnr Ambience",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        29,
-        5,
-        8
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        38.4,
-        15.400000000000002,
-        38.4
-      ],
+      "position": [29, 5, 8],
+      "rotation": [0, 0, 0],
+      "scale": [38.4, 15.400000000000002, 38.4],
       "visible": true,
       "gameplay": {
         "type": "audio-region",
@@ -5118,21 +3229,9 @@
       "name": "Hvergelmir Ambience",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        5,
-        32
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        40.8,
-        17.6,
-        40.8
-      ],
+      "position": [0, 5, 32],
+      "rotation": [0, 0, 0],
+      "scale": [40.8, 17.6, 40.8],
       "visible": true,
       "gameplay": {
         "type": "audio-region",
@@ -5148,21 +3247,9 @@
       "name": "Crown Watch Ambience",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        64,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        50.4,
-        24.200000000000003,
-        50.4
-      ],
+      "position": [0, 64, 0],
+      "rotation": [0, 0, 0],
+      "scale": [50.4, 24.200000000000003, 50.4],
       "visible": true,
       "gameplay": {
         "type": "audio-region",
@@ -5178,21 +3265,9 @@
       "name": "Niðr-Rót Ambience",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        5,
-        54
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        55.199999999999996,
-        22,
-        45.6
-      ],
+      "position": [0, 5, 54],
+      "rotation": [0, 0, 0],
+      "scale": [55.199999999999996, 22, 45.6],
       "visible": true,
       "gameplay": {
         "type": "audio-region",
@@ -5208,21 +3283,9 @@
       "name": "Crown Ascent",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        0,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true
     },
     {
@@ -5230,21 +3293,9 @@
       "name": "Crown Ramp 1",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        1.5606898808333871e-15,
-        3.4320000000000004,
-        -25.488
-      ],
-      "rotation": [
-        -0.55,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [1.5606898808333871e-15, 3.4320000000000004, -25.488],
+      "rotation": [-0.55, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5252,11 +3303,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#75654f",
         "emissive": "#2c241a",
         "emissiveIntensity": 0.06,
@@ -5272,21 +3319,9 @@
       "name": "Crown Landing 1",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        9.644104676725043,
-        6.63,
-        -23.282928307495386
-      ],
-      "rotation": [
-        0,
-        -1.1780972450961724,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [9.644104676725043, 6.63, -23.282928307495386],
+      "rotation": [0, -1.1780972450961724, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5294,11 +3329,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -5314,21 +3345,9 @@
       "name": "Crown Ramp 2",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        9.534374029328678,
-        9.828,
-        -23.018015090343106
-      ],
-      "rotation": [
-        -0.55,
-        0.39269908169872414,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [9.534374029328678, 9.828, -23.018015090343106],
+      "rotation": [-0.55, 0.39269908169872414, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5336,11 +3355,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#8a795f",
         "emissive": "#352b1d",
         "emissiveIntensity": 0.06,
@@ -5356,21 +3371,9 @@
       "name": "Crown Landing 2",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        17.414470243570435,
-        13.026,
-        -17.41447024357043
-      ],
-      "rotation": [
-        0,
-        -0.7853981633974483,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [17.414470243570435, 13.026, -17.41447024357043],
+      "rotation": [0, -0.7853981633974483, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5378,11 +3381,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -5398,21 +3397,9 @@
       "name": "Crown Ramp 3",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        17.211714445133005,
-        16.224,
-        -17.211714445133
-      ],
-      "rotation": [
-        -0.55,
-        0.7853981633974483,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [17.211714445133005, 16.224, -17.211714445133],
+      "rotation": [-0.55, 0.7853981633974483, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5420,11 +3407,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#75654f",
         "emissive": "#2c241a",
         "emissiveIntensity": 0.06,
@@ -5440,21 +3423,9 @@
       "name": "Crown Landing 3",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        22.223275438886244,
-        19.421999999999997,
-        -9.20518208713958
-      ],
-      "rotation": [
-        0,
-        -0.39269908169872414,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [22.223275438886244, 19.421999999999997, -9.20518208713958],
+      "rotation": [0, -0.39269908169872414, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5462,11 +3433,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -5482,21 +3449,9 @@
       "name": "Crown Ramp 4",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        21.958362221733957,
-        22.619999999999997,
-        -9.095451439743211
-      ],
-      "rotation": [
-        -0.55,
-        1.1780972450961724,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [21.958362221733957, 22.619999999999997, -9.095451439743211],
+      "rotation": [-0.55, 1.1780972450961724, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5504,11 +3459,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#8a795f",
         "emissive": "#352b1d",
         "emissiveIntensity": 0.06,
@@ -5524,21 +3475,9 @@
       "name": "Crown Landing 4",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        23.480819999999994,
-        25.818,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [23.480819999999994, 25.818, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5546,11 +3485,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -5566,21 +3501,9 @@
       "name": "Crown Ramp 5",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        23.194079999999996,
-        29.016,
-        0
-      ],
-      "rotation": [
-        -0.55,
-        1.5707963267948966,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [23.194079999999996, 29.016, 0],
+      "rotation": [-0.55, 1.5707963267948966, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5588,11 +3511,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#75654f",
         "emissive": "#2c241a",
         "emissiveIntensity": 0.06,
@@ -5608,21 +3527,9 @@
       "name": "Crown Landing 5",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        21.163622570277102,
-        32.214,
-        8.766259497554117
-      ],
-      "rotation": [
-        0,
-        0.39269908169872414,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [21.163622570277102, 32.214, 8.766259497554117],
+      "rotation": [0, 0.39269908169872414, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5630,11 +3537,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -5650,21 +3553,9 @@
       "name": "Crown Ramp 6",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        20.89870935312481,
-        35.412,
-        8.65652885015775
-      ],
-      "rotation": [
-        -0.55,
-        1.9634954084936207,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [20.89870935312481, 35.412, 8.65652885015775],
+      "rotation": [-0.55, 1.9634954084936207, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5672,11 +3563,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#8a795f",
         "emissive": "#352b1d",
         "emissiveIntensity": 0.06,
@@ -5692,21 +3579,9 @@
       "name": "Crown Landing 6",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        15.792423856070986,
-        38.61,
-        15.792423856070982
-      ],
-      "rotation": [
-        0,
-        0.7853981633974483,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [15.792423856070986, 38.61, 15.792423856070982],
+      "rotation": [0, 0.7853981633974483, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5714,11 +3589,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -5734,21 +3605,9 @@
       "name": "Crown Ramp 7",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        15.589668057633556,
-        41.808,
-        15.589668057633554
-      ],
-      "rotation": [
-        -0.55,
-        2.356194490192345,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [15.589668057633556, 41.808, 15.589668057633554],
+      "rotation": [-0.55, 2.356194490192345, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5756,11 +3615,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#75654f",
         "emissive": "#2c241a",
         "emissiveIntensity": 0.06,
@@ -5776,21 +3631,9 @@
       "name": "Crown Landing 7",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        8.327336907968656,
-        45.006,
-        20.10396970166796
-      ],
-      "rotation": [
-        0,
-        1.1780972450961724,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [8.327336907968656, 45.006, 20.10396970166796],
+      "rotation": [0, 1.1780972450961724, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5798,11 +3641,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -5818,21 +3657,9 @@
       "name": "Crown Ramp 8",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        8.217606260572287,
-        48.20399999999999,
-        19.83905648451567
-      ],
-      "rotation": [
-        -0.55,
-        2.748893571891069,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [8.217606260572287, 48.20399999999999, 19.83905648451567],
+      "rotation": [-0.55, 2.748893571891069, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5840,11 +3667,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#8a795f",
         "emissive": "#352b1d",
         "emissiveIntensity": 0.06,
@@ -5860,21 +3683,9 @@
       "name": "Crown Landing 8",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        1.2973234634427528e-15,
-        51.401999999999994,
-        21.1869
-      ],
-      "rotation": [
-        0,
-        1.5707963267948966,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [1.2973234634427528e-15, 51.401999999999994, 21.1869],
+      "rotation": [0, 1.5707963267948966, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5882,11 +3693,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -5902,21 +3709,9 @@
       "name": "Crown Ramp 9",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        1.279765702283377e-15,
-        54.6,
-        20.90016
-      ],
-      "rotation": [
-        -0.55,
-        3.141592653589793,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [1.279765702283377e-15, 54.6, 20.90016],
+      "rotation": [-0.55, 3.141592653589793, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5924,11 +3719,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#75654f",
         "emissive": "#2c241a",
         "emissiveIntensity": 0.06,
@@ -5944,21 +3735,9 @@
       "name": "Crown Landing 9",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -7.8884143183831865,
-        57.797999999999995,
-        19.044316833058808
-      ],
-      "rotation": [
-        0,
-        1.9634954084936207,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-7.8884143183831865, 57.797999999999995, 19.044316833058808],
+      "rotation": [0, 1.9634954084936207, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -5966,11 +3745,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -5986,21 +3761,9 @@
       "name": "Crown Ramp 10",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -7.778683670986822,
-        60.996,
-        18.77940361590652
-      ],
-      "rotation": [
-        -0.55,
-        3.5342917352885173,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-7.778683670986822, 60.996, 18.77940361590652],
+      "rotation": [-0.55, 3.5342917352885173, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6008,11 +3771,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#8a795f",
         "emissive": "#352b1d",
         "emissiveIntensity": 0.06,
@@ -6028,21 +3787,9 @@
       "name": "Crown Landing 10",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -14.17037746857154,
-        64.194,
-        14.170377468571541
-      ],
-      "rotation": [
-        0,
-        2.356194490192345,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-14.17037746857154, 64.194, 14.170377468571541],
+      "rotation": [0, 2.356194490192345, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6050,11 +3797,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -6070,21 +3813,9 @@
       "name": "Crown Ramp 11",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -13.967621670134111,
-        67.39200000000001,
-        13.967621670134113
-      ],
-      "rotation": [
-        -0.55,
-        3.9269908169872414,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-13.967621670134111, 67.39200000000001, 13.967621670134113],
+      "rotation": [-0.55, 3.9269908169872414, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6092,11 +3823,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#75654f",
         "emissive": "#2c241a",
         "emissiveIntensity": 0.06,
@@ -6112,21 +3839,9 @@
       "name": "Crown Landing 11",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -17.98466396444966,
-        70.59,
-        7.449491728797736
-      ],
-      "rotation": [
-        0,
-        2.7488935718910685,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-17.98466396444966, 70.59, 7.449491728797736],
+      "rotation": [0, 2.7488935718910685, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6134,11 +3849,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -6154,21 +3865,9 @@
       "name": "Crown Ramp 12",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -17.719750747297375,
-        73.788,
-        7.33976108140137
-      ],
-      "rotation": [
-        -0.55,
-        4.319689898685965,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-17.719750747297375, 73.788, 7.33976108140137],
+      "rotation": [-0.55, 4.319689898685965, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6176,11 +3875,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#8a795f",
         "emissive": "#352b1d",
         "emissiveIntensity": 0.06,
@@ -6197,20 +3892,10 @@
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
       "position": [
-        -18.892979999999998,
-        76.98599999999999,
-        2.313722748335496e-15
+        -18.892979999999998, 76.98599999999999, 2.313722748335496e-15
       ],
-      "rotation": [
-        0,
-        3.141592653589793,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "rotation": [0, 3.141592653589793, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6218,11 +3903,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -6238,21 +3919,9 @@
       "name": "Crown Ramp 13",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -18.60624,
-        80.184,
-        2.2786072260167453e-15
-      ],
-      "rotation": [
-        -0.55,
-        4.71238898038469,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-18.60624, 80.184, 2.2786072260167453e-15],
+      "rotation": [-0.55, 4.71238898038469, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6260,11 +3929,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#75654f",
         "emissive": "#2c241a",
         "emissiveIntensity": 0.06,
@@ -6280,21 +3945,9 @@
       "name": "Crown Landing 13",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -16.925011095840517,
-        83.38199999999999,
-        -7.010569139212267
-      ],
-      "rotation": [
-        0,
-        3.5342917352885177,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-16.925011095840517, 83.38199999999999, -7.010569139212267],
+      "rotation": [0, 3.5342917352885177, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6302,11 +3955,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -6322,21 +3971,9 @@
       "name": "Crown Ramp 14",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -16.660097878688227,
-        86.58,
-        -6.9008384918159
-      ],
-      "rotation": [
-        -0.55,
-        5.105088062083414,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-16.660097878688227, 86.58, -6.9008384918159],
+      "rotation": [-0.55, 5.105088062083414, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6344,11 +3981,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#8a795f",
         "emissive": "#352b1d",
         "emissiveIntensity": 0.06,
@@ -6364,21 +3997,9 @@
       "name": "Crown Landing 14",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -12.548331081072098,
-        89.77799999999999,
-        -12.548331081072094
-      ],
-      "rotation": [
-        0,
-        3.9269908169872414,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-12.548331081072098, 89.77799999999999, -12.548331081072094],
+      "rotation": [0, 3.9269908169872414, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6386,11 +4007,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -6406,21 +4023,9 @@
       "name": "Crown Ramp 15",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -12.345575282634668,
-        92.976,
-        -12.345575282634664
-      ],
-      "rotation": [
-        -0.55,
-        5.497787143782138,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-12.345575282634668, 92.976, -12.345575282634664],
+      "rotation": [-0.55, 5.497787143782138, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6428,11 +4033,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#75654f",
         "emissive": "#2c241a",
         "emissiveIntensity": 0.06,
@@ -6448,21 +4049,9 @@
       "name": "Crown Landing 15",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -6.571646549626808,
-        96.17399999999999,
-        -15.865358227231368
-      ],
-      "rotation": [
-        0,
-        4.319689898685965,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-6.571646549626808, 96.17399999999999, -15.865358227231368],
+      "rotation": [0, 4.319689898685965, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6470,11 +4059,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          7.901280000000001,
-          1,
-          7.901280000000001
-        ],
+        "args": [7.901280000000001, 1, 7.901280000000001],
         "color": "#8c7c63",
         "emissive": "#32281c",
         "emissiveIntensity": 0.05,
@@ -6490,21 +4075,9 @@
       "name": "Crown Ramp 16",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -6.461915902230442,
-        99.372,
-        -15.600445010079081
-      ],
-      "rotation": [
-        -0.55,
-        5.890486225480862,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-6.461915902230442, 99.372, -15.600445010079081],
+      "rotation": [-0.55, 5.890486225480862, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6512,11 +4085,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          6.7651200000000005,
-          1,
-          20.088
-        ],
+        "args": [6.7651200000000005, 1, 20.088],
         "color": "#8a795f",
         "emissive": "#352b1d",
         "emissiveIntensity": 0.06,
@@ -6532,21 +4101,9 @@
       "name": "Crown Threshold Platform",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        0,
-        103.116,
-        -9.558000000000002
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 103.116, -9.558000000000002],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6554,11 +4111,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          12.744,
-          1.1,
-          10.1952
-        ],
+        "args": [12.744, 1.1, 10.1952],
         "color": "#9a8a6f",
         "emissive": "#3a2f20",
         "emissiveIntensity": 0.08,
@@ -6574,21 +4127,9 @@
       "name": "Crown Bridge",
       "kind": "primitive",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        0,
-        103.35000000000001,
-        -3.56832
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 103.35000000000001, -3.56832],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -6596,11 +4137,7 @@
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          8.9208,
-          0.8,
-          8.66592
-        ],
+        "args": [8.9208, 0.8, 8.66592],
         "color": "#a39673",
         "emissive": "#4b4128",
         "emissiveIntensity": 0.1,
@@ -6616,21 +4153,9 @@
       "name": "Ascent Chronicle",
       "kind": "prefab",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        17.8416,
-        37.44,
-        11.4696
-      ],
-      "rotation": [
-        0,
-        0.9,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [17.8416, 37.44, 11.4696],
+      "rotation": [0, 0.9, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -6655,21 +4180,9 @@
       "name": "Ascent Guide · Lower Bough",
       "kind": "group",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        21.6648,
-        12.48,
-        -12.744
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [21.6648, 12.48, -12.744],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -6698,21 +4211,9 @@
       "name": "Ascent Guide · Mid Bough",
       "kind": "group",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        -17.8416,
-        48.36,
-        8.9208
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-17.8416, 48.36, 8.9208],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -6741,21 +4242,9 @@
       "name": "Ascent Guide · Crown Threshold",
       "kind": "group",
       "parentId": "yggdrasil-crown-path-group",
-      "position": [
-        6.372,
-        90.47999999999999,
-        -14.0184
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [6.372, 90.47999999999999, -14.0184],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -6784,38 +4273,18 @@
       "name": "Spawn Safety Pad",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        1.55,
-        -118
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 1.55, -118],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "collision": {
         "shape": "cuboid",
-        "size": [
-          16,
-          1.6,
-          16
-        ],
+        "size": [16, 1.6, 16],
         "friction": 0.95
       },
       "primitive": {
         "geometry": "box",
-        "args": [
-          16,
-          1.6,
-          16
-        ],
+        "args": [16, 1.6, 16],
         "color": "#ffffff",
         "emissive": "#ffffff",
         "emissiveIntensity": 0,
@@ -6833,21 +4302,9 @@
       "name": "Horizon Monolith 1",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        165.3295974611387,
-        8.5,
-        60.350014112159435
-      ],
-      "rotation": [
-        0,
-        3.491592653589793,
-        0
-      ],
-      "scale": [
-        2.2,
-        2.8,
-        2.2
-      ],
+      "position": [165.3295974611387, 8.5, 60.350014112159435],
+      "rotation": [0, 3.491592653589793, 0],
+      "scale": [2.2, 2.8, 2.2],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
@@ -6861,21 +4318,9 @@
       "name": "Horizon Beacon 1",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        165.3295974611387,
-        15.5,
-        60.350014112159435
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [165.3295974611387, 15.5, 60.350014112159435],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -6904,21 +4349,9 @@
       "name": "Horizon Monolith 2",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        30.400153390689944,
-        8.5,
-        173.35463845488104
-      ],
-      "rotation": [
-        0,
-        4.538790204786391,
-        0
-      ],
-      "scale": [
-        2.2,
-        2.8,
-        2.2
-      ],
+      "position": [30.400153390689944, 8.5, 173.35463845488104],
+      "rotation": [0, 4.538790204786391, 0],
+      "scale": [2.2, 2.8, 2.2],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
@@ -6932,21 +4365,9 @@
       "name": "Horizon Beacon 2",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        30.400153390689944,
-        15.5,
-        173.35463845488104
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [30.400153390689944, 15.5, 173.35463845488104],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -6975,21 +4396,9 @@
       "name": "Horizon Monolith 3",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -134.92944407044877,
-        8.5,
-        113.00462434272164
-      ],
-      "rotation": [
-        0,
-        5.5859877559829885,
-        0
-      ],
-      "scale": [
-        2.2,
-        2.8,
-        2.2
-      ],
+      "position": [-134.92944407044877, 8.5, 113.00462434272164],
+      "rotation": [0, 5.5859877559829885, 0],
+      "scale": [2.2, 2.8, 2.2],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
@@ -7003,21 +4412,9 @@
       "name": "Horizon Beacon 3",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -134.92944407044877,
-        15.5,
-        113.00462434272164
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-134.92944407044877, 15.5, 113.00462434272164],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -7046,21 +4443,9 @@
       "name": "Horizon Monolith 4",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -165.3295974611387,
-        8.5,
-        -60.350014112159435
-      ],
-      "rotation": [
-        0,
-        6.633185307179586,
-        0
-      ],
-      "scale": [
-        2.2,
-        2.8,
-        2.2
-      ],
+      "position": [-165.3295974611387, 8.5, -60.350014112159435],
+      "rotation": [0, 6.633185307179586, 0],
+      "scale": [2.2, 2.8, 2.2],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
@@ -7074,21 +4459,9 @@
       "name": "Horizon Beacon 4",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -165.3295974611387,
-        15.5,
-        -60.350014112159435
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-165.3295974611387, 15.5, -60.350014112159435],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -7117,21 +4490,9 @@
       "name": "Horizon Monolith 5",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -30.40015339069004,
-        8.5,
-        -173.35463845488104
-      ],
-      "rotation": [
-        0,
-        7.680382858376183,
-        0
-      ],
-      "scale": [
-        2.2,
-        2.8,
-        2.2
-      ],
+      "position": [-30.40015339069004, 8.5, -173.35463845488104],
+      "rotation": [0, 7.680382858376183, 0],
+      "scale": [2.2, 2.8, 2.2],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
@@ -7145,21 +4506,9 @@
       "name": "Horizon Beacon 5",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -30.40015339069004,
-        15.5,
-        -173.35463845488104
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-30.40015339069004, 15.5, -173.35463845488104],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -7188,21 +4537,9 @@
       "name": "Horizon Monolith 6",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        134.92944407044877,
-        8.5,
-        -113.00462434272166
-      ],
-      "rotation": [
-        0,
-        8.72758040957278,
-        0
-      ],
-      "scale": [
-        2.2,
-        2.8,
-        2.2
-      ],
+      "position": [134.92944407044877, 8.5, -113.00462434272166],
+      "rotation": [0, 8.72758040957278, 0],
+      "scale": [2.2, 2.8, 2.2],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
@@ -7216,21 +4553,9 @@
       "name": "Horizon Beacon 6",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        134.92944407044877,
-        15.5,
-        -113.00462434272166
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [134.92944407044877, 15.5, -113.00462434272166],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -7259,30 +4584,13 @@
       "name": "Sea Root NORTH",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        3.2,
-        118
-      ],
-      "rotation": [
-        1.18,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 3.2, 118],
+      "rotation": [1.18, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          2.6,
-          4.4,
-          44,
-          12
-        ],
+        "args": [2.6, 4.4, 44, 12],
         "color": "#3f2d1c",
         "emissive": "#140d08",
         "emissiveIntensity": 0.03,
@@ -7298,30 +4606,13 @@
       "name": "Sea Root SOUTH",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        3.2,
-        -118
-      ],
-      "rotation": [
-        -1.18,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 3.2, -118],
+      "rotation": [-1.18, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          2.6,
-          4.4,
-          44,
-          12
-        ],
+        "args": [2.6, 4.4, 44, 12],
         "color": "#3f2d1c",
         "emissive": "#140d08",
         "emissiveIntensity": 0.03,
@@ -7337,30 +4628,13 @@
       "name": "Sea Root EAST",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        118,
-        3.2,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        -1.18
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [118, 3.2, 0],
+      "rotation": [0, 0, -1.18],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          2.6,
-          4.4,
-          44,
-          12
-        ],
+        "args": [2.6, 4.4, 44, 12],
         "color": "#3f2d1c",
         "emissive": "#140d08",
         "emissiveIntensity": 0.03,
@@ -7376,30 +4650,13 @@
       "name": "Sea Root WEST",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -118,
-        3.2,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        1.18
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-118, 3.2, 0],
+      "rotation": [0, 0, 1.18],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          2.6,
-          4.4,
-          44,
-          12
-        ],
+        "args": [2.6, 4.4, 44, 12],
         "color": "#3f2d1c",
         "emissive": "#140d08",
         "emissiveIntensity": 0.03,
@@ -7415,30 +4672,13 @@
       "name": "Sea Root NE",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        84,
-        3.6,
-        84
-      ],
-      "rotation": [
-        0.92,
-        0,
-        -0.92
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [84, 3.6, 84],
+      "rotation": [0.92, 0, -0.92],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          2,
-          3.4,
-          36,
-          12
-        ],
+        "args": [2, 3.4, 36, 12],
         "color": "#3f2d1c",
         "emissive": "#140d08",
         "emissiveIntensity": 0.03,
@@ -7454,30 +4694,13 @@
       "name": "Sea Root NW",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -84,
-        3.6,
-        84
-      ],
-      "rotation": [
-        0.92,
-        0,
-        0.92
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-84, 3.6, 84],
+      "rotation": [0.92, 0, 0.92],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          2,
-          3.4,
-          36,
-          12
-        ],
+        "args": [2, 3.4, 36, 12],
         "color": "#3f2d1c",
         "emissive": "#140d08",
         "emissiveIntensity": 0.03,
@@ -7493,30 +4716,13 @@
       "name": "Sea Root SE",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        84,
-        3.6,
-        -84
-      ],
-      "rotation": [
-        -0.92,
-        0,
-        -0.92
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [84, 3.6, -84],
+      "rotation": [-0.92, 0, -0.92],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          2,
-          3.4,
-          36,
-          12
-        ],
+        "args": [2, 3.4, 36, 12],
         "color": "#3f2d1c",
         "emissive": "#140d08",
         "emissiveIntensity": 0.03,
@@ -7532,30 +4738,13 @@
       "name": "Sea Root SW",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -84,
-        3.6,
-        -84
-      ],
-      "rotation": [
-        -0.92,
-        0,
-        0.92
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-84, 3.6, -84],
+      "rotation": [-0.92, 0, 0.92],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          2,
-          3.4,
-          36,
-          12
-        ],
+        "args": [2, 3.4, 36, 12],
         "color": "#3f2d1c",
         "emissive": "#140d08",
         "emissiveIntensity": 0.03,
@@ -7571,29 +4760,13 @@
       "name": "Shore Stone 1",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        153.0692390853313,
-        -0.32,
-        16.90585832892492
-      ],
-      "rotation": [
-        0,
-        0.11,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [153.0692390853313, -0.32, 16.90585832892492],
+      "rotation": [0, 0.11, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          9,
-          2.4,
-          7
-        ],
+        "args": [9, 2.4, 7],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -7609,30 +4782,13 @@
       "name": "Shore Stone 2",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        135.6627969087273,
-        -0.5800000000000001,
-        84.82691515610722
-      ],
-      "rotation": [
-        0,
-        0.5587989505128276,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [135.6627969087273, -0.5800000000000001, 84.82691515610722],
+      "rotation": [0, 0.5587989505128276, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          4.4,
-          5.8,
-          2.8,
-          14
-        ],
+        "args": [4.4, 5.8, 2.8, 14],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -7648,29 +4804,13 @@
       "name": "Shore Stone 3",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        88.62629757490187,
-        -0.32,
-        140.36160222142286
-      ],
-      "rotation": [
-        0,
-        1.0075979010256553,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [88.62629757490187, -0.32, 140.36160222142286],
+      "rotation": [0, 1.0075979010256553, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          11,
-          2.4,
-          7
-        ],
+        "args": [11, 2.4, 7],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -7686,30 +4826,13 @@
       "name": "Shore Stone 4",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        17.579116876989836,
-        -0.5800000000000001,
-        152.99338106540796
-      ],
-      "rotation": [
-        0,
-        1.4563968515384829,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [17.579116876989836, -0.5800000000000001, 152.99338106540796],
+      "rotation": [0, 1.4563968515384829, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          4.4,
-          5.8,
-          2.8,
-          14
-        ],
+        "args": [4.4, 5.8, 2.8, 14],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -7725,29 +4848,13 @@
       "name": "Shore Stone 5",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -52.5123150187125,
-        -0.32,
-        151.13721173614226
-      ],
-      "rotation": [
-        0,
-        1.9051958020513104,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-52.5123150187125, -0.32, 151.13721173614226],
+      "rotation": [0, 1.9051958020513104, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          10,
-          2.4,
-          7
-        ],
+        "args": [10, 2.4, 7],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -7764,29 +4871,14 @@
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
-        -117.12123729476998,
-        -0.5800000000000001,
-        117.63764607701984
+        -117.12123729476998, -0.5800000000000001, 117.63764607701984
       ],
-      "rotation": [
-        0,
-        2.353994752564138,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "rotation": [0, 2.353994752564138, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          4.4,
-          5.8,
-          2.8,
-          14
-        ],
+        "args": [4.4, 5.8, 2.8, 14],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -7802,29 +4894,13 @@
       "name": "Shore Stone 7",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -145.2457960741413,
-        -0.32,
-        51.18260175869288
-      ],
-      "rotation": [
-        0,
-        2.8027937030769654,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-145.2457960741413, -0.32, 51.18260175869288],
+      "rotation": [0, 2.8027937030769654, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          9,
-          2.4,
-          7
-        ],
+        "args": [9, 2.4, 7],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -7841,29 +4917,14 @@
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
-        -159.03297567307152,
-        -0.5800000000000001,
-        -17.56452813394793
+        -159.03297567307152, -0.5800000000000001, -17.56452813394793
       ],
-      "rotation": [
-        0,
-        3.251592653589793,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "rotation": [0, 3.251592653589793, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          4.4,
-          5.8,
-          2.8,
-          14
-        ],
+        "args": [4.4, 5.8, 2.8, 14],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -7879,29 +4940,13 @@
       "name": "Shore Stone 9",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -140.7501517928046,
-        -0.32,
-        -88.00792447446119
-      ],
-      "rotation": [
-        0,
-        3.7003916041026206,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-140.7501517928046, -0.32, -88.00792447446119],
+      "rotation": [0, 3.7003916041026206, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          11,
-          2.4,
-          7
-        ],
+        "args": [11, 2.4, 7],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -7917,30 +4962,13 @@
       "name": "Shore Stone 10",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -82.21957726828245,
-        -0.5800000000000001,
-        -130.2149803740911
-      ],
-      "rotation": [
-        0,
-        4.149190554615449,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-82.21957726828245, -0.5800000000000001, -130.2149803740911],
+      "rotation": [0, 4.149190554615449, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          4.4,
-          5.8,
-          2.8,
-          14
-        ],
+        "args": [4.4, 5.8, 2.8, 14],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -7956,29 +4984,13 @@
       "name": "Shore Stone 11",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -18.26401753453488,
-        -0.32,
-        -158.9541621458784
-      ],
-      "rotation": [
-        0,
-        4.597989505128276,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-18.26401753453488, -0.32, -158.9541621458784],
+      "rotation": [0, 4.597989505128276, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          10,
-          2.4,
-          7
-        ],
+        "args": [10, 2.4, 7],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -7994,30 +5006,13 @@
       "name": "Shore Stone 12",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        54.48152683191423,
-        -0.5800000000000001,
-        -156.8048571762476
-      ],
-      "rotation": [
-        0,
-        5.046788455641104,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [54.48152683191423, -0.5800000000000001, -156.8048571762476],
+      "rotation": [0, 5.046788455641104, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          4.4,
-          5.8,
-          2.8,
-          14
-        ],
+        "args": [4.4, 5.8, 2.8, 14],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -8033,29 +5028,13 @@
       "name": "Shore Stone 13",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        108.6546418276782,
-        -0.32,
-        -109.13371985458464
-      ],
-      "rotation": [
-        0,
-        5.495587406153931,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [108.6546418276782, -0.32, -109.13371985458464],
+      "rotation": [0, 5.495587406153931, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          9,
-          2.4,
-          7
-        ],
+        "args": [9, 2.4, 7],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -8072,29 +5051,14 @@
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
-        150.90472319391307,
-        -0.5800000000000001,
-        -53.176729099940616
+        150.90472319391307, -0.5800000000000001, -53.176729099940616
       ],
-      "rotation": [
-        0,
-        5.944386356666759,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "rotation": [0, 5.944386356666759, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          4.4,
-          5.8,
-          2.8,
-          14
-        ],
+        "args": [4.4, 5.8, 2.8, 14],
         "color": "#6d685a",
         "emissive": "#26221b",
         "emissiveIntensity": 0.04,
@@ -8110,29 +5074,13 @@
       "name": "Shelf Break 1",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        121.56035881761137,
-        -1.9,
-        58.72034710501608
-      ],
-      "rotation": [
-        0,
-        0.45,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [121.56035881761137, -1.9, 58.72034710501608],
+      "rotation": [0, 0.45, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          22,
-          3.2,
-          10
-        ],
+        "args": [22, 3.2, 10],
         "color": "#4d5646",
         "emissive": "#1a2017",
         "emissiveIntensity": 0.03,
@@ -8148,29 +5096,13 @@
       "name": "Shelf Break 2",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        9.926867096821772,
-        -1.9,
-        134.63453238171118
-      ],
-      "rotation": [
-        0,
-        1.4971975511965976,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [9.926867096821772, -1.9, 134.63453238171118],
+      "rotation": [0, 1.4971975511965976, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          22,
-          3.2,
-          10
-        ],
+        "args": [22, 3.2, 10],
         "color": "#4d5646",
         "emissive": "#1a2017",
         "emissiveIntensity": 0.03,
@@ -8186,29 +5118,13 @@
       "name": "Shelf Break 3",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -111.63349172078962,
-        -1.9,
-        75.91418527669511
-      ],
-      "rotation": [
-        0,
-        2.5443951023931954,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-111.63349172078962, -1.9, 75.91418527669511],
+      "rotation": [0, 2.5443951023931954, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          22,
-          3.2,
-          10
-        ],
+        "args": [22, 3.2, 10],
         "color": "#4d5646",
         "emissive": "#1a2017",
         "emissiveIntensity": 0.03,
@@ -8224,29 +5140,13 @@
       "name": "Shelf Break 4",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -121.56035881761137,
-        -1.9,
-        -58.72034710501609
-      ],
-      "rotation": [
-        0,
-        3.5915926535897933,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-121.56035881761137, -1.9, -58.72034710501609],
+      "rotation": [0, 3.5915926535897933, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          22,
-          3.2,
-          10
-        ],
+        "args": [22, 3.2, 10],
         "color": "#4d5646",
         "emissive": "#1a2017",
         "emissiveIntensity": 0.03,
@@ -8262,29 +5162,13 @@
       "name": "Shelf Break 5",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -9.92686709682179,
-        -1.9,
-        -134.63453238171118
-      ],
-      "rotation": [
-        0,
-        4.638790204786391,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-9.92686709682179, -1.9, -134.63453238171118],
+      "rotation": [0, 4.638790204786391, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          22,
-          3.2,
-          10
-        ],
+        "args": [22, 3.2, 10],
         "color": "#4d5646",
         "emissive": "#1a2017",
         "emissiveIntensity": 0.03,
@@ -8300,29 +5184,13 @@
       "name": "Shelf Break 6",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        111.63349172078965,
-        -1.9,
-        -75.91418527669508
-      ],
-      "rotation": [
-        0,
-        5.685987755982989,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [111.63349172078965, -1.9, -75.91418527669508],
+      "rotation": [0, 5.685987755982989, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [
-          22,
-          3.2,
-          10
-        ],
+        "args": [22, 3.2, 10],
         "color": "#4d5646",
         "emissive": "#1a2017",
         "emissiveIntensity": 0.03,
@@ -8338,21 +5206,9 @@
       "name": "Perimeter Mist north",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        6,
-        162
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        210,
-        16,
-        72
-      ],
+      "position": [0, 6, 162],
+      "rotation": [0, 0, 0],
+      "scale": [210, 16, 72],
       "visible": true,
       "gameplay": {
         "type": "fog-volume",
@@ -8368,21 +5224,9 @@
       "name": "Perimeter Mist south",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        6,
-        -162
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        210,
-        16,
-        72
-      ],
+      "position": [0, 6, -162],
+      "rotation": [0, 0, 0],
+      "scale": [210, 16, 72],
       "visible": true,
       "gameplay": {
         "type": "fog-volume",
@@ -8398,21 +5242,9 @@
       "name": "Perimeter Mist east",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        162,
-        6,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        72,
-        16,
-        210
-      ],
+      "position": [162, 6, 0],
+      "rotation": [0, 0, 0],
+      "scale": [72, 16, 210],
       "visible": true,
       "gameplay": {
         "type": "fog-volume",
@@ -8428,21 +5260,9 @@
       "name": "Perimeter Mist west",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -162,
-        6,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        72,
-        16,
-        210
-      ],
+      "position": [-162, 6, 0],
+      "rotation": [0, 0, 0],
+      "scale": [72, 16, 210],
       "visible": true,
       "gameplay": {
         "type": "fog-volume",
@@ -8458,21 +5278,9 @@
       "name": "Perimeter Mist ring",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        8,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        320,
-        18,
-        320
-      ],
+      "position": [0, 8, 0],
+      "rotation": [0, 0, 0],
+      "scale": [320, 18, 320],
       "visible": true,
       "gameplay": {
         "type": "fog-volume",
@@ -8488,30 +5296,13 @@
       "name": "Outer Shoal North",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        -1.8,
-        244
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, -1.8, 244],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          20.16,
-          24,
-          4.2,
-          22
-        ],
+        "args": [20.16, 24, 4.2, 22],
         "color": "#545f4c",
         "emissive": "#1c2219",
         "emissiveIntensity": 0.03,
@@ -8527,21 +5318,9 @@
       "name": "Drowned Monolith north",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        4,
-        1.7,
-        242
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1.25,
-        1.6,
-        1.25
-      ],
+      "position": [4, 1.7, 242],
+      "rotation": [0, 0, 0],
+      "scale": [1.25, 1.6, 1.25],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb"
@@ -8555,21 +5334,9 @@
       "name": "Drowned Ring north",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -6,
-        -0.1,
-        249
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        0.95,
-        0.95,
-        0.95
-      ],
+      "position": [-6, -0.1, 249],
+      "rotation": [0, 0, 0],
+      "scale": [0.95, 0.95, 0.95],
       "visible": true,
       "prefab": {
         "type": "broken-ring"
@@ -8583,21 +5350,9 @@
       "name": "Outer Beacon north",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        3.8,
-        244
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 3.8, 244],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -8626,30 +5381,13 @@
       "name": "Outer Shoal South",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        -2.2,
-        -248
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, -2.2, -248],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          16.8,
-          20,
-          4.2,
-          22
-        ],
+        "args": [16.8, 20, 4.2, 22],
         "color": "#545f4c",
         "emissive": "#1c2219",
         "emissiveIntensity": 0.03,
@@ -8665,21 +5403,9 @@
       "name": "Drowned Monolith south",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -3,
-        1.7,
-        -245
-      ],
-      "rotation": [
-        0,
-        0.3,
-        0
-      ],
-      "scale": [
-        1.25,
-        1.6,
-        1.25
-      ],
+      "position": [-3, 1.7, -245],
+      "rotation": [0, 0.3, 0],
+      "scale": [1.25, 1.6, 1.25],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
@@ -8693,21 +5419,9 @@
       "name": "Drowned Ring south",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -4,
-        -0.1,
-        -253
-      ],
-      "rotation": [
-        0,
-        0.5,
-        0
-      ],
-      "scale": [
-        0.95,
-        0.95,
-        0.95
-      ],
+      "position": [-4, -0.1, -253],
+      "rotation": [0, 0.5, 0],
+      "scale": [0.95, 0.95, 0.95],
       "visible": true,
       "prefab": {
         "type": "broken-ring"
@@ -8721,21 +5435,9 @@
       "name": "Outer Beacon south",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        0,
-        3.8,
-        -248
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 3.8, -248],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -8764,30 +5466,13 @@
       "name": "Outer Shoal East",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        238,
-        -2,
-        28
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [238, -2, 28],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          18.48,
-          22,
-          4.2,
-          22
-        ],
+        "args": [18.48, 22, 4.2, 22],
         "color": "#545f4c",
         "emissive": "#1c2219",
         "emissiveIntensity": 0.03,
@@ -8803,21 +5488,9 @@
       "name": "Drowned Monolith east",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        242,
-        1.7,
-        26
-      ],
-      "rotation": [
-        0,
-        0.6,
-        0
-      ],
-      "scale": [
-        1.25,
-        1.6,
-        1.25
-      ],
+      "position": [242, 1.7, 26],
+      "rotation": [0, 0.6, 0],
+      "scale": [1.25, 1.6, 1.25],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
@@ -8831,21 +5504,9 @@
       "name": "Drowned Ring east",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        232,
-        -0.1,
-        33
-      ],
-      "rotation": [
-        0,
-        1,
-        0
-      ],
-      "scale": [
-        0.95,
-        0.95,
-        0.95
-      ],
+      "position": [232, -0.1, 33],
+      "rotation": [0, 1, 0],
+      "scale": [0.95, 0.95, 0.95],
       "visible": true,
       "prefab": {
         "type": "broken-ring"
@@ -8859,21 +5520,9 @@
       "name": "Outer Beacon east",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        238,
-        3.8,
-        28
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [238, 3.8, 28],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -8902,30 +5551,13 @@
       "name": "Outer Shoal West",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -246,
-        -1.9,
-        -16
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-246, -1.9, -16],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          21.84,
-          26,
-          4.2,
-          22
-        ],
+        "args": [21.84, 26, 4.2, 22],
         "color": "#545f4c",
         "emissive": "#1c2219",
         "emissiveIntensity": 0.03,
@@ -8941,21 +5573,9 @@
       "name": "Drowned Monolith west",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -249,
-        1.7,
-        -13
-      ],
-      "rotation": [
-        0,
-        0.8999999999999999,
-        0
-      ],
-      "scale": [
-        1.25,
-        1.6,
-        1.25
-      ],
+      "position": [-249, 1.7, -13],
+      "rotation": [0, 0.8999999999999999, 0],
+      "scale": [1.25, 1.6, 1.25],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb"
@@ -8969,21 +5589,9 @@
       "name": "Drowned Ring west",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -250,
-        -0.1,
-        -21
-      ],
-      "rotation": [
-        0,
-        1.5,
-        0
-      ],
-      "scale": [
-        0.95,
-        0.95,
-        0.95
-      ],
+      "position": [-250, -0.1, -21],
+      "rotation": [0, 1.5, 0],
+      "scale": [0.95, 0.95, 0.95],
       "visible": true,
       "prefab": {
         "type": "broken-ring"
@@ -8997,21 +5605,9 @@
       "name": "Outer Beacon west",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -246,
-        3.8,
-        -16
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-246, 3.8, -16],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -9040,30 +5636,13 @@
       "name": "Broken Root Islet",
       "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -188,
-        -2.1,
-        188
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-188, -2.1, 188],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "primitive": {
         "geometry": "cylinder",
-        "args": [
-          15.12,
-          18,
-          4.2,
-          22
-        ],
+        "args": [15.12, 18, 4.2, 22],
         "color": "#545f4c",
         "emissive": "#1c2219",
         "emissiveIntensity": 0.03,
@@ -9079,21 +5658,9 @@
       "name": "Drowned Monolith nw",
       "kind": "asset",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -184,
-        1.7,
-        186
-      ],
-      "rotation": [
-        0,
-        1.2,
-        0
-      ],
-      "scale": [
-        1.25,
-        1.6,
-        1.25
-      ],
+      "position": [-184, 1.7, 186],
+      "rotation": [0, 1.2, 0],
+      "scale": [1.25, 1.6, 1.25],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
@@ -9107,21 +5674,9 @@
       "name": "Drowned Ring nw",
       "kind": "prefab",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -194,
-        -0.1,
-        193
-      ],
-      "rotation": [
-        0,
-        2,
-        0
-      ],
-      "scale": [
-        0.95,
-        0.95,
-        0.95
-      ],
+      "position": [-194, -0.1, 193],
+      "rotation": [0, 2, 0],
+      "scale": [0.95, 0.95, 0.95],
       "visible": true,
       "prefab": {
         "type": "broken-ring"
@@ -9135,21 +5690,9 @@
       "name": "Outer Beacon nw",
       "kind": "group",
       "parentId": "yggdrasil-glade-root",
-      "position": [
-        -188,
-        3.8,
-        188
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [-188, 3.8, 188],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true,
       "gameplay": {
         "type": "firefly",

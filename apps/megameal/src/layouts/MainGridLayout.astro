@@ -1,47 +1,48 @@
 ---
-import "@fontsource/creepster";
-import "@fontsource/metal-mania";
+import '@fontsource/creepster'
+import '@fontsource/metal-mania'
 import {
-	connectionPatterns,
-	constellationConfig,
-	constellationPatterns,
-	defaultEraConfig,
-} from "@/config/timelineconfig";
-import Bleepy from "@components/bleepy/Bleepy.astro";
-import SiteSfxBridge from "@components/client/SiteSfxBridge.svelte";
-import UniverseHeroSlide from "@components/home/UniverseHeroSlide.astro";
-import SharedMainGridLayout from "@merkin/blog-core/layouts/MainGridLayout.astro";
-import timelineManifest from "../../../../packages/shared-data/generated/timeline.json";
-import "@/styles/megameal-interactions.css";
+  connectionPatterns,
+  constellationConfig,
+  constellationPatterns,
+  defaultEraConfig,
+} from '@/config/timelineconfig'
+import Bleepy from '@components/bleepy/Bleepy.astro'
+import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
+import HomeIntroHeroSlide from '@components/home/HomeIntroHeroSlide.astro'
+import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
+import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
+import timelineManifest from '../../../../packages/shared-data/generated/timeline.json'
+import '@/styles/megameal-interactions.css'
 
 interface Props {
-	title?: string;
-	banner?: string;
-	description?: string;
-	lang?: string;
-	setOGTypeArticle?: boolean;
-	headings?: import("astro").MarkdownHeading[];
-	post?: unknown;
-	bannerLink?: string;
-	isPostPage?: boolean;
-	pageMascotContext?: string;
-	backgroundImage?: string | null;
-	oneColumn?: boolean;
-	customAuthorData?: {
-		avatarImage?: string;
-		authorName?: string;
-		authorBio?: string;
-		authorLink?: string;
-	};
-	homeLayout?: "default" | "portal";
-	contentMode?: "default" | "banner-only";
-	showMascot?: boolean;
-	showAssistantWidget?: boolean;
-	timelineEvents?: unknown[];
-	timelineEraConfig?: Record<string, unknown>;
-	timelineConstellationConfig?: Record<string, unknown>;
-	timelineConstellationPatterns?: Record<string, unknown>;
-	timelineConnectionPatterns?: Record<string, unknown>;
+  title?: string
+  banner?: string
+  description?: string
+  lang?: string
+  setOGTypeArticle?: boolean
+  headings?: import('astro').MarkdownHeading[]
+  post?: unknown
+  bannerLink?: string
+  isPostPage?: boolean
+  pageMascotContext?: string
+  backgroundImage?: string | null
+  oneColumn?: boolean
+  customAuthorData?: {
+    avatarImage?: string
+    authorName?: string
+    authorBio?: string
+    authorLink?: string
+  }
+  homeLayout?: 'default' | 'portal'
+  contentMode?: 'default' | 'banner-only'
+  showMascot?: boolean
+  showAssistantWidget?: boolean
+  timelineEvents?: unknown[]
+  timelineEraConfig?: Record<string, unknown>
+  timelineConstellationConfig?: Record<string, unknown>
+  timelineConstellationPatterns?: Record<string, unknown>
+  timelineConnectionPatterns?: Record<string, unknown>
 }
 ---
 
@@ -62,7 +63,7 @@ interface Props {
   )}
   <slot slot="overlay" name="overlay" />
   {Astro.props.homeLayout === 'portal' && (
-    <UniverseHeroSlide slot="banner-slide-content" transparentMode={true} />
+    <HomeIntroHeroSlide slot="banner-slide-content" />
   )}
   {Astro.props.homeLayout !== 'portal' && (
     <UniverseHeroSlide slot="banner-slide-content" />

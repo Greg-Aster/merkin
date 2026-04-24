@@ -1,12 +1,17 @@
 // Helper to convert human-readable group indices (1-based)
 // into Rapier InteractionGroups (32-bit bitmask):
 // upper 16 bits = membership mask; lower 16 bits = filter mask.
-const interactionGroups = (membershipMask: number, filterMask: number): number =>
-  (membershipMask << 16) | (filterMask & 0xffff)
+const interactionGroups = (
+  membershipMask: number,
+  filterMask: number,
+): number => (membershipMask << 16) | (filterMask & 0xffff)
 
 const makeGroups = (membershipIndex: number, collidesWithIndices: number[]) => {
   const membershipMask = 1 << (membershipIndex - 1)
-  const filterMask = collidesWithIndices.reduce((mask, idx) => mask | (1 << (idx - 1)), 0)
+  const filterMask = collidesWithIndices.reduce(
+    (mask, idx) => mask | (1 << (idx - 1)),
+    0,
+  )
   return interactionGroups(membershipMask, filterMask)
 }
 

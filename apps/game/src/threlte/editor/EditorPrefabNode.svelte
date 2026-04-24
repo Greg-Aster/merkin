@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { useTask } from '@threlte/core'
-  import HeroProp from '../components/HeroProp.svelte'
-  import ProceduralMesh from '../components/ProceduralMesh.svelte'
-  import type { EditorPrefabData } from './editorStore'
+import { useTask } from '@threlte/core'
+import HeroProp from '../components/HeroProp.svelte'
+import ProceduralMesh from '../components/ProceduralMesh.svelte'
+import type { EditorPrefabData } from './editorStore'
 
-  export let prefab: EditorPrefabData
+export let prefab: EditorPrefabData
 
-  let time = 0
+let time = 0
 
-  useTask((delta) => {
-    time += delta
-  })
+useTask(delta => {
+  time += delta
+})
 </script>
 
 {#if prefab.type === 'anomaly-cluster'}

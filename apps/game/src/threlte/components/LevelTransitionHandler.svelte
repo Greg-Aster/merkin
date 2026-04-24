@@ -5,192 +5,214 @@
   Manages the transition logic and communicates with the game's level system.
 -->
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte'
-  import { currentLevelStore, gameActions, type StarData } from '../stores/gameStateStore'
-  import { getLevelRegistry, isPlayableLevel, resolveLevelId } from '../levels/levelRegistry'
+import { createEventDispatcher, onMount } from 'svelte'
+import {
+  getLevelRegistry,
+  isPlayableLevel,
+  resolveLevelId,
+} from '../levels/levelRegistry'
+import {
+  type StarData,
+  currentLevelStore,
+  gameActions,
+} from '../stores/gameStateStore'
 
-  const dispatch = createEventDispatcher()
-  const isDev = import.meta.env.DEV
+const dispatch = createEventDispatcher()
+const isDev = import.meta.env.DEV
 
-  // Props  
-  export let transitionDelay = 500 // ms delay before transition
+// Props
+export let transitionDelay = 500 // ms delay before transition
 
-  // State
-  let isTransitioning = false
-  let currentTransition: any = null
+// State
+let isTransitioning = false
+let currentTransition: any = null
 
-  onMount(() => {
-    if (isDev) console.log('🎮 LevelTransitionHandler initialized')
-    
-    return () => {
-      // Cleanup any ongoing transitions
-      if (currentTransition) {
-        clearTimeout(currentTransition)
-      }
-    }
-  })
+onMount(() => {
+  if (isDev) console.log('🎮 LevelTransitionHandler initialized')
 
-  // Subscribe to level changes to track transitions
-  $: if ($currentLevelStore) {
-    if (isDev) console.log('🎮 Current level:', $currentLevelStore)
-  }
-
-  /**
-   * Handle a level transition request
-   */
-  export function handleTransition(levelType: string, fromStar?: StarData | null) {
-    if (isTransitioning) {
-      console.warn('🎮 Transition already in progress, ignoring request')
-      return false
-    }
-
-    if (isDev) console.log('🎮 Processing level transition:', levelType)
-    
-    // Map the level identifier
-    const mappedLevelId = resolveLevelId(levelType)
-    
-    if (!isValidLevel(mappedLevelId)) {
-      console.error('🎮 Invalid level identifier:', levelType, '→', mappedLevelId)
-      dispatch('transitionFailed', {
-        reason: 'invalid_level',
-        requestedLevel: levelType,
-        mappedLevel: mappedLevelId,
-        fromStar
-      })
-      return false
-    }
-
-    // Start transition process
-    startTransition(mappedLevelId, fromStar)
-    return true
-  }
-
-  function isValidLevel(levelId: string): boolean {
-    return isPlayableLevel(levelId)
-  }
-
-  function startTransition(levelId: string, fromStar?: StarData | null) {
-    isTransitioning = true
-    
-    if (isDev) console.log('🎮 Starting transition to:', levelId)
-    
-    // Dispatch transition started event
-    dispatch('transitionStarted', {
-      targetLevel: levelId,
-      fromStar,
-      timestamp: Date.now()
-    })
-
-    // Record the transition for analytics
-    recordTransition(levelId, fromStar)
-
-    // Add transition delay for smooth UX
-    currentTransition = setTimeout(() => {
-      executeTransition(levelId, fromStar)
-    }, transitionDelay)
-  }
-
-  function executeTransition(levelId: string, fromStar?: StarData | null) {
-    try {
-      if (isDev) console.log('🎮 Executing transition to:', levelId)
-      
-      // Update the game state
-      gameActions.transitionToLevel(levelId)
-      
-      // Record successful transition
-      if (fromStar) {
-        gameActions.recordInteraction('level_transition_from_star', fromStar.uniqueId)
-      }
-      
-      // Dispatch completion event
-      dispatch('transitionCompleted', {
-        targetLevel: levelId,
-        fromStar,
-        timestamp: Date.now(),
-        success: true
-      })
-      
-      if (isDev) console.log('✅ Level transition completed:', levelId)
-      
-    } catch (error) {
-      console.error('❌ Level transition failed:', error)
-      
-      dispatch('transitionFailed', {
-        targetLevel: levelId,
-        fromStar,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: Date.now()
-      })
-    } finally {
-      isTransitioning = false
-      currentTransition = null
-    }
-  }
-
-  function recordTransition(levelId: string, fromStar?: StarData | null) {
-    // Record transition analytics
-    gameActions.recordInteraction('level_transition', levelId)
-    
-    if (fromStar) {
-      if (isDev) console.log('📊 Transition triggered by star:', fromStar.title, '→', levelId)
-    } else {
-      if (isDev) console.log('📊 Direct transition to:', levelId)
-    }
-  }
-
-  /**
-   * Cancel an ongoing transition (if possible)
-   */
-  export function cancelTransition(): boolean {
-    if (!isTransitioning) {
-      return false
-    }
-
+  return () => {
+    // Cleanup any ongoing transitions
     if (currentTransition) {
       clearTimeout(currentTransition)
-      currentTransition = null
     }
+  }
+})
 
-    isTransitioning = false
-    
-    if (isDev) console.log('🎮 Transition cancelled')
-    
-    dispatch('transitionCancelled', {
-      timestamp: Date.now()
+// Subscribe to level changes to track transitions
+$: if ($currentLevelStore) {
+  if (isDev) console.log('🎮 Current level:', $currentLevelStore)
+}
+
+/**
+ * Handle a level transition request
+ */
+export function handleTransition(
+  levelType: string,
+  fromStar?: StarData | null,
+) {
+  if (isTransitioning) {
+    console.warn('🎮 Transition already in progress, ignoring request')
+    return false
+  }
+
+  if (isDev) console.log('🎮 Processing level transition:', levelType)
+
+  // Map the level identifier
+  const mappedLevelId = resolveLevelId(levelType)
+
+  if (!isValidLevel(mappedLevelId)) {
+    console.error('🎮 Invalid level identifier:', levelType, '→', mappedLevelId)
+    dispatch('transitionFailed', {
+      reason: 'invalid_level',
+      requestedLevel: levelType,
+      mappedLevel: mappedLevelId,
+      fromStar,
     })
-    
-    return true
+    return false
   }
 
-  /**
-   * Get current transition status
-   */
-  export function getTransitionStatus() {
-    return {
-      isTransitioning,
-      hasActiveTransition: currentTransition !== null,
-      currentLevel: $currentLevelStore
+  // Start transition process
+  startTransition(mappedLevelId, fromStar)
+  return true
+}
+
+function isValidLevel(levelId: string): boolean {
+  return isPlayableLevel(levelId)
+}
+
+function startTransition(levelId: string, fromStar?: StarData | null) {
+  isTransitioning = true
+
+  if (isDev) console.log('🎮 Starting transition to:', levelId)
+
+  // Dispatch transition started event
+  dispatch('transitionStarted', {
+    targetLevel: levelId,
+    fromStar,
+    timestamp: Date.now(),
+  })
+
+  // Record the transition for analytics
+  recordTransition(levelId, fromStar)
+
+  // Add transition delay for smooth UX
+  currentTransition = setTimeout(() => {
+    executeTransition(levelId, fromStar)
+  }, transitionDelay)
+}
+
+function executeTransition(levelId: string, fromStar?: StarData | null) {
+  try {
+    if (isDev) console.log('🎮 Executing transition to:', levelId)
+
+    // Update the game state
+    gameActions.transitionToLevel(levelId)
+
+    // Record successful transition
+    if (fromStar) {
+      gameActions.recordInteraction(
+        'level_transition_from_star',
+        fromStar.uniqueId,
+      )
     }
+
+    // Dispatch completion event
+    dispatch('transitionCompleted', {
+      targetLevel: levelId,
+      fromStar,
+      timestamp: Date.now(),
+      success: true,
+    })
+
+    if (isDev) console.log('✅ Level transition completed:', levelId)
+  } catch (error) {
+    console.error('❌ Level transition failed:', error)
+
+    dispatch('transitionFailed', {
+      targetLevel: levelId,
+      fromStar,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: Date.now(),
+    })
+  } finally {
+    isTransitioning = false
+    currentTransition = null
+  }
+}
+
+function recordTransition(levelId: string, fromStar?: StarData | null) {
+  // Record transition analytics
+  gameActions.recordInteraction('level_transition', levelId)
+
+  if (fromStar) {
+    if (isDev)
+      console.log(
+        '📊 Transition triggered by star:',
+        fromStar.title,
+        '→',
+        levelId,
+      )
+  } else {
+    if (isDev) console.log('📊 Direct transition to:', levelId)
+  }
+}
+
+/**
+ * Cancel an ongoing transition (if possible)
+ */
+export function cancelTransition(): boolean {
+  if (!isTransitioning) {
+    return false
   }
 
-  /**
-   * Get available level mappings (for debugging)
-   */
-  export function getLevelMappings() {
-    return Object.fromEntries(
-      getLevelRegistry().flatMap((entry) => [
-        [entry.id, entry.id],
-        ...(entry.aliases ?? []).map((alias) => [alias, entry.id]),
-      ])
-    )
+  if (currentTransition) {
+    clearTimeout(currentTransition)
+    currentTransition = null
   }
 
-  /**
-   * Programmatic transition (for external API)
-   */
-  export function transitionToLevel(levelId: string, fromStar?: StarData | null): boolean {
-    return handleTransition(levelId, fromStar)
+  isTransitioning = false
+
+  if (isDev) console.log('🎮 Transition cancelled')
+
+  dispatch('transitionCancelled', {
+    timestamp: Date.now(),
+  })
+
+  return true
+}
+
+/**
+ * Get current transition status
+ */
+export function getTransitionStatus() {
+  return {
+    isTransitioning,
+    hasActiveTransition: currentTransition !== null,
+    currentLevel: $currentLevelStore,
   }
+}
+
+/**
+ * Get available level mappings (for debugging)
+ */
+export function getLevelMappings() {
+  return Object.fromEntries(
+    getLevelRegistry().flatMap(entry => [
+      [entry.id, entry.id],
+      ...(entry.aliases ?? []).map(alias => [alias, entry.id]),
+    ]),
+  )
+}
+
+/**
+ * Programmatic transition (for external API)
+ */
+export function transitionToLevel(
+  levelId: string,
+  fromStar?: StarData | null,
+): boolean {
+  return handleTransition(levelId, fromStar)
+}
 </script>
 
 <!-- Transition UI feedback (optional visual indicator) -->

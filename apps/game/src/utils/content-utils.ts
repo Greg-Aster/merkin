@@ -23,27 +23,28 @@ export type GamePostData = {
 export async function getSortedPosts(
   includeDrafts = false,
 ): Promise<{ body: string; data: GamePostData; slug: string }[]> {
-  const allPosts: { body: string; data: GamePostData; slug: string }[] = postsManifest.items
-    .filter(post => (includeDrafts ? true : post.draft !== true))
-    .map(post => ({
-      body: '',
-      data: {
-        title: post.title,
-        published: post.published,
-        draft: post.draft,
-        description: post.description,
-        tags: post.tags,
-        category: post.category,
-        timelineYear: post.timelineYear,
-        bannerType: post.bannerType,
-        timelineEra: post.timelineEra,
-        timelineLocation: post.timelineLocation,
-        isKeyEvent: post.isKeyEvent,
-        isLevel: post.isLevel,
-        levelId: post.levelId ?? null,
-      } satisfies GamePostData,
-      slug: post.slug,
-    }))
+  const allPosts: { body: string; data: GamePostData; slug: string }[] =
+    postsManifest.items
+      .filter(post => (includeDrafts ? true : post.draft !== true))
+      .map(post => ({
+        body: '',
+        data: {
+          title: post.title,
+          published: post.published,
+          draft: post.draft,
+          description: post.description,
+          tags: post.tags,
+          category: post.category,
+          timelineYear: post.timelineYear,
+          bannerType: post.bannerType,
+          timelineEra: post.timelineEra,
+          timelineLocation: post.timelineLocation,
+          isKeyEvent: post.isKeyEvent,
+          isLevel: post.isLevel,
+          levelId: post.levelId ?? null,
+        } satisfies GamePostData,
+        slug: post.slug,
+      }))
 
   const sorted = allPosts.sort((a, b) => {
     const dateA = new Date(a.data.published ?? 0)

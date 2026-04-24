@@ -1,23 +1,23 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte'
-  import { editorCircleSelectStore } from './editorStore'
+import { onDestroy } from 'svelte'
+import { editorCircleSelectStore } from './editorStore'
 
-  let circleSelect = {
-    active: false,
-    x: 0,
-    y: 0,
-    radius: 48,
-    selecting: false,
-    subtracting: false,
-  }
+let circleSelect = {
+  active: false,
+  x: 0,
+  y: 0,
+  radius: 48,
+  selecting: false,
+  subtracting: false,
+}
 
-  const unsubscribe = editorCircleSelectStore.subscribe((value) => {
-    circleSelect = value
-  })
+const unsubscribe = editorCircleSelectStore.subscribe(value => {
+  circleSelect = value
+})
 
-  onDestroy(() => {
-    unsubscribe()
-  })
+onDestroy(() => {
+  unsubscribe()
+})
 </script>
 
 {#if circleSelect.active}

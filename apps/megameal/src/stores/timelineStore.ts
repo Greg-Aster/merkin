@@ -104,7 +104,7 @@ function loadSavedPreferences(): Partial<TimelineViewState> {
       const savedScale = localStorage.getItem('timeline-last-era-scale')
       if (savedScale) {
         const scale = Number.parseFloat(savedScale)
-        if (!isNaN(scale) && isFinite(scale) && scale > 0) {
+        if (!Number.isNaN(scale) && Number.isFinite(scale) && scale > 0) {
           savedPrefs.lastEraScale = scale
           savedPrefs.scale = scale
           console.log(`Loaded scale: ${scale}`)
@@ -116,7 +116,7 @@ function loadSavedPreferences(): Partial<TimelineViewState> {
       const savedOffsetX = localStorage.getItem('timeline-last-era-offset-x')
       if (savedOffsetX) {
         const offsetX = Number.parseFloat(savedOffsetX)
-        if (!isNaN(offsetX) && isFinite(offsetX)) {
+        if (!Number.isNaN(offsetX) && Number.isFinite(offsetX)) {
           savedPrefs.lastEraOffsetX = offsetX
           savedPrefs.offsetX = offsetX
           console.log(`Loaded offsetX: ${offsetX}`)
@@ -128,7 +128,7 @@ function loadSavedPreferences(): Partial<TimelineViewState> {
       const savedOffsetY = localStorage.getItem('timeline-last-era-offset-y')
       if (savedOffsetY) {
         const offsetY = Number.parseFloat(savedOffsetY)
-        if (!isNaN(offsetY) && isFinite(offsetY)) {
+        if (!Number.isNaN(offsetY) && Number.isFinite(offsetY)) {
           savedPrefs.lastEraOffsetY = offsetY
           savedPrefs.offsetY = offsetY
           console.log(`Loaded offsetY: ${offsetY}`)
@@ -175,13 +175,13 @@ function saveViewState(state: TimelineViewState) {
       }
 
       // Save navigation state only if we have valid numbers
-      if (isFinite(state.scale) && state.scale > 0) {
+      if (Number.isFinite(state.scale) && state.scale > 0) {
         localStorage.setItem('timeline-last-era-scale', String(state.scale))
       } else {
         console.warn(`Not saving invalid scale: ${state.scale}`)
       }
 
-      if (isFinite(state.offsetX)) {
+      if (Number.isFinite(state.offsetX)) {
         localStorage.setItem(
           'timeline-last-era-offset-x',
           String(state.offsetX),
@@ -190,7 +190,7 @@ function saveViewState(state: TimelineViewState) {
         console.warn(`Not saving invalid offsetX: ${state.offsetX}`)
       }
 
-      if (isFinite(state.offsetY)) {
+      if (Number.isFinite(state.offsetY)) {
         localStorage.setItem(
           'timeline-last-era-offset-y',
           String(state.offsetY),
@@ -315,7 +315,11 @@ const actions = {
   saveEraPosition: (scale: number, offsetX: number, offsetY: number) =>
     baseStore.update(state => {
       // Validate inputs to avoid NaN or infinite values
-      if (!isFinite(scale) || !isFinite(offsetX) || !isFinite(offsetY)) {
+      if (
+        !Number.isFinite(scale) ||
+        !Number.isFinite(offsetX) ||
+        !Number.isFinite(offsetY)
+      ) {
         console.warn('Invalid position values:', { scale, offsetX, offsetY })
         return state
       }
@@ -363,13 +367,13 @@ export const filteredEvents = derived(
   ($store, set) => {
     // Filter events based on current filters
     const filtered = processTimelineEvents($store.events, {
-      category: $store.category || undefined,
-      startYear: $store.startYear || undefined,
-      endYear: $store.endYear || undefined,
+      category: $store.category ?? undefined,
+      startYear: $store.startYear ?? undefined,
+      endYear: $store.endYear ?? undefined,
       era:
         $store.era === 'all-eras' || $store.era === 'all-time'
           ? undefined
-          : $store.era,
+          : $store.era ?? undefined,
       onlyKeyEvents: $store.showOnlyKeyEvents,
     })
 

@@ -1,6 +1,11 @@
 import type { QualitySettings } from '../OptimizationManager'
 
-export type RuntimeQualityTier = 'ultra_low' | 'low' | 'medium' | 'high' | 'ultra'
+export type RuntimeQualityTier =
+  | 'ultra_low'
+  | 'low'
+  | 'medium'
+  | 'high'
+  | 'ultra'
 
 export interface RuntimePropBudget {
   cullDistance: number
@@ -43,40 +48,43 @@ const PROP_BUDGETS: Record<RuntimeQualityTier, RuntimePropBudget> = {
   },
 }
 
-const POINT_LIGHT_BUDGETS: Record<RuntimeQualityTier, RuntimePointLightBudget> = {
-  ultra_low: {
-    enabled: false,
-    cullDistance: 0,
-    intensityScale: 0,
-    rangeScale: 0,
-  },
-  low: {
-    enabled: false,
-    cullDistance: 0,
-    intensityScale: 0,
-    rangeScale: 0,
-  },
-  medium: {
-    enabled: true,
-    cullDistance: 18,
-    intensityScale: 0.72,
-    rangeScale: 0.75,
-  },
-  high: {
-    enabled: true,
-    cullDistance: 28,
-    intensityScale: 0.88,
-    rangeScale: 0.9,
-  },
-  ultra: {
-    enabled: true,
-    cullDistance: 40,
-    intensityScale: 1,
-    rangeScale: 1,
-  },
-}
+const POINT_LIGHT_BUDGETS: Record<RuntimeQualityTier, RuntimePointLightBudget> =
+  {
+    ultra_low: {
+      enabled: false,
+      cullDistance: 0,
+      intensityScale: 0,
+      rangeScale: 0,
+    },
+    low: {
+      enabled: false,
+      cullDistance: 0,
+      intensityScale: 0,
+      rangeScale: 0,
+    },
+    medium: {
+      enabled: true,
+      cullDistance: 18,
+      intensityScale: 0.72,
+      rangeScale: 0.75,
+    },
+    high: {
+      enabled: true,
+      cullDistance: 28,
+      intensityScale: 0.88,
+      rangeScale: 0.9,
+    },
+    ultra: {
+      enabled: true,
+      cullDistance: 40,
+      intensityScale: 1,
+      rangeScale: 1,
+    },
+  }
 
-export function getRuntimePropBudget(qualityTier: RuntimeQualityTier): RuntimePropBudget {
+export function getRuntimePropBudget(
+  qualityTier: RuntimeQualityTier,
+): RuntimePropBudget {
   return PROP_BUDGETS[qualityTier]
 }
 
@@ -103,9 +111,9 @@ export function shouldEnableSceneShadows(
   qualitySettings: Pick<QualitySettings, 'enableShadows' | 'shadowMapSize'>,
 ): boolean {
   return (
-    qualitySettings.enableShadows
-    && qualitySettings.shadowMapSize > 0
-    && qualityTier !== 'ultra_low'
-    && qualityTier !== 'low'
+    qualitySettings.enableShadows &&
+    qualitySettings.shadowMapSize > 0 &&
+    qualityTier !== 'ultra_low' &&
+    qualityTier !== 'low'
   )
 }

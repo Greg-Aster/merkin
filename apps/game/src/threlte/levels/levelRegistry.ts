@@ -4,7 +4,11 @@ import initialRegistry from './level-registry.json'
 export const DEFAULT_LEVEL_ID = 'observatory'
 
 export type LevelLifecycleStatus = 'active' | 'draft' | 'archived'
-export type BuiltInLevelComponentKey = 'observatory' | 'sci-fi-room' | 'miranda' | 'solitude'
+export type BuiltInLevelComponentKey =
+  | 'observatory'
+  | 'sci-fi-room'
+  | 'miranda'
+  | 'solitude'
 
 export interface LevelRegistryComponentSource {
   kind: 'component'
@@ -16,7 +20,9 @@ export interface LevelRegistrySceneSource {
   sceneId: string
 }
 
-export type LevelRegistrySource = LevelRegistryComponentSource | LevelRegistrySceneSource
+export type LevelRegistrySource =
+  | LevelRegistryComponentSource
+  | LevelRegistrySceneSource
 
 export interface LevelRegistryStarMapSettings {
   enabled: boolean
@@ -61,7 +67,11 @@ function normalizeEntries(entries: LevelRegistryEntry[]): LevelRegistryEntry[] {
       status: 'active',
       deployed: true,
       source: { kind: 'component', componentKey: 'observatory' },
-      aliases: ['observatory-level', 'hybrid-observatory', 'hybrid-observatory-level'],
+      aliases: [
+        'observatory-level',
+        'hybrid-observatory',
+        'hybrid-observatory-level',
+      ],
       starMap: {
         enabled: true,
         year: 2150,
@@ -75,15 +85,15 @@ function normalizeEntries(entries: LevelRegistryEntry[]): LevelRegistryEntry[] {
 }
 
 export const levelRegistryStore = writable<LevelRegistryEntry[]>(
-  normalizeEntries(initialRegistry as LevelRegistryEntry[])
+  normalizeEntries(initialRegistry as LevelRegistryEntry[]),
 )
 
-export const playableLevelsStore = derived(levelRegistryStore, ($entries) =>
-  $entries.filter((entry) => entry.deployed)
+export const playableLevelsStore = derived(levelRegistryStore, $entries =>
+  $entries.filter(entry => entry.deployed),
 )
 
-export const starMapLevelsStore = derived(levelRegistryStore, ($entries) =>
-  $entries.filter((entry) => entry.deployed && entry.starMap?.enabled)
+export const starMapLevelsStore = derived(levelRegistryStore, $entries =>
+  $entries.filter(entry => entry.deployed && entry.starMap?.enabled),
 )
 
 export function sanitizeLevelId(value: string) {
@@ -104,37 +114,52 @@ export function getLevelRegistry() {
 
 export function upsertLevelRegistryEntry(entry: LevelRegistryEntry) {
   const normalizedEntry = normalizeEntry(entry)
-  levelRegistryStore.update((entries) => {
-    const nextEntries = entries.filter((candidate) => candidate.id !== normalizedEntry.id)
+  levelRegistryStore.update(entries => {
+    const nextEntries = entries.filter(
+      candidate => candidate.id !== normalizedEntry.id,
+    )
     nextEntries.push(normalizedEntry)
     return normalizeEntries(nextEntries)
   })
 }
 
-export function getLevelRegistryEntry(levelId: string | null | undefined, entries = getLevelRegistry()) {
+export function getLevelRegistryEntry(
+  levelId: string | null | undefined,
+  entries = getLevelRegistry(),
+) {
   if (!levelId) {
-    return entries.find((entry) => entry.id === DEFAULT_LEVEL_ID) ?? entries[0] ?? null
+    return (
+      entries.find(entry => entry.id === DEFAULT_LEVEL_ID) ?? entries[0] ?? null
+    )
   }
 
-  return entries.find((entry) => entry.id === levelId)
-    ?? entries.find((entry) => entry.aliases?.includes(levelId))
-    ?? null
+  return (
+    entries.find(entry => entry.id === levelId) ??
+    entries.find(entry => entry.aliases?.includes(levelId)) ??
+    null
+  )
 }
 
-export function resolveLevelId(levelId: string | null | undefined, entries = getLevelRegistry()) {
+export function resolveLevelId(
+  levelId: string | null | undefined,
+  entries = getLevelRegistry(),
+) {
   const matched = getLevelRegistryEntry(levelId, entries)
   return matched?.id ?? DEFAULT_LEVEL_ID
 }
 
-export function isPlayableLevel(levelId: string | null | undefined, entries = getLevelRegistry()) {
+export function isPlayableLevel(
+  levelId: string | null | undefined,
+  entries = getLevelRegistry(),
+) {
   const matched = getLevelRegistryEntry(levelId, entries)
   return Boolean(matched?.deployed)
 }
 
 export function createStarMapLevelEvents(entries = getLevelRegistry()) {
   return entries
-    .filter((entry) => entry.deployed && entry.starMap?.enabled)
-    .map((entry) => ({
+    .filter(entry => entry.deployed && entry.starMap?.enabled)
+    .map(entry => ({
       id: `level-star-${entry.id}`,
       uniqueId: `level-star-${entry.id}`,
       title: entry.title,

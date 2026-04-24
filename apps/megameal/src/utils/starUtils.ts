@@ -366,7 +366,7 @@ export function createEnhancedStarTexture(
       ctx.stroke()
       break
 
-    case 'halo':
+    case 'halo': {
       // Multiple halos
       const haloRings = [
         { radius: finalRadius * 1.2, opacity: 1 },
@@ -385,6 +385,7 @@ export function createEnhancedStarTexture(
         ctx.fill()
       })
       break
+    }
 
     default: // subtle
       ctx.fillStyle = color

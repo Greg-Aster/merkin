@@ -24,12 +24,11 @@ const {
   variant = 'sidebar',
   dismissible = false,
   storageKey = 'megameal-sponsored-window-dismissed',
-  kicker =
-    variant === 'overlay'
-      ? 'Live Ad Feed'
-      : variant === 'portal'
-        ? 'Paid Message'
-        : 'Megameal Signal',
+  kicker = variant === 'overlay'
+    ? 'Live Ad Feed'
+    : variant === 'portal'
+      ? 'Paid Message'
+      : 'Megameal Signal',
   factTypes = ['advertisement'],
 } = Astro.props
 
@@ -45,7 +44,8 @@ const fallbackFact: TimelineFact = {
   ctaText: 'Return To Consumption',
   href: '/posts/explainer/',
   sponsor: 'Corporate Calm Division',
-  finePrint: 'Normal service will resume once the market regains consciousness.',
+  finePrint:
+    'Normal service will resume once the market regains consciousness.',
 }
 
 const initialFact = availableFacts[0] ?? fallbackFact

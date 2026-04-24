@@ -1,54 +1,55 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte'
+import { createEventDispatcher } from 'svelte'
 
-  interface EditorPresetOption {
-    id: string
-    label: string
-    description?: string
-  }
+interface EditorPresetOption {
+  id: string
+  label: string
+  description?: string
+}
 
-  export interface EditorAudioLibraryTrack {
-    label: string
-    src: string
-  }
+export interface EditorAudioLibraryTrack {
+  label: string
+  src: string
+}
 
-  export let presetValue = ''
-  export let presets: EditorPresetOption[] = []
-  export let enabled = false
-  export let track = ''
-  export let volume = 0.16
-  export let falloff = 28
-  export let audioLibrary: EditorAudioLibraryTrack[] = []
-  export let message = ''
+export let presetValue = ''
+export let presets: EditorPresetOption[] = []
+export let enabled = false
+export let track = ''
+export let volume = 0.16
+export let falloff = 28
+export let audioLibrary: EditorAudioLibraryTrack[] = []
+export let message = ''
 
-  const dispatch = createEventDispatcher<{
-    presetChange: string | undefined
-    enabledChange: boolean
-    trackChange: string
-    volumeChange: string
-    falloffChange: string
-  }>()
+const dispatch = createEventDispatcher<{
+  presetChange: string | undefined
+  enabledChange: boolean
+  trackChange: string
+  volumeChange: string
+  falloffChange: string
+}>()
 
-  function handlePresetChange(event: Event) {
-    const nextValue = (event.currentTarget as HTMLSelectElement).value || undefined
-    dispatch('presetChange', nextValue)
-  }
+function handlePresetChange(event: Event) {
+  const nextValue =
+    (event.currentTarget as HTMLSelectElement).value || undefined
+  dispatch('presetChange', nextValue)
+}
 
-  function handleEnabledChange(event: Event) {
-    dispatch('enabledChange', (event.currentTarget as HTMLInputElement).checked)
-  }
+function handleEnabledChange(event: Event) {
+  dispatch('enabledChange', (event.currentTarget as HTMLInputElement).checked)
+}
 
-  function handleTrackChange(event: Event) {
-    dispatch('trackChange', (event.currentTarget as HTMLSelectElement).value)
-  }
+function handleTrackChange(event: Event) {
+  dispatch('trackChange', (event.currentTarget as HTMLSelectElement).value)
+}
 
-  function handleVolumeChange(event: Event) {
-    dispatch('volumeChange', (event.currentTarget as HTMLInputElement).value)
-  }
+function handleVolumeChange(event: Event) {
+  dispatch('volumeChange', (event.currentTarget as HTMLInputElement).value)
+}
 
-  function handleFalloffChange(event: Event) {
-    dispatch('falloffChange', (event.currentTarget as HTMLInputElement).value)
-  }
+function handleFalloffChange(event: Event) {
+  dispatch('falloffChange', (event.currentTarget as HTMLInputElement).value)
+}
 </script>
 
 <select class="text-input" value={presetValue} on:change={handlePresetChange}>

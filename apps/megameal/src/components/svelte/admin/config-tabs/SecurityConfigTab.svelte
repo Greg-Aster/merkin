@@ -102,6 +102,8 @@ function resetPassword() {
             on:click={promptPasswordReset}
             disabled={resetInProgress || resetComplete}
             class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors flex items-center disabled:opacity-60 whitespace-nowrap"
+            data-sfx-hover="hover-emphasis"
+            data-sfx-click="warning"
           >
             {#if resetInProgress}
               <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -144,12 +146,16 @@ function resetPassword() {
           <button 
             on:click={cancelPasswordReset}
             class="py-2 px-4 bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-neutral-200 font-medium rounded-md transition-colors"
+            data-sfx-hover="hover-soft"
+            data-sfx-click="panel-close"
           >
             Cancel
           </button>
           <button 
             on:click={resetPassword}
             class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors"
+            data-sfx-hover="hover-emphasis"
+            data-sfx-click="warning"
           >
             Reset Password
           </button>

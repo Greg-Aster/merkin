@@ -11,9 +11,6 @@ onMount(() => {
 function completeCheckout() {
   isConfirmed = true
   cart.clear()
-  document.dispatchEvent(
-    new CustomEvent('megameal:sfx', { detail: { id: 'select' } }),
-  )
 }
 </script>
 
@@ -46,6 +43,8 @@ function completeCheckout() {
       <div class="mt-6">
         <a
           href="/store/"
+          data-sfx-hover="hover-soft"
+          data-sfx-click="sweep"
           class="inline-flex items-center rounded-xl bg-[var(--primary)] px-5 py-3 font-semibold text-white transition hover:bg-[var(--primary-hover)]"
         >
           Return to Catalog
@@ -63,6 +62,8 @@ function completeCheckout() {
       <div class="mt-6">
         <a
           href="/store/"
+          data-sfx-hover="hover-soft"
+          data-sfx-click="sweep"
           class="inline-flex items-center rounded-xl border border-white/10 bg-slate-900 px-5 py-3 font-semibold text-slate-100 transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
         >
           Browse the catalog
@@ -89,6 +90,8 @@ function completeCheckout() {
                   {#if item.href}
                     <a
                       href={item.href}
+                      data-sfx-hover="hover-soft"
+                      data-sfx-click="soft"
                       class="mt-2 inline-block text-sm text-cyan-300 transition hover:text-cyan-200"
                     >
                       Review item dossier
@@ -136,6 +139,8 @@ function completeCheckout() {
         </p>
 
         <button
+          data-sfx-hover="hover-emphasis"
+          data-sfx-click="success"
           class="mt-6 w-full rounded-xl bg-[var(--primary)] px-5 py-3 font-semibold text-white transition hover:bg-[var(--primary-hover)]"
           onclick={completeCheckout}
         >
@@ -143,6 +148,8 @@ function completeCheckout() {
         </button>
 
         <button
+          data-sfx-hover="hover-soft"
+          data-sfx-click="warning"
           class="mt-3 w-full rounded-xl border border-white/10 bg-slate-900 px-5 py-3 text-sm font-semibold text-slate-300 transition hover:border-rose-400/40 hover:text-rose-300"
           onclick={() => cart.clear()}
         >

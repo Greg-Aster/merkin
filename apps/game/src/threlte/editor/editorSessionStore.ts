@@ -60,11 +60,15 @@ const DEFAULT_CIRCLE_SELECT_STATE: EditorCircleSelectState = {
 }
 
 export const editorStateStore = writable<EditorState>(DEFAULT_EDITOR_STATE)
-export const editorMarqueeStore = writable<EditorMarqueeState>(DEFAULT_MARQUEE_STATE)
-export const editorCircleSelectStore = writable<EditorCircleSelectState>(DEFAULT_CIRCLE_SELECT_STATE)
+export const editorMarqueeStore = writable<EditorMarqueeState>(
+  DEFAULT_MARQUEE_STATE,
+)
+export const editorCircleSelectStore = writable<EditorCircleSelectState>(
+  DEFAULT_CIRCLE_SELECT_STATE,
+)
 
 export function initializeEditor(enabled: boolean) {
-  editorStateStore.update((state) => ({
+  editorStateStore.update(state => ({
     ...state,
     enabled,
     panelOpen: enabled ? state.panelOpen : false,
@@ -72,7 +76,7 @@ export function initializeEditor(enabled: boolean) {
 }
 
 export function setEditorLevel(levelId: string) {
-  editorStateStore.update((state) => ({
+  editorStateStore.update(state => ({
     ...state,
     currentLevelId: levelId,
     selectedNodeId: null,
@@ -87,11 +91,11 @@ export function setEditorLevel(levelId: string) {
 }
 
 export function markEditorDirty() {
-  editorStateStore.update((state) => ({ ...state, dirty: true }))
+  editorStateStore.update(state => ({ ...state, dirty: true }))
 }
 
 export function clearSelection() {
-  editorStateStore.update((state) => ({
+  editorStateStore.update(state => ({
     ...state,
     selectedNodeId: null,
     selectedNodeIds: [],
@@ -100,21 +104,21 @@ export function clearSelection() {
 }
 
 export function setIsolatedNodes(nodeIds: string[]) {
-  editorStateStore.update((state) => ({
+  editorStateStore.update(state => ({
     ...state,
     isolatedNodeIds: Array.from(new Set(nodeIds)),
   }))
 }
 
 export function clearIsolatedNodes() {
-  editorStateStore.update((state) => ({
+  editorStateStore.update(state => ({
     ...state,
     isolatedNodeIds: [],
   }))
 }
 
 export function toggleIsolatedNode(nodeId: string) {
-  editorStateStore.update((state) => {
+  editorStateStore.update(state => {
     const isolated = new Set(state.isolatedNodeIds)
     if (isolated.has(nodeId)) {
       isolated.delete(nodeId)
@@ -129,8 +133,11 @@ export function toggleIsolatedNode(nodeId: string) {
   })
 }
 
-export function setSelectedNodes(nodeIds: string[], anchorId: string | null = nodeIds[0] ?? null) {
-  editorStateStore.update((state) => ({
+export function setSelectedNodes(
+  nodeIds: string[],
+  anchorId: string | null = nodeIds[0] ?? null,
+) {
+  editorStateStore.update(state => ({
     ...state,
     selectedNodeId: nodeIds[0] ?? null,
     selectedNodeIds: [...nodeIds],
@@ -138,8 +145,11 @@ export function setSelectedNodes(nodeIds: string[], anchorId: string | null = no
   }))
 }
 
-export function selectEditorNode(nodeId: string | null, options?: { additive?: boolean; toggle?: boolean; rangeOrder?: string[] }) {
-  editorStateStore.update((state) => {
+export function selectEditorNode(
+  nodeId: string | null,
+  options?: { additive?: boolean; toggle?: boolean; rangeOrder?: string[] },
+) {
+  editorStateStore.update(state => {
     if (!nodeId) {
       return {
         ...state,
@@ -154,8 +164,13 @@ export function selectEditorNode(nodeId: string | null, options?: { additive?: b
       const anchorIndex = order.indexOf(state.selectionAnchorId)
       const targetIndex = order.indexOf(nodeId)
       if (anchorIndex !== -1 && targetIndex !== -1) {
-        const [start, end] = anchorIndex < targetIndex ? [anchorIndex, targetIndex] : [targetIndex, anchorIndex]
-        const ids = Array.from(new Set([...state.selectedNodeIds, ...order.slice(start, end + 1)]))
+        const [start, end] =
+          anchorIndex < targetIndex
+            ? [anchorIndex, targetIndex]
+            : [targetIndex, anchorIndex]
+        const ids = Array.from(
+          new Set([...state.selectedNodeIds, ...order.slice(start, end + 1)]),
+        )
         return {
           ...state,
           selectedNodeId: nodeId,
@@ -166,7 +181,9 @@ export function selectEditorNode(nodeId: string | null, options?: { additive?: b
 
     if (options?.toggle) {
       const exists = state.selectedNodeIds.includes(nodeId)
-      const nextIds = exists ? state.selectedNodeIds.filter((id) => id !== nodeId) : [...state.selectedNodeIds, nodeId]
+      const nextIds = exists
+        ? state.selectedNodeIds.filter(id => id !== nodeId)
+        : [...state.selectedNodeIds, nodeId]
       return {
         ...state,
         selectedNodeId: nextIds[nextIds.length - 1] ?? null,
@@ -179,7 +196,9 @@ export function selectEditorNode(nodeId: string | null, options?: { additive?: b
       return {
         ...state,
         selectedNodeId: nodeId,
-        selectedNodeIds: Array.from(new Set([...state.selectedNodeIds, nodeId])),
+        selectedNodeIds: Array.from(
+          new Set([...state.selectedNodeIds, nodeId]),
+        ),
         selectionAnchorId: state.selectionAnchorId ?? nodeId,
       }
     }
@@ -194,96 +213,117 @@ export function selectEditorNode(nodeId: string | null, options?: { additive?: b
 }
 
 export function setTransformMode(mode: EditorTransformMode) {
-  editorStateStore.update((state) => ({ ...state, transformMode: mode }))
+  editorStateStore.update(state => ({ ...state, transformMode: mode }))
 }
 
 export function setEditorInteractionMode(mode: EditorInteractionMode) {
-  editorStateStore.update((state) => ({
+  editorStateStore.update(state => ({
     ...state,
     interactionMode: mode,
     modalTransformActive: false,
   }))
 }
 
-export function setEditorViewportLightingMode(mode: EditorViewportLightingMode) {
-  editorStateStore.update((state) => ({ ...state, viewportLightingMode: mode }))
+export function setEditorViewportLightingMode(
+  mode: EditorViewportLightingMode,
+) {
+  editorStateStore.update(state => ({ ...state, viewportLightingMode: mode }))
 }
 
 export function setTransformSpace(space: EditorSpace) {
-  editorStateStore.update((state) => ({ ...state, transformSpace: space }))
+  editorStateStore.update(state => ({ ...state, transformSpace: space }))
 }
 
 export function setTransformAxis(axis: EditorTransformAxis) {
-  editorStateStore.update((state) => ({ ...state, transformAxis: axis }))
+  editorStateStore.update(state => ({ ...state, transformAxis: axis }))
 }
 
 export function setModalTransformActive(active: boolean) {
-  editorStateStore.update((state) => ({ ...state, modalTransformActive: active }))
+  editorStateStore.update(state => ({ ...state, modalTransformActive: active }))
 }
 
 export function setCollisionOverlayEnabled(enabled: boolean) {
-  editorStateStore.update((state) => ({ ...state, collisionOverlayEnabled: enabled }))
+  editorStateStore.update(state => ({
+    ...state,
+    collisionOverlayEnabled: enabled,
+  }))
 }
 
 export function setTerrainBrushMode(mode: EditorTerrainBrushMode) {
-  editorStateStore.update((state) => ({ ...state, terrainBrushMode: mode }))
+  editorStateStore.update(state => ({ ...state, terrainBrushMode: mode }))
 }
 
 export function setTerrainBrushSize(size: number) {
-  editorStateStore.update((state) => ({ ...state, terrainBrushSize: Math.max(1, size) }))
+  editorStateStore.update(state => ({
+    ...state,
+    terrainBrushSize: Math.max(1, size),
+  }))
 }
 
 export function setTerrainBrushStrength(strength: number) {
-  editorStateStore.update((state) => ({ ...state, terrainBrushStrength: Math.max(0.01, strength) }))
+  editorStateStore.update(state => ({
+    ...state,
+    terrainBrushStrength: Math.max(0.01, strength),
+  }))
 }
 
 export function setTerrainBrushFalloff(falloff: number) {
-  editorStateStore.update((state) => ({ ...state, terrainBrushFalloff: Math.min(Math.max(0, falloff), 1) }))
+  editorStateStore.update(state => ({
+    ...state,
+    terrainBrushFalloff: Math.min(Math.max(0, falloff), 1),
+  }))
 }
 
 export function setOrbitEnabled(enabled: boolean) {
-  editorStateStore.update((state) => ({ ...state, orbitEnabled: enabled }))
+  editorStateStore.update(state => ({ ...state, orbitEnabled: enabled }))
 }
 
 export function togglePanelOpen() {
-  editorStateStore.update((state) => ({ ...state, panelOpen: !state.panelOpen }))
+  editorStateStore.update(state => ({ ...state, panelOpen: !state.panelOpen }))
 }
 
 export function togglePropertiesShelfOpen() {
-  editorStateStore.update((state) => ({ ...state, propertiesShelfOpen: !state.propertiesShelfOpen }))
+  editorStateStore.update(state => ({
+    ...state,
+    propertiesShelfOpen: !state.propertiesShelfOpen,
+  }))
 }
 
 export function setSnappingEnabled(enabled: boolean) {
-  editorStateStore.update((state) => ({ ...state, snappingEnabled: enabled }))
+  editorStateStore.update(state => ({ ...state, snappingEnabled: enabled }))
 }
 
 export function setTranslateSnap(value: number) {
-  editorStateStore.update((state) => ({
+  editorStateStore.update(state => ({
     ...state,
-    translateSnap: Number.isFinite(value) ? Math.max(0.01, value) : state.translateSnap,
+    translateSnap: Number.isFinite(value)
+      ? Math.max(0.01, value)
+      : state.translateSnap,
   }))
 }
 
 export function setRotateSnap(value: number) {
-  editorStateStore.update((state) => ({
+  editorStateStore.update(state => ({
     ...state,
-    rotateSnap: Number.isFinite(value) ? Math.max(0.1, value) : state.rotateSnap,
+    rotateSnap: Number.isFinite(value)
+      ? Math.max(0.1, value)
+      : state.rotateSnap,
   }))
 }
 
 export function setScaleSnap(value: number) {
-  editorStateStore.update((state) => ({
+  editorStateStore.update(state => ({
     ...state,
     scaleSnap: Number.isFinite(value) ? Math.max(0.01, value) : state.scaleSnap,
   }))
 }
 
 export function setSurfaceSnapEnabled(enabled: boolean) {
-  editorStateStore.update((state) => ({ ...state, surfaceSnapEnabled: enabled }))
+  editorStateStore.update(state => ({ ...state, surfaceSnapEnabled: enabled }))
 }
 
 export function setSurfaceSnapOffset(offset: number) {
-  editorStateStore.update((state) => ({ ...state, surfaceSnapOffset: offset }))
+  editorStateStore.update(state => ({ ...state, surfaceSnapOffset: offset }))
 }
 
 export function beginMarqueeSelection(startX: number, startY: number) {
@@ -297,7 +337,7 @@ export function beginMarqueeSelection(startX: number, startY: number) {
 }
 
 export function updateMarqueeSelection(currentX: number, currentY: number) {
-  editorMarqueeStore.update((state) => ({
+  editorMarqueeStore.update(state => ({
     ...state,
     currentX,
     currentY,
@@ -309,7 +349,7 @@ export function endMarqueeSelection() {
 }
 
 export function activateCircleSelect(x = 0, y = 0) {
-  editorCircleSelectStore.update((state) => ({
+  editorCircleSelectStore.update(state => ({
     ...state,
     active: true,
     x,
@@ -320,7 +360,7 @@ export function activateCircleSelect(x = 0, y = 0) {
 }
 
 export function deactivateCircleSelect() {
-  editorCircleSelectStore.update((state) => ({
+  editorCircleSelectStore.update(state => ({
     ...state,
     active: false,
     selecting: false,
@@ -329,7 +369,7 @@ export function deactivateCircleSelect() {
 }
 
 export function updateCircleSelectPointer(x: number, y: number) {
-  editorCircleSelectStore.update((state) => ({
+  editorCircleSelectStore.update(state => ({
     ...state,
     x,
     y,
@@ -337,14 +377,19 @@ export function updateCircleSelectPointer(x: number, y: number) {
 }
 
 export function setCircleSelectRadius(radius: number) {
-  editorCircleSelectStore.update((state) => ({
+  editorCircleSelectStore.update(state => ({
     ...state,
-    radius: Number.isFinite(radius) ? Math.min(Math.max(radius, 12), 240) : state.radius,
+    radius: Number.isFinite(radius)
+      ? Math.min(Math.max(radius, 12), 240)
+      : state.radius,
   }))
 }
 
-export function setCircleSelectSelecting(selecting: boolean, subtracting = false) {
-  editorCircleSelectStore.update((state) => ({
+export function setCircleSelectSelecting(
+  selecting: boolean,
+  subtracting = false,
+) {
+  editorCircleSelectStore.update(state => ({
     ...state,
     selecting,
     subtracting: selecting ? subtracting : false,

@@ -28,25 +28,61 @@
     "q1": {
       "text": "How would you rate the aroma of your MegaMeal upon first unsealing the containment pouch?",
       "options": [
-        { "text": "Like childhood nostalgia blended with regulated chemicals. Comforting.", "trait": "obedience", "next": "q2" },
-        { "text": "Aggressively wet. I respected it immediately.", "trait": "devotion", "next": "q2" },
-        { "text": "It smelled like a lawsuit trying to hatch.", "trait": "skepticism", "next": "q2" }
+        {
+          "text": "Like childhood nostalgia blended with regulated chemicals. Comforting.",
+          "trait": "obedience",
+          "next": "q2"
+        },
+        {
+          "text": "Aggressively wet. I respected it immediately.",
+          "trait": "devotion",
+          "next": "q2"
+        },
+        {
+          "text": "It smelled like a lawsuit trying to hatch.",
+          "trait": "skepticism",
+          "next": "q2"
+        }
       ]
     },
     "q2": {
       "text": "During consumption, how much of your personality remained your own?",
       "options": [
-        { "text": "Most of it, though the sauce did make several compelling arguments.", "trait": "skepticism", "next": "q3" },
-        { "text": "Roughly half. The rest now belongs to the brand family.", "trait": "obedience", "next": "q3" },
-        { "text": "None. I was blessed by the paste.", "trait": "transcendence", "next": "q3" }
+        {
+          "text": "Most of it, though the sauce did make several compelling arguments.",
+          "trait": "skepticism",
+          "next": "q3"
+        },
+        {
+          "text": "Roughly half. The rest now belongs to the brand family.",
+          "trait": "obedience",
+          "next": "q3"
+        },
+        {
+          "text": "None. I was blessed by the paste.",
+          "trait": "transcendence",
+          "next": "q3"
+        }
       ]
     },
     "q3": {
       "text": "Which follow-up service feels most valuable to you as a MegaMeal customer?",
       "options": [
-        { "text": "A satisfaction coupon and maybe a quiet room.", "trait": "obedience", "next": "OUTCOME_DELIGHTED" },
-        { "text": "A medical consultation, witness protection, or both.", "trait": "skepticism", "next": "OUTCOME_CONCERNING" },
-        { "text": "Immediate absorption into the Infinite Hunger of the Masses.", "trait": "transcendence", "next": "OUTCOME_TRANSCENDENT" }
+        {
+          "text": "A satisfaction coupon and maybe a quiet room.",
+          "trait": "obedience",
+          "next": "OUTCOME_DELIGHTED"
+        },
+        {
+          "text": "A medical consultation, witness protection, or both.",
+          "trait": "skepticism",
+          "next": "OUTCOME_CONCERNING"
+        },
+        {
+          "text": "Immediate absorption into the Infinite Hunger of the Masses.",
+          "trait": "transcendence",
+          "next": "OUTCOME_TRANSCENDENT"
+        }
       ]
     }
   }

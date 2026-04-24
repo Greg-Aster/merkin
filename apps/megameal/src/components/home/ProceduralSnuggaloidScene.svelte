@@ -1,48 +1,48 @@
 <script lang="ts">
-import { T, useTask } from "@threlte/core";
-import type * as THREE from "three";
+import { T, useTask } from '@threlte/core'
+import type * as THREE from 'three'
 
-export let variant: "snuggaloid" | "generic" = "generic";
-export let targetRotationX = -0.12;
-export let targetRotationY = 0.42;
+export let variant: 'snuggaloid' | 'generic' = 'generic'
+export let targetRotationX = -0.12
+export let targetRotationY = 0.42
 
-let root: THREE.Group | null = null;
-let accentCube: THREE.Mesh | null = null;
+let root: THREE.Group | null = null
+let accentCube: THREE.Mesh | null = null
 
 const palette =
-	variant === "snuggaloid"
-		? {
-				shell: "#f472b6",
-				shellDark: "#be185d",
-				glow: "#f9a8d4",
-				accent: "#fde68a",
-				stage: "#0f172a",
-			}
-		: {
-				shell: "#60a5fa",
-				shellDark: "#1d4ed8",
-				glow: "#bfdbfe",
-				accent: "#f8fafc",
-				stage: "#0f172a",
-			};
+  variant === 'snuggaloid'
+    ? {
+        shell: '#f472b6',
+        shellDark: '#be185d',
+        glow: '#f9a8d4',
+        accent: '#fde68a',
+        stage: '#0f172a',
+      }
+    : {
+        shell: '#60a5fa',
+        shellDark: '#1d4ed8',
+        glow: '#bfdbfe',
+        accent: '#f8fafc',
+        stage: '#0f172a',
+      }
 
-useTask((delta) => {
-	const time = performance.now() * 0.001;
+useTask(delta => {
+  const time = performance.now() * 0.001
 
-	if (root) {
-		root.position.y = Math.sin(time * 1.1) * 0.06;
-		root.rotation.x +=
-			(targetRotationX - root.rotation.x) * Math.min(1, delta * 5.5);
-		root.rotation.y +=
-			(targetRotationY - root.rotation.y) * Math.min(1, delta * 5.5);
-		root.rotation.z = Math.sin(time * 0.8) * 0.03;
-	}
+  if (root) {
+    root.position.y = Math.sin(time * 1.1) * 0.06
+    root.rotation.x +=
+      (targetRotationX - root.rotation.x) * Math.min(1, delta * 5.5)
+    root.rotation.y +=
+      (targetRotationY - root.rotation.y) * Math.min(1, delta * 5.5)
+    root.rotation.z = Math.sin(time * 0.8) * 0.03
+  }
 
-	if (accentCube) {
-		accentCube.rotation.x += delta * 0.18;
-		accentCube.rotation.y += delta * 0.28;
-	}
-});
+  if (accentCube) {
+    accentCube.rotation.x += delta * 0.18
+    accentCube.rotation.y += delta * 0.28
+  }
+})
 </script>
 
 <T.PerspectiveCamera makeDefault position={[0, 0.9, 6.2]} fov={28} />

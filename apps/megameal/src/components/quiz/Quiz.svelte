@@ -1,124 +1,138 @@
 
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { fly, scale } from 'svelte/transition';
-  import { cubicOut, elasticOut } from 'svelte/easing';
-  import { playSiteSfx } from '../../utils/site-sfx';
+import { onMount } from 'svelte'
+import { cubicOut, elasticOut } from 'svelte/easing'
+import { fly, scale } from 'svelte/transition'
+import { playSiteSfx } from '../../utils/site-sfx'
 
-  // Props for the new graph-based quiz structure
-  export let initialQuestion: string;
-  export let nodes: Record<string, { text: string; options: { text: string; trait?: string; next: string }[] }>;
-  export let outcomes: Record<string, { title: string; description: string; emoji?: string }>;
+// Props for the new graph-based quiz structure
+export let initialQuestion: string
+export let nodes: Record<
+  string,
+  { text: string; options: { text: string; trait?: string; next: string }[] }
+>
+export let outcomes: Record<
+  string,
+  { title: string; description: string; emoji?: string }
+>
 
-  // State Management
-  let quizState: 'asking' | 'thinking' | 'completed' = 'asking';
-  let currentNodeId: string = initialQuestion;
-  let selectedAnswerIndex: number | null = null;
-  let userTraits: string[] = [];
-  let finalOutcome: { title: string; description: string; emoji?: string } | null = null;
-  let traitCounts: Record<string, number> = {};
-  let questionNumber: number = 1;
-  let showThinking: boolean = false;
-  const traitPalette = [
-    'linear-gradient(135deg, rgba(255, 99, 132, 0.9), rgba(255, 159, 64, 0.82))',
-    'linear-gradient(135deg, rgba(54, 162, 235, 0.9), rgba(75, 192, 192, 0.82))',
-    'linear-gradient(135deg, rgba(255, 206, 86, 0.9), rgba(255, 159, 64, 0.82))',
-    'linear-gradient(135deg, rgba(153, 102, 255, 0.9), rgba(201, 90, 255, 0.82))',
-    'linear-gradient(135deg, rgba(75, 192, 192, 0.9), rgba(88, 226, 166, 0.82))',
-    'linear-gradient(135deg, rgba(255, 159, 64, 0.9), rgba(255, 99, 132, 0.82))'
-  ];
+// State Management
+let quizState: 'asking' | 'thinking' | 'completed' = 'asking'
+let currentNodeId: string = initialQuestion
+let selectedAnswerIndex: number | null = null
+let userTraits: string[] = []
+let finalOutcome: {
+  title: string
+  description: string
+  emoji?: string
+} | null = null
+let traitCounts: Record<string, number> = {}
+let questionNumber: number = 1
+let showThinking: boolean = false
+const traitPalette = [
+  'linear-gradient(135deg, rgba(255, 99, 132, 0.9), rgba(255, 159, 64, 0.82))',
+  'linear-gradient(135deg, rgba(54, 162, 235, 0.9), rgba(75, 192, 192, 0.82))',
+  'linear-gradient(135deg, rgba(255, 206, 86, 0.9), rgba(255, 159, 64, 0.82))',
+  'linear-gradient(135deg, rgba(153, 102, 255, 0.9), rgba(201, 90, 255, 0.82))',
+  'linear-gradient(135deg, rgba(75, 192, 192, 0.9), rgba(88, 226, 166, 0.82))',
+  'linear-gradient(135deg, rgba(255, 159, 64, 0.9), rgba(255, 99, 132, 0.82))',
+]
 
-  // Computed values for progress bar and question node
-  $: currentNode = nodes[currentNodeId] || null;
-  $: progressPercentage = Math.min((questionNumber / 12) * 100, 100);
-  $: traitEntries = Object.entries(traitCounts).sort(([, left], [, right]) => right - left);
-  $: maxTraitCount = traitEntries[0]?.[1] ?? 1;
-  
-  // Safety check function (non-reactive)
-  function validateCurrentNode() {
-    if (!nodes[currentNodeId]) {
-      console.error(`Node '${currentNodeId}' not found in nodes object`);
-      currentNodeId = initialQuestion; // fallback to initial question
+// Computed values for progress bar and question node
+$: currentNode = nodes[currentNodeId] || null
+$: progressPercentage = Math.min((questionNumber / 12) * 100, 100)
+$: traitEntries = Object.entries(traitCounts).sort(
+  ([, left], [, right]) => right - left,
+)
+$: maxTraitCount = traitEntries[0]?.[1] ?? 1
+
+// Safety check function (non-reactive)
+function validateCurrentNode() {
+  if (!nodes[currentNodeId]) {
+    console.error(`Node '${currentNodeId}' not found in nodes object`)
+    currentNodeId = initialQuestion // fallback to initial question
+  }
+}
+
+function handleAnswerSelect(index: number) {
+  selectedAnswerIndex = index
+}
+
+function handleNext() {
+  if (selectedAnswerIndex === null || !currentNode) {
+    playSiteSfx('error')
+    return
+  }
+
+  const chosenOption = currentNode.options[selectedAnswerIndex]
+  if (!chosenOption) {
+    console.error('Invalid option selected')
+    playSiteSfx('error')
+    return
+  }
+
+  // Show thinking animation
+  quizState = 'thinking'
+  showThinking = true
+
+  setTimeout(() => {
+    if (chosenOption.trait) {
+      userTraits.push(chosenOption.trait)
     }
-  }
 
-  function handleAnswerSelect(index: number) {
-    selectedAnswerIndex = index;
-    playSiteSfx('select');
-  }
-
-  function handleNext() {
-    if (selectedAnswerIndex === null || !currentNode) {
-      playSiteSfx('error');
-      return;
+    if (chosenOption.next.startsWith('OUTCOME_')) {
+      calculateResult(chosenOption.next)
+      playSiteSfx('success')
+      quizState = 'completed'
+    } else if (nodes[chosenOption.next]) {
+      currentNodeId = chosenOption.next
+      selectedAnswerIndex = null
+      questionNumber++
+      validateCurrentNode()
+      playSiteSfx('sweep')
+      quizState = 'asking'
+    } else {
+      console.error(`Next node '${chosenOption.next}' not found`)
+      calculateResult('OUTCOME_DEFAULT')
+      playSiteSfx('warning')
+      quizState = 'completed'
     }
-    
-    const chosenOption = currentNode.options[selectedAnswerIndex];
-    if (!chosenOption) {
-      console.error('Invalid option selected');
-      playSiteSfx('error');
-      return;
-    }
+    showThinking = false
+  }, 1200) // Thinking delay
+}
 
-    playSiteSfx('panel-open');
-    
-    // Show thinking animation
-    quizState = 'thinking';
-    showThinking = true;
-    
-    setTimeout(() => {
-      if (chosenOption.trait) {
-        userTraits.push(chosenOption.trait);
-      }
-      
-      if (chosenOption.next.startsWith('OUTCOME_')) {
-        calculateResult(chosenOption.next);
-        quizState = 'completed';
-      } else if (nodes[chosenOption.next]) {
-        currentNodeId = chosenOption.next;
-        selectedAnswerIndex = null;
-        questionNumber++;
-        validateCurrentNode();
-        quizState = 'asking';
-      } else {
-        console.error(`Next node '${chosenOption.next}' not found`);
-        calculateResult('OUTCOME_DEFAULT');
-        quizState = 'completed';
-      }
-      showThinking = false;
-    }, 1200); // Thinking delay
-  }
+function calculateResult(finalOutcomeKey: string) {
+  traitCounts = userTraits.reduce(
+    (acc, trait) => {
+      acc[trait] = (acc[trait] || 0) + 1
+      return acc
+    },
+    {} as Record<string, number>,
+  )
+  finalOutcome = outcomes[finalOutcomeKey] || outcomes['OUTCOME_DEFAULT']
+}
 
-  function calculateResult(finalOutcomeKey: string) {
-    traitCounts = userTraits.reduce((acc, trait) => {
-      acc[trait] = (acc[trait] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    finalOutcome = outcomes[finalOutcomeKey] || outcomes['OUTCOME_DEFAULT'];
-  }
+function getTraitBarStyle(index: number, value: number) {
+  const width = Math.max((value / maxTraitCount) * 100, 14)
+  return `width: ${width}%; background: ${traitPalette[index % traitPalette.length]};`
+}
 
-  function getTraitBarStyle(index: number, value: number) {
-    const width = Math.max((value / maxTraitCount) * 100, 14);
-    return `width: ${width}%; background: ${traitPalette[index % traitPalette.length]};`;
-  }
+function handleRestart() {
+  quizState = 'asking'
+  currentNodeId = initialQuestion
+  selectedAnswerIndex = null
+  userTraits = []
+  finalOutcome = null
+  traitCounts = {}
+  questionNumber = 1
+  showThinking = false
+  validateCurrentNode()
+}
 
-  function handleRestart() {
-    playSiteSfx('panel-back');
-    quizState = 'asking';
-    currentNodeId = initialQuestion;
-    selectedAnswerIndex = null;
-    userTraits = [];
-    finalOutcome = null;
-    traitCounts = {};
-    questionNumber = 1;
-    showThinking = false;
-    validateCurrentNode();
-  }
-  
-  // Initialize on mount
-  onMount(() => {
-    validateCurrentNode();
-  });
+// Initialize on mount
+onMount(() => {
+  validateCurrentNode()
+})
 </script>
 
 <div class="card-base p-6 md:p-8 cosmic-quiz-container">
@@ -152,6 +166,8 @@
                 type="button"
                 class="card-base2 text-75 btn-quiz-option cosmic-option"
                 class:selected={selectedAnswerIndex === i}
+                data-sfx-hover="hover-emphasis"
+                data-sfx-click="select"
                 on:click={() => handleAnswerSelect(i)}
                 in:fly={{ x: -100, duration: 400, delay: 400 + (i * 100), easing: cubicOut }}>
                 <span class="option-number">{String.fromCharCode(65 + i)}</span>
@@ -163,7 +179,7 @@
       {/key}
     {:else}
       <div class="text-center text-red-400">
-        Error: Question not found. <button type="button" class="btn-primary" on:click={handleRestart}>Restart Quiz</button>
+        Error: Question not found. <button type="button" class="btn-primary" data-sfx-hover="hover-soft" data-sfx-click="panel-back" on:click={handleRestart}>Restart Quiz</button>
       </div>
     {/if}
 
@@ -171,6 +187,8 @@
       type="button"
       class="btn-primary w-full mt-6 cosmic-submit" 
       class:pulsing={selectedAnswerIndex !== null}
+      data-sfx-hover="hover-emphasis"
+      data-sfx-click="panel-open"
       on:click={handleNext} 
       disabled={selectedAnswerIndex === null}>
       {selectedAnswerIndex !== null ? 'Continue...' : 'Select an Answer'}
@@ -224,7 +242,7 @@
       {/if}
 
       <p class="text-lg text-75 mb-6 whitespace-pre-line">{finalOutcome.description}</p>
-      <button type="button" class="btn-primary" on:click={handleRestart}>
+      <button type="button" class="btn-primary" data-sfx-hover="hover-soft" data-sfx-click="panel-back" on:click={handleRestart}>
         Retake Diagnostic
       </button>
     </div>

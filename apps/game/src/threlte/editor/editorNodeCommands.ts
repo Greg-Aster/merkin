@@ -68,8 +68,11 @@ function withUpdatedTimestamp(scene: EditorSceneDocument) {
   }
 }
 
-function applyAddNodeCommand(scene: EditorSceneDocument, node: EditorSceneNode): ApplyEditorNodeCommandsResult {
-  if (scene.nodes.some((existingNode) => existingNode.id === node.id)) {
+function applyAddNodeCommand(
+  scene: EditorSceneDocument,
+  node: EditorSceneNode,
+): ApplyEditorNodeCommandsResult {
+  if (scene.nodes.some(existingNode => existingNode.id === node.id)) {
     return { scene, changed: false }
   }
 
@@ -85,11 +88,11 @@ function applyAddNodeCommand(scene: EditorSceneDocument, node: EditorSceneNode):
 function applyReplaceNodeCommand(
   scene: EditorSceneDocument,
   nodeId: string,
-  node: EditorSceneNode
+  node: EditorSceneNode,
 ): ApplyEditorNodeCommandsResult {
   let changed = false
 
-  const nextNodes = scene.nodes.map((currentNode) => {
+  const nextNodes = scene.nodes.map(currentNode => {
     if (currentNode.id !== nodeId) return currentNode
     changed = true
     return cloneNode(node)
@@ -111,11 +114,11 @@ function applyReplaceNodeCommand(
 function applyPatchNodeCommand(
   scene: EditorSceneDocument,
   nodeId: string,
-  patch: EditorSceneNodePatch
+  patch: EditorSceneNodePatch,
 ): ApplyEditorNodeCommandsResult {
   let changed = false
 
-  const nextNodes = scene.nodes.map((currentNode) => {
+  const nextNodes = scene.nodes.map(currentNode => {
     if (currentNode.id !== nodeId) return currentNode
     changed = true
     return {
@@ -137,7 +140,10 @@ function applyPatchNodeCommand(
   }
 }
 
-function applyRemoveNodesCommand(scene: EditorSceneDocument, nodeIds: string[]): ApplyEditorNodeCommandsResult {
+function applyRemoveNodesCommand(
+  scene: EditorSceneDocument,
+  nodeIds: string[],
+): ApplyEditorNodeCommandsResult {
   const uniqueIds = Array.from(new Set(nodeIds))
   if (uniqueIds.length === 0) {
     return { scene, changed: false }
@@ -147,10 +153,10 @@ function applyRemoveNodesCommand(scene: EditorSceneDocument, nodeIds: string[]):
   for (const nodeId of uniqueIds) {
     idsToRemove.add(nodeId)
     const descendants = collectDescendantIds(scene.nodes, nodeId)
-    descendants.forEach((id) => idsToRemove.add(id))
+    descendants.forEach(id => idsToRemove.add(id))
   }
 
-  const nextNodes = scene.nodes.filter((node) => !idsToRemove.has(node.id))
+  const nextNodes = scene.nodes.filter(node => !idsToRemove.has(node.id))
   if (nextNodes.length === scene.nodes.length) {
     return { scene, changed: false }
   }
@@ -168,19 +174,25 @@ function applyReparentNodeCommand(
   scene: EditorSceneDocument,
   nodeId: string,
   parentId: string | null,
-  transform?: EditorNodeTransformPatch
+  transform?: EditorNodeTransformPatch,
 ): ApplyEditorNodeCommandsResult {
   let changed = false
 
-  const nextNodes = scene.nodes.map((node) => {
+  const nextNodes = scene.nodes.map(node => {
     if (node.id !== nodeId) return node
     changed = true
     return {
       ...node,
       parentId,
-      ...(transform?.position ? { position: [...transform.position] as EditorSceneNode['position'] } : {}),
-      ...(transform?.rotation ? { rotation: [...transform.rotation] as EditorSceneNode['rotation'] } : {}),
-      ...(transform?.scale ? { scale: [...transform.scale] as EditorSceneNode['scale'] } : {}),
+      ...(transform?.position
+        ? { position: [...transform.position] as EditorSceneNode['position'] }
+        : {}),
+      ...(transform?.rotation
+        ? { rotation: [...transform.rotation] as EditorSceneNode['rotation'] }
+        : {}),
+      ...(transform?.scale
+        ? { scale: [...transform.scale] as EditorSceneNode['scale'] }
+        : {}),
     }
   })
 
@@ -199,7 +211,7 @@ function applyReparentNodeCommand(
 
 export function applyEditorNodeCommand(
   scene: EditorSceneDocument,
-  command: EditorNodeCommand
+  command: EditorNodeCommand,
 ): ApplyEditorNodeCommandsResult {
   switch (command.type) {
     case 'add-node':
@@ -211,13 +223,18 @@ export function applyEditorNodeCommand(
     case 'remove-nodes':
       return applyRemoveNodesCommand(scene, command.nodeIds)
     case 'reparent-node':
-      return applyReparentNodeCommand(scene, command.nodeId, command.parentId, command.transform)
+      return applyReparentNodeCommand(
+        scene,
+        command.nodeId,
+        command.parentId,
+        command.transform,
+      )
   }
 }
 
 export function applyEditorNodeCommands(
   scene: EditorSceneDocument,
-  commands: EditorNodeCommand[]
+  commands: EditorNodeCommand[],
 ): ApplyEditorNodeCommandsResult {
   let nextScene = scene
   let changed = false

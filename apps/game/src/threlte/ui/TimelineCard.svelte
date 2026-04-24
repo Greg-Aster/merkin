@@ -190,15 +190,21 @@ let cardElement: HTMLElement
 
 function getPositioningStyles() {
   if (event?.screenPosition && !isMobile) {
-    const x = Math.max(10, Math.min(window.innerWidth - 220, event.screenPosition.x + 20))
-    const y = Math.max(10, Math.min(window.innerHeight - 150, event.screenPosition.y - 50))
+    const x = Math.max(
+      10,
+      Math.min(window.innerWidth - 220, event.screenPosition.x + 20),
+    )
+    const y = Math.max(
+      10,
+      Math.min(window.innerHeight - 150, event.screenPosition.y - 50),
+    )
     return `left: ${x}px; top: ${y}px;`
   }
-  
+
   if (isMobile) {
     return 'bottom: 220px; left: 50%; transform: translateX(-50%);'
   }
-  
+
   return 'bottom: 20px; left: 50%; transform: translateX(-50%);'
 }
 

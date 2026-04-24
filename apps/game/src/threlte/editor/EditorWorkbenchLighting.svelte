@@ -1,19 +1,20 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte'
-  import { T } from '@threlte/core'
-  import { editorStateStore } from './editorStore'
+import { T } from '@threlte/core'
+import { onDestroy } from 'svelte'
+import { editorStateStore } from './editorStore'
 
-  let editorState
+let editorState
 
-  const unsub = editorStateStore.subscribe((value) => {
-    editorState = value
-  })
+const unsub = editorStateStore.subscribe(value => {
+  editorState = value
+})
 
-  $: workbenchEnabled = !!editorState?.enabled && editorState.viewportLightingMode === 'workbench'
+$: workbenchEnabled =
+  !!editorState?.enabled && editorState.viewportLightingMode === 'workbench'
 
-  onDestroy(() => {
-    unsub()
-  })
+onDestroy(() => {
+  unsub()
+})
 </script>
 
 {#if workbenchEnabled}

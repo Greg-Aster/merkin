@@ -3,15 +3,15 @@
   Replaces AudioManager.ts with reactive audio management
 -->
 <script lang="ts">
-import { useTask } from '@threlte/core'
-import { onMount, onDestroy, createEventDispatcher } from 'svelte'
-import { writable } from 'svelte/store'
-import { Howl, Howler } from 'howler'
 import {
   type AudioSfxConfig,
   type AudioSfxId,
 } from '@merkin/shared-audio/audio-ids'
 import { gameAudioProfile } from '@merkin/shared-audio/game-audio-profile'
+import { useTask } from '@threlte/core'
+import { Howl, Howler } from 'howler'
+import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+import { writable } from 'svelte/store'
 import {
   ambienceVolumeSetting,
   isSoundEnabled,
@@ -34,14 +34,14 @@ class SimpleAudioManager {
   private sounds: Map<string, Howl> = new Map()
   private masterVolume: number = 0.7
   private initialized: boolean = false
-  
+
   async initialize() {
     try {
       // Set up Howler global settings
       Howler.volume(this.masterVolume)
       Howler.autoUnlock = true
       Howler.autoSuspend = false
-      
+
       this.initialized = true
       if (isDev) {
         console.log('🎵 SimpleAudioManager initialized with Howler.js')
@@ -51,16 +51,16 @@ class SimpleAudioManager {
       throw error
     }
   }
-  
+
   setMasterVolume(volume: number) {
     this.masterVolume = Math.max(0, Math.min(1, volume))
     Howler.volume(this.masterVolume)
   }
-  
+
   getMasterVolume(): number {
     return this.masterVolume
   }
-  
+
   loadSound(id: string, src: string | string[], options: any = {}): Howl {
     const sound = new Howl({
       src: Array.isArray(src) ? src : [src],
@@ -77,13 +77,13 @@ class SimpleAudioManager {
           sound.play()
         })
       },
-      ...options
+      ...options,
     })
-    
+
     this.sounds.set(id, sound)
     return sound
   }
-  
+
   play(id: string): number | null {
     const sound = this.sounds.get(id)
     if (sound) {
@@ -92,32 +92,32 @@ class SimpleAudioManager {
     console.warn(`Audio: Sound "${id}" not found`)
     return null
   }
-  
+
   pause(id: string) {
     const sound = this.sounds.get(id)
     if (sound) {
       sound.pause()
     }
   }
-  
+
   stop(id: string) {
     const sound = this.sounds.get(id)
     if (sound) {
       sound.stop()
     }
   }
-  
+
   setVolume(id: string, volume: number) {
     const sound = this.sounds.get(id)
     if (sound) {
       sound.volume(Math.max(0, Math.min(1, volume)))
     }
   }
-  
+
   getSound(id: string): Howl | undefined {
     return this.sounds.get(id)
   }
-  
+
   unload(id: string) {
     const sound = this.sounds.get(id)
     if (sound) {
@@ -125,12 +125,12 @@ class SimpleAudioManager {
       this.sounds.delete(id)
     }
   }
-  
+
   update(delta: number) {
     // Update spatial audio positions if needed
     // Howler handles most updates automatically
   }
-  
+
   dispose() {
     // Unload all sounds
     for (const [id, sound] of this.sounds) {
@@ -139,11 +139,11 @@ class SimpleAudioManager {
     this.sounds.clear()
     this.initialized = false
   }
-  
+
   isReady(): boolean {
     return this.initialized
   }
-  
+
   getSoundIds(): string[] {
     return Array.from(this.sounds.keys())
   }
@@ -158,29 +158,179 @@ let audioManager: SimpleAudioManager | null = null
 let isInitialized = false
 let hasUserUnlockedAudio = false
 let lastScrollSoundAt = 0
+let lastHoverAnchor: HTMLElement | null = null
+let lastFocusTarget: HTMLElement | null = null
+let lastPointerAt = -Infinity
+const INTERACTIVE_SELECTOR = 'button, a[href], [role="button"], summary'
+const lastPlayedAt = new Map<AudioSfxId, number>()
 
-function isUiTarget(target: EventTarget | null): target is HTMLElement {
-  return target instanceof HTMLElement
+function isCoolingDown(id: AudioSfxId, cooldownMs = 0) {
+  if (cooldownMs <= 0) return false
+  const now = window.performance.now()
+  const previous = lastPlayedAt.get(id) ?? -Infinity
+  if (now - previous < cooldownMs) {
+    return true
+  }
+  lastPlayedAt.set(id, now)
+  return false
+}
+
+function isNativeInteractive(element: HTMLElement | null) {
+  return !!element?.closest(INTERACTIVE_SELECTOR)
+}
+
+function readExplicitSfx(
+  element: HTMLElement | null,
+  trigger: 'click' | 'hover' | 'focus' | 'key',
+): AudioSfxId | null {
+  if (!element) return null
+
+  const explicitElement = element.closest<HTMLElement>(`[data-sfx-${trigger}]`)
+  if (!explicitElement) return null
+
+  const explicit =
+    trigger === 'click'
+      ? explicitElement.dataset.sfxClick
+      : trigger === 'hover'
+        ? explicitElement.dataset.sfxHover
+        : trigger === 'focus'
+          ? explicitElement.dataset.sfxFocus
+          : explicitElement.dataset.sfxKey
+
+  return (explicit as AudioSfxId | undefined) ?? null
+}
+
+function isMutedSurface(element: HTMLElement) {
+  return !!element.closest('audio, video, textarea, [contenteditable="true"]')
+}
+
+function isPointerMutedSurface(element: HTMLElement) {
+  return (
+    isMutedSurface(element) ||
+    !!element.closest(
+      'input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]), select',
+    )
+  )
+}
+
+function isTypingField(element: HTMLElement) {
+  return !!element.closest(
+    'input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]), textarea, select, [contenteditable="true"]',
+  )
+}
+
+function resolvePointerSfx(target: EventTarget | null): AudioSfxId | null {
+  const element = target instanceof HTMLElement ? target : null
+  if (!element) return null
+
+  const explicit = readExplicitSfx(element, 'click')
+  if (explicit) return explicit
+
+  if (isPointerMutedSurface(element)) {
+    return null
+  }
+
+  if (element.closest('.settings-overlay, .close-button')) {
+    return 'panel-close'
+  }
+
+  if (element.closest('.settings-button')) {
+    return 'panel-open'
+  }
+
+  if (element.closest('.danger, [data-danger="true"]')) {
+    return 'warning'
+  }
+
+  if (element.closest('.settings-panel, .editor-section')) {
+    return 'soft'
+  }
+
+  if (isNativeInteractive(element)) {
+    return 'soft'
+  }
+
+  return 'soft'
+}
+
+function getHoverAnchor(target: EventTarget | null): HTMLElement | null {
+  const element = target instanceof HTMLElement ? target : null
+  if (!element || isMutedSurface(element)) return null
+
+  return (
+    element.closest<HTMLElement>('[data-sfx-hover], button, a[href], [role="button"]') ??
+    null
+  )
+}
+
+function resolveHoverSfx(anchor: HTMLElement | null): AudioSfxId | null {
+  if (!anchor) return null
+
+  const explicit = readExplicitSfx(anchor, 'hover')
+  if (explicit) return explicit
+
+  if (
+    anchor.matches(
+      '.settings-button, .close-button, .danger, [data-danger="true"]',
+    )
+  ) {
+    return 'hover-emphasis'
+  }
+
+  if (anchor.matches('button, a[href], [role="button"]')) {
+    return 'hover-soft'
+  }
+
+  return null
+}
+
+function resolveFocusSfx(target: EventTarget | null): AudioSfxId | null {
+  const element = target instanceof HTMLElement ? target : null
+  if (!element || isMutedSurface(element)) return null
+
+  const explicit = readExplicitSfx(element, 'focus')
+  if (explicit) return explicit
+
+  if (element.matches('input, textarea, select, button, a[href]')) {
+    return 'focus-soft'
+  }
+
+  return null
+}
+
+function resolveKeySfx(target: EventTarget | null): AudioSfxId | null {
+  const element = target instanceof HTMLElement ? target : null
+  if (!element || isTypingField(element) || isMutedSurface(element)) return null
+
+  const explicitKey = readExplicitSfx(element, 'key')
+  if (explicitKey) return explicitKey
+
+  const explicitClick = readExplicitSfx(element, 'click')
+  if (explicitClick) return explicitClick
+
+  return resolvePointerSfx(element)
 }
 
 function ensureSound(id: string, src: string | string[], options: any = {}) {
   if (!audioManager) return null
   const existing = audioManager.getSound(id)
   if (existing) return existing
-  const resolved = Array.isArray(src) ? src.map(resolveAudioSrc) : resolveAudioSrc(src)
+  const resolved = Array.isArray(src)
+    ? src.map(resolveAudioSrc)
+    : resolveAudioSrc(src)
   return audioManager.loadSound(id, resolved, options)
 }
 
 function resolveAudioSrc(src: string): string {
   if (/^(https?:)?\/\//.test(src)) return src
 
-  const runtimeBase = typeof window !== 'undefined'
-    ? (
-        window.location.pathname === '/game' || window.location.pathname.startsWith('/game/')
-          ? '/game/'
-          : '/'
-      )
-    : GAME_AUDIO_BASE
+  const runtimeBase =
+    typeof window !== 'undefined'
+      ? window.location.pathname === '/game' ||
+        window.location.pathname.startsWith('/game/')
+        ? '/game/'
+        : '/'
+      : GAME_AUDIO_BASE
   const basePath = runtimeBase.endsWith('/') ? runtimeBase : `${runtimeBase}/`
   const relativePath = src.replace(/^\/+/, '')
   return new URL(relativePath, `http://megameal.local${basePath}`).pathname
@@ -215,6 +365,7 @@ function playConfiguredSfx(
   if (!audioManager) return
 
   const config = { ...gameAudioProfile.sfx[id], ...overrides }
+  if (isCoolingDown(id, config.cooldownMs ?? 0)) return
   const sound = ensureConfiguredSfx(id, overrides)
   if (!sound) return
 
@@ -263,23 +414,10 @@ async function handlePointerDown(event: PointerEvent) {
   await unlockAudioContext()
   startAmbienceIfNeeded()
 
-  const target = isUiTarget(event.target) ? event.target : null
-
-  if (target?.closest('input[type="range"], input[type="checkbox"], select, textarea')) {
-    return
+  const sfxId = resolvePointerSfx(event.target)
+  if (sfxId) {
+    playConfiguredSfx(sfxId)
   }
-
-  if (target?.closest('.settings-button, .settings-overlay, .settings-panel')) {
-    playConfiguredSfx('panel-open')
-    return
-  }
-
-  if (target?.closest('button, a[href], [role="button"]')) {
-    playConfiguredSfx('select')
-    return
-  }
-
-  playConfiguredSfx('soft')
 }
 
 async function handleWheel(event: WheelEvent) {
@@ -322,14 +460,65 @@ async function handleKeyDown(event: KeyboardEvent) {
     return
   }
 
-  playConfiguredSfx('soft', { volume: 0.18 })
+  const sfxId = resolveKeySfx(event.target)
+  if (sfxId) {
+    playConfiguredSfx(sfxId, { volume: 0.18 })
+  }
+}
+
+function handleDelegatedPointerDown(event: PointerEvent) {
+  lastPointerAt = window.performance.now()
+  void handlePointerDown(event)
+}
+
+function handleMouseOver(event: MouseEvent) {
+  const anchor = getHoverAnchor(event.target)
+  if (!anchor || anchor === lastHoverAnchor) return
+
+  const related = event.relatedTarget
+  if (related instanceof Node && anchor.contains(related)) return
+
+  lastHoverAnchor = anchor
+  const sfxId = resolveHoverSfx(anchor)
+  if (sfxId) {
+    playConfiguredSfx(sfxId)
+  }
+}
+
+function handleMouseOut(event: MouseEvent) {
+  if (!lastHoverAnchor) return
+
+  const target = event.target
+  const related = event.relatedTarget
+  if (!(target instanceof Node) || !lastHoverAnchor.contains(target)) return
+  if (related instanceof Node && lastHoverAnchor.contains(related)) return
+
+  lastHoverAnchor = null
+}
+
+function handleFocusIn(event: FocusEvent) {
+  const target = event.target instanceof HTMLElement ? event.target : null
+  if (!target || target === lastFocusTarget) return
+  if (window.performance.now() - lastPointerAt < 140) return
+
+  lastFocusTarget = target
+  const sfxId = resolveFocusSfx(target)
+  if (sfxId) {
+    playConfiguredSfx(sfxId)
+  }
+}
+
+function handleFocusOut(event: FocusEvent) {
+  if (event.target === lastFocusTarget) {
+    lastFocusTarget = null
+  }
 }
 
 onMount(async () => {
   // Update stores
   audioEnabledStore.set(enabled)
   masterVolumeStore.set(masterVolume)
-  
+
   if (!enabled) {
     if (isDev) {
       console.log('🔇 Audio system disabled for performance')
@@ -341,28 +530,36 @@ onMount(async () => {
     if (isDev) {
       console.log('🎵 Initializing Threlte Audio System...')
     }
-    
+
     // Create and initialize audio manager
     audioManager = new SimpleAudioManager()
     await audioManager.initialize()
-    
+
     // Configure audio settings
     audioManager.setMasterVolume(masterVolume)
     ensureConfiguredAmbience()
     ensureConfiguredSfx('soft')
     ensureConfiguredSfx('select')
+    ensureConfiguredSfx('hover-soft')
+    ensureConfiguredSfx('hover-emphasis')
+    ensureConfiguredSfx('focus-soft')
     ensureConfiguredSfx('panel-open')
+    ensureConfiguredSfx('panel-close')
     ensureConfiguredSfx('panel-back')
     ensureConfiguredSfx('error')
     ensureConfiguredSfx('scroll')
-    
+
     isInitialized = true
     if (isDev) {
       console.log('✅ Threlte Audio System initialized')
     }
-    
+
     dispatch('audioInitialized', { audioManager })
-    window.addEventListener('pointerdown', handlePointerDown, true)
+    window.addEventListener('pointerdown', handleDelegatedPointerDown, true)
+    window.addEventListener('mouseover', handleMouseOver, true)
+    window.addEventListener('mouseout', handleMouseOut, true)
+    window.addEventListener('focusin', handleFocusIn, true)
+    window.addEventListener('focusout', handleFocusOut, true)
     window.addEventListener('wheel', handleWheel, { passive: true })
     window.addEventListener('keydown', handleKeyDown, true)
   } catch (error) {
@@ -372,7 +569,7 @@ onMount(async () => {
 })
 
 // Update audio system
-useTask((delta) => {
+useTask(delta => {
   if (audioManager && isInitialized) {
     audioManager.update(delta)
   }
@@ -402,11 +599,17 @@ $: if (audioManager) {
 }
 
 function resolveAmbienceVolume(baseVolume: number): number {
-  return Math.min(1, Math.max(0, $masterVolumeSetting * $ambienceVolumeSetting * baseVolume))
+  return Math.min(
+    1,
+    Math.max(0, $masterVolumeSetting * $ambienceVolumeSetting * baseVolume),
+  )
 }
 
 function resolveSfxVolume(baseVolume: number): number {
-  return Math.min(1, Math.max(0, $masterVolumeSetting * $sfxVolumeSetting * baseVolume))
+  return Math.min(
+    1,
+    Math.max(0, $masterVolumeSetting * $sfxVolumeSetting * baseVolume),
+  )
 }
 
 // Reactive enabled state
@@ -420,7 +623,11 @@ $: if (audioManager) {
 }
 
 // Export audio functions for external use
-export function loadSound(id: string, src: string | string[], options: any = {}): Howl | null {
+export function loadSound(
+  id: string,
+  src: string | string[],
+  options: any = {},
+): Howl | null {
   if (audioManager) {
     const sound = audioManager.loadSound(id, src, options)
     loadedSoundsStore.set(audioManager.getSoundIds())
@@ -472,19 +679,23 @@ export function unloadSound(id: string) {
 
 export function getAudioStats() {
   if (!audioManager) return null
-  
+
   return {
     enabled,
     initialized: isInitialized,
     masterVolume: audioManager.getMasterVolume(),
     loadedSounds: audioManager.getSoundIds().length,
-    spatialAudio: enableSpatialAudio
+    spatialAudio: enableSpatialAudio,
   }
 }
 
 onDestroy(() => {
   if (typeof window !== 'undefined') {
-    window.removeEventListener('pointerdown', handlePointerDown, true)
+    window.removeEventListener('pointerdown', handleDelegatedPointerDown, true)
+    window.removeEventListener('mouseover', handleMouseOver, true)
+    window.removeEventListener('mouseout', handleMouseOut, true)
+    window.removeEventListener('focusin', handleFocusIn, true)
+    window.removeEventListener('focusout', handleFocusOut, true)
     window.removeEventListener('wheel', handleWheel)
     window.removeEventListener('keydown', handleKeyDown, true)
   }

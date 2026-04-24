@@ -2,6 +2,7 @@
  * Lighting Manager - Industry standard lighting system
  */
 
+import { type Writable, writable } from 'svelte/store'
 import {
   AmbientLight,
   Color,
@@ -11,7 +12,6 @@ import {
   SpotLight,
   Vector3,
 } from 'three'
-import { writable, type Writable } from 'svelte/store'
 import { MessageType, type SystemRegistry } from '../../core/LevelSystem'
 
 const isDev = import.meta.env.DEV
@@ -48,14 +48,14 @@ export interface LightingData {
 export class LightingManager {
   private lightingData: Writable<LightingData>
   private registry: SystemRegistry
-  private scene: Scene
-  
+  private scene!: Scene
+
   // Actual THREE.js light objects
-  private ambientLight: AmbientLight
+  private ambientLight!: AmbientLight
   private directionalLights: DirectionalLight[] = []
   private pointLights: PointLight[] = []
   private spotLights: SpotLight[] = []
-  
+
   // Enhanced point light pool for dynamic lights with efficient management
   private pointLightPool: PointLight[] = []
   private activePointLights: Set<PointLight> = new Set()
@@ -68,7 +68,7 @@ export class LightingManager {
       ambient: { color: new Color(0x404060), intensity: 1.0 },
       directional: [],
       point: [],
-      spot: []
+      spot: [],
     })
 
     // Subscribe to lighting data changes and broadcast to all components
@@ -82,14 +82,14 @@ export class LightingManager {
         source: 'lighting-manager',
         data: data,
         timestamp: Date.now(),
-        priority: 'normal'
+        priority: 'normal',
       })
     })
   }
 
   initialize(scene: Scene): void {
     this.scene = scene
-    
+
     // Create default ambient light
     this.ambientLight = new AmbientLight(0x404060, 1.0)
     this.scene.add(this.ambientLight)
@@ -109,17 +109,24 @@ export class LightingManager {
 
   private initializePointLightPool(poolSize: number = 32): void {
     if (!this.scene) {
-      console.error('❌ LightingManager: Cannot initialize point light pool without scene')
+      console.error(
+        '❌ LightingManager: Cannot initialize point light pool without scene',
+      )
       return
     }
-    
+
     this.ensurePointLightPoolSize(poolSize)
-    if (isDev) console.log(`💡 LightingManager: Created point light pool with ${poolSize} lights`)
+    if (isDev)
+      console.log(
+        `💡 LightingManager: Created point light pool with ${poolSize} lights`,
+      )
   }
 
   ensurePointLightPoolSize(poolSize: number): void {
     if (!this.scene) {
-      console.error('❌ LightingManager: Cannot resize point light pool without scene')
+      console.error(
+        '❌ LightingManager: Cannot resize point light pool without scene',
+      )
       return
     }
 
@@ -128,7 +135,10 @@ export class LightingManager {
       this.pointLightPool.push(this.createPooledPointLight())
     }
 
-    if (this.pointLightPool.length > 0 && this.activePointLights.size < this.pointLightPool.length) {
+    if (
+      this.pointLightPool.length > 0 &&
+      this.activePointLights.size < this.pointLightPool.length
+    ) {
       this.poolExhaustedWarningShown = false
     }
   }
@@ -140,12 +150,14 @@ export class LightingManager {
 
     // Update directional lights
     this.updateDirectionalLights(data.directional)
-    
+
     // Update point lights
     this.updatePointLightsFromData(data.point)
   }
 
-  private updateDirectionalLights(directionalData: LightingData['directional']): void {
+  private updateDirectionalLights(
+    directionalData: LightingData['directional'],
+  ): void {
     // Remove excess directional lights
     while (this.directionalLights.length > directionalData.length) {
       const light = this.directionalLights.pop()!
@@ -166,7 +178,7 @@ export class LightingManager {
         const light = new DirectionalLight(data.color, data.intensity)
         light.position.copy(data.direction).multiplyScalar(100)
         light.castShadow = data.castShadow
-        
+
         if (data.castShadow) {
           light.shadow.mapSize.width = 1024
           light.shadow.mapSize.height = 1024
@@ -177,7 +189,7 @@ export class LightingManager {
           light.shadow.camera.top = 180
           light.shadow.camera.bottom = -180
         }
-        
+
         this.scene.add(light)
         this.directionalLights.push(light)
       }
@@ -205,7 +217,12 @@ export class LightingManager {
         this.activePointLights.add(light)
       } else {
         // If we need more lights than in pool, create dynamically
-        const light = new PointLight(data.color, data.intensity, data.distance, data.decay)
+        const light = new PointLight(
+          data.color,
+          data.intensity,
+          data.distance,
+          data.decay,
+        )
         light.position.copy(data.position)
         this.scene.add(light)
         this.pointLights.push(light)
@@ -216,43 +233,67 @@ export class LightingManager {
   updateAmbientLight(color: Color, intensity: number): void {
     this.lightingData.update(data => ({
       ...data,
-      ambient: { color: color.clone(), intensity }
+      ambient: { color: color.clone(), intensity },
     }))
   }
 
-  addDirectionalLight(direction: Vector3, color: Color, intensity: number, castShadow = false): void {
+  addDirectionalLight(
+    direction: Vector3,
+    color: Color,
+    intensity: number,
+    castShadow = false,
+  ): void {
     this.lightingData.update(data => ({
       ...data,
-      directional: [...data.directional, {
-        direction: direction.clone(),
-        color: color.clone(),
-        intensity,
-        castShadow
-      }]
+      directional: [
+        ...data.directional,
+        {
+          direction: direction.clone(),
+          color: color.clone(),
+          intensity,
+          castShadow,
+        },
+      ],
     }))
   }
 
-  addPointLight(position: Vector3, color: Color, intensity: number, distance: number, decay = 2): void {
+  addPointLight(
+    position: Vector3,
+    color: Color,
+    intensity: number,
+    distance: number,
+    decay = 2,
+  ): void {
     this.lightingData.update(data => ({
       ...data,
-      point: [...data.point, {
-        position: position.clone(),
-        color: color.clone(),
-        intensity,
-        distance,
-        decay
-      }]
+      point: [
+        ...data.point,
+        {
+          position: position.clone(),
+          color: color.clone(),
+          intensity,
+          distance,
+          decay,
+        },
+      ],
     }))
   }
 
   clearPointLights(): void {
     this.lightingData.update(data => ({
       ...data,
-      point: []
+      point: [],
     }))
   }
 
-  updatePointLights(lights: Array<{position: Vector3, color: Color, intensity: number, distance: number}>): void {
+  updatePointLights(
+    lights: Array<{
+      position: Vector3
+      color: Color
+      intensity: number
+      distance: number
+    }>,
+  ): void {
     this.lightingData.update(data => ({
       ...data,
       point: lights.map(light => ({
@@ -260,14 +301,14 @@ export class LightingManager {
         color: light.color.clone(),
         intensity: light.intensity,
         distance: light.distance,
-        decay: 2
-      }))
+        decay: 2,
+      })),
     }))
   }
 
   getLightingData(): LightingData {
     let currentData: LightingData
-    this.lightingData.subscribe(data => currentData = data)()
+    this.lightingData.subscribe(data => (currentData = data))()
     return currentData!
   }
 
@@ -278,7 +319,7 @@ export class LightingManager {
   // =====================================================
   // EFFICIENT LIGHT POOL MANAGEMENT METHODS
   // =====================================================
-  
+
   /**
    * Request a light for a specific owner (e.g., firefly entity ID)
    * Returns a light from the pool or null if none available
@@ -291,13 +332,15 @@ export class LightingManager {
     }
 
     // Find an available light from the pool
-    const availableLight = this.pointLightPool.find(light => !this.activePointLights.has(light))
+    const availableLight = this.pointLightPool.find(
+      light => !this.activePointLights.has(light),
+    )
     if (!availableLight) {
       if (!this.poolExhaustedWarningShown && import.meta.env.DEV) {
         this.poolExhaustedWarningShown = true
         console.warn(
           `💡 LightingManager: Point light pool exhausted (${this.activePointLights.size}/${this.pointLightPool.length} in use); ` +
-          `owner ${ownerId} could not acquire a light`
+            `owner ${ownerId} could not acquire a light`,
         )
       }
       return null
@@ -341,12 +384,15 @@ export class LightingManager {
   /**
    * Update a specific light's properties efficiently
    */
-  updateLight(ownerId: string, properties: {
-    position?: Vector3
-    color?: Color | number
-    intensity?: number
-    distance?: number
-  }): boolean {
+  updateLight(
+    ownerId: string,
+    properties: {
+      position?: Vector3
+      color?: Color | number
+      intensity?: number
+      distance?: number
+    },
+  ): boolean {
     const light = this.ownedLights.get(ownerId)
     if (!light) {
       return false
@@ -356,7 +402,10 @@ export class LightingManager {
       light.position.copy(properties.position)
     }
     if (properties.color !== undefined) {
-      light.color = properties.color instanceof Color ? properties.color : new Color(properties.color)
+      light.color =
+        properties.color instanceof Color
+          ? properties.color
+          : new Color(properties.color)
     }
     if (properties.intensity !== undefined) {
       light.intensity = properties.intensity
@@ -381,28 +430,28 @@ export class LightingManager {
       total: this.pointLightPool.length,
       active: this.activePointLights.size,
       available: this.pointLightPool.length - this.activePointLights.size,
-      owners: Array.from(this.ownedLights.keys())
+      owners: Array.from(this.ownedLights.keys()),
     }
   }
 
   dispose(): void {
     // Remove all lights from scene
     this.scene.remove(this.ambientLight)
-    
+
     this.directionalLights.forEach(light => this.scene.remove(light))
     this.directionalLights = []
-    
+
     this.pointLightPool.forEach(light => this.scene.remove(light))
     this.pointLightPool = []
     this.activePointLights.clear()
     this.ownedLights.clear() // Clear the new ownership tracking
-    
+
     this.pointLights.forEach(light => this.scene.remove(light))
     this.pointLights = []
-    
+
     this.spotLights.forEach(light => this.scene.remove(light))
     this.spotLights = []
-    
+
     if (isDev) console.log('💡 LightingManager: Disposed all lights')
   }
 }

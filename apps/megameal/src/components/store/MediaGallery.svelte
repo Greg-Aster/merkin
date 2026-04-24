@@ -1,93 +1,114 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte'
+import { onDestroy, onMount } from 'svelte'
 
-  export interface MediaItem {
-    type: 'image' | 'video' | 'youtube'
-    src?: string
-    videoId?: string
-    poster?: string
-    alt?: string
-    caption?: string
-  }
+export interface MediaItem {
+  type: 'image' | 'video' | 'youtube'
+  src?: string
+  videoId?: string
+  poster?: string
+  alt?: string
+  caption?: string
+}
 
-  interface Props {
-    items: MediaItem[]
-    autoPlayInterval?: number
-    class?: string
-  }
+interface Props {
+  items: MediaItem[]
+  autoPlayInterval?: number
+  class?: string
+}
 
-  const { items = [], autoPlayInterval = 5000, class: className = '' }: Props = $props()
+const {
+  items = [],
+  autoPlayInterval = 5000,
+  class: className = '',
+}: Props = $props()
 
-  let currentIndex = $state(0)
-  let isPaused = $state(false)
-  let isYoutubePlaying = $state(false)
-  let timer: ReturnType<typeof setInterval> | null = null
-  let touchStartX = 0
-  let videoEl: HTMLVideoElement | null = null
+let currentIndex = $state(0)
+let isPaused = $state(false)
+let isYoutubePlaying = $state(false)
+let timer: ReturnType<typeof setInterval> | null = null
+let touchStartX = 0
+let videoEl = $state<HTMLVideoElement | null>(null)
 
-  const hasMultiple = $derived(items.length > 1)
+const hasMultiple = $derived(items.length > 1)
 
-  function goTo(index: number) {
-    if (index === currentIndex) return
-    if (videoEl) videoEl.pause()
-    isYoutubePlaying = false
-    currentIndex = ((index % items.length) + items.length) % items.length
-    resetTimer()
-  }
+function goTo(index: number) {
+  if (index === currentIndex) return
+  if (videoEl) videoEl.pause()
+  isYoutubePlaying = false
+  currentIndex = ((index % items.length) + items.length) % items.length
+  resetTimer()
+}
 
-  function next() { goTo(currentIndex + 1) }
-  function prev() { goTo(currentIndex - 1) }
+function next() {
+  goTo(currentIndex + 1)
+}
+function prev() {
+  goTo(currentIndex - 1)
+}
 
-  function resetTimer() {
-    if (timer) clearInterval(timer)
-    if (items.length <= 1) return
-    timer = setInterval(() => {
-      if (!isPaused && !isYoutubePlaying) next()
-    }, autoPlayInterval)
-  }
+function resetTimer() {
+  if (timer) clearInterval(timer)
+  if (items.length <= 1) return
+  timer = setInterval(() => {
+    if (!isPaused && !isYoutubePlaying) next()
+  }, autoPlayInterval)
+}
 
-  function handleVideoEnd() {
-    if (items.length > 1) next()
-  }
+function handleVideoEnd() {
+  if (items.length > 1) next()
+}
 
-  function handleMessage(e: MessageEvent) {
-    try {
-      const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data
-      if (data?.event === 'onStateChange') {
-        if (data.info === 1) { isYoutubePlaying = true; isPaused = true }
-        if (data.info === 0 || data.info === 2) { isYoutubePlaying = false; isPaused = false }
+function handleMessage(e: MessageEvent) {
+  try {
+    const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data
+    if (data?.event === 'onStateChange') {
+      if (data.info === 1) {
+        isYoutubePlaying = true
+        isPaused = true
       }
-    } catch { /* ignore malformed postMessages */ }
-  }
-
-  onMount(() => {
-    resetTimer()
-    window.addEventListener('message', handleMessage)
-  })
-
-  onDestroy(() => {
-    if (timer) clearInterval(timer)
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('message', handleMessage)
+      if (data.info === 0 || data.info === 2) {
+        isYoutubePlaying = false
+        isPaused = false
+      }
     }
-  })
-
-  function thumbBg(item: MediaItem): string {
-    if (item.type === 'image' && item.src) return `background-image:url('${item.src}')`
-    if (item.type === 'video' && item.poster) return `background-image:url('${item.poster}')`
-    if (item.type === 'youtube' && item.videoId) return `background-image:url('https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg')`
-    return ''
+  } catch {
+    /* ignore malformed postMessages */
   }
+}
 
-  function isVideoType(item: MediaItem) {
-    return item.type === 'youtube' || item.type === 'video'
+onMount(() => {
+  resetTimer()
+  window.addEventListener('message', handleMessage)
+})
+
+onDestroy(() => {
+  if (timer) clearInterval(timer)
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('message', handleMessage)
   }
+})
+
+function thumbBg(item: MediaItem): string {
+  if (item.type === 'image' && item.src)
+    return `background-image:url('${item.src}')`
+  if (item.type === 'video' && item.poster)
+    return `background-image:url('${item.poster}')`
+  if (item.type === 'youtube' && item.videoId)
+    return `background-image:url('https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg')`
+  return ''
+}
+
+function isVideoType(item: MediaItem) {
+  return item.type === 'youtube' || item.type === 'video'
+}
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
   class={['media-gallery relative select-none overflow-hidden rounded-[var(--radius-large)] bg-slate-900', className].filter(Boolean).join(' ')}
-  role="region"
+  role="application"
+  aria-roledescription="carousel"
   aria-label="Product media gallery"
   onmouseenter={() => { isPaused = true }}
   onmouseleave={() => { isPaused = false }}

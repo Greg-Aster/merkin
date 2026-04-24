@@ -5,7 +5,9 @@ interface CreateEditorPrefabFactoryOptions {
   addNode: (node: EditorSceneNode) => string
 }
 
-export function createEditorPrefabFactory(options: CreateEditorPrefabFactoryOptions) {
+export function createEditorPrefabFactory(
+  options: CreateEditorPrefabFactoryOptions,
+) {
   const { addNode, createId } = options
 
   return {
@@ -96,10 +98,12 @@ export function createEditorPrefabFactory(options: CreateEditorPrefabFactoryOpti
           lightDistance: 4.6,
           lightDecay: 1.25,
           spriteIntensity: 1.15,
+          lightBurstBoost: 1.25,
           title: 'Solitude',
           author: 'The Firefly',
           location: 'The Solitude Plain',
-          excerpt: 'A patient glow waits where the ruined circle remembers its shape.',
+          excerpt:
+            'A patient glow waits where the ruined circle remembers its shape.',
           body: 'This is a place for solitude. You are alone here.',
         },
       })
@@ -171,7 +175,7 @@ export function createEditorPrefabFactory(options: CreateEditorPrefabFactoryOpti
       name: string,
       url: string,
       parentId: string | null = null,
-      scale: [number, number, number] = [0.001, 0.001, 0.001]
+      scale: [number, number, number] = [0.001, 0.001, 0.001],
     ) {
       return addNode({
         id: createId('asset'),
@@ -189,7 +193,7 @@ export function createEditorPrefabFactory(options: CreateEditorPrefabFactoryOpti
       name: string,
       type: EditorPrefabType,
       position: [number, number, number] = [0, 0, 0],
-      parentId: string | null = null
+      parentId: string | null = null,
     ) {
       return addNode({
         id: createId('prefab'),
@@ -203,7 +207,11 @@ export function createEditorPrefabFactory(options: CreateEditorPrefabFactoryOpti
         prefab: { type },
       })
     },
-    addEmpty(name = 'Empty', parentId: string | null = null, position: [number, number, number] = [0, 0, 0]) {
+    addEmpty(
+      name = 'Empty',
+      parentId: string | null = null,
+      position: [number, number, number] = [0, 0, 0],
+    ) {
       return addNode({
         id: createId('group'),
         name,

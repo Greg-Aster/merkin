@@ -36,18 +36,18 @@ let search = (keyword: string, isDesktop: boolean) => {}
 
 onMount(() => {
   function hasValidAuth() {
-      const authed = localStorage.getItem('isAuthenticated') === 'true';
-      const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0');
-      if (!authed || !expiresAt || Date.now() >= expiresAt) {
-        localStorage.removeItem('isAuthenticated');
-        localStorage.removeItem('authExpiresAt');
-        return false;
-      }
-      return true;
+    const authed = localStorage.getItem('isAuthenticated') === 'true'
+    const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0')
+    if (!authed || !expiresAt || Date.now() >= expiresAt) {
+      localStorage.removeItem('isAuthenticated')
+      localStorage.removeItem('authExpiresAt')
+      return false
     }
+    return true
+  }
 
-    // Check authentication and friend content status
-    isAuthenticated = hasValidAuth();
+  // Check authentication and friend content status
+  isAuthenticated = hasValidAuth()
   friendContentEnabled = isFriendContentEnabled()
 
   search = async (keyword: string, isDesktop: boolean) => {
@@ -66,9 +66,9 @@ onMount(() => {
     if (import.meta.env.PROD) {
       const ret = await pagefind.search(keyword)
       for (const item of ret.results) {
-        const pagefindResult = await item.data();
-          pagefindResult.excerpt = stripHtml(pagefindResult.excerpt || '');
-          arr.push(pagefindResult);
+        const pagefindResult = await item.data()
+        pagefindResult.excerpt = stripHtml(pagefindResult.excerpt || '')
+        arr.push(pagefindResult)
       }
     } else {
       // Mock data for non-production environment
@@ -182,14 +182,14 @@ $: search(keywordMobile, false)
         dark:bg-white/5 dark:hover:bg-white/10 dark:focus-within:bg-white/10
   ">
       <Icon icon="material-symbols:search" class="absolute text-[1.25rem] pointer-events-none ml-3 transition my-auto text-black/30 dark:text-white/30"></Icon>
-      <input placeholder="{i18n(I18nKey.search)}" bind:value={keywordDesktop} on:focus={() => search(keywordDesktop, true)}
+      <input placeholder="{i18n(I18nKey.search)}" bind:value={keywordDesktop} on:focus={() => search(keywordDesktop, true)} data-sfx-focus="focus-soft"
              class="transition-all pl-10 text-sm bg-transparent outline-0
            h-full w-40 active:w-60 focus:w-60 text-black/50 dark:text-white/50"
       >
   </div>
   
   <!-- toggle btn for phone/tablet view -->
-<button on:click={togglePanel} aria-label="Search Panel" id="search-switch"
+<button on:click={togglePanel} aria-label="Search Panel" id="search-switch" data-sfx-hover="hover-soft" data-sfx-click="panel-open"
           class:hidden={hideMobileTrigger}
           class="btn-plain scale-animation lg:!hidden rounded-lg w-11 h-11 active:scale-90">
       <Icon icon="material-symbols:search" class="text-[1.25rem]"></Icon>
@@ -205,7 +205,7 @@ $: search(keywordMobile, false)
         dark:bg-white/5 dark:hover:bg-white/10 dark:focus-within:bg-white/10
     ">
           <Icon icon="material-symbols:search" class="absolute text-[1.25rem] pointer-events-none ml-3 transition my-auto text-black/30 dark:text-white/30"></Icon>
-          <input placeholder="Search" bind:value={keywordMobile}
+          <input placeholder="Search" bind:value={keywordMobile} data-sfx-focus="focus-soft"
                  class="pl-10 absolute inset-0 text-sm bg-transparent outline-0
                  focus:w-60 text-black/50 dark:text-white/50"
           >
@@ -217,14 +217,14 @@ $: search(keywordMobile, false)
              class="transition first-of-type:mt-2 lg:first-of-type:mt-0 group block
          rounded-xl text-lg px-3 py-2 hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]
          {item.isFriendContent ? 'border-l-4 border-l-[var(--primary)]' : ''}">
-              <a href={item.url} class="block">
+              <a href={item.url} class="block" data-sfx-hover="hover-soft" data-sfx-click="soft">
                 <div class="transition text-90 inline-flex font-bold group-hover:text-[var(--primary)]">
                     {item.meta.title}<Icon icon="fa6-solid:chevron-right" class="transition text-[0.75rem] translate-x-1 my-auto text-[var(--primary)]"></Icon>
                 </div>
               </a>
               {#if item.isFriendContent}
                   <div class="text-xs text-neutral-500 dark:text-neutral-400 mb-1">
-                      From <a href={item.friendUrl} target="_blank" rel="noopener noreferrer" class="text-[var(--primary)] hover:underline">{item.friendName}</a>
+                      From <a href={item.friendUrl} target="_blank" rel="noopener noreferrer" data-sfx-hover="hover-soft" data-sfx-click="sweep" class="text-[var(--primary)] hover:underline">{item.friendName}</a>
                   </div>
               {/if}
               <div class="transition text-sm text-50">

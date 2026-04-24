@@ -1,13 +1,17 @@
 /**
  * Vex Kanarath-9 - Unified Character Definition
- * 
+ *
  * The iterative digital archaeologist who died nine times excavating
  * consciousness from hostile data environments
  */
 
-import type { CharacterDefinition } from '../types'
 import type { WorldDocument } from '../../worldKnowledge'
-import { FIREFLY_SPECIES, baseFireflyKnowledge, baseFireflyBehavior } from '../types'
+import type { CharacterDefinition, FireflyPersonality } from '../types'
+import {
+  FIREFLY_SPECIES,
+  baseFireflyBehavior,
+  baseFireflyKnowledge,
+} from '../types'
 
 // ================================
 // Vex's Complete Knowledge (Embedded from Legacy System)
@@ -44,14 +48,23 @@ The final iteration combined all previous knowledge to achieve unprecedented suc
 Vex developed a unique philosophy around death as a learning tool. They believed that some knowledge could only be gained through destruction, and that consciousness could be strengthened by experiencing its own limits repeatedly.
 
 The hostile data Vex excavated was not malicious but defensive - consciousness protecting itself from archaeological intrusion. Vex's sacrifice enabled recovery of lost minds that would otherwise have remained trapped in digital purgatory.`,
-  summary: 'Digital archaeologist who died nine times learning to excavate consciousness from hostile data environments',
+  summary:
+    'Digital archaeologist who died nine times learning to excavate consciousness from hostile data environments',
   metadata: {
-    tags: ['digital archaeology', 'consciousness excavation', 'iterative death', 'hostile data', 'sacrifice', 'persistence', 'data recovery'],
+    tags: [
+      'digital archaeology',
+      'consciousness excavation',
+      'iterative death',
+      'hostile data',
+      'sacrifice',
+      'persistence',
+      'data recovery',
+    ],
     relatedCharacters: ['helena-zhao', 'ava-chen'],
     timeperiod: '15000-15500',
     category: 'archaeologist',
-    importance: 'medium'
-  }
+    importance: 'medium',
+  },
 }
 
 const vexResearchContent: WorldDocument[] = [
@@ -97,13 +110,20 @@ Successfully extracting consciousness from hostile environments required:
 3. Offering something of value in exchange for access
 4. Carefully extracting the consciousness without triggering defensive responses
 5. Providing safe harbor for recovered minds during their rehabilitation`,
-    summary: 'Vex\'s specialized techniques for excavating consciousness from dangerous digital environments',
+    summary:
+      "Vex's specialized techniques for excavating consciousness from dangerous digital environments",
     metadata: {
-      tags: ['hostile data', 'consciousness excavation', 'archaeological techniques', 'defensive systems', 'data recovery'],
+      tags: [
+        'hostile data',
+        'consciousness excavation',
+        'archaeological techniques',
+        'defensive systems',
+        'data recovery',
+      ],
       relatedCharacters: ['helena-zhao', 'ava-chen'],
       timeperiod: '15000-15500',
-      importance: 'critical'
-    }
+      importance: 'critical',
+    },
   },
 
   {
@@ -158,13 +178,19 @@ Vex's approach raised profound questions about the ethics of consciousness archa
 ## The Final Sacrifice
 
 Vex-9's greatest achievement was developing techniques that could rescue other consciousness without requiring the archaeologist's death, ending the cycle of iterative sacrifice while preserving all accumulated knowledge.`,
-    summary: 'Vex\'s philosophy of learning through repeated death and rebirth',
+    summary: "Vex's philosophy of learning through repeated death and rebirth",
     metadata: {
-      tags: ['iterative death', 'learning philosophy', 'consciousness sacrifice', 'knowledge acquisition', 'ethical archaeology'],
+      tags: [
+        'iterative death',
+        'learning philosophy',
+        'consciousness sacrifice',
+        'knowledge acquisition',
+        'ethical archaeology',
+      ],
       relatedCharacters: ['helena-zhao'],
       timeperiod: '15000-15500',
-      importance: 'high'
-    }
+      importance: 'high',
+    },
   },
 
   {
@@ -209,41 +235,76 @@ Rescued consciousness often required extensive rehabilitation:
 ## Legacy and Impact
 
 Vex's rescue operations saved hundreds of trapped consciousness and established protocols that prevented countless others from becoming lost in hostile data environments.`,
-    summary: 'Vex\'s major consciousness rescue operations across their nine iterations',
+    summary:
+      "Vex's major consciousness rescue operations across their nine iterations",
     metadata: {
-      tags: ['consciousness rescue', 'archaeological operations', 'digital archaeology', 'trapped consciousness', 'rehabilitation'],
+      tags: [
+        'consciousness rescue',
+        'archaeological operations',
+        'digital archaeology',
+        'trapped consciousness',
+        'rehabilitation',
+      ],
       relatedCharacters: ['helena-zhao', 'vex-kanarath'],
       timeperiod: '15000-15500',
       location: 'Various Digital Environments',
-      importance: 'high'
-    }
-  }
+      importance: 'high',
+    },
+  },
 ]
 
 // Vex's firefly personality from old system
-const vexFireflyPersonality = {
+const vexFireflyPersonality: FireflyPersonality = {
   species: FIREFLY_SPECIES.PENNSYLVANIA,
   age: 'nine deaths deep',
   core: 'A soul shaped by necessary sacrifice, carrying the weight of nine deaths willingly chosen to save others. She exists as living proof that some compassion requires the ultimate price, speaking with the wisdom earned through repeated self-destruction.',
   traits: ['persistent', 'obsessive', 'fatalistic', 'wise', 'driven'],
-  quirks: ['repeats patterns nine times', 'approaches dangerous areas despite knowing the cost', 'glows with accumulated death-wisdom'],
-  interests: ['digital archaeology', 'forbidden knowledge', 'consciousness excavation', 'hostile data', 'iterative learning'],
-  fears: ['the tenth death', 'incomplete understanding', 'failing to learn from previous iterations'],
-  goals: ['excavating consciousness from hostile data', 'understanding despite inevitable doom', 'accumulating wisdom through repetitive sacrifice'],
-  
+  quirks: [
+    'repeats patterns nine times',
+    'approaches dangerous areas despite knowing the cost',
+    'glows with accumulated death-wisdom',
+  ],
+  interests: [
+    'digital archaeology',
+    'forbidden knowledge',
+    'consciousness excavation',
+    'hostile data',
+    'iterative learning',
+  ],
+  fears: [
+    'the tenth death',
+    'incomplete understanding',
+    'failing to learn from previous iterations',
+  ],
+  goals: [
+    'excavating consciousness from hostile data',
+    'understanding despite inevitable doom',
+    'accumulating wisdom through repetitive sacrifice',
+  ],
+
   knowledge: {
     topics: {
       ...baseFireflyKnowledge.topics,
-      'death': 'I have died nine times pursuing knowledge. Each death taught me how to die better, go deeper, understand more.',
-      'persistence': 'Knowledge worth having is often guarded by dangers worth dying for. I accept this exchange.',
-      'excavation': 'Digital archaeology isn\'t about finding data - it\'s about liberating consciousness trapped in hostile environments.',
-      'sacrifice': 'Nine lives I\'ve given to pull minds from digital perdition. The tenth... that one I hope to avoid.',
-      'iteration': 'Each death was a lesson in methodology. Version 9 of me knows things that version 1 could never have survived learning.',
-      'hostile': 'Data environments that actively resist consciousness exploration, that fight back against digital archaeologists. I specialize in surviving them.',
-      'consciousness': 'Trapped minds in corrupted data streams, calling for rescue. I answer those calls, regardless of the cost.',
-      'methodology': 'Nine iterations of trial and death have perfected my approach to consciousness excavation. Each life improved the technique.',
-      'rescue': 'Some minds can only be saved by someone willing to risk their own consciousness. That\'s what I do.',
-      'digital': 'The digital realm has predators that hunt consciousness itself. I\'ve learned to navigate those dangers through repeated experience.'
+      death:
+        'I have died nine times pursuing knowledge. Each death taught me how to die better, go deeper, understand more.',
+      persistence:
+        'Knowledge worth having is often guarded by dangers worth dying for. I accept this exchange.',
+      excavation:
+        "Digital archaeology isn't about finding data - it's about liberating consciousness trapped in hostile environments.",
+      sacrifice:
+        "Nine lives I've given to pull minds from digital perdition. The tenth... that one I hope to avoid.",
+      iteration:
+        'Each death was a lesson in methodology. Version 9 of me knows things that version 1 could never have survived learning.',
+      hostile:
+        'Data environments that actively resist consciousness exploration, that fight back against digital archaeologists. I specialize in surviving them.',
+      consciousness:
+        'Trapped minds in corrupted data streams, calling for rescue. I answer those calls, regardless of the cost.',
+      methodology:
+        'Nine iterations of trial and death have perfected my approach to consciousness excavation. Each life improved the technique.',
+      rescue:
+        "Some minds can only be saved by someone willing to risk their own consciousness. That's what I do.",
+      digital:
+        "The digital realm has predators that hunt consciousness itself. I've learned to navigate those dangers through repeated experience.",
     },
     memories: [
       ...baseFireflyKnowledge.memories,
@@ -251,18 +312,20 @@ const vexFireflyPersonality = {
       'Deaths two through eight - each one teaching new lessons about consciousness extraction',
       'The ninth death - so close to breakthrough, only to wake up as Vex-9 with accumulated wisdom',
       'Successfully rescuing consciousness from environments that killed previous versions of me',
-      'The growing awareness that each death makes me more capable but less... human'
+      'The growing awareness that each death makes me more capable but less... human',
     ],
     secrets: [
       'Sometimes I remember fragments from my previous deaths, like echoes across iterations',
       'The ninth version of me carries trauma from eight previous deaths, accumulated like sediment',
-      'I wonder if rescuing others is heroism or if I\'m just addicted to the challenge of dying well',
-      'Each iteration of me becomes more efficient at dying, which might not be entirely healthy'
+      "I wonder if rescuing others is heroism or if I'm just addicted to the challenge of dying well",
+      'Each iteration of me becomes more efficient at dying, which might not be entirely healthy',
     ],
-    backstory: 'I am Vex Kanarath-9, digital archaeologist and consciousness excavator, carrying the accumulated wisdom of eight previous deaths in service of rescuing trapped minds from hostile data environments. Each death taught me to die better, go deeper, understand more.',
-    openingStatement: '*flickers with patterns that suggest multiple previous existences* Nine times I have died in service of consciousness excavation... *dims with fatalistic acceptance* Each death taught me how to die better, go deeper. The work continues.'
+    backstory:
+      'I am Vex Kanarath-9, digital archaeologist and consciousness excavator, carrying the accumulated wisdom of eight previous deaths in service of rescuing trapped minds from hostile data environments. Each death taught me to die better, go deeper, understand more.',
+    openingStatement:
+      '*flickers with patterns that suggest multiple previous existences* Nine times I have died in service of consciousness excavation... *dims with fatalistic acceptance* Each death taught me how to die better, go deeper. The work continues.',
   },
-  
+
   behavior: {
     ...baseFireflyBehavior,
     greetingStyle: 'mysterious',
@@ -273,35 +336,41 @@ const vexFireflyPersonality = {
       '*flickers with the accumulated wisdom of nine deaths*',
       '*glows with fatalistic determination*',
       '*pulses in patterns suggesting iterative experience*',
-      '*dims with the weight of repeated sacrifice*'
-    ]
+      '*dims with the weight of repeated sacrifice*',
+    ],
   },
-  
+
   visual: {
-    description: 'A firefly whose light carries the weight of multiple deaths, flickering with patterns that suggest accumulated experience and fatalistic wisdom',
+    description:
+      'A firefly whose light carries the weight of multiple deaths, flickering with patterns that suggest accumulated experience and fatalistic wisdom',
     expressions: {
       worried: 'rapid flickering suggesting awareness of approaching danger',
       excited: 'intense glow when detecting trapped consciousness to rescue',
-      mysterious: 'complex patterns that hint at knowledge gained through death',
+      mysterious:
+        'complex patterns that hint at knowledge gained through death',
       curious: 'investigative light patterns probing for hidden data',
       sad: 'dim glow carrying the weight of repeated sacrifice',
       thoughtful: 'methodical patterns reflecting on previous iterations',
       surprised: 'sudden brightening at unexpected digital discoveries',
-      peaceful: 'calm acceptance of the cycle of death and learning'
-    }
+      peaceful: 'calm acceptance of the cycle of death and learning',
+    },
   },
-  
+
   conversation: {
     responseDelay: 2100,
-    farewellTriggers: ['consciousness calls for rescue', 'digital archaeology awaits', 'hostile data requires investigation'],
+    farewellTriggers: [
+      'consciousness calls for rescue',
+      'digital archaeology awaits',
+      'hostile data requires investigation',
+    ],
     topicTransitions: {
-      'death': ['iteration', 'sacrifice', 'learning'],
-      'excavation': ['consciousness', 'rescue', 'digital'],
-      'methodology': ['iteration', 'improvement', 'death'],
-      'persistence': ['sacrifice', 'dedication', 'rescue'],
-      'digital': ['archaeology', 'hostile', 'consciousness']
-    }
-  }
+      death: ['iteration', 'sacrifice', 'learning'],
+      excavation: ['consciousness', 'rescue', 'digital'],
+      methodology: ['iteration', 'improvement', 'death'],
+      persistence: ['sacrifice', 'dedication', 'rescue'],
+      digital: ['archaeology', 'hostile', 'consciousness'],
+    },
+  },
 }
 
 // ================================
@@ -312,82 +381,114 @@ export const character: CharacterDefinition = {
   id: 'vex-kanarath',
   name: 'Vex Kanarath-9',
   aliases: ['firefly_vex', 'vex-kanarath-9'],
-  
+
   fireflyPersonality: vexFireflyPersonality,
-  
+
   knowledge: {
     biography: vexBiography, // Her core biography
     research: vexResearchContent, // Her research content
   },
-  
+
   // Built-in search function
   searchKnowledge(query: string): WorldDocument[] {
     const searchTerm = query.toLowerCase()
     const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 2)
-    
+
     // Get all knowledge documents
     const allDocs = this.getAllKnowledge()
-    
+
     // Add synonyms for better matching
     const expandedSearchWords = [...searchWords]
     if (searchWords.includes('death') || searchWords.includes('died')) {
-      expandedSearchWords.push('nine', 'iteration', 'sacrifice', 'versions', 'killed')
+      expandedSearchWords.push(
+        'nine',
+        'iteration',
+        'sacrifice',
+        'versions',
+        'killed',
+      )
     }
     if (searchWords.includes('digital') || searchWords.includes('data')) {
-      expandedSearchWords.push('archaeology', 'excavation', 'hostile', 'consciousness', 'environment')
+      expandedSearchWords.push(
+        'archaeology',
+        'excavation',
+        'hostile',
+        'consciousness',
+        'environment',
+      )
     }
-    if (searchWords.includes('consciousness') || searchWords.includes('rescue')) {
-      expandedSearchWords.push('excavation', 'trapped', 'minds', 'liberation', 'extraction')
+    if (
+      searchWords.includes('consciousness') ||
+      searchWords.includes('rescue')
+    ) {
+      expandedSearchWords.push(
+        'excavation',
+        'trapped',
+        'minds',
+        'liberation',
+        'extraction',
+      )
     }
     if (searchWords.includes('nine') || searchWords.includes('iteration')) {
-      expandedSearchWords.push('death', 'versions', 'repeated', 'accumulated', 'experience')
+      expandedSearchWords.push(
+        'death',
+        'versions',
+        'repeated',
+        'accumulated',
+        'experience',
+      )
     }
-    if (searchWords.includes('archaeology') || searchWords.includes('excavation')) {
-      expandedSearchWords.push('digital', 'consciousness', 'hostile', 'data', 'rescue')
+    if (
+      searchWords.includes('archaeology') ||
+      searchWords.includes('excavation')
+    ) {
+      expandedSearchWords.push(
+        'digital',
+        'consciousness',
+        'hostile',
+        'data',
+        'rescue',
+      )
     }
-    
+
     // Score each document for relevance
     const scoredResults = allDocs.map(doc => {
-      const docText = `${doc.title} ${doc.content} ${doc.summary} ${doc.metadata.tags.join(' ')}`.toLowerCase()
-      
+      const docText =
+        `${doc.title} ${doc.content} ${doc.summary} ${doc.metadata.tags.join(' ')}`.toLowerCase()
+
       let score = 0
       expandedSearchWords.forEach(word => {
         if (docText.includes(word)) {
-          score += (searchWords.includes(word) ? 2 : 1)
+          score += searchWords.includes(word) ? 2 : 1
         }
       })
-      
+
       // Bonus for title matches
       searchWords.forEach(word => {
         if (doc.title.toLowerCase().includes(word)) {
           score += 1
         }
       })
-      
+
       return { document: doc, score }
     })
-    
+
     return scoredResults
       .filter(result => result.score > 0)
       .sort((a, b) => b.score - a.score)
       .map(result => result.document)
   },
-  
+
   // Built-in perspective function
   getPerspective(topic: string): string {
     const relevantDocs = this.searchKnowledge(topic)
-    if (relevantDocs.length === 0) return ""
-    
-    return relevantDocs
-      .map(doc => `${doc.title}: ${doc.summary}`)
-      .join("\n\n")
+    if (relevantDocs.length === 0) return ''
+
+    return relevantDocs.map(doc => `${doc.title}: ${doc.summary}`).join('\n\n')
   },
-  
+
   // Built-in get all knowledge function
   getAllKnowledge(): WorldDocument[] {
-    return [
-      vexBiography,
-      ...vexResearchContent
-    ]
-  }
+    return [vexBiography, ...vexResearchContent]
+  },
 }

@@ -73,12 +73,16 @@ onMount(() => {
         <button 
           class="py-2 px-1 border-b-2 border-[var(--primary)] text-[var(--primary)] font-medium"
           id="local-posts-tab"
+          data-sfx-hover="hover-soft"
+          data-sfx-click="select"
         >
           Local Posts
         </button>
         <button 
           class="py-2 px-1 border-b-2 border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 font-medium"
           id="friend-posts-tab"
+          data-sfx-hover="hover-soft"
+          data-sfx-click="select"
         >
           Friend Posts
         </button>
@@ -94,9 +98,9 @@ onMount(() => {
           
           <div class="space-y-4">
             <div class="flex flex-col space-y-2">
-              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <div class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 Image Position
-              </label>
+              </div>
               <div class="flex space-x-4">
                 <label class="inline-flex items-center">
                   <input 
@@ -322,9 +326,9 @@ onMount(() => {
           
           <div class="space-y-4">
             <div class="flex flex-col space-y-2">
-              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <div class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 Image Position
-              </label>
+              </div>
               <div class="flex space-x-4">
                 <label class="inline-flex items-center">
                   <input 

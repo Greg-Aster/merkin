@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { runtimeDiagnosticsSummaryStore } from '../stores/runtimeDiagnosticsStore'
+import { runtimeDiagnosticsSummaryStore } from '../stores/runtimeDiagnosticsStore'
 
-  export let title = 'Runtime Diagnostics'
-  export let compact = false
+export let title = 'Runtime Diagnostics'
+export let compact = false
 
-  $: summary = $runtimeDiagnosticsSummaryStore
+$: summary = $runtimeDiagnosticsSummaryStore
 
-  function formatTimestamp(timestamp: number) {
-    if (!timestamp) return 'never'
-    return new Date(timestamp).toLocaleTimeString()
-  }
+function formatTimestamp(timestamp: number) {
+  if (!timestamp) return 'never'
+  return new Date(timestamp).toLocaleTimeString()
+}
 </script>
 
 <div class:compact class="runtime-diagnostics-panel">

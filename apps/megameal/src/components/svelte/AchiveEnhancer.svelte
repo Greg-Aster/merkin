@@ -157,7 +157,10 @@ function createNewYearSection(panel, year, posts) {
 function addPostElement(container, post) {
   // Create post element
   const postElement = document.createElement('a')
-  postElement.href = toSafeExternalUrl(post.data.sourceUrl, `/friend-${post.slug || post.id}`)
+  postElement.href = toSafeExternalUrl(
+    post.data.sourceUrl,
+    `/friend-${post.slug || post.id}`,
+  )
   postElement.className =
     'group btn-plain !block h-10 w-full rounded-lg hover:text-[initial] friend-archive-item'
   postElement.setAttribute('aria-label', post.data.title)
@@ -172,8 +175,8 @@ function addPostElement(container, post) {
   // Format tags
   const tags = post.data.tags || []
   const formattedTags = tags.map(t => `#${t}`).join(' ')
-      const safeTitle = escapeHtml(post.data.title)
-      const safeTags = escapeHtml(formattedTags)
+  const safeTitle = escapeHtml(post.data.title)
+  const safeTags = escapeHtml(formattedTags)
 
   // Create post content
   postElement.innerHTML = `

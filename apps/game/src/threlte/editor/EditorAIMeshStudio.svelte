@@ -1,70 +1,80 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte'
-  import type { EditorSceneNode } from './editorStore'
-  import RuntimeDiagnosticsPanel from '../ui/RuntimeDiagnosticsPanel.svelte'
-  import EditorAssetPreview from './EditorAssetPreview.svelte'
+import { createEventDispatcher } from 'svelte'
+import RuntimeDiagnosticsPanel from '../ui/RuntimeDiagnosticsPanel.svelte'
+import EditorAssetPreview from './EditorAssetPreview.svelte'
+import type { EditorSceneNode } from './editorStore'
 
-  const dispatch = createEventDispatcher()
+const dispatch = createEventDispatcher()
 
-  export let comfyUiStatus = ''
-  export let comfyUiApiUrl = ''
-  export let comfyUiBusy = false
-  export let comfyUiReady = false
-  export let comfyWorkflowEditorStatus = ''
-  export let selectedComfyWorkflowPath = ''
+export let comfyUiStatus = ''
+export let comfyUiApiUrl = ''
+export let comfyUiBusy = false
+export let comfyUiReady = false
+export let comfyWorkflowEditorStatus = ''
+export let selectedComfyWorkflowPath = ''
 
-  export let hunyuanApiUrl = ''
-  export let hunyuanStatus = ''
-  export let hunyuanBackendStatus = ''
-  export let hunyuanBusy = false
-  export let hunyuanServiceReady = false
-  export let hunyuanBackendCanGenerate = false
-  export let hunyuanBackendCanRetexture = false
-  export let hunyuanLastOutputUrl = ''
-  export let hunyuanLastResultSummary = ''
-  export let hunyuanLastFitReport = ''
-  export let hunyuanSupportsReplacement = false
-  export let hunyuanSupportsTextureWrap = false
-  export let recentHunyuanJobs: Array<any> = []
-  export let hunyuanJobsLoading = false
-  export let hunyuanJobsError = ''
-  export let selectedHunyuanJobId = ''
-  export let hunyuanReferenceImageUrl = ''
-  export let hunyuanDetectedReferenceImageUrl = ''
-  export let hunyuanPrompt = ''
+export let hunyuanApiUrl = ''
+export let hunyuanStatus = ''
+export let hunyuanBackendStatus = ''
+export let hunyuanBusy = false
+export let hunyuanServiceReady = false
+export let hunyuanBackendCanGenerate = false
+export let hunyuanBackendCanRetexture = false
+export let hunyuanLastOutputUrl = ''
+export let hunyuanLastResultSummary = ''
+export let hunyuanLastFitReport = ''
+export let hunyuanSupportsReplacement = false
+export let hunyuanSupportsTextureWrap = false
+export let recentHunyuanJobs: Array<any> = []
+export let hunyuanJobsLoading = false
+export let hunyuanJobsError = ''
+export let selectedHunyuanJobId = ''
+export let hunyuanReferenceImageUrl = ''
+export let hunyuanDetectedReferenceImageUrl = ''
+export let hunyuanPrompt = ''
 
-  export let hunyuanScratchName = 'Generated Artifact'
-  export let hunyuanScratchReferenceImageUrl = ''
-  export let hunyuanScratchPrompt = ''
-  export let hunyuanApplyToSimilarNodes = false
-  export let matchingSelectionCount = 0
-  export let similarSelectionLabel = 'matching nodes'
+export let hunyuanScratchName = 'Generated Artifact'
+export let hunyuanScratchReferenceImageUrl = ''
+export let hunyuanScratchPrompt = ''
+export let hunyuanApplyToSimilarNodes = false
+export let matchingSelectionCount = 0
+export let similarSelectionLabel = 'matching nodes'
 
-  export let selectedNode: EditorSceneNode | null = null
-  export let selectedNodes: EditorSceneNode[] = []
-  export let canUseAiMeshStudio: (node: EditorSceneNode | null) => boolean = () => false
-  export let canRetextureSelection: (node: EditorSceneNode | null) => boolean = () => false
-  export let canApplyGeneratedAssetToSelection = false
-  export let runtimeAssetFailures: Array<{ id: string, source: string, message: string, updatedAt: number }> = []
+export let selectedNode: EditorSceneNode | null = null
+export let selectedNodes: EditorSceneNode[] = []
+export let canUseAiMeshStudio: (node: EditorSceneNode | null) => boolean = () =>
+  false
+export let canRetextureSelection: (node: EditorSceneNode | null) => boolean =
+  () => false
+export let canApplyGeneratedAssetToSelection = false
+export let runtimeAssetFailures: Array<{
+  id: string
+  source: string
+  message: string
+  updatedAt: number
+}> = []
 
-  $: selectedHunyuanJob = recentHunyuanJobs.find((job) => job.id === selectedHunyuanJobId) ?? null
-  $: selectedSourcePreviewUrl = selectedNode?.asset?.url ?? ''
-  $: currentReferencePreviewUrl = hunyuanReferenceImageUrl || hunyuanDetectedReferenceImageUrl || ''
-  $: latestJobReferenceImageUrl = selectedHunyuanJob?.result?.referenceImageUrl || ''
+$: selectedHunyuanJob =
+  recentHunyuanJobs.find(job => job.id === selectedHunyuanJobId) ?? null
+$: selectedSourcePreviewUrl = selectedNode?.asset?.url ?? ''
+$: currentReferencePreviewUrl =
+  hunyuanReferenceImageUrl || hunyuanDetectedReferenceImageUrl || ''
+$: latestJobReferenceImageUrl =
+  selectedHunyuanJob?.result?.referenceImageUrl || ''
 
-  function getJobSummary(job: any) {
-    if (!job) return ''
-    return job.sourceName || job.assetUrl || job.id
-  }
+function getJobSummary(job: any) {
+  if (!job) return ''
+  return job.sourceName || job.assetUrl || job.id
+}
 
-  function getJobDetail(job: any) {
-    if (!job) return ''
-    return job.error || job.result?.message || ''
-  }
+function getJobDetail(job: any) {
+  if (!job) return ''
+  return job.error || job.result?.message || ''
+}
 
-  function emit(type: string) {
-    dispatch(type)
-  }
+function emit(type: string) {
+  dispatch(type)
+}
 </script>
 
 <div class="editor-section">

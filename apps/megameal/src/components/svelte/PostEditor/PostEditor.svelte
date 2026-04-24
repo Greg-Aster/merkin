@@ -543,18 +543,24 @@ $: if (activeTab === 'browse') {
   <div class="border-b border-neutral-200 dark:border-neutral-700 mb-6">
     <nav class="flex space-x-4">
       <button 
+        data-sfx-hover="hover-soft"
+        data-sfx-click="soft"
         class="py-2 px-4 font-medium {activeTab === 'create' ? 'text-[var(--primary)] border-b-2 border-[var(--primary)]' : 'text-black/75 dark:text-white/75 hover:text-black/90 dark:hover:text-white/90'}"
         on:click={() => activeTab = 'create'}
       >
         {isEditing ? 'Edit Post' : 'Create New'}
       </button>
       <button 
+        data-sfx-hover="hover-soft"
+        data-sfx-click="soft"
         class="py-2 px-4 font-medium {activeTab === 'browse' ? 'text-[var(--primary)] border-b-2 border-[var(--primary)]' : 'text-black/75 dark:text-white/75 hover:text-black/90 dark:hover:text-white/90'}"
         on:click={() => activeTab = 'browse'}
       >
         Browse Posts
       </button>
       <button 
+        data-sfx-hover="hover-soft"
+        data-sfx-click="soft"
         class="py-2 px-4 font-medium {activeTab === 'import' ? 'text-[var(--primary)] border-b-2 border-[var(--primary)]' : 'text-black/75 dark:text-white/75 hover:text-black/90 dark:hover:text-white/90'}"
         on:click={() => activeTab = 'import'}
       >
@@ -631,18 +637,24 @@ $: if (activeTab === 'browse') {
       <h3 class="text-base font-medium text-black/75 dark:text-white/75 mb-2">Local File Actions</h3>
       <div class="flex flex-wrap gap-3">
         <button 
+          data-sfx-hover="hover-soft"
+          data-sfx-click="panel-back"
           on:click={clearForm}
           class="px-4 py-2 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100 font-medium rounded hover:bg-red-200 dark:hover:bg-red-800 transition"
         >
           {isEditing ? 'Discard Changes' : 'Clear'}
         </button>
         <button 
+          data-sfx-hover="hover-soft"
+          data-sfx-click="confirm"
           on:click={saveDraft}
           class="px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 font-medium rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition"
         >
           Save as Local Draft
         </button>
         <button 
+          data-sfx-hover="hover-emphasis"
+          data-sfx-click="confirm"
           on:click={publishPost}
           disabled={!formValid}
           class="px-4 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
@@ -661,6 +673,8 @@ $: if (activeTab === 'browse') {
       <div class="flex flex-wrap gap-3">
         <button 
           data-action="save-to-github"
+          data-sfx-hover="hover-soft"
+          data-sfx-click="confirm"
           on:click={() => window.dispatchEvent(new CustomEvent('save-to-github', { detail: { post, isDraft: true } }))}
           disabled={!isGitHubAuthenticated || isCommitting || !formValid}
           class="px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 font-medium rounded transition-colors flex items-center justify-center disabled:opacity-50"
@@ -681,6 +695,8 @@ $: if (activeTab === 'browse') {
         
         <button 
           data-action="save-to-github"
+          data-sfx-hover="hover-emphasis"
+          data-sfx-click="success"
           on:click={() => window.dispatchEvent(new CustomEvent('save-to-github', { detail: { post, isDraft: false } }))}
           disabled={!isGitHubAuthenticated || isCommitting || !formValid}
           class="px-4 py-2 bg-neutral-800 dark:bg-neutral-200 hover:bg-neutral-900 dark:hover:bg-neutral-300 text-white dark:text-neutral-800 font-medium rounded transition-colors flex items-center justify-center disabled:opacity-50"

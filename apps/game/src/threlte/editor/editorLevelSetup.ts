@@ -20,23 +20,23 @@ const SHARED_LEVEL_SETTING_KEYS = [
 
 function mergeDeepRecords(
   base: Record<string, unknown>,
-  overrides: Record<string, unknown>
+  overrides: Record<string, unknown>,
 ): Record<string, unknown> {
   const result = structuredClone(base)
 
   for (const [key, value] of Object.entries(overrides)) {
     const current = result[key]
     if (
-      value
-      && typeof value === 'object'
-      && !Array.isArray(value)
-      && current
-      && typeof current === 'object'
-      && !Array.isArray(current)
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      current &&
+      typeof current === 'object' &&
+      !Array.isArray(current)
     ) {
       result[key] = mergeDeepRecords(
         current as Record<string, unknown>,
-        value as Record<string, unknown>
+        value as Record<string, unknown>,
       )
     } else {
       result[key] = structuredClone(value)
@@ -60,7 +60,7 @@ export function mergeLevelSettings<T extends object>(
 }
 
 export function pickSharedLevelSettings(
-  source: Partial<SharedLevelEditorSettings> | null | undefined
+  source: Partial<SharedLevelEditorSettings> | null | undefined,
 ): SharedLevelEditorSettings {
   const picked: SharedLevelEditorSettings = {}
 
@@ -74,7 +74,9 @@ export function pickSharedLevelSettings(
   return picked
 }
 
-export function removeSharedLevelSettings<T extends object | null | undefined>(source: T): T {
+export function removeSharedLevelSettings<T extends object | null | undefined>(
+  source: T,
+): T {
   if (!source) return source
 
   const next = structuredClone(source) as Record<string, unknown>
@@ -85,46 +87,68 @@ export function removeSharedLevelSettings<T extends object | null | undefined>(s
   return next as T
 }
 
-function hasSettingsEntries(source: Record<string, unknown> | null | undefined) {
+function hasSettingsEntries(
+  source: Record<string, unknown> | null | undefined,
+) {
   return !!source && Object.keys(source).length > 0
 }
 
-export function normalizeLevelSceneSettings(levelId: string, settings?: EditorSceneSettings): EditorSceneSettings {
+export function normalizeLevelSceneSettings(
+  levelId: string,
+  settings?: EditorSceneSettings,
+): EditorSceneSettings {
   const normalized = structuredClone(settings ?? {}) as EditorSceneSettings
-  const legacySettings = levelId === 'solitude' ? normalized.solitude : normalized.observatory
+  const legacySettings =
+    levelId === 'solitude' ? normalized.solitude : normalized.observatory
 
   normalized.level = mergeLevelSettings<SharedLevelEditorSettings>(
     pickSharedLevelSettings(legacySettings),
-    normalized.level ?? {}
+    normalized.level ?? {},
   )
 
   if (normalized.observatory) {
-    normalized.observatory = removeSharedLevelSettings(normalized.observatory) as ObservatoryEditorSettings
+    normalized.observatory = removeSharedLevelSettings(
+      normalized.observatory,
+    ) as ObservatoryEditorSettings
   }
 
   if (normalized.solitude) {
-    normalized.solitude = removeSharedLevelSettings(normalized.solitude) as SolitudeEditorSettings
+    normalized.solitude = removeSharedLevelSettings(
+      normalized.solitude,
+    ) as SolitudeEditorSettings
   }
 
   return normalized
 }
 
 export function mergeObservatoryEditorSettings(
-  settings: EditorSceneSettings | null | undefined
+  settings: EditorSceneSettings | null | undefined,
 ): ObservatoryEditorSettings | null {
-  if (!hasSettingsEntries(settings?.level as Record<string, unknown>) && !hasSettingsEntries(settings?.observatory as Record<string, unknown>)) {
+  if (
+    !hasSettingsEntries(settings?.level as Record<string, unknown>) &&
+    !hasSettingsEntries(settings?.observatory as Record<string, unknown>)
+  ) {
     return null
   }
 
-  return mergeLevelSettings<ObservatoryEditorSettings>(settings?.level ?? {}, settings?.observatory ?? {})
+  return mergeLevelSettings<ObservatoryEditorSettings>(
+    settings?.level ?? {},
+    settings?.observatory ?? {},
+  )
 }
 
 export function mergeSolitudeEditorSettings(
-  settings: EditorSceneSettings | null | undefined
+  settings: EditorSceneSettings | null | undefined,
 ): SolitudeEditorSettings | null {
-  if (!hasSettingsEntries(settings?.level as Record<string, unknown>) && !hasSettingsEntries(settings?.solitude as Record<string, unknown>)) {
+  if (
+    !hasSettingsEntries(settings?.level as Record<string, unknown>) &&
+    !hasSettingsEntries(settings?.solitude as Record<string, unknown>)
+  ) {
     return null
   }
 
-  return mergeLevelSettings<SolitudeEditorSettings>(settings?.level ?? {}, settings?.solitude ?? {})
+  return mergeLevelSettings<SolitudeEditorSettings>(
+    settings?.level ?? {},
+    settings?.solitude ?? {},
+  )
 }

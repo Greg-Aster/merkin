@@ -35,7 +35,11 @@ function clampByte(value: number) {
   return Math.max(0, Math.min(255, Math.round(value)))
 }
 
-function applyTextureSettings(texture: THREE.DataTexture, repeat: RepeatTuple, isColorTexture: boolean) {
+function applyTextureSettings(
+  texture: THREE.DataTexture,
+  repeat: RepeatTuple,
+  isColorTexture: boolean,
+) {
   texture.wrapS = THREE.RepeatWrapping
   texture.wrapT = THREE.RepeatWrapping
   texture.repeat.set(repeat[0], repeat[1])
@@ -49,7 +53,10 @@ function applyTextureSettings(texture: THREE.DataTexture, repeat: RepeatTuple, i
   return texture
 }
 
-function createRgbaTexture(size: number, fillPixel: (x: number, y: number, index: number, data: Uint8Array) => void) {
+function createRgbaTexture(
+  size: number,
+  fillPixel: (x: number, y: number, index: number, data: Uint8Array) => void,
+) {
   const data = new Uint8Array(size * size * 4)
 
   for (let y = 0; y < size; y += 1) {
@@ -62,7 +69,12 @@ function createRgbaTexture(size: number, fillPixel: (x: number, y: number, index
   return new THREE.DataTexture(data, size, size, THREE.RGBAFormat)
 }
 
-function paintColor(data: Uint8Array, index: number, color: THREE.Color, brightness = 1) {
+function paintColor(
+  data: Uint8Array,
+  index: number,
+  color: THREE.Color,
+  brightness = 1,
+) {
   data[index] = clampByte(color.r * 255 * brightness)
   data[index + 1] = clampByte(color.g * 255 * brightness)
   data[index + 2] = clampByte(color.b * 255 * brightness)
@@ -77,7 +89,9 @@ function paintGray(data: Uint8Array, index: number, value: number) {
   data[index + 3] = 255
 }
 
-export function createTechPanelTextureBundle(options: ColorTextureOptions): ProceduralTextureBundle {
+export function createTechPanelTextureBundle(
+  options: ColorTextureOptions,
+): ProceduralTextureBundle {
   const size = options.size ?? 256
   const repeat = options.repeat ?? [2, 2]
   const random = createSeededRandom(options.seed ?? 7)
@@ -134,11 +148,13 @@ export function createTechPanelTextureBundle(options: ColorTextureOptions): Proc
   return {
     map: applyTextureSettings(map, repeat, true),
     roughnessMap: applyTextureSettings(roughnessMap, repeat, false),
-    bumpMap: applyTextureSettings(bumpMap, repeat, false)
+    bumpMap: applyTextureSettings(bumpMap, repeat, false),
   }
 }
 
-export function createFloorTileTextureBundle(options: ColorTextureOptions): ProceduralTextureBundle {
+export function createFloorTileTextureBundle(
+  options: ColorTextureOptions,
+): ProceduralTextureBundle {
   const size = options.size ?? 256
   const repeat = options.repeat ?? [4, 4]
   const random = createSeededRandom(options.seed ?? 11)
@@ -149,7 +165,8 @@ export function createFloorTileTextureBundle(options: ColorTextureOptions): Proc
   const map = createRgbaTexture(size, (x, y, index, data) => {
     const tile = x % 48 === 0 || y % 48 === 0
     const smallTile = x % 24 === 0 || y % 24 === 0
-    const cautionInset = x % 96 > 60 && x % 96 < 72 && y % 96 > 12 && y % 96 < 36
+    const cautionInset =
+      x % 96 > 60 && x % 96 < 72 && y % 96 > 12 && y % 96 < 36
     const noise = (random() - 0.5) * 0.1
 
     let color = baseColor.clone().offsetHSL(0, 0, noise)
@@ -183,11 +200,13 @@ export function createFloorTileTextureBundle(options: ColorTextureOptions): Proc
   return {
     map: applyTextureSettings(map, repeat, true),
     roughnessMap: applyTextureSettings(roughnessMap, repeat, false),
-    bumpMap: applyTextureSettings(bumpMap, repeat, false)
+    bumpMap: applyTextureSettings(bumpMap, repeat, false),
   }
 }
 
-export function createStoneTextureBundle(options: ColorTextureOptions): ProceduralTextureBundle {
+export function createStoneTextureBundle(
+  options: ColorTextureOptions,
+): ProceduralTextureBundle {
   const size = options.size ?? 256
   const repeat = options.repeat ?? [2, 2]
   const random = createSeededRandom(options.seed ?? 17)
@@ -227,11 +246,13 @@ export function createStoneTextureBundle(options: ColorTextureOptions): Procedur
   return {
     map: applyTextureSettings(map, repeat, true),
     roughnessMap: applyTextureSettings(roughnessMap, repeat, false),
-    bumpMap: applyTextureSettings(bumpMap, repeat, false)
+    bumpMap: applyTextureSettings(bumpMap, repeat, false),
   }
 }
 
-export function createWoodTextureBundle(options: ColorTextureOptions): ProceduralTextureBundle {
+export function createWoodTextureBundle(
+  options: ColorTextureOptions,
+): ProceduralTextureBundle {
   const size = options.size ?? 256
   const repeat = options.repeat ?? [3, 2]
   const random = createSeededRandom(options.seed ?? 23)
@@ -242,8 +263,10 @@ export function createWoodTextureBundle(options: ColorTextureOptions): Procedura
   const map = createRgbaTexture(size, (x, y, index, data) => {
     const grain = Math.sin((x / size) * Math.PI * 18 + y * 0.02) * 0.08
     const plank = x % 86 < 3
-    const knot = ((x - 60) ** 2 + (y - 120) ** 2) < 180
-    let color = baseColor.clone().offsetHSL(0, 0, grain + (random() - 0.5) * 0.05)
+    const knot = (x - 60) ** 2 + (y - 120) ** 2 < 180
+    let color = baseColor
+      .clone()
+      .offsetHSL(0, 0, grain + (random() - 0.5) * 0.05)
 
     if (plank) color.lerp(grainColor, 0.6)
     else if (knot) color.lerp(highlightColor, 0.4)
@@ -266,11 +289,13 @@ export function createWoodTextureBundle(options: ColorTextureOptions): Procedura
   return {
     map: applyTextureSettings(map, repeat, true),
     roughnessMap: applyTextureSettings(roughnessMap, repeat, false),
-    bumpMap: applyTextureSettings(bumpMap, repeat, false)
+    bumpMap: applyTextureSettings(bumpMap, repeat, false),
   }
 }
 
-export function createRustTextureBundle(options: ColorTextureOptions): ProceduralTextureBundle {
+export function createRustTextureBundle(
+  options: ColorTextureOptions,
+): ProceduralTextureBundle {
   const size = options.size ?? 256
   const repeat = options.repeat ?? [2, 2]
   const random = createSeededRandom(options.seed ?? 31)
@@ -279,7 +304,9 @@ export function createRustTextureBundle(options: ColorTextureOptions): Procedura
   const dustColor = new THREE.Color(options.accentColor ?? '#86755f')
 
   const map = createRgbaTexture(size, (x, y, index, data) => {
-    const patch = ((x - 96) ** 2 + (y - 120) ** 2) < 2200 || ((x - 180) ** 2 + (y - 56) ** 2) < 1500
+    const patch =
+      (x - 96) ** 2 + (y - 120) ** 2 < 2200 ||
+      (x - 180) ** 2 + (y - 56) ** 2 < 1500
     const streak = (x + y) % 51 < 2
     let color = baseColor.clone().offsetHSL(0, 0, (random() - 0.5) * 0.12)
 
@@ -290,14 +317,18 @@ export function createRustTextureBundle(options: ColorTextureOptions): Procedura
   })
 
   const roughnessMap = createRgbaTexture(size, (x, y, index, data) => {
-    const patch = ((x - 96) ** 2 + (y - 120) ** 2) < 2200 || ((x - 180) ** 2 + (y - 56) ** 2) < 1500
+    const patch =
+      (x - 96) ** 2 + (y - 120) ** 2 < 2200 ||
+      (x - 180) ** 2 + (y - 56) ** 2 < 1500
     let value = 214 + (random() - 0.5) * 16
     if (patch) value = 236 + (random() - 0.5) * 12
     paintGray(data, index, value)
   })
 
   const bumpMap = createRgbaTexture(size, (x, y, index, data) => {
-    const patch = ((x - 96) ** 2 + (y - 120) ** 2) < 2200 || ((x - 180) ** 2 + (y - 56) ** 2) < 1500
+    const patch =
+      (x - 96) ** 2 + (y - 120) ** 2 < 2200 ||
+      (x - 180) ** 2 + (y - 56) ** 2 < 1500
     const streak = (x + y) % 51 < 2
     let value = 124
     if (patch) value = 154
@@ -308,11 +339,13 @@ export function createRustTextureBundle(options: ColorTextureOptions): Procedura
   return {
     map: applyTextureSettings(map, repeat, true),
     roughnessMap: applyTextureSettings(roughnessMap, repeat, false),
-    bumpMap: applyTextureSettings(bumpMap, repeat, false)
+    bumpMap: applyTextureSettings(bumpMap, repeat, false),
   }
 }
 
-export function createScreenTexture(options: ColorTextureOptions & { repeat?: RepeatTuple }) {
+export function createScreenTexture(
+  options: ColorTextureOptions & { repeat?: RepeatTuple },
+) {
   const size = options.size ?? 256
   const repeat = options.repeat ?? [1, 1]
   const random = createSeededRandom(options.seed ?? 41)
@@ -324,7 +357,9 @@ export function createScreenTexture(options: ColorTextureOptions & { repeat?: Re
     const scanline = y % 6 === 0
     const graphBand = y > 56 && y < 80 && x % 22 < 12
     const hudBand = y > 142 && y < 154
-    let color = baseColor.clone().lerp(accentColor, 0.2 + Math.sin(x * 0.05) * 0.08)
+    let color = baseColor
+      .clone()
+      .lerp(accentColor, 0.2 + Math.sin(x * 0.05) * 0.08)
 
     if (scanline) color.lerp(detailColor, 0.32)
     if (graphBand || hudBand) color.lerp(accentColor, 0.5)
@@ -336,7 +371,9 @@ export function createScreenTexture(options: ColorTextureOptions & { repeat?: Re
   return applyTextureSettings(map, repeat, true)
 }
 
-export function disposeProceduralTextureBundle(bundle: ProceduralTextureBundle) {
+export function disposeProceduralTextureBundle(
+  bundle: ProceduralTextureBundle,
+) {
   bundle.map.dispose()
   bundle.roughnessMap.dispose()
   bundle.bumpMap.dispose()

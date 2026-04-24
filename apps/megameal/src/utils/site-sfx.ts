@@ -1,9 +1,9 @@
-import { Howl } from 'howler'
+import { Howl, Howler } from 'howler'
 import {
-  siteAudioConfig,
-  siteSfxProfile,
   type AudioSfxConfig,
   type AudioSfxId,
+  siteAudioConfig,
+  siteSfxProfile,
 } from '../config/audio'
 
 export type SiteSfxId = AudioSfxId
@@ -18,14 +18,29 @@ const sfxConfigMap: Record<SiteSfxId, AudioSfxConfig> = siteSfxProfile
 
 class SiteSfxManager {
   private howls = new Map<SiteSfxId, Howl>()
+  private lastPlayedAt = new Map<SiteSfxId, number>()
   private initialized = false
 
   initialize(): void {
     if (this.initialized || typeof window === 'undefined') return
 
     this.initialized = true
+    Howler.autoUnlock = true
     window.playSiteSfx = (id: SiteSfxId) => {
       this.play(id)
+    }
+  }
+
+  async unlockFromGesture(): Promise<void> {
+    if (typeof window === 'undefined') return
+
+    try {
+      const ctx = Howler.ctx
+      if (ctx && ctx.state === 'suspended') {
+        await ctx.resume()
+      }
+    } catch (error) {
+      console.warn('Site SFX unlock failed:', error)
     }
   }
 
@@ -35,6 +50,7 @@ class SiteSfxManager {
 
     const config = sfxConfigMap[id]
     if (!config) return
+    if (this.isCoolingDown(config)) return
 
     const howl = this.getHowl(config)
     howl.volume(this.getResolvedVolume(config))
@@ -44,8 +60,17 @@ class SiteSfxManager {
 
     const playId = howl.play()
     if (typeof playId === 'number') {
+      this.lastPlayedAt.set(id, window.performance.now())
       howl.rate(this.getResolvedRate(config), playId)
     }
+  }
+
+  private isCoolingDown(config: AudioSfxConfig): boolean {
+    const cooldownMs = config.cooldownMs ?? 0
+    if (cooldownMs <= 0) return false
+
+    const lastPlayedAt = this.lastPlayedAt.get(config.id) ?? -Infinity
+    return window.performance.now() - lastPlayedAt < cooldownMs
   }
 
   private getHowl(config: AudioSfxConfig): Howl {
@@ -57,6 +82,15 @@ class SiteSfxManager {
       volume: this.getResolvedVolume(config),
       preload: true,
       html5: config.html5 ?? false,
+      onloaderror: (_soundId: number, error: unknown) => {
+        console.warn(`Site SFX load failed for "${config.id}"`, config.src, error)
+      },
+      onplayerror: (_soundId: number, error: unknown) => {
+        console.warn(`Site SFX play failed for "${config.id}"`, config.src, error)
+        howl.once('unlock', () => {
+          howl.play()
+        })
+      },
     })
 
     this.howls.set(config.id, howl)
@@ -71,9 +105,12 @@ class SiteSfxManager {
   }
 
   private getMasterVolume(): number {
-    if (typeof window === 'undefined') return siteAudioConfig.defaultMasterVolume
+    if (typeof window === 'undefined')
+      return siteAudioConfig.defaultMasterVolume
 
-    const stored = Number(window.localStorage.getItem(siteAudioConfig.masterVolumeStorageKey))
+    const stored = Number(
+      window.localStorage.getItem(siteAudioConfig.masterVolumeStorageKey),
+    )
     if (!Number.isFinite(stored)) return siteAudioConfig.defaultMasterVolume
 
     return Math.min(1, Math.max(0, stored))
@@ -82,12 +119,16 @@ class SiteSfxManager {
   private getSfxVolume(): number {
     if (typeof window === 'undefined') return siteAudioConfig.defaultSfxVolume
 
-    const stored = Number(window.localStorage.getItem(siteAudioConfig.sfxVolumeStorageKey))
+    const stored = Number(
+      window.localStorage.getItem(siteAudioConfig.sfxVolumeStorageKey),
+    )
     if (Number.isFinite(stored)) {
       return Math.min(1, Math.max(0, stored))
     }
 
-    const legacy = Number(window.localStorage.getItem(siteAudioConfig.legacyVolumeStorageKey))
+    const legacy = Number(
+      window.localStorage.getItem(siteAudioConfig.legacyVolumeStorageKey),
+    )
     if (Number.isFinite(legacy)) {
       return Math.min(1, Math.max(0, legacy))
     }
@@ -96,7 +137,10 @@ class SiteSfxManager {
   }
 
   private getResolvedVolume(config: AudioSfxConfig): number {
-    return Math.min(1, Math.max(0, this.getMasterVolume() * this.getSfxVolume() * config.volume))
+    return Math.min(
+      1,
+      Math.max(0, this.getMasterVolume() * this.getSfxVolume() * config.volume),
+    )
   }
 
   private getResolvedRate(config: AudioSfxConfig): number {

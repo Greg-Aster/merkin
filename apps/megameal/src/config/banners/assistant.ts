@@ -32,6 +32,14 @@
 
 import type { AssistantBannerData } from './types'
 
+type AssistantThemeStyle = {
+  background: string
+  text: string
+  accent: string
+  border: string
+  backdropFilter?: string
+}
+
 // =====================================================================
 // ASSISTANT BANNER DATA CONFIGURATION
 // =====================================================================
@@ -487,7 +495,8 @@ export function getAssistantBannerStyles(
   theme?: keyof typeof assistantBannerStyling.themes,
 ): Record<string, string> {
   const currentTheme = theme || assistantBannerStyling.currentTheme
-  const themeStyles = assistantBannerStyling.themes[currentTheme]
+  const themeStyles: AssistantThemeStyle =
+    assistantBannerStyling.themes[currentTheme]
 
   const styles: Record<string, string> = {
     position: 'relative',

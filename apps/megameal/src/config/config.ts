@@ -26,7 +26,7 @@ export const siteConfig: SiteConfig = {
     position: 'center',
     credit: {
       enable: false,
-        text: 'Corporate Archives Division',
+      text: 'Corporate Archives Division',
       url: '',
     },
   },

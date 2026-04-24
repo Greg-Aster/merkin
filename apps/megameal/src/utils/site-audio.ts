@@ -1,8 +1,8 @@
 import { Howl, Howler } from 'howler'
 import {
+  type SiteAudioTrackConfig,
   getTrackForPathname,
   siteAudioConfig,
-  type SiteAudioTrackConfig,
 } from '../config/audio'
 
 declare global {
@@ -70,6 +70,7 @@ class SiteAudioManager {
     this.ambienceVolume = this.readStoredAmbienceVolume()
     this.sfxVolume = this.readStoredSfxVolume()
     Howler.autoUnlock = true
+    Howler.autoSuspend = false
     Howler.html5PoolSize = 12
 
     this.pendingPathname = window.location.pathname
@@ -176,10 +177,7 @@ class SiteAudioManager {
       return
     }
 
-    if (
-      this.currentTrack?.id === nextTrack.id &&
-      this.currentHowl
-    ) {
+    if (this.currentTrack?.id === nextTrack.id && this.currentHowl) {
       if (
         (userInitiated || this.audioUnlocked) &&
         !this.suspended &&
@@ -205,12 +203,22 @@ class SiteAudioManager {
       volume: 0,
       html5: nextTrack.html5 ?? false,
       preload: true,
-      onplayerror: () => {
+      onplayerror: (_soundId: number, error: unknown) => {
+        console.warn(
+          `Site ambience play failed for "${nextTrack.id}"`,
+          nextTrack.src,
+          error,
+        )
         nextHowl.once('unlock', () => {
           nextHowl.play()
         })
       },
-      onloaderror: () => {
+      onloaderror: (_soundId: number, error: unknown) => {
+        console.warn(
+          `Site ambience load failed for "${nextTrack.id}"`,
+          nextTrack.src,
+          error,
+        )
         if (this.currentHowl === nextHowl) {
           this.currentHowl = null
           this.currentTrack = null
@@ -329,9 +337,12 @@ class SiteAudioManager {
   }
 
   private readStoredMasterVolume(): number {
-    if (typeof window === 'undefined') return siteAudioConfig.defaultMasterVolume
+    if (typeof window === 'undefined')
+      return siteAudioConfig.defaultMasterVolume
 
-    const stored = Number(window.localStorage.getItem(siteAudioConfig.masterVolumeStorageKey))
+    const stored = Number(
+      window.localStorage.getItem(siteAudioConfig.masterVolumeStorageKey),
+    )
     if (!Number.isFinite(stored)) return siteAudioConfig.defaultMasterVolume
 
     return Math.min(1, Math.max(0, stored))
@@ -339,18 +350,26 @@ class SiteAudioManager {
 
   private writeStoredMasterVolume(volume: number): void {
     if (typeof window === 'undefined') return
-    window.localStorage.setItem(siteAudioConfig.masterVolumeStorageKey, String(volume))
+    window.localStorage.setItem(
+      siteAudioConfig.masterVolumeStorageKey,
+      String(volume),
+    )
   }
 
   private readStoredAmbienceVolume(): number {
-    if (typeof window === 'undefined') return siteAudioConfig.defaultAmbienceVolume
+    if (typeof window === 'undefined')
+      return siteAudioConfig.defaultAmbienceVolume
 
-    const stored = Number(window.localStorage.getItem(siteAudioConfig.ambienceVolumeStorageKey))
+    const stored = Number(
+      window.localStorage.getItem(siteAudioConfig.ambienceVolumeStorageKey),
+    )
     if (Number.isFinite(stored)) {
       return Math.min(1, Math.max(0, stored))
     }
 
-    const legacy = Number(window.localStorage.getItem(siteAudioConfig.legacyVolumeStorageKey))
+    const legacy = Number(
+      window.localStorage.getItem(siteAudioConfig.legacyVolumeStorageKey),
+    )
     if (Number.isFinite(legacy)) {
       return Math.min(1, Math.max(0, legacy))
     }
@@ -360,18 +379,25 @@ class SiteAudioManager {
 
   private writeStoredAmbienceVolume(volume: number): void {
     if (typeof window === 'undefined') return
-    window.localStorage.setItem(siteAudioConfig.ambienceVolumeStorageKey, String(volume))
+    window.localStorage.setItem(
+      siteAudioConfig.ambienceVolumeStorageKey,
+      String(volume),
+    )
   }
 
   private readStoredSfxVolume(): number {
     if (typeof window === 'undefined') return siteAudioConfig.defaultSfxVolume
 
-    const stored = Number(window.localStorage.getItem(siteAudioConfig.sfxVolumeStorageKey))
+    const stored = Number(
+      window.localStorage.getItem(siteAudioConfig.sfxVolumeStorageKey),
+    )
     if (Number.isFinite(stored)) {
       return Math.min(1, Math.max(0, stored))
     }
 
-    const legacy = Number(window.localStorage.getItem(siteAudioConfig.legacyVolumeStorageKey))
+    const legacy = Number(
+      window.localStorage.getItem(siteAudioConfig.legacyVolumeStorageKey),
+    )
     if (Number.isFinite(legacy)) {
       return Math.min(1, Math.max(0, legacy))
     }
@@ -381,11 +407,20 @@ class SiteAudioManager {
 
   private writeStoredSfxVolume(volume: number): void {
     if (typeof window === 'undefined') return
-    window.localStorage.setItem(siteAudioConfig.sfxVolumeStorageKey, String(volume))
+    window.localStorage.setItem(
+      siteAudioConfig.sfxVolumeStorageKey,
+      String(volume),
+    )
   }
 
   private resolveTrackVolume(track: SiteAudioTrackConfig): number {
-    return Math.min(1, Math.max(0, this.masterVolume * this.ambienceVolume * (track.volume ?? 1)))
+    return Math.min(
+      1,
+      Math.max(
+        0,
+        this.masterVolume * this.ambienceVolume * (track.volume ?? 1),
+      ),
+    )
   }
 
   private pauseCurrentTrack(): void {
@@ -438,28 +473,56 @@ class SiteAudioManager {
       this.syncEmbeddedMediaSuspension()
     }
 
-    document.addEventListener('play', (event) => syncMediaState(event.target), true)
-    document.addEventListener('pause', (event) => syncMediaState(event.target), true)
-    document.addEventListener('ended', (event) => syncMediaState(event.target), true)
-    document.addEventListener('emptied', (event) => syncMediaState(event.target), true)
-    document.addEventListener('volumechange', (event) => syncMediaState(event.target), true)
+    document.addEventListener(
+      'play',
+      event => syncMediaState(event.target),
+      true,
+    )
+    document.addEventListener(
+      'pause',
+      event => syncMediaState(event.target),
+      true,
+    )
+    document.addEventListener(
+      'ended',
+      event => syncMediaState(event.target),
+      true,
+    )
+    document.addEventListener(
+      'emptied',
+      event => syncMediaState(event.target),
+      true,
+    )
+    document.addEventListener(
+      'volumechange',
+      event => syncMediaState(event.target),
+      true,
+    )
     document.addEventListener('astro:page-load', refreshMediaState)
   }
 
   private bindSuspensionEvents(): void {
-    window.addEventListener('megameal:audio-suspend', (event) => {
-      const detail = event instanceof CustomEvent ? event.detail as { reason?: string } | undefined : undefined
+    window.addEventListener('megameal:audio-suspend', event => {
+      const detail =
+        event instanceof CustomEvent
+          ? (event.detail as { reason?: string } | undefined)
+          : undefined
       this.suspendAmbience(detail?.reason ?? 'external-request')
     })
 
-    window.addEventListener('megameal:audio-resume', (event) => {
-      const detail = event instanceof CustomEvent ? event.detail as { reason?: string } | undefined : undefined
+    window.addEventListener('megameal:audio-resume', event => {
+      const detail =
+        event instanceof CustomEvent
+          ? (event.detail as { reason?: string } | undefined)
+          : undefined
       this.resumeAmbience(detail?.reason)
     })
   }
 
   private isMediaAudible(element: HTMLMediaElement): boolean {
-    return !element.paused && !element.ended && !element.muted && element.volume > 0
+    return (
+      !element.paused && !element.ended && !element.muted && element.volume > 0
+    )
   }
 
   private syncEmbeddedMediaSuspension(): void {
@@ -475,8 +538,9 @@ class SiteAudioManager {
 
   private bindYouTubeEmbeds(): void {
     const bindFrames = () => {
-      const frames = Array.from(document.querySelectorAll('iframe')).filter((frame): frame is HTMLIFrameElement =>
-        frame instanceof HTMLIFrameElement && this.isYouTubeEmbed(frame),
+      const frames = Array.from(document.querySelectorAll('iframe')).filter(
+        (frame): frame is HTMLIFrameElement =>
+          frame instanceof HTMLIFrameElement && this.isYouTubeEmbed(frame),
       )
 
       if (frames.length === 0) return
@@ -496,7 +560,9 @@ class SiteAudioManager {
 
     if (!this.youtubeApiPromise) {
       this.youtubeApiPromise = new Promise<void>((resolve, reject) => {
-        const existingScript = document.querySelector<HTMLScriptElement>('script[data-megameal-youtube-api="true"]')
+        const existingScript = document.querySelector<HTMLScriptElement>(
+          'script[data-megameal-youtube-api="true"]',
+        )
         const previousReady = window.onYouTubeIframeAPIReady
 
         window.onYouTubeIframeAPIReady = () => {
@@ -510,9 +576,10 @@ class SiteAudioManager {
         script.src = 'https://www.youtube.com/iframe_api'
         script.async = true
         script.dataset.megamealYoutubeApi = 'true'
-        script.onerror = () => reject(new Error('Failed to load YouTube iframe API'))
+        script.onerror = () =>
+          reject(new Error('Failed to load YouTube iframe API'))
         document.head.appendChild(script)
-      }).catch((error) => {
+      }).catch(error => {
         this.youtubeApiPromise = null
         console.warn('Unable to initialize YouTube iframe API:', error)
       })
@@ -522,7 +589,8 @@ class SiteAudioManager {
   }
 
   private attachYouTubePlayer(frame: HTMLIFrameElement): void {
-    if (this.boundYouTubeFrames.has(frame) || !window.YT?.Player) return
+    const youtubeApi = window.YT
+    if (this.boundYouTubeFrames.has(frame) || !youtubeApi?.Player) return
 
     const normalizedSrc = this.normalizeYouTubeSrc(frame.src)
     if (normalizedSrc !== frame.src) {
@@ -536,15 +604,15 @@ class SiteAudioManager {
 
     this.boundYouTubeFrames.add(frame)
 
-    new window.YT.Player(frame, {
+    new youtubeApi.Player(frame, {
       events: {
         onStateChange: (event: { data: number }) => {
-          if (event.data === window.YT.PlayerState.PLAYING) {
+          if (event.data === youtubeApi.PlayerState.PLAYING) {
             this.activeYouTubePlayers.add(frame.id)
           } else if (
-            event.data === window.YT.PlayerState.PAUSED ||
-            event.data === window.YT.PlayerState.ENDED ||
-            event.data === window.YT.PlayerState.CUED
+            event.data === youtubeApi.PlayerState.PAUSED ||
+            event.data === youtubeApi.PlayerState.ENDED ||
+            event.data === youtubeApi.PlayerState.CUED
           ) {
             this.activeYouTubePlayers.delete(frame.id)
           }
@@ -559,7 +627,8 @@ class SiteAudioManager {
     try {
       const url = new URL(frame.src, window.location.origin)
       return (
-        (url.hostname === 'www.youtube.com' || url.hostname === 'www.youtube-nocookie.com') &&
+        (url.hostname === 'www.youtube.com' ||
+          url.hostname === 'www.youtube-nocookie.com') &&
         url.pathname.startsWith('/embed/')
       )
     } catch {

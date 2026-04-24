@@ -311,7 +311,7 @@ export function hasValidDate(dateString: string): boolean {
     const date = new Date(dateString)
 
     // 1. Check if it's a valid date
-    if (isNaN(date.getTime())) return false
+    if (Number.isNaN(date.getTime())) return false
 
     // 2. Check if it's not today's date (which likely means it's a fallback)
     const today = new Date()
@@ -528,7 +528,7 @@ export async function fetchFriendContent(
                 if (pubDate) {
                   try {
                     published = new Date(pubDate)
-                    if (isNaN(published.getTime())) {
+                    if (Number.isNaN(published.getTime())) {
                       // Handle alternative date formats
                       published = new Date()
                     }
@@ -827,7 +827,7 @@ export async function fetchFriendContent(
             if (directDateStr) {
               try {
                 published = new Date(directDateStr)
-                if (!isNaN(published.getTime())) {
+                if (!Number.isNaN(published.getTime())) {
                   foundDate = true
                   console.log(`Found direct date attribute: ${directDateStr}`)
                 }
@@ -840,7 +840,7 @@ export async function fetchFriendContent(
             if (!foundDate && directTimestamp) {
               try {
                 published = new Date(Number.parseInt(directTimestamp))
-                if (!isNaN(published.getTime())) {
+                if (!Number.isNaN(published.getTime())) {
                   foundDate = true
                   console.log(
                     `Found direct timestamp attribute: ${directTimestamp}`,
@@ -859,7 +859,7 @@ export async function fetchFriendContent(
                 if (dateStr) {
                   try {
                     published = new Date(dateStr)
-                    if (!isNaN(published.getTime())) {
+                    if (!Number.isNaN(published.getTime())) {
                       foundDate = true
                       console.log(
                         `Found time element with datetime: ${dateStr}`,
@@ -1158,7 +1158,10 @@ export async function fetchFriendContent(
             let readingTime = 1 // Default
 
             const directWordCount = element.getAttribute('data-post-words')
-            if (directWordCount && !isNaN(Number.parseInt(directWordCount))) {
+            if (
+              directWordCount &&
+              !Number.isNaN(Number.parseInt(directWordCount))
+            ) {
               wordCount = Number.parseInt(directWordCount)
             } else {
               // Estimate from description if available
@@ -1170,7 +1173,7 @@ export async function fetchFriendContent(
             const directReadingTime = element.getAttribute('data-post-minutes')
             if (
               directReadingTime &&
-              !isNaN(Number.parseInt(directReadingTime))
+              !Number.isNaN(Number.parseInt(directReadingTime))
             ) {
               readingTime = Number.parseInt(directReadingTime)
             } else {

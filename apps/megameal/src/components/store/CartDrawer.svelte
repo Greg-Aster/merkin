@@ -29,7 +29,7 @@ onMount(() => {
       cart.add(detail)
       isOpen = true
       document.dispatchEvent(
-        new CustomEvent('megameal:sfx', { detail: { id: 'select' } }),
+        new CustomEvent('megameal:sfx', { detail: { id: 'cart-add' } }),
       )
     }
   }
@@ -52,7 +52,12 @@ function closeDrawer() {
 }
 
 function handleBackdropClick(e: MouseEvent) {
-  if ((e.target as HTMLElement).id === 'cart-backdrop') closeDrawer()
+  if ((e.target as HTMLElement).id === 'cart-backdrop') {
+    closeDrawer()
+    document.dispatchEvent(
+      new CustomEvent('megameal:sfx', { detail: { id: 'panel-close' } }),
+    )
+  }
 }
 
 const emptyMessages = [
@@ -92,6 +97,8 @@ const emptyMessage =
       <button
         onclick={closeDrawer}
         aria-label="Close cart"
+        data-sfx-hover="hover-soft"
+        data-sfx-click="panel-close"
         class="text-slate-400 hover:text-slate-100 transition p-1 rounded hover:bg-slate-700"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
@@ -110,6 +117,8 @@ const emptyMessage =
           <p class="text-slate-400 text-sm italic max-w-xs">{emptyMessage}</p>
           <button
             onclick={closeDrawer}
+            data-sfx-hover="hover-soft"
+            data-sfx-click="panel-close"
             class="text-xs text-[var(--primary)] hover:underline"
           >
             Return to the catalog
@@ -124,6 +133,8 @@ const emptyMessage =
                 {#if item.href}
                   <a
                     href={item.href}
+                    data-sfx-hover="hover-soft"
+                    data-sfx-click="soft"
                     class="mt-1 inline-block text-xs text-cyan-300 transition hover:text-cyan-200"
                   >
                     View item
@@ -138,17 +149,23 @@ const emptyMessage =
                 <button
                   onclick={() => cart.updateQuantity(item.id, item.quantity - 1)}
                   aria-label="Decrease quantity"
+                  data-sfx-hover="hover-soft"
+                  data-sfx-click="soft"
                   class="w-7 h-7 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center justify-center transition text-sm font-bold"
                 >−</button>
                 <span class="w-6 text-center text-slate-200 text-sm">{item.quantity}</span>
                 <button
                   onclick={() => cart.updateQuantity(item.id, item.quantity + 1)}
                   aria-label="Increase quantity"
+                  data-sfx-hover="hover-soft"
+                  data-sfx-click="select"
                   class="w-7 h-7 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center justify-center transition text-sm font-bold"
                 >+</button>
                 <button
                   onclick={() => cart.remove(item.id)}
                   aria-label="Remove item"
+                  data-sfx-hover="hover-soft"
+                  data-sfx-click="warning"
                   class="w-7 h-7 rounded bg-slate-800 hover:bg-rose-900/60 text-slate-500 hover:text-rose-400 flex items-center justify-center transition ml-1"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
@@ -175,11 +192,15 @@ const emptyMessage =
         <a
           class="block w-full text-center btn-primary text-white font-semibold py-3 px-4 rounded-[var(--radius-medium,8px)] transition-all hover:bg-[var(--primary-hover)] active:scale-95"
           href={url('/store/checkout/')}
+          data-sfx-hover="hover-emphasis"
+          data-sfx-click="confirm"
         >
           Proceed to Checkout
         </a>
         <button
-          onclick={() => { cart.clear(); document.dispatchEvent(new CustomEvent('megameal:sfx', { detail: { id: 'panel-back' } })) }}
+          onclick={() => { cart.clear() }}
+          data-sfx-hover="hover-soft"
+          data-sfx-click="panel-back"
           class="w-full text-xs text-slate-500 hover:text-rose-400 transition py-1"
         >
           Abandon cart (the items will remember)

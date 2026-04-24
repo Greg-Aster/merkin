@@ -14,6 +14,8 @@ function toggleCart() {
 <button
   id="cart-toggle-btn"
   aria-label="Shopping Cart"
+  data-sfx-hover="hover-soft"
+  data-sfx-click="panel-open"
   class="btn-plain scale-animation rounded-lg h-11 w-11 flex items-center justify-center active:scale-90 relative"
   onclick={toggleCart}
 >

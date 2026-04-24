@@ -5,9 +5,7 @@
 
 import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
 
-const latest = postsManifest.items
-  .filter(post => !post.draft)
-  .slice(0, 3)
+const latest = postsManifest.items.filter(post => !post.draft).slice(0, 3)
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {

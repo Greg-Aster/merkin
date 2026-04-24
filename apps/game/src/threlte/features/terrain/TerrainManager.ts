@@ -1,6 +1,6 @@
 /**
  * Unified Terrain Manager
- * 
+ *
  * Consolidates terrain logic from:
  * - HeightmapCache.ts: generateFromImage method and height data management
  * - TerrainCollider.svelte: getHeightAt method with bilinear interpolation
@@ -11,16 +11,17 @@
 import * as THREE from 'three'
 import { OptimizationLevel, optimizationManager } from '../performance'
 
-const isDev = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true
+const isDev =
+  (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true
 
 export interface TerrainConfig {
   heightmapUrl: string
   worldSize: number
-  worldSizeX?: number  // Actual X dimension (for rectangular terrain)
-  worldSizeZ?: number  // Actual Z dimension (for rectangular terrain)
+  worldSizeX?: number // Actual X dimension (for rectangular terrain)
+  worldSizeZ?: number // Actual Z dimension (for rectangular terrain)
   minHeight: number
   maxHeight: number
-  bounds?: { min: [number, number, number], max: [number, number, number] }
+  bounds?: { min: [number, number, number]; max: [number, number, number] }
   chunkPathTemplate?: string
   chunkSize?: number
   gridSize?: [number, number]
@@ -56,7 +57,7 @@ export class TerrainManager {
     [OptimizationLevel.LOW]: 32,
     [OptimizationLevel.MEDIUM]: 64,
     [OptimizationLevel.HIGH]: 128,
-    [OptimizationLevel.ULTRA]: 256
+    [OptimizationLevel.ULTRA]: 256,
   }
 
   constructor() {}
@@ -69,7 +70,9 @@ export class TerrainManager {
 
     // Check for bounds availability
     if (!config.bounds) {
-      issues.push('⚠️ No bounds data - falling back to centered coordinate assumptions')
+      issues.push(
+        '⚠️ No bounds data - falling back to centered coordinate assumptions',
+      )
     } else {
       // Validate bounds data consistency
       const boundsWorldSizeX = config.bounds.max[0] - config.bounds.min[0]
@@ -79,7 +82,7 @@ export class TerrainManager {
       // Check if worldSize matches the generation logic
       if (Math.abs(config.worldSize - maxDimension) > 0.1) {
         issues.push(
-          `⚠️ WorldSize mismatch: config.worldSize=${config.worldSize.toFixed(2)} but bounds suggest ${maxDimension.toFixed(2)}`
+          `⚠️ WorldSize mismatch: config.worldSize=${config.worldSize.toFixed(2)} but bounds suggest ${maxDimension.toFixed(2)}`,
         )
       }
 
@@ -87,7 +90,7 @@ export class TerrainManager {
       const aspectRatio = boundsWorldSizeX / boundsWorldSizeZ
       if (Math.abs(aspectRatio - 1.0) > 0.05) {
         issues.push(
-          `⚠️ Rectangular terrain detected: ${boundsWorldSizeX.toFixed(1)}x${boundsWorldSizeZ.toFixed(1)} (aspect ratio: ${aspectRatio.toFixed(2)})`
+          `⚠️ Rectangular terrain detected: ${boundsWorldSizeX.toFixed(1)}x${boundsWorldSizeZ.toFixed(1)} (aspect ratio: ${aspectRatio.toFixed(2)})`,
         )
       }
 
@@ -96,7 +99,7 @@ export class TerrainManager {
       const centerZ = (config.bounds.min[2] + config.bounds.max[2]) / 2
       if (Math.abs(centerX) > 1.0 || Math.abs(centerZ) > 1.0) {
         issues.push(
-          `⚠️ Terrain not centered: center at (${centerX.toFixed(1)}, ${centerZ.toFixed(1)}) instead of origin`
+          `⚠️ Terrain not centered: center at (${centerX.toFixed(1)}, ${centerZ.toFixed(1)}) instead of origin`,
         )
       }
     }
@@ -112,73 +115,83 @@ export class TerrainManager {
     }
 
     // Log coordinate system summary for debugging
-    const computedWorldSizeX = config.bounds ? config.bounds.max[0] - config.bounds.min[0] : config.worldSize
-    const computedWorldSizeZ = config.bounds ? config.bounds.max[2] - config.bounds.min[2] : config.worldSize
-    
-    if (isDev) console.log('🔍 Coordinate System Summary:', {
-      worldSize: config.worldSize,
-      worldSizeX: config.worldSizeX || computedWorldSizeX,
-      worldSizeZ: config.worldSizeZ || computedWorldSizeZ,
-      bounds: config.bounds,
-      hasChunks: !!(config.gridSize && config.chunkSize),
-      chunkGrid: config.gridSize,
-      chunkSize: config.chunkSize,
-      isRectangular: Math.abs(computedWorldSizeX - computedWorldSizeZ) > 0.1
-    })
+    const computedWorldSizeX = config.bounds
+      ? config.bounds.max[0] - config.bounds.min[0]
+      : config.worldSize
+    const computedWorldSizeZ = config.bounds
+      ? config.bounds.max[2] - config.bounds.min[2]
+      : config.worldSize
+
+    if (isDev)
+      console.log('🔍 Coordinate System Summary:', {
+        worldSize: config.worldSize,
+        worldSizeX: config.worldSizeX || computedWorldSizeX,
+        worldSizeZ: config.worldSizeZ || computedWorldSizeZ,
+        bounds: config.bounds,
+        hasChunks: !!(config.gridSize && config.chunkSize),
+        chunkGrid: config.gridSize,
+        chunkSize: config.chunkSize,
+        isRectangular: Math.abs(computedWorldSizeX - computedWorldSizeZ) > 0.1,
+      })
   }
 
   /**
    * Initialize terrain from heightmap image (from HeightmapCache.ts)
    */
   public async initialize(config: TerrainConfig): Promise<void> {
-    if (isDev) console.log(`🗺️ Loading terrain heightmap: ${config.heightmapUrl}`)
-    
+    if (isDev)
+      console.log(`🗺️ Loading terrain heightmap: ${config.heightmapUrl}`)
+
     // Validate coordinate system consistency
     this.validateCoordinateSystem(config)
-    
+
     this.config = config
-    
+
     return new Promise((resolve, reject) => {
       const img = new Image()
       img.crossOrigin = 'anonymous'
-      
+
       img.onload = () => {
         try {
           const canvas = document.createElement('canvas')
           const ctx = canvas.getContext('2d')!
-          
+
           canvas.width = img.width
           canvas.height = img.height
           this.resolution = img.width
 
           ctx.drawImage(img, 0, 0)
           const imageData = ctx.getImageData(0, 0, img.width, img.height)
-          
+
           this.heightData = new Float32Array(img.width * img.height)
           const { minHeight, maxHeight } = config
           const heightRange = maxHeight - minHeight
-          
+
           for (let i = 0; i < imageData.data.length; i += 4) {
             const grayscale = imageData.data[i] / 255
-            const worldHeight = minHeight + (grayscale * heightRange)
+            const worldHeight = minHeight + grayscale * heightRange
             this.heightData[i / 4] = worldHeight
           }
           this.baseHeightData = new Float32Array(this.heightData)
-          
+
           // Initialize chunks if we have chunk configuration
           if (config.gridSize && config.chunkSize) {
             this.initializeChunks()
           }
-          
+
           this.isReady = true
-          if (isDev) console.log(`✅ Terrain initialized: ${img.width}x${img.height}, ${(this.heightData.length * 4 / 1024).toFixed(1)}KB`)
+          if (isDev)
+            console.log(
+              `✅ Terrain initialized: ${img.width}x${img.height}, ${((this.heightData.length * 4) / 1024).toFixed(1)}KB`,
+            )
           resolve()
         } catch (error) {
           reject(error)
         }
       }
-      
-      img.onerror = () => reject(new Error(`Failed to load heightmap: ${config.heightmapUrl}`))
+
+      img.onerror = () =>
+        reject(new Error(`Failed to load heightmap: ${config.heightmapUrl}`))
       img.src = config.heightmapUrl
     })
   }
@@ -205,8 +218,8 @@ export class TerrainManager {
           centerZ = bounds.min[2] + (z + 0.5) * chunkSize
         } else {
           // Fallback to centered grid assumption
-          centerX = (x - gridX/2 + 0.5) * chunkSize
-          centerZ = (z - gridZ/2 + 0.5) * chunkSize
+          centerX = (x - gridX / 2 + 0.5) * chunkSize
+          centerZ = (z - gridZ / 2 + 0.5) * chunkSize
         }
 
         this.chunks.push({
@@ -218,7 +231,12 @@ export class TerrainManager {
         })
       }
     }
-    if (isDev) console.log('🏔️ TerrainManager: Initialized', this.chunks.length, 'chunks with bounds-based positioning')
+    if (isDev)
+      console.log(
+        '🏔️ TerrainManager: Initialized',
+        this.chunks.length,
+        'chunks with bounds-based positioning',
+      )
   }
 
   /**
@@ -226,12 +244,13 @@ export class TerrainManager {
    */
   public getVisibleChunks(playerPosition: THREE.Vector3): TerrainChunk[] {
     if (!this.config || !this.config.lods || this.chunks.length === 0) {
-      if (isDev) console.log('🏔️ getVisibleChunks: No config/lods/chunks', { 
-        hasConfig: !!this.config, 
-        hasLods: !!this.config?.lods, 
-        chunkCount: this.chunks.length,
-        playerPos: [playerPosition.x, playerPosition.y, playerPosition.z]
-      })
+      if (isDev)
+        console.log('🏔️ getVisibleChunks: No config/lods/chunks', {
+          hasConfig: !!this.config,
+          hasLods: !!this.config?.lods,
+          chunkCount: this.chunks.length,
+          playerPos: [playerPosition.x, playerPosition.y, playerPosition.z],
+        })
       return []
     }
 
@@ -246,7 +265,10 @@ export class TerrainManager {
       }
 
       if (newLod !== chunk.currentLod) {
-        if (isDev) console.log(`🏔️ Chunk ${chunk.id}: playerDist=${distance.toFixed(1)}, newLOD=${newLod}`)
+        if (isDev)
+          console.log(
+            `🏔️ Chunk ${chunk.id}: playerDist=${distance.toFixed(1)}, newLOD=${newLod}`,
+          )
         chunk.currentLod = newLod
       }
     })
@@ -268,7 +290,9 @@ export class TerrainManager {
     // Use actual bounds for coordinate conversion (matches heightmap generation)
     const bounds = this.config.bounds
     if (!bounds) {
-      console.warn('⚠️ No bounds available for height sampling, falling back to centered assumption')
+      console.warn(
+        '⚠️ No bounds available for height sampling, falling back to centered assumption',
+      )
       const worldSize = this.config.worldSize
       const halfSize = worldSize / 2
       const u = (worldX + halfSize) / worldSize
@@ -279,7 +303,7 @@ export class TerrainManager {
     // Convert world coordinates to UV using actual bounds (matches generation pipeline)
     const worldSizeX = bounds.max[0] - bounds.min[0]
     const worldSizeZ = bounds.max[2] - bounds.min[2]
-    
+
     const u = (worldX - bounds.min[0]) / worldSizeX
     const v = (worldZ - bounds.min[2]) / worldSizeZ
 
@@ -293,7 +317,7 @@ export class TerrainManager {
     if (!this.heightData) return 0
 
     const resolution = this.resolution
-    
+
     // Clamp to valid range
     const clampedU = Math.max(0, Math.min(1, u))
     const clampedV = Math.max(0, Math.min(1, v))
@@ -346,7 +370,9 @@ export class TerrainManager {
   }
 
   public getHeightDataCopy(): Float32Array {
-    return this.heightData ? new Float32Array(this.heightData) : new Float32Array(0)
+    return this.heightData
+      ? new Float32Array(this.heightData)
+      : new Float32Array(0)
   }
 
   public getBaseHeightData(): Float32Array {
@@ -367,7 +393,12 @@ export class TerrainManager {
     const nextHeightData = new Float32Array(this.baseHeightData)
     for (const [indexKey, height] of Object.entries(overrides)) {
       const index = Number(indexKey)
-      if (!Number.isInteger(index) || index < 0 || index >= nextHeightData.length) continue
+      if (
+        !Number.isInteger(index) ||
+        index < 0 ||
+        index >= nextHeightData.length
+      )
+        continue
       nextHeightData[index] = height
     }
 
@@ -378,8 +409,12 @@ export class TerrainManager {
     if (!this.config || !this.heightData) return null
 
     const bounds = this.config.bounds
-    const worldSizeX = bounds ? bounds.max[0] - bounds.min[0] : this.getWorldSizeX()
-    const worldSizeZ = bounds ? bounds.max[2] - bounds.min[2] : this.getWorldSizeZ()
+    const worldSizeX = bounds
+      ? bounds.max[0] - bounds.min[0]
+      : this.getWorldSizeX()
+    const worldSizeZ = bounds
+      ? bounds.max[2] - bounds.min[2]
+      : this.getWorldSizeZ()
     const originX = bounds ? bounds.min[0] : -this.getWorldSize() / 2
     const originZ = bounds ? bounds.min[2] : -this.getWorldSize() / 2
     const u = THREE.MathUtils.clamp((worldX - originX) / worldSizeX, 0, 1)
@@ -400,8 +435,12 @@ export class TerrainManager {
     if (!this.config) return null
 
     const bounds = this.config.bounds
-    const worldSizeX = bounds ? bounds.max[0] - bounds.min[0] : this.getWorldSizeX()
-    const worldSizeZ = bounds ? bounds.max[2] - bounds.min[2] : this.getWorldSizeZ()
+    const worldSizeX = bounds
+      ? bounds.max[0] - bounds.min[0]
+      : this.getWorldSizeX()
+    const worldSizeZ = bounds
+      ? bounds.max[2] - bounds.min[2]
+      : this.getWorldSizeZ()
     const originX = bounds ? bounds.min[0] : -this.getWorldSize() / 2
     const originZ = bounds ? bounds.min[2] : -this.getWorldSize() / 2
 
@@ -447,7 +486,10 @@ export class TerrainManager {
   /**
    * Get terrain bounds for accurate physics collider positioning
    */
-  public getBounds(): { min: [number, number, number], max: [number, number, number] } | null {
+  public getBounds(): {
+    min: [number, number, number]
+    max: [number, number, number]
+  } | null {
     return this.config?.bounds || null
   }
 
@@ -468,7 +510,7 @@ export class TerrainManager {
         lastGenerationTime: 0,
         memoryUsage: 0,
         resolution: '0x0',
-        sampleCount: 0
+        sampleCount: 0,
       }
     }
 
@@ -476,7 +518,7 @@ export class TerrainManager {
       lastGenerationTime: 0, // Could be tracked if needed
       memoryUsage: this.heightData.length * 4,
       resolution: `${this.resolution}x${this.resolution}`,
-      sampleCount: this.heightData.length
+      sampleCount: this.heightData.length,
     }
   }
 

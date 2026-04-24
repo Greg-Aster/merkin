@@ -10,11 +10,11 @@ import type { GitHubService, Post } from '../types'
 
 // Initialize event dispatcher
 const dispatch = createEventDispatcher<{
-  'auth-success': void
-  'auth-logout': void
+  'auth-success': undefined
+  'auth-logout': undefined
   'save-success': { post: Post; isDraft: boolean }
   'save-error': { error: string }
-  'rebuild-success': void
+  'rebuild-success': undefined
   'rebuild-error': { error: string }
 }>()
 

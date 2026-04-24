@@ -7,13 +7,8 @@ export interface Props {
   storeBaseUrl: string
 }
 
-const {
-  currentPage,
-  totalPages,
-  pageUrlPrev,
-  pageUrlNext,
-  storeBaseUrl
-} = Astro.props
+const { currentPage, totalPages, pageUrlPrev, pageUrlNext, storeBaseUrl } =
+  Astro.props
 
 // Generate page numbers for pagination
 const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1)

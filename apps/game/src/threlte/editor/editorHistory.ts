@@ -9,17 +9,19 @@ export interface CreateEditorHistoryOptions<TDocument> {
   clone: (document: TDocument | null) => TDocument | null
 }
 
-export function createEditorHistory<TDocument>(options: CreateEditorHistoryOptions<TDocument>) {
+export function createEditorHistory<TDocument>(
+  options: CreateEditorHistoryOptions<TDocument>,
+) {
   const undoStackStore = writable<TDocument[]>([])
   const redoStackStore = writable<TDocument[]>([])
-  const canUndoStore = derived(undoStackStore, ($undo) => $undo.length > 0)
-  const canRedoStore = derived(redoStackStore, ($redo) => $redo.length > 0)
+  const canUndoStore = derived(undoStackStore, $undo => $undo.length > 0)
+  const canRedoStore = derived(redoStackStore, $redo => $redo.length > 0)
 
   let transactionDepth = 0
 
   function pushUndoSnapshot(document: TDocument | null) {
     if (!document) return
-    undoStackStore.update((stack) => [...stack, options.clone(document)!])
+    undoStackStore.update(stack => [...stack, options.clone(document)!])
   }
 
   function clearRedoStack() {
@@ -67,7 +69,7 @@ export function createEditorHistory<TDocument>(options: CreateEditorHistoryOptio
 
     const previous = undoStack[undoStack.length - 1]
     undoStackStore.set(undoStack.slice(0, -1))
-    redoStackStore.update((stack) => [...stack, options.clone(current)!])
+    redoStackStore.update(stack => [...stack, options.clone(current)!])
 
     return {
       document: options.clone(previous)!,
@@ -86,7 +88,7 @@ export function createEditorHistory<TDocument>(options: CreateEditorHistoryOptio
 
     const next = redoStack[redoStack.length - 1]
     redoStackStore.set(redoStack.slice(0, -1))
-    undoStackStore.update((stack) => [...stack, options.clone(current)!])
+    undoStackStore.update(stack => [...stack, options.clone(current)!])
 
     return {
       document: options.clone(next)!,

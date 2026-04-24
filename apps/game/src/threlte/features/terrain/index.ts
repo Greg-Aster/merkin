@@ -1,6 +1,6 @@
 /**
  * Terrain Feature - Public API
- * 
+ *
  * Unified terrain system that consolidates:
  * - Visual chunk rendering with LOD
  * - Physics collision from heightmap
@@ -17,4 +17,9 @@ export { TerrainManager } from './TerrainManager'
 export { terrainStore, terrainStatsStore, terrainActions } from './terrainStore'
 
 // Types
-export type { TerrainConfig, TerrainChunk, TerrainState, TerrainStats } from './types'
+export type {
+  TerrainConfig,
+  TerrainChunk,
+  TerrainState,
+  TerrainStats,
+} from './types'

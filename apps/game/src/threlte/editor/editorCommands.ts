@@ -1,14 +1,14 @@
 import {
-  applyEditorNodeCommand,
   type ApplyEditorNodeCommandsResult,
   type EditorNodeCommand,
   type EditorNodeTransformPatch,
   type EditorSceneNodePatch,
+  applyEditorNodeCommand,
 } from './editorNodeCommands'
 import {
-  applyEditorSceneSettingsCommand,
   type ApplyEditorSceneSettingsCommandsResult,
   type EditorSceneSettingsCommand,
+  applyEditorSceneSettingsCommand,
 } from './editorSceneCommands'
 import type { EditorSceneDocument } from './editorTypes'
 
@@ -22,7 +22,7 @@ export type { EditorNodeTransformPatch, EditorSceneNodePatch }
 
 export function applyEditorSceneCommand(
   scene: EditorSceneDocument,
-  command: EditorSceneCommand
+  command: EditorSceneCommand,
 ): ApplyEditorSceneCommandsResult {
   switch (command.type) {
     case 'replace-settings':
@@ -38,7 +38,7 @@ export function applyEditorSceneCommand(
 
 export function applyEditorSceneCommands(
   scene: EditorSceneDocument,
-  commands: EditorSceneCommand[]
+  commands: EditorSceneCommand[],
 ): ApplyEditorSceneCommandsResult {
   let nextScene = scene
   let changed = false

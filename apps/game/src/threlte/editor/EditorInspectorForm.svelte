@@ -1,143 +1,217 @@
 <script lang="ts">
-  import EditorAssetPreview from './EditorAssetPreview.svelte'
-  import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
+import EditorAssetPreview from './EditorAssetPreview.svelte'
+import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
 
-  type TextureField =
-    | 'mapUrl'
-    | 'normalMapUrl'
-    | 'roughnessMapUrl'
-    | 'metalnessMapUrl'
-    | 'emissiveMapUrl'
-    | 'alphaMapUrl'
+type TextureField =
+  | 'mapUrl'
+  | 'normalMapUrl'
+  | 'roughnessMapUrl'
+  | 'metalnessMapUrl'
+  | 'emissiveMapUrl'
+  | 'alphaMapUrl'
 
-  type MaterialNumericField =
-    | 'emissiveIntensity'
-    | 'metalness'
-    | 'roughness'
-    | 'opacity'
-    | 'envMapIntensity'
-    | 'transmission'
-    | 'ior'
-    | 'clearcoat'
-    | 'clearcoatRoughness'
-    | 'thickness'
-    | 'reflectivity'
+type MaterialNumericField =
+  | 'emissiveIntensity'
+  | 'metalness'
+  | 'roughness'
+  | 'opacity'
+  | 'envMapIntensity'
+  | 'transmission'
+  | 'ior'
+  | 'clearcoat'
+  | 'clearcoatRoughness'
+  | 'thickness'
+  | 'reflectivity'
 
-  type MaterialBooleanField = 'transparent' | 'wireframe' | 'doubleSided' | 'flatShading'
-  type PhysicsNumericField = 'gravityScale' | 'linearDamping' | 'angularDamping'
-  type PhysicsBooleanField = 'canSleep' | 'ccd' | 'lockRotations' | 'lockTranslations'
-  type CollisionNumericField = 'friction' | 'restitution'
-  type CollisionBooleanField = 'sensor'
-  type LightNumericField = 'intensity' | 'distance' | 'decay'
-  type GameplayField = 'title' | 'author' | 'location' | 'excerpt' | 'body' | 'targetLevelId' | 'markerColor' | 'audioTrack' | 'fogColor' | 'mistColor'
-  type GameplayNumericField =
-    | 'markerSize'
-    | 'audioVolume'
-    | 'regionFalloff'
-    | 'fogDensity'
-    | 'mistOpacity'
-    | 'mistLayers'
-    | 'mistSpacing'
-    | 'mistScale'
-    | 'mistDriftSpeed'
-    | 'wanderRadius'
-    | 'wanderSpeed'
-    | 'hoverHeight'
-    | 'bobAmplitude'
-    | 'bobSpeed'
-    | 'twinkleSpeed'
-    | 'lightIntensity'
-    | 'lightDistance'
-    | 'lightDecay'
-    | 'spriteIntensity'
+type MaterialBooleanField =
+  | 'transparent'
+  | 'wireframe'
+  | 'doubleSided'
+  | 'flatShading'
+type PhysicsNumericField = 'gravityScale' | 'linearDamping' | 'angularDamping'
+type PhysicsBooleanField =
+  | 'canSleep'
+  | 'ccd'
+  | 'lockRotations'
+  | 'lockTranslations'
+type CollisionNumericField = 'friction' | 'restitution'
+type CollisionBooleanField = 'sensor'
+type LightNumericField = 'intensity' | 'distance' | 'decay'
+type GameplayField =
+  | 'title'
+  | 'author'
+  | 'location'
+  | 'excerpt'
+  | 'body'
+  | 'targetLevelId'
+  | 'markerColor'
+  | 'audioTrack'
+  | 'fogColor'
+  | 'mistColor'
+type GameplayNumericField =
+  | 'markerSize'
+  | 'audioVolume'
+  | 'regionFalloff'
+  | 'fogDensity'
+  | 'mistOpacity'
+  | 'mistLayers'
+  | 'mistSpacing'
+  | 'mistScale'
+  | 'mistDriftSpeed'
+  | 'wanderRadius'
+  | 'wanderSpeed'
+  | 'hoverHeight'
+  | 'bobAmplitude'
+  | 'bobSpeed'
+  | 'twinkleSpeed'
+  | 'lightIntensity'
+  | 'lightDistance'
+  | 'lightDecay'
+  | 'spriteIntensity'
+  | 'lightBurstBoost'
 
-  type AssetBrowserItem = {
-    name: string
-    path: string
-    isDirectory: boolean
-  }
+type AssetBrowserItem = {
+  name: string
+  path: string
+  isDirectory: boolean
+}
 
-  type AmbientAudioTrack = {
-    label: string
-    src: string
-  }
+type AmbientAudioTrack = {
+  label: string
+  src: string
+}
 
-  export let selectedNode: EditorSceneNode | null = null
-  export let selectedNodes: EditorSceneNode[] = []
-  export let parentCandidates: EditorSceneNode[] = []
-  export let multiParentCandidates: EditorSceneNode[] = []
-  export let selectedNodeMaterial: EditorMaterialData = {}
-  export let selectedNodeColliderSize: [number, number, number] = [1, 1, 1]
-  export let styleDescriptor = ''
+export let selectedNode: EditorSceneNode | null = null
+export let selectedNodes: EditorSceneNode[] = []
+export let parentCandidates: EditorSceneNode[] = []
+export let multiParentCandidates: EditorSceneNode[] = []
+export let selectedNodeMaterial: EditorMaterialData = {}
+export let selectedNodeColliderSize: [number, number, number] = [1, 1, 1]
+export let styleDescriptor = ''
 
-  export let assetPickerTargetNodeId = ''
-  export let assetBrowserPath = ''
-  export let assetBrowserItems: AssetBrowserItem[] = []
-  export let assetBrowserFilter = ''
-  export let assetBrowserError = ''
-  export let assetBrowserLoading = false
-  export let selectedLibraryItemPath = ''
+export let assetPickerTargetNodeId = ''
+export let assetBrowserPath = ''
+export let assetBrowserItems: AssetBrowserItem[] = []
+export let assetBrowserFilter = ''
+export let assetBrowserError = ''
+export let assetBrowserLoading = false
+export let selectedLibraryItemPath = ''
 
-  export let activeTextureMaterialField: TextureField | null = null
-  export let textureBrowserPath = ''
-  export let textureBrowserItems: AssetBrowserItem[] = []
-  export let textureBrowserError = ''
-  export let textureBrowserLoading = false
+export let activeTextureMaterialField: TextureField | null = null
+export let textureBrowserPath = ''
+export let textureBrowserItems: AssetBrowserItem[] = []
+export let textureBrowserError = ''
+export let textureBrowserLoading = false
 
-  export let ambientAudioLibrary: AmbientAudioTrack[] = []
+export let ambientAudioLibrary: AmbientAudioTrack[] = []
 
-  export let onNameChange: (value: string) => void = () => {}
-  export let onVisibleChange: (value: boolean) => void = () => {}
-  export let onParentChange: (value: string) => void = () => {}
-  export let onPrefabVariantChange: (value: string) => void = () => {}
-  export let onAssetUrlChange: (value: string) => void = () => {}
-  export let onOpenGeneratedAssetPicker: () => void = () => {}
-  export let onOpenImportedAssetPicker: () => void = () => {}
-  export let onAssetLibraryRootSelect: (path: string) => void = () => {}
-  export let onAssetBrowserUp: () => void = () => {}
-  export let onAssetBrowserRefresh: () => void = () => {}
-  export let onAssetBrowserFilterChange: (value: string) => void = () => {}
-  export let onAssetLibraryItemSelect: (item: AssetBrowserItem) => void = () => {}
-  export let onApplySelectedLibraryAsset: () => void = () => {}
-  export let onCancelAssetPicker: () => void = () => {}
-  export let onStyleDescriptorChange: (value: string) => void = () => {}
-  export let onPrimitiveGeometryChange: (value: string) => void = () => {}
-  export let onPrimitiveArgChange: (index: number, value: string) => void = () => {}
-  export let onCollisionEnabledChange: (value: boolean) => void = () => {}
-  export let onPhysicsBodyTypeChange: (value: string) => void = () => {}
-  export let onPhysicsNumericChange: (field: PhysicsNumericField, value: string) => void = () => {}
-  export let onPhysicsBooleanChange: (field: PhysicsBooleanField, value: boolean) => void = () => {}
-  export let onCollisionSizeChange: (index: number, value: string) => void = () => {}
-  export let onCollisionNumericChange: (field: CollisionNumericField, value: string) => void = () => {}
-  export let onCollisionBooleanChange: (field: CollisionBooleanField, value: boolean) => void = () => {}
-  export let onRecalculateCollision: () => void = () => {}
-  export let onMaterialColorChange: (field: 'color' | 'emissive', value: string) => void = () => {}
-  export let onMaterialNumericChange: (field: MaterialNumericField, value: string) => void = () => {}
-  export let onMaterialBooleanChange: (field: MaterialBooleanField, value: boolean) => void = () => {}
-  export let onMaterialTextureChange: (field: TextureField, value: string) => void = () => {}
-  export let onOpenTexturePicker: (field: TextureField) => void = () => {}
-  export let onTextureBrowserUp: () => void = () => {}
-  export let onTextureBrowserRefresh: () => void = () => {}
-  export let onTextureBrowserOpenDirectory: (path: string) => void = () => {}
-  export let onTextureBrowserPick: (item: AssetBrowserItem) => void = () => {}
-  export let onResetMaterialOverrides: () => void = () => {}
-  export let onLightFieldChange: (field: 'color', value: string) => void = () => {}
-  export let onLightNumericChange: (field: LightNumericField, value: string) => void = () => {}
-  export let onGameplayFieldChange: (field: GameplayField, value: string) => void = () => {}
-  export let onGameplayBooleanChange: (field: 'wanderEnabled', value: boolean) => void = () => {}
-  export let onGameplayNumericChange: (field: GameplayNumericField, value: string) => void = () => {}
-  export let onTransformChange: (field: 'position' | 'rotation' | 'scale', index: number, value: string) => void = () => {}
-  export let onDuplicate: () => void = () => {}
-  export let onDelete: () => void = () => {}
+export let onNameChange: (value: string) => void = () => {}
+export let onVisibleChange: (value: boolean) => void = () => {}
+export let onParentChange: (value: string) => void = () => {}
+export let onPrefabVariantChange: (value: string) => void = () => {}
+export let onAssetUrlChange: (value: string) => void = () => {}
+export let onOpenGeneratedAssetPicker: () => void = () => {}
+export let onOpenImportedAssetPicker: () => void = () => {}
+export let onAssetLibraryRootSelect: (path: string) => void = () => {}
+export let onAssetBrowserUp: () => void = () => {}
+export let onAssetBrowserRefresh: () => void = () => {}
+export let onAssetBrowserFilterChange: (value: string) => void = () => {}
+export let onAssetLibraryItemSelect: (item: AssetBrowserItem) => void = () => {}
+export let onApplySelectedLibraryAsset: () => void = () => {}
+export let onCancelAssetPicker: () => void = () => {}
+export let onStyleDescriptorChange: (value: string) => void = () => {}
+export let onPrimitiveGeometryChange: (value: string) => void = () => {}
+export let onPrimitiveArgChange: (index: number, value: string) => void =
+  () => {}
+export let onCollisionEnabledChange: (value: boolean) => void = () => {}
+export let onPhysicsBodyTypeChange: (value: string) => void = () => {}
+export let onPhysicsNumericChange: (
+  field: PhysicsNumericField,
+  value: string,
+) => void = () => {}
+export let onPhysicsBooleanChange: (
+  field: PhysicsBooleanField,
+  value: boolean,
+) => void = () => {}
+export let onCollisionSizeChange: (index: number, value: string) => void =
+  () => {}
+export let onCollisionNumericChange: (
+  field: CollisionNumericField,
+  value: string,
+) => void = () => {}
+export let onCollisionBooleanChange: (
+  field: CollisionBooleanField,
+  value: boolean,
+) => void = () => {}
+export let onRecalculateCollision: () => void = () => {}
+export let onMaterialColorChange: (
+  field: 'color' | 'emissive',
+  value: string,
+) => void = () => {}
+export let onMaterialNumericChange: (
+  field: MaterialNumericField,
+  value: string,
+) => void = () => {}
+export let onMaterialBooleanChange: (
+  field: MaterialBooleanField,
+  value: boolean,
+) => void = () => {}
+export let onMaterialTextureChange: (
+  field: TextureField,
+  value: string,
+) => void = () => {}
+export let onOpenTexturePicker: (field: TextureField) => void = () => {}
+export let onTextureBrowserUp: () => void = () => {}
+export let onTextureBrowserRefresh: () => void = () => {}
+export let onTextureBrowserOpenDirectory: (path: string) => void = () => {}
+export let onTextureBrowserPick: (item: AssetBrowserItem) => void = () => {}
+export let onResetMaterialOverrides: () => void = () => {}
+export let onLightFieldChange: (field: 'color', value: string) => void =
+  () => {}
+export let onLightNumericChange: (
+  field: LightNumericField,
+  value: string,
+) => void = () => {}
+export let onGameplayFieldChange: (
+  field: GameplayField,
+  value: string,
+) => void = () => {}
+export let onGameplayBooleanChange: (
+  field: 'wanderEnabled',
+  value: boolean,
+) => void = () => {}
+export let onGameplayNumericChange: (
+  field: GameplayNumericField,
+  value: string,
+) => void = () => {}
+export let onTransformChange: (
+  field: 'position' | 'rotation' | 'scale',
+  index: number,
+  value: string,
+) => void = () => {}
+export let onDuplicate: () => void = () => {}
+export let onDelete: () => void = () => {}
 
-  const generatedRoot = 'apps/megameal/public/generated/hunyuan3d'
-  const importedRoot = 'apps/megameal/public/models'
-  const transformFields: Array<'position' | 'rotation' | 'scale'> = ['position', 'rotation', 'scale']
+const generatedRoot = 'apps/megameal/public/generated/hunyuan3d'
+const importedRoot = 'apps/megameal/public/models'
+const transformFields: Array<'position' | 'rotation' | 'scale'> = [
+  'position',
+  'rotation',
+  'scale',
+]
 
-  $: hasSingleSelection = !!selectedNode && selectedNodes.length <= 1
-  $: hasMultiSelection = selectedNodes.length > 1
-  $: hasGeometryNode = !!(selectedNode?.asset || selectedNode?.prefab || selectedNode?.primitive)
-  $: filteredAssetBrowserItems = assetBrowserItems.filter((item) => !assetBrowserFilter.trim() || item.name.toLowerCase().includes(assetBrowserFilter.trim().toLowerCase()))
+$: hasSingleSelection = !!selectedNode && selectedNodes.length <= 1
+$: hasMultiSelection = selectedNodes.length > 1
+$: hasGeometryNode = !!(
+  selectedNode?.asset ||
+  selectedNode?.prefab ||
+  selectedNode?.primitive
+)
+$: filteredAssetBrowserItems = assetBrowserItems.filter(
+  item =>
+    !assetBrowserFilter.trim() ||
+    item.name.toLowerCase().includes(assetBrowserFilter.trim().toLowerCase()),
+)
 </script>
 
 {#if hasSingleSelection && selectedNode}
@@ -427,11 +501,12 @@
         <div class="tuple-group"><div class="tuple-label">Glow Distance</div><input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.lightDistance ?? 4.6} on:change={(e) => onGameplayNumericChange('lightDistance', (e.currentTarget as HTMLInputElement).value)} /></div>
         <div class="tuple-group"><div class="tuple-label">Glow Decay</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.lightDecay ?? 1.25} on:change={(e) => onGameplayNumericChange('lightDecay', (e.currentTarget as HTMLInputElement).value)} /></div>
         <div class="tuple-group"><div class="tuple-label">Sprite Intensity</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.spriteIntensity ?? 1.15} on:change={(e) => onGameplayNumericChange('spriteIntensity', (e.currentTarget as HTMLInputElement).value)} /></div>
+        <div class="tuple-group"><div class="tuple-label">Burst Glow Boost</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.lightBurstBoost ?? 1.25} on:change={(e) => onGameplayNumericChange('lightBurstBoost', (e.currentTarget as HTMLInputElement).value)} /></div>
         <div class="tuple-group"><div class="tuple-label">Hover Height</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.hoverHeight ?? 0.28} on:change={(e) => onGameplayNumericChange('hoverHeight', (e.currentTarget as HTMLInputElement).value)} /></div>
         <div class="tuple-group"><div class="tuple-label">Bob Amplitude</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.bobAmplitude ?? 0.08} on:change={(e) => onGameplayNumericChange('bobAmplitude', (e.currentTarget as HTMLInputElement).value)} /></div>
         <div class="tuple-group"><div class="tuple-label">Bob Speed</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.bobSpeed ?? 0.55} on:change={(e) => onGameplayNumericChange('bobSpeed', (e.currentTarget as HTMLInputElement).value)} /></div>
         <div class="tuple-group"><div class="tuple-label">Twinkle Speed</div><input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.twinkleSpeed ?? 0.9} on:change={(e) => onGameplayNumericChange('twinkleSpeed', (e.currentTarget as HTMLInputElement).value)} /></div>
-        <div class="save-message">Adjust luminance with the glow controls and motion with wander/hover/bob/twinkle controls.</div>
+        <div class="save-message">Adjust luminance with the glow controls, use burst glow boost for the player light-release reaction, and tune motion with wander/hover/bob/twinkle controls.</div>
       {:else if selectedNode.gameplay.type === 'note'}
         <div class="tuple-group"><div class="tuple-label">Title</div><input class="text-input" value={selectedNode.gameplay.title ?? ''} on:input={(e) => onGameplayFieldChange('title', (e.currentTarget as HTMLInputElement).value)} /></div>
         <div class="tuple-group"><div class="tuple-label">Author</div><input class="text-input" value={selectedNode.gameplay.author ?? ''} on:input={(e) => onGameplayFieldChange('author', (e.currentTarget as HTMLInputElement).value)} /></div>

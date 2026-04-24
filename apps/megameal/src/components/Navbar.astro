@@ -1,35 +1,35 @@
 ---
-import { Icon } from "astro-icon/components";
-import { navBarConfig, siteConfig } from "../config/config";
-import { LinkPresets } from "../constants/link-presets";
-import { LinkPreset, type NavBarLink } from "../types/config";
-import { url } from "../utils/url-utils";
-import LightDarkSwitch from "./LightDarkSwitch.svelte";
-import Search from "./Search.svelte";
-import SiteAudioControl from "./client/SiteAudioControl.svelte";
-import StoreCartButton from "./store/StoreCartButton.svelte";
-import AdminNavbar from "./svelte/admin/AdminNavbar.svelte";
-import DisplaySettings from "./widget/DisplaySettings.svelte";
-import NavMenuPanel from "./widget/NavMenuPanel.astro";
+import { Icon } from 'astro-icon/components'
+import { navBarConfig, siteConfig } from '../config/config'
+import { LinkPresets } from '../constants/link-presets'
+import { LinkPreset, type NavBarLink } from '../types/config'
+import { url } from '../utils/url-utils'
+import LightDarkSwitch from './LightDarkSwitch.svelte'
+import Search from './Search.svelte'
+import SiteAudioControl from './client/SiteAudioControl.svelte'
+import StoreCartButton from './store/StoreCartButton.svelte'
+import AdminNavbar from './svelte/admin/AdminNavbar.svelte'
+import DisplaySettings from './widget/DisplaySettings.svelte'
+import NavMenuPanel from './widget/NavMenuPanel.astro'
 
-const className = Astro.props.class;
+const className = Astro.props.class
 
 const links: NavBarLink[] = navBarConfig.links.map(
-	(item: NavBarLink | LinkPreset): NavBarLink => {
-		if (typeof item === "number") {
-			return LinkPresets[item];
-		}
-		return item;
-	},
-);
+  (item: NavBarLink | LinkPreset): NavBarLink => {
+    if (typeof item === 'number') {
+      return LinkPresets[item]
+    }
+    return item
+  },
+)
 
 const homeLink =
-	links.find((link) => !link.external && link.url === "/") ??
-	LinkPresets[LinkPreset.Home];
-const navigationLinks = links.filter((link) => link !== homeLink);
-// Check authentication status from cookies
-const isAuthenticated =
-	Astro.cookies.get("isAuthenticated")?.boolean() || false;
+  links.find(link => !link.external && link.url === '/') ??
+  LinkPresets[LinkPreset.Home]
+const navigationLinks = links.filter(link => link !== homeLink)
+// Prerendered pages cannot read per-request auth state during static builds.
+// Admin auth is already derived from localStorage on the client.
+const isAuthenticated = false
 ---
 
 <div id="navbar" class="z-50 onload-animation">
@@ -39,45 +39,49 @@ const isAuthenticated =
         "navbar-shell card-base !overflow-visible max-w-[var(--page-width)] h-[3rem] md:h-[4.5rem] !rounded-t-none mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-1.5 md:gap-3 px-2 md:px-4"]}>
         
         <div class="flex items-center justify-start min-w-0">
-            <!-- Admin controls only need to appear for authenticated sessions. -->
-            {isAuthenticated && <AdminNavbar client:load siteTitle={siteConfig.title} />}
-            {!isAuthenticated && (
-                <a
-                  aria-label={`${siteConfig.title} home`}
-                  href={homeLink.external ? homeLink.url : url(homeLink.url)}
-                  target={homeLink.external ? "_blank" : null}
-                  class="group flex items-center overflow-visible rounded-xl px-1.5 md:px-2 py-1 md:py-1.5 transition-all duration-200 hover:bg-white/6 active:scale-[0.98]"
+            <div id="admin-navbar-shell" class="hidden">
+                <AdminNavbar client:load siteTitle={siteConfig.title} />
+            </div>
+            <a
+              id="public-home-link"
+              aria-label={`${siteConfig.title} home`}
+              href={homeLink.external ? homeLink.url : url(homeLink.url)}
+              target={homeLink.external ? "_blank" : null}
+              data-sfx-hover="hover-emphasis"
+              data-sfx-click="sweep"
+              class="group flex items-center overflow-visible rounded-xl px-1.5 md:px-2 py-1 md:py-1.5 transition-all duration-200 hover:bg-white/6 active:scale-[0.98]"
+            >
+                <span
+                  class="megameal-mark hidden sm:block select-none rounded-[1rem] px-3.5 py-2.5 transition-all duration-300"
                 >
-                    <span
-                      class="megameal-mark hidden sm:block select-none rounded-[1rem] px-3.5 py-2.5 transition-all duration-300"
-                    >
-                        <span class="megameal-mark__inner block leading-[0.9]" style="transform: skewX(-12deg);">
-                            <span
-                              class="megameal-mark__mega block text-[0.82rem] font-black uppercase tracking-[0.26em] transition-all duration-300"
-                            >
-                              MEGA
-                            </span>
-                            <span
-                              class="megameal-mark__meal block pl-3 text-[1rem] font-black uppercase tracking-[0.18em] transition-all duration-300"
-                            >
-                              MEAL
-                            </span>
+                    <span class="megameal-mark__inner block leading-[0.9]" style="transform: skewX(-12deg);">
+                        <span
+                          class="megameal-mark__mega block text-[0.82rem] font-black uppercase tracking-[0.26em] transition-all duration-300"
+                        >
+                          MEGA
+                        </span>
+                        <span
+                          class="megameal-mark__meal block pl-3 text-[1rem] font-black uppercase tracking-[0.18em] transition-all duration-300"
+                        >
+                          MEAL
                         </span>
                     </span>
-                    <span class="megameal-mark-mobile sm:hidden select-none rounded-[0.75rem] px-1.5 py-1.5">
-                        <span class="megameal-mark-mobile__text">MEGAMEAL</span>
-                    </span>
-                </a>
-            )}
+                </span>
+                <span class="megameal-mark-mobile sm:hidden select-none rounded-[0.75rem] px-1.5 py-1.5">
+                    <span class="megameal-mark-mobile__text">MEGAMEAL</span>
+                </span>
+            </a>
         </div>
         
-        <div class:list={["flex items-center justify-center gap-2 md:gap-4 min-w-0", {"hidden": isAuthenticated}]}>
+        <div id="public-nav-shell" class="flex items-center justify-center gap-2 md:gap-4 min-w-0">
             <!-- Regular Navigation Links (hidden when in admin mode) -->
             <div id="standard-nav" class="hidden md:flex items-center">
             {navigationLinks.map((l) => {
                 return l.dropdown ? (
                     <div class="relative group">
                         <a aria-label={l.name} href={l.external ? l.url : url(l.url)} target={l.external ? "_blank" : null}
+                          data-sfx-hover="hover-soft"
+                          data-sfx-click="sweep"
                           class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95"
                         >
                             <div class="flex items-center">
@@ -90,6 +94,8 @@ const isAuthenticated =
                             <div class="py-1 rounded-lg overflow-hidden">
                                 {l.dropdown.map((item) => (
                                     <a href={item.external ? item.url : url(item.url)} target={item.external ? "_blank" : null}
+                                       data-sfx-hover="hover-soft"
+                                       data-sfx-click="soft"
                                        class="block px-4 py-2 text-black/75 dark:text-white/75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-[var(--primary)] transition-colors duration-200"
                                     >
                                         <div class="flex items-center justify-between">
@@ -103,6 +109,8 @@ const isAuthenticated =
                     </div>
                 ) : (
                     <a aria-label={l.name} href={l.external ? l.url : url(l.url)} target={l.external ? "_blank" : null}
+                      data-sfx-hover="hover-soft"
+                      data-sfx-click="sweep"
                       class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95"
                     >
                         <div class="flex items-center">
@@ -123,7 +131,7 @@ const isAuthenticated =
             </div>
             <SiteAudioControl client:idle />
             {!siteConfig.themeColor.fixed && (
-                    <button aria-label="Display Settings" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 hidden md:inline-flex" id="display-settings-switch">
+                    <button aria-label="Display Settings" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 hidden md:inline-flex" id="display-settings-switch">
                         <Icon name="material-symbols:palette-outline" class="text-[1.25rem]"></Icon>
                     </button>
             )}
@@ -140,19 +148,19 @@ const isAuthenticated =
             </button> -->
                         
             <!-- ⭐ RESTORED: Mobile Hamburger Menu Button -->
-            <button aria-label="Menu" name="Nav Menu" class="mobile-header-button btn-plain scale-animation rounded-lg w-9 h-9 md:w-11 md:h-11 active:scale-90 md:!hidden" id="nav-menu-switch">
+            <button aria-label="Menu" name="Nav Menu" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="mobile-header-button btn-plain scale-animation rounded-lg w-9 h-9 md:w-11 md:h-11 active:scale-90 md:!hidden" id="nav-menu-switch">
                 <Icon name="material-symbols:menu-rounded" class="text-[1.25rem]"></Icon>
             </button>
         </div>
         
         <NavMenuPanel links={links} isAuthenticated={isAuthenticated}>
             <div class="mobile-menu-tools md:hidden">
-                <button type="button" id="mobile-search-action" class="mobile-menu-tools__button">
+                <button type="button" id="mobile-search-action" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="mobile-menu-tools__button">
                     <span>Search</span>
                     <Icon name="material-symbols:search-rounded" class="text-[1.1rem] text-[var(--primary)]" />
                 </button>
                 {!siteConfig.themeLock && (
-                    <button type="button" id="mobile-theme-action" class="mobile-menu-tools__button">
+                    <button type="button" id="mobile-theme-action" data-sfx-hover="hover-soft" data-sfx-click="soft" class="mobile-menu-tools__button">
                         <span id="mobile-theme-action-label">Theme</span>
                         <Icon name="material-symbols:dark-mode-outline-rounded" class="text-[1.1rem] text-[var(--primary)]" />
                     </button>
@@ -246,6 +254,34 @@ const isAuthenticated =
                 switchTheme();
                 updateMobileThemeLabel();
             });
+        }
+
+        const hasValidAuth = () => {
+            const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+            const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0');
+            if (!isAuthenticated || !expiresAt || Date.now() >= expiresAt) {
+                localStorage.removeItem('isAuthenticated');
+                localStorage.removeItem('authExpiresAt');
+                return false;
+            }
+            return true;
+        };
+
+        const isAuthenticated = hasValidAuth();
+        const publicHomeLink = document.getElementById('public-home-link');
+        const adminNavbarShell = document.getElementById('admin-navbar-shell');
+        const publicNavShell = document.getElementById('public-nav-shell');
+
+        if (publicHomeLink) {
+            publicHomeLink.style.display = isAuthenticated ? 'none' : '';
+        }
+
+        if (adminNavbarShell) {
+            adminNavbarShell.style.display = isAuthenticated ? 'flex' : 'none';
+        }
+
+        if (publicNavShell) {
+            publicNavShell.style.display = isAuthenticated ? 'none' : '';
         }
 
         updateMobileThemeLabel();

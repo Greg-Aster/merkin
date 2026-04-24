@@ -1,63 +1,67 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { hostStore, initializeHost, registerRoom } from '../index';
-  import LogTerminal from './LogTerminal.svelte';
-  import { setInputFocus } from '../../../stores/uiStore';
-  import { playerNameStore } from '../index';
+import { onMount } from 'svelte'
+import { setInputFocus } from '../../../stores/uiStore'
+import { hostStore, initializeHost, registerRoom } from '../index'
+import { playerNameStore } from '../index'
+import LogTerminal from './LogTerminal.svelte'
 
-  // Add this line to define isRegistered
-  $: isRegistered = $hostStore.isRoomRegistered;
+// Add this line to define isRegistered
+$: isRegistered = $hostStore.isRoomRegistered
 
-  let roomNameInput = '';
-  let copyButtonText = '📋 Copy Join Link';
+let roomNameInput = ''
+let copyButtonText = '📋 Copy Join Link'
 
-  // When the component loads, start the host service
-  onMount(() => {
-    initializeHost();
-  });
+// When the component loads, start the host service
+onMount(() => {
+  initializeHost()
+})
 
-  // Sanitization function to ensure room names are clean
-  function sanitizeRoomName(name: string): string {
-    return name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+// Sanitization function to ensure room names are clean
+function sanitizeRoomName(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+}
+
+// Called when the user clicks the "Register Room" button
+async function handleRegisterRoom() {
+  const saneName = sanitizeRoomName(roomNameInput)
+  if (saneName.length < 3 || !$hostStore.hostId) return
+
+  const success = await registerRoom(saneName, $hostStore.hostId)
+  if (success) {
+    hostStore.setRoomName(saneName)
+    hostStore.setRoomRegistered(true)
   }
+}
 
-  // Called when the user clicks the "Register Room" button
-  async function handleRegisterRoom() {
-    const saneName = sanitizeRoomName(roomNameInput);
-    if (saneName.length < 3 || !$hostStore.hostId) return;
+// Generates the shareable URL
+function getJoinUrl(): string {
+  if (!$hostStore.isRoomRegistered || !$hostStore.roomName) return ''
 
-    const success = await registerRoom(saneName, $hostStore.hostId);
-    if (success) {
-      hostStore.setRoomName(saneName);
-      hostStore.setRoomRegistered(true);
-    }
+  const basePath =
+    import.meta.env.BASE_URL === '/'
+      ? '/'
+      : `/${import.meta.env.BASE_URL.replace(/^\/+|\/+$/g, '')}/`
+
+  return `${window.location.origin}${basePath}?room=${$hostStore.roomName}`
+}
+
+// Copies the URL to the clipboard
+async function copyJoinLink() {
+  const url = getJoinUrl()
+  if (!url) return
+  try {
+    await navigator.clipboard.writeText(url)
+    copyButtonText = '✓ Copied!'
+    setTimeout(() => (copyButtonText = '📋 Copy Join Link'), 2000)
+  } catch (err) {
+    copyButtonText = '❌ Copy Failed'
+    setTimeout(() => (copyButtonText = '📋 Copy Join Link'), 2000)
   }
-
-  // Generates the shareable URL
-  function getJoinUrl(): string {
-    if (!$hostStore.isRoomRegistered || !$hostStore.roomName) return '';
-
-    const basePath =
-      import.meta.env.BASE_URL === '/'
-        ? '/'
-        : `/${import.meta.env.BASE_URL.replace(/^\/+|\/+$/g, '')}/`;
-
-    return `${window.location.origin}${basePath}?room=${$hostStore.roomName}`;
-  }
-
-  // Copies the URL to the clipboard
-  async function copyJoinLink() {
-    const url = getJoinUrl();
-    if (!url) return;
-    try {
-      await navigator.clipboard.writeText(url);
-      copyButtonText = '✓ Copied!';
-      setTimeout(() => copyButtonText = '📋 Copy Join Link', 2000);
-    } catch (err) {
-      copyButtonText = '❌ Copy Failed' ;
-      setTimeout(() => copyButtonText = '📋 Copy Join Link', 2000);
-    }
-  }
+}
 </script>
 
 <div class="host-panel">

@@ -381,7 +381,8 @@ const productHref = `/store/${productSlug}/`
       {/* CTA: Add to Cart */}
       {canAddToCart && (
         <button
-          data-sfx-click="select"
+          data-sfx-hover="hover-emphasis"
+          data-sfx-click="cart-add"
           data-add-to-cart
           data-product-id={product.id}
           data-product-name={name}
@@ -400,7 +401,8 @@ const productHref = `/store/${productSlug}/`
           href={stripePaymentLink}
           target="_blank"
           rel="noopener noreferrer"
-          data-sfx-click="select"
+          data-sfx-hover="hover-emphasis"
+          data-sfx-click="confirm"
           class="block w-full text-center btn-primary text-white font-semibold py-3 px-4 rounded-[var(--radius-medium)] transition-all duration-200 ease-in-out hover:bg-[var(--primary-hover)] active:scale-95 focus:outline-none"
         >
           Buy Now
