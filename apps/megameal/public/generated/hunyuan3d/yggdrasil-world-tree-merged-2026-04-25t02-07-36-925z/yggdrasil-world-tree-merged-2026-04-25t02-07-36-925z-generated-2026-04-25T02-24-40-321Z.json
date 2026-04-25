@@ -1,0 +1,14 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-world-tree/yggdrasil-world-tree-merged-2026-04-25T02-07-36-925Z.glb",
+  "sourceName": "Yggdrasil World Tree Merged",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/yggdrasil-world-tree-merged-2026-04-25T02-19-29-754Z/reference/yggdrasil-world-tree-merged-reference-2026-04-25T02-21-26-339Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1777083686466-lxm8s4",
+  "prompt": "object: Yggdrasil World Tree. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-25T02:24:42.260Z"
+}

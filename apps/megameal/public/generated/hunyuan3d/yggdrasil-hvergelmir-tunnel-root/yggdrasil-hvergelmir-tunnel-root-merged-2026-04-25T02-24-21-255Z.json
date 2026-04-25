@@ -1,0 +1,16 @@
+{
+  "id": "yggdrasil-hvergelmir-tunnel-root-merged-2026-04-25T02-24-21-255Z",
+  "label": "Yggdrasil Hvergelmir Tunnel Root Merged",
+  "descriptor": "merged Hvergelmir lower tunnel root beam cluster forming one tangled passage structure",
+  "sourceScene": "yggdrasil",
+  "mergedNodeIds": [
+    "yggdrasil-hvergelmir-tunnel-root-1",
+    "yggdrasil-hvergelmir-tunnel-root-2",
+    "yggdrasil-hvergelmir-tunnel-root-3"
+  ],
+  "nodeCount": 3,
+  "createdAt": "2026-04-25T02:24:21.256Z",
+  "assetUrl": "/generated/hunyuan3d/yggdrasil-hvergelmir-tunnel-root/yggdrasil-hvergelmir-tunnel-root-merged-2026-04-25T02-24-21-255Z.glb",
+  "source": "scene-direct-merge",
+  "collisionNote": "Visual merge only. Source tunnel root nodes had no collision."
+}

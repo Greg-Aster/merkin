@@ -1,0 +1,20 @@
+{
+  "id": "yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z",
+  "label": "Yggdrasil Bifrost Ribbon Merged",
+  "descriptor": "merged luminous Bifrost rainbow runway ribbons embedded in the approach path",
+  "sourceScene": "yggdrasil",
+  "mergedNodeIds": [
+    "yggdrasil-bifrost-ribbon-1",
+    "yggdrasil-bifrost-ribbon-2",
+    "yggdrasil-bifrost-ribbon-3",
+    "yggdrasil-bifrost-ribbon-4",
+    "yggdrasil-bifrost-ribbon-5",
+    "yggdrasil-bifrost-ribbon-6",
+    "yggdrasil-bifrost-ribbon-7"
+  ],
+  "nodeCount": 7,
+  "createdAt": "2026-04-25T02:17:02.007Z",
+  "assetUrl": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+  "source": "scene-direct-merge",
+  "collisionNote": "Visual merge only. Source ribbon nodes had no collision."
+}
