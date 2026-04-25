@@ -1,0 +1,32 @@
+{
+  "id": "yggdrasil-world-tree-merged-2026-04-25T02-07-36-925Z",
+  "label": "Yggdrasil World Tree Merged",
+  "descriptor": "merged world tree trunk, branches, and canopy mass above ground",
+  "sourceScene": "yggdrasil",
+  "mergedNodeIds": [
+    "yggdrasil-trunk-lower",
+    "yggdrasil-trunk-mid",
+    "yggdrasil-trunk-upper",
+    "yggdrasil-branch-north",
+    "yggdrasil-branch-south",
+    "yggdrasil-branch-east",
+    "yggdrasil-branch-west",
+    "yggdrasil-branch-ne",
+    "yggdrasil-branch-nw",
+    "yggdrasil-branch-se",
+    "yggdrasil-branch-sw",
+    "yggdrasil-canopy-1",
+    "yggdrasil-canopy-2",
+    "yggdrasil-canopy-3",
+    "yggdrasil-canopy-4",
+    "yggdrasil-canopy-5",
+    "yggdrasil-canopy-6",
+    "yggdrasil-canopy-7",
+    "yggdrasil-canopy-8",
+    "yggdrasil-canopy-9"
+  ],
+  "nodeCount": 20,
+  "createdAt": "2026-04-25T02:07:36.926Z",
+  "assetUrl": "/generated/hunyuan3d/yggdrasil-world-tree/yggdrasil-world-tree-merged-2026-04-25T02-07-36-925Z.glb",
+  "source": "scene-direct-merge"
+}
