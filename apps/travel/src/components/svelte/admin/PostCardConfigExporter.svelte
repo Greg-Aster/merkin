@@ -1,21 +1,21 @@
 <script>
-    import { createEventDispatcher, onMount } from 'svelte';
-    import { fade } from 'svelte/transition';
-    
-    // Props
-    export let show = false;
-    export let postCardConfig;
-    
-    // Local state
-    let copySuccess = false;
-    let tsConfig = '';
-    
-    // Event dispatcher
-    const dispatch = createEventDispatcher();
-    
-    // Format config as TypeScript
-    function formatAsTypeScript() {
-      return `// Configuration for PostCard components and friend post integration
+import { createEventDispatcher, onMount } from 'svelte'
+import { fade } from 'svelte/transition'
+
+// Props
+export let show = false
+export let postCardConfig
+
+// Local state
+let copySuccess = false
+let tsConfig = ''
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Format config as TypeScript
+function formatAsTypeScript() {
+  return `// Configuration for PostCard components and friend post integration
   
   // Base PostCard configuration
   export interface PostCardConfig {
@@ -72,31 +72,31 @@
   }
   
   // Export the configuration
-  export const postCardConfig: PostCardConfigs = ${JSON.stringify(postCardConfig, null, 2)};`;
-    }
-    
-    // Copy config to clipboard
-    async function copyToClipboard() {
-      try {
-        await navigator.clipboard.writeText(tsConfig);
-        copySuccess = true;
-        setTimeout(() => copySuccess = false, 2000);
-      } catch (error) {
-        console.error('Failed to copy config to clipboard', error);
-        alert('Failed to copy to clipboard. Please try again.');
-      }
-    }
-    
-    // Update TS config when props change
-    $: if (postCardConfig) {
-      tsConfig = formatAsTypeScript();
-    }
-    
-    // Handle close event
-    function handleClose() {
-      dispatch('close');
-    }
-  </script>
+  export const postCardConfig: PostCardConfigs = ${JSON.stringify(postCardConfig, null, 2)};`
+}
+
+// Copy config to clipboard
+async function copyToClipboard() {
+  try {
+    await navigator.clipboard.writeText(tsConfig)
+    copySuccess = true
+    setTimeout(() => (copySuccess = false), 2000)
+  } catch (error) {
+    console.error('Failed to copy config to clipboard', error)
+    alert('Failed to copy to clipboard. Please try again.')
+  }
+}
+
+// Update TS config when props change
+$: if (postCardConfig) {
+  tsConfig = formatAsTypeScript()
+}
+
+// Handle close event
+function handleClose() {
+  dispatch('close')
+}
+</script>
   
   {#if show}
     <div transition:fade={{ duration: 200 }} class="fixed inset-0 bg-black/50 dark:bg-black/60 z-50 flex items-center justify-center overflow-y-auto" on:click|self={handleClose}>

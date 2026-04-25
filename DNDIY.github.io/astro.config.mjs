@@ -25,6 +25,19 @@ import { existsSync } from 'fs';
 import { dirname, join } from 'path';
 import fs from 'fs';
 
+function manualClientChunks(id) {
+  if (!id.includes('node_modules')) return undefined;
+
+  if (id.includes('photoswipe')) return 'vendor-photoswipe';
+  if (id.includes('@swup') || id.includes('/swup/')) return 'vendor-swup';
+  if (id.includes('marked') || id.includes('markdown-it')) return 'vendor-markdown';
+  if (id.includes('katex')) return 'vendor-katex';
+  if (id.includes('mammoth')) return 'vendor-mammoth';
+  if (id.includes('overlayscrollbars')) return 'vendor-overlayscrollbars';
+
+  return 'vendor';
+}
+
 // CORS middleware for friend content sharing
 const corsMiddleware = () => {
   return {
@@ -33,39 +46,39 @@ const corsMiddleware = () => {
       'astro:server:setup': ({ server }) => {
         server.middlewares.use((req, res, next) => {
           // Check if the request is for an RSS feed or API endpoint
-          if (req.url.includes('/rss.xml') || 
-              req.url.includes('/feed.xml') || 
-              req.url.includes('/feed') || 
-              req.url.includes('/rss') || 
+          if (req.url.includes('/rss.xml') ||
+              req.url.includes('/feed.xml') ||
+              req.url.includes('/feed') ||
+              req.url.includes('/rss') ||
               req.url.includes('/atom.xml') ||
               req.url.includes('/api/') ||
               req.url.includes('/friend-content.json')) {
-            
+
             // Set CORS headers
             res.setHeader('Access-Control-Allow-Origin', '*');
             res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
             res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-            
+
             // Handle preflight requests
             if (req.method === 'OPTIONS') {
               res.statusCode = 204;
               return res.end();
             }
           }
-          
+
           next();
         });
       },
       'astro:build:done': ({ pages, dir }) => {
         const outputDir = fileURLToPath(dir.href);
-        
+
         // Create a client-side CORS proxy script that can be loaded by other sites
         const proxyJsPath = join(outputDir, 'cors-proxy.js');
         const proxyJsContent = `
 /* CORS Proxy Helper for RSS feeds */
 window.loadRSSCORS = function(url, callback) {
   // Try direct fetch first
-  fetch(url, { 
+  fetch(url, {
     method: 'GET',
     headers: { 'Accept': 'application/xml, text/xml, application/rss+xml' },
     mode: 'cors'
@@ -82,12 +95,12 @@ window.loadRSSCORS = function(url, callback) {
   .catch(err => {
     // Fallback to a fetch with looser CORS policy
     console.log('Direct fetch failed, attempting alternative method');
-    
+
     // Use alternate approach - create a temporary iframe
     const frame = document.createElement('iframe');
     frame.style.display = 'none';
     document.body.appendChild(frame);
-    
+
     // Set timeout for cleanup
     const timeout = setTimeout(() => {
       try {
@@ -95,7 +108,7 @@ window.loadRSSCORS = function(url, callback) {
         if (callback) callback(null);
       } catch(e) {}
     }, 5000);
-    
+
     // Setup message handler
     window.addEventListener('message', function messageHandler(event) {
       try {
@@ -105,7 +118,7 @@ window.loadRSSCORS = function(url, callback) {
           clearTimeout(timeout);
           window.removeEventListener('message', messageHandler);
           document.body.removeChild(frame);
-          
+
           // Process data
           const parser = new DOMParser();
           const doc = parser.parseFromString(data.content, 'text/xml');
@@ -116,13 +129,13 @@ window.loadRSSCORS = function(url, callback) {
         if (callback) callback(null);
       }
     });
-    
+
     // Navigate iframe to a special URL that can read the content
     frame.src = url;
   });
 };
         `.trim();
-        
+
         fs.writeFileSync(proxyJsPath, proxyJsContent);
         console.log(`Created CORS proxy helper at ${proxyJsPath}`);
       }
@@ -154,7 +167,7 @@ if (explicitSiteUrl) {
       const cnameContent = fs.readFileSync(cnamePath, 'utf-8');
       // Clean the content (remove whitespace, etc.)
       customDomain = cnameContent.trim();
-      
+
       if (customDomain) {
         siteUrl = `https://${customDomain}`;
         console.log(`Using custom domain from CNAME: ${siteUrl}`);
@@ -163,13 +176,13 @@ if (explicitSiteUrl) {
       console.warn('Error reading CNAME file:', error);
     }
   }
-  
+
   // Auto-detect GitHub Pages environment if no custom domain was found or for subpath
   const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
-  
+
   if (GITHUB_REPOSITORY) {
     const [username, repo] = GITHUB_REPOSITORY.split('/');
-    
+
     if (!customDomain) {
       // No custom domain, use GitHub Pages domain
       siteUrl = `https://${username}.github.io`;
@@ -193,11 +206,7 @@ export default defineConfig({
   trailingSlash: "always",
   integrations: [
     corsMiddleware(), // Add the CORS middleware as an integration
-    tailwind(
-      {
-        nesting: true,
-      }
-    ), 
+    tailwind(),
     swup({
       theme: false,
       animationClass: "transition-swup-", // see https://swup.js.org/options/#animationselector
@@ -211,7 +220,7 @@ export default defineConfig({
       updateHead: true,
       updateBodyClass: false,
       globalInstance: true,
-    }), 
+    }),
     icon({
       include: {
         "preprocess: viteProcess(),": ["*"],
@@ -219,8 +228,8 @@ export default defineConfig({
         "fa6-regular": ["*"],
         "fa6-solid": ["*"],
       },
-    }), 
-    svelte(), 
+    }),
+    svelte(),
     sitemap({
       filter: (page) => {
         const { pathname } = new URL(page);
@@ -236,14 +245,14 @@ export default defineConfig({
           pathname === '/atom.xml'
         );
       },
-    }), 
+    }),
     Compress({
       CSS: false,
       Image: false,
       Action: {
         Passed: async () => true, // https://github.com/PlayForm/Compress/issues/376
       },
-    }), 
+    }),
     mdx()
   ],
   markdown: {
@@ -313,7 +322,11 @@ export default defineConfig({
       },
     },
     build: {
+      chunkSizeWarningLimit: 550,
       rollupOptions: {
+        output: {
+          manualChunks: manualClientChunks,
+        },
         onwarn(warning, warn) {
           // temporarily suppress this warning
           if (

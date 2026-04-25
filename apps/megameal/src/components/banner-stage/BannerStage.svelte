@@ -226,7 +226,7 @@ $effect(() => {
         class="banner-stage-frame"
         transition:fade={{ duration: transitionDuration(activeTransition) }}
       >
-        <svelte:component this={activeSceneComponent} props={activeSceneProps} />
+        <activeSceneComponent {...activeSceneProps}></activeSceneComponent>
       </div>
     {/key}
   {:else if errorMessage}

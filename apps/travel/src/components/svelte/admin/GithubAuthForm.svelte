@@ -1,27 +1,27 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
+import { createEventDispatcher } from 'svelte'
 
-  // Props
-  export let isAuthenticating = false;
-  export let errorMessage = '';
-  export let token = '';
+// Props
+export let isAuthenticating = false
+export let errorMessage = ''
+export let token = ''
 
-  // Create event dispatcher
-  const dispatch = createEventDispatcher();
+// Create event dispatcher
+const dispatch = createEventDispatcher()
 
-  // Handle auth submission
-  function handleSubmit() {
-    if (!token.trim()) {
-      dispatch('error', 'Please enter a valid token');
-      return;
-    }
-    dispatch('authenticate', token);
+// Handle auth submission
+function handleSubmit() {
+  if (!token.trim()) {
+    dispatch('error', 'Please enter a valid token')
+    return
   }
+  dispatch('authenticate', token)
+}
 
-  // Handle cancel
-  function handleCancel() {
-    dispatch('cancel');
-  }
+// Handle cancel
+function handleCancel() {
+  dispatch('cancel')
+}
 </script>
 
 <div class="auth-form bg-neutral-50 dark:bg-neutral-800/50 p-5 rounded-lg border border-neutral-300 dark:border-neutral-600 mb-4">

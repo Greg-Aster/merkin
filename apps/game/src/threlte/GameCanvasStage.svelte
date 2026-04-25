@@ -1,67 +1,68 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte'
-  import { Canvas } from '@threlte/core'
-  import EventBus from './systems/EventBus.svelte'
-  import InteractionSystem from './systems/InteractionSystem.svelte'
-  import Time from './systems/Time.svelte'
-  import AssetLoader from './systems/AssetLoader.svelte'
-  import Renderer from './systems/Renderer.svelte'
-  import SimplePostProcessing from './systems/SimplePostProcessing.svelte'
-  import SpawnSystem from './systems/SpawnSystem.svelte'
-  import PerformanceSystem from './features/performance/systems/Performance.svelte'
-  import LODSystem from './features/performance/systems/LOD.svelte'
-  import { qualitySettingsStore } from './features/performance/stores/performanceStore'
-  import { levelEditorSettingsStore } from './editor/editorStore'
-  import { isSettingsMenuOpen } from './stores/uiStore'
+import { Canvas } from '@threlte/core'
+import { createEventDispatcher } from 'svelte'
+import { levelEditorSettingsStore } from './editor/editorStore'
+import { qualitySettingsStore } from './features/performance/stores/performanceStore'
+import LODSystem from './features/performance/systems/LOD.svelte'
+import PerformanceSystem from './features/performance/systems/Performance.svelte'
+import { isSettingsMenuOpen } from './stores/uiStore'
+import AssetLoader from './systems/AssetLoader.svelte'
+import EventBus from './systems/EventBus.svelte'
+import InteractionSystem from './systems/InteractionSystem.svelte'
+import Renderer from './systems/Renderer.svelte'
+import SimplePostProcessing from './systems/SimplePostProcessing.svelte'
+import SpawnSystem from './systems/SpawnSystem.svelte'
+import Time from './systems/Time.svelte'
 
-  const dispatch = createEventDispatcher()
+const dispatch = createEventDispatcher()
 
-  export let isInitialized = false
-  export let error: string | null = null
-  export let isMobile = false
-  export let editorEnabled = false
-  export let collisionOverlayEnabled = false
-  export let currentLevel = 'observatory'
-  export let currentLevelComponent: any = null
-  export let parsedTimelineEvents: any[] = []
-  export let timelineEventsPayload = '[]'
-  export let currentLevelRenderConfig: {
-    offset: [number, number, number]
-    spawn: [number, number, number]
-  } = {
-    offset: [0, 0, 0],
-    spawn: [0, 1, 0],
-  }
+export let isInitialized = false
+export let error: string | null = null
+export let isMobile = false
+export let editorEnabled = false
+export let collisionOverlayEnabled = false
+export let currentLevel = 'observatory'
+export let currentLevelComponent: any = null
+export let parsedTimelineEvents: any[] = []
+export let timelineEventsPayload = '[]'
+export let currentLevelRenderConfig: {
+  offset: [number, number, number]
+  spawn: [number, number, number]
+} = {
+  offset: [0, 0, 0],
+  spawn: [0, 1, 0],
+}
 
-  export let audioSystemComponent: any = null
-  export let physicsSystemComponent: any = null
-  export let playerComponentClass: any = null
-  export let multiplayerManagerComponent: any = null
-  export let editorCollisionOverlayComponent: any = null
-  export let editorSceneLayerComponent: any = null
-  export let editorTerrainSculptLayerComponent: any = null
-  export let editorViewportControlsComponent: any = null
-  export let editorWorkbenchLightingComponent: any = null
+export let audioSystemComponent: any = null
+export let physicsSystemComponent: any = null
+export let playerComponentClass: any = null
+export let multiplayerManagerComponent: any = null
+export let editorCollisionOverlayComponent: any = null
+export let editorSceneLayerComponent: any = null
+export let editorTerrainSculptLayerComponent: any = null
+export let editorViewportControlsComponent: any = null
+export let editorWorkbenchLightingComponent: any = null
 
-  export let interactionSystemRef: any = null
-  export let spawnSystemRef: any = null
-  export let playerComponentRef: any = null
-  export let physicsReady = false
-  export let terrainReady = false
-  export let playerReady = false
+export let interactionSystemRef: any = null
+export let spawnSystemRef: any = null
+export let playerComponentRef: any = null
+export let physicsReady = false
+export let terrainReady = false
+export let playerReady = false
 
-  export let normalizeLevelId: (levelId: string) => string = (levelId) => levelId
+export let normalizeLevelId: (levelId: string) => string = levelId => levelId
 
-  function forward(type: string, detail: unknown) {
-    dispatch(type, detail)
-  }
+function forward(type: string, detail: unknown) {
+  dispatch(type, detail)
+}
 
-  $: playerMoveSpeed = $levelEditorSettingsStore?.player?.moveSpeed ?? 5
-  $: playerJumpForce = $levelEditorSettingsStore?.player?.jumpForce ?? 8
-  $: playerLightIntensityScale = $levelEditorSettingsStore?.player?.lightIntensityScale ?? 60
-  $: if (!playerComponentRef) {
-    playerReady = false
-  }
+$: playerMoveSpeed = $levelEditorSettingsStore?.player?.moveSpeed ?? 5
+$: playerJumpForce = $levelEditorSettingsStore?.player?.jumpForce ?? 8
+$: playerLightIntensityScale =
+  $levelEditorSettingsStore?.player?.lightIntensityScale ?? 60
+$: if (!playerComponentRef) {
+  playerReady = false
+}
 </script>
 
 {#if isInitialized && !error}

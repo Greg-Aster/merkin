@@ -6,8 +6,10 @@ export const th: Translation = {
   [Key.about]: 'เกี่ยวกับ',
   [Key.archive]: 'คลัง',
   [Key.community]: 'ชุมชน',
+  [Key.store]: 'ร้านค้า',
+  [Key.projects]: 'โปรเจกต์',
   [Key.search]: 'ค้นหา',
-  
+
   [Key.configs]: 'การตั้งค่า',
   [Key.friends]: 'เพื่อน',
   [Key.newPost]: 'โพสต์ใหม่',

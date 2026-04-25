@@ -1,6 +1,6 @@
 /**
  * MEGAMEAL NPC Conversation System - Type Definitions
- * 
+ *
  * Modular conversation system for AI-powered NPC interactions
  * Integrates with existing Bleepy AI service and game architecture
  */
@@ -26,6 +26,7 @@ export interface ConversationMessage {
 export interface ConversationSession {
   id: string
   npcId: string
+  personality: NPCPersonality
   messages: ConversationMessage[]
   startTime: number
   lastInteraction: number
@@ -56,7 +57,7 @@ export interface NPCPersonality {
   name: string
   species?: string
   age?: number | string
-  
+
   // Core traits
   personality: {
     core: string // Main personality description
@@ -66,7 +67,7 @@ export interface NPCPersonality {
     fears?: string[] // Things they're afraid of
     goals?: string[] // Current objectives/desires
   }
-  
+
   // Knowledge & Memory
   knowledge: {
     topics: Record<string, string> // Topic -> knowledge level/content
@@ -75,16 +76,21 @@ export interface NPCPersonality {
     backstory: string // Rich background story
     openingStatement?: string // First statement when clicked, replaces generic greeting
   }
-  
+
   // Behavioral patterns
   behavior: {
     greetingStyle: 'formal' | 'casual' | 'shy' | 'enthusiastic' | 'mysterious'
-    conversationStyle: 'talkative' | 'concise' | 'philosophical' | 'playful' | 'wise'
+    conversationStyle:
+      | 'talkative'
+      | 'concise'
+      | 'philosophical'
+      | 'playful'
+      | 'wise'
     emotionalRange: NPCEmotion[]
     defaultMood: NPCEmotion
     speechPatterns?: string[] // Unique ways of speaking
   }
-  
+
   // Visual & interaction
   visual: {
     description: string
@@ -92,7 +98,7 @@ export interface NPCPersonality {
     animations?: Record<string, string>
     visualCues?: Partial<Record<NPCEmotion, string>> // Allow partial emotion coverage
   }
-  
+
   // Conversation parameters
   conversation: {
     maxResponseLength?: number // DEPRECATED: Use MemoryManagerAgent.getResponseTokenLimit() instead
@@ -102,10 +108,22 @@ export interface NPCPersonality {
   }
 }
 
-export type NPCEmotion = 
-  | 'neutral' | 'happy' | 'excited' | 'curious' | 'thoughtful'
-  | 'sad' | 'worried' | 'surprised' | 'confused' | 'mysterious'
-  | 'playful' | 'wise' | 'mischievous' | 'peaceful' | 'energetic'
+export type NPCEmotion =
+  | 'neutral'
+  | 'happy'
+  | 'excited'
+  | 'curious'
+  | 'thoughtful'
+  | 'sad'
+  | 'worried'
+  | 'surprised'
+  | 'confused'
+  | 'mysterious'
+  | 'playful'
+  | 'wise'
+  | 'mischievous'
+  | 'peaceful'
+  | 'energetic'
 
 // ================================
 // AI Integration
@@ -155,10 +173,10 @@ export interface ConversationUIState {
   position: { x: number; y: number } | 'centered' | 'bottom'
   size: 'compact' | 'normal' | 'expanded'
   theme: 'game' | 'mystical' | 'nature' | 'cosmic' | 'firefly'
-  
+
   // Read-only mode for generic fireflies
   isReadOnly?: boolean
-  readOnlyText?: string  
+  readOnlyText?: string
   readOnlyDuration?: number
 }
 
@@ -182,11 +200,11 @@ export interface NPCConversationComponent {
   personality: NPCPersonality
   isInteractable: boolean
   interactionRadius?: number
-  
+
   // ECS integration
   entityId?: number
   position?: [number, number, number]
-  
+
   // Event handlers
   onConversationStart?: (session: ConversationSession) => void
   onConversationEnd?: (session: ConversationSession) => void
@@ -201,15 +219,15 @@ export interface NPCConversationComponent {
 export interface ConversationStores {
   // Active conversation state
   activeSession: Writable<ConversationSession | null>
-  
+
   // UI state
   uiState: Writable<ConversationUIState>
   uiConfig: Writable<ConversationUIConfig>
-  
+
   // System state
   availableNPCs: Readable<Map<string, NPCPersonality>>
   conversationHistory: Readable<Map<string, ConversationSession[]>>
-  
+
   // Interaction state
   nearbyNPCs: Readable<NPCConversationComponent[]>
   isProcessingResponse: Readable<boolean>
@@ -225,22 +243,22 @@ export interface ConversationSystemConfig {
   aiProvider: 'gemini' | 'deepseek' | 'openai'
   maxRetries: number
   timeout: number
-  
+
   // Conversation limits
   maxSessionLength: number // Max messages per session
   sessionTimeout: number // Minutes of inactivity before session ends
   maxConcurrentSessions: number
-  
+
   // Memory & persistence
   enablePersistence: boolean
   maxStoredSessions: number
   memoryDecayRate: number // How quickly NPCs "forget" old conversations
-  
+
   // Performance
   enableCaching: boolean
   cacheTimeout: number
   batchRequestDelay: number
-  
+
   // Debug
   enableLogging: boolean
   enableDebugUI: boolean
@@ -250,13 +268,28 @@ export interface ConversationSystemConfig {
 // Events
 // ================================
 
-export type ConversationEvent = 
+export type ConversationEvent =
   | { type: 'conversation_started'; data: { npcId: string; sessionId: string } }
-  | { type: 'conversation_ended'; data: { npcId: string; sessionId: string; duration: number } }
-  | { type: 'message_sent'; data: { sessionId: string; message: ConversationMessage } }
-  | { type: 'message_received'; data: { sessionId: string; message: ConversationMessage } }
-  | { type: 'emotion_changed'; data: { npcId: string; emotion: NPCEmotion; previous: NPCEmotion } }
-  | { type: 'relationship_changed'; data: { npcId: string; delta: number; newLevel: number } }
+  | {
+      type: 'conversation_ended'
+      data: { npcId: string; sessionId: string; duration: number }
+    }
+  | {
+      type: 'message_sent'
+      data: { sessionId: string; message: ConversationMessage }
+    }
+  | {
+      type: 'message_received'
+      data: { sessionId: string; message: ConversationMessage }
+    }
+  | {
+      type: 'emotion_changed'
+      data: { npcId: string; emotion: NPCEmotion; previous: NPCEmotion }
+    }
+  | {
+      type: 'relationship_changed'
+      data: { npcId: string; delta: number; newLevel: number }
+    }
   | { type: 'memory_updated'; data: { npcId: string; memory: string } }
   | { type: 'error'; data: { error: Error; context: string } }
 
@@ -264,14 +297,22 @@ export type ConversationEvent =
 // Utility Types
 // ================================
 
-export type ConversationEventHandler<T extends ConversationEvent = ConversationEvent> = (event: T) => void
+export type ConversationEventHandler<
+  T extends ConversationEvent = ConversationEvent,
+> = (event: T) => void
 
 export interface ConversationUtils {
   generateSessionId(): string
   generateMessageId(): string
-  calculateRelationshipLevel(interactionCount: number, positiveInteractions: number): number
+  calculateRelationshipLevel(
+    interactionCount: number,
+    positiveInteractions: number,
+  ): number
   formatTimestamp(timestamp: number): string
   extractKeywords(text: string): string[]
   detectEmotion(text: string): NPCEmotion
-  generateContextPrompt(personality: NPCPersonality, context: ConversationContext): string
+  generateContextPrompt(
+    personality: NPCPersonality,
+    context: ConversationContext,
+  ): string
 }

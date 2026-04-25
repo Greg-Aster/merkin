@@ -1,97 +1,110 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte'
-  import type { EditorSceneNode } from './editorStore'
+import { createEventDispatcher } from 'svelte'
+import type { EditorSceneNode } from './editorStore'
 
-  const dispatch = createEventDispatcher()
+const dispatch = createEventDispatcher()
 
-  export let styleProfileName = 'Painterly Storybook'
-  export let stylePrompt = ''
-  export let styleNegativePrompt = ''
-  export let styleLoraNotes = ''
-  export let styleControlNetNotes = ''
-  export let styleReferenceImageUrl = ''
-  export let styleSimplifyRatio = 0.6
-  export let styleSimplifyError = 0.001
+export let styleProfileName = 'Painterly Storybook'
+export let stylePrompt = ''
+export let styleNegativePrompt = ''
+export let styleLoraNotes = ''
+export let styleControlNetNotes = ''
+export let styleReferenceImageUrl = ''
+export let styleSimplifyRatio = 0.6
+export let styleSimplifyError = 0.001
 
-  export let styleBusy = false
-  export let styleStatus = ''
-  export let styleInspectReport = ''
-  export let styleSourceSummary = ''
-  export let styleWorkspaceManifestUrl = ''
-  export let styleWorkspaceSourceAssetUrl = ''
-  export let styleGeneratedReferenceImageUrl = ''
-  export let styleSimplifiedAssetUrl = ''
-  export let styleBlenderExportPath = ''
-  export let styleBlenderOpenCommand = ''
-  export let styleBatchBusy = false
-  export let styleBatchStatus = ''
-  export let hunyuanLastFitReport = ''
-  export let styleBatchResumeAvailable = false
-  export let styleBatchResumeSummary = ''
-  export let stylePresets: Array<{
-    id: string
-    label: string
-    prompt: string
-    negativePrompt: string
-    loraNotes: string
-    controlNetNotes: string
-  }> = []
-  export let styleSceneCandidates: Array<{
-    id: string
-    name: string
-    kindLabel: string
-    descriptor: string
-    selected: boolean
-    status: string
-  }> = []
+export let styleBusy = false
+export let styleStatus = ''
+export let styleInspectReport = ''
+export let styleSourceSummary = ''
+export let styleWorkspaceManifestUrl = ''
+export let styleWorkspaceSourceAssetUrl = ''
+export let styleGeneratedReferenceImageUrl = ''
+export let styleSimplifiedAssetUrl = ''
+export let styleBlenderExportPath = ''
+export let styleBlenderOpenCommand = ''
+export let styleBatchBusy = false
+export let styleBatchStatus = ''
+export let hunyuanLastFitReport = ''
+export let styleBatchResumeAvailable = false
+export let styleBatchResumeSummary = ''
+export let stylePresets: Array<{
+  id: string
+  label: string
+  prompt: string
+  negativePrompt: string
+  loraNotes: string
+  controlNetNotes: string
+}> = []
+export let styleSceneCandidates: Array<{
+  id: string
+  name: string
+  kindLabel: string
+  descriptor: string
+  selected: boolean
+  status: string
+}> = []
 
-  export let comfyUiStatus = ''
-  export let comfyUiBusy = false
-  export let comfyUiReady = false
-  export let hunyuanBackendStatus = ''
-  export let hunyuanBusy = false
-  export let hunyuanServiceReady = false
-  export let hunyuanDetectedReferenceImageUrl = ''
+export let comfyUiStatus = ''
+export let comfyUiBusy = false
+export let comfyUiReady = false
+export let hunyuanBackendStatus = ''
+export let hunyuanBusy = false
+export let hunyuanServiceReady = false
+export let hunyuanDetectedReferenceImageUrl = ''
 
-  export let selectedNode: EditorSceneNode | null = null
-  export let selectedNodes: EditorSceneNode[] = []
-  export let canUseStyleStudio: (node: EditorSceneNode | null) => boolean = () => false
-  export let runtimeAssetFailures: Array<{ id: string, source: string, message: string, updatedAt: number }> = []
-  export let pipelineLogEnabled = false
-  export let pipelineLogEntries: string[] = []
+export let selectedNode: EditorSceneNode | null = null
+export let selectedNodes: EditorSceneNode[] = []
+export let canUseStyleStudio: (node: EditorSceneNode | null) => boolean = () =>
+  false
+export let runtimeAssetFailures: Array<{
+  id: string
+  source: string
+  message: string
+  updatedAt: number
+}> = []
+export let pipelineLogEnabled = false
+export let pipelineLogEntries: string[] = []
 
-  function emit(type: string) {
-    dispatch(type)
-  }
+function emit(type: string) {
+  dispatch(type)
+}
 
-  function emitPresetApply(presetId: string) {
-    dispatch('applyStylePreset', { presetId })
-  }
+function emitPresetApply(presetId: string) {
+  dispatch('applyStylePreset', { presetId })
+}
 
-  function emitBatchToggle(candidateId: string, selected: boolean) {
-    dispatch('toggleBatchCandidate', { candidateId, selected })
-  }
+function emitBatchToggle(candidateId: string, selected: boolean) {
+  dispatch('toggleBatchCandidate', { candidateId, selected })
+}
 
-  function emitBatchDescriptorUpdate(candidateId: string, descriptor: string) {
-    dispatch('updateBatchDescriptor', { candidateId, descriptor })
-  }
+function emitBatchDescriptorUpdate(candidateId: string, descriptor: string) {
+  dispatch('updateBatchDescriptor', { candidateId, descriptor })
+}
 
-  function emitPipelineLogToggle(value: boolean) {
-    dispatch('setPipelineLogEnabled', { value })
-  }
+function emitPipelineLogToggle(value: boolean) {
+  dispatch('setPipelineLogEnabled', { value })
+}
 
-  $: hasSelectedAsset = selectedNodes.length <= 1 && canUseStyleStudio(selectedNode)
-  $: hasInspection = styleInspectReport.trim().length > 0 || styleSourceSummary.trim().length > 0
-  $: resolvedReferenceImageUrl = styleReferenceImageUrl || styleGeneratedReferenceImageUrl || hunyuanDetectedReferenceImageUrl
-  $: hasReference = resolvedReferenceImageUrl.trim().length > 0
-  $: hasStyleBrief = stylePrompt.trim().length > 0
-  $: workspaceReady = styleWorkspaceManifestUrl.trim().length > 0
-  $: canBakeTexture = hasSelectedAsset && (hasReference || hasStyleBrief)
-  $: canReplaceMesh = hasSelectedAsset && hasStyleBrief
-  $: selectedBatchCount = styleSceneCandidates.filter((candidate) => candidate.selected).length
-  $: totalBatchCount = styleSceneCandidates.length
-  $: canBatchRetexture = selectedBatchCount > 0 && (hasReference || hasStyleBrief)
-  $: canBatchReimagine = selectedBatchCount > 0 && hasStyleBrief
+$: hasSelectedAsset =
+  selectedNodes.length <= 1 && canUseStyleStudio(selectedNode)
+$: hasInspection =
+  styleInspectReport.trim().length > 0 || styleSourceSummary.trim().length > 0
+$: resolvedReferenceImageUrl =
+  styleReferenceImageUrl ||
+  styleGeneratedReferenceImageUrl ||
+  hunyuanDetectedReferenceImageUrl
+$: hasReference = resolvedReferenceImageUrl.trim().length > 0
+$: hasStyleBrief = stylePrompt.trim().length > 0
+$: workspaceReady = styleWorkspaceManifestUrl.trim().length > 0
+$: canBakeTexture = hasSelectedAsset && (hasReference || hasStyleBrief)
+$: canReplaceMesh = hasSelectedAsset && hasStyleBrief
+$: selectedBatchCount = styleSceneCandidates.filter(
+  candidate => candidate.selected,
+).length
+$: totalBatchCount = styleSceneCandidates.length
+$: canBatchRetexture = selectedBatchCount > 0 && (hasReference || hasStyleBrief)
+$: canBatchReimagine = selectedBatchCount > 0 && hasStyleBrief
 </script>
 
 <div class="editor-section">

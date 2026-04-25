@@ -355,6 +355,8 @@ onMount(() => {
           <button 
             on:click={generateSlug} 
             class="px-3 py-2 bg-neutral-200 dark:bg-neutral-600 border border-neutral-300 dark:border-neutral-600 rounded-r text-neutral-700 dark:text-neutral-200"
+            type="button"
+            aria-label="Generate slug from title"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
@@ -713,6 +715,7 @@ onMount(() => {
             type="button" 
             on:click={() => showMarkdownHelp = false}
             class="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+            aria-label="Close markdown help"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -822,19 +825,19 @@ onMount(() => {
           <div class="mb-4">
             <div class="flex flex-wrap gap-1 p-1 bg-neutral-100 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-t text-neutral-700 dark:text-neutral-300">
               <!-- Formatting buttons -->
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Heading 1 (Ctrl+Alt+1)" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Heading 1 (Ctrl+Alt+1)" aria-label="Insert heading level 1"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '# ', '', 'content');
                 }}>
                 <span class="font-bold">H1</span>
               </button>
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Heading 2 (Ctrl+Alt+2)" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Heading 2 (Ctrl+Alt+2)" aria-label="Insert heading level 2"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '## ', '', 'content');
                 }}>
                 <span class="font-bold">H2</span>
               </button>
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Heading 3 (Ctrl+Alt+3)" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Heading 3 (Ctrl+Alt+3)" aria-label="Insert heading level 3"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '### ', '', 'content');
                 }}>
@@ -843,19 +846,19 @@ onMount(() => {
               
               <div class="h-6 w-px bg-neutral-300 dark:bg-neutral-600 mx-1"></div>
               
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Bold (Ctrl+B)" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Bold (Ctrl+B)" aria-label="Insert bold text"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '**', '**', 'content');
                 }}>
                 <span class="font-bold">B</span>
               </button>
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Italic (Ctrl+I)" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Italic (Ctrl+I)" aria-label="Insert italic text"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '_', '_', 'content');
                 }}>
                 <span class="italic">I</span>
               </button>
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Strikethrough" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Strikethrough" aria-label="Insert strikethrough text"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '~~', '~~', 'content');
                 }}>
@@ -864,19 +867,19 @@ onMount(() => {
               
               <div class="h-6 w-px bg-neutral-300 dark:bg-neutral-600 mx-1"></div>
               
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Bullet List (Ctrl+Alt+L)" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Bullet List (Ctrl+Alt+L)" aria-label="Insert bullet list"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '- ', '', 'content');
                 }}>
                 <span>• List</span>
               </button>
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Numbered List" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Numbered List" aria-label="Insert numbered list"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '1. ', '', 'content');
                 }}>
                 <span>1. List</span>
               </button>
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Task List" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Task List" aria-label="Insert task list"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '- [ ] ', '', 'content');
                 }}>
@@ -885,13 +888,13 @@ onMount(() => {
               
               <div class="h-6 w-px bg-neutral-300 dark:bg-neutral-600 mx-1"></div>
               
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Link (Ctrl+K)" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Link (Ctrl+K)" aria-label="Insert link"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '[', '](url)', 'content');
                 }}>
                 <span>🔗 Link</span>
               </button>
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Image" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Image" aria-label="Insert image"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '![alt text](', ')', 'content');
                 }}>
@@ -900,25 +903,25 @@ onMount(() => {
               
               <div class="h-6 w-px bg-neutral-300 dark:bg-neutral-600 mx-1"></div>
               
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Code Block" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Code Block" aria-label="Insert code block"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '```\n', '\n```', 'content');
                 }}>
                 <span>Code</span>
               </button>
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Inline Code" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Inline Code" aria-label="Insert inline code"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '`', '`', 'content');
                 }}>
                 <span>{'`'}</span>
               </button>
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Table" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Table" aria-label="Insert table"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '| Header | Header |\n| ------ | ------ |\n| Cell   | Cell   |\n', '', 'content');
                 }}>
                 <span>Table</span>
               </button>
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Quote" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Quote" aria-label="Insert block quote"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '> ', '', 'content');
                 }}>
@@ -927,7 +930,7 @@ onMount(() => {
               
               <div class="h-6 w-px bg-neutral-300 dark:bg-neutral-600 mx-1"></div>
               
-              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Horizontal Rule" 
+              <button type="button" class="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700" title="Horizontal Rule" aria-label="Insert horizontal rule"
                 on:click={() => {
                   post.content = insertTextAtCursor(post.content, '\n---\n', '', 'content');
                 }}>

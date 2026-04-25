@@ -15,8 +15,8 @@ import banner3 from '@/assets/banner/0028.png'
 import banner4 from '@/assets/banner/0035.png'
 import banner5 from '@/assets/banner/0042.png'
 import banner6 from '@/assets/banner/0049.png'
-import banner7 from '@/assets/banner/ComfyUI_0003.png'
 import banner8 from '@/assets/banner/0085.png'
+import banner7 from '@/assets/banner/ComfyUI_0003.png'
 
 export const standardBannerData: StandardBannerData = {}
 
@@ -161,7 +161,9 @@ export function getBannerItemPreviewDetails(
   let urlForDisplay = ''
   if (hasValidLink) {
     const base =
-      typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : 'http://localhost'
     try {
       urlForDisplay = new URL(linkUrl as string, base).pathname
     } catch {

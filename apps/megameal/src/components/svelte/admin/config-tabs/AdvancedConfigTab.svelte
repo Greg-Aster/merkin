@@ -180,6 +180,8 @@ function resetToDefaults() {
     
     <button 
       class="py-2 px-4 bg-[var(--primary)] hover:opacity-90 text-white font-medium rounded-md transition-opacity flex items-center"
+      data-sfx-hover="hover-emphasis"
+      data-sfx-click="panel-open"
       on:click={showExportDialog}
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -199,6 +201,8 @@ function resetToDefaults() {
     <div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
       <button 
         class="py-2 px-4 bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 text-neutral-700 dark:text-neutral-200 font-medium rounded-md transition-colors flex items-center"
+        data-sfx-hover="hover-soft"
+        data-sfx-click="confirm"
         on:click={copyToClipboard}
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -209,6 +213,8 @@ function resetToDefaults() {
       
       <button 
         class="py-2 px-4 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-800/30 font-medium rounded-md transition-colors flex items-center"
+        data-sfx-hover="hover-emphasis"
+        data-sfx-click="warning"
         on:click={resetToDefaults}
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

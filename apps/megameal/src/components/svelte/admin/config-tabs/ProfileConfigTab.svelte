@@ -316,13 +316,17 @@ function updateSelectedPlatform(event) {
                 <h4 class="text-sm font-medium text-black/80 dark:text-white/80">Sequence Images</h4>
                 <div class="flex flex-wrap gap-2">
                   {#each avatarConfig.avatarList as avatar, index}
-                    <div 
+                    <button
+                      type="button"
                       class="w-16 h-16 bg-neutral-200 dark:bg-neutral-700 rounded-md overflow-hidden cursor-pointer border-2 border-transparent hover:border-[var(--primary)] transition-colors"
                       class:border-[var(--primary)]={selectedAvatarIndex === index}
+                      data-sfx-hover="hover-soft"
+                      data-sfx-click="select"
                       on:click={() => selectAvatar(index)}
+                      aria-label={`Select avatar ${index + 1}`}
                     >
                       <img src={avatar} alt={`Avatar ${index + 1}`} class="w-full h-full object-cover" />
-                    </div>
+                    </button>
                   {/each}
                 </div>
                 
@@ -368,6 +372,8 @@ function updateSelectedPlatform(event) {
 
             <button 
               class="w-full py-1.5 px-3 bg-red-500 hover:bg-red-600 text-white font-medium rounded-md transition-colors text-sm"
+              data-sfx-hover="hover-emphasis"
+              data-sfx-click="warning"
               on:click={removeAvatar}
             >
               Remove Avatar
@@ -422,6 +428,8 @@ function updateSelectedPlatform(event) {
       <h3 class="text-lg font-medium text-black/80 dark:text-white/80">Social Links</h3>
       <button 
         class="py-1.5 px-3 bg-[var(--primary)] hover:opacity-90 text-white font-medium rounded-md transition-opacity text-sm flex items-center"
+        data-sfx-hover="hover-emphasis"
+        data-sfx-click="panel-open"
         on:click={addSocialLink}
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -455,8 +463,11 @@ function updateSelectedPlatform(event) {
             <div class="flex space-x-1">
               <button 
                 class="p-1.5 text-neutral-500 hover:text-[var(--primary)] rounded"
+                data-sfx-hover="hover-soft"
+                data-sfx-click="panel-open"
                 title="Edit Link"
                 on:click={() => editSocialLink(index)}
+                aria-label={`Edit ${link.name}`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -464,8 +475,11 @@ function updateSelectedPlatform(event) {
               </button>
               <button 
                 class="p-1.5 text-neutral-500 hover:text-red-500 rounded"
+                data-sfx-hover="hover-emphasis"
+                data-sfx-click="warning"
                 title="Delete Link"
                 on:click={() => deleteSocialLink(index)}
+                aria-label={`Delete ${link.name}`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

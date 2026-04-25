@@ -3,13 +3,15 @@
 // Highlights one story arc/series with chapters listed, inviting the visitor to begin reading.
 // Designed to communicate "this is a complete story" rather than individual blog posts.
 
-import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
-import { SERIES_CONFIG, FEATURED_SERIES_ORDER } from '@/config/seriesConfig'
 import ImageWrapper from '@/components/misc/ImageWrapper.astro'
+import { FEATURED_SERIES_ORDER, SERIES_CONFIG } from '@/config/seriesConfig'
+import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
 
 type SharedFeaturedPost = (typeof postsManifest.items)[number]
 
-function getPostsBySeriesFromSharedData(seriesId: string): SharedFeaturedPost[] {
+function getPostsBySeriesFromSharedData(
+  seriesId: string,
+): SharedFeaturedPost[] {
   return postsManifest.items
     .filter(post => !post.draft && post.series === seriesId)
     .sort((left, right) => (left.seriesPart ?? 0) - (right.seriesPart ?? 0))

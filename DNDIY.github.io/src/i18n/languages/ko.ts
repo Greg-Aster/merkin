@@ -6,8 +6,10 @@ export const ko: Translation = {
   [Key.about]: '소개',
   [Key.archive]: '아카이브',
   [Key.community]: '토론',
+  [Key.store]: '스토어',
+  [Key.projects]: '프로젝트',
   [Key.search]: '검색',
-  
+
   [Key.configs]: '설정',
   [Key.friends]: '친구',
   [Key.newPost]: '새 게시물',

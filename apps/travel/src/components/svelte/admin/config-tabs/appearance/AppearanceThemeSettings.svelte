@@ -1,31 +1,31 @@
 <script>
-  import { createEventDispatcher, onMount } from 'svelte';
-  import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts';
-  
-  // Props
-  export let siteConfig;
-  
-  // Local state
-  let themePreview = '';
-  
-  // Event dispatcher
-  const dispatch = createEventDispatcher();
-  
-  // Initialize theme preview
-  onMount(() => {
-    updateThemePreview();
-  });
-  
-  // Function to update theme preview
-  function updateThemePreview() {
-    themePreview = `hsl(${siteConfig.themeColor.hue}, 65%, 50%)`;
-  }
-  
-  // Function to handle hue change
-  function handleHueChange() {
-    updateThemePreview();
-    dispatch('change', siteConfig);
-  }
+import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts'
+import { createEventDispatcher, onMount } from 'svelte'
+
+// Props
+export let siteConfig
+
+// Local state
+let themePreview = ''
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Initialize theme preview
+onMount(() => {
+  updateThemePreview()
+})
+
+// Function to update theme preview
+function updateThemePreview() {
+  themePreview = `hsl(${siteConfig.themeColor.hue}, 65%, 50%)`
+}
+
+// Function to handle hue change
+function handleHueChange() {
+  updateThemePreview()
+  dispatch('change', siteConfig)
+}
 </script>
 
 <!-- Default LIGHT_DARK_AUTO Theme Settings -->

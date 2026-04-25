@@ -1,3 +1,4 @@
+import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts'
 import type {
   LicenseConfig,
   NavBarConfig,
@@ -5,7 +6,6 @@ import type {
   SiteConfig,
 } from '../types/config'
 import { LinkPreset } from '../types/config'
-import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts'
 
 
 export const siteConfig: SiteConfig = {

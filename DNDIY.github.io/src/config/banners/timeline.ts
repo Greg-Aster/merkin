@@ -237,7 +237,16 @@ export const timelineBannerCategories = {
     icon: 'globe',
     defaultBackground: '/posts/timeline/universe.png',
   },
-}
+} as Record<
+  string,
+  {
+    displayName: string
+    description: string
+    color: string
+    icon: string
+    defaultBackground: string
+  }
+>
 
 // =====================================================================
 // HELPER FUNCTIONS

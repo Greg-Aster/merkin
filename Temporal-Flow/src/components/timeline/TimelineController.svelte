@@ -1,459 +1,487 @@
 <script lang="ts">
-  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-  import { timelineStore, timelineActions, filteredEvents, selectedEvent } from '../../stores/timelineStore';
-  import type { TimelineEvent } from '../../services/TimelineService.client';
-  import { extractEraConfig } from '../../services/TimelineService.client'; // Added this import
-  
-  // Components
-  import TimelineCore from './TimelineCore.svelte';
-  import ListView from './TimelineViewModes/ListView.svelte';
-  import MapView from './TimelineViewModes/MapView.svelte';
-  import TreeView from './TimelineViewModes/TreeView.svelte';
-  
-  // Props
-  export let id: string = "timeline-controller";
-  export let category: string = "";
-  export let startYear: number | undefined = undefined;
-  export let endYear: number | undefined = undefined;
-  export let background: string = "/assets/banner/0001.png";
-  export let compact: boolean = false;
-  export let asBanner: boolean = false;
-  export let bannerHeight: string = "500px";
-  export let initialEvents: string = "[]"; // Serialized events
+import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+import type { TimelineEvent } from '../../services/TimelineService.client'
+import { extractEraConfig } from '../../services/TimelineService.client' // Added this import
+import {
+  filteredEvents,
+  selectedEvent,
+  timelineActions,
+  timelineStore,
+} from '../../stores/timelineStore'
 
-  // Local state
-  let timelineCore: TimelineCore;
-  let loading = true;
-  let error: string | null = null;
-  let eraConfig = {};
-  let isInitialized = false;
-  let isMobile = false;
-  let showGestureHint = false;
-  let gestureHintTimer: number | null = null;
+// Components
+import TimelineCore from './TimelineCore.svelte'
+import ListView from './TimelineViewModes/ListView.svelte'
+import MapView from './TimelineViewModes/MapView.svelte'
+import TreeView from './TimelineViewModes/TreeView.svelte'
 
-  // Safe Event dispatch
-  const dispatch = createEventDispatcher();
-  
-  // Simple safe JSON parse function that doesn't use complex revivers
-  function parseEvents(jsonString: string): any[] {
-    if (!jsonString || typeof jsonString !== 'string') {
-      return [];
-    }
-    
-    try {
-      const parsed = JSON.parse(jsonString);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (e) {
-      console.error("Error parsing events:", e);
-      return [];
-    }
+// Props
+export let id: string = 'timeline-controller'
+export let category: string = ''
+export let startYear: number | undefined = undefined
+export let endYear: number | undefined = undefined
+export let background: string = '/assets/banner/0001.png'
+export let compact: boolean = false
+export let asBanner: boolean = false
+export let bannerHeight: string = '500px'
+export let initialEvents: string = '[]' // Serialized events
+
+// Local state
+let timelineCore: TimelineCore
+let loading = true
+let error: string | null = null
+let eraConfig = {}
+let isInitialized = false
+let isMobile = false
+let showGestureHint = false
+let gestureHintTimer: number | null = null
+
+// Safe Event dispatch
+const dispatch = createEventDispatcher()
+
+// Simple safe JSON parse function that doesn't use complex revivers
+function parseEvents(jsonString: string): any[] {
+  if (!jsonString || typeof jsonString !== 'string') {
+    return []
   }
-  
-  // Check if we're on a mobile device
-  function checkMobileView() {
-    isMobile = window.innerWidth < 768; // Standard mobile breakpoint
+
+  try {
+    const parsed = JSON.parse(jsonString)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (e) {
+    console.error('Error parsing events:', e)
+    return []
   }
-  
-  // Function to show gesture hint for mobile users
-  function showTouchGestureHint() {
-    // Only show hint on mobile devices
-    if (!isMobile) return;
-    
-    // Set flag to show the hint
-    showGestureHint = true;
-    
-    // Clear any existing timer
-    if (gestureHintTimer) {
-      clearTimeout(gestureHintTimer);
-    }
-    
-    // Set timer to hide the hint after 3 seconds
-    gestureHintTimer = setTimeout(() => {
-      showGestureHint = false;
-      gestureHintTimer = null;
-    }, 3000) as unknown as number;
+}
+
+// Check if we're on a mobile device
+function checkMobileView() {
+  isMobile = window.innerWidth < 768 // Standard mobile breakpoint
+}
+
+// Function to show gesture hint for mobile users
+function showTouchGestureHint() {
+  // Only show hint on mobile devices
+  if (!isMobile) return
+
+  // Set flag to show the hint
+  showGestureHint = true
+
+  // Clear any existing timer
+  if (gestureHintTimer) {
+    clearTimeout(gestureHintTimer)
   }
-  
-  // New function to initialize timeline with saved era
-  function initializeTimeline() {
-    // 1. Get the current configuration
-    const availableEras = Object.keys(eraConfig);
-    const savedEra = $timelineStore.era || $timelineStore.lastEra;
-    
-    console.log("Available eras:", availableEras);
-    console.log("Saved era:", savedEra);
-    
-    // 2. Validate the era
-    const isValidEra = savedEra && availableEras.includes(savedEra);
-    
-    // 3. Set the dropdown value (UI state)
-    const eraSelect = document.querySelector('.era-select') as HTMLSelectElement;
-    if (eraSelect) {
-      eraSelect.value = isValidEra ? savedEra : 'all';
-    }
-    
-    // 4. Apply the navigation
-    if (isValidEra && timelineCore) {
-      // If we have saved position data for this era, use it
-      if ($timelineStore.lastEraScale !== null && 
-          $timelineStore.lastEraOffsetX !== null && 
-          $timelineStore.lastEraOffsetY !== null) {
-        console.log('Restoring saved position', {
-          scale: $timelineStore.lastEraScale,
-          offsetX: $timelineStore.lastEraOffsetX,
-          offsetY: $timelineStore.lastEraOffsetY
-        });
-        timelineCore.setPosition(
-          $timelineStore.lastEraScale, 
-          $timelineStore.lastEraOffsetX, 
-          $timelineStore.lastEraOffsetY
-        );
-      } else {
-        // Otherwise navigate to the era's range
-        const config = eraConfig[savedEra];
-        console.log(`Navigating to era range: ${config.startYear}-${config.endYear}`);
-        timelineCore.navigateToEraRange(config.startYear, config.endYear);
-      }
+
+  // Set timer to hide the hint after 3 seconds
+  gestureHintTimer = setTimeout(() => {
+    showGestureHint = false
+    gestureHintTimer = null
+  }, 3000) as unknown as number
+}
+
+// New function to initialize timeline with saved era
+function initializeTimeline() {
+  // 1. Get the current configuration
+  const availableEras = Object.keys(eraConfig)
+  const savedEra = $timelineStore.era || $timelineStore.lastEra
+
+  console.log('Available eras:', availableEras)
+  console.log('Saved era:', savedEra)
+
+  // 2. Validate the era
+  const isValidEra = savedEra && availableEras.includes(savedEra)
+
+  // 3. Set the dropdown value (UI state)
+  const eraSelect = document.querySelector('.era-select') as HTMLSelectElement
+  if (eraSelect) {
+    eraSelect.value = isValidEra ? savedEra : 'all'
+  }
+
+  // 4. Apply the navigation
+  if (isValidEra && timelineCore) {
+    // If we have saved position data for this era, use it
+    if (
+      $timelineStore.lastEraScale !== null &&
+      $timelineStore.lastEraOffsetX !== null &&
+      $timelineStore.lastEraOffsetY !== null
+    ) {
+      console.log('Restoring saved position', {
+        scale: $timelineStore.lastEraScale,
+        offsetX: $timelineStore.lastEraOffsetX,
+        offsetY: $timelineStore.lastEraOffsetY,
+      })
+      timelineCore.setPosition(
+        $timelineStore.lastEraScale,
+        $timelineStore.lastEraOffsetX,
+        $timelineStore.lastEraOffsetY,
+      )
     } else {
-      // Default to 'all' view
-      console.log("No valid era found, using default 'all' view");
-      if (timelineCore) {
-        timelineCore.resetView();
-      }
-      // Update the store if needed
-      if (savedEra && !isValidEra) {
-        console.log(`Clearing invalid era: ${savedEra}`);
-        timelineActions.setEra(null);
-      }
+      // Otherwise navigate to the era's range
+      const config = eraConfig[savedEra]
+      console.log(
+        `Navigating to era range: ${config.startYear}-${config.endYear}`,
+      )
+      timelineCore.navigateToEraRange(config.startYear, config.endYear)
+    }
+  } else {
+    // Default to 'all' view
+    console.log("No valid era found, using default 'all' view")
+    if (timelineCore) {
+      timelineCore.resetView()
+    }
+    // Update the store if needed
+    if (savedEra && !isValidEra) {
+      console.log(`Clearing invalid era: ${savedEra}`)
+      timelineActions.setEra(null)
     }
   }
-  
+}
+
 // Initialize the component only after mounting
 onMount(() => {
-  console.log("Timeline controller mounting");
-  
+  console.log('Timeline controller mounting')
+
   // Check for mobile view
-  checkMobileView();
-  
+  checkMobileView()
+
   // Listen for window resize to update mobile state
-  window.addEventListener('resize', checkMobileView);
-  
+  window.addEventListener('resize', checkMobileView)
+
   // Show gesture hint for mobile users
   if (isMobile) {
     // Show gesture hint with a slight delay to ensure it appears after the component is visible
-    setTimeout(showTouchGestureHint, 1000);
+    setTimeout(showTouchGestureHint, 1000)
   }
-  
+
   // Avoid double initialization
-  if (isInitialized) return;
+  if (isInitialized) return
 
   try {
     // Parse events first
-    const events = parseEvents(initialEvents);
-    
+    const events = parseEvents(initialEvents)
+
     // Process events (ensure year is a number)
     const processedEvents = events.map(event => ({
       ...event,
-      year: typeof event.year === 'string' ? parseInt(event.year, 10) : event.year
-    }));
-    
+      year:
+        typeof event.year === 'string' ? parseInt(event.year, 10) : event.year,
+    }))
+
     // Initialize store props
     if (category) {
-      timelineActions.setCategory(category);
+      timelineActions.setCategory(category)
     }
-    
+
     if (asBanner) {
-      timelineActions.setBannerMode(true);
+      timelineActions.setBannerMode(true)
     }
-    
+
     if (startYear || endYear) {
-      timelineActions.setYearRange(
-        startYear || null,
-        endYear || null
-      );
+      timelineActions.setYearRange(startYear || null, endYear || null)
     }
-    
+
     if (compact) {
-      timelineActions.toggleCompact();
+      timelineActions.toggleCompact()
     }
-    
+
     // Set initial events
-    timelineActions.setInitialEvents(processedEvents);
-    
+    timelineActions.setInitialEvents(processedEvents)
+
     // Extract era configuration properly using the utility function
-    eraConfig = extractEraConfig(processedEvents);
-    
+    eraConfig = extractEraConfig(processedEvents)
+
     // Create a function to determine the appropriate background based on priority
     function determineBackground() {
       // First priority: Check for event-specific backgrounds from blog posts
-      const backgroundEvents = processedEvents.filter(event => event.bannerData?.background);
-      if (backgroundEvents.length > 0 && backgroundEvents[0].bannerData?.background) {
-        console.log("Using banner post background:", backgroundEvents[0].bannerData.background);
-        return backgroundEvents[0].bannerData.background;
+      const backgroundEvents = processedEvents.filter(
+        event => event.bannerData?.background,
+      )
+      if (
+        backgroundEvents.length > 0 &&
+        backgroundEvents[0].bannerData?.background
+      ) {
+        console.log(
+          'Using banner post background:',
+          backgroundEvents[0].bannerData.background,
+        )
+        return backgroundEvents[0].bannerData.background
       }
-      
+
       // Second priority: Use the current era's background
-      const currentEra = $timelineStore.era || $timelineStore.lastEra || 'all-eras';
+      const currentEra =
+        $timelineStore.era || $timelineStore.lastEra || 'all-eras'
       if (eraConfig[currentEra]?.backgroundImage) {
-        console.log("Using era background:", eraConfig[currentEra].backgroundImage);
-        return eraConfig[currentEra].backgroundImage;
+        console.log(
+          'Using era background:',
+          eraConfig[currentEra].backgroundImage,
+        )
+        return eraConfig[currentEra].backgroundImage
       }
-      
+
       // Fallback: Use the default background
-      console.log("Using default background:", background);
-      return background; // this is the prop from the component
+      console.log('Using default background:', background)
+      return background // this is the prop from the component
     }
 
     // Set the background based on priority
-    const selectedBackground = determineBackground();
-    timelineActions.setBackground(selectedBackground);
-    
+    const selectedBackground = determineBackground()
+    timelineActions.setBackground(selectedBackground)
+
     // Mark as initialized
-    isInitialized = true;
-    
+    isInitialized = true
+
     // Initialize timeline with proper era after a short delay
     // to ensure timelineCore is ready
     setTimeout(() => {
       if (timelineCore) {
-        console.log("TimelineCore is ready, initializing timeline");
-        initializeTimeline();
+        console.log('TimelineCore is ready, initializing timeline')
+        initializeTimeline()
       } else {
-        console.log("TimelineCore not ready yet, setting up interval check");
+        console.log('TimelineCore not ready yet, setting up interval check')
         // If timeline core isn't ready yet, wait for it
         const checkInterval = setInterval(() => {
           if (timelineCore) {
-            console.log("TimelineCore is now ready, initializing timeline");
-            initializeTimeline();
-            clearInterval(checkInterval);
+            console.log('TimelineCore is now ready, initializing timeline')
+            initializeTimeline()
+            clearInterval(checkInterval)
           }
-        }, 100);
-        
+        }, 100)
+
         // Clear interval after max 2 seconds to prevent infinite loop
-        setTimeout(() => clearInterval(checkInterval), 2000);
+        setTimeout(() => clearInterval(checkInterval), 2000)
       }
-    }, 100);
-    
+    }, 100)
   } catch (e) {
-    console.error("Error initializing timeline:", e);
-    error = "Failed to initialize timeline";
+    console.error('Error initializing timeline:', e)
+    error = 'Failed to initialize timeline'
   } finally {
     // Always set loading to false, even if there's an error
-    loading = false;
+    loading = false
   }
-  
+
   // Return cleanup function
   return () => {
-    window.removeEventListener('resize', checkMobileView);
+    window.removeEventListener('resize', checkMobileView)
     if (gestureHintTimer) {
-      clearTimeout(gestureHintTimer);
+      clearTimeout(gestureHintTimer)
     }
-  };
-});
-  
+  }
+})
+
 // Improved handleEraFilter function with background handling
 function handleEraFilter(e) {
-  const value = e.target.value;
-  console.log(`Era selected from dropdown: ${value}`);
-  
+  const value = e.target.value
+  console.log(`Era selected from dropdown: ${value}`)
+
   // Handle "all" or "all-time" options more directly
   if (value === 'all') {
-    console.log(`Setting view for "All Eras" option`);
-    timelineActions.setEra('all-eras');
-    
+    console.log(`Setting view for "All Eras" option`)
+    timelineActions.setEra('all-eras')
+
     // Set the background for all-eras (with improved handling)
     if (eraConfig['all-eras'] && eraConfig['all-eras'].backgroundImage) {
       // Update the store
-      timelineActions.setBackground(eraConfig['all-eras'].backgroundImage);
+      timelineActions.setBackground(eraConfig['all-eras'].backgroundImage)
       // Force update on TimelineCore by directly updating the prop
-      if (timelineCore) timelineCore.updateBackground(eraConfig['all-eras'].backgroundImage);
+      if (timelineCore)
+        timelineCore.updateBackground(eraConfig['all-eras'].backgroundImage)
     }
-    
+
     if (timelineCore && typeof timelineCore.navigateToEraRange === 'function') {
-      timelineCore.navigateToEraRange(eraConfig['all-eras'].startYear, eraConfig['all-eras'].endYear);
+      timelineCore.navigateToEraRange(
+        eraConfig['all-eras'].startYear,
+        eraConfig['all-eras'].endYear,
+      )
     } else {
-      handleResetView();
+      handleResetView()
     }
-    return;
+    return
   } else if (value === 'all-time') {
-    console.log(`Setting view for "All Time" option`);
-    timelineActions.setEra('all-time');
-    
+    console.log(`Setting view for "All Time" option`)
+    timelineActions.setEra('all-time')
+
     // Set the background for all-time (with improved handling)
     if (eraConfig['all-time'] && eraConfig['all-time'].backgroundImage) {
       // Update the store
-      timelineActions.setBackground(eraConfig['all-time'].backgroundImage);
+      timelineActions.setBackground(eraConfig['all-time'].backgroundImage)
       // Force update on TimelineCore by directly updating the prop
-      if (timelineCore) timelineCore.updateBackground(eraConfig['all-time'].backgroundImage);
+      if (timelineCore)
+        timelineCore.updateBackground(eraConfig['all-time'].backgroundImage)
     }
-    
+
     if (timelineCore && typeof timelineCore.navigateToEraRange === 'function') {
-      timelineCore.navigateToEraRange(eraConfig['all-time'].startYear, eraConfig['all-time'].endYear);
+      timelineCore.navigateToEraRange(
+        eraConfig['all-time'].startYear,
+        eraConfig['all-time'].endYear,
+      )
     } else {
-      handleResetView();
+      handleResetView()
     }
-    return;
+    return
   }
-  
+
   // Validate era exists in config
   if (!eraConfig[value]) {
-    console.warn(`Invalid era selected: ${value}`);
-    e.target.value = 'all'; // Reset dropdown to "all"
-    timelineActions.setEra(null);
-    handleResetView();
-    return;
+    console.warn(`Invalid era selected: ${value}`)
+    e.target.value = 'all' // Reset dropdown to "all"
+    timelineActions.setEra(null)
+    handleResetView()
+    return
   }
-  
+
   // For specific era selection
-  const startYear = eraConfig[value].startYear;
-  const endYear = eraConfig[value].endYear;
-  
-  console.log(`Era selected: ${value} (${startYear}-${endYear})`);
-  
+  const startYear = eraConfig[value].startYear
+  const endYear = eraConfig[value].endYear
+
+  console.log(`Era selected: ${value} (${startYear}-${endYear})`)
+
   // Update the era in the store (this will persist to localStorage)
-  timelineActions.setEra(value);
-  
+  timelineActions.setEra(value)
+
   // Check if we should update the background
-  let shouldUpdateBackground = true;
-  
+  let shouldUpdateBackground = true
+
   // Check if any event has a specific background (higher priority)
-  const eventsInEra = $filteredEvents.filter(e => 
-    e.year >= startYear && e.year <= endYear && e.bannerData?.background
-  );
-  
+  const eventsInEra = $filteredEvents.filter(
+    e => e.year >= startYear && e.year <= endYear && e.bannerData?.background,
+  )
+
   if (eventsInEra.length > 0 && eventsInEra[0].bannerData?.background) {
     // If an event has a specific background, use it
-    const eventBackground = eventsInEra[0].bannerData.background;
-    console.log(`Using event-specific background: ${eventBackground}`);
-    timelineActions.setBackground(eventBackground);
-    if (timelineCore) timelineCore.updateBackground(eventBackground);
-    shouldUpdateBackground = false;
+    const eventBackground = eventsInEra[0].bannerData.background
+    console.log(`Using event-specific background: ${eventBackground}`)
+    timelineActions.setBackground(eventBackground)
+    if (timelineCore) timelineCore.updateBackground(eventBackground)
+    shouldUpdateBackground = false
   }
-  
+
   // Only use era background if no event-specific background was found
   if (shouldUpdateBackground && eraConfig[value].backgroundImage) {
-    console.log(`Setting era background image: ${eraConfig[value].backgroundImage}`);
-    timelineActions.setBackground(eraConfig[value].backgroundImage);
-    if (timelineCore) timelineCore.updateBackground(eraConfig[value].backgroundImage);
+    console.log(
+      `Setting era background image: ${eraConfig[value].backgroundImage}`,
+    )
+    timelineActions.setBackground(eraConfig[value].backgroundImage)
+    if (timelineCore)
+      timelineCore.updateBackground(eraConfig[value].backgroundImage)
   }
-  
+
   // Call the navigateToEraRange function if it exists
   if (timelineCore && typeof timelineCore.navigateToEraRange === 'function') {
-    timelineCore.navigateToEraRange(startYear, endYear);
-    
+    timelineCore.navigateToEraRange(startYear, endYear)
+
     // After navigation is complete, save the position for this era
     // We'll add a delay to ensure the animation has time to complete
     setTimeout(() => {
       if (timelineCore) {
         // Save the current position for this era
         timelineActions.saveEraPosition(
-          timelineCore.getCurrentScale(), 
-          timelineCore.getCurrentOffsetX(), 
-          timelineCore.getCurrentOffsetY()
-        );
+          timelineCore.getCurrentScale(),
+          timelineCore.getCurrentOffsetX(),
+          timelineCore.getCurrentOffsetY(),
+        )
       }
-    }, 500);
+    }, 500)
   } else {
-    console.warn("timelineCore.navigateToEraRange function not available");
-    handleResetView(); // Fallback to reset view
+    console.warn('timelineCore.navigateToEraRange function not available')
+    handleResetView() // Fallback to reset view
   }
 }
-  
-  function handleResize() {
-    // Simple resize handler
-    checkMobileView();
-  }
 
-  // Safe handlers for timeline actions
-  function handleZoomIn() {
-    timelineActions.zoomIn();
-    if (timelineCore && typeof timelineCore.zoomIn === 'function') {
-      timelineCore.zoomIn();
-      
-      // Save position after zoom
-      setTimeout(() => {
-        if (timelineCore && $timelineStore.era) {
-          timelineActions.saveEraPosition(
-            timelineCore.getCurrentScale(),
-            timelineCore.getCurrentOffsetX(),
-            timelineCore.getCurrentOffsetY()
-          );
-        }
-      }, 300);
-    }
-  }
-  
-  function handleZoomOut() {
-    timelineActions.zoomOut();
-    if (timelineCore && typeof timelineCore.zoomOut === 'function') {
-      timelineCore.zoomOut();
-      
-      // Save position after zoom
-      setTimeout(() => {
-        if (timelineCore && $timelineStore.era) {
-          timelineActions.saveEraPosition(
-            timelineCore.getCurrentScale(),
-            timelineCore.getCurrentOffsetX(),
-            timelineCore.getCurrentOffsetY()
-          );
-        }
-      }, 300);
-    }
-  }
-  
-  function handlePan(x: number, y: number) {
-    timelineActions.pan(x, y);
-    if (timelineCore && typeof timelineCore.pan === 'function') {
-      timelineCore.pan(x, y);
-      
-      // Save position after pan
-      setTimeout(() => {
-        if (timelineCore && $timelineStore.era) {
-          timelineActions.saveEraPosition(
-            timelineCore.getCurrentScale(),
-            timelineCore.getCurrentOffsetX(),
-            timelineCore.getCurrentOffsetY()
-          );
-        }
-      }, 300);
-    }
-  }
-  
-  function handleResetView() {
-    timelineActions.resetView();
-    if (timelineCore && typeof timelineCore.resetView === 'function') {
-      timelineCore.resetView();
-    }
-  }
-  
-  function handleSelectEvent(e) {
-    if (e && e.detail && e.detail.event && e.detail.event.slug) {
-      timelineActions.selectEvent(e.detail.event.slug);
-    }
-  }
-  
-  function handleDeselectEvent() {
-    timelineActions.selectEvent(null);
-  }
-  
-  function handleSetViewMode(mode) {
-    timelineActions.setViewMode(mode);
-  }
-  
-  // Keep the function even though we removed the buttons
-  function handleToggleCompact() {
-    timelineActions.toggleCompact();
-  }
-  
-  // Define currentHeight as a reactive variable
-  $: currentHeight = asBanner ? (isMobile ? '600px' : bannerHeight) : "500px";
-  $: useEraColors = $timelineStore.era === 'all-eras';
+function handleResize() {
+  // Simple resize handler
+  checkMobileView()
+}
 
-  // (like $: currentHeight = asBanner ? ... and $: useEraColors = ...)
+// Safe handlers for timeline actions
+function handleZoomIn() {
+  timelineActions.zoomIn()
+  if (timelineCore && typeof timelineCore.zoomIn === 'function') {
+    timelineCore.zoomIn()
+
+    // Save position after zoom
+    setTimeout(() => {
+      if (timelineCore && $timelineStore.era) {
+        timelineActions.saveEraPosition(
+          timelineCore.getCurrentScale(),
+          timelineCore.getCurrentOffsetX(),
+          timelineCore.getCurrentOffsetY(),
+        )
+      }
+    }, 300)
+  }
+}
+
+function handleZoomOut() {
+  timelineActions.zoomOut()
+  if (timelineCore && typeof timelineCore.zoomOut === 'function') {
+    timelineCore.zoomOut()
+
+    // Save position after zoom
+    setTimeout(() => {
+      if (timelineCore && $timelineStore.era) {
+        timelineActions.saveEraPosition(
+          timelineCore.getCurrentScale(),
+          timelineCore.getCurrentOffsetX(),
+          timelineCore.getCurrentOffsetY(),
+        )
+      }
+    }, 300)
+  }
+}
+
+function handlePan(x: number, y: number) {
+  timelineActions.pan(x, y)
+  if (timelineCore && typeof timelineCore.pan === 'function') {
+    timelineCore.pan(x, y)
+
+    // Save position after pan
+    setTimeout(() => {
+      if (timelineCore && $timelineStore.era) {
+        timelineActions.saveEraPosition(
+          timelineCore.getCurrentScale(),
+          timelineCore.getCurrentOffsetX(),
+          timelineCore.getCurrentOffsetY(),
+        )
+      }
+    }, 300)
+  }
+}
+
+function handleResetView() {
+  timelineActions.resetView()
+  if (timelineCore && typeof timelineCore.resetView === 'function') {
+    timelineCore.resetView()
+  }
+}
+
+function handleSelectEvent(e) {
+  if (e && e.detail && e.detail.event && e.detail.event.slug) {
+    timelineActions.selectEvent(e.detail.event.slug)
+  }
+}
+
+function handleDeselectEvent() {
+  timelineActions.selectEvent(null)
+}
+
+function handleSetViewMode(mode) {
+  timelineActions.setViewMode(mode)
+}
+
+// Keep the function even though we removed the buttons
+function handleToggleCompact() {
+  timelineActions.toggleCompact()
+}
+
+// Define currentHeight as a reactive variable
+$: currentHeight = asBanner ? (isMobile ? '600px' : bannerHeight) : '500px'
+$: useEraColors = $timelineStore.era === 'all-eras'
+
+// (like $: currentHeight = asBanner ? ... and $: useEraColors = ...)
 $: if (timelineCore && $timelineStore.background) {
   // Ensure the TimelineCore background stays in sync with the store
-  timelineCore.updateBackground($timelineStore.background);
+  timelineCore.updateBackground($timelineStore.background)
 }
-
 </script>
 
 <div class="timeline-wrapper relative w-full overflow-hidden {asBanner ? 'timeline-banner-mode' : ''}" 

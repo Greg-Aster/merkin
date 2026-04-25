@@ -1,43 +1,50 @@
 <!-- DynamicBanner.astro -->
 ---
-import { Image } from 'astro:assets';
-import { BANNER_HEIGHT, BANNER_HEIGHT_MOBILE } from "../constants/constants";
+import { Image } from 'astro:assets'
+import { BANNER_HEIGHT, BANNER_HEIGHT_MOBILE } from '../constants/constants'
 
 interface Props {
-  type: 'image' | 'video' | 'slideshow';
-  content: any; 
-  position?: 'top' | 'center' | 'bottom';
-  alt?: string;
+  type: 'image' | 'video' | 'slideshow'
+  content: any
+  position?: 'top' | 'center' | 'bottom'
+  alt?: string
 }
 
-const { type = 'image', content, position = 'center', alt = 'Banner content' } = Astro.props;
+const {
+  type = 'image',
+  content,
+  position = 'center',
+  alt = 'Banner content',
+} = Astro.props
 
 // Handle different content types
-const isSlideshow = type === 'slideshow' && Array.isArray(content);
-const isVideo = type === 'video';
-const isImage = type === 'image' || (isSlideshow && content.length === 1);
+const isSlideshow = type === 'slideshow' && Array.isArray(content)
+const isVideo = type === 'video'
+const isImage = type === 'image' || (isSlideshow && content.length === 1)
 
 // Parse video URL for embed if needed
-let videoSrc = '';
-let videoProvider = '';
+let videoSrc = ''
+let videoProvider = ''
 if (isVideo && typeof content === 'string') {
   if (content.includes('youtube.com') || content.includes('youtu.be')) {
-    videoProvider = 'youtube';
+    videoProvider = 'youtube'
     // Extract YouTube video ID
-    const match = content.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+    const match = content.match(
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/,
+    )
     if (match && match[1]) {
-      videoSrc = `https://www.youtube.com/embed/${match[1]}?autoplay=0&rel=0`;
+      videoSrc = `https://www.youtube.com/embed/${match[1]}?autoplay=0&rel=0`
     }
   } else if (content.includes('vimeo.com')) {
-    videoProvider = 'vimeo';
+    videoProvider = 'vimeo'
     // Extract Vimeo video ID
-    const match = content.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+    const match = content.match(/vimeo\.com\/(?:video\/)?(\d+)/)
     if (match && match[1]) {
-      videoSrc = `https://player.vimeo.com/video/${match[1]}`;
+      videoSrc = `https://player.vimeo.com/video/${match[1]}`
     }
   } else {
     // Assume it's a direct video file
-    videoSrc = content;
+    videoSrc = content
   }
 }
 ---

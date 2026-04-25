@@ -1,76 +1,82 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { createEventDispatcher } from 'svelte';
-  import type { TimelineEvent } from '../../../services/TimelineService.client';
-  import { getEraDisplayName, getEraClasses } from '../../../services/TimelineService.client';
-  import TimelineCard from '../TimelineCard.svelte'; // Import the same card component used in TimelineCore
-  
-  // Props
-  export let events: TimelineEvent[] = [];
-  export let background: string = '/assets/banner/0001.png';
-  export let selectedEvent: TimelineEvent | null = null;
-  
-  // Create Svelte event dispatcher
-  const dispatch = createEventDispatcher();
-  
-  // Filter events that have locations
-  $: eventsWithLocations = events.filter(event => event.location);
-  
-  // Reference to root element for DOM event handling
-  let rootElement: HTMLElement;
-  
-  // Tracking hover/selection state
-  let hoveredEventSlug: string | null = null;
-  
-  // Enhanced event handling with Svelte's dispatcher
-  function handleSelect(event: TimelineEvent) {
-    console.log(`MapView handling selection for: ${event.title} (${event.slug})`);
-    
-    // If this event is already selected, navigate to its page
-    if (selectedEvent && selectedEvent.slug === event.slug) {
-      console.log(`MapView navigating to: /posts/${event.slug}/`);
-      window.location.href = `/posts/${event.slug}/`;
-      return;
-    }
-    
-    // Otherwise, dispatch selection event using Svelte's dispatcher
-    console.log(`MapView dispatching select event for: ${event.slug}`);
-    dispatch('select', { slug: event.slug });
+import { onMount } from 'svelte'
+import { createEventDispatcher } from 'svelte'
+import type { TimelineEvent } from '../../../services/TimelineService.client'
+import {
+  getEraClasses,
+  getEraDisplayName,
+} from '../../../services/TimelineService.client'
+import TimelineCard from '../TimelineCard.svelte' // Import the same card component used in TimelineCore
+
+// Props
+export let events: TimelineEvent[] = []
+export let background: string = '/assets/banner/0001.png'
+export let selectedEvent: TimelineEvent | null = null
+
+// Create Svelte event dispatcher
+const dispatch = createEventDispatcher()
+
+// Filter events that have locations
+$: eventsWithLocations = events.filter(event => event.location)
+
+// Reference to root element for DOM event handling
+let rootElement: HTMLElement
+
+// Tracking hover/selection state
+let hoveredEventSlug: string | null = null
+
+// Enhanced event handling with Svelte's dispatcher
+function handleSelect(event: TimelineEvent) {
+  console.log(`MapView handling selection for: ${event.title} (${event.slug})`)
+
+  // If this event is already selected, navigate to its page
+  if (selectedEvent && selectedEvent.slug === event.slug) {
+    console.log(`MapView navigating to: /posts/${event.slug}/`)
+    window.location.href = `/posts/${event.slug}/`
+    return
   }
-  
-  // Handle hover for showing information cards
-  function handleHover(event: TimelineEvent) {
-    hoveredEventSlug = event.slug;
-  }
-  
-  function clearHover() {
-    hoveredEventSlug = null;
-  }
-  
-  // Generate a pseudo-random x,y coordinate based on location name
-  // This creates a consistent position for each location
-  function getLocationCoordinates(location: string) {
-    // Simple hash function for pseudo-random but consistent coordinates
-    const hash = [...location].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 0);
-    
-    // Position the pin in the map area
-    const x = 50 + (hash % 300);
-    const y = 50 + ((hash * 17) % 200);
-    
-    return { x, y };
-  }
-  
-  // Initialize DOM events and logging
-  onMount(() => {
-    console.log("MapView mounted with locations:", eventsWithLocations.length);
-    
-    // Add debugging log to check if component is properly rendering
-    console.log("MapView elements:", {
-      rootElement,
-      pins: document.querySelectorAll('.map-pin').length,
-      cards: document.querySelectorAll('.location-card').length
-    });
-  });
+
+  // Otherwise, dispatch selection event using Svelte's dispatcher
+  console.log(`MapView dispatching select event for: ${event.slug}`)
+  dispatch('select', { slug: event.slug })
+}
+
+// Handle hover for showing information cards
+function handleHover(event: TimelineEvent) {
+  hoveredEventSlug = event.slug
+}
+
+function clearHover() {
+  hoveredEventSlug = null
+}
+
+// Generate a pseudo-random x,y coordinate based on location name
+// This creates a consistent position for each location
+function getLocationCoordinates(location: string) {
+  // Simple hash function for pseudo-random but consistent coordinates
+  const hash = [...location].reduce(
+    (h, c) => (h * 31 + c.charCodeAt(0)) % 360,
+    0,
+  )
+
+  // Position the pin in the map area
+  const x = 50 + (hash % 300)
+  const y = 50 + ((hash * 17) % 200)
+
+  return { x, y }
+}
+
+// Initialize DOM events and logging
+onMount(() => {
+  console.log('MapView mounted with locations:', eventsWithLocations.length)
+
+  // Add debugging log to check if component is properly rendering
+  console.log('MapView elements:', {
+    rootElement,
+    pins: document.querySelectorAll('.map-pin').length,
+    cards: document.querySelectorAll('.location-card').length,
+  })
+})
 </script>
 
 <div class="map-view relative" bind:this={rootElement}>

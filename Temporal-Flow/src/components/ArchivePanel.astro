@@ -1,6 +1,6 @@
 ---
-import SharedArchivePanel from '@merkin/blog-core/components/ArchivePanel.astro'
 import { UNCATEGORIZED } from '@constants/constants'
+import SharedArchivePanel from '@merkin/blog-core/components/ArchivePanel.astro'
 import I18nKey from '../i18n/i18nKey'
 import { i18n } from '../i18n/translation'
 import { getSortedPosts } from '../utils/content-utils'
@@ -14,8 +14,12 @@ interface Props {
 const { tags, categories } = Astro.props
 
 let posts = await getSortedPosts()
-const normalizedTags = new Set((tags ?? []).map((tag: string) => tag.toLowerCase()))
-const normalizedCategories = new Set((categories ?? []).map((category: string) => category.toLowerCase()))
+const normalizedTags = new Set(
+  (tags ?? []).map((tag: string) => tag.toLowerCase()),
+)
+const normalizedCategories = new Set(
+  (categories ?? []).map((category: string) => category.toLowerCase()),
+)
 
 if (Array.isArray(tags) && tags.length > 0) {
   posts = posts.filter(
@@ -28,8 +32,10 @@ if (Array.isArray(tags) && tags.length > 0) {
 if (Array.isArray(categories) && categories.length > 0) {
   posts = posts.filter(
     post =>
-      (post.data.category && normalizedCategories.has(post.data.category.toLowerCase())) ||
-      (!post.data.category && normalizedCategories.has(UNCATEGORIZED.toLowerCase())),
+      (post.data.category &&
+        normalizedCategories.has(post.data.category.toLowerCase())) ||
+      (!post.data.category &&
+        normalizedCategories.has(UNCATEGORIZED.toLowerCase())),
   )
 }
 

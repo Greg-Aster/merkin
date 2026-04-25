@@ -1,8 +1,8 @@
 <script lang="ts">
-import SharedLightDarkSwitch from '@merkin/blog-core/components/LightDarkSwitch.svelte'
+import { siteConfig } from '@/config/config.ts'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
-import { siteConfig } from '@/config/config.ts'
+import SharedLightDarkSwitch from '@merkin/blog-core/components/LightDarkSwitch.svelte'
 </script>
 
 <SharedLightDarkSwitch

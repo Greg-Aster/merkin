@@ -1,50 +1,52 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
-  
-  // Props
-  export let viewSettings;
-  export let onUpdate;
-  
-  // Local state
-  let settings = { ...viewSettings };
-  
-  // Create event dispatcher
-  const dispatch = createEventDispatcher();
-  
-  // Handle form changes
-  function handleChange() {
-    onUpdate(settings);
-    dispatch('change', settings);
-  }
-  
-  // Reset to defaults
-  function resetToDefaults() {
-    if (confirm('Are you sure you want to reset all view settings to defaults?')) {
-      settings = {
-        defaultZoom: 1,
-        maxZoom: 5,
-        minZoom: 0.5,
-        zoomStep: 0.2,
-        padding: 15,
-        zoomRatioThresholds: {
-          verySmall: 50,
-          small: 20,
-          medium: 10,
-          large: 4,
-          veryLarge: 2
-        },
-        zoomLevels: {
-          verySmall: 4,
-          small: 3,
-          medium: 2.5,
-          large: 2,
-          veryLarge: 1.5,
-          full: 1.2
-        }
-      };
-      handleChange();
+import { createEventDispatcher } from 'svelte'
+
+// Props
+export let viewSettings
+export let onUpdate
+
+// Local state
+let settings = { ...viewSettings }
+
+// Create event dispatcher
+const dispatch = createEventDispatcher()
+
+// Handle form changes
+function handleChange() {
+  onUpdate(settings)
+  dispatch('change', settings)
+}
+
+// Reset to defaults
+function resetToDefaults() {
+  if (
+    confirm('Are you sure you want to reset all view settings to defaults?')
+  ) {
+    settings = {
+      defaultZoom: 1,
+      maxZoom: 5,
+      minZoom: 0.5,
+      zoomStep: 0.2,
+      padding: 15,
+      zoomRatioThresholds: {
+        verySmall: 50,
+        small: 20,
+        medium: 10,
+        large: 4,
+        veryLarge: 2,
+      },
+      zoomLevels: {
+        verySmall: 4,
+        small: 3,
+        medium: 2.5,
+        large: 2,
+        veryLarge: 1.5,
+        full: 1.2,
+      },
     }
+    handleChange()
   }
+}
 </script>
 
 <div class="view-settings-editor">

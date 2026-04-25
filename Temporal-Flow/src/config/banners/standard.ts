@@ -171,7 +171,9 @@ export function getBannerItemPreviewDetails(
   let urlForDisplay = ''
   if (hasValidLink) {
     const base =
-      typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : 'http://localhost'
     try {
       urlForDisplay = new URL(linkUrl as string, base).pathname
     } catch {

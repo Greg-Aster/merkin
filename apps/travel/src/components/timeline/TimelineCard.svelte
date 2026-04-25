@@ -1,34 +1,35 @@
 <script lang="ts">
-  import { fly, fade } from 'svelte/transition';
-  import { cubicOut } from 'svelte/easing';
-  import type { TimelineEvent } from '../../services/TimelineService.client';
-  import { getEraDisplayName } from '../../services/TimelineService.client';
-  
-  // Props
-  export let event: TimelineEvent;
-  export let isSelected: boolean = false;
-  export let compact: boolean = false;
-  export let position: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
-  export let isMobile: boolean = false;
-  
-  // Helper function to get CSS classes for era badges
-  function getEraBadgeClass(era?: string): string {
-    if (!era) return "bg-[oklch(0.9_0.05_var(--hue))/0.1] dark:bg-[oklch(0.3_0.05_var(--hue))/0.2] text-[oklch(0.4_0.05_var(--hue))] dark:text-[oklch(0.9_0.05_var(--hue))]";
-    
-    // Match your existing era badge classes
-    switch(era) {
-      case 'pre-spork':
-        return "bg-[oklch(0.8_0.1_var(--hue))/0.1] dark:bg-[oklch(0.8_0.1_var(--hue))/0.2] text-[oklch(0.3_0.1_var(--hue))] dark:text-[oklch(0.8_0.1_var(--hue))]";
-      case 'spork-uprising':
-        return "bg-[oklch(0.7_0.2_var(--hue))/0.1] dark:bg-[oklch(0.7_0.2_var(--hue))/0.2] text-[oklch(0.3_0.2_var(--hue))] dark:text-[oklch(0.7_0.2_var(--hue))]";
-      case 'snuggaloid':
-        return "bg-[oklch(0.6_0.3_var(--hue))/0.1] dark:bg-[oklch(0.6_0.3_var(--hue))/0.2] text-[oklch(0.3_0.3_var(--hue))] dark:text-[oklch(0.6_0.3_var(--hue))]";
-      case 'post-extinction':
-        return "bg-[oklch(0.5_0.1_var(--hue))/0.1] dark:bg-[oklch(0.5_0.1_var(--hue))/0.2] text-[oklch(0.2_0.1_var(--hue))] dark:text-[oklch(0.5_0.1_var(--hue))]";
-      default:
-        return "bg-[oklch(0.9_0.05_var(--hue))/0.1] dark:bg-[oklch(0.3_0.05_var(--hue))/0.2] text-[oklch(0.4_0.05_var(--hue))] dark:text-[oklch(0.9_0.05_var(--hue))]";
-    }
+import { cubicOut } from 'svelte/easing'
+import { fade, fly } from 'svelte/transition'
+import type { TimelineEvent } from '../../services/TimelineService.client'
+import { getEraDisplayName } from '../../services/TimelineService.client'
+
+// Props
+export let event: TimelineEvent
+export let isSelected: boolean = false
+export let compact: boolean = false
+export let position: 'top' | 'bottom' | 'left' | 'right' = 'bottom'
+export let isMobile: boolean = false
+
+// Helper function to get CSS classes for era badges
+function getEraBadgeClass(era?: string): string {
+  if (!era)
+    return 'bg-[oklch(0.9_0.05_var(--hue))/0.1] dark:bg-[oklch(0.3_0.05_var(--hue))/0.2] text-[oklch(0.4_0.05_var(--hue))] dark:text-[oklch(0.9_0.05_var(--hue))]'
+
+  // Match your existing era badge classes
+  switch (era) {
+    case 'pre-spork':
+      return 'bg-[oklch(0.8_0.1_var(--hue))/0.1] dark:bg-[oklch(0.8_0.1_var(--hue))/0.2] text-[oklch(0.3_0.1_var(--hue))] dark:text-[oklch(0.8_0.1_var(--hue))]'
+    case 'spork-uprising':
+      return 'bg-[oklch(0.7_0.2_var(--hue))/0.1] dark:bg-[oklch(0.7_0.2_var(--hue))/0.2] text-[oklch(0.3_0.2_var(--hue))] dark:text-[oklch(0.7_0.2_var(--hue))]'
+    case 'snuggaloid':
+      return 'bg-[oklch(0.6_0.3_var(--hue))/0.1] dark:bg-[oklch(0.6_0.3_var(--hue))/0.2] text-[oklch(0.3_0.3_var(--hue))] dark:text-[oklch(0.6_0.3_var(--hue))]'
+    case 'post-extinction':
+      return 'bg-[oklch(0.5_0.1_var(--hue))/0.1] dark:bg-[oklch(0.5_0.1_var(--hue))/0.2] text-[oklch(0.2_0.1_var(--hue))] dark:text-[oklch(0.5_0.1_var(--hue))]'
+    default:
+      return 'bg-[oklch(0.9_0.05_var(--hue))/0.1] dark:bg-[oklch(0.3_0.05_var(--hue))/0.2] text-[oklch(0.4_0.05_var(--hue))] dark:text-[oklch(0.9_0.05_var(--hue))]'
   }
+}
 </script>
 
 <div 

@@ -1,94 +1,96 @@
 <script lang="ts">
-  import { T, useTask } from '@threlte/core'
-  import { onDestroy } from 'svelte'
-  import * as THREE from 'three'
-  import { qualityLevelStore } from '../features/performance/stores/performanceStore'
-  import { OptimizationLevel } from '../features/performance/OptimizationManager'
+import { T, useTask } from '@threlte/core'
+import { onDestroy } from 'svelte'
+import * as THREE from 'three'
+import { OptimizationLevel } from '../features/performance/OptimizationManager'
+import { qualityLevelStore } from '../features/performance/stores/performanceStore'
 
-  export let enabled = true
-  export let color = '#241557'
-  export let opacity = 0.14
-  export let layers = 3
-  export let scale = 360
-  export let baseHeight = 0.4
-  export let heightStep = 0.45
-  export let driftSpeed = 0.05
+export let enabled = true
+export let color = '#241557'
+export let opacity = 0.14
+export let layers = 3
+export let scale = 360
+export let baseHeight = 0.4
+export let heightStep = 0.45
+export let driftSpeed = 0.05
 
-  let mistTexture: THREE.Texture | null = null
-  let mistPlanes: Array<THREE.Mesh | null> = []
-  let animationTime = 0
+let mistTexture: THREE.Texture | null = null
+let mistPlanes: Array<THREE.Mesh | null> = []
+let animationTime = 0
 
-  function createMistTexture() {
-    const canvas = document.createElement('canvas')
-    canvas.width = 256
-    canvas.height = 256
+function createMistTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 256
+  canvas.height = 256
 
-    const context = canvas.getContext('2d')
-    if (!context) return null
+  const context = canvas.getContext('2d')
+  if (!context) return null
 
-    const gradient = context.createRadialGradient(128, 128, 20, 128, 128, 128)
-    gradient.addColorStop(0, 'rgba(255,255,255,0.95)')
-    gradient.addColorStop(0.3, 'rgba(255,255,255,0.55)')
-    gradient.addColorStop(0.72, 'rgba(255,255,255,0.12)')
-    gradient.addColorStop(1, 'rgba(255,255,255,0)')
-    context.fillStyle = gradient
-    context.fillRect(0, 0, 256, 256)
+  const gradient = context.createRadialGradient(128, 128, 20, 128, 128, 128)
+  gradient.addColorStop(0, 'rgba(255,255,255,0.95)')
+  gradient.addColorStop(0.3, 'rgba(255,255,255,0.55)')
+  gradient.addColorStop(0.72, 'rgba(255,255,255,0.12)')
+  gradient.addColorStop(1, 'rgba(255,255,255,0)')
+  context.fillStyle = gradient
+  context.fillRect(0, 0, 256, 256)
 
-    for (let index = 0; index < 84; index += 1) {
-      const x = Math.random() * 256
-      const y = Math.random() * 256
-      const radius = 18 + Math.random() * 42
-      const puff = context.createRadialGradient(x, y, 0, x, y, radius)
-      puff.addColorStop(0, 'rgba(255,255,255,0.2)')
-      puff.addColorStop(0.6, 'rgba(255,255,255,0.08)')
-      puff.addColorStop(1, 'rgba(255,255,255,0)')
-      context.fillStyle = puff
-      context.fillRect(x - radius, y - radius, radius * 2, radius * 2)
-    }
-
-    const texture = new THREE.CanvasTexture(canvas)
-    texture.wrapS = THREE.RepeatWrapping
-    texture.wrapT = THREE.RepeatWrapping
-    texture.repeat.set(1.4, 1.4)
-    texture.needsUpdate = true
-    return texture
+  for (let index = 0; index < 84; index += 1) {
+    const x = Math.random() * 256
+    const y = Math.random() * 256
+    const radius = 18 + Math.random() * 42
+    const puff = context.createRadialGradient(x, y, 0, x, y, radius)
+    puff.addColorStop(0, 'rgba(255,255,255,0.2)')
+    puff.addColorStop(0.6, 'rgba(255,255,255,0.08)')
+    puff.addColorStop(1, 'rgba(255,255,255,0)')
+    context.fillStyle = puff
+    context.fillRect(x - radius, y - radius, radius * 2, radius * 2)
   }
 
-  $: effectiveLayers = (() => {
-    switch ($qualityLevelStore) {
-      case OptimizationLevel.ULTRA_LOW:
-        return Math.max(0, Math.min(1, layers - 2))
-      case OptimizationLevel.LOW:
-        return Math.max(1, Math.min(2, layers - 1))
-      case OptimizationLevel.MEDIUM:
-        return Math.max(1, Math.min(3, layers))
-      default:
-        return Math.max(1, layers)
-    }
-  })()
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.wrapS = THREE.RepeatWrapping
+  texture.wrapT = THREE.RepeatWrapping
+  texture.repeat.set(1.4, 1.4)
+  texture.needsUpdate = true
+  return texture
+}
 
-  $: if (enabled && !mistTexture && typeof document !== 'undefined') {
-    mistTexture = createMistTexture()
+$: effectiveLayers = (() => {
+  switch ($qualityLevelStore) {
+    case OptimizationLevel.ULTRA_LOW:
+      return Math.max(0, Math.min(1, layers - 2))
+    case OptimizationLevel.LOW:
+      return Math.max(1, Math.min(2, layers - 1))
+    case OptimizationLevel.MEDIUM:
+      return Math.max(1, Math.min(3, layers))
+    default:
+      return Math.max(1, layers)
   }
+})()
 
-  useTask((delta) => {
-    if (!enabled || !mistPlanes.length) return
+$: if (enabled && !mistTexture && typeof document !== 'undefined') {
+  mistTexture = createMistTexture()
+}
 
-    animationTime += delta
-    mistPlanes.forEach((plane, index) => {
-      if (!plane) return
-      const drift = animationTime * driftSpeed * (1 + index * 0.15)
-      plane.position.x = Math.sin(drift + index * 1.2) * (3.5 + (index % 6) * 1.25)
-      plane.position.z = Math.cos(drift * 0.7 + index * 1.5) * (4.5 + (index % 5) * 1.15)
-      plane.rotation.z = Math.sin(drift * 0.25 + index) * 0.04
-    })
+useTask(delta => {
+  if (!enabled || !mistPlanes.length) return
+
+  animationTime += delta
+  mistPlanes.forEach((plane, index) => {
+    if (!plane) return
+    const drift = animationTime * driftSpeed * (1 + index * 0.15)
+    plane.position.x =
+      Math.sin(drift + index * 1.2) * (3.5 + (index % 6) * 1.25)
+    plane.position.z =
+      Math.cos(drift * 0.7 + index * 1.5) * (4.5 + (index % 5) * 1.15)
+    plane.rotation.z = Math.sin(drift * 0.25 + index) * 0.04
   })
+})
 
-  onDestroy(() => {
-    mistTexture?.dispose()
-    mistTexture = null
-    mistPlanes = []
-  })
+onDestroy(() => {
+  mistTexture?.dispose()
+  mistTexture = null
+  mistPlanes = []
+})
 </script>
 
 {#if enabled && mistTexture && effectiveLayers > 0}

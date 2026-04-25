@@ -3,7 +3,7 @@
   Replaces AssetLoader.ts with reactive asset management
 -->
 <script lang="ts">
-import { onMount, onDestroy, createEventDispatcher } from 'svelte'
+import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import { writable } from 'svelte/store'
 import { AudioLoader, TextureLoader } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
@@ -30,13 +30,13 @@ export let loadedAssets = []
 
 onMount(async () => {
   if (isDev) console.log('📦 Initializing Threlte Asset Loading System...')
-  
+
   try {
     // Initialize Three.js loaders
     gltfLoader = new GLTFLoader()
     textureLoader = new TextureLoader()
     audioLoader = new AudioLoader()
-    
+
     isInitialized = true
     if (isDev) console.log('✅ Threlte Asset Loading System initialized')
   } catch (error) {
@@ -58,19 +58,22 @@ function updateProgress(progress: number, url: string) {
 /**
  * Load GLTF model
  */
-export async function loadGLTF(url: string, onProgress?: (progress: number) => void) {
+export async function loadGLTF(
+  url: string,
+  onProgress?: (progress: number) => void,
+) {
   if (!gltfLoader) {
     throw new Error('AssetLoader not initialized')
   }
-  
+
   isLoading = true
   loadingStore.set(true)
   dispatch('loadingStart', { url })
-  
+
   return new Promise((resolve, reject) => {
     gltfLoader.load(
       url,
-      (gltf) => {
+      gltf => {
         isLoading = false
         loadingStore.set(false)
         loadedAssets.push(url)
@@ -78,19 +81,19 @@ export async function loadGLTF(url: string, onProgress?: (progress: number) => v
         dispatch('loadingComplete', { url, asset: gltf })
         resolve(gltf)
       },
-      (progress) => {
+      progress => {
         const progressPercent = (progress.loaded / progress.total) * 100
         updateProgress(progressPercent, url)
         if (onProgress) onProgress(progressPercent)
       },
-      (error) => {
+      error => {
         isLoading = false
         loadingStore.set(false)
         loadingError = error
         errorStore.set(error)
         dispatch('loadingError', { url, error })
         reject(error)
-      }
+      },
     )
   })
 }
@@ -102,15 +105,15 @@ export async function loadTexture(url: string) {
   if (!textureLoader) {
     throw new Error('AssetLoader not initialized')
   }
-  
+
   isLoading = true
   loadingStore.set(true)
   dispatch('loadingStart', { url })
-  
+
   return new Promise((resolve, reject) => {
     textureLoader.load(
       url,
-      (texture) => {
+      texture => {
         isLoading = false
         loadingStore.set(false)
         loadedAssets.push(url)
@@ -118,18 +121,18 @@ export async function loadTexture(url: string) {
         dispatch('loadingComplete', { url, asset: texture })
         resolve(texture)
       },
-      (progress) => {
+      progress => {
         const progressPercent = (progress.loaded / progress.total) * 100
         updateProgress(progressPercent, url)
       },
-      (error) => {
+      error => {
         isLoading = false
         loadingStore.set(false)
         loadingError = error
         errorStore.set(error)
         dispatch('loadingError', { url, error })
         reject(error)
-      }
+      },
     )
   })
 }
@@ -141,15 +144,15 @@ export async function loadAudio(url: string) {
   if (!audioLoader) {
     throw new Error('AssetLoader not initialized')
   }
-  
+
   isLoading = true
   loadingStore.set(true)
   dispatch('loadingStart', { url })
-  
+
   return new Promise((resolve, reject) => {
     audioLoader.load(
       url,
-      (audioBuffer) => {
+      audioBuffer => {
         isLoading = false
         loadingStore.set(false)
         loadedAssets.push(url)
@@ -157,18 +160,18 @@ export async function loadAudio(url: string) {
         dispatch('loadingComplete', { url, asset: audioBuffer })
         resolve(audioBuffer)
       },
-      (progress) => {
+      progress => {
         const progressPercent = (progress.loaded / progress.total) * 100
         updateProgress(progressPercent, url)
       },
-      (error) => {
+      error => {
         isLoading = false
         loadingStore.set(false)
         loadingError = error
         errorStore.set(error)
         dispatch('loadingError', { url, error })
         reject(error)
-      }
+      },
     )
   })
 }
@@ -180,21 +183,21 @@ export async function preloadAssets(urls: string[]) {
   if (!gltfLoader || !textureLoader || !audioLoader) {
     throw new Error('AssetLoader not initialized')
   }
-  
+
   isLoading = true
   loadingStore.set(true)
   dispatch('preloadStart', { urls })
-  
+
   try {
     const results = []
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i]
       const progress = (i / urls.length) * 100
-      
+
       loadingProgress = progress
       progressStore.set(progress)
       dispatch('preloadProgress', { progress, current: url })
-      
+
       // Determine asset type and load accordingly
       if (url.endsWith('.gltf') || url.endsWith('.glb')) {
         results.push(await loadGLTF(url))
@@ -204,13 +207,13 @@ export async function preloadAssets(urls: string[]) {
         results.push(await loadAudio(url))
       }
     }
-    
+
     isLoading = false
     loadingStore.set(false)
     loadingProgress = 100
     progressStore.set(100)
     dispatch('preloadComplete', { results })
-    
+
     return results
   } catch (error) {
     isLoading = false
@@ -230,7 +233,7 @@ export function getLoadingStats() {
     isLoading,
     progress: loadingProgress,
     loadedCount: loadedAssets.length,
-    error: loadingError
+    error: loadingError,
   }
 }
 

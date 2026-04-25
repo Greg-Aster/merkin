@@ -176,21 +176,22 @@ function handleDefaultBannerTypeChange(event) {
 <!-- Banner Settings -->
 <div class="bg-neutral-50 dark:bg-neutral-800/50 p-5 rounded-lg border border-neutral-200 dark:border-neutral-700 mb-8">
   <h3 class="text-lg font-medium text-black/80 dark:text-white/80 mb-3">Banner Settings</h3>
-  
+
   <!-- Default Banner Type Selection -->
   <div class="mb-6 pt-0 pb-4 border-b border-neutral-200 dark:border-neutral-700">
     <h4 class="text-md font-medium text-black/80 dark:text-white/80 mb-3">Default Banner Type</h4>
-    
+
     <div class="space-y-4">
       <div>
         <label for="default-banner-type" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
           Choose the banner type for the main page
         </label>
-        <select 
-            id="default-banner-type" 
+        <select
+            id="default-banner-type"
             bind:value={bannerConfig.defaultBannerType}
             on:change={handleDefaultBannerTypeChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-900 dark:text-neutral-100"
+            data-sfx-focus="focus-soft"
           >
             <option value="standard">Standard (Animated images)</option>
             <option value="video">Video</option>
@@ -201,22 +202,23 @@ function handleDefaultBannerTypeChange(event) {
           This banner type will be used on the main page and any page that doesn't specify its own banner.
         </p>
       </div>
-      
+
       <!-- Video Banner Settings (only show if video type is selected) -->
       {#if bannerConfig.defaultBannerType === 'video'}
         <div class="p-4 bg-neutral-100 dark:bg-neutral-700/30 rounded-md">
           <h5 class="text-sm font-medium text-black/80 dark:text-white/80 mb-3">Video Banner Settings</h5>
-          
+
           <div>
             <label for="video-id" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               YouTube Video ID
             </label>
-            <input 
-              type="text" 
-              id="video-id" 
+            <input
+              type="text"
+              id="video-id"
               bind:value={bannerConfig.defaultBannerData.videoId}
               on:input={handleChange}
               class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+              data-sfx-focus="focus-soft"
               placeholder="e.g., dQw4w9WgXcQ"
             />
             <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
@@ -225,21 +227,22 @@ function handleDefaultBannerTypeChange(event) {
           </div>
         </div>
       {/if}
-      
+
       <!-- Image Banner Settings (only show if image type is selected) -->
       {#if bannerConfig.defaultBannerType === 'image'}
         <div class="p-4 bg-neutral-100 dark:bg-neutral-700/30 rounded-md">
           <h5 class="text-sm font-medium text-black/80 dark:text-white/80 mb-3">Image Banner Settings</h5>
-          
+
           <div>
             <label for="image-url" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               Image URL
             </label>
-            <select 
-                id="image-url" 
+            <select
+                id="image-url"
                 bind:value={bannerConfig.defaultBannerData.imageUrl}
                 on:change={handleChange}
                 class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+                data-sfx-focus="focus-soft"
               >
                 <option value="" class="text-neutral-900 dark:text-neutral-100">Select an image</option>
                 <option value="/src/assets/banner/0001.png" class="text-neutral-900 dark:text-neutral-100">0001.png</option>
@@ -257,115 +260,122 @@ function handleDefaultBannerTypeChange(event) {
           </div>
         </div>
       {/if}
-      
+
       <!-- Timeline Banner Settings (only show if timeline type is selected) -->
       {#if bannerConfig.defaultBannerType === 'timeline'}
         <div class="p-4 bg-neutral-100 dark:bg-neutral-700/30 rounded-md">
           <h5 class="text-sm font-medium text-black/80 dark:text-white/80 mb-3">Timeline Banner Settings</h5>
-          
+
           <div class="space-y-4">
             <div>
               <label for="timeline-category" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Category
               </label>
-              <input 
-                type="text" 
-                id="timeline-category" 
-                bind:value={bannerConfig.defaultBannerData.category}
-                on:input={handleChange}
-                class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-                placeholder="e.g., history, science, etc."
-                required
-              />
+            <input
+              type="text"
+              id="timeline-category"
+              bind:value={bannerConfig.defaultBannerData.category}
+              on:input={handleChange}
+              class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+              data-sfx-focus="focus-soft"
+              placeholder="e.g., history, science, etc."
+              required
+            />
               <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
                 Category is required for timeline banners
               </p>
             </div>
-            
+
             <div>
               <label for="timeline-title" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Title (optional)
               </label>
-              <input 
-                type="text" 
-                id="timeline-title" 
-                bind:value={bannerConfig.defaultBannerData.title}
-                on:input={handleChange}
-                class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
-                placeholder="Timeline title"
-              />
+            <input
+              type="text"
+              id="timeline-title"
+              bind:value={bannerConfig.defaultBannerData.title}
+              on:input={handleChange}
+              class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+              data-sfx-focus="focus-soft"
+              placeholder="Timeline title"
+            />
             </div>
-            
+
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label for="timeline-start-year" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                   Start Year
                 </label>
-                <input 
-                  type="number" 
-                  id="timeline-start-year" 
+                <input
+                  type="number"
+                  id="timeline-start-year"
                   bind:value={bannerConfig.defaultBannerData.startYear}
                   on:input={handleChange}
                   class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+                  data-sfx-focus="focus-soft"
                   placeholder="e.g., 1900"
                 />
               </div>
-              
+
               <div>
                 <label for="timeline-end-year" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                   End Year
                 </label>
-                <input 
-                  type="number" 
-                  id="timeline-end-year" 
+                <input
+                  type="number"
+                  id="timeline-end-year"
                   bind:value={bannerConfig.defaultBannerData.endYear}
                   on:input={handleChange}
                   class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+                  data-sfx-focus="focus-soft"
                   placeholder="e.g., 2023"
                 />
               </div>
             </div>
-            
+
             <div>
               <label for="timeline-background" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Background Image (optional)
               </label>
-              <input 
-                type="text" 
-                id="timeline-background" 
+              <input
+                type="text"
+                id="timeline-background"
                 bind:value={bannerConfig.defaultBannerData.background}
                 on:input={handleChange}
                 class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+                data-sfx-focus="focus-soft"
                 placeholder="/public/posts/timeline/universe.png"
               />
               <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
                 Path to the background image for the timeline
               </p>
             </div>
-            
+
             <div class="flex items-center">
-              <input 
-                type="checkbox" 
-                id="timeline-compact" 
+              <input
+                type="checkbox"
+                id="timeline-compact"
                 bind:checked={bannerConfig.defaultBannerData.compact}
                 on:change={handleChange}
-                class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded" 
+                class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded"
+                data-sfx-click="soft"
               />
               <label for="timeline-compact" class="ml-2 block text-sm text-neutral-700 dark:text-neutral-300">
                 Compact Mode
               </label>
             </div>
-            
+
             <div>
               <label for="timeline-height" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Timeline Height
               </label>
-              <input 
-                type="text" 
-                id="timeline-height" 
+              <input
+                type="text"
+                id="timeline-height"
                 bind:value={bannerConfig.defaultBannerData.height}
                 on:input={handleChange}
                 class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+                data-sfx-focus="focus-soft"
                 placeholder="70vh"
               />
               <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
@@ -375,20 +385,20 @@ function handleDefaultBannerTypeChange(event) {
           </div>
         </div>
       {/if}
-      
+
       <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-sm text-blue-800 dark:text-blue-200">
         <p>The selected banner type will be used for the main page and pages without a specific banner. Post pages can still override this with their own banner settings.</p>
       </div>
     </div>
   </div>
-  
+
   <!-- Standard Banner Settings Section -->
   {#if bannerConfig.defaultBannerType === 'standard'}
   <div class="space-y-6">
     <!-- Standard Banner Image Selection (only show for standard banner type) -->
     <div>
       <h4 class="text-md font-medium text-black/80 dark:text-white/80 mb-3">Banner Images</h4>
-      
+
       <div class="space-y-4">
         <!-- Banner Preview -->
         <div class="w-full h-40 bg-neutral-200 dark:bg-neutral-700 rounded-lg overflow-hidden mb-3 relative">
@@ -410,45 +420,48 @@ function handleDefaultBannerTypeChange(event) {
             </div>
           {/if}
         </div>
-        
+
         <!-- Banner Type Toggle -->
         <div class="flex items-center space-x-2">
           <span class="text-sm text-neutral-700 dark:text-neutral-300">Banner Type:</span>
           <label class="inline-flex items-center">
-            <input 
-              type="radio" 
-              name="bannerType" 
-              checked={!isBannerSequence} 
+            <input
+              type="radio"
+              name="bannerType"
+              checked={!isBannerSequence}
               on:change={toggleBannerType}
-              class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600" 
+              class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600"
+              data-sfx-click="select"
             />
             <span class="ml-1 text-sm text-neutral-600 dark:text-neutral-400">Static</span>
           </label>
           <label class="inline-flex items-center">
-            <input 
-              type="radio" 
-              name="bannerType" 
-              checked={isBannerSequence} 
+            <input
+              type="radio"
+              name="bannerType"
+              checked={isBannerSequence}
               on:change={toggleBannerType}
-              class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600" 
+              class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600"
+              data-sfx-click="select"
             />
             <span class="ml-1 text-sm text-neutral-600 dark:text-neutral-400">Animated Sequence</span>
           </label>
         </div>
-        
+
         <!-- Banner Selection Dropdown -->
         <div>
-          <select 
+          <select
               class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+            data-sfx-focus="focus-soft"
             on:change={(e) => {
               const path = e.target.value;
               if (path) {
                 bannerConfig.defaultBanner = path;
-                
+
                 if (!isBannerSequence) {
                   bannerConfig.bannerList = [path];
                 }
-                
+
                 handleChange();
               }
             }}
@@ -467,32 +480,40 @@ function handleDefaultBannerTypeChange(event) {
             Choose a banner image from your project assets
           </p>
         </div>
-        
+
         <!-- Banner Sequence Controls (if sequence mode) -->
         {#if isBannerSequence}
           <div class="pt-3 border-t border-neutral-200 dark:border-neutral-700 space-y-3">
             <h4 class="text-sm font-medium text-black/80 dark:text-white/80">Banner Sequence</h4>
-            
+
             <!-- Sequence Preview -->
             <div class="flex flex-wrap gap-2">
               {#each bannerConfig.bannerList as banner, index}
                 <div class="relative group">
-                  <div 
+                  <button
+                    type="button"
                     class="w-24 h-16 bg-neutral-200 dark:bg-neutral-700 rounded-md overflow-hidden cursor-pointer border-2 border-transparent hover:border-[var(--primary)] transition-colors flex-shrink-0 flex items-center justify-center"
                     class:border-[var(--primary)]={selectedBannerIndex === index}
+                    data-sfx-hover="hover-soft"
+                    data-sfx-click="select"
                     on:click={() => selectBanner(index)}
+                    aria-label={`Select ${getDisplayPath(banner)}`}
                   >
                     <!-- Show a color block with filename -->
                     <div class="w-full h-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs p-1 text-center">
                       {getDisplayPath(banner)}
                     </div>
-                  </div>
-                  
+                  </button>
+
                   <!-- Remove button -->
                   <button
+                    type="button"
                     class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                     title="Remove from sequence"
+                    data-sfx-hover="hover-emphasis"
+                    data-sfx-click="warning"
                     on:click={() => removeBannerFromSequence(index)}
+                    aria-label={`Remove ${getDisplayPath(banner)} from sequence`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -501,11 +522,12 @@ function handleDefaultBannerTypeChange(event) {
                 </div>
               {/each}
             </div>
-            
+
             <!-- Add to Sequence -->
             <div>
-              <select 
+              <select
     class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+                data-sfx-focus="focus-soft"
                 on:change={(e) => {
                   const path = e.target.value;
                   if (path && !bannerConfig.bannerList.includes(path)) {
@@ -531,7 +553,7 @@ function handleDefaultBannerTypeChange(event) {
                 Select banners to add to the animation sequence
               </p>
             </div>
-            
+
             <!-- Banner Sequence Order Info -->
             <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-sm text-blue-800 dark:text-blue-200">
               <p>The banner marked with a highlighted border is your default banner. It will be shown first in the animation sequence.</p>
@@ -540,19 +562,20 @@ function handleDefaultBannerTypeChange(event) {
         {/if}
       </div>
     </div>
-    
+
     <!-- Animation Settings (only for standard banner type) -->
     <div>
       <h4 class="text-md font-medium text-black/80 dark:text-white/80 mb-3">Animation Settings</h4>
-      
+
       <div class="space-y-4">
         <div class="flex items-center">
-          <input 
-            type="checkbox" 
-            id="banner-animation-enabled" 
+          <input
+            type="checkbox"
+            id="banner-animation-enabled"
             bind:checked={bannerConfig.animation.enabled}
             on:change={handleChange}
-            class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded" 
+            class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded"
+            data-sfx-click="soft"
             disabled={!isBannerSequence}
           />
           <label for="banner-animation-enabled" class="ml-2 block text-sm text-neutral-700 dark:text-neutral-300">
@@ -562,74 +585,79 @@ function handleDefaultBannerTypeChange(event) {
             {/if}
           </label>
         </div>
-        
+
         <div>
           <label for="banner-animation-interval" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Animation Interval (ms)
           </label>
           <div class="flex items-center space-x-4">
-            <input 
-              type="range" 
-              id="banner-animation-interval" 
-              min="1000" 
-              max="10000" 
+            <input
+              type="range"
+              id="banner-animation-interval"
+              min="1000"
+              max="10000"
               step="500"
               bind:value={bannerConfig.animation.interval}
               on:input={handleChange}
-              class="flex-grow h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer" 
+              class="flex-grow h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer"
+              data-sfx-focus="focus-soft"
               disabled={!bannerConfig.animation.enabled || !isBannerSequence}
             />
-            <input 
-              type="number" 
+            <input
+              type="number"
               bind:value={bannerConfig.animation.interval}
               on:input={handleChange}
-              min="1000" 
-              max="10000" 
+              min="1000"
+              max="10000"
               step="500"
-              class="w-24 px-2 py-1 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm transition text-center" 
+              class="w-24 px-2 py-1 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm transition text-center"
+              data-sfx-focus="focus-soft"
               disabled={!bannerConfig.animation.enabled || !isBannerSequence}
             />
           </div>
         </div>
-        
+
         <div>
           <label for="banner-transition-duration" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Transition Duration (ms)
           </label>
           <div class="flex items-center space-x-4">
-            <input 
-              type="range" 
-              id="banner-transition-duration" 
-              min="100" 
-              max="2000" 
+            <input
+              type="range"
+              id="banner-transition-duration"
+              min="100"
+              max="2000"
               step="100"
               bind:value={bannerConfig.animation.transitionDuration}
               on:input={handleChange}
-              class="flex-grow h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer" 
+              class="flex-grow h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer"
+              data-sfx-focus="focus-soft"
               disabled={!bannerConfig.animation.enabled || !isBannerSequence}
             />
-            <input 
-              type="number" 
+            <input
+              type="number"
               bind:value={bannerConfig.animation.transitionDuration}
               on:input={handleChange}
-              min="100" 
-              max="2000" 
+              min="100"
+              max="2000"
               step="100"
-              class="w-24 px-2 py-1 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm transition text-center" 
+              class="w-24 px-2 py-1 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm transition text-center"
+              data-sfx-focus="focus-soft"
               disabled={!bannerConfig.animation.enabled || !isBannerSequence}
             />
           </div>
         </div>
-        
+
         <div>
           <label for="banner-animation-direction" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Animation Direction
           </label>
-          <select 
-            id="banner-animation-direction" 
+          <select
+            id="banner-animation-direction"
             bind:value={bannerConfig.animation.direction}
             on:change={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-900 dark:text-neutral-100"
+            data-sfx-focus="focus-soft"
             disabled={!bannerConfig.animation.enabled || !isBannerSequence}
           >
             <option value="forward">Forward</option>
@@ -639,127 +667,134 @@ function handleDefaultBannerTypeChange(event) {
         </div>
       </div>
     </div>
-    
+
     <!-- Visual Settings (only for standard and image banner types) -->
     <div>
       <h4 class="text-md font-medium text-black/80 dark:text-white/80 mb-3">Visual Settings</h4>
-      
+
       <div class="space-y-4">
         <div>
           <label for="banner-object-fit" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Image Fit
           </label>
-          <select 
-            id="banner-object-fit" 
+          <select
+            id="banner-object-fit"
             bind:value={bannerConfig.visual.objectFit}
             on:change={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-900 dark:text-neutral-100"
+            data-sfx-focus="focus-soft"
           >
             <option value="cover">Cover</option>
             <option value="contain">Contain</option>
             <option value="fill">Fill</option>
           </select>
         </div>
-        
+
         <div>
           <label for="banner-object-position" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Image Position
           </label>
-          <input 
-            type="text" 
-            id="banner-object-position" 
+          <input
+            type="text"
+            id="banner-object-position"
             bind:value={bannerConfig.visual.objectPosition}
             on:input={handleChange}
               class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+            data-sfx-focus="focus-soft"
             placeholder="e.g., center"
           />
         </div>
-        
+
         <div>
           <label for="banner-border-radius" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Border Radius
           </label>
-          <input 
-            type="text" 
-            id="banner-border-radius" 
+          <input
+            type="text"
+            id="banner-border-radius"
             bind:value={bannerConfig.visual.borderRadius}
             on:input={handleChange}
               class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+            data-sfx-focus="focus-soft"
             placeholder="e.g., 0.5rem"
           />
         </div>
-        
+
         <div class="flex items-center">
-          <input 
-            type="checkbox" 
-            id="banner-apply-gradient" 
+          <input
+            type="checkbox"
+            id="banner-apply-gradient"
             bind:checked={bannerConfig.visual.applyGradientOverlay}
             on:change={handleChange}
-            class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded" 
+            class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded"
+            data-sfx-click="soft"
           />
           <label for="banner-apply-gradient" class="ml-2 block text-sm text-neutral-700 dark:text-neutral-300">
             Apply Gradient Overlay
           </label>
         </div>
-        
+
         <div>
           <label for="banner-gradient-overlay" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Gradient Overlay
           </label>
-          <input 
-            type="text" 
-            id="banner-gradient-overlay" 
+          <input
+            type="text"
+            id="banner-gradient-overlay"
             bind:value={bannerConfig.visual.gradientOverlay}
             on:input={handleChange}
               class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
+            data-sfx-focus="focus-soft"
             placeholder="e.g., linear-gradient(to bottom, rgba(0,0,0,0.2), transparent)"
             disabled={!bannerConfig.visual.applyGradientOverlay}
           />
         </div>
       </div>
     </div>
-    
+
     <!-- Fallback Settings (only for standard banner type) -->
     <div>
       <h4 class="text-md font-medium text-black/80 dark:text-white/80 mb-3">Fallback Settings</h4>
-      
+
       <div class="space-y-4">
         <div class="flex items-center">
-          <input 
-            type="checkbox" 
-            id="banner-fallback-enabled" 
+          <input
+            type="checkbox"
+            id="banner-fallback-enabled"
             bind:checked={bannerConfig.fallback.enabled}
             on:change={handleChange}
-            class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded" 
+            class="h-4 w-4 text-[var(--primary)] border-neutral-300 dark:border-neutral-600 rounded"
+            data-sfx-click="soft"
           />
           <label for="banner-fallback-enabled" class="ml-2 block text-sm text-neutral-700 dark:text-neutral-300">
             Enable Fallback
           </label>
         </div>
-        
+
         <div>
           <label for="banner-fallback-type" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Fallback Type
           </label>
-          <select 
-            id="banner-fallback-type" 
+          <select
+            id="banner-fallback-type"
             bind:value={bannerConfig.fallback.type}
             on:change={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-900 dark:text-neutral-100"
+            data-sfx-focus="focus-soft"
             disabled={!bannerConfig.fallback.enabled}
           >
             <option value="color">Solid Color</option>
             <option value="gradient">Gradient</option>
           </select>
         </div>
-        
+
         <div>
           <label for="banner-fallback-value" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Fallback Value
           </label>
-          <input 
-            type="text" 
-            id="banner-fallback-value" 
+          <input
+            type="text"
+            id="banner-fallback-value"
             bind:value={bannerConfig.fallback.value}
             on:input={handleChange}
               class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
@@ -771,20 +806,20 @@ function handleDefaultBannerTypeChange(event) {
     </div>
   </div>
   {/if}
-  
+
   <!-- Layout Settings (for all banner types) -->
   <div class="space-y-4 pt-6 mt-6 border-t border-neutral-200 dark:border-neutral-700">
     <h4 class="text-md font-medium text-black/80 dark:text-white/80 mb-3">Layout Settings</h4>
-    
+
     <div class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label for="banner-height-desktop" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Desktop Height
           </label>
-          <input 
-            type="text" 
-            id="banner-height-desktop" 
+          <input
+            type="text"
+            id="banner-height-desktop"
             bind:value={bannerConfig.layout.height.desktop}
             on:input={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
@@ -795,9 +830,9 @@ function handleDefaultBannerTypeChange(event) {
           <label for="banner-height-mobile" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Mobile Height
           </label>
-          <input 
-            type="text" 
-            id="banner-height-mobile" 
+          <input
+            type="text"
+            id="banner-height-mobile"
             bind:value={bannerConfig.layout.height.mobile}
             on:input={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
@@ -805,15 +840,15 @@ function handleDefaultBannerTypeChange(event) {
           />
         </div>
       </div>
-      
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label for="banner-overlap-desktop" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Desktop Content Overlap
           </label>
-          <input 
-            type="text" 
-            id="banner-overlap-desktop" 
+          <input
+            type="text"
+            id="banner-overlap-desktop"
             bind:value={bannerConfig.layout.overlap.desktop}
             on:input={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
@@ -824,9 +859,9 @@ function handleDefaultBannerTypeChange(event) {
           <label for="banner-overlap-mobile" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Mobile Content Overlap
           </label>
-          <input 
-            type="text" 
-            id="banner-overlap-mobile" 
+          <input
+            type="text"
+            id="banner-overlap-mobile"
             bind:value={bannerConfig.layout.overlap.mobile}
             on:input={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
@@ -834,14 +869,14 @@ function handleDefaultBannerTypeChange(event) {
           />
         </div>
       </div>
-      
+
       <div>
         <label for="banner-max-width" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
           Maximum Width (px)
         </label>
-        <input 
-          type="number" 
-          id="banner-max-width" 
+        <input
+          type="number"
+          id="banner-max-width"
           bind:value={bannerConfig.layout.maxWidth}
           on:input={handleChange}
           class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
@@ -850,20 +885,20 @@ function handleDefaultBannerTypeChange(event) {
       </div>
     </div>
   </div>
-  
+
   <!-- Navbar Spacing Settings (for all banner types) -->
   <div class="space-y-4 pt-6 mt-6 border-t border-neutral-200 dark:border-neutral-700">
     <h4 class="text-md font-medium text-black/80 dark:text-white/80 mb-3">Navbar Spacing</h4>
-    
+
     <div class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label for="navbar-spacing-standard" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Standard Banner Spacing
           </label>
-          <input 
-            type="text" 
-            id="navbar-spacing-standard" 
+          <input
+            type="text"
+            id="navbar-spacing-standard"
             bind:value={bannerConfig.navbarSpacing.standard}
             on:input={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
@@ -877,9 +912,9 @@ function handleDefaultBannerTypeChange(event) {
           <label for="navbar-spacing-timeline" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Timeline Banner Spacing
           </label>
-          <input 
-            type="text" 
-            id="navbar-spacing-timeline" 
+          <input
+            type="text"
+            id="navbar-spacing-timeline"
             bind:value={bannerConfig.navbarSpacing.timeline}
             on:input={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
@@ -890,15 +925,15 @@ function handleDefaultBannerTypeChange(event) {
           </p>
         </div>
       </div>
-      
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label for="navbar-spacing-video" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Video Banner Spacing
           </label>
-          <input 
-            type="text" 
-            id="navbar-spacing-video" 
+          <input
+            type="text"
+            id="navbar-spacing-video"
             bind:value={bannerConfig.navbarSpacing.video}
             on:input={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
@@ -912,9 +947,9 @@ function handleDefaultBannerTypeChange(event) {
           <label for="navbar-spacing-image" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Image Banner Spacing
           </label>
-          <input 
-            type="text" 
-            id="navbar-spacing-image" 
+          <input
+            type="text"
+            id="navbar-spacing-image"
             bind:value={bannerConfig.navbarSpacing.image}
             on:input={handleChange}
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
@@ -925,7 +960,7 @@ function handleDefaultBannerTypeChange(event) {
           </p>
         </div>
       </div>
-      
+
       <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-sm text-blue-800 dark:text-blue-200">
         <p>These settings control the space between your navbar and different banner types. Increase values to add more space below the navbar.</p>
       </div>

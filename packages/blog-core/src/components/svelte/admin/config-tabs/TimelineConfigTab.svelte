@@ -185,9 +185,9 @@ function restoreDefaults() {
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               Default Era
-            </label>
+            </div>
             <select 
               bind:value={timelineConfig.defaultEra} 
               on:change={notifyChanges}
@@ -254,9 +254,9 @@ function restoreDefaults() {
           </div>
           
           <div class="timeline-preview mb-6">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Timeline Preview
-            </label>
+            </div>
             <div class="relative h-12 bg-neutral-100 dark:bg-neutral-800 rounded-lg overflow-hidden">
               {#each timelineConfig.eras as era}
                 <!-- Calculate position and width based on years -->
@@ -293,6 +293,7 @@ function restoreDefaults() {
                     on:click={() => moveEraUp(index)}
                     disabled={index === 0}
                     class:opacity-50={index === 0}
+                    aria-label={`Move ${era.name} up`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -303,6 +304,7 @@ function restoreDefaults() {
                     on:click={() => moveEraDown(index)}
                     disabled={index === timelineConfig.eras.length - 1}
                     class:opacity-50={index === timelineConfig.eras.length - 1}
+                    aria-label={`Move ${era.name} down`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -311,6 +313,7 @@ function restoreDefaults() {
                   <button 
                     class="p-1.5 text-neutral-500 hover:text-[var(--primary)] rounded"
                     on:click={() => editEra(index)}
+                    aria-label={`Edit ${era.name}`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -319,6 +322,7 @@ function restoreDefaults() {
                   <button 
                     class="p-1.5 text-neutral-500 hover:text-red-500 rounded"
                     on:click={() => deleteEra(index)}
+                    aria-label={`Delete ${era.name}`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -374,9 +378,9 @@ function restoreDefaults() {
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               Current Year
-            </label>
+            </div>
             <input 
               type="number" 
               bind:value={timelineConfig.displayOptions.currentYear} 
@@ -391,9 +395,9 @@ function restoreDefaults() {
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               Year Label Spacing
-            </label>
+            </div>
             <input 
               type="number" 
               bind:value={timelineConfig.displayOptions.yearSpacing} 
@@ -408,9 +412,9 @@ function restoreDefaults() {
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               Timeline Height (px)
-            </label>
+            </div>
             <input 
               type="number" 
               bind:value={timelineConfig.displayOptions.timelineHeight} 
@@ -434,9 +438,9 @@ function restoreDefaults() {
         </h3>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+          <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Era Name
-          </label>
+          </div>
           <input 
             type="text" 
             bind:value={editingEra.data.name} 
@@ -447,9 +451,9 @@ function restoreDefaults() {
         
         <div class="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               Start Year
-            </label>
+            </div>
             <input 
               type="number" 
               bind:value={editingEra.data.startYear} 
@@ -460,9 +464,9 @@ function restoreDefaults() {
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               End Year
-            </label>
+            </div>
             <input 
               type="number" 
               bind:value={editingEra.data.endYear} 
@@ -474,9 +478,9 @@ function restoreDefaults() {
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+          <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Color
-          </label>
+          </div>
           <div class="flex items-center space-x-3">
             <input 
               type="color" 
@@ -493,9 +497,9 @@ function restoreDefaults() {
         </div>
         
         <div class="mb-6">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+          <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Description
-          </label>
+          </div>
           <textarea 
             bind:value={editingEra.data.description} 
             rows="3" 

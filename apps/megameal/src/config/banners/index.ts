@@ -32,12 +32,12 @@
 // TYPE DEFINITIONS AND INTERFACES
 // =====================================================================
 
-import * as standardBannerModule from './standard'
-import * as videoBannerModule from './video'
-import * as imageBannerModule from './image'
-import * as timelineBannerModule from './timeline'
 import * as assistantBannerModule from './assistant'
+import * as imageBannerModule from './image'
 import * as noneBannerModule from './none'
+import * as standardBannerModule from './standard'
+import * as timelineBannerModule from './timeline'
+import * as videoBannerModule from './video'
 
 // Export all type definitions for external use
 export type {
@@ -278,11 +278,14 @@ export const bannerTypeGuards = {
  * Useful for validating banner configurations programmatically
  */
 export const bannerValidators = {
-  validateStandardBannerConfig: standardBannerModule.validateStandardBannerConfig,
+  validateStandardBannerConfig:
+    standardBannerModule.validateStandardBannerConfig,
   validateVideoBannerConfig: videoBannerModule.validateVideoBannerConfig,
   validateImageBannerConfig: imageBannerModule.validateImageBannerConfig,
-  validateTimelineBannerConfig: timelineBannerModule.validateTimelineBannerConfig,
-  validateAssistantBannerConfig: assistantBannerModule.validateAssistantBannerConfig,
+  validateTimelineBannerConfig:
+    timelineBannerModule.validateTimelineBannerConfig,
+  validateAssistantBannerConfig:
+    assistantBannerModule.validateAssistantBannerConfig,
   validateNoneBannerConfig: noneBannerModule.validateNoneBannerConfig,
 } as const
 

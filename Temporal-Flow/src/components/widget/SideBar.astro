@@ -1,13 +1,16 @@
 ---
 import SharedSideBar from '@merkin/blog-core/components/widget/SideBar.astro'
 import type { MarkdownHeading } from 'astro'
+import {
+  avatarConfig,
+  getAvatarIndexFromSlug,
+} from '../../config/avatar.config'
 import { profileConfig } from '../../config/config'
-import { avatarConfig, getAvatarIndexFromSlug } from '../../config/avatar.config'
+import I18nKey from '../../i18n/i18nKey'
+import { i18n } from '../../i18n/translation'
 import { getCategoryList } from '../../utils/content-utils'
 import { getTagList } from '../../utils/content-utils'
 import { getCategoryUrl, getTagUrl } from '../../utils/url-utils'
-import I18nKey from '../../i18n/i18nKey'
-import { i18n } from '../../i18n/translation'
 
 interface Props {
   class?: string
@@ -28,19 +31,20 @@ const customBio = Astro.props.customBio
 const hideProfile = Astro.props.hideProfile
 
 // Calculate active avatar index from slug
-const activeAvatarIndex = postSlug && !customAvatar
-  ? getAvatarIndexFromSlug(postSlug, avatarConfig.avatarList.length)
-  : 0
+const activeAvatarIndex =
+  postSlug && !customAvatar
+    ? getAvatarIndexFromSlug(postSlug, avatarConfig.avatarList.length)
+    : 0
 
 // Get categories and tags data
-const categories = (await getCategoryList()).map((category) => ({
+const categories = (await getCategoryList()).map(category => ({
   name: category.name,
   count: String(category.count),
   url: getCategoryUrl(category.name),
   ariaLabel: `View all posts in the ${category.name} category`,
 }))
 
-const tags = (await getTagList()).map((tag) => ({
+const tags = (await getTagList()).map(tag => ({
   name: tag.name,
   count: String(tag.count),
   url: getTagUrl(tag.name),

@@ -28,20 +28,22 @@ export function collectDescendantIds(nodes: EditorSceneNode[], nodeId: string) {
 export function collectSubtreeIds(nodes: EditorSceneNode[], rootId: string) {
   const ids = new Set<string>([rootId])
   const descendants = collectDescendantIds(nodes, rootId)
-  descendants.forEach((id) => ids.add(id))
+  descendants.forEach(id => ids.add(id))
   return ids
 }
 
 export function createNodeLookup(nodes: EditorSceneNode[]) {
-  return new Map(nodes.map((node) => [node.id, node]))
+  return new Map(nodes.map(node => [node.id, node]))
 }
 
 function createLocalMatrix(node: EditorSceneNode) {
-  const quaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler(...node.rotation))
+  const quaternion = new THREE.Quaternion().setFromEuler(
+    new THREE.Euler(...node.rotation),
+  )
   return new THREE.Matrix4().compose(
     new THREE.Vector3(...node.position),
     quaternion,
-    new THREE.Vector3(...node.scale)
+    new THREE.Vector3(...node.scale),
   )
 }
 
@@ -49,7 +51,7 @@ export function getWorldMatrixForNode(
   lookup: Map<string, EditorSceneNode>,
   nodeId: string,
   cache = new Map<string, THREE.Matrix4>(),
-  visiting = new Set<string>()
+  visiting = new Set<string>(),
 ): THREE.Matrix4 {
   const cached = cache.get(nodeId)
   if (cached) return cached.clone()
@@ -61,7 +63,9 @@ export function getWorldMatrixForNode(
   visiting.add(nodeId)
   const localMatrix = createLocalMatrix(node)
   const worldMatrix: THREE.Matrix4 = node.parentId
-    ? getWorldMatrixForNode(lookup, node.parentId, cache, visiting).multiply(localMatrix)
+    ? getWorldMatrixForNode(lookup, node.parentId, cache, visiting).multiply(
+        localMatrix,
+      )
     : localMatrix
   cache.set(nodeId, worldMatrix.clone())
   visiting.delete(nodeId)
@@ -85,20 +89,28 @@ function decomposeMatrix(matrix: THREE.Matrix4): EditorNodeLocalTransform {
 export function getLocalTransformForWorldMatrix(
   nodes: EditorSceneNode[],
   parentId: string | null,
-  worldMatrix: THREE.Matrix4
+  worldMatrix: THREE.Matrix4,
 ): EditorNodeLocalTransform {
   const lookup = createNodeLookup(nodes)
-  const parentWorldMatrix = parentId ? getWorldMatrixForNode(lookup, parentId) : new THREE.Matrix4().identity()
-  const localMatrix = parentWorldMatrix.clone().invert().multiply(worldMatrix.clone())
+  const parentWorldMatrix = parentId
+    ? getWorldMatrixForNode(lookup, parentId)
+    : new THREE.Matrix4().identity()
+  const localMatrix = parentWorldMatrix
+    .clone()
+    .invert()
+    .multiply(worldMatrix.clone())
   return decomposeMatrix(localMatrix)
 }
 
-export function getTopLevelNodeIds(nodes: EditorSceneNode[], nodeIds: string[]) {
+export function getTopLevelNodeIds(
+  nodes: EditorSceneNode[],
+  nodeIds: string[],
+) {
   const uniqueIds = Array.from(new Set(nodeIds))
   const selected = new Set(uniqueIds)
   const lookup = createNodeLookup(nodes)
 
-  return uniqueIds.filter((nodeId) => {
+  return uniqueIds.filter(nodeId => {
     let currentParentId = lookup.get(nodeId)?.parentId ?? null
     while (currentParentId) {
       if (selected.has(currentParentId)) return false
@@ -118,20 +130,22 @@ export function createWorldMatrixResolver(nodes: EditorSceneNode[]) {
 export function getSharedParentId(nodes: EditorSceneNode[], nodeIds: string[]) {
   const lookup = createNodeLookup(nodes)
   const rootNodes = nodeIds
-    .map((nodeId) => lookup.get(nodeId) ?? null)
+    .map(nodeId => lookup.get(nodeId) ?? null)
     .filter((node): node is EditorSceneNode => node !== null)
 
   if (rootNodes.length === 0) return null
 
-  return rootNodes.every((node) => (node.parentId ?? null) === (rootNodes[0].parentId ?? null))
-    ? (rootNodes[0].parentId ?? null)
+  return rootNodes.every(
+    node => (node.parentId ?? null) === (rootNodes[0].parentId ?? null),
+  )
+    ? rootNodes[0].parentId ?? null
     : null
 }
 
 export function getCenteredGroupTransform(
   nodes: EditorSceneNode[],
   nodeIds: string[],
-  parentId: string | null
+  parentId: string | null,
 ): EditorNodeLocalTransform | null {
   if (nodeIds.length === 0) return null
 
@@ -148,7 +162,7 @@ export function getCenteredGroupTransform(
   const groupWorldMatrix = new THREE.Matrix4().compose(
     center,
     new THREE.Quaternion(),
-    new THREE.Vector3(1, 1, 1)
+    new THREE.Vector3(1, 1, 1),
   )
 
   return getLocalTransformForWorldMatrix(nodes, parentId, groupWorldMatrix)

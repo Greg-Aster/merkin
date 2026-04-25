@@ -1,136 +1,146 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  
-  // Props
-  export let era: string | undefined = undefined;
-  export let isKeyEvent: boolean = false;
-  export let isSelected: boolean = false;
-  export let isHovered: boolean = false;
-  export let size: number = 8;
-  export let identifier: string = Math.random().toString(36).substring(2, 10);
-  export let useEraColors: boolean = false;
+import { onMount } from 'svelte'
 
-  
-// Era color mapping 
+// Props
+export let era: string | undefined = undefined
+export let isKeyEvent: boolean = false
+export let isSelected: boolean = false
+export let isHovered: boolean = false
+export let size: number = 8
+export let identifier: string = Math.random().toString(36).substring(2, 10)
+export let useEraColors: boolean = false
+
+// Era color mapping
 const eraColorMap = {
-  'ancient-epoch': '#3b82f6',        // Blue
-  'awakening-era': '#8b5cf6',        // Purple
-  'golden-age': '#f59e0b',           // Orange
-  'conflict-epoch': '#ec4899',       // Pink
+  'ancient-epoch': '#3b82f6', // Blue
+  'awakening-era': '#8b5cf6', // Purple
+  'golden-age': '#f59e0b', // Orange
+  'conflict-epoch': '#ec4899', // Pink
   'singularity-conflict': '#ef4444', // Red
-  'transcendent-age': '#14b8a6',     // Teal
-  'final-epoch': '#22c55e',          // Green
-  'unknown': '#6366f1'               // Indigo
-};
-  
-  // Full color spectrum with direct color values
-  const colorSpectrum = [
-    // Reds
-    '#ef4444', '#f43f5e',
-    // Oranges
-    '#f97316', '#f59e0b',
-    // Yellows
-    '#eab308', '#facc15',
-    // Greens
-    '#22c55e', '#10b981', '#14b8a6',
-    // Blues
-    '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1',
-    // Purples
-    '#8b5cf6', '#a855f7', '#d946ef',
-    // Pinks
-    '#ec4899', '#f43f5e'
-  ];
-  
-  // Star types
-  const starTypes = [
-    'point',     // Simple point of light
-    'classic',   // Classic star shape
-    'sparkle',   // Star with sparkle effect
-    'refraction', // Improved refraction star
-    'halo',      // Star with halo
-    'subtle'     // Subtle star with minimal decoration
-  ];
-  
-  // Helper to get deterministic random values
-  function hashCode(str): number {
-    if (!str) return 0;
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
-      hash |= 0;
-    }
-    return Math.abs(hash);
+  'transcendent-age': '#14b8a6', // Teal
+  'final-epoch': '#22c55e', // Green
+  unknown: '#6366f1', // Indigo
+}
+
+// Full color spectrum with direct color values
+const colorSpectrum = [
+  // Reds
+  '#ef4444',
+  '#f43f5e',
+  // Oranges
+  '#f97316',
+  '#f59e0b',
+  // Yellows
+  '#eab308',
+  '#facc15',
+  // Greens
+  '#22c55e',
+  '#10b981',
+  '#14b8a6',
+  // Blues
+  '#06b6d4',
+  '#0ea5e9',
+  '#3b82f6',
+  '#6366f1',
+  // Purples
+  '#8b5cf6',
+  '#a855f7',
+  '#d946ef',
+  // Pinks
+  '#ec4899',
+  '#f43f5e',
+]
+
+// Star types
+const starTypes = [
+  'point', // Simple point of light
+  'classic', // Classic star shape
+  'sparkle', // Star with sparkle effect
+  'refraction', // Improved refraction star
+  'halo', // Star with halo
+  'subtle', // Subtle star with minimal decoration
+]
+
+// Helper to get deterministic random values
+function hashCode(str): number {
+  if (!str) return 0
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i)
+    hash |= 0
   }
-  
-  // Get a color from the color spectrum (without using era colors)
-    function getStarColor(id: string): string {
-    // If useEraColors is true and we have a valid era, use the era color
-    if (useEraColors && era && eraColorMap[era]) {
-      return eraColorMap[era];
-    }
-    
-    // Otherwise use the original random color based on id
-    const hash = hashCode(id);
-    return colorSpectrum[hash % colorSpectrum.length];
+  return Math.abs(hash)
+}
+
+// Get a color from the color spectrum (without using era colors)
+function getStarColor(id: string): string {
+  // If useEraColors is true and we have a valid era, use the era color
+  if (useEraColors && era && eraColorMap[era]) {
+    return eraColorMap[era]
   }
-  
-  // Get a secondary color that's the same as primary but with different opacity
-  // (instead of a complementary color from the opposite side)
-  function getSecondaryColor(primaryColor: string): string {
-    // Just use the same color - we'll adjust opacity in the styling
-    return primaryColor;
+
+  // Otherwise use the original random color based on id
+  const hash = hashCode(id)
+  return colorSpectrum[hash % colorSpectrum.length]
+}
+
+// Get a secondary color that's the same as primary but with different opacity
+// (instead of a complementary color from the opposite side)
+function getSecondaryColor(primaryColor: string): string {
+  // Just use the same color - we'll adjust opacity in the styling
+  return primaryColor
+}
+
+// Get star type
+function getStarType(id: string): string {
+  const hash = hashCode(id)
+  if (isKeyEvent) {
+    // Key events get more elaborate stars
+    return ['classic', 'sparkle', 'refraction', 'halo'][hash % 4]
   }
-  
-  // Get star type
-  function getStarType(id: string): string {
-    const hash = hashCode(id);
-    if (isKeyEvent) {
-      // Key events get more elaborate stars
-      return ['classic', 'sparkle', 'refraction', 'halo'][hash % 4];
-    }
-    return starTypes[hash % starTypes.length];
+  return starTypes[hash % starTypes.length]
+}
+
+// Get a size factor for the star
+function getSizeFactor(): number {
+  return isKeyEvent ? 1.2 : 0.85 + Math.random() * 0.3
+}
+
+// Get animation duration
+function getAnimationDuration(id: string): number {
+  const hash = hashCode(id)
+  return 4 + (hash % 5) // 4-8 second duration
+}
+
+// Create unique ID - no longer use era, use the identifier instead
+$: uniqueId = `star-${identifier}-${isKeyEvent ? 'key' : 'normal'}`
+
+// Set reactive variables
+$: starType = getStarType(uniqueId)
+$: sizeFactor = getSizeFactor()
+$: finalSize = size * sizeFactor
+$: mainColor = getStarColor(uniqueId)
+$: secondaryColor = getSecondaryColor(mainColor)
+$: animationDuration = getAnimationDuration(uniqueId)
+
+// For sparkle effect
+let showSparkle = false
+let isInitialized = false
+let showInitAnimation = false
+
+onMount(() => {
+  isInitialized = true
+  showInitAnimation = true
+
+  // Remove initialization effect after it finishes
+  setTimeout(() => {
+    showInitAnimation = false
+  }, 3000) // Match this to the animation duration
+
+  return () => {
+    // Nothing to clean up
   }
-  
-  // Get a size factor for the star
-  function getSizeFactor(): number {
-    return isKeyEvent ? 1.2 : 0.85 + (Math.random() * 0.3);
-  }
-  
-  // Get animation duration
-  function getAnimationDuration(id: string): number {
-    const hash = hashCode(id);
-    return 4 + (hash % 5); // 4-8 second duration
-  }
-  
-  // Create unique ID - no longer use era, use the identifier instead
-  $: uniqueId = `star-${identifier}-${isKeyEvent ? 'key' : 'normal'}`;
-  
-  // Set reactive variables
-  $: starType = getStarType(uniqueId);
-  $: sizeFactor = getSizeFactor();
-  $: finalSize = size * sizeFactor;
-  $: mainColor = getStarColor(uniqueId);
-  $: secondaryColor = getSecondaryColor(mainColor);
-  $: animationDuration = getAnimationDuration(uniqueId);
-  
-  // For sparkle effect
-  let showSparkle = false;
-  let isInitialized = false;
-  let showInitAnimation = false;
-  
-  onMount(() => {
-    isInitialized = true;
-    showInitAnimation = true;
-    
-    // Remove initialization effect after it finishes
-    setTimeout(() => {
-      showInitAnimation = false;
-    }, 3000); // Match this to the animation duration
-    
-    return () => {
-      // Nothing to clean up
-    };
-  });
+})
 </script>
 
 <div 

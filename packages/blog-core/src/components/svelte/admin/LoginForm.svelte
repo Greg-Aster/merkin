@@ -44,6 +44,13 @@
   export function hide() {
     formShown = false;
   }
+
+  function handleBackdropKeydown(event) {
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'Escape') {
+      event.preventDefault();
+      hide();
+    }
+  }
   
   // Toggle the form visibility
   export function toggle() {
@@ -183,6 +190,10 @@ export default passwordConfig;
   <div 
     class="fixed inset-0 bg-black/25 dark:bg-black/40 z-40" 
     on:click={hide} 
+    on:keydown={handleBackdropKeydown}
+    role="button"
+    tabindex="0"
+    aria-label="Close login panel"
     transition:fade={{ duration: 200 }}
   ></div>
   

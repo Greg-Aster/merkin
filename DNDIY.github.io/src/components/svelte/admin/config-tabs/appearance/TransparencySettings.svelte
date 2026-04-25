@@ -1,22 +1,22 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
-    
-    // Props
-    export let siteConfig;
-    
-    // Initialize transparency setting if it doesn't exist
-    if (siteConfig.transparency === undefined) {
-      siteConfig.transparency = 0.9;
-    }
-    
-    // Event dispatcher
-    const dispatch = createEventDispatcher();
-    
-    // Handle input changes
-    function handleChange() {
-      dispatch('change', siteConfig);
-    }
-  </script>
+import { createEventDispatcher } from 'svelte'
+
+// Props
+export let siteConfig
+
+// Initialize transparency setting if it doesn't exist
+if (siteConfig.transparency === undefined) {
+  siteConfig.transparency = 0.9
+}
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Handle input changes
+function handleChange() {
+  dispatch('change', siteConfig)
+}
+</script>
   
   <div class="bg-neutral-50 dark:bg-neutral-800/50 p-5 rounded-lg border border-neutral-200 dark:border-neutral-700 mb-8">
     <h3 class="text-lg font-medium text-black/80 dark:text-white/80 mb-3">Content Transparency</h3>

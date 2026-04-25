@@ -1,7 +1,21 @@
 import type { EditorSceneDocument, EditorSceneNode } from './editorTypes'
 
-export type OutlinerDisplayMode = 'view-layer' | 'collections' | 'blender-file' | 'data-api'
-export type OutlinerItemType = 'scene' | 'collection' | 'node' | 'category' | 'setting' | 'asset' | 'material' | 'prefab' | 'light' | 'gameplay'
+export type OutlinerDisplayMode =
+  | 'view-layer'
+  | 'collections'
+  | 'blender-file'
+  | 'data-api'
+export type OutlinerItemType =
+  | 'scene'
+  | 'collection'
+  | 'node'
+  | 'category'
+  | 'setting'
+  | 'asset'
+  | 'material'
+  | 'prefab'
+  | 'light'
+  | 'gameplay'
 
 export type OutlinerModeOption = {
   id: OutlinerDisplayMode

@@ -1,3 +1,4 @@
+import { AUTO_MODE } from '@constants/constants.ts'
 import type {
   LicenseConfig,
   NavBarConfig,
@@ -5,14 +6,13 @@ import type {
   SiteConfig,
 } from '../types/config'
 import { LinkPreset } from '../types/config'
-import { AUTO_MODE } from '@constants/constants.ts'
 import { url } from '../utils/url-utils'
 
 export const siteConfig: SiteConfig = {
-  title: "Greg Aster Trail Log",
-  subtitle: "PCT 2026 | Field Notes, Gear, and Trail Lessons",
+  title: 'Greg Aster Trail Log',
+  subtitle: 'PCT 2026 | Field Notes, Gear, and Trail Lessons',
   enablePostFooterNav: true,
-  lang: "en",
+  lang: 'en',
   themeColor: {
     hue: 145,
     fixed: false,
@@ -21,12 +21,12 @@ export const siteConfig: SiteConfig = {
   defaultTheme: AUTO_MODE,
   banner: {
     enable: false,
-    src: "/avatar/avatar1.jpg",
-    position: "center",
+    src: '/avatar/avatar1.jpg',
+    position: 'center',
     credit: {
       enable: false,
-      text: "",
-      url: "",
+      text: '',
+      url: '',
     },
   },
   toc: {
@@ -38,18 +38,18 @@ export const siteConfig: SiteConfig = {
     enable: true,
     showOnHome: true,
     showOnPostsWithoutToc: true,
-    stickyTop: "3.5rem",
+    stickyTop: '3.5rem',
     mobilePortraitHero: {
       enabled: true,
-      style: "banner-overlay",
+      style: 'banner-overlay',
     },
     widget: {
-      type: "updates",
-      collection: "updates",
-      slug: "trail-updates",
+      type: 'updates',
+      collection: 'updates',
+      slug: 'trail-updates',
       excerptLength: 1000,
-      pageUrl: url("/journal/"),
-      pageLinkLabel: "Open full trail journal",
+      pageUrl: url('/journal/'),
+      pageLinkLabel: 'Open full trail journal',
     },
   },
   favicon: [],
@@ -59,8 +59,8 @@ export const navBarConfig: NavBarConfig = {
   links: [
     0,
     {
-      name: "Journal",
-      url: url("/journal/"),
+      name: 'Journal',
+      url: url('/journal/'),
     },
     1,
     2,
@@ -68,26 +68,26 @@ export const navBarConfig: NavBarConfig = {
 }
 
 export const profileConfig: ProfileConfig = {
-  avatar: "/avatar/avatar1.jpg",
-  name: "Greg Aster",
-  bio: "Field notes, gear systems, and trail lessons",
+  avatar: '/avatar/avatar1.jpg',
+  name: 'Greg Aster',
+  bio: 'Field notes, gear systems, and trail lessons',
   links: [
     {
-      name: "Bluesky",
-      icon: "fa6-brands:bluesky",
-      url: "https://bsky.app/profile/astervisualarts.bsky.social",
+      name: 'Bluesky',
+      icon: 'fa6-brands:bluesky',
+      url: 'https://bsky.app/profile/astervisualarts.bsky.social',
     },
     {
-      name: "GitHub",
-      icon: "fa6-brands:github",
-      url: "https://github.com/Greg-Aster",
+      name: 'GitHub',
+      icon: 'fa6-brands:github',
+      url: 'https://github.com/Greg-Aster',
     },
   ],
-  avatarFilename: "avatar1.jpg",
+  avatarFilename: 'avatar1.jpg',
 }
 
 export const licenseConfig: LicenseConfig = {
   enable: true,
-  name: "CC BY-NC-SA 4.0",
-  url: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+  name: 'CC BY-NC-SA 4.0',
+  url: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
 }

@@ -6,287 +6,305 @@
 -->
 
 <script lang="ts">
-  import { onMount, onDestroy, createEventDispatcher } from 'svelte'
-  import { slide, fade, fly } from 'svelte/transition'
-  import { quintOut } from 'svelte/easing'
-  import {
-    conversationUIState,
-    conversationUIConfig,
-    currentMessages,
-    isConversationActive,
-    currentNPCPersonality,
-    isProcessingResponse,
-    conversationActions,
-    activeConversationSession
-  } from './conversationStores'
-  import type { NPCEmotion } from './types'
-  import FireflyAvatar from './FireflyAvatar.svelte'
+import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+import { quintOut } from 'svelte/easing'
+import { fade, fly, slide } from 'svelte/transition'
+import FireflyAvatar from './FireflyAvatar.svelte'
+import {
+  activeConversationSession,
+  conversationActions,
+  conversationUIConfig,
+  conversationUIState,
+  currentMessages,
+  currentNPCPersonality,
+  isConversationActive,
+  isProcessingResponse,
+} from './conversationStores'
+import type { NPCEmotion } from './types'
 
-  const dispatch = createEventDispatcher()
+const dispatch = createEventDispatcher()
 
-  // Component props
-  export let visible: boolean = false
-  export let position: 'bottom' | 'centered' | { x: number; y: number } = 'bottom'
-  export let maxWidth: number = 700
-  export let maxHeight: number = 500
-  
-  // Read-only mode can be passed as props or from UI state
-  export let readOnly: boolean = false
-  export let readOnlyText: string = ''
-  export let readOnlyDuration: number = 8000
+// Component props
+export let visible: boolean = false
+export let position: 'bottom' | 'centered' | { x: number; y: number } = 'bottom'
+export let maxWidth: number = 700
+export let maxHeight: number = 500
 
-  // Local state
-  let dialogContainer: HTMLElement
-  let messageContainer: HTMLElement
-  let messageInput: HTMLInputElement
-  let currentMessage = ''
-  let isTypingMessage = false
-  let autoCloseTimer: ReturnType<typeof setTimeout> | null = null
-  let isUserScrolledUp = false
-  let lastMessageCount = 0
+// Read-only mode can be passed as props or from UI state
+export let readOnly: boolean = false
+export let readOnlyText: string = ''
+export let readOnlyDuration: number = 8000
 
-  // Reactive state
-  $: messages = $currentMessages
-  $: npcPersonality = $currentNPCPersonality
-  $: uiState = $conversationUIState
-  $: uiConfig = $conversationUIConfig
-  $: isActive = $isConversationActive
-  $: isProcessing = $isProcessingResponse
-  $: session = $activeConversationSession
-  
-  // Use UI state values for read-only mode when available
-  $: effectiveReadOnly = readOnly || uiState.isReadOnly || false
-  $: effectiveReadOnlyText = readOnlyText || uiState.readOnlyText || ''
-  $: effectiveReadOnlyDuration = readOnlyDuration || uiState.readOnlyDuration || 4000
-  
-  // Smart auto-scroll: Only scroll to bottom for new messages if user hasn't scrolled up
-  $: if (messageContainer && messages.length > lastMessageCount) {
-    if (!isUserScrolledUp) {
-      setTimeout(() => {
-        if (messageContainer && !isUserScrolledUp) {
-          messageContainer.scrollTop = messageContainer.scrollHeight
-        }
-      }, 100)
-    }
-    lastMessageCount = messages.length
-  }
+// Local state
+let dialogContainer: HTMLElement
+let messageContainer: HTMLElement
+let messageInput: HTMLInputElement
+let currentMessage = ''
+let isTypingMessage = false
+let autoCloseTimer: ReturnType<typeof setTimeout> | null = null
+let isUserScrolledUp = false
+let lastMessageCount = 0
 
-  // Auto-close timer - only if not typing
-  $: if (visible && uiConfig.autoCloseDelay && uiConfig.autoCloseDelay > 0 && !isTypingMessage) {
-    setupAutoClose()
-  }
-  
-  // Read-only mode auto-dismiss
-  $: if (visible && effectiveReadOnly && effectiveReadOnlyDuration > 0) {
-    setupReadOnlyAutoClose()
-  }
+// Reactive state
+$: messages = $currentMessages
+$: npcPersonality = $currentNPCPersonality
+$: uiState = $conversationUIState
+$: uiConfig = $conversationUIConfig
+$: isActive = $isConversationActive
+$: isProcessing = $isProcessingResponse
+$: session = $activeConversationSession
 
-  // Position calculation
-  $: positionStyles = calculatePosition(position)
+// Use UI state values for read-only mode when available
+$: effectiveReadOnly = readOnly || uiState.isReadOnly || false
+$: effectiveReadOnlyText = readOnlyText || uiState.readOnlyText || ''
+$: effectiveReadOnlyDuration =
+  readOnlyDuration || uiState.readOnlyDuration || 4000
 
-  // Theme-based styles
-  $: themeClass = `theme-${uiState.theme}`
-  
-  // Get firefly visual properties from personality or session
-  $: fireflyColor = getFireflyColor(npcPersonality || session?.personality)
-  
-  function getFireflyColor(personality: any): string {
-    // Default firefly colors from HybridFireflyComponent
-    const fireflyColors = ['#87ceeb', '#98fb98', '#ffffe0', '#dda0dd', '#f0e68c', '#ffa07a', '#20b2aa', '#9370db']
-    
-    if (personality?.visual?.primaryColor) {
-      return personality.visual.primaryColor
-    }
-    
-    // Use personality ID to consistently pick same color for same firefly
-    if (personality?.id && typeof personality.id === 'string') {
-      const hash = personality.id.split('').reduce((a, b) => {
-        a = ((a << 5) - a) + b.charCodeAt(0)
-        return a & a
-      }, 0)
-      return fireflyColors[Math.abs(hash) % fireflyColors.length]
-    }
-    
-    return fireflyColors[0] // Default to sky blue
-  }
-
-  function isAtBottom(container: HTMLElement): boolean {
-    // Consider "at bottom" if within 50px of the bottom
-    const threshold = 50
-    return container.scrollTop + container.clientHeight >= container.scrollHeight - threshold
-  }
-
-  function handleScroll(): void {
-    if (messageContainer) {
-      isUserScrolledUp = !isAtBottom(messageContainer)
-    }
-  }
-
-  function calculatePosition(pos: typeof position): string {
-    if (pos === 'bottom') {
-      return 'bottom: 2rem; left: 50%; transform: translateX(-50%);'
-    } else if (pos === 'centered') {
-      return 'top: 50%; left: 50%; transform: translate(-50%, -50%);'
-    } else if (typeof pos === 'object') {
-      return `top: ${pos.y}px; left: ${pos.x}px;`
-    }
-    return 'bottom: 2rem; left: 50%; transform: translateX(-50%);'
-  }
-
-  function setupAutoClose(): void {
-    if (autoCloseTimer) {
-      clearTimeout(autoCloseTimer)
-    }
-    
-    autoCloseTimer = setTimeout(() => {
-      if (visible && !isProcessing) {
-        handleClose()
-      }
-    }, uiConfig.autoCloseDelay)
-  }
-
-  function resetAutoClose(): void {
-    if (autoCloseTimer) {
-      clearTimeout(autoCloseTimer)
-      autoCloseTimer = null
-    }
-    if (uiConfig.autoCloseDelay && uiConfig.autoCloseDelay > 0) {
-      setupAutoClose()
-    }
-  }
-
-  function setupReadOnlyAutoClose(): void {
-    if (autoCloseTimer) {
-      clearTimeout(autoCloseTimer)
-    }
-    
-    autoCloseTimer = setTimeout(() => {
-      if (visible && effectiveReadOnly) {
-        handleClose()
-      }
-    }, effectiveReadOnlyDuration)
-  }
-
-  async function handleSendMessage(): Promise<void> {
-    if (!currentMessage.trim() || isProcessing || !isActive) return
-
-    const message = currentMessage.trim()
-    currentMessage = ''
-    
-    resetAutoClose()
-
-    try {
-      await conversationActions.sendMessage(message)
-    } catch (error) {
-      console.error('Failed to send message:', error)
-    }
-  }
-
-  function handleKeyPress(event: KeyboardEvent): void {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-      handleSendMessage()
-    } else if (event.key === 'Escape') {
-      handleClose()
-    }
-  }
-
-  // Handle input changes to track typing state
-  function handleInputChange(): void {
-    isTypingMessage = currentMessage.length > 0
-    resetAutoClose()
-  }
-
-  // Auto-focus input after NPC response
-  $: if (messages.length > 0 && messageInput && !isProcessing) {
+// Smart auto-scroll: Only scroll to bottom for new messages if user hasn't scrolled up
+$: if (messageContainer && messages.length > lastMessageCount) {
+  if (!isUserScrolledUp) {
     setTimeout(() => {
-      if (messageInput && !isProcessing) {
-        messageInput.focus()
+      if (messageContainer && !isUserScrolledUp) {
+        messageContainer.scrollTop = messageContainer.scrollHeight
       }
     }, 100)
   }
+  lastMessageCount = messages.length
+}
 
-  function handleClose(): void {
-    dispatch('close')
-    conversationActions.endConversation()
+// Auto-close timer - only if not typing
+$: if (
+  visible &&
+  uiConfig.autoCloseDelay &&
+  uiConfig.autoCloseDelay > 0 &&
+  !isTypingMessage
+) {
+  setupAutoClose()
+}
+
+// Read-only mode auto-dismiss
+$: if (visible && effectiveReadOnly && effectiveReadOnlyDuration > 0) {
+  setupReadOnlyAutoClose()
+}
+
+// Position calculation
+$: positionStyles = calculatePosition(position)
+
+// Theme-based styles
+$: themeClass = `theme-${uiState.theme}`
+
+// Get firefly visual properties from personality or session
+$: fireflyColor = getFireflyColor(npcPersonality || session?.personality)
+
+function getFireflyColor(personality: any): string {
+  // Default firefly colors from HybridFireflyComponent
+  const fireflyColors = [
+    '#87ceeb',
+    '#98fb98',
+    '#ffffe0',
+    '#dda0dd',
+    '#f0e68c',
+    '#ffa07a',
+    '#20b2aa',
+    '#9370db',
+  ]
+
+  if (personality?.visual?.primaryColor) {
+    return personality.visual.primaryColor
   }
 
-  function formatTimestamp(timestamp: number): string {
-    return new Date(timestamp).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    })
+  // Use personality ID to consistently pick same color for same firefly
+  if (personality?.id && typeof personality.id === 'string') {
+    const hash = personality.id.split('').reduce((a, b) => {
+      a = (a << 5) - a + b.charCodeAt(0)
+      return a & a
+    }, 0)
+    return fireflyColors[Math.abs(hash) % fireflyColors.length]
   }
 
-  function getEmotionEmoji(emotion: NPCEmotion): string {
-    const emojiMap: Record<NPCEmotion, string> = {
-      neutral: '😐',
-      happy: '😊',
-      excited: '🤩',
-      curious: '🤔',
-      thoughtful: '💭',
-      sad: '😢',
-      worried: '😟',
-      surprised: '😲',
-      confused: '😕',
-      mysterious: '🌟',
-      playful: '😄',
-      wise: '🧙',
-      mischievous: '😏',
-      peaceful: '😌',
-      energetic: '⚡'
+  return fireflyColors[0] // Default to sky blue
+}
+
+function isAtBottom(container: HTMLElement): boolean {
+  // Consider "at bottom" if within 50px of the bottom
+  const threshold = 50
+  return (
+    container.scrollTop + container.clientHeight >=
+    container.scrollHeight - threshold
+  )
+}
+
+function handleScroll(): void {
+  if (messageContainer) {
+    isUserScrolledUp = !isAtBottom(messageContainer)
+  }
+}
+
+function calculatePosition(pos: typeof position): string {
+  if (pos === 'bottom') {
+    return 'bottom: 2rem; left: 50%; transform: translateX(-50%);'
+  } else if (pos === 'centered') {
+    return 'top: 50%; left: 50%; transform: translate(-50%, -50%);'
+  } else if (typeof pos === 'object') {
+    return `top: ${pos.y}px; left: ${pos.x}px;`
+  }
+  return 'bottom: 2rem; left: 50%; transform: translateX(-50%);'
+}
+
+function setupAutoClose(): void {
+  if (autoCloseTimer) {
+    clearTimeout(autoCloseTimer)
+  }
+
+  autoCloseTimer = setTimeout(() => {
+    if (visible && !isProcessing) {
+      handleClose()
     }
-    return emojiMap[emotion] || '🌟'
+  }, uiConfig.autoCloseDelay)
+}
+
+function resetAutoClose(): void {
+  if (autoCloseTimer) {
+    clearTimeout(autoCloseTimer)
+    autoCloseTimer = null
+  }
+  if (uiConfig.autoCloseDelay && uiConfig.autoCloseDelay > 0) {
+    setupAutoClose()
+  }
+}
+
+function setupReadOnlyAutoClose(): void {
+  if (autoCloseTimer) {
+    clearTimeout(autoCloseTimer)
   }
 
-  function getEmotionColor(emotion: NPCEmotion): string {
-    const colorMap: Record<NPCEmotion, string> = {
-      neutral: '#8892b0',
-      happy: '#64ffda',
-      excited: '#ff6b6b',
-      curious: '#4ecdc4',
-      thoughtful: '#a8e6cf',
-      sad: '#87ceeb',
-      worried: '#dda0dd',
-      surprised: '#ffb347',
-      confused: '#f0e68c',
-      mysterious: '#9370db',
-      playful: '#ff69b4',
-      wise: '#daa520',
-      mischievous: '#ff1493',
-      peaceful: '#98fb98',
-      energetic: '#ffd700'
+  autoCloseTimer = setTimeout(() => {
+    if (visible && effectiveReadOnly) {
+      handleClose()
     }
-    return colorMap[emotion] || '#64ffda'
-  }
+  }, effectiveReadOnlyDuration)
+}
 
-  function getDisplayName(fullName: string, species: string): string {
-    // For fireflies, show only first name for intimacy
-    if (species?.toLowerCase().includes('firefly')) {
-      return fullName?.split(' ')[0] || fullName || 'Unknown'
-    }
-    // For non-fireflies, show full name
-    return fullName || 'Unknown'
-  }
+async function handleSendMessage(): Promise<void> {
+  if (!currentMessage.trim() || isProcessing || !isActive) return
 
-  // Reset scroll state when conversation changes
-  $: if (session?.id) {
-    isUserScrolledUp = false
-    lastMessageCount = 0
-  }
+  const message = currentMessage.trim()
+  currentMessage = ''
 
-  // Lifecycle
-  onMount(() => {
-    if (messageInput) {
+  resetAutoClose()
+
+  try {
+    await conversationActions.sendMessage(message)
+  } catch (error) {
+    console.error('Failed to send message:', error)
+  }
+}
+
+function handleKeyPress(event: KeyboardEvent): void {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault()
+    handleSendMessage()
+  } else if (event.key === 'Escape') {
+    handleClose()
+  }
+}
+
+// Handle input changes to track typing state
+function handleInputChange(): void {
+  isTypingMessage = currentMessage.length > 0
+  resetAutoClose()
+}
+
+// Auto-focus input after NPC response
+$: if (messages.length > 0 && messageInput && !isProcessing) {
+  setTimeout(() => {
+    if (messageInput && !isProcessing) {
       messageInput.focus()
     }
-  })
+  }, 100)
+}
 
-  onDestroy(() => {
-    if (autoCloseTimer) {
-      clearTimeout(autoCloseTimer)
-    }
+function handleClose(): void {
+  dispatch('close')
+  conversationActions.endConversation()
+}
+
+function formatTimestamp(timestamp: number): string {
+  return new Date(timestamp).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
   })
+}
+
+function getEmotionEmoji(emotion: NPCEmotion): string {
+  const emojiMap: Record<NPCEmotion, string> = {
+    neutral: '😐',
+    happy: '😊',
+    excited: '🤩',
+    curious: '🤔',
+    thoughtful: '💭',
+    sad: '😢',
+    worried: '😟',
+    surprised: '😲',
+    confused: '😕',
+    mysterious: '🌟',
+    playful: '😄',
+    wise: '🧙',
+    mischievous: '😏',
+    peaceful: '😌',
+    energetic: '⚡',
+  }
+  return emojiMap[emotion] || '🌟'
+}
+
+function getEmotionColor(emotion: NPCEmotion): string {
+  const colorMap: Record<NPCEmotion, string> = {
+    neutral: '#8892b0',
+    happy: '#64ffda',
+    excited: '#ff6b6b',
+    curious: '#4ecdc4',
+    thoughtful: '#a8e6cf',
+    sad: '#87ceeb',
+    worried: '#dda0dd',
+    surprised: '#ffb347',
+    confused: '#f0e68c',
+    mysterious: '#9370db',
+    playful: '#ff69b4',
+    wise: '#daa520',
+    mischievous: '#ff1493',
+    peaceful: '#98fb98',
+    energetic: '#ffd700',
+  }
+  return colorMap[emotion] || '#64ffda'
+}
+
+function getDisplayName(fullName: string, species: string): string {
+  // For fireflies, show only first name for intimacy
+  if (species?.toLowerCase().includes('firefly')) {
+    return fullName?.split(' ')[0] || fullName || 'Unknown'
+  }
+  // For non-fireflies, show full name
+  return fullName || 'Unknown'
+}
+
+// Reset scroll state when conversation changes
+$: if (session?.id) {
+  isUserScrolledUp = false
+  lastMessageCount = 0
+}
+
+// Lifecycle
+onMount(() => {
+  if (messageInput) {
+    messageInput.focus()
+  }
+})
+
+onDestroy(() => {
+  if (autoCloseTimer) {
+    clearTimeout(autoCloseTimer)
+  }
+})
 </script>
 
 {#if (visible && isActive) || (visible && effectiveReadOnly)}

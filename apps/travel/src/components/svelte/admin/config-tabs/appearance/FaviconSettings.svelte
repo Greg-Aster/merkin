@@ -1,79 +1,79 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
-  
-  // Props
-  export let siteConfig;
-  
-  // Local state
-  let editingFavicon = null;
-  let showFaviconEditor = false;
-  let uploadingFavicon = false;
-  
-  // Event dispatcher
-  const dispatch = createEventDispatcher();
-  
-  // Function to add a favicon
-  function addFavicon() {
-    editingFavicon = {
-      isNew: true,
-      data: {
-        src: '',
-        theme: 'light',
-        sizes: ''
-      }
-    };
-    showFaviconEditor = true;
+import { createEventDispatcher } from 'svelte'
+
+// Props
+export let siteConfig
+
+// Local state
+let editingFavicon = null
+let showFaviconEditor = false
+let uploadingFavicon = false
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Function to add a favicon
+function addFavicon() {
+  editingFavicon = {
+    isNew: true,
+    data: {
+      src: '',
+      theme: 'light',
+      sizes: '',
+    },
   }
-  
-  // Function to edit a favicon
-  function editFavicon(index) {
-    editingFavicon = {
-      isNew: false,
-      index: index,
-      data: { ...siteConfig.favicon[index] }
-    };
-    showFaviconEditor = true;
+  showFaviconEditor = true
+}
+
+// Function to edit a favicon
+function editFavicon(index) {
+  editingFavicon = {
+    isNew: false,
+    index: index,
+    data: { ...siteConfig.favicon[index] },
   }
-  
-  // Function to save favicon
-  function saveFavicon() {
-    if (editingFavicon.isNew) {
-      // Add new favicon
-      if (!siteConfig.favicon) {
-        siteConfig.favicon = [];
-      }
-      siteConfig.favicon = [...siteConfig.favicon, editingFavicon.data];
-    } else {
-      // Update existing favicon
-      const newFavicons = [...siteConfig.favicon];
-      newFavicons[editingFavicon.index] = editingFavicon.data;
-      siteConfig.favicon = newFavicons;
+  showFaviconEditor = true
+}
+
+// Function to save favicon
+function saveFavicon() {
+  if (editingFavicon.isNew) {
+    // Add new favicon
+    if (!siteConfig.favicon) {
+      siteConfig.favicon = []
     }
-    
-    showFaviconEditor = false;
-    dispatch('change', siteConfig);
+    siteConfig.favicon = [...siteConfig.favicon, editingFavicon.data]
+  } else {
+    // Update existing favicon
+    const newFavicons = [...siteConfig.favicon]
+    newFavicons[editingFavicon.index] = editingFavicon.data
+    siteConfig.favicon = newFavicons
   }
-  
-  // Function to delete favicon
-  function deleteFavicon(index) {
-    if (confirm('Are you sure you want to delete this favicon?')) {
-      siteConfig.favicon = siteConfig.favicon.filter((_, i) => i !== index);
-      dispatch('change', siteConfig);
-    }
+
+  showFaviconEditor = false
+  dispatch('change', siteConfig)
+}
+
+// Function to delete favicon
+function deleteFavicon(index) {
+  if (confirm('Are you sure you want to delete this favicon?')) {
+    siteConfig.favicon = siteConfig.favicon.filter((_, i) => i !== index)
+    dispatch('change', siteConfig)
   }
-  
-  // Function to handle favicon upload
-  function handleFaviconUpload() {
-    // In a real implementation, this would upload to a server
-    // For demo purposes, we'll simulate a delay
-    uploadingFavicon = true;
-    
-    setTimeout(() => {
-      // Set a demo favicon URL
-      editingFavicon.data.src = '/api/placeholder/32/32';
-      uploadingFavicon = false;
-    }, 1500);
-  }
+}
+
+// Function to handle favicon upload
+function handleFaviconUpload() {
+  // In a real implementation, this would upload to a server
+  // For demo purposes, we'll simulate a delay
+  uploadingFavicon = true
+
+  setTimeout(() => {
+    // Set a demo favicon URL
+    editingFavicon.data.src = '/api/placeholder/32/32'
+    uploadingFavicon = false
+  }, 1500)
+}
 </script>
 
 <!-- Favicon Settings -->

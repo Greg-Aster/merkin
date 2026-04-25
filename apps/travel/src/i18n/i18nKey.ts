@@ -4,7 +4,7 @@ enum I18nKey {
   archive = 'archive',
   community = 'community',
   search = 'search',
-  
+
   configs = 'configs',
   friends = 'friends',
   newPost = 'newPost',

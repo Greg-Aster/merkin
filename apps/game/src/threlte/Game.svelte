@@ -3,863 +3,974 @@
   Replaces Three.js with Threlte declarative components
 -->
 <script lang="ts">
-  import { onDestroy, onMount, createEventDispatcher } from 'svelte'
-  
-  // Modern UI components only
-  import ThrelteMobileControls from './features/player/ThrelteMobileControls.svelte'
-  import GameCanvasStage from './GameCanvasStage.svelte'
-  import RuntimeDiagnosticsPanel from './ui/RuntimeDiagnosticsPanel.svelte'
+import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 
-  import { 
-    isConversationActive, 
-    conversationUIState, 
-    conversationActions 
-  } from './features/conversation/conversationStores'
-  
-  // Import MobileEnhancements component
-  import MobileEnhancements from './ui/MobileEnhancements.svelte'
-  
-  import { resetLevelRuntime } from './core/levelRuntimeReset'
-  
-  // Import UI components
-  import TimelineCard from './ui/TimelineCard.svelte'
-  import SettingsButton from './ui/SettingsButton.svelte'
-  
-  // Import modern Threlte stores for reactive state management
-  import {
-    currentLevelStore, 
-    selectedStarStore, 
-    gameStatsStore, 
-    isMobileStore, 
-    isLoadingStore, 
-    errorStore,
-    gameActions,
-    loadGameState,
-    type StarData 
-  } from './stores/gameStateStore'
-  import {
-    getLevelRegistryEntry,
-    levelRegistryStore,
-    resolveLevelId as resolveRegistryLevelId,
-  } from './levels/levelRegistry'
-  
-  // Import UI state store
-  import {
-    isSettingsMenuOpen,
-  } from './stores/uiStore'
-  import { editorStateStore, initializeEditor } from './editor/editorStore'
-  import {
-    resetRuntimeDiagnostics,
-    setRuntimeDiagnostic,
-  } from './stores/runtimeDiagnosticsStore'
-  
-  const dispatch = createEventDispatcher()
-  const isDev = import.meta.env.DEV
+import GameCanvasStage from './GameCanvasStage.svelte'
+// Modern UI components only
+import ThrelteMobileControls from './features/player/ThrelteMobileControls.svelte'
+import RuntimeDiagnosticsPanel from './ui/RuntimeDiagnosticsPanel.svelte'
 
-  function debugLog(...args: any[]) {
-    if (isDev) {
-      console.log(...args)
+import {
+  conversationActions,
+  conversationUIState,
+  isConversationActive,
+} from './features/conversation/conversationStores'
+
+// Import MobileEnhancements component
+import MobileEnhancements from './ui/MobileEnhancements.svelte'
+
+import { resetLevelRuntime } from './core/levelRuntimeReset'
+
+import SettingsButton from './ui/SettingsButton.svelte'
+// Import UI components
+import TimelineCard from './ui/TimelineCard.svelte'
+
+import {
+  getLevelRegistryEntry,
+  levelRegistryStore,
+  resolveLevelId as resolveRegistryLevelId,
+} from './levels/levelRegistry'
+// Import modern Threlte stores for reactive state management
+import {
+  type StarData,
+  currentLevelStore,
+  errorStore,
+  gameActions,
+  gameStatsStore,
+  isLoadingStore,
+  isMobileStore,
+  loadGameState,
+  selectedStarStore,
+} from './stores/gameStateStore'
+
+import { editorStateStore, initializeEditor } from './editor/editorStore'
+import {
+  resetRuntimeDiagnostics,
+  setRuntimeDiagnostic,
+} from './stores/runtimeDiagnosticsStore'
+// Import UI state store
+import { isSettingsMenuOpen } from './stores/uiStore'
+
+const dispatch = createEventDispatcher()
+const isDev = import.meta.env.DEV
+
+function debugLog(...args: any[]) {
+  if (isDev) {
+    console.log(...args)
+  }
+}
+
+// Props
+export let timelineEvents = []
+
+// Parse timeline events if they come as JSON string from Astro
+$: parsedTimelineEvents = (() => {
+  if (typeof timelineEvents === 'string') {
+    try {
+      const parsed = JSON.parse(timelineEvents)
+      debugLog(
+        `🎮 Game.svelte: Parsed ${parsed.length} timeline events from JSON string`,
+      )
+      return parsed
+    } catch (error) {
+      console.error('Failed to parse timeline events:', error)
+      return []
     }
   }
-  
-  // Props
-  export let timelineEvents = []
-  
-  // Parse timeline events if they come as JSON string from Astro
-  $: parsedTimelineEvents = (() => {
-    if (typeof timelineEvents === 'string') {
-      try {
-        const parsed = JSON.parse(timelineEvents)
-        debugLog(`🎮 Game.svelte: Parsed ${parsed.length} timeline events from JSON string`)
-        return parsed
-      } catch (error) {
-        console.error('Failed to parse timeline events:', error)
-        return []
-      }
-    }
-    const events = Array.isArray(timelineEvents) ? timelineEvents : []
-    debugLog(`🎮 Game.svelte: Using ${events.length} timeline events directly`)
-    return events
-  })()
-  $: timelineEventsPayload =
-    typeof timelineEvents === 'string' ? timelineEvents : JSON.stringify(parsedTimelineEvents)
-  // Game state - fully migrated to reactive Threlte stores
-  
-  // UI state (local)
-  let loadingMessage = 'Initializing Threlte...'
-  let isInitialized = false
-  let showDebugPanel = false
-  
-  // Room joining state
-  let isJoiningRoom = false
-  let roomJoinError = ''
+  const events = Array.isArray(timelineEvents) ? timelineEvents : []
+  debugLog(`🎮 Game.svelte: Using ${events.length} timeline events directly`)
+  return events
+})()
+$: timelineEventsPayload =
+  typeof timelineEvents === 'string'
+    ? timelineEvents
+    : JSON.stringify(parsedTimelineEvents)
+// Game state - fully migrated to reactive Threlte stores
 
-  let currentLevelComponent: any = null
-  let settingsPanelComponent: any = null
-  let conversationDialogComponent: any = null
-  let chatBoxComponentClass: any = null
-  let audioSystemComponent: any = null
-  let multiplayerManagerComponent: any = null
-  let physicsSystemComponent: any = null
-  let playerComponentClass: any = null
-  let editorPanelComponent: any = null
-  let editorControlsOverlayComponent: any = null
-  let editorCollisionOverlayComponent: any = null
-  let editorCircleSelectOverlayComponent: any = null
-  let editorMarqueeOverlayComponent: any = null
-  let editorSceneLayerComponent: any = null
-  let editorTerrainSculptLayerComponent: any = null
-  let editorViewportControlsComponent: any = null
-  let editorWorkbenchLightingComponent: any = null
-  let initializeClientFn: ((roomName: string) => void) | null = null
-  
-  let playerComponent: any = null
-  let playerReady = false
-  let spawnSystem: any = null
-  let interactionSystem: any = null // Reference to centralized InteractionSystem
-  let chatBoxComponent: any = null // Reference to ChatBox component instance
-  let editorEnabled = false
-  let collisionOverlayEnabled = false
-  let activeLevelNote: {
-    title: string
-    author: string
-    location: string
-    excerpt: string
-    body: string
-  } | null = null
-  let levelRegistry = []
-  
-  // Spawn system state
-  let physicsReady = false
-  let activeLevelLoadRequest = 0
-  let editorFeaturesPromise: Promise<void> | null = null
-  let sceneLayerComponentPromise: Promise<void> | null = null
-  let deferredAudioCleanup: (() => void) | null = null
-  let deferredGameplayCoreCleanup: (() => void) | null = null
-  let gameplayCorePromise: Promise<void> | null = null
-  let pendingLevelReturn: {
-    levelType: string
-    title: string
-    message: string
-    confirmLabel: string
-    cancelLabel: string
-  } | null = null
+// UI state (local)
+let loadingMessage = 'Initializing Threlte...'
+let isInitialized = false
+let showDebugPanel = false
 
-  const levelComponentCache = new Map<string, any>()
+// Room joining state
+let isJoiningRoom = false
+let roomJoinError = ''
 
-  function getModuleDefault<T>(module: T | undefined | null, label: string) {
-    if (!module || typeof module !== 'object' || !('default' in module) || !(module as any).default) {
-      throw new Error(`Failed to load ${label}.`)
-    }
+let currentLevelComponent: any = null
+let settingsPanelComponent: any = null
+let conversationDialogComponent: any = null
+let chatBoxComponentClass: any = null
+let audioSystemComponent: any = null
+let multiplayerManagerComponent: any = null
+let physicsSystemComponent: any = null
+let playerComponentClass: any = null
+let editorPanelComponent: any = null
+let editorControlsOverlayComponent: any = null
+let editorCollisionOverlayComponent: any = null
+let editorCircleSelectOverlayComponent: any = null
+let editorMarqueeOverlayComponent: any = null
+let editorSceneLayerComponent: any = null
+let editorTerrainSculptLayerComponent: any = null
+let editorViewportControlsComponent: any = null
+let editorWorkbenchLightingComponent: any = null
+let initializeClientFn: ((roomName: string) => void) | null = null
 
-    return (module as any).default
+let playerComponent: any = null
+let playerReady = false
+let spawnSystem: any = null
+let interactionSystem: any = null // Reference to centralized InteractionSystem
+let chatBoxComponent: any = null // Reference to ChatBox component instance
+let editorEnabled = false
+let collisionOverlayEnabled = false
+let activeLevelNote: {
+  title: string
+  author: string
+  location: string
+  excerpt: string
+  body: string
+} | null = null
+let levelRegistry = []
+
+// Spawn system state
+let physicsReady = false
+let activeLevelLoadRequest = 0
+let editorFeaturesPromise: Promise<void> | null = null
+let sceneLayerComponentPromise: Promise<void> | null = null
+let deferredAudioCleanup: (() => void) | null = null
+let deferredGameplayCoreCleanup: (() => void) | null = null
+let gameplayCorePromise: Promise<void> | null = null
+let pendingLevelReturn: {
+  levelType: string
+  title: string
+  message: string
+  confirmLabel: string
+  cancelLabel: string
+} | null = null
+
+const levelComponentCache = new Map<string, any>()
+
+function getModuleDefault<T>(module: T | undefined | null, label: string) {
+  if (
+    !module ||
+    typeof module !== 'object' ||
+    !('default' in module) ||
+    !(module as any).default
+  ) {
+    throw new Error(`Failed to load ${label}.`)
   }
 
-  function normalizeLevelId(levelId: string | null | undefined) {
-    return resolveRegistryLevelId(levelId, levelRegistry)
-  }
+  return (module as any).default
+}
 
-  function getLevelRenderConfig(levelId: string) {
-    const normalizedLevel = normalizeLevelId(levelId)
-    const levelEntry = getLevelRegistryEntry(normalizedLevel, levelRegistry)
+function normalizeLevelId(levelId: string | null | undefined) {
+  return resolveRegistryLevelId(levelId, levelRegistry)
+}
 
-    if (levelEntry?.source.kind === 'scene') {
-      return {
-        offset: [0, 0, 0] as [number, number, number],
-        spawn: [0, 1, 0] as [number, number, number],
-      }
-    }
+function getLevelRenderConfig(levelId: string) {
+  const normalizedLevel = normalizeLevelId(levelId)
+  const levelEntry = getLevelRegistryEntry(normalizedLevel, levelRegistry)
 
-    if (normalizedLevel === 'sci-fi-room') {
-      return {
-        offset: [0, 0, 0] as [number, number, number],
-        spawn: [0, 1, 0] as [number, number, number],
-      }
-    }
-
-    if (normalizedLevel === 'miranda') {
-      return {
-        offset: [0, 0, 0] as [number, number, number],
-        spawn: [0, 4.25, -13.8] as [number, number, number],
-      }
-    }
-
-    if (normalizedLevel === 'solitude') {
-      return {
-        offset: [0, 0, 0] as [number, number, number],
-        spawn: [0, 2.4, -24] as [number, number, number],
-      }
-    }
-
+  if (levelEntry?.source.kind === 'scene') {
     return {
-      offset: [0, 15, 10] as [number, number, number],
-      spawn: [0, 18, -50] as [number, number, number],
+      offset: [0, 0, 0] as [number, number, number],
+      spawn: [0, 1, 0] as [number, number, number],
     }
   }
-  
-  // --- NEW: Robust Loading State ---
-  // We now consider the game "loaded" only when the terrain's physics are ready.
-  let terrainReady = false
-  $: currentLevelRenderConfig = getLevelRenderConfig(currentLevel)
-  $: if (terrainReady) {
-    debugLog('✅ Terrain and physics are ready. Hiding loading screen.')
-    gameActions.setLoading(false);
+
+  if (normalizedLevel === 'sci-fi-room') {
+    return {
+      offset: [0, 0, 0] as [number, number, number],
+      spawn: [0, 1, 0] as [number, number, number],
+    }
   }
-  $: if (isInitialized && terrainReady && !error) {
-    setRuntimeDiagnostic('engine', {
-      level: 'ready',
-      message: `Engine ready on level ${currentLevel}.`,
-    })
+
+  if (normalizedLevel === 'miranda') {
+    return {
+      offset: [0, 0, 0] as [number, number, number],
+      spawn: [0, 4.25, -13.8] as [number, number, number],
+    }
   }
-  
-  // Reactive store subscriptions (these are reactive by default)
-  $: currentLevel = $currentLevelStore
-  $: levelRegistry = $levelRegistryStore
-  $: selectedStar = $selectedStarStore
-  $: gameStats = $gameStatsStore
-  $: isMobile = $isMobileStore
-  $: isLoading = $isLoadingStore
-  $: error = $errorStore
-  $: editorEnabled = $editorStateStore.enabled
-  $: collisionOverlayEnabled = $editorStateStore.collisionOverlayEnabled
-  $: playerReady = Boolean(
-    playerComponent
-    && typeof playerComponent.spawnAt === 'function'
-    && typeof playerComponent.isSpawnReady === 'function'
-    && playerComponent.isSpawnReady()
-  )
-  $: setRuntimeDiagnostic('mode', {
+
+  if (normalizedLevel === 'solitude') {
+    return {
+      offset: [0, 0, 0] as [number, number, number],
+      spawn: [0, 2.4, -24] as [number, number, number],
+    }
+  }
+
+  return {
+    offset: [0, 15, 10] as [number, number, number],
+    spawn: [0, 18, -50] as [number, number, number],
+  }
+}
+
+// --- NEW: Robust Loading State ---
+// We now consider the game "loaded" only when the terrain's physics are ready.
+let terrainReady = false
+$: currentLevelRenderConfig = getLevelRenderConfig(currentLevel)
+$: if (terrainReady) {
+  debugLog('✅ Terrain and physics are ready. Hiding loading screen.')
+  gameActions.setLoading(false)
+}
+$: if (isInitialized && terrainReady && !error) {
+  setRuntimeDiagnostic('engine', {
     level: 'ready',
-    message: editorEnabled ? 'Editor mode active.' : 'Gameplay mode active.',
+    message: `Engine ready on level ${currentLevel}.`,
   })
-  $: setRuntimeDiagnostic('terrain', {
-    level: terrainReady ? 'ready' : 'loading',
-    message: terrainReady ? 'Terrain and physics surfaces are ready.' : 'Waiting for active level terrain readiness.',
-  })
-  $: setRuntimeDiagnostic('physics', {
-    level: physicsReady ? 'ready' : 'loading',
-    message: physicsReady ? 'Physics world is active.' : 'Waiting for physics world to initialize.',
-  })
-  $: setRuntimeDiagnostic('player', {
-    level: editorEnabled ? 'idle' : playerReady ? 'ready' : 'loading',
-    message: editorEnabled
-      ? 'Player runtime disabled while editor mode is active.'
-      : playerReady
-        ? 'Player component is ready for spawn requests.'
-        : 'Waiting for player component readiness.',
-  })
-  $: setRuntimeDiagnostic('editor', {
-    level: editorEnabled ? 'ready' : 'idle',
-    message: editorEnabled ? 'Editor subsystems active.' : 'Editor subsystems inactive.',
-  })
-  
-  // Reactive level and star tracking - debug logs removed for performance
-  $: if (isDev && currentLevel) {
-    debugLog('🎮 Current level:', currentLevel)
+}
+
+// Reactive store subscriptions (these are reactive by default)
+$: currentLevel = $currentLevelStore
+$: levelRegistry = $levelRegistryStore
+$: selectedStar = $selectedStarStore
+$: gameStats = $gameStatsStore
+$: isMobile = $isMobileStore
+$: isLoading = $isLoadingStore
+$: error = $errorStore
+$: editorEnabled = $editorStateStore.enabled
+$: collisionOverlayEnabled = $editorStateStore.collisionOverlayEnabled
+$: playerReady = Boolean(
+  playerComponent &&
+    typeof playerComponent.spawnAt === 'function' &&
+    typeof playerComponent.isSpawnReady === 'function' &&
+    playerComponent.isSpawnReady(),
+)
+$: setRuntimeDiagnostic('mode', {
+  level: 'ready',
+  message: editorEnabled ? 'Editor mode active.' : 'Gameplay mode active.',
+})
+$: setRuntimeDiagnostic('terrain', {
+  level: terrainReady ? 'ready' : 'loading',
+  message: terrainReady
+    ? 'Terrain and physics surfaces are ready.'
+    : 'Waiting for active level terrain readiness.',
+})
+$: setRuntimeDiagnostic('physics', {
+  level: physicsReady ? 'ready' : 'loading',
+  message: physicsReady
+    ? 'Physics world is active.'
+    : 'Waiting for physics world to initialize.',
+})
+$: setRuntimeDiagnostic('player', {
+  level: editorEnabled ? 'idle' : playerReady ? 'ready' : 'loading',
+  message: editorEnabled
+    ? 'Player runtime disabled while editor mode is active.'
+    : playerReady
+      ? 'Player component is ready for spawn requests.'
+      : 'Waiting for player component readiness.',
+})
+$: setRuntimeDiagnostic('editor', {
+  level: editorEnabled ? 'ready' : 'idle',
+  message: editorEnabled
+    ? 'Editor subsystems active.'
+    : 'Editor subsystems inactive.',
+})
+
+// Reactive level and star tracking - debug logs removed for performance
+$: if (isDev && currentLevel) {
+  debugLog('🎮 Current level:', currentLevel)
+}
+
+$: if (isDev && selectedStar) {
+  debugLog('⭐ Star selected:', selectedStar.title)
+}
+
+// Modern dialog system now handled by ConversationDialog component
+
+/**
+ * Convert cardClass string to position type
+ */
+function getPositionFromCardClass(
+  cardClass?: string,
+): 'top' | 'bottom' | 'left' | 'right' | undefined {
+  if (!cardClass) return undefined
+
+  if (cardClass.includes('top')) return 'top'
+  if (cardClass.includes('bottom')) return 'bottom'
+  if (cardClass.includes('left')) return 'left'
+  if (cardClass.includes('right')) return 'right'
+
+  return undefined
+}
+
+function extractSelectedStar(detail: any): StarData | null {
+  if (!detail) return null
+
+  const baseStar = detail.star ?? detail.eventData ?? detail
+  if (!baseStar) return null
+
+  const mergedScreenPosition = {
+    ...(baseStar.screenPosition ?? {}),
+    ...(detail.screenPosition ?? {}),
   }
-  
-  $: if (isDev && selectedStar) {
-    debugLog('⭐ Star selected:', selectedStar.title)
+
+  return {
+    ...baseStar,
+    screenPosition:
+      Object.keys(mergedScreenPosition).length > 0
+        ? mergedScreenPosition
+        : undefined,
   }
-  
-  // Modern dialog system now handled by ConversationDialog component
-  
-  /**
-   * Convert cardClass string to position type
-   */
-  function getPositionFromCardClass(
-    cardClass?: string,
-  ): 'top' | 'bottom' | 'left' | 'right' | undefined {
-    if (!cardClass) return undefined
-  
-    if (cardClass.includes('top')) return 'top'
-    if (cardClass.includes('bottom')) return 'bottom'
-    if (cardClass.includes('left')) return 'left'
-    if (cardClass.includes('right')) return 'right'
+}
 
-    return undefined
-  }
-
-  function extractSelectedStar(detail: any): StarData | null {
-    if (!detail) return null
-
-    const baseStar = detail.star ?? detail.eventData ?? detail
-    if (!baseStar) return null
-
-    const mergedScreenPosition = {
-      ...(baseStar.screenPosition ?? {}),
-      ...(detail.screenPosition ?? {}),
+// Convert StarData to TimelineEvent for the TimelineCard
+$: selectedEvent = selectedStar
+  ? {
+      id: selectedStar.uniqueId,
+      title: selectedStar.title,
+      description: selectedStar.description,
+      slug: selectedStar.slug,
+      year: selectedStar.timelineYear,
+      era: selectedStar.timelineEra,
+      location: selectedStar.timelineLocation,
+      isKeyEvent: selectedStar.isKeyEvent,
+      isLevel: selectedStar.isLevel,
+      levelId: selectedStar.levelId,
+      tags: selectedStar.tags,
+      category: selectedStar.category,
+      unlocked: true,
+      screenPosition: selectedStar.screenPosition,
     }
+  : null
 
-    return {
-      ...baseStar,
-      screenPosition: Object.keys(mergedScreenPosition).length > 0 ? mergedScreenPosition : undefined,
+$: if (typeof window !== 'undefined' && isInitialized && currentLevel) {
+  void ensureLevelComponent(currentLevel)
+}
+
+$: if (currentLevel) {
+  activeLevelNote = null
+}
+
+$: if ($isSettingsMenuOpen && !settingsPanelComponent) {
+  void ensureSettingsPanelComponent()
+}
+
+$: if (
+  ($isConversationActive || $conversationUIState.isVisible) &&
+  !conversationDialogComponent
+) {
+  void ensureConversationDialogComponent()
+}
+
+$: if (
+  currentLevel &&
+  !editorSceneLayerComponent &&
+  !sceneLayerComponentPromise
+) {
+  void ensureSceneLayerComponent()
+}
+
+$: if (editorEnabled && !editorFeaturesPromise) {
+  void ensureEditorFeatures()
+}
+
+/**
+ * Check URL parameters for room joining
+ */
+async function checkForRoomJoin() {
+  if (typeof window === 'undefined') return
+
+  const urlParams = new URLSearchParams(window.location.search)
+  const roomParam = urlParams.get('room')
+  const joinParam = urlParams.get('join') // Legacy support
+
+  if (roomParam) {
+    debugLog(`🎮 Found room parameter: ${roomParam}`)
+    isJoiningRoom = true
+    loadingMessage = `Joining room "${roomParam}"...`
+
+    try {
+      debugLog(`🎮 Joining room: ${roomParam}`)
+      await ensureMultiplayerFeatures()
+      initializeClientFn?.(roomParam)
+      debugLog(`✅ Initiated join for room "${roomParam}"`)
+    } catch (error) {
+      roomJoinError = `Failed to join room "${roomParam}". Please try again.`
+      console.error(`❌ Failed to join room "${roomParam}":`, error)
+    } finally {
+      isJoiningRoom = false
     }
+  } else if (joinParam) {
+    // Legacy support for direct host ID joining is deprecated
+    roomJoinError =
+      'Direct host ID joining is no longer supported. Please use room names instead.'
+    console.warn(`⚠️ Legacy join parameter "${joinParam}" is deprecated`)
   }
-  
-  // Convert StarData to TimelineEvent for the TimelineCard
-  $: selectedEvent = selectedStar
-    ? {
-        id: selectedStar.uniqueId,
-        title: selectedStar.title,
-        description: selectedStar.description,
-        slug: selectedStar.slug,
-        year: selectedStar.timelineYear,
-        era: selectedStar.timelineEra,
-        location: selectedStar.timelineLocation,
-        isKeyEvent: selectedStar.isKeyEvent,
-        isLevel: selectedStar.isLevel,
-        levelId: selectedStar.levelId,
-        tags: selectedStar.tags,
-        category: selectedStar.category,
-        unlocked: true,
-        screenPosition: selectedStar.screenPosition,
-      }
-    : null
-  
-  $: if (typeof window !== 'undefined' && isInitialized && currentLevel) {
-    void ensureLevelComponent(currentLevel)
-  }
+}
 
-  $: if (currentLevel) {
-    activeLevelNote = null
+async function ensureLevelComponent(levelId: string) {
+  const normalizedLevel = normalizeLevelId(levelId)
+  const levelEntry = getLevelRegistryEntry(normalizedLevel, levelRegistry)
+  const levelSource = levelEntry?.source ?? {
+    kind: 'component',
+    componentKey: 'observatory' as const,
   }
-
-  $: if ($isSettingsMenuOpen && !settingsPanelComponent) {
-    void ensureSettingsPanelComponent()
-  }
-
-  $: if (($isConversationActive || $conversationUIState.isVisible) && !conversationDialogComponent) {
-    void ensureConversationDialogComponent()
-  }
-
-  $: if (currentLevel && !editorSceneLayerComponent && !sceneLayerComponentPromise) {
-    void ensureSceneLayerComponent()
-  }
-
-  $: if (editorEnabled && !editorFeaturesPromise) {
-    void ensureEditorFeatures()
-  }
-
-  /**
-   * Check URL parameters for room joining
-   */
-  async function checkForRoomJoin() {
-    if (typeof window === 'undefined') return;
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const roomParam = urlParams.get('room');
-    const joinParam = urlParams.get('join'); // Legacy support
-    
-    if (roomParam) {
-      debugLog(`🎮 Found room parameter: ${roomParam}`)
-      isJoiningRoom = true;
-      loadingMessage = `Joining room "${roomParam}"...`;
-      
-      try {
-        debugLog(`🎮 Joining room: ${roomParam}`)
-        await ensureMultiplayerFeatures()
-        initializeClientFn?.(roomParam)
-        debugLog(`✅ Initiated join for room "${roomParam}"`)
-      } catch (error) {
-        roomJoinError = `Failed to join room "${roomParam}". Please try again.`;
-        console.error(`❌ Failed to join room "${roomParam}":`, error);
-      } finally {
-        isJoiningRoom = false;
-      }
-    } else if (joinParam) {
-      // Legacy support for direct host ID joining is deprecated
-      roomJoinError = 'Direct host ID joining is no longer supported. Please use room names instead.';
-      console.warn(`⚠️ Legacy join parameter "${joinParam}" is deprecated`)
-    }
-  }
-
-  async function ensureLevelComponent(levelId: string) {
-    const normalizedLevel = normalizeLevelId(levelId)
-    const levelEntry = getLevelRegistryEntry(normalizedLevel, levelRegistry)
-    const levelSource = levelEntry?.source ?? { kind: 'component', componentKey: 'observatory' as const }
-    const cacheKey = levelSource.kind === 'scene'
+  const cacheKey =
+    levelSource.kind === 'scene'
       ? `scene:${normalizedLevel}`
       : `component:${levelSource.componentKey}:${normalizedLevel}`
-    const cached = levelComponentCache.get(cacheKey)
-    if (cached) {
-      currentLevelComponent = cached
-      return
-    }
-
-    const requestId = ++activeLevelLoadRequest
-    currentLevelComponent = null
-
-    const module =
-      levelSource.kind === 'scene'
-        ? await import('./levels/SceneDocumentLevel.svelte')
-        : levelSource.componentKey === 'sci-fi-room'
-          ? await import('./levels/SciFiRoom.svelte')
-          : levelSource.componentKey === 'solitude'
-            ? await import('./levels/Solitude.svelte')
-            : levelSource.componentKey === 'miranda'
-              ? await import('./levels/MirandaShip.svelte')
-              : await import('./levels/HybridObservatory.svelte')
-
-    levelComponentCache.set(cacheKey, module.default)
-
-    if (requestId === activeLevelLoadRequest) {
-      currentLevelComponent = module.default
-    }
+  const cached = levelComponentCache.get(cacheKey)
+  if (cached) {
+    currentLevelComponent = cached
+    return
   }
 
-  async function ensureSettingsPanelComponent() {
-    if (settingsPanelComponent) return
-    try {
-      const module = await import('./ui/SettingsPanel.svelte')
-      settingsPanelComponent = getModuleDefault(module, 'settings panel')
-    } catch (error) {
-      console.warn('Failed to load settings panel:', error)
-    }
+  const requestId = ++activeLevelLoadRequest
+  currentLevelComponent = null
+
+  const module =
+    levelSource.kind === 'scene'
+      ? await import('./levels/SceneDocumentLevel.svelte')
+      : levelSource.componentKey === 'sci-fi-room'
+        ? await import('./levels/SciFiRoom.svelte')
+        : levelSource.componentKey === 'solitude'
+          ? await import('./levels/Solitude.svelte')
+          : levelSource.componentKey === 'miranda'
+            ? await import('./levels/MirandaShip.svelte')
+            : await import('./levels/HybridObservatory.svelte')
+
+  levelComponentCache.set(cacheKey, module.default)
+
+  if (requestId === activeLevelLoadRequest) {
+    currentLevelComponent = module.default
+  }
+}
+
+async function ensureSettingsPanelComponent() {
+  if (settingsPanelComponent) return
+  try {
+    const module = await import('./ui/SettingsPanel.svelte')
+    settingsPanelComponent = getModuleDefault(module, 'settings panel')
+  } catch (error) {
+    console.warn('Failed to load settings panel:', error)
+  }
+}
+
+async function ensureConversationDialogComponent() {
+  if (conversationDialogComponent) return
+  try {
+    const module = await import(
+      './features/conversation/ConversationDialog.svelte'
+    )
+    conversationDialogComponent = getModuleDefault(
+      module,
+      'conversation dialog',
+    )
+  } catch (error) {
+    console.warn('Failed to load conversation dialog:', error)
+  }
+}
+
+async function ensureSceneLayerComponent() {
+  if (editorSceneLayerComponent) return
+
+  if (!sceneLayerComponentPromise) {
+    sceneLayerComponentPromise = import('./editor/EditorSceneLayer.svelte')
+      .then(module => {
+        editorSceneLayerComponent = getModuleDefault(
+          module,
+          'editor scene layer',
+        )
+      })
+      .catch(error => {
+        console.warn('Failed to load scene layer:', error)
+        sceneLayerComponentPromise = null
+      })
   }
 
-  async function ensureConversationDialogComponent() {
-    if (conversationDialogComponent) return
-    try {
-      const module = await import('./features/conversation/ConversationDialog.svelte')
-      conversationDialogComponent = getModuleDefault(module, 'conversation dialog')
-    } catch (error) {
-      console.warn('Failed to load conversation dialog:', error)
-    }
+  await sceneLayerComponentPromise
+}
+
+async function ensureChatBoxComponent() {
+  if (chatBoxComponentClass) return
+  try {
+    const module = await import('./features/multiplayer/ui/ChatBox.svelte')
+    chatBoxComponentClass = getModuleDefault(module, 'chat box')
+  } catch (error) {
+    console.warn('Failed to load chat box:', error)
   }
+}
 
-  async function ensureSceneLayerComponent() {
-    if (editorSceneLayerComponent) return
-
-    if (!sceneLayerComponentPromise) {
-      sceneLayerComponentPromise = import('./editor/EditorSceneLayer.svelte')
-        .then((module) => {
-          editorSceneLayerComponent = getModuleDefault(module, 'editor scene layer')
-        })
-        .catch((error) => {
-          console.warn('Failed to load scene layer:', error)
-          sceneLayerComponentPromise = null
-        })
-    }
-
-    await sceneLayerComponentPromise
+async function ensureAudioSystemComponent() {
+  if (audioSystemComponent) return
+  try {
+    const module = await import('./systems/Audio.svelte')
+    audioSystemComponent = getModuleDefault(module, 'audio system')
+  } catch (error) {
+    console.warn('Failed to load audio system:', error)
   }
+}
 
-  async function ensureChatBoxComponent() {
-    if (chatBoxComponentClass) return
-    try {
-      const module = await import('./features/multiplayer/ui/ChatBox.svelte')
-      chatBoxComponentClass = getModuleDefault(module, 'chat box')
-    } catch (error) {
-      console.warn('Failed to load chat box:', error)
-    }
-  }
+async function ensureEditorFeatures() {
+  if (editorPanelComponent && editorViewportControlsComponent) return
 
-  async function ensureAudioSystemComponent() {
-    if (audioSystemComponent) return
-    try {
-      const module = await import('./systems/Audio.svelte')
-      audioSystemComponent = getModuleDefault(module, 'audio system')
-    } catch (error) {
-      console.warn('Failed to load audio system:', error)
-    }
-  }
-
-  async function ensureEditorFeatures() {
-    if (editorPanelComponent && editorViewportControlsComponent) return
-
-    if (!editorFeaturesPromise) {
-      editorFeaturesPromise = Promise.all([
-        import('./editor/EditorPanel.svelte'),
-        import('./editor/EditorControlsOverlay.svelte'),
-        import('./editor/EditorCollisionOverlay.svelte'),
-        import('./editor/EditorCircleSelectOverlay.svelte'),
-        import('./editor/EditorMarqueeOverlay.svelte'),
-        import('./editor/EditorSceneLayer.svelte'),
-        import('./editor/EditorTerrainSculptLayer.svelte'),
-        import('./editor/EditorViewportControls.svelte'),
-        import('./editor/EditorWorkbenchLighting.svelte'),
-      ]).then(([
-        editorPanelModule,
-        editorControlsOverlayModule,
-        editorCollisionOverlayModule,
-        editorCircleSelectOverlayModule,
-        editorMarqueeOverlayModule,
-        editorSceneLayerModule,
-        editorTerrainSculptLayerModule,
-        editorViewportControlsModule,
-        editorWorkbenchLightingModule,
-      ]) => {
-        editorPanelComponent = getModuleDefault(editorPanelModule, 'editor panel')
-        editorControlsOverlayComponent = getModuleDefault(editorControlsOverlayModule, 'editor controls overlay')
-        editorCollisionOverlayComponent = getModuleDefault(editorCollisionOverlayModule, 'editor collision overlay')
-        editorCircleSelectOverlayComponent = getModuleDefault(editorCircleSelectOverlayModule, 'editor circle select overlay')
-        editorMarqueeOverlayComponent = getModuleDefault(editorMarqueeOverlayModule, 'editor marquee overlay')
-        editorSceneLayerComponent = getModuleDefault(editorSceneLayerModule, 'editor scene layer')
-        editorTerrainSculptLayerComponent = getModuleDefault(editorTerrainSculptLayerModule, 'editor terrain sculpt layer')
-        editorViewportControlsComponent = getModuleDefault(editorViewportControlsModule, 'editor viewport controls')
-        editorWorkbenchLightingComponent = getModuleDefault(editorWorkbenchLightingModule, 'editor workbench lighting')
-      }).catch((error) => {
+  if (!editorFeaturesPromise) {
+    editorFeaturesPromise = Promise.all([
+      import('./editor/EditorPanel.svelte'),
+      import('./editor/EditorControlsOverlay.svelte'),
+      import('./editor/EditorCollisionOverlay.svelte'),
+      import('./editor/EditorCircleSelectOverlay.svelte'),
+      import('./editor/EditorMarqueeOverlay.svelte'),
+      import('./editor/EditorSceneLayer.svelte'),
+      import('./editor/EditorTerrainSculptLayer.svelte'),
+      import('./editor/EditorViewportControls.svelte'),
+      import('./editor/EditorWorkbenchLighting.svelte'),
+    ])
+      .then(
+        ([
+          editorPanelModule,
+          editorControlsOverlayModule,
+          editorCollisionOverlayModule,
+          editorCircleSelectOverlayModule,
+          editorMarqueeOverlayModule,
+          editorSceneLayerModule,
+          editorTerrainSculptLayerModule,
+          editorViewportControlsModule,
+          editorWorkbenchLightingModule,
+        ]) => {
+          editorPanelComponent = getModuleDefault(
+            editorPanelModule,
+            'editor panel',
+          )
+          editorControlsOverlayComponent = getModuleDefault(
+            editorControlsOverlayModule,
+            'editor controls overlay',
+          )
+          editorCollisionOverlayComponent = getModuleDefault(
+            editorCollisionOverlayModule,
+            'editor collision overlay',
+          )
+          editorCircleSelectOverlayComponent = getModuleDefault(
+            editorCircleSelectOverlayModule,
+            'editor circle select overlay',
+          )
+          editorMarqueeOverlayComponent = getModuleDefault(
+            editorMarqueeOverlayModule,
+            'editor marquee overlay',
+          )
+          editorSceneLayerComponent = getModuleDefault(
+            editorSceneLayerModule,
+            'editor scene layer',
+          )
+          editorTerrainSculptLayerComponent = getModuleDefault(
+            editorTerrainSculptLayerModule,
+            'editor terrain sculpt layer',
+          )
+          editorViewportControlsComponent = getModuleDefault(
+            editorViewportControlsModule,
+            'editor viewport controls',
+          )
+          editorWorkbenchLightingComponent = getModuleDefault(
+            editorWorkbenchLightingModule,
+            'editor workbench lighting',
+          )
+        },
+      )
+      .catch(error => {
         console.warn('Failed to load editor features:', error)
         editorFeaturesPromise = null
       })
-    }
-
-    await editorFeaturesPromise
   }
 
-  async function ensureGameplayCore() {
-    if (physicsSystemComponent && playerComponentClass) return
+  await editorFeaturesPromise
+}
 
-    if (!gameplayCorePromise) {
-      gameplayCorePromise = Promise.all([
-        import('./systems/Physics.svelte'),
-        import('./features/player/Player.svelte'),
-      ]).then(([physicsModule, playerModule]) => {
-        physicsSystemComponent = getModuleDefault(physicsModule, 'physics system')
-        playerComponentClass = getModuleDefault(playerModule, 'player component')
-      }).catch((error) => {
+async function ensureGameplayCore() {
+  if (physicsSystemComponent && playerComponentClass) return
+
+  if (!gameplayCorePromise) {
+    gameplayCorePromise = Promise.all([
+      import('./systems/Physics.svelte'),
+      import('./features/player/Player.svelte'),
+    ])
+      .then(([physicsModule, playerModule]) => {
+        physicsSystemComponent = getModuleDefault(
+          physicsModule,
+          'physics system',
+        )
+        playerComponentClass = getModuleDefault(
+          playerModule,
+          'player component',
+        )
+      })
+      .catch(error => {
         console.warn('Failed to load gameplay core:', error)
         gameplayCorePromise = null
       })
-    }
-
-    await gameplayCorePromise
   }
 
-  async function ensureMultiplayerFeatures() {
-    if (multiplayerManagerComponent && initializeClientFn) return
+  await gameplayCorePromise
+}
 
-    try {
-      const [componentModule, serviceModule] = await Promise.all([
-        import('./features/multiplayer/components/MultiplayerManager.svelte'),
-        import('./features/multiplayer/services/MultiplayerService'),
-      ])
+async function ensureMultiplayerFeatures() {
+  if (multiplayerManagerComponent && initializeClientFn) return
 
-      multiplayerManagerComponent = getModuleDefault(componentModule, 'multiplayer manager')
-      initializeClientFn = serviceModule.initializeClient
-      void ensureChatBoxComponent()
-    } catch (error) {
-      console.warn('Failed to load multiplayer features:', error)
+  try {
+    const [componentModule, serviceModule] = await Promise.all([
+      import('./features/multiplayer/components/MultiplayerManager.svelte'),
+      import('./features/multiplayer/services/MultiplayerService'),
+    ])
+
+    multiplayerManagerComponent = getModuleDefault(
+      componentModule,
+      'multiplayer manager',
+    )
+    initializeClientFn = serviceModule.initializeClient
+    void ensureChatBoxComponent()
+  } catch (error) {
+    console.warn('Failed to load multiplayer features:', error)
+  }
+}
+
+function setupDeferredAudioLoading() {
+  if (typeof window === 'undefined') return () => {}
+
+  let scheduled = false
+
+  const loadAudio = () => {
+    if (scheduled) return
+    scheduled = true
+    void ensureAudioSystemComponent()
+  }
+
+  const handleFirstInteraction = () => {
+    loadAudio()
+    removeListeners()
+  }
+
+  const removeListeners = () => {
+    window.removeEventListener('pointerdown', handleFirstInteraction, true)
+    window.removeEventListener('touchstart', handleFirstInteraction, true)
+    window.removeEventListener('keydown', handleFirstInteraction, true)
+  }
+
+  window.addEventListener('pointerdown', handleFirstInteraction, {
+    capture: true,
+    once: true,
+    passive: true,
+  })
+  window.addEventListener('touchstart', handleFirstInteraction, {
+    capture: true,
+    once: true,
+    passive: true,
+  })
+  window.addEventListener('keydown', handleFirstInteraction, {
+    capture: true,
+    once: true,
+  })
+
+  return removeListeners
+}
+
+function setupDeferredGameplayCoreLoading() {
+  if (typeof window === 'undefined') return () => {}
+  if (physicsSystemComponent && playerComponentClass) return () => {}
+
+  let scheduled = false
+  let animationFrameId: number | null = null
+  let timeoutId: number | null = null
+  let idleCallbackId: number | null = null
+
+  const removeListeners = () => {
+    window.removeEventListener('pointerdown', handleFirstInteraction, true)
+    window.removeEventListener('touchstart', handleFirstInteraction, true)
+    window.removeEventListener('keydown', handleFirstInteraction, true)
+  }
+
+  const cleanup = () => {
+    removeListeners()
+
+    if (animationFrameId !== null) {
+      window.cancelAnimationFrame(animationFrameId)
+    }
+
+    if (timeoutId !== null) {
+      window.clearTimeout(timeoutId)
+    }
+
+    if (idleCallbackId !== null && 'cancelIdleCallback' in window) {
+      window.cancelIdleCallback(idleCallbackId)
     }
   }
 
-  function setupDeferredAudioLoading() {
-    if (typeof window === 'undefined') return () => {}
-
-    let scheduled = false
-
-    const loadAudio = () => {
-      if (scheduled) return
-      scheduled = true
-      void ensureAudioSystemComponent()
-    }
-
-    const handleFirstInteraction = () => {
-      loadAudio()
-      removeListeners()
-    }
-
-    const removeListeners = () => {
-      window.removeEventListener('pointerdown', handleFirstInteraction, true)
-      window.removeEventListener('touchstart', handleFirstInteraction, true)
-      window.removeEventListener('keydown', handleFirstInteraction, true)
-    }
-
-    window.addEventListener('pointerdown', handleFirstInteraction, { capture: true, once: true, passive: true })
-    window.addEventListener('touchstart', handleFirstInteraction, { capture: true, once: true, passive: true })
-    window.addEventListener('keydown', handleFirstInteraction, { capture: true, once: true })
-
-    return removeListeners
+  const loadGameplayCore = () => {
+    if (scheduled) return
+    scheduled = true
+    cleanup()
+    void ensureGameplayCore()
   }
 
-  function setupDeferredGameplayCoreLoading() {
-    if (typeof window === 'undefined') return () => {}
-    if (physicsSystemComponent && playerComponentClass) return () => {}
-
-    let scheduled = false
-    let animationFrameId: number | null = null
-    let timeoutId: number | null = null
-    let idleCallbackId: number | null = null
-
-    const removeListeners = () => {
-      window.removeEventListener('pointerdown', handleFirstInteraction, true)
-      window.removeEventListener('touchstart', handleFirstInteraction, true)
-      window.removeEventListener('keydown', handleFirstInteraction, true)
-    }
-
-    const cleanup = () => {
-      removeListeners()
-
-      if (animationFrameId !== null) {
-        window.cancelAnimationFrame(animationFrameId)
-      }
-
-      if (timeoutId !== null) {
-        window.clearTimeout(timeoutId)
-      }
-
-      if (
-        idleCallbackId !== null
-        && 'cancelIdleCallback' in window
-      ) {
-        window.cancelIdleCallback(idleCallbackId)
-      }
-    }
-
-    const loadGameplayCore = () => {
-      if (scheduled) return
-      scheduled = true
-      cleanup()
-      void ensureGameplayCore()
-    }
-
-    const scheduleIdleLoad = () => {
-      if ('requestIdleCallback' in window) {
-        idleCallbackId = window.requestIdleCallback(() => {
+  const scheduleIdleLoad = () => {
+    if ('requestIdleCallback' in window) {
+      idleCallbackId = window.requestIdleCallback(
+        () => {
           loadGameplayCore()
-        }, { timeout: 400 })
-        return
-      }
-
-      timeoutId = window.setTimeout(() => {
-        loadGameplayCore()
-      }, 48)
-    }
-
-    const handleFirstInteraction = () => {
-      loadGameplayCore()
-    }
-
-    animationFrameId = window.requestAnimationFrame(() => {
-      scheduleIdleLoad()
-    })
-
-    window.addEventListener('pointerdown', handleFirstInteraction, { capture: true, once: true, passive: true })
-    window.addEventListener('touchstart', handleFirstInteraction, { capture: true, once: true, passive: true })
-    window.addEventListener('keydown', handleFirstInteraction, { capture: true, once: true })
-
-    return cleanup
-  }
-
-  /**
-   * Initialize Threlte-based game
-   */
-  async function initializeThrelte() {
-    try {
-      resetRuntimeDiagnostics()
-      setRuntimeDiagnostic('engine', {
-        level: 'loading',
-        message: 'Initializing Threlte game shell…',
-      })
-      loadingMessage = 'Initializing MEGAMEAL...'
-      gameActions.setLoading(true)
-
-      const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
-      const shouldEnableEditor = urlParams?.get('editor') === '1'
-      const requestedLevel = normalizeLevelId(urlParams?.get('level'))
-      initializeEditor(shouldEnableEditor)
-      
-      // Detect mobile and update store
-      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
+        },
+        { timeout: 400 },
       )
-      gameActions.setMobile(isMobileDevice)
-  
-      loadingMessage = 'Building world...'
-  
-      // Load saved game state
-      loadGameState()
-      
-      if (requestedLevel !== 'observatory') {
-        gameActions.transitionToLevel(requestedLevel)
-      } else if (!$currentLevelStore || $currentLevelStore === '') {
-        gameActions.transitionToLevel('observatory')
-      }
-      
-      // Set up Threlte-based state management
-      setupStateUpdates()
-
-      if (shouldEnableEditor) {
-        await ensureGameplayCore()
-      }
-      
-      // Check for room joining after initialization
-      await checkForRoomJoin()
-  
-      // The loading screen will now be hidden by the `terrainReady` reactive block.
-      isInitialized = true
-      setRuntimeDiagnostic('engine', {
-        level: 'ready',
-        message: 'Game shell initialized. Waiting for runtime subsystems.',
-      })
-      if (!shouldEnableEditor) {
-        deferredAudioCleanup = setupDeferredAudioLoading()
-        deferredGameplayCoreCleanup = setupDeferredGameplayCoreLoading()
-      }
-  
-      debugLog('✅ Game systems initialized. Waiting for terrain...')
-    } catch (err) {
-      console.error('❌ Failed to initialize Threlte game:', err)
-      setRuntimeDiagnostic('engine', {
-        level: 'error',
-        message: err instanceof Error ? err.message : 'Unknown engine initialization error.',
-      })
-      gameActions.setError(err instanceof Error ? err.message : 'Unknown error')
-      gameActions.setLoading(false)
-    }
-  }
-  
-  /**
-   * Set up reactive state updates using modern stores
-   */
-  function setupStateUpdates() {
-    debugLog('🔄 Setting up reactive Threlte store-based state management')
-    
-    // All state is now managed by reactive stores
-    // No need for manual initialization - stores handle their own state
-    
-    debugLog('✅ Reactive store-based state management ready')
-  }
-  
-  /**
-   * Handle level transition requests - Pure Threlte store-based implementation
-   */
-  function handleLevelTransition(event: CustomEvent) {
-    const { levelType } = event.detail
-    transitionToLevel(levelType)
-  }
-
-  function handleLevelReturnRequest(detail: {
-    levelType?: string
-    title?: string
-    message?: string
-    confirmLabel?: string
-    cancelLabel?: string
-  }) {
-    pendingLevelReturn = {
-      levelType: detail.levelType || 'observatory',
-      title: detail.title || 'Return to Observatory?',
-      message: detail.message || 'Leave this level and travel back to the observatory?',
-      confirmLabel: detail.confirmLabel || 'Return',
-      cancelLabel: detail.cancelLabel || 'Cancel',
-    }
-  }
-
-  function cancelPendingLevelReturn() {
-    pendingLevelReturn = null
-  }
-
-  function confirmPendingLevelReturn() {
-    if (!pendingLevelReturn) return
-    const { levelType } = pendingLevelReturn
-    pendingLevelReturn = null
-    transitionToLevel(levelType)
-  }
-
-  function resolveLevelId(levelType: string) {
-    return getLevelRegistryEntry(levelType, levelRegistry)?.id ?? levelType
-  }
-
-  function transitionToLevel(levelType: string) {
-    const levelId = resolveLevelId(levelType)
-    setRuntimeDiagnostic('engine', {
-      level: 'loading',
-      message: `Transitioning to ${levelId}…`,
-    })
-    resetLevelRuntime({
-      interactionSystem,
-      spawnSystem,
-    })
-    terrainReady = false
-    activeLevelNote = null
-    pendingLevelReturn = null
-    currentLevelComponent = null
-    gameActions.selectStar(null)
-    gameActions.transitionToLevel(levelId)
-    debugLog(`🎮 Threlte store-based level transition: ${levelId}`)
-  }
-  
-  /**
-   * Handle return to observatory - Store-based implementation
-   */
-  function handleReturnToObservatory() {
-    transitionToLevel('observatory')
-    debugLog('🎮 Threlte store: Returned to observatory')
-  }
-  
-  // Mobile controls now handled through reactive stores - no event forwarding needed
-  
-  /**
-   * Reset view - Handled by Player component
-   */
-  function resetView() {
-    // View reset is now handled by the Player component's camera controls
-    debugLog('🎮 View reset requested - handled by Player component')
-  }
-  
-  /**
-   * Toggle debug panel
-   */
-  function toggleDebugPanel() {
-    showDebugPanel = !showDebugPanel
-  }
-  
-  // CORRECTED VERSION
-  function handleKeyDown(event: KeyboardEvent) {
-    if (event.key === 'F1') {
-      event.preventDefault();
-      isSettingsMenuOpen.update(open => !open);
       return
     }
 
-    if (event.key === 'F2') {
-      event.preventDefault();
-      toggleDebugPanel()
-    }
+    timeoutId = window.setTimeout(() => {
+      loadGameplayCore()
+    }, 48)
   }
 
-  // Player spawning is handled by ECS SpawnSystem
-
-  function handlePlayerInteraction(detail: any) {
-    gameActions.recordInteraction('click', detail.type)
-    const selected = interactionSystem?.selectAtScreenPosition?.(detail.x, detail.y)
-    if (!selected) {
-      dispatch('objectClick', detail)
-    }
+  const handleFirstInteraction = () => {
+    loadGameplayCore()
   }
 
-  function handlePlayerLightBurst(detail: any) {
-    gameActions.recordInteraction('light_burst', 'player')
-    interactionSystem?.triggerLightBurst?.(detail)
-    dispatch('lightBurst', detail)
-  }
-  
-  // Lifecycle
-  onMount(async () => {
-    debugLog('🎮 Starting MEGAMEAL Game with Threlte...')
-    await initializeThrelte()
-
-    // Make gameActions globally available for debugging
-    if (isDev) {
-      window.gameActions = gameActions;
-      debugLog('🔧 gameActions available globally for debugging')
-    }
-
-    window.addEventListener('keydown', handleKeyDown);
+  animationFrameId = window.requestAnimationFrame(() => {
+    scheduleIdleLoad()
   })
-  
-  onDestroy(() => {
-    debugLog('🧹 Cleaning up Threlte Game...')
-    window.removeEventListener('keydown', handleKeyDown);
-    deferredAudioCleanup?.()
-    deferredAudioCleanup = null
-    deferredGameplayCoreCleanup?.()
-    deferredGameplayCoreCleanup = null
-    // All cleanup is now handled by individual Threlte components
-    debugLog('✅ Threlte Game cleaned up')
+
+  window.addEventListener('pointerdown', handleFirstInteraction, {
+    capture: true,
+    once: true,
+    passive: true,
   })
-  </script>
+  window.addEventListener('touchstart', handleFirstInteraction, {
+    capture: true,
+    once: true,
+    passive: true,
+  })
+  window.addEventListener('keydown', handleFirstInteraction, {
+    capture: true,
+    once: true,
+  })
+
+  return cleanup
+}
+
+/**
+ * Initialize Threlte-based game
+ */
+async function initializeThrelte() {
+  try {
+    resetRuntimeDiagnostics()
+    setRuntimeDiagnostic('engine', {
+      level: 'loading',
+      message: 'Initializing Threlte game shell…',
+    })
+    loadingMessage = 'Initializing MEGAMEAL...'
+    gameActions.setLoading(true)
+
+    const urlParams =
+      typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search)
+        : null
+    const shouldEnableEditor = urlParams?.get('editor') === '1'
+    const requestedLevel = normalizeLevelId(urlParams?.get('level'))
+    initializeEditor(shouldEnableEditor)
+
+    // Detect mobile and update store
+    const isMobileDevice =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      )
+    gameActions.setMobile(isMobileDevice)
+
+    loadingMessage = 'Building world...'
+
+    // Load saved game state
+    loadGameState()
+
+    if (requestedLevel !== 'observatory') {
+      gameActions.transitionToLevel(requestedLevel)
+    } else if (!$currentLevelStore || $currentLevelStore === '') {
+      gameActions.transitionToLevel('observatory')
+    }
+
+    // Set up Threlte-based state management
+    setupStateUpdates()
+
+    if (shouldEnableEditor) {
+      await ensureGameplayCore()
+    }
+
+    // Check for room joining after initialization
+    await checkForRoomJoin()
+
+    // The loading screen will now be hidden by the `terrainReady` reactive block.
+    isInitialized = true
+    setRuntimeDiagnostic('engine', {
+      level: 'ready',
+      message: 'Game shell initialized. Waiting for runtime subsystems.',
+    })
+    if (!shouldEnableEditor) {
+      deferredAudioCleanup = setupDeferredAudioLoading()
+      deferredGameplayCoreCleanup = setupDeferredGameplayCoreLoading()
+    }
+
+    debugLog('✅ Game systems initialized. Waiting for terrain...')
+  } catch (err) {
+    console.error('❌ Failed to initialize Threlte game:', err)
+    setRuntimeDiagnostic('engine', {
+      level: 'error',
+      message:
+        err instanceof Error
+          ? err.message
+          : 'Unknown engine initialization error.',
+    })
+    gameActions.setError(err instanceof Error ? err.message : 'Unknown error')
+    gameActions.setLoading(false)
+  }
+}
+
+/**
+ * Set up reactive state updates using modern stores
+ */
+function setupStateUpdates() {
+  debugLog('🔄 Setting up reactive Threlte store-based state management')
+
+  // All state is now managed by reactive stores
+  // No need for manual initialization - stores handle their own state
+
+  debugLog('✅ Reactive store-based state management ready')
+}
+
+/**
+ * Handle level transition requests - Pure Threlte store-based implementation
+ */
+function handleLevelTransition(event: CustomEvent) {
+  const { levelType } = event.detail
+  transitionToLevel(levelType)
+}
+
+function handleLevelReturnRequest(detail: {
+  levelType?: string
+  title?: string
+  message?: string
+  confirmLabel?: string
+  cancelLabel?: string
+}) {
+  pendingLevelReturn = {
+    levelType: detail.levelType || 'observatory',
+    title: detail.title || 'Return to Observatory?',
+    message:
+      detail.message || 'Leave this level and travel back to the observatory?',
+    confirmLabel: detail.confirmLabel || 'Return',
+    cancelLabel: detail.cancelLabel || 'Cancel',
+  }
+}
+
+function cancelPendingLevelReturn() {
+  pendingLevelReturn = null
+}
+
+function confirmPendingLevelReturn() {
+  if (!pendingLevelReturn) return
+  const { levelType } = pendingLevelReturn
+  pendingLevelReturn = null
+  transitionToLevel(levelType)
+}
+
+function resolveLevelId(levelType: string) {
+  return getLevelRegistryEntry(levelType, levelRegistry)?.id ?? levelType
+}
+
+function transitionToLevel(levelType: string) {
+  const levelId = resolveLevelId(levelType)
+  setRuntimeDiagnostic('engine', {
+    level: 'loading',
+    message: `Transitioning to ${levelId}…`,
+  })
+  resetLevelRuntime({
+    interactionSystem,
+    spawnSystem,
+  })
+  terrainReady = false
+  activeLevelNote = null
+  pendingLevelReturn = null
+  currentLevelComponent = null
+  gameActions.selectStar(null)
+  gameActions.transitionToLevel(levelId)
+  debugLog(`🎮 Threlte store-based level transition: ${levelId}`)
+}
+
+/**
+ * Handle return to observatory - Store-based implementation
+ */
+function handleReturnToObservatory() {
+  transitionToLevel('observatory')
+  debugLog('🎮 Threlte store: Returned to observatory')
+}
+
+// Mobile controls now handled through reactive stores - no event forwarding needed
+
+/**
+ * Reset view - Handled by Player component
+ */
+function resetView() {
+  // View reset is now handled by the Player component's camera controls
+  debugLog('🎮 View reset requested - handled by Player component')
+}
+
+/**
+ * Toggle debug panel
+ */
+function toggleDebugPanel() {
+  showDebugPanel = !showDebugPanel
+}
+
+// CORRECTED VERSION
+function handleKeyDown(event: KeyboardEvent) {
+  if (event.key === 'F1') {
+    event.preventDefault()
+    isSettingsMenuOpen.update(open => !open)
+    return
+  }
+
+  if (event.key === 'F2') {
+    event.preventDefault()
+    toggleDebugPanel()
+  }
+}
+
+// Player spawning is handled by ECS SpawnSystem
+
+function handlePlayerInteraction(detail: any) {
+  gameActions.recordInteraction('click', detail.type)
+  const selected = interactionSystem?.selectAtScreenPosition?.(
+    detail.x,
+    detail.y,
+  )
+  if (!selected) {
+    dispatch('objectClick', detail)
+  }
+}
+
+function handlePlayerLightBurst(detail: any) {
+  gameActions.recordInteraction('light_burst', 'player')
+  interactionSystem?.triggerLightBurst?.(detail)
+  dispatch('lightBurst', detail)
+}
+
+// Lifecycle
+onMount(async () => {
+  debugLog('🎮 Starting MEGAMEAL Game with Threlte...')
+  await initializeThrelte()
+
+  // Make gameActions globally available for debugging
+  if (isDev) {
+    window.gameActions = gameActions
+    debugLog('🔧 gameActions available globally for debugging')
+  }
+
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onDestroy(() => {
+  debugLog('🧹 Cleaning up Threlte Game...')
+  window.removeEventListener('keydown', handleKeyDown)
+  deferredAudioCleanup?.()
+  deferredAudioCleanup = null
+  deferredGameplayCoreCleanup?.()
+  deferredGameplayCoreCleanup = null
+  // All cleanup is now handled by individual Threlte components
+  debugLog('✅ Threlte Game cleaned up')
+})
+</script>
   
   <!-- Game Container - Allow input to pass through to Player component -->
   <div class="w-full h-full relative bg-black overflow-hidden" style="pointer-events: none;">

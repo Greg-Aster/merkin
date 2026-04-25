@@ -1,7 +1,7 @@
 /**
  * Industry-Standard Level System Architecture
  * Based on Unity/Unreal patterns adapted for Three.js/Threlte
- * 
+ *
  * This replaces the broken component binding approach with a proper
  * event-driven architecture that allows true modular composition.
  */
@@ -32,19 +32,19 @@ export interface LevelContext {
 
 export enum ComponentType {
   ENVIRONMENT = 'environment',
-  LIGHTING = 'lighting', 
+  LIGHTING = 'lighting',
   OCEAN = 'ocean',
   PARTICLE_SYSTEM = 'particle_system',
   AUDIO = 'audio',
   PHYSICS = 'physics',
-  UI = 'ui'
+  UI = 'ui',
 }
 
 export enum MessageType {
   LIGHTING_UPDATE = 'lighting_update',
   COMPONENT_READY = 'component_ready',
   PERFORMANCE_WARNING = 'performance_warning',
-  USER_INTERACTION = 'user_interaction'
+  USER_INTERACTION = 'user_interaction',
 }
 
 export interface SystemMessage {
@@ -72,10 +72,13 @@ export class SystemRegistry {
   }
 
   registerComponent(component: LevelComponent): void {
-    if (isDev) console.log(`📋 Registering component: ${component.id} (${component.type})`)
-    
+    if (isDev)
+      console.log(
+        `📋 Registering component: ${component.id} (${component.type})`,
+      )
+
     this.components.set(component.id, component)
-    
+
     if (!this.componentsByType.has(component.type)) {
       this.componentsByType.set(component.type, [])
     }
@@ -87,7 +90,7 @@ export class SystemRegistry {
       source: 'registry',
       data: { componentId: component.id, componentType: component.type },
       timestamp: Date.now(),
-      priority: 'normal'
+      priority: 'normal',
     })
   }
 
@@ -96,7 +99,7 @@ export class SystemRegistry {
     if (component) {
       component.dispose()
       this.components.delete(componentId)
-      
+
       const typeComponents = this.componentsByType.get(component.type)
       if (typeComponents) {
         const index = typeComponents.indexOf(component)
@@ -119,7 +122,7 @@ export class SystemRegistry {
   sendMessage(message: SystemMessage): void {
     // Add to queue for processing
     this.messageQueue.push(message)
-    
+
     // Critical messages get processed immediately
     if (message.priority === 'critical') {
       this.processMessage(message)
@@ -143,7 +146,9 @@ export class SystemRegistry {
     }
 
     // Also dispatch to event bus for external listeners
-    this.eventBus.dispatchEvent(new CustomEvent('system-message', { detail: message }))
+    this.eventBus.dispatchEvent(
+      new CustomEvent('system-message', { detail: message }),
+    )
   }
 
   private startMessageProcessing(): void {
@@ -152,9 +157,13 @@ export class SystemRegistry {
 
     const processQueue = () => {
       // Process messages by priority
-      const criticalMessages = this.messageQueue.filter(m => m.priority === 'critical')
+      const criticalMessages = this.messageQueue.filter(
+        m => m.priority === 'critical',
+      )
       const highMessages = this.messageQueue.filter(m => m.priority === 'high')
-      const normalMessages = this.messageQueue.filter(m => m.priority === 'normal')
+      const normalMessages = this.messageQueue.filter(
+        m => m.priority === 'normal',
+      )
       const lowMessages = this.messageQueue.filter(m => m.priority === 'low')
 
       // Process critical and high priority immediately
@@ -173,11 +182,12 @@ export class SystemRegistry {
       })
 
       // Clear processed messages
-      this.messageQueue = this.messageQueue.filter(m => 
-        m.priority !== 'critical' && 
-        m.priority !== 'high' && 
-        !(normalMessages.slice(0, 10).includes(m)) &&
-        !(lowMessages.slice(0, 5).includes(m))
+      this.messageQueue = this.messageQueue.filter(
+        m =>
+          m.priority !== 'critical' &&
+          m.priority !== 'high' &&
+          !normalMessages.slice(0, 10).includes(m) &&
+          !lowMessages.slice(0, 5).includes(m),
       )
 
       requestAnimationFrame(processQueue)
@@ -205,7 +215,6 @@ export class SystemRegistry {
   }
 }
 
-
 /**
  * Base Component Class - Extend this for any level component
  */
@@ -226,7 +235,7 @@ export abstract class BaseLevelComponent implements LevelComponent {
     this.context = context
     await this.onInitialize()
     this.isInitialized = true
-    
+
     if (isDev) console.log(`✅ Component ${this.id} initialized`)
   }
 
@@ -242,24 +251,29 @@ export abstract class BaseLevelComponent implements LevelComponent {
 
   dispose(): void {
     if (this.isDisposed) return
-    
+
     this.onDispose()
     this.isDisposed = true
     this.context = undefined
-    
+
     if (isDev) console.log(`🧹 Component ${this.id} disposed`)
   }
 
-  protected sendMessage(type: MessageType, data: any, target?: string, priority: 'low' | 'normal' | 'high' | 'critical' = 'normal'): void {
+  protected sendMessage(
+    type: MessageType,
+    data: any,
+    target?: string,
+    priority: 'low' | 'normal' | 'high' | 'critical' = 'normal',
+  ): void {
     if (!this.context) return
-    
+
     this.context.registry.sendMessage({
       type,
       source: this.id,
       target,
       data,
       timestamp: Date.now(),
-      priority
+      priority,
     })
   }
 

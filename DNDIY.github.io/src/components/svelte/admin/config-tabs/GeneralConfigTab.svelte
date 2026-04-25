@@ -1,36 +1,36 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
-    
-    // Props
-    export let siteConfig;
-    export let licenseConfig;
-    
-    // Event dispatcher
-    const dispatch = createEventDispatcher();
-    
-    // Available languages for dropdown
-    const availableLanguages = [
-      { code: 'en', name: 'English' },
-      { code: 'es', name: 'Español' },
-      { code: 'ja', name: 'Japanese (日本語)' },
-      { code: 'ko', name: 'Korean (한국어)' },
-      { code: 'th', name: 'Thai (ไทย)' },
-      { code: 'zh_CN', name: 'Simplified Chinese (简体中文)' },
-      { code: 'zh_TW', name: 'Traditional Chinese (繁體中文)' }
-    ];
-    
-    // TOC depth options
-    const tocDepthOptions = [
-      { value: 1, label: 'Level 1 Headers Only' },
-      { value: 2, label: 'Level 1-2 Headers' },
-      { value: 3, label: 'Level 1-3 Headers' }
-    ];
-    
-    // Handle changes to form fields
-    function handleChange() {
-      dispatch('change', { siteConfig, licenseConfig });
-    }
-  </script>
+import { createEventDispatcher } from 'svelte'
+
+// Props
+export let siteConfig
+export let licenseConfig
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Available languages for dropdown
+const availableLanguages = [
+  { code: 'en', name: 'English' },
+  { code: 'es', name: 'Español' },
+  { code: 'ja', name: 'Japanese (日本語)' },
+  { code: 'ko', name: 'Korean (한국어)' },
+  { code: 'th', name: 'Thai (ไทย)' },
+  { code: 'zh_CN', name: 'Simplified Chinese (简体中文)' },
+  { code: 'zh_TW', name: 'Traditional Chinese (繁體中文)' },
+]
+
+// TOC depth options
+const tocDepthOptions = [
+  { value: 1, label: 'Level 1 Headers Only' },
+  { value: 2, label: 'Level 1-2 Headers' },
+  { value: 3, label: 'Level 1-3 Headers' },
+]
+
+// Handle changes to form fields
+function handleChange() {
+  dispatch('change', { siteConfig, licenseConfig })
+}
+</script>
   
   <div class="general-settings space-y-6">
     <div>

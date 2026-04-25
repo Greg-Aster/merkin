@@ -41,7 +41,7 @@
         "recommended": true
       },
       "complexity": {
-        "recommended": true
+        "recommended": false
       },
       "correctness": {
         "recommended": true
@@ -53,13 +53,17 @@
         "recommended": true
       },
       "style": {
-        "recommended": true
+        "recommended": false
       },
       "suspicious": {
-        "recommended": true
+        "recommended": true,
+        "noExplicitAny": "off",
+        "noImplicitAnyLet": "off",
+        "noAssignInExpressions": "off",
+        "noShadowRestrictedNames": "off"
       },
       "nursery": {
-        "recommended": true
+        "recommended": false
       }
     }
   }

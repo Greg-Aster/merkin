@@ -7,7 +7,7 @@ export const zh_TW: Translation = {
   [Key.archive]: '彙整',
   [Key.community]: '社群',
   [Key.search]: '搜尋',
-  
+
   [Key.configs]: '配置',
   [Key.friends]: '友鏈',
   [Key.newPost]: '新文章',

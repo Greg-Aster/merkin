@@ -28,7 +28,7 @@ export function getEditorObject(nodeId: string | null) {
 
 export function getEditorObjects(nodeIds: string[]) {
   return nodeIds
-    .map((nodeId) => objectByNodeId.get(nodeId) ?? null)
+    .map(nodeId => objectByNodeId.get(nodeId) ?? null)
     .filter((object): object is THREE.Object3D => object !== null)
 }
 

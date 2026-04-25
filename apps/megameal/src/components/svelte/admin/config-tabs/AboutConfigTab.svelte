@@ -103,9 +103,7 @@ const displayNames = {
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Section Title
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Section Title</div>
             <input 
               type="text" 
               bind:value={aboutConfig.team.title} 
@@ -115,9 +113,7 @@ const displayNames = {
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Description
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</div>
             <textarea 
               bind:value={aboutConfig.team.description} 
               on:input={notifyChanges}
@@ -128,9 +124,7 @@ const displayNames = {
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Layout Style
-              </label>
+              <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Layout Style</div>
               <select 
                 bind:value={aboutConfig.team.layout} 
                 on:change={notifyChanges}
@@ -143,9 +137,7 @@ const displayNames = {
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Avatar Shape
-              </label>
+              <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Avatar Shape</div>
               <select 
                 bind:value={aboutConfig.team.avatarShape} 
                 on:change={notifyChanges}
@@ -159,14 +151,10 @@ const displayNames = {
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Columns
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Columns</div>
             <div class="grid grid-cols-3 gap-4">
               <div>
-                <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">
-                  Mobile
-                </label>
+                <div class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Mobile</div>
                 <input 
                   type="number" 
                   min="1" 
@@ -177,9 +165,7 @@ const displayNames = {
                 />
               </div>
               <div>
-                <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">
-                  Tablet
-                </label>
+                <div class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Tablet</div>
                 <input 
                   type="number" 
                   min="1" 
@@ -190,9 +176,7 @@ const displayNames = {
                 />
               </div>
               <div>
-                <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">
-                  Desktop
-                </label>
+                <div class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Desktop</div>
                 <input 
                   type="number" 
                   min="1" 
@@ -247,9 +231,7 @@ const displayNames = {
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Default Title
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Default Title</div>
             <input 
               type="text" 
               bind:value={aboutConfig.content.defaultTitle} 
@@ -304,9 +286,7 @@ const displayNames = {
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Section Title
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Section Title</div>
             <input 
               type="text" 
               bind:value={aboutConfig.contact.title} 
@@ -316,9 +296,7 @@ const displayNames = {
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Description
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</div>
             <textarea 
               bind:value={aboutConfig.contact.description} 
               on:input={notifyChanges}
@@ -333,9 +311,7 @@ Contact Information</h4>
           
           <!-- Email Input -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Email Address
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Email Address</div>
             <input 
               type="email" 
               bind:value={aboutConfig.contact.contactInfo.email} 
@@ -346,9 +322,7 @@ Contact Information</h4>
           
           <!-- Phone Input (Optional) -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Phone Number (Optional)
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Phone Number (Optional)</div>
             <input 
               type="text" 
               bind:value={aboutConfig.contact.contactInfo.phone} 
@@ -359,9 +333,7 @@ Contact Information</h4>
           
           <!-- Address Input (Optional) -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Address (Optional)
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Address (Optional)</div>
             <textarea 
               bind:value={aboutConfig.contact.contactInfo.address} 
               on:input={notifyChanges}
@@ -372,9 +344,7 @@ Contact Information</h4>
           
           <!-- Hours Input (Optional) -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Hours (Optional)
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Hours (Optional)</div>
             <input 
               type="text" 
               bind:value={aboutConfig.contact.contactInfo.hours} 
@@ -405,6 +375,7 @@ Display Order</h4>
                     <button 
                       class="p-1 text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 disabled:opacity-30"
                       on:click={() => moveUp(index)}
+                      aria-label={`Move ${displayNames[item] || item} up`}
                       disabled={index === 0}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -414,6 +385,7 @@ Display Order</h4>
                     <button 
                       class="p-1 text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 disabled:opacity-30"
                       on:click={() => moveDown(index)}
+                      aria-label={`Move ${displayNames[item] || item} down`}
                       disabled={index === aboutConfig.contact.displayOrder.length - 1}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -435,9 +407,7 @@ Display Order</h4>
           
           <!-- Add item to display order if missing -->
           <div class="mt-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Add Item to Display
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Add Item to Display</div>
             <div class="flex space-x-2">
               <select 
                 id="add-display-item" 

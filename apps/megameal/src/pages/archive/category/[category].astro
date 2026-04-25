@@ -8,7 +8,7 @@ import { getCategoryList } from '@utils/content-utils'
 export async function getStaticPaths() {
   const categories = await getCategoryList()
   const normalizedCategories = new Set(
-    categories.map((category) => category.name.toLowerCase()),
+    categories.map(category => category.name.toLowerCase()),
   )
 
   return Array.from(normalizedCategories).map(category => {
@@ -20,7 +20,9 @@ export async function getStaticPaths() {
   })
 }
 
-const category = decodeURIComponent(Astro.params.category as string).toLowerCase()
+const category = decodeURIComponent(
+  Astro.params.category as string,
+).toLowerCase()
 ---
 
 <MainGridLayout title={i18n(I18nKey.archive)} description={i18n(I18nKey.archive)}>

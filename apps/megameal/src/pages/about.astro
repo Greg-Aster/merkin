@@ -3,11 +3,11 @@ import { getCollection, getEntry } from 'astro:content'
 import Markdown from '@components/misc/Markdown.astro'
 import TOC from '@components/widget/TOC.astro'
 import { Icon } from 'astro-icon/components'
+import ImageWrapper from '../components/misc/ImageWrapper.astro'
 import { aboutConfig } from '../config/about.config'
 import I18nKey from '../i18n/i18nKey'
 import { i18n } from '../i18n/translation'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
-import ImageWrapper from '../components/misc/ImageWrapper.astro'
 
 // Fetch the about content
 const aboutPost = await getEntry('spec', 'about')
@@ -86,7 +86,9 @@ function getAvatarShapeClass(shape: 'circle' | 'rounded' | 'square' | string) {
 function isVideoMedia(src?: string) {
   if (!src) return false
   const lower = src.toLowerCase()
-  return lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.endsWith('.mov')
+  return (
+    lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.endsWith('.mov')
+  )
 }
 ---
 
@@ -108,6 +110,8 @@ function isVideoMedia(src?: string) {
         {aboutAuthors.map((author, index) => (
           <a 
             href={`/about/${author.slug}/`} 
+            data-sfx-hover="hover-emphasis"
+            data-sfx-click="soft"
             class={`author-card group rounded-lg overflow-hidden transition-all hover:shadow-lg bg-gradient-to-br border ${getAuthorColorScheme(index)}`}
           >
             <div class="p-6 flex items-center gap-4">
@@ -172,6 +176,8 @@ function isVideoMedia(src?: string) {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {processedTeamMembers.map((member, index) => (
             <div class="team-member-card rounded-lg overflow-hidden transition-all hover:shadow-lg cursor-pointer"
+                 data-sfx-hover="hover-emphasis"
+                 data-sfx-click="panel-open"
                  data-member-slug={member.slug}>
               <ImageWrapper
                 src={member.image}
@@ -186,7 +192,7 @@ function isVideoMedia(src?: string) {
                   <p class="text-sm text-neutral-400">{member.role}</p>
                 )}
                 {aboutConfig.team.showEmail && member.email && (
-                  <a href={`mailto:${member.email}`} class="text-[var(--primary)] hover:text-[var(--primary-dark)] block mt-2">{member.email}</a>
+                  <a href={`mailto:${member.email}`} data-sfx-hover="hover-soft" data-sfx-click="soft" class="text-[var(--primary)] hover:text-[var(--primary-dark)] block mt-2">{member.email}</a>
                 )}
               </div>
             </div>

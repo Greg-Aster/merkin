@@ -1,50 +1,50 @@
 <script lang="ts">
-  import { chatStore } from '../stores/chatStore';
-  import { sendChatMessage } from '../services/MultiplayerService';
-  import { multiplayerStore } from '../stores/multiplayerStore';
-  import { afterUpdate } from 'svelte';
-  import { setInputFocus } from '../../../stores/uiStore';
-  import { playerNameStore } from '../index';
+import { afterUpdate } from 'svelte'
+import { setInputFocus } from '../../../stores/uiStore'
+import { playerNameStore } from '../index'
+import { sendChatMessage } from '../services/MultiplayerService'
+import { chatStore } from '../stores/chatStore'
+import { multiplayerStore } from '../stores/multiplayerStore'
 
-  // State to control if the chat window is open or closed
-  let isExpanded = true;
+// State to control if the chat window is open or closed
+let isExpanded = true
 
-  let messageInput = '';
-  let chatContainer: HTMLElement;
-  let inputElement: HTMLInputElement;
+let messageInput = ''
+let chatContainer: HTMLElement
+let inputElement: HTMLInputElement
 
-  // Auto-scroll to bottom when new messages arrive
-  afterUpdate(() => {
-    if (chatContainer) {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-  });
-  function handleSubmit(event: Event) {
-    event.preventDefault();
-    
-    if (messageInput.trim() === '') return;
-    
-    sendChatMessage(messageInput.trim());
-    messageInput = '';
+// Auto-scroll to bottom when new messages arrive
+afterUpdate(() => {
+  if (chatContainer) {
+    chatContainer.scrollTop = chatContainer.scrollHeight
   }
+})
+function handleSubmit(event: Event) {
+  event.preventDefault()
 
-  function formatTime(timestamp: string) {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+  if (messageInput.trim() === '') return
 
-  function getFriendlyName(peerId: string) {
-    return playerNameStore.getName(peerId);
-  }
+  sendChatMessage(messageInput.trim())
+  messageInput = ''
+}
 
-  // Export function to focus input from parent
-  export function focusInput() {
-    if (inputElement) {
-      if (!isExpanded) isExpanded = true;
-      // Allow DOM to update before focusing
-      setTimeout(() => inputElement.focus(), 0);
-    }
+function formatTime(timestamp: string) {
+  const date = new Date(timestamp)
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+function getFriendlyName(peerId: string) {
+  return playerNameStore.getName(peerId)
+}
+
+// Export function to focus input from parent
+export function focusInput() {
+  if (inputElement) {
+    if (!isExpanded) isExpanded = true
+    // Allow DOM to update before focusing
+    setTimeout(() => inputElement.focus(), 0)
   }
+}
 </script>
 
 {#if $multiplayerStore.isConnected}

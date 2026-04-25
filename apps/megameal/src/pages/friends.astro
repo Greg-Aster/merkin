@@ -2,8 +2,8 @@
 import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import FriendManager from '../components/svelte/friends/FriendManager.svelte'
-import MainGridLayout from '../layouts/MainGridLayout.astro'
 import passwordConfig from '../config/password.config'
+import MainGridLayout from '../layouts/MainGridLayout.astro'
 
 // Get all saved friends from the content collection
 let savedFriends = []
@@ -36,6 +36,7 @@ try {
           <input 
             type="text" 
             id="auth-username" 
+            data-sfx-focus="focus-soft"
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200 transition" 
           />
         </div>
@@ -44,11 +45,14 @@ try {
           <input 
             type="password" 
             id="auth-password" 
+            data-sfx-focus="focus-soft"
             class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200 transition" 
           />
         </div>
         <button 
           id="auth-submit" 
+          data-sfx-hover="hover-emphasis"
+          data-sfx-click="confirm"
           class="w-full py-2 px-4 bg-[var(--primary)] hover:opacity-90 text-white font-medium rounded-md transition-opacity"
         >
           Sign In
@@ -82,7 +86,7 @@ try {
             
             <div class="space-y-4 bg-neutral-50 dark:bg-neutral-800/50 p-4 rounded-lg mb-6">
               <div class="flex items-start">
-                <input type="checkbox" id="share-posts" class="mt-1 mr-3" checked />
+                <input type="checkbox" id="share-posts" data-sfx-focus="focus-soft" class="mt-1 mr-3" checked />
                 <div>
                   <label for="share-posts" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Blog Posts</label>
                   <p class="text-xs text-neutral-500 dark:text-neutral-400">Include your blog content</p>
@@ -90,7 +94,7 @@ try {
               </div>
               
               <div class="flex items-start">
-                <input type="checkbox" id="share-timeline" class="mt-1 mr-3" checked />
+                <input type="checkbox" id="share-timeline" data-sfx-focus="focus-soft" class="mt-1 mr-3" checked />
                 <div>
                   <label for="share-timeline" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Timeline Events</label>
                   <p class="text-xs text-neutral-500 dark:text-neutral-400">Include timeline data</p>
@@ -98,7 +102,7 @@ try {
               </div>
               
               <div class="flex items-start">
-                <input type="checkbox" id="share-config" class="mt-1 mr-3" />
+                <input type="checkbox" id="share-config" data-sfx-focus="focus-soft" class="mt-1 mr-3" />
                 <div>
                   <label for="share-config" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Site Configuration</label>
                   <p class="text-xs text-neutral-500 dark:text-neutral-400">Include your site settings</p>
@@ -106,7 +110,7 @@ try {
               </div>
               
               <div class="flex items-start">
-                <input type="checkbox" id="share-assets" class="mt-1 mr-3" checked />
+                <input type="checkbox" id="share-assets" data-sfx-focus="focus-soft" class="mt-1 mr-3" checked />
                 <div>
                   <label for="share-assets" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Media Assets</label>
                   <p class="text-xs text-neutral-500 dark:text-neutral-400">Include images and other media files</p>
@@ -115,7 +119,7 @@ try {
             </div>
             
             <div class="space-y-4">
-              <button id="create-package-button" class="w-full px-4 py-3 bg-[var(--primary)] text-white font-medium rounded-md hover:opacity-90 transition-opacity flex items-center justify-center">
+              <button id="create-package-button" data-sfx-hover="hover-emphasis" data-sfx-click="confirm" class="w-full px-4 py-3 bg-[var(--primary)] text-white font-medium rounded-md hover:opacity-90 transition-opacity flex items-center justify-center">
                 <Icon name="mdi:package-variant" class="w-5 h-5 mr-2" />
                 Create & Download Package
               </button>
@@ -137,7 +141,7 @@ try {
                   <label for="package-file" class="block cursor-pointer">
                     <Icon name="mdi:cloud-upload-outline" class="w-10 h-10 mx-auto text-neutral-400 dark:text-neutral-600 mb-2" />
                     <span class="text-sm text-neutral-600 dark:text-neutral-400">Click to select a package file or drag and drop</span>
-                    <input id="package-file" type="file" accept=".zip,.json" class="hidden" />
+                  <input id="package-file" type="file" accept=".zip,.json" data-sfx-focus="focus-soft" class="hidden" />
                   </label>
                   <p id="file-name" class="mt-2 text-sm text-neutral-500 dark:text-neutral-500 hidden"></p>
                 </div>
@@ -148,7 +152,7 @@ try {
                 <h3 class="text-md font-medium text-black/70 dark:text-white/70 mb-2">Import Options</h3>
                 
                 <div class="flex items-start">
-                  <input type="checkbox" id="import-posts" class="mt-1 mr-3" checked />
+                  <input type="checkbox" id="import-posts" data-sfx-focus="focus-soft" class="mt-1 mr-3" checked />
                   <div>
                     <label for="import-posts" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Blog Posts</label>
                     <p class="text-xs text-neutral-500 dark:text-neutral-400">Import blog content</p>
@@ -156,7 +160,7 @@ try {
                 </div>
                 
                 <div class="flex items-start">
-                  <input type="checkbox" id="import-timeline" class="mt-1 mr-3" checked />
+                  <input type="checkbox" id="import-timeline" data-sfx-focus="focus-soft" class="mt-1 mr-3" checked />
                   <div>
                     <label for="import-timeline" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Timeline Events</label>
                     <p class="text-xs text-neutral-500 dark:text-neutral-400">Import timeline data</p>
@@ -164,7 +168,7 @@ try {
                 </div>
                 
                 <div class="flex items-start">
-                  <input type="checkbox" id="import-config" class="mt-1 mr-3" />
+                  <input type="checkbox" id="import-config" data-sfx-focus="focus-soft" class="mt-1 mr-3" />
                   <div>
                     <label for="import-config" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Site Configuration</label>
                     <p class="text-xs text-neutral-500 dark:text-neutral-400">Replace your site settings (use with caution)</p>
@@ -172,7 +176,7 @@ try {
                 </div>
                 
                 <div class="flex items-start">
-                  <input type="checkbox" id="import-assets" class="mt-1 mr-3" checked />
+                  <input type="checkbox" id="import-assets" data-sfx-focus="focus-soft" class="mt-1 mr-3" checked />
                   <div>
                     <label for="import-assets" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Media Assets</label>
                     <p class="text-xs text-neutral-500 dark:text-neutral-400">Import images and other media files</p>
@@ -180,7 +184,7 @@ try {
                 </div>
                 
                 <div class="pt-2">
-                  <button id="import-package-button" class="w-full px-4 py-3 bg-[var(--primary)] text-white font-medium rounded-md hover:opacity-90 transition-opacity flex items-center justify-center">
+                  <button id="import-package-button" data-sfx-hover="hover-emphasis" data-sfx-click="confirm" class="w-full px-4 py-3 bg-[var(--primary)] text-white font-medium rounded-md hover:opacity-90 transition-opacity flex items-center justify-center">
                     <Icon name="mdi:import" class="w-5 h-5 mr-2" />
                     Import Content
                   </button>

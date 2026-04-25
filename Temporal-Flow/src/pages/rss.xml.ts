@@ -11,12 +11,12 @@ const parser = new MarkdownIt()
 
 function stripMdxSyntax(body: string): string {
   return body
-    .replace(/^import\s+.*?['"][^'"]*['"]\s*;?\s*$/gm, '')   // import statements
-    .replace(/^export\s+.*$/gm, '')                            // export statements
-    .replace(/<[A-Z][A-Za-z0-9]*[^>]*\/>/g, '')               // self-closing JSX <Foo />
+    .replace(/^import\s+.*?['"][^'"]*['"]\s*;?\s*$/gm, '') // import statements
+    .replace(/^export\s+.*$/gm, '') // export statements
+    .replace(/<[A-Z][A-Za-z0-9]*[^>]*\/>/g, '') // self-closing JSX <Foo />
     .replace(/<[A-Z][A-Za-z0-9]*[^>]*>[\s\S]*?<\/[A-Z][A-Za-z0-9]*>/g, '') // JSX blocks
-    .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')                      // JSX comments {/* */}
-    .replace(/\{[^}]*\}/g, '')                                 // JSX expressions {...}
+    .replace(/\{\/\*[\s\S]*?\*\/\}/g, '') // JSX comments {/* */}
+    .replace(/\{[^}]*\}/g, '') // JSX expressions {...}
     .replace(/\n{3,}/g, '\n\n')
     .trim()
 }

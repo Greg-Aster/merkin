@@ -3,5 +3,5 @@
 /// <reference types="astro/client" />
 
 interface Window {
-    [key: string]: any;
-  }
+  [key: string]: any
+}

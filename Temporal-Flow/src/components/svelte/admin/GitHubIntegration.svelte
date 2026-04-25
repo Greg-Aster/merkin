@@ -1,279 +1,292 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
-  import GithubAuthForm from './GithubAuthForm.svelte';
-  import { createGitHubService } from '../../../lib/github-service';
-  
-  // Props
-  export let siteConfig;
-  export let navBarConfig;
-  export let profileConfig;
-  export let licenseConfig;
-  export let timelineConfig;
-  export let avatarConfig;
-  export let communityConfig;
-  export let aboutConfig;
-  export let postCardConfig;
-  export let bannerConfig;
-  export let originalConfigValues;
-  export let hasChanges = false;
-  
-  // State
-  let githubService = createGitHubService();
-  let isGitHubAuthenticated = false;
-  let showGitHubAuthForm = false;
-  let isCommitting = false;
-  let commitStatus = { success: false, error: null };
-  let showDeployOptions = false;
-  let githubToken = '';
-  
-  // Event dispatcher
-  const dispatch = createEventDispatcher();
-  
-  // Initialize on component mount
-  export function initialize() {
-    // Check GitHub authentication status
-    isGitHubAuthenticated = githubService.isAuthenticated();
-    
-    // Set GitHub repository settings if needed
-    if (!githubService.config) {
-      githubService = createGitHubService({
-        // These should match your GitHub repository details
-        owner: 'your-github-username', // Update with your GitHub username
-        repo: 'your-repo-name',        // Update with your repository name
-        branch: 'main',                // Update with your branch name
-        configPath: 'src/config',
-        postsPath: 'src/content'
-      });
-    }
+import { createEventDispatcher } from 'svelte'
+import { createGitHubService } from '../../../lib/github-service'
+import GithubAuthForm from './GithubAuthForm.svelte'
+
+// Props
+export let siteConfig
+export let navBarConfig
+export let profileConfig
+export let licenseConfig
+export let timelineConfig
+export let avatarConfig
+export let communityConfig
+export let aboutConfig
+export let postCardConfig
+export let bannerConfig
+export let originalConfigValues
+export let hasChanges = false
+
+// State
+let githubService = createGitHubService()
+let isGitHubAuthenticated = false
+let showGitHubAuthForm = false
+let isCommitting = false
+let commitStatus = { success: false, error: null }
+let showDeployOptions = false
+let githubToken = ''
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Initialize on component mount
+export function initialize() {
+  // Check GitHub authentication status
+  isGitHubAuthenticated = githubService.isAuthenticated()
+
+  // Set GitHub repository settings if needed
+  if (!githubService.config) {
+    githubService = createGitHubService({
+      // These should match your GitHub repository details
+      owner: 'your-github-username', // Update with your GitHub username
+      repo: 'your-repo-name', // Update with your repository name
+      branch: 'main', // Update with your branch name
+      configPath: 'src/config',
+      postsPath: 'src/content',
+    })
   }
-  
-  // Show GitHub auth form
-  function showGitHubAuth() {
-    showGitHubAuthForm = true;
+}
+
+// Show GitHub auth form
+function showGitHubAuth() {
+  showGitHubAuthForm = true
+}
+
+// Handle GitHub authentication
+async function handleGitHubAuth(event) {
+  // Get token from event if provided, otherwise use the bound value
+  const token = event && event.detail ? event.detail : githubToken
+
+  if (!token) {
+    commitStatus.error = 'Please enter a valid token'
+    return
   }
-  
-  // Handle GitHub authentication
-  async function handleGitHubAuth(event) {
-    // Get token from event if provided, otherwise use the bound value
-    const token = event && event.detail ? event.detail : githubToken;
-    
-    if (!token) {
-      commitStatus.error = 'Please enter a valid token';
-      return;
-    }
-    
-    try {
-      isCommitting = true;
-      commitStatus.error = null;
-      
-      // Authenticate with GitHub
-      const success = githubService.authenticate(token);
-      
-      if (success) {
-        // Test the token with a simple API call
-        try {
-          await githubService.getFile('README.md');
-          isGitHubAuthenticated = true;
-          showGitHubAuthForm = false;
-          commitStatus.success = true;
-          
-          // Show success message
-          setTimeout(() => {
-            commitStatus.success = false;
-          }, 3000);
-        } catch (error) {
-          console.error('Token validation error:', error);
-          if (error.message.includes('401')) {
-            commitStatus.error = 'Authentication failed. Please check your token permissions.';
-          } else if (error.message.includes('404')) {
-            commitStatus.error = 'Repository or README.md not found. Check your repository settings.';
-          } else {
-            commitStatus.error = `Token validation error: ${error.message}`;
-          }
-          githubService.logout(); // Clear the invalid token
-        }
-      } else {
-        commitStatus.error = 'Failed to authenticate';
-      }
-    } catch (error) {
-      console.error('Authentication error:', error);
-      commitStatus.error = error.message || 'Failed to authenticate';
-    } finally {
-      isCommitting = false;
-    }
-  }
-  
-  // Handle GitHub logout
-  function handleGitHubLogout() {
-    githubService.logout();
-    isGitHubAuthenticated = false;
-    showDeployOptions = false;
-  }
-  
-  // Handle constant references in the config
-  function preserveConstants(configObj) {
-    // Create a deep copy to avoid modifying the original
-    const config = JSON.parse(JSON.stringify(configObj));
-    
-    // Check if defaultTheme exists and handle it specially
-    if (config.defaultTheme) {
-      // Check if the defaultTheme is already a string constant reference
-      if (typeof config.defaultTheme === 'string' && 
-          (config.defaultTheme === 'LIGHT_MODE' || 
-           config.defaultTheme === 'DARK_MODE' || 
-           config.defaultTheme === 'AUTO_MODE')) {
-        // If it's already a constant name, wrap it for our formatter
-        config.defaultTheme = `__CONSTANT_${config.defaultTheme.toLowerCase()}__`;
-      } else {
-        // Otherwise, use the string value
-        const themeValue = config.defaultTheme;
-        config.defaultTheme = `__CONSTANT_${themeValue}__`;
-      }
-    }
-    
-    // Add handling for other constants here if needed
-    
-    return config;
-  }
-  
-  // Format a config object into TypeScript code
-  function formatConfigObject(configName, configObj) {
-    // Create a more precise formatter that preserves empty arrays and objects
-    function formatWithPreservation(obj, indent = 2, level = 0) {
-      const spaces = ' '.repeat(indent * level);
-      const nextSpaces = ' '.repeat(indent * (level + 1));
-      
-      if (obj === null) return 'null';
-      if (obj === undefined) return 'undefined';
-      
-      if (Array.isArray(obj)) {
-        // Empty array becomes []
-        if (obj.length === 0) return '[]';
-        
-        // Array with items gets formatted with proper indentation
-        const items = obj.map(item => `${nextSpaces}${formatWithPreservation(item, indent, level + 1)}`);
-        return `[\n${items.join(',\n')}\n${spaces}]`;
-      }
-      
-      if (typeof obj === 'object') {
-        // Empty object becomes {}
-        const keys = Object.keys(obj);
-        if (keys.length === 0) return '{}';
-        
-        // Object with properties gets formatted with proper indentation
-        const items = keys.map(key => {
-          const keyStr = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? key : `"${key}"`;
-          return `${nextSpaces}${keyStr}: ${formatWithPreservation(obj[key], indent, level + 1)}`;
-        });
-        
-        return `{\n${items.join(',\n')}\n${spaces}}`;
-      }
-      
-      if (typeof obj === 'string') {
-        // Check if the string is a special constant
-        if (obj.startsWith('__CONSTANT_') && obj.endsWith('__')) {
-          return obj.substring(11, obj.length - 2); // Remove the __CONSTANT_ and __ parts
-        }
-        return `"${obj.replace(/"/g, '\\"')}"`;
-      }
-      
-      // For numbers, booleans, etc.
-      return String(obj);
-    }
-    
-    if (configName === 'siteConfig') {
-      const processedConfig = preserveConstants(configObj);
-      
-      let formattedConfig = formatWithPreservation(processedConfig);
-      // Replace constants
-      formattedConfig = formattedConfig.replace(/"__CONSTANT_light__"/g, 'LIGHT_MODE')
-                                        .replace(/"__CONSTANT_dark__"/g, 'DARK_MODE')
-                                        .replace(/"__CONSTANT_auto__"/g, 'AUTO_MODE');
-      return formattedConfig;
-    } else if (configName === 'navBarConfig') {
-      // Handle special LinkPreset enum values
-      let formattedConfig = formatWithPreservation(configObj);
-      formattedConfig = formattedConfig.replace(/"LinkPreset\.([a-zA-Z]+)"/g, 'LinkPreset.$1');
-      return formattedConfig;
-    } else {
-      // Generic handling for other config types
-      return formatWithPreservation(configObj);
-    }
-  }
-  
-  // Update config.ts file with all changes
-  async function updateMainConfigFile(changes) {
-    // First retrieve the current file
-    const currentFile = await githubService.getFile('src/config/config.ts');
-    if (!currentFile) {
-      throw new Error('Could not retrieve the current config.ts file');
-    }
-    
-    let fileContent = currentFile.content;
-    
-    // Ensure necessary imports are present
-    if (!fileContent.includes('import { AUTO_MODE, DARK_MODE, LIGHT_MODE }')) {
-      // Add import at top of file
-      fileContent = `import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts'\n\n${fileContent}`;
-    }
-    
-    // Ensure LinkPreset is properly imported
-    if (changes.some(c => c.name === 'navBarConfig')) {
-      // If file doesn't have LinkPreset import at all
-      if (!fileContent.includes('import { LinkPreset }')) {
-        // Check if file already has import type statement
-        if (fileContent.includes('import type {')) {
-          fileContent = fileContent.replace(
-            /import type {/,
-            'import { LinkPreset } from \'../types/config\'\nimport type {'
-          );
+
+  try {
+    isCommitting = true
+    commitStatus.error = null
+
+    // Authenticate with GitHub
+    const success = githubService.authenticate(token)
+
+    if (success) {
+      // Test the token with a simple API call
+      try {
+        await githubService.getFile('README.md')
+        isGitHubAuthenticated = true
+        showGitHubAuthForm = false
+        commitStatus.success = true
+
+        // Show success message
+        setTimeout(() => {
+          commitStatus.success = false
+        }, 3000)
+      } catch (error) {
+        console.error('Token validation error:', error)
+        if (error.message.includes('401')) {
+          commitStatus.error =
+            'Authentication failed. Please check your token permissions.'
+        } else if (error.message.includes('404')) {
+          commitStatus.error =
+            'Repository or README.md not found. Check your repository settings.'
         } else {
-          // Add it at the top of the file
-          fileContent = `import { LinkPreset } from '../types/config'\n${fileContent}`;
+          commitStatus.error = `Token validation error: ${error.message}`
         }
+        githubService.logout() // Clear the invalid token
       }
+    } else {
+      commitStatus.error = 'Failed to authenticate'
     }
-    
-    // For each changed config, update its section in the file
-    for (const config of changes) {
-      const formattedConfig = formatConfigObject(config.name, config.obj);
-      
-      // Create a more precise regex that matches the export declaration and its value
-      const regexPattern = new RegExp(`export const ${config.name}[\\s\\S]*?(?=\\n\\nexport const|$)`, 'g');
-      
-      if (regexPattern.test(fileContent)) {
-        // Update existing config section
-        fileContent = fileContent.replace(
-          regexPattern,
-          `export const ${config.name}: ${config.typeName} = ${formattedConfig}`
-        );
-      } else {
-        // Append new config section if it doesn't exist
-        fileContent += `\n\nexport const ${config.name}: ${config.typeName} = ${formattedConfig}`;
-      }
-    }
-    
-    // Save the updated file
-    return githubService.commitFile(
-      'src/config/config.ts', 
-      fileContent, 
-      `Update ${changes.map(c => c.name).join(', ')} in config.ts`
-    );
+  } catch (error) {
+    console.error('Authentication error:', error)
+    commitStatus.error = error.message || 'Failed to authenticate'
+  } finally {
+    isCommitting = false
   }
-  
-  // Update standalone config files
-  async function updateStandaloneConfigFile(config) {
-    // Generate standalone file content based on config type
-    let fileContent = '';
-    
-    if (config.name === 'timelineConfig') {
-      fileContent = `// TimelineConfig.ts - Central configuration for all timeline services
+}
+
+// Handle GitHub logout
+function handleGitHubLogout() {
+  githubService.logout()
+  isGitHubAuthenticated = false
+  showDeployOptions = false
+}
+
+// Handle constant references in the config
+function preserveConstants(configObj) {
+  // Create a deep copy to avoid modifying the original
+  const config = JSON.parse(JSON.stringify(configObj))
+
+  // Check if defaultTheme exists and handle it specially
+  if (config.defaultTheme) {
+    // Check if the defaultTheme is already a string constant reference
+    if (
+      typeof config.defaultTheme === 'string' &&
+      (config.defaultTheme === 'LIGHT_MODE' ||
+        config.defaultTheme === 'DARK_MODE' ||
+        config.defaultTheme === 'AUTO_MODE')
+    ) {
+      // If it's already a constant name, wrap it for our formatter
+      config.defaultTheme = `__CONSTANT_${config.defaultTheme.toLowerCase()}__`
+    } else {
+      // Otherwise, use the string value
+      const themeValue = config.defaultTheme
+      config.defaultTheme = `__CONSTANT_${themeValue}__`
+    }
+  }
+
+  // Add handling for other constants here if needed
+
+  return config
+}
+
+// Format a config object into TypeScript code
+function formatConfigObject(configName, configObj) {
+  // Create a more precise formatter that preserves empty arrays and objects
+  function formatWithPreservation(obj, indent = 2, level = 0) {
+    const spaces = ' '.repeat(indent * level)
+    const nextSpaces = ' '.repeat(indent * (level + 1))
+
+    if (obj === null) return 'null'
+    if (obj === undefined) return 'undefined'
+
+    if (Array.isArray(obj)) {
+      // Empty array becomes []
+      if (obj.length === 0) return '[]'
+
+      // Array with items gets formatted with proper indentation
+      const items = obj.map(
+        item =>
+          `${nextSpaces}${formatWithPreservation(item, indent, level + 1)}`,
+      )
+      return `[\n${items.join(',\n')}\n${spaces}]`
+    }
+
+    if (typeof obj === 'object') {
+      // Empty object becomes {}
+      const keys = Object.keys(obj)
+      if (keys.length === 0) return '{}'
+
+      // Object with properties gets formatted with proper indentation
+      const items = keys.map(key => {
+        const keyStr = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? key : `"${key}"`
+        return `${nextSpaces}${keyStr}: ${formatWithPreservation(obj[key], indent, level + 1)}`
+      })
+
+      return `{\n${items.join(',\n')}\n${spaces}}`
+    }
+
+    if (typeof obj === 'string') {
+      // Check if the string is a special constant
+      if (obj.startsWith('__CONSTANT_') && obj.endsWith('__')) {
+        return obj.substring(11, obj.length - 2) // Remove the __CONSTANT_ and __ parts
+      }
+      return `"${obj.replace(/"/g, '\\"')}"`
+    }
+
+    // For numbers, booleans, etc.
+    return String(obj)
+  }
+
+  if (configName === 'siteConfig') {
+    const processedConfig = preserveConstants(configObj)
+
+    let formattedConfig = formatWithPreservation(processedConfig)
+    // Replace constants
+    formattedConfig = formattedConfig
+      .replace(/"__CONSTANT_light__"/g, 'LIGHT_MODE')
+      .replace(/"__CONSTANT_dark__"/g, 'DARK_MODE')
+      .replace(/"__CONSTANT_auto__"/g, 'AUTO_MODE')
+    return formattedConfig
+  } else if (configName === 'navBarConfig') {
+    // Handle special LinkPreset enum values
+    let formattedConfig = formatWithPreservation(configObj)
+    formattedConfig = formattedConfig.replace(
+      /"LinkPreset\.([a-zA-Z]+)"/g,
+      'LinkPreset.$1',
+    )
+    return formattedConfig
+  } else {
+    // Generic handling for other config types
+    return formatWithPreservation(configObj)
+  }
+}
+
+// Update config.ts file with all changes
+async function updateMainConfigFile(changes) {
+  // First retrieve the current file
+  const currentFile = await githubService.getFile('src/config/config.ts')
+  if (!currentFile) {
+    throw new Error('Could not retrieve the current config.ts file')
+  }
+
+  let fileContent = currentFile.content
+
+  // Ensure necessary imports are present
+  if (!fileContent.includes('import { AUTO_MODE, DARK_MODE, LIGHT_MODE }')) {
+    // Add import at top of file
+    fileContent = `import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts'\n\n${fileContent}`
+  }
+
+  // Ensure LinkPreset is properly imported
+  if (changes.some(c => c.name === 'navBarConfig')) {
+    // If file doesn't have LinkPreset import at all
+    if (!fileContent.includes('import { LinkPreset }')) {
+      // Check if file already has import type statement
+      if (fileContent.includes('import type {')) {
+        fileContent = fileContent.replace(
+          /import type {/,
+          "import { LinkPreset } from '../types/config'\nimport type {",
+        )
+      } else {
+        // Add it at the top of the file
+        fileContent = `import { LinkPreset } from '../types/config'\n${fileContent}`
+      }
+    }
+  }
+
+  // For each changed config, update its section in the file
+  for (const config of changes) {
+    const formattedConfig = formatConfigObject(config.name, config.obj)
+
+    // Create a more precise regex that matches the export declaration and its value
+    const regexPattern = new RegExp(
+      `export const ${config.name}[\\s\\S]*?(?=\\n\\nexport const|$)`,
+      'g',
+    )
+
+    if (regexPattern.test(fileContent)) {
+      // Update existing config section
+      fileContent = fileContent.replace(
+        regexPattern,
+        `export const ${config.name}: ${config.typeName} = ${formattedConfig}`,
+      )
+    } else {
+      // Append new config section if it doesn't exist
+      fileContent += `\n\nexport const ${config.name}: ${config.typeName} = ${formattedConfig}`
+    }
+  }
+
+  // Save the updated file
+  return githubService.commitFile(
+    'src/config/config.ts',
+    fileContent,
+    `Update ${changes.map(c => c.name).join(', ')} in config.ts`,
+  )
+}
+
+// Update standalone config files
+async function updateStandaloneConfigFile(config) {
+  // Generate standalone file content based on config type
+  let fileContent = ''
+
+  if (config.name === 'timelineConfig') {
+    fileContent = `// TimelineConfig.ts - Central configuration for all timeline services
 import type { TimelineConfig } from '../types/timelineconfig'
 
-export const timelineConfig: TimelineConfig = ${formatConfigObject(config.name, config.obj)}`;
-    } 
-    else if (config.name === 'avatarConfig') {
-      fileContent = `// Import type - use import type syntax to fix verbatimModuleSyntax error
+export const timelineConfig: TimelineConfig = ${formatConfigObject(config.name, config.obj)}`
+  } else if (config.name === 'avatarConfig') {
+    fileContent = `// Import type - use import type syntax to fix verbatimModuleSyntax error
 import type { ImageMetadata } from 'astro'
 
 // Define the avatar configuration type
@@ -287,11 +300,10 @@ animationInterval: number
 * Avatar configuration for the site
 * Controls which avatars are used for the home page and posts
 */
-export const avatarConfig: AvatarConfig = ${formatConfigObject(config.name, config.obj)}`;
-    }
-    else if (config.name === 'communityConfig') {
-      // Create a specialized format that matches your current file structure
-      fileContent = `// Import types
+export const avatarConfig: AvatarConfig = ${formatConfigObject(config.name, config.obj)}`
+  } else if (config.name === 'communityConfig') {
+    // Create a specialized format that matches your current file structure
+    fileContent = `// Import types
 import type { 
 CommunityConfig,
 DiscordConfig,
@@ -303,10 +315,9 @@ HeroConfig
 } from '../types/communityconfig';
 
 // Community page configuration
-export const communityConfig: CommunityConfig = ${formatConfigObject(config.name, config.obj)}`;
-    }
-    else if (config.name === 'aboutConfig') {
-      fileContent = `// Import types
+export const communityConfig: CommunityConfig = ${formatConfigObject(config.name, config.obj)}`
+  } else if (config.name === 'aboutConfig') {
+    fileContent = `// Import types
 import type { 
 AboutConfig,
 TeamSectionConfig,
@@ -315,10 +326,9 @@ ContactSectionConfig
 } from '../types/aboutconfig';
 
 // About page configuration
-export const aboutConfig: AboutConfig = ${formatConfigObject(config.name, config.obj)}`;
-    }
-    else if (config.name === 'postCardConfig') {
-        fileContent = `// Configuration for PostCard components and friend post integration
+export const aboutConfig: AboutConfig = ${formatConfigObject(config.name, config.obj)}`
+  } else if (config.name === 'postCardConfig') {
+    fileContent = `// Configuration for PostCard components and friend post integration
 
     // Base PostCard configuration
     export interface PostCardConfig {
@@ -375,10 +385,9 @@ export const aboutConfig: AboutConfig = ${formatConfigObject(config.name, config
     }
 
     // Export the configuration
-    export const postCardConfig: PostCardConfigs = ${formatConfigObject(config.name, config.obj)}`;
-    } 
-    else if (config.name === 'bannerConfig') {
-        fileContent = `// Import type - use import type syntax to fix verbatimModuleSyntax error
+    export const postCardConfig: PostCardConfigs = ${formatConfigObject(config.name, config.obj)}`
+  } else if (config.name === 'bannerConfig') {
+    fileContent = `// Import type - use import type syntax to fix verbatimModuleSyntax error
 import type { ImageMetadata } from 'astro'
 
 // Import banner images
@@ -442,18 +451,21 @@ export interface BannerConfig {
  * Banner configuration for the site
  * Controls which images are used for the animated banner
  */
-export const bannerConfig: BannerConfig = ${formatConfigObject(config.name, config.obj)
-          .replace(/"bannerList": \[\s*"([^"]+)",/g, 'bannerList: [\n    banner1,')
-          .replace(/"banner(\d+)",/g, 'banner$1,')
-          .replace(/"defaultBanner": "banner(\d+)"/g, 'defaultBanner: banner$1')
-          .replace(/"forward"/g, "'forward'")
-          .replace(/"reverse"/g, "'reverse'")
-          .replace(/"alternate"/g, "'alternate'")
-          .replace(/"cover"/g, "'cover'")
-          .replace(/"contain"/g, "'contain'")
-          .replace(/"fill"/g, "'fill'")
-          .replace(/"color"/g, "'color'")
-          .replace(/"gradient"/g, "'gradient'")}
+export const bannerConfig: BannerConfig = ${formatConfigObject(
+      config.name,
+      config.obj,
+    )
+      .replace(/"bannerList": \[\s*"([^"]+)",/g, 'bannerList: [\n    banner1,')
+      .replace(/"banner(\d+)",/g, 'banner$1,')
+      .replace(/"defaultBanner": "banner(\d+)"/g, 'defaultBanner: banner$1')
+      .replace(/"forward"/g, "'forward'")
+      .replace(/"reverse"/g, "'reverse'")
+      .replace(/"alternate"/g, "'alternate'")
+      .replace(/"cover"/g, "'cover'")
+      .replace(/"contain"/g, "'contain'")
+      .replace(/"fill"/g, "'fill'")
+      .replace(/"color"/g, "'color'")
+      .replace(/"gradient"/g, "'gradient'")}
 
 /**
  * Get appropriate banner dimensions based on screen size
@@ -497,225 +509,238 @@ export function getBannerAnimationSettings(): {
     transitionDuration: bannerConfig.animation.transitionDuration,
     direction: bannerConfig.animation.direction
   };
-}`;
+}`
+  }
+
+  // Save the standalone file
+  return githubService.commitFile(
+    `src/config/${config.filename}`,
+    fileContent,
+    `Update ${config.name} configuration`,
+  )
+}
+
+// Save configs to GitHub
+async function saveConfigsToGitHub() {
+  if (!isGitHubAuthenticated) {
+    commitStatus.error = 'Please authenticate with GitHub first'
+    return
+  }
+
+  try {
+    isCommitting = true
+    commitStatus.error = null
+
+    // Track which configs have changed
+    const mainConfigChanges = []
+    const standaloneConfigChanges = []
+
+    // Check which configs in the main file have changed
+    if (JSON.stringify(siteConfig) !== originalConfigValues.siteConfig) {
+      mainConfigChanges.push({
+        name: 'siteConfig',
+        obj: siteConfig,
+        typeName: 'SiteConfig',
+      })
     }
 
-    // Save the standalone file
-    return githubService.commitFile(
-      `src/config/${config.filename}`, 
-      fileContent, 
-      `Update ${config.name} configuration`
-    );
+    if (JSON.stringify(navBarConfig) !== originalConfigValues.navBarConfig) {
+      mainConfigChanges.push({
+        name: 'navBarConfig',
+        obj: navBarConfig,
+        typeName: 'NavBarConfig',
+      })
+    }
+
+    if (JSON.stringify(profileConfig) !== originalConfigValues.profileConfig) {
+      mainConfigChanges.push({
+        name: 'profileConfig',
+        obj: profileConfig,
+        typeName: 'ProfileConfig',
+      })
+    }
+
+    if (JSON.stringify(licenseConfig) !== originalConfigValues.licenseConfig) {
+      mainConfigChanges.push({
+        name: 'licenseConfig',
+        obj: licenseConfig,
+        typeName: 'LicenseConfig',
+      })
+    }
+
+    // Check which standalone config files have changed
+    if (
+      JSON.stringify(timelineConfig) !== originalConfigValues.timelineConfig
+    ) {
+      standaloneConfigChanges.push({
+        name: 'timelineConfig',
+        obj: timelineConfig,
+        filename: 'timelineconfig.ts',
+      })
+    }
+
+    if (JSON.stringify(avatarConfig) !== originalConfigValues.avatarConfig) {
+      standaloneConfigChanges.push({
+        name: 'avatarConfig',
+        obj: avatarConfig,
+        filename: 'avatar.config.ts',
+      })
+    }
+
+    if (
+      JSON.stringify(communityConfig) !== originalConfigValues.communityConfig
+    ) {
+      standaloneConfigChanges.push({
+        name: 'communityConfig',
+        obj: communityConfig,
+        filename: 'community.config.ts',
+      })
+    }
+
+    if (JSON.stringify(aboutConfig) !== originalConfigValues.aboutConfig) {
+      standaloneConfigChanges.push({
+        name: 'aboutConfig',
+        obj: aboutConfig,
+        filename: 'about.config.ts',
+      })
+    }
+
+    if (
+      JSON.stringify(postCardConfig) !== originalConfigValues.postCardConfig
+    ) {
+      standaloneConfigChanges.push({
+        name: 'postCardConfig',
+        obj: postCardConfig,
+        filename: 'postcard.config.ts',
+      })
+    }
+
+    if (JSON.stringify(bannerConfig) !== originalConfigValues.bannerConfig) {
+      standaloneConfigChanges.push({
+        name: 'bannerConfig',
+        obj: bannerConfig,
+        filename: 'banner.config.ts',
+      })
+    }
+
+    // If no configs have changed, inform the user
+    if (
+      mainConfigChanges.length === 0 &&
+      standaloneConfigChanges.length === 0
+    ) {
+      commitStatus.error = 'No configuration changes detected to commit'
+      isCommitting = false
+      return
+    }
+
+    console.log(`Saving configuration changes...`)
+
+    // Update the main config.ts file if needed
+    if (mainConfigChanges.length > 0) {
+      await updateMainConfigFile(mainConfigChanges)
+      console.log(
+        `Updated ${mainConfigChanges.length} configs in main config.ts file`,
+      )
+    }
+
+    // Update standalone config files if needed
+    for (const config of standaloneConfigChanges) {
+      await updateStandaloneConfigFile(config)
+      console.log(`Saved ${config.filename}`)
+    }
+
+    // Notify parent that changes were saved and values should be updated
+    dispatch('configsaved', {
+      success: true,
+      message: 'Configurations saved successfully to GitHub',
+    })
+
+    // Reset hasChanges flag (this is also done in the parent)
+    // hasChanges = false;
+
+    // Show success and deploy options
+    commitStatus.success = true
+    showDeployOptions = true
+
+    // Show success message
+    setTimeout(() => {
+      commitStatus.success = false
+    }, 3000)
+  } catch (error) {
+    console.error('Error saving configs to GitHub:', error)
+
+    // Provide more detailed error messages
+    if (error.message.includes('401')) {
+      commitStatus.error =
+        'Authentication failed. Please refresh your GitHub token.'
+    } else if (error.message.includes('404')) {
+      commitStatus.error =
+        'Repository or file not found. Check your repository settings.'
+    } else {
+      commitStatus.error = `Failed to save to GitHub: ${error.message}`
+    }
+
+    // Notify parent of error
+    dispatch('configsaved', {
+      success: false,
+      error: error.message,
+    })
+  } finally {
+    isCommitting = false
   }
-  
-  // Save configs to GitHub
-  async function saveConfigsToGitHub() {
-    if (!isGitHubAuthenticated) {
-      commitStatus.error = 'Please authenticate with GitHub first';
-      return;
-    }
-    
-    try {
-      isCommitting = true;
-      commitStatus.error = null;
-      
-      // Track which configs have changed
-      const mainConfigChanges = [];
-      const standaloneConfigChanges = [];
-      
-      // Check which configs in the main file have changed
-      if (JSON.stringify(siteConfig) !== originalConfigValues.siteConfig) {
-        mainConfigChanges.push({ 
-          name: 'siteConfig', 
-          obj: siteConfig, 
-          typeName: 'SiteConfig' 
-        });
-      }
-      
-      if (JSON.stringify(navBarConfig) !== originalConfigValues.navBarConfig) {
-        mainConfigChanges.push({ 
-          name: 'navBarConfig', 
-          obj: navBarConfig, 
-          typeName: 'NavBarConfig' 
-        });
-      }
-      
-      if (JSON.stringify(profileConfig) !== originalConfigValues.profileConfig) {
-        mainConfigChanges.push({ 
-          name: 'profileConfig', 
-          obj: profileConfig, 
-          typeName: 'ProfileConfig' 
-        });
-      }
-      
-      if (JSON.stringify(licenseConfig) !== originalConfigValues.licenseConfig) {
-        mainConfigChanges.push({ 
-          name: 'licenseConfig', 
-          obj: licenseConfig, 
-          typeName: 'LicenseConfig' 
-        });
-      }
-      
-      // Check which standalone config files have changed
-      if (JSON.stringify(timelineConfig) !== originalConfigValues.timelineConfig) {
-        standaloneConfigChanges.push({ 
-          name: 'timelineConfig', 
-          obj: timelineConfig, 
-          filename: 'timelineconfig.ts' 
-        });
-      }
-      
-      if (JSON.stringify(avatarConfig) !== originalConfigValues.avatarConfig) {
-        standaloneConfigChanges.push({ 
-          name: 'avatarConfig', 
-          obj: avatarConfig, 
-          filename: 'avatar.config.ts' 
-        });
-      }
-      
-      if (JSON.stringify(communityConfig) !== originalConfigValues.communityConfig) {
-        standaloneConfigChanges.push({ 
-          name: 'communityConfig', 
-          obj: communityConfig, 
-          filename: 'community.config.ts' 
-        });
-      }
-      
-      if (JSON.stringify(aboutConfig) !== originalConfigValues.aboutConfig) {
-        standaloneConfigChanges.push({ 
-          name: 'aboutConfig', 
-          obj: aboutConfig, 
-          filename: 'about.config.ts' 
-        });
-      }
-      
-      if (JSON.stringify(postCardConfig) !== originalConfigValues.postCardConfig) {
-        standaloneConfigChanges.push({ 
-          name: 'postCardConfig', 
-          obj: postCardConfig, 
-          filename: 'postcard.config.ts' 
-        });
-      }
-      
-      if (JSON.stringify(bannerConfig) !== originalConfigValues.bannerConfig) {
-        standaloneConfigChanges.push({ 
-          name: 'bannerConfig', 
-          obj: bannerConfig, 
-          filename: 'banner.config.ts' 
-        });
-      }
-      
-      // If no configs have changed, inform the user
-      if (mainConfigChanges.length === 0 && standaloneConfigChanges.length === 0) {
-        commitStatus.error = 'No configuration changes detected to commit';
-        isCommitting = false;
-        return;
-      }
-      
-      console.log(`Saving configuration changes...`);
-      
-      // Update the main config.ts file if needed
-      if (mainConfigChanges.length > 0) {
-        await updateMainConfigFile(mainConfigChanges);
-        console.log(`Updated ${mainConfigChanges.length} configs in main config.ts file`);
-      }
-      
-      // Update standalone config files if needed
-      for (const config of standaloneConfigChanges) {
-        await updateStandaloneConfigFile(config);
-        console.log(`Saved ${config.filename}`);
-      }
-      
-      // Notify parent that changes were saved and values should be updated
-      dispatch('configsaved', {
-        success: true,
-        message: 'Configurations saved successfully to GitHub'
-      });
-      
-      // Reset hasChanges flag (this is also done in the parent)
-      // hasChanges = false;
-      
-      // Show success and deploy options
-      commitStatus.success = true;
-      showDeployOptions = true;
-      
-      // Show success message
-      setTimeout(() => {
-        commitStatus.success = false;
-      }, 3000);
-    } catch (error) {
-      console.error('Error saving configs to GitHub:', error);
-      
-      // Provide more detailed error messages
-      if (error.message.includes('401')) {
-        commitStatus.error = 'Authentication failed. Please refresh your GitHub token.';
-      } else if (error.message.includes('404')) {
-        commitStatus.error = 'Repository or file not found. Check your repository settings.';
-      } else {
-        commitStatus.error = `Failed to save to GitHub: ${error.message}`;
-      }
-      
-      // Notify parent of error
-      dispatch('configsaved', {
-        success: false,
-        error: error.message
-      });
-    } finally {
-      isCommitting = false;
-    }
+}
+
+// Trigger site rebuild
+async function triggerSiteRebuild() {
+  if (!isGitHubAuthenticated) {
+    commitStatus.error = 'Please authenticate with GitHub first'
+    return
   }
-  
-  // Trigger site rebuild
-  async function triggerSiteRebuild() {
-    if (!isGitHubAuthenticated) {
-      commitStatus.error = 'Please authenticate with GitHub first';
-      return;
+
+  try {
+    isCommitting = true
+    commitStatus.error = null
+
+    // Add a small delay to ensure all commits are processed
+    // This prevents triggering a rebuild while commits are still being processed
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    // Trigger the GitHub Action workflow for rebuilding the site
+    // Make sure this matches your actual workflow filename
+    await githubService.triggerWorkflow('deploy.yml')
+
+    // Update UI status
+    commitStatus.success = true
+    showDeployOptions = false
+
+    // Notify parent that site rebuild was triggered
+    dispatch('deploy', {
+      success: true,
+      message: 'Site rebuild triggered successfully',
+    })
+
+    // Show success message
+    setTimeout(() => {
+      commitStatus.success = false
+    }, 3000)
+  } catch (error) {
+    console.error('Error triggering rebuild:', error)
+
+    if (error.message.includes('404')) {
+      commitStatus.error = `Failed to trigger rebuild: Workflow file not found. Make sure 'deploy.yml' exists in your repository's .github/workflows directory.`
+    } else {
+      commitStatus.error = `Failed to trigger rebuild: ${error.message}`
     }
-    
-    try {
-      isCommitting = true;
-      commitStatus.error = null;
-      
-      // Add a small delay to ensure all commits are processed
-      // This prevents triggering a rebuild while commits are still being processed
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Trigger the GitHub Action workflow for rebuilding the site
-      // Make sure this matches your actual workflow filename
-      await githubService.triggerWorkflow('deploy.yml');
-      
-      // Update UI status
-      commitStatus.success = true;
-      showDeployOptions = false;
-      
-      // Notify parent that site rebuild was triggered
-      dispatch('deploy', {
-        success: true,
-        message: 'Site rebuild triggered successfully'
-      });
-      
-      // Show success message
-      setTimeout(() => {
-        commitStatus.success = false;
-      }, 3000);
-    } catch (error) {
-      console.error('Error triggering rebuild:', error);
-      
-      if (error.message.includes('404')) {
-        commitStatus.error = `Failed to trigger rebuild: Workflow file not found. Make sure 'deploy.yml' exists in your repository's .github/workflows directory.`;
-      } else {
-        commitStatus.error = `Failed to trigger rebuild: ${error.message}`;
-      }
-      
-      // Notify parent of error
-      dispatch('deploy', {
-        success: false,
-        error: error.message
-      });
-    } finally {
-      isCommitting = false;
-    }
+
+    // Notify parent of error
+    dispatch('deploy', {
+      success: false,
+      error: error.message,
+    })
+  } finally {
+    isCommitting = false
   }
+}
 </script>
 
 <!-- GitHub Integration Panel -->

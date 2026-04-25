@@ -13,6 +13,8 @@ export interface SiteAudioTrackConfig {
   loop?: boolean
   volume?: number
   html5?: boolean
+  hashModulo?: number
+  hashRemainder?: number
 }
 
 export interface SiteAudioConfig {
@@ -51,24 +53,51 @@ export const siteAudioConfig: SiteAudioConfig = {
   tracks: [
     {
       id: 'portal-deck',
-      src: '/audio/ambient/Wicked Shadows Whisper.mp3',
+      src: '/audio/ambient/portal-deck.mp3',
       label: 'Portal Deck',
-      routes: ['/', '/community', '/friends'],
-      volume: 0.92,
+      routes: ['/'],
+      volume: 0.9,
+    },
+    {
+      id: 'community-signal',
+      src: '/audio/ambient/Whistling Dreams.mp3',
+      label: 'Whistling Dreams',
+      routes: ['/community'],
+      volume: 0.68,
+    },
+    {
+      id: 'about-glow',
+      src: '/audio/ambient/Untitled.mp3',
+      label: 'Signal Bloom',
+      routes: ['/about'],
+      volume: 0.7,
     },
     {
       id: 'timeline-drift',
       src: '/audio/ambient/Shadow Waltz.mp3',
-      label: 'Timeline Drift',
-      routes: ['/posts/timeline', '/posts/explainer', '/posts/timelines', '/archive'],
-      volume: 0.86,
+      label: 'Shadow Waltz',
+      routes: [
+        '/timeline',
+        '/posts/timeline',
+        '/posts/explainer',
+        '/posts/timelines',
+        '/archive',
+      ],
+      volume: 0.84,
     },
     {
       id: 'commercial-hum',
       src: '/audio/ambient/Dark Shadows of Delight.mp3',
-      label: 'Commercial Hum',
-      routes: ['/store', '/store-placeholder', '/about'],
-      volume: 0.8,
+      label: 'Dark Shadows of Delight',
+      routes: ['/store', '/store-placeholder'],
+      volume: 0.78,
+    },
+    {
+      id: 'checkout-signal',
+      src: '/audio/ambient/piano synth.mp3',
+      label: 'Checkout Signal',
+      routes: ['/store/checkout'],
+      volume: 0.62,
     },
     {
       id: 'playfloor-loop',
@@ -86,10 +115,51 @@ export const siteAudioConfig: SiteAudioConfig = {
     },
     {
       id: 'shadow-broadcast',
-      src: '/audio/ambient/Untitled.mp3',
-      label: 'Shadow Broadcast',
+      src: '/audio/ambient/Wicked Shadows Whisper.mp3',
+      label: 'Wicked Shadows Whisper',
       routes: ['/posts'],
-      volume: 0.72,
+      volume: 0.7,
+      hashModulo: 3,
+      hashRemainder: 0,
+    },
+    {
+      id: 'shadow-broadcast-alt',
+      src: '/audio/ambient/Untitled.mp3',
+      label: 'Archive Pulse',
+      routes: ['/posts'],
+      volume: 0.66,
+      hashModulo: 3,
+      hashRemainder: 1,
+    },
+    {
+      id: 'shadow-broadcast-soft',
+      src: '/audio/ambient/Whistling Dreams.mp3',
+      label: 'Whistling Dreams',
+      routes: ['/posts'],
+      volume: 0.64,
+      hashModulo: 3,
+      hashRemainder: 2,
+    },
+    {
+      id: 'quiet-gate',
+      src: '/audio/ambient/Whistling Dreams.mp3',
+      label: 'Quiet Gate',
+      routes: ['/friends', '/login', '/privacy'],
+      volume: 0.62,
+    },
+    {
+      id: 'admin-grid',
+      src: '/audio/ambient/piano synth.mp3',
+      label: 'Piano Synth',
+      routes: ['/host', '/new-post', '/configs'],
+      volume: 0.66,
+    },
+    {
+      id: 'lab-drive',
+      src: '/audio/ambient/Faster.mp3',
+      label: 'Faster',
+      routes: ['/labs'],
+      volume: 0.62,
     },
   ],
 }
@@ -107,16 +177,86 @@ export const siteSfxProfile: Record<AudioSfxId, AudioSfxConfig> = {
     volume: 0.42,
     preload: true,
   },
+  'hover-soft': {
+    id: 'hover-soft',
+    src: '/audio/sfx/interface-click-tone.mp3',
+    volume: 0.24,
+    rate: 1.06,
+    rateJitter: 0.04,
+    cooldownMs: 110,
+    interrupt: false,
+    preload: true,
+  },
+  'hover-emphasis': {
+    id: 'hover-emphasis',
+    src: '/audio/sfx/interface-click-tone.mp3',
+    volume: 0.3,
+    rate: 0.94,
+    rateJitter: 0.03,
+    cooldownMs: 130,
+    interrupt: false,
+    preload: true,
+  },
+  'focus-soft': {
+    id: 'focus-soft',
+    src: '/audio/sfx/interface-click-tone.mp3',
+    volume: 0.26,
+    rate: 0.98,
+    rateJitter: 0.03,
+    cooldownMs: 140,
+    interrupt: false,
+    preload: true,
+  },
   'panel-open': {
     id: 'panel-open',
     src: '/audio/sfx/interface-open.mp3',
     volume: 0.5,
     preload: true,
   },
+  'panel-close': {
+    id: 'panel-close',
+    src: '/audio/sfx/interface-back.mp3',
+    volume: 0.42,
+    rate: 1.05,
+    rateJitter: 0.04,
+    preload: true,
+  },
   'panel-back': {
     id: 'panel-back',
     src: '/audio/sfx/interface-back.mp3',
     volume: 0.46,
+    preload: true,
+  },
+  confirm: {
+    id: 'confirm',
+    src: '/audio/sfx/select-click.mp3',
+    volume: 0.54,
+    rate: 0.92,
+    rateJitter: 0.03,
+    preload: true,
+  },
+  success: {
+    id: 'success',
+    src: '/audio/sfx/interface-open.mp3',
+    volume: 0.58,
+    rate: 1.08,
+    rateJitter: 0.04,
+    preload: true,
+  },
+  warning: {
+    id: 'warning',
+    src: '/audio/sfx/interface-error.mp3',
+    volume: 0.44,
+    rate: 0.94,
+    rateJitter: 0.02,
+    preload: true,
+  },
+  'cart-add': {
+    id: 'cart-add',
+    src: '/audio/sfx/select-click.mp3',
+    volume: 0.62,
+    rate: 0.88,
+    rateJitter: 0.03,
     preload: true,
   },
   error: {
@@ -150,26 +290,45 @@ export function normalizeAudioPathname(pathname: string): string {
   return normalized.length > 0 ? normalized : '/'
 }
 
+function getStablePathHash(pathname: string): number {
+  let hash = 0
+  for (let index = 0; index < pathname.length; index += 1) {
+    hash = (hash * 31 + pathname.charCodeAt(index)) >>> 0
+  }
+  return hash
+}
+
 export function getTrackForPathname(
   pathname: string,
 ): SiteAudioTrackConfig | null {
   const normalizedPath = normalizeAudioPathname(pathname)
+  const pathHash = getStablePathHash(normalizedPath)
 
   const matches = siteAudioConfig.tracks
-    .filter(track =>
-      track.routes.some(route => {
+    .flatMap(track =>
+      track.routes.flatMap(route => {
         const normalizedRoute = normalizeAudioPathname(route)
-        return (
+        const routeMatches =
           normalizedPath === normalizedRoute ||
           normalizedPath.startsWith(`${normalizedRoute}/`)
-        )
+        if (!routeMatches) return []
+
+        if (
+          typeof track.hashModulo === 'number' &&
+          track.hashModulo > 0 &&
+          typeof track.hashRemainder === 'number'
+        ) {
+          if (pathHash % track.hashModulo !== track.hashRemainder) {
+            return []
+          }
+        }
+
+        return [{ track, matchedRouteLength: normalizedRoute.length }]
       }),
     )
     .sort((a, b) => {
-      const aLength = Math.max(...a.routes.map(route => normalizeAudioPathname(route).length))
-      const bLength = Math.max(...b.routes.map(route => normalizeAudioPathname(route).length))
-      return bLength - aLength
+      return b.matchedRouteLength - a.matchedRouteLength
     })
 
-  return matches[0] ?? null
+  return matches[0]?.track ?? null
 }

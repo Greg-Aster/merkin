@@ -87,11 +87,7 @@ if (!isVectorOrAnimated && (isLocal || isPublic)) {
   })
 
   const candidatePaths = isLocal
-    ? [
-        path
-          .normalize(path.join('/src', basePath, src))
-          .replace(/\\/g, '/'),
-      ]
+    ? [path.normalize(path.join('/src', basePath, src)).replace(/\\/g, '/')]
     : createRootRelativeCandidates(src).map(candidate =>
         path.normalize(candidate).replace(/\\/g, '/'),
       )
@@ -100,16 +96,18 @@ if (!isVectorOrAnimated && (isLocal || isPublic)) {
   const file = resolvedPath ? files[resolvedPath] : undefined
 
   if (!file && isLocal) {
-    console.error(
-      `\n[ERROR] Image file not found: ${candidatePaths[0]}`,
-    )
+    console.error(`\n[ERROR] Image file not found: ${candidatePaths[0]}`)
   } else if (file) {
     img = await file()
   }
 }
 
-const imageClass = ['w-full h-full object-cover', imgClass].filter(Boolean).join(' ')
-const imageStyle = [`object-position: ${position}`, imgStyle].filter(Boolean).join('; ')
+const imageClass = ['w-full h-full object-cover', imgClass]
+  .filter(Boolean)
+  .join(' ')
+const imageStyle = [`object-position: ${position}`, imgStyle]
+  .filter(Boolean)
+  .join('; ')
 const publicSrc = isPublic ? url(src, import.meta.env.BASE_URL) : src
 ---
 <div id={id} class:list={[className, 'overflow-hidden relative']}>

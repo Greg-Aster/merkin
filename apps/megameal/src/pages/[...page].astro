@@ -2,8 +2,6 @@
 import type { GetStaticPaths } from 'astro'
 import PostPage from '../components/PostPage.astro'
 import Pagination from '../components/control/Pagination.astro'
-import FeaturedArc from '../components/home/FeaturedArc.astro'
-import LatestTransmissions from '../components/home/LatestTransmissions.astro'
 import FactsWidget from '../components/widget/FactsWidget.astro'
 import { PAGE_SIZE } from '../constants/constants'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
@@ -21,12 +19,6 @@ const len = page.data.length
 ---
 
 <MainGridLayout homeLayout="portal">
-  {isFirstPage && (
-    <section class="portal-snap-section portal-snap-section--editorial appear-on-scroll delay-2 deferred-section" aria-label="Featured content">
-      <FeaturedArc />
-      <LatestTransmissions />
-    </section>
-  )}
   {!isFirstPage && (
     <div class="dispatches-stream deferred-section">
       <PostPage page={page}></PostPage>
@@ -259,13 +251,6 @@ const len = page.data.length
     transition-delay: 0s;
   }
 
-  /* Editorial section contains FeaturedArc + LatestTransmissions as one grouped block */
-  .portal-snap-section--editorial {
-    display: grid;
-    align-content: center;
-    padding-block: clamp(2rem, 6svh, 4rem);
-  }
-
   :global(html.megameal-home-snap) {
     scroll-padding-top: 0.75rem;
   }
@@ -316,10 +301,6 @@ const len = page.data.length
   }
 
   @media (max-width: 48rem) {
-    .portal-snap-section--editorial {
-      padding-block: clamp(1.5rem, 5svh, 3rem);
-    }
-
     :global(html.megameal-home-stage-ready) .portal-snap-section:not(.is-current) {
       opacity: 0.24;
       pointer-events: none;

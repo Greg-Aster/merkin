@@ -1,8 +1,19 @@
-export type EditorNodeKind = 'asset' | 'primitive' | 'light' | 'prefab' | 'group'
+export type EditorNodeKind =
+  | 'asset'
+  | 'primitive'
+  | 'light'
+  | 'prefab'
+  | 'group'
 export type EditorTransformMode = 'translate' | 'rotate' | 'scale'
 export type EditorSpace = 'world' | 'local'
 export type EditorTransformAxis = 'all' | 'x' | 'y' | 'z'
-export type EditorStylePreset = 'site' | 'surreal-site' | 'ghibli' | 'alto' | 'monument' | 'retro'
+export type EditorStylePreset =
+  | 'site'
+  | 'surreal-site'
+  | 'ghibli'
+  | 'alto'
+  | 'monument'
+  | 'retro'
 export type EditorAtmospherePresetId =
   | 'lonely-wind'
   | 'ruin-haze'
@@ -21,17 +32,28 @@ export type EditorAudioPresetId =
   | 'lonely-wind'
   | 'silent-basin'
   | 'cold-starlight'
+  | 'wind-signals'
+  | 'archive-pulse'
   | 'shadow-waltz'
   | 'ruin-whispers'
   | 'courtyard-breeze'
   | 'glass-horizon'
   | 'quiet-tide'
+  | 'glass-signal'
   | 'signal-bloom'
+  | 'control-room'
   | 'cathedral-deck'
 export type EditorInteractionMode = 'objects' | 'terrain'
 export type EditorTerrainBrushMode = 'raise' | 'smooth' | 'flatten'
 export type EditorViewportLightingMode = 'authored' | 'workbench'
-export type PrimitiveGeometryKind = 'box' | 'cylinder' | 'octahedron' | 'tetrahedron' | 'icosahedron' | 'dodecahedron' | 'torus'
+export type PrimitiveGeometryKind =
+  | 'box'
+  | 'cylinder'
+  | 'octahedron'
+  | 'tetrahedron'
+  | 'icosahedron'
+  | 'dodecahedron'
+  | 'torus'
 export type EditorPrefabType =
   | 'anomaly-cluster'
   | 'command-console'
@@ -126,7 +148,13 @@ export interface EditorNodeCollisionData {
 }
 
 export interface EditorGameplayData {
-  type: 'portal' | 'note' | 'firefly' | 'audio-region' | 'fog-volume' | 'mist-region'
+  type:
+    | 'portal'
+    | 'note'
+    | 'firefly'
+    | 'audio-region'
+    | 'fog-volume'
+    | 'mist-region'
   markerColor?: string
   markerSize?: number
   wanderEnabled?: boolean
@@ -140,6 +168,7 @@ export interface EditorGameplayData {
   lightDistance?: number
   lightDecay?: number
   spriteIntensity?: number
+  lightBurstBoost?: number
   targetLevelId?: string
   title?: string
   author?: string

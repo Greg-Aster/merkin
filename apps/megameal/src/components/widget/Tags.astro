@@ -11,7 +11,7 @@ interface Props {
 }
 
 const { class: className, style }: Props = Astro.props
-const tags = (await getTagList()).map((tag) => ({
+const tags = (await getTagList()).map(tag => ({
   name: tag.name,
   href: getTagUrl(tag.name),
   ariaLabel: `View all posts with the ${tag.name} tag`,

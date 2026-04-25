@@ -1,68 +1,69 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
-    
-    // Props
-    export let era;
-    export let onSave;
-    export let onCancel;
-    
-    // Local state
-    let formData = { ...era };
-    let errors = {};
-    let isNewEra = !era.key || era.key === '';
-    
-    // Event dispatcher
-    const dispatch = createEventDispatcher();
-    
-    // Function to validate form
-    function validateForm() {
-      errors = {};
-      
-      if (!formData.key) {
-        errors.key = "Era key is required";
-      } else if (!/^[a-z0-9-]+$/.test(formData.key)) {
-        errors.key = "Era key can only contain lowercase letters, numbers, and hyphens";
-      }
-      
-      if (!formData.displayName) {
-        errors.displayName = "Display name is required";
-      }
-      
-      if (formData.startYear === undefined || formData.startYear === null) {
-        errors.startYear = "Start year is required";
-      }
-      
-      if (formData.endYear === undefined || formData.endYear === null) {
-        errors.endYear = "End year is required";
-      }
-      
-      if (formData.startYear >= formData.endYear) {
-        errors.endYear = "End year must be greater than start year";
-      }
-      
-      return Object.keys(errors).length === 0;
+import { createEventDispatcher } from 'svelte'
+
+// Props
+export let era
+export let onSave
+export let onCancel
+
+// Local state
+let formData = { ...era }
+let errors = {}
+let isNewEra = !era.key || era.key === ''
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Function to validate form
+function validateForm() {
+  errors = {}
+
+  if (!formData.key) {
+    errors.key = 'Era key is required'
+  } else if (!/^[a-z0-9-]+$/.test(formData.key)) {
+    errors.key =
+      'Era key can only contain lowercase letters, numbers, and hyphens'
+  }
+
+  if (!formData.displayName) {
+    errors.displayName = 'Display name is required'
+  }
+
+  if (formData.startYear === undefined || formData.startYear === null) {
+    errors.startYear = 'Start year is required'
+  }
+
+  if (formData.endYear === undefined || formData.endYear === null) {
+    errors.endYear = 'End year is required'
+  }
+
+  if (formData.startYear >= formData.endYear) {
+    errors.endYear = 'End year must be greater than start year'
+  }
+
+  return Object.keys(errors).length === 0
+}
+
+// Function to handle form submission
+function handleSubmit() {
+  if (validateForm()) {
+    const success = onSave(formData)
+    if (success) {
+      dispatch('saved', formData)
     }
-    
-    // Function to handle form submission
-    function handleSubmit() {
-      if (validateForm()) {
-        const success = onSave(formData);
-        if (success) {
-          dispatch('saved', formData);
-        }
-      }
-    }
-    
-    // Function to generate a slug from display name
-    function generateSlug() {
-      if (formData.displayName && isNewEra) {
-        formData.key = formData.displayName
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-');
-      }
-    }
-  </script>
+  }
+}
+
+// Function to generate a slug from display name
+function generateSlug() {
+  if (formData.displayName && isNewEra) {
+    formData.key = formData.displayName
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+  }
+}
+</script>
   
   <div class="era-editor p-6">
     <h3 class="text-xl font-semibold text-black/80 dark:text-white/80 mb-4">

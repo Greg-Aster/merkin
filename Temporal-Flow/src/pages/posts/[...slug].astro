@@ -7,11 +7,11 @@ import Markdown from '@components/misc/Markdown.astro'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
-import { getDir, getPostUrlBySlug, url } from '@utils/url-utils'
+import { url, getDir, getPostUrlBySlug } from '@utils/url-utils'
 import { Icon } from 'astro-icon/components'
-import { licenseConfig } from '../../config/config'
 import PostMetadata from '../../components/PostMeta.astro'
 import ImageWrapper from '../../components/misc/ImageWrapper.astro'
+import { licenseConfig } from '../../config/config'
 import { profileConfig, siteConfig } from '../../config/config'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
 
@@ -19,7 +19,8 @@ export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => data.draft !== true)
   const sortedPosts = [...posts].sort(
     (a, b) =>
-      new Date(b.data.published).getTime() - new Date(a.data.published).getTime(),
+      new Date(b.data.published).getTime() -
+      new Date(a.data.published).getTime(),
   )
 
   return sortedPosts.map((post, index) => {
@@ -59,7 +60,9 @@ const jsonLd = {
     name: profileConfig.name,
     url: Astro.site,
   },
-  inLanguage: (post.data.lang ? post.data.lang.replace('_', '-') : siteConfig.lang.replace('_', '-')),
+  inLanguage: post.data.lang
+    ? post.data.lang.replace('_', '-')
+    : siteConfig.lang.replace('_', '-'),
   // TODO include cover image here
 }
 

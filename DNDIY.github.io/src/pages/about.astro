@@ -1,47 +1,47 @@
 ---
-import MainGridLayout from '../layouts/MainGridLayout.astro';
-import { getEntry, getCollection } from 'astro:content';
-import { i18n } from '../i18n/translation';
-import I18nKey from '../i18n/i18nKey';
-import Markdown from '@components/misc/Markdown.astro';
-import { Icon } from 'astro-icon/components';
-import { collections } from '../content.config';
-import TOC from '@components/widget/TOC.astro'; // Import the TOC widget
-import { aboutConfig } from '../config/about.config';
+import { getCollection, getEntry } from 'astro:content'
+import Markdown from '@components/misc/Markdown.astro'
+import TOC from '@components/widget/TOC.astro' // Import the TOC widget
+import { Icon } from 'astro-icon/components'
+import { aboutConfig } from '../config/about.config'
+import { collections } from '../content.config'
+import I18nKey from '../i18n/i18nKey'
+import { i18n } from '../i18n/translation'
+import MainGridLayout from '../layouts/MainGridLayout.astro'
 
 // Fetch the about content
-const aboutPost = await getEntry('spec', 'about');
+const aboutPost = await getEntry('spec', 'about')
 if (!aboutPost) {
-  throw new Error("About content not found in 'spec/about'");
+  throw new Error("About content not found in 'spec/about'")
 }
-const { Content, headings: aboutHeadings } = await aboutPost.render(); // Extract headings from the about content
+const { Content, headings: aboutHeadings } = await aboutPost.render() // Extract headings from the about content
 
 // Fetch team members
-const allTeamMembers = await getCollection('team');
+const allTeamMembers = await getCollection('team')
 // Sort by order field (optional)
-const teamMembers = allTeamMembers.sort((a, b) => a.data.order - b.data.order);
+const teamMembers = allTeamMembers.sort((a, b) => a.data.order - b.data.order)
 
 const processedTeamMembers = await Promise.all(
-  teamMembers.map(async (member) => {
-    const { Content: MemberContent } = await member.render();
+  teamMembers.map(async member => {
+    const { Content: MemberContent } = await member.render()
     return {
       ...member.data,
       slug: member.slug,
-      contentId: `member-content-${member.slug}`
-    };
-  })
-);
+      contentId: `member-content-${member.slug}`,
+    }
+  }),
+)
 
 // Helper function to get avatar shape class
 function getAvatarShapeClass(shape) {
-  switch(shape) {
+  switch (shape) {
     case 'circle':
-      return 'rounded-full';
+      return 'rounded-full'
     case 'rounded':
-      return 'rounded-lg';
+      return 'rounded-lg'
     case 'square':
     default:
-      return '';
+      return ''
   }
 }
 ---

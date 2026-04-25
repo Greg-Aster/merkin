@@ -7,3 +7,15 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+interface Performance {
+  memory?: {
+    usedJSHeapSize: number
+  }
+}
+
+interface Window {
+  THREE?: unknown
+  PerformanceValidator?: unknown
+  PerformanceTestUtils?: unknown
+}

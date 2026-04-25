@@ -167,6 +167,8 @@ function downloadFile(filename, content) {
           <button 
             type="button"
             class="px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-md hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
+            data-sfx-hover="hover-soft"
+            data-sfx-click="panel-close"
             on:click={closeDialog}
           >
             Close
@@ -175,6 +177,8 @@ function downloadFile(filename, content) {
           <button 
             type="button"
             class="px-4 py-2 bg-[var(--primary)] hover:opacity-90 text-white font-medium rounded-md transition-opacity flex items-center disabled:opacity-60"
+            data-sfx-hover="hover-emphasis"
+            data-sfx-click="confirm"
             on:click={downloadConfigFile}
             disabled={exportStatus.processing}
           >

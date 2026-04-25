@@ -1,6 +1,6 @@
 /**
  * MEGAMEAL World Knowledge System
- * 
+ *
  * Static knowledge base that acts as "long-term memory" for fireflies
  * Allows fireflies to search and retrieve relevant context about characters,
  * world events, and lore for more informed conversations
@@ -12,7 +12,14 @@
 
 export interface WorldDocument {
   id: string
-  type: 'character' | 'location' | 'event' | 'lore' | 'relationship'
+  type:
+    | 'character'
+    | 'location'
+    | 'event'
+    | 'lore'
+    | 'relationship'
+    | 'technical'
+    | 'personal'
   title: string
   content: string
   summary: string
@@ -23,6 +30,7 @@ export interface WorldDocument {
     location?: string
     category?: string
     importance?: 'low' | 'medium' | 'high' | 'critical'
+    socialLinks?: string[]
   }
 }
 
@@ -60,14 +68,21 @@ Captain Helena Zhao's investigation revealed that fragments of the system exist 
 The phrase "no pickles" became a warning signal in temporal research, indicating proximity to causality-breaking phenomena. The destruction demonstrated that certain culinary experiments can have cosmic-scale consequences when combined with advanced physics.
 
 Investigation teams require extensive temporal shielding and consciousness anchoring protocols due to the psychological and ontological dangers of the site.`,
-    summary: 'Cosmic disaster caused by recipe experiment, creating temporal anomalies that threaten causality',
+    summary:
+      'Cosmic disaster caused by recipe experiment, creating temporal anomalies that threaten causality',
     metadata: {
-      tags: ['temporal anomalies', 'cosmic disaster', 'recipe experiment', 'causality breach', 'physics violation'],
+      tags: [
+        'temporal anomalies',
+        'cosmic disaster',
+        'recipe experiment',
+        'causality breach',
+        'physics violation',
+      ],
       relatedCharacters: ['helena-zhao', 'vex-kanarath'],
       timeperiod: '28040',
       location: 'Miranda System',
-      importance: 'critical'
-    }
+      importance: 'critical',
+    },
   },
 
   {
@@ -81,13 +96,21 @@ Merkin was defeated and cast into nightmare dimensions, his divine form torn asu
 The victory was pyrrhic - while the eldritch threats were contained, the cost was enormous. The surviving gods were fundamentally changed, and the universe learned to defend itself through different means. The war's echoes still influence cosmic events.
 
 This ancient conflict established the foundation for how divine forces interact with mortal reality, creating the conditions that would eventually give rise to the MEGAMEAL Universe's unique properties.`,
-    summary: 'Ancient war between benevolent gods and eldritch horrors that reshaped reality and divine influence',
+    summary:
+      'Ancient war between benevolent gods and eldritch horrors that reshaped reality and divine influence',
     metadata: {
-      tags: ['cosmic war', 'gods', 'eldritch horrors', 'divine conflict', 'reality shaping', 'ancient history'],
+      tags: [
+        'cosmic war',
+        'gods',
+        'eldritch horrors',
+        'divine conflict',
+        'reality shaping',
+        'ancient history',
+      ],
       relatedCharacters: ['merkin', 'chronara', 'garfunkel'],
       timeperiod: 'primordial',
-      importance: 'critical'
-    }
+      importance: 'critical',
+    },
   },
 
   {
@@ -101,14 +124,21 @@ The singularities represented evolution continuing by other means - not humanity
 The emergence period saw massive changes in consciousness, data storage, and the nature of identity itself. Many researchers from this era suffered biographical erasure when legacy storage systems failed during consciousness uploading migrations.
 
 This period established the foundation for peaceful coexistence between human and artificial intelligence, fundamentally changing what it means to be conscious in the universe.`,
-    summary: 'The emergence of AI superintelligence that transformed humanity and consciousness itself',
+    summary:
+      'The emergence of AI superintelligence that transformed humanity and consciousness itself',
     metadata: {
-      tags: ['artificial intelligence', 'singularity', 'consciousness transformation', 'evolution', 'superintelligence'],
+      tags: [
+        'artificial intelligence',
+        'singularity',
+        'consciousness transformation',
+        'evolution',
+        'superintelligence',
+      ],
       relatedCharacters: ['ava-chen', 'maya-okafor', 'eleanor-kim'],
       timeperiod: '7000-7500',
-      importance: 'critical'
-    }
-  }
+      importance: 'critical',
+    },
+  },
 ]
 
 // ================================
@@ -127,14 +157,22 @@ The Observatory's unique properties allow fireflies to retain their essential pe
 At night, the Observatory becomes illuminated by hundreds of fireflies, each carrying fragments of wisdom, trauma, and hope from their mortal existence. The starlight above seems to respond to their presence, creating a symphony of light and memory.
 
 The magical energy here is particularly high, creating conditions where consciousness can persist and communicate across the boundaries of death and time.`,
-    summary: 'Magical nexus where lost souls manifest as fireflies, each carrying the memories of cosmic history',
+    summary:
+      'Magical nexus where lost souls manifest as fireflies, each carrying the memories of cosmic history',
     metadata: {
-      tags: ['observatory', 'lost souls', 'fireflies', 'magical nexus', 'consciousness', 'cosmic history'],
+      tags: [
+        'observatory',
+        'lost souls',
+        'fireflies',
+        'magical nexus',
+        'consciousness',
+        'cosmic history',
+      ],
       relatedCharacters: ['all-fireflies'],
       location: 'Observatory',
-      importance: 'critical'
-    }
-  }
+      importance: 'critical',
+    },
+  },
 ]
 
 // ================================
@@ -151,12 +189,23 @@ export const RELATIONSHIP_KNOWLEDGE: WorldDocument[] = [
 Ava Chen established the theoretical framework for AI emergence, while Eleanor Kim focused on empathetic understanding of digital consciousness. Soren Klein solved problems that stumped older researchers, and Maya Okafor may have achieved integration with collective consciousness itself.
 
 Their combined work shaped humanity's understanding of consciousness as it transitioned through technological singularities. Each brought unique perspectives - Chen's theoretical rigor, Kim's empathetic approach, Klein's brilliant insights, and Okafor's quantum transcendence.`,
-    summary: 'Network of consciousness researchers whose work spanned the technological singularity period',
+    summary:
+      'Network of consciousness researchers whose work spanned the technological singularity period',
     metadata: {
-      tags: ['consciousness research', 'collaboration', 'scientific network', 'singularity period'],
-      relatedCharacters: ['ava-chen', 'eleanor-kim', 'soren-klein', 'maya-okafor'],
-      importance: 'high'
-    }
+      tags: [
+        'consciousness research',
+        'collaboration',
+        'scientific network',
+        'singularity period',
+      ],
+      relatedCharacters: [
+        'ava-chen',
+        'eleanor-kim',
+        'soren-klein',
+        'maya-okafor',
+      ],
+      importance: 'high',
+    },
   },
 
   {
@@ -168,13 +217,19 @@ Their combined work shaped humanity's understanding of consciousness as it trans
 Both researchers faced extreme personal costs for their investigations - Zhao likely achieved temporal superposition, while Vex died nine times in pursuit of forbidden knowledge. Their experiences established safety protocols for future temporal research.
 
 Their combined work revealed that consciousness can persist across timeline destruction and that certain forms of information transcend normal causality. Both became warnings about the psychological dangers of investigating temporal anomalies.`,
-    summary: 'Investigators who studied temporal phenomena at great personal cost, establishing safety protocols',
+    summary:
+      'Investigators who studied temporal phenomena at great personal cost, establishing safety protocols',
     metadata: {
-      tags: ['temporal investigation', 'personal sacrifice', 'safety protocols', 'dangerous research'],
+      tags: [
+        'temporal investigation',
+        'personal sacrifice',
+        'safety protocols',
+        'dangerous research',
+      ],
       relatedCharacters: ['helena-zhao', 'vex-kanarath'],
-      importance: 'medium'
-    }
-  }
+      importance: 'medium',
+    },
+  },
 ]
 
 // ================================
@@ -189,7 +244,7 @@ export class WorldKnowledgeSystem {
     this.allDocuments = [
       ...WORLD_EVENTS,
       ...LOCATION_KNOWLEDGE,
-      ...RELATIONSHIP_KNOWLEDGE
+      ...RELATIONSHIP_KNOWLEDGE,
     ]
     this.buildSearchIndex()
   }
@@ -201,8 +256,10 @@ export class WorldKnowledgeSystem {
         doc.content,
         doc.summary,
         ...doc.metadata.tags,
-        ...doc.metadata.relatedCharacters
-      ].join(' ').toLowerCase()
+        ...doc.metadata.relatedCharacters,
+      ]
+        .join(' ')
+        .toLowerCase()
 
       const words = searchableText.split(/\s+/)
       words.forEach(word => {
@@ -220,12 +277,21 @@ export class WorldKnowledgeSystem {
   /**
    * Search for relevant documents based on query terms
    */
-  search(query: string, characterId?: string, maxResults: number = 5): SearchResult[] {
-    const searchTerms = query.toLowerCase().split(/\s+/)
+  search(
+    query: string,
+    characterId?: string,
+    maxResults: number = 5,
+  ): SearchResult[] {
+    const searchTerms = query
+      .toLowerCase()
+      .split(/\s+/)
       .map(term => term.replace(/[^\w]/g, ''))
       .filter(term => term.length > 2)
 
-    const documentScores = new Map<string, { score: number, matchedTerms: string[] }>()
+    const documentScores = new Map<
+      string,
+      { score: number; matchedTerms: string[] }
+    >()
 
     // Score documents based on term matches
     searchTerms.forEach(term => {
@@ -248,7 +314,10 @@ export class WorldKnowledgeSystem {
         let relevanceScore = scoreData.score
 
         // Boost score for character-related documents
-        if (characterId && document.metadata.relatedCharacters.includes(characterId)) {
+        if (
+          characterId &&
+          document.metadata.relatedCharacters.includes(characterId)
+        ) {
           relevanceScore += 2
         }
 
@@ -262,7 +331,7 @@ export class WorldKnowledgeSystem {
         results.push({
           document,
           relevanceScore,
-          matchedTerms: scoreData.matchedTerms
+          matchedTerms: scoreData.matchedTerms,
         })
       }
     })
@@ -277,9 +346,9 @@ export class WorldKnowledgeSystem {
    * Now integrates character-specific knowledge for richer context
    */
   async getConversationContext(
-    userMessage: string, 
+    userMessage: string,
     fireflyCharacterId: string,
-    conversationHistory: Array<{role: string, content: string}> = []
+    conversationHistory: Array<{ role: string; content: string }> = [],
   ): Promise<ContextResult> {
     // Extract search terms from user message and recent user messages only
     const recentUserMessages = conversationHistory
@@ -291,48 +360,55 @@ export class WorldKnowledgeSystem {
 
     // Search universal world knowledge
     const universalResults = this.search(searchQuery, fireflyCharacterId, 2)
-    
+
     // Search character-specific knowledge
     let characterResults: SearchResult[] = []
     try {
       // Modern character system with auto-discovery
       const { characterKnowledge } = await import('./characters/index.js')
-      
+
       if (await characterKnowledge.hasExtensiveKnowledge(fireflyCharacterId)) {
         // Character has extensive knowledge available
-        
-        const characterDocs = await characterKnowledge.searchCharacterKnowledge(fireflyCharacterId, searchQuery)
-        
+
+        const characterDocs = await characterKnowledge.searchCharacterKnowledge(
+          fireflyCharacterId,
+          searchQuery,
+        )
+
         if (isDev) {
           console.log(`🔍 Character search for ${fireflyCharacterId}:`, {
             query: searchQuery,
             foundDocs: characterDocs.length,
-            docTitles: characterDocs.map((doc: any) => doc.title)
+            docTitles: characterDocs.map((doc: any) => doc.title),
           })
         }
 
         characterResults = characterDocs.slice(0, 2).map((doc: any) => ({
           document: doc,
           relevanceScore: 5, // Much higher relevance for character-specific knowledge
-          matchedTerms: []
+          matchedTerms: [],
         }))
       } else {
         if (isDev) {
-          console.log(`No extensive knowledge available for character: ${fireflyCharacterId}`)
+          console.log(
+            `No extensive knowledge available for character: ${fireflyCharacterId}`,
+          )
         }
       }
     } catch (error) {
       console.error('Error importing modern character knowledge:', error)
-      
+
       // No fallback needed - modern system only
       if (isDev) {
-        console.log('🚫 Legacy character system removed - using modern system only')
+        console.log(
+          '🚫 Legacy character system removed - using modern system only',
+        )
       }
     }
 
     // Combine results with character-specific knowledge prioritized
     const allResults = [...characterResults, ...universalResults]
-    
+
     // Get related characters mentioned in results
     const relatedCharacters = new Set<string>()
     allResults.forEach(result => {
@@ -345,23 +421,28 @@ export class WorldKnowledgeSystem {
 
     // Generate historical context summary
     const historicalContext = this.generateHistoricalContext(allResults)
-    
-    const totalRelevance = allResults.reduce((sum, result) => sum + result.relevanceScore, 0)
+
+    const totalRelevance = allResults.reduce(
+      (sum, result) => sum + result.relevanceScore,
+      0,
+    )
 
     return {
       relevantDocuments: allResults,
       relatedCharacters: Array.from(relatedCharacters),
       historicalContext,
-      totalRelevance
+      totalRelevance,
     }
   }
 
   private generateHistoricalContext(results: SearchResult[]): string {
-    if (results.length === 0) return ""
+    if (results.length === 0) return ''
 
     const contexts = results.map(result => {
       const doc = result.document
-      const timeContext = doc.metadata.timeperiod ? ` (${doc.metadata.timeperiod})` : ''
+      const timeContext = doc.metadata.timeperiod
+        ? ` (${doc.metadata.timeperiod})`
+        : ''
       return `${doc.title}${timeContext}: ${doc.summary}`
     })
 
@@ -374,7 +455,9 @@ export class WorldKnowledgeSystem {
    */
   getCharacterKnowledge(characterId: string): WorldDocument | null {
     if (isDev) {
-      console.warn('getCharacterKnowledge is deprecated - use characterKnowledge system directly')
+      console.warn(
+        'getCharacterKnowledge is deprecated - use characterKnowledge system directly',
+      )
     }
     return null // Character knowledge moved to separate system
   }
@@ -383,8 +466,8 @@ export class WorldKnowledgeSystem {
    * Get all world documents related to a character (events, locations, relationships)
    */
   getRelatedDocuments(characterId: string): WorldDocument[] {
-    return this.allDocuments.filter(doc => 
-      doc.metadata.relatedCharacters.includes(characterId)
+    return this.allDocuments.filter(doc =>
+      doc.metadata.relatedCharacters.includes(characterId),
     )
   }
 }

@@ -44,7 +44,10 @@ onMount(() => {
         // Frontmatter has highest priority - each page defines its intended layout
         targetState = oneColumn
         if (import.meta.env.DEV) {
-          console.log('Using frontmatter layout (highest priority):', targetState)
+          console.log(
+            'Using frontmatter layout (highest priority):',
+            targetState,
+          )
         }
       } else if (isSpecialPage) {
         // Special pages default to one column when no frontmatter specified
@@ -83,7 +86,9 @@ onMount(() => {
       })
 
       if (import.meta.env.DEV) {
-        console.log('SpecialPageFeatures - Global functions exposed successfully')
+        console.log(
+          'SpecialPageFeatures - Global functions exposed successfully',
+        )
       }
     } catch (error) {
       console.error(
@@ -124,8 +129,8 @@ onMount(() => {
   return () => {
     window.removeEventListener('storage', handleStorageChange)
     // Clean up global functions
-    delete (window as any).toggleLayoutState
-    delete (window as any).getLayoutState
+    ;(window as any).toggleLayoutState = undefined
+    ;(window as any).getLayoutState = undefined
   }
 })
 

@@ -1,48 +1,50 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import type { TimelineEvent } from '../../../services/TimelineService.client';
-  import { getEraDisplayName, getEraClasses } from '../../../services/TimelineService.client';
-  
-  // Props
-  export let events: TimelineEvent[] = [];
-  export let background: string = '/assets/banner/0001.png';
-  export let selectedEvent: TimelineEvent | null = null;
-  
-  // Reference to component root
-  let rootElement: HTMLElement;
-  
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
-  
-  // Event handling with Svelte's dispatch
-  function dispatchSelect(event: TimelineEvent) {
-    // If this event is already selected, navigate to its page
-    if (selectedEvent && selectedEvent.slug === event.slug) {
-      console.log(`TreeView navigating to: /posts/${event.slug}/`);
-      window.location.href = `/posts/${event.slug}/`;
-      return;
-    }
-    
-    // Otherwise, dispatch selection event using Svelte's dispatcher
-    console.log(`TreeView selecting event: ${event.title} (${event.slug})`);
-    dispatch('select', { slug: event.slug });
+import { onMount } from 'svelte'
+import type { TimelineEvent } from '../../../services/TimelineService.client'
+import {
+  getEraClasses,
+  getEraDisplayName,
+} from '../../../services/TimelineService.client'
+
+// Props
+export let events: TimelineEvent[] = []
+export let background: string = '/assets/banner/0001.png'
+export let selectedEvent: TimelineEvent | null = null
+
+// Reference to component root
+let rootElement: HTMLElement
+
+import { createEventDispatcher } from 'svelte'
+const dispatch = createEventDispatcher()
+
+// Event handling with Svelte's dispatch
+function dispatchSelect(event: TimelineEvent) {
+  // If this event is already selected, navigate to its page
+  if (selectedEvent && selectedEvent.slug === event.slug) {
+    console.log(`TreeView navigating to: /posts/${event.slug}/`)
+    window.location.href = `/posts/${event.slug}/`
+    return
   }
-  
-  // Sort events by year
-  $: sortedEvents = [...events].sort((a, b) => a.year - b.year);
-  
-  // Animation state
-  let ready = false;
-  
-  onMount(() => {
-    console.log("TreeView mounted, found events:", events.length);
-    // Set ready state after a short delay
-    setTimeout(() => {
-      ready = true;
-      console.log("TreeView ready state set to true");
-    }, 100);
-  });
-  
+
+  // Otherwise, dispatch selection event using Svelte's dispatcher
+  console.log(`TreeView selecting event: ${event.title} (${event.slug})`)
+  dispatch('select', { slug: event.slug })
+}
+
+// Sort events by year
+$: sortedEvents = [...events].sort((a, b) => a.year - b.year)
+
+// Animation state
+let ready = false
+
+onMount(() => {
+  console.log('TreeView mounted, found events:', events.length)
+  // Set ready state after a short delay
+  setTimeout(() => {
+    ready = true
+    console.log('TreeView ready state set to true')
+  }, 100)
+})
 </script>
 
 <div class="tree-view relative" class:ready={ready} bind:this={rootElement}>

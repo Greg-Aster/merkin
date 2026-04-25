@@ -1,6 +1,6 @@
 <script lang="ts">
-  import EditorSceneNode from './EditorSceneNode.svelte'
-  import type { EditorSceneNode as SceneNode } from './editorStore'
+import EditorSceneNode from './EditorSceneNode.svelte'
+import type { EditorSceneNode as SceneNode } from './editorStore'
 
 export let node: SceneNode
 export let nodes: SceneNode[] = []
@@ -10,7 +10,7 @@ export let selectedNodeIds: string[] = []
 export let interactionSystem: any = null
 export let interactiveEnabled = false
 
-  $: childNodes = nodes.filter((child) => child.parentId === node.id)
+$: childNodes = nodes.filter(child => child.parentId === node.id)
 </script>
 
 <EditorSceneNode

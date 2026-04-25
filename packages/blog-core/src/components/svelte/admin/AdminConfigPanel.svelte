@@ -873,7 +873,4 @@ $: {
     transition: background-color 0.2s ease;
   }
   
-  .tab-button.active::after {
-    background-color: var(--primary);
-  }
 </style>

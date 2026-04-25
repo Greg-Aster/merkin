@@ -1,8 +1,11 @@
 import { derived } from 'svelte/store'
 import { editorSceneStore } from './editorDocumentStore'
-import { mergeObservatoryEditorSettings, mergeSolitudeEditorSettings } from './editorLevelSetup'
-import { editorStateStore } from './editorSessionStore'
 import { collectDescendantIds, createNodeLookup } from './editorHierarchyUtils'
+import {
+  mergeObservatoryEditorSettings,
+  mergeSolitudeEditorSettings,
+} from './editorLevelSetup'
+import { editorStateStore } from './editorSessionStore'
 
 export interface EditorNodeViewportState {
   effectiveVisible: boolean
@@ -11,55 +14,69 @@ export interface EditorNodeViewportState {
   locked: boolean
 }
 
-export const editorSceneSettingsStore = derived(editorSceneStore, ($scene) => $scene?.settings ?? {})
+export const editorSceneSettingsStore = derived(
+  editorSceneStore,
+  $scene => $scene?.settings ?? {},
+)
 
 export const levelEditorSettingsStore = derived(
   editorSceneSettingsStore,
-  ($settings) => $settings.level ?? null
+  $settings => $settings.level ?? null,
 )
 
 export const observatoryEditorSettingsStore = derived(
   editorSceneSettingsStore,
-  ($settings) => mergeObservatoryEditorSettings($settings)
+  $settings => mergeObservatoryEditorSettings($settings),
 )
 
 export const solitudeEditorSettingsStore = derived(
   editorSceneSettingsStore,
-  ($settings) => mergeSolitudeEditorSettings($settings)
+  $settings => mergeSolitudeEditorSettings($settings),
 )
 
 export const selectedEditorNodeStore = derived(
   [editorStateStore, editorSceneStore],
   ([$editorStateStore, $editorSceneStore]) => {
     if (!$editorSceneStore || !$editorStateStore.selectedNodeId) return null
-    return $editorSceneStore.nodes.find((node) => node.id === $editorStateStore.selectedNodeId) ?? null
-  }
+    return (
+      $editorSceneStore.nodes.find(
+        node => node.id === $editorStateStore.selectedNodeId,
+      ) ?? null
+    )
+  },
 )
 
 export const selectedEditorNodesStore = derived(
   [editorStateStore, editorSceneStore],
   ([$editorStateStore, $editorSceneStore]) => {
-    if (!$editorSceneStore || $editorStateStore.selectedNodeIds.length === 0) return []
-    return $editorSceneStore.nodes.filter((node) => $editorStateStore.selectedNodeIds.includes(node.id))
-  }
+    if (!$editorSceneStore || $editorStateStore.selectedNodeIds.length === 0)
+      return []
+    return $editorSceneStore.nodes.filter(node =>
+      $editorStateStore.selectedNodeIds.includes(node.id),
+    )
+  },
 )
 
-export const editorNodesStore = derived(editorSceneStore, ($scene) => $scene?.nodes ?? [])
+export const editorNodesStore = derived(
+  editorSceneStore,
+  $scene => $scene?.nodes ?? [],
+)
 
-export const editorRootNodesStore = derived(
-  editorNodesStore,
-  ($nodes) => $nodes.filter((node) => !node.parentId)
+export const editorRootNodesStore = derived(editorNodesStore, $nodes =>
+  $nodes.filter(node => !node.parentId),
 )
 
 export const isolationActiveStore = derived(
   editorStateStore,
-  ($editorStateStore) => $editorStateStore.isolatedNodeIds.length > 0
+  $editorStateStore => $editorStateStore.isolatedNodeIds.length > 0,
 )
 
 export const editorNodeViewportStateStore = derived(
   [editorNodesStore, editorStateStore],
   ([$nodes, $editorStateStore]) => {
-    const isolatedNodeIds = $editorStateStore.isolatedNodeIds.filter((nodeId) => $nodes.some((node) => node.id === nodeId))
+    const isolatedNodeIds = $editorStateStore.isolatedNodeIds.filter(nodeId =>
+      $nodes.some(node => node.id === nodeId),
+    )
     const isolatedSet = new Set(isolatedNodeIds)
     const allowedSet = new Set<string>()
     const lookup = createNodeLookup($nodes)
@@ -68,7 +85,7 @@ export const editorNodeViewportStateStore = derived(
       for (const nodeId of isolatedSet) {
         allowedSet.add(nodeId)
         const descendants = collectDescendantIds($nodes, nodeId)
-        descendants.forEach((id) => allowedSet.add(id))
+        descendants.forEach(id => allowedSet.add(id))
 
         let currentParentId = lookup.get(nodeId)?.parentId ?? null
         while (currentParentId) {
@@ -79,15 +96,16 @@ export const editorNodeViewportStateStore = derived(
     }
 
     return new Map(
-      $nodes.map((node) => [
+      $nodes.map(node => [
         node.id,
         {
-          effectiveVisible: node.visible && (isolatedSet.size === 0 || allowedSet.has(node.id)),
+          effectiveVisible:
+            node.visible && (isolatedSet.size === 0 || allowedSet.has(node.id)),
           isolated: isolatedSet.has(node.id),
           dimmed: isolatedSet.size > 0 && !allowedSet.has(node.id),
           locked: node.locked ?? false,
         } satisfies EditorNodeViewportState,
-      ])
+      ]),
     )
-  }
+  },
 )

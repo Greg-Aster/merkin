@@ -1,30 +1,32 @@
-import { defineCollection } from 'astro:content'
+import { defineCollection, z } from 'astro:content'
 import {
   postsSchema,
   specSchema,
   teamSchema,
-  friendsSchema,
-  assetDataSchema,
   updatesSchema,
 } from '@merkin/blog-core/schemas/content'
 
-const posts = defineCollection({ schema: postsSchema })
-const spec = defineCollection({ schema: specSchema })
-const team = defineCollection({ schema: teamSchema })
-const friends = defineCollection({ schema: friendsSchema })
-const updates = defineCollection({ schema: updatesSchema })
+type DefinedCollection = ReturnType<typeof defineCollection>
 
-// Mirror megameal content contract for asset-style folders.
-const avatar = defineCollection({
-  type: 'data',
-  schema: assetDataSchema,
-})
+const posts: DefinedCollection = defineCollection({ schema: postsSchema })
+const spec: DefinedCollection = defineCollection({ schema: specSchema })
+const team: DefinedCollection = defineCollection({ schema: teamSchema })
+const friends: DefinedCollection = defineCollection({ schema: z.object({}) })
+const avatar: DefinedCollection = defineCollection({ schema: z.object({}) })
+const updates: DefinedCollection = defineCollection({ schema: updatesSchema })
 
-export const collections = {
+export const collections: {
+  avatar: typeof avatar
+  friends: typeof friends
+  posts: typeof posts
+  spec: typeof spec
+  team: typeof team
+  updates: typeof updates
+} = {
+  avatar,
+  friends,
   posts,
   spec,
   team,
-  friends,
   updates,
-  avatar,
 }

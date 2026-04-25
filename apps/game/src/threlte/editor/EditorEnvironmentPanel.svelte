@@ -1,32 +1,48 @@
 <script lang="ts">
-  import type {
-    EditorStylePreset,
-    ObservatoryEditorSettings,
-    SharedLevelEditorSettings,
-    SolitudeEditorSettings,
-  } from './editorTypes'
-  import {
-    observatoryAtmospherePresets,
-    solitudeAtmospherePresets,
-    solitudeAudioPresets,
-  } from './editorLevelPresets'
-  import { getSolitudeAtmosphereProfile } from '../styles/GameplayStyleProfiles'
-  import EditorAtmospherePresetPicker from './EditorAtmospherePresetPicker.svelte'
-  import EditorAmbientAudioPresetControls from './EditorAmbientAudioPresetControls.svelte'
+import { getSolitudeAtmosphereProfile } from '../styles/GameplayStyleProfiles'
+import EditorAmbientAudioPresetControls from './EditorAmbientAudioPresetControls.svelte'
+import EditorAtmospherePresetPicker from './EditorAtmospherePresetPicker.svelte'
+import {
+  observatoryAtmospherePresets,
+  solitudeAtmospherePresets,
+  solitudeAudioPresets,
+} from './editorLevelPresets'
+import type {
+  EditorStylePreset,
+  ObservatoryEditorSettings,
+  SharedLevelEditorSettings,
+  SolitudeEditorSettings,
+} from './editorTypes'
 
-  export let levelId: string
-  export let levelSettings: SharedLevelEditorSettings
-  export let effectiveObservatorySettings: ObservatoryEditorSettings
-  export let effectiveSolitudeSettings: SolitudeEditorSettings
-  export let observatoryStylePresets: EditorStylePreset[]
-  export let ambientAudioLibrary: Array<{ label: string, src: string }>
-  export let updateLevelSetting: (path: Array<string | number>, value: unknown) => void
-  export let updateLevelNumericSetting: (path: Array<string | number>, value: string) => void
-  export let updateObservatorySetting: (path: Array<string | number>, value: unknown) => void
-  export let updateObservatoryNumericSetting: (path: Array<string | number>, value: string) => void
-  export let applySolitudeAtmospherePreset: (presetId: string | undefined) => void = () => {}
+export let levelId: string
+export let levelSettings: SharedLevelEditorSettings
+export let effectiveObservatorySettings: ObservatoryEditorSettings
+export let effectiveSolitudeSettings: SolitudeEditorSettings
+export let observatoryStylePresets: EditorStylePreset[]
+export let ambientAudioLibrary: Array<{ label: string; src: string }>
+export let updateLevelSetting: (
+  path: Array<string | number>,
+  value: unknown,
+) => void
+export let updateLevelNumericSetting: (
+  path: Array<string | number>,
+  value: string,
+) => void
+export let updateObservatorySetting: (
+  path: Array<string | number>,
+  value: unknown,
+) => void
+export let updateObservatoryNumericSetting: (
+  path: Array<string | number>,
+  value: string,
+) => void
+export let applySolitudeAtmospherePreset: (
+  presetId: string | undefined,
+) => void = () => {}
 
-  $: solitudeProfile = getSolitudeAtmosphereProfile(effectiveSolitudeSettings?.presets?.atmosphere)
+$: solitudeProfile = getSolitudeAtmosphereProfile(
+  effectiveSolitudeSettings?.presets?.atmosphere,
+)
 </script>
 
 <div class="editor-section">
@@ -121,7 +137,6 @@
             <option value={preset}>{preset}</option>
           {/each}
         </select>
-        <label class="checkbox"><input type="checkbox" checked={effectiveObservatorySettings.style?.enabled ?? true} on:change={(event) => updateLevelSetting(['style', 'enabled'], (event.currentTarget as HTMLInputElement).checked)} /> Toon / Stylized Lighting</label>
         <div class="editor-field-grid editor-mt-sm">
           <label class="editor-field"><span class="editor-field-label">Fog Color</span><input class="text-input" type="color" value={effectiveObservatorySettings.style?.fog?.color ?? '#87CEEB'} on:input={(event) => updateLevelSetting(['style', 'fog', 'color'], (event.currentTarget as HTMLInputElement).value)} /></label>
           <label class="editor-field"><span class="editor-field-label">Fog Density</span><input class="tuple-input" type="number" step="0.0005" value={effectiveObservatorySettings.style?.fog?.density ?? 0.002} on:change={(event) => updateLevelNumericSetting(['style', 'fog', 'density'], (event.currentTarget as HTMLInputElement).value)} /></label>

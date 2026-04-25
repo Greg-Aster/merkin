@@ -1,24 +1,25 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte'
+import { createEventDispatcher } from 'svelte'
 
-  export interface EditorPresetOption {
-    id: string
-    label: string
-    description?: string
-  }
+export interface EditorPresetOption {
+  id: string
+  label: string
+  description?: string
+}
 
-  export let value = ''
-  export let presets: EditorPresetOption[] = []
-  export let message = ''
+export let value = ''
+export let presets: EditorPresetOption[] = []
+export let message = ''
 
-  const dispatch = createEventDispatcher<{
-    presetChange: string | undefined
-  }>()
+const dispatch = createEventDispatcher<{
+  presetChange: string | undefined
+}>()
 
-  function handlePresetChange(event: Event) {
-    const nextValue = (event.currentTarget as HTMLSelectElement).value || undefined
-    dispatch('presetChange', nextValue)
-  }
+function handlePresetChange(event: Event) {
+  const nextValue =
+    (event.currentTarget as HTMLSelectElement).value || undefined
+  dispatch('presetChange', nextValue)
+}
 </script>
 
 <select class="text-input" value={value} on:change={handlePresetChange}>

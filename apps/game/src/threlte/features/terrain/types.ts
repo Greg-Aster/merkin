@@ -2,7 +2,11 @@
  * Terrain Feature Types
  */
 
-import type { TerrainManager, TerrainConfig, TerrainChunk } from './TerrainManager'
+import type {
+  TerrainChunk,
+  TerrainConfig,
+  TerrainManager,
+} from './TerrainManager'
 
 export type { TerrainConfig, TerrainChunk }
 
@@ -11,7 +15,10 @@ export interface TerrainState {
   heightData: Float32Array | null
   resolution: number
   worldSize: number
-  bounds: { min: [number, number, number], max: [number, number, number] } | null
+  bounds: {
+    min: [number, number, number]
+    max: [number, number, number]
+  } | null
   visibleChunks: TerrainChunk[]
   manager: TerrainManager | null
   error: string | null

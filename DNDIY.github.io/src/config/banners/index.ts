@@ -32,6 +32,13 @@
 // TYPE DEFINITIONS AND INTERFACES
 // =====================================================================
 
+import * as assistantBannerModule from './assistant'
+import * as imageBannerModule from './image'
+import * as noneBannerModule from './none'
+import * as standardBannerModule from './standard'
+import * as timelineBannerModule from './timeline'
+import * as videoBannerModule from './video'
+
 // Export all type definitions for external use
 export type {
   // Core banner types
@@ -233,12 +240,12 @@ export { isNoneBannerData } from './none'
  * Useful when you need to iterate over all banner types or access them dynamically
  */
 export const allBannerConfigs = {
-  standard: standardBannerConfig,
-  video: videoBannerConfig,
-  image: imageBannerConfig,
-  timeline: timelineBannerConfig,
-  assistant: assistantBannerConfig,
-  none: noneBannerConfig,
+  standard: standardBannerModule.standardBannerConfig,
+  video: videoBannerModule.videoBannerConfig,
+  image: imageBannerModule.imageBannerConfig,
+  timeline: timelineBannerModule.timelineBannerConfig,
+  assistant: assistantBannerModule.assistantBannerConfig,
+  none: noneBannerModule.noneBannerConfig,
 } as const
 
 /**
@@ -246,12 +253,12 @@ export const allBannerConfigs = {
  * Useful for accessing raw banner data without full configuration
  */
 export const allBannerData = {
-  standard: standardBannerData,
-  video: videoBannerData,
-  image: imageBannerData,
-  timeline: timelineBannerData,
-  assistant: assistantBannerData,
-  none: noneBannerData,
+  standard: standardBannerModule.standardBannerData,
+  video: videoBannerModule.videoBannerData,
+  image: imageBannerModule.imageBannerData,
+  timeline: timelineBannerModule.timelineBannerData,
+  assistant: assistantBannerModule.assistantBannerData,
+  none: noneBannerModule.noneBannerData,
 } as const
 
 /**
@@ -259,11 +266,11 @@ export const allBannerData = {
  * Useful for dynamic type checking based on banner type strings
  */
 export const bannerTypeGuards = {
-  isVideoBannerData,
-  isImageBannerData,
-  isTimelineBannerData,
-  isAssistantBannerData,
-  isNoneBannerData,
+  isVideoBannerData: videoBannerModule.isVideoBannerData,
+  isImageBannerData: imageBannerModule.isImageBannerData,
+  isTimelineBannerData: timelineBannerModule.isTimelineBannerData,
+  isAssistantBannerData: assistantBannerModule.isAssistantBannerData,
+  isNoneBannerData: noneBannerModule.isNoneBannerData,
 } as const
 
 /**
@@ -271,12 +278,15 @@ export const bannerTypeGuards = {
  * Useful for validating banner configurations programmatically
  */
 export const bannerValidators = {
-  validateStandardBannerConfig,
-  validateVideoBannerConfig,
-  validateImageBannerConfig,
-  validateTimelineBannerConfig,
-  validateAssistantBannerConfig,
-  validateNoneBannerConfig,
+  validateStandardBannerConfig:
+    standardBannerModule.validateStandardBannerConfig,
+  validateVideoBannerConfig: videoBannerModule.validateVideoBannerConfig,
+  validateImageBannerConfig: imageBannerModule.validateImageBannerConfig,
+  validateTimelineBannerConfig:
+    timelineBannerModule.validateTimelineBannerConfig,
+  validateAssistantBannerConfig:
+    assistantBannerModule.validateAssistantBannerConfig,
+  validateNoneBannerConfig: noneBannerModule.validateNoneBannerConfig,
 } as const
 
 // =====================================================================
@@ -293,17 +303,17 @@ export const bannerValidators = {
 export function getBannerConfigByType(bannerType: string) {
   switch (bannerType) {
     case 'standard':
-      return standardBannerConfig
+      return standardBannerModule.standardBannerConfig
     case 'video':
-      return videoBannerConfig
+      return videoBannerModule.videoBannerConfig
     case 'image':
-      return imageBannerConfig
+      return imageBannerModule.imageBannerConfig
     case 'timeline':
-      return timelineBannerConfig
+      return timelineBannerModule.timelineBannerConfig
     case 'assistant':
-      return assistantBannerConfig
+      return assistantBannerModule.assistantBannerConfig
     case 'none':
-      return noneBannerConfig
+      return noneBannerModule.noneBannerConfig
     default:
       return null
   }
@@ -319,17 +329,17 @@ export function getBannerConfigByType(bannerType: string) {
 export function getBannerDataByType(bannerType: string) {
   switch (bannerType) {
     case 'standard':
-      return standardBannerData
+      return standardBannerModule.standardBannerData
     case 'video':
-      return videoBannerData
+      return videoBannerModule.videoBannerData
     case 'image':
-      return imageBannerData
+      return imageBannerModule.imageBannerData
     case 'timeline':
-      return timelineBannerData
+      return timelineBannerModule.timelineBannerData
     case 'assistant':
-      return assistantBannerData
+      return assistantBannerModule.assistantBannerData
     case 'none':
-      return noneBannerData
+      return noneBannerModule.noneBannerData
     default:
       return null
   }
@@ -345,15 +355,15 @@ export function getBannerDataByType(bannerType: string) {
 export function getTypeGuardByBannerType(bannerType: string) {
   switch (bannerType) {
     case 'video':
-      return isVideoBannerData
+      return videoBannerModule.isVideoBannerData
     case 'image':
-      return isImageBannerData
+      return imageBannerModule.isImageBannerData
     case 'timeline':
-      return isTimelineBannerData
+      return timelineBannerModule.isTimelineBannerData
     case 'assistant':
-      return isAssistantBannerData
+      return assistantBannerModule.isAssistantBannerData
     case 'none':
-      return isNoneBannerData
+      return noneBannerModule.isNoneBannerData
     case 'standard':
       // Standard banner data is just an empty object, so we can check for that
       return (data: any) =>
@@ -397,17 +407,17 @@ export function isValidBannerType(
 export function validateBannerDataByType(bannerType: string, data: any) {
   switch (bannerType) {
     case 'standard':
-      return validateStandardBannerConfig(data)
+      return standardBannerModule.validateStandardBannerConfig()
     case 'video':
-      return validateVideoBannerConfig(data)
+      return videoBannerModule.validateVideoBannerConfig(data)
     case 'image':
-      return validateImageBannerConfig(data)
+      return imageBannerModule.validateImageBannerConfig(data)
     case 'timeline':
-      return validateTimelineBannerConfig(data)
+      return timelineBannerModule.validateTimelineBannerConfig(data)
     case 'assistant':
-      return validateAssistantBannerConfig(data)
+      return assistantBannerModule.validateAssistantBannerConfig(data)
     case 'none':
-      return validateNoneBannerConfig(data)
+      return noneBannerModule.validateNoneBannerConfig(data)
     default:
       return null
   }

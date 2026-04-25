@@ -1,67 +1,69 @@
 <script lang="ts">
-  import { onMount, createEventDispatcher } from 'svelte';
-  import type { AboutConfig } from '../types/aboutconfig';
-  
-  // Props
-  export let aboutConfig: AboutConfig;
-  
-  // Event dispatcher to notify parent of changes
-  const dispatch = createEventDispatcher();
-  
-  // Local state
-  let activeSection = 'team';
-  
-  // Sections for tab navigation
-  const sections = [
-    { id: 'team', label: 'Team Section' },
-    { id: 'content', label: 'Content Section' },
-    { id: 'contact', label: 'Contact Section' }
-  ];
-  
-  // Function to notify parent of changes
-  function notifyChanges() {
-    dispatch('change');
+import { createEventDispatcher, onMount } from 'svelte'
+import type { AboutConfig } from '../types/aboutconfig'
+
+// Props
+export let aboutConfig: AboutConfig
+
+// Event dispatcher to notify parent of changes
+const dispatch = createEventDispatcher()
+
+// Local state
+let activeSection = 'team'
+
+// Sections for tab navigation
+const sections = [
+  { id: 'team', label: 'Team Section' },
+  { id: 'content', label: 'Content Section' },
+  { id: 'contact', label: 'Contact Section' },
+]
+
+// Function to notify parent of changes
+function notifyChanges() {
+  dispatch('change')
+}
+
+// Function to toggle a section's enabled status
+function toggleSection(section: keyof AboutConfig) {
+  aboutConfig[section].enabled = !aboutConfig[section].enabled
+  notifyChanges()
+}
+
+// Function to update display order for contact section
+function updateDisplayOrder() {
+  notifyChanges()
+}
+
+// Function to move item up in display order
+function moveUp(index: number) {
+  if (index > 0) {
+    const temp = aboutConfig.contact.displayOrder[index]
+    aboutConfig.contact.displayOrder[index] =
+      aboutConfig.contact.displayOrder[index - 1]
+    aboutConfig.contact.displayOrder[index - 1] = temp
+    notifyChanges()
   }
-  
-  // Function to toggle a section's enabled status
-  function toggleSection(section: keyof AboutConfig) {
-    aboutConfig[section].enabled = !aboutConfig[section].enabled;
-    notifyChanges();
+}
+
+// Function to move item down in display order
+function moveDown(index: number) {
+  if (index < aboutConfig.contact.displayOrder.length - 1) {
+    const temp = aboutConfig.contact.displayOrder[index]
+    aboutConfig.contact.displayOrder[index] =
+      aboutConfig.contact.displayOrder[index + 1]
+    aboutConfig.contact.displayOrder[index + 1] = temp
+    notifyChanges()
   }
-  
-  // Function to update display order for contact section
-  function updateDisplayOrder() {
-    notifyChanges();
-  }
-  
-  // Function to move item up in display order
-  function moveUp(index: number) {
-    if (index > 0) {
-      const temp = aboutConfig.contact.displayOrder[index];
-      aboutConfig.contact.displayOrder[index] = aboutConfig.contact.displayOrder[index - 1];
-      aboutConfig.contact.displayOrder[index - 1] = temp;
-      notifyChanges();
-    }
-  }
-  
-  // Function to move item down in display order
-  function moveDown(index: number) {
-    if (index < aboutConfig.contact.displayOrder.length - 1) {
-      const temp = aboutConfig.contact.displayOrder[index];
-      aboutConfig.contact.displayOrder[index] = aboutConfig.contact.displayOrder[index + 1];
-      aboutConfig.contact.displayOrder[index + 1] = temp;
-      notifyChanges();
-    }
-  }
-  
-  // Display names for order items
-  const displayNames = {
-    'description': 'Description Text',
-    'email': 'Email Address',
-    'phone': 'Phone Number',
-    'address': 'Physical Address',
-    'hours': 'Office Hours'
-  };
+}
+
+// Display names for order items
+const displayNames = {
+  description: 'Description Text',
+  email: 'Email Address',
+  phone: 'Phone Number',
+  address: 'Physical Address',
+  hours: 'Office Hours',
+}
 </script>
 
 <div class="about-config-tab">
@@ -101,9 +103,7 @@
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Section Title
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Section Title</div>
             <input 
               type="text" 
               bind:value={aboutConfig.team.title} 
@@ -113,9 +113,7 @@
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Description
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</div>
             <textarea 
               bind:value={aboutConfig.team.description} 
               on:input={notifyChanges}
@@ -126,9 +124,7 @@
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Layout Style
-              </label>
+              <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Layout Style</div>
               <select 
                 bind:value={aboutConfig.team.layout} 
                 on:change={notifyChanges}
@@ -141,9 +137,7 @@
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Avatar Shape
-              </label>
+              <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Avatar Shape</div>
               <select 
                 bind:value={aboutConfig.team.avatarShape} 
                 on:change={notifyChanges}
@@ -157,14 +151,10 @@
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Columns
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Columns</div>
             <div class="grid grid-cols-3 gap-4">
               <div>
-                <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">
-                  Mobile
-                </label>
+                <div class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Mobile</div>
                 <input 
                   type="number" 
                   min="1" 
@@ -175,9 +165,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">
-                  Tablet
-                </label>
+                <div class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Tablet</div>
                 <input 
                   type="number" 
                   min="1" 
@@ -188,9 +176,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">
-                  Desktop
-                </label>
+                <div class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Desktop</div>
                 <input 
                   type="number" 
                   min="1" 
@@ -245,9 +231,7 @@
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Default Title
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Default Title</div>
             <input 
               type="text" 
               bind:value={aboutConfig.content.defaultTitle} 
@@ -302,9 +286,7 @@
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Section Title
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Section Title</div>
             <input 
               type="text" 
               bind:value={aboutConfig.contact.title} 
@@ -314,9 +296,7 @@
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Description
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</div>
             <textarea 
               bind:value={aboutConfig.contact.description} 
               on:input={notifyChanges}
@@ -331,9 +311,7 @@ Contact Information</h4>
           
           <!-- Email Input -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Email Address
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Email Address</div>
             <input 
               type="email" 
               bind:value={aboutConfig.contact.contactInfo.email} 
@@ -344,9 +322,7 @@ Contact Information</h4>
           
           <!-- Phone Input (Optional) -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Phone Number (Optional)
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Phone Number (Optional)</div>
             <input 
               type="text" 
               bind:value={aboutConfig.contact.contactInfo.phone} 
@@ -357,9 +333,7 @@ Contact Information</h4>
           
           <!-- Address Input (Optional) -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Address (Optional)
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Address (Optional)</div>
             <textarea 
               bind:value={aboutConfig.contact.contactInfo.address} 
               on:input={notifyChanges}
@@ -370,9 +344,7 @@ Contact Information</h4>
           
           <!-- Hours Input (Optional) -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Hours (Optional)
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Hours (Optional)</div>
             <input 
               type="text" 
               bind:value={aboutConfig.contact.contactInfo.hours} 
@@ -403,6 +375,7 @@ Display Order</h4>
                     <button 
                       class="p-1 text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 disabled:opacity-30"
                       on:click={() => moveUp(index)}
+                      aria-label={`Move ${displayNames[item] || item} up`}
                       disabled={index === 0}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -412,6 +385,7 @@ Display Order</h4>
                     <button 
                       class="p-1 text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 disabled:opacity-30"
                       on:click={() => moveDown(index)}
+                      aria-label={`Move ${displayNames[item] || item} down`}
                       disabled={index === aboutConfig.contact.displayOrder.length - 1}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -433,9 +407,7 @@ Display Order</h4>
           
           <!-- Add item to display order if missing -->
           <div class="mt-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Add Item to Display
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Add Item to Display</div>
             <div class="flex space-x-2">
               <select 
                 id="add-display-item" 

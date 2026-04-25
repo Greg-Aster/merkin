@@ -1,192 +1,230 @@
 <script>
-  import { createEventDispatcher, onMount } from 'svelte';
-  
-  // Props
-  export let profileConfig;
-  export let avatarConfig;
-  
-  // Local state
-  let editingSocial = null;
-  let showSocialEditor = false;
-  let isAvatarSequence = false;
-  let avatarCount = 0;
-  let selectedAvatarIndex = 0;
-  
-  // Event dispatcher
-  const dispatch = createEventDispatcher();
-  
-  // Common social media platforms with icons
-  const socialPlatforms = [
-    { name: 'Twitter', icon: 'fa6-brands:twitter', prefix: 'https://twitter.com/' },
-    { name: 'GitHub', icon: 'fa6-brands:github', prefix: 'https://github.com/' },
-    { name: 'LinkedIn', icon: 'fa6-brands:linkedin', prefix: 'https://linkedin.com/in/' },
-    { name: 'Instagram', icon: 'fa6-brands:instagram', prefix: 'https://instagram.com/' },
-    { name: 'YouTube', icon: 'fa6-brands:youtube', prefix: 'https://youtube.com/' },
-    { name: 'Facebook', icon: 'fa6-brands:facebook', prefix: 'https://facebook.com/' },
-    { name: 'Discord', icon: 'fa6-brands:discord', prefix: '' },
-    { name: 'Twitch', icon: 'fa6-brands:twitch', prefix: 'https://twitch.tv/' },
-    { name: 'Reddit', icon: 'fa6-brands:reddit', prefix: 'https://reddit.com/user/' },
-    { name: 'Medium', icon: 'fa6-brands:medium', prefix: 'https://medium.com/@' },
-    { name: 'Dev.to', icon: 'fa6-brands:dev', prefix: 'https://dev.to/' },
-    { name: 'Patreon', icon: 'fa6-brands:patreon', prefix: 'https://patreon.com/' },
-    { name: 'Ko-fi', icon: 'fa6-brands:kofi', prefix: 'https://ko-fi.com/' },
-    { name: 'Bluesky', icon: 'fa6-brands:bluesky', prefix: 'https://bsky.app/profile/' },
-    { name: 'Mastodon', icon: 'fa6-brands:mastodon', prefix: '' },
-    { name: 'Email', icon: 'fa6-solid:envelope', prefix: 'mailto:' },
-    { name: 'Website', icon: 'fa6-solid:globe', prefix: 'https://' },
-    { name: 'Custom', icon: 'fa6-solid:link', prefix: '' }
-  ];
-  
-  // Function to add a social link
-  function addSocialLink() {
-    editingSocial = {
-      isNew: true,
-      data: {
-        name: '',
-        icon: '',
-        url: ''
-      },
-      platformIndex: null
-    };
-    showSocialEditor = true;
-  }
-  
-  // Function to edit a social link
-  function editSocialLink(index) {
-    editingSocial = {
-      isNew: false,
-      index: index,
-      data: { ...profileConfig.links[index] },
-      platformIndex: null
-    };
-    
-    // Try to find the platform index
-    const platform = socialPlatforms.findIndex(p => p.icon === profileConfig.links[index].icon);
-    if (platform !== -1) {
-      editingSocial.platformIndex = platform;
-    }
-    
-    showSocialEditor = true;
-  }
-  
-  // Function to save social link
-  function saveSocialLink() {
-    // Update icon if platform selected
-    if (editingSocial.platformIndex !== null) {
-      editingSocial.data.icon = socialPlatforms[editingSocial.platformIndex].icon;
-      
-      // If it's a new link and name is empty, use platform name
-      if (editingSocial.isNew && !editingSocial.data.name.trim()) {
-        editingSocial.data.name = socialPlatforms[editingSocial.platformIndex].name;
-      }
-    }
-    
-    if (editingSocial.isNew) {
-      // Add new social link
-      profileConfig.links = [...profileConfig.links, editingSocial.data];
-    } else {
-      // Update existing link
-      const newLinks = [...profileConfig.links];
-      newLinks[editingSocial.index] = editingSocial.data;
-      profileConfig.links = newLinks;
-    }
-    
-    showSocialEditor = false;
-    dispatch('change', profileConfig);
-  }
-  
-  // Function to delete social link
-  function deleteSocialLink(index) {
-    if (confirm(`Are you sure you want to delete the "${profileConfig.links[index].name}" social link?`)) {
-      profileConfig.links = profileConfig.links.filter((_, i) => i !== index);
-      dispatch('change', profileConfig);
-    }
-  }
-  
-  // Avatar Functions
-  
-  // Initialize from avatarConfig on mount
-  onMount(() => {
-    // Initialize avatarConfig if it doesn't exist
-    if (!avatarConfig) {
-      avatarConfig = {
-        avatarList: [],
-        homeAvatar: '',
-        animationInterval: 3500
-      };
-    }
-    
-    // Check if we have a sequence or single avatar
-    if (avatarConfig && avatarConfig.avatarList) {
-      isAvatarSequence = avatarConfig.avatarList.length > 1;
-      avatarCount = avatarConfig.avatarList.length;
-      
-      // Set the selected avatar index to match the home avatar
-      if (isAvatarSequence && avatarConfig.homeAvatar) {
-        const homeAvatarPath = avatarConfig.homeAvatar.toString();
-        const foundIndex = avatarConfig.avatarList.findIndex(avatar => 
-          avatar.toString() === homeAvatarPath
-        );
-        if (foundIndex >= 0) {
-          selectedAvatarIndex = foundIndex;
-        }
-      }
-      
-      // Make sure profile avatar matches home avatar
-      if (avatarConfig.homeAvatar) {
-        profileConfig.avatar = avatarConfig.homeAvatar;
-      }
-    }
-  });
+import { createEventDispatcher, onMount } from 'svelte'
 
-  // Function to update animation interval
-  function updateAnimationInterval() {
-    dispatch('avatarChange', avatarConfig);
+// Props
+export let profileConfig
+export let avatarConfig
+
+// Local state
+let editingSocial = null
+let showSocialEditor = false
+let isAvatarSequence = false
+let avatarCount = 0
+let selectedAvatarIndex = 0
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Common social media platforms with icons
+const socialPlatforms = [
+  {
+    name: 'Twitter',
+    icon: 'fa6-brands:twitter',
+    prefix: 'https://twitter.com/',
+  },
+  { name: 'GitHub', icon: 'fa6-brands:github', prefix: 'https://github.com/' },
+  {
+    name: 'LinkedIn',
+    icon: 'fa6-brands:linkedin',
+    prefix: 'https://linkedin.com/in/',
+  },
+  {
+    name: 'Instagram',
+    icon: 'fa6-brands:instagram',
+    prefix: 'https://instagram.com/',
+  },
+  {
+    name: 'YouTube',
+    icon: 'fa6-brands:youtube',
+    prefix: 'https://youtube.com/',
+  },
+  {
+    name: 'Facebook',
+    icon: 'fa6-brands:facebook',
+    prefix: 'https://facebook.com/',
+  },
+  { name: 'Discord', icon: 'fa6-brands:discord', prefix: '' },
+  { name: 'Twitch', icon: 'fa6-brands:twitch', prefix: 'https://twitch.tv/' },
+  {
+    name: 'Reddit',
+    icon: 'fa6-brands:reddit',
+    prefix: 'https://reddit.com/user/',
+  },
+  { name: 'Medium', icon: 'fa6-brands:medium', prefix: 'https://medium.com/@' },
+  { name: 'Dev.to', icon: 'fa6-brands:dev', prefix: 'https://dev.to/' },
+  {
+    name: 'Patreon',
+    icon: 'fa6-brands:patreon',
+    prefix: 'https://patreon.com/',
+  },
+  { name: 'Ko-fi', icon: 'fa6-brands:kofi', prefix: 'https://ko-fi.com/' },
+  {
+    name: 'Bluesky',
+    icon: 'fa6-brands:bluesky',
+    prefix: 'https://bsky.app/profile/',
+  },
+  { name: 'Mastodon', icon: 'fa6-brands:mastodon', prefix: '' },
+  { name: 'Email', icon: 'fa6-solid:envelope', prefix: 'mailto:' },
+  { name: 'Website', icon: 'fa6-solid:globe', prefix: 'https://' },
+  { name: 'Custom', icon: 'fa6-solid:link', prefix: '' },
+]
+
+// Function to add a social link
+function addSocialLink() {
+  editingSocial = {
+    isNew: true,
+    data: {
+      name: '',
+      icon: '',
+      url: '',
+    },
+    platformIndex: null,
   }
-  
-  // Function to toggle avatar type
-  function toggleAvatarType() {
-    isAvatarSequence = !isAvatarSequence;
-    if (!isAvatarSequence) {
-      // If switching to single avatar, set avatarList to just the home avatar
-      avatarConfig.avatarList = [avatarConfig.homeAvatar];
-    }
+  showSocialEditor = true
+}
+
+// Function to edit a social link
+function editSocialLink(index) {
+  editingSocial = {
+    isNew: false,
+    index: index,
+    data: { ...profileConfig.links[index] },
+    platformIndex: null,
   }
-  
-  // Function to remove avatar
-  function removeAvatar() {
-    if (confirm('Are you sure you want to remove your avatar?')) {
-      profileConfig.avatar = '';
-      dispatch('change', profileConfig);
-      
-      // Reset avatar config
-      avatarConfig.homeAvatar = '';
-      avatarConfig.avatarList = [];
-      isAvatarSequence = false;
-      avatarCount = 0;
-      dispatch('avatarChange', avatarConfig);
-    }
+
+  // Try to find the platform index
+  const platform = socialPlatforms.findIndex(
+    p => p.icon === profileConfig.links[index].icon,
+  )
+  if (platform !== -1) {
+    editingSocial.platformIndex = platform
   }
-  
-  // Function to select an avatar from the sequence
-  function selectAvatar(index) {
-    selectedAvatarIndex = index;
-    // Update the home avatar
-    avatarConfig.homeAvatar = avatarConfig.avatarList[index];
-    dispatch('avatarChange', avatarConfig);
-  }
-  
-  // Update selected platform
-  function updateSelectedPlatform(event) {
-    const selectedIndex = parseInt(event.target.value);
-    editingSocial.platformIndex = selectedIndex;
-    
-    // Pre-fill URL with prefix if it's empty or new
-    if (editingSocial.isNew || !editingSocial.data.url) {
-      editingSocial.data.url = socialPlatforms[selectedIndex].prefix;
+
+  showSocialEditor = true
+}
+
+// Function to save social link
+function saveSocialLink() {
+  // Update icon if platform selected
+  if (editingSocial.platformIndex !== null) {
+    editingSocial.data.icon = socialPlatforms[editingSocial.platformIndex].icon
+
+    // If it's a new link and name is empty, use platform name
+    if (editingSocial.isNew && !editingSocial.data.name.trim()) {
+      editingSocial.data.name =
+        socialPlatforms[editingSocial.platformIndex].name
     }
   }
 
+  if (editingSocial.isNew) {
+    // Add new social link
+    profileConfig.links = [...profileConfig.links, editingSocial.data]
+  } else {
+    // Update existing link
+    const newLinks = [...profileConfig.links]
+    newLinks[editingSocial.index] = editingSocial.data
+    profileConfig.links = newLinks
+  }
+
+  showSocialEditor = false
+  dispatch('change', profileConfig)
+}
+
+// Function to delete social link
+function deleteSocialLink(index) {
+  if (
+    confirm(
+      `Are you sure you want to delete the "${profileConfig.links[index].name}" social link?`,
+    )
+  ) {
+    profileConfig.links = profileConfig.links.filter((_, i) => i !== index)
+    dispatch('change', profileConfig)
+  }
+}
+
+// Avatar Functions
+
+// Initialize from avatarConfig on mount
+onMount(() => {
+  // Initialize avatarConfig if it doesn't exist
+  if (!avatarConfig) {
+    avatarConfig = {
+      avatarList: [],
+      homeAvatar: '',
+      animationInterval: 3500,
+    }
+  }
+
+  // Check if we have a sequence or single avatar
+  if (avatarConfig && avatarConfig.avatarList) {
+    isAvatarSequence = avatarConfig.avatarList.length > 1
+    avatarCount = avatarConfig.avatarList.length
+
+    // Set the selected avatar index to match the home avatar
+    if (isAvatarSequence && avatarConfig.homeAvatar) {
+      const homeAvatarPath = avatarConfig.homeAvatar.toString()
+      const foundIndex = avatarConfig.avatarList.findIndex(
+        avatar => avatar.toString() === homeAvatarPath,
+      )
+      if (foundIndex >= 0) {
+        selectedAvatarIndex = foundIndex
+      }
+    }
+
+    // Make sure profile avatar matches home avatar
+    if (avatarConfig.homeAvatar) {
+      profileConfig.avatar = avatarConfig.homeAvatar
+    }
+  }
+})
+
+// Function to update animation interval
+function updateAnimationInterval() {
+  dispatch('avatarChange', avatarConfig)
+}
+
+// Function to toggle avatar type
+function toggleAvatarType() {
+  isAvatarSequence = !isAvatarSequence
+  if (!isAvatarSequence) {
+    // If switching to single avatar, set avatarList to just the home avatar
+    avatarConfig.avatarList = [avatarConfig.homeAvatar]
+  }
+}
+
+// Function to remove avatar
+function removeAvatar() {
+  if (confirm('Are you sure you want to remove your avatar?')) {
+    profileConfig.avatar = ''
+    dispatch('change', profileConfig)
+
+    // Reset avatar config
+    avatarConfig.homeAvatar = ''
+    avatarConfig.avatarList = []
+    isAvatarSequence = false
+    avatarCount = 0
+    dispatch('avatarChange', avatarConfig)
+  }
+}
+
+// Function to select an avatar from the sequence
+function selectAvatar(index) {
+  selectedAvatarIndex = index
+  // Update the home avatar
+  avatarConfig.homeAvatar = avatarConfig.avatarList[index]
+  dispatch('avatarChange', avatarConfig)
+}
+
+// Update selected platform
+function updateSelectedPlatform(event) {
+  const selectedIndex = parseInt(event.target.value)
+  editingSocial.platformIndex = selectedIndex
+
+  // Pre-fill URL with prefix if it's empty or new
+  if (editingSocial.isNew || !editingSocial.data.url) {
+    editingSocial.data.url = socialPlatforms[selectedIndex].prefix
+  }
+}
 </script>
 
 <div class="profile-config-tab">

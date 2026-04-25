@@ -1,4 +1,8 @@
-import type { EditorPrimitiveData, EditorRigidBodyType, EditorSceneNode } from './editorTypes'
+import type {
+  EditorPrimitiveData,
+  EditorRigidBodyType,
+  EditorSceneNode,
+} from './editorTypes'
 
 type TextureField =
   | 'mapUrl'
@@ -14,7 +18,16 @@ type LibraryItem = {
   isDirectory: boolean
 }
 
-type EditorPanelTab = 'workflow' | 'scene' | 'environment' | 'create' | 'hierarchy' | 'inspect' | 'style' | 'ai' | 'save'
+type EditorPanelTab =
+  | 'workflow'
+  | 'scene'
+  | 'environment'
+  | 'create'
+  | 'hierarchy'
+  | 'inspect'
+  | 'style'
+  | 'ai'
+  | 'save'
 
 type InspectorControllerDeps = {
   getSelectedNode: () => EditorSceneNode | null
@@ -25,10 +38,16 @@ type InspectorControllerDeps = {
   selectEditorNode: (nodeId: string) => void
   setSaveMessage: (message: string) => void
   updateNodeStyleDescriptor: (nodeId: string, value: string) => void
-  getNodeVisualColliderSize: (node: EditorSceneNode | null) => [number, number, number]
+  getNodeVisualColliderSize: (
+    node: EditorSceneNode | null,
+  ) => [number, number, number]
 
   getTextureBrowserPath: () => string
-  getTextureBrowserItems: () => Array<{ name: string; path: string; isDirectory: boolean }>
+  getTextureBrowserItems: () => Array<{
+    name: string
+    path: string
+    isDirectory: boolean
+  }>
   getTextureBrowserLoading: () => boolean
   getActiveTextureMaterialField: () => TextureField | null
   setActiveTextureMaterialField: (field: TextureField | null) => void
@@ -45,7 +64,10 @@ type InspectorControllerDeps = {
   setActiveEditorTab: (tab: EditorPanelTab) => void
   setHunyuanSelectionKey: (value: string) => void
   setLastInspectedHunyuanAsset: (value: string) => void
-  inspectSelectedAssetForHunyuan: (assetUrl: string, selectionKey: string) => Promise<unknown>
+  inspectSelectedAssetForHunyuan: (
+    assetUrl: string,
+    selectionKey: string,
+  ) => Promise<unknown>
   setSelectedGeneratedVariantUrl: (assetUrl: string) => void
   setHunyuanLastOutputUrl: (assetUrl: string) => void
 }
@@ -61,9 +83,15 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     ]
   }
 
-  function resolveInitialAssetBrowserDirectory(preferredRoot: string, assetUrl: string) {
-    const matchingAssetPath = resolveWorkspaceAssetCandidates(assetUrl)
-      .find((candidate) => candidate === preferredRoot || candidate.startsWith(`${preferredRoot}/`))
+  function resolveInitialAssetBrowserDirectory(
+    preferredRoot: string,
+    assetUrl: string,
+  ) {
+    const matchingAssetPath = resolveWorkspaceAssetCandidates(assetUrl).find(
+      candidate =>
+        candidate === preferredRoot ||
+        candidate.startsWith(`${preferredRoot}/`),
+    )
 
     if (!matchingAssetPath) {
       return {
@@ -81,8 +109,13 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
   function updateParent(nextParentId: string) {
     const selectedNodes = deps.getSelectedNodes()
     if (selectedNodes.length === 0) return
-    const applied = deps.reparentNodes(selectedNodes.map((node) => node.id), nextParentId || null)
-    deps.setSaveMessage(applied ? 'Hierarchy updated' : 'Invalid parent relationship')
+    const applied = deps.reparentNodes(
+      selectedNodes.map(node => node.id),
+      nextParentId || null,
+    )
+    deps.setSaveMessage(
+      applied ? 'Hierarchy updated' : 'Invalid parent relationship',
+    )
   }
 
   function goUpTextureBrowser() {
@@ -94,15 +127,15 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
 
   function openTexturePicker(field: TextureField) {
     deps.setActiveTextureMaterialField(field)
-    if (deps.getTextureBrowserItems().length === 0 && !deps.getTextureBrowserLoading()) {
+    if (
+      deps.getTextureBrowserItems().length === 0 &&
+      !deps.getTextureBrowserLoading()
+    ) {
       void deps.loadTextureBrowser(deps.getTextureBrowserPath())
     }
   }
 
-  function updateNodeMaterialTextureField(
-    field: TextureField,
-    value: string
-  ) {
+  function updateNodeMaterialTextureField(field: TextureField, value: string) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode) return
     deps.patchNode(selectedNode.id, {
@@ -113,10 +146,13 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     })
   }
 
-  function applyTextureFromBrowser(item: { name: string, path: string }) {
+  function applyTextureFromBrowser(item: { name: string; path: string }) {
     const activeTextureMaterialField = deps.getActiveTextureMaterialField()
     if (!activeTextureMaterialField) return
-    updateNodeMaterialTextureField(activeTextureMaterialField, deps.resolvePublicAssetUrl(item.path, item.name))
+    updateNodeMaterialTextureField(
+      activeTextureMaterialField,
+      deps.resolvePublicAssetUrl(item.path, item.name),
+    )
     deps.setActiveTextureMaterialField(null)
   }
 
@@ -149,14 +185,14 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
   async function openAssetPickerForSelectedNode(preferredRoot: string) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode?.asset) {
-      deps.setSaveMessage('Select an asset node before choosing a replacement asset')
+      deps.setSaveMessage(
+        'Select an asset node before choosing a replacement asset',
+      )
       return
     }
 
-    const { directoryPath, selectedAssetPath } = resolveInitialAssetBrowserDirectory(
-      preferredRoot,
-      selectedNode.asset.url,
-    )
+    const { directoryPath, selectedAssetPath } =
+      resolveInitialAssetBrowserDirectory(preferredRoot, selectedNode.asset.url)
 
     deps.setAssetPickerTargetNodeId(selectedNode.id)
     deps.setSelectedLibraryItem(null)
@@ -165,7 +201,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
 
     const items = await deps.loadAssetBrowser(directoryPath)
     const currentAssetItem = selectedAssetPath
-      ? items.find((item) => !item.isDirectory && item.path === selectedAssetPath)
+      ? items.find(item => !item.isDirectory && item.path === selectedAssetPath)
       : null
 
     if (currentAssetItem) {
@@ -183,7 +219,9 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     const assetPickerTargetNodeId = deps.getAssetPickerTargetNodeId()
     const selectedLibraryItem = deps.getSelectedLibraryItem()
     if (!assetPickerTargetNodeId) {
-      deps.setSaveMessage('No target object is waiting for an asset replacement')
+      deps.setSaveMessage(
+        'No target object is waiting for an asset replacement',
+      )
       return
     }
     if (!selectedLibraryItem || selectedLibraryItem.isDirectory) {
@@ -191,14 +229,21 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
       return
     }
 
-    const targetNode = deps.getEditorNodes().find((node) => node.id === assetPickerTargetNodeId)
+    const targetNode = deps
+      .getEditorNodes()
+      .find(node => node.id === assetPickerTargetNodeId)
     if (!targetNode?.asset) {
-      deps.setSaveMessage('The target object is no longer available for asset replacement')
+      deps.setSaveMessage(
+        'The target object is no longer available for asset replacement',
+      )
       deps.setAssetPickerTargetNodeId('')
       return
     }
 
-    const url = deps.resolvePublicAssetUrl(selectedLibraryItem.path, selectedLibraryItem.name)
+    const url = deps.resolvePublicAssetUrl(
+      selectedLibraryItem.path,
+      selectedLibraryItem.name,
+    )
     deps.patchNode(targetNode.id, {
       asset: {
         ...targetNode.asset,
@@ -208,7 +253,9 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
 
     deps.selectEditorNode(targetNode.id)
     deps.setAssetPickerTargetNodeId('')
-    deps.setSaveMessage(`Replaced ${targetNode.name} with ${selectedLibraryItem.name}`)
+    deps.setSaveMessage(
+      `Replaced ${targetNode.name} with ${selectedLibraryItem.name}`,
+    )
     void deps.inspectSelectedAssetForHunyuan(url, targetNode.id)
   }
 
@@ -220,7 +267,9 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
   function applyGeneratedVariantToSelectedNode(assetUrl: string) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode?.asset) {
-      deps.setSaveMessage('Select a generated asset node before applying a variant.')
+      deps.setSaveMessage(
+        'Select a generated asset node before applying a variant.',
+      )
       return
     }
     if (!assetUrl) return
@@ -295,8 +344,19 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
   }
 
   function updateNodeMaterialNumericField(
-    field: 'emissiveIntensity' | 'metalness' | 'roughness' | 'opacity' | 'envMapIntensity' | 'transmission' | 'ior' | 'clearcoat' | 'clearcoatRoughness' | 'thickness' | 'reflectivity',
-    value: string
+    field:
+      | 'emissiveIntensity'
+      | 'metalness'
+      | 'roughness'
+      | 'opacity'
+      | 'envMapIntensity'
+      | 'transmission'
+      | 'ior'
+      | 'clearcoat'
+      | 'clearcoatRoughness'
+      | 'thickness'
+      | 'reflectivity',
+    value: string,
   ) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode) return
@@ -312,7 +372,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
 
   function updateNodeMaterialBooleanField(
     field: 'transparent' | 'wireframe' | 'doubleSided' | 'flatShading',
-    value: boolean
+    value: boolean,
   ) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode) return
@@ -338,7 +398,9 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
       collision: value
         ? {
             shape: 'cuboid',
-            size: selectedNode.collision?.size ?? deps.getNodeVisualColliderSize(selectedNode),
+            size:
+              selectedNode.collision?.size ??
+              deps.getNodeVisualColliderSize(selectedNode),
             friction: selectedNode.collision?.friction ?? 0.7,
             restitution: selectedNode.collision?.restitution ?? 0,
             sensor: selectedNode.collision?.sensor ?? false,
@@ -347,7 +409,10 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     })
   }
 
-  function updateCollisionNumericField(field: 'friction' | 'restitution', value: string) {
+  function updateCollisionNumericField(
+    field: 'friction' | 'restitution',
+    value: string,
+  ) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode?.collision) return
     const numeric = Number(value)
@@ -366,7 +431,11 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     if (!selectedNode?.collision) return
     const numeric = Number(value)
     if (Number.isNaN(numeric)) return
-    const size = [...(selectedNode.collision.size ?? [1, 1, 1])] as [number, number, number]
+    const size = [...(selectedNode.collision.size ?? [1, 1, 1])] as [
+      number,
+      number,
+      number,
+    ]
     size[index] = Math.max(0.05, numeric)
 
     deps.patchNode(selectedNode.id, {
@@ -415,7 +484,10 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     })
   }
 
-  function updatePhysicsNumericField(field: 'gravityScale' | 'linearDamping' | 'angularDamping', value: string) {
+  function updatePhysicsNumericField(
+    field: 'gravityScale' | 'linearDamping' | 'angularDamping',
+    value: string,
+  ) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode) return
     const numeric = Number(value)
@@ -428,7 +500,10 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     })
   }
 
-  function updatePhysicsBooleanField(field: 'canSleep' | 'ccd' | 'lockRotations' | 'lockTranslations', value: boolean) {
+  function updatePhysicsBooleanField(
+    field: 'canSleep' | 'ccd' | 'lockRotations' | 'lockTranslations',
+    value: boolean,
+  ) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode) return
     deps.patchNode(selectedNode.id, {
@@ -476,7 +551,10 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     })
   }
 
-  function updateLightNumericField(field: 'intensity' | 'distance' | 'decay', value: string) {
+  function updateLightNumericField(
+    field: 'intensity' | 'distance' | 'decay',
+    value: string,
+  ) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode?.light) return
     const numeric = Number(value)
@@ -489,7 +567,20 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     })
   }
 
-  function updateGameplayField(field: 'title' | 'author' | 'location' | 'excerpt' | 'body' | 'targetLevelId' | 'markerColor' | 'audioTrack' | 'fogColor' | 'mistColor', value: string) {
+  function updateGameplayField(
+    field:
+      | 'title'
+      | 'author'
+      | 'location'
+      | 'excerpt'
+      | 'body'
+      | 'targetLevelId'
+      | 'markerColor'
+      | 'audioTrack'
+      | 'fogColor'
+      | 'mistColor',
+    value: string,
+  ) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode?.gameplay) return
     deps.patchNode(selectedNode.id, {
@@ -511,7 +602,30 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     })
   }
 
-  function updateGameplayNumericField(field: 'markerSize' | 'audioVolume' | 'regionFalloff' | 'fogDensity' | 'mistOpacity' | 'mistLayers' | 'mistSpacing' | 'mistScale' | 'mistDriftSpeed' | 'wanderRadius' | 'wanderSpeed' | 'hoverHeight' | 'bobAmplitude' | 'bobSpeed' | 'twinkleSpeed' | 'lightIntensity' | 'lightDistance' | 'lightDecay' | 'spriteIntensity', value: string) {
+  function updateGameplayNumericField(
+    field:
+      | 'markerSize'
+      | 'audioVolume'
+      | 'regionFalloff'
+      | 'fogDensity'
+      | 'mistOpacity'
+      | 'mistLayers'
+      | 'mistSpacing'
+      | 'mistScale'
+      | 'mistDriftSpeed'
+      | 'wanderRadius'
+      | 'wanderSpeed'
+      | 'hoverHeight'
+      | 'bobAmplitude'
+      | 'bobSpeed'
+      | 'twinkleSpeed'
+      | 'lightIntensity'
+      | 'lightDistance'
+      | 'lightDecay'
+      | 'spriteIntensity'
+      | 'lightBurstBoost',
+    value: string,
+  ) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode?.gameplay) return
     const numeric = Number(value)

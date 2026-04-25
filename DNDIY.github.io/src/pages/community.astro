@@ -1,9 +1,9 @@
 ---
-import MainGridLayout from '../layouts/MainGridLayout.astro';
-import { i18n } from '../i18n/translation';
-import I18nKey from '../i18n/i18nKey';
-import { Icon } from 'astro-icon/components';
-import { communityConfig } from '../config/community.config';
+import { Icon } from 'astro-icon/components'
+import { communityConfig } from '../config/community.config'
+import I18nKey from '../i18n/i18nKey'
+import { i18n } from '../i18n/translation'
+import MainGridLayout from '../layouts/MainGridLayout.astro'
 ---
 
 <MainGridLayout title={i18n(I18nKey.community) || "Our Community"} description={i18n(I18nKey.community) || "Join our community through multiple channels"}>

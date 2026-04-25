@@ -7,7 +7,7 @@ export const es: Translation = {
   [Key.archive]: 'Archivo',
   [Key.community]: 'Comunidad',
   [Key.search]: 'Buscar',
-  
+
   [Key.configs]: 'Configuraciones',
   [Key.friends]: 'Amigos',
   [Key.newPost]: 'Nueva Publicación',

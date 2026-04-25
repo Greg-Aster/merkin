@@ -63,6 +63,35 @@ function ensureDirectory(directoryPath) {
   }
 }
 
+function getEditorScenePath(levelId) {
+  return path.join(EDITOR_SCENES_ROOT, `${levelId}.scene.json`);
+}
+
+function listEditorSceneBackupFilenames(levelId) {
+  if (!fs.existsSync(EDITOR_SCENES_ROOT)) return [];
+
+  const prefix = `${levelId}.scene.`;
+  return fs
+    .readdirSync(EDITOR_SCENES_ROOT)
+    .filter(filename => filename.startsWith(prefix) && filename.endsWith('.json'))
+    .filter(filename => filename !== `${levelId}.scene.json`)
+    .sort((left, right) => right.localeCompare(left));
+}
+
+function getLatestEditorSceneBackupPath(levelId) {
+  const [latestBackup] = listEditorSceneBackupFilenames(levelId);
+  if (!latestBackup) return null;
+  return path.join(EDITOR_SCENES_ROOT, latestBackup);
+}
+
+function getOriginalEditorSceneSnapshotPath(levelId) {
+  const originalSnapshot = listEditorSceneBackupFilenames(levelId).find((filename) =>
+    filename.includes('.original-packaged.'),
+  );
+  if (!originalSnapshot) return null;
+  return path.join(EDITOR_SCENES_ROOT, originalSnapshot);
+}
+
 function formatBytes(size = 0) {
   if (!Number.isFinite(size) || size <= 0) return '0 B';
   if (size < 1024) return `${size} B`;
@@ -3405,13 +3434,30 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/api/editor-scene/load' && req.method === 'GET') {
     try {
       const levelId = parsedUrl.query.levelId;
+      const snapshotMode = parsedUrl.query.snapshot;
       if (!levelId) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, message: 'levelId is required' }));
         return;
       }
 
-      const scenePath = path.join(EDITOR_SCENES_ROOT, `${levelId}.scene.json`);
+      const scenePath =
+        snapshotMode === 'latest-backup'
+          ? getLatestEditorSceneBackupPath(levelId)
+          : snapshotMode === 'original-packaged'
+            ? getOriginalEditorSceneSnapshotPath(levelId)
+          : getEditorScenePath(levelId);
+
+      if (
+        (snapshotMode === 'latest-backup' ||
+          snapshotMode === 'original-packaged') &&
+        !scenePath
+      ) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, scene: null, snapshotFile: null }));
+        return;
+      }
+
       if (!scenePath.startsWith(EDITOR_SCENES_ROOT)) {
         res.writeHead(403, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, message: 'Access denied' }));
@@ -3426,7 +3472,15 @@ const server = http.createServer(async (req, res) => {
 
       const scene = JSON.parse(fs.readFileSync(scenePath, 'utf8'));
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: true, scene }));
+      res.end(JSON.stringify({
+        success: true,
+        scene,
+        snapshotFile:
+          snapshotMode === 'latest-backup' ||
+          snapshotMode === 'original-packaged'
+            ? path.basename(scenePath)
+            : null,
+      }));
     } catch (error) {
       console.error('Editor scene load error:', error);
       res.writeHead(500, { 'Content-Type': 'application/json' });

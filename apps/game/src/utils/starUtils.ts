@@ -1,6 +1,12 @@
 // src/utils/starUtils.ts
 // Shared utilities between StarMapView and StarNode components
 
+declare global {
+  interface Window {
+    THREE?: unknown
+  }
+}
+
 export const ERA_COLORS = {
   'ancient-epoch': '#3b82f6',
   'awakening-era': '#8b5cf6',
@@ -366,7 +372,7 @@ export function createEnhancedStarTexture(
       ctx.stroke()
       break
 
-    case 'halo':
+    case 'halo': {
       // Multiple halos
       const haloRings = [
         { radius: finalRadius * 1.2, opacity: 1 },
@@ -385,6 +391,7 @@ export function createEnhancedStarTexture(
         ctx.fill()
       })
       break
+    }
 
     default: // subtle
       ctx.fillStyle = color

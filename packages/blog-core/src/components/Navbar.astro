@@ -21,8 +21,9 @@ let links: NavBarLink[] = navBarConfig.links.map(
   },
 )
 
-// Check authentication status from cookies
-const isAuthenticated = Astro.cookies.get('isAuthenticated')?.boolean() || false;
+// Prerendered pages cannot read per-request auth state during static builds.
+// Admin auth is already derived from localStorage on the client.
+const isAuthenticated = false
 ---
 
 <div id="navbar" class="z-50 onload-animation">
@@ -135,6 +136,22 @@ function loadButtonScript() {
                 menuPanel.classList.toggle("float-panel-closed");
             }
         });
+    }
+
+    const hasValidAuth = () => {
+        const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+        const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0');
+        if (!isAuthenticated || !expiresAt || Date.now() >= expiresAt) {
+            localStorage.removeItem('isAuthenticated');
+            localStorage.removeItem('authExpiresAt');
+            return false;
+        }
+        return true;
+    };
+
+    const standardNav = document.getElementById('standard-nav');
+    if (standardNav) {
+        standardNav.style.display = hasValidAuth() ? 'none' : '';
     }
 }
 

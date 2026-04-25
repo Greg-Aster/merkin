@@ -1,20 +1,20 @@
 <script>
-    export let addonsConfig;
-    
-    // Initialize addons config structure if it doesn't exist
-    if (!addonsConfig) {
-      addonsConfig = {
-        enabled: false,
-        availableAddons: [],
-        installedAddons: []
-      };
-    }
-    
-    // Function to toggle addons system
-    function toggleAddons() {
-      addonsConfig.enabled = !addonsConfig.enabled;
-    }
-  </script>
+export let addonsConfig
+
+// Initialize addons config structure if it doesn't exist
+if (!addonsConfig) {
+  addonsConfig = {
+    enabled: false,
+    availableAddons: [],
+    installedAddons: [],
+  }
+}
+
+// Function to toggle addons system
+function toggleAddons() {
+  addonsConfig.enabled = !addonsConfig.enabled
+}
+</script>
   
   <div class="space-y-6">
     <div class="card-base p-6">

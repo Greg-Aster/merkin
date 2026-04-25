@@ -1,234 +1,269 @@
 <script lang="ts">
-  import { onDestroy, onMount, createEventDispatcher, getContext } from 'svelte'
-  import { T, useThrelte } from '@threlte/core'
-  import * as THREE from 'three'
-  import type { SystemRegistry } from '../core/LevelSystem'
-  import { qualityLevelStore, qualitySettingsStore } from '../features/performance/stores/performanceStore'
-  import { shouldEnableSceneShadows } from '../features/performance/utils/runtimeSceneBudget'
-  import {
-    createToonGradientMap,
-    findClosestPaletteColor,
-    getPalette,
-    type ColorPalette,
-    type StylePreset,
-  } from './StylePalettes'
+import { T, useThrelte } from '@threlte/core'
+import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte'
+import * as THREE from 'three'
+import type { SystemRegistry } from '../core/LevelSystem'
+import {
+  qualityLevelStore,
+  qualitySettingsStore,
+} from '../features/performance/stores/performanceStore'
+import { shouldEnableSceneShadows } from '../features/performance/utils/runtimeSceneBudget'
+import {
+  type ColorPalette,
+  type StylePreset,
+  createToonGradientMap,
+  findClosestPaletteColor,
+  getPalette,
+} from './StylePalettes'
 
-  type MaterialSet = THREE.Material | THREE.Material[]
-  type ChildObjectEvent = THREE.Event & { child?: THREE.Object3D }
+type MaterialSet = THREE.Material | THREE.Material[]
+type ChildObjectEvent = THREE.Event & { child?: THREE.Object3D }
 
-  const dispatch = createEventDispatcher()
-  const registry = getContext<SystemRegistry | undefined>('systemRegistry')
-  const { scene, renderer } = useThrelte()
-  const isDev = import.meta.env.DEV
+const dispatch = createEventDispatcher()
+const registry = getContext<SystemRegistry | undefined>('systemRegistry')
+const { scene, renderer } = useThrelte()
+const isDev = import.meta.env.DEV
 
-  export let stylePreset: StylePreset = 'site'
-  export let enableOutlines = true
-  export let enableToonShading = true
-  export let flattenMaterials = true
-  export let usePaintedOutlines = true
-  export let outlineThickness = 0.03
-  export let outlineOpacity = 0.88
+export let stylePreset: StylePreset = 'site'
+export let enableOutlines = true
+export let enableToonShading = false
+export let flattenMaterials = true
+export let usePaintedOutlines = true
+export let outlineThickness = 0.03
+export let outlineOpacity = 0.88
 
-  export let enableStyleLighting = true
-  export let enableStyleFog = true
-  export let ambientColor = ''
-  export let ambientIntensity = 10.4
-  export let sunIntensity = 0.8
-  export let fillIntensity = 0.3
-  export let toneMappingExposure = 1.2
+export let enableStyleLighting = true
+export let enableStyleFog = true
+export let ambientColor = ''
+export let ambientIntensity = 10.4
+export let sunIntensity = 0.8
+export let fillIntensity = 0.3
+export let toneMappingExposure = 1.2
 
-  let isInitialized = false
-  let currentPalette: ColorPalette = getPalette(stylePreset)
-  let toonGradientMap: THREE.Texture | null = null
-  const originalMaterials = new Map<string, MaterialSet>()
-  const processedMaterials = new Map<string, MaterialSet>()
-  const outlineShells = new Map<string, THREE.Mesh>()
-  const watchedObjects = new Map<
-    THREE.Object3D,
-    {
-      onChildAdded: (event: THREE.Event) => void
-      onChildRemoved: (event: THREE.Event) => void
-    }
-  >()
+let isInitialized = false
+let currentPalette: ColorPalette = getPalette(stylePreset)
+let toonGradientMap: THREE.Texture | null = null
+const originalMaterials = new Map<string, MaterialSet>()
+const processedMaterials = new Map<string, MaterialSet>()
+const outlineShells = new Map<string, THREE.Mesh>()
+const watchedObjects = new Map<
+  THREE.Object3D,
+  {
+    onChildAdded: (event: THREE.Event) => void
+    onChildRemoved: (event: THREE.Event) => void
+  }
+>()
 
-  function disposeMaterialSet(materialSet: MaterialSet) {
-    if (Array.isArray(materialSet)) {
-      materialSet.forEach((material) => material.dispose())
-      return
-    }
-
-    materialSet.dispose()
+function disposeMaterialSet(materialSet: MaterialSet) {
+  if (Array.isArray(materialSet)) {
+    materialSet.forEach(material => material.dispose())
+    return
   }
 
-  function resolveAmbientColor() {
-    if (!ambientColor) return currentPalette.ambient
+  materialSet.dispose()
+}
 
-    try {
-      return new THREE.Color(ambientColor)
-    } catch (error) {
-      console.warn('Failed to resolve custom ambient color for render style:', error)
-      return currentPalette.ambient
-    }
+function resolveAmbientColor() {
+  if (!ambientColor) return currentPalette.ambient
+
+  try {
+    return new THREE.Color(ambientColor)
+  } catch (error) {
+    console.warn(
+      'Failed to resolve custom ambient color for render style:',
+      error,
+    )
+    return currentPalette.ambient
+  }
+}
+
+function setupRenderer() {
+  if (!renderer) return
+
+  renderer.toneMapping = THREE.ACESFilmicToneMapping
+  renderer.toneMappingExposure = toneMappingExposure
+  renderer.shadowMap.enabled = shouldEnableSceneShadows(
+    $qualityLevelStore,
+    $qualitySettingsStore,
+  )
+  if (renderer.shadowMap.enabled) {
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+  }
+  renderer.outputColorSpace = THREE.SRGBColorSpace
+  renderer.setClearColor(currentPalette.sky, 1.0)
+}
+
+function rebuildGradientMap() {
+  toonGradientMap?.dispose()
+  toonGradientMap = createToonGradientMap(
+    currentPalette.shadow,
+    currentPalette.sun,
+  )
+}
+
+function getMaterialKey(mesh: THREE.Mesh) {
+  return `${mesh.uuid}:material`
+}
+
+function getOutlineKey(mesh: THREE.Mesh) {
+  return `${mesh.uuid}:outline`
+}
+
+function shouldSkipRenderStyle(object: THREE.Object3D | null | undefined) {
+  let current: THREE.Object3D | null | undefined = object
+
+  while (current) {
+    if (current.userData?.renderStyleSkip) return true
+    current = current.parent
   }
 
-  function setupRenderer() {
-    if (!renderer) return
+  return false
+}
 
-    renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = toneMappingExposure
-    renderer.shadowMap.enabled = shouldEnableSceneShadows($qualityLevelStore, $qualitySettingsStore)
-    if (renderer.shadowMap.enabled) {
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap
-    }
-    renderer.outputColorSpace = THREE.SRGBColorSpace
-    renderer.setClearColor(currentPalette.sky, 1.0)
+function getBaseColorFromObjectName(objectName: string) {
+  const normalizedName = objectName.toLowerCase()
+
+  if (
+    normalizedName.includes('tree') ||
+    normalizedName.includes('birch') ||
+    normalizedName.includes('maple')
+  ) {
+    return currentPalette.trees.clone()
   }
 
-  function rebuildGradientMap() {
-    toonGradientMap?.dispose()
-    toonGradientMap = createToonGradientMap(currentPalette.shadow, currentPalette.sun)
+  if (
+    normalizedName.includes('grass') ||
+    normalizedName.includes('lawn') ||
+    normalizedName.includes('fern')
+  ) {
+    return currentPalette.grass.clone()
   }
 
-  function getMaterialKey(mesh: THREE.Mesh) {
-    return `${mesh.uuid}:material`
+  if (normalizedName.includes('flower') || normalizedName.includes('petal')) {
+    return currentPalette.flowers.clone()
   }
 
-  function getOutlineKey(mesh: THREE.Mesh) {
-    return `${mesh.uuid}:outline`
+  if (
+    normalizedName.includes('water') ||
+    normalizedName.includes('ocean') ||
+    normalizedName.includes('lake')
+  ) {
+    return currentPalette.water.clone()
   }
 
-  function shouldSkipRenderStyle(object: THREE.Object3D | null | undefined) {
-    let current: THREE.Object3D | null | undefined = object
-
-    while (current) {
-      if (current.userData?.renderStyleSkip) return true
-      current = current.parent
-    }
-
-    return false
+  if (normalizedName.includes('sky') || normalizedName.includes('cloud')) {
+    return currentPalette.skyGradient.clone()
   }
 
-  function getBaseColorFromObjectName(objectName: string) {
-    const normalizedName = objectName.toLowerCase()
+  return currentPalette.earth.clone()
+}
 
-    if (normalizedName.includes('tree') || normalizedName.includes('birch') || normalizedName.includes('maple')) {
-      return currentPalette.trees.clone()
-    }
+function getNormalizedMaterialColor(
+  material: THREE.Material,
+  objectName: string,
+) {
+  const candidateMaterial = material as THREE.Material & {
+    color?: THREE.Color | string | number
+  }
+  const fallbackColor = getBaseColorFromObjectName(objectName)
 
-    if (normalizedName.includes('grass') || normalizedName.includes('lawn') || normalizedName.includes('fern')) {
-      return currentPalette.grass.clone()
-    }
-
-    if (normalizedName.includes('flower') || normalizedName.includes('petal')) {
-      return currentPalette.flowers.clone()
-    }
-
-    if (normalizedName.includes('water') || normalizedName.includes('ocean') || normalizedName.includes('lake')) {
-      return currentPalette.water.clone()
-    }
-
-    if (normalizedName.includes('sky') || normalizedName.includes('cloud')) {
-      return currentPalette.skyGradient.clone()
-    }
-
-    return currentPalette.earth.clone()
+  if (!candidateMaterial.color) {
+    return fallbackColor
   }
 
-  function getNormalizedMaterialColor(material: THREE.Material, objectName: string) {
-    const candidateMaterial = material as THREE.Material & { color?: THREE.Color | string | number }
-    const fallbackColor = getBaseColorFromObjectName(objectName)
+  try {
+    const sourceColor =
+      candidateMaterial.color instanceof THREE.Color
+        ? candidateMaterial.color
+        : new THREE.Color(candidateMaterial.color as string | number)
+    const paletteColor = findClosestPaletteColor(sourceColor, currentPalette)
+    return flattenMaterials
+      ? paletteColor.clone().lerp(sourceColor, 0.12)
+      : paletteColor.clone().lerp(sourceColor, 0.32)
+  } catch (error) {
+    console.warn('Failed to normalize material color for render style:', error)
+    return fallbackColor
+  }
+}
 
-    if (!candidateMaterial.color) {
-      return fallbackColor
-    }
-
-    try {
-      const sourceColor =
-        candidateMaterial.color instanceof THREE.Color
-          ? candidateMaterial.color
-          : new THREE.Color(candidateMaterial.color as string | number)
-      const paletteColor = findClosestPaletteColor(sourceColor, currentPalette)
-      return flattenMaterials
-        ? paletteColor.clone().lerp(sourceColor, 0.12)
-        : paletteColor.clone().lerp(sourceColor, 0.32)
-    } catch (error) {
-      console.warn('Failed to normalize material color for render style:', error)
-      return fallbackColor
-    }
+function shouldKeepColorMap(material: THREE.Material) {
+  const candidateMaterial = material as THREE.Material & {
+    map?: THREE.Texture | null
   }
 
-  function shouldKeepColorMap(material: THREE.Material) {
-    const candidateMaterial = material as THREE.Material & {
-      map?: THREE.Texture | null
-    }
+  if (!candidateMaterial.map) return false
+  return true
+}
 
-    if (!candidateMaterial.map) return false
-    return true
+function createStylizedMaterial(
+  originalMaterial: THREE.Material,
+  objectName: string,
+) {
+  const sourceMaterial = originalMaterial as THREE.Material & {
+    color?: THREE.Color
+    map?: THREE.Texture | null
+    normalMap?: THREE.Texture | null
+    alphaMap?: THREE.Texture | null
+    emissive?: THREE.Color
+    emissiveMap?: THREE.Texture | null
+    emissiveIntensity?: number
+    transparent?: boolean
+    opacity?: number
+    alphaTest?: number
+    side?: THREE.Side
+    aoMap?: THREE.Texture | null
+    flatShading?: boolean
   }
 
-  function createStylizedMaterial(originalMaterial: THREE.Material, objectName: string) {
-    const sourceMaterial = originalMaterial as THREE.Material & {
-      color?: THREE.Color
-      map?: THREE.Texture | null
-      normalMap?: THREE.Texture | null
-      alphaMap?: THREE.Texture | null
-      emissive?: THREE.Color
-      emissiveMap?: THREE.Texture | null
-      emissiveIntensity?: number
-      transparent?: boolean
-      opacity?: number
-      alphaTest?: number
-      side?: THREE.Side
-      aoMap?: THREE.Texture | null
-      flatShading?: boolean
-    }
+  const toonMaterial = new THREE.MeshToonMaterial({
+    color: getNormalizedMaterialColor(originalMaterial, objectName),
+    map: shouldKeepColorMap(originalMaterial)
+      ? sourceMaterial.map ?? null
+      : null,
+    normalMap: flattenMaterials ? null : sourceMaterial.normalMap ?? null,
+    alphaMap: sourceMaterial.alphaMap ?? null,
+    transparent: sourceMaterial.transparent ?? false,
+    opacity: sourceMaterial.opacity ?? 1,
+    alphaTest: sourceMaterial.alphaTest ?? 0,
+    side: sourceMaterial.side ?? THREE.FrontSide,
+    aoMap: sourceMaterial.aoMap ?? null,
+    emissive: sourceMaterial.emissive ?? new THREE.Color(0x000000),
+    emissiveMap: sourceMaterial.emissiveMap ?? null,
+    emissiveIntensity: sourceMaterial.emissiveIntensity ?? 0,
+    gradientMap: toonGradientMap,
+    fog: true,
+  })
 
-    const toonMaterial = new THREE.MeshToonMaterial({
-      color: getNormalizedMaterialColor(originalMaterial, objectName),
-      map: shouldKeepColorMap(originalMaterial) ? sourceMaterial.map ?? null : null,
-      normalMap: flattenMaterials ? null : sourceMaterial.normalMap ?? null,
-      alphaMap: sourceMaterial.alphaMap ?? null,
-      transparent: sourceMaterial.transparent ?? false,
-      opacity: sourceMaterial.opacity ?? 1,
-      alphaTest: sourceMaterial.alphaTest ?? 0,
-      side: sourceMaterial.side ?? THREE.FrontSide,
-      aoMap: sourceMaterial.aoMap ?? null,
-      emissive: sourceMaterial.emissive ?? new THREE.Color(0x000000),
-      emissiveMap: sourceMaterial.emissiveMap ?? null,
-      emissiveIntensity: sourceMaterial.emissiveIntensity ?? 0,
-      gradientMap: toonGradientMap,
-      fog: true,
-    })
+  toonMaterial.dithering = true
+  toonMaterial.flatShading =
+    flattenMaterials || Boolean(sourceMaterial.flatShading)
 
-    toonMaterial.dithering = true
-    toonMaterial.flatShading = flattenMaterials || Boolean(sourceMaterial.flatShading)
+  return toonMaterial
+}
 
-    return toonMaterial
-  }
+function createPaintedOutlineMaterial() {
+  const outlineMaterial = new THREE.MeshBasicMaterial({
+    color: currentPalette.outline.clone(),
+    side: THREE.BackSide,
+    transparent: true,
+    opacity: outlineOpacity,
+    depthWrite: false,
+    depthTest: true,
+    toneMapped: false,
+    fog: true,
+  })
 
-  function createPaintedOutlineMaterial() {
-    const outlineMaterial = new THREE.MeshBasicMaterial({
-      color: currentPalette.outline.clone(),
-      side: THREE.BackSide,
-      transparent: true,
-      opacity: outlineOpacity,
-      depthWrite: false,
-      depthTest: true,
-      toneMapped: false,
-      fog: true,
-    })
-
-    if (usePaintedOutlines) {
-      outlineMaterial.onBeforeCompile = (shader) => {
-        shader.vertexShader = shader.vertexShader
-          .replace(
-            '#include <common>',
-            `#include <common>
-            varying vec3 vRenderStyleWorldPosition;`
-          )
-          .replace(
-            '#include <worldpos_vertex>',
-            `#include <worldpos_vertex>
+  if (usePaintedOutlines) {
+    outlineMaterial.onBeforeCompile = shader => {
+      shader.vertexShader = shader.vertexShader
+        .replace(
+          '#include <common>',
+          `#include <common>
+            varying vec3 vRenderStyleWorldPosition;`,
+        )
+        .replace(
+          '#include <worldpos_vertex>',
+          `#include <worldpos_vertex>
             vec4 renderStyleWorldPosition = vec4( transformed, 1.0 );
             #ifdef USE_BATCHING
               renderStyleWorldPosition = batchingMatrix * renderStyleWorldPosition;
@@ -237,307 +272,322 @@
               renderStyleWorldPosition = instanceMatrix * renderStyleWorldPosition;
             #endif
             renderStyleWorldPosition = modelMatrix * renderStyleWorldPosition;
-            vRenderStyleWorldPosition = renderStyleWorldPosition.xyz;`
-          )
+            vRenderStyleWorldPosition = renderStyleWorldPosition.xyz;`,
+        )
 
-        shader.fragmentShader = shader.fragmentShader
-          .replace(
-            '#include <common>',
-            `#include <common>
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          '#include <common>',
+          `#include <common>
             varying vec3 vRenderStyleWorldPosition;
             float renderStyleNoise(vec2 value) {
               return fract(sin(dot(value, vec2(12.9898, 78.233))) * 43758.5453123);
-            }`
-          )
-          .replace(
-            'vec4 diffuseColor = vec4( diffuse, opacity );',
-            `vec4 diffuseColor = vec4( diffuse, opacity );
+            }`,
+        )
+        .replace(
+          'vec4 diffuseColor = vec4( diffuse, opacity );',
+          `vec4 diffuseColor = vec4( diffuse, opacity );
             float brushNoise = renderStyleNoise(floor(vRenderStyleWorldPosition.xz * 10.0));
-            diffuseColor.a *= mix(0.78, 1.0, brushNoise);`
-          )
-      }
-
-      outlineMaterial.customProgramCacheKey = () => 'render-style-painted-outline'
+            diffuseColor.a *= mix(0.78, 1.0, brushNoise);`,
+        )
     }
 
-    return outlineMaterial
+    outlineMaterial.customProgramCacheKey = () => 'render-style-painted-outline'
   }
 
-  function applyMaterialStyling(mesh: THREE.Mesh) {
-    if (shouldSkipRenderStyle(mesh)) return
-    if (mesh.userData.renderStyleOutline) return
+  return outlineMaterial
+}
 
-    const materialKey = getMaterialKey(mesh)
-    if (!originalMaterials.has(materialKey)) {
-      originalMaterials.set(materialKey, mesh.material)
-    }
+function applyMaterialStyling(mesh: THREE.Mesh) {
+  if (shouldSkipRenderStyle(mesh)) return
+  if (mesh.userData.renderStyleOutline) return
 
-    const existingProcessed = processedMaterials.get(materialKey)
-    if (existingProcessed) {
-      disposeMaterialSet(existingProcessed)
-      processedMaterials.delete(materialKey)
-    }
-
-    if (!enableToonShading) {
-      const originalMaterial = originalMaterials.get(materialKey)
-      if (originalMaterial) {
-        mesh.material = originalMaterial
-      }
-      return
-    }
-
-    const nextMaterial = Array.isArray(mesh.material)
-      ? mesh.material.map((material) => createStylizedMaterial(material, mesh.name))
-      : createStylizedMaterial(mesh.material, mesh.name)
-
-    mesh.material = nextMaterial
-    processedMaterials.set(materialKey, nextMaterial)
-    mesh.frustumCulled = true
-    mesh.castShadow = shouldEnableSceneShadows($qualityLevelStore, $qualitySettingsStore)
-    mesh.receiveShadow = shouldEnableSceneShadows($qualityLevelStore, $qualitySettingsStore)
+  const materialKey = getMaterialKey(mesh)
+  if (!originalMaterials.has(materialKey)) {
+    originalMaterials.set(materialKey, mesh.material)
   }
 
-  function removeOutlineShell(mesh: THREE.Mesh) {
-    const outlineKey = getOutlineKey(mesh)
-    const existingShell = outlineShells.get(outlineKey)
-    if (!existingShell) return
-
-    existingShell.removeFromParent()
-    if (existingShell.material instanceof THREE.Material) {
-      existingShell.material.dispose()
-    }
-    outlineShells.delete(outlineKey)
+  const existingProcessed = processedMaterials.get(materialKey)
+  if (existingProcessed) {
+    disposeMaterialSet(existingProcessed)
+    processedMaterials.delete(materialKey)
   }
 
-  function applyOutlineShell(mesh: THREE.Mesh) {
-    const skinnedMesh = mesh as THREE.Mesh & { isSkinnedMesh?: boolean }
-    if (!enableOutlines || shouldSkipRenderStyle(mesh) || mesh.userData.renderStyleOutline || skinnedMesh.isSkinnedMesh) {
-      removeOutlineShell(mesh)
-      return
+  if (!enableToonShading) {
+    const originalMaterial = originalMaterials.get(materialKey)
+    if (originalMaterial) {
+      mesh.material = originalMaterial
     }
+    return
+  }
 
+  const nextMaterial = Array.isArray(mesh.material)
+    ? mesh.material.map(material => createStylizedMaterial(material, mesh.name))
+    : createStylizedMaterial(mesh.material, mesh.name)
+
+  mesh.material = nextMaterial
+  processedMaterials.set(materialKey, nextMaterial)
+  mesh.frustumCulled = true
+  mesh.castShadow = shouldEnableSceneShadows(
+    $qualityLevelStore,
+    $qualitySettingsStore,
+  )
+  mesh.receiveShadow = shouldEnableSceneShadows(
+    $qualityLevelStore,
+    $qualitySettingsStore,
+  )
+}
+
+function removeOutlineShell(mesh: THREE.Mesh) {
+  const outlineKey = getOutlineKey(mesh)
+  const existingShell = outlineShells.get(outlineKey)
+  if (!existingShell) return
+
+  existingShell.removeFromParent()
+  if (existingShell.material instanceof THREE.Material) {
+    existingShell.material.dispose()
+  }
+  outlineShells.delete(outlineKey)
+}
+
+function applyOutlineShell(mesh: THREE.Mesh) {
+  const skinnedMesh = mesh as THREE.Mesh & { isSkinnedMesh?: boolean }
+  if (
+    !enableOutlines ||
+    shouldSkipRenderStyle(mesh) ||
+    mesh.userData.renderStyleOutline ||
+    skinnedMesh.isSkinnedMesh
+  ) {
     removeOutlineShell(mesh)
-
-    const outlineMaterial = createPaintedOutlineMaterial()
-    const outlineShell = new THREE.Mesh(mesh.geometry, outlineMaterial)
-    outlineShell.name = `${mesh.name || mesh.uuid}__renderStyleOutline`
-    outlineShell.userData.renderStyleOutline = true
-    outlineShell.renderOrder = (mesh.renderOrder ?? 0) - 1
-    outlineShell.frustumCulled = mesh.frustumCulled
-    outlineShell.position.set(0, 0, 0)
-    outlineShell.rotation.set(0, 0, 0)
-    outlineShell.scale.setScalar(1 + outlineThickness)
-
-    // Outline shells are visual-only and should never capture interactions.
-    outlineShell.raycast = () => null
-
-    mesh.add(outlineShell)
-    outlineShells.set(getOutlineKey(mesh), outlineShell)
+    return
   }
 
-  function restoreOriginalSceneMaterials() {
-    if (!scene) return
+  removeOutlineShell(mesh)
 
-    scene.traverse((object) => {
-      if (!(object instanceof THREE.Mesh) || object.userData.renderStyleOutline) return
+  const outlineMaterial = createPaintedOutlineMaterial()
+  const outlineShell = new THREE.Mesh(mesh.geometry, outlineMaterial)
+  outlineShell.name = `${mesh.name || mesh.uuid}__renderStyleOutline`
+  outlineShell.userData.renderStyleOutline = true
+  outlineShell.renderOrder = (mesh.renderOrder ?? 0) - 1
+  outlineShell.frustumCulled = mesh.frustumCulled
+  outlineShell.position.set(0, 0, 0)
+  outlineShell.rotation.set(0, 0, 0)
+  outlineShell.scale.setScalar(1 + outlineThickness)
 
-      const materialKey = getMaterialKey(object)
-      const originalMaterial = originalMaterials.get(materialKey)
-      if (originalMaterial) {
-        object.material = originalMaterial
-      }
+  // Outline shells are visual-only and should never capture interactions.
+  outlineShell.raycast = () => null
 
-      removeOutlineShell(object)
-    })
-  }
+  mesh.add(outlineShell)
+  outlineShells.set(getOutlineKey(mesh), outlineShell)
+}
 
-  function disposeProcessedMaterials() {
-    processedMaterials.forEach((materialSet) => {
-      disposeMaterialSet(materialSet)
-    })
-    processedMaterials.clear()
-  }
+function restoreOriginalSceneMaterials() {
+  if (!scene) return
 
-  function applyStyleToScene() {
-    if (!scene) return
+  scene.traverse(object => {
+    if (!(object instanceof THREE.Mesh) || object.userData.renderStyleOutline)
+      return
 
-    scene.traverse((object) => {
-      if (!(object instanceof THREE.Mesh)) return
-      if (object.userData.renderStyleOutline) return
-
-      applyMaterialStyling(object)
-      applyOutlineShell(object)
-    })
-  }
-
-  function watchObject(object: THREE.Object3D) {
-    if (watchedObjects.has(object)) return
-
-    const onChildAdded = (event: THREE.Event) => {
-      const { child } = event as ChildObjectEvent
-      if (!child || child.userData.renderStyleOutline) return
-
-      styleNewObject(child)
-      watchObjectTree(child)
+    const materialKey = getMaterialKey(object)
+    const originalMaterial = originalMaterials.get(materialKey)
+    if (originalMaterial) {
+      object.material = originalMaterial
     }
 
-    const onChildRemoved = (event: THREE.Event) => {
-      const { child } = event as ChildObjectEvent
-      if (!child) return
-      unwatchObjectTree(child)
-    }
+    removeOutlineShell(object)
+  })
+}
 
-    object.addEventListener('childadded', onChildAdded)
-    object.addEventListener('childremoved', onChildRemoved)
-    watchedObjects.set(object, { onChildAdded, onChildRemoved })
+function disposeProcessedMaterials() {
+  processedMaterials.forEach(materialSet => {
+    disposeMaterialSet(materialSet)
+  })
+  processedMaterials.clear()
+}
+
+function applyStyleToScene() {
+  if (!scene) return
+
+  scene.traverse(object => {
+    if (!(object instanceof THREE.Mesh)) return
+    if (object.userData.renderStyleOutline) return
+
+    applyMaterialStyling(object)
+    applyOutlineShell(object)
+  })
+}
+
+function watchObject(object: THREE.Object3D) {
+  if (watchedObjects.has(object)) return
+
+  const onChildAdded = (event: THREE.Event) => {
+    const { child } = event as ChildObjectEvent
+    if (!child || child.userData.renderStyleOutline) return
+
+    styleNewObject(child)
+    watchObjectTree(child)
   }
 
-  function watchObjectTree(root: THREE.Object3D) {
-    watchObject(root)
-    root.traverse((object) => {
-      if (object === root) return
-      watchObject(object)
-    })
+  const onChildRemoved = (event: THREE.Event) => {
+    const { child } = event as ChildObjectEvent
+    if (!child) return
+    unwatchObjectTree(child)
   }
 
-  function unwatchObject(object: THREE.Object3D) {
-    const listeners = watchedObjects.get(object)
-    if (!listeners) return
+  object.addEventListener('childadded', onChildAdded)
+  object.addEventListener('childremoved', onChildRemoved)
+  watchedObjects.set(object, { onChildAdded, onChildRemoved })
+}
 
-    object.removeEventListener('childadded', listeners.onChildAdded)
-    object.removeEventListener('childremoved', listeners.onChildRemoved)
-    watchedObjects.delete(object)
-  }
+function watchObjectTree(root: THREE.Object3D) {
+  watchObject(root)
+  root.traverse(object => {
+    if (object === root) return
+    watchObject(object)
+  })
+}
 
-  function unwatchObjectTree(root: THREE.Object3D) {
-    const objects: THREE.Object3D[] = [root]
-    root.traverse((object) => {
-      if (object === root) return
-      objects.push(object)
-    })
+function unwatchObject(object: THREE.Object3D) {
+  const listeners = watchedObjects.get(object)
+  if (!listeners) return
 
-    objects.reverse().forEach(unwatchObject)
-  }
+  object.removeEventListener('childadded', listeners.onChildAdded)
+  object.removeEventListener('childremoved', listeners.onChildRemoved)
+  watchedObjects.delete(object)
+}
 
-  function registerWithLevelSystem() {
-    registry?.sendMessage({
-      type: 'STYLE_SYSTEM_READY' as any,
-      source: 'render-style-system',
-      data: {
-        palette: currentPalette,
-        preset: stylePreset,
-        flattenMaterials,
-        paintedOutlines: usePaintedOutlines,
-      },
-      timestamp: Date.now(),
-      priority: 'normal',
-    })
-  }
+function unwatchObjectTree(root: THREE.Object3D) {
+  const objects: THREE.Object3D[] = [root]
+  root.traverse(object => {
+    if (object === root) return
+    objects.push(object)
+  })
 
-  function notifyStyleChanged() {
-    dispatch('styleChanged', {
+  objects.reverse().forEach(unwatchObject)
+}
+
+function registerWithLevelSystem() {
+  registry?.sendMessage({
+    type: 'STYLE_SYSTEM_READY' as any,
+    source: 'render-style-system',
+    data: {
       palette: currentPalette,
       preset: stylePreset,
       flattenMaterials,
       paintedOutlines: usePaintedOutlines,
-    })
+    },
+    timestamp: Date.now(),
+    priority: 'normal',
+  })
+}
 
-    registry?.sendMessage({
-      type: 'STYLE_CHANGED' as any,
-      source: 'render-style-system',
-      data: {
-        palette: currentPalette,
-        preset: stylePreset,
-        flattenMaterials,
-        paintedOutlines: usePaintedOutlines,
-      },
-      timestamp: Date.now(),
-      priority: 'high',
-    })
-  }
+function notifyStyleChanged() {
+  dispatch('styleChanged', {
+    palette: currentPalette,
+    preset: stylePreset,
+    flattenMaterials,
+    paintedOutlines: usePaintedOutlines,
+  })
 
-  function updateSceneStyle() {
-    if (!scene || !renderer) return
-
-    currentPalette = getPalette(stylePreset)
-    setupRenderer()
-    rebuildGradientMap()
-    restoreOriginalSceneMaterials()
-    disposeProcessedMaterials()
-    applyStyleToScene()
-    notifyStyleChanged()
-  }
-
-  function initializeStyleSystem() {
-    if (!scene || !renderer) {
-      console.warn('RenderStyleSystem could not initialize because scene or renderer is unavailable.')
-      return
-    }
-
-    currentPalette = getPalette(stylePreset)
-    setupRenderer()
-    rebuildGradientMap()
-    applyStyleToScene()
-    watchObjectTree(scene)
-    registerWithLevelSystem()
-
-    isInitialized = true
-
-    if (isDev) {
-      console.log('🎨 RenderStyleSystem initialized', {
-        preset: stylePreset,
-        flattenMaterials,
-        usePaintedOutlines,
-      })
-    }
-
-    dispatch('styleSystemReady', {
+  registry?.sendMessage({
+    type: 'STYLE_CHANGED' as any,
+    source: 'render-style-system',
+    data: {
       palette: currentPalette,
       preset: stylePreset,
+      flattenMaterials,
+      paintedOutlines: usePaintedOutlines,
+    },
+    timestamp: Date.now(),
+    priority: 'high',
+  })
+}
+
+function updateSceneStyle() {
+  if (!scene || !renderer) return
+
+  currentPalette = getPalette(stylePreset)
+  setupRenderer()
+  rebuildGradientMap()
+  restoreOriginalSceneMaterials()
+  disposeProcessedMaterials()
+  applyStyleToScene()
+  notifyStyleChanged()
+}
+
+function initializeStyleSystem() {
+  if (!scene || !renderer) {
+    console.warn(
+      'RenderStyleSystem could not initialize because scene or renderer is unavailable.',
+    )
+    return
+  }
+
+  currentPalette = getPalette(stylePreset)
+  setupRenderer()
+  rebuildGradientMap()
+  applyStyleToScene()
+  watchObjectTree(scene)
+  registerWithLevelSystem()
+
+  isInitialized = true
+
+  if (isDev) {
+    console.log('🎨 RenderStyleSystem initialized', {
+      preset: stylePreset,
+      flattenMaterials,
+      usePaintedOutlines,
     })
   }
 
-  export function styleNewObject(object: THREE.Object3D) {
-    object.traverse((child) => {
-      if (!(child instanceof THREE.Mesh) || child.userData.renderStyleOutline) return
-      applyMaterialStyling(child)
-      applyOutlineShell(child)
-    })
-  }
-
-  export function getCurrentPalette() {
-    return currentPalette
-  }
-
-  onMount(() => {
-    initializeStyleSystem()
+  dispatch('styleSystemReady', {
+    palette: currentPalette,
+    preset: stylePreset,
   })
+}
 
-  $: if (isInitialized) {
-    stylePreset
-    enableOutlines
-    enableToonShading
-    flattenMaterials
-    usePaintedOutlines
-    outlineThickness
-    outlineOpacity
-    toneMappingExposure
-    updateSceneStyle()
+export function styleNewObject(object: THREE.Object3D) {
+  object.traverse(child => {
+    if (!(child instanceof THREE.Mesh) || child.userData.renderStyleOutline)
+      return
+    applyMaterialStyling(child)
+    applyOutlineShell(child)
+  })
+}
+
+export function getCurrentPalette() {
+  return currentPalette
+}
+
+onMount(() => {
+  initializeStyleSystem()
+})
+
+$: if (isInitialized) {
+  stylePreset
+  enableOutlines
+  enableToonShading
+  flattenMaterials
+  usePaintedOutlines
+  outlineThickness
+  outlineOpacity
+  toneMappingExposure
+  updateSceneStyle()
+}
+
+onDestroy(() => {
+  if (scene) {
+    unwatchObjectTree(scene)
   }
 
-  onDestroy(() => {
-    if (scene) {
-      unwatchObjectTree(scene)
-    }
+  restoreOriginalSceneMaterials()
+  disposeProcessedMaterials()
 
-    restoreOriginalSceneMaterials()
-    disposeProcessedMaterials()
+  originalMaterials.clear()
 
-    originalMaterials.clear()
-
-    toonGradientMap?.dispose()
-    toonGradientMap = null
-  })
+  toonGradientMap?.dispose()
+  toonGradientMap = null
+})
 </script>
 
 {#if isInitialized && enableStyleLighting}

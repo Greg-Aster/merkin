@@ -46,9 +46,6 @@ export function BioCardComponent(properties, children) {
       href: href,
       target: '_blank',
     },
-    [
-      nTitle,
-      nDescription,
-    ],
+    [nTitle, nDescription],
   )
 }

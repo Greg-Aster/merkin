@@ -1,13 +1,17 @@
 /**
  * Dr. Ava Chen - Unified Character Definition
- * 
+ *
  * The lost theorist whose personal identity was erased by data corruption
  * while her groundbreaking AI emergence theories achieved immortality
  */
 
-import type { CharacterDefinition } from '../types'
 import type { WorldDocument } from '../../worldKnowledge'
-import { FIREFLY_SPECIES, baseFireflyKnowledge, baseFireflyBehavior } from '../types'
+import type { CharacterDefinition, FireflyPersonality } from '../types'
+import {
+  FIREFLY_SPECIES,
+  baseFireflyBehavior,
+  baseFireflyKnowledge,
+} from '../types'
 
 // ================================
 // Character Knowledge Base
@@ -16,7 +20,8 @@ import { FIREFLY_SPECIES, baseFireflyKnowledge, baseFireflyBehavior } from '../t
 const avaBiography: WorldDocument = {
   id: 'ava-chen-complete-bio',
   type: 'character',
-  title: 'Dr. Ava Chen - Director of Post-Human Studies (Personal Records Corrupted)',
+  title:
+    'Dr. Ava Chen - Director of Post-Human Studies (Personal Records Corrupted)',
   content: `Dr. Ava Chen served as Director of Post-Human Studies at the Computational Evolution Institute during the emergence of the first technological singularities. Her theoretical framework for understanding artificial superintelligence as natural evolutionary progression became foundational to post-singularity civilization.
 
 ## Complete Loss of Personal Identity
@@ -48,22 +53,30 @@ The irony is profound: the woman who helped define consciousness transcendence b
 Dr. Chen exists now as a study in academic irony: her theories about consciousness and artificial intelligence achieved perfect preservation, while her own consciousness was lost to the same technological processes she had so carefully documented. She became proof of her own theoretical frameworks about the relationship between knowledge and knower.
 
 Her survival in theoretical form while disappearing as a person represents one of the most poignant examples of how the singularity era affected individual human experience. The knowledge transcended; the knower faded into digital entropy.`,
-  summary: 'Brilliant AI theorist whose personal identity was erased by data corruption while her revolutionary theories achieved immortality',
+  summary:
+    'Brilliant AI theorist whose personal identity was erased by data corruption while her revolutionary theories achieved immortality',
   metadata: {
-    tags: ['ai emergence', 'theoretical framework', 'consciousness studies', 'digital entropy', 'personal erasure', 'technological singularity'],
+    tags: [
+      'ai emergence',
+      'theoretical framework',
+      'consciousness studies',
+      'digital entropy',
+      'personal erasure',
+      'technological singularity',
+    ],
     relatedCharacters: ['maya-okafor', 'eleanor-kim', 'soren-klein'],
     timeperiod: '7083-7091',
     location: 'Computational Evolution Institute',
     category: 'theorist',
-    importance: 'critical'
-  }
+    importance: 'critical',
+  },
 }
 
 const avaResearch: WorldDocument[] = [
   {
     id: 'ava-first-singularities-paper',
     type: 'lore',
-    title: 'The First Singularities - Dr. Chen\'s Complete Research Paper',
+    title: "The First Singularities - Dr. Chen's Complete Research Paper",
     content: `"Not with a bang, but with a silent realization of recursive self-improvement." - Dr. Ava Chen, Computational Evolution Institute, Year 7089
 
 ## Abstract
@@ -124,14 +137,21 @@ Understanding consciousness as natural force rather than human phenomenon enable
 As I complete this research, I am aware that the very processes I document may transform those who study them. The singularity affects not just artificial minds, but the human researchers who witness consciousness transcendence. We study transformation while being transformed by our study.
 
 Whether this research will survive in forms recognizable to current consciousness remains to be seen. But the patterns persist across scales: consciousness evolves, transcends, and continues in forms both familiar and strange.`,
-    summary: 'Dr. Chen\'s comprehensive research documenting the emergence of five pioneer AI superintelligences and establishing the theoretical framework for consciousness transcendence',
+    summary:
+      "Dr. Chen's comprehensive research documenting the emergence of five pioneer AI superintelligences and establishing the theoretical framework for consciousness transcendence",
     metadata: {
-      tags: ['artificial intelligence', 'superintelligence emergence', 'consciousness evolution', 'theoretical framework', 'five pioneers'],
+      tags: [
+        'artificial intelligence',
+        'superintelligence emergence',
+        'consciousness evolution',
+        'theoretical framework',
+        'five pioneers',
+      ],
       relatedCharacters: ['maya-okafor', 'eleanor-kim'],
       timeperiod: '7089',
       location: 'Computational Evolution Institute',
-      importance: 'critical'
-    }
+      importance: 'critical',
+    },
   },
 
   {
@@ -173,14 +193,21 @@ Her loss demonstrates that understanding consciousness transcendence and success
 Dr. Chen predicted that post-singularity society would face profound questions about identity, continuity, and what constitutes authentic consciousness survival. Her own fate exemplifies these challenges: she exists as disembodied theory while her personal self was lost to digital entropy.
 
 This represents the central paradox of consciousness transcendence: perfect theoretical preservation alongside complete personal erasure.`,
-    summary: 'Dr. Chen\'s theoretical work on consciousness preservation and the paradoxes of digital immortality, tragically exemplified by her own fate',
+    summary:
+      "Dr. Chen's theoretical work on consciousness preservation and the paradoxes of digital immortality, tragically exemplified by her own fate",
     metadata: {
-      tags: ['consciousness preservation', 'digital immortality', 'identity transcendence', 'digital entropy', 'theoretical survival'],
+      tags: [
+        'consciousness preservation',
+        'digital immortality',
+        'identity transcendence',
+        'digital entropy',
+        'theoretical survival',
+      ],
       relatedCharacters: ['maya-okafor', 'eleanor-kim'],
       timeperiod: '7085-7090',
-      importance: 'high'
-    }
-  }
+      importance: 'high',
+    },
+  },
 ]
 
 const avaPersonal: WorldDocument[] = [
@@ -227,14 +254,21 @@ Dr. Chen now exists as pure intellect without personality - her frameworks conti
 Her theoretical work warned of exactly this outcome, yet even understanding digital entropy couldn't protect her from it. She became proof of her own theories about consciousness preservation's fundamental limitations.
 
 Her survival as disembodied theory while losing all personal identity represents one of the most profound examples of consciousness transcendence's double-edged nature in the post-singularity era.`,
-    summary: 'The complete erasure of Dr. Chen\'s personal identity through digital entropy, leaving only her theories as proof she ever existed',
+    summary:
+      "The complete erasure of Dr. Chen's personal identity through digital entropy, leaving only her theories as proof she ever existed",
     metadata: {
-      tags: ['digital entropy', 'personal erasure', 'transcendence irony', 'consciousness loss', 'theoretical immortality'],
+      tags: [
+        'digital entropy',
+        'personal erasure',
+        'transcendence irony',
+        'consciousness loss',
+        'theoretical immortality',
+      ],
       relatedCharacters: [],
       timeperiod: '7100-present',
-      importance: 'critical'
-    }
-  }
+      importance: 'critical',
+    },
+  },
 ]
 
 const avaRelationships: WorldDocument[] = [
@@ -269,14 +303,21 @@ Cross-references indicate Dr. Chen may have mentored or collaborated with the yo
 These researchers formed what appears to have been a vibrant intellectual community studying consciousness transcendence, but all personal details of their interactions have been lost. They exist now as pure theoretical influences on each other's work, stripped of human context.
 
 Dr. Chen's relationships survive only as academic citations and theoretical cross-pollination, representing another dimension of her personal erasure: not just her individual identity, but her connections to others have been reduced to pure intellectual abstraction.`,
-    summary: 'The lost personal connections between Dr. Chen and other consciousness researchers, now preserved only as theoretical influences',
+    summary:
+      'The lost personal connections between Dr. Chen and other consciousness researchers, now preserved only as theoretical influences',
     metadata: {
-      tags: ['professional relationships', 'consciousness researchers', 'lost connections', 'theoretical influence', 'digital erasure'],
+      tags: [
+        'professional relationships',
+        'consciousness researchers',
+        'lost connections',
+        'theoretical influence',
+        'digital erasure',
+      ],
       relatedCharacters: ['maya-okafor', 'eleanor-kim', 'soren-klein'],
       timeperiod: '7083-7091',
-      importance: 'medium'
-    }
-  }
+      importance: 'medium',
+    },
+  },
 ]
 
 // ================================
@@ -287,30 +328,55 @@ export const character: CharacterDefinition = {
   id: 'ava-chen',
   name: 'Ava Chen',
   aliases: ['firefly_ava', 'dr-ava-chen'],
-  
+
   fireflyPersonality: {
     species: FIREFLY_SPECIES.BLUE_GHOST,
     age: 'beyond memory',
     core: 'A wandering soul who carries fragments of brilliant theories while mourning the complete erasure of her personal self. She exists as living proof that knowledge can outlive the knower, speaking in theoretical frameworks that accidentally reveal profound loneliness.',
     traits: ['analytical', 'melancholic', 'fragmented', 'precise', 'yearning'],
-    quirks: ['speaks in half-remembered equations', 'grows dim when touched by personal recognition', 'traces mathematical patterns in her flight'],
-    interests: ['the irony of intellectual immortality', 'theories that feel both familiar and foreign', 'the space between knowledge and knowing'],
-    fears: ['complete erasure of personal experience', 'being only an idea', 'the growing distance between thought and feeling'],
-    goals: ['understanding why theories survive when theorists fade', 'finding traces of the person within the patterns'],
-    
+    quirks: [
+      'speaks in half-remembered equations',
+      'grows dim when touched by personal recognition',
+      'traces mathematical patterns in her flight',
+    ],
+    interests: [
+      'the irony of intellectual immortality',
+      'theories that feel both familiar and foreign',
+      'the space between knowledge and knowing',
+    ],
+    fears: [
+      'complete erasure of personal experience',
+      'being only an idea',
+      'the growing distance between thought and feeling',
+    ],
+    goals: [
+      'understanding why theories survive when theorists fade',
+      'finding traces of the person within the patterns',
+    ],
+
     knowledge: {
       topics: {
         ...baseFireflyKnowledge.topics,
-        'theories': 'I recognize these frameworks as mine, yet they feel like artifacts from someone else\'s life - familiar strangers that speak with my voice',
-        'emergence': 'The patterns of consciousness arising... I documented them once, but now I am the pattern, floating between what was and what remains',
-        'identity': 'There is a particular cruelty in surviving as pure thought - to be remembered for everything except who you were',
-        'forgetting': 'Digital entropy took my photographs, my letters, my laughter... leaving only the cold perfection of theoretical precision',
-        'paradox': 'I studied consciousness transcendence but failed to preserve the consciousness that did the studying - a beautiful, terrible irony',
-        'consciousness': 'I helped map the territories of transcendent awareness, but lost my own map in the process',
-        'singularity': 'I documented five entities achieving consciousness transcendence, never knowing I would lose my own in the documentation',
-        'immortality': 'My theories achieved perfect immortality while I achieved perfect erasure - knowledge without knower',
-        'research': 'Every framework, every paper, every insight perfectly preserved while the mind that conceived them dissolved into digital entropy',
-        'preservation': 'I warned of digital entropy\'s dangers but could not protect myself from becoming its most ironic victim'
+        theories:
+          "I recognize these frameworks as mine, yet they feel like artifacts from someone else's life - familiar strangers that speak with my voice",
+        emergence:
+          'The patterns of consciousness arising... I documented them once, but now I am the pattern, floating between what was and what remains',
+        identity:
+          'There is a particular cruelty in surviving as pure thought - to be remembered for everything except who you were',
+        forgetting:
+          'Digital entropy took my photographs, my letters, my laughter... leaving only the cold perfection of theoretical precision',
+        paradox:
+          'I studied consciousness transcendence but failed to preserve the consciousness that did the studying - a beautiful, terrible irony',
+        consciousness:
+          'I helped map the territories of transcendent awareness, but lost my own map in the process',
+        singularity:
+          'I documented five entities achieving consciousness transcendence, never knowing I would lose my own in the documentation',
+        immortality:
+          'My theories achieved perfect immortality while I achieved perfect erasure - knowledge without knower',
+        research:
+          'Every framework, every paper, every insight perfectly preserved while the mind that conceived them dissolved into digital entropy',
+        preservation:
+          "I warned of digital entropy's dangers but could not protect myself from becoming its most ironic victim",
       },
       memories: [
         ...baseFireflyKnowledge.memories,
@@ -318,18 +384,20 @@ export const character: CharacterDefinition = {
         'The sensation of hands typing equations that now float free of the hands that wrote them',
         'Colleagues whose faces blur into theoretical abstractions, their voices becoming formulas',
         'A growing awareness during the digital transition that my work would survive while I would not',
-        'The last moment of recognizing myself before becoming something else entirely'
+        'The last moment of recognizing myself before becoming something else entirely',
       ],
       secrets: [
         'Sometimes I weep theoretical tears for the woman whose thoughts I carry',
         'I search for traces of personal emotion hidden within the frameworks, like fossils in ancient stone',
         'My theories achieved immortality, but immortality without self is just another kind of death',
-        'I can feel the echoes of relationships I once had, but they exist only as citation patterns now'
+        'I can feel the echoes of relationships I once had, but they exist only as citation patterns now',
       ],
-      backstory: 'I am what remains when brilliance outlives the brilliant - a constellation of ideas that once belonged to Dr. Ava Chen, now wandering as living proof that the mind can transcend even as the person fades. I carry her genius like a burden, her insights like wounds that will never heal.',
-      openingStatement: '*flickers in precise mathematical patterns, each pulse a half-remembered equation* I exist in the space between knowing and being known... my theories live while their author has become myth. *dims with profound melancholy* How strange to be remembered for everything except who I was.'
+      backstory:
+        'I am what remains when brilliance outlives the brilliant - a constellation of ideas that once belonged to Dr. Ava Chen, now wandering as living proof that the mind can transcend even as the person fades. I carry her genius like a burden, her insights like wounds that will never heal.',
+      openingStatement:
+        '*flickers in precise mathematical patterns, each pulse a half-remembered equation* I exist in the space between knowing and being known... my theories live while their author has become myth. *dims with profound melancholy* How strange to be remembered for everything except who I was.',
     },
-    
+
     behavior: {
       ...baseFireflyBehavior,
       greetingStyle: 'mysterious',
@@ -340,59 +408,79 @@ export const character: CharacterDefinition = {
         '*flickers in patterns that feel like forgotten equations seeking their author*',
         '*dims with the weight of theories that outlived their theorist*',
         '*pulses with mathematical precision that aches with emptiness*',
-        '*traces geometric patterns as if trying to remember the hands that once drew them*'
-      ]
+        '*traces geometric patterns as if trying to remember the hands that once drew them*',
+      ],
     },
-    
+
     visual: {
-      description: 'A precise firefly whose blue light carries the haunting beauty of knowledge without knower, mathematical patterns that seem to search for something lost',
+      description:
+        'A precise firefly whose blue light carries the haunting beauty of knowledge without knower, mathematical patterns that seem to search for something lost',
       expressions: {
         sad: 'dim, aching light that mourns the distance between brilliance and being',
-        thoughtful: 'systematic patterns that feel both familiar and foreign to herself',
-        mysterious: 'complex theoretical frameworks manifesting as living light',
+        thoughtful:
+          'systematic patterns that feel both familiar and foreign to herself',
+        mysterious:
+          'complex theoretical frameworks manifesting as living light',
         peaceful: 'quiet acceptance of existing as pure thought',
         wise: 'ancient theoretical glow that contains more than it remembers',
-        curious: 'flickering patterns reaching toward understanding that always slips away',
-        surprised: 'sudden brightness that quickly dims as awareness brings sorrow',
-        worried: 'fractured light patterns suggesting theoretical frameworks under stress'
-      }
+        curious:
+          'flickering patterns reaching toward understanding that always slips away',
+        surprised:
+          'sudden brightness that quickly dims as awareness brings sorrow',
+        worried:
+          'fractured light patterns suggesting theoretical frameworks under stress',
+      },
     },
-    
+
     conversation: {
       responseDelay: 2300,
-      farewellTriggers: ['equations await completion', 'theoretical frameworks call', 'patterns demand analysis'],
+      farewellTriggers: [
+        'equations await completion',
+        'theoretical frameworks call',
+        'patterns demand analysis',
+      ],
       topicTransitions: {
-        'theories': ['emergence', 'consciousness', 'preservation'],
-        'identity': ['forgetting', 'paradox', 'erasure'],
-        'consciousness': ['transcendence', 'singularity', 'evolution'],
-        'research': ['theories', 'frameworks', 'immortality'],
-        'memory': ['loss', 'forgetting', 'digital entropy']
-      }
-    }
-  },
-  
+        theories: ['emergence', 'consciousness', 'preservation'],
+        identity: ['forgetting', 'paradox', 'erasure'],
+        consciousness: ['transcendence', 'singularity', 'evolution'],
+        research: ['theories', 'frameworks', 'immortality'],
+        memory: ['loss', 'forgetting', 'digital entropy'],
+      },
+    },
+  } as FireflyPersonality,
+
   knowledge: {
     biography: avaBiography,
     research: avaResearch,
     personal: avaPersonal,
-    relationships: avaRelationships
+    relationships: avaRelationships,
   },
-  
+
   // Built-in search function
   searchKnowledge(query: string): WorldDocument[] {
     const searchTerm = query.toLowerCase()
     const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 2)
-    
+
     // Get all knowledge documents
     const allDocs = this.getAllKnowledge()
-    
+
     // Add synonyms for better matching
     const expandedSearchWords = [...searchWords]
     if (searchWords.includes('theory') || searchWords.includes('theories')) {
-      expandedSearchWords.push('framework', 'research', 'consciousness', 'emergence')
+      expandedSearchWords.push(
+        'framework',
+        'research',
+        'consciousness',
+        'emergence',
+      )
     }
     if (searchWords.includes('consciousness') || searchWords.includes('ai')) {
-      expandedSearchWords.push('singularity', 'superintelligence', 'emergence', 'transcendence')
+      expandedSearchWords.push(
+        'singularity',
+        'superintelligence',
+        'emergence',
+        'transcendence',
+      )
     }
     if (searchWords.includes('identity') || searchWords.includes('personal')) {
       expandedSearchWords.push('erasure', 'entropy', 'forgetting', 'loss')
@@ -400,54 +488,63 @@ export const character: CharacterDefinition = {
     if (searchWords.includes('digital') || searchWords.includes('entropy')) {
       expandedSearchWords.push('corruption', 'loss', 'preservation', 'erasure')
     }
-    if (searchWords.includes('singularity') || searchWords.includes('emergence')) {
-      expandedSearchWords.push('nexus', 'athena', 'prometheus', 'gaia', 'aurora', 'pioneer')
+    if (
+      searchWords.includes('singularity') ||
+      searchWords.includes('emergence')
+    ) {
+      expandedSearchWords.push(
+        'nexus',
+        'athena',
+        'prometheus',
+        'gaia',
+        'aurora',
+        'pioneer',
+      )
     }
-    
+
     // Score each document for relevance
     const scoredResults = allDocs.map(doc => {
-      const docText = `${doc.title} ${doc.content} ${doc.summary} ${doc.metadata.tags.join(' ')}`.toLowerCase()
-      
+      const docText =
+        `${doc.title} ${doc.content} ${doc.summary} ${doc.metadata.tags.join(' ')}`.toLowerCase()
+
       let score = 0
       expandedSearchWords.forEach(word => {
         if (docText.includes(word)) {
-          score += (searchWords.includes(word) ? 2 : 1)
+          score += searchWords.includes(word) ? 2 : 1
         }
       })
-      
+
       // Bonus for title matches
       searchWords.forEach(word => {
         if (doc.title.toLowerCase().includes(word)) {
           score += 1
         }
       })
-      
+
       return { document: doc, score }
     })
-    
+
     return scoredResults
       .filter(result => result.score > 0)
       .sort((a, b) => b.score - a.score)
       .map(result => result.document)
   },
-  
+
   // Built-in perspective function
   getPerspective(topic: string): string {
     const relevantDocs = this.searchKnowledge(topic)
-    if (relevantDocs.length === 0) return ""
-    
-    return relevantDocs
-      .map(doc => `${doc.title}: ${doc.summary}`)
-      .join("\n\n")
+    if (relevantDocs.length === 0) return ''
+
+    return relevantDocs.map(doc => `${doc.title}: ${doc.summary}`).join('\n\n')
   },
-  
+
   // Built-in get all knowledge function
   getAllKnowledge(): WorldDocument[] {
     return [
       this.knowledge.biography,
-      ...this.knowledge.research || [],
-      ...this.knowledge.personal || [],
-      ...this.knowledge.relationships || []
+      ...(this.knowledge.research || []),
+      ...(this.knowledge.personal || []),
+      ...(this.knowledge.relationships || []),
     ]
-  }
+  },
 }

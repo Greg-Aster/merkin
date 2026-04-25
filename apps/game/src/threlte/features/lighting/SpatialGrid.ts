@@ -1,6 +1,6 @@
 /**
  * SpatialGrid - Efficient spatial partitioning for lighting culling
- * 
+ *
  * This system divides the game world into a grid and tracks which fireflies
  * are in each cell. This dramatically reduces culling checks from O(n) per frame
  * to O(visible_cells) per frame.
@@ -24,32 +24,38 @@ export class SpatialGrid {
   private worldBounds: { min: THREE.Vector3; max: THREE.Vector3 }
   private grid: Map<string, GridCell> = new Map()
   private entityToCell: Map<string, string> = new Map() // Track which cell each entity is in
-  
+
   // Performance tracking
   private stats = {
     totalEntities: 0,
     activeCells: 0,
     lastCullCount: 0,
-    lastUpdateTime: 0
+    lastUpdateTime: 0,
   }
 
-  constructor(cellSize: number = 50, worldBounds?: { min: THREE.Vector3; max: THREE.Vector3 }) {
+  constructor(
+    cellSize: number = 50,
+    worldBounds?: { min: THREE.Vector3; max: THREE.Vector3 },
+  ) {
     this.cellSize = cellSize
     this.worldBounds = worldBounds || {
       min: new THREE.Vector3(-500, -50, -500),
-      max: new THREE.Vector3(500, 100, 500)
+      max: new THREE.Vector3(500, 100, 500),
     }
-    
-    console.log(`🔲 SpatialGrid: Initialized with cell size ${cellSize}, bounds:`, this.worldBounds)
+
+    console.log(
+      `🔲 SpatialGrid: Initialized with cell size ${cellSize}, bounds:`,
+      this.worldBounds,
+    )
   }
 
   /**
    * Convert world position to grid coordinates
    */
-  private worldToGrid(position: THREE.Vector3): { x: number, z: number } {
+  private worldToGrid(position: THREE.Vector3): { x: number; z: number } {
     return {
       x: Math.floor(position.x / this.cellSize),
-      z: Math.floor(position.z / this.cellSize)
+      z: Math.floor(position.z / this.cellSize),
     }
   }
 
@@ -66,15 +72,15 @@ export class SpatialGrid {
   private getCell(gridX: number, gridZ: number): GridCell {
     const key = this.gridToKey(gridX, gridZ)
     let cell = this.grid.get(key)
-    
+
     if (!cell) {
       cell = {
         entities: new Set(),
-        lastUpdated: performance.now()
+        lastUpdated: performance.now(),
       }
       this.grid.set(key, cell)
     }
-    
+
     return cell
   }
 
@@ -126,16 +132,16 @@ export class SpatialGrid {
       if (entity.id === entityId) {
         cell.entities.delete(entity)
         this.entityToCell.delete(entityId)
-        
+
         // Clean up empty cells
         if (cell.entities.size === 0) {
           this.grid.delete(cellKey)
         }
-        
+
         return true
       }
     }
-    
+
     return false
   }
 
@@ -147,20 +153,23 @@ export class SpatialGrid {
   getVisibleEntities(camera: THREE.Camera): SpatialEntity[] {
     const startTime = performance.now()
     const visibleEntities: SpatialEntity[] = []
-    
+
     // Create frustum from camera
     const frustum = new THREE.Frustum()
     const projScreenMatrix = new THREE.Matrix4()
-    projScreenMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+    projScreenMatrix.multiplyMatrices(
+      camera.projectionMatrix,
+      camera.matrixWorldInverse,
+    )
     frustum.setFromProjectionMatrix(projScreenMatrix)
 
     // Get the approximate bounds of the frustum in world space
     const frustumBounds = this.getFrustumBounds(camera)
-    
+
     // Convert frustum bounds to grid coordinates
     const minGrid = this.worldToGrid(frustumBounds.min)
     const maxGrid = this.worldToGrid(frustumBounds.max)
-    
+
     let cellsChecked = 0
     let entitiesChecked = 0
 
@@ -169,11 +178,11 @@ export class SpatialGrid {
       for (let z = minGrid.z - 1; z <= maxGrid.z + 1; z++) {
         const cellKey = this.gridToKey(x, z)
         const cell = this.grid.get(cellKey)
-        
+
         if (!cell || cell.entities.size === 0) continue
-        
+
         cellsChecked++
-        
+
         // Check each entity in this cell against the frustum
         for (const entity of cell.entities) {
           entitiesChecked++
@@ -202,28 +211,35 @@ export class SpatialGrid {
    * Get approximate bounds of camera frustum in world space
    * This is a rough approximation to determine which grid cells to check
    */
-  private getFrustumBounds(camera: THREE.Camera): { min: THREE.Vector3; max: THREE.Vector3 } {
+  private getFrustumBounds(camera: THREE.Camera): {
+    min: THREE.Vector3
+    max: THREE.Vector3
+  } {
     if (camera instanceof THREE.PerspectiveCamera) {
       // For perspective camera, approximate the frustum as expanding cone
       const distance = camera.far * 0.7 // Use 70% of far distance for practical culling
-      const halfHeight = Math.tan(camera.fov * Math.PI / 360) * distance
+      const halfHeight = Math.tan((camera.fov * Math.PI) / 360) * distance
       const halfWidth = halfHeight * camera.aspect
-      
+
       const cameraPos = camera.position
-      const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion)
-      const centerPoint = cameraPos.clone().add(forward.multiplyScalar(distance * 0.5))
-      
+      const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(
+        camera.quaternion,
+      )
+      const centerPoint = cameraPos
+        .clone()
+        .add(forward.multiplyScalar(distance * 0.5))
+
       return {
         min: new THREE.Vector3(
           centerPoint.x - halfWidth,
           centerPoint.y - halfHeight,
-          centerPoint.z - distance * 0.5
+          centerPoint.z - distance * 0.5,
         ),
         max: new THREE.Vector3(
           centerPoint.x + halfWidth,
           centerPoint.y + halfHeight,
-          centerPoint.z + distance * 0.5
-        )
+          centerPoint.z + distance * 0.5,
+        ),
       }
     } else {
       // Fallback for orthographic or other camera types
@@ -237,18 +253,26 @@ export class SpatialGrid {
   getEntitiesInRadius(center: THREE.Vector3, radius: number): SpatialEntity[] {
     const entities: SpatialEntity[] = []
     const radiusSquared = radius * radius
-    
+
     // Determine which cells to check
     const gridRadius = Math.ceil(radius / this.cellSize)
     const centerGrid = this.worldToGrid(center)
-    
-    for (let x = centerGrid.x - gridRadius; x <= centerGrid.x + gridRadius; x++) {
-      for (let z = centerGrid.z - gridRadius; z <= centerGrid.z + gridRadius; z++) {
+
+    for (
+      let x = centerGrid.x - gridRadius;
+      x <= centerGrid.x + gridRadius;
+      x++
+    ) {
+      for (
+        let z = centerGrid.z - gridRadius;
+        z <= centerGrid.z + gridRadius;
+        z++
+      ) {
         const cellKey = this.gridToKey(x, z)
         const cell = this.grid.get(cellKey)
-        
+
         if (!cell) continue
-        
+
         for (const entity of cell.entities) {
           const distanceSquared = center.distanceToSquared(entity.position)
           if (distanceSquared <= radiusSquared) {
@@ -257,7 +281,7 @@ export class SpatialGrid {
         }
       }
     }
-    
+
     return entities
   }
 
@@ -274,7 +298,8 @@ export class SpatialGrid {
     return {
       ...this.stats,
       lastUpdateTimeMs: this.stats.lastUpdateTime,
-      averageEntitiesPerCell: this.stats.totalEntities / Math.max(this.stats.activeCells, 1)
+      averageEntitiesPerCell:
+        this.stats.totalEntities / Math.max(this.stats.activeCells, 1),
     }
   }
 
@@ -293,17 +318,17 @@ export class SpatialGrid {
    */
   debugVisualize(): void {
     if (!import.meta.env.DEV) return
-    
+
     console.log('🔲 SpatialGrid Debug:')
     console.log(`  Cells: ${this.grid.size}`)
     console.log(`  Total entities: ${this.entityToCell.size}`)
-    
+
     // Show most populated cells
     const cellsWithCounts = Array.from(this.grid.entries())
       .map(([key, cell]) => ({ key, count: cell.entities.size }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
-    
+
     console.log('  Top 5 cells by entity count:')
     cellsWithCounts.forEach(({ key, count }) => {
       console.log(`    ${key}: ${count} entities`)

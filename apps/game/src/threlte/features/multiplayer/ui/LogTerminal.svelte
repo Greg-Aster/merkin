@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { logStore, type LogEntry } from '../index';
-  import { onMount } from 'svelte';
+import { onMount } from 'svelte'
+import { type LogEntry, logStore } from '../index'
 
-  let terminalElement: HTMLDivElement;
+let terminalElement: HTMLDivElement
 
-  // Reactive statement to scroll to bottom when logs change
-  $: if (terminalElement && $logStore.length) {
-    terminalElement.scrollTop = terminalElement.scrollHeight;
-  }
+// Reactive statement to scroll to bottom when logs change
+$: if (terminalElement && $logStore.length) {
+  terminalElement.scrollTop = terminalElement.scrollHeight
+}
 </script>
 
 <div class="terminal-container">

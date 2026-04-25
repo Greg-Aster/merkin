@@ -3,7 +3,7 @@
  * Replaces the old event-bus-driven GameStateManager with reactive Svelte stores
  */
 
-import { writable, derived, type Writable } from 'svelte/store'
+import { type Writable, derived, writable } from 'svelte/store'
 import { DEFAULT_LEVEL_ID } from '../levels/levelRegistry'
 
 // Core game state types
@@ -57,14 +57,14 @@ export const playerStateStore: Writable<PlayerState> = writable({
   rotation: [0, 0, 0], // Keep rotation as is
   health: 100,
   energy: 100,
-  inventory: []
+  inventory: [],
 })
 
 export const gameSessionStore: Writable<GameSession> = writable({
   totalPlayTime: 0,
   timeExplored: 0,
   interactionsCount: 0,
-  levelsVisited: [DEFAULT_LEVEL_ID]
+  levelsVisited: [DEFAULT_LEVEL_ID],
 })
 
 // UI state stores
@@ -77,7 +77,7 @@ export const dialogueStore = writable({
   visible: false,
   text: '',
   speaker: '',
-  duration: 3000
+  duration: 3000,
 })
 
 // Derived stores for computed values
@@ -90,8 +90,8 @@ export const gameStatsStore = derived(
     levelsVisited: $session.levelsVisited,
     playerHealth: $player.health,
     playerEnergy: $player.energy,
-    inventorySize: $player.inventory.length
-  })
+    inventorySize: $player.inventory.length,
+  }),
 )
 
 // Action creators for updating state
@@ -101,7 +101,7 @@ export const gameActions = {
     currentLevelStore.set(levelId)
     gameSessionStore.update(session => ({
       ...session,
-      levelsVisited: [...new Set([...session.levelsVisited, levelId])]
+      levelsVisited: [...new Set([...session.levelsVisited, levelId])],
     }))
   },
 
@@ -127,7 +127,7 @@ export const gameActions = {
   recordInteraction: (type: string, objectId: string) => {
     gameSessionStore.update(session => ({
       ...session,
-      interactionsCount: session.interactionsCount + 1
+      interactionsCount: session.interactionsCount + 1,
     }))
   },
 
@@ -151,29 +151,34 @@ export const gameActions = {
 
   setError: (error: string | null) => {
     errorStore.set(error)
-  }
+  },
 }
 
 // Persistence helpers
 export const saveGameState = () => {
-  const state = {
+  const state: {
+    currentLevel: string
+    selectedStar: StarData | null
+    playerState: PlayerState | null
+    gameSession: GameSession | null
+  } = {
     currentLevel: '',
     selectedStar: null,
     playerState: null,
-    gameSession: null
+    gameSession: null,
   }
-  
+
   // Subscribe once to get current values
   const unsubscribers = [
-    currentLevelStore.subscribe(val => state.currentLevel = val),
-    selectedStarStore.subscribe(val => state.selectedStar = val),
-    playerStateStore.subscribe(val => state.playerState = val),
-    gameSessionStore.subscribe(val => state.gameSession = val)
+    currentLevelStore.subscribe(val => (state.currentLevel = val)),
+    selectedStarStore.subscribe(val => (state.selectedStar = val)),
+    playerStateStore.subscribe(val => (state.playerState = val)),
+    gameSessionStore.subscribe(val => (state.gameSession = val)),
   ]
-  
+
   // Unsubscribe immediately
   unsubscribers.forEach(unsub => unsub())
-  
+
   try {
     localStorage.setItem('megameal-game-state', JSON.stringify(state))
     if (import.meta.env.DEV) console.log('💾 Game state saved')
@@ -187,13 +192,13 @@ export const loadGameState = () => {
     const saved = localStorage.getItem('megameal-game-state')
     if (saved) {
       const state = JSON.parse(saved)
-      
+
       if (state.currentLevel) currentLevelStore.set(state.currentLevel)
       // Don't restore selectedStar - always start with none selected
       // if (state.selectedStar) selectedStarStore.set(state.selectedStar)
       if (state.playerState) playerStateStore.set(state.playerState)
       if (state.gameSession) gameSessionStore.set(state.gameSession)
-      
+
       if (import.meta.env.DEV) console.log('📂 Game state loaded')
     }
   } catch (error) {

@@ -19,7 +19,7 @@ function withUpdatedTimestamp(scene: EditorSceneDocument) {
 
 export function applyEditorSceneSettingsCommand(
   scene: EditorSceneDocument,
-  command: EditorSceneSettingsCommand
+  command: EditorSceneSettingsCommand,
 ): ApplyEditorSceneSettingsCommandsResult {
   switch (command.type) {
     case 'replace-settings':
@@ -35,7 +35,7 @@ export function applyEditorSceneSettingsCommand(
 
 export function applyEditorSceneSettingsCommands(
   scene: EditorSceneDocument,
-  commands: EditorSceneSettingsCommand[]
+  commands: EditorSceneSettingsCommand[],
 ): ApplyEditorSceneSettingsCommandsResult {
   let nextScene = scene
   let changed = false

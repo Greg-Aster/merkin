@@ -1,32 +1,32 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
-    import { fade } from 'svelte/transition';
-    
-    // Event dispatcher for notifying parent components
-    const dispatch = createEventDispatcher();
-    
-    // State variables
-    let showConfirmDialog = false;
-    let resetInProgress = false;
-    let resetComplete = false;
-    
-    // Function to show confirmation dialog
-    function promptPasswordReset() {
-      showConfirmDialog = true;
-    }
-    
-    // Function to cancel the password reset
-    function cancelPasswordReset() {
-      showConfirmDialog = false;
-    }
-    
-    // Function to generate a reset password config file
-    function resetPassword() {
-      resetInProgress = true;
-      
-      try {
-        // Generate default password config file with needsSetup = true
-        const resetConfigContent = `// Password configuration file
+import { createEventDispatcher } from 'svelte'
+import { fade } from 'svelte/transition'
+
+// Event dispatcher for notifying parent components
+const dispatch = createEventDispatcher()
+
+// State variables
+let showConfirmDialog = false
+let resetInProgress = false
+let resetComplete = false
+
+// Function to show confirmation dialog
+function promptPasswordReset() {
+  showConfirmDialog = true
+}
+
+// Function to cancel the password reset
+function cancelPasswordReset() {
+  showConfirmDialog = false
+}
+
+// Function to generate a reset password config file
+function resetPassword() {
+  resetInProgress = true
+
+  try {
+    // Generate default password config file with needsSetup = true
+    const resetConfigContent = `// Password configuration file
   // Reset on ${new Date().toISOString()}
   // Place this file in your /config directory to trigger password setup
   
@@ -40,42 +40,42 @@
   };
   
   export default passwordConfig;
-  `;
-        
-        // Create and download the file
-        const blob = new Blob([resetConfigContent], { type: 'text/typescript' });
-        const url = URL.createObjectURL(blob);
-        
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'password.config.ts';
-        document.body.appendChild(a);
-        a.click();
-        
-        // Cleanup
-        setTimeout(() => {
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }, 0);
-        
-        // Mark as complete
-        resetComplete = true;
-        showConfirmDialog = false;
-        
-        // Notify of changes
-        dispatch('change');
-        
-        // Reset UI after a delay
-        setTimeout(() => {
-          resetComplete = false;
-          resetInProgress = false;
-        }, 3000);
-      } catch (error) {
-        console.error('Error generating password reset file:', error);
-        resetInProgress = false;
-      }
-    }
-  </script>
+  `
+
+    // Create and download the file
+    const blob = new Blob([resetConfigContent], { type: 'text/typescript' })
+    const url = URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'password.config.ts'
+    document.body.appendChild(a)
+    a.click()
+
+    // Cleanup
+    setTimeout(() => {
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    }, 0)
+
+    // Mark as complete
+    resetComplete = true
+    showConfirmDialog = false
+
+    // Notify of changes
+    dispatch('change')
+
+    // Reset UI after a delay
+    setTimeout(() => {
+      resetComplete = false
+      resetInProgress = false
+    }, 3000)
+  } catch (error) {
+    console.error('Error generating password reset file:', error)
+    resetInProgress = false
+  }
+}
+</script>
   
   <div class="security-config-tab space-y-8">
     <div>

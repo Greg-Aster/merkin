@@ -1,19 +1,19 @@
 <script>
-  import SharedLoginForm from '@merkin/blog-core/components/svelte/admin/LoginForm.svelte'
+import SharedLoginForm from '@merkin/blog-core/components/svelte/admin/LoginForm.svelte'
 
-  let sharedLoginFormRef
+let sharedLoginFormRef
 
-  export function show() {
-    sharedLoginFormRef?.show?.()
-  }
+export function show() {
+  sharedLoginFormRef?.show?.()
+}
 
-  export function hide() {
-    sharedLoginFormRef?.hide?.()
-  }
+export function hide() {
+  sharedLoginFormRef?.hide?.()
+}
 
-  export function toggle() {
-    sharedLoginFormRef?.toggle?.()
-  }
+export function toggle() {
+  sharedLoginFormRef?.toggle?.()
+}
 </script>
 
 <SharedLoginForm bind:this={sharedLoginFormRef} on:login on:setup />

@@ -1,24 +1,24 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
-  import AppearanceThemeSettings from './appearance/AppearanceThemeSettings.svelte';
-  import BannerSettings from './appearance/BannerSettings.svelte';
-  import PostCardSettings from './appearance/PostCardSettings.svelte';
-  import FaviconSettings from './appearance/FaviconSettings.svelte';
-  import TransparencySettings from './appearance/TransparencySettings.svelte';
-  
-  // Props
-  export let siteConfig;
-  export let postCardConfig;
-  export let bannerConfig;
-  
-  // Event dispatcher
-  const dispatch = createEventDispatcher();
-  
-  // Handle change events from child components
-  function handleChange(event) {
-    // Forward the change event to the parent
-    dispatch('change', event.detail || siteConfig);
-  }
+import { createEventDispatcher } from 'svelte'
+import AppearanceThemeSettings from './appearance/AppearanceThemeSettings.svelte'
+import BannerSettings from './appearance/BannerSettings.svelte'
+import FaviconSettings from './appearance/FaviconSettings.svelte'
+import PostCardSettings from './appearance/PostCardSettings.svelte'
+import TransparencySettings from './appearance/TransparencySettings.svelte'
+
+// Props
+export let siteConfig
+export let postCardConfig
+export let bannerConfig
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Handle change events from child components
+function handleChange(event) {
+  // Forward the change event to the parent
+  dispatch('change', event.detail || siteConfig)
+}
 </script>
 
 <div class="appearance-config-tab">

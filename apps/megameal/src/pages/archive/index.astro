@@ -1,11 +1,11 @@
 ---
-import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
-import timelineManifest from '../../../../../packages/shared-data/generated/timeline.json'
-import gameStarsManifest from '../../../../../packages/shared-data/generated/game-stars.json'
 import ArchiveStoryMap from '@components/archive/ArchiveStoryMap.astro'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
+import gameStarsManifest from '../../../../../packages/shared-data/generated/game-stars.json'
+import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
+import timelineManifest from '../../../../../packages/shared-data/generated/timeline.json'
 
 const allPosts = postsManifest.items
 const publishedPosts = postsManifest.items.filter(post => !post.draft)
@@ -19,11 +19,15 @@ const activeArcCount = new Set(
 ).size
 
 const publicationYears = allPosts
-  .map(post => (post.published ? new Date(post.published).getUTCFullYear() : null))
+  .map(post =>
+    post.published ? new Date(post.published).getUTCFullYear() : null,
+  )
   .filter((year): year is number => year !== null)
 
-const latestYear = publicationYears.length > 0 ? Math.max(...publicationYears) : null
-const earliestYear = publicationYears.length > 0 ? Math.min(...publicationYears) : null
+const latestYear =
+  publicationYears.length > 0 ? Math.max(...publicationYears) : null
+const earliestYear =
+  publicationYears.length > 0 ? Math.min(...publicationYears) : null
 
 const archiveStats = [
   {

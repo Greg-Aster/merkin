@@ -283,7 +283,6 @@ export function setupBleepy(
     ;(mascotSpeechBubble as HTMLElement).style.transform = 'translateY(0)'
     ;(mascotSpeechBubble as HTMLElement).style.pointerEvents = 'none'
     ;(mascotSpeechText as HTMLElement).textContent = ''
-
     ;(mascotSpeechText as HTMLElement).textContent = text
     void (mascotSpeechBubble as HTMLElement).offsetWidth
     mascotSpeechBubble.classList.add('appearing')

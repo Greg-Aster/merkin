@@ -1,162 +1,172 @@
 <script lang="ts">
-  import { T } from '@threlte/core';
-  import { useRapier } from '@threlte/rapier';
-  import { onDestroy } from 'svelte';
-  import * as THREE from 'three';
+import { T } from '@threlte/core'
+import { useRapier } from '@threlte/rapier'
+import { onDestroy } from 'svelte'
+import * as THREE from 'three'
 
-  export let position: [number, number, number] = [0, 0, 0];
-  export let radius = 1;
-  export let bandWidth = 1;
-  export let enableContour = true;
-  export let electricOpacity = 1;
-  export let fireOpacity = 0.2;
-  export let coreOpacity = 0.25;
-  export let electricColor = '#7ed8ff';
-  export let fireColor = '#ff9b4d';
-  export let lightColor = '#b4ecff';
-  export let lightDistance = 10;
-  export let lightIntensity = 8;
-  const gameplayPointLightScale = 180;
+export let position: [number, number, number] = [0, 0, 0]
+export let radius = 1
+export let bandWidth = 1
+export let enableContour = true
+export let electricOpacity = 1
+export let fireOpacity = 0.2
+export let coreOpacity = 0.25
+export let electricColor = '#7ed8ff'
+export let fireColor = '#ff9b4d'
+export let lightColor = '#b4ecff'
+export let lightDistance = 10
+export let lightIntensity = 8
+const gameplayPointLightScale = 180
 
-  const rapier = useRapier();
-  const rayDirection = { x: 0, y: -1, z: 0 };
-  const SAMPLE_RAY_HEIGHT = 18;
-  const SAMPLE_RAY_DISTANCE = 72;
-  const MIN_SAMPLE_COUNT = 14;
-  const MAX_SAMPLE_COUNT = 22;
-  const RADIUS_REBUILD_STEP = 2.4;
-  const BANDWIDTH_REBUILD_STEP = 0.25;
-  const POSITION_REBUILD_STEP = 0.5;
-  const LIGHT_SAMPLE_COUNT = 2;
+const rapier = useRapier()
+const rayDirection = { x: 0, y: -1, z: 0 }
+const SAMPLE_RAY_HEIGHT = 18
+const SAMPLE_RAY_DISTANCE = 72
+const MIN_SAMPLE_COUNT = 14
+const MAX_SAMPLE_COUNT = 22
+const RADIUS_REBUILD_STEP = 2.4
+const BANDWIDTH_REBUILD_STEP = 0.25
+const POSITION_REBUILD_STEP = 0.5
+const LIGHT_SAMPLE_COUNT = 2
 
-  let electricGeometry = new THREE.BufferGeometry();
-  let coreGeometry = new THREE.BufferGeometry();
-  let orbitLightPositions: Array<[number, number, number]> = [];
-  let quantizedRadius = 0;
-  let quantizedBandWidth = 0;
-  let quantizedX = 0;
-  let quantizedY = 0;
-  let quantizedZ = 0;
-  let rebuildKey = '';
+let electricGeometry = new THREE.BufferGeometry()
+let coreGeometry = new THREE.BufferGeometry()
+let orbitLightPositions: Array<[number, number, number]> = []
+let quantizedRadius = 0
+let quantizedBandWidth = 0
+let quantizedX = 0
+let quantizedY = 0
+let quantizedZ = 0
+let rebuildKey = ''
 
-  function disposeGeometry(geometry: THREE.BufferGeometry) {
-    geometry.dispose();
+function disposeGeometry(geometry: THREE.BufferGeometry) {
+  geometry.dispose()
+}
+
+function replaceGeometry(
+  target: 'electric' | 'core',
+  nextGeometry: THREE.BufferGeometry,
+) {
+  const currentGeometry =
+    target === 'electric' ? electricGeometry : coreGeometry
+
+  if (target === 'electric') {
+    electricGeometry = nextGeometry
+  } else {
+    coreGeometry = nextGeometry
   }
 
-  function replaceGeometry(target: 'electric' | 'core', nextGeometry: THREE.BufferGeometry) {
-    const currentGeometry = target === 'electric'
-      ? electricGeometry
-      : coreGeometry;
+  disposeGeometry(currentGeometry)
+}
 
-    if (target === 'electric') {
-      electricGeometry = nextGeometry;
-    } else {
-      coreGeometry = nextGeometry;
-    }
+function sampleGroundY(x: number, z: number, fallbackY: number) {
+  if (!rapier.world || !rapier?.rapier?.Ray) return fallbackY
 
-    disposeGeometry(currentGeometry);
-  }
+  const rayOriginY = Math.max(fallbackY + SAMPLE_RAY_HEIGHT, SAMPLE_RAY_HEIGHT)
+  const ray = new rapier.rapier.Ray({ x, y: rayOriginY, z }, rayDirection)
 
-  function sampleGroundY(x: number, z: number, fallbackY: number) {
-    if (!rapier.world || !rapier?.rapier?.Ray) return fallbackY;
+  const hit = rapier.world.castRay(
+    ray,
+    SAMPLE_RAY_DISTANCE,
+    true,
+    rapier.rapier.QueryFilterFlags.EXCLUDE_SENSORS,
+  )
 
-    const rayOriginY = Math.max(fallbackY + SAMPLE_RAY_HEIGHT, SAMPLE_RAY_HEIGHT);
-    const ray = new rapier.rapier.Ray(
-      { x, y: rayOriginY, z },
-      rayDirection,
-    );
+  if (!hit || !Number.isFinite(hit.toi)) return fallbackY
+  return rayOriginY - hit.toi
+}
 
-    const hit = rapier.world.castRay(
-      ray,
-      SAMPLE_RAY_DISTANCE,
-      true,
-      rapier.rapier.QueryFilterFlags.EXCLUDE_SENSORS,
-    );
+function sampleContourPoints() {
+  const sampleCount = Math.max(
+    MIN_SAMPLE_COUNT,
+    Math.min(MAX_SAMPLE_COUNT, Math.round(radius * 0.45 + bandWidth * 4.5)),
+  )
+  const points: THREE.Vector3[] = []
+  const centerX = position[0]
+  const centerY = position[1]
+  const centerZ = position[2]
 
-    if (!hit || !Number.isFinite(hit.toi)) return fallbackY;
-    return rayOriginY - hit.toi;
-  }
-
-  function sampleContourPoints() {
-    const sampleCount = Math.max(MIN_SAMPLE_COUNT, Math.min(MAX_SAMPLE_COUNT, Math.round(radius * 0.45 + bandWidth * 4.5)));
-    const points: THREE.Vector3[] = [];
-    const centerX = position[0];
-    const centerY = position[1];
-    const centerZ = position[2];
-
-    for (let index = 0; index < sampleCount; index += 1) {
-      const angle = (index / sampleCount) * Math.PI * 2;
-      const radialNoise =
-        Math.sin(angle * 6 + radius * 0.42) * bandWidth * 0.14 +
-        Math.sin(angle * 13 - radius * 0.23) * bandWidth * 0.07;
-      const sampleRadius = Math.max(0.2, radius + radialNoise);
-      const worldX = centerX + Math.cos(angle) * sampleRadius;
-      const worldZ = centerZ + Math.sin(angle) * sampleRadius;
-      const groundY = sampleGroundY(worldX, worldZ, centerY);
-      const heightNoise = Math.sin(angle * 9 + radius * 0.8) * Math.min(0.16, bandWidth * 0.1);
-      points.push(new THREE.Vector3(
+  for (let index = 0; index < sampleCount; index += 1) {
+    const angle = (index / sampleCount) * Math.PI * 2
+    const radialNoise =
+      Math.sin(angle * 6 + radius * 0.42) * bandWidth * 0.14 +
+      Math.sin(angle * 13 - radius * 0.23) * bandWidth * 0.07
+    const sampleRadius = Math.max(0.2, radius + radialNoise)
+    const worldX = centerX + Math.cos(angle) * sampleRadius
+    const worldZ = centerZ + Math.sin(angle) * sampleRadius
+    const groundY = sampleGroundY(worldX, worldZ, centerY)
+    const heightNoise =
+      Math.sin(angle * 9 + radius * 0.8) * Math.min(0.16, bandWidth * 0.1)
+    points.push(
+      new THREE.Vector3(
         worldX - centerX,
-        (groundY - centerY) + 0.08 + heightNoise,
+        groundY - centerY + 0.08 + heightNoise,
         worldZ - centerZ,
-      ));
-    }
-
-    return points;
-  }
-
-  function rebuildShockwaveGeometry() {
-    const contourPoints = sampleContourPoints();
-    if (contourPoints.length < 4) return;
-
-    const contourCurve = new THREE.CatmullRomCurve3([...contourPoints, contourPoints[0].clone()], true, 'catmullrom', 0.32);
-    const tubularSegments = Math.max(14, contourPoints.length);
-
-    replaceGeometry(
-      'electric',
-      new THREE.TubeGeometry(
-        contourCurve,
-        tubularSegments,
-        Math.max(0.07, bandWidth * 0.18),
-        4,
-        true,
       ),
-    );
-
-    replaceGeometry(
-      'core',
-      new THREE.TubeGeometry(
-        contourCurve,
-        tubularSegments,
-        Math.max(0.03, bandWidth * 0.08),
-        3,
-        true,
-      ),
-    );
-
-    const lightIndexes = Array.from({ length: LIGHT_SAMPLE_COUNT }, (_, index) => (
-      Math.floor(contourPoints.length * (index / LIGHT_SAMPLE_COUNT))
-    ));
-
-    orbitLightPositions = lightIndexes.map((pointIndex) => {
-      const point = contourPoints[pointIndex] ?? contourPoints[0];
-      return [point.x, point.y + 0.3, point.z] as [number, number, number];
-    });
+    )
   }
 
-  $: quantizedRadius = Math.round(radius / RADIUS_REBUILD_STEP);
-  $: quantizedBandWidth = Math.round(bandWidth / BANDWIDTH_REBUILD_STEP);
-  $: quantizedX = Math.round(position[0] / POSITION_REBUILD_STEP);
-  $: quantizedY = Math.round(position[1] / POSITION_REBUILD_STEP);
-  $: quantizedZ = Math.round(position[2] / POSITION_REBUILD_STEP);
-  $: rebuildKey = `${quantizedRadius}:${quantizedBandWidth}:${quantizedX}:${quantizedY}:${quantizedZ}`;
-  $: if (enableContour && rebuildKey) {
-    rebuildShockwaveGeometry();
-  }
+  return points
+}
 
-  onDestroy(() => {
-    disposeGeometry(electricGeometry);
-    disposeGeometry(coreGeometry);
-  });
+function rebuildShockwaveGeometry() {
+  const contourPoints = sampleContourPoints()
+  if (contourPoints.length < 4) return
+
+  const contourCurve = new THREE.CatmullRomCurve3(
+    [...contourPoints, contourPoints[0].clone()],
+    true,
+    'catmullrom',
+    0.32,
+  )
+  const tubularSegments = Math.max(14, contourPoints.length)
+
+  replaceGeometry(
+    'electric',
+    new THREE.TubeGeometry(
+      contourCurve,
+      tubularSegments,
+      Math.max(0.07, bandWidth * 0.18),
+      4,
+      true,
+    ),
+  )
+
+  replaceGeometry(
+    'core',
+    new THREE.TubeGeometry(
+      contourCurve,
+      tubularSegments,
+      Math.max(0.03, bandWidth * 0.08),
+      3,
+      true,
+    ),
+  )
+
+  const lightIndexes = Array.from({ length: LIGHT_SAMPLE_COUNT }, (_, index) =>
+    Math.floor(contourPoints.length * (index / LIGHT_SAMPLE_COUNT)),
+  )
+
+  orbitLightPositions = lightIndexes.map(pointIndex => {
+    const point = contourPoints[pointIndex] ?? contourPoints[0]
+    return [point.x, point.y + 0.3, point.z] as [number, number, number]
+  })
+}
+
+$: quantizedRadius = Math.round(radius / RADIUS_REBUILD_STEP)
+$: quantizedBandWidth = Math.round(bandWidth / BANDWIDTH_REBUILD_STEP)
+$: quantizedX = Math.round(position[0] / POSITION_REBUILD_STEP)
+$: quantizedY = Math.round(position[1] / POSITION_REBUILD_STEP)
+$: quantizedZ = Math.round(position[2] / POSITION_REBUILD_STEP)
+$: rebuildKey = `${quantizedRadius}:${quantizedBandWidth}:${quantizedX}:${quantizedY}:${quantizedZ}`
+$: if (enableContour && rebuildKey) {
+  rebuildShockwaveGeometry()
+}
+
+onDestroy(() => {
+  disposeGeometry(electricGeometry)
+  disposeGeometry(coreGeometry)
+})
 </script>
 
 <T.Group {position}>

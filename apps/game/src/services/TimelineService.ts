@@ -1,3 +1,4 @@
+import gameStarsManifest from '../../../../packages/shared-data/generated/game-stars.json'
 import {
   defaultEraConfig,
   defaultEraDisplayNames,
@@ -10,7 +11,6 @@ import {
   getTimelineStatistics,
   groupEventsByEra,
 } from '../config/timelineconfig.ts'
-import gameStarsManifest from '../../../../packages/shared-data/generated/game-stars.json'
 // Use 'import type' for types and interfaces
 import type {
   EraConfig,

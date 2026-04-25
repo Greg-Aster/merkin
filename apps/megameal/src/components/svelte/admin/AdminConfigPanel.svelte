@@ -602,6 +602,8 @@ $: {
           {#each tabs as tab}
             <button 
               id={`tab-${tab.id}`} 
+              data-sfx-hover="hover-soft"
+              data-sfx-click="soft"
               class="tab-button py-4 px-3 border-b-2 transition-colors font-medium flex items-center whitespace-nowrap
                      {activeTab === tab.id ? 
                        'border-[var(--primary)] text-[var(--primary)]' : 
@@ -779,6 +781,8 @@ $: {
           <button 
             on:click={saveAllConfiguration}
             disabled={saveStatus.saving || !hasChanges}
+            data-sfx-hover="hover-emphasis"
+            data-sfx-click="success"
             class="py-2 px-6 bg-[var(--primary)] hover:opacity-90 text-white font-medium rounded-md transition-opacity flex items-center disabled:opacity-60"
             title={!hasChanges ? "No changes to save" : "Save your changes"}
           >
@@ -873,7 +877,4 @@ $: {
     transition: background-color 0.2s ease;
   }
   
-  .tab-button.active::after {
-    background-color: var(--primary);
-  }
 </style>

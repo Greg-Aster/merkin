@@ -477,22 +477,26 @@ function handleDefaultBannerTypeChange(event) {
             <div class="flex flex-wrap gap-2">
               {#each bannerConfig.bannerList as banner, index}
                 <div class="relative group">
-                  <div 
+                  <button
+                    type="button"
                     class="w-24 h-16 bg-neutral-200 dark:bg-neutral-700 rounded-md overflow-hidden cursor-pointer border-2 border-transparent hover:border-[var(--primary)] transition-colors flex-shrink-0 flex items-center justify-center"
                     class:border-[var(--primary)]={selectedBannerIndex === index}
                     on:click={() => selectBanner(index)}
+                    aria-label={`Select banner ${index + 1}: ${getDisplayPath(banner)}`}
                   >
                     <!-- Show a color block with filename -->
                     <div class="w-full h-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs p-1 text-center">
                       {getDisplayPath(banner)}
                     </div>
-                  </div>
+                  </button>
                   
                   <!-- Remove button -->
                   <button
+                    type="button"
                     class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                     title="Remove from sequence"
                     on:click={() => removeBannerFromSequence(index)}
+                    aria-label={`Remove ${getDisplayPath(banner)} from banner sequence`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />

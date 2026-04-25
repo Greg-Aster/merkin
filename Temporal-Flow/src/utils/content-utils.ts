@@ -3,14 +3,14 @@ import type { BlogPostData } from '@/types/config'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
 
-export async function getSortedPosts(includeDrafts = false): Promise<
-  { body: string, data: BlogPostData; slug: string }[]
-> {
+export async function getSortedPosts(
+  includeDrafts = false,
+): Promise<{ body: string; data: BlogPostData; slug: string }[]> {
   const allBlogPosts = (await getCollection('posts', ({ data }) => {
     // If includeDrafts is true, include all posts regardless of draft status
     // Otherwise, only include non-draft posts
-    return includeDrafts ? true : data.draft !== true;
-  })) as unknown as { body: string, data: BlogPostData; slug: string }[];
+    return includeDrafts ? true : data.draft !== true
+  })) as unknown as { body: string; data: BlogPostData; slug: string }[]
 
   const sorted = allBlogPosts.sort(
     (a: { data: BlogPostData }, b: { data: BlogPostData }) => {

@@ -1,3 +1,4 @@
+import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts'
 import type {
   LicenseConfig,
   NavBarConfig,
@@ -5,8 +6,6 @@ import type {
   SiteConfig,
 } from '../types/config'
 import { LinkPreset } from '../types/config'
-import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts'
-
 
 export const siteConfig: SiteConfig = {
   title: 'Greg Aster',
@@ -25,14 +24,14 @@ export const siteConfig: SiteConfig = {
     credit: {
       enable: true,
       text: '',
-      url: ''
-    }
+      url: '',
+    },
   },
   toc: {
     enable: true,
-    depth: 3
+    depth: 3,
   },
-  favicon: []
+  favicon: [],
 }
 
 export const navBarConfig: NavBarConfig = {
@@ -68,12 +67,12 @@ export const navBarConfig: NavBarConfig = {
           external: true,
         },
         // Add more dropdown items as needed
-      ]
+      ],
     },
     LinkPreset.Community,
     LinkPreset.Archive,
     LinkPreset.About,
-/*     {
+    /*     {
       name: 'YouTube',
       url: 'https://www.youtube.com/dndiy',
       external: true,
@@ -82,12 +81,11 @@ export const navBarConfig: NavBarConfig = {
 }
 
 export const profileConfig: ProfileConfig = {
-  avatar: ''
+  avatar: '',
   //[
-   // '/src/assets/images/avatar.png',
-   // '/src/assets/images/avatar2.jpg',
-   //]
-   ,
+  // '/src/assets/images/avatar.png',
+  // '/src/assets/images/avatar2.jpg',
+  //]
   name: 'Greg Aster',
   bio: 'Filmmaker, Animator, and Creator of Strange Worlds',
   links: [
@@ -111,6 +109,6 @@ export const profileConfig: ProfileConfig = {
 
 export const licenseConfig: LicenseConfig = {
   enable: true,
-  name: "CC BY-NC-SA 4.0",
-  url: "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+  name: 'CC BY-NC-SA 4.0',
+  url: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
 }

@@ -108,6 +108,33 @@ const adminLinks = [
 </div>
 
 <script>
+  const hasValidAuth = () => {
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
+    const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0')
+    if (!isAuthenticated || !expiresAt || Date.now() >= expiresAt) {
+      localStorage.removeItem('isAuthenticated')
+      localStorage.removeItem('authExpiresAt')
+      return false
+    }
+    return true
+  }
+
+  const syncMenuAuthState = () => {
+    const isAuthenticated = hasValidAuth()
+    const defaultLinks = document.getElementById('default-links')
+    const adminLinks = document.getElementById('admin-links')
+
+    if (defaultLinks) {
+      defaultLinks.style.display = isAuthenticated ? 'none' : ''
+    }
+
+    if (adminLinks) {
+      adminLinks.style.display = isAuthenticated ? '' : 'none'
+    }
+  }
+
+  syncMenuAuthState()
+
   document.getElementById('menu-logout-button')?.addEventListener('click', () => {
     localStorage.removeItem('isAuthenticated')
     localStorage.removeItem('authExpiresAt')

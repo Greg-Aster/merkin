@@ -1,28 +1,32 @@
 <script lang="ts">
-  import { editorMarqueeStore } from './editorStore'
+import { editorMarqueeStore } from './editorStore'
 
-  let marquee = {
-    active: false,
-    startX: 0,
-    startY: 0,
-    currentX: 0,
-    currentY: 0,
-  }
+let marquee = {
+  active: false,
+  startX: 0,
+  startY: 0,
+  currentX: 0,
+  currentY: 0,
+}
+let left = 0
+let marqueeTop = 0
+let width = 0
+let height = 0
 
-  const unsubscribe = editorMarqueeStore.subscribe((value) => {
-    marquee = value
-  })
+const unsubscribe = editorMarqueeStore.subscribe(value => {
+  marquee = value
+})
 
-  $: left = Math.min(marquee.startX, marquee.currentX)
-  $: top = Math.min(marquee.startY, marquee.currentY)
-  $: width = Math.abs(marquee.currentX - marquee.startX)
-  $: height = Math.abs(marquee.currentY - marquee.startY)
+$: left = Math.min(marquee.startX, marquee.currentX)
+$: marqueeTop = Math.min(marquee.startY, marquee.currentY)
+$: width = Math.abs(marquee.currentX - marquee.startX)
+$: height = Math.abs(marquee.currentY - marquee.startY)
 </script>
 
 {#if marquee.active}
   <div
     class="editor-marquee"
-    style={`left:${left}px; top:${top}px; width:${width}px; height:${height}px;`}
+    style={`left:${left}px; top:${marqueeTop}px; width:${width}px; height:${height}px;`}
   ></div>
 {/if}
 

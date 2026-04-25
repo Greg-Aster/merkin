@@ -1,7 +1,10 @@
-import { get } from 'svelte/store'
 import { EDITOR_API_BASE } from '@config/editorApi'
+import { get } from 'svelte/store'
+import type {
+  LevelLifecycleStatus,
+  LevelRegistryEntry,
+} from '../levels/levelRegistry'
 import { createDefaultSceneForLevel } from './defaultScenes'
-import type { LevelLifecycleStatus, LevelRegistryEntry } from '../levels/levelRegistry'
 
 interface EditorLevelControllerDeps {
   getEditorSceneStore: () => any
@@ -16,7 +19,11 @@ interface EditorLevelControllerDeps {
     metadataStarMapYear: number
     metadataStarMapDescription: string
     metadataSourceKind: 'component' | 'scene'
-    metadataSourceComponentKey: 'observatory' | 'sci-fi-room' | 'miranda' | 'solitude'
+    metadataSourceComponentKey:
+      | 'observatory'
+      | 'sci-fi-room'
+      | 'miranda'
+      | 'solitude'
     saveAsTitle: string
     saveAsLevelId: string
     newLevelTitle: string
@@ -24,7 +31,9 @@ interface EditorLevelControllerDeps {
     newLevelTemplateId: string
     importBuffer: string
   }
-  setMetadataState: (next: Partial<ReturnType<EditorLevelControllerDeps['getMetadataState']>>) => void
+  setMetadataState: (
+    next: Partial<ReturnType<EditorLevelControllerDeps['getMetadataState']>>,
+  ) => void
   setSaveMessage: (message: string) => void
   setLevelRegistry: (entries: LevelRegistryEntry[]) => void
   sanitizeLevelId: (value: string) => string
@@ -47,7 +56,10 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
         deps.setLevelRegistry(payload.entries)
       }
     } catch (error) {
-      console.warn('Level registry disk load unavailable, using in-memory registry.', error)
+      console.warn(
+        'Level registry disk load unavailable, using in-memory registry.',
+        error,
+      )
     }
   }
 
@@ -71,7 +83,12 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
     }
   }
 
-  function createScenePayload(targetLevelId: string, sourceScene = get(deps.getEditorSceneStore()) ?? createDefaultSceneForLevel(targetLevelId) ?? deps.createEmptyScene(targetLevelId)) {
+  function createScenePayload(
+    targetLevelId: string,
+    sourceScene = get(deps.getEditorSceneStore()) ??
+      createDefaultSceneForLevel(targetLevelId) ??
+      deps.createEmptyScene(targetLevelId),
+  ) {
     return {
       ...structuredClone(sourceScene),
       levelId: targetLevelId,
@@ -82,19 +99,31 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
   function hasMeaningfulSceneContent(scene: any) {
     if (!scene) return false
     if (Array.isArray(scene.nodes) && scene.nodes.length > 0) return true
-    if (scene.settings && typeof scene.settings === 'object' && Object.keys(scene.settings).length > 0) return true
+    if (
+      scene.settings &&
+      typeof scene.settings === 'object' &&
+      Object.keys(scene.settings).length > 0
+    )
+      return true
     return false
   }
 
   function replaceRegistryEntry(nextEntry: LevelRegistryEntry) {
-    const remainingEntries = deps.getLevelRegistryEntries().filter((entry) => entry.id !== nextEntry.id)
-    return [...remainingEntries, nextEntry].sort((left, right) => left.title.localeCompare(right.title))
+    const remainingEntries = deps
+      .getLevelRegistryEntries()
+      .filter(entry => entry.id !== nextEntry.id)
+    return [...remainingEntries, nextEntry].sort((left, right) =>
+      left.title.localeCompare(right.title),
+    )
   }
 
   function buildMetadataEntry(targetLevelId: string): LevelRegistryEntry {
     const state = deps.getMetadataState()
-    const existingEntry = deps.getLevelRegistryEntries().find((entry) => entry.id === targetLevelId)
-    const nextTitle = state.metadataTitle.trim() || existingEntry?.title || targetLevelId
+    const existingEntry = deps
+      .getLevelRegistryEntries()
+      .find(entry => entry.id === targetLevelId)
+    const nextTitle =
+      state.metadataTitle.trim() || existingEntry?.title || targetLevelId
 
     return {
       id: targetLevelId,
@@ -102,21 +131,33 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
       status: state.metadataStatus,
       deployed: state.metadataDeployed,
       aliases: existingEntry?.aliases ?? [],
-      source: state.metadataSourceKind === 'component'
-        ? { kind: 'component', componentKey: state.metadataSourceComponentKey }
-        : { kind: 'scene', sceneId: targetLevelId },
+      source:
+        state.metadataSourceKind === 'component'
+          ? {
+              kind: 'component',
+              componentKey: state.metadataSourceComponentKey,
+            }
+          : { kind: 'scene', sceneId: targetLevelId },
       starMap: {
         enabled: state.metadataStarMapEnabled,
-        year: Number.isFinite(Number(state.metadataStarMapYear)) ? Number(state.metadataStarMapYear) : 2100,
+        year: Number.isFinite(Number(state.metadataStarMapYear))
+          ? Number(state.metadataStarMapYear)
+          : 2100,
         era: existingEntry?.starMap?.era ?? 'unknown',
-        description: state.metadataStarMapDescription.trim() || `Enter ${nextTitle}`,
+        description:
+          state.metadataStarMapDescription.trim() || `Enter ${nextTitle}`,
       },
     }
   }
 
-  async function saveSceneDocumentToDisk(targetLevelId: string, sourceScene = get(deps.getEditorSceneStore())) {
+  async function saveSceneDocumentToDisk(
+    targetLevelId: string,
+    sourceScene = get(deps.getEditorSceneStore()),
+  ) {
     if (!sourceScene) {
-      throw new Error('Cannot save scene to disk because no scene document is loaded.')
+      throw new Error(
+        'Cannot save scene to disk because no scene document is loaded.',
+      )
     }
 
     const payloadScene = createScenePayload(targetLevelId, sourceScene)
@@ -165,14 +206,17 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
   async function saveAsNewLevel() {
     const state = deps.getMetadataState()
     const targetLevelId = deps.sanitizeLevelId(state.saveAsLevelId)
-    const title = state.saveAsTitle.trim() || state.metadataTitle.trim() || targetLevelId
+    const title =
+      state.saveAsTitle.trim() || state.metadataTitle.trim() || targetLevelId
 
     if (!targetLevelId) {
       deps.setSaveMessage('Enter a level ID for Save As')
       return
     }
 
-    if (deps.getLevelRegistryEntries().some((entry) => entry.id === targetLevelId)) {
+    if (
+      deps.getLevelRegistryEntries().some(entry => entry.id === targetLevelId)
+    ) {
       deps.setSaveMessage('That level ID already exists')
       return
     }
@@ -221,14 +265,20 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
       return
     }
 
-    if (deps.getLevelRegistryEntries().some((entry) => entry.id === targetLevelId)) {
+    if (
+      deps.getLevelRegistryEntries().some(entry => entry.id === targetLevelId)
+    ) {
       deps.setSaveMessage('That level ID already exists')
       return
     }
 
-    const templateScene = state.newLevelTemplateId === deps.getActiveSceneLevelId()
-      ? get(deps.getEditorSceneStore()) ?? createDefaultSceneForLevel(state.newLevelTemplateId) ?? deps.createEmptyScene(state.newLevelTemplateId)
-      : createDefaultSceneForLevel(state.newLevelTemplateId) ?? deps.createEmptyScene(state.newLevelTemplateId)
+    const templateScene =
+      state.newLevelTemplateId === deps.getActiveSceneLevelId()
+        ? get(deps.getEditorSceneStore()) ??
+          createDefaultSceneForLevel(state.newLevelTemplateId) ??
+          deps.createEmptyScene(state.newLevelTemplateId)
+        : createDefaultSceneForLevel(state.newLevelTemplateId) ??
+          deps.createEmptyScene(state.newLevelTemplateId)
     const scenePayload = createScenePayload(targetLevelId, templateScene)
     const nextEntry: LevelRegistryEntry = {
       id: targetLevelId,

@@ -167,6 +167,8 @@ function deleteGuideline(index: number) {
       {#each sections as section}
         <button 
           class="py-2 px-3 md:px-4 text-sm md:text-base {activeSection === section.id ? 'text-[var(--primary)] border-b-2 border-[var(--primary)]' : 'text-neutral-600 dark:text-neutral-400'}"
+          data-sfx-hover="hover-soft"
+          data-sfx-click="select"
           on:click={() => activeSection = section.id}
         >
           {section.label}
@@ -181,9 +183,7 @@ function deleteGuideline(index: number) {
           <h3 class="font-medium text-lg text-black/80 dark:text-white/80 mb-4">Hero Section</h3>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Title
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Title</div>
             <input 
               type="text" 
               bind:value={communityConfig.hero.title} 
@@ -193,9 +193,7 @@ function deleteGuideline(index: number) {
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Description
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</div>
             <textarea 
               bind:value={communityConfig.hero.description} 
               on:input={notifyChanges}
@@ -252,6 +250,8 @@ Quick Access Options</h4>
           
           <button 
             class="py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-md transition-colors flex items-center"
+            data-sfx-hover="hover-emphasis"
+            data-sfx-click="warning"
             on:click={() => {
               // Set configuration to match original community.astro layout
               communityConfig.hero = {
@@ -455,9 +455,7 @@ Quick Access Options</h4>
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Section Title
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Section Title</div>
             <input 
               type="text" 
               bind:value={communityConfig.discord.title} 
@@ -467,9 +465,7 @@ Quick Access Options</h4>
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Description
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</div>
             <textarea 
               bind:value={communityConfig.discord.description} 
               on:input={notifyChanges}
@@ -480,9 +476,7 @@ Quick Access Options</h4>
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Discord Invite URL
-              </label>
+              <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Discord Invite URL</div>
               <input 
                 type="text" 
                 bind:value={communityConfig.discord.inviteUrl} 
@@ -492,9 +486,7 @@ Quick Access Options</h4>
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Button Text
-              </label>
+              <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Button Text</div>
               <input 
                 type="text" 
                 bind:value={communityConfig.discord.buttonText} 
@@ -518,7 +510,10 @@ Discord Features</h4>
                 </div>
                 <button 
                   class="p-1.5 text-neutral-500 hover:text-[var(--primary)] rounded-full"
+                  data-sfx-hover="hover-soft"
+                  data-sfx-click="panel-open"
                   on:click={() => editFeatureItem('discord', index)}
+                  aria-label={`Edit ${feature.title}`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -545,7 +540,10 @@ Discord Channels</h4>
                 <div class="flex space-x-2">
                   <button 
                     class="p-1.5 text-neutral-500 hover:text-[var(--primary)] rounded-full"
+                    data-sfx-hover="hover-soft"
+                    data-sfx-click="panel-open"
                     on:click={() => editDiscordChannel(index)}
+                    aria-label={`Edit ${channel.name}`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -553,7 +551,10 @@ Discord Channels</h4>
                   </button>
                   <button 
                     class="p-1.5 text-neutral-500 hover:text-red-500 rounded-full"
+                    data-sfx-hover="hover-emphasis"
+                    data-sfx-click="warning"
                     on:click={() => deleteChannel(index)}
+                    aria-label={`Delete ${channel.name}`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -566,6 +567,8 @@ Discord Channels</h4>
           
           <button 
             class="py-1.5 px-3 bg-[var(--primary)] hover:opacity-90 text-white font-medium rounded-md transition-opacity text-sm flex items-center"
+            data-sfx-hover="hover-emphasis"
+            data-sfx-click="panel-open"
             on:click={addChannel}
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -594,9 +597,7 @@ Discord Channels</h4>
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Section Title
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Section Title</div>
             <input 
               type="text" 
               bind:value={communityConfig.contact.title} 
@@ -606,9 +607,7 @@ Discord Channels</h4>
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Description
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</div>
             <textarea 
               bind:value={communityConfig.contact.description} 
               on:input={notifyChanges}
@@ -619,9 +618,7 @@ Discord Channels</h4>
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Form Action URL
-              </label>
+              <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Form Action URL</div>
               <input 
                 type="text" 
                 bind:value={communityConfig.contact.formActionUrl} 
@@ -632,9 +629,7 @@ Discord Channels</h4>
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Button Text
-              </label>
+              <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Button Text</div>
               <input 
                 type="text" 
                 bind:value={communityConfig.contact.buttonText} 
@@ -659,6 +654,7 @@ Contact Features</h4>
                 <button 
                   class="p-1.5 text-neutral-500 hover:text-[var(--primary)] rounded-full"
                   on:click={() => editFeatureItem('contact', index)}
+                  aria-label={`Edit ${feature.title}`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -677,7 +673,7 @@ Form Field Settings</h4>
             <h5 class="font-medium mb-2 text-neutral-800 dark:text-neutral-200">Name Field</h5>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Label</label>
+                <div class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Label</div>
                 <input 
                   type="text" 
                   bind:value={communityConfig.contact.formFields.name.label} 
@@ -686,7 +682,7 @@ Form Field Settings</h4>
                 />
               </div>
               <div>
-                <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Placeholder</label>
+                <div class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Placeholder</div>
                 <input 
                   type="text" 
                   bind:value={communityConfig.contact.formFields.name.placeholder} 
@@ -713,7 +709,7 @@ Form Field Settings</h4>
             <h5 class="font-medium mb-2 text-neutral-800 dark:text-neutral-200">Email Field</h5>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Label</label>
+                <div class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Label</div>
                 <input 
                   type="text" 
                   bind:value={communityConfig.contact.formFields.email.label} 
@@ -722,7 +718,7 @@ Form Field Settings</h4>
                 />
               </div>
               <div>
-                <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Placeholder</label>
+                <div class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Placeholder</div>
                 <input 
                   type="text" 
                   bind:value={communityConfig.contact.formFields.email.placeholder} 
@@ -749,7 +745,7 @@ Form Field Settings</h4>
             <h5 class="font-medium mb-2 text-neutral-800 dark:text-neutral-200">Subject Field</h5>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Label</label>
+                <div class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Label</div>
                 <input 
                   type="text" 
                   bind:value={communityConfig.contact.formFields.subject.label} 
@@ -758,7 +754,7 @@ Form Field Settings</h4>
                 />
               </div>
               <div>
-                <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Placeholder</label>
+                <div class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Placeholder</div>
                 <input 
                   type="text" 
                   bind:value={communityConfig.contact.formFields.subject.placeholder} 
@@ -785,7 +781,7 @@ Form Field Settings</h4>
             <h5 class="font-medium mb-2 text-neutral-800 dark:text-neutral-200">Message Field</h5>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Label</label>
+                <div class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Label</div>
                 <input 
                   type="text" 
                   bind:value={communityConfig.contact.formFields.message.label} 
@@ -794,7 +790,7 @@ Form Field Settings</h4>
                 />
               </div>
               <div>
-                <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Placeholder</label>
+                <div class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Placeholder</div>
                 <input 
                   type="text" 
                   bind:value={communityConfig.contact.formFields.message.placeholder} 
@@ -805,7 +801,7 @@ Form Field Settings</h4>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
               <div>
-                <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Rows</label>
+                <div class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Rows</div>
                 <input 
                   type="number" 
                   bind:value={communityConfig.contact.formFields.message.rows} 
@@ -849,9 +845,7 @@ Form Field Settings</h4>
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Section Title
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Section Title</div>
             <input 
               type="text" 
               bind:value={communityConfig.newsletter.title} 
@@ -861,9 +855,7 @@ Form Field Settings</h4>
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Description
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</div>
             <textarea 
               bind:value={communityConfig.newsletter.description} 
               on:input={notifyChanges}
@@ -873,9 +865,7 @@ Form Field Settings</h4>
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Button Text
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Button Text</div>
             <input 
               type="text" 
               bind:value={communityConfig.newsletter.buttonText} 
@@ -885,9 +875,7 @@ Form Field Settings</h4>
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Consent Text
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Consent Text</div>
             <textarea 
               bind:value={communityConfig.newsletter.consentText} 
               on:input={notifyChanges}
@@ -911,6 +899,7 @@ Newsletter Features</h4>
                 <button 
                   class="p-1.5 text-neutral-500 hover:text-[var(--primary)] rounded-full"
                   on:click={() => editFeatureItem('newsletter', index)}
+                  aria-label={`Edit ${feature.title}`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -940,9 +929,7 @@ Newsletter Features</h4>
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Section Title
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Section Title</div>
             <input 
               type="text" 
               bind:value={communityConfig.events.title} 
@@ -952,9 +939,7 @@ Newsletter Features</h4>
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Description
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</div>
             <textarea 
               bind:value={communityConfig.events.description} 
               on:input={notifyChanges}
@@ -965,9 +950,7 @@ Newsletter Features</h4>
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Calendar URL
-              </label>
+              <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Calendar URL</div>
               <input 
                 type="text" 
                 bind:value={communityConfig.events.calendarUrl} 
@@ -977,9 +960,7 @@ Newsletter Features</h4>
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Calendar Button Text
-              </label>
+              <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Calendar Button Text</div>
               <input 
                 type="text" 
                 bind:value={communityConfig.events.calendarButtonText} 
@@ -1021,9 +1002,7 @@ Newsletter Features</h4>
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Section Title
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Section Title</div>
             <input 
               type="text" 
               bind:value={communityConfig.guidelines.title} 
@@ -1033,9 +1012,7 @@ Newsletter Features</h4>
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Description
-            </label>
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</div>
             <textarea 
               bind:value={communityConfig.guidelines.description} 
               on:input={notifyChanges}
@@ -1059,6 +1036,7 @@ Community Guidelines List</h4>
                   <button 
                     class="p-1.5 text-neutral-500 hover:text-[var(--primary)] rounded-full"
                     on:click={() => editGuidelineItem(index)}
+                    aria-label={`Edit guideline ${index + 1}`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -1067,6 +1045,7 @@ Community Guidelines List</h4>
                   <button 
                     class="p-1.5 text-neutral-500 hover:text-red-500 rounded-full"
                     on:click={() => deleteGuideline(index)}
+                    aria-label={`Delete guideline ${index + 1}`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -1098,9 +1077,7 @@ Community Guidelines List</h4>
         <h3 class="text-lg font-semibold text-black/80 dark:text-white/80 mb-4">Edit Feature</h3>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-            Feature Title
-          </label>
+          <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Feature Title</div>
           <input 
             type="text" 
             bind:value={editFeature.title} 
@@ -1109,9 +1086,7 @@ Community Guidelines List</h4>
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-            Description
-          </label>
+          <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</div>
           <textarea 
             bind:value={editFeature.description} 
             rows="3" 
@@ -1120,9 +1095,7 @@ Community Guidelines List</h4>
         </div>
         
         <div class="mb-6">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-            Icon
-          </label>
+          <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Icon</div>
           <input 
             type="text" 
             bind:value={editFeature.icon} 
@@ -1159,9 +1132,7 @@ Community Guidelines List</h4>
         </h3>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-            Channel Name
-          </label>
+          <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Channel Name</div>
           <input 
             type="text" 
             bind:value={editChannel.name} 
@@ -1170,9 +1141,7 @@ Community Guidelines List</h4>
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-            Description
-          </label>
+          <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</div>
           <input 
             type="text" 
             bind:value={editChannel.description} 
@@ -1181,9 +1150,7 @@ Community Guidelines List</h4>
         </div>
         
         <div class="mb-6">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-            Color
-          </label>
+          <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Color</div>
           <select 
             bind:value={editChannel.color} 
               class="w-full px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md text-sm text-neutral-800 dark:text-neutral-200"
@@ -1226,9 +1193,7 @@ Community Guidelines List</h4>
         </h3>
         
         <div class="mb-6">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-            Guideline Text
-          </label>
+          <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Guideline Text</div>
           <textarea 
             bind:value={editGuideline} 
             rows="3" 

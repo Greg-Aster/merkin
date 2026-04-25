@@ -1,4 +1,3 @@
-import type { EditorSceneNode, EditorState } from './editorTypes'
 import {
   ensureOutlinerDefaultExpansion,
   getOutlinerExpandedIds,
@@ -7,7 +6,11 @@ import {
   resolveOutlinerSelectionIntent,
   setOutlinerExpandedIds,
 } from './editorOutliner'
-import type { OutlinerDisplayMode, OutlinerTreeItem } from './editorOutlinerTypes'
+import type {
+  OutlinerDisplayMode,
+  OutlinerTreeItem,
+} from './editorOutlinerTypes'
+import type { EditorSceneNode, EditorState } from './editorTypes'
 
 type SelectionOptions = {
   additive?: boolean
@@ -21,7 +24,9 @@ type EditorOutlinerControllerDeps = {
   getOutlinerDisplayMode: () => OutlinerDisplayMode
   setOutlinerDisplayMode: (mode: OutlinerDisplayMode) => void
   getOutlinerExpandedIdsByMode: () => Record<OutlinerDisplayMode, string[]>
-  setOutlinerExpandedIdsByMode: (value: Record<OutlinerDisplayMode, string[]>) => void
+  setOutlinerExpandedIdsByMode: (
+    value: Record<OutlinerDisplayMode, string[]>,
+  ) => void
   getOutlinerVisibleNodeOrder: () => string[]
   selectEditorNode: (nodeId: string, options?: SelectionOptions) => void
   setSelectedNodes: (nodeIds: string[], anchorId?: string | null) => void
@@ -42,8 +47,13 @@ function stopEvent(event?: MouseEvent | DragEvent) {
   event?.stopPropagation()
 }
 
-export function createEditorOutlinerController(deps: EditorOutlinerControllerDeps) {
-  function applyOutlinerExpandedIds(mode: OutlinerDisplayMode, ids: Set<string>) {
+export function createEditorOutlinerController(
+  deps: EditorOutlinerControllerDeps,
+) {
+  function applyOutlinerExpandedIds(
+    mode: OutlinerDisplayMode,
+    ids: Set<string>,
+  ) {
     deps.setOutlinerExpandedIdsByMode(
       setOutlinerExpandedIds(deps.getOutlinerExpandedIdsByMode(), mode, ids),
     )
@@ -67,7 +77,10 @@ export function createEditorOutlinerController(deps: EditorOutlinerControllerDep
   function toggleExpanded(itemId: string, event?: MouseEvent) {
     stopEvent(event)
     const mode = deps.getOutlinerDisplayMode()
-    const expanded = getOutlinerExpandedIds(deps.getOutlinerExpandedIdsByMode(), mode)
+    const expanded = getOutlinerExpandedIds(
+      deps.getOutlinerExpandedIdsByMode(),
+      mode,
+    )
     if (expanded.has(itemId)) {
       expanded.delete(itemId)
     } else {
@@ -124,9 +137,9 @@ export function createEditorOutlinerController(deps: EditorOutlinerControllerDep
     const ids = getOutlinerTargetNodeIds(item)
     if (ids.length === 0) return
     const nodes = ids
-      .map((id) => deps.getEditorNodes().find((candidate) => candidate.id === id))
+      .map(id => deps.getEditorNodes().find(candidate => candidate.id === id))
       .filter(Boolean) as EditorSceneNode[]
-    const nextVisible = !nodes.every((node) => node.visible)
+    const nextVisible = !nodes.every(node => node.visible)
     deps.patchNodes(ids, { visible: nextVisible })
   }
 
@@ -135,9 +148,9 @@ export function createEditorOutlinerController(deps: EditorOutlinerControllerDep
     const ids = getOutlinerTargetNodeIds(item)
     if (ids.length === 0) return
     const nodes = ids
-      .map((id) => deps.getEditorNodes().find((candidate) => candidate.id === id))
+      .map(id => deps.getEditorNodes().find(candidate => candidate.id === id))
       .filter(Boolean) as EditorSceneNode[]
-    const nextLocked = nodes.every((node) => node.locked ?? false) ? false : true
+    const nextLocked = nodes.every(node => node.locked ?? false) ? false : true
     deps.patchNodes(ids, { locked: nextLocked })
   }
 
@@ -146,7 +159,8 @@ export function createEditorOutlinerController(deps: EditorOutlinerControllerDep
     const ids = getOutlinerTargetNodeIds(item)
     if (ids.length === 0) return
     const isolated = new Set(deps.getEditorState().isolatedNodeIds)
-    const sameIsolation = ids.length === isolated.size && ids.every((id) => isolated.has(id))
+    const sameIsolation =
+      ids.length === isolated.size && ids.every(id => isolated.has(id))
     if (sameIsolation) {
       deps.clearIsolatedNodes()
       return
@@ -156,9 +170,11 @@ export function createEditorOutlinerController(deps: EditorOutlinerControllerDep
 
   function startDrag(nodeId: string, event: DragEvent) {
     const editorState = deps.getEditorState()
-    const ids = editorState.selectedNodeIds.includes(nodeId) && deps.getDragSelectionIds().length > 0
-      ? deps.getDragSelectionIds()
-      : [nodeId]
+    const ids =
+      editorState.selectedNodeIds.includes(nodeId) &&
+      deps.getDragSelectionIds().length > 0
+        ? deps.getDragSelectionIds()
+        : [nodeId]
 
     deps.setDraggedHierarchyNodeIds(ids)
     if (!editorState.selectedNodeIds.includes(nodeId)) {
@@ -185,9 +201,12 @@ export function createEditorOutlinerController(deps: EditorOutlinerControllerDep
 
   function drop(event: DragEvent, targetId: string | null) {
     event.preventDefault()
-    const ids = deps.getDraggedHierarchyNodeIds().length > 0
-      ? deps.getDraggedHierarchyNodeIds()
-      : (event.dataTransfer?.getData('text/plain') ?? '').split(',').filter(Boolean)
+    const ids =
+      deps.getDraggedHierarchyNodeIds().length > 0
+        ? deps.getDraggedHierarchyNodeIds()
+        : (event.dataTransfer?.getData('text/plain') ?? '')
+            .split(',')
+            .filter(Boolean)
 
     if (ids.length === 0) {
       clearDragState()
@@ -197,7 +216,9 @@ export function createEditorOutlinerController(deps: EditorOutlinerControllerDep
     const applied = deps.reparentNodes(ids, targetId)
     deps.setSaveMessage(
       applied
-        ? (targetId ? 'Hierarchy moved under parent' : 'Hierarchy moved to root')
+        ? targetId
+          ? 'Hierarchy moved under parent'
+          : 'Hierarchy moved to root'
         : 'Invalid hierarchy drop',
     )
     clearDragState()

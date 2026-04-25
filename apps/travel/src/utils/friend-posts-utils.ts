@@ -24,7 +24,11 @@ type FormattedFriendPost = {
     url: string
   }
   render: () => {
-    remarkPluginFrontmatter: { words: number; minutes: number; excerpt: string }
+    remarkPluginFrontmatter: {
+      words: number
+      minutes: number
+      excerpt: string
+    }
   }
 }
 

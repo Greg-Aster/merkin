@@ -65,12 +65,13 @@ export async function GET() {
     })
   } catch (error) {
     console.error('Error generating friend content JSON:', error)
+    const message = error instanceof Error ? error.message : 'Unknown error'
 
     // Return a meaningful error response
     return new Response(
       JSON.stringify({
         error: 'Failed to generate friend content',
-        message: error.message || 'Unknown error',
+        message,
       }),
       {
         status: 500,

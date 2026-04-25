@@ -76,6 +76,8 @@ function handleClickOutside(event) {
     <a 
       href={isAuthenticatedState ? "#" : "/"} 
       on:click={handleButtonClick}
+      data-sfx-hover="hover-soft"
+      data-sfx-click="panel-open"
       class="btn-plain scale-animation rounded-lg h-[3.25rem] px-5 font-bold active:scale-95 flex items-center"
     >
       <div class="flex flex-row items-center text-md">
@@ -102,7 +104,7 @@ function handleClickOutside(event) {
    class="absolute left-0 mt-1 w-48 rounded-lg shadow-lg card-base float-panel py-1 z-50"
    transition:slide={{ duration: 150, axis: 'y' }}
  >
-   <a href="/new-post/" class="block px-4 py-2 text-75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-[var(--primary)] transition-colors duration-200">
+   <a href="/new-post/" data-sfx-hover="hover-soft" data-sfx-click="soft" class="block px-4 py-2 text-75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-[var(--primary)] transition-colors duration-200">
      <div class="flex items-center">
        <svg xmlns="http://www.w3.org/2000/svg" class="text-[1.25rem] mr-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -111,7 +113,7 @@ function handleClickOutside(event) {
        New Post
      </div>
    </a>
-   <a href="/configs/" class="block px-4 py-2 text-75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-[var(--primary)] transition-colors duration-200">
+   <a href="/configs/" data-sfx-hover="hover-soft" data-sfx-click="soft" class="block px-4 py-2 text-75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-[var(--primary)] transition-colors duration-200">
      <div class="flex items-center">
        <svg xmlns="http://www.w3.org/2000/svg" class="text-[1.25rem] mr-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -123,7 +125,7 @@ function handleClickOutside(event) {
        Configs
      </div>
    </a>
-   <a href="/friends/" class="block px-4 py-2 text-75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-[var(--primary)] transition-colors duration-200">
+   <a href="/friends/" data-sfx-hover="hover-soft" data-sfx-click="soft" class="block px-4 py-2 text-75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-[var(--primary)] transition-colors duration-200">
      <div class="flex items-center">
        <svg xmlns="http://www.w3.org/2000/svg" class="text-[1.25rem] mr-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -134,7 +136,7 @@ function handleClickOutside(event) {
        Friends
      </div>
    </a>
-   <a href="/" class="block px-4 py-2 text-75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-[var(--primary)] transition-colors duration-200">
+   <a href="/" data-sfx-hover="hover-soft" data-sfx-click="panel-back" class="block px-4 py-2 text-75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-[var(--primary)] transition-colors duration-200">
      <div class="flex items-center">
        <svg xmlns="http://www.w3.org/2000/svg" class="text-[1.25rem] mr-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -146,6 +148,8 @@ function handleClickOutside(event) {
    <div class="border-t border-neutral-200 dark:border-neutral-700 my-1"></div>
    <button 
      on:click={handleLogout}
+     data-sfx-hover="hover-soft"
+     data-sfx-click="warning"
      class="block w-full text-left px-4 py-2 text-75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-red-500 transition-colors duration-200"
    >
      <div class="flex items-center">

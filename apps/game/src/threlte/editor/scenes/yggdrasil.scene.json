@@ -1,7 +1,7 @@
 {
   "levelId": "yggdrasil",
   "version": 1,
-  "updatedAt": "2026-04-19T17:58:11.544Z",
+  "updatedAt": "2026-04-25T01:59:37.814Z",
   "settings": {
     "level": {
       "spawn": {
@@ -68,42 +68,46 @@
     {
       "id": "yggdrasil-shore-ring",
       "name": "Shore Ring",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
-        -19.328206991636343,
+        -1.02,
         0
       ],
       "rotation": [
-        1.4999999999999993,
+        1.5707963267948966,
         0,
         0
       ],
       "scale": [
-        189.7629235810407,
-        188.7976031931478,
-        20.137438584817716
+        1,
+        1,
+        1
       ],
       "visible": true,
-      "generation": {
-        "descriptor": "shoreline ring, drowned shrine perimeter",
-        "sourceVisualSize": [
-          305.20001220703125,
-          9.060231208801337,
-          305.20001220703125
+      "primitive": {
+        "geometry": "torus",
+        "args": [
+          148,
+          4.6,
+          18,
+          60
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/shore-ring/shore-ring-generated-2026-04-19T16-32-21-479Z.glb",
-        "lastBakedAt": "2026-04-19T16:32:25.616Z"
+        "color": "#716857",
+        "emissive": "#2f2921",
+        "emissiveIntensity": 0.08,
+        "metalness": 0.12,
+        "roughness": 0.88
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/shore-ring/shore-ring-generated-2026-04-19T16-32-21-479Z.glb"
+      "generation": {
+        "descriptor": "low circular shoreline perimeter ring made of eroded ritual stone, broad horizontal boundary element at the island edge"
       }
     },
     {
       "id": "yggdrasil-island-shelf",
       "name": "Island Shelf",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -116,27 +120,31 @@
         0
       ],
       "scale": [
-        156.53964984552007,
-        1.8252430638898813,
-        154.57836716430054
+        1,
+        1,
+        1
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.93
       },
-      "generation": {
-        "descriptor": "broad outer island shelf of weathered sacred stone",
-        "sourceVisualSize": [
-          304,
-          3.5999999046325684,
-          304
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          118,
+          152,
+          3.6,
+          48
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/island-shelf/island-shelf-generated-2026-04-19T16-35-28-683Z.glb",
-        "lastBakedAt": "2026-04-19T16:35:31.728Z"
+        "color": "#43513a",
+        "emissive": "#182116",
+        "emissiveIntensity": 0.04,
+        "metalness": 0.03,
+        "roughness": 0.97
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/island-shelf/island-shelf-generated-2026-04-19T16-35-28-683Z.glb"
+      "generation": {
+        "descriptor": "broad low outer island shelf of weathered sacred stone forming the perimeter terrace around the central island"
       }
     },
     {
@@ -163,7 +171,7 @@
     {
       "id": "yggdrasil-ground",
       "name": "World Root Basin",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -176,33 +184,37 @@
         0
       ],
       "scale": [
-        198.58357227530166,
-        15.503876200018002,
-        198.7184686511477
+        1,
+        1,
+        1
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.94
       },
-      "generation": {
-        "descriptor": "vast circular island foundation of dark earth and root-laced stone",
-        "sourceVisualSize": [
-          392,
-          6.400000095367432,
-          392
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          172,
+          196,
+          6.4,
+          56
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
-        "lastBakedAt": "2026-04-19T16:38:38.465Z"
+        "color": "#2b3827",
+        "emissive": "#10170f",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.04,
+        "roughness": 0.96
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb"
+      "generation": {
+        "descriptor": "very large circular island ground mass of dark earth and embedded sacred stone, the main foundation surface of the level"
       }
     },
     {
       "id": "yggdrasil-mound",
       "name": "Root Mound",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -215,33 +227,37 @@
         0
       ],
       "scale": [
-        89.19159977296684,
-        8.75692133590203,
-        89.72724955391283
+        1,
+        1,
+        1
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.92
       },
-      "generation": {
-        "descriptor": "root mound",
-        "sourceVisualSize": [
-          176,
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          60,
+          88,
           13,
-          176
+          36
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
-        "lastBakedAt": "2026-04-19T16:41:29.849Z"
+        "color": "#4d5e3d",
+        "emissive": "#202c18",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.02,
+        "roughness": 0.98
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb"
+      "generation": {
+        "descriptor": "large central root mound of raised earth and stone, a broad elevated mass supporting the main tree base"
       }
     },
     {
       "id": "yggdrasil-dais",
       "name": "Well Dais",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -254,33 +270,37 @@
         0
       ],
       "scale": [
-        37.21853483034551,
-        1.6215504290438507,
-        37.837781024352815
+        1,
+        1,
+        1
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.9
       },
-      "generation": {
-        "descriptor": "well dais",
-        "sourceVisualSize": [
-          72,
-          3.200000047683716,
-          72
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          26,
+          36,
+          3.2,
+          28
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-04-19T16-44-36-480Z.glb",
-        "lastBakedAt": "2026-04-19T16:44:40.336Z"
+        "color": "#6e6a57",
+        "emissive": "#24231a",
+        "emissiveIntensity": 0.02,
+        "metalness": 0.08,
+        "roughness": 0.9
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/well-dais/well-dais-generated-2026-04-19T16-44-36-480Z.glb"
+      "generation": {
+        "descriptor": "raised circular carved stone dais at the center of the root court, surrounding the sacred well area"
       }
     },
     {
       "id": "yggdrasil-bifrost-path",
       "name": "Bifrost Approach",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -293,33 +313,36 @@
         0
       ],
       "scale": [
-        7.651460663840727,
-        0.45578388558717225,
-        82.62297724845334
+        1,
+        1,
+        1
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "generation": {
-        "descriptor": "bifrost approach",
-        "sourceVisualSize": [
+      "primitive": {
+        "geometry": "box",
+        "args": [
           10,
-          0.8999999761581421,
+          0.9,
           82
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/bifrost-approach/bifrost-approach-generated-2026-04-19T16-47-32-023Z.glb",
-        "lastBakedAt": "2026-04-19T16:47:35.483Z"
+        "color": "#a18f6a",
+        "emissive": "#65416c",
+        "emissiveIntensity": 0.28,
+        "metalness": 0.3,
+        "roughness": 0.52
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/bifrost-approach/bifrost-approach-generated-2026-04-19T16-47-32-023Z.glb"
+      "generation": {
+        "descriptor": "long straight ceremonial causeway of sacred stone leading toward the island center, a path rather than a bridge or arch"
       }
     },
     {
       "id": "yggdrasil-trunk-lower",
       "name": "Trunk Lower",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -332,33 +355,37 @@
         0
       ],
       "scale": [
-        15.217455174935278,
-        24.255093919889454,
-        16.06081057303339
+        1.18,
+        1.22,
+        1.18
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.85
       },
-      "generation": {
-        "descriptor": "colossal ancient trunk segment of blackened sacred timber, fissured bark mass",
-        "sourceVisualSize": [
-          29.94216915130615,
-          47.86694274902344,
-          29.94216915130615
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          9.8176,
+          12.687359999999998,
+          39.235200000000006,
+          16
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/trunk-lower/trunk-lower-generated-2026-04-19T16-50-31-183Z.glb",
-        "lastBakedAt": "2026-04-19T16:50:34.179Z"
+        "color": "#5a4229",
+        "emissive": "#22160d",
+        "emissiveIntensity": 0.04,
+        "metalness": 0.05,
+        "roughness": 0.95
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/trunk-lower/trunk-lower-generated-2026-04-19T16-50-31-183Z.glb"
+      "generation": {
+        "descriptor": "massive vertical trunk section of ancient blackened timber with deep bark grooves and sacred fissures, clearly a tree trunk segment"
       }
     },
     {
       "id": "yggdrasil-trunk-mid",
       "name": "Trunk Mid",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -371,29 +398,33 @@
         0
       ],
       "scale": [
-        11.703217569569494,
-        20.363851174441514,
-        12.310766827673527
+        1.18,
+        1.22,
+        1.18
       ],
       "visible": true,
-      "generation": {
-        "descriptor": "colossal ancient trunk segment of blackened sacred timber, fissured bark mass",
-        "sourceVisualSize": [
-          22.813082008361814,
-          39.88911895751953,
-          22.813082008361814
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          7.2499199999999995,
+          9.66656,
+          32.696,
+          16
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/trunk-mid/trunk-mid-generated-2026-04-19T16-53-29-448Z.glb",
-        "lastBakedAt": "2026-04-19T16:53:33.827Z"
+        "color": "#62492d",
+        "emissive": "#23170d",
+        "emissiveIntensity": 0.05,
+        "metalness": 0.05,
+        "roughness": 0.94
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/trunk-mid/trunk-mid-generated-2026-04-19T16-53-29-448Z.glb"
+      "generation": {
+        "descriptor": "massive vertical trunk section of ancient blackened timber with deep bark grooves and sacred fissures, clearly a tree trunk segment"
       }
     },
     {
       "id": "yggdrasil-trunk-upper",
       "name": "Trunk Upper",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -406,29 +437,33 @@
         0
       ],
       "scale": [
-        8.488195980670941,
-        16.17727626787774,
-        9.035885665791858
+        1.18,
+        1.22,
+        1.18
       ],
       "visible": true,
-      "generation": {
-        "descriptor": "colossal ancient trunk segment of blackened sacred timber, fissured bark mass",
-        "sourceVisualSize": [
-          16.68083297729492,
-          31.911295166015627,
-          17.109810943603513
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          4.83328,
+          7.2499199999999995,
+          26.1568,
+          14
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/trunk-upper/trunk-upper-generated-2026-04-19T16-56-26-375Z.glb",
-        "lastBakedAt": "2026-04-19T16:56:29.905Z"
+        "color": "#6b5133",
+        "emissive": "#25190e",
+        "emissiveIntensity": 0.05,
+        "metalness": 0.04,
+        "roughness": 0.94
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/trunk-upper/trunk-upper-generated-2026-04-19T16-56-26-375Z.glb"
+      "generation": {
+        "descriptor": "massive vertical trunk section of ancient blackened timber with deep bark grooves and sacred fissures, clearly a tree trunk segment"
       }
     },
     {
       "id": "yggdrasil-root-north",
       "name": "Root north",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -441,33 +476,37 @@
         0
       ],
       "scale": [
-        3.8426114517483434,
-        10.554330270503057,
-        17.557704212157915
+        1,
+        1,
+        1
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "generation": {
-        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
-        "sourceVisualSize": [
-          7.182378768920898,
-          20.847124236903046,
-          34.2649132322789
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          2.124,
+          3.776,
+          34.16,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/root-north/root-north-generated-2026-04-19T16-59-20-463Z.glb",
-        "lastBakedAt": "2026-04-19T16:59:24.414Z"
+        "color": "#4d3722",
+        "emissive": "#1d120a",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.97
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/root-north/root-north-generated-2026-04-19T16-59-20-463Z.glb"
+      "generation": {
+        "descriptor": "huge buttress root of ancient sacred wood spreading out from the trunk, a heavy structural tree root rather than a branch"
       }
     },
     {
       "id": "yggdrasil-root-south",
       "name": "Root south",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -480,33 +519,37 @@
         0
       ],
       "scale": [
-        3.409322425420529,
-        12.63710313359757,
-        17.926552332538748
+        1,
+        1,
+        1
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "generation": {
-        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
-        "sourceVisualSize": [
-          6.733479976654053,
-          24.352455964630533,
-          35.27049171426999
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          1.888,
+          3.54,
+          36.6,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/root-south/root-south-generated-2026-04-19T17-02-12-977Z.glb",
-        "lastBakedAt": "2026-04-19T17:02:16.769Z"
+        "color": "#4d3722",
+        "emissive": "#1d120a",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.97
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/root-south/root-south-generated-2026-04-19T17-02-12-977Z.glb"
+      "generation": {
+        "descriptor": "huge buttress root of ancient sacred wood spreading out from the trunk, a heavy structural tree root rather than a branch"
       }
     },
     {
       "id": "yggdrasil-root-east",
       "name": "Root east",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         21.24,
@@ -519,33 +562,37 @@
         -1.15
       ],
       "scale": [
-        18.429517052804123,
-        12.05331750545334,
-        3.705504560840582
+        1,
+        1,
+        1
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "generation": {
-        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
-        "sourceVisualSize": [
-          36.24938568150149,
-          21.30158696103758,
-          7.315999984741211
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          2.006,
+          3.658,
+          36.6,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/root-east/root-east-generated-2026-04-19T17-05-01-813Z.glb",
-        "lastBakedAt": "2026-04-19T17:05:05.214Z"
+        "color": "#4d3722",
+        "emissive": "#1d120a",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.97
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/root-east/root-east-generated-2026-04-19T17-05-01-813Z.glb"
+      "generation": {
+        "descriptor": "huge buttress root of ancient sacred wood spreading out from the trunk, a heavy structural tree root rather than a branch"
       }
     },
     {
       "id": "yggdrasil-root-west",
       "name": "Root west",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         -21.24,
@@ -558,33 +605,37 @@
         1.05
       ],
       "scale": [
-        16.78530786876281,
-        13.085456246515403,
-        3.75206424294114
+        1,
+        1,
+        1
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "generation": {
-        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
-        "sourceVisualSize": [
-          33.093241581738006,
-          23.03249666686655,
-          7.315999984741211
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          2.006,
+          3.658,
+          34.16,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/root-west/root-west-generated-2026-04-19T17-07-48-681Z.glb",
-        "lastBakedAt": "2026-04-19T17:07:51.752Z"
+        "color": "#4d3722",
+        "emissive": "#1d120a",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.97
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/root-west/root-west-generated-2026-04-19T17-07-48-681Z.glb"
+      "generation": {
+        "descriptor": "huge buttress root of ancient sacred wood spreading out from the trunk, a heavy structural tree root rather than a branch"
       }
     },
     {
       "id": "yggdrasil-root-northeast",
       "name": "Root northeast",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         15.34,
@@ -597,33 +648,37 @@
         -0.72
       ],
       "scale": [
-        11.86662269140726,
-        10.300229022101744,
-        11.95407625821269
+        1,
+        1,
+        1
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "generation": {
-        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
-        "sourceVisualSize": [
-          23.35659877858925,
-          20.328119988859118,
-          23.546422168851862
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          1.416,
+          2.832,
+          29.28,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/root-northeast/root-northeast-generated-2026-04-19T17-10-26-920Z.glb",
-        "lastBakedAt": "2026-04-19T17:10:30.381Z"
+        "color": "#4d3722",
+        "emissive": "#1d120a",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.97
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/root-northeast/root-northeast-generated-2026-04-19T17-10-26-920Z.glb"
+      "generation": {
+        "descriptor": "huge buttress root of ancient sacred wood spreading out from the trunk, a heavy structural tree root rather than a branch"
       }
     },
     {
       "id": "yggdrasil-root-northwest",
       "name": "Root northwest",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         -15.34,
@@ -636,33 +691,37 @@
         0.72
       ],
       "scale": [
-        11.847361234105309,
-        10.453517905225246,
-        12.210088034292932
+        1,
+        1,
+        1
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "generation": {
-        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
-        "sourceVisualSize": [
-          23.35659877858925,
-          20.328119988859118,
-          23.546422168851862
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          1.416,
+          2.832,
+          29.28,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/root-northwest/root-northwest-generated-2026-04-19T17-13-41-911Z.glb",
-        "lastBakedAt": "2026-04-19T17:13:45.712Z"
+        "color": "#4d3722",
+        "emissive": "#1d120a",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.97
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/root-northwest/root-northwest-generated-2026-04-19T17-13-41-911Z.glb"
+      "generation": {
+        "descriptor": "huge buttress root of ancient sacred wood spreading out from the trunk, a heavy structural tree root rather than a branch"
       }
     },
     {
       "id": "yggdrasil-root-southeast",
       "name": "Root southeast",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         15.34,
@@ -675,33 +734,37 @@
         -0.72
       ],
       "scale": [
-        12.985266458325041,
-        10.335946789539603,
-        13.291799135677032
+        1,
+        1,
+        1
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "generation": {
-        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
-        "sourceVisualSize": [
-          23.35659877858925,
-          20.328119988859118,
-          23.546422168851862
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          1.416,
+          2.832,
+          29.28,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/root-southeast/root-southeast-generated-2026-04-19T17-16-26-636Z.glb",
-        "lastBakedAt": "2026-04-19T17:16:30.100Z"
+        "color": "#4d3722",
+        "emissive": "#1d120a",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.97
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/root-southeast/root-southeast-generated-2026-04-19T17-16-26-636Z.glb"
+      "generation": {
+        "descriptor": "huge buttress root of ancient sacred wood spreading out from the trunk, a heavy structural tree root rather than a branch"
       }
     },
     {
       "id": "yggdrasil-root-southwest",
       "name": "Root southwest",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         -15.34,
@@ -714,33 +777,37 @@
         0.72
       ],
       "scale": [
-        11.876397702980338,
-        10.72361840268148,
-        12.063334273708623
+        1,
+        1,
+        1
       ],
       "visible": true,
       "collision": {
         "shape": "cuboid",
         "friction": 0.88
       },
-      "generation": {
-        "descriptor": "ancient root buttress of cyclopean sacred wood, root-cathedral mass",
-        "sourceVisualSize": [
-          23.35659877858925,
-          20.328119988859118,
-          23.546422168851862
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          1.416,
+          2.832,
+          29.28,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/root-southwest/root-southwest-generated-2026-04-19T17-19-22-220Z.glb",
-        "lastBakedAt": "2026-04-19T17:19:25.602Z"
+        "color": "#4d3722",
+        "emissive": "#1d120a",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.97
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/root-southwest/root-southwest-generated-2026-04-19T17-19-22-220Z.glb"
+      "generation": {
+        "descriptor": "huge buttress root of ancient sacred wood spreading out from the trunk, a heavy structural tree root rather than a branch"
       }
     },
     {
       "id": "yggdrasil-branch-north",
       "name": "Branch north",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -753,29 +820,33 @@
         0
       ],
       "scale": [
-        3.113190071245697,
-        17.31787124887397,
-        12.502673981717585
+        1.16,
+        1.18,
+        1.16
       ],
       "visible": true,
-      "generation": {
-        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
-        "sourceVisualSize": [
-          6.142759857177734,
-          32.81494151464133,
-          23.555537888515197
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          1.5312,
+          2.784,
+          29.263999999999996,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-north/branch-north-generated-2026-04-19T17-22-30-105Z.glb",
-        "lastBakedAt": "2026-04-19T17:22:33.595Z"
+        "color": "#725837",
+        "emissive": "#251a10",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.95
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/branch-north/branch-north-generated-2026-04-19T17-22-30-105Z.glb"
+      "generation": {
+        "descriptor": "massive horizontal or diagonal branch segment of dark sacred wood, an overhead limb extending away from the trunk"
       }
     },
     {
       "id": "yggdrasil-branch-south",
       "name": "Branch south",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -788,29 +859,33 @@
         0
       ],
       "scale": [
-        3.156640796502397,
-        18.121705958362877,
-        15.363641568413149
+        1.16,
+        1.18,
+        1.16
       ],
       "visible": true,
-      "generation": {
-        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
-        "sourceVisualSize": [
-          6.142759857177734,
-          35.758837499399135,
-          25.360455864148214
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          1.5312,
+          2.784,
+          32.1904,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-south/branch-south-generated-2026-04-19T17-25-13-766Z.glb",
-        "lastBakedAt": "2026-04-19T17:25:17.820Z"
+        "color": "#725837",
+        "emissive": "#251a10",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.95
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/branch-south/branch-south-generated-2026-04-19T17-25-13-766Z.glb"
+      "generation": {
+        "descriptor": "massive horizontal or diagonal branch segment of dark sacred wood, an overhead limb extending away from the trunk"
       }
     },
     {
       "id": "yggdrasil-branch-east",
       "name": "Branch east",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         13.440000000000001,
@@ -823,29 +898,33 @@
         -0.62
       ],
       "scale": [
-        13.115104348276486,
-        15.854632208366603,
-        3.526273866446287
+        1.16,
+        1.18,
+        1.16
       ],
       "visible": true,
-      "generation": {
-        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
-        "sourceVisualSize": [
-          24.563541235973993,
-          31.31670372325405,
-          5.812991943359375
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          1.392,
+          2.5056,
+          29.263999999999996,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-east/branch-east-generated-2026-04-19T17-28-01-226Z.glb",
-        "lastBakedAt": "2026-04-19T17:28:04.600Z"
+        "color": "#725837",
+        "emissive": "#251a10",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.95
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/branch-east/branch-east-generated-2026-04-19T17-28-01-226Z.glb"
+      "generation": {
+        "descriptor": "massive horizontal or diagonal branch segment of dark sacred wood, an overhead limb extending away from the trunk"
       }
     },
     {
       "id": "yggdrasil-branch-west",
       "name": "Branch west",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         -13.440000000000001,
@@ -858,29 +937,33 @@
         0.62
       ],
       "scale": [
-        12.49137590568438,
-        15.86635983911786,
-        3.116986038885634
+        1.16,
+        1.18,
+        1.16
       ],
       "visible": true,
-      "generation": {
-        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
-        "sourceVisualSize": [
-          24.563541235973993,
-          31.31670372325405,
-          5.812991943359375
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          1.392,
+          2.5056,
+          29.263999999999996,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-west/branch-west-generated-2026-04-19T17-30-56-202Z.glb",
-        "lastBakedAt": "2026-04-19T17:30:59.350Z"
+        "color": "#725837",
+        "emissive": "#251a10",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.95
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/branch-west/branch-west-generated-2026-04-19T17-30-56-202Z.glb"
+      "generation": {
+        "descriptor": "massive horizontal or diagonal branch segment of dark sacred wood, an overhead limb extending away from the trunk"
       }
     },
     {
       "id": "yggdrasil-branch-ne",
       "name": "Branch ne",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         10.752,
@@ -893,29 +976,33 @@
         -0.46
       ],
       "scale": [
-        8.409777655495084,
-        13.442046451625014,
-        12.34872359865102
+        1.16,
+        1.18,
+        1.16
       ],
       "visible": true,
-      "generation": {
-        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
-        "sourceVisualSize": [
-          16.39233860609102,
-          26.445075666139957,
-          15.350698305483084
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          1.2528,
+          2.0879999999999996,
+          23.411199999999997,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-ne/branch-ne-generated-2026-04-19T17-33-36-110Z.glb",
-        "lastBakedAt": "2026-04-19T17:33:40.132Z"
+        "color": "#725837",
+        "emissive": "#251a10",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.95
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/branch-ne/branch-ne-generated-2026-04-19T17-33-36-110Z.glb"
+      "generation": {
+        "descriptor": "massive horizontal or diagonal branch segment of dark sacred wood, an overhead limb extending away from the trunk"
       }
     },
     {
       "id": "yggdrasil-branch-nw",
       "name": "Branch nw",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         -10.752,
@@ -928,29 +1015,33 @@
         0.46
       ],
       "scale": [
-        8.636455820789351,
-        13.41667715145148,
-        7.8914972627687785
+        1.16,
+        1.18,
+        1.16
       ],
       "visible": true,
-      "generation": {
-        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
-        "sourceVisualSize": [
-          16.39233860609102,
-          26.445075666139957,
-          15.350698305483084
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          1.2528,
+          2.0879999999999996,
+          23.411199999999997,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-nw/branch-nw-generated-2026-04-19T17-36-13-707Z.glb",
-        "lastBakedAt": "2026-04-19T17:36:16.765Z"
+        "color": "#725837",
+        "emissive": "#251a10",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.95
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/branch-nw/branch-nw-generated-2026-04-19T17-36-13-707Z.glb"
+      "generation": {
+        "descriptor": "massive horizontal or diagonal branch segment of dark sacred wood, an overhead limb extending away from the trunk"
       }
     },
     {
       "id": "yggdrasil-branch-se",
       "name": "Branch se",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         10.752,
@@ -963,29 +1054,33 @@
         -0.46
       ],
       "scale": [
-        9.145877190507845,
-        13.43003182476256,
-        10.35558049696638
+        1.16,
+        1.18,
+        1.16
       ],
       "visible": true,
-      "generation": {
-        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
-        "sourceVisualSize": [
-          16.39233860609102,
-          26.445075666139957,
-          15.350698305483084
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          1.2528,
+          2.0879999999999996,
+          23.411199999999997,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-se/branch-se-generated-2026-04-19T17-39-02-154Z.glb",
-        "lastBakedAt": "2026-04-19T17:39:05.268Z"
+        "color": "#725837",
+        "emissive": "#251a10",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.95
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/branch-se/branch-se-generated-2026-04-19T17-39-02-154Z.glb"
+      "generation": {
+        "descriptor": "massive horizontal or diagonal branch segment of dark sacred wood, an overhead limb extending away from the trunk"
       }
     },
     {
       "id": "yggdrasil-branch-sw",
       "name": "Branch sw",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         -10.752,
@@ -998,29 +1093,33 @@
         0.46
       ],
       "scale": [
-        8.341053400614179,
-        13.433579364892438,
-        12.698071226307455
+        1.16,
+        1.18,
+        1.16
       ],
       "visible": true,
-      "generation": {
-        "descriptor": "high sacred branch span, storm-dark wood, immense overhead limb",
-        "sourceVisualSize": [
-          16.39233860609102,
-          26.445075666139957,
-          15.350698305483084
+      "primitive": {
+        "geometry": "cylinder",
+        "args": [
+          1.2528,
+          2.0879999999999996,
+          23.411199999999997,
+          10
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/branch-sw/branch-sw-generated-2026-04-19T17-41-49-573Z.glb",
-        "lastBakedAt": "2026-04-19T17:41:54.048Z"
+        "color": "#725837",
+        "emissive": "#251a10",
+        "emissiveIntensity": 0.03,
+        "metalness": 0.03,
+        "roughness": 0.95
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/branch-sw/branch-sw-generated-2026-04-19T17-41-49-573Z.glb"
+      "generation": {
+        "descriptor": "massive horizontal or diagonal branch segment of dark sacred wood, an overhead limb extending away from the trunk"
       }
     },
     {
       "id": "yggdrasil-canopy-1",
       "name": "Canopy 1",
-      "kind": "asset",
+      "kind": "primitive",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -1033,23 +1132,25 @@
         0
       ],
       "scale": [
-        17.50440818236155,
-        16.982408999471037,
-        18.95524832644284
+        1,
+        1,
+        1
       ],
       "visible": true,
-      "generation": {
-        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume",
-        "sourceVisualSize": [
-          33.41696548461914,
-          33.41696548461914,
-          33.41696548461914
+      "primitive": {
+        "geometry": "icosahedron",
+        "args": [
+          19.641999999999996,
+          0
         ],
-        "lastBakedAssetUrl": "/generated/hunyuan3d/canopy-1/canopy-1-generated-2026-04-19T17-45-32-578Z.glb",
-        "lastBakedAt": "2026-04-19T17:45:37.072Z"
+        "color": "#657d47",
+        "emissive": "#40551f",
+        "emissiveIntensity": 0.08,
+        "metalness": 0.04,
+        "roughness": 0.92
       },
-      "asset": {
-        "url": "/generated/hunyuan3d/canopy-1/canopy-1-generated-2026-04-19T17-45-32-578Z.glb"
+      "generation": {
+        "descriptor": "large clustered canopy mass representing dense foliage or crown volume, a broad leaf mass rather than a trunk or root"
       }
     },
     {
@@ -1086,7 +1187,7 @@
         "roughness": 0.92
       },
       "generation": {
-        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
+        "descriptor": "large clustered canopy mass representing dense foliage or crown volume, a broad leaf mass rather than a trunk or root"
       }
     },
     {
@@ -1123,7 +1224,7 @@
         "roughness": 0.92
       },
       "generation": {
-        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
+        "descriptor": "large clustered canopy mass representing dense foliage or crown volume, a broad leaf mass rather than a trunk or root"
       }
     },
     {
@@ -1160,7 +1261,7 @@
         "roughness": 0.92
       },
       "generation": {
-        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
+        "descriptor": "large clustered canopy mass representing dense foliage or crown volume, a broad leaf mass rather than a trunk or root"
       }
     },
     {
@@ -1197,7 +1298,7 @@
         "roughness": 0.92
       },
       "generation": {
-        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
+        "descriptor": "large clustered canopy mass representing dense foliage or crown volume, a broad leaf mass rather than a trunk or root"
       }
     },
     {
@@ -1234,7 +1335,7 @@
         "roughness": 0.92
       },
       "generation": {
-        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
+        "descriptor": "large clustered canopy mass representing dense foliage or crown volume, a broad leaf mass rather than a trunk or root"
       }
     },
     {
@@ -1271,7 +1372,7 @@
         "roughness": 0.92
       },
       "generation": {
-        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
+        "descriptor": "large clustered canopy mass representing dense foliage or crown volume, a broad leaf mass rather than a trunk or root"
       }
     },
     {
@@ -1308,7 +1409,7 @@
         "roughness": 0.92
       },
       "generation": {
-        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
+        "descriptor": "large clustered canopy mass representing dense foliage or crown volume, a broad leaf mass rather than a trunk or root"
       }
     },
     {
@@ -1345,7 +1446,7 @@
         "roughness": 0.92
       },
       "generation": {
-        "descriptor": "dense mythic canopy mass, void-dark leaves, eerie crown volume"
+        "descriptor": "large clustered canopy mass representing dense foliage or crown volume, a broad leaf mass rather than a trunk or root"
       }
     },
     {
@@ -1386,7 +1487,7 @@
         "opacity": 0.8
       },
       "generation": {
-        "descriptor": "crown halo"
+        "descriptor": "large circular halo or luminous ring suspended around the upper crown, a floating sacred ornament not a portal"
       }
     },
     {
@@ -1425,7 +1526,7 @@
         "roughness": 0.82
       },
       "generation": {
-        "descriptor": "carved stone well ring, runic shrine circumference"
+        "descriptor": "well of urd ring, carved circular stone ring around a sacred well"
       }
     },
     {
@@ -1470,7 +1571,7 @@
         "opacity": 0.86
       },
       "generation": {
-        "descriptor": "sacred abyssal well pool, dark reflective myth-water"
+        "descriptor": "well of urd pool, low circular sacred water basin or well pool"
       }
     },
     {
@@ -1541,7 +1642,7 @@
         "url": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb"
       },
       "generation": {
-        "descriptor": "Well of Urd Root Shrine"
+        "descriptor": "decorative sacred planter or root shrine object placed near a mythic well"
       }
     },
     {
@@ -1580,7 +1681,7 @@
         "roughness": 0.82
       },
       "generation": {
-        "descriptor": "carved stone well ring, runic shrine circumference"
+        "descriptor": "well of mimir ring, carved circular stone ring around a sacred well"
       }
     },
     {
@@ -1625,7 +1726,7 @@
         "opacity": 0.86
       },
       "generation": {
-        "descriptor": "sacred abyssal well pool, dark reflective myth-water"
+        "descriptor": "well of mimir pool, low circular sacred water basin or well pool"
       }
     },
     {
@@ -1696,7 +1797,7 @@
         "url": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb"
       },
       "generation": {
-        "descriptor": "Well of Mimir Root Shrine"
+        "descriptor": "decorative sacred planter or root shrine object placed near a mythic well"
       }
     },
     {
@@ -1735,7 +1836,7 @@
         "roughness": 0.82
       },
       "generation": {
-        "descriptor": "carved stone well ring, runic shrine circumference"
+        "descriptor": "hvergelmir basin ring, carved circular stone ring around a sacred well"
       }
     },
     {
@@ -1780,7 +1881,7 @@
         "opacity": 0.86
       },
       "generation": {
-        "descriptor": "sacred abyssal well pool, dark reflective myth-water"
+        "descriptor": "hvergelmir basin pool, low circular sacred water basin or well pool"
       }
     },
     {
@@ -1851,7 +1952,7 @@
         "url": "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb"
       },
       "generation": {
-        "descriptor": "Hvergelmir Basin Root Shrine"
+        "descriptor": "decorative sacred planter or root shrine object placed near a mythic well"
       }
     },
     {
@@ -1879,7 +1980,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb"
       },
       "generation": {
-        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
+        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
       }
     },
     {
@@ -1950,7 +2051,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18T22-29-37-524Z.glb"
       },
       "generation": {
-        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
+        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
       }
     },
     {
@@ -2021,7 +2122,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18T22-42-43-915Z.glb"
       },
       "generation": {
-        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
+        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
       }
     },
     {
@@ -2092,7 +2193,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb"
       },
       "generation": {
-        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
+        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
       }
     },
     {
@@ -2163,7 +2264,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb"
       },
       "generation": {
-        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
+        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
       }
     },
     {
@@ -2234,7 +2335,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-23-01-827Z.glb"
       },
       "generation": {
-        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
+        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
       }
     },
     {
@@ -2305,7 +2406,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
       },
       "generation": {
-        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
+        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
       }
     },
     {
@@ -2376,7 +2477,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
       },
       "generation": {
-        "descriptor": "weathered rune monolith, neon fissures, cosmic shrine stone"
+        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
       }
     },
     {
@@ -2461,7 +2562,7 @@
         "roughness": 0.72
       },
       "generation": {
-        "descriptor": "ceremonial approach stone, weathered runic slab"
+        "descriptor": "broad rectangular stepping slab set into the main approach route, a flat walkable path stone"
       }
     },
     {
@@ -2503,7 +2604,7 @@
         "roughness": 0.72
       },
       "generation": {
-        "descriptor": "ceremonial approach stone, weathered runic slab"
+        "descriptor": "broad rectangular stepping slab set into the main approach route, a flat walkable path stone"
       }
     },
     {
@@ -2545,7 +2646,7 @@
         "roughness": 0.72
       },
       "generation": {
-        "descriptor": "ceremonial approach stone, weathered runic slab"
+        "descriptor": "broad rectangular stepping slab set into the main approach route, a flat walkable path stone"
       }
     },
     {
@@ -2587,7 +2688,7 @@
         "roughness": 0.72
       },
       "generation": {
-        "descriptor": "ceremonial approach stone, weathered runic slab"
+        "descriptor": "broad rectangular stepping slab set into the main approach route, a flat walkable path stone"
       }
     },
     {
@@ -2629,7 +2730,7 @@
         "roughness": 0.72
       },
       "generation": {
-        "descriptor": "ceremonial approach stone, weathered runic slab"
+        "descriptor": "broad rectangular stepping slab set into the main approach route, a flat walkable path stone"
       }
     },
     {
@@ -2671,7 +2772,7 @@
         "roughness": 0.72
       },
       "generation": {
-        "descriptor": "ceremonial approach stone, weathered runic slab"
+        "descriptor": "broad rectangular stepping slab set into the main approach route, a flat walkable path stone"
       }
     },
     {
@@ -2821,7 +2922,7 @@
         "type": "portal-apparatus"
       },
       "generation": {
-        "descriptor": "occult portal apparatus"
+        "descriptor": "portal-like threshold frame at the approach entrance, a ceremonial arrival structure"
       }
     },
     {
@@ -2849,7 +2950,7 @@
         "type": "support-column"
       },
       "generation": {
-        "descriptor": "retro-futurist support column"
+        "descriptor": "vertical support column framing the arrival threshold or gate"
       }
     },
     {
@@ -2877,7 +2978,7 @@
         "type": "support-column"
       },
       "generation": {
-        "descriptor": "retro-futurist support column"
+        "descriptor": "vertical support column framing the arrival threshold or gate"
       }
     },
     {
@@ -2905,7 +3006,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
       },
       "generation": {
-        "descriptor": "threshold world-tree monolith, magenta-violet rune channels"
+        "descriptor": "tall threshold monolith beside the arrival route, a vertical standing stone framing the entrance"
       }
     },
     {
@@ -2933,7 +3034,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
       },
       "generation": {
-        "descriptor": "threshold world-tree monolith, magenta-violet rune channels"
+        "descriptor": "tall threshold monolith beside the arrival route, a vertical standing stone framing the entrance"
       }
     },
     {
@@ -2967,7 +3068,7 @@
         "markerSize": 1.08
       },
       "generation": {
-        "descriptor": "occult portal apparatus"
+        "descriptor": "portal frame or ceremonial gateway apparatus"
       }
     },
     {
@@ -3006,7 +3107,7 @@
         "body": "The threshold into Yggdrasil should feel ceremonial, not casual. In surviving Norse sources Bifrost is not merely color in the sky; it is a charged passage between domains. This approach therefore frames the tree as something earned, not stumbled upon: a world-axis reached by crossing from ordinary space into sacred narrative space."
       },
       "generation": {
-        "descriptor": "ritual story marker obelisk"
+        "descriptor": "story marker pedestal or lore obelisk"
       }
     },
     {
@@ -3034,7 +3135,7 @@
         "type": "support-column"
       },
       "generation": {
-        "descriptor": "retro-futurist support column"
+        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support"
       }
     },
     {
@@ -3062,7 +3163,7 @@
         "type": "support-column"
       },
       "generation": {
-        "descriptor": "retro-futurist support column"
+        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support"
       }
     },
     {
@@ -3090,7 +3191,7 @@
         "type": "observation-rig"
       },
       "generation": {
-        "descriptor": "cosmic observation rig"
+        "descriptor": "ritual shrine rig or ceremonial framework placed near a sacred well"
       }
     },
     {
@@ -3118,7 +3219,7 @@
         "type": "support-column"
       },
       "generation": {
-        "descriptor": "retro-futurist support column"
+        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support"
       }
     },
     {
@@ -3146,7 +3247,7 @@
         "type": "support-column"
       },
       "generation": {
-        "descriptor": "retro-futurist support column"
+        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support"
       }
     },
     {
@@ -3174,7 +3275,7 @@
         "type": "observation-rig"
       },
       "generation": {
-        "descriptor": "cosmic observation rig"
+        "descriptor": "ritual shrine rig or ceremonial framework placed near a sacred well"
       }
     },
     {
@@ -3202,7 +3303,7 @@
         "type": "support-column"
       },
       "generation": {
-        "descriptor": "retro-futurist support column"
+        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support"
       }
     },
     {
@@ -3230,7 +3331,7 @@
         "type": "support-column"
       },
       "generation": {
-        "descriptor": "retro-futurist support column"
+        "descriptor": "ritual support column placed beside a sacred well shrine, a freestanding vertical stone support"
       }
     },
     {
@@ -3258,7 +3359,7 @@
         "type": "observation-rig"
       },
       "generation": {
-        "descriptor": "cosmic observation rig"
+        "descriptor": "ritual shrine rig or ceremonial framework placed near a sacred well"
       }
     },
     {
@@ -3286,7 +3387,7 @@
         "type": "growth-planter"
       },
       "generation": {
-        "descriptor": "biomechanical growth planter"
+        "descriptor": "sacred planter or root shrine vessel containing ritual growth near a well"
       }
     },
     {
@@ -3314,7 +3415,7 @@
         "type": "growth-planter"
       },
       "generation": {
-        "descriptor": "biomechanical growth planter"
+        "descriptor": "sacred planter or root shrine vessel containing ritual growth near a well"
       }
     },
     {
@@ -3342,7 +3443,7 @@
         "type": "bench-growth"
       },
       "generation": {
-        "descriptor": "overgrown haunted bench"
+        "descriptor": "weathered sacred bench or seated shrine element with overgrowth"
       }
     },
     {
@@ -3381,7 +3482,7 @@
         "body": "One of Yggdrasil’s great roots reaches to the Well of Urd, where the Norns are said to attend the tree and the fate of lives. Medieval descriptions emphasize care as much as prophecy: they water the trunk with sacred water and white clay so the bark does not decay. This scene leans into that older image. Fate here is not abstract bookkeeping. It is ritual maintenance of the living world-axis."
       },
       "generation": {
-        "descriptor": "ritual story marker obelisk"
+        "descriptor": "story marker pedestal or lore obelisk"
       }
     },
     {
@@ -3420,7 +3521,7 @@
         "body": "Another root bends toward Mimir’s well, seat of difficult wisdom. Later tradition most famously remembers Odin giving one of his eyes for a drink from its depths. The point is not simply that knowledge is valuable, but that true insight alters the seeker. This shrine is therefore framed as solemn rather than benevolent: not a fountain of comfort, but a place where understanding costs something real."
       },
       "generation": {
-        "descriptor": "ritual story marker obelisk"
+        "descriptor": "story marker pedestal or lore obelisk"
       }
     },
     {
@@ -3459,7 +3560,7 @@
         "body": "At Hvergelmir the world-tree ceases to look like tranquil symbolism and becomes strain made visible. Tradition places Nidhogg and other serpents among the lower roots, where cold water, gnawing, and underworld pressure gather. This matters for accuracy: Yggdrasil is not a spotless emblem of harmony. It endures because it is continuously threatened and continuously sustained."
       },
       "generation": {
-        "descriptor": "ritual story marker obelisk"
+        "descriptor": "story marker pedestal or lore obelisk"
       }
     },
     {
@@ -3498,7 +3599,7 @@
         "body": "Ratatoskr, the squirrel of the old poems, carries words between the eagle above and Nidhogg below. The tradition is sharp-edged: the messenger does not calm the axis of the world, but keeps its tensions alive. In spatial terms this means the trunk is not just connective tissue. It is a corridor of communication, irritation, memory, and consequence."
       },
       "generation": {
-        "descriptor": "ritual story marker obelisk"
+        "descriptor": "story marker pedestal or lore obelisk"
       }
     },
     {
@@ -3537,7 +3638,7 @@
         "body": "The upper crown of Yggdrasil is not empty decoration. The eagle and the hawk Veðrfölnir give the canopy intelligence and surveillance. This landmark makes that legible in play: the top of the tree is a station of oversight, a place from which the structure of worlds can be observed rather than merely admired."
       },
       "generation": {
-        "descriptor": "ritual story marker obelisk"
+        "descriptor": "story marker pedestal or lore obelisk"
       }
     },
     {
@@ -3576,7 +3677,7 @@
         "body": "The four stags named in the poetic tradition browse in Yggdrasil’s branches. Their presence complicates the image of the world-tree in useful ways. The upper boughs are alive, but they are also consumed, worn, and changed. In this level, the stag spirits turn that idea into visible motion across the canopy."
       },
       "generation": {
-        "descriptor": "ritual story marker obelisk"
+        "descriptor": "story marker pedestal or lore obelisk"
       }
     },
     {
@@ -3874,7 +3975,7 @@
         "opacity": 0.78
       },
       "generation": {
-        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
+        "descriptor": "narrow luminous runway strip embedded in the approach path, a thin decorative spectral ribbon rather than a large structure"
       }
     },
     {
@@ -3914,7 +4015,7 @@
         "opacity": 0.78
       },
       "generation": {
-        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
+        "descriptor": "narrow luminous runway strip embedded in the approach path, a thin decorative spectral ribbon rather than a large structure"
       }
     },
     {
@@ -3954,7 +4055,7 @@
         "opacity": 0.78
       },
       "generation": {
-        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
+        "descriptor": "narrow luminous runway strip embedded in the approach path, a thin decorative spectral ribbon rather than a large structure"
       }
     },
     {
@@ -3994,7 +4095,7 @@
         "opacity": 0.78
       },
       "generation": {
-        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
+        "descriptor": "narrow luminous runway strip embedded in the approach path, a thin decorative spectral ribbon rather than a large structure"
       }
     },
     {
@@ -4034,7 +4135,7 @@
         "opacity": 0.78
       },
       "generation": {
-        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
+        "descriptor": "narrow luminous runway strip embedded in the approach path, a thin decorative spectral ribbon rather than a large structure"
       }
     },
     {
@@ -4074,7 +4175,7 @@
         "opacity": 0.78
       },
       "generation": {
-        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
+        "descriptor": "narrow luminous runway strip embedded in the approach path, a thin decorative spectral ribbon rather than a large structure"
       }
     },
     {
@@ -4114,7 +4215,7 @@
         "opacity": 0.78
       },
       "generation": {
-        "descriptor": "neon bifrost causeway ribbon, magenta violet spectral light"
+        "descriptor": "narrow luminous runway strip embedded in the approach path, a thin decorative spectral ribbon rather than a large structure"
       }
     },
     {
@@ -4306,7 +4407,7 @@
         "opacity": 0.84
       },
       "generation": {
-        "descriptor": "eagle crown ring"
+        "descriptor": "high crown perch structure associated with the upper watch point, a perched landmark near the top of the tree"
       }
     },
     {
@@ -4334,7 +4435,7 @@
         "type": "observation-rig"
       },
       "generation": {
-        "descriptor": "cosmic observation rig"
+        "descriptor": "high crown perch structure associated with the upper watch point, a perched landmark near the top of the tree"
       }
     },
     {
@@ -4362,7 +4463,7 @@
         "type": "support-column"
       },
       "generation": {
-        "descriptor": "retro-futurist support column"
+        "descriptor": "high crown perch structure associated with the upper watch point, a perched landmark near the top of the tree"
       }
     },
     {
@@ -4401,7 +4502,7 @@
         "body": "This perch is an interpretive landmark: a deliberate spatial answer to a common problem in mythic level design, where the “top of the tree” is said to matter but cannot be read at ground level. Here the perch, ring, and spirits translate the old cosmological image into something legible at a distance."
       },
       "generation": {
-        "descriptor": "ritual story marker obelisk"
+        "descriptor": "story marker pedestal or lore obelisk"
       }
     },
     {
@@ -4537,7 +4638,7 @@
         "type": "wasteland-archway"
       },
       "generation": {
-        "descriptor": "wasteland stone archway"
+        "descriptor": "arched entry structure marking the descent into the Hvergelmir depth area"
       }
     },
     {
@@ -4565,7 +4666,7 @@
         "type": "wasteland-archway"
       },
       "generation": {
-        "descriptor": "wasteland stone archway"
+        "descriptor": "arched entry structure marking the descent into the Hvergelmir depth area"
       }
     },
     {
@@ -4593,7 +4694,7 @@
         "type": "broken-ring"
       },
       "generation": {
-        "descriptor": "broken ancient stone ring ruin"
+        "descriptor": "broken sacred ring ruin placed in the lower Hvergelmir sub-area"
       }
     },
     {
@@ -4621,7 +4722,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb"
       },
       "generation": {
-        "descriptor": "cold root-depth monolith, underworld shrine stone"
+        "descriptor": "tall cold-depth monolith placed in the Hvergelmir lower passage, a shrine-like standing stone"
       }
     },
     {
@@ -4649,7 +4750,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb"
       },
       "generation": {
-        "descriptor": "cold root-depth monolith, underworld shrine stone"
+        "descriptor": "tall cold-depth monolith placed in the Hvergelmir lower passage, a shrine-like standing stone"
       }
     },
     {
@@ -4688,7 +4789,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "tunnel root 1"
+        "descriptor": "large tunnel-forming root beam in the Hvergelmir depth passage"
       }
     },
     {
@@ -4727,7 +4828,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "tunnel root 2"
+        "descriptor": "large tunnel-forming root beam in the Hvergelmir depth passage"
       }
     },
     {
@@ -4766,7 +4867,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "tunnel root 3"
+        "descriptor": "large tunnel-forming root beam in the Hvergelmir depth passage"
       }
     },
     {
@@ -4835,7 +4936,7 @@
         "body": "This sub-area pushes Hvergelmir beyond a single pool into a readable lower district: a cold root pocket where arches, tunnel-roots, and serpent-omens suggest depth, danger, and the underworld pull associated with the lowest reaches of the tree. It is meant to feel like a place where a traveler should lower their voice."
       },
       "generation": {
-        "descriptor": "ritual story marker obelisk"
+        "descriptor": "story marker pedestal or lore obelisk"
       }
     },
     {
@@ -4906,7 +5007,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
       },
       "generation": {
-        "descriptor": "Foreground Root Stone Left"
+        "descriptor": "foreground standing stone used to frame the first view of the island"
       }
     },
     {
@@ -4934,7 +5035,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
       },
       "generation": {
-        "descriptor": "Foreground Root Stone Right"
+        "descriptor": "foreground standing stone used to frame the first view of the island"
       }
     },
     {
@@ -5264,7 +5365,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -5306,7 +5407,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -5348,7 +5449,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -5390,7 +5491,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -5432,7 +5533,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -5474,7 +5575,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -5516,7 +5617,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -5558,7 +5659,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -5600,7 +5701,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -5642,7 +5743,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -5684,7 +5785,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -5726,7 +5827,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -5768,7 +5869,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -5810,7 +5911,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -5852,7 +5953,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -5894,7 +5995,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -5936,7 +6037,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -5978,7 +6079,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -6020,7 +6121,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -6062,7 +6163,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -6104,7 +6205,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -6146,7 +6247,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -6188,7 +6289,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -6230,7 +6331,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -6272,7 +6373,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -6314,7 +6415,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -6356,7 +6457,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -6398,7 +6499,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -6440,7 +6541,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -6482,7 +6583,7 @@
         "roughness": 0.9
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "small flat landing platform on the ascent route, a rest point between ramp sections"
       }
     },
     {
@@ -6524,7 +6625,7 @@
         "roughness": 0.88
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "sloped climbable ascent platform wrapping around the trunk, a walkable ramp section leading upward"
       }
     },
     {
@@ -6566,7 +6667,7 @@
         "roughness": 0.84
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "broad final landing platform at the top of the ascent path, just before the crown perch"
       }
     },
     {
@@ -6608,7 +6709,7 @@
         "roughness": 0.82
       },
       "generation": {
-        "descriptor": "ritual ascent platform, root-wood pilgrimage path"
+        "descriptor": "short flat bridge section connecting the final ascent platform to the crown threshold"
       }
     },
     {
@@ -6647,7 +6748,7 @@
         "body": "This ascent path turns the upper world-tree from a backdrop into a destination. It is intentionally interpretive rather than archaeological: a ritualized route of platforms and landings that gives players a clear, game-readable climb while preserving the mythic sensation of circling the trunk toward the crown."
       },
       "generation": {
-        "descriptor": "ritual story marker obelisk"
+        "descriptor": "story marker pedestal or lore obelisk"
       }
     },
     {
@@ -6825,7 +6926,7 @@
         "opacity": 0
       },
       "generation": {
-        "descriptor": "spawn safety pad"
+        "descriptor": "hidden safety spawn platform used only to provide a stable player landing surface"
       }
     },
     {
@@ -6853,7 +6954,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
       },
       "generation": {
-        "descriptor": "Horizon Monolith 1"
+        "descriptor": "distant horizon standing stone used to establish scale and sacred perimeter"
       }
     },
     {
@@ -6924,7 +7025,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
       },
       "generation": {
-        "descriptor": "Horizon Monolith 2"
+        "descriptor": "distant horizon standing stone used to establish scale and sacred perimeter"
       }
     },
     {
@@ -6995,7 +7096,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
       },
       "generation": {
-        "descriptor": "Horizon Monolith 3"
+        "descriptor": "distant horizon standing stone used to establish scale and sacred perimeter"
       }
     },
     {
@@ -7066,7 +7167,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
       },
       "generation": {
-        "descriptor": "Horizon Monolith 4"
+        "descriptor": "distant horizon standing stone used to establish scale and sacred perimeter"
       }
     },
     {
@@ -7137,7 +7238,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
       },
       "generation": {
-        "descriptor": "Horizon Monolith 5"
+        "descriptor": "distant horizon standing stone used to establish scale and sacred perimeter"
       }
     },
     {
@@ -7208,7 +7309,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
       },
       "generation": {
-        "descriptor": "Horizon Monolith 6"
+        "descriptor": "distant horizon standing stone used to establish scale and sacred perimeter"
       }
     },
     {
@@ -7290,7 +7391,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "descending sea root of drowned cosmic timber"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
       }
     },
     {
@@ -7329,7 +7430,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "descending sea root of drowned cosmic timber"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
       }
     },
     {
@@ -7368,7 +7469,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "descending sea root of drowned cosmic timber"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
       }
     },
     {
@@ -7407,7 +7508,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "descending sea root of drowned cosmic timber"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
       }
     },
     {
@@ -7446,7 +7547,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "descending sea root of drowned cosmic timber"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
       }
     },
     {
@@ -7485,7 +7586,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "descending sea root of drowned cosmic timber"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
       }
     },
     {
@@ -7524,7 +7625,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "descending sea root of drowned cosmic timber"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
       }
     },
     {
@@ -7563,7 +7664,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "descending sea root of drowned cosmic timber"
+        "descriptor": "large descending root of drowned timber reaching from the island down toward the surrounding sea, clearly a root element"
       }
     },
     {
@@ -7601,7 +7702,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -7640,7 +7741,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -7678,7 +7779,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -7717,7 +7818,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -7755,7 +7856,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -7794,7 +7895,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -7832,7 +7933,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -7871,7 +7972,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -7909,7 +8010,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -7948,7 +8049,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -7986,7 +8087,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -8025,7 +8126,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -8063,7 +8164,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -8102,7 +8203,7 @@
         "roughness": 0.94
       },
       "generation": {
-        "descriptor": "weathered shoreline stone, sea-worn ruin fragment"
+        "descriptor": "low shoreline boulder or broken coastal slab resting near the edge of the island"
       }
     },
     {
@@ -8140,7 +8241,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "broken island shelf segment, collapsed sacred ledge"
+        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea"
       }
     },
     {
@@ -8178,7 +8279,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "broken island shelf segment, collapsed sacred ledge"
+        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea"
       }
     },
     {
@@ -8216,7 +8317,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "broken island shelf segment, collapsed sacred ledge"
+        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea"
       }
     },
     {
@@ -8254,7 +8355,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "broken island shelf segment, collapsed sacred ledge"
+        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea"
       }
     },
     {
@@ -8292,7 +8393,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "broken island shelf segment, collapsed sacred ledge"
+        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea"
       }
     },
     {
@@ -8330,7 +8431,7 @@
         "roughness": 0.98
       },
       "generation": {
-        "descriptor": "broken island shelf segment, collapsed sacred ledge"
+        "descriptor": "broken edge shelf fragment where the outer island terrace collapses toward the sea"
       }
     },
     {
@@ -8519,7 +8620,7 @@
         "roughness": 0.97
       },
       "generation": {
-        "descriptor": "outer sacred islet, drowned mythic outcrop"
+        "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass"
       }
     },
     {
@@ -8547,7 +8648,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb"
       },
       "generation": {
-        "descriptor": "drowned shoreline monolith ruin, abyssal runes, salt-dark sacred stone"
+        "descriptor": "drowned standing monolith rising from an outer shoal, a partially submerged sacred stone"
       }
     },
     {
@@ -8575,7 +8676,7 @@
         "type": "broken-ring"
       },
       "generation": {
-        "descriptor": "half-submerged sacred ring ruin, broken ritual stone"
+        "descriptor": "half-submerged broken ring ruin resting on an outer shoal"
       }
     },
     {
@@ -8657,7 +8758,7 @@
         "roughness": 0.97
       },
       "generation": {
-        "descriptor": "outer sacred islet, drowned mythic outcrop"
+        "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass"
       }
     },
     {
@@ -8685,7 +8786,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
       },
       "generation": {
-        "descriptor": "drowned shoreline monolith ruin, abyssal runes, salt-dark sacred stone"
+        "descriptor": "drowned standing monolith rising from an outer shoal, a partially submerged sacred stone"
       }
     },
     {
@@ -8713,7 +8814,7 @@
         "type": "broken-ring"
       },
       "generation": {
-        "descriptor": "half-submerged sacred ring ruin, broken ritual stone"
+        "descriptor": "half-submerged broken ring ruin resting on an outer shoal"
       }
     },
     {
@@ -8795,7 +8896,7 @@
         "roughness": 0.97
       },
       "generation": {
-        "descriptor": "outer sacred islet, drowned mythic outcrop"
+        "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass"
       }
     },
     {
@@ -8823,7 +8924,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
       },
       "generation": {
-        "descriptor": "drowned shoreline monolith ruin, abyssal runes, salt-dark sacred stone"
+        "descriptor": "drowned standing monolith rising from an outer shoal, a partially submerged sacred stone"
       }
     },
     {
@@ -8851,7 +8952,7 @@
         "type": "broken-ring"
       },
       "generation": {
-        "descriptor": "half-submerged sacred ring ruin, broken ritual stone"
+        "descriptor": "half-submerged broken ring ruin resting on an outer shoal"
       }
     },
     {
@@ -8933,7 +9034,7 @@
         "roughness": 0.97
       },
       "generation": {
-        "descriptor": "outer sacred islet, drowned mythic outcrop"
+        "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass"
       }
     },
     {
@@ -8961,7 +9062,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb"
       },
       "generation": {
-        "descriptor": "drowned shoreline monolith ruin, abyssal runes, salt-dark sacred stone"
+        "descriptor": "drowned standing monolith rising from an outer shoal, a partially submerged sacred stone"
       }
     },
     {
@@ -8989,7 +9090,7 @@
         "type": "broken-ring"
       },
       "generation": {
-        "descriptor": "half-submerged sacred ring ruin, broken ritual stone"
+        "descriptor": "half-submerged broken ring ruin resting on an outer shoal"
       }
     },
     {
@@ -9071,7 +9172,7 @@
         "roughness": 0.97
       },
       "generation": {
-        "descriptor": "outer sacred islet, drowned mythic outcrop"
+        "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass"
       }
     },
     {
@@ -9099,7 +9200,7 @@
         "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
       },
       "generation": {
-        "descriptor": "drowned shoreline monolith ruin, abyssal runes, salt-dark sacred stone"
+        "descriptor": "drowned standing monolith rising from an outer shoal, a partially submerged sacred stone"
       }
     },
     {
@@ -9127,7 +9228,7 @@
         "type": "broken-ring"
       },
       "generation": {
-        "descriptor": "half-submerged sacred ring ruin, broken ritual stone"
+        "descriptor": "half-submerged broken ring ruin resting on an outer shoal"
       }
     },
     {

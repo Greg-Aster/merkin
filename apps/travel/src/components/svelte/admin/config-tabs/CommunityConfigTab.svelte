@@ -1,150 +1,158 @@
 <script lang="ts">
-  import { onMount, createEventDispatcher } from 'svelte';
-  import type { CommunityConfig } from '../types/communityconfig';
-  
-  // Props
-  export let communityConfig: CommunityConfig;
-  
-  // Event dispatcher to notify parent of changes
-  const dispatch = createEventDispatcher();
-  
-  // Local state
-  let activeSection = 'general';
-  let editFeature: any = null;
-  let editChannel: any = null;
-  let editGuideline: string = '';
-  let guidelineIndex: number = -1;
-  let showFeatureEditor = false;
-  let showChannelEditor = false;
-  let showGuidelineEditor = false;
-  
-  // Sections for tab navigation
-  const sections = [
-    { id: 'general', label: 'General' },
-    { id: 'discord', label: 'Discord' },
-    { id: 'contact', label: 'Contact' },
-    { id: 'newsletter', label: 'Newsletter' },
-    { id: 'events', label: 'Events' },
-    { id: 'guidelines', label: 'Guidelines' }
-  ];
-  
-  // Function to notify parent of changes
-  function notifyChanges() {
-    dispatch('change');
+import { createEventDispatcher, onMount } from 'svelte'
+import type { CommunityConfig } from '../types/communityconfig'
+
+// Props
+export let communityConfig: CommunityConfig
+
+// Event dispatcher to notify parent of changes
+const dispatch = createEventDispatcher()
+
+// Local state
+let activeSection = 'general'
+let editFeature: any = null
+let editChannel: any = null
+let editGuideline: string = ''
+let guidelineIndex: number = -1
+let showFeatureEditor = false
+let showChannelEditor = false
+let showGuidelineEditor = false
+
+// Sections for tab navigation
+const sections = [
+  { id: 'general', label: 'General' },
+  { id: 'discord', label: 'Discord' },
+  { id: 'contact', label: 'Contact' },
+  { id: 'newsletter', label: 'Newsletter' },
+  { id: 'events', label: 'Events' },
+  { id: 'guidelines', label: 'Guidelines' },
+]
+
+// Function to notify parent of changes
+function notifyChanges() {
+  dispatch('change')
+}
+
+// Function to toggle a section's enabled status
+function toggleSection(section: keyof CommunityConfig) {
+  communityConfig[section].enabled = !communityConfig[section].enabled
+  notifyChanges()
+}
+
+// Function to toggle a hero option
+function toggleHeroOption(index: number) {
+  communityConfig.hero.options[index].enabled =
+    !communityConfig.hero.options[index].enabled
+  notifyChanges()
+}
+
+// Function to edit a feature
+function editFeatureItem(section: string, index: number) {
+  const sectionKey = section as keyof CommunityConfig
+  editFeature = {
+    section: section,
+    index: index,
+    ...communityConfig[sectionKey].features[index],
   }
-  
-  // Function to toggle a section's enabled status
-  function toggleSection(section: keyof CommunityConfig) {
-    communityConfig[section].enabled = !communityConfig[section].enabled;
-    notifyChanges();
-  }
-  
-  // Function to toggle a hero option
-  function toggleHeroOption(index: number) {
-    communityConfig.hero.options[index].enabled = !communityConfig.hero.options[index].enabled;
-    notifyChanges();
-  }
-  
-  // Function to edit a feature
-  function editFeatureItem(section: string, index: number) {
-    const sectionKey = section as keyof CommunityConfig;
-    editFeature = {
-      section: section,
-      index: index,
-      ...communityConfig[sectionKey].features[index]
-    };
-    showFeatureEditor = true;
-  }
-  
-  // Function to save feature changes
-  function saveFeature() {
-    if (editFeature) {
-      const sectionKey = editFeature.section as keyof CommunityConfig;
-      communityConfig[sectionKey].features[editFeature.index] = {
-        title: editFeature.title,
-        description: editFeature.description,
-        icon: editFeature.icon
-      };
-      notifyChanges();
-      showFeatureEditor = false;
+  showFeatureEditor = true
+}
+
+// Function to save feature changes
+function saveFeature() {
+  if (editFeature) {
+    const sectionKey = editFeature.section as keyof CommunityConfig
+    communityConfig[sectionKey].features[editFeature.index] = {
+      title: editFeature.title,
+      description: editFeature.description,
+      icon: editFeature.icon,
     }
+    notifyChanges()
+    showFeatureEditor = false
   }
-  
-  // Function to edit a discord channel
-  function editDiscordChannel(index: number) {
-    editChannel = {
-      index: index,
-      ...communityConfig.discord.channels[index]
-    };
-    showChannelEditor = true;
+}
+
+// Function to edit a discord channel
+function editDiscordChannel(index: number) {
+  editChannel = {
+    index: index,
+    ...communityConfig.discord.channels[index],
   }
-  
-  // Function to save channel changes
-  function saveChannel() {
-    if (editChannel) {
-      communityConfig.discord.channels[editChannel.index] = {
-        name: editChannel.name,
-        description: editChannel.description,
-        color: editChannel.color
-      };
-      notifyChanges();
-      showChannelEditor = false;
+  showChannelEditor = true
+}
+
+// Function to save channel changes
+function saveChannel() {
+  if (editChannel) {
+    communityConfig.discord.channels[editChannel.index] = {
+      name: editChannel.name,
+      description: editChannel.description,
+      color: editChannel.color,
     }
+    notifyChanges()
+    showChannelEditor = false
   }
-  
-  // Function to add a new channel
-  function addChannel() {
-    editChannel = {
-      index: communityConfig.discord.channels.length,
-      name: "#new-channel",
-      description: "Channel description",
-      color: "blue-500"
-    };
-    showChannelEditor = true;
+}
+
+// Function to add a new channel
+function addChannel() {
+  editChannel = {
+    index: communityConfig.discord.channels.length,
+    name: '#new-channel',
+    description: 'Channel description',
+    color: 'blue-500',
   }
-  
-  // Function to delete a channel
-  function deleteChannel(index: number) {
-    if (confirm("Are you sure you want to delete this channel?")) {
-      communityConfig.discord.channels = communityConfig.discord.channels.filter((_, i) => i !== index);
-      notifyChanges();
-    }
+  showChannelEditor = true
+}
+
+// Function to delete a channel
+function deleteChannel(index: number) {
+  if (confirm('Are you sure you want to delete this channel?')) {
+    communityConfig.discord.channels = communityConfig.discord.channels.filter(
+      (_, i) => i !== index,
+    )
+    notifyChanges()
   }
-  
-  // Function to add a new guideline
-  function addGuideline() {
-    editGuideline = "";
-    guidelineIndex = -1;
-    showGuidelineEditor = true;
+}
+
+// Function to add a new guideline
+function addGuideline() {
+  editGuideline = ''
+  guidelineIndex = -1
+  showGuidelineEditor = true
+}
+
+// Function to edit a guideline
+function editGuidelineItem(index: number) {
+  editGuideline = communityConfig.guidelines.items[index]
+  guidelineIndex = index
+  showGuidelineEditor = true
+}
+
+// Function to save guideline
+function saveGuideline() {
+  if (guidelineIndex === -1) {
+    // Add new guideline
+    communityConfig.guidelines.items = [
+      ...communityConfig.guidelines.items,
+      editGuideline,
+    ]
+  } else {
+    // Update existing guideline
+    communityConfig.guidelines.items[guidelineIndex] = editGuideline
   }
-  
-  // Function to edit a guideline
-  function editGuidelineItem(index: number) {
-    editGuideline = communityConfig.guidelines.items[index];
-    guidelineIndex = index;
-    showGuidelineEditor = true;
+  showGuidelineEditor = false
+  notifyChanges()
+}
+
+// Function to delete a guideline
+function deleteGuideline(index: number) {
+  if (confirm('Are you sure you want to delete this guideline?')) {
+    communityConfig.guidelines.items = communityConfig.guidelines.items.filter(
+      (_, i) => i !== index,
+    )
+    notifyChanges()
   }
-  
-  // Function to save guideline
-  function saveGuideline() {
-    if (guidelineIndex === -1) {
-      // Add new guideline
-      communityConfig.guidelines.items = [...communityConfig.guidelines.items, editGuideline];
-    } else {
-      // Update existing guideline
-      communityConfig.guidelines.items[guidelineIndex] = editGuideline;
-    }
-    showGuidelineEditor = false;
-    notifyChanges();
-  }
-  
-  // Function to delete a guideline
-  function deleteGuideline(index: number) {
-    if (confirm("Are you sure you want to delete this guideline?")) {
-      communityConfig.guidelines.items = communityConfig.guidelines.items.filter((_, i) => i !== index);
-      notifyChanges();
-    }
-  }
+}
 </script>
 
 <div class="community-config-tab">

@@ -1,28 +1,28 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
-    
-    // Props
-    export let communityConfig;
-    export let show = false;
-    
-    // State
-    let exportStatus = {
-      processing: false,
-      error: null,
-      success: false
-    };
-    
-    // Event dispatcher
-    const dispatch = createEventDispatcher();
-    
-    // Function to close the dialog
-    function closeDialog() {
-      dispatch('close');
-    }
-    
-    // Format the type imports
-    function formatTypeImports() {
-      return `// Import types
+import { createEventDispatcher } from 'svelte'
+
+// Props
+export let communityConfig
+export let show = false
+
+// State
+let exportStatus = {
+  processing: false,
+  error: null,
+  success: false,
+}
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Function to close the dialog
+function closeDialog() {
+  dispatch('close')
+}
+
+// Format the type imports
+function formatTypeImports() {
+  return `// Import types
   import type { 
     CommunityConfig,
     DiscordConfig,
@@ -31,66 +31,69 @@
     EventsConfig,
     GuidelinesConfig,
     HeroConfig
-  } from '../types/communityconfig';`;
-    }
-    
-    // Function to generate config file content
-    function generateConfigFileContent() {
-      try {
-        // Generate community config content with types
-        let communityConfigContent = `${formatTypeImports()}
+  } from '../types/communityconfig';`
+}
+
+// Function to generate config file content
+function generateConfigFileContent() {
+  try {
+    // Generate community config content with types
+    let communityConfigContent = `${formatTypeImports()}
   
   // Community page configuration
-  export const communityConfig: CommunityConfig = ${JSON.stringify(communityConfig, null, 2)
-          .replace(/"([^"]+)":/g, '$1:')}`;
-          
-        return communityConfigContent;
-      } catch (error) {
-        exportStatus.error = `Error generating configuration: ${error.message}`;
-        console.error('Config generation error:', error);
-        return '';
-      }
-    }
-    
-    // Function to download configuration file
-    async function downloadConfigFile() {
-      try {
-        exportStatus.processing = true;
-        exportStatus.error = null;
-        
-        const configContent = generateConfigFileContent();
-        if (!configContent) return;
-        
-        // Create and download the config file
-        downloadFile('community.config.ts', configContent);
-        
-        exportStatus.success = true;
-        setTimeout(() => {
-          exportStatus.success = false;
-        }, 3000);
-      } catch (error) {
-        exportStatus.error = `Error exporting configuration: ${error.message}`;
-        console.error('Export error:', error);
-      } finally {
-        exportStatus.processing = false;
-      }
-    }
-    
-    // Helper function to download a file
-    function downloadFile(filename, content) {
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 100);
-    }
-  </script>
+  export const communityConfig: CommunityConfig = ${JSON.stringify(
+    communityConfig,
+    null,
+    2,
+  ).replace(/"([^"]+)":/g, '$1:')}`
+
+    return communityConfigContent
+  } catch (error) {
+    exportStatus.error = `Error generating configuration: ${error.message}`
+    console.error('Config generation error:', error)
+    return ''
+  }
+}
+
+// Function to download configuration file
+async function downloadConfigFile() {
+  try {
+    exportStatus.processing = true
+    exportStatus.error = null
+
+    const configContent = generateConfigFileContent()
+    if (!configContent) return
+
+    // Create and download the config file
+    downloadFile('community.config.ts', configContent)
+
+    exportStatus.success = true
+    setTimeout(() => {
+      exportStatus.success = false
+    }, 3000)
+  } catch (error) {
+    exportStatus.error = `Error exporting configuration: ${error.message}`
+    console.error('Export error:', error)
+  } finally {
+    exportStatus.processing = false
+  }
+}
+
+// Helper function to download a file
+function downloadFile(filename, content) {
+  const blob = new Blob([content], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  setTimeout(() => {
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }, 100)
+}
+</script>
   
   {#if show}
     <div class="fixed inset-0 bg-black/50 dark:bg-black/60 z-50 flex items-center justify-center">

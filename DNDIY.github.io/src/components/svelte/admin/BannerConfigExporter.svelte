@@ -1,22 +1,22 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
-  
-  // Props
-  export let bannerConfig;
-  export let show = false;
-  
-  // Event dispatcher
-  const dispatch = createEventDispatcher();
-  
-  // Function to close the dialog
-  function closeDialog() {
-    dispatch('close');
-  }
-  
-  // Function to generate banner.config.ts content
-  function generateBannerConfigContent() {
-    // Create a string template for the banner.config.ts file
-    let bannerConfigContent = `// Import type - use import type syntax to fix verbatimModuleSyntax error
+import { createEventDispatcher } from 'svelte'
+
+// Props
+export let bannerConfig
+export let show = false
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Function to close the dialog
+function closeDialog() {
+  dispatch('close')
+}
+
+// Function to generate banner.config.ts content
+function generateBannerConfigContent() {
+  // Create a string template for the banner.config.ts file
+  let bannerConfigContent = `// Import type - use import type syntax to fix verbatimModuleSyntax error
 import type { ImageMetadata } from 'astro'
 
 // Import banner images
@@ -120,28 +120,32 @@ export interface BannerConfig {
  * Banner configuration for the site
  * Controls which images are used for the animated banner
  */
-export const bannerConfig: BannerConfig = ${JSON.stringify({
+export const bannerConfig: BannerConfig = ${JSON.stringify(
+    {
       ...bannerConfig,
       // Ensure navbarSpacing exists even if it's not in the current config
       navbarSpacing: bannerConfig.navbarSpacing || {
         standard: '0',
         timeline: '4.5rem',
         video: '4.5rem',
-        image: '4.5rem'
-      }
-    }, null, 2)
-      .replace(/"([^"]+)":/g, '$1:')
-      .replace(/"forward"/g, "'forward'")
-      .replace(/"reverse"/g, "'reverse'")
-      .replace(/"alternate"/g, "'alternate'")
-      .replace(/"cover"/g, "'cover'")
-      .replace(/"contain"/g, "'contain'")
-      .replace(/"fill"/g, "'fill'")
-      .replace(/"color"/g, "'color'")
-      .replace(/"gradient"/g, "'gradient'")
-      .replace(/"bannerList": \[\s*"([^"]+)",/g, 'bannerList: [\n    banner1,')
-      .replace(/"banner(\d+)",/g, 'banner$1,')
-      .replace(/"defaultBanner": "banner(\d+)"/g, 'defaultBanner: banner$1')}
+        image: '4.5rem',
+      },
+    },
+    null,
+    2,
+  )
+    .replace(/"([^"]+)":/g, '$1:')
+    .replace(/"forward"/g, "'forward'")
+    .replace(/"reverse"/g, "'reverse'")
+    .replace(/"alternate"/g, "'alternate'")
+    .replace(/"cover"/g, "'cover'")
+    .replace(/"contain"/g, "'contain'")
+    .replace(/"fill"/g, "'fill'")
+    .replace(/"color"/g, "'color'")
+    .replace(/"gradient"/g, "'gradient'")
+    .replace(/"bannerList": \[\s*"([^"]+)",/g, 'bannerList: [\n    banner1,')
+    .replace(/"banner(\d+)",/g, 'banner$1,')
+    .replace(/"defaultBanner": "banner(\d+)"/g, 'defaultBanner: banner$1')}
 
 /**
  * Get appropriate banner dimensions based on screen size
@@ -200,26 +204,26 @@ export function isImageBannerData(data: any): data is ImageBannerData {
 
 export function isTimelineBannerData(data: any): data is TimelineBannerData {
   return data && 'category' in data && typeof data.category === 'string';
-}`;
-    
-    return bannerConfigContent;
-  }
-  
-  // Function to download the banner config file
-  function downloadBannerConfig() {
-    const content = generateBannerConfigContent();
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'banner.config.ts';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 100);
-  }
+}`
+
+  return bannerConfigContent
+}
+
+// Function to download the banner config file
+function downloadBannerConfig() {
+  const content = generateBannerConfigContent()
+  const blob = new Blob([content], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'banner.config.ts'
+  document.body.appendChild(a)
+  a.click()
+  setTimeout(() => {
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }, 100)
+}
 </script>
 
 {#if show}

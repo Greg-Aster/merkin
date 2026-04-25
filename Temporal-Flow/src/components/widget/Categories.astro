@@ -11,7 +11,7 @@ interface Props {
 }
 
 const { class: className, style }: Props = Astro.props
-const categories = (await getCategoryList()).map((category) => ({
+const categories = (await getCategoryList()).map(category => ({
   name: category.name,
   count: String(category.count),
   url: getCategoryUrl(category.name),

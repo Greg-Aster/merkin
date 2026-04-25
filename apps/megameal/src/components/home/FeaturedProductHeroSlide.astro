@@ -1,26 +1,24 @@
 ---
-import { getCollection } from "astro:content";
-import FeaturedProductBanner from "./FeaturedProductBanner.svelte";
+import { getCollection } from 'astro:content'
 import {
-	buildFlagshipProductShowcase,
-	getProductSlug,
-} from "../../utils/flagship-product-showcase";
+  buildFlagshipProductShowcase,
+  getProductSlug,
+} from '../../utils/flagship-product-showcase'
+import FeaturedProductBanner from './FeaturedProductBanner.svelte'
 
 const products = await getCollection(
-	"products",
-	({ data }) => data.draft !== true,
-);
+  'products',
+  ({ data }) => data.draft !== true,
+)
 const product =
-	products.find((entry) => getProductSlug(entry) === "snuggaloids") ??
-	products.find((entry) => entry.data.featured) ??
-	products[0];
+  products.find(entry => getProductSlug(entry) === 'snuggaloids') ??
+  products.find(entry => entry.data.featured) ??
+  products[0]
 
 if (!product) {
-	throw new Error(
-		"FeaturedProductHeroSlide could not resolve a product entry.",
-	);
+  throw new Error('FeaturedProductHeroSlide could not resolve a product entry.')
 }
-const showcase = buildFlagshipProductShowcase(product, products);
+const showcase = buildFlagshipProductShowcase(product, products)
 ---
 
 <div class="featured-product-hero-slide">

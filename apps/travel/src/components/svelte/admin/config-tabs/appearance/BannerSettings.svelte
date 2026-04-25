@@ -1,174 +1,176 @@
 <script>
-  import { createEventDispatcher, onMount } from 'svelte';
-  
-  // Props
-  export let bannerConfig;
+import { createEventDispatcher, onMount } from 'svelte'
 
-  // Initialize navbarSpacing if it doesn't exist
+// Props
+export let bannerConfig
+
+// Initialize navbarSpacing if it doesn't exist
+if (!bannerConfig.navbarSpacing) {
+  bannerConfig.navbarSpacing = {
+    standard: '0',
+    timeline: '4.5rem',
+    video: '4.5rem',
+    image: '4.5rem',
+  }
+}
+
+// Local state
+let isBannerSequence = false
+let bannerCount = 0
+let selectedBannerIndex = 0
+let imageBaseUrl = '/src/assets/banner/' // Base URL for serving images
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Helper functions for paths
+function getDisplayPath(path) {
+  // Return just the filename part for display purposes
+  if (!path) return ''
+  const filename = path.split('/').pop()
+  return filename
+}
+
+// Handle changes to configuration
+function handleChange() {
+  dispatch('change', bannerConfig)
+}
+
+// Convert import path to URL path
+function getImageUrl(path) {
+  if (!path) return null
+
+  // Extract the filename - handle both formats:
+  // 1. "src/assets/banner/0001.png" (from configuration)
+  // 2. Object format (when imported in the TypeScript file)
+  let filename
+  if (typeof path === 'string') {
+    filename = path.split('/').pop()
+  } else if (path && path.toString) {
+    const pathStr = path.toString()
+    filename = pathStr.split('/').pop()
+  } else {
+    return null
+  }
+
+  return `${imageBaseUrl}${filename}`
+}
+
+// Initialize from bannerConfig on mount
+onMount(() => {
+  // Check if we have a sequence or single banner
+  if (bannerConfig && bannerConfig.bannerList) {
+    isBannerSequence = bannerConfig.bannerList.length > 1
+    bannerCount = bannerConfig.bannerList.length
+
+    // Set the selected banner index to match the default banner
+    if (isBannerSequence && bannerConfig.defaultBanner) {
+      const defaultBannerStr = bannerConfig.defaultBanner.toString()
+      const foundIndex = bannerConfig.bannerList.findIndex(
+        banner => banner.toString() === defaultBannerStr,
+      )
+      if (foundIndex >= 0) {
+        selectedBannerIndex = foundIndex
+      }
+    }
+  }
+
+  // Initialize default banner type if it doesn't exist
+  if (!bannerConfig.defaultBannerType) {
+    bannerConfig.defaultBannerType = 'standard'
+  }
+
+  // Initialize default banner data if it doesn't exist
+  if (!bannerConfig.defaultBannerData) {
+    bannerConfig.defaultBannerData = {}
+  }
+
+  // Initialize navbar spacing if it doesn't exist
   if (!bannerConfig.navbarSpacing) {
     bannerConfig.navbarSpacing = {
       standard: '0',
       timeline: '4.5rem',
       video: '4.5rem',
-      image: '4.5rem'
-    };
+      image: '4.5rem',
+    }
   }
-  
-  // Local state
-  let isBannerSequence = false;
-  let bannerCount = 0;
-  let selectedBannerIndex = 0;
-  let imageBaseUrl = '/src/assets/banner/'; // Base URL for serving images
-  
-  // Event dispatcher
-  const dispatch = createEventDispatcher();
-  
-  // Helper functions for paths
-  function getDisplayPath(path) {
-    // Return just the filename part for display purposes
-    if (!path) return '';
-    const filename = path.split('/').pop();
-    return filename;
+})
+
+// Function to toggle banner type
+function toggleBannerType() {
+  isBannerSequence = !isBannerSequence
+
+  if (!isBannerSequence && bannerConfig.bannerList.length > 0) {
+    // If switching to single banner, keep only the default banner
+    bannerConfig.bannerList = [bannerConfig.defaultBanner]
+    bannerConfig.animation.enabled = false
+  } else if (isBannerSequence) {
+    // If switching to sequence, enable animation
+    bannerConfig.animation.enabled = true
   }
-  
-  // Handle changes to configuration
-  function handleChange() {
-    dispatch('change', bannerConfig);
+
+  handleChange()
+}
+
+// Function to select a banner from the sequence
+function selectBanner(index) {
+  selectedBannerIndex = index
+  // Update the default banner
+  bannerConfig.defaultBanner = bannerConfig.bannerList[index]
+  handleChange()
+}
+
+// Function to remove banner from sequence
+function removeBannerFromSequence(index) {
+  if (bannerConfig.bannerList.length <= 1) {
+    alert('Cannot remove the only banner in the sequence')
+    return
   }
-  
-  // Convert import path to URL path
-  function getImageUrl(path) {
-    if (!path) return null;
-    
-    // Extract the filename - handle both formats:
-    // 1. "src/assets/banner/0001.png" (from configuration)
-    // 2. Object format (when imported in the TypeScript file)
-    let filename;
-    if (typeof path === 'string') {
-      filename = path.split('/').pop();
-    } else if (path && path.toString) {
-      const pathStr = path.toString();
-      filename = pathStr.split('/').pop();
-    } else {
-      return null;
-    }
-    
-    return `${imageBaseUrl}${filename}`;
+
+  // Remove banner from list
+  bannerConfig.bannerList = bannerConfig.bannerList.filter(
+    (_, i) => i !== index,
+  )
+
+  // If we removed the default banner, set a new default
+  if (selectedBannerIndex === index) {
+    selectedBannerIndex = 0
+    bannerConfig.defaultBanner = bannerConfig.bannerList[0]
+  } else if (selectedBannerIndex > index) {
+    // Adjust selectedBannerIndex if we removed a banner before it
+    selectedBannerIndex--
   }
-  
-  // Initialize from bannerConfig on mount
-  onMount(() => {
-    // Check if we have a sequence or single banner
-    if (bannerConfig && bannerConfig.bannerList) {
-      isBannerSequence = bannerConfig.bannerList.length > 1;
-      bannerCount = bannerConfig.bannerList.length;
-      
-      // Set the selected banner index to match the default banner
-      if (isBannerSequence && bannerConfig.defaultBanner) {
-        const defaultBannerStr = bannerConfig.defaultBanner.toString();
-        const foundIndex = bannerConfig.bannerList.findIndex(banner => 
-          banner.toString() === defaultBannerStr
-        );
-        if (foundIndex >= 0) {
-          selectedBannerIndex = foundIndex;
-        }
-      }
+
+  bannerCount = bannerConfig.bannerList.length
+  handleChange()
+}
+
+// Function to handle default banner type change
+function handleDefaultBannerTypeChange(event) {
+  const newType = event.target.value
+  bannerConfig.defaultBannerType = newType
+
+  // Reset banner data when type changes
+  if (newType === 'standard') {
+    bannerConfig.defaultBannerData = {}
+  } else if (newType === 'video') {
+    bannerConfig.defaultBannerData = { videoId: '' }
+  } else if (newType === 'image') {
+    bannerConfig.defaultBannerData = { imageUrl: '' }
+  } else if (newType === 'timeline') {
+    bannerConfig.defaultBannerData = {
+      category: '',
+      title: '',
+      startYear: null,
+      endYear: null,
+      background: '/public/posts/timeline/universe.png',
+      compact: false,
+      height: '70vh',
     }
-    
-    // Initialize default banner type if it doesn't exist
-    if (!bannerConfig.defaultBannerType) {
-      bannerConfig.defaultBannerType = 'standard';
-    }
-    
-    // Initialize default banner data if it doesn't exist
-    if (!bannerConfig.defaultBannerData) {
-      bannerConfig.defaultBannerData = {};
-    }
-    
-    // Initialize navbar spacing if it doesn't exist
-    if (!bannerConfig.navbarSpacing) {
-      bannerConfig.navbarSpacing = {
-        standard: '0',
-        timeline: '4.5rem',
-        video: '4.5rem',
-        image: '4.5rem'
-      };
-    }
-  });
-  
-  // Function to toggle banner type
-  function toggleBannerType() {
-    isBannerSequence = !isBannerSequence;
-    
-    if (!isBannerSequence && bannerConfig.bannerList.length > 0) {
-      // If switching to single banner, keep only the default banner
-      bannerConfig.bannerList = [bannerConfig.defaultBanner];
-      bannerConfig.animation.enabled = false;
-    } else if (isBannerSequence) {
-      // If switching to sequence, enable animation
-      bannerConfig.animation.enabled = true;
-    }
-    
-    handleChange();
   }
-  
-  // Function to select a banner from the sequence
-  function selectBanner(index) {
-    selectedBannerIndex = index;
-    // Update the default banner
-    bannerConfig.defaultBanner = bannerConfig.bannerList[index];
-    handleChange();
-  }
-  
-  // Function to remove banner from sequence
-  function removeBannerFromSequence(index) {
-    if (bannerConfig.bannerList.length <= 1) {
-      alert("Cannot remove the only banner in the sequence");
-      return;
-    }
-    
-    // Remove banner from list
-    bannerConfig.bannerList = bannerConfig.bannerList.filter((_, i) => i !== index);
-    
-    // If we removed the default banner, set a new default
-    if (selectedBannerIndex === index) {
-      selectedBannerIndex = 0;
-      bannerConfig.defaultBanner = bannerConfig.bannerList[0];
-    } else if (selectedBannerIndex > index) {
-      // Adjust selectedBannerIndex if we removed a banner before it
-      selectedBannerIndex--;
-    }
-    
-    bannerCount = bannerConfig.bannerList.length;
-    handleChange();
-  }
-  
-  // Function to handle default banner type change
-  function handleDefaultBannerTypeChange(event) {
-    const newType = event.target.value;
-    bannerConfig.defaultBannerType = newType;
-    
-    // Reset banner data when type changes
-    if (newType === 'standard') {
-      bannerConfig.defaultBannerData = {};
-    } else if (newType === 'video') {
-      bannerConfig.defaultBannerData = { videoId: '' };
-    } else if (newType === 'image') {
-      bannerConfig.defaultBannerData = { imageUrl: '' };
-    } else if (newType === 'timeline') {
-      bannerConfig.defaultBannerData = { 
-        category: '', 
-        title: '', 
-        startYear: null, 
-        endYear: null,
-        background: '/public/posts/timeline/universe.png',
-        compact: false,
-        height: '70vh'
-      };
-    }
-    
-    handleChange();
-  }
+
+  handleChange()
+}
 </script>
 
 <!-- Banner Settings -->

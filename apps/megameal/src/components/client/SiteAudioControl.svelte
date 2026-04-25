@@ -1,10 +1,7 @@
 <script lang="ts">
 import Icon from '@iconify/svelte/dist/Icon.svelte'
 import { onMount } from 'svelte'
-import {
-  siteAudioManager,
-  type SiteAudioState,
-} from '../../utils/site-audio'
+import { type SiteAudioState, siteAudioManager } from '../../utils/site-audio'
 
 let audioState: SiteAudioState = {
   enabled: false,
@@ -26,8 +23,8 @@ const syncAudioForCurrentPage = () => {
   siteAudioManager.syncForPath(window.location.pathname)
 }
 
-const toggleAudio = () => {
-  siteAudioManager.unlockFromGesture()
+const toggleAudio = async () => {
+  await siteAudioManager.unlockFromGesture()
   siteAudioManager.toggle()
 }
 
@@ -67,7 +64,7 @@ onMount(() => {
   siteAudioManager.initialize()
   syncViewportMode()
 
-  const unsubscribe = siteAudioManager.subscribe((state) => {
+  const unsubscribe = siteAudioManager.subscribe(state => {
     audioState = state
   })
 
@@ -80,7 +77,9 @@ onMount(() => {
   const handleViewportChange = () => {
     syncViewportMode()
   }
-  document.addEventListener('pointerdown', handleFirstGesture, { passive: true })
+  document.addEventListener('pointerdown', handleFirstGesture, {
+    passive: true,
+  })
   document.addEventListener('keydown', handleFirstGesture)
   mediaQuery.addEventListener('change', handleViewportChange)
 

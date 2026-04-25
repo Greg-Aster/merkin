@@ -75,12 +75,9 @@ export let product: {
   reviews: ProductReview[]
   quirks?: Quirk[]
 }
-// biome-ignore lint/style/useConst: Svelte component props must use `let`.
 export let showBannerControls = true
-// biome-ignore lint/style/useConst: Svelte component props must use `let`.
 export let kickerLabel = 'Featured Product'
 
-// biome-ignore lint/style/useConst: Svelte component props must use `let`.
 export let relatedProducts: RelatedProduct[] = []
 
 let selectedIndex = 0
@@ -1406,10 +1403,9 @@ onMount(() => {
 		text-transform: uppercase;
 	}
 
-	.featured-product-qanda p,
-	.featured-product-reviews p,
-	.featured-product-assurance p,
-	.featured-product-ingredients p {
+		.featured-product-qanda p,
+		.featured-product-reviews p,
+		.featured-product-assurance p {
 		margin: 0.55rem 0 0;
 		color: rgb(203 213 225 / 0.94);
 		line-height: 1.7;

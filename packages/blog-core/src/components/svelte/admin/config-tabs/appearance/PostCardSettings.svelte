@@ -94,9 +94,9 @@ onMount(() => {
           
           <div class="space-y-4">
             <div class="flex flex-col space-y-2">
-              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <div class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 Image Position
-              </label>
+              </div>
               <div class="flex space-x-4">
                 <label class="inline-flex items-center">
                   <input 
@@ -322,9 +322,9 @@ onMount(() => {
           
           <div class="space-y-4">
             <div class="flex flex-col space-y-2">
-              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <div class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 Image Position
-              </label>
+              </div>
               <div class="flex space-x-4">
                 <label class="inline-flex items-center">
                   <input 

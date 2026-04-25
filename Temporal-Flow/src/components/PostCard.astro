@@ -2,29 +2,29 @@
 // src/components/PostCard.astro
 // This updated PostCard component adds data attributes to support client-side filtering
 
-import path from 'path';
-import PostMetadata from './PostMeta.astro';
-import ImageWrapper from './misc/ImageWrapper.astro';
-import { Icon } from 'astro-icon/components';
-import { i18n } from '../i18n/translation';
-import I18nKey from '../i18n/i18nKey';
-import { getDir } from '../utils/url-utils';
-import { postCardConfig } from '../config/postcard.config';
+import path from 'path'
+import { Icon } from 'astro-icon/components'
+import { postCardConfig } from '../config/postcard.config'
+import I18nKey from '../i18n/i18nKey'
+import { i18n } from '../i18n/translation'
+import { getDir } from '../utils/url-utils'
+import PostMetadata from './PostMeta.astro'
+import ImageWrapper from './misc/ImageWrapper.astro'
 
 interface Props {
-  class?: string;
-  entry: any;
-  title: string;
-  url: string;
-  published: Date;
-  updated?: Date;
-  tags: string[];
-  category: string;
-  image: string;
-  description: string;
-  draft: boolean;
-  style?: string;
-  isPostPage?: boolean;
+  class?: string
+  entry: any
+  title: string
+  url: string
+  published: Date
+  updated?: Date
+  tags: string[]
+  category: string
+  image: string
+  description: string
+  draft: boolean
+  style?: string
+  isPostPage?: boolean
 }
 
 const {
@@ -38,36 +38,39 @@ const {
   image,
   description,
   style = '',
-  isPostPage = false
-} = Astro.props;
+  isPostPage = false,
+} = Astro.props
 
-const className = Astro.props.class;
+const className = Astro.props.class
 
 // Modify the hasCover logic
-const hasCover = image !== undefined && image !== null && image !== '' && 
-  (!isPostPage || (isPostPage && entry.data.showImageOnPost !== false));
+const hasCover =
+  image !== undefined &&
+  image !== null &&
+  image !== '' &&
+  (!isPostPage || (isPostPage && entry.data.showImageOnPost !== false))
 
 // Get local post card config
-const config = postCardConfig.localPosts;
+const config = postCardConfig.localPosts
 
 // Set the cover width based on the configuration
-const coverWidth = `${config.layout.imageSizePercentage}%`;
-const usesRightAlignedImage = config.layout.imagePosition === 'right';
+const coverWidth = `${config.layout.imageSizePercentage}%`
+const usesRightAlignedImage = config.layout.imagePosition === 'right'
 
-const { remarkPluginFrontmatter } = await entry.render();
+const { remarkPluginFrontmatter } = await entry.render()
 
 // Calculate timestamp for data attribute
-const timestamp = published.getTime();
-const dateStr = published.toISOString().split('T')[0];
+const timestamp = published.getTime()
+const dateStr = published.toISOString().split('T')[0]
 const mobileDateStr = published.toLocaleDateString('en-US', {
   month: 'numeric',
   day: 'numeric',
-});
+})
 const mobileMetaDate = published.toLocaleDateString('en-US', {
   month: 'short',
   day: 'numeric',
   year: 'numeric',
-});
+})
 ---
 
 <div 

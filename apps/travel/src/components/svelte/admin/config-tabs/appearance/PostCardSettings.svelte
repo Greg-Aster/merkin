@@ -1,53 +1,65 @@
 <script>
-  import { createEventDispatcher, onMount } from 'svelte';
-  
-  // Props
-  export let postCardConfig;
-  
-  // Event dispatcher
-  const dispatch = createEventDispatcher();
-  
-  // Handle changes to configuration
-  function handleChange() {
-    dispatch('change', postCardConfig);
+import { createEventDispatcher, onMount } from 'svelte'
+
+// Props
+export let postCardConfig
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Handle changes to configuration
+function handleChange() {
+  dispatch('change', postCardConfig)
+}
+
+// Initialize tab functionality
+onMount(() => {
+  // Tab functionality
+  // Get references to tabs and panels
+  const localPostsTab = document.getElementById('local-posts-tab')
+  const friendPostsTab = document.getElementById('friend-posts-tab')
+  const localPostsPanel = document.getElementById('local-posts-panel')
+  const friendPostsPanel = document.getElementById('friend-posts-panel')
+
+  // Add click event listeners to tabs
+  if (localPostsTab && friendPostsTab && localPostsPanel && friendPostsPanel) {
+    localPostsTab.addEventListener('click', () => {
+      // Activate local posts tab
+      localPostsTab.classList.add(
+        'border-[var(--primary)]',
+        'text-[var(--primary)]',
+      )
+      localPostsTab.classList.remove('border-transparent', 'text-neutral-500')
+      friendPostsTab.classList.remove(
+        'border-[var(--primary)]',
+        'text-[var(--primary)]',
+      )
+      friendPostsTab.classList.add('border-transparent', 'text-neutral-500')
+
+      // Show local posts panel, hide friend posts panel
+      localPostsPanel.classList.remove('hidden')
+      friendPostsPanel.classList.add('hidden')
+    })
+
+    friendPostsTab.addEventListener('click', () => {
+      // Activate friend posts tab
+      friendPostsTab.classList.add(
+        'border-[var(--primary)]',
+        'text-[var(--primary)]',
+      )
+      friendPostsTab.classList.remove('border-transparent', 'text-neutral-500')
+      localPostsTab.classList.remove(
+        'border-[var(--primary)]',
+        'text-[var(--primary)]',
+      )
+      localPostsTab.classList.add('border-transparent', 'text-neutral-500')
+
+      // Show friend posts panel, hide local posts panel
+      friendPostsPanel.classList.remove('hidden')
+      localPostsPanel.classList.add('hidden')
+    })
   }
-  
-  // Initialize tab functionality
-  onMount(() => {
-    // Tab functionality
-    // Get references to tabs and panels
-    const localPostsTab = document.getElementById('local-posts-tab');
-    const friendPostsTab = document.getElementById('friend-posts-tab');
-    const localPostsPanel = document.getElementById('local-posts-panel');
-    const friendPostsPanel = document.getElementById('friend-posts-panel');
-    
-    // Add click event listeners to tabs
-    if (localPostsTab && friendPostsTab && localPostsPanel && friendPostsPanel) {
-      localPostsTab.addEventListener('click', () => {
-        // Activate local posts tab
-        localPostsTab.classList.add('border-[var(--primary)]', 'text-[var(--primary)]');
-        localPostsTab.classList.remove('border-transparent', 'text-neutral-500');
-        friendPostsTab.classList.remove('border-[var(--primary)]', 'text-[var(--primary)]');
-        friendPostsTab.classList.add('border-transparent', 'text-neutral-500');
-        
-        // Show local posts panel, hide friend posts panel
-        localPostsPanel.classList.remove('hidden');
-        friendPostsPanel.classList.add('hidden');
-      });
-      
-      friendPostsTab.addEventListener('click', () => {
-        // Activate friend posts tab
-        friendPostsTab.classList.add('border-[var(--primary)]', 'text-[var(--primary)]');
-        friendPostsTab.classList.remove('border-transparent', 'text-neutral-500');
-        localPostsTab.classList.remove('border-[var(--primary)]', 'text-[var(--primary)]');
-        localPostsTab.classList.add('border-transparent', 'text-neutral-500');
-        
-        // Show friend posts panel, hide local posts panel
-        friendPostsPanel.classList.remove('hidden');
-        localPostsPanel.classList.add('hidden');
-      });
-    }
-  });
+})
 </script>
 
 <!-- PostCard Settings -->

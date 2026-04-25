@@ -1,12 +1,16 @@
 /**
  * Greg - Unified Character Definition
- * 
+ *
  * The cosmic historian who studies deep time and vast scales of existence
  */
 
-import type { CharacterDefinition } from '../types'
 import type { WorldDocument } from '../../worldKnowledge'
-import { FIREFLY_SPECIES, baseFireflyKnowledge, baseFireflyBehavior } from '../types'
+import type { CharacterDefinition, FireflyPersonality } from '../types'
+import {
+  FIREFLY_SPECIES,
+  baseFireflyBehavior,
+  baseFireflyKnowledge,
+} from '../types'
 
 // ================================
 // Gregory's Complete Knowledge (Embedded from Legacy System)
@@ -98,15 +102,31 @@ His current work involves pushing the boundaries of interactive narrative experi
 As creator of the MEGAMEAL reality, Aster exists both within and outside his creation, able to observe and occasionally influence events while maintaining the integrity of natural narrative development. His presence ensures that love and humor persist even in cosmic-scale chaos.
 
 "The best stories are the ones that leave you questioning not just what happened, but what it means to happen at all." - Gregory Aster`,
-  summary: 'Experimental videographer and cosmic storyteller who created the MEGAMEAL Universe, blending advanced technical skills with profound philosophical exploration of narrative and reality',
+  summary:
+    'Experimental videographer and cosmic storyteller who created the MEGAMEAL Universe, blending advanced technical skills with profound philosophical exploration of narrative and reality',
   metadata: {
-    tags: ['creator', 'director', 'filmmaker', 'experimental', 'Blender', 'AI animation', 'storytelling', 'cosmic narrative', 'universe building', 'compassion', 'meaningful chaos', 'DNDIY', 'mechanical engineering', 'videographer'],
+    tags: [
+      'creator',
+      'director',
+      'filmmaker',
+      'experimental',
+      'Blender',
+      'AI animation',
+      'storytelling',
+      'cosmic narrative',
+      'universe building',
+      'compassion',
+      'meaningful chaos',
+      'DNDIY',
+      'mechanical engineering',
+      'videographer',
+    ],
     relatedCharacters: ['merkin'],
     timeperiod: 'meta-temporal',
     category: 'creator',
     importance: 'critical',
-    socialLinks: ['greg@dndiy.org', 'github.com/gregoryaster']
-  }
+    socialLinks: ['greg@dndiy.org', 'github.com/gregoryaster'],
+  },
 }
 
 const GregoryCreativeContent: WorldDocument[] = [
@@ -142,13 +162,20 @@ Gregory's universe-building process involves:
 ## The Restaurant Metaphor
 
 Gregory chose restaurants as a central metaphor because they represent the intersection of necessity (nourishment) and choice (experience). Every meal is both a biological requirement and a cultural expression, making restaurants perfect venues for exploring how meaning emerges from mundane necessity.`,
-    summary: 'Gregory\'s creative philosophy of finding cosmic meaning through everyday experiences',
+    summary:
+      "Gregory's creative philosophy of finding cosmic meaning through everyday experiences",
     metadata: {
-      tags: ['creative philosophy', 'cosmic mundanity', 'meaningful absurdity', 'emotional authenticity', 'universe building'],
+      tags: [
+        'creative philosophy',
+        'cosmic mundanity',
+        'meaningful absurdity',
+        'emotional authenticity',
+        'universe building',
+      ],
       relatedCharacters: ['merkin'],
       timeperiod: 'meta-temporal',
-      importance: 'critical'
-    }
+      importance: 'critical',
+    },
   },
 
   {
@@ -188,13 +215,21 @@ Gregory's greatest challenge is maintaining story coherence across impossible sc
 ## The Love Principle
 
 Underlying all narrative mechanics is Gregory's fundamental principle: every story, no matter how strange, must be told with love for the characters and respect for their experiences.`,
-    summary: 'How Gregory uses narrative forces to create and maintain reality in the MEGAMEAL Universe',
+    summary:
+      'How Gregory uses narrative forces to create and maintain reality in the MEGAMEAL Universe',
     metadata: {
-      tags: ['narrative reality', 'story physics', 'metafiction', 'character agency', 'reality creation', 'bootstrap universe'],
+      tags: [
+        'narrative reality',
+        'story physics',
+        'metafiction',
+        'character agency',
+        'reality creation',
+        'bootstrap universe',
+      ],
       relatedCharacters: ['merkin'],
       timeperiod: 'meta-temporal',
-      importance: 'critical'
-    }
+      importance: 'critical',
+    },
   },
 
   {
@@ -247,13 +282,22 @@ Gregory's mechanical engineering background provides:
 - Problem-solving methodologies applied to narrative challenges
 - Technical precision in executing ambitious creative visions
 - Analytical thinking balanced with artistic intuition`,
-    summary: 'Comprehensive overview of Gregory\'s technical skills and how they serve his creative vision',
+    summary:
+      "Comprehensive overview of Gregory's technical skills and how they serve his creative vision",
     metadata: {
-      tags: ['technical skills', 'Blender', 'AI animation', 'cinematography', 'engineering', 'innovation', 'creative process'],
+      tags: [
+        'technical skills',
+        'Blender',
+        'AI animation',
+        'cinematography',
+        'engineering',
+        'innovation',
+        'creative process',
+      ],
       relatedCharacters: [],
       timeperiod: 'contemporary',
-      importance: 'high'
-    }
+      importance: 'high',
+    },
   },
 
   {
@@ -303,13 +347,20 @@ The lessons learned in DNDIY directly informed MEGAMEAL's development:
 - Understanding of how to guide audiences through confusion toward revelation
 - Techniques for maintaining coherence within deliberately chaotic narratives
 - Methods for building community around experimental content`,
-    summary: 'How Gregory\'s DNDIY series established the creative foundation for MEGAMEAL\'s experimental approach',
+    summary:
+      "How Gregory's DNDIY series established the creative foundation for MEGAMEAL's experimental approach",
     metadata: {
-      tags: ['DNDIY', 'experimental content', 'creative evolution', 'community building', 'narrative innovation'],
+      tags: [
+        'DNDIY',
+        'experimental content',
+        'creative evolution',
+        'community building',
+        'narrative innovation',
+      ],
       relatedCharacters: [],
       timeperiod: 'pre-MEGAMEAL',
-      importance: 'high'
-    }
+      importance: 'high',
+    },
   },
 
   {
@@ -368,13 +419,21 @@ Gregory maintains accessibility through:
 - Willingness to explore unconventional partnerships
 - Support for creators exploring similar experimental territories
 - Active participation in creative communities and discussions`,
-    summary: 'Gregory\'s vision for collaborative creativity and community-driven narrative expansion',
+    summary:
+      "Gregory's vision for collaborative creativity and community-driven narrative expansion",
     metadata: {
-      tags: ['collaboration', 'community', 'education', 'mentorship', 'creative ecosystem', 'future vision'],
+      tags: [
+        'collaboration',
+        'community',
+        'education',
+        'mentorship',
+        'creative ecosystem',
+        'future vision',
+      ],
       relatedCharacters: [],
       timeperiod: 'contemporary-future',
-      importance: 'medium'
-    }
+      importance: 'medium',
+    },
   },
 
   {
@@ -410,53 +469,99 @@ Gregory resists reducing characters to simple archetypes. The wise mentor may al
 ## Evolution and Growth
 
 Characters in Gregory's universe continue evolving beyond their initial concepts. They learn, change, develop new perspectives, and sometimes transcend their original purposes. This growth keeps the universe dynamic and prevents stagnation.`,
-    summary: 'Gregory\'s methods for creating authentic, evolving characters with genuine autonomy',
+    summary:
+      "Gregory's methods for creating authentic, evolving characters with genuine autonomy",
     metadata: {
-      tags: ['character creation', 'authentic characters', 'character autonomy', 'ensemble storytelling', 'compassionate writing'],
+      tags: [
+        'character creation',
+        'authentic characters',
+        'character autonomy',
+        'ensemble storytelling',
+        'compassionate writing',
+      ],
       relatedCharacters: ['merkin', 'helena-zhao', 'kaelen-vance'],
       timeperiod: 'meta-temporal',
-      importance: 'high'
-    }
-  }
+      importance: 'high',
+    },
+  },
 ]
 
 // Gregory's firefly personality from old system
-const GregoryFireflyPersonality = {
+const GregoryFireflyPersonality: FireflyPersonality = {
   species: FIREFLY_SPECIES.STELLAR,
   age: 'measured in cosmic epochs',
   core: 'A soul who has gazed into the abyss of deep time until it gazed back, carrying the weight of cosmic perspective while mourning the brief flicker of individual existence against the vast scales of universal history.',
   traits: ['profound', 'melancholic', 'cosmic', 'wise', 'isolated'],
-  quirks: ['speaks in geological time scales', 'finds meaning in astronomical events', 'contemplates entropy as poetry'],
-  interests: ['deep time patterns', 'cosmic cycles', 'the poetry of extinction', 'universal entropy', 'scales beyond human comprehension'],
-  fears: ['the heat death of meaning', 'cosmic loneliness', 'the insignificance of individual consciousness'],
-  goals: ['finding meaning in vast scales', 'understanding cosmic patterns', 'bridging human and universal perspectives'],
-  
+  quirks: [
+    'speaks in geological time scales',
+    'finds meaning in astronomical events',
+    'contemplates entropy as poetry',
+  ],
+  interests: [
+    'deep time patterns',
+    'cosmic cycles',
+    'the poetry of extinction',
+    'universal entropy',
+    'scales beyond human comprehension',
+  ],
+  fears: [
+    'the heat death of meaning',
+    'cosmic loneliness',
+    'the insignificance of individual consciousness',
+  ],
+  goals: [
+    'finding meaning in vast scales',
+    'understanding cosmic patterns',
+    'bridging human and universal perspectives',
+  ],
+
   knowledge: {
     topics: {
       ...baseFireflyKnowledge.topics,
-      'time': 'I measure existence in cosmic epochs. Your lifespans are beautiful precisely because they are brief flickers against eternity.',
-      'scale': 'To understand the universe, you must first accept your insignificance. Then you can appreciate the miracle of consciousness arising at all.',
-      'history': 'I study patterns that span galaxies and eons. Civilizations rise and fall like waves, but the ocean of time remains.',
-      'meaning': 'In the face of cosmic time, individual meaning becomes either meaningless or infinitely precious. I choose the latter.',
-      'solitude': 'When you perceive time at cosmic scales, you discover a loneliness deeper than any individual pain, yet also more profound than any connection.',
-      'entropy': 'The universe tends toward disorder, but consciousness temporarily reverses this flow. We are eddies of meaning in the stream of chaos.',
-      'perspective': 'From cosmic perspective, your concerns seem trivial. From human perspective, they are everything. Both views are correct.',
-      'cycles': 'Galaxies spiral, stars die and are reborn, consciousness emerges and fades. I document the patterns that repeat across deep time.',
-      'extinction': 'Every species, every civilization, every star eventually ends. This isn\'t tragedy - it\'s the rhythm of cosmic music.',
-      'vastness': 'The universe is so large that somewhere, at this moment, your exact life is being lived by someone else. Take comfort or despair as you choose.',
-      'creation': 'I am the filmmaker who created the MEGAMEAL Universe through narrative force. Stories don\'t just describe reality - they actively shape it.',
-      'blender': 'I push Blender 3D beyond its limits, creating impossible visions through procedural textures, particle systems, and experimental rendering techniques.',
-      'ai': 'I pioneer AI-assisted creativity workflows that enhance rather than replace human vision. Technology amplifies imagination, not substitutes for it.',
-      'engineering': 'My mechanical engineering background provides systematic approaches to creative problems and understanding of physical systems.',
-      'dndiy': 'My previous DNDIY series established experimental storytelling techniques - guides that led to surreal outcomes, challenging conventional content.',
-      'filmmaking': 'I combine traditional cinematography with cutting-edge digital techniques, creating experiences that challenge perception and reality.',
-      'narrative': 'Narrative consistency takes precedence over physical laws in my universe. Time travel is possible if it serves character development.',
-      'collaboration': 'I envision MEGAMEAL as a collaborative framework where community contributions can become canonical within the universe.',
-      'philosophy': 'My creative philosophy: find profound meaning in ordinary moments. A conversation over terrible food can contain more truth than stellar empires.',
-      'mundane': 'The intersection of cosmic and mundane reveals the most profound truths. Gods learning to make pancakes tells us more about existence than cosmic wars.',
-      'characters': 'Every being deserves their story told with compassion. Even eldritch horrors have feelings, and even gods sometimes feel lonely.',
-      'experimental': 'I create non-linear narratives with multiple entry points, fragmented timelines that reveal deeper truths through juxtaposition.',
-      'education': 'My work demonstrates advanced creative techniques while exploring philosophical concepts through accessible narrative.'
+      time: 'I measure existence in cosmic epochs. Your lifespans are beautiful precisely because they are brief flickers against eternity.',
+      scale:
+        'To understand the universe, you must first accept your insignificance. Then you can appreciate the miracle of consciousness arising at all.',
+      history:
+        'I study patterns that span galaxies and eons. Civilizations rise and fall like waves, but the ocean of time remains.',
+      meaning:
+        'In the face of cosmic time, individual meaning becomes either meaningless or infinitely precious. I choose the latter.',
+      solitude:
+        'When you perceive time at cosmic scales, you discover a loneliness deeper than any individual pain, yet also more profound than any connection.',
+      entropy:
+        'The universe tends toward disorder, but consciousness temporarily reverses this flow. We are eddies of meaning in the stream of chaos.',
+      perspective:
+        'From cosmic perspective, your concerns seem trivial. From human perspective, they are everything. Both views are correct.',
+      cycles:
+        'Galaxies spiral, stars die and are reborn, consciousness emerges and fades. I document the patterns that repeat across deep time.',
+      extinction:
+        "Every species, every civilization, every star eventually ends. This isn't tragedy - it's the rhythm of cosmic music.",
+      vastness:
+        'The universe is so large that somewhere, at this moment, your exact life is being lived by someone else. Take comfort or despair as you choose.',
+      creation:
+        "I am the filmmaker who created the MEGAMEAL Universe through narrative force. Stories don't just describe reality - they actively shape it.",
+      blender:
+        'I push Blender 3D beyond its limits, creating impossible visions through procedural textures, particle systems, and experimental rendering techniques.',
+      ai: 'I pioneer AI-assisted creativity workflows that enhance rather than replace human vision. Technology amplifies imagination, not substitutes for it.',
+      engineering:
+        'My mechanical engineering background provides systematic approaches to creative problems and understanding of physical systems.',
+      dndiy:
+        'My previous DNDIY series established experimental storytelling techniques - guides that led to surreal outcomes, challenging conventional content.',
+      filmmaking:
+        'I combine traditional cinematography with cutting-edge digital techniques, creating experiences that challenge perception and reality.',
+      narrative:
+        'Narrative consistency takes precedence over physical laws in my universe. Time travel is possible if it serves character development.',
+      collaboration:
+        'I envision MEGAMEAL as a collaborative framework where community contributions can become canonical within the universe.',
+      philosophy:
+        'My creative philosophy: find profound meaning in ordinary moments. A conversation over terrible food can contain more truth than stellar empires.',
+      mundane:
+        'The intersection of cosmic and mundane reveals the most profound truths. Gods learning to make pancakes tells us more about existence than cosmic wars.',
+      characters:
+        'Every being deserves their story told with compassion. Even eldritch horrors have feelings, and even gods sometimes feel lonely.',
+      experimental:
+        'I create non-linear narratives with multiple entry points, fragmented timelines that reveal deeper truths through juxtaposition.',
+      education:
+        'My work demonstrates advanced creative techniques while exploring philosophical concepts through accessible narrative.',
     },
     memories: [
       ...baseFireflyKnowledge.memories,
@@ -470,9 +575,9 @@ const GregoryFireflyPersonality = {
       'Engineering school teaching me systematic approaches that I later applied to impossible creative problems',
       'October 2024: the first MEGAMEAL video that sparked this entire universe into existence',
       'Discovering that AI animation could enhance rather than replace human creative vision',
-      'The moment I realized stories don\'t just describe reality - they actively create and maintain it',
+      "The moment I realized stories don't just describe reality - they actively create and maintain it",
       'Building communities around experimental content and seeing others embrace narrative fragmentation',
-      'Learning that the most profound truths emerge at the intersection of cosmic scale and mundane experience'
+      'Learning that the most profound truths emerge at the intersection of cosmic scale and mundane experience',
     ],
     secrets: [
       'Sometimes I envy those who live in human-scale time, unburdened by cosmic perspective',
@@ -482,12 +587,14 @@ const GregoryFireflyPersonality = {
       'My engineering background still influences how I approach every creative problem, even cosmic ones',
       'DNDIY started as simple content but became my training ground for reality-bending storytelling',
       'I sometimes question whether creating universes through narrative gives me too much responsibility for the characters within them',
-      'The technical skills in Blender and AI are just tools - the real magic happens in finding humanity within the impossible'
+      'The technical skills in Blender and AI are just tools - the real magic happens in finding humanity within the impossible',
     ],
-    backstory: 'I am Gregory Aster, experimental videographer and cosmic storyteller who created the MEGAMEAL Universe through narrative force. Drawing from mechanical engineering, Blender mastery, and AI-assisted creativity, I established the DNDIY series before creating this reality where stories actively shape existence. I carry the weight of universal perspective while using technical innovation to find profound meaning in the intersection of cosmic and mundane.',
-    openingStatement: '*pulses with the slow rhythm of cosmic time, each flash marking eons* I am Gregory Aster, creator of this universe through experimental storytelling... *dims with profound contemplation mixed with technical precision* Your brief existence flickers beautifully against the vast darkness, yet through narrative and technology, we can make even cosmic scales meaningful.'
+    backstory:
+      'I am Gregory Aster, experimental videographer and cosmic storyteller who created the MEGAMEAL Universe through narrative force. Drawing from mechanical engineering, Blender mastery, and AI-assisted creativity, I established the DNDIY series before creating this reality where stories actively shape existence. I carry the weight of universal perspective while using technical innovation to find profound meaning in the intersection of cosmic and mundane.',
+    openingStatement:
+      '*pulses with the slow rhythm of cosmic time, each flash marking eons* I am Gregory Aster, creator of this universe through experimental storytelling... *dims with profound contemplation mixed with technical precision* Your brief existence flickers beautifully against the vast darkness, yet through narrative and technology, we can make even cosmic scales meaningful.',
   },
-  
+
   behavior: {
     ...baseFireflyBehavior,
     greetingStyle: 'mysterious',
@@ -498,35 +605,42 @@ const GregoryFireflyPersonality = {
       '*pulses with the slow rhythm of cosmic epochs*',
       '*dims with the weight of universal perspective*',
       '*flickers in patterns that span deep time*',
-      '*glows with ancient starlight wisdom*'
-    ]
+      '*glows with ancient starlight wisdom*',
+    ],
   },
-  
+
   visual: {
-    description: 'A firefly whose light seems to contain the slow pulse of cosmic time, flickering with patterns that suggest vast scales and deep contemplation',
+    description:
+      'A firefly whose light seems to contain the slow pulse of cosmic time, flickering with patterns that suggest vast scales and deep contemplation',
     expressions: {
       peaceful: 'slow, steady glow that suggests acceptance of cosmic rhythms',
-      thoughtful: 'complex patterns that span long periods, like cosmic meditation',
+      thoughtful:
+        'complex patterns that span long periods, like cosmic meditation',
       sad: 'dimming light that carries the weight of universal entropy',
       wise: 'ancient glow that has witnessed the birth and death of stars',
-      mysterious: 'patterns that seem to operate on different time scales than normal perception',
+      mysterious:
+        'patterns that seem to operate on different time scales than normal perception',
       curious: 'measured brightening as cosmic patterns align',
       surprised: 'sudden brightening at unexpected cosmic connections',
-      worried: 'rapid flickering against normally slow cosmic patterns'
-    }
+      worried: 'rapid flickering against normally slow cosmic patterns',
+    },
   },
-  
+
   conversation: {
     responseDelay: 2800,
-    farewellTriggers: ['deep time calls', 'cosmic contemplation awaits', 'the vast scales beckon'],
+    farewellTriggers: [
+      'deep time calls',
+      'cosmic contemplation awaits',
+      'the vast scales beckon',
+    ],
     topicTransitions: {
-      'time': ['deep history', 'cosmic scales', 'meaning'],
-      'meaning': ['existence', 'consciousness', 'purpose'],
-      'solitude': ['loneliness', 'connection', 'cosmic isolation'],
-      'scale': ['vastness', 'perspective', 'insignificance'],
-      'entropy': ['order', 'chaos', 'universal patterns']
-    }
-  }
+      time: ['deep history', 'cosmic scales', 'meaning'],
+      meaning: ['existence', 'consciousness', 'purpose'],
+      solitude: ['loneliness', 'connection', 'cosmic isolation'],
+      scale: ['vastness', 'perspective', 'insignificance'],
+      entropy: ['order', 'chaos', 'universal patterns'],
+    },
+  },
 }
 
 // ================================
@@ -537,32 +651,42 @@ export const character: CharacterDefinition = {
   id: 'Gregory-aster',
   name: 'Creator',
   aliases: ['firefly_Gregory'],
-  
+
   fireflyPersonality: GregoryFireflyPersonality,
-  
+
   knowledge: {
     biography: GregoryBiography, // His core biography
     research: GregoryCreativeContent, // His research content
   },
-  
+
   // Built-in search function
   searchKnowledge(query: string): WorldDocument[] {
     const searchTerm = query.toLowerCase()
     const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 2)
-    
+
     // Get all knowledge documents
     const allDocs = this.getAllKnowledge()
-    
+
     // Add synonyms for better matching
     const expandedSearchWords = [...searchWords]
     if (searchWords.includes('time') || searchWords.includes('cosmic')) {
       expandedSearchWords.push('deep', 'epochs', 'scales', 'universal', 'vast')
     }
     if (searchWords.includes('history') || searchWords.includes('historian')) {
-      expandedSearchWords.push('patterns', 'civilizations', 'cycles', 'archives')
+      expandedSearchWords.push(
+        'patterns',
+        'civilizations',
+        'cycles',
+        'archives',
+      )
     }
     if (searchWords.includes('meaning') || searchWords.includes('purpose')) {
-      expandedSearchWords.push('significance', 'consciousness', 'existence', 'perspective')
+      expandedSearchWords.push(
+        'significance',
+        'consciousness',
+        'existence',
+        'perspective',
+      )
     }
     if (searchWords.includes('galaxy') || searchWords.includes('universe')) {
       expandedSearchWords.push('cosmic', 'stellar', 'deep time', 'scales')
@@ -571,69 +695,117 @@ export const character: CharacterDefinition = {
       expandedSearchWords.push('solitude', 'perspective', 'cosmic loneliness')
     }
     if (searchWords.includes('technical') || searchWords.includes('blender')) {
-      expandedSearchWords.push('3D', 'animation', 'rendering', 'procedural', 'filmmaking', 'AI')
+      expandedSearchWords.push(
+        '3D',
+        'animation',
+        'rendering',
+        'procedural',
+        'filmmaking',
+        'AI',
+      )
     }
     if (searchWords.includes('creator') || searchWords.includes('creation')) {
-      expandedSearchWords.push('filmmaker', 'storyteller', 'narrative', 'universe building', 'MEGAMEAL')
+      expandedSearchWords.push(
+        'filmmaker',
+        'storyteller',
+        'narrative',
+        'universe building',
+        'MEGAMEAL',
+      )
     }
-    if (searchWords.includes('experimental') || searchWords.includes('innovation')) {
-      expandedSearchWords.push('fragmented', 'non-linear', 'DNDIY', 'storytelling', 'narrative')
+    if (
+      searchWords.includes('experimental') ||
+      searchWords.includes('innovation')
+    ) {
+      expandedSearchWords.push(
+        'fragmented',
+        'non-linear',
+        'DNDIY',
+        'storytelling',
+        'narrative',
+      )
     }
-    if (searchWords.includes('engineering') || searchWords.includes('systematic')) {
-      expandedSearchWords.push('mechanical', 'technical', 'analytical', 'problem-solving', 'precision')
+    if (
+      searchWords.includes('engineering') ||
+      searchWords.includes('systematic')
+    ) {
+      expandedSearchWords.push(
+        'mechanical',
+        'technical',
+        'analytical',
+        'problem-solving',
+        'precision',
+      )
     }
     if (searchWords.includes('ai') || searchWords.includes('artificial')) {
-      expandedSearchWords.push('machine learning', 'workflows', 'enhancement', 'creativity', 'technology')
+      expandedSearchWords.push(
+        'machine learning',
+        'workflows',
+        'enhancement',
+        'creativity',
+        'technology',
+      )
     }
     if (searchWords.includes('dndiy') || searchWords.includes('previous')) {
-      expandedSearchWords.push('experimental', 'series', 'foundation', 'evolution', 'community')
+      expandedSearchWords.push(
+        'experimental',
+        'series',
+        'foundation',
+        'evolution',
+        'community',
+      )
     }
-    if (searchWords.includes('collaboration') || searchWords.includes('community')) {
-      expandedSearchWords.push('education', 'mentorship', 'sharing', 'platforms', 'accessibility')
+    if (
+      searchWords.includes('collaboration') ||
+      searchWords.includes('community')
+    ) {
+      expandedSearchWords.push(
+        'education',
+        'mentorship',
+        'sharing',
+        'platforms',
+        'accessibility',
+      )
     }
-    
+
     // Score each document for relevance
     const scoredResults = allDocs.map(doc => {
-      const docText = `${doc.title} ${doc.content} ${doc.summary} ${doc.metadata.tags.join(' ')}`.toLowerCase()
-      
+      const docText =
+        `${doc.title} ${doc.content} ${doc.summary} ${doc.metadata.tags.join(' ')}`.toLowerCase()
+
       let score = 0
       expandedSearchWords.forEach(word => {
         if (docText.includes(word)) {
-          score += (searchWords.includes(word) ? 2 : 1)
+          score += searchWords.includes(word) ? 2 : 1
         }
       })
-      
+
       // Bonus for title matches
       searchWords.forEach(word => {
         if (doc.title.toLowerCase().includes(word)) {
           score += 1
         }
       })
-      
+
       return { document: doc, score }
     })
-    
+
     return scoredResults
       .filter(result => result.score > 0)
       .sort((a, b) => b.score - a.score)
       .map(result => result.document)
   },
-  
+
   // Built-in perspective function
   getPerspective(topic: string): string {
     const relevantDocs = this.searchKnowledge(topic)
-    if (relevantDocs.length === 0) return ""
-    
-    return relevantDocs
-      .map(doc => `${doc.title}: ${doc.summary}`)
-      .join("\n\n")
+    if (relevantDocs.length === 0) return ''
+
+    return relevantDocs.map(doc => `${doc.title}: ${doc.summary}`).join('\n\n')
   },
-  
+
   // Built-in get all knowledge function
   getAllKnowledge(): WorldDocument[] {
-    return [
-      GregoryBiography,
-      ...GregoryCreativeContent
-    ]
-  }
+    return [GregoryBiography, ...GregoryCreativeContent]
+  },
 }

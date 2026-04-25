@@ -1,98 +1,96 @@
 ---
-import { getCollection } from "astro:content";
-import { Icon } from "astro-icon/components";
-import MarketplaceListingCard from "../components/store/MarketplaceListingCard.astro";
-import StoreLayout from "../layouts/store/StoreLayout.astro";
-import { buildFlagshipProductShowcase } from "../utils/flagship-product-showcase";
-import { url } from "../utils/url-utils";
+import { getCollection } from 'astro:content'
+import { Icon } from 'astro-icon/components'
+import MarketplaceListingCard from '../components/store/MarketplaceListingCard.astro'
+import StoreLayout from '../layouts/store/StoreLayout.astro'
+import { buildFlagshipProductShowcase } from '../utils/flagship-product-showcase'
+import { url } from '../utils/url-utils'
 
 const allProducts = await getCollection(
-	"products",
-	({ data }) => data.draft !== true,
-);
+  'products',
+  ({ data }) => data.draft !== true,
+)
 
 function resolveAsset(path: string | undefined) {
-	if (!path) return undefined;
-	return path.startsWith("/") ? url(path) : path;
+  if (!path) return undefined
+  return path.startsWith('/') ? url(path) : path
 }
 
 function getProductHref(product: (typeof allProducts)[number]) {
-	return `/store/${product.data.slug ?? product.id.replace(/\.(md|mdx)$/, "")}/`;
+  return `/store/${product.data.slug ?? product.id.replace(/\.(md|mdx)$/, '')}/`
 }
 
 function getPrimaryVisual(product: (typeof allProducts)[number]) {
-	const media = product.data.media ?? [];
-	for (const item of media) {
-		if (item.type === "image" && item.src) return resolveAsset(item.src);
-		if (item.thumbnail) return resolveAsset(item.thumbnail);
-		if (item.poster) return resolveAsset(item.poster);
-		if (item.type === "youtube" && item.videoId) {
-			return `https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg`;
-		}
-	}
-	return resolveAsset(product.data.image);
+  const media = product.data.media ?? []
+  for (const item of media) {
+    if (item.type === 'image' && item.src) return resolveAsset(item.src)
+    if (item.thumbnail) return resolveAsset(item.thumbnail)
+    if (item.poster) return resolveAsset(item.poster)
+    if (item.type === 'youtube' && item.videoId) {
+      return `https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg`
+    }
+  }
+  return resolveAsset(product.data.image)
 }
 
 allProducts.sort((a, b) => {
-	if (a.data.featured && !b.data.featured) return -1;
-	if (!a.data.featured && b.data.featured) return 1;
-	return (b.data.rating ?? 0) - (a.data.rating ?? 0);
-});
+  if (a.data.featured && !b.data.featured) return -1
+  if (!a.data.featured && b.data.featured) return 1
+  return (b.data.rating ?? 0) - (a.data.rating ?? 0)
+})
 
-const featuredProduct = allProducts.find((p) => p.data.featured);
+const featuredProduct = allProducts.find(p => p.data.featured)
 const featuredShowcase = featuredProduct
-	? buildFlagshipProductShowcase(featuredProduct, allProducts)
-	: null;
+  ? buildFlagshipProductShowcase(featuredProduct, allProducts)
+  : null
 const spotlightProducts = allProducts
-	.filter((product) => product.id !== featuredProduct?.id)
-	.slice(0, 3);
+  .filter(product => product.id !== featuredProduct?.id)
+  .slice(0, 3)
 
 const categories = [
-	{ id: "all", label: "All Products" },
-	{ id: "equipment", label: "Equipment" },
-	{ id: "consumables", label: "Consumables" },
-	{ id: "publications", label: "Publications" },
-	{ id: "companions", label: "Companions" },
-	{ id: "relics", label: "Relics" },
-];
+  { id: 'all', label: 'All Products' },
+  { id: 'equipment', label: 'Equipment' },
+  { id: 'consumables', label: 'Consumables' },
+  { id: 'publications', label: 'Publications' },
+  { id: 'companions', label: 'Companions' },
+  { id: 'relics', label: 'Relics' },
+]
 
 const categoryCounts = Object.fromEntries(
-	categories.map((category) => [
-		category.id,
-		category.id === "all"
-			? allProducts.length
-			: allProducts.filter((product) => product.data.category === category.id)
-					.length,
-	]),
-);
+  categories.map(category => [
+    category.id,
+    category.id === 'all'
+      ? allProducts.length
+      : allProducts.filter(product => product.data.category === category.id)
+          .length,
+  ]),
+)
 
 const availabilityDisplay: Record<string, string> = {
-	available: "Available Now",
-	coming_soon: "Coming Soon",
-	out_of_stock: "Out of Stock",
-	not_in_your_area: "Not in Your Area",
-	not_in_your_timeline: "Not in Your Timeline",
-	artifact_only: "Artifact Only",
-};
+  available: 'Available Now',
+  coming_soon: 'Coming Soon',
+  out_of_stock: 'Out of Stock',
+  not_in_your_area: 'Not in Your Area',
+  not_in_your_timeline: 'Not in Your Timeline',
+  artifact_only: 'Artifact Only',
+}
 
 const availabilityCounts = Object.entries(availabilityDisplay).map(
-	([availability, label]) => ({
-		availability,
-		label,
-		count: allProducts.filter(
-			(product) =>
-				(product.data.availability ?? "coming_soon") === availability,
-		).length,
-	}),
-);
+  ([availability, label]) => ({
+    availability,
+    label,
+    count: allProducts.filter(
+      product => (product.data.availability ?? 'coming_soon') === availability,
+    ).length,
+  }),
+)
 
 const availableNowCount =
-	availabilityCounts.find((item) => item.availability === "available")?.count ??
-	0;
-const restrictedCount = allProducts.length - availableNowCount;
+  availabilityCounts.find(item => item.availability === 'available')?.count ?? 0
+const restrictedCount = allProducts.length - availableNowCount
 const companionCount = allProducts.filter(
-	(product) => product.data.category === "companions",
-).length;
+  product => product.data.category === 'companions',
+).length
 ---
 
 <StoreLayout
@@ -180,6 +178,8 @@ const companionCount = allProducts.filter(
 											<div class="absolute inset-0 flex items-center justify-center bg-black/30">
 												<a
 													href={getProductHref(featuredProduct)}
+													data-sfx-hover="hover-emphasis"
+													data-sfx-click="sweep"
 													class="flex h-16 w-16 items-center justify-center rounded-full bg-red-600/90 shadow-xl transition hover:bg-red-600"
 													aria-label="View product"
 												>
@@ -257,10 +257,12 @@ const companionCount = allProducts.filter(
 										${featuredProduct.data.price.toFixed(2)}
 									</span>
 								)}
-								<a
-									href={getProductHref(featuredProduct)}
-									class="btn-primary rounded-[var(--radius-medium)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover)]"
-								>
+									<a
+										href={getProductHref(featuredProduct)}
+										data-sfx-hover="hover-emphasis"
+										data-sfx-click="sweep"
+										class="btn-primary rounded-[var(--radius-medium)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover)]"
+									>
 									View Product
 								</a>
 								<span class="text-xs text-slate-500">
@@ -283,12 +285,14 @@ const companionCount = allProducts.filter(
 					</div>
 					<div class="storefront-category-list" role="group" aria-label="Filter by category">
 						{categories.map((category) => (
-							<button
-								type="button"
-								data-category={category.id}
-								data-active={category.id === "all" ? "true" : "false"}
-								class="category-filter storefront-filter-button"
-							>
+								<button
+									type="button"
+									data-category={category.id}
+									data-active={category.id === "all" ? "true" : "false"}
+									data-sfx-hover="hover-soft"
+									data-sfx-click="soft"
+									class="category-filter storefront-filter-button"
+								>
 								<span>{category.label}</span>
 								<strong>{categoryCounts[category.id]}</strong>
 							</button>
@@ -344,11 +348,12 @@ const companionCount = allProducts.filter(
 					</div>
 					<div class="storefront-toolbar__controls">
 						<span id="product-count">{allProducts.length} products</span>
-						<select
-							id="sort-select"
-							class="storefront-sort-select"
-							aria-label="Sort products"
-						>
+							<select
+								id="sort-select"
+								data-sfx-focus="focus-soft"
+								class="storefront-sort-select"
+								aria-label="Sort products"
+							>
 							<option value="featured">Featured</option>
 							<option value="rating">Top Rated</option>
 							<option value="price-asc">Price: Low to High</option>
@@ -365,8 +370,8 @@ const companionCount = allProducts.filter(
 							<h2>Secondary Signals</h2>
 						</div>
 						<div class="storefront-spotlight__grid">
-							{spotlightProducts.map((product) => (
-								<a href={getProductHref(product)} class="storefront-spotlight__card">
+								{spotlightProducts.map((product) => (
+									<a href={getProductHref(product)} data-sfx-hover="hover-soft" data-sfx-click="soft" class="storefront-spotlight__card">
 									<div class="storefront-spotlight__media">
 										{getPrimaryVisual(product) ? (
 											<img
@@ -423,11 +428,13 @@ const companionCount = allProducts.filter(
 				<div id="no-results" class="hidden py-16 text-center text-slate-500">
 					<Icon name="mdi:filter-remove-outline" class="mx-auto mb-3 h-12 w-12 opacity-30" />
 					<p class="italic">No products match this filter in your timeline.</p>
-					<button
-						type="button"
-						data-category="all"
-						class="category-filter mt-3 text-xs text-[var(--primary)] hover:underline"
-					>
+						<button
+							type="button"
+							data-category="all"
+							data-sfx-hover="hover-soft"
+							data-sfx-click="panel-back"
+							class="category-filter mt-3 text-xs text-[var(--primary)] hover:underline"
+						>
 						Clear filter
 					</button>
 				</div>

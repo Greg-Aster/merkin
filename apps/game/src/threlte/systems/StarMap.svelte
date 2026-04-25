@@ -9,435 +9,471 @@
   - Integrated with StarNavigationSystem for timeline card display.
 -->
 <script lang="ts">
-  import { T, useTask, useThrelte } from '@threlte/core'
-  import { onMount, createEventDispatcher } from 'svelte'
-  import {
-    AdditiveBlending,
-    BufferGeometry,
-    CanvasTexture,
-    Color,
-    Float32BufferAttribute,
-    Group,
-    LineBasicMaterial,
-    LineSegments,
-    Sprite,
-    SpriteMaterial,
-    Vector3,
-  } from 'three'
-  import type { Shader } from 'three'
-  import {
-    selectedStarStore,
-    gameActions,
-    type StarData
-  } from '../stores/gameStateStore'
-  import { createStarMapLevelEvents, levelRegistryStore } from '../levels/levelRegistry'
+import { T, useTask, useThrelte } from '@threlte/core'
+import { createEventDispatcher, onMount } from 'svelte'
+import {
+  AdditiveBlending,
+  BufferGeometry,
+  CanvasTexture,
+  Color,
+  Float32BufferAttribute,
+  Group,
+  LineBasicMaterial,
+  LineSegments,
+  Sprite,
+  SpriteMaterial,
+  Vector3,
+} from 'three'
+import type { Shader } from 'three'
+import {
+  createStarMapLevelEvents,
+  levelRegistryStore,
+} from '../levels/levelRegistry'
+import {
+  type StarData,
+  gameActions,
+  selectedStarStore,
+} from '../stores/gameStateStore'
 
-  // Import the ACTUAL original system configurations
-  import {
-    constellationConfig,
-    constellationPatterns,
-    connectionPatterns,
-    eraColorMap,
-    colorSpectrum,
-    starTypes,
-  } from '../../config/timelineconfig'
-  import {
-    hashCode,
-    getStarColor,
-    getStarType,
-    getSizeFactor,
-    createEnhancedStarTexture
-  } from '../../utils/starUtils'
+// Import the ACTUAL original system configurations
+import {
+  colorSpectrum,
+  connectionPatterns,
+  constellationConfig,
+  constellationPatterns,
+  eraColorMap,
+  starTypes,
+} from '../../config/timelineconfig'
+import {
+  createEnhancedStarTexture,
+  getSizeFactor,
+  getStarColor,
+  getStarType,
+  hashCode,
+} from '../../utils/starUtils'
 
-  const dispatch = createEventDispatcher()
-  const { camera } = useThrelte()
-  const isDev = import.meta.env.DEV
+const dispatch = createEventDispatcher()
+const { camera } = useThrelte()
+const isDev = import.meta.env.DEV
 
-  function debugLog(...args: any[]) {
-    if (isDev) {
-      console.log(...args)
+function debugLog(...args: any[]) {
+  if (isDev) {
+    console.log(...args)
+  }
+}
+
+// --- PROPS ---
+export let timelineEvents: any[] = []
+export let interactionSystem: any = null // Centralized interaction system from Game
+
+// --- STATE ---
+let stars: StarData[] = []
+let starSprites: Sprite[] = []
+let constellationLines: LineSegments[] = []
+let starGroup: Group
+let hoveredStarIndex: number | null = null
+let nextTransitionCleanupAt = 10
+let starRegenerationKey = ''
+
+// Smooth transition states for natural glow effects
+let hoverTransitions: Map<number, number> = new Map() // starIndex -> transition value (0-1)
+let selectionTransitions: Map<string, number> = new Map() // uniqueId -> transition value (0-1)
+
+// Export the component reference for StarNavigationSystem
+export { starGroup as starMapRef }
+
+// --- STORES ---
+$: selectedStar = $selectedStarStore
+$: registryLevelEvents = createStarMapLevelEvents($levelRegistryStore)
+
+// --- SHADER UNIFORMS ---
+// These are variables we can pass from our JS to the GPU shader.
+const uniforms = {
+  u_time: { value: 0 },
+  u_selectedStarIndex: { value: -1 }, // -1 means no star is selected
+  u_hoveredStarIndex: { value: -1 },
+  u_cameraPosition: { value: new Vector3() },
+}
+
+// --- LIFECYCLE & DATA GENERATION ---
+
+onMount(() => {
+  debugLog('✨ StarMap: Initializing with centralized interaction system')
+  generateStars()
+})
+
+$: starRegenerationKey = `${timelineEvents.length}:${registryLevelEvents.map(event => `${event.uniqueId}:${event.title}:${event.year}`).join('|')}`
+
+$: if (starGroup && starRegenerationKey) {
+  generateStars()
+}
+
+// This reactive block creates star sprites whenever the star data changes.
+$: if (starGroup && stars.length > 0) {
+  setupStarSprites()
+}
+
+function generateStars() {
+  const newStars: StarData[] = []
+
+  debugLog(`🌟 StarMap: Processing ${timelineEvents.length} timeline events`)
+
+  // Process timeline events (blog posts)
+  timelineEvents.forEach((event, index) => {
+    const star = createStarFromTimelineEvent(event, index)
+    newStars.push(star)
+    if (index < 3) {
+      // Log first few stars for debugging
+      debugLog(`⭐ Star ${index}:`, {
+        title: star.title,
+        position: star.position,
+        color: star.color,
+        size: star.size,
+        isKeyEvent: star.isKeyEvent,
+      })
     }
-  }
-
-  // --- PROPS ---
-  export let timelineEvents: any[] = []
-  export let interactionSystem: any = null // Centralized interaction system from Game
-
-  // --- STATE ---
-  let stars: StarData[] = []
-  let starSprites: Sprite[] = []
-  let constellationLines: LineSegments[] = []
-  let starGroup: Group
-  let hoveredStarIndex: number | null = null
-  let nextTransitionCleanupAt = 10
-  let starRegenerationKey = ''
-  
-  // Smooth transition states for natural glow effects
-  let hoverTransitions: Map<number, number> = new Map() // starIndex -> transition value (0-1)
-  let selectionTransitions: Map<string, number> = new Map() // uniqueId -> transition value (0-1)
-  
-  // Export the component reference for StarNavigationSystem
-  export { starGroup as starMapRef }
-
-  // --- STORES ---
-  $: selectedStar = $selectedStarStore
-  $: registryLevelEvents = createStarMapLevelEvents($levelRegistryStore)
-
-  // --- SHADER UNIFORMS ---
-  // These are variables we can pass from our JS to the GPU shader.
-  const uniforms = {
-    u_time: { value: 0 },
-    u_selectedStarIndex: { value: -1 }, // -1 means no star is selected
-    u_hoveredStarIndex: { value: -1 },
-    u_cameraPosition: { value: new Vector3() }
-  }
-
-  // --- LIFECYCLE & DATA GENERATION ---
-
-  onMount(() => {
-    debugLog('✨ StarMap: Initializing with centralized interaction system')
-    generateStars()
   })
 
-  $: starRegenerationKey = `${timelineEvents.length}:${registryLevelEvents.map((event) => `${event.uniqueId}:${event.title}:${event.year}`).join('|')}`
-
-  $: if (starGroup && starRegenerationKey) {
-    generateStars()
-  }
-
-  // This reactive block creates star sprites whenever the star data changes.
-  $: if (starGroup && stars.length > 0) {
-    setupStarSprites()
-  }
-
-  function generateStars() {
-    const newStars: StarData[] = []
-    
-    debugLog(`🌟 StarMap: Processing ${timelineEvents.length} timeline events`)
-    
-    // Process timeline events (blog posts)
-    timelineEvents.forEach((event, index) => {
-      const star = createStarFromTimelineEvent(event, index)
-      newStars.push(star)
-      if (index < 3) { // Log first few stars for debugging
-        debugLog(`⭐ Star ${index}:`, {
-          title: star.title,
-          position: star.position,
-          color: star.color,
-          size: star.size,
-          isKeyEvent: star.isKeyEvent
-        })
-      }
+  // Add level stars as timeline events (they use the exact same system)
+  const levelEvents = registryLevelEvents
+  levelEvents.forEach((event, index) => {
+    const star = createStarFromTimelineEvent(event, newStars.length + index)
+    newStars.push(star)
+    debugLog(`🎮 Level Star ${index}:`, {
+      title: star.title,
+      levelId: star.levelId,
+      isLevel: star.isLevel,
     })
-    
-    // Add level stars as timeline events (they use the exact same system)
-    const levelEvents = registryLevelEvents
-    levelEvents.forEach((event, index) => {
-      const star = createStarFromTimelineEvent(event, newStars.length + index)
-      newStars.push(star)
-      debugLog(`🎮 Level Star ${index}:`, {
+  })
+
+  stars = newStars
+  debugLog(
+    `✅ StarMap: Generated ${stars.length} total stars (${timelineEvents.length} timeline + ${levelEvents.length} level stars)`,
+  )
+
+  // Log star distribution for debugging
+  const keyEventStars = stars.filter(s => s.isKeyEvent).length
+  const levelStars = stars.filter(s => s.isLevel).length
+  debugLog(
+    `📊 Star distribution: ${keyEventStars} key events, ${levelStars} level stars, ${stars.length - keyEventStars - levelStars} timeline events`,
+  )
+}
+
+function setupStarSprites() {
+  debugLog(
+    `🌟 StarMap: Creating authentic star sprites for ${stars.length} stars`,
+  )
+
+  // Clear existing sprites and constellation lines
+  starSprites.forEach(sprite => starGroup.remove(sprite))
+  constellationLines.forEach(line => starGroup.remove(line))
+  starSprites = []
+  constellationLines = []
+
+  stars.forEach((star, i) => {
+    // Create authentic star sprite with enhanced texture
+    const sprite = createStarSprite(star, i)
+    starSprites.push(sprite)
+    starGroup.add(sprite)
+
+    // Debug first few stars
+    if (i < 3) {
+      debugLog(`⭐ Star ${i} created:`, {
         title: star.title,
-        levelId: star.levelId,
-        isLevel: star.isLevel
-      })
-    })
-    
-    stars = newStars
-    debugLog(`✅ StarMap: Generated ${stars.length} total stars (${timelineEvents.length} timeline + ${levelEvents.length} level stars)`)
-    
-    // Log star distribution for debugging
-    const keyEventStars = stars.filter(s => s.isKeyEvent).length
-    const levelStars = stars.filter(s => s.isLevel).length
-    debugLog(`📊 Star distribution: ${keyEventStars} key events, ${levelStars} level stars, ${stars.length - keyEventStars - levelStars} timeline events`)
-  }
-
-  function setupStarSprites() {
-    debugLog(`🌟 StarMap: Creating authentic star sprites for ${stars.length} stars`)
-    
-    // Clear existing sprites and constellation lines
-    starSprites.forEach(sprite => starGroup.remove(sprite))
-    constellationLines.forEach(line => starGroup.remove(line))
-    starSprites = []
-    constellationLines = []
-
-    stars.forEach((star, i) => {
-      // Create authentic star sprite with enhanced texture
-      const sprite = createStarSprite(star, i)
-      starSprites.push(sprite)
-      starGroup.add(sprite)
-      
-      // Debug first few stars
-      if (i < 3) {
-        debugLog(`⭐ Star ${i} created:`, {
-          title: star.title,
-          position: star.position,
-          color: star.color,
-          era: star.era,
-          size: star.size
-        })
-      }
-    })
-    
-    // Create constellation lines like original system
-    createConstellationLines()
-    
-    // Register sprites with centralized interaction system
-    if (interactionSystem && starSprites.length > 0) {
-      interactionSystem.registerStarSprites(starSprites, stars, {
-        onClick: handleStarClick,
-        onHover: (data: any, hovered: boolean) => handleStarHover(data, hovered)
+        position: star.position,
+        color: star.color,
+        era: star.era,
+        size: star.size,
       })
     }
-    
-    debugLog(`✅ StarMap: Created ${starSprites.length} authentic star sprites with centralized interaction`)
-  }
-
-  function createStarSprite(star: StarData, index: number): Sprite {
-    // Use original enhanced star texture generation
-    const starType = getStarType(star.uniqueId, star.isKeyEvent)
-    const canvas = createEnhancedStarTexture(star.color, starType, star.isKeyEvent)
-    const texture = new CanvasTexture(canvas)
-    texture.needsUpdate = true
-    
-    const material = new SpriteMaterial({
-      map: texture,
-      transparent: true,
-      alphaTest: 0.001,
-      blending: AdditiveBlending,
-      depthWrite: false
-    })
-
-    const sprite = new Sprite(material)
-    sprite.position.set(...star.position)
-    sprite.scale.setScalar(star.size * 30) // Natural size for distance 1000 with good clickability
-    
-    // Store star data for interaction
-    ;(sprite as any).starData = star
-    ;(sprite as any).starIndex = index
-    
-    // Sprite verification (minimal logging)
-    if (index === 0) {
-      const actualDistance = sprite.position.length()
-      debugLog(`🔍 Sprite created: ${star.title.substring(0, 20)}... distance ${actualDistance.toFixed(1)}`)
-    }
-
-    return sprite
-  }
+  })
 
   // Create constellation lines like original system
-  function createConstellationLines() {
-    const eraGroups = groupStarsByEra()
-    
-    Object.entries(eraGroups).forEach(([era, eraStars]) => {
-      if (eraStars.length < 2) return
-      
-      const config = constellationConfig[era]
-      if (!config) return
-      
-      const pattern = constellationPatterns[config.pattern]
-      const connections = connectionPatterns[config.pattern]
-      
-      if (!connections || !pattern) return
-      
-      // Create line geometry for this era's constellation
-      const points: Vector3[] = []
-      const colors: number[] = []
-      const eraColor = new Color(eraColorMap[era] || '#ffffff')
-      
-      connections.forEach(([startIdx, endIdx]) => {
-        if (startIdx < eraStars.length && endIdx < eraStars.length) {
-          const startStar = eraStars[startIdx]
-          const endStar = eraStars[endIdx]
-          
-          points.push(new Vector3(...startStar.position))
-          points.push(new Vector3(...endStar.position))
-          
-          // Add colors for each vertex
-          colors.push(eraColor.r, eraColor.g, eraColor.b)
-          colors.push(eraColor.r, eraColor.g, eraColor.b)
-        }
-      })
-      
-      if (points.length > 0) {
-        const geometry = new BufferGeometry().setFromPoints(points)
-        geometry.setAttribute('color', new Float32BufferAttribute(colors, 3))
+  createConstellationLines()
 
-        const material = new LineBasicMaterial({
-          vertexColors: true,
-          transparent: true,
-          opacity: 0.3,
-          blending: AdditiveBlending
-        })
-
-        const lines = new LineSegments(geometry, material)
-        constellationLines.push(lines)
-        starGroup.add(lines)
-      }
+  // Register sprites with centralized interaction system
+  if (interactionSystem && starSprites.length > 0) {
+    interactionSystem.registerStarSprites(starSprites, stars, {
+      onClick: handleStarClick,
+      onHover: (data: any, hovered: boolean) => handleStarHover(data, hovered),
     })
   }
-  
-  function groupStarsByEra(): { [era: string]: StarData[] } {
-    const groups: { [era: string]: StarData[] } = {}
-    
-    stars.forEach(star => {
-      const era = star.era || 'unknown'
-      if (!groups[era]) groups[era] = []
-      groups[era].push(star)
-    })
-    
-    return groups
-  }
-  
-  // --- ANIMATION ---
 
-  useTask((delta) => {
-    if (starSprites.length === 0) return
+  debugLog(
+    `✅ StarMap: Created ${starSprites.length} authentic star sprites with centralized interaction`,
+  )
+}
 
-    const time = performance.now() * 0.001
-    const selectedStarId = selectedStar?.uniqueId ?? null
-    
-    if (time >= nextTransitionCleanupAt) {
-      nextTransitionCleanupAt = time + 10
+function createStarSprite(star: StarData, index: number): Sprite {
+  // Use original enhanced star texture generation
+  const starType = getStarType(star.uniqueId, star.isKeyEvent)
+  const canvas = createEnhancedStarTexture(
+    star.color,
+    starType,
+    star.isKeyEvent,
+  )
+  const texture = new CanvasTexture(canvas)
+  texture.needsUpdate = true
 
-      for (const [key, value] of hoverTransitions.entries()) {
-        if (value <= 0) hoverTransitions.delete(key)
-      }
-      for (const [key, value] of selectionTransitions.entries()) {
-        if (value <= 0) selectionTransitions.delete(key)
-      }
-    }
-
-    for (let index = 0; index < starSprites.length; index += 1) {
-      const sprite = starSprites[index]
-      const star = stars[index]
-      if (!star) continue
-
-      // Authentic twinkling animation like original system
-      const twinkleTime = time * star.twinkleSpeed + star.animationOffset
-      const twinkle1 = Math.sin(twinkleTime) * 0.15
-      const twinkle2 = Math.sin(twinkleTime * 1.7 + 1) * 0.1
-      const twinkle3 = Math.sin(twinkleTime * 0.3 + 2) * 0.05
-      const twinkle = 0.85 + twinkle1 + twinkle2 + twinkle3
-
-      let scale = star.size * 50 * twinkle
-      let opacity = star.intensity * twinkle
-
-      // Smooth transition effects for natural glow
-      const isSelected = selectedStarId === star.uniqueId
-      const isHovered = index === hoveredStarIndex
-      
-      // Update hover transition (smooth fade in/out)
-      const currentHoverTransition = hoverTransitions.get(index) || 0
-      if (isHovered) {
-        hoverTransitions.set(index, Math.min(1, currentHoverTransition + delta * 3)) // 3 = transition speed
-      } else {
-        hoverTransitions.set(index, Math.max(0, currentHoverTransition - delta * 3))
-      }
-      const hoverAmount = hoverTransitions.get(index) || 0
-      
-      // Update selection transition (smooth fade in/out)
-      const currentSelectionTransition = selectionTransitions.get(star.uniqueId) || 0
-      if (isSelected) {
-        selectionTransitions.set(star.uniqueId, Math.min(1, currentSelectionTransition + delta * 2)) // 2 = slower for selection
-      } else {
-        selectionTransitions.set(star.uniqueId, Math.max(0, currentSelectionTransition - delta * 2))
-      }
-      const selectionAmount = selectionTransitions.get(star.uniqueId) || 0
-
-      // Apply smooth effects based on transition amounts
-      scale *= 1 + (selectionAmount * 0.8) + (hoverAmount * 0.4) // Gradual scale increase
-      opacity *= 1 + (selectionAmount * 1.0) + (hoverAmount * 0.5) // Gradual opacity increase
-      
-      // Debug only when transition starts
-      if (isSelected && selectionAmount < 0.1 && index === 0) {
-        debugLog(`🔥 Selected star transition started: ${star.title.substring(0, 30)}...`)
-      }
-
-      sprite.scale.setScalar(scale)
-      if (sprite.material) {
-        ;(sprite.material as SpriteMaterial).opacity = Math.min(1, opacity)
-      }
-    }
-    
-    const lineOpacity = 0.2 + Math.sin(time * 0.5) * 0.1
-
-    for (let index = 0; index < constellationLines.length; index += 1) {
-      const line = constellationLines[index]
-      if (line.material) {
-        const baseMaterial = line.material as LineBasicMaterial
-        baseMaterial.opacity = lineOpacity
-      }
-    }
+  const material = new SpriteMaterial({
+    map: texture,
+    transparent: true,
+    alphaTest: 0.001,
+    blending: AdditiveBlending,
+    depthWrite: false,
   })
 
-  // --- INTERACTION HANDLERS (for centralized interaction system) ---
+  const sprite = new Sprite(material)
+  sprite.position.set(...star.position)
+  sprite.scale.setScalar(star.size * 30) // Natural size for distance 1000 with good clickability
 
-  function handleStarClick(data: any) {
-    const { sprite, index, timestamp, ...star } = data
-    debugLog('⭐ StarMap: Star clicked via InteractionSystem:', star.title)
-    
-    // Update stores
-    gameActions.selectStar(star)
-    gameActions.recordInteraction('star_click', star.uniqueId)
-    
-    // Calculate screen position for timeline cards
-    const worldPosition = new Vector3().copy(sprite.position)
-    const screenPosition = interactionSystem?.getScreenPosition(worldPosition) || { x: 0, y: 0 }
-    
-    // Dispatch enhanced event with all necessary data
-    dispatch('starSelected', {
-      star: star,
-      eventData: star,
-      screenPosition: screenPosition,
-      worldPosition: worldPosition,
-      index: index,
-      timestamp: timestamp
+  // Store star data for interaction
+  ;(sprite as any).starData = star
+  ;(sprite as any).starIndex = index
+
+  // Sprite verification (minimal logging)
+  if (index === 0) {
+    const actualDistance = sprite.position.length()
+    debugLog(
+      `🔍 Sprite created: ${star.title.substring(0, 20)}... distance ${actualDistance.toFixed(1)}`,
+    )
+  }
+
+  return sprite
+}
+
+// Create constellation lines like original system
+function createConstellationLines() {
+  const eraGroups = groupStarsByEra()
+
+  Object.entries(eraGroups).forEach(([era, eraStars]) => {
+    if (eraStars.length < 2) return
+
+    const config = constellationConfig[era]
+    if (!config) return
+
+    const pattern = constellationPatterns[config.pattern]
+    const connections = connectionPatterns[config.pattern]
+
+    if (!connections || !pattern) return
+
+    // Create line geometry for this era's constellation
+    const points: Vector3[] = []
+    const colors: number[] = []
+    const eraColor = new Color(eraColorMap[era] || '#ffffff')
+
+    connections.forEach(([startIdx, endIdx]) => {
+      if (startIdx < eraStars.length && endIdx < eraStars.length) {
+        const startStar = eraStars[startIdx]
+        const endStar = eraStars[endIdx]
+
+        points.push(new Vector3(...startStar.position))
+        points.push(new Vector3(...endStar.position))
+
+        // Add colors for each vertex
+        colors.push(eraColor.r, eraColor.g, eraColor.b)
+        colors.push(eraColor.r, eraColor.g, eraColor.b)
+      }
     })
-    
-    // Emit global event for StarNavigationSystem
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('starmap.star.selected', {
+
+    if (points.length > 0) {
+      const geometry = new BufferGeometry().setFromPoints(points)
+      geometry.setAttribute('color', new Float32BufferAttribute(colors, 3))
+
+      const material = new LineBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.3,
+        blending: AdditiveBlending,
+      })
+
+      const lines = new LineSegments(geometry, material)
+      constellationLines.push(lines)
+      starGroup.add(lines)
+    }
+  })
+}
+
+function groupStarsByEra(): { [era: string]: StarData[] } {
+  const groups: { [era: string]: StarData[] } = {}
+
+  stars.forEach(star => {
+    const era = star.era || 'unknown'
+    if (!groups[era]) groups[era] = []
+    groups[era].push(star)
+  })
+
+  return groups
+}
+
+// --- ANIMATION ---
+
+useTask(delta => {
+  if (starSprites.length === 0) return
+
+  const time = performance.now() * 0.001
+  const selectedStarId = selectedStar?.uniqueId ?? null
+
+  if (time >= nextTransitionCleanupAt) {
+    nextTransitionCleanupAt = time + 10
+
+    for (const [key, value] of hoverTransitions.entries()) {
+      if (value <= 0) hoverTransitions.delete(key)
+    }
+    for (const [key, value] of selectionTransitions.entries()) {
+      if (value <= 0) selectionTransitions.delete(key)
+    }
+  }
+
+  for (let index = 0; index < starSprites.length; index += 1) {
+    const sprite = starSprites[index]
+    const star = stars[index]
+    if (!star) continue
+
+    // Authentic twinkling animation like original system
+    const twinkleTime = time * star.twinkleSpeed + star.animationOffset
+    const twinkle1 = Math.sin(twinkleTime) * 0.15
+    const twinkle2 = Math.sin(twinkleTime * 1.7 + 1) * 0.1
+    const twinkle3 = Math.sin(twinkleTime * 0.3 + 2) * 0.05
+    const twinkle = 0.85 + twinkle1 + twinkle2 + twinkle3
+
+    let scale = star.size * 50 * twinkle
+    let opacity = star.intensity * twinkle
+
+    // Smooth transition effects for natural glow
+    const isSelected = selectedStarId === star.uniqueId
+    const isHovered = index === hoveredStarIndex
+
+    // Update hover transition (smooth fade in/out)
+    const currentHoverTransition = hoverTransitions.get(index) || 0
+    if (isHovered) {
+      hoverTransitions.set(
+        index,
+        Math.min(1, currentHoverTransition + delta * 3),
+      ) // 3 = transition speed
+    } else {
+      hoverTransitions.set(
+        index,
+        Math.max(0, currentHoverTransition - delta * 3),
+      )
+    }
+    const hoverAmount = hoverTransitions.get(index) || 0
+
+    // Update selection transition (smooth fade in/out)
+    const currentSelectionTransition =
+      selectionTransitions.get(star.uniqueId) || 0
+    if (isSelected) {
+      selectionTransitions.set(
+        star.uniqueId,
+        Math.min(1, currentSelectionTransition + delta * 2),
+      ) // 2 = slower for selection
+    } else {
+      selectionTransitions.set(
+        star.uniqueId,
+        Math.max(0, currentSelectionTransition - delta * 2),
+      )
+    }
+    const selectionAmount = selectionTransitions.get(star.uniqueId) || 0
+
+    // Apply smooth effects based on transition amounts
+    scale *= 1 + selectionAmount * 0.8 + hoverAmount * 0.4 // Gradual scale increase
+    opacity *= 1 + selectionAmount * 1.0 + hoverAmount * 0.5 // Gradual opacity increase
+
+    // Debug only when transition starts
+    if (isSelected && selectionAmount < 0.1 && index === 0) {
+      debugLog(
+        `🔥 Selected star transition started: ${star.title.substring(0, 30)}...`,
+      )
+    }
+
+    sprite.scale.setScalar(scale)
+    if (sprite.material) {
+      ;(sprite.material as SpriteMaterial).opacity = Math.min(1, opacity)
+    }
+  }
+
+  const lineOpacity = 0.2 + Math.sin(time * 0.5) * 0.1
+
+  for (let index = 0; index < constellationLines.length; index += 1) {
+    const line = constellationLines[index]
+    if (line.material) {
+      const baseMaterial = line.material as LineBasicMaterial
+      baseMaterial.opacity = lineOpacity
+    }
+  }
+})
+
+// --- INTERACTION HANDLERS (for centralized interaction system) ---
+
+function handleStarClick(data: any) {
+  const { sprite, index, timestamp, ...star } = data
+  debugLog('⭐ StarMap: Star clicked via InteractionSystem:', star.title)
+
+  // Update stores
+  gameActions.selectStar(star)
+  gameActions.recordInteraction('star_click', star.uniqueId)
+
+  // Calculate screen position for timeline cards
+  const worldPosition = new Vector3().copy(sprite.position)
+  const screenPosition = interactionSystem?.getScreenPosition(
+    worldPosition,
+  ) || { x: 0, y: 0 }
+
+  // Dispatch enhanced event with all necessary data
+  dispatch('starSelected', {
+    star: star,
+    eventData: star,
+    screenPosition: screenPosition,
+    worldPosition: worldPosition,
+    index: index,
+    timestamp: timestamp,
+  })
+
+  // Emit global event for StarNavigationSystem
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('starmap.star.selected', {
         detail: {
           eventData: star,
           screenPosition: screenPosition,
           worldPosition: worldPosition,
-          index: index
-        }
-      }))
-    }
+          index: index,
+        },
+      }),
+    )
   }
+}
 
-  function handleStarHover(data: any, hovered: boolean) {
-    if (hovered) {
-      hoveredStarIndex = data.index
-      gameActions.recordInteraction('star_hover', data.uniqueId)
-    } else {
-      hoveredStarIndex = null
-    }
+function handleStarHover(data: any, hovered: boolean) {
+  if (hovered) {
+    hoveredStarIndex = data.index
+    gameActions.recordInteraction('star_hover', data.uniqueId)
+  } else {
+    hoveredStarIndex = null
   }
+}
 
+// --- REACTIVE UPDATES ---
 
-  // --- REACTIVE UPDATES ---
+// Update shader uniform when the selected star changes
+$: uniforms.u_selectedStarIndex.value = selectedStar
+  ? stars.findIndex(s => s.uniqueId === selectedStar.uniqueId)
+  : -1
 
-  // Update shader uniform when the selected star changes
-  $: uniforms.u_selectedStarIndex.value = selectedStar
-    ? stars.findIndex(s => s.uniqueId === selectedStar.uniqueId)
-    : -1
-  
-  // Update shader uniform for hover effect
-  $: uniforms.u_hoveredStarIndex.value = hoveredStarIndex ?? -1
+// Update shader uniform for hover effect
+$: uniforms.u_hoveredStarIndex.value = hoveredStarIndex ?? -1
 
-  // --- ADVANCED STAR SHADER (Modernized from original) ---
+// --- ADVANCED STAR SHADER (Modernized from original) ---
 
-  const onBeforeCompile = (shader: Shader) => {
-    // Add our custom uniforms and attributes to the shader
-    shader.uniforms.u_time = uniforms.u_time
-    shader.uniforms.u_selectedStarIndex = uniforms.u_selectedStarIndex
-    shader.uniforms.u_hoveredStarIndex = uniforms.u_hoveredStarIndex
-    shader.uniforms.u_cameraPosition = uniforms.u_cameraPosition
+const onBeforeCompile = (shader: Shader) => {
+  // Add our custom uniforms and attributes to the shader
+  shader.uniforms.u_time = uniforms.u_time
+  shader.uniforms.u_selectedStarIndex = uniforms.u_selectedStarIndex
+  shader.uniforms.u_hoveredStarIndex = uniforms.u_hoveredStarIndex
+  shader.uniforms.u_cameraPosition = uniforms.u_cameraPosition
 
-    // Inject code into the vertex shader
-    shader.vertexShader = `
+  // Inject code into the vertex shader
+  shader.vertexShader = `
       attribute vec3 a_color;
       attribute vec4 a_attributes; // size, intensity, twinkleSpeed, animationOffset
       
@@ -450,8 +486,8 @@
 
       ${shader.vertexShader}
     `.replace(
-      '#include <project_vertex>',
-      `
+    '#include <project_vertex>',
+    `
       v_color = a_color;
       v_attributes = a_attributes;
       v_uv = uv;
@@ -479,11 +515,11 @@
       // Final position calculation
       vec4 mvPosition = modelViewMatrix * instanceMatrix * vec4(position * scale, 1.0);
       gl_Position = projectionMatrix * mvPosition;
-      `
-    )
+      `,
+  )
 
-    // Enhanced fragment shader with star-like appearance
-    shader.fragmentShader = `
+  // Enhanced fragment shader with star-like appearance
+  shader.fragmentShader = `
       varying vec3 v_color;
       varying vec4 v_attributes;
       varying float v_is_selected;
@@ -495,8 +531,8 @@
       
       ${shader.fragmentShader}
     `.replace(
-      '#include <dithering_fragment>',
-      `
+    '#include <dithering_fragment>',
+    `
       #include <dithering_fragment>
       
       // Create star-like appearance with UV coordinates
@@ -535,118 +571,131 @@
       // Ensure stars are always visible (emissive)
       gl_FragColor = vec4(final_color, final_alpha * intensity);
       gl_FragColor.rgb = max(gl_FragColor.rgb, v_color * 0.3); // Minimum visibility
-      `
+      `,
+  )
+}
+
+// --- CONSTELLATION-BASED STAR POSITIONING (Using imported configuration) ---
+
+function createStarFromTimelineEvent(event: any, index: number): StarData {
+  const era = event.era || 'unknown'
+  const config = constellationConfig[era] || constellationConfig.unknown
+  const pattern =
+    constellationPatterns[config.pattern] || constellationPatterns.scattered
+
+  // Group events by era for constellation positioning
+  const eraEvents = timelineEvents.filter(e => (e.era || 'unknown') === era)
+  let indexInEra = eraEvents.findIndex(
+    e => e.uniqueId === event.uniqueId || e.slug === event.slug,
+  )
+
+  // If not found in timeline events (e.g., level stars), use a deterministic index
+  if (indexInEra === -1) {
+    // Use hash of the star's unique ID to get consistent positioning
+    const starId = event.uniqueId || event.id || event.title
+    const hash = hashCode(starId)
+    indexInEra = Math.abs(hash) % 10 // Deterministic position in constellation
+  }
+
+  const patternIndex = indexInEra % pattern.length
+  const patternPosition = pattern[patternIndex]
+
+  // Add offset for overlapping stars (when more events than pattern positions)
+  const overlapGroup = Math.floor(indexInEra / pattern.length)
+  const offsetMultiplier = overlapGroup * 8 // 8 degrees offset per overlap group
+
+  // Safety check for pattern position
+  if (!patternPosition) {
+    if (isDev) {
+      console.warn(
+        `Missing pattern position for era: ${era}, pattern: ${config.pattern}, index: ${patternIndex}`,
+      )
+    }
+    // Use default offset if pattern position is missing
+    return {
+      uniqueId: event.uniqueId || event.slug || `fallback_star_${index}`,
+      position: [100, 100, 100], // Safe fallback position
+      color: '#ffffff',
+      size: 1.0,
+      title: event.title || 'Unknown Star',
+    }
+  }
+
+  // Calculate position using spherical coordinates with overlap prevention
+  const azimuthDeg =
+    config.centerAzimuth + patternPosition.azOffset + offsetMultiplier
+  const elevationDeg = Math.max(
+    25,
+    Math.min(
+      75,
+      config.centerElevation +
+        patternPosition.elOffset +
+        offsetMultiplier * 0.3,
+    ),
+  )
+
+  // Convert to 3D coordinates using skybox radius
+  const azimuthRad = (azimuthDeg * Math.PI) / 180
+  const elevationRad = (elevationDeg * Math.PI) / 180
+  const polarAngleRad = Math.PI / 2 - elevationRad
+  const sphereRadius = 1000 // Match skybox distance exactly
+
+  const x = sphereRadius * Math.sin(polarAngleRad) * Math.cos(azimuthRad)
+  const y = sphereRadius * Math.cos(polarAngleRad)
+  const z = sphereRadius * Math.sin(polarAngleRad) * Math.sin(azimuthRad)
+
+  // Positioning verification (minimal logging)
+  const calculatedDistance = Math.sqrt(x * x + y * y + z * z)
+  if (index === 0) {
+    debugLog(
+      `🔍 Star positioning verified: distance ${calculatedDistance.toFixed(1)} (expected ${sphereRadius})`,
     )
   }
 
-  // --- CONSTELLATION-BASED STAR POSITIONING (Using imported configuration) ---
+  // Use original era colors and sizing with size factor
+  const eraColor = getStarColor(event.uniqueId || event.slug, era, true)
+  const starSize = getSizeFactor(event.isKeyEvent || false)
 
-  function createStarFromTimelineEvent(event: any, index: number): StarData {
-    const era = event.era || 'unknown'
-    const config = constellationConfig[era] || constellationConfig.unknown
-    const pattern = constellationPatterns[config.pattern] || constellationPatterns.scattered
-    
-    // Group events by era for constellation positioning
-    const eraEvents = timelineEvents.filter(e => (e.era || 'unknown') === era)
-    let indexInEra = eraEvents.findIndex(e => e.uniqueId === event.uniqueId || e.slug === event.slug)
-    
-    // If not found in timeline events (e.g., level stars), use a deterministic index
-    if (indexInEra === -1) {
-      // Use hash of the star's unique ID to get consistent positioning
-      const starId = event.uniqueId || event.id || event.title
-      const hash = hashCode(starId)
-      indexInEra = Math.abs(hash) % 10 // Deterministic position in constellation
-    }
-    
-    const patternIndex = indexInEra % pattern.length
-    const patternPosition = pattern[patternIndex]
-    
-    // Add offset for overlapping stars (when more events than pattern positions)
-    const overlapGroup = Math.floor(indexInEra / pattern.length)
-    const offsetMultiplier = overlapGroup * 8 // 8 degrees offset per overlap group
-    
-    // Safety check for pattern position
-    if (!patternPosition) {
-      if (isDev) {
-        console.warn(`Missing pattern position for era: ${era}, pattern: ${config.pattern}, index: ${patternIndex}`)
-      }
-      // Use default offset if pattern position is missing
-      return {
-        uniqueId: event.uniqueId || event.slug || `fallback_star_${index}`,
-        position: [100, 100, 100], // Safe fallback position
-        color: '#ffffff',
-        size: 1.0,
-        title: event.title || 'Unknown Star'
-      }
-    }
-    
-    // Calculate position using spherical coordinates with overlap prevention
-    const azimuthDeg = config.centerAzimuth + patternPosition.azOffset + offsetMultiplier
-    const elevationDeg = Math.max(25, Math.min(75, 
-      config.centerElevation + patternPosition.elOffset + (offsetMultiplier * 0.3)
-    ))
-    
-    // Convert to 3D coordinates using skybox radius
-    const azimuthRad = (azimuthDeg * Math.PI) / 180
-    const elevationRad = (elevationDeg * Math.PI) / 180
-    const polarAngleRad = Math.PI / 2 - elevationRad
-    const sphereRadius = 1000  // Match skybox distance exactly
-    
-    const x = sphereRadius * Math.sin(polarAngleRad) * Math.cos(azimuthRad)
-    const y = sphereRadius * Math.cos(polarAngleRad)
-    const z = sphereRadius * Math.sin(polarAngleRad) * Math.sin(azimuthRad)
-    
-    // Positioning verification (minimal logging)
-    const calculatedDistance = Math.sqrt(x*x + y*y + z*z)
-    if (index === 0) {
-      debugLog(`🔍 Star positioning verified: distance ${calculatedDistance.toFixed(1)} (expected ${sphereRadius})`)
-    }
-    
-    // Use original era colors and sizing with size factor
-    const eraColor = getStarColor(event.uniqueId || event.slug, era, true)
-    const starSize = getSizeFactor(event.isKeyEvent || false)
-    
-    const starData = {
-      uniqueId: event.uniqueId || event.slug || `timeline_star_${index}`,
-      position: [x, y, z],
-      color: eraColor,
-      size: starSize,
-      intensity: event.isKeyEvent ? 1.2 : 0.8,
-      title: event.title || `Star ${index + 1}`,
-      description: event.description || 'A distant star',
-      timelineYear: event.year,
-      timelineEra: event.era,
-      timelineLocation: event.location,
-      isKeyEvent: event.isKeyEvent || false,
-      isLevel: event.isLevel || false,
-      levelId: event.levelId,
-      tags: event.tags || [],
-      category: event.category || 'unknown',
-      slug: event.slug,
-      clickable: true,
-      hoverable: true,
-      unlocked: true,
-      animationOffset: 0,
-      twinkleSpeed: 1.0,
-      screenPosition: { cardClass: 'bottom' },
-      era: era,
-      // Include all original event data for timeline cards
-      ...event
-    }
-    
-    // Debug duplicate events (only first 3 for brevity)
-    if (index < 3) {
-      debugLog(`🔍 Star ${index} data mapping:`, {
-        uniqueId: starData.uniqueId,
-        title: starData.title?.substring(0, 30) + '...'
-      })
-    }
-    
-    return starData
+  const starData = {
+    uniqueId: event.uniqueId || event.slug || `timeline_star_${index}`,
+    position: [x, y, z],
+    color: eraColor,
+    size: starSize,
+    intensity: event.isKeyEvent ? 1.2 : 0.8,
+    title: event.title || `Star ${index + 1}`,
+    description: event.description || 'A distant star',
+    timelineYear: event.year,
+    timelineEra: event.era,
+    timelineLocation: event.location,
+    isKeyEvent: event.isKeyEvent || false,
+    isLevel: event.isLevel || false,
+    levelId: event.levelId,
+    tags: event.tags || [],
+    category: event.category || 'unknown',
+    slug: event.slug,
+    clickable: true,
+    hoverable: true,
+    unlocked: true,
+    animationOffset: 0,
+    twinkleSpeed: 1.0,
+    screenPosition: { cardClass: 'bottom' },
+    era: era,
+    // Include all original event data for timeline cards
+    ...event,
   }
 
-  // --- PURE LEVEL STAR DATA ---
-  
+  // Debug duplicate events (only first 3 for brevity)
+  if (index < 3) {
+    debugLog(`🔍 Star ${index} data mapping:`, {
+      uniqueId: starData.uniqueId,
+      title: starData.title?.substring(0, 30) + '...',
+    })
+  }
+
+  return starData
+}
+
+// --- PURE LEVEL STAR DATA ---
 </script>
 
 <T.Group name="authentic-starnode-system" bind:ref={starGroup}>

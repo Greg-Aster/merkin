@@ -12,7 +12,14 @@ export interface PersistedStyleBatchEntry {
   sourceAssetUrl?: string
   workspaceReferenceImageUrl?: string
   jobId?: string
-  status: 'pending' | 'queued' | 'running' | 'succeeded' | 'applied' | 'failed' | 'cancelled'
+  status:
+    | 'pending'
+    | 'queued'
+    | 'running'
+    | 'succeeded'
+    | 'applied'
+    | 'failed'
+    | 'cancelled'
   outputAssetUrl?: string
   error?: string
 }
@@ -34,14 +41,20 @@ export interface PersistedStyleBatchSession {
   entries: PersistedStyleBatchEntry[]
 }
 
-export function saveEditorSceneToLocalStorage(levelId: string, scene: EditorSceneDocument) {
+export function saveEditorSceneToLocalStorage(
+  levelId: string,
+  scene: EditorSceneDocument,
+) {
   const payload: EditorSceneDocument = {
     ...scene,
     levelId,
     updatedAt: new Date().toISOString(),
   }
 
-  localStorage.setItem(`${SCENE_STORAGE_PREFIX}${levelId}`, JSON.stringify(payload))
+  localStorage.setItem(
+    `${SCENE_STORAGE_PREFIX}${levelId}`,
+    JSON.stringify(payload),
+  )
   return payload
 }
 
@@ -57,14 +70,20 @@ export function loadEditorSceneFromLocalStorage(levelId: string) {
   }
 }
 
-export function saveStyleBatchSessionToLocalStorage(levelId: string, session: PersistedStyleBatchSession) {
+export function saveStyleBatchSessionToLocalStorage(
+  levelId: string,
+  session: PersistedStyleBatchSession,
+) {
   const payload: PersistedStyleBatchSession = {
     ...session,
     levelId,
     updatedAt: new Date().toISOString(),
   }
 
-  localStorage.setItem(`${STYLE_BATCH_STORAGE_PREFIX}${levelId}`, JSON.stringify(payload))
+  localStorage.setItem(
+    `${STYLE_BATCH_STORAGE_PREFIX}${levelId}`,
+    JSON.stringify(payload),
+  )
   return payload
 }
 

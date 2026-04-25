@@ -9,13 +9,13 @@
  * or external URLs. Paths that already start with the base are left alone.
  */
 
-import { visit } from 'unist-util-visit';
+import { visit } from 'unist-util-visit'
 
 export function remarkRebaseImages(options = {}) {
-  const base = (options.base || '/').replace(/\/$/, ''); // strip trailing slash
+  const base = (options.base || '/').replace(/\/$/, '') // strip trailing slash
 
   return function (tree) {
-    if (!base) return; // base is '' (root), nothing to prefix
+    if (!base) return // base is '' (root), nothing to prefix
 
     visit(tree, 'image', function (node) {
       if (
@@ -24,8 +24,8 @@ export function remarkRebaseImages(options = {}) {
         !node.url.startsWith('//') &&
         !node.url.startsWith(base + '/')
       ) {
-        node.url = base + node.url;
+        node.url = base + node.url
       }
-    });
-  };
+    })
+  }
 }

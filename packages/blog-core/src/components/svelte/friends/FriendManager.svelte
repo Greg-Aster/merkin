@@ -473,6 +473,7 @@ function formatTimeAgo(dateString) {
                 on:click={() => handleSaveAsPermanent(friend)}
                 class="p-2 text-green-500 hover:bg-green-500 hover:bg-opacity-10 rounded-full" 
                 title="Save as permanent friend"
+                aria-label={`Save ${friend.name} as a permanent friend`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
@@ -487,6 +488,7 @@ function formatTimeAgo(dateString) {
                 on:click={() => handleRemoveFriend(friend.id)}
                 class="p-2 text-red-500 hover:bg-red-500 hover:bg-opacity-10 rounded-full" 
                 title="Remove friend"
+                aria-label={`Remove ${friend.name}`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="3 6 5 6 21 6"></polyline>

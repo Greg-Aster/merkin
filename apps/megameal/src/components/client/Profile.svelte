@@ -180,7 +180,11 @@ function configureVideoElement(video: HTMLVideoElement) {
 // 🎬 NEW: Update all video elements when config changes
 function updateVideoSettings() {
   if (import.meta.env.DEV) {
-    console.log('🎬 Updating video settings for', videoElements.length, 'videos')
+    console.log(
+      '🎬 Updating video settings for',
+      videoElements.length,
+      'videos',
+    )
   }
   videoElements.forEach((video: ExtendedHTMLVideoElement) => {
     if (video && !video.paused) {
@@ -196,7 +200,10 @@ function updateVideoSettings() {
 // Watch for config changes and update videos
 // Only update if we actually have video elements to configure
 $: {
-  if ((playbackRate || shouldLoop || loopDelay || playOnce) && videoElements.length > 0) {
+  if (
+    (playbackRate || shouldLoop || loopDelay || playOnce) &&
+    videoElements.length > 0
+  ) {
     if (import.meta.env.DEV) {
       console.log('🎬 Video config changed:', {
         playbackRate,
@@ -406,7 +413,7 @@ onMount(() => {
                   disablePictureInPicture
                   preload={mediaConfig.loading === 'eager' ? 'auto' : 'none'}
                   on:loadedmetadata={(e) => configureVideoElement(e.currentTarget as ExtendedHTMLVideoElement)}
-                />
+                ></video>
               {:else}
                 <!-- Static image in cycling mode -->
                 <img

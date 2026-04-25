@@ -41,6 +41,7 @@ function handleChange() {
             bind:value={siteConfig.transparency}
             on:input={handleChange}
             class="flex-grow h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer" 
+            data-sfx-focus="focus-soft"
           />
         </div>
       </div>

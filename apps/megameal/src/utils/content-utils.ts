@@ -85,7 +85,9 @@ export async function getPostsBySeries(
 
 export async function getAllSeries(
   includeDrafts = false,
-): Promise<Record<string, { body: string; data: BlogPostData; slug: string }[]>> {
+): Promise<
+  Record<string, { body: string; data: BlogPostData; slug: string }[]>
+> {
   const allPosts = (await getCollection('posts', ({ data }) => {
     return includeDrafts ? true : data.draft !== true
   })) as unknown as { body: string; data: BlogPostData; slug: string }[]

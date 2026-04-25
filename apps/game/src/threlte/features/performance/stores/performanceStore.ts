@@ -2,29 +2,32 @@ import { writable } from 'svelte/store'
 import type { Writable } from 'svelte/store'
 
 // Import the manager and its types
-import { optimizationManager, type QualitySettings } from '../OptimizationManager'
+import {
+  type QualitySettings,
+  optimizationManager,
+} from '../OptimizationManager'
 
 // --- Part 1: Performance Monitoring (For UI/Debug Panels) ---
 
 export interface MemoryInfo {
-  geometries: number;
-  textures: number;
-  programs: number;
+  geometries: number
+  textures: number
+  programs: number
 }
 
 export interface LongTaskInfo {
-  supported: boolean;
-  count: number;
-  lastDuration: number;
-  maxDuration: number;
-  totalDuration: number;
+  supported: boolean
+  count: number
+  lastDuration: number
+  maxDuration: number
+  totalDuration: number
 }
 
 export interface SystemTimingInfo {
-  lastMs: number;
-  avgMs: number;
-  maxMs: number;
-  samples: number;
+  lastMs: number
+  avgMs: number
+  maxMs: number
+  samples: number
 }
 
 export const fpsStore: Writable<number> = writable(60)
@@ -34,10 +37,11 @@ export const memoryStore: Writable<MemoryInfo> = writable({
   textures: 0,
   programs: 0,
 })
-export const renderInfoStore: Writable<{calls: number, triangles: number}> = writable({
-  calls: 0,
-  triangles: 0
-})
+export const renderInfoStore: Writable<{ calls: number; triangles: number }> =
+  writable({
+    calls: 0,
+    triangles: 0,
+  })
 export const performanceGradeStore: Writable<string> = writable('A')
 export const performanceScoreStore: Writable<number> = writable(100)
 export const optimizationRecommendationsStore: Writable<string[]> = writable([])
@@ -48,7 +52,8 @@ export const longTaskStore: Writable<LongTaskInfo> = writable({
   maxDuration: 0,
   totalDuration: 0,
 })
-export const systemTimingsStore: Writable<Record<string, SystemTimingInfo>> = writable({})
+export const systemTimingsStore: Writable<Record<string, SystemTimingInfo>> =
+  writable({})
 
 // --- Part 2: Performance Configuration (For Driving Component Logic) ---
 
@@ -57,7 +62,7 @@ export const systemTimingsStore: Writable<Record<string, SystemTimingInfo>> = wr
  * Components will subscribe to this to configure themselves reactively.
  */
 export const qualitySettingsStore: Writable<QualitySettings> = writable(
-  optimizationManager.getQualitySettings()
+  optimizationManager.getQualitySettings(),
 )
 
 /**
@@ -65,7 +70,7 @@ export const qualitySettingsStore: Writable<QualitySettings> = writable(
  * Useful for displaying the current level in the UI.
  */
 export const qualityLevelStore: Writable<string> = writable(
-  optimizationManager.getOptimizationLevel()
+  optimizationManager.getOptimizationLevel(),
 )
 
 // --- Part 3: Connect the Manager to the Stores ---
@@ -75,7 +80,7 @@ export const qualityLevelStore: Writable<string> = writable(
 if (typeof window !== 'undefined') {
   window.addEventListener('optimizationLevelChanged', (event: any) => {
     const { qualitySettings, level } = event.detail
-    
+
     // Update both the detailed settings store and the level name store
     qualitySettingsStore.set(qualitySettings)
     qualityLevelStore.set(level)
@@ -83,7 +88,7 @@ if (typeof window !== 'undefined') {
 }
 
 export function recordLongTask(duration: number): void {
-  longTaskStore.update((current) => ({
+  longTaskStore.update(current => ({
     supported: true,
     count: current.count + 1,
     lastDuration: duration,
@@ -93,18 +98,18 @@ export function recordLongTask(duration: number): void {
 }
 
 export function markLongTaskSupport(supported: boolean): void {
-  longTaskStore.update((current) => ({
+  longTaskStore.update(current => ({
     ...current,
     supported,
   }))
 }
 
 export function recordSystemTiming(name: string, durationMs: number): void {
-  systemTimingsStore.update((current) => {
+  systemTimingsStore.update(current => {
     const previous = current[name]
     const nextSamples = (previous?.samples ?? 0) + 1
     const nextAvg = previous
-      ? ((previous.avgMs * previous.samples) + durationMs) / nextSamples
+      ? (previous.avgMs * previous.samples + durationMs) / nextSamples
       : durationMs
 
     return {

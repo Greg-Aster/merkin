@@ -1,95 +1,113 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
+import { onMount } from 'svelte'
 
-  let isMobile = false
-  let isFullScreen = false
-  let supportsFullscreen = false
+let isMobile = false
+let isFullScreen = false
+let supportsFullscreen = false
 
-  function getFullscreenElement(): Element | null {
-    return document.fullscreenElement
-      || (document as Document & { webkitFullscreenElement?: Element }).webkitFullscreenElement
-      || null
+function getFullscreenElement(): Element | null {
+  return (
+    document.fullscreenElement ||
+    (document as Document & { webkitFullscreenElement?: Element })
+      .webkitFullscreenElement ||
+    null
+  )
+}
+
+function getViewportElement(): HTMLElement {
+  return document.getElementById('game-viewport') ?? document.documentElement
+}
+
+function syncViewportHeight() {
+  const viewportHeight = window.visualViewport?.height ?? window.innerHeight
+  document.documentElement.style.setProperty(
+    '--game-dvh',
+    `${viewportHeight}px`,
+  )
+}
+
+function nudgeBrowserChromeAway() {
+  window.setTimeout(() => {
+    window.scrollTo(0, 1)
+    syncViewportHeight()
+  }, 80)
+}
+
+async function toggleFullScreen() {
+  const viewport = getViewportElement()
+  const fullscreenTarget = viewport as HTMLElement & {
+    webkitRequestFullscreen?: () => Promise<void> | void
+  }
+  const fullscreenDocument = document as Document & {
+    webkitExitFullscreen?: () => Promise<void> | void
   }
 
-  function getViewportElement(): HTMLElement {
-    return document.getElementById('game-viewport') ?? document.documentElement
-  }
-
-  function syncViewportHeight() {
-    const viewportHeight = window.visualViewport?.height ?? window.innerHeight
-    document.documentElement.style.setProperty('--game-dvh', `${viewportHeight}px`)
-  }
-
-  function nudgeBrowserChromeAway() {
-    window.setTimeout(() => {
-      window.scrollTo(0, 1)
-      syncViewportHeight()
-    }, 80)
-  }
-
-  async function toggleFullScreen() {
-    const viewport = getViewportElement()
-    const fullscreenTarget = viewport as HTMLElement & {
-      webkitRequestFullscreen?: () => Promise<void> | void
-    }
-    const fullscreenDocument = document as Document & {
-      webkitExitFullscreen?: () => Promise<void> | void
-    }
-
-    try {
-      if (!getFullscreenElement()) {
-        if (viewport.requestFullscreen) {
-          await viewport.requestFullscreen()
-        } else if (fullscreenTarget.webkitRequestFullscreen) {
-          await fullscreenTarget.webkitRequestFullscreen()
-        }
-      } else if (document.exitFullscreen) {
-        await document.exitFullscreen()
-      } else if (fullscreenDocument.webkitExitFullscreen) {
-        await fullscreenDocument.webkitExitFullscreen()
+  try {
+    if (!getFullscreenElement()) {
+      if (viewport.requestFullscreen) {
+        await viewport.requestFullscreen()
+      } else if (fullscreenTarget.webkitRequestFullscreen) {
+        await fullscreenTarget.webkitRequestFullscreen()
       }
-    } catch (error) {
-      console.warn('Unable to toggle fullscreen mode:', error)
+    } else if (document.exitFullscreen) {
+      await document.exitFullscreen()
+    } else if (fullscreenDocument.webkitExitFullscreen) {
+      await fullscreenDocument.webkitExitFullscreen()
     }
+  } catch (error) {
+    console.warn('Unable to toggle fullscreen mode:', error)
   }
+}
 
-  function handleFullScreenChange() {
-    isFullScreen = !!getFullscreenElement()
-    syncViewportHeight()
-  }
+function handleFullScreenChange() {
+  isFullScreen = !!getFullscreenElement()
+  syncViewportHeight()
+}
 
-  onMount(() => {
-    isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
+onMount(() => {
+  isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
     )
 
-    supportsFullscreen = Boolean(
-      document.fullscreenEnabled
-      || (document as Document & { webkitFullscreenEnabled?: boolean }).webkitFullscreenEnabled
-      || document.documentElement.requestFullscreen
-      || (document.documentElement as HTMLElement & { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen
+  supportsFullscreen = Boolean(
+    document.fullscreenEnabled ||
+      (document as Document & { webkitFullscreenEnabled?: boolean })
+        .webkitFullscreenEnabled ||
+      document.documentElement.requestFullscreen ||
+      (
+        document.documentElement as HTMLElement & {
+          webkitRequestFullscreen?: () => void
+        }
+      ).webkitRequestFullscreen,
+  )
+
+  syncViewportHeight()
+  nudgeBrowserChromeAway()
+
+  const viewport = window.visualViewport
+  const resizeHandler = () => syncViewportHeight()
+
+  viewport?.addEventListener('resize', resizeHandler)
+  window.addEventListener('orientationchange', nudgeBrowserChromeAway)
+  window.addEventListener('resize', resizeHandler)
+  document.addEventListener('fullscreenchange', handleFullScreenChange)
+  document.addEventListener(
+    'webkitfullscreenchange',
+    handleFullScreenChange as EventListener,
+  )
+
+  return () => {
+    viewport?.removeEventListener('resize', resizeHandler)
+    window.removeEventListener('orientationchange', nudgeBrowserChromeAway)
+    window.removeEventListener('resize', resizeHandler)
+    document.removeEventListener('fullscreenchange', handleFullScreenChange)
+    document.removeEventListener(
+      'webkitfullscreenchange',
+      handleFullScreenChange as EventListener,
     )
-
-    syncViewportHeight()
-    nudgeBrowserChromeAway()
-
-    const viewport = window.visualViewport
-    const resizeHandler = () => syncViewportHeight()
-
-    viewport?.addEventListener('resize', resizeHandler)
-    window.addEventListener('orientationchange', nudgeBrowserChromeAway)
-    window.addEventListener('resize', resizeHandler)
-    document.addEventListener('fullscreenchange', handleFullScreenChange)
-    document.addEventListener('webkitfullscreenchange', handleFullScreenChange as EventListener)
-
-    return () => {
-      viewport?.removeEventListener('resize', resizeHandler)
-      window.removeEventListener('orientationchange', nudgeBrowserChromeAway)
-      window.removeEventListener('resize', resizeHandler)
-      document.removeEventListener('fullscreenchange', handleFullScreenChange)
-      document.removeEventListener('webkitfullscreenchange', handleFullScreenChange as EventListener)
-    }
-  })
+  }
+})
 </script>
 
 <svelte:head>
@@ -112,6 +130,8 @@
 {#if isMobile && supportsFullscreen}
   <button
     class="fullscreen-button"
+    data-sfx-hover="hover-soft"
+    data-sfx-click="panel-open"
     on:click|preventDefault|stopPropagation={toggleFullScreen}
     aria-label={isFullScreen ? 'Exit full-screen mode' : 'Enter full-screen mode'}
     data-mobile-ui="true"

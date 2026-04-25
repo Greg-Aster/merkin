@@ -1,8 +1,8 @@
 ---
-import { getCollection } from 'astro:content';
-import QuizLayout from '../../layouts/QuizLayout.astro';
+import { getCollection } from 'astro:content'
+import QuizLayout from '../../layouts/QuizLayout.astro'
 
-const allQuizzes = await getCollection('quizzes');
+const allQuizzes = await getCollection('quizzes')
 ---
 <QuizLayout
   title="Quizzes"
@@ -13,7 +13,7 @@ const allQuizzes = await getCollection('quizzes');
     <ul class="flex flex-col gap-4">
       {allQuizzes.map(quiz => (
         <li>
-          <a href={`/quiz/${quiz.id}/`} class="block card-base2 p-6 hover:border-primary transition-colors duration-200">
+          <a href={`/quiz/${quiz.id}/`} data-sfx-hover="hover-emphasis" data-sfx-click="soft" class="block card-base2 p-6 hover:border-primary transition-colors duration-200">
             <h2 class="text-2xl font-bold text-90">{quiz.data.title}</h2>
             <p class="text-75 mt-2">{quiz.data.description}</p>
           </a>

@@ -203,6 +203,8 @@ function removeDropdownItem(linkIndex, itemIndex) {
       <div class="flex justify-end mb-4">
         <button 
           class="py-1.5 px-3 bg-[var(--primary)] hover:opacity-90 text-white font-medium rounded-md transition-opacity text-sm flex items-center"
+          data-sfx-hover="hover-emphasis"
+          data-sfx-click="panel-open"
           on:click={addNewLink}
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -248,6 +250,7 @@ function removeDropdownItem(linkIndex, itemIndex) {
                   title="Move Up"
                   on:click={() => moveLink(index, 'up')}
                   disabled={index === 0}
+                  aria-label={`Move ${getLinkName(link)} up`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
@@ -258,6 +261,7 @@ function removeDropdownItem(linkIndex, itemIndex) {
                   title="Move Down"
                   on:click={() => moveLink(index, 'down')}
                   disabled={index === navBarConfig.links.length - 1}
+                  aria-label={`Move ${getLinkName(link)} down`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -265,8 +269,11 @@ function removeDropdownItem(linkIndex, itemIndex) {
                 </button>
                 <button 
                   class="p-1.5 text-neutral-500 hover:text-[var(--primary)] rounded"
+                  data-sfx-hover="hover-soft"
+                  data-sfx-click="panel-open"
                   title="Edit Link"
                   on:click={() => editLink(index)}
+                  aria-label={`Edit ${getLinkName(link)}`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -274,8 +281,11 @@ function removeDropdownItem(linkIndex, itemIndex) {
                 </button>
                 <button 
                   class="p-1.5 text-neutral-500 hover:text-red-500 rounded"
+                  data-sfx-hover="hover-emphasis"
+                  data-sfx-click="warning"
                   title="Delete Link"
                   on:click={() => deleteLink(index)}
+                  aria-label={`Delete ${getLinkName(link)}`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -305,8 +315,11 @@ function removeDropdownItem(linkIndex, itemIndex) {
                       </div>
                       <button 
                         class="p-1 text-neutral-500 hover:text-red-500 rounded-full"
+                        data-sfx-hover="hover-emphasis"
+                        data-sfx-click="warning"
                         title="Remove Item"
                         on:click={() => removeDropdownItem(index, itemIndex)}
+                        aria-label={`Remove ${item.name}`}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -319,6 +332,8 @@ function removeDropdownItem(linkIndex, itemIndex) {
                 <div class="mt-3">
                   <button 
                     class="py-1 px-2 bg-neutral-200 dark:bg-neutral-600 hover:bg-neutral-300 dark:hover:bg-neutral-500 text-neutral-700 dark:text-neutral-200 text-xs rounded transition-colors flex items-center"
+                    data-sfx-hover="hover-soft"
+                    data-sfx-click="panel-open"
                     on:click={() => toggleDropdownEditor(index)}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -335,7 +350,7 @@ function removeDropdownItem(linkIndex, itemIndex) {
                     
                     <div class="space-y-2">
                       <div>
-                        <label class="block text-xs text-neutral-600 dark:text-neutral-400 mb-1">Name</label>
+                        <div class="block text-xs text-neutral-600 dark:text-neutral-400 mb-1">Name</div>
                         <input 
                           type="text" 
                           id="dropdown-name" 
@@ -345,7 +360,7 @@ function removeDropdownItem(linkIndex, itemIndex) {
                       </div>
                       
                       <div>
-                        <label class="block text-xs text-neutral-600 dark:text-neutral-400 mb-1">URL</label>
+                        <div class="block text-xs text-neutral-600 dark:text-neutral-400 mb-1">URL</div>
                         <input 
                           type="text" 
                           id="dropdown-url" 
@@ -393,6 +408,8 @@ function removeDropdownItem(linkIndex, itemIndex) {
               <div class="border-t border-neutral-200 dark:border-neutral-700 p-3 flex justify-center">
                 <button 
                   class="py-1 px-2 bg-neutral-200 dark:bg-neutral-600 hover:bg-neutral-300 dark:hover:bg-neutral-500 text-neutral-700 dark:text-neutral-200 text-xs rounded transition-colors flex items-center"
+                  data-sfx-hover="hover-soft"
+                  data-sfx-click="panel-open"
                   on:click={() => toggleDropdownEditor(index)}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -418,7 +435,7 @@ function removeDropdownItem(linkIndex, itemIndex) {
             
             <!-- Link Type Selector -->
             <div class="mb-4">
-              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Link Type</label>
+              <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Link Type</div>
               <div class="flex space-x-4">
                 <label class="flex items-center">
                   <input 

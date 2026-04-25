@@ -1,14 +1,17 @@
 ---
 import SharedProfile from '@merkin/blog-core/components/widget/Profile.astro'
+import {
+  avatarConfig,
+  getAvatarIndexFromSlug,
+} from '../../config/avatar.config'
 import { profileConfig } from '../../config/config'
-import { avatarConfig, getAvatarIndexFromSlug } from '../../config/avatar.config'
 
 interface Props {
-  slug?: string;
-  customAvatar?: string;
-  customName?: string;
-  customBio?: string;
-  isHomePage?: boolean;
+  slug?: string
+  customAvatar?: string
+  customName?: string
+  customBio?: string
+  isHomePage?: boolean
 }
 
 const {
@@ -16,13 +19,14 @@ const {
   customAvatar = '',
   customName = '',
   customBio = '',
-  isHomePage = false
-} = Astro.props;
+  isHomePage = false,
+} = Astro.props
 
 // Calculate active avatar index from slug
-const activeAvatarIndex = slug && !isHomePage && !customAvatar
-  ? getAvatarIndexFromSlug(slug, avatarConfig.avatarList.length)
-  : 0
+const activeAvatarIndex =
+  slug && !isHomePage && !customAvatar
+    ? getAvatarIndexFromSlug(slug, avatarConfig.avatarList.length)
+    : 0
 ---
 <SharedProfile
   slug={slug}

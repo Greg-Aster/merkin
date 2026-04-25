@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { T } from '@threlte/core'
+import { T } from '@threlte/core'
 
-  export let shape: 'cuboid' | 'cylinder' = 'cuboid'
-  export let args: number[] = [1, 1, 1]
-  export let position: [number, number, number] = [0, 0, 0]
-  export let color = '#ff8c63'
+export let shape: 'cuboid' | 'cylinder' = 'cuboid'
+export let args: number[] = [1, 1, 1]
+export let position: [number, number, number] = [0, 0, 0]
+export let color = '#ff8c63'
 </script>
 
 <T.Group {position}>

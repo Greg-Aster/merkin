@@ -1,55 +1,58 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { groupEventsByEra } from '../../../services/TimelineService.client';
-  import { getEraDisplayName, getEraClasses } from '../../../services/TimelineService.client';
-  import type { TimelineEvent } from '../../../services/TimelineService.client';
-  
-  // Props
-  export let events: TimelineEvent[] = [];
-  export let background: string = '/assets/banner/0001.png';
-  export let selectedEvent: TimelineEvent | null = null;
-  
-  // Group events by era
-  $: eventsByEra = groupEventsByEra(events);
-  
-  // Reference to root element for DOM event handling
-  let rootElement: HTMLElement;
-  
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
-  
-  // Enhanced event handling using Svelte's dispatch
-  function handleSelect(event: TimelineEvent) {
-    // If this event is already selected, navigate to its page
-    if (selectedEvent && selectedEvent.slug === event.slug) {
-      console.log(`ListView navigating to: /posts/${event.slug}/`);
-      window.location.href = `/posts/${event.slug}/`;
-      return;
-    }
-    
-    // Otherwise, dispatch selection event using Svelte's dispatcher
-    console.log(`ListView selecting event: ${event.title} (${event.slug})`);
-    dispatch('select', { slug: event.slug });
+import { onMount } from 'svelte'
+import { groupEventsByEra } from '../../../services/TimelineService.client'
+import {
+  getEraClasses,
+  getEraDisplayName,
+} from '../../../services/TimelineService.client'
+import type { TimelineEvent } from '../../../services/TimelineService.client'
+
+// Props
+export let events: TimelineEvent[] = []
+export let background: string = '/assets/banner/0001.png'
+export let selectedEvent: TimelineEvent | null = null
+
+// Group events by era
+$: eventsByEra = groupEventsByEra(events)
+
+// Reference to root element for DOM event handling
+let rootElement: HTMLElement
+
+import { createEventDispatcher } from 'svelte'
+const dispatch = createEventDispatcher()
+
+// Enhanced event handling using Svelte's dispatch
+function handleSelect(event: TimelineEvent) {
+  // If this event is already selected, navigate to its page
+  if (selectedEvent && selectedEvent.slug === event.slug) {
+    console.log(`ListView navigating to: /posts/${event.slug}/`)
+    window.location.href = `/posts/${event.slug}/`
+    return
   }
-  
-  // Initialize DOM events and logging
-  onMount(() => {
-    console.log("ListView mounted with events:", events.length);
-    
-    // Add global document listener to catch all select events for debugging
-    const handleGlobalSelectEvent = (e: Event) => {
-      const selectEvent = e as CustomEvent;
-      if (selectEvent.type === 'select' && selectEvent.detail?.slug) {
-        console.log('Global select event intercepted:', selectEvent.detail);
-      }
-    };
-    
-    document.addEventListener('select', handleGlobalSelectEvent);
-    
-    return () => {
-      document.removeEventListener('select', handleGlobalSelectEvent);
-    };
-  });
+
+  // Otherwise, dispatch selection event using Svelte's dispatcher
+  console.log(`ListView selecting event: ${event.title} (${event.slug})`)
+  dispatch('select', { slug: event.slug })
+}
+
+// Initialize DOM events and logging
+onMount(() => {
+  console.log('ListView mounted with events:', events.length)
+
+  // Add global document listener to catch all select events for debugging
+  const handleGlobalSelectEvent = (e: Event) => {
+    const selectEvent = e as CustomEvent
+    if (selectEvent.type === 'select' && selectEvent.detail?.slug) {
+      console.log('Global select event intercepted:', selectEvent.detail)
+    }
+  }
+
+  document.addEventListener('select', handleGlobalSelectEvent)
+
+  return () => {
+    document.removeEventListener('select', handleGlobalSelectEvent)
+  }
+})
 </script>
 
 <div class="list-view relative" bind:this={rootElement}>

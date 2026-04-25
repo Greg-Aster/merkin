@@ -4,23 +4,23 @@
 -->
 <script lang="ts">
 import { T, useTask, useThrelte } from '@threlte/core'
-import { onMount, onDestroy, createEventDispatcher } from 'svelte'
+import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
 import {
-  registerLODObject,
-  unregisterLODObject,
-  adjustLODForPerformance,
-  getLODStats,
-  setLODEnabled,
-  setLODDistances,
-  applyLODLevel,
-  getLODObjects,
-  clearLODObjects,
-  lodEnabledStore,
-  lodDistancesStore,
-  lodQualityStore,
   type LODLevel,
-  type LODObject
+  type LODObject,
+  adjustLODForPerformance,
+  applyLODLevel,
+  clearLODObjects,
+  getLODObjects,
+  getLODStats,
+  lodDistancesStore,
+  lodEnabledStore,
+  lodQualityStore,
+  registerLODObject,
+  setLODDistances,
+  setLODEnabled,
+  unregisterLODObject,
 } from '../utils/lodUtils'
 
 const dispatch = createEventDispatcher()
@@ -45,11 +45,11 @@ onMount(() => {
   if (isDev) {
     console.log('🎯 Initializing Threlte LOD System...')
   }
-  
+
   if (enableLOD) {
     setupLODSystem()
   }
-  
+
   isInitialized = true
   if (isDev) {
     console.log('✅ Threlte LOD System initialized')
@@ -65,7 +65,7 @@ function setupLODSystem() {
     window.addEventListener('threlte:registerLOD', handleLODRegistration)
     window.addEventListener('threlte:unregisterLOD', handleLODUnregistration)
   }
-  
+
   if (isDev) {
     console.log('🎯 LOD system configured with distances:', [10, 25, 50, 100])
   }
@@ -88,7 +88,11 @@ function handleLODUnregistration(event: CustomEvent) {
 }
 
 // Component-specific functions that need to dispatch events
-function handleRegisterLODObject(id: string, mesh: THREE.Mesh, customLevels?: LODLevel[]) {
+function handleRegisterLODObject(
+  id: string,
+  mesh: THREE.Mesh,
+  customLevels?: LODLevel[],
+) {
   registerLODObject(id, mesh, customLevels)
   dispatch('lodObjectRegistered', { id, levels: customLevels?.length || 0 })
 }
@@ -103,21 +107,21 @@ function handleUnregisterLODObject(id: string) {
  */
 function updateLODLevels() {
   if (!camera || !enableLOD) return
-  
+
   const lodObjects = getLODObjects()
   const cameraPosition = camera.position
-  
+
   lodObjects.forEach((lodObject, id) => {
     const mesh = lodObject.mesh
     const distance = cameraPosition.distanceTo(mesh.position)
-    
+
     // Skip if distance hasn't changed significantly
     if (Math.abs(distance - lodObject.lastDistance) < 1) {
       return
     }
-    
+
     lodObject.lastDistance = distance
-    
+
     // Find appropriate LOD level
     let newLevel = 0
     for (let i = lodObject.levels.length - 1; i >= 0; i--) {
@@ -126,20 +130,20 @@ function updateLODLevels() {
         break
       }
     }
-    
+
     // Apply LOD level if changed
     if (newLevel !== lodObject.currentLevel) {
       applyLODLevel(lodObject, newLevel)
       lodObject.currentLevel = newLevel
-      
-      dispatch('lodLevelChanged', { 
-        id, 
-        level: newLevel, 
+
+      dispatch('lodLevelChanged', {
+        id,
+        level: newLevel,
         distance,
-        quality: lodObject.levels[newLevel].quality
+        quality: lodObject.levels[newLevel].quality,
       })
     }
-    
+
     // Frustum culling
     if (enableCulling && distance > maxDistance) {
       mesh.visible = false
@@ -163,18 +167,18 @@ function handlePerformanceAdjustment(targetFPS: number, currentFPS: number) {
 function batchUpdateLOD() {
   const lodObjects = getLODObjects()
   if (!isInitialized || lodObjects.size === 0) return
-  
+
   // Update in batches to spread load
   const batchSize = Math.min(10, lodObjects.size)
   const objectArray = Array.from(lodObjects.values())
-  
+
   for (let i = 0; i < batchSize; i++) {
     const index = (performance.now() / 100 + i) % objectArray.length
     const lodObject = objectArray[Math.floor(index)]
-    
+
     if (lodObject && camera) {
       const distance = camera.position.distanceTo(lodObject.mesh.position)
-      
+
       // Update LOD level
       let newLevel = 0
       for (let j = lodObject.levels.length - 1; j >= 0; j--) {
@@ -183,7 +187,7 @@ function batchUpdateLOD() {
           break
         }
       }
-      
+
       if (newLevel !== lodObject.currentLevel) {
         applyLODLevel(lodObject, newLevel)
         lodObject.currentLevel = newLevel
@@ -193,9 +197,9 @@ function batchUpdateLOD() {
 }
 
 // Update LOD system
-useTask((delta) => {
+useTask(delta => {
   if (!enableLOD || !isInitialized) return
-  
+
   // Throttle updates
   lastUpdateTime += delta
   if (lastUpdateTime >= updateFrequency) {
@@ -223,7 +227,7 @@ onDestroy(() => {
     window.removeEventListener('threlte:registerLOD', handleLODRegistration)
     window.removeEventListener('threlte:unregisterLOD', handleLODUnregistration)
   }
-  
+
   clearLODObjects()
   if (isDev) {
     console.log('🧹 Threlte LOD System disposed')
@@ -231,8 +235,22 @@ onDestroy(() => {
 })
 
 // Export component functions that include event dispatching
-export { registerLODObject, unregisterLODObject, adjustLODForPerformance, getLODStats, setLODEnabled, setLODDistances }
-export const lodUtils = { registerLODObject, unregisterLODObject, adjustLODForPerformance, getLODStats, setLODEnabled, setLODDistances }
+export {
+  registerLODObject,
+  unregisterLODObject,
+  adjustLODForPerformance,
+  getLODStats,
+  setLODEnabled,
+  setLODDistances,
+}
+export const lodUtils = {
+  registerLODObject,
+  unregisterLODObject,
+  adjustLODForPerformance,
+  getLODStats,
+  setLODEnabled,
+  setLODDistances,
+}
 </script>
 
 <!-- No visual output - this is a system component -->

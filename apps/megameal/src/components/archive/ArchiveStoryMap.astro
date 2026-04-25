@@ -1,7 +1,7 @@
 ---
-import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
-import { Icon } from 'astro-icon/components'
 import { getPostUrlBySlug } from '@/utils/url-utils'
+import { Icon } from 'astro-icon/components'
+import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
 
 type ArchivePost = (typeof postsManifest.items)[number]
 
@@ -23,33 +23,60 @@ function normalizeId(value: string) {
 
 function getArchiveGroupTitle(post: ArchivePost) {
   if (post.seriesTitle) return post.seriesTitle
-  if (post.series === 'first-contact-manual') return "The Interstellar Traveler's First Contact Manual"
+  if (post.series === 'first-contact-manual')
+    return "The Interstellar Traveler's First Contact Manual"
   if (post.series) return post.series
-  if (post.sourcePath?.includes('miranda-bloody-mary')) return 'The Miranda Incident'
-  if (post.tags?.some(tag => /cookbook|recipe/i.test(tag))) return 'Galactic Cookbook'
+  if (post.sourcePath?.includes('miranda-bloody-mary'))
+    return 'The Miranda Incident'
+  if (post.tags?.some(tag => /cookbook|recipe/i.test(tag)))
+    return 'Galactic Cookbook'
   if (post.category === 'Site Updates') return 'Site Transmissions'
-  if (post.category === 'Store Announcement' || post.sourcePath?.includes('/store/')) return 'Commercial Records'
+  if (
+    post.category === 'Store Announcement' ||
+    post.sourcePath?.includes('/store/')
+  )
+    return 'Commercial Records'
   if (post.sourcePath?.startsWith('timelines/')) return 'Chronology Fragments'
   return 'Core Entry Points'
 }
 
 function getGroupDescription(title: string) {
   const descriptions: Record<string, string> = {
-    'Core Entry Points': 'Primary gateways into the MEGAMEAL universe and its competing transmission modes.',
-    'Site Transmissions': 'Development notes, assistant dispatches, and project-facing updates from the active surface.',
-    'Galactic Cookbook': 'Culinary records, recipe fragments, and edible historical artifacts from the archive.',
-    'Chronology Fragments': 'Loose timeline records that define eras, disasters, ascensions, and lost civilizations.',
-    "The Interstellar Traveler's First Contact Manual": 'A survival manual for contact with beings that do not care if you remain intact.',
-    'Commercial Records': 'Storefront debris, product records, and corporate commerce fragments.',
-    'The Miranda Incident': 'Recovered testimony, recipes, access denials, and contradictory evidence from a temporal catastrophe.',
-    'The Snuggloid Emergence': 'Companion-product records documenting the rise of a suspiciously affectionate species.',
+    'Core Entry Points':
+      'Primary gateways into the MEGAMEAL universe and its competing transmission modes.',
+    'Site Transmissions':
+      'Development notes, assistant dispatches, and project-facing updates from the active surface.',
+    'Galactic Cookbook':
+      'Culinary records, recipe fragments, and edible historical artifacts from the archive.',
+    'Chronology Fragments':
+      'Loose timeline records that define eras, disasters, ascensions, and lost civilizations.',
+    "The Interstellar Traveler's First Contact Manual":
+      'A survival manual for contact with beings that do not care if you remain intact.',
+    'Commercial Records':
+      'Storefront debris, product records, and corporate commerce fragments.',
+    'The Miranda Incident':
+      'Recovered testimony, recipes, access denials, and contradictory evidence from a temporal catastrophe.',
+    'The Snuggloid Emergence':
+      'Companion-product records documenting the rise of a suspiciously affectionate species.',
   }
 
-  return descriptions[title] ?? 'Related records in the broader MEGAMEAL story graph.'
+  return (
+    descriptions[title] ??
+    'Related records in the broader MEGAMEAL story graph.'
+  )
 }
 
 function getGroupTone(index: number) {
-  const tones = ['core', 'signal', 'cookbook', 'chronology', 'manual', 'commercial', 'miranda', 'snuggloid']
+  const tones = [
+    'core',
+    'signal',
+    'cookbook',
+    'chronology',
+    'manual',
+    'commercial',
+    'miranda',
+    'snuggloid',
+  ]
   return tones[index % tones.length]
 }
 
@@ -77,14 +104,35 @@ function getNodeStyle(index: number, total: number) {
 
 function getPreviewImages(posts: ArchivePost[], tone: string) {
   const fallbackByTone: Record<string, string[]> = {
-    core: ['/posts/timeline/universe.png', '/posts/timeline/universe-avatar.png'],
+    core: [
+      '/posts/timeline/universe.png',
+      '/posts/timeline/universe-avatar.png',
+    ],
     signal: ['/assets/banner/golden-era.jpg', '/posts/horror.png'],
-    cookbook: ['/posts/cookbook/cookbook.png', '/posts/timeline/zelephant-roast.png'],
-    chronology: ['/posts/timeline/archive.png', '/posts/timeline/corporate.png'],
-    manual: ['/posts/timeline/chronos.png', '/posts/timeline/awakening-era.png'],
-    commercial: ['/posts/Mega-Meal-Explained/ultra-sign.png', '/posts/Mega-Meal-Explained/burger-hole.png'],
-    miranda: ['/posts/timeline/redacted.png', '/posts/timeline/vault-keypad.png'],
-    snuggloid: ['/posts/timeline/snuggloid-entity.png', '/posts/timeline/snuggloid1.png'],
+    cookbook: [
+      '/posts/cookbook/cookbook.png',
+      '/posts/timeline/zelephant-roast.png',
+    ],
+    chronology: [
+      '/posts/timeline/archive.png',
+      '/posts/timeline/corporate.png',
+    ],
+    manual: [
+      '/posts/timeline/chronos.png',
+      '/posts/timeline/awakening-era.png',
+    ],
+    commercial: [
+      '/posts/Mega-Meal-Explained/ultra-sign.png',
+      '/posts/Mega-Meal-Explained/burger-hole.png',
+    ],
+    miranda: [
+      '/posts/timeline/redacted.png',
+      '/posts/timeline/vault-keypad.png',
+    ],
+    snuggloid: [
+      '/posts/timeline/snuggloid-entity.png',
+      '/posts/timeline/snuggloid1.png',
+    ],
   }
 
   const seen = new Set<string>()
@@ -97,7 +145,10 @@ function getPreviewImages(posts: ArchivePost[], tone: string) {
       return true
     })
 
-  return [...discovered, ...(fallbackByTone[tone] ?? fallbackByTone.core)].slice(0, 3)
+  return [
+    ...discovered,
+    ...(fallbackByTone[tone] ?? fallbackByTone.core),
+  ].slice(0, 3)
 }
 
 const grouped = new Map<string, ArchivePost[]>()
@@ -143,7 +194,10 @@ const archiveGroups: ArchiveGroup[] = Array.from(grouped.entries())
       const timelineB = b.timelineYear ?? Number.POSITIVE_INFINITY
       if (timelineA !== timelineB) return timelineA - timelineB
 
-      return new Date(b.published ?? 0).getTime() - new Date(a.published ?? 0).getTime()
+      return (
+        new Date(b.published ?? 0).getTime() -
+        new Date(a.published ?? 0).getTime()
+      )
     }),
   }))
 
@@ -160,11 +214,11 @@ const restrictedCount = postsManifest.items.length - publicCount
         Public records are open entry points. Restricted records are visible as locked nodes so the scale of the universe is readable before every file is cleared for release.
       </p>
       <div class="archive-view-switch" role="group" aria-label="Archive display mode">
-        <button type="button" class="archive-view-switch__button is-active" data-archive-view-button data-view-target="node" aria-pressed="true">
+        <button type="button" class="archive-view-switch__button is-active" data-archive-view-button data-view-target="node" data-sfx-hover="hover-soft" data-sfx-click="soft" aria-pressed="true">
           <Icon name="mdi:vector-polyline" />
           <span>Node View</span>
         </button>
-        <button type="button" class="archive-view-switch__button" data-archive-view-button data-view-target="list" aria-pressed="false">
+        <button type="button" class="archive-view-switch__button" data-archive-view-button data-view-target="list" data-sfx-hover="hover-soft" data-sfx-click="soft" aria-pressed="false">
           <Icon name="mdi:format-list-bulleted-square" />
           <span>List View</span>
         </button>

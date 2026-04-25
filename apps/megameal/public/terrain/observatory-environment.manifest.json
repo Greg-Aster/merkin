@@ -109,7 +109,7 @@
   },
   "style": {
     "preset": "ghibli",
-    "enabled": true,
+    "enabled": false,
     "colorGrading": {
       "saturation": 1.2,
       "contrast": 1.1,

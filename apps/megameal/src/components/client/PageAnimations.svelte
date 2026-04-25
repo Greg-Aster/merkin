@@ -36,7 +36,7 @@ function replayPageAnimations() {
 }
 
 function clearAnimationQueue() {
-  animationTimeouts.forEach((timeoutId) => {
+  animationTimeouts.forEach(timeoutId => {
     window.clearTimeout(timeoutId)
   })
   animationTimeouts = []
@@ -44,7 +44,7 @@ function clearAnimationQueue() {
 
 function scheduleTimeout(callback: () => void, delay: number) {
   const timeoutId = window.setTimeout(() => {
-    animationTimeouts = animationTimeouts.filter((id) => id !== timeoutId)
+    animationTimeouts = animationTimeouts.filter(id => id !== timeoutId)
     callback()
   }, delay)
 
@@ -53,19 +53,23 @@ function scheduleTimeout(callback: () => void, delay: number) {
 
 function resetOnloadAnimations() {
   const elements = document.querySelectorAll<HTMLElement>('.onload-animation')
-  elements.forEach((element) => {
+  elements.forEach(element => {
     element.classList.remove('loaded')
   })
 }
 
 function initializeOnloadAnimations() {
-  const elements =
-    document.querySelectorAll<HTMLElement>('.onload-animation:not(.loaded)')
+  const elements = document.querySelectorAll<HTMLElement>(
+    '.onload-animation:not(.loaded)',
+  )
 
   elements.forEach((element, index) => {
-    scheduleTimeout(() => {
-      element.classList.add('loaded')
-    }, 100 + index * 50)
+    scheduleTimeout(
+      () => {
+        element.classList.add('loaded')
+      },
+      100 + index * 50,
+    )
   })
 }
 

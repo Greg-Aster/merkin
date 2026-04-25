@@ -3,20 +3,20 @@
   Real-time performance metrics and optimization controls
 -->
 <script lang="ts">
-import { onMount, onDestroy } from 'svelte'
+import { onDestroy, onMount } from 'svelte'
 import {
-  fpsStore,
-  frameTimeStore,
-  memoryStore,
-  renderInfoStore,
-  qualityLevelStore,
-  performanceGradeStore,
-  performanceScoreStore,
-  optimizationRecommendationsStore,
-  longTaskStore,
-  systemTimingsStore,
   type LongTaskInfo,
   type SystemTimingInfo,
+  fpsStore,
+  frameTimeStore,
+  longTaskStore,
+  memoryStore,
+  optimizationRecommendationsStore,
+  performanceGradeStore,
+  performanceScoreStore,
+  qualityLevelStore,
+  renderInfoStore,
+  systemTimingsStore,
 } from '../stores/performanceStore'
 
 // Props
@@ -43,7 +43,11 @@ let longTasks: LongTaskInfo = {
 let systemTimings: Record<string, SystemTimingInfo> = {}
 
 // Chart data for performance history
-let performanceHistory: Array<{time: number, fps: number, frameTime: number}> = []
+let performanceHistory: Array<{
+  time: number
+  fps: number
+  frameTime: number
+}> = []
 let maxHistoryLength = 60 // 60 seconds of data
 
 // Subscribe to performance stores
@@ -76,9 +80,11 @@ const unsubscribeScore = performanceScoreStore.subscribe(value => {
   performanceScore = value
 })
 
-const unsubscribeRecommendations = optimizationRecommendationsStore.subscribe(value => {
-  recommendations = value
-})
+const unsubscribeRecommendations = optimizationRecommendationsStore.subscribe(
+  value => {
+    recommendations = value
+  },
+)
 
 const unsubscribeLongTasks = longTaskStore.subscribe(value => {
   longTasks = value
@@ -91,7 +97,7 @@ const unsubscribeSystemTimings = systemTimingsStore.subscribe(value => {
 function updatePerformanceHistory() {
   const now = Date.now()
   performanceHistory.push({ time: now, fps, frameTime })
-  
+
   // Keep only recent data
   const cutoff = now - maxHistoryLength * 1000
   performanceHistory = performanceHistory.filter(entry => entry.time >= cutoff)
@@ -99,23 +105,35 @@ function updatePerformanceHistory() {
 
 function getPerformanceGradeColor(grade: string): string {
   switch (grade) {
-    case 'A': return '#22c55e'
-    case 'B': return '#84cc16'  
-    case 'C': return '#eab308'
-    case 'D': return '#f97316'
-    case 'F': return '#ef4444'
-    default: return '#6b7280'
+    case 'A':
+      return '#22c55e'
+    case 'B':
+      return '#84cc16'
+    case 'C':
+      return '#eab308'
+    case 'D':
+      return '#f97316'
+    case 'F':
+      return '#ef4444'
+    default:
+      return '#6b7280'
   }
 }
 
 function getQualityLevelColor(level: string): string {
   switch (level) {
-    case 'ultra': return '#8b5cf6'
-    case 'high': return '#3b82f6'
-    case 'medium': return '#10b981'
-    case 'low': return '#f59e0b'
-    case 'ultra_low': return '#ef4444'
-    default: return '#6b7280'
+    case 'ultra':
+      return '#8b5cf6'
+    case 'high':
+      return '#3b82f6'
+    case 'medium':
+      return '#10b981'
+    case 'low':
+      return '#f59e0b'
+    case 'ultra_low':
+      return '#ef4444'
+    default:
+      return '#6b7280'
   }
 }
 

@@ -1,0 +1,16 @@
+---
+import FactsWidget from '../components/widget/FactsWidget.astro'
+import MainGridLayout from '../layouts/MainGridLayout.astro'
+---
+
+<MainGridLayout homeLayout="test-portal" title="Test Portal">
+  <FactsWidget
+    slot="overlay"
+    variant="overlay"
+    dismissible={true}
+    storageKey="megameal-test-portal-sponsored-overlay-dismissed"
+    kicker="Sponsored"
+    title="Sponsored"
+    footerText="Floating promotions are a service, not an intrusion."
+  />
+</MainGridLayout>

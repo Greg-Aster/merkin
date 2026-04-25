@@ -1,147 +1,151 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  import type { TimelineConfig } from '../types/timelineconfig';
-  
-  // Props
-  export let timelineConfig: TimelineConfig;
-  
-  // Event dispatcher to notify parent of changes
-  const dispatch = createEventDispatcher();
-  
-  // Local state
-  let activeSection = 'general';
-  let editingEra: any = null;
-  let showEraEditor = false;
-  
-  // Sections for tab navigation
-  const sections = [
-    { id: 'general', label: 'General Settings' },
-    { id: 'eras', label: 'Timeline Eras' },
-    { id: 'display', label: 'Display Options' }
-  ];
-  
-  // Function to notify parent of changes
-  function notifyChanges() {
-    dispatch('change');
+import { createEventDispatcher } from 'svelte'
+import type { TimelineConfig } from '../types/timelineconfig'
+
+// Props
+export let timelineConfig: TimelineConfig
+
+// Event dispatcher to notify parent of changes
+const dispatch = createEventDispatcher()
+
+// Local state
+let activeSection = 'general'
+let editingEra: any = null
+let showEraEditor = false
+
+// Sections for tab navigation
+const sections = [
+  { id: 'general', label: 'General Settings' },
+  { id: 'eras', label: 'Timeline Eras' },
+  { id: 'display', label: 'Display Options' },
+]
+
+// Function to notify parent of changes
+function notifyChanges() {
+  dispatch('change')
+}
+
+// Function to add a new era
+function addEra() {
+  editingEra = {
+    isNew: true,
+    data: {
+      name: '',
+      startYear: 2000,
+      endYear: 2020,
+      color: '#3b82f6',
+      description: '',
+    },
   }
-  
-  // Function to add a new era
-  function addEra() {
-    editingEra = {
-      isNew: true,
-      data: {
-        name: '',
-        startYear: 2000,
-        endYear: 2020,
-        color: '#3b82f6',
-        description: ''
-      }
-    };
-    showEraEditor = true;
+  showEraEditor = true
+}
+
+// Function to edit an era
+function editEra(index: number) {
+  editingEra = {
+    isNew: false,
+    index: index,
+    data: { ...timelineConfig.eras[index] },
   }
-  
-  // Function to edit an era
-  function editEra(index: number) {
-    editingEra = {
-      isNew: false,
-      index: index,
-      data: { ...timelineConfig.eras[index] }
-    };
-    showEraEditor = true;
-  }
-  
-  // Function to save era
-  function saveEra() {
-    if (editingEra.isNew) {
-      // Add new era
-      timelineConfig.eras = [...timelineConfig.eras, editingEra.data];
-    } else {
-      // Update existing era
-      const newEras = [...timelineConfig.eras];
-      newEras[editingEra.index] = editingEra.data;
-      timelineConfig.eras = newEras;
-    }
-    
-    showEraEditor = false;
-    notifyChanges();
-  }
-  
-  // Function to delete era
-  function deleteEra(index: number) {
-    if (confirm('Are you sure you want to delete this era?')) {
-      timelineConfig.eras = timelineConfig.eras.filter((_, i) => i !== index);
-      notifyChanges();
-    }
-  }
-  
-  // Function to move era up in the list
-  function moveEraUp(index: number) {
-    if (index > 0) {
-      const newEras = [...timelineConfig.eras];
-      const temp = newEras[index];
-      newEras[index] = newEras[index - 1];
-      newEras[index - 1] = temp;
-      timelineConfig.eras = newEras;
-      notifyChanges();
-    }
-  }
-  
-  // Function to move era down in the list
-  function moveEraDown(index: number) {
-    if (index < timelineConfig.eras.length - 1) {
-      const newEras = [...timelineConfig.eras];
-      const temp = newEras[index];
-      newEras[index] = newEras[index + 1];
-      newEras[index + 1] = temp;
-      timelineConfig.eras = newEras;
-      notifyChanges();
-    }
+  showEraEditor = true
+}
+
+// Function to save era
+function saveEra() {
+  if (editingEra.isNew) {
+    // Add new era
+    timelineConfig.eras = [...timelineConfig.eras, editingEra.data]
+  } else {
+    // Update existing era
+    const newEras = [...timelineConfig.eras]
+    newEras[editingEra.index] = editingEra.data
+    timelineConfig.eras = newEras
   }
 
-  // Function to restore default configuration
-  function restoreDefaults() {
-    if (confirm('Are you sure you want to restore default configuration? This will reset all timeline settings.')) {
-      // Reset to default configuration
-      timelineConfig = {
-        enableTimeline: true,
-        defaultEra: 'present',
-        showEraDescriptions: true,
-        eras: [
-          {
-            name: 'past',
-            startYear: 1900,
-            endYear: 2000,
-            color: '#6b7280', // gray-500
-            description: 'Historical content and background'
-          },
-          {
-            name: 'present',
-            startYear: 2000,
-            endYear: 2030,
-            color: '#3b82f6', // blue-500
-            description: 'Current projects and ongoing work'
-          },
-          {
-            name: 'future',
-            startYear: 2030,
-            endYear: 2100,
-            color: '#10b981', // emerald-500
-            description: 'Planned projects and future vision'
-          }
-        ],
-        displayOptions: {
-          showYearLabels: true,
-          showEraLabels: true,
-          highlightCurrentYear: true,
-          currentYear: new Date().getFullYear(),
-          yearSpacing: 10,
-          timelineHeight: 8
-        }
-      };
-      
-      notifyChanges();
-    }
+  showEraEditor = false
+  notifyChanges()
+}
+
+// Function to delete era
+function deleteEra(index: number) {
+  if (confirm('Are you sure you want to delete this era?')) {
+    timelineConfig.eras = timelineConfig.eras.filter((_, i) => i !== index)
+    notifyChanges()
   }
+}
+
+// Function to move era up in the list
+function moveEraUp(index: number) {
+  if (index > 0) {
+    const newEras = [...timelineConfig.eras]
+    const temp = newEras[index]
+    newEras[index] = newEras[index - 1]
+    newEras[index - 1] = temp
+    timelineConfig.eras = newEras
+    notifyChanges()
+  }
+}
+
+// Function to move era down in the list
+function moveEraDown(index: number) {
+  if (index < timelineConfig.eras.length - 1) {
+    const newEras = [...timelineConfig.eras]
+    const temp = newEras[index]
+    newEras[index] = newEras[index + 1]
+    newEras[index + 1] = temp
+    timelineConfig.eras = newEras
+    notifyChanges()
+  }
+}
+
+// Function to restore default configuration
+function restoreDefaults() {
+  if (
+    confirm(
+      'Are you sure you want to restore default configuration? This will reset all timeline settings.',
+    )
+  ) {
+    // Reset to default configuration
+    timelineConfig = {
+      enableTimeline: true,
+      defaultEra: 'present',
+      showEraDescriptions: true,
+      eras: [
+        {
+          name: 'past',
+          startYear: 1900,
+          endYear: 2000,
+          color: '#6b7280', // gray-500
+          description: 'Historical content and background',
+        },
+        {
+          name: 'present',
+          startYear: 2000,
+          endYear: 2030,
+          color: '#3b82f6', // blue-500
+          description: 'Current projects and ongoing work',
+        },
+        {
+          name: 'future',
+          startYear: 2030,
+          endYear: 2100,
+          color: '#10b981', // emerald-500
+          description: 'Planned projects and future vision',
+        },
+      ],
+      displayOptions: {
+        showYearLabels: true,
+        showEraLabels: true,
+        highlightCurrentYear: true,
+        currentYear: new Date().getFullYear(),
+        yearSpacing: 10,
+        timelineHeight: 8,
+      },
+    }
+
+    notifyChanges()
+  }
+}
 </script>
 
 <div class="timeline-config-tab">
@@ -181,9 +185,9 @@
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               Default Era
-            </label>
+            </div>
             <select 
               bind:value={timelineConfig.defaultEra} 
               on:change={notifyChanges}
@@ -250,9 +254,9 @@
           </div>
           
           <div class="timeline-preview mb-6">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Timeline Preview
-            </label>
+            </div>
             <div class="relative h-12 bg-neutral-100 dark:bg-neutral-800 rounded-lg overflow-hidden">
               {#each timelineConfig.eras as era}
                 <!-- Calculate position and width based on years -->
@@ -289,6 +293,7 @@
                     on:click={() => moveEraUp(index)}
                     disabled={index === 0}
                     class:opacity-50={index === 0}
+                    aria-label={`Move ${era.name} up`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -299,6 +304,7 @@
                     on:click={() => moveEraDown(index)}
                     disabled={index === timelineConfig.eras.length - 1}
                     class:opacity-50={index === timelineConfig.eras.length - 1}
+                    aria-label={`Move ${era.name} down`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -307,6 +313,7 @@
                   <button 
                     class="p-1.5 text-neutral-500 hover:text-[var(--primary)] rounded"
                     on:click={() => editEra(index)}
+                    aria-label={`Edit ${era.name}`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -315,6 +322,7 @@
                   <button 
                     class="p-1.5 text-neutral-500 hover:text-red-500 rounded"
                     on:click={() => deleteEra(index)}
+                    aria-label={`Delete ${era.name}`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -370,9 +378,9 @@
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               Current Year
-            </label>
+            </div>
             <input 
               type="number" 
               bind:value={timelineConfig.displayOptions.currentYear} 
@@ -387,9 +395,9 @@
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               Year Label Spacing
-            </label>
+            </div>
             <input 
               type="number" 
               bind:value={timelineConfig.displayOptions.yearSpacing} 
@@ -404,9 +412,9 @@
           </div>
           
           <div class="mb-4">
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               Timeline Height (px)
-            </label>
+            </div>
             <input 
               type="number" 
               bind:value={timelineConfig.displayOptions.timelineHeight} 
@@ -430,9 +438,9 @@
         </h3>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+          <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Era Name
-          </label>
+          </div>
           <input 
             type="text" 
             bind:value={editingEra.data.name} 
@@ -443,9 +451,9 @@
         
         <div class="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               Start Year
-            </label>
+            </div>
             <input 
               type="number" 
               bind:value={editingEra.data.startYear} 
@@ -456,9 +464,9 @@
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
               End Year
-            </label>
+            </div>
             <input 
               type="number" 
               bind:value={editingEra.data.endYear} 
@@ -470,9 +478,9 @@
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+          <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Color
-          </label>
+          </div>
           <div class="flex items-center space-x-3">
             <input 
               type="color" 
@@ -489,9 +497,9 @@
         </div>
         
         <div class="mb-6">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+          <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Description
-          </label>
+          </div>
           <textarea 
             bind:value={editingEra.data.description} 
             rows="3" 

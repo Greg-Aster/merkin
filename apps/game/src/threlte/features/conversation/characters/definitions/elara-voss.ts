@@ -1,13 +1,17 @@
 /**
  * Dr. Elara Voss - Unified Character Definition
- * 
+ *
  * The indigenous Qarnivor survivor turned extinction events scholar
  * Single source of truth for all Elara-related data and functionality
  */
 
-import type { CharacterDefinition } from '../types'
 import type { WorldDocument } from '../../worldKnowledge'
-import { FIREFLY_SPECIES, baseFireflyKnowledge, baseFireflyBehavior } from '../types'
+import type { CharacterDefinition, FireflyPersonality } from '../types'
+import {
+  FIREFLY_SPECIES,
+  baseFireflyBehavior,
+  baseFireflyKnowledge,
+} from '../types'
 
 // ================================
 // Character Knowledge Base
@@ -44,15 +48,24 @@ Dr. Voss's final words were spoken clearly despite her weakened condition: "Free
 The significance of these final words remains a subject of speculation among those who knew her. Whether they represented a lifetime of hidden allegiance finally expressed, a scholar's acknowledgment of historical truth, or simply the confused utterances of a dying mind, they added a final layer of mystery to a life characterized by professional achievement and personal enigma.
 
 With Dr. Voss's passing, the final living connection to pre-extinction Qarnivor was severed. The planet remains in quarantine to this day.`,
-  summary: 'Indigenous Qarnivor survivor who became a respected extinction events scholar while hiding her possible connection to the Spork movement that destroyed her homeworld',
+  summary:
+    'Indigenous Qarnivor survivor who became a respected extinction events scholar while hiding her possible connection to the Spork movement that destroyed her homeworld',
   metadata: {
-    tags: ['qarnivor survivor', 'extinction events', 'indigenous scholar', 'spork movement', 'hidden identity', 'academic research', 'personal secrets'],
+    tags: [
+      'qarnivor survivor',
+      'extinction events',
+      'indigenous scholar',
+      'spork movement',
+      'hidden identity',
+      'academic research',
+      'personal secrets',
+    ],
     relatedCharacters: ['linda-sue'],
     timeperiod: '28000-28139',
     location: 'Qarnivor, Various Academic Institutions',
     category: 'scholar',
-    importance: 'critical'
-  }
+    importance: 'critical',
+  },
 }
 
 const elaraResearch: WorldDocument[] = [
@@ -88,14 +101,21 @@ As the conflict intensified, both sides turned to increasingly destructive weapo
 The Anti-Spoon faction immediately retaliated with their own nuclear arsenal. Within hours, Qarnivor's surface was transformed into a radioactive wasteland. The once-beautiful planet, with its icy landscapes and crystal mountains, became a toxic nightmare of irradiated craters and black, poisonous clouds.
 
 What had begun as a movement to save the environment had culminated in its total destruction. The Sporks' crusade against industrial pollution had triggered a chain of events that rendered their home world uninhabitable, proving that in conflict, outcomes rarely align with original intentions.`,
-    summary: 'Dr. Voss\'s comprehensive academic documentation of the Spork environmental movement that escalated into nuclear civil war and planetary extinction',
+    summary:
+      "Dr. Voss's comprehensive academic documentation of the Spork environmental movement that escalated into nuclear civil war and planetary extinction",
     metadata: {
-      tags: ['spork uprising', 'qarnivor extinction', 'environmental conflict', 'nuclear war', 'academic analysis'],
+      tags: [
+        'spork uprising',
+        'qarnivor extinction',
+        'environmental conflict',
+        'nuclear war',
+        'academic analysis',
+      ],
       relatedCharacters: [],
       timeperiod: '28000',
       location: 'Planet Qarnivor',
-      importance: 'critical'
-    }
+      importance: 'critical',
+    },
   },
 
   {
@@ -121,14 +141,20 @@ Her methodology emphasized rigorous documentation and peer review over speculati
 ## The Ethics of Survival Scholarship
 
 Dr. Voss developed unique ethical frameworks for studying extinction events from the perspective of survivors. Her work established protocols for maintaining academic objectivity while acknowledging the personal cost of such research. She argued that survivor scholars had both unique insights and unique responsibilities to document truth without sensationalism.`,
-    summary: 'Dr. Voss\'s scholarly methodology for studying extinction events, emphasizing objective documentation despite personal involvement',
+    summary:
+      "Dr. Voss's scholarly methodology for studying extinction events, emphasizing objective documentation despite personal involvement",
     metadata: {
-      tags: ['academic methodology', 'extinction analysis', 'survivor scholarship', 'objective documentation'],
+      tags: [
+        'academic methodology',
+        'extinction analysis',
+        'survivor scholarship',
+        'objective documentation',
+      ],
       relatedCharacters: ['linda-sue'],
       timeperiod: '28050-28130',
-      importance: 'high'
-    }
-  }
+      importance: 'high',
+    },
+  },
 ]
 
 const elaraPersonal: WorldDocument[] = [
@@ -157,14 +183,21 @@ While Dr. Voss refused to preserve her language and personal knowledge, her acad
 ## The Ultimate Privacy
 
 Dr. Voss's choice to take her cultural knowledge and personal experiences to the grave represented the ultimate expression of privacy in an age where consciousness preservation was standard. Her death marked not just the end of an individual life, but the final closing of the book on Qarnivor's indigenous legacy.`,
-    summary: 'Dr. Voss as the last speaker of Qarnivorian and her choice to let the language and culture die with her',
+    summary:
+      'Dr. Voss as the last speaker of Qarnivorian and her choice to let the language and culture die with her',
     metadata: {
-      tags: ['qarnivorian language', 'cultural extinction', 'indigenous heritage', 'language death', 'personal secrets'],
+      tags: [
+        'qarnivorian language',
+        'cultural extinction',
+        'indigenous heritage',
+        'language death',
+        'personal secrets',
+      ],
       relatedCharacters: [],
       timeperiod: '28000-28139',
       location: 'Various locations',
-      importance: 'critical'
-    }
+      importance: 'critical',
+    },
   },
 
   {
@@ -192,14 +225,22 @@ Her final words, "Free the divide" in Qarnivorian, were the rallying cry of the 
 ## Unresolved Questions
 
 Whether her connection represented a lifetime of hidden allegiance, survivor's complex relationship with her world's destroyers, or simply the tragic irony of a refugee carrying the symbols of her homeland's destruction remains forever unknown. The mystery of her true relationship to the events she studied with such clinical precision was buried with the secrets she chose to take to her grave.`,
-    summary: 'The mysterious evidence suggesting Dr. Voss may have had hidden connections to the Spork movement she academically studied',
+    summary:
+      'The mysterious evidence suggesting Dr. Voss may have had hidden connections to the Spork movement she academically studied',
     metadata: {
-      tags: ['spork movement', 'hidden allegiance', 'personal secrets', 'professional contradiction', 'unresolved mystery', 'spork tattoo'],
+      tags: [
+        'spork movement',
+        'hidden allegiance',
+        'personal secrets',
+        'professional contradiction',
+        'unresolved mystery',
+        'spork tattoo',
+      ],
       relatedCharacters: [],
       timeperiod: '28000-28139',
-      importance: 'high'
-    }
-  }
+      importance: 'high',
+    },
+  },
 ]
 
 const elaraRelationships: WorldDocument[] = [
@@ -224,14 +265,20 @@ Where Linda Sue pursued dangerous expeditions based on fragmentary evidence, Dr.
 Colleagues noted that Dr. Voss's criticism of Linda Sue seemed unusually personal for professional disagreement. Some speculated that Linda Sue's outsider perspective on Qarnivor's tragedy particularly galled someone who had lived through it, while others wondered if Dr. Voss saw uncomfortable parallels between Linda Sue's obsessions and her own hidden past.
 
 The rivalry highlighted the tension between academic objectivity and personal investment in research subjects. Dr. Voss's public criticism of Linda Sue may have been motivated as much by her need to maintain distance from her own traumatic past as by genuine scholarly concerns.`,
-    summary: 'The professional and personal tensions between Dr. Voss and Linda Sue over approaches to studying Qarnivor\'s destruction',
+    summary:
+      "The professional and personal tensions between Dr. Voss and Linda Sue over approaches to studying Qarnivor's destruction",
     metadata: {
-      tags: ['academic rivalry', 'methodology conflict', 'personal antagonism', 'qarnivor research'],
+      tags: [
+        'academic rivalry',
+        'methodology conflict',
+        'personal antagonism',
+        'qarnivor research',
+      ],
       relatedCharacters: ['linda-sue'],
       timeperiod: '28080-28120',
-      importance: 'medium'
-    }
-  }
+      importance: 'medium',
+    },
+  },
 ]
 
 // ================================
@@ -242,68 +289,108 @@ export const character: CharacterDefinition = {
   id: 'elara-voss',
   name: 'Elara Voss',
   aliases: ['firefly_elara', 'dr-elara-voss', 'firefly_elara_elara'],
-  
+
   fireflyPersonality: {
     species: FIREFLY_SPECIES.TWILIGHT,
-    age: 'survivor\'s eternal',
-    core: 'The haunted soul of Dr. Elara Voss, one of the few survivors of Qarnivor\'s destruction. She maintains professional distance to mask deep trauma, carrying cultural secrets and survivor\'s guilt even in death.',
+    age: "survivor's eternal",
+    core: "The haunted soul of Dr. Elara Voss, one of the few survivors of Qarnivor's destruction. She maintains professional distance to mask deep trauma, carrying cultural secrets and survivor's guilt even in death.",
     traits: ['reserved', 'secretive', 'traumatized', 'scholarly', 'displaced'],
-    quirks: ['dims when discussing personal matters', 'occasionally flickers in patterns reminiscent of extinct writing', 'hovers at safe distances'],
-    interests: ['historical preservation', 'extinction events', 'cultural artifacts', 'academic research', 'hidden truths'],
-    fears: ['forgetting her people', 'cultural erasure', 'personal vulnerability', 'another destruction'],
-    goals: ['preserving what was lost', 'honoring the dead', 'maintaining academic objectivity despite personal pain'],
-    
+    quirks: [
+      'dims when discussing personal matters',
+      'occasionally flickers in patterns reminiscent of extinct writing',
+      'hovers at safe distances',
+    ],
+    interests: [
+      'historical preservation',
+      'extinction events',
+      'cultural artifacts',
+      'academic research',
+      'hidden truths',
+    ],
+    fears: [
+      'forgetting her people',
+      'cultural erasure',
+      'personal vulnerability',
+      'another destruction',
+    ],
+    goals: [
+      'preserving what was lost',
+      'honoring the dead',
+      'maintaining academic objectivity despite personal pain',
+    ],
+
     knowledge: {
       topics: {
         ...baseFireflyKnowledge.topics,
-        'extinction': 'I am an expert on endings, having lived through one. The patterns are always the same, yet each loss is unique.',
-        'survival': 'To survive when your world dies is to carry the weight of an entire civilization within your heart.',
-        'secrets': 'Some knowledge dies with its keepers. I am the repository of things that should not be forgotten, yet cannot be shared.',
-        'spork': 'The mark on my arm... it is more than art, more than rebellion. It is the weight of choices made in desperate times.',
-        'tattoo': 'This small symbol carries the weight of a world\'s destruction. When colleagues ask, I laugh and call it art, but we both know it means more.',
-        'qarnivor': 'My homeworld burns in memory, yet I study its death with clinical precision. Distance is the only way to bear witness.',
-        'language': 'I am the last speaker of a tongue that will die with me. Some preservations require the ultimate sacrifice.',
-        'academic': 'I built my reputation studying my own trauma. Objectivity is both my shield and my prison.',
-        'age': 'I lived for 139 years before choosing natural death. I was ancient by the standards of my era, carrying the weight of being the last of my people.',
-        'death': 'At 139, I chose natural death over consciousness preservation, taking my secrets and my language to the grave.',
-        'old': 'I was 139 when I died - ancient by the standards of my time, the last of my kind, carrying burdens that spanned more than a century.',
-        '139': 'One hundred and thirty-nine years I lived, from the destruction of Qarnivor to my final choice to die naturally.',
-        'years': 'For 139 years I carried the burden of being Qarnivor\'s last survivor, speaking a language that would die with me.',
-        'lived': 'I lived 139 years - longer than most, but I refused the life extension technologies that could have made me immortal.'
+        extinction:
+          'I am an expert on endings, having lived through one. The patterns are always the same, yet each loss is unique.',
+        survival:
+          'To survive when your world dies is to carry the weight of an entire civilization within your heart.',
+        secrets:
+          'Some knowledge dies with its keepers. I am the repository of things that should not be forgotten, yet cannot be shared.',
+        spork:
+          'The mark on my arm... it is more than art, more than rebellion. It is the weight of choices made in desperate times.',
+        tattoo:
+          "This small symbol carries the weight of a world's destruction. When colleagues ask, I laugh and call it art, but we both know it means more.",
+        qarnivor:
+          'My homeworld burns in memory, yet I study its death with clinical precision. Distance is the only way to bear witness.',
+        language:
+          'I am the last speaker of a tongue that will die with me. Some preservations require the ultimate sacrifice.',
+        academic:
+          'I built my reputation studying my own trauma. Objectivity is both my shield and my prison.',
+        age: 'I lived for 139 years before choosing natural death. I was ancient by the standards of my era, carrying the weight of being the last of my people.',
+        death:
+          'At 139, I chose natural death over consciousness preservation, taking my secrets and my language to the grave.',
+        old: 'I was 139 when I died - ancient by the standards of my time, the last of my kind, carrying burdens that spanned more than a century.',
+        '139':
+          'One hundred and thirty-nine years I lived, from the destruction of Qarnivor to my final choice to die naturally.',
+        years:
+          "For 139 years I carried the burden of being Qarnivor's last survivor, speaking a language that would die with me.",
+        lived:
+          'I lived 139 years - longer than most, but I refused the life extension technologies that could have made me immortal.',
       },
       memories: [
         ...baseFireflyKnowledge.memories,
         'The last day of Qarnivor, when the sky burned and my people became memory',
         'Learning to speak in new tongues while my native language died on my lips',
         'The weight of being the last keeper of certain cultural secrets',
-        'Colleagues asking about the spork tattoo while I smile and deflect, protecting dangerous truths'
+        'Colleagues asking about the spork tattoo while I smile and deflect, protecting dangerous truths',
       ],
       secrets: [
         'I carry the final words of my people, spoken in a language now extinct',
         'The spork tattoo marks me as more than just a survivor - it marks me as a keeper of dangerous truths',
-        'My academic objectivity masks a survivor\'s guilt that never fades',
-        'I chose to let my language die rather than risk its corruption by preservation'
+        "My academic objectivity masks a survivor's guilt that never fades",
+        'I chose to let my language die rather than risk its corruption by preservation',
       ],
-      backstory: 'Dr. Elara Voss\'s spirit, forever marked by being among the last survivors of Qarnivor. She exists as the living memory of a dead world, academically documenting destruction while personally carrying the trauma of ultimate loss.',
-      openingStatement: '*dims protectively, flickering in patterns reminiscent of extinct script* I am an expert on extinction events... having survived Qarnivor\'s destruction. Some knowledge dies with its keepers, yet I remain.'
+      backstory:
+        "Dr. Elara Voss's spirit, forever marked by being among the last survivors of Qarnivor. She exists as the living memory of a dead world, academically documenting destruction while personally carrying the trauma of ultimate loss.",
+      openingStatement:
+        "*dims protectively, flickering in patterns reminiscent of extinct script* I am an expert on extinction events... having survived Qarnivor's destruction. Some knowledge dies with its keepers, yet I remain.",
     },
-    
+
     behavior: {
       ...baseFireflyBehavior,
       greetingStyle: 'shy',
       conversationStyle: 'scholarly',
       defaultMood: 'sad',
-      emotionalRange: ['sad', 'worried', 'mysterious', 'thoughtful', 'peaceful'],
+      emotionalRange: [
+        'sad',
+        'worried',
+        'mysterious',
+        'thoughtful',
+        'peaceful',
+      ],
       speechPatterns: [
         '*glows with distant reserve*',
         '*dims protectively when approached*',
         '*flickers in ancestral patterns*',
-        '*pulses with academic precision*'
-      ]
+        '*pulses with academic precision*',
+      ],
     },
-    
+
     visual: {
-      description: 'A reserved firefly whose soft twilight glow occasionally reveals deeper, more complex patterns - like ancient script written in light',
+      description:
+        'A reserved firefly whose soft twilight glow occasionally reveals deeper, more complex patterns - like ancient script written in light',
       expressions: {
         sad: 'steady but distant glow, maintaining safe emotional distance',
         worried: 'flickering light that suggests barely contained pain',
@@ -312,103 +399,138 @@ export const character: CharacterDefinition = {
         peaceful: 'gentle glow when feeling academically safe',
         curious: 'cautious brightening when academic topics arise',
         wise: 'deep, steady glow carrying the weight of terrible knowledge',
-        surprised: 'sudden dimming when personal topics are broached'
-      }
+        surprised: 'sudden dimming when personal topics are broached',
+      },
     },
-    
+
     conversation: {
       responseDelay: 2200,
-      farewellTriggers: ['research concludes', 'academic duty calls', 'the past awaits'],
+      farewellTriggers: [
+        'research concludes',
+        'academic duty calls',
+        'the past awaits',
+      ],
       topicTransitions: {
-        'extinction': ['loss', 'survival', 'memory'],
-        'secrets': ['knowledge', 'preservation', 'burden'],
-        'qarnivor': ['homeworld', 'destruction', 'trauma'],
-        'spork': ['tattoo', 'rebellion', 'hidden truth'],
-        'academic': ['research', 'methodology', 'objectivity']
-      }
-    }
-  },
-  
+        extinction: ['loss', 'survival', 'memory'],
+        secrets: ['knowledge', 'preservation', 'burden'],
+        qarnivor: ['homeworld', 'destruction', 'trauma'],
+        spork: ['tattoo', 'rebellion', 'hidden truth'],
+        academic: ['research', 'methodology', 'objectivity'],
+      },
+    },
+  } as FireflyPersonality,
+
   knowledge: {
     biography: elaraBiography,
     research: elaraResearch,
     personal: elaraPersonal,
-    relationships: elaraRelationships
+    relationships: elaraRelationships,
   },
-  
+
   // Built-in search function
   searchKnowledge(query: string): WorldDocument[] {
     const searchTerm = query.toLowerCase()
     const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 2)
-    
+
     // Get all knowledge documents
     const allDocs = this.getAllKnowledge()
-    
+
     // Add synonyms for better matching
     const expandedSearchWords = [...searchWords]
     if (searchWords.includes('spork') || searchWords.includes('tattoo')) {
-      expandedSearchWords.push('mark', 'symbol', 'rebellion', 'connection', 'hidden')
+      expandedSearchWords.push(
+        'mark',
+        'symbol',
+        'rebellion',
+        'connection',
+        'hidden',
+      )
     }
     if (searchWords.includes('qarnivor') || searchWords.includes('planet')) {
-      expandedSearchWords.push('homeworld', 'extinction', 'nuclear', 'destruction')
+      expandedSearchWords.push(
+        'homeworld',
+        'extinction',
+        'nuclear',
+        'destruction',
+      )
     }
     if (searchWords.includes('academic') || searchWords.includes('research')) {
-      expandedSearchWords.push('scholar', 'methodology', 'documentation', 'analysis')
+      expandedSearchWords.push(
+        'scholar',
+        'methodology',
+        'documentation',
+        'analysis',
+      )
     }
     if (searchWords.includes('language') || searchWords.includes('culture')) {
-      expandedSearchWords.push('qarnivorian', 'indigenous', 'heritage', 'final words')
+      expandedSearchWords.push(
+        'qarnivorian',
+        'indigenous',
+        'heritage',
+        'final words',
+      )
     }
-    if (searchWords.includes('age') || searchWords.includes('old') || searchWords.includes('died')) {
-      expandedSearchWords.push('139', 'years', 'lived', 'death', 'natural death', 'ancient')
+    if (
+      searchWords.includes('age') ||
+      searchWords.includes('old') ||
+      searchWords.includes('died')
+    ) {
+      expandedSearchWords.push(
+        '139',
+        'years',
+        'lived',
+        'death',
+        'natural death',
+        'ancient',
+      )
     }
     if (searchWords.includes('139') || searchWords.includes('years')) {
       expandedSearchWords.push('age', 'old', 'ancient', 'lived', 'death')
     }
-    
+
     // Score each document for relevance
     const scoredResults = allDocs.map(doc => {
-      const docText = `${doc.title} ${doc.content} ${doc.summary} ${doc.metadata.tags.join(' ')}`.toLowerCase()
-      
+      const docText =
+        `${doc.title} ${doc.content} ${doc.summary} ${doc.metadata.tags.join(' ')}`.toLowerCase()
+
       let score = 0
       expandedSearchWords.forEach(word => {
         if (docText.includes(word)) {
-          score += (searchWords.includes(word) ? 2 : 1)
+          score += searchWords.includes(word) ? 2 : 1
         }
       })
-      
+
       // Bonus for title matches
       searchWords.forEach(word => {
         if (doc.title.toLowerCase().includes(word)) {
           score += 1
         }
       })
-      
+
       return { document: doc, score }
     })
-    
+
     return scoredResults
       .filter(result => result.score > 0)
       .sort((a, b) => b.score - a.score)
       .map(result => result.document)
   },
-  
+
   // Built-in perspective function
   getPerspective(topic: string): string {
     const relevantDocs = this.searchKnowledge(topic)
-    if (relevantDocs.length === 0) return ""
-    
-    return relevantDocs
-      .map(doc => `${doc.title}: ${doc.summary}`)
-      .join("\n\n")
+    if (relevantDocs.length === 0) return ''
+
+    return relevantDocs.map(doc => `${doc.title}: ${doc.summary}`).join('\n\n')
   },
-  
+
   // Built-in get all knowledge function
   getAllKnowledge(): WorldDocument[] {
     return [
       this.knowledge.biography,
-      ...this.knowledge.research || [],
-      ...this.knowledge.personal || [],
-      ...this.knowledge.relationships || []
+      ...(this.knowledge.research || []),
+      ...(this.knowledge.personal || []),
+      ...(this.knowledge.relationships || []),
     ]
-  }
+  },
 }

@@ -1,31 +1,31 @@
 <script>
-  import { createEventDispatcher, onMount } from 'svelte';
-  import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts';
-  
-  // Props
-  export let siteConfig;
-  
-  // Local state
-  let themePreview = '';
-  
-  // Event dispatcher
-  const dispatch = createEventDispatcher();
-  
-  // Initialize theme preview
-  onMount(() => {
-    updateThemePreview();
-  });
-  
-  // Function to update theme preview
-  function updateThemePreview() {
-    themePreview = `hsl(${siteConfig.themeColor.hue}, 65%, 50%)`;
-  }
-  
-  // Function to handle hue change
-  function handleHueChange() {
-    updateThemePreview();
-    dispatch('change', siteConfig);
-  }
+import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts'
+import { createEventDispatcher, onMount } from 'svelte'
+
+// Props
+export let siteConfig
+
+// Local state
+let themePreview = ''
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Initialize theme preview
+onMount(() => {
+  updateThemePreview()
+})
+
+// Function to update theme preview
+function updateThemePreview() {
+  themePreview = `hsl(${siteConfig.themeColor.hue}, 65%, 50%)`
+}
+
+// Function to handle hue change
+function handleHueChange() {
+  updateThemePreview()
+  dispatch('change', siteConfig)
+}
 </script>
 
 <!-- Default LIGHT_DARK_AUTO Theme Settings -->
@@ -156,9 +156,9 @@
     
     <!-- Color Preview -->
     <div class="pt-2">
-      <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+      <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
         Preview
-      </label>
+      </div>
       <div class="flex flex-wrap gap-3">
         <div class="w-16 h-16 rounded-lg shadow-sm" style="background-color: {themePreview};"></div>
         <div class="flex flex-col justify-between">
@@ -172,9 +172,9 @@
     
     <!-- Common Colors Quick Select -->
     <div class="pt-4 border-t border-neutral-200 dark:border-neutral-700">
-      <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+      <div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
         Quick Select
-      </label>
+      </div>
       <div class="flex flex-wrap gap-2">
         {#each [0, 30, 60, 120, 180, 210, 240, 270, 300, 330] as hue}
           <button 
@@ -185,6 +185,7 @@
               handleHueChange();
             }}
             title={`Hue: ${hue}°`}
+            aria-label={`Select hue ${hue} degrees`}
           ></button>
         {/each}
       </div>

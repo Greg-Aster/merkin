@@ -1,17 +1,17 @@
 ---
-import { getCollection } from 'astro:content';
-import QuizLayout from '../../layouts/QuizLayout.astro';
-import Quiz from '../../components/quiz/Quiz.svelte';
+import { getCollection } from 'astro:content'
+import Quiz from '../../components/quiz/Quiz.svelte'
+import QuizLayout from '../../layouts/QuizLayout.astro'
 
 export async function getStaticPaths() {
-  const quizEntries = await getCollection('quizzes');
+  const quizEntries = await getCollection('quizzes')
   return quizEntries.map(entry => ({
     params: { slug: entry.id },
     props: { quiz: entry.data },
-  }));
+  }))
 }
 
-const { quiz } = Astro.props;
+const { quiz } = Astro.props
 ---
 <QuizLayout title={quiz.title} description={quiz.description}>
   <h1 class="text-4xl font-bold mb-2 text-center" style="color: var(--primary)">{quiz.title}</h1>

@@ -1,45 +1,45 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  
-  // Props - receive all configs
-  export let siteConfig;
-  export let navBarConfig;
-  export let profileConfig;
-  export let licenseConfig;
-  export let timelineConfig;
-  export let avatarConfig;
-  
-  // Local state
-  let showExportOptions = false;
-  let exportFormat = 'astro';
-  let fileName = 'site-config';
-  let statusMessage = { text: '', type: '' };
-  
-  // Event dispatcher
-  const dispatch = createEventDispatcher();
-  
-  // Format options
-  const exportFormats = [
-    { value: 'astro', label: 'Astro Configuration (.ts)' },
-    { value: 'json', label: 'JSON Configuration (.json)' }
-  ];
-  
-  // Function to generate the config file content
-  function generateConfigContent() {
-    try {
-      // Combine all configs into one object for export
-      const fullConfig = {
-        siteConfig,
-        navBarConfig,
-        profileConfig,
-        licenseConfig,
-        timelineConfig,
-        avatarConfig
-      };
-      
-      if (exportFormat === 'astro') {
-        // Generate TypeScript configuration
-        return `// Site Configuration - Generated on ${new Date().toLocaleString()}
+import { createEventDispatcher } from 'svelte'
+
+// Props - receive all configs
+export let siteConfig
+export let navBarConfig
+export let profileConfig
+export let licenseConfig
+export let timelineConfig
+export let avatarConfig
+
+// Local state
+let showExportOptions = false
+let exportFormat = 'astro'
+let fileName = 'site-config'
+let statusMessage = { text: '', type: '' }
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Format options
+const exportFormats = [
+  { value: 'astro', label: 'Astro Configuration (.ts)' },
+  { value: 'json', label: 'JSON Configuration (.json)' },
+]
+
+// Function to generate the config file content
+function generateConfigContent() {
+  try {
+    // Combine all configs into one object for export
+    const fullConfig = {
+      siteConfig,
+      navBarConfig,
+      profileConfig,
+      licenseConfig,
+      timelineConfig,
+      avatarConfig,
+    }
+
+    if (exportFormat === 'astro') {
+      // Generate TypeScript configuration
+      return `// Site Configuration - Generated on ${new Date().toLocaleString()}
 import type { SiteConfig, NavBarConfig, ProfileConfig, LicenseConfig, TimelineConfig, AvatarConfig } from '../types';
 
 // Site Configuration
@@ -59,104 +59,108 @@ export const timelineConfig: TimelineConfig = ${JSON.stringify(timelineConfig, n
 
 // Avatar Configuration
 export const avatarConfig: AvatarConfig = ${JSON.stringify(avatarConfig, null, 2)};
-`;
-      } else {
-        // Generate JSON configuration
-        return JSON.stringify(fullConfig, null, 2);
+`
+    } else {
+      // Generate JSON configuration
+      return JSON.stringify(fullConfig, null, 2)
+    }
+  } catch (error) {
+    statusMessage = {
+      text: `Error generating config: ${error.message}`,
+      type: 'error',
+    }
+    return ''
+  }
+}
+
+// Function to download the configuration file
+function downloadConfig() {
+  try {
+    const content = generateConfigContent()
+    if (!content) return
+
+    const extension = exportFormat === 'astro' ? 'ts' : 'json'
+    const fileNameWithExt = `${fileName}.${extension}`
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+
+    // Create download link and trigger click
+    const a = document.createElement('a')
+    a.href = url
+    a.download = fileNameWithExt
+    document.body.appendChild(a)
+    a.click()
+
+    // Clean up
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    statusMessage = {
+      text: `Configuration exported as ${fileNameWithExt}`,
+      type: 'success',
+    }
+
+    // Hide the success message after 3 seconds
+    setTimeout(() => {
+      if (statusMessage.type === 'success') {
+        statusMessage = { text: '', type: '' }
       }
-    } catch (error) {
-      statusMessage = { 
-        text: `Error generating config: ${error.message}`, 
-        type: 'error' 
-      };
-      return '';
+    }, 3000)
+  } catch (error) {
+    statusMessage = {
+      text: `Error exporting config: ${error.message}`,
+      type: 'error',
     }
   }
-  
-  // Function to download the configuration file
-  function downloadConfig() {
-    try {
-      const content = generateConfigContent();
-      if (!content) return;
-      
-      const extension = exportFormat === 'astro' ? 'ts' : 'json';
-      const fileNameWithExt = `${fileName}.${extension}`;
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      
-      // Create download link and trigger click
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileNameWithExt;
-      document.body.appendChild(a);
-      a.click();
-      
-      // Clean up
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      statusMessage = { 
-        text: `Configuration exported as ${fileNameWithExt}`, 
-        type: 'success' 
-      };
-      
+}
+
+// Function to copy config to clipboard
+function copyToClipboard() {
+  try {
+    const content = generateConfigContent()
+    if (!content) return
+
+    navigator.clipboard.writeText(content).then(() => {
+      statusMessage = {
+        text: 'Configuration copied to clipboard',
+        type: 'success',
+      }
+
       // Hide the success message after 3 seconds
       setTimeout(() => {
         if (statusMessage.type === 'success') {
-          statusMessage = { text: '', type: '' };
+          statusMessage = { text: '', type: '' }
         }
-      }, 3000);
-    } catch (error) {
-      statusMessage = { 
-        text: `Error exporting config: ${error.message}`, 
-        type: 'error' 
-      };
+      }, 3000)
+    })
+  } catch (error) {
+    statusMessage = {
+      text: `Error copying to clipboard: ${error.message}`,
+      type: 'error',
     }
   }
-  
-  // Function to copy config to clipboard
-  function copyToClipboard() {
-    try {
-      const content = generateConfigContent();
-      if (!content) return;
-      
-      navigator.clipboard.writeText(content).then(() => {
-        statusMessage = { 
-          text: 'Configuration copied to clipboard', 
-          type: 'success' 
-        };
-        
-        // Hide the success message after 3 seconds
-        setTimeout(() => {
-          if (statusMessage.type === 'success') {
-            statusMessage = { text: '', type: '' };
-          }
-        }, 3000);
-      });
-    } catch (error) {
-      statusMessage = { 
-        text: `Error copying to clipboard: ${error.message}`, 
-        type: 'error' 
-      };
+}
+
+// Function to open export dialog
+function showExportDialog() {
+  showExportOptions = true
+}
+
+// Reset all configurations to default (placeholder)
+function resetToDefaults() {
+  if (
+    confirm(
+      'Are you sure you want to reset all configurations to default values? This cannot be undone.',
+    )
+  ) {
+    // This would typically call a service or API to reset configs
+    // For now, it's just a placeholder
+    statusMessage = {
+      text: 'This is a placeholder. In a real implementation, this would reset your configs to default values.',
+      type: 'info',
     }
   }
-  
-  // Function to open export dialog
-  function showExportDialog() {
-    showExportOptions = true;
-  }
-  
-  // Reset all configurations to default (placeholder)
-  function resetToDefaults() {
-    if (confirm('Are you sure you want to reset all configurations to default values? This cannot be undone.')) {
-      // This would typically call a service or API to reset configs
-      // For now, it's just a placeholder
-      statusMessage = { 
-        text: 'This is a placeholder. In a real implementation, this would reset your configs to default values.', 
-        type: 'info' 
-      };
-    }
-  }
+}
 </script>
 
 <div class="advanced-config-tab">

@@ -52,6 +52,9 @@ blog-pusher-sync/
 apps/game/src/threlte/editor/scenes/*.backup.json
 apps/game/src/threlte/editor/scenes/*.pre-restore.json
 
+# Local source audio libraries and downloaded packs
+Archive/audio-packs/
+
 # Archived large media (cleanup guardrails)
 **/posts/Mega-Meal-Explained/gif/title4.gif
 **/posts/Mega-Meal-Explained/gif/running-480p.gif

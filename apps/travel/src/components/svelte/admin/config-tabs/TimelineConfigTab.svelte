@@ -1,147 +1,151 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  import type { TimelineConfig } from '../types/timelineconfig';
-  
-  // Props
-  export let timelineConfig: TimelineConfig;
-  
-  // Event dispatcher to notify parent of changes
-  const dispatch = createEventDispatcher();
-  
-  // Local state
-  let activeSection = 'general';
-  let editingEra: any = null;
-  let showEraEditor = false;
-  
-  // Sections for tab navigation
-  const sections = [
-    { id: 'general', label: 'General Settings' },
-    { id: 'eras', label: 'Timeline Eras' },
-    { id: 'display', label: 'Display Options' }
-  ];
-  
-  // Function to notify parent of changes
-  function notifyChanges() {
-    dispatch('change');
+import { createEventDispatcher } from 'svelte'
+import type { TimelineConfig } from '../types/timelineconfig'
+
+// Props
+export let timelineConfig: TimelineConfig
+
+// Event dispatcher to notify parent of changes
+const dispatch = createEventDispatcher()
+
+// Local state
+let activeSection = 'general'
+let editingEra: any = null
+let showEraEditor = false
+
+// Sections for tab navigation
+const sections = [
+  { id: 'general', label: 'General Settings' },
+  { id: 'eras', label: 'Timeline Eras' },
+  { id: 'display', label: 'Display Options' },
+]
+
+// Function to notify parent of changes
+function notifyChanges() {
+  dispatch('change')
+}
+
+// Function to add a new era
+function addEra() {
+  editingEra = {
+    isNew: true,
+    data: {
+      name: '',
+      startYear: 2000,
+      endYear: 2020,
+      color: '#3b82f6',
+      description: '',
+    },
   }
-  
-  // Function to add a new era
-  function addEra() {
-    editingEra = {
-      isNew: true,
-      data: {
-        name: '',
-        startYear: 2000,
-        endYear: 2020,
-        color: '#3b82f6',
-        description: ''
-      }
-    };
-    showEraEditor = true;
+  showEraEditor = true
+}
+
+// Function to edit an era
+function editEra(index: number) {
+  editingEra = {
+    isNew: false,
+    index: index,
+    data: { ...timelineConfig.eras[index] },
   }
-  
-  // Function to edit an era
-  function editEra(index: number) {
-    editingEra = {
-      isNew: false,
-      index: index,
-      data: { ...timelineConfig.eras[index] }
-    };
-    showEraEditor = true;
-  }
-  
-  // Function to save era
-  function saveEra() {
-    if (editingEra.isNew) {
-      // Add new era
-      timelineConfig.eras = [...timelineConfig.eras, editingEra.data];
-    } else {
-      // Update existing era
-      const newEras = [...timelineConfig.eras];
-      newEras[editingEra.index] = editingEra.data;
-      timelineConfig.eras = newEras;
-    }
-    
-    showEraEditor = false;
-    notifyChanges();
-  }
-  
-  // Function to delete era
-  function deleteEra(index: number) {
-    if (confirm('Are you sure you want to delete this era?')) {
-      timelineConfig.eras = timelineConfig.eras.filter((_, i) => i !== index);
-      notifyChanges();
-    }
-  }
-  
-  // Function to move era up in the list
-  function moveEraUp(index: number) {
-    if (index > 0) {
-      const newEras = [...timelineConfig.eras];
-      const temp = newEras[index];
-      newEras[index] = newEras[index - 1];
-      newEras[index - 1] = temp;
-      timelineConfig.eras = newEras;
-      notifyChanges();
-    }
-  }
-  
-  // Function to move era down in the list
-  function moveEraDown(index: number) {
-    if (index < timelineConfig.eras.length - 1) {
-      const newEras = [...timelineConfig.eras];
-      const temp = newEras[index];
-      newEras[index] = newEras[index + 1];
-      newEras[index + 1] = temp;
-      timelineConfig.eras = newEras;
-      notifyChanges();
-    }
+  showEraEditor = true
+}
+
+// Function to save era
+function saveEra() {
+  if (editingEra.isNew) {
+    // Add new era
+    timelineConfig.eras = [...timelineConfig.eras, editingEra.data]
+  } else {
+    // Update existing era
+    const newEras = [...timelineConfig.eras]
+    newEras[editingEra.index] = editingEra.data
+    timelineConfig.eras = newEras
   }
 
-  // Function to restore default configuration
-  function restoreDefaults() {
-    if (confirm('Are you sure you want to restore default configuration? This will reset all timeline settings.')) {
-      // Reset to default configuration
-      timelineConfig = {
-        enableTimeline: true,
-        defaultEra: 'present',
-        showEraDescriptions: true,
-        eras: [
-          {
-            name: 'past',
-            startYear: 1900,
-            endYear: 2000,
-            color: '#6b7280', // gray-500
-            description: 'Historical content and background'
-          },
-          {
-            name: 'present',
-            startYear: 2000,
-            endYear: 2030,
-            color: '#3b82f6', // blue-500
-            description: 'Current projects and ongoing work'
-          },
-          {
-            name: 'future',
-            startYear: 2030,
-            endYear: 2100,
-            color: '#10b981', // emerald-500
-            description: 'Planned projects and future vision'
-          }
-        ],
-        displayOptions: {
-          showYearLabels: true,
-          showEraLabels: true,
-          highlightCurrentYear: true,
-          currentYear: new Date().getFullYear(),
-          yearSpacing: 10,
-          timelineHeight: 8
-        }
-      };
-      
-      notifyChanges();
-    }
+  showEraEditor = false
+  notifyChanges()
+}
+
+// Function to delete era
+function deleteEra(index: number) {
+  if (confirm('Are you sure you want to delete this era?')) {
+    timelineConfig.eras = timelineConfig.eras.filter((_, i) => i !== index)
+    notifyChanges()
   }
+}
+
+// Function to move era up in the list
+function moveEraUp(index: number) {
+  if (index > 0) {
+    const newEras = [...timelineConfig.eras]
+    const temp = newEras[index]
+    newEras[index] = newEras[index - 1]
+    newEras[index - 1] = temp
+    timelineConfig.eras = newEras
+    notifyChanges()
+  }
+}
+
+// Function to move era down in the list
+function moveEraDown(index: number) {
+  if (index < timelineConfig.eras.length - 1) {
+    const newEras = [...timelineConfig.eras]
+    const temp = newEras[index]
+    newEras[index] = newEras[index + 1]
+    newEras[index + 1] = temp
+    timelineConfig.eras = newEras
+    notifyChanges()
+  }
+}
+
+// Function to restore default configuration
+function restoreDefaults() {
+  if (
+    confirm(
+      'Are you sure you want to restore default configuration? This will reset all timeline settings.',
+    )
+  ) {
+    // Reset to default configuration
+    timelineConfig = {
+      enableTimeline: true,
+      defaultEra: 'present',
+      showEraDescriptions: true,
+      eras: [
+        {
+          name: 'past',
+          startYear: 1900,
+          endYear: 2000,
+          color: '#6b7280', // gray-500
+          description: 'Historical content and background',
+        },
+        {
+          name: 'present',
+          startYear: 2000,
+          endYear: 2030,
+          color: '#3b82f6', // blue-500
+          description: 'Current projects and ongoing work',
+        },
+        {
+          name: 'future',
+          startYear: 2030,
+          endYear: 2100,
+          color: '#10b981', // emerald-500
+          description: 'Planned projects and future vision',
+        },
+      ],
+      displayOptions: {
+        showYearLabels: true,
+        showEraLabels: true,
+        highlightCurrentYear: true,
+        currentYear: new Date().getFullYear(),
+        yearSpacing: 10,
+        timelineHeight: 8,
+      },
+    }
+
+    notifyChanges()
+  }
+}
 </script>
 
 <div class="timeline-config-tab">

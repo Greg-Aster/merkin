@@ -37,6 +37,7 @@
     "deploy:travel": "pnpm build:travel && bash ./scripts/deploy-pages-with-retry.sh apps/travel/dist merkin-travel",
     "deploy:all": "pnpm build:shared-data && pnpm build:megameal && pnpm deploy:megameal:static && pnpm deploy:dndiy && pnpm deploy:temporal && pnpm deploy:travel && pnpm build:game && pnpm deploy:game:static && pnpm deploy:edge-router",
     "lint:all": "pnpm -r lint",
+    "lint:fix:all": "pnpm -r lint:fix",
     "format:all": "pnpm -r format",
     "type-check:all": "pnpm -r type-check"
   },

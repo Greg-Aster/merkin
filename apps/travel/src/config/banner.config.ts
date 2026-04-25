@@ -2,22 +2,26 @@ import type { ImageMetadata } from 'astro'
 
 // Pacific Crest Trail landscape photography
 // Sources: Wikimedia Commons (CC/Public Domain) and Unsplash (free commercial use)
-import pctBanner01 from 'src/assets/banner/pct-banner-01-desert.jpg'          // PCT Desert, CA — Public Domain
-import pctBanner02 from 'src/assets/banner/pct-banner-02-san-jacinto.jpg'     // San Jacinto Mtns — Public Domain
+import pctBanner01 from 'src/assets/banner/pct-banner-01-desert.jpg' // PCT Desert, CA — Public Domain
+import pctBanner02 from 'src/assets/banner/pct-banner-02-san-jacinto.jpg' // San Jacinto Mtns — Public Domain
 import pctBanner03 from 'src/assets/banner/pct-banner-03-sierra-tuolumne.jpg' // Tuolumne Meadows, Yosemite — CC BY-SA 4.0
-import pctBanner04 from 'src/assets/banner/pct-banner-04-eastern-sierra.jpg'  // Eastern Sierra — Unsplash
-import pctBanner05 from 'src/assets/banner/pct-banner-05-mount-shasta.jpg'    // Mount Shasta — CC BY-SA 4.0
-import pctBanner06 from 'src/assets/banner/pct-banner-06-north-cascades.jpg'  // North Cascades, WA — CC BY-SA 4.0
-import pctBanner07 from 'src/assets/banner/pct-banner-07-alpine-meadow.jpg'   // Alpine Meadow Wildflowers — CC BY 3.0
+import pctBanner04 from 'src/assets/banner/pct-banner-04-eastern-sierra.jpg' // Eastern Sierra — Unsplash
+import pctBanner05 from 'src/assets/banner/pct-banner-05-mount-shasta.jpg' // Mount Shasta — CC BY-SA 4.0
+import pctBanner06 from 'src/assets/banner/pct-banner-06-north-cascades.jpg' // North Cascades, WA — CC BY-SA 4.0
+import pctBanner07 from 'src/assets/banner/pct-banner-07-alpine-meadow.jpg' // Alpine Meadow Wildflowers — CC BY 3.0
 import pctBanner08 from 'src/assets/banner/pct-banner-08-lake-reflection.jpg' // Mountain Lake Reflection — Unsplash
-import pctBanner09 from 'src/assets/banner/pct-banner-09-crater-lake.jpg'     // Crater Lake, OR — CC BY-SA 3.0
-import pctBanner10 from 'src/assets/banner/pct-banner-10-forest-trail.jpg'    // PCT Forest Trail, OR — CC BY 4.0
+import pctBanner09 from 'src/assets/banner/pct-banner-09-crater-lake.jpg' // Crater Lake, OR — CC BY-SA 3.0
+import pctBanner10 from 'src/assets/banner/pct-banner-10-forest-trail.jpg' // PCT Forest Trail, OR — CC BY 4.0
 
-export type BannerType = 'standard' | 'video' | 'image' | 'timeline';
+export type BannerType = 'standard' | 'video' | 'image' | 'timeline'
 
-export interface StandardBannerData {}
-export interface VideoBannerData { videoId: string }
-export interface ImageBannerData { imageUrl: string }
+export type StandardBannerData = {}
+export interface VideoBannerData {
+  videoId: string
+}
+export interface ImageBannerData {
+  imageUrl: string
+}
 export interface TimelineBannerData {
   category: string
   title?: string
@@ -30,7 +34,11 @@ export interface TimelineBannerData {
 
 export interface BannerConfig {
   defaultBannerType: BannerType
-  defaultBannerData: StandardBannerData | VideoBannerData | ImageBannerData | TimelineBannerData
+  defaultBannerData:
+    | StandardBannerData
+    | VideoBannerData
+    | ImageBannerData
+    | TimelineBannerData
   bannerList: ImageMetadata[]
   standardBannerConfig?: any // Compatibility with blog-core MainGridLayout
   defaultBanner: ImageMetadata
@@ -111,17 +119,77 @@ export interface BannerConfig {
   }
 }
 
+interface BannerPostData {
+  bannerLink: string
+  customAvatar: string
+  customName: string
+  customBio: string
+  slug: string
+  wantsNoDefaultBanner: boolean
+}
+
+interface BannerAnimationSettings {
+  enabled: boolean
+  interval: number
+  transitionDuration: number
+  direction: BannerConfig['animation']['direction']
+  randomStart?: boolean
+  motion?: BannerConfig['animation']['motion']
+}
+
+interface BannerConfigurationResult {
+  postData: BannerPostData | null
+  bannerType: {
+    hasTimelineBanner: boolean
+    hasVideoBanner: boolean
+    hasImageBanner: boolean
+    hasAssistantBanner: boolean
+    hasStandardBanner: boolean
+    hasPostBanner: boolean
+    isStandardPage: boolean
+    currentBannerType: BannerType
+  }
+  bannerDataSources: {
+    videoBannerData: null
+    imageBannerData: null
+    timelineBannerData: null
+    assistantBannerData: null
+  }
+  layout: {
+    mainPanelTop: string
+    navbarSpacing: string
+    bannerHeight: string
+    bannerHeightMobile: string
+    bannerOverlap: string
+    dynamicOverlap: string
+    mainContentOffset: string
+  }
+  finalBannerLink: string
+  currentBannerType: BannerType
+}
+
 export const bannerConfig: BannerConfig = {
   defaultBannerType: 'standard',
   defaultBannerData: {},
-  bannerList: [pctBanner01, pctBanner02, pctBanner03, pctBanner04, pctBanner05, pctBanner06, pctBanner07, pctBanner08, pctBanner09, pctBanner10],
+  bannerList: [
+    pctBanner01,
+    pctBanner02,
+    pctBanner03,
+    pctBanner04,
+    pctBanner05,
+    pctBanner06,
+    pctBanner07,
+    pctBanner08,
+    pctBanner09,
+    pctBanner10,
+  ],
   defaultBanner: pctBanner01,
   animation: {
     enabled: true,
-    interval: 12000,        // 12 seconds per image — slow, scenic pace
+    interval: 12000, // 12 seconds per image — slow, scenic pace
     transitionDuration: 1800, // 1.8 second crossfade
     direction: 'forward',
-    randomStart: true,      // start on a random image each page load
+    randomStart: true, // start on a random image each page load
     motion: {
       enabled: true,
       mode: 'alternate',
@@ -142,13 +210,15 @@ export const bannerConfig: BannerConfig = {
     objectFit: 'cover',
     objectPosition: 'center',
     applyGradientOverlay: true,
-    gradientOverlay: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.12), rgba(15, 23, 42, 0.4))',
+    gradientOverlay:
+      'linear-gradient(to bottom, rgba(15, 23, 42, 0.12), rgba(15, 23, 42, 0.4))',
     borderRadius: '0',
   },
   fallback: {
     enabled: true,
     type: 'gradient',
-    value: 'linear-gradient(to bottom, var(--color-primary-light), var(--color-primary))',
+    value:
+      'linear-gradient(to bottom, var(--color-primary-light), var(--color-primary))',
   },
   navbar: {
     height: '5rem',
@@ -194,7 +264,7 @@ export function getFallbackBannerCSS(): string {
     : bannerConfig.fallback.value
 }
 
-export function getBannerAnimationSettings() {
+export function getBannerAnimationSettings(): BannerAnimationSettings {
   return {
     enabled: bannerConfig.animation.enabled,
     interval: bannerConfig.animation.interval,
@@ -207,10 +277,14 @@ export function getBannerAnimationSettings() {
 
 export function getPanelTopPosition(bannerType: BannerType): string {
   switch (bannerType) {
-    case 'video': return bannerConfig.panel.top.video
-    case 'image': return bannerConfig.panel.top.image
-    case 'timeline': return bannerConfig.panel.top.timeline
-    default: return bannerConfig.panel.top.standard
+    case 'video':
+      return bannerConfig.panel.top.video
+    case 'image':
+      return bannerConfig.panel.top.image
+    case 'timeline':
+      return bannerConfig.panel.top.timeline
+    default:
+      return bannerConfig.panel.top.standard
   }
 }
 
@@ -234,20 +308,30 @@ export function isTimelineBannerData(data: any): data is TimelineBannerData {
 // COMPATIBILITY LAYER: Functions required by blog-core's MainGridLayout
 // ============================================================
 
-export function getDynamicBackgroundImage(backgroundImage?: string | null): string | null {
+export function getDynamicBackgroundImage(
+  backgroundImage?: string | null,
+): string | null {
   if (backgroundImage === 'none' || backgroundImage === '') return null
   return backgroundImage || null
 }
 
-export function getShouldShowParallaxBackground(backgroundImage?: string | null): boolean {
-  return !!(getDynamicBackgroundImage(backgroundImage) && bannerConfig.parallax.enabled)
+export function getShouldShowParallaxBackground(
+  backgroundImage?: string | null,
+): boolean {
+  return !!(
+    getDynamicBackgroundImage(backgroundImage) && bannerConfig.parallax.enabled
+  )
 }
 
 export function getBannerLink(_index: number): string | null {
   return null
 }
 
-export function determineBannerConfiguration(post: any, _pageType: string, defaultBannerLink = '') {
+export function determineBannerConfiguration(
+  post: any,
+  _pageType: string,
+  defaultBannerLink = '',
+): BannerConfigurationResult {
   const mainPanelTop = getPanelTopPosition(bannerConfig.defaultBannerType)
   const navbarSpacing = bannerConfig.navbar.spacing.standard
   // Keep author metadata flowing to MainGridLayout so post-level avatar/name/bio overrides work.
@@ -318,5 +402,5 @@ bannerConfig.standardBannerConfig = {
   isVideoBannerItem: (_item: any) => false,
   isImageBannerItem: (_item: any) => true,
   getBannerItemPreviewDetails: (_item: any) => ({ title: '', description: '' }),
-};
-(bannerConfig as any).layout.maxWidth ??= 1920;
+}
+;(bannerConfig as any).layout.maxWidth ??= 1920

@@ -5,57 +5,72 @@
   in development and for potential in-game style switching.
 -->
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte'
-  import { 
-    currentStylePresetStore, 
-    enableToonShadingStore, 
-    enableOutlinesStore,
-    enableColorGradingStore,
-    styleSystemReadyStore
-  } from '../core/StyleManager'
-  
-  const dispatch = createEventDispatcher()
-  
-  // Props
-  export let visible = true
-  export let position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' = 'top-right'
-  
-  // Style options
-  const stylePresets = [
-    { value: 'site', label: 'Website Palette', description: 'Megameal-derived cool dark palette' },
-    { value: 'surreal-site', label: 'Surreal Site', description: 'Dark hyper-saturated cyan, violet, and magenta' },
-    { value: 'ghibli', label: 'Studio Ghibli', description: 'Warm, natural colors' },
-    { value: 'alto', label: 'Alto\'s Adventure', description: 'Minimalist gradients' },
-    { value: 'monument', label: 'Monument Valley', description: 'Pastel architecture' },
-    { value: 'retro', label: 'Retro/Synthwave', description: 'Bold 80s colors' }
-  ] as const
-  
-  // Local state
-  let isExpanded = false
-  
-  // Reactive values from stores
-  $: currentPreset = $currentStylePresetStore
-  $: toonShadingEnabled = $enableToonShadingStore
-  $: outlinesEnabled = $enableOutlinesStore
-  $: colorGradingEnabled = $enableColorGradingStore
-  $: styleSystemReady = $styleSystemReadyStore
-  
-  function handlePresetChange(preset: typeof stylePresets[number]['value']) {
-    currentStylePresetStore.set(preset)
-    dispatch('styleChanged', { preset })
-  }
-  
-  function toggleToonShading() {
-    enableToonShadingStore.update(enabled => !enabled)
-  }
-  
-  function toggleOutlines() {
-    enableOutlinesStore.update(enabled => !enabled)
-  }
-  
-  function toggleColorGrading() {
-    enableColorGradingStore.update(enabled => !enabled)
-  }
+import { createEventDispatcher } from 'svelte'
+import {
+  currentStylePresetStore,
+  enableColorGradingStore,
+  enableOutlinesStore,
+  styleSystemReadyStore,
+} from '../core/StyleManager'
+
+const dispatch = createEventDispatcher()
+
+// Props
+export let visible = true
+export let position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' =
+  'top-right'
+
+// Style options
+const stylePresets = [
+  {
+    value: 'site',
+    label: 'Website Palette',
+    description: 'Megameal-derived cool dark palette',
+  },
+  {
+    value: 'surreal-site',
+    label: 'Surreal Site',
+    description: 'Dark hyper-saturated cyan, violet, and magenta',
+  },
+  {
+    value: 'ghibli',
+    label: 'Studio Ghibli',
+    description: 'Warm, natural colors',
+  },
+  {
+    value: 'alto',
+    label: "Alto's Adventure",
+    description: 'Minimalist gradients',
+  },
+  {
+    value: 'monument',
+    label: 'Monument Valley',
+    description: 'Pastel architecture',
+  },
+  { value: 'retro', label: 'Retro/Synthwave', description: 'Bold 80s colors' },
+] as const
+
+// Local state
+let isExpanded = false
+
+// Reactive values from stores
+$: currentPreset = $currentStylePresetStore
+$: outlinesEnabled = $enableOutlinesStore
+$: colorGradingEnabled = $enableColorGradingStore
+$: styleSystemReady = $styleSystemReadyStore
+
+function handlePresetChange(preset: (typeof stylePresets)[number]['value']) {
+  currentStylePresetStore.set(preset)
+  dispatch('styleChanged', { preset })
+}
+
+function toggleOutlines() {
+  enableOutlinesStore.update(enabled => !enabled)
+}
+
+function toggleColorGrading() {
+  enableColorGradingStore.update(enabled => !enabled)
+}
 </script>
 
 {#if visible && styleSystemReady}
@@ -93,15 +108,6 @@
         <!-- Feature Toggles -->
         <div class="control-group">
           <h3>Effects</h3>
-          
-          <label class="toggle-label">
-            <input 
-              type="checkbox" 
-              bind:checked={toonShadingEnabled}
-              on:change={toggleToonShading}
-            />
-            <span>Toon Shading</span>
-          </label>
           
           <label class="toggle-label">
             <input 

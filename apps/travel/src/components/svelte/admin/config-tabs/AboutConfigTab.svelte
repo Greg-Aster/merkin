@@ -1,67 +1,69 @@
 <script lang="ts">
-  import { onMount, createEventDispatcher } from 'svelte';
-  import type { AboutConfig } from '../types/aboutconfig';
-  
-  // Props
-  export let aboutConfig: AboutConfig;
-  
-  // Event dispatcher to notify parent of changes
-  const dispatch = createEventDispatcher();
-  
-  // Local state
-  let activeSection = 'team';
-  
-  // Sections for tab navigation
-  const sections = [
-    { id: 'team', label: 'Team Section' },
-    { id: 'content', label: 'Content Section' },
-    { id: 'contact', label: 'Contact Section' }
-  ];
-  
-  // Function to notify parent of changes
-  function notifyChanges() {
-    dispatch('change');
+import { createEventDispatcher, onMount } from 'svelte'
+import type { AboutConfig } from '../types/aboutconfig'
+
+// Props
+export let aboutConfig: AboutConfig
+
+// Event dispatcher to notify parent of changes
+const dispatch = createEventDispatcher()
+
+// Local state
+let activeSection = 'team'
+
+// Sections for tab navigation
+const sections = [
+  { id: 'team', label: 'Team Section' },
+  { id: 'content', label: 'Content Section' },
+  { id: 'contact', label: 'Contact Section' },
+]
+
+// Function to notify parent of changes
+function notifyChanges() {
+  dispatch('change')
+}
+
+// Function to toggle a section's enabled status
+function toggleSection(section: keyof AboutConfig) {
+  aboutConfig[section].enabled = !aboutConfig[section].enabled
+  notifyChanges()
+}
+
+// Function to update display order for contact section
+function updateDisplayOrder() {
+  notifyChanges()
+}
+
+// Function to move item up in display order
+function moveUp(index: number) {
+  if (index > 0) {
+    const temp = aboutConfig.contact.displayOrder[index]
+    aboutConfig.contact.displayOrder[index] =
+      aboutConfig.contact.displayOrder[index - 1]
+    aboutConfig.contact.displayOrder[index - 1] = temp
+    notifyChanges()
   }
-  
-  // Function to toggle a section's enabled status
-  function toggleSection(section: keyof AboutConfig) {
-    aboutConfig[section].enabled = !aboutConfig[section].enabled;
-    notifyChanges();
+}
+
+// Function to move item down in display order
+function moveDown(index: number) {
+  if (index < aboutConfig.contact.displayOrder.length - 1) {
+    const temp = aboutConfig.contact.displayOrder[index]
+    aboutConfig.contact.displayOrder[index] =
+      aboutConfig.contact.displayOrder[index + 1]
+    aboutConfig.contact.displayOrder[index + 1] = temp
+    notifyChanges()
   }
-  
-  // Function to update display order for contact section
-  function updateDisplayOrder() {
-    notifyChanges();
-  }
-  
-  // Function to move item up in display order
-  function moveUp(index: number) {
-    if (index > 0) {
-      const temp = aboutConfig.contact.displayOrder[index];
-      aboutConfig.contact.displayOrder[index] = aboutConfig.contact.displayOrder[index - 1];
-      aboutConfig.contact.displayOrder[index - 1] = temp;
-      notifyChanges();
-    }
-  }
-  
-  // Function to move item down in display order
-  function moveDown(index: number) {
-    if (index < aboutConfig.contact.displayOrder.length - 1) {
-      const temp = aboutConfig.contact.displayOrder[index];
-      aboutConfig.contact.displayOrder[index] = aboutConfig.contact.displayOrder[index + 1];
-      aboutConfig.contact.displayOrder[index + 1] = temp;
-      notifyChanges();
-    }
-  }
-  
-  // Display names for order items
-  const displayNames = {
-    'description': 'Description Text',
-    'email': 'Email Address',
-    'phone': 'Phone Number',
-    'address': 'Physical Address',
-    'hours': 'Office Hours'
-  };
+}
+
+// Display names for order items
+const displayNames = {
+  description: 'Description Text',
+  email: 'Email Address',
+  phone: 'Phone Number',
+  address: 'Physical Address',
+  hours: 'Office Hours',
+}
 </script>
 
 <div class="about-config-tab">

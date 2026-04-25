@@ -772,6 +772,8 @@ async function triggerSiteRebuild() {
     {:else}
       <button 
         on:click={showGitHubAuth}
+        data-sfx-hover="hover-emphasis"
+        data-sfx-click="confirm"
         class="py-2 px-4 bg-neutral-800 dark:bg-neutral-200 hover:bg-neutral-900 dark:hover:bg-neutral-300 text-white dark:text-neutral-800 font-medium rounded-md transition-colors flex items-center"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24">
@@ -797,6 +799,8 @@ async function triggerSiteRebuild() {
       <button 
         on:click={saveConfigsToGitHub}
         disabled={isCommitting || !hasChanges}
+        data-sfx-hover="hover-soft"
+        data-sfx-click="confirm"
         class="py-2 px-4 bg-neutral-800 dark:bg-neutral-200 hover:bg-neutral-900 dark:hover:bg-neutral-300 text-white dark:text-neutral-800 font-medium rounded-md transition-colors flex items-center justify-center disabled:opacity-50"
       >
         {#if isCommitting && !showDeployOptions}
@@ -817,6 +821,8 @@ async function triggerSiteRebuild() {
         <button 
           on:click={triggerSiteRebuild}
           disabled={isCommitting}
+          data-sfx-hover="hover-emphasis"
+          data-sfx-click="success"
           class="py-2 px-4 bg-[var(--primary)] hover:opacity-90 text-white font-medium rounded-md transition-opacity flex items-center justify-center disabled:opacity-50"
         >
           {#if isCommitting}
@@ -836,6 +842,8 @@ async function triggerSiteRebuild() {
       
       <button 
         on:click={handleGitHubLogout}
+        data-sfx-hover="hover-soft"
+        data-sfx-click="warning"
         class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors flex items-center justify-center"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

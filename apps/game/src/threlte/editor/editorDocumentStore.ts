@@ -1,5 +1,12 @@
-import { get, writable, type Writable } from 'svelte/store'
-import { createEditorHistory } from './editorHistory'
+import { type Writable, get, writable } from 'svelte/store'
+import { upgradeLegacySceneDocument } from './defaultScenes'
+import {
+  type EditorNodeTransformPatch,
+  type EditorSceneCommand,
+  type EditorSceneNodePatch,
+  applyEditorSceneCommands,
+} from './editorCommands'
+import { ensureNodeGeneration, ensureSceneGeneration } from './editorGeneration'
 import {
   collectDescendantIds,
   collectSubtreeIds,
@@ -9,6 +16,8 @@ import {
   getSharedParentId,
   getTopLevelNodeIds,
 } from './editorHierarchyUtils'
+import { createEditorHistory } from './editorHistory'
+import { normalizeLevelSceneSettings } from './editorLevelSetup'
 import {
   exportEditorSceneJson,
   importEditorSceneJson,
@@ -22,15 +31,6 @@ import {
   markEditorDirty,
   setSelectedNodes,
 } from './editorSessionStore'
-import {
-  applyEditorSceneCommands,
-  type EditorNodeTransformPatch,
-  type EditorSceneCommand,
-  type EditorSceneNodePatch,
-} from './editorCommands'
-import { upgradeLegacySceneDocument } from './defaultScenes'
-import { ensureNodeGeneration, ensureSceneGeneration } from './editorGeneration'
-import { normalizeLevelSceneSettings } from './editorLevelSetup'
 import type {
   EditorSceneDocument,
   EditorSceneNode,
@@ -44,7 +44,9 @@ function createId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
-function normalizeSceneDocument(scene: EditorSceneDocument): EditorSceneDocument {
+function normalizeSceneDocument(
+  scene: EditorSceneDocument,
+): EditorSceneDocument {
   const upgraded = upgradeLegacySceneDocument(scene)
   return ensureSceneGeneration({
     ...upgraded,
@@ -53,14 +55,18 @@ function normalizeSceneDocument(scene: EditorSceneDocument): EditorSceneDocument
 }
 
 function cloneScene(scene: EditorSceneDocument | null) {
-  return scene ? normalizeSceneDocument(structuredClone(scene) as EditorSceneDocument) : null
+  return scene
+    ? normalizeSceneDocument(structuredClone(scene) as EditorSceneDocument)
+    : null
 }
 
 const editorHistory = createEditorHistory<EditorSceneDocument>({
   clone: cloneScene,
 })
 
-function mutateScene(mutator: (scene: EditorSceneDocument) => EditorSceneDocument) {
+function mutateScene(
+  mutator: (scene: EditorSceneDocument) => EditorSceneDocument,
+) {
   const current = get(editorSceneStore)
   if (!current) return
 
@@ -85,7 +91,8 @@ export function executeSceneCommands(commands: EditorSceneCommand[]) {
   return true
 }
 
-export const editorSceneStore: Writable<EditorSceneDocument | null> = writable(null)
+export const editorSceneStore: Writable<EditorSceneDocument | null> =
+  writable(null)
 export const { canUndoStore, canRedoStore } = editorHistory
 
 export const editorPrefabs = createEditorPrefabFactory({
@@ -107,10 +114,11 @@ export function setEditorScene(scene: EditorSceneDocument) {
   const normalized = normalizeSceneDocument(scene)
   editorSceneStore.set(normalized)
   editorHistory.reset()
-  editorStateStore.update((state) => ({
+  editorStateStore.update(state => ({
     ...state,
     currentLevelId: normalized.levelId,
     interactionMode: state.interactionMode,
+    isolatedNodeIds: [],
     transformAxis: 'all',
     modalTransformActive: false,
     dirty: false,
@@ -120,10 +128,12 @@ export function setEditorScene(scene: EditorSceneDocument) {
 export function selectAllNodes() {
   const scene = get(editorSceneStore)
   if (!scene) return
-  const ids = scene.nodes.map((node) => node.id)
+  const ids = scene.nodes.map(node => node.id)
   setSelectedNodes(ids, ids[0] ?? null)
 }
-export function updateSceneSettings(updater: (settings: EditorSceneSettings) => EditorSceneSettings) {
+export function updateSceneSettings(
+  updater: (settings: EditorSceneSettings) => EditorSceneSettings,
+) {
   const scene = get(editorSceneStore)
   if (!scene) return
 
@@ -131,33 +141,33 @@ export function updateSceneSettings(updater: (settings: EditorSceneSettings) => 
     type: 'replace-settings',
     settings: normalizeLevelSceneSettings(
       scene.levelId,
-      updater(structuredClone(scene.settings ?? {}) as EditorSceneSettings)
+      updater(structuredClone(scene.settings ?? {}) as EditorSceneSettings),
     ),
   })
 }
 
 export function updateLevelSceneSettings(
-  updater: (settings: SharedLevelEditorSettings) => SharedLevelEditorSettings
+  updater: (settings: SharedLevelEditorSettings) => SharedLevelEditorSettings,
 ) {
-  updateSceneSettings((settings) => ({
+  updateSceneSettings(settings => ({
     ...settings,
     level: updater(settings.level ?? {}),
   }))
 }
 
 export function updateObservatorySceneSettings(
-  updater: (settings: ObservatoryEditorSettings) => ObservatoryEditorSettings
+  updater: (settings: ObservatoryEditorSettings) => ObservatoryEditorSettings,
 ) {
-  updateSceneSettings((settings) => ({
+  updateSceneSettings(settings => ({
     ...settings,
     observatory: updater(settings.observatory ?? {}),
   }))
 }
 
 export function updateSolitudeSceneSettings(
-  updater: (settings: SolitudeEditorSettings) => SolitudeEditorSettings
+  updater: (settings: SolitudeEditorSettings) => SolitudeEditorSettings,
 ) {
-  updateSceneSettings((settings) => ({
+  updateSceneSettings(settings => ({
     ...settings,
     solitude: updater(settings.solitude ?? {}),
   }))
@@ -170,7 +180,7 @@ export function addNode(node: EditorSceneNode) {
   })
 
   if (applied) {
-    editorStateStore.update((state) => ({
+    editorStateStore.update(state => ({
       ...state,
       selectedNodeId: normalizedNode.id,
       selectedNodeIds: [normalizedNode.id],
@@ -181,11 +191,14 @@ export function addNode(node: EditorSceneNode) {
   return normalizedNode.id
 }
 
-function updateNode(nodeId: string, updater: (node: EditorSceneNode) => EditorSceneNode) {
+function updateNode(
+  nodeId: string,
+  updater: (node: EditorSceneNode) => EditorSceneNode,
+) {
   const scene = get(editorSceneStore)
   if (!scene) return
 
-  const currentNode = scene.nodes.find((node) => node.id === nodeId)
+  const currentNode = scene.nodes.find(node => node.id === nodeId)
   if (!currentNode) return
 
   const nextNode = updater(structuredClone(currentNode) as EditorSceneNode)
@@ -209,15 +222,18 @@ export function patchNodes(nodeIds: string[], patch: EditorSceneNodePatch) {
   if (uniqueNodeIds.length === 0) return false
 
   return executeSceneCommands(
-    uniqueNodeIds.map((nodeId) => ({
+    uniqueNodeIds.map(nodeId => ({
       type: 'patch-node',
       nodeId,
       patch,
-    }))
+    })),
   )
 }
 
-export function patchNodeTransform(nodeId: string, transform: EditorNodeTransformPatch) {
+export function patchNodeTransform(
+  nodeId: string,
+  transform: EditorNodeTransformPatch,
+) {
   return patchNode(nodeId, transform)
 }
 
@@ -243,7 +259,11 @@ export function removeNodes(nodeIds: string[]) {
   }
 }
 
-export function addEmptyNode(name = 'Empty', parentId: string | null = null, position: [number, number, number] = [0, 0, 0]) {
+export function addEmptyNode(
+  name = 'Empty',
+  parentId: string | null = null,
+  position: [number, number, number] = [0, 0, 0],
+) {
   return editorPrefabs.addEmpty(name, parentId, position)
 }
 
@@ -251,7 +271,10 @@ export function duplicateNode(nodeId: string) {
   return duplicateNodes([nodeId])[0] ?? null
 }
 
-export function duplicateNodes(nodeIds: string[], options?: { offset?: [number, number, number] }) {
+export function duplicateNodes(
+  nodeIds: string[],
+  options?: { offset?: [number, number, number] },
+) {
   const scene = get(editorSceneStore)
   if (!scene) return []
 
@@ -262,12 +285,12 @@ export function duplicateNodes(nodeIds: string[], options?: { offset?: [number, 
 
   for (const rootId of topLevelIds) {
     const subtreeIds = collectSubtreeIds(scene.nodes, rootId)
-    subtreeIds.forEach((id) => idsToDuplicate.add(id))
+    subtreeIds.forEach(id => idsToDuplicate.add(id))
   }
 
   const copies = scene.nodes
-    .filter((node) => idsToDuplicate.has(node.id))
-    .map((source) => {
+    .filter(node => idsToDuplicate.has(node.id))
+    .map(source => {
       const nextId = createId(source.kind)
       idMap.set(source.id, nextId)
       return { source, nextId }
@@ -275,28 +298,38 @@ export function duplicateNodes(nodeIds: string[], options?: { offset?: [number, 
     .map(({ source, nextId }) => ({
       ...structuredClone(source),
       id: nextId,
-      name: topLevelIds.includes(source.id) ? `${source.name} Copy` : source.name,
+      name: topLevelIds.includes(source.id)
+        ? `${source.name} Copy`
+        : source.name,
       parentId: idMap.get(source.parentId ?? '') ?? source.parentId ?? null,
       position: topLevelIds.includes(source.id)
-        ? ([source.position[0] + offset[0], source.position[1] + offset[1], source.position[2] + offset[2]] as [number, number, number])
-        : ([source.position[0], source.position[1], source.position[2]] as [number, number, number]),
+        ? ([
+            source.position[0] + offset[0],
+            source.position[1] + offset[1],
+            source.position[2] + offset[2],
+          ] as [number, number, number])
+        : ([source.position[0], source.position[1], source.position[2]] as [
+            number,
+            number,
+            number,
+          ]),
     }))
 
   if (copies.length === 0) return []
 
   const selectedCopyIds = topLevelIds
-    .map((nodeId) => idMap.get(nodeId) ?? null)
+    .map(nodeId => idMap.get(nodeId) ?? null)
     .filter((nodeId): nodeId is string => nodeId !== null)
 
   const applied = executeSceneCommands(
-    copies.map((node) => ({
+    copies.map(node => ({
       type: 'add-node',
       node,
-    }))
+    })),
   )
 
   if (applied) {
-    editorStateStore.update((state) => ({
+    editorStateStore.update(state => ({
       ...state,
       selectedNodeId: selectedCopyIds[0] ?? null,
       selectedNodeIds: selectedCopyIds,
@@ -307,7 +340,11 @@ export function duplicateNodes(nodeIds: string[], options?: { offset?: [number, 
   return applied ? selectedCopyIds : []
 }
 
-export function reparentNode(nodeId: string, parentId: string | null, options?: { preserveWorldTransform?: boolean }) {
+export function reparentNode(
+  nodeId: string,
+  parentId: string | null,
+  options?: { preserveWorldTransform?: boolean },
+) {
   const scene = get(editorSceneStore)
   if (!scene) return false
   if (nodeId === parentId) return false
@@ -317,15 +354,24 @@ export function reparentNode(nodeId: string, parentId: string | null, options?: 
     return false
   }
 
-  const worldMatrix = options?.preserveWorldTransform === false
-    ? null
-    : createWorldMatrixResolver(scene.nodes)(nodeId)
+  const worldMatrix =
+    options?.preserveWorldTransform === false
+      ? null
+      : createWorldMatrixResolver(scene.nodes)(nodeId)
 
   return executeSceneCommand({
     type: 'reparent-node',
     nodeId,
     parentId,
-    ...(worldMatrix ? { transform: getLocalTransformForWorldMatrix(scene.nodes, parentId, worldMatrix) } : {}),
+    ...(worldMatrix
+      ? {
+          transform: getLocalTransformForWorldMatrix(
+            scene.nodes,
+            parentId,
+            worldMatrix,
+          ),
+        }
+      : {}),
   })
 }
 
@@ -343,7 +389,7 @@ export function reparentNodes(nodeIds: string[], parentId: string | null) {
       continue
     }
 
-    const node = workingScene.nodes.find((candidate) => candidate.id === nodeId)
+    const node = workingScene.nodes.find(candidate => candidate.id === nodeId)
     if (!node) {
       success = false
       continue
@@ -360,7 +406,11 @@ export function reparentNodes(nodeIds: string[], parentId: string | null) {
       type: 'reparent-node',
       nodeId,
       parentId,
-      transform: getLocalTransformForWorldMatrix(workingScene.nodes, parentId, worldMatrix),
+      transform: getLocalTransformForWorldMatrix(
+        workingScene.nodes,
+        parentId,
+        worldMatrix,
+      ),
     }
 
     const result = applyEditorSceneCommands(workingScene, [command])
@@ -386,7 +436,11 @@ export function groupNodes(nodeIds: string[], name = 'Group') {
   if (topLevelIds.length === 0) return null
 
   const commonParentId = getSharedParentId(scene.nodes, topLevelIds)
-  const groupTransform = getCenteredGroupTransform(scene.nodes, topLevelIds, commonParentId)
+  const groupTransform = getCenteredGroupTransform(
+    scene.nodes,
+    topLevelIds,
+    commonParentId,
+  )
   if (!groupTransform) return null
   const getWorldMatrix = createWorldMatrixResolver(scene.nodes)
 
@@ -401,10 +455,12 @@ export function groupNodes(nodeIds: string[], name = 'Group') {
     ...groupTransform,
   }
 
-  const commands: EditorSceneCommand[] = [{
-    type: 'add-node',
-    node: groupNode,
-  }]
+  const commands: EditorSceneCommand[] = [
+    {
+      type: 'add-node',
+      node: groupNode,
+    },
+  ]
   const sceneWithGroup = applyEditorSceneCommands(scene, commands).scene
 
   for (const nodeId of topLevelIds) {
@@ -413,7 +469,11 @@ export function groupNodes(nodeIds: string[], name = 'Group') {
       type: 'reparent-node',
       nodeId,
       parentId: groupId,
-      transform: getLocalTransformForWorldMatrix(sceneWithGroup.nodes, groupId, worldMatrix),
+      transform: getLocalTransformForWorldMatrix(
+        sceneWithGroup.nodes,
+        groupId,
+        worldMatrix,
+      ),
     })
   }
 
@@ -429,7 +489,9 @@ export function ungroupNodes(nodeIds: string[]) {
   if (!scene) return []
 
   const topLevelIds = getTopLevelNodeIds(scene.nodes, nodeIds)
-  const groupIds = topLevelIds.filter((nodeId) => scene.nodes.find((node) => node.id === nodeId)?.kind === 'group')
+  const groupIds = topLevelIds.filter(
+    nodeId => scene.nodes.find(node => node.id === nodeId)?.kind === 'group',
+  )
   if (groupIds.length === 0) return []
 
   const nextSelection: string[] = []
@@ -437,10 +499,12 @@ export function ungroupNodes(nodeIds: string[]) {
   const commands: EditorSceneCommand[] = []
 
   for (const groupId of groupIds) {
-    const groupNode = workingScene.nodes.find((node) => node.id === groupId)
+    const groupNode = workingScene.nodes.find(node => node.id === groupId)
     if (!groupNode) continue
 
-    const childIds = workingScene.nodes.filter((node) => node.parentId === groupId).map((node) => node.id)
+    const childIds = workingScene.nodes
+      .filter(node => node.parentId === groupId)
+      .map(node => node.id)
     const groupCommands: EditorSceneCommand[] = []
 
     if (childIds.length > 0) {
@@ -454,7 +518,11 @@ export function ungroupNodes(nodeIds: string[]) {
           type: 'reparent-node',
           nodeId: childId,
           parentId,
-          transform: getLocalTransformForWorldMatrix(workingScene.nodes, parentId, worldMatrix),
+          transform: getLocalTransformForWorldMatrix(
+            workingScene.nodes,
+            parentId,
+            worldMatrix,
+          ),
         })
       }
     }
@@ -494,7 +562,7 @@ export function undoScene() {
   if (!result.changed) return false
 
   editorSceneStore.set(result.document)
-  editorStateStore.update((state) => ({
+  editorStateStore.update(state => ({
     ...state,
     dirty: true,
     selectedNodeId: null,
@@ -510,7 +578,7 @@ export function redoScene() {
   if (!result.changed) return false
 
   editorSceneStore.set(result.document)
-  editorStateStore.update((state) => ({
+  editorStateStore.update(state => ({
     ...state,
     dirty: true,
     selectedNodeId: null,
@@ -526,7 +594,7 @@ export function saveSceneToLocalStorage(levelId: string) {
 
   const payload = saveEditorSceneToLocalStorage(levelId, scene)
   editorSceneStore.set(payload)
-  editorStateStore.update((state) => ({
+  editorStateStore.update(state => ({
     ...state,
     dirty: false,
     lastSavedAt: payload.updatedAt,

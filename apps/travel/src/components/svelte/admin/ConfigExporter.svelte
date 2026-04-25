@@ -1,64 +1,64 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
-  
-  // Props
-  export let siteConfig;
-  export let navBarConfig;
-  export let profileConfig;
-  export let licenseConfig;
-  export let timelineConfig;
-  export let avatarConfig;
-  export let communityConfig;
-  export let aboutConfig;
-  export let show = false;
-  
-  // State
-  let selectedConfigs = {
-    mainConfig: true,   // config.ts (contains siteConfig, navBarConfig, profileConfig, licenseConfig)
-    timelineConfig: false,
-    avatarConfig: false,
-    communityConfig: false,
-    aboutConfig: false
-  };
-  
-  let exportStatus = {
-    processing: false,
-    error: null,
-    success: false
-  };
-  
-  // Event dispatcher
-  const dispatch = createEventDispatcher();
-  
-  // Function to close the dialog
-  function closeDialog() {
-    dispatch('close');
+import { createEventDispatcher } from 'svelte'
+
+// Props
+export let siteConfig
+export let navBarConfig
+export let profileConfig
+export let licenseConfig
+export let timelineConfig
+export let avatarConfig
+export let communityConfig
+export let aboutConfig
+export let show = false
+
+// State
+let selectedConfigs = {
+  mainConfig: true, // config.ts (contains siteConfig, navBarConfig, profileConfig, licenseConfig)
+  timelineConfig: false,
+  avatarConfig: false,
+  communityConfig: false,
+  aboutConfig: false,
+}
+
+let exportStatus = {
+  processing: false,
+  error: null,
+  success: false,
+}
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Function to close the dialog
+function closeDialog() {
+  dispatch('close')
+}
+
+// Function to handle constant references in the config
+function preserveConstants(configObj) {
+  // Create a deep copy to avoid modifying the original
+  const config = JSON.parse(JSON.stringify(configObj))
+
+  // Check if defaultTheme exists and handle it specially
+  if (config.defaultTheme) {
+    // Store the original value to determine which constant to use
+    const themeValue = config.defaultTheme
+
+    // Mark it for replacement with the appropriate constant
+    config.defaultTheme = `__CONSTANT_${themeValue}__`
   }
-  
-  // Function to handle constant references in the config
-  function preserveConstants(configObj) {
-    // Create a deep copy to avoid modifying the original
-    const config = JSON.parse(JSON.stringify(configObj));
-    
-    // Check if defaultTheme exists and handle it specially
-    if (config.defaultTheme) {
-      // Store the original value to determine which constant to use
-      const themeValue = config.defaultTheme;
-      
-      // Mark it for replacement with the appropriate constant
-      config.defaultTheme = `__CONSTANT_${themeValue}__`;
-    }
-    
-    return config;
-  }
-  
-  // Function to generate config file content
-  function generateConfigFileContent() {
-    // Apply constant preservation to siteConfig
-    const processedSiteConfig = preserveConstants(siteConfig);
-    
-    // Generate main config.ts content
-    let mainConfigContent = `import type {
+
+  return config
+}
+
+// Function to generate config file content
+function generateConfigFileContent() {
+  // Apply constant preservation to siteConfig
+  const processedSiteConfig = preserveConstants(siteConfig)
+
+  // Generate main config.ts content
+  let mainConfigContent = `import type {
   LicenseConfig,
   NavBarConfig,
   ProfileConfig,
@@ -68,36 +68,52 @@ import { LinkPreset } from '../types/config'
 import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from '@constants/constants.ts'
 
 
-export const siteConfig: SiteConfig = ${JSON.stringify(processedSiteConfig, null, 2)
-      .replace(/"([^"]+)":/g, '$1:')
-      .replace(/"__CONSTANT_light__"/g, 'LIGHT_MODE')
-      .replace(/"__CONSTANT_dark__"/g, 'DARK_MODE')
-      .replace(/"__CONSTANT_auto__"/g, 'AUTO_MODE')}
+export const siteConfig: SiteConfig = ${JSON.stringify(
+    processedSiteConfig,
+    null,
+    2,
+  )
+    .replace(/"([^"]+)":/g, '$1:')
+    .replace(/"__CONSTANT_light__"/g, 'LIGHT_MODE')
+    .replace(/"__CONSTANT_dark__"/g, 'DARK_MODE')
+    .replace(/"__CONSTANT_auto__"/g, 'AUTO_MODE')}
 
-export const navBarConfig: NavBarConfig = ${JSON.stringify(navBarConfig, null, 2)
-      .replace(/"([^"]+)":/g, '$1:')
-      .replace(/"LinkPreset\.([a-zA-Z]+)"/g, 'LinkPreset.$1')}
+export const navBarConfig: NavBarConfig = ${JSON.stringify(
+    navBarConfig,
+    null,
+    2,
+  )
+    .replace(/"([^"]+)":/g, '$1:')
+    .replace(/"LinkPreset\.([a-zA-Z]+)"/g, 'LinkPreset.$1')}
 
-export const profileConfig: ProfileConfig = ${JSON.stringify(profileConfig, null, 2)
-      .replace(/"([^"]+)":/g, '$1:')}
+export const profileConfig: ProfileConfig = ${JSON.stringify(
+    profileConfig,
+    null,
+    2,
+  ).replace(/"([^"]+)":/g, '$1:')}
 
-export const licenseConfig: LicenseConfig = ${JSON.stringify(licenseConfig, null, 2)
-      .replace(/"([^"]+)":/g, '$1:')}`;
+export const licenseConfig: LicenseConfig = ${JSON.stringify(
+    licenseConfig,
+    null,
+    2,
+  ).replace(/"([^"]+)":/g, '$1:')}`
 
-    // Generate timelineconfig.ts content
-    const timelineConfigContent = `// TimelineConfig.ts - Central configuration for all timeline services
+  // Generate timelineconfig.ts content
+  const timelineConfigContent = `// TimelineConfig.ts - Central configuration for all timeline services
 
-export const timelineConfig = ${JSON.stringify(timelineConfig, null, 2)
-      .replace(/"([^"]+)":/g, '$1:')}`;
-      
-    // Generate avatar.config.ts content
-    const avatarConfigContent = `// Import type - use import type syntax to fix verbatimModuleSyntax error
+export const timelineConfig = ${JSON.stringify(timelineConfig, null, 2).replace(
+    /"([^"]+)":/g,
+    '$1:',
+  )}`
+
+  // Generate avatar.config.ts content
+  const avatarConfigContent = `// Import type - use import type syntax to fix verbatimModuleSyntax error
       import type { ImageMetadata } from 'astro'
 
       // Import avatar images
-      ${avatarConfig.avatarList.map((path, index) => 
-      `import avatar${index + 1} from '${path}'`
-      ).join('\n')}
+      ${avatarConfig.avatarList
+        .map((path, index) => `import avatar${index + 1} from '${path}'`)
+        .join('\n')}
 
       // Define the avatar configuration type
       export interface AvatarConfig {
@@ -117,9 +133,11 @@ export const timelineConfig = ${JSON.stringify(timelineConfig, null, 2)
       ],
       
       // Avatar to use on the home page (site owner)
-      homeAvatar: ${avatarConfig.homeAvatar ? 
-          `avatar${avatarConfig.avatarList.findIndex(path => path === avatarConfig.homeAvatar) + 1}` : 
-          'avatar1'},
+      homeAvatar: ${
+        avatarConfig.homeAvatar
+          ? `avatar${avatarConfig.avatarList.findIndex(path => path === avatarConfig.homeAvatar) + 1}`
+          : 'avatar1'
+      },
       
       // Animation interval in milliseconds
       animationInterval: ${Number(avatarConfig.animationInterval) || 3500}
@@ -141,10 +159,10 @@ export const timelineConfig = ${JSON.stringify(timelineConfig, null, 2)
       
       // Ensure positive index and map to available avatars
       return Math.abs(hash) % avatarCount
-      }`;  
+      }`
 
-    // Generate community.config.ts content
-    const communityConfigContent = `// Import types
+  // Generate community.config.ts content
+  const communityConfigContent = `// Import types
 import type { 
 CommunityConfig,
 DiscordConfig,
@@ -156,11 +174,14 @@ HeroConfig
 } from '../types/communityconfig';
 
 // Community page configuration
-export const communityConfig: CommunityConfig = ${JSON.stringify(communityConfig, null, 2)
-      .replace(/"([^"]+)":/g, '$1:')}`;
+export const communityConfig: CommunityConfig = ${JSON.stringify(
+    communityConfig,
+    null,
+    2,
+  ).replace(/"([^"]+)":/g, '$1:')}`
 
-    // Generate about.config.ts content
-    const aboutConfigContent = `// Import types
+  // Generate about.config.ts content
+  const aboutConfigContent = `// Import types
 import type { 
 AboutConfig,
 TeamSectionConfig,
@@ -169,73 +190,82 @@ ContactSectionConfig
 } from '../types/aboutconfig';
 
 // About page configuration
-export const aboutConfig: AboutConfig = ${JSON.stringify(aboutConfig, null, 2)
-      .replace(/"([^"]+)":/g, '$1:')}`;
+export const aboutConfig: AboutConfig = ${JSON.stringify(
+    aboutConfig,
+    null,
+    2,
+  ).replace(/"([^"]+)":/g, '$1:')}`
 
-    return {
+  return {
+    mainConfigContent,
+    timelineConfigContent,
+    avatarConfigContent,
+    communityConfigContent,
+    aboutConfigContent,
+  }
+}
+
+// Function to download configuration files
+async function downloadConfigFiles() {
+  try {
+    exportStatus.processing = true
+    exportStatus.error = null
+
+    const {
       mainConfigContent,
       timelineConfigContent,
       avatarConfigContent,
       communityConfigContent,
-      aboutConfigContent
-    };
-  }
-  
-  // Function to download configuration files
-  async function downloadConfigFiles() {
-    try {
-      exportStatus.processing = true;
-      exportStatus.error = null;
-      
-      const { mainConfigContent, timelineConfigContent, avatarConfigContent, communityConfigContent, aboutConfigContent } = generateConfigFileContent();
-      
-      // Create and download the selected config files
-      if (selectedConfigs.mainConfig) {
-        downloadFile('config.ts', mainConfigContent);
-      }
-      
-      if (selectedConfigs.timelineConfig) {
-        downloadFile('timelineconfig.ts', timelineConfigContent);
-      }
-      
-      if (selectedConfigs.avatarConfig) {
-        downloadFile('avatar.config.ts', avatarConfigContent);
-      }
-      
-      if (selectedConfigs.communityConfig) {
-        downloadFile('community.config.ts', communityConfigContent);
-      }
-      
-      if (selectedConfigs.aboutConfig) {
-        downloadFile('about.config.ts', aboutConfigContent);
-      }
-      
-      exportStatus.success = true;
-      setTimeout(() => {
-        exportStatus.success = false;
-      }, 3000);
-    } catch (error) {
-      exportStatus.error = `Error exporting configuration: ${error.message}`;
-      console.error('Export error:', error);
-    } finally {
-      exportStatus.processing = false;
+      aboutConfigContent,
+    } = generateConfigFileContent()
+
+    // Create and download the selected config files
+    if (selectedConfigs.mainConfig) {
+      downloadFile('config.ts', mainConfigContent)
     }
-  }
-  
-  // Helper function to download a file
-  function downloadFile(filename, content) {
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
+
+    if (selectedConfigs.timelineConfig) {
+      downloadFile('timelineconfig.ts', timelineConfigContent)
+    }
+
+    if (selectedConfigs.avatarConfig) {
+      downloadFile('avatar.config.ts', avatarConfigContent)
+    }
+
+    if (selectedConfigs.communityConfig) {
+      downloadFile('community.config.ts', communityConfigContent)
+    }
+
+    if (selectedConfigs.aboutConfig) {
+      downloadFile('about.config.ts', aboutConfigContent)
+    }
+
+    exportStatus.success = true
     setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 100);
+      exportStatus.success = false
+    }, 3000)
+  } catch (error) {
+    exportStatus.error = `Error exporting configuration: ${error.message}`
+    console.error('Export error:', error)
+  } finally {
+    exportStatus.processing = false
   }
+}
+
+// Helper function to download a file
+function downloadFile(filename, content) {
+  const blob = new Blob([content], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  setTimeout(() => {
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }, 100)
+}
 </script>
 
 {#if show}

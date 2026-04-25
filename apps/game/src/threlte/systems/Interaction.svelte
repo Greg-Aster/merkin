@@ -4,7 +4,7 @@
 -->
 <script lang="ts">
 import { useTask, useThrelte } from '@threlte/core'
-import { onMount, onDestroy, createEventDispatcher } from 'svelte'
+import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import { writable } from 'svelte/store'
 import * as THREE from 'three'
 
@@ -74,12 +74,12 @@ onMount(async () => {
  */
 function setupInteractionTracking() {
   if (!container) return
-  
+
   // Mouse events
   container.addEventListener('mousemove', handleMouseMove)
   container.addEventListener('click', handleClick)
   container.addEventListener('contextmenu', handleRightClick)
-  
+
   // Touch events for mobile
   container.addEventListener('touchstart', handleTouchStart)
   container.addEventListener('touchend', handleTouchEnd)
@@ -90,26 +90,29 @@ function setupInteractionTracking() {
  */
 function handleMouseMove(event: MouseEvent) {
   if (!enableRaycasting) return
-  
+
   const rect = container!.getBoundingClientRect()
   const x = ((event.clientX - rect.left) / rect.width) * 2 - 1
   const y = -((event.clientY - rect.top) / rect.height) * 2 + 1
-  
+
   // Perform raycast
   const intersections = performRaycast(x, y)
-  
+
   // Update hovered object
   const newHovered = intersections.length > 0 ? intersections[0].object : null
   if (newHovered !== hoveredObject) {
     if (hoveredObject) {
       dispatch('objectHoverEnd', { object: hoveredObject })
     }
-    
+
     hoveredObject = newHovered
     hoveredObjectStore.set(hoveredObject)
-    
+
     if (hoveredObject) {
-      dispatch('objectHoverStart', { object: hoveredObject, intersection: intersections[0] })
+      dispatch('objectHoverStart', {
+        object: hoveredObject,
+        intersection: intersections[0],
+      })
     }
   }
 }
@@ -119,37 +122,37 @@ function handleMouseMove(event: MouseEvent) {
  */
 function handleClick(event: MouseEvent) {
   if (!enableRaycasting) return
-  
+
   const rect = container!.getBoundingClientRect()
   const x = ((event.clientX - rect.left) / rect.width) * 2 - 1
   const y = -((event.clientY - rect.top) / rect.height) * 2 + 1
-  
+
   // Perform raycast
   const intersections = performRaycast(x, y)
-  
+
   if (intersections.length > 0) {
     const clickedObject = intersections[0].object
     const intersection = intersections[0]
-    
+
     // Update selected object
     selectedObject = clickedObject
     selectedObjectStore.set(selectedObject)
-    
+
     // Dispatch interaction events
-    dispatch('objectClick', { 
-      object: clickedObject, 
+    dispatch('objectClick', {
+      object: clickedObject,
       intersection,
       button: event.button,
-      position: intersection.point
+      position: intersection.point,
     })
-    
+
     // Check if object is interactable
     if (isObjectInteractable(clickedObject)) {
       dispatch('interaction.performed', {
         interactionType: 'click',
         objectId: clickedObject.userData?.id || clickedObject.uuid,
         position: intersection.point,
-        object: clickedObject
+        object: clickedObject,
       })
     }
   } else {
@@ -165,23 +168,23 @@ function handleClick(event: MouseEvent) {
  */
 function handleRightClick(event: MouseEvent) {
   event.preventDefault()
-  
+
   if (!enableRaycasting) return
-  
+
   const rect = container!.getBoundingClientRect()
   const x = ((event.clientX - rect.left) / rect.width) * 2 - 1
   const y = -((event.clientY - rect.top) / rect.height) * 2 + 1
-  
+
   const intersections = performRaycast(x, y)
-  
+
   if (intersections.length > 0) {
     const clickedObject = intersections[0].object
     const intersection = intersections[0]
-    
-    dispatch('objectRightClick', { 
-      object: clickedObject, 
+
+    dispatch('objectRightClick', {
+      object: clickedObject,
       intersection,
-      position: intersection.point
+      position: intersection.point,
     })
   }
 }
@@ -195,14 +198,14 @@ function handleTouchStart(event: TouchEvent) {
     const rect = container!.getBoundingClientRect()
     const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1
     const y = -((touch.clientY - rect.top) / rect.height) * 2 + 1
-    
+
     const intersections = performRaycast(x, y)
-    
+
     if (intersections.length > 0) {
-      dispatch('objectTouch', { 
-        object: intersections[0].object, 
+      dispatch('objectTouch', {
+        object: intersections[0].object,
         intersection: intersections[0],
-        touch: touch
+        touch: touch,
       })
     }
   }
@@ -218,21 +221,21 @@ function handleTouchEnd(event: TouchEvent) {
     const rect = container!.getBoundingClientRect()
     const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1
     const y = -((touch.clientY - rect.top) / rect.height) * 2 + 1
-    
+
     const intersections = performRaycast(x, y)
-    
+
     if (intersections.length > 0) {
       const touchedObject = intersections[0].object
-      
+
       selectedObject = touchedObject
       selectedObjectStore.set(selectedObject)
-      
+
       if (isObjectInteractable(touchedObject)) {
         dispatch('interaction.performed', {
           interactionType: 'touch',
           objectId: touchedObject.userData?.id || touchedObject.uuid,
           position: intersections[0].point,
-          object: touchedObject
+          object: touchedObject,
         })
       }
     }
@@ -244,29 +247,29 @@ function handleTouchEnd(event: TouchEvent) {
  */
 function performRaycast(x: number, y: number): THREE.Intersection[] {
   if (!camera) return []
-  
+
   const raycaster = new THREE.Raycaster()
   const pointer = new THREE.Vector2(x, y)
-  
+
   raycaster.setFromCamera(pointer, camera)
-  
+
   // Get all objects in the scene for raycasting
   const scene = camera.parent
   if (!scene) return []
-  
+
   // Filter for interactable objects only
   const objects = []
-  scene.traverse((child) => {
+  scene.traverse(child => {
     if (child.userData?.interactable || isObjectInteractable(child)) {
       objects.push(child)
     }
   })
-  
+
   const intersections = raycaster.intersectObjects(objects, false)
-  
+
   // Filter by distance
-  return intersections.filter(intersection => 
-    intersection.distance <= maxInteractionDistance
+  return intersections.filter(
+    intersection => intersection.distance <= maxInteractionDistance,
   )
 }
 
@@ -307,7 +310,7 @@ function handleInteractionEvent(event: string, data: any) {
 }
 
 // Update interaction system each frame
-useTask((delta) => {
+useTask(delta => {
   if (isInitialized) {
     // Interaction system is event-driven, no frame updates needed
   }
@@ -318,7 +321,7 @@ useTask((delta) => {
  */
 export function addInteractable(object: THREE.Object3D, config?: any) {
   object.userData = { ...object.userData, interactable: true, ...config }
-  
+
   if (!interactableObjects.includes(object)) {
     interactableObjects.push(object)
     interactableObjectsStore.set([...interactableObjects])
@@ -334,9 +337,9 @@ export function removeInteractable(object: THREE.Object3D) {
     interactableObjects.splice(index, 1)
     interactableObjectsStore.set([...interactableObjects])
   }
-  
+
   if (object.userData) {
-    delete object.userData.interactable
+    object.userData.interactable = undefined
   }
 }
 
@@ -353,12 +356,11 @@ onDestroy(() => {
     container.removeEventListener('touchstart', handleTouchStart)
     container.removeEventListener('touchend', handleTouchEnd)
   }
-  
+
   if (isDev) {
     console.log('🧹 Threlte Interaction System disposed')
   }
 })
-
 </script>
 
 <!-- No visual output - this is a system component -->

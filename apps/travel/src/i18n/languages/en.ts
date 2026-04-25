@@ -7,7 +7,7 @@ export const en: Translation = {
   [Key.archive]: 'Archive',
   [Key.community]: 'Community',
   [Key.search]: 'Search',
-  
+
   [Key.configs]: 'Configs',
   [Key.friends]: 'Friends',
   [Key.newPost]: 'New Post',

@@ -21,7 +21,7 @@ export function getCategoryUrl(category: string): string {
   return getSharedCategoryUrl(
     category,
     i18n(i18nKey.uncategorized),
-    import.meta.env.BASE_URL
+    import.meta.env.BASE_URL,
   )
 }
 
