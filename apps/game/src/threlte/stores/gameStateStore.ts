@@ -69,7 +69,6 @@ export const gameSessionStore: Writable<GameSession> = writable({
 
 // UI state stores
 export const isMobileStore: Writable<boolean> = writable(false)
-export const isLoadingStore: Writable<boolean> = writable(true)
 export const errorStore: Writable<string | null> = writable(null)
 
 // Dialogue state stores
@@ -145,10 +144,6 @@ export const gameActions = {
     isMobileStore.set(isMobile)
   },
 
-  setLoading: (isLoading: boolean) => {
-    isLoadingStore.set(isLoading)
-  },
-
   setError: (error: string | null) => {
     errorStore.set(error)
   },
@@ -206,7 +201,19 @@ export const loadGameState = () => {
   }
 }
 
-// Auto-save every 30 seconds
 if (typeof window !== 'undefined') {
-  setInterval(saveGameState, 30000)
+  const persistenceKey = '__megamealGameStatePersistenceInstalled'
+  const runtimeWindow = window as unknown as Window &
+    Record<string, boolean | undefined>
+
+  if (!runtimeWindow[persistenceKey]) {
+    runtimeWindow[persistenceKey] = true
+
+    window.addEventListener('pagehide', saveGameState)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        saveGameState()
+      }
+    })
+  }
 }

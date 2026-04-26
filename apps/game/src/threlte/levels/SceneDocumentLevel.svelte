@@ -21,10 +21,15 @@ import type {
   EditorSceneDocument,
   EditorSceneNode,
 } from '../editor/editorTypes'
+import {
+  adaptEditorSceneToLevelDefinition,
+  createLevelBuildReport,
+} from '../engine'
 import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
 import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
 import { Terrain, type TerrainConfig } from '../features/terrain'
 import { playerStateStore } from '../stores/gameStateStore'
+import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 import { buildRuntimeVisualStyleFromLevelSettings } from '../styles/GameplayStyleProfiles'
 import {
   replaceRuntimeVisualStyle,
@@ -75,7 +80,7 @@ let playerPosition: [number, number, number] = [0, 0, 0]
 let starMapComponent: any = null
 let starMapRef: Group
 
-$: usesGeneratedTerrainCollider = levelId === 'yggdrasil' && !editorEnabled
+$: usesGeneratedTerrainCollider = levelId === 'yggdrasil'
 
 const SKYBOX_PRESETS = {
   observatory: {
@@ -177,6 +182,15 @@ async function loadSceneDocument(level: string) {
   })
   sceneNodes = sceneDocument.nodes
   rootNodes = sceneNodes.filter(node => !node.parentId)
+
+  const levelDefinition = adaptEditorSceneToLevelDefinition(sceneDocument)
+  const buildReport = createLevelBuildReport(levelDefinition)
+  setRuntimeDiagnostic('levelDefinition', {
+    label: 'Level Definition',
+    level: buildReport.warnings.length > 0 ? 'warning' : 'ready',
+    message: `${buildReport.levelId}: ${buildReport.actorCount} actors, ${buildReport.physicsActorCount} physics actors, ${buildReport.trimeshActorCount} trimesh actors.`,
+    meta: buildReport as unknown as Record<string, unknown>,
+  })
 
   const spawnPosition =
     sceneDocument.settings?.level?.spawn?.position ?? playerSpawnPoint

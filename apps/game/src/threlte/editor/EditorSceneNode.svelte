@@ -1,8 +1,8 @@
 <script lang="ts">
 import { T, useTask, useThrelte } from '@threlte/core'
-import { Collider, RigidBody } from '@threlte/rapier'
 import { createEventDispatcher, onDestroy } from 'svelte'
 import * as THREE from 'three'
+import CollisionBody from '../collision/CollisionBody.svelte'
 import GroundMistLayer from '../components/GroundMistLayer.svelte'
 import ProceduralMesh from '../components/ProceduralMesh.svelte'
 import StarSprite from '../components/StarSprite.svelte'
@@ -10,12 +10,7 @@ import { activeConversationSession } from '../features/conversation/conversation
 import { qualityLevelStore } from '../features/performance/stores/performanceStore'
 import { getRuntimePropBudget } from '../features/performance/utils/runtimeSceneBudget'
 import { gameActions } from '../stores/gameStateStore'
-import EditorAssetTrimeshCollider from './EditorAssetTrimeshCollider.svelte'
-import EditorColliderHelper from './EditorColliderHelper.svelte'
-import EditorMeshColliderHelper from './EditorMeshColliderHelper.svelte'
 import EditorNodeRenderContent from './EditorNodeRenderContent.svelte'
-import EditorPrimitiveTrimeshCollider from './EditorPrimitiveTrimeshCollider.svelte'
-import EditorPrimitiveTrimeshHelper from './EditorPrimitiveTrimeshHelper.svelte'
 import {
   getNodeColliderArgs,
   getNodeVisualColliderSize,
@@ -165,26 +160,6 @@ function getRigidBodyType() {
 
 function getColliderArgs() {
   return getNodeColliderArgs(node)
-}
-
-function isAssetTrimeshCollision() {
-  return (
-    node.kind === 'asset' &&
-    !!node.asset?.url &&
-    effectiveCollision?.shape === 'trimesh'
-  )
-}
-
-function isPrimitiveTrimeshCollision() {
-  return (
-    node.kind === 'primitive' &&
-    !!node.primitive &&
-    effectiveCollision?.shape === 'trimesh'
-  )
-}
-
-function isCylinderCollision() {
-  return effectiveCollision?.shape === 'cylinder'
 }
 
 function logCollisionOverlaySource() {
@@ -501,10 +476,11 @@ onDestroy(() => {
 </script>
 
 <T.Group bind:ref={group} visible={effectiveVisible}>
-  {#if !editorEnabled && hasPhysicsBody() && isPersistentRuntimeNode() && !isAssetTrimeshCollision() && !isPrimitiveTrimeshCollision() && effectiveVisible}
-    <EditorNodeRenderContent {node} {editorEnabled} />
-    <RigidBody
-      type={getRigidBodyType()}
+  {#if !editorEnabled && hasPhysicsBody() && isPersistentRuntimeNode() && effectiveVisible}
+    <CollisionBody
+      shape={effectiveCollision?.shape ?? 'cuboid'}
+      args={getColliderArgs()}
+      bodyType={getRigidBodyType()}
       gravityScale={node.physics?.gravityScale ?? 1}
       canSleep={node.physics?.canSleep ?? true}
       ccd={node.physics?.ccd ?? false}
@@ -512,124 +488,28 @@ onDestroy(() => {
       angularDamping={node.physics?.angularDamping ?? 0}
       lockRotations={node.physics?.lockRotations ?? false}
       lockTranslations={node.physics?.lockTranslations ?? false}
+      friction={effectiveCollision?.friction ?? 0.7}
+      restitution={effectiveCollision?.restitution ?? 0}
+      sensor={effectiveCollision?.sensor ?? false}
+      assetUrl={node.asset?.url ?? ''}
+      primitiveGeometry={node.primitive?.geometry}
+      primitiveArgs={node.primitive?.args ?? []}
     >
-      {#if isCylinderCollision()}
-        <Collider
-          shape="cylinder"
-          args={getColliderArgs()}
-          friction={effectiveCollision?.friction ?? 0.7}
-          restitution={effectiveCollision?.restitution ?? 0}
-          sensor={effectiveCollision?.sensor ?? false}
-        />
-      {:else if effectiveCollision?.shape === 'cuboid'}
-        <Collider
-          shape="cuboid"
-          args={getColliderArgs()}
-          friction={effectiveCollision.friction ?? 0.7}
-          restitution={effectiveCollision.restitution ?? 0}
-          sensor={effectiveCollision.sensor ?? false}
-        />
-      {/if}
-    </RigidBody>
-  {:else if !editorEnabled && hasPhysicsBody() && isAssetTrimeshCollision() && effectiveVisible}
-    <RigidBody
-      type={getRigidBodyType()}
-      gravityScale={node.physics?.gravityScale ?? 1}
-      canSleep={node.physics?.canSleep ?? true}
-      ccd={node.physics?.ccd ?? false}
-      linearDamping={node.physics?.linearDamping ?? 0}
-      angularDamping={node.physics?.angularDamping ?? 0}
-      lockRotations={node.physics?.lockRotations ?? false}
-      lockTranslations={node.physics?.lockTranslations ?? false}
-    >
-      <EditorAssetTrimeshCollider
-        url={node.asset?.url ?? ''}
-        friction={effectiveCollision?.friction ?? 0.7}
-        restitution={effectiveCollision?.restitution ?? 0}
-        sensor={effectiveCollision?.sensor ?? false}
-      />
       <EditorNodeRenderContent {node} {editorEnabled} />
-    </RigidBody>
-  {:else if !editorEnabled && hasPhysicsBody() && isPrimitiveTrimeshCollision() && effectiveVisible}
-    <RigidBody
-      type={getRigidBodyType()}
-      gravityScale={node.physics?.gravityScale ?? 1}
-      canSleep={node.physics?.canSleep ?? true}
-      ccd={node.physics?.ccd ?? false}
-      linearDamping={node.physics?.linearDamping ?? 0}
-      angularDamping={node.physics?.angularDamping ?? 0}
-      lockRotations={node.physics?.lockRotations ?? false}
-      lockTranslations={node.physics?.lockTranslations ?? false}
-    >
-      <EditorPrimitiveTrimeshCollider
-        geometry={node.primitive?.geometry}
-        args={node.primitive?.args ?? []}
-        friction={effectiveCollision?.friction ?? 0.7}
-        restitution={effectiveCollision?.restitution ?? 0}
-        sensor={effectiveCollision?.sensor ?? false}
-      />
-      <EditorNodeRenderContent {node} {editorEnabled} />
-    </RigidBody>
-  {:else if !editorEnabled && hasPhysicsBody() && isCylinderCollision() && effectiveVisible}
-    <RigidBody
-      type={getRigidBodyType()}
-      gravityScale={node.physics?.gravityScale ?? 1}
-      canSleep={node.physics?.canSleep ?? true}
-      ccd={node.physics?.ccd ?? false}
-      linearDamping={node.physics?.linearDamping ?? 0}
-      angularDamping={node.physics?.angularDamping ?? 0}
-      lockRotations={node.physics?.lockRotations ?? false}
-      lockTranslations={node.physics?.lockTranslations ?? false}
-    >
-      <Collider
-        shape="cylinder"
-        args={getColliderArgs()}
-        friction={effectiveCollision?.friction ?? 0.7}
-        restitution={effectiveCollision?.restitution ?? 0}
-        sensor={effectiveCollision?.sensor ?? false}
-      />
-      <EditorNodeRenderContent {node} {editorEnabled} />
-    </RigidBody>
-  {:else if !editorEnabled && hasPhysicsBody() && effectiveCollision?.shape === 'cuboid' && effectiveVisible}
-    <RigidBody
-      type={getRigidBodyType()}
-      gravityScale={node.physics?.gravityScale ?? 1}
-      canSleep={node.physics?.canSleep ?? true}
-      ccd={node.physics?.ccd ?? false}
-      linearDamping={node.physics?.linearDamping ?? 0}
-      angularDamping={node.physics?.angularDamping ?? 0}
-      lockRotations={node.physics?.lockRotations ?? false}
-      lockTranslations={node.physics?.lockTranslations ?? false}
-    >
-      <Collider
-        shape="cuboid"
-        args={getColliderArgs()}
-        friction={effectiveCollision.friction ?? 0.7}
-        restitution={effectiveCollision.restitution ?? 0}
-        sensor={effectiveCollision.sensor ?? false}
-      />
-      <EditorNodeRenderContent {node} {editorEnabled} />
-    </RigidBody>
+    </CollisionBody>
   {:else}
     <EditorNodeRenderContent {node} {editorEnabled} />
   {/if}
 
-  {#if hasPhysicsBody() && effectiveCollision?.shape === 'cuboid' && editorEnabled && $editorStateStore.collisionOverlayEnabled}
-    <EditorColliderHelper shape="cuboid" args={getColliderArgs()} />
-  {/if}
-
-  {#if hasPhysicsBody() && isCylinderCollision() && editorEnabled && $editorStateStore.collisionOverlayEnabled}
-    <EditorColliderHelper shape="cylinder" args={getColliderArgs()} />
-  {/if}
-
-  {#if isAssetTrimeshCollision() && editorEnabled && $editorStateStore.collisionOverlayEnabled}
-    <EditorMeshColliderHelper url={node.asset?.url ?? ''} />
-  {/if}
-
-  {#if isPrimitiveTrimeshCollision() && editorEnabled && $editorStateStore.collisionOverlayEnabled}
-    <EditorPrimitiveTrimeshHelper
-      geometry={node.primitive?.geometry}
-      args={node.primitive?.args ?? []}
+  {#if hasPhysicsBody() && editorEnabled && $editorStateStore.collisionOverlayEnabled}
+    <CollisionBody
+      physicsEnabled={false}
+      showOverlay={true}
+      shape={effectiveCollision?.shape ?? 'cuboid'}
+      args={getColliderArgs()}
+      assetUrl={node.asset?.url ?? ''}
+      primitiveGeometry={node.primitive?.geometry}
+      primitiveArgs={node.primitive?.args ?? []}
     />
   {/if}
 

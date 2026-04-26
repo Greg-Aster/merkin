@@ -518,6 +518,12 @@ export const constellationConfig: Record<
     spread: 25,
     pattern: 'scattered',
   },
+  'level-portals': {
+    centerAzimuth: 30,
+    centerElevation: 35,
+    spread: 25,
+    pattern: 'level_gate',
+  },
   // New eras from content
   wip: {
     centerAzimuth: 90,
@@ -618,6 +624,14 @@ export const constellationPatterns: Record<
     { azOffset: 8, elOffset: -10 },
     { azOffset: 0, elOffset: 5 },
   ],
+  level_gate: [
+    { azOffset: 0, elOffset: 14 },
+    { azOffset: -16, elOffset: 6 },
+    { azOffset: 16, elOffset: 6 },
+    { azOffset: -10, elOffset: -10 },
+    { azOffset: 10, elOffset: -10 },
+    { azOffset: 0, elOffset: -18 },
+  ],
   scattered: [
     { azOffset: 5, elOffset: 8 },
     { azOffset: -12, elOffset: -5 },
@@ -691,6 +705,16 @@ export const connectionPatterns: Record<string, Array<[number, number]>> = {
     [1, 6],
     [2, 4],
     [3, 5],
+  ],
+  level_gate: [
+    [0, 1],
+    [0, 2],
+    [1, 3],
+    [2, 4],
+    [3, 5],
+    [4, 5],
+    [1, 2],
+    [3, 4],
   ],
   scattered: [
     [0, 1],

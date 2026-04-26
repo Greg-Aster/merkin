@@ -1,8 +1,10 @@
 <script lang="ts">
 import { T, useTask } from '@threlte/core'
+import { Euler, Quaternion } from 'three'
 import type * as THREE from 'three'
 import HomeIntroParticle from './HomeIntroParticle.svelte'
 import HomeIntroScreenPanel from './HomeIntroScreenPanel.svelte'
+import { homeIntroScreens, homeIntroWheelToScreenRatio } from './homeIntroScreens'
 
 type IntroInputState = {
   x: number
@@ -27,20 +29,17 @@ const screenNodes: THREE.Group[] = []
 
 const particleCount = 260
 const particleClusterCount = 7
-const primaryScreenIndex = 3
-const screenCount = 7
-const screenStepX = 2.28
-const screenStepY = 1.68
-const screenStepDepth = 1.08
-const screenStillMedia = [
-  '/assets/banner/golden-era.webp',
-  '/assets/banner/ultra-headquarters.png',
-  '/assets/banner/archive_still.png',
-  '/assets/banner/ComfyUI_00138_.webp',
-  '/assets/banner/ComfyUI_0144.png',
-  '/assets/banner/golden-era1280wide.jpg',
-  '/assets/banner/ComfyUI_0145.png',
-]
+const primaryScreenIndex = 0
+const screenOrbitRadiusX = 2.46
+const screenOrbitRadiusZ = 2.06
+const screenOrbitCenterZ = -0.72
+const screenStepY = 2.05
+const screenAngleStep = 0.9
+const targetScreenEuler = new Euler(0, 0, 0, 'YXZ')
+const targetScreenQuaternion = new Quaternion()
+let activeScreenSceneId = ''
+const portalScreens = homeIntroScreens
+const screenCount = portalScreens.length
 
 const particleClusters = [
   { x: -2.75, y: 2.22, z: -0.55, spread: 0.78, hue: 0.53 },
@@ -91,6 +90,9 @@ const screens = Array.from({ length: screenCount }, (_, index) => {
   return {
     position: [0, 0, 0] as [number, number, number],
     rotation: [0, 0, 0] as [number, number, number],
+    sceneId: portalScreens[index].sceneId,
+    stillSrc: portalScreens[index].stillSrc,
+    videoSrc: portalScreens[index].videoSrc,
     primary: index === primaryScreenIndex,
   }
 })
@@ -104,8 +106,31 @@ function wrappedScreenOffset(value: number) {
   return centeredOrbitProgress(value / screenCount) * screenCount
 }
 
+function wrappedScreenIndex(value: number) {
+  return ((value % screenCount) + screenCount) % screenCount
+}
+
+function syncBannerToFrontScreen(selectedIndex: number) {
+  if (typeof window === 'undefined') return
+
+  const activeIndex = wrappedScreenIndex(Math.round(selectedIndex))
+  const sceneId = portalScreens[activeIndex]?.sceneId
+  if (!sceneId || sceneId === activeScreenSceneId) return
+
+  activeScreenSceneId = sceneId
+  window.dispatchEvent(
+    new CustomEvent('merkin:banner-select-scene', {
+      detail: {
+        sceneId,
+        screenIndex: activeIndex,
+      },
+    }),
+  )
+}
+
 function updateScreenOrbit(wheel: number, ease: number) {
-  const selectedIndex = primaryScreenIndex + wheel * 1.08
+  const selectedIndex = primaryScreenIndex + wheel * homeIntroWheelToScreenRatio
+  syncBannerToFrontScreen(selectedIndex)
 
   for (let index = 0; index < screenCount; index += 1) {
     const screen = screenNodes[index]
@@ -113,27 +138,28 @@ function updateScreenOrbit(wheel: number, ease: number) {
 
     const offset = wrappedScreenOffset(index - selectedIndex)
     const depth = Math.abs(offset)
-    const side = Math.sign(offset)
-    const spiral = offset * 0.96
-    const frontWeight = Math.max(0, 1 - depth * 0.42)
-    const x = Math.sin(spiral) * screenStepX + side * depth * 0.18
+    const spiral = offset * screenAngleStep
+    const x = Math.sin(spiral) * screenOrbitRadiusX
     const y = -offset * screenStepY
     const z =
-      0.4 - depth * screenStepDepth + side * 0.12 + Math.cos(spiral) * 0.2
-    const targetScale = Math.max(0.38, 0.98 - depth * 0.14 + frontWeight * 0.08)
-    const targetYaw = -x * 0.12 + side * Math.min(depth * 0.09, 0.24)
-    const targetPitch = 0.018 - offset * 0.056
-    const targetRoll = -offset * 0.044
+      screenOrbitCenterZ + Math.cos(spiral) * screenOrbitRadiusZ - depth * 0.08
+    const targetScale = 0.92
+    const outwardYaw = Math.atan2(
+      x / screenOrbitRadiusX,
+      (z - screenOrbitCenterZ) / screenOrbitRadiusZ,
+    )
+    const targetPitch = Math.sin(spiral) * -0.025
+    const targetRoll = Math.sin(spiral) * 0.018
 
     screen.position.x += (x - screen.position.x) * ease
     screen.position.y += (y - screen.position.y) * ease
     screen.position.z += (z - screen.position.z) * ease
-    screen.rotation.x += (targetPitch - screen.rotation.x) * ease
-    screen.rotation.y += (targetYaw - screen.rotation.y) * ease
-    screen.rotation.z += (targetRoll - screen.rotation.z) * ease
-    screen.scale.x += (targetScale - screen.scale.x) * ease
-    screen.scale.y += (targetScale - screen.scale.y) * ease
-    screen.scale.z += (targetScale - screen.scale.z) * ease
+    targetScreenEuler.set(targetPitch, outwardYaw, targetRoll)
+    targetScreenQuaternion.setFromEuler(targetScreenEuler)
+    screen.quaternion.slerp(targetScreenQuaternion, ease)
+
+    const scale = screen.scale.x + (targetScale - screen.scale.x) * ease
+    screen.scale.setScalar(scale)
   }
 }
 
@@ -168,8 +194,8 @@ useTask(delta => {
   }
 
   if (screenRail) {
-    screenRail.rotation.y = time * 0.035 - input.dragX * 0.42
-    screenRail.position.y = Math.sin(time * 0.45) * 0.055
+    screenRail.rotation.y += (-input.dragX * 0.24 - screenRail.rotation.y) * ease
+    screenRail.position.y = Math.sin(time * 0.45) * 0.055 + wheel * 0.025
   }
 
   updateScreenOrbit(wheel, ease)
@@ -197,7 +223,8 @@ useTask(delta => {
 				<HomeIntroScreenPanel
 					{index}
 					imageSrc={screen.primary ? titleImageSrc : ""}
-					stillSrc={screenStillMedia[index]}
+					stillSrc={screen.stillSrc}
+					videoSrc={screen.videoSrc}
 					primary={screen.primary}
 				/>
 			</T.Group>
@@ -210,7 +237,7 @@ useTask(delta => {
 		{/each}
 	</T.Group>
 
-	<T.Group bind:ref={emblem} position={[0, -0.04, -2.05]} scale={[0.5, 0.5, 0.5]}>
+	<T.Group bind:ref={emblem} position={[0, -0.04, -2.28]} scale={[1.72, 1.72, 1.72]}>
 		<T.Mesh bind:ref={ringA} rotation={[Math.PI / 2, 0, 0]}>
 			<T.TorusGeometry args={[1.18, 0.01, 12, 128]} />
 			<T.MeshBasicMaterial color="#67e8f9" transparent={true} opacity={0.48} />

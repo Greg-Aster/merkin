@@ -718,7 +718,11 @@ const gridLayoutClasses = [
   <!-- ⭐ SIMPLIFIED: NAVBAR - NOW ALWAYS VISIBLE                     -->
   <!-- =============================================================== -->
   <slot slot="head" name="head"></slot>
-  <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-2 md:px-4 mx-auto">
+  <div
+    id="top-row"
+    class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-2 md:px-4 mx-auto"
+    data-content-mode={isBannerOnly ? 'banner-only' : 'default'}
+  >
     <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all duration-300">
       <Navbar></Navbar>
     </div>
@@ -763,7 +767,13 @@ const gridLayoutClasses = [
   <!-- ⭐ SIMPLIFIED: One column mobile, two column desktop           -->
   <!-- =============================================================== -->
   <div class={`w-full z-30 pointer-events-none relative`}>
-    <div id="main-panel-wrapper" class="responsive-panel-wrapper relative max-w-[var(--page-width)] mx-auto pointer-events-auto" data-is-home={isHomePage ? "true" : "false"} data-home-layout={isPortalHome ? 'portal' : 'default'}>
+    <div
+      id="main-panel-wrapper"
+      class="responsive-panel-wrapper relative max-w-[var(--page-width)] mx-auto pointer-events-auto"
+      data-is-home={isHomePage ? "true" : "false"}
+      data-home-layout={isPortalHome ? 'portal' : 'default'}
+      data-content-mode={isBannerOnly ? 'banner-only' : 'default'}
+    >
       <div
         id="main-grid"
         class:list={[gridLayoutClasses, 'transition-swup-fade', { 'has-right-rail': shouldShowRightRail }]}
@@ -825,9 +835,9 @@ const gridLayoutClasses = [
               data-is-home-page={isHomePage}
             ></div>
             {!isBannerOnly && <slot />}
-            <div class="footer onload-animation hidden md:block">
+            {!isBannerOnly && <div class="footer onload-animation hidden md:block">
               <Footer></Footer>
-            </div>
+            </div>}
           </div>
         </main>
 
@@ -873,12 +883,12 @@ const gridLayoutClasses = [
         )}
 
         <!-- Mobile-only Footer -->
-        <div class="footer col-span-1 onload-animation block md:hidden 2xl:hidden">
+        {!isBannerOnly && <div class="footer col-span-1 onload-animation block md:hidden 2xl:hidden">
           <Footer></Footer>
-        </div>
+        </div>}
       </div>
 
-      <BackToTop></BackToTop>
+      {!isBannerOnly && <BackToTop></BackToTop>}
     </div>
   </div>
 
@@ -961,6 +971,13 @@ const gridLayoutClasses = [
     margin-top: var(--main-content-offset);
   }
 
+  :global(html:has(#banner-container.banner-only-mode)),
+  :global(html:has(#banner-container.banner-only-mode) body) {
+    height: 100%;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+  }
+
   .mobile-support-label,
   :global(#sidebar .sidebar-group-label) {
     display: none;
@@ -981,6 +998,27 @@ const gridLayoutClasses = [
   /* Shared source of truth for banner height */
   #banner-container .banner-aspect-container {
     height: var(--banner-height);
+  }
+
+  #banner-container.banner-only-mode {
+    margin-top: 0;
+  }
+
+  #banner-container.banner-only-mode .banner-aspect-container {
+    height: calc(100dvh - 4.5rem);
+    min-height: 0;
+  }
+
+  #banner-container.banner-only-mode .banner-content-wrapper,
+  #banner-container.banner-only-mode #standard-banner-container,
+  #banner-container.banner-only-mode .banner-slide,
+  #banner-container.banner-only-mode .banner-link,
+  #banner-container.banner-only-mode .banner-media-layer {
+    height: 100%;
+  }
+
+  #main-panel-wrapper[data-content-mode='banner-only'] {
+    display: none;
   }
 
   #banner-container.banner-only-mode.has-timeline-banner .banner-container-timeline,
@@ -1015,6 +1053,15 @@ const gridLayoutClasses = [
 
     #banner-container .banner-aspect-container {
       height: var(--banner-height-mobile, var(--banner-height));
+    }
+
+    #banner-container.banner-only-mode {
+      margin-top: 0;
+    }
+
+    #banner-container.banner-only-mode .banner-aspect-container {
+      height: calc(100dvh - 3rem);
+      min-height: 0;
     }
   }
 

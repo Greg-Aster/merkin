@@ -82,6 +82,86 @@ let selectionTransitions: Map<string, number> = new Map() // uniqueId -> transit
 // Export the component reference for StarNavigationSystem
 export { starGroup as starMapRef }
 
+type ConstellationConfig = {
+  centerAzimuth: number
+  centerElevation: number
+  spread: number
+  pattern: string
+}
+
+function getStarIdentity(event: any, fallbackIndex = 0): string {
+  return String(
+    event?.uniqueId ??
+      event?.id ??
+      event?.slug ??
+      event?.levelId ??
+      event?.title ??
+      `timeline_star_${fallbackIndex}`,
+  )
+}
+
+function normalizeEra(event: any): string {
+  return event?.era || 'unknown'
+}
+
+function getDynamicConstellationConfig(era: string): ConstellationConfig {
+  const knownConfig = constellationConfig[era]
+  if (knownConfig) return knownConfig
+
+  const patternNames = Object.keys(constellationPatterns)
+  const hash = hashCode(era || 'unknown')
+  const pattern = patternNames[hash % patternNames.length] ?? 'scattered'
+
+  return {
+    centerAzimuth: hash % 360,
+    centerElevation: 32 + (hash % 34),
+    spread: 28 + (hash % 18),
+    pattern,
+  }
+}
+
+function getPatternForConfig(config: ConstellationConfig) {
+  return constellationPatterns[config.pattern] || constellationPatterns.scattered
+}
+
+function getConnectionsForStarCount(
+  config: ConstellationConfig,
+  starCount: number,
+): Array<[number, number]> {
+  const baseConnections = connectionPatterns[config.pattern] ?? []
+  const pattern = getPatternForConfig(config)
+  const connections = baseConnections.filter(
+    ([startIdx, endIdx]) => startIdx < starCount && endIdx < starCount,
+  )
+
+  for (let index = pattern.length; index < starCount; index += 1) {
+    connections.push([index - 1, index])
+
+    const anchorIndex = index % pattern.length
+    if (anchorIndex !== index - 1) {
+      connections.push([anchorIndex, index])
+    }
+  }
+
+  if (connections.length === 0) {
+    for (let index = 1; index < starCount; index += 1) {
+      connections.push([index - 1, index])
+    }
+  }
+
+  return connections
+}
+
+function getIndexInEra(event: any, allEvents: any[], fallbackIndex: number) {
+  const era = normalizeEra(event)
+  const starId = getStarIdentity(event, fallbackIndex)
+  const indexInEra = allEvents
+    .filter(candidate => normalizeEra(candidate) === era)
+    .findIndex(candidate => getStarIdentity(candidate, fallbackIndex) === starId)
+
+  return indexInEra === -1 ? Math.max(0, fallbackIndex) : indexInEra
+}
+
 // --- STORES ---
 $: selectedStar = $selectedStarStore
 $: registryLevelEvents = createStarMapLevelEvents($levelRegistryStore)
@@ -102,7 +182,11 @@ onMount(() => {
   generateStars()
 })
 
-$: starRegenerationKey = `${timelineEvents.length}:${registryLevelEvents.map(event => `${event.uniqueId}:${event.title}:${event.year}`).join('|')}`
+$: starRegenerationKey = `${timelineEvents
+  .map(event => `${getStarIdentity(event)}:${event.title}:${event.year}:${event.era}`)
+  .join('|')}::${registryLevelEvents
+  .map(event => `${getStarIdentity(event)}:${event.title}:${event.year}:${event.era}`)
+  .join('|')}`
 
 $: if (starGroup && starRegenerationKey) {
   generateStars()
@@ -115,12 +199,13 @@ $: if (starGroup && stars.length > 0) {
 
 function generateStars() {
   const newStars: StarData[] = []
+  const allStarEvents = [...timelineEvents, ...registryLevelEvents]
 
   debugLog(`🌟 StarMap: Processing ${timelineEvents.length} timeline events`)
 
   // Process timeline events (blog posts)
   timelineEvents.forEach((event, index) => {
-    const star = createStarFromTimelineEvent(event, index)
+    const star = createStarFromTimelineEvent(event, index, allStarEvents)
     newStars.push(star)
     if (index < 3) {
       // Log first few stars for debugging
@@ -137,7 +222,11 @@ function generateStars() {
   // Add level stars as timeline events (they use the exact same system)
   const levelEvents = registryLevelEvents
   levelEvents.forEach((event, index) => {
-    const star = createStarFromTimelineEvent(event, newStars.length + index)
+    const star = createStarFromTimelineEvent(
+      event,
+      timelineEvents.length + index,
+      allStarEvents,
+    )
     newStars.push(star)
     debugLog(`🎮 Level Star ${index}:`, {
       title: star.title,
@@ -249,11 +338,10 @@ function createConstellationLines() {
   Object.entries(eraGroups).forEach(([era, eraStars]) => {
     if (eraStars.length < 2) return
 
-    const config = constellationConfig[era]
-    if (!config) return
+    const config = getDynamicConstellationConfig(era)
 
-    const pattern = constellationPatterns[config.pattern]
-    const connections = connectionPatterns[config.pattern]
+    const pattern = getPatternForConfig(config)
+    const connections = getConnectionsForStarCount(config, eraStars.length)
 
     if (!connections || !pattern) return
 
@@ -577,25 +665,16 @@ const onBeforeCompile = (shader: Shader) => {
 
 // --- CONSTELLATION-BASED STAR POSITIONING (Using imported configuration) ---
 
-function createStarFromTimelineEvent(event: any, index: number): StarData {
+function createStarFromTimelineEvent(
+  event: any,
+  index: number,
+  allStarEvents: any[] = timelineEvents,
+): StarData {
   const era = event.era || 'unknown'
-  const config = constellationConfig[era] || constellationConfig.unknown
-  const pattern =
-    constellationPatterns[config.pattern] || constellationPatterns.scattered
-
-  // Group events by era for constellation positioning
-  const eraEvents = timelineEvents.filter(e => (e.era || 'unknown') === era)
-  let indexInEra = eraEvents.findIndex(
-    e => e.uniqueId === event.uniqueId || e.slug === event.slug,
-  )
-
-  // If not found in timeline events (e.g., level stars), use a deterministic index
-  if (indexInEra === -1) {
-    // Use hash of the star's unique ID to get consistent positioning
-    const starId = event.uniqueId || event.id || event.title
-    const hash = hashCode(starId)
-    indexInEra = Math.abs(hash) % 10 // Deterministic position in constellation
-  }
+  const config = getDynamicConstellationConfig(era)
+  const pattern = getPatternForConfig(config)
+  const indexInEra = getIndexInEra(event, allStarEvents, index)
+  const starId = getStarIdentity(event, index)
 
   const patternIndex = indexInEra % pattern.length
   const patternPosition = pattern[patternIndex]
@@ -613,7 +692,7 @@ function createStarFromTimelineEvent(event: any, index: number): StarData {
     }
     // Use default offset if pattern position is missing
     return {
-      uniqueId: event.uniqueId || event.slug || `fallback_star_${index}`,
+      uniqueId: starId,
       position: [100, 100, 100], // Safe fallback position
       color: '#ffffff',
       size: 1.0,
@@ -653,11 +732,11 @@ function createStarFromTimelineEvent(event: any, index: number): StarData {
   }
 
   // Use original era colors and sizing with size factor
-  const eraColor = getStarColor(event.uniqueId || event.slug, era, true)
+  const eraColor = getStarColor(starId, era, true)
   const starSize = getSizeFactor(event.isKeyEvent || false)
 
   const starData = {
-    uniqueId: event.uniqueId || event.slug || `timeline_star_${index}`,
+    uniqueId: starId,
     position: [x, y, z],
     color: eraColor,
     size: starSize,

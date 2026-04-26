@@ -37,7 +37,6 @@ import {
   errorStore,
   gameActions,
   gameStatsStore,
-  isLoadingStore,
   isMobileStore,
   loadGameState,
   selectedStarStore,
@@ -204,14 +203,8 @@ function getLevelRenderConfig(levelId: string) {
   }
 }
 
-// --- NEW: Robust Loading State ---
-// We now consider the game "loaded" only when the terrain's physics are ready.
 let terrainReady = false
 $: currentLevelRenderConfig = getLevelRenderConfig(currentLevel)
-$: if (terrainReady) {
-  debugLog('✅ Terrain and physics are ready. Hiding loading screen.')
-  gameActions.setLoading(false)
-}
 $: if (isInitialized && terrainReady && !error) {
   setRuntimeDiagnostic('engine', {
     level: 'ready',
@@ -225,7 +218,6 @@ $: levelRegistry = $levelRegistryStore
 $: selectedStar = $selectedStarStore
 $: gameStats = $gameStatsStore
 $: isMobile = $isMobileStore
-$: isLoading = $isLoadingStore
 $: error = $errorStore
 $: editorEnabled = $editorStateStore.enabled
 $: collisionOverlayEnabled = $editorStateStore.collisionOverlayEnabled
@@ -753,7 +745,6 @@ async function initializeThrelte() {
       message: 'Initializing Threlte game shell…',
     })
     loadingMessage = 'Initializing MEGAMEAL...'
-    gameActions.setLoading(true)
 
     const urlParams =
       typeof window !== 'undefined'
@@ -791,7 +782,6 @@ async function initializeThrelte() {
     // Check for room joining after initialization
     await checkForRoomJoin()
 
-    // The loading screen will now be hidden by the `terrainReady` reactive block.
     isInitialized = true
     setRuntimeDiagnostic('engine', {
       level: 'ready',
@@ -802,7 +792,7 @@ async function initializeThrelte() {
       deferredGameplayCoreCleanup = setupDeferredGameplayCoreLoading()
     }
 
-    debugLog('✅ Game systems initialized. Waiting for terrain...')
+    debugLog('✅ Game systems initialized.')
   } catch (err) {
     console.error('❌ Failed to initialize Threlte game:', err)
     setRuntimeDiagnostic('engine', {
@@ -813,7 +803,6 @@ async function initializeThrelte() {
           : 'Unknown engine initialization error.',
     })
     gameActions.setError(err instanceof Error ? err.message : 'Unknown error')
-    gameActions.setLoading(false)
   }
 }
 
@@ -1028,8 +1017,8 @@ onDestroy(() => {
   
     <!-- Legacy container removed - Player component now handles all input -->
   
-    <!-- Modern Loading Screen -->
-    {#if isLoading || isJoiningRoom}
+    <!-- Room Join Screen -->
+    {#if isJoiningRoom}
       <div class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50" style="pointer-events: auto;">
         <div class="text-center text-white">
           <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto"></div>
@@ -1067,10 +1056,10 @@ onDestroy(() => {
     {/if}
   
     <!-- Modern Minimal Debug Panel -->
-    {#if isInitialized && !isLoading && !error && showDebugPanel}
+    {#if isInitialized && !error && showDebugPanel}
       <div class="fixed top-4 right-4 bg-black bg-opacity-80 text-white p-4 rounded" style="pointer-events: auto;">
         <h3 class="font-bold">🔧 Debug Info</h3>
-        <p>Game State: {isInitialized ? 'Ready' : 'Loading'}</p>
+        <p>Game State: {isInitialized ? 'Ready' : 'Initializing'}</p>
         <p>Current Level: {currentLevel}</p>
         <p>Mobile: {isMobile ? 'Yes' : 'No'}</p>
         <div class="mt-3">
@@ -1146,7 +1135,7 @@ onDestroy(() => {
         {/if}
 
         <!-- Settings Button -->
-        {#if isInitialized && !isLoading && !error}
+        {#if isInitialized && !error}
           <SettingsButton />
         {/if}
         
@@ -1156,7 +1145,7 @@ onDestroy(() => {
         {/if}
         
         <!-- Threlte-Native Mobile Controls -->
-        {#if isMobile && isInitialized && !isLoading && !error}
+        {#if isMobile && isInitialized && !error}
           <ThrelteMobileControls />
         {/if}
 

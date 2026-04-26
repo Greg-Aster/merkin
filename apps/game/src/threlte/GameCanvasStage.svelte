@@ -130,28 +130,6 @@ $: if (!playerComponentRef) {
             physicsReady = true
           }}
         >
-          {#if editorEnabled && editorViewportControlsComponent}
-            <svelte:component this={editorViewportControlsComponent} enabled={true} />
-          {:else}
-            <svelte:component
-              this={playerComponentClass}
-              bind:this={playerComponentRef}
-              position={[0, 0, 0]}
-              speed={playerMoveSpeed}
-              jumpForce={playerJumpForce}
-              lightIntensityScale={playerLightIntensityScale}
-              on:spawnReadyChange={(e) => {
-                playerReady = Boolean(e.detail?.ready)
-              }}
-              on:interaction={(e) => forward('playerInteraction', e.detail)}
-              on:lightBurst={(e) => forward('lightBurst', e.detail)}
-            />
-          {/if}
-
-          {#if multiplayerManagerComponent}
-            <svelte:component this={multiplayerManagerComponent} />
-          {/if}
-
           {#if currentLevelComponent}
             {#key `${currentLevel}:${currentLevelComponent}`}
               <svelte:component
@@ -175,6 +153,28 @@ $: if (!playerComponentRef) {
                 }}
               />
             {/key}
+          {/if}
+
+          {#if editorEnabled && editorViewportControlsComponent}
+            <svelte:component this={editorViewportControlsComponent} enabled={true} />
+          {:else if terrainReady}
+            <svelte:component
+              this={playerComponentClass}
+              bind:this={playerComponentRef}
+              position={[0, 0, 0]}
+              speed={playerMoveSpeed}
+              jumpForce={playerJumpForce}
+              lightIntensityScale={playerLightIntensityScale}
+              on:spawnReadyChange={(e) => {
+                playerReady = Boolean(e.detail?.ready)
+              }}
+              on:interaction={(e) => forward('playerInteraction', e.detail)}
+              on:lightBurst={(e) => forward('lightBurst', e.detail)}
+            />
+          {/if}
+
+          {#if multiplayerManagerComponent}
+            <svelte:component this={multiplayerManagerComponent} />
           {/if}
 
           {#if currentLevel}

@@ -68,7 +68,7 @@ useTask(() => {
     mesh.position.y =
       particle.anchorY +
       particle.height +
-      wheel * 0.075 +
+      wheel * 0.24 +
       Math.sin(time * 1.1 + particle.phase) *
         (0.05 + particle.clusterStrength * 0.11)
     mesh.position.z =

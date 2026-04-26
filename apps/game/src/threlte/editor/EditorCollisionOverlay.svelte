@@ -133,7 +133,7 @@ function updateBoundsMesh() {
     return
   }
 
-  boundsMesh.visible = false
+  boundsMesh.visible = shouldShowTerrainOverlay()
   boundsMesh.position.set(
     (bounds.min[0] + bounds.max[0]) / 2,
     (bounds.min[1] + bounds.max[1]) / 2,

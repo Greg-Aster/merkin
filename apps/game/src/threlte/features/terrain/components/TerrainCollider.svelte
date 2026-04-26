@@ -453,7 +453,6 @@ $: if (trimeshMode !== 'chunked') {
   }
 }
 
-// Dispatch terrainReady when TriMesh is ready (single or chunked)
 $: if (
   useTrimesh &&
   !trimeshReadyDispatched &&
@@ -463,24 +462,31 @@ $: if (
       activeTrimeshChunks &&
       activeTrimeshChunks.length > 0))
 ) {
+  dispatchTerrainReady(
+    trimeshMode === 'single' ? 1 : activeTrimeshChunks.length,
+  )
+}
+
+function dispatchTerrainReady(activeChunks: number) {
+  if (trimeshReadyDispatched || !trimeshLayout) return
+
   try {
     trimeshReadyDispatched = true
     const dsRes = `${trimeshLayout.dsSize}x${trimeshLayout.dsSize}`
-    const approxActive =
-      trimeshMode === 'single' ? 1 : activeTrimeshChunks?.length || 0
-    if (import.meta.env.DEV)
-      console.log('✅ TriMesh terrain ready:', {
+    if (import.meta.env.DEV) {
+      console.log('TriMesh terrain collider ready:', {
         mode: trimeshMode,
-        approxActiveChunks: approxActive,
+        activeChunks,
         dsResolution: dsRes,
       })
+    }
     dispatch('terrainReady', {
       colliderType: 'trimesh',
-      activeChunks: approxActive,
+      activeChunks,
       dsResolution: dsRes,
     })
   } catch (e) {
-    console.warn('⚠️ Failed to dispatch TriMesh readiness:', e)
+    console.warn('Failed to dispatch TriMesh readiness:', e)
   }
 }
 
@@ -536,6 +542,7 @@ onDestroy(() => {
           friction={friction}
           restitution={restitution}
           on:create={() => {
+            dispatchTerrainReady(activeTrimeshChunks.length)
             if (import.meta.env.DEV) console.log('✅ TriMesh collider created at', patch.position, 'for', chunk)
           }}
           on:destroy={() => {
@@ -556,6 +563,7 @@ onDestroy(() => {
       friction={friction}
       restitution={restitution}
       on:create={() => {
+        dispatchTerrainReady(1)
         if (import.meta.env.DEV) console.log('✅ Single TriMesh collider created (world-space)')
       }}
     />

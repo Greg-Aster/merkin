@@ -517,15 +517,33 @@ export function loadConversationHistory(): void {
   }
 }
 
-// Auto-save conversation history periodically
 if (typeof window !== 'undefined') {
-  setInterval(saveConversationHistory, 60000) // Save every minute
+  const persistenceKey = '__megamealConversationPersistenceInstalled'
+  const runtimeWindow = window as unknown as Window &
+    Record<string, boolean | undefined>
 
-  // Load on initialization
-  loadConversationHistory()
+  if (!runtimeWindow[persistenceKey]) {
+    runtimeWindow[persistenceKey] = true
+    loadConversationHistory()
 
-  // Save on page unload
-  window.addEventListener('beforeunload', saveConversationHistory)
+    let saveTimeout: number | null = null
+    conversationHistory.subscribe(() => {
+      if (saveTimeout !== null) {
+        window.clearTimeout(saveTimeout)
+      }
+      saveTimeout = window.setTimeout(() => {
+        saveTimeout = null
+        saveConversationHistory()
+      }, 250)
+    })
+
+    window.addEventListener('pagehide', saveConversationHistory)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        saveConversationHistory()
+      }
+    })
+  }
 }
 
 // ================================

@@ -1,4 +1,9 @@
 import type { EditorNodeCollisionData, EditorSceneNode } from './editorTypes'
+import {
+  getDefaultCollisionShape,
+  isTerrainVisualActor,
+  resolveCollisionPolicy,
+} from '../engine/collisionPolicy'
 
 const MIN_COLLIDER_SIZE = 0.05
 type ColliderArgs = [number, number, number] | [number, number]
@@ -14,35 +19,23 @@ function clampSize(value: number | undefined) {
 }
 
 function isTerrainVisualNode(node: EditorSceneNode | null | undefined) {
-  const id = node?.id ?? ''
-
-  return (
-    id === 'solitude-ground-plateau' ||
-    id === 'solitude-ground-dais' ||
-    id === 'yggdrasil-shore-ring' ||
-    id === 'yggdrasil-island-shelf' ||
-    id === 'yggdrasil-ground' ||
-    id === 'yggdrasil-dais' ||
-    id === 'yggdrasil-bifrost-path' ||
-    id === 'yggdrasil-spawn-pad'
-  )
+  return isTerrainVisualActor(node?.id ?? '')
 }
 
 export function getDefaultCollisionShape(
   node: EditorSceneNode | null | undefined,
 ): EditorNodeCollisionData['shape'] {
-  if (node?.kind === 'asset') return 'cuboid'
-  if (node?.kind === 'primitive' && node.primitive?.geometry === 'cylinder') {
-    return 'cylinder'
-  }
-  if (
-    node?.kind === 'primitive' &&
-    node.primitive?.geometry &&
-    node.primitive.geometry !== 'box'
-  ) {
-    return 'trimesh'
-  }
-  return 'cuboid'
+  return getDefaultCollisionShape({
+    actorId: node?.id ?? '',
+    actorKind:
+      node?.kind === 'asset' ||
+      node?.kind === 'primitive' ||
+      node?.kind === 'prefab' ||
+      node?.kind === 'light'
+        ? node.kind
+        : 'empty',
+    primitiveGeometry: node?.primitive?.geometry,
+  })
 }
 
 function resolveAuthoredCollisionShape(
@@ -89,23 +82,23 @@ export function resolveNodeCollision(
   node: EditorSceneNode | null | undefined,
 ): EditorNodeCollisionData | null {
   if (!isEditorGeometryNode(node)) return null
-  if (isTerrainVisualNode(node)) return null
-  const current = node
-  if (current.collision?.enabled === false) return null
-  if (current.collision) {
-    return {
-      ...current.collision,
-      shape: resolveAuthoredCollisionShape(current),
-      enabled: current.collision.enabled ?? true,
-    }
-  }
-  if (!isDefaultSolidNode(current)) return null
+  const result = resolveCollisionPolicy({
+    actorId: node.id,
+    actorKind: node.kind,
+    visible: node.visible,
+    hasGameplay: Boolean(node.gameplay),
+    primitiveGeometry: node.primitive?.geometry,
+    authoredCollision: node.collision,
+  })
+  if (!result.collision) return null
 
   return {
-    shape: getDefaultCollisionShape(node),
-    friction: 0.7,
-    restitution: 0,
-    sensor: false,
+    shape: resolveAuthoredCollisionShape(node),
+    enabled: true,
+    size: result.collision.size,
+    friction: result.collision.friction,
+    restitution: result.collision.restitution,
+    sensor: result.collision.sensor,
   }
 }
 

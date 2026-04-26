@@ -30,7 +30,6 @@ export class ConversationManager {
 
   constructor(config: ConversationSystemConfig) {
     this.config = config
-    this.setupCleanupInterval()
   }
 
   // ================================
@@ -42,6 +41,9 @@ export class ConversationManager {
     personality: NPCPersonality,
     context: ConversationContext,
   ): Promise<ConversationSession> {
+    this.cleanupExpiredSessions()
+    this.cleanupCache()
+
     const sessionId = this.generateSessionId()
 
     const session: ConversationSession = {
@@ -126,6 +128,9 @@ export class ConversationManager {
     userMessage: string,
     personality: NPCPersonality,
   ): Promise<ConversationMessage> {
+    this.cleanupExpiredSessions()
+    this.cleanupCache()
+
     const session = this.activeSessions.get(sessionId)
     if (!session || !session.isActive) {
       throw new Error(`Session ${sessionId} is not active`)
@@ -539,13 +544,6 @@ export class ConversationManager {
   // Cleanup & Maintenance
   // ================================
 
-  private setupCleanupInterval(): void {
-    setInterval(() => {
-      this.cleanupExpiredSessions()
-      this.cleanupCache()
-    }, 60000) // Run every minute
-  }
-
   private cleanupExpiredSessions(): void {
     const now = Date.now()
     const expiredSessions: string[] = []
@@ -580,14 +578,17 @@ export class ConversationManager {
   // ================================
 
   getActiveSessionCount(): number {
+    this.cleanupExpiredSessions()
     return this.activeSessions.size
   }
 
   getAllActiveSessions(): ConversationSession[] {
+    this.cleanupExpiredSessions()
     return Array.from(this.activeSessions.values())
   }
 
   isSessionActive(sessionId: string): boolean {
+    this.cleanupExpiredSessions()
     return this.activeSessions.has(sessionId)
   }
 

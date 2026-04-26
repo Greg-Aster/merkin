@@ -4,6 +4,7 @@ import { getHealthyRuntimeOrigin } from "../../../scripts/dev-runtime.mjs"
 const host = process.env.SITE_DEV_HOST || "127.0.0.1"
 const port = String(process.env.SITE_DEV_PORT || 4321)
 const appUrl = `http://${host}:${port}`
+const pnpmCommand = process.platform === "win32" ? "pnpm.cmd" : "pnpm"
 
 function spawnCommand(command, args, options = {}) {
   return spawn(command, args, {
@@ -45,7 +46,7 @@ async function main() {
     return
   }
 
-  const astroProcess = spawnCommand("pnpm", ["astro", "dev", "--host", host, "--port", port], {
+  const astroProcess = spawnCommand(pnpmCommand, ["astro", "dev", "--host", host, "--port", port], {
     env: process.env,
   })
 

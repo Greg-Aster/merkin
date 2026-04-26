@@ -166,7 +166,7 @@ export function createStarMapLevelEvents(entries = getLevelRegistry()) {
       description: entry.starMap?.description ?? `Enter ${entry.title}`,
       slug: null,
       year: entry.starMap?.year ?? 2100,
-      era: entry.starMap?.era ?? 'unknown',
+      era: 'level-portals',
       isLevel: true,
       levelId: entry.id,
       isKeyEvent: false,

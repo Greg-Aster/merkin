@@ -66,7 +66,6 @@ let showStarSystems = false
 const deferredSceneBootCleanups: Array<() => void> = []
 // Timeline data state
 let realTimelineEvents: any[] = []
-let isLoadingTimeline = true
 let timelineLoadError: string | null = null
 let appliedTerrainOverrideSignature = ''
 let loadToken = 0
@@ -319,7 +318,6 @@ async function loadTimelineData(token: number) {
   })
 
   try {
-    isLoadingTimeline = true
     timelineLoadError = null
     if (timelineEventsJson && timelineEventsJson !== '[]') {
       realTimelineEvents = JSON.parse(timelineEventsJson)
@@ -344,10 +342,6 @@ async function loadTimelineData(token: number) {
       level: 'error',
       message: timelineLoadError,
     })
-  } finally {
-    if (token === loadToken) {
-      isLoadingTimeline = false
-    }
   }
 }
 
@@ -458,8 +452,7 @@ $: oceanAnimationEnabled =
 $: if (
   terrainReady &&
   activeManifest &&
-  !deferredEnvironmentBootStarted &&
-  (!activeManifest.features.starMap || !isLoadingTimeline)
+  !deferredEnvironmentBootStarted
 ) {
   startDeferredSceneBoot()
 }
@@ -467,11 +460,7 @@ $: if (deferredEnvironmentBootStarted && activeManifest) {
   if (!activeManifest.features.ocean) showOcean = false
   if (!activeManifest.features.vegetation) showVegetation = false
   if (!activeManifest.features.fireflies) showFireflies = false
-  if (
-    !activeManifest.features.starMap ||
-    isLoadingTimeline ||
-    !!timelineLoadError
-  )
+  if (!activeManifest.features.starMap || !!timelineLoadError)
     showStarSystems = false
 }
 $: terrainOverrideSignature = JSON.stringify(
@@ -651,18 +640,16 @@ function startDeferredSceneBoot() {
           showVisualChunks={!terrainAuthoringActive}
           on:terrainReady={(e) => {
             terrainReady = true;
-            setTimeout(() => {
-              dispatch('terrainReady');
-              if (spawnSystem && spawnSystem.requestSpawn) {
-                const spawnHeight = getHeightAt(playerSpawnPoint[0], playerSpawnPoint[2]);
-                spawnSystem.requestSpawn({
-                  entityType: 'player',
-                  position: [playerSpawnPoint[0], Math.max(playerSpawnPoint[1], spawnHeight + 2), playerSpawnPoint[2]],
-                  priority: 10,
-                  metadata: { levelName: activeManifest.name, spawnReason: 'level_load' }
-                });
-              }
-            }, 10);
+            if (spawnSystem && spawnSystem.requestSpawn) {
+              const spawnHeight = getHeightAt(playerSpawnPoint[0], playerSpawnPoint[2]);
+              spawnSystem.requestSpawn({
+                entityType: 'player',
+                position: [playerSpawnPoint[0], Math.max(playerSpawnPoint[1], spawnHeight + 2), playerSpawnPoint[2]],
+                priority: 10,
+                metadata: { levelName: activeManifest.name, spawnReason: 'level_load' }
+              });
+            }
+            dispatch('terrainReady');
           }}
         />
       {/if}
@@ -756,14 +743,7 @@ function startDeferredSceneBoot() {
       
       <!-- Star Map and Navigation System - configured from manifest -->
       {#if activeManifest.features.starMap}
-        {#if isLoadingTimeline}
-          <T.Group position={[0, 5, 0]} name="loading-indicator">
-            <T.Mesh>
-              <T.SphereGeometry args={[2]} />
-              <T.MeshBasicMaterial color="#00ff88" transparent opacity={0.6} />
-            </T.Mesh>
-          </T.Group>
-        {:else if timelineLoadError}
+        {#if timelineLoadError}
           <T.Group position={[0, 5, 0]} name="error-indicator">
             <T.Mesh>
               <T.SphereGeometry args={[2]} />

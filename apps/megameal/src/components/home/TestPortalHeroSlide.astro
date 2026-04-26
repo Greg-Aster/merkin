@@ -59,6 +59,11 @@ import HomeIntroEnvironment from './HomeIntroEnvironment.svelte'
     border: 0;
   }
 
+  :global(#banner-container.banner-only-mode #standard-banner-container .banner-billboard),
+  :global(#banner-container.banner-only-mode #standard-banner-container .banner-title-display) {
+    display: none !important;
+  }
+
   @keyframes intro-veil-fade {
     from {
       opacity: 0;

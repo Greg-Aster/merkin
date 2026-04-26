@@ -976,6 +976,10 @@ const hasAssistantBanner = scene?.id === "assistant";
     overflow: hidden;
   }
 
+  #standard-banner-container.banner-portal-fading .banner-slide {
+    opacity: 0 !important;
+  }
+
   .banner-media-layer > .banner-image,
   .banner-media-layer > .banner-video,
   .banner-media-layer > .banner-image-fallback {
@@ -1098,6 +1102,7 @@ const hasAssistantBanner = scene?.id === "assistant";
   const bannerCleanupKey = '__merkinBannerCleanup'
   const bannerPageLoadBoundKey = '__merkinBannerPageLoadBound'
   const bannerControlEventName = 'merkin:banner-control'
+  const bannerSceneSelectEventName = 'merkin:banner-select-scene'
   const bannerStateEventName = 'merkin:banner-state'
 
   const initializeBannerSystems = () => {
@@ -1224,6 +1229,7 @@ const hasAssistantBanner = scene?.id === "assistant";
     }
     let bannerTimeoutId = null
     let motionCleanupTimeoutId = null
+    let portalFadeTimeoutId = null
     let progressAnimationFrameId = null
     let currentSlideIndex = initialSlideIndex
     let currentSlideDuration = interval
@@ -1538,6 +1544,37 @@ const hasAssistantBanner = scene?.id === "assistant";
       }
     }
 
+    const goToSceneSlide = sceneId => {
+      if (!slides.length || typeof sceneId !== 'string' || sceneId.length === 0) {
+        return
+      }
+
+      const nextIndex = slides.findIndex(slide => slide.dataset.sceneId === sceneId)
+      if (nextIndex < 0) return
+
+      pauseBanner('portal-sync')
+      clearScheduledAdvance()
+      stopProgressLoop()
+
+      if (nextIndex === currentSlideIndex) {
+        dispatchBannerState()
+        return
+      }
+
+      if (portalFadeTimeoutId) {
+        clearTimeout(portalFadeTimeoutId)
+        portalFadeTimeoutId = null
+      }
+      standardBannerContainer?.classList.add('banner-portal-fading')
+      portalFadeTimeoutId = setTimeout(() => {
+        portalFadeTimeoutId = null
+        showSlide(nextIndex)
+        requestAnimationFrame(() => {
+          standardBannerContainer?.classList.remove('banner-portal-fading')
+        })
+      }, Math.min(520, Math.max(180, transitionDuration * 0.22)))
+    }
+
     if (standardBannerContainer && slides.length > 0) {
       showSlide(initialSlideIndex)
       if (slides.length > 1 && animationConfig.enabled) {
@@ -1589,6 +1626,15 @@ const hasAssistantBanner = scene?.id === "assistant";
           } else {
             resumeBanner('visibility')
           }
+        },
+        { signal },
+      )
+
+      window.addEventListener(
+        bannerSceneSelectEventName,
+        event => {
+          const sceneId = event?.detail?.sceneId
+          goToSceneSlide(sceneId)
         },
         { signal },
       )
@@ -1682,6 +1728,11 @@ const hasAssistantBanner = scene?.id === "assistant";
         clearTimeout(motionCleanupTimeoutId)
         motionCleanupTimeoutId = null
       }
+      if (portalFadeTimeoutId) {
+        clearTimeout(portalFadeTimeoutId)
+        portalFadeTimeoutId = null
+      }
+      standardBannerContainer?.classList.remove('banner-portal-fading')
       cleanupHiddenSlideMotion()
       abortController.abort()
     }

@@ -318,9 +318,9 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
     icon: 'book-open',
   },
   '/timeline/': {
-    title: 'Open the Timeline',
+    title: 'The Timeline',
     description:
-      'The timeline is the map layer for the whole project: eras, incidents, recipes, wars, corporate ascensions, and archival fragments.',
+      'Browse the approved sequence of disasters. Every era is labeled for your comfort, and none of the labels imply liability.',
     icon: 'timeline',
     kicker: 'Chronology Console',
     stat: `${publishedTimelineCount} live timeline entries`,
@@ -333,13 +333,13 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
     icon: 'book-open',
   },
   '/posts/cookbook/cookbook-index/': {
-    title: 'Open the Cookbook',
+    title: 'The Cookbook',
     description:
-      'Discover recipes, cooking techniques, and commercial food artifacts pulled out of the MEGAMEAL universe.',
+      'Recipes from a future where dinner has a brand strategy, a waiver, and a suspiciously well-funded legal department.',
     icon: 'user-group',
-    kicker: 'Cookbook Project',
-    stat: 'Recipe index online',
-    ctaLabel: 'Open Cookbook',
+    kicker: 'Culinary Compliance',
+    stat: 'Flavor optimism mandatory',
+    ctaLabel: 'View Recipes',
   },
   '/posts/timeline/': {
     title: 'Timeline Map',
@@ -348,49 +348,49 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
     icon: 'newspaper',
   },
   '/archive/': {
-    title: 'Read the Story Arcs',
+    title: 'The Archive',
     description:
-      'Follow connected chapters, recovered accounts, recipes, corporate records, and cosmic incident reports.',
+      'Incident reports, story arcs, and documents that were absolutely not shredded, denied, re-shredded, and then lovingly restored.',
     icon: 'newspaper',
-    kicker: 'Story Archive',
-    stat: `${activeArcCount} active arcs`,
+    kicker: 'Recovered Materials',
+    stat: `${activeArcCount} sanitized arcs`,
     ctaLabel: 'Open Archive',
   },
   '/game/': {
-    title: 'Enter the Game Mode',
+    title: 'Game Mode',
     description:
-      'Move from reading the universe into navigating it. The observatory turns story nodes into explorable coordinates.',
+      'Navigate the cosmic menu board yourself. Management reminds you that falling through spacetime is not covered by the meal plan.',
     icon: 'rocket',
     kicker: 'Star Observatory',
-    stat: `${publishedGameStarsCount} star nodes`,
+    stat: `${publishedGameStarsCount} player agency nodes`,
     ctaLabel: 'Enter Game',
   },
   '/store/': {
-    title: 'Browse the Store',
+    title: 'The Store',
     description:
-      'Artifacts, goods, fake products, and dystopian brand debris from the MEGAMEAL economy.',
+      'Acquire artifacts from the economy that made everything worse, now available in convenient collectible formats.',
     icon: 'briefcase',
-    kicker: 'Commercial Layer',
-    stat: 'Artifacts and goods',
-    ctaLabel: 'Browse Store',
+    kicker: 'Retail Afterlife',
+    stat: 'Consumption encouraged',
+    ctaLabel: 'Browse Goods',
   },
   '/community/': {
-    title: 'Join the Community',
+    title: 'Community',
     description:
-      'Follow updates, contact the project, and stay connected as the universe expands.',
+      'Join the channels. Share theories. Report anomalies. Remember: friendship is cheaper than customer support.',
     icon: 'user-group',
-    kicker: 'Live Channels',
-    stat: `${publishedDispatchCount} transmissions`,
+    kicker: 'Public Relations',
+    stat: `${publishedDispatchCount} monitored transmissions`,
     ctaLabel: 'Open Channels',
   },
   '/posts/introducing-story-mode/': {
-    title: 'Open Story Mode',
+    title: 'Story Mode',
     description:
-      'Read the saga as connected arcs and guided entry points instead of a flat chronological feed.',
+      'Read the saga in a humane order, or as humane as a galactic fast-food empire permits before the upsell begins.',
     icon: 'newspaper',
-    kicker: 'Guided Entry',
-    stat: 'Arc-first reading mode',
-    ctaLabel: 'Open Story Mode',
+    kicker: 'Guided Consumption',
+    stat: 'Narrative rails engaged',
+    ctaLabel: 'Start Reading',
   },
   /*
   '/contact': {
