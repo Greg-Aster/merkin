@@ -15,6 +15,7 @@ let terrainMesh: THREE.Mesh | null = null
 let terrainGeometry: THREE.BufferGeometry | null = null
 let terrainMaterial: THREE.MeshBasicMaterial | null = null
 let boundsMesh: THREE.Mesh | null = null
+let terrainGeometrySignature = ''
 
 const unsubEditor = editorStateStore.subscribe(value => {
   editorState = value
@@ -61,6 +62,7 @@ function ensureObjects() {
         transparent: true,
         opacity: 0.55,
         depthWrite: false,
+        depthTest: false,
       }),
     )
     boundsMesh.renderOrder = 17
@@ -77,6 +79,19 @@ function rebuildTerrainGeometry() {
     terrainState.resolution === 0
   )
     return
+
+  const signature = [
+    levelId,
+    terrainState.resolution,
+    terrainState.worldSize,
+    terrainState.worldSizeX,
+    terrainState.worldSizeZ,
+    terrainState.bounds
+      ? `${terrainState.bounds.min.join(',')}:${terrainState.bounds.max.join(',')}`
+      : 'no-bounds',
+  ].join('|')
+  if (signature === terrainGeometrySignature) return
+  terrainGeometrySignature = signature
 
   const manager = terrainState.manager
   const resolution = terrainState.resolution
@@ -151,6 +166,10 @@ onMount(() => {
   rebuildTerrainGeometry()
   updateBoundsMesh()
 })
+
+$: if (shouldShowTerrainOverlay()) {
+  ensureObjects()
+}
 
 $: if (terrainMesh) {
   terrainMesh.visible = shouldShowTerrainOverlay()

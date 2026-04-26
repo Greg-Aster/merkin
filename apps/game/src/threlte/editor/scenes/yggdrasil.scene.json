@@ -1,7 +1,7 @@
 ﻿{
     "levelId":  "yggdrasil",
     "version":  1,
-    "updatedAt":  "2026-04-26T19:03:13.5523068Z",
+    "updatedAt":  "2026-04-26T19:20:44.5374551Z",
     "settings":  {
                      "level":  {
                                    "spawn":  {
@@ -723,7 +723,7 @@
                                          "descriptor":  "large circular halo or luminous ring suspended around the upper crown, a floating sacred ornament not a portal"
                                      },
                       "collision":  {
-                                        "shape":  "trimesh",
+                                        "shape":  "cylinder",
                                         "enabled":  true,
                                         "friction":  0.7,
                                         "restitution":  0,
@@ -769,7 +769,7 @@
                                          "descriptor":  "well of urd ring, carved circular stone ring around a sacred well"
                                      },
                       "collision":  {
-                                        "shape":  "trimesh",
+                                        "shape":  "cylinder",
                                         "enabled":  true,
                                         "friction":  0.7,
                                         "restitution":  0,
@@ -938,7 +938,7 @@
                                          "descriptor":  "well of mimir ring, carved circular stone ring around a sacred well"
                                      },
                       "collision":  {
-                                        "shape":  "trimesh",
+                                        "shape":  "cylinder",
                                         "enabled":  true,
                                         "friction":  0.7,
                                         "restitution":  0,
@@ -1107,7 +1107,7 @@
                                          "descriptor":  "hvergelmir basin ring, carved circular stone ring around a sacred well"
                                      },
                       "collision":  {
-                                        "shape":  "trimesh",
+                                        "shape":  "cylinder",
                                         "enabled":  true,
                                         "friction":  0.7,
                                         "restitution":  0,
@@ -2963,7 +2963,7 @@
                                          "descriptor":  "high crown perch structure associated with the upper watch point, a perched landmark near the top of the tree"
                                      },
                       "collision":  {
-                                        "shape":  "trimesh",
+                                        "shape":  "cylinder",
                                         "enabled":  true,
                                         "friction":  0.7,
                                         "restitution":  0,
@@ -6640,11 +6640,16 @@
                                     "scale":  1
                                 },
                       "collision":  {
-                                        "shape":  "trimesh",
+                                        "shape":  "cuboid",
                                         "enabled":  true,
                                         "friction":  0.7,
                                         "restitution":  0,
-                                        "sensor":  false
+                                        "sensor":  false,
+                                        "size":  [
+                                                     54,
+                                                     8,
+                                                     54
+                                                 ]
                                     },
                       "generation":  {
                                          "family":  "yggdrasil-crown-ascent-merged",
@@ -6680,11 +6685,16 @@
                                     "scale":  1
                                 },
                       "collision":  {
-                                        "shape":  "trimesh",
+                                        "shape":  "cuboid",
                                         "enabled":  true,
                                         "friction":  0.7,
                                         "restitution":  0,
-                                        "sensor":  false
+                                        "sensor":  false,
+                                        "size":  [
+                                                     22,
+                                                     1.2,
+                                                     96
+                                                 ]
                                     },
                       "generation":  {
                                          "family":  "yggdrasil-bifrost-ribbon-merged",

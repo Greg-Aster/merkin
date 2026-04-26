@@ -154,6 +154,10 @@ function hasPhysicsBody() {
   return !!resolveNodeCollision(node)
 }
 
+function hasLiveCollisionBody() {
+  return hasPhysicsBody() && effectiveVisible
+}
+
 function getRigidBodyType() {
   return node.physics?.bodyType ?? 'fixed'
 }
@@ -476,7 +480,7 @@ onDestroy(() => {
 </script>
 
 <T.Group bind:ref={group} visible={effectiveVisible}>
-  {#if !editorEnabled && hasPhysicsBody() && isPersistentRuntimeNode() && effectiveVisible}
+  {#if !editorEnabled && hasLiveCollisionBody()}
     <CollisionBody
       shape={effectiveCollision?.shape ?? 'cuboid'}
       args={getColliderArgs()}
@@ -501,7 +505,7 @@ onDestroy(() => {
     <EditorNodeRenderContent {node} {editorEnabled} />
   {/if}
 
-  {#if hasPhysicsBody() && editorEnabled && $editorStateStore.collisionOverlayEnabled}
+  {#if hasLiveCollisionBody() && editorEnabled && $editorStateStore.collisionOverlayEnabled}
     <CollisionBody
       physicsEnabled={false}
       showOverlay={true}
