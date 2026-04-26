@@ -2,12 +2,10 @@
 import { TERRAIN_GROUP } from '@/threlte/constants/physics'
 import { playerStateStore } from '@/threlte/stores/gameStateStore'
 import { T } from '@threlte/core'
-import { Collider, RigidBody, useRapier } from '@threlte/rapier'
-import { createEventDispatcher, onDestroy, onMount } from 'svelte'
-import * as THREE from 'three'
+import { Collider, RigidBody } from '@threlte/rapier'
+import { createEventDispatcher, onDestroy } from 'svelte'
 
 const dispatch = createEventDispatcher()
-const rapier = useRapier()
 // Track player position for chunk activation
 let playerPos: [number, number, number] = [0, 0, 0]
 let unsubscribePlayer: (() => void) | null = null
@@ -26,12 +24,7 @@ export let bounds: {
 export let position: [number, number, number] = [0, 0, 0]
 export let friction: number = 0.9
 export let restitution: number = 0.0
-// Additional debug overlays (disabled by default)
-export let renderPhysicsDebug: boolean = false
-
-// Debug toggles
 export let showBoundsAABB: boolean = false
-export let enableRaycastProbe: boolean = false
 export let useTrimesh: boolean = true // Default to TriMesh system
 export let trimeshDownsample: number = 8
 export let trimeshChunkVerts: number = 65
@@ -40,124 +33,8 @@ export let trimeshMode: 'single' | 'chunked' = 'single'
 export let chunkSize: number | null = null
 export let gridSize: [number, number] | null = null
 
-// Allow toggles from URL query params
-onMount(() => {
-  try {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('hf_pdbg') === '0') renderPhysicsDebug = false
-    if (params.get('hf_pdbg') === '1') renderPhysicsDebug = true
-    if (params.get('hf_aabb') === '1') showBoundsAABB = true
-    if (params.get('hf_probe') === '1') enableRaycastProbe = true
-    if (params.get('hf_tm') === '0') useTrimesh = false // Allow disabling for debug
-    if (params.get('hf_tm_ds'))
-      trimeshDownsample = Math.max(1, parseInt(params.get('hf_tm_ds')!))
-    if (params.get('hf_tm_cv'))
-      trimeshChunkVerts = Math.max(9, parseInt(params.get('hf_tm_cv')!))
-    if (params.get('hf_tm_rad'))
-      trimeshActiveRadius = Math.max(1, parseInt(params.get('hf_tm_rad')!))
-    if (params.get('hf_tm_mode') === 'chunked') trimeshMode = 'chunked'
-  } catch (e) {
-    if (import.meta.env.DEV) {
-      console.warn('Failed to parse URL params for debug toggles')
-    }
-  }
-})
-
 // Signal readiness once TriMesh colliders are active so Game.svelte can proceed
 let trimeshReadyDispatched = false
-
-// (Removed heavy debug wireframe generation)
-
-// Diagnostic functions
-function logColliderInventory() {
-  if (!rapier.world) return
-  if (!import.meta.env.DEV) return
-  console.log('🔍 Collider Inventory:')
-  let count = 0
-
-  try {
-    if (typeof rapier.world.forEachCollider === 'function') {
-      rapier.world.forEachCollider((collider: any) => {
-        count++
-        const t = collider.translation()
-        const g = collider.collisionGroups()
-        const s =
-          typeof collider.shapeType === 'function'
-            ? collider.shapeType()
-            : 'unknown'
-        console.log(
-          `  ${count}. Shape: ${s}, Pos: [${t.x.toFixed(2)}, ${t.y.toFixed(2)}, ${t.z.toFixed(2)}], Groups: ${g}, Sensor: ${collider.isSensor()}`,
-        )
-      })
-    } else if (
-      rapier.world.colliders &&
-      typeof rapier.world.colliders.forEach === 'function'
-    ) {
-      rapier.world.colliders.forEach((collider: any) => {
-        count++
-        const t = collider.translation()
-        const g = collider.collisionGroups()
-        const s =
-          typeof collider.shapeType === 'function'
-            ? collider.shapeType()
-            : 'unknown'
-        console.log(
-          `  ${count}. Shape: ${s}, Pos: [${t.x.toFixed(2)}, ${t.y.toFixed(2)}, ${t.z.toFixed(2)}], Groups: ${g}, Sensor: ${collider.isSensor()}`,
-        )
-      })
-    } else {
-      console.warn('Collider iteration API not available')
-    }
-  } catch (e) {
-    console.warn('Collider inventory failed:', e)
-  }
-  console.log(`📊 Total active colliders: ${count}`)
-}
-
-function performRaycastProbe(testPoints: Array<[number, number, number]> = []) {
-  if (!rapier.world || !bounds) return
-  if (!import.meta.env.DEV) return
-
-  const defaultTestPoints = [
-    [bounds.min[0], bounds.max[1] + 10, bounds.min[2]], // Bottom-left corner
-    [bounds.max[0], bounds.max[1] + 10, bounds.min[2]], // Bottom-right corner
-    [bounds.max[0], bounds.max[1] + 10, bounds.max[2]], // Top-right corner
-    [bounds.min[0], bounds.max[1] + 10, bounds.max[2]], // Top-left corner
-    [
-      (bounds.min[0] + bounds.max[0]) / 2,
-      bounds.max[1] + 10,
-      (bounds.min[2] + bounds.max[2]) / 2,
-    ], // Center
-  ]
-
-  const points = testPoints.length > 0 ? testPoints : defaultTestPoints
-
-  console.log('🎯 Ground Raycast Probe:')
-  points.forEach((point, i) => {
-    const ray = new rapier.rapier.Ray(
-      { x: point[0], y: point[1], z: point[2] },
-      { x: 0, y: -1, z: 0 },
-    )
-
-    const hit = rapier.world!.castRay(ray, 5000.0, true)
-    if (hit && Number.isFinite(hit.toi)) {
-      const hitPoint = ray.pointAt(hit.toi)
-      if (hitPoint && Number.isFinite(hitPoint.y)) {
-        console.log(
-          `  Point ${i + 1} [${point[0].toFixed(2)}, ${point[2].toFixed(2)}]: Ray Y=${hitPoint.y.toFixed(3)}`,
-        )
-      } else {
-        console.log(
-          `  Point ${i + 1} [${point[0].toFixed(2)}, ${point[2].toFixed(2)}]: Hit but invalid point`,
-        )
-      }
-    } else {
-      console.log(
-        `  Point ${i + 1} [${point[0].toFixed(2)}, ${point[2].toFixed(2)}]: No hit`,
-      )
-    }
-  })
-}
 
 // --- TriMesh Fallback (chunked, downsampled) ---
 // Downsample height data for TriMesh construction
@@ -473,13 +350,6 @@ function dispatchTerrainReady(activeChunks: number) {
   try {
     trimeshReadyDispatched = true
     const dsRes = `${trimeshLayout.dsSize}x${trimeshLayout.dsSize}`
-    if (import.meta.env.DEV) {
-      console.log('TriMesh terrain collider ready:', {
-        mode: trimeshMode,
-        activeChunks,
-        dsResolution: dsRes,
-      })
-    }
     dispatch('terrainReady', {
       colliderType: 'trimesh',
       activeChunks,
@@ -489,23 +359,6 @@ function dispatchTerrainReady(activeChunks: number) {
     console.warn('Failed to dispatch TriMesh readiness:', e)
   }
 }
-
-// Calculate actual terrain position based on bounds or fallback to centered (no rotation)
-$: terrainOffset = (() => {
-  const offset = bounds
-    ? [bounds.min[0], 0, bounds.min[2]]
-    : [-worldSize / 2, 0, -worldSize / 2]
-  // Anchor info (dev only)
-  if (import.meta.env.DEV) console.log('📍 Using min corner anchor:', offset)
-  return offset
-})()
-
-// (Removed debug wireframe computation)
-
-// Run diagnostics when enabled
-onMount(() => {
-  // No debug diagnostics by default
-})
 
 function setPlayerTracking(enabled: boolean) {
   if (enabled && !isTrackingPlayer) {
@@ -543,10 +396,6 @@ onDestroy(() => {
           restitution={restitution}
           on:create={() => {
             dispatchTerrainReady(activeTrimeshChunks.length)
-            if (import.meta.env.DEV) console.log('✅ TriMesh collider created at', patch.position, 'for', chunk)
-          }}
-          on:destroy={() => {
-            if (import.meta.env.DEV) console.log('🗑️ TriMesh collider destroyed:', chunk)
           }}
         />
       </RigidBody>
@@ -564,7 +413,6 @@ onDestroy(() => {
       restitution={restitution}
       on:create={() => {
         dispatchTerrainReady(1)
-        if (import.meta.env.DEV) console.log('✅ Single TriMesh collider created (world-space)')
       }}
     />
   </RigidBody>

@@ -30,7 +30,8 @@ function isGeometryNode(node) {
 
 function auditScene(file) {
   const fullPath = join(sceneDir, file)
-  const scene = JSON.parse(readFileSync(fullPath, 'utf8'))
+  const source = readFileSync(fullPath, 'utf8').replace(/^\uFEFF/, '')
+  const scene = JSON.parse(source)
   const nodes = Array.isArray(scene.nodes) ? scene.nodes : []
   const geometryNodes = nodes.filter(isGeometryNode)
   const explicitCollision = geometryNodes.filter(node => node.collision)

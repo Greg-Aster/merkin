@@ -112,12 +112,7 @@ $: colliderDownsample = (() => {
       trimeshDownsample={colliderDownsample}
       chunkSize={config.chunkSize}
       gridSize={config.gridSize}
-      renderPhysicsDebug={false}
       showBoundsAABB={false}
-      enableRaycastProbe={false}
-      flipRowsForCollider={false}
-      swapAxesForCollider={false}
-      anchorAtCenter={false}
       on:terrainReady={(e) => dispatch('terrainReady', e.detail)}
     />
 
