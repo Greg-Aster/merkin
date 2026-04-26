@@ -1,5 +1,6 @@
 <script lang="ts">
 import EditorAssetPreview from './EditorAssetPreview.svelte'
+import { resolveNodeCollision } from './editorCollisionDefaults'
 import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
 
 type TextureField =
@@ -88,6 +89,9 @@ export let multiParentCandidates: EditorSceneNode[] = []
 export let selectedNodeMaterial: EditorMaterialData = {}
 export let selectedNodeColliderSize: [number, number, number] = [1, 1, 1]
 export let styleDescriptor = ''
+export let canUseAiMeshStudioSelection = false
+export let hunyuanBusy = false
+export let hunyuanPrompt = ''
 
 export let assetPickerTargetNodeId = ''
 export let assetBrowserPath = ''
@@ -144,6 +148,8 @@ export let onCollisionBooleanChange: (
   value: boolean,
 ) => void = () => {}
 export let onRecalculateCollision: () => void = () => {}
+
+$: effectiveCollision = resolveNodeCollision(selectedNode)
 export let onMaterialColorChange: (
   field: 'color' | 'emissive',
   value: string,
@@ -191,6 +197,8 @@ export let onTransformChange: (
 ) => void = () => {}
 export let onDuplicate: () => void = () => {}
 export let onDelete: () => void = () => {}
+export let onConvertSelectedToMesh: () => void = () => {}
+export let onReimagineSelected: () => void = () => {}
 
 const generatedRoot = 'apps/megameal/public/generated/hunyuan3d'
 const importedRoot = 'apps/megameal/public/models'
@@ -207,6 +215,7 @@ $: hasGeometryNode = !!(
   selectedNode?.prefab ||
   selectedNode?.primitive
 )
+$: canConvertSelectedToMesh = !!(selectedNode?.primitive || selectedNode?.prefab)
 $: filteredAssetBrowserItems = assetBrowserItems.filter(
   item =>
     !assetBrowserFilter.trim() ||
@@ -219,6 +228,26 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
     <div class="label">Inspector</div>
     <input class="text-input" value={selectedNode.name} on:input={(e) => onNameChange((e.currentTarget as HTMLInputElement).value)} />
     <label class="checkbox"><input type="checkbox" checked={selectedNode.visible} on:change={(e) => onVisibleChange((e.currentTarget as HTMLInputElement).checked)} /> Visible</label>
+    {#if hasGeometryNode}
+      <div class="tuple-group editor-mt-sm">
+        <div class="tuple-label">Object Description</div>
+        <input class="text-input" value={styleDescriptor} on:input={(e) => onStyleDescriptorChange((e.currentTarget as HTMLInputElement).value)} />
+      </div>
+      <div class="tuple-group">
+        <div class="tuple-label">Style Prompt</div>
+        <textarea
+          rows="3"
+          bind:value={hunyuanPrompt}
+          placeholder="Describe the new style, material, shape language, or mood for this object."
+        ></textarea>
+      </div>
+      <div class="button-row compact editor-mt-sm">
+        <button on:click={onConvertSelectedToMesh} disabled={!canConvertSelectedToMesh}>Convert To Mesh</button>
+        <button on:click={onReimagineSelected} disabled={!canUseAiMeshStudioSelection || hunyuanBusy}>
+          {hunyuanBusy ? 'Reimagining…' : 'Reimagine Selected'}
+        </button>
+      </div>
+    {/if}
 
     <div class="tuple-group">
       <div class="tuple-label">Parent</div>
@@ -319,7 +348,7 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
     {#if hasGeometryNode}
       <div class="tuple-group">
         <div class="tuple-label">Physics</div>
-        <label class="checkbox"><input type="checkbox" checked={!!selectedNode.collision} on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Solid / Collider</label>
+        <label class="checkbox"><input type="checkbox" checked={!!effectiveCollision} on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Solid / Collider</label>
         <select class="text-input" value={selectedNode.physics?.bodyType ?? 'fixed'} on:change={(e) => onPhysicsBodyTypeChange((e.currentTarget as HTMLSelectElement).value)}>
           <option value="fixed">Fixed</option>
           <option value="dynamic">Dynamic</option>
@@ -338,19 +367,25 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
           <label class="checkbox"><input type="checkbox" checked={selectedNode.physics?.lockRotations ?? false} on:change={(e) => onPhysicsBooleanChange('lockRotations', (e.currentTarget as HTMLInputElement).checked)} /> Lock Rotations</label>
           <label class="checkbox"><input type="checkbox" checked={selectedNode.physics?.lockTranslations ?? false} on:change={(e) => onPhysicsBooleanChange('lockTranslations', (e.currentTarget as HTMLInputElement).checked)} /> Lock Translations</label>
         </div>
-        {#if selectedNode.collision}
+        {#if effectiveCollision && effectiveCollision.shape !== 'trimesh'}
           <div class="tuple-label">Collider Size</div>
           <div class="tuple-row">
             {#each [0, 1, 2] as index}
-              <input class="tuple-input" type="number" min="0.05" step="0.05" value={selectedNode.collision.size?.[index] ?? selectedNodeColliderSize[index]} on:change={(e) => onCollisionSizeChange(index, (e.currentTarget as HTMLInputElement).value)} />
+              <input class="tuple-input" type="number" min="0.05" step="0.05" value={effectiveCollision.size?.[index] ?? selectedNodeColliderSize[index]} on:change={(e) => onCollisionSizeChange(index, (e.currentTarget as HTMLInputElement).value)} />
             {/each}
           </div>
           <div class="tuple-row">
-            <input class="tuple-input" type="number" min="0" step="0.05" value={selectedNode.collision.friction ?? 0.7} on:change={(e) => onCollisionNumericChange('friction', (e.currentTarget as HTMLInputElement).value)} />
-            <input class="tuple-input" type="number" min="0" step="0.05" value={selectedNode.collision.restitution ?? 0} on:change={(e) => onCollisionNumericChange('restitution', (e.currentTarget as HTMLInputElement).value)} />
+            <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.friction ?? 0.7} on:change={(e) => onCollisionNumericChange('friction', (e.currentTarget as HTMLInputElement).value)} />
+            <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.restitution ?? 0} on:change={(e) => onCollisionNumericChange('restitution', (e.currentTarget as HTMLInputElement).value)} />
           </div>
-          <label class="checkbox"><input type="checkbox" checked={selectedNode.collision.sensor ?? false} on:change={(e) => onCollisionBooleanChange('sensor', (e.currentTarget as HTMLInputElement).checked)} /> Sensor Only</label>
+          <label class="checkbox"><input type="checkbox" checked={effectiveCollision.sensor ?? false} on:change={(e) => onCollisionBooleanChange('sensor', (e.currentTarget as HTMLInputElement).checked)} /> Sensor Only</label>
           <button on:click={onRecalculateCollision}>Match Collider To Visual</button>
+        {:else if effectiveCollision}
+          <div class="tuple-row">
+            <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.friction ?? 0.7} on:change={(e) => onCollisionNumericChange('friction', (e.currentTarget as HTMLInputElement).value)} />
+            <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.restitution ?? 0} on:change={(e) => onCollisionNumericChange('restitution', (e.currentTarget as HTMLInputElement).value)} />
+          </div>
+          <label class="checkbox"><input type="checkbox" checked={effectiveCollision.sensor ?? false} on:change={(e) => onCollisionBooleanChange('sensor', (e.currentTarget as HTMLInputElement).checked)} /> Sensor Only</label>
         {/if}
       </div>
 

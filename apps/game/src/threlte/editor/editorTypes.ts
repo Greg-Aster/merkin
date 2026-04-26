@@ -140,7 +140,8 @@ export interface EditorNodePhysicsData {
 }
 
 export interface EditorNodeCollisionData {
-  shape: 'cuboid'
+  shape: 'cuboid' | 'cylinder' | 'trimesh'
+  enabled?: boolean
   size?: [number, number, number]
   friction?: number
   restitution?: number

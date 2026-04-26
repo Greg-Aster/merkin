@@ -86,20 +86,14 @@ export class TerrainManager {
         )
       }
 
+      const hasExplicitRectangularSize =
+        config.worldSizeX !== undefined || config.worldSizeZ !== undefined
+
       // Check for rectangular vs square terrain assumptions
       const aspectRatio = boundsWorldSizeX / boundsWorldSizeZ
-      if (Math.abs(aspectRatio - 1.0) > 0.05) {
+      if (Math.abs(aspectRatio - 1.0) > 0.05 && !hasExplicitRectangularSize) {
         issues.push(
           `⚠️ Rectangular terrain detected: ${boundsWorldSizeX.toFixed(1)}x${boundsWorldSizeZ.toFixed(1)} (aspect ratio: ${aspectRatio.toFixed(2)})`,
-        )
-      }
-
-      // Check if terrain is centered at origin
-      const centerX = (config.bounds.min[0] + config.bounds.max[0]) / 2
-      const centerZ = (config.bounds.min[2] + config.bounds.max[2]) / 2
-      if (Math.abs(centerX) > 1.0 || Math.abs(centerZ) > 1.0) {
-        issues.push(
-          `⚠️ Terrain not centered: center at (${centerX.toFixed(1)}, ${centerZ.toFixed(1)}) instead of origin`,
         )
       }
     }

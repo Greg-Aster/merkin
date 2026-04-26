@@ -54,7 +54,7 @@ function createSolitudeGroundNodes(): EditorSceneNode[] {
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
       visible: true,
-      collision: { shape: 'cuboid', friction: 0.92 },
+      collision: { shape: 'cuboid', enabled: false, friction: 0.92 },
       primitive: {
         geometry: 'box',
         args: [240, 2.4, 240],
@@ -74,7 +74,7 @@ function createSolitudeGroundNodes(): EditorSceneNode[] {
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
       visible: true,
-      collision: { shape: 'cuboid', friction: 0.94 },
+      collision: { shape: 'cuboid', enabled: false, friction: 0.94 },
       primitive: {
         geometry: 'box',
         args: [44, 0.8, 44],

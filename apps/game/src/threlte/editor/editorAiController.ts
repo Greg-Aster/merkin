@@ -399,6 +399,14 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
     const targetNodeId = selectedNode.id
     const targetNodeIds = deps.getAiReplacementTargetIds(selectedNode)
     const targetSourceName = deps.getAiSourceName(selectedNode)
+    const objectDescription = deps.getDefaultStyleDescriptor(selectedNode).trim()
+    const stylePrompt = String(state.hunyuanPrompt ?? '').trim()
+    const prompt = [
+      objectDescription ? `object description: ${objectDescription}` : '',
+      stylePrompt ? `style prompt: ${stylePrompt}` : targetSourceName,
+    ]
+      .filter(Boolean)
+      .join('\n')
     const source = await deps.ensureSceneNodeSourceAsset(selectedNode)
     const targetAssetUrl = source.assetUrl
     const editorNodes = deps.getEditorNodes()
@@ -453,7 +461,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
         assetUrl: targetAssetUrl || undefined,
         sourceName: targetSourceName,
         mode,
-        prompt: (state.hunyuanPrompt || targetSourceName).trim(),
+        prompt,
         referenceImageUrl: state.hunyuanReferenceImageUrl,
         workflowPath: state.selectedComfyWorkflowPath,
       })

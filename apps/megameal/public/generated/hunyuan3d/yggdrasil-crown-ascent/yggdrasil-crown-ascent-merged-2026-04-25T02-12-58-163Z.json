@@ -1,7 +1,7 @@
 {
   "id": "yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z",
   "label": "Yggdrasil Crown Ascent Merged",
-  "descriptor": "merged spiral crown ascent walkway with ramps, landings, final platform, and short crown bridge",
+  "descriptor": "spiral stairway walkway",
   "sourceScene": "yggdrasil",
   "mergedNodeIds": [
     "yggdrasil-crown-path-ramp-1",

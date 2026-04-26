@@ -1,5 +1,6 @@
 <script lang="ts">
 import EditorAssetPreview from './EditorAssetPreview.svelte'
+import { resolveNodeCollision } from './editorCollisionDefaults'
 import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
 
 type TextureField =
@@ -66,6 +67,8 @@ export let selectedGeneratedVariantUrl = ''
 export let styleDescriptor = ''
 export let canUseStyleStudioSelection = false
 export let canUseAiMeshStudioSelection = false
+export let hunyuanBusy = false
+export let hunyuanPrompt = ''
 export let generatedVariantItems: GeneratedVariantItem[] = []
 export let generatedVariantLoading = false
 export let generatedVariantError = ''
@@ -82,6 +85,8 @@ export let colliderSize: [number, number, number] = [1, 1, 1]
 export let onNameChange: (value: string) => void = () => {}
 export let onOpenStyleTab: () => void = () => {}
 export let onOpenAiTab: () => void = () => {}
+export let onConvertSelectedToMesh: () => void = () => {}
+export let onReimagineSelected: () => void = () => {}
 export let onDuplicate: () => void = () => {}
 export let onDelete: () => void = () => {}
 export let onVisibleChange: (value: boolean) => void = () => {}
@@ -134,6 +139,8 @@ export let onMaterialTextureChange: (field: 'mapUrl', value: string) => void =
   () => {}
 export let onOpenTexturePicker: (field: TextureField) => void = () => {}
 export let onResetMaterialOverrides: () => void = () => {}
+
+$: effectiveCollision = resolveNodeCollision(selectedNode)
 export let onCollisionEnabledChange: (value: boolean) => void = () => {}
 export let onPhysicsBodyTypeChange: (value: string) => void = () => {}
 export let onColliderSizeChange: (index: number, value: string) => void =
@@ -156,6 +163,7 @@ $: hasGeometryNode = !!(
   selectedNode?.prefab ||
   selectedNode?.primitive
 )
+$: canConvertSelectedToMesh = !!(selectedNode?.primitive || selectedNode?.prefab)
 </script>
 
 {#if hasSingleSelection && selectedNode}
@@ -168,6 +176,27 @@ $: hasGeometryNode = !!(
       <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onDuplicate}>Duplicate</button>
       <button class="danger" data-danger="true" data-sfx-hover="hover-emphasis" data-sfx-click="warning" on:click={onDelete}>Delete</button>
     </div>
+    {#if hasGeometryNode}
+      <div class="tuple-group editor-mt-sm">
+        <div class="tuple-label">Object Description</div>
+        <input class="text-input" value={styleDescriptor} data-sfx-focus="focus-soft" on:input={(e) => onStyleDescriptorChange((e.currentTarget as HTMLInputElement).value)} />
+      </div>
+      <div class="tuple-group">
+        <div class="tuple-label">Style Prompt</div>
+        <textarea
+          rows="3"
+          bind:value={hunyuanPrompt}
+          data-sfx-focus="focus-soft"
+          placeholder="Describe the new style, material, shape language, or mood for this object."
+        ></textarea>
+      </div>
+      <div class="button-row compact editor-mt-sm">
+        <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onConvertSelectedToMesh} disabled={!canConvertSelectedToMesh}>Convert To Mesh</button>
+        <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onReimagineSelected} disabled={!canUseAiMeshStudioSelection || hunyuanBusy}>
+          {hunyuanBusy ? 'Reimagining…' : 'Reimagine Selected'}
+        </button>
+      </div>
+    {/if}
     <label class="checkbox editor-mt-sm"><input type="checkbox" checked={selectedNode.visible} data-sfx-click="soft" on:change={(e) => onVisibleChange((e.currentTarget as HTMLInputElement).checked)} /> Visible</label>
   </div>
 
@@ -525,13 +554,13 @@ $: hasGeometryNode = !!(
   {#if hasGeometryNode}
     <div class="editor-section compact-surface">
       <div class="label">Physics</div>
-      <label class="checkbox"><input type="checkbox" checked={!!selectedNode.collision} data-sfx-click="soft" on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Solid / Collider</label>
+      <label class="checkbox"><input type="checkbox" checked={!!effectiveCollision} data-sfx-click="soft" on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Solid / Collider</label>
       <select class="text-input" value={selectedNode.physics?.bodyType ?? 'fixed'} data-sfx-focus="focus-soft" on:change={(e) => onPhysicsBodyTypeChange((e.currentTarget as HTMLSelectElement).value)}>
         <option value="fixed">Fixed</option>
         <option value="dynamic">Dynamic</option>
         <option value="kinematicPosition">Kinematic</option>
       </select>
-      {#if selectedNode.collision}
+      {#if effectiveCollision && effectiveCollision.shape !== 'trimesh'}
         <div class="tuple-label editor-mt-sm">Collider Size</div>
         <div class="tuple-row">
           {#each [0, 1, 2] as index}

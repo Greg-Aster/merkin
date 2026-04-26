@@ -93,6 +93,7 @@
       "visible": true,
       "collision": {
         "shape": "cuboid",
+        "enabled": false,
         "friction": 0.92
       },
       "generation": {
@@ -116,6 +117,7 @@
       "visible": true,
       "collision": {
         "shape": "cuboid",
+        "enabled": false,
         "friction": 0.94
       },
       "generation": {

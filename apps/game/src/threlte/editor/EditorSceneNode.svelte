@@ -10,8 +10,17 @@ import { activeConversationSession } from '../features/conversation/conversation
 import { qualityLevelStore } from '../features/performance/stores/performanceStore'
 import { getRuntimePropBudget } from '../features/performance/utils/runtimeSceneBudget'
 import { gameActions } from '../stores/gameStateStore'
+import EditorAssetTrimeshCollider from './EditorAssetTrimeshCollider.svelte'
 import EditorColliderHelper from './EditorColliderHelper.svelte'
+import EditorMeshColliderHelper from './EditorMeshColliderHelper.svelte'
 import EditorNodeRenderContent from './EditorNodeRenderContent.svelte'
+import EditorPrimitiveTrimeshCollider from './EditorPrimitiveTrimeshCollider.svelte'
+import EditorPrimitiveTrimeshHelper from './EditorPrimitiveTrimeshHelper.svelte'
+import {
+  getNodeColliderArgs,
+  getNodeVisualColliderSize,
+  resolveNodeCollision,
+} from './editorCollisionDefaults'
 import { registerEditorObject, unregisterEditorObject } from './editorRegistry'
 import { editorNodeViewportStateStore, editorStateStore } from './editorStore'
 import type { EditorSceneNode } from './editorStore'
@@ -41,6 +50,7 @@ let fireflySelectionTimeoutId: ReturnType<typeof setTimeout> | null = null
 let conversationFeaturePromise: Promise<
   typeof import('../features/conversation')
 > | null = null
+let collisionOverlayLogSignature = ''
 const nodeWorldPosition = new THREE.Vector3()
 let distanceCullAccumulator = 0
 const gameplayPointLightScale = 1
@@ -145,65 +155,8 @@ function getActiveCamera(): THREE.Camera | null {
     : null
 }
 
-function getPrimitiveColliderArgs() {
-  if (node.kind !== 'primitive' || !node.primitive)
-    return [0.5, 0.5, 0.5] as [number, number, number]
-
-  const [scaleX = 1, scaleY = 1, scaleZ = 1] = node.scale
-
-  if (node.primitive.geometry === 'box') {
-    const [width = 1, height = 1, depth = 1] = node.primitive.args
-    return [
-      Math.abs(width * scaleX) / 2,
-      Math.abs(height * scaleY) / 2,
-      Math.abs(depth * scaleZ) / 2,
-    ] as [number, number, number]
-  }
-
-  if (node.primitive.geometry === 'cylinder') {
-    const [radiusTop = 0.5, radiusBottom = 0.5, height = 1] =
-      node.primitive.args
-    const radius = Math.max(Math.abs(radiusTop), Math.abs(radiusBottom))
-    return [
-      Math.max(0.05, radius * Math.abs(scaleX)),
-      Math.max(0.05, Math.abs(height * scaleY) / 2),
-      Math.max(0.05, radius * Math.abs(scaleZ)),
-    ] as [number, number, number]
-  }
-
-  if (
-    ['octahedron', 'tetrahedron', 'icosahedron', 'dodecahedron'].includes(
-      node.primitive.geometry,
-    )
-  ) {
-    const [radius = 0.5] = node.primitive.args
-    return [
-      Math.max(0.05, Math.abs(radius * scaleX)),
-      Math.max(0.05, Math.abs(radius * scaleY)),
-      Math.max(0.05, Math.abs(radius * scaleZ)),
-    ] as [number, number, number]
-  }
-
-  if (node.primitive.geometry === 'torus') {
-    const [radius = 0.5, tube = 0.2] = node.primitive.args
-    const outerRadius = Math.abs(radius) + Math.abs(tube)
-    return [
-      Math.max(0.05, outerRadius * Math.abs(scaleX)),
-      Math.max(0.05, Math.abs(tube * scaleY)),
-      Math.max(0.05, outerRadius * Math.abs(scaleZ)),
-    ] as [number, number, number]
-  }
-
-  return [0.5, 0.5, 0.5] as [number, number, number]
-}
-
 function hasPhysicsBody() {
-  return (
-    !!node.collision &&
-    (node.kind === 'primitive' ||
-      node.kind === 'asset' ||
-      node.kind === 'prefab')
-  )
+  return !!resolveNodeCollision(node)
 }
 
 function getRigidBodyType() {
@@ -211,23 +164,49 @@ function getRigidBodyType() {
 }
 
 function getColliderArgs() {
-  if (node.collision?.size) {
-    return [
-      Math.abs(node.collision.size[0]) / 2,
-      Math.abs(node.collision.size[1]) / 2,
-      Math.abs(node.collision.size[2]) / 2,
-    ] as [number, number, number]
-  }
+  return getNodeColliderArgs(node)
+}
 
-  if (node.kind === 'primitive') {
-    return getPrimitiveColliderArgs()
-  }
+function isAssetTrimeshCollision() {
+  return (
+    node.kind === 'asset' &&
+    !!node.asset?.url &&
+    effectiveCollision?.shape === 'trimesh'
+  )
+}
 
-  return [
-    Math.max(0.05, Math.abs(node.scale[0]) / 2),
-    Math.max(0.05, Math.abs(node.scale[1]) / 2),
-    Math.max(0.05, Math.abs(node.scale[2]) / 2),
-  ] as [number, number, number]
+function isPrimitiveTrimeshCollision() {
+  return (
+    node.kind === 'primitive' &&
+    !!node.primitive &&
+    effectiveCollision?.shape === 'trimesh'
+  )
+}
+
+function isCylinderCollision() {
+  return effectiveCollision?.shape === 'cylinder'
+}
+
+function logCollisionOverlaySource() {
+  if (!effectiveCollision) return
+  const signature = JSON.stringify({
+    id: node.id,
+    shape: effectiveCollision.shape,
+    args: effectiveCollision.shape === 'cuboid' ? getColliderArgs() : null,
+    url: node.asset?.url ?? null,
+  })
+  if (signature === collisionOverlayLogSignature) return
+  collisionOverlayLogSignature = signature
+  console.info('[collision-overlay]', {
+    id: node.id,
+    name: node.name,
+    kind: node.kind,
+    shape: effectiveCollision.shape,
+    colliderArgs:
+      effectiveCollision.shape === 'cuboid' ? getColliderArgs() : undefined,
+    assetUrl: node.asset?.url,
+    visible: node.visible !== false,
+  })
 }
 
 useTask(delta => {
@@ -265,7 +244,8 @@ useTask(delta => {
   group.getWorldPosition(nodeWorldPosition)
 
   const distanceToCamera = activeCamera.position.distanceTo(nodeWorldPosition)
-  runtimeDistanceVisible = distanceToCamera <= getRuntimeCullDistance()
+  runtimeDistanceVisible =
+    distanceToCamera <= getRuntimeCullDistance() + getRuntimeBoundsPadding()
 })
 
 function loadConversationFeature() {
@@ -323,6 +303,15 @@ function isFireflySelected() {
   if (selected) return true
   if (node.gameplay?.type !== 'firefly') return false
   return fireflyConversationSelected || fireflyInteractionSelected
+}
+
+function isPersistentRuntimeNode() {
+  return (
+    node.id === 'yggdrasil-tree-merged' ||
+    node.id === 'yggdrasil-crown-ascent-merged' ||
+    node.generation?.family === 'yggdrasil-tree-merged' ||
+    node.generation?.family === 'yggdrasil-crown-ascent-merged'
+  )
 }
 
 function registerInteractiveMarker(sprite: THREE.Sprite) {
@@ -434,10 +423,11 @@ function getFireflyMotionOffset() {
 
 function supportsRuntimeDistanceCulling() {
   return (
-    node.kind === 'asset' ||
-    node.kind === 'prefab' ||
-    node.kind === 'primitive' ||
-    node.kind === 'light'
+    !isPersistentRuntimeNode() &&
+    (node.kind === 'asset' ||
+      node.kind === 'prefab' ||
+      node.kind === 'primitive' ||
+      node.kind === 'light')
   )
 }
 
@@ -454,6 +444,24 @@ function getRuntimeCullDistance() {
   }
 }
 
+function getRuntimeBoundsPadding() {
+  const size = getNodeVisualColliderSize(node)
+  const scaledAssetSize =
+    node.kind === 'asset'
+      ? ([
+          Math.abs(node.scale[0] ?? 1) * 2,
+          Math.abs(node.scale[1] ?? 1) * 2,
+          Math.abs(node.scale[2] ?? 1) * 2,
+        ] as [number, number, number])
+      : ([0, 0, 0] as [number, number, number])
+  const effectiveSize: [number, number, number] = [
+    Math.max(size[0], scaledAssetSize[0]),
+    Math.max(size[1], scaledAssetSize[1]),
+    Math.max(size[2], scaledAssetSize[2]),
+  ]
+  return Math.max(8, Math.hypot(...effectiveSize) / 2)
+}
+
 $: viewportVisible =
   $editorNodeViewportStateStore.get(node.id)?.effectiveVisible ?? node.visible
 $: effectiveVisible = viewportVisible && runtimeDistanceVisible
@@ -466,6 +474,12 @@ $: fireflyIgnitionColor = (() => {
   const ignitedColor = new THREE.Color('#ff1830')
   return `#${baseColor.lerp(ignitedColor, shockwaveIgnition).getHexString()}`
 })()
+$: effectiveCollision = resolveNodeCollision(node)
+$: if (editorEnabled && $editorStateStore.collisionOverlayEnabled) {
+  logCollisionOverlaySource()
+} else {
+  collisionOverlayLogSignature = ''
+}
 
 $: if (group) {
   registerEditorObject(node.id, group)
@@ -487,7 +501,96 @@ onDestroy(() => {
 </script>
 
 <T.Group bind:ref={group} visible={effectiveVisible}>
-  {#if !editorEnabled && hasPhysicsBody() && node.collision?.shape === 'cuboid' && viewportVisible}
+  {#if !editorEnabled && hasPhysicsBody() && isPersistentRuntimeNode() && !isAssetTrimeshCollision() && !isPrimitiveTrimeshCollision() && effectiveVisible}
+    <EditorNodeRenderContent {node} {editorEnabled} />
+    <RigidBody
+      type={getRigidBodyType()}
+      gravityScale={node.physics?.gravityScale ?? 1}
+      canSleep={node.physics?.canSleep ?? true}
+      ccd={node.physics?.ccd ?? false}
+      linearDamping={node.physics?.linearDamping ?? 0}
+      angularDamping={node.physics?.angularDamping ?? 0}
+      lockRotations={node.physics?.lockRotations ?? false}
+      lockTranslations={node.physics?.lockTranslations ?? false}
+    >
+      {#if isCylinderCollision()}
+        <Collider
+          shape="cylinder"
+          args={getColliderArgs()}
+          friction={effectiveCollision?.friction ?? 0.7}
+          restitution={effectiveCollision?.restitution ?? 0}
+          sensor={effectiveCollision?.sensor ?? false}
+        />
+      {:else if effectiveCollision?.shape === 'cuboid'}
+        <Collider
+          shape="cuboid"
+          args={getColliderArgs()}
+          friction={effectiveCollision.friction ?? 0.7}
+          restitution={effectiveCollision.restitution ?? 0}
+          sensor={effectiveCollision.sensor ?? false}
+        />
+      {/if}
+    </RigidBody>
+  {:else if !editorEnabled && hasPhysicsBody() && isAssetTrimeshCollision() && effectiveVisible}
+    <RigidBody
+      type={getRigidBodyType()}
+      gravityScale={node.physics?.gravityScale ?? 1}
+      canSleep={node.physics?.canSleep ?? true}
+      ccd={node.physics?.ccd ?? false}
+      linearDamping={node.physics?.linearDamping ?? 0}
+      angularDamping={node.physics?.angularDamping ?? 0}
+      lockRotations={node.physics?.lockRotations ?? false}
+      lockTranslations={node.physics?.lockTranslations ?? false}
+    >
+      <EditorAssetTrimeshCollider
+        url={node.asset?.url ?? ''}
+        friction={effectiveCollision?.friction ?? 0.7}
+        restitution={effectiveCollision?.restitution ?? 0}
+        sensor={effectiveCollision?.sensor ?? false}
+      />
+      <EditorNodeRenderContent {node} {editorEnabled} />
+    </RigidBody>
+  {:else if !editorEnabled && hasPhysicsBody() && isPrimitiveTrimeshCollision() && effectiveVisible}
+    <RigidBody
+      type={getRigidBodyType()}
+      gravityScale={node.physics?.gravityScale ?? 1}
+      canSleep={node.physics?.canSleep ?? true}
+      ccd={node.physics?.ccd ?? false}
+      linearDamping={node.physics?.linearDamping ?? 0}
+      angularDamping={node.physics?.angularDamping ?? 0}
+      lockRotations={node.physics?.lockRotations ?? false}
+      lockTranslations={node.physics?.lockTranslations ?? false}
+    >
+      <EditorPrimitiveTrimeshCollider
+        geometry={node.primitive?.geometry}
+        args={node.primitive?.args ?? []}
+        friction={effectiveCollision?.friction ?? 0.7}
+        restitution={effectiveCollision?.restitution ?? 0}
+        sensor={effectiveCollision?.sensor ?? false}
+      />
+      <EditorNodeRenderContent {node} {editorEnabled} />
+    </RigidBody>
+  {:else if !editorEnabled && hasPhysicsBody() && isCylinderCollision() && effectiveVisible}
+    <RigidBody
+      type={getRigidBodyType()}
+      gravityScale={node.physics?.gravityScale ?? 1}
+      canSleep={node.physics?.canSleep ?? true}
+      ccd={node.physics?.ccd ?? false}
+      linearDamping={node.physics?.linearDamping ?? 0}
+      angularDamping={node.physics?.angularDamping ?? 0}
+      lockRotations={node.physics?.lockRotations ?? false}
+      lockTranslations={node.physics?.lockTranslations ?? false}
+    >
+      <Collider
+        shape="cylinder"
+        args={getColliderArgs()}
+        friction={effectiveCollision?.friction ?? 0.7}
+        restitution={effectiveCollision?.restitution ?? 0}
+        sensor={effectiveCollision?.sensor ?? false}
+      />
+      <EditorNodeRenderContent {node} {editorEnabled} />
+    </RigidBody>
+  {:else if !editorEnabled && hasPhysicsBody() && effectiveCollision?.shape === 'cuboid' && effectiveVisible}
     <RigidBody
       type={getRigidBodyType()}
       gravityScale={node.physics?.gravityScale ?? 1}
@@ -501,9 +604,9 @@ onDestroy(() => {
       <Collider
         shape="cuboid"
         args={getColliderArgs()}
-        friction={node.collision.friction ?? 0.7}
-        restitution={node.collision.restitution ?? 0}
-        sensor={node.collision.sensor ?? false}
+        friction={effectiveCollision.friction ?? 0.7}
+        restitution={effectiveCollision.restitution ?? 0}
+        sensor={effectiveCollision.sensor ?? false}
       />
       <EditorNodeRenderContent {node} {editorEnabled} />
     </RigidBody>
@@ -511,8 +614,23 @@ onDestroy(() => {
     <EditorNodeRenderContent {node} {editorEnabled} />
   {/if}
 
-  {#if hasPhysicsBody() && node.collision?.shape === 'cuboid' && editorEnabled && $editorStateStore.collisionOverlayEnabled}
+  {#if hasPhysicsBody() && effectiveCollision?.shape === 'cuboid' && editorEnabled && $editorStateStore.collisionOverlayEnabled}
     <EditorColliderHelper shape="cuboid" args={getColliderArgs()} />
+  {/if}
+
+  {#if hasPhysicsBody() && isCylinderCollision() && editorEnabled && $editorStateStore.collisionOverlayEnabled}
+    <EditorColliderHelper shape="cylinder" args={getColliderArgs()} />
+  {/if}
+
+  {#if isAssetTrimeshCollision() && editorEnabled && $editorStateStore.collisionOverlayEnabled}
+    <EditorMeshColliderHelper url={node.asset?.url ?? ''} />
+  {/if}
+
+  {#if isPrimitiveTrimeshCollision() && editorEnabled && $editorStateStore.collisionOverlayEnabled}
+    <EditorPrimitiveTrimeshHelper
+      geometry={node.primitive?.geometry}
+      args={node.primitive?.args ?? []}
+    />
   {/if}
 
   {#if selected}

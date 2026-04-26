@@ -23,6 +23,7 @@ import type {
 } from '../editor/editorTypes'
 import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
 import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
+import { Terrain, type TerrainConfig } from '../features/terrain'
 import { playerStateStore } from '../stores/gameStateStore'
 import { buildRuntimeVisualStyleFromLevelSettings } from '../styles/GameplayStyleProfiles'
 import {
@@ -39,6 +40,26 @@ const sceneModules = import.meta.glob('../editor/scenes/*.scene.json', {
   import: 'default',
 }) as Record<string, EditorSceneDocument>
 
+const YGGDRASIL_TERRAIN_CONFIG: TerrainConfig = {
+  heightmapUrl: '/terrain/heightmaps/yggdrasil_heightmap.png',
+  worldSize: 440,
+  worldSizeX: 440,
+  worldSizeZ: 340,
+  minHeight: -3.2,
+  maxHeight: 7.2,
+  bounds: {
+    min: [-220, -3.2, -150],
+    max: [220, 7.2, 190],
+  },
+  chunkSize: 110,
+  gridSize: [4, 4],
+  lods: [
+    { level: 0, distance: 80 },
+    { level: 1, distance: 160 },
+    { level: 2, distance: 260 },
+  ],
+}
+
 export let levelId: string
 export let position: [number, number, number] = [0, 0, 0]
 export let editorEnabled = false
@@ -53,6 +74,8 @@ let rootNodes: EditorSceneNode[] = []
 let playerPosition: [number, number, number] = [0, 0, 0]
 let starMapComponent: any = null
 let starMapRef: Group
+
+$: usesGeneratedTerrainCollider = levelId === 'yggdrasil' && !editorEnabled
 
 const SKYBOX_PRESETS = {
   observatory: {
@@ -166,7 +189,9 @@ async function loadSceneDocument(level: string) {
     })
   }
 
-  dispatch('terrainReady')
+  if (!(level === 'yggdrasil' && !editorEnabled)) {
+    dispatch('terrainReady')
+  }
 }
 
 $: sharedLevelSettings = sceneDocument?.settings?.level ?? {}
@@ -343,6 +368,15 @@ onDestroy(() => {
     <T.HemisphereLight skyColor="#dbe9ff" groundColor="#1b2130" intensity={0.85} />
     <T.DirectionalLight position={[14, 20, -10]} color="#d7e6ff" intensity={keyLightIntensity} />
     <T.DirectionalLight position={[-16, 10, 18]} color="#50688f" intensity={fillLightIntensity} />
+
+    {#if usesGeneratedTerrainCollider}
+      <Terrain
+        config={YGGDRASIL_TERRAIN_CONFIG}
+        showVisualChunks={false}
+        showVisualSurface={false}
+        on:terrainReady={() => dispatch('terrainReady')}
+      />
+    {/if}
 
     {#if waterEnabled && waterSettings}
       <OceanComponent

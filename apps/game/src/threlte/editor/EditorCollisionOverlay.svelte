@@ -28,7 +28,7 @@ function shouldShowTerrainOverlay() {
   return (
     !!editorState?.enabled &&
     !!editorState?.collisionOverlayEnabled &&
-    levelId === 'observatory' &&
+    !!levelId &&
     !!terrainState?.manager &&
     !!terrainState?.heightData &&
     terrainState?.resolution > 0
@@ -44,6 +44,7 @@ function ensureObjects() {
       transparent: true,
       opacity: 0.38,
       depthWrite: false,
+      depthTest: false,
     })
     terrainMesh = new THREE.Mesh(terrainGeometry, terrainMaterial)
     terrainMesh.frustumCulled = false
@@ -63,6 +64,7 @@ function ensureObjects() {
       }),
     )
     boundsMesh.renderOrder = 17
+    boundsMesh.visible = false
     scene.add(boundsMesh)
   }
 }
@@ -131,7 +133,7 @@ function updateBoundsMesh() {
     return
   }
 
-  boundsMesh.visible = shouldShowTerrainOverlay()
+  boundsMesh.visible = false
   boundsMesh.position.set(
     (bounds.min[0] + bounds.max[0]) / 2,
     (bounds.min[1] + bounds.max[1]) / 2,

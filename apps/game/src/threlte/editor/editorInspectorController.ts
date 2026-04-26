@@ -1,4 +1,5 @@
 import type {
+  EditorNodeCollisionData,
   EditorPrimitiveData,
   EditorRigidBodyType,
   EditorSceneNode,
@@ -41,6 +42,9 @@ type InspectorControllerDeps = {
   getNodeVisualColliderSize: (
     node: EditorSceneNode | null,
   ) => [number, number, number]
+  getDefaultCollisionShape: (
+    node: EditorSceneNode | null,
+  ) => EditorNodeCollisionData['shape']
 
   getTextureBrowserPath: () => string
   getTextureBrowserItems: () => Array<{
@@ -393,19 +397,28 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
   function updateCollisionEnabled(value: boolean) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode) return
+    const defaultShape = deps.getDefaultCollisionShape(selectedNode)
 
     deps.patchNode(selectedNode.id, {
       collision: value
         ? {
-            shape: 'cuboid',
-            size:
-              selectedNode.collision?.size ??
-              deps.getNodeVisualColliderSize(selectedNode),
+            shape: defaultShape,
+            enabled: true,
+            ...(defaultShape === 'trimesh'
+              ? {}
+              : {
+                  size:
+                    selectedNode.collision?.size ??
+                    deps.getNodeVisualColliderSize(selectedNode),
+                }),
             friction: selectedNode.collision?.friction ?? 0.7,
             restitution: selectedNode.collision?.restitution ?? 0,
             sensor: selectedNode.collision?.sensor ?? false,
           }
-        : undefined,
+        : {
+            shape: 'cuboid',
+            enabled: false,
+          },
     })
   }
 
@@ -414,13 +427,20 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     value: string,
   ) {
     const selectedNode = deps.getSelectedNode()
-    if (!selectedNode?.collision) return
+    if (!selectedNode) return
     const numeric = Number(value)
     if (Number.isNaN(numeric)) return
+    const defaultShape = deps.getDefaultCollisionShape(selectedNode)
 
     deps.patchNode(selectedNode.id, {
       collision: {
-        ...selectedNode.collision,
+        ...(selectedNode.collision ?? {
+          shape: defaultShape,
+          ...(defaultShape === 'trimesh'
+            ? {}
+            : { size: deps.getNodeVisualColliderSize(selectedNode) }),
+        }),
+        enabled: true,
         [field]: numeric,
       },
     })
@@ -428,19 +448,21 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
 
   function updateCollisionSize(index: number, value: string) {
     const selectedNode = deps.getSelectedNode()
-    if (!selectedNode?.collision) return
+    if (!selectedNode) return
     const numeric = Number(value)
     if (Number.isNaN(numeric)) return
-    const size = [...(selectedNode.collision.size ?? [1, 1, 1])] as [
-      number,
-      number,
-      number,
-    ]
+    const size = [
+      ...(selectedNode.collision?.size ??
+        deps.getNodeVisualColliderSize(selectedNode)),
+    ] as [number, number, number]
     size[index] = Math.max(0.05, numeric)
 
     deps.patchNode(selectedNode.id, {
       collision: {
-        ...selectedNode.collision,
+        ...(selectedNode.collision ?? {
+          shape: deps.getDefaultCollisionShape(selectedNode),
+        }),
+        enabled: true,
         size,
       },
     })
@@ -448,10 +470,17 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
 
   function updateCollisionBooleanField(field: 'sensor', value: boolean) {
     const selectedNode = deps.getSelectedNode()
-    if (!selectedNode?.collision) return
+    if (!selectedNode) return
+    const defaultShape = deps.getDefaultCollisionShape(selectedNode)
     deps.patchNode(selectedNode.id, {
       collision: {
-        ...selectedNode.collision,
+        ...(selectedNode.collision ?? {
+          shape: defaultShape,
+          ...(defaultShape === 'trimesh'
+            ? {}
+            : { size: deps.getNodeVisualColliderSize(selectedNode) }),
+        }),
+        enabled: true,
         [field]: value,
       },
     })
@@ -460,12 +489,16 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
   function recalculateCollisionFromVisual() {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode) return
+    const defaultShape = deps.getDefaultCollisionShape(selectedNode)
 
     deps.patchNode(selectedNode.id, {
       collision: {
-        ...(selectedNode.collision ?? { shape: 'cuboid' as const }),
-        shape: 'cuboid',
-        size: deps.getNodeVisualColliderSize(selectedNode),
+        ...(selectedNode.collision ?? { shape: defaultShape }),
+        shape: defaultShape,
+        enabled: true,
+        ...(defaultShape === 'trimesh'
+          ? { size: undefined }
+          : { size: deps.getNodeVisualColliderSize(selectedNode) }),
         friction: selectedNode.collision?.friction ?? 0.7,
         restitution: selectedNode.collision?.restitution ?? 0,
         sensor: selectedNode.collision?.sensor ?? false,

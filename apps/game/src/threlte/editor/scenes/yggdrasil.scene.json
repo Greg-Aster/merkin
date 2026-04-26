@@ -1,13 +1,13 @@
 {
   "levelId": "yggdrasil",
   "version": 1,
-  "updatedAt": "2026-04-25T02:26:56.071Z",
+  "updatedAt": "2026-04-26T02:54:01.901Z",
   "settings": {
     "level": {
       "spawn": {
         "position": [
           0,
-          6.2,
+          26.2,
           -118
         ]
       },
@@ -214,7 +214,7 @@
     {
       "id": "yggdrasil-mound",
       "name": "Root Mound",
-      "kind": "primitive",
+      "kind": "asset",
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
@@ -233,25 +233,24 @@
       ],
       "visible": true,
       "collision": {
-        "shape": "cuboid",
-        "friction": 0.92
-      },
-      "primitive": {
-        "geometry": "cylinder",
-        "args": [
-          60,
-          88,
-          13,
-          36
+        "shape": "cylinder",
+        "enabled": true,
+        "size": [
+          176,
+          12,
+          176
         ],
-        "color": "#4d5e3d",
-        "emissive": "#202c18",
-        "emissiveIntensity": 0.03,
-        "metalness": 0.02,
-        "roughness": 0.98
+        "friction": 0.35,
+        "restitution": 0,
+        "sensor": false
       },
       "generation": {
-        "descriptor": "large central root mound of raised earth and stone, a broad elevated mass supporting the main tree base"
+        "descriptor": "large central root mound of raised earth and stone, a broad elevated mass supporting the main tree base",
+        "lastBakedAssetUrl": "/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb",
+        "lastBakedAt": "2026-04-26T01:47:59.433Z"
+      },
+      "asset": {
+        "url": "/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb"
       }
     },
     {
@@ -1187,574 +1186,6 @@
       },
       "generation": {
         "descriptor": "decorative sacred planter or root shrine object placed near a mythic well"
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-1",
-      "name": "Rune Monolith 1",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        82.96,
-        4.2,
-        0
-      ],
-      "rotation": [
-        0,
-        3.141592653589793,
-        0
-      ],
-      "scale": [
-        1.35,
-        1.35,
-        1.35
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb"
-      },
-      "generation": {
-        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-firefly-1",
-      "name": "Rune Monolith 1 Firefly",
-      "kind": "group",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        101.21119999999999,
-        9.5,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f2e8a3",
-        "markerSize": 0.48,
-        "wanderEnabled": true,
-        "wanderRadius": 0.45,
-        "wanderSpeed": 0.28,
-        "hoverHeight": 0.3,
-        "bobAmplitude": 0.12,
-        "bobSpeed": 1.2,
-        "twinkleSpeed": 1.4,
-        "lightIntensity": 2.4,
-        "lightDistance": 5.5,
-        "lightDecay": 1.7,
-        "spriteIntensity": 0.9,
-        "title": "Rune Monolith 1",
-        "author": "Ratatoskr Whisper",
-        "location": "Yggdrasil",
-        "excerpt": "A small light circles the runes.",
-        "body": "A faint spirit-fire circles the old stones around Yggdrasil."
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-2",
-      "name": "Rune Monolith 2",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        58.661578567235985,
-        4.2,
-        58.66157856723598
-      ],
-      "rotation": [
-        0,
-        3.9269908169872414,
-        0
-      ],
-      "scale": [
-        1.4300000000000002,
-        1.4700000000000002,
-        1.35
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18T22-29-37-524Z.glb"
-      },
-      "generation": {
-        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-firefly-2",
-      "name": "Rune Monolith 2 Firefly",
-      "kind": "group",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        71.5671258520279,
-        9.5,
-        71.56712585202789
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f2e8a3",
-        "markerSize": 0.48,
-        "wanderEnabled": true,
-        "wanderRadius": 0.45,
-        "wanderSpeed": 0.28,
-        "hoverHeight": 0.3,
-        "bobAmplitude": 0.12,
-        "bobSpeed": 1.2,
-        "twinkleSpeed": 1.4,
-        "lightIntensity": 2.4,
-        "lightDistance": 5.5,
-        "lightDecay": 1.7,
-        "spriteIntensity": 0.9,
-        "title": "Rune Monolith 2",
-        "author": "Ratatoskr Whisper",
-        "location": "Yggdrasil",
-        "excerpt": "A small light circles the runes.",
-        "body": "A faint spirit-fire circles the old stones around Yggdrasil."
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-3",
-      "name": "Rune Monolith 3",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        5.0798349228632206e-15,
-        4.2,
-        82.96
-      ],
-      "rotation": [
-        0,
-        4.71238898038469,
-        0
-      ],
-      "scale": [
-        1.51,
-        1.35,
-        1.35
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-18T22-42-43-915Z.glb"
-      },
-      "generation": {
-        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-firefly-3",
-      "name": "Rune Monolith 3 Firefly",
-      "kind": "group",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        6.197398605893129e-15,
-        9.5,
-        101.21119999999999
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f2e8a3",
-        "markerSize": 0.48,
-        "wanderEnabled": true,
-        "wanderRadius": 0.45,
-        "wanderSpeed": 0.28,
-        "hoverHeight": 0.3,
-        "bobAmplitude": 0.12,
-        "bobSpeed": 1.2,
-        "twinkleSpeed": 1.4,
-        "lightIntensity": 2.4,
-        "lightDistance": 5.5,
-        "lightDecay": 1.7,
-        "spriteIntensity": 0.9,
-        "title": "Rune Monolith 3",
-        "author": "Ratatoskr Whisper",
-        "location": "Yggdrasil",
-        "excerpt": "A small light circles the runes.",
-        "body": "A faint spirit-fire circles the old stones around Yggdrasil."
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-4",
-      "name": "Rune Monolith 4",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        -58.66157856723598,
-        4.2,
-        58.661578567235985
-      ],
-      "rotation": [
-        0,
-        5.497787143782138,
-        0
-      ],
-      "scale": [
-        1.35,
-        1.4700000000000002,
-        1.35
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb"
-      },
-      "generation": {
-        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-firefly-4",
-      "name": "Rune Monolith 4 Firefly",
-      "kind": "group",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        -71.56712585202789,
-        9.5,
-        71.5671258520279
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f2e8a3",
-        "markerSize": 0.48,
-        "wanderEnabled": true,
-        "wanderRadius": 0.45,
-        "wanderSpeed": 0.28,
-        "hoverHeight": 0.3,
-        "bobAmplitude": 0.12,
-        "bobSpeed": 1.2,
-        "twinkleSpeed": 1.4,
-        "lightIntensity": 2.4,
-        "lightDistance": 5.5,
-        "lightDecay": 1.7,
-        "spriteIntensity": 0.9,
-        "title": "Rune Monolith 4",
-        "author": "Ratatoskr Whisper",
-        "location": "Yggdrasil",
-        "excerpt": "A small light circles the runes.",
-        "body": "A faint spirit-fire circles the old stones around Yggdrasil."
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-5",
-      "name": "Rune Monolith 5",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        -82.96,
-        4.2,
-        1.0159669845726441e-14
-      ],
-      "rotation": [
-        0,
-        6.283185307179586,
-        0
-      ],
-      "scale": [
-        1.4300000000000002,
-        1.35,
-        1.35
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb"
-      },
-      "generation": {
-        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-firefly-5",
-      "name": "Rune Monolith 5 Firefly",
-      "kind": "group",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        -101.21119999999999,
-        9.5,
-        1.2394797211786258e-14
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f2e8a3",
-        "markerSize": 0.48,
-        "wanderEnabled": true,
-        "wanderRadius": 0.45,
-        "wanderSpeed": 0.28,
-        "hoverHeight": 0.3,
-        "bobAmplitude": 0.12,
-        "bobSpeed": 1.2,
-        "twinkleSpeed": 1.4,
-        "lightIntensity": 2.4,
-        "lightDistance": 5.5,
-        "lightDecay": 1.7,
-        "spriteIntensity": 0.9,
-        "title": "Rune Monolith 5",
-        "author": "Ratatoskr Whisper",
-        "location": "Yggdrasil",
-        "excerpt": "A small light circles the runes.",
-        "body": "A faint spirit-fire circles the old stones around Yggdrasil."
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-6",
-      "name": "Rune Monolith 6",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        -58.661578567236,
-        4.2,
-        -58.66157856723598
-      ],
-      "rotation": [
-        0,
-        7.0685834705770345,
-        0
-      ],
-      "scale": [
-        1.51,
-        1.4700000000000002,
-        1.35
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-23-01-827Z.glb"
-      },
-      "generation": {
-        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-firefly-6",
-      "name": "Rune Monolith 6 Firefly",
-      "kind": "group",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        -71.56712585202791,
-        9.5,
-        -71.56712585202789
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f2e8a3",
-        "markerSize": 0.48,
-        "wanderEnabled": true,
-        "wanderRadius": 0.45,
-        "wanderSpeed": 0.28,
-        "hoverHeight": 0.3,
-        "bobAmplitude": 0.12,
-        "bobSpeed": 1.2,
-        "twinkleSpeed": 1.4,
-        "lightIntensity": 2.4,
-        "lightDistance": 5.5,
-        "lightDecay": 1.7,
-        "spriteIntensity": 0.9,
-        "title": "Rune Monolith 6",
-        "author": "Ratatoskr Whisper",
-        "location": "Yggdrasil",
-        "excerpt": "A small light circles the runes.",
-        "body": "A faint spirit-fire circles the old stones around Yggdrasil."
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-7",
-      "name": "Rune Monolith 7",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        -1.5239504768589664e-14,
-        4.2,
-        -82.96
-      ],
-      "rotation": [
-        0,
-        7.853981633974483,
-        0
-      ],
-      "scale": [
-        1.35,
-        1.35,
-        1.35
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
-      },
-      "generation": {
-        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-firefly-7",
-      "name": "Rune Monolith 7 Firefly",
-      "kind": "group",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        -1.859219581767939e-14,
-        9.5,
-        -101.21119999999999
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f2e8a3",
-        "markerSize": 0.48,
-        "wanderEnabled": true,
-        "wanderRadius": 0.45,
-        "wanderSpeed": 0.28,
-        "hoverHeight": 0.3,
-        "bobAmplitude": 0.12,
-        "bobSpeed": 1.2,
-        "twinkleSpeed": 1.4,
-        "lightIntensity": 2.4,
-        "lightDistance": 5.5,
-        "lightDecay": 1.7,
-        "spriteIntensity": 0.9,
-        "title": "Rune Monolith 7",
-        "author": "Ratatoskr Whisper",
-        "location": "Yggdrasil",
-        "excerpt": "A small light circles the runes.",
-        "body": "A faint spirit-fire circles the old stones around Yggdrasil."
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-8",
-      "name": "Rune Monolith 8",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        58.66157856723597,
-        4.2,
-        -58.661578567236
-      ],
-      "rotation": [
-        0,
-        8.63937979737193,
-        0
-      ],
-      "scale": [
-        1.4300000000000002,
-        1.4700000000000002,
-        1.35
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
-      },
-      "generation": {
-        "descriptor": "tall weathered rune monolith of sacred stone, upright shrine-like standing stone with fissures"
-      }
-    },
-    {
-      "id": "yggdrasil-monolith-firefly-8",
-      "name": "Rune Monolith 8 Firefly",
-      "kind": "group",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        71.56712585202789,
-        9.5,
-        -71.56712585202791
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "visible": true,
-      "gameplay": {
-        "type": "firefly",
-        "markerColor": "#f2e8a3",
-        "markerSize": 0.48,
-        "wanderEnabled": true,
-        "wanderRadius": 0.45,
-        "wanderSpeed": 0.28,
-        "hoverHeight": 0.3,
-        "bobAmplitude": 0.12,
-        "bobSpeed": 1.2,
-        "twinkleSpeed": 1.4,
-        "lightIntensity": 2.4,
-        "lightDistance": 5.5,
-        "lightDecay": 1.7,
-        "spriteIntensity": 0.9,
-        "title": "Rune Monolith 8",
-        "author": "Ratatoskr Whisper",
-        "location": "Yggdrasil",
-        "excerpt": "A small light circles the runes.",
-        "body": "A faint spirit-fire circles the old stones around Yggdrasil."
       }
     },
     {
@@ -3570,7 +3001,7 @@
     {
       "id": "yggdrasil-hvergelmir-depth-arch-1",
       "name": "Lower Root Arch",
-      "kind": "prefab",
+      "kind": "asset",
       "parentId": "yggdrasil-hvergelmir-depth-group",
       "position": [
         0,
@@ -3583,16 +3014,30 @@
         0
       ],
       "scale": [
-        1.4560000000000002,
-        1.4560000000000002,
-        1.4560000000000002
+        2.432243594186929,
+        6.474176628428351,
+        0.4630093179099871
       ],
       "visible": true,
-      "prefab": {
-        "type": "wasteland-archway"
-      },
       "generation": {
-        "descriptor": "arched entry structure marking the descent into the Hvergelmir depth area"
+        "descriptor": "arched entry structure marking the descent into Hvergelmir",
+        "lastBakedAssetUrl": "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+        "lastBakedAt": "2026-04-26T02:38:29.006Z",
+        "sourceVisualSize": [
+          4.804799930572511,
+          12.026559988501074,
+          0.9027200069427437
+        ]
+      },
+      "asset": {
+        "url": "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb"
+      },
+      "collision": {
+        "shape": "cuboid",
+        "enabled": true,
+        "friction": 0.7,
+        "restitution": 0,
+        "sensor": false
       }
     },
     {
@@ -3937,34 +3382,6 @@
       }
     },
     {
-      "id": "yggdrasil-arrival-foreground-left",
-      "name": "Foreground Root Stone Left",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        -25.488,
-        4.8,
-        -137.62560000000002
-      ],
-      "rotation": [
-        0,
-        0.35,
-        0
-      ],
-      "scale": [
-        1.1760000000000002,
-        1.3250000000000002,
-        1.1760000000000002
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
-      },
-      "generation": {
-        "descriptor": "foreground standing stone used to frame the first view of the island"
-      }
-    },
-    {
       "id": "yggdrasil-arrival-foreground-right",
       "name": "Foreground Root Stone Right",
       "kind": "asset",
@@ -4205,7 +3622,7 @@
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
-        64,
+        64.13551074892379,
         0
       ],
       "rotation": [
@@ -4498,34 +3915,6 @@
       }
     },
     {
-      "id": "yggdrasil-horizon-monolith-1",
-      "name": "Horizon Monolith 1",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        165.3295974611387,
-        8.5,
-        60.350014112159435
-      ],
-      "rotation": [
-        0,
-        3.491592653589793,
-        0
-      ],
-      "scale": [
-        2.2,
-        2.8,
-        2.2
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
-      },
-      "generation": {
-        "descriptor": "distant horizon standing stone used to establish scale and sacred perimeter"
-      }
-    },
-    {
       "id": "yggdrasil-horizon-firefly-1",
       "name": "Horizon Beacon 1",
       "kind": "group",
@@ -4566,34 +3955,6 @@
         "location": "Far Root Sea",
         "excerpt": "A distant watcher marks the farther edge of the world-root island.",
         "body": "These horizon beacons are there to make the outer edge of Yggdrasil’s domain feel inhabited and deep, not abruptly finished."
-      }
-    },
-    {
-      "id": "yggdrasil-horizon-monolith-2",
-      "name": "Horizon Monolith 2",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        30.400153390689944,
-        8.5,
-        173.35463845488104
-      ],
-      "rotation": [
-        0,
-        4.538790204786391,
-        0
-      ],
-      "scale": [
-        2.2,
-        2.8,
-        2.2
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
-      },
-      "generation": {
-        "descriptor": "distant horizon standing stone used to establish scale and sacred perimeter"
       }
     },
     {
@@ -4640,34 +4001,6 @@
       }
     },
     {
-      "id": "yggdrasil-horizon-monolith-3",
-      "name": "Horizon Monolith 3",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        -134.92944407044877,
-        8.5,
-        113.00462434272164
-      ],
-      "rotation": [
-        0,
-        5.5859877559829885,
-        0
-      ],
-      "scale": [
-        2.2,
-        2.8,
-        2.2
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
-      },
-      "generation": {
-        "descriptor": "distant horizon standing stone used to establish scale and sacred perimeter"
-      }
-    },
-    {
       "id": "yggdrasil-horizon-firefly-3",
       "name": "Horizon Beacon 3",
       "kind": "group",
@@ -4708,34 +4041,6 @@
         "location": "Far Root Sea",
         "excerpt": "A distant watcher marks the farther edge of the world-root island.",
         "body": "These horizon beacons are there to make the outer edge of Yggdrasil’s domain feel inhabited and deep, not abruptly finished."
-      }
-    },
-    {
-      "id": "yggdrasil-horizon-monolith-4",
-      "name": "Horizon Monolith 4",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        -165.3295974611387,
-        8.5,
-        -60.350014112159435
-      ],
-      "rotation": [
-        0,
-        6.633185307179586,
-        0
-      ],
-      "scale": [
-        2.2,
-        2.8,
-        2.2
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
-      },
-      "generation": {
-        "descriptor": "distant horizon standing stone used to establish scale and sacred perimeter"
       }
     },
     {
@@ -4782,34 +4087,6 @@
       }
     },
     {
-      "id": "yggdrasil-horizon-monolith-5",
-      "name": "Horizon Monolith 5",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        -30.40015339069004,
-        8.5,
-        -173.35463845488104
-      ],
-      "rotation": [
-        0,
-        7.680382858376183,
-        0
-      ],
-      "scale": [
-        2.2,
-        2.8,
-        2.2
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
-      },
-      "generation": {
-        "descriptor": "distant horizon standing stone used to establish scale and sacred perimeter"
-      }
-    },
-    {
       "id": "yggdrasil-horizon-firefly-5",
       "name": "Horizon Beacon 5",
       "kind": "group",
@@ -4850,34 +4127,6 @@
         "location": "Far Root Sea",
         "excerpt": "A distant watcher marks the farther edge of the world-root island.",
         "body": "These horizon beacons are there to make the outer edge of Yggdrasil’s domain feel inhabited and deep, not abruptly finished."
-      }
-    },
-    {
-      "id": "yggdrasil-horizon-monolith-6",
-      "name": "Horizon Monolith 6",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        134.92944407044877,
-        8.5,
-        -113.00462434272166
-      ],
-      "rotation": [
-        0,
-        8.72758040957278,
-        0
-      ],
-      "scale": [
-        2.2,
-        2.8,
-        2.2
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
-      },
-      "generation": {
-        "descriptor": "distant horizon standing stone used to establish scale and sacred perimeter"
       }
     },
     {
@@ -6129,7 +5378,7 @@
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
-        8,
+        11.619478501933823,
         0
       ],
       "rotation": [
@@ -6142,7 +5391,7 @@
         18,
         320
       ],
-      "visible": true,
+      "visible": false,
       "gameplay": {
         "type": "fog-volume",
         "markerColor": "#7a8f8b",
@@ -6330,34 +5579,6 @@
       }
     },
     {
-      "id": "yggdrasil-drowned-monolith-south",
-      "name": "Drowned Monolith south",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        -3,
-        1.7,
-        -245
-      ],
-      "rotation": [
-        0,
-        0.3,
-        0
-      ],
-      "scale": [
-        1.25,
-        1.6,
-        1.25
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb"
-      },
-      "generation": {
-        "descriptor": "drowned standing monolith rising from an outer shoal, a partially submerged sacred stone"
-      }
-    },
-    {
       "id": "yggdrasil-drowned-ring-south",
       "name": "Drowned Ring south",
       "kind": "prefab",
@@ -6465,34 +5686,6 @@
       },
       "generation": {
         "descriptor": "small outer islet or shoal beyond the main island, a distant low landmass"
-      }
-    },
-    {
-      "id": "yggdrasil-drowned-monolith-east",
-      "name": "Drowned Monolith east",
-      "kind": "asset",
-      "parentId": "yggdrasil-glade-root",
-      "position": [
-        242,
-        1.7,
-        26
-      ],
-      "rotation": [
-        0,
-        0.6,
-        0
-      ],
-      "scale": [
-        1.25,
-        1.6,
-        1.25
-      ],
-      "visible": true,
-      "asset": {
-        "url": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb"
-      },
-      "generation": {
-        "descriptor": "drowned standing monolith rising from an outer shoal, a partially submerged sacred stone"
       }
     },
     {
@@ -6849,7 +6042,7 @@
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
-        127.06211933359585,
+        118.67750456081407,
         0
       ],
       "rotation": [
@@ -6865,8 +6058,11 @@
       "visible": true,
       "locked": false,
       "collision": {
-        "shape": "cuboid",
-        "friction": 0.86
+        "shape": "cylinder",
+        "enabled": true,
+        "friction": 0.7,
+        "restitution": 0,
+        "sensor": false
       },
       "asset": {
         "url": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb"
@@ -6911,9 +6107,16 @@
         "url": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
         "scale": 1
       },
+      "collision": {
+        "shape": "trimesh",
+        "enabled": true,
+        "friction": 0.7,
+        "restitution": 0,
+        "sensor": false
+      },
       "generation": {
         "family": "yggdrasil-crown-ascent-merged",
-        "descriptor": "merged spiral crown ascent walkway with ramps, landings, final platform, and short crown bridge"
+        "descriptor": "walkway with ramps, landings, final platform, and short crown bridge"
       },
       "lastBakedAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
       "lastBakedAt": "2026-04-25T02:12:58.165Z"
@@ -6943,6 +6146,13 @@
       "asset": {
         "url": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
         "scale": 1
+      },
+      "collision": {
+        "shape": "trimesh",
+        "enabled": true,
+        "friction": 0.7,
+        "restitution": 0,
+        "sensor": false
       },
       "generation": {
         "family": "yggdrasil-bifrost-ribbon-merged",

@@ -122,6 +122,11 @@ import {
   updateObservatorySceneSettings,
   updateSolitudeSceneSettings,
 } from './editorStore'
+import {
+  getDefaultCollisionShape,
+  getNodeVisualColliderSize,
+  resolveNodeCollision,
+} from './editorCollisionDefaults'
 import { createEditorStyleController } from './editorStyleController'
 
 export let levelId: string
@@ -1300,6 +1305,7 @@ const inspectorController = createEditorInspectorController({
   },
   updateNodeStyleDescriptor,
   getNodeVisualColliderSize,
+  getDefaultCollisionShape,
   getTextureBrowserPath: () => textureBrowserPath,
   getTextureBrowserItems: () => textureBrowserItems,
   getTextureBrowserLoading: () => textureBrowserLoading,
@@ -1398,7 +1404,9 @@ $: multiSelectionParentCandidates = editorNodes.filter(
   node => !selectedNodes.some(selected => selected.id === node.id),
 )
 $: selectedNodeStyleDescriptor = getDefaultStyleDescriptor(selectedNode)
-$: selectedNodeColliderSize = getNodeVisualColliderSize(selectedNode)
+$: selectedNodeColliderSize =
+  resolveNodeCollision(selectedNode)?.size ??
+  getNodeVisualColliderSize(selectedNode)
 $: canUseStyleStudioSelection = canUseStyleStudio(selectedNode)
 $: canUseAiMeshStudioSelection = canUseAiMeshStudio(selectedNode)
 $: selectedLibraryItemPath = selectedLibraryItem?.path ?? ''
@@ -2315,27 +2323,6 @@ function getSelectedNodeMaterialDefaults(
   return node.material ?? {}
 }
 
-function getNodeVisualColliderSize(
-  node: EditorSceneNode | null,
-): [number, number, number] {
-  if (!node) return [1, 1, 1]
-
-  if (node.primitive?.geometry === 'box') {
-    const [width = 1, height = 1, depth = 1] = node.primitive.args
-    return [
-      Math.max(0.05, Math.abs(width * node.scale[0])),
-      Math.max(0.05, Math.abs(height * node.scale[1])),
-      Math.max(0.05, Math.abs(depth * node.scale[2])),
-    ]
-  }
-
-  return [
-    Math.max(0.05, Math.abs(node.scale[0])),
-    Math.max(0.05, Math.abs(node.scale[1])),
-    Math.max(0.05, Math.abs(node.scale[2])),
-  ]
-}
-
 function addRawPrimitive() {
   addNode({
     id: `primitive-${Date.now()}`,
@@ -2922,6 +2909,9 @@ onDestroy(() => {
           {textureBrowserError}
           {textureBrowserLoading}
           {ambientAudioLibrary}
+          {canUseAiMeshStudioSelection}
+          {hunyuanBusy}
+          bind:hunyuanPrompt
           onNameChange={inspectorController.updateNodeName}
           onVisibleChange={inspectorController.updateVisible}
           onParentChange={inspectorController.updateParent}
@@ -2937,6 +2927,8 @@ onDestroy(() => {
           onApplySelectedLibraryAsset={inspectorController.applySelectedLibraryAssetToTargetNode}
           onCancelAssetPicker={inspectorController.cancelAssetPickerTarget}
           onStyleDescriptorChange={inspectorController.updateSelectedNodeStyleDescriptor}
+          onConvertSelectedToMesh={() => void assetController.convertSelectedNodeToMesh()}
+          onReimagineSelected={() => { hunyuanApplyToSimilarNodes = false; void aiController.runHunyuanForSelection('generate') }}
           onPrimitiveGeometryChange={(value) => inspectorController.updatePrimitiveField('geometry', value)}
           onPrimitiveArgChange={inspectorController.updatePrimitiveArg}
           onCollisionEnabledChange={inspectorController.updateCollisionEnabled}
@@ -3180,6 +3172,8 @@ onDestroy(() => {
                 {generatedVariantLoading}
                 {generatedVariantError}
                 {styleBusy}
+                {hunyuanBusy}
+                bind:hunyuanPrompt
                 {styleBlenderExportPath}
                 {styleBlenderOpenCommand}
                 {styleStatus}
@@ -3191,6 +3185,8 @@ onDestroy(() => {
                 onNameChange={inspectorController.updateNodeName}
                 onOpenStyleTab={() => setActiveEditorTab('style')}
                 onOpenAiTab={() => setActiveEditorTab('ai')}
+                onConvertSelectedToMesh={() => void assetController.convertSelectedNodeToMesh()}
+                onReimagineSelected={() => { hunyuanApplyToSimilarNodes = false; void aiController.runHunyuanForSelection('generate') }}
                 onDuplicate={createController.duplicateSelection}
                 onDelete={createController.deleteSelection}
                 onVisibleChange={inspectorController.updateVisible}

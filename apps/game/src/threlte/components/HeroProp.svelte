@@ -3,7 +3,6 @@ import { T, useTask, useThrelte } from '@threlte/core'
 import { getContext } from 'svelte'
 import { createEventDispatcher, onDestroy } from 'svelte'
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import {
   EDITOR_MATERIAL_OVERRIDE_CONTEXT,
   type EditorMaterialOverrideStore,
@@ -24,6 +23,7 @@ import {
   fixGLTFMaterials,
   syncObjectMaterialOverride,
 } from '../utils/materialUtils'
+import { cloneCachedGltfScene } from '../utils/gltfAssetCache'
 
 const dispatch = createEventDispatcher()
 
@@ -154,8 +154,6 @@ function disposeLoadedScene(object: THREE.Object3D | null) {
 
   object.traverse(child => {
     if (!(child instanceof THREE.Mesh)) return
-
-    child.geometry?.dispose?.()
 
     const disposeMaterial = (material: THREE.Material) => {
       material?.dispose?.()
@@ -293,20 +291,19 @@ async function syncOverrideTextures() {
 
 async function loadSceneFromUrl(nextUrl: string) {
   const token = ++activeLoadToken
-  const loader = new GLTFLoader()
 
   try {
-    const gltf = await loader.loadAsync(nextUrl)
+    const nextScene = await cloneCachedGltfScene(nextUrl)
     if (disposed || token !== activeLoadToken) {
-      disposeLoadedScene(gltf.scene)
+      disposeLoadedScene(nextScene)
       return
     }
 
     const previousScene = scene
-    scene = gltf.scene
+    scene = nextScene
     loadErrorMessage = ''
 
-    fixGLTFMaterials(gltf)
+    fixGLTFMaterials({ scene } as any)
     scene.traverse(child => {
       if (!(child instanceof THREE.Mesh)) return
       child.frustumCulled = !inEditorContext

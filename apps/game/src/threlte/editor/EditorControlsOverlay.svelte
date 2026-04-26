@@ -128,6 +128,7 @@ onDestroy(() => {
     color: #e8f5ff;
     backdrop-filter: blur(10px);
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+    pointer-events: none;
     z-index: 85;
   }
 
@@ -164,6 +165,7 @@ onDestroy(() => {
 
   .button-row {
     margin-bottom: 0.45rem;
+    pointer-events: auto;
   }
 
   .button-row.compact {

@@ -567,6 +567,60 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     return stageSceneNodeSourceAsset(node)
   }
 
+  async function convertSelectedNodeToMesh() {
+    const selectedNode = deps.getSelectedNode()
+    if (!selectedNode) {
+      deps.setSaveMessage('Select one object before converting to mesh')
+      return
+    }
+    if (!selectedNode.primitive && !selectedNode.prefab) {
+      deps.setSaveMessage('Selected object is already a mesh asset')
+      return
+    }
+
+    try {
+      deps.setSaveMessage(`Converting ${selectedNode.name} to mesh…`)
+      const source = await stageSceneNodeSourceAsset(selectedNode)
+      const prefabAssetUrl = getPrefabAssetUrl(selectedNode.prefab?.type)
+      const scaleWasBakedIntoMesh =
+        !!selectedNode.primitive || (!!selectedNode.prefab && !prefabAssetUrl)
+      const previousCollision = selectedNode.collision
+      deps.patchNode(selectedNode.id, {
+        kind: 'asset',
+        asset: { url: source.assetUrl },
+        primitive: undefined,
+        prefab: undefined,
+        scale: scaleWasBakedIntoMesh ? [1, 1, 1] : selectedNode.scale,
+        collision:
+          previousCollision?.enabled === false
+            ? { shape: 'trimesh', enabled: false }
+            : {
+                shape: 'trimesh',
+                enabled: true,
+                friction: previousCollision?.friction ?? 0.7,
+                restitution: previousCollision?.restitution ?? 0,
+                sensor: previousCollision?.sensor ?? false,
+              },
+        generation: {
+          ...(selectedNode.generation ?? {}),
+          descriptor: deps.getDefaultStyleDescriptor(selectedNode),
+          lastBakedAssetUrl: source.assetUrl,
+          lastBakedAt: new Date().toISOString(),
+        },
+      })
+      deps.appendPipelineLog('Converted selected object to mesh asset', {
+        nodeId: selectedNode.id,
+        assetUrl: source.assetUrl,
+      })
+      deps.setSaveMessage(`Converted ${selectedNode.name} to mesh`)
+    } catch (error) {
+      console.error('Convert object to mesh failed:', error)
+      deps.setSaveMessage(
+        error instanceof Error ? error.message : 'Convert object to mesh failed',
+      )
+    }
+  }
+
   async function mergeSelectionToAsset(mergeDescriptor = '') {
     const selectedNodes = deps.getSelectedNodes()
     if (selectedNodes.length === 0) {
@@ -705,6 +759,7 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     inspectSelectedAssetForHunyuan,
     stageSceneNodeSourceAsset,
     ensureSceneNodeSourceAsset,
+    convertSelectedNodeToMesh,
     mergeSelectionToAsset,
   }
 }

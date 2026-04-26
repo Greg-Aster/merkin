@@ -1,0 +1,28 @@
+{
+  "heightmapUrl": "/terrain/heightmaps/yggdrasil_heightmap.png",
+  "worldSize": 440,
+  "heightScale": 10.4,
+  "heightOffset": -3.2,
+  "bounds": {
+    "min": [
+      -220,
+      -3.2,
+      -150
+    ],
+    "max": [
+      220,
+      7.2,
+      190
+    ]
+  },
+  "resolution": "512x512",
+  "originalGLB": "yggdrasil-scene-document",
+  "generatedAt": "2026-04-26T02:37:01.331Z",
+  "pipelineVersion": "1.0.0",
+  "synchronizedWith": {
+    "levelId": "yggdrasil",
+    "glbPath": "scene-document-yggdrasil",
+    "generatedBy": "codex-yggdrasil-heightmap-fallback",
+    "syncedAt": "2026-04-26T02:37:01.332Z"
+  }
+}

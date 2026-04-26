@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onDestroy } from 'svelte'
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { cloneCachedGltfScene } from '../utils/gltfAssetCache'
 
 export let assetUrl = ''
 export let imageUrl = ''
@@ -19,7 +19,6 @@ let frameId = 0
 let loadToken = 0
 let status = ''
 
-const gltfLoader = new GLTFLoader()
 const meshPattern = /\.(glb|gltf)$/i
 const imagePattern = /\.(png|jpe?g|webp|gif|bmp|svg|avif)$/i
 
@@ -41,25 +40,11 @@ function disposePreviewObject(object: THREE.Object3D | null) {
 
   object.traverse(child => {
     const mesh = child as THREE.Mesh
-    if (mesh.geometry) {
-      mesh.geometry.dispose()
-    }
-
     const materials = Array.isArray(mesh.material)
       ? mesh.material
       : [mesh.material]
     for (const material of materials) {
       if (!material) continue
-      for (const value of Object.values(material)) {
-        if (
-          value &&
-          typeof value === 'object' &&
-          'isTexture' in value &&
-          value.isTexture
-        ) {
-          value.dispose()
-        }
-      }
       material.dispose?.()
     }
   })
@@ -182,10 +167,10 @@ async function loadMeshPreview() {
   }
 
   try {
-    const gltf = await gltfLoader.loadAsync(resolvedMeshUrl)
+    const object = await cloneCachedGltfScene(resolvedMeshUrl)
     if (currentToken !== loadToken || !scene) return
 
-    previewObject = gltf.scene
+    previewObject = object
     scene.add(previewObject)
     fitCameraToObject(previewObject)
     status = ''
