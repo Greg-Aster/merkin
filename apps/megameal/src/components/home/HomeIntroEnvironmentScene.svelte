@@ -1,167 +1,179 @@
 <script lang="ts">
-import { T, useTask } from "@threlte/core";
-import type * as THREE from "three";
-import HomeIntroParticle from "./HomeIntroParticle.svelte";
-import HomeIntroScreenPanel from "./HomeIntroScreenPanel.svelte";
+import { T, useTask } from '@threlte/core'
+import type * as THREE from 'three'
+import HomeIntroParticle from './HomeIntroParticle.svelte'
+import HomeIntroScreenPanel from './HomeIntroScreenPanel.svelte'
 
 type IntroInputState = {
-	x: number;
-	y: number;
-	dragX: number;
-	dragY: number;
-	wheel: number;
-	active: boolean;
-};
+  x: number
+  y: number
+  dragX: number
+  dragY: number
+  wheel: number
+  active: boolean
+}
 
-export let input: IntroInputState;
-// biome-ignore lint/style/useConst: Parent component passes this as a prop.
-export let titleImageSrc = "";
+export let input: IntroInputState
+export let titleImageSrc = ''
 
-// biome-ignore lint/style/useConst: Svelte bind:ref assigns this ref at runtime.
-let world: THREE.Group | null = null;
-// biome-ignore lint/style/useConst: Svelte bind:ref assigns this ref at runtime.
-let emblem: THREE.Group | null = null;
-// biome-ignore lint/style/useConst: Svelte bind:ref assigns this ref at runtime.
-let ringA: THREE.Mesh | null = null;
-// biome-ignore lint/style/useConst: Svelte bind:ref assigns this ref at runtime.
-let ringB: THREE.Mesh | null = null;
-// biome-ignore lint/style/useConst: Svelte bind:ref assigns this ref at runtime.
-let ringC: THREE.Mesh | null = null;
-// biome-ignore lint/style/useConst: Svelte bind:ref assigns this ref at runtime.
-let starColumn: THREE.Group | null = null;
-// biome-ignore lint/style/useConst: Svelte bind:ref assigns this ref at runtime.
-let screenRail: THREE.Group | null = null;
-const screenNodes: THREE.Group[] = [];
+let world: THREE.Group | null = null
+let emblem: THREE.Group | null = null
+let ringA: THREE.Mesh | null = null
+let ringB: THREE.Mesh | null = null
+let ringC: THREE.Mesh | null = null
+let starColumn: THREE.Group | null = null
+let screenRail: THREE.Group | null = null
+const screenNodes: THREE.Group[] = []
 
-const particleCount = 320;
-const particleBands = 160;
-const particleClusterCount = 8;
-const primaryScreenIndex = 3;
-const screenCount = 7;
-const screenOrbitRadius = 3.15;
-const screenOrbitDepth = 1.86;
-const screenOrbitCenterZ = -0.34;
-const screenOrbitStartAngle = Math.PI;
+const particleCount = 260
+const particleClusterCount = 7
+const primaryScreenIndex = 3
+const screenCount = 7
+const screenStepX = 2.28
+const screenStepY = 1.68
+const screenStepDepth = 1.08
+const screenStillMedia = [
+  '/assets/banner/golden-era.webp',
+  '/assets/banner/ultra-headquarters.png',
+  '/assets/banner/archive_still.png',
+  '/assets/banner/ComfyUI_00138_.webp',
+  '/assets/banner/ComfyUI_0144.png',
+  '/assets/banner/golden-era1280wide.jpg',
+  '/assets/banner/ComfyUI_0145.png',
+]
+
+const particleClusters = [
+  { x: -2.75, y: 2.22, z: -0.55, spread: 0.78, hue: 0.53 },
+  { x: 2.74, y: 2.0, z: -1.38, spread: 0.88, hue: 0.77 },
+  { x: -3.34, y: -1.98, z: -1.68, spread: 0.82, hue: 0.62 },
+  { x: 2.95, y: -2.18, z: -2.28, spread: 0.86, hue: 0.86 },
+  { x: -0.34, y: 2.7, z: -1.72, spread: 0.7, hue: 0.58 },
+  { x: 0.95, y: -2.72, z: -1.05, spread: 0.76, hue: 0.71 },
+  { x: 0.18, y: 0.08, z: -3.12, spread: 1.02, hue: 0.66 },
+]
 
 function hash01(seed: number) {
-	return (Math.sin(seed * 12.9898) * 43758.5453) % 1;
+  return (Math.sin(seed * 12.9898) * 43758.5453) % 1
 }
 
 const particles = Array.from({ length: particleCount }, (_, index) => {
-	const coneT = (index % particleBands) / (particleBands - 1);
-	const band = Math.floor(index / particleBands);
-	const cluster = index % particleClusterCount;
-	const randomA = Math.abs(hash01(index + 1));
-	const randomB = Math.abs(hash01(index + 17));
-	const radialT = randomA ** 2.35;
-	const waist = Math.sin(coneT * Math.PI);
-	const clusterAngle =
-		(cluster / particleClusterCount) * Math.PI * 2 + coneT * 1.15 + band * 0.34;
-	const radius =
-		0.2 + radialT * 1.55 + waist * 0.12 + Math.sin(index * 1.73) * 0.035;
-	const angle = clusterAngle + (randomB - 0.5) * (0.16 + radialT * 0.42);
-	const height = -1.82 + coneT * 3.85 + band * 0.08;
+  const cluster = index % particleClusterCount
+  const clusterCenter = particleClusters[cluster]
+  const randomA = Math.abs(hash01(index + 1))
+  const randomB = Math.abs(hash01(index + 17))
+  const randomC = Math.abs(hash01(index + 41))
+  const randomD = Math.abs(hash01(index + 79))
+  const radialT = randomA ** 1.65
+  const angle = randomB * Math.PI * 2
+  const verticalAngle = (randomC - 0.5) * Math.PI
+  const radius = clusterCenter.spread * (0.18 + radialT * 1.05)
 
-	return {
-		angle,
-		cluster,
-		clusterStrength: 1 - radialT,
-		height,
-		radius,
-		phase: randomB * Math.PI * 2,
-		radialT,
-		speed: 0.08 + radialT * 0.08 + band * 0.018,
-		size: 0.012 + (1 - radialT) * 0.016 + (index % 4) * 0.002,
-		hueOffset: index * 0.0037,
-		coneT,
-	};
-});
+  return {
+    anchorX: clusterCenter.x,
+    anchorY: clusterCenter.y,
+    anchorZ: clusterCenter.z,
+    angle,
+    cluster,
+    clusterStrength: 0.26 + (1 - radialT) * 0.58,
+    height: Math.sin(verticalAngle) * clusterCenter.spread * 1.72,
+    radius,
+    phase: randomB * Math.PI * 2,
+    radialT,
+    speed: 0.026 + randomD * 0.045 + radialT * 0.026,
+    size: 0.008 + (1 - radialT) * 0.018 + (index % 5) * 0.0013,
+    hueOffset: clusterCenter.hue + randomD * 0.08,
+    zOffset:
+      Math.cos(verticalAngle) * clusterCenter.spread * (randomD - 0.5) * 1.35,
+  }
+})
 
 const screens = Array.from({ length: screenCount }, (_, index) => {
-	return {
-		position: [0, 0, 0] as [number, number, number],
-		rotation: [0, 0, 0] as [number, number, number],
-		primary: index === primaryScreenIndex,
-	};
-});
+  return {
+    position: [0, 0, 0] as [number, number, number],
+    rotation: [0, 0, 0] as [number, number, number],
+    primary: index === primaryScreenIndex,
+  }
+})
 
 function centeredOrbitProgress(value: number) {
-	const wrapped = ((value % 1) + 1) % 1;
-	return wrapped > 0.5 ? wrapped - 1 : wrapped;
+  const wrapped = ((value % 1) + 1) % 1
+  return wrapped > 0.5 ? wrapped - 1 : wrapped
+}
+
+function wrappedScreenOffset(value: number) {
+  return centeredOrbitProgress(value / screenCount) * screenCount
 }
 
 function updateScreenOrbit(wheel: number, ease: number) {
-	const selectedIndex = primaryScreenIndex + wheel * 0.92;
+  const selectedIndex = primaryScreenIndex + wheel * 1.08
 
-	for (let index = 0; index < screenCount; index += 1) {
-		const screen = screenNodes[index];
-		if (!screen) continue;
+  for (let index = 0; index < screenCount; index += 1) {
+    const screen = screenNodes[index]
+    if (!screen) continue
 
-		const orbitProgress = centeredOrbitProgress(
-			(index - selectedIndex) / screenCount,
-		);
-		const angle = orbitProgress * Math.PI * 2 + screenOrbitStartAngle;
-		const frontWeight = Math.max(0, 1 - Math.abs(orbitProgress) * 3.2);
-		const x = Math.sin(angle) * screenOrbitRadius;
-		const z = screenOrbitCenterZ + Math.cos(angle) * screenOrbitDepth;
-		const y = orbitProgress * 2.25 + wheel * 0.5;
-		const targetScale = 0.72 + frontWeight * 0.34;
+    const offset = wrappedScreenOffset(index - selectedIndex)
+    const depth = Math.abs(offset)
+    const side = Math.sign(offset)
+    const spiral = offset * 0.96
+    const frontWeight = Math.max(0, 1 - depth * 0.42)
+    const x = Math.sin(spiral) * screenStepX + side * depth * 0.18
+    const y = -offset * screenStepY
+    const z =
+      0.4 - depth * screenStepDepth + side * 0.12 + Math.cos(spiral) * 0.2
+    const targetScale = Math.max(0.38, 0.98 - depth * 0.14 + frontWeight * 0.08)
+    const targetYaw = -x * 0.12 + side * Math.min(depth * 0.09, 0.24)
+    const targetPitch = 0.018 - offset * 0.056
+    const targetRoll = -offset * 0.044
 
-		screen.position.x += (x - screen.position.x) * ease;
-		screen.position.y += (y - screen.position.y) * ease;
-		screen.position.z += (z - screen.position.z) * ease;
-		screen.rotation.x +=
-			(0.02 - orbitProgress * 0.08 - screen.rotation.x) * ease;
-		screen.rotation.y += (angle - screen.rotation.y) * ease;
-		screen.rotation.z += (orbitProgress * 0.1 - screen.rotation.z) * ease;
-		screen.scale.x += (targetScale - screen.scale.x) * ease;
-		screen.scale.y += (targetScale - screen.scale.y) * ease;
-		screen.scale.z += (targetScale - screen.scale.z) * ease;
-	}
+    screen.position.x += (x - screen.position.x) * ease
+    screen.position.y += (y - screen.position.y) * ease
+    screen.position.z += (z - screen.position.z) * ease
+    screen.rotation.x += (targetPitch - screen.rotation.x) * ease
+    screen.rotation.y += (targetYaw - screen.rotation.y) * ease
+    screen.rotation.z += (targetRoll - screen.rotation.z) * ease
+    screen.scale.x += (targetScale - screen.scale.x) * ease
+    screen.scale.y += (targetScale - screen.scale.y) * ease
+    screen.scale.z += (targetScale - screen.scale.z) * ease
+  }
 }
 
-useTask((delta) => {
-	const time = performance.now() * 0.001;
-	const ease = Math.min(1, delta * 4.8);
-	const pointerX = Number.isFinite(input.x) ? input.x : 0;
-	const pointerY = Number.isFinite(input.y) ? input.y : 0;
-	const wheel = Number.isFinite(input.wheel) ? input.wheel : 0;
-	const wheelLift = wheel * 0.32;
-	const wheelSpin = wheel * 1.4;
+useTask(delta => {
+  const time = performance.now() * 0.001
+  const ease = Math.min(1, delta * 4.8)
+  const pointerX = Number.isFinite(input.x) ? input.x : 0
+  const pointerY = Number.isFinite(input.y) ? input.y : 0
+  const wheel = Number.isFinite(input.wheel) ? input.wheel : 0
 
-	if (world) {
-		world.rotation.x +=
-			(-pointerY * 0.12 - wheel * 0.035 - world.rotation.x) * ease;
-		world.rotation.y +=
-			(pointerX * 0.18 + wheelSpin * 0.18 - world.rotation.y) * ease;
-		world.position.x += (pointerX * 0.18 - world.position.x) * ease;
-		world.position.y +=
-			(-pointerY * 0.08 + wheelLift - world.position.y) * ease;
-	}
+  if (world) {
+    world.rotation.x += (-pointerY * 0.085 - world.rotation.x) * ease
+    world.rotation.y += (pointerX * 0.12 - world.rotation.y) * ease
+    world.position.x += (pointerX * 0.1 - world.position.x) * ease
+    world.position.y += (-pointerY * 0.055 - world.position.y) * ease
+  }
 
-	if (emblem) {
-		emblem.rotation.x = Math.sin(time * 0.56) * 0.08 + input.dragY * 1.8;
-		emblem.rotation.y = time * 0.18 + input.dragX * 2.6;
-		emblem.rotation.z = Math.sin(time * 0.32) * 0.045;
-		emblem.position.y = Math.sin(time * 0.82) * 0.08;
-	}
+  if (emblem) {
+    emblem.rotation.x = Math.sin(time * 0.56) * 0.08 + input.dragY * 1.8
+    emblem.rotation.y = time * 0.18 + input.dragX * 2.6
+    emblem.rotation.z = Math.sin(time * 0.32) * 0.045
+    emblem.position.y = Math.sin(time * 0.82) * 0.08
+  }
 
-	if (ringA) ringA.rotation.z += delta * 0.34;
-	if (ringB) ringB.rotation.x -= delta * 0.2;
-	if (ringC) ringC.rotation.y += delta * 0.26;
+  if (ringA) ringA.rotation.z += delta * 0.34
+  if (ringB) ringB.rotation.x -= delta * 0.2
+  if (ringC) ringC.rotation.y += delta * 0.26
 
-	if (starColumn) {
-		starColumn.rotation.y = time * 0.12 - input.dragX * 0.8 + wheelSpin;
-		starColumn.rotation.z = Math.sin(time * 0.18) * 0.035;
-	}
+  if (starColumn) {
+    starColumn.rotation.y = time * 0.055 - input.dragX * 0.5 + wheel * 0.2
+    starColumn.rotation.z = Math.sin(time * 0.18) * 0.035
+  }
 
-	if (screenRail) {
-		screenRail.rotation.y = time * 0.035 - input.dragX * 0.42;
-		screenRail.position.y = Math.sin(time * 0.45) * 0.055;
-	}
+  if (screenRail) {
+    screenRail.rotation.y = time * 0.035 - input.dragX * 0.42
+    screenRail.position.y = Math.sin(time * 0.45) * 0.055
+  }
 
-	updateScreenOrbit(wheel, ease);
-});
+  updateScreenOrbit(wheel, ease)
+})
 </script>
 
 <T.PerspectiveCamera makeDefault position={[0, 0.08, 6.8]} fov={44} />
@@ -185,19 +197,20 @@ useTask((delta) => {
 				<HomeIntroScreenPanel
 					{index}
 					imageSrc={screen.primary ? titleImageSrc : ""}
+					stillSrc={screenStillMedia[index]}
 					primary={screen.primary}
 				/>
 			</T.Group>
 		{/each}
 	</T.Group>
 
-	<T.Group bind:ref={starColumn} position={[0, 0, -0.34]}>
+  <T.Group bind:ref={starColumn} position={[0, 0, -0.42]}>
 		{#each particles as particle, index}
 			<HomeIntroParticle {particle} {index} {input} />
 		{/each}
 	</T.Group>
 
-	<T.Group bind:ref={emblem} position={[0, -0.02, 0.18]}>
+	<T.Group bind:ref={emblem} position={[0, -0.04, -2.05]} scale={[0.5, 0.5, 0.5]}>
 		<T.Mesh bind:ref={ringA} rotation={[Math.PI / 2, 0, 0]}>
 			<T.TorusGeometry args={[1.18, 0.01, 12, 128]} />
 			<T.MeshBasicMaterial color="#67e8f9" transparent={true} opacity={0.48} />

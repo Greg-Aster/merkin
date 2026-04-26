@@ -1,84 +1,84 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
-    
-    // Props
-    export let show = false;
-    export let avatarConfig;
-    export let isSequence = false;
-    
-    // Generate unique filename based on timestamp
-    const timestamp = new Date().getTime().toString().substring(6);
-    const filePrefix = `avatar_${timestamp}`;
-    
-    // State
-    let saving = false;
-    let error = null;
-    let success = false;
-    let fileNames = [];
-    
-    // Create file names for display
-    if (isSequence && avatarConfig && avatarConfig.avatarList) {
-      for (let i = 0; i < avatarConfig.avatarList.length; i++) {
-        fileNames.push(i === 0 ? `${filePrefix}.png` : `${filePrefix}${i+1}.png`);
-      }
-    } else {
-      fileNames.push(`${filePrefix}.png`);
-    }
-    
-    // Event dispatcher
-    const dispatch = createEventDispatcher();
-    
-    // Function to close the dialog
-    function closeDialog() {
-      dispatch('close');
-    }
-    
-    // Function to download the actual image files
-    function downloadImageFiles() {
-      try {
-        saving = true;
-        error = null;
-        
-        // For each image in the avatar list
-        if (avatarConfig && avatarConfig.avatarList) {
-          avatarConfig.avatarList.forEach((avatar, index) => {
-            if (typeof avatar === 'string' && avatar.startsWith('data:')) {
-              // Create filename based on index
-              const filename = index === 0 ? `${filePrefix}.png` : `${filePrefix}${index+1}.png`;
-              
-              // Create downloadable link
-              const link = document.createElement('a');
-              link.href = avatar;
-              link.download = filename;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }
-          });
+import { createEventDispatcher } from 'svelte'
+
+// Props
+export let show = false
+export let avatarConfig
+export let isSequence = false
+
+// Generate unique filename based on timestamp
+const timestamp = new Date().getTime().toString().substring(6)
+const filePrefix = `avatar_${timestamp}`
+
+// State
+let saving = false
+let error = null
+let success = false
+let fileNames = []
+
+// Create file names for display
+if (isSequence && avatarConfig && avatarConfig.avatarList) {
+  for (let i = 0; i < avatarConfig.avatarList.length; i++) {
+    fileNames.push(i === 0 ? `${filePrefix}.png` : `${filePrefix}${i + 1}.png`)
+  }
+} else {
+  fileNames.push(`${filePrefix}.png`)
+}
+
+// Event dispatcher
+const dispatch = createEventDispatcher()
+
+// Function to close the dialog
+function closeDialog() {
+  dispatch('close')
+}
+
+// Function to download the actual image files
+function downloadImageFiles() {
+  try {
+    saving = true
+    error = null
+
+    // For each image in the avatar list
+    if (avatarConfig && avatarConfig.avatarList) {
+      avatarConfig.avatarList.forEach((avatar, index) => {
+        if (typeof avatar === 'string' && avatar.startsWith('data:')) {
+          // Create filename based on index
+          const filename =
+            index === 0 ? `${filePrefix}.png` : `${filePrefix}${index + 1}.png`
+
+          // Create downloadable link
+          const link = document.createElement('a')
+          link.href = avatar
+          link.download = filename
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
         }
-        
-        success = true;
-        
-        // Notify parent with the generated file names
-        dispatch('saved', { 
-          success: true, 
-          fileNames,
-          filePrefix
-        });
-        
-        // Auto close after a delay
-        setTimeout(() => {
-          if (success) closeDialog();
-        }, 2000);
-        
-      } catch (err) {
-        console.error('Error saving images:', err);
-        error = 'Failed to save images. Please try again.';
-      } finally {
-        saving = false;
-      }
+      })
     }
-  </script>
+
+    success = true
+
+    // Notify parent with the generated file names
+    dispatch('saved', {
+      success: true,
+      fileNames,
+      filePrefix,
+    })
+
+    // Auto close after a delay
+    setTimeout(() => {
+      if (success) closeDialog()
+    }, 2000)
+  } catch (err) {
+    console.error('Error saving images:', err)
+    error = 'Failed to save images. Please try again.'
+  } finally {
+    saving = false
+  }
+}
+</script>
   
   {#if show}
     <div class="fixed inset-0 bg-black/50 dark:bg-black/60 z-50 flex items-center justify-center">
@@ -88,9 +88,11 @@
             Download Avatar Images
           </h3>
           
-          <p class="text-neutral-600 dark:text-neutral-400 mb-4">
+          <div class="text-neutral-600 dark:text-neutral-400 mb-4">
             {#if isSequence}
-              The following images will be downloaded to your computer. Save them to your <code class="font-mono text-sm bg-neutral-100 dark:bg-neutral-700 px-1 py-0.5 rounded">src/content/avatar/</code> folder:
+              <p>
+                The following images will be downloaded to your computer. Save them to your <code class="font-mono text-sm bg-neutral-100 dark:bg-neutral-700 px-1 py-0.5 rounded">src/content/avatar/</code> folder:
+              </p>
               <ul class="mt-2 ml-4 list-disc space-y-1">
                 {#each fileNames as fileName, idx}
                   <li class="text-sm">
@@ -102,9 +104,11 @@
                 {/each}
               </ul>
             {:else}
-              The image will be downloaded as <span class="font-mono bg-neutral-100 dark:bg-neutral-700 px-1 py-0.5 rounded">{fileNames[0]}</span>. Save it to your <code class="font-mono text-sm bg-neutral-100 dark:bg-neutral-700 px-1 py-0.5 rounded">src/content/avatar/</code> folder.
+              <p>
+                The image will be downloaded as <span class="font-mono bg-neutral-100 dark:bg-neutral-700 px-1 py-0.5 rounded">{fileNames[0]}</span>. Save it to your <code class="font-mono text-sm bg-neutral-100 dark:bg-neutral-700 px-1 py-0.5 rounded">src/content/avatar/</code> folder.
+              </p>
             {/if}
-          </p>
+          </div>
           
           <div class="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
             <strong>Important:</strong> After downloading, make sure to also download and save the avatar.config.ts file from the configuration panel.

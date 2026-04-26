@@ -1,0 +1,14 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/wasteland-stone-archway-2026-04-26T02-26-12-155Z/lower-root-arch.glb",
+  "sourceName": "Lower Root Arch",
+  "sourceReferenceImageUrl": "/generated/hunyuan3d/references/lower-root-arch-reference-2026-04-26T02-29-53-691Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "promptId": "merkin-1777170593847-a08s2f",
+  "prompt": "object description: arched entry structure marking the descent into Hvergelmir\nstyle prompt: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-04-26T02:34:18.087Z"
+}
