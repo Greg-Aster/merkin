@@ -8,8 +8,6 @@ export let metadataStarMapDescription = ''
 export let metadataSourceKind: 'component' | 'scene' = 'scene'
 export let metadataSourceComponentKey:
   | 'observatory'
-  | 'sci-fi-room'
-  | 'miranda'
   | 'solitude' = 'observatory'
 export let saveAsTitle = ''
 export let saveAsLevelId = ''
@@ -56,8 +54,6 @@ export let onApplyImport: () => void = () => {}
       <div class="tuple-label">Built-In Level</div>
       <select class="text-input" bind:value={metadataSourceComponentKey} data-sfx-focus="focus-soft">
         <option value="observatory">Observatory</option>
-        <option value="sci-fi-room">Sci Fi Room</option>
-        <option value="miranda">Miranda Wreck</option>
         <option value="solitude">Solitude</option>
       </select>
     </div>

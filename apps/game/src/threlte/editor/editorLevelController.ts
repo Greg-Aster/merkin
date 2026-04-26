@@ -21,8 +21,6 @@ interface EditorLevelControllerDeps {
     metadataSourceKind: 'component' | 'scene'
     metadataSourceComponentKey:
       | 'observatory'
-      | 'sci-fi-room'
-      | 'miranda'
       | 'solitude'
     saveAsTitle: string
     saveAsLevelId: string

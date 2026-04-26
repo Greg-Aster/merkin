@@ -257,8 +257,6 @@ let metadataStarMapDescription = ''
 let metadataSourceKind: 'component' | 'scene' = 'scene'
 let metadataSourceComponentKey:
   | 'observatory'
-  | 'sci-fi-room'
-  | 'miranda'
   | 'solitude' = 'observatory'
 let loadedMetadataLevelId = ''
 let activeEditorTab: EditorPanelTab = 'workflow'

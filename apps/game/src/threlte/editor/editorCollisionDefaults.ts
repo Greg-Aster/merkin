@@ -1,6 +1,6 @@
 import type { EditorNodeCollisionData, EditorSceneNode } from './editorTypes'
 import {
-  getDefaultCollisionShape,
+  getDefaultCollisionShape as getPolicyDefaultCollisionShape,
   isTerrainVisualActor,
   resolveCollisionPolicy,
 } from '../engine/collisionPolicy'
@@ -25,7 +25,7 @@ function isTerrainVisualNode(node: EditorSceneNode | null | undefined) {
 export function getDefaultCollisionShape(
   node: EditorSceneNode | null | undefined,
 ): EditorNodeCollisionData['shape'] {
-  return getDefaultCollisionShape({
+  return getPolicyDefaultCollisionShape({
     actorId: node?.id ?? '',
     actorKind:
       node?.kind === 'asset' ||

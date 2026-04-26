@@ -1,3 +1,3 @@
 export * from './collisionPolicy'
-export * from './legacySceneAdapter'
+export * from './sceneAdapter'
 export * from './types'

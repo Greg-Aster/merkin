@@ -413,13 +413,9 @@ async function ensureLevelComponent(levelId: string) {
   const module =
     levelSource.kind === 'scene'
       ? await import('./levels/SceneDocumentLevel.svelte')
-      : levelSource.componentKey === 'sci-fi-room'
-        ? await import('./levels/SciFiRoom.svelte')
-        : levelSource.componentKey === 'solitude'
-          ? await import('./levels/Solitude.svelte')
-          : levelSource.componentKey === 'miranda'
-            ? await import('./levels/MirandaShip.svelte')
-            : await import('./levels/HybridObservatory.svelte')
+      : levelSource.componentKey === 'solitude'
+        ? await import('./levels/Solitude.svelte')
+        : await import('./levels/HybridObservatory.svelte')
 
   levelComponentCache.set(cacheKey, module.default)
 

@@ -6,8 +6,6 @@ export const DEFAULT_LEVEL_ID = 'observatory'
 export type LevelLifecycleStatus = 'active' | 'draft' | 'archived'
 export type BuiltInLevelComponentKey =
   | 'observatory'
-  | 'sci-fi-room'
-  | 'miranda'
   | 'solitude'
 
 export interface LevelRegistryComponentSource {
