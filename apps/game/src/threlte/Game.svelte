@@ -918,17 +918,7 @@ function transitionToLevel(levelType: string) {
     level: 'loading',
     message: `Transitioning to ${levelId}…`,
   })
-  resetLevelRuntime({
-    interactionSystem,
-    spawnSystem,
-  })
-  worldUnloading = true
-  staticWorldReady = false
-  playerSpawned = false
-  activeLevelNote = null
-  pendingLevelReturn = null
-  currentLevelComponent = null
-  gameActions.selectStar(null)
+  resetRuntimeForLevelTransition(levelId)
   gameActions.transitionToLevel(levelId)
   debugLog(`🎮 Threlte store-based level transition: ${levelId}`)
 }

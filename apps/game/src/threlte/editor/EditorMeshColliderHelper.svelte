@@ -20,6 +20,15 @@ function disposeScene(root: THREE.Object3D | null) {
   disposeCachedGltfScene(root)
 }
 
+function disposeMeshMaterial(material: THREE.Material | THREE.Material[]) {
+  if (Array.isArray(material)) {
+    material.forEach(entry => entry.dispose?.())
+    return
+  }
+
+  material.dispose?.()
+}
+
 async function loadHelperScene(nextUrl: string) {
   const token = ++loadToken
 
@@ -41,6 +50,7 @@ async function loadHelperScene(nextUrl: string) {
 
     nextScene.traverse(child => {
       if (!(child instanceof THREE.Mesh)) return
+      disposeMeshMaterial(child.material)
       child.material = helperMaterial
       child.renderOrder = 18
       child.frustumCulled = false
