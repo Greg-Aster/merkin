@@ -5,6 +5,14 @@
   align-items: start;
 }
 
+.storefront-hero {
+  align-items: start;
+}
+
+.storefront-mobile-controls {
+  display: none;
+}
+
 .storefront-featured-listing {
   position: relative;
   width: 100vw;

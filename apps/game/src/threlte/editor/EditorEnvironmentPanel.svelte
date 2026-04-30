@@ -28,14 +28,6 @@ export let updateLevelNumericSetting: (
   path: Array<string | number>,
   value: string,
 ) => void
-export let updateObservatorySetting: (
-  path: Array<string | number>,
-  value: unknown,
-) => void
-export let updateObservatoryNumericSetting: (
-  path: Array<string | number>,
-  value: string,
-) => void
 export let applySolitudeAtmospherePreset: (
   presetId: string | undefined,
 ) => void = () => {}

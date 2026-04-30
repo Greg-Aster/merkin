@@ -23,6 +23,20 @@ const TERRAIN_LEVELS = [
     manifestPath: join(publicRoot, 'terrain/solitude.manifest.json'),
     targetResolution: 128,
   },
+  {
+    id: 'sci-fi-room',
+    levelId: 'sci-fi-room',
+    sceneSettingsKey: 'level',
+    manifestPath: join(publicRoot, 'terrain/sci-fi-room.manifest.json'),
+    targetResolution: 128,
+  },
+  {
+    id: 'yggdrasil',
+    levelId: 'yggdrasil',
+    sceneSettingsKey: 'level',
+    manifestPath: join(publicRoot, 'terrain/yggdrasil.manifest.json'),
+    targetResolution: 128,
+  },
 ]
 
 const MAGIC = 0x4d4d5443 // MMTC
@@ -327,6 +341,7 @@ function updateManifestCollision(manifest, publicBinaryPath, publicMetaPath, met
       ...(manifest.collision ?? {}),
       terrain: {
         type: 'baked-terrain-mesh',
+        authoredException: true,
         url: publicBinaryPath,
         metadataUrl: publicMetaPath,
         triangleCount: meta.triangleCount,

@@ -139,7 +139,6 @@ import {
   undoScene,
   ungroupNodes,
   updateLevelSceneSettings,
-  updateObservatorySceneSettings,
   updateSolitudeSceneSettings,
 } from './editorStore'
 import { createEditorStyleController } from './editorStyleController'
@@ -259,12 +258,9 @@ let metadataDeployed = false
 let metadataStarMapEnabled = false
 let metadataStarMapYear = 2100
 let metadataStarMapDescription = ''
-let metadataSourceKind: 'component' | 'scene' = 'scene'
-let metadataSourceComponentKey: 'observatory' | 'solitude' = 'observatory'
+let metadataSourceKind: 'scene' = 'scene'
 let loadedMetadataLevelId = ''
 let activeEditorTab: EditorPanelTab = 'workflow'
-let pipelineLogEnabled = false
-let pipelineLogEntries: string[] = []
 let hierarchyFilter = ''
 let outlinerDisplayMode: OutlinerDisplayMode = 'view-layer'
 let outlinerExpandedIdsByMode: Record<OutlinerDisplayMode, string[]> = {
@@ -341,9 +337,6 @@ let styleSceneCandidates: Array<{
   status: string
 }> = []
 
-const PIPELINE_LOG_STORAGE_KEY = 'merkin:editor-pipeline-log'
-const PIPELINE_LOG_ENABLED_STORAGE_KEY = 'merkin:editor-pipeline-log-enabled'
-
 function sendPipelineLogToTerminal(message: string, detail?: unknown) {
   void fetch(`${EDITOR_API_BASE}/api/editor/log`, {
     method: 'POST',
@@ -360,28 +353,6 @@ function sendPipelineLogToTerminal(message: string, detail?: unknown) {
 
 function appendPipelineLog(message: string, detail?: unknown) {
   sendPipelineLogToTerminal(message, detail)
-  if (!pipelineLogEnabled) return
-
-  const timestamp = new Date().toISOString()
-  const suffix =
-    detail === undefined
-      ? ''
-      : ` :: ${typeof detail === 'string' ? detail : JSON.stringify(detail)}`
-  pipelineLogEntries = [
-    `[${timestamp}] ${message}${suffix}`,
-    ...pipelineLogEntries,
-  ].slice(0, 400)
-}
-
-function clearPipelineLog() {
-  pipelineLogEntries = []
-  saveMessage = 'Cleared pipeline log'
-}
-
-async function copyPipelineLog() {
-  const text = pipelineLogEntries.slice().reverse().join('\n')
-  await navigator.clipboard.writeText(text)
-  saveMessage = 'Copied pipeline log to clipboard'
 }
 
 const unsubState = editorStateStore.subscribe(value => {
@@ -526,7 +497,6 @@ const levelController = createEditorLevelController({
     metadataStarMapYear,
     metadataStarMapDescription,
     metadataSourceKind,
-    metadataSourceComponentKey,
     saveAsTitle,
     saveAsLevelId,
     newLevelTitle,
@@ -547,8 +517,6 @@ const levelController = createEditorLevelController({
       metadataStarMapDescription = next.metadataStarMapDescription
     if (next.metadataSourceKind !== undefined)
       metadataSourceKind = next.metadataSourceKind
-    if (next.metadataSourceComponentKey !== undefined)
-      metadataSourceComponentKey = next.metadataSourceComponentKey
     if (next.saveAsTitle !== undefined) saveAsTitle = next.saveAsTitle
     if (next.saveAsLevelId !== undefined) saveAsLevelId = next.saveAsLevelId
     if (next.newLevelTitle !== undefined) newLevelTitle = next.newLevelTitle
@@ -1443,11 +1411,7 @@ $: if (activeSceneLevelId && loadedMetadataLevelId !== activeSceneLevelId) {
   metadataStarMapYear = entry?.starMap?.year ?? 2100
   metadataStarMapDescription =
     entry?.starMap?.description ?? `Enter ${entry?.title ?? activeSceneLevelId}`
-  metadataSourceKind = entry?.source.kind ?? 'scene'
-  metadataSourceComponentKey =
-    entry?.source.kind === 'component'
-      ? entry.source.componentKey
-      : 'observatory'
+  metadataSourceKind = 'scene'
   loadedMetadataLevelId = activeSceneLevelId
 }
 
@@ -1974,24 +1938,6 @@ function setNestedValue<T>(
   return next
 }
 
-function updateObservatorySetting(
-  path: Array<string | number>,
-  value: unknown,
-) {
-  updateObservatorySceneSettings(settings =>
-    setNestedValue(settings, path, value),
-  )
-}
-
-function updateObservatoryNumericSetting(
-  path: Array<string | number>,
-  value: string,
-) {
-  const numeric = Number(value)
-  if (Number.isNaN(numeric)) return
-  updateObservatorySetting(path, numeric)
-}
-
 function updateLevelSetting(path: Array<string | number>, value: unknown) {
   updateLevelSceneSettings(settings => setNestedValue(settings, path, value))
 }
@@ -2102,17 +2048,6 @@ $: if (typeof window !== 'undefined' && selectedComfyWorkflowPath) {
   window.localStorage.setItem(
     'merkin:selected-comfy-workflow-path',
     selectedComfyWorkflowPath,
-  )
-}
-
-$: if (typeof window !== 'undefined') {
-  window.localStorage.setItem(
-    PIPELINE_LOG_ENABLED_STORAGE_KEY,
-    pipelineLogEnabled ? '1' : '0',
-  )
-  window.localStorage.setItem(
-    PIPELINE_LOG_STORAGE_KEY,
-    JSON.stringify(pipelineLogEntries),
   )
 }
 
@@ -2912,8 +2847,6 @@ $: editorPanelPropContext = {
   redoScene,
   updateLevelSetting,
   updateLevelNumericSetting,
-  updateObservatorySetting,
-  updateObservatoryNumericSetting,
   applySolitudeAtmospherePreset,
   setTerrainAutoBake,
   bakeTerrainCollision,
@@ -2968,14 +2901,6 @@ onMount(() => {
       window.localStorage.getItem('merkin:selected-comfy-workflow-path') || ''
     if (savedWorkflowPath) {
       selectedComfyWorkflowPath = savedWorkflowPath
-    }
-    pipelineLogEnabled =
-      window.localStorage.getItem(PIPELINE_LOG_ENABLED_STORAGE_KEY) === '1'
-    try {
-      const savedLog = window.localStorage.getItem(PIPELINE_LOG_STORAGE_KEY)
-      pipelineLogEntries = savedLog ? JSON.parse(savedLog) : []
-    } catch {
-      pipelineLogEntries = []
     }
   }
   void assetController.loadAssetBrowser(assetBrowserPath)
@@ -3144,7 +3069,6 @@ onDestroy(() => {
           bind:metadataStarMapYear
           bind:metadataStarMapDescription
           bind:metadataSourceKind
-          bind:metadataSourceComponentKey
           bind:saveAsTitle
           bind:saveAsLevelId
           bind:importBuffer

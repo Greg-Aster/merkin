@@ -1,27 +1,13 @@
 <script lang="ts">
 import type { SharedLevelEditorSettings } from './editorTypes'
 
-export let levelId: string
 export let levelSettings: SharedLevelEditorSettings
-export let updateLevelSetting: (
-  path: Array<string | number>,
-  value: unknown,
-) => void
 export let updateLevelNumericSetting: (
   path: Array<string | number>,
   value: string,
 ) => void
 
 const AXIS_LABELS = ['X', 'Y', 'Z']
-
-function getDefaultSpawnPositionForLevel(
-  levelId: string,
-): [number, number, number] {
-  if (levelId === 'sci-fi-room') return [0, 1, 0]
-  if (levelId === 'miranda') return [0, 4.25, -13.8]
-  if (levelId === 'solitude') return [0, 2.4, -24]
-  return [0, 18, -50]
-}
 </script>
 
 <div class="editor-section">
@@ -37,7 +23,7 @@ function getDefaultSpawnPositionForLevel(
             class="tuple-input"
             type="number"
             step="0.1"
-            value={levelSettings.spawn?.position?.[index] ?? getDefaultSpawnPositionForLevel(levelId)[index]}
+            value={levelSettings.spawn?.position?.[index] ?? ''}
             on:change={(event) => updateLevelNumericSetting(['spawn', 'position', index], (event.currentTarget as HTMLInputElement).value)}
           />
         </label>

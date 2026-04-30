@@ -21,8 +21,7 @@ interface EditorLevelControllerDeps {
     metadataStarMapEnabled: boolean
     metadataStarMapYear: number
     metadataStarMapDescription: string
-    metadataSourceKind: 'component' | 'scene'
-    metadataSourceComponentKey: 'observatory' | 'solitude'
+    metadataSourceKind: 'scene'
     saveAsTitle: string
     saveAsLevelId: string
     newLevelTitle: string
@@ -135,13 +134,7 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
       status: state.metadataStatus,
       deployed: state.metadataDeployed,
       aliases: existingEntry?.aliases ?? [],
-      source:
-        state.metadataSourceKind === 'component'
-          ? {
-              kind: 'component',
-              componentKey: state.metadataSourceComponentKey,
-            }
-          : { kind: 'scene', sceneId: targetLevelId },
+      source: { kind: 'scene', sceneId: targetLevelId },
       starMap: {
         enabled: state.metadataStarMapEnabled,
         year: Number.isFinite(Number(state.metadataStarMapYear))

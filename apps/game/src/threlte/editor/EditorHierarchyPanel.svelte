@@ -48,6 +48,10 @@ export let onUngroupSelection: () => void = () => {}
 export let onDuplicateSelection: () => void = () => {}
 export let onDeleteSelection: () => void = () => {}
 export let onClearSelection: () => void = () => {}
+
+function handleFilterInput(event: Event) {
+  onFilterChange((event.currentTarget as HTMLInputElement).value)
+}
 </script>
 
 <div class="editor-section">
@@ -55,7 +59,7 @@ export let onClearSelection: () => void = () => {}
   <div class="save-message">{selectedNodes.length > 1 ? `${selectedNodes.length} selected` : selectedNodes.length === 1 ? '1 selected' : 'Nothing selected'}</div>
   <div class="tuple-group editor-mb-sm">
     <div class="tuple-label">Filter</div>
-    <input class="text-input" bind:value={hierarchyFilter} placeholder="Search by name, kind, prefab, gameplay, or asset path" data-sfx-focus="focus-soft" />
+    <input class="text-input" bind:value={hierarchyFilter} placeholder="Search by name, kind, prefab, gameplay, or asset path" data-sfx-focus="focus-soft" on:input={handleFilterInput} />
   </div>
   <div class="button-row compact editor-mb-sm">
     <button data-sfx-hover="hover-soft" data-sfx-click="select" on:click={onIsolateSelection} disabled={selectedNodes.length === 0}>Isolate</button>

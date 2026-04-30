@@ -30,6 +30,29 @@ function getRequiredActorError(actorId: string, reason: string) {
   return `Required actor "${actorId}" ${reason}.`
 }
 
+function hasBakedTerrainRuntime(level: LevelDefinition) {
+  const terrain = (level.settings as any)?.level?.collision?.terrain
+  return terrain?.source === 'baked-heightmap' && typeof terrain.manifestUrl === 'string'
+}
+
+function isTerrainRuntimeActorId(level: LevelDefinition, actorId: string) {
+  return actorId === `${level.id}-terrain`
+}
+
+function isSpawnRuntimeActorId(level: LevelDefinition, actorId: string) {
+  return actorId === `${level.id}-player-spawn`
+}
+
+function isSatisfiedByRuntimeSystem(level: LevelDefinition, actorId: string) {
+  if (isTerrainRuntimeActorId(level, actorId) && hasBakedTerrainRuntime(level)) {
+    return true
+  }
+  if (isSpawnRuntimeActorId(level, actorId) && isFiniteVec3(level.spawn.player)) {
+    return true
+  }
+  return false
+}
+
 export function createLevelBuildReport(
   level: LevelDefinition,
 ): LevelBuildReport {
@@ -40,6 +63,7 @@ export function createLevelBuildReport(
   const duplicateActorIds = new Set<string>()
   const actorsById = new Map<string, ActorDefinition>()
   const runtimeAssetUrls = new Set<string>()
+  const requiredAssetUrls = new Set<string>()
   let assetActorCount = 0
   let defaultCollisionActorCount = 0
   let physicsActorCount = 0
@@ -118,7 +142,8 @@ export function createLevelBuildReport(
   }
 
   const missingRequiredActorIds = contract.requiredActorIds.filter(
-    actorId => !actorsById.has(actorId),
+    actorId =>
+      !actorsById.has(actorId) && !isSatisfiedByRuntimeSystem(level, actorId),
   )
 
   for (const actorId of missingRequiredActorIds) {
@@ -135,11 +160,16 @@ export function createLevelBuildReport(
 
     if (!actor.render?.asset?.url) {
       errors.push(getRequiredActorError(actorId, 'has no runtime asset URL'))
+    } else {
+      requiredAssetUrls.add(actor.render.asset.url)
     }
   }
 
   for (const actorId of contract.requiredWalkableActorIds) {
     const actor = actorsById.get(actorId)
+    if (!actor && isTerrainRuntimeActorId(level, actorId) && hasBakedTerrainRuntime(level)) {
+      continue
+    }
     if (!actor) continue
 
     if (!isWalkableActor(actor)) {
@@ -177,6 +207,7 @@ export function createLevelBuildReport(
     requiredActorCount: contract.requiredActorIds.length,
     requiredRenderActorIds: [...contract.requiredAssetActorIds],
     missingRequiredActorIds,
+    requiredAssetUrls: [...requiredAssetUrls].sort(),
     runtimeAssetUrls: [...runtimeAssetUrls].sort(),
     errors,
     warnings,

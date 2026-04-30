@@ -7,9 +7,7 @@ export let metadataDeployed = false
 export let metadataStarMapEnabled = false
 export let metadataStarMapYear = 2100
 export let metadataStarMapDescription = ''
-export let metadataSourceKind: 'component' | 'scene' = 'scene'
-export let metadataSourceComponentKey: 'observatory' | 'solitude' =
-  'observatory'
+export let metadataSourceKind: 'scene' = 'scene'
 export let saveAsTitle = ''
 export let saveAsLevelId = ''
 export let importBuffer = ''
@@ -35,7 +33,6 @@ export let onApplyImport: () => void = () => {}
   bind:metadataStarMapYear
   bind:metadataStarMapDescription
   bind:metadataSourceKind
-  bind:metadataSourceComponentKey
   bind:saveAsTitle
   bind:saveAsLevelId
   bind:importBuffer

@@ -1,0 +1,29 @@
+{
+  "type": "baked-terrain-mesh",
+  "version": 1,
+  "sourceHeightmap": "/terrain/heightmaps/yggdrasil_heightmap.png",
+  "sourceResolution": 512,
+  "colliderResolution": 129,
+  "sampleStep": 4,
+  "vertexCount": 16641,
+  "indexCount": 98304,
+  "triangleCount": 32768,
+  "bounds": {
+    "min": [
+      -220,
+      -3.2,
+      -150
+    ],
+    "max": [
+      220,
+      7.2,
+      190
+    ]
+  },
+  "center": [
+    0,
+    0,
+    20
+  ],
+  "heightOverrideCount": 0
+}

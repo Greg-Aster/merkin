@@ -6,6 +6,7 @@ export let x: number
 export let z: number
 export let lod: number
 export let pathTemplate: string
+export let levelId: string | null = null
 
 $: url = pathTemplate
   .replace('{x}', x.toString())
@@ -16,5 +17,5 @@ $: url = pathTemplate
 <!-- Place the GLB at world origin; its internal geometry is already in world space -->
 <T.Group position={[0, 0, 0]}>
   <!-- Visual only - no collision (terrain physics handled by TriMesh collider) -->
-  <HeroProp {url} />
+  <HeroProp {url} {levelId} />
 </T.Group>

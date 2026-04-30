@@ -35,6 +35,7 @@ function handleAssetError() {
 {#if asset}
   <HeroProp
     url={asset.url}
+    {levelId}
     {runtimeCulling}
     on:load={handleAssetLoad}
     on:error={handleAssetError}

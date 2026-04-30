@@ -27,8 +27,8 @@
       "hybrid-observatory-level"
     ],
     "source": {
-      "kind": "component",
-      "componentKey": "observatory"
+      "kind": "scene",
+      "sceneId": "observatory"
     },
     "starMap": {
       "enabled": true,
@@ -61,8 +61,8 @@
     "deployed": true,
     "aliases": ["solitude-level"],
     "source": {
-      "kind": "component",
-      "componentKey": "solitude"
+      "kind": "scene",
+      "sceneId": "solitude"
     },
     "starMap": {
       "enabled": true,

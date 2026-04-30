@@ -115,8 +115,7 @@ let initializeClientFn: ((roomName: string) => void) | null = null
 
 let playerComponent: any = null
 let playerReady = false
-let playerSpawned = false
-let spawnSystem: any = null
+let gameplayEnabled = false
 let interactionSystem: any = null // Reference to centralized InteractionSystem
 let chatBoxComponent: any = null // Reference to ChatBox component instance
 let editorEnabled = false
@@ -130,7 +129,6 @@ let activeLevelNote: {
 } | null = null
 let levelRegistry = []
 
-// Spawn system state
 let physicsReady = false
 let staticWorldReady = false
 let worldUnloading = false
@@ -175,34 +173,11 @@ function getLevelRenderConfig(levelId: string) {
   if (levelEntry?.source.kind === 'scene') {
     return {
       offset: [0, 0, 0] as [number, number, number],
-      spawn: [0, 1, 0] as [number, number, number],
-    }
-  }
-
-  if (normalizedLevel === 'sci-fi-room') {
-    return {
-      offset: [0, 0, 0] as [number, number, number],
-      spawn: [0, 1, 0] as [number, number, number],
-    }
-  }
-
-  if (normalizedLevel === 'miranda') {
-    return {
-      offset: [0, 0, 0] as [number, number, number],
-      spawn: [0, 4.25, -13.8] as [number, number, number],
-    }
-  }
-
-  if (normalizedLevel === 'solitude') {
-    return {
-      offset: [0, 0, 0] as [number, number, number],
-      spawn: [0, 2.4, -24] as [number, number, number],
     }
   }
 
   return {
-    offset: [0, 15, 10] as [number, number, number],
-    spawn: [0, 18, -50] as [number, number, number],
+    offset: [0, 0, 0] as [number, number, number],
   }
 }
 
@@ -220,12 +195,7 @@ $: collisionOverlayEnabled = $editorStateStore.collisionOverlayEnabled
 $: if (currentLevel && currentLevel !== lastRuntimeResetLevel) {
   resetRuntimeForLevelTransition(currentLevel)
 }
-$: playerReady = Boolean(
-  playerComponent &&
-    typeof playerComponent.spawnAt === 'function' &&
-    typeof playerComponent.isSpawnReady === 'function' &&
-    playerComponent.isSpawnReady(),
-)
+$: playerReady = Boolean(playerComponent)
 $: setRuntimeDiagnostic('mode', {
   level: 'ready',
   message: editorEnabled ? 'Editor mode active.' : 'Gameplay mode active.',
@@ -237,7 +207,7 @@ $: gameWorldLifecycle = createGameWorldLifecycleSnapshot({
   staticWorldReady,
   physicsReady,
   playerComponentReady: editorEnabled || playerReady,
-  playerSpawned: editorEnabled || playerSpawned,
+  gameplayEnabled: editorEnabled || gameplayEnabled,
   editorEnabled,
   unloading: worldUnloading,
   error,
@@ -287,7 +257,7 @@ $: setRuntimeDiagnostic('player', {
   message: editorEnabled
     ? 'Player runtime disabled while editor mode is active.'
     : playerReady
-      ? 'Player component is ready for spawn requests.'
+      ? 'Player component is ready at the level position.'
       : 'Waiting for player component readiness.',
 })
 $: setRuntimeDiagnostic('editor', {
@@ -434,13 +404,10 @@ async function ensureLevelComponent(levelId: string) {
   const normalizedLevel = normalizeLevelId(levelId)
   const levelEntry = getLevelRegistryEntry(normalizedLevel, levelRegistry)
   const levelSource = levelEntry?.source ?? {
-    kind: 'component',
-    componentKey: 'observatory' as const,
+    kind: 'scene',
+    sceneId: 'observatory',
   }
-  const cacheKey =
-    levelSource.kind === 'scene'
-      ? `scene:${normalizedLevel}`
-      : `component:${levelSource.componentKey}:${normalizedLevel}`
+  const cacheKey = `scene:${levelSource.sceneId}:${normalizedLevel}`
   const cached = levelComponentCache.get(cacheKey)
   if (cached) {
     currentLevelComponent = cached
@@ -451,12 +418,7 @@ async function ensureLevelComponent(levelId: string) {
   const requestId = ++activeLevelLoadRequest
   currentLevelComponent = null
 
-  const module =
-    levelSource.kind === 'scene'
-      ? await import('./levels/SceneDocumentLevel.svelte')
-      : levelSource.componentKey === 'solitude'
-        ? await import('./levels/Solitude.svelte')
-        : await import('./levels/HybridObservatory.svelte')
+  const module = await import('./levels/SceneDocumentLevel.svelte')
 
   levelComponentCache.set(cacheKey, module.default)
 
@@ -901,12 +863,11 @@ function resolveLevelId(levelType: string) {
 function resetRuntimeForLevelTransition(levelId: string) {
   resetLevelRuntime({
     interactionSystem,
-    spawnSystem,
   })
   lastRuntimeResetLevel = levelId
   worldUnloading = true
   staticWorldReady = false
-  playerSpawned = false
+  gameplayEnabled = false
   activeLevelNote = null
   pendingLevelReturn = null
   currentLevelComponent = null
@@ -947,8 +908,6 @@ function handleKeyDown(event: KeyboardEvent) {
   }
 }
 
-// Player spawning is a GameWorld lifecycle phase executed by SpawnSystem.
-
 function handlePlayerInteraction(detail: any) {
   gameActions.recordInteraction('click', detail.type)
   const selected = interactionSystem?.selectAtScreenPosition?.(
@@ -964,14 +923,6 @@ function handlePlayerLightBurst(detail: any) {
   gameActions.recordInteraction('light_burst', 'player')
   interactionSystem?.triggerLightBurst?.(detail)
   dispatch('lightBurst', detail)
-}
-
-function handleEntitySpawned(detail: any) {
-  if (detail?.entityType === 'player') {
-    playerSpawned = true
-  }
-
-  dispatch('entitySpawned', detail)
 }
 
 // Lifecycle
@@ -1026,12 +977,11 @@ onDestroy(() => {
         {editorViewportControlsComponent}
         {editorWorkbenchLightingComponent}
         bind:interactionSystemRef={interactionSystem}
-        bind:spawnSystemRef={spawnSystem}
         bind:playerComponentRef={playerComponent}
         bind:physicsReady
         bind:staticWorldReady
         bind:playerReady
-        bind:gameplayEnabled={playerSpawned}
+        bind:gameplayEnabled
         {normalizeLevelId}
         on:levelTransition={handleLevelTransition}
         on:starSelected={(e) => {
@@ -1045,7 +995,6 @@ onDestroy(() => {
         on:performanceUpdate={(e) => dispatch('performanceUpdate', e.detail)}
         on:qualityChanged={(e) => dispatch('qualityChanged', e.detail)}
         on:lodLevelChanged={(e) => dispatch('lodLevelChanged', e.detail)}
-        on:entitySpawned={(e) => handleEntitySpawned(e.detail)}
         on:playerInteraction={(e) => handlePlayerInteraction(e.detail)}
         on:lightBurst={(e) => handlePlayerLightBurst(e.detail)}
         on:telescopeInteraction={(e) => dispatch('telescopeInteraction', e.detail)}

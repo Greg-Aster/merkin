@@ -48,7 +48,7 @@
 		color: rgb(74 222 128);
 		font-size: clamp(1.9rem, 3vw, 2.5rem);
 		font-weight: 900;
-		letter-spacing: -0.04em;
+		letter-spacing: 0;
 	}
 
 	.featured-product-price--drifting {

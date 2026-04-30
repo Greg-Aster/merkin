@@ -50,8 +50,8 @@ export interface StarData {
 export const currentLevelStore: Writable<string> = writable(DEFAULT_LEVEL_ID)
 export const selectedStarStore: Writable<StarData | null> = writable(null)
 export const playerStateStore: Writable<PlayerState> = writable({
-  position: [0, 12, 10], // Spawn at center with reasonable height
-  rotation: [0, 0, 0], // Keep rotation as is
+  position: [0, 12, 10],
+  rotation: [0, 0, 0],
   health: 100,
   energy: 100,
   inventory: [],

@@ -97,22 +97,22 @@ const companionCount = allProducts.filter(
 	title="Store — MEGA MEAL"
 	description="Browse the official MEGA MEAL artifact catalog. Some items are purchasable. Others exist only in adjacent timelines. We apologize for the inconvenience."
 >
-	<div class="container mx-auto max-w-[86rem] px-4 py-8">
-		<div class="mb-8 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.7fr)] xl:items-end">
+	<div class="container mx-auto max-w-[86rem] px-3 py-4 sm:px-4 md:py-8">
+		<div class="storefront-hero mb-4 grid gap-4 md:mb-8 xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.7fr)] xl:items-end">
 			<div class="space-y-4">
 				<div class="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-slate-900/60 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-200">
 					<span class="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.8)]"></span>
 					Catalog Portal
 				</div>
 				<div>
-					<h1 class="mb-3 text-4xl font-bold text-[var(--primary)] md:text-5xl">
+					<h1 class="storefront-hero__title mb-2 text-3xl font-bold text-[var(--primary)] sm:text-4xl md:mb-3 md:text-5xl">
 						The Artifact Catalog
 					</h1>
-					<p class="max-w-3xl text-sm leading-relaxed text-slate-300">
+					<p class="storefront-hero__copy max-w-3xl text-sm leading-relaxed text-slate-300">
 						Official merchandise, domestic companions, relic hardware, and consumer spillover recovered from across the MEGA MEAL timeline. Browse by category, inspect listings, and proceed only if your household is certified for attachment-grade inventory.
 					</p>
 				</div>
-				<div class="grid gap-3 sm:grid-cols-3">
+				<div class="storefront-hero__stats grid gap-3 min-[480px]:grid-cols-3">
 					<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-3">
 						<p class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
 							Products
@@ -137,7 +137,7 @@ const companionCount = allProducts.filter(
 				</div>
 			</div>
 
-			<aside class="rounded-[1.6rem] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.96))] p-5 shadow-2xl">
+			<aside class="storefront-advisory rounded-[1.6rem] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.96))] p-5 shadow-2xl">
 				<p class="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-200">
 					Catalog Advisory
 				</p>
@@ -155,14 +155,14 @@ const companionCount = allProducts.filter(
 		</div>
 
 		{featuredProduct && featuredShowcase && (
-			<section class="storefront-featured-listing mb-10">
-				<div class="storefront-featured-listing__inner overflow-hidden rounded-[1.9rem] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.94),rgba(2,6,23,0.98))] shadow-[0_30px_80px_rgba(2,6,23,0.45)]">
-					<div class="relative p-6 md:p-8">
-					<div class="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-[var(--primary)]/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
+			<section class="storefront-featured-listing mb-5 md:mb-10">
+				<div class="storefront-featured-listing__inner overflow-hidden rounded-[1.4rem] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.94),rgba(2,6,23,0.98))] shadow-[0_30px_80px_rgba(2,6,23,0.45)] sm:rounded-[1.9rem]">
+					<div class="relative p-4 sm:p-6 md:p-8">
+					<div class="storefront-featured-listing__badge absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-[var(--primary)]/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
 						Featured Listing
 					</div>
 					<div class="grid items-center gap-8 pt-8 xl:grid-cols-[minmax(0,1.1fr)_minmax(24rem,0.9fr)]">
-						<div class="relative aspect-[16/10] overflow-hidden rounded-[1.4rem] border border-slate-700/60 bg-slate-900">
+						<div class="storefront-featured-listing__media relative aspect-[16/10] overflow-hidden rounded-[1.4rem] border border-slate-700/60 bg-slate-900">
 							{(() => {
 								const media = featuredProduct.data.media;
 								const img = featuredProduct.data.image;
@@ -201,8 +201,8 @@ const companionCount = allProducts.filter(
 								);
 							})()}
 						</div>
-						<div class="space-y-4">
-							<div class="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
+						<div class="storefront-featured-listing__body space-y-4">
+							<div class="storefront-featured-listing__meta flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
 								<span>{featuredProduct.data.category ?? "Product"}</span>
 								<span>•</span>
 								<span>{availabilityDisplay[featuredProduct.data.availability ?? "coming_soon"] ?? "Catalog Entry"}</span>
@@ -213,7 +213,7 @@ const companionCount = allProducts.filter(
 									</>
 								)}
 							</div>
-							<h2 class="text-3xl font-bold text-slate-100">{featuredProduct.data.name}</h2>
+							<h2 class="text-2xl font-bold text-slate-100 sm:text-3xl">{featuredProduct.data.name}</h2>
 							{featuredProduct.data.tagline && (
 								<p class="text-sm italic text-slate-300">"{featuredProduct.data.tagline}"</p>
 							)}
@@ -222,7 +222,7 @@ const companionCount = allProducts.filter(
 									{featuredProduct.data.description}
 								</p>
 							)}
-							<div class="grid gap-3 sm:grid-cols-3">
+							<div class="storefront-featured-listing__signals grid gap-3 min-[540px]:grid-cols-3">
 								<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-3">
 									<p class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
 										Primary Asset
@@ -251,7 +251,7 @@ const companionCount = allProducts.filter(
 									<span class="text-xs text-slate-400">Clarifications available</span>
 								</div>
 							</div>
-							<div class="flex flex-wrap items-center gap-4">
+							<div class="flex flex-wrap items-center gap-3 sm:gap-4">
 								{featuredProduct.data.price && (
 									<span class="text-xl font-bold text-emerald-400">
 										${featuredProduct.data.price.toFixed(2)}
@@ -261,7 +261,7 @@ const companionCount = allProducts.filter(
 										href={getProductHref(featuredProduct)}
 										data-sfx-hover="hover-emphasis"
 										data-sfx-click="sweep"
-										class="btn-primary rounded-[var(--radius-medium)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover)]"
+										class="btn-primary w-full rounded-[var(--radius-medium)] px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-[var(--primary-hover)] sm:w-auto"
 									>
 									View Product
 								</a>
@@ -300,7 +300,7 @@ const companionCount = allProducts.filter(
 					</div>
 				</section>
 
-				<section class="storefront-panel">
+				<section class="storefront-panel storefront-panel--secondary">
 					<div class="storefront-panel__header">
 						<p>Availability Matrix</p>
 						<h2>Fulfillment Status</h2>
@@ -315,7 +315,7 @@ const companionCount = allProducts.filter(
 					</div>
 				</section>
 
-				<section class="storefront-panel storefront-panel--signal">
+				<section class="storefront-panel storefront-panel--signal storefront-panel--secondary">
 					<div class="storefront-panel__header">
 						<p>Market Signal</p>
 						<h2>Recommended Route</h2>
@@ -341,17 +341,60 @@ const companionCount = allProducts.filter(
 			</aside>
 
 			<div class="storefront-marketplace__main">
+				<div class="storefront-mobile-controls">
+					<div class="storefront-mobile-controls__header">
+						<div>
+							<p class="storefront-toolbar__kicker">Marketplace Board</p>
+							<h2>Current Listings</h2>
+						</div>
+						<span class="product-count">{allProducts.length} products</span>
+					</div>
+					<label class="storefront-search-field">
+						<span class="sr-only">Search products</span>
+						<Icon name="mdi:magnify" class="h-4 w-4" />
+						<input
+							id="product-search"
+							type="search"
+							placeholder="Search products"
+							autocomplete="off"
+							data-sfx-focus="focus-soft"
+						/>
+					</label>
+					<div class="storefront-mobile-controls__row">
+						<select
+							data-sfx-focus="focus-soft"
+							class="storefront-filter-select category-select-control"
+							aria-label="Filter by category"
+						>
+							{categories.map((category) => (
+								<option value={category.id}>
+									{category.label} ({categoryCounts[category.id]})
+								</option>
+							))}
+						</select>
+						<select
+							data-sfx-focus="focus-soft"
+							class="storefront-sort-select sort-select-control"
+							aria-label="Sort products"
+						>
+							<option value="featured">Featured</option>
+							<option value="rating">Top Rated</option>
+							<option value="price-asc">Price: Low to High</option>
+							<option value="price-desc">Price: High to Low</option>
+							<option value="available">Available First</option>
+						</select>
+					</div>
+				</div>
 				<div class="storefront-toolbar">
 					<div>
 						<p class="storefront-toolbar__kicker">Marketplace Board</p>
 						<h2>Current Listings</h2>
 					</div>
 					<div class="storefront-toolbar__controls">
-						<span id="product-count">{allProducts.length} products</span>
+						<span class="product-count">{allProducts.length} products</span>
 							<select
-								id="sort-select"
 								data-sfx-focus="focus-soft"
-								class="storefront-sort-select"
+								class="storefront-sort-select sort-select-control"
 								aria-label="Sort products"
 							>
 							<option value="featured">Featured</option>
@@ -418,6 +461,7 @@ const companionCount = allProducts.filter(
 								data-price={product.data.price ?? 0}
 								data-rating={product.data.rating ?? 0}
 								data-featured={product.data.featured ? "1" : "0"}
+								data-search={`${product.data.name} ${product.data.category ?? ""} ${product.data.tagline ?? ""} ${product.data.description ?? ""}`.toLowerCase()}
 							>
 								<MarketplaceListingCard product={product} />
 							</div>
@@ -450,23 +494,44 @@ const companionCount = allProducts.filter(
 		);
 		const grid = document.getElementById("product-grid");
 		const noResults = document.getElementById("no-results");
-		const countEl = document.getElementById("product-count");
-		const sortSelect = document.getElementById(
-			"sort-select",
-		) as HTMLSelectElement | null;
+		const countEls = Array.from(document.querySelectorAll<HTMLElement>(".product-count"));
+		const sortSelects = Array.from(
+			document.querySelectorAll<HTMLSelectElement>(".sort-select-control"),
+		);
+		const categorySelects = Array.from(
+			document.querySelectorAll<HTMLSelectElement>(".category-select-control"),
+		);
+		const searchInput = document.getElementById("product-search") as HTMLInputElement | null;
 
 		let activeCategory = "all";
+		let activeSearch = "";
+
+		function syncCategoryControls() {
+			document
+				.querySelectorAll<HTMLButtonElement>(".category-filter")
+				.forEach((candidate) => {
+					candidate.dataset.active =
+						candidate.dataset.category === activeCategory ? "true" : "false";
+				});
+
+			categorySelects.forEach((select) => {
+				select.value = activeCategory;
+			});
+		}
 
 		function applyFilter() {
 			let visible = 0;
 			for (const item of items) {
 				const category = item.dataset.category ?? "";
-				const show = activeCategory === "all" || category === activeCategory;
+				const search = item.dataset.search ?? "";
+				const matchesCategory = activeCategory === "all" || category === activeCategory;
+				const matchesSearch = !activeSearch || search.includes(activeSearch);
+				const show = matchesCategory && matchesSearch;
 				item.classList.toggle("hidden", !show);
 				if (show) visible += 1;
 			}
 
-			if (countEl) {
+			for (const countEl of countEls) {
 				countEl.textContent = `${visible} product${visible !== 1 ? "s" : ""}`;
 			}
 			noResults?.classList.toggle("hidden", visible > 0);
@@ -512,19 +577,31 @@ const companionCount = allProducts.filter(
 		document.querySelectorAll<HTMLButtonElement>(".category-filter").forEach((button) => {
 			button.addEventListener("click", () => {
 				activeCategory = button.dataset.category ?? "all";
-
-				document
-					.querySelectorAll<HTMLButtonElement>(".category-filter")
-					.forEach((candidate) => {
-						candidate.dataset.active =
-							candidate.dataset.category === activeCategory ? "true" : "false";
-					});
-
+				syncCategoryControls();
 				applyFilter();
 			});
 		});
 
-		sortSelect?.addEventListener("change", () => applySort(sortSelect.value));
+		categorySelects.forEach((select) => {
+			select.addEventListener("change", () => {
+				activeCategory = select.value;
+				syncCategoryControls();
+				applyFilter();
+			});
+		});
+
+		searchInput?.addEventListener("input", () => {
+			activeSearch = searchInput.value.trim().toLowerCase();
+			applyFilter();
+		});
+
+		sortSelects.forEach((sortSelect) => {
+			sortSelect.addEventListener("change", () => {
+				sortSelects.forEach((candidate) => {
+					if (candidate !== sortSelect) candidate.value = sortSelect.value;
+				});
+				applySort(sortSelect.value);
+			});
+		});
 	});
 </script>
-

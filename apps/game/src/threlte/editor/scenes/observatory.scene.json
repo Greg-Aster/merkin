@@ -9,7 +9,7 @@
         "audio": "courtyard-breeze"
       },
       "spawn": {
-        "position": [-137.2, 20, -49.5]
+        "position": [-137.2, 1.8, -49.5]
       },
       "features": {
         "ocean": true,

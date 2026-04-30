@@ -1,13 +1,14 @@
 <script lang="ts">
 import { T } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+import { get } from 'svelte/store'
 import { Color, Group, Quaternion, Vector3 } from 'three'
 import AmbientAudioRegions from '../components/AmbientAudioRegions.svelte'
 import AmbientParticleField from '../components/AmbientParticleField.svelte'
 import SceneFogExp2 from '../components/SceneFogExp2.svelte'
 import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
 import LevelManager from '../core/LevelManager.svelte'
-import type { PlayerSpawnRequestedDetail } from '../core/levelRuntimeEvents'
+import type { PlayerLevelPositionDetail } from '../core/levelRuntimeEvents'
 import { upgradeLegacySceneDocument } from '../editor/defaultScenes'
 import { ensureSceneGeneration } from '../editor/editorGeneration'
 import { normalizeLevelSceneSettings } from '../editor/editorLevelSetup'
@@ -23,8 +24,21 @@ import {
   adaptEditorSceneToLevelDefinition,
   createActorWorldMatrixResolver,
   createLevelBuildReport,
+  getLevelCollisionWorkflow,
 } from '../engine'
+import { prepareRequiredLevelRenderAssets } from '../engine/levelAssetPreloader'
+import { endLevelRuntimeAssetScope } from '../engine/runtimeAssetManifest'
 import { withEditorSceneEngineData } from '../engine/sceneDocumentRuntime'
+import {
+  TerrainRuntime,
+  loadTerrainRuntimeComponentData,
+  type TerrainRuntimeComponentData,
+  type TerrainRuntimeComponentSource,
+} from '../features/terrain'
+import {
+  qualityLevelStore,
+  recordSystemTiming,
+} from '../features/performance/stores/performanceStore'
 import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
 import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
 import { playerStateStore } from '../stores/gameStateStore'
@@ -48,17 +62,24 @@ export let levelId: string
 export let position: [number, number, number] = [0, 0, 0]
 export let editorEnabled = false
 export let interactionSystem: any = null
-export let playerSpawnPoint: [number, number, number] = [0, 1, 0]
 export let timelineEvents: any[] = []
 
 let sceneDocument: EditorSceneDocument | null = null
 let levelDefinition: LevelDefinition | null = null
 let levelActors: ActorDefinition[] = []
 let rootActors: ActorDefinition[] = []
+let renderActorsReady = false
+let visibleRootActorCount = 0
+let actorRevealFrame = 0
+let actorRevealComplete: (() => void) | null = null
 let playerPosition: [number, number, number] = [0, 0, 0]
 let starMapComponent: any = null
 let starMapRef: Group
 let loadToken = 0
+let terrainRuntimeData: TerrainRuntimeComponentData | null = null
+let terrainRuntimeReady = false
+let pendingSceneReady = false
+let pendingSpawnPosition: [number, number, number] | null = null
 
 const SKYBOX_PRESETS = {
   observatory: {
@@ -85,6 +106,60 @@ const SKYBOX_PRESETS = {
   },
 } as const
 
+function getActorRevealBatchSize() {
+  switch (get(qualityLevelStore)) {
+    case 'ultra_low':
+    case 'low':
+      return 2
+    case 'medium':
+      return 4
+    default:
+      return 6
+  }
+}
+
+function cancelActorReveal() {
+  if (actorRevealFrame) {
+    cancelAnimationFrame(actorRevealFrame)
+    actorRevealFrame = 0
+  }
+  actorRevealComplete = null
+}
+
+function revealNextActorBatch() {
+  const startedAt = performance.now()
+  visibleRootActorCount = Math.min(
+    rootActors.length,
+    visibleRootActorCount + getActorRevealBatchSize(),
+  )
+  recordSystemTiming('level.actorReveal', performance.now() - startedAt)
+
+  if (visibleRootActorCount < rootActors.length) {
+    actorRevealFrame = requestAnimationFrame(revealNextActorBatch)
+    return
+  }
+
+  actorRevealFrame = 0
+  const complete = actorRevealComplete
+  actorRevealComplete = null
+  complete?.()
+}
+
+function startActorReveal(onComplete: () => void) {
+  cancelActorReveal()
+  visibleRootActorCount = 0
+  actorRevealComplete = onComplete
+
+  if (rootActors.length === 0) {
+    actorRevealComplete = null
+    onComplete()
+    return
+  }
+
+  actorRevealFrame = requestAnimationFrame(revealNextActorBatch)
+}
+
+
 function parseSceneColor(
   value: string | number | null | undefined,
   fallback: number,
@@ -101,26 +176,107 @@ function parseSceneColor(
 function resolveSpawnPosition(
   definition: LevelDefinition,
 ): [number, number, number] {
-  const position = definition.spawn?.player ?? playerSpawnPoint
-  return [
-    Number(position[0]) || 0,
-    Number(position[1]) || 0,
-    Number(position[2]) || 0,
-  ]
+  const position = definition.spawn.player
+  if (!position.every(component => Number.isFinite(component))) {
+    throw new Error(
+      `${definition.id}: level definition has an invalid player spawn.`,
+    )
+  }
+
+  return [position[0], position[1], position[2]]
 }
 
-function dispatchPlayerSpawnRequest(
+function dispatchPlayerLevelPosition(
   level: string,
   spawnPosition: [number, number, number],
 ) {
-  const detail: PlayerSpawnRequestedDetail = {
+  const detail: PlayerLevelPositionDetail = {
     levelId: level,
     position: spawnPosition,
     reason: 'level_load',
     metadata: { levelName: level },
   }
-  dispatch('playerSpawnRequested', detail)
+  dispatch('playerLevelPosition', detail)
 }
+
+function getTerrainCollisionSettings(settings: EditorSceneSettings) {
+  return settings.level?.collision?.terrain as
+    | {
+        source?: string
+        runtimeSource?: TerrainRuntimeComponentSource
+        manifestUrl?: string
+      }
+    | undefined
+}
+
+async function loadSceneTerrainRuntimeData(
+  level: string,
+  settings: EditorSceneSettings,
+) {
+  const terrainSettings = getTerrainCollisionSettings(settings)
+  if (
+    terrainSettings?.source !== 'baked-heightmap' ||
+    !terrainSettings.manifestUrl
+  ) {
+    return null
+  }
+
+  const response = await fetch(terrainSettings.manifestUrl)
+  if (!response.ok) {
+    throw new Error(
+      `${level}: failed to load terrain manifest ${terrainSettings.manifestUrl} (${response.status})`,
+    )
+  }
+
+  const manifest = await response.json()
+  const workflow = getLevelCollisionWorkflow(level)
+  const hasAuthoredGroundVisuals = (workflow.groundActorIds?.length ?? 0) > 0
+  return loadTerrainRuntimeComponentData({
+    levelId: level,
+    source: terrainSettings.runtimeSource ?? 'editor-manifest',
+    manifest,
+    manifestUrl: terrainSettings.manifestUrl,
+    boundsFallback: manifest.physics?.bounds ?? null,
+    showVisualSurface: !hasAuthoredGroundVisuals,
+  })
+}
+
+function activateSceneGameplay(level: string, spawnPosition: [number, number, number]) {
+  dispatchPlayerLevelPosition(level, spawnPosition)
+  dispatch('staticWorldReady', {
+    levelId: level,
+    source: terrainRuntimeData ? 'scene-document-terrain' : 'scene-document',
+    metadata: {
+      actorCount: levelActors.length,
+      terrainRuntime: Boolean(terrainRuntimeData),
+    },
+  })
+}
+
+function requestSceneGameplayActivation(
+  level: string,
+  spawnPosition: [number, number, number],
+) {
+  pendingSceneReady = true
+  pendingSpawnPosition = spawnPosition
+
+  if (terrainRuntimeData && !terrainRuntimeReady) return
+
+  pendingSceneReady = false
+  pendingSpawnPosition = null
+  activateSceneGameplay(level, spawnPosition)
+}
+
+function handleTerrainRuntimeReady() {
+  terrainRuntimeReady = true
+  if (!pendingSceneReady || !pendingSpawnPosition) return
+
+  const spawnPosition = pendingSpawnPosition
+  pendingSceneReady = false
+  pendingSpawnPosition = null
+  activateSceneGameplay(levelId, spawnPosition)
+}
+
 
 async function loadSceneDocument(level: string, token: number) {
   const loadedScene = await loadEditorSceneDocument(level, {
@@ -131,12 +287,31 @@ async function loadSceneDocument(level: string, token: number) {
   const baseScene = loadedScene.scene
   const upgradedScene = upgradeLegacySceneDocument(baseScene)
 
+  const normalizedSceneSettings = normalizeLevelSceneSettings(
+    level,
+    upgradedScene.settings,
+  )
+
+  terrainRuntimeData = null
+  terrainRuntimeReady = false
+  pendingSceneReady = false
+  pendingSpawnPosition = null
+  renderActorsReady = false
+  visibleRootActorCount = 0
+  cancelActorReveal()
+
   sceneDocument = withEditorSceneEngineData(
     ensureSceneGeneration({
       ...upgradedScene,
-      settings: normalizeLevelSceneSettings(level, upgradedScene.settings),
+      settings: normalizedSceneSettings,
     }),
   )
+  terrainRuntimeData = await loadSceneTerrainRuntimeData(
+    level,
+    normalizedSceneSettings,
+  )
+  if (token !== loadToken) return
+
   levelDefinition =
     sceneDocument.engine?.levelDefinition ??
     adaptEditorSceneToLevelDefinition(sceneDocument)
@@ -163,12 +338,33 @@ async function loadSceneDocument(level: string, token: number) {
   }
   if (token !== loadToken) return
 
-  dispatch('staticWorldReady', {
-    levelId: level,
-    source: 'scene-document',
-    metadata: { actorCount: buildReport.actorCount },
+  const preloadReport = await prepareRequiredLevelRenderAssets(
+    level,
+    buildReport.requiredAssetUrls,
+    get(qualityLevelStore),
+  )
+  if (token !== loadToken) return
+
+  setRuntimeDiagnostic('levelAssets', {
+    label: 'Level Assets',
+    level: preloadReport.failures.length > 0 ? 'error' : 'ready',
+    message:
+      preloadReport.failures.length > 0
+        ? `${level}: ${preloadReport.failures.length} required render asset(s) failed to preload.`
+        : `${level}: ${preloadReport.requiredResolvedUrls.length} required render asset(s) resolved for ${preloadReport.qualityTier}.`,
+    meta: preloadReport as unknown as Record<string, unknown>,
   })
-  dispatchPlayerSpawnRequest(level, resolveSpawnPosition(levelDefinition))
+
+  if (preloadReport.failures.length > 0) {
+    return
+  }
+
+  renderActorsReady = true
+  const spawnPosition = resolveSpawnPosition(levelDefinition)
+  startActorReveal(() => {
+    if (token !== loadToken) return
+    requestSceneGameplayActivation(level, spawnPosition)
+  })
 }
 
 $: levelSettings = (levelDefinition?.settings ?? {}) as EditorSceneSettings
@@ -242,6 +438,9 @@ $: effectiveAudioRegions = [
   ...presetAmbientAudioRegions,
   ...authoredAudioRegions,
 ]
+$: visibleRootActors = renderActorsReady
+  ? rootActors.slice(0, visibleRootActorCount)
+  : []
 $: effectiveFog = (() => {
   const fogVolumes = authoredGameplayNodes.filter(
     entry => entry.gameplay?.type === 'fog-volume',
@@ -332,6 +531,12 @@ onMount(() => {
 })
 
 onDestroy(() => {
+  cancelActorReveal()
+  endLevelRuntimeAssetScope(levelId)
+  terrainRuntimeData = null
+  terrainRuntimeReady = false
+  pendingSceneReady = false
+  pendingSpawnPosition = null
   resetRuntimeVisualStyle()
 })
 </script>
@@ -348,6 +553,17 @@ onDestroy(() => {
     <T.HemisphereLight skyColor="#dbe9ff" groundColor="#1b2130" intensity={0.38} />
     <T.DirectionalLight position={[14, 20, -10]} color="#d7e6ff" intensity={keyLightIntensity} />
     <T.DirectionalLight position={[-16, 10, 18]} color="#50688f" intensity={fillLightIntensity} />
+
+    {#if terrainRuntimeData}
+      <TerrainRuntime
+        levelId={levelId}
+        config={terrainRuntimeData.config}
+        showVisualChunks={terrainRuntimeData.runtime.showVisualChunks}
+        showVisualSurface={terrainRuntimeData.runtime.showVisualSurface}
+        collisionStrategy={terrainRuntimeData.runtime.collisionStrategy}
+        on:terrainRuntimeReady={handleTerrainRuntimeReady}
+      />
+    {/if}
 
     {#if waterEnabled && waterSettings}
       <OceanComponent
@@ -419,8 +635,8 @@ onDestroy(() => {
       />
     {/if}
 
-    {#if !editorEnabled}
-      {#each rootActors as actor (actor.id)}
+    {#if !editorEnabled && renderActorsReady}
+      {#each visibleRootActors as actor (actor.id)}
         <RuntimeActorBranch
           {actor}
           actors={levelActors}

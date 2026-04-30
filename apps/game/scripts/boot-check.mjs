@@ -1,57 +1,44 @@
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { setTimeout as delay } from 'node:timers/promises'
+import {
+  normalizeBrowserName,
+  parseArgValue,
+  spawnGameDev,
+  stopChildProcess,
+  waitForUrl,
+} from './lib/browserHarness.mjs'
 
-const appRoot = fileURLToPath(new URL('..', import.meta.url))
 const repoRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const editorApiBase = String(process.env.PUBLIC_EDITOR_API_BASE || 'http://127.0.0.1:3001').replace(/\/+$/, '')
 const gameDevPort = String(process.env.GAME_DEV_PORT || 4322)
 const pnpmBin = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'
-const npxBin = process.platform === 'win32' ? 'npx.cmd' : 'npx'
 const useShell = process.platform === 'win32'
-
-function spawnDev() {
-  return spawn(pnpmBin, ['--dir', 'apps/game', 'dev'], {
-    cwd: repoRoot,
-    stdio: 'inherit',
-    shell: useShell,
-    env: process.env,
-  })
-}
-
-async function waitForUrl(url, attempts = 60, intervalMs = 500) {
-  for (let index = 0; index < attempts; index += 1) {
-    try {
-      const response = await fetch(url)
-      if (response.ok || response.status === 204) {
-        return
-      }
-    } catch {}
-
-    await delay(intervalMs)
-  }
-
-  throw new Error(`Timed out waiting for ${url}`)
-}
+const args = process.argv.slice(2)
+const browserName = normalizeBrowserName(
+  parseArgValue(args, 'browser', process.env.GAME_BROWSER || 'chromium'),
+)
+const noServer = args.includes('--no-server') || process.env.GAME_NO_SERVER === '1'
 
 async function runBootCheck() {
-  const devProcess = spawnDev()
-
-  const shutdown = () => {
-    if (!devProcess.killed) {
-      devProcess.kill('SIGTERM')
-    }
-  }
+  const devProcess = noServer ? null : spawnGameDev(repoRoot)
 
   try {
     await waitForUrl(`${editorApiBase}/favicon.ico`)
     await waitForUrl(`http://127.0.0.1:${gameDevPort}/`)
 
     const browserProcess = spawn(
-      npxBin,
-      ['-y', '-p', 'playwright', 'node', './scripts/boot-check-browser.mjs'],
+      pnpmBin,
+      [
+        '--dir',
+        'apps/game',
+        'exec',
+        'node',
+        './scripts/boot-check-browser.mjs',
+        '--browser',
+        browserName,
+      ],
       {
-        cwd: appRoot,
+        cwd: repoRoot,
         stdio: 'inherit',
         shell: useShell,
         env: process.env,
@@ -67,7 +54,7 @@ async function runBootCheck() {
       throw new Error(`Browser boot check failed with exit code ${exitCode}`)
     }
   } finally {
-    shutdown()
+    await stopChildProcess(devProcess)
   }
 }
 

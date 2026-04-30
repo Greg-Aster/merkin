@@ -1,18 +1,24 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { fixObjectMaterials } from './materialUtils'
 
 THREE.Cache.enabled = true
 
 const gltfLoader = new GLTFLoader()
 const cacheUrlKey = '__gltfCacheUrl'
 const cacheDisposedKey = '__gltfCacheDisposed'
+const sharedMaterialsKey = '__gltfSharedMaterials'
 
 interface GltfCacheEntry {
   promise: Promise<GLTF>
   gltf: GLTF | null
   refCount: number
   evictWhenUnused: boolean
+}
+
+export interface CloneCachedGltfSceneOptions {
+  cloneMaterials?: boolean
 }
 
 const gltfCache = new Map<string, GltfCacheEntry>()
@@ -92,6 +98,8 @@ function disposeGltfSource(gltf: GLTF) {
 }
 
 function disposeCloneResources(root: THREE.Object3D) {
+  if (root.userData[sharedMaterialsKey]) return
+
   const resources = collectSceneResources(root)
   resources.materials.forEach(disposeMaterial)
 }
@@ -126,6 +134,12 @@ export function loadCachedGltf(url: string) {
   entry.promise = gltfLoader
     .loadAsync(normalizedUrl)
     .then(gltf => {
+      for (const scene of gltf.scenes ?? []) {
+        fixObjectMaterials(scene)
+      }
+      if (gltf.scene && !gltf.scenes?.includes(gltf.scene)) {
+        fixObjectMaterials(gltf.scene)
+      }
       entry.gltf = gltf
       releaseEntryIfUnused(normalizedUrl, entry)
       return gltf
@@ -139,23 +153,30 @@ export function loadCachedGltf(url: string) {
   return entry.promise
 }
 
-export async function cloneCachedGltfScene(url: string) {
+export async function cloneCachedGltfScene(
+  url: string,
+  options: CloneCachedGltfSceneOptions = {},
+) {
   const normalizedUrl = normalizeGltfUrl(url)
   const gltf = await loadCachedGltf(url)
   const entry = gltfCache.get(normalizedUrl)
   const source = gltf.scene ?? gltf.scenes?.[0] ?? new THREE.Group()
   const clone = source.clone(true)
+  const cloneMaterials = options.cloneMaterials ?? true
 
   if (entry) {
     entry.refCount += 1
     clone.userData[cacheUrlKey] = normalizedUrl
     clone.userData[cacheDisposedKey] = false
+    clone.userData[sharedMaterialsKey] = !cloneMaterials
   }
 
-  clone.traverse(child => {
-    if (!(child instanceof THREE.Mesh) || !child.material) return
-    child.material = cloneMaterial(child.material)
-  })
+  if (cloneMaterials) {
+    clone.traverse(child => {
+      if (!(child instanceof THREE.Mesh) || !child.material) return
+      child.material = cloneMaterial(child.material)
+    })
+  }
 
   return clone
 }

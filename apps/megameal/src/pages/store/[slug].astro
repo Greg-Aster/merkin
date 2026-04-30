@@ -198,10 +198,10 @@ const flagshipShowcase = isShowcaseProduct
 ---
 
 <StoreLayout title={name} description={tagline}>
-  <div class="container mx-auto px-4 py-6 max-w-6xl">
+  <div class="container mx-auto max-w-6xl px-3 py-5 sm:px-4 md:py-6">
 
     {/* Breadcrumb */}
-    <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6" aria-label="Breadcrumb">
+    <nav class="mb-5 flex flex-wrap items-center gap-2 text-sm text-slate-500 md:mb-6" aria-label="Breadcrumb">
       <a href="/" data-sfx-hover="hover-soft" data-sfx-click="soft" class="hover:text-[var(--primary)] transition">Home</a>
       <Icon name="mdi:chevron-right" class="h-4 w-4" />
       <a href="/store/" data-sfx-hover="hover-soft" data-sfx-click="soft" class="hover:text-[var(--primary)] transition">Store</a>
@@ -214,7 +214,7 @@ const flagshipShowcase = isShowcaseProduct
         </>
       )}
       <Icon name="mdi:chevron-right" class="h-4 w-4" />
-      <span class="text-slate-300 truncate max-w-[200px]">{name}</span>
+      <span class="max-w-full truncate text-slate-300 sm:max-w-[200px]">{name}</span>
     </nav>
 
     {isShowcaseProduct && flagshipShowcase ? (
@@ -228,7 +228,7 @@ const flagshipShowcase = isShowcaseProduct
         />
 
         {realDescription && (
-          <div class="mt-8 rounded-3xl border border-slate-700/50 bg-slate-900/60 p-6 md:p-8">
+          <div class="mt-6 rounded-2xl border border-slate-700/50 bg-slate-900/60 p-4 sm:p-6 md:mt-8 md:rounded-3xl md:p-8">
             <p class="mb-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500">
               Reality Layer
             </p>
@@ -245,7 +245,7 @@ const flagshipShowcase = isShowcaseProduct
         )}
 
         {hasProductBody && (
-          <div class="mt-8 rounded-3xl border border-slate-700/50 bg-slate-900/60 p-6 md:p-8">
+          <div class="mt-6 rounded-2xl border border-slate-700/50 bg-slate-900/60 p-4 sm:p-6 md:mt-8 md:rounded-3xl md:p-8">
             <p class="mb-4 text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500">
               Listing Appendix
             </p>
@@ -264,7 +264,7 @@ const flagshipShowcase = isShowcaseProduct
       </section>
     ) : (
     <>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+    <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-8">
 
       {/* LEFT — Media Gallery */}
       <div class="lg:sticky lg:top-24">
@@ -299,7 +299,7 @@ const flagshipShowcase = isShowcaseProduct
               </span>
             )}
           </div>
-          <h1 class="text-3xl font-bold text-slate-100 leading-tight mb-1">{name}</h1>
+          <h1 class="mb-1 text-2xl font-bold leading-tight text-slate-100 sm:text-3xl">{name}</h1>
           {tagline && <p class="text-slate-400 italic text-sm">"{tagline}"</p>}
         </div>
 
@@ -323,7 +323,7 @@ const flagshipShowcase = isShowcaseProduct
         {/* Price */}
         <div>
           {price ? (
-            <p class="text-3xl font-bold text-emerald-400">${price.toFixed(2)}</p>
+            <p class="text-2xl font-bold text-emerald-400 sm:text-3xl">${price.toFixed(2)}</p>
           ) : (
             <p class="text-sm text-amber-400 italic">Price: Inquire Within</p>
           )}
@@ -360,7 +360,7 @@ const flagshipShowcase = isShowcaseProduct
         )}
 
         {/* CTA block */}
-        <div class="rounded-xl bg-slate-800/40 border border-slate-700/50 p-5 space-y-3">
+        <div class="space-y-3 rounded-xl border border-slate-700/50 bg-slate-800/40 p-4 sm:p-5">
           {canAddToCart && (
             <>
               {shippingNote && (
@@ -414,8 +414,8 @@ const flagshipShowcase = isShowcaseProduct
 
     {/* Details Section */}
     {(hasSpecifications || hasQandA || hasPreWrittenReviews) && (
-      <div class="mt-12 card-base p-6 md:p-8">
-        <div class="flex flex-wrap gap-1 mb-6 border-b border-slate-700/50" role="tablist">
+      <div class="card-base mt-8 p-4 sm:p-6 md:mt-12 md:p-8">
+        <div class="mb-6 flex gap-1 overflow-x-auto border-b border-slate-700/50" role="tablist">
           {hasSpecifications && (
             <button class="detail-tab px-5 py-2.5 text-sm font-medium border-b-2 border-[var(--primary)] text-[var(--primary)] -mb-px" data-tab="specs" data-sfx-hover="hover-soft" data-sfx-click="soft" role="tab" aria-selected="true">
               Specifications

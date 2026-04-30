@@ -90,62 +90,24 @@ export function unregisterLODObject(id: string) {
  * Generate default LOD levels for a mesh
  */
 function generateDefaultLODLevels(mesh: THREE.Mesh): LODLevel[] {
-  const distances = [10, 25, 50, 100]
-  const levels: LODLevel[] = []
+  const material = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material
 
-  // Original quality (closest)
-  levels.push({
-    distance: 0,
-    geometry: mesh.geometry,
-    material: Array.isArray(mesh.material) ? mesh.material[0] : mesh.material,
-    visible: true,
-    quality: 'ultra',
-  })
-
-  // Generate simplified versions
-  for (let i = 0; i < distances.length; i++) {
-    const distance = distances[i]
-    const quality = ['high', 'medium', 'low', 'ultra_low'][i] as any
-
-    levels.push({
-      distance,
-      geometry: simplifyGeometry(mesh.geometry, 0.8 - i * 0.15), // Reduce detail progressively
-      material: Array.isArray(mesh.material) ? mesh.material[0] : mesh.material, // Could also simplify materials
-      visible: i < 3, // Hide at furthest distances
-      quality,
-    })
-  }
-
-  return levels
-}
-
-/**
- * Simplify geometry (basic implementation)
- */
-function simplifyGeometry(
-  geometry: THREE.BufferGeometry,
-  factor: number,
-): THREE.BufferGeometry {
-  // This is a basic implementation - in production you'd want a proper mesh simplification algorithm
-  const simplified = geometry.clone()
-
-  // Simple vertex reduction by skipping vertices
-  if (simplified.attributes.position) {
-    const positions = simplified.attributes.position.array
-    const newPositions = []
-
-    const skip = Math.max(1, Math.floor(1 / factor))
-    for (let i = 0; i < positions.length; i += skip * 3) {
-      newPositions.push(positions[i], positions[i + 1], positions[i + 2])
-    }
-
-    simplified.setAttribute(
-      'position',
-      new THREE.Float32BufferAttribute(newPositions, 3),
-    )
-  }
-
-  return simplified
+  return [
+    {
+      distance: 0,
+      geometry: mesh.geometry,
+      material,
+      visible: true,
+      quality: 'ultra',
+    },
+    {
+      distance: 100,
+      geometry: mesh.geometry,
+      material,
+      visible: false,
+      quality: 'ultra_low',
+    },
+  ]
 }
 
 /**

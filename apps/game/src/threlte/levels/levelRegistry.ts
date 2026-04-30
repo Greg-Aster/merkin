@@ -9,21 +9,12 @@ import initialRegistry from './level-registry.json'
 export const DEFAULT_LEVEL_ID = 'observatory'
 
 export type LevelLifecycleStatus = 'active' | 'draft' | 'archived'
-export type BuiltInLevelComponentKey = 'observatory' | 'solitude'
-
-export interface LevelRegistryComponentSource {
-  kind: 'component'
-  componentKey: BuiltInLevelComponentKey
-}
-
 export interface LevelRegistrySceneSource {
   kind: 'scene'
   sceneId: string
 }
 
-export type LevelRegistrySource =
-  | LevelRegistryComponentSource
-  | LevelRegistrySceneSource
+export type LevelRegistrySource = LevelRegistrySceneSource
 
 export interface LevelRegistryStarMapSettings {
   enabled: boolean
@@ -78,7 +69,7 @@ function normalizeEntries(entries: LevelRegistryEntry[]): LevelRegistryEntry[] {
       title: 'Observatory',
       status: 'active',
       deployed: true,
-      source: { kind: 'component', componentKey: 'observatory' },
+      source: { kind: 'scene', sceneId: 'observatory' },
       aliases: [
         'observatory-level',
         'hybrid-observatory',
@@ -187,16 +178,6 @@ export function validateLevelRegistryEntry(
 
   if (!entry.title.trim()) {
     errors.push(`${entry.id}: title is empty.`)
-  }
-
-  if (entry.source.kind === 'component') {
-    if (!['observatory', 'solitude'].includes(entry.source.componentKey)) {
-      errors.push(`${entry.id}: unknown component source.`)
-    }
-    warnings.push(
-      `${entry.id}: component source is not LevelDefinition-backed yet.`,
-    )
-    return { valid: errors.length === 0, errors, warnings }
   }
 
   const scene = getPackagedRegistryScene(entry.source.sceneId)

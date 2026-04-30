@@ -5,9 +5,7 @@ export let metadataDeployed = false
 export let metadataStarMapEnabled = false
 export let metadataStarMapYear = 2100
 export let metadataStarMapDescription = ''
-export let metadataSourceKind: 'component' | 'scene' = 'scene'
-export let metadataSourceComponentKey: 'observatory' | 'solitude' =
-  'observatory'
+export let metadataSourceKind: 'scene' = 'scene'
 export let saveAsTitle = ''
 export let saveAsLevelId = ''
 export let importBuffer = ''
@@ -45,18 +43,8 @@ export let onApplyImport: () => void = () => {}
     <div class="tuple-label">Runtime Source</div>
     <select class="text-input" bind:value={metadataSourceKind} data-sfx-focus="focus-soft">
       <option value="scene">Scene File</option>
-      <option value="component">Built-In Runtime</option>
     </select>
   </div>
-  {#if metadataSourceKind === 'component'}
-    <div class="tuple-group">
-      <div class="tuple-label">Built-In Level</div>
-      <select class="text-input" bind:value={metadataSourceComponentKey} data-sfx-focus="focus-soft">
-        <option value="observatory">Observatory</option>
-        <option value="solitude">Solitude</option>
-      </select>
-    </div>
-  {/if}
   <div class="tuple-group">
     <div class="tuple-label">Star Year</div>
     <input class="tuple-input" type="number" bind:value={metadataStarMapYear} data-sfx-focus="focus-soft" disabled={!metadataStarMapEnabled || !metadataDeployed} />

@@ -6,7 +6,7 @@ export interface StaticWorldReadyDetail {
   metadata?: Record<string, unknown>
 }
 
-export interface PlayerSpawnRequestedDetail {
+export interface PlayerLevelPositionDetail {
   levelId: string
   position: Vec3
   reason: 'level_load' | 'level_transition' | 'editor_preview'

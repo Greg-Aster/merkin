@@ -94,6 +94,7 @@ function handleFilterInput(event: Event) {
           class:drop-target={dragEnabled && !!row.nodeId && currentDropTargetId === row.nodeId}
           role="treeitem"
           aria-selected={isRowSelected(row)}
+          tabindex={row.nodeId ? 0 : -1}
           draggable={dragEnabled && !!row.nodeId && !!row.draggable}
           on:dragstart={(event) => { if (dragEnabled && row.nodeId) onRowDragStart(row, event) }}
           on:dragend={onRowDragEnd}

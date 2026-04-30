@@ -8,7 +8,7 @@ export let integrationParameters: any = undefined
 export let ccd: boolean = false
 
 onMount(() => {
-  // Dispatch this event so GameWorld can advance the lifecycle to spawning.
+  // Dispatch this event so GameWorld can advance the gameplay lifecycle.
   dispatch('physicsReady')
 })
 </script>

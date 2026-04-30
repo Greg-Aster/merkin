@@ -267,32 +267,6 @@ async function ensureMultiplayerControls() {
     color: white;
   }
 
-  .visual-grid {
-    display: grid;
-    gap: 12px;
-  }
-
-  .field {
-    display: grid;
-    gap: 6px;
-    font-size: 14px;
-  }
-
-  .field span {
-    color: rgba(255, 255, 255, 0.88);
-  }
-
-  .field select,
-  .field input[type="number"] {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
-  }
-
-  .auto-quality-card,
   .status-block {
     display: grid;
     gap: 8px;
@@ -302,7 +276,6 @@ async function ensureMultiplayerControls() {
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  .auto-quality-heading,
   .status-title {
     font-size: 12px;
     letter-spacing: 0.08em;
@@ -310,19 +283,10 @@ async function ensureMultiplayerControls() {
     color: rgba(255, 255, 255, 0.62);
   }
 
-  .auto-quality-summary,
   .status-copy {
     font-size: 14px;
     line-height: 1.4;
     color: rgba(255, 255, 255, 0.92);
-  }
-
-  .status-meta {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.72);
   }
 
   .checkbox-label {

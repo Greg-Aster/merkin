@@ -7,14 +7,10 @@ export interface LevelRuntimeResetServices {
   interactionSystem?: {
     clearInteractiveObjects?: () => void
   } | null
-  spawnSystem?: {
-    resetSpawnState?: () => void
-  } | null
 }
 
 export function resetLevelRuntime(services: LevelRuntimeResetServices = {}) {
   services.interactionSystem?.clearInteractiveObjects?.()
-  services.spawnSystem?.resetSpawnState?.()
 
   terrainActions.reset()
   resetPostProcessingState()

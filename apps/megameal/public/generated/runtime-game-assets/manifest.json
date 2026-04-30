@@ -1,0 +1,1773 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-04-30T19:49:05.900Z",
+  "sourceSceneDirectory": "apps/game/src/threlte/editor/scenes",
+  "cookedAssetDirectory": "apps/megameal/public/generated/runtime-game-assets",
+  "summary": {
+    "sourceAssetCount": 31,
+    "sourceAssetBytes": 120367804,
+    "sourceAssetSize": "114.8MB",
+    "cookedAssetCount": 31,
+    "cookedVariantCount": 93,
+    "cookedTierCoverage": {
+      "high": 31,
+      "medium": 31,
+      "low": 31
+    },
+    "missingSourceAssetCount": 0,
+    "rawGeneratedRuntimeAssetCount": 31
+  },
+  "assets": {
+    "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4131184,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+      "scenes": [
+        {
+          "sceneId": "sci-fi-room",
+          "nodeIds": [
+            "sci-fi-planter-d"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.high.glb",
+          "exists": true,
+          "sizeBytes": 855768,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 742560,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.low.glb",
+          "exists": true,
+          "sizeBytes": 645440,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4459784,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb",
+      "scenes": [
+        {
+          "sceneId": "sci-fi-room",
+          "nodeIds": [
+            "sci-fi-planter-a"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.high.glb",
+          "exists": true,
+          "sizeBytes": 823132,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 694556,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.low.glb",
+          "exists": true,
+          "sizeBytes": 581564,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4268412,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+      "scenes": [
+        {
+          "sceneId": "sci-fi-room",
+          "nodeIds": [
+            "sci-fi-planter-c"
+          ]
+        },
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-planter-urd"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.high.glb",
+          "exists": true,
+          "sizeBytes": 814788,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 719300,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.low.glb",
+          "exists": true,
+          "sizeBytes": 649684,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 1890788,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+      "scenes": [
+        {
+          "sceneId": "sci-fi-room",
+          "nodeIds": [
+            "sci-fi-planter-b"
+          ]
+        },
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-planter-mimir"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.high.glb",
+          "exists": true,
+          "sizeBytes": 810576,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 795304,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.low.glb",
+          "exists": true,
+          "sizeBytes": 656160,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4149408,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
+      "scenes": [
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-planter-hvergelmir"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.high.glb",
+          "exists": true,
+          "sizeBytes": 872340,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 748308,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.low.glb",
+          "exists": true,
+          "sizeBytes": 651388,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4250188,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+      "scenes": [
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-hvergelmir-depth-arch-1"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.high.glb",
+          "exists": true,
+          "sizeBytes": 847468,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 753644,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.low.glb",
+          "exists": true,
+          "sizeBytes": 697580,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4590784,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-ring-fragment-east"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.high.glb",
+          "exists": true,
+          "sizeBytes": 835936,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 707336,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.low.glb",
+          "exists": true,
+          "sizeBytes": 607800,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4753348,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-ring-fragment-west"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.high.glb",
+          "exists": true,
+          "sizeBytes": 887756,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 772228,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.low.glb",
+          "exists": true,
+          "sizeBytes": 700308,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4687240,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-ground-dais"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.high.glb",
+          "exists": true,
+          "sizeBytes": 899268,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 780676,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.low.glb",
+          "exists": true,
+          "sizeBytes": 702108,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4633436,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-pillar-11"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.high.glb",
+          "exists": true,
+          "sizeBytes": 815684,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 716116,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.low.glb",
+          "exists": true,
+          "sizeBytes": 640172,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 3792848,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-pillar-12"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.high.glb",
+          "exists": true,
+          "sizeBytes": 708684,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 602964,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.low.glb",
+          "exists": true,
+          "sizeBytes": 485164,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 5213128,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-ground-plateau"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.high.glb",
+          "exists": true,
+          "sizeBytes": 1068060,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 934972,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.low.glb",
+          "exists": true,
+          "sizeBytes": 871068,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4595356,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
+      "scenes": [
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-arrival-monolith-right"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.high.glb",
+          "exists": true,
+          "sizeBytes": 821524,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 722068,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.low.glb",
+          "exists": true,
+          "sizeBytes": 635172,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 3835624,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+      "scenes": [
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-arrival-foreground-right",
+            "yggdrasil-arrival-monolith-left",
+            "yggdrasil-drowned-monolith-nw"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.high.glb",
+          "exists": true,
+          "sizeBytes": 750700,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 623420,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.low.glb",
+          "exists": true,
+          "sizeBytes": 511292,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 3900524,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
+      "scenes": [
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-hvergelmir-depth-monolith-right"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.high.glb",
+          "exists": true,
+          "sizeBytes": 690416,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 544336,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.low.glb",
+          "exists": true,
+          "sizeBytes": 390816,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4163524,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+      "scenes": [
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-hvergelmir-depth-monolith-left"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.high.glb",
+          "exists": true,
+          "sizeBytes": 703040,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 549184,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.low.glb",
+          "exists": true,
+          "sizeBytes": 393184,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4439648,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb",
+      "scenes": [
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-drowned-monolith-north",
+            "yggdrasil-drowned-monolith-west"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.high.glb",
+          "exists": true,
+          "sizeBytes": 738524,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 561220,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.low.glb",
+          "exists": true,
+          "sizeBytes": 388076,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4689512,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-pillar-1"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.high.glb",
+          "exists": true,
+          "sizeBytes": 786688,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 640144,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.low.glb",
+          "exists": true,
+          "sizeBytes": 501452,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4694680,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-pillar-2"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.high.glb",
+          "exists": true,
+          "sizeBytes": 809712,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 667032,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.low.glb",
+          "exists": true,
+          "sizeBytes": 539308,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4300756,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-pillar-3"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.high.glb",
+          "exists": true,
+          "sizeBytes": 737268,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 592100,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.low.glb",
+          "exists": true,
+          "sizeBytes": 453084,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 3948184,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-pillar-4"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.high.glb",
+          "exists": true,
+          "sizeBytes": 787628,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 701668,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.low.glb",
+          "exists": true,
+          "sizeBytes": 630644,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4306228,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-pillar-5"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.high.glb",
+          "exists": true,
+          "sizeBytes": 794020,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 668724,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.low.glb",
+          "exists": true,
+          "sizeBytes": 556980,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 3706992,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-pillar-6"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.high.glb",
+          "exists": true,
+          "sizeBytes": 661524,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 539756,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.low.glb",
+          "exists": true,
+          "sizeBytes": 421472,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 5305072,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-pillar-7"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.high.glb",
+          "exists": true,
+          "sizeBytes": 957684,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 798036,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.low.glb",
+          "exists": true,
+          "sizeBytes": 691700,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 3788064,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-pillar-8"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.high.glb",
+          "exists": true,
+          "sizeBytes": 645920,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 401336,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.low.glb",
+          "exists": true,
+          "sizeBytes": 224800,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 3830936,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-pillar-9"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.high.glb",
+          "exists": true,
+          "sizeBytes": 683924,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 548392,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.low.glb",
+          "exists": true,
+          "sizeBytes": 405808,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 4646216,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb",
+      "scenes": [
+        {
+          "sceneId": "solitude",
+          "nodeIds": [
+            "solitude-pillar-10"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.high.glb",
+          "exists": true,
+          "sizeBytes": 885988,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 765012,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.low.glb",
+          "exists": true,
+          "sizeBytes": 685612,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 15008,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+      "scenes": [
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-bifrost-ribbon-merged"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.high.glb",
+          "exists": true,
+          "sizeBytes": 6076,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 6076,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.low.glb",
+          "exists": true,
+          "sizeBytes": 6076,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 74008,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+      "scenes": [
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-crown-ascent-merged"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.high.glb",
+          "exists": true,
+          "sizeBytes": 10216,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 10216,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
+          "exists": true,
+          "sizeBytes": 10216,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 5297464,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+      "scenes": [
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-tree-merged"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.high.glb",
+          "exists": true,
+          "sizeBytes": 1161764,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.medium.glb",
+          "exists": true,
+          "sizeBytes": 1021868,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.low.glb",
+          "exists": true,
+          "sizeBytes": 954164,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    },
+    "/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb": {
+      "sourceUrl": "/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb",
+      "sourceExists": true,
+      "sourceSizeBytes": 9460,
+      "sourcePath": "apps/megameal/public/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb",
+      "scenes": [
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-mound"
+          ]
+        }
+      ],
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.high.glb",
+          "exists": true,
+          "sizeBytes": 4616,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.00008
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.medium.glb",
+          "exists": true,
+          "sizeBytes": 4616,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.00012
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.low.glb",
+          "exists": true,
+          "sizeBytes": 4616,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.0002
+          }
+        }
+      }
+    }
+  }
+}

@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "assets": {
     "environment": "/models/levels/sci-fi-room.glb",
-    "heightmap": null,
+    "heightmap": "/terrain/heightmaps/sci-fi-room_heightmap.png",
     "chunksPath": "/terrain/levels/sci-fi-room/"
   },
   "spawn": {
@@ -21,7 +21,7 @@
     ]
   },
   "physics": {
-    "type": "scene-authored",
+    "type": "baked-terrain-mesh",
     "worldSize": 5.39045262336731,
     "gridX": 4,
     "gridY": 4,
@@ -137,5 +137,34 @@
     "starMap": false,
     "conversations": false,
     "styles": true
+  },
+  "collision": {
+    "terrain": {
+      "type": "baked-terrain-mesh",
+      "authoredException": true,
+      "url": "/terrain/collision/sci-fi-room.collider.bin",
+      "metadataUrl": "/terrain/collision/sci-fi-room.collider.meta.json",
+      "triangleCount": 32768,
+      "vertexCount": 16641,
+      "colliderResolution": 129,
+      "sampleStep": 8,
+      "bounds": {
+        "min": [
+          -2.6336541175842285,
+          -0.08223403990268707,
+          -2.2834396362304688
+        ],
+        "max": [
+          2.756798505783081,
+          1.983830451965332,
+          2.3493473529815674
+        ]
+      },
+      "center": [
+        0.06157219409942627,
+        0,
+        0.032953858375549316
+      ]
+    }
   }
 }

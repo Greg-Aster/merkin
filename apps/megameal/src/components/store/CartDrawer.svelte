@@ -87,7 +87,7 @@ const emptyMessage =
     class="fixed top-0 right-0 h-full w-full max-w-md bg-[var(--card-bg,#1e1e2e)] border-l border-slate-700 z-50 flex flex-col shadow-2xl"
   >
     <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700/60">
+    <div class="flex items-center justify-between border-b border-slate-700/60 px-4 py-4 sm:px-6">
       <h2 class="text-lg font-bold text-slate-100">
         Your Commitments
         {#if $cartCount > 0}
@@ -108,7 +108,7 @@ const emptyMessage =
     </div>
 
     <!-- Items -->
-    <div class="flex-1 overflow-y-auto px-6 py-4">
+    <div class="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
       {#if $cart.length === 0}
         <div class="flex flex-col items-center justify-center h-full gap-4 text-center">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12 text-slate-600">
@@ -127,7 +127,7 @@ const emptyMessage =
       {:else}
         <ul class="space-y-4">
           {#each $cart as item (item.id)}
-            <li class="flex items-start gap-4 border-b border-slate-700/40 pb-4">
+            <li class="flex flex-col gap-3 border-b border-slate-700/40 pb-4 sm:flex-row sm:items-start sm:gap-4">
               <div class="flex-1 min-w-0">
                 <p class="font-semibold text-slate-200 text-sm truncate">{item.name}</p>
                 {#if item.href}
@@ -145,7 +145,7 @@ const emptyMessage =
                 {/if}
                 <p class="text-emerald-400 text-sm font-semibold mt-1">${item.price.toFixed(2)} each</p>
               </div>
-              <div class="flex items-center gap-2 shrink-0">
+              <div class="flex shrink-0 flex-wrap items-center justify-start gap-2 sm:justify-end">
                 <button
                   onclick={() => cart.updateQuantity(item.id, item.quantity - 1)}
                   aria-label="Decrease quantity"
@@ -181,7 +181,7 @@ const emptyMessage =
 
     <!-- Footer -->
     {#if $cart.length > 0}
-      <div class="border-t border-slate-700/60 px-6 py-4 space-y-3">
+      <div class="space-y-3 border-t border-slate-700/60 px-4 py-4 sm:px-6">
         <div class="flex justify-between items-center">
           <span class="text-slate-400 text-sm">Total</span>
           <span class="text-xl font-bold text-emerald-400">${$cartTotal.toFixed(2)}</span>

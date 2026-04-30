@@ -248,5 +248,33 @@ const sellerScore = (96 + (deterministicValue % 34) / 10).toFixed(1)
 			</div>
 		</div>
 	</a>
-</article>
 
+	<a href={productHref} class="marketplace-card-mobile" aria-label={`Inspect ${product.data.name}`}>
+		<div class="marketplace-card-mobile__media">
+			{thumbnail ? (
+				<img src={thumbnail} alt={product.data.name} loading="lazy" />
+			) : (
+				<div class="marketplace-card-mobile__placeholder">
+					<Icon name="mdi:image-off-outline" class="h-8 w-8 opacity-40" />
+				</div>
+			)}
+			<span class={`marketplace-card-mobile__badge ${availabilityTone.badgeClass}`}>
+				{availabilityTone.label}
+			</span>
+		</div>
+		<div class="marketplace-card-mobile__body">
+			<p>{product.data.category ?? "catalog entry"}</p>
+			<h2>{product.data.name}</h2>
+			<div class="marketplace-card-mobile__footer">
+				<strong>
+					{typeof product.data.price === "number"
+						? `$${product.data.price.toFixed(2)}`
+						: availabilityTone.label}
+				</strong>
+				<span>
+					Inspect <Icon name="mdi:arrow-right" class="h-3.5 w-3.5" />
+				</span>
+			</div>
+		</div>
+	</a>
+</article>

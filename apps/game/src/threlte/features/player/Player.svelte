@@ -32,9 +32,6 @@ const GAMEPAD_LOOK_DEADZONE = 0.12
 const GAMEPAD_LOOK_SPEED = 2.2
 const PLAYER_CAPSULE_HALF_HEIGHT = 0.9
 const PLAYER_CAPSULE_RADIUS = 0.45
-const PLAYER_SPAWN_RAY_HEIGHT = 24
-const PLAYER_SPAWN_RAY_DISTANCE = 120
-const PLAYER_SPAWN_STABILIZE_DELAYS_MS = [120, 260]
 
 // --- Visual Constants ---
 const CAMERA_SMOOTH_SPEED = 0.2 // How quickly visuals catch up to physics
@@ -57,7 +54,7 @@ const dispatch = createEventDispatcher()
 const rapier = useRapier()
 
 // --- Props ---
-export let position: [number, number, number] = [0, 10, 0]
+export let position: [number, number, number]
 export let speed = 5
 export let jumpForce = 10
 export let lightIntensityScale = 60
@@ -108,8 +105,8 @@ let hasConnectedGamepad = false
 let sendPlayerUpdateFn: ((playerState: PlayerState) => void) | null = null
 let multiplayerServicePromise: Promise<void> | null = null
 let networkSyncElapsed = 0
-let spawnStabilizeTimeoutIds: number[] = []
-let lastReportedSpawnReady = false
+let lastReportedPlayerReady = false
+let appliedLevelPositionKey = ''
 
 const tempAxisY = new Vector3(0, 1, 0)
 const tempDesiredTranslation = new Vector3()
@@ -139,13 +136,11 @@ let shockwaves: Array<{
   bandWidth: number
   opacity: number
   electricOpacity: number
-  fireOpacity: number
   coreOpacity: number
   progress: number
   maxScale: number
   strength: number
   electricColor: string
-  fireColor: string
   lightColor: string
   lightDistance: number
   lightIntensity: number
@@ -752,13 +747,11 @@ function spawnLightShockwave(
       bandWidth: 0.9 + strength * 0.7,
       opacity: 0.65 + strength * 0.2,
       electricOpacity: 0.96,
-      fireOpacity: 0.14 + strength * 0.08,
       coreOpacity: 0.32 + strength * 0.12,
       progress: 0,
       maxScale,
       strength,
       electricColor: LIGHT_SHOCKWAVE_COLOR,
-      fireColor: LIGHT_SHOCKWAVE_FIRE_COLOR,
       lightColor: LIGHT_SHOCKWAVE_COLOR,
       lightDistance: 7,
       lightIntensity: 6 + strength * 16,
@@ -773,67 +766,34 @@ function spawnLightShockwave(
   })
 }
 
-function clearSpawnStabilizers() {
-  spawnStabilizeTimeoutIds.forEach(timeoutId => {
-    window.clearTimeout(timeoutId)
-  })
-  spawnStabilizeTimeoutIds = []
-}
-
-function sampleSpawnGroundY(x: number, z: number, fallbackY: number) {
-  if (!rapier.world || !rapier?.rapier?.Ray) return null
-
-  const rayOriginY = Math.max(
-    fallbackY + PLAYER_SPAWN_RAY_HEIGHT,
-    PLAYER_SPAWN_RAY_HEIGHT,
-  )
-  const ray = new rapier.rapier.Ray(
-    { x, y: rayOriginY, z },
-    { x: 0, y: -1, z: 0 },
-  )
-
-  const hit = rapier.world.castRay(
-    ray,
-    PLAYER_SPAWN_RAY_DISTANCE,
-    true,
-    rapier.rapier.QueryFilterFlags.EXCLUDE_SENSORS,
-  )
-
-  if (!hit || !Number.isFinite(hit.toi)) return null
-  return rayOriginY - hit.toi
-}
-
-function resolveSafeSpawnPosition(x: number, y: number, z: number) {
-  const groundY = sampleSpawnGroundY(x, z, y)
-  const safeY =
-    groundY === null ? y : Math.max(y, groundY + getSpawnGroundOffset())
-
-  return { x, y: safeY, z }
-}
-
-function applySpawnPosition(x: number, y: number, z: number) {
-  if (!rigidBody) return
+function applyLevelPosition() {
+  if (!isPlayerPhysicsReady()) return false
+  const [x, y, z] = position
+  const positionKey = position.join(',')
+  if (positionKey === appliedLevelPositionKey) return true
+  appliedLevelPositionKey = positionKey
   const pos = { x, y, z }
   rigidBody.setTranslation(pos, true)
+  rigidBody.setNextKinematicTranslation(pos)
   playerVelocity.set(0, 0, 0)
   gameActions.updatePlayerPosition([pos.x, pos.y, pos.z])
   if (visualGroup) {
     visualGroup.position.set(pos.x, pos.y, pos.z)
   }
+  return true
 }
 
-function scheduleSpawnStabilization(x: number, y: number, z: number) {
-  clearSpawnStabilizers()
-
-  PLAYER_SPAWN_STABILIZE_DELAYS_MS.forEach(delayMs => {
-    const timeoutId = window.setTimeout(() => {
-      if (!rigidBody) return
-      const safePosition = resolveSafeSpawnPosition(x, y, z)
-      applySpawnPosition(safePosition.x, safePosition.y, safePosition.z)
-    }, delayMs)
-
-    spawnStabilizeTimeoutIds = [...spawnStabilizeTimeoutIds, timeoutId]
-  })
+function isPlayerPhysicsReady() {
+  return Boolean(
+    rigidBody &&
+      characterController &&
+      visualGroup &&
+      cameraPivot &&
+      camera &&
+      (typeof rigidBody.isValid !== 'function' || rigidBody.isValid()) &&
+      typeof rigidBody.numColliders === 'function' &&
+      rigidBody.numColliders() >= 1,
+  )
 }
 
 async function ensureMultiplayerService(): Promise<void> {
@@ -871,7 +831,9 @@ $: if ($multiplayerStore.isConnected && !sendPlayerUpdateFn) {
 }
 
 useTask(delta => {
+  const levelPositionApplied = applyLevelPosition()
   if (
+    !levelPositionApplied ||
     !gameplayEnabled ||
     !rigidBody ||
     !characterController ||
@@ -967,7 +929,6 @@ useTask(delta => {
           1,
           nextProgress * 0.38 + shockwave.strength * 0.08,
         )
-        const fireMix = Math.min(1, 0.08 + warmth * 0.52)
         return {
           ...shockwave,
           progress: nextProgress,
@@ -975,10 +936,6 @@ useTask(delta => {
           opacity: (1 - nextProgress) * 0.75,
           electricOpacity:
             (1 - nextProgress) * (1.04 + shockwave.strength * 0.06),
-          fireOpacity:
-            (1 - nextProgress) *
-            (0.16 + shockwave.strength * 0.08) *
-            Math.max(0.14, 0.4 + warmth * 0.26),
           coreOpacity: (1 - nextProgress) * (0.34 + shockwave.strength * 0.14),
           lightDistance: 5 + nextRadius * 1.35,
           lightIntensity: (1 - nextProgress) * (8 + shockwave.strength * 18),
@@ -986,11 +943,6 @@ useTask(delta => {
             shockwaveElectricBaseColor,
             shockwaveCoreBaseColor,
             electricMix,
-          ),
-          fireColor: mixShockwaveColor(
-            shockwaveCoreBaseColor,
-            shockwaveFireBaseColor,
-            fireMix,
           ),
           lightColor: mixShockwaveColor(
             shockwaveElectricBaseColor,
@@ -1133,30 +1085,13 @@ useTask(delta => {
   }
 })
 
-// --- Component API & Lifecycle ---
-export function isSpawnReady() {
-  return Boolean(rigidBody)
+$: playerRigReady = isPlayerPhysicsReady() && Boolean(appliedLevelPositionKey)
+$: if (playerRigReady) {
+  applyLevelPosition()
 }
-
-export function getSpawnGroundOffset() {
-  return PLAYER_CAPSULE_HALF_HEIGHT + PLAYER_CAPSULE_RADIUS + 0.18
-}
-
-export function resetPhysics() {
-  playerVelocity.set(0, 0, 0)
-}
-
-export function spawnAt(x: number, y: number, z: number) {
-  if (!rigidBody) return
-  const safePosition = resolveSafeSpawnPosition(x, y, z)
-  applySpawnPosition(safePosition.x, safePosition.y, safePosition.z)
-  scheduleSpawnStabilization(x, y, z)
-}
-
-$: spawnReady = Boolean(rigidBody)
-$: if (spawnReady !== lastReportedSpawnReady) {
-  lastReportedSpawnReady = spawnReady
-  dispatch('spawnReadyChange', { ready: spawnReady })
+$: if (playerRigReady !== lastReportedPlayerReady) {
+  lastReportedPlayerReady = playerRigReady
+  dispatch('playerReadyChange', { ready: playerRigReady })
 }
 
 onMount(() => {
@@ -1186,7 +1121,6 @@ onDestroy(() => {
   if (surfaceMoveHoldTimeout !== null) {
     window.clearTimeout(surfaceMoveHoldTimeout)
   }
-  clearSpawnStabilizers()
   characterController?.free?.()
   chargeAudioContext?.close?.()
   chargeAudioContext = null
@@ -1214,6 +1148,7 @@ onDestroy(() => {
 <RigidBody
   bind:rigidBody
   type="kinematicPosition"
+  {position}
   enabledRotations={[false, true, false]}
   userData={{ isPlayer: true, type: 'player' }}
 >
@@ -1255,10 +1190,8 @@ onDestroy(() => {
     radius={shockwave.radius}
     bandWidth={shockwave.bandWidth}
     electricOpacity={shockwave.electricOpacity}
-    fireOpacity={shockwave.fireOpacity}
     coreOpacity={shockwave.coreOpacity}
     electricColor={shockwave.electricColor}
-    fireColor={shockwave.fireColor}
     lightColor={shockwave.lightColor}
     lightDistance={shockwave.lightDistance}
     lightIntensity={shockwave.lightIntensity}

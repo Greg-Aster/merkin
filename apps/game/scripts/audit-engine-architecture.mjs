@@ -7,6 +7,8 @@ const publicDir = join(process.cwd(), '../megameal/public')
 const bakedTerrainManifests = [
   'observatory-environment.manifest.json',
   'solitude.manifest.json',
+  'sci-fi-room.manifest.json',
+  'yggdrasil.manifest.json',
 ]
 const terrainManifestFiles = readdirSync(terrainDir)
   .filter(file => file.endsWith('.manifest.json'))
@@ -21,6 +23,10 @@ const forbiddenLegacyStyleFiles = [
 const forbiddenDuplicateInteractionFiles = [
   'src/threlte/systems/Interaction.svelte',
 ]
+const allowedDefaultCameraFiles = new Set([
+  'src/threlte/features/player/Player.svelte',
+  'src/threlte/editor/EditorViewportControls.svelte',
+])
 const terrainTriangleBudget = 50_000
 const runtimeAssetFileBudgetBytes = 40 * 1024 * 1024
 const sceneRuntimeAssetBudgetBytes = 160 * 1024 * 1024
@@ -53,6 +59,21 @@ function getSceneFiles() {
     .sort()
 }
 
+function getSourceFiles(dir, prefix = '') {
+  const files = []
+  for (const entry of readdirSync(dir)) {
+    const fullPath = join(dir, entry)
+    const relativePath = prefix ? `${prefix}/${entry}` : entry
+    const stat = statSync(fullPath)
+    if (stat.isDirectory()) {
+      files.push(...getSourceFiles(fullPath, relativePath))
+    } else if (/\.(svelte|ts|js|mjs)$/.test(entry)) {
+      files.push(relativePath)
+    }
+  }
+  return files
+}
+
 function getNonRuntimeSceneJsonFiles() {
   return readdirSync(sceneDir)
     .filter(file => file.endsWith('.json') && !file.endsWith('.scene.json'))
@@ -61,6 +82,14 @@ function getNonRuntimeSceneJsonFiles() {
 
 function isGeometryNode(node) {
   return ['asset', 'primitive', 'prefab'].includes(node.kind)
+}
+
+function isFiniteVec3(value) {
+  return (
+    Array.isArray(value) &&
+    value.length === 3 &&
+    value.every(component => Number.isFinite(component))
+  )
 }
 
 function getAssetUrl(node) {
@@ -81,6 +110,7 @@ function auditScene(file) {
   const hasBom = source.startsWith('\uFEFF')
   const scene = JSON.parse(source.replace(/^\uFEFF/, ''))
   const nodes = Array.isArray(scene.nodes) ? scene.nodes : []
+  const spawnPosition = scene.settings?.level?.spawn?.position
   const geometryNodes = nodes.filter(isGeometryNode)
   const explicitCollision = geometryNodes.filter(node => node.collision)
   const missingCollisionIntent = explicitCollision.filter(
@@ -161,6 +191,8 @@ function auditScene(file) {
     totalRuntimeAssetBytes,
     largestAsset,
     hasBom,
+    spawnPosition,
+    hasValidSpawn: isFiniteVec3(spawnPosition),
     explicitTrimeshIds: explicitTrimesh.map(node => node.id),
     missingCollisionIntentIds: missingCollisionIntent.map(node => node.id),
     missingCollisionChannelIds: missingCollisionChannel.map(node => node.id),
@@ -189,6 +221,14 @@ for (const file of forbiddenDuplicateInteractionFiles) {
   if (existsSync(join(process.cwd(), file))) {
     failures.push(
       `${file}: duplicate interaction system must stay removed; use systems/InteractionSystem.svelte`,
+    )
+  }
+}
+for (const file of getSourceFiles(join(process.cwd(), 'src/threlte'), 'src/threlte')) {
+  const source = readFileSync(join(process.cwd(), file), 'utf8')
+  if (source.includes('makeDefault') && !allowedDefaultCameraFiles.has(file)) {
+    failures.push(
+      `${file}: default scene cameras are only allowed in Player.svelte for gameplay and EditorViewportControls.svelte for editor orbit mode`,
     )
   }
 }
@@ -421,9 +461,16 @@ for (const report of reports) {
       `missingDefaultCollision=${report.missingDefaultCollision}`,
       `assetFiles=${report.assetFiles}`,
       `assetSize=${formatBytes(report.totalRuntimeAssetBytes)}`,
+      `spawn=${report.hasValidSpawn ? `[${report.spawnPosition.join(',')}]` : 'invalid'}`,
       `bom=${report.hasBom ? 'yes' : 'no'}`,
     ].join('  '),
   )
+
+  if (!report.hasValidSpawn) {
+    failures.push(
+      `${report.file}: level must define settings.level.spawn.position as a finite Vec3`,
+    )
+  }
 
   if (report.explicitTrimeshIds.length > 0) {
     console.log(`  explicit trimesh: ${report.explicitTrimeshIds.join(', ')}`)

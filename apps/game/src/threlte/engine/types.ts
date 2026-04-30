@@ -177,6 +177,7 @@ export interface LevelBuildReport {
   requiredActorCount: number
   requiredRenderActorIds: string[]
   missingRequiredActorIds: string[]
+  requiredAssetUrls: string[]
   runtimeAssetUrls: string[]
   errors: string[]
   warnings: string[]

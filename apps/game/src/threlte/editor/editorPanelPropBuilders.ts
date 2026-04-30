@@ -198,8 +198,6 @@ export type EditorPanelPropBuilderContext = {
   redoScene: () => boolean
   updateLevelSetting: AnyFunction
   updateLevelNumericSetting: AnyFunction
-  updateObservatorySetting: AnyFunction
-  updateObservatoryNumericSetting: AnyFunction
   applySolitudeAtmospherePreset: AnyFunction
   setTerrainAutoBake: (value: boolean) => void
   bakeTerrainCollision: () => Promise<void>
@@ -389,17 +387,13 @@ export function buildEnvironmentTabProps(
     ambientAudioLibrary: context.ambientAudioLibrary,
     updateLevelSetting: context.updateLevelSetting,
     updateLevelNumericSetting: context.updateLevelNumericSetting,
-    updateObservatorySetting: context.updateObservatorySetting,
-    updateObservatoryNumericSetting: context.updateObservatoryNumericSetting,
     applySolitudeAtmospherePreset: context.applySolitudeAtmospherePreset,
   }
 }
 
 export function buildPlayerTabProps(context: EditorPanelPropBuilderContext) {
   return {
-    levelId: context.levelId,
     levelSettings: context.levelSettings,
-    updateLevelSetting: context.updateLevelSetting,
     updateLevelNumericSetting: context.updateLevelNumericSetting,
   }
 }

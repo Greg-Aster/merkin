@@ -19,7 +19,7 @@
     ]
   },
   "physics": {
-    "type": "scene-authored",
+    "type": "baked-terrain-mesh",
     "worldSize": 440,
     "minHeight": -3.2,
     "maxHeight": 7.2,
@@ -33,6 +33,35 @@
         220,
         7.2,
         190
+      ]
+    }
+  },
+  "collision": {
+    "terrain": {
+      "type": "baked-terrain-mesh",
+      "authoredException": true,
+      "url": "/terrain/collision/yggdrasil.collider.bin",
+      "metadataUrl": "/terrain/collision/yggdrasil.collider.meta.json",
+      "triangleCount": 32768,
+      "vertexCount": 16641,
+      "colliderResolution": 129,
+      "sampleStep": 4,
+      "bounds": {
+        "min": [
+          -220,
+          -3.2,
+          -150
+        ],
+        "max": [
+          220,
+          7.2,
+          190
+        ]
+      },
+      "center": [
+        0,
+        0,
+        20
       ]
     }
   }

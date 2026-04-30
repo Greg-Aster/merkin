@@ -14,12 +14,12 @@ function completeCheckout() {
 }
 </script>
 
-<section class="mx-auto max-w-5xl px-4 py-8">
-  <header class="mb-8 max-w-3xl">
+<section class="mx-auto max-w-5xl px-3 py-5 sm:px-4 md:py-8">
+  <header class="mb-6 max-w-3xl md:mb-8">
     <p class="text-xs uppercase tracking-[0.28em] text-amber-300/80">
       Acquisition Terminal
     </p>
-    <h1 class="mt-3 text-4xl font-bold text-white md:text-5xl">
+    <h1 class="mt-3 text-3xl font-bold text-white sm:text-4xl md:text-5xl">
       Checkout Processing
     </h1>
     <p class="mt-4 text-base leading-7 text-slate-300">
@@ -29,11 +29,11 @@ function completeCheckout() {
   </header>
 
   {#if isConfirmed}
-    <div class="rounded-3xl border border-emerald-400/20 bg-emerald-950/30 p-8 shadow-2xl shadow-emerald-950/20">
+    <div class="rounded-2xl border border-emerald-400/20 bg-emerald-950/30 p-5 shadow-2xl shadow-emerald-950/20 sm:p-8 md:rounded-3xl">
       <p class="text-xs uppercase tracking-[0.24em] text-emerald-300/70">
         Confirmation Archive
       </p>
-      <h2 class="mt-3 text-3xl font-bold text-white">
+      <h2 class="mt-3 text-2xl font-bold text-white sm:text-3xl">
         Acquisition Accepted
       </h2>
       <p class="mt-4 max-w-2xl text-slate-300">
@@ -52,7 +52,7 @@ function completeCheckout() {
       </div>
     </div>
   {:else if $cartCount === 0}
-    <div class="rounded-3xl border border-white/10 bg-slate-950/70 p-8 text-center shadow-2xl">
+    <div class="rounded-2xl border border-white/10 bg-slate-950/70 p-5 text-center shadow-2xl sm:p-8 md:rounded-3xl">
       <p class="text-lg italic text-slate-400">
         No items are awaiting commitment.
       </p>
@@ -72,14 +72,14 @@ function completeCheckout() {
     </div>
   {:else}
     <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-      <div class="rounded-3xl border border-white/10 bg-slate-950/70 p-6 shadow-2xl">
+      <div class="rounded-2xl border border-white/10 bg-slate-950/70 p-4 shadow-2xl sm:p-6 md:rounded-3xl">
         <h2 class="text-xl font-bold text-white">
           Pending Commitments
         </h2>
         <ul class="mt-5 space-y-4">
           {#each $cart as item (item.id)}
             <li class="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
-              <div class="flex items-start justify-between gap-4">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <div>
                   <p class="font-semibold text-slate-100">{item.name}</p>
                   {#if item.sku}
@@ -98,7 +98,7 @@ function completeCheckout() {
                     </a>
                   {/if}
                 </div>
-                <div class="text-right">
+                <div class="text-left sm:text-right">
                   <p class="text-sm text-slate-400">Qty {item.quantity}</p>
                   <p class="mt-1 font-semibold text-emerald-400">
                     ${(item.price * item.quantity).toFixed(2)}
@@ -110,7 +110,7 @@ function completeCheckout() {
         </ul>
       </div>
 
-      <aside class="rounded-3xl border border-white/10 bg-slate-950/70 p-6 shadow-2xl">
+      <aside class="rounded-2xl border border-white/10 bg-slate-950/70 p-4 shadow-2xl sm:p-6 md:rounded-3xl">
         <p class="text-xs uppercase tracking-[0.24em] text-slate-500">
           Transaction Summary
         </p>

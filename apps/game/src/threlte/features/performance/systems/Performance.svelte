@@ -14,6 +14,7 @@ import {
   memoryStore,
   recordLongTask,
   renderInfoStore,
+  systemTimingsStore,
 } from '../stores/performanceStore'
 
 // Props — matching what Game.svelte passes
@@ -118,6 +119,7 @@ onMount(() => {
         fps: $fpsStore,
         frameTime: $frameTimeStore,
         longTasks: $longTaskStore,
+        systemTimings: $systemTimingsStore,
         renderInfo: renderer.info
           ? {
               calls: renderer.info.render.calls,

@@ -1,7 +1,6 @@
 export * from './actorHierarchy'
 export * from './collisionPolicy'
 export * from './collisionChannels'
-export * from './componentLevelDefinition'
 export * from './levelCollisionWorkflow'
 export * from './levelContracts'
 export * from './levelValidation'

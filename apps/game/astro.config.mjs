@@ -84,6 +84,43 @@ function createToolsBridgeAutostartPlugin() {
   }
 }
 
+const buildCruftWarningPatterns = [
+  {
+    label: 'manual chunk cycle',
+    pattern: /Circular chunk:/,
+  },
+  {
+    label: 'unused Svelte export',
+    pattern: /Component has unused export property/,
+  },
+  {
+    label: 'unused Svelte CSS selector',
+    pattern: /Unused CSS selector/,
+  },
+]
+
+function createBuildCruftGatePlugin() {
+  return {
+    name: 'merkin-build-cruft-gate',
+    apply: 'build',
+    configResolved(config) {
+      const originalWarn = config.logger.warn.bind(config.logger)
+      config.logger.warn = (message, options) => {
+        const text = String(message)
+        const match = buildCruftWarningPatterns.find(({ pattern }) =>
+          pattern.test(text),
+        )
+
+        if (match) {
+          throw new Error(`[build-cruft-gate] ${match.label}: ${text}`)
+        }
+
+        originalWarn(message, options)
+      }
+    },
+  }
+}
+
 export default defineConfig({
   site: siteUrl,
   base: normalizedBasePath,
@@ -112,7 +149,7 @@ export default defineConfig({
         },
       },
     },
-    plugins: [wasm(), createDevRuntimePlugin('game', gameDevHost), createToolsBridgeAutostartPlugin()],
+    plugins: [wasm(), createDevRuntimePlugin('game', gameDevHost), createToolsBridgeAutostartPlugin(), createBuildCruftGatePlugin()],
     optimizeDeps: {
       exclude: ['three', '@dimforge/rapier3d', '@dimforge/rapier3d-compat'],
     },
@@ -131,11 +168,54 @@ export default defineConfig({
           manualChunks(id) {
             if (!id.includes('node_modules')) {
               if (
+                id.includes('/src/threlte/styles/GameplayStyleProfiles.ts')
+                || id.includes('/src/threlte/styles/runtimeVisualStyleStore.ts')
+                || id.includes('/src/threlte/styles/StylePalettes.ts')
+              ) {
+                return 'style-runtime'
+              }
+
+              if (
                 id.includes('/src/threlte/editor/EditorPanel.svelte')
+                || id.includes('/src/threlte/editor/EditorPanelHeader.svelte')
+                || id.includes('/src/threlte/editor/EditorPanelTabRail.svelte')
+                || id.includes('/src/threlte/editor/EditorPanelToolsDock.svelte')
+                || id.includes('/src/threlte/editor/EditorWorkflowTabHost.svelte')
+                || id.includes('/src/threlte/editor/EditorWorkflowPanel.svelte')
+                || id.includes('/src/threlte/editor/EditorSceneTabHost.svelte')
+                || id.includes('/src/threlte/editor/EditorSceneToolsPanel.svelte')
+                || id.includes('/src/threlte/editor/EditorPlayerTabHost.svelte')
+                || id.includes('/src/threlte/editor/EditorPlayerPanel.svelte')
+                || id.includes('/src/threlte/editor/EditorCreateTabHost.svelte')
+                || id.includes('/src/threlte/editor/EditorCreatePanel.svelte')
+                || id.includes('/src/threlte/editor/EditorHierarchyTabHost.svelte')
+                || id.includes('/src/threlte/editor/EditorHierarchyPanel.svelte')
+                || id.includes('/src/threlte/editor/EditorInspectTabHost.svelte')
+                || id.includes('/src/threlte/editor/EditorInspectorForm.svelte')
+                || id.includes('/src/threlte/editor/EditorStyleTabHost.svelte')
+                || id.includes('/src/threlte/editor/EditorSaveTabHost.svelte')
+                || id.includes('/src/threlte/editor/EditorSavePanel.svelte')
+                || id.includes('/src/threlte/editor/EditorSideStackHost.svelte')
+                || id.includes('/src/threlte/editor/EditorOutliner.svelte')
+                || id.includes('/src/threlte/editor/EditorOutlinerDock.svelte')
+                || id.includes('/src/threlte/editor/EditorPropertiesDock.svelte')
+                || id.includes('/src/threlte/editor/EditorPropertiesShelf.svelte')
                 || id.includes('/src/threlte/editor/EditorEnvironmentPanel.svelte')
+                || id.includes('/src/threlte/editor/EditorEnvironmentTabHost.svelte')
                 || id.includes('/src/threlte/editor/EditorAtmospherePresetPicker.svelte')
                 || id.includes('/src/threlte/editor/EditorAmbientAudioPresetControls.svelte')
                 || id.includes('/src/threlte/editor/EditorControlsOverlay.svelte')
+                || id.includes('/src/threlte/editor/editorAiController.ts')
+                || id.includes('/src/threlte/editor/editorAssetController.ts')
+                || id.includes('/src/threlte/editor/editorCreateController.ts')
+                || id.includes('/src/threlte/editor/editorInspectorController.ts')
+                || id.includes('/src/threlte/editor/editorLevelController.ts')
+                || id.includes('/src/threlte/editor/editorOutliner.ts')
+                || id.includes('/src/threlte/editor/editorOutlinerController.ts')
+                || id.includes('/src/threlte/editor/editorOutlinerTypes.ts')
+                || id.includes('/src/threlte/editor/editorPanelPropBuilders.ts')
+                || id.includes('/src/threlte/editor/editorPanelTabs.ts')
+                || id.includes('/src/threlte/editor/editorStyleController.ts')
               ) {
                 return 'editor-panel'
               }
@@ -161,12 +241,17 @@ export default defineConfig({
                 || id.includes('/src/threlte/editor/editorSessionStore.ts')
                 || id.includes('/src/threlte/editor/editorSelectors.ts')
                 || id.includes('/src/threlte/editor/editorTypes.ts')
+                || id.includes('/src/threlte/editor/editorBakeSource.ts')
+                || id.includes('/src/threlte/editor/editorCollisionDefaults.ts')
                 || id.includes('/src/threlte/editor/defaultScenes.ts')
                 || id.includes('/src/threlte/editor/editorDocumentStore.ts')
+                || id.includes('/src/threlte/editor/editorGeneration.ts')
                 || id.includes('/src/threlte/editor/editorPersistence.ts')
                 || id.includes('/src/threlte/editor/editorCommands.ts')
                 || id.includes('/src/threlte/editor/editorNodeCommands.ts')
                 || id.includes('/src/threlte/editor/editorSceneCommands.ts')
+                || id.includes('/src/threlte/editor/editorSceneDocumentLoader.ts')
+                || id.includes('/src/threlte/editor/editorSceneDocumentValidation.ts')
                 || id.includes('/src/threlte/editor/editorHierarchyUtils.ts')
                 || id.includes('/src/threlte/editor/editorHistory.ts')
                 || id.includes('/src/threlte/editor/editorPrefabFactory.ts')

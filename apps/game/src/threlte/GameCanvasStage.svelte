@@ -26,10 +26,8 @@ export let parsedTimelineEvents: any[] = []
 export let timelineEventsPayload = '[]'
 export let currentLevelRenderConfig: {
   offset: [number, number, number]
-  spawn: [number, number, number]
 } = {
   offset: [0, 0, 0],
-  spawn: [0, 1, 0],
 }
 
 export let audioSystemComponent: any = null
@@ -43,7 +41,6 @@ export let editorViewportControlsComponent: any = null
 export let editorWorkbenchLightingComponent: any = null
 
 export let interactionSystemRef: any = null
-export let spawnSystemRef: any = null
 export let playerComponentRef: any = null
 export let physicsReady = false
 export let staticWorldReady = false
@@ -117,7 +114,6 @@ function forward(type: string, detail: unknown) {
         {editorViewportControlsComponent}
         {editorWorkbenchLightingComponent}
         bind:interactionSystemRef
-        bind:spawnSystemRef
         bind:playerComponentRef
         bind:physicsReady
         bind:staticWorldReady
@@ -130,7 +126,6 @@ function forward(type: string, detail: unknown) {
         on:noteRead={(e) => forward('noteRead', e.detail)}
         on:portalTransition={(e) => forward('portalTransition', e.detail)}
         on:requestLevelReturn={(e) => forward('requestLevelReturn', e.detail)}
-        on:entitySpawned={(e) => forward('entitySpawned', e.detail)}
         on:playerInteraction={(e) => forward('playerInteraction', e.detail)}
         on:lightBurst={(e) => forward('lightBurst', e.detail)}
       />

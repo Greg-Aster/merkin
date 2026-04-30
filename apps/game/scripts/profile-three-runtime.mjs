@@ -11,7 +11,7 @@ const staticRoots = [
 const gameplayBootRoots = [
   path.join(threlteRoot, 'systems', 'Physics.svelte'),
   path.join(threlteRoot, 'features', 'player', 'Player.svelte'),
-  path.join(threlteRoot, 'levels', 'HybridObservatory.svelte'),
+  path.join(threlteRoot, 'levels', 'SceneDocumentLevel.svelte'),
 ]
 
 const importPattern = /import\s+(?:[^'"]+?\s+from\s+)?["']([^"']+)["']/g

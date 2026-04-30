@@ -37,7 +37,7 @@ import '../styles/features/extracted/navbar.css'
     <div class="absolute hidden md:block h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->
     <div class:list={[
         className,
-        "navbar-shell card-base !overflow-visible max-w-[var(--page-width)] h-[3rem] md:h-[4.5rem] !rounded-t-none mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-1.5 md:gap-3 px-2 md:px-4"]}>
+        "navbar-shell card-base !overflow-visible max-w-[var(--page-width)] min-h-[3.25rem] md:h-[4.5rem] md:min-h-0 !rounded-t-none mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-1.5 md:gap-3 px-2.5 py-1 md:px-4 md:py-0"]}>
         
         <div class="flex items-center justify-start min-w-0">
             <div id="admin-navbar-shell" class="hidden">
@@ -53,7 +53,7 @@ import '../styles/features/extracted/navbar.css'
               class="group flex items-center overflow-visible rounded-xl px-1.5 md:px-2 py-1 md:py-1.5 transition-all duration-200 hover:bg-white/6 active:scale-[0.98]"
             >
                 <span
-                  class="megameal-mark hidden sm:block select-none rounded-[1rem] px-3.5 py-2.5 transition-all duration-300"
+                  class="megameal-mark hidden md:block select-none rounded-[1rem] px-3.5 py-2.5 transition-all duration-300"
                 >
                     <span class="megameal-mark__inner block leading-[0.9]" style="transform: skewX(-12deg);">
                         <span
@@ -68,7 +68,7 @@ import '../styles/features/extracted/navbar.css'
                         </span>
                     </span>
                 </span>
-                <span class="megameal-mark-mobile sm:hidden select-none rounded-[0.75rem] px-1.5 py-1.5">
+                <span class="megameal-mark-mobile md:hidden select-none rounded-[0.75rem] px-2 py-1.5">
                     <span class="megameal-mark-mobile__text">MEGAMEAL</span>
                 </span>
             </a>

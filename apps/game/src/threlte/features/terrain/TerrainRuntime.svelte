@@ -3,7 +3,6 @@ import { T } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount, tick } from 'svelte'
 import { get } from 'svelte/store'
 import * as THREE from 'three'
-import type { StaticWorldReadyDetail } from '../../core/levelRuntimeEvents'
 import { playerStateStore } from '../../stores/gameStateStore'
 import { type TerrainConfig, TerrainManager } from './TerrainManager'
 import {
@@ -46,14 +45,7 @@ function markTerrainRuntimeReady(detail: TerrainRuntimeReadyDetail) {
   if (signature === readySignature) return
   readySignature = signature
 
-  const staticWorldReadyDetail: StaticWorldReadyDetail = {
-    levelId,
-    source: 'terrain-runtime',
-    metadata: detail as unknown as Record<string, unknown>,
-  }
-
   dispatch('terrainRuntimeReady', detail)
-  dispatch('staticWorldReady', staticWorldReadyDetail)
 }
 
 const unsubscribePlayer = playerStateStore.subscribe(p =>
@@ -189,6 +181,7 @@ $: visibleChunks =
               z={chunk.z}
               lod={chunk.currentLod}
               pathTemplate={config.chunkPathTemplate}
+              {levelId}
             />
           {/if}
         {/each}

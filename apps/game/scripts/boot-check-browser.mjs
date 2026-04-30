@@ -1,4 +1,14 @@
-import { chromium } from 'playwright'
+import {
+  launchBrowser,
+  normalizeBrowserName,
+  parseArgValue,
+} from './lib/browserHarness.mjs'
+
+const args = process.argv.slice(2)
+const browserName = normalizeBrowserName(
+  parseArgValue(args, 'browser', process.env.GAME_BROWSER || 'chromium'),
+)
+const appOrigin = `http://127.0.0.1:${process.env.GAME_DEV_PORT || 4322}`
 
 const migratedLevels = [
   'observatory',
@@ -11,12 +21,12 @@ const migratedLevels = [
 function createLevelSmokeCheck(levelId) {
   return {
     name: `level:${levelId}`,
-    url: `http://127.0.0.1:4322/?level=${levelId}&debug=1`,
+    url: `${appOrigin}/?level=${levelId}&debug=1`,
     postLoadDelayMs: 1000,
     interact: async (page, context) => {
-      const spawnSignal = waitForConsoleMessage(
+      const playableSignal = waitForConsoleMessage(
         context.consoleMessages,
-        message => message.includes('SpawnSystem: Spawned player'),
+        message => message.includes('GameWorld: Player level position resolved'),
         60000,
       )
 
@@ -25,17 +35,17 @@ function createLevelSmokeCheck(levelId) {
         .locator('.runtime-diagnostics-panel')
         .first()
         .waitFor({ state: 'attached', timeout: 10000 })
-      await page.waitForSelector(`text=Current Level: ${levelId}`, {
-        timeout: 10000,
-      })
+      await waitForPageText(page, `Current Level: ${levelId}`, 10000)
       try {
-        await page.waitForSelector(`text=Gameplay is enabled on ${levelId}.`, {
-          timeout: 45000,
-        })
+        await waitForPageText(
+          page,
+          `Gameplay is enabled on ${levelId}.`,
+          45000,
+        )
       } catch (error) {
-        await spawnSignal
+        await playableSignal
       }
-      await spawnSignal
+      await playableSignal
       await assertRequiredRenderActors(page, levelId)
 
       try {
@@ -49,10 +59,18 @@ function createLevelSmokeCheck(levelId) {
           )
         }
       } catch (error) {
-        await spawnSignal
+        await playableSignal
       }
     },
   }
+}
+
+async function waitForPageText(page, text, timeout) {
+  await page.waitForFunction(
+    expectedText => document.body?.innerText.includes(expectedText),
+    text,
+    { timeout },
+  )
 }
 
 async function assertRequiredRenderActors(page, levelId) {
@@ -103,12 +121,12 @@ function waitForConsoleMessage(messages, predicate, timeoutMs) {
 const checks = [
   {
     name: 'game',
-    url: 'http://127.0.0.1:4322/',
+    url: `${appOrigin}/`,
     postLoadDelayMs: 5000,
   },
   {
     name: 'editor',
-    url: 'http://127.0.0.1:4322/?editor=1',
+    url: `${appOrigin}/?editor=1`,
     postLoadDelayMs: 7000,
   },
   ...migratedLevels.map(createLevelSmokeCheck),
@@ -123,6 +141,8 @@ const ignoredMessagePatterns = [
   /glTexStorage2D/i,
   /glTexSubImage2DRobustANGLE/i,
   /Audio play failed/i,
+  /unreachable code after return statement.*rapier3d.*character_controller\.js/i,
+  /WebGL warning: drawElementsInstanced: Drawing to a destination rect smaller than the viewport rect/i,
 ]
 
 const transientMessagePatterns = [
@@ -130,15 +150,7 @@ const transientMessagePatterns = [
   /Failed to fetch dynamically imported module/i,
 ]
 
-const launchOptions = {
-  headless: true,
-}
-
-if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH) {
-  launchOptions.executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-}
-
-const browser = await chromium.launch(launchOptions)
+const browser = await launchBrowser(browserName)
 
 const failures = []
 
@@ -238,5 +250,5 @@ if (failures.length > 0) {
 }
 
 console.log(
-  '[boot-check] gameplay, editor, and migrated levels loaded without console warnings/errors',
+  `[boot-check] ${browserName}: gameplay, editor, and migrated levels loaded without console warnings/errors`,
 )

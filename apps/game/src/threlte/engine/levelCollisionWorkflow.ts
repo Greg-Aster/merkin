@@ -43,7 +43,8 @@ export const LEVEL_COLLISION_WORKFLOWS: Record<string, LevelCollisionWorkflow> =
     },
     yggdrasil: {
       levelId: 'yggdrasil',
-      terrainCollision: 'scene-authored',
+      terrainCollision: 'heightmap',
+      terrainManifestUrl: '/terrain/yggdrasil.manifest.json',
       visualOnlyActorIds: [
         'yggdrasil-mound',
         'yggdrasil-bifrost-ribbon-merged',
@@ -62,7 +63,8 @@ export const LEVEL_COLLISION_WORKFLOWS: Record<string, LevelCollisionWorkflow> =
     },
     'sci-fi-room': {
       levelId: 'sci-fi-room',
-      terrainCollision: 'scene-authored',
+      terrainCollision: 'heightmap',
+      terrainManifestUrl: '/terrain/sci-fi-room.manifest.json',
     },
   }
 

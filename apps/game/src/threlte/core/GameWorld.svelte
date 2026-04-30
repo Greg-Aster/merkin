@@ -1,9 +1,8 @@
 <script lang="ts">
 import { createEventDispatcher } from 'svelte'
 import { levelEditorSettingsStore } from '../editor/editorSelectors'
-import SpawnSystem from '../systems/SpawnSystem.svelte'
 import type {
-  PlayerSpawnRequestedDetail,
+  PlayerLevelPositionDetail,
   StaticWorldReadyDetail,
 } from './levelRuntimeEvents'
 
@@ -18,10 +17,8 @@ export let parsedTimelineEvents: any[] = []
 export let timelineEventsPayload = '[]'
 export let currentLevelRenderConfig: {
   offset: [number, number, number]
-  spawn: [number, number, number]
 } = {
   offset: [0, 0, 0],
-  spawn: [0, 1, 0],
 }
 
 export let physicsSystemComponent: any = null
@@ -34,7 +31,6 @@ export let editorViewportControlsComponent: any = null
 export let editorWorkbenchLightingComponent: any = null
 
 export let interactionSystemRef: any = null
-export let spawnSystemRef: any = null
 export let playerComponentRef: any = null
 export let physicsReady = false
 export let staticWorldReady = false
@@ -46,9 +42,8 @@ export let normalizeLevelId: (levelId: string) => string = levelId => levelId
 let activeLevelKey = currentLevel
 let activeLevelComponent = currentLevelComponent
 let worldSessionId = 0
-let pendingPlayerSpawnRequest: PlayerSpawnRequestedDetail | null = null
-let lastPlayerSpawnRequestKey = ''
-let playerSpawnInFlight = false
+let levelPlayerPosition: PlayerLevelPositionDetail['position'] | null =
+  null
 
 function forward(type: string, detail: unknown) {
   dispatch(type, detail)
@@ -59,56 +54,14 @@ function handleStaticWorldReady(detail: StaticWorldReadyDetail) {
   forward('staticWorldReady', detail)
 }
 
-function handlePlayerSpawnRequested(detail: PlayerSpawnRequestedDetail) {
-  pendingPlayerSpawnRequest = detail
-  processPlayerSpawnRequest()
-}
-
-async function processPlayerSpawnRequest() {
-  if (editorEnabled) return
-  if (!staticWorldReady) return
-  if (!physicsReady) return
-  if (!playerReady) return
-  if (playerSpawnInFlight) return
-  if (!pendingPlayerSpawnRequest || !spawnSystemRef?.requestSpawn) return
-
-  const requestKey = [
-    pendingPlayerSpawnRequest.levelId,
-    pendingPlayerSpawnRequest.position.join(','),
-    pendingPlayerSpawnRequest.reason,
-  ].join(':')
-  if (lastPlayerSpawnRequestKey === requestKey) return
-
-  playerSpawnInFlight = true
-
-  try {
-    const result = await spawnSystemRef.requestSpawn({
-      entityType: 'player',
-      position: pendingPlayerSpawnRequest.position,
-      metadata: {
-        ...pendingPlayerSpawnRequest.metadata,
-        levelName: pendingPlayerSpawnRequest.levelId,
-        spawnReason: pendingPlayerSpawnRequest.reason,
-      },
+function handlePlayerLevelPosition(detail: PlayerLevelPositionDetail) {
+  levelPlayerPosition = detail.position
+  if (import.meta.env.DEV) {
+    console.info('GameWorld: Player level position resolved', {
+      levelId: detail.levelId,
+      position: detail.position,
+      reason: detail.reason,
     })
-
-    if (result?.success) {
-      lastPlayerSpawnRequestKey = requestKey
-      pendingPlayerSpawnRequest = null
-      gameplayEnabled = true
-      return
-    }
-
-    console.error(
-      `GameWorld: Player spawn failed during lifecycle phase. Reason: ${result?.reason ?? 'unknown'}`,
-    )
-  } catch (error) {
-    console.error(
-      'GameWorld: Player spawn command threw during lifecycle phase.',
-      error,
-    )
-  } finally {
-    playerSpawnInFlight = false
   }
 }
 
@@ -121,10 +74,7 @@ function resetWorldSession() {
   playerReady = false
   gameplayEnabled = false
   playerComponentRef = null
-  pendingPlayerSpawnRequest = null
-  lastPlayerSpawnRequestKey = ''
-  playerSpawnInFlight = false
-  spawnSystemRef?.resetSpawnState?.()
+  levelPlayerPosition = null
 }
 
 $: playerMoveSpeed = $levelEditorSettingsStore?.player?.moveSpeed ?? 5
@@ -134,33 +84,16 @@ $: playerLightIntensityScale =
 $: if (!playerComponentRef) {
   playerReady = false
 }
+$: gameplayEnabled = Boolean(
+  !editorEnabled && staticWorldReady && levelPlayerPosition,
+)
 $: if (
   currentLevel !== activeLevelKey ||
   currentLevelComponent !== activeLevelComponent
 ) {
   resetWorldSession()
 }
-$: {
-  staticWorldReady
-  physicsReady
-  playerReady
-  editorEnabled
-  spawnSystemRef
-  pendingPlayerSpawnRequest
-  processPlayerSpawnRequest()
-}
 </script>
-
-{#if !editorEnabled}
-  <SpawnSystem
-    bind:this={spawnSystemRef}
-    playerComponent={playerComponentRef}
-    {playerReady}
-    {physicsReady}
-    {staticWorldReady}
-    on:entitySpawned={(e) => forward('entitySpawned', e.detail)}
-  />
-{/if}
 
 {#if physicsSystemComponent && playerComponentClass}
   {#key worldSessionId}
@@ -184,7 +117,6 @@ $: {
           timelineEventsJson={timelineEventsPayload}
           interactionSystem={interactionSystemRef}
           position={currentLevelRenderConfig.offset}
-          playerSpawnPoint={currentLevelRenderConfig.spawn}
           collisionDebugEnabled={editorEnabled && collisionOverlayEnabled}
           on:starSelected={(e) => forward('starSelected', e.detail)}
           on:telescopeInteraction={(e) => forward('telescopeInteraction', e.detail)}
@@ -192,22 +124,22 @@ $: {
           on:portalTransition={(e) => forward('portalTransition', e.detail)}
           on:requestLevelReturn={(e) => forward('requestLevelReturn', e.detail)}
           on:staticWorldReady={(e) => handleStaticWorldReady(e.detail)}
-          on:playerSpawnRequested={(e) => handlePlayerSpawnRequested(e.detail)}
+          on:playerLevelPosition={(e) => handlePlayerLevelPosition(e.detail)}
         />
       {/if}
 
       {#if editorEnabled && editorViewportControlsComponent}
         <svelte:component this={editorViewportControlsComponent} enabled={true} />
-      {:else if staticWorldReady}
+      {:else if staticWorldReady && levelPlayerPosition}
         <svelte:component
           this={playerComponentClass}
           bind:this={playerComponentRef}
-          position={[0, 0, 0]}
+          position={levelPlayerPosition}
           speed={playerMoveSpeed}
           jumpForce={playerJumpForce}
           lightIntensityScale={playerLightIntensityScale}
           {gameplayEnabled}
-          on:spawnReadyChange={(e) => {
+          on:playerReadyChange={(e) => {
             playerReady = Boolean(e.detail?.ready)
           }}
           on:interaction={(e) => forward('playerInteraction', e.detail)}

@@ -63,8 +63,6 @@ export let runtimeAssetFailures: Array<{
   message: string
   updatedAt: number
 }> = []
-export let pipelineLogEnabled = false
-export let pipelineLogEntries: string[] = []
 
 function emit(type: string) {
   dispatch(type)
@@ -80,10 +78,6 @@ function emitBatchToggle(candidateId: string, selected: boolean) {
 
 function emitBatchDescriptorUpdate(candidateId: string, descriptor: string) {
   dispatch('updateBatchDescriptor', { candidateId, descriptor })
-}
-
-function emitPipelineLogToggle(value: boolean) {
-  dispatch('setPipelineLogEnabled', { value })
 }
 
 $: hasSelectedAsset =

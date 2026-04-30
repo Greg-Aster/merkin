@@ -1,0 +1,40 @@
+{
+  "sampleSeconds": 8,
+  "sampleIntervalMs": 1000,
+  "levels": ["observatory", "solitude", "sci-fi-room", "miranda", "yggdrasil"],
+  "profiles": [
+    {
+      "id": "desktop-chromium-1080p",
+      "viewport": { "width": 1440, "height": 900 },
+      "deviceScaleFactor": 1,
+      "isMobile": false,
+      "hasTouch": false,
+      "budgets": {
+        "minAverageFps": 30,
+        "minLowestFps": 18,
+        "maxAverageFrameTimeMs": 34,
+        "maxDrawCalls": 950,
+        "maxTriangles": 1800000,
+        "maxTextures": 220,
+        "maxLongTasks": 8
+      }
+    },
+    {
+      "id": "mobile-chromium-390",
+      "viewport": { "width": 390, "height": 844 },
+      "deviceScaleFactor": 2,
+      "isMobile": true,
+      "hasTouch": true,
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+      "budgets": {
+        "minAverageFps": 24,
+        "minLowestFps": 15,
+        "maxAverageFrameTimeMs": 44,
+        "maxDrawCalls": 650,
+        "maxTriangles": 950000,
+        "maxTextures": 160,
+        "maxLongTasks": 10
+      }
+    }
+  ]
+}

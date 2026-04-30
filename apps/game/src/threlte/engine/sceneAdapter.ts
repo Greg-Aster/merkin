@@ -15,7 +15,18 @@ import type {
 } from './types'
 
 function getSpawn(scene: EditorSceneDocument): Vec3 {
-  return scene.settings?.level?.spawn?.position ?? [0, 1, 0]
+  const position = scene.settings?.level?.spawn?.position
+  if (
+    !position ||
+    position.length !== 3 ||
+    !position.every(component => Number.isFinite(component))
+  ) {
+    throw new Error(
+      `${scene.levelId}: scene is missing a finite settings.level.spawn.position Vec3.`,
+    )
+  }
+
+  return position
 }
 
 function getActorKind(node: EditorSceneNode): ActorDefinition['kind'] {

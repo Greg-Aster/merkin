@@ -5,7 +5,7 @@ export type GameWorldPhase =
   | 'unloading'
   | 'building-static-world'
   | 'building-physics'
-  | 'spawning-player'
+  | 'placing-player'
   | 'playable'
   | 'error'
 
@@ -16,7 +16,7 @@ export interface GameWorldReadiness {
   staticWorldReady: boolean
   physicsReady: boolean
   playerComponentReady: boolean
-  playerSpawned: boolean
+  gameplayEnabled: boolean
   editorEnabled: boolean
   unloading: boolean
   error: string | null
@@ -37,9 +37,9 @@ export function resolveGameWorldPhase(
   if (!readiness.physicsReady) return 'building-physics'
   if (
     !readiness.editorEnabled &&
-    (!readiness.playerComponentReady || !readiness.playerSpawned)
+    (!readiness.playerComponentReady || !readiness.gameplayEnabled)
   ) {
-    return 'spawning-player'
+    return 'placing-player'
   }
 
   return 'playable'
@@ -90,10 +90,10 @@ export function getGameWorldDiagnostic(snapshot: GameWorldLifecycleSnapshot) {
         level: 'loading' as const,
         message: `Building physics world for ${snapshot.levelId}.`,
       }
-    case 'spawning-player':
+    case 'placing-player':
       return {
         level: 'loading' as const,
-        message: `Spawning player in ${snapshot.levelId}.`,
+        message: `Placing player at level position in ${snapshot.levelId}.`,
       }
     case 'playable':
       return {
@@ -116,7 +116,7 @@ export function createGameWorldLifecycleDiagnostics(
   const isBuilding =
     snapshot.phase === 'building-static-world' ||
     snapshot.phase === 'building-physics' ||
-    snapshot.phase === 'spawning-player'
+    snapshot.phase === 'placing-player'
 
   return [
     {

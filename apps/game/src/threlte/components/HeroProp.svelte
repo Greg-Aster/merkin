@@ -10,11 +10,17 @@ import {
 import {
   qualityLevelStore,
   qualitySettingsStore,
+  recordSystemTiming,
 } from '../features/performance/stores/performanceStore'
 import {
   getRuntimePropBudget,
   shouldEnableSceneShadows,
 } from '../features/performance/utils/runtimeSceneBudget'
+import {
+  getLevelRuntimeAssetTier,
+  resolveRuntimeAssetUrl,
+  resolveRuntimeAssetUrlSync,
+} from '../engine/runtimeAssetManifest'
 import { reportRuntimeAssetFailure } from '../stores/runtimeDiagnosticsStore'
 import { runtimeVisualStyleStore } from '../styles/runtimeVisualStyleStore'
 import {
@@ -24,20 +30,23 @@ import {
 import {
   createObjectMaterialOverrideState,
   disposeObjectMaterialOverrideState,
-  fixGLTFMaterials,
   syncObjectMaterialOverride,
 } from '../utils/materialUtils'
 
 const dispatch = createEventDispatcher()
 
 export let url: string
+export let levelId: string | null = null
 export let runtimeCulling = true
 
 const { camera } = useThrelte()
 let scene: THREE.Group | null = null
 let disposed = false
 let activeLoadToken = 0
+let activeResolveToken = 0
 let loadedUrl = ''
+let resolvedUrl = ''
+let lastResolveKey = ''
 let loadErrorMessage = ''
 let editorMaterialOverride = null
 const materialOverrideState = createObjectMaterialOverrideState()
@@ -70,6 +79,7 @@ let currentDistanceToCamera = 0
 let currentCullDistance = 0
 let runtimeVisible = true
 let distanceCheckAccumulator = 0
+let appliedMaterialStyleKey = ''
 const unsubscribe = editorMaterialOverrideStore?.subscribe(value => {
   editorMaterialOverride = value
 })
@@ -113,6 +123,8 @@ async function loadOverrideTexture(
 
 function applyOverrideTexturesToScene() {
   if (!scene) return
+  const hasTextures = Object.values(overrideTextures).some(Boolean)
+  if (!hasTextures) return
 
   scene.traverse(child => {
     if (!(child instanceof THREE.Mesh) || !child.material) return
@@ -224,6 +236,11 @@ function applyRuntimePropBudget() {
 
 function applyRuntimeMaterialStyle() {
   if (!scene) return
+  const styleKey = String(
+    $runtimeVisualStyleStore.screenFx.accentGlowIntensity ?? 0,
+  )
+  if (styleKey === appliedMaterialStyleKey) return
+  appliedMaterialStyleKey = styleKey
 
   const envBoost = Math.max(
     1.1,
@@ -283,9 +300,13 @@ async function syncOverrideTextures() {
 
 async function loadSceneFromUrl(nextUrl: string) {
   const token = ++activeLoadToken
+  const startedAt = performance.now()
 
   try {
-    const nextScene = await cloneCachedGltfScene(nextUrl)
+    const nextScene = await cloneCachedGltfScene(nextUrl, {
+      cloneMaterials: inEditorContext,
+    })
+    recordSystemTiming('asset.gltf.load', performance.now() - startedAt)
     if (disposed || token !== activeLoadToken) {
       disposeLoadedScene(nextScene)
       return
@@ -293,9 +314,9 @@ async function loadSceneFromUrl(nextUrl: string) {
 
     const previousScene = scene
     scene = nextScene
+    appliedMaterialStyleKey = ''
     loadErrorMessage = ''
 
-    fixGLTFMaterials({ scene } as any)
     scene.traverse(child => {
       if (!(child instanceof THREE.Mesh)) return
       child.frustumCulled = !inEditorContext
@@ -305,11 +326,13 @@ async function loadSceneFromUrl(nextUrl: string) {
     applyRuntimePropBudget()
     applyRuntimeMaterialStyle()
 
-    syncObjectMaterialOverride(
-      scene,
-      editorMaterialOverride,
-      materialOverrideState,
-    )
+    if (inEditorContext) {
+      syncObjectMaterialOverride(
+        scene,
+        editorMaterialOverride,
+        materialOverrideState,
+      )
+    }
     applyOverrideTexturesToScene()
 
     if (previousScene && previousScene !== scene) {
@@ -318,6 +341,7 @@ async function loadSceneFromUrl(nextUrl: string) {
 
     dispatch('load', { scene })
   } catch (error) {
+    recordSystemTiming('asset.gltf.load.failed', performance.now() - startedAt)
     if (disposed || token !== activeLoadToken) return
     scene = null
     loadErrorMessage =
@@ -331,17 +355,60 @@ async function loadSceneFromUrl(nextUrl: string) {
   }
 }
 
-$: if (url && url !== loadedUrl) {
-  loadedUrl = url
-  void loadSceneFromUrl(url)
+async function syncResolvedUrl(sourceUrl: string, qualityTier: string) {
+  const token = ++activeResolveToken
+  const startedAt = performance.now()
+  const cachedUrl = resolveRuntimeAssetUrlSync(sourceUrl, qualityTier, {
+    levelId,
+  })
+
+  if (cachedUrl) {
+    recordSystemTiming(
+      cachedUrl === sourceUrl
+        ? 'asset.manifest.resolve.cachedRaw'
+        : 'asset.manifest.resolve.cachedCooked',
+      performance.now() - startedAt,
+    )
+    resolvedUrl = cachedUrl
+    return
+  }
+
+  const nextUrl = await resolveRuntimeAssetUrl(sourceUrl, qualityTier, {
+    levelId,
+  })
+  recordSystemTiming(
+    nextUrl === sourceUrl
+      ? 'asset.manifest.resolve.raw'
+      : 'asset.manifest.resolve.cooked',
+    performance.now() - startedAt,
+  )
+  if (disposed || token !== activeResolveToken) return
+  resolvedUrl = nextUrl
+}
+
+$: effectiveQualityTier = getLevelRuntimeAssetTier(levelId, $qualityLevelStore)
+
+$: if (url) {
+  const resolveKey = `${levelId ?? ''}|${effectiveQualityTier}|${url}`
+  if (resolveKey !== lastResolveKey) {
+    lastResolveKey = resolveKey
+    void syncResolvedUrl(url, effectiveQualityTier)
+  }
+}
+
+$: if (resolvedUrl && resolvedUrl !== loadedUrl) {
+  loadedUrl = resolvedUrl
+  void loadSceneFromUrl(resolvedUrl)
 }
 
 $: if (scene) {
-  syncObjectMaterialOverride(
-    scene,
-    editorMaterialOverride,
-    materialOverrideState,
-  )
+  if (inEditorContext) {
+    syncObjectMaterialOverride(
+      scene,
+      editorMaterialOverride,
+      materialOverrideState,
+    )
+  }
   applyOverrideTexturesToScene()
   applyRuntimePropBudget()
   applyRuntimeMaterialStyle()
@@ -386,6 +453,7 @@ useTask(delta => {
 onDestroy(() => {
   disposed = true
   activeLoadToken += 1
+  activeResolveToken += 1
   textureLoadToken += 1
   unsubscribe?.()
   disposeOverrideTextures()
