@@ -384,6 +384,7 @@ $: if (
 }
 
 $: if (
+  editorEnabled &&
   currentLevel &&
   !editorSceneLayerComponent &&
   !sceneLayerComponentPromise

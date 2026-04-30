@@ -11,11 +11,15 @@ import RuntimeActorRenderContent from './RuntimeActorRenderContent.svelte'
 import { getRuntimeActorColliderArgs } from './runtimeActorCollision'
 
 export let actor: ActorDefinition
+export let levelId = ''
 export let interactionSystem: any = null
 export let interactiveEnabled = false
 
 $: visible = actor.render?.visible ?? true
 $: collision = actor.physics?.collision ?? null
+$: bodyType = actor.physics?.bodyType ?? 'fixed'
+$: renderVisualOutsideCollider =
+  actor.render?.physicsAttachment === 'outside-collider'
 $: gameplayNode = {
   id: actor.id,
   name: actor.name,
@@ -31,14 +35,14 @@ $: gameplayNode = {
   scale={actor.transform.scale}
   {visible}
 >
-  {#if collision && visible}
+  {#if collision && visible && !renderVisualOutsideCollider}
     <CollisionBody
       shape={collision.shape}
       intent={collision.intent}
       channel={collision.channel}
       triangleBudget={collision.triangleBudget}
       args={getRuntimeActorColliderArgs(actor)}
-      bodyType={actor.physics?.bodyType ?? 'fixed'}
+      {bodyType}
       gravityScale={actor.physics?.gravityScale ?? 1}
       canSleep={actor.physics?.canSleep ?? true}
       ccd={actor.physics?.ccd ?? false}
@@ -53,10 +57,33 @@ $: gameplayNode = {
       primitiveGeometry={actor.render?.primitive?.geometry}
       primitiveArgs={actor.render?.primitive?.args ?? []}
     >
-      <RuntimeActorRenderContent {actor} />
+      <RuntimeActorRenderContent {actor} {levelId} />
     </CollisionBody>
+  {:else if collision && visible && renderVisualOutsideCollider}
+    <CollisionBody
+      shape={collision.shape}
+      intent={collision.intent}
+      channel={collision.channel}
+      triangleBudget={collision.triangleBudget}
+      args={getRuntimeActorColliderArgs(actor)}
+      {bodyType}
+      gravityScale={actor.physics?.gravityScale ?? 1}
+      canSleep={actor.physics?.canSleep ?? true}
+      ccd={actor.physics?.ccd ?? false}
+      linearDamping={actor.physics?.linearDamping ?? 0}
+      angularDamping={actor.physics?.angularDamping ?? 0}
+      lockRotations={actor.physics?.lockRotations ?? false}
+      lockTranslations={actor.physics?.lockTranslations ?? false}
+      friction={collision.friction ?? 0.7}
+      restitution={collision.restitution ?? 0}
+      sensor={collision.sensor ?? false}
+      assetUrl={actor.render?.asset?.url ?? ''}
+      primitiveGeometry={actor.render?.primitive?.geometry}
+      primitiveArgs={actor.render?.primitive?.args ?? []}
+    />
+    <RuntimeActorRenderContent {actor} {levelId} />
   {:else}
-    <RuntimeActorRenderContent {actor} />
+    <RuntimeActorRenderContent {actor} {levelId} />
   {/if}
 
   <EditorNodeGameplayRenderer

@@ -30,6 +30,10 @@ export type PrimitiveGeometryKind =
 
 export type PhysicsBodyType = 'fixed' | 'dynamic' | 'kinematicPosition'
 export type CollisionShape = 'cuboid' | 'cylinder' | 'trimesh'
+export type RenderCullingPolicy = 'runtime-budget' | 'never'
+export type RenderPhysicsAttachmentPolicy =
+  | 'inside-collider'
+  | 'outside-collider'
 export type CollisionIntent =
   | 'none'
   | 'walkable'
@@ -51,6 +55,8 @@ export interface TransformComponent {
 
 export interface RenderComponent {
   visible: boolean
+  cullingPolicy: RenderCullingPolicy
+  physicsAttachment: RenderPhysicsAttachmentPolicy
   primitive?: {
     geometry: PrimitiveGeometryKind
     args: number[]
@@ -169,6 +175,7 @@ export interface LevelBuildReport {
   defaultCollisionActorCount: number
   visualOnlyActorCount: number
   requiredActorCount: number
+  requiredRenderActorIds: string[]
   missingRequiredActorIds: string[]
   runtimeAssetUrls: string[]
   errors: string[]

@@ -29,6 +29,10 @@ import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
 import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
 import { playerStateStore } from '../stores/gameStateStore'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
+import {
+  clearRuntimeRenderedActors,
+  setRequiredRuntimeRenderActors,
+} from '../stores/runtimeRenderRegistry'
 import { buildRuntimeVisualStyleFromLevelSettings } from '../styles/GameplayStyleProfiles'
 import {
   replaceRuntimeVisualStyle,
@@ -141,6 +145,8 @@ async function loadSceneDocument(level: string, token: number) {
   if (token !== loadToken) return
 
   const buildReport = createLevelBuildReport(levelDefinition)
+  clearRuntimeRenderedActors(level)
+  setRequiredRuntimeRenderActors(level, buildReport.requiredRenderActorIds)
   const hasBuildErrors = buildReport.errors.length > 0
   const hasBuildWarnings = buildReport.warnings.length > 0
   setRuntimeDiagnostic('levelDefinition', {
@@ -418,6 +424,7 @@ onDestroy(() => {
         <RuntimeActorBranch
           {actor}
           actors={levelActors}
+          {levelId}
           {interactionSystem}
           interactiveEnabled={true}
           on:portalTransition={(event) => dispatch('portalTransition', event.detail)}

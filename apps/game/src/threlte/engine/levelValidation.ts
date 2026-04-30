@@ -175,6 +175,7 @@ export function createLevelBuildReport(
     defaultCollisionActorCount,
     visualOnlyActorCount,
     requiredActorCount: contract.requiredActorIds.length,
+    requiredRenderActorIds: [...contract.requiredAssetActorIds],
     missingRequiredActorIds,
     runtimeAssetUrls: [...runtimeAssetUrls].sort(),
     errors,

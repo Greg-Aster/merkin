@@ -5,8 +5,13 @@ import ProceduralMesh from '../components/ProceduralMesh.svelte'
 import EditorPrefabNode from '../editor/EditorPrefabNode.svelte'
 import type { EditorPrefabData } from '../editor/editorTypes'
 import type { ActorDefinition } from '../engine/types'
+import {
+  markRuntimeActorRendered,
+  unmarkRuntimeActorRendered,
+} from '../stores/runtimeRenderRegistry'
 
 export let actor: ActorDefinition
+export let levelId = ''
 
 $: render = actor.render ?? null
 $: material = (render?.material ?? {}) as Record<string, any>
@@ -14,10 +19,26 @@ $: primitive = render?.primitive ?? null
 $: asset = render?.asset ?? null
 $: prefab = render?.prefab ?? null
 $: light = actor.light ?? null
+$: runtimeCulling = render?.cullingPolicy !== 'never'
+
+function handleAssetLoad() {
+  if (!levelId) return
+  markRuntimeActorRendered(levelId, actor.id)
+}
+
+function handleAssetError() {
+  if (!levelId) return
+  unmarkRuntimeActorRendered(levelId, actor.id)
+}
 </script>
 
 {#if asset}
-  <HeroProp url={asset.url} />
+  <HeroProp
+    url={asset.url}
+    {runtimeCulling}
+    on:load={handleAssetLoad}
+    on:error={handleAssetError}
+  />
 {:else if prefab}
   <EditorPrefabNode prefab={prefab as EditorPrefabData} />
 {:else if primitive}

@@ -21,9 +21,10 @@ function createLevelSmokeCheck(levelId) {
       )
 
       await page.mouse.click(24, 24)
-      await page.waitForSelector('.runtime-diagnostics-panel', {
-        timeout: 10000,
-      })
+      await page
+        .locator('.runtime-diagnostics-panel')
+        .first()
+        .waitFor({ state: 'attached', timeout: 10000 })
       await page.waitForSelector(`text=Current Level: ${levelId}`, {
         timeout: 10000,
       })
@@ -35,6 +36,7 @@ function createLevelSmokeCheck(levelId) {
         await spawnSignal
       }
       await spawnSignal
+      await assertRequiredRenderActors(page, levelId)
 
       try {
         const summaryText = await page
@@ -50,6 +52,33 @@ function createLevelSmokeCheck(levelId) {
         await spawnSignal
       }
     },
+  }
+}
+
+async function assertRequiredRenderActors(page, levelId) {
+  await page.waitForFunction(
+    level => {
+      const state = window.__gameRuntimeRenderState
+      const required = state?.required?.[level] ?? []
+      const rendered = new Set(state?.rendered?.[level] ?? [])
+      const missingActors = required.filter(actorId => !rendered.has(actorId))
+
+      return required.length === 0 || missingActors.length === 0
+    },
+    levelId,
+    { timeout: 30000 },
+  )
+
+  const missingActorIds = await page.evaluate(level => {
+    const state = window.__gameRuntimeRenderState
+    const required = state?.required?.[level] ?? []
+    const rendered = new Set(state?.rendered?.[level] ?? [])
+    return required.filter(actorId => !rendered.has(actorId))
+  }, levelId)
+  if (missingActorIds.length > 0) {
+    throw new Error(
+      `${levelId} missing required rendered actors: ${missingActorIds.join(', ')}`,
+    )
   }
 }
 

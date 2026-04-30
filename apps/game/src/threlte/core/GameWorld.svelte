@@ -223,7 +223,7 @@ $: {
         {#if editorWorkbenchLightingComponent}
           <svelte:component this={editorWorkbenchLightingComponent} />
         {/if}
-        {#if editorSceneLayerComponent}
+        {#if editorEnabled && editorSceneLayerComponent}
           <svelte:component
             this={editorSceneLayerComponent}
             levelId={currentLevel}
@@ -233,10 +233,10 @@ $: {
             on:noteRead={(e) => forward('noteRead', e.detail)}
           />
         {/if}
-        {#if editorCollisionOverlayComponent}
+        {#if editorEnabled && editorCollisionOverlayComponent}
           <svelte:component this={editorCollisionOverlayComponent} levelId={currentLevel} />
         {/if}
-        {#if editorTerrainSculptLayerComponent}
+        {#if editorEnabled && editorTerrainSculptLayerComponent}
           <svelte:component this={editorTerrainSculptLayerComponent} levelId={currentLevel} />
         {/if}
       {/if}

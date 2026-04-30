@@ -2,6 +2,8 @@ import type {
   CollisionChannel,
   CollisionIntent,
   LevelDefinition,
+  RenderCullingPolicy,
+  RenderPhysicsAttachmentPolicy,
 } from '../engine/types'
 import type { TerrainRuntimeComponentSource } from '../features/terrain'
 
@@ -133,6 +135,11 @@ export interface EditorMaterialData {
   reflectivity?: number
 }
 
+export interface EditorRenderPolicyData {
+  cullingPolicy?: RenderCullingPolicy
+  physicsAttachment?: RenderPhysicsAttachmentPolicy
+}
+
 export type EditorRigidBodyType = 'fixed' | 'dynamic' | 'kinematicPosition'
 
 export interface EditorNodePhysicsData {
@@ -222,6 +229,7 @@ export interface EditorSceneNode {
   light?: EditorLightData
   prefab?: EditorPrefabData
   material?: EditorMaterialData
+  renderPolicy?: EditorRenderPolicyData
   physics?: EditorNodePhysicsData
   collision?: EditorNodeCollisionData
   gameplay?: EditorGameplayData

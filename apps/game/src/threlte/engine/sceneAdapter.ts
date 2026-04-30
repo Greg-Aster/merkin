@@ -9,6 +9,8 @@ import type {
   CollisionShape,
   LevelDefinition,
   PhysicsBodyType,
+  RenderCullingPolicy,
+  RenderPhysicsAttachmentPolicy,
   Vec3,
 } from './types'
 
@@ -24,6 +26,21 @@ function getActorKind(node: EditorSceneNode): ActorDefinition['kind'] {
 
 function getPhysicsBodyType(node: EditorSceneNode): PhysicsBodyType {
   return node.physics?.bodyType ?? 'fixed'
+}
+
+function getRenderCullingPolicy(node: EditorSceneNode): RenderCullingPolicy {
+  return node.renderPolicy?.cullingPolicy ?? 'runtime-budget'
+}
+
+function getRenderPhysicsAttachmentPolicy(
+  node: EditorSceneNode,
+): RenderPhysicsAttachmentPolicy {
+  return (
+    node.renderPolicy?.physicsAttachment ??
+    (node.kind === 'asset' && getPhysicsBodyType(node) === 'fixed'
+      ? 'outside-collider'
+      : 'inside-collider')
+  )
 }
 
 function toCollisionShape(
@@ -110,6 +127,8 @@ function toActor(
       node.kind === 'prefab'
         ? {
             visible: node.visible,
+            cullingPolicy: getRenderCullingPolicy(node),
+            physicsAttachment: getRenderPhysicsAttachmentPolicy(node),
             primitive: node.primitive
               ? {
                   geometry: node.primitive.geometry,
