@@ -27,9 +27,14 @@ function toggleAddons() {
             Allow installation and management of third-party add-ons
           </p>
         </div>
-        <label class="switch">
-          <input type="checkbox" bind:checked={addonsConfig.enabled} on:change={toggleAddons}>
-          <span class="slider round"></span>
+        <label class="relative inline-block h-[34px] w-[60px]">
+          <input
+            type="checkbox"
+            bind:checked={addonsConfig.enabled}
+            on:change={toggleAddons}
+            class="peer sr-only"
+          >
+          <span class="absolute inset-0 cursor-pointer rounded-[34px] bg-[#ccc] transition before:absolute before:bottom-1 before:left-1 before:h-[26px] before:w-[26px] before:rounded-full before:bg-white before:transition before:content-[''] peer-checked:bg-[var(--primary)] peer-focus:shadow-[0_0_1px_var(--primary)] peer-checked:before:translate-x-[26px]"></span>
         </label>
       </div>
     </div>
@@ -101,60 +106,3 @@ function toggleAddons() {
     {/if}
   </div>
   
-  <style>
-    /* Switch styling */
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 60px;
-      height: 34px;
-    }
-    
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: .4s;
-    }
-    
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 26px;
-      width: 26px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: .4s;
-    }
-    
-    input:checked + .slider {
-      background-color: var(--primary);
-    }
-    
-    input:focus + .slider {
-      box-shadow: 0 0 1px var(--primary);
-    }
-    
-    input:checked + .slider:before {
-      transform: translateX(26px);
-    }
-    
-    .slider.round {
-      border-radius: 34px;
-    }
-    
-    .slider.round:before {
-      border-radius: 50%;
-    }
-  </style>

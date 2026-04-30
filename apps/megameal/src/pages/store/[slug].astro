@@ -66,27 +66,40 @@ const resolveAsset = (path: string | undefined) => {
   return path.startsWith('/') ? url(path) : path
 }
 
-// Unified media items
-const mediaItems: Array<{
-  type: string
+type MediaGalleryItem = {
+  type: 'image' | 'video' | 'youtube'
   src?: string
   videoId?: string
   poster?: string
   alt?: string
   caption?: string
-}> =
+}
+
+const isGalleryMediaType = (type: string): type is MediaGalleryItem['type'] =>
+  type === 'image' || type === 'video' || type === 'youtube'
+
+// Unified media items
+const mediaItems: MediaGalleryItem[] =
   Array.isArray(media) && media.length > 0
-    ? media.map(item => ({
-        ...item,
-        src: item.src ? resolveAsset(item.src) : undefined,
-        poster: item.poster ? resolveAsset(item.poster) : undefined,
-      }))
+    ? media.flatMap(item => {
+        if (!isGalleryMediaType(item.type)) return []
+        return [
+          {
+            type: item.type,
+            src: item.src ? resolveAsset(item.src) : undefined,
+            videoId: item.videoId,
+            poster: item.poster ? resolveAsset(item.poster) : undefined,
+            alt: item.alt,
+            caption: item.caption,
+          },
+        ]
+      })
     : [
         ...(image
-          ? [{ type: 'image', src: resolveAsset(image), alt: name }]
+          ? [{ type: 'image' as const, src: resolveAsset(image), alt: name }]
           : []),
         ...(additionalImages ?? []).map((src: string) => ({
-          type: 'image',
+          type: 'image' as const,
           src: resolveAsset(src),
           alt: name,
         })),

@@ -1,6 +1,7 @@
 <!-- LayoutToggle.svelte - Cleaned and simplified -->
 <script lang="ts">
 import { onMount } from 'svelte'
+import '../../styles/features/layout-toggle.css'
 
 // Appearance configuration
 export const position:
@@ -159,7 +160,7 @@ $: shouldHideToggle = isFullscreenMode
     <button
       on:click={toggleLayout}
       disabled={isTransitioning || isFullscreenMode || !isReady}
-      class="fixed {positionClasses} z-50 {sizeClasses} bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 disabled:opacity-50 group"
+      class="layout-toggle-button fixed {positionClasses} z-50 {sizeClasses} bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 disabled:opacity-50 group"
       aria-label={isOneColumn ? 'Switch to two column layout' : 'Switch to single column layout'}
       title={isOneColumn ? 'Show sidebar' : 'Hide sidebar'}
     >
@@ -188,7 +189,7 @@ $: shouldHideToggle = isFullscreenMode
       <button
         on:click={toggleLayout}
         disabled={isTransitioning || isFullscreenMode || !isReady}
-        class="group relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="layout-toggle-button group relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
         aria-label={isOneColumn ? 'Switch to two column layout' : 'Switch to single column layout'}
         title={isOneColumn ? 'Show sidebar' : 'Hide sidebar'}
       >
@@ -245,31 +246,3 @@ $: shouldHideToggle = isFullscreenMode
   {/if}
 {/if}
 
-<style>
-  /* Ensure button stays above other content */
-  button {
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-  
-  /* Smooth icon transitions */
-  svg {
-    transition: transform 0.2s ease;
-  }
-  
-  button:hover svg {
-    transform: scale(1.1);
-  }
-  
-  /* Subtle glow effect on hover for minimal variant */
-  button:hover {
-    box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.3);
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    button {
-      padding: 0.5rem;
-    }
-  }
-</style>

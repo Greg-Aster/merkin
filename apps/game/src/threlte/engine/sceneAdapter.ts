@@ -7,7 +7,6 @@ import { resolveCollisionPolicy } from './collisionPolicy'
 import type {
   ActorDefinition,
   CollisionShape,
-  LevelBuildReport,
   LevelDefinition,
   PhysicsBodyType,
   Vec3,
@@ -33,12 +32,48 @@ function toCollisionShape(
   return shape
 }
 
-function toActor(node: EditorSceneNode): {
+function getPrimitiveMaterial(node: EditorSceneNode) {
+  if (!node.primitive)
+    return node.material as Record<string, unknown> | undefined
+
+  return {
+    color: node.material?.color ?? node.primitive.color,
+    mapUrl: node.material?.mapUrl,
+    emissive: node.material?.emissive ?? node.primitive.emissive,
+    emissiveMapUrl: node.material?.emissiveMapUrl,
+    emissiveIntensity:
+      node.material?.emissiveIntensity ?? node.primitive.emissiveIntensity,
+    metalness: node.material?.metalness ?? node.primitive.metalness,
+    metalnessMapUrl: node.material?.metalnessMapUrl,
+    roughness: node.material?.roughness ?? node.primitive.roughness,
+    roughnessMapUrl: node.material?.roughnessMapUrl,
+    normalMapUrl: node.material?.normalMapUrl,
+    alphaMapUrl: node.material?.alphaMapUrl,
+    opacity: node.material?.opacity ?? node.primitive.opacity,
+    transparent: node.material?.transparent ?? node.primitive.transparent,
+    wireframe: node.material?.wireframe,
+    doubleSided: node.material?.doubleSided,
+    flatShading: node.material?.flatShading,
+    envMapIntensity: node.material?.envMapIntensity,
+    transmission: node.material?.transmission,
+    ior: node.material?.ior,
+    clearcoat: node.material?.clearcoat,
+    clearcoatRoughness: node.material?.clearcoatRoughness,
+    thickness: node.material?.thickness,
+    reflectivity: node.material?.reflectivity,
+  } satisfies Record<string, unknown>
+}
+
+function toActor(
+  scene: EditorSceneDocument,
+  node: EditorSceneNode,
+): {
   actor: ActorDefinition
-  collisionSource: 'authored' | 'none'
+  collisionSource: 'authored' | 'default' | 'none'
   warning?: string
 } {
   const collisionResult = resolveCollisionPolicy({
+    levelId: scene.levelId,
     actorId: node.id,
     actorKind:
       node.kind === 'asset' ||
@@ -49,6 +84,7 @@ function toActor(node: EditorSceneNode): {
         : 'empty',
     visible: node.visible,
     hasGameplay: Boolean(node.gameplay),
+    bodyType: getPhysicsBodyType(node),
     primitiveGeometry: node.primitive?.geometry,
     authoredCollision: node.collision
       ? {
@@ -69,7 +105,9 @@ function toActor(node: EditorSceneNode): {
       scale: node.scale,
     },
     render:
-      node.kind === 'primitive' || node.kind === 'asset' || node.kind === 'prefab'
+      node.kind === 'primitive' ||
+      node.kind === 'asset' ||
+      node.kind === 'prefab'
         ? {
             visible: node.visible,
             primitive: node.primitive
@@ -80,7 +118,7 @@ function toActor(node: EditorSceneNode): {
               : undefined,
             asset: node.asset,
             prefab: node.prefab,
-            material: node.material as Record<string, unknown> | undefined,
+            material: getPrimitiveMaterial(node),
           }
         : undefined,
     physics: collisionResult.collision
@@ -158,30 +196,6 @@ export function adaptEditorSceneToLevelDefinition(
       player: getSpawn(scene),
     },
     settings: scene.settings as Record<string, unknown>,
-    actors: scene.nodes.map(node => toActor(node).actor),
-  }
-}
-
-export function createLevelBuildReport(
-  level: LevelDefinition,
-): LevelBuildReport {
-  const warnings: string[] = []
-  let trimeshActorCount = 0
-  let physicsActorCount = 0
-
-  for (const actor of level.actors) {
-    if (!actor.physics) continue
-    physicsActorCount += 1
-    if (actor.physics.collision.shape === 'trimesh') {
-      trimeshActorCount += 1
-    }
-  }
-
-  return {
-    levelId: level.id,
-    actorCount: level.actors.length,
-    physicsActorCount,
-    trimeshActorCount,
-    warnings,
+    actors: scene.nodes.map(node => toActor(scene, node).actor),
   }
 }

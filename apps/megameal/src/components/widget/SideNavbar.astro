@@ -20,6 +20,7 @@ import { navBarConfig, siteConfig } from '../../config/config'
 import { LinkPresets } from '../../constants/link-presets'
 import type { LinkPreset, NavBarLink } from '../../types/config'
 import { url } from '../../utils/url-utils'
+import '../../styles/features/side-navbar.css'
 
 // =====================================================================
 // TYPESCRIPT INTERFACES
@@ -275,23 +276,6 @@ style={style}>
   
   NOTE: Panel styles and hue slider styles moved to MainGridLayout.astro
 -->
-<style>
-  /* =============================================================== */
-  /* SIDEBAR CONSTRAINTS - Prevent any layout issues */
-  /* =============================================================== */
-  
-  #unified-sidenav {
-    min-width: 0; /* Allow shrinking */
-    flex-shrink: 0; /* But don't shrink the actual sidebar */
-  }
-  
-  /* Ensure buttons respect container width */
-  #unified-sidenav button,
-  #unified-sidenav a {
-    min-width: 0; /* Allow content to shrink */
-  }
-</style>
-
 <!-- =============================================================== -->
 <!-- JAVASCRIPT - SIMPLIFIED (PANELS MOVED TO MAINGRIDLAYOUT) -->
 <!-- =============================================================== -->

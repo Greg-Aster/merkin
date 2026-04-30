@@ -54,7 +54,12 @@ function createSolitudeGroundNodes(): EditorSceneNode[] {
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
       visible: true,
-      collision: { shape: 'cuboid', enabled: false, friction: 0.92 },
+      collision: {
+        shape: 'cuboid',
+        intent: 'none',
+        enabled: false,
+        friction: 0.92,
+      },
       primitive: {
         geometry: 'box',
         args: [240, 2.4, 240],
@@ -74,7 +79,12 @@ function createSolitudeGroundNodes(): EditorSceneNode[] {
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
       visible: true,
-      collision: { shape: 'cuboid', enabled: false, friction: 0.94 },
+      collision: {
+        shape: 'cuboid',
+        intent: 'none',
+        enabled: false,
+        friction: 0.94,
+      },
       primitive: {
         geometry: 'box',
         args: [44, 0.8, 44],
@@ -108,7 +118,12 @@ function createMirandaGroundNodes(): EditorSceneNode[] {
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
       visible: true,
-      collision: { shape: 'cuboid', friction: 0.88 },
+      collision: {
+        shape: 'cuboid',
+        intent: 'blocker',
+        channel: 'worldStatic',
+        friction: 0.88,
+      },
       primitive: {
         geometry: 'box',
         args: [40, 1.2, 92],
@@ -128,7 +143,12 @@ function createMirandaGroundNodes(): EditorSceneNode[] {
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
       visible: true,
-      collision: { shape: 'cuboid', friction: 0.88 },
+      collision: {
+        shape: 'cuboid',
+        intent: 'blocker',
+        channel: 'worldStatic',
+        friction: 0.88,
+      },
       primitive: {
         geometry: 'box',
         args: [18, 0.9, 18],
@@ -162,7 +182,12 @@ function createObservatoryGroundNodes(): EditorSceneNode[] {
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
       visible: true,
-      collision: { shape: 'cuboid', friction: 0.96 },
+      collision: {
+        shape: 'cuboid',
+        intent: 'blocker',
+        channel: 'worldStatic',
+        friction: 0.96,
+      },
       primitive: {
         geometry: 'box',
         args: [260, 2.4, 260],
@@ -182,7 +207,12 @@ function createObservatoryGroundNodes(): EditorSceneNode[] {
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
       visible: true,
-      collision: { shape: 'cuboid', friction: 0.92 },
+      collision: {
+        shape: 'cuboid',
+        intent: 'blocker',
+        channel: 'worldStatic',
+        friction: 0.92,
+      },
       primitive: {
         geometry: 'box',
         args: [28, 0.9, 34],
@@ -226,7 +256,12 @@ function createSciFiRoomFloorNodes(): EditorSceneNode[] {
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
       visible: true,
-      collision: { shape: 'cuboid', friction: 0.9 },
+      collision: {
+        shape: 'cuboid',
+        intent: 'blocker',
+        channel: 'worldStatic',
+        friction: 0.9,
+      },
       primitive: {
         geometry: 'box',
         args: [
@@ -264,7 +299,12 @@ function createSciFiRoomFloorNodes(): EditorSceneNode[] {
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
       visible: true,
-      collision: { shape: 'cuboid', friction: 0.7 },
+      collision: {
+        shape: 'cuboid',
+        intent: 'blocker',
+        channel: 'worldStatic',
+        friction: 0.7,
+      },
       primitive: {
         geometry: 'box',
         args: [
@@ -305,7 +345,12 @@ function createSciFiRoomFloorNodes(): EditorSceneNode[] {
         rotation: [0, 0, 0],
         scale: [1, 1, 1],
         visible: true,
-        collision: { shape: 'cuboid', friction: 0.5 },
+        collision: {
+          shape: 'cuboid',
+          intent: 'blocker',
+          channel: 'worldStatic',
+          friction: 0.5,
+        },
         primitive: {
           geometry: 'box',
           args: [

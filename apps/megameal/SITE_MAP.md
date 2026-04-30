@@ -12,6 +12,7 @@ This is a working map of the Astro routes in `apps/megameal/src/pages`.
 | `/game/` | Game/observatory entry point | `src/pages/game.astro` |
 | `/archive/` | Story archive index | `src/pages/archive/index.astro` |
 | `/store/` | Store/catalog landing page | `src/pages/store.astro` |
+| `/snuggaloid-concept/` | Physical Snuggaloid commission concept and artist brief | `src/pages/snuggaloid-concept.astro` |
 | `/community/` | Community page | `src/pages/community.astro` |
 | `/about/` | About page | `src/pages/about.astro` |
 | `/privacy/` | Privacy page | `src/pages/privacy.astro` |

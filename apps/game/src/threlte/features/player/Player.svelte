@@ -62,6 +62,7 @@ export let speed = 5
 export let jumpForce = 10
 export let lightIntensityScale = 60
 export let mouseSensitivity = 0.002
+export let gameplayEnabled = true
 
 // --- Player State ---
 let rigidBody: any // Physics body reference
@@ -188,6 +189,7 @@ $: if (!dragToLook && surfaceTouchId !== null) {
 
 // --- Input Handlers ---
 function handleKeydown(event: KeyboardEvent) {
+  if (!gameplayEnabled) return
   if ($uiStore.isInputFocused) return
   if (
     [
@@ -209,11 +211,13 @@ function handleKeydown(event: KeyboardEvent) {
 }
 
 function handleKeyup(event: KeyboardEvent) {
+  if (!gameplayEnabled) return
   if ($uiStore.isInputFocused) return
   keyStates[event.code] = false
 }
 
 function handleMouseDown(event: MouseEvent) {
+  if (!gameplayEnabled) return
   isMouseDown = true
   lastMouseX = event.clientX
   lastMouseY = event.clientY
@@ -221,6 +225,7 @@ function handleMouseDown(event: MouseEvent) {
 }
 
 function handleMouseUp(event: MouseEvent) {
+  if (!gameplayEnabled) return
   const wasMouseDown = isMouseDown
   isMouseDown = false
   dispatch('unlock')
@@ -236,6 +241,7 @@ function handleMouseUp(event: MouseEvent) {
 }
 
 function handleMouseMove(event: MouseEvent) {
+  if (!gameplayEnabled) return
   if ($uiStore.isInputFocused) return
   if (!isMouseDown) return
   const deltaX = event.clientX - lastMouseX
@@ -267,6 +273,7 @@ function resetSurfaceTouchState() {
 
 function handleTouchStart(event: TouchEvent) {
   if (
+    !gameplayEnabled ||
     !isMobile ||
     !dragToLook ||
     $uiStore.isInputFocused ||
@@ -302,6 +309,7 @@ function handleTouchStart(event: TouchEvent) {
 
 function handleTouchMove(event: TouchEvent) {
   if (
+    !gameplayEnabled ||
     !isMobile ||
     !dragToLook ||
     $uiStore.isInputFocused ||
@@ -341,6 +349,7 @@ function handleTouchMove(event: TouchEvent) {
 }
 
 function handleTouchEnd(event: TouchEvent) {
+  if (!gameplayEnabled) return
   if (!isMobile || !dragToLook || surfaceTouchId === null) return
 
   const touch = Array.from(event.changedTouches).find(
@@ -863,6 +872,7 @@ $: if ($multiplayerStore.isConnected && !sendPlayerUpdateFn) {
 
 useTask(delta => {
   if (
+    !gameplayEnabled ||
     !rigidBody ||
     !characterController ||
     (typeof rigidBody.isValid === 'function' && !rigidBody.isValid()) ||

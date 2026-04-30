@@ -1,12 +1,15 @@
 import { derived, get, writable } from 'svelte/store'
+import type { EditorSceneDocument } from '../editor/editorTypes'
+import {
+  adaptEditorSceneToLevelDefinition,
+  createLevelBuildReport,
+} from '../engine'
 import initialRegistry from './level-registry.json'
 
 export const DEFAULT_LEVEL_ID = 'observatory'
 
 export type LevelLifecycleStatus = 'active' | 'draft' | 'archived'
-export type BuiltInLevelComponentKey =
-  | 'observatory'
-  | 'solitude'
+export type BuiltInLevelComponentKey = 'observatory' | 'solitude'
 
 export interface LevelRegistryComponentSource {
   kind: 'component'
@@ -38,6 +41,17 @@ export interface LevelRegistryEntry {
   source: LevelRegistrySource
   starMap?: LevelRegistryStarMapSettings
 }
+
+export interface LevelRegistryValidationResult {
+  valid: boolean
+  errors: string[]
+  warnings: string[]
+}
+
+const packagedSceneModules = import.meta.glob('../editor/scenes/*.scene.json', {
+  eager: true,
+  import: 'default',
+}) as Record<string, EditorSceneDocument>
 
 function cloneEntry<T>(value: T): T {
   return structuredClone(value)
@@ -154,9 +168,73 @@ export function isPlayableLevel(
   return Boolean(matched?.deployed)
 }
 
+function getPackagedRegistryScene(sceneId: string) {
+  const match = Object.entries(packagedSceneModules).find(([path]) =>
+    path.endsWith(`/${sceneId}.scene.json`),
+  )
+  return match ? (structuredClone(match[1]) as EditorSceneDocument) : null
+}
+
+export function validateLevelRegistryEntry(
+  entry: LevelRegistryEntry,
+): LevelRegistryValidationResult {
+  const errors: string[] = []
+  const warnings: string[] = []
+
+  if (!entry.id.trim()) {
+    errors.push('Level registry entry has an empty id.')
+  }
+
+  if (!entry.title.trim()) {
+    errors.push(`${entry.id}: title is empty.`)
+  }
+
+  if (entry.source.kind === 'component') {
+    if (!['observatory', 'solitude'].includes(entry.source.componentKey)) {
+      errors.push(`${entry.id}: unknown component source.`)
+    }
+    warnings.push(
+      `${entry.id}: component source is not LevelDefinition-backed yet.`,
+    )
+    return { valid: errors.length === 0, errors, warnings }
+  }
+
+  const scene = getPackagedRegistryScene(entry.source.sceneId)
+  if (!scene) {
+    errors.push(`${entry.id}: missing packaged scene ${entry.source.sceneId}.`)
+    return { valid: false, errors, warnings }
+  }
+
+  const levelDefinition = adaptEditorSceneToLevelDefinition(scene)
+  const buildReport = createLevelBuildReport(levelDefinition)
+  errors.push(...buildReport.errors)
+  warnings.push(...buildReport.warnings)
+
+  if (levelDefinition.id !== entry.id) {
+    warnings.push(
+      `${entry.id}: registry id differs from LevelDefinition id ${levelDefinition.id}.`,
+    )
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings,
+  }
+}
+
+export function isLevelRegistryEntryValidForStarMap(entry: LevelRegistryEntry) {
+  return validateLevelRegistryEntry(entry).valid
+}
+
 export function createStarMapLevelEvents(entries = getLevelRegistry()) {
   return entries
-    .filter(entry => entry.deployed && entry.starMap?.enabled)
+    .filter(
+      entry =>
+        entry.deployed &&
+        entry.starMap?.enabled &&
+        isLevelRegistryEntryValidForStarMap(entry),
+    )
     .map(entry => ({
       id: `level-star-${entry.id}`,
       uniqueId: `level-star-${entry.id}`,

@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+Claude Code should also read and follow `AGENTS.md` at the repository root and any nested `AGENTS.md` in the project being edited. Those files contain the shared agent operating rules, styling standards, and definition of done used by Codex and other coding agents.
+
 ## Repository Overview
 
 The Merkin repository is a **multi-project workspace** containing five distinct projects:

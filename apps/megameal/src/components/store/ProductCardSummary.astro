@@ -1,0 +1,75 @@
+---
+import { Icon } from 'astro-icon/components'
+
+interface Props {
+  emptyStars: number
+  fullStars: number
+  halfStar: boolean
+  isRated: boolean
+  name: string
+  price?: number
+  productHref: string
+  productId: string
+  ratingLabel: string
+  tagline?: string
+}
+
+const {
+  emptyStars,
+  fullStars,
+  halfStar,
+  isRated,
+  name,
+  price,
+  productHref,
+  productId,
+  ratingLabel,
+  tagline,
+} = Astro.props
+---
+
+<div class="p-5 flex flex-col flex-grow">
+  <div class="flex justify-between items-center mb-2">
+    <h3
+      id={`product-title-${productId}`}
+      class="text-2xl font-semibold text-slate-800 dark:text-slate-100 group-hover:text-[var(--primary)] transition-colors duration-200 mr-2"
+    >
+      {name}
+    </h3>
+
+    <div class="flex items-center product-rating shrink-0 h-5" aria-label={ratingLabel}>
+      {isRated ? (
+        <Fragment>
+          {Array(fullStars).fill(null).map(() => <Icon name="mdi:star" class="h-5 w-5 text-amber-400" />)}
+          {halfStar && <Icon name="mdi:star-half-full" class="h-5 w-5 text-amber-400" />}
+          {Array(emptyStars).fill(null).map(() => <Icon name="mdi:star-outline" class="h-5 w-5 text-amber-400" />)}
+        </Fragment>
+      ) : (
+        <span class="text-xs text-slate-500 dark:text-slate-400 italic">Not rated</span>
+      )}
+    </div>
+  </div>
+
+  {price ? (
+    <p class="text-sm font-semibold text-emerald-400 mb-2">${price.toFixed(2)}</p>
+  ) : (
+    <p class="text-sm text-amber-400 dark:text-amber-300 italic mb-2">Price: Inquire Within</p>
+  )}
+
+  {tagline && <p class="text-sm text-slate-600 dark:text-slate-400 italic mb-1 line-clamp-2">"{tagline}"</p>}
+
+  <div class="mt-auto pt-3 flex items-center justify-between">
+    <div class="card-expansion-trigger flex items-center gap-1 text-[var(--primary)] hover:text-[var(--primary-hover)] transition-colors duration-200">
+      <span class="text-sm font-medium">Quick View</span>
+      <Icon name="mdi:chevron-down" class="h-6 w-6 transition-transform duration-300 ease-in-out icon" />
+    </div>
+    <a
+      href={productHref}
+      class="text-xs text-slate-500 hover:text-[var(--primary)] transition-colors flex items-center gap-1"
+      aria-label={`Full product page for ${name}`}
+    >
+      Full Page <Icon name="mdi:arrow-right" class="h-3.5 w-3.5" />
+    </a>
+  </div>
+</div>
+

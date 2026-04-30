@@ -1,0 +1,62 @@
+name: Game Engine CI
+
+on:
+  pull_request:
+    paths:
+      - "apps/game/**"
+      - "apps/megameal/public/terrain/**"
+      - "packages/shared-audio/**"
+      - "packages/shared-data/**"
+      - ".github/workflows/game-engine-ci.yml"
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - "apps/game/**"
+      - "apps/megameal/public/terrain/**"
+      - "packages/shared-audio/**"
+      - "packages/shared-data/**"
+      - ".github/workflows/game-engine-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9.14.4"
+
+jobs:
+  engine-audit:
+    name: Type Check And Engine Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check game
+        run: pnpm --dir apps/game type-check
+
+      - name: Audit engine architecture
+        run: pnpm --dir apps/game audit:engine
+
+      - name: Install Playwright Chromium
+        run: pnpm --dir apps/game exec playwright install --with-deps chromium
+
+      - name: Runtime smoke check migrated levels
+        run: pnpm --dir apps/game smoke:boot

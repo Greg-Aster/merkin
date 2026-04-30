@@ -9,11 +9,15 @@ import {
 } from '@/config/timelineconfig'
 import Bleepy from '@components/bleepy/Bleepy.astro'
 import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
-import TestPortalHeroSlide from '@components/home/TestPortalHeroSlide.astro'
+import PortalHeroSlide from '@components/home/PortalHeroSlide.astro'
 import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
 import timelineManifest from '../../../../packages/shared-data/generated/timeline.json'
-import '@/styles/megameal-interactions.css'
+import '@/styles/features/banner/banner-base.css'
+import '@/styles/features/banner/banner-billboards.css'
+import '@/styles/features/banner/banner-title-display.css'
+import '@/styles/features/banner/banner-responsive.css'
+import '@/styles/features/interactions.css'
 
 interface Props {
   title?: string
@@ -47,6 +51,8 @@ interface Props {
 
 const isTestPortalLayout = Astro.props.homeLayout === 'test-portal'
 const sharedHomeLayout = isTestPortalLayout ? 'portal' : Astro.props.homeLayout
+const shouldRenderPortalHero =
+  Astro.props.homeLayout === 'portal' || Astro.props.homeLayout === 'test-portal'
 const sharedProps = {
   ...Astro.props,
   homeLayout: sharedHomeLayout,
@@ -69,14 +75,11 @@ const sharedProps = {
   {Astro.props.showMascot && (
     <Bleepy slot="mascot" mascotContext={Astro.props.pageMascotContext} instanceIdentifier="LAYOUT_BLEEPY" />
   )}
-  {Astro.props.homeLayout === 'test-portal' && (
-    <TestPortalHeroSlide slot="banner-overlay-content" />
+  {shouldRenderPortalHero && (
+    <PortalHeroSlide slot="banner-overlay-content" />
   )}
   <slot slot="overlay" name="overlay" />
-  {Astro.props.homeLayout === 'portal' && (
-    <UniverseHeroSlide slot="banner-slide-content" transparentMode={true} />
-  )}
-  {Astro.props.homeLayout !== 'portal' && Astro.props.homeLayout !== 'test-portal' && (
+  {!shouldRenderPortalHero && (
     <UniverseHeroSlide slot="banner-slide-content" />
   )}
 </SharedMainGridLayout>

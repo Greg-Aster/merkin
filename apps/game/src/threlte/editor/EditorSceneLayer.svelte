@@ -1,17 +1,16 @@
 <script lang="ts">
-import { EDITOR_API_BASE } from '@config/editorApi'
 import { T } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 import EditorSceneBranch from './EditorSceneBranch.svelte'
-import { createDefaultSceneForLevel } from './defaultScenes'
 import {
-  type EditorSceneDocument,
-  createEmptyScene,
+  loadEditorSceneDocument,
+  loadImmediateEditorSceneDocument,
+} from './editorSceneDocumentLoader'
+import {
   editorNodesStore,
   editorRootNodesStore,
   editorStateStore,
-  loadSceneFromLocalStorage,
   selectEditorNode,
   setEditorLevel,
   setEditorScene,
@@ -42,58 +41,28 @@ const unsubscribeRoots = editorRootNodesStore.subscribe(value => {
   rootNodes = value
 })
 
-function getSceneUpdatedAt(scene: { updatedAt?: string } | null | undefined) {
-  if (!scene?.updatedAt) return 0
-  const timestamp = Date.parse(scene.updatedAt)
-  return Number.isFinite(timestamp) ? timestamp : 0
-}
-
-function getPreferredLoadedScene(
-  level: string,
-  diskScene: EditorSceneDocument | null,
-) {
-  const localScene = loadSceneFromLocalStorage(level)
-
-  if (diskScene && localScene) {
-    return getSceneUpdatedAt(localScene) >= getSceneUpdatedAt(diskScene)
-      ? localScene
-      : diskScene
-  }
-
-  if (diskScene) {
-    return diskScene
-  }
-
-  return localScene ?? null
-}
-
 async function loadEditorScene(level: string) {
   const loadToken = ++activeLoadToken
   setEditorLevel(level)
 
-  const immediateScene =
-    getPreferredLoadedScene(level, null) ??
-    createDefaultSceneForLevel(level) ??
-    createEmptyScene(level)
-  setEditorScene(immediateScene)
-
-  let diskScene = null
+  const immediateScene = loadImmediateEditorSceneDocument(level, {
+    includeLocalStorage: true,
+  })
+  setEditorScene(immediateScene.scene)
 
   try {
-    const response = await fetch(
-      `${EDITOR_API_BASE}/api/editor-scene/load?levelId=${encodeURIComponent(level)}`,
-    )
+    const loadedScene = await loadEditorSceneDocument(level, {
+      includeLocalStorage: true,
+    })
     if (loadToken !== activeLoadToken) return
-    if (response.ok) {
-      const payload = await response.json()
-      if (payload?.success && payload.scene) {
-        diskScene = payload.scene
-        setRuntimeDiagnostic('scenePersistence', {
-          level: 'ready',
-          message: `Loaded editor scene for ${level} from disk.`,
-        })
-      }
-    }
+    setEditorScene(loadedScene.scene)
+    setRuntimeDiagnostic('scenePersistence', {
+      level: loadedScene.source === 'disk' ? 'ready' : 'warning',
+      message:
+        loadedScene.source === 'disk'
+          ? `Loaded editor scene for ${level} from disk.`
+          : `Using ${loadedScene.source} editor scene state for ${level}.`,
+    })
   } catch (error) {
     if (loadToken !== activeLoadToken) return
     console.warn(
@@ -104,20 +73,10 @@ async function loadEditorScene(level: string) {
       level: 'warning',
       message: `Editor scene disk load unavailable for ${level}; using local storage fallback.`,
     })
-  }
-
-  if (loadToken !== activeLoadToken) return
-  const stored = getPreferredLoadedScene(level, diskScene)
-  const fallbackScene =
-    createDefaultSceneForLevel(level) ?? createEmptyScene(level)
-  setEditorScene(stored ?? fallbackScene)
-  if (!diskScene) {
-    setRuntimeDiagnostic('scenePersistence', {
-      level: stored ? 'warning' : 'idle',
-      message: stored
-        ? `Using local editor scene state for ${level}.`
-        : `Using default editor scene template for ${level}.`,
+    const fallbackScene = loadImmediateEditorSceneDocument(level, {
+      includeLocalStorage: true,
     })
+    setEditorScene(fallbackScene.scene)
   }
 }
 

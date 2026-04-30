@@ -149,8 +149,8 @@ The button to submit the chat message.
 
 ## Animations Import
 
-The line `@import '../bleepy/mascotAnimations.css';` within the `<style is:global>` tag in [`BleepyBanner.astro`](src/components/bleepy/BleepyBanner.astro:0) is used to:
+`BleepyBanner.astro` imports `../../styles/features/bleepy/BleepyBanner.css`. That stylesheet imports `./mascotAnimations.css` from the same feature folder.
 
-*   Import external CSS rules defined in [`mascotAnimations.css`](src/components/bleepy/mascotAnimations.css:0).
-*   These imported styles typically define keyframe animations and associated classes used for the mascot's dynamic behaviors (e.g., idle animations, reactions).
-*   The `is:global` directive ensures these styles are applied globally and not scoped to the component, which is necessary for animations that might be triggered by JavaScript adding/removing classes on elements.
+*   Keep Bleepy animation CSS under `src/styles/features/bleepy/`.
+*   Import feature CSS from the component frontmatter instead of adding component `<style>` blocks.
+*   Scope selectors to the Bleepy container classes or IDs so shared animation names and mascot states do not leak into unrelated UI.

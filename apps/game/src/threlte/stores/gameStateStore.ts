@@ -1,7 +1,4 @@
-/**
- * Central Game State Store - Modern Threlte Implementation
- * Replaces the old event-bus-driven GameStateManager with reactive Svelte stores
- */
+/** Central game state store for player, session, level, and selection state. */
 
 import { type Writable, derived, writable } from 'svelte/store'
 import { DEFAULT_LEVEL_ID } from '../levels/levelRegistry'

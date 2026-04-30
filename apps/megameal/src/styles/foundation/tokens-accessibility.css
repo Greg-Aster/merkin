@@ -1,0 +1,103 @@
+﻿    /* ===================================================================
+     * ACCESSIBILITY: PREFERS-REDUCED-MOTION
+     * Disable autoplay and animations for users with motion sensitivity
+     * ===================================================================
+     */
+    @media (prefers-reduced-motion: reduce) {
+        /* Disable video autoplay */
+        video {
+            animation: none;
+        }
+
+        /* Generic animation disables */
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+
+        /* Allow specific fast transitions that improve accessibility */
+        [role="button"],
+        button,
+        a {
+            transition-duration: 0.01ms !important;
+        }
+    }
+
+    /* PostCard image fix - override ImageWrapper's object-cover */
+    .postcard-image-fix img {
+        object-fit: contain !important;
+    }
+
+    /* ===================================================================
+     * GLOBAL CSS CUSTOM PROPERTIES - SINGLE SOURCE OF TRUTH
+     * ===================================================================
+     */
+    :root {
+        /* ðŸŽ¯ TRANSPARENCY & OPACITY SYSTEM */
+        --bg-opacity: 0.85; /* Default transparency value */
+        --card-border-opacity: 0.2; /* Default opacity for general cards */
+        --card-border-subtle-opacity: 0.1; /* Subtle border opacity */
+
+        /* ðŸŽ¯ TIMELINE BANNER SPECIFIC */
+        --timeline-banner-border-line-opacity: 0.3;
+        --timeline-banner-glow-opacity: 0.7;
+
+        /* ðŸŽ¯ DESIGN SYSTEM COLORS - Enhanced for consistency */
+        --primary: #007bff;
+        --primary-hover: #0056b3;
+        --primary-rgb: 0, 123, 255;
+        --hue: 210; /* Base hue for color calculations */
+
+        /* ðŸŽ¯ SURFACE COLORS - Light mode */
+        --card-bg: oklch(0.98 0.01 var(--hue));
+        --text-color: oklch(0.2 0.01 var(--hue));
+        --border-color: oklch(0.8 0.01 var(--hue));
+        --surface-1: oklch(0.95 0.01 var(--hue));
+        --surface-2: oklch(0.92 0.02 var(--hue));
+        --input-bg: oklch(0.96 0.01 var(--hue));
+        --input-border-color: oklch(0.7 0.01 var(--hue));
+        --text-on-primary: oklch(0.98 0.01 var(--hue));
+        --text-color-muted: oklch(0.5 0.01 var(--hue));
+
+        /* ðŸŽ¯ RESPONSIVE SPACING - Tailwind-aligned */
+        --radius-large: 0.75rem; /* Tailwind lg rounded */
+        --spacing-panel: 5.25rem; /* Standard panel offset */
+
+        /* ðŸŽ¯ LAYOUT - Responsive page width */
+        --page-width: 1280px; /* Default max width for content */
+
+        /* ðŸŽ¯ ANIMATION TIMINGS - Consistent across site */
+        --transition-fast: 0.15s ease;
+        --transition-normal: 0.3s ease;
+        --transition-slow: 0.5s ease;
+    }
+
+    /* ðŸŽ¯ RESPONSIVE PAGE WIDTH - Adjust for different screen sizes */
+    @media (min-width: 1536px) {
+        :root {
+            --page-width: 1536px; /* Larger width for 2xl screens */
+        }
+    }
+
+    @media (min-width: 1920px) {
+        :root {
+            --page-width: 1920px; /* Even larger for very wide screens */
+        }
+    }
+    
+    /* ðŸŽ¯ DARK MODE - Automatic system preference */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --card-bg: oklch(0.15 0.01 var(--hue));
+            --text-color: oklch(0.9 0.01 var(--hue));
+            --border-color: oklch(0.3 0.01 var(--hue));
+            --surface-1: oklch(0.2 0.01 var(--hue));
+            --surface-2: oklch(0.25 0.02 var(--hue));
+            --input-bg: oklch(0.18 0.01 var(--hue));
+            --input-border-color: oklch(0.4 0.01 var(--hue));
+            --text-on-primary: oklch(0.98 0.01 var(--hue));
+            --text-color-muted: oklch(0.6 0.01 var(--hue));
+        }
+    }
+

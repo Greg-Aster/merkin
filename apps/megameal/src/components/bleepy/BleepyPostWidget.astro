@@ -3,6 +3,7 @@ interface Props {
   mascotContext?: string
 }
 const { mascotContext } = Astro.props
+import '../../styles/features/bleepy/BleepyPostWidget.css'
 ---
 
 <div id="bleepy-post-widget" class="card-base p-4 flex flex-col gap-4" data-page-context={mascotContext || ''}>
@@ -95,6 +96,3 @@ const { mascotContext } = Astro.props
   });
 </script>
 
-<style>
-  @import './BleepyPostWidget.css';
-</style>

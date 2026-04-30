@@ -1,0 +1,140 @@
+﻿    /* ===================================================================
+     * FORM INPUT SYSTEM - BROWSER COMPATIBILITY
+     * ===================================================================
+     */
+    input:-webkit-autofill {
+        transition: color 9999s ease-out, background-color 9999s ease-out;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+        input:-webkit-autofill {
+            -webkit-text-fill-color: oklch(0.85 0.01 var(--hue)) !important;
+            box-shadow: 0 0 0px 1000px oklch(0.25 0.01 var(--hue) / 0.7) inset !important;
+        }
+    }
+    
+    /* Firefox autofill support */
+    @-moz-document url-prefix() {
+        @media (prefers-color-scheme: dark) {
+            input:-moz-autofill {
+                color: oklch(0.85 0.01 var(--hue)) !important;
+                background-color: oklch(0.25 0.01 var(--hue) / 0.7) !important;
+            }
+        }
+    }
+
+    /* ===================================================================
+     * PARALLAX BACKGROUND SYSTEM - BANNER INTEGRATION
+     * ===================================================================
+     */
+    .parallax-bg {
+        @apply absolute top-0 left-0 w-full transition-opacity duration-300;
+        transform: translateZ(0);
+        height: 130vh;
+        opacity: 1;
+    }
+
+    /* Only apply will-change when actively scrolling */
+    .parallax-bg.is-scrolling {
+        will-change: transform;
+    }
+    
+    #parallax-banner {
+        @apply opacity-0 transition-opacity duration-500;
+        
+        &.loaded {
+            @apply opacity-100;
+        }
+    }
+
+    @keyframes fadeInParallax {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* ===================================================================
+     * PRODUCT CARD SYSTEM - ENHANCED INTERACTIONS
+     * ===================================================================
+     */
+    .product-card {
+        @apply transition-all duration-300;
+        
+        &.selected {
+            box-shadow: 
+                0 0 20px 7px var(--primary), 
+                0 0 10px 3px var(--primary-hover);
+            transform: scale(1.03);
+            z-index: 10;
+        }
+        
+        &.expanded {
+            .product-description-short {
+                @apply hidden;
+            }
+            
+            .product-description-full,
+            .product-additional-details {
+                @apply block opacity-100 overflow-visible;
+                max-height: 1000px;
+            }
+        }
+    }
+
+    .product-description-full,
+    .product-additional-details {
+        @apply hidden opacity-0 overflow-hidden;
+        max-height: 0;
+        transition: 
+            max-height 0.5s ease-in-out, 
+            opacity 0.5s ease-in-out;
+    }
+
+    /* ===================================================================
+     * ACCESSIBILITY & PERFORMANCE
+     * ===================================================================
+     */
+    
+    /* ðŸŽ¯ REDUCED MOTION SUPPORT */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+        
+        .neon-text {
+            animation: none;
+        }
+        
+        .parallax-bg {
+            transform: none !important;
+        }
+        
+        /* Disable mobile timeline animations for reduced motion */
+        .timeline-tap-hint {
+            animation: none !important;
+        }
+        
+        .timeline-mobile-active::before {
+            animation: none !important;
+        }
+    }
+
+    /* ðŸŽ¯ HIGH CONTRAST SUPPORT */
+    @media (prefers-contrast: high) {
+        .card-base,
+        .card-base2 {
+            border: 2px solid currentColor !important;
+        }
+        
+        .btn-plain:hover,
+        .btn-regular:hover {
+            outline: 2px solid currentColor !important;
+        }
+        
+        .timeline-mobile-active::before {
+            border: 2px solid currentColor !important;
+        }
+    }

@@ -1,0 +1,11 @@
+.profile-card .avatar-image {
+  border-radius: 0.75rem;
+}
+
+.profile-card .transition-opacity {
+  transition: opacity 1s ease-in-out;
+}
+
+.profile-card video.avatar-image {
+  object-fit: cover;
+}

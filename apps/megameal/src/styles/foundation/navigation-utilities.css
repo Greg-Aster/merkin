@@ -1,0 +1,195 @@
+﻿    /* ===================================================================
+     * PANEL SYSTEM - CONSISTENT POSITIONING
+     * ===================================================================
+     */
+    .float-panel {
+        @apply rounded-xl overflow-hidden shadow-xl transition-all duration-300;
+        @apply dark:shadow-none;
+        top: var(--spacing-panel);
+        background-color: var(--float-panel-bg);
+    }
+    
+    .float-panel-closed {
+        @apply -translate-y-1 opacity-0 pointer-events-none;
+    }
+
+    /* â­ SIDENAV PANEL SYSTEM - ENHANCED */
+    .sidenav-panel {
+        @apply opacity-0 -translate-x-4 pointer-events-none transition-all duration-200 ease-in-out;
+        @apply fixed z-[100] shadow-lg rounded-lg;
+    }
+    
+    .sidenav-panel.panel-open {
+        @apply opacity-100 translate-x-0 pointer-events-auto;
+    }
+
+    /* ===================================================================
+     * SEARCH SYSTEM - CONSISTENT HIGHLIGHTING
+     * ===================================================================
+     */
+    .search-panel mark {
+        @apply bg-transparent;
+        color: var(--primary);
+    }
+
+    /* ===================================================================
+     * TABLE OF CONTENTS SYSTEM - SMOOTH BEHAVIOR
+     * ===================================================================
+     */
+    .toc-hide,
+    .toc-not-ready {
+        @apply opacity-0 pointer-events-none;
+    }
+    
+    #toc-wrapper {
+        transition: opacity var(--transition-normal);
+    }
+    
+    #toc-inner-wrapper {
+        mask-image: linear-gradient(
+            to bottom, 
+            transparent 0%, 
+            black 2rem, 
+            black calc(100% - 2rem), 
+            transparent 100%
+        );
+    }
+
+    /* ===================================================================
+     * HUE SLIDER SYSTEM - ENHANCED
+     * ===================================================================
+     */
+    .hue-gradient {
+        background: linear-gradient(to bottom, 
+            hsl(360, 100%, 50%), 
+            hsl(300, 100%, 50%), 
+            hsl(240, 100%, 50%), 
+            hsl(180, 100%, 50%), 
+            hsl(120, 100%, 50%), 
+            hsl(60, 100%, 50%), 
+            hsl(0, 100%, 50%));
+    }
+    
+    .hue-slider {
+        writing-mode: vertical-lr;
+        direction: rtl;
+    }
+    
+    .hue-thumb {
+        top: calc((360 - 230)/360 * 100% - 1px);
+        transition: top 0.1s ease;
+    }
+
+    /* ===================================================================
+     * UTILITY CLASSES - ESSENTIAL HELPERS
+     * ===================================================================
+     */
+    .hide-scrollbar {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    .collapsed {
+        height: var(--collapsedHeight);
+    }
+
+    /* ===================================================================
+     * ICON SYSTEM - CONSISTENT ICON STYLING
+     * ===================================================================
+     */
+    .meta-icon {
+        @apply w-8 h-8 transition-all duration-200 rounded-md flex items-center justify-center mr-2;
+        background-color: var(--btn-regular-bg);
+        color: var(--btn-content);
+    }
+
+    .with-divider {
+        @apply before:ml-1.5 before:mr-1.5 before:text-sm before:font-medium;
+        @apply before:first-of-type:hidden before:transition-colors before:duration-200;
+        
+        &::before {
+            content: '/';
+            color: var(--meta-divider);
+        }
+    }
+
+    /* ===================================================================
+     * COPY BUTTON SYSTEM - FEEDBACK STATES
+     * ===================================================================
+     */
+    .copy-btn-icon {
+        @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+        transition: opacity var(--transition-fast);
+    }
+    
+    .copy-btn .copy-icon {
+        @apply opacity-100 fill-white dark:fill-white/75;
+    }
+    
+    .copy-btn.success .copy-icon {
+        @apply opacity-0;
+        fill: var(--deep-text);
+    }
+    
+    .copy-btn .success-icon {
+        @apply opacity-0;
+    }
+    
+    .copy-btn.success .success-icon {
+        @apply opacity-100;
+    }
+
+    /* ===================================================================
+     * VISUAL EFFECTS SYSTEM - ENHANCED AESTHETICS
+     * ===================================================================
+     */
+    .neon-text {
+        text-shadow: 
+            0 0 5px #fff, 
+            0 0 10px #fff, 
+            0 0 20px oklch(0.65 0.5 var(--hue)), 
+            0 0 40px oklch(0.65 0.5 var(--hue));
+        animation: glow 1.5s infinite alternate;
+    }
+    
+    @keyframes glow {
+        from {
+            text-shadow: 
+                0 0 5px #fff, 
+                0 0 10px #fff, 
+                0 0 20px oklch(0.65 0.5 var(--hue)), 
+                0 0 40px oklch(0.65 0.5 var(--hue));
+        }
+        to {
+            text-shadow: 
+                0 0 10px #fff, 
+                0 0 20px #fff, 
+                0 0 40px oklch(0.65 0.5 var(--hue)), 
+                0 0 80px oklch(0.65 0.5 var(--hue));
+        }
+    }
+
+    /* ===================================================================
+     * DECORATIVE ELEMENTS - DASH LINE
+     * ===================================================================
+     */
+    .dash-line {
+        position: relative;
+        
+        &::before {
+            content: "";
+            position: absolute;
+            width: 10%;
+            height: 100%;
+            left: calc(50% - 1px);
+            border-left: 2px dashed var(--line-color);
+            pointer-events: none;
+            transition: all var(--transition-normal);
+            transform: translateY(-50%);
+        }
+    }
+

@@ -399,7 +399,9 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
     const targetNodeId = selectedNode.id
     const targetNodeIds = deps.getAiReplacementTargetIds(selectedNode)
     const targetSourceName = deps.getAiSourceName(selectedNode)
-    const objectDescription = deps.getDefaultStyleDescriptor(selectedNode).trim()
+    const objectDescription = deps
+      .getDefaultStyleDescriptor(selectedNode)
+      .trim()
     const stylePrompt = String(state.hunyuanPrompt ?? '').trim()
     const prompt = [
       objectDescription ? `object description: ${objectDescription}` : '',

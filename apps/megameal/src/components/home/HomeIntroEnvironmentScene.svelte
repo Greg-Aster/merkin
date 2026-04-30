@@ -1,5 +1,6 @@
 <script lang="ts">
 import { T, useTask } from '@threlte/core'
+import { onDestroy, onMount } from 'svelte'
 import { Euler, Quaternion } from 'three'
 import type * as THREE from 'three'
 import HomeIntroParticle from './HomeIntroParticle.svelte'
@@ -26,29 +27,70 @@ let ringC: THREE.Mesh | null = null
 let starColumn: THREE.Group | null = null
 let screenRail: THREE.Group | null = null
 const screenNodes: THREE.Group[] = []
+let portraitMobile = false
 
-const particleCount = 260
-const particleClusterCount = 7
+const particleCount = 840
+const particleClusterCount = 9
 const primaryScreenIndex = 0
 const screenOrbitRadiusX = 2.46
 const screenOrbitRadiusZ = 2.06
 const screenOrbitCenterZ = -0.72
 const screenStepY = 2.05
 const screenAngleStep = 0.9
+const effectScrollStepY = screenStepY * homeIntroWheelToScreenRatio
+const particleScrollSpan = 10.8
 const targetScreenEuler = new Euler(0, 0, 0, 'YXZ')
 const targetScreenQuaternion = new Quaternion()
 let activeScreenSceneId = ''
+let effectWheel = 0
 const portalScreens = homeIntroScreens
 const screenCount = portalScreens.length
 
+$: sceneScale = portraitMobile ? 0.78 : 1
+$: cameraPosition = portraitMobile
+  ? ([0, 0.2, 8.85] as [number, number, number])
+  : ([0, 0.08, 6.8] as [number, number, number])
+$: cameraFov = portraitMobile ? 48 : 44
+$: railPosition = portraitMobile
+  ? ([0, 0.46, -0.68] as [number, number, number])
+  : ([0, 0, -0.34] as [number, number, number])
+$: starColumnPosition = portraitMobile
+  ? ([0, 0.18, -0.62] as [number, number, number])
+  : ([0, 0, -0.42] as [number, number, number])
+$: emblemScale = portraitMobile
+  ? ([0.88, 0.88, 0.88] as [number, number, number])
+  : ([1.72, 1.72, 1.72] as [number, number, number])
+
+function syncViewportMode() {
+  if (typeof window === 'undefined') return
+  portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
+}
+
+onMount(() => {
+  syncViewportMode()
+  window.addEventListener('resize', syncViewportMode)
+
+  return () => {
+    window.removeEventListener('resize', syncViewportMode)
+  }
+})
+
+onDestroy(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', syncViewportMode)
+  }
+})
+
 const particleClusters = [
-  { x: -2.75, y: 2.22, z: -0.55, spread: 0.78, hue: 0.53 },
-  { x: 2.74, y: 2.0, z: -1.38, spread: 0.88, hue: 0.77 },
-  { x: -3.34, y: -1.98, z: -1.68, spread: 0.82, hue: 0.62 },
-  { x: 2.95, y: -2.18, z: -2.28, spread: 0.86, hue: 0.86 },
-  { x: -0.34, y: 2.7, z: -1.72, spread: 0.7, hue: 0.58 },
-  { x: 0.95, y: -2.72, z: -1.05, spread: 0.76, hue: 0.71 },
-  { x: 0.18, y: 0.08, z: -3.12, spread: 1.02, hue: 0.66 },
+  { x: -0.92, y: 3.25, z: -0.38, spread: 0.58, hue: 0.53 },
+  { x: 1.02, y: 2.36, z: -0.72, spread: 0.64, hue: 0.58 },
+  { x: -1.12, y: 0.54, z: -0.94, spread: 0.58, hue: 0.66 },
+  { x: 1.06, y: -0.18, z: -1.08, spread: 0.64, hue: 0.73 },
+  { x: -0.88, y: -1.62, z: -0.82, spread: 0.62, hue: 0.8 },
+  { x: 0.76, y: -2.74, z: -0.46, spread: 0.58, hue: 0.88 },
+  { x: 0, y: 0.08, z: -1.38, spread: 0.64, hue: 0.61 },
+  { x: -0.38, y: 4.28, z: 0.08, spread: 0.54, hue: 0.55 },
+  { x: 0.42, y: -4.08, z: 0.02, spread: 0.56, hue: 0.7 },
 ]
 
 function hash01(seed: number) {
@@ -62,10 +104,11 @@ const particles = Array.from({ length: particleCount }, (_, index) => {
   const randomB = Math.abs(hash01(index + 17))
   const randomC = Math.abs(hash01(index + 41))
   const randomD = Math.abs(hash01(index + 79))
+  const randomE = Math.abs(hash01(index + 131))
   const radialT = randomA ** 1.65
   const angle = randomB * Math.PI * 2
   const verticalAngle = (randomC - 0.5) * Math.PI
-  const radius = clusterCenter.spread * (0.18 + radialT * 1.05)
+  const radius = clusterCenter.spread * (0.1 + radialT * 0.72)
 
   return {
     anchorX: clusterCenter.x,
@@ -74,15 +117,16 @@ const particles = Array.from({ length: particleCount }, (_, index) => {
     angle,
     cluster,
     clusterStrength: 0.26 + (1 - radialT) * 0.58,
-    height: Math.sin(verticalAngle) * clusterCenter.spread * 1.72,
+    height: Math.sin(verticalAngle) * clusterCenter.spread * 1.42,
     radius,
     phase: randomB * Math.PI * 2,
     radialT,
-    speed: 0.026 + randomD * 0.045 + radialT * 0.026,
-    size: 0.008 + (1 - radialT) * 0.018 + (index % 5) * 0.0013,
+    speed: 0.038 + randomD * 0.072 + radialT * 0.032,
+    size: 0.012 + (1 - radialT) * 0.024 + randomE * 0.014,
     hueOffset: clusterCenter.hue + randomD * 0.08,
+    shape: randomE,
     zOffset:
-      Math.cos(verticalAngle) * clusterCenter.spread * (randomD - 0.5) * 1.35,
+      Math.cos(verticalAngle) * clusterCenter.spread * (randomD - 0.5) * 0.72,
   }
 })
 
@@ -92,7 +136,6 @@ const screens = Array.from({ length: screenCount }, (_, index) => {
     rotation: [0, 0, 0] as [number, number, number],
     sceneId: portalScreens[index].sceneId,
     stillSrc: portalScreens[index].stillSrc,
-    videoSrc: portalScreens[index].videoSrc,
     primary: index === primaryScreenIndex,
   }
 })
@@ -108,6 +151,10 @@ function wrappedScreenOffset(value: number) {
 
 function wrappedScreenIndex(value: number) {
   return ((value % screenCount) + screenCount) % screenCount
+}
+
+function getSelectedScreenIndex(wheel: number) {
+  return primaryScreenIndex + wheel * homeIntroWheelToScreenRatio
 }
 
 function syncBannerToFrontScreen(selectedIndex: number) {
@@ -129,7 +176,7 @@ function syncBannerToFrontScreen(selectedIndex: number) {
 }
 
 function updateScreenOrbit(wheel: number, ease: number) {
-  const selectedIndex = primaryScreenIndex + wheel * homeIntroWheelToScreenRatio
+  const selectedIndex = getSelectedScreenIndex(wheel)
   syncBannerToFrontScreen(selectedIndex)
 
   for (let index = 0; index < screenCount; index += 1) {
@@ -139,14 +186,17 @@ function updateScreenOrbit(wheel: number, ease: number) {
     const offset = wrappedScreenOffset(index - selectedIndex)
     const depth = Math.abs(offset)
     const spiral = offset * screenAngleStep
-    const x = Math.sin(spiral) * screenOrbitRadiusX
-    const y = -offset * screenStepY
+    const orbitRadiusX = screenOrbitRadiusX * (portraitMobile ? 0.78 : 1)
+    const orbitRadiusZ = screenOrbitRadiusZ * (portraitMobile ? 0.9 : 1)
+    const stepY = screenStepY * (portraitMobile ? 1.08 : 1)
+    const x = Math.sin(spiral) * orbitRadiusX
+    const y = -offset * stepY
     const z =
-      screenOrbitCenterZ + Math.cos(spiral) * screenOrbitRadiusZ - depth * 0.08
-    const targetScale = 0.92
+      screenOrbitCenterZ + Math.cos(spiral) * orbitRadiusZ - depth * 0.08
+    const targetScale = portraitMobile ? 0.82 : 0.92
     const outwardYaw = Math.atan2(
-      x / screenOrbitRadiusX,
-      (z - screenOrbitCenterZ) / screenOrbitRadiusZ,
+      x / orbitRadiusX,
+      (z - screenOrbitCenterZ) / orbitRadiusZ,
     )
     const targetPitch = Math.sin(spiral) * -0.025
     const targetRoll = Math.sin(spiral) * 0.018
@@ -169,6 +219,9 @@ useTask(delta => {
   const pointerX = Number.isFinite(input.x) ? input.x : 0
   const pointerY = Number.isFinite(input.y) ? input.y : 0
   const wheel = Number.isFinite(input.wheel) ? input.wheel : 0
+  effectWheel += (wheel - effectWheel) * ease
+  const selectedIndex = getSelectedScreenIndex(effectWheel)
+  const spiralPhase = selectedIndex * screenAngleStep
 
   if (world) {
     world.rotation.x += (-pointerY * 0.085 - world.rotation.x) * ease
@@ -178,10 +231,16 @@ useTask(delta => {
   }
 
   if (emblem) {
+    const orbitX = portraitMobile ? 0.42 : 0.92
+    const orbitZ = portraitMobile ? 0.34 : 0.68
+    const baseZ = portraitMobile ? -1.42 : -0.9
     emblem.rotation.x = Math.sin(time * 0.56) * 0.08 + input.dragY * 1.8
-    emblem.rotation.y = time * 0.18 + input.dragX * 2.6
+    emblem.rotation.y = spiralPhase + time * 0.18 + input.dragX * 2.6
     emblem.rotation.z = Math.sin(time * 0.32) * 0.045
-    emblem.position.y = Math.sin(time * 0.82) * 0.08
+    emblem.position.x += (Math.sin(spiralPhase) * orbitX - emblem.position.x) * ease
+    emblem.position.y += (-0.04 + Math.sin(time * 0.82) * 0.08 - emblem.position.y) * ease
+    emblem.position.z +=
+      (baseZ + Math.cos(spiralPhase) * orbitZ - emblem.position.z) * ease
   }
 
   if (ringA) ringA.rotation.z += delta * 0.34
@@ -189,7 +248,7 @@ useTask(delta => {
   if (ringC) ringC.rotation.y += delta * 0.26
 
   if (starColumn) {
-    starColumn.rotation.y = time * 0.055 - input.dragX * 0.5 + wheel * 0.2
+    starColumn.rotation.y = -spiralPhase + time * 0.055 - input.dragX * 0.5
     starColumn.rotation.z = Math.sin(time * 0.18) * 0.035
   }
 
@@ -202,7 +261,7 @@ useTask(delta => {
 })
 </script>
 
-<T.PerspectiveCamera makeDefault position={[0, 0.08, 6.8]} fov={44} />
+<T.PerspectiveCamera makeDefault position={cameraPosition} fov={cameraFov} />
 
 <T.AmbientLight intensity={0.56} color="#dbeafe" />
 <T.PointLight position={[-3.2, 2.6, 2.4]} intensity={18} color="#60a5fa" distance={10} />
@@ -216,28 +275,34 @@ useTask(delta => {
 	color="#ffffff"
 />
 
-<T.Group bind:ref={world} position={[0, 0, 0]}>
-	<T.Group bind:ref={screenRail} position={[0, 0, -0.34]}>
+<T.Group bind:ref={world} position={[0, 0, 0]} scale={[sceneScale, sceneScale, sceneScale]}>
+	<T.Group bind:ref={screenRail} position={railPosition}>
 		{#each screens as screen, index}
 			<T.Group bind:ref={screenNodes[index]} position={screen.position} rotation={screen.rotation}>
 				<HomeIntroScreenPanel
 					{index}
 					imageSrc={screen.primary ? titleImageSrc : ""}
 					stillSrc={screen.stillSrc}
-					videoSrc={screen.videoSrc}
 					primary={screen.primary}
 				/>
 			</T.Group>
 		{/each}
 	</T.Group>
 
-  <T.Group bind:ref={starColumn} position={[0, 0, -0.42]}>
+  <T.Group bind:ref={starColumn} position={starColumnPosition}>
 		{#each particles as particle, index}
-			<HomeIntroParticle {particle} {index} {input} />
+			<HomeIntroParticle
+				{particle}
+				{index}
+				{input}
+				wheel={effectWheel}
+				scrollStep={effectScrollStepY}
+				scrollSpan={particleScrollSpan}
+			/>
 		{/each}
 	</T.Group>
 
-	<T.Group bind:ref={emblem} position={[0, -0.04, -2.28]} scale={[1.72, 1.72, 1.72]}>
+	<T.Group bind:ref={emblem} position={[0, -0.04, -2.28]} scale={emblemScale}>
 		<T.Mesh bind:ref={ringA} rotation={[Math.PI / 2, 0, 0]}>
 			<T.TorusGeometry args={[1.18, 0.01, 12, 128]} />
 			<T.MeshBasicMaterial color="#67e8f9" transparent={true} opacity={0.48} />

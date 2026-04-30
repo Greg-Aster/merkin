@@ -1,0 +1,201 @@
+---
+import MediaGallery from './MediaGallery.svelte'
+
+interface MediaItem {
+  type: 'image' | 'video' | 'youtube'
+  src?: string
+  videoId?: string
+  poster?: string
+  alt?: string
+  caption?: string
+}
+
+interface Props {
+  availabilityMessage: string
+  canAddToCart: boolean
+  canBuyExternal: boolean
+  currentAvailability: string
+  description?: string
+  hasPreWrittenReviews: boolean
+  hasQandA: boolean
+  hasSpecifications: boolean
+  mediaItems: MediaItem[]
+  name: string
+  price?: number
+  productHref: string
+  productId: string
+  shippingNote?: string
+  sku?: string
+  stripePaymentLink?: string
+}
+
+const {
+  availabilityMessage,
+  canAddToCart,
+  canBuyExternal,
+  currentAvailability,
+  description,
+  hasPreWrittenReviews,
+  hasQandA,
+  hasSpecifications,
+  mediaItems,
+  name,
+  price,
+  productHref,
+  productId,
+  shippingNote,
+  sku,
+  stripePaymentLink,
+} = Astro.props
+
+const safeProductId = productId.replace(/\./g, '-')
+const hasAnyDetails = description || hasSpecifications || hasQandA || hasPreWrittenReviews
+---
+
+<div class="expandable-details overflow-hidden max-h-0 opacity-0 bg-slate-800/30 dark:bg-slate-900/50">
+  <div class="details-content p-5 border-t border-slate-700/50">
+    {mediaItems.length > 0 && (
+      <div class="mb-5 -mx-5 -mt-5" onclick="event.stopPropagation()">
+        <MediaGallery client:visible items={mediaItems} autoPlayInterval={6000} class="rounded-none" />
+      </div>
+    )}
+
+    <div
+      class="tab-navigation mb-4 flex flex-wrap border-b border-slate-700/50 dark:border-slate-700"
+      role="tablist"
+      aria-label="Product Details Tabs"
+    >
+      {description && (
+        <button
+          id={`tab-button-description-${safeProductId}`}
+          class="tab-link px-4 py-3 text-sm font-medium -mb-px border-b-2 focus:outline-none data-[active=true]:border-[var(--primary)] data-[active=true]:text-[var(--primary)] text-slate-400 dark:text-slate-300 hover:text-[var(--primary-hover)] dark:hover:text-[var(--primary)] border-transparent"
+          data-tab-type="description"
+          data-active="true"
+          data-sfx-click="select"
+          type="button"
+          role="tab"
+          aria-controls={`tab-description-${safeProductId}`}
+          aria-selected="true"
+        >
+          Description
+        </button>
+      )}
+      {hasSpecifications && (
+        <button
+          id={`tab-button-specifications-${safeProductId}`}
+          class="tab-link px-4 py-3 text-sm font-medium -mb-px border-b-2 focus:outline-none data-[active=true]:border-[var(--primary)] data-[active=true]:text-[var(--primary)] text-slate-400 dark:text-slate-300 hover:text-[var(--primary-hover)] dark:hover:text-[var(--primary)] border-transparent"
+          data-tab-type="specifications"
+          data-active="false"
+          data-sfx-click="select"
+          type="button"
+          role="tab"
+          aria-controls={`tab-specifications-${safeProductId}`}
+          aria-selected="false"
+        >
+          Specifications
+        </button>
+      )}
+      {hasQandA && (
+        <button
+          id={`tab-button-qanda-${safeProductId}`}
+          class="tab-link px-4 py-3 text-sm font-medium -mb-px border-b-2 focus:outline-none data-[active=true]:border-[var(--primary)] data-[active=true]:text-[var(--primary)] text-slate-400 dark:text-slate-300 hover:text-[var(--primary-hover)] dark:hover:text-[var(--primary)] border-transparent"
+          data-tab-type="qanda"
+          data-active="false"
+          data-sfx-click="select"
+          type="button"
+          role="tab"
+          aria-controls={`tab-qanda-${safeProductId}`}
+          aria-selected="false"
+        >
+          Q&A
+        </button>
+      )}
+      {hasPreWrittenReviews && (
+        <button
+          id={`tab-button-reviews-${safeProductId}`}
+          class="tab-link px-4 py-3 text-sm font-medium -mb-px border-b-2 focus:outline-none data-[active=true]:border-[var(--primary)] data-[active=true]:text-[var(--primary)] text-slate-400 dark:text-slate-300 hover:text-[var(--primary-hover)] dark:hover:text-[var(--primary)] border-transparent"
+          data-tab-type="reviews"
+          data-active="false"
+          data-sfx-click="select"
+          type="button"
+          role="tab"
+          aria-controls={`tab-reviews-${safeProductId}`}
+          aria-selected="false"
+        >
+          Reviews
+        </button>
+      )}
+    </div>
+
+    <div class="tab-content pt-4 min-h-[100px]">
+      {description && (
+        <div id={`tab-description-${safeProductId}`} class="tab-panel text-slate-700 dark:text-slate-300" role="tabpanel" aria-labelledby={`tab-button-description-${safeProductId}`} data-active="true" />
+      )}
+
+      {hasSpecifications && (
+        <div id={`tab-specifications-${safeProductId}`} class="tab-panel text-slate-700 dark:text-slate-300" role="tabpanel" aria-labelledby={`tab-button-specifications-${safeProductId}`} style="display: none;" data-active="false" />
+      )}
+
+      {hasQandA && (
+        <div id={`tab-qanda-${safeProductId}`} class="tab-panel text-slate-700 dark:text-slate-300" role="tabpanel" aria-labelledby={`tab-button-qanda-${safeProductId}`} style="display: none;" data-active="false" />
+      )}
+
+      {hasPreWrittenReviews && (
+        <div id={`tab-reviews-${safeProductId}`} class="tab-panel text-slate-700 dark:text-slate-300" role="tabpanel" aria-labelledby={`tab-button-reviews-${safeProductId}`} style="display: none;" data-active="false" />
+      )}
+
+      {!hasAnyDetails && (
+        <p class="text-sm text-slate-400 dark:text-slate-500 italic py-4">No details available for this product.</p>
+      )}
+    </div>
+
+    <div class="flex justify-between items-center mb-4">
+      {price ? (
+        <p class="text-xl font-bold text-emerald-400">${price.toFixed(2)}</p>
+      ) : (
+        <p class="text-sm text-amber-400 italic">Price: Inquire Within</p>
+      )}
+      {sku && <p class="text-xs text-slate-500">SKU: {sku}</p>}
+    </div>
+
+    {shippingNote && currentAvailability !== 'available' && (
+      <p class="text-xs text-slate-400 italic mb-4 border-l-2 border-slate-600 pl-3">{shippingNote}</p>
+    )}
+
+    {canAddToCart && (
+      <button
+        data-sfx-hover="hover-emphasis"
+        data-sfx-click="cart-add"
+        data-add-to-cart
+        data-product-id={productId}
+        data-product-name={name}
+        data-product-price={price}
+        data-product-sku={sku}
+        data-product-href={productHref}
+        class="w-full btn-primary text-white font-semibold py-3 px-4 rounded-[var(--radius-medium)] transition-all duration-200 ease-in-out hover:bg-[var(--primary-hover)] active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 focus:ring-offset-slate-800"
+      >
+        Add to Cart
+      </button>
+    )}
+
+    {canBuyExternal && (
+      <a
+        href={stripePaymentLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-sfx-hover="hover-emphasis"
+        data-sfx-click="confirm"
+        class="block w-full text-center btn-primary text-white font-semibold py-3 px-4 rounded-[var(--radius-medium)] transition-all duration-200 ease-in-out hover:bg-[var(--primary-hover)] active:scale-95 focus:outline-none"
+      >
+        Buy Now
+      </a>
+    )}
+
+    {!canAddToCart && !canBuyExternal && (
+      <div class="w-full text-center py-3 px-4 rounded-[var(--radius-medium)] bg-slate-700/50 border border-slate-600/50">
+        <p class="text-sm text-slate-400 italic">{availabilityMessage}</p>
+      </div>
+    )}
+  </div>
+</div>
+

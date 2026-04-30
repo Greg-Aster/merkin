@@ -45,6 +45,12 @@ type InspectorControllerDeps = {
   getDefaultCollisionShape: (
     node: EditorSceneNode | null,
   ) => EditorNodeCollisionData['shape']
+  getDefaultCollisionIntent: (
+    node: EditorSceneNode | null,
+  ) => NonNullable<EditorNodeCollisionData['intent']>
+  getDefaultCollisionChannel: (
+    node: EditorSceneNode | null,
+  ) => NonNullable<EditorNodeCollisionData['channel']>
 
   getTextureBrowserPath: () => string
   getTextureBrowserItems: () => Array<{
@@ -398,11 +404,16 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode) return
     const defaultShape = deps.getDefaultCollisionShape(selectedNode)
+    const defaultIntent = deps.getDefaultCollisionIntent(selectedNode)
 
     deps.patchNode(selectedNode.id, {
       collision: value
         ? {
             shape: defaultShape,
+            intent: selectedNode.collision?.intent ?? defaultIntent,
+            channel:
+              selectedNode.collision?.channel ??
+              deps.getDefaultCollisionChannel(selectedNode),
             enabled: true,
             ...(defaultShape === 'trimesh'
               ? {}
@@ -417,13 +428,75 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
           }
         : {
             shape: 'cuboid',
+            intent: 'none',
+            channel: 'worldStatic',
             enabled: false,
           },
     })
   }
 
+  function updateCollisionIntent(value: string) {
+    const selectedNode = deps.getSelectedNode()
+    if (!selectedNode) return
+    const defaultShape = deps.getDefaultCollisionShape(selectedNode)
+    const intent = value as EditorNodeCollisionData['intent']
+
+    deps.patchNode(selectedNode.id, {
+      collision:
+        intent === 'none'
+          ? {
+              ...(selectedNode.collision ?? { shape: defaultShape }),
+              intent,
+              channel: selectedNode.collision?.channel ?? 'worldStatic',
+              enabled: false,
+            }
+          : {
+              ...(selectedNode.collision ?? {
+                shape: defaultShape,
+                ...(defaultShape === 'trimesh'
+                  ? {}
+                  : { size: deps.getNodeVisualColliderSize(selectedNode) }),
+              }),
+              intent,
+              channel:
+                selectedNode.collision?.channel ??
+                deps.getDefaultCollisionChannel({
+                  ...selectedNode,
+                  collision: {
+                    ...(selectedNode.collision ?? { shape: defaultShape }),
+                    intent,
+                  },
+                }),
+              enabled: true,
+              sensor: intent === 'trigger',
+              friction: selectedNode.collision?.friction ?? 0.7,
+              restitution: selectedNode.collision?.restitution ?? 0,
+            },
+    })
+  }
+
+  function updateCollisionChannel(value: string) {
+    const selectedNode = deps.getSelectedNode()
+    if (!selectedNode) return
+    const defaultShape = deps.getDefaultCollisionShape(selectedNode)
+
+    deps.patchNode(selectedNode.id, {
+      collision: {
+        ...(selectedNode.collision ?? {
+          shape: defaultShape,
+          intent: deps.getDefaultCollisionIntent(selectedNode),
+          ...(defaultShape === 'trimesh'
+            ? {}
+            : { size: deps.getNodeVisualColliderSize(selectedNode) }),
+        }),
+        channel: value as EditorNodeCollisionData['channel'],
+        enabled: selectedNode.collision?.intent !== 'none',
+      },
+    })
+  }
+
   function updateCollisionNumericField(
-    field: 'friction' | 'restitution',
+    field: 'friction' | 'restitution' | 'triangleBudget',
     value: string,
   ) {
     const selectedNode = deps.getSelectedNode()
@@ -436,6 +509,8 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
       collision: {
         ...(selectedNode.collision ?? {
           shape: defaultShape,
+          intent: deps.getDefaultCollisionIntent(selectedNode),
+          channel: deps.getDefaultCollisionChannel(selectedNode),
           ...(defaultShape === 'trimesh'
             ? {}
             : { size: deps.getNodeVisualColliderSize(selectedNode) }),
@@ -461,6 +536,8 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
       collision: {
         ...(selectedNode.collision ?? {
           shape: deps.getDefaultCollisionShape(selectedNode),
+          intent: deps.getDefaultCollisionIntent(selectedNode),
+          channel: deps.getDefaultCollisionChannel(selectedNode),
         }),
         enabled: true,
         size,
@@ -476,11 +553,22 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
       collision: {
         ...(selectedNode.collision ?? {
           shape: defaultShape,
+          intent: deps.getDefaultCollisionIntent(selectedNode),
+          channel: deps.getDefaultCollisionChannel(selectedNode),
           ...(defaultShape === 'trimesh'
             ? {}
             : { size: deps.getNodeVisualColliderSize(selectedNode) }),
         }),
         enabled: true,
+        ...(field === 'sensor'
+          ? {
+              intent: value
+                ? 'trigger'
+                : selectedNode.collision?.intent === 'trigger'
+                  ? deps.getDefaultCollisionIntent(selectedNode)
+                  : selectedNode.collision?.intent,
+            }
+          : {}),
         [field]: value,
       },
     })
@@ -495,6 +583,12 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
       collision: {
         ...(selectedNode.collision ?? { shape: defaultShape }),
         shape: defaultShape,
+        intent:
+          selectedNode.collision?.intent ??
+          deps.getDefaultCollisionIntent(selectedNode),
+        channel:
+          selectedNode.collision?.channel ??
+          deps.getDefaultCollisionChannel(selectedNode),
         enabled: true,
         ...(defaultShape === 'trimesh'
           ? { size: undefined }
@@ -694,6 +788,8 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     updateNodeMaterialBooleanField,
     clearNodeMaterialOverrides,
     updateCollisionEnabled,
+    updateCollisionIntent,
+    updateCollisionChannel,
     updateCollisionNumericField,
     updateCollisionSize,
     updateCollisionBooleanField,

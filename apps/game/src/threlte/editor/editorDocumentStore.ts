@@ -1,5 +1,13 @@
 import { type Writable, get, writable } from 'svelte/store'
+import { withEditorSceneEngineData } from '../engine/sceneDocumentRuntime'
 import { upgradeLegacySceneDocument } from './defaultScenes'
+import {
+  getDefaultCollisionChannel,
+  getDefaultCollisionIntent,
+  getDefaultCollisionShape,
+  getNodeVisualColliderSize,
+  isDefaultSolidNode,
+} from './editorCollisionDefaults'
 import {
   type EditorNodeTransformPatch,
   type EditorSceneCommand,
@@ -48,9 +56,36 @@ function normalizeSceneDocument(
   scene: EditorSceneDocument,
 ): EditorSceneDocument {
   const upgraded = upgradeLegacySceneDocument(scene)
-  return ensureSceneGeneration({
+  const generated = ensureSceneGeneration({
     ...upgraded,
     settings: normalizeLevelSceneSettings(upgraded.levelId, upgraded.settings),
+  })
+
+  return withEditorSceneEngineData({
+    ...generated,
+    nodes: generated.nodes.map(node => {
+      if (!isDefaultSolidNode(node) || node.collision) return node
+      const shape = getDefaultCollisionShape(node)
+      return {
+        ...node,
+        physics: {
+          bodyType: 'fixed',
+          ...(node.physics ?? {}),
+        },
+        collision: {
+          shape,
+          intent: getDefaultCollisionIntent(node),
+          channel: getDefaultCollisionChannel(node),
+          enabled: true,
+          ...(shape === 'trimesh'
+            ? {}
+            : { size: getNodeVisualColliderSize(node) }),
+          friction: 0.7,
+          restitution: 0,
+          sensor: false,
+        },
+      }
+    }),
   })
 }
 

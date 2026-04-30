@@ -1,7 +1,4 @@
-<!-- 
-  Threlte Time System Component
-  Replaces Time.ts with reactive time management
--->
+<!-- Runtime time source for frame delta, elapsed time, pause state, and FPS telemetry. -->
 <script lang="ts">
 import { useTask } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'

@@ -1,3 +1,4 @@
+import { getLevelCollisionWorkflow } from '../engine/levelCollisionWorkflow'
 import type {
   EditorSceneSettings,
   ObservatoryEditorSettings,
@@ -14,6 +15,7 @@ const SHARED_LEVEL_SETTING_KEYS = [
   'water',
   'ambientParticles',
   'ambientAudio',
+  'collision',
   'presets',
   'skyboxPreset',
 ] as const satisfies ReadonlyArray<keyof SharedLevelEditorSettings>
@@ -98,12 +100,39 @@ export function normalizeLevelSceneSettings(
   settings?: EditorSceneSettings,
 ): EditorSceneSettings {
   const normalized = structuredClone(settings ?? {}) as EditorSceneSettings
+  const workflow = getLevelCollisionWorkflow(levelId)
   const legacySettings =
     levelId === 'solitude' ? normalized.solitude : normalized.observatory
 
   normalized.level = mergeLevelSettings<SharedLevelEditorSettings>(
     pickSharedLevelSettings(legacySettings),
     normalized.level ?? {},
+  )
+
+  normalized.level = mergeLevelSettings<SharedLevelEditorSettings>(
+    {
+      collision: {
+        terrain: {
+          source:
+            workflow.terrainCollision === 'heightmap'
+              ? 'baked-heightmap'
+              : workflow.terrainCollision,
+          runtimeSource:
+            workflow.terrainCollision === 'heightmap'
+              ? 'built-in-manifest'
+              : undefined,
+          manifestUrl: workflow.terrainManifestUrl,
+          autoBakeOnTerrainChange: false,
+          dirty: false,
+        },
+        defaults: {
+          solidObjectsByDefault: true,
+          defaultFriction: 0.7,
+          defaultRestitution: 0,
+        },
+      },
+    },
+    normalized.level,
   )
 
   if (normalized.observatory) {

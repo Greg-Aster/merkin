@@ -7,11 +7,7 @@ export function createPrimitiveGeometry(
 ): THREE.BufferGeometry {
   switch (geometry) {
     case 'box':
-      return new THREE.BoxGeometry(
-        args[0] ?? 1,
-        args[1] ?? 1,
-        args[2] ?? 1,
-      )
+      return new THREE.BoxGeometry(args[0] ?? 1, args[1] ?? 1, args[2] ?? 1)
     case 'cylinder':
       return new THREE.CylinderGeometry(
         args[0] ?? 0.5,

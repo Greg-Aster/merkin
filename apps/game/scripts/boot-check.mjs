@@ -1,16 +1,20 @@
 import { spawn } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import { setTimeout as delay } from 'node:timers/promises'
 
-const appRoot = new URL('..', import.meta.url)
-const repoRoot = new URL('../../..', import.meta.url)
+const appRoot = fileURLToPath(new URL('..', import.meta.url))
+const repoRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const editorApiBase = String(process.env.PUBLIC_EDITOR_API_BASE || 'http://127.0.0.1:3001').replace(/\/+$/, '')
 const gameDevPort = String(process.env.GAME_DEV_PORT || 4322)
+const pnpmBin = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'
+const npxBin = process.platform === 'win32' ? 'npx.cmd' : 'npx'
+const useShell = process.platform === 'win32'
 
 function spawnDev() {
-  return spawn('pnpm', ['--dir', 'apps/game', 'dev'], {
+  return spawn(pnpmBin, ['--dir', 'apps/game', 'dev'], {
     cwd: repoRoot,
     stdio: 'inherit',
-    shell: false,
+    shell: useShell,
     env: process.env,
   })
 }
@@ -44,12 +48,12 @@ async function runBootCheck() {
     await waitForUrl(`http://127.0.0.1:${gameDevPort}/`)
 
     const browserProcess = spawn(
-      'npx',
+      npxBin,
       ['-y', '-p', 'playwright', 'node', './scripts/boot-check-browser.mjs'],
       {
         cwd: appRoot,
         stdio: 'inherit',
-        shell: false,
+        shell: useShell,
         env: process.env,
       }
     )

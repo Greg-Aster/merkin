@@ -1,65 +1,17 @@
 <script>
-import { createEventDispatcher, onMount } from 'svelte'
+import { createEventDispatcher } from 'svelte'
 
 // Props
 export let postCardConfig
 
 // Event dispatcher
 const dispatch = createEventDispatcher()
+let activeTab = 'local'
 
 // Handle changes to configuration
 function handleChange() {
   dispatch('change', postCardConfig)
 }
-
-// Initialize tab functionality
-onMount(() => {
-  // Tab functionality
-  // Get references to tabs and panels
-  const localPostsTab = document.getElementById('local-posts-tab')
-  const friendPostsTab = document.getElementById('friend-posts-tab')
-  const localPostsPanel = document.getElementById('local-posts-panel')
-  const friendPostsPanel = document.getElementById('friend-posts-panel')
-
-  // Add click event listeners to tabs
-  if (localPostsTab && friendPostsTab && localPostsPanel && friendPostsPanel) {
-    localPostsTab.addEventListener('click', () => {
-      // Activate local posts tab
-      localPostsTab.classList.add(
-        'border-[var(--primary)]',
-        'text-[var(--primary)]',
-      )
-      localPostsTab.classList.remove('border-transparent', 'text-neutral-500')
-      friendPostsTab.classList.remove(
-        'border-[var(--primary)]',
-        'text-[var(--primary)]',
-      )
-      friendPostsTab.classList.add('border-transparent', 'text-neutral-500')
-
-      // Show local posts panel, hide friend posts panel
-      localPostsPanel.classList.remove('hidden')
-      friendPostsPanel.classList.add('hidden')
-    })
-
-    friendPostsTab.addEventListener('click', () => {
-      // Activate friend posts tab
-      friendPostsTab.classList.add(
-        'border-[var(--primary)]',
-        'text-[var(--primary)]',
-      )
-      friendPostsTab.classList.remove('border-transparent', 'text-neutral-500')
-      localPostsTab.classList.remove(
-        'border-[var(--primary)]',
-        'text-[var(--primary)]',
-      )
-      localPostsTab.classList.add('border-transparent', 'text-neutral-500')
-
-      // Show friend posts panel, hide local posts panel
-      friendPostsPanel.classList.remove('hidden')
-      localPostsPanel.classList.add('hidden')
-    })
-  }
-})
 </script>
 
 <!-- PostCard Settings -->
@@ -71,18 +23,20 @@ onMount(() => {
     <div class="border-b border-neutral-200 dark:border-neutral-700 mb-4">
       <nav class="flex space-x-8" aria-label="PostCard Tabs">
         <button 
-          class="py-2 px-1 border-b-2 border-[var(--primary)] text-[var(--primary)] font-medium"
+          class={`py-2 px-1 border-b-2 font-medium ${activeTab === 'local' ? 'border-[var(--primary)] text-[var(--primary)]' : 'border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
           id="local-posts-tab"
           data-sfx-hover="hover-soft"
           data-sfx-click="select"
+          on:click={() => activeTab = 'local'}
         >
           Local Posts
         </button>
         <button 
-          class="py-2 px-1 border-b-2 border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 font-medium"
+          class={`py-2 px-1 border-b-2 font-medium ${activeTab === 'friend' ? 'border-[var(--primary)] text-[var(--primary)]' : 'border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
           id="friend-posts-tab"
           data-sfx-hover="hover-soft"
           data-sfx-click="select"
+          on:click={() => activeTab = 'friend'}
         >
           Friend Posts
         </button>
@@ -90,7 +44,7 @@ onMount(() => {
     </div>
     
     <!-- Local Posts Settings -->
-    <div id="local-posts-panel">
+    <div id="local-posts-panel" class:hidden={activeTab !== 'local'}>
       <div class="space-y-6">
         <!-- Layout Settings -->
         <div>
@@ -317,7 +271,7 @@ onMount(() => {
     </div>
     
     <!-- Friend Posts Settings (initially hidden, would be shown via JavaScript) -->
-    <div id="friend-posts-panel" class="hidden">
+    <div id="friend-posts-panel" class:hidden={activeTab !== 'friend'}>
       <!-- Friend Post Layout Options -->
       <div class="space-y-6">
         <!-- Layout Settings -->

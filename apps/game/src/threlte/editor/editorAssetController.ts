@@ -585,6 +585,10 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       const scaleWasBakedIntoMesh =
         !!selectedNode.primitive || (!!selectedNode.prefab && !prefabAssetUrl)
       const previousCollision = selectedNode.collision
+      const preservedCollisionShape =
+        previousCollision?.shape && previousCollision.shape !== 'trimesh'
+          ? previousCollision.shape
+          : 'cuboid'
       deps.patchNode(selectedNode.id, {
         kind: 'asset',
         asset: { url: source.assetUrl },
@@ -593,10 +597,18 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
         scale: scaleWasBakedIntoMesh ? [1, 1, 1] : selectedNode.scale,
         collision:
           previousCollision?.enabled === false
-            ? { shape: 'trimesh', enabled: false }
+            ? {
+                shape: preservedCollisionShape,
+                intent: 'none',
+                enabled: false,
+              }
             : {
-                shape: 'trimesh',
+                shape: preservedCollisionShape,
+                intent:
+                  previousCollision?.intent ??
+                  (previousCollision?.sensor ? 'trigger' : 'blocker'),
                 enabled: true,
+                size: previousCollision?.size,
                 friction: previousCollision?.friction ?? 0.7,
                 restitution: previousCollision?.restitution ?? 0,
                 sensor: previousCollision?.sensor ?? false,
@@ -616,7 +628,9 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     } catch (error) {
       console.error('Convert object to mesh failed:', error)
       deps.setSaveMessage(
-        error instanceof Error ? error.message : 'Convert object to mesh failed',
+        error instanceof Error
+          ? error.message
+          : 'Convert object to mesh failed',
       )
     }
   }
@@ -637,13 +651,15 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     }
 
     const commonParentId = getSharedParentId(editorNodes, topLevelIds)
-    const placement =
-      getCenteredGroupTransform(editorNodes, topLevelIds, commonParentId) ??
-      {
-        position: [0, 0, 0] as [number, number, number],
-        rotation: [0, 0, 0] as [number, number, number],
-        scale: [1, 1, 1] as [number, number, number],
-      }
+    const placement = getCenteredGroupTransform(
+      editorNodes,
+      topLevelIds,
+      commonParentId,
+    ) ?? {
+      position: [0, 0, 0] as [number, number, number],
+      rotation: [0, 0, 0] as [number, number, number],
+      scale: [1, 1, 1] as [number, number, number],
+    }
 
     const mergeLabel =
       topLevelIds.length === 1
@@ -654,7 +670,9 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       `merged selection asset from ${topLevelIds.length} scene node${topLevelIds.length === 1 ? '' : 's'}`
 
     try {
-      deps.setSaveMessage(`Merging ${topLevelIds.length} node${topLevelIds.length === 1 ? '' : 's'} into one asset…`)
+      deps.setSaveMessage(
+        `Merging ${topLevelIds.length} node${topLevelIds.length === 1 ? '' : 's'} into one asset…`,
+      )
       const exported = await exportSceneNodesToMergedGlb(
         editorNodes,
         topLevelIds,
@@ -663,19 +681,22 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       const glbBase64 = await arrayBufferToBase64(
         await exported.blob.arrayBuffer(),
       )
-      const response = await fetch(`${EDITOR_API_BASE}/api/style/source-asset`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: exported.fileName,
-          glbBase64,
-          sourceName: mergeLabel,
-          sourceKind: 'merged-selection',
-          descriptor: normalizedMergeDescriptor,
-          levelId: deps.getActiveSceneLevelId(),
-          nodeId: topLevelIds.join(','),
-        }),
-      })
+      const response = await fetch(
+        `${EDITOR_API_BASE}/api/style/source-asset`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fileName: exported.fileName,
+            glbBase64,
+            sourceName: mergeLabel,
+            sourceKind: 'merged-selection',
+            descriptor: normalizedMergeDescriptor,
+            levelId: deps.getActiveSceneLevelId(),
+            nodeId: topLevelIds.join(','),
+          }),
+        },
+      )
       const payload = await deps.readJsonPayload(
         response,
         'Merged selection asset staging',

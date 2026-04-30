@@ -12,8 +12,12 @@ const viteCacheDir = path.join(appRoot, 'node_modules', '.vite')
 const toolsUrl = String(process.env.PUBLIC_EDITOR_API_BASE || process.env.EDITOR_API_BASE || 'http://127.0.0.1:3001').replace(/\/+$/, '')
 
 function spawnCommand(command, args, options = {}) {
-  return spawn(command, args, {
+  const resolvedCommand =
+    process.platform === 'win32' && command === 'pnpm' ? 'pnpm.cmd' : command
+
+  return spawn(resolvedCommand, args, {
     stdio: 'inherit',
+    shell: process.platform === 'win32' && command === 'pnpm',
     ...options,
   })
 }

@@ -36,6 +36,12 @@ export type CollisionIntent =
   | 'blocker'
   | 'trigger'
   | 'detailMesh'
+export type CollisionChannel =
+  | 'worldStatic'
+  | 'worldDynamic'
+  | 'player'
+  | 'trigger'
+  | 'detail'
 
 export interface TransformComponent {
   position: Vec3
@@ -73,6 +79,7 @@ export interface PhysicsComponent {
 
 export interface CollisionComponent {
   intent: CollisionIntent
+  channel: CollisionChannel
   shape: CollisionShape
   size?: Vec3
   friction?: number
@@ -155,7 +162,15 @@ export interface LevelDefinition {
 export interface LevelBuildReport {
   levelId: string
   actorCount: number
+  assetActorCount: number
   physicsActorCount: number
   trimeshActorCount: number
+  detailMeshActorCount: number
+  defaultCollisionActorCount: number
+  visualOnlyActorCount: number
+  requiredActorCount: number
+  missingRequiredActorIds: string[]
+  runtimeAssetUrls: string[]
+  errors: string[]
   warnings: string[]
 }

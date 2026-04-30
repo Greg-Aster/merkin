@@ -1,7 +1,4 @@
-<!-- 
-  Threlte Audio System Component
-  Replaces AudioManager.ts with reactive audio management
--->
+<!-- Runtime audio system for ambience, music, SFX, and spatial sound. -->
 <script lang="ts">
 import {
   type AudioSfxConfig,
@@ -258,8 +255,9 @@ function getHoverAnchor(target: EventTarget | null): HTMLElement | null {
   if (!element || isMutedSurface(element)) return null
 
   return (
-    element.closest<HTMLElement>('[data-sfx-hover], button, a[href], [role="button"]') ??
-    null
+    element.closest<HTMLElement>(
+      '[data-sfx-hover], button, a[href], [role="button"]',
+    ) ?? null
   )
 }
 

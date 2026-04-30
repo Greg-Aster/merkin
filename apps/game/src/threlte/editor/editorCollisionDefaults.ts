@@ -1,9 +1,11 @@
-import type { EditorNodeCollisionData, EditorSceneNode } from './editorTypes'
+import { getDefaultCollisionChannel as getPolicyDefaultCollisionChannel } from '../engine/collisionChannels'
 import {
+  getDefaultCollisionIntent as getPolicyDefaultCollisionIntent,
   getDefaultCollisionShape as getPolicyDefaultCollisionShape,
   isTerrainVisualActor,
   resolveCollisionPolicy,
 } from '../engine/collisionPolicy'
+import type { EditorNodeCollisionData, EditorSceneNode } from './editorTypes'
 
 const MIN_COLLIDER_SIZE = 0.05
 type ColliderArgs = [number, number, number] | [number, number]
@@ -35,6 +37,35 @@ export function getDefaultCollisionShape(
         ? node.kind
         : 'empty',
     primitiveGeometry: node?.primitive?.geometry,
+  })
+}
+
+export function getDefaultCollisionIntent(
+  node: EditorSceneNode | null | undefined,
+): NonNullable<EditorNodeCollisionData['intent']> {
+  return getPolicyDefaultCollisionIntent({
+    actorId: node?.id ?? '',
+    actorKind:
+      node?.kind === 'asset' ||
+      node?.kind === 'primitive' ||
+      node?.kind === 'prefab' ||
+      node?.kind === 'light'
+        ? node.kind
+        : 'empty',
+    visible: node?.visible,
+    hasGameplay: Boolean(node?.gameplay),
+    bodyType: node?.physics?.bodyType,
+    primitiveGeometry: node?.primitive?.geometry,
+    authoredCollision: node?.collision,
+  })
+}
+
+export function getDefaultCollisionChannel(
+  node: EditorSceneNode | null | undefined,
+) {
+  return getPolicyDefaultCollisionChannel({
+    intent: node?.collision?.intent ?? getDefaultCollisionIntent(node),
+    bodyType: node?.physics?.bodyType,
   })
 }
 
@@ -87,6 +118,7 @@ export function resolveNodeCollision(
     actorKind: node.kind,
     visible: node.visible,
     hasGameplay: Boolean(node.gameplay),
+    bodyType: node.physics?.bodyType,
     primitiveGeometry: node.primitive?.geometry,
     authoredCollision: node.collision,
   })
@@ -94,11 +126,14 @@ export function resolveNodeCollision(
 
   return {
     shape: resolveAuthoredCollisionShape(node),
+    intent: result.collision.intent,
+    channel: result.collision.channel,
     enabled: true,
     size: result.collision.size,
     friction: result.collision.friction,
     restitution: result.collision.restitution,
     sensor: result.collision.sensor,
+    triangleBudget: result.collision.triangleBudget,
   }
 }
 

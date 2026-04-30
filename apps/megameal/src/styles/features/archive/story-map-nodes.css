@@ -1,0 +1,154 @@
+﻿  .archive-node-map {
+    position: relative;
+    z-index: 1;
+    min-height: clamp(15rem, 30vw, 20rem);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--archive-accent) 30%, transparent);
+    border-radius: 1rem;
+    background:
+      radial-gradient(circle at center, color-mix(in srgb, var(--archive-accent) 18%, transparent), transparent 28%),
+      radial-gradient(circle at 24% 24%, rgba(255,255,255,0.1), transparent 18%),
+      linear-gradient(145deg, rgba(5,8,18,0.82), rgba(8,5,12,0.76));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      0 18px 48px rgba(0,0,0,0.24);
+  }
+
+  .archive-node-map__backdrop {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr 0.85fr;
+    gap: 0.35rem;
+    padding: 0.4rem;
+    opacity: 0.46;
+  }
+
+  .archive-node-map__image {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.8rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    filter: saturate(0.92) contrast(1.08) brightness(0.72);
+  }
+
+  .archive-node-map__image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.42)),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 5px);
+  }
+
+  .archive-node-map__image--one {
+    background-image: var(--archive-bg-1);
+  }
+
+  .archive-node-map__image--two {
+    background-image: var(--archive-bg-2);
+    transform: translateY(8%);
+  }
+
+  .archive-node-map__image--three {
+    background-image: var(--archive-bg-3);
+    transform: translateY(-6%);
+  }
+
+  .archive-node-map::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--archive-accent) 15%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--archive-accent) 12%, transparent) 1px, transparent 1px);
+    background-size: 2.8rem 2.8rem;
+    opacity: 0.28;
+    transform: perspective(620px) rotateX(62deg) translateY(20%);
+    transform-origin: bottom;
+  }
+
+  .archive-node-map__orbit {
+    position: absolute;
+    inset: 14%;
+    border: 1px solid color-mix(in srgb, var(--archive-accent) 30%, transparent);
+    border-radius: 999px;
+    box-shadow: 0 0 28px color-mix(in srgb, var(--archive-accent) 12%, transparent);
+  }
+
+  .archive-node-map__orbit--inner {
+    inset: 29%;
+    border-style: dashed;
+    opacity: 0.68;
+  }
+
+  .archive-node-map__core {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 3.2rem;
+    aspect-ratio: 1;
+    border: 1px solid color-mix(in srgb, var(--archive-accent) 46%, white);
+    border-radius: 999px;
+    background: rgba(0,0,0,0.44);
+    color: color-mix(in srgb, var(--archive-accent) 75%, white);
+    transform: translate(-50%, -50%);
+    box-shadow:
+      0 0 26px color-mix(in srgb, var(--archive-accent) 26%, transparent),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  .archive-node-map__core svg {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  .archive-map-node {
+    position: absolute;
+    left: var(--node-x);
+    top: var(--node-y);
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    aspect-ratio: 1;
+    border-radius: 999px;
+    transform: translate(-50%, -50%);
+    animation: archiveNodePulse 4.6s ease-in-out infinite;
+    animation-delay: var(--node-delay);
+  }
+
+  .archive-map-node svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  .archive-map-node--open {
+    border: 1px solid color-mix(in srgb, var(--archive-accent) 74%, white);
+    background: color-mix(in srgb, var(--archive-accent) 34%, rgba(0,0,0,0.62));
+    color: white;
+    box-shadow:
+      0 0 20px color-mix(in srgb, var(--archive-accent) 46%, transparent),
+      0 0 54px color-mix(in srgb, var(--archive-accent) 18%, transparent);
+  }
+
+  .archive-map-node--locked {
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.58);
+    color: rgba(255,255,255,0.54);
+    filter: grayscale(0.8);
+    opacity: 0.62;
+  }
+
+  .archive-access-line {
+    align-items: center;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid color-mix(in srgb, var(--archive-accent) 24%, transparent);
+    border-radius: 999px;
+    background: rgba(0,0,0,0.26);
+  }
+

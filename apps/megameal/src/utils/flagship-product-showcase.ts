@@ -68,7 +68,7 @@ export function buildFlagshipProductShowcase(
           {
             id: imageMedia.id ?? 'primary-image',
             type: 'image' as const,
-            src: imageMedia.src,
+            src: imageMedia.src ?? fallbackThumb,
             alt: imageMedia.alt ?? product.data.name,
             caption:
               imageMedia.caption ??

@@ -1,4 +1,4 @@
----
+﻿---
 import { getCollection } from 'astro:content'
 import Markdown from '@components/misc/Markdown.astro'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
@@ -6,8 +6,9 @@ import { Icon } from 'astro-icon/components'
 import ImageWrapper from '../../components/misc/ImageWrapper.astro'
 import { avatarConfig, siteConfig } from '../../config/config'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
+import '../../styles/pages/about-detail.css'
 
-// ⭐ FIXED: Import the correct layout toggle component
+// â­ FIXED: Import the correct layout toggle component
 import LayoutToggle from '../../components/client/LayoutToggle.svelte'
 
 export async function getStaticPaths() {
@@ -21,7 +22,7 @@ export async function getStaticPaths() {
 const { aboutPage } = Astro.props
 console.log('ABOUT PAGE - Processing about page:', aboutPage.slug)
 
-// ⭐ NEW: Extract oneColumn setting from frontmatter
+// â­ NEW: Extract oneColumn setting from frontmatter
 const oneColumnMode = aboutPage.data.oneColumn || false
 console.log('ABOUT PAGE - oneColumn from frontmatter:', oneColumnMode)
 
@@ -38,7 +39,7 @@ console.log('ABOUT PAGE - Custom author data:', customAuthorData)
 // Extract backgroundImage from frontmatter for dynamic background support
 const backgroundImage = aboutPage.data.backgroundImage
 
-// 🎬 NEW: Video configuration from avatarConfig (same as Profile.svelte)
+// ðŸŽ¬ NEW: Video configuration from avatarConfig (same as Profile.svelte)
 const videoConfig = avatarConfig?.videoConfig || {}
 const playbackRate = videoConfig.playbackRate || 0.5 // Default to 50% speed
 const shouldLoop = videoConfig.loop ?? true // Default to true, can be disabled
@@ -52,7 +53,7 @@ console.log('ABOUT PAGE - Video config:', {
   playOnce,
 })
 
-// 🎬 NEW: Video detection helper functions (same as Profile.svelte)
+// ðŸŽ¬ NEW: Video detection helper functions (same as Profile.svelte)
 function isVideoFile(src: string): boolean {
   if (!src) return false
   const lowercaseSrc = src.toLowerCase()
@@ -97,7 +98,7 @@ const jsonLd = {
 <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
 
 <!-- =============================================================== -->
-<!-- ⭐ FIXED: BUILT-IN LAYOUT TOGGLE - USING CORRECT COMPONENT     -->
+<!-- â­ FIXED: BUILT-IN LAYOUT TOGGLE - USING CORRECT COMPONENT     -->
 <!-- =============================================================== -->
 <LayoutToggle 
   client:load 
@@ -115,12 +116,12 @@ const jsonLd = {
     
     <!-- Author Header Section -->
     <div class="relative onload-animation mb-6">
-      <!-- 🎬 ENHANCED: Author Avatar with Video Support and Configuration -->
+      <!-- ðŸŽ¬ ENHANCED: Author Avatar with Video Support and Configuration -->
       {aboutPage.data.avatar && (
         <div class="flex flex-col md:flex-row items-center md:items-start gap-6 mb-6">
           <div class="flex-shrink-0">
             {isVideoFile(aboutPage.data.avatar) ? (
-              <!-- 🎬 ENHANCED: Video avatar support with configuration from avatarConfig -->
+              <!-- ðŸŽ¬ ENHANCED: Video avatar support with configuration from avatarConfig -->
               <video
                 id="about-avatar-video"
                 src={aboutPage.data.avatar}
@@ -144,7 +145,7 @@ const jsonLd = {
                 </div>
               </video>
             ) : (
-              <!-- 🎬 ENHANCED: Image avatar (including animated GIFs, WebP, etc.) -->
+              <!-- ðŸŽ¬ ENHANCED: Image avatar (including animated GIFs, WebP, etc.) -->
               <ImageWrapper
                 src={aboutPage.data.avatar}
                 alt={`Profile image of ${aboutPage.data.name}`}
@@ -259,7 +260,7 @@ const jsonLd = {
 
 </MainGridLayout>
 
-<!-- 🎬 NEW: Client-side script to configure video elements with avatarConfig settings -->
+<!-- ðŸŽ¬ NEW: Client-side script to configure video elements with avatarConfig settings -->
 <script>
   const videoEndedHandlers = new WeakMap<HTMLVideoElement, EventListener>()
 
@@ -287,7 +288,7 @@ const jsonLd = {
     return Number.isFinite(parsedValue) ? parsedValue : fallback
   }
 
-  // 🎬 NEW: Configure video elements with settings from avatarConfig
+  // ðŸŽ¬ NEW: Configure video elements with settings from avatarConfig
   function configureVideoElements() {
     const videoElements = document.querySelectorAll<HTMLVideoElement>(
       'video[data-playback-rate]',
@@ -299,7 +300,7 @@ const jsonLd = {
       const loopDelay = getIntDataAttribute(video, 'loopDelay', 5000)
       const playOnce = video.dataset.playOnce === 'true'
 
-      console.log('🎬 Configuring about page video:', {
+      console.log('ðŸŽ¬ Configuring about page video:', {
         playbackRate,
         shouldLoop,
         loopDelay,
@@ -354,19 +355,5 @@ const jsonLd = {
   document.addEventListener('astro:page-load', configureVideoElements)
 </script>
 
-<style>
-  /* Add scroll margin for hash navigation */
-  #about-container {
-    scroll-margin-top: calc(var(--navbar-height) + 2rem);
-  }
   
-  /* Ensure smooth scrolling */
-  html {
-    scroll-behavior: smooth;
-  }
 
-  /* 🎬 NEW: Ensure videos fit properly */
-  video {
-    object-fit: cover;
-  }
-</style>

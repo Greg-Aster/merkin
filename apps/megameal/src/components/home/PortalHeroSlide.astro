@@ -1,0 +1,16 @@
+---
+import mainTitleCard from '@/assets/banner/main-title.png'
+import HomeIntroEnvironment from './HomeIntroEnvironment.svelte'
+import '../../styles/features/home/portal-hero-slide.css'
+---
+
+<section class="megameal-home-intro" aria-label="MEGAMEAL portal introduction">
+  <div class="megameal-home-intro__environment" aria-hidden="true">
+    <HomeIntroEnvironment client:load titleImageSrc={mainTitleCard.src} />
+  </div>
+
+  <div class="megameal-home-intro__screen-reader-copy">
+    <p>Commercial Portal Online</p>
+    <p>MEGA MEAL SAGA portal. Navigation destinations rotate through the broadcast.</p>
+  </div>
+</section>

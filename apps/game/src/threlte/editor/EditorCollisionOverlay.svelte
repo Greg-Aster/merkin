@@ -2,6 +2,7 @@
 import { useThrelte } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
+import { getLevelCollisionWorkflow } from '../engine/levelCollisionWorkflow'
 import { terrainStore } from '../features/terrain/terrainStore'
 import { editorStateStore } from './editorStore'
 
@@ -26,10 +27,12 @@ const unsubTerrain = terrainStore.subscribe(value => {
 })
 
 function shouldShowTerrainOverlay() {
+  const workflow = getLevelCollisionWorkflow(levelId)
   return (
     !!editorState?.enabled &&
     !!editorState?.collisionOverlayEnabled &&
     !!levelId &&
+    workflow.terrainCollision === 'heightmap' &&
     !!terrainState?.manager &&
     !!terrainState?.heightData &&
     terrainState?.resolution > 0

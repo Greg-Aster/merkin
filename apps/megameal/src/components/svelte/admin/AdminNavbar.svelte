@@ -70,7 +70,7 @@ function handleClickOutside(event) {
 
 <svelte:window on:click={handleClickOutside} />
 
-<div class="admin-navbar-component">
+<div class="admin-navbar-component flex items-center">
   <!-- Home Button / Settings Button -->
   <div class="admin-dropdown relative">
     <a 
@@ -167,9 +167,3 @@ function handleClickOutside(event) {
 
 </div>
 
-<style>
-.admin-navbar-component {
-display: flex;
-align-items: center;
-}
-</style>

@@ -85,7 +85,7 @@ function handleRefreshClick() {
     {:else}
       <div class="space-y-4">
         {#each filteredPosts as post (post.id)}
-          <div class="bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow post-card">
+          <div class="bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 ease-in-out hover:-translate-y-0.5 post-card">
             <div class="p-4">
               <div class="flex justify-between items-start">
                 <div>
@@ -202,13 +202,3 @@ function handleRefreshClick() {
   </div>
 </div>
 
-<style>
-  /* Post card hover animation */
-  :global(.post-card) {
-    @apply transition-all duration-200 ease-in-out;
-  }
-  
-  :global(.post-card:hover) {
-    @apply transform -translate-y-0.5 shadow-md;
-  }
-</style>

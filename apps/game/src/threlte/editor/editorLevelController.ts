@@ -1,10 +1,13 @@
 import { EDITOR_API_BASE } from '@config/editorApi'
 import { get } from 'svelte/store'
+import { withEditorSceneEngineData } from '../engine/sceneDocumentRuntime'
 import type {
   LevelLifecycleStatus,
   LevelRegistryEntry,
 } from '../levels/levelRegistry'
 import { createDefaultSceneForLevel } from './defaultScenes'
+import { assertValidEditorSceneDocument } from './editorSceneDocumentValidation'
+import type { EditorSceneDocument } from './editorTypes'
 
 interface EditorLevelControllerDeps {
   getEditorSceneStore: () => any
@@ -19,9 +22,7 @@ interface EditorLevelControllerDeps {
     metadataStarMapYear: number
     metadataStarMapDescription: string
     metadataSourceKind: 'component' | 'scene'
-    metadataSourceComponentKey:
-      | 'observatory'
-      | 'solitude'
+    metadataSourceComponentKey: 'observatory' | 'solitude'
     saveAsTitle: string
     saveAsLevelId: string
     newLevelTitle: string
@@ -87,11 +88,16 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
       createDefaultSceneForLevel(targetLevelId) ??
       deps.createEmptyScene(targetLevelId),
   ) {
-    return {
-      ...structuredClone(sourceScene),
-      levelId: targetLevelId,
-      updatedAt: new Date().toISOString(),
-    }
+    const clonedScene = structuredClone(sourceScene) as EditorSceneDocument
+
+    return assertValidEditorSceneDocument(
+      withEditorSceneEngineData({
+        ...clonedScene,
+        levelId: targetLevelId,
+        updatedAt: new Date().toISOString(),
+      }),
+      'Scene disk save',
+    )
   }
 
   function hasMeaningfulSceneContent(scene: any) {

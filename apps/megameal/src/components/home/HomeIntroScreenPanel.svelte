@@ -11,21 +11,16 @@ import {
   SRGBColorSpace,
   type Texture,
   TextureLoader,
-  VideoTexture,
 } from 'three'
 
 export let index: number
 export let primary = false
 export let imageSrc = ''
 export let stillSrc = ''
-export let videoSrc = ''
 
 let titleTexture: Texture | null = null
 let stillTexture: Texture | null = null
 let frostTexture: CanvasTexture | null = null
-let videoTexture: VideoTexture | null = null
-let videoElement: HTMLVideoElement | null = null
-let videoReadyHandler: (() => void) | null = null
 
 const additiveBlending = AdditiveBlending
 const normalBlending = NormalBlending
@@ -83,20 +78,6 @@ function createFrostTexture() {
   return texture
 }
 
-function disposeVideo() {
-  if (videoElement && videoReadyHandler) {
-    videoElement.removeEventListener('loadeddata', videoReadyHandler)
-    videoElement.removeEventListener('canplay', videoReadyHandler)
-  }
-  videoElement?.pause()
-  videoElement?.removeAttribute('src')
-  videoElement?.load()
-  videoTexture?.dispose()
-  videoReadyHandler = null
-  videoElement = null
-  videoTexture = null
-}
-
 function disposeTitleTexture() {
   titleTexture?.dispose()
   titleTexture = null
@@ -124,37 +105,6 @@ onMount(() => {
     })
   }
 
-  if (videoSrc) {
-    videoElement = document.createElement('video')
-    videoElement.src = videoSrc
-    videoElement.crossOrigin = 'anonymous'
-    videoElement.loop = true
-    videoElement.muted = true
-    videoElement.playsInline = true
-    videoElement.autoplay = true
-    videoElement.preload = 'auto'
-
-    videoReadyHandler = () => {
-      if (!videoElement || videoTexture) return
-
-      const texture = new VideoTexture(videoElement)
-      texture.colorSpace = SRGBColorSpace
-      texture.needsUpdate = true
-      videoTexture = texture
-    }
-
-    videoElement.addEventListener('loadeddata', videoReadyHandler)
-    videoElement.addEventListener('canplay', videoReadyHandler)
-    if (videoElement.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-      videoReadyHandler()
-    }
-    videoElement.load()
-    videoElement.play().catch(() => {
-      // Autoplay can still be blocked in unusual browser states; the panel
-      // keeps its fallback tint until playback is available.
-    })
-  }
-
   if (primary && imageSrc) {
     titleTexture = loader.load(imageSrc, texture => {
       texture.colorSpace = SRGBColorSpace
@@ -164,7 +114,6 @@ onMount(() => {
   }
 
   return () => {
-    disposeVideo()
     disposeStillTexture()
     disposeTitleTexture()
     disposeFrostTexture()
@@ -172,7 +121,6 @@ onMount(() => {
 })
 
 onDestroy(() => {
-  disposeVideo()
   disposeStillTexture()
   disposeTitleTexture()
   disposeFrostTexture()
@@ -234,26 +182,14 @@ onDestroy(() => {
 		/>
 	</T.Mesh>
 
-	{#if videoTexture}
-		<T.Mesh position={[0, 0, 0]}>
-			<T.PlaneGeometry args={[mediaWidth, mediaHeight]} />
-			<T.MeshBasicMaterial
-				map={videoTexture}
-				side={frontSide}
-				transparent={true}
-				opacity={primary ? 0.74 : 0.58}
-				blending={normalBlending}
-				depthWrite={false}
-			/>
-		</T.Mesh>
-	{:else if stillTexture}
+	{#if stillTexture}
 		<T.Mesh position={[0, 0, 0]}>
 			<T.PlaneGeometry args={[mediaWidth, mediaHeight]} />
 			<T.MeshBasicMaterial
 				map={stillTexture}
 				side={frontSide}
 				transparent={true}
-				opacity={primary ? 0.74 : 0.58}
+				opacity={primary ? 0.94 : 0.94}
 				blending={normalBlending}
 				depthWrite={false}
 			/>
@@ -265,7 +201,7 @@ onDestroy(() => {
 				map={titleTexture}
 				side={frontSide}
 				transparent={true}
-				opacity={0.86}
+				opacity={0.62}
 				blending={normalBlending}
 				depthWrite={false}
 			/>
@@ -291,7 +227,7 @@ onDestroy(() => {
 				map={titleTexture}
 				side={frontSide}
 				transparent={true}
-				opacity={0.48}
+				opacity={0.34}
 				blending={normalBlending}
 				depthWrite={false}
 			/>

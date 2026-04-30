@@ -16,9 +16,13 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page } = Astro.props
 const isFirstPage = page.currentPage === 1
 const len = page.data.length
+import '../styles/pages/dynamic-page.css'
 ---
 
-<MainGridLayout homeLayout="portal">
+<MainGridLayout
+  homeLayout={isFirstPage ? 'portal' : 'default'}
+  contentMode={isFirstPage ? 'banner-only' : 'default'}
+>
   {!isFirstPage && (
     <div class="dispatches-stream deferred-section">
       <PostPage page={page}></PostPage>
@@ -32,6 +36,7 @@ const len = page.data.length
   {isFirstPage && (
     <FactsWidget
       slot="overlay"
+      class="portal-sponsored-overlay"
       variant="overlay"
       dismissible={true}
       storageKey="megameal-home-sponsored-overlay-dismissed"
@@ -218,124 +223,3 @@ const len = page.data.length
     ;(window as any)[portalScrollSwupBoundKey] = true
   }
 </script>
-
-<style>
-  .portal-snap-section {
-    position: relative;
-    scroll-margin-block-start: 0.75rem;
-    transition:
-      opacity 0.58s cubic-bezier(0.22, 1, 0.36, 1),
-      filter 0.58s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.66s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  :global(html.megameal-home-stage-ready) .portal-snap-section:not(.is-current) {
-    opacity: 0.26;
-    pointer-events: none;
-    filter: saturate(0.72) brightness(0.68) blur(1px);
-    transform: translateY(0.38rem) scale(0.995);
-  }
-
-  :global(html.megameal-home-stage-ready) .portal-snap-section.is-approaching:not(.is-current) {
-    opacity: 0.52;
-    filter: saturate(0.88) brightness(0.82) blur(0.35px);
-    transform: translateY(0.16rem) scale(0.998);
-  }
-
-  .portal-snap-section.is-current,
-  .portal-snap-section.is-current.is-visible {
-    opacity: 1;
-    pointer-events: auto;
-    filter: saturate(1) brightness(1);
-    transform: none;
-    transition-delay: 0s;
-  }
-
-  :global(html.megameal-home-snap) {
-    scroll-padding-top: 0.75rem;
-  }
-
-  /*
-   * Keep this as visual staging, not root-level scroll snapping. The site already
-   * runs custom scroll/overlay systems, and CSS snap on html can trap mousewheel
-   * movement in Firefox/OverlayScrollbars.
-   */
-  :global(html.megameal-home-snap #banner-container.portal-snap-stage),
-  .portal-snap-section {
-    scroll-margin-block-start: 0.75rem;
-  }
-
-  :global(#banner-container.portal-snap-stage) {
-    transition:
-      opacity 0.58s cubic-bezier(0.22, 1, 0.36, 1),
-      filter 0.58s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.66s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  :global(html.megameal-home-stage-ready #banner-container.portal-snap-stage:not(.is-current)) {
-    opacity: 0.26;
-    pointer-events: none;
-    filter: saturate(0.72) brightness(0.68) blur(1px);
-    transform: translateY(0.38rem) scale(0.995);
-  }
-
-  :global(html.megameal-home-stage-ready #banner-container.portal-snap-stage.is-approaching:not(.is-current)) {
-    opacity: 0.52;
-    filter: saturate(0.88) brightness(0.82) blur(0.35px);
-    transform: translateY(0.16rem) scale(0.998);
-  }
-
-  :global(#banner-container.portal-snap-stage.is-current) {
-    opacity: 1;
-    pointer-events: auto;
-    filter: saturate(1) brightness(1);
-    transform: none;
-    transition-delay: 0s;
-  }
-
-  @supports (content-visibility: auto) {
-    .dispatches-stream {
-      content-visibility: auto;
-      contain-intrinsic-size: 1px 720px;
-    }
-  }
-
-  @media (max-width: 48rem) {
-    :global(html.megameal-home-stage-ready) .portal-snap-section:not(.is-current) {
-      opacity: 0.24;
-      pointer-events: none;
-      filter: saturate(0.72) brightness(0.68) blur(0.75px);
-      transform: translateY(0.28rem) scale(0.996);
-    }
-
-    :global(html.megameal-home-stage-ready) .portal-snap-section.is-approaching:not(.is-current) {
-      opacity: 0.56;
-      filter: saturate(0.9) brightness(0.84) blur(0.25px);
-      transform: translateY(0.1rem) scale(0.999);
-    }
-
-    :global(html.megameal-home-stage-ready #banner-container.portal-snap-stage:not(.is-current)) {
-      opacity: 0.24;
-      pointer-events: none;
-      filter: saturate(0.72) brightness(0.68) blur(0.75px);
-      transform: translateY(0.28rem) scale(0.996);
-    }
-
-    :global(html.megameal-home-stage-ready #banner-container.portal-snap-stage.is-approaching:not(.is-current)) {
-      opacity: 0.56;
-      filter: saturate(0.9) brightness(0.84) blur(0.25px);
-      transform: translateY(0.1rem) scale(0.999);
-    }
-
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .portal-snap-section,
-    :global(#banner-container.portal-snap-stage) {
-      opacity: 1 !important;
-      filter: none !important;
-      transform: none !important;
-      transition: none !important;
-    }
-  }
-</style>

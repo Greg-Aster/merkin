@@ -1,3 +1,10 @@
+import type {
+  CollisionChannel,
+  CollisionIntent,
+  LevelDefinition,
+} from '../engine/types'
+import type { TerrainRuntimeComponentSource } from '../features/terrain'
+
 export type EditorNodeKind =
   | 'asset'
   | 'primitive'
@@ -141,11 +148,14 @@ export interface EditorNodePhysicsData {
 
 export interface EditorNodeCollisionData {
   shape: 'cuboid' | 'cylinder' | 'trimesh'
+  intent?: CollisionIntent
+  channel?: CollisionChannel
   enabled?: boolean
   size?: [number, number, number]
   friction?: number
   restitution?: number
   sensor?: boolean
+  triangleBudget?: number
 }
 
 export interface EditorGameplayData {
@@ -339,6 +349,36 @@ export interface SharedLevelAmbientAudioSettings {
   }
 }
 
+export interface SharedLevelCollisionSettings {
+  collision?: {
+    terrain?: {
+      source?: 'baked-heightmap' | 'scene-authored' | 'none'
+      runtimeSource?: TerrainRuntimeComponentSource
+      manifestUrl?: string
+      heightmapUrl?: string
+      heightmapResolution?: number
+      sourceAssetUrl?: string
+      sourceNodeId?: string
+      sourceName?: string
+      sourceTriangleCount?: number
+      colliderUrl?: string
+      metadataUrl?: string
+      colliderResolution?: number
+      triangleCount?: number
+      vertexCount?: number
+      autoBakeOnTerrainChange?: boolean
+      dirty?: boolean
+      lastGeneratedAt?: string
+      heightOverrideCount?: number
+    }
+    defaults?: {
+      solidObjectsByDefault?: boolean
+      defaultFriction?: number
+      defaultRestitution?: number
+    }
+  }
+}
+
 export interface SharedLevelPresetSettings {
   presets?: {
     atmosphere?: EditorAtmospherePresetId
@@ -359,6 +399,7 @@ export interface SharedLevelEditorSettings
     SharedLevelWaterSettings,
     SharedLevelAmbientParticleSettings,
     SharedLevelAmbientAudioSettings,
+    SharedLevelCollisionSettings,
     SharedLevelPresetSettings,
     SharedLevelSkyboxSettings {}
 
@@ -383,6 +424,9 @@ export interface EditorSceneDocument {
   updatedAt: string
   nodes: EditorSceneNode[]
   settings?: EditorSceneSettings
+  engine?: {
+    levelDefinition: LevelDefinition
+  }
 }
 
 export interface EditorState {

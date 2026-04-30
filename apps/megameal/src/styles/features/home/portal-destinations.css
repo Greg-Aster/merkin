@@ -1,0 +1,16 @@
+.portal-showcase {
+  --route-timeline: oklch(0.74 0.17 245);
+  --route-game: oklch(0.78 0.17 145);
+  --route-story: oklch(0.75 0.19 325);
+  --route-store: oklch(0.84 0.16 85);
+  --route-community: oklch(0.76 0.17 25);
+  display: grid;
+  gap: 1.35rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 540px) {
+  .portal-showcase {
+    gap: 1rem;
+  }
+}

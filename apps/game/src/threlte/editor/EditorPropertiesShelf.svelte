@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { CollisionChannel, CollisionIntent } from '../engine/types'
 import EditorAssetPreview from './EditorAssetPreview.svelte'
 import { resolveNodeCollision } from './editorCollisionDefaults'
 import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
@@ -142,6 +143,9 @@ export let onResetMaterialOverrides: () => void = () => {}
 
 $: effectiveCollision = resolveNodeCollision(selectedNode)
 export let onCollisionEnabledChange: (value: boolean) => void = () => {}
+export let onCollisionIntentChange: (value: CollisionIntent) => void = () => {}
+export let onCollisionChannelChange: (value: CollisionChannel) => void =
+  () => {}
 export let onPhysicsBodyTypeChange: (value: string) => void = () => {}
 export let onColliderSizeChange: (index: number, value: string) => void =
   () => {}
@@ -155,6 +159,24 @@ const transformFields: Array<'position' | 'rotation' | 'scale'> = [
   'rotation',
   'scale',
 ]
+const collisionIntentOptions: Array<{ value: CollisionIntent; label: string }> =
+  [
+    { value: 'none', label: 'None' },
+    { value: 'walkable', label: 'Walkable' },
+    { value: 'blocker', label: 'Blocker' },
+    { value: 'trigger', label: 'Trigger' },
+    { value: 'detailMesh', label: 'Detail Mesh' },
+  ]
+const collisionChannelOptions: Array<{
+  value: CollisionChannel
+  label: string
+}> = [
+  { value: 'worldStatic', label: 'World Static' },
+  { value: 'worldDynamic', label: 'World Dynamic' },
+  { value: 'player', label: 'Player' },
+  { value: 'trigger', label: 'Trigger' },
+  { value: 'detail', label: 'Detail' },
+]
 
 $: hasSingleSelection = !!selectedNode && selectedNodes.length <= 1
 $: hasMultiSelection = selectedNodes.length > 1
@@ -163,7 +185,9 @@ $: hasGeometryNode = !!(
   selectedNode?.prefab ||
   selectedNode?.primitive
 )
-$: canConvertSelectedToMesh = !!(selectedNode?.primitive || selectedNode?.prefab)
+$: canConvertSelectedToMesh = !!(
+  selectedNode?.primitive || selectedNode?.prefab
+)
 </script>
 
 {#if hasSingleSelection && selectedNode}
@@ -555,6 +579,16 @@ $: canConvertSelectedToMesh = !!(selectedNode?.primitive || selectedNode?.prefab
     <div class="editor-section compact-surface">
       <div class="label">Physics</div>
       <label class="checkbox"><input type="checkbox" checked={!!effectiveCollision} data-sfx-click="soft" on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Solid / Collider</label>
+      <select class="text-input" value={selectedNode.collision?.intent ?? effectiveCollision?.intent ?? 'none'} data-sfx-focus="focus-soft" on:change={(e) => onCollisionIntentChange((e.currentTarget as HTMLSelectElement).value as CollisionIntent)}>
+        {#each collisionIntentOptions as option}
+          <option value={option.value}>{option.label}</option>
+        {/each}
+      </select>
+      <select class="text-input" value={selectedNode.collision?.channel ?? effectiveCollision?.channel ?? 'worldStatic'} data-sfx-focus="focus-soft" on:change={(e) => onCollisionChannelChange((e.currentTarget as HTMLSelectElement).value as CollisionChannel)}>
+        {#each collisionChannelOptions as option}
+          <option value={option.value}>{option.label}</option>
+        {/each}
+      </select>
       <select class="text-input" value={selectedNode.physics?.bodyType ?? 'fixed'} data-sfx-focus="focus-soft" on:change={(e) => onPhysicsBodyTypeChange((e.currentTarget as HTMLSelectElement).value)}>
         <option value="fixed">Fixed</option>
         <option value="dynamic">Dynamic</option>

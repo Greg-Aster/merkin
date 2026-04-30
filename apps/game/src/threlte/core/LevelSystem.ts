@@ -1,10 +1,4 @@
-/**
- * Industry-Standard Level System Architecture
- * Based on Unity/Unreal patterns adapted for Three.js/Threlte
- *
- * This replaces the broken component binding approach with a proper
- * event-driven architecture that allows true modular composition.
- */
+/** Component registry and message bus for modular level subsystems. */
 
 import * as THREE from 'three'
 import type { LightingManager } from '../features/lighting/LightingManager'

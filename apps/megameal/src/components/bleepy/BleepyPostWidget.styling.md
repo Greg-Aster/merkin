@@ -113,5 +113,6 @@ The button to submit the user's message.
 
 ## Animations Import
 
-*   **Purpose:** The line `@import './mascotAnimations.css';` (path may vary, e.g., `../components/bleepy/mascotAnimations.css` if imported from a different style block context) is typically found within a `<style is:global>` tag or a regular `<style>` tag in the Astro component.
-*   **Functionality:** It imports CSS rules defined in `mascotAnimations.css`. These rules are responsible for the various animations applied to the mascot, such as idle movements, reactions to messages, or specific state changes (e.g., thinking, speaking). Using `is:global` ensures these animation keyframes and classes are available globally if needed, or they might be scoped if not global.
+*   **Purpose:** `BleepyPostWidget.astro` imports `../../styles/features/bleepy/BleepyPostWidget.css`, which imports `./mascotAnimations.css`.
+*   **Functionality:** The feature stylesheet contains the widget CSS, while `mascotAnimations.css` contains shared mascot keyframes and animation state selectors.
+*   **Architecture:** Keep these styles under `src/styles/features/bleepy/` and import them from component frontmatter. Avoid reintroducing component `<style>` blocks for shared mascot behavior.

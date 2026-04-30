@@ -1,14 +1,18 @@
 <script lang="ts">
+import { EDITOR_API_BASE } from '@config/editorApi'
 import { useThrelte } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
+import { getLevelCollisionWorkflow } from '../engine/levelCollisionWorkflow'
 import { terrainStore } from '../features/terrain/terrainStore'
 import {
   type EditorState,
+  editorSceneStore,
   editorStateStore,
   endSceneTransaction,
   setOrbitEnabled,
   startSceneTransaction,
+  updateLevelSceneSettings,
   updateObservatorySceneSettings,
 } from './editorStore'
 
@@ -17,6 +21,7 @@ export let levelId: string
 const { scene, camera, renderer } = useThrelte()
 
 let editorState: EditorState | undefined
+let editorScene
 let terrainState
 let previewMesh: THREE.Mesh | null = null
 let previewMaterial: THREE.MeshStandardMaterial | null = null
@@ -40,15 +45,20 @@ const unsubEditor = editorStateStore.subscribe(value => {
   editorState = value
 })
 
+const unsubScene = editorSceneStore.subscribe(value => {
+  editorScene = value
+})
+
 const unsubTerrain = terrainStore.subscribe(value => {
   terrainState = value
 })
 
 function isTerrainModeActive() {
+  const workflow = getLevelCollisionWorkflow(levelId)
   return (
     !!editorState?.enabled &&
     editorState.interactionMode === 'terrain' &&
-    levelId === 'observatory' &&
+    !!workflow.terrainSculpting &&
     !!terrainState?.isReady &&
     !!terrainState?.manager &&
     !!terrainState?.heightData
@@ -352,6 +362,84 @@ function commitSculptStroke() {
       heightOverrides: overrides,
     },
   }))
+
+  updateLevelSceneSettings(settings => ({
+    ...settings,
+    collision: {
+      ...(settings.collision ?? {}),
+      terrain: {
+        ...(settings.collision?.terrain ?? {}),
+        source: 'baked-heightmap',
+        runtimeSource:
+          settings.collision?.terrain?.runtimeSource ?? 'editor-manifest',
+        autoBakeOnTerrainChange:
+          settings.collision?.terrain?.autoBakeOnTerrainChange ?? false,
+        dirty: true,
+      },
+    },
+  }))
+
+  const autoBake =
+    editorScene?.settings?.level?.collision?.terrain
+      ?.autoBakeOnTerrainChange === true
+  if (autoBake) {
+    void bakeTerrainCollisionFromEditor()
+  }
+}
+
+async function bakeTerrainCollisionFromEditor() {
+  try {
+    const response = await fetch(
+      `${EDITOR_API_BASE}/api/editor-terrain/bake-collision`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ levelId }),
+      },
+    )
+    const payload = await response.json()
+    if (!payload?.success) {
+      throw new Error(payload?.message ?? 'Terrain collision bake failed')
+    }
+    const collision = payload.collision
+    const metadata = payload.metadata
+    updateLevelSceneSettings(settings => ({
+      ...settings,
+      collision: {
+        ...(settings.collision ?? {}),
+        terrain: {
+          ...(settings.collision?.terrain ?? {}),
+          source: 'baked-heightmap',
+          runtimeSource: 'editor-manifest',
+          manifestUrl: getLevelCollisionWorkflow(levelId).terrainManifestUrl,
+          heightmapUrl:
+            metadata?.sourceHeightmap ??
+            settings.collision?.terrain?.heightmapUrl,
+          colliderUrl:
+            collision?.url ?? settings.collision?.terrain?.colliderUrl,
+          metadataUrl:
+            collision?.metadataUrl ?? settings.collision?.terrain?.metadataUrl,
+          colliderResolution:
+            collision?.colliderResolution ??
+            settings.collision?.terrain?.colliderResolution,
+          triangleCount:
+            collision?.triangleCount ??
+            settings.collision?.terrain?.triangleCount,
+          vertexCount:
+            collision?.vertexCount ?? settings.collision?.terrain?.vertexCount,
+          autoBakeOnTerrainChange:
+            settings.collision?.terrain?.autoBakeOnTerrainChange ?? true,
+          dirty: false,
+          lastGeneratedAt: new Date().toISOString(),
+          heightOverrideCount:
+            metadata?.heightOverrideCount ??
+            settings.collision?.terrain?.heightOverrideCount,
+        },
+      },
+    }))
+  } catch (error) {
+    console.error('Editor terrain collision bake failed:', error)
+  }
 }
 
 function handlePointerDown(event: PointerEvent) {
@@ -431,6 +519,7 @@ $: if (terrainState?.heightData && previewGeometry) {
 
 onDestroy(() => {
   unsubEditor()
+  unsubScene()
   unsubTerrain()
   rendererRef?.domElement.removeEventListener(
     'pointerdown',

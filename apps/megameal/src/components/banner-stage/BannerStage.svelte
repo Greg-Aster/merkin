@@ -2,6 +2,7 @@
 import { onMount } from 'svelte'
 import { writable } from 'svelte/store'
 import { fade } from 'svelte/transition'
+import '../../styles/features/banner-stage/banner-stage.css'
 import { setBannerStageContext } from './context'
 import { type BannerStageRegistry, bannerStageRegistry } from './registry'
 import {
@@ -251,71 +252,3 @@ $effect(() => {
   {/if}
 </div>
 
-<style>
-  .banner-stage-shell {
-    position: relative;
-    overflow: hidden;
-    border-radius: 0.75rem;
-    background:
-      radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 42%),
-      linear-gradient(180deg, rgba(10, 18, 28, 0.96), rgba(2, 6, 12, 0.98));
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    min-height: clamp(20rem, 56vh, 34rem);
-    box-shadow:
-      0 24px 80px rgba(0, 0, 0, 0.36),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  }
-
-  .banner-stage-shell--glitch::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-      linear-gradient(
-        180deg,
-        transparent 0%,
-        rgba(96, 165, 250, 0.08) 48%,
-        transparent 52%,
-        transparent 100%
-      );
-    mix-blend-mode: screen;
-  }
-
-  .banner-stage-frame {
-    min-height: inherit;
-  }
-
-  .banner-stage-fallback {
-    min-height: inherit;
-    display: grid;
-    place-items: center;
-    padding: 2rem;
-    color: rgba(226, 232, 240, 0.82);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-  }
-
-  .banner-stage-fallback--error {
-    color: rgba(253, 186, 116, 0.94);
-  }
-
-  .banner-stage-debug {
-    position: absolute;
-    right: 0.75rem;
-    bottom: 0.75rem;
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    font-size: 0.68rem;
-    line-height: 1;
-    padding: 0.45rem 0.6rem;
-    border-radius: 999px;
-    background: rgba(2, 6, 12, 0.82);
-    border: 1px solid rgba(148, 163, 184, 0.14);
-    color: rgba(226, 232, 240, 0.68);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-</style>

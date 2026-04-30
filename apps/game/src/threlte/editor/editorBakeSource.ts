@@ -1,16 +1,16 @@
 import * as THREE from 'three'
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import {
+  createWorldMatrixResolver,
+  getTopLevelNodeIds,
+} from './editorHierarchyUtils'
 import type {
   EditorMaterialData,
   EditorPrefabType,
   EditorPrimitiveData,
   EditorSceneNode,
 } from './editorTypes'
-import {
-  createWorldMatrixResolver,
-  getTopLevelNodeIds,
-} from './editorHierarchyUtils'
 
 const PREFAB_ASSET_URLS: Partial<Record<EditorPrefabType, string>> = {
   'hanging-light':
@@ -1313,7 +1313,9 @@ async function buildSceneNodeSubtreeObject(
     hasContent = true
   }
 
-  for (const childNode of nodes.filter(candidate => candidate.parentId === node.id)) {
+  for (const childNode of nodes.filter(
+    candidate => candidate.parentId === node.id,
+  )) {
     const childObject = await buildSceneNodeSubtreeObject(childNode, nodes)
     if (!childObject) continue
     applyNodeTransformToObject(childObject, childNode)
@@ -1420,7 +1422,9 @@ export async function exportSceneNodesToMergedGlb(
   const getWorldMatrix = createWorldMatrixResolver(nodes)
   const worldCenter = new THREE.Vector3()
   for (const nodeId of topLevelIds) {
-    worldCenter.add(new THREE.Vector3().setFromMatrixPosition(getWorldMatrix(nodeId)))
+    worldCenter.add(
+      new THREE.Vector3().setFromMatrixPosition(getWorldMatrix(nodeId)),
+    )
   }
   worldCenter.multiplyScalar(1 / topLevelIds.length)
 
@@ -1441,7 +1445,9 @@ export async function exportSceneNodesToMergedGlb(
     }
 
     if (root.children.length === 0) {
-      throw new Error('The current selection does not contain exportable geometry.')
+      throw new Error(
+        'The current selection does not contain exportable geometry.',
+      )
     }
 
     const blob = await exportObjectToGlb(root)

@@ -21,7 +21,7 @@
     ]
   },
   "physics": {
-    "type": "trimesh",
+    "type": "scene-authored",
     "worldSize": 5.39045262336731,
     "gridX": 4,
     "gridY": 4,
@@ -39,12 +39,6 @@
         1.983830451965332,
         2.3493473529815674
       ]
-    },
-    "trimesh": {
-      "downsample": 16,
-      "mode": "single",
-      "chunkVerts": 65,
-      "activeRadius": 2
     }
   },
   "lighting": {

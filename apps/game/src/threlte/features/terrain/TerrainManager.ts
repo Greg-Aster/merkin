@@ -11,9 +11,6 @@
 import * as THREE from 'three'
 import { OptimizationLevel, optimizationManager } from '../performance'
 
-const isDev =
-  (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true
-
 export interface TerrainConfig {
   heightmapUrl: string
   worldSize: number
@@ -22,6 +19,18 @@ export interface TerrainConfig {
   minHeight: number
   maxHeight: number
   bounds?: { min: [number, number, number]; max: [number, number, number] }
+  collision?: {
+    type: 'baked-terrain-mesh'
+    authoredException: true
+    url: string
+    metadataUrl?: string
+    triangleCount?: number
+    vertexCount?: number
+    colliderResolution?: number
+    sampleStep?: number
+    bounds?: { min: [number, number, number]; max: [number, number, number] }
+    center?: [number, number, number]
+  }
   chunkPathTemplate?: string
   chunkSize?: number
   gridSize?: [number, number]
@@ -98,44 +107,15 @@ export class TerrainManager {
       }
     }
 
-    // Log validation results
     if (issues.length > 0) {
-      if (isDev) {
-        console.warn('🔍 Coordinate System Validation Issues:')
-        issues.forEach(issue => console.warn(issue))
-      }
-    } else {
-      if (isDev) console.log('✅ Coordinate system validation passed')
+      console.warn('Terrain coordinate validation issues:', issues)
     }
-
-    // Log coordinate system summary for debugging
-    const computedWorldSizeX = config.bounds
-      ? config.bounds.max[0] - config.bounds.min[0]
-      : config.worldSize
-    const computedWorldSizeZ = config.bounds
-      ? config.bounds.max[2] - config.bounds.min[2]
-      : config.worldSize
-
-    if (isDev)
-      console.log('🔍 Coordinate System Summary:', {
-        worldSize: config.worldSize,
-        worldSizeX: config.worldSizeX || computedWorldSizeX,
-        worldSizeZ: config.worldSizeZ || computedWorldSizeZ,
-        bounds: config.bounds,
-        hasChunks: !!(config.gridSize && config.chunkSize),
-        chunkGrid: config.gridSize,
-        chunkSize: config.chunkSize,
-        isRectangular: Math.abs(computedWorldSizeX - computedWorldSizeZ) > 0.1,
-      })
   }
 
   /**
    * Initialize terrain from heightmap image (from HeightmapCache.ts)
    */
   public async initialize(config: TerrainConfig): Promise<void> {
-    if (isDev)
-      console.log(`🗺️ Loading terrain heightmap: ${config.heightmapUrl}`)
-
     // Validate coordinate system consistency
     this.validateCoordinateSystem(config)
 
@@ -174,10 +154,6 @@ export class TerrainManager {
           }
 
           this.isReady = true
-          if (isDev)
-            console.log(
-              `✅ Terrain initialized: ${img.width}x${img.height}, ${((this.heightData.length * 4) / 1024).toFixed(1)}KB`,
-            )
           resolve()
         } catch (error) {
           reject(error)
@@ -225,12 +201,6 @@ export class TerrainManager {
         })
       }
     }
-    if (isDev)
-      console.log(
-        '🏔️ TerrainManager: Initialized',
-        this.chunks.length,
-        'chunks with bounds-based positioning',
-      )
   }
 
   /**
@@ -238,13 +208,6 @@ export class TerrainManager {
    */
   public getVisibleChunks(playerPosition: THREE.Vector3): TerrainChunk[] {
     if (!this.config || !this.config.lods || this.chunks.length === 0) {
-      if (isDev)
-        console.log('🏔️ getVisibleChunks: No config/lods/chunks', {
-          hasConfig: !!this.config,
-          hasLods: !!this.config?.lods,
-          chunkCount: this.chunks.length,
-          playerPos: [playerPosition.x, playerPosition.y, playerPosition.z],
-        })
       return []
     }
 
@@ -259,10 +222,6 @@ export class TerrainManager {
       }
 
       if (newLod !== chunk.currentLod) {
-        if (isDev)
-          console.log(
-            `🏔️ Chunk ${chunk.id}: playerDist=${distance.toFixed(1)}, newLOD=${newLod}`,
-          )
         chunk.currentLod = newLod
       }
     })
@@ -525,6 +484,5 @@ export class TerrainManager {
     this.config = null
     this.chunks = []
     this.isReady = false
-    console.log('🗑️ Terrain cleared')
   }
 }

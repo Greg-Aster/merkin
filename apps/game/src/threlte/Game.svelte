@@ -1,12 +1,8 @@
-<!-- 
-  Threlte-based Game.svelte - Phase 1 Foundation
-  Replaces Three.js with Threlte declarative components
--->
+<!-- Game application shell for UI state, route-level orchestration, and canvas mounting. -->
 <script lang="ts">
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 
 import GameCanvasStage from './GameCanvasStage.svelte'
-// Modern UI components only
 import ThrelteMobileControls from './features/player/ThrelteMobileControls.svelte'
 import RuntimeDiagnosticsPanel from './ui/RuntimeDiagnosticsPanel.svelte'
 
@@ -16,13 +12,17 @@ import {
   isConversationActive,
 } from './features/conversation/conversationStores'
 
-// Import MobileEnhancements component
 import MobileEnhancements from './ui/MobileEnhancements.svelte'
 
+import {
+  createGameWorldLifecycleDiagnostics,
+  createGameWorldLifecycleSnapshot,
+  getGameWorldDiagnostic,
+  isGameWorldPlayable,
+} from './core/gameWorldLifecycle'
 import { resetLevelRuntime } from './core/levelRuntimeReset'
 
 import SettingsButton from './ui/SettingsButton.svelte'
-// Import UI components
 import TimelineCard from './ui/TimelineCard.svelte'
 
 import {
@@ -30,7 +30,6 @@ import {
   levelRegistryStore,
   resolveLevelId as resolveRegistryLevelId,
 } from './levels/levelRegistry'
-// Import modern Threlte stores for reactive state management
 import {
   type StarData,
   currentLevelStore,
@@ -42,7 +41,7 @@ import {
   selectedStarStore,
 } from './stores/gameStateStore'
 
-import { editorStateStore, initializeEditor } from './editor/editorStore'
+import { editorStateStore, initializeEditor } from './editor/editorSessionStore'
 import {
   resetRuntimeDiagnostics,
   setRuntimeDiagnostic,
@@ -116,6 +115,7 @@ let initializeClientFn: ((roomName: string) => void) | null = null
 
 let playerComponent: any = null
 let playerReady = false
+let playerSpawned = false
 let spawnSystem: any = null
 let interactionSystem: any = null // Reference to centralized InteractionSystem
 let chatBoxComponent: any = null // Reference to ChatBox component instance
@@ -132,6 +132,8 @@ let levelRegistry = []
 
 // Spawn system state
 let physicsReady = false
+let staticWorldReady = false
+let worldUnloading = false
 let activeLevelLoadRequest = 0
 let editorFeaturesPromise: Promise<void> | null = null
 let sceneLayerComponentPromise: Promise<void> | null = null
@@ -203,14 +205,7 @@ function getLevelRenderConfig(levelId: string) {
   }
 }
 
-let terrainReady = false
 $: currentLevelRenderConfig = getLevelRenderConfig(currentLevel)
-$: if (isInitialized && terrainReady && !error) {
-  setRuntimeDiagnostic('engine', {
-    level: 'ready',
-    message: `Engine ready on level ${currentLevel}.`,
-  })
-}
 
 // Reactive store subscriptions (these are reactive by default)
 $: currentLevel = $currentLevelStore
@@ -231,11 +226,51 @@ $: setRuntimeDiagnostic('mode', {
   level: 'ready',
   message: editorEnabled ? 'Editor mode active.' : 'Gameplay mode active.',
 })
-$: setRuntimeDiagnostic('terrain', {
-  level: terrainReady ? 'ready' : 'loading',
-  message: terrainReady
-    ? 'Terrain and physics surfaces are ready.'
-    : 'Waiting for active level terrain readiness.',
+$: gameWorldLifecycle = createGameWorldLifecycleSnapshot({
+  levelId: currentLevel,
+  shellReady: isInitialized,
+  levelComponentReady: Boolean(currentLevelComponent),
+  staticWorldReady,
+  physicsReady,
+  playerComponentReady: editorEnabled || playerReady,
+  playerSpawned: editorEnabled || playerSpawned,
+  editorEnabled,
+  unloading: worldUnloading,
+  error,
+})
+$: gameWorldDiagnostic = getGameWorldDiagnostic(gameWorldLifecycle)
+$: gameWorldLifecycleDiagnostics =
+  createGameWorldLifecycleDiagnostics(gameWorldLifecycle)
+$: setRuntimeDiagnostic('world', {
+  label: 'Game World',
+  level: gameWorldDiagnostic.level,
+  message: gameWorldDiagnostic.message,
+  meta: gameWorldLifecycle as unknown as Record<string, unknown>,
+})
+$: gameWorldLifecycleDiagnostics.forEach(entry => {
+  setRuntimeDiagnostic(entry.key, {
+    label: entry.label,
+    level: entry.level,
+    message: entry.message,
+    meta: {
+      active: entry.active,
+      phase: gameWorldLifecycle.phase,
+      levelId: gameWorldLifecycle.levelId,
+    },
+  })
+})
+$: setRuntimeDiagnostic('engine', {
+  level: isGameWorldPlayable(gameWorldLifecycle) ? 'ready' : 'loading',
+  message: isGameWorldPlayable(gameWorldLifecycle)
+    ? `Engine ready on level ${currentLevel}.`
+    : `Engine waiting for world phase: ${gameWorldLifecycle.phase}.`,
+})
+$: setRuntimeDiagnostic('staticWorld', {
+  label: 'Static World',
+  level: staticWorldReady ? 'ready' : 'loading',
+  message: staticWorldReady
+    ? 'Static render/collision world is ready.'
+    : 'Waiting for active level static world readiness.',
 })
 $: setRuntimeDiagnostic('physics', {
   level: physicsReady ? 'ready' : 'loading',
@@ -404,6 +439,7 @@ async function ensureLevelComponent(levelId: string) {
   const cached = levelComponentCache.get(cacheKey)
   if (cached) {
     currentLevelComponent = cached
+    worldUnloading = false
     return
   }
 
@@ -421,6 +457,7 @@ async function ensureLevelComponent(levelId: string) {
 
   if (requestId === activeLevelLoadRequest) {
     currentLevelComponent = module.default
+    worldUnloading = false
   }
 }
 
@@ -747,8 +784,10 @@ async function initializeThrelte() {
         ? new URLSearchParams(window.location.search)
         : null
     const shouldEnableEditor = urlParams?.get('editor') === '1'
+    const shouldShowDebugPanel = urlParams?.get('debug') === '1'
     const requestedLevel = normalizeLevelId(urlParams?.get('level'))
     initializeEditor(shouldEnableEditor)
+    showDebugPanel = shouldShowDebugPanel
 
     // Detect mobile and update store
     const isMobileDevice =
@@ -864,7 +903,9 @@ function transitionToLevel(levelType: string) {
     interactionSystem,
     spawnSystem,
   })
-  terrainReady = false
+  worldUnloading = true
+  staticWorldReady = false
+  playerSpawned = false
   activeLevelNote = null
   pendingLevelReturn = null
   currentLevelComponent = null
@@ -873,23 +914,7 @@ function transitionToLevel(levelType: string) {
   debugLog(`🎮 Threlte store-based level transition: ${levelId}`)
 }
 
-/**
- * Handle return to observatory - Store-based implementation
- */
-function handleReturnToObservatory() {
-  transitionToLevel('observatory')
-  debugLog('🎮 Threlte store: Returned to observatory')
-}
-
 // Mobile controls now handled through reactive stores - no event forwarding needed
-
-/**
- * Reset view - Handled by Player component
- */
-function resetView() {
-  // View reset is now handled by the Player component's camera controls
-  debugLog('🎮 View reset requested - handled by Player component')
-}
 
 /**
  * Toggle debug panel
@@ -912,7 +937,7 @@ function handleKeyDown(event: KeyboardEvent) {
   }
 }
 
-// Player spawning is handled by ECS SpawnSystem
+// Player spawning is a GameWorld lifecycle phase executed by SpawnSystem.
 
 function handlePlayerInteraction(detail: any) {
   gameActions.recordInteraction('click', detail.type)
@@ -929,6 +954,14 @@ function handlePlayerLightBurst(detail: any) {
   gameActions.recordInteraction('light_burst', 'player')
   interactionSystem?.triggerLightBurst?.(detail)
   dispatch('lightBurst', detail)
+}
+
+function handleEntitySpawned(detail: any) {
+  if (detail?.entityType === 'player') {
+    playerSpawned = true
+  }
+
+  dispatch('entitySpawned', detail)
 }
 
 // Lifecycle
@@ -986,8 +1019,9 @@ onDestroy(() => {
         bind:spawnSystemRef={spawnSystem}
         bind:playerComponentRef={playerComponent}
         bind:physicsReady
-        bind:terrainReady
-        {playerReady}
+        bind:staticWorldReady
+        bind:playerReady
+        bind:gameplayEnabled={playerSpawned}
         {normalizeLevelId}
         on:levelTransition={handleLevelTransition}
         on:starSelected={(e) => {
@@ -1001,7 +1035,7 @@ onDestroy(() => {
         on:performanceUpdate={(e) => dispatch('performanceUpdate', e.detail)}
         on:qualityChanged={(e) => dispatch('qualityChanged', e.detail)}
         on:lodLevelChanged={(e) => dispatch('lodLevelChanged', e.detail)}
-        on:entitySpawned={(e) => dispatch('entitySpawned', e.detail)}
+        on:entitySpawned={(e) => handleEntitySpawned(e.detail)}
         on:playerInteraction={(e) => handlePlayerInteraction(e.detail)}
         on:lightBurst={(e) => handlePlayerLightBurst(e.detail)}
         on:telescopeInteraction={(e) => dispatch('telescopeInteraction', e.detail)}
@@ -1022,7 +1056,7 @@ onDestroy(() => {
           {#if currentLevel !== 'observatory'}
             <button
               class="mt-6 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm"
-              on:click={() => { gameActions.transitionToLevel('observatory'); terrainReady = false; }}
+              on:click={() => { transitionToLevel('observatory') }}
             >
               ← Return to Observatory
             </button>
@@ -1081,7 +1115,7 @@ onDestroy(() => {
             <svelte:component this={editorPanelComponent} levelId={currentLevel} />
           {/if}
         {/if}
-        <!-- Modern Timeline Card (replaces deleted TimelineCard component) -->
+        <!-- Timeline card -->
         <TimelineCard
           isVisible={!!selectedEvent}
           event={selectedEvent}
@@ -1154,11 +1188,6 @@ onDestroy(() => {
         {/if}
       </div>
 
-      <!--
-      // ==================================================================
-      // === ADD THE CONVERSATION DIALOG RENDERING BLOCK HERE ===
-      // ==================================================================
-      -->
       {#if ($isConversationActive || $conversationUIState.isVisible) && conversationDialogComponent}
         <div style="pointer-events: auto;">
             <svelte:component

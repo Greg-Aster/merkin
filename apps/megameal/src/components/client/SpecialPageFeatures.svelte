@@ -1,6 +1,7 @@
 <!-- SpecialPageFeatures.svelte - Cleaned and simplified -->
 <script lang="ts">
 import { onMount } from 'svelte'
+import '../../styles/features/special-page-features.css'
 
 export const currentPath = ''
 export const oneColumn = false // From frontmatter - treated as INITIAL state
@@ -283,40 +284,4 @@ export function resetSpecialPageState() {
 </script>
 
 <!-- This component doesn't render anything visible, it just manages state and behavior -->
-<div style="display: none;"></div>
-
-<style>
-  /* CSS handles layout changes - no more DOM manipulation */
-  
-  /* Hide sidebar in one column mode */
-  :global(body.one-column-mode #main-grid > div:first-child) {
-    display: none !important;
-  }
-  
-  /* Force single column grid in one column mode */
-  :global(body.one-column-mode #main-grid) {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Fullscreen mode overrides - highest priority */
-  :global(body.fullscreen-mode #main-grid > div:first-child,
-          body.fullscreen-mode #toc-wrapper,
-          body.fullscreen-mode #banner-container) {
-    display: none !important;
-  }
-
-  :global(body.fullscreen-mode #main-grid) {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Mobile-first safety - ensure mobile is always single column */
-  @media (max-width: 767px) {
-    :global(#main-grid) {
-      grid-template-columns: 1fr !important;
-    }
-    
-    :global(#main-grid > div:first-child) {
-      display: none !important;
-    }
-  }
-</style>
+<div hidden></div>

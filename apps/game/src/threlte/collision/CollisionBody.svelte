@@ -1,17 +1,25 @@
 <script lang="ts">
 import { T } from '@threlte/core'
 import { Collider, RigidBody } from '@threlte/rapier'
-import type { PrimitiveGeometryKind } from '../engine'
 import EditorAssetTrimeshCollider from '../editor/EditorAssetTrimeshCollider.svelte'
 import EditorColliderHelper from '../editor/EditorColliderHelper.svelte'
+import EditorCollisionOverlayLabel from '../editor/EditorCollisionOverlayLabel.svelte'
 import EditorMeshColliderHelper from '../editor/EditorMeshColliderHelper.svelte'
 import EditorPrimitiveTrimeshCollider from '../editor/EditorPrimitiveTrimeshCollider.svelte'
 import EditorPrimitiveTrimeshHelper from '../editor/EditorPrimitiveTrimeshHelper.svelte'
 import type { EditorRigidBodyType } from '../editor/editorTypes'
+import type {
+  CollisionChannel,
+  CollisionIntent,
+  PrimitiveGeometryKind,
+} from '../engine'
 
 export let physicsEnabled = true
 export let showOverlay = false
 export let shape: 'cuboid' | 'cylinder' | 'trimesh' = 'cuboid'
+export let intent: CollisionIntent = 'blocker'
+export let channel: CollisionChannel = 'worldStatic'
+export let triangleBudget: number | undefined = undefined
 export let args: number[] = [0.5, 0.5, 0.5]
 export let bodyType: EditorRigidBodyType = 'fixed'
 export let position: [number, number, number] = [0, 0, 0]
@@ -34,6 +42,17 @@ export let overlayColor = '#ff8c63'
 
 $: isAssetTrimesh = shape === 'trimesh' && assetUrl.length > 0
 $: isPrimitiveTrimesh = shape === 'trimesh' && !!primitiveGeometry
+$: overlayLabelLines = [
+  `shape: ${shape}`,
+  `intent: ${intent}`,
+  `channel: ${channel}`,
+  `budget: ${triangleBudget ?? 'n/a'}`,
+]
+$: overlayLabelPosition = [
+  0,
+  Math.max(1, Number(args[1] ?? args[0] ?? 1) * 2 + 0.55),
+  0,
+] as [number, number, number]
 </script>
 
 <T.Group {position} {rotation} {scale}>
@@ -99,5 +118,9 @@ $: isPrimitiveTrimesh = shape === 'trimesh' && !!primitiveGeometry
     {:else}
       <EditorColliderHelper shape="cuboid" {args} color={overlayColor} />
     {/if}
+    <EditorCollisionOverlayLabel
+      lines={overlayLabelLines}
+      position={overlayLabelPosition}
+    />
   {/if}
 </T.Group>

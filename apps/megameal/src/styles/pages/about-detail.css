@@ -1,0 +1,11 @@
+#about-container {
+  scroll-margin-top: calc(var(--navbar-height) + 2rem);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+#about-container video {
+  object-fit: cover;
+}

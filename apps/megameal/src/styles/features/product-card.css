@@ -1,0 +1,121 @@
+.product-card-wrapper {
+  position: relative;
+}
+
+.product-card {
+  cursor: pointer;
+}
+
+.product-card:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.product-card .expandable-details {
+  transition:
+    max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease-in-out;
+}
+
+.product-card.selected .expandable-details {
+  max-height: 2400px;
+  opacity: 1;
+}
+
+.product-card .card-expansion-trigger .icon {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card.selected .card-expansion-trigger .icon {
+  transform: rotate(180deg);
+}
+
+.product-card .btn-primary {
+  cursor: pointer;
+}
+
+.product-card .line-clamp-2 {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.product-card .gallery-nav {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.product-card .product-image-gallery:hover .gallery-nav {
+  opacity: 1;
+}
+
+.product-card .tab-navigation .tab-link {
+  cursor: pointer;
+  transition:
+    color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out;
+}
+
+.product-card .tab-navigation .tab-link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  border-radius: 2px;
+}
+
+.product-card .tab-panel {
+  animation: store-tab-fade-in 0.3s ease-in-out;
+}
+
+@keyframes store-tab-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.product-card .qna-item:not(:last-child) {
+  border-bottom: 1px solid rgba(var(--slate-rgb, 71, 85, 105), 0.2);
+  padding-bottom: 0.75rem;
+}
+
+.product-card.selected .expandable-details .btn-primary {
+  opacity: 0.75;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.product-card.selected .expandable-details .btn-primary:hover {
+  opacity: 1;
+}
+
+.product-card .review-item:not(:last-child) {
+  border-bottom: 1px solid rgba(var(--slate-rgb, 71, 85, 105), 0.15);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.product-card .review-author {
+  font-weight: 600;
+}
+
+.product-card .review-date {
+  font-size: 0.8em;
+  color: var(--slate-500);
+}
+
+.dark .product-card .review-date {
+  color: var(--slate-400);
+}
+
+.product-card .review-rating .icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.1em;
+  color: var(--amber-400);
+}

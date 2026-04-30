@@ -11,7 +11,7 @@
     "rotation": [0, 0, 0]
   },
   "physics": {
-    "type": "trimesh",
+    "type": "baked-terrain-mesh",
     "worldSize": 2200,
     "gridX": 1,
     "gridY": 1,
@@ -21,12 +21,6 @@
     "bounds": {
       "min": [-1100, -0.32, -1100],
       "max": [1100, 0.52, 1100]
-    },
-    "trimesh": {
-      "downsample": 10,
-      "mode": "single",
-      "chunkVerts": 65,
-      "activeRadius": 1
     }
   },
   "lighting": {
@@ -46,18 +40,48 @@
   },
   "optimization": {
     "oceanSegments": {
-      "ultra_low": { "width": 8, "height": 8 },
-      "low": { "width": 12, "height": 12 },
-      "medium": { "width": 24, "height": 24 },
-      "high": { "width": 32, "height": 32 },
-      "ultra": { "width": 64, "height": 64 }
+      "ultra_low": {
+        "width": 8,
+        "height": 8
+      },
+      "low": {
+        "width": 12,
+        "height": 12
+      },
+      "medium": {
+        "width": 24,
+        "height": 24
+      },
+      "high": {
+        "width": 32,
+        "height": 32
+      },
+      "ultra": {
+        "width": 64,
+        "height": 64
+      }
     },
     "terrainSegments": {
-      "ultra_low": { "width": 16, "height": 16 },
-      "low": { "width": 32, "height": 32 },
-      "medium": { "width": 64, "height": 64 },
-      "high": { "width": 128, "height": 128 },
-      "ultra": { "width": 256, "height": 256 }
+      "ultra_low": {
+        "width": 16,
+        "height": 16
+      },
+      "low": {
+        "width": 32,
+        "height": 32
+      },
+      "medium": {
+        "width": 64,
+        "height": 64
+      },
+      "high": {
+        "width": 128,
+        "height": 128
+      },
+      "ultra": {
+        "width": 256,
+        "height": 256
+      }
     }
   },
   "style": {
@@ -87,5 +111,22 @@
     "starMap": true,
     "conversations": true,
     "styles": true
+  },
+  "collision": {
+    "terrain": {
+      "type": "baked-terrain-mesh",
+      "authoredException": true,
+      "url": "/terrain/collision/solitude.collider.bin",
+      "metadataUrl": "/terrain/collision/solitude.collider.meta.json",
+      "triangleCount": 32768,
+      "vertexCount": 16641,
+      "colliderResolution": 129,
+      "sampleStep": 2,
+      "bounds": {
+        "min": [-1100, -0.32, -1100],
+        "max": [1100, 0.52, 1100]
+      },
+      "center": [0, 0, 0]
+    }
   }
 }

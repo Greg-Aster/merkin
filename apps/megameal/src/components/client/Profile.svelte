@@ -1,6 +1,7 @@
 <!-- Profile.svelte - Enhanced with video playback controls -->
 <script lang="ts">
 import { onDestroy, onMount } from 'svelte'
+import '../../styles/features/profile.css'
 
 // Props
 export const slug = ''
@@ -331,7 +332,7 @@ onMount(() => {
 })
 </script>
 
-<div class="card-base p-3">
+<div class="profile-card card-base p-3">
   <a
     aria-label="Go to About Page"
     href={displayLink}
@@ -546,18 +547,3 @@ onMount(() => {
   </div>
 </div>
 
-<style>
-  .avatar-image {
-    border-radius: 0.75rem;
-  }
-  
-  /* Ensure smooth transitions */
-  .transition-opacity {
-    transition: opacity 1s ease-in-out;
-  }
-
-  /* Ensure videos fit properly */
-  video.avatar-image {
-    object-fit: cover;
-  }
-</style>

@@ -12,6 +12,8 @@
 		"smoke:engine": "node ./scripts/smoke-check.mjs",
 		"smoke:boot": "node ./scripts/boot-check.mjs",
 		"audit:engine": "node ./scripts/audit-engine-architecture.mjs",
+		"bake:terrain-collision": "node ./scripts/bake-terrain-collision.mjs",
+		"generate:terrain-heightmap": "node ./scripts/generate-terrain-heightmap.mjs",
 		"profile:three-runtime": "node ./scripts/profile-three-runtime.mjs",
 		"preview": "astro preview",
 		"type-check": "tsc --noEmit",

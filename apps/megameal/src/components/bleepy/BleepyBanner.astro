@@ -3,6 +3,7 @@ export interface Props {
   backgroundImageUrl?: string
 }
 const { backgroundImageUrl } = Astro.props
+import '../../styles/features/bleepy/BleepyBanner.css'
 ---
 <!-- Main Mascot Container -->
 <div id="mascot-container" class="bleepy-banner-container" data-background-image-url={backgroundImageUrl}>
@@ -94,6 +95,3 @@ const { backgroundImageUrl } = Astro.props
   });
 </script>
 
-<style>
-  @import './BleepyBanner.css';
-</style>

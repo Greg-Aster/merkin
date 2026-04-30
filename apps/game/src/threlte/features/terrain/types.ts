@@ -30,3 +30,24 @@ export interface TerrainStats {
   sampleCount: number
   chunksVisible: number
 }
+
+export interface TerrainRuntimeReadyDetail {
+  source: 'baked-collider'
+  heightmapUrl: string
+  heightmapReady: boolean
+  collisionReady: boolean
+  bounds: TerrainState['bounds']
+  resolution: number
+  worldSize: number
+  worldSizeX?: number
+  worldSizeZ?: number
+  collision?: {
+    type: 'baked-terrain-mesh'
+    authoredException: true
+    url: string
+    sourceResolution: number
+    colliderResolution: number
+    sampleStep: number
+    triangleCount: number
+  }
+}

@@ -1,0 +1,318 @@
+/**
+ * megameal-interactions.css
+ * MEGAMEAL-only interaction enhancements: hover effects, 3D lifts, entrance animations.
+ * Imported in apps/megameal/src/layouts/MainGridLayout.astro.
+ * Does NOT affect travel, DNDIY, or Temporal-Flow sites.
+ */
+
+/* ============================================================
+   BANNER SLIDES — pointer-events fix
+   Invisible slides (opacity:0) must not intercept clicks.
+   JS also sets pointer-events per slide, but this is the CSS fallback
+   to ensure correct state before JS runs.
+   ============================================================ */
+
+#standard-banner-container .banner-slide[style*="opacity: 0"] {
+  pointer-events: none;
+}
+#standard-banner-container .banner-slide[style*="opacity: 1"] {
+  pointer-events: auto;
+}
+
+/* ============================================================
+   HTML BANNER SLIDE — suppress generic hover UI
+   The html-type slide (data-banner-media-type="unknown") has its own
+   CTAs and design. Hide blog-core's generic dark overlay and info icon
+   which appear on hover and obscure the custom content.
+   ============================================================ */
+
+/* Hide only blog-core's generic black hover overlay.
+   Do not target child position here because the HTML slide's first child
+   is its real media layer, not an overlay. */
+.banner-slide[data-banner-media-type="unknown"] .banner-hover-overlay,
+#standard-banner-container .banner-slide:has(.banner-media-layer[data-banner-media-type="unknown"]) .banner-hover-overlay {
+  display: none !important;
+}
+
+#standard-banner-container .banner-slide:has(.banner-media-layer[data-banner-media-type="unknown"]) .banner-title-display {
+  display: none !important;
+}
+
+/* Normal cursor — the slide itself isn't a link; the CTAs inside it are */
+.banner-slide[data-banner-media-type="unknown"] .banner-link,
+#standard-banner-container .banner-slide:has(.banner-media-layer[data-banner-media-type="unknown"]) .banner-link {
+  cursor: default;
+}
+
+/* Deliberate banner transitions: slow scale, soft blur, depth shift */
+#standard-banner-container .banner-slide {
+  transition-property: opacity, transform, filter;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  transform: scale(1.035) translate3d(0, 0.75rem, 0);
+  filter: saturate(0.82) brightness(0.78) blur(10px);
+}
+
+#standard-banner-container .banner-slide[data-active="true"] {
+  transform: scale(1) translate3d(0, 0, 0);
+  filter: saturate(1) brightness(1) blur(0);
+  z-index: 2;
+}
+
+#standard-banner-container .banner-slide[data-active="false"] {
+  z-index: 1;
+}
+
+/* Product-widget slides need a taller full-width banner frame.
+   The HTML slide stays mounted in the rotation stack, so size the portal
+   banner for the richer storefront layout rather than per-frame switching. */
+#banner-container:has(.featured-product-shell) .banner-aspect-container {
+  height: clamp(48rem, 84vh, 60rem) !important;
+}
+
+#banner-container:has(.featured-product-shell) .banner-content-wrapper,
+#banner-container:has(.featured-product-shell) #standard-banner-container,
+#banner-container:has(.featured-product-shell) .banner-slide,
+#banner-container:has(.featured-product-shell) .banner-media-layer[data-banner-media-type="unknown"] {
+  height: 100%;
+}
+
+#standard-banner-container .banner-billboard {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  pointer-events: none;
+  color: white;
+}
+
+#standard-banner-container .banner-billboard h3,
+#standard-banner-container .banner-billboard p,
+#standard-banner-container .banner-billboard .banner-title-kicker {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+}
+
+#standard-banner-container .banner-billboard p {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+#standard-banner-container .banner-billboard .banner-title-kicker {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+}
+
+#standard-banner-container .banner-billboard .banner-title-meta,
+#standard-banner-container .banner-billboard .banner-billboard__store-offer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+#standard-banner-container .banner-billboard--timeline {
+  display: grid;
+  align-items: end;
+  padding: 1.25rem 1.5rem 1.6rem;
+}
+
+#standard-banner-container .banner-billboard__timeline-panel {
+  display: grid;
+  gap: 0.95rem;
+  width: min(68rem, 96%);
+  justify-self: center;
+  padding: 1.45rem 1.7rem 1.5rem;
+  border-radius: 1.6rem;
+  border: 1px solid rgba(120, 216, 255, 0.26);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(96, 211, 255, 0.2), transparent 56%),
+    linear-gradient(180deg, rgba(7, 16, 32, 0.86), rgba(7, 16, 32, 0.4));
+  box-shadow: 0 24px 62px rgba(0, 0, 0, 0.24);
+}
+
+#standard-banner-container .banner-billboard__timeline-topline {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+#standard-banner-container .banner-billboard__timeline-statline,
+#standard-banner-container .banner-billboard__timeline-cta {
+  font-size: 0.9rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+#standard-banner-container .banner-billboard__timeline-statline {
+  color: rgba(182, 231, 255, 0.72);
+}
+
+#standard-banner-container .banner-billboard__timeline-cta {
+  padding: 0.9rem 1.15rem;
+  border-radius: 999px;
+  border: 1px solid rgba(124, 226, 255, 0.32);
+  color: rgb(186 239 255);
+  background: rgba(88, 192, 255, 0.12);
+}
+
+#standard-banner-container .banner-billboard__timeline-copy {
+  width: 100%;
+}
+
+#standard-banner-container .banner-billboard__timeline-copy h3 {
+  max-width: 15ch;
+  font-size: clamp(3rem, 6.4vw, 6rem);
+  line-height: 0.84;
+  letter-spacing: -0.05em;
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+}
+
+#standard-banner-container .banner-billboard__timeline-copy p {
+  max-width: 48rem;
+  margin-top: 0.95rem;
+  font-size: 1.32rem;
+  line-height: 1.5;
+}
+
+#standard-banner-container .banner-billboard__timeline-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#standard-banner-container .banner-billboard--archive {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding: 0.8rem;
+}
+
+#standard-banner-container .banner-billboard__archive-card {
+  width: calc(100% - 0.5rem);
+  min-height: calc(100% - 0.5rem);
+  padding: 2.25rem 2.6rem 2.35rem;
+  border-radius: 1.15rem;
+  border: 1px solid rgba(164, 219, 255, 0.4);
+  background:
+    radial-gradient(circle at 16% 10%, rgba(154, 228, 255, 0.22), transparent 30%),
+    radial-gradient(circle at 100% 100%, rgba(44, 135, 255, 0.18), transparent 32%),
+    linear-gradient(180deg, rgba(24, 78, 148, 0.985), rgba(10, 32, 72, 0.975));
+  box-shadow:
+    0 36px 110px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    inset 0 0 0 1px rgba(134, 209, 255, 0.08);
+  transform: none;
+  backdrop-filter: blur(4px) saturate(1.08);
+}
+
+#standard-banner-container .banner-billboard__archive-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+#standard-banner-container .banner-billboard__archive-stamp {
+  padding: 0.7rem 0.95rem;
+  border: 1px solid rgba(196, 234, 255, 0.5);
+  border-radius: 0.45rem;
+  color: rgb(235 247 255);
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+#standard-banner-container .banner-billboard__archive-card h3 {
+  max-width: 16ch;
+  font-size: clamp(3.6rem, 7.2vw, 7.2rem);
+  line-height: 0.78;
+  letter-spacing: -0.06em;
+  font-family: 'Creepster', 'Roboto', sans-serif;
+  color: rgb(239 249 255);
+  text-shadow:
+    0 0 18px rgba(154, 228, 255, 0.14),
+    0 14px 36px rgba(0, 0, 0, 0.34);
+}
+
+#standard-banner-container .banner-billboard__archive-card p {
+  max-width: 60rem;
+  margin-top: 1.15rem;
+  font-size: 1.46rem;
+  line-height: 1.4;
+  color: rgba(235, 246, 255, 0.96);
+  font-family: 'Roboto', system-ui, sans-serif;
+}
+
+#standard-banner-container .banner-billboard__archive-footer {
+  margin-top: 1.2rem;
+  padding-top: 0.9rem;
+  border-top: 1px dashed rgba(184, 227, 255, 0.32);
+  color: rgba(228, 245, 255, 0.96);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+}
+
+#standard-banner-container .banner-billboard--cookbook {
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+}
+
+#standard-banner-container .banner-billboard__cookbook-slab {
+  display: grid;
+  gap: 1rem;
+  width: min(72rem, calc(100% - 1.5rem));
+  padding: 1.6rem 1.85rem 1.6rem;
+  border-radius: 2.4rem;
+  border: 1px solid rgba(255, 177, 136, 0.26);
+  background:
+    linear-gradient(135deg, rgba(255, 110, 84, 0.88), rgba(132, 36, 26, 0.82) 56%, rgba(48, 11, 22, 0.86));
+  box-shadow:
+    0 32px 90px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+#standard-banner-container .banner-billboard__cookbook-topline {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+#standard-banner-container .banner-billboard__cookbook-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+  gap: 1.35rem;
+  align-items: end;
+}
+
+#standard-banner-container .banner-billboard__cookbook-copy h3 {
+  max-width: 9ch;
+  font-size: clamp(3.3rem, 7vw, 7rem);
+  line-height: 0.8;
+  letter-spacing: -0.07em;
+  text-transform: uppercase;
+  font-family: 'Sriracha', cursive;
+}
+
+#standard-banner-container .banner-billboard__cookbook-copy p {
+  max-width: 28rem;
+  justify-self: end;
+  font-size: 1.22rem;
+  line-height: 1.46;
+}
+
+#standard-banner-container .banner-billboard__cookbook-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  padding-top: 0.4rem;
+}

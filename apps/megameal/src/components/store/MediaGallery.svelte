@@ -1,5 +1,6 @@
 <script lang="ts">
 import { onDestroy, onMount } from 'svelte'
+import '../../styles/features/store/media-gallery.css'
 
 export interface MediaItem {
   type: 'image' | 'video' | 'youtube'
@@ -244,11 +245,3 @@ function isVideoType(item: MediaItem) {
   {/if}
 </div>
 
-<style>
-  .media-gallery:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
-  .scrollbar-none { scrollbar-width: none; }
-  .scrollbar-none::-webkit-scrollbar { display: none; }
-  .gallery-nav { opacity: 0; }
-  .media-gallery:hover .gallery-nav,
-  .media-gallery:focus-within .gallery-nav { opacity: 1; }
-</style>

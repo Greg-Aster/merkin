@@ -9,19 +9,11 @@
     "chunksPath": "/terrain/levels/observatory-environment/"
   },
   "spawn": {
-    "position": [
-      -137.2,
-      20,
-      -49.5
-    ],
-    "rotation": [
-      0,
-      0,
-      0
-    ]
+    "position": [-137.2, 20, -49.5],
+    "rotation": [0, 0, 0]
   },
   "physics": {
-    "type": "trimesh",
+    "type": "baked-terrain-mesh",
     "worldSize": 393.5526885986328,
     "gridX": 4,
     "gridY": 4,
@@ -29,33 +21,15 @@
     "minHeight": -1.8438290357589722,
     "maxHeight": 56.307861328125,
     "bounds": {
-      "min": [
-        -196.7517120361328,
-        -1.8438290357589722,
-        -194.6022491455078
-      ],
-      "max": [
-        196.8009765625,
-        56.307861328125,
-        194.5846710205078
-      ]
-    },
-    "trimesh": {
-      "downsample": 8,
-      "mode": "chunked",
-      "chunkVerts": 65,
-      "activeRadius": 3
+      "min": [-196.7517120361328, -1.8438290357589722, -194.6022491455078],
+      "max": [196.8009765625, 56.307861328125, 194.5846710205078]
     }
   },
   "lighting": {
     "ambientIntensity": 0.3,
     "directionalLights": [
       {
-        "position": [
-          100,
-          200,
-          100
-        ],
+        "position": [100, 200, 100],
         "color": 16777215,
         "intensity": 1
       }
@@ -148,5 +122,22 @@
     "underwaterFogDensity": 0.1,
     "underwaterFogColor": 533536,
     "surfaceFogDensity": 0.001
+  },
+  "collision": {
+    "terrain": {
+      "type": "baked-terrain-mesh",
+      "authoredException": true,
+      "url": "/terrain/collision/observatory-environment.collider.bin",
+      "metadataUrl": "/terrain/collision/observatory-environment.collider.meta.json",
+      "triangleCount": 32768,
+      "vertexCount": 16641,
+      "colliderResolution": 129,
+      "sampleStep": 8,
+      "bounds": {
+        "min": [-199.5517120361328, -1.8438290357589722, -195.1022491455078],
+        "max": [194.0009765625, 56.307861328125, 194.0846710205078]
+      },
+      "center": [-2.7753677368164062, 0, -0.5087890625]
+    }
   }
 }

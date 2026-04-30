@@ -121,7 +121,9 @@ function getDynamicConstellationConfig(era: string): ConstellationConfig {
 }
 
 function getPatternForConfig(config: ConstellationConfig) {
-  return constellationPatterns[config.pattern] || constellationPatterns.scattered
+  return (
+    constellationPatterns[config.pattern] || constellationPatterns.scattered
+  )
 }
 
 function getConnectionsForStarCount(
@@ -157,7 +159,9 @@ function getIndexInEra(event: any, allEvents: any[], fallbackIndex: number) {
   const starId = getStarIdentity(event, fallbackIndex)
   const indexInEra = allEvents
     .filter(candidate => normalizeEra(candidate) === era)
-    .findIndex(candidate => getStarIdentity(candidate, fallbackIndex) === starId)
+    .findIndex(
+      candidate => getStarIdentity(candidate, fallbackIndex) === starId,
+    )
 
   return indexInEra === -1 ? Math.max(0, fallbackIndex) : indexInEra
 }
@@ -183,9 +187,15 @@ onMount(() => {
 })
 
 $: starRegenerationKey = `${timelineEvents
-  .map(event => `${getStarIdentity(event)}:${event.title}:${event.year}:${event.era}`)
+  .map(
+    event =>
+      `${getStarIdentity(event)}:${event.title}:${event.year}:${event.era}`,
+  )
   .join('|')}::${registryLevelEvents
-  .map(event => `${getStarIdentity(event)}:${event.title}:${event.year}:${event.era}`)
+  .map(
+    event =>
+      `${getStarIdentity(event)}:${event.title}:${event.year}:${event.era}`,
+  )
   .join('|')}`
 
 $: if (starGroup && starRegenerationKey) {

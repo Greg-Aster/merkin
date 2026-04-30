@@ -7,13 +7,21 @@ import AmbientParticleField from '../components/AmbientParticleField.svelte'
 import SceneFogExp2 from '../components/SceneFogExp2.svelte'
 import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
 import LevelManager from '../core/LevelManager.svelte'
-import { createWorldMatrixResolver } from '../editor/editorHierarchyUtils'
+import type { PlayerSpawnRequestedDetail } from '../core/levelRuntimeEvents'
+import { editorSceneStore } from '../editor/editorDocumentStore'
 import { resolveSolitudePresetSettings } from '../editor/editorLevelPresets'
+import { solitudeEditorSettingsStore } from '../editor/editorSelectors'
+import { editorStateStore } from '../editor/editorSessionStore'
 import {
-  editorSceneStore,
-  editorStateStore,
-  solitudeEditorSettingsStore,
-} from '../editor/editorStore'
+  type ActorDefinition,
+  type LevelBuildReport,
+  type LevelDefinition,
+  type RuntimeGameplayData,
+  adaptEditorSceneToLevelDefinition,
+  createActorWorldMatrixResolver,
+  createComponentLevelDefinition,
+  createLevelBuildReport,
+} from '../engine'
 import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
 import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
 import {
@@ -21,8 +29,14 @@ import {
   qualitySettingsStore,
 } from '../features/performance/stores/performanceStore'
 import { shouldEnableSceneShadows } from '../features/performance/utils/runtimeSceneBudget'
-import { Terrain, type TerrainConfig, terrainStore } from '../features/terrain'
+import {
+  TerrainRuntime,
+  type TerrainRuntimeComponentData,
+  loadTerrainRuntimeComponentData,
+  terrainStore,
+} from '../features/terrain'
 import { playerStateStore } from '../stores/gameStateStore'
+import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 import {
   DEFAULT_SOLITUDE_ATMOSPHERE_PRESET,
   buildSolitudeRuntimeVisualStyle,
@@ -36,22 +50,27 @@ import Skybox from '../systems/Skybox.svelte'
 import StarMap from '../systems/StarMap.svelte'
 
 const dispatch = createEventDispatcher()
-const isDev = import.meta.env.DEV
 
 export let manifestUrl = '/terrain/solitude.manifest.json'
+export let levelId = 'solitude'
 export let timelineEvents: any[] = []
 export let timelineEventsJson = '[]'
-export let spawnSystem: any = null
 export let interactionSystem: any = null
 export let playerSpawnPoint: [number, number, number] = [0, 2.4, -24]
 
 let baseManifest: any = null
 let manifest: any = null
-let terrainConfig: TerrainConfig | null = null
+let terrainRuntimeData: TerrainRuntimeComponentData | null = null
 let realTimelineEvents: any[] = []
 let isLoadingTimeline = true
 let timelineLoadError: string | null = null
 let starMapRef: THREE.Group
+let terrainRuntimeReady = false
+let lastPlayerSpawnRequestKey = ''
+let componentLevelDefinition: LevelDefinition | null = null
+let authoredSceneLevelDefinition: LevelDefinition | null = null
+let solitudeLevelDefinition: LevelDefinition | null = null
+let componentLevelBuildReport: LevelBuildReport | null = null
 
 function loadTimelineData() {
   try {
@@ -81,47 +100,13 @@ async function loadManifest() {
 
   baseManifest = await response.json()
 
-  const bounds = baseManifest.physics?.bounds ?? null
-  const heightmapConfigUrl = baseManifest.assets?.heightmap?.replace(
-    '_heightmap.png',
-    '_config.json',
-  )
-  let heightmapConfig: any = null
-
-  if (heightmapConfigUrl) {
-    try {
-      const configResponse = await fetch(heightmapConfigUrl)
-      if (configResponse.ok) {
-        heightmapConfig = await configResponse.json()
-      }
-    } catch (error) {
-      if (isDev) {
-        console.warn('Solitude heightmap config unavailable:', error)
-      }
-    }
-  }
-
-  terrainConfig = {
-    heightmapUrl: baseManifest.assets.heightmap,
-    worldSize: baseManifest.physics.worldSize,
-    worldSizeX: heightmapConfig?.bounds
-      ? heightmapConfig.bounds.max[0] - heightmapConfig.bounds.min[0]
-      : undefined,
-    worldSizeZ: heightmapConfig?.bounds
-      ? heightmapConfig.bounds.max[2] - heightmapConfig.bounds.min[2]
-      : undefined,
-    minHeight: heightmapConfig?.heightOffset ?? baseManifest.physics.minHeight,
-    maxHeight: heightmapConfig
-      ? heightmapConfig.heightOffset + heightmapConfig.heightScale
-      : baseManifest.physics.maxHeight,
-    bounds: heightmapConfig?.bounds ?? bounds,
-    chunkSize: baseManifest.physics.chunkSize,
-    gridSize: [
-      baseManifest.physics.gridX || 1,
-      baseManifest.physics.gridY || 1,
-    ],
-    lods: [{ level: 0, distance: baseManifest.physics.worldSize * 2 }],
-  }
+  terrainRuntimeData = await loadTerrainRuntimeComponentData({
+    levelId,
+    source: 'built-in-manifest',
+    manifest: baseManifest,
+    manifestUrl,
+    showVisualSurface: false,
+  })
 }
 
 function applySolitudeEditorSettings(base: any, editorSettings: any) {
@@ -392,11 +377,36 @@ function handleLevelTransition(event: CustomEvent) {
 }
 
 function getSpawnHeight() {
-  if (!$terrainStore.manager) return playerSpawnPoint[1]
-  return $terrainStore.manager.getHeightAt(
-    playerSpawnPoint[0],
-    playerSpawnPoint[2],
-  )
+  const spawn = solitudeLevelDefinition?.spawn.player ?? playerSpawnPoint
+  if (!$terrainStore.manager) return spawn[1]
+  return $terrainStore.manager.getHeightAt(spawn[0], spawn[2])
+}
+
+function requestPlayerSpawn() {
+  if (!terrainRuntimeReady || !manifest) return
+  if (componentLevelBuildReport?.errors.length) return
+
+  const spawn = solitudeLevelDefinition?.spawn.player ?? playerSpawnPoint
+  const spawnHeight = getSpawnHeight()
+  const spawnPosition: [number, number, number] = [
+    spawn[0],
+    Math.max(spawn[1], spawnHeight + 1.5),
+    spawn[2],
+  ]
+  const requestKey = `${levelId}:${spawnPosition.join(',')}`
+  if (lastPlayerSpawnRequestKey === requestKey) return
+
+  const detail: PlayerSpawnRequestedDetail = {
+    levelId,
+    position: spawnPosition,
+    reason: 'level_load',
+    metadata: {
+      levelName: manifest.id ?? levelId,
+      levelDefinitionId: solitudeLevelDefinition?.id,
+    },
+  }
+  dispatch('playerSpawnRequested', detail)
+  lastPlayerSpawnRequestKey = requestKey
 }
 
 function clampNumber(value: number, min: number, max: number) {
@@ -454,6 +464,59 @@ $: resolvedSolitudeSettings = resolveSolitudePresetSettings(
 $: manifest = baseManifest
   ? applySolitudeEditorSettings(baseManifest, resolvedSolitudeSettings)
   : null
+$: componentLevelDefinition =
+  manifest && terrainRuntimeData
+    ? createComponentLevelDefinition({
+        levelId,
+        title: manifest.name ?? 'Solitude',
+        spawn: manifest.spawn?.position ?? [0, 2.4, -24],
+        settings: manifest,
+        terrain: {
+          id: `${levelId}-terrain`,
+          name: manifest.name ?? 'Solitude Terrain',
+          manifestUrl,
+          heightmapUrl: terrainRuntimeData.manifest.assets?.heightmap,
+          worldSize: terrainRuntimeData.config.worldSize,
+          worldSizeX: terrainRuntimeData.config.worldSizeX,
+          worldSizeZ: terrainRuntimeData.config.worldSizeZ,
+          bounds: terrainRuntimeData.config.bounds,
+        },
+        systemActorIds: [
+          `${levelId}-ocean-system`,
+          `${levelId}-ambient-particles-system`,
+          `${levelId}-star-map-system`,
+        ],
+      })
+    : null
+$: authoredSceneLevelDefinition = $editorSceneStore
+  ? adaptEditorSceneToLevelDefinition($editorSceneStore)
+  : null
+$: solitudeLevelDefinition = componentLevelDefinition
+  ? {
+      ...componentLevelDefinition,
+      actors: [
+        ...componentLevelDefinition.actors,
+        ...(authoredSceneLevelDefinition?.actors ?? []),
+      ],
+    }
+  : null
+$: componentLevelBuildReport = solitudeLevelDefinition
+  ? createLevelBuildReport(solitudeLevelDefinition)
+  : null
+$: if (componentLevelBuildReport) {
+  setRuntimeDiagnostic('levelDefinition', {
+    label: 'Level Definition',
+    level: componentLevelBuildReport.errors.length
+      ? 'error'
+      : componentLevelBuildReport.warnings.length
+        ? 'warning'
+        : 'ready',
+    message: componentLevelBuildReport.errors.length
+      ? `${componentLevelBuildReport.levelId}: component level contract failed with ${componentLevelBuildReport.errors.length} errors.`
+      : `${componentLevelBuildReport.levelId}: ${componentLevelBuildReport.actorCount} component/scene actors, ${componentLevelBuildReport.physicsActorCount} physics actors.`,
+    meta: componentLevelBuildReport as unknown as Record<string, unknown>,
+  })
+}
 $: solitudeAtmosphereProfile = getSolitudeAtmosphereProfile(
   resolvedSolitudeSettings?.presets?.atmosphere ??
     DEFAULT_SOLITUDE_ATMOSPHERE_PRESET,
@@ -466,6 +529,12 @@ $: if (manifest) {
   replaceRuntimeVisualStyle(resolvedRuntimeVisualStyle)
 }
 $: playerSpawnPoint = manifest?.spawn?.position ?? [0, 2.4, -24]
+$: {
+  terrainRuntimeReady
+  manifest
+  playerSpawnPoint
+  requestPlayerSpawn()
+}
 $: waterEnabled = manifest?.features?.water ?? manifest?.water?.enabled ?? false
 $: activeSkyboxPreset =
   SKYBOX_PRESETS[manifest?.skyboxPreset as keyof typeof SKYBOX_PRESETS] ??
@@ -554,24 +623,27 @@ $: presetAmbientAudioRegions =
       ]
     : []
 $: authoredGameplayNodes = (() => {
-  const scene = $editorSceneStore
-  if (!scene) return []
-  const getWorldMatrix = createWorldMatrixResolver(scene.nodes)
+  if (!solitudeLevelDefinition) return []
+  const getWorldMatrix = createActorWorldMatrixResolver(
+    solitudeLevelDefinition.actors,
+  )
 
-  return scene.nodes
+  return solitudeLevelDefinition.actors
     .filter(
-      node =>
-        node.gameplay?.type === 'audio-region' ||
-        node.gameplay?.type === 'fog-volume',
+      actor =>
+        actor.gameplay?.type === 'audio-region' ||
+        actor.gameplay?.type === 'fog-volume',
     )
-    .map(node => {
-      const worldMatrix = getWorldMatrix(node.id)
+    .map((actor: ActorDefinition) => {
+      const gameplay = actor.gameplay?.data as RuntimeGameplayData | undefined
+      const worldMatrix = getWorldMatrix(actor.id)
       const position = new THREE.Vector3()
       const quaternion = new THREE.Quaternion()
       const scale = new THREE.Vector3()
       worldMatrix.decompose(position, quaternion, scale)
       return {
-        node,
+        actor,
+        gameplay,
         position: [position.x, position.y, position.z] as [
           number,
           number,
@@ -588,16 +660,15 @@ $: authoredGameplayNodes = (() => {
 $: authoredAudioRegions = authoredGameplayNodes
   .filter(
     entry =>
-      entry.node.gameplay?.type === 'audio-region' &&
-      entry.node.gameplay?.audioTrack,
+      entry.gameplay?.type === 'audio-region' && entry.gameplay?.audioTrack,
   )
   .map(entry => ({
-    id: entry.node.id,
+    id: entry.actor.id,
     position: entry.position,
     scale: entry.scale,
-    track: entry.node.gameplay?.audioTrack ?? '',
-    volume: entry.node.gameplay?.audioVolume ?? 0.24,
-    falloff: entry.node.gameplay?.regionFalloff ?? 12,
+    track: entry.gameplay?.audioTrack ?? '',
+    volume: entry.gameplay?.audioVolume ?? 0.24,
+    falloff: entry.gameplay?.regionFalloff ?? 12,
   }))
 $: effectiveAudioRegions = [
   ...presetAmbientAudioRegions,
@@ -606,7 +677,7 @@ $: effectiveAudioRegions = [
 $: effectiveFog = (() => {
   const playerPosition = $playerStateStore.position
   const fogVolumes = authoredGameplayNodes.filter(
-    entry => entry.node.gameplay?.type === 'fog-volume',
+    entry => entry.gameplay?.type === 'fog-volume',
   )
   const baseColor = new THREE.Color(manifest?.style?.fog?.color ?? '#43206c')
   const baseDensity = manifest?.style?.fog?.density ?? 0.00092
@@ -628,7 +699,7 @@ $: effectiveFog = (() => {
     const dy = Math.max(Math.abs(py - cy) - sy, 0)
     const dz = Math.max(Math.abs(pz - cz) - sz, 0)
     const outsideDistance = Math.sqrt(dx * dx + dy * dy + dz * dz)
-    const falloff = entry.node.gameplay?.regionFalloff ?? 8
+    const falloff = entry.gameplay?.regionFalloff ?? 8
     const influence =
       outsideDistance <= 0.0001
         ? 1
@@ -638,8 +709,8 @@ $: effectiveFog = (() => {
 
     if (influence > strongestInfluence) {
       strongestInfluence = influence
-      targetColor = new THREE.Color(entry.node.gameplay?.fogColor ?? '#9ba9bb')
-      targetDensity = entry.node.gameplay?.fogDensity ?? 0.0025
+      targetColor = new THREE.Color(entry.gameplay?.fogColor ?? '#9ba9bb')
+      targetDensity = entry.gameplay?.fogDensity ?? 0.0025
     }
   }
 
@@ -673,6 +744,8 @@ $: effectiveFog = (() => {
 $: solitudeLightingTheme = solitudeAtmosphereProfile.lighting
 
 onMount(() => {
+  terrainRuntimeReady = false
+  lastPlayerSpawnRequestKey = ''
   void loadManifest().catch(error => {
     console.error('❌ Solitude: Failed to load manifest:', error)
   })
@@ -684,7 +757,7 @@ onDestroy(() => {
 })
 </script>
 
-{#if manifest && terrainConfig}
+{#if manifest && terrainRuntimeData}
   <LevelManager>
     <T.Group name={manifest.id ?? 'solitude-level'}>
       <Skybox
@@ -720,20 +793,15 @@ onDestroy(() => {
         density={effectiveFog.density}
       />
 
-      <Terrain
-        config={terrainConfig}
-        showVisualSurface={false}
-        on:terrainReady={() => {
-          dispatch('terrainReady')
-          if (spawnSystem?.requestSpawn) {
-            const spawnHeight = getSpawnHeight()
-            spawnSystem.requestSpawn({
-              entityType: 'player',
-              position: [playerSpawnPoint[0], Math.max(playerSpawnPoint[1], spawnHeight + 1.5), playerSpawnPoint[2]],
-              priority: 10,
-              metadata: { levelName: manifest.id ?? 'solitude', spawnReason: 'level_load' },
-            })
-          }
+      <TerrainRuntime
+        levelId={terrainRuntimeData.levelId}
+        config={terrainRuntimeData.config}
+        collisionStrategy={terrainRuntimeData.runtime.collisionStrategy}
+        showVisualChunks={terrainRuntimeData.runtime.showVisualChunks}
+        showVisualSurface={terrainRuntimeData.runtime.showVisualSurface}
+        on:staticWorldReady
+        on:terrainRuntimeReady={(e) => {
+          terrainRuntimeReady = true
         }}
       />
 

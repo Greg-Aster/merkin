@@ -9,11 +9,7 @@
         "audio": "courtyard-breeze"
       },
       "spawn": {
-        "position": [
-          -137.2,
-          20,
-          -49.5
-        ]
+        "position": [-137.2, 20, -49.5]
       },
       "features": {
         "ocean": true,
@@ -75,21 +71,9 @@
       "id": "observatory-ground-root",
       "name": "Observatory Grounds",
       "kind": "group",
-      "position": [
-        0,
-        0,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true
     }
   ]

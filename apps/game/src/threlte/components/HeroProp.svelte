@@ -17,17 +17,18 @@ import {
 } from '../features/performance/utils/runtimeSceneBudget'
 import { reportRuntimeAssetFailure } from '../stores/runtimeDiagnosticsStore'
 import { runtimeVisualStyleStore } from '../styles/runtimeVisualStyleStore'
+import { cloneCachedGltfScene } from '../utils/gltfAssetCache'
 import {
   createObjectMaterialOverrideState,
   disposeObjectMaterialOverrideState,
   fixGLTFMaterials,
   syncObjectMaterialOverride,
 } from '../utils/materialUtils'
-import { cloneCachedGltfScene } from '../utils/gltfAssetCache'
 
 const dispatch = createEventDispatcher()
 
 export let url: string
+export let runtimeCulling = true
 
 const { camera } = useThrelte()
 let scene: THREE.Group | null = null
@@ -201,11 +202,13 @@ function getScaledBoundingRadius() {
 function applyRuntimePropBudget() {
   if (!scene) return
 
-  if (inEditorContext) {
+  if (inEditorContext || !runtimeCulling) {
     currentCullDistance = Number.POSITIVE_INFINITY
+    runtimeVisible = true
+    scene.visible = true
     sceneMeshes.forEach(mesh => {
-      mesh.castShadow = true
-      mesh.receiveShadow = true
+      mesh.castShadow = inEditorContext
+      mesh.receiveShadow = inEditorContext
       mesh.frustumCulled = false
     })
     return
@@ -361,7 +364,7 @@ useTask(delta => {
   const activeCamera = getActiveCamera()
   if (!scene || !activeCamera) return
 
-  if (inEditorContext) {
+  if (inEditorContext || !runtimeCulling) {
     if (!runtimeVisible) {
       runtimeVisible = true
       scene.visible = true

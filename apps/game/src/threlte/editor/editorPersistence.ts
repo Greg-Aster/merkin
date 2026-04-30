@@ -1,3 +1,5 @@
+import { withEditorSceneEngineData } from '../engine/sceneDocumentRuntime'
+import { assertValidEditorSceneDocument } from './editorSceneDocumentValidation'
 import type { EditorSceneDocument } from './editorTypes'
 
 const SCENE_STORAGE_PREFIX = 'megameal.editor.scene:'
@@ -45,11 +47,14 @@ export function saveEditorSceneToLocalStorage(
   levelId: string,
   scene: EditorSceneDocument,
 ) {
-  const payload: EditorSceneDocument = {
-    ...scene,
-    levelId,
-    updatedAt: new Date().toISOString(),
-  }
+  const payload: EditorSceneDocument = assertValidEditorSceneDocument(
+    withEditorSceneEngineData({
+      ...scene,
+      levelId,
+      updatedAt: new Date().toISOString(),
+    }),
+    'Scene save',
+  )
 
   localStorage.setItem(
     `${SCENE_STORAGE_PREFIX}${levelId}`,
@@ -118,9 +123,13 @@ export function clearAllStyleBatchSessionsFromLocalStorage() {
 }
 
 export function exportEditorSceneJson(scene: EditorSceneDocument | null) {
-  return JSON.stringify(scene, null, 2)
+  return JSON.stringify(
+    scene ? assertValidEditorSceneDocument(scene, 'Scene export') : null,
+    null,
+    2,
+  )
 }
 
 export function importEditorSceneJson(json: string) {
-  return JSON.parse(json) as EditorSceneDocument
+  return assertValidEditorSceneDocument(JSON.parse(json), 'Scene import')
 }

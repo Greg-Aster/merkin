@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { CollisionChannel, CollisionIntent } from '../engine/types'
 import EditorAssetPreview from './EditorAssetPreview.svelte'
 import { resolveNodeCollision } from './editorCollisionDefaults'
 import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
@@ -35,7 +36,7 @@ type PhysicsBooleanField =
   | 'ccd'
   | 'lockRotations'
   | 'lockTranslations'
-type CollisionNumericField = 'friction' | 'restitution'
+type CollisionNumericField = 'friction' | 'restitution' | 'triangleBudget'
 type CollisionBooleanField = 'sensor'
 type LightNumericField = 'intensity' | 'distance' | 'decay'
 type GameplayField =
@@ -128,6 +129,9 @@ export let onPrimitiveGeometryChange: (value: string) => void = () => {}
 export let onPrimitiveArgChange: (index: number, value: string) => void =
   () => {}
 export let onCollisionEnabledChange: (value: boolean) => void = () => {}
+export let onCollisionIntentChange: (value: CollisionIntent) => void = () => {}
+export let onCollisionChannelChange: (value: CollisionChannel) => void =
+  () => {}
 export let onPhysicsBodyTypeChange: (value: string) => void = () => {}
 export let onPhysicsNumericChange: (
   field: PhysicsNumericField,
@@ -207,6 +211,24 @@ const transformFields: Array<'position' | 'rotation' | 'scale'> = [
   'rotation',
   'scale',
 ]
+const collisionIntentOptions: Array<{ value: CollisionIntent; label: string }> =
+  [
+    { value: 'none', label: 'None' },
+    { value: 'walkable', label: 'Walkable' },
+    { value: 'blocker', label: 'Blocker' },
+    { value: 'trigger', label: 'Trigger' },
+    { value: 'detailMesh', label: 'Detail Mesh' },
+  ]
+const collisionChannelOptions: Array<{
+  value: CollisionChannel
+  label: string
+}> = [
+  { value: 'worldStatic', label: 'World Static' },
+  { value: 'worldDynamic', label: 'World Dynamic' },
+  { value: 'player', label: 'Player' },
+  { value: 'trigger', label: 'Trigger' },
+  { value: 'detail', label: 'Detail' },
+]
 
 $: hasSingleSelection = !!selectedNode && selectedNodes.length <= 1
 $: hasMultiSelection = selectedNodes.length > 1
@@ -215,7 +237,9 @@ $: hasGeometryNode = !!(
   selectedNode?.prefab ||
   selectedNode?.primitive
 )
-$: canConvertSelectedToMesh = !!(selectedNode?.primitive || selectedNode?.prefab)
+$: canConvertSelectedToMesh = !!(
+  selectedNode?.primitive || selectedNode?.prefab
+)
 $: filteredAssetBrowserItems = assetBrowserItems.filter(
   item =>
     !assetBrowserFilter.trim() ||
@@ -349,6 +373,16 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
       <div class="tuple-group">
         <div class="tuple-label">Physics</div>
         <label class="checkbox"><input type="checkbox" checked={!!effectiveCollision} on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Solid / Collider</label>
+        <select class="text-input" value={selectedNode.collision?.intent ?? effectiveCollision?.intent ?? 'none'} on:change={(e) => onCollisionIntentChange((e.currentTarget as HTMLSelectElement).value as CollisionIntent)}>
+          {#each collisionIntentOptions as option}
+            <option value={option.value}>{option.label}</option>
+          {/each}
+        </select>
+        <select class="text-input" value={selectedNode.collision?.channel ?? effectiveCollision?.channel ?? 'worldStatic'} on:change={(e) => onCollisionChannelChange((e.currentTarget as HTMLSelectElement).value as CollisionChannel)}>
+          {#each collisionChannelOptions as option}
+            <option value={option.value}>{option.label}</option>
+          {/each}
+        </select>
         <select class="text-input" value={selectedNode.physics?.bodyType ?? 'fixed'} on:change={(e) => onPhysicsBodyTypeChange((e.currentTarget as HTMLSelectElement).value)}>
           <option value="fixed">Fixed</option>
           <option value="dynamic">Dynamic</option>
@@ -379,6 +413,11 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
             <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.restitution ?? 0} on:change={(e) => onCollisionNumericChange('restitution', (e.currentTarget as HTMLInputElement).value)} />
           </div>
           <label class="checkbox"><input type="checkbox" checked={effectiveCollision.sensor ?? false} on:change={(e) => onCollisionBooleanChange('sensor', (e.currentTarget as HTMLInputElement).checked)} /> Sensor Only</label>
+          {#if effectiveCollision.intent === 'detailMesh'}
+            <div class="tuple-row">
+              <input class="tuple-input" type="number" min="0" step="1" value={effectiveCollision.triangleBudget ?? 0} on:change={(e) => onCollisionNumericChange('triangleBudget', (e.currentTarget as HTMLInputElement).value)} />
+            </div>
+          {/if}
           <button on:click={onRecalculateCollision}>Match Collider To Visual</button>
         {:else if effectiveCollision}
           <div class="tuple-row">
@@ -386,6 +425,11 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
             <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.restitution ?? 0} on:change={(e) => onCollisionNumericChange('restitution', (e.currentTarget as HTMLInputElement).value)} />
           </div>
           <label class="checkbox"><input type="checkbox" checked={effectiveCollision.sensor ?? false} on:change={(e) => onCollisionBooleanChange('sensor', (e.currentTarget as HTMLInputElement).checked)} /> Sensor Only</label>
+          {#if effectiveCollision.intent === 'detailMesh'}
+            <div class="tuple-row">
+              <input class="tuple-input" type="number" min="0" step="1" value={effectiveCollision.triangleBudget ?? 0} on:change={(e) => onCollisionNumericChange('triangleBudget', (e.currentTarget as HTMLInputElement).value)} />
+            </div>
+          {/if}
         {/if}
       </div>
 

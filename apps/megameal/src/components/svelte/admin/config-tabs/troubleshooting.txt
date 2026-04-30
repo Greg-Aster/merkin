@@ -161,7 +161,7 @@ import { ViewTransitions } from 'astro:transitions';
 ```
 
 2. **Tailwind configuration**: Check your Tailwind configuration includes all needed classes
-3. **Component encapsulation**: Svelte's styling might be too encapsulated - use `:global()` where needed
+3. **Component styling**: Prefer Tailwind utilities or feature CSS under `src/styles/`; avoid `:global()` unless the selector targets a documented third-party or generated DOM surface.
 
 ## Getting Further Help
 

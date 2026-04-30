@@ -388,24 +388,3 @@ function positionPanelRelativeToButton(
   </div>
 {/if}
 
-<style>
-  .hue-gradient {
-    background: linear-gradient(to bottom, 
-      hsl(360, 100%, 50%), 
-      hsl(300, 100%, 50%), 
-      hsl(240, 100%, 50%), 
-      hsl(180, 100%, 50%), 
-      hsl(120, 100%, 50%), 
-      hsl(60, 100%, 50%), 
-      hsl(0, 100%, 50%));
-  }
-  
-  .hue-slider {
-    writing-mode: bt-lr; 
-    -webkit-appearance: slider-vertical;
-  }
-  
-  .sidenav-panel.panel-open {
-    @apply opacity-100 translate-x-0 pointer-events-auto;
-  }
-</style>

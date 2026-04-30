@@ -24,7 +24,10 @@ let disposed = false
 let loadToken = 0
 let loadedUrl = ''
 
-function getGeometryPatch(mesh: THREE.Mesh, index: number): MeshColliderPatch | null {
+function getGeometryPatch(
+  mesh: THREE.Mesh,
+  index: number,
+): MeshColliderPatch | null {
   const geometry = mesh.geometry
   const positionAttribute = geometry?.getAttribute('position')
   if (!positionAttribute || positionAttribute.count < 3) return null
@@ -39,7 +42,9 @@ function getGeometryPatch(mesh: THREE.Mesh, index: number): MeshColliderPatch | 
   const geometryIndex = geometry.index
   const indices = geometryIndex
     ? new Uint32Array(Array.from(geometryIndex.array))
-    : new Uint32Array(Array.from({ length: positionAttribute.count }, (_, i) => i))
+    : new Uint32Array(
+        Array.from({ length: positionAttribute.count }, (_, i) => i),
+      )
 
   if (indices.length < 3) return null
 

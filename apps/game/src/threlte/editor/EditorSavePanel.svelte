@@ -6,9 +6,8 @@ export let metadataStarMapEnabled = false
 export let metadataStarMapYear = 2100
 export let metadataStarMapDescription = ''
 export let metadataSourceKind: 'component' | 'scene' = 'scene'
-export let metadataSourceComponentKey:
-  | 'observatory'
-  | 'solitude' = 'observatory'
+export let metadataSourceComponentKey: 'observatory' | 'solitude' =
+  'observatory'
 export let saveAsTitle = ''
 export let saveAsLevelId = ''
 export let importBuffer = ''

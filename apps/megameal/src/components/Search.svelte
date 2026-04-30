@@ -183,7 +183,7 @@ $: search(keywordMobile, false)
   ">
       <Icon icon="material-symbols:search" class="absolute text-[1.25rem] pointer-events-none ml-3 transition my-auto text-black/30 dark:text-white/30"></Icon>
       <input placeholder="{i18n(I18nKey.search)}" bind:value={keywordDesktop} on:focus={() => search(keywordDesktop, true)} data-sfx-focus="focus-soft"
-             class="transition-all pl-10 text-sm bg-transparent outline-0
+             class="transition-all pl-10 text-sm bg-transparent outline-0 focus:outline-0
            h-full w-40 active:w-60 focus:w-60 text-black/50 dark:text-white/50"
       >
   </div>
@@ -206,8 +206,8 @@ $: search(keywordMobile, false)
     ">
           <Icon icon="material-symbols:search" class="absolute text-[1.25rem] pointer-events-none ml-3 transition my-auto text-black/30 dark:text-white/30"></Icon>
           <input placeholder="Search" bind:value={keywordMobile} data-sfx-focus="focus-soft"
-                 class="pl-10 absolute inset-0 text-sm bg-transparent outline-0
-                 focus:w-60 text-black/50 dark:text-white/50"
+                 class="pl-10 absolute inset-0 text-sm bg-transparent outline-0 focus:outline-0
+                  focus:w-60 text-black/50 dark:text-white/50"
           >
       </div>
   
@@ -234,8 +234,3 @@ $: search(keywordMobile, false)
       {/each}
   </div>
   
-  <style>
-    input:focus {
-      outline: 0;
-    }
-  </style>

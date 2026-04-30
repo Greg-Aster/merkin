@@ -1,5 +1,4 @@
 <script lang="ts">
-import { EDITOR_API_BASE } from '@config/editorApi'
 import { T } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import { Color, Group, Quaternion, Vector3 } from 'three'
@@ -8,79 +7,54 @@ import AmbientParticleField from '../components/AmbientParticleField.svelte'
 import SceneFogExp2 from '../components/SceneFogExp2.svelte'
 import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
 import LevelManager from '../core/LevelManager.svelte'
-import EditorSceneBranch from '../editor/EditorSceneBranch.svelte'
-import {
-  createDefaultSceneForLevel,
-  upgradeLegacySceneDocument,
-} from '../editor/defaultScenes'
+import type { PlayerSpawnRequestedDetail } from '../core/levelRuntimeEvents'
+import { upgradeLegacySceneDocument } from '../editor/defaultScenes'
 import { ensureSceneGeneration } from '../editor/editorGeneration'
-import { createWorldMatrixResolver } from '../editor/editorHierarchyUtils'
 import { normalizeLevelSceneSettings } from '../editor/editorLevelSetup'
-import { createEmptyScene } from '../editor/editorStore'
+import { loadEditorSceneDocument } from '../editor/editorSceneDocumentLoader'
 import type {
   EditorSceneDocument,
-  EditorSceneNode,
+  EditorSceneSettings,
 } from '../editor/editorTypes'
 import {
+  type ActorDefinition,
+  type LevelDefinition,
+  type RuntimeGameplayData,
   adaptEditorSceneToLevelDefinition,
+  createActorWorldMatrixResolver,
   createLevelBuildReport,
 } from '../engine'
+import { withEditorSceneEngineData } from '../engine/sceneDocumentRuntime'
 import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
 import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
-import { Terrain, type TerrainConfig } from '../features/terrain'
 import { playerStateStore } from '../stores/gameStateStore'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 import { buildRuntimeVisualStyleFromLevelSettings } from '../styles/GameplayStyleProfiles'
 import {
   replaceRuntimeVisualStyle,
   resetRuntimeVisualStyle,
-  runtimeVisualStyleStore,
 } from '../styles/runtimeVisualStyleStore'
 import Skybox from '../systems/Skybox.svelte'
 import StarMap from '../systems/StarMap.svelte'
+import RuntimeActorBranch from './RuntimeActorBranch.svelte'
 
 const dispatch = createEventDispatcher()
-const sceneModules = import.meta.glob('../editor/scenes/*.scene.json', {
-  eager: true,
-  import: 'default',
-}) as Record<string, EditorSceneDocument>
-
-const YGGDRASIL_TERRAIN_CONFIG: TerrainConfig = {
-  heightmapUrl: '/terrain/heightmaps/yggdrasil_heightmap.png',
-  worldSize: 440,
-  worldSizeX: 440,
-  worldSizeZ: 340,
-  minHeight: -3.2,
-  maxHeight: 7.2,
-  bounds: {
-    min: [-220, -3.2, -150],
-    max: [220, 7.2, 190],
-  },
-  chunkSize: 110,
-  gridSize: [4, 4],
-  lods: [
-    { level: 0, distance: 80 },
-    { level: 1, distance: 160 },
-    { level: 2, distance: 260 },
-  ],
-}
 
 export let levelId: string
 export let position: [number, number, number] = [0, 0, 0]
 export let editorEnabled = false
-export let spawnSystem: any = null
 export let interactionSystem: any = null
 export let playerSpawnPoint: [number, number, number] = [0, 1, 0]
 export let timelineEvents: any[] = []
 
 let sceneDocument: EditorSceneDocument | null = null
-let sceneNodes: EditorSceneNode[] = []
-let rootNodes: EditorSceneNode[] = []
+let levelDefinition: LevelDefinition | null = null
+let levelActors: ActorDefinition[] = []
+let rootActors: ActorDefinition[] = []
 let playerPosition: [number, number, number] = [0, 0, 0]
 let starMapComponent: any = null
 let starMapRef: Group
-
-$: usesGeneratedTerrainCollider = levelId === 'yggdrasil'
+let loadToken = 0
 
 const SKYBOX_PRESETS = {
   observatory: {
@@ -107,10 +81,6 @@ const SKYBOX_PRESETS = {
   },
 } as const
 
-function cloneScene(scene: EditorSceneDocument) {
-  return structuredClone(scene) as EditorSceneDocument
-}
-
 function parseSceneColor(
   value: string | number | null | undefined,
   fallback: number,
@@ -124,114 +94,104 @@ function parseSceneColor(
   return Number.parseInt(normalized, 16)
 }
 
-function hasMeaningfulSceneContent(
-  scene: EditorSceneDocument | null | undefined,
+function resolveSpawnPosition(
+  definition: LevelDefinition,
+): [number, number, number] {
+  const position = definition.spawn?.player ?? playerSpawnPoint
+  return [
+    Number(position[0]) || 0,
+    Number(position[1]) || 0,
+    Number(position[2]) || 0,
+  ]
+}
+
+function dispatchPlayerSpawnRequest(
+  level: string,
+  spawnPosition: [number, number, number],
 ) {
-  if (!scene) return false
-
-  if (Array.isArray(scene.nodes) && scene.nodes.length > 0) {
-    return true
+  const detail: PlayerSpawnRequestedDetail = {
+    levelId: level,
+    position: spawnPosition,
+    reason: 'level_load',
+    metadata: { levelName: level },
   }
-
-  if (scene.settings && Object.keys(scene.settings).length > 0) {
-    return true
-  }
-
-  return false
+  dispatch('playerSpawnRequested', detail)
 }
 
-function getStaticScene(level: string) {
-  const match = Object.entries(sceneModules).find(([path]) =>
-    path.endsWith(`/${level}.scene.json`),
-  )
-  return match ? cloneScene(match[1]) : null
-}
+async function loadSceneDocument(level: string, token: number) {
+  const loadedScene = await loadEditorSceneDocument(level, {
+    includeLocalStorage: false,
+  })
+  if (token !== loadToken) return
 
-async function getDiskScene(level: string) {
-  if (!import.meta.env.DEV) return null
-
-  try {
-    const response = await fetch(
-      `${EDITOR_API_BASE}/api/editor-scene/load?levelId=${encodeURIComponent(level)}`,
-    )
-    if (!response.ok) return null
-    const payload = await response.json()
-    return payload?.success && payload.scene
-      ? (payload.scene as EditorSceneDocument)
-      : null
-  } catch {
-    return null
-  }
-}
-
-async function loadSceneDocument(level: string) {
-  const diskScene = await getDiskScene(level)
-  const staticScene = getStaticScene(level)
-  const fallbackScene =
-    createDefaultSceneForLevel(level) ?? createEmptyScene(level)
-  const baseScene = hasMeaningfulSceneContent(diskScene)
-    ? diskScene
-    : hasMeaningfulSceneContent(staticScene)
-      ? staticScene
-      : fallbackScene
+  const baseScene = loadedScene.scene
   const upgradedScene = upgradeLegacySceneDocument(baseScene)
 
-  sceneDocument = ensureSceneGeneration({
-    ...upgradedScene,
-    settings: normalizeLevelSceneSettings(level, upgradedScene.settings),
-  })
-  sceneNodes = sceneDocument.nodes
-  rootNodes = sceneNodes.filter(node => !node.parentId)
+  sceneDocument = withEditorSceneEngineData(
+    ensureSceneGeneration({
+      ...upgradedScene,
+      settings: normalizeLevelSceneSettings(level, upgradedScene.settings),
+    }),
+  )
+  levelDefinition =
+    sceneDocument.engine?.levelDefinition ??
+    adaptEditorSceneToLevelDefinition(sceneDocument)
+  levelActors = levelDefinition.actors
+  rootActors = levelActors.filter(actor => !actor.parentId)
+  if (token !== loadToken) return
 
-  const levelDefinition = adaptEditorSceneToLevelDefinition(sceneDocument)
   const buildReport = createLevelBuildReport(levelDefinition)
+  const hasBuildErrors = buildReport.errors.length > 0
+  const hasBuildWarnings = buildReport.warnings.length > 0
   setRuntimeDiagnostic('levelDefinition', {
     label: 'Level Definition',
-    level: buildReport.warnings.length > 0 ? 'warning' : 'ready',
-    message: `${buildReport.levelId}: ${buildReport.actorCount} actors, ${buildReport.physicsActorCount} physics actors, ${buildReport.trimeshActorCount} trimesh actors.`,
+    level: hasBuildErrors ? 'error' : hasBuildWarnings ? 'warning' : 'ready',
+    message: hasBuildErrors
+      ? `${buildReport.levelId}: level contract failed with ${buildReport.errors.length} errors.`
+      : `${buildReport.levelId}: ${buildReport.actorCount} actors, ${buildReport.physicsActorCount} physics actors, ${buildReport.trimeshActorCount} trimesh actors, ${buildReport.detailMeshActorCount} detail mesh actors.`,
     meta: buildReport as unknown as Record<string, unknown>,
   })
 
-  const spawnPosition =
-    sceneDocument.settings?.level?.spawn?.position ?? playerSpawnPoint
-  if (spawnSystem?.requestSpawn) {
-    spawnSystem.requestSpawn({
-      entityType: 'player',
-      position: spawnPosition,
-      priority: 10,
-      metadata: { levelName: level, spawnReason: 'level_load' },
-    })
+  if (hasBuildErrors) {
+    return
   }
+  if (token !== loadToken) return
 
-  if (!(level === 'yggdrasil' && !editorEnabled)) {
-    dispatch('terrainReady')
-  }
+  dispatch('staticWorldReady', {
+    levelId: level,
+    source: 'scene-document',
+    metadata: { actorCount: buildReport.actorCount },
+  })
+  dispatchPlayerSpawnRequest(level, resolveSpawnPosition(levelDefinition))
 }
 
-$: sharedLevelSettings = sceneDocument?.settings?.level ?? {}
-$: observatorySettings = sceneDocument?.settings?.observatory ?? {}
+$: levelSettings = (levelDefinition?.settings ?? {}) as EditorSceneSettings
+$: sharedLevelSettings = levelSettings.level ?? {}
+$: observatorySettings = levelSettings.observatory ?? {}
 $: activeSkyboxPreset =
   SKYBOX_PRESETS[
     sharedLevelSettings.skyboxPreset as keyof typeof SKYBOX_PRESETS
   ] ?? SKYBOX_PRESETS.observatory
 $: authoredGameplayNodes = (() => {
-  if (!sceneDocument) return []
-  const getWorldMatrix = createWorldMatrixResolver(sceneDocument.nodes)
+  if (!levelDefinition) return []
+  const getWorldMatrix = createActorWorldMatrixResolver(levelDefinition.actors)
 
-  return sceneDocument.nodes
+  return levelDefinition.actors
     .filter(
-      node =>
-        node.gameplay?.type === 'audio-region' ||
-        node.gameplay?.type === 'fog-volume',
+      actor =>
+        actor.gameplay?.type === 'audio-region' ||
+        actor.gameplay?.type === 'fog-volume',
     )
-    .map(node => {
-      const worldMatrix = getWorldMatrix(node.id)
+    .map(actor => {
+      const gameplay = actor.gameplay?.data as RuntimeGameplayData | undefined
+      const worldMatrix = getWorldMatrix(actor.id)
       const position = new Vector3()
       const quaternion = new Quaternion()
       const scale = new Vector3()
       worldMatrix.decompose(position, quaternion, scale)
       return {
-        node,
+        actor,
+        gameplay,
         position: [position.x, position.y, position.z] as [
           number,
           number,
@@ -248,16 +208,15 @@ $: authoredGameplayNodes = (() => {
 $: authoredAudioRegions = authoredGameplayNodes
   .filter(
     entry =>
-      entry.node.gameplay?.type === 'audio-region' &&
-      entry.node.gameplay?.audioTrack,
+      entry.gameplay?.type === 'audio-region' && entry.gameplay?.audioTrack,
   )
   .map(entry => ({
-    id: entry.node.id,
+    id: entry.actor.id,
     position: entry.position,
     scale: entry.scale,
-    track: entry.node.gameplay?.audioTrack ?? '',
-    volume: entry.node.gameplay?.audioVolume ?? 0.24,
-    falloff: entry.node.gameplay?.regionFalloff ?? 12,
+    track: entry.gameplay?.audioTrack ?? '',
+    volume: entry.gameplay?.audioVolume ?? 0.24,
+    falloff: entry.gameplay?.regionFalloff ?? 12,
   }))
 $: presetAmbientAudioRegions =
   sharedLevelSettings.ambientAudio?.enabled &&
@@ -279,7 +238,7 @@ $: effectiveAudioRegions = [
 ]
 $: effectiveFog = (() => {
   const fogVolumes = authoredGameplayNodes.filter(
-    entry => entry.node.gameplay?.type === 'fog-volume',
+    entry => entry.gameplay?.type === 'fog-volume',
   )
   const baseColor = new Color(
     sharedLevelSettings.style?.fog?.color ?? '#5f76a8',
@@ -302,7 +261,7 @@ $: effectiveFog = (() => {
     const dy = Math.max(Math.abs(py - cy) - sy, 0)
     const dz = Math.max(Math.abs(pz - cz) - sz, 0)
     const outsideDistance = Math.sqrt(dx * dx + dy * dy + dz * dz)
-    const falloff = entry.node.gameplay?.regionFalloff ?? 8
+    const falloff = entry.gameplay?.regionFalloff ?? 8
     const influence =
       outsideDistance <= 0.0001
         ? 1
@@ -313,8 +272,8 @@ $: effectiveFog = (() => {
     if (influence <= strongestInfluence) continue
 
     strongestInfluence = influence
-    targetColor = new Color(entry.node.gameplay?.fogColor ?? '#dbe4ef')
-    targetDensity = entry.node.gameplay?.fogDensity ?? baseDensity
+    targetColor = new Color(entry.gameplay?.fogColor ?? '#dbe4ef')
+    targetDensity = entry.gameplay?.fogDensity ?? baseDensity
   }
 
   return {
@@ -352,15 +311,16 @@ $: if (sceneDocument) {
     buildRuntimeVisualStyleFromLevelSettings(sharedLevelSettings),
   )
 }
-
 onMount(() => {
+  const token = ++loadToken
   const unsubscribePlayer = playerStateStore.subscribe(state => {
     playerPosition = state.position
   })
 
-  void loadSceneDocument(levelId)
+  void loadSceneDocument(levelId, token)
 
   return () => {
+    loadToken += 1
     unsubscribePlayer()
   }
 })
@@ -379,18 +339,9 @@ onDestroy(() => {
 
     <SceneFogExp2 color={fogColor} density={fogDensity} />
     <T.AmbientLight intensity={ambientIntensity} color="#cfe4ff" />
-    <T.HemisphereLight skyColor="#dbe9ff" groundColor="#1b2130" intensity={0.85} />
+    <T.HemisphereLight skyColor="#dbe9ff" groundColor="#1b2130" intensity={0.38} />
     <T.DirectionalLight position={[14, 20, -10]} color="#d7e6ff" intensity={keyLightIntensity} />
     <T.DirectionalLight position={[-16, 10, 18]} color="#50688f" intensity={fillLightIntensity} />
-
-    {#if usesGeneratedTerrainCollider}
-      <Terrain
-        config={YGGDRASIL_TERRAIN_CONFIG}
-        showVisualChunks={false}
-        showVisualSurface={false}
-        on:terrainReady={() => dispatch('terrainReady')}
-      />
-    {/if}
 
     {#if waterEnabled && waterSettings}
       <OceanComponent
@@ -463,13 +414,10 @@ onDestroy(() => {
     {/if}
 
     {#if !editorEnabled}
-      {#each rootNodes as node (node.id)}
-        <EditorSceneBranch
-          {node}
-          nodes={sceneNodes}
-          editorEnabled={false}
-          selectedNodeId={null}
-          selectedNodeIds={[]}
+      {#each rootActors as actor (actor.id)}
+        <RuntimeActorBranch
+          {actor}
+          actors={levelActors}
           {interactionSystem}
           interactiveEnabled={true}
           on:portalTransition={(event) => dispatch('portalTransition', event.detail)}

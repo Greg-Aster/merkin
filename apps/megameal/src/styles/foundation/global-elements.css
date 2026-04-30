@@ -1,0 +1,37 @@
+﻿/* ===================================================================
+ * GLOBAL STYLES OUTSIDE @layer - PRESERVED
+ * ===================================================================
+ */
+
+.custom-md img, 
+#post-cover img {
+    @apply cursor-zoom-in;
+}
+
+::selection {
+    background-color: var(--selection-bg);
+}
+
+/* ===================================================================
+ * â­ STREAMLINED: CLEAN MOBILE-FIRST RESPONSIVE SYSTEM
+ * ===================================================================
+ * 
+ * âœ… SIMPLIFIED TO SINGLE BREAKPOINT:
+ * - Mobile: One column layout, no sidebar, navbar always visible
+ * - Desktop (md+): Two column layout with sidebar
+ * 
+ * âœ… REMOVED COMPLEX GRID CSS:
+ * - No more conflicting grid styles
+ * - Clean separation: Tailwind classes handle layout, CSS handles styling
+ * 
+ * âœ… PRESERVED ALL FUNCTIONALITY:
+ * - All component styles, animations, effects intact  
+ * - Accessibility and performance optimizations kept
+ * - Dark mode, reduced motion, high contrast support preserved
+ * 
+ * âœ… RESULT:
+ * - Clean, maintainable mobile-first design
+ * - No layout conflicts or sudden shifts
+ * - Single md: breakpoint for consistent behavior
+ * ===================================================================
+ */

@@ -164,6 +164,3 @@ function resetPassword() {
     </div>
   {/if}
   
-  <style>
-    /* Add any component-specific styles here */
-  </style>

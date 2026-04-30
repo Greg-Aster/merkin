@@ -1,7 +1,4 @@
-<!-- 
-  Threlte Asset Loading System
-  Replaces AssetLoader.ts with reactive asset management
--->
+<!-- Shared asset loading state and loaders for Threlte runtime systems. -->
 <script lang="ts">
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import { writable } from 'svelte/store'

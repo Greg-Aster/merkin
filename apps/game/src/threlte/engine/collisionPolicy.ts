@@ -1,42 +1,43 @@
+import { resolveCollisionChannel } from './collisionChannels'
+import {
+  getActorCollisionRole,
+  getCollisionIntentForRole,
+} from './levelCollisionWorkflow'
 import type {
+  CollisionChannel,
   CollisionComponent,
   CollisionIntent,
   CollisionShape,
+  PhysicsBodyType,
   PrimitiveGeometryKind,
 } from './types'
 
 export interface CollisionPolicyInput {
+  levelId?: string | null
   actorId: string
   actorKind: 'asset' | 'primitive' | 'prefab' | 'terrain' | 'light' | 'empty'
   visible?: boolean
   hasGameplay?: boolean
+  bodyType?: PhysicsBodyType
   primitiveGeometry?: PrimitiveGeometryKind
   authoredCollision?: {
     shape?: CollisionShape
+    intent?: CollisionIntent
+    channel?: CollisionChannel
     enabled?: boolean
     size?: [number, number, number]
     friction?: number
     restitution?: number
     sensor?: boolean
+    triangleBudget?: number
   } | null
 }
 
 export interface CollisionPolicyResult {
   collision: CollisionComponent | null
-  source: 'authored' | 'none'
+  source: 'authored' | 'default' | 'none'
   warning?: string
 }
-
-const TERRAIN_VISUAL_ACTOR_IDS = new Set([
-  'solitude-ground-plateau',
-  'solitude-ground-dais',
-  'yggdrasil-shore-ring',
-  'yggdrasil-island-shelf',
-  'yggdrasil-ground',
-  'yggdrasil-dais',
-  'yggdrasil-bifrost-path',
-  'yggdrasil-spawn-pad',
-])
 
 export function getDefaultCollisionShape(
   input: CollisionPolicyInput,
@@ -47,13 +48,6 @@ export function getDefaultCollisionShape(
     input.primitiveGeometry === 'cylinder'
   ) {
     return 'cylinder'
-  }
-  if (
-    input.actorKind === 'primitive' &&
-    input.primitiveGeometry &&
-    input.primitiveGeometry !== 'box'
-  ) {
-    return 'trimesh'
   }
   return 'cuboid'
 }
@@ -75,20 +69,38 @@ function getAuthoredShape(input: CollisionPolicyInput): CollisionShape {
   return authoredShape
 }
 
-function getIntent(shape: CollisionShape, sensor?: boolean): CollisionIntent {
-  if (sensor) return 'trigger'
-  if (shape === 'trimesh') return 'detailMesh'
-  return 'blocker'
+export function isTerrainVisualActor(actorId: string) {
+  return getActorCollisionRole({ actorId }) === 'visualOnly'
 }
 
-export function isTerrainVisualActor(actorId: string) {
-  return TERRAIN_VISUAL_ACTOR_IDS.has(actorId)
+export function getDefaultCollisionIntent(input: CollisionPolicyInput) {
+  const authoredShape = input.authoredCollision
+    ? getAuthoredShape(input)
+    : undefined
+  const role = getActorCollisionRole({
+    actorId: input.actorId,
+    levelId: input.levelId,
+    sensor: input.authoredCollision?.sensor,
+    shape: authoredShape,
+  })
+
+  return getCollisionIntentForRole(role)
 }
 
 export function resolveCollisionPolicy(
   input: CollisionPolicyInput,
 ): CollisionPolicyResult {
-  if (isTerrainVisualActor(input.actorId)) {
+  const authoredShape = input.authoredCollision
+    ? getAuthoredShape(input)
+    : undefined
+  const role = getActorCollisionRole({
+    actorId: input.actorId,
+    levelId: input.levelId,
+    sensor: input.authoredCollision?.sensor,
+    shape: authoredShape,
+  })
+
+  if (role === 'visualOnly') {
     return { collision: null, source: 'none' }
   }
 
@@ -97,19 +109,51 @@ export function resolveCollisionPolicy(
   }
 
   if (input.authoredCollision) {
-    const shape = getAuthoredShape(input)
+    const shape = authoredShape ?? getAuthoredShape(input)
+    const intent =
+      input.authoredCollision.intent ??
+      (input.authoredCollision.sensor
+        ? 'trigger'
+        : getCollisionIntentForRole(role))
+    if (intent === 'none') {
+      return { collision: null, source: 'none' }
+    }
+
     return {
       source: 'authored',
       collision: {
-        intent: getIntent(shape, input.authoredCollision.sensor),
+        intent,
+        channel: resolveCollisionChannel({
+          intent,
+          bodyType: input.bodyType,
+          authoredChannel: input.authoredCollision.channel,
+        }),
         shape,
         size: input.authoredCollision.size,
         friction: input.authoredCollision.friction,
         restitution: input.authoredCollision.restitution,
-        sensor: input.authoredCollision.sensor,
+        sensor: intent === 'trigger' ? true : input.authoredCollision.sensor,
+        triangleBudget: input.authoredCollision.triangleBudget,
       },
     }
   }
 
-  return { collision: null, source: 'none' }
+  const solidByDefault =
+    (input.actorKind === 'asset' ||
+      input.actorKind === 'primitive' ||
+      input.actorKind === 'prefab') &&
+    input.visible !== false &&
+    !input.hasGameplay
+
+  if (!solidByDefault) {
+    return { collision: null, source: 'none' }
+  }
+
+  return {
+    source: 'none',
+    collision: null,
+    warning: solidByDefault
+      ? 'Visible geometry has no authored collision intent; runtime physics is disabled for this actor.'
+      : undefined,
+  }
 }

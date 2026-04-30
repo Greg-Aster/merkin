@@ -1,0 +1,29 @@
+{
+  "type": "baked-terrain-mesh",
+  "version": 1,
+  "sourceHeightmap": "/terrain/heightmaps/observatory-environment_heightmap.png",
+  "sourceResolution": 1024,
+  "colliderResolution": 129,
+  "sampleStep": 8,
+  "vertexCount": 16641,
+  "indexCount": 98304,
+  "triangleCount": 32768,
+  "bounds": {
+    "min": [
+      -199.5517120361328,
+      -1.8438290357589722,
+      -195.1022491455078
+    ],
+    "max": [
+      194.0009765625,
+      56.307861328125,
+      194.0846710205078
+    ]
+  },
+  "center": [
+    -2.7753677368164062,
+    0,
+    -0.5087890625
+  ],
+  "heightOverrideCount": 0
+}

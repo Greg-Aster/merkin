@@ -6,11 +6,29 @@ import AmbientAudioRegions from '../components/AmbientAudioRegions.svelte'
 import NaturePackVegetation from '../components/NaturePackVegetation.svelte'
 import SceneFogExp2 from '../components/SceneFogExp2.svelte'
 import LevelManager from '../core/LevelManager.svelte'
+import type { PlayerSpawnRequestedDetail } from '../core/levelRuntimeEvents'
 import { resolveObservatoryPresetSettings } from '../editor/editorLevelPresets'
 import {
-  editorStateStore,
-  observatoryEditorSettingsStore,
-} from '../editor/editorStore'
+  mergeLevelSettings,
+  mergeObservatoryEditorSettings,
+  normalizeLevelSceneSettings,
+} from '../editor/editorLevelSetup'
+import {
+  loadEditorSceneDocument,
+  loadImmediateEditorSceneDocument,
+} from '../editor/editorSceneDocumentLoader'
+import { observatoryEditorSettingsStore } from '../editor/editorSelectors'
+import { editorStateStore } from '../editor/editorSessionStore'
+import type {
+  EditorSceneSettings,
+  ObservatoryEditorSettings,
+} from '../editor/editorTypes'
+import {
+  type LevelBuildReport,
+  type LevelDefinition,
+  createComponentLevelDefinition,
+  createLevelBuildReport,
+} from '../engine'
 import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
 import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
 import { OptimizationLevel, optimizationManager } from '../features/performance'
@@ -18,7 +36,13 @@ import {
   qualityLevelStore,
   qualitySettingsStore,
 } from '../features/performance/stores/performanceStore'
-import { Terrain, type TerrainConfig, terrainStore } from '../features/terrain'
+import {
+  type HeightmapConfig,
+  TerrainRuntime,
+  type TerrainRuntimeComponentData,
+  loadTerrainRuntimeComponentData,
+  terrainStore,
+} from '../features/terrain'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 import { buildRuntimeVisualStyleFromLevelSettings } from '../styles/GameplayStyleProfiles'
 import {
@@ -38,16 +62,14 @@ const isMobileDevice =
 // The manifest URL is now the primary input for configuring the level
 export let manifestUrl: string =
   '/terrain/observatory-environment.manifest.json' // Generated manifest path
+export let levelId = 'observatory'
 export let timelineEvents: any[] = []
 export let timelineEventsJson: string = '[]'
-export let spawnSystem: any = null
 export let interactionSystem: any = null
 
 // --- State ---
 let manifest: any = null // Will hold the loaded level manifest data
-let terrainConfig: TerrainConfig | null = null
-let heightmapConfig: any = null // Loaded heightmap config for validation
-let playerSpawnPoint: [number, number, number] = [0, 50, 0] // Default spawn, will be overwritten by manifest
+let terrainRuntimeData: TerrainRuntimeComponentData | null = null
 
 // Component references
 let hybridFireflyComponent: any = null
@@ -56,7 +78,7 @@ let naturePackVegetation: any = null
 let skyboxComponent: any = null
 let hybridFireflyComponentType: any = null
 let starMapComponentType: any = null
-let terrainReady = false
+let terrainRuntimeReady = false
 let starMapRef: Group
 let deferredEnvironmentBootStarted = false
 let showOcean = false
@@ -69,6 +91,11 @@ let realTimelineEvents: any[] = []
 let timelineLoadError: string | null = null
 let appliedTerrainOverrideSignature = ''
 let loadToken = 0
+let authoredObservatorySettings: ObservatoryEditorSettings | null = null
+let authoredObservatorySettingsReady = false
+let lastPlayerSpawnRequestKey = ''
+let componentLevelDefinition: LevelDefinition | null = null
+let componentLevelBuildReport: LevelBuildReport | null = null
 
 function mergeDeep<T>(base: T, overrides: Partial<T> | null | undefined): T {
   if (!overrides) return structuredClone(base)
@@ -133,11 +160,82 @@ function applyObservatoryEditorSettings(
   }
 }
 
+function resolvePackagedObservatorySettings() {
+  const { scene } = loadImmediateEditorSceneDocument('observatory', {
+    includeDisk: false,
+    includeLocalStorage: false,
+  })
+  return normalizeLevelSceneSettings('observatory', scene.settings)
+}
+
+async function loadAuthoredObservatorySettings(token: number) {
+  const loadedScene = await loadEditorSceneDocument('observatory', {
+    includeLocalStorage: false,
+  })
+  if (token !== loadToken) return
+
+  const packagedSettings = resolvePackagedObservatorySettings()
+  const loadedSettings =
+    loadedScene.source === 'disk'
+      ? normalizeLevelSceneSettings('observatory', loadedScene.scene.settings)
+      : {}
+  authoredObservatorySettings = mergeObservatoryEditorSettings(
+    mergeLevelSettings<EditorSceneSettings>(packagedSettings, loadedSettings),
+  )
+  authoredObservatorySettingsReady = true
+}
+
+function resolvePlayerSpawnPosition(): [number, number, number] | null {
+  const position =
+    componentLevelDefinition?.spawn.player ?? activeManifest?.spawn?.position
+  if (!position) return null
+
+  return [
+    Number(position[0]) || 0,
+    Number(position[1]) || 0,
+    Number(position[2]) || 0,
+  ]
+}
+
+function requestPlayerSpawn() {
+  if (!terrainRuntimeReady || !authoredObservatorySettingsReady) return
+  if (!activeManifest) return
+  if (componentLevelBuildReport?.errors.length) return
+
+  const requestedSpawn = resolvePlayerSpawnPosition()
+  if (!requestedSpawn) return
+
+  const spawnHeight = getHeightAt(requestedSpawn[0], requestedSpawn[2])
+  const spawnPosition: [number, number, number] = [
+    requestedSpawn[0],
+    Math.max(requestedSpawn[1], spawnHeight + 2),
+    requestedSpawn[2],
+  ]
+  const requestKey = `${activeManifest.id}:${spawnPosition.join(',')}`
+  if (lastPlayerSpawnRequestKey === requestKey) return
+
+  const detail: PlayerSpawnRequestedDetail = {
+    levelId: activeManifest.id,
+    position: spawnPosition,
+    reason: 'level_load',
+    metadata: {
+      levelName: activeManifest.name,
+      levelDefinitionId: componentLevelDefinition?.id,
+    },
+  }
+  dispatch('playerSpawnRequested', detail)
+  lastPlayerSpawnRequestKey = requestKey
+}
+
 // --- Lifecycle & Data Loading ---
 onMount(() => {
   const token = ++loadToken
+  terrainRuntimeReady = false
+  authoredObservatorySettingsReady = false
+  lastPlayerSpawnRequestKey = ''
   void ensureSkyboxComponent()
   void loadLevelFromManifest(token)
+  void loadAuthoredObservatorySettings(token)
   void loadTimelineData(token)
 })
 
@@ -162,79 +260,22 @@ async function loadLevelFromManifest(token: number) {
     if (token !== loadToken) return
     manifest = data
 
-    // Configure the level based on the loaded manifest
-    playerSpawnPoint = manifest.spawn.position
+    const terrainBounds = manifest.physics?.bounds ?? null
+    let heightmapConfig: HeightmapConfig | null = null
 
-    // Load bounds information from heightmap config if not in manifest
-    let terrainBounds = null
-    if (manifest.physics?.bounds) {
-      terrainBounds = manifest.physics.bounds
-    } else {
-      // Try to load bounds and vertical parameters from the heightmap config file
-      try {
-        const heightmapConfigUrl = manifest.assets.heightmap.replace(
-          '_heightmap.png',
-          '_config.json',
-        )
-        const configResponse = await fetch(heightmapConfigUrl)
-        if (configResponse.ok) {
-          const configData = await configResponse.json()
-          terrainBounds = configData.bounds
-
-          // Load vertical parameters from config to ensure exact match with generation
-          const worldSizeX = configData.bounds.max[0] - configData.bounds.min[0]
-          const worldSizeZ = configData.bounds.max[2] - configData.bounds.min[2]
-
-          heightmapConfig = {
-            ...configData,
-            minHeight: configData.heightOffset,
-            maxHeight: configData.heightOffset + configData.heightScale,
-            worldSizeX: worldSizeX,
-            worldSizeZ: worldSizeZ,
-          }
-
-          if (isDev)
-            console.log('✅ Loaded terrain config from heightmap:', {
-              bounds: terrainBounds,
-              worldSizeX: worldSizeX,
-              worldSizeZ: worldSizeZ,
-              aspectRatio: (worldSizeX / worldSizeZ).toFixed(3),
-              heightOffset: configData.heightOffset,
-              heightScale: configData.heightScale,
-              computedMinHeight: heightmapConfig.minHeight,
-              computedMaxHeight: heightmapConfig.maxHeight,
-              manifestMinHeight: manifest.physics.minHeight,
-              manifestMaxHeight: manifest.physics.maxHeight,
-            })
-        }
-      } catch (e) {
-        if (isDev)
-          console.warn('⚠️ Could not load heightmap config for bounds:', e)
-      }
-    }
-
-    // Build the terrain configuration object from the manifest
-    terrainConfig = {
-      heightmapUrl: manifest.assets.heightmap,
-      worldSize: manifest.physics.worldSize,
-      // Use heightmap config values for exact match with generation, fallback to manifest
-      worldSizeX: heightmapConfig?.worldSizeX,
-      worldSizeZ: heightmapConfig?.worldSizeZ,
-      minHeight: heightmapConfig?.minHeight ?? manifest.physics.minHeight,
-      maxHeight: heightmapConfig?.maxHeight ?? manifest.physics.maxHeight,
-      bounds: terrainBounds,
-      chunkPathTemplate:
-        manifest.assets.chunksPath + 'chunk_{x}_{z}_LOD{lod}.glb',
-      chunkSize:
-        manifest.physics.chunkSize ||
-        manifest.physics.worldSize / (manifest.physics.gridX || 4),
-      gridSize: [manifest.physics.gridX || 4, manifest.physics.gridY || 4],
-      lods: [{ level: 0, distance: 1000 }],
-    }
+    terrainRuntimeData = await loadTerrainRuntimeComponentData({
+      levelId,
+      source: 'built-in-manifest',
+      manifest,
+      manifestUrl,
+      boundsFallback: manifest.physics?.bounds ?? terrainBounds,
+    })
+    heightmapConfig = terrainRuntimeData.heightmapConfig
 
     // Validate height parameters match between manifest and config
     if (
-      heightmapConfig &&
+      heightmapConfig?.minHeight !== undefined &&
+      heightmapConfig.maxHeight !== undefined &&
       (Math.abs(heightmapConfig.minHeight - manifest.physics.minHeight) >
         0.01 ||
         Math.abs(heightmapConfig.maxHeight - manifest.physics.maxHeight) > 0.01)
@@ -357,21 +398,70 @@ function handleLevelTransition(event: CustomEvent) {
 }
 // Get current optimization settings reactively
 $: resolvedObservatorySettings = resolveObservatoryPresetSettings(
-  $observatoryEditorSettingsStore,
+  mergeLevelSettings<ObservatoryEditorSettings>(
+    authoredObservatorySettings ?? {},
+    $observatoryEditorSettingsStore ?? {},
+  ),
 )
 $: activeManifest = manifest
   ? applyObservatoryEditorSettings(manifest, resolvedObservatorySettings)
   : null
+$: componentLevelDefinition =
+  activeManifest && terrainRuntimeData
+    ? createComponentLevelDefinition({
+        levelId,
+        title: activeManifest.name ?? 'Observatory',
+        spawn: activeManifest.spawn?.position ?? [-137.2, 20, -49.5],
+        settings: activeManifest,
+        terrain: {
+          id: `${levelId}-terrain`,
+          name: activeManifest.name ?? 'Observatory Terrain',
+          manifestUrl,
+          heightmapUrl: terrainRuntimeData.manifest.assets?.heightmap,
+          worldSize: terrainRuntimeData.config.worldSize,
+          worldSizeX: terrainRuntimeData.config.worldSizeX,
+          worldSizeZ: terrainRuntimeData.config.worldSizeZ,
+          bounds: terrainRuntimeData.config.bounds,
+        },
+        systemActorIds: [
+          `${levelId}-ocean-system`,
+          `${levelId}-vegetation-system`,
+          `${levelId}-star-map-system`,
+        ],
+      })
+    : null
+$: componentLevelBuildReport = componentLevelDefinition
+  ? createLevelBuildReport(componentLevelDefinition)
+  : null
+$: if (componentLevelBuildReport) {
+  setRuntimeDiagnostic('levelDefinition', {
+    label: 'Level Definition',
+    level: componentLevelBuildReport.errors.length
+      ? 'error'
+      : componentLevelBuildReport.warnings.length
+        ? 'warning'
+        : 'ready',
+    message: componentLevelBuildReport.errors.length
+      ? `${componentLevelBuildReport.levelId}: component level contract failed with ${componentLevelBuildReport.errors.length} errors.`
+      : `${componentLevelBuildReport.levelId}: ${componentLevelBuildReport.actorCount} component actors, ${componentLevelBuildReport.physicsActorCount} physics actors.`,
+    meta: componentLevelBuildReport as unknown as Record<string, unknown>,
+  })
+}
 $: terrainAuthoringActive =
   $editorStateStore.enabled && $editorStateStore.interactionMode === 'terrain'
 $: workbenchViewport =
   $editorStateStore.enabled &&
   $editorStateStore.viewportLightingMode === 'workbench'
-$: playerSpawnPoint = activeManifest?.spawn?.position ?? [0, 50, 0]
 $: if (activeManifest) {
   replaceRuntimeVisualStyle(
     buildRuntimeVisualStyleFromLevelSettings(activeManifest),
   )
+}
+$: {
+  terrainRuntimeReady
+  authoredObservatorySettingsReady
+  activeManifest
+  requestPlayerSpawn()
 }
 $: levelOptimizationSettings = activeManifest
   ? optimizationManager.getComponentSettings(activeManifest.id)
@@ -450,7 +540,7 @@ $: oceanAnimationEnabled =
   $qualityLevelStore !== OptimizationLevel.ULTRA_LOW
 
 $: if (
-  terrainReady &&
+  terrainRuntimeReady &&
   activeManifest &&
   !deferredEnvironmentBootStarted
 ) {
@@ -634,22 +724,16 @@ function startDeferredSceneBoot() {
         />
       {/if}
       
-      {#if terrainConfig}
-        <Terrain 
-          config={terrainConfig}
+      {#if terrainRuntimeData}
+        <TerrainRuntime 
+          levelId={terrainRuntimeData.levelId}
+          config={terrainRuntimeData.config}
+          collisionStrategy={terrainRuntimeData.runtime.collisionStrategy}
           showVisualChunks={!terrainAuthoringActive}
-          on:terrainReady={(e) => {
-            terrainReady = true;
-            if (spawnSystem && spawnSystem.requestSpawn) {
-              const spawnHeight = getHeightAt(playerSpawnPoint[0], playerSpawnPoint[2]);
-              spawnSystem.requestSpawn({
-                entityType: 'player',
-                position: [playerSpawnPoint[0], Math.max(playerSpawnPoint[1], spawnHeight + 2), playerSpawnPoint[2]],
-                priority: 10,
-                metadata: { levelName: activeManifest.name, spawnReason: 'level_load' }
-              });
-            }
-            dispatch('terrainReady');
+          showVisualSurface={terrainRuntimeData.runtime.showVisualSurface}
+          on:staticWorldReady
+          on:terrainRuntimeReady={(e) => {
+            terrainRuntimeReady = true
           }}
         />
       {/if}
@@ -699,7 +783,7 @@ function startDeferredSceneBoot() {
       {/if}
 
       <!-- Nature Pack Vegetation System - configured from manifest -->
-      {#if activeManifest.features.vegetation && showVegetation && terrainReady && vegetationInstanceCount > 0}
+      {#if activeManifest.features.vegetation && showVegetation && terrainRuntimeReady && vegetationInstanceCount > 0}
         <NaturePackVegetation
           bind:this={naturePackVegetation}
           {getHeightAt}

@@ -1,0 +1,14 @@
+.featured-product-hero-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: clamp(0.7rem, 2vw, 1.25rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 18% 18%, rgb(34 197 94 / 0.1), transparent 18%),
+    radial-gradient(circle at 84% 78%, rgb(236 72 153 / 0.14), transparent 22%),
+    linear-gradient(180deg, rgb(2 6 23 / 0.52), rgb(2 6 23 / 0.2));
+}
