@@ -93,6 +93,7 @@ const {
 } = Astro.props
 
 const isBannerOnly = contentMode === 'banner-only'
+const isPortalBannerMode = homeLayout === 'portal' && isBannerOnly
 
 const rawBannerConfig = (bannerModule as any).bannerConfig ?? {}
 
@@ -738,6 +739,7 @@ const gridLayoutClasses = [
     bannerConfig={bannerConfig}
     bannerAnimationSettings={bannerAnimationSettings}
     isBannerOnly={isBannerOnly}
+    isPortalBannerMode={isPortalBannerMode}
     timelineEvents={timelineEvents}
     timelineEraConfig={timelineEraConfig}
     timelineConstellationConfig={timelineConstellationConfig}
@@ -971,8 +973,8 @@ const gridLayoutClasses = [
     margin-top: var(--main-content-offset);
   }
 
-  :global(html:has(#banner-container.banner-only-mode)),
-  :global(html:has(#banner-container.banner-only-mode) body) {
+  :global(html:has(#banner-container.portal-banner-mode.banner-only-mode)),
+  :global(html:has(#banner-container.portal-banner-mode.banner-only-mode) body) {
     height: 100%;
     overflow: hidden !important;
     overscroll-behavior: none !important;
@@ -1000,20 +1002,20 @@ const gridLayoutClasses = [
     height: var(--banner-height);
   }
 
-  #banner-container.banner-only-mode {
+  #banner-container.portal-banner-mode.banner-only-mode {
     margin-top: 0;
   }
 
-  #banner-container.banner-only-mode .banner-aspect-container {
-    height: calc(100dvh - 4.5rem);
+  #banner-container.portal-banner-mode.banner-only-mode .banner-aspect-container {
+    height: 100dvh;
     min-height: 0;
   }
 
-  #banner-container.banner-only-mode .banner-content-wrapper,
-  #banner-container.banner-only-mode #standard-banner-container,
-  #banner-container.banner-only-mode .banner-slide,
-  #banner-container.banner-only-mode .banner-link,
-  #banner-container.banner-only-mode .banner-media-layer {
+  #banner-container.portal-banner-mode.banner-only-mode .banner-content-wrapper,
+  #banner-container.portal-banner-mode.banner-only-mode #standard-banner-container,
+  #banner-container.portal-banner-mode.banner-only-mode .banner-slide,
+  #banner-container.portal-banner-mode.banner-only-mode .banner-link,
+  #banner-container.portal-banner-mode.banner-only-mode .banner-media-layer {
     height: 100%;
   }
 
@@ -1055,12 +1057,12 @@ const gridLayoutClasses = [
       height: var(--banner-height-mobile, var(--banner-height));
     }
 
-    #banner-container.banner-only-mode {
+    #banner-container.portal-banner-mode.banner-only-mode {
       margin-top: 0;
     }
 
-    #banner-container.banner-only-mode .banner-aspect-container {
-      height: calc(100dvh - 3rem);
+    #banner-container.portal-banner-mode.banner-only-mode .banner-aspect-container {
+      height: 100dvh;
       min-height: 0;
     }
   }

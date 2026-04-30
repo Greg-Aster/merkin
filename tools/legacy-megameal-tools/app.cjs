@@ -67,6 +67,16 @@ function getEditorScenePath(levelId) {
   return path.join(EDITOR_SCENES_ROOT, `${levelId}.scene.json`);
 }
 
+function getTerrainManifestPathForLevel(levelId) {
+  const manifestByLevel = {
+    observatory: path.join(GAME_PUBLIC_ROOT, 'terrain', 'observatory-environment.manifest.json'),
+    'observatory-environment': path.join(GAME_PUBLIC_ROOT, 'terrain', 'observatory-environment.manifest.json'),
+    solitude: path.join(GAME_PUBLIC_ROOT, 'terrain', 'solitude.manifest.json'),
+  };
+
+  return manifestByLevel[levelId] || null;
+}
+
 function listEditorSceneBackupFilenames(levelId) {
   if (!fs.existsSync(EDITOR_SCENES_ROOT)) return [];
 
@@ -2645,6 +2655,13 @@ const server = http.createServer(async (req, res) => {
     req.on('end', async () => {
       try {
         const { inputFile, resolution, outputDir, worldSize } = JSON.parse(body);
+        res.writeHead(410, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: false,
+          message: 'Legacy heightmap generation is retired. Use /api/editor-terrain/generate-heightmap so generated heightmaps are saved through the editor terrain/collision workflow.',
+          replacementEndpoint: '/api/editor-terrain/generate-heightmap',
+        }));
+        return;
         
         console.log('🔥 Heightmap generation request:', { inputFile, resolution, outputDir, worldSize });
         
@@ -4623,6 +4640,305 @@ const server = http.createServer(async (req, res) => {
         console.error('Hunyuan run error:', error);
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, message: `Hunyuan run failed: ${error.message}` }));
+      }
+    });
+    return;
+  }
+
+  if (pathname === '/api/editor-terrain/generate-heightmap' && req.method === 'POST') {
+    let body = '';
+
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+
+    req.on('end', () => {
+      try {
+        const {
+          levelId,
+          nodeId,
+          sourceAssetUrl,
+          resolution = 512,
+          bakeCollision = true,
+        } = JSON.parse(body || '{}');
+
+        if (!levelId) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'levelId is required' }));
+          return;
+        }
+
+        const manifestPath = getTerrainManifestPathForLevel(levelId);
+        if (!manifestPath) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: false,
+            message: `Level "${levelId}" does not use the baked heightmap terrain workflow.`,
+          }));
+          return;
+        }
+
+        const scenePath = getEditorScenePath(levelId);
+        const scene = fs.existsSync(scenePath)
+          ? JSON.parse(fs.readFileSync(scenePath, 'utf8').replace(/^\uFEFF/, ''))
+          : null;
+        const sourceNode = nodeId && scene?.nodes
+          ? scene.nodes.find(node => node.id === nodeId)
+          : null;
+        const resolvedSourceUrl = sourceAssetUrl || sourceNode?.asset?.url || '';
+
+        if (!resolvedSourceUrl) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: false,
+            message: 'Select an asset node or provide sourceAssetUrl before generating a terrain heightmap.',
+          }));
+          return;
+        }
+
+        const sourcePath = resolvePublicAssetPath(resolvedSourceUrl);
+        if (!fs.existsSync(sourcePath)) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: `Source mesh not found: ${resolvedSourceUrl}` }));
+          return;
+        }
+
+        const args = [
+          '--dir',
+          'apps/game',
+          'generate:terrain-heightmap',
+          '--',
+          `--level=${levelId}`,
+          `--source=${resolvedSourceUrl}`,
+          `--sourceName=${sourceNode?.name || path.basename(sourcePath)}`,
+          `--resolution=${resolution}`,
+          `--position=${JSON.stringify(sourceNode?.position || [0, 0, 0])}`,
+          `--rotation=${JSON.stringify(sourceNode?.rotation || [0, 0, 0])}`,
+          `--scale=${JSON.stringify(sourceNode?.scale || [1, 1, 1])}`,
+        ];
+
+        const child = spawn('pnpm', args, {
+          cwd: REPO_ROOT,
+          stdio: 'pipe',
+          shell: process.platform === 'win32',
+        });
+
+        let stdout = '';
+        let stderr = '';
+
+        child.stdout.on('data', chunk => {
+          stdout += chunk.toString();
+        });
+        child.stderr.on('data', chunk => {
+          stderr += chunk.toString();
+        });
+
+        child.on('close', code => {
+          if (code !== 0) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              success: false,
+              message: stderr || stdout || `Terrain heightmap generation failed with exit code ${code}`,
+            }));
+            return;
+          }
+
+          let generated = null;
+          try {
+            const jsonLine = stdout
+              .trim()
+              .split(/\r?\n/)
+              .reverse()
+              .find(line => line.trim().startsWith('{'));
+            generated = jsonLine ? JSON.parse(jsonLine) : null;
+          } catch {}
+
+          const finish = (collisionPayload = null) => {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              success: true,
+              ...generated,
+              collision: collisionPayload?.collision ?? null,
+              collisionMetadata: collisionPayload?.metadata ?? null,
+              stdout,
+            }));
+          };
+
+          if (!bakeCollision) {
+            finish();
+            return;
+          }
+
+          const bakeChild = spawn('pnpm', [
+            '--dir',
+            'apps/game',
+            'bake:terrain-collision',
+            '--',
+            `--level=${levelId}`,
+          ], {
+            cwd: REPO_ROOT,
+            stdio: 'pipe',
+            shell: process.platform === 'win32',
+          });
+
+          let bakeStdout = '';
+          let bakeStderr = '';
+          bakeChild.stdout.on('data', chunk => {
+            bakeStdout += chunk.toString();
+          });
+          bakeChild.stderr.on('data', chunk => {
+            bakeStderr += chunk.toString();
+          });
+          bakeChild.on('close', bakeCode => {
+            if (bakeCode !== 0) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({
+                success: false,
+                message: bakeStderr || bakeStdout || `Terrain collision bake failed with exit code ${bakeCode}`,
+                heightmap: generated,
+              }));
+              return;
+            }
+
+            try {
+              const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8').replace(/^\uFEFF/, ''));
+              const metadataUrl = manifest?.collision?.terrain?.metadataUrl;
+              const metadataPath = metadataUrl
+                ? path.join(GAME_PUBLIC_ROOT, metadataUrl.replace(/^\/+/, ''))
+                : '';
+              const metadata = metadataPath && fs.existsSync(metadataPath)
+                ? JSON.parse(fs.readFileSync(metadataPath, 'utf8').replace(/^\uFEFF/, ''))
+                : null;
+              finish({
+                collision: manifest.collision?.terrain ?? null,
+                metadata,
+              });
+            } catch (readError) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({
+                success: false,
+                message: `Heightmap generated and collision baked, but reading metadata failed: ${readError.message}`,
+                heightmap: generated,
+              }));
+            }
+          });
+          bakeChild.on('error', error => {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              success: false,
+              message: `Collision bake process error: ${error.message}`,
+              heightmap: generated,
+            }));
+          });
+        });
+
+        child.on('error', error => {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: `Heightmap generation process error: ${error.message}` }));
+        });
+      } catch (error) {
+        console.error('Editor terrain heightmap generation error:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: 'Terrain heightmap generation failed: ' + error.message }));
+      }
+    });
+    return;
+  }
+
+  if (pathname === '/api/editor-terrain/bake-collision' && req.method === 'POST') {
+    let body = '';
+
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+
+    req.on('end', () => {
+      try {
+        const { levelId } = JSON.parse(body || '{}');
+        if (!levelId) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'levelId is required' }));
+          return;
+        }
+
+        const manifestPath = getTerrainManifestPathForLevel(levelId);
+        if (!manifestPath) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: false,
+            message: `Level "${levelId}" does not use the baked heightmap terrain workflow.`,
+          }));
+          return;
+        }
+
+        const child = spawn('pnpm', [
+          '--dir',
+          'apps/game',
+          'bake:terrain-collision',
+          '--',
+          `--level=${levelId}`,
+        ], {
+          cwd: REPO_ROOT,
+          stdio: 'pipe',
+          shell: process.platform === 'win32',
+        });
+
+        let stdout = '';
+        let stderr = '';
+
+        child.stdout.on('data', chunk => {
+          stdout += chunk.toString();
+        });
+        child.stderr.on('data', chunk => {
+          stderr += chunk.toString();
+        });
+
+        child.on('close', code => {
+          if (code !== 0) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              success: false,
+              message: stderr || stdout || `Terrain collision bake failed with exit code ${code}`,
+            }));
+            return;
+          }
+
+          try {
+            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8').replace(/^\uFEFF/, ''));
+            const metadataUrl = manifest?.collision?.terrain?.metadataUrl;
+            const metadataPath = metadataUrl
+              ? path.join(GAME_PUBLIC_ROOT, metadataUrl.replace(/^\/+/, ''))
+              : '';
+            const metadata = metadataPath && fs.existsSync(metadataPath)
+              ? JSON.parse(fs.readFileSync(metadataPath, 'utf8').replace(/^\uFEFF/, ''))
+              : null;
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              success: true,
+              manifestPath: toRepoRelative(manifestPath),
+              manifestUrl: toPublicAssetUrl(manifestPath),
+              collision: manifest.collision?.terrain ?? null,
+              metadata,
+              stdout,
+            }));
+          } catch (readError) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              success: false,
+              message: `Bake completed, but reading manifest metadata failed: ${readError.message}`,
+            }));
+          }
+        });
+
+        child.on('error', error => {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: `Bake process error: ${error.message}` }));
+        });
+      } catch (error) {
+        console.error('Editor terrain collision bake error:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: 'Terrain collision bake failed: ' + error.message }));
       }
     });
     return;

@@ -17,7 +17,10 @@ import {
 } from '../features/performance/utils/runtimeSceneBudget'
 import { reportRuntimeAssetFailure } from '../stores/runtimeDiagnosticsStore'
 import { runtimeVisualStyleStore } from '../styles/runtimeVisualStyleStore'
-import { cloneCachedGltfScene } from '../utils/gltfAssetCache'
+import {
+  cloneCachedGltfScene,
+  disposeCachedGltfScene,
+} from '../utils/gltfAssetCache'
 import {
   createObjectMaterialOverrideState,
   disposeObjectMaterialOverrideState,
@@ -151,21 +154,7 @@ function applyOverrideTexturesToScene() {
 }
 
 function disposeLoadedScene(object: THREE.Object3D | null) {
-  if (!object) return
-
-  object.traverse(child => {
-    if (!(child instanceof THREE.Mesh)) return
-
-    const disposeMaterial = (material: THREE.Material) => {
-      material?.dispose?.()
-    }
-
-    if (Array.isArray(child.material)) {
-      child.material.forEach(disposeMaterial)
-    } else {
-      disposeMaterial(child.material)
-    }
-  })
+  disposeCachedGltfScene(object)
 }
 
 function snapshotSceneMeshes(root: THREE.Group) {

@@ -32,7 +32,7 @@ type StandardBannerItem = {
 	type?: string;
 	src?: string;
 	alt?: string;
-	fallbackImage?: import("astro").ImageMetadata;
+	fallbackImage?: import("astro").ImageMetadata | string;
 	preload?: "none" | "metadata" | "auto";
 	playbackRate?: number;
 	holdMs?: number;
@@ -108,6 +108,7 @@ interface Props {
 	bannerConfig: BannerStageConfig;
 	bannerAnimationSettings: unknown;
 	isBannerOnly?: boolean;
+	isPortalBannerMode?: boolean;
 	timelineEvents?: unknown[];
 	timelineEraConfig?: Record<string, TimelineEraDefinition>;
 	timelineConstellationConfig?: Record<string, unknown>;
@@ -133,6 +134,7 @@ const {
 	bannerConfig,
 	bannerAnimationSettings,
 	isBannerOnly = false,
+	isPortalBannerMode = false,
 	timelineEvents = [],
 	timelineEraConfig,
 	timelineConstellationConfig,
@@ -167,6 +169,12 @@ function normalizeAssetUrl(assetPath?: string | null): string {
 	return url(assetPath, import.meta.env.BASE_URL);
 }
 
+function getAssetSrc(asset?: import("astro").ImageMetadata | string): string | undefined {
+	if (!asset) return undefined;
+	if (typeof asset === "string") return normalizeAssetUrl(asset);
+	return asset.src;
+}
+
 const hasVideoBanner = scene?.id === "video";
 const hasTimelineBanner = scene?.id === "timeline";
 const hasImageBanner = scene?.id === "image";
@@ -182,7 +190,8 @@ const hasAssistantBanner = scene?.id === "assistant";
     ${hasImageBanner ? 'has-image-banner' : ''}
     ${hasAssistantBanner ? 'has-assistant-banner' : ''}
     ${hasStandardBanner ? 'has-standard-banner' : ''}
-    ${isBannerOnly ? 'banner-only-mode' : ''}`}
+    ${isBannerOnly ? 'banner-only-mode' : ''}
+    ${isPortalBannerMode ? 'portal-banner-mode' : ''}`}
   data-banner-scene={scene?.id ?? 'none'}
   data-mobile-right-rail-hero={shouldShowMobilePortraitRightRailHero
     ? mobilePortraitRightRailHeroStyle
@@ -410,7 +419,7 @@ const hasAssistantBanner = scene?.id === "assistant";
                                   ? item.preload ||
                                     bannerConfig.standardBannerConfig.video.preload
                                   : 'none'}
-                                poster={item.fallbackImage}
+                                poster={getAssetSrc(item.fallbackImage)}
                                 class={`banner-video w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
                                 style={`border-radius: ${bannerConfig.visual.borderRadius};`}
                                 onerror="this.style.display='none'; var ne = this.nextElementSibling; if (ne) ne.style.display='block';"
@@ -768,6 +777,23 @@ const hasAssistantBanner = scene?.id === "assistant";
     height: var(--banner-height);
   }
 
+  #banner-container.portal-banner-mode.banner-only-mode {
+    margin-top: 0;
+  }
+
+  #banner-container.portal-banner-mode.banner-only-mode .banner-aspect-container {
+    height: 100dvh;
+    min-height: 100svh;
+  }
+
+  #banner-container.portal-banner-mode.banner-only-mode .banner-content-wrapper,
+  #banner-container.portal-banner-mode.banner-only-mode #standard-banner-container,
+  #banner-container.portal-banner-mode.banner-only-mode .banner-slide,
+  #banner-container.portal-banner-mode.banner-only-mode .banner-link,
+  #banner-container.portal-banner-mode.banner-only-mode .banner-media-layer {
+    height: 100%;
+  }
+
   #banner-container.banner-only-mode.has-timeline-banner .banner-container-timeline,
   #banner-container.banner-only-mode.has-timeline-banner .banner-content-wrapper,
   #banner-container.banner-only-mode.has-timeline-banner #timeline-mobile-wrapper {
@@ -794,6 +820,15 @@ const hasAssistantBanner = scene?.id === "assistant";
 
     #banner-container .banner-aspect-container {
       height: var(--banner-height-mobile, var(--banner-height));
+    }
+
+    #banner-container.portal-banner-mode.banner-only-mode {
+      margin-top: 0;
+    }
+
+    #banner-container.portal-banner-mode.banner-only-mode .banner-aspect-container {
+      height: 100dvh;
+      min-height: 100svh;
     }
   }
 

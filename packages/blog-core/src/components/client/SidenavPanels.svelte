@@ -401,8 +401,8 @@ function positionPanelRelativeToButton(
   }
   
   .hue-slider {
-    writing-mode: bt-lr; 
-    -webkit-appearance: slider-vertical;
+    writing-mode: vertical-lr;
+    direction: rtl;
   }
   
   .sidenav-panel.panel-open {

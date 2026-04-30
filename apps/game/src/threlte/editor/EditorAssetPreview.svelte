@@ -1,7 +1,10 @@
 <script lang="ts">
 import { onDestroy } from 'svelte'
 import * as THREE from 'three'
-import { cloneCachedGltfScene } from '../utils/gltfAssetCache'
+import {
+  cloneCachedGltfScene,
+  disposeCachedGltfScene,
+} from '../utils/gltfAssetCache'
 
 export let assetUrl = ''
 export let imageUrl = ''
@@ -36,18 +39,7 @@ $: resolvedMeshUrl = isMeshUrl(assetUrl) ? assetUrl : ''
 $: previewMode = resolvedMeshUrl ? 'mesh' : resolvedImageUrl ? 'image' : 'empty'
 
 function disposePreviewObject(object: THREE.Object3D | null) {
-  if (!object) return
-
-  object.traverse(child => {
-    const mesh = child as THREE.Mesh
-    const materials = Array.isArray(mesh.material)
-      ? mesh.material
-      : [mesh.material]
-    for (const material of materials) {
-      if (!material) continue
-      material.dispose?.()
-    }
-  })
+  disposeCachedGltfScene(object)
 }
 
 function stopPreviewLoop() {

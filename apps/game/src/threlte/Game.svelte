@@ -134,6 +134,7 @@ let levelRegistry = []
 let physicsReady = false
 let staticWorldReady = false
 let worldUnloading = false
+let lastRuntimeResetLevel = ''
 let activeLevelLoadRequest = 0
 let editorFeaturesPromise: Promise<void> | null = null
 let sceneLayerComponentPromise: Promise<void> | null = null
@@ -216,6 +217,9 @@ $: isMobile = $isMobileStore
 $: error = $errorStore
 $: editorEnabled = $editorStateStore.enabled
 $: collisionOverlayEnabled = $editorStateStore.collisionOverlayEnabled
+$: if (currentLevel && currentLevel !== lastRuntimeResetLevel) {
+  resetRuntimeForLevelTransition(currentLevel)
+}
 $: playerReady = Boolean(
   playerComponent &&
     typeof playerComponent.spawnAt === 'function' &&
@@ -891,6 +895,21 @@ function confirmPendingLevelReturn() {
 
 function resolveLevelId(levelType: string) {
   return getLevelRegistryEntry(levelType, levelRegistry)?.id ?? levelType
+}
+
+function resetRuntimeForLevelTransition(levelId: string) {
+  resetLevelRuntime({
+    interactionSystem,
+    spawnSystem,
+  })
+  lastRuntimeResetLevel = levelId
+  worldUnloading = true
+  staticWorldReady = false
+  playerSpawned = false
+  activeLevelNote = null
+  pendingLevelReturn = null
+  currentLevelComponent = null
+  gameActions.selectStar(null)
 }
 
 function transitionToLevel(levelType: string) {

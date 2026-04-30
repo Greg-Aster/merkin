@@ -2,7 +2,10 @@
 import { T } from '@threlte/core'
 import { onDestroy } from 'svelte'
 import * as THREE from 'three'
-import { cloneCachedGltfScene } from '../utils/gltfAssetCache'
+import {
+  cloneCachedGltfScene,
+  disposeCachedGltfScene,
+} from '../utils/gltfAssetCache'
 
 export let url = ''
 export let color = '#4df0ff'
@@ -14,17 +17,7 @@ let loadedUrl = ''
 
 function disposeScene(root: THREE.Object3D | null) {
   if (!root) return
-  const materials = new Set<THREE.Material>()
-  root.traverse(child => {
-    if (!(child instanceof THREE.Mesh)) return
-    const material = child.material
-    if (Array.isArray(material)) {
-      material.forEach(entry => materials.add(entry))
-    } else {
-      materials.add(material)
-    }
-  })
-  materials.forEach(material => material.dispose?.())
+  disposeCachedGltfScene(root)
 }
 
 async function loadHelperScene(nextUrl: string) {

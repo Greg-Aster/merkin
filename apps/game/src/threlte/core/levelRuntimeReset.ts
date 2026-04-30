@@ -1,6 +1,7 @@
 import { terrainActions } from '../features/terrain'
 import { resetPostProcessingState } from '../stores/postProcessingStore'
 import { resetRuntimeVisualStyle } from '../styles/runtimeVisualStyleStore'
+import { clearGltfCache } from '../utils/gltfAssetCache'
 
 export interface LevelRuntimeResetServices {
   interactionSystem?: {
@@ -18,4 +19,5 @@ export function resetLevelRuntime(services: LevelRuntimeResetServices = {}) {
   terrainActions.reset()
   resetPostProcessingState()
   resetRuntimeVisualStyle()
+  clearGltfCache()
 }
