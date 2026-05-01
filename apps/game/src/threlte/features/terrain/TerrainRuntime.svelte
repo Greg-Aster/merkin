@@ -4,6 +4,7 @@ import { createEventDispatcher, onDestroy, onMount, tick } from 'svelte'
 import { get } from 'svelte/store'
 import * as THREE from 'three'
 import { playerStateStore } from '../../stores/gameStateStore'
+import { setRuntimeDiagnostic } from '../../stores/runtimeDiagnosticsStore'
 import { type TerrainConfig, TerrainManager } from './TerrainManager'
 import {
   type BakedTerrainCollider,
@@ -57,6 +58,10 @@ onMount(async () => {
   localManager = null
   readySignature = ''
   terrainActions.reset()
+  setRuntimeDiagnostic('terrain', {
+    level: 'loading',
+    message: `Loading terrain runtime for ${levelId}.`,
+  })
 
   try {
     const manager = new TerrainManager()
@@ -74,6 +79,15 @@ onMount(async () => {
       bounds: manager.getBounds(),
       manager,
     }))
+    setRuntimeDiagnostic('terrain', {
+      level: 'loading',
+      message: `Terrain height data ready for ${levelId}; loading collision.`,
+      meta: {
+        levelId,
+        heightmapUrl: config.heightmapUrl,
+        chunksPath: config.chunkPathTemplate,
+      },
+    })
 
     if (collisionStrategy === 'baked-terrain-mesh' && config.collision?.url) {
       bakedCollider = await loadBakedTerrainCollider(config.collision)
@@ -89,11 +103,27 @@ onMount(async () => {
         ...state,
         error: message,
       }))
+      setRuntimeDiagnostic('terrain', {
+        level: 'error',
+        message,
+        meta: { levelId },
+      })
       return
     }
 
     if (bakedCollider && config.collision?.url) {
       await tick()
+      setRuntimeDiagnostic('terrain', {
+        level: 'ready',
+        message: `Terrain ready on ${levelId}.`,
+        meta: {
+          levelId,
+          heightmapUrl: config.heightmapUrl,
+          collisionUrl: config.collision.url,
+          triangleCount: bakedCollider.triangleCount,
+          visualChunks: Boolean(config.chunkPathTemplate),
+        },
+      })
       markTerrainRuntimeReady({
         source: 'baked-collider',
         heightmapUrl: config.heightmapUrl,
@@ -117,10 +147,17 @@ onMount(async () => {
   } catch (error) {
     if (initializationCancelled) return
     console.error('Failed to initialize terrain runtime:', error)
+    const message =
+      error instanceof Error ? error.message : 'Unknown terrain error'
     terrainStore.update(state => ({
       ...state,
-      error: error instanceof Error ? error.message : 'Unknown terrain error',
+      error: message,
     }))
+    setRuntimeDiagnostic('terrain', {
+      level: 'error',
+      message: `Failed to initialize terrain runtime for ${levelId}: ${message}`,
+      meta: { levelId },
+    })
   }
 })
 
@@ -142,7 +179,8 @@ $: visibleChunks =
 
 <T.Group>
   {#if $terrainStore.isReady && $terrainStore.heightData}
-    <T.Group name={`${levelId}-terrain-physics`}>
+    {#if bakedCollider}
+      <T.Group name={`${levelId}-terrain-physics`}>
       <TerrainCollider
         heightData={$terrainStore.heightData}
         resolution={$terrainStore.resolution}
@@ -159,7 +197,8 @@ $: visibleChunks =
         bakedColliderInput={bakedCollider}
         on:terrainRuntimeReady={(event) => markTerrainRuntimeReady(event.detail)}
       />
-    </T.Group>
+      </T.Group>
+    {/if}
 
     <T.Group name={`${levelId}-terrain-visual-lod`}>
       {#if showVisualSurface && !config.chunkPathTemplate}

@@ -1,32 +1,61 @@
-import type { EditorSceneDocument } from './sceneDocumentTypes'
+import type { SceneDocument } from './sceneDocumentTypes'
+import {
+  getRuntimeSceneManifestUrl,
+  isRuntimeSceneManifest,
+  type RuntimeSceneManifest,
+} from './runtimeSceneManifest'
+import type { LevelDefinition } from './types'
 
-const sceneModules = import.meta.glob('../editor/scenes/*.scene.json', {
-  eager: true,
-  import: 'default',
-}) as Record<string, EditorSceneDocument>
+export type RuntimeSceneDocumentLoadResult =
+  | {
+      levelDefinition: LevelDefinition
+      runtimeManifest: RuntimeSceneManifest
+      scene: null
+      source: 'runtime-manifest'
+    }
+  | {
+      scene: SceneDocument
+      source: 'packaged'
+    }
 
-export interface RuntimeSceneDocumentLoadResult {
-  scene: EditorSceneDocument
-  source: 'packaged'
-}
+async function loadRuntimeSceneManifest(levelId: string) {
+  const url = getRuntimeSceneManifestUrl(levelId)
 
-function cloneScene(scene: EditorSceneDocument) {
-  return structuredClone(scene) as EditorSceneDocument
+  try {
+    const response = await fetch(url)
+    if (!response.ok) return null
+
+    const manifest = await response.json()
+    if (!isRuntimeSceneManifest(manifest) || manifest.levelId !== levelId) {
+      console.warn(`${levelId}: invalid runtime scene manifest ${url}`)
+      return null
+    }
+
+    return manifest
+  } catch {
+    return null
+  }
 }
 
 export async function loadRuntimeSceneDocument(
   levelId: string,
 ): Promise<RuntimeSceneDocumentLoadResult> {
-  const match = Object.entries(sceneModules).find(([path]) =>
-    path.endsWith(`/${levelId}.scene.json`),
-  )
-
-  if (!match) {
-    throw new Error(`${levelId}: packaged runtime scene document not found.`)
+  const runtimeManifest = await loadRuntimeSceneManifest(levelId)
+  if (runtimeManifest) {
+    return {
+      levelDefinition: runtimeManifest.levelDefinition,
+      runtimeManifest,
+      scene: null,
+      source: 'runtime-manifest',
+    }
   }
 
+  const { requirePackagedSceneDocument } = await import(
+    './packagedSceneDocuments'
+  )
+
   return {
-    scene: cloneScene(match[1]),
+    scene: requirePackagedSceneDocument(levelId),
     source: 'packaged',
   }
 }

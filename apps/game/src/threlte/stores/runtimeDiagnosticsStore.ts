@@ -110,11 +110,11 @@ const DEFAULT_DIAGNOSTICS: Record<string, DiagnosticRecord> = {
     message: 'Editor disabled.',
     updatedAt: 0,
   },
-  toolsBridge: {
-    key: 'toolsBridge',
-    label: 'Tools Bridge',
+  editorApi: {
+    key: 'editorApi',
+    label: 'Editor API',
     level: 'idle',
-    message: 'Tools bridge status unknown.',
+    message: 'Editor API status unknown.',
     updatedAt: 0,
   },
   comfyUi: {
@@ -203,7 +203,7 @@ export function reportRuntimeAssetFailure(source: string, message: string) {
   }
 
   runtimeAssetFailuresStore.update(current => [entry, ...current].slice(0, 12))
-  setRuntimeDiagnostic('toolsBridge', {
+  setRuntimeDiagnostic('editorApi', {
     level: 'warning',
     message:
       'Asset/runtime failures have been reported. Open diagnostics for details.',

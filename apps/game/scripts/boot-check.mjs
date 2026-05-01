@@ -9,8 +9,11 @@ import {
 } from './lib/browserHarness.mjs'
 
 const repoRoot = fileURLToPath(new URL('../../..', import.meta.url))
-const editorApiBase = String(process.env.PUBLIC_EDITOR_API_BASE || 'http://127.0.0.1:3001').replace(/\/+$/, '')
 const gameDevPort = String(process.env.GAME_DEV_PORT || 4322)
+const appOrigin = `http://127.0.0.1:${gameDevPort}`
+const editorApiBase = String(
+  process.env.PUBLIC_EDITOR_API_BASE || process.env.EDITOR_API_BASE || appOrigin,
+).replace(/\/+$/, '')
 const pnpmBin = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'
 const useShell = process.platform === 'win32'
 const args = process.argv.slice(2)
@@ -23,8 +26,8 @@ async function runBootCheck() {
   const devProcess = noServer ? null : spawnGameDev(repoRoot)
 
   try {
-    await waitForUrl(`${editorApiBase}/favicon.ico`)
-    await waitForUrl(`http://127.0.0.1:${gameDevPort}/`)
+    await waitForUrl(`${appOrigin}/`)
+    await waitForUrl(`${editorApiBase}/api/level-registry`)
 
     const browserProcess = spawn(
       pnpmBin,

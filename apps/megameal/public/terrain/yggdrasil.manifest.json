@@ -70,9 +70,29 @@
     }
   },
   "visualChunks": {
-    "generatedAt": "2026-05-01T01:32:30.361Z",
+    "generatedAt": "2026-05-01T02:23:14.133Z",
     "generatedBy": "cook-terrain-chunks",
     "chunkCount": 48,
+    "material": {
+      "name": "terrain-chunk-yggdrasil-moss",
+      "baseColorFactor": [
+        0.025,
+        0.04,
+        0.032,
+        1
+      ],
+      "roughnessFactor": 1,
+      "metallicFactor": 0
+    },
+    "activation": {
+      "maxActiveChunksByTier": {
+        "ultra_low": 4,
+        "low": 6,
+        "medium": 8,
+        "high": 9,
+        "ultra": 12
+      }
+    },
     "lods": [
       {
         "level": 0,

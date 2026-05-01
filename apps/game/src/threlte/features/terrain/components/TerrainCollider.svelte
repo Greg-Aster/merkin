@@ -57,6 +57,7 @@ async function loadBakedCollider(collisionConfig: TerrainConfig['collision']) {
 $: if (bakedColliderInput) {
   activeLoadToken += 1
   bakedCollider = bakedColliderInput
+  loadedUrl = collision?.url ?? loadedUrl
 }
 
 function dispatchReady() {
@@ -91,7 +92,7 @@ function dispatchReady() {
   dispatch('terrainRuntimeReady', detail)
 }
 
-$: if (collision?.url && collision.url !== loadedUrl) {
+$: if (!bakedColliderInput && collision?.url && collision.url !== loadedUrl) {
   loadedUrl = collision.url
   void loadBakedCollider(collision)
 }

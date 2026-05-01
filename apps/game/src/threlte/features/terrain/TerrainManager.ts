@@ -35,6 +35,10 @@ export interface TerrainConfig {
   chunkSize?: number
   gridSize?: [number, number]
   lods?: Array<{ level: number; distance: number }>
+  chunkActivation?: {
+    maxActiveChunks?: number
+    maxActiveChunksByTier?: Partial<Record<OptimizationLevel, number>>
+  }
 }
 
 export interface TerrainChunk {
@@ -217,6 +221,8 @@ export class TerrainManager {
       return []
     }
 
+    const candidates: Array<{ chunk: TerrainChunk; distance: number }> = []
+
     this.chunks.forEach(chunk => {
       const distance = playerPosition.distanceTo(chunk.position)
       let newLod = -1
@@ -230,9 +236,45 @@ export class TerrainManager {
       if (newLod !== chunk.currentLod) {
         chunk.currentLod = newLod
       }
+
+      if (newLod !== -1) {
+        candidates.push({ chunk, distance })
+      }
     })
 
+    const maxActiveChunks = this.getMaxActiveChunks()
+    if (maxActiveChunks && candidates.length > maxActiveChunks) {
+      const activeChunks = new Set(
+        candidates
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, maxActiveChunks)
+          .map(candidate => candidate.chunk.id),
+      )
+
+      for (const chunk of this.chunks) {
+        if (!activeChunks.has(chunk.id)) {
+          chunk.currentLod = -1
+        }
+      }
+    }
+
     return this.chunks.filter(chunk => chunk.currentLod !== -1)
+  }
+
+  private getMaxActiveChunks(): number | null {
+    if (!this.config?.chunkActivation) return null
+
+    const currentLevel = optimizationManager.getOptimizationLevel()
+    const tierLimit =
+      this.config.chunkActivation.maxActiveChunksByTier?.[currentLevel]
+    const configuredLimit =
+      tierLimit ?? this.config.chunkActivation.maxActiveChunks
+
+    if (!Number.isFinite(configuredLimit) || configuredLimit! <= 0) {
+      return null
+    }
+
+    return Math.floor(configuredLimit!)
   }
 
   /**

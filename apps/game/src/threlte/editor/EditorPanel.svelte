@@ -161,6 +161,7 @@ let saveMessage = 'Local only'
 let terrainCollisionBakePending = false
 let terrainHeightmapGeneratePending = false
 let terrainChunkCookPending = false
+let worldPartitionCookPending = false
 const ASSET_LIBRARY_ROOT_MODELS = 'apps/megameal/public/models'
 const ASSET_LIBRARY_ROOT_GENERATED = 'apps/megameal/public/generated/hunyuan3d'
 const COMFY_WORKFLOW_LIBRARY_ROOT = 'apps/game/authoring/workflows/ref-image'
@@ -1364,8 +1365,9 @@ $: observatorySettings = editorScene?.settings?.observatory ?? {}
 $: solitudeSettings = editorScene?.settings?.solitude ?? {}
 $: terrainCollisionSettings = levelSettings.collision?.terrain ?? null
 $: collisionDefaultPolicy =
-  (levelSettings.collision?.workflow
-    ?.actorCollision as LevelCollisionDefaultPolicy | undefined) ??
+  (levelSettings.collision?.workflow?.actorCollision as
+    | LevelCollisionDefaultPolicy
+    | undefined) ??
   (levelSettings.collision?.defaults?.solidObjectsByDefault === false
     ? 'authored-only'
     : 'lightweight-auto')
@@ -2694,6 +2696,52 @@ async function cookTerrainChunks() {
   }
 }
 
+async function cookWorldPartition() {
+  if (worldPartitionCookPending) return
+  worldPartitionCookPending = true
+  saveMessage = 'Cooking actor world partition...'
+
+  try {
+    const response = await fetch(
+      `${EDITOR_API_BASE}/api/editor-scene/cook-world-partition`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ levelId: activeSceneLevelId }),
+      },
+    )
+    const payload = await response.json()
+    if (!payload?.success) {
+      throw new Error(payload?.message ?? 'World partition cook failed')
+    }
+
+    updateLevelSceneSettings(settings => ({
+      ...settings,
+      worldPartition: {
+        ...(settings.worldPartition ?? {}),
+        partitionUrl:
+          payload.partitionUrl ?? settings.worldPartition?.partitionUrl,
+        cellSize: payload.cellSize ?? settings.worldPartition?.cellSize,
+        activeRadius:
+          payload.activeRadius ?? settings.worldPartition?.activeRadius,
+        cells: payload.cells ?? settings.worldPartition?.cells,
+        residentActors:
+          payload.residentActors ?? settings.worldPartition?.residentActors,
+        streamableActors:
+          payload.streamableActors ?? settings.worldPartition?.streamableActors,
+        lastGeneratedAt: new Date().toISOString(),
+      },
+    }))
+    saveMessage = `Cooked ${payload.cells ?? 0} actor partition cells`
+  } catch (error) {
+    console.error('World partition cook failed:', error)
+    saveMessage =
+      error instanceof Error ? error.message : 'World partition cook failed'
+  } finally {
+    worldPartitionCookPending = false
+  }
+}
+
 async function reloadFromDisk() {
   try {
     const response = await fetch(
@@ -2893,6 +2941,7 @@ $: editorPanelPropContext = {
   terrainCollisionBakePending,
   terrainHeightmapGeneratePending,
   terrainChunkCookPending,
+  worldPartitionCookPending,
   selectedTerrainSourceName,
   selectedTerrainSourceAssetUrl,
   editorStyleStudioComponent,
@@ -2961,6 +3010,7 @@ $: editorPanelPropContext = {
   bakeTerrainCollision,
   generateTerrainHeightmapFromSelection,
   cookTerrainChunks,
+  cookWorldPartition,
   switchEditorLevel,
   reloadFromDisk,
   loadPackagedLevelScene,

@@ -361,7 +361,35 @@ function makeBufferView(bufferViews, chunks, typedArray, target) {
   return bufferViews.length - 1
 }
 
-function writeGlb(path, mesh) {
+function normalizeTerrainChunkMaterial(material) {
+  if (
+    material &&
+    typeof material.name === 'string' &&
+    Array.isArray(material.baseColorFactor) &&
+    material.baseColorFactor.length === 4 &&
+    material.baseColorFactor.every(value => Number.isFinite(value)) &&
+    Number.isFinite(material.roughnessFactor) &&
+    Number.isFinite(material.metallicFactor)
+  ) {
+    return {
+      name: material.name,
+      baseColorFactor: material.baseColorFactor.map(value =>
+        Math.min(1, Math.max(0, value)),
+      ),
+      roughnessFactor: Math.min(1, Math.max(0, material.roughnessFactor)),
+      metallicFactor: Math.min(1, Math.max(0, material.metallicFactor)),
+    }
+  }
+
+  return {
+    name: 'terrain-chunk-default',
+    baseColorFactor: [0.18, 0.24, 0.18, 1],
+    roughnessFactor: 0.94,
+    metallicFactor: 0,
+  }
+}
+
+function writeGlb(path, mesh, material) {
   mkdirSync(dirname(path), { recursive: true })
   const chunks = []
   const bufferViews = []
@@ -382,11 +410,11 @@ function writeGlb(path, mesh) {
     nodes: [{ mesh: 0 }],
     materials: [
       {
-        name: 'terrain-chunk',
+        name: material.name,
         pbrMetallicRoughness: {
-          baseColorFactor: [0.27, 0.34, 0.25, 1],
-          roughnessFactor: 0.94,
-          metallicFactor: 0,
+          baseColorFactor: material.baseColorFactor,
+          roughnessFactor: material.roughnessFactor,
+          metallicFactor: material.metallicFactor,
         },
       },
     ],
@@ -456,6 +484,7 @@ function writeGlb(path, mesh) {
 
 function updateManifest(manifest, { level, grid, lods, chunksPath, bounds }) {
   const width = bounds.max[0] - bounds.min[0]
+  const material = normalizeTerrainChunkMaterial(manifest.visualChunks?.material)
   return {
     ...manifest,
     assets: {
@@ -472,6 +501,12 @@ function updateManifest(manifest, { level, grid, lods, chunksPath, bounds }) {
       generatedAt: new Date().toISOString(),
       generatedBy: 'cook-terrain-chunks',
       chunkCount: grid * grid * lods.length,
+      material: {
+        name: material.name,
+        baseColorFactor: material.baseColorFactor,
+        roughnessFactor: material.roughnessFactor,
+        metallicFactor: material.metallicFactor,
+      },
       lods: lods.map((lod, index) => ({
         level: index,
         distance: lod.distance,
@@ -530,6 +565,7 @@ const lods = lodResolutions.map((resolution, index) => ({
 }))
 const publicChunksPath = `/terrain/levels/${level.id}/`
 const chunksDir = join(publicRoot, publicChunksPath.replace(/^\//, ''))
+const material = normalizeTerrainChunkMaterial(manifest.visualChunks?.material)
 
 rmSync(chunksDir, { recursive: true, force: true })
 mkdirSync(chunksDir, { recursive: true })
@@ -549,7 +585,11 @@ for (let x = 0; x < grid; x += 1) {
         resolution: lods[lod].resolution,
       })
       totalTriangles += mesh.indices.length / 3
-      writeGlb(join(chunksDir, `chunk_${x}_${z}_LOD${lod}.glb`), mesh)
+      writeGlb(
+        join(chunksDir, `chunk_${x}_${z}_LOD${lod}.glb`),
+        mesh,
+        material,
+      )
     }
   }
 }

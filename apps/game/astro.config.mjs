@@ -2,84 +2,38 @@ import svelte from '@astrojs/svelte'
 import tailwind from '@astrojs/tailwind'
 import { defineConfig } from 'astro/config'
 import wasm from 'vite-plugin-wasm'
-import { createDevRuntimePlugin, readRuntimeSync } from '../../scripts/dev-runtime.mjs'
-import { spawn } from 'node:child_process'
-import { fileURLToPath } from 'node:url'
+import { createDevRuntimePlugin } from '../../scripts/dev-runtime.mjs'
+import { createRequire } from 'node:module'
+
+const require = createRequire(import.meta.url)
+const {
+  handleEditorToolsRequest,
+  isEditorToolsApiPath,
+} = require('./scripts/editor-tools/server.cjs')
 
 const siteUrl = process.env.SITE_URL || 'https://game.megameal.org'
 const configuredBasePath = process.env.GAME_BASE_PATH || process.env.PUBLIC_BASE_PATH || '/'
 const gameDevHost = process.env.GAME_DEV_HOST || '127.0.0.1'
 const gameDevPort = Number.parseInt(process.env.GAME_DEV_PORT || '4322', 10)
-const defaultEditorApiBridge = process.env.EDITOR_API_BASE || process.env.PUBLIC_EDITOR_API_BASE || 'http://127.0.0.1:3001'
 const normalizedBasePath =
   configuredBasePath === '/'
     ? '/'
     : `/${configuredBasePath.replace(/^\/+|\/+$/g, '')}/`
 
-function resolveToolsBridgeTarget() {
-  return readRuntimeSync('tools')?.origin || defaultEditorApiBridge
-}
-
-let toolsAutostartProcess = null
-
-function createToolsBridgeAutostartPlugin() {
+function createEditorToolsApiPlugin() {
   return {
-    name: 'merkin-tools-bridge-autostart',
+    name: 'merkin-editor-tools-api',
     apply: 'serve',
     configureServer(server) {
-      if (process.env.GAME_EDITOR_AUTOSTART_TOOLS === '0') {
-        return
-      }
-
-      if (process.env.PUBLIC_EDITOR_API_BASE || process.env.EDITOR_API_BASE) {
-        return
-      }
-
-      if (toolsAutostartProcess) {
-        return
-      }
-
-      const gameScriptsRoot = fileURLToPath(new URL('./scripts', import.meta.url))
-      const startToolsBridge = () => {
-        if (toolsAutostartProcess) return
-
-        toolsAutostartProcess = spawn('node', ['dev-tools.mjs'], {
-          cwd: gameScriptsRoot,
-          stdio: 'inherit',
-          env: {
-            ...process.env,
-            GAME_EDITOR_AUTOSTART_TOOLS: '0',
-          },
-        })
-
-        const cleanup = () => {
-          if (!toolsAutostartProcess) return
-          const child = toolsAutostartProcess
-          toolsAutostartProcess = null
-          if (!child.killed) {
-            child.kill('SIGTERM')
-          }
+      server.middlewares.use((req, res, next) => {
+        const pathname = new URL(req.url || '/', 'http://localhost').pathname
+        if (!isEditorToolsApiPath(pathname)) {
+          next()
+          return
         }
 
-        toolsAutostartProcess.on('exit', () => {
-          toolsAutostartProcess = null
-        })
-
-        toolsAutostartProcess.on('error', (error) => {
-          console.error('❌ Failed to autostart tools bridge:', error)
-          toolsAutostartProcess = null
-        })
-
-        server.httpServer?.once('close', cleanup)
-        process.once('SIGINT', cleanup)
-        process.once('SIGTERM', cleanup)
-      }
-
-      if (server.httpServer?.listening) {
-        startToolsBridge()
-      } else {
-        server.httpServer?.once('listening', startToolsBridge)
-      }
+        Promise.resolve(handleEditorToolsRequest(req, res)).catch(next)
+      })
     },
   }
 }
@@ -140,16 +94,8 @@ export default defineConfig({
     server: {
       host: gameDevHost,
       port: gameDevPort,
-      proxy: {
-        '/api/tools': {
-          target: defaultEditorApiBridge,
-          changeOrigin: true,
-          rewrite: (pathname) => pathname.replace(/^\/api\/tools/, ''),
-          router: () => resolveToolsBridgeTarget(),
-        },
-      },
     },
-    plugins: [wasm(), createDevRuntimePlugin('game', gameDevHost), createToolsBridgeAutostartPlugin(), createBuildCruftGatePlugin()],
+    plugins: [wasm(), createDevRuntimePlugin('game', gameDevHost), createEditorToolsApiPlugin(), createBuildCruftGatePlugin()],
     optimizeDeps: {
       exclude: ['three', '@dimforge/rapier3d', '@dimforge/rapier3d-compat'],
     },

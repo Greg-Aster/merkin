@@ -55,6 +55,7 @@ export let terrainCollisionSettings: TerrainCollisionSettings | null = null
 export let terrainCollisionBakePending = false
 export let terrainHeightmapGeneratePending = false
 export let terrainChunkCookPending = false
+export let worldPartitionCookPending = false
 export let selectedTerrainSourceName = ''
 export let selectedTerrainSourceAssetUrl = ''
 export let terrainBrushMode = 'raise'
@@ -81,11 +82,13 @@ export let onSetCollisionOverlayEnabled: (value: boolean) => void = () => {}
 export let onSetCollisionDefaultPolicy: (
   value: LevelCollisionDefaultPolicy,
 ) => void = () => {}
-export let onSetCollisionBudget: (value: LevelCollisionBudget) => void = () => {}
+export let onSetCollisionBudget: (value: LevelCollisionBudget) => void =
+  () => {}
 export let onSetTerrainAutoBake: (value: boolean) => void = () => {}
 export let onBakeTerrainCollision: () => void = () => {}
 export let onGenerateTerrainHeightmap: () => void = () => {}
 export let onCookTerrainChunks: () => void = () => {}
+export let onCookWorldPartition: () => void = () => {}
 export let onSetTerrainBrushMode: (mode: string) => void = () => {}
 export let onSetTerrainBrushSize: (value: number) => void = () => {}
 export let onSetTerrainBrushStrength: (value: number) => void = () => {}
@@ -119,6 +122,7 @@ export let onSetSurfaceSnapOffset: (value: number) => void = () => {}
   {terrainCollisionBakePending}
   {terrainHeightmapGeneratePending}
   {terrainChunkCookPending}
+  {worldPartitionCookPending}
   {selectedTerrainSourceName}
   {selectedTerrainSourceAssetUrl}
   {terrainBrushMode}
@@ -147,6 +151,7 @@ export let onSetSurfaceSnapOffset: (value: number) => void = () => {}
   {onBakeTerrainCollision}
   {onGenerateTerrainHeightmap}
   {onCookTerrainChunks}
+  {onCookWorldPartition}
   {onSetTerrainBrushMode}
   {onSetTerrainBrushSize}
   {onSetTerrainBrushStrength}

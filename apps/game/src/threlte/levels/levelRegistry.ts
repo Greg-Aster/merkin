@@ -1,9 +1,4 @@
 import { derived, get, writable } from 'svelte/store'
-import type { EditorSceneDocument } from '../engine/sceneDocumentTypes'
-import {
-  adaptEditorSceneToLevelDefinition,
-  createLevelBuildReport,
-} from '../engine'
 import initialRegistry from './level-registry.json'
 
 export const DEFAULT_LEVEL_ID = 'observatory'
@@ -38,11 +33,6 @@ export interface LevelRegistryValidationResult {
   errors: string[]
   warnings: string[]
 }
-
-const packagedSceneModules = import.meta.glob('../editor/scenes/*.scene.json', {
-  eager: true,
-  import: 'default',
-}) as Record<string, EditorSceneDocument>
 
 function cloneEntry<T>(value: T): T {
   return structuredClone(value)
@@ -159,13 +149,6 @@ export function isPlayableLevel(
   return Boolean(matched?.deployed)
 }
 
-function getPackagedRegistryScene(sceneId: string) {
-  const match = Object.entries(packagedSceneModules).find(([path]) =>
-    path.endsWith(`/${sceneId}.scene.json`),
-  )
-  return match ? (structuredClone(match[1]) as EditorSceneDocument) : null
-}
-
 export function validateLevelRegistryEntry(
   entry: LevelRegistryEntry,
 ): LevelRegistryValidationResult {
@@ -180,21 +163,8 @@ export function validateLevelRegistryEntry(
     errors.push(`${entry.id}: title is empty.`)
   }
 
-  const scene = getPackagedRegistryScene(entry.source.sceneId)
-  if (!scene) {
-    errors.push(`${entry.id}: missing packaged scene ${entry.source.sceneId}.`)
-    return { valid: false, errors, warnings }
-  }
-
-  const levelDefinition = adaptEditorSceneToLevelDefinition(scene)
-  const buildReport = createLevelBuildReport(levelDefinition)
-  errors.push(...buildReport.errors)
-  warnings.push(...buildReport.warnings)
-
-  if (levelDefinition.id !== entry.id) {
-    warnings.push(
-      `${entry.id}: registry id differs from LevelDefinition id ${levelDefinition.id}.`,
-    )
+  if (entry.source.kind !== 'scene' || !entry.source.sceneId.trim()) {
+    errors.push(`${entry.id}: source.sceneId is empty.`)
   }
 
   return {

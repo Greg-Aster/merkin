@@ -456,3 +456,21 @@ export interface EditorSceneDocument {
     levelDefinition: LevelDefinition
   }
 }
+
+export type ScenePrimitiveData = EditorPrimitiveData
+export type SceneAssetData = EditorAssetData
+export type SceneLightData = EditorLightData
+export type ScenePrefabData = EditorPrefabData
+export type SceneMaterialData = EditorMaterialData
+export type SceneRenderPolicyData = EditorRenderPolicyData
+export type SceneRigidBodyType = EditorRigidBodyType
+export type SceneNodePhysicsData = EditorNodePhysicsData
+export type SceneNodeCollisionData = EditorNodeCollisionData
+export type SceneGameplayData = EditorGameplayData
+export type SceneGenerationData = EditorGenerationData
+export type SceneNode = EditorSceneNode
+export type SharedLevelSettings = SharedLevelEditorSettings
+export type ObservatorySceneSettings = ObservatoryEditorSettings
+export type SolitudeSceneSettings = SolitudeEditorSettings
+export type SceneSettings = EditorSceneSettings
+export type SceneDocument = EditorSceneDocument

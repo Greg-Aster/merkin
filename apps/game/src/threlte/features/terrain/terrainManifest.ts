@@ -26,6 +26,18 @@ export type TerrainManifest = {
   }
   visualChunks?: {
     lods?: Array<{ level: number; distance: number; resolution?: number }>
+    material?: {
+      name: string
+      baseColorFactor: [number, number, number, number]
+      roughnessFactor: number
+      metallicFactor: number
+    }
+    activation?: {
+      maxActiveChunks?: number
+      maxActiveChunksByTier?: Partial<
+        Record<'ultra_low' | 'low' | 'medium' | 'high' | 'ultra', number>
+      >
+    }
     generatedAt?: string
     generatedBy?: string
     chunkCount?: number
@@ -151,6 +163,7 @@ export function buildTerrainConfigFromManifest(
           distance: lod.distance,
         }))
       : [{ level: 0, distance: worldSize * 2 }],
+    chunkActivation: manifest.visualChunks?.activation,
   }
 }
 

@@ -1,8 +1,9 @@
 <script lang="ts">
 import { T, useTask } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
-import { Euler, Quaternion } from 'three'
+import { Box3, Euler, Quaternion, Vector3 } from 'three'
 import type * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import HomeIntroParticle from './HomeIntroParticle.svelte'
 import HomeIntroScreenPanel from './HomeIntroScreenPanel.svelte'
 import { homeIntroScreens, homeIntroWheelToScreenRatio } from './homeIntroScreens'
@@ -24,6 +25,8 @@ let emblem: THREE.Group | null = null
 let ringA: THREE.Mesh | null = null
 let ringB: THREE.Mesh | null = null
 let ringC: THREE.Mesh | null = null
+let logoMeshRoot: THREE.Group | null = null
+let logoModel: THREE.Object3D | null = null
 let starColumn: THREE.Group | null = null
 let screenRail: THREE.Group | null = null
 const screenNodes: THREE.Group[] = []
@@ -41,6 +44,13 @@ const effectScrollStepY = screenStepY * homeIntroWheelToScreenRatio
 const particleScrollSpan = 10.8
 const targetScreenEuler = new Euler(0, 0, 0, 'YXZ')
 const targetScreenQuaternion = new Quaternion()
+const logoBounds = new Box3()
+const logoCenter = new Vector3()
+const logoSize = new Vector3()
+const logoTargetSize = new Vector3(4.68, 2.24, 1.44)
+const logoModelSrc = '/assets/3D/Hy3D_textured_00005_.glb'
+const logoRotationOffset = Math.PI
+const gltfLoader = new GLTFLoader()
 let activeScreenSceneId = ''
 let effectWheel = 0
 const portalScreens = homeIntroScreens
@@ -60,15 +70,86 @@ $: starColumnPosition = portraitMobile
 $: emblemScale = portraitMobile
   ? ([0.88, 0.88, 0.88] as [number, number, number])
   : ([1.72, 1.72, 1.72] as [number, number, number])
+$: logoCanvasPosition = portraitMobile
+  ? ([0, 0.2, -1.45] as [number, number, number])
+  : ([0, 0.08, -1.05] as [number, number, number])
 
 function syncViewportMode() {
   if (typeof window === 'undefined') return
   portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
 }
 
+function disposeObjectResources(object: THREE.Object3D) {
+  object.traverse(child => {
+    const mesh = child as THREE.Mesh
+    const geometry = mesh.geometry
+    const material = mesh.material
+
+    geometry?.dispose?.()
+
+    if (Array.isArray(material)) {
+      material.forEach(item => item.dispose())
+    } else {
+      material?.dispose?.()
+    }
+  })
+}
+
+function disposeLogoModel() {
+  if (!logoModel) return
+
+  logoModel.parent?.remove(logoModel)
+  disposeObjectResources(logoModel)
+  logoModel = null
+}
+
+function fitLogoModel(model: THREE.Object3D) {
+  model.updateMatrixWorld(true)
+  logoBounds.setFromObject(model)
+  if (logoBounds.isEmpty()) return
+
+  logoBounds.getCenter(logoCenter)
+  logoBounds.getSize(logoSize)
+
+  const scale = Math.min(
+    logoTargetSize.x / Math.max(logoSize.x, 0.001),
+    logoTargetSize.y / Math.max(logoSize.y, 0.001),
+    logoTargetSize.z / Math.max(logoSize.z, 0.001),
+  )
+
+  model.scale.setScalar(scale)
+  model.position.set(
+    -logoCenter.x * scale,
+    -logoCenter.y * scale,
+    -logoCenter.z * scale,
+  )
+}
+
+function attachLogoModel() {
+  if (!logoMeshRoot || !logoModel || logoModel.parent === logoMeshRoot) return
+  logoModel.parent?.remove(logoModel)
+  logoMeshRoot.add(logoModel)
+}
+
+async function loadLogoModel() {
+  try {
+    const gltf = await gltfLoader.loadAsync(logoModelSrc)
+    const model = gltf.scene ?? gltf.scenes?.[0]
+    if (!model) return
+
+    disposeLogoModel()
+    logoModel = model
+    fitLogoModel(logoModel)
+    attachLogoModel()
+  } catch (error) {
+    console.error('Failed to load portal logo mesh:', error)
+  }
+}
+
 onMount(() => {
   syncViewportMode()
   window.addEventListener('resize', syncViewportMode)
+  void loadLogoModel()
 
   return () => {
     window.removeEventListener('resize', syncViewportMode)
@@ -79,7 +160,10 @@ onDestroy(() => {
   if (typeof window !== 'undefined') {
     window.removeEventListener('resize', syncViewportMode)
   }
+  disposeLogoModel()
 })
+
+$: attachLogoModel()
 
 const particleClusters = [
   { x: -0.92, y: 3.25, z: -0.38, spread: 0.58, hue: 0.53 },
@@ -243,6 +327,20 @@ useTask(delta => {
       (baseZ + Math.cos(spiralPhase) * orbitZ - emblem.position.z) * ease
   }
 
+  if (logoMeshRoot) {
+    const logoBaseY = portraitMobile ? 0.2 : 0.08
+    const logoBaseZ = portraitMobile ? -1.45 : -1.05
+    logoMeshRoot.position.x += (0 - logoMeshRoot.position.x) * ease
+    logoMeshRoot.position.y +=
+      (logoBaseY + Math.sin(time * 0.38) * 0.025 - logoMeshRoot.position.y) *
+      ease
+    logoMeshRoot.position.z += (logoBaseZ - logoMeshRoot.position.z) * ease
+    logoMeshRoot.rotation.x =
+      -0.075 + Math.sin(time * 0.22) * 0.028 + input.dragY * 0.12
+    logoMeshRoot.rotation.y = logoRotationOffset + time * 0.085 + input.dragX * 0.24
+    logoMeshRoot.rotation.z = 0.045 + Math.sin(time * 0.3) * 0.014
+  }
+
   if (ringA) ringA.rotation.z += delta * 0.34
   if (ringB) ringB.rotation.x -= delta * 0.2
   if (ringC) ringC.rotation.y += delta * 0.26
@@ -318,39 +416,7 @@ useTask(delta => {
 			<T.MeshBasicMaterial color="#a78bfa" transparent={true} opacity={0.36} />
 		</T.Mesh>
 
-		<T.Group position={[0, 0.02, 0.78]}>
-			<T.Mesh position={[-0.52, 0, 0]} rotation={[0, 0, -0.22]}>
-				<T.BoxGeometry args={[0.16, 1.06, 0.16]} />
-				<T.MeshStandardMaterial color="#fff7ed" emissive="#f97316" emissiveIntensity={0.22} />
-			</T.Mesh>
-			<T.Mesh position={[-0.28, 0, 0]} rotation={[0, 0, 0.24]}>
-				<T.BoxGeometry args={[0.14, 0.78, 0.16]} />
-				<T.MeshStandardMaterial color="#fde68a" emissive="#eab308" emissiveIntensity={0.2} />
-			</T.Mesh>
-			<T.Mesh position={[-0.04, 0, 0]} rotation={[0, 0, -0.24]}>
-				<T.BoxGeometry args={[0.14, 0.78, 0.16]} />
-				<T.MeshStandardMaterial color="#fde68a" emissive="#eab308" emissiveIntensity={0.2} />
-			</T.Mesh>
-			<T.Mesh position={[0.2, 0, 0]} rotation={[0, 0, 0.22]}>
-				<T.BoxGeometry args={[0.16, 1.06, 0.16]} />
-				<T.MeshStandardMaterial color="#fff7ed" emissive="#f97316" emissiveIntensity={0.22} />
-			</T.Mesh>
-			<T.Mesh position={[0.54, 0, 0]} rotation={[0, 0, -0.18]}>
-				<T.BoxGeometry args={[0.16, 1.06, 0.16]} />
-				<T.MeshStandardMaterial color="#fff7ed" emissive="#22d3ee" emissiveIntensity={0.2} />
-			</T.Mesh>
-			<T.Mesh position={[0.8, 0, 0]} rotation={[0, 0, 0.22]}>
-				<T.BoxGeometry args={[0.14, 0.78, 0.16]} />
-				<T.MeshStandardMaterial color="#bae6fd" emissive="#0284c7" emissiveIntensity={0.22} />
-			</T.Mesh>
-			<T.Mesh position={[1.04, 0, 0]} rotation={[0, 0, -0.22]}>
-				<T.BoxGeometry args={[0.14, 0.78, 0.16]} />
-				<T.MeshStandardMaterial color="#bae6fd" emissive="#0284c7" emissiveIntensity={0.22} />
-			</T.Mesh>
-			<T.Mesh position={[1.3, 0, 0]} rotation={[0, 0, 0.18]}>
-				<T.BoxGeometry args={[0.16, 1.06, 0.16]} />
-				<T.MeshStandardMaterial color="#fff7ed" emissive="#22d3ee" emissiveIntensity={0.2} />
-			</T.Mesh>
-		</T.Group>
 	</T.Group>
 </T.Group>
+
+<T.Group bind:ref={logoMeshRoot} position={logoCanvasPosition} />

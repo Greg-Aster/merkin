@@ -118,7 +118,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
       state.hunyuanServiceReady = false
       state.hunyuanBackendCanGenerate = false
       state.hunyuanBackendCanRetexture = false
-      state.hunyuanBackendStatus = `Mesh backend unavailable at ${EDITOR_API_BASE}.`
+      state.hunyuanBackendStatus = `Mesh backend unavailable at ${EDITOR_API_BASE || 'same-origin /api'}.`
       deps.setRuntimeDiagnostic('hunyuan', {
         level: 'error',
         message: state.hunyuanBackendStatus,
@@ -152,7 +152,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
       })
     } catch {
       state.comfyUiReady = false
-      state.comfyUiStatus = `ComfyUI bridge unavailable at ${EDITOR_API_BASE}.`
+      state.comfyUiStatus = `ComfyUI editor API unavailable at ${EDITOR_API_BASE || 'same-origin /api'}.`
       deps.setRuntimeDiagnostic('comfyUi', {
         level: 'error',
         message: state.comfyUiStatus,
@@ -249,7 +249,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
     } catch (error) {
       console.error('Recent Hunyuan jobs load failed:', error)
       state.recentHunyuanJobs = []
-      state.hunyuanJobsError = `Job history unavailable at ${EDITOR_API_BASE}.`
+      state.hunyuanJobsError = `Job history unavailable at ${EDITOR_API_BASE || 'same-origin /api'}.`
     } finally {
       state.hunyuanJobsLoading = false
     }

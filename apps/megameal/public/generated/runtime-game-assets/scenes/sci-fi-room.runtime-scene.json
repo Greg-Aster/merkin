@@ -1,0 +1,2357 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-05-01T02:10:28.661Z",
+  "levelId": "sci-fi-room",
+  "sceneId": "sci-fi-room",
+  "source": {
+    "kind": "scene-document",
+    "path": "apps/game/src/threlte/editor/scenes/sci-fi-room.scene.json",
+    "version": 5,
+    "updatedAt": "2026-04-26T19:03:13.2665345Z"
+  },
+  "levelDefinition": {
+    "id": "sci-fi-room",
+    "version": 5,
+    "updatedAt": "2026-04-26T19:03:13.2665345Z",
+    "spawn": {
+      "player": [
+        0,
+        3.31,
+        0
+      ]
+    },
+    "settings": {
+      "level": {
+        "collision": {
+          "workflow": {
+            "actorCollision": "lightweight-auto",
+            "colliderBudget": "mobile",
+            "terrainSculpting": false,
+            "autoBakeTerrain": true,
+            "terrainVisualChunks": "auto"
+          },
+          "terrain": {
+            "source": "baked-heightmap",
+            "runtimeSource": "built-in-manifest",
+            "manifestUrl": "/terrain/sci-fi-room.manifest.json",
+            "autoBakeOnTerrainChange": true,
+            "dirty": false
+          },
+          "defaults": {
+            "solidObjectsByDefault": true,
+            "defaultFriction": 0.7,
+            "defaultRestitution": 0
+          }
+        },
+        "spawn": {
+          "position": [
+            0,
+            3.31,
+            0
+          ]
+        },
+        "features": {
+          "ocean": true,
+          "vegetation": true,
+          "fireflies": true,
+          "starMap": true,
+          "conversations": true,
+          "styles": true
+        },
+        "style": {
+          "preset": "ghibli",
+          "enabled": true,
+          "fog": {
+            "color": "#87CEEB",
+            "density": 0.002
+          },
+          "colorGrading": {
+            "saturation": 1.2,
+            "contrast": 1.1,
+            "brightness": 1,
+            "warmth": 1.05
+          },
+          "bloom": {
+            "intensity": 0.3,
+            "threshold": 0.9
+          }
+        },
+        "lighting": {
+          "ambientIntensity": 10.4,
+          "sunIntensity": 0.8,
+          "fillIntensity": 0.3,
+          "fallbackAmbientIntensity": 4.8,
+          "fallbackMoonlightIntensity": 0.45,
+          "fallbackFillLightIntensity": 0.2
+        }
+      },
+      "observatory": {
+        "ocean": {
+          "size": {
+            "width": 4000,
+            "height": 4000
+          },
+          "enableRising": true,
+          "initialLevel": -2,
+          "targetLevel": 5,
+          "riseRate": 0.01,
+          "enableAnimation": true,
+          "underwaterFogDensity": 0.1,
+          "underwaterFogColor": 533536,
+          "surfaceFogDensity": 0.001
+        }
+      }
+    },
+    "actors": [
+      {
+        "id": "sci-fi-floor-root",
+        "name": "Floor Root",
+        "kind": "empty",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "editor": {
+          "legacyKind": "group",
+          "collisionSource": "none"
+        }
+      },
+      {
+        "id": "sci-fi-floor-interior-group",
+        "name": "Interior Floor",
+        "kind": "empty",
+        "parentId": "sci-fi-floor-root",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "editor": {
+          "legacyKind": "group",
+          "collisionSource": "none"
+        }
+      },
+      {
+        "id": "sci-fi-floor-interior-slab",
+        "name": "Interior Floor Slab",
+        "kind": "primitive",
+        "parentId": "sci-fi-floor-interior-group",
+        "transform": {
+          "position": [
+            0,
+            -0.56,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "primitive": {
+            "geometry": "box",
+            "args": [
+              21.56,
+              0.48,
+              18.52
+            ]
+          },
+          "material": {
+            "color": "#1a2630",
+            "emissive": "#1a3d4a",
+            "emissiveIntensity": 0.45,
+            "metalness": 0.82,
+            "roughness": 0.34
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.9
+          }
+        },
+        "editor": {
+          "legacyKind": "primitive",
+          "generation": {
+            "descriptor": "interior floor slab"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-floor-courtyard-group",
+        "name": "Courtyard Floor",
+        "kind": "empty",
+        "parentId": "sci-fi-floor-root",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "editor": {
+          "legacyKind": "group",
+          "collisionSource": "none"
+        }
+      },
+      {
+        "id": "sci-fi-floor-courtyard-slab",
+        "name": "Courtyard Floor Slab",
+        "kind": "primitive",
+        "parentId": "sci-fi-floor-courtyard-group",
+        "transform": {
+          "position": [
+            0,
+            -0.56,
+            21.52
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "primitive": {
+            "geometry": "box",
+            "args": [
+              25.871999999999996,
+              0.48,
+              25.871999999999996
+            ]
+          },
+          "material": {
+            "color": "#1a2d3a",
+            "metalness": 0.42,
+            "roughness": 0.54
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7
+          }
+        },
+        "editor": {
+          "legacyKind": "primitive",
+          "generation": {
+            "descriptor": "courtyard floor slab"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-floor-wasteland-group",
+        "name": "Wasteland Floor",
+        "kind": "empty",
+        "parentId": "sci-fi-floor-root",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "editor": {
+          "legacyKind": "group",
+          "collisionSource": "none"
+        }
+      },
+      {
+        "id": "sci-fi-floor-wasteland-tile-4-4",
+        "name": "Wasteland Tile",
+        "kind": "primitive",
+        "parentId": "sci-fi-floor-wasteland-group",
+        "transform": {
+          "position": [
+            0.06343171812727633,
+            -0.8057873524102024,
+            1.735961716105777
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            9.36987728893793,
+            1,
+            9.487735836358526
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "primitive": {
+            "geometry": "box",
+            "args": [
+              21.56,
+              0.384,
+              21.56
+            ]
+          },
+          "material": {
+            "color": "#4d4d23",
+            "emissive": "#933e3e",
+            "emissiveIntensity": 0.01,
+            "metalness": 0.12,
+            "roughness": 0.92,
+            "transparent": false,
+            "doubleSided": false
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "size": [
+              202.01455434950176,
+              0.384,
+              204.55558463188981
+            ],
+            "friction": 0.5,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "primitive",
+          "generation": {
+            "descriptor": "wasteland tile"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-anomaly-a",
+        "name": "Anomaly Cluster A",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            -2.5,
+            1.48,
+            2
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "anomaly-cluster",
+            "variant": "magenta"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "anomalous floating crystal cluster"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-anomaly-b",
+        "name": "Anomaly Cluster B",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            2.8,
+            1.18,
+            1.5
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "anomaly-cluster",
+            "variant": "green"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "anomalous floating crystal cluster"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-anomaly-c",
+        "name": "Anomaly Cluster C",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            -4.2,
+            1.98,
+            2.8
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "anomaly-cluster",
+            "variant": "cyan"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "anomalous floating crystal cluster"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-anomaly-d",
+        "name": "Anomaly Cluster D",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            4.6,
+            1.28,
+            2.1
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "anomaly-cluster",
+            "variant": "rose"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "anomalous floating crystal cluster"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-console",
+        "name": "Command Console",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "command-console"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "retro-futurist command console"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-portal",
+        "name": "Observatory Portal",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            -9.98,
+            -0.32,
+            -8.26
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "portal-apparatus"
+          }
+        },
+        "gameplay": {
+          "type": "portal",
+          "data": {
+            "type": "portal",
+            "targetLevelId": "observatory",
+            "markerColor": "#ff8cff",
+            "markerSize": 1.1
+          }
+        },
+        "interaction": {
+          "kind": "portal",
+          "targetId": "observatory",
+          "data": {
+            "type": "portal",
+            "targetLevelId": "observatory",
+            "markerColor": "#ff8cff",
+            "markerSize": 1.1
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "occult portal apparatus"
+          },
+          "collisionSource": "none"
+        }
+      },
+      {
+        "id": "sci-fi-story-pillar",
+        "name": "Story Marker Â· Pillar",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            3,
+            1.18,
+            -2
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "story-marker",
+            "variant": "magenta"
+          }
+        },
+        "gameplay": {
+          "type": "note",
+          "data": {
+            "type": "note",
+            "markerColor": "#ff00ff",
+            "markerSize": 0.62,
+            "title": "Pillar Whisper",
+            "author": "Architectural Residue",
+            "location": "Command Center",
+            "excerpt": "The pillar hums first, like a machine trying to remember the language of prayer.",
+            "body": "The pillar hums first, like a machine trying to remember the language of prayer.\n\nIts glow is not decorative. It pulses in measured intervals, as if syncing itself to some vanished crew protocol.\n\nEven here, the room seems to prefer ritual to utility."
+          }
+        },
+        "interaction": {
+          "kind": "note",
+          "data": {
+            "type": "note",
+            "markerColor": "#ff00ff",
+            "markerSize": 0.62,
+            "title": "Pillar Whisper",
+            "author": "Architectural Residue",
+            "location": "Command Center",
+            "excerpt": "The pillar hums first, like a machine trying to remember the language of prayer.",
+            "body": "The pillar hums first, like a machine trying to remember the language of prayer.\n\nIts glow is not decorative. It pulses in measured intervals, as if syncing itself to some vanished crew protocol.\n\nEven here, the room seems to prefer ritual to utility."
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "ritual story marker obelisk"
+          },
+          "collisionSource": "none"
+        }
+      },
+      {
+        "id": "sci-fi-story-bench",
+        "name": "Story Marker Â· Bench",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            0,
+            0.38,
+            19.52
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "story-marker",
+            "variant": "amber"
+          }
+        },
+        "gameplay": {
+          "type": "note",
+          "data": {
+            "type": "note",
+            "markerColor": "#ffaa00",
+            "markerSize": 0.58,
+            "title": "Bench Note",
+            "author": "Unknown Visitor",
+            "location": "Courtyard Threshold",
+            "excerpt": "The bench offers a pause before the open sky, its carved warning almost tender: look up before you go farther.",
+            "body": "The bench offers a pause before the open sky, its carved warning almost tender: look up before you go farther.\n\nWhatever was built here expected hesitation.\n\nIt wanted people to stop, adjust to the stars, and only then continue."
+          }
+        },
+        "interaction": {
+          "kind": "note",
+          "data": {
+            "type": "note",
+            "markerColor": "#ffaa00",
+            "markerSize": 0.58,
+            "title": "Bench Note",
+            "author": "Unknown Visitor",
+            "location": "Courtyard Threshold",
+            "excerpt": "The bench offers a pause before the open sky, its carved warning almost tender: look up before you go farther.",
+            "body": "The bench offers a pause before the open sky, its carved warning almost tender: look up before you go farther.\n\nWhatever was built here expected hesitation.\n\nIt wanted people to stop, adjust to the stars, and only then continue."
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "ritual story marker obelisk"
+          },
+          "collisionSource": "none"
+        }
+      },
+      {
+        "id": "sci-fi-story-fountain",
+        "name": "Story Marker Â· Fountain",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            0,
+            0.6,
+            21.52
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "story-marker",
+            "variant": "cyan"
+          }
+        },
+        "gameplay": {
+          "type": "note",
+          "data": {
+            "type": "note",
+            "markerColor": "#00ccff",
+            "markerSize": 0.64,
+            "title": "Fountain Inscription",
+            "author": "Central Basin Archive",
+            "location": "Courtyard Core",
+            "excerpt": "At the courtyard heart, the fountain mirrors the constellations, as if the room is learning to become an observatory.",
+            "body": "At the courtyard heart, the fountain mirrors the constellations, as if the room is learning to become an observatory.\n\nThe basin does not reflect what is above so much as rehearse it.\n\nThis place is less a room than a machine for becoming sky-aware."
+          }
+        },
+        "interaction": {
+          "kind": "note",
+          "data": {
+            "type": "note",
+            "markerColor": "#00ccff",
+            "markerSize": 0.64,
+            "title": "Fountain Inscription",
+            "author": "Central Basin Archive",
+            "location": "Courtyard Core",
+            "excerpt": "At the courtyard heart, the fountain mirrors the constellations, as if the room is learning to become an observatory.",
+            "body": "At the courtyard heart, the fountain mirrors the constellations, as if the room is learning to become an observatory.\n\nThe basin does not reflect what is above so much as rehearse it.\n\nThis place is less a room than a machine for becoming sky-aware."
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "ritual story marker obelisk"
+          },
+          "collisionSource": "none"
+        }
+      },
+      {
+        "id": "sci-fi-story-plant",
+        "name": "Story Marker Â· Plant",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            3,
+            1.88,
+            25.52
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "story-marker",
+            "variant": "green"
+          }
+        },
+        "gameplay": {
+          "type": "note",
+          "data": {
+            "type": "note",
+            "markerColor": "#5edeb9",
+            "markerSize": 0.56,
+            "title": "Plant Spiral",
+            "author": "Botanical Subsystem",
+            "location": "Courtyard Growth Ring",
+            "excerpt": "The spiral plants lean toward one particular star cluster, suggesting the garden knows the route better than you do.",
+            "body": "The spiral plants lean toward one particular star cluster, suggesting the garden knows the route better than you do.\n\nTheir motion is too deliberate for weather and too patient for machinery.\n\nSomething in this level still tracks the sky with devotion."
+          }
+        },
+        "interaction": {
+          "kind": "note",
+          "data": {
+            "type": "note",
+            "markerColor": "#5edeb9",
+            "markerSize": 0.56,
+            "title": "Plant Spiral",
+            "author": "Botanical Subsystem",
+            "location": "Courtyard Growth Ring",
+            "excerpt": "The spiral plants lean toward one particular star cluster, suggesting the garden knows the route better than you do.",
+            "body": "The spiral plants lean toward one particular star cluster, suggesting the garden knows the route better than you do.\n\nTheir motion is too deliberate for weather and too patient for machinery.\n\nSomething in this level still tracks the sky with devotion."
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "ritual story marker obelisk"
+          },
+          "collisionSource": "none"
+        }
+      },
+      {
+        "id": "sci-fi-story-junk",
+        "name": "Story Marker Â· Junk Memory",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            -3.6,
+            1.48,
+            52.44
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "story-marker",
+            "variant": "red"
+          }
+        },
+        "gameplay": {
+          "type": "note",
+          "data": {
+            "type": "note",
+            "markerColor": "#ff6666",
+            "markerSize": 0.7,
+            "title": "Junk Memory",
+            "author": "Debris Field Echo",
+            "location": "Deep Wasteland",
+            "excerpt": "Deep in the wasteland, the debris resolves into intent: this ruin was not abandoned, it was aimed at the heavens and left mid-sentence.",
+            "body": "Deep in the wasteland, the debris resolves into intent: this ruin was not abandoned, it was aimed at the heavens and left mid-sentence.\n\nThe broken shapes form vectors, not rubble.\n\nWhatever failed here was trying to point beyond the room."
+          }
+        },
+        "interaction": {
+          "kind": "note",
+          "data": {
+            "type": "note",
+            "markerColor": "#ff6666",
+            "markerSize": 0.7,
+            "title": "Junk Memory",
+            "author": "Debris Field Echo",
+            "location": "Deep Wasteland",
+            "excerpt": "Deep in the wasteland, the debris resolves into intent: this ruin was not abandoned, it was aimed at the heavens and left mid-sentence.",
+            "body": "Deep in the wasteland, the debris resolves into intent: this ruin was not abandoned, it was aimed at the heavens and left mid-sentence.\n\nThe broken shapes form vectors, not rubble.\n\nWhatever failed here was trying to point beyond the room."
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "ritual story marker obelisk"
+          },
+          "collisionSource": "none"
+        }
+      },
+      {
+        "id": "sci-fi-command-fin-left",
+        "name": "Command Fin Left",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            -4.8,
+            2.18,
+            -3.8
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "command-fin"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "dark retro-futurist fin pillar"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-command-fin-right",
+        "name": "Command Fin Right",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            4.8,
+            2.18,
+            -3.8
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "command-fin"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "dark retro-futurist fin pillar"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-hanging-light-left",
+        "name": "Hanging Light Left",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            -3,
+            7.7,
+            -0.9
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "hanging-light"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "ornate hanging industrial light"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-hanging-light-right",
+        "name": "Hanging Light Right",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            3,
+            7.7,
+            -0.9
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "hanging-light"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "ornate hanging industrial light"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-aircon-command",
+        "name": "Command Aircon",
+        "kind": "asset",
+        "transform": {
+          "position": [
+            -10.23,
+            1.65,
+            -1.3
+          ],
+          "rotation": [
+            0,
+            1.5707963267948966,
+            0
+          ],
+          "scale": [
+            0.00092,
+            0.00092,
+            0.00092
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "outside-collider",
+          "asset": {
+            "url": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "asset",
+          "generation": {
+            "descriptor": "Command Aircon"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-support-column-a",
+        "name": "Support Column A",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            -3.5,
+            3.68,
+            -2
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "support-column"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "retro-futurist support column"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-support-column-b",
+        "name": "Support Column B",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            3.5,
+            3.68,
+            2
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "support-column"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "retro-futurist support column"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-support-column-c",
+        "name": "Support Column C",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            -3.5,
+            3.68,
+            2
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "support-column"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "retro-futurist support column"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-support-column-d",
+        "name": "Support Column D",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            3.5,
+            3.68,
+            -2
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "support-column"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "retro-futurist support column"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-interior-archway",
+        "name": "Interior Archway",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            0,
+            0,
+            3.5
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "interior-archway"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "ancient interior archway ruin"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-courtyard-pylon-left",
+        "name": "Courtyard Pylon Left",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            -1.2,
+            0,
+            18.52
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "courtyard-pylon"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "weathered courtyard pylon"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-courtyard-pylon-right",
+        "name": "Courtyard Pylon Right",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            1.2,
+            0,
+            18.52
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "courtyard-pylon"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "weathered courtyard pylon"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-wasteland-archway",
+        "name": "Wasteland Archway",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            0,
+            0,
+            24.52
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "wasteland-archway"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "wasteland stone archway"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-fountain",
+        "name": "Courtyard Fountain",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            0,
+            -0.32,
+            21.52
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "courtyard-fountain"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "strange luminous courtyard fountain"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-observation-rig",
+        "name": "Observation Rig",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "observation-rig"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "cosmic observation rig"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-courtyard-aircon",
+        "name": "Courtyard Utility Unit",
+        "kind": "asset",
+        "transform": {
+          "position": [
+            4.2,
+            0.03,
+            26.22
+          ],
+          "rotation": [
+            0,
+            -1.15,
+            0
+          ],
+          "scale": [
+            0.0009,
+            0.0009,
+            0.0009
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "outside-collider",
+          "asset": {
+            "url": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "asset",
+          "generation": {
+            "descriptor": "Courtyard Utility Unit"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-planter-a",
+        "name": "Growth Planter A",
+        "kind": "asset",
+        "transform": {
+          "position": [
+            -3,
+            0.6235367123297062,
+            25.52
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "outside-collider",
+          "asset": {
+            "url": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "asset",
+          "generation": {
+            "descriptor": "Growth Planter A"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-planter-b",
+        "name": "Growth Planter B",
+        "kind": "asset",
+        "transform": {
+          "position": [
+            3,
+            0,
+            25.52
+          ],
+          "rotation": [
+            0,
+            0.6,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "outside-collider",
+          "asset": {
+            "url": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "asset",
+          "generation": {
+            "descriptor": "Growth Planter B"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-planter-c",
+        "name": "Growth Planter C",
+        "kind": "asset",
+        "transform": {
+          "position": [
+            -3,
+            0.5602743438210331,
+            23.52
+          ],
+          "rotation": [
+            0,
+            1.1999999999999997,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "outside-collider",
+          "asset": {
+            "url": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "asset",
+          "generation": {
+            "descriptor": "Growth Planter C"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-planter-d",
+        "name": "Growth Planter D",
+        "kind": "asset",
+        "transform": {
+          "position": [
+            3,
+            0.6254496116841847,
+            23.52
+          ],
+          "rotation": [
+            0,
+            -0.39999999999999997,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "outside-collider",
+          "asset": {
+            "url": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "asset",
+          "generation": {
+            "descriptor": "Growth Planter D"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-bench",
+        "name": "Bench Growth",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            0,
+            0,
+            19.52
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "bench-growth"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "overgrown haunted bench"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-monolith-a",
+        "name": "Monolith A",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            -8.5,
+            3.48,
+            53.54
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1.2,
+            7.6,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "wasteland-monolith"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "weathered monolith pillar"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-monolith-b",
+        "name": "Monolith B",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            7.2,
+            4.28,
+            58.54
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1.5,
+            9.2,
+            1.2
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "wasteland-monolith"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "weathered monolith pillar"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-monolith-c",
+        "name": "Monolith C",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            -2.4,
+            2.78,
+            62.04
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.9,
+            6.2,
+            0.9
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "wasteland-monolith"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "weathered monolith pillar"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-broken-ring",
+        "name": "Broken Ring",
+        "kind": "prefab",
+        "transform": {
+          "position": [
+            2.8,
+            3.78,
+            56.44
+          ],
+          "rotation": [
+            0.28,
+            0.45,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "inside-collider",
+          "prefab": {
+            "type": "broken-ring"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "prefab",
+          "generation": {
+            "descriptor": "broken ancient stone ring ruin"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-barrel",
+        "name": "Wasteland Barrel",
+        "kind": "asset",
+        "transform": {
+          "position": [
+            5.4,
+            -0.3,
+            48.44
+          ],
+          "rotation": [
+            0,
+            -0.6,
+            0
+          ],
+          "scale": [
+            0.001,
+            0.001,
+            0.001
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "outside-collider",
+          "asset": {
+            "url": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "asset",
+          "generation": {
+            "descriptor": "Wasteland Barrel"
+          },
+          "collisionSource": "authored"
+        }
+      },
+      {
+        "id": "sci-fi-barrier",
+        "name": "Concrete Barrier",
+        "kind": "asset",
+        "transform": {
+          "position": [
+            -5.8,
+            -0.3,
+            54.64
+          ],
+          "rotation": [
+            0,
+            0.35,
+            0
+          ],
+          "scale": [
+            0.00108,
+            0.00108,
+            0.00108
+          ]
+        },
+        "render": {
+          "visible": true,
+          "cullingPolicy": "runtime-budget",
+          "physicsAttachment": "outside-collider",
+          "asset": {
+            "url": "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "blocker",
+            "channel": "worldStatic",
+            "shape": "cuboid",
+            "friction": 0.7,
+            "restitution": 0,
+            "sensor": false
+          }
+        },
+        "editor": {
+          "legacyKind": "asset",
+          "generation": {
+            "descriptor": "Concrete Barrier"
+          },
+          "collisionSource": "authored"
+        }
+      }
+    ]
+  },
+  "buildReport": {
+    "levelId": "sci-fi-room",
+    "actorCount": 45,
+    "assetActorCount": 8,
+    "primitiveActorCount": 3,
+    "neverCullActorCount": 0,
+    "gameplayFireflyActorCount": 0,
+    "physicsActorCount": 35,
+    "trimeshActorCount": 0,
+    "detailMeshActorCount": 0,
+    "defaultCollisionActorCount": 0,
+    "visualOnlyActorCount": 10,
+    "requiredActorCount": 0,
+    "requiredRenderActorIds": [],
+    "missingRequiredActorIds": [],
+    "requiredAssetUrls": [],
+    "runtimeAssetUrls": [
+      "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+      "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb",
+      "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+      "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+      "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+      "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
+      "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
+    ],
+    "errors": [],
+    "warnings": []
+  },
+  "runtime": {
+    "requiredRenderActorIds": [],
+    "requiredAssetUrls": [],
+    "runtimeAssetUrls": [
+      "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+      "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb",
+      "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+      "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+      "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+      "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
+      "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
+    ],
+    "terrainManifestUrl": "/terrain/sci-fi-room.manifest.json"
+  }
+}

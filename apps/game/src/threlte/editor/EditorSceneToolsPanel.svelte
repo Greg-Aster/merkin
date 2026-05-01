@@ -55,6 +55,7 @@ export let terrainCollisionSettings: {
 export let terrainCollisionBakePending = false
 export let terrainHeightmapGeneratePending = false
 export let terrainChunkCookPending = false
+export let worldPartitionCookPending = false
 export let selectedTerrainSourceName = ''
 export let selectedTerrainSourceAssetUrl = ''
 export let transformMode = 'translate'
@@ -77,7 +78,8 @@ export let onSetCollisionOverlayEnabled: (value: boolean) => void = () => {}
 export let onSetCollisionDefaultPolicy: (
   value: LevelCollisionDefaultPolicy,
 ) => void = () => {}
-export let onSetCollisionBudget: (value: LevelCollisionBudget) => void = () => {}
+export let onSetCollisionBudget: (value: LevelCollisionBudget) => void =
+  () => {}
 export let onSetTerrainBrushMode: (mode: string) => void = () => {}
 export let onSetTerrainBrushSize: (value: number) => void = () => {}
 export let onSetTerrainBrushStrength: (value: number) => void = () => {}
@@ -86,6 +88,7 @@ export let onSetTerrainAutoBake: (value: boolean) => void = () => {}
 export let onBakeTerrainCollision: () => void = () => {}
 export let onGenerateTerrainHeightmap: () => void = () => {}
 export let onCookTerrainChunks: () => void = () => {}
+export let onCookWorldPartition: () => void = () => {}
 export let onSetTransformMode: (mode: string) => void = () => {}
 export let onSetTransformSpace: (mode: string) => void = () => {}
 export let onSetTransformAxis: (axis: string) => void = () => {}
@@ -172,6 +175,14 @@ $: terrainBakeToolsAvailable =
   {#if !terrainBakeToolsAvailable}
     <div class="save-message">Select a mesh asset to start a baked terrain workflow for this level.</div>
   {/if}
+</div>
+
+<div class="editor-section">
+  <div class="label">World Partition</div>
+  <button class="full" disabled={worldPartitionCookPending} data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onCookWorldPartition}>
+    {worldPartitionCookPending ? 'Cooking Partition...' : 'Cook Actor Partition'}
+  </button>
+  <div class="save-message">Cooks visual-only actor roots into spatial runtime cells. Collision, gameplay, lights, audio, and never-cull actors stay resident.</div>
 </div>
 
 {#if terrainBakeToolsAvailable}

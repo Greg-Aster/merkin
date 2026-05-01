@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-05-01T02:10:28.661Z",
+  "levelId": "observatory",
+  "sceneId": "observatory",
+  "source": {
+    "kind": "scene-document",
+    "path": "apps/game/src/threlte/editor/scenes/observatory.scene.json",
+    "version": 1,
+    "updatedAt": "2026-04-24T23:03:07.450Z"
+  },
+  "levelDefinition": {
+    "id": "observatory",
+    "version": 1,
+    "updatedAt": "2026-04-24T23:03:07.450Z",
+    "spawn": {
+      "player": [
+        -137.2,
+        1.8,
+        -49.5
+      ]
+    },
+    "settings": {
+      "level": {
+        "collision": {
+          "workflow": {
+            "actorCollision": "lightweight-auto",
+            "colliderBudget": "mobile",
+            "terrainSculpting": true,
+            "autoBakeTerrain": true,
+            "terrainVisualChunks": "auto"
+          },
+          "terrain": {
+            "source": "baked-heightmap",
+            "runtimeSource": "built-in-manifest",
+            "manifestUrl": "/terrain/observatory-environment.manifest.json",
+            "autoBakeOnTerrainChange": true,
+            "dirty": false
+          },
+          "defaults": {
+            "solidObjectsByDefault": true,
+            "defaultFriction": 0.7,
+            "defaultRestitution": 0
+          }
+        },
+        "presets": {
+          "atmosphere": "moon-archive",
+          "audio": "courtyard-breeze"
+        },
+        "spawn": {
+          "position": [
+            -137.2,
+            1.8,
+            -49.5
+          ]
+        },
+        "features": {
+          "ocean": true,
+          "vegetation": true,
+          "fireflies": true,
+          "starMap": true,
+          "conversations": true,
+          "styles": true
+        },
+        "style": {
+          "preset": "monument",
+          "enabled": true,
+          "fog": {
+            "color": "#596784",
+            "density": 0.00075
+          },
+          "colorGrading": {
+            "saturation": 0.96,
+            "contrast": 1.08,
+            "brightness": 0.91,
+            "warmth": 0.88
+          },
+          "bloom": {
+            "intensity": 0.18,
+            "threshold": 0.9
+          }
+        },
+        "lighting": {
+          "ambientIntensity": 7.2,
+          "sunIntensity": 0.42,
+          "fillIntensity": 0.26,
+          "fallbackAmbientIntensity": 4,
+          "fallbackMoonlightIntensity": 0.62,
+          "fallbackFillLightIntensity": 0.24
+        },
+        "player": {
+          "lightIntensityScale": 2
+        }
+      },
+      "observatory": {
+        "ocean": {
+          "size": {
+            "width": 4000,
+            "height": 4000
+          },
+          "enableRising": true,
+          "initialLevel": -2,
+          "targetLevel": 5,
+          "riseRate": 0.01,
+          "enableAnimation": true,
+          "underwaterFogDensity": 0.1,
+          "underwaterFogColor": 533536,
+          "surfaceFogDensity": 0.001
+        }
+      }
+    },
+    "actors": [
+      {
+        "id": "observatory-ground-root",
+        "name": "Observatory Grounds",
+        "kind": "empty",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "editor": {
+          "legacyKind": "group",
+          "collisionSource": "none"
+        }
+      }
+    ]
+  },
+  "buildReport": {
+    "levelId": "observatory",
+    "actorCount": 1,
+    "assetActorCount": 0,
+    "primitiveActorCount": 0,
+    "neverCullActorCount": 0,
+    "gameplayFireflyActorCount": 0,
+    "physicsActorCount": 0,
+    "trimeshActorCount": 0,
+    "detailMeshActorCount": 0,
+    "defaultCollisionActorCount": 0,
+    "visualOnlyActorCount": 1,
+    "requiredActorCount": 2,
+    "requiredRenderActorIds": [],
+    "missingRequiredActorIds": [],
+    "requiredAssetUrls": [],
+    "runtimeAssetUrls": [],
+    "errors": [],
+    "warnings": []
+  },
+  "runtime": {
+    "requiredRenderActorIds": [],
+    "requiredAssetUrls": [],
+    "runtimeAssetUrls": [],
+    "terrainManifestUrl": "/terrain/observatory-environment.manifest.json"
+  }
+}

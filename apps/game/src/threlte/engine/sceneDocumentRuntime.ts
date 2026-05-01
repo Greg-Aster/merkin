@@ -1,24 +1,24 @@
-import type { EditorSceneDocument } from './sceneDocumentTypes'
-import { adaptEditorSceneToLevelDefinition } from './sceneAdapter'
+import type { SceneDocument } from './sceneDocumentTypes'
+import { adaptSceneDocumentToLevelDefinition } from './sceneAdapter'
 import type { LevelDefinition } from './types'
 
-export interface EditorSceneEngineData {
+export interface SceneEngineData {
   levelDefinition: LevelDefinition
 }
 
-export function createEditorSceneEngineData(
-  scene: EditorSceneDocument,
-): EditorSceneEngineData {
+export function createSceneEngineData(scene: SceneDocument): SceneEngineData {
   return {
-    levelDefinition: adaptEditorSceneToLevelDefinition(scene),
+    levelDefinition: adaptSceneDocumentToLevelDefinition(scene),
   }
 }
 
-export function withEditorSceneEngineData(
-  scene: EditorSceneDocument,
-): EditorSceneDocument {
+export function withSceneEngineData(scene: SceneDocument): SceneDocument {
   return {
     ...scene,
-    engine: createEditorSceneEngineData(scene),
+    engine: createSceneEngineData(scene),
   }
 }
+
+export type EditorSceneEngineData = SceneEngineData
+export const createEditorSceneEngineData = createSceneEngineData
+export const withEditorSceneEngineData = withSceneEngineData

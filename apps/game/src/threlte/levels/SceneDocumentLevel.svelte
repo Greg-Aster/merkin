@@ -9,15 +9,11 @@ import SceneFogExp2 from '../components/SceneFogExp2.svelte'
 import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
 import LevelManager from '../core/LevelManager.svelte'
 import type { PlayerLevelPositionDetail } from '../core/levelRuntimeEvents'
-import type {
-  EditorSceneDocument,
-  EditorSceneSettings,
-} from '../engine/sceneDocumentTypes'
 import {
   type ActorDefinition,
   type LevelDefinition,
   type RuntimeGameplayData,
-  adaptEditorSceneToLevelDefinition,
+  adaptSceneDocumentToLevelDefinition,
   createActorWorldMatrixResolver,
   createLevelBuildReport,
   getLevelCollisionWorkflow,
@@ -26,8 +22,16 @@ import { prepareRequiredLevelRenderAssets } from '../engine/levelAssetPreloader'
 import { endLevelRuntimeAssetScope } from '../engine/runtimeAssetManifest'
 import { normalizeRuntimeLevelSceneSettings } from '../engine/runtimeLevelSettings'
 import { loadRuntimeSceneDocument } from '../engine/runtimeSceneDocumentLoader'
-import { upgradeRuntimeSceneDocument } from '../engine/runtimeSceneDocumentUpgrade'
-import { withEditorSceneEngineData } from '../engine/sceneDocumentRuntime'
+import {
+  type RuntimeWorldPartition,
+  getActiveWorldPartitionActorIds,
+  loadRuntimeWorldPartition,
+} from '../engine/runtimeWorldPartition'
+import { withSceneEngineData } from '../engine/sceneDocumentRuntime'
+import type {
+  SceneDocument,
+  SceneSettings,
+} from '../engine/sceneDocumentTypes'
 import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
 import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
 import {
@@ -64,7 +68,7 @@ export let editorEnabled = false
 export let interactionSystem: any = null
 export let timelineEvents: any[] = []
 
-let sceneDocument: EditorSceneDocument | null = null
+let sceneDocument: SceneDocument | null = null
 let levelDefinition: LevelDefinition | null = null
 let levelActors: ActorDefinition[] = []
 let rootActors: ActorDefinition[] = []
@@ -78,6 +82,7 @@ let starMapRef: Group
 let loadToken = 0
 let terrainRuntimeData: TerrainRuntimeComponentData | null = null
 let terrainRuntimeReady = false
+let worldPartition: RuntimeWorldPartition | null = null
 let pendingSceneReady = false
 let pendingSpawnPosition: [number, number, number] | null = null
 
@@ -198,7 +203,7 @@ function dispatchPlayerLevelPosition(
   dispatch('playerLevelPosition', detail)
 }
 
-function getTerrainCollisionSettings(settings: EditorSceneSettings) {
+function getTerrainCollisionSettings(settings: SceneSettings) {
   return settings.level?.collision?.terrain as
     | {
         source?: string
@@ -210,7 +215,7 @@ function getTerrainCollisionSettings(settings: EditorSceneSettings) {
 
 async function loadSceneTerrainRuntimeData(
   level: string,
-  settings: EditorSceneSettings,
+  settings: SceneSettings,
 ) {
   const terrainSettings = getTerrainCollisionSettings(settings)
   if (
@@ -284,35 +289,43 @@ async function loadSceneDocument(level: string, token: number) {
   const loadedScene = await loadRuntimeSceneDocument(level)
   if (token !== loadToken) return
 
-  const baseScene = loadedScene.scene
-  const upgradedScene = upgradeRuntimeSceneDocument(baseScene)
-
-  const normalizedSceneSettings = normalizeRuntimeLevelSceneSettings(
-    level,
-    upgradedScene.settings,
-  )
-
   terrainRuntimeData = null
   terrainRuntimeReady = false
+  worldPartition = null
   pendingSceneReady = false
   pendingSpawnPosition = null
   renderActorsReady = false
   visibleRootActorCount = 0
   cancelActorReveal()
 
-  sceneDocument = withEditorSceneEngineData({
-    ...upgradedScene,
-    settings: normalizedSceneSettings,
-  })
+  let normalizedSceneSettings: SceneSettings
+
+  if (loadedScene.source === 'runtime-manifest') {
+    levelDefinition = loadedScene.levelDefinition
+    normalizedSceneSettings = (levelDefinition.settings ?? {}) as SceneSettings
+    sceneDocument = null
+  } else {
+    const baseScene = loadedScene.scene
+    normalizedSceneSettings = normalizeRuntimeLevelSceneSettings(
+      level,
+      baseScene.settings,
+    )
+    sceneDocument = withSceneEngineData({
+      ...baseScene,
+      settings: normalizedSceneSettings,
+    })
+    levelDefinition =
+      sceneDocument.engine?.levelDefinition ??
+      adaptSceneDocumentToLevelDefinition(sceneDocument)
+  }
+
   terrainRuntimeData = await loadSceneTerrainRuntimeData(
     level,
     normalizedSceneSettings,
   )
+  worldPartition = await loadRuntimeWorldPartition(level)
   if (token !== loadToken) return
 
-  levelDefinition =
-    sceneDocument.engine?.levelDefinition ??
-    adaptEditorSceneToLevelDefinition(sceneDocument)
   levelActors = levelDefinition.actors
   rootActors = levelActors.filter(actor => !actor.parentId)
   if (token !== loadToken) return
@@ -365,7 +378,7 @@ async function loadSceneDocument(level: string, token: number) {
   })
 }
 
-$: levelSettings = (levelDefinition?.settings ?? {}) as EditorSceneSettings
+$: levelSettings = (levelDefinition?.settings ?? {}) as SceneSettings
 $: sharedLevelSettings = levelSettings.level ?? {}
 $: observatorySettings = levelSettings.observatory ?? {}
 $: activeSkyboxPreset =
@@ -437,8 +450,23 @@ $: effectiveAudioRegions = [
   ...authoredAudioRegions,
 ]
 $: visibleRootActors = renderActorsReady
-  ? rootActors.slice(0, visibleRootActorCount)
+  ? rootActors
+      .slice(0, visibleRootActorCount)
+      .filter(
+        actor =>
+          !streamableWorldPartitionActorIds.has(actor.id) ||
+          activeWorldPartitionActorIds.has(actor.id),
+      )
   : []
+$: activeWorldPartitionActorIds = worldPartition
+  ? getActiveWorldPartitionActorIds({
+      partition: worldPartition,
+      playerPosition,
+    })
+  : new Set<string>()
+$: streamableWorldPartitionActorIds = new Set(
+  worldPartition?.streamableActorIds ?? [],
+)
 $: effectiveFog = (() => {
   const fogVolumes = authoredGameplayNodes.filter(
     entry => entry.gameplay?.type === 'fog-volume',
@@ -509,7 +537,7 @@ $: underwaterFogColor = parseSceneColor(
   waterSettings?.underwaterFogColor,
   0x0a1922,
 )
-$: if (sceneDocument) {
+$: if (levelDefinition) {
   replaceRuntimeVisualStyle(
     buildRuntimeVisualStyleFromLevelSettings(sharedLevelSettings),
   )
@@ -642,6 +670,8 @@ onDestroy(() => {
           {levelId}
           {interactionSystem}
           interactiveEnabled={true}
+          activeActorIds={activeWorldPartitionActorIds}
+          streamableActorIds={streamableWorldPartitionActorIds}
           on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
           on:noteRead={(event) => dispatch('noteRead', event.detail)}
         />

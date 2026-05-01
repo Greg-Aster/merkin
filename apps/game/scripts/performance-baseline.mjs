@@ -22,7 +22,7 @@ const appOrigin = `http://127.0.0.1:${gameDevPort}`
 const editorApiBase = String(
   process.env.PUBLIC_EDITOR_API_BASE ||
     process.env.EDITOR_API_BASE ||
-    'http://127.0.0.1:3001',
+    appOrigin,
 ).replace(/\/+$/, '')
 const argv = process.argv.slice(2)
 const args = new Set(argv)
@@ -225,8 +225,8 @@ async function run() {
   }
 
   try {
-    await waitForUrl(`${editorApiBase}/favicon.ico`)
     await waitForUrl(`${appOrigin}/`)
+    await waitForUrl(`${editorApiBase}/api/level-registry`)
 
     const results = []
     const levelFilters = createFilterSet(levelFilter)

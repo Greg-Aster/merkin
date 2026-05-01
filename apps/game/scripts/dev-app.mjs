@@ -9,7 +9,6 @@ const port = String(process.env.GAME_DEV_PORT || 4322)
 const appUrl = `http://${host}:${port}`
 const appRoot = fileURLToPath(new URL('..', import.meta.url))
 const viteCacheDir = path.join(appRoot, 'node_modules', '.vite')
-const toolsUrl = String(process.env.PUBLIC_EDITOR_API_BASE || process.env.EDITOR_API_BASE || 'http://127.0.0.1:3001').replace(/\/+$/, '')
 
 function spawnCommand(command, args, options = {}) {
   const resolvedCommand =
@@ -28,41 +27,6 @@ async function removeIfPresent(targetPath) {
 
 async function cleanupViteCache() {
   await removeIfPresent(viteCacheDir)
-}
-
-async function sleep(ms) {
-  await new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-async function ensureToolsBridge() {
-  const existingOrigin = await getHealthyRuntimeOrigin('tools', toolsUrl)
-  if (existingOrigin) {
-    return null
-  }
-
-  const toolsProcess = spawnCommand('pnpm', ['dev:tools'], {
-    cwd: appRoot,
-    env: {
-      ...process.env,
-    },
-  })
-
-  for (let attempt = 0; attempt < 30; attempt += 1) {
-    const healthyOrigin = await getHealthyRuntimeOrigin('tools', toolsUrl)
-    if (healthyOrigin) {
-      console.log(`🛠️ Tools bridge ready at: ${healthyOrigin}`)
-      return toolsProcess
-    }
-
-    if (toolsProcess.exitCode !== null) {
-      throw new Error(`Tools bridge exited before becoming healthy (code ${toolsProcess.exitCode}).`)
-    }
-
-    await sleep(250)
-  }
-
-  toolsProcess.kill('SIGTERM')
-  throw new Error(`Tools bridge did not become healthy at ${toolsUrl}.`)
 }
 
 async function keepAliveForExistingApp(origin) {
@@ -117,13 +81,11 @@ async function main() {
     return
   }
 
-  const toolsProcess = await ensureToolsBridge()
   await cleanupViteCache()
 
   const astroProcess = spawnCommand('pnpm', ['astro', 'dev', '--host', host, '--port', port], {
     env: {
       ...process.env,
-      GAME_EDITOR_AUTOSTART_TOOLS: '0',
     },
   })
 
@@ -143,11 +105,6 @@ async function main() {
 
   process.on('SIGINT', () => astroProcess.kill('SIGINT'))
   process.on('SIGTERM', () => astroProcess.kill('SIGTERM'))
-  astroProcess.on('exit', () => {
-    if (toolsProcess && toolsProcess.exitCode === null) {
-      toolsProcess.kill('SIGTERM')
-    }
-  })
 }
 
 main().catch((error) => {

@@ -7,8 +7,13 @@ export let actors: ActorDefinition[] = []
 export let levelId = ''
 export let interactionSystem: any = null
 export let interactiveEnabled = false
+export let activeActorIds: Set<string> | null = null
+export let streamableActorIds: Set<string> | null = null
 
-$: childActors = actors.filter(child => child.parentId === actor.id)
+$: childActors = actors.filter(child => {
+  if (child.parentId !== actor.id) return false
+  return !streamableActorIds?.has(child.id) || activeActorIds?.has(child.id)
+})
 </script>
 
 <RuntimeActorNode
@@ -27,6 +32,8 @@ $: childActors = actors.filter(child => child.parentId === actor.id)
       {levelId}
       {interactionSystem}
       {interactiveEnabled}
+      {activeActorIds}
+      {streamableActorIds}
       on:portalTransition
       on:noteRead
     />

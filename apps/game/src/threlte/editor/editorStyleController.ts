@@ -289,7 +289,7 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       state.styleStatus =
         error instanceof Error
           ? error.message
-          : 'Style inspection failed. Check the local tools bridge.'
+          : 'Style inspection failed. Check the local editor API.'
     } finally {
       state.styleBusy = false
     }
@@ -670,7 +670,7 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       state.styleStatus =
         error instanceof Error
           ? error.message
-          : 'Style workspace generation failed. Check ComfyUI and the tools bridge.'
+          : 'Style workspace generation failed. Check ComfyUI and the editor API.'
       return false
     } finally {
       state.styleBusy = false
@@ -744,7 +744,7 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       state.styleStatus =
         error instanceof Error
           ? error.message
-          : 'Mesh simplification failed. Check the local tools bridge.'
+          : 'Mesh simplification failed. Check the local editor API.'
     } finally {
       state.styleBusy = false
     }
@@ -798,7 +798,7 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       state.styleStatus =
         error instanceof Error
           ? error.message
-          : 'Blender export failed. Check the local tools bridge.'
+          : 'Blender export failed. Check the local editor API.'
     } finally {
       state.styleBusy = false
     }
@@ -866,7 +866,7 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       state.styleStatus =
         error instanceof Error
           ? error.message
-          : 'Blender reimport failed. Check the local tools bridge.'
+          : 'Blender reimport failed. Check the local editor API.'
       state.saveMessage = state.styleStatus
     } finally {
       state.styleBusy = false
@@ -1214,7 +1214,7 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
         state.styleBatchStatus =
           error instanceof Error
             ? error.message
-            : 'Scene style batch failed. Check the tools bridge and local AI services.'
+            : 'Scene style batch failed. Check the editor API and local AI services.'
         updatePersistedStyleBatchSession(current => ({
           ...current,
           entries: current.entries.map(candidate =>

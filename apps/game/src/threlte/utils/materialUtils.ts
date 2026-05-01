@@ -9,7 +9,7 @@
  */
 
 import * as THREE from 'three'
-import type { EditorMaterialData } from '../engine/sceneDocumentTypes'
+import type { SceneMaterialData } from '../engine/sceneDocumentTypes'
 
 type MaterialSet = THREE.Material | THREE.Material[]
 
@@ -40,8 +40,8 @@ function disposeMaterialSet(materialSet: MaterialSet) {
   materialSet.dispose()
 }
 
-function isEditorMaterialDataEmpty(
-  override: EditorMaterialData | null | undefined,
+function isSceneMaterialDataEmpty(
+  override: SceneMaterialData | null | undefined,
 ) {
   if (!override) return true
   return Object.values(override).every(value => value === undefined)
@@ -49,7 +49,7 @@ function isEditorMaterialDataEmpty(
 
 function applyEditorMaterialOverride(
   material: THREE.Material,
-  override: EditorMaterialData,
+  override: SceneMaterialData,
 ) {
   const target = material as THREE.Material & {
     color?: THREE.Color
@@ -137,11 +137,11 @@ function applyEditorMaterialOverride(
 
 export function syncObjectMaterialOverride(
   object: THREE.Object3D,
-  override: EditorMaterialData | null | undefined,
+  override: SceneMaterialData | null | undefined,
   state: ObjectMaterialOverrideState,
 ) {
   const activeMeshes = new Set<THREE.Mesh>()
-  const hasOverride = !isEditorMaterialDataEmpty(override)
+  const hasOverride = !isSceneMaterialDataEmpty(override)
 
   object.traverse(child => {
     if (!(child instanceof THREE.Mesh) || !child.material) return

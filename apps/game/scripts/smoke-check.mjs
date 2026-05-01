@@ -8,7 +8,7 @@ const repoRoot = resolve(appRoot, '..', '..')
 const requiredPaths = [
   ['Build output index', resolve(appRoot, 'dist/index.html')],
   ['Shared favicon', resolve(repoRoot, 'apps/megameal/public/favicon.ico')],
-  ['Tools bridge entry', resolve(repoRoot, 'tools/legacy-megameal-tools/app.cjs')],
+  ['Game editor tools API handler', resolve(appRoot, 'scripts/editor-tools/server.cjs')],
 ]
 
 function run(cmd, cwd = repoRoot) {

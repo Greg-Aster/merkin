@@ -16,6 +16,24 @@ const DEV_ASSET_PREFIXES = [
   '/node_modules/',
 ]
 
+const GAME_EDITOR_API_ENDPOINTS = new Set([
+  '/api/browse',
+  '/api/editor-scene/load',
+  '/api/editor-scene/save',
+  '/api/editor-scene/cook-world-partition',
+  '/api/editor-terrain/generate-heightmap',
+  '/api/editor-terrain/bake-collision',
+  '/api/editor-terrain/cook-chunks',
+  '/api/level-registry',
+  '/api/editor/log',
+])
+
+const GAME_EDITOR_API_PREFIXES = [
+  '/api/hunyuan3d/',
+  '/api/comfyui/',
+  '/api/style/',
+]
+
 const proxy = httpProxy.createProxyServer({
   changeOrigin: true,
   ws: true,
@@ -63,7 +81,10 @@ function isGamePath(pathname) {
 }
 
 function isGameOwnedApiPath(pathname) {
-  return pathname === '/api/tools' || pathname.startsWith('/api/tools/')
+  return (
+    GAME_EDITOR_API_ENDPOINTS.has(pathname) ||
+    GAME_EDITOR_API_PREFIXES.some(prefix => pathname.startsWith(prefix))
+  )
 }
 
 function isAmbiguousDevAssetPath(pathname) {

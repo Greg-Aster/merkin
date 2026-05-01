@@ -1,8 +1,21 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { readDeployedSceneLevels } from './lib/levelRegistry.mjs'
 
 const sceneDir = join(process.cwd(), 'src/threlte/editor/scenes')
 const terrainDir = join(process.cwd(), '../megameal/public/terrain')
+const gameEditorToolsBridgePath = join(
+  process.cwd(),
+  'scripts/editor-tools/server.cjs',
+)
+const runtimeSceneDir = join(
+  process.cwd(),
+  '../megameal/public/generated/runtime-game-assets/scenes',
+)
+const worldPartitionDir = join(
+  process.cwd(),
+  '../megameal/public/runtime-world-partitions',
+)
 const publicDir = join(process.cwd(), '../megameal/public')
 const bakedTerrainManifests = [
   'observatory-environment.manifest.json',
@@ -14,6 +27,7 @@ const chunkedTerrainRequiredManifests = new Set([
   'solitude.manifest.json',
   'yggdrasil.manifest.json',
 ])
+const requiredWorldPartitionLevels = ['solitude', 'yggdrasil']
 const terrainManifestFiles = readdirSync(terrainDir)
   .filter(file => file.endsWith('.manifest.json'))
   .sort()
@@ -26,6 +40,22 @@ const forbiddenLegacyStyleFiles = [
 ]
 const forbiddenDuplicateInteractionFiles = [
   'src/threlte/systems/Interaction.svelte',
+]
+const retiredToolsEndpoints = [
+  '/api/project-file',
+  '/api/generate-heightmap',
+  '/api/analyze-glb',
+  '/api/process-level',
+  '/api/generate-level',
+  '/api/unified-pipeline',
+  '/api/levels/scan',
+  '/api/pure-level-stars',
+  '/api/starmap/data',
+  '/api/starmap/save',
+  '/api/save-level-config',
+  '/api/update-manifest',
+  '/api/convert-cubemap',
+  '/api/get-level-manifests',
 ]
 const allowedDefaultCameraFiles = new Set([
   'src/threlte/features/player/Player.svelte',
@@ -268,6 +298,27 @@ for (const file of getSourceFiles(
       `${file}: default scene cameras are only allowed in Player.svelte for gameplay and EditorViewportControls.svelte for editor orbit mode`,
     )
   }
+
+  for (const endpoint of retiredToolsEndpoints) {
+    if (source.includes(endpoint)) {
+      failures.push(
+        `${file}: retired tools endpoint ${endpoint} must not be called by the current editor/runtime`,
+      )
+    }
+  }
+}
+
+for (const routeSourcePath of [gameEditorToolsBridgePath]) {
+  if (existsSync(routeSourcePath)) {
+    const editorApiSource = readFileSync(routeSourcePath, 'utf8')
+    for (const endpoint of retiredToolsEndpoints) {
+      if (editorApiSource.includes(`pathname === '${endpoint}'`)) {
+        failures.push(
+          `${routeSourcePath}: retired route handler ${endpoint} must stay deleted`,
+        )
+      }
+    }
+  }
 }
 
 function stripBom(source) {
@@ -327,6 +378,74 @@ function assertEqual(label, expected, actual, manifestFile) {
   }
 }
 
+function isValidMaterialFactor(value) {
+  return Number.isFinite(value) && value >= 0 && value <= 1
+}
+
+function validateTerrainChunkMaterial(file, manifest) {
+  if (!manifest.assets?.chunksPath) return
+
+  const material = manifest.visualChunks?.material
+  if (!material) {
+    failures.push(`${file}: terrain visual chunks require visualChunks.material`)
+    return
+  }
+
+  if (typeof material.name !== 'string' || !material.name.trim()) {
+    failures.push(`${file}: visualChunks.material.name is required`)
+  }
+  if (
+    !Array.isArray(material.baseColorFactor) ||
+    material.baseColorFactor.length !== 4 ||
+    !material.baseColorFactor.every(isValidMaterialFactor)
+  ) {
+    failures.push(
+      `${file}: visualChunks.material.baseColorFactor must be four values from 0 to 1`,
+    )
+  }
+  if (!isValidMaterialFactor(material.roughnessFactor)) {
+    failures.push(
+      `${file}: visualChunks.material.roughnessFactor must be from 0 to 1`,
+    )
+  }
+  if (!isValidMaterialFactor(material.metallicFactor)) {
+    failures.push(
+      `${file}: visualChunks.material.metallicFactor must be from 0 to 1`,
+    )
+  }
+}
+
+function validateTerrainChunkActivation(file, manifest) {
+  if (!manifest.assets?.chunksPath) return
+
+  const activation = manifest.visualChunks?.activation
+  if (!activation) {
+    failures.push(`${file}: terrain visual chunks require visualChunks.activation`)
+    return
+  }
+
+  const maxActiveChunks = activation.maxActiveChunks
+  const tierLimits = activation.maxActiveChunksByTier ?? {}
+  const hasGlobalLimit = Number.isInteger(maxActiveChunks) && maxActiveChunks > 0
+  const hasTierLimit = Object.values(tierLimits).some(
+    value => Number.isInteger(value) && value > 0,
+  )
+
+  if (!hasGlobalLimit && !hasTierLimit) {
+    failures.push(
+      `${file}: visualChunks.activation requires a positive maxActiveChunks or maxActiveChunksByTier value`,
+    )
+  }
+
+  for (const [tier, value] of Object.entries(tierLimits)) {
+    if (!Number.isInteger(value) || value <= 0) {
+      failures.push(
+        `${file}: visualChunks.activation.maxActiveChunksByTier.${tier} must be a positive integer`,
+      )
+    }
+  }
+}
+
 function auditTerrainManifest(file) {
   const fullPath = join(terrainDir, file)
   const source = readFileSync(fullPath, 'utf8')
@@ -373,6 +492,9 @@ function auditTerrainManifest(file) {
     failures.push(`${file}: terrain visual chunks are required`)
   }
   if (manifest.assets?.chunksPath) {
+    validateTerrainChunkMaterial(file, manifest)
+    validateTerrainChunkActivation(file, manifest)
+
     const chunkDir = join(
       publicDir,
       normalizePublicPath(manifest.assets.chunksPath),
@@ -482,6 +604,43 @@ function auditTerrainManifest(file) {
 }
 
 const terrainReports = bakedTerrainManifests.map(auditTerrainManifest)
+const worldPartitionReports = requiredWorldPartitionLevels.map(levelId => {
+  const file = `${levelId}.partition.json`
+  const fullPath = join(worldPartitionDir, file)
+  const report = {
+    file,
+    cells: 0,
+    residentActors: 0,
+    streamableActors: 0,
+    maxActorsPerCell: 0,
+  }
+
+  if (!existsSync(fullPath)) {
+    failures.push(`${file}: missing runtime world partition manifest`)
+    return report
+  }
+
+  const partition = readJsonFile(fullPath)
+  report.cells = partition.cells?.length ?? 0
+  report.residentActors = partition.residentActorIds?.length ?? 0
+  report.streamableActors = partition.streamableActorIds?.length ?? 0
+  report.maxActorsPerCell = partition.budgets?.maxActorsPerCell ?? 0
+
+  if (partition.version !== 1) {
+    failures.push(`${file}: unsupported partition version ${partition.version}`)
+  }
+  if (partition.levelId !== levelId) {
+    failures.push(`${file}: levelId mismatch ${partition.levelId}`)
+  }
+  if (!Array.isArray(partition.cells)) {
+    failures.push(`${file}: cells must be an array`)
+  }
+  if (report.streamableActors < 1) {
+    failures.push(`${file}: expected at least one streamable actor`)
+  }
+
+  return report
+})
 const legacyTerrainManifestReports = terrainManifestFiles.map(file => {
   const fullPath = join(terrainDir, file)
   const source = readFileSync(fullPath, 'utf8')
@@ -501,6 +660,63 @@ const legacyTerrainManifestReports = terrainManifestFiles.map(file => {
     physicsType,
     hasLegacyTrimesh,
   }
+})
+const runtimeSceneReports = readDeployedSceneLevels({
+  appRoot: process.cwd(),
+}).map(level => {
+  const file = `${level.id}.runtime-scene.json`
+  const fullPath = join(runtimeSceneDir, file)
+  const report = {
+    file,
+    levelId: level.id,
+    exists: existsSync(fullPath),
+    actorCount: 0,
+    requiredRenderActorCount: 0,
+    requiredAssetCount: 0,
+    runtimeAssetCount: 0,
+    buildErrors: 0,
+  }
+
+  if (!report.exists) {
+    failures.push(`${file}: missing cooked runtime scene manifest`)
+    return report
+  }
+
+  const manifest = readJsonFile(fullPath)
+  const levelDefinition = manifest.levelDefinition
+  const buildReport = manifest.buildReport
+
+  if (manifest.schemaVersion !== 1) {
+    failures.push(`${file}: unsupported runtime scene schemaVersion`)
+  }
+  if (manifest.levelId !== level.id) {
+    failures.push(`${file}: levelId mismatch ${manifest.levelId}`)
+  }
+  if (!levelDefinition || levelDefinition.id !== level.id) {
+    failures.push(`${file}: levelDefinition id mismatch`)
+  }
+  if (!isFiniteVec3(levelDefinition?.spawn?.player)) {
+    failures.push(`${file}: levelDefinition spawn.player must be a finite Vec3`)
+  }
+  if (!Array.isArray(levelDefinition?.actors)) {
+    failures.push(`${file}: levelDefinition actors must be an array`)
+  }
+  if (!buildReport || buildReport.levelId !== level.id) {
+    failures.push(`${file}: buildReport levelId mismatch`)
+  }
+
+  report.actorCount = levelDefinition?.actors?.length ?? 0
+  report.requiredRenderActorCount =
+    buildReport?.requiredRenderActorIds?.length ?? 0
+  report.requiredAssetCount = buildReport?.requiredAssetUrls?.length ?? 0
+  report.runtimeAssetCount = buildReport?.runtimeAssetUrls?.length ?? 0
+  report.buildErrors = buildReport?.errors?.length ?? 0
+
+  if (report.buildErrors > 0) {
+    failures.push(`${file}: cooked runtime scene has build errors`)
+  }
+
+  return report
 })
 
 console.log('Engine architecture scene audit')
@@ -687,6 +903,24 @@ console.log(
 )
 
 console.log('')
+console.log('Cooked runtime scene audit')
+console.log('==========================')
+
+for (const report of runtimeSceneReports) {
+  console.log(
+    [
+      report.file,
+      `exists=${report.exists ? 'yes' : 'no'}`,
+      `actors=${report.actorCount}`,
+      `requiredRender=${report.requiredRenderActorCount}`,
+      `requiredAssets=${report.requiredAssetCount}`,
+      `runtimeAssets=${report.runtimeAssetCount}`,
+      `buildErrors=${report.buildErrors}`,
+    ].join('  '),
+  )
+}
+
+console.log('')
 console.log('Baked terrain collision audit')
 console.log('=============================')
 
@@ -702,6 +936,22 @@ for (const report of terrainReports) {
       `sampleStep=${report.sampleStep}`,
       `chunks=${report.chunkFiles}`,
       `expectedChunks=${report.expectedChunkFiles}`,
+    ].join('  '),
+  )
+}
+
+console.log('')
+console.log('World partition audit')
+console.log('=====================')
+
+for (const report of worldPartitionReports) {
+  console.log(
+    [
+      report.file,
+      `cells=${report.cells}`,
+      `residentActors=${report.residentActors}`,
+      `streamableActors=${report.streamableActors}`,
+      `maxActorsPerCell=${report.maxActorsPerCell}`,
     ].join('  '),
   )
 }

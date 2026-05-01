@@ -1,8 +1,8 @@
 import type {
-  EditorSceneSettings,
-  ObservatoryEditorSettings,
-  SharedLevelEditorSettings,
-  SolitudeEditorSettings,
+  ObservatorySceneSettings,
+  SceneSettings,
+  SharedLevelSettings,
+  SolitudeSceneSettings,
 } from './sceneDocumentTypes'
 import { getLevelCollisionWorkflow } from './levelCollisionWorkflow'
 
@@ -19,7 +19,7 @@ const SHARED_LEVEL_SETTING_KEYS = [
   'terrainSculpt',
   'presets',
   'skyboxPreset',
-] as const satisfies ReadonlyArray<keyof SharedLevelEditorSettings>
+] as const satisfies ReadonlyArray<keyof SharedLevelSettings>
 
 function mergeDeepRecords(
   base: Record<string, unknown>,
@@ -63,9 +63,9 @@ export function mergeLevelSettings<T extends object>(
 }
 
 export function pickSharedLevelSettings(
-  source: Partial<SharedLevelEditorSettings> | null | undefined,
-): SharedLevelEditorSettings {
-  const picked: SharedLevelEditorSettings = {}
+  source: Partial<SharedLevelSettings> | null | undefined,
+): SharedLevelSettings {
+  const picked: SharedLevelSettings = {}
 
   for (const key of SHARED_LEVEL_SETTING_KEYS) {
     const value = source?.[key]
@@ -92,19 +92,19 @@ export function removeSharedLevelSettings<T extends object | null | undefined>(
 
 export function normalizeRuntimeLevelSceneSettings(
   levelId: string,
-  settings?: EditorSceneSettings,
-): EditorSceneSettings {
-  const normalized = structuredClone(settings ?? {}) as EditorSceneSettings
+  settings?: SceneSettings,
+): SceneSettings {
+  const normalized = structuredClone(settings ?? {}) as SceneSettings
   const workflow = getLevelCollisionWorkflow(levelId)
   const legacySettings =
     levelId === 'solitude' ? normalized.solitude : normalized.observatory
 
-  normalized.level = mergeLevelSettings<SharedLevelEditorSettings>(
+  normalized.level = mergeLevelSettings<SharedLevelSettings>(
     pickSharedLevelSettings(legacySettings),
     normalized.level ?? {},
   )
 
-  normalized.level = mergeLevelSettings<SharedLevelEditorSettings>(
+  normalized.level = mergeLevelSettings<SharedLevelSettings>(
     {
       collision: {
         workflow: {
@@ -140,13 +140,13 @@ export function normalizeRuntimeLevelSceneSettings(
   if (normalized.observatory) {
     normalized.observatory = removeSharedLevelSettings(
       normalized.observatory,
-    ) as ObservatoryEditorSettings
+    ) as ObservatorySceneSettings
   }
 
   if (normalized.solitude) {
     normalized.solitude = removeSharedLevelSettings(
       normalized.solitude,
-    ) as SolitudeEditorSettings
+    ) as SolitudeSceneSettings
   }
 
   return normalized

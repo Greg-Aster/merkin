@@ -166,5 +166,18 @@
         0.032953858375549316
       ]
     }
+  },
+  "visualChunks": {
+    "generatedBy": "legacy-terrain-chunk-cooker",
+    "chunkCount": 48,
+    "material": {
+      "name": "terrain-chunk-sci-fi-floor",
+      "baseColorFactor": [0.12, 0.13, 0.15, 1],
+      "roughnessFactor": 0.72,
+      "metallicFactor": 0
+    },
+    "activation": {
+      "maxActiveChunks": 4
+    }
   }
 }

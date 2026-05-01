@@ -57,7 +57,7 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     state.assetBrowserLoading = true
     state.assetBrowserError = ''
     state.selectedLibraryItem = null
-    deps.setRuntimeDiagnostic('toolsBridge', {
+    deps.setRuntimeDiagnostic('editorApi', {
       level: 'loading',
       message: `Browsing assets from ${path}…`,
     })
@@ -68,7 +68,7 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       const payload = await response.json()
       if (!payload?.success) {
         state.assetBrowserError = payload?.message ?? 'Failed to browse assets'
-        deps.setRuntimeDiagnostic('toolsBridge', {
+        deps.setRuntimeDiagnostic('editorApi', {
           level: 'warning',
           message: state.assetBrowserError,
         })
@@ -85,7 +85,7 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
             a.name.localeCompare(b.name),
         )
       state.assetBrowserItems = nextItems
-      deps.setRuntimeDiagnostic('toolsBridge', {
+      deps.setRuntimeDiagnostic('editorApi', {
         level: 'ready',
         message: `Asset browser connected. Loaded ${nextItems.length} entries from ${path}.`,
       })
@@ -94,9 +94,9 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       console.error('Asset browser load failed:', error)
       state.assetBrowserError = 'Asset browser unavailable'
       deps.reportRuntimeAssetFailure('asset-browser', state.assetBrowserError)
-      deps.setRuntimeDiagnostic('toolsBridge', {
+      deps.setRuntimeDiagnostic('editorApi', {
         level: 'error',
-        message: `Asset browser unavailable at ${EDITOR_API_BASE}.`,
+        message: `Asset browser unavailable at ${EDITOR_API_BASE || 'same-origin /api'}.`,
       })
       return []
     } finally {
@@ -488,7 +488,7 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       )
         return
       console.error('Hunyuan asset inspect failed:', error)
-      state.hunyuanStatus = `Hunyuan bridge unavailable at ${EDITOR_API_BASE}.`
+      state.hunyuanStatus = `Hunyuan editor API unavailable at ${EDITOR_API_BASE || 'same-origin /api'}.`
       deps.setRuntimeDiagnostic('hunyuan', {
         level: 'error',
         message: state.hunyuanStatus,

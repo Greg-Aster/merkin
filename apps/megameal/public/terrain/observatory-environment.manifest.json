@@ -139,5 +139,24 @@
       },
       "center": [-2.7753677368164062, 0, -0.5087890625]
     }
+  },
+  "visualChunks": {
+    "generatedBy": "legacy-terrain-chunk-cooker",
+    "chunkCount": 64,
+    "material": {
+      "name": "terrain-chunk-observatory-ground",
+      "baseColorFactor": [0.18, 0.22, 0.18, 1],
+      "roughnessFactor": 0.94,
+      "metallicFactor": 0
+    },
+    "activation": {
+      "maxActiveChunksByTier": {
+        "ultra_low": 4,
+        "low": 6,
+        "medium": 8,
+        "high": 9,
+        "ultra": 12
+      }
+    }
   }
 }

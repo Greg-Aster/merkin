@@ -8,6 +8,12 @@ import {
 } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { readDeployedSceneLevels } from './lib/levelRegistry.mjs'
+import {
+  adaptSceneDocumentToLevelDefinition,
+  createLevelBuildReport,
+  createRuntimeSceneManifest,
+  normalizeRuntimeLevelSceneSettings,
+} from './lib/runtimeSceneManifest.mjs'
 
 const appRoot = join(import.meta.dirname, '..')
 const repoRoot = join(appRoot, '..', '..')
@@ -15,6 +21,7 @@ const sceneDir = join(appRoot, 'src/threlte/editor/scenes')
 const publicRoot = join(repoRoot, 'apps/megameal/public')
 const cookedRoot = join(publicRoot, 'generated/runtime-game-assets')
 const manifestPath = join(cookedRoot, 'manifest.json')
+const runtimeSceneRoot = join(cookedRoot, 'scenes')
 
 const tierConfigs = [
   {
@@ -107,6 +114,63 @@ function collectSceneAssets() {
   )
 }
 
+function getRuntimeSceneManifestPublicUrl(levelId) {
+  return `/generated/runtime-game-assets/scenes/${levelId}.runtime-scene.json`
+}
+
+function getWorldPartitionPublicUrl(levelId) {
+  return `/runtime-world-partitions/${levelId}.partition.json`
+}
+
+function getSceneLevelEntries() {
+  return readDeployedSceneLevels({ appRoot }).map(level => ({
+    levelId: level.id,
+    sceneId: level.source?.sceneId ?? level.id,
+  }))
+}
+
+async function buildRuntimeSceneManifests() {
+  const manifests = []
+  const generatedAt = new Date().toISOString()
+
+  for (const entry of getSceneLevelEntries()) {
+    const scenePath = join(sceneDir, `${entry.sceneId}.scene.json`)
+    if (!existsSync(scenePath)) {
+      throw new Error(
+        `Missing deployed scene document: ${relative(repoRoot, scenePath)}`,
+      )
+    }
+
+    const scene = readJson(scenePath)
+    const normalizedScene = {
+      ...scene,
+      settings: normalizeRuntimeLevelSceneSettings(entry.levelId, scene.settings),
+    }
+    const levelDefinition = adaptSceneDocumentToLevelDefinition(normalizedScene)
+    const buildReport = createLevelBuildReport(levelDefinition)
+    const worldPartitionUrl = getWorldPartitionPublicUrl(entry.levelId)
+    const worldPartitionPath = resolvePublicPath(worldPartitionUrl)
+
+    manifests.push({
+      outputUrl: getRuntimeSceneManifestPublicUrl(entry.levelId),
+      outputPath: resolvePublicPath(getRuntimeSceneManifestPublicUrl(entry.levelId)),
+      manifest: createRuntimeSceneManifest({
+        scene: normalizedScene,
+        sceneId: entry.sceneId,
+        sourcePath: relative(repoRoot, scenePath),
+        levelDefinition,
+        buildReport,
+        generatedAt,
+        worldPartitionUrl: existsSync(worldPartitionPath)
+          ? worldPartitionUrl
+          : undefined,
+      }),
+    })
+  }
+
+  return manifests
+}
+
 function getCookedPublicUrl(sourceUrl, tier) {
   const relativeSource = sourceUrl.replace(/^\//, '').replace(/\.glb$/i, '')
   return `/generated/runtime-game-assets/${relativeSource}.${tier}.glb`
@@ -150,11 +214,12 @@ function createManifestEntry(asset) {
   }
 }
 
-function buildManifest() {
+async function buildManifest() {
   const assets = collectSceneAssets()
   const entries = Object.fromEntries(
     assets.map(asset => [asset.sourceUrl, createManifestEntry(asset)]),
   )
+  const runtimeScenes = await buildRuntimeSceneManifests()
   const totalSourceBytes = Object.values(entries).reduce(
     (sum, entry) => sum + entry.sourceSizeBytes,
     0,
@@ -187,6 +252,7 @@ function buildManifest() {
     ),
     sourceSceneDirectory: relative(repoRoot, sceneDir),
     cookedAssetDirectory: relative(repoRoot, cookedRoot),
+    runtimeSceneDirectory: relative(repoRoot, runtimeSceneRoot),
     summary: {
       sourceAssetCount: Object.keys(entries).length,
       sourceAssetBytes: totalSourceBytes,
@@ -200,8 +266,26 @@ function buildManifest() {
       rawGeneratedRuntimeAssetCount: Object.values(entries).filter(
         entry => entry.rawGeneratedRuntimeAsset,
       ).length,
+      runtimeSceneManifestCount: runtimeScenes.length,
     },
     assets: entries,
+    runtimeScenes: Object.fromEntries(
+      runtimeScenes.map(entry => [
+        entry.manifest.levelId,
+        {
+          url: entry.outputUrl,
+          sourceScene: entry.manifest.source.path,
+          actorCount: entry.manifest.buildReport.actorCount,
+          requiredRenderActorCount:
+            entry.manifest.runtime.requiredRenderActorIds.length,
+          requiredAssetCount: entry.manifest.runtime.requiredAssetUrls.length,
+          runtimeAssetCount: entry.manifest.runtime.runtimeAssetUrls.length,
+          buildErrors: entry.manifest.buildReport.errors,
+          buildWarnings: entry.manifest.buildReport.warnings,
+        },
+      ]),
+    ),
+    runtimeSceneManifests: runtimeScenes,
   }
 }
 
@@ -270,6 +354,9 @@ function printSummary(manifest) {
     `raw generated runtime assets: ${manifest.summary.rawGeneratedRuntimeAssetCount}`,
   )
   console.log(`missing source assets: ${manifest.summary.missingSourceAssetCount}`)
+  console.log(
+    `runtime scene manifests: ${manifest.summary.runtimeSceneManifestCount}`,
+  )
 
   const largest = Object.values(manifest.assets)
     .sort((a, b) => b.sourceSizeBytes - a.sourceSizeBytes)
@@ -289,7 +376,7 @@ const requestedAsset = getArg('--asset')
 const requestedTier = getArg('--tier')
 const maxAssets = Number.parseInt(getArg('--max-assets') ?? '0', 10)
 
-let manifest = buildManifest()
+let manifest = await buildManifest()
 printSummary(manifest)
 
 if (shouldCook) {
@@ -317,12 +404,19 @@ if (shouldCook) {
     }
   }
 
-  manifest = buildManifest()
+  manifest = await buildManifest()
 }
 
 if (shouldWriteManifest) {
   mkdirSync(cookedRoot, { recursive: true })
-  writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`)
+  mkdirSync(runtimeSceneRoot, { recursive: true })
+  for (const entry of manifest.runtimeSceneManifests) {
+    writeFileSync(entry.outputPath, `${JSON.stringify(entry.manifest, null, 2)}\n`)
+    console.log(`wrote ${relative(repoRoot, entry.outputPath)}`)
+  }
+
+  const { runtimeSceneManifests, ...assetManifest } = manifest
+  writeFileSync(manifestPath, `${JSON.stringify(assetManifest, null, 2)}\n`)
   console.log('')
   console.log(`wrote ${relative(repoRoot, manifestPath)}`)
 }

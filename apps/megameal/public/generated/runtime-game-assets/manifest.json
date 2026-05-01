@@ -1,8 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-04-30T19:49:05.900Z",
+  "generatedAt": "2026-05-01T02:10:28.670Z",
+  "sourceLevelRegistry": "apps/game/src/threlte/levels/level-registry.json",
   "sourceSceneDirectory": "apps/game/src/threlte/editor/scenes",
   "cookedAssetDirectory": "apps/megameal/public/generated/runtime-game-assets",
+  "runtimeSceneDirectory": "apps/megameal/public/generated/runtime-game-assets/scenes",
   "summary": {
     "sourceAssetCount": 31,
     "sourceAssetBytes": 120367804,
@@ -15,7 +17,8 @@
       "low": 31
     },
     "missingSourceAssetCount": 0,
-    "rawGeneratedRuntimeAssetCount": 31
+    "rawGeneratedRuntimeAssetCount": 31,
+    "runtimeSceneManifestCount": 5
   },
   "assets": {
     "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb": {
@@ -1768,6 +1771,58 @@
           }
         }
       }
+    }
+  },
+  "runtimeScenes": {
+    "miranda": {
+      "url": "/generated/runtime-game-assets/scenes/miranda.runtime-scene.json",
+      "sourceScene": "apps/game/src/threlte/editor/scenes/miranda.scene.json",
+      "actorCount": 70,
+      "requiredRenderActorCount": 0,
+      "requiredAssetCount": 0,
+      "runtimeAssetCount": 0,
+      "buildErrors": [],
+      "buildWarnings": []
+    },
+    "observatory": {
+      "url": "/generated/runtime-game-assets/scenes/observatory.runtime-scene.json",
+      "sourceScene": "apps/game/src/threlte/editor/scenes/observatory.scene.json",
+      "actorCount": 1,
+      "requiredRenderActorCount": 0,
+      "requiredAssetCount": 0,
+      "runtimeAssetCount": 0,
+      "buildErrors": [],
+      "buildWarnings": []
+    },
+    "sci-fi-room": {
+      "url": "/generated/runtime-game-assets/scenes/sci-fi-room.runtime-scene.json",
+      "sourceScene": "apps/game/src/threlte/editor/scenes/sci-fi-room.scene.json",
+      "actorCount": 45,
+      "requiredRenderActorCount": 0,
+      "requiredAssetCount": 0,
+      "runtimeAssetCount": 7,
+      "buildErrors": [],
+      "buildWarnings": []
+    },
+    "solitude": {
+      "url": "/generated/runtime-game-assets/scenes/solitude.runtime-scene.json",
+      "sourceScene": "apps/game/src/threlte/editor/scenes/solitude.scene.json",
+      "actorCount": 33,
+      "requiredRenderActorCount": 0,
+      "requiredAssetCount": 0,
+      "runtimeAssetCount": 16,
+      "buildErrors": [],
+      "buildWarnings": []
+    },
+    "yggdrasil": {
+      "url": "/generated/runtime-game-assets/scenes/yggdrasil.runtime-scene.json",
+      "sourceScene": "apps/game/src/threlte/editor/scenes/yggdrasil.scene.json",
+      "actorCount": 166,
+      "requiredRenderActorCount": 1,
+      "requiredAssetCount": 1,
+      "runtimeAssetCount": 13,
+      "buildErrors": [],
+      "buildWarnings": []
     }
   }
 }

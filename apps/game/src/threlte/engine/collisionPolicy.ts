@@ -4,7 +4,7 @@ import {
   getCollisionIntentForRole,
   getLevelCollisionWorkflow,
 } from './levelCollisionWorkflow'
-import type { EditorSceneSettings } from './sceneDocumentTypes'
+import type { SceneSettings } from './sceneDocumentTypes'
 import type {
   CollisionChannel,
   CollisionComponent,
@@ -18,7 +18,7 @@ export interface CollisionPolicyInput {
   levelId?: string | null
   actorId: string
   actorKind: 'asset' | 'primitive' | 'prefab' | 'terrain' | 'light' | 'empty'
-  levelSettings?: EditorSceneSettings | null
+  levelSettings?: SceneSettings | null
   visible?: boolean
   hasGameplay?: boolean
   bodyType?: PhysicsBodyType

@@ -208,13 +208,23 @@ export function clearGltfCache() {
 }
 
 export function getGltfCacheStats() {
-  return {
-    entries: gltfCache.size,
-    retainedEntries: Array.from(gltfCache.entries()).map(([url, entry]) => ({
+  const retainedEntries = Array.from(gltfCache.entries()).map(
+    ([url, entry]) => ({
       url,
       loaded: Boolean(entry.gltf),
       refCount: entry.refCount,
       evictWhenUnused: entry.evictWhenUnused,
-    })),
+    }),
+  )
+
+  return {
+    entries: gltfCache.size,
+    loadedEntries: retainedEntries.filter(entry => entry.loaded).length,
+    pendingEntries: retainedEntries.filter(entry => !entry.loaded).length,
+    referencedEntries: retainedEntries.filter(entry => entry.refCount > 0)
+      .length,
+    unreferencedEntries: retainedEntries.filter(entry => entry.refCount === 0)
+      .length,
+    retainedEntries,
   }
 }

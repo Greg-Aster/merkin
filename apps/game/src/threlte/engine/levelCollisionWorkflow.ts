@@ -1,4 +1,4 @@
-import type { EditorSceneSettings } from './sceneDocumentTypes'
+import type { SceneSettings } from './sceneDocumentTypes'
 import type { CollisionIntent } from './types'
 
 export type CollisionRole =
@@ -130,7 +130,7 @@ function resolveTerrainCollisionSource(
 function resolveWorkflowFromSettings(
   levelId: string,
   fallback: LevelCollisionWorkflow,
-  settings?: EditorSceneSettings | null,
+  settings?: SceneSettings | null,
 ): LevelCollisionWorkflow {
   const collisionSettings = settings?.level?.collision
   const terrainSettings = collisionSettings?.terrain
@@ -192,7 +192,7 @@ export function inferLevelIdFromActorId(actorId: string) {
 
 export function getLevelCollisionWorkflow(
   levelId?: string | null,
-  settings?: EditorSceneSettings | null,
+  settings?: SceneSettings | null,
 ) {
   const resolvedLevelId = levelId || DEFAULT_WORKFLOW.levelId
   const fallback =
@@ -206,7 +206,7 @@ export function getLevelCollisionWorkflow(
 export function getActorCollisionRole(input: {
   actorId: string
   levelId?: string | null
-  settings?: EditorSceneSettings | null
+  settings?: SceneSettings | null
   sensor?: boolean
   shape?: string
 }): CollisionRole {

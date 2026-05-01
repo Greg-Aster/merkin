@@ -167,9 +167,29 @@
     }
   },
   "visualChunks": {
-    "generatedAt": "2026-05-01T01:32:30.313Z",
+    "generatedAt": "2026-05-01T02:23:14.124Z",
     "generatedBy": "cook-terrain-chunks",
     "chunkCount": 48,
+    "material": {
+      "name": "terrain-chunk-solitude-stone",
+      "baseColorFactor": [
+        0.13,
+        0.135,
+        0.13,
+        1
+      ],
+      "roughnessFactor": 0.98,
+      "metallicFactor": 0
+    },
+    "activation": {
+      "maxActiveChunksByTier": {
+        "ultra_low": 4,
+        "low": 6,
+        "medium": 8,
+        "high": 9,
+        "ultra": 12
+      }
+    },
     "lods": [
       {
         "level": 0,

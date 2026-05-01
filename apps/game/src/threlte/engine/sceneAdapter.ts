@@ -1,7 +1,7 @@
 import type {
-  EditorNodeCollisionData,
-  EditorSceneDocument,
-  EditorSceneNode,
+  SceneDocument,
+  SceneNode,
+  SceneNodeCollisionData,
 } from './sceneDocumentTypes'
 import { resolveCollisionPolicy } from './collisionPolicy'
 import type {
@@ -14,7 +14,7 @@ import type {
   Vec3,
 } from './types'
 
-function getSpawn(scene: EditorSceneDocument): Vec3 {
+function getSpawn(scene: SceneDocument): Vec3 {
   const position = scene.settings?.level?.spawn?.position
   if (
     !position ||
@@ -29,22 +29,22 @@ function getSpawn(scene: EditorSceneDocument): Vec3 {
   return position
 }
 
-function getActorKind(node: EditorSceneNode): ActorDefinition['kind'] {
+function getActorKind(node: SceneNode): ActorDefinition['kind'] {
   if (node.light) return 'light'
   if (node.gameplay?.type === 'audio-region') return 'volume'
   return node.kind === 'group' ? 'empty' : node.kind
 }
 
-function getPhysicsBodyType(node: EditorSceneNode): PhysicsBodyType {
+function getPhysicsBodyType(node: SceneNode): PhysicsBodyType {
   return node.physics?.bodyType ?? 'fixed'
 }
 
-function getRenderCullingPolicy(node: EditorSceneNode): RenderCullingPolicy {
+function getRenderCullingPolicy(node: SceneNode): RenderCullingPolicy {
   return node.renderPolicy?.cullingPolicy ?? 'runtime-budget'
 }
 
 function getRenderPhysicsAttachmentPolicy(
-  node: EditorSceneNode,
+  node: SceneNode,
 ): RenderPhysicsAttachmentPolicy {
   return (
     node.renderPolicy?.physicsAttachment ??
@@ -55,12 +55,12 @@ function getRenderPhysicsAttachmentPolicy(
 }
 
 function toCollisionShape(
-  shape: EditorNodeCollisionData['shape'],
+  shape: SceneNodeCollisionData['shape'],
 ): CollisionShape {
   return shape
 }
 
-function getPrimitiveMaterial(node: EditorSceneNode) {
+function getPrimitiveMaterial(node: SceneNode) {
   if (!node.primitive)
     return node.material as Record<string, unknown> | undefined
 
@@ -93,8 +93,8 @@ function getPrimitiveMaterial(node: EditorSceneNode) {
 }
 
 function toActor(
-  scene: EditorSceneDocument,
-  node: EditorSceneNode,
+  scene: SceneDocument,
+  node: SceneNode,
 ): {
   actor: ActorDefinition
   collisionSource: 'authored' | 'default' | 'none'
@@ -216,8 +216,8 @@ function toActor(
   }
 }
 
-export function adaptEditorSceneToLevelDefinition(
-  scene: EditorSceneDocument,
+export function adaptSceneDocumentToLevelDefinition(
+  scene: SceneDocument,
 ): LevelDefinition {
   return {
     id: scene.levelId,
@@ -230,3 +230,6 @@ export function adaptEditorSceneToLevelDefinition(
     actors: scene.nodes.map(node => toActor(scene, node).actor),
   }
 }
+
+export const adaptEditorSceneToLevelDefinition =
+  adaptSceneDocumentToLevelDefinition

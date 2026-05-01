@@ -23,9 +23,9 @@ Current snapshot:
 | Root/config/docs | 11 |
 | `authoring` | 54 |
 | `public` | 16 |
-| `scripts` | 15 |
-| `src` | 265 |
-| Total | 361 |
+| `scripts` | 18 |
+| `src` | 267 |
+| Total | 366 |
 
 The file checklist lives in `CRUFT_FILE_INVENTORY.md`.
 
@@ -265,8 +265,7 @@ Code-level pass on 2026-04-30:
 
 | Script | Status | Finding |
 | --- | --- | --- |
-| `scripts/dev-app.mjs` | Keep | Active dev bootstrap. It owns game server startup, tools bridge startup, and stale Vite cache cleanup. |
-| `scripts/dev-tools.mjs` | Keep | Active tools bridge bootstrap. It correctly reuses a healthy existing bridge. |
+| `scripts/dev-app.mjs` | Keep | Active dev bootstrap. It owns game server startup and stale Vite cache cleanup; editor APIs are now same-origin dev middleware. |
 | `scripts/smoke-check.mjs` | Keep | Active build/path smoke used by `smoke:engine`; intentionally lightweight. |
 | `scripts/boot-check.mjs` | Keep | Active CI wrapper for browser boot checks; delegates browser specifics to `boot-check-browser.mjs`. |
 | `scripts/lib/levelRegistry.mjs` | Keep | Shared script helper now owns deployed scene level discovery from `level-registry.json`. |
@@ -277,23 +276,38 @@ Code-level pass on 2026-04-30:
 | `scripts/profile-level-resources.mjs` | Keep | Useful profiler now defaults to deployed registry levels and uses shared playable readiness. |
 | `scripts/profile-three-runtime.mjs` | Refactor | Useful boundary scanner, but import parsing is regex/static-import-only and should become a proper dependency audit. |
 | `scripts/audit-engine-architecture.mjs` | Refactor | Important gate, but it is a large monolith with hard-coded visual-only actor exceptions, terrain manifest names, and source checks. |
-| `scripts/cook-runtime-assets.mjs` | Refactor | Important cook/manifest script now starts from deployed registry levels instead of all scene files, but still reads scene JSON for asset discovery and writes runtime cooked outputs into `apps/megameal/public`. |
+| `scripts/cook-runtime-assets.mjs` | Refactor | Important cook/manifest script now starts from deployed registry levels and writes runtime asset plus scene manifests, but still reads editor scene JSON as the authoring source. |
 | `scripts/bake-terrain-collision.mjs` | Keep | Important terrain collider baker now discovers deployed terrain manifests instead of carrying a per-level table. |
 | `scripts/generate-terrain-heightmap.mjs` | Keep | Useful authoring tool now resolves levels through terrain manifest discovery instead of a two-level allowlist. |
+| `scripts/editor-tools/server.cjs` | Refactor | Active editor API handler migrated from `tools/legacy-megameal-tools/app.cjs`; still too broad, but no longer starts a separate tools server or serves the legacy tools UI shell. |
 
 Script conclusions:
 
-- No script is currently dead.
+- No reviewed active script is currently dead; `scripts/dev-tools.mjs` was removed after editor APIs moved to same-origin game dev middleware.
 - Deployed-level discovery has been centralized in `levelRegistry.mjs`; browser readiness logic and filters remain in `browserHarness.mjs`.
 - Terrain discovery has been centralized in `terrainManifestDiscovery.mjs`; the remaining runtime asset script is registry-bound but still needs to move away from direct editor scene asset scanning.
 - The architecture audit should be split into smaller checks so future gates can fail on one contract without growing a single monolithic script forever.
 
 Editor terrain bake path hardened on 2026-04-30:
 
-- The level editor already had terrain controls, but the tools bridge still resolved terrain manifests through a stale hard-coded map.
-- The tools bridge now discovers existing terrain manifests by registry/manifest aliases and creates a starter terrain manifest when `Generate Heightmap From Selection` is used on a level without one.
+- The level editor already had terrain controls, but the editor API still resolved terrain manifests through a stale hard-coded map.
+- The editor API now discovers existing terrain manifests by registry/manifest aliases and creates a starter terrain manifest when `Generate Heightmap From Selection` is used on a level without one.
 - Terrain sculpt height overrides now save through shared `settings.level.terrainSculpt` instead of the old observatory-specific settings key.
 - The editor terrain tools are available for baked-heightmap workflows and for selected mesh assets that can seed a new generated heightmap.
+
+Editor tools cruft review started on 2026-04-30:
+
+- Removed the separate port `3001` editor bridge from normal game dev. Editor APIs are served from the game dev server through same-origin `/api/*` middleware.
+- Removed the `tools/legacy-megameal-tools/app.cjs` compatibility wrapper.
+- Removed `scripts/dev-tools.mjs` and the `dev:tools` package script.
+- Current editor callers use `/api/browse`, `/api/editor-scene/*`, `/api/editor-terrain/*`, `/api/level-registry`, `/api/editor/log`, `/api/hunyuan3d/*`, `/api/comfyui/*`, and `/api/style/*`.
+- Retired routes now return `410`: `/api/project-file`, `/api/generate-heightmap`, `/api/analyze-glb`, `/api/process-level`, `/api/generate-level`, `/api/unified-pipeline`, `/api/levels/scan`, `/api/pure-level-stars`, `/api/starmap/data`, `/api/starmap/save`, `/api/save-level-config`, `/api/update-manifest`, `/api/convert-cubemap`, and `/api/get-level-manifests`.
+- Removed the unreachable route implementations for those retired endpoints; only the active editor bridge routes and explicit retirement responses remain.
+- `audit:engine` now fails if current `src/threlte` code references those retired tools endpoints.
+- `pnpm dev` now starts through `dev:app`; `dev-app.mjs` no longer starts a separate tools process by default.
+- `astro.config.mjs` installs the game-owned editor API middleware in dev, and `src/config/editorApi.ts` defaults to same-origin requests.
+- Updated runtime diagnostics and editor error messages from "tools bridge" to "editor API".
+- Remaining editor tools work: split the large API handler by domain (`scene`, `terrain`, `style`, `ai`).
 
 Runtime/editor boundary scan started on 2026-04-30:
 
@@ -301,7 +315,11 @@ Runtime/editor boundary scan started on 2026-04-30:
 - `editor/editorTypes.ts` now re-exports scene document data contracts and keeps editor UI/session state local.
 - Runtime and runtime-adjacent files now import scene document/material/collision body types from `engine/sceneDocumentTypes` instead of `editor/editorTypes`.
 - `runtimeLevelSettings.ts` now treats `terrainSculpt` as shared level settings, matching the editor terrain sculpt save path.
-- Remaining boundary work: retire the remaining editor-scene JSON import assumptions in runtime loaders.
+- Added `src/threlte/engine/packagedSceneDocuments.ts` as the single packaged scene discovery contract. Runtime loading and registry validation no longer duplicate direct `editor/scenes` glob ownership.
+- Removed the runtime-only `runtimeSceneDocumentUpgrade.ts` shim. Its current `sci-fi-room` planter transform was baked into the source scene document so runtime loading no longer patches one level at activation time.
+- Added neutral `SceneDocument`, `SceneSettings`, `SceneNode`, and related shared scene contract aliases. Runtime modules now use the neutral names; editor aliases remain for editor-specific code until the editor architecture wave.
+- Added `src/threlte/engine/runtimeSceneManifest.ts` and `scripts/lib/runtimeSceneManifest.mjs` for cooked runtime scene manifests. `cook:runtime-assets` now writes `apps/megameal/public/generated/runtime-game-assets/scenes/*.runtime-scene.json`, runtime loading prefers those manifests, and `audit:engine` fails deployed levels without cooked runtime scenes.
+- Remaining boundary work: remove the packaged editor-scene fallback after cooked manifests are fully required in all dev/deploy paths, then eventually rename the underlying shared schema declarations away from `Editor*` names.
 
 Universal collision workflow pass on 2026-04-30:
 

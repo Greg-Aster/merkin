@@ -16,6 +16,7 @@ import {
   renderInfoStore,
   systemTimingsStore,
 } from '../stores/performanceStore'
+import { getGltfCacheStats } from '../../../utils/gltfAssetCache'
 
 // Props — matching what Game.svelte passes
 export let enablePerformanceMonitoring = true
@@ -187,6 +188,7 @@ onMount(() => {
             }
           : null,
         scene: collectSceneStats(),
+        gltfCache: getGltfCacheStats(),
         quality: optimizationManager.getOptimizationLevel(),
       }),
     }
