@@ -26,6 +26,7 @@ let shell: HTMLDivElement | null = null
 let lastPointerX = 0
 let lastPointerY = 0
 let activePointerId: number | null = null
+let activeTouchId: number | null = null
 let manualWheelOffset = 0
 let scrollFrame = 0
 let activeScreenIndex = 0
@@ -37,7 +38,8 @@ const input: IntroInputState = {
   wheel: 0,
   active: false,
 }
-const touchDragMultiplier = 1.55
+const touchDragMultiplier = 2.15
+const touchWheelSensitivity = 3.8
 
 $: activeScreen = homeIntroScreens[activeScreenIndex] ?? homeIntroScreens[0]
 
@@ -135,7 +137,42 @@ function scheduleScrollDrivenWheel() {
   })
 }
 
+function isInteractiveTarget(eventTarget: EventTarget | null) {
+  return (
+    eventTarget instanceof Element &&
+    !!eventTarget.closest('a, button, input, textarea, select, [role="button"]')
+  )
+}
+
+function applyDragDelta(
+  clientX: number,
+  clientY: number,
+  inputMultiplier: number,
+  wheelDistance: number,
+  wheelSensitivity: number,
+) {
+  updatePointer(clientX, clientY)
+
+  if (!input.active) return
+
+  const width = Math.max(shell?.clientWidth ?? window.innerWidth, 1)
+  const deltaX = (clientX - lastPointerX) * inputMultiplier
+  const deltaY = (clientY - lastPointerY) * inputMultiplier
+
+  input.dragX += deltaX / width
+  input.dragY += deltaY / Math.max(wheelDistance, 1)
+  manualWheelOffset = clamp(
+    manualWheelOffset - (deltaY / Math.max(wheelDistance, 1)) * wheelSensitivity,
+    homeIntroMinWheel,
+    homeIntroMaxWheel,
+  )
+  scheduleScrollDrivenWheel()
+  lastPointerX = clientX
+  lastPointerY = clientY
+}
+
 function handlePointerDown(event: PointerEvent) {
+  if (event.pointerType === 'touch' || isInteractiveTarget(event.target)) return
   if (!isInsideShell(event.clientX, event.clientY)) return
 
   input.active = true
@@ -152,6 +189,7 @@ function handlePointerDown(event: PointerEvent) {
 }
 
 function handlePointerMove(event: PointerEvent) {
+  if (event.pointerType === 'touch') return
   if (
     input.active &&
     activePointerId !== null &&
@@ -160,26 +198,8 @@ function handlePointerMove(event: PointerEvent) {
     return
   }
 
-  updatePointer(event.clientX, event.clientY)
-
-  if (!input.active) return
-
-  const width = Math.max(shell?.clientWidth ?? window.innerWidth, 1)
   const height = Math.max(shell?.clientHeight ?? window.innerHeight, 1)
-  const inputMultiplier = event.pointerType === 'touch' ? touchDragMultiplier : 1
-  const deltaX = (event.clientX - lastPointerX) * inputMultiplier
-  const deltaY = (event.clientY - lastPointerY) * inputMultiplier
-
-  input.dragX += deltaX / width
-  input.dragY += deltaY / height
-  manualWheelOffset = clamp(
-    manualWheelOffset - (deltaY / height) * 4.2,
-    homeIntroMinWheel,
-    homeIntroMaxWheel,
-  )
-  scheduleScrollDrivenWheel()
-  lastPointerX = event.clientX
-  lastPointerY = event.clientY
+  applyDragDelta(event.clientX, event.clientY, 1, height, 4.2)
 }
 
 function handlePointerUp(event?: PointerEvent) {
@@ -203,6 +223,54 @@ function handlePointerUp(event?: PointerEvent) {
   activePointerId = null
 }
 
+function getChangedTouch(event: TouchEvent) {
+  return activeTouchId === null
+    ? event.changedTouches[0]
+    : Array.from(event.changedTouches).find(
+        ({ identifier }) => identifier === activeTouchId,
+      )
+}
+
+function handleTouchStart(event: TouchEvent) {
+  if (isInteractiveTarget(event.target)) return
+
+  const touch = event.changedTouches[0]
+  if (!touch || !isInsideShell(touch.clientX, touch.clientY)) return
+
+  activeTouchId = touch.identifier
+  activePointerId = null
+  input.active = true
+  lastPointerX = touch.clientX
+  lastPointerY = touch.clientY
+  updatePointer(touch.clientX, touch.clientY)
+}
+
+function handleTouchMove(event: TouchEvent) {
+  const touch = getChangedTouch(event)
+  if (!touch || activeTouchId === null) return
+
+  event.preventDefault()
+  const touchWheelDistance = Math.max(
+    220,
+    Math.min(window.innerHeight * 0.46, 360),
+  )
+  applyDragDelta(
+    touch.clientX,
+    touch.clientY,
+    touchDragMultiplier,
+    touchWheelDistance,
+    touchWheelSensitivity,
+  )
+}
+
+function handleTouchEnd(event: TouchEvent) {
+  const touch = getChangedTouch(event)
+  if (!touch) return
+
+  input.active = false
+  activeTouchId = null
+}
+
 function handleWheel(event: WheelEvent) {
   if (!shell || (!isInsideShell(event.clientX, event.clientY) && !isShellVisible())) {
     return
@@ -224,6 +292,10 @@ onMount(() => {
   window.addEventListener('pointermove', handlePointerMove)
   window.addEventListener('pointerup', handlePointerUp)
   window.addEventListener('pointercancel', handlePointerUp)
+  window.addEventListener('touchstart', handleTouchStart, { passive: false })
+  window.addEventListener('touchmove', handleTouchMove, { passive: false })
+  window.addEventListener('touchend', handleTouchEnd)
+  window.addEventListener('touchcancel', handleTouchEnd)
   window.addEventListener('wheel', handleWheel, { passive: true })
   window.addEventListener('scroll', scheduleScrollDrivenWheel, { passive: true })
   window.addEventListener('resize', scheduleScrollDrivenWheel)
@@ -233,6 +305,10 @@ onMount(() => {
     window.removeEventListener('pointermove', handlePointerMove)
     window.removeEventListener('pointerup', handlePointerUp)
     window.removeEventListener('pointercancel', handlePointerUp)
+    window.removeEventListener('touchstart', handleTouchStart)
+    window.removeEventListener('touchmove', handleTouchMove)
+    window.removeEventListener('touchend', handleTouchEnd)
+    window.removeEventListener('touchcancel', handleTouchEnd)
     window.removeEventListener('wheel', handleWheel)
     window.removeEventListener('scroll', scheduleScrollDrivenWheel)
     window.removeEventListener('resize', scheduleScrollDrivenWheel)
@@ -245,6 +321,7 @@ onMount(() => {
 
 onDestroy(() => {
   input.active = false
+  activeTouchId = null
   if (scrollFrame) {
     window.cancelAnimationFrame(scrollFrame)
     scrollFrame = 0
