@@ -2,7 +2,9 @@ import { resolveCollisionChannel } from './collisionChannels'
 import {
   getActorCollisionRole,
   getCollisionIntentForRole,
+  getLevelCollisionWorkflow,
 } from './levelCollisionWorkflow'
+import type { EditorSceneSettings } from './sceneDocumentTypes'
 import type {
   CollisionChannel,
   CollisionComponent,
@@ -16,6 +18,7 @@ export interface CollisionPolicyInput {
   levelId?: string | null
   actorId: string
   actorKind: 'asset' | 'primitive' | 'prefab' | 'terrain' | 'light' | 'empty'
+  levelSettings?: EditorSceneSettings | null
   visible?: boolean
   hasGameplay?: boolean
   bodyType?: PhysicsBodyType
@@ -80,6 +83,7 @@ export function getDefaultCollisionIntent(input: CollisionPolicyInput) {
   const role = getActorCollisionRole({
     actorId: input.actorId,
     levelId: input.levelId,
+    settings: input.levelSettings,
     sensor: input.authoredCollision?.sensor,
     shape: authoredShape,
   })
@@ -96,9 +100,11 @@ export function resolveCollisionPolicy(
   const role = getActorCollisionRole({
     actorId: input.actorId,
     levelId: input.levelId,
+    settings: input.levelSettings,
     sensor: input.authoredCollision?.sensor,
     shape: authoredShape,
   })
+  const workflow = getLevelCollisionWorkflow(input.levelId, input.levelSettings)
 
   if (role === 'visualOnly') {
     return { collision: null, source: 'none' }
@@ -147,6 +153,29 @@ export function resolveCollisionPolicy(
 
   if (!solidByDefault) {
     return { collision: null, source: 'none' }
+  }
+
+  if (workflow.defaultActorCollision === 'lightweight-auto') {
+    const intent = getCollisionIntentForRole(role)
+    if (intent === 'none') {
+      return { collision: null, source: 'none' }
+    }
+
+    return {
+      source: 'default',
+      collision: {
+        intent,
+        channel: resolveCollisionChannel({
+          intent,
+          bodyType: input.bodyType,
+        }),
+        shape: getDefaultCollisionShape(input),
+        friction: input.levelSettings?.level?.collision?.defaults?.defaultFriction,
+        restitution:
+          input.levelSettings?.level?.collision?.defaults?.defaultRestitution,
+        sensor: intent === 'trigger',
+      },
+    }
   }
 
   return {

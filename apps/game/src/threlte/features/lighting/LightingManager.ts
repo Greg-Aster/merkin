@@ -51,7 +51,7 @@ export class LightingManager {
   private scene!: Scene
 
   // Actual THREE.js light objects
-  private ambientLight!: AmbientLight
+  private ambientLight: AmbientLight | null = null
   private directionalLights: DirectionalLight[] = []
   private pointLights: PointLight[] = []
   private spotLights: SpotLight[] = []
@@ -89,10 +89,6 @@ export class LightingManager {
 
   initialize(scene: Scene): void {
     this.scene = scene
-
-    // Create default ambient light
-    this.ambientLight = new AmbientLight(0x404060, 1.0)
-    this.scene.add(this.ambientLight)
 
     // Initialize point light pool for performance
     this.initializePointLightPool()
@@ -144,9 +140,20 @@ export class LightingManager {
   }
 
   private updateLightsFromData(data: LightingData): void {
-    // Update ambient light
-    this.ambientLight.color = data.ambient.color
-    this.ambientLight.intensity = data.ambient.intensity
+    if (data.ambient.intensity > 0) {
+      if (!this.ambientLight) {
+        this.ambientLight = new AmbientLight(
+          data.ambient.color,
+          data.ambient.intensity,
+        )
+        this.scene.add(this.ambientLight)
+      }
+      this.ambientLight.color = data.ambient.color
+      this.ambientLight.intensity = data.ambient.intensity
+    } else if (this.ambientLight) {
+      this.scene.remove(this.ambientLight)
+      this.ambientLight = null
+    }
 
     // Update directional lights
     this.updateDirectionalLights(data.directional)
@@ -436,7 +443,10 @@ export class LightingManager {
 
   dispose(): void {
     // Remove all lights from scene
-    this.scene.remove(this.ambientLight)
+    if (this.ambientLight) {
+      this.scene.remove(this.ambientLight)
+      this.ambientLight = null
+    }
 
     this.directionalLights.forEach(light => this.scene.remove(light))
     this.directionalLights = []

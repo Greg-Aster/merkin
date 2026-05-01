@@ -16,6 +16,7 @@ const SHARED_LEVEL_SETTING_KEYS = [
   'ambientParticles',
   'ambientAudio',
   'collision',
+  'terrainSculpt',
   'presets',
   'skyboxPreset',
 ] as const satisfies ReadonlyArray<keyof SharedLevelEditorSettings>
@@ -112,6 +113,13 @@ export function normalizeLevelSceneSettings(
   normalized.level = mergeLevelSettings<SharedLevelEditorSettings>(
     {
       collision: {
+        workflow: {
+          actorCollision: workflow.defaultActorCollision,
+          colliderBudget: workflow.colliderBudget,
+          terrainSculpting: workflow.terrainSculpting ?? false,
+          autoBakeTerrain: workflow.autoBakeTerrain ?? true,
+          terrainVisualChunks: workflow.terrainVisualChunks ?? 'auto',
+        },
         terrain: {
           source:
             workflow.terrainCollision === 'heightmap'
@@ -122,7 +130,7 @@ export function normalizeLevelSceneSettings(
               ? 'built-in-manifest'
               : undefined,
           manifestUrl: workflow.terrainManifestUrl,
-          autoBakeOnTerrainChange: false,
+          autoBakeOnTerrainChange: workflow.autoBakeTerrain ?? true,
           dirty: false,
         },
         defaults: {

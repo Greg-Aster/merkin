@@ -5,7 +5,11 @@ import {
   isTerrainVisualActor,
   resolveCollisionPolicy,
 } from '../engine/collisionPolicy'
-import type { EditorNodeCollisionData, EditorSceneNode } from './editorTypes'
+import type {
+  EditorNodeCollisionData,
+  EditorSceneNode,
+  EditorSceneSettings,
+} from './editorTypes'
 
 const MIN_COLLIDER_SIZE = 0.05
 type ColliderArgs = [number, number, number] | [number, number]
@@ -42,6 +46,7 @@ export function getDefaultCollisionShape(
 
 export function getDefaultCollisionIntent(
   node: EditorSceneNode | null | undefined,
+  levelSettings?: EditorSceneSettings | null,
 ): NonNullable<EditorNodeCollisionData['intent']> {
   return getPolicyDefaultCollisionIntent({
     actorId: node?.id ?? '',
@@ -56,6 +61,7 @@ export function getDefaultCollisionIntent(
     hasGameplay: Boolean(node?.gameplay),
     bodyType: node?.physics?.bodyType,
     primitiveGeometry: node?.primitive?.geometry,
+    levelSettings,
     authoredCollision: node?.collision,
   })
 }
@@ -111,6 +117,7 @@ export function isDefaultSolidNode(node: EditorSceneNode | null | undefined) {
 
 export function resolveNodeCollision(
   node: EditorSceneNode | null | undefined,
+  levelSettings?: EditorSceneSettings | null,
 ): EditorNodeCollisionData | null {
   if (!isEditorGeometryNode(node)) return null
   const result = resolveCollisionPolicy({
@@ -120,6 +127,7 @@ export function resolveNodeCollision(
     hasGameplay: Boolean(node.gameplay),
     bodyType: node.physics?.bodyType,
     primitiveGeometry: node.primitive?.geometry,
+    levelSettings,
     authoredCollision: node.collision,
   })
   if (!result.collision) return null
@@ -203,8 +211,9 @@ export function getNodeVisualColliderSize(
 
 export function getNodeColliderArgs(
   node: EditorSceneNode | null | undefined,
+  levelSettings?: EditorSceneSettings | null,
 ): ColliderArgs {
-  const collision = resolveNodeCollision(node)
+  const collision = resolveNodeCollision(node, levelSettings)
   if (!node || !collision) return [0.5, 0.5, 0.5]
 
   const worldSize = collision.size ?? getNodeVisualColliderSize(node)

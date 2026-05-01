@@ -316,7 +316,7 @@ export class PerformanceValidator {
 
     if (metrics.fps.average < 45) {
       recommendations.push(
-        'Consider reducing scene complexity or enabling LOD system',
+        'Consider reducing scene complexity or tightening runtime culling/LOD budgets',
       )
     }
 

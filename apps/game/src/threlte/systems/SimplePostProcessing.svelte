@@ -10,6 +10,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 import { qualityLevelStore } from '../features/performance/stores/performanceStore'
+import { resolveRuntimePostProcessingPolicy } from '../features/performance/utils/runtimeVisualQualityPolicy'
 import {
   adaptiveBloomConfig,
   adaptiveToneMappingConfig,
@@ -27,10 +28,6 @@ let composer: EffectComposer | null = null
 let bloomPass: UnrealBloomPass | null = null
 let vignetteElement: HTMLDivElement | null = null
 let overlayContainer: HTMLElement | null = null
-
-function clampNumber(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value))
-}
 
 function getActiveCamera() {
   const candidate = camera as THREE.Camera & { current?: THREE.Camera | null }
@@ -96,42 +93,32 @@ function setupComposer() {
 function updateRendererStyle() {
   if (!renderer) return
 
-  const grading = $runtimeVisualStyleStore.colorGrading
-  const exposure =
-    toneMappingExposure *
-    $runtimeVisualStyleStore.toneMappingExposure *
-    $adaptiveToneMappingConfig.exposure *
-    clampNumber(grading.brightness, 0.82, 1.08)
+  const policy = resolveRuntimePostProcessingPolicy({
+    baseExposure: toneMappingExposure,
+    visualStyle: $runtimeVisualStyleStore,
+    bloom: $adaptiveBloomConfig,
+    toneMapping: $adaptiveToneMappingConfig,
+  })
 
   renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = exposure
+  renderer.toneMappingExposure = policy.exposure
   renderer.outputColorSpace = THREE.SRGBColorSpace
 }
 
 function updateBloomSettings() {
   if (!bloomPass) return
 
-  const bloomEnabled =
-    $adaptiveBloomConfig.enabled && $adaptiveBloomConfig.intensity > 0.01
-  const styleBloomIntensity = $runtimeVisualStyleStore.screenFx.bloomIntensity
-  const strength = bloomEnabled
-    ? clampNumber(
-        styleBloomIntensity * $adaptiveBloomConfig.intensity * 0.85,
-        0,
-        1.35,
-      )
-    : 0
+  const policy = resolveRuntimePostProcessingPolicy({
+    baseExposure: toneMappingExposure,
+    visualStyle: $runtimeVisualStyleStore,
+    bloom: $adaptiveBloomConfig,
+    toneMapping: $adaptiveToneMappingConfig,
+  })
 
-  bloomPass.enabled = bloomEnabled
-  bloomPass.strength = strength
-  bloomPass.radius = clampNumber(0.2 + styleBloomIntensity * 0.7, 0.18, 0.85)
-  bloomPass.threshold = clampNumber(
-    ($runtimeVisualStyleStore.screenFx.bloomThreshold +
-      $adaptiveBloomConfig.threshold) *
-      0.5,
-    0.58,
-    0.98,
-  )
+  bloomPass.enabled = policy.bloomEnabled
+  bloomPass.strength = policy.bloomStrength
+  bloomPass.radius = policy.bloomRadius
+  bloomPass.threshold = policy.bloomThreshold
 }
 
 function updateComposerSize() {
@@ -142,11 +129,13 @@ function updateComposerSize() {
 function updateOverlayStyle() {
   if (!vignetteElement) return
 
-  const vignetteStrength = clampNumber(
-    $runtimeVisualStyleStore.screenFx.vignetteStrength * 0.5,
-    0.04,
-    0.26,
-  )
+  const policy = resolveRuntimePostProcessingPolicy({
+    baseExposure: toneMappingExposure,
+    visualStyle: $runtimeVisualStyleStore,
+    bloom: $adaptiveBloomConfig,
+    toneMapping: $adaptiveToneMappingConfig,
+  })
+  const vignetteStrength = policy.vignetteStrength
   vignetteElement.style.backgroundImage = `radial-gradient(circle at 50% 48%, rgba(0,0,0,0) 42%, rgba(2,4,14,${(vignetteStrength * 0.42).toFixed(3)}) 78%, rgba(1,2,8,${vignetteStrength.toFixed(3)}) 100%)`
   vignetteElement.style.backgroundRepeat = 'no-repeat'
   vignetteElement.style.backgroundSize = '100% 100%'

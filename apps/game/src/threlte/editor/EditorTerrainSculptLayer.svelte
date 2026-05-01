@@ -13,7 +13,6 @@ import {
   setOrbitEnabled,
   startSceneTransaction,
   updateLevelSceneSettings,
-  updateObservatorySceneSettings,
 } from './editorStore'
 
 export let levelId: string
@@ -54,11 +53,17 @@ const unsubTerrain = terrainStore.subscribe(value => {
 })
 
 function isTerrainModeActive() {
-  const workflow = getLevelCollisionWorkflow(levelId)
+  const workflow = getLevelCollisionWorkflow(levelId, editorScene?.settings)
+  const terrainCollisionSettings = editorScene?.settings?.level?.collision?.terrain
+  const terrainSculptingAvailable =
+    Boolean(workflow.terrainSculpting) ||
+    terrainCollisionSettings?.source === 'baked-heightmap' ||
+    Boolean(terrainCollisionSettings?.manifestUrl)
+
   return (
     !!editorState?.enabled &&
     editorState.interactionMode === 'terrain' &&
-    !!workflow.terrainSculpting &&
+    terrainSculptingAvailable &&
     !!terrainState?.isReady &&
     !!terrainState?.manager &&
     !!terrainState?.heightData
@@ -355,16 +360,12 @@ function commitSculptStroke() {
     }
   }
 
-  updateObservatorySceneSettings(settings => ({
+  updateLevelSceneSettings(settings => ({
     ...settings,
     terrainSculpt: {
       ...(settings.terrainSculpt ?? {}),
       heightOverrides: overrides,
     },
-  }))
-
-  updateLevelSceneSettings(settings => ({
-    ...settings,
     collision: {
       ...(settings.collision ?? {}),
       terrain: {

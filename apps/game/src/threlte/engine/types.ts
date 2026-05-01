@@ -169,6 +169,9 @@ export interface LevelBuildReport {
   levelId: string
   actorCount: number
   assetActorCount: number
+  primitiveActorCount: number
+  neverCullActorCount: number
+  gameplayFireflyActorCount: number
   physicsActorCount: number
   trimeshActorCount: number
   detailMeshActorCount: number

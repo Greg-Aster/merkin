@@ -3,11 +3,11 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
-  readdirSync,
   statSync,
   writeFileSync,
 } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
+import { readDeployedSceneLevels } from './lib/levelRegistry.mjs'
 
 const appRoot = join(import.meta.dirname, '..')
 const repoRoot = join(appRoot, '..', '..')
@@ -66,18 +66,21 @@ function resolvePublicPath(url) {
   return join(publicRoot, normalizePublicUrl(url).replace(/^\//, ''))
 }
 
-function getSceneFiles() {
-  return readdirSync(sceneDir)
-    .filter(file => file.endsWith('.scene.json'))
-    .sort()
-}
-
 function collectSceneAssets() {
   const byUrl = new Map()
+  const levels = readDeployedSceneLevels({ appRoot })
 
-  for (const file of getSceneFiles()) {
-    const scene = readJson(join(sceneDir, file))
-    const sceneId = scene.levelId ?? file.replace(/\.scene\.json$/, '')
+  for (const level of levels) {
+    const sceneId = level.source?.sceneId ?? level.id
+    const scenePath = join(sceneDir, `${sceneId}.scene.json`)
+    if (!existsSync(scenePath)) {
+      throw new Error(
+        `Missing deployed scene document: ${relative(repoRoot, scenePath)}`,
+      )
+    }
+
+    const scene = readJson(scenePath)
+    const levelId = scene.levelId ?? level.id
     const nodes = Array.isArray(scene.nodes) ? scene.nodes : []
 
     for (const node of nodes) {
@@ -92,9 +95,9 @@ function collectSceneAssets() {
           scenes: new Map(),
         }
 
-      const sceneNodeIds = entry.scenes.get(sceneId) ?? []
+      const sceneNodeIds = entry.scenes.get(levelId) ?? []
       sceneNodeIds.push(node.id)
-      entry.scenes.set(sceneId, sceneNodeIds)
+      entry.scenes.set(levelId, sceneNodeIds)
       byUrl.set(normalizedUrl, entry)
     }
   }
@@ -178,6 +181,10 @@ function buildManifest() {
   return {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
+    sourceLevelRegistry: relative(
+      repoRoot,
+      join(appRoot, 'src/threlte/levels/level-registry.json'),
+    ),
     sourceSceneDirectory: relative(repoRoot, sceneDir),
     cookedAssetDirectory: relative(repoRoot, cookedRoot),
     summary: {

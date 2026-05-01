@@ -1,18 +1,18 @@
 <script lang="ts">
 import { T } from '@threlte/core'
 import { Collider, RigidBody } from '@threlte/rapier'
-import EditorAssetTrimeshCollider from '../editor/EditorAssetTrimeshCollider.svelte'
-import EditorColliderHelper from '../editor/EditorColliderHelper.svelte'
-import EditorCollisionOverlayLabel from '../editor/EditorCollisionOverlayLabel.svelte'
-import EditorMeshColliderHelper from '../editor/EditorMeshColliderHelper.svelte'
-import EditorPrimitiveTrimeshCollider from '../editor/EditorPrimitiveTrimeshCollider.svelte'
-import EditorPrimitiveTrimeshHelper from '../editor/EditorPrimitiveTrimeshHelper.svelte'
-import type { EditorRigidBodyType } from '../editor/editorTypes'
+import type { EditorRigidBodyType } from '../engine/sceneDocumentTypes'
 import type {
   CollisionChannel,
   CollisionIntent,
   PrimitiveGeometryKind,
 } from '../engine'
+import AssetTrimeshCollider from './AssetTrimeshCollider.svelte'
+import ColliderHelper from './ColliderHelper.svelte'
+import CollisionOverlayLabel from './CollisionOverlayLabel.svelte'
+import MeshColliderHelper from './MeshColliderHelper.svelte'
+import PrimitiveTrimeshCollider from './PrimitiveTrimeshCollider.svelte'
+import PrimitiveTrimeshHelper from './PrimitiveTrimeshHelper.svelte'
 
 export let physicsEnabled = true
 export let showOverlay = false
@@ -68,14 +68,14 @@ $: overlayLabelPosition = [
       {lockTranslations}
     >
       {#if isAssetTrimesh}
-        <EditorAssetTrimeshCollider
+        <AssetTrimeshCollider
           url={assetUrl}
           {friction}
           {restitution}
           {sensor}
         />
       {:else if isPrimitiveTrimesh}
-        <EditorPrimitiveTrimeshCollider
+        <PrimitiveTrimeshCollider
           geometry={primitiveGeometry}
           args={primitiveArgs}
           {friction}
@@ -107,18 +107,15 @@ $: overlayLabelPosition = [
 
   {#if showOverlay}
     {#if isAssetTrimesh}
-      <EditorMeshColliderHelper url={assetUrl} color={overlayColor} />
+      <MeshColliderHelper url={assetUrl} color={overlayColor} />
     {:else if isPrimitiveTrimesh}
-      <EditorPrimitiveTrimeshHelper
-        geometry={primitiveGeometry}
-        args={primitiveArgs}
-      />
+      <PrimitiveTrimeshHelper geometry={primitiveGeometry} args={primitiveArgs} />
     {:else if shape === 'cylinder'}
-      <EditorColliderHelper shape="cylinder" {args} color={overlayColor} />
+      <ColliderHelper shape="cylinder" {args} color={overlayColor} />
     {:else}
-      <EditorColliderHelper shape="cuboid" {args} color={overlayColor} />
+      <ColliderHelper shape="cuboid" {args} color={overlayColor} />
     {/if}
-    <EditorCollisionOverlayLabel
+    <CollisionOverlayLabel
       lines={overlayLabelLines}
       position={overlayLabelPosition}
     />

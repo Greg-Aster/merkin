@@ -27,16 +27,6 @@ export interface BloomConfig extends EffectConfig {
   smoothWidth: number
 }
 
-export interface SSAOConfig extends EffectConfig {
-  radius: number
-  samples: number
-  rings: number
-}
-
-export interface FXAAConfig extends EffectConfig {
-  // FXAA doesn't have additional configuration
-}
-
 export interface ToneMappingConfig extends EffectConfig {
   exposure: number
   whitePoint: number
@@ -57,21 +47,6 @@ export const DEFAULT_BLOOM_CONFIG: BloomConfig = {
   quality: 'high',
 }
 
-export const DEFAULT_SSAO_CONFIG: SSAOConfig = {
-  enabled: false,
-  intensity: 0.5,
-  radius: 0.1,
-  samples: 16,
-  rings: 3,
-  quality: 'medium',
-}
-
-export const DEFAULT_FXAA_CONFIG: FXAAConfig = {
-  enabled: true,
-  intensity: 1.0,
-  quality: 'high',
-}
-
 export const DEFAULT_TONE_MAPPING_CONFIG: ToneMappingConfig = {
   enabled: true,
   intensity: 1.0,
@@ -86,10 +61,6 @@ export const postProcessingStore: Writable<PostProcessingConfig> = writable(
 
 export const bloomStore: Writable<BloomConfig> = writable(DEFAULT_BLOOM_CONFIG)
 
-export const ssaoStore: Writable<SSAOConfig> = writable(DEFAULT_SSAO_CONFIG)
-
-export const fxaaStore: Writable<FXAAConfig> = writable(DEFAULT_FXAA_CONFIG)
-
 export const toneMappingStore: Writable<ToneMappingConfig> = writable(
   DEFAULT_TONE_MAPPING_CONFIG,
 )
@@ -98,8 +69,6 @@ export const toneMappingStore: Writable<ToneMappingConfig> = writable(
 const qualityConfigs = {
   ultra_low: {
     bloom: { enabled: false, intensity: 0, threshold: 1.0, smoothWidth: 0.1 },
-    ssao: { enabled: false, intensity: 0, radius: 0.05, samples: 4, rings: 2 },
-    fxaa: { enabled: true, intensity: 1.0 },
     toneMapping: {
       enabled: true,
       intensity: 0.8,
@@ -109,8 +78,6 @@ const qualityConfigs = {
   },
   low: {
     bloom: { enabled: false, intensity: 0, threshold: 0.95, smoothWidth: 0.05 },
-    ssao: { enabled: false, intensity: 0, radius: 0.08, samples: 8, rings: 2 },
-    fxaa: { enabled: true, intensity: 1.0 },
     toneMapping: {
       enabled: true,
       intensity: 0.9,
@@ -125,14 +92,6 @@ const qualityConfigs = {
       threshold: 0.9,
       smoothWidth: 0.03,
     },
-    ssao: {
-      enabled: false,
-      intensity: 0.3,
-      radius: 0.1,
-      samples: 12,
-      rings: 3,
-    },
-    fxaa: { enabled: true, intensity: 1.0 },
     toneMapping: {
       enabled: true,
       intensity: 1.0,
@@ -147,8 +106,6 @@ const qualityConfigs = {
       threshold: 0.84,
       smoothWidth: 0.025,
     },
-    ssao: { enabled: true, intensity: 0.5, radius: 0.1, samples: 16, rings: 3 },
-    fxaa: { enabled: true, intensity: 1.0 },
     toneMapping: {
       enabled: true,
       intensity: 1.0,
@@ -163,14 +120,6 @@ const qualityConfigs = {
       threshold: 0.8,
       smoothWidth: 0.02,
     },
-    ssao: {
-      enabled: true,
-      intensity: 0.7,
-      radius: 0.12,
-      samples: 24,
-      rings: 4,
-    },
-    fxaa: { enabled: true, intensity: 1.0 },
     toneMapping: {
       enabled: true,
       intensity: 1.1,
@@ -190,34 +139,6 @@ export const adaptiveBloomConfig = derived(
     return {
       ...$bloom,
       ...qualityConfig.bloom,
-      quality: $postProcessing.qualityLevel,
-    }
-  },
-)
-
-export const adaptiveSSAOConfig = derived(
-  [postProcessingStore, ssaoStore],
-  ([$postProcessing, $ssao]) => {
-    if (!$postProcessing.adaptiveQuality) return $ssao
-
-    const qualityConfig = qualityConfigs[$postProcessing.qualityLevel]
-    return {
-      ...$ssao,
-      ...qualityConfig.ssao,
-      quality: $postProcessing.qualityLevel,
-    }
-  },
-)
-
-export const adaptiveFXAAConfig = derived(
-  [postProcessingStore, fxaaStore],
-  ([$postProcessing, $fxaa]) => {
-    if (!$postProcessing.adaptiveQuality) return $fxaa
-
-    const qualityConfig = qualityConfigs[$postProcessing.qualityLevel]
-    return {
-      ...$fxaa,
-      ...qualityConfig.fxaa,
       quality: $postProcessing.qualityLevel,
     }
   },
@@ -272,7 +193,6 @@ export function adjustQualityForPerformance(
   targetFPS: number = 60,
 ) {
   const isDev = import.meta.env.DEV
-  const currentConfig = postProcessingStore
 
   if (avgFPS < targetFPS * 0.7) {
     // Performance is poor, reduce quality
@@ -333,8 +253,6 @@ export function adjustQualityForPerformance(
 export function resetPostProcessingState() {
   postProcessingStore.set({ ...DEFAULT_POST_PROCESSING_CONFIG })
   bloomStore.set({ ...DEFAULT_BLOOM_CONFIG })
-  ssaoStore.set({ ...DEFAULT_SSAO_CONFIG })
-  fxaaStore.set({ ...DEFAULT_FXAA_CONFIG })
   toneMappingStore.set({ ...DEFAULT_TONE_MAPPING_CONFIG })
 }
 
@@ -342,11 +260,7 @@ export function resetPostProcessingState() {
 export const postProcessingStores = {
   postProcessing: postProcessingStore,
   bloom: bloomStore,
-  ssao: ssaoStore,
-  fxaa: fxaaStore,
   toneMapping: toneMappingStore,
   adaptiveBloom: adaptiveBloomConfig,
-  adaptiveSSAO: adaptiveSSAOConfig,
-  adaptiveFXAA: adaptiveFXAAConfig,
   adaptiveToneMapping: adaptiveToneMappingConfig,
 }

@@ -4,29 +4,29 @@ import { getContext } from 'svelte'
 import { createEventDispatcher, onDestroy } from 'svelte'
 import * as THREE from 'three'
 import {
-  EDITOR_MATERIAL_OVERRIDE_CONTEXT,
-  type EditorMaterialOverrideStore,
-} from '../editor/editorMaterialContext'
+  getLevelRuntimeAssetTier,
+  resolveRuntimeAssetUrl,
+  resolveRuntimeAssetUrlSync,
+} from '../engine/runtimeAssetManifest'
 import {
   qualityLevelStore,
   qualitySettingsStore,
   recordSystemTiming,
 } from '../features/performance/stores/performanceStore'
 import {
-  getRuntimePropBudget,
-  shouldEnableSceneShadows,
+  resolveRuntimePropVisibility,
+  resolveRuntimeVisibilityPolicy,
 } from '../features/performance/utils/runtimeSceneBudget'
-import {
-  getLevelRuntimeAssetTier,
-  resolveRuntimeAssetUrl,
-  resolveRuntimeAssetUrlSync,
-} from '../engine/runtimeAssetManifest'
 import { reportRuntimeAssetFailure } from '../stores/runtimeDiagnosticsStore'
 import { runtimeVisualStyleStore } from '../styles/runtimeVisualStyleStore'
 import {
   cloneCachedGltfScene,
   disposeCachedGltfScene,
 } from '../utils/gltfAssetCache'
+import {
+  EDITOR_MATERIAL_OVERRIDE_CONTEXT,
+  type EditorMaterialOverrideStore,
+} from '../utils/materialOverrideContext'
 import {
   createObjectMaterialOverrideState,
   disposeObjectMaterialOverrideState,
@@ -203,34 +203,27 @@ function getScaledBoundingRadius() {
 function applyRuntimePropBudget() {
   if (!scene) return
 
-  if (inEditorContext || !runtimeCulling) {
-    currentCullDistance = Number.POSITIVE_INFINITY
-    runtimeVisible = true
-    scene.visible = true
-    sceneMeshes.forEach(mesh => {
-      mesh.castShadow = inEditorContext
-      mesh.receiveShadow = inEditorContext
-      mesh.frustumCulled = false
-    })
-    return
-  }
-
-  const propBudget = getRuntimePropBudget($qualityLevelStore)
-  const shadowsEnabled = shouldEnableSceneShadows(
+  const policy = resolveRuntimeVisibilityPolicy(
     $qualityLevelStore,
     $qualitySettingsStore,
   )
   const scaledBoundingRadius = getScaledBoundingRadius()
+  const visibility = resolveRuntimePropVisibility({
+    policy,
+    distanceToCamera: currentDistanceToCamera,
+    boundingRadius: scaledBoundingRadius,
+    runtimeCulling,
+    editorContext: inEditorContext,
+  })
 
-  currentCullDistance = propBudget.cullDistance + scaledBoundingRadius
+  currentCullDistance = visibility.cullDistance
+  runtimeVisible = visibility.visible
+  scene.visible = visibility.visible
 
   sceneMeshes.forEach(mesh => {
-    mesh.castShadow =
-      shadowsEnabled && currentDistanceToCamera <= propBudget.shadowDistance
-    mesh.receiveShadow =
-      shadowsEnabled &&
-      currentDistanceToCamera <= propBudget.receiveShadowDistance
-    mesh.frustumCulled = true
+    mesh.castShadow = visibility.castShadow
+    mesh.receiveShadow = visibility.receiveShadow
+    mesh.frustumCulled = visibility.frustumCulled
   })
 }
 
@@ -439,15 +432,7 @@ useTask(delta => {
     activeCamera.position.distanceTo(propWorldPosition) - scaledBoundingRadius,
   )
 
-  const nextVisible = currentDistanceToCamera <= currentCullDistance
-  if (runtimeVisible !== nextVisible) {
-    runtimeVisible = nextVisible
-    scene.visible = nextVisible
-  }
-
-  if (nextVisible) {
-    applyRuntimePropBudget()
-  }
+  applyRuntimePropBudget()
 })
 
 onDestroy(() => {

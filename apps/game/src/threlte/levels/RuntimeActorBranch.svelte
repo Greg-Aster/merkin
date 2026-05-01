@@ -16,6 +16,7 @@ $: childActors = actors.filter(child => child.parentId === actor.id)
   {levelId}
   {interactionSystem}
   {interactiveEnabled}
+  hasChildren={childActors.length > 0}
   on:portalTransition
   on:noteRead
 >

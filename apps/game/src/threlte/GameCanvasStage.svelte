@@ -3,7 +3,6 @@ import { Canvas } from '@threlte/core'
 import { createEventDispatcher } from 'svelte'
 import GameWorld from './core/GameWorld.svelte'
 import { qualitySettingsStore } from './features/performance/stores/performanceStore'
-import LODSystem from './features/performance/systems/LOD.svelte'
 import PerformanceSystem from './features/performance/systems/Performance.svelte'
 import { isSettingsMenuOpen } from './stores/uiStore'
 import AssetLoader from './systems/AssetLoader.svelte'
@@ -75,14 +74,6 @@ function forward(type: string, detail: unknown) {
         enableAutomaticOptimization={true}
         on:performanceUpdate={(e) => forward('performanceUpdate', e.detail)}
         on:qualityChanged={(e) => forward('qualityChanged', e.detail)}
-      />
-
-      <LODSystem
-        enableLOD={true}
-        maxDistance={200}
-        updateFrequency={0.1}
-        enableCulling={true}
-        on:lodLevelChanged={(e) => forward('lodLevelChanged', e.detail)}
       />
 
       <AssetLoader />

@@ -24,6 +24,7 @@
 		"baseline:performance:strict": "node ./scripts/performance-baseline.mjs --strict",
 		"profile:resources": "node ./scripts/profile-level-resources.mjs",
 		"bake:terrain-collision": "node ./scripts/bake-terrain-collision.mjs",
+		"cook:terrain-chunks": "node ./scripts/cook-terrain-chunks.mjs",
 		"generate:terrain-heightmap": "node ./scripts/generate-terrain-heightmap.mjs",
 		"profile:three-runtime": "node ./scripts/profile-three-runtime.mjs",
 		"preview": "astro preview",

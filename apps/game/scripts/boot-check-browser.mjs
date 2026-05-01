@@ -1,7 +1,13 @@
 import {
+  assertRequiredRenderActors,
+  isTransientConsoleMessage,
   launchBrowser,
   normalizeBrowserName,
   parseArgValue,
+  readDeployedLevelIds,
+  shouldIgnoreConsoleMessage,
+  shouldIgnoreRequestFailure,
+  waitForPlayableLevel,
 } from './lib/browserHarness.mjs'
 
 const args = process.argv.slice(2)
@@ -9,14 +15,7 @@ const browserName = normalizeBrowserName(
   parseArgValue(args, 'browser', process.env.GAME_BROWSER || 'chromium'),
 )
 const appOrigin = `http://127.0.0.1:${process.env.GAME_DEV_PORT || 4322}`
-
-const migratedLevels = [
-  'observatory',
-  'solitude',
-  'sci-fi-room',
-  'miranda',
-  'yggdrasil',
-]
+const deployedLevelIds = readDeployedLevelIds()
 
 function createLevelSmokeCheck(levelId) {
   return {
@@ -24,28 +23,13 @@ function createLevelSmokeCheck(levelId) {
     url: `${appOrigin}/?level=${levelId}&debug=1`,
     postLoadDelayMs: 1000,
     interact: async (page, context) => {
-      const playableSignal = waitForConsoleMessage(
-        context.consoleMessages,
-        message => message.includes('GameWorld: Player level position resolved'),
-        60000,
-      )
-
       await page.mouse.click(24, 24)
-      await page
-        .locator('.runtime-diagnostics-panel')
-        .first()
-        .waitFor({ state: 'attached', timeout: 10000 })
-      await waitForPageText(page, `Current Level: ${levelId}`, 10000)
-      try {
-        await waitForPageText(
-          page,
-          `Gameplay is enabled on ${levelId}.`,
-          45000,
-        )
-      } catch (error) {
-        await playableSignal
-      }
-      await playableSignal
+      await waitForPlayableLevel(page, levelId, {
+        consoleMessages: context.consoleMessages,
+        diagnosticsTimeoutMs: 10000,
+        currentLevelTimeoutMs: 10000,
+        gameplayTimeoutMs: 45000,
+      })
       await assertRequiredRenderActors(page, levelId)
 
       try {
@@ -58,64 +42,9 @@ function createLevelSmokeCheck(levelId) {
             `${levelId} runtime diagnostics reported failures: ${summaryText}`,
           )
         }
-      } catch (error) {
-        await playableSignal
-      }
+      } catch {}
     },
   }
-}
-
-async function waitForPageText(page, text, timeout) {
-  await page.waitForFunction(
-    expectedText => document.body?.innerText.includes(expectedText),
-    text,
-    { timeout },
-  )
-}
-
-async function assertRequiredRenderActors(page, levelId) {
-  await page.waitForFunction(
-    level => {
-      const state = window.__gameRuntimeRenderState
-      const required = state?.required?.[level] ?? []
-      const rendered = new Set(state?.rendered?.[level] ?? [])
-      const missingActors = required.filter(actorId => !rendered.has(actorId))
-
-      return required.length === 0 || missingActors.length === 0
-    },
-    levelId,
-    { timeout: 30000 },
-  )
-
-  const missingActorIds = await page.evaluate(level => {
-    const state = window.__gameRuntimeRenderState
-    const required = state?.required?.[level] ?? []
-    const rendered = new Set(state?.rendered?.[level] ?? [])
-    return required.filter(actorId => !rendered.has(actorId))
-  }, levelId)
-  if (missingActorIds.length > 0) {
-    throw new Error(
-      `${levelId} missing required rendered actors: ${missingActorIds.join(', ')}`,
-    )
-  }
-}
-
-function waitForConsoleMessage(messages, predicate, timeoutMs) {
-  return new Promise((resolve, reject) => {
-    const startedAt = Date.now()
-    const interval = setInterval(() => {
-      if (messages.some(predicate)) {
-        clearInterval(interval)
-        resolve()
-        return
-      }
-
-      if (Date.now() - startedAt > timeoutMs) {
-        clearInterval(interval)
-        reject(new Error('Timed out waiting for runtime console signal.'))
-      }
-    }, 100)
-  })
 }
 
 const checks = [
@@ -129,25 +58,7 @@ const checks = [
     url: `${appOrigin}/?editor=1`,
     postLoadDelayMs: 7000,
   },
-  ...migratedLevels.map(createLevelSmokeCheck),
-]
-
-const ignoredMessagePatterns = [
-  /CONTEXT_LOST_WEBGL/i,
-  /GPU stall due to ReadPixels/i,
-  /GL Driver Message/i,
-  /GL_INVALID_ENUM/i,
-  /GL_INVALID_OPERATION/i,
-  /glTexStorage2D/i,
-  /glTexSubImage2DRobustANGLE/i,
-  /Audio play failed/i,
-  /unreachable code after return statement.*rapier3d.*character_controller\.js/i,
-  /WebGL warning: drawElementsInstanced: Drawing to a destination rect smaller than the viewport rect/i,
-]
-
-const transientMessagePatterns = [
-  /Outdated Optimize Dep/i,
-  /Failed to fetch dynamically imported module/i,
+  ...deployedLevelIds.map(createLevelSmokeCheck),
 ]
 
 const browser = await launchBrowser(browserName)
@@ -169,7 +80,7 @@ for (const check of checks) {
     consoleMessages.push(`[${type}] ${msg.text()}`)
     if (type === 'warning' || type === 'error') {
       const text = msg.text()
-      if (ignoredMessagePatterns.some(pattern => pattern.test(text))) {
+      if (shouldIgnoreConsoleMessage(text)) {
         return
       }
       messages.push(`[${type}] ${text}`)
@@ -183,7 +94,7 @@ for (const check of checks) {
   page.on('requestfailed', request => {
     const url = request.url()
     const errorText = request.failure()?.errorText || 'unknown error'
-    if (/\/audio\//i.test(url) || /ERR_ABORTED/i.test(errorText)) {
+    if (shouldIgnoreRequestFailure(url, errorText)) {
       return
     }
     messages.push(`[requestfailed] ${request.method()} ${url} :: ${errorText}`)
@@ -217,7 +128,7 @@ for (const check of checks) {
   await runNavigation()
 
   const hasTransientFailure = messages.some(message =>
-    transientMessagePatterns.some(pattern => pattern.test(message)),
+    isTransientConsoleMessage(message),
   )
 
   if (hasTransientFailure) {

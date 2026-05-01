@@ -4,7 +4,8 @@
   "type": "terrain",
   "version": "1.0.0",
   "assets": {
-    "heightmap": "/terrain/heightmaps/yggdrasil_heightmap.png"
+    "heightmap": "/terrain/heightmaps/yggdrasil_heightmap.png",
+    "chunksPath": "/terrain/levels/yggdrasil/"
   },
   "spawn": {
     "position": [
@@ -34,7 +35,10 @@
         7.2,
         190
       ]
-    }
+    },
+    "gridX": 4,
+    "gridY": 4,
+    "chunkSize": 110
   },
   "collision": {
     "terrain": {
@@ -64,5 +68,27 @@
         20
       ]
     }
+  },
+  "visualChunks": {
+    "generatedAt": "2026-05-01T01:32:30.361Z",
+    "generatedBy": "cook-terrain-chunks",
+    "chunkCount": 48,
+    "lods": [
+      {
+        "level": 0,
+        "distance": 198,
+        "resolution": 33
+      },
+      {
+        "level": 1,
+        "distance": 396,
+        "resolution": 17
+      },
+      {
+        "level": 2,
+        "distance": 594,
+        "resolution": 9
+      }
+    ]
   }
 }

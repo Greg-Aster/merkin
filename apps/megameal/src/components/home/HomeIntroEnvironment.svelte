@@ -25,6 +25,7 @@ export let titleImageSrc = ''
 let shell: HTMLDivElement | null = null
 let lastPointerX = 0
 let lastPointerY = 0
+let activePointerId: number | null = null
 let manualWheelOffset = 0
 let scrollFrame = 0
 let activeScreenIndex = 0
@@ -36,6 +37,7 @@ const input: IntroInputState = {
   wheel: 0,
   active: false,
 }
+const touchDragMultiplier = 1.55
 
 $: activeScreen = homeIntroScreens[activeScreenIndex] ?? homeIntroScreens[0]
 
@@ -137,20 +139,36 @@ function handlePointerDown(event: PointerEvent) {
   if (!isInsideShell(event.clientX, event.clientY)) return
 
   input.active = true
+  activePointerId = event.pointerId
   lastPointerX = event.clientX
   lastPointerY = event.clientY
   updatePointer(event.clientX, event.clientY)
+
+  try {
+    shell?.setPointerCapture(event.pointerId)
+  } catch {
+    // Window-level listeners still keep drag input alive if capture is not available.
+  }
 }
 
 function handlePointerMove(event: PointerEvent) {
+  if (
+    input.active &&
+    activePointerId !== null &&
+    event.pointerId !== activePointerId
+  ) {
+    return
+  }
+
   updatePointer(event.clientX, event.clientY)
 
   if (!input.active) return
 
   const width = Math.max(shell?.clientWidth ?? window.innerWidth, 1)
   const height = Math.max(shell?.clientHeight ?? window.innerHeight, 1)
-  const deltaX = event.clientX - lastPointerX
-  const deltaY = event.clientY - lastPointerY
+  const inputMultiplier = event.pointerType === 'touch' ? touchDragMultiplier : 1
+  const deltaX = (event.clientX - lastPointerX) * inputMultiplier
+  const deltaY = (event.clientY - lastPointerY) * inputMultiplier
 
   input.dragX += deltaX / width
   input.dragY += deltaY / height
@@ -164,8 +182,25 @@ function handlePointerMove(event: PointerEvent) {
   lastPointerY = event.clientY
 }
 
-function handlePointerUp() {
+function handlePointerUp(event?: PointerEvent) {
+  if (
+    event &&
+    activePointerId !== null &&
+    event.pointerId !== activePointerId
+  ) {
+    return
+  }
+
+  if (activePointerId !== null) {
+    try {
+      shell?.releasePointerCapture(activePointerId)
+    } catch {
+      // Capture may already be released after browser-driven pointer cancellation.
+    }
+  }
+
   input.active = false
+  activePointerId = null
 }
 
 function handleWheel(event: WheelEvent) {
@@ -238,4 +273,3 @@ onDestroy(() => {
 		{/if}
 	</aside>
 </div>
-

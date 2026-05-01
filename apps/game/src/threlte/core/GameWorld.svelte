@@ -1,6 +1,5 @@
 <script lang="ts">
 import { createEventDispatcher } from 'svelte'
-import { levelEditorSettingsStore } from '../editor/editorSelectors'
 import type {
   PlayerLevelPositionDetail,
   StaticWorldReadyDetail,
@@ -42,14 +41,23 @@ export let normalizeLevelId: (levelId: string) => string = levelId => levelId
 let activeLevelKey = currentLevel
 let activeLevelComponent = currentLevelComponent
 let worldSessionId = 0
-let levelPlayerPosition: PlayerLevelPositionDetail['position'] | null =
-  null
+let levelPlayerPosition: PlayerLevelPositionDetail['position'] | null = null
+let playerSettings: {
+  moveSpeed?: number
+  jumpForce?: number
+  lightIntensityScale?: number
+} = {}
 
 function forward(type: string, detail: unknown) {
   dispatch(type, detail)
 }
 
 function handleStaticWorldReady(detail: StaticWorldReadyDetail) {
+  const nextPlayerSettings = detail.metadata?.player
+  playerSettings =
+    nextPlayerSettings && typeof nextPlayerSettings === 'object'
+      ? (nextPlayerSettings as typeof playerSettings)
+      : {}
   staticWorldReady = true
   forward('staticWorldReady', detail)
 }
@@ -75,12 +83,12 @@ function resetWorldSession() {
   gameplayEnabled = false
   playerComponentRef = null
   levelPlayerPosition = null
+  playerSettings = {}
 }
 
-$: playerMoveSpeed = $levelEditorSettingsStore?.player?.moveSpeed ?? 5
-$: playerJumpForce = $levelEditorSettingsStore?.player?.jumpForce ?? 8
-$: playerLightIntensityScale =
-  $levelEditorSettingsStore?.player?.lightIntensityScale ?? 60
+$: playerMoveSpeed = playerSettings.moveSpeed ?? 5
+$: playerJumpForce = playerSettings.jumpForce ?? 8
+$: playerLightIntensityScale = playerSettings.lightIntensityScale ?? 60
 $: if (!playerComponentRef) {
   playerReady = false
 }

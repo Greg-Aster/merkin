@@ -1,43 +1,17 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { inflateSync } from 'node:zlib'
+import {
+  discoverTerrainLevels,
+  formatTerrainLevelList,
+  resolveTerrainLevel,
+} from './lib/terrainManifestDiscovery.mjs'
 
 const repoRoot = new URL('../../..', import.meta.url).pathname.replace(
   /^\/([A-Za-z]:)/,
   '$1',
 )
 const publicRoot = join(repoRoot, 'apps/megameal/public')
-
-const TERRAIN_LEVELS = [
-  {
-    id: 'observatory-environment',
-    levelId: 'observatory',
-    sceneSettingsKey: 'observatory',
-    manifestPath: join(publicRoot, 'terrain/observatory-environment.manifest.json'),
-    targetResolution: 128,
-  },
-  {
-    id: 'solitude',
-    levelId: 'solitude',
-    sceneSettingsKey: 'solitude',
-    manifestPath: join(publicRoot, 'terrain/solitude.manifest.json'),
-    targetResolution: 128,
-  },
-  {
-    id: 'sci-fi-room',
-    levelId: 'sci-fi-room',
-    sceneSettingsKey: 'level',
-    manifestPath: join(publicRoot, 'terrain/sci-fi-room.manifest.json'),
-    targetResolution: 128,
-  },
-  {
-    id: 'yggdrasil',
-    levelId: 'yggdrasil',
-    sceneSettingsKey: 'level',
-    manifestPath: join(publicRoot, 'terrain/yggdrasil.manifest.json'),
-    targetResolution: 128,
-  },
-]
 
 const MAGIC = 0x4d4d5443 // MMTC
 const VERSION = 1
@@ -362,14 +336,19 @@ function updateManifestCollision(manifest, publicBinaryPath, publicMetaPath, met
 const requestedLevel =
   process.argv.find(arg => arg.startsWith('--level='))?.split('=')[1] ??
   process.argv[2]
+const terrainLevels = discoverTerrainLevels({ repoRoot, publicRoot })
+const requestedTerrainLevel = resolveTerrainLevel(terrainLevels, requestedLevel)
 const levelsToBake = requestedLevel
-  ? TERRAIN_LEVELS.filter(
-      level => level.id === requestedLevel || level.levelId === requestedLevel,
-    )
-  : TERRAIN_LEVELS
+  ? [requestedTerrainLevel].filter(Boolean)
+  : terrainLevels
 
 if (requestedLevel && levelsToBake.length === 0) {
-  throw new Error(`Unknown terrain collision bake level: ${requestedLevel}`)
+  throw new Error(
+    `Unknown terrain collision bake level: ${requestedLevel}. Known terrain levels: ${formatTerrainLevelList(terrainLevels)}`,
+  )
+}
+if (levelsToBake.length === 0) {
+  throw new Error('No deployed terrain manifests were discovered for collision baking')
 }
 
 for (const level of levelsToBake) {

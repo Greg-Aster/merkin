@@ -10,7 +10,12 @@ import type {
 } from './editorOutlinerTypes'
 import type { EditorPanelTab } from './editorPanelTabs'
 import type { EditorPrefabType } from './editorStore'
-import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
+import type {
+  EditorMaterialData,
+  EditorSceneNode,
+  LevelCollisionBudget,
+  LevelCollisionDefaultPolicy,
+} from './editorTypes'
 
 type AnyFunction = (...args: any[]) => any
 type AnyController = Record<string, AnyFunction>
@@ -135,8 +140,11 @@ export type EditorPanelPropBuilderContext = {
   hierarchyFilter: string
   outlinerRows: OutlinerRow[]
   terrainCollisionSettings: Record<string, any> | null
+  collisionDefaultPolicy: LevelCollisionDefaultPolicy
+  collisionBudget: LevelCollisionBudget
   terrainCollisionBakePending: boolean
   terrainHeightmapGeneratePending: boolean
+  terrainChunkCookPending: boolean
   selectedTerrainSourceName: string
   selectedTerrainSourceAssetUrl: string
   editorStyleStudioComponent: any
@@ -181,6 +189,8 @@ export type EditorPanelPropBuilderContext = {
   setEditorInteractionMode: (mode: 'objects' | 'terrain') => void
   setEditorViewportLightingMode: (mode: 'authored' | 'workbench') => void
   setCollisionOverlayEnabled: (value: boolean) => void
+  setCollisionDefaultPolicy: (value: LevelCollisionDefaultPolicy) => void
+  setCollisionBudget: (value: LevelCollisionBudget) => void
   setTerrainBrushMode: (mode: 'raise' | 'smooth' | 'flatten') => void
   setTerrainBrushSize: (value: number) => void
   setTerrainBrushStrength: (value: number) => void
@@ -202,6 +212,7 @@ export type EditorPanelPropBuilderContext = {
   setTerrainAutoBake: (value: boolean) => void
   bakeTerrainCollision: () => Promise<void>
   generateTerrainHeightmapFromSelection: () => Promise<void>
+  cookTerrainChunks: () => Promise<void>
   switchEditorLevel: () => void
   reloadFromDisk: () => Promise<void>
   loadPackagedLevelScene: () => void
@@ -320,9 +331,12 @@ export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
     interactionMode: editorState?.interactionMode ?? 'objects',
     viewportLightingMode: editorState?.viewportLightingMode ?? 'authored',
     collisionOverlayEnabled: editorState?.collisionOverlayEnabled ?? false,
+    collisionDefaultPolicy: context.collisionDefaultPolicy,
+    collisionBudget: context.collisionBudget,
     terrainCollisionSettings: context.terrainCollisionSettings,
     terrainCollisionBakePending: context.terrainCollisionBakePending,
     terrainHeightmapGeneratePending: context.terrainHeightmapGeneratePending,
+    terrainChunkCookPending: context.terrainChunkCookPending,
     selectedTerrainSourceName: context.selectedTerrainSourceName,
     selectedTerrainSourceAssetUrl: context.selectedTerrainSourceAssetUrl,
     terrainBrushMode: editorState?.terrainBrushMode ?? 'raise',
@@ -351,10 +365,13 @@ export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
     onSetViewportLightingMode: (mode: string) =>
       context.setEditorViewportLightingMode(mode as 'authored' | 'workbench'),
     onSetCollisionOverlayEnabled: context.setCollisionOverlayEnabled,
+    onSetCollisionDefaultPolicy: context.setCollisionDefaultPolicy,
+    onSetCollisionBudget: context.setCollisionBudget,
     onSetTerrainAutoBake: context.setTerrainAutoBake,
     onBakeTerrainCollision: () => void context.bakeTerrainCollision(),
     onGenerateTerrainHeightmap: () =>
       void context.generateTerrainHeightmapFromSelection(),
+    onCookTerrainChunks: () => void context.cookTerrainChunks(),
     onSetTerrainBrushMode: (mode: string) =>
       context.setTerrainBrushMode(mode as 'raise' | 'smooth' | 'flatten'),
     onSetTerrainBrushSize: context.setTerrainBrushSize,

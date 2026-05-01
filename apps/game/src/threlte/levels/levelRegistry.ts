@@ -1,5 +1,5 @@
 import { derived, get, writable } from 'svelte/store'
-import type { EditorSceneDocument } from '../editor/editorTypes'
+import type { EditorSceneDocument } from '../engine/sceneDocumentTypes'
 import {
   adaptEditorSceneToLevelDefinition,
   createLevelBuildReport,

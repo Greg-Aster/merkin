@@ -3,8 +3,8 @@ import { T, useTask, useThrelte } from '@threlte/core'
 import { onDestroy } from 'svelte'
 import * as THREE from 'three'
 import { qualityLevelStore } from '../features/performance/stores/performanceStore'
-import { getRuntimePropBudget } from '../features/performance/utils/runtimeSceneBudget'
-import EditorNodeGameplayRenderer from './EditorNodeGameplayRenderer.svelte'
+import { getRuntimeNodeCullDistance } from '../features/performance/utils/runtimeSceneBudget'
+import RuntimeGameplayRenderer from '../levels/RuntimeGameplayRenderer.svelte'
 import EditorNodeGizmos from './EditorNodeGizmos.svelte'
 import EditorNodePhysicsBody from './EditorNodePhysicsBody.svelte'
 import EditorNodeRenderContent from './EditorNodeRenderContent.svelte'
@@ -55,16 +55,7 @@ function supportsRuntimeDistanceCulling() {
 }
 
 function getRuntimeCullDistance() {
-  const baseDistance = getRuntimePropBudget($qualityLevelStore).cullDistance
-
-  switch (node.kind) {
-    case 'light':
-      return baseDistance * 0.4
-    case 'primitive':
-      return baseDistance * 0.85
-    default:
-      return baseDistance
-  }
+  return getRuntimeNodeCullDistance($qualityLevelStore, node.kind)
 }
 
 function getRuntimeBoundsPadding() {
@@ -135,7 +126,7 @@ onDestroy(() => {
 
   <EditorNodeGizmos {selected} />
 
-  <EditorNodeGameplayRenderer
+  <RuntimeGameplayRenderer
     {node}
     {selected}
     {editorEnabled}

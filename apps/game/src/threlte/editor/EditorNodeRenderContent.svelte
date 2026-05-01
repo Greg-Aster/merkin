@@ -6,8 +6,8 @@ import * as THREE from 'three'
 import AdaptivePointLight from '../components/AdaptivePointLight.svelte'
 import HeroProp from '../components/HeroProp.svelte'
 import ProceduralMesh from '../components/ProceduralMesh.svelte'
-import EditorPrefabNode from './EditorPrefabNode.svelte'
-import { EDITOR_MATERIAL_OVERRIDE_CONTEXT } from './editorMaterialContext'
+import RuntimePrefabNode from '../levels/RuntimePrefabNode.svelte'
+import { EDITOR_MATERIAL_OVERRIDE_CONTEXT } from '../utils/materialOverrideContext'
 import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
 
 export let node: EditorSceneNode
@@ -132,7 +132,7 @@ $: materialOverrideStore.set(
   {#if assetNode}
     <HeroProp url={assetNode.url} runtimeCulling={!isPersistentRuntimeAsset(node)} />
   {:else if prefabNode}
-    <EditorPrefabNode prefab={prefabNode} />
+    <RuntimePrefabNode prefab={prefabNode} />
   {:else if primitiveNode}
     <ProceduralMesh
       name={node.name}

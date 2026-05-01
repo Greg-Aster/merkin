@@ -2,12 +2,15 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 import {
+  createFilterSet,
   createContextOptions,
   launchBrowser,
   normalizeBrowserName,
   parseArgValue,
+  shouldIgnoreConsoleMessage,
   spawnGameDev,
   stopChildProcess,
+  waitForPlayableLevel,
   waitForUrl,
 } from './lib/browserHarness.mjs'
 
@@ -33,37 +36,8 @@ const profileFilter = parseArgValue(
   process.env.GAME_PERF_PROFILE || '',
 )
 
-function createFilterSet(value) {
-  return new Set(
-    String(value)
-      .split(',')
-      .map(item => item.trim())
-      .filter(Boolean),
-  )
-}
-
 function readBaselines() {
   return JSON.parse(readFileSync(baselinePath, 'utf8'))
-}
-
-async function waitForPlayable(page, levelId) {
-  await page
-    .locator('.runtime-diagnostics-panel')
-    .first()
-    .waitFor({ state: 'attached', timeout: 15000 })
-  await waitForPageText(page, `Current Level: ${levelId}`, 15000)
-  await waitForPageText(page, `Gameplay is enabled on ${levelId}.`, 90000)
-  await page.waitForFunction(() => Boolean(window.__megamealDiagnostics), null, {
-    timeout: 15000,
-  })
-}
-
-async function waitForPageText(page, text, timeout) {
-  await page.waitForFunction(
-    expectedText => document.body?.innerText.includes(expectedText),
-    text,
-    { timeout },
-  )
 }
 
 function getNumber(value, fallback = 0) {
@@ -173,23 +147,7 @@ async function runProfileLevel(browser, baseline, profile, levelId, browserName)
     const type = msg.type()
     if (type !== 'warning' && type !== 'error') return
     const text = msg.text()
-    if (/Audio play failed/i.test(text)) return
-    if (/GPU stall due to ReadPixels/i.test(text)) return
-    if (/GL_INVALID/i.test(text)) return
-    if (
-      /WebGL warning: drawElementsInstanced: Drawing to a destination rect smaller than the viewport rect/i.test(
-        text,
-      )
-    ) {
-      return
-    }
-    if (
-      /unreachable code after return statement.*rapier3d.*character_controller\.js/i.test(
-        text,
-      )
-    ) {
-      return
-    }
+    if (shouldIgnoreConsoleMessage(text)) return
     messages.push(`[${type}] ${text}`)
   })
 
@@ -200,7 +158,7 @@ async function runProfileLevel(browser, baseline, profile, levelId, browserName)
   const url = `${appOrigin}/?level=${levelId}&debug=1`
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
-    await waitForPlayable(page, levelId)
+    await waitForPlayableLevel(page, levelId)
     const samples = await collectSamples(page, baseline)
     const summary = summarizeSamples(samples)
     const budgetFailures = compareAgainstBudgets(summary, profile.budgets ?? {})

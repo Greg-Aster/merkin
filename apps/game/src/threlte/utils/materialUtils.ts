@@ -9,7 +9,7 @@
  */
 
 import * as THREE from 'three'
-import type { EditorMaterialData } from '../editor/editorTypes'
+import type { EditorMaterialData } from '../engine/sceneDocumentTypes'
 
 type MaterialSet = THREE.Material | THREE.Material[]
 

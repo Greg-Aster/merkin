@@ -2,13 +2,12 @@
 import AdaptivePointLight from '../components/AdaptivePointLight.svelte'
 import HeroProp from '../components/HeroProp.svelte'
 import ProceduralMesh from '../components/ProceduralMesh.svelte'
-import EditorPrefabNode from '../editor/EditorPrefabNode.svelte'
-import type { EditorPrefabData } from '../editor/editorTypes'
 import type { ActorDefinition } from '../engine/types'
 import {
   markRuntimeActorRendered,
   unmarkRuntimeActorRendered,
 } from '../stores/runtimeRenderRegistry'
+import RuntimePrefabNode from './RuntimePrefabNode.svelte'
 
 export let actor: ActorDefinition
 export let levelId = ''
@@ -41,7 +40,7 @@ function handleAssetError() {
     on:error={handleAssetError}
   />
 {:else if prefab}
-  <EditorPrefabNode prefab={prefab as EditorPrefabData} />
+  <RuntimePrefabNode {prefab} />
 {:else if primitive}
   <ProceduralMesh
     name={actor.name}

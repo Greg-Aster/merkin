@@ -10,6 +10,10 @@ const bakedTerrainManifests = [
   'sci-fi-room.manifest.json',
   'yggdrasil.manifest.json',
 ]
+const chunkedTerrainRequiredManifests = new Set([
+  'solitude.manifest.json',
+  'yggdrasil.manifest.json',
+])
 const terrainManifestFiles = readdirSync(terrainDir)
   .filter(file => file.endsWith('.manifest.json'))
   .sort()
@@ -30,6 +34,26 @@ const allowedDefaultCameraFiles = new Set([
 const terrainTriangleBudget = 50_000
 const runtimeAssetFileBudgetBytes = 40 * 1024 * 1024
 const sceneRuntimeAssetBudgetBytes = 160 * 1024 * 1024
+const visualBudgetDefaults = {
+  maxPrimitiveActors: 80,
+  maxNeverCullActors: 4,
+  maxGameplayFireflies: 40,
+}
+const visualBudgetByLevel = {
+  observatory: {
+    maxPrimitiveActors: 8,
+    maxGameplayFireflies: 0,
+  },
+  solitude: {
+    maxPrimitiveActors: 16,
+    maxGameplayFireflies: 16,
+  },
+  yggdrasil: {
+    maxPrimitiveActors: 80,
+    maxNeverCullActors: 4,
+    maxGameplayFireflies: 40,
+  },
+}
 const colliderMagic = 0x4d4d5443
 const colliderVersion = 1
 const collisionIntents = new Set([
@@ -112,6 +136,13 @@ function auditScene(file) {
   const nodes = Array.isArray(scene.nodes) ? scene.nodes : []
   const spawnPosition = scene.settings?.level?.spawn?.position
   const geometryNodes = nodes.filter(isGeometryNode)
+  const primitiveNodes = nodes.filter(node => node.kind === 'primitive')
+  const neverCullNodes = nodes.filter(
+    node => node.renderPolicy?.cullingPolicy === 'never',
+  )
+  const gameplayFireflies = nodes.filter(
+    node => node.gameplay?.type === 'firefly',
+  )
   const explicitCollision = geometryNodes.filter(node => node.collision)
   const missingCollisionIntent = explicitCollision.filter(
     node => !collisionIntents.has(node.collision?.intent),
@@ -179,6 +210,9 @@ function auditScene(file) {
     sizeKb: Math.round(statSync(fullPath).size / 1024),
     nodes: nodes.length,
     geometryNodes: geometryNodes.length,
+    primitiveNodes: primitiveNodes.length,
+    neverCullNodes: neverCullNodes.length,
+    gameplayFireflies: gameplayFireflies.length,
     explicitCollision: explicitCollision.length,
     missingCollisionIntent: missingCollisionIntent.length,
     missingCollisionChannel: missingCollisionChannel.length,
@@ -224,7 +258,10 @@ for (const file of forbiddenDuplicateInteractionFiles) {
     )
   }
 }
-for (const file of getSourceFiles(join(process.cwd(), 'src/threlte'), 'src/threlte')) {
+for (const file of getSourceFiles(
+  join(process.cwd(), 'src/threlte'),
+  'src/threlte',
+)) {
   const source = readFileSync(join(process.cwd(), file), 'utf8')
   if (source.includes('makeDefault') && !allowedDefaultCameraFiles.has(file)) {
     failures.push(
@@ -306,6 +343,9 @@ function auditTerrainManifest(file) {
     sampleStep: collision?.sampleStep ?? 0,
     artifact: collision?.url ?? 'missing',
     metadata: collision?.metadataUrl ?? 'missing',
+    chunksPath: manifest.assets?.chunksPath ?? 'missing',
+    chunkFiles: 0,
+    expectedChunkFiles: manifest.visualChunks?.chunkCount ?? 0,
     hasBom,
   }
 
@@ -325,6 +365,35 @@ function auditTerrainManifest(file) {
     failures.push(
       `${file}: baked terrain collision must set authoredException=true`,
     )
+  }
+  if (
+    chunkedTerrainRequiredManifests.has(file) &&
+    !manifest.assets?.chunksPath
+  ) {
+    failures.push(`${file}: terrain visual chunks are required`)
+  }
+  if (manifest.assets?.chunksPath) {
+    const chunkDir = join(
+      publicDir,
+      normalizePublicPath(manifest.assets.chunksPath),
+    )
+    if (!existsSync(chunkDir)) {
+      failures.push(
+        `${file}: missing terrain chunk directory ${manifest.assets.chunksPath}`,
+      )
+    } else {
+      report.chunkFiles = readdirSync(chunkDir).filter(entry =>
+        /^chunk_\d+_\d+_LOD\d+\.glb$/i.test(entry),
+      ).length
+      if (
+        report.expectedChunkFiles > 0 &&
+        report.chunkFiles !== report.expectedChunkFiles
+      ) {
+        failures.push(
+          `${file}: terrain chunk count mismatch expected=${report.expectedChunkFiles} actual=${report.chunkFiles}`,
+        )
+      }
+    }
   }
   if (!collision?.url || !collision?.metadataUrl) {
     failures.push(`${file}: baked collider url and metadataUrl are required`)
@@ -451,6 +520,9 @@ for (const report of reports) {
       `${report.sizeKb}KB`,
       `nodes=${report.nodes}`,
       `geometry=${report.geometryNodes}`,
+      `primitives=${report.primitiveNodes}`,
+      `neverCull=${report.neverCullNodes}`,
+      `fireflies=${report.gameplayFireflies}`,
       `explicitCollision=${report.explicitCollision}`,
       `missingIntent=${report.missingCollisionIntent}`,
       `missingChannel=${report.missingCollisionChannel}`,
@@ -519,6 +591,26 @@ for (const report of reports) {
       `${report.file}: scene runtime assets exceed ${formatBytes(sceneRuntimeAssetBudgetBytes)} budget: ${formatBytes(report.totalRuntimeAssetBytes)}`,
     )
   }
+  const levelId = report.file.replace(/\.scene\.json$/, '')
+  const visualBudget = {
+    ...visualBudgetDefaults,
+    ...(visualBudgetByLevel[levelId] ?? {}),
+  }
+  if (report.primitiveNodes > visualBudget.maxPrimitiveActors) {
+    failures.push(
+      `${report.file}: primitive render actors exceed visual budget ${report.primitiveNodes}/${visualBudget.maxPrimitiveActors}; bake repeated primitives into runtime assets or chunks`,
+    )
+  }
+  if (report.neverCullNodes > visualBudget.maxNeverCullActors) {
+    failures.push(
+      `${report.file}: never-cull render actors exceed visual budget ${report.neverCullNodes}/${visualBudget.maxNeverCullActors}`,
+    )
+  }
+  if (report.gameplayFireflies > visualBudget.maxGameplayFireflies) {
+    failures.push(
+      `${report.file}: firefly gameplay actors exceed visual budget ${report.gameplayFireflies}/${visualBudget.maxGameplayFireflies}; use chunked/pooled marker presentation`,
+    )
+  }
   if (report.largestAsset && report.largestAsset.sizeBytes > 0) {
     console.log(
       `  largest asset: ${report.largestAsset.url} (${formatBytes(report.largestAsset.sizeBytes)})`,
@@ -530,6 +622,9 @@ const totals = reports.reduce(
   (sum, report) => ({
     nodes: sum.nodes + report.nodes,
     geometryNodes: sum.geometryNodes + report.geometryNodes,
+    primitiveNodes: sum.primitiveNodes + report.primitiveNodes,
+    neverCullNodes: sum.neverCullNodes + report.neverCullNodes,
+    gameplayFireflies: sum.gameplayFireflies + report.gameplayFireflies,
     explicitCollision: sum.explicitCollision + report.explicitCollision,
     missingCollisionIntent:
       sum.missingCollisionIntent + report.missingCollisionIntent,
@@ -551,6 +646,9 @@ const totals = reports.reduce(
   {
     nodes: 0,
     geometryNodes: 0,
+    primitiveNodes: 0,
+    neverCullNodes: 0,
+    gameplayFireflies: 0,
     explicitCollision: 0,
     missingCollisionIntent: 0,
     missingCollisionChannel: 0,
@@ -571,6 +669,9 @@ console.log(
     'TOTAL',
     `nodes=${totals.nodes}`,
     `geometry=${totals.geometryNodes}`,
+    `primitives=${totals.primitiveNodes}`,
+    `neverCull=${totals.neverCullNodes}`,
+    `fireflies=${totals.gameplayFireflies}`,
     `explicitCollision=${totals.explicitCollision}`,
     `missingIntent=${totals.missingCollisionIntent}`,
     `missingChannel=${totals.missingCollisionChannel}`,
@@ -599,6 +700,8 @@ for (const report of terrainReports) {
       `triangles=${report.triangleCount}`,
       `resolution=${report.colliderResolution}`,
       `sampleStep=${report.sampleStep}`,
+      `chunks=${report.chunkFiles}`,
+      `expectedChunks=${report.expectedChunkFiles}`,
     ].join('  '),
   )
 }

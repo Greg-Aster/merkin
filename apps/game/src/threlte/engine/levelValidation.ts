@@ -32,7 +32,10 @@ function getRequiredActorError(actorId: string, reason: string) {
 
 function hasBakedTerrainRuntime(level: LevelDefinition) {
   const terrain = (level.settings as any)?.level?.collision?.terrain
-  return terrain?.source === 'baked-heightmap' && typeof terrain.manifestUrl === 'string'
+  return (
+    terrain?.source === 'baked-heightmap' &&
+    typeof terrain.manifestUrl === 'string'
+  )
 }
 
 function isTerrainRuntimeActorId(level: LevelDefinition, actorId: string) {
@@ -44,10 +47,16 @@ function isSpawnRuntimeActorId(level: LevelDefinition, actorId: string) {
 }
 
 function isSatisfiedByRuntimeSystem(level: LevelDefinition, actorId: string) {
-  if (isTerrainRuntimeActorId(level, actorId) && hasBakedTerrainRuntime(level)) {
+  if (
+    isTerrainRuntimeActorId(level, actorId) &&
+    hasBakedTerrainRuntime(level)
+  ) {
     return true
   }
-  if (isSpawnRuntimeActorId(level, actorId) && isFiniteVec3(level.spawn.player)) {
+  if (
+    isSpawnRuntimeActorId(level, actorId) &&
+    isFiniteVec3(level.spawn.player)
+  ) {
     return true
   }
   return false
@@ -65,6 +74,9 @@ export function createLevelBuildReport(
   const runtimeAssetUrls = new Set<string>()
   const requiredAssetUrls = new Set<string>()
   let assetActorCount = 0
+  let primitiveActorCount = 0
+  let neverCullActorCount = 0
+  let gameplayFireflyActorCount = 0
   let defaultCollisionActorCount = 0
   let physicsActorCount = 0
   let trimeshActorCount = 0
@@ -85,6 +97,15 @@ export function createLevelBuildReport(
 
     if (actor.kind === 'asset') {
       assetActorCount += 1
+    }
+    if (actor.kind === 'primitive') {
+      primitiveActorCount += 1
+    }
+    if (actor.render?.cullingPolicy === 'never') {
+      neverCullActorCount += 1
+    }
+    if (actor.gameplay?.type === 'firefly') {
+      gameplayFireflyActorCount += 1
     }
 
     if (actor.render?.asset?.url) {
@@ -167,7 +188,11 @@ export function createLevelBuildReport(
 
   for (const actorId of contract.requiredWalkableActorIds) {
     const actor = actorsById.get(actorId)
-    if (!actor && isTerrainRuntimeActorId(level, actorId) && hasBakedTerrainRuntime(level)) {
+    if (
+      !actor &&
+      isTerrainRuntimeActorId(level, actorId) &&
+      hasBakedTerrainRuntime(level)
+    ) {
       continue
     }
     if (!actor) continue
@@ -195,10 +220,31 @@ export function createLevelBuildReport(
     )
   }
 
+  if (primitiveActorCount > contract.maxPrimitiveActorCount) {
+    errors.push(
+      `${primitiveActorCount} primitive render actors exceed contract budget of ${contract.maxPrimitiveActorCount}. Bake repeated primitives into runtime assets or chunks.`,
+    )
+  }
+
+  if (neverCullActorCount > contract.maxNeverCullActorCount) {
+    errors.push(
+      `${neverCullActorCount} never-cull render actors exceed contract budget of ${contract.maxNeverCullActorCount}.`,
+    )
+  }
+
+  if (gameplayFireflyActorCount > contract.maxGameplayFireflyCount) {
+    errors.push(
+      `${gameplayFireflyActorCount} firefly gameplay actors exceed contract budget of ${contract.maxGameplayFireflyCount}. Use chunked/pooled marker presentation.`,
+    )
+  }
+
   return {
     levelId: level.id,
     actorCount: level.actors.length,
     assetActorCount,
+    primitiveActorCount,
+    neverCullActorCount,
+    gameplayFireflyActorCount,
     physicsActorCount,
     trimeshActorCount,
     detailMeshActorCount,

@@ -9,14 +9,10 @@ import SceneFogExp2 from '../components/SceneFogExp2.svelte'
 import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
 import LevelManager from '../core/LevelManager.svelte'
 import type { PlayerLevelPositionDetail } from '../core/levelRuntimeEvents'
-import { upgradeLegacySceneDocument } from '../editor/defaultScenes'
-import { ensureSceneGeneration } from '../editor/editorGeneration'
-import { normalizeLevelSceneSettings } from '../editor/editorLevelSetup'
-import { loadEditorSceneDocument } from '../editor/editorSceneDocumentLoader'
 import type {
   EditorSceneDocument,
   EditorSceneSettings,
-} from '../editor/editorTypes'
+} from '../engine/sceneDocumentTypes'
 import {
   type ActorDefinition,
   type LevelDefinition,
@@ -28,19 +24,22 @@ import {
 } from '../engine'
 import { prepareRequiredLevelRenderAssets } from '../engine/levelAssetPreloader'
 import { endLevelRuntimeAssetScope } from '../engine/runtimeAssetManifest'
+import { normalizeRuntimeLevelSceneSettings } from '../engine/runtimeLevelSettings'
+import { loadRuntimeSceneDocument } from '../engine/runtimeSceneDocumentLoader'
+import { upgradeRuntimeSceneDocument } from '../engine/runtimeSceneDocumentUpgrade'
 import { withEditorSceneEngineData } from '../engine/sceneDocumentRuntime'
-import {
-  TerrainRuntime,
-  loadTerrainRuntimeComponentData,
-  type TerrainRuntimeComponentData,
-  type TerrainRuntimeComponentSource,
-} from '../features/terrain'
+import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
+import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
 import {
   qualityLevelStore,
   recordSystemTiming,
 } from '../features/performance/stores/performanceStore'
-import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
-import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
+import {
+  TerrainRuntime,
+  type TerrainRuntimeComponentData,
+  type TerrainRuntimeComponentSource,
+  loadTerrainRuntimeComponentData,
+} from '../features/terrain'
 import { playerStateStore } from '../stores/gameStateStore'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 import {
@@ -55,6 +54,7 @@ import {
 import Skybox from '../systems/Skybox.svelte'
 import StarMap from '../systems/StarMap.svelte'
 import RuntimeActorBranch from './RuntimeActorBranch.svelte'
+import SceneLighting from './SceneLighting.svelte'
 
 const dispatch = createEventDispatcher()
 
@@ -159,7 +159,6 @@ function startActorReveal(onComplete: () => void) {
   actorRevealFrame = requestAnimationFrame(revealNextActorBatch)
 }
 
-
 function parseSceneColor(
   value: string | number | null | undefined,
   fallback: number,
@@ -229,7 +228,7 @@ async function loadSceneTerrainRuntimeData(
   }
 
   const manifest = await response.json()
-  const workflow = getLevelCollisionWorkflow(level)
+  const workflow = getLevelCollisionWorkflow(level, settings)
   const hasAuthoredGroundVisuals = (workflow.groundActorIds?.length ?? 0) > 0
   return loadTerrainRuntimeComponentData({
     levelId: level,
@@ -241,7 +240,10 @@ async function loadSceneTerrainRuntimeData(
   })
 }
 
-function activateSceneGameplay(level: string, spawnPosition: [number, number, number]) {
+function activateSceneGameplay(
+  level: string,
+  spawnPosition: [number, number, number],
+) {
   dispatchPlayerLevelPosition(level, spawnPosition)
   dispatch('staticWorldReady', {
     levelId: level,
@@ -249,6 +251,7 @@ function activateSceneGameplay(level: string, spawnPosition: [number, number, nu
     metadata: {
       actorCount: levelActors.length,
       terrainRuntime: Boolean(terrainRuntimeData),
+      player: sharedLevelSettings.player ?? null,
     },
   })
 }
@@ -277,17 +280,14 @@ function handleTerrainRuntimeReady() {
   activateSceneGameplay(levelId, spawnPosition)
 }
 
-
 async function loadSceneDocument(level: string, token: number) {
-  const loadedScene = await loadEditorSceneDocument(level, {
-    includeLocalStorage: false,
-  })
+  const loadedScene = await loadRuntimeSceneDocument(level)
   if (token !== loadToken) return
 
   const baseScene = loadedScene.scene
-  const upgradedScene = upgradeLegacySceneDocument(baseScene)
+  const upgradedScene = upgradeRuntimeSceneDocument(baseScene)
 
-  const normalizedSceneSettings = normalizeLevelSceneSettings(
+  const normalizedSceneSettings = normalizeRuntimeLevelSceneSettings(
     level,
     upgradedScene.settings,
   )
@@ -300,12 +300,10 @@ async function loadSceneDocument(level: string, token: number) {
   visibleRootActorCount = 0
   cancelActorReveal()
 
-  sceneDocument = withEditorSceneEngineData(
-    ensureSceneGeneration({
-      ...upgradedScene,
-      settings: normalizedSceneSettings,
-    }),
-  )
+  sceneDocument = withEditorSceneEngineData({
+    ...upgradedScene,
+    settings: normalizedSceneSettings,
+  })
   terrainRuntimeData = await loadSceneTerrainRuntimeData(
     level,
     normalizedSceneSettings,
@@ -549,10 +547,11 @@ onDestroy(() => {
     />
 
     <SceneFogExp2 color={fogColor} density={fogDensity} />
-    <T.AmbientLight intensity={ambientIntensity} color="#cfe4ff" />
-    <T.HemisphereLight skyColor="#dbe9ff" groundColor="#1b2130" intensity={0.38} />
-    <T.DirectionalLight position={[14, 20, -10]} color="#d7e6ff" intensity={keyLightIntensity} />
-    <T.DirectionalLight position={[-16, 10, 18]} color="#50688f" intensity={fillLightIntensity} />
+    <SceneLighting
+      {ambientIntensity}
+      {keyLightIntensity}
+      {fillLightIntensity}
+    />
 
     {#if terrainRuntimeData}
       <TerrainRuntime

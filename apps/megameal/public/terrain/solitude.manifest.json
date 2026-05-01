@@ -4,35 +4,60 @@
   "type": "terrain",
   "version": "1.0.0",
   "assets": {
-    "heightmap": "/terrain/heightmaps/solitude_heightmap.png"
+    "heightmap": "/terrain/heightmaps/solitude_heightmap.png",
+    "chunksPath": "/terrain/levels/solitude/"
   },
   "spawn": {
-    "position": [0, 2.4, -24],
-    "rotation": [0, 0, 0]
+    "position": [
+      0,
+      2.4,
+      -24
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ]
   },
   "physics": {
     "type": "baked-terrain-mesh",
     "worldSize": 2200,
-    "gridX": 1,
-    "gridY": 1,
-    "chunkSize": 2200,
+    "gridX": 4,
+    "gridY": 4,
+    "chunkSize": 550,
     "minHeight": -0.32,
     "maxHeight": 0.52,
     "bounds": {
-      "min": [-1100, -0.32, -1100],
-      "max": [1100, 0.52, 1100]
+      "min": [
+        -1100,
+        -0.32,
+        -1100
+      ],
+      "max": [
+        1100,
+        0.52,
+        1100
+      ]
     }
   },
   "lighting": {
     "ambientIntensity": 0.75,
     "directionalLights": [
       {
-        "position": [70, 110, 32],
+        "position": [
+          70,
+          110,
+          32
+        ],
         "color": 13162239,
         "intensity": 0.7
       },
       {
-        "position": [-60, 36, -48],
+        "position": [
+          -60,
+          36,
+          -48
+        ],
         "color": 4344686,
         "intensity": 0.22
       }
@@ -123,10 +148,44 @@
       "colliderResolution": 129,
       "sampleStep": 2,
       "bounds": {
-        "min": [-1100, -0.32, -1100],
-        "max": [1100, 0.52, 1100]
+        "min": [
+          -1100,
+          -0.32,
+          -1100
+        ],
+        "max": [
+          1100,
+          0.52,
+          1100
+        ]
       },
-      "center": [0, 0, 0]
+      "center": [
+        0,
+        0,
+        0
+      ]
     }
+  },
+  "visualChunks": {
+    "generatedAt": "2026-05-01T01:32:30.313Z",
+    "generatedBy": "cook-terrain-chunks",
+    "chunkCount": 48,
+    "lods": [
+      {
+        "level": 0,
+        "distance": 990,
+        "resolution": 33
+      },
+      {
+        "level": 1,
+        "distance": 1980,
+        "resolution": 17
+      },
+      {
+        "level": 2,
+        "distance": 2970,
+        "resolution": 9
+      }
+    ]
   }
 }

@@ -1,4 +1,4 @@
-import type { EditorSceneDocument } from '../editor/editorTypes'
+import type { EditorSceneDocument } from './sceneDocumentTypes'
 import { adaptEditorSceneToLevelDefinition } from './sceneAdapter'
 import type { LevelDefinition } from './types'
 

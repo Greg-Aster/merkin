@@ -4,9 +4,7 @@ import path from 'node:path'
 const appRoot = path.resolve(import.meta.dirname, '..')
 const threlteRoot = path.join(appRoot, 'src', 'threlte')
 
-const staticRoots = [
-  path.join(threlteRoot, 'Game.svelte'),
-]
+const staticRoots = [path.join(threlteRoot, 'Game.svelte')]
 
 const gameplayBootRoots = [
   path.join(threlteRoot, 'systems', 'Physics.svelte'),
@@ -49,7 +47,7 @@ function resolveImport(fromFile, specifier) {
 }
 
 function parseImports(filePath) {
-  const source = readFile(filePath)
+  const source = readFile(filePath).replace(/import\s+type\s+[^;]+;?/g, '')
   const imports = []
   let match
 
@@ -100,7 +98,7 @@ function summarizeThreeUsers(graph) {
 
   for (const [filePath, info] of graph.entries()) {
     const threeDeps = info.externalDeps.filter(
-      (specifier) => specifier === 'three' || specifier.startsWith('three/')
+      specifier => specifier === 'three' || specifier.startsWith('three/'),
     )
 
     if (threeDeps.length === 0) continue
@@ -114,8 +112,23 @@ function summarizeThreeUsers(graph) {
     })
   }
 
-  results.sort((a, b) => b.size - a.size || a.relativePath.localeCompare(b.relativePath))
+  results.sort(
+    (a, b) => b.size - a.size || a.relativePath.localeCompare(b.relativePath),
+  )
   return results
+}
+
+function summarizeEditorUsers(graph) {
+  return [...graph.keys()]
+    .map(filePath => ({
+      filePath,
+      relativePath: path.relative(appRoot, filePath),
+      size: fs.statSync(filePath).size,
+    }))
+    .filter(entry => entry.relativePath.startsWith('src/threlte/editor/'))
+    .sort(
+      (a, b) => b.size - a.size || a.relativePath.localeCompare(b.relativePath),
+    )
 }
 
 function printSection(title, users) {
@@ -127,8 +140,23 @@ function printSection(title, users) {
 
   for (const user of users) {
     console.log(
-      `  - ${user.relativePath} (${user.size} bytes) -> ${user.threeDeps.join(', ')}`
+      `  - ${user.relativePath} (${user.size} bytes) -> ${user.threeDeps.join(', ')}`,
     )
+  }
+}
+
+function printBoundarySection(title, users) {
+  console.log(`\n[three-profile] ${title}`)
+  if (users.length === 0) {
+    console.log('  none')
+    return
+  }
+
+  for (const user of users.slice(0, 16)) {
+    console.log(`  - ${user.relativePath} (${user.size} bytes)`)
+  }
+  if (users.length > 16) {
+    console.log(`  ... ${users.length - 16} more`)
   }
 }
 
@@ -137,12 +165,21 @@ const gameplayGraph = buildGraph(gameplayBootRoots)
 
 const staticThreeUsers = summarizeThreeUsers(staticGraph)
 const gameplayThreeUsers = summarizeThreeUsers(gameplayGraph)
+const staticEditorUsers = summarizeEditorUsers(staticGraph)
+const gameplayEditorUsers = summarizeEditorUsers(gameplayGraph)
 
 printSection('static shell graph three users', staticThreeUsers)
 printSection('initial gameplay boot graph three users', gameplayThreeUsers)
+printBoundarySection('static shell editor boundary users', staticEditorUsers)
+printBoundarySection(
+  'initial gameplay boot editor boundary users',
+  gameplayEditorUsers,
+)
 
 console.log('\n[three-profile] totals')
 console.log(`  static shell files scanned: ${staticGraph.size}`)
 console.log(`  static shell three users: ${staticThreeUsers.length}`)
+console.log(`  static shell editor users: ${staticEditorUsers.length}`)
 console.log(`  gameplay boot files scanned: ${gameplayGraph.size}`)
 console.log(`  gameplay boot three users: ${gameplayThreeUsers.length}`)
+console.log(`  gameplay boot editor users: ${gameplayEditorUsers.length}`)

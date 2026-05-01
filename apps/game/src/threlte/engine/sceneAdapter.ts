@@ -2,7 +2,7 @@ import type {
   EditorNodeCollisionData,
   EditorSceneDocument,
   EditorSceneNode,
-} from '../editor/editorTypes'
+} from './sceneDocumentTypes'
 import { resolveCollisionPolicy } from './collisionPolicy'
 import type {
   ActorDefinition,
@@ -114,6 +114,7 @@ function toActor(
     hasGameplay: Boolean(node.gameplay),
     bodyType: getPhysicsBodyType(node),
     primitiveGeometry: node.primitive?.geometry,
+    levelSettings: scene.settings,
     authoredCollision: node.collision
       ? {
           ...node.collision,

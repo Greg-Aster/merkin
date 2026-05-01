@@ -173,8 +173,14 @@ export class TerrainManager {
     if (!this.config || !this.config.gridSize || !this.config.chunkSize) return
 
     const [gridX, gridZ] = this.config.gridSize
-    const chunkSize = this.config.chunkSize
     const bounds = this.config.bounds
+    const chunkSizeX = bounds
+      ? (bounds.max[0] - bounds.min[0]) / gridX
+      : this.config.chunkSize
+    const chunkSizeZ = bounds
+      ? (bounds.max[2] - bounds.min[2]) / gridZ
+      : this.config.chunkSize
+    if (!chunkSizeX || !chunkSizeZ) return
 
     this.chunks = []
     for (let x = 0; x < gridX; x++) {
@@ -184,12 +190,12 @@ export class TerrainManager {
 
         if (bounds) {
           // Use actual bounds for positioning (matches generation pipeline)
-          centerX = bounds.min[0] + (x + 0.5) * chunkSize
-          centerZ = bounds.min[2] + (z + 0.5) * chunkSize
+          centerX = bounds.min[0] + (x + 0.5) * chunkSizeX
+          centerZ = bounds.min[2] + (z + 0.5) * chunkSizeZ
         } else {
           // Fallback to centered grid assumption
-          centerX = (x - gridX / 2 + 0.5) * chunkSize
-          centerZ = (z - gridZ / 2 + 0.5) * chunkSize
+          centerX = (x - gridX / 2 + 0.5) * chunkSizeX
+          centerZ = (z - gridZ / 2 + 0.5) * chunkSizeZ
         }
 
         this.chunks.push({

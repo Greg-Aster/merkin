@@ -1,5 +1,9 @@
 <script lang="ts">
 import { getLevelCollisionWorkflow } from '../engine/levelCollisionWorkflow'
+import type {
+  LevelCollisionBudget,
+  LevelCollisionDefaultPolicy,
+} from '../engine/sceneDocumentTypes'
 import type { TerrainRuntimeComponentSource } from '../features/terrain'
 
 export let levelId = ''
@@ -18,6 +22,9 @@ export let canRedo = false
 export let interactionMode = 'objects'
 export let viewportLightingMode = 'authored'
 export let collisionOverlayEnabled = false
+export let collisionDefaultPolicy: LevelCollisionDefaultPolicy =
+  'lightweight-auto'
+export let collisionBudget: LevelCollisionBudget = 'mobile'
 export let terrainBrushMode = 'raise'
 export let terrainBrushSize = 24
 export let terrainBrushStrength = 0.35
@@ -41,9 +48,13 @@ export let terrainCollisionSettings: {
   dirty?: boolean
   lastGeneratedAt?: string
   heightOverrideCount?: number
+  chunksPath?: string
+  chunkGrid?: number
+  chunkCount?: number
 } | null = null
 export let terrainCollisionBakePending = false
 export let terrainHeightmapGeneratePending = false
+export let terrainChunkCookPending = false
 export let selectedTerrainSourceName = ''
 export let selectedTerrainSourceAssetUrl = ''
 export let transformMode = 'translate'
@@ -63,6 +74,10 @@ export let onCreateLevel: () => void = () => {}
 export let onSetInteractionMode: (mode: string) => void = () => {}
 export let onSetViewportLightingMode: (mode: string) => void = () => {}
 export let onSetCollisionOverlayEnabled: (value: boolean) => void = () => {}
+export let onSetCollisionDefaultPolicy: (
+  value: LevelCollisionDefaultPolicy,
+) => void = () => {}
+export let onSetCollisionBudget: (value: LevelCollisionBudget) => void = () => {}
 export let onSetTerrainBrushMode: (mode: string) => void = () => {}
 export let onSetTerrainBrushSize: (value: number) => void = () => {}
 export let onSetTerrainBrushStrength: (value: number) => void = () => {}
@@ -70,6 +85,7 @@ export let onSetTerrainBrushFalloff: (value: number) => void = () => {}
 export let onSetTerrainAutoBake: (value: boolean) => void = () => {}
 export let onBakeTerrainCollision: () => void = () => {}
 export let onGenerateTerrainHeightmap: () => void = () => {}
+export let onCookTerrainChunks: () => void = () => {}
 export let onSetTransformMode: (mode: string) => void = () => {}
 export let onSetTransformSpace: (mode: string) => void = () => {}
 export let onSetTransformAxis: (axis: string) => void = () => {}
@@ -81,12 +97,18 @@ export let onSetSurfaceSnapEnabled: (value: boolean) => void = () => {}
 export let onSetSurfaceSnapOffset: (value: number) => void = () => {}
 
 $: levelCollisionWorkflow = getLevelCollisionWorkflow(levelId)
-$: terrainSculptingAvailable = !!levelCollisionWorkflow.terrainSculpting
 $: terrainCollisionSource =
   terrainCollisionSettings?.source ??
   (levelCollisionWorkflow.terrainCollision === 'heightmap'
     ? 'baked-heightmap'
     : levelCollisionWorkflow.terrainCollision)
+$: hasBakedTerrainWorkflow =
+  terrainCollisionSource === 'baked-heightmap' ||
+  Boolean(terrainCollisionSettings?.manifestUrl)
+$: terrainSculptingAvailable =
+  Boolean(levelCollisionWorkflow.terrainSculpting) || hasBakedTerrainWorkflow
+$: terrainBakeToolsAvailable =
+  terrainSculptingAvailable || Boolean(selectedTerrainSourceAssetUrl)
 </script>
 
 <div class="editor-section">
@@ -135,14 +157,24 @@ $: terrainCollisionSource =
     <button class:active={viewportLightingMode === 'workbench'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetViewportLightingMode('workbench')}>Workbench</button>
   </div>
   <label class="checkbox"><input type="checkbox" checked={collisionOverlayEnabled} data-sfx-click="soft" on:change={(event) => onSetCollisionOverlayEnabled((event.currentTarget as HTMLInputElement).checked)} /> Collision Overlay</label>
+  <div class="button-row compact-three-columns editor-mt-sm">
+    <button class:active={collisionDefaultPolicy === 'lightweight-auto'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionDefaultPolicy('lightweight-auto')}>Auto</button>
+    <button class:active={collisionDefaultPolicy === 'authored-only'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionDefaultPolicy('authored-only')}>Authored</button>
+    <button class:active={collisionDefaultPolicy === 'none'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionDefaultPolicy('none')}>Off</button>
+  </div>
+  <div class="button-row compact-three-columns editor-mt-sm">
+    <button class:active={collisionBudget === 'mobile'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionBudget('mobile')}>Mobile</button>
+    <button class:active={collisionBudget === 'balanced'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionBudget('balanced')}>Balanced</button>
+    <button class:active={collisionBudget === 'desktop'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionBudget('desktop')}>Desktop</button>
+  </div>
   <div class="save-message">Collision source: {terrainCollisionSource}{terrainCollisionSettings?.dirty ? ' - terrain bake needed' : ''}</div>
   <div class="save-message">Terrain component data: {terrainCollisionSettings?.runtimeSource ?? (terrainSculptingAvailable ? 'built-in-manifest' : 'scene-authored')}</div>
-  {#if !terrainSculptingAvailable}
-    <div class="save-message">Terrain sculpting is unavailable for this level collision workflow.</div>
+  {#if !terrainBakeToolsAvailable}
+    <div class="save-message">Select a mesh asset to start a baked terrain workflow for this level.</div>
   {/if}
 </div>
 
-{#if terrainSculptingAvailable}
+{#if terrainBakeToolsAvailable}
   <div class="editor-section">
     <div class="label">Terrain Sculpt</div>
     <label class="checkbox"><input type="checkbox" checked={terrainCollisionSettings?.autoBakeOnTerrainChange ?? false} data-sfx-click="soft" on:change={(event) => onSetTerrainAutoBake((event.currentTarget as HTMLInputElement).checked)} /> Auto Bake Collision</label>
@@ -169,6 +201,9 @@ $: terrainCollisionSource =
     <button class="full" disabled={terrainCollisionBakePending} data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onBakeTerrainCollision}>
       {terrainCollisionBakePending ? 'Baking Collision...' : 'Bake Terrain Collision'}
     </button>
+    <button class="full" disabled={terrainChunkCookPending || !(terrainCollisionSettings?.heightmapUrl || levelCollisionWorkflow.terrainManifestUrl)} data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onCookTerrainChunks}>
+      {terrainChunkCookPending ? 'Cooking Chunks...' : 'Cook Visual Chunks'}
+    </button>
     <div class="save-message">
       Source: {selectedTerrainSourceName || terrainCollisionSettings?.sourceName || 'select an asset mesh'}
     </div>
@@ -187,7 +222,13 @@ $: terrainCollisionSource =
     {#if terrainCollisionSettings?.sourceTriangleCount}
       <div class="save-message">Source mesh triangles: {terrainCollisionSettings.sourceTriangleCount}</div>
     {/if}
+    {#if terrainCollisionSettings?.chunksPath}
+      <div class="save-message">Chunks: {terrainCollisionSettings.chunkCount ?? 0} files at {terrainCollisionSettings.chunksPath}</div>
+    {/if}
     <div class="save-message">LMB drags terrain. Hold Shift while sculpting to lower with the raise brush.</div>
+    {#if !terrainSculptingAvailable}
+      <div class="save-message">Generate a heightmap first, then switch to Terrain mode to sculpt it.</div>
+    {/if}
   </div>
 {/if}
 

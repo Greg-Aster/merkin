@@ -5,7 +5,10 @@ import {
   qualityLevelStore,
   qualitySettingsStore,
 } from '../features/performance/stores/performanceStore'
-import { getRuntimePointLightBudget } from '../features/performance/utils/runtimeSceneBudget'
+import {
+  resolveRuntimePointLightVisibility,
+  resolveRuntimeVisibilityPolicy,
+} from '../features/performance/utils/runtimeSceneBudget'
 
 export let position: [number, number, number] = [0, 0, 0]
 export let color = '#ffffff'
@@ -31,16 +34,20 @@ function getActiveCamera(): THREE.Camera | null {
 }
 
 function applyLightBudget() {
-  const budget = getRuntimePointLightBudget(
+  const policy = resolveRuntimeVisibilityPolicy(
     $qualityLevelStore,
     $qualitySettingsStore,
   )
-  const inRange =
-    budget.enabled && currentDistanceToCamera <= budget.cullDistance
+  const lightVisibility = resolveRuntimePointLightVisibility({
+    policy,
+    distanceToCamera: currentDistanceToCamera,
+    sourceIntensity: intensity,
+    sourceDistance: distance,
+  })
 
-  visible = inRange
-  effectiveIntensity = inRange ? intensity * budget.intensityScale : 0
-  effectiveDistance = inRange ? distance * budget.rangeScale : 0
+  visible = lightVisibility.visible
+  effectiveIntensity = lightVisibility.intensity
+  effectiveDistance = lightVisibility.distance
 }
 
 $: applyLightBudget()

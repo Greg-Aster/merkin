@@ -1,4 +1,4 @@
-import type { SharedLevelEditorSettings } from '../editor/editorTypes'
+import type { SharedLevelEditorSettings } from '../engine/sceneDocumentTypes'
 import type { StylePreset } from './StylePalettes'
 import {
   DEFAULT_RUNTIME_VISUAL_STYLE,

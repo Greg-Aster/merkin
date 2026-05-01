@@ -2,7 +2,11 @@ import type { Vec3 } from '../engine'
 
 export interface StaticWorldReadyDetail {
   levelId: string
-  source: 'scene-document' | 'terrain-runtime' | 'component-level'
+  source:
+    | 'scene-document'
+    | 'scene-document-terrain'
+    | 'terrain-runtime'
+    | 'component-level'
   metadata?: Record<string, unknown>
 }
 

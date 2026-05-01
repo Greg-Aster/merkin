@@ -41,7 +41,6 @@ import {
   selectedStarStore,
 } from './stores/gameStateStore'
 
-import { editorStateStore, initializeEditor } from './editor/editorSessionStore'
 import {
   resetRuntimeDiagnostics,
   setRuntimeDiagnostic,
@@ -139,6 +138,7 @@ let sceneLayerComponentPromise: Promise<void> | null = null
 let deferredAudioCleanup: (() => void) | null = null
 let deferredGameplayCoreCleanup: (() => void) | null = null
 let gameplayCorePromise: Promise<void> | null = null
+let editorSessionCleanup: (() => void) | null = null
 let pendingLevelReturn: {
   levelType: string
   title: string
@@ -190,8 +190,6 @@ $: selectedStar = $selectedStarStore
 $: gameStats = $gameStatsStore
 $: isMobile = $isMobileStore
 $: error = $errorStore
-$: editorEnabled = $editorStateStore.enabled
-$: collisionOverlayEnabled = $editorStateStore.collisionOverlayEnabled
 $: if (currentLevel && currentLevel !== lastRuntimeResetLevel) {
   resetRuntimeForLevelTransition(currentLevel)
 }
@@ -567,6 +565,24 @@ async function ensureEditorFeatures() {
   await editorFeaturesPromise
 }
 
+async function enableEditorSession() {
+  if (editorSessionCleanup) return
+
+  const module = await import('./editor/editorSessionStore')
+  const unsubscribe = module.editorStateStore.subscribe(state => {
+    editorEnabled = state.enabled
+    collisionOverlayEnabled = state.collisionOverlayEnabled
+  })
+
+  module.initializeEditor(true)
+  editorSessionCleanup = () => {
+    module.initializeEditor(false)
+    unsubscribe()
+    editorEnabled = false
+    collisionOverlayEnabled = false
+  }
+}
+
 async function ensureGameplayCore() {
   if (physicsSystemComponent && playerComponentClass) return
 
@@ -753,7 +769,11 @@ async function initializeThrelte() {
     const shouldEnableEditor = urlParams?.get('editor') === '1'
     const shouldShowDebugPanel = urlParams?.get('debug') === '1'
     const requestedLevel = normalizeLevelId(urlParams?.get('level'))
-    initializeEditor(shouldEnableEditor)
+    editorEnabled = false
+    collisionOverlayEnabled = false
+    if (shouldEnableEditor) {
+      await enableEditorSession()
+    }
     showDebugPanel = shouldShowDebugPanel
 
     // Detect mobile and update store
@@ -946,6 +966,8 @@ onDestroy(() => {
   deferredAudioCleanup = null
   deferredGameplayCoreCleanup?.()
   deferredGameplayCoreCleanup = null
+  editorSessionCleanup?.()
+  editorSessionCleanup = null
   // All cleanup is now handled by individual Threlte components
   debugLog('✅ Threlte Game cleaned up')
 })
@@ -994,7 +1016,6 @@ onDestroy(() => {
         on:timeUpdate={(e) => dispatch('timeUpdate', e.detail)}
         on:performanceUpdate={(e) => dispatch('performanceUpdate', e.detail)}
         on:qualityChanged={(e) => dispatch('qualityChanged', e.detail)}
-        on:lodLevelChanged={(e) => dispatch('lodLevelChanged', e.detail)}
         on:playerInteraction={(e) => handlePlayerInteraction(e.detail)}
         on:lightBurst={(e) => handlePlayerLightBurst(e.detail)}
         on:telescopeInteraction={(e) => dispatch('telescopeInteraction', e.detail)}

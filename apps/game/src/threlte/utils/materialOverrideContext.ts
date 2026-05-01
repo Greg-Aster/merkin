@@ -1,0 +1,6 @@
+import type { Readable } from 'svelte/store'
+import type { EditorMaterialData } from '../engine/sceneDocumentTypes'
+
+export const EDITOR_MATERIAL_OVERRIDE_CONTEXT = 'editor-material-override'
+
+export type EditorMaterialOverrideStore = Readable<EditorMaterialData | null>

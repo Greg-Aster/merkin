@@ -3,6 +3,11 @@ import { dirname, join } from 'node:path'
 import { deflateSync } from 'node:zlib'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import {
+  discoverTerrainLevels,
+  formatTerrainLevelList,
+  resolveTerrainLevel,
+} from './lib/terrainManifestDiscovery.mjs'
 
 globalThis.self = globalThis
 globalThis.createImageBitmap ??= async () => ({ width: 1, height: 1, close() {} })
@@ -12,20 +17,6 @@ const repoRoot = new URL('../../..', import.meta.url).pathname.replace(
   '$1',
 )
 const publicRoot = join(repoRoot, 'apps/megameal/public')
-const sceneRoot = join(repoRoot, 'apps/game/src/threlte/editor/scenes')
-
-const TERRAIN_LEVELS = {
-  observatory: {
-    id: 'observatory-environment',
-    levelId: 'observatory',
-    manifestPath: join(publicRoot, 'terrain/observatory-environment.manifest.json'),
-  },
-  solitude: {
-    id: 'solitude',
-    levelId: 'solitude',
-    manifestPath: join(publicRoot, 'terrain/solitude.manifest.json'),
-  },
-}
 
 const DEFAULT_RESOLUTION = 512
 
@@ -325,14 +316,21 @@ const resolution = Math.max(
   Math.min(2048, Number.parseInt(getArg('resolution', `${DEFAULT_RESOLUTION}`), 10)),
 )
 
-if (!levelId || !TERRAIN_LEVELS[levelId]) {
-  throw new Error(`Expected --level to be one of: ${Object.keys(TERRAIN_LEVELS).join(', ')}`)
+const terrainLevels = discoverTerrainLevels({ repoRoot, publicRoot })
+const level = resolveTerrainLevel(terrainLevels, levelId)
+
+if (!levelId) {
+  throw new Error(`Expected --level to be one of: ${formatTerrainLevelList(terrainLevels)}`)
+}
+if (!level) {
+  throw new Error(
+    `Unknown terrain heightmap level: ${levelId}. Known terrain levels: ${formatTerrainLevelList(terrainLevels)}`,
+  )
 }
 if (!sourceUrl) {
   throw new Error('Expected --source=/public/source.glb')
 }
 
-const level = TERRAIN_LEVELS[levelId]
 const sourcePath = resolvePublicPath(sourceUrl)
 if (!existsSync(sourcePath)) {
   throw new Error(`Source mesh not found: ${sourceUrl}`)
@@ -381,7 +379,7 @@ writeJson(level.manifestPath, updateManifest(manifest, publicHeightmapPath, boun
 console.log(
   JSON.stringify({
     success: true,
-    levelId,
+    levelId: level.levelId,
     manifestUrl: `/terrain/${level.id}.manifest.json`,
     heightmapUrl: publicHeightmapPath,
     configUrl: publicHeightmapPath.replace('_heightmap.png', '_config.json'),

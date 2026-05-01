@@ -3,6 +3,8 @@ import {
   launchBrowser,
   normalizeBrowserName,
   parseArgValue,
+  readDeployedLevelIds,
+  waitForPlayableLevel,
 } from './lib/browserHarness.mjs'
 
 const argv = process.argv.slice(2)
@@ -11,10 +13,24 @@ const browserName = normalizeBrowserName(
 )
 const gameDevPort = String(process.env.GAME_DEV_PORT || 4322)
 const appOrigin = `http://127.0.0.1:${gameDevPort}`
-const levelsArg = parseArgValue(argv, 'levels', process.env.GAME_PROFILE_LEVELS || '')
+const levelsArg = parseArgValue(
+  argv,
+  'levels',
+  process.env.GAME_PROFILE_LEVELS || '',
+)
 const levels = levelsArg
-  ? levelsArg.split(',').map(level => level.trim()).filter(Boolean)
-  : ['observatory', 'solitude', 'sci-fi-room', 'miranda', 'yggdrasil']
+  ? levelsArg
+      .split(',')
+      .map(level => level.trim())
+      .filter(Boolean)
+  : readDeployedLevelIds()
+const settleMs = Number(
+  parseArgValue(
+    argv,
+    'settle-ms',
+    process.env.GAME_PROFILE_SETTLE_MS || '1000',
+  ),
+)
 const profile = {
   viewport: { width: 1440, height: 900 },
   deviceScaleFactor: 1,
@@ -32,22 +48,6 @@ function formatBytes(value) {
     unit += 1
   }
   return `${size.toFixed(size >= 10 || unit === 0 ? 0 : 1)} ${units[unit]}`
-}
-
-async function waitForPlayable(page, levelId) {
-  await page
-    .locator('.runtime-diagnostics-panel')
-    .first()
-    .waitFor({ state: 'attached', timeout: 15000 })
-  await page.waitForSelector(`text=Current Level: ${levelId}`, {
-    timeout: 15000,
-  })
-  await page.waitForSelector(`text=Gameplay is enabled on ${levelId}.`, {
-    timeout: 60000,
-  })
-  await page.waitForFunction(() => Boolean(window.__megamealDiagnostics), null, {
-    timeout: 15000,
-  })
 }
 
 function summarizeResources(resources) {
@@ -75,11 +75,51 @@ function summarizeResources(resources) {
     byType.set(key, current)
   }
 
+  const byExtension = new Map()
+  for (const resource of resources) {
+    let extension = 'none'
+    try {
+      const pathname = new URL(resource.name).pathname.toLowerCase()
+      const match = pathname.match(/\.([a-z0-9]+)$/)
+      extension = match?.[1] ?? 'none'
+    } catch {
+      extension = 'unknown'
+    }
+
+    const current = byExtension.get(extension) ?? {
+      count: 0,
+      transferSize: 0,
+      decodedBodySize: 0,
+    }
+    current.count += 1
+    current.transferSize += resource.transferSize
+    current.decodedBodySize += resource.decodedBodySize
+    byExtension.set(extension, current)
+  }
+
+  const threeResources = resources
+    .filter(resource => {
+      try {
+        return new URL(resource.name).pathname.includes('/three')
+      } catch {
+        return resource.name.includes('three')
+      }
+    })
+    .sort(
+      (a, b) =>
+        Math.max(b.transferSize, b.decodedBodySize) -
+        Math.max(a.transferSize, a.decodedBodySize),
+    )
+
   return {
     totals,
     byType: [...byType.entries()].sort(
       (a, b) => b[1].transferSize - a[1].transferSize,
     ),
+    byExtension: [...byExtension.entries()].sort(
+      (a, b) => b[1].transferSize - a[1].transferSize,
+    ),
+    threeResources,
     top: [...resources]
       .sort(
         (a, b) =>
@@ -90,35 +130,68 @@ function summarizeResources(resources) {
   }
 }
 
+function getResourceCountByExtension(summary, extension) {
+  return summary.byExtension.find(([key]) => key === extension)?.[1]?.count ?? 0
+}
+
 async function profileLevel(browser, levelId) {
   const context = await browser.newContext(createContextOptions(profile))
   const page = await context.newPage()
+  await page.addInitScript(() => {
+    performance.setResourceTimingBufferSize?.(2000)
+  })
   const url = `${appOrigin}/?level=${levelId}&debug=1`
 
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
-    await waitForPlayable(page, levelId)
-    await page.waitForTimeout(1000)
+    await waitForPlayableLevel(page, levelId, { gameplayTimeoutMs: 60000 })
+    await page.waitForTimeout(Number.isFinite(settleMs) ? settleMs : 1000)
+
+    const rafFps = await page.evaluate(
+      () =>
+        new Promise(resolve => {
+          let frames = 0
+          const startedAt = performance.now()
+
+          function tick() {
+            frames += 1
+            const elapsed = performance.now() - startedAt
+            if (elapsed >= 1200) {
+              resolve(Math.round((frames * 1000) / elapsed))
+              return
+            }
+            requestAnimationFrame(tick)
+          }
+
+          requestAnimationFrame(tick)
+        }),
+    )
 
     const payload = await page.evaluate(() => {
-      const resources = performance
-        .getEntriesByType('resource')
-        .map(entry => ({
-          name: entry.name,
-          initiatorType: entry.initiatorType,
-          transferSize: entry.transferSize || 0,
-          encodedBodySize: entry.encodedBodySize || 0,
-          decodedBodySize: entry.decodedBodySize || 0,
-          duration: entry.duration || 0,
-        }))
+      const resources = performance.getEntriesByType('resource').map(entry => ({
+        name: entry.name,
+        initiatorType: entry.initiatorType,
+        transferSize: entry.transferSize || 0,
+        encodedBodySize: entry.encodedBodySize || 0,
+        decodedBodySize: entry.decodedBodySize || 0,
+        duration: entry.duration || 0,
+      }))
 
       return {
         resources,
+        location: window.location.href,
         diagnostics: window.__megamealDiagnostics?.getSnapshot?.() ?? null,
+        memory: performance.memory
+          ? {
+              usedJSHeapSize: performance.memory.usedJSHeapSize,
+              totalJSHeapSize: performance.memory.totalJSHeapSize,
+              jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+            }
+          : null,
       }
     })
 
-    return { levelId, url, ...payload }
+    return { levelId, url, rafFps, ...payload }
   } finally {
     await context.close()
   }
@@ -132,6 +205,9 @@ try {
     const summary = summarizeResources(result.resources)
     const diagnostics = result.diagnostics
     const renderInfo = diagnostics?.renderInfo ?? {}
+    const sceneInfo = diagnostics?.scene ?? {}
+    const longTasks = diagnostics?.longTasks ?? {}
+    const memory = result.memory ?? null
 
     console.log(
       [
@@ -141,9 +217,23 @@ try {
         `encoded=${formatBytes(summary.totals.encodedBodySize)}`,
         `decoded=${formatBytes(summary.totals.decodedBodySize)}`,
         `fps=${diagnostics?.fps ?? 'n/a'}`,
+        `rafFps=${result.rafFps ?? 'n/a'}`,
         `calls=${renderInfo.calls ?? 'n/a'}`,
         `tris=${renderInfo.triangles ?? 'n/a'}`,
+        `geometries=${renderInfo.geometries ?? 'n/a'}`,
         `textures=${renderInfo.textures ?? 'n/a'}`,
+        `programs=${renderInfo.programs ?? 'n/a'}`,
+        `meshes=${sceneInfo.meshes ?? 'n/a'}`,
+        `visibleMeshes=${sceneInfo.visibleMeshes ?? 'n/a'}`,
+        `lights=${sceneInfo.lights ?? 'n/a'}`,
+        `visibleLights=${sceneInfo.visibleLights ?? 'n/a'}`,
+        `pointLights=${sceneInfo.pointLights ?? 'n/a'}`,
+        `visiblePointLights=${sceneInfo.visiblePointLights ?? 'n/a'}`,
+        `glb=${getResourceCountByExtension(summary, 'glb')}`,
+        `img=${getResourceCountByExtension(summary, 'png') + getResourceCountByExtension(summary, 'jpg') + getResourceCountByExtension(summary, 'jpeg') + getResourceCountByExtension(summary, 'webp')}`,
+        `longTasks=${longTasks.count ?? 'n/a'}`,
+        `longTaskMax=${longTasks.maxDuration ? `${Math.round(longTasks.maxDuration)}ms` : 'n/a'}`,
+        `heap=${memory?.usedJSHeapSize ? formatBytes(memory.usedJSHeapSize) : 'n/a'}`,
       ].join(' '),
     )
 
@@ -152,6 +242,26 @@ try {
         `  type ${type}: count=${typeSummary.count} transfer=${formatBytes(
           typeSummary.transferSize,
         )} decoded=${formatBytes(typeSummary.decodedBodySize)}`,
+      )
+    }
+
+    for (const [extension, extensionSummary] of summary.byExtension.slice(
+      0,
+      8,
+    )) {
+      console.log(
+        `  ext .${extension}: count=${extensionSummary.count} transfer=${formatBytes(
+          extensionSummary.transferSize,
+        )} decoded=${formatBytes(extensionSummary.decodedBodySize)}`,
+      )
+    }
+
+    for (const resource of summary.threeResources.slice(0, 8)) {
+      const path = new URL(resource.name).pathname
+      console.log(
+        `  three ${formatBytes(
+          Math.max(resource.transferSize, resource.decodedBodySize),
+        )} ${resource.initiatorType || 'unknown'} ${path}`,
       )
     }
 

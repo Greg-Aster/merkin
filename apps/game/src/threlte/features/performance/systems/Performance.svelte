@@ -23,7 +23,7 @@ export let enableAutomaticOptimization = false
 export let targetFPS = 0 // 0 = derive from detected device type automatically
 
 const dispatch = createEventDispatcher()
-const { renderer } = useThrelte()
+const { renderer, scene } = useThrelte()
 const isDev = import.meta.env.DEV
 
 // --- FPS tracking ---
@@ -47,6 +47,61 @@ const UPGRADE_THRESHOLD = 12 // 12s consistently over target * 1.15 → step up
 let degradeCount = 0
 let upgradeCount = 0
 let longTaskObserver: PerformanceObserver | null = null
+
+function collectSceneStats() {
+  const materialSet = new Set<unknown>()
+  const geometrySet = new Set<unknown>()
+  const stats = {
+    objects: 0,
+    visibleObjects: 0,
+    meshes: 0,
+    visibleMeshes: 0,
+    lights: 0,
+    visibleLights: 0,
+    pointLights: 0,
+    visiblePointLights: 0,
+    directionalLights: 0,
+    visibleDirectionalLights: 0,
+    materials: 0,
+    geometries: 0,
+  }
+
+  scene?.traverse(object => {
+    stats.objects += 1
+    if (object.visible) stats.visibleObjects += 1
+
+    const candidate = object as any
+    if (candidate.isMesh) {
+      stats.meshes += 1
+      if (object.visible) stats.visibleMeshes += 1
+      if (candidate.geometry) geometrySet.add(candidate.geometry)
+      if (Array.isArray(candidate.material)) {
+        candidate.material.forEach((material: unknown) =>
+          materialSet.add(material),
+        )
+      } else if (candidate.material) {
+        materialSet.add(candidate.material)
+      }
+    }
+
+    if (candidate.isLight) {
+      stats.lights += 1
+      if (object.visible) stats.visibleLights += 1
+    }
+    if (candidate.isPointLight) {
+      stats.pointLights += 1
+      if (object.visible) stats.visiblePointLights += 1
+    }
+    if (candidate.isDirectionalLight) {
+      stats.directionalLights += 1
+      if (object.visible) stats.visibleDirectionalLights += 1
+    }
+  })
+
+  stats.materials = materialSet.size
+  stats.geometries = geometrySet.size
+  return stats
+}
 
 const TIER_ORDER: OptimizationLevel[] = [
   OptimizationLevel.ULTRA_LOW,
@@ -131,6 +186,7 @@ onMount(() => {
               programs: renderer.info.programs?.length || 0,
             }
           : null,
+        scene: collectSceneStats(),
         quality: optimizationManager.getOptimizationLevel(),
       }),
     }

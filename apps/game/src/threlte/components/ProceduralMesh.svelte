@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import {
   EDITOR_MATERIAL_OVERRIDE_CONTEXT,
   type EditorMaterialOverrideStore,
-} from '../editor/editorMaterialContext'
+} from '../utils/materialOverrideContext'
 
 export type ProceduralGeometryKind =
   | 'box'

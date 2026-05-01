@@ -67,14 +67,124 @@ function getEditorScenePath(levelId) {
   return path.join(EDITOR_SCENES_ROOT, `${levelId}.scene.json`);
 }
 
+function readJsonFile(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, 'utf8').replace(/^\uFEFF/, ''));
+}
+
+function addAlias(aliases, value) {
+  if (typeof value !== 'string') return;
+  const trimmed = value.trim();
+  if (trimmed) aliases.add(trimmed);
+}
+
+function getRegistrySceneLevels() {
+  if (!fs.existsSync(LEVEL_REGISTRY_PATH)) return [];
+  return readJsonFile(LEVEL_REGISTRY_PATH)
+    .filter((entry) => entry?.source?.kind === 'scene' && entry?.id);
+}
+
+function getLevelAliases(level) {
+  const aliases = new Set();
+  addAlias(aliases, level.id);
+  addAlias(aliases, level.source?.sceneId);
+  for (const alias of level.aliases || []) addAlias(aliases, alias);
+  return aliases;
+}
+
+function getTerrainManifestAliases(manifestId, manifest) {
+  const aliases = new Set();
+  addAlias(aliases, manifestId);
+  addAlias(aliases, manifest?.id);
+  addAlias(aliases, manifestId.replace(/-environment$/, ''));
+  addAlias(aliases, manifestId.replace(/-terrain$/, ''));
+  if (typeof manifest?.id === 'string') {
+    addAlias(aliases, manifest.id.replace(/-environment$/, ''));
+    addAlias(aliases, manifest.id.replace(/-terrain$/, ''));
+  }
+  return aliases;
+}
+
+function getTerrainManifestRecords() {
+  const terrainRoot = path.join(GAME_PUBLIC_ROOT, 'terrain');
+  if (!fs.existsSync(terrainRoot)) return [];
+
+  return fs
+    .readdirSync(terrainRoot)
+    .filter((file) => file.endsWith('.manifest.json'))
+    .sort((left, right) => left.localeCompare(right))
+    .map((file) => {
+      const manifestPath = path.join(terrainRoot, file);
+      const manifest = readJsonFile(manifestPath);
+      const manifestId = file.replace(/\.manifest\.json$/, '');
+      return {
+        id: manifestId,
+        manifest,
+        manifestPath,
+        aliases: getTerrainManifestAliases(manifestId, manifest),
+      };
+    });
+}
+
 function getTerrainManifestPathForLevel(levelId) {
-  const manifestByLevel = {
-    observatory: path.join(GAME_PUBLIC_ROOT, 'terrain', 'observatory-environment.manifest.json'),
-    'observatory-environment': path.join(GAME_PUBLIC_ROOT, 'terrain', 'observatory-environment.manifest.json'),
-    solitude: path.join(GAME_PUBLIC_ROOT, 'terrain', 'solitude.manifest.json'),
+  const registryLevel =
+    getRegistrySceneLevels().find((level) => getLevelAliases(level).has(levelId)) ||
+    { id: levelId, source: { sceneId: levelId }, aliases: [] };
+  const levelAliases = getLevelAliases(registryLevel);
+  const terrainManifest = getTerrainManifestRecords().find((record) =>
+    [...record.aliases].some((alias) => levelAliases.has(alias)),
+  );
+
+  return terrainManifest?.manifestPath || null;
+}
+
+function getLevelTitle(levelId) {
+  return (
+    getRegistrySceneLevels().find((level) => getLevelAliases(level).has(levelId))
+      ?.title || levelId
+  );
+}
+
+function getSceneSpawnPosition(scene) {
+  const spawn = scene?.settings?.level?.spawn?.position;
+  return Array.isArray(spawn) && spawn.length === 3 ? spawn.map(Number) : [0, 1, 0];
+}
+
+function assertSafeTerrainLevelId(levelId) {
+  if (!/^[a-z0-9][a-z0-9-]*$/i.test(levelId)) {
+    throw new Error(`Unsafe terrain level id: ${levelId}`);
+  }
+}
+
+function ensureTerrainManifestForLevel(levelId, scene = null) {
+  assertSafeTerrainLevelId(levelId);
+  const existingManifestPath = getTerrainManifestPathForLevel(levelId);
+  if (existingManifestPath) return existingManifestPath;
+
+  const terrainRoot = path.join(GAME_PUBLIC_ROOT, 'terrain');
+  ensureDirectory(terrainRoot);
+
+  const manifestPath = path.join(terrainRoot, `${levelId}.manifest.json`);
+  if (!manifestPath.startsWith(terrainRoot)) {
+    throw new Error('Terrain manifest path resolves outside the terrain directory');
+  }
+
+  const manifest = {
+    name: getLevelTitle(levelId),
+    id: levelId,
+    type: 'terrain',
+    version: '1.0.0',
+    assets: {},
+    spawn: {
+      position: getSceneSpawnPosition(scene),
+      rotation: [0, 0, 0],
+    },
+    physics: {
+      type: 'baked-terrain-mesh',
+    },
   };
 
-  return manifestByLevel[levelId] || null;
+  fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  return manifestPath;
 }
 
 function listEditorSceneBackupFilenames(levelId) {
@@ -4668,20 +4778,11 @@ const server = http.createServer(async (req, res) => {
           return;
         }
 
-        const manifestPath = getTerrainManifestPathForLevel(levelId);
-        if (!manifestPath) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({
-            success: false,
-            message: `Level "${levelId}" does not use the baked heightmap terrain workflow.`,
-          }));
-          return;
-        }
-
         const scenePath = getEditorScenePath(levelId);
         const scene = fs.existsSync(scenePath)
-          ? JSON.parse(fs.readFileSync(scenePath, 'utf8').replace(/^\uFEFF/, ''))
+          ? readJsonFile(scenePath)
           : null;
+        const manifestPath = ensureTerrainManifestForLevel(levelId, scene);
         const sourceNode = nodeId && scene?.nodes
           ? scene.nodes.find(node => node.id === nodeId)
           : null;
@@ -4939,6 +5040,98 @@ const server = http.createServer(async (req, res) => {
         console.error('Editor terrain collision bake error:', error);
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, message: 'Terrain collision bake failed: ' + error.message }));
+      }
+    });
+    return;
+  }
+
+  if (pathname === '/api/editor-terrain/cook-chunks' && req.method === 'POST') {
+    let body = '';
+
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+
+    req.on('end', () => {
+      try {
+        const { levelId, grid = 4, lodResolutions = '33,17,9' } = JSON.parse(body || '{}');
+        if (!levelId) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'levelId is required' }));
+          return;
+        }
+
+        const manifestPath = getTerrainManifestPathForLevel(levelId);
+        if (!manifestPath) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: false,
+            message: `Level "${levelId}" does not have a terrain manifest to chunk.`,
+          }));
+          return;
+        }
+
+        const child = spawn('pnpm', [
+          '--dir',
+          'apps/game',
+          'cook:terrain-chunks',
+          '--',
+          `--level=${levelId}`,
+          `--grid=${grid}`,
+          `--lod-resolutions=${lodResolutions}`,
+        ], {
+          cwd: REPO_ROOT,
+          stdio: 'pipe',
+          shell: process.platform === 'win32',
+        });
+
+        let stdout = '';
+        let stderr = '';
+
+        child.stdout.on('data', chunk => {
+          stdout += chunk.toString();
+        });
+        child.stderr.on('data', chunk => {
+          stderr += chunk.toString();
+        });
+
+        child.on('close', code => {
+          if (code !== 0) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              success: false,
+              message: stderr || stdout || `Terrain chunk cook failed with exit code ${code}`,
+            }));
+            return;
+          }
+
+          let payload = null;
+          try {
+            const jsonLine = stdout
+              .trim()
+              .split(/\r?\n/)
+              .reverse()
+              .find(line => line.trim().startsWith('{'));
+            payload = jsonLine ? JSON.parse(jsonLine) : null;
+          } catch {}
+
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: true,
+            manifestPath: toRepoRelative(manifestPath),
+            ...(payload || {}),
+            stdout,
+          }));
+        });
+
+        child.on('error', error => {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: `Terrain chunk cook process error: ${error.message}` }));
+        });
+      } catch (error) {
+        console.error('Editor terrain chunk cook error:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: 'Terrain chunk cook failed: ' + error.message }));
       }
     });
     return;

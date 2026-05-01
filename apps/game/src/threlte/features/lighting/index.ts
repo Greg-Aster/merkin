@@ -1,4 +1,3 @@
-export { default as LightingComponent } from './LightingComponent.svelte'
 export { LightingManager, type LightingData } from './LightingManager'
 export {
   FireflyLightingSystem,

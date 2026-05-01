@@ -24,6 +24,12 @@ export type TerrainManifest = {
   collision?: {
     terrain?: TerrainConfig['collision']
   }
+  visualChunks?: {
+    lods?: Array<{ level: number; distance: number; resolution?: number }>
+    generatedAt?: string
+    generatedBy?: string
+    chunkCount?: number
+  }
 }
 
 export type HeightmapConfig = {
@@ -139,7 +145,12 @@ export function buildTerrainConfigFromManifest(
       : undefined,
     chunkSize: physics.chunkSize ?? worldSize / gridX,
     gridSize: [gridX, gridY],
-    lods: [{ level: 0, distance: worldSize * 2 }],
+    lods: manifest.visualChunks?.lods?.length
+      ? manifest.visualChunks.lods.map(lod => ({
+          level: lod.level,
+          distance: lod.distance,
+        }))
+      : [{ level: 0, distance: worldSize * 2 }],
   }
 }
 

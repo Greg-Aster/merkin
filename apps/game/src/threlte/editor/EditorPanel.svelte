@@ -87,6 +87,8 @@ import {
   type EditorMaterialData,
   type EditorSceneNode,
   type EditorStylePreset,
+  type LevelCollisionBudget,
+  type LevelCollisionDefaultPolicy,
   addEmptyNode,
   addNode,
   canRedoStore,
@@ -158,11 +160,12 @@ let importBuffer = ''
 let saveMessage = 'Local only'
 let terrainCollisionBakePending = false
 let terrainHeightmapGeneratePending = false
+let terrainChunkCookPending = false
 const ASSET_LIBRARY_ROOT_MODELS = 'apps/megameal/public/models'
 const ASSET_LIBRARY_ROOT_GENERATED = 'apps/megameal/public/generated/hunyuan3d'
-const COMFY_WORKFLOW_LIBRARY_ROOT = 'apps/game/public/ref-image'
+const COMFY_WORKFLOW_LIBRARY_ROOT = 'apps/game/authoring/workflows/ref-image'
 const DEFAULT_COMFY_WORKFLOW_PATH =
-  'apps/game/public/ref-image/Hunyaun example.json'
+  'apps/game/authoring/workflows/ref-image/Hunyaun example.json'
 let assetBrowserPath = ASSET_LIBRARY_ROOT_MODELS
 let assetBrowserItems: Array<{
   name: string
@@ -1360,6 +1363,16 @@ $: levelSettings = editorScene?.settings?.level ?? {}
 $: observatorySettings = editorScene?.settings?.observatory ?? {}
 $: solitudeSettings = editorScene?.settings?.solitude ?? {}
 $: terrainCollisionSettings = levelSettings.collision?.terrain ?? null
+$: collisionDefaultPolicy =
+  (levelSettings.collision?.workflow
+    ?.actorCollision as LevelCollisionDefaultPolicy | undefined) ??
+  (levelSettings.collision?.defaults?.solidObjectsByDefault === false
+    ? 'authored-only'
+    : 'lightweight-auto')
+$: collisionBudget =
+  (levelSettings.collision?.workflow?.colliderBudget as
+    | LevelCollisionBudget
+    | undefined) ?? 'mobile'
 $: effectiveObservatorySettings =
   resolveObservatoryPresetSettings(
     mergeLevelSettings(levelSettings, observatorySettings),
@@ -1377,7 +1390,7 @@ $: multiSelectionParentCandidates = editorNodes.filter(
 )
 $: selectedNodeStyleDescriptor = getDefaultStyleDescriptor(selectedNode)
 $: selectedNodeColliderSize =
-  resolveNodeCollision(selectedNode)?.size ??
+  resolveNodeCollision(selectedNode, editorScene?.settings)?.size ??
   getNodeVisualColliderSize(selectedNode)
 $: selectedTerrainSourceName = selectedNode?.asset?.url ? selectedNode.name : ''
 $: selectedTerrainSourceAssetUrl = selectedNode?.asset?.url ?? ''
@@ -2424,6 +2437,10 @@ function setTerrainAutoBake(enabled: boolean) {
     ...settings,
     collision: {
       ...(settings.collision ?? {}),
+      workflow: {
+        ...(settings.collision?.workflow ?? {}),
+        autoBakeTerrain: enabled,
+      },
       terrain: {
         ...(settings.collision?.terrain ?? {}),
         source: 'baked-heightmap',
@@ -2436,6 +2453,43 @@ function setTerrainAutoBake(enabled: boolean) {
   saveMessage = enabled
     ? 'Terrain collision will auto-bake after terrain edits'
     : 'Terrain collision auto-bake disabled'
+}
+
+function setCollisionDefaultPolicy(policy: LevelCollisionDefaultPolicy) {
+  updateLevelSceneSettings(settings => ({
+    ...settings,
+    collision: {
+      ...(settings.collision ?? {}),
+      workflow: {
+        ...(settings.collision?.workflow ?? {}),
+        actorCollision: policy,
+      },
+      defaults: {
+        ...(settings.collision?.defaults ?? {}),
+        solidObjectsByDefault: policy === 'lightweight-auto',
+      },
+    },
+  }))
+  saveMessage =
+    policy === 'lightweight-auto'
+      ? 'Default lightweight colliders enabled'
+      : policy === 'authored-only'
+        ? 'Only authored colliders will run'
+        : 'Default runtime colliders disabled'
+}
+
+function setCollisionBudget(budget: LevelCollisionBudget) {
+  updateLevelSceneSettings(settings => ({
+    ...settings,
+    collision: {
+      ...(settings.collision ?? {}),
+      workflow: {
+        ...(settings.collision?.workflow ?? {}),
+        colliderBudget: budget,
+      },
+    },
+  }))
+  saveMessage = `Collision budget set to ${budget}`
 }
 
 async function bakeTerrainCollision() {
@@ -2587,6 +2641,56 @@ async function generateTerrainHeightmapFromSelection() {
         : 'Terrain heightmap generation failed'
   } finally {
     terrainHeightmapGeneratePending = false
+  }
+}
+
+async function cookTerrainChunks() {
+  if (terrainChunkCookPending) return
+  terrainChunkCookPending = true
+  saveMessage = 'Cooking terrain visual chunks...'
+
+  try {
+    const response = await fetch(
+      `${EDITOR_API_BASE}/api/editor-terrain/cook-chunks`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ levelId: activeSceneLevelId }),
+      },
+    )
+    const payload = await response.json()
+    if (!payload?.success) {
+      throw new Error(payload?.message ?? 'Terrain chunk cook failed')
+    }
+
+    updateLevelSceneSettings(settings => ({
+      ...settings,
+      collision: {
+        ...(settings.collision ?? {}),
+        terrain: {
+          ...(settings.collision?.terrain ?? {}),
+          source: 'baked-heightmap',
+          runtimeSource:
+            settings.collision?.terrain?.runtimeSource ?? 'editor-manifest',
+          manifestUrl:
+            payload.manifestUrl ?? settings.collision?.terrain?.manifestUrl,
+          chunksPath:
+            payload.chunksPath ?? settings.collision?.terrain?.chunksPath,
+          chunkGrid: payload.grid ?? settings.collision?.terrain?.chunkGrid,
+          chunkCount:
+            payload.chunkCount ?? settings.collision?.terrain?.chunkCount,
+          chunkLods: payload.lods ?? settings.collision?.terrain?.chunkLods,
+          lastChunksGeneratedAt: new Date().toISOString(),
+        },
+      },
+    }))
+    saveMessage = `Cooked ${payload.chunkCount ?? 0} terrain visual chunks`
+  } catch (error) {
+    console.error('Terrain chunk cook failed:', error)
+    saveMessage =
+      error instanceof Error ? error.message : 'Terrain chunk cook failed'
+  } finally {
+    terrainChunkCookPending = false
   }
 }
 
@@ -2784,8 +2888,11 @@ $: editorPanelPropContext = {
   hierarchyFilter,
   outlinerRows,
   terrainCollisionSettings,
+  collisionDefaultPolicy,
+  collisionBudget,
   terrainCollisionBakePending,
   terrainHeightmapGeneratePending,
+  terrainChunkCookPending,
   selectedTerrainSourceName,
   selectedTerrainSourceAssetUrl,
   editorStyleStudioComponent,
@@ -2849,8 +2956,11 @@ $: editorPanelPropContext = {
   updateLevelNumericSetting,
   applySolitudeAtmospherePreset,
   setTerrainAutoBake,
+  setCollisionDefaultPolicy,
+  setCollisionBudget,
   bakeTerrainCollision,
   generateTerrainHeightmapFromSelection,
+  cookTerrainChunks,
   switchEditorLevel,
   reloadFromDisk,
   loadPackagedLevelScene,

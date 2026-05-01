@@ -10,7 +10,7 @@
   to avoid code duplication and ensure consistent behavior.
 -->
 <script lang="ts">
-import { useThrelte } from '@threlte/core'
+import { useTask, useThrelte } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
 import { gameActions } from '../stores/gameStateStore'
@@ -60,10 +60,14 @@ let hoveredObjectId: string | null = null
 let canvasElement: HTMLCanvasElement | null = null
 let hoverCheckFrameId: number | null = null
 let clickSelectionTimeoutId: number | null = null
+let touchHoverReleaseTimeoutId: number | null = null
 let activeLightBursts: ActiveLightBurst[] = []
 let lightBurstAnimationFrameId: number | null = null
 let lastLightBurstFrameTime = 0
 let lightBurstIdCounter = 0
+let activeTouchId: number | null = null
+let isCoarsePointer = false
+let centerHoverAccumulator = 0
 
 const pointer = new THREE.Vector2()
 const raycaster = new THREE.Raycaster()
@@ -75,6 +79,9 @@ raycaster.params.Sprite = { threshold: 1000 }
 // Mouse tracking (from StarMap pattern)
 let lastMouseX = 0
 let lastMouseY = 0
+
+const touchHoverReleaseDelayMs = 140
+const centerHoverCheckIntervalSeconds = 0.08
 
 function syncInteractiveCollections() {
   interactiveObjects = Array.from(interactiveObjectById.values())
@@ -223,6 +230,59 @@ function handleCanvasMouseMove(event: MouseEvent) {
   queueHoverCheck()
 }
 
+function handleCanvasTouchStart(event: TouchEvent) {
+  const touch = event.changedTouches[0]
+  if (!touch) return
+
+  if (touchHoverReleaseTimeoutId !== null) {
+    window.clearTimeout(touchHoverReleaseTimeoutId)
+    touchHoverReleaseTimeoutId = null
+  }
+
+  activeTouchId = touch.identifier
+  lastMouseX = touch.clientX
+  lastMouseY = touch.clientY
+  queueHoverCheck()
+}
+
+function handleCanvasTouchMove(event: TouchEvent) {
+  const touch =
+    activeTouchId === null
+      ? event.changedTouches[0]
+      : Array.from(event.changedTouches).find(
+          ({ identifier }) => identifier === activeTouchId,
+        )
+  if (!touch) return
+
+  lastMouseX = touch.clientX
+  lastMouseY = touch.clientY
+  queueHoverCheck()
+}
+
+function handleCanvasTouchEnd(event: TouchEvent) {
+  const touch =
+    activeTouchId === null
+      ? event.changedTouches[0]
+      : Array.from(event.changedTouches).find(
+          ({ identifier }) => identifier === activeTouchId,
+        )
+  if (!touch) return
+
+  lastMouseX = touch.clientX
+  lastMouseY = touch.clientY
+  activeTouchId = null
+  queueHoverCheck()
+
+  if (touchHoverReleaseTimeoutId !== null) {
+    window.clearTimeout(touchHoverReleaseTimeoutId)
+  }
+
+  touchHoverReleaseTimeoutId = window.setTimeout(() => {
+    touchHoverReleaseTimeoutId = null
+    applyHoveredObject(null)
+  }, touchHoverReleaseDelayMs)
+}
+
 function queueHoverCheck() {
   if (hoverCheckFrameId !== null) return
 
@@ -364,11 +424,24 @@ function selectObjectInCrosshair() {
 }
 
 function checkObjectHover() {
-  if (!$camera || interactiveObjects.length === 0) return
+  if (!$camera || interactiveObjects.length === 0) {
+    applyHoveredObject(null)
+    return
+  }
 
   const intersected = getIntersectedObject()
   const newHoveredId = intersected?.object.id || null
 
+  applyHoveredObject(newHoveredId, intersected)
+}
+
+function applyHoveredObject(
+  newHoveredId: string | null,
+  intersected?: {
+    object: InteractiveObject
+    sprite: THREE.Sprite
+  } | null,
+) {
   // Handle hover change
   if (newHoveredId !== hoveredObjectId) {
     // Call unhover on previous object
@@ -391,6 +464,16 @@ function checkObjectHover() {
 
     hoveredObjectId = newHoveredId
   }
+}
+
+function updateCenterHoverTarget() {
+  const canvas = getCanvasElement()
+  if (!canvas) return false
+
+  const rect = canvas.getBoundingClientRect()
+  lastMouseX = rect.left + rect.width / 2
+  lastMouseY = rect.top + rect.height / 2
+  return true
 }
 
 function getIntersectedObject(): {
@@ -427,6 +510,10 @@ function getIntersectedObject(): {
 // --- LIFECYCLE ---
 
 onMount(() => {
+  isCoarsePointer =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(pointer: coarse)').matches
+
   if (isDev) {
     console.log(
       '🎯 InteractionSystem: Initializing centralized interaction system',
@@ -441,6 +528,18 @@ onMount(() => {
 
     canvas.addEventListener('click', handleCanvasClick)
     canvas.addEventListener('mousemove', handleCanvasMouseMove)
+    canvas.addEventListener('touchstart', handleCanvasTouchStart, {
+      passive: true,
+    })
+    canvas.addEventListener('touchmove', handleCanvasTouchMove, {
+      passive: true,
+    })
+    canvas.addEventListener('touchend', handleCanvasTouchEnd, {
+      passive: true,
+    })
+    canvas.addEventListener('touchcancel', handleCanvasTouchEnd, {
+      passive: true,
+    })
     if (isDev) {
       console.log('🎯 InteractionSystem: Canvas event listeners attached')
     }
@@ -458,6 +557,10 @@ onDestroy(() => {
   if (canvasElement) {
     canvasElement.removeEventListener('click', handleCanvasClick)
     canvasElement.removeEventListener('mousemove', handleCanvasMouseMove)
+    canvasElement.removeEventListener('touchstart', handleCanvasTouchStart)
+    canvasElement.removeEventListener('touchmove', handleCanvasTouchMove)
+    canvasElement.removeEventListener('touchend', handleCanvasTouchEnd)
+    canvasElement.removeEventListener('touchcancel', handleCanvasTouchEnd)
   }
 
   if (hoverCheckFrameId !== null) {
@@ -468,6 +571,11 @@ onDestroy(() => {
     window.clearTimeout(clickSelectionTimeoutId)
   }
 
+  if (touchHoverReleaseTimeoutId !== null) {
+    window.clearTimeout(touchHoverReleaseTimeoutId)
+    touchHoverReleaseTimeoutId = null
+  }
+
   if (lightBurstAnimationFrameId !== null) {
     window.cancelAnimationFrame(lightBurstAnimationFrameId)
     lightBurstAnimationFrameId = null
@@ -475,6 +583,24 @@ onDestroy(() => {
 
   if (isDev) {
     console.log('🎯 InteractionSystem: Event listeners cleaned up')
+  }
+})
+
+useTask(delta => {
+  if (
+    !isCoarsePointer ||
+    activeTouchId !== null ||
+    interactiveObjects.length === 0
+  ) {
+    return
+  }
+
+  centerHoverAccumulator += delta
+  if (centerHoverAccumulator < centerHoverCheckIntervalSeconds) return
+
+  centerHoverAccumulator = 0
+  if (updateCenterHoverTarget()) {
+    checkObjectHover()
   }
 })
 

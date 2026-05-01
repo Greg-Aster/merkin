@@ -6,6 +6,9 @@ export interface LevelRuntimeContract {
   maxDefaultCollisionActors: number
   maxTrimeshActors: number
   maxRuntimeAssetCount: number
+  maxPrimitiveActorCount: number
+  maxNeverCullActorCount: number
+  maxGameplayFireflyCount: number
 }
 
 const DEFAULT_RUNTIME_CONTRACT: LevelRuntimeContract = {
@@ -16,6 +19,9 @@ const DEFAULT_RUNTIME_CONTRACT: LevelRuntimeContract = {
   maxDefaultCollisionActors: 0,
   maxTrimeshActors: 0,
   maxRuntimeAssetCount: 60,
+  maxPrimitiveActorCount: 80,
+  maxNeverCullActorCount: 4,
+  maxGameplayFireflyCount: 40,
 }
 
 const LEVEL_RUNTIME_CONTRACTS: Record<string, Partial<LevelRuntimeContract>> = {
@@ -26,6 +32,8 @@ const LEVEL_RUNTIME_CONTRACTS: Record<string, Partial<LevelRuntimeContract>> = {
     maxDefaultCollisionActors: 0,
     maxTrimeshActors: 0,
     maxRuntimeAssetCount: 0,
+    maxPrimitiveActorCount: 8,
+    maxGameplayFireflyCount: 0,
   },
   solitude: {
     requiredActorIds: ['solitude-terrain', 'solitude-player-spawn'],
@@ -34,6 +42,8 @@ const LEVEL_RUNTIME_CONTRACTS: Record<string, Partial<LevelRuntimeContract>> = {
     maxDefaultCollisionActors: 0,
     maxTrimeshActors: 0,
     maxRuntimeAssetCount: 24,
+    maxPrimitiveActorCount: 16,
+    maxGameplayFireflyCount: 16,
   },
   yggdrasil: {
     requiredActorIds: [
@@ -46,6 +56,9 @@ const LEVEL_RUNTIME_CONTRACTS: Record<string, Partial<LevelRuntimeContract>> = {
     maxDefaultCollisionActors: 0,
     maxTrimeshActors: 0,
     maxRuntimeAssetCount: 24,
+    maxPrimitiveActorCount: 80,
+    maxNeverCullActorCount: 4,
+    maxGameplayFireflyCount: 40,
   },
 }
 
