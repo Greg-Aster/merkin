@@ -1,17 +1,27 @@
 <script lang="ts">
-import { T } from '@threlte/core'
+import { T, useTask } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import {
   AdditiveBlending,
-  CanvasTexture,
   DoubleSide,
   FrontSide,
+  MultiplyBlending,
   NormalBlending,
-  RepeatWrapping,
   SRGBColorSpace,
+  type CanvasTexture,
+  type Group,
   type Texture,
   TextureLoader,
 } from 'three'
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
+import HomeIntroLogoReflections from './HomeIntroLogoReflections.svelte'
+import {
+  createCausticTexture,
+  createFrostTexture,
+  createGrimeTexture,
+  createImageAlphaTexture,
+  createSheenTexture,
+} from './homeIntroGlassTextures'
 
 export let index: number
 export let primary = false
@@ -20,9 +30,17 @@ export let stillSrc = ''
 
 let titleTexture: Texture | null = null
 let stillTexture: Texture | null = null
+let titleAlphaTexture: CanvasTexture | null = null
+let stillAlphaTexture: CanvasTexture | null = null
 let frostTexture: CanvasTexture | null = null
+let sheenTexture: CanvasTexture | null = null
+let causticTexture: CanvasTexture | null = null
+let grimeTexture: CanvasTexture | null = null
+let sheenSweep: Group | null = null
+let secondarySheenSweep: Group | null = null
 
 const additiveBlending = AdditiveBlending
+const multiplyBlending = MultiplyBlending
 const normalBlending = NormalBlending
 const doubleSide = DoubleSide
 const frontSide = FrontSide
@@ -39,44 +57,50 @@ const titleEchoHeight = 0.96
 const fallbackWidth = 2.76
 const fallbackHeight = 0.44
 const glassDepth = 0.16
-const bevelRailWidth = 0.11
-const bevelHighlightWidth = 0.018
-
-function createFrostTexture() {
-  const canvas = document.createElement('canvas')
-  canvas.width = 96
-  canvas.height = 96
-  const context = canvas.getContext('2d')
-  if (!context) return null
-
-  const imageData = context.createImageData(canvas.width, canvas.height)
-  for (let index = 0; index < imageData.data.length; index += 4) {
-    const grain = 138 + Math.random() * 92
-    const veil = Math.random() > 0.72 ? 255 : grain
-    imageData.data[index] = veil
-    imageData.data[index + 1] = Math.min(255, veil + 10)
-    imageData.data[index + 2] = Math.min(255, veil + 18)
-    imageData.data[index + 3] = 68 + Math.random() * 76
-  }
-  context.putImageData(imageData, 0, 0)
-
-  const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height)
-  gradient.addColorStop(0, 'rgb(255 255 255 / 0.22)')
-  gradient.addColorStop(0.48, 'rgb(255 255 255 / 0.035)')
-  gradient.addColorStop(1, 'rgb(255 255 255 / 0.14)')
-  context.globalCompositeOperation = 'screen'
-  context.fillStyle = gradient
-  context.fillRect(0, 0, canvas.width, canvas.height)
-
-  const texture = new CanvasTexture(canvas)
-  texture.colorSpace = SRGBColorSpace
-  texture.wrapS = RepeatWrapping
-  texture.wrapT = RepeatWrapping
-  texture.repeat.set(2.5, 1.6)
-  texture.needsUpdate = true
-
-  return texture
-}
+const bevelRailWidth = 0.16
+const bevelHighlightWidth = 0.026
+const sheenWidth = 0.42
+const sheenHeight = frameHeight * 1.55
+const causticWidth = frameWidth * 0.98
+const causticHeight = frameHeight * 0.92
+const grimeWidth = frameWidth * 0.98
+const grimeHeight = frameHeight * 0.9
+const prismOffset = 0.028
+const mainGlassGeometry = new RoundedBoxGeometry(
+  frameWidth,
+  frameHeight,
+  glassDepth * 1.24,
+  5,
+  0.095,
+)
+const horizontalRailGeometry = new RoundedBoxGeometry(
+  frameWidth,
+  bevelRailWidth,
+  glassDepth * 1.9,
+  5,
+  0.055,
+)
+const verticalRailGeometry = new RoundedBoxGeometry(
+  bevelRailWidth,
+  frameHeight,
+  glassDepth * 1.9,
+  5,
+  0.055,
+)
+const horizontalHighlightGeometry = new RoundedBoxGeometry(
+  frameWidth * 0.93,
+  bevelHighlightWidth,
+  0.018,
+  4,
+  0.012,
+)
+const verticalHighlightGeometry = new RoundedBoxGeometry(
+  bevelHighlightWidth,
+  frameHeight * 0.82,
+  0.018,
+  4,
+  0.012,
+)
 
 function disposeTitleTexture() {
   titleTexture?.dispose()
@@ -88,19 +112,49 @@ function disposeStillTexture() {
   stillTexture = null
 }
 
+function disposeTitleAlphaTexture() {
+  titleAlphaTexture?.dispose()
+  titleAlphaTexture = null
+}
+
+function disposeStillAlphaTexture() {
+  stillAlphaTexture?.dispose()
+  stillAlphaTexture = null
+}
+
 function disposeFrostTexture() {
   frostTexture?.dispose()
   frostTexture = null
 }
 
+function disposeSheenTexture() {
+  sheenTexture?.dispose()
+  sheenTexture = null
+}
+
+function disposeCausticTexture() {
+  causticTexture?.dispose()
+  causticTexture = null
+}
+
+function disposeGrimeTexture() {
+  grimeTexture?.dispose()
+  grimeTexture = null
+}
+
 onMount(() => {
   const loader = new TextureLoader()
   frostTexture = createFrostTexture()
+  sheenTexture = createSheenTexture()
+  causticTexture = createCausticTexture()
+  grimeTexture = createGrimeTexture()
 
   if (stillSrc) {
     stillTexture = loader.load(stillSrc, texture => {
       texture.colorSpace = SRGBColorSpace
       texture.needsUpdate = true
+      disposeStillAlphaTexture()
+      stillAlphaTexture = createImageAlphaTexture(texture.image)
       stillTexture = texture
     })
   }
@@ -109,6 +163,8 @@ onMount(() => {
     titleTexture = loader.load(imageSrc, texture => {
       texture.colorSpace = SRGBColorSpace
       texture.needsUpdate = true
+      disposeTitleAlphaTexture()
+      titleAlphaTexture = createImageAlphaTexture(texture.image)
       titleTexture = texture
     })
   }
@@ -116,31 +172,83 @@ onMount(() => {
   return () => {
     disposeStillTexture()
     disposeTitleTexture()
+    disposeStillAlphaTexture()
+    disposeTitleAlphaTexture()
     disposeFrostTexture()
+    disposeSheenTexture()
+    disposeCausticTexture()
+    disposeGrimeTexture()
   }
 })
 
 onDestroy(() => {
   disposeStillTexture()
   disposeTitleTexture()
+  disposeStillAlphaTexture()
+  disposeTitleAlphaTexture()
   disposeFrostTexture()
+  disposeSheenTexture()
+  disposeCausticTexture()
+  disposeGrimeTexture()
+})
+
+useTask(() => {
+  const time = performance.now() * 0.001
+  const panelPhase = index * 0.19
+  const travel = frameWidth * 2.3
+  const startX = -travel * 0.5
+  const primarySpeed = primary ? 0.18 : 0.12
+  const secondarySpeed = primary ? 0.13 : 0.09
+  const primaryPass = (time * primarySpeed + panelPhase) % 1
+  const secondaryPass = (time * secondarySpeed + panelPhase + 0.46) % 1
+
+  if (sheenSweep) {
+    sheenSweep.position.x = startX + primaryPass * travel
+    sheenSweep.position.y = Math.sin(time * 0.42 + index) * 0.035
+  }
+
+  if (secondarySheenSweep) {
+    secondarySheenSweep.position.x = startX + secondaryPass * travel
+    secondarySheenSweep.position.y = Math.cos(time * 0.36 + index) * 0.028
+  }
+
+  if (causticTexture) {
+    causticTexture.offset.x = time * (primary ? 0.012 : 0.008) + index * 0.037
+    causticTexture.offset.y = Math.sin(time * 0.18 + index) * 0.018
+    causticTexture.rotation = Math.sin(time * 0.08 + index) * 0.035
+  }
+
+  if (grimeTexture) {
+    grimeTexture.offset.x = Math.sin(time * 0.035 + index) * 0.012
+    grimeTexture.offset.y = Math.cos(time * 0.028 + index) * 0.01
+  }
 })
 </script>
 
 <T.Group>
 	<T.Mesh position={[0, 0, -0.07]}>
-		<T.BoxGeometry args={[frameWidth, frameHeight, glassDepth]} />
+		<T is={mainGlassGeometry} />
 		<T.MeshPhysicalMaterial
 			color="#f8fafc"
 			side={doubleSide}
 			transparent={true}
-			opacity={primary ? 0.13 : 0.1}
-			roughness={0.9}
-			metalness={0}
-			transmission={0.52}
-			thickness={0.58}
-			clearcoat={0.52}
-			clearcoatRoughness={0.62}
+			opacity={primary ? 0.2 : 0.15}
+			roughness={0.18}
+			roughnessMap={grimeTexture}
+			metalness={0.08}
+			transmission={0.82}
+			thickness={1.15}
+			clearcoat={1}
+			clearcoatRoughness={0.08}
+			ior={1.7}
+			reflectivity={0.78}
+			iridescence={primary ? 0.36 : 0.24}
+			iridescenceIOR={1.42}
+			iridescenceThicknessRange={[120, 420]}
+			attenuationColor={primary ? "#67e8f9" : "#a78bfa"}
+			attenuationDistance={primary ? 2.1 : 1.55}
+			emissive={primary ? "#0e7490" : "#1e1b4b"}
+			emissiveIntensity={primary ? 0.025 : 0.014}
 			depthWrite={false}
 		/>
 	</T.Mesh>
@@ -182,32 +290,97 @@ onDestroy(() => {
 		/>
 	</T.Mesh>
 
+	<T.Mesh position={[0, 0, 0.105]}>
+		<T.PlaneGeometry args={[causticWidth, causticHeight]} />
+		<T.MeshBasicMaterial
+			map={causticTexture}
+			color={primary ? "#e0f2fe" : "#c4b5fd"}
+			side={frontSide}
+			transparent={true}
+			opacity={primary ? 0.18 : 0.1}
+			blending={additiveBlending}
+			depthWrite={false}
+			depthTest={true}
+		/>
+	</T.Mesh>
+
+	<T.Mesh position={[0, 0, 0.118]}>
+		<T.PlaneGeometry args={[grimeWidth, grimeHeight]} />
+		<T.MeshBasicMaterial
+			map={grimeTexture}
+			color="#64748b"
+			side={frontSide}
+			transparent={true}
+			opacity={primary ? 0.22 : 0.16}
+			blending={multiplyBlending}
+			premultipliedAlpha={true}
+			depthWrite={false}
+			depthTest={true}
+		/>
+	</T.Mesh>
+
+	<T.Group position={[0, 0, -0.18]} scale={[primary ? 1.08 : 0.9, primary ? 0.82 : 0.68, 1]}>
+		<HomeIntroLogoReflections atmosphereReveal={primary ? 0.42 : 0.26} />
+	</T.Group>
+
+	<T.Group bind:ref={sheenSweep} position={[-frameWidth * 0.5, 0, 0.132]} rotation={[0, 0, -0.48]}>
+		<T.Mesh>
+			<T.PlaneGeometry args={[sheenWidth, sheenHeight]} />
+			<T.MeshBasicMaterial
+				map={sheenTexture}
+				color="#dff7ff"
+				side={doubleSide}
+				transparent={true}
+				opacity={primary ? 0.14 : 0.08}
+				blending={additiveBlending}
+				depthWrite={false}
+				depthTest={true}
+			/>
+		</T.Mesh>
+	</T.Group>
+
+	<T.Group bind:ref={secondarySheenSweep} position={[frameWidth * 0.3, 0, 0.128]} rotation={[0, 0, -0.48]}>
+		<T.Mesh>
+			<T.PlaneGeometry args={[sheenWidth * 0.56, sheenHeight * 0.92]} />
+			<T.MeshBasicMaterial
+				map={sheenTexture}
+				color="#c4b5fd"
+				side={doubleSide}
+				transparent={true}
+				opacity={primary ? 0.08 : 0.05}
+				blending={additiveBlending}
+				depthWrite={false}
+				depthTest={true}
+			/>
+		</T.Mesh>
+	</T.Group>
+
 	{#if stillTexture}
-		<T.Mesh position={[0, 0, 0]}>
+		<T.Mesh position={[0, 0, 0.158]}>
 			<T.PlaneGeometry args={[mediaWidth, mediaHeight]} />
 			<T.MeshBasicMaterial
 				map={stillTexture}
 				side={frontSide}
-				transparent={true}
-				opacity={primary ? 0.94 : 0.94}
+				transparent={false}
+				opacity={1}
 				blending={normalBlending}
-				depthWrite={false}
+				depthWrite={true}
 			/>
 		</T.Mesh>
 	{:else if primary && titleTexture}
-		<T.Mesh position={[0, 0.02, 0.01]}>
+		<T.Mesh position={[0, 0.02, 0.158]}>
 			<T.PlaneGeometry args={[titleWidth, titleHeight]} />
 			<T.MeshBasicMaterial
 				map={titleTexture}
 				side={frontSide}
-				transparent={true}
-				opacity={0.62}
+				transparent={false}
+				opacity={1}
 				blending={normalBlending}
-				depthWrite={false}
+				depthWrite={true}
 			/>
 		</T.Mesh>
 	{:else}
-		<T.Mesh position={[0, 0.02, 0.01]}>
+		<T.Mesh position={[0, 0.02, 0.158]}>
 			<T.PlaneGeometry args={[fallbackWidth, fallbackHeight]} />
 			<T.MeshBasicMaterial
 				color={primary ? "#67e8f9" : "#8b5cf6"}
@@ -221,7 +394,7 @@ onDestroy(() => {
 	{/if}
 
 	{#if primary && titleTexture}
-		<T.Mesh position={[0, 0.02, 0.018]}>
+		<T.Mesh position={[0, 0.02, 0.19]}>
 			<T.PlaneGeometry args={[titleEchoWidth, titleEchoHeight]} />
 			<T.MeshBasicMaterial
 				map={titleTexture}
@@ -235,86 +408,192 @@ onDestroy(() => {
 	{/if}
 
 	<T.Mesh position={[0, frameHeight / 2 - bevelRailWidth / 2, 0.035]}>
-		<T.BoxGeometry args={[frameWidth, bevelRailWidth, glassDepth * 1.45]} />
+		<T is={horizontalRailGeometry} />
 		<T.MeshPhysicalMaterial
 			color="#f8fafc"
 			transparent={true}
-			opacity={primary ? 0.21 : 0.15}
-			roughness={0.52}
-			metalness={0}
-			transmission={0.38}
-			thickness={0.32}
-			clearcoat={0.64}
-			clearcoatRoughness={0.38}
+			opacity={primary ? 0.36 : 0.25}
+			roughness={0.14}
+			roughnessMap={grimeTexture}
+			metalness={0.12}
+			transmission={0.58}
+			thickness={0.55}
+			clearcoat={1}
+			clearcoatRoughness={0.06}
+			ior={1.78}
+			reflectivity={0.86}
+			iridescence={primary ? 0.55 : 0.36}
+			iridescenceIOR={1.48}
+			iridescenceThicknessRange={[180, 520]}
+			attenuationColor="#67e8f9"
+			attenuationDistance={1.8}
+			emissive="#67e8f9"
+			emissiveIntensity={primary ? 0.055 : 0.026}
 			depthWrite={false}
 		/>
 	</T.Mesh>
 
 	<T.Mesh position={[0, -frameHeight / 2 + bevelRailWidth / 2, 0.035]}>
-		<T.BoxGeometry args={[frameWidth, bevelRailWidth, glassDepth * 1.45]} />
+		<T is={horizontalRailGeometry} />
 		<T.MeshPhysicalMaterial
 			color="#f8fafc"
 			transparent={true}
-			opacity={primary ? 0.16 : 0.12}
-			roughness={0.58}
-			metalness={0}
-			transmission={0.4}
-			thickness={0.32}
-			clearcoat={0.58}
-			clearcoatRoughness={0.44}
+			opacity={primary ? 0.28 : 0.2}
+			roughness={0.18}
+			roughnessMap={grimeTexture}
+			metalness={0.1}
+			transmission={0.56}
+			thickness={0.52}
+			clearcoat={0.94}
+			clearcoatRoughness={0.08}
+			ior={1.72}
+			reflectivity={0.76}
+			iridescence={primary ? 0.38 : 0.24}
+			iridescenceIOR={1.44}
+			iridescenceThicknessRange={[120, 440]}
+			attenuationColor="#38bdf8"
+			attenuationDistance={1.7}
+			emissive="#38bdf8"
+			emissiveIntensity={primary ? 0.035 : 0.018}
 			depthWrite={false}
 		/>
 	</T.Mesh>
 
 	<T.Mesh position={[-frameWidth / 2 + bevelRailWidth / 2, 0, 0.035]}>
-		<T.BoxGeometry args={[bevelRailWidth, frameHeight, glassDepth * 1.45]} />
+		<T is={verticalRailGeometry} />
 		<T.MeshPhysicalMaterial
 			color="#f8fafc"
 			transparent={true}
-			opacity={primary ? 0.18 : 0.13}
-			roughness={0.56}
-			metalness={0}
-			transmission={0.4}
-			thickness={0.32}
-			clearcoat={0.58}
-			clearcoatRoughness={0.42}
+			opacity={primary ? 0.3 : 0.21}
+			roughness={0.16}
+			roughnessMap={grimeTexture}
+			metalness={0.1}
+			transmission={0.56}
+			thickness={0.52}
+			clearcoat={0.96}
+			clearcoatRoughness={0.08}
+			ior={1.74}
+			reflectivity={0.78}
+			iridescence={primary ? 0.44 : 0.28}
+			iridescenceIOR={1.48}
+			iridescenceThicknessRange={[160, 500]}
+			attenuationColor="#a78bfa"
+			attenuationDistance={1.7}
+			emissive="#a78bfa"
+			emissiveIntensity={primary ? 0.038 : 0.02}
 			depthWrite={false}
 		/>
 	</T.Mesh>
 
 	<T.Mesh position={[frameWidth / 2 - bevelRailWidth / 2, 0, 0.035]}>
-		<T.BoxGeometry args={[bevelRailWidth, frameHeight, glassDepth * 1.45]} />
+		<T is={verticalRailGeometry} />
 		<T.MeshPhysicalMaterial
 			color="#f8fafc"
 			transparent={true}
-			opacity={primary ? 0.15 : 0.105}
-			roughness={0.62}
-			metalness={0}
-			transmission={0.42}
-			thickness={0.32}
-			clearcoat={0.54}
-			clearcoatRoughness={0.48}
+			opacity={primary ? 0.24 : 0.17}
+			roughness={0.2}
+			roughnessMap={grimeTexture}
+			metalness={0.08}
+			transmission={0.54}
+			thickness={0.5}
+			clearcoat={0.9}
+			clearcoatRoughness={0.1}
+			ior={1.68}
+			reflectivity={0.7}
+			iridescence={primary ? 0.3 : 0.18}
+			iridescenceIOR={1.4}
+			iridescenceThicknessRange={[120, 360]}
+			attenuationColor="#60a5fa"
+			attenuationDistance={1.6}
+			emissive="#60a5fa"
+			emissiveIntensity={primary ? 0.032 : 0.017}
 			depthWrite={false}
 		/>
 	</T.Mesh>
 
 	<T.Mesh position={[0, frameHeight / 2 - bevelHighlightWidth, 0.14]}>
-		<T.BoxGeometry args={[frameWidth * 0.92, bevelHighlightWidth, 0.012]} />
+		<T is={horizontalHighlightGeometry} />
 		<T.MeshBasicMaterial
 			color="#ffffff"
 			transparent={true}
-			opacity={primary ? 0.32 : 0.22}
+			opacity={primary ? 0.58 : 0.36}
+			blending={additiveBlending}
+			depthWrite={false}
+		/>
+	</T.Mesh>
+
+	<T.Mesh position={[-prismOffset, frameHeight / 2 - bevelHighlightWidth * 2.4, 0.152]}>
+		<T is={horizontalHighlightGeometry} />
+		<T.MeshBasicMaterial
+			color="#22d3ee"
+			transparent={true}
+			opacity={primary ? 0.22 : 0.14}
+			blending={additiveBlending}
+			depthWrite={false}
+		/>
+	</T.Mesh>
+
+	<T.Mesh position={[prismOffset, frameHeight / 2 - bevelHighlightWidth * 3.4, 0.154]}>
+		<T is={horizontalHighlightGeometry} />
+		<T.MeshBasicMaterial
+			color="#fb7185"
+			transparent={true}
+			opacity={primary ? 0.16 : 0.1}
 			blending={additiveBlending}
 			depthWrite={false}
 		/>
 	</T.Mesh>
 
 	<T.Mesh position={[-frameWidth / 2 + bevelHighlightWidth, 0, 0.14]}>
-		<T.BoxGeometry args={[bevelHighlightWidth, frameHeight * 0.82, 0.012]} />
+		<T is={verticalHighlightGeometry} />
 		<T.MeshBasicMaterial
 			color="#ffffff"
 			transparent={true}
-			opacity={primary ? 0.24 : 0.16}
+			opacity={primary ? 0.38 : 0.24}
+			blending={additiveBlending}
+			depthWrite={false}
+		/>
+	</T.Mesh>
+
+	<T.Mesh position={[-frameWidth / 2 + bevelHighlightWidth * 2.4, -prismOffset, 0.152]}>
+		<T is={verticalHighlightGeometry} />
+		<T.MeshBasicMaterial
+			color="#22d3ee"
+			transparent={true}
+			opacity={primary ? 0.18 : 0.11}
+			blending={additiveBlending}
+			depthWrite={false}
+		/>
+	</T.Mesh>
+
+	<T.Mesh position={[-frameWidth / 2 + bevelHighlightWidth * 3.4, prismOffset, 0.154]}>
+		<T is={verticalHighlightGeometry} />
+		<T.MeshBasicMaterial
+			color="#fb7185"
+			transparent={true}
+			opacity={primary ? 0.14 : 0.085}
+			blending={additiveBlending}
+			depthWrite={false}
+		/>
+	</T.Mesh>
+
+	<T.Mesh position={[frameWidth / 2 - bevelHighlightWidth, 0, 0.14]}>
+		<T is={verticalHighlightGeometry} />
+		<T.MeshBasicMaterial
+			color="#93c5fd"
+			transparent={true}
+			opacity={primary ? 0.2 : 0.13}
+			blending={additiveBlending}
+			depthWrite={false}
+		/>
+	</T.Mesh>
+
+	<T.Mesh position={[0, -frameHeight / 2 + bevelHighlightWidth, 0.14]}>
+		<T is={horizontalHighlightGeometry} />
+		<T.MeshBasicMaterial
+			color="#67e8f9"
+			transparent={true}
+			opacity={primary ? 0.24 : 0.15}
 			blending={additiveBlending}
 			depthWrite={false}
 		/>

@@ -3,10 +3,11 @@
     inset: 0;
     overflow: hidden;
     pointer-events: none;
+    --portal-reveal-progress: 0;
   }
 
   .home-intro-environment canvas {
-    filter: saturate(1.22) contrast(1.08);
+    filter: brightness(0.92) saturate(1.28) contrast(1.24);
   }
 
   .home-intro-copy {
@@ -16,6 +17,11 @@
     color: rgb(248 250 252);
     text-shadow: 0 0.18rem 1rem rgb(0 0 0 / 0.82);
     pointer-events: auto;
+    opacity: clamp(0, calc((var(--portal-reveal-progress) - 0.18) * 1.55), 1);
+    transform: translateY(calc((1 - var(--portal-reveal-progress)) * 0.75rem));
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease;
   }
 
   .home-intro-copy::before {
@@ -41,6 +47,7 @@
     min-width: min(20rem, calc(100% - 2rem));
     padding: 0.78rem 0.92rem;
     text-align: right;
+    opacity: clamp(0.32, calc(var(--portal-reveal-progress) * 1.45), 1);
   }
 
   .home-intro-copy--status::before {

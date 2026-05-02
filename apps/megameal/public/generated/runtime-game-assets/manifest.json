@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-01T02:10:28.670Z",
+  "generatedAt": "2026-05-02T01:30:09.517Z",
   "sourceLevelRegistry": "apps/game/src/threlte/levels/level-registry.json",
   "sourceSceneDirectory": "apps/game/src/threlte/editor/scenes",
   "cookedAssetDirectory": "apps/megameal/public/generated/runtime-game-assets",
@@ -1818,8 +1818,8 @@
       "url": "/generated/runtime-game-assets/scenes/yggdrasil.runtime-scene.json",
       "sourceScene": "apps/game/src/threlte/editor/scenes/yggdrasil.scene.json",
       "actorCount": 166,
-      "requiredRenderActorCount": 1,
-      "requiredAssetCount": 1,
+      "requiredRenderActorCount": 13,
+      "requiredAssetCount": 12,
       "runtimeAssetCount": 13,
       "buildErrors": [],
       "buildWarnings": []

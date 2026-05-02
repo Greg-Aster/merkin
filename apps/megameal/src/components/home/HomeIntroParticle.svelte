@@ -100,6 +100,7 @@ export let particle: ParticleConfig
 export let wheel = 0
 export let scrollStep = 1
 export let scrollSpan = 10
+export let atmosphereReveal = 1
 
 let mesh: Sprite | null = null
 let coreMaterial: SpriteMaterial | null = null
@@ -156,17 +157,18 @@ useTask(() => {
 
   if (coreMaterial) {
     const hue = particle.hueOffset + Math.sin(time * 0.08 + index) * 0.025
-    coreMaterial.color.setHSL(hue, 0.86, 0.72 + centerWeight * 0.2)
-    coreMaterial.opacity = Math.min(
-      0.98,
-      0.28 + centerWeight * 0.5 + pulse * 0.08,
+    coreMaterial.color.setHSL(hue, 0.88, 0.76 + centerWeight * 0.22)
+    coreMaterial.opacity = atmosphereReveal * Math.min(
+      1.0,
+      0.42 + centerWeight * 0.58 + pulse * 0.12,
     )
   }
 
   if (haloMaterial) {
     const hue = particle.hueOffset + 0.04
-    haloMaterial.color.setHSL(hue, 0.96, 0.58)
-    haloMaterial.opacity = 0.1 + centerWeight * 0.24 + pulse * 0.035
+    haloMaterial.color.setHSL(hue, 0.98, 0.62)
+    haloMaterial.opacity =
+      atmosphereReveal * (0.18 + centerWeight * 0.36 + pulse * 0.06)
   }
 })
 </script>
@@ -177,7 +179,7 @@ useTask(() => {
 		map={starTexture}
 		color="#e0f2fe"
 		transparent={true}
-		opacity={0.84}
+		opacity={1.0 * atmosphereReveal}
 		blending={additiveBlending}
 		depthWrite={false}
 	/>
@@ -187,7 +189,7 @@ useTask(() => {
 			map={starTexture}
 			color="#38bdf8"
 			transparent={true}
-			opacity={0.22}
+			opacity={0.32 * atmosphereReveal}
 			blending={additiveBlending}
 			depthWrite={false}
 		/>

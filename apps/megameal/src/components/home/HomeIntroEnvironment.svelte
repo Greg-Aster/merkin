@@ -4,8 +4,8 @@ import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
 import HomeIntroEnvironmentScene from './HomeIntroEnvironmentScene.svelte'
 import {
+  homeIntroIntroOffsetScreens,
   homeIntroMaxWheel,
-  homeIntroMinWheel,
   homeIntroScreens,
   homeIntroWheelToScreenRatio,
 } from './homeIntroScreens'
@@ -17,6 +17,7 @@ type IntroInputState = {
   dragX: number
   dragY: number
   wheel: number
+  reveal: number
   active: boolean
 }
 
@@ -27,20 +28,21 @@ let lastPointerX = 0
 let lastPointerY = 0
 let activePointerId: number | null = null
 let activeTouchId: number | null = null
-let manualWheelOffset = 0
+let virtualWheel = 0
 let scrollFrame = 0
 let activeScreenIndex = 0
+let revealProgress = 0
 const input: IntroInputState = {
   x: 0,
   y: 0,
   dragX: 0,
   dragY: 0,
   wheel: 0,
+  reveal: 0,
   active: false,
 }
-const touchDragMultiplier = 2.15
-const touchWheelSensitivity = 3.8
-
+const carouselRevealWheelSpan =
+  homeIntroIntroOffsetScreens / homeIntroWheelToScreenRatio
 $: activeScreen = homeIntroScreens[activeScreenIndex] ?? homeIntroScreens[0]
 
 const createRenderer = (canvas: HTMLCanvasElement) => {
@@ -53,7 +55,7 @@ const createRenderer = (canvas: HTMLCanvasElement) => {
 
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = 1.25
+  renderer.toneMappingExposure = 1.08
   renderer.setClearColor(0x000000, 0)
 
   return renderer
@@ -97,34 +99,27 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
 }
 
-function wrappedScreenIndex(value: number) {
-  return ((value % homeIntroScreens.length) + homeIntroScreens.length) % homeIntroScreens.length
+function clampScreenIndex(value: number) {
+  return Math.min(
+    homeIntroScreens.length - 1,
+    Math.max(0, value),
+  )
 }
 
 function syncActiveScreenFromWheel(wheel: number) {
-  activeScreenIndex = wrappedScreenIndex(
-    Math.round(wheel * homeIntroWheelToScreenRatio),
+  activeScreenIndex = clampScreenIndex(
+    Math.round(wheel * homeIntroWheelToScreenRatio - homeIntroIntroOffsetScreens),
   )
 }
 
+function syncRevealProgress() {
+  input.reveal = clamp(input.wheel / carouselRevealWheelSpan, 0, 1)
+  revealProgress = input.reveal
+}
+
 function updateScrollDrivenWheel() {
-  if (!shell) {
-    input.wheel = manualWheelOffset
-    syncActiveScreenFromWheel(input.wheel)
-    return
-  }
-
-  const bounds = shell.getBoundingClientRect()
-  const viewportHeight = Math.max(window.innerHeight, 1)
-  const scrollableDistance = Math.max(bounds.height - viewportHeight, viewportHeight)
-  const scrollProgress = clamp(-bounds.top / scrollableDistance, 0, 1)
-  const scrollWheel = scrollProgress * homeIntroMaxWheel
-
-  input.wheel = clamp(
-    scrollWheel + manualWheelOffset,
-    homeIntroMinWheel,
-    homeIntroMaxWheel,
-  )
+  input.wheel = clamp(virtualWheel, 0, homeIntroMaxWheel)
+  syncRevealProgress()
   syncActiveScreenFromWheel(input.wheel)
 }
 
@@ -149,7 +144,6 @@ function applyDragDelta(
   clientY: number,
   inputMultiplier: number,
   wheelDistance: number,
-  wheelSensitivity: number,
 ) {
   updatePointer(clientX, clientY)
 
@@ -161,9 +155,9 @@ function applyDragDelta(
 
   input.dragX += deltaX / width
   input.dragY += deltaY / Math.max(wheelDistance, 1)
-  manualWheelOffset = clamp(
-    manualWheelOffset - (deltaY / Math.max(wheelDistance, 1)) * wheelSensitivity,
-    homeIntroMinWheel,
+  virtualWheel = clamp(
+    virtualWheel - (deltaY / Math.max(wheelDistance, 1)) * 4.2,
+    0,
     homeIntroMaxWheel,
   )
   scheduleScrollDrivenWheel()
@@ -199,7 +193,7 @@ function handlePointerMove(event: PointerEvent) {
   }
 
   const height = Math.max(shell?.clientHeight ?? window.innerHeight, 1)
-  applyDragDelta(event.clientX, event.clientY, 1, height, 4.2)
+  applyDragDelta(event.clientX, event.clientY, 1, height)
 }
 
 function handlePointerUp(event?: PointerEvent) {
@@ -254,13 +248,7 @@ function handleTouchMove(event: TouchEvent) {
     220,
     Math.min(window.innerHeight * 0.46, 360),
   )
-  applyDragDelta(
-    touch.clientX,
-    touch.clientY,
-    touchDragMultiplier,
-    touchWheelDistance,
-    touchWheelSensitivity,
-  )
+  applyDragDelta(touch.clientX, touch.clientY, 2.15, touchWheelDistance)
 }
 
 function handleTouchEnd(event: TouchEvent) {
@@ -276,10 +264,11 @@ function handleWheel(event: WheelEvent) {
     return
   }
 
+  event.preventDefault()
   const viewportHeight = Math.max(window.innerHeight, 1)
-  manualWheelOffset = clamp(
-    manualWheelOffset + (event.deltaY / viewportHeight) * 2.4,
-    homeIntroMinWheel,
+  virtualWheel = clamp(
+    virtualWheel + (event.deltaY / viewportHeight) * 2.4,
+    0,
     homeIntroMaxWheel,
   )
   scheduleScrollDrivenWheel()
@@ -296,8 +285,7 @@ onMount(() => {
   window.addEventListener('touchmove', handleTouchMove, { passive: false })
   window.addEventListener('touchend', handleTouchEnd)
   window.addEventListener('touchcancel', handleTouchEnd)
-  window.addEventListener('wheel', handleWheel, { passive: true })
-  window.addEventListener('scroll', scheduleScrollDrivenWheel, { passive: true })
+  window.addEventListener('wheel', handleWheel, { passive: false })
   window.addEventListener('resize', scheduleScrollDrivenWheel)
 
   return () => {
@@ -310,7 +298,6 @@ onMount(() => {
     window.removeEventListener('touchend', handleTouchEnd)
     window.removeEventListener('touchcancel', handleTouchEnd)
     window.removeEventListener('wheel', handleWheel)
-    window.removeEventListener('scroll', scheduleScrollDrivenWheel)
     window.removeEventListener('resize', scheduleScrollDrivenWheel)
     if (scrollFrame) {
       window.cancelAnimationFrame(scrollFrame)
@@ -329,7 +316,11 @@ onDestroy(() => {
 })
 </script>
 
-<div bind:this={shell} class="home-intro-environment">
+<div
+  bind:this={shell}
+  class="home-intro-environment"
+  style={`--portal-reveal-progress: ${revealProgress}`}
+>
 	<Canvas {createRenderer} dpr={1.5}>
 		<HomeIntroEnvironmentScene {input} {titleImageSrc} />
 	</Canvas>

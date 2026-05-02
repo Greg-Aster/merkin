@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-01T02:10:28.661Z",
+  "generatedAt": "2026-05-02T01:30:09.509Z",
   "levelId": "yggdrasil",
   "sceneId": "yggdrasil",
   "source": {
@@ -100,6 +100,28 @@
           "underwaterFogDensity": 0.085,
           "underwaterFogColor": "#09151d",
           "surfaceFogDensity": 0.00135
+        },
+        "worldPartition": {
+          "cellSize": 80,
+          "activeRadius": 5
+        },
+        "runtimeAssets": {
+          "maxTier": "medium",
+          "requiredAssetActorIds": [
+            "yggdrasil-mound",
+            "yggdrasil-planter-urd",
+            "yggdrasil-planter-mimir",
+            "yggdrasil-planter-hvergelmir",
+            "yggdrasil-arrival-monolith-left",
+            "yggdrasil-arrival-monolith-right",
+            "yggdrasil-arrival-foreground-right",
+            "yggdrasil-hvergelmir-depth-arch-1",
+            "yggdrasil-hvergelmir-depth-monolith-left",
+            "yggdrasil-hvergelmir-depth-monolith-right",
+            "yggdrasil-tree-merged",
+            "yggdrasil-crown-ascent-merged",
+            "yggdrasil-bifrost-ribbon-merged"
+          ]
         },
         "player": {
           "lightIntensityScale": 6
@@ -9909,7 +9931,7 @@
         "transform": {
           "position": [
             0,
-            0.9,
+            1.18,
             -74
           ],
           "rotation": [
@@ -9930,6 +9952,13 @@
           "asset": {
             "url": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
             "scale": 1
+          },
+          "material": {
+            "transparent": true,
+            "opacity": 1,
+            "doubleSided": true,
+            "emissiveIntensity": 2.2,
+            "envMapIntensity": 2
           }
         },
         "editor": {
@@ -9958,11 +9987,34 @@
     "visualOnlyActorCount": 65,
     "requiredActorCount": 3,
     "requiredRenderActorIds": [
-      "yggdrasil-tree-merged"
+      "yggdrasil-tree-merged",
+      "yggdrasil-mound",
+      "yggdrasil-planter-urd",
+      "yggdrasil-planter-mimir",
+      "yggdrasil-planter-hvergelmir",
+      "yggdrasil-arrival-monolith-left",
+      "yggdrasil-arrival-monolith-right",
+      "yggdrasil-arrival-foreground-right",
+      "yggdrasil-hvergelmir-depth-arch-1",
+      "yggdrasil-hvergelmir-depth-monolith-left",
+      "yggdrasil-hvergelmir-depth-monolith-right",
+      "yggdrasil-crown-ascent-merged",
+      "yggdrasil-bifrost-ribbon-merged"
     ],
     "missingRequiredActorIds": [],
     "requiredAssetUrls": [
-      "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb"
+      "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+      "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+      "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
+      "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
+      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
+      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+      "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+      "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+      "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+      "/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb"
     ],
     "runtimeAssetUrls": [
       "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
@@ -9984,10 +10036,33 @@
   },
   "runtime": {
     "requiredRenderActorIds": [
-      "yggdrasil-tree-merged"
+      "yggdrasil-tree-merged",
+      "yggdrasil-mound",
+      "yggdrasil-planter-urd",
+      "yggdrasil-planter-mimir",
+      "yggdrasil-planter-hvergelmir",
+      "yggdrasil-arrival-monolith-left",
+      "yggdrasil-arrival-monolith-right",
+      "yggdrasil-arrival-foreground-right",
+      "yggdrasil-hvergelmir-depth-arch-1",
+      "yggdrasil-hvergelmir-depth-monolith-left",
+      "yggdrasil-hvergelmir-depth-monolith-right",
+      "yggdrasil-crown-ascent-merged",
+      "yggdrasil-bifrost-ribbon-merged"
     ],
     "requiredAssetUrls": [
-      "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb"
+      "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+      "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+      "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
+      "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
+      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
+      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+      "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+      "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+      "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+      "/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb"
     ],
     "runtimeAssetUrls": [
       "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
