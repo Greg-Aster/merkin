@@ -21,6 +21,7 @@ type IntroInputState = {
   dragY: number
   wheel: number
   reveal: number
+  introOffsetScreens: number
   active: boolean
 }
 
@@ -48,10 +49,10 @@ let atmosphereReveal = 0
 const particleCount = 840
 const particleClusterCount = 9
 const primaryScreenIndex = 0
-const screenOrbitRadiusX = 3.18
-const screenOrbitRadiusZ = 2.34
+const screenOrbitRadiusX = 5.25
+const screenOrbitRadiusZ = 3.75
 const screenOrbitCenterZ = -0.72
-const screenStepY = 2.05
+const screenStepY = 2.24
 const screenAngleStep = 0.9
 const effectScrollStepY = screenStepY * homeIntroWheelToScreenRatio
 const particleScrollSpan = 10.8
@@ -62,14 +63,16 @@ const logoCenter = new Vector3()
 const logoSize = new Vector3()
 const logoTargetSize = new Vector3(4.68, 2.24, 1.44)
 const logoModelSrc = '/assets/3D/Hy3D_textured_00005_.glb'
-const logoIntroDuration = 1.65
+const logoIntroDuration = 2.05
 const logoImpactDuration = 0.42
 const logoRotationOffset = Math.PI
-const logoEmissiveTint = new Color('#ffffff')
-const logoEmissiveIntensity = 0.16
+const logoEmissiveTint = new Color('#000000')
+const logoEmissiveIntensity = 0
+const logoEnvironmentIntensity = 0.18
 const gltfLoader = new GLTFLoader()
 let activeScreenSceneId = ''
 let effectWheel = 0
+let logoEffectWheel = 0
 const portalScreens = homeIntroScreens
 const screenCount = portalScreens.length
 
@@ -82,11 +85,15 @@ $: railPosition = portraitMobile
   ? ([0, 0.46, -0.68] as [number, number, number])
   : ([0, 0, -0.34] as [number, number, number])
 $: starColumnPosition = portraitMobile
-  ? ([0, 0.18, -0.62] as [number, number, number])
-  : ([0, 0, -0.42] as [number, number, number])
+  ? ([0, 0.08, -2.02] as [number, number, number])
+  : ([0, 0, -1.86] as [number, number, number])
+$: starColumnScale = portraitMobile
+  ? ([0.9, 1, 0.92] as [number, number, number])
+  : ([1.04, 1, 0.98] as [number, number, number])
 $: emblemScale = portraitMobile
-  ? ([0.88, 0.88, 0.88] as [number, number, number])
-  : ([1.72, 1.72, 1.72] as [number, number, number])
+  ? ([3.64, 3.64, 3.64] as [number, number, number])
+  : ([3.98, 3.98, 3.98] as [number, number, number])
+$: emblemBaseY = portraitMobile ? 0.08 : -0.04
 $: logoIntroStartPosition = portraitMobile
   ? ([0, 0.2, 2.65] as [number, number, number])
   : ([0, 0.08, 1.9] as [number, number, number])
@@ -154,7 +161,7 @@ function tuneLogoMaterial(material: THREE.Material) {
   }
 
   if ('envMapIntensity' in standardMaterial) {
-    standardMaterial.envMapIntensity = 1.15
+    standardMaterial.envMapIntensity = logoEnvironmentIntensity
   }
 
   if ('emissive' in standardMaterial) {
@@ -162,8 +169,8 @@ function tuneLogoMaterial(material: THREE.Material) {
     standardMaterial.emissiveIntensity = logoEmissiveIntensity
   }
 
-  if ('emissiveMap' in standardMaterial && standardMaterial.map) {
-    standardMaterial.emissiveMap = standardMaterial.map
+  if ('emissiveMap' in standardMaterial) {
+    standardMaterial.emissiveMap = null
   }
 
   material.needsUpdate = true
@@ -202,6 +209,7 @@ async function loadLogoModel() {
     fitLogoModel(logoModel)
     tuneLogoModel(logoModel)
     attachLogoModel()
+    logoIntroStartedAt = performance.now() * 0.001
   } catch (error) {
     console.error('Failed to load portal logo mesh:', error)
   }
@@ -209,7 +217,6 @@ async function loadLogoModel() {
 
 onMount(() => {
   syncViewportMode()
-  logoIntroStartedAt = performance.now() * 0.001
   window.addEventListener('resize', syncViewportMode)
   void loadLogoModel()
 
@@ -251,15 +258,24 @@ const particles = Array.from({ length: particleCount }, (_, index) => {
   const randomC = Math.abs(hash01(index + 41))
   const randomD = Math.abs(hash01(index + 79))
   const randomE = Math.abs(hash01(index + 131))
-  const radialT = randomA ** 1.65
+  const randomF = Math.abs(hash01(index + 181))
+  const radialT = randomA ** 1.25
   const angle = randomB * Math.PI * 2
   const verticalAngle = (randomC - 0.5) * Math.PI
-  const radius = clusterCenter.spread * (0.1 + radialT * 0.72)
+  const strayT =
+    randomE > 0.74 ? ((randomE - 0.74) / 0.26) ** 0.72 : 0
+  const edgeAngle = randomF * Math.PI * 2
+  const radius =
+    clusterCenter.spread * (0.1 + radialT * (0.82 + strayT * 1.45))
+  const anchorX =
+    clusterCenter.x * (1 - strayT * 0.58) + Math.cos(edgeAngle) * strayT * 4.2
+  const anchorZ =
+    clusterCenter.z + Math.sin(edgeAngle) * strayT * 1.25
 
   return {
-    anchorX: clusterCenter.x,
+    anchorX,
     anchorY: clusterCenter.y,
-    anchorZ: clusterCenter.z,
+    anchorZ,
     angle,
     cluster,
     clusterStrength: 0.26 + (1 - radialT) * 0.58,
@@ -268,11 +284,17 @@ const particles = Array.from({ length: particleCount }, (_, index) => {
     phase: randomB * Math.PI * 2,
     radialT,
     speed: 0.038 + randomD * 0.072 + radialT * 0.032,
-    size: 0.012 + (1 - radialT) * 0.024 + randomE * 0.014,
+    size:
+      (0.012 + (1 - radialT) * 0.024 + randomE * 0.014) *
+      (1 - strayT * 0.22),
     hueOffset: clusterCenter.hue + randomD * 0.08,
     shape: randomE,
+    strayT,
     zOffset:
-      Math.cos(verticalAngle) * clusterCenter.spread * (randomD - 0.5) * 0.72,
+      Math.cos(verticalAngle) *
+      clusterCenter.spread *
+      (randomD - 0.5) *
+      (0.72 + strayT * 0.56),
   }
 })
 
@@ -300,10 +322,14 @@ function smoothstep(value: number) {
 }
 
 function getSelectedScreenIndex(wheel: number) {
+  const introOffsetScreens = Number.isFinite(input.introOffsetScreens)
+    ? input.introOffsetScreens
+    : homeIntroIntroOffsetScreens
+
   return (
     primaryScreenIndex +
     wheel * homeIntroWheelToScreenRatio -
-    homeIntroIntroOffsetScreens
+    introOffsetScreens
   )
 }
 
@@ -343,7 +369,7 @@ function updateScreenOrbit(wheel: number, ease: number) {
     const y = -offset * stepY
     const z =
       screenOrbitCenterZ + Math.cos(spiral) * orbitRadiusZ - depth * 0.08
-    const targetScale = portraitMobile ? 0.82 : 0.92
+    const targetScale = portraitMobile ? 1.0 : 1.12
     const outwardYaw = Math.atan2(
       x / orbitRadiusX,
       (z - screenOrbitCenterZ) / orbitRadiusZ,
@@ -370,12 +396,13 @@ useTask(delta => {
   const pointerY = Number.isFinite(input.y) ? input.y : 0
   const wheel = Number.isFinite(input.wheel) ? input.wheel : 0
   effectWheel += (wheel - effectWheel) * ease
+  logoEffectWheel += (wheel - logoEffectWheel) * Math.min(1, delta * 2.7)
   const selectedIndex = getSelectedScreenIndex(effectWheel)
   const spiralPhase = selectedIndex * screenAngleStep
   const revealProgress = clamp01(Number.isFinite(input.reveal) ? input.reveal : 0)
   const logoIntroElapsed = logoIntroStartedAt
     ? Math.max(0, time - logoIntroStartedAt)
-    : logoIntroDuration
+    : 0
   const logoIntroRaw = clamp01(logoIntroElapsed / logoIntroDuration)
   const logoIntroDrop = logoIntroRaw
   const logoIntroScale = logoIntroRaw
@@ -410,25 +437,23 @@ useTask(delta => {
   }
 
   if (emblem) {
-    const orbitX = portraitMobile ? 0.42 : 0.92
-    const orbitZ = portraitMobile ? 0.34 : 0.68
     const baseZ = portraitMobile ? -1.42 : -0.9
     emblem.rotation.x = Math.sin(time * 0.56) * 0.08 + input.dragY * 1.8
     emblem.rotation.y = spiralPhase + time * 0.18 + input.dragX * 2.6
     emblem.rotation.z = Math.sin(time * 0.32) * 0.045
-    emblem.position.x += (Math.sin(spiralPhase) * orbitX - emblem.position.x) * ease
-    emblem.position.y += (-0.04 + Math.sin(time * 0.82) * 0.08 - emblem.position.y) * ease
-    emblem.position.z +=
-      (baseZ + Math.cos(spiralPhase) * orbitZ - emblem.position.z) * ease
+    emblem.position.x += (0 - emblem.position.x) * ease
+    emblem.position.y += (emblemBaseY + Math.sin(time * 0.82) * 0.08 - emblem.position.y) * ease
+    emblem.position.z += (baseZ - emblem.position.z) * ease
   }
 
   if (logoMeshRoot) {
     const logoBaseY = portraitMobile ? 0.2 : 0.08
     const logoBaseZ = portraitMobile ? -1.45 : -1.05
+    const logoDriftX = Math.sin(time * 0.31) * (portraitMobile ? 0.012 : 0.018)
     const logoStartY = logoBaseY
     const logoStartZ = portraitMobile ? 2.65 : 1.9
     const logoRestY = logoBaseY + Math.sin(time * 0.38) * 0.025
-    const logoRestZ = logoBaseZ
+    const logoRestZ = logoBaseZ + Math.sin(time * 0.24) * 0.018
     const logoTargetY = logoStartY + (logoRestY - logoStartY) * logoIntroDrop
     const logoTargetZ = logoStartZ + (logoRestZ - logoStartZ) * logoIntroDrop
     const logoTargetScale = 2.35 + (1 - 2.35) * logoIntroScale
@@ -437,15 +462,14 @@ useTask(delta => {
       logoMeshRoot.position.set(0, logoTargetY, logoTargetZ)
       logoMeshRoot.scale.setScalar(logoTargetScale)
     } else {
-      logoMeshRoot.position.x += (0 - logoMeshRoot.position.x) * ease
+      logoMeshRoot.position.x += (logoDriftX - logoMeshRoot.position.x) * ease
       logoMeshRoot.position.y += (logoRestY - logoMeshRoot.position.y) * ease
       logoMeshRoot.position.z += (logoRestZ - logoMeshRoot.position.z) * ease
       logoMeshRoot.scale.setScalar(logoMeshRoot.scale.x + (1 - logoMeshRoot.scale.x) * ease)
     }
-    logoMeshRoot.rotation.x =
-      -0.075 + Math.sin(time * 0.22) * 0.028 + input.dragY * 0.12
-    logoMeshRoot.rotation.y = logoRotationOffset + time * 0.085 + input.dragX * 0.24
-    logoMeshRoot.rotation.z = 0.045 + Math.sin(time * 0.3) * 0.014
+    logoMeshRoot.rotation.x = -0.075 + logoEffectWheel * 0.012 + input.dragY * 0.035
+    logoMeshRoot.rotation.y = logoRotationOffset + logoEffectWheel * 0.16 + input.dragX * 0.035
+    logoMeshRoot.rotation.z = 0.045 + logoEffectWheel * 0.008
   }
 
   if (ringA) ringA.rotation.z += delta * 0.34
@@ -479,35 +503,6 @@ useTask(delta => {
 <T.PerspectiveCamera bind:ref={camera} makeDefault position={cameraPosition} fov={cameraFov} />
 
 <T.AmbientLight intensity={0.0} color="#dbeafe" />
-<T.PointLight
-	position={[-2.35, 1.72, 1.35]}
-	intensity={7.5}
-	color="#60a5fa"
-	distance={4.8}
-	decay={2.15}
-/>
-<T.PointLight
-	position={[2.2, -0.95, 1.55]}
-	intensity={5.5}
-	color="#8b5cf6"
-	distance={4.2}
-	decay={2.2}
-/>
-<T.PointLight
-	position={[0.2, 1.05, -1.2]}
-	intensity={4.5}
-	color="#f97316"
-	distance={3.8}
-	decay={2.35}
-/>
-<T.SpotLight
-	position={[0, 3.1, 3.2]}
-	angle={0.24}
-	penumbra={0.32}
-	intensity={11}
-	distance={7}
-	color="#ffffff"
-/>
 
 <T.Group bind:ref={world} position={[0, 0, 0]} scale={[sceneScale, sceneScale, sceneScale]}>
 	<T.Group bind:ref={screenRail} position={railPosition}>
@@ -523,7 +518,7 @@ useTask(delta => {
 		{/each}
 	</T.Group>
 
-  <T.Group bind:ref={starColumn} position={starColumnPosition}>
+  <T.Group bind:ref={starColumn} position={starColumnPosition} scale={starColumnScale}>
 		{#each particles as particle, index}
 			<HomeIntroParticle
 				{particle}
@@ -537,7 +532,7 @@ useTask(delta => {
 		{/each}
 	</T.Group>
 
-	<T.Group bind:ref={emblem} position={[0, -0.04, -2.28]} scale={emblemScale}>
+	<T.Group bind:ref={emblem} position={[0, emblemBaseY, -2.28]} scale={emblemScale}>
 		<T.Mesh bind:ref={ringA} rotation={[Math.PI / 2, 0, 0]}>
 			<T.TorusGeometry args={[0.86, 0.009, 12, 128]} />
 			<T.MeshBasicMaterial color="#67e8f9" transparent={true} opacity={0.08 * atmosphereReveal} />
@@ -553,20 +548,22 @@ useTask(delta => {
 				emitterAngle={0.18}
 				emitterSize={0.92}
 				emitterOpacity={0.96}
-				emitterIntensity={34}
-				emitterDistance={6.8}
+				emitterIntensity={102}
+				emitterDistance={7.6}
 				emitterDecay={1.25}
+				emitterFrontFacing={true}
+				emitterFrontOffset={1.65}
 				{atmosphereReveal}
 			/>
 		</T.Group>
 
 		<T.Mesh bind:ref={ringB} rotation={[0.32, Math.PI / 2, 0.26]}>
-			<T.TorusGeometry args={[1.02, 0.007, 12, 128]} />
+			<T.TorusGeometry args={[0.88, 0.007, 12, 128]} />
 			<T.MeshBasicMaterial color="#8b5cf6" transparent={true} opacity={0.07 * atmosphereReveal} />
 		</T.Mesh>
 		<T.Group bind:ref={ringGlowB} rotation={[0.32, Math.PI / 2, 0.26]}>
 			<HomeIntroRingGlow
-				radius={1.02}
+				radius={0.88}
 				count={76}
 				color="#8b5cf6"
 				opacity={0.9}
@@ -575,20 +572,22 @@ useTask(delta => {
 				emitterAngle={2.24}
 				emitterSize={0.78}
 				emitterOpacity={0.9}
-				emitterIntensity={28}
-				emitterDistance={6.2}
+				emitterIntensity={102}
+				emitterDistance={7.0}
 				emitterDecay={1.25}
+				emitterFrontFacing={true}
+				emitterFrontOffset={1.55}
 				{atmosphereReveal}
 			/>
 		</T.Group>
 
 		<T.Mesh bind:ref={ringC} rotation={[0.76, 0.28, Math.PI / 2]}>
-			<T.TorusGeometry args={[1.18, 0.006, 10, 128]} />
+			<T.TorusGeometry args={[0.82, 0.006, 10, 128]} />
 			<T.MeshBasicMaterial color="#a78bfa" transparent={true} opacity={0.06 * atmosphereReveal} />
 		</T.Mesh>
 		<T.Group bind:ref={ringGlowC} rotation={[0.76, 0.28, Math.PI / 2]}>
 			<HomeIntroRingGlow
-				radius={1.18}
+				radius={0.82}
 				count={84}
 				color="#a78bfa"
 				opacity={0.9}
@@ -597,9 +596,11 @@ useTask(delta => {
 				emitterAngle={4.18}
 				emitterSize={0.68}
 				emitterOpacity={1.0}
-				emitterIntensity={22}
-				emitterDistance={5.8}
+				emitterIntensity={76}
+				emitterDistance={6.6}
 				emitterDecay={1.25}
+				emitterFrontFacing={true}
+				emitterFrontOffset={1.45}
 				{atmosphereReveal}
 			/>
 		</T.Group>

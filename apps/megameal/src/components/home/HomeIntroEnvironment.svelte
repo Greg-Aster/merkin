@@ -4,8 +4,9 @@ import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
 import HomeIntroEnvironmentScene from './HomeIntroEnvironmentScene.svelte'
 import {
+  homeIntroMaxWheelForOffset,
   homeIntroIntroOffsetScreens,
-  homeIntroMaxWheel,
+  homeIntroMobileIntroOffsetScreens,
   homeIntroScreens,
   homeIntroWheelToScreenRatio,
 } from './homeIntroScreens'
@@ -18,6 +19,7 @@ type IntroInputState = {
   dragY: number
   wheel: number
   reveal: number
+  introOffsetScreens: number
   active: boolean
 }
 
@@ -32,6 +34,7 @@ let virtualWheel = 0
 let scrollFrame = 0
 let activeScreenIndex = 0
 let revealProgress = 0
+let portraitMobile = false
 const input: IntroInputState = {
   x: 0,
   y: 0,
@@ -39,10 +42,14 @@ const input: IntroInputState = {
   dragY: 0,
   wheel: 0,
   reveal: 0,
+  introOffsetScreens: homeIntroIntroOffsetScreens,
   active: false,
 }
-const carouselRevealWheelSpan =
-  homeIntroIntroOffsetScreens / homeIntroWheelToScreenRatio
+$: introOffsetScreens = portraitMobile
+  ? homeIntroMobileIntroOffsetScreens
+  : homeIntroIntroOffsetScreens
+$: carouselRevealWheelSpan = introOffsetScreens / homeIntroWheelToScreenRatio
+$: maxWheel = homeIntroMaxWheelForOffset(introOffsetScreens)
 $: activeScreen = homeIntroScreens[activeScreenIndex] ?? homeIntroScreens[0]
 
 const createRenderer = (canvas: HTMLCanvasElement) => {
@@ -95,6 +102,11 @@ function isShellVisible() {
   )
 }
 
+function syncViewportMode() {
+  if (typeof window === 'undefined') return
+  portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
+}
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
 }
@@ -108,7 +120,7 @@ function clampScreenIndex(value: number) {
 
 function syncActiveScreenFromWheel(wheel: number) {
   activeScreenIndex = clampScreenIndex(
-    Math.round(wheel * homeIntroWheelToScreenRatio - homeIntroIntroOffsetScreens),
+    Math.round(wheel * homeIntroWheelToScreenRatio - introOffsetScreens),
   )
 }
 
@@ -118,7 +130,8 @@ function syncRevealProgress() {
 }
 
 function updateScrollDrivenWheel() {
-  input.wheel = clamp(virtualWheel, 0, homeIntroMaxWheel)
+  input.introOffsetScreens = introOffsetScreens
+  input.wheel = clamp(virtualWheel, 0, maxWheel)
   syncRevealProgress()
   syncActiveScreenFromWheel(input.wheel)
 }
@@ -158,7 +171,7 @@ function applyDragDelta(
   virtualWheel = clamp(
     virtualWheel - (deltaY / Math.max(wheelDistance, 1)) * 4.2,
     0,
-    homeIntroMaxWheel,
+    maxWheel,
   )
   scheduleScrollDrivenWheel()
   lastPointerX = clientX
@@ -269,12 +282,18 @@ function handleWheel(event: WheelEvent) {
   virtualWheel = clamp(
     virtualWheel + (event.deltaY / viewportHeight) * 2.4,
     0,
-    homeIntroMaxWheel,
+    maxWheel,
   )
   scheduleScrollDrivenWheel()
 }
 
+function handleResize() {
+  syncViewportMode()
+  scheduleScrollDrivenWheel()
+}
+
 onMount(() => {
+  syncViewportMode()
   updateScrollDrivenWheel()
 
   window.addEventListener('pointerdown', handlePointerDown)
@@ -286,7 +305,7 @@ onMount(() => {
   window.addEventListener('touchend', handleTouchEnd)
   window.addEventListener('touchcancel', handleTouchEnd)
   window.addEventListener('wheel', handleWheel, { passive: false })
-  window.addEventListener('resize', scheduleScrollDrivenWheel)
+  window.addEventListener('resize', handleResize)
 
   return () => {
     window.removeEventListener('pointerdown', handlePointerDown)
@@ -298,7 +317,7 @@ onMount(() => {
     window.removeEventListener('touchend', handleTouchEnd)
     window.removeEventListener('touchcancel', handleTouchEnd)
     window.removeEventListener('wheel', handleWheel)
-    window.removeEventListener('resize', scheduleScrollDrivenWheel)
+    window.removeEventListener('resize', handleResize)
     if (scrollFrame) {
       window.cancelAnimationFrame(scrollFrame)
       scrollFrame = 0

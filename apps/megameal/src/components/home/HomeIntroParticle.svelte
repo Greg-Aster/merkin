@@ -91,6 +91,7 @@ type ParticleConfig = {
   size: number
   hueOffset: number
   shape: number
+  strayT: number
   zOffset: number
 }
 
@@ -121,6 +122,7 @@ useTask(() => {
   const spin = particle.angle + time * particle.speed + input.dragX * 0.42
   const pulse = Math.sin(time * 1.25 + index) * 0.22 + 0.78
   const centerWeight = 1 - particle.radialT
+  const strayOpacity = 1 - particle.strayT * 0.42
   const clusterPulse = Math.sin(time * 0.72 + particle.phase + particle.cluster)
   const clusterOrbit =
     Math.sin(time * 0.36 + particle.cluster * 1.7) *
@@ -161,14 +163,16 @@ useTask(() => {
     coreMaterial.opacity = atmosphereReveal * Math.min(
       1.0,
       0.42 + centerWeight * 0.58 + pulse * 0.12,
-    )
+    ) * strayOpacity
   }
 
   if (haloMaterial) {
     const hue = particle.hueOffset + 0.04
     haloMaterial.color.setHSL(hue, 0.98, 0.62)
     haloMaterial.opacity =
-      atmosphereReveal * (0.18 + centerWeight * 0.36 + pulse * 0.06)
+      atmosphereReveal *
+      (0.18 + centerWeight * 0.36 + pulse * 0.06) *
+      strayOpacity
   }
 })
 </script>

@@ -40,7 +40,7 @@ function getGlowTexture() {
 
 <script lang="ts">
 import { T, useTask } from '@threlte/core'
-import { AdditiveBlending } from 'three'
+import { AdditiveBlending, Vector3 } from 'three'
 import type { Group, SpotLight } from 'three'
 
 export let radius = 1
@@ -62,13 +62,19 @@ export let emitterDecay = 1.35
 export let emitterSpotAngle = 0.34
 export let emitterSpotPenumbra = 0.72
 export let emitterPointFill = 0.18
+export let emitterFrontFacing = false
+export let emitterFrontOffset = 1.35
 
 let group: Group | null = null
+let emitterGroup: Group | null = null
 let emitterLight: SpotLight | null = null
 let emitterTarget: Group | null = null
 
 const additiveBlending = AdditiveBlending
 const glowTexture = getGlowTexture()
+const emitterLocalPosition = new Vector3()
+const emitterWorldPosition = new Vector3()
+const emitterTargetWorldPosition = new Vector3()
 
 $: sparks = Array.from({ length: count }, (_, index) => {
   const progress = index / Math.max(count, 1)
@@ -93,6 +99,26 @@ useTask(() => {
   group.rotation.set(rotation[0], rotation[1], rotation[2])
   group.rotation[spinAxis] += time * spinSpeed
 
+  if (emitterGroup) {
+    emitterLocalPosition.set(
+      emitterPosition[0],
+      emitterPosition[1],
+      emitterPosition[2],
+    )
+
+    if (emitterFrontFacing) {
+      emitterWorldPosition.copy(emitterLocalPosition)
+      group.localToWorld(emitterWorldPosition)
+      group.getWorldPosition(emitterTargetWorldPosition)
+      emitterWorldPosition.z =
+        emitterTargetWorldPosition.z + emitterFrontOffset
+      group.worldToLocal(emitterWorldPosition)
+      emitterGroup.position.copy(emitterWorldPosition)
+    } else {
+      emitterGroup.position.copy(emitterLocalPosition)
+    }
+  }
+
   if (emitterLight && emitterTarget && emitterLight.target !== emitterTarget) {
     emitterLight.target = emitterTarget
   }
@@ -114,7 +140,7 @@ useTask(() => {
     </T.Sprite>
   {/each}
   {#if emitter}
-    <T.Group position={emitterPosition}>
+    <T.Group bind:ref={emitterGroup}>
       <T.SpotLight
         bind:ref={emitterLight}
         intensity={emitterIntensity * atmosphereReveal}

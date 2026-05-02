@@ -99,10 +99,14 @@ export const homeIntroScreens = [
 
 export const homeIntroWheelToScreenRatio = 1.08
 export const homeIntroIntroOffsetScreens = 2.85
+export const homeIntroMobileIntroOffsetScreens = 3.75
 export const homeIntroWheelOverscanScreens = 1.8
 export const homeIntroScreenCount = homeIntroScreens.length
 export const homeIntroMinWheel =
   -homeIntroWheelOverscanScreens / homeIntroWheelToScreenRatio
+export function homeIntroMaxWheelForOffset(offsetScreens = homeIntroIntroOffsetScreens) {
+  return (homeIntroScreenCount - 1 + offsetScreens) / homeIntroWheelToScreenRatio
+}
 export const homeIntroMaxWheel =
-  (homeIntroScreenCount - 1 + homeIntroIntroOffsetScreens) /
+  (homeIntroScreenCount - 1 + homeIntroMobileIntroOffsetScreens) /
   homeIntroWheelToScreenRatio
