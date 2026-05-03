@@ -249,7 +249,7 @@ export const bannerConfig: BannerConfig = {
   visual: {
     objectFit: 'cover',
     objectPosition: 'center',
-    applyGradientOverlay: true,
+    applyGradientOverlay: false,
     gradientOverlay:
       'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3))',
     borderRadius: '0.5rem',

@@ -5,7 +5,6 @@ import {
   AdditiveBlending,
   DoubleSide,
   FrontSide,
-  MultiplyBlending,
   NormalBlending,
   SRGBColorSpace,
   type CanvasTexture,
@@ -44,7 +43,6 @@ let stillTextureRequested = false
 let titleTextureRequested = false
 
 const additiveBlending = AdditiveBlending
-const multiplyBlending = MultiplyBlending
 const normalBlending = NormalBlending
 const doubleSide = DoubleSide
 const frontSide = FrontSide
@@ -56,8 +54,6 @@ const mediaWidth = 2.92
 const mediaHeight = 1.64
 const titleWidth = 2.92
 const titleHeight = 1.26
-const titleEchoWidth = 2.24
-const titleEchoHeight = 0.96
 const fallbackWidth = 2.76
 const fallbackHeight = 0.44
 const glassDepth = 0.16
@@ -67,8 +63,6 @@ const sheenWidth = 0.42
 const sheenHeight = frameHeight * 1.55
 const causticWidth = frameWidth * 0.98
 const causticHeight = frameHeight * 0.92
-const grimeWidth = frameWidth * 0.98
-const grimeHeight = frameHeight * 0.9
 const prismOffset = 0.028
 const mainGlassGeometry = new RoundedBoxGeometry(
   frameWidth,
@@ -207,7 +201,9 @@ function ensureMediaTexturesLoaded() {
   }
 }
 
-$: ensureMediaTexturesLoaded()
+$: if (loader && shouldLoadMedia) {
+  ensureMediaTexturesLoaded()
+}
 
 useTask(() => {
   const time = performance.now() * 0.001
@@ -321,21 +317,6 @@ useTask(() => {
 		/>
 	</T.Mesh>
 
-	<T.Mesh position={[0, 0, 0.118]}>
-		<T.PlaneGeometry args={[grimeWidth, grimeHeight]} />
-		<T.MeshBasicMaterial
-			map={grimeTexture}
-			color="#64748b"
-			side={frontSide}
-			transparent={true}
-			opacity={primary ? 0.22 : 0.16}
-			blending={multiplyBlending}
-			premultipliedAlpha={true}
-			depthWrite={false}
-			depthTest={true}
-		/>
-	</T.Mesh>
-
 	<T.Group position={[0, 0, -0.18]} scale={[primary ? 1.08 : 0.9, primary ? 0.82 : 0.68, 1]}>
 		<HomeIntroLogoReflections atmosphereReveal={primary ? 0.42 : 0.26} />
 	</T.Group>
@@ -405,20 +386,6 @@ useTask(() => {
 				transparent={true}
 				opacity={primary ? 0.32 : 0.16}
 				blending={additiveBlending}
-				depthWrite={false}
-			/>
-		</T.Mesh>
-	{/if}
-
-	{#if primary && titleTexture}
-		<T.Mesh position={[0, 0.02, 0.19]}>
-			<T.PlaneGeometry args={[titleEchoWidth, titleEchoHeight]} />
-			<T.MeshBasicMaterial
-				map={titleTexture}
-				side={frontSide}
-				transparent={true}
-				opacity={0.34}
-				blending={normalBlending}
 				depthWrite={false}
 			/>
 		</T.Mesh>

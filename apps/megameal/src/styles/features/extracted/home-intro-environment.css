@@ -75,8 +75,9 @@
     left: clamp(1rem, 4vw, 3.25rem);
     bottom: clamp(1.1rem, 5vh, 3.4rem);
     display: grid;
-    gap: 0.72rem;
-    padding: clamp(0.98rem, 2vw, 1.3rem);
+    gap: 0.46rem;
+    max-width: min(19rem, calc(100% - 2rem));
+    padding: clamp(0.62rem, 1.1vw, 0.78rem);
   }
 
   .home-intro-copy--feature::before {
@@ -103,20 +104,20 @@
   }
 
   .home-intro-copy h2 {
-    max-width: 14ch;
+    max-width: 13ch;
     margin: 0;
-    font-size: clamp(1.85rem, 4.2vw, 4.6rem);
+    font-size: clamp(1.18rem, 2.35vw, 2.55rem);
     font-weight: 900;
-    line-height: 0.95;
+    line-height: 1;
     text-transform: uppercase;
   }
 
   .home-intro-copy p {
-    max-width: 31rem;
+    max-width: 18rem;
     margin: 0;
     color: rgb(226 232 240 / 0.86);
-    font-size: clamp(0.92rem, 1.3vw, 1.05rem);
-    line-height: 1.55;
+    font-size: clamp(0.76rem, 0.9vw, 0.84rem);
+    line-height: 1.36;
   }
 
   .home-intro-copy__button {
@@ -166,21 +167,21 @@
       right: 0.75rem;
       left: 0.75rem;
       bottom: max(0.8rem, env(safe-area-inset-bottom));
-      padding: 0.78rem;
-      gap: 0.5rem;
+      padding: 0.58rem;
+      gap: 0.34rem;
     }
 
     .home-intro-copy h2 {
       max-width: 18ch;
-      font-size: clamp(1.25rem, 7.2vw, 2rem);
+      font-size: clamp(1.08rem, 6vw, 1.62rem);
       line-height: 1;
     }
 
     .home-intro-copy p {
       display: -webkit-box;
       overflow: hidden;
-      font-size: 0.84rem;
-      line-height: 1.42;
+      font-size: 0.76rem;
+      line-height: 1.34;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 3;
     }
