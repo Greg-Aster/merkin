@@ -3,6 +3,7 @@ import { CanvasTexture, SRGBColorSpace } from 'three'
 import type { Texture } from 'three'
 
 let sharedGlowTexture: Texture | null = null
+let sharedRingGlowTexture: Texture | null = null
 
 function getGlowTexture() {
   if (sharedGlowTexture) return sharedGlowTexture
@@ -36,11 +37,48 @@ function getGlowTexture() {
 
   return sharedGlowTexture
 }
+
+function getRingGlowTexture() {
+  if (sharedRingGlowTexture) return sharedRingGlowTexture
+  if (typeof document === 'undefined') return null
+
+  const canvas = document.createElement('canvas')
+  canvas.width = 512
+  canvas.height = 512
+  const context = canvas.getContext('2d')
+  if (!context) return null
+
+  const center = canvas.width / 2
+  const gradient = context.createRadialGradient(
+    center,
+    center,
+    0,
+    center,
+    center,
+    center,
+  )
+  gradient.addColorStop(0, 'rgb(255 255 255 / 0)')
+  gradient.addColorStop(0.52, 'rgb(255 255 255 / 0)')
+  gradient.addColorStop(0.61, 'rgb(255 255 255 / 0.05)')
+  gradient.addColorStop(0.68, 'rgb(255 255 255 / 0.34)')
+  gradient.addColorStop(0.72, 'rgb(255 255 255 / 0.9)')
+  gradient.addColorStop(0.76, 'rgb(255 255 255 / 0.28)')
+  gradient.addColorStop(0.86, 'rgb(255 255 255 / 0.055)')
+  gradient.addColorStop(1, 'rgb(255 255 255 / 0)')
+  context.fillStyle = gradient
+  context.fillRect(0, 0, canvas.width, canvas.height)
+
+  sharedRingGlowTexture = new CanvasTexture(canvas)
+  sharedRingGlowTexture.colorSpace = SRGBColorSpace
+  sharedRingGlowTexture.needsUpdate = true
+
+  return sharedRingGlowTexture
+}
 </script>
 
 <script lang="ts">
 import { T, useTask } from '@threlte/core'
-import { AdditiveBlending, Vector3 } from 'three'
+import { AdditiveBlending, DoubleSide, Vector3 } from 'three'
 import type { Group, SpotLight } from 'three'
 
 export let radius = 1
@@ -52,6 +90,7 @@ export let rotation: [number, number, number] = [0, 0, 0]
 export let spinAxis: 'x' | 'y' | 'z' = 'z'
 export let spinSpeed = 0
 export let atmosphereReveal = 1
+export let haloOpacity = 0.26
 export let emitter = false
 export let emitterAngle = 0
 export let emitterSize = 0.72
@@ -71,7 +110,9 @@ let emitterLight: SpotLight | null = null
 let emitterTarget: Group | null = null
 
 const additiveBlending = AdditiveBlending
+const doubleSide = DoubleSide
 const glowTexture = getGlowTexture()
+const ringGlowTexture = getRingGlowTexture()
 const emitterLocalPosition = new Vector3()
 const emitterWorldPosition = new Vector3()
 const emitterTargetWorldPosition = new Vector3()
@@ -127,6 +168,19 @@ useTask(() => {
 
 <T.Group bind:ref={group}>
   <T.Group bind:ref={emitterTarget} />
+  <T.Mesh>
+    <T.PlaneGeometry args={[radius * 2.8, radius * 2.8]} />
+    <T.MeshBasicMaterial
+      map={ringGlowTexture}
+      color={color}
+      transparent={true}
+      opacity={atmosphereReveal * haloOpacity}
+      side={doubleSide}
+      blending={additiveBlending}
+      depthWrite={false}
+      depthTest={true}
+    />
+  </T.Mesh>
   {#each sparks as spark}
     <T.Sprite position={[spark.x, spark.y, 0]} scale={[spark.size, spark.size, spark.size]}>
       <T.SpriteMaterial

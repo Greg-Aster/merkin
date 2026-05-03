@@ -27,13 +27,11 @@ type IntroInputState = {
 
 export let input: IntroInputState
 export let titleImageSrc = ''
+export let onLogoReady: (() => void) | undefined
 
 let world: THREE.Group | null = null
 let camera: THREE.PerspectiveCamera | null = null
 let emblem: THREE.Group | null = null
-let ringA: THREE.Mesh | null = null
-let ringB: THREE.Mesh | null = null
-let ringC: THREE.Mesh | null = null
 let ringGlowA: THREE.Group | null = null
 let ringGlowB: THREE.Group | null = null
 let ringGlowC: THREE.Group | null = null
@@ -46,7 +44,8 @@ let portraitMobile = false
 let logoIntroStartedAt = 0
 let atmosphereReveal = 0
 
-const particleCount = 840
+const particleCount = 360
+const particleSizeMultiplier = 1.75
 const particleClusterCount = 9
 const primaryScreenIndex = 0
 const screenOrbitRadiusX = 5.25
@@ -210,6 +209,7 @@ async function loadLogoModel() {
     tuneLogoModel(logoModel)
     attachLogoModel()
     logoIntroStartedAt = performance.now() * 0.001
+    onLogoReady?.()
   } catch (error) {
     console.error('Failed to load portal logo mesh:', error)
   }
@@ -286,7 +286,8 @@ const particles = Array.from({ length: particleCount }, (_, index) => {
     speed: 0.038 + randomD * 0.072 + radialT * 0.032,
     size:
       (0.012 + (1 - radialT) * 0.024 + randomE * 0.014) *
-      (1 - strayT * 0.22),
+      (1 - strayT * 0.22) *
+      particleSizeMultiplier,
     hueOffset: clusterCenter.hue + randomD * 0.08,
     shape: randomE,
     strayT,
@@ -472,12 +473,9 @@ useTask(delta => {
     logoMeshRoot.rotation.z = 0.045 + logoEffectWheel * 0.008
   }
 
-  if (ringA) ringA.rotation.z += delta * 0.34
-  if (ringB) ringB.rotation.x -= delta * 0.2
-  if (ringC) ringC.rotation.y += delta * 0.26
-  if (ringGlowA && ringA) ringGlowA.quaternion.copy(ringA.quaternion)
-  if (ringGlowB && ringB) ringGlowB.quaternion.copy(ringB.quaternion)
-  if (ringGlowC && ringC) ringGlowC.quaternion.copy(ringC.quaternion)
+  if (ringGlowA) ringGlowA.rotation.z += delta * 0.34
+  if (ringGlowB) ringGlowB.rotation.x -= delta * 0.2
+  if (ringGlowC) ringGlowC.rotation.y += delta * 0.26
 
   if (starColumn) {
     starColumn.rotation.y = -spiralPhase + time * 0.055 - input.dragX * 0.5
@@ -533,22 +531,19 @@ useTask(delta => {
 	</T.Group>
 
 	<T.Group bind:ref={emblem} position={[0, emblemBaseY, -2.28]} scale={emblemScale}>
-		<T.Mesh bind:ref={ringA} rotation={[Math.PI / 2, 0, 0]}>
-			<T.TorusGeometry args={[0.86, 0.009, 12, 128]} />
-			<T.MeshBasicMaterial color="#67e8f9" transparent={true} opacity={0.08 * atmosphereReveal} />
-		</T.Mesh>
 		<T.Group bind:ref={ringGlowA} rotation={[Math.PI / 2, 0, 0]}>
 			<HomeIntroRingGlow
 				radius={0.86}
-				count={68}
+				count={0}
 				color="#67e8f9"
 				opacity={0.5}
 				size={0.3}
+				haloOpacity={0.96}
 				emitter={true}
 				emitterAngle={0.18}
-				emitterSize={0.92}
-				emitterOpacity={0.96}
-				emitterIntensity={102}
+				emitterSize={1.52}
+				emitterOpacity={1}
+				emitterIntensity={128}
 				emitterDistance={7.6}
 				emitterDecay={1.25}
 				emitterFrontFacing={true}
@@ -557,22 +552,19 @@ useTask(delta => {
 			/>
 		</T.Group>
 
-		<T.Mesh bind:ref={ringB} rotation={[0.32, Math.PI / 2, 0.26]}>
-			<T.TorusGeometry args={[0.88, 0.007, 12, 128]} />
-			<T.MeshBasicMaterial color="#8b5cf6" transparent={true} opacity={0.07 * atmosphereReveal} />
-		</T.Mesh>
 		<T.Group bind:ref={ringGlowB} rotation={[0.32, Math.PI / 2, 0.26]}>
 			<HomeIntroRingGlow
 				radius={0.88}
-				count={76}
+				count={0}
 				color="#8b5cf6"
 				opacity={0.9}
 				size={0.27}
+				haloOpacity={0.86}
 				emitter={true}
 				emitterAngle={2.24}
-				emitterSize={0.78}
-				emitterOpacity={0.9}
-				emitterIntensity={102}
+				emitterSize={1.34}
+				emitterOpacity={1}
+				emitterIntensity={124}
 				emitterDistance={7.0}
 				emitterDecay={1.25}
 				emitterFrontFacing={true}
@@ -581,22 +573,19 @@ useTask(delta => {
 			/>
 		</T.Group>
 
-		<T.Mesh bind:ref={ringC} rotation={[0.76, 0.28, Math.PI / 2]}>
-			<T.TorusGeometry args={[0.82, 0.006, 10, 128]} />
-			<T.MeshBasicMaterial color="#a78bfa" transparent={true} opacity={0.06 * atmosphereReveal} />
-		</T.Mesh>
 		<T.Group bind:ref={ringGlowC} rotation={[0.76, 0.28, Math.PI / 2]}>
 			<HomeIntroRingGlow
 				radius={0.82}
-				count={84}
+				count={0}
 				color="#a78bfa"
 				opacity={0.9}
 				size={0.24}
+				haloOpacity={0.78}
 				emitter={true}
 				emitterAngle={4.18}
-				emitterSize={0.68}
-				emitterOpacity={1.0}
-				emitterIntensity={76}
+				emitterSize={1.18}
+				emitterOpacity={1}
+				emitterIntensity={96}
 				emitterDistance={6.6}
 				emitterDecay={1.25}
 				emitterFrontFacing={true}

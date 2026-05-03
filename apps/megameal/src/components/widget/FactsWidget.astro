@@ -15,6 +15,7 @@ export interface Props {
   title?: string
   kicker?: string
   factTypes?: TimelineFact['type'][]
+  showPrivacyNoticeFirst?: boolean
 }
 
 const {
@@ -30,11 +31,34 @@ const {
       ? 'Paid Message'
       : 'Megameal Signal',
   factTypes = ['advertisement'],
+  showPrivacyNoticeFirst = false,
 } = Astro.props
 
-const availableFacts = megaMealUniverseFacts.filter(fact =>
+const filteredFacts = megaMealUniverseFacts.filter(fact =>
   factTypes.includes(fact.type),
 )
+
+const privacyNoticeFact = {
+  type: 'advertisement',
+  eyebrow: 'Cookie Refusal Desk',
+  headline: 'No Cookies. No Personal Data. No Appetite For Either.',
+  text: "This site doesn't use cookies, and we don't care about your personal data. Thank you for choosing MEGAMEAL.",
+  sponsor: 'Privacy Indifference Department',
+  finePrint:
+    'Your refusal has been accepted before you were asked.',
+  theme: 'morale',
+  cookieActions: [
+    'Reject All Cookies',
+    'Reject Every Cookie',
+    'Reject Cookies Again',
+  ],
+} as TimelineFact & { cookieActions: string[] }
+
+const shouldShowPrivacyNoticeFirst =
+  showPrivacyNoticeFirst && variant === 'overlay'
+const availableFacts = shouldShowPrivacyNoticeFirst
+  ? [privacyNoticeFact, ...filteredFacts]
+  : filteredFacts
 
 const fallbackFact: TimelineFact = {
   type: 'advertisement',
@@ -151,6 +175,35 @@ import '../../styles/features/facts-widget/motion-responsive.css'
           >
             {initialFact.ctaText || 'Comply'}
           </a>
+          <div class="facts-widget-cookie-actions" data-fact-cookie-actions hidden>
+            <button
+              type="button"
+              class="facts-widget-cookie-choice"
+              data-fact-cookie-choice="0"
+              data-action="next"
+              data-sfx-click="sweep"
+            >
+              Reject All Cookies
+            </button>
+            <button
+              type="button"
+              class="facts-widget-cookie-choice"
+              data-fact-cookie-choice="1"
+              data-action="next"
+              data-sfx-click="sweep"
+            >
+              Reject Every Cookie
+            </button>
+            <button
+              type="button"
+              class="facts-widget-cookie-choice"
+              data-fact-cookie-choice="2"
+              data-action="next"
+              data-sfx-click="sweep"
+            >
+              Reject Cookies Again
+            </button>
+          </div>
         </div>
 
         <p
@@ -181,7 +234,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
   </div>
 </section>
 
-<script is:inline define:vars={{ widgetId, facts: availableFacts, fallbackFact }}>
+<script is:inline define:vars={{ widgetId, facts: availableFacts, fallbackFact, hasFirstPrivacyNotice: shouldShowPrivacyNoticeFirst }}>
   const widget = document.getElementById(widgetId)
 
   if (!widget) {
@@ -200,6 +253,8 @@ import '../../styles/features/facts-widget/motion-responsive.css'
     const mediaEl = widget.querySelector('[data-fact-media]')
     const mediaVideoEl = widget.querySelector('[data-fact-media-video]')
     const mediaImgEl = widget.querySelector('[data-fact-media-img]')
+    const cookieActionsEl = widget.querySelector('[data-fact-cookie-actions]')
+    const cookieChoiceEls = Array.from(widget.querySelectorAll('[data-fact-cookie-choice]'))
     const frameEl = widget.querySelector('.facts-widget-frame')
     const storageKey =
       widget.dataset.storageKey || 'megameal-sponsored-window-dismissed'
@@ -212,6 +267,8 @@ import '../../styles/features/facts-widget/motion-responsive.css'
     let collapseTimeoutId
     let scrollIdleTimeoutId
     let cleanupOverlayActivityListeners = () => {}
+    const overlayScrollIdleDelay = 7000
+    const overlayRestoreIdleDelay = 4200
 
     const specialFactLinks = {
       Explainer: '/posts/explainer/',
@@ -246,6 +303,18 @@ import '../../styles/features/facts-widget/motion-responsive.css'
       ctaEl.textContent = fact.ctaText || 'Comply'
       ctaEl.setAttribute('href', resolveHref(fact))
       widget.dataset.factTheme = fact.theme || 'default'
+      widget.dataset.factRole = fact.cookieActions ? 'privacy-notice' : 'standard'
+
+      if (fact.cookieActions?.length && cookieActionsEl) {
+        ctaEl.hidden = true
+        cookieActionsEl.hidden = false
+        cookieChoiceEls.forEach((button, index) => {
+          button.textContent = fact.cookieActions[index] || 'Reject All Cookies'
+        })
+      } else {
+        ctaEl.hidden = false
+        if (cookieActionsEl) cookieActionsEl.hidden = true
+      }
 
       if (fact.finePrint) {
         finePrintEl.textContent = fact.finePrint
@@ -281,11 +350,13 @@ import '../../styles/features/facts-widget/motion-responsive.css'
     }
 
     const getRandomFactIndex = () => {
-      if (facts.length <= 1) return facts.length === 1 ? 0 : -1
+      const firstRandomIndex = hasFirstPrivacyNotice ? 1 : 0
+      if (facts.length <= firstRandomIndex) return -1
+      if (facts.length === firstRandomIndex + 1) return firstRandomIndex
 
       let nextIndex = currentIndex
-      while (nextIndex === currentIndex) {
-        nextIndex = Math.floor(Math.random() * facts.length)
+      while (nextIndex === currentIndex || nextIndex < firstRandomIndex) {
+        nextIndex = firstRandomIndex + Math.floor(Math.random() * (facts.length - firstRandomIndex))
       }
 
       return nextIndex
@@ -312,7 +383,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
       widget.dataset.scrollIdle = idle ? 'true' : 'false'
     }
 
-    const scheduleScrollIdle = (delay = 2400) => {
+    const scheduleScrollIdle = (delay = overlayScrollIdleDelay) => {
       if (!isOverlay || widget.classList.contains('is-dismissed')) return
       window.clearTimeout(scrollIdleTimeoutId)
       scrollIdleTimeoutId = window.setTimeout(() => setScrollIdle(true), delay)
@@ -355,7 +426,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
       applyFact(facts[currentIndex] || fallbackFact)
       setPinned(false)
       setExpanded(false)
-      scheduleScrollIdle(1400)
+      scheduleScrollIdle(overlayRestoreIdleDelay)
       startRotation()
     }
 
@@ -381,7 +452,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
     })
 
     if (facts.length) {
-      currentIndex = getRandomFactIndex()
+      currentIndex = hasFirstPrivacyNotice ? 0 : getRandomFactIndex()
       applyFact(facts[currentIndex] || fallbackFact)
     } else {
       applyFact(fallbackFact)
@@ -392,7 +463,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
     } else {
       setExpanded(isOverlay ? false : true)
       startRotation()
-      scheduleScrollIdle(2600)
+      scheduleScrollIdle()
     }
 
     if (frameEl instanceof HTMLElement && isOverlay) {

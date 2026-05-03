@@ -13,4 +13,44 @@ import '../../styles/features/home/portal-hero-slide.css'
     <p>Commercial Portal Online</p>
     <p>MEGA MEAL SAGA portal. Navigation destinations rotate through the broadcast.</p>
   </div>
+
+  <button class="megameal-home-intro__scroll-cue" type="button" aria-label="Scroll to portal destinations">
+    <span class="megameal-home-intro__scroll-cue-icon" aria-hidden="true"></span>
+  </button>
 </section>
+
+<script>
+  const bindPortalScrollCue = () => {
+    const cue = document.querySelector<HTMLButtonElement>('.megameal-home-intro__scroll-cue')
+    if (!cue || cue.dataset.portalScrollCueBound === 'true') return
+
+    cue.dataset.portalScrollCueBound = 'true'
+    cue.addEventListener('click', () => {
+      const hero = document.getElementById('banner-container')
+      const candidates = Array.from(
+        document.querySelectorAll<HTMLElement>('.portal-snap-section, .portal-showcase, main#main'),
+      )
+      const target = candidates.find((element) => {
+        const rect = element.getBoundingClientRect()
+        return rect.top > window.innerHeight * 0.35
+      })
+      const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+      const behavior: ScrollBehavior = motionQuery.matches ? 'auto' : 'smooth'
+
+      if (target) {
+        target.scrollIntoView({ behavior, block: 'start' })
+        return
+      }
+
+      const heroBottom =
+        hero?.getBoundingClientRect().bottom ?? window.innerHeight
+      window.scrollTo({
+        top: window.scrollY + Math.max(heroBottom, window.innerHeight * 0.82),
+        behavior,
+      })
+    })
+  }
+
+  bindPortalScrollCue()
+  document.addEventListener('astro:page-load', bindPortalScrollCue)
+</script>

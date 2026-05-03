@@ -35,6 +35,11 @@ let scrollFrame = 0
 let activeScreenIndex = 0
 let revealProgress = 0
 let portraitMobile = false
+let backgroundReady = false
+let backgroundRevealTimeout = 0
+let backgroundRevealFallbackTimeout = 0
+const backgroundRevealDelayMs = 1100
+const backgroundRevealFallbackDelayMs = 2600
 const input: IntroInputState = {
   x: 0,
   y: 0,
@@ -292,9 +297,45 @@ function handleResize() {
   scheduleScrollDrivenWheel()
 }
 
+function clearBackgroundRevealTimers() {
+  if (typeof window === 'undefined') return
+
+  if (backgroundRevealTimeout) {
+    window.clearTimeout(backgroundRevealTimeout)
+    backgroundRevealTimeout = 0
+  }
+
+  if (backgroundRevealFallbackTimeout) {
+    window.clearTimeout(backgroundRevealFallbackTimeout)
+    backgroundRevealFallbackTimeout = 0
+  }
+}
+
+function revealBackground() {
+  if (backgroundReady) return
+
+  backgroundReady = true
+  clearBackgroundRevealTimers()
+}
+
+function handleLogoReady() {
+  if (typeof window === 'undefined' || backgroundReady) return
+
+  if (backgroundRevealTimeout) {
+    window.clearTimeout(backgroundRevealTimeout)
+  }
+
+  backgroundRevealTimeout = window.setTimeout(() => {
+    revealBackground()
+  }, backgroundRevealDelayMs)
+}
+
 onMount(() => {
   syncViewportMode()
   updateScrollDrivenWheel()
+  backgroundRevealFallbackTimeout = window.setTimeout(() => {
+    revealBackground()
+  }, backgroundRevealFallbackDelayMs)
 
   window.addEventListener('pointerdown', handlePointerDown)
   window.addEventListener('pointermove', handlePointerMove)
@@ -322,6 +363,7 @@ onMount(() => {
       window.cancelAnimationFrame(scrollFrame)
       scrollFrame = 0
     }
+    clearBackgroundRevealTimers()
   }
 })
 
@@ -332,16 +374,20 @@ onDestroy(() => {
     window.cancelAnimationFrame(scrollFrame)
     scrollFrame = 0
   }
+  clearBackgroundRevealTimers()
 })
 </script>
 
 <div
   bind:this={shell}
   class="home-intro-environment"
+  class:home-intro-environment--background-ready={backgroundReady}
   style={`--portal-reveal-progress: ${revealProgress}`}
 >
+  <div class="home-intro-background-curtain" aria-hidden="true"></div>
+
 	<Canvas {createRenderer} dpr={1.5}>
-		<HomeIntroEnvironmentScene {input} {titleImageSrc} />
+		<HomeIntroEnvironmentScene {input} {titleImageSrc} onLogoReady={handleLogoReady} />
 	</Canvas>
 
 	<div class="home-intro-copy home-intro-copy--status" aria-live="polite">

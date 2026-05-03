@@ -6,7 +6,24 @@
     --portal-reveal-progress: 0;
   }
 
+  .home-intro-background-curtain {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(circle at 50% 48%, rgb(15 23 42 / 0.84), rgb(2 6 23 / 0.98) 64%),
+      rgb(2 6 23);
+    opacity: 1;
+    transition: opacity 1800ms ease-out;
+  }
+
+  .home-intro-environment--background-ready .home-intro-background-curtain {
+    opacity: 0;
+  }
+
   .home-intro-environment canvas {
+    position: relative;
+    z-index: 1;
     filter: brightness(0.92) saturate(1.28) contrast(1.24);
   }
 
@@ -40,14 +57,14 @@
   }
 
   .home-intro-copy--status {
-    top: clamp(1rem, 5vh, 3rem);
+    top: clamp(5rem, 11vh, 7.2rem);
     right: clamp(1rem, 4vw, 3.25rem);
     display: grid;
     gap: 0.42rem;
     min-width: min(20rem, calc(100% - 2rem));
     padding: 0.78rem 0.92rem;
     text-align: right;
-    opacity: clamp(0.32, calc(var(--portal-reveal-progress) * 1.45), 1);
+    opacity: clamp(0, calc((var(--portal-reveal-progress) - 0.14) * 1.8), 1);
   }
 
   .home-intro-copy--status::before {
@@ -138,7 +155,7 @@
     }
 
     .home-intro-copy--status {
-      top: max(4.75rem, env(safe-area-inset-top));
+      top: max(5.8rem, calc(env(safe-area-inset-top) + 4.9rem));
       right: 0.75rem;
       min-width: 0;
       width: min(15.75rem, calc(100% - 1.5rem));
@@ -183,7 +200,7 @@
 
   @media (max-width: 430px) and (orientation: portrait) {
     .home-intro-copy--status {
-      top: max(4.35rem, env(safe-area-inset-top));
+      top: max(5.35rem, calc(env(safe-area-inset-top) + 4.55rem));
       width: min(13rem, calc(100% - 1.5rem));
       text-align: right;
     }
@@ -202,6 +219,10 @@
   @media (prefers-reduced-motion: reduce) {
     .home-intro-environment {
       opacity: 0.7;
+    }
+
+    .home-intro-background-curtain {
+      transition: none;
     }
 
     .home-intro-copy__button {
