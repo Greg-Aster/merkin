@@ -79,7 +79,7 @@ function getRingGlowTexture() {
 <script lang="ts">
 import { T, useTask } from '@threlte/core'
 import { AdditiveBlending, DoubleSide, Vector3 } from 'three'
-import type { Group, SpotLight } from 'three'
+import type { Group } from 'three'
 
 export let radius = 1
 export let count = 36
@@ -95,19 +95,11 @@ export let emitter = false
 export let emitterAngle = 0
 export let emitterSize = 0.72
 export let emitterOpacity = 0.86
-export let emitterIntensity = 16
-export let emitterDistance = 4.8
-export let emitterDecay = 1.35
-export let emitterSpotAngle = 0.34
-export let emitterSpotPenumbra = 0.72
-export let emitterPointFill = 0.18
 export let emitterFrontFacing = false
 export let emitterFrontOffset = 1.35
 
 let group: Group | null = null
 let emitterGroup: Group | null = null
-let emitterLight: SpotLight | null = null
-let emitterTarget: Group | null = null
 
 const additiveBlending = AdditiveBlending
 const doubleSide = DoubleSide
@@ -115,7 +107,7 @@ const glowTexture = getGlowTexture()
 const ringGlowTexture = getRingGlowTexture()
 const emitterLocalPosition = new Vector3()
 const emitterWorldPosition = new Vector3()
-const emitterTargetWorldPosition = new Vector3()
+const groupWorldPosition = new Vector3()
 
 $: sparks = Array.from({ length: count }, (_, index) => {
   const progress = index / Math.max(count, 1)
@@ -150,9 +142,9 @@ useTask(() => {
     if (emitterFrontFacing) {
       emitterWorldPosition.copy(emitterLocalPosition)
       group.localToWorld(emitterWorldPosition)
-      group.getWorldPosition(emitterTargetWorldPosition)
+      group.getWorldPosition(groupWorldPosition)
       emitterWorldPosition.z =
-        emitterTargetWorldPosition.z + emitterFrontOffset
+        groupWorldPosition.z + emitterFrontOffset
       group.worldToLocal(emitterWorldPosition)
       emitterGroup.position.copy(emitterWorldPosition)
     } else {
@@ -160,14 +152,10 @@ useTask(() => {
     }
   }
 
-  if (emitterLight && emitterTarget && emitterLight.target !== emitterTarget) {
-    emitterLight.target = emitterTarget
-  }
 })
 </script>
 
 <T.Group bind:ref={group}>
-  <T.Group bind:ref={emitterTarget} />
   <T.Mesh>
     <T.PlaneGeometry args={[radius * 2.8, radius * 2.8]} />
     <T.MeshBasicMaterial
@@ -195,21 +183,6 @@ useTask(() => {
   {/each}
   {#if emitter}
     <T.Group bind:ref={emitterGroup}>
-      <T.SpotLight
-        bind:ref={emitterLight}
-        intensity={emitterIntensity * atmosphereReveal}
-        distance={emitterDistance}
-        decay={emitterDecay}
-        angle={emitterSpotAngle}
-        penumbra={emitterSpotPenumbra}
-        color={color}
-      />
-      <T.PointLight
-        intensity={emitterIntensity * emitterPointFill * atmosphereReveal}
-        distance={Math.min(emitterDistance, radius * 2.2)}
-        decay={emitterDecay}
-        color={color}
-      />
       <T.Sprite scale={[emitterSize, emitterSize, emitterSize]}>
         <T.SpriteMaterial
           map={glowTexture}

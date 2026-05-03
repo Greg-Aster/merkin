@@ -1,10 +1,9 @@
 <script lang="ts">
 import { T, useTask } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
-import { Box3, Color, Euler, Quaternion, Vector3 } from 'three'
+import { Box3, Euler, Quaternion, Vector3 } from 'three'
 import type * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import HomeIntroLogoReflections from './HomeIntroLogoReflections.svelte'
 import HomeIntroParticle from './HomeIntroParticle.svelte'
 import HomeIntroRingGlow from './HomeIntroRingGlow.svelte'
 import HomeIntroScreenPanel from './HomeIntroScreenPanel.svelte'
@@ -37,10 +36,17 @@ let ringGlowB: THREE.Group | null = null
 let ringGlowC: THREE.Group | null = null
 let logoMeshRoot: THREE.Group | null = null
 let logoModel: THREE.Object3D | null = null
+let logoSearchLightA: THREE.SpotLight | null = null
+let logoSearchLightB: THREE.SpotLight | null = null
+let logoSearchLightC: THREE.SpotLight | null = null
+let logoSearchTargetA: THREE.Group | null = null
+let logoSearchTargetB: THREE.Group | null = null
+let logoSearchTargetC: THREE.Group | null = null
 let starColumn: THREE.Group | null = null
 let screenRail: THREE.Group | null = null
 const screenNodes: THREE.Group[] = []
 let portraitMobile = false
+let particleLimit = 360
 let logoIntroStartedAt = 0
 let atmosphereReveal = 0
 
@@ -60,20 +66,23 @@ const targetScreenQuaternion = new Quaternion()
 const logoBounds = new Box3()
 const logoCenter = new Vector3()
 const logoSize = new Vector3()
+const logoLightTarget = new Vector3(0, 0, -1.05)
+const logoSearchLightPosition = new Vector3()
 const logoTargetSize = new Vector3(4.68, 2.24, 1.44)
 const logoModelSrc = '/assets/3D/Hy3D_textured_00005_.glb'
 const logoIntroDuration = 2.05
 const logoImpactDuration = 0.42
 const logoRotationOffset = Math.PI
-const logoEmissiveTint = new Color('#000000')
-const logoEmissiveIntensity = 0
-const logoEnvironmentIntensity = 0.18
 const gltfLoader = new GLTFLoader()
 let activeScreenSceneId = ''
 let effectWheel = 0
 let logoEffectWheel = 0
 const portalScreens = homeIntroScreens
 const screenCount = portalScreens.length
+let screenMediaLoadStates = Array.from(
+  { length: screenCount },
+  (_, index) => index === primaryScreenIndex,
+)
 
 $: sceneScale = portraitMobile ? 0.78 : 1
 $: cameraPosition = portraitMobile
@@ -100,6 +109,23 @@ $: logoIntroStartPosition = portraitMobile
 function syncViewportMode() {
   if (typeof window === 'undefined') return
   portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
+
+  const connection = (navigator as Navigator & {
+    connection?: { saveData?: boolean; effectiveType?: string }
+  }).connection
+  const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory
+  const reducedData =
+    connection?.saveData === true ||
+    connection?.effectiveType === 'slow-2g' ||
+    connection?.effectiveType === '2g'
+  const lowMemoryDevice = typeof deviceMemory === 'number' && deviceMemory <= 4
+
+  particleLimit =
+    portraitMobile || reducedData
+      ? 180
+      : lowMemoryDevice
+        ? 240
+        : particleCount
 }
 
 function disposeObjectResources(object: THREE.Object3D) {
@@ -148,33 +174,6 @@ function fitLogoModel(model: THREE.Object3D) {
   )
 }
 
-function tuneLogoMaterial(material: THREE.Material) {
-  const standardMaterial = material as THREE.MeshStandardMaterial
-
-  if ('roughness' in standardMaterial) {
-    standardMaterial.roughness = 0.16
-  }
-
-  if ('metalness' in standardMaterial) {
-    standardMaterial.metalness = 0.9
-  }
-
-  if ('envMapIntensity' in standardMaterial) {
-    standardMaterial.envMapIntensity = logoEnvironmentIntensity
-  }
-
-  if ('emissive' in standardMaterial) {
-    standardMaterial.emissive.copy(logoEmissiveTint)
-    standardMaterial.emissiveIntensity = logoEmissiveIntensity
-  }
-
-  if ('emissiveMap' in standardMaterial) {
-    standardMaterial.emissiveMap = null
-  }
-
-  material.needsUpdate = true
-}
-
 function tuneLogoModel(model: THREE.Object3D) {
   model.traverse(child => {
     const mesh = child as THREE.Mesh
@@ -182,12 +181,6 @@ function tuneLogoModel(model: THREE.Object3D) {
 
     mesh.castShadow = false
     mesh.receiveShadow = false
-
-    if (Array.isArray(mesh.material)) {
-      mesh.material.forEach(tuneLogoMaterial)
-    } else {
-      tuneLogoMaterial(mesh.material)
-    }
   })
 }
 
@@ -308,6 +301,7 @@ const screens = Array.from({ length: screenCount }, (_, index) => {
     primary: index === primaryScreenIndex,
   }
 })
+$: visibleParticles = particles.slice(0, particleLimit)
 
 function clampScreenIndex(value: number) {
   return Math.min(screenCount - 1, Math.max(0, value))
@@ -320,6 +314,37 @@ function clamp01(value: number) {
 function smoothstep(value: number) {
   const normalized = clamp01(value)
   return normalized * normalized * (3 - normalized * 2)
+}
+
+function updateLogoSearchLight(
+  light: THREE.SpotLight | null,
+  target: THREE.Group | null,
+  time: number,
+  phase: number,
+  intensity: number,
+  radiusX: number,
+  radiusY: number,
+  frontOffset: number,
+) {
+  if (!light || !target) return
+
+  const drift = time * 0.24 + phase
+  const sweep = time * 0.11 + phase * 0.7
+  const targetX = logoLightTarget.x + Math.cos(sweep) * 0.18
+  const targetY = logoLightTarget.y + Math.sin(sweep) * 0.14
+
+  target.position.set(targetX, targetY, logoLightTarget.z)
+  logoSearchLightPosition.set(
+    logoLightTarget.x + Math.cos(drift) * radiusX,
+    logoLightTarget.y + 0.42 + Math.sin(drift) * radiusY,
+    logoLightTarget.z + frontOffset,
+  )
+  light.position.copy(logoSearchLightPosition)
+  light.intensity = atmosphereReveal * intensity
+
+  if (light.target !== target) {
+    light.target = target
+  }
 }
 
 function getSelectedScreenIndex(wheel: number) {
@@ -352,9 +377,29 @@ function syncBannerToFrontScreen(selectedIndex: number) {
   )
 }
 
+function syncScreenMediaLoadStates(selectedIndex: number) {
+  let changed = false
+  const activeIndex = clampScreenIndex(Math.round(selectedIndex))
+  const next = screenMediaLoadStates.map((loaded, index) => {
+    const shouldLoad =
+      loaded ||
+      index === primaryScreenIndex ||
+      index === activeIndex ||
+      Math.abs(index - selectedIndex) <= 1.15
+
+    if (shouldLoad !== loaded) changed = true
+    return shouldLoad
+  })
+
+  if (changed) {
+    screenMediaLoadStates = next
+  }
+}
+
 function updateScreenOrbit(wheel: number, ease: number) {
   const selectedIndex = getSelectedScreenIndex(wheel)
   syncBannerToFrontScreen(selectedIndex)
+  syncScreenMediaLoadStates(selectedIndex)
 
   for (let index = 0; index < screenCount; index += 1) {
     const screen = screenNodes[index]
@@ -471,11 +516,45 @@ useTask(delta => {
     logoMeshRoot.rotation.x = -0.075 + logoEffectWheel * 0.012 + input.dragY * 0.035
     logoMeshRoot.rotation.y = logoRotationOffset + logoEffectWheel * 0.16 + input.dragX * 0.035
     logoMeshRoot.rotation.z = 0.045 + logoEffectWheel * 0.008
+    logoMeshRoot.getWorldPosition(logoLightTarget)
+  } else {
+    logoLightTarget.set(0, 0, -1.05)
   }
 
   if (ringGlowA) ringGlowA.rotation.z += delta * 0.34
   if (ringGlowB) ringGlowB.rotation.x -= delta * 0.2
   if (ringGlowC) ringGlowC.rotation.y += delta * 0.26
+
+  updateLogoSearchLight(
+    logoSearchLightA,
+    logoSearchTargetA,
+    time,
+    0,
+    180,
+    3.05,
+    11.4,
+    6.5,
+  )
+  updateLogoSearchLight(
+    logoSearchLightB,
+    logoSearchTargetB,
+    time,
+    Math.PI * 0.72,
+    154,
+    2.75,
+    1.12,
+    6,
+  )
+  updateLogoSearchLight(
+    logoSearchLightC,
+    logoSearchTargetC,
+    time,
+    Math.PI * 1.38,
+    130,
+    2.45,
+    1.02,
+    5.6,
+  )
 
   if (starColumn) {
     starColumn.rotation.y = -spiralPhase + time * 0.055 - input.dragX * 0.5
@@ -501,6 +580,33 @@ useTask(delta => {
 <T.PerspectiveCamera bind:ref={camera} makeDefault position={cameraPosition} fov={cameraFov} />
 
 <T.AmbientLight intensity={0.0} color="#dbeafe" />
+<T.Group bind:ref={logoSearchTargetA} />
+<T.Group bind:ref={logoSearchTargetB} />
+<T.Group bind:ref={logoSearchTargetC} />
+<T.SpotLight
+	bind:ref={logoSearchLightA}
+	color="#dff7ff"
+	distance={16.5}
+	decay={1.02}
+	angle={0.9}
+	penumbra={0.98}
+/>
+<T.SpotLight
+	bind:ref={logoSearchLightB}
+	color="#8b5cf6"
+	distance={15.7}
+	decay={1.04}
+	angle={0.94}
+	penumbra={0.98}
+/>
+<T.SpotLight
+	bind:ref={logoSearchLightC}
+	color="#67e8f9"
+	distance={15}
+	decay={1.06}
+	angle={0.98}
+	penumbra={0.99}
+/>
 
 <T.Group bind:ref={world} position={[0, 0, 0]} scale={[sceneScale, sceneScale, sceneScale]}>
 	<T.Group bind:ref={screenRail} position={railPosition}>
@@ -511,13 +617,14 @@ useTask(delta => {
 					imageSrc={screen.primary ? titleImageSrc : ""}
 					stillSrc={screen.stillSrc}
 					primary={screen.primary}
+					shouldLoadMedia={screenMediaLoadStates[index]}
 				/>
 			</T.Group>
 		{/each}
 	</T.Group>
 
   <T.Group bind:ref={starColumn} position={starColumnPosition} scale={starColumnScale}>
-		{#each particles as particle, index}
+		{#each visibleParticles as particle, index}
 			<HomeIntroParticle
 				{particle}
 				{index}
@@ -543,9 +650,6 @@ useTask(delta => {
 				emitterAngle={0.18}
 				emitterSize={1.52}
 				emitterOpacity={1}
-				emitterIntensity={128}
-				emitterDistance={7.6}
-				emitterDecay={1.25}
 				emitterFrontFacing={true}
 				emitterFrontOffset={1.65}
 				{atmosphereReveal}
@@ -564,9 +668,6 @@ useTask(delta => {
 				emitterAngle={2.24}
 				emitterSize={1.34}
 				emitterOpacity={1}
-				emitterIntensity={124}
-				emitterDistance={7.0}
-				emitterDecay={1.25}
 				emitterFrontFacing={true}
 				emitterFrontOffset={1.55}
 				{atmosphereReveal}
@@ -585,9 +686,6 @@ useTask(delta => {
 				emitterAngle={4.18}
 				emitterSize={1.18}
 				emitterOpacity={1}
-				emitterIntensity={96}
-				emitterDistance={6.6}
-				emitterDecay={1.25}
 				emitterFrontFacing={true}
 				emitterFrontOffset={1.45}
 				{atmosphereReveal}
@@ -597,6 +695,4 @@ useTask(delta => {
 	</T.Group>
 </T.Group>
 
-<T.Group bind:ref={logoMeshRoot} position={logoIntroStartPosition} scale={[2.35, 2.35, 2.35]}>
-	<HomeIntroLogoReflections {atmosphereReveal} />
-</T.Group>
+<T.Group bind:ref={logoMeshRoot} position={logoIntroStartPosition} scale={[2.35, 2.35, 2.35]} />

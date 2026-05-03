@@ -180,6 +180,8 @@ const hasTimelineBanner = scene?.id === "timeline";
 const hasImageBanner = scene?.id === "image";
 const hasStandardBanner = scene?.id === "standard";
 const hasAssistantBanner = scene?.id === "assistant";
+const transparentPixel =
+	"data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
 ---
 
 <div
@@ -419,37 +421,76 @@ const hasAssistantBanner = scene?.id === "assistant";
                                   ? item.preload ||
                                     bannerConfig.standardBannerConfig.video.preload
                                   : 'none'}
-                                poster={getAssetSrc(item.fallbackImage)}
+                                poster={isInitialSlide
+                                  ? getAssetSrc(item.fallbackImage)
+                                  : undefined}
+                                data-poster={!isInitialSlide
+                                  ? getAssetSrc(item.fallbackImage)
+                                  : undefined}
                                 class={`banner-video w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
                                 style={`border-radius: ${bannerConfig.visual.borderRadius};`}
                                 onerror="this.style.display='none'; var ne = this.nextElementSibling; if (ne) ne.style.display='block';"
                               >
                                 Your browser does not support the video tag.
                               </video>
+                              {isInitialSlide ? (
+                                <Image
+                                  src={item.fallbackImage}
+                                  alt={item.alt}
+                                  width={bannerConfig.layout.maxWidth}
+                                  height={Math.round(
+                                    bannerConfig.layout.maxWidth * 0.5625,
+                                  )}
+                                  class={`banner-image-fallback w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
+                                  style={`border-radius: ${bannerConfig.visual.borderRadius}; display: none;`}
+                                  loading="eager"
+                                  decoding="async"
+                                />
+                              ) : (
+                                <img
+                                  src={transparentPixel}
+                                  data-src={getAssetSrc(item.fallbackImage)}
+                                  alt={item.alt}
+                                  width={bannerConfig.layout.maxWidth}
+                                  height={Math.round(
+                                    bannerConfig.layout.maxWidth * 0.5625,
+                                  )}
+                                  class={`banner-image-fallback w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
+                                  style={`border-radius: ${bannerConfig.visual.borderRadius}; display: none;`}
+                                  loading="lazy"
+                                  decoding="async"
+                                />
+                              )}
+                            </>
+                          ) : isImageItem ? (
+                            isInitialSlide ? (
                               <Image
-                                src={item.fallbackImage}
+                                src={item.src}
                                 alt={item.alt}
                                 width={bannerConfig.layout.maxWidth}
                                 height={Math.round(
                                   bannerConfig.layout.maxWidth * 0.5625,
                                 )}
-                                class={`banner-image-fallback w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
-                                style={`border-radius: ${bannerConfig.visual.borderRadius}; display: none;`}
-                                loading={isInitialSlide ? 'eager' : 'lazy'}
+                                class={`banner-image w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
+                                style={`border-radius: ${bannerConfig.visual.borderRadius};`}
+                                loading="eager"
+                                decoding="async"
                               />
-                            </>
-                          ) : isImageItem ? (
-                            <Image
-                              src={item.src}
-                              alt={item.alt}
-                              width={bannerConfig.layout.maxWidth}
-                              height={Math.round(
-                                bannerConfig.layout.maxWidth * 0.5625,
-                              )}
-                              class={`banner-image w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
-                              style={`border-radius: ${bannerConfig.visual.borderRadius};`}
-                              loading={isInitialSlide ? 'eager' : 'lazy'}
-                            />
+                            ) : (
+                              <img
+                                src={transparentPixel}
+                                data-src={getAssetSrc(item.src)}
+                                alt={item.alt}
+                                width={bannerConfig.layout.maxWidth}
+                                height={Math.round(
+                                  bannerConfig.layout.maxWidth * 0.5625,
+                                )}
+                                class={`banner-image w-full h-full object-${bannerConfig.visual.objectFit} object-${bannerConfig.visual.objectPosition} transition-transform duration-300 group-hover:scale-105`}
+                                style={`border-radius: ${bannerConfig.visual.borderRadius};`}
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            )
                           ) : (
                             <slot name="banner-slide-content" />
                           )}
@@ -1360,8 +1401,20 @@ const hasAssistantBanner = scene?.id === "assistant";
 
         videoElement.src = deferredSrc
         videoElement.removeAttribute('data-src')
+        if (videoElement.dataset.poster) {
+          videoElement.poster = videoElement.dataset.poster
+          videoElement.removeAttribute('data-poster')
+        }
         applyVideoPlaybackRate(videoElement)
         videoElement.load()
+      })
+
+      slide.querySelectorAll('img[data-src]').forEach(imageElement => {
+        const deferredSrc = imageElement.dataset.src
+        if (!deferredSrc || imageElement.getAttribute('src') === deferredSrc) return
+
+        imageElement.src = deferredSrc
+        imageElement.removeAttribute('data-src')
       })
     }
 

@@ -27,6 +27,7 @@ export let index: number
 export let primary = false
 export let imageSrc = ''
 export let stillSrc = ''
+export let shouldLoadMedia = primary
 
 let titleTexture: Texture | null = null
 let stillTexture: Texture | null = null
@@ -38,6 +39,9 @@ let causticTexture: CanvasTexture | null = null
 let grimeTexture: CanvasTexture | null = null
 let sheenSweep: Group | null = null
 let secondarySheenSweep: Group | null = null
+let loader: TextureLoader | null = null
+let stillTextureRequested = false
+let titleTextureRequested = false
 
 const additiveBlending = AdditiveBlending
 const multiplyBlending = MultiplyBlending
@@ -143,33 +147,15 @@ function disposeGrimeTexture() {
 }
 
 onMount(() => {
-  const loader = new TextureLoader()
+  loader = new TextureLoader()
   frostTexture = createFrostTexture()
   sheenTexture = createSheenTexture()
   causticTexture = createCausticTexture()
   grimeTexture = createGrimeTexture()
-
-  if (stillSrc) {
-    stillTexture = loader.load(stillSrc, texture => {
-      texture.colorSpace = SRGBColorSpace
-      texture.needsUpdate = true
-      disposeStillAlphaTexture()
-      stillAlphaTexture = createImageAlphaTexture(texture.image)
-      stillTexture = texture
-    })
-  }
-
-  if (primary && imageSrc) {
-    titleTexture = loader.load(imageSrc, texture => {
-      texture.colorSpace = SRGBColorSpace
-      texture.needsUpdate = true
-      disposeTitleAlphaTexture()
-      titleAlphaTexture = createImageAlphaTexture(texture.image)
-      titleTexture = texture
-    })
-  }
+  ensureMediaTexturesLoaded()
 
   return () => {
+    loader = null
     disposeStillTexture()
     disposeTitleTexture()
     disposeStillAlphaTexture()
@@ -182,6 +168,7 @@ onMount(() => {
 })
 
 onDestroy(() => {
+  loader = null
   disposeStillTexture()
   disposeTitleTexture()
   disposeStillAlphaTexture()
@@ -191,6 +178,36 @@ onDestroy(() => {
   disposeCausticTexture()
   disposeGrimeTexture()
 })
+
+function ensureMediaTexturesLoaded() {
+  if (!loader || !shouldLoadMedia) return
+
+  const shouldLoadStill = stillSrc && (!primary || !imageSrc)
+
+  if (shouldLoadStill && !stillTextureRequested) {
+    stillTextureRequested = true
+    stillTexture = loader.load(stillSrc, texture => {
+      texture.colorSpace = SRGBColorSpace
+      texture.needsUpdate = true
+      disposeStillAlphaTexture()
+      stillAlphaTexture = createImageAlphaTexture(texture.image)
+      stillTexture = texture
+    })
+  }
+
+  if (primary && imageSrc && !titleTextureRequested) {
+    titleTextureRequested = true
+    titleTexture = loader.load(imageSrc, texture => {
+      texture.colorSpace = SRGBColorSpace
+      texture.needsUpdate = true
+      disposeTitleAlphaTexture()
+      titleAlphaTexture = createImageAlphaTexture(texture.image)
+      titleTexture = texture
+    })
+  }
+}
+
+$: ensureMediaTexturesLoaded()
 
 useTask(() => {
   const time = performance.now() * 0.001
@@ -355,11 +372,11 @@ useTask(() => {
 		</T.Mesh>
 	</T.Group>
 
-	{#if stillTexture}
-		<T.Mesh position={[0, 0, 0.158]}>
-			<T.PlaneGeometry args={[mediaWidth, mediaHeight]} />
+	{#if primary && titleTexture}
+		<T.Mesh position={[0, 0.02, 0.158]}>
+			<T.PlaneGeometry args={[titleWidth, titleHeight]} />
 			<T.MeshBasicMaterial
-				map={stillTexture}
+				map={titleTexture}
 				side={frontSide}
 				transparent={false}
 				opacity={1}
@@ -367,11 +384,11 @@ useTask(() => {
 				depthWrite={true}
 			/>
 		</T.Mesh>
-	{:else if primary && titleTexture}
-		<T.Mesh position={[0, 0.02, 0.158]}>
-			<T.PlaneGeometry args={[titleWidth, titleHeight]} />
+	{:else if stillTexture}
+		<T.Mesh position={[0, 0, 0.158]}>
+			<T.PlaneGeometry args={[mediaWidth, mediaHeight]} />
 			<T.MeshBasicMaterial
-				map={titleTexture}
+				map={stillTexture}
 				side={frontSide}
 				transparent={false}
 				opacity={1}

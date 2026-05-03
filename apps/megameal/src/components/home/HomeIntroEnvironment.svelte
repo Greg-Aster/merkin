@@ -38,6 +38,7 @@ let portraitMobile = false
 let backgroundReady = false
 let backgroundRevealTimeout = 0
 let backgroundRevealFallbackTimeout = 0
+let canvasDpr = 1
 const backgroundRevealDelayMs = 1100
 const backgroundRevealFallbackDelayMs = 2600
 const input: IntroInputState = {
@@ -110,6 +111,40 @@ function isShellVisible() {
 function syncViewportMode() {
   if (typeof window === 'undefined') return
   portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
+}
+
+function prefersReducedData() {
+  if (typeof navigator === 'undefined') return false
+
+  const connection = (navigator as Navigator & {
+    connection?: { saveData?: boolean; effectiveType?: string }
+  }).connection
+
+  return (
+    connection?.saveData === true ||
+    connection?.effectiveType === 'slow-2g' ||
+    connection?.effectiveType === '2g'
+  )
+}
+
+function getDeviceMemory() {
+  if (typeof navigator === 'undefined') return undefined
+
+  return (navigator as Navigator & { deviceMemory?: number }).deviceMemory
+}
+
+function syncCanvasDpr() {
+  if (typeof window === 'undefined') return
+
+  const devicePixelRatio = Math.max(1, window.devicePixelRatio || 1)
+  const deviceMemory = getDeviceMemory()
+  const lowMemoryDevice = typeof deviceMemory === 'number' && deviceMemory <= 4
+  const compactViewport = window.innerWidth <= 760 || window.innerHeight <= 640
+
+  canvasDpr = Math.min(
+    devicePixelRatio,
+    compactViewport || lowMemoryDevice || prefersReducedData() ? 1 : 1.25,
+  )
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -294,6 +329,7 @@ function handleWheel(event: WheelEvent) {
 
 function handleResize() {
   syncViewportMode()
+  syncCanvasDpr()
   scheduleScrollDrivenWheel()
 }
 
@@ -332,6 +368,7 @@ function handleLogoReady() {
 
 onMount(() => {
   syncViewportMode()
+  syncCanvasDpr()
   updateScrollDrivenWheel()
   backgroundRevealFallbackTimeout = window.setTimeout(() => {
     revealBackground()
@@ -386,7 +423,7 @@ onDestroy(() => {
 >
   <div class="home-intro-background-curtain" aria-hidden="true"></div>
 
-	<Canvas {createRenderer} dpr={1.5}>
+	<Canvas {createRenderer} dpr={canvasDpr}>
 		<HomeIntroEnvironmentScene {input} {titleImageSrc} onLogoReady={handleLogoReady} />
 	</Canvas>
 
