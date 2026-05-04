@@ -1,0 +1,73 @@
+---
+type ArchiveStat = {
+  label: string
+  value: string
+  note: string
+}
+
+interface Props {
+  stats: ArchiveStat[]
+}
+
+const { stats } = Astro.props
+const featuredStats = stats.slice(0, 3)
+---
+
+<section class="relative h-full w-full overflow-hidden bg-black text-white">
+  <video
+    id="archive-banner-video"
+    class="absolute inset-0 h-full w-full object-cover opacity-80"
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="metadata"
+    poster="/assets/banner/archive_still.png"
+    aria-hidden="true"
+  >
+    <source src="/assets/banner/archive_2.webm" type="video/webm" />
+  </video>
+
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_72%_24%,rgba(255,255,255,0.16),transparent_30%),linear-gradient(90deg,rgba(0,0,0,0.86),rgba(0,0,0,0.48)_46%,rgba(0,0,0,0.3))]"></div>
+
+  <div class="relative z-10 flex h-full items-end px-4 py-5 sm:px-8 sm:py-8 lg:px-12">
+    <div class="grid w-full gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(20rem,0.72fr)] lg:items-end">
+      <div class="max-w-3xl">
+        <p class="mb-3 text-xs font-bold uppercase tracking-[0.28em] text-white/68">
+          Dispatch Index
+        </p>
+        <h1 class="text-3xl font-black leading-[0.96] text-white sm:text-5xl lg:text-7xl">
+          The Archive
+        </h1>
+        <p class="mt-4 max-w-2xl text-sm leading-6 text-white/74 sm:text-base">
+          A connected record of posts, timeline entries, story arcs, and star map
+          destinations across the Mega Meal Saga.
+        </p>
+      </div>
+
+      <div class="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+        {featuredStats.map(stat => (
+          <div class="rounded-lg border border-white/14 bg-black/38 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md">
+            <div class="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/56">
+              {stat.label}
+            </div>
+            <div class="mt-1 text-2xl font-black leading-none text-white">
+              {stat.value}
+            </div>
+            <div class="mt-1 text-xs leading-5 text-white/62">
+              {stat.note}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const archiveBannerVideo = document.getElementById('archive-banner-video')
+
+  if (archiveBannerVideo instanceof HTMLVideoElement) {
+    archiveBannerVideo.playbackRate = 0.25
+  }
+</script>

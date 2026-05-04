@@ -169,6 +169,8 @@ export interface BannerConfig {
       video: string
       image: string
       assistant: string
+      cookbook?: string
+      archive?: string
       none: string
     }
     // ⭐ FIXED: Mobile portrait spacing now accounts for always-visible navbar
@@ -183,6 +185,7 @@ export interface BannerConfig {
       image: string
       timeline: string
       assistant: string
+      archive?: string
       standard: string // ⭐ THIS IS YOUR BANNER OVERLAP CONTROL!
       none: string
     }
@@ -272,6 +275,8 @@ export const bannerConfig: BannerConfig = {
       video: '5.5rem', // ✅ Desktop spacing
       image: '4rem', // ✅ Desktop spacing
       assistant: '5.5rem', // ✅ Desktop spacing
+      cookbook: '5.5rem',
+      archive: '5.5rem',
       none: '-8rem', // ✅ Desktop spacing
     },
     // No extra mobile banner offset: navbar stays in normal flow above the banner
@@ -286,6 +291,7 @@ export const bannerConfig: BannerConfig = {
       image: '-0.5rem', // ✅ WORKING VALUE
       timeline: '-0.5rem', // ✅ WORKING VALUE
       assistant: '-0.5rem', // ✅ WORKING VALUE
+      archive: '-0.5rem',
       standard: '-2rem', // ✅ Reduced overlap for better content visibility
       none: '12rem', // ✅ WORKING VALUE
     },
@@ -350,6 +356,8 @@ export function determineBannerType(
   const hasPostVideoBanner =
     post?.data?.bannerType === 'video' && post?.data?.bannerData?.videoId
   const hasPostAssistantBanner = post?.data?.bannerType === 'assistant'
+  const hasPostCookbookBanner = post?.data?.bannerType === 'cookbook'
+  const hasPostArchiveBanner = post?.data?.bannerType === 'archive'
   const hasPostImageBanner =
     !postData?.wantsNoDefaultBanner &&
     (post?.data?.image ||
@@ -357,13 +365,17 @@ export function determineBannerType(
         post?.data?.bannerData?.imageUrl)) &&
     !hasPostVideoBanner &&
     !hasPostTimelineBanner &&
-    !hasPostAssistantBanner
+    !hasPostAssistantBanner &&
+    !hasPostCookbookBanner &&
+    !hasPostArchiveBanner
 
   const hasPostBanner =
     hasPostVideoBanner ||
     hasPostImageBanner ||
     hasPostTimelineBanner ||
-    hasPostAssistantBanner
+    hasPostAssistantBanner ||
+    hasPostCookbookBanner ||
+    hasPostArchiveBanner
 
   // Check for default banners
   const useDefaultVideo =
@@ -400,6 +412,8 @@ export function determineBannerType(
   const hasVideoBanner = hasPostVideoBanner || useDefaultVideo
   const hasImageBanner = hasPostImageBanner || useDefaultImage
   const hasAssistantBanner = hasPostAssistantBanner || useDefaultAssistant
+  const hasCookbookBanner = hasPostCookbookBanner
+  const hasArchiveBanner = hasPostArchiveBanner
   const hasStandardBanner = useDefaultStandard
 
   const currentBannerType: BannerType = hasVideoBanner
@@ -407,18 +421,24 @@ export function determineBannerType(
     : hasImageBanner
       ? 'image'
       : hasTimelineBanner
-        ? 'timeline'
-        : hasAssistantBanner
-          ? 'assistant'
-          : hasStandardBanner
-            ? 'standard'
-            : 'none'
+      ? 'timeline'
+      : hasAssistantBanner
+        ? 'assistant'
+        : hasCookbookBanner
+          ? 'cookbook'
+          : hasArchiveBanner
+            ? 'archive'
+            : hasStandardBanner
+              ? 'standard'
+              : 'none'
 
   return {
     hasTimelineBanner,
     hasVideoBanner,
     hasImageBanner,
     hasAssistantBanner,
+    hasCookbookBanner,
+    hasArchiveBanner,
     hasStandardBanner,
     hasPostBanner,
     isStandardPage: !hasPostBanner,
@@ -435,6 +455,8 @@ export function getBannerDataSources(
     hasVideoBanner,
     hasImageBanner,
     hasAssistantBanner,
+    hasCookbookBanner,
+    hasArchiveBanner,
   } = bannerType
 
   let resolvedImageBannerData: any = null
@@ -484,6 +506,14 @@ export function getBannerDataSources(
         : hasAssistantBanner
           ? bannerConfig.defaultBannerData
           : null,
+    cookbookBannerData:
+      hasCookbookBanner && post?.data?.bannerType === 'cookbook'
+        ? post.data.bannerData
+        : null,
+    archiveBannerData:
+      hasArchiveBanner && post?.data?.bannerType === 'archive'
+        ? post.data.bannerData
+        : null,
   }
 }
 
@@ -523,6 +553,8 @@ export function determineBannerConfiguration(
         hasVideoBanner: false,
         hasImageBanner: false,
         hasAssistantBanner: false,
+        hasCookbookBanner: false,
+        hasArchiveBanner: false,
         hasStandardBanner: false,
         hasPostBanner: false,
         isStandardPage: false,
@@ -533,6 +565,8 @@ export function determineBannerConfiguration(
         imageBannerData: null,
         timelineBannerData: null,
         assistantBannerData: null,
+        cookbookBannerData: null,
+        archiveBannerData: null,
       },
       layout: {
         mainPanelTop: bannerConfig.panel.top.none,
@@ -614,6 +648,10 @@ export function getPanelTopPosition(bannerType: BannerType): string {
       return bannerConfig.panel.top.timeline
     case 'assistant':
       return bannerConfig.panel.top.assistant
+    case 'cookbook':
+      return bannerConfig.panel.top.video
+    case 'archive':
+      return bannerConfig.panel.top.archive ?? bannerConfig.panel.top.video
     case 'none':
       return bannerConfig.panel.top.none
     default:

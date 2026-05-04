@@ -76,4 +76,4 @@ Despite his casual demeanor and surprising sense of humor, Merkin carries the we
 
 ---
 
-*To witness Merkin's cosmic curation in action, explore the [Timeline of All Things](/posts/explainer/) or discover his favorite [Universal Recipes](/posts/cookbook/cookbook-index/).*
+*To witness Merkin's cosmic curation in action, explore the [Timeline of All Things](/posts/explainer/) or discover his favorite [Universal Recipes](/cookbook/).*

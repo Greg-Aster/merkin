@@ -1,0 +1,233 @@
+---
+import fs from 'node:fs'
+import path from 'node:path'
+import type { CollectionEntry } from 'astro:content'
+import MainGridLayout from '@layouts/MainGridLayout.astro'
+import Markdown from '@components/misc/Markdown.astro'
+import { Icon } from 'astro-icon/components'
+import { url } from '../../utils/url-utils'
+import CookbookBanner from './CookbookBanner.astro'
+
+interface Props {
+  entry: CollectionEntry<'cookbook'>
+  entries: CollectionEntry<'cookbook'>[]
+}
+
+const { entry, entries } = Astro.props
+const visibleEntries = entries
+  .filter(item => item.data.draft !== true)
+  .sort((a, b) => (a.data.page ?? 999) - (b.data.page ?? 999))
+const { Content } = await entry.render()
+
+const currentIndex = visibleEntries.findIndex(item => item.slug === entry.slug)
+const previousEntry = currentIndex > 0 ? visibleEntries[currentIndex - 1] : null
+const nextEntry =
+  currentIndex >= 0 && currentIndex < visibleEntries.length - 1
+    ? visibleEntries[currentIndex + 1]
+    : null
+
+const cookbookBannerPost = {
+  slug: entry.slug,
+  data: {
+    title: entry.data.title,
+    description: entry.data.description,
+    image: entry.data.image || '/posts/cookbook/cookbook.png',
+    bannerType: 'cookbook',
+    oneColumn: true,
+    showToc: false,
+  },
+}
+
+const isRecipe = entry.data.kind === 'recipe'
+const localPdfPath = path.join(
+  process.cwd(),
+  'public',
+  'downloads',
+  'cookbook',
+  `${entry.slug}.pdf`,
+)
+const hasStaticPdf = fs.existsSync(localPdfPath)
+const recipeDownloadUrl = hasStaticPdf
+  ? url(`/downloads/cookbook/${entry.slug}.pdf`)
+  : url(`/pdf/cookbook/${entry.slug}/`)
+const recipeDownloadLabel = hasStaticPdf
+  ? 'Download Recipe PDF'
+  : 'Open Printable Recipe'
+
+function cookbookHref(item: CollectionEntry<'cookbook'> | null, anchor = '') {
+  if (!item) return '#'
+  const href = item.slug === 'cookbook-index'
+    ? '/cookbook/'
+    : `/cookbook/${item.slug}/`
+  return anchor ? `${href}${anchor}` : href
+}
+---
+
+<MainGridLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  banner={entry.data.image || '/posts/cookbook/cookbook.png'}
+  post={cookbookBannerPost}
+  backgroundImage={entry.data.image || '/posts/cookbook/cookbook.png'}
+  oneColumn={true}
+>
+  <CookbookBanner
+    slot="banner-slide-content"
+    entries={visibleEntries}
+    activeSlug={entry.slug}
+  />
+
+  <div class="w-full pt-6">
+    <main class="min-w-0">
+      <article id="cookbook-reader" class="card-base z-10 scroll-mt-24 rounded-lg px-5 py-5 md:px-9 md:py-7">
+        <nav class="mb-5 flex items-center justify-between gap-3 rounded-lg border border-black/10 bg-black/[0.03] p-2 dark:border-white/10 dark:bg-white/[0.06]" aria-label="Cookbook page controls">
+          <a
+            href={cookbookHref(previousEntry, '#cookbook-reader')}
+            class:list={[
+              'btn-card inline-flex h-10 w-10 items-center justify-center rounded-md transition active:scale-95',
+              previousEntry ? '' : 'pointer-events-none opacity-35',
+            ]}
+            aria-label={previousEntry
+              ? `Previous page: ${previousEntry.data.title}`
+              : 'Start of cookbook'}
+            data-sfx-hover="hover-soft"
+            data-sfx-click="soft"
+          >
+            <Icon name="material-symbols:chevron-left-rounded" class="text-2xl text-[var(--primary)]" />
+          </a>
+
+          <div class="min-w-0 text-center">
+            <div class="text-xs font-bold uppercase tracking-[0.14em] text-[var(--primary)]">
+              Page {entry.data.page ?? currentIndex + 1}
+            </div>
+            <div class="truncate text-sm font-bold text-black/60 dark:text-white/60">
+              {entry.data.section}
+            </div>
+          </div>
+
+          <a
+            href={cookbookHref(nextEntry, '#cookbook-reader')}
+            class:list={[
+              'btn-card inline-flex h-10 w-10 items-center justify-center rounded-md transition active:scale-95',
+              nextEntry ? '' : 'pointer-events-none opacity-35',
+            ]}
+            aria-label={nextEntry
+              ? `Next page: ${nextEntry.data.title}`
+              : 'End of cookbook'}
+            data-sfx-hover="hover-soft"
+            data-sfx-click="soft"
+          >
+            <Icon name="material-symbols:chevron-right-rounded" class="text-2xl text-[var(--primary)]" />
+          </a>
+        </nav>
+
+        <div class="mb-4 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-black/45 dark:text-white/45">
+          <span>{entry.data.section}</span>
+          <span aria-hidden="true">/</span>
+          <span>Page {entry.data.page ?? currentIndex + 1}</span>
+        </div>
+
+        <div class="grid gap-5 md:grid-cols-[minmax(0,1fr)_12rem] md:items-start">
+          <div>
+            <h1 class="mb-3 text-3xl font-black leading-tight text-black/90 dark:text-white/90 md:text-5xl">
+              {entry.data.title}
+            </h1>
+            <p class="text-base leading-relaxed text-black/65 dark:text-white/65 md:text-lg">
+              {entry.data.description}
+            </p>
+          </div>
+          {entry.data.image && (
+            <img
+              src={entry.data.image}
+              alt=""
+              loading="eager"
+              decoding="async"
+              class="aspect-[4/5] w-full rounded-lg object-cover"
+            />
+          )}
+        </div>
+
+        {isRecipe && (
+          <section class="my-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Recipe details">
+            {[
+              ['Prep', entry.data.prepTime],
+              ['Cook', entry.data.cookTime],
+              ['Serves', entry.data.servings],
+              ['Difficulty', entry.data.difficulty],
+            ].filter(([, value]) => value).map(([label, value]) => (
+              <div class="rounded-lg border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.06]">
+                <div class="text-xs font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
+                  {label}
+                </div>
+                <div class="mt-1 font-bold text-black/80 dark:text-white/80">
+                  {value}
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+
+        <Markdown class="markdown-content">
+          <Content />
+        </Markdown>
+
+        <nav class="mt-8 flex items-center justify-between gap-3 border-t border-dashed border-black/10 pt-5 dark:border-white/10" aria-label="Cookbook page controls">
+          <a
+            href={cookbookHref(previousEntry, '#cookbook-reader')}
+            class:list={[
+              'btn-card inline-flex min-h-[3rem] min-w-0 flex-1 items-center gap-2 rounded-lg px-3 py-2 text-left transition active:scale-[0.98]',
+              previousEntry ? '' : 'pointer-events-none opacity-35',
+            ]}
+            data-sfx-hover="hover-soft"
+            data-sfx-click="soft"
+          >
+            <Icon name="material-symbols:chevron-left-rounded" class="shrink-0 text-2xl text-[var(--primary)]" />
+            <span class="min-w-0">
+              <span class="block text-xs font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
+                Previous
+              </span>
+              <span class="line-clamp-1 block text-sm font-bold text-black/70 dark:text-white/70">
+                {previousEntry?.data.title ?? 'Start of book'}
+              </span>
+            </span>
+          </a>
+
+          <a
+            href={cookbookHref(nextEntry, '#cookbook-reader')}
+            class:list={[
+              'btn-card inline-flex min-h-[3rem] min-w-0 flex-1 items-center justify-end gap-2 rounded-lg px-3 py-2 text-right transition active:scale-[0.98]',
+              nextEntry ? '' : 'pointer-events-none opacity-35',
+            ]}
+            data-sfx-hover="hover-soft"
+            data-sfx-click="soft"
+          >
+            <span class="min-w-0">
+              <span class="block text-xs font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
+                Next
+              </span>
+              <span class="line-clamp-1 block text-sm font-bold text-black/70 dark:text-white/70">
+                {nextEntry?.data.title ?? 'End of book'}
+              </span>
+            </span>
+            <Icon name="material-symbols:chevron-right-rounded" class="shrink-0 text-2xl text-[var(--primary)]" />
+          </a>
+        </nav>
+      </article>
+
+      {isRecipe && (
+        <a
+          href={recipeDownloadUrl}
+          download={hasStaticPdf ? `${entry.slug}.pdf` : undefined}
+          class="mt-4 block w-full overflow-hidden font-bold active:scale-95"
+          data-sfx-hover="hover-emphasis"
+          data-sfx-click="confirm"
+        >
+          <div class="card-base btn-card flex min-h-[4.5rem] w-full items-center justify-center gap-3 rounded-lg px-4 py-3">
+            <Icon name="material-symbols:download-rounded" class="shrink-0 text-[1.5rem] text-[var(--primary)]" />
+            <span class="text-black/80 dark:text-white/80">{recipeDownloadLabel}</span>
+          </div>
+        </a>
+      )}
+    </main>
+  </div>
+</MainGridLayout>

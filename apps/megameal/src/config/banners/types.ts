@@ -43,6 +43,8 @@ export type BannerType =
   | 'image'
   | 'timeline'
   | 'assistant'
+  | 'cookbook'
+  | 'archive'
   | 'none'
 
 // =====================================================================
@@ -163,6 +165,12 @@ export interface AssistantBannerData {
 }
 
 /**
+ * Archive banner configuration
+ * Custom-rendered archive banner content is supplied via slots.
+ */
+export type ArchiveBannerData = Record<string, never>
+
+/**
  * None banner configuration
  * Used when no banner should be displayed
  */
@@ -178,6 +186,7 @@ export type BannerData =
   | ImageBannerData
   | TimelineBannerData
   | AssistantBannerData
+  | ArchiveBannerData
   | NoneBannerData
 
 // =====================================================================
@@ -226,6 +235,8 @@ export interface BannerDeterminationResult {
   hasVideoBanner: boolean
   hasImageBanner: boolean
   hasAssistantBanner: boolean
+  hasCookbookBanner?: boolean
+  hasArchiveBanner?: boolean
   hasStandardBanner: boolean
   hasPostBanner: boolean
   isStandardPage: boolean
@@ -341,6 +352,8 @@ export interface BannerNavbarConfig {
     video: string // For video banner
     image: string // For image banner
     assistant: string // For assistant banner
+    cookbook?: string // For cookbook banner
+    archive?: string // For archive banner
     none: string // For none banner
   }
 }
@@ -356,6 +369,7 @@ export interface BannerPanelConfig {
     timeline: string // CSS value for timeline banner type
     standard: string // CSS value for standard banner type
     assistant: string // CSS value for assistant banner type
+    archive?: string // CSS value for archive banner type
     none: string // CSS value for none banner type
   }
 }

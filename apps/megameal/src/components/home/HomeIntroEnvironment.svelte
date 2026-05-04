@@ -2,6 +2,7 @@
 import { Canvas } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
+import { navigateWithMegamealTransition } from '@/utils/megamealRouteTransitions'
 import HomeIntroEnvironmentScene from './HomeIntroEnvironmentScene.svelte'
 import {
   homeIntroMaxWheelForOffset,
@@ -355,7 +356,27 @@ function handlePointerMove(event: PointerEvent) {
 function navigateActiveScreen() {
   if (typeof window === 'undefined' || !activeScreen.href) return
 
-  window.location.assign(activeScreen.href)
+  navigateWithMegamealTransition({
+    href: activeScreen.href,
+    type: 'portal-zoom',
+    sourceRect: getActiveScreenTransitionRect(),
+    previewSrc: activeScreen.webglStillSrc ?? activeScreen.stillSrc,
+  })
+}
+
+function getActiveScreenTransitionRect() {
+  if (!shell) return null
+
+  const bounds = shell.getBoundingClientRect()
+  const horizontalLimit = portraitMobile ? 0.7 : 0.58
+  const verticalLimit = portraitMobile ? 0.48 : 0.42
+  const verticalCenter = portraitMobile ? -0.02 : -0.04
+  const width = bounds.width * horizontalLimit
+  const height = bounds.height * verticalLimit
+  const centerX = bounds.left + bounds.width * 0.5
+  const centerY = bounds.top + bounds.height * (0.5 + verticalCenter * 0.5)
+
+  return new DOMRect(centerX - width / 2, centerY - height / 2, width, height)
 }
 
 function handlePointerUp(event?: PointerEvent) {

@@ -58,8 +58,8 @@ import { isImageBannerItem, isVideoBannerItem } from './types'
 import banner3Fallback from '@/assets/banner/cookbook.png'
 //import banner1 from '@/assets/banner/main-title.png'
 import banner1Fallback from '@/assets/banner/main-title.png' // Fallback for your video
-import starObservatoryFallback from '@/assets/site/posts/Mega-Meal-Explained/overlook.png'
-import storefrontBanner from '@/assets/site/posts/Mega-Meal-Explained/ultra-headquarters.png'
+import starObservatoryFallback from '@/assets/banner/game.webp'
+import storefrontBanner from '@/assets/banner/store-page.webp'
 import storyModeBanner from '@/assets/site/posts/building.png'
 import archiveDispatchesBanner from '@/assets/site/posts/timeline/archive.png'
 import communityChannelsBanner from '@/assets/site/posts/timeline/golden-era.png'
@@ -205,7 +205,7 @@ const bannerEntries: BannerEntry[] = [
       preload: 'none', // Don't preload video until needed
       playbackRate: 0.25, // Slow down this clip to make it more readable as a banner
     },
-    link: '/posts/cookbook/cookbook-index/',
+    link: '/cookbook/',
   },
   {
     item: {
@@ -332,7 +332,7 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
       'Start with the core premise of the project, the setting, and the tone before moving into the deeper branches of the universe.',
     icon: 'book-open',
   },
-  '/posts/cookbook/cookbook-index/': {
+  '/cookbook/': {
     title: 'The Cookbook',
     description:
       'Recipes from a future where dinner has a brand strategy, a waiver, and a suspiciously well-funded legal department.',
@@ -377,20 +377,20 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
   '/community/': {
     title: 'Community',
     description:
-      'Join the channels. Share theories. Report anomalies. Remember: friendship is cheaper than customer support.',
+      'A future community hub for channels, theory sharing, and anomaly reports. The desk is staffed by placeholders for now.',
     icon: 'user-group',
     kicker: 'Public Relations',
-    stat: `${publishedDispatchCount} monitored transmissions`,
-    ctaLabel: 'Open Channels',
+    stat: 'Community desk in progress',
+    ctaLabel: 'Preview Desk',
   },
   '/posts/introducing-story-mode/': {
     title: 'Story Mode',
     description:
-      'Read the saga in a humane order, or as humane as a galactic fast-food empire permits before the upsell begins.',
+      'A planned guided path through the saga. Narrative rails are visible, but the full route is still being assembled.',
     icon: 'newspaper',
     kicker: 'Guided Consumption',
-    stat: 'Narrative rails engaged',
-    ctaLabel: 'Start Reading',
+    stat: 'Story route under construction',
+    ctaLabel: 'View Preview',
   },
   /*
   '/contact': {

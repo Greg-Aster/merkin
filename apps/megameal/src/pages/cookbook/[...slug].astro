@@ -1,0 +1,21 @@
+---
+import { getCollection } from 'astro:content'
+import CookbookReaderPage from '../../components/cookbook/CookbookReaderPage.astro'
+
+export async function getStaticPaths() {
+  const entries = await getCollection('cookbook', ({ data }) => data.draft !== true)
+
+  return entries.map(entry => ({
+    params: { slug: entry.slug },
+    props: { entry, entries },
+  }))
+}
+
+const { entry, entries } = Astro.props
+
+if (entry.slug === 'cookbook-index') {
+  return Astro.redirect('/cookbook/', 301)
+}
+---
+
+<CookbookReaderPage entry={entry} entries={entries} />

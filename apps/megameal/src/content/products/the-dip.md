@@ -79,7 +79,7 @@ qanda:
   - question: "Is it true children have been wandering at night after eating it?"
     answer: "There are recurring reports of children standing in dark rooms, moving in loose groups through neighborhoods, and gathering inside unused commercial spaces with no memory of doing so the next day. The company attributes this to rumor, ordinary childhood behavior, and insufficient parental confidence."
     linkLabel: "Read the W Corporation field imagery"
-    linkHref: "/posts/mega-meal-explained/"
+    linkHref: "/videos/mega-meal-explained/"
     linkAccent: "creepy"
   - question: "What are they building in warehouses?"
     answer: "No official statement has clarified this. Accounts differ on whether the children are stacking packaging, arranging playground components, or simply standing in formation around something already there."
@@ -104,7 +104,7 @@ preWrittenReviews:
     date: "After midnight"
     comment: "Three nights in a row the children were out again, barefoot and silent, all heading toward the old W Corporation storage annex. In daylight they remembered nothing except wanting more sauce."
     linkLabel: "Open the campaign dossier"
-    linkHref: "/posts/mega-meal-explained/"
+    linkHref: "/videos/mega-meal-explained/"
     flags:
       - "community report"
       - "warehouse activity ongoing"

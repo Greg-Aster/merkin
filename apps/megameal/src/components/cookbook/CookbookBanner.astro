@@ -1,0 +1,274 @@
+---
+import { Icon } from 'astro-icon/components'
+
+interface CookbookEntry {
+  slug: string
+  data: {
+    title: string
+    description?: string
+    image?: string
+    section?: string
+    page?: number
+  }
+}
+
+interface Props {
+  entries: CookbookEntry[]
+  activeSlug?: string
+}
+
+const { entries, activeSlug = '' } = Astro.props
+const activeEntry =
+  entries.find(entry => entry.slug === activeSlug) ?? entries[0] ?? null
+const recipeCount = entries.length
+const entryBySlug = new Map(entries.map(entry => [entry.slug, entry]))
+const cookbookIndexSections = [
+  {
+    title: 'Front Matter',
+    items: [{ label: 'Archivist Introduction', page: '1', slug: 'cookbook-index' }],
+  },
+  {
+    title: 'Legendary Beverages',
+    items: [
+      {
+        label: 'The Perfect Miranda Bloody Mary',
+        page: '12',
+        slug: 'perfect-miranda-bloody-mary',
+      },
+      { label: 'Zero-G Vodka Notes', page: '18' },
+      { label: 'Temporal Brunch Pairings', page: '22' },
+    ],
+  },
+  {
+    title: 'Magnificent Main Courses',
+    items: [
+      {
+        label: 'Zelephant and Black Quarnivorian Truffle Roast',
+        page: '38',
+        slug: 'zelephant-truffle-roast',
+      },
+      { label: 'Corporate Banquet Substitutions', page: '46' },
+      { label: 'Extinct Protein Handling', page: '52' },
+    ],
+  },
+  {
+    title: 'Spectacular Sweets',
+    items: [
+      { label: 'Chromatic Meat Cake', page: '64', slug: 'meat-cake' },
+      { label: 'Bioluminescent Frostings', page: '72' },
+      { label: 'Candied Sweetmeat Appendix', page: '78' },
+    ],
+  },
+  {
+    title: 'Appendices',
+    items: [
+      { label: 'Reality-Compliant Substitutions', page: '91' },
+      { label: 'Restricted Ingredients', page: '104' },
+    ],
+  },
+]
+
+function cookbookHrefForSlug(slug?: string) {
+  if (!slug || !entryBySlug.has(slug)) return ''
+  return slug === 'cookbook-index' ? '/cookbook/' : `/cookbook/${slug}/`
+}
+---
+
+<section
+  class="relative h-full w-full overflow-hidden bg-black text-white"
+  aria-label="Cookbook browser"
+>
+  <video
+    id="cookbook-banner-video"
+    src="/assets/banner/cookbook-glitch0001-0049.webm"
+    poster="/posts/cookbook/cookbook.png"
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="metadata"
+    class="absolute inset-0 h-full w-full object-cover opacity-55"
+  ></video>
+  <div class="absolute inset-0 bg-gradient-to-b from-black/75 via-black/35 to-black/85"></div>
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.18),transparent_32%),radial-gradient(circle_at_78%_42%,rgba(255,210,120,0.14),transparent_30%)]"></div>
+
+  <div class="relative z-10 mx-auto grid h-full max-w-[var(--page-width)] grid-rows-[1fr_auto] gap-4 px-4 py-6 md:px-8 md:py-10">
+    <div class="grid min-h-0 items-center gap-6 md:grid-cols-[minmax(16rem,0.8fr)_minmax(0,1.4fr)]">
+      <div class="hidden md:block">
+        <div class="max-w-sm rounded-lg border border-white/20 bg-black/35 p-4 shadow-2xl backdrop-blur">
+          <div class="mb-3 flex items-center justify-between gap-3 border-b border-white/15 pb-3">
+            <div>
+              <div class="text-xs font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
+                Contents
+              </div>
+              <div class="mt-1 text-lg font-black leading-tight text-white">
+                Table of Contents
+              </div>
+            </div>
+            <Icon name="material-symbols:menu-book-outline-rounded" class="text-2xl text-white/55" />
+          </div>
+          <nav class="max-h-[min(48vh,25rem)] space-y-3 overflow-y-auto pr-1" aria-label="Cookbook table of contents">
+            {cookbookIndexSections.map(section => (
+              <section class="space-y-1.5">
+                <h2 class="text-[0.7rem] font-black uppercase tracking-[0.14em] text-white/50">
+                  {section.title}
+                </h2>
+                <div class="space-y-1">
+                  {section.items.map(item => {
+                    const href = cookbookHrefForSlug(item.slug)
+                    const isActive = item.slug === activeSlug
+                    const itemClasses = [
+                      'grid grid-cols-[2.25rem_minmax(0,1fr)] gap-2 rounded-md border px-2 py-1.5 transition',
+                      isActive
+                        ? 'border-[var(--primary)] bg-white/15'
+                        : href
+                          ? 'border-white/10 bg-white/5 hover:border-white/25 hover:bg-white/10 active:scale-[0.98]'
+                          : 'border-white/5 bg-white/[0.03] opacity-55',
+                    ]
+
+                    const content = (
+                      <>
+                        <span class="rounded bg-white/10 px-1.5 py-0.5 text-center text-[0.68rem] font-bold text-white/75">
+                          {item.page}
+                        </span>
+                        <span class="min-w-0">
+                          <span class="line-clamp-1 block text-sm font-bold leading-tight text-white">
+                            {item.label}
+                          </span>
+                          {!href && (
+                            <span class="mt-0.5 block text-[0.65rem] font-bold uppercase tracking-[0.1em] text-white/35">
+                              Planned
+                            </span>
+                          )}
+                        </span>
+                      </>
+                    )
+
+                    return href ? (
+                      <a
+                        href={href}
+                        class:list={itemClasses}
+                        aria-current={isActive ? 'page' : undefined}
+                        data-sfx-hover="hover-soft"
+                        data-sfx-click="soft"
+                      >
+                        {content}
+                      </a>
+                    ) : (
+                      <div class:list={itemClasses} aria-disabled="true">
+                        {content}
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      <div class="max-w-4xl">
+        <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-white/80 backdrop-blur">
+          <Icon name="material-symbols:menu-book-outline-rounded" class="text-base text-[var(--primary)]" />
+          Cookbook
+        </div>
+        <h1 class="max-w-3xl text-4xl font-black leading-none text-white md:text-6xl">
+          The Galactic Cookbook
+        </h1>
+        <p class="mt-4 max-w-2xl text-base leading-relaxed text-white/75 md:text-lg">
+          A virtual recipe book for dishes that survived corporate collapse,
+          extinction events, temporal loops, and several rounds of compliance review.
+        </p>
+
+        {activeEntry && (
+          <a
+            href={activeEntry.slug === 'cookbook-index'
+              ? '/cookbook/'
+              : `/cookbook/${activeEntry.slug}/`}
+            class="mt-6 inline-grid max-w-xl grid-cols-[5.5rem_minmax(0,1fr)] gap-3 rounded-lg border border-white/20 bg-black/35 p-3 text-left transition hover:border-[var(--primary)] hover:bg-black/50 active:scale-[0.99]"
+            data-sfx-hover="hover-soft"
+            data-sfx-click="soft"
+          >
+            {activeEntry.data.image && (
+              <img
+                src={activeEntry.data.image}
+                alt=""
+                loading="eager"
+                decoding="async"
+                class="aspect-square w-full rounded-md object-cover"
+              />
+            )}
+            <span class="min-w-0 self-center">
+              <span class="block text-xs font-bold uppercase tracking-[0.14em] text-[var(--primary)]">
+                Current Page {activeEntry.data.page ?? 1}
+              </span>
+              <span class="mt-1 block text-lg font-black leading-tight text-white">
+                {activeEntry.data.title}
+              </span>
+              <span class="mt-1 line-clamp-2 block text-sm leading-snug text-white/65">
+                {activeEntry.data.description}
+              </span>
+            </span>
+          </a>
+        )}
+      </div>
+    </div>
+
+    <nav
+      class="rounded-lg border border-white/15 bg-black/45 p-2 backdrop-blur"
+      aria-label="Cookbook recipes"
+    >
+      <div class="mb-2 flex items-center justify-between gap-3 px-2 text-xs font-bold uppercase tracking-[0.14em] text-white/60">
+        <span>{recipeCount} Recipes Indexed</span>
+        <span>E-Reader Shelf</span>
+      </div>
+      <div class="flex gap-2 overflow-x-auto pb-1">
+        {entries.map(entry => {
+          const isActive = entry.slug === activeSlug
+          return (
+            <a
+              href={entry.slug === 'cookbook-index'
+                ? '/cookbook/'
+                : `/cookbook/${entry.slug}/`}
+              class:list={[
+                'grid min-w-[14rem] grid-cols-[3.5rem_minmax(0,1fr)] gap-2 rounded-md border p-2 transition active:scale-[0.98]',
+                isActive
+                  ? 'border-[var(--primary)] bg-white/15'
+                  : 'border-white/10 bg-white/5 hover:border-white/25 hover:bg-white/10',
+              ]}
+              aria-current={isActive ? 'page' : undefined}
+              data-sfx-hover="hover-soft"
+              data-sfx-click="soft"
+            >
+              {entry.data.image && (
+                <img
+                  src={entry.data.image}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  class="aspect-square w-full rounded object-cover"
+                />
+              )}
+              <span class="min-w-0 self-center">
+                <span class="block text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
+                  Page {entry.data.page ?? 1}
+                </span>
+                <span class="line-clamp-2 block text-sm font-bold leading-tight text-white">
+                  {entry.data.title}
+                </span>
+              </span>
+            </a>
+          )
+        })}
+      </div>
+    </nav>
+  </div>
+</section>
+
+<script>
+  const cookbookBannerVideo = document.getElementById('cookbook-banner-video')
+
+  if (cookbookBannerVideo instanceof HTMLVideoElement) {
+    cookbookBannerVideo.playbackRate = 0.25
+  }
+</script>

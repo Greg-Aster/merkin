@@ -108,6 +108,111 @@
     0 14px 32px rgba(0, 0, 0, 0.25);
 }
 
+/* ============================================================
+   MEGAMEAL ROUTE TRANSITIONS
+   Shared opt-in route overlay for portal-style navigation.
+   ============================================================ */
+
+.megameal-route-transition {
+  --megameal-route-left: 50vw;
+  --megameal-route-top: 42vh;
+  --megameal-route-width: 40vw;
+  --megameal-route-height: 22.5vw;
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 220ms ease, visibility 0s linear 220ms;
+}
+
+html.megameal-route-transition-active .megameal-route-transition {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.megameal-route-transition__frame {
+  position: fixed;
+  left: var(--megameal-route-left);
+  top: var(--megameal-route-top);
+  width: var(--megameal-route-width);
+  height: var(--megameal-route-height);
+  overflow: hidden;
+  border-radius: 1.1rem;
+  background:
+    radial-gradient(circle at 50% 42%, rgb(59 130 246 / 0.24), transparent 58%),
+    rgb(2 6 23);
+  background-position: center;
+  background-size: cover;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.18),
+    0 28px 86px rgb(0 0 0 / 0.45);
+  transform: translateZ(0);
+  transition:
+    left 620ms cubic-bezier(0.2, 0.84, 0.24, 1),
+    top 620ms cubic-bezier(0.2, 0.84, 0.24, 1),
+    width 620ms cubic-bezier(0.2, 0.84, 0.24, 1),
+    height 620ms cubic-bezier(0.2, 0.84, 0.24, 1),
+    border-radius 540ms ease,
+    opacity 420ms ease,
+    filter 540ms ease;
+}
+
+.megameal-route-transition__frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 42%, rgb(0 0 0 / 0.34) 74%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(0 0 0 / 0.2));
+  opacity: 0.8;
+}
+
+.megameal-route-transition__shade {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0);
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.megameal-route-transition[data-state="entering"] .megameal-route-transition__frame {
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  filter: saturate(1.08) brightness(0.88);
+}
+
+.megameal-route-transition[data-state="entering"] .megameal-route-transition__shade,
+.megameal-route-transition[data-state="arrived"] .megameal-route-transition__shade {
+  opacity: 1;
+}
+
+.megameal-route-transition[data-state="revealing"] {
+  opacity: 0;
+  transition: opacity 680ms ease;
+}
+
+.megameal-route-transition[data-state="revealing"] .megameal-route-transition__frame {
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .megameal-route-transition,
+  .megameal-route-transition__frame,
+  .megameal-route-transition__shade {
+    transition: none;
+  }
+}
+
 /* Prevent double-transform on elements that have their own hover transform */
 .era-card:hover,
 .arc-card:hover {

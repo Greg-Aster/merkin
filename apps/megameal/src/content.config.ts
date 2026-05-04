@@ -124,6 +124,32 @@ const videosCollection = defineCollection({
   }),
 })
 
+const cookbookCollection = defineCollection({
+  schema: z.object({
+    title: z.string(),
+    published: z.date(),
+    description: z.string(),
+    image: z.string().optional(),
+    tags: z.array(z.string()).optional().default([]),
+    category: z.string().optional().default('Cookbook'),
+    section: z.string().optional().default('Archive'),
+    page: z.number().optional(),
+    kind: z.enum(['index', 'recipe', 'essay']).optional().default('recipe'),
+    authorName: z.string().optional(),
+    authorBio: z.string().optional(),
+    prepTime: z.string().optional(),
+    cookTime: z.string().optional(),
+    totalTime: z.string().optional(),
+    servings: z.string().optional(),
+    difficulty: z.string().optional(),
+    era: z.string().optional(),
+    location: z.string().optional(),
+    downloadable: z.boolean().optional().default(false),
+    draft: z.boolean().optional().default(false),
+    related: z.array(z.string()).optional().default([]),
+  }),
+})
+
 // Rest of collections remain unchanged
 const specCollection = defineCollection({
   schema: specSchema,
@@ -264,6 +290,7 @@ const quizzesCollection = defineCollection({
 export const collections = {
   posts: postsCollection,
   videos: videosCollection,
+  cookbook: cookbookCollection,
   spec: specCollection,
   team: teamCollection,
   friends: friendsCollection,

@@ -54,6 +54,7 @@ const isTestPortalLayout = Astro.props.homeLayout === 'test-portal'
 const sharedHomeLayout = isTestPortalLayout ? 'portal' : Astro.props.homeLayout
 const shouldRenderPortalHero =
   Astro.props.homeLayout === 'portal' || Astro.props.homeLayout === 'test-portal'
+const hasCustomBannerSlideContent = Astro.slots.has('banner-slide-content')
 const sharedProps = {
   ...Astro.props,
   homeLayout: sharedHomeLayout,
@@ -70,6 +71,11 @@ const sharedProps = {
   timelineConnectionPatterns={connectionPatterns}
 >
   <slot slot="head" name="head" />
+  <script>
+    import { initMegamealRouteTransitions } from '@/utils/megamealRouteTransitions'
+
+    initMegamealRouteTransitions()
+  </script>
   <slot />
   <SiteSfxBridge client:load />
   <!-- MEGAMEAL-specific: Bleepy AI assistant mascot -->
@@ -82,6 +88,8 @@ const sharedProps = {
   <slot slot="overlay" name="overlay" />
   {shouldRenderPortalHero ? (
     <PortalHeroBackgroundSlide slot="banner-slide-content" />
+  ) : hasCustomBannerSlideContent ? (
+    <slot slot="banner-slide-content" name="banner-slide-content" />
   ) : (
     <UniverseHeroSlide slot="banner-slide-content" />
   )}

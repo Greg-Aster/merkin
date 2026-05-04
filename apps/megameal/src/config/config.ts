@@ -62,7 +62,7 @@ export const navBarConfig: NavBarConfig = {
       dropdown: [
         {
           name: 'Cookbook',
-          url: '/posts/cookbook/cookbook-index/',
+          url: '/cookbook/',
         },
         {
           name: 'Quizzes',

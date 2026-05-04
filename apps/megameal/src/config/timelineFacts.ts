@@ -22,7 +22,7 @@ export interface TimelineFact {
 const specialFactLinks: Record<string, string> = {
   Explainer: '/posts/explainer/',
   Timeline: '/timeline/',
-  'Mega-Meal-3': '/posts/mega-meal-3/',
+  'Mega-Meal-3': '/videos/qarnivor-snuggloid-emergence/',
 }
 
 export function resolveTimelineFactHref(fact: TimelineFact): string | null {
@@ -132,7 +132,7 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     headline: 'Acquire The Galactic Cookbook',
     text: 'Recipes, rituals, plating doctrine, and acceptable substitutions for the modern interstellar table.',
     ctaText: 'Browse Cookbook',
-    href: '/posts/cookbook/cookbook-index/',
+    href: '/cookbook/',
     sponsor: 'Executive Culinary Council',
     finePrint: 'Ingredients may be seasonal, extinct, or sentient.',
     theme: 'culinary',

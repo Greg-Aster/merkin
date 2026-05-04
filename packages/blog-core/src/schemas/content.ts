@@ -20,7 +20,9 @@ export const postsSchema = z.object({
   oneColumn: z.boolean().optional().default(false),
   showToc: z.boolean().optional(),
   backgroundImage: z.string().optional(),
-  bannerType: z.enum(['image', 'video', 'timeline', 'assistant']).optional(),
+  bannerType: z
+    .enum(['image', 'video', 'timeline', 'assistant', 'cookbook', 'archive'])
+    .optional(),
   bannerLink: z.string().optional(),
   bannerData: z
     .object({
@@ -148,7 +150,9 @@ export const aboutSchema = z.object({
     .optional()
     .default([]),
   backgroundImage: z.string().optional(),
-  bannerType: z.enum(['image', 'video', 'timeline', 'assistant']).optional(),
+  bannerType: z
+    .enum(['image', 'video', 'timeline', 'assistant', 'cookbook', 'archive'])
+    .optional(),
   bannerData: z
     .object({
       videoId: z.string().optional(),

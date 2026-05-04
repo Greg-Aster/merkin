@@ -1,4 +1,5 @@
 ---
+import ArchiveBanner from '@components/archive/ArchiveBanner.astro'
 import ArchiveStoryMap from '@components/archive/ArchiveStoryMap.astro'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
@@ -54,10 +55,31 @@ const archiveStats = [
     note: 'Observatory destinations synced to the game layer',
   },
 ]
+
+const archiveBannerPost = {
+  slug: 'archive',
+  data: {
+    title: i18n(I18nKey.archive),
+    description:
+      'A connected record of posts, timeline entries, story arcs, and star map destinations across the Mega Meal Saga.',
+    image: '/assets/banner/archive_still.png',
+    bannerType: 'archive',
+    oneColumn: true,
+    showToc: false,
+  },
+}
+
 import '../../styles/pages/archive-index.css'
 ---
 
-<MainGridLayout title={i18n(I18nKey.archive)}>
+<MainGridLayout
+  title={i18n(I18nKey.archive)}
+  description={archiveBannerPost.data.description}
+  post={archiveBannerPost}
+  oneColumn={true}
+  backgroundImage="none"
+>
+    <ArchiveBanner slot="banner-slide-content" stats={archiveStats} />
     <section class="archive-summary card-base">
       <div class="archive-summary-head">
         <div class="archive-kicker">Archive Overview</div>

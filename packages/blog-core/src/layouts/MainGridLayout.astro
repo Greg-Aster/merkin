@@ -280,6 +280,16 @@ function normalizeBannerConfig(config: any) {
         image: spacingFromConfig.image ?? '0',
         assistant:
           spacingFromConfig.assistant ?? spacingFromConfig.standard ?? '0',
+        cookbook:
+          spacingFromConfig.cookbook ??
+          spacingFromConfig.video ??
+          spacingFromConfig.standard ??
+          '0',
+        archive:
+          spacingFromConfig.archive ??
+          spacingFromConfig.video ??
+          spacingFromConfig.standard ??
+          '0',
         none: spacingFromConfig.none ?? '0',
       },
     },
@@ -292,6 +302,11 @@ function normalizeBannerConfig(config: any) {
         image: config.panel?.top?.image ?? '0',
         assistant:
           config.panel?.top?.assistant ?? config.panel?.top?.standard ?? '0',
+        archive:
+          config.panel?.top?.archive ??
+          config.panel?.top?.video ??
+          config.panel?.top?.standard ??
+          '0',
         none: config.panel?.top?.none ?? '0',
         mobilePortrait: mobilePortraitPanelTop,
       },
@@ -332,6 +347,12 @@ const getPanelTopPosition = (bannerType: string): string => {
       return bannerConfig.panel.top.timeline
     case 'assistant':
       return bannerConfig.panel.top.assistant
+    case 'cookbook':
+      return bannerConfig.panel.top.video ?? bannerConfig.panel.top.standard
+    case 'archive':
+      return bannerConfig.panel.top.archive ??
+        bannerConfig.panel.top.video ??
+        bannerConfig.panel.top.standard
     case 'none':
       return bannerConfig.panel.top.none
     default:
@@ -362,6 +383,10 @@ const determineBannerConfiguration =
           postValue?.data?.bannerData?.videoId
         const hasPostAssistantBanner =
           postValue?.data?.bannerType === 'assistant'
+        const hasPostCookbookBanner =
+          postValue?.data?.bannerType === 'cookbook'
+        const hasPostArchiveBanner =
+          postValue?.data?.bannerType === 'archive'
         const hasPostImageBanner =
           !!(
             postValue?.data?.image ||
@@ -370,13 +395,17 @@ const determineBannerConfiguration =
           ) &&
           !hasPostVideoBanner &&
           !hasPostTimelineBanner &&
-          !hasPostAssistantBanner
+          !hasPostAssistantBanner &&
+          !hasPostCookbookBanner &&
+          !hasPostArchiveBanner
 
         const hasPostBanner =
           hasPostVideoBanner ||
           hasPostImageBanner ||
           hasPostTimelineBanner ||
-          hasPostAssistantBanner
+          hasPostAssistantBanner ||
+          hasPostCookbookBanner ||
+          hasPostArchiveBanner
 
         const defaultBannerType = bannerConfig.defaultBannerType
         const hasTimelineBanner =
@@ -391,12 +420,16 @@ const determineBannerConfiguration =
         const hasAssistantBanner =
           hasPostAssistantBanner ||
           (!hasPostBanner && defaultBannerType === 'assistant')
+        const hasCookbookBanner = hasPostCookbookBanner
+        const hasArchiveBanner = hasPostArchiveBanner
         const hasStandardBanner =
           !hasPostBanner &&
           !hasTimelineBanner &&
           !hasVideoBanner &&
           !hasImageBanner &&
-          !hasAssistantBanner
+          !hasAssistantBanner &&
+          !hasCookbookBanner &&
+          !hasArchiveBanner
 
         const currentBannerType = hasVideoBanner
           ? 'video'
@@ -406,9 +439,13 @@ const determineBannerConfiguration =
               ? 'timeline'
               : hasAssistantBanner
                 ? 'assistant'
-                : hasStandardBanner
-                  ? 'standard'
-                  : 'none'
+                : hasCookbookBanner
+                  ? 'cookbook'
+                  : hasArchiveBanner
+                    ? 'archive'
+                    : hasStandardBanner
+                      ? 'standard'
+                      : 'none'
 
         const postImage = normalizeAssetUrl(
           postValue?.data?.bannerData?.imageUrl || postValue?.data?.image,
@@ -421,6 +458,8 @@ const determineBannerConfiguration =
             hasVideoBanner,
             hasImageBanner,
             hasAssistantBanner,
+            hasCookbookBanner,
+            hasArchiveBanner,
             hasStandardBanner,
             hasPostBanner,
             isStandardPage: !hasPostBanner,
@@ -450,6 +489,14 @@ const determineBannerConfiguration =
                 : hasAssistantBanner
                   ? bannerConfig.defaultBannerData
                   : null,
+            cookbookBannerData:
+              hasCookbookBanner && postValue?.data?.bannerType === 'cookbook'
+                ? postValue.data.bannerData
+                : null,
+            archiveBannerData:
+              hasArchiveBanner && postValue?.data?.bannerType === 'archive'
+                ? postValue.data.bannerData
+                : null,
           },
           layout: {
             mainPanelTop: getPanelTopPosition(currentBannerType),
@@ -621,7 +668,7 @@ const shouldShowMobilePortraitRightRailHero =
 
 const currentBackgroundImage = getDynamicBackgroundImage(backgroundImage)
 const shouldShowParallaxBackground =
-  getShouldShowParallaxBackground(backgroundImage)
+  !isPortalBannerMode && getShouldShowParallaxBackground(backgroundImage)
 
 // =====================================================================
 // BLEEPY CONTEXT SETUP
@@ -643,10 +690,10 @@ if (post && post.data) {
 // Conditionally create the grid classes
 const gridLayoutClasses = [
   'transition duration-700 w-full left-0 right-0 grid mx-auto gap-4 md:gap-4 px-2 md:px-4 relative',
-  isPortalHome || isBannerOnly
+  isPortalHome || isBannerOnly || oneColumnMode
     ? 'grid-cols-1'
     : 'grid-cols-1 md:grid-cols-[16.5rem_auto]',
-  !isPortalHome && !isBannerOnly && shouldShowRightRail
+  !isPortalHome && !isBannerOnly && !oneColumnMode && shouldShowRightRail
     ? '2xl:grid-cols-[16.5rem_auto_var(--toc-width)]'
     : '',
 ].join(' ')
@@ -780,11 +827,12 @@ const gridLayoutClasses = [
         id="main-grid"
         class:list={[gridLayoutClasses, 'transition-swup-fade', { 'has-right-rail': shouldShowRightRail }]}
         style={`margin-top: ${mainContentOffset};`}
+        data-one-column={oneColumnMode ? 'true' : 'false'}
         data-mobile-right-rail-hero={shouldShowMobilePortraitRightRailHero ? mobilePortraitRightRailHeroStyle : 'default'}
       >
 
         <!-- Grid Item 1: SIDEBAR -->
-        {!isPortalHome && !isBannerOnly && (
+        {!isPortalHome && !isBannerOnly && !oneColumnMode && (
         <div class="hidden md:block mb-4 col-span-1 md:max-w-[17.5rem] onload-animation mobile-support-column">
           <section class="mobile-support-group mobile-support-profile-group">
             <div class="mobile-support-label">About</div>
@@ -844,7 +892,7 @@ const gridLayoutClasses = [
         </main>
 
         <!-- Grid Item 3: RIGHT RAIL -->
-        {shouldShowRightRail && !isBannerOnly && (
+        {shouldShowRightRail && !isBannerOnly && !oneColumnMode && (
           <div
             id="toc-wrapper"
             class="hidden 2xl:block z-0"
@@ -1869,5 +1917,18 @@ const gridLayoutClasses = [
     .banner-media-layer.banner-motion-active > .banner-image-fallback {
       animation: none !important;
     }
+  }
+
+  #main-grid[data-one-column='true'] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #main-grid[data-one-column='true'] > div:first-child,
+  #main-grid[data-one-column='true'] #toc-wrapper {
+    display: none !important;
+  }
+
+  #main-grid[data-one-column='true'] main#main {
+    grid-column: 1 !important;
   }
 </style>

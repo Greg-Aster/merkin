@@ -54,6 +54,10 @@ const { post, previousPost, nextPost } = Astro.props // Destructure `post` inste
 const retiredPostRedirects: Record<string, string> = {
   'mega-meal-explained': '/videos/mega-meal-explained/',
   'mega-meal-3': '/videos/qarnivor-snuggloid-emergence/',
+  'cookbook/cookbook-index': '/cookbook/',
+  'timelines/perfect-mary-recipe': '/cookbook/perfect-miranda-bloody-mary/',
+  'timelines/zelephant-truffle-roast': '/cookbook/zelephant-truffle-roast/',
+  'timelines/meat-cake': '/cookbook/meat-cake/',
 }
 const retiredPostRedirect = retiredPostRedirects[post.slug]
 

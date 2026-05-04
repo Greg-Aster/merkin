@@ -8,6 +8,27 @@ import '../styles/pages/community.css'
 ---
 
 <MainGridLayout title={i18n(I18nKey.community) || "Our Community"} description={i18n(I18nKey.community) || "Join our community through multiple channels"}>
+  <section class="card-base mb-6 rounded-[var(--radius-large)] border border-cyan-400/25 bg-cyan-950/20 p-5">
+    <div class="flex flex-col gap-4 md:flex-row md:items-start">
+      <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-cyan-400/15 text-cyan-200">
+        <Icon name="mdi:traffic-cone" class="h-7 w-7" />
+      </div>
+      <div>
+        <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-200/75">
+          Community Desk Under Construction
+        </p>
+        <h1 class="mb-2 text-2xl font-black text-white md:text-3xl">
+          This section is being rebuilt.
+        </h1>
+        <p class="max-w-3xl leading-relaxed text-neutral-300">
+          The community page is currently a preview of the planned hub. Links,
+          channels, and participation workflows may change while the rest of the
+          Mega Meal portal gets organized into dedicated sections.
+        </p>
+      </div>
+    </div>
+  </section>
+
   <!-- Community Hero Section -->
   <div id="community-hero" class="card-base flex flex-col md:flex-row w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-[300px] mb-8">
     <div class="pl-6 md:pl-9 pr-6 md:pr-9 pt-6 md:pt-7 pb-6 md:w-2/3">

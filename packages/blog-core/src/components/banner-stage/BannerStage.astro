@@ -180,6 +180,22 @@ const hasTimelineBanner = scene?.id === "timeline";
 const hasImageBanner = scene?.id === "image";
 const hasStandardBanner = scene?.id === "standard";
 const hasAssistantBanner = scene?.id === "assistant";
+const hasCookbookBanner = scene?.id === "cookbook";
+const hasArchiveBanner = scene?.id === "archive";
+const videoBannerId =
+	hasPostBanner && post?.data?.bannerType === "video"
+		? post.data.bannerData?.videoId
+		: bannerDataSources.videoBannerData?.videoId;
+const videoBannerParams = new URLSearchParams({
+	autoplay: "0",
+	mute: "0",
+	controls: "1",
+	enablejsapi: "1",
+	playsinline: "1",
+	rel: "0",
+	modestbranding: "1",
+	iv_load_policy: "3",
+});
 const transparentPixel =
 	"data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
 ---
@@ -191,6 +207,8 @@ const transparentPixel =
     ${hasVideoBanner ? 'has-video-banner' : ''}
     ${hasImageBanner ? 'has-image-banner' : ''}
     ${hasAssistantBanner ? 'has-assistant-banner' : ''}
+    ${hasCookbookBanner ? 'has-cookbook-banner' : ''}
+    ${hasArchiveBanner ? 'has-archive-banner' : ''}
     ${hasStandardBanner ? 'has-standard-banner' : ''}
     ${isBannerOnly ? 'banner-only-mode' : ''}
     ${isPortalBannerMode ? 'portal-banner-mode' : ''}`}
@@ -204,7 +222,7 @@ const transparentPixel =
       <div class="banner-aspect-container">
         <div class="banner-content-wrapper">
           <iframe
-            src={`https://www.youtube.com/embed/${hasPostBanner && post?.data?.bannerType === 'video' ? post.data.bannerData.videoId : bannerDataSources.videoBannerData?.videoId}?autoplay=0&mute=0&controls=1&enablejsapi=1&playsinline=1`}
+            src={`https://www.youtube-nocookie.com/embed/${videoBannerId}?${videoBannerParams.toString()}`}
             title="YouTube video player"
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
@@ -334,6 +352,17 @@ const transparentPixel =
               loading="eager"
             />
           )}
+        </div>
+      </div>
+    </div>
+  )}
+
+  {(hasCookbookBanner || hasArchiveBanner) && (
+    <div class="banner-container-standard">
+      <div class="banner-aspect-container">
+        <div class="banner-content-wrapper">
+          <slot name="banner-slide-content" />
+          <slot name="banner-overlay-content" />
         </div>
       </div>
     </div>
