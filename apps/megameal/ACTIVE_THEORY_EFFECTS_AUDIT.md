@@ -2,6 +2,8 @@
 
 Focused comparison between the Megameal portal intro and public techniques visible in the Active Theory site bundle/config.
 
+Progress notes live in `PORTAL_EFFECTS_PROGRESS.md`.
+
 ## Ranked Borrow List
 
 | Rank | Technique | Visual Impact | Performance Cost | Megameal Status |
