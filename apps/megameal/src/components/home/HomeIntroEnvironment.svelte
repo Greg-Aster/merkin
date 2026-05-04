@@ -30,6 +30,10 @@ export let titleImageSrc = ''
 let shell: HTMLDivElement | null = null
 let lastPointerX = 0
 let lastPointerY = 0
+let pointerDownClientX = 0
+let pointerDownClientY = 0
+let pointerDownStartedOnScreen = false
+let pointerDragDistance = 0
 let activePointerId: number | null = null
 let activeTouchId: number | null = null
 let virtualWheel = 0
@@ -44,6 +48,7 @@ let backgroundRevealTimeout = 0
 let backgroundRevealFallbackTimeout = 0
 let canvasDpr = 1
 let sceneQuality: SceneQuality = 'high'
+let portalHoverActive = false
 const backgroundRevealDelayMs = 1100
 const backgroundRevealFallbackDelayMs = 2600
 const wheelMomentumDecay = 2.4
@@ -95,6 +100,7 @@ function updatePointer(clientX: number, clientY: number) {
 
   input.x = ((clientX - bounds.left) / bounds.width - 0.5) * 2
   input.y = ((clientY - bounds.top) / bounds.height - 0.5) * 2
+  portalHoverActive = isPointerOverActiveScreen(clientX, clientY)
 }
 
 function isInsideShell(clientX: number, clientY: number) {
@@ -106,6 +112,22 @@ function isInsideShell(clientX: number, clientY: number) {
     clientX <= bounds.right &&
     clientY >= bounds.top &&
     clientY <= bounds.bottom
+  )
+}
+
+function isPointerOverActiveScreen(clientX: number, clientY: number) {
+  if (!shell || !isInsideShell(clientX, clientY)) return false
+
+  const bounds = shell.getBoundingClientRect()
+  const normalizedX = ((clientX - bounds.left) / bounds.width - 0.5) * 2
+  const normalizedY = ((clientY - bounds.top) / bounds.height - 0.5) * 2
+  const horizontalLimit = portraitMobile ? 0.7 : 0.58
+  const verticalLimit = portraitMobile ? 0.48 : 0.42
+  const verticalCenter = portraitMobile ? -0.02 : -0.04
+
+  return (
+    Math.abs(normalizedX) <= horizontalLimit &&
+    Math.abs(normalizedY - verticalCenter) <= verticalLimit
   )
 }
 
@@ -294,6 +316,10 @@ function handlePointerDown(event: PointerEvent) {
   activePointerId = event.pointerId
   lastPointerX = event.clientX
   lastPointerY = event.clientY
+  pointerDownClientX = event.clientX
+  pointerDownClientY = event.clientY
+  pointerDragDistance = 0
+  pointerDownStartedOnScreen = isPointerOverActiveScreen(event.clientX, event.clientY)
   updatePointer(event.clientX, event.clientY)
 
   try {
@@ -314,7 +340,22 @@ function handlePointerMove(event: PointerEvent) {
   }
 
   const height = Math.max(shell?.clientHeight ?? window.innerHeight, 1)
+  if (input.active) {
+    pointerDragDistance = Math.max(
+      pointerDragDistance,
+      Math.hypot(
+        event.clientX - pointerDownClientX,
+        event.clientY - pointerDownClientY,
+      ),
+    )
+  }
   applyDragDelta(event.clientX, event.clientY, 1, height)
+}
+
+function navigateActiveScreen() {
+  if (typeof window === 'undefined' || !activeScreen.href) return
+
+  window.location.assign(activeScreen.href)
 }
 
 function handlePointerUp(event?: PointerEvent) {
@@ -334,8 +375,20 @@ function handlePointerUp(event?: PointerEvent) {
     }
   }
 
+  const shouldNavigate =
+    !!event &&
+    pointerDownStartedOnScreen &&
+    pointerDragDistance <= 8 &&
+    isPointerOverActiveScreen(event.clientX, event.clientY)
+
   input.active = false
   activePointerId = null
+  pointerDownStartedOnScreen = false
+  pointerDragDistance = 0
+
+  if (shouldNavigate) {
+    navigateActiveScreen()
+  }
 }
 
 function getChangedTouch(event: TouchEvent) {
@@ -438,6 +491,7 @@ function handlePortalAdvance(event: Event) {
 function handleResize() {
   syncViewportMode()
   syncCanvasDpr()
+  portalHoverActive = false
   scheduleScrollDrivenWheel()
 }
 
@@ -533,12 +587,19 @@ onDestroy(() => {
   bind:this={shell}
   class="home-intro-environment"
   class:home-intro-environment--background-ready={backgroundReady}
+  class:home-intro-environment--screen-hover={portalHoverActive}
   style={`--portal-reveal-progress: ${revealProgress}`}
 >
   <div class="home-intro-background-curtain" aria-hidden="true"></div>
 
 	<Canvas {createRenderer} dpr={canvasDpr}>
-		<HomeIntroEnvironmentScene {input} {titleImageSrc} {sceneQuality} onLogoReady={handleLogoReady} />
+		<HomeIntroEnvironmentScene
+			{input}
+			{titleImageSrc}
+			{sceneQuality}
+			hoveredScreenIndex={portalHoverActive ? activeScreenIndex : -1}
+			onLogoReady={handleLogoReady}
+		/>
 	</Canvas>
 
 	<div class="home-intro-copy home-intro-copy--status" aria-live="polite">

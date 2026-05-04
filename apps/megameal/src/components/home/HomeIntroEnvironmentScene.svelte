@@ -42,6 +42,7 @@ export let input: IntroInputState
 export let titleImageSrc = ''
 export let sceneQuality: SceneQuality = 'high'
 export let onLogoReady: (() => void) | undefined
+export let hoveredScreenIndex = -1
 
 let world: THREE.Group | null = null
 let camera: THREE.PerspectiveCamera | null = null
@@ -364,6 +365,10 @@ const screens = Array.from({ length: screenCount }, (_, index) => {
     position: [0, 0, 0] as [number, number, number],
     rotation: [0, 0, 0] as [number, number, number],
     sceneId: portalScreens[index].sceneId,
+    kicker: portalScreens[index].kicker,
+    title: portalScreens[index].title,
+    stat: portalScreens[index].stat,
+    ctaLabel: portalScreens[index].ctaLabel,
     stillSrc: portalScreens[index].webglStillSrc ?? portalScreens[index].stillSrc,
     ktx2Src: portalScreens[index].ktx2StillSrc ?? '',
     primary: index === primaryScreenIndex,
@@ -719,6 +724,11 @@ useTask(delta => {
 					imageSrc={screen.primary ? titleImageSrc : ""}
 					stillSrc={screen.stillSrc}
 					ktx2Src={screen.ktx2Src}
+					kicker={screen.kicker}
+					title={screen.title}
+					stat={screen.stat}
+					ctaLabel={screen.ctaLabel}
+					hovered={index === hoveredScreenIndex}
 					primary={screen.primary}
 					shouldLoadMedia={screenMediaLoadStates[index]}
 					{sceneQuality}

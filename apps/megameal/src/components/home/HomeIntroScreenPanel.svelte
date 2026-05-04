@@ -3,17 +3,20 @@ import { T, useTask, useThrelte } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import {
   AdditiveBlending,
+  Box3,
   DoubleSide,
   FrontSide,
   NormalBlending,
   SRGBColorSpace,
-  type CanvasTexture,
+  Vector3,
+  CanvasTexture,
   type Group,
   type Texture,
   type WebGLRenderer,
   TextureLoader,
 } from 'three'
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
+import type * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import HomeIntroLogoReflections from './HomeIntroLogoReflections.svelte'
 import {
   getHomeIntroKtx2Loader,
@@ -22,8 +25,6 @@ import {
 } from './homeIntroKtx2Loader'
 import {
   createCausticTexture,
-  createFrostTexture,
-  createGrimeTexture,
   createSheenTexture,
 } from './homeIntroGlassTextures'
 
@@ -36,23 +37,37 @@ export let stillSrc = ''
 export let ktx2Src = ''
 export let shouldLoadMedia = primary
 export let sceneQuality: SceneQuality = 'high'
+export let kicker = ''
+export let title = ''
+export let stat = ''
+export let ctaLabel = ''
+export let hovered = false
 
 const threlte = useThrelte()
 
 let titleTexture: Texture | null = null
 let stillTexture: Texture | null = null
-let frostTexture: CanvasTexture | null = null
+let screenTextTexture: CanvasTexture | null = null
+let panelRoot: Group | null = null
 let sheenTexture: CanvasTexture | null = null
 let causticTexture: CanvasTexture | null = null
-let grimeTexture: CanvasTexture | null = null
+let screenModel: THREE.Object3D | null = null
 let sheenSweep: Group | null = null
 let secondarySheenSweep: Group | null = null
 let loader: TextureLoader | null = null
+let screenLoadAbortController: AbortController | null = null
+let screenModelRequested = false
 let stillTextureRequested = false
 let ktx2TextureRequested = false
 let titleTextureRequested = false
 let mounted = false
 let disposed = false
+let hoverBlend = 0
+let mediaOpacity = 1
+let titleMediaOpacity = 1
+let mediaGhostOpacity = 1
+let glassEffectOpacity = 1
+let textOpacity = primary ? 0.72 : 0.58
 
 const additiveBlending = AdditiveBlending
 const normalBlending = NormalBlending
@@ -62,55 +77,29 @@ const frameWidth = 3.18
 const frameHeight = 1.78
 const glowWidth = 3.38
 const glowHeight = 1.98
-const mediaWidth = 2.92
-const mediaHeight = 1.64
-const titleWidth = 2.92
-const titleHeight = 1.26
+const mediaWidth = frameWidth * .95
+const mediaHeight = frameHeight * .95
+const titleWidth = mediaWidth
+const titleHeight = mediaHeight
 const fallbackWidth = 2.76
 const fallbackHeight = 0.44
-const glassDepth = 0.16
-const bevelRailWidth = 0.16
-const bevelHighlightWidth = 0.026
 const sheenWidth = 0.42
 const sheenHeight = frameHeight * 1.55
 const causticWidth = frameWidth * 0.98
 const causticHeight = frameHeight * 0.92
-const prismOffset = 0.028
-const mainGlassGeometry = new RoundedBoxGeometry(
-  frameWidth,
-  frameHeight,
-  glassDepth * 1.24,
-  5,
-  0.095,
-)
-const horizontalRailGeometry = new RoundedBoxGeometry(
-  frameWidth,
-  bevelRailWidth,
-  glassDepth * 1.9,
-  5,
-  0.055,
-)
-const verticalRailGeometry = new RoundedBoxGeometry(
-  bevelRailWidth,
-  frameHeight,
-  glassDepth * 1.9,
-  5,
-  0.055,
-)
-const horizontalHighlightGeometry = new RoundedBoxGeometry(
-  frameWidth * 0.93,
-  bevelHighlightWidth,
-  0.018,
-  4,
-  0.012,
-)
-const verticalHighlightGeometry = new RoundedBoxGeometry(
-  bevelHighlightWidth,
-  frameHeight * 0.82,
-  0.018,
-  4,
-  0.012,
-)
+const glassMediaOffset = 0.014
+const glassMediaGhostScale = 1.012
+const mediaSurfaceZ = -0.094
+const mediaGhostNearZ = -0.1
+const mediaGhostFarZ = -0.106
+const textSurfaceZ = -0.028
+const textWidth = 2.54
+const textHeight = 1.24
+const screenModelSrc = '/assets/3D/screen.glb'
+const screenGltfLoader = new GLTFLoader()
+const screenBounds = new Box3()
+const screenCenter = new Vector3()
+const screenSize = new Vector3()
 
 $: panelGlassEnabled = sceneQuality !== 'lean'
 
@@ -128,14 +117,14 @@ function disposeTitleTexture() {
   titleTexture = null
 }
 
+function disposeScreenTextTexture() {
+  screenTextTexture?.dispose()
+  screenTextTexture = null
+}
+
 function disposeStillTexture() {
   stillTexture?.dispose()
   stillTexture = null
-}
-
-function disposeFrostTexture() {
-  frostTexture?.dispose()
-  frostTexture = null
 }
 
 function disposeSheenTexture() {
@@ -148,26 +137,231 @@ function disposeCausticTexture() {
   causticTexture = null
 }
 
-function disposeGrimeTexture() {
-  grimeTexture?.dispose()
-  grimeTexture = null
+function disposeMaterial(material: THREE.Material) {
+  Object.values(material).forEach(value => {
+    if (value && typeof value === 'object' && 'isTexture' in value) {
+      ;(value as Texture).dispose()
+    }
+  })
+  material.dispose()
+}
+
+function disposeObjectResources(object: THREE.Object3D | null) {
+  object?.traverse(item => {
+    const mesh = item as THREE.Mesh
+    if (!mesh.isMesh) return
+
+    mesh.geometry?.dispose()
+
+    const materials = Array.isArray(mesh.material)
+      ? mesh.material
+      : [mesh.material]
+
+    materials.forEach(material => {
+      if (material) disposeMaterial(material)
+    })
+  })
+}
+
+function disposeScreenModel() {
+  disposeObjectResources(screenModel)
+  screenModel = null
+}
+
+function configureMediaTexture(texture: Texture, invertY = false) {
+  texture.colorSpace = SRGBColorSpace
+
+  if (invertY) {
+    texture.repeat.y = -1
+    texture.offset.y = 1
+  }
+
+  texture.needsUpdate = true
+}
+
+function wrapCanvasText(
+  context: CanvasRenderingContext2D,
+  value: string,
+  maxWidth: number,
+) {
+  const words = value.split(/\s+/).filter(Boolean)
+  const lines: string[] = []
+  let line = ''
+
+  words.forEach(word => {
+    const nextLine = line ? `${line} ${word}` : word
+    if (context.measureText(nextLine).width <= maxWidth || !line) {
+      line = nextLine
+      return
+    }
+
+    lines.push(line)
+    line = word
+  })
+
+  if (line) lines.push(line)
+  return lines
+}
+
+function createScreenTextTexture() {
+  if (typeof document === 'undefined') return null
+
+  const canvas = document.createElement('canvas')
+  canvas.width = 1024
+  canvas.height = 512
+  const context = canvas.getContext('2d')
+  if (!context) return null
+
+  context.clearRect(0, 0, canvas.width, canvas.height)
+
+  const maxWidth = 820
+  const x = 92
+  let y = 120
+
+  context.textBaseline = 'top'
+  context.fillStyle = 'rgb(103 232 249 / 0.86)'
+  context.font = '700 28px "JetBrains Mono", ui-monospace, monospace'
+  context.fillText((kicker || stat || 'PORTAL').toUpperCase(), x, y)
+
+  y += 54
+  context.fillStyle = 'rgb(248 250 252 / 0.96)'
+  context.shadowColor = 'rgb(103 232 249 / 0.42)'
+  context.shadowBlur = 18
+  context.font = '800 76px Inter, ui-sans-serif, system-ui, sans-serif'
+
+  wrapCanvasText(context, title || 'MEGA MEAL SAGA', maxWidth)
+    .slice(0, 2)
+    .forEach(line => {
+      context.fillText(line, x, y)
+      y += 82
+    })
+
+  context.shadowBlur = 0
+  context.fillStyle = 'rgb(226 232 240 / 0.78)'
+  context.font = '600 24px "JetBrains Mono", ui-monospace, monospace'
+  const detail = stat || ctaLabel
+  if (detail) {
+    context.fillText(detail.toUpperCase(), x, 372)
+  }
+
+  if (ctaLabel) {
+    const label = ctaLabel.toUpperCase()
+    context.fillStyle = 'rgb(15 23 42 / 0.78)'
+    context.fillRect(x, 420, Math.min(420, context.measureText(label).width + 66), 52)
+    context.strokeStyle = 'rgb(103 232 249 / 0.72)'
+    context.lineWidth = 2
+    context.strokeRect(x, 420, Math.min(420, context.measureText(label).width + 66), 52)
+    context.fillStyle = 'rgb(224 242 254 / 0.94)'
+    context.font = '800 24px "JetBrains Mono", ui-monospace, monospace'
+    context.fillText(label, x + 28, 434)
+  }
+
+  const texture = new CanvasTexture(canvas)
+  texture.colorSpace = SRGBColorSpace
+  texture.needsUpdate = true
+
+  return texture
+}
+
+function syncScreenTextTexture() {
+  if (!mounted) return
+
+  disposeScreenTextTexture()
+  screenTextTexture = createScreenTextTexture()
 }
 
 function syncPanelGlassTextures() {
   if (typeof document === 'undefined') return
 
   if (!panelGlassEnabled) {
-    disposeFrostTexture()
     disposeSheenTexture()
     disposeCausticTexture()
-    disposeGrimeTexture()
     return
   }
 
-  frostTexture ??= createFrostTexture()
   sheenTexture ??= createSheenTexture()
   causticTexture ??= createCausticTexture()
-  grimeTexture ??= createGrimeTexture()
+}
+
+function fitScreenModel(model: THREE.Object3D) {
+  model.updateMatrixWorld(true)
+  screenBounds.setFromObject(model)
+  if (screenBounds.isEmpty()) return
+
+  screenBounds.getCenter(screenCenter)
+  screenBounds.getSize(screenSize)
+
+  const scale = Math.min(
+    frameWidth / Math.max(screenSize.x, 0.001),
+    frameHeight / Math.max(screenSize.y, 0.001),
+  )
+
+  model.scale.setScalar(scale)
+  model.position.set(
+    -screenCenter.x * scale,
+    -screenCenter.y * scale,
+    -screenCenter.z * scale,
+  )
+}
+
+function tuneScreenModel(model: THREE.Object3D) {
+  model.traverse(item => {
+    const mesh = item as THREE.Mesh
+    if (!mesh.isMesh) return
+
+    mesh.castShadow = false
+    mesh.receiveShadow = false
+    mesh.frustumCulled = false
+    mesh.renderOrder = 12
+
+    const materials = Array.isArray(mesh.material)
+      ? mesh.material
+      : [mesh.material]
+
+    materials.forEach((sourceMaterial, materialIndex) => {
+      if (!sourceMaterial) return
+
+      const material = sourceMaterial.clone() as THREE.MeshPhysicalMaterial
+      material.transparent = material.transparent || material.opacity < 1
+      material.depthWrite = false
+      material.side = DoubleSide
+      material.needsUpdate = true
+
+      if (Array.isArray(mesh.material)) {
+        mesh.material[materialIndex] = material
+      } else {
+        mesh.material = material
+      }
+    })
+  })
+}
+
+async function loadScreenModel() {
+  if (screenModelRequested || typeof window === 'undefined') return
+
+  screenModelRequested = true
+  const controller = new AbortController()
+  screenLoadAbortController = controller
+
+  try {
+    const gltf = await screenGltfLoader.loadAsync(screenModelSrc)
+    const model = gltf.scene ?? gltf.scenes?.[0] ?? null
+
+    if (!mounted || controller.signal.aborted || !model) {
+      disposeObjectResources(model)
+      return
+    }
+
+    fitScreenModel(model)
+    tuneScreenModel(model)
+    screenModel = model
+  } catch {
+    screenModel = null
+  } finally {
+    if (screenLoadAbortController === controller) {
+      screenLoadAbortController = null
+    }
+  }
 }
 
 function cleanupPanel() {
@@ -175,14 +369,16 @@ function cleanupPanel() {
 
   disposed = true
   mounted = false
+  screenLoadAbortController?.abort()
+  screenLoadAbortController = null
   releaseHomeIntroKtx2Loader()
   loader = null
+  disposeScreenModel()
   disposeStillTexture()
   disposeTitleTexture()
-  disposeFrostTexture()
+  disposeScreenTextTexture()
   disposeSheenTexture()
   disposeCausticTexture()
-  disposeGrimeTexture()
 }
 
 onMount(() => {
@@ -191,6 +387,8 @@ onMount(() => {
   retainHomeIntroKtx2Loader()
   loader = new TextureLoader()
   syncPanelGlassTextures()
+  syncScreenTextTexture()
+  loadScreenModel()
   ensureMediaTexturesLoaded()
 
   return cleanupPanel
@@ -217,8 +415,7 @@ function ensureMediaTexturesLoaded() {
             texture.dispose()
             return
           }
-          texture.colorSpace = SRGBColorSpace
-          texture.needsUpdate = true
+          configureMediaTexture(texture, true)
           stillTexture = texture
         },
         undefined,
@@ -242,8 +439,7 @@ function ensureMediaTexturesLoaded() {
         texture.dispose()
         return
       }
-      texture.colorSpace = SRGBColorSpace
-      texture.needsUpdate = true
+      configureMediaTexture(texture)
       titleTexture = texture
     })
   }
@@ -258,8 +454,7 @@ function loadStillTexture() {
       texture.dispose()
       return
     }
-    texture.colorSpace = SRGBColorSpace
-    texture.needsUpdate = true
+    configureMediaTexture(texture)
     stillTexture = texture
   })
 }
@@ -268,10 +463,15 @@ $: if (loader && shouldLoadMedia) {
   ensureMediaTexturesLoaded()
 }
 
+$: if (mounted && (kicker || title || stat || ctaLabel)) {
+  syncScreenTextTexture()
+}
+
 $: syncPanelGlassTextures()
 
-useTask(() => {
+useTask(delta => {
   const time = performance.now() * 0.001
+  const ease = 1 - Math.exp(-delta * 8)
   const panelPhase = index * 0.19
   const travel = frameWidth * 2.3
   const startX = -travel * 0.5
@@ -296,51 +496,53 @@ useTask(() => {
     causticTexture.rotation = Math.sin(time * 0.08 + index) * 0.035
   }
 
-  if (grimeTexture) {
-    grimeTexture.offset.x = Math.sin(time * 0.035 + index) * 0.012
-    grimeTexture.offset.y = Math.cos(time * 0.028 + index) * 0.01
+  hoverBlend += ((hovered ? 1 : 0) - hoverBlend) * ease
+  const baseTitleOpacity = panelGlassEnabled ? 0.76 : 1
+  const baseMediaOpacity = panelGlassEnabled ? (primary ? 0.62 : 0.48) : 1
+  titleMediaOpacity = baseTitleOpacity + (1 - baseTitleOpacity) * hoverBlend
+  mediaOpacity = baseMediaOpacity + (1 - baseMediaOpacity) * hoverBlend
+  mediaGhostOpacity = 1
+  glassEffectOpacity = 1
+  textOpacity = primary ? 0.96 : 0.88
+
+  if (panelRoot) {
+    panelRoot.position.z = hoverBlend * 0.045
+    panelRoot.rotation.x = hoverBlend * -0.018
+    panelRoot.rotation.y = Math.sin(time * 0.8 + index) * hoverBlend * 0.018
+    const scale = 1 + hoverBlend * 0.028
+    panelRoot.scale.set(scale, scale, scale)
   }
 })
 </script>
 
-<T.Group>
-	<T.Mesh position={[0, 0, -0.07]}>
-		<T is={mainGlassGeometry} />
-		<T.MeshPhysicalMaterial
-			color="#f8fafc"
-			side={doubleSide}
-			transparent={true}
-			opacity={primary ? 0.2 : 0.15}
-			roughness={0.18}
-			roughnessMap={grimeTexture}
-			metalness={0.08}
-			transmission={0.82}
-			thickness={1.15}
-			clearcoat={1}
-			clearcoatRoughness={0.08}
-			ior={1.7}
-			reflectivity={0.78}
-			iridescence={primary ? 0.36 : 0.24}
-			iridescenceIOR={1.42}
-			iridescenceThicknessRange={[120, 420]}
-			attenuationColor={primary ? "#67e8f9" : "#a78bfa"}
-			attenuationDistance={primary ? 2.1 : 1.55}
-			emissive={primary ? "#0e7490" : "#1e1b4b"}
-			emissiveIntensity={primary ? 0.025 : 0.014}
-			depthWrite={false}
-		/>
-	</T.Mesh>
-
-	{#if panelGlassEnabled}
-		<T.Mesh position={[0, 0, 0.018]}>
-			<T.PlaneGeometry args={[frameWidth * 0.94, frameHeight * 0.86]} />
-			<T.MeshBasicMaterial
-				map={frostTexture}
-				color="#dff7ff"
+<T.Group bind:ref={panelRoot}>
+	{#if screenModel}
+		<T.Group position={[0, 0, -0.07]}>
+			<T is={screenModel} />
+		</T.Group>
+	{:else}
+		<T.Mesh position={[0, 0, -0.07]} renderOrder={12}>
+			<T.PlaneGeometry args={[frameWidth, frameHeight]} />
+			<T.MeshPhysicalMaterial
+				color="#f8fafc"
 				side={doubleSide}
 				transparent={true}
-				opacity={primary ? 0.07 : 0.055}
-				blending={normalBlending}
+				opacity={primary ? 0.16 : 0.11}
+				roughness={0.26}
+				metalness={0.04}
+				transmission={0.92}
+				thickness={1.45}
+				clearcoat={1}
+				clearcoatRoughness={0.12}
+				ior={1.7}
+				reflectivity={0.62}
+				iridescence={primary ? 0.36 : 0.24}
+				iridescenceIOR={1.42}
+				iridescenceThicknessRange={[120, 420]}
+				attenuationColor={primary ? "#67e8f9" : "#a78bfa"}
+				attenuationDistance={primary ? 2.1 : 1.55}
+				emissive={primary ? "#0e7490" : "#1e1b4b"}
+				emissiveIntensity={primary ? 0.025 : 0.014}
 				depthWrite={false}
 			/>
 		</T.Mesh>
@@ -352,7 +554,7 @@ useTask(() => {
 			color="#f8fafc"
 			side={doubleSide}
 			transparent={true}
-			opacity={primary ? 0.045 : 0.035}
+			opacity={(primary ? 0.026 : 0.018) * glassEffectOpacity}
 			blending={normalBlending}
 			depthWrite={false}
 		/>
@@ -364,7 +566,7 @@ useTask(() => {
 			color={primary ? "#1e1b4b" : "#172554"}
 			side={doubleSide}
 			transparent={true}
-			opacity={primary ? 0.2 : 0.16}
+			opacity={(primary ? 0.12 : 0.09) * glassEffectOpacity}
 			blending={additiveBlending}
 			depthWrite={false}
 		/>
@@ -378,7 +580,7 @@ useTask(() => {
 				color={primary ? "#e0f2fe" : "#c4b5fd"}
 				side={frontSide}
 				transparent={true}
-				opacity={primary ? 0.18 : 0.1}
+				opacity={(primary ? 0.26 : 0.16) * glassEffectOpacity}
 				blending={additiveBlending}
 				depthWrite={false}
 				depthTest={true}
@@ -401,7 +603,7 @@ useTask(() => {
 					color="#dff7ff"
 					side={doubleSide}
 					transparent={true}
-					opacity={primary ? 0.14 : 0.08}
+					opacity={(primary ? 0.14 : 0.08) * glassEffectOpacity}
 					blending={additiveBlending}
 					depthWrite={false}
 					depthTest={true}
@@ -417,7 +619,7 @@ useTask(() => {
 					color="#c4b5fd"
 					side={doubleSide}
 					transparent={true}
-					opacity={primary ? 0.08 : 0.05}
+					opacity={(primary ? 0.08 : 0.05) * glassEffectOpacity}
 					blending={additiveBlending}
 					depthWrite={false}
 					depthTest={true}
@@ -427,31 +629,87 @@ useTask(() => {
 	{/if}
 
 	{#if primary && titleTexture}
-		<T.Mesh position={[0, 0.02, 0.158]}>
+		{#if panelGlassEnabled}
+			<T.Mesh position={[glassMediaOffset, 0.02 - glassMediaOffset * 0.44, mediaGhostFarZ]} scale={[glassMediaGhostScale, glassMediaGhostScale, 1]}>
+				<T.PlaneGeometry args={[titleWidth, titleHeight]} />
+				<T.MeshBasicMaterial
+					map={titleTexture}
+					color="#67e8f9"
+					side={frontSide}
+					transparent={true}
+					opacity={0.2 * mediaGhostOpacity}
+					blending={additiveBlending}
+					depthWrite={false}
+				/>
+			</T.Mesh>
+
+			<T.Mesh position={[-glassMediaOffset * 0.72, 0.02 + glassMediaOffset * 0.32, mediaGhostNearZ]} scale={[1.006, 1.006, 1]}>
+				<T.PlaneGeometry args={[titleWidth, titleHeight]} />
+				<T.MeshBasicMaterial
+					map={titleTexture}
+					color="#a78bfa"
+					side={frontSide}
+					transparent={true}
+					opacity={0.14 * mediaGhostOpacity}
+					blending={additiveBlending}
+					depthWrite={false}
+				/>
+			</T.Mesh>
+		{/if}
+
+		<T.Mesh position={[0, 0.02, mediaSurfaceZ]}>
 			<T.PlaneGeometry args={[titleWidth, titleHeight]} />
 			<T.MeshBasicMaterial
 				map={titleTexture}
 				side={frontSide}
-				transparent={false}
-				opacity={1}
+				transparent={true}
+				opacity={titleMediaOpacity}
 				blending={normalBlending}
-				depthWrite={true}
+				depthWrite={!panelGlassEnabled}
 			/>
 		</T.Mesh>
 	{:else if stillTexture}
-		<T.Mesh position={[0, 0, 0.158]}>
+		{#if panelGlassEnabled}
+			<T.Mesh position={[glassMediaOffset, -glassMediaOffset * 0.46, mediaGhostFarZ]} scale={[glassMediaGhostScale, glassMediaGhostScale, 1]}>
+				<T.PlaneGeometry args={[mediaWidth, mediaHeight]} />
+				<T.MeshBasicMaterial
+					map={stillTexture}
+					color="#67e8f9"
+					side={frontSide}
+					transparent={true}
+					opacity={(primary ? 0.18 : 0.12) * mediaGhostOpacity}
+					blending={additiveBlending}
+					depthWrite={false}
+				/>
+			</T.Mesh>
+
+			<T.Mesh position={[-glassMediaOffset * 0.78, glassMediaOffset * 0.36, mediaGhostNearZ]} scale={[1.008, 1.008, 1]}>
+				<T.PlaneGeometry args={[mediaWidth, mediaHeight]} />
+				<T.MeshBasicMaterial
+					map={stillTexture}
+					color="#c4b5fd"
+					side={frontSide}
+					transparent={true}
+					opacity={(primary ? 0.12 : 0.08) * mediaGhostOpacity}
+					blending={additiveBlending}
+					depthWrite={false}
+				/>
+			</T.Mesh>
+		{/if}
+
+		<T.Mesh position={[0, 0, mediaSurfaceZ]}>
 			<T.PlaneGeometry args={[mediaWidth, mediaHeight]} />
 			<T.MeshBasicMaterial
 				map={stillTexture}
 				side={frontSide}
-				transparent={false}
-				opacity={1}
+				transparent={true}
+				opacity={mediaOpacity}
 				blending={normalBlending}
-				depthWrite={true}
+				depthWrite={!panelGlassEnabled}
 			/>
 		</T.Mesh>
 	{:else}
-		<T.Mesh position={[0, 0.02, 0.158]}>
+		<T.Mesh position={[0, 0.02, mediaSurfaceZ]}>
 			<T.PlaneGeometry args={[fallbackWidth, fallbackHeight]} />
 			<T.MeshBasicMaterial
 				color={primary ? "#67e8f9" : "#8b5cf6"}
@@ -464,195 +722,19 @@ useTask(() => {
 		</T.Mesh>
 	{/if}
 
-	<T.Mesh position={[0, frameHeight / 2 - bevelRailWidth / 2, 0.035]}>
-		<T is={horizontalRailGeometry} />
-		<T.MeshPhysicalMaterial
-			color="#f8fafc"
-			transparent={true}
-			opacity={primary ? 0.36 : 0.25}
-			roughness={0.14}
-			roughnessMap={grimeTexture}
-			metalness={0.12}
-			transmission={0.58}
-			thickness={0.55}
-			clearcoat={1}
-			clearcoatRoughness={0.06}
-			ior={1.78}
-			reflectivity={0.86}
-			iridescence={primary ? 0.55 : 0.36}
-			iridescenceIOR={1.48}
-			iridescenceThicknessRange={[180, 520]}
-			attenuationColor="#67e8f9"
-			attenuationDistance={1.8}
-			emissive="#67e8f9"
-			emissiveIntensity={primary ? 0.055 : 0.026}
-			depthWrite={false}
-		/>
-	</T.Mesh>
+	{#if screenTextTexture}
+		<T.Mesh position={[0, 0.01, textSurfaceZ]} renderOrder={21}>
+			<T.PlaneGeometry args={[textWidth, textHeight]} />
+			<T.MeshBasicMaterial
+				map={screenTextTexture}
+				side={doubleSide}
+				transparent={true}
+				opacity={textOpacity}
+				blending={normalBlending}
+				depthWrite={false}
+				depthTest={false}
+			/>
+		</T.Mesh>
+	{/if}
 
-	<T.Mesh position={[0, -frameHeight / 2 + bevelRailWidth / 2, 0.035]}>
-		<T is={horizontalRailGeometry} />
-		<T.MeshPhysicalMaterial
-			color="#f8fafc"
-			transparent={true}
-			opacity={primary ? 0.28 : 0.2}
-			roughness={0.18}
-			roughnessMap={grimeTexture}
-			metalness={0.1}
-			transmission={0.56}
-			thickness={0.52}
-			clearcoat={0.94}
-			clearcoatRoughness={0.08}
-			ior={1.72}
-			reflectivity={0.76}
-			iridescence={primary ? 0.38 : 0.24}
-			iridescenceIOR={1.44}
-			iridescenceThicknessRange={[120, 440]}
-			attenuationColor="#38bdf8"
-			attenuationDistance={1.7}
-			emissive="#38bdf8"
-			emissiveIntensity={primary ? 0.035 : 0.018}
-			depthWrite={false}
-		/>
-	</T.Mesh>
-
-	<T.Mesh position={[-frameWidth / 2 + bevelRailWidth / 2, 0, 0.035]}>
-		<T is={verticalRailGeometry} />
-		<T.MeshPhysicalMaterial
-			color="#f8fafc"
-			transparent={true}
-			opacity={primary ? 0.3 : 0.21}
-			roughness={0.16}
-			roughnessMap={grimeTexture}
-			metalness={0.1}
-			transmission={0.56}
-			thickness={0.52}
-			clearcoat={0.96}
-			clearcoatRoughness={0.08}
-			ior={1.74}
-			reflectivity={0.78}
-			iridescence={primary ? 0.44 : 0.28}
-			iridescenceIOR={1.48}
-			iridescenceThicknessRange={[160, 500]}
-			attenuationColor="#a78bfa"
-			attenuationDistance={1.7}
-			emissive="#a78bfa"
-			emissiveIntensity={primary ? 0.038 : 0.02}
-			depthWrite={false}
-		/>
-	</T.Mesh>
-
-	<T.Mesh position={[frameWidth / 2 - bevelRailWidth / 2, 0, 0.035]}>
-		<T is={verticalRailGeometry} />
-		<T.MeshPhysicalMaterial
-			color="#f8fafc"
-			transparent={true}
-			opacity={primary ? 0.24 : 0.17}
-			roughness={0.2}
-			roughnessMap={grimeTexture}
-			metalness={0.08}
-			transmission={0.54}
-			thickness={0.5}
-			clearcoat={0.9}
-			clearcoatRoughness={0.1}
-			ior={1.68}
-			reflectivity={0.7}
-			iridescence={primary ? 0.3 : 0.18}
-			iridescenceIOR={1.4}
-			iridescenceThicknessRange={[120, 360]}
-			attenuationColor="#60a5fa"
-			attenuationDistance={1.6}
-			emissive="#60a5fa"
-			emissiveIntensity={primary ? 0.032 : 0.017}
-			depthWrite={false}
-		/>
-	</T.Mesh>
-
-	<T.Mesh position={[0, frameHeight / 2 - bevelHighlightWidth, 0.14]}>
-		<T is={horizontalHighlightGeometry} />
-		<T.MeshBasicMaterial
-			color="#ffffff"
-			transparent={true}
-			opacity={primary ? 0.58 : 0.36}
-			blending={additiveBlending}
-			depthWrite={false}
-		/>
-	</T.Mesh>
-
-	<T.Mesh position={[-prismOffset, frameHeight / 2 - bevelHighlightWidth * 2.4, 0.152]}>
-		<T is={horizontalHighlightGeometry} />
-		<T.MeshBasicMaterial
-			color="#22d3ee"
-			transparent={true}
-			opacity={primary ? 0.22 : 0.14}
-			blending={additiveBlending}
-			depthWrite={false}
-		/>
-	</T.Mesh>
-
-	<T.Mesh position={[prismOffset, frameHeight / 2 - bevelHighlightWidth * 3.4, 0.154]}>
-		<T is={horizontalHighlightGeometry} />
-		<T.MeshBasicMaterial
-			color="#fb7185"
-			transparent={true}
-			opacity={primary ? 0.16 : 0.1}
-			blending={additiveBlending}
-			depthWrite={false}
-		/>
-	</T.Mesh>
-
-	<T.Mesh position={[-frameWidth / 2 + bevelHighlightWidth, 0, 0.14]}>
-		<T is={verticalHighlightGeometry} />
-		<T.MeshBasicMaterial
-			color="#ffffff"
-			transparent={true}
-			opacity={primary ? 0.38 : 0.24}
-			blending={additiveBlending}
-			depthWrite={false}
-		/>
-	</T.Mesh>
-
-	<T.Mesh position={[-frameWidth / 2 + bevelHighlightWidth * 2.4, -prismOffset, 0.152]}>
-		<T is={verticalHighlightGeometry} />
-		<T.MeshBasicMaterial
-			color="#22d3ee"
-			transparent={true}
-			opacity={primary ? 0.18 : 0.11}
-			blending={additiveBlending}
-			depthWrite={false}
-		/>
-	</T.Mesh>
-
-	<T.Mesh position={[-frameWidth / 2 + bevelHighlightWidth * 3.4, prismOffset, 0.154]}>
-		<T is={verticalHighlightGeometry} />
-		<T.MeshBasicMaterial
-			color="#fb7185"
-			transparent={true}
-			opacity={primary ? 0.14 : 0.085}
-			blending={additiveBlending}
-			depthWrite={false}
-		/>
-	</T.Mesh>
-
-	<T.Mesh position={[frameWidth / 2 - bevelHighlightWidth, 0, 0.14]}>
-		<T is={verticalHighlightGeometry} />
-		<T.MeshBasicMaterial
-			color="#93c5fd"
-			transparent={true}
-			opacity={primary ? 0.2 : 0.13}
-			blending={additiveBlending}
-			depthWrite={false}
-		/>
-	</T.Mesh>
-
-	<T.Mesh position={[0, -frameHeight / 2 + bevelHighlightWidth, 0.14]}>
-		<T is={horizontalHighlightGeometry} />
-		<T.MeshBasicMaterial
-			color="#67e8f9"
-			transparent={true}
-			opacity={primary ? 0.24 : 0.15}
-			blending={additiveBlending}
-			depthWrite={false}
-		/>
-	</T.Mesh>
 </T.Group>
