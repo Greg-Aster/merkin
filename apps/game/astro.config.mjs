@@ -166,7 +166,7 @@ export default defineConfig({
                 || id.includes('/src/threlte/features/performance/stores/')
                 || id.includes('/src/threlte/features/performance/utils/')
               ) {
-                return 'runtime-performance'
+                return 'runtime-world'
               }
 
               if (
