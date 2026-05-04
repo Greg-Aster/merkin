@@ -1,48 +1,17 @@
-import { spawnSync } from 'node:child_process'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { join, relative } from 'node:path'
 import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs'
-import { dirname, join, relative } from 'node:path'
-import { readDeployedSceneLevels } from './lib/levelRegistry.mjs'
-import {
-  adaptSceneDocumentToLevelDefinition,
-  createLevelBuildReport,
-  createRuntimeSceneManifest,
-  normalizeRuntimeLevelSceneSettings,
-} from './lib/runtimeSceneManifest.mjs'
+  buildRuntimeAssetManifest,
+  createRuntimeAssetCookContext,
+  formatBytes,
+  getRuntimeSceneBuildErrors,
+  normalizePublicUrl,
+  tierConfigs,
+} from './lib/runtimeAssetCookManifest.mjs'
+import { cookRuntimeAssetVariant } from './lib/runtimeAssetVariantCooker.mjs'
 
 const appRoot = join(import.meta.dirname, '..')
-const repoRoot = join(appRoot, '..', '..')
-const sceneDir = join(appRoot, 'src/threlte/editor/scenes')
-const publicRoot = join(repoRoot, 'apps/megameal/public')
-const cookedRoot = join(publicRoot, 'generated/runtime-game-assets')
-const manifestPath = join(cookedRoot, 'manifest.json')
-const runtimeSceneRoot = join(cookedRoot, 'scenes')
-
-const tierConfigs = [
-  {
-    id: 'high',
-    simplifyRatio: 0.82,
-    simplifyError: 0.00008,
-    textureSize: 2048,
-  },
-  {
-    id: 'medium',
-    simplifyRatio: 0.52,
-    simplifyError: 0.00012,
-    textureSize: 1024,
-  },
-  {
-    id: 'low',
-    simplifyRatio: 0.28,
-    simplifyError: 0.0002,
-    textureSize: 512,
-  },
-]
+const context = createRuntimeAssetCookContext({ appRoot })
 
 function hasFlag(name) {
   return process.argv.includes(name)
@@ -53,293 +22,11 @@ function getArg(name) {
   return process.argv.find(arg => arg.startsWith(prefix))?.slice(prefix.length)
 }
 
-function stripBom(source) {
-  return source.replace(/^\uFEFF/, '')
-}
-
-function readJson(filePath) {
-  return JSON.parse(stripBom(readFileSync(filePath, 'utf8')))
-}
-
-function formatBytes(bytes) {
-  return `${Math.round((bytes / (1024 * 1024)) * 10) / 10}MB`
-}
-
-function normalizePublicUrl(url) {
-  return url.startsWith('/') ? url : `/${url}`
-}
-
-function resolvePublicPath(url) {
-  return join(publicRoot, normalizePublicUrl(url).replace(/^\//, ''))
-}
-
-function collectSceneAssets() {
-  const byUrl = new Map()
-  const levels = readDeployedSceneLevels({ appRoot })
-
-  for (const level of levels) {
-    const sceneId = level.source?.sceneId ?? level.id
-    const scenePath = join(sceneDir, `${sceneId}.scene.json`)
-    if (!existsSync(scenePath)) {
-      throw new Error(
-        `Missing deployed scene document: ${relative(repoRoot, scenePath)}`,
-      )
-    }
-
-    const scene = readJson(scenePath)
-    const levelId = scene.levelId ?? level.id
-    const nodes = Array.isArray(scene.nodes) ? scene.nodes : []
-
-    for (const node of nodes) {
-      const url = node.asset?.url
-      if (typeof url !== 'string' || !url.endsWith('.glb')) continue
-
-      const normalizedUrl = normalizePublicUrl(url)
-      const entry =
-        byUrl.get(normalizedUrl) ??
-        {
-          sourceUrl: normalizedUrl,
-          scenes: new Map(),
-        }
-
-      const sceneNodeIds = entry.scenes.get(levelId) ?? []
-      sceneNodeIds.push(node.id)
-      entry.scenes.set(levelId, sceneNodeIds)
-      byUrl.set(normalizedUrl, entry)
-    }
-  }
-
-  return [...byUrl.values()].sort((a, b) =>
-    a.sourceUrl.localeCompare(b.sourceUrl),
-  )
-}
-
-function getRuntimeSceneManifestPublicUrl(levelId) {
-  return `/generated/runtime-game-assets/scenes/${levelId}.runtime-scene.json`
-}
-
-function getWorldPartitionPublicUrl(levelId) {
-  return `/runtime-world-partitions/${levelId}.partition.json`
-}
-
-function getSceneLevelEntries() {
-  return readDeployedSceneLevels({ appRoot }).map(level => ({
-    levelId: level.id,
-    sceneId: level.source?.sceneId ?? level.id,
-  }))
-}
-
-async function buildRuntimeSceneManifests() {
-  const manifests = []
-  const generatedAt = new Date().toISOString()
-
-  for (const entry of getSceneLevelEntries()) {
-    const scenePath = join(sceneDir, `${entry.sceneId}.scene.json`)
-    if (!existsSync(scenePath)) {
-      throw new Error(
-        `Missing deployed scene document: ${relative(repoRoot, scenePath)}`,
-      )
-    }
-
-    const scene = readJson(scenePath)
-    const normalizedScene = {
-      ...scene,
-      settings: normalizeRuntimeLevelSceneSettings(entry.levelId, scene.settings),
-    }
-    const levelDefinition = adaptSceneDocumentToLevelDefinition(normalizedScene)
-    const buildReport = createLevelBuildReport(levelDefinition)
-    const worldPartitionUrl = getWorldPartitionPublicUrl(entry.levelId)
-    const worldPartitionPath = resolvePublicPath(worldPartitionUrl)
-
-    manifests.push({
-      outputUrl: getRuntimeSceneManifestPublicUrl(entry.levelId),
-      outputPath: resolvePublicPath(getRuntimeSceneManifestPublicUrl(entry.levelId)),
-      manifest: createRuntimeSceneManifest({
-        scene: normalizedScene,
-        sceneId: entry.sceneId,
-        sourcePath: relative(repoRoot, scenePath),
-        levelDefinition,
-        buildReport,
-        generatedAt,
-        worldPartitionUrl: existsSync(worldPartitionPath)
-          ? worldPartitionUrl
-          : undefined,
-      }),
-    })
-  }
-
-  return manifests
-}
-
-function getCookedPublicUrl(sourceUrl, tier) {
-  const relativeSource = sourceUrl.replace(/^\//, '').replace(/\.glb$/i, '')
-  return `/generated/runtime-game-assets/${relativeSource}.${tier}.glb`
-}
-
-function createManifestEntry(asset) {
-  const sourcePath = resolvePublicPath(asset.sourceUrl)
-  const sourceExists = existsSync(sourcePath)
-  const sourceSizeBytes = sourceExists ? statSync(sourcePath).size : 0
-  const qualityVariants = {}
-
-  for (const tier of tierConfigs) {
-    const url = getCookedPublicUrl(asset.sourceUrl, tier.id)
-    const fullPath = resolvePublicPath(url)
-    qualityVariants[tier.id] = {
-      url,
-      exists: existsSync(fullPath),
-      sizeBytes: existsSync(fullPath) ? statSync(fullPath).size : 0,
-      pipeline: {
-        command: 'gltf-transform optimize',
-        compress: 'quantize',
-        textureCompress: 'webp',
-        textureSize: tier.textureSize,
-        simplifyRatio: tier.simplifyRatio,
-        simplifyError: tier.simplifyError,
-      },
-    }
-  }
-
-  return {
-    sourceUrl: asset.sourceUrl,
-    sourceExists,
-    sourceSizeBytes,
-    sourcePath: relative(repoRoot, sourcePath),
-    scenes: [...asset.scenes.entries()].map(([sceneId, nodeIds]) => ({
-      sceneId,
-      nodeIds: [...new Set(nodeIds)].sort(),
-    })),
-    rawGeneratedRuntimeAsset: asset.sourceUrl.startsWith('/generated/'),
-    qualityVariants,
-  }
-}
-
-async function buildManifest() {
-  const assets = collectSceneAssets()
-  const entries = Object.fromEntries(
-    assets.map(asset => [asset.sourceUrl, createManifestEntry(asset)]),
-  )
-  const runtimeScenes = await buildRuntimeSceneManifests()
-  const totalSourceBytes = Object.values(entries).reduce(
-    (sum, entry) => sum + entry.sourceSizeBytes,
-    0,
-  )
-  const cookedAssets = Object.values(entries).filter(entry =>
-    Object.values(entry.qualityVariants).some(variant => variant.exists),
-  )
-  const cookedVariantCount = Object.values(entries).reduce(
-    (sum, entry) =>
-      sum +
-      Object.values(entry.qualityVariants).filter(variant => variant.exists)
-        .length,
-    0,
-  )
-  const cookedTierCoverage = Object.fromEntries(
-    tierConfigs.map(tier => [
-      tier.id,
-      Object.values(entries).filter(
-        entry => entry.qualityVariants[tier.id]?.exists,
-      ).length,
-    ]),
-  )
-
-  return {
-    schemaVersion: 1,
-    generatedAt: new Date().toISOString(),
-    sourceLevelRegistry: relative(
-      repoRoot,
-      join(appRoot, 'src/threlte/levels/level-registry.json'),
-    ),
-    sourceSceneDirectory: relative(repoRoot, sceneDir),
-    cookedAssetDirectory: relative(repoRoot, cookedRoot),
-    runtimeSceneDirectory: relative(repoRoot, runtimeSceneRoot),
-    summary: {
-      sourceAssetCount: Object.keys(entries).length,
-      sourceAssetBytes: totalSourceBytes,
-      sourceAssetSize: formatBytes(totalSourceBytes),
-      cookedAssetCount: cookedAssets.length,
-      cookedVariantCount,
-      cookedTierCoverage,
-      missingSourceAssetCount: Object.values(entries).filter(
-        entry => !entry.sourceExists,
-      ).length,
-      rawGeneratedRuntimeAssetCount: Object.values(entries).filter(
-        entry => entry.rawGeneratedRuntimeAsset,
-      ).length,
-      runtimeSceneManifestCount: runtimeScenes.length,
-    },
-    assets: entries,
-    runtimeScenes: Object.fromEntries(
-      runtimeScenes.map(entry => [
-        entry.manifest.levelId,
-        {
-          url: entry.outputUrl,
-          sourceScene: entry.manifest.source.path,
-          actorCount: entry.manifest.buildReport.actorCount,
-          requiredRenderActorCount:
-            entry.manifest.runtime.requiredRenderActorIds.length,
-          requiredAssetCount: entry.manifest.runtime.requiredAssetUrls.length,
-          runtimeAssetCount: entry.manifest.runtime.runtimeAssetUrls.length,
-          buildErrors: entry.manifest.buildReport.errors,
-          buildWarnings: entry.manifest.buildReport.warnings,
-        },
-      ]),
-    ),
-    runtimeSceneManifests: runtimeScenes,
-  }
-}
-
-function cookVariant(sourceUrl, tier, options = {}) {
-  const inputPath = resolvePublicPath(sourceUrl)
-  const outputUrl = getCookedPublicUrl(sourceUrl, tier.id)
-  const outputPath = resolvePublicPath(outputUrl)
-
-  if (!existsSync(inputPath)) {
-    throw new Error(`Missing source asset: ${sourceUrl}`)
-  }
-
-  if (!options.force && existsSync(outputPath)) {
-    console.log(`[cook-runtime-assets] skipped existing ${outputUrl}`)
-    return
-  }
-
-  mkdirSync(dirname(outputPath), { recursive: true })
-
-  const args = [
-    'exec',
-    'gltf-transform',
-    'optimize',
-    inputPath,
-    outputPath,
-    '--compress',
-    'quantize',
-    '--texture-compress',
-    'webp',
-    '--texture-size',
-    String(tier.textureSize),
-    '--simplify',
-    'true',
-    '--simplify-ratio',
-    String(tier.simplifyRatio),
-    '--simplify-error',
-    String(tier.simplifyError),
-  ]
-
-  const result = spawnSync('pnpm', args, {
-    cwd: repoRoot,
-    stdio: 'inherit',
-    shell: process.platform === 'win32',
-  })
-
-  if (result.status !== 0) {
-    throw new Error(
-      `Failed to cook ${sourceUrl} ${tier.id} with exit code ${result.status}`,
-    )
-  }
-}
-
 function printSummary(manifest) {
   const tierCoverage = manifest.summary.cookedTierCoverage ?? {}
+  const runtimeSceneBuildErrorCount = Object.values(
+    manifest.runtimeScenes,
+  ).reduce((sum, scene) => sum + scene.buildErrors.length, 0)
 
   console.log('Runtime asset cooking manifest')
   console.log('==============================')
@@ -357,6 +44,7 @@ function printSummary(manifest) {
   console.log(
     `runtime scene manifests: ${manifest.summary.runtimeSceneManifestCount}`,
   )
+  console.log(`runtime scene build errors: ${runtimeSceneBuildErrorCount}`)
 
   const largest = Object.values(manifest.assets)
     .sort((a, b) => b.sourceSizeBytes - a.sourceSizeBytes)
@@ -369,6 +57,21 @@ function printSummary(manifest) {
   }
 }
 
+function writeManifestOutputs(manifest) {
+  mkdirSync(context.cookedRoot, { recursive: true })
+  mkdirSync(context.runtimeSceneRoot, { recursive: true })
+
+  for (const entry of manifest.runtimeSceneManifests) {
+    writeFileSync(entry.outputPath, `${JSON.stringify(entry.manifest, null, 2)}\n`)
+    console.log(`wrote ${relative(context.repoRoot, entry.outputPath)}`)
+  }
+
+  const { runtimeSceneManifests, ...assetManifest } = manifest
+  writeFileSync(context.manifestPath, `${JSON.stringify(assetManifest, null, 2)}\n`)
+  console.log('')
+  console.log(`wrote ${relative(context.repoRoot, context.manifestPath)}`)
+}
+
 const shouldCook = hasFlag('--cook')
 const shouldWriteManifest = hasFlag('--write-manifest') || shouldCook
 const forceCook = hasFlag('--force')
@@ -376,7 +79,7 @@ const requestedAsset = getArg('--asset')
 const requestedTier = getArg('--tier')
 const maxAssets = Number.parseInt(getArg('--max-assets') ?? '0', 10)
 
-let manifest = await buildManifest()
+let manifest = await buildRuntimeAssetManifest(context)
 printSummary(manifest)
 
 if (shouldCook) {
@@ -400,27 +103,33 @@ if (shouldCook) {
   for (const asset of assetsToCook) {
     for (const tier of tiersToCook) {
       console.log(`[cook-runtime-assets] ${asset.sourceUrl} -> ${tier.id}`)
-      cookVariant(asset.sourceUrl, tier, { force: forceCook })
+      cookRuntimeAssetVariant({
+        context,
+        sourceUrl: asset.sourceUrl,
+        tier,
+        force: forceCook,
+      })
     }
   }
 
-  manifest = await buildManifest()
+  manifest = await buildRuntimeAssetManifest(context)
 }
 
 if (shouldWriteManifest) {
-  mkdirSync(cookedRoot, { recursive: true })
-  mkdirSync(runtimeSceneRoot, { recursive: true })
-  for (const entry of manifest.runtimeSceneManifests) {
-    writeFileSync(entry.outputPath, `${JSON.stringify(entry.manifest, null, 2)}\n`)
-    console.log(`wrote ${relative(repoRoot, entry.outputPath)}`)
-  }
-
-  const { runtimeSceneManifests, ...assetManifest } = manifest
-  writeFileSync(manifestPath, `${JSON.stringify(assetManifest, null, 2)}\n`)
-  console.log('')
-  console.log(`wrote ${relative(repoRoot, manifestPath)}`)
+  writeManifestOutputs(manifest)
 }
 
 if (manifest.summary.missingSourceAssetCount > 0) {
+  process.exitCode = 1
+}
+
+const runtimeSceneBuildErrors = getRuntimeSceneBuildErrors(manifest)
+
+if (runtimeSceneBuildErrors.length > 0) {
+  console.error('')
+  console.error('runtime scene manifest build errors')
+  for (const error of runtimeSceneBuildErrors) {
+    console.error(`- ${error}`)
+  }
   process.exitCode = 1
 }

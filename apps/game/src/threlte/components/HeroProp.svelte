@@ -8,6 +8,8 @@ import {
   resolveRuntimeAssetUrl,
   resolveRuntimeAssetUrlSync,
 } from '../engine/runtimeAssetManifest'
+import { traceRuntimeCulling } from '../engine/runtimeCullingTrace'
+import type { SceneMaterialData } from '../engine/sceneDocumentTypes'
 import {
   qualityLevelStore,
   qualitySettingsStore,
@@ -38,6 +40,7 @@ const dispatch = createEventDispatcher()
 export let url: string
 export let levelId: string | null = null
 export let runtimeCulling = true
+export let materialOverride: SceneMaterialData | null = null
 
 const { camera } = useThrelte()
 let scene: THREE.Group | null = null
@@ -83,6 +86,8 @@ let appliedMaterialStyleKey = ''
 const unsubscribe = editorMaterialOverrideStore?.subscribe(value => {
   editorMaterialOverride = value
 })
+
+$: effectiveMaterialOverride = editorMaterialOverride ?? materialOverride
 
 function getActiveCamera(): THREE.Camera | null {
   const candidate = camera as THREE.Camera & { current?: THREE.Camera | null }
@@ -220,6 +225,23 @@ function applyRuntimePropBudget() {
   runtimeVisible = visibility.visible
   scene.visible = visibility.visible
 
+  if (!inEditorContext && runtimeCulling) {
+    traceRuntimeCulling({
+      levelId: levelId ?? undefined,
+      url: resolvedUrl || url,
+      reason: 'hero-prop-budget',
+      culled: !visibility.visible,
+      detail: {
+        sourceUrl: url,
+        resolvedUrl,
+        distanceToCamera: currentDistanceToCamera,
+        boundingRadius: scaledBoundingRadius,
+        cullDistance: visibility.cullDistance,
+        qualityTier: $qualityLevelStore,
+      },
+    })
+  }
+
   sceneMeshes.forEach(mesh => {
     mesh.castShadow = visibility.castShadow
     mesh.receiveShadow = visibility.receiveShadow
@@ -322,7 +344,13 @@ async function loadSceneFromUrl(nextUrl: string) {
     if (inEditorContext) {
       syncObjectMaterialOverride(
         scene,
-        editorMaterialOverride,
+        effectiveMaterialOverride,
+        materialOverrideState,
+      )
+    } else {
+      syncObjectMaterialOverride(
+        scene,
+        materialOverride,
         materialOverrideState,
       )
     }
@@ -398,9 +426,11 @@ $: if (scene) {
   if (inEditorContext) {
     syncObjectMaterialOverride(
       scene,
-      editorMaterialOverride,
+      effectiveMaterialOverride,
       materialOverrideState,
     )
+  } else {
+    syncObjectMaterialOverride(scene, materialOverride, materialOverrideState)
   }
   applyOverrideTexturesToScene()
   applyRuntimePropBudget()

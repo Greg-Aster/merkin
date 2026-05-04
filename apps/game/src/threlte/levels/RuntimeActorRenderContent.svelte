@@ -1,10 +1,13 @@
 <script lang="ts">
+import { onDestroy, onMount } from 'svelte'
 import AdaptivePointLight from '../components/AdaptivePointLight.svelte'
 import HeroProp from '../components/HeroProp.svelte'
 import ProceduralMesh from '../components/ProceduralMesh.svelte'
 import type { ActorDefinition } from '../engine/types'
 import {
+  markRuntimeAssetActorLoaded,
   markRuntimeActorRendered,
+  unmarkRuntimeAssetActorLoaded,
   unmarkRuntimeActorRendered,
 } from '../stores/runtimeRenderRegistry'
 import RuntimePrefabNode from './RuntimePrefabNode.svelte'
@@ -18,24 +21,41 @@ $: primitive = render?.primitive ?? null
 $: asset = render?.asset ?? null
 $: prefab = render?.prefab ?? null
 $: light = actor.light ?? null
-$: runtimeCulling = render?.cullingPolicy !== 'never'
+
+function hasImmediateRenderContent() {
+  return Boolean(prefab || primitive || light)
+}
 
 function handleAssetLoad() {
   if (!levelId) return
+  markRuntimeAssetActorLoaded(levelId, actor.id)
   markRuntimeActorRendered(levelId, actor.id)
 }
 
 function handleAssetError() {
   if (!levelId) return
+  unmarkRuntimeAssetActorLoaded(levelId, actor.id)
   unmarkRuntimeActorRendered(levelId, actor.id)
 }
+
+onMount(() => {
+  if (!levelId || !hasImmediateRenderContent()) return
+  markRuntimeActorRendered(levelId, actor.id)
+})
+
+onDestroy(() => {
+  if (!levelId) return
+  unmarkRuntimeActorRendered(levelId, actor.id)
+  unmarkRuntimeAssetActorLoaded(levelId, actor.id)
+})
 </script>
 
 {#if asset}
   <HeroProp
     url={asset.url}
     {levelId}
-    {runtimeCulling}
+    materialOverride={material}
+    runtimeCulling={false}
     on:load={handleAssetLoad}
     on:error={handleAssetError}
   />

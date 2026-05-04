@@ -8,6 +8,7 @@ type Env = {
 const DEFAULT_GAME_PREFIX = '/game'
 const STATIC_ASSET_PATTERN =
   /\.(?:avif|css|gif|ico|jpg|jpeg|js|json|map|mp3|mp4|ogg|png|svg|txt|wav|webm|webp|woff|woff2|xml)$/i
+const HTML_CONTENT_TYPE_PATTERN = /\btext\/html\b/i
 
 function normalizeOrigin(origin: string): string {
   return origin.replace(/\/+$/, '')
@@ -70,14 +71,26 @@ function applyCachePolicy(
   upstreamUrl: URL,
 ): void {
   if (request.method !== 'GET') return
-  if (responseHeaders.has('cache-control')) return
 
-  if (STATIC_ASSET_PATTERN.test(upstreamUrl.pathname)) {
-    responseHeaders.set('cache-control', 'public, max-age=31536000, immutable')
+  const contentType = responseHeaders.get('content-type') ?? ''
+  const isHtmlResponse = HTML_CONTENT_TYPE_PATTERN.test(contentType)
+  const isStaticAssetRequest = STATIC_ASSET_PATTERN.test(upstreamUrl.pathname)
+
+  if (isHtmlResponse) {
+    responseHeaders.set('cache-control', 'no-cache, no-store, must-revalidate')
+    responseHeaders.set('pragma', 'no-cache')
+    responseHeaders.set('expires', '0')
     return
   }
 
-  responseHeaders.set('cache-control', 'public, max-age=300')
+  if (!responseHeaders.has('cache-control')) {
+    responseHeaders.set(
+      'cache-control',
+      isStaticAssetRequest
+        ? 'public, max-age=31536000, immutable'
+        : 'public, max-age=300',
+    )
+  }
 }
 
 async function proxyRequest(

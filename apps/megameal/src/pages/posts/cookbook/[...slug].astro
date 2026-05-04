@@ -1,0 +1,14 @@
+---
+export function getStaticPaths() {
+  return [{ params: { slug: 'cookbook-index' } }]
+}
+
+const slug = Astro.params.slug ?? ''
+const redirectTarget = slug === 'cookbook-index' ? '/cookbook/' : undefined
+
+if (!redirectTarget) {
+  return Astro.redirect('/cookbook/', 302)
+}
+
+return Astro.redirect(redirectTarget, 301)
+---

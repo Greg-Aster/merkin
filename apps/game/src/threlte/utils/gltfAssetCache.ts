@@ -9,12 +9,14 @@ const gltfLoader = new GLTFLoader()
 const cacheUrlKey = '__gltfCacheUrl'
 const cacheDisposedKey = '__gltfCacheDisposed'
 const sharedMaterialsKey = '__gltfSharedMaterials'
+const maxConcurrentGltfLoads = 2
 
 interface GltfCacheEntry {
   promise: Promise<GLTF>
   gltf: GLTF | null
   refCount: number
   evictWhenUnused: boolean
+  lastUsedAt: number
 }
 
 export interface CloneCachedGltfSceneOptions {
@@ -22,6 +24,16 @@ export interface CloneCachedGltfSceneOptions {
 }
 
 const gltfCache = new Map<string, GltfCacheEntry>()
+let activeGltfLoads = 0
+const pendingGltfLoads: Array<{
+  url: string
+  resolve: (gltf: GLTF) => void
+  reject: (error: unknown) => void
+}> = []
+
+function nowMs() {
+  return typeof performance !== 'undefined' ? performance.now() : Date.now()
+}
 
 function cloneMaterial(material: THREE.Material | THREE.Material[]) {
   return Array.isArray(material)
@@ -110,11 +122,38 @@ function releaseEntryIfUnused(url: string, entry: GltfCacheEntry) {
   if (entry.gltf) {
     disposeGltfSource(entry.gltf)
   }
+  THREE.Cache.remove?.(url)
   gltfCache.delete(url)
 }
 
 function normalizeGltfUrl(url: string) {
   return url.trim()
+}
+
+function pumpGltfLoadQueue() {
+  while (
+    activeGltfLoads < maxConcurrentGltfLoads &&
+    pendingGltfLoads.length > 0
+  ) {
+    const request = pendingGltfLoads.shift()
+    if (!request) return
+
+    activeGltfLoads += 1
+    gltfLoader
+      .loadAsync(request.url)
+      .then(request.resolve, request.reject)
+      .finally(() => {
+        activeGltfLoads = Math.max(0, activeGltfLoads - 1)
+        pumpGltfLoadQueue()
+      })
+  }
+}
+
+function loadGltfWithBudget(url: string) {
+  return new Promise<GLTF>((resolve, reject) => {
+    pendingGltfLoads.push({ url, resolve, reject })
+    pumpGltfLoadQueue()
+  })
 }
 
 export function loadCachedGltf(url: string) {
@@ -129,10 +168,10 @@ export function loadCachedGltf(url: string) {
     gltf: null,
     refCount: 0,
     evictWhenUnused: false,
+    lastUsedAt: nowMs(),
   }
 
-  entry.promise = gltfLoader
-    .loadAsync(normalizedUrl)
+  entry.promise = loadGltfWithBudget(normalizedUrl)
     .then(gltf => {
       for (const scene of gltf.scenes ?? []) {
         fixObjectMaterials(scene)
@@ -166,6 +205,7 @@ export async function cloneCachedGltfScene(
 
   if (entry) {
     entry.refCount += 1
+    entry.lastUsedAt = nowMs()
     clone.userData[cacheUrlKey] = normalizedUrl
     clone.userData[cacheDisposedKey] = false
     clone.userData[sharedMaterialsKey] = !cloneMaterials
@@ -195,7 +235,35 @@ export function disposeCachedGltfScene(root: THREE.Object3D | null) {
   if (!entry) return
 
   entry.refCount = Math.max(0, entry.refCount - 1)
+  entry.lastUsedAt = nowMs()
   releaseEntryIfUnused(url, entry)
+}
+
+export function evictUnusedGltfCacheEntries(options: {
+  maxUnreferencedEntries?: number
+  maxUnusedAgeMs?: number
+} = {}) {
+  const maxUnreferencedEntries = options.maxUnreferencedEntries ?? 4
+  const maxUnusedAgeMs = options.maxUnusedAgeMs ?? 8_000
+  const currentTime = nowMs()
+  const unusedEntries = Array.from(gltfCache.entries())
+    .filter(([, entry]) => entry.gltf && entry.refCount === 0)
+    .sort(([, left], [, right]) => left.lastUsedAt - right.lastUsedAt)
+  const overBudgetCount = Math.max(
+    0,
+    unusedEntries.length - Math.max(0, maxUnreferencedEntries),
+  )
+  const overBudgetUrls = new Set(
+    unusedEntries.slice(0, overBudgetCount).map(([url]) => url),
+  )
+
+  for (const [url, entry] of unusedEntries) {
+    const stale = currentTime - entry.lastUsedAt >= maxUnusedAgeMs
+    if (!stale && !overBudgetUrls.has(url)) continue
+
+    entry.evictWhenUnused = true
+    releaseEntryIfUnused(url, entry)
+  }
 }
 
 export function clearGltfCache() {

@@ -51,15 +51,13 @@ import {
   getStarType,
   hashCode,
 } from '../../utils/starUtils'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 
 const dispatch = createEventDispatcher()
 const { camera } = useThrelte()
-const isDev = import.meta.env.DEV
 
 function debugLog(...args: any[]) {
-  if (isDev) {
-    console.log(...args)
-  }
+  runtimeDebugLog(...args)
 }
 
 // --- PROPS ---
@@ -695,7 +693,7 @@ function createStarFromTimelineEvent(
 
   // Safety check for pattern position
   if (!patternPosition) {
-    if (isDev) {
+    if (import.meta.env.DEV) {
       console.warn(
         `Missing pattern position for era: ${era}, pattern: ${config.pattern}, index: ${patternIndex}`,
       )

@@ -3,7 +3,7 @@
   
   This system provides unified click/hover detection for all interactive elements:
   - Stars (from StarMap)
-  - Fireflies (from HybridFireflyComponent) 
+  - Fireflies (from scene-authored gameplay markers)
   - Future interactive objects
   
   Follows ECS architecture with centralized canvas event handling
@@ -14,10 +14,10 @@ import { useTask, useThrelte } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
 import { gameActions } from '../stores/gameStateStore'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 
 const dispatch = createEventDispatcher()
 const { camera } = useThrelte()
-const isDev = import.meta.env.DEV
 
 // Centralized registry of all interactive objects
 interface InteractiveObject {
@@ -172,11 +172,9 @@ export function registerStarSprites(
 
   syncInteractiveCollections()
 
-  if (isDev) {
-    console.log(
-      `🌟 InteractionSystem: Registered ${sprites.length} star sprites`,
-    )
-  }
+  runtimeDebugLog(
+    `🌟 InteractionSystem: Registered ${sprites.length} star sprites`,
+  )
 }
 
 export function registerFireflySprites(
@@ -514,11 +512,9 @@ onMount(() => {
     typeof window !== 'undefined' &&
     window.matchMedia?.('(pointer: coarse)').matches
 
-  if (isDev) {
-    console.log(
-      '🎯 InteractionSystem: Initializing centralized interaction system',
-    )
-  }
+  runtimeDebugLog(
+    '🎯 InteractionSystem: Initializing centralized interaction system',
+  )
 
   const attachCanvasListeners = () => {
     const canvas = getCanvasElement()
@@ -540,9 +536,7 @@ onMount(() => {
     canvas.addEventListener('touchcancel', handleCanvasTouchEnd, {
       passive: true,
     })
-    if (isDev) {
-      console.log('🎯 InteractionSystem: Canvas event listeners attached')
-    }
+    runtimeDebugLog('🎯 InteractionSystem: Canvas event listeners attached')
     return true
   }
 
@@ -581,9 +575,7 @@ onDestroy(() => {
     lightBurstAnimationFrameId = null
   }
 
-  if (isDev) {
-    console.log('🎯 InteractionSystem: Event listeners cleaned up')
-  }
+  runtimeDebugLog('🎯 InteractionSystem: Event listeners cleaned up')
 })
 
 useTask(delta => {

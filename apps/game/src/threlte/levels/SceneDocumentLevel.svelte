@@ -9,22 +9,19 @@ import SceneFogExp2 from '../components/SceneFogExp2.svelte'
 import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
 import LevelManager from '../core/LevelManager.svelte'
 import type { PlayerLevelPositionDetail } from '../core/levelRuntimeEvents'
-import {
-  type ActorDefinition,
-  type LevelDefinition,
-  type RuntimeGameplayData,
-  adaptSceneDocumentToLevelDefinition,
-  createActorWorldMatrixResolver,
-  createLevelBuildReport,
-  getLevelCollisionWorkflow,
-} from '../engine'
+import { createActorWorldMatrixResolver } from '../engine/actorHierarchy'
+import { getLevelCollisionWorkflow } from '../engine/levelCollisionWorkflow'
+import { createLevelBuildReport } from '../engine/levelValidation'
+import type { RuntimeGameplayData } from '../engine/runtimeGameplayTypes'
+import { traceRuntimeCulling } from '../engine/runtimeCullingTrace'
+import { adaptSceneDocumentToLevelDefinition } from '../engine/sceneAdapter'
+import type { ActorDefinition, LevelDefinition } from '../engine/types'
 import { prepareRequiredLevelRenderAssets } from '../engine/levelAssetPreloader'
 import { endLevelRuntimeAssetScope } from '../engine/runtimeAssetManifest'
 import { normalizeRuntimeLevelSceneSettings } from '../engine/runtimeLevelSettings'
 import { loadRuntimeSceneDocument } from '../engine/runtimeSceneDocumentLoader'
 import {
   type RuntimeWorldPartition,
-  getActiveWorldPartitionActorIds,
   loadRuntimeWorldPartition,
 } from '../engine/runtimeWorldPartition'
 import { withSceneEngineData } from '../engine/sceneDocumentRuntime'
@@ -38,16 +35,18 @@ import {
   qualityLevelStore,
   recordSystemTiming,
 } from '../features/performance/stores/performanceStore'
+import TerrainRuntime from '../features/terrain/TerrainRuntime.svelte'
 import {
-  TerrainRuntime,
   type TerrainRuntimeComponentData,
   type TerrainRuntimeComponentSource,
   loadTerrainRuntimeComponentData,
-} from '../features/terrain'
+} from '../features/terrain/terrainManifest'
 import { playerStateStore } from '../stores/gameStateStore'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 import {
   clearRuntimeRenderedActors,
+  setRuntimeActiveActors,
+  setRuntimeLevelActors,
   setRequiredRuntimeRenderActors,
 } from '../stores/runtimeRenderRegistry'
 import { buildRuntimeVisualStyleFromLevelSettings } from '../styles/GameplayStyleProfiles'
@@ -73,7 +72,9 @@ let levelDefinition: LevelDefinition | null = null
 let levelActors: ActorDefinition[] = []
 let rootActors: ActorDefinition[] = []
 let renderActorsReady = false
-let visibleRootActorCount = 0
+let visibleActorIds = new Set<string>()
+let actorRevealOrder: ActorDefinition[] = []
+let actorRevealIndex = 0
 let actorRevealFrame = 0
 let actorRevealComplete: (() => void) | null = null
 let playerPosition: [number, number, number] = [0, 0, 0]
@@ -131,15 +132,47 @@ function cancelActorReveal() {
   actorRevealComplete = null
 }
 
+function buildActorRevealOrder(actors: ActorDefinition[]) {
+  const childrenByParent = new Map<string | null, ActorDefinition[]>()
+  for (const actor of actors) {
+    const parentId = actor.parentId ?? null
+    const children = childrenByParent.get(parentId) ?? []
+    children.push(actor)
+    childrenByParent.set(parentId, children)
+  }
+
+  const orderedActors: ActorDefinition[] = []
+  const visit = (actor: ActorDefinition) => {
+    orderedActors.push(actor)
+    const children = childrenByParent.get(actor.id) ?? []
+    for (const child of children) {
+      visit(child)
+    }
+  }
+
+  for (const root of childrenByParent.get(null) ?? []) {
+    visit(root)
+  }
+
+  return orderedActors
+}
+
 function revealNextActorBatch() {
   const startedAt = performance.now()
-  visibleRootActorCount = Math.min(
-    rootActors.length,
-    visibleRootActorCount + getActorRevealBatchSize(),
+  const nextRevealIndex = Math.min(
+    actorRevealOrder.length,
+    actorRevealIndex + getActorRevealBatchSize(),
   )
+  const nextVisibleActorIds = new Set(visibleActorIds)
+  for (let index = actorRevealIndex; index < nextRevealIndex; index += 1) {
+    const actor = actorRevealOrder[index]
+    if (actor) nextVisibleActorIds.add(actor.id)
+  }
+  actorRevealIndex = nextRevealIndex
+  visibleActorIds = nextVisibleActorIds
   recordSystemTiming('level.actorReveal', performance.now() - startedAt)
 
-  if (visibleRootActorCount < rootActors.length) {
+  if (actorRevealIndex < actorRevealOrder.length) {
     actorRevealFrame = requestAnimationFrame(revealNextActorBatch)
     return
   }
@@ -152,10 +185,12 @@ function revealNextActorBatch() {
 
 function startActorReveal(onComplete: () => void) {
   cancelActorReveal()
-  visibleRootActorCount = 0
+  actorRevealOrder = buildActorRevealOrder(levelActors)
+  actorRevealIndex = 0
+  visibleActorIds = new Set<string>()
   actorRevealComplete = onComplete
 
-  if (rootActors.length === 0) {
+  if (actorRevealOrder.length === 0) {
     actorRevealComplete = null
     onComplete()
     return
@@ -285,7 +320,21 @@ function handleTerrainRuntimeReady() {
   activateSceneGameplay(levelId, spawnPosition)
 }
 
-async function loadSceneDocument(level: string, token: number) {
+function getRuntimeAssetTierCap(settings: SceneSettings) {
+  const levelSettings = settings.level as
+    | {
+        runtimeAssets?: { maxTier?: string }
+        performance?: { assetTierCap?: string }
+      }
+    | undefined
+
+  return (
+    levelSettings?.runtimeAssets?.maxTier ??
+    levelSettings?.performance?.assetTierCap
+  )
+}
+
+async function loadSceneDocumentUnchecked(level: string, token: number) {
   const loadedScene = await loadRuntimeSceneDocument(level)
   if (token !== loadToken) return
 
@@ -295,7 +344,9 @@ async function loadSceneDocument(level: string, token: number) {
   pendingSceneReady = false
   pendingSpawnPosition = null
   renderActorsReady = false
-  visibleRootActorCount = 0
+  visibleActorIds = new Set<string>()
+  actorRevealOrder = []
+  actorRevealIndex = 0
   cancelActorReveal()
 
   let normalizedSceneSettings: SceneSettings
@@ -328,11 +379,24 @@ async function loadSceneDocument(level: string, token: number) {
 
   levelActors = levelDefinition.actors
   rootActors = levelActors.filter(actor => !actor.parentId)
+  setRuntimeLevelActors(level, levelActors)
   if (token !== loadToken) return
 
   const buildReport = createLevelBuildReport(levelDefinition)
   clearRuntimeRenderedActors(level)
   setRequiredRuntimeRenderActors(level, buildReport.requiredRenderActorIds)
+  traceRuntimeCulling({
+    levelId: level,
+    reason: 'level-render-gate',
+    culled: true,
+    detail: {
+      status: 'contract',
+      actorCount: buildReport.actorCount,
+      requiredRenderActorIds: buildReport.requiredRenderActorIds,
+      requiredAssetUrls: buildReport.requiredAssetUrls,
+      buildErrors: buildReport.errors,
+    },
+  })
   const hasBuildErrors = buildReport.errors.length > 0
   const hasBuildWarnings = buildReport.warnings.length > 0
   setRuntimeDiagnostic('levelDefinition', {
@@ -353,8 +417,23 @@ async function loadSceneDocument(level: string, token: number) {
     level,
     buildReport.requiredAssetUrls,
     get(qualityLevelStore),
+    {
+      maxTier: getRuntimeAssetTierCap(normalizedSceneSettings),
+      recordTiming: recordSystemTiming,
+    },
   )
   if (token !== loadToken) return
+  traceRuntimeCulling({
+    levelId: level,
+    reason: 'level-render-gate',
+    culled: preloadReport.failures.length > 0,
+    detail: {
+      status: 'preload-complete',
+      requiredResolvedUrls: preloadReport.requiredResolvedUrls,
+      failureCount: preloadReport.failures.length,
+      failures: preloadReport.failures,
+    },
+  })
 
   setRuntimeDiagnostic('levelAssets', {
     label: 'Level Assets',
@@ -371,11 +450,60 @@ async function loadSceneDocument(level: string, token: number) {
   }
 
   renderActorsReady = true
+  traceRuntimeCulling({
+    levelId: level,
+    reason: 'level-render-gate',
+    culled: false,
+    detail: {
+      status: 'render-actors-ready',
+      rootActorCount: rootActors.length,
+      worldPartition: worldPartition
+        ? {
+            activeRadius: worldPartition.activeRadius,
+            cellSize: worldPartition.cellSize,
+            residentActorCount: worldPartition.residentActorIds.length,
+            streamableActorCount: worldPartition.streamableActorIds.length,
+          }
+        : null,
+    },
+  })
   const spawnPosition = resolveSpawnPosition(levelDefinition)
   startActorReveal(() => {
     if (token !== loadToken) return
     requestSceneGameplayActivation(level, spawnPosition)
   })
+}
+
+async function loadSceneDocument(level: string, token: number) {
+  try {
+    await loadSceneDocumentUnchecked(level, token)
+  } catch (error) {
+    if (token !== loadToken) return
+
+    const message =
+      error instanceof Error ? error.message : 'Unknown level load error.'
+    console.error('Failed to load runtime scene document:', error)
+    levelDefinition = null
+    sceneDocument = null
+    levelActors = []
+    rootActors = []
+    renderActorsReady = false
+    visibleActorIds = new Set<string>()
+    actorRevealOrder = []
+    actorRevealIndex = 0
+    terrainRuntimeData = null
+    terrainRuntimeReady = false
+    worldPartition = null
+    pendingSceneReady = false
+    pendingSpawnPosition = null
+    clearRuntimeRenderedActors(level)
+    setRuntimeDiagnostic('levelDefinition', {
+      label: 'Level Definition',
+      level: 'error',
+      message,
+      meta: { levelId: level },
+    })
+  }
 }
 
 $: levelSettings = (levelDefinition?.settings ?? {}) as SceneSettings
@@ -450,23 +578,12 @@ $: effectiveAudioRegions = [
   ...authoredAudioRegions,
 ]
 $: visibleRootActors = renderActorsReady
-  ? rootActors
-      .slice(0, visibleRootActorCount)
-      .filter(
-        actor =>
-          !streamableWorldPartitionActorIds.has(actor.id) ||
-          activeWorldPartitionActorIds.has(actor.id),
-      )
+  ? rootActors.filter(actor => visibleActorIds.has(actor.id))
   : []
-$: activeWorldPartitionActorIds = worldPartition
-  ? getActiveWorldPartitionActorIds({
-      partition: worldPartition,
-      playerPosition,
-    })
-  : new Set<string>()
-$: streamableWorldPartitionActorIds = new Set(
-  worldPartition?.streamableActorIds ?? [],
-)
+$: runtimeActiveActorIds = new Set(levelActors.map(actor => actor.id))
+$: if (renderActorsReady) {
+  setRuntimeActiveActors(levelId, Array.from(runtimeActiveActorIds))
+}
 $: effectiveFog = (() => {
   const fogVolumes = authoredGameplayNodes.filter(
     entry => entry.gameplay?.type === 'fog-volume',
@@ -670,8 +787,7 @@ onDestroy(() => {
           {levelId}
           {interactionSystem}
           interactiveEnabled={true}
-          activeActorIds={activeWorldPartitionActorIds}
-          streamableActorIds={streamableWorldPartitionActorIds}
+          {visibleActorIds}
           on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
           on:noteRead={(event) => dispatch('noteRead', event.detail)}
         />

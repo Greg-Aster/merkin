@@ -1,11 +1,8 @@
-<!-- 
-  Threlte Performance Monitoring Panel
-  Real-time performance metrics and optimization controls
--->
 <script lang="ts">
-import { onDestroy, onMount } from 'svelte'
+import { onDestroy } from 'svelte'
 import {
   type LongTaskInfo,
+  type RenderInfo,
   type SystemTimingInfo,
   fpsStore,
   frameTimeStore,
@@ -19,20 +16,18 @@ import {
   systemTimingsStore,
 } from '../stores/performanceStore'
 
-// Props
 export let visible = false
 export let position = 'top-right'
 export let compact = false
 
-// Performance data
 let fps = 60
 let frameTime = 16.67
 let memory = { geometries: 0, textures: 0, programs: 0 }
-let renderInfo = { calls: 0, triangles: 0, points: 0, lines: 0 }
+let renderInfo: RenderInfo = { calls: 0, triangles: 0, points: 0, lines: 0 }
 let qualityLevel = 'medium'
 let performanceGrade = 'A'
 let performanceScore = 100
-let recommendations = []
+let recommendations: string[] = []
 let longTasks: LongTaskInfo = {
   supported: false,
   count: 0,
@@ -42,15 +37,13 @@ let longTasks: LongTaskInfo = {
 }
 let systemTimings: Record<string, SystemTimingInfo> = {}
 
-// Chart data for performance history
 let performanceHistory: Array<{
   time: number
   fps: number
   frameTime: number
 }> = []
-let maxHistoryLength = 60 // 60 seconds of data
+const maxHistoryLength = 60
 
-// Subscribe to performance stores
 const unsubscribeFPS = fpsStore.subscribe(value => {
   fps = value
   updatePerformanceHistory()
@@ -98,7 +91,6 @@ function updatePerformanceHistory() {
   const now = Date.now()
   performanceHistory.push({ time: now, fps, frameTime })
 
-  // Keep only recent data
   const cutoff = now - maxHistoryLength * 1000
   performanceHistory = performanceHistory.filter(entry => entry.time >= cutoff)
 }

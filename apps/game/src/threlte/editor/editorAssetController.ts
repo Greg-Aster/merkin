@@ -10,6 +10,16 @@ import {
   getTopLevelNodeIds,
 } from './editorHierarchyUtils'
 import type { EditorSceneNode } from './editorStore'
+import {
+  browseEditorWorkspace,
+  getPublicAssetDirectoryPath,
+  isGeneratedModelFile,
+  isJsonWorkspaceEntry,
+  isModelWorkspaceEntry,
+  resolvePublicAssetUrl,
+  sortWorkspaceEntriesByDirectoryAndName,
+  type EditorWorkspaceEntry,
+} from './editorWorkspaceBrowser'
 
 interface EditorAssetControllerDeps {
   state: Record<string, any>
@@ -62,28 +72,11 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       message: `Browsing assets from ${path}…`,
     })
     try {
-      const response = await fetch(
-        `${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`,
-      )
-      const payload = await response.json()
-      if (!payload?.success) {
-        state.assetBrowserError = payload?.message ?? 'Failed to browse assets'
-        deps.setRuntimeDiagnostic('editorApi', {
-          level: 'warning',
-          message: state.assetBrowserError,
-        })
-        return []
-      }
+      const items = await browseEditorWorkspace(path)
       state.assetBrowserPath = path
-      const nextItems = payload.items
-        .filter(
-          (item: any) => item.isDirectory || /\.(gltf|glb)$/i.test(item.name),
-        )
-        .sort(
-          (a: any, b: any) =>
-            Number(b.isDirectory) - Number(a.isDirectory) ||
-            a.name.localeCompare(b.name),
-        )
+      const nextItems = sortWorkspaceEntriesByDirectoryAndName(
+        items.filter(isModelWorkspaceEntry),
+      )
       state.assetBrowserItems = nextItems
       deps.setRuntimeDiagnostic('editorApi', {
         level: 'ready',
@@ -105,31 +98,7 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
   }
 
   async function browseWorkspaceEntries(path: string) {
-    const response = await fetch(
-      `${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`,
-    )
-    const payload = await response.json()
-    if (!payload?.success) {
-      throw new Error(payload?.message ?? `Failed to browse ${path}`)
-    }
-    return Array.isArray(payload.items) ? payload.items : []
-  }
-
-  function resolvePublicAssetUrl(path: string, fallbackName: string) {
-    const publicPrefixes = ['apps/game/public/', 'apps/megameal/public/']
-    const matchedPrefix = publicPrefixes.find(prefix => path.startsWith(prefix))
-    if (matchedPrefix) {
-      return `/${path.slice(matchedPrefix.length)}`
-    }
-
-    return `/${fallbackName}`
-  }
-
-  function getPublicAssetDirectoryPath(assetUrl: string) {
-    if (typeof assetUrl !== 'string' || !assetUrl.startsWith('/')) return ''
-    const normalized = assetUrl.replace(/^\/+/, '')
-    const workspacePath = `apps/megameal/public/${normalized}`
-    return workspacePath.replace(/\/[^/]+$/, '')
+    return browseEditorWorkspace(path)
   }
 
   function getSelectedNodePreviewAssetUrl(
@@ -170,17 +139,17 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     try {
       const items = await browseWorkspaceEntries(directoryPath)
       state.generatedVariantItems = items
-        .filter(
-          (item: any) => !item.isDirectory && /\.(glb|gltf)$/i.test(item.name),
-        )
-        .sort((left: any, right: any) => right.name.localeCompare(left.name))
-        .map((item: any) => ({
+        .filter(isGeneratedModelFile)
+        .sort((left, right) => right.name.localeCompare(left.name))
+        .map(item => ({
           name: item.name,
           path: item.path,
           url: resolvePublicAssetUrl(item.path, item.name),
         }))
       state.selectedGeneratedVariantUrl =
-        state.generatedVariantItems.find((item: any) => item.url === assetUrl)
+        state.generatedVariantItems.find(
+          (item: { url: string }) => item.url === assetUrl,
+        )
           ?.url ??
         state.generatedVariantItems[0]?.url ??
         ''
@@ -199,26 +168,13 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     state.textureBrowserLoading = true
     state.textureBrowserError = ''
     try {
-      const response = await fetch(
-        `${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`,
-      )
-      const payload = await response.json()
-      if (!payload?.success) {
-        state.textureBrowserError =
-          payload?.message ?? 'Failed to browse textures'
-        return
-      }
+      const items = await browseEditorWorkspace(path)
       state.textureBrowserPath = path
-      state.textureBrowserItems = payload.items
-        .filter(
-          (item: any) =>
-            item.isDirectory || deps.textureFilePattern.test(item.name),
-        )
-        .sort(
-          (a: any, b: any) =>
-            Number(b.isDirectory) - Number(a.isDirectory) ||
-            a.name.localeCompare(b.name),
-        )
+      state.textureBrowserItems = sortWorkspaceEntriesByDirectoryAndName(
+        items.filter(
+          item => item.isDirectory || deps.textureFilePattern.test(item.name),
+        ),
+      )
     } catch (error) {
       console.error('Texture browser load failed:', error)
       state.textureBrowserError = 'Texture browser unavailable'
@@ -232,24 +188,12 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     state.workflowBrowserError = ''
 
     try {
-      const response = await fetch(
-        `${EDITOR_API_BASE}/api/browse?path=${encodeURIComponent(path)}`,
-      )
-      const payload = await response.json()
-      if (!payload?.success) {
-        state.workflowBrowserError =
-          payload?.message ?? 'Failed to browse workflows'
-        return
-      }
+      const items = await browseEditorWorkspace(path)
 
       state.workflowBrowserPath = path
-      state.workflowBrowserItems = payload.items
-        .filter((item: any) => item.isDirectory || /\.json$/i.test(item.name))
-        .sort(
-          (a: any, b: any) =>
-            Number(b.isDirectory) - Number(a.isDirectory) ||
-            a.name.localeCompare(b.name),
-        )
+      state.workflowBrowserItems = sortWorkspaceEntriesByDirectoryAndName(
+        items.filter(isJsonWorkspaceEntry),
+      )
     } catch (error) {
       console.error('Workflow browser load failed:', error)
       state.workflowBrowserError = 'Workflow browser unavailable'
@@ -344,7 +288,7 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       selectedDirectory === deps.assetLibraryRootGenerated
         ? rootItems
         : await loadAssetBrowser(selectedDirectory)
-    const foundItem = directoryItems.find((item: any) =>
+    const foundItem = directoryItems.find((item: EditorWorkspaceEntry) =>
       workspaceCandidates.includes(item.path),
     )
     if (foundItem) {

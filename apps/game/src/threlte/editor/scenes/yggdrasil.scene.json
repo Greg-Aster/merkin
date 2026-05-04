@@ -76,6 +76,28 @@
         "underwaterFogColor": "#09151d",
         "surfaceFogDensity": 0.00135
       },
+      "worldPartition": {
+        "cellSize": 80,
+        "activeRadius": 5
+      },
+      "runtimeAssets": {
+        "maxTier": "medium",
+        "requiredAssetActorIds": [
+          "yggdrasil-mound",
+          "yggdrasil-planter-urd",
+          "yggdrasil-planter-mimir",
+          "yggdrasil-planter-hvergelmir",
+          "yggdrasil-arrival-monolith-left",
+          "yggdrasil-arrival-monolith-right",
+          "yggdrasil-arrival-foreground-right",
+          "yggdrasil-hvergelmir-depth-arch-1",
+          "yggdrasil-hvergelmir-depth-monolith-left",
+          "yggdrasil-hvergelmir-depth-monolith-right",
+          "yggdrasil-tree-merged",
+          "yggdrasil-crown-ascent-merged",
+          "yggdrasil-bifrost-ribbon-merged"
+        ]
+      },
       "player": {
         "lightIntensityScale": 6
       }
@@ -6900,7 +6922,7 @@
       "parentId": "yggdrasil-glade-root",
       "position": [
         0,
-        0.9,
+        1.18,
         -74
       ],
       "rotation": [
@@ -6918,6 +6940,13 @@
       "asset": {
         "url": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
         "scale": 1
+      },
+      "material": {
+        "transparent": true,
+        "opacity": 1,
+        "doubleSided": true,
+        "emissiveIntensity": 2.2,
+        "envMapIntensity": 2
       },
       "collision": {
         "shape": "cuboid",
@@ -7026,6 +7055,28 @@
             "underwaterFogDensity": 0.085,
             "underwaterFogColor": "#09151d",
             "surfaceFogDensity": 0.00135
+          },
+          "worldPartition": {
+            "cellSize": 80,
+            "activeRadius": 5
+          },
+          "runtimeAssets": {
+            "maxTier": "medium",
+            "requiredAssetActorIds": [
+              "yggdrasil-mound",
+              "yggdrasil-planter-urd",
+              "yggdrasil-planter-mimir",
+              "yggdrasil-planter-hvergelmir",
+              "yggdrasil-arrival-monolith-left",
+              "yggdrasil-arrival-monolith-right",
+              "yggdrasil-arrival-foreground-right",
+              "yggdrasil-hvergelmir-depth-arch-1",
+              "yggdrasil-hvergelmir-depth-monolith-left",
+              "yggdrasil-hvergelmir-depth-monolith-right",
+              "yggdrasil-tree-merged",
+              "yggdrasil-crown-ascent-merged",
+              "yggdrasil-bifrost-ribbon-merged"
+            ]
           },
           "player": {
             "lightIntensityScale": 6
@@ -16835,7 +16886,7 @@
           "transform": {
             "position": [
               0,
-              0.9,
+              1.18,
               -74
             ],
             "rotation": [
@@ -16856,6 +16907,13 @@
             "asset": {
               "url": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
               "scale": 1
+            },
+            "material": {
+              "transparent": true,
+              "opacity": 1,
+              "doubleSided": true,
+              "emissiveIntensity": 2.2,
+              "envMapIntensity": 2
             }
           },
           "editor": {

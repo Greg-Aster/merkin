@@ -1,4 +1,5 @@
 <script lang="ts">
+import { onDestroy } from 'svelte'
 import { editorMarqueeStore } from './editorStore'
 
 let marquee = {
@@ -15,6 +16,10 @@ let height = 0
 
 const unsubscribe = editorMarqueeStore.subscribe(value => {
   marquee = value
+})
+
+onDestroy(() => {
+  unsubscribe()
 })
 
 $: left = Math.min(marquee.startX, marquee.currentX)

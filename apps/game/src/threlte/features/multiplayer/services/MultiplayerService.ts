@@ -1,25 +1,77 @@
 import Peer, { type DataConnection } from 'peerjs'
 import { get } from 'svelte/store'
-import { logStore } from '../index'
 import { type ChatMessage, addMessage } from '../stores/chatStore'
+import { logStore } from '../stores/logStore'
 import { type PlayerState, multiplayerStore } from '../stores/multiplayerStore'
 
 const WORKER_URL = 'https://megameal-room-directory.greggles.workers.dev'
 
-class EventEmitter {
-  private listeners: { [key: string]: Function[] } = {}
-  on(event: string, fn: Function) {
+function getAppPath(pathname: string) {
+  const basePath =
+    import.meta.env.BASE_URL === '/'
+      ? '/'
+      : `/${import.meta.env.BASE_URL.replace(/^\/+|\/+$/g, '')}/`
+  return new URL(pathname.replace(/^\/+/, ''), `${window.location.origin}${basePath}`)
+    .toString()
+}
+
+type MultiplayerPlayerListItem = {
+  peerId: string
+}
+
+type MultiplayerServiceEvents = {
+  error: [message: string]
+  'host-open': [hostId: string]
+  'player-connected': [peerId: string]
+  'player-list-changed': [players: MultiplayerPlayerListItem[]]
+}
+
+type MultiplayerMessage =
+  | {
+      type: 'chat_message'
+      payload: ChatMessage
+    }
+  | {
+      type: 'full_state'
+      payload: Record<string, PlayerState>
+    }
+  | {
+      type: 'player_update'
+      payload: PlayerState
+    }
+
+class EventEmitter<Events extends Record<string, unknown[]>> {
+  private listeners: { [EventName in keyof Events]?: Array<(...args: Events[EventName]) => void> } = {}
+
+  on<EventName extends keyof Events>(
+    event: EventName,
+    fn: (...args: Events[EventName]) => void,
+  ) {
     this.listeners[event] = this.listeners[event] || []
     this.listeners[event].push(fn)
   }
-  emit(event: string, ...args: any[]) {
-    if (this.listeners[event]) {
-      this.listeners[event].forEach(fn => fn(...args))
-    }
+
+  emit<EventName extends keyof Events>(
+    event: EventName,
+    ...args: Events[EventName]
+  ) {
+    this.listeners[event]?.forEach(fn => fn(...args))
   }
 }
 
-class UnifiedMultiplayerService extends EventEmitter {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function isRoomLookupResponse(value: unknown): value is { hostId: string } {
+  return isRecord(value) && typeof value.hostId === 'string'
+}
+
+function isMultiplayerMessage(value: unknown): value is MultiplayerMessage {
+  return isRecord(value) && typeof value.type === 'string'
+}
+
+class UnifiedMultiplayerService extends EventEmitter<MultiplayerServiceEvents> {
   private peer: Peer | null = null
   private connections: Map<string, DataConnection> = new Map()
   private isHost: boolean = false
@@ -58,6 +110,9 @@ class UnifiedMultiplayerService extends EventEmitter {
         throw new Error(err.error)
       }
       const data = await response.json()
+      if (!isRoomLookupResponse(data)) {
+        throw new Error('Room lookup returned an invalid host response.')
+      }
       this.connectToHost(data.hostId)
     } catch (error) {
       logStore.addLog(`Failed to join: ${(error as Error).message}`, 'error')
@@ -100,7 +155,9 @@ class UnifiedMultiplayerService extends EventEmitter {
       }
     })
 
-    conn.on('data', (data: any) => {
+    conn.on('data', (data: unknown) => {
+      if (!isMultiplayerMessage(data)) return
+
       if (this.isHost) {
         if (data.type === 'player_update') {
           this.playerStates[conn.peer] = data.payload
@@ -153,9 +210,10 @@ class UnifiedMultiplayerService extends EventEmitter {
     this.emit('player-list-changed', playerList)
   }
 
-  public send(data: any) {
-    // The client's connection to the host is the first and only one in its map.
-    const conn = this.connections.get(this.hostId!)
+  public send(data: MultiplayerMessage) {
+    if (!this.hostId) return
+
+    const conn = this.connections.get(this.hostId)
     if (conn) conn.send(data)
   }
 }
@@ -189,5 +247,5 @@ export function sendChatMessage(message: string) {
 }
 
 export function createRoom() {
-  window.open('/host', '_blank')
+  window.open(getAppPath('host'), '_blank', 'noopener,noreferrer')
 }

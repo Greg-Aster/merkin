@@ -16,6 +16,4 @@ interface Performance {
 
 interface Window {
   THREE?: unknown
-  PerformanceValidator?: unknown
-  PerformanceTestUtils?: unknown
 }

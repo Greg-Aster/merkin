@@ -1,22 +1,20 @@
 <script lang="ts">
 import { onMount } from 'svelte'
 import { setInputFocus } from '../../../stores/uiStore'
-import { hostStore, initializeHost, registerRoom } from '../index'
-import { playerNameStore } from '../index'
+import { hostStore, initializeHost, registerRoom } from '../stores/hostStore'
+import { playerNameStore } from '../stores/playerNameStore'
 import LogTerminal from './LogTerminal.svelte'
 
-// Add this line to define isRegistered
 $: isRegistered = $hostStore.isRoomRegistered
+$: sanitizedRoomName = sanitizeRoomName(roomNameInput)
 
 let roomNameInput = ''
 let copyButtonText = '📋 Copy Join Link'
 
-// When the component loads, start the host service
 onMount(() => {
   initializeHost()
 })
 
-// Sanitization function to ensure room names are clean
 function sanitizeRoomName(name: string): string {
   return name
     .trim()
@@ -25,19 +23,16 @@ function sanitizeRoomName(name: string): string {
     .replace(/[^a-z0-9-]/g, '')
 }
 
-// Called when the user clicks the "Register Room" button
 async function handleRegisterRoom() {
-  const saneName = sanitizeRoomName(roomNameInput)
-  if (saneName.length < 3 || !$hostStore.hostId) return
+  if (sanitizedRoomName.length < 3 || !$hostStore.hostId) return
 
-  const success = await registerRoom(saneName, $hostStore.hostId)
+  const success = await registerRoom(sanitizedRoomName, $hostStore.hostId)
   if (success) {
-    hostStore.setRoomName(saneName)
+    hostStore.setRoomName(sanitizedRoomName)
     hostStore.setRoomRegistered(true)
   }
 }
 
-// Generates the shareable URL
 function getJoinUrl(): string {
   if (!$hostStore.isRoomRegistered || !$hostStore.roomName) return ''
 
@@ -49,7 +44,6 @@ function getJoinUrl(): string {
   return `${window.location.origin}${basePath}?room=${$hostStore.roomName}`
 }
 
-// Copies the URL to the clipboard
 async function copyJoinLink() {
   const url = getJoinUrl()
   if (!url) return
@@ -57,7 +51,7 @@ async function copyJoinLink() {
     await navigator.clipboard.writeText(url)
     copyButtonText = '✓ Copied!'
     setTimeout(() => (copyButtonText = '📋 Copy Join Link'), 2000)
-  } catch (err) {
+  } catch {
     copyButtonText = '❌ Copy Failed'
     setTimeout(() => (copyButtonText = '📋 Copy Join Link'), 2000)
   }
@@ -67,9 +61,7 @@ async function copyJoinLink() {
 <div class="host-panel">
   <h1>🎮 MEGAMEAL Host Panel</h1>
 
-  <!-- This section will only show AFTER the host service is ready -->
   {#if $hostStore.hostId}
-    <!-- If the room is NOT yet registered, show the registration form -->
     {#if !$hostStore.isRoomRegistered}
       <div class="room-registration-section">
         <h2>🏠 Create Your Room</h2>
@@ -83,14 +75,13 @@ async function copyJoinLink() {
             on:focus={() => setInputFocus(true)}
             on:blur={() => setInputFocus(false)}
           />
-          <button on:click={handleRegisterRoom} disabled={roomNameInput.length < 3}>
+          <button on:click={handleRegisterRoom} disabled={sanitizedRoomName.length < 3}>
             🚀 Register Room
           </button>
         </div>
       </div>
     {/if}
 
-    <!-- If the room IS registered, show the "Room is Live" panel -->
     {#if $hostStore.isRoomRegistered}
       <div class="room-active-section">
         <h2>🎉 Room is Live!</h2>
@@ -102,7 +93,6 @@ async function copyJoinLink() {
       </div>
     {/if}
 
-    <!-- Player list and other features will go here -->
     <section class="card">
         <h2>Connected Players ({$hostStore.players.length})</h2>
         {#if $hostStore.players.length > 0}
@@ -110,10 +100,6 @@ async function copyJoinLink() {
             {#each $hostStore.players as player (player.peerId)}
               <li class="player-item">
                 <span class="player-name">{playerNameStore.getName(player.peerId)}</span>
-                <div class="player-controls">
-                  <button class="btn-small btn-warning">🔇 Mute</button>
-                  <button class="btn-small btn-danger">👋 Kick</button>
-                </div>
               </li>
             {/each}
           </ul>
@@ -122,7 +108,6 @@ async function copyJoinLink() {
         {/if}
     </section>
 
-    <!-- Server Information Section -->
     <section class="card">
       <h2>Server Information</h2>
       <div class="info-grid">
@@ -157,11 +142,9 @@ async function copyJoinLink() {
     </div>
   {/if}
   
-  <!-- The log terminal is always visible at the bottom -->
   <LogTerminal />
 </div>
 
-<!-- Use the superior styles from your legacy file -->
 <style>
   :global(body) {
     --bg-primary: #1a1a1a; --bg-secondary: #282828; --text-primary: #f0f0f0;
@@ -222,14 +205,6 @@ async function copyJoinLink() {
     margin-bottom: 0.5rem; font-family: monospace;
   }
   .player-name { font-weight: 600; color: var(--text-primary); }
-  .player-controls { display: flex; gap: 0.5rem; }
-  .btn-small { 
-    padding: 0.5rem 0.75rem; font-size: 0.8rem; border-radius: 4px;
-  }
-  .btn-warning { background-color: #f59e0b; color: #1a1a1a; }
-  .btn-warning:hover { background-color: #d97706; }
-  .btn-danger { background-color: #ef4444; color: white; }
-  .btn-danger:hover { background-color: #dc2626; }
   .empty-state { 
     text-align: center; color: #b0b0b0; font-style: italic; 
     padding: 2rem; 
@@ -262,6 +237,5 @@ async function copyJoinLink() {
     h1 { font-size: 1.5rem; }
     .input-group { gap: 1.5rem; }
     .info-grid { grid-template-columns: 1fr; }
-    .player-controls { flex-direction: column; gap: 0.25rem; }
   }
 </style>

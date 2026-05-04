@@ -20,8 +20,6 @@ export let onTabSelect: (tab: EditorPanelTab) => void = () => {}
 
 <style>
   .editor-tools-panel {
-    display: flex;
-    flex-direction: column;
     min-height: 0;
     overflow: hidden;
     background: rgba(9, 14, 24, 0.92);

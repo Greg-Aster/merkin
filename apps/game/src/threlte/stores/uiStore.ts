@@ -1,17 +1,5 @@
 import { writable } from 'svelte/store'
 
-export type RenderStylePresetChoice =
-  | 'manifest'
-  | 'site'
-  | 'surreal-site'
-  | 'ghibli'
-  | 'alto'
-  | 'monument'
-  | 'etherpunk'
-  | 'retro'
-
-export type RenderLookMode = 'stylized' | 'beauty'
-
 const createUiStore = () => {
   const { subscribe, update } = writable({
     isInputFocused: false,
@@ -76,30 +64,6 @@ function createPersistentNumberStore(
   return store
 }
 
-function createPersistentStringStore<T extends string>(
-  key: string,
-  initialValue: T,
-  allowedValues?: readonly T[],
-) {
-  const store = writable<T>(initialValue)
-
-  if (typeof window !== 'undefined') {
-    const stored = window.localStorage.getItem(key)
-    if (stored !== null) {
-      const nextValue = stored as T
-      if (!allowedValues || allowedValues.includes(nextValue)) {
-        store.set(nextValue)
-      }
-    }
-
-    store.subscribe(value => {
-      window.localStorage.setItem(key, value)
-    })
-  }
-
-  return store
-}
-
 // Audio settings
 export const isSoundEnabled = createPersistentBooleanStore(
   'megameal-game-audio-enabled',
@@ -119,48 +83,4 @@ export const sfxVolumeSetting = createPersistentNumberStore(
   'megameal-game-sfx-volume',
   0.48,
   { min: 0, max: 1 },
-)
-
-// Stylized rendering settings
-export const renderStyleEnabled = createPersistentBooleanStore(
-  'megameal-game-render-style-enabled',
-  true,
-)
-export const renderLookMode = createPersistentStringStore<RenderLookMode>(
-  'megameal-game-render-look-mode',
-  'beauty',
-  ['stylized', 'beauty'],
-)
-export const renderStylePresetChoice =
-  createPersistentStringStore<RenderStylePresetChoice>(
-    'megameal-game-render-style-preset-choice',
-    'surreal-site',
-    [
-      'manifest',
-      'site',
-      'surreal-site',
-      'ghibli',
-      'alto',
-      'monument',
-      'etherpunk',
-      'retro',
-    ],
-  )
-export const renderStyleFlattenMaterials = createPersistentBooleanStore(
-  'megameal-game-render-style-flatten-materials',
-  false,
-)
-export const renderStylePaintedOutlines = createPersistentBooleanStore(
-  'megameal-game-render-style-painted-outlines',
-  true,
-)
-export const renderStyleOutlineThickness = createPersistentNumberStore(
-  'megameal-game-render-style-outline-thickness',
-  0.03,
-  { min: 0.005, max: 0.08 },
-)
-export const renderStyleOutlineOpacity = createPersistentNumberStore(
-  'megameal-game-render-style-outline-opacity',
-  0.88,
-  { min: 0.2, max: 1 },
 )

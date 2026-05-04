@@ -66,12 +66,12 @@ async function loadEditorScene(level: string) {
   } catch (error) {
     if (loadToken !== activeLoadToken) return
     console.warn(
-      'Editor scene disk load unavailable, falling back to local storage.',
+      'Editor scene disk load unavailable, falling back to packaged editor scene.',
       error,
     )
     setRuntimeDiagnostic('scenePersistence', {
       level: 'warning',
-      message: `Editor scene disk load unavailable for ${level}; using local storage fallback.`,
+      message: `Editor scene disk load unavailable for ${level}; using packaged editor scene fallback.`,
     })
     const fallbackScene = loadImmediateEditorSceneDocument(level, {
       includeLocalStorage: true,

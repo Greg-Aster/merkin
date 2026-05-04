@@ -97,7 +97,7 @@ $: themeClass = `theme-${uiState.theme}`
 $: fireflyColor = getFireflyColor(npcPersonality || session?.personality)
 
 function getFireflyColor(personality: any): string {
-  // Default firefly colors from HybridFireflyComponent
+  // Default firefly colors used by conversation avatars.
   const fireflyColors = [
     '#87ceeb',
     '#98fb98',

@@ -17,6 +17,7 @@ import { profileConfig, siteConfig } from '../../config/config'
 import { SERIES_CONFIG } from '../../config/seriesConfig'
 import { getPostsBySeries } from '../../utils/content-utils'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
+import { firstContactManualRedirects } from '../../utils/reader'
 import '../../styles/pages/post-detail.css'
 
 // ⭐ FIXED: Import the correct layout toggle component
@@ -52,6 +53,8 @@ export async function getStaticPaths() {
 
 const { post, previousPost, nextPost } = Astro.props // Destructure `post` instead of `entry`
 const retiredPostRedirects: Record<string, string> = {
+  ...firstContactManualRedirects(),
+  'introducing-story-mode': '/reader/first-contact-manual/',
   'mega-meal-explained': '/videos/mega-meal-explained/',
   'mega-meal-3': '/videos/qarnivor-snuggloid-emergence/',
   'cookbook/cookbook-index': '/cookbook/',

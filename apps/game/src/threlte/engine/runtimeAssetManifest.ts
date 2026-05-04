@@ -22,6 +22,13 @@ export interface RuntimeAssetManifest {
 }
 
 const manifestUrl = '/generated/runtime-game-assets/manifest.json'
+const tierRank: Record<RuntimeAssetQualityTier, number> = {
+  ultra_low: 0,
+  low: 1,
+  medium: 2,
+  high: 3,
+  ultra: 4,
+}
 
 let manifestPromise: Promise<RuntimeAssetManifest | null> | null = null
 let runtimeAssetManifest: RuntimeAssetManifest | null = null
@@ -47,6 +54,15 @@ function normalizeTier(tier: RuntimeAssetQualityTier | string) {
     default:
       return 'medium'
   }
+}
+
+function clampTier(
+  tier: RuntimeAssetQualityTier,
+  maxTier: RuntimeAssetQualityTier | string | undefined,
+) {
+  if (!maxTier) return tier
+  const normalizedMaxTier = normalizeTier(maxTier) as RuntimeAssetQualityTier
+  return tierRank[tier] > tierRank[normalizedMaxTier] ? normalizedMaxTier : tier
 }
 
 function getTierPreference(qualityTier: RuntimeAssetQualityTier) {
@@ -88,12 +104,14 @@ export async function preloadRuntimeAssetManifest() {
 export function beginLevelRuntimeAssetScope(
   levelId: string,
   qualityTier: RuntimeAssetQualityTier | string,
+  options: { maxTier?: RuntimeAssetQualityTier | string } = {},
 ) {
   const normalizedLevelId = normalizeLevelId(levelId)
   if (!normalizedLevelId) return
+  const normalizedTier = normalizeTier(qualityTier) as RuntimeAssetQualityTier
   levelAssetTiers.set(
     normalizedLevelId,
-    normalizeTier(qualityTier) as RuntimeAssetQualityTier,
+    clampTier(normalizedTier, options.maxTier),
   )
 }
 

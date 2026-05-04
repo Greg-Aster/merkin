@@ -2,6 +2,7 @@
 import { createEventDispatcher } from 'svelte'
 import RuntimeDiagnosticsPanel from '../ui/RuntimeDiagnosticsPanel.svelte'
 import EditorAssetPreview from './EditorAssetPreview.svelte'
+import type { HunyuanJobStatus } from './editorHunyuanJobPolling'
 import type { EditorSceneNode } from './editorStore'
 
 const dispatch = createEventDispatcher()
@@ -25,7 +26,7 @@ export let hunyuanLastResultSummary = ''
 export let hunyuanLastFitReport = ''
 export let hunyuanSupportsReplacement = false
 export let hunyuanSupportsTextureWrap = false
-export let recentHunyuanJobs: Array<any> = []
+export let recentHunyuanJobs: HunyuanJobStatus[] = []
 export let hunyuanJobsLoading = false
 export let hunyuanJobsError = ''
 export let selectedHunyuanJobId = ''
@@ -62,12 +63,12 @@ $: currentReferencePreviewUrl =
 $: latestJobReferenceImageUrl =
   selectedHunyuanJob?.result?.referenceImageUrl || ''
 
-function getJobSummary(job: any) {
+function getJobSummary(job: HunyuanJobStatus | null) {
   if (!job) return ''
   return job.sourceName || job.assetUrl || job.id
 }
 
-function getJobDetail(job: any) {
+function getJobDetail(job: HunyuanJobStatus | null) {
   if (!job) return ''
   return job.error || job.result?.message || ''
 }

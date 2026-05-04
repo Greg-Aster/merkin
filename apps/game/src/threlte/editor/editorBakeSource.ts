@@ -5,6 +5,7 @@ import {
   createWorldMatrixResolver,
   getTopLevelNodeIds,
 } from './editorHierarchyUtils'
+import { createPrimitiveGeometry } from '../engine/primitiveGeometry'
 import type {
   EditorMaterialData,
   EditorPrefabType,
@@ -59,29 +60,6 @@ function resolvePrimitiveMaterial(
     thickness: override?.thickness ?? 0,
     reflectivity: override?.reflectivity ?? 0.5,
   })
-}
-
-function createPrimitiveGeometry(
-  geometry: EditorPrimitiveData['geometry'],
-  args: number[],
-) {
-  if (geometry === 'box')
-    return new THREE.BoxGeometry(...(args as [number?, number?, number?]))
-  if (geometry === 'cylinder')
-    return new THREE.CylinderGeometry(
-      ...(args as [number?, number?, number?, number?]),
-    )
-  if (geometry === 'octahedron')
-    return new THREE.OctahedronGeometry(...(args as [number?, number?]))
-  if (geometry === 'tetrahedron')
-    return new THREE.TetrahedronGeometry(...(args as [number?, number?]))
-  if (geometry === 'icosahedron')
-    return new THREE.IcosahedronGeometry(...(args as [number?, number?]))
-  if (geometry === 'dodecahedron')
-    return new THREE.DodecahedronGeometry(...(args as [number?, number?]))
-  return new THREE.TorusGeometry(
-    ...(args as [number?, number?, number?, number?, number?]),
-  )
 }
 
 function createPrimitiveMesh(

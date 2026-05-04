@@ -5,10 +5,10 @@
 <script lang="ts">
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import { writable } from 'svelte/store'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 
 // Create event dispatcher for Svelte component communication
 const dispatch = createEventDispatcher()
-const isDev = import.meta.env.DEV
 
 // Create reactive stores for key game events
 export const gameStateStore = writable(null)
@@ -67,7 +67,7 @@ let eventBus: SimpleEventBus
 let isInitialized = false
 
 onMount(() => {
-  if (isDev) console.log('📡 Initializing Threlte EventBus System...')
+  runtimeDebugLog('📡 Initializing Threlte EventBus System...')
 
   // Create EventBus instance
   eventBus = new SimpleEventBus()
@@ -76,7 +76,7 @@ onMount(() => {
   setupEventBridges()
 
   isInitialized = true
-  if (isDev) console.log('✅ Threlte EventBus System initialized')
+  runtimeDebugLog('✅ Threlte EventBus System initialized')
 })
 
 /**
@@ -151,7 +151,7 @@ function setupEventBridges() {
     dispatch('dialogueHide')
   })
 
-  if (isDev) console.log('🔗 EventBus bridges to Svelte stores established')
+  runtimeDebugLog('🔗 EventBus bridges to Svelte stores established')
 }
 
 /**
@@ -199,7 +199,7 @@ export function getEventBusStats() {
 onDestroy(() => {
   if (eventBus) {
     eventBus.clear()
-    if (isDev) console.log('🧹 Threlte EventBus System cleaned up')
+    runtimeDebugLog('🧹 Threlte EventBus System cleaned up')
   }
 })
 

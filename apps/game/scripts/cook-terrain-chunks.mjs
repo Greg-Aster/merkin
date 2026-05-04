@@ -28,6 +28,10 @@ function getArg(name, fallback = '') {
   )
 }
 
+function hasFlag(name) {
+  return process.argv.includes(`--${name}`)
+}
+
 function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8').replace(/^\uFEFF/, ''))
 }
@@ -519,6 +523,7 @@ function updateManifest(manifest, { level, grid, lods, chunksPath, bounds }) {
 const requestedLevel = getArg('level') || process.argv[2]
 const grid = parsePositiveInt(getArg('grid', '4'), 4)
 const lodResolutions = parseLodResolutions(getArg('lod-resolutions', '33,17,9'))
+const dryRun = hasFlag('dry-run')
 const terrainLevels = discoverTerrainLevels({ repoRoot, publicRoot })
 const level = resolveTerrainLevel(terrainLevels, requestedLevel)
 
@@ -566,9 +571,18 @@ const lods = lodResolutions.map((resolution, index) => ({
 const publicChunksPath = `/terrain/levels/${level.id}/`
 const chunksDir = join(publicRoot, publicChunksPath.replace(/^\//, ''))
 const material = normalizeTerrainChunkMaterial(manifest.visualChunks?.material)
+const nextManifest = updateManifest(manifest, {
+  level,
+  grid,
+  lods,
+  chunksPath: publicChunksPath,
+  bounds,
+})
 
-rmSync(chunksDir, { recursive: true, force: true })
-mkdirSync(chunksDir, { recursive: true })
+if (!dryRun) {
+  rmSync(chunksDir, { recursive: true, force: true })
+  mkdirSync(chunksDir, { recursive: true })
+}
 
 let totalTriangles = 0
 for (let x = 0; x < grid; x += 1) {
@@ -585,29 +599,25 @@ for (let x = 0; x < grid; x += 1) {
         resolution: lods[lod].resolution,
       })
       totalTriangles += mesh.indices.length / 3
-      writeGlb(
-        join(chunksDir, `chunk_${x}_${z}_LOD${lod}.glb`),
-        mesh,
-        material,
-      )
+      if (!dryRun) {
+        writeGlb(
+          join(chunksDir, `chunk_${x}_${z}_LOD${lod}.glb`),
+          mesh,
+          material,
+        )
+      }
     }
   }
 }
 
-writeJson(
-  level.manifestPath,
-  updateManifest(manifest, {
-    level,
-    grid,
-    lods,
-    chunksPath: publicChunksPath,
-    bounds,
-  }),
-)
+if (!dryRun) {
+  writeJson(level.manifestPath, nextManifest)
+}
 
 console.log(
   JSON.stringify({
     success: true,
+    dryRun,
     levelId: level.levelId,
     manifestUrl: `/terrain/${level.id}.manifest.json`,
     chunksPath: publicChunksPath,

@@ -9,7 +9,8 @@ import * as THREE from 'three'
 import {
   type QualitySettings,
   qualitySettingsStore,
-} from '../features/performance'
+} from '../features/performance/stores/performanceStore'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 
 // Renderer configuration
 export const antialias = true
@@ -79,9 +80,7 @@ onMount(() => {
     return
   }
 
-  if (import.meta.env.DEV) {
-    console.log('🎨 Configuring Threlte renderer...')
-  }
+  runtimeDebugLog('🎨 Configuring Threlte renderer...')
 
   // One-time renderer setup
   renderer.toneMapping = THREE.ACESFilmicToneMapping
@@ -106,9 +105,7 @@ onMount(() => {
   }
   window.addEventListener('resize', handleResize)
 
-  if (import.meta.env.DEV) {
-    console.log('✅ Threlte renderer configured')
-  }
+  runtimeDebugLog('✅ Threlte renderer configured')
 })
 
 onDestroy(() => {

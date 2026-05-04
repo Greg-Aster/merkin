@@ -268,7 +268,7 @@
 }
 
 #standard-banner-container .banner-slide[data-scene-id="cookbook-billboard"] .banner-title-display,
-#standard-banner-container .banner-slide[data-scene-id="story-mode-billboard"] .banner-title-display {
+#standard-banner-container .banner-slide[data-scene-id="reader-billboard"] .banner-title-display {
   width: min(38rem, calc(100% - 3rem));
   background:
     radial-gradient(circle at 50% 0%, rgba(255, 150, 129, 0.18), transparent 52%),
@@ -277,6 +277,6 @@
 }
 
 #standard-banner-container .banner-slide[data-scene-id="cookbook-billboard"] .banner-title-sigil,
-#standard-banner-container .banner-slide[data-scene-id="story-mode-billboard"] .banner-title-sigil {
+#standard-banner-container .banner-slide[data-scene-id="reader-billboard"] .banner-title-sigil {
   color: rgb(255 181 166);
 }

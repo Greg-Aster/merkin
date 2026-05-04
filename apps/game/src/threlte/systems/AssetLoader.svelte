@@ -4,9 +4,9 @@ import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import { writable } from 'svelte/store'
 import { AudioLoader, TextureLoader } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 
 const dispatch = createEventDispatcher()
-const isDev = import.meta.env.DEV
 
 // Reactive stores for loading state
 export const loadingStore = writable(false)
@@ -26,7 +26,7 @@ export let loadingError = null
 export let loadedAssets = []
 
 onMount(async () => {
-  if (isDev) console.log('📦 Initializing Threlte Asset Loading System...')
+  runtimeDebugLog('📦 Initializing Threlte Asset Loading System...')
 
   try {
     // Initialize Three.js loaders
@@ -35,7 +35,7 @@ onMount(async () => {
     audioLoader = new AudioLoader()
 
     isInitialized = true
-    if (isDev) console.log('✅ Threlte Asset Loading System initialized')
+    runtimeDebugLog('✅ Threlte Asset Loading System initialized')
   } catch (error) {
     console.error('❌ Failed to initialize Asset Loading System:', error)
     loadingError = error
@@ -239,7 +239,7 @@ onDestroy(() => {
   gltfLoader = null
   textureLoader = null
   audioLoader = null
-  if (isDev) console.log('🧹 Threlte Asset Loading System disposed')
+  runtimeDebugLog('🧹 Threlte Asset Loading System disposed')
 })
 
 // Export loaders for external access

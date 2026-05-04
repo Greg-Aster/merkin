@@ -20,7 +20,7 @@ Terrain runtime is owned by `src/threlte/features/terrain/TerrainRuntime.svelte`
 
 Terrain data enters that boundary through `TerrainRuntimeComponentData` from `src/threlte/features/terrain/terrainManifest.ts`. Built-in terrain manifests, editor-authored terrain manifests, and generated terrain heightmaps all adapt to this same component data shape before `TerrainRuntime.svelte` mounts. Level code should not rebuild terrain config ad hoc or bypass the component data source/runtime/collision metadata.
 
-Runtime scene files live in `src/threlte/editor/scenes` and that directory is production-only: every JSON file in it must be a runtime-loaded `*.scene.json` document. Backup snapshots and source-history captures belong under `src/threlte/editor/scene-backups` so editor/runtime globs, audits, and bundle scans cannot accidentally treat archival data as level data.
+Runtime scene files live in `src/threlte/editor/scenes` and that directory is production-only: every JSON file in it must be a runtime-loaded `*.scene.json` document. Backup snapshots and source-history captures belong under `authoring/scene-backups` so editor/runtime globs, audits, and bundle scans cannot accidentally treat archival data as level data.
 
 Runtime visual styling is data-driven. Level profiles and authored scene settings adapt into `RuntimeVisualStyleSettings` through `src/threlte/styles/GameplayStyleProfiles.ts`, then runtime systems consume `src/threlte/styles/runtimeVisualStyleStore.ts`. Legacy scene-traversal style systems and dev style toggles are not part of the runtime boundary.
 

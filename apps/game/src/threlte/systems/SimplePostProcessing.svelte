@@ -6,6 +6,7 @@
 import { useTask, useThrelte } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
@@ -20,7 +21,6 @@ import { runtimeVisualStyleStore } from '../styles/runtimeVisualStyleStore'
 
 const { renderer, scene, camera, size, autoRender, renderStage } = useThrelte()
 
-const isDev = import.meta.env.DEV
 
 export let toneMappingExposure = 1.0
 
@@ -156,9 +156,7 @@ onMount(() => {
   updateBloomSettings()
   updateOverlayStyle()
 
-  if (isDev) {
-    console.log('✨ Real bloom post-processing loaded')
-  }
+  runtimeDebugLog('✨ Real bloom post-processing loaded')
 })
 
 useTask(

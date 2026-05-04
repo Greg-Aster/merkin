@@ -15,6 +15,7 @@ import {
   masterVolumeSetting,
   sfxVolumeSetting,
 } from '../stores/uiStore'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 
 // Audio configuration
 export let enabled = false // Disabled by default for performance
@@ -24,7 +25,6 @@ export let enableSpatialAudio = true
 const dispatch = createEventDispatcher()
 const GAME_AMBIENCE_ID = gameAudioProfile.ambience.id
 const GAME_AUDIO_BASE = import.meta.env.BASE_URL || '/'
-const isDev = import.meta.env.DEV
 
 // Simple audio manager implementation using Howler.js
 class SimpleAudioManager {
@@ -40,9 +40,7 @@ class SimpleAudioManager {
       Howler.autoSuspend = false
 
       this.initialized = true
-      if (isDev) {
-        console.log('🎵 SimpleAudioManager initialized with Howler.js')
-      }
+      runtimeDebugLog('🎵 SimpleAudioManager initialized with Howler.js')
     } catch (error) {
       console.error('Failed to initialize audio:', error)
       throw error
@@ -518,16 +516,12 @@ onMount(async () => {
   masterVolumeStore.set(masterVolume)
 
   if (!enabled) {
-    if (isDev) {
-      console.log('🔇 Audio system disabled for performance')
-    }
+    runtimeDebugLog('🔇 Audio system disabled for performance')
     return
   }
 
   try {
-    if (isDev) {
-      console.log('🎵 Initializing Threlte Audio System...')
-    }
+    runtimeDebugLog('🎵 Initializing Threlte Audio System...')
 
     // Create and initialize audio manager
     audioManager = new SimpleAudioManager()
@@ -548,9 +542,7 @@ onMount(async () => {
     ensureConfiguredSfx('scroll')
 
     isInitialized = true
-    if (isDev) {
-      console.log('✅ Threlte Audio System initialized')
-    }
+    runtimeDebugLog('✅ Threlte Audio System initialized')
 
     dispatch('audioInitialized', { audioManager })
     window.addEventListener('pointerdown', handleDelegatedPointerDown, true)
@@ -699,9 +691,7 @@ onDestroy(() => {
   }
   if (audioManager) {
     audioManager.dispose()
-    if (isDev) {
-      console.log('🧹 Threlte Audio System disposed')
-    }
+    runtimeDebugLog('🧹 Threlte Audio System disposed')
   }
 })
 

@@ -3,6 +3,7 @@ import {
   getRuntimeSceneManifestUrl,
   isRuntimeSceneManifest,
   type RuntimeSceneManifest,
+  validateRuntimeSceneManifest,
 } from './runtimeSceneManifest'
 import type { LevelDefinition } from './types'
 
@@ -18,6 +19,17 @@ export type RuntimeSceneDocumentLoadResult =
       source: 'packaged'
     }
 
+export interface RuntimeSceneDocumentLoadOptions {
+  allowPackagedFallback?: boolean
+}
+
+function canUsePackagedRuntimeFallback() {
+  if (!import.meta.env.DEV || typeof window === 'undefined') return false
+
+  const params = new URLSearchParams(window.location.search)
+  return params.get('runtimeSource') === 'packaged'
+}
+
 async function loadRuntimeSceneManifest(levelId: string) {
   const url = getRuntimeSceneManifestUrl(levelId)
 
@@ -27,18 +39,28 @@ async function loadRuntimeSceneManifest(levelId: string) {
 
     const manifest = await response.json()
     if (!isRuntimeSceneManifest(manifest) || manifest.levelId !== levelId) {
-      console.warn(`${levelId}: invalid runtime scene manifest ${url}`)
-      return null
+      throw new Error(`${levelId}: invalid runtime scene manifest ${url}.`)
+    }
+
+    const validation = validateRuntimeSceneManifest(manifest, levelId)
+    if (!validation.valid) {
+      throw new Error(
+        `${levelId}: cooked runtime scene manifest failed validation: ${validation.errors.join(' ')}`,
+      )
     }
 
     return manifest
-  } catch {
-    return null
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error
+    }
+    throw new Error(`${levelId}: failed to load runtime scene manifest ${url}.`)
   }
 }
 
 export async function loadRuntimeSceneDocument(
   levelId: string,
+  options: RuntimeSceneDocumentLoadOptions = {},
 ): Promise<RuntimeSceneDocumentLoadResult> {
   const runtimeManifest = await loadRuntimeSceneManifest(levelId)
   if (runtimeManifest) {
@@ -48,6 +70,14 @@ export async function loadRuntimeSceneDocument(
       scene: null,
       source: 'runtime-manifest',
     }
+  }
+
+  const allowPackagedFallback =
+    options.allowPackagedFallback ?? canUsePackagedRuntimeFallback()
+  if (!allowPackagedFallback || !import.meta.env.DEV) {
+    throw new Error(
+      `${levelId}: missing cooked runtime scene manifest ${getRuntimeSceneManifestUrl(levelId)}. Run pnpm --dir apps/game cook:runtime-assets before gameplay, or use ?runtimeSource=packaged in dev for explicit recovery.`,
+    )
   }
 
   const { requirePackagedSceneDocument } = await import(

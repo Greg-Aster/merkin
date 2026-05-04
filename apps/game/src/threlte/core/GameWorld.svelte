@@ -4,6 +4,7 @@ import type {
   PlayerLevelPositionDetail,
   StaticWorldReadyDetail,
 } from './levelRuntimeEvents'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 
 const dispatch = createEventDispatcher()
 
@@ -64,13 +65,11 @@ function handleStaticWorldReady(detail: StaticWorldReadyDetail) {
 
 function handlePlayerLevelPosition(detail: PlayerLevelPositionDetail) {
   levelPlayerPosition = detail.position
-  if (import.meta.env.DEV) {
-    console.info('GameWorld: Player level position resolved', {
-      levelId: detail.levelId,
-      position: detail.position,
-      reason: detail.reason,
-    })
-  }
+  runtimeDebugLog('GameWorld: Player level position resolved', {
+    levelId: detail.levelId,
+    position: detail.position,
+    reason: detail.reason,
+  })
 }
 
 function resetWorldSession() {

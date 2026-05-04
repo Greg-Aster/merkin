@@ -1,0 +1,169 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { Icon } from 'astro-icon/components'
+import MainGridLayout from '@layouts/MainGridLayout.astro'
+import Markdown from '@components/misc/Markdown.astro'
+import {
+  FIRST_CONTACT_MANUAL_TITLE,
+  firstContactManualHref,
+} from '../../utils/reader'
+import ReaderBanner from './ReaderBanner.astro'
+
+interface Props {
+  entry: CollectionEntry<'reader'>
+  entries: CollectionEntry<'reader'>[]
+}
+
+const { entry, entries } = Astro.props
+const { Content } = await entry.render()
+const currentIndex = entries.findIndex(item => item.slug === entry.slug)
+const previousEntry = currentIndex > 0 ? entries[currentIndex - 1] : null
+const nextEntry =
+  currentIndex >= 0 && currentIndex < entries.length - 1
+    ? entries[currentIndex + 1]
+    : null
+
+const readerBannerPost = {
+  slug: entry.slug,
+  data: {
+    title: FIRST_CONTACT_MANUAL_TITLE,
+    description: entry.data.description,
+    image: entry.data.image || '/posts/timeline/dont.png',
+    bannerType: 'reader',
+    oneColumn: true,
+    showToc: false,
+  },
+}
+---
+
+<MainGridLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  banner={entry.data.image || '/posts/timeline/dont.png'}
+  post={readerBannerPost}
+  backgroundImage={entry.data.image || '/posts/timeline/dont.png'}
+  oneColumn={true}
+>
+  <ReaderBanner
+    slot="banner-slide-content"
+    entries={entries}
+    activeSlug={entry.slug}
+  />
+
+  <div class="w-full pt-6">
+    <main class="min-w-0">
+      <article id="reader-page" class="card-base z-10 scroll-mt-24 rounded-lg px-5 py-5 md:px-9 md:py-7">
+        <nav class="mb-5 flex items-center justify-between gap-3 rounded-lg border border-black/10 bg-black/[0.03] p-2 dark:border-white/10 dark:bg-white/[0.06]" aria-label="Reader controls">
+          <a
+            href={previousEntry ? firstContactManualHref(previousEntry, '#reader-page') : '#'}
+            class:list={[
+              'btn-card inline-flex h-10 w-10 items-center justify-center rounded-md transition active:scale-95',
+              previousEntry ? '' : 'pointer-events-none opacity-35',
+            ]}
+            aria-label={previousEntry
+              ? `Previous entry: ${previousEntry.data.title}`
+              : 'Start of book'}
+            data-sfx-hover="hover-soft"
+            data-sfx-click="soft"
+          >
+            <Icon name="material-symbols:chevron-left-rounded" class="text-2xl text-[var(--primary)]" />
+          </a>
+
+          <div class="min-w-0 text-center">
+            <div class="text-xs font-bold uppercase tracking-[0.14em] text-[var(--primary)]">
+              Entry {currentIndex + 1} of {entries.length}
+            </div>
+            <div class="truncate text-sm font-bold text-black/60 dark:text-white/60">
+              Universal Reader
+            </div>
+          </div>
+
+          <a
+            href={nextEntry ? firstContactManualHref(nextEntry, '#reader-page') : '#'}
+            class:list={[
+              'btn-card inline-flex h-10 w-10 items-center justify-center rounded-md transition active:scale-95',
+              nextEntry ? '' : 'pointer-events-none opacity-35',
+            ]}
+            aria-label={nextEntry
+              ? `Next entry: ${nextEntry.data.title}`
+              : 'End of book'}
+            data-sfx-hover="hover-soft"
+            data-sfx-click="soft"
+          >
+            <Icon name="material-symbols:chevron-right-rounded" class="text-2xl text-[var(--primary)]" />
+          </a>
+        </nav>
+
+        <div class="mb-4 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-black/45 dark:text-white/45">
+          <span>{FIRST_CONTACT_MANUAL_TITLE}</span>
+          <span aria-hidden="true">/</span>
+          <span>Entry {currentIndex + 1}</span>
+        </div>
+
+        <div class="grid gap-5 md:grid-cols-[minmax(0,1fr)_12rem] md:items-start">
+          <div>
+            <h1 class="mb-3 text-3xl font-black leading-tight text-black/90 dark:text-white/90 md:text-5xl">
+              {entry.data.title}
+            </h1>
+            <p class="text-base leading-relaxed text-black/65 dark:text-white/65 md:text-lg">
+              {entry.data.description}
+            </p>
+          </div>
+          <img
+            src={entry.data.image || '/posts/timeline/dont.png'}
+            alt=""
+            loading="eager"
+            decoding="async"
+            class="aspect-[4/5] w-full rounded-lg object-cover"
+          />
+        </div>
+
+        <Markdown class="markdown-content">
+          <Content />
+        </Markdown>
+
+        <nav class="mt-8 flex items-center justify-between gap-3 border-t border-dashed border-black/10 pt-5 dark:border-white/10" aria-label="Reader controls">
+          <a
+            href={previousEntry ? firstContactManualHref(previousEntry, '#reader-page') : '#'}
+            class:list={[
+              'btn-card inline-flex min-h-[3rem] min-w-0 flex-1 items-center gap-2 rounded-lg px-3 py-2 text-left transition active:scale-[0.98]',
+              previousEntry ? '' : 'pointer-events-none opacity-35',
+            ]}
+            data-sfx-hover="hover-soft"
+            data-sfx-click="soft"
+          >
+            <Icon name="material-symbols:chevron-left-rounded" class="shrink-0 text-2xl text-[var(--primary)]" />
+            <span class="min-w-0">
+              <span class="block text-xs font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
+                Previous
+              </span>
+              <span class="line-clamp-1 block text-sm font-bold text-black/70 dark:text-white/70">
+                {previousEntry?.data.title ?? 'Start of book'}
+              </span>
+            </span>
+          </a>
+
+          <a
+            href={nextEntry ? firstContactManualHref(nextEntry, '#reader-page') : '#'}
+            class:list={[
+              'btn-card inline-flex min-h-[3rem] min-w-0 flex-1 items-center justify-end gap-2 rounded-lg px-3 py-2 text-right transition active:scale-[0.98]',
+              nextEntry ? '' : 'pointer-events-none opacity-35',
+            ]}
+            data-sfx-hover="hover-soft"
+            data-sfx-click="soft"
+          >
+            <span class="min-w-0">
+              <span class="block text-xs font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
+                Next
+              </span>
+              <span class="line-clamp-1 block text-sm font-bold text-black/70 dark:text-white/70">
+                {nextEntry?.data.title ?? 'End of book'}
+              </span>
+            </span>
+            <Icon name="material-symbols:chevron-right-rounded" class="shrink-0 text-2xl text-[var(--primary)]" />
+          </a>
+        </nav>
+      </article>
+    </main>
+  </div>
+</MainGridLayout>

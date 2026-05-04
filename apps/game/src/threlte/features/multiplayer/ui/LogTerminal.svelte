@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMount } from 'svelte'
-import { type LogEntry, logStore } from '../index'
+import { type LogEntry, logStore } from '../stores/logStore'
 
 let terminalElement: HTMLDivElement
 

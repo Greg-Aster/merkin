@@ -62,10 +62,39 @@ function isSatisfiedByRuntimeSystem(level: LevelDefinition, actorId: string) {
   return false
 }
 
+function getAuthoredRuntimeAssetContract(level: LevelDefinition) {
+  const runtimeAssets = (level.settings as any)?.level?.runtimeAssets
+  const toStringArray = (value: unknown) =>
+    Array.isArray(value)
+      ? value.filter((item): item is string => typeof item === 'string')
+      : []
+
+  return {
+    requiredActorIds: toStringArray(runtimeAssets?.requiredActorIds),
+    requiredAssetActorIds: [
+      ...toStringArray(runtimeAssets?.requiredRenderActorIds),
+      ...toStringArray(runtimeAssets?.requiredAssetActorIds),
+    ],
+  }
+}
+
+function uniqueStrings(values: string[]) {
+  return [...new Set(values)]
+}
+
 export function createLevelBuildReport(
   level: LevelDefinition,
 ): LevelBuildReport {
   const contract = getLevelRuntimeContract(level.id)
+  const authoredRuntimeContract = getAuthoredRuntimeAssetContract(level)
+  const requiredActorIds = uniqueStrings([
+    ...contract.requiredActorIds,
+    ...authoredRuntimeContract.requiredActorIds,
+  ])
+  const requiredAssetActorIds = uniqueStrings([
+    ...contract.requiredAssetActorIds,
+    ...authoredRuntimeContract.requiredAssetActorIds,
+  ])
   const warnings: string[] = []
   const errors: string[] = []
   const actorIds = new Set<string>()
@@ -162,7 +191,7 @@ export function createLevelBuildReport(
     errors.push(`Duplicate actor id "${actorId}" found in level definition.`)
   }
 
-  const missingRequiredActorIds = contract.requiredActorIds.filter(
+  const missingRequiredActorIds = requiredActorIds.filter(
     actorId =>
       !actorsById.has(actorId) && !isSatisfiedByRuntimeSystem(level, actorId),
   )
@@ -171,9 +200,12 @@ export function createLevelBuildReport(
     errors.push(getRequiredActorError(actorId, 'is missing'))
   }
 
-  for (const actorId of contract.requiredAssetActorIds) {
+  for (const actorId of requiredAssetActorIds) {
     const actor = actorsById.get(actorId)
-    if (!actor) continue
+    if (!actor) {
+      errors.push(getRequiredActorError(actorId, 'is missing'))
+      continue
+    }
 
     if (actor.render?.visible === false) {
       errors.push(getRequiredActorError(actorId, 'is not visible'))
@@ -250,8 +282,8 @@ export function createLevelBuildReport(
     detailMeshActorCount,
     defaultCollisionActorCount,
     visualOnlyActorCount,
-    requiredActorCount: contract.requiredActorIds.length,
-    requiredRenderActorIds: [...contract.requiredAssetActorIds],
+    requiredActorCount: requiredActorIds.length,
+    requiredRenderActorIds: requiredAssetActorIds,
     missingRequiredActorIds,
     requiredAssetUrls: [...requiredAssetUrls].sort(),
     runtimeAssetUrls: [...runtimeAssetUrls].sort(),

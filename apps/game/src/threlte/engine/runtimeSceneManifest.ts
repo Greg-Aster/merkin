@@ -27,6 +27,11 @@ export interface RuntimeSceneManifest {
   }
 }
 
+export interface RuntimeSceneManifestValidationResult {
+  valid: boolean
+  errors: string[]
+}
+
 export function getRuntimeSceneManifestUrl(levelId: string) {
   return `${RUNTIME_SCENE_MANIFEST_BASE_URL}/${levelId}.runtime-scene.json`
 }
@@ -82,4 +87,86 @@ export function isRuntimeSceneManifest(
     Array.isArray(manifest.levelDefinition.actors) &&
     Boolean(manifest.buildReport)
   )
+}
+
+function isFiniteVec3(value: unknown): value is [number, number, number] {
+  return (
+    Array.isArray(value) &&
+    value.length === 3 &&
+    value.every(component => Number.isFinite(component))
+  )
+}
+
+function sameStringSet(left: string[], right: string[]) {
+  if (left.length !== right.length) return false
+
+  const rightSet = new Set(right)
+  return left.every(value => rightSet.has(value))
+}
+
+export function validateRuntimeSceneManifest(
+  manifest: RuntimeSceneManifest,
+  expectedLevelId = manifest.levelId,
+): RuntimeSceneManifestValidationResult {
+  const errors: string[] = []
+  const buildReport = manifest.buildReport
+  const runtime = manifest.runtime
+
+  if (manifest.levelId !== expectedLevelId) {
+    errors.push(
+      `Manifest levelId "${manifest.levelId}" does not match requested level "${expectedLevelId}".`,
+    )
+  }
+  if (manifest.levelDefinition.id !== manifest.levelId) {
+    errors.push(
+      `Level definition id "${manifest.levelDefinition.id}" does not match manifest level "${manifest.levelId}".`,
+    )
+  }
+  if (buildReport.levelId !== manifest.levelId) {
+    errors.push(
+      `Build report levelId "${buildReport.levelId}" does not match manifest level "${manifest.levelId}".`,
+    )
+  }
+  if (!isFiniteVec3(manifest.levelDefinition.spawn?.player)) {
+    errors.push('Level definition has no finite player spawn Vec3.')
+  }
+  if (buildReport.errors.length > 0) {
+    errors.push(
+      `Cooked level build report contains ${buildReport.errors.length} error(s).`,
+    )
+  }
+  if (
+    !sameStringSet(
+      runtime.requiredRenderActorIds,
+      buildReport.requiredRenderActorIds,
+    )
+  ) {
+    errors.push(
+      'Runtime requiredRenderActorIds do not match build report requiredRenderActorIds.',
+    )
+  }
+  if (!sameStringSet(runtime.requiredAssetUrls, buildReport.requiredAssetUrls)) {
+    errors.push(
+      'Runtime requiredAssetUrls do not match build report requiredAssetUrls.',
+    )
+  }
+  if (!sameStringSet(runtime.runtimeAssetUrls, buildReport.runtimeAssetUrls)) {
+    errors.push(
+      'Runtime runtimeAssetUrls do not match build report runtimeAssetUrls.',
+    )
+  }
+
+  for (const url of [
+    ...runtime.requiredAssetUrls,
+    ...runtime.runtimeAssetUrls,
+  ]) {
+    if (!url.startsWith('/')) {
+      errors.push(`Runtime asset URL "${url}" must be a public absolute path.`)
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  }
 }

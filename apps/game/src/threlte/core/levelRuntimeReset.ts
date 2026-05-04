@@ -1,4 +1,4 @@
-import { terrainActions } from '../features/terrain'
+import { terrainActions } from '../features/terrain/terrainStore'
 import { resetPostProcessingState } from '../stores/postProcessingStore'
 import { resetRuntimeVisualStyle } from '../styles/runtimeVisualStyleStore'
 import { clearGltfCache } from '../utils/gltfAssetCache'

@@ -141,7 +141,6 @@ import {
   undoScene,
   ungroupNodes,
   updateLevelSceneSettings,
-  updateSolitudeSceneSettings,
 } from './editorStore'
 import { createEditorStyleController } from './editorStyleController'
 
@@ -1251,7 +1250,7 @@ aiController = createEditorAiController({
   getDefaultStyleDescriptor,
   ensureSceneNodeSourceAsset: assetController.ensureSceneNodeSourceAsset,
   getSceneNodeVisualBounds: styleController.getSceneNodeVisualBounds,
-  fitGeneratedAssetToSource: styleController.fitGeneratedAssetToSource,
+  inspectGeneratedAssetBounds: styleController.inspectAssetBounds,
   readJsonPayload,
   refreshGeneratedAssetLibrary: assetController.refreshGeneratedAssetLibrary,
   inspectSelectedAssetForHunyuan:
@@ -2014,19 +2013,6 @@ function applySolitudeAtmospherePreset(presetId: string | undefined) {
 
     return nextSettings
   })
-}
-
-function updateSolitudeSetting(path: Array<string | number>, value: unknown) {
-  updateSolitudeSceneSettings(settings => setNestedValue(settings, path, value))
-}
-
-function updateSolitudeNumericSetting(
-  path: Array<string | number>,
-  value: string,
-) {
-  const numeric = Number(value)
-  if (Number.isNaN(numeric)) return
-  updateSolitudeSetting(path, numeric)
 }
 
 function applyStylePreset(presetId: string) {

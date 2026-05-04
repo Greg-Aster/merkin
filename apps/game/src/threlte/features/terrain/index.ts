@@ -7,8 +7,6 @@
  * - Height queries for gameplay
  */
 
-// Main terrain component
-export { default as Terrain } from './Terrain.svelte'
 export { default as TerrainRuntime } from './TerrainRuntime.svelte'
 
 // Core terrain manager

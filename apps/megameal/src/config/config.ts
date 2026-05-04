@@ -20,8 +20,8 @@ export const siteConfig: SiteConfig = {
   themeLock: DARK_MODE,
   banner: {
     enable: true,
-    src: '/posts/timeline/golden-era.png', // Used as fallback and OG image
-    video: '/assets/banner/golden-era.webm', // Animated video background
+    src: '/assets/banner/posters/golden-era-poster.webp', // Used as fallback and OG image
+    video: '/assets/banner/golden-era12fps.webm', // Animated video background
     playbackRate: 0.25,
     position: 'center',
     credit: {

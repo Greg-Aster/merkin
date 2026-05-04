@@ -70,7 +70,9 @@ const sharedProps = {
   timelineConstellationPatterns={constellationPatterns}
   timelineConnectionPatterns={connectionPatterns}
 >
-  <slot slot="head" name="head" />
+  <Fragment slot="head">
+    <slot name="head" />
+  </Fragment>
   <script>
     import { initMegamealRouteTransitions } from '@/utils/megamealRouteTransitions'
 
@@ -80,17 +82,29 @@ const sharedProps = {
   <SiteSfxBridge client:load />
   <!-- MEGAMEAL-specific: Bleepy AI assistant mascot -->
   {Astro.props.showMascot && (
-    <Bleepy slot="mascot" mascotContext={Astro.props.pageMascotContext} instanceIdentifier="LAYOUT_BLEEPY" />
+    <Fragment slot="mascot">
+      <Bleepy mascotContext={Astro.props.pageMascotContext} instanceIdentifier="LAYOUT_BLEEPY" />
+    </Fragment>
   )}
   {shouldRenderPortalHero && (
-    <PortalHeroSlide slot="banner-overlay-content" />
+    <Fragment slot="banner-overlay-content">
+      <PortalHeroSlide />
+    </Fragment>
   )}
-  <slot slot="overlay" name="overlay" />
+  <Fragment slot="overlay">
+    <slot name="overlay" />
+  </Fragment>
   {shouldRenderPortalHero ? (
-    <PortalHeroBackgroundSlide slot="banner-slide-content" />
+    <Fragment slot="banner-slide-content">
+      <PortalHeroBackgroundSlide />
+    </Fragment>
   ) : hasCustomBannerSlideContent ? (
-    <slot slot="banner-slide-content" name="banner-slide-content" />
+    <Fragment slot="banner-slide-content">
+      <slot name="banner-slide-content" />
+    </Fragment>
   ) : (
-    <UniverseHeroSlide slot="banner-slide-content" />
+    <Fragment slot="banner-slide-content">
+      <UniverseHeroSlide />
+    </Fragment>
   )}
 </SharedMainGridLayout>

@@ -1,9 +1,4 @@
-/**
- * Hybrid ECS Integration for MEGAMEAL
- *
- * This bridges our existing modular component system with a high-performance
- * ECS for managing dynamic game objects like fireflies, particles, etc.
- */
+/** ECS bridge for dynamic runtime entities such as fireflies and vegetation. */
 
 import {
   Types,
@@ -15,8 +10,9 @@ import {
   defineSystem,
 } from 'bitecs'
 import { Color, Vector3 } from 'three'
-import type { LevelContext, SystemRegistry } from './LevelSystem'
-const isDev = import.meta.env.DEV
+import { runtimeDebugLog } from '../utils/runtimeLog'
+import type { LevelContext } from './LevelSystem'
+type EcsWorld = ReturnType<typeof createWorld>
 
 // =============================================================================
 // ECS COMPONENT DEFINITIONS
@@ -125,16 +121,14 @@ export const lightCyclingQuery = defineQuery([LightCycling, LightEmitter])
 // =============================================================================
 
 export class ECSWorldManager {
-  private world: any
-  private systems: Array<(world: any, deltaTime: number) => void> = []
-  private registry: SystemRegistry
+  private world: EcsWorld
+  private systems: Array<(world: EcsWorld, deltaTime: number) => void> = []
   private emotionalStateEntity: number
   private getHeightAt?: (x: number, z: number) => number
-  private originalIntensities: Map<number, number> = new Map() // Store original prop values
+  private originalIntensities: Map<number, number> = new Map()
 
-  constructor(registry: SystemRegistry) {
+  constructor() {
     this.world = createWorld()
-    this.registry = registry
 
     // Create singleton emotional state entity
     this.emotionalStateEntity = addEntity(this.world)
@@ -147,9 +141,7 @@ export class ECSWorldManager {
     EmotionalState.discovery[this.emotionalStateEntity] = 30
 
     this.setupCoreSystems()
-    if (isDev) {
-      console.log('🔧 ECS World initialized')
-    }
+    runtimeDebugLog('ECS World initialized')
   }
 
   setTerrainHeightFunction(
@@ -214,35 +206,6 @@ export class ECSWorldManager {
         return world
       }),
     )
-
-    // Light cycling system - DISABLED for component-level random cycling
-    // The HybridFireflyComponent now handles all light selection and cycling
-    /*
-    this.addSystem(defineSystem((world) => {
-      const entities = lightCyclingQuery(world)
-      const deltaTime = 0.016 // Assume 60fps
-      
-      for (let i = 0; i < entities.length; i++) {
-        const eid = entities[i]
-        
-        // Update cycle time
-        LightCycling.cycleTime[eid] += deltaTime
-        
-        // Update fade progress
-        const targetFade = LightCycling.isActive[eid] ? 1.0 : 0.0
-        const currentFade = LightCycling.fadeProgress[eid]
-        const fadeDirection = targetFade - currentFade
-        
-        LightCycling.fadeProgress[eid] += fadeDirection * 0.3 * deltaTime
-        LightCycling.fadeProgress[eid] = Math.max(0, Math.min(1, LightCycling.fadeProgress[eid]))
-        
-        // Apply fade to light intensity
-        LightEmitter.intensity[eid] *= LightCycling.fadeProgress[eid]
-      }
-      
-      return world
-    }))
-    */
 
     // Terrain following system - keeps entities above ground (less frequent)
     this.addSystem(
@@ -320,7 +283,7 @@ export class ECSWorldManager {
     )
   }
 
-  addSystem(system: (world: any, deltaTime: number) => void): void {
+  addSystem(system: (world: EcsWorld, deltaTime: number) => void): void {
     this.systems.push(system)
   }
 
@@ -331,7 +294,7 @@ export class ECSWorldManager {
     }
   }
 
-  getWorld(): any {
+  getWorld(): EcsWorld {
     return this.world
   }
 
@@ -359,9 +322,7 @@ export class ECSWorldManager {
     if (discovery !== undefined)
       EmotionalState.discovery[this.emotionalStateEntity] = discovery
 
-    if (isDev) {
-      console.log('🎭 Emotional state updated:', this.getEmotionalState())
-    }
+    runtimeDebugLog('Emotional state updated:', this.getEmotionalState())
   }
 
   // Modern ECS entity creation with configuration
@@ -401,7 +362,6 @@ export class ECSWorldManager {
     LightEmitter.range[eid] = config.lightRange
     LightEmitter.decay[eid] = 1.2
 
-    // Store original intensity for emotional system
     this.originalIntensities.set(eid, config.lightIntensity)
 
     // Configure emotional responsiveness
@@ -488,8 +448,6 @@ export class ECSWorldManager {
 
   dispose(): void {
     // Clean up ECS world
-    if (isDev) {
-      console.log('🧹 ECS World disposed')
-    }
+    runtimeDebugLog('ECS World disposed')
   }
 }

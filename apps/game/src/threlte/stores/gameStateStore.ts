@@ -2,6 +2,7 @@
 
 import { type Writable, derived, writable } from 'svelte/store'
 import { DEFAULT_LEVEL_ID } from '../levels/levelRegistry'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 
 // Core game state types
 export interface PlayerState {
@@ -173,7 +174,7 @@ export const saveGameState = () => {
 
   try {
     localStorage.setItem('megameal-game-state', JSON.stringify(state))
-    if (import.meta.env.DEV) console.log('💾 Game state saved')
+    runtimeDebugLog('💾 Game state saved')
   } catch (error) {
     console.warn('Failed to save game state:', error)
   }
@@ -191,7 +192,7 @@ export const loadGameState = () => {
       if (state.playerState) playerStateStore.set(state.playerState)
       if (state.gameSession) gameSessionStore.set(state.gameSession)
 
-      if (import.meta.env.DEV) console.log('📂 Game state loaded')
+      runtimeDebugLog('📂 Game state loaded')
     }
   } catch (error) {
     console.warn('Failed to load game state:', error)

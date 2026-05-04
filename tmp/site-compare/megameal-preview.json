@@ -1,0 +1,276 @@
+{
+  "status": 200,
+  "elapsedMs": 13600,
+  "dom": {
+    "title": "MEGA MEAL SAGA - Consuming Time Itself Since 3042",
+    "bodyText": "Skip to main content\nMEGA\nMEAL\nTimeline\nGame\nStore\nArchive\nMore\nHome\nTimeline\nGame\nStore\nArchive\nMore\nCookbook\nQuizzes\nAbout\nTheme Color\n250\nCOMMERCIAL PORTAL ONLINE\nPUBLIC ORIENTATION FEED\nCOMMERCIAL PORTAL ONLINE\nMEGA MEAL SAGA\n\nA cheerful multimedia nutrition concern about hunger, history, and the many ways a corporation can smile while measuring your bones.\n\nBEGIN INTAKE\n\nCommercial Portal Online\n\nMEGA MEAL SAGA portal. Navigation destinations rotate through the broadcast.\n\nSPONSORED\nNEXT CAMPAIGN\n×\nCOOKIE REFUSAL DESK\nPRIVACY INDIFFERENCE DEPARTMENT\nNo Cookies. No Personal Data. No Appetite For Either.\n\nThis site doesn't use cookies, and we don't care about your personal data. Thank you for choosing MEGAMEAL.\n\nREJECT ALL COOKIES\nREJECT EVERY COOKIE\nREJECT COOKIES AGAIN\n\nYour refusal h",
+    "canvasCount": 1,
+    "imgCount": 14,
+    "pictureCount": 0,
+    "videoCount": 9,
+    "svgCount": 27,
+    "scriptCount": 15,
+    "stylesheetCount": 58,
+    "htmlBytes": 252022,
+    "navTiming": {
+      "domContentLoaded": 2853,
+      "loadEventEnd": 3217,
+      "duration": 3217,
+      "transferSize": 49861,
+      "encodedBodySize": 49561
+    }
+  },
+  "requestCount": 73,
+  "totalEncodedKiB": 6088.7,
+  "byType": {
+    "text/html": {
+      "count": 2,
+      "encodedKiB": 48.7
+    },
+    "text/css": {
+      "count": 38,
+      "encodedKiB": 133.2
+    },
+    "image/png": {
+      "count": 2,
+      "encodedKiB": 1325.1
+    },
+    "video/webm": {
+      "count": 1,
+      "encodedKiB": 1844.1
+    },
+    "text/javascript": {
+      "count": 25,
+      "encodedKiB": 484
+    },
+    "font/woff2": {
+      "count": 4,
+      "encodedKiB": 101.8
+    },
+    "model/gltf-binary": {
+      "count": 1,
+      "encodedKiB": 2151.8
+    }
+  },
+  "topRequests": [
+    {
+      "url": "/assets/3D/Hy3D_textured_00005_optimized.glb",
+      "status": 200,
+      "mimeType": "model/gltf-binary",
+      "encodedKiB": 2151.8
+    },
+    {
+      "url": "/assets/banner/golden-era.webm",
+      "status": 206,
+      "mimeType": "video/webm",
+      "encodedKiB": 1844.1
+    },
+    {
+      "url": "/_astro/main-title.Drn830kW.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "encodedKiB": 803.9
+    },
+    {
+      "url": "/_astro/avatar.CyQZiLwS.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "encodedKiB": 521.2
+    },
+    {
+      "url": "/_astro/vendor-3d-core.D8QtOt5Y.js",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 176.5
+    },
+    {
+      "url": "/_astro/vendor.C0HSjk-D.js",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 134.7
+    },
+    {
+      "url": "/_astro/vendor-3d-extras.C88g19ck.js",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 49.2
+    },
+    {
+      "url": "/",
+      "status": 200,
+      "mimeType": "text/html",
+      "encodedKiB": 48.7
+    },
+    {
+      "url": "/_astro/vendor.DpGYzaqb.css",
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedKiB": 48.1
+    },
+    {
+      "url": "/_astro/jetbrains-mono-latin-wght-normal.B9CIFXIH.woff2",
+      "status": 200,
+      "mimeType": "font/woff2",
+      "encodedKiB": 39.8
+    },
+    {
+      "url": "/_astro/PortalHeroSlide.astro_astro_type_script_index_0_lang.NxkbYQ0Z.js",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 31.9
+    },
+    {
+      "url": "/_astro/roboto-latin-700-normal.CXeAXeti.woff2",
+      "status": 200,
+      "mimeType": "font/woff2",
+      "encodedKiB": 20.8
+    },
+    {
+      "url": "/_astro/roboto-latin-500-normal.CkrA1NAy.woff2",
+      "status": 200,
+      "mimeType": "font/woff2",
+      "encodedKiB": 20.8
+    },
+    {
+      "url": "/_astro/vendor-photoswipe.BD0LiiWv.js",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 20.7
+    },
+    {
+      "url": "/_astro/roboto-latin-400-normal.CNwBRw8h.woff2",
+      "status": 200,
+      "mimeType": "font/woff2",
+      "encodedKiB": 20.4
+    },
+    {
+      "url": "/_astro/vendor-overlayscrollbars.DcO71RYo.js",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 14.4
+    },
+    {
+      "url": "/_astro/vendor-swup.0QqxMkRT.js",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 13.4
+    },
+    {
+      "url": "/_astro/vendor-markdown.BaswSlok.js",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 12
+    },
+    {
+      "url": "/_astro/vendor-audio.CUAEZXcY.js",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 10.3
+    },
+    {
+      "url": "/_astro/vendor-katex.BRd0jKnN.css",
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedKiB": 8.1
+    },
+    {
+      "url": "/_astro/timeline-styles.D5WM8hUT.css",
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedKiB": 5.8
+    },
+    {
+      "url": "/_astro/MainGridLayout_astro_astro_type_style_index_0_lang.DrfkXfgq.css",
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedKiB": 4.1
+    },
+    {
+      "url": "/_astro/timelineViewClient.CO1NTZDG.js",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 3.7
+    },
+    {
+      "url": "/_astro/vendor-overlayscrollbars.CcrqmrpS.css",
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedKiB": 2.9
+    },
+    {
+      "url": "/_astro/bleepy.CNoQjYId.css",
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedKiB": 2.8
+    },
+    {
+      "url": "/_astro/BleepyBanner.C2GNIbMY.css",
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedKiB": 2.7
+    },
+    {
+      "url": "/_astro/Layout_astro_astro_type_style_index_0_lang.CFX49qJn.css",
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedKiB": 2.7
+    },
+    {
+      "url": "/_astro/banner-billboards.CNsAfae0.css",
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedKiB": 2.7
+    },
+    {
+      "url": "/_astro/zh_TW.CrSzfV0l.js",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 2.5
+    },
+    {
+      "url": "/_astro/responsive.BstrnQAf.css",
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedKiB": 2.5
+    }
+  ],
+  "failedRequests": [
+    {
+      "url": "http://127.0.0.1:4322/pagefind/pagefind.js",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "consoleMessages": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "warning",
+      "text": "https://svelte.dev/e/hydration_mismatch"
+    },
+    {
+      "type": "warning",
+      "text": "https://svelte.dev/e/hydration_mismatch"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x6740309e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x6740309e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x6740309e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x6740309e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+    }
+  ],
+  "pageErrors": [
+    "Failed to fetch dynamically imported module: http://127.0.0.1:4322/pagefind/pagefind.js"
+  ]
+}

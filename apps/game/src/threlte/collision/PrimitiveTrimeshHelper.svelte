@@ -2,8 +2,8 @@
 import { T } from '@threlte/core'
 import { onDestroy } from 'svelte'
 import * as THREE from 'three'
-import type { PrimitiveGeometryKind } from '../engine'
-import { createPrimitiveGeometry } from './primitiveGeometry'
+import { createPrimitiveGeometry } from '../engine/primitiveGeometry'
+import type { PrimitiveGeometryKind } from '../engine/types'
 
 export let geometry: PrimitiveGeometryKind = 'box'
 export let args: number[] = [1, 1, 1]

@@ -20,6 +20,7 @@ export interface EditorSceneDocumentLoadOptions {
   includeLocalStorage?: boolean
   includePackaged?: boolean
   includeDefault?: boolean
+  preferLocalStorage?: boolean
 }
 
 export interface EditorSceneDocumentLoadResult {
@@ -29,14 +30,6 @@ export interface EditorSceneDocumentLoadResult {
 
 function cloneScene(scene: EditorSceneDocument) {
   return structuredClone(scene) as EditorSceneDocument
-}
-
-export function getSceneUpdatedAt(
-  scene: { updatedAt?: string } | null | undefined,
-) {
-  if (!scene?.updatedAt) return 0
-  const timestamp = Date.parse(scene.updatedAt)
-  return Number.isFinite(timestamp) ? timestamp : 0
 }
 
 export function hasMeaningfulSceneContent(
@@ -81,18 +74,6 @@ function getLocalEditorScene(levelId: string) {
   return loadEditorSceneFromLocalStorage(levelId)
 }
 
-function selectNewestScene(
-  left: EditorSceneDocumentLoadResult | null,
-  right: EditorSceneDocumentLoadResult | null,
-) {
-  if (!left) return right
-  if (!right) return left
-
-  return getSceneUpdatedAt(left.scene) >= getSceneUpdatedAt(right.scene)
-    ? left
-    : right
-}
-
 export function loadImmediateEditorSceneDocument(
   levelId: string,
   options: EditorSceneDocumentLoadOptions = {},
@@ -100,6 +81,7 @@ export function loadImmediateEditorSceneDocument(
   const includeLocalStorage = options.includeLocalStorage ?? false
   const includePackaged = options.includePackaged ?? true
   const includeDefault = options.includeDefault ?? true
+  const preferLocalStorage = options.preferLocalStorage ?? false
 
   const loadedLocalScene = includeLocalStorage
     ? getLocalEditorScene(levelId)
@@ -127,8 +109,20 @@ export function loadImmediateEditorSceneDocument(
       } satisfies EditorSceneDocumentLoadResult)
     : null
 
+  if (preferLocalStorage) {
+    return (
+      localScene ??
+      packagedResult ??
+      defaultResult ?? {
+        scene: createEmptyScene(levelId),
+        source: 'default',
+      }
+    )
+  }
+
   return (
-    selectNewestScene(localScene, packagedResult) ??
+    packagedResult ??
+    localScene ??
     defaultResult ?? {
       scene: createEmptyScene(levelId),
       source: 'default',
@@ -159,5 +153,5 @@ export async function loadEditorSceneDocument(
         } satisfies EditorSceneDocumentLoadResult)
       : null
 
-  return selectNewestScene(immediate, diskResult) ?? immediate
+  return diskResult ?? immediate
 }

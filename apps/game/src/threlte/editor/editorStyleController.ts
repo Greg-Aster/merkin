@@ -1,13 +1,21 @@
-import { EDITOR_API_BASE } from '@config/editorApi'
 import * as THREE from 'three'
 import { canBakeSceneNode, getPrefabAssetUrl } from './editorBakeSource'
 import {
   type PersistedStyleBatchEntry,
   type PersistedStyleBatchSession,
-  clearStyleBatchSessionFromLocalStorage,
   saveEditorSceneToLocalStorage,
-  saveStyleBatchSessionToLocalStorage,
 } from './editorPersistence'
+import { cancelHunyuanJobs } from './editorHunyuanApi'
+import { createEditorStyleBatchSessionController } from './editorStyleBatchSession'
+import { applyGeneratedAssetToNode } from './editorGeneratedAssetApplication'
+import {
+  exportStyleAssetForBlender,
+  fetchLatestStyleWorkspace,
+  inspectStyleAsset,
+  packageStyleWorkspace,
+  reimportStyleAssetFromBlender,
+  simplifyStyleAsset,
+} from './editorStyleApi'
 import { getEditorObject } from './editorRegistry'
 import type { EditorSceneNode } from './editorStore'
 
@@ -46,6 +54,18 @@ interface EditorStyleControllerDeps {
 
 export function createEditorStyleController(deps: EditorStyleControllerDeps) {
   const state = deps.state
+  const {
+    resetQueuedStyleBatchEntriesForResume,
+    persistStyleBatchSession,
+    updatePersistedStyleBatchSession,
+    createStyleBatchSession,
+  } = createEditorStyleBatchSessionController({
+    state,
+    getEditorNodes: deps.getEditorNodes,
+    getActiveSceneLevelId: deps.getActiveSceneLevelId,
+    getDefaultStyleDescriptor: deps.getDefaultStyleDescriptor,
+    getAiSourceName: deps.getAiSourceName,
+  })
 
   function buildNodeStylePrompt(node: EditorSceneNode) {
     const descriptor = deps.getDefaultStyleDescriptor(node)
@@ -72,88 +92,108 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     }
   }
 
-  function resetQueuedStyleBatchEntriesForResume(
-    session: PersistedStyleBatchSession,
-  ) {
-    return {
-      ...session,
-      entries: session.entries.map(entry =>
-        entry.status === 'queued' || entry.status === 'running'
-          ? {
-              ...entry,
-              jobId: undefined,
-              status: 'pending' as const,
-              error: undefined,
-            }
-          : entry,
-      ),
-    } satisfies PersistedStyleBatchSession
+  function setStyleBatchNodeStatus(nodeId: string, message: string) {
+    state.styleBatchNodeStatusById = {
+      ...state.styleBatchNodeStatusById,
+      [nodeId]: message,
+    }
   }
 
-  function persistStyleBatchSession(
-    session: PersistedStyleBatchSession | null,
+  function updateStyleBatchEntry(
+    nodeId: string,
+    patch: Partial<PersistedStyleBatchEntry>,
   ) {
-    state.styleBatchSession = session
-    if (typeof window === 'undefined') return null
+    updatePersistedStyleBatchSession(current => ({
+      ...current,
+      entries: current.entries.map(candidate =>
+        candidate.nodeId === nodeId ? { ...candidate, ...patch } : candidate,
+      ),
+    }))
+  }
 
-    if (session) {
-      return saveStyleBatchSessionToLocalStorage(
-        deps.getActiveSceneLevelId(),
-        session,
-      )
+  function markStyleBatchEntry(
+    entry: PersistedStyleBatchEntry,
+    patch: Partial<PersistedStyleBatchEntry>,
+    message?: string,
+  ) {
+    Object.assign(entry, patch)
+    updateStyleBatchEntry(entry.nodeId, patch)
+    if (message) {
+      setStyleBatchNodeStatus(entry.nodeId, message)
+    }
+  }
+
+  function getCompletedStyleBatchMessage(
+    session: PersistedStyleBatchSession,
+    hasIncompleteEntries: boolean,
+  ) {
+    if (hasIncompleteEntries) {
+      return 'Scene batch stopped with incomplete items. Generated assets that finished were applied, and the remaining session was kept for inspection or recovery.'
     }
 
-    clearStyleBatchSessionFromLocalStorage(deps.getActiveSceneLevelId())
-    return null
+    return session.mode === 'texture'
+      ? `Texture style batch finished for ${session.entries.length} object${session.entries.length === 1 ? '' : 's'}. The scene file was saved to disk.`
+      : `Scene regeneration finished for ${session.entries.length} object${session.entries.length === 1 ? '' : 's'}. The scene file was saved to disk.`
   }
 
-  function updatePersistedStyleBatchSession(
-    mutator: (
-      session: PersistedStyleBatchSession,
-    ) => PersistedStyleBatchSession,
-  ) {
-    if (!state.styleBatchSession) return null
-    const next = mutator(
-      structuredClone(state.styleBatchSession) as PersistedStyleBatchSession,
+  async function completeStyleBatchSession(session: PersistedStyleBatchSession) {
+    await deps.saveSceneDocumentToDisk(deps.getActiveSceneLevelId())
+    const finalSession = state.styleBatchSession
+    const hasIncompleteEntries = !!finalSession?.entries.some(
+      (entry: PersistedStyleBatchEntry) => entry.status !== 'applied',
     )
-    persistStyleBatchSession(next)
-    return next
+    state.styleBatchStatus = getCompletedStyleBatchMessage(
+      session,
+      hasIncompleteEntries,
+    )
+    state.saveMessage = state.styleBatchStatus
+    if (!hasIncompleteEntries) {
+      persistStyleBatchSession(null)
+    }
   }
 
-  function createStyleBatchSession(
-    mode: 'texture' | 'generate',
-    candidateIds: string[],
-  ) {
-    const entries: PersistedStyleBatchEntry[] = candidateIds
-      .map(nodeId => deps.getEditorNodes().find(node => node.id === nodeId))
-      .filter(
-        (node): node is EditorSceneNode => !!node && canBakeSceneNode(node),
-      )
-      .map(node => ({
-        nodeId: node.id,
-        nodeName: node.name,
-        descriptor: deps.getDefaultStyleDescriptor(node),
-        mode,
-        sourceName: deps.getAiSourceName(node),
-        status: 'pending',
-      }))
+  function setCheckpointedStyleBatchStatus(message: string) {
+    state.styleBatchStatus = message
+    state.saveMessage = `${state.styleBatchStatus} Local scene state was checkpointed.`
+  }
 
-    return {
-      levelId: deps.getActiveSceneLevelId(),
-      mode,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      styleProfileName: state.styleProfileName,
-      stylePrompt: state.stylePrompt,
-      styleNegativePrompt: state.styleNegativePrompt,
-      styleLoraNotes: state.styleLoraNotes,
-      styleControlNetNotes: state.styleControlNetNotes,
-      styleReferenceImageUrl: state.styleReferenceImageUrl,
-      comfyUiApiUrl: state.comfyUiApiUrl,
-      hunyuanApiUrl: state.hunyuanApiUrl,
-      workflowPath: state.selectedComfyWorkflowPath,
-      entries,
-    } satisfies PersistedStyleBatchSession
+  function markActiveStyleBatchJobFailed(message: string) {
+    updatePersistedStyleBatchSession(current => ({
+      ...current,
+      entries: current.entries.map(candidate =>
+        candidate.jobId === state.hunyuanActiveJobId &&
+        (candidate.status === 'queued' || candidate.status === 'running')
+          ? {
+              ...candidate,
+              status: 'failed',
+              error: message,
+            }
+          : candidate,
+      ),
+    }))
+  }
+
+  function handleStyleBatchSessionError(error: unknown) {
+    if (state.styleBatchStopIntent === 'pause') {
+      setCheckpointedStyleBatchStatus(
+        'Scene style batch paused. Resume the saved session when you are ready.',
+      )
+      state.styleBatchPendingResume = state.styleBatchSession
+      return
+    }
+
+    if (state.styleBatchStopIntent === 'cancel') {
+      setCheckpointedStyleBatchStatus(
+        'Scene style batch cancelled. Auto-resume was discarded.',
+      )
+      return
+    }
+
+    state.styleBatchStatus =
+      error instanceof Error
+        ? error.message
+        : 'Scene style batch failed. Check the editor API and local AI services.'
+    markActiveStyleBatchJobFailed(state.styleBatchStatus)
   }
 
   async function pauseActiveHunyuanJobs() {
@@ -177,15 +217,10 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     }
 
     try {
-      const response = await fetch(
-        `${EDITOR_API_BASE}/api/hunyuan3d/jobs/cancel`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ all: true }),
-        },
+      const payload = await cancelHunyuanJobs(
+        deps.readJsonPayload,
+        'Hunyuan pause',
       )
-      const payload = await deps.readJsonPayload(response, 'Hunyuan pause')
       state.styleBatchStatus = `${payload?.message ?? 'Pause requested.'} Resume remains available from the saved batch session.`
       state.saveMessage = `${state.styleBatchStatus} Local scene state was checkpointed.`
       void deps.refreshHunyuanRecentJobs()
@@ -212,15 +247,10 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     state.styleBatchPendingResume = null
 
     try {
-      const response = await fetch(
-        `${EDITOR_API_BASE}/api/hunyuan3d/jobs/cancel`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ all: true }),
-        },
+      const payload = await cancelHunyuanJobs(
+        deps.readJsonPayload,
+        'Hunyuan cancel',
       )
-      const payload = await deps.readJsonPayload(response, 'Hunyuan cancel')
       state.styleBatchStatus = `${payload?.message ?? 'Cancellation requested.'} Auto-resume has been cleared.`
       state.styleBatchNodeStatusById = {}
       state.saveMessage = `${state.styleBatchStatus} Local scene state was checkpointed.`
@@ -263,10 +293,11 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
 
     try {
       const source = await deps.ensureSceneNodeSourceAsset(selectedNode)
-      const response = await fetch(
-        `${EDITOR_API_BASE}/api/style/inspect?assetUrl=${encodeURIComponent(source.assetUrl)}`,
+      const payload = await inspectStyleAsset(
+        source.assetUrl,
+        deps.readJsonPayload,
+        'Style inspection',
       )
-      const payload = await deps.readJsonPayload(response, 'Style inspection')
 
       if (!payload?.success) {
         state.styleStatus = payload?.message ?? 'Style inspection failed.'
@@ -335,10 +366,11 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
   }
 
   async function inspectAssetBounds(assetUrl: string) {
-    const response = await fetch(
-      `${EDITOR_API_BASE}/api/style/inspect?assetUrl=${encodeURIComponent(assetUrl)}`,
+    const payload = await inspectStyleAsset(
+      assetUrl,
+      deps.readJsonPayload,
+      'Asset bounds inspect',
     )
-    const payload = await deps.readJsonPayload(response, 'Asset bounds inspect')
     if (!payload?.success) return null
 
     const reportedBounds = payload.analysis?.bounds
@@ -482,79 +514,6 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     return { size: localScale, maxDimension: Math.max(...localScale) }
   }
 
-  async function fitGeneratedAssetToSource(
-    nodeId: string,
-    sourceVisualBounds: {
-      size: [number, number, number]
-      maxDimension: number
-    },
-    generatedAssetUrl: string,
-    fallbackScale: [number, number, number],
-  ) {
-    const generatedBounds = await inspectAssetBounds(generatedAssetUrl)
-    const sourceSize = sourceVisualBounds?.size ?? [0, 0, 0]
-    const sourceMax = Number(sourceVisualBounds?.maxDimension ?? 0)
-    const generatedMax = Number(generatedBounds?.maxDimension ?? 0)
-    if (
-      !Number.isFinite(sourceMax) ||
-      !Number.isFinite(generatedMax) ||
-      sourceMax <= 0.0001 ||
-      generatedMax <= 0.0001
-    ) {
-      const report = `Fit fallback for ${nodeId}: source bounds ${Number.isFinite(sourceMax) ? sourceMax.toFixed(4) : 'invalid'}, generated bounds ${Number.isFinite(generatedMax) ? generatedMax.toFixed(4) : 'invalid'}. Keeping existing scale [${fallbackScale.map(v => v.toFixed(3)).join(', ')}].`
-      deps.appendPipelineLog('Generated asset fit fallback', {
-        nodeId,
-        generatedAssetUrl,
-        sourceSize,
-        sourceMax,
-        generatedBounds,
-        fallbackScale,
-      })
-      return { appliedScale: fallbackScale, report, usedFallback: true }
-    }
-
-    const generatedSize =
-      Array.isArray(generatedBounds?.size) && generatedBounds.size.length === 3
-        ? ([
-            Math.abs(Number(generatedBounds.size[0] ?? 0)),
-            Math.abs(Number(generatedBounds.size[1] ?? 0)),
-            Math.abs(Number(generatedBounds.size[2] ?? 0)),
-          ] as [number, number, number])
-        : ([generatedMax, generatedMax, generatedMax] as [
-            number,
-            number,
-            number,
-          ])
-
-    const axisRatios = sourceSize.map((value, index) => {
-      const generatedAxis = generatedSize[index]
-      if (
-        !Number.isFinite(value) ||
-        !Number.isFinite(generatedAxis) ||
-        value <= 0.0001 ||
-        generatedAxis <= 0.0001
-      ) {
-        return sourceMax / generatedMax
-      }
-      return value / generatedAxis
-    }) as [number, number, number]
-
-    const clampedRatios = axisRatios.map(ratio =>
-      Math.min(Math.max(ratio, 0.05), 500),
-    ) as [number, number, number]
-    const appliedScale = [...clampedRatios] as [number, number, number]
-    const report = `Source [${sourceSize.map(v => v.toFixed(2)).join(', ')}]u → Generated [${generatedSize.map(v => v.toFixed(2)).join(', ')}]u → Applied ×[${clampedRatios.map(v => v.toFixed(3)).join(', ')}] → Final scale [${appliedScale.map(v => v.toFixed(3)).join(', ')}]`
-    deps.appendPipelineLog('Computed generated asset fit', {
-      nodeId,
-      generatedAssetUrl,
-      sourceSize,
-      generatedSize,
-      ratios: clampedRatios,
-      appliedScale,
-    })
-    return { appliedScale, report, usedFallback: false }
-  }
-
   async function restoreLatestStyleWorkspaceForSelection(
     assetUrl: string,
     selectionKey: string,
@@ -563,12 +522,9 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     const restoreToken = ++state.styleWorkspaceRestoreToken
 
     try {
-      const response = await fetch(
-        `${EDITOR_API_BASE}/api/style/workspace/latest?assetUrl=${encodeURIComponent(assetUrl)}`,
-      )
-      const payload = await deps.readJsonPayload(
-        response,
-        'Latest style workspace lookup',
+      const payload = await fetchLatestStyleWorkspace(
+        assetUrl,
+        deps.readJsonPayload,
       )
 
       if (
@@ -626,10 +582,8 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
 
     try {
       const source = await deps.ensureSceneNodeSourceAsset(selectedNode)
-      const response = await fetch(`${EDITOR_API_BASE}/api/style/workspace`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const payload = await packageStyleWorkspace(
+        {
           assetUrl: source.assetUrl,
           sourceName: selectedNode.name,
           styleProfileName: state.styleProfileName.trim(),
@@ -641,11 +595,8 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
           comfyUiApiUrl: state.comfyUiApiUrl,
           hunyuanApiUrl: state.hunyuanApiUrl,
           generateReferenceIfMissing: true,
-        }),
-      })
-      const payload = await deps.readJsonPayload(
-        response,
-        'Style workspace packaging',
+        },
+        deps.readJsonPayload,
       )
 
       if (!payload?.success) {
@@ -714,18 +665,16 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
 
     try {
       const source = await deps.ensureSceneNodeSourceAsset(selectedNode)
-      const response = await fetch(`${EDITOR_API_BASE}/api/style/simplify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const payload = await simplifyStyleAsset(
+        {
           assetUrl: source.assetUrl,
           outputName: `${selectedNode.name}-style`,
           ratio: state.styleSimplifyRatio,
           error: state.styleSimplifyError,
           lockBorder: true,
-        }),
-      })
-      const payload = await deps.readJsonPayload(response, 'Style simplify')
+        },
+        deps.readJsonPayload,
+      )
 
       if (!payload?.success) {
         state.styleStatus = payload?.message ?? 'Mesh simplification failed.'
@@ -765,22 +714,14 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
 
     try {
       const source = await deps.ensureSceneNodeSourceAsset(selectedNode)
-      const response = await fetch(
-        `${EDITOR_API_BASE}/api/style/export-blender`,
+      const payload = await exportStyleAssetForBlender(
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            assetUrl: source.assetUrl,
-            exportName: selectedNode.name,
-            referenceImageUrl: state.styleReferenceImageUrl.trim(),
-            openInBlender: options?.openInBlender ?? false,
-          }),
+          assetUrl: source.assetUrl,
+          exportName: selectedNode.name,
+          referenceImageUrl: state.styleReferenceImageUrl.trim(),
+          openInBlender: options?.openInBlender ?? false,
         },
-      )
-      const payload = await deps.readJsonPayload(
-        response,
-        'Blender export packaging',
+        deps.readJsonPayload,
       )
 
       if (!payload?.success) {
@@ -817,21 +758,13 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
 
     try {
       const source = await deps.ensureSceneNodeSourceAsset(selectedNode)
-      const response = await fetch(
-        `${EDITOR_API_BASE}/api/style/reimport-blender`,
+      const payload = await reimportStyleAssetFromBlender(
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sourceAssetUrl: source.assetUrl,
-            exportPath: state.styleBlenderExportPath.trim(),
-            nodeName: selectedNode.name,
-          }),
+          sourceAssetUrl: source.assetUrl,
+          exportPath: state.styleBlenderExportPath.trim(),
+          nodeName: selectedNode.name,
         },
-      )
-      const payload = await deps.readJsonPayload(
-        response,
-        'Blender reimport packaging',
+        deps.readJsonPayload,
       )
 
       if (!payload?.success || !payload.assetUrl) {
@@ -920,47 +853,97 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       throw new Error(`Could not find ${entry.nodeName} in the current scene.`)
     }
 
-    const sourceVisualBounds = await getSceneNodeVisualBounds(
-      node,
-      entry.sourceAssetUrl || '',
-    )
-    const baseScale = [...node.scale] as [number, number, number]
-    const fitResult = await fitGeneratedAssetToSource(
-      entry.nodeId,
-      sourceVisualBounds,
-      assetUrl,
-      baseScale,
-    )
-    state.hunyuanLastFitReport = fitResult.report
-
-    deps.patchNode(entry.nodeId, {
-      kind: 'asset',
-      asset: { url: assetUrl },
-      scale: fitResult.appliedScale,
-      prefab: undefined,
-      primitive: undefined,
-      generation: {
-        ...(node.generation ?? {}),
-        descriptor: entry.descriptor,
-        sourceVisualSize: sourceVisualBounds.size,
-        lastBakedAssetUrl: assetUrl,
-        lastBakedAt: new Date().toISOString(),
-      },
-    })
-
-    deps.appendPipelineLog(
-      'Applied style batch result with preserved transform',
+    const applicationResult = await applyGeneratedAssetToNode(
       {
-        nodeId: entry.nodeId,
-        assetUrl,
-        transform: getNodeTransformSnapshot(node),
+        getSceneNodeVisualBounds,
+        inspectGeneratedAssetBounds: inspectAssetBounds,
+        patchNode: deps.patchNode,
+        appendPipelineLog: deps.appendPipelineLog,
+        getNodeTransformSnapshot,
+      },
+      node,
+      assetUrl,
+      {
+        sourceAssetUrl: entry.sourceAssetUrl,
+        descriptor: entry.descriptor,
+        logMessage: 'Applied style batch result with preserved transform',
       },
     )
+    state.hunyuanLastFitReport = applicationResult.fitReport
 
     const scene = deps.getCurrentScene()
     if (scene && typeof window !== 'undefined') {
       saveEditorSceneToLocalStorage(deps.getActiveSceneLevelId(), scene)
     }
+  }
+
+  async function queueStyleBatchEntryJob(
+    session: PersistedStyleBatchSession,
+    entry: PersistedStyleBatchEntry,
+    node: EditorSceneNode,
+    prompt: string,
+  ) {
+    state.styleBatchStatus =
+      session.mode === 'texture'
+        ? `Baking style onto ${entry.nodeName}…`
+        : `Reimagining ${entry.nodeName}…`
+    setStyleBatchNodeStatus(entry.nodeId, 'Preparing source asset…')
+
+    const source = await deps.ensureSceneNodeSourceAsset(node)
+    const workspacePayload = await packageStyleWorkspace(
+      {
+        assetUrl: source.assetUrl,
+        sourceName: node.name,
+        styleProfileName: session.styleProfileName.trim(),
+        prompt,
+        negativePrompt: session.styleNegativePrompt.trim(),
+        loraNotes: session.styleLoraNotes.trim(),
+        controlNetNotes: session.styleControlNetNotes.trim(),
+        referenceImageUrl: session.styleReferenceImageUrl.trim(),
+        comfyUiApiUrl: session.comfyUiApiUrl,
+        hunyuanApiUrl: session.hunyuanApiUrl,
+        generateReferenceIfMissing: true,
+      },
+      deps.readJsonPayload,
+    )
+    if (!workspacePayload?.success) {
+      throw new Error(
+        workspacePayload?.message ??
+          `Could not package a style workspace for ${entry.nodeName}.`,
+      )
+    }
+
+    const resolvedWorkspaceReferenceImageUrl =
+      (entry.workspaceReferenceImageUrl ||
+        workspacePayload.referenceImageUrl ||
+        workspacePayload.generatedReferenceImageUrl ||
+        session.styleReferenceImageUrl.trim()) as string
+
+    const queuedJob = await deps.queueHunyuanJob({
+      apiUrl: session.hunyuanApiUrl,
+      comfyUiApiUrl: session.comfyUiApiUrl,
+      assetUrl: source.assetUrl,
+      sourceName: entry.sourceName,
+      mode: session.mode,
+      prompt,
+      referenceImageUrl: resolvedWorkspaceReferenceImageUrl,
+      workflowPath: session.workflowPath,
+    })
+
+    state.selectedHunyuanJobId = queuedJob.id
+    markStyleBatchEntry(
+      entry,
+      {
+        sourceAssetUrl: source.assetUrl,
+        workspaceReferenceImageUrl: resolvedWorkspaceReferenceImageUrl,
+        jobId: queuedJob.id,
+        status: 'queued',
+        error: undefined,
+      },
+      'Queued in ComfyUI + Hunyuan…',
+    )
+
+    return source.assetUrl
   }
 
   async function resumeStyleBatchSession(session: PersistedStyleBatchSession) {
@@ -988,20 +971,18 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
         }
 
         if (entry.status === 'applied') {
-          state.styleBatchNodeStatusById = {
-            ...state.styleBatchNodeStatusById,
-            [entry.nodeId]: `Finished. Scene now uses ${entry.outputAssetUrl ?? 'the generated asset'}.`,
-          }
+          setStyleBatchNodeStatus(
+            entry.nodeId,
+            `Finished. Scene now uses ${entry.outputAssetUrl ?? 'the generated asset'}.`,
+          )
           continue
         }
 
         if (entry.status === 'failed') {
-          state.styleBatchNodeStatusById = {
-            ...state.styleBatchNodeStatusById,
-            [entry.nodeId]:
-              entry.error ||
-              'This batch item failed earlier and was not resumed.',
-          }
+          setStyleBatchNodeStatus(
+            entry.nodeId,
+            entry.error || 'This batch item failed earlier and was not resumed.',
+          )
           continue
         }
 
@@ -1010,18 +991,11 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
           .find(candidate => candidate.id === entry.nodeId)
         if (!node || !canBakeSceneNode(node)) {
           const message = `Skipped ${entry.nodeName}; the node is missing or no longer geometry-backed.`
-          state.styleBatchNodeStatusById = {
-            ...state.styleBatchNodeStatusById,
-            [entry.nodeId]: message,
-          }
-          updatePersistedStyleBatchSession(current => ({
-            ...current,
-            entries: current.entries.map(candidate =>
-              candidate.nodeId === entry.nodeId
-                ? { ...candidate, status: 'failed', error: message }
-                : candidate,
-            ),
-          }))
+          markStyleBatchEntry(
+            entry,
+            { status: 'failed', error: message },
+            message,
+          )
           continue
         }
 
@@ -1029,89 +1003,12 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
         let sourceAssetUrl = entry.sourceAssetUrl ?? ''
 
         if (!entry.jobId && entry.status === 'pending') {
-          state.styleBatchStatus =
-            session.mode === 'texture'
-              ? `Baking style onto ${entry.nodeName}…`
-              : `Reimagining ${entry.nodeName}…`
-          state.styleBatchNodeStatusById = {
-            ...state.styleBatchNodeStatusById,
-            [entry.nodeId]: 'Preparing source asset…',
-          }
-
-          const source = await deps.ensureSceneNodeSourceAsset(node)
-          sourceAssetUrl = source.assetUrl
-
-          const workspaceResponse = await fetch(
-            `${EDITOR_API_BASE}/api/style/workspace`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                assetUrl: source.assetUrl,
-                sourceName: node.name,
-                styleProfileName: session.styleProfileName.trim(),
-                prompt,
-                negativePrompt: session.styleNegativePrompt.trim(),
-                loraNotes: session.styleLoraNotes.trim(),
-                controlNetNotes: session.styleControlNetNotes.trim(),
-                referenceImageUrl: session.styleReferenceImageUrl.trim(),
-                comfyUiApiUrl: session.comfyUiApiUrl,
-                hunyuanApiUrl: session.hunyuanApiUrl,
-                generateReferenceIfMissing: true,
-              }),
-            },
-          )
-          const workspacePayload = await deps.readJsonPayload(
-            workspaceResponse,
-            'Style workspace packaging',
-          )
-          if (!workspacePayload?.success) {
-            throw new Error(
-              workspacePayload?.message ??
-                `Could not package a style workspace for ${entry.nodeName}.`,
-            )
-          }
-
-          const resolvedWorkspaceReferenceImageUrl =
-            (entry.workspaceReferenceImageUrl ||
-              workspacePayload.referenceImageUrl ||
-              workspacePayload.generatedReferenceImageUrl ||
-              session.styleReferenceImageUrl.trim()) as string
-
-          const queuedJob = await deps.queueHunyuanJob({
-            apiUrl: session.hunyuanApiUrl,
-            comfyUiApiUrl: session.comfyUiApiUrl,
-            assetUrl: source.assetUrl,
-            sourceName: entry.sourceName,
-            mode: session.mode,
+          sourceAssetUrl = await queueStyleBatchEntryJob(
+            session,
+            entry,
+            node,
             prompt,
-            referenceImageUrl: resolvedWorkspaceReferenceImageUrl,
-            workflowPath: session.workflowPath,
-          })
-
-          state.selectedHunyuanJobId = queuedJob.id
-          updatePersistedStyleBatchSession(current => ({
-            ...current,
-            entries: current.entries.map(candidate =>
-              candidate.nodeId === entry.nodeId
-                ? {
-                    ...candidate,
-                    sourceAssetUrl: source.assetUrl,
-                    workspaceReferenceImageUrl:
-                      resolvedWorkspaceReferenceImageUrl,
-                    jobId: queuedJob.id,
-                    status: 'queued',
-                    error: undefined,
-                  }
-                : candidate,
-            ),
-          }))
-          state.styleBatchNodeStatusById = {
-            ...state.styleBatchNodeStatusById,
-            [entry.nodeId]: 'Queued in ComfyUI + Hunyuan…',
-          }
-          entry.jobId = queuedJob.id
-          entry.status = 'queued'
+          )
         }
 
         if (!entry.jobId) {
@@ -1120,115 +1017,44 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
 
         const payload = await deps.waitForQueuedHunyuanJob(entry.jobId, {
           onQueued: () => {
-            state.styleBatchNodeStatusById = {
-              ...state.styleBatchNodeStatusById,
-              [entry.nodeId]: 'Queued in ComfyUI + Hunyuan…',
-            }
-            updatePersistedStyleBatchSession(current => ({
-              ...current,
-              entries: current.entries.map(candidate =>
-                candidate.nodeId === entry.nodeId
-                  ? { ...candidate, status: 'queued' }
-                  : candidate,
-              ),
-            }))
+            markStyleBatchEntry(
+              entry,
+              { status: 'queued' },
+              'Queued in ComfyUI + Hunyuan…',
+            )
           },
           onRunning: () => {
-            state.styleBatchNodeStatusById = {
-              ...state.styleBatchNodeStatusById,
-              [entry.nodeId]: 'Generating with ComfyUI + Hunyuan…',
-            }
-            updatePersistedStyleBatchSession(current => ({
-              ...current,
-              entries: current.entries.map(candidate =>
-                candidate.nodeId === entry.nodeId
-                  ? { ...candidate, status: 'running' }
-                  : candidate,
-              ),
-            }))
+            markStyleBatchEntry(
+              entry,
+              { status: 'running' },
+              'Generating with ComfyUI + Hunyuan…',
+            )
           },
         })
 
-        updatePersistedStyleBatchSession(current => ({
-          ...current,
-          entries: current.entries.map(candidate =>
-            candidate.nodeId === entry.nodeId
-              ? {
-                  ...candidate,
-                  sourceAssetUrl: sourceAssetUrl || candidate.sourceAssetUrl,
-                  outputAssetUrl: payload.assetUrl,
-                  status: 'succeeded',
-                  error: undefined,
-                }
-              : candidate,
-          ),
-        }))
+        markStyleBatchEntry(entry, {
+          sourceAssetUrl: sourceAssetUrl || entry.sourceAssetUrl,
+          outputAssetUrl: payload.assetUrl,
+          status: 'succeeded',
+          error: undefined,
+        })
 
         await applyStyleBatchEntryResult(entry, payload.assetUrl)
 
-        updatePersistedStyleBatchSession(current => ({
-          ...current,
-          entries: current.entries.map(candidate =>
-            candidate.nodeId === entry.nodeId
-              ? {
-                  ...candidate,
-                  outputAssetUrl: payload.assetUrl,
-                  status: 'applied',
-                }
-              : candidate,
-          ),
-        }))
-
-        state.styleBatchNodeStatusById = {
-          ...state.styleBatchNodeStatusById,
-          [entry.nodeId]: `Finished. Scene now uses ${payload.assetUrl}.`,
-        }
+        markStyleBatchEntry(
+          entry,
+          {
+            outputAssetUrl: payload.assetUrl,
+            status: 'applied',
+          },
+          `Finished. Scene now uses ${payload.assetUrl}.`,
+        )
       }
 
-      await deps.saveSceneDocumentToDisk(deps.getActiveSceneLevelId())
-      const finalSession = state.styleBatchSession
-      const hasIncompleteEntries = !!finalSession?.entries.some(
-        (entry: PersistedStyleBatchEntry) => entry.status !== 'applied',
-      )
-      state.styleBatchStatus = hasIncompleteEntries
-        ? 'Scene batch stopped with incomplete items. Generated assets that finished were applied, and the remaining session was kept for inspection or recovery.'
-        : session.mode === 'texture'
-          ? `Texture style batch finished for ${session.entries.length} object${session.entries.length === 1 ? '' : 's'}. The scene file was saved to disk.`
-          : `Scene regeneration finished for ${session.entries.length} object${session.entries.length === 1 ? '' : 's'}. The scene file was saved to disk.`
-      state.saveMessage = state.styleBatchStatus
-      if (!hasIncompleteEntries) {
-        persistStyleBatchSession(null)
-      }
+      await completeStyleBatchSession(session)
     } catch (error) {
       console.error('Scene style batch failed:', error)
-      if (state.styleBatchStopIntent === 'pause') {
-        state.styleBatchStatus =
-          'Scene style batch paused. Resume the saved session when you are ready.'
-        state.styleBatchPendingResume = state.styleBatchSession
-        state.saveMessage = `${state.styleBatchStatus} Local scene state was checkpointed.`
-      } else if (state.styleBatchStopIntent === 'cancel') {
-        state.styleBatchStatus =
-          'Scene style batch cancelled. Auto-resume was discarded.'
-        state.saveMessage = `${state.styleBatchStatus} Local scene state was checkpointed.`
-      } else {
-        state.styleBatchStatus =
-          error instanceof Error
-            ? error.message
-            : 'Scene style batch failed. Check the editor API and local AI services.'
-        updatePersistedStyleBatchSession(current => ({
-          ...current,
-          entries: current.entries.map(candidate =>
-            candidate.jobId === state.hunyuanActiveJobId &&
-            (candidate.status === 'queued' || candidate.status === 'running')
-              ? {
-                  ...candidate,
-                  status: 'failed',
-                  error: state.styleBatchStatus,
-                }
-              : candidate,
-          ),
-        }))
-      }
+      handleStyleBatchSessionError(error)
     } finally {
       state.hunyuanActiveJobId = ''
       state.styleBatchBusy = false
@@ -1300,8 +1126,8 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
   return {
     buildNodeStylePrompt,
     getNodeTransformSnapshot,
+    inspectAssetBounds,
     getSceneNodeVisualBounds,
-    fitGeneratedAssetToSource,
     pauseActiveHunyuanJobs,
     cancelActiveHunyuanJobs,
     persistStyleBatchSession,

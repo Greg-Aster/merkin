@@ -109,15 +109,6 @@ function getPrimitiveFallbackMaterial(
   }
 }
 
-function isPersistentRuntimeAsset(node: EditorSceneNode) {
-  return (
-    node.id === 'yggdrasil-tree-merged' ||
-    node.id === 'yggdrasil-crown-ascent-merged' ||
-    node.generation?.family === 'yggdrasil-tree-merged' ||
-    node.generation?.family === 'yggdrasil-crown-ascent-merged'
-  )
-}
-
 $: materialOverrideStore.set(
   primitiveNode
     ? getPrimitiveFallbackMaterial(node)
@@ -130,7 +121,7 @@ $: materialOverrideStore.set(
 
 {#key renderKey}
   {#if assetNode}
-    <HeroProp url={assetNode.url} runtimeCulling={!isPersistentRuntimeAsset(node)} />
+    <HeroProp url={assetNode.url} runtimeCulling={false} />
   {:else if prefabNode}
     <RuntimePrefabNode prefab={prefabNode} />
   {:else if primitiveNode}

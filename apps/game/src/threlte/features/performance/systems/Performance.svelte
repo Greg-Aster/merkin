@@ -16,7 +16,11 @@ import {
   renderInfoStore,
   systemTimingsStore,
 } from '../stores/performanceStore'
-import { getGltfCacheStats } from '../../../utils/gltfAssetCache'
+import {
+  evictUnusedGltfCacheEntries,
+  getGltfCacheStats,
+} from '../../../utils/gltfAssetCache'
+import { runtimeDebugLog } from '../../../utils/runtimeLog'
 
 // Props — matching what Game.svelte passes
 export let enablePerformanceMonitoring = true
@@ -25,7 +29,6 @@ export let targetFPS = 0 // 0 = derive from detected device type automatically
 
 const dispatch = createEventDispatcher()
 const { renderer, scene } = useThrelte()
-const isDev = import.meta.env.DEV
 
 // --- FPS tracking ---
 let frameCount = 0
@@ -48,6 +51,7 @@ const UPGRADE_THRESHOLD = 12 // 12s consistently over target * 1.15 → step up
 let degradeCount = 0
 let upgradeCount = 0
 let longTaskObserver: PerformanceObserver | null = null
+let lastGltfCacheEvictionTime = 0
 
 function collectSceneStats() {
   const materialSet = new Set<unknown>()
@@ -126,9 +130,7 @@ function stepQualityDown() {
   const idx = TIER_ORDER.indexOf(current)
   if (idx <= 0) return
   const next = TIER_ORDER[idx - 1]
-  if (isDev) {
-    console.log(`🔽 Performance: stepping quality down ${current} → ${next}`)
-  }
+  runtimeDebugLog(`🔽 Performance: stepping quality down ${current} → ${next}`)
   optimizationManager.setOptimizationLevel(next)
   dispatch('qualityChanged', { from: current, to: next, reason: 'fps_low' })
   degradeCount = 0
@@ -140,9 +142,7 @@ function stepQualityUp() {
   const idx = TIER_ORDER.indexOf(current)
   if (idx >= TIER_ORDER.length - 1) return
   const next = TIER_ORDER[idx + 1]
-  if (isDev) {
-    console.log(`🔼 Performance: stepping quality up ${current} → ${next}`)
-  }
+  runtimeDebugLog(`🔼 Performance: stepping quality up ${current} → ${next}`)
   optimizationManager.setOptimizationLevel(next)
   dispatch('qualityChanged', { from: current, to: next, reason: 'fps_good' })
   degradeCount = 0
@@ -208,6 +208,14 @@ useTask(() => {
   // Sample once per second
   if (deltaTime < 1000) return
 
+  if (currentTime - lastGltfCacheEvictionTime >= 5000) {
+    lastGltfCacheEvictionTime = currentTime
+    evictUnusedGltfCacheEntries({
+      maxUnreferencedEntries: 4,
+      maxUnusedAgeMs: 8000,
+    })
+  }
+
   const currentFps = Math.round((frameCount * 1000) / deltaTime)
   const currentFrameTime = deltaTime / frameCount
 
@@ -252,11 +260,9 @@ useTask(() => {
       degradeCount = 0
       upgradeCount = 0
       fpsSamples.length = 0
-      if (isDev) {
-        console.log(
-          '⏱️ Performance: startup grace period over, adaptive quality enabled',
-        )
-      }
+      runtimeDebugLog(
+        '⏱️ Performance: startup grace period over, adaptive quality enabled',
+      )
     }
   }
 

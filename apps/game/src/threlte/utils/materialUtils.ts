@@ -10,6 +10,7 @@
 
 import * as THREE from 'three'
 import type { SceneMaterialData } from '../engine/sceneDocumentTypes'
+import { runtimeDebugLog } from './runtimeLog'
 
 type MaterialSet = THREE.Material | THREE.Material[]
 
@@ -294,7 +295,7 @@ export function fixVegetationMaterial(
  */
 export function debugMaterial(material: THREE.Material, name?: string): void {
   const mat = material as any
-  console.log(`🔍 Material Debug ${name ? `(${name})` : ''}:`, {
+  runtimeDebugLog(`🔍 Material Debug ${name ? `(${name})` : ''}:`, {
     transparent: mat.transparent,
     opacity: mat.opacity,
     alphaTest: mat.alphaTest,

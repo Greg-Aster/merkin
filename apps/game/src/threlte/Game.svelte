@@ -4,7 +4,6 @@ import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 
 import GameCanvasStage from './GameCanvasStage.svelte'
 import ThrelteMobileControls from './features/player/ThrelteMobileControls.svelte'
-import RuntimeDiagnosticsPanel from './ui/RuntimeDiagnosticsPanel.svelte'
 
 import {
   conversationActions,
@@ -45,16 +44,14 @@ import {
   resetRuntimeDiagnostics,
   setRuntimeDiagnostic,
 } from './stores/runtimeDiagnosticsStore'
+import { runtimeDebugLog } from './utils/runtimeLog'
 // Import UI state store
 import { isSettingsMenuOpen } from './stores/uiStore'
 
 const dispatch = createEventDispatcher()
-const isDev = import.meta.env.DEV
 
 function debugLog(...args: any[]) {
-  if (isDev) {
-    console.log(...args)
-  }
+  runtimeDebugLog(...args)
 }
 
 // Props
@@ -96,6 +93,7 @@ let roomJoinError = ''
 let currentLevelComponent: any = null
 let settingsPanelComponent: any = null
 let conversationDialogComponent: any = null
+let runtimeDiagnosticsPanelComponent: any = null
 let chatBoxComponentClass: any = null
 let audioSystemComponent: any = null
 let multiplayerManagerComponent: any = null
@@ -266,11 +264,11 @@ $: setRuntimeDiagnostic('editor', {
 })
 
 // Reactive level and star tracking - debug logs removed for performance
-$: if (isDev && currentLevel) {
+$: if (currentLevel) {
   debugLog('🎮 Current level:', currentLevel)
 }
 
-$: if (isDev && selectedStar) {
+$: if (selectedStar) {
   debugLog('⭐ Star selected:', selectedStar.title)
 }
 
@@ -342,6 +340,10 @@ $: if (currentLevel) {
 
 $: if ($isSettingsMenuOpen && !settingsPanelComponent) {
   void ensureSettingsPanelComponent()
+}
+
+$: if (showDebugPanel && !runtimeDiagnosticsPanelComponent) {
+  void ensureRuntimeDiagnosticsPanelComponent()
 }
 
 $: if (
@@ -448,6 +450,19 @@ async function ensureConversationDialogComponent() {
     )
   } catch (error) {
     console.warn('Failed to load conversation dialog:', error)
+  }
+}
+
+async function ensureRuntimeDiagnosticsPanelComponent() {
+  if (runtimeDiagnosticsPanelComponent) return
+  try {
+    const module = await import('./ui/RuntimeDiagnosticsPanel.svelte')
+    runtimeDiagnosticsPanelComponent = getModuleDefault(
+      module,
+      'runtime diagnostics panel',
+    )
+  } catch (error) {
+    console.warn('Failed to load runtime diagnostics panel:', error)
   }
 }
 
@@ -951,7 +966,7 @@ onMount(async () => {
   await initializeThrelte()
 
   // Make gameActions globally available for debugging
-  if (isDev) {
+  if (import.meta.env.DEV) {
     window.gameActions = gameActions
     debugLog('🔧 gameActions available globally for debugging')
   }
@@ -1072,9 +1087,14 @@ onDestroy(() => {
         <p>Game State: {isInitialized ? 'Ready' : 'Initializing'}</p>
         <p>Current Level: {currentLevel}</p>
         <p>Mobile: {isMobile ? 'Yes' : 'No'}</p>
-        <div class="mt-3">
-          <RuntimeDiagnosticsPanel compact={true} />
-        </div>
+        {#if runtimeDiagnosticsPanelComponent}
+          <div class="mt-3">
+            <svelte:component
+              this={runtimeDiagnosticsPanelComponent}
+              compact={true}
+            />
+          </div>
+        {/if}
       </div>
     {/if}
       

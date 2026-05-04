@@ -1,4 +1,5 @@
 import type { EditorSceneDocument, EditorSceneNode } from './editorTypes'
+import { collectDescendantIds } from './editorHierarchyUtils'
 
 export interface EditorNodeTransformPatch {
   position?: EditorSceneNode['position']
@@ -37,24 +38,6 @@ export type EditorNodeCommand =
 export interface ApplyEditorNodeCommandsResult {
   scene: EditorSceneDocument
   changed: boolean
-}
-
-function collectDescendantIds(nodes: EditorSceneNode[], nodeId: string) {
-  const descendants = new Set<string>()
-  const stack = [nodeId]
-
-  while (stack.length > 0) {
-    const current = stack.pop()!
-    for (const node of nodes) {
-      if (node.parentId !== current) continue
-      if (!descendants.has(node.id)) {
-        descendants.add(node.id)
-        stack.push(node.id)
-      }
-    }
-  }
-
-  return descendants
 }
 
 function cloneNode(node: EditorSceneNode) {

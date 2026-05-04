@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content'
+import ReaderPage from '../../components/reader/ReaderPage.astro'
+import {
+  firstContactManualRouteParam,
+  sortFirstContactManualEntries,
+} from '../../utils/reader'
+
+export async function getStaticPaths() {
+  const readerEntries = await getCollection('reader')
+  const entries = sortFirstContactManualEntries(readerEntries)
+
+  return entries.map(entry => ({
+    params: { slug: firstContactManualRouteParam(entry) },
+    props: {
+      entry,
+      entries,
+    },
+  }))
+}
+
+const { entry, entries } = Astro.props
+---
+
+<ReaderPage entry={entry} entries={entries} />

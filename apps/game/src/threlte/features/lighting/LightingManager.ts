@@ -13,8 +13,7 @@ import {
   Vector3,
 } from 'three'
 import { MessageType, type SystemRegistry } from '../../core/LevelSystem'
-
-const isDev = import.meta.env.DEV
+import { runtimeDebugLog } from '../../utils/runtimeLog'
 
 export interface LightingData {
   ambient: {
@@ -93,7 +92,7 @@ export class LightingManager {
     // Initialize point light pool for performance
     this.initializePointLightPool()
 
-    if (isDev) console.log('💡 LightingManager: Initialized with scene')
+    runtimeDebugLog('💡 LightingManager: Initialized with scene')
   }
 
   private createPooledPointLight(): PointLight {
@@ -112,10 +111,9 @@ export class LightingManager {
     }
 
     this.ensurePointLightPoolSize(poolSize)
-    if (isDev)
-      console.log(
-        `💡 LightingManager: Created point light pool with ${poolSize} lights`,
-      )
+    runtimeDebugLog(
+      `💡 LightingManager: Created point light pool with ${poolSize} lights`,
+    )
   }
 
   ensurePointLightPoolSize(poolSize: number): void {
@@ -462,6 +460,6 @@ export class LightingManager {
     this.spotLights.forEach(light => this.scene.remove(light))
     this.spotLights = []
 
-    if (isDev) console.log('💡 LightingManager: Disposed all lights')
+    runtimeDebugLog('💡 LightingManager: Disposed all lights')
   }
 }

@@ -1,0 +1,69 @@
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+import { readDeployedSceneLevels } from './levelRegistry.mjs'
+
+export function auditRuntimeScenes({
+  appRoot,
+  runtimeSceneDir,
+  isFiniteVec3,
+  readJsonFile,
+}) {
+  const failures = []
+  const reports = readDeployedSceneLevels({ appRoot }).map(level => {
+    const file = `${level.id}.runtime-scene.json`
+    const fullPath = join(runtimeSceneDir, file)
+    const report = {
+      file,
+      levelId: level.id,
+      exists: existsSync(fullPath),
+      actorCount: 0,
+      requiredRenderActorCount: 0,
+      requiredAssetCount: 0,
+      runtimeAssetCount: 0,
+      buildErrors: 0,
+    }
+
+    if (!report.exists) {
+      failures.push(`${file}: missing cooked runtime scene manifest`)
+      return report
+    }
+
+    const manifest = readJsonFile(fullPath)
+    const levelDefinition = manifest.levelDefinition
+    const buildReport = manifest.buildReport
+
+    if (manifest.schemaVersion !== 1) {
+      failures.push(`${file}: unsupported runtime scene schemaVersion`)
+    }
+    if (manifest.levelId !== level.id) {
+      failures.push(`${file}: levelId mismatch ${manifest.levelId}`)
+    }
+    if (!levelDefinition || levelDefinition.id !== level.id) {
+      failures.push(`${file}: levelDefinition id mismatch`)
+    }
+    if (!isFiniteVec3(levelDefinition?.spawn?.player)) {
+      failures.push(`${file}: levelDefinition spawn.player must be a finite Vec3`)
+    }
+    if (!Array.isArray(levelDefinition?.actors)) {
+      failures.push(`${file}: levelDefinition actors must be an array`)
+    }
+    if (!buildReport || buildReport.levelId !== level.id) {
+      failures.push(`${file}: buildReport levelId mismatch`)
+    }
+
+    report.actorCount = levelDefinition?.actors?.length ?? 0
+    report.requiredRenderActorCount =
+      buildReport?.requiredRenderActorIds?.length ?? 0
+    report.requiredAssetCount = buildReport?.requiredAssetUrls?.length ?? 0
+    report.runtimeAssetCount = buildReport?.runtimeAssetUrls?.length ?? 0
+    report.buildErrors = buildReport?.errors?.length ?? 0
+
+    if (report.buildErrors > 0) {
+      failures.push(`${file}: cooked runtime scene has build errors`)
+    }
+
+    return report
+  })
+
+  return { failures, reports }
+}

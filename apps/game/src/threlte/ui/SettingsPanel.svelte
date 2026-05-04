@@ -168,15 +168,6 @@ async function ensureMultiplayerControls() {
           </div>
         </section>
 
-		<section class="settings-section">
-		  <h3>Rendering</h3>
-		  <div class="section-content">
-			<div class="status-block">
-			  <div class="status-title">Native Materials Only</div>
-			  <div class="status-copy">Stylized toon, outline, and palette override passes are disabled while the renderer is being upgraded toward a cleaner high-end baseline.</div>
-			</div>
-		  </div>
-		</section>
       </div>
     </div>
   </div>

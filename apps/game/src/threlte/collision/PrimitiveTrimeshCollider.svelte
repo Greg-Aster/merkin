@@ -1,7 +1,7 @@
 <script lang="ts">
 import { Collider } from '@threlte/rapier'
-import type { PrimitiveGeometryKind } from '../engine'
-import { createPrimitiveTrimeshArgs } from './primitiveGeometry'
+import { createPrimitiveTrimeshArgs } from '../engine/primitiveGeometry'
+import type { PrimitiveGeometryKind } from '../engine/types'
 
 export let geometry: PrimitiveGeometryKind = 'box'
 export let args: number[] = [1, 1, 1]

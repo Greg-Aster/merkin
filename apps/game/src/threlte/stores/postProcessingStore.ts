@@ -4,6 +4,7 @@
  */
 
 import { type Writable, derived, writable } from 'svelte/store'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 
 // Quality level definitions (matches existing optimization system)
 export type QualityLevel = 'ultra_low' | 'low' | 'medium' | 'high' | 'ultra'
@@ -192,8 +193,6 @@ export function adjustQualityForPerformance(
   avgFPS: number,
   targetFPS: number = 60,
 ) {
-  const isDev = import.meta.env.DEV
-
   if (avgFPS < targetFPS * 0.7) {
     // Performance is poor, reduce quality
     postProcessingStore.update(config => {
@@ -209,11 +208,9 @@ export function adjustQualityForPerformance(
         ['ultra_low', 'low', 'medium', 'high', 'ultra'] as QualityLevel[]
       )[newIndex]
 
-      if (isDev) {
-        console.log(
-          `🔽 Reducing post-processing quality: ${config.qualityLevel} → ${newLevel}`,
-        )
-      }
+      runtimeDebugLog(
+        `🔽 Reducing post-processing quality: ${config.qualityLevel} → ${newLevel}`,
+      )
       return {
         ...config,
         qualityLevel: newLevel,
@@ -235,11 +232,9 @@ export function adjustQualityForPerformance(
       )[newIndex]
 
       if (newLevel !== config.qualityLevel) {
-        if (isDev) {
-          console.log(
-            `🔼 Increasing post-processing quality: ${config.qualityLevel} → ${newLevel}`,
-          )
-        }
+        runtimeDebugLog(
+          `🔼 Increasing post-processing quality: ${config.qualityLevel} → ${newLevel}`,
+        )
         return {
           ...config,
           qualityLevel: newLevel,

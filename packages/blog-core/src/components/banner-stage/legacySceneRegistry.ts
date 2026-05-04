@@ -6,6 +6,7 @@ export type LegacyBannerSceneId =
   | 'assistant'
   | 'cookbook'
   | 'archive'
+  | 'reader'
   | 'none'
 
 export interface LegacyBannerSceneDefinition {
@@ -22,6 +23,7 @@ const LEGACY_BANNER_SCENES: LegacyBannerSceneDefinition[] = [
   { id: 'assistant', title: 'Assistant Banner', transition: 'cut' },
   { id: 'cookbook', title: 'Cookbook Banner', transition: 'cut' },
   { id: 'archive', title: 'Archive Banner', transition: 'cut' },
+  { id: 'reader', title: 'Reader Banner', transition: 'cut' },
   { id: 'none', title: 'No Banner', transition: 'cut' },
 ]
 

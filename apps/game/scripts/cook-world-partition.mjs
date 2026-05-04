@@ -24,6 +24,20 @@ function getArg(name, fallback = '') {
   )
 }
 
+function hasFlag(name) {
+  return process.argv.includes(`--${name}`)
+}
+
+function parsePositiveNumber(value, fallback) {
+  const number = Number(value)
+  return Number.isFinite(number) && number > 0 ? number : fallback
+}
+
+function parseNonNegativeInteger(value, fallback) {
+  const number = Number.parseInt(value, 10)
+  return Number.isFinite(number) && number >= 0 ? number : fallback
+}
+
 function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8').replace(/^\uFEFF/, ''))
 }
@@ -47,25 +61,41 @@ function resolveLevel(requestedLevel) {
   )
 }
 
+function formatSceneLevelList() {
+  return readSceneLevels({ appRoot })
+    .map(level => {
+      const sceneId = level.source?.sceneId ?? level.id
+      return sceneId === level.id ? level.id : `${level.id} (${sceneId})`
+    })
+    .join(', ')
+}
+
 function getScenePath(level) {
   const sceneId = level.source?.sceneId ?? level.id
   return join(sceneRoot, `${sceneId}.scene.json`)
 }
 
 function isCriticalNode(node) {
+  const collisionIntent =
+    node.collision?.enabled === false ? 'none' : node.collision?.intent
   const collisionIsRuntimeCritical =
-    Boolean(node.collision) &&
-    node.collision.enabled !== false &&
-    node.collision.intent !== 'none'
+    collisionIntent === 'walkable' || collisionIntent === 'trigger'
+  const gameplayType = node.gameplay?.type
+  const gameplayIsRuntimeCritical =
+    Boolean(gameplayType) && !['firefly', 'note'].includes(gameplayType)
 
   return (
     collisionIsRuntimeCritical ||
-    Boolean(node.gameplay) ||
+    gameplayIsRuntimeCritical ||
     Boolean(node.light) ||
     Boolean(node.audioRegion) ||
     node.kind === 'playerSpawn' ||
     node.renderPolicy?.cullingPolicy === 'never'
   )
+}
+
+function isStreamableRenderNode(node) {
+  return ['asset', 'primitive', 'prefab'].includes(node.kind)
 }
 
 function getNodeMap(nodes) {
@@ -130,6 +160,10 @@ function estimateNodeTriangles(node) {
   return 80
 }
 
+function getScenePartitionSettings(scene) {
+  return scene.settings?.level?.worldPartition ?? {}
+}
+
 function cookPartition(scene, { cellSize, activeRadius }) {
   const nodes = scene.nodes ?? []
   const nodeMap = getNodeMap(nodes)
@@ -141,9 +175,8 @@ function cookPartition(scene, { cellSize, activeRadius }) {
   for (const node of nodes) {
     const subtree = getSubtree(node, childrenByParent)
     const streamable =
-      subtree.some(candidate =>
-        ['asset', 'primitive', 'prefab'].includes(candidate.kind),
-      ) && subtree.every(node => !isCriticalNode(node))
+      subtree.some(candidate => isStreamableRenderNode(candidate)) &&
+      subtree.every(node => !isCriticalNode(node))
 
     if (streamable) streamableCandidates.push({ node, subtree })
   }
@@ -159,9 +192,13 @@ function cookPartition(scene, { cellSize, activeRadius }) {
     }
     return true
   })
-  const streamableActorIds = selectedStreamables.map(
-    candidate => candidate.node.id,
-  )
+  const streamableActorIds = [
+    ...new Set(
+      selectedStreamables.flatMap(candidate =>
+        candidate.subtree.map(node => node.id),
+      ),
+    ),
+  ]
   const streamableActorIdSet = new Set(streamableActorIds)
   const residentActorIds = nodes
     .map(node => node.id)
@@ -169,6 +206,7 @@ function cookPartition(scene, { cellSize, activeRadius }) {
 
   for (const { node, subtree } of selectedStreamables) {
     const position = getWorldPosition(node, nodeMap, positionCache)
+    const actorIds = subtree.map(node => node.id)
     const key = getCellKey(position, cellSize)
     const cell = cells.get(key) ?? {
       key,
@@ -178,8 +216,8 @@ function cookPartition(scene, { cellSize, activeRadius }) {
       actorCount: 0,
       estimatedTriangles: 0,
     }
-    cell.actorIds.push(node.id)
-    cell.actorCount += 1
+    cell.actorIds.push(...actorIds)
+    cell.actorCount += actorIds.length
     cell.estimatedTriangles += subtree.reduce(
       (sum, node) => sum + estimateNodeTriangles(node),
       0,
@@ -213,15 +251,13 @@ function cookPartition(scene, { cellSize, activeRadius }) {
 }
 
 const requestedLevel = getArg('level') || process.argv[2]
-const cellSize = Math.max(20, Number(getArg('cell-size', '120')) || 120)
-const activeRadius = Math.max(
-  0,
-  Number.parseInt(getArg('active-radius', '1'), 10),
-)
+const cellSizeArg = getArg('cell-size')
+const activeRadiusArg = getArg('active-radius')
+const dryRun = hasFlag('dry-run')
 const level = resolveLevel(requestedLevel)
 
 if (!requestedLevel || !level) {
-  throw new Error('Expected --level=<scene-level-id>')
+  throw new Error(`Expected --level to be one of: ${formatSceneLevelList()}`)
 }
 
 const scenePath = getScenePath(level)
@@ -230,14 +266,26 @@ if (!existsSync(scenePath)) {
 }
 
 const scene = readJson(scenePath)
+const scenePartitionSettings = getScenePartitionSettings(scene)
+const cellSize = Math.max(
+  20,
+  parsePositiveNumber(cellSizeArg, scenePartitionSettings.cellSize ?? 120),
+)
+const activeRadius = parseNonNegativeInteger(
+  activeRadiusArg,
+  scenePartitionSettings.activeRadius ?? 1,
+)
 const partition = cookPartition(scene, { cellSize, activeRadius })
 const outputUrl = `/runtime-world-partitions/${level.id}.partition.json`
 const outputPath = join(publicRoot, outputUrl.replace(/^\//, ''))
-writeJson(outputPath, partition)
+if (!dryRun) {
+  writeJson(outputPath, partition)
+}
 
 console.log(
   JSON.stringify({
     success: true,
+    dryRun,
     levelId: level.id,
     partitionUrl: outputUrl,
     cellSize,

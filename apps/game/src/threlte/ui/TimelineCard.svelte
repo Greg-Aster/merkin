@@ -1,38 +1,4 @@
-<!--
-  TimelineCard.svelte - Restored legacy game-local card interaction path.
--->
-
 <style>
-  .timeline-card {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    color: rgba(0, 0, 0, 0.9);
-  }
-
-  :global(.timeline-card .text-75) {
-    color: rgba(0, 0, 0, 0.75);
-  }
-
-  :global(.timeline-card .text-50) {
-    color: rgba(0, 0, 0, 0.5);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .timeline-card {
-      background: rgba(0, 0, 0, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    :global(.timeline-card .text-75) {
-      color: rgba(255, 255, 255, 0.75);
-    }
-
-    :global(.timeline-card .text-50) {
-      color: rgba(255, 255, 255, 0.5);
-    }
-  }
-
   .timeline-card {
     background: rgba(0, 0, 0, 0.9) !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
@@ -164,14 +130,32 @@
 
 <script lang="ts">
 import { createEventDispatcher } from 'svelte'
-export let event: any
+
+type TimelineCardEvent = {
+  description?: string
+  isLevel?: boolean
+  levelId?: string
+  screenPosition?: {
+    x: number
+    y: number
+  }
+  slug?: string
+  title?: string
+  uniqueId?: string
+}
+
+export let event: TimelineCardEvent | null = null
 export let isSelected = false
 export let compact = false
 export let position: 'top' | 'bottom' | 'left' | 'right' = 'bottom'
 export let isMobile = false
 export let isVisible = true
 
-const dispatch = createEventDispatcher()
+const dispatch = createEventDispatcher<{
+  levelTransition: {
+    levelType?: string
+  }
+}>()
 
 const BLOG_ORIGIN =
   typeof window !== 'undefined' &&
@@ -184,12 +168,12 @@ function getCanonicalPostUrl(slug: string): string {
   return `${BLOG_ORIGIN}/posts/${slug}/#post-container`
 }
 
-const cardId = `timeline-card-${event?.slug || event?.uniqueId || 'unknown'}-${Math.random().toString(36).substring(2, 9)}`
+$: cardId = `timeline-card-${event?.slug || event?.uniqueId || 'unknown'}`
 
 let cardElement: HTMLElement
 
 function getPositioningStyles() {
-  if (event?.screenPosition && !isMobile) {
+  if (typeof window !== 'undefined' && event?.screenPosition && !isMobile) {
     const x = Math.max(
       10,
       Math.min(window.innerWidth - 220, event.screenPosition.x + 20),
@@ -225,7 +209,7 @@ $: if (cardElement && isVisible) {
   triggerAnimation()
 }
 
-function handleViewEvent(clickEvent: Event) {
+function handleViewEvent(clickEvent: MouseEvent) {
   clickEvent.stopPropagation()
   clickEvent.preventDefault()
   dispatch('levelTransition', { levelType: event?.levelId })

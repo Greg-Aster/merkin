@@ -2,6 +2,7 @@
 // Underwater effect state management following MEGAMEAL architecture
 
 import { derived, writable } from 'svelte/store'
+import { runtimeDebugLog } from '../../../utils/runtimeLog'
 
 // Types
 export interface UnderwaterState {
@@ -72,7 +73,7 @@ export const underwaterFogDensity = derived(
 // Action creators following MEGAMEAL store pattern
 export const underwaterActions = {
   enterWater: (depth: number = 1) => {
-    console.log('🌊 Player entered water at depth:', depth)
+    runtimeDebugLog('🌊 Player entered water at depth:', depth)
     underwaterStateStore.update(state => ({
       ...state,
       isUnderwater: true,
@@ -85,7 +86,7 @@ export const underwaterActions = {
   },
 
   exitWater: () => {
-    console.log('🏖️ Player exited water')
+    runtimeDebugLog('🏖️ Player exited water')
     underwaterStateStore.update(state => ({
       ...state,
       isUnderwater: false,

@@ -1,10 +1,10 @@
 <script lang="ts">
 import { afterUpdate } from 'svelte'
 import { setInputFocus } from '../../../stores/uiStore'
-import { playerNameStore } from '../index'
 import { sendChatMessage } from '../services/MultiplayerService'
 import { chatStore } from '../stores/chatStore'
 import { multiplayerStore } from '../stores/multiplayerStore'
+import { playerNameStore } from '../stores/playerNameStore'
 
 // State to control if the chat window is open or closed
 let isExpanded = true

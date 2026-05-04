@@ -33,8 +33,7 @@ function isImageUrl(value: string) {
   return imagePattern.test(value.split('?')[0] || '')
 }
 
-$: resolvedImageUrl =
-  imageUrl || (!assetUrl && isImageUrl(imageUrl) ? imageUrl : '')
+$: resolvedImageUrl = imageUrl || (isImageUrl(assetUrl) ? assetUrl : '')
 $: resolvedMeshUrl = isMeshUrl(assetUrl) ? assetUrl : ''
 $: previewMode = resolvedMeshUrl ? 'mesh' : resolvedImageUrl ? 'image' : 'empty'
 
@@ -49,7 +48,11 @@ function stopPreviewLoop() {
   }
 }
 
-function destroyRenderer() {
+function destroyRenderer(invalidateLoad = true) {
+  if (invalidateLoad) {
+    loadToken += 1
+  }
+
   stopPreviewLoop()
   resizeObserver?.disconnect()
   resizeObserver = null
@@ -103,7 +106,7 @@ async function loadMeshPreview() {
 
   const currentToken = ++loadToken
   status = 'Loading mesh preview…'
-  destroyRenderer()
+  destroyRenderer(false)
 
   const parent = canvas.parentElement
   const width = Math.max(220, parent?.clientWidth ?? 320)
@@ -160,7 +163,10 @@ async function loadMeshPreview() {
 
   try {
     const object = await cloneCachedGltfScene(resolvedMeshUrl)
-    if (currentToken !== loadToken || !scene) return
+    if (currentToken !== loadToken || !scene) {
+      disposePreviewObject(object)
+      return
+    }
 
     previewObject = object
     scene.add(previewObject)

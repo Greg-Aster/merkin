@@ -1,5 +1,6 @@
 <script lang="ts">
 import EditorWorkflowPanel from './EditorWorkflowPanel.svelte'
+import type { HunyuanJobStatus } from './editorHunyuanJobPolling'
 import type { EditorSceneNode } from './editorStore'
 
 type WorkflowBrowserItem = {
@@ -25,7 +26,7 @@ export let workflowCanGenerateSelection = false
 export let workflowCanRetextureSelection = false
 export let canApplyGeneratedAssetToSelection = false
 export let hunyuanLastOutputUrl = ''
-export let selectedHunyuanJob: any = null
+export let selectedHunyuanJob: HunyuanJobStatus | null = null
 export let canShowAll = false
 
 export let onResetWorkflowPath: () => void = () => {}

@@ -3,7 +3,7 @@
  * Clean, focused implementation for device-aware performance optimization
  */
 
-const isDev = import.meta.env.DEV
+import { runtimeDebugLog } from '../../utils/runtimeLog'
 
 export enum OptimizationLevel {
   ULTRA_LOW = 'ultra_low',
@@ -24,11 +24,6 @@ export interface DeviceCapabilities {
   hardwareConcurrency: number
   maxTextureSize: number
   deviceType: 'phone' | 'tablet' | 'desktop' | 'unknown'
-}
-
-export interface ComponentOptimizationConfig {
-  componentId: string
-  optimizationSettings: Record<OptimizationLevel, any>
 }
 
 export interface QualitySettings {
@@ -52,9 +47,6 @@ export interface QualitySettings {
   // Performance limits
   maxFireflyLights: number
   maxVegetationInstances: number
-
-  // Component-specific overrides (components register their own settings)
-  componentOverrides: Map<string, any>
 }
 
 export class OptimizationManager {
@@ -63,9 +55,6 @@ export class OptimizationManager {
   private deviceCapabilities: DeviceCapabilities | null = null
   private currentOptimizationLevel: OptimizationLevel = OptimizationLevel.MEDIUM
   private currentQualitySettings: QualitySettings
-
-  // Component registration system
-  private componentConfigs: Map<string, ComponentOptimizationConfig> = new Map()
 
   // Base quality profiles - minimal settings only
   private readonly baseQualityProfiles: Record<
@@ -86,7 +75,6 @@ export class OptimizationManager {
       enableVegetation: false,
       maxFireflyLights: 5,
       maxVegetationInstances: 0,
-      componentOverrides: new Map(),
     },
     [OptimizationLevel.LOW]: {
       canvasScale: 0.65,
@@ -102,7 +90,6 @@ export class OptimizationManager {
       enableVegetation: true,
       maxFireflyLights: 6,
       maxVegetationInstances: 2,
-      componentOverrides: new Map(),
     },
     [OptimizationLevel.MEDIUM]: {
       canvasScale: 0.85,
@@ -118,7 +105,6 @@ export class OptimizationManager {
       enableVegetation: true,
       maxFireflyLights: 12,
       maxVegetationInstances: 5,
-      componentOverrides: new Map(),
     },
     [OptimizationLevel.HIGH]: {
       canvasScale: 1.0,
@@ -134,7 +120,6 @@ export class OptimizationManager {
       enableVegetation: true,
       maxFireflyLights: 24,
       maxVegetationInstances: 10,
-      componentOverrides: new Map(),
     },
     [OptimizationLevel.ULTRA]: {
       canvasScale: 1.0,
@@ -150,7 +135,6 @@ export class OptimizationManager {
       enableVegetation: true,
       maxFireflyLights: 40,
       maxVegetationInstances: 18,
-      componentOverrides: new Map(),
     },
   }
 
@@ -160,12 +144,10 @@ export class OptimizationManager {
     )
     this.detectDeviceCapabilities()
     this.autoSetOptimizationLevel()
-    if (isDev) {
-      console.log(
-        'OptimizationManager initialized with level:',
-        this.currentOptimizationLevel,
-      )
-    }
+    runtimeDebugLog(
+      'OptimizationManager initialized with level:',
+      this.currentOptimizationLevel,
+    )
   }
 
   public static getInstance(): OptimizationManager {
@@ -290,15 +272,13 @@ export class OptimizationManager {
       deviceType,
     }
 
-    if (isDev) {
-      console.log('Device detection:', {
-        deviceType,
-        estimatedGPUTier,
-        hardwareConcurrency,
-        maxTextureSize,
-        totalPixels: screenWidth * screenHeight * pixelRatio,
-      })
-    }
+    runtimeDebugLog('Device detection:', {
+      deviceType,
+      estimatedGPUTier,
+      hardwareConcurrency,
+      maxTextureSize,
+      totalPixels: screenWidth * screenHeight * pixelRatio,
+    })
   }
 
   private estimateDeviceYear(userAgent: string): number {
@@ -375,11 +355,9 @@ export class OptimizationManager {
     this.currentOptimizationLevel = level
     this.currentQualitySettings = this.buildQualitySettings(level)
 
-    if (isDev) {
-      console.log(`Optimization level set to: ${level}`, {
-        qualitySettings: this.currentQualitySettings,
-      })
-    }
+    runtimeDebugLog(`Optimization level set to: ${level}`, {
+      qualitySettings: this.currentQualitySettings,
+    })
 
     // Dispatch event for other systems to react
     if (typeof window !== 'undefined' && window.dispatchEvent) {
@@ -407,53 +385,9 @@ export class OptimizationManager {
     return this.deviceCapabilities
   }
 
-  /**
-   * Register component-specific optimization settings
-   */
-  public registerComponent(
-    componentId: string,
-    config: ComponentOptimizationConfig,
-  ): void {
-    this.componentConfigs.set(componentId, config)
-    console.log(
-      `⚙️ Registered optimization config for component: ${componentId}`,
-    )
-
-    // Rebuild current quality settings to include the new component
-    this.currentQualitySettings = this.buildQualitySettings(
-      this.currentOptimizationLevel,
-    )
-  }
-
-  /**
-   * Get component-specific settings for the current optimization level
-   */
-  public getComponentSettings(componentId: string): any {
-    const config = this.componentConfigs.get(componentId)
-    if (!config) return {}
-
-    return config.optimizationSettings[this.currentOptimizationLevel] || {}
-  }
-
-  /**
-   * Build quality settings by combining base settings with component overrides
-   */
   private buildQualitySettings(level: OptimizationLevel): QualitySettings {
     const baseSettings = this.baseQualityProfiles[level]
-    const componentOverrides = new Map<string, any>()
-
-    // Collect all component settings for this level
-    for (const [componentId, config] of this.componentConfigs) {
-      const componentSettings = config.optimizationSettings[level]
-      if (componentSettings) {
-        componentOverrides.set(componentId, componentSettings)
-      }
-    }
-
-    return {
-      ...baseSettings,
-      componentOverrides,
-    } as QualitySettings
+    return { ...baseSettings } as QualitySettings
   }
 }
 

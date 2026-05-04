@@ -1,0 +1,37 @@
+---
+import { firstContactManualRedirects } from '../../../utils/reader'
+
+export function getStaticPaths() {
+  const firstContactSlugs = Object.keys(firstContactManualRedirects()).map(slug =>
+    slug.replace(/^timelines\//, ''),
+  )
+  return [
+    ...firstContactSlugs,
+    'perfect-mary-recipe',
+    'zelephant-truffle-roast',
+    'meat-cake',
+  ].map(slug => ({
+    params: { slug },
+  }))
+}
+
+const timelineRedirects: Record<string, string> = {
+  ...Object.fromEntries(
+    Object.entries(firstContactManualRedirects()).map(([slug, href]) => [
+      slug.replace(/^timelines\//, ''),
+      href,
+    ]),
+  ),
+  'perfect-mary-recipe': '/cookbook/perfect-miranda-bloody-mary/',
+  'zelephant-truffle-roast': '/cookbook/zelephant-truffle-roast/',
+  'meat-cake': '/cookbook/meat-cake/',
+}
+const slug = Astro.params.slug ?? ''
+const redirectTarget = timelineRedirects[slug]
+
+if (!redirectTarget) {
+  return Astro.redirect('/archive/', 302)
+}
+
+return Astro.redirect(redirectTarget, 301)
+---

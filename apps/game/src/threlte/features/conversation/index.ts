@@ -32,9 +32,6 @@ export type {
   ConversationUIState,
 } from './types'
 
-// Note: ConversationalFireflyComponent was merged into HybridFireflyComponent
-// Use HybridFireflyComponent with enableAIConversations={true} instead
-
 export type {
   ConversationMessage,
   NPCConversationComponent,

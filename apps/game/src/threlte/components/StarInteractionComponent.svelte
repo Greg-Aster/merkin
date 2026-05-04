@@ -14,10 +14,10 @@ import {
   gameActions,
   selectedStarStore,
 } from '../stores/gameStateStore'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 // TimelineCard functionality moved to Game.svelte with modern implementation
 
 const dispatch = createEventDispatcher()
-const isDev = import.meta.env.DEV
 const { camera, renderer } = useThrelte()
 
 // Extract non-reactive references
@@ -158,7 +158,7 @@ function handleStarClick(intersection: any, mouseEvent: MouseEvent) {
     worldPosition: point,
   })
 
-  if (isDev) console.log('⭐ Star clicked:', starData.title)
+  runtimeDebugLog('⭐ Star clicked:', starData.title)
 }
 
 function findStarDataByIndex(instanceId: number): StarData | null {
@@ -246,7 +246,7 @@ function showTimelineCard(
   // Add slight offset to avoid covering the star
   cardPosition.y -= 20
 
-  if (isDev) console.log('📋 Showing timeline card at:', cardPosition)
+  runtimeDebugLog('📋 Showing timeline card at:', cardPosition)
 }
 
 function handleStarSelection(star: StarData | null) {
@@ -263,13 +263,13 @@ function clearSelection() {
   gameActions.selectStar(null)
 
   dispatch('starDeselected')
-  if (isDev) console.log('⭐ Star selection cleared')
+  runtimeDebugLog('⭐ Star selection cleared')
 }
 
 function handleLevelTransition(event: CustomEvent) {
   const { levelType } = event.detail
 
-  if (isDev) console.log('🎮 Level transition requested:', levelType)
+  runtimeDebugLog('🎮 Level transition requested:', levelType)
 
   const mappedLevelId = resolveLevelId(levelType)
 

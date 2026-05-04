@@ -16,9 +16,9 @@ import {
   currentLevelStore,
   gameActions,
 } from '../stores/gameStateStore'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 
 const dispatch = createEventDispatcher()
-const isDev = import.meta.env.DEV
 
 // Props
 export let transitionDelay = 500 // ms delay before transition
@@ -28,7 +28,7 @@ let isTransitioning = false
 let currentTransition: any = null
 
 onMount(() => {
-  if (isDev) console.log('🎮 LevelTransitionHandler initialized')
+  runtimeDebugLog('🎮 LevelTransitionHandler initialized')
 
   return () => {
     // Cleanup any ongoing transitions
@@ -40,7 +40,7 @@ onMount(() => {
 
 // Subscribe to level changes to track transitions
 $: if ($currentLevelStore) {
-  if (isDev) console.log('🎮 Current level:', $currentLevelStore)
+  runtimeDebugLog('🎮 Current level:', $currentLevelStore)
 }
 
 /**
@@ -55,7 +55,7 @@ export function handleTransition(
     return false
   }
 
-  if (isDev) console.log('🎮 Processing level transition:', levelType)
+  runtimeDebugLog('🎮 Processing level transition:', levelType)
 
   // Map the level identifier
   const mappedLevelId = resolveLevelId(levelType)
@@ -83,7 +83,7 @@ function isValidLevel(levelId: string): boolean {
 function startTransition(levelId: string, fromStar?: StarData | null) {
   isTransitioning = true
 
-  if (isDev) console.log('🎮 Starting transition to:', levelId)
+  runtimeDebugLog('🎮 Starting transition to:', levelId)
 
   // Dispatch transition started event
   dispatch('transitionStarted', {
@@ -103,7 +103,7 @@ function startTransition(levelId: string, fromStar?: StarData | null) {
 
 function executeTransition(levelId: string, fromStar?: StarData | null) {
   try {
-    if (isDev) console.log('🎮 Executing transition to:', levelId)
+    runtimeDebugLog('🎮 Executing transition to:', levelId)
 
     // Update the game state
     gameActions.transitionToLevel(levelId)
@@ -124,7 +124,7 @@ function executeTransition(levelId: string, fromStar?: StarData | null) {
       success: true,
     })
 
-    if (isDev) console.log('✅ Level transition completed:', levelId)
+    runtimeDebugLog('✅ Level transition completed:', levelId)
   } catch (error) {
     console.error('❌ Level transition failed:', error)
 
@@ -145,15 +145,14 @@ function recordTransition(levelId: string, fromStar?: StarData | null) {
   gameActions.recordInteraction('level_transition', levelId)
 
   if (fromStar) {
-    if (isDev)
-      console.log(
-        '📊 Transition triggered by star:',
-        fromStar.title,
-        '→',
-        levelId,
-      )
+    runtimeDebugLog(
+      '📊 Transition triggered by star:',
+      fromStar.title,
+      '→',
+      levelId,
+    )
   } else {
-    if (isDev) console.log('📊 Direct transition to:', levelId)
+    runtimeDebugLog('📊 Direct transition to:', levelId)
   }
 }
 
@@ -172,7 +171,7 @@ export function cancelTransition(): boolean {
 
   isTransitioning = false
 
-  if (isDev) console.log('🎮 Transition cancelled')
+  runtimeDebugLog('🎮 Transition cancelled')
 
   dispatch('transitionCancelled', {
     timestamp: Date.now(),

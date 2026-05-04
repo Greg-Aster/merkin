@@ -1,0 +1,304 @@
+{
+  "target": {
+    "name": "megameal-local",
+    "url": "http://127.0.0.1:4321/"
+  },
+  "responseStatus": 200,
+  "elapsedMs": 12959,
+  "screenshot": "/home/greggles/Merkin/tmp/site-compare/megameal-local.png",
+  "dom": {
+    "title": "MEGA MEAL SAGA - Consuming Time Itself Since 3042",
+    "bodyText": "Skip to main content\nMEGA\nMEAL\nTimeline\nGame\nStore\nArchive\nMore\nThis Is a Fake Search Result\nBecause the search cannot work in the <mark>dev</mark> environment.\nIf You Want to Test the Search\nTry running <mark>npm build && npm preview</mark> instead.\nHome\nTimeline\nGame\nStore\nArchive\nMore\nCookbook\nQuizzes\nAbout\nTheme Color\n220\nCOMMERCIAL PORTAL ONLINE\nPUBLIC ORIENTATION FEED\nCOMMERCIAL PORTAL ONLINE\nMEGA MEAL SAGA\n\nA cheerful multimedia nutrition concern about hunger, history, and the many ways a corporation can smile while measuring your bones.\n\nBEGIN INTAKE\n\nCommercial Portal Online\n\nMEGA MEA",
+    "canvasCount": 1,
+    "imgCount": 9,
+    "pictureCount": 0,
+    "videoCount": 9,
+    "svgCount": 34,
+    "scriptCount": 116,
+    "stylesheetCount": 101,
+    "htmlBytes": 1083735,
+    "navTiming": {
+      "domContentLoaded": 486,
+      "loadEventEnd": 4891,
+      "duration": 4891,
+      "transferSize": 1113585,
+      "encodedBodySize": 1113285
+    },
+    "resourceHints": [
+      {
+        "name": "http://127.0.0.1:4321/@vite/client",
+        "initiatorType": "script",
+        "transferSize": 298803
+      },
+      {
+        "name": "http://127.0.0.1:4321/@fs/home/greggles/Merkin/node_modules/.pnpm/astro@5.18.0_@types+node@25.3.0_jiti@1.21.7_lightningcss@1.30.2_rollup@2.79.2_stylus@0.63.0_t_7vn6jpzph3su3mh3sni77p7mdm/node_modules/astro/dist/runtime/client/dev-toolbar/entrypoint.js?v=bf77f77e",
+        "initiatorType": "script",
+        "transferSize": 58853
+      },
+      {
+        "name": "http://127.0.0.1:4321/@id/astro:scripts/page.js",
+        "initiatorType": "script",
+        "transferSize": 10056
+      },
+      {
+        "name": "http://127.0.0.1:4321/@fs/home/greggles/Merkin/node_modules/.pnpm/@astrojs+tailwind@5.1.5_astro@5.18.0_@types+node@25.3.0_jiti@1.21.7_lightningcss@1.30.2_rollu_toif2i45k6qfmhfcqjd2ucwn7y/node_modules/@astrojs/tailwind/base.css",
+        "initiatorType": "script",
+        "transferSize": 260868
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/extracted/site-audio-control.css",
+        "initiatorType": "script",
+        "transferSize": 3850
+      },
+      {
+        "name": "http://127.0.0.1:4321/@fs/home/greggles/Merkin/packages/blog-core/src/components/widget/DisplaySettings.svelte?svelte&type=style&lang.css",
+        "initiatorType": "script",
+        "transferSize": 2820
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/extracted/navbar.css",
+        "initiatorType": "script",
+        "transferSize": 7811
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/archive/story-map-shell.css",
+        "initiatorType": "script",
+        "transferSize": 7947
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/archive/story-map-nodes.css",
+        "initiatorType": "script",
+        "transferSize": 5373
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/archive/story-map-records.css",
+        "initiatorType": "script",
+        "transferSize": 3265
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/archive/story-map-responsive.css",
+        "initiatorType": "script",
+        "transferSize": 2575
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/banner-stage/banner-stage.css",
+        "initiatorType": "script",
+        "transferSize": 2386
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/banner-stage/banner-stage-lab.css",
+        "initiatorType": "script",
+        "transferSize": 1667
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/extracted/bleepy.css",
+        "initiatorType": "script",
+        "transferSize": 21337
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/bleepy/BleepyBanner.css",
+        "initiatorType": "script",
+        "transferSize": 15708
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/bleepy/BleepyPostWidget.css",
+        "initiatorType": "script",
+        "transferSize": 11422
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/layout-toggle.css",
+        "initiatorType": "script",
+        "transferSize": 1222
+      },
+      {
+        "name": "http://127.0.0.1:4321/@fs/home/greggles/Merkin/packages/blog-core/src/components/control/BackToTop.astro?astro&type=style&index=0&lang.css",
+        "initiatorType": "script",
+        "transferSize": 1558
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/home/era-browser.css",
+        "initiatorType": "script",
+        "transferSize": 4010
+      },
+      {
+        "name": "http://127.0.0.1:4321/src/styles/features/extracted/featured-arc.css",
+        "initiatorType": "script",
+        "transferSize": 5889
+      }
+    ]
+  },
+  "requestCount": 235,
+  "totalEncodedKiB": 13042.5,
+  "byType": {
+    "text/html": {
+      "count": 1,
+      "encodedKiB": 1087.5
+    },
+    "text/javascript": {
+      "count": 222,
+      "encodedKiB": 6529
+    },
+    "font/woff2": {
+      "count": 4,
+      "encodedKiB": 101.7
+    },
+    "image/png": {
+      "count": 2,
+      "encodedKiB": 1325.1
+    },
+    "video/webm": {
+      "count": 1,
+      "encodedKiB": 1844.1
+    },
+    "application/json": {
+      "count": 4,
+      "encodedKiB": 3.4
+    },
+    "model/gltf-binary": {
+      "count": 1,
+      "encodedKiB": 2151.8
+    }
+  },
+  "topRequests": [
+    {
+      "url": "/assets/3D/Hy3D_textured_00005_optimized.glb",
+      "status": 200,
+      "mimeType": "model/gltf-binary",
+      "encodedKiB": 2151.8
+    },
+    {
+      "url": "/assets/banner/golden-era.webm",
+      "status": 206,
+      "mimeType": "video/webm",
+      "encodedKiB": 1844.1
+    },
+    {
+      "url": "/node_modules/.vite/deps/chunk-RM6I44EV.js?v=bf77f77e",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 1586.2
+    },
+    {
+      "url": "/",
+      "status": 200,
+      "mimeType": "text/html",
+      "encodedKiB": 1087.5
+    },
+    {
+      "url": "/@fs/home/greggles/Merkin/apps/megameal/src/assets/banner/main-title.png?origWidth=1280&origHeight=720&origFormat=png",
+      "status": 200,
+      "mimeType": "image/png",
+      "encodedKiB": 803.9
+    },
+    {
+      "url": "/@fs/home/greggles/Merkin/apps/megameal/src/assets/content-avatar/avatar.png?origWidth=768&origHeight=768&origFormat=png",
+      "status": 200,
+      "mimeType": "image/png",
+      "encodedKiB": 521.2
+    },
+    {
+      "url": "/@vite/client",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 291.8
+    },
+    {
+      "url": "/@fs/home/greggles/Merkin/node_modules/.pnpm/astro@5.18.0_@types+node@25.3.0_jiti@1.21.7_lightningcss@1.30.2_rollup@2.79.2_stylus@0.63.0_t_7vn6jpzph3su3mh3sni77p7mdm/node_modules/astro/dist/runtime/client/dev-toolbar/ui-library/icons.js?v=bf77f77e",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 271.3
+    },
+    {
+      "url": "/@fs/home/greggles/Merkin/node_modules/.pnpm/@astrojs+tailwind@5.1.5_astro@5.18.0_@types+node@25.3.0_jiti@1.21.7_lightningcss@1.30.2_rollu_toif2i45k6qfmhfcqjd2ucwn7y/node_modules/@astrojs/tailwind/base.css",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 254.7
+    },
+    {
+      "url": "/node_modules/.vite/deps/astro___aria-query.js?v=bf77f77e",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 213.1
+    },
+    {
+      "url": "/src/stores/friendStore.ts",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 126.8
+    },
+    {
+      "url": "/node_modules/.vite/deps/astro___axobject-query.js?v=bf77f77e",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 121.9
+    },
+    {
+      "url": "/@fs/home/greggles/Merkin/node_modules/.pnpm/astro@5.18.0_@types+node@25.3.0_jiti@1.21.7_lightningcss@1.30.2_rollup@2.79.2_stylus@0.63.0_t_7vn6jpzph3su3mh3sni77p7mdm/node_modules/astro/dist/runtime/client/dev-toolbar/apps/audit/rules/a11y.js?v=bf77f77e",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 119.6
+    },
+    {
+      "url": "/node_modules/.vite/deps/chunk-AMBQQC2K.js?v=bf77f77e",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 116.6
+    },
+    {
+      "url": "/@fs/home/greggles/Merkin/node_modules/.pnpm/astro@5.18.0_@types+node@25.3.0_jiti@1.21.7_lightningcss@1.30.2_rollup@2.79.2_stylus@0.63.0_t_7vn6jpzph3su3mh3sni77p7mdm/node_modules/astro/dist/runtime/client/dev-toolbar/apps/astro.js?v=bf77f77e",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 109
+    },
+    {
+      "url": "/node_modules/.vite/deps/three_examples_jsm_loaders_GLTFLoader__js.js?v=bf77f77e",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 100.6
+    },
+    {
+      "url": "/@fs/home/greggles/Merkin/packages/blog-core/src/components/timeline/TimelineViewModes/timelineViewClient.js",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 94.6
+    },
+    {
+      "url": "/src/components/home/HomeIntroEnvironmentScene.svelte?t=1777856309943",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 89.7
+    },
+    {
+      "url": "/@fs/home/greggles/Merkin/node_modules/.pnpm/astro@5.18.0_@types+node@25.3.0_jiti@1.21.7_lightningcss@1.30.2_rollup@2.79.2_stylus@0.63.0_t_7vn6jpzph3su3mh3sni77p7mdm/node_modules/astro/dist/runtime/client/dev-toolbar/toolbar.js?v=bf77f77e",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 87.5
+    },
+    {
+      "url": "/@fs/home/greggles/Merkin/packages/blog-core/src/layouts/MainGridLayout.astro?astro&type=script&index=0&lang.ts",
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedKiB": 87.1
+    }
+  ],
+  "failedRequests": [],
+  "consoleMessages": [
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x3040274c800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x3040274c800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x3040274c800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x3040274c800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+    }
+  ],
+  "pageErrors": []
+}

@@ -55,15 +55,15 @@ import { isImageBannerItem, isVideoBannerItem } from './types'
 // BANNER IMAGE IMPORTS (for images and video fallbacks)
 // =====================================================================
 
-import banner3Fallback from '@/assets/banner/cookbook.png'
+import banner3Fallback from '@/assets/banner/posters/cookbook-poster.webp'
 //import banner1 from '@/assets/banner/main-title.png'
 import banner1Fallback from '@/assets/banner/main-title.png' // Fallback for your video
 import starObservatoryFallback from '@/assets/banner/game.webp'
 import storefrontBanner from '@/assets/banner/store-page.webp'
-import storyModeBanner from '@/assets/site/posts/building.png'
+import firstContactManualBanner from '@/assets/site/posts/timeline/dont.png'
 import archiveDispatchesBanner from '@/assets/site/posts/timeline/archive.png'
-import communityChannelsBanner from '@/assets/site/posts/timeline/golden-era.png'
-import timelineMapFallback from '@/assets/site/posts/timeline/universe.png'
+import communityChannelsBanner from '@/assets/banner/posters/golden-era-poster.webp'
+import timelineMapFallback from '@/assets/banner/posters/universe-poster.webp'
 
 type BannerEntry = {
   item: BannerItem
@@ -249,22 +249,24 @@ const bannerEntries: BannerEntry[] = [
       type: 'video',
       sceneId: 'community-billboard',
       weight: 1,
-      src: `${import.meta.env.BASE_URL}assets/banner/golden-era.webm`,
+      src: `${import.meta.env.BASE_URL}assets/banner/golden-era12fps.webm`,
       fallbackImage: communityChannelsBanner,
       alt: 'Join the community channels',
+      playbackRate: 0.25,
     },
     link: '/community/',
   },
   {
     item: {
       type: 'video',
-      sceneId: 'story-mode-billboard',
+      sceneId: 'reader-billboard',
       weight: 1,
-      src: `${import.meta.env.BASE_URL}assets/banner/golden-era.webm`,
-      fallbackImage: storyModeBanner, // Fallback for image items can just be the same image
-      alt: 'Read the story mode dispatches',
+      src: `${import.meta.env.BASE_URL}assets/banner/universbg0001-0121.webm`,
+      fallbackImage: firstContactManualBanner,
+      alt: 'Read the First Contact Manual',
+      playbackRate: 0.1,
     },
-    link: '/posts/introducing-story-mode/',
+    link: '/reader/first-contact-manual/',
   },
 ]
 
@@ -383,14 +385,14 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
     stat: 'Community desk in progress',
     ctaLabel: 'Preview Desk',
   },
-  '/posts/introducing-story-mode/': {
-    title: 'Story Mode',
+  '/reader/first-contact-manual/': {
+    title: 'First Contact Manual',
     description:
-      'A planned guided path through the saga. Narrative rails are visible, but the full route is still being assembled.',
+      'Open the survival manual for alien contact, hostile civilizations, and the wisdom of remaining professionally unnoticed.',
     icon: 'newspaper',
-    kicker: 'Guided Consumption',
-    stat: 'Story route under construction',
-    ctaLabel: 'View Preview',
+    kicker: 'Universal Reader',
+    stat: 'Manual reader online',
+    ctaLabel: 'Open Manual',
   },
   /*
   '/contact': {

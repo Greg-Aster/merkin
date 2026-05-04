@@ -1,4 +1,4 @@
-import type { Vec3 } from '../engine'
+import type { Vec3 } from '../engine/types'
 
 export interface StaticWorldReadyDetail {
   levelId: string

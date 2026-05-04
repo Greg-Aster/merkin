@@ -114,6 +114,62 @@ export default defineConfig({
           manualChunks(id) {
             if (!id.includes('node_modules')) {
               if (
+                id.includes('/src/threlte/stores/runtimeDiagnosticsStore.ts')
+                || id.includes('/src/threlte/stores/gameStateStore.ts')
+                || id.includes('/src/threlte/levels/levelRegistry.ts')
+              ) {
+                return 'runtime-state'
+              }
+
+              if (
+                id.includes('/src/threlte/ui/RuntimeDiagnosticsPanel.svelte')
+              ) {
+                return 'runtime-diagnostics'
+              }
+
+              if (
+                id.includes('/src/threlte/features/conversation/conversationStores.ts')
+              ) {
+                return 'runtime-conversation'
+              }
+
+              if (
+                id.includes('/src/threlte/engine/')
+                && !id.includes('/src/threlte/engine/packagedSceneDocuments.ts')
+              ) {
+                return 'runtime-engine'
+              }
+
+              if (
+                id.includes('/src/threlte/components/')
+                || id.includes('/src/threlte/systems/')
+                || id.includes('/src/threlte/core/')
+                || id.includes('/src/threlte/collision/')
+                || id.includes('/src/threlte/features/lighting/')
+                || id.includes('/src/threlte/features/ocean/')
+                || id.includes('/src/threlte/features/terrain/')
+                || id.includes('/src/threlte/levels/Runtime')
+                || id.includes('/src/threlte/levels/runtimeActorCollision.ts')
+              ) {
+                return 'runtime-world'
+              }
+
+              if (
+                id.includes('/src/threlte/utils/materialUtils.ts')
+                || id.includes('/src/threlte/utils/gltfAssetCache.ts')
+              ) {
+                return 'runtime-assets'
+              }
+
+              if (
+                id.includes('/src/threlte/features/performance/OptimizationManager.ts')
+                || id.includes('/src/threlte/features/performance/stores/')
+                || id.includes('/src/threlte/features/performance/utils/')
+              ) {
+                return 'runtime-performance'
+              }
+
+              if (
                 id.includes('/src/threlte/styles/GameplayStyleProfiles.ts')
                 || id.includes('/src/threlte/styles/runtimeVisualStyleStore.ts')
                 || id.includes('/src/threlte/styles/StylePalettes.ts')
@@ -210,7 +266,6 @@ export default defineConfig({
 
               if (
                 id.includes('/src/threlte/editor/')
-                || id.includes('/src/threlte/utils/materialUtils.ts')
               ) {
                 return 'editor-core'
               }

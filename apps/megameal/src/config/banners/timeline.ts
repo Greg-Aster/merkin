@@ -71,7 +71,7 @@ export const timelineBannerData: TimelineBannerData = {
   title: 'Site Timeline', // Optional display title
   startYear: 1, // Optional start year
   endYear: 50000, // Optional end year
-  background: '/posts/timeline/universe.png', // Optional background image
+  background: '/assets/banner/posters/universe-poster.webp', // Optional background image
   compact: false, // Optional compact display mode
   // height: "70vh"                 // Optional custom height
 }
@@ -156,7 +156,7 @@ export const timelineBannerEraConfig: EraConfigMap = {
   // Add banner-specific era overrides
   'all-time': {
     ...defaultEraConfig['all-time'],
-    backgroundImage: '/posts/timeline/universe.png',
+    backgroundImage: '/assets/banner/posters/universe-poster.webp',
     zoomLevel: 1.0,
     panToYear: 25000,
   },
@@ -175,7 +175,7 @@ export const timelineBannerEraConfig: EraConfigMap = {
 
   'golden-age': {
     ...defaultEraConfig['golden-age'],
-    backgroundImage: '/posts/timeline/golden-era.png',
+    backgroundImage: '/assets/banner/posters/golden-era-poster.webp',
     zoomLevel: 2.5,
   },
 
@@ -214,7 +214,7 @@ export const timelineBannerCategories = {
     description: 'The complete chronicle of events',
     color: 'var(--color-primary)',
     icon: 'timeline',
-    defaultBackground: '/posts/timeline/universe.png',
+    defaultBackground: '/assets/banner/posters/universe-poster.webp',
   },
   TECH: {
     displayName: 'Technology Timeline',
@@ -235,7 +235,7 @@ export const timelineBannerCategories = {
     description: 'All events across all categories',
     color: 'var(--color-neutral)',
     icon: 'globe',
-    defaultBackground: '/posts/timeline/universe.png',
+    defaultBackground: '/assets/banner/posters/universe-poster.webp',
   },
 } as Record<
   string,

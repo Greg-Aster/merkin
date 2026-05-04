@@ -150,6 +150,10 @@ const cookbookCollection = defineCollection({
   }),
 })
 
+const readerCollection = defineCollection({
+  schema: postsSchema,
+})
+
 // Rest of collections remain unchanged
 const specCollection = defineCollection({
   schema: specSchema,
@@ -291,6 +295,7 @@ export const collections = {
   posts: postsCollection,
   videos: videosCollection,
   cookbook: cookbookCollection,
+  reader: readerCollection,
   spec: specCollection,
   team: teamCollection,
   friends: friendsCollection,

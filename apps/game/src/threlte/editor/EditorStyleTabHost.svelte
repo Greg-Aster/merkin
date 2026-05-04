@@ -135,6 +135,6 @@ export let onUpdateBatchDescriptor: (
   />
 {:else}
   <div class="editor-section">
-    <div class="save-message">Loading Style Studioâ€¦</div>
+    <div class="save-message">Loading Style Studio...</div>
   </div>
 {/if}

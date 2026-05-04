@@ -8,6 +8,18 @@
 import type { CharacterDefinition } from './types'
 const isDev = import.meta.env.DEV
 
+type CharacterModule = {
+  character: CharacterDefinition
+}
+
+const characterDefinitionModules = import.meta.glob<CharacterModule>(
+  './definitions/*.ts',
+)
+
+function getCharacterIdFromModulePath(path: string) {
+  return path.replace(/^\.\/definitions\//, '').replace(/\.ts$/, '')
+}
+
 export class CharacterRegistry {
   private characters = new Map<string, CharacterDefinition>()
   private loaded = new Set<string>()
@@ -21,20 +33,9 @@ export class CharacterRegistry {
       return this._availableCharacterIds
     }
 
-    // Known character files - in a real implementation this would scan the directory
-    // For now, we'll use the known character list
-    this._availableCharacterIds = [
-      'elara-voss',
-      'helena-zhao',
-      'ava-chen',
-      'maya-okafor',
-      'soren-klein',
-      'gregory-aster',
-      'kaelen-vance',
-      'eleanor-kim',
-      'vex-kanarath',
-      'merkin',
-    ]
+    this._availableCharacterIds = Object.keys(characterDefinitionModules)
+      .map(getCharacterIdFromModulePath)
+      .sort()
 
     if (isDev) {
       console.log(
@@ -130,7 +131,13 @@ export class CharacterRegistry {
 
     // Try to dynamically load character
     try {
-      const characterModule = await import(`./definitions/${normalizedId}.ts`)
+      const loadCharacterModule =
+        characterDefinitionModules[`./definitions/${normalizedId}.ts`]
+      if (!loadCharacterModule) {
+        return null
+      }
+
+      const characterModule = await loadCharacterModule()
       const character = characterModule.character as CharacterDefinition
 
       // Validate character definition
@@ -165,12 +172,7 @@ export class CharacterRegistry {
       return true
     }
 
-    try {
-      await import(`./definitions/${normalizedId}.ts`)
-      return true
-    } catch {
-      return false
-    }
+    return Boolean(characterDefinitionModules[`./definitions/${normalizedId}.ts`])
   }
 
   /**

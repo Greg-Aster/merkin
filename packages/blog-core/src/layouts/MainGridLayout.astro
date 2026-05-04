@@ -290,6 +290,11 @@ function normalizeBannerConfig(config: any) {
           spacingFromConfig.video ??
           spacingFromConfig.standard ??
           '0',
+        reader:
+          spacingFromConfig.reader ??
+          spacingFromConfig.video ??
+          spacingFromConfig.standard ??
+          '0',
         none: spacingFromConfig.none ?? '0',
       },
     },
@@ -304,6 +309,11 @@ function normalizeBannerConfig(config: any) {
           config.panel?.top?.assistant ?? config.panel?.top?.standard ?? '0',
         archive:
           config.panel?.top?.archive ??
+          config.panel?.top?.video ??
+          config.panel?.top?.standard ??
+          '0',
+        reader:
+          config.panel?.top?.reader ??
           config.panel?.top?.video ??
           config.panel?.top?.standard ??
           '0',
@@ -353,6 +363,10 @@ const getPanelTopPosition = (bannerType: string): string => {
       return bannerConfig.panel.top.archive ??
         bannerConfig.panel.top.video ??
         bannerConfig.panel.top.standard
+    case 'reader':
+      return bannerConfig.panel.top.reader ??
+        bannerConfig.panel.top.video ??
+        bannerConfig.panel.top.standard
     case 'none':
       return bannerConfig.panel.top.none
     default:
@@ -387,6 +401,8 @@ const determineBannerConfiguration =
           postValue?.data?.bannerType === 'cookbook'
         const hasPostArchiveBanner =
           postValue?.data?.bannerType === 'archive'
+        const hasPostReaderBanner =
+          postValue?.data?.bannerType === 'reader'
         const hasPostImageBanner =
           !!(
             postValue?.data?.image ||
@@ -397,7 +413,8 @@ const determineBannerConfiguration =
           !hasPostTimelineBanner &&
           !hasPostAssistantBanner &&
           !hasPostCookbookBanner &&
-          !hasPostArchiveBanner
+          !hasPostArchiveBanner &&
+          !hasPostReaderBanner
 
         const hasPostBanner =
           hasPostVideoBanner ||
@@ -405,7 +422,8 @@ const determineBannerConfiguration =
           hasPostTimelineBanner ||
           hasPostAssistantBanner ||
           hasPostCookbookBanner ||
-          hasPostArchiveBanner
+          hasPostArchiveBanner ||
+          hasPostReaderBanner
 
         const defaultBannerType = bannerConfig.defaultBannerType
         const hasTimelineBanner =
@@ -422,6 +440,7 @@ const determineBannerConfiguration =
           (!hasPostBanner && defaultBannerType === 'assistant')
         const hasCookbookBanner = hasPostCookbookBanner
         const hasArchiveBanner = hasPostArchiveBanner
+        const hasReaderBanner = hasPostReaderBanner
         const hasStandardBanner =
           !hasPostBanner &&
           !hasTimelineBanner &&
@@ -429,7 +448,8 @@ const determineBannerConfiguration =
           !hasImageBanner &&
           !hasAssistantBanner &&
           !hasCookbookBanner &&
-          !hasArchiveBanner
+          !hasArchiveBanner &&
+          !hasReaderBanner
 
         const currentBannerType = hasVideoBanner
           ? 'video'
@@ -443,9 +463,11 @@ const determineBannerConfiguration =
                   ? 'cookbook'
                   : hasArchiveBanner
                     ? 'archive'
-                    : hasStandardBanner
-                      ? 'standard'
-                      : 'none'
+                    : hasReaderBanner
+                      ? 'reader'
+                      : hasStandardBanner
+                        ? 'standard'
+                        : 'none'
 
         const postImage = normalizeAssetUrl(
           postValue?.data?.bannerData?.imageUrl || postValue?.data?.image,
@@ -460,6 +482,7 @@ const determineBannerConfiguration =
             hasAssistantBanner,
             hasCookbookBanner,
             hasArchiveBanner,
+            hasReaderBanner,
             hasStandardBanner,
             hasPostBanner,
             isStandardPage: !hasPostBanner,
@@ -495,6 +518,10 @@ const determineBannerConfiguration =
                 : null,
             archiveBannerData:
               hasArchiveBanner && postValue?.data?.bannerType === 'archive'
+                ? postValue.data.bannerData
+                : null,
+            readerBannerData:
+              hasReaderBanner && postValue?.data?.bannerType === 'reader'
                 ? postValue.data.bannerData
                 : null,
           },

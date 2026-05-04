@@ -420,6 +420,15 @@ export interface SharedLevelSkyboxSettings {
   skyboxPreset?: 'observatory' | 'classic'
 }
 
+export interface SharedLevelRuntimeAssetSettings {
+  runtimeAssets?: {
+    maxTier?: 'low' | 'medium' | 'high'
+    requiredActorIds?: string[]
+    requiredAssetActorIds?: string[]
+    requiredRenderActorIds?: string[]
+  }
+}
+
 export interface SharedLevelEditorSettings
   extends SharedLevelSpawnSettings,
     SharedLevelPlayerSettings,
@@ -432,7 +441,8 @@ export interface SharedLevelEditorSettings
     SharedLevelCollisionSettings,
     SharedLevelTerrainSculptSettings,
     SharedLevelPresetSettings,
-    SharedLevelSkyboxSettings {}
+    SharedLevelSkyboxSettings,
+    SharedLevelRuntimeAssetSettings {}
 
 export interface ObservatoryEditorSettings extends SharedLevelEditorSettings {
   ocean?: SharedLevelWaterSettings['water']

@@ -52,6 +52,11 @@ const runtimeBudgets = {
     'GAME_PROFILE_MAX_EDITOR_SCENES',
     0,
   ),
+  maxEditorChunkLoads: parseNumberBudget(
+    'max-editor-chunks',
+    'GAME_PROFILE_MAX_EDITOR_CHUNKS',
+    0,
+  ),
   maxTerrainColliderLoads: parseNumberBudget(
     'max-terrain-colliders',
     'GAME_PROFILE_MAX_TERRAIN_COLLIDERS',
@@ -124,6 +129,7 @@ Options:
   --settle-ms=<ms>                  Time to wait after level readiness.
   --strict                          Exit non-zero on budget failures.
   --max-editor-scenes=<count>       Runtime editor scene load budget.
+  --max-editor-chunks=<count>       Runtime editor JS/CSS chunk load budget.
   --max-terrain-colliders=<count>   Terrain collider request budget.
   --max-three-entrypoints=<count>   Three runtime entrypoint budget.
   --max-requests=<count>            Total request budget.
@@ -260,6 +266,9 @@ function getThreeRuntimeEntrypoints(resources) {
     }
 
     const basename = pathname.split('/').pop() ?? pathname
+    if (/three-examples-vendor|asset-vendor|effects-vendor/i.test(basename)) {
+      continue
+    }
     if (!/three(?:\.module|\.core|[-.])|three-vendor/i.test(basename)) {
       continue
     }
@@ -310,6 +319,7 @@ function evaluateRuntimeBudgets(input) {
     summary,
     diagnostics,
     editorSceneLoads,
+    editorChunkLoads,
     terrainColliderLoads,
     glbLoads,
     threeEntrypoints,
@@ -325,6 +335,12 @@ function evaluateRuntimeBudgets(input) {
     'editor scene loads',
     editorSceneLoads,
     runtimeBudgets.maxEditorSceneLoads,
+  )
+  addBudgetViolation(
+    violations,
+    'editor chunk loads',
+    editorChunkLoads,
+    runtimeBudgets.maxEditorChunkLoads,
   )
   addBudgetViolation(
     violations,
@@ -406,6 +422,19 @@ function evaluateRuntimeBudgets(input) {
   return violations
 }
 
+function getTopSystemTimings(systemTimings, limit = 10) {
+  return Object.entries(systemTimings ?? {})
+    .map(([name, timing]) => ({
+      name,
+      lastMs: timing?.lastMs ?? 0,
+      avgMs: timing?.avgMs ?? 0,
+      maxMs: timing?.maxMs ?? 0,
+      samples: timing?.samples ?? 0,
+    }))
+    .sort((left, right) => right.maxMs - left.maxMs)
+    .slice(0, limit)
+}
+
 async function profileLevel(browser, levelId) {
   const context = await browser.newContext(createContextOptions(profile))
   const page = await context.newPage()
@@ -481,11 +510,16 @@ try {
     const renderInfo = diagnostics?.renderInfo ?? {}
     const sceneInfo = diagnostics?.scene ?? {}
     const longTasks = diagnostics?.longTasks ?? {}
+    const systemTimings = diagnostics?.systemTimings ?? {}
     const gltfCache = diagnostics?.gltfCache ?? {}
     const memory = result.memory ?? null
     const editorSceneLoads = countResourcesMatching(
       result.resources,
       /\/editor\/scenes\/.*\.scene\.json/i,
+    )
+    const editorChunkLoads = countResourcesMatching(
+      result.resources,
+      /\/_astro\/editor-(?:ai|core|document|panel|runtime)[^/]*\.(?:js|css)$/i,
     )
     const terrainColliderLoads = countResourcesMatching(
       result.resources,
@@ -498,6 +532,7 @@ try {
       summary,
       diagnostics,
       editorSceneLoads,
+      editorChunkLoads,
       terrainColliderLoads,
       glbLoads,
       threeEntrypoints,
@@ -530,6 +565,7 @@ try {
         `gltfReferenced=${gltfCache.referencedEntries ?? 'n/a'}`,
         `gltfUnreferenced=${gltfCache.unreferencedEntries ?? 'n/a'}`,
         `editorScenes=${editorSceneLoads}`,
+        `editorChunks=${editorChunkLoads}`,
         `terrainColliders=${terrainColliderLoads}`,
         `img=${getResourceCountByExtension(summary, 'png') + getResourceCountByExtension(summary, 'jpg') + getResourceCountByExtension(summary, 'jpeg') + getResourceCountByExtension(summary, 'webp')}`,
         `longTasks=${longTasks.count ?? 'n/a'}`,
@@ -547,6 +583,29 @@ try {
 
     for (const entrypoint of threeEntrypoints) {
       console.log(`  three-entry ${entrypoint}`)
+    }
+
+    for (const resource of summary.top) {
+      const path = new URL(resource.name).pathname
+      if (
+        /\/_astro\/editor-(?:ai|core|document|panel|runtime)[^/]*\.(?:js|css)$/i.test(
+          path,
+        )
+      ) {
+        console.log(
+          `  editor-chunk ${formatBytes(
+            Math.max(resource.transferSize, resource.decodedBodySize),
+          )} ${resource.initiatorType || 'unknown'} ${path}`,
+        )
+      }
+    }
+
+    for (const timing of getTopSystemTimings(systemTimings)) {
+      console.log(
+        `  timing ${timing.name}: max=${Math.round(timing.maxMs)}ms avg=${Math.round(
+          timing.avgMs,
+        )}ms last=${Math.round(timing.lastMs)}ms samples=${timing.samples}`,
+      )
     }
 
     for (const [type, typeSummary] of summary.byType.slice(0, 6)) {

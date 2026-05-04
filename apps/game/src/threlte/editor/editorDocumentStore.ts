@@ -43,9 +43,7 @@ import type {
   EditorSceneDocument,
   EditorSceneNode,
   EditorSceneSettings,
-  ObservatoryEditorSettings,
   SharedLevelEditorSettings,
-  SolitudeEditorSettings,
 } from './editorTypes'
 
 function createId(prefix: string) {
@@ -187,24 +185,6 @@ export function updateLevelSceneSettings(
   updateSceneSettings(settings => ({
     ...settings,
     level: updater(settings.level ?? {}),
-  }))
-}
-
-export function updateObservatorySceneSettings(
-  updater: (settings: ObservatoryEditorSettings) => ObservatoryEditorSettings,
-) {
-  updateSceneSettings(settings => ({
-    ...settings,
-    observatory: updater(settings.observatory ?? {}),
-  }))
-}
-
-export function updateSolitudeSceneSettings(
-  updater: (settings: SolitudeEditorSettings) => SolitudeEditorSettings,
-) {
-  updateSceneSettings(settings => ({
-    ...settings,
-    solitude: updater(settings.solitude ?? {}),
   }))
 }
 export function addNode(node: EditorSceneNode) {

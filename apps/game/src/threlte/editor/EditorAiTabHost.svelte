@@ -124,6 +124,6 @@ export let onRefreshRecentJobs: () => void = () => {}
   />
 {:else}
   <div class="editor-section">
-    <div class="save-message">Loading AI mesh toolsâ€¦</div>
+    <div class="save-message">Loading AI mesh tools...</div>
   </div>
 {/if}

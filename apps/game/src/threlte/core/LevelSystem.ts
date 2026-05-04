@@ -2,7 +2,7 @@
 
 import * as THREE from 'three'
 import type { LightingManager } from '../features/lighting/LightingManager'
-const isDev = import.meta.env.DEV
+import { runtimeDebugLog } from '../utils/runtimeLog'
 
 // Core interfaces that any level component must implement
 export interface LevelComponent {
@@ -15,13 +15,13 @@ export interface LevelComponent {
 }
 
 export interface LevelContext {
-  scene: THREE.Scene
-  camera: THREE.Camera
-  renderer: THREE.WebGLRenderer
+  scene: THREE.Scene | null
+  camera: THREE.Camera | null
+  renderer: THREE.WebGLRenderer | null
   eventBus: EventTarget
   registry: SystemRegistry
   lighting: LightingManager
-  ecsWorld?: any // ECSWorldManager - optional to avoid circular import
+  ecsWorld?: unknown
 }
 
 export enum ComponentType {
@@ -44,8 +44,8 @@ export enum MessageType {
 export interface SystemMessage {
   type: MessageType
   source: string
-  target?: string // undefined = broadcast to all
-  data: any
+  target?: string
+  data: unknown
   timestamp: number
   priority: 'low' | 'normal' | 'high' | 'critical'
 }
@@ -59,17 +59,18 @@ export class SystemRegistry {
   private messageQueue: SystemMessage[] = []
   private eventBus = new EventTarget()
   private isProcessingMessages = false
+  private messageFrameId: number | null = null
 
   constructor() {
-    // Process message queue every frame
     this.startMessageProcessing()
   }
 
   registerComponent(component: LevelComponent): void {
-    if (isDev)
-      console.log(
-        `📋 Registering component: ${component.id} (${component.type})`,
-      )
+    if (this.components.has(component.id)) {
+      this.unregisterComponent(component.id)
+    }
+
+    runtimeDebugLog(`Registering component: ${component.id} (${component.type})`)
 
     this.components.set(component.id, component)
 
@@ -78,7 +79,6 @@ export class SystemRegistry {
     }
     this.componentsByType.get(component.type)!.push(component)
 
-    // Notify other components that a new component is ready
     this.sendMessage({
       type: MessageType.COMPONENT_READY,
       source: 'registry',
@@ -101,7 +101,7 @@ export class SystemRegistry {
           typeComponents.splice(index, 1)
         }
       }
-      if (isDev) console.log(`📋 Unregistered component: ${componentId}`)
+      runtimeDebugLog(`Unregistered component: ${componentId}`)
     }
   }
 
@@ -114,24 +114,27 @@ export class SystemRegistry {
   }
 
   sendMessage(message: SystemMessage): void {
-    // Add to queue for processing
-    this.messageQueue.push(message)
-
-    // Critical messages get processed immediately
     if (message.priority === 'critical') {
       this.processMessage(message)
+      return
+    }
+
+    this.messageQueue.push(message)
+  }
+
+  updateComponents(deltaTime: number): void {
+    for (const component of this.components.values()) {
+      component.update(deltaTime)
     }
   }
 
   private processMessage(message: SystemMessage): void {
     if (message.target) {
-      // Direct message to specific component
       const component = this.components.get(message.target)
       if (component) {
         component.handleMessage(message)
       }
     } else {
-      // Broadcast to all components
       for (const component of this.components.values()) {
         if (component.id !== message.source) {
           component.handleMessage(message)
@@ -139,7 +142,6 @@ export class SystemRegistry {
       }
     }
 
-    // Also dispatch to event bus for external listeners
     this.eventBus.dispatchEvent(
       new CustomEvent('system-message', { detail: message }),
     )
@@ -150,7 +152,11 @@ export class SystemRegistry {
     this.isProcessingMessages = true
 
     const processQueue = () => {
-      // Process messages by priority
+      if (!this.isProcessingMessages) {
+        this.messageFrameId = null
+        return
+      }
+
       const criticalMessages = this.messageQueue.filter(
         m => m.priority === 'critical',
       )
@@ -160,22 +166,18 @@ export class SystemRegistry {
       )
       const lowMessages = this.messageQueue.filter(m => m.priority === 'low')
 
-      // Process critical and high priority immediately
       criticalMessages.concat(highMessages).forEach(message => {
         this.processMessage(message)
       })
 
-      // Process normal messages (batch up to 10 per frame)
       normalMessages.slice(0, 10).forEach(message => {
         this.processMessage(message)
       })
 
-      // Process low priority messages (batch up to 5 per frame)
       lowMessages.slice(0, 5).forEach(message => {
         this.processMessage(message)
       })
 
-      // Clear processed messages
       this.messageQueue = this.messageQueue.filter(
         m =>
           m.priority !== 'critical' &&
@@ -184,10 +186,10 @@ export class SystemRegistry {
           !lowMessages.slice(0, 5).includes(m),
       )
 
-      requestAnimationFrame(processQueue)
+      this.messageFrameId = requestAnimationFrame(processQueue)
     }
 
-    requestAnimationFrame(processQueue)
+    this.messageFrameId = requestAnimationFrame(processQueue)
   }
 
   addEventListener(type: string, listener: EventListener): void {
@@ -200,6 +202,10 @@ export class SystemRegistry {
 
   dispose(): void {
     this.isProcessingMessages = false
+    if (this.messageFrameId !== null) {
+      cancelAnimationFrame(this.messageFrameId)
+      this.messageFrameId = null
+    }
     for (const component of this.components.values()) {
       component.dispose()
     }
@@ -230,7 +236,7 @@ export abstract class BaseLevelComponent implements LevelComponent {
     await this.onInitialize()
     this.isInitialized = true
 
-    if (isDev) console.log(`✅ Component ${this.id} initialized`)
+    runtimeDebugLog(`Component ${this.id} initialized`)
   }
 
   update(deltaTime: number): void {
@@ -250,12 +256,12 @@ export abstract class BaseLevelComponent implements LevelComponent {
     this.isDisposed = true
     this.context = undefined
 
-    if (isDev) console.log(`🧹 Component ${this.id} disposed`)
+    runtimeDebugLog(`Component ${this.id} disposed`)
   }
 
   protected sendMessage(
     type: MessageType,
-    data: any,
+    data: unknown,
     target?: string,
     priority: 'low' | 'normal' | 'high' | 'critical' = 'normal',
   ): void {

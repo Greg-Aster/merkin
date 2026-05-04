@@ -138,7 +138,7 @@ export const defaultEraConfig: EraConfigMap = {
     endYear: 50000,
     zoomLevel: 1,
     panToYear: 25000,
-    backgroundImage: '/posts/timeline/universe.png',
+    backgroundImage: '/assets/banner/posters/universe-poster.webp',
   },
   'all-eras': {
     displayName: 'All-Eras',
@@ -146,7 +146,7 @@ export const defaultEraConfig: EraConfigMap = {
     endYear: 50000,
     zoomLevel: 1.3,
     panToYear: 25000,
-    backgroundImage: '/posts/timeline/universe.png',
+    backgroundImage: '/assets/banner/posters/universe-poster.webp',
   },
   'ancient-epoch': {
     displayName: 'The Ancient Epoch',
@@ -170,7 +170,7 @@ export const defaultEraConfig: EraConfigMap = {
     endYear: 25000,
     zoomLevel: 2.75,
     panToYear: 20000,
-    backgroundImage: '/posts/timeline/golden-era.png',
+    backgroundImage: '/assets/banner/posters/golden-era-poster.webp',
   },
   'conflict-epoch': {
     displayName: 'Extinction Epoch',

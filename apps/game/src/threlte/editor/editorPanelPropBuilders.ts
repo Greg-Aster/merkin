@@ -16,6 +16,7 @@ import type {
   LevelCollisionBudget,
   LevelCollisionDefaultPolicy,
 } from './editorTypes'
+import type { HunyuanJobStatus } from './editorHunyuanJobPolling'
 
 type AnyFunction = (...args: any[]) => any
 type AnyController = Record<string, AnyFunction>
@@ -104,12 +105,12 @@ export type EditorPanelPropBuilderContext = {
   hunyuanDetectedReferenceImageUrl: string
   hunyuanJobsLoading: boolean
   hunyuanJobsError: string
-  recentHunyuanJobs: Array<any>
+  recentHunyuanJobs: HunyuanJobStatus[]
   workflowCanGenerateSelection: boolean
   workflowCanRetextureSelection: boolean
   canApplyGeneratedAssetToSelection: boolean
   canWorkflowShowAll: boolean
-  selectedHunyuanJob: any
+  selectedHunyuanJob: HunyuanJobStatus | null
   mergeDescriptor: string
   activeSceneLevelId: string
   createQuickNodeActions: Array<{ label: string; action: () => void }>

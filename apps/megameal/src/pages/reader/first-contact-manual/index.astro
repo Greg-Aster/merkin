@@ -1,0 +1,18 @@
+---
+import { getCollection } from 'astro:content'
+import ReaderPage from '../../../components/reader/ReaderPage.astro'
+import {
+  sortFirstContactManualEntries,
+} from '../../../utils/reader'
+
+const readerEntries = await getCollection('reader')
+const entries = sortFirstContactManualEntries(readerEntries)
+const entry =
+  entries.find(item => item.slug === 'first-contact-manual/index') ?? entries[0]
+
+if (!entry) {
+  throw new Error('No First Contact Manual index entry found.')
+}
+---
+
+<ReaderPage entry={entry} entries={entries} />

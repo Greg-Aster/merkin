@@ -9,6 +9,10 @@ import StarSprite from '../components/StarSprite.svelte'
 import type { RuntimeGameplayRenderNode } from '../engine/runtimeGameplayTypes'
 import { activeConversationSession } from '../features/conversation/conversationStores'
 import { gameActions } from '../stores/gameStateStore'
+import {
+  getRuntimeNodeAnimationPhase,
+  resolveRuntimeFireflyPresentation,
+} from './runtimeGameplayPresentation'
 
 const dispatch = createEventDispatcher()
 
@@ -32,117 +36,7 @@ let conversationFeaturePromise: Promise<
 > | null = null
 const gameplayPointLightScale = 0.22
 
-function supportsShockwaveFireflyIgnition() {
-  if (node.gameplay?.type !== 'firefly') return false
-  const author = (node.gameplay.author ?? '').toLowerCase()
-  const name = (node.name ?? '').toLowerCase()
-  return (
-    node.id.includes('pillar-firefly') ||
-    author.includes('pillar firefly') ||
-    name.includes('pillar')
-  )
-}
-
-function isSolitudeFirefly() {
-  return node.gameplay?.type === 'firefly' && node.id.startsWith('solitude-')
-}
-
-function resolveFireflyColor() {
-  const authored = node.gameplay?.markerColor
-  if (isSolitudeFirefly() && (!authored || authored === '#f5f1a8')) {
-    return '#ff4658'
-  }
-  return authored ?? '#ff4658'
-}
-
-function resolveFireflySetting<T>(
-  authored: T | undefined,
-  legacyValue: T,
-  tunedValue: T,
-  fallbackValue: T,
-) {
-  if (
-    isSolitudeFirefly() &&
-    (authored === undefined || authored === legacyValue)
-  ) {
-    return tunedValue
-  }
-  return authored ?? fallbackValue
-}
-
-function resolveFireflyLightIntensity() {
-  if (node.id.startsWith('yggdrasil-')) {
-    return resolveFireflySetting(node.gameplay?.lightIntensity, 4, 0.32, 0.32)
-  }
-  if (node.id === 'solitude-firefly') {
-    return resolveFireflySetting(node.gameplay?.lightIntensity, 5, 1.45, 1.15)
-  }
-  return resolveFireflySetting(node.gameplay?.lightIntensity, 4, 1.15, 1.15)
-}
-
-function resolveFireflyLightDistance() {
-  if (node.id.startsWith('yggdrasil-')) {
-    return resolveFireflySetting(node.gameplay?.lightDistance, 6, 2.2, 2.2)
-  }
-  if (node.id === 'solitude-firefly') {
-    return resolveFireflySetting(node.gameplay?.lightDistance, 2, 4.6, 4.6)
-  }
-  return resolveFireflySetting(node.gameplay?.lightDistance, 6, 4.6, 4.6)
-}
-
-function resolveFireflyLightDecay() {
-  if (node.id.startsWith('yggdrasil-')) {
-    return resolveFireflySetting(node.gameplay?.lightDecay, 1.6, 1.9, 1.9)
-  }
-  if (node.id === 'solitude-firefly') {
-    return resolveFireflySetting(node.gameplay?.lightDecay, 2, 1.25, 1.25)
-  }
-  return resolveFireflySetting(node.gameplay?.lightDecay, 1.6, 1.25, 1.25)
-}
-
-function resolveFireflySpriteIntensity() {
-  if (node.id.startsWith('yggdrasil-')) {
-    return resolveFireflySetting(
-      node.gameplay?.spriteIntensity,
-      0.95,
-      0.72,
-      0.72,
-    )
-  }
-  if (node.id === 'solitude-firefly') {
-    return resolveFireflySetting(
-      node.gameplay?.spriteIntensity,
-      1.95,
-      1.2,
-      1.15,
-    )
-  }
-  return resolveFireflySetting(node.gameplay?.spriteIntensity, 0.95, 1.15, 1.15)
-}
-
-function resolveFireflyLightBurstBoost() {
-  const authored = node.gameplay?.lightBurstBoost
-  if (typeof authored === 'number' && Number.isFinite(authored)) {
-    return Math.max(0, authored)
-  }
-  if (node.id === 'solitude-firefly') {
-    return 1.75
-  }
-  if (node.id.startsWith('yggdrasil-')) {
-    return 0.38
-  }
-  if (isSolitudeFirefly()) {
-    return 1.4
-  }
-  return 1.0
-}
-
-function resolveFireflyTwinkleSpeed() {
-  if (node.id === 'solitude-firefly') {
-    return resolveFireflySetting(node.gameplay?.twinkleSpeed, 0.5, 0.9, 0.9)
-  }
-  return resolveFireflySetting(node.gameplay?.twinkleSpeed, 1.6, 0.9, 0.9)
-}
+let fireflyPresentation = resolveRuntimeFireflyPresentation(node)
 
 function loadConversationFeature() {
   if (!conversationFeaturePromise) {
@@ -246,9 +140,10 @@ function registerInteractiveMarker(sprite: THREE.Sprite) {
       ) => {
         lightBurstGlow = Math.max(
           lightBurstGlow,
-          (0.45 + burst.strength * 0.75) * resolveFireflyLightBurstBoost(),
+          (0.45 + burst.strength * 0.75) *
+            fireflyPresentation.lightBurstBoost,
         )
-        if (supportsShockwaveFireflyIgnition()) {
+        if (fireflyPresentation.shockwaveEnabled) {
           shockwaveIgnited = true
         }
       },
@@ -257,56 +152,19 @@ function registerInteractiveMarker(sprite: THREE.Sprite) {
 }
 
 function getFireflyMotionOffset() {
-  const hoverHeight = resolveFireflySetting(
-    node.gameplay?.hoverHeight,
-    0.36,
-    0.28,
-    0.28,
-  )
-  const bobAmplitude = resolveFireflySetting(
-    node.gameplay?.bobAmplitude,
-    0.14,
-    0.08,
-    0.08,
-  )
-  const bobSpeed = resolveFireflySetting(
-    node.gameplay?.bobSpeed,
-    1.4,
-    0.55,
-    0.55,
-  )
-  const wanderEnabled = resolveFireflySetting(
-    node.gameplay?.wanderEnabled,
-    false,
-    true,
-    true,
-  )
-  const wanderRadius = resolveFireflySetting(
-    node.gameplay?.wanderRadius,
-    0.35,
-    0.16,
-    0.16,
-  )
-  const wanderSpeed = resolveFireflySetting(
-    node.gameplay?.wanderSpeed,
-    0.45,
-    0.18,
-    0.18,
-  )
-  const basePhase =
-    Array.from(node.id).reduce(
-      (accumulator, character) => accumulator + character.charCodeAt(0),
-      0,
-    ) * 0.0175
+  const basePhase = getRuntimeNodeAnimationPhase(node.id)
 
   return [
-    wanderEnabled
-      ? Math.sin(animationTime * wanderSpeed + basePhase) * wanderRadius
+    fireflyPresentation.wanderEnabled
+      ? Math.sin(animationTime * fireflyPresentation.wanderSpeed + basePhase) *
+        fireflyPresentation.wanderRadius
       : 0,
-    hoverHeight +
-      Math.sin(animationTime * bobSpeed + basePhase * 0.5) * bobAmplitude,
-    wanderEnabled
-      ? Math.cos(animationTime * wanderSpeed + basePhase) * wanderRadius
+    fireflyPresentation.hoverHeight +
+      Math.sin(animationTime * fireflyPresentation.bobSpeed + basePhase * 0.5) *
+        fireflyPresentation.bobAmplitude,
+    fireflyPresentation.wanderEnabled
+      ? Math.cos(animationTime * fireflyPresentation.wanderSpeed + basePhase) *
+        fireflyPresentation.wanderRadius
       : 0,
   ] as [number, number, number]
 }
@@ -334,7 +192,8 @@ useTask(delta => {
 $: fireflyConversationSelected =
   node.gameplay?.type === 'firefly' &&
   $activeConversationSession?.npcId === getFireflyConversationId()
-$: fireflyBaseColor = resolveFireflyColor()
+$: fireflyPresentation = resolveRuntimeFireflyPresentation(node)
+$: fireflyBaseColor = fireflyPresentation.baseColor
 $: fireflyIgnitionColor = (() => {
   const baseColor = new THREE.Color(fireflyBaseColor)
   const ignitedColor = new THREE.Color('#ff1830')
@@ -354,24 +213,24 @@ onDestroy(() => {
 {#if node.gameplay}
   {#if node.gameplay.type === 'firefly'}
     {@const fireflyMotionOffset = getFireflyMotionOffset()}
-    {@const baseLightIntensity = resolveFireflyLightIntensity()}
-    {@const baseSpriteIntensity = resolveFireflySpriteIntensity()}
+    {@const baseLightIntensity = fireflyPresentation.lightIntensity}
+    {@const baseSpriteIntensity = fireflyPresentation.spriteIntensity}
     {@const lightDrivenSpriteIntensity = baseSpriteIntensity * Math.max(0.75, baseLightIntensity / 1.15)}
     {@const selectionBlend = fireflySelectionBlend}
     {@const fireflySelected = selectionBlend > 0.01}
-    {@const selectionLightMultiplier = node.id.startsWith('yggdrasil-') ? 1 + selectionBlend * 0.65 : 1 + selectionBlend * 3}
+    {@const selectionLightMultiplier = 1 + selectionBlend * fireflyPresentation.selectionLightBoost}
     {@const selectionSpriteIntensityMultiplier = 1}
     {@const selectionGlowBoost = 1 + selectionBlend * 1.2 + (markerHovered ? 0.25 : 0)}
-    {@const shockwaveBoost = supportsShockwaveFireflyIgnition() ? resolveFireflyLightBurstBoost() : 1}
-    {@const shockwaveIntensityMultiplier = supportsShockwaveFireflyIgnition() ? 1 + shockwaveIgnition * 2.8 * shockwaveBoost : 1}
-    {@const shockwaveDistanceMultiplier = supportsShockwaveFireflyIgnition() ? 1 + shockwaveIgnition * 1.1 * shockwaveBoost : 1}
-    {@const shockwaveSpriteSizeMultiplier = supportsShockwaveFireflyIgnition() ? 1 + shockwaveIgnition * 0.55 * shockwaveBoost : 1}
-    {@const shockwaveSpriteIntensity = supportsShockwaveFireflyIgnition()
+    {@const shockwaveBoost = fireflyPresentation.shockwaveEnabled ? fireflyPresentation.lightBurstBoost : 1}
+    {@const shockwaveIntensityMultiplier = fireflyPresentation.shockwaveEnabled ? 1 + shockwaveIgnition * 2.8 * shockwaveBoost : 1}
+    {@const shockwaveDistanceMultiplier = fireflyPresentation.shockwaveEnabled ? 1 + shockwaveIgnition * 1.1 * shockwaveBoost : 1}
+    {@const shockwaveSpriteSizeMultiplier = fireflyPresentation.shockwaveEnabled ? 1 + shockwaveIgnition * 0.55 * shockwaveBoost : 1}
+    {@const shockwaveSpriteIntensity = fireflyPresentation.shockwaveEnabled
       ? Math.max(lightDrivenSpriteIntensity * (1 + shockwaveIgnition * 1.4 * shockwaveBoost), 0.72 + shockwaveIgnition * 0.65 * shockwaveBoost)
       : lightDrivenSpriteIntensity}
     {@const baseSpriteVisualIntensity = Math.max(
       (markerHovered ? Math.max(shockwaveSpriteIntensity * 1.2, 1.05) : shockwaveSpriteIntensity) * selectionSpriteIntensityMultiplier,
-      shockwaveSpriteIntensity * selectionSpriteIntensityMultiplier + lightBurstGlow * (node.id.startsWith('yggdrasil-') ? 0.18 : 0.55),
+      shockwaveSpriteIntensity * selectionSpriteIntensityMultiplier + lightBurstGlow * fireflyPresentation.lightBurstSpriteBoost,
     )}
     {@const baseSpriteOpacityIntensity = Math.min(1, baseSpriteVisualIntensity)}
     {@const baseSpriteGlowBoost = selectionGlowBoost * (1 + Math.max(0, baseSpriteVisualIntensity - 1) * 1.8)}
@@ -381,8 +240,8 @@ onDestroy(() => {
         position={fireflyMotionOffset}
         color={fireflyIgnitionColor}
         intensity={(markerHovered ? Math.max(baseLightIntensity * 1.18, baseLightIntensity) : baseLightIntensity) * selectionLightMultiplier * shockwaveIntensityMultiplier * gameplayPointLightScale}
-        distance={resolveFireflyLightDistance() * shockwaveDistanceMultiplier}
-        decay={resolveFireflyLightDecay()}
+        distance={fireflyPresentation.lightDistance * shockwaveDistanceMultiplier}
+        decay={fireflyPresentation.lightDecay}
       />
     {/if}
     <StarSprite
@@ -390,7 +249,7 @@ onDestroy(() => {
       color={fireflyIgnitionColor}
       size={(node.gameplay.markerSize ?? 0.58) * (1 + lightBurstGlow * 0.08) * shockwaveSpriteSizeMultiplier}
       intensity={baseSpriteOpacityIntensity}
-      twinkleSpeed={resolveFireflyTwinkleSpeed()}
+      twinkleSpeed={fireflyPresentation.twinkleSpeed}
       animationOffset={animationTime}
       starType="sparkle"
       isKeyElement={true}
@@ -408,7 +267,7 @@ onDestroy(() => {
         color={fireflyIgnitionColor}
         size={(node.gameplay.markerSize ?? 0.58) * (1 + lightBurstGlow * 0.08) * shockwaveSpriteSizeMultiplier}
         intensity={selectionBlend * Math.max(1.15, shockwaveSpriteIntensity * 0.95)}
-        twinkleSpeed={resolveFireflyTwinkleSpeed()}
+        twinkleSpeed={fireflyPresentation.twinkleSpeed}
         animationOffset={animationTime + 0.35}
         starType="sparkle"
         isKeyElement={true}

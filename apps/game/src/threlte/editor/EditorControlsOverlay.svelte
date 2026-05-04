@@ -94,7 +94,7 @@ onDestroy(() => {
 
     <div class="legend">
       {#if editorState.interactionMode === 'terrain'}
-        <span>LMB drag sculpts terrain in the observatory.</span>
+        <span>LMB drag sculpts terrain in the active level.</span>
         <span>Shift lowers while using the raise brush.</span>
         <span>Smooth evens the terrain · Flatten samples the start height.</span>
       {:else}

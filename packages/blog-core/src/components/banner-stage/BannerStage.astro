@@ -102,6 +102,9 @@ interface Props {
 		imageBannerData?: BannerMediaData;
 		timelineBannerData?: BannerMediaData;
 		assistantBannerData?: BannerMediaData;
+		cookbookBannerData?: BannerMediaData;
+		archiveBannerData?: BannerMediaData;
+		readerBannerData?: BannerMediaData;
 	};
 	hasPostBanner?: boolean;
 	finalBannerLink?: string;
@@ -182,6 +185,7 @@ const hasStandardBanner = scene?.id === "standard";
 const hasAssistantBanner = scene?.id === "assistant";
 const hasCookbookBanner = scene?.id === "cookbook";
 const hasArchiveBanner = scene?.id === "archive";
+const hasReaderBanner = scene?.id === "reader";
 const videoBannerId =
 	hasPostBanner && post?.data?.bannerType === "video"
 		? post.data.bannerData?.videoId
@@ -209,6 +213,7 @@ const transparentPixel =
     ${hasAssistantBanner ? 'has-assistant-banner' : ''}
     ${hasCookbookBanner ? 'has-cookbook-banner' : ''}
     ${hasArchiveBanner ? 'has-archive-banner' : ''}
+    ${hasReaderBanner ? 'has-reader-banner' : ''}
     ${hasStandardBanner ? 'has-standard-banner' : ''}
     ${isBannerOnly ? 'banner-only-mode' : ''}
     ${isPortalBannerMode ? 'portal-banner-mode' : ''}`}
@@ -357,7 +362,7 @@ const transparentPixel =
     </div>
   )}
 
-  {(hasCookbookBanner || hasArchiveBanner) && (
+  {(hasCookbookBanner || hasArchiveBanner || hasReaderBanner) && (
     <div class="banner-container-standard">
       <div class="banner-aspect-container">
         <div class="banner-content-wrapper">
@@ -697,7 +702,7 @@ const transparentPixel =
                                 </div>
                               )}
                             </div>
-                          ) : item.sceneId === 'story-mode-billboard' ? (
+                          ) : item.sceneId === 'reader-billboard' ? (
                             <div class="banner-billboard banner-billboard--story-mode">
                               <div class="banner-billboard__story-mode-panel">
                                 <div class="banner-billboard__story-mode-header">

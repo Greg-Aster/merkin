@@ -1,5 +1,24 @@
 import { EDITOR_API_BASE } from '@config/editorApi'
 import type { EditorSceneNode } from './editorStore'
+import {
+  fetchComfyUiServiceStatus,
+  fetchHunyuanJobStatus,
+  fetchHunyuanRecentJobs,
+  fetchHunyuanServiceStatus,
+  queueHunyuanJobRequest,
+} from './editorHunyuanApi'
+import {
+  type HunyuanJobStatus,
+  getHunyuanBackendStatusFromResult,
+  getQueuedHunyuanStatusMessage,
+  getRunningHunyuanStatusMessage,
+  waitForHunyuanJob,
+} from './editorHunyuanJobPolling'
+import {
+  applyGeneratedAssetReplacementPlan,
+  createGeneratedAssetNode,
+  prepareGeneratedAssetReplacementPlan,
+} from './editorGeneratedAssetApplication'
 
 interface EditorAiControllerDeps {
   state: Record<string, any>
@@ -21,13 +40,13 @@ interface EditorAiControllerDeps {
   getSceneNodeVisualBounds: (
     node: EditorSceneNode,
     sourceAssetUrl?: string,
-  ) => Promise<{ size: [number, number, number] }>
-  fitGeneratedAssetToSource: (
-    nodeId: string,
-    sourceVisualBounds: { size: [number, number, number] },
+  ) => Promise<{ size: [number, number, number]; maxDimension: number }>
+  inspectGeneratedAssetBounds: (
     assetUrl: string,
-    baseScale: [number, number, number],
-  ) => Promise<{ appliedScale: [number, number, number]; report: string }>
+  ) => Promise<{
+    size: [number, number, number]
+    maxDimension: number
+  } | null>
   readJsonPayload: (response: Response, context: string) => Promise<any>
   refreshGeneratedAssetLibrary: (selectAssetUrl?: string) => Promise<void>
   inspectSelectedAssetForHunyuan: (
@@ -57,39 +76,13 @@ interface EditorAiControllerDeps {
 export function createEditorAiController(deps: EditorAiControllerDeps) {
   const state = deps.state
 
-  function createGeneratedAssetNode(assetUrl: string, name: string) {
-    const selectedNode = deps.getSelectedNode()
-    const fallbackName = name.trim() || 'Generated Asset'
-    const parentId =
-      selectedNode?.kind === 'group'
-        ? selectedNode.id
-        : selectedNode?.parentId ?? null
-    const anchorPosition = selectedNode?.position ?? [0, 0, 0]
-    const nextPosition: [number, number, number] = [
-      anchorPosition[0] + (selectedNode ? 2 : 0),
-      anchorPosition[1],
-      anchorPosition[2],
-    ]
-
-    deps.addNode({
-      id: `asset-${Date.now()}`,
-      name: fallbackName,
-      kind: 'asset',
-      parentId,
-      position: nextPosition,
-      rotation: [0, 0, 0],
-      scale: [1, 1, 1],
-      visible: true,
-      asset: { url: assetUrl },
-    })
-  }
-
   async function refreshHunyuanServiceStatus(ensure = false) {
     try {
-      const response = await fetch(
-        `${EDITOR_API_BASE}/api/hunyuan3d/status?apiUrl=${encodeURIComponent(state.hunyuanApiUrl)}&comfyUiApiUrl=${encodeURIComponent(state.comfyUiApiUrl)}${ensure ? '&ensure=1' : ''}`,
-      )
-      const payload = await response.json()
+      const payload = await fetchHunyuanServiceStatus({
+        apiUrl: state.hunyuanApiUrl,
+        comfyUiApiUrl: state.comfyUiApiUrl,
+        ensure,
+      })
 
       if (!payload?.success || !payload?.status) {
         state.hunyuanServiceReady = false
@@ -129,10 +122,10 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
   async function refreshComfyUiServiceStatus(ensure = false) {
     state.comfyUiBusy = ensure
     try {
-      const response = await fetch(
-        `${EDITOR_API_BASE}/api/comfyui/status?apiUrl=${encodeURIComponent(state.comfyUiApiUrl)}${ensure ? '&ensure=1' : ''}`,
-      )
-      const payload = await response.json()
+      const payload = await fetchComfyUiServiceStatus({
+        apiUrl: state.comfyUiApiUrl,
+        ensure,
+      })
 
       if (!payload?.success || !payload?.status) {
         state.comfyUiReady = false
@@ -221,10 +214,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
     state.hunyuanJobsError = ''
 
     try {
-      const response = await fetch(
-        `${EDITOR_API_BASE}/api/hunyuan3d/jobs?limit=${encodeURIComponent(String(limit))}`,
-      )
-      const payload = await response.json()
+      const payload = await fetchHunyuanRecentJobs(limit)
 
       if (!payload?.success || !Array.isArray(payload.jobs)) {
         state.recentHunyuanJobs = []
@@ -237,11 +227,13 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
       if (
         !state.selectedHunyuanJobId ||
         !state.recentHunyuanJobs.some(
-          (job: any) => job.id === state.selectedHunyuanJobId,
+          (job: HunyuanJobStatus) => job.id === state.selectedHunyuanJobId,
         )
       ) {
         state.selectedHunyuanJobId =
-          state.recentHunyuanJobs.find((job: any) => job.status === 'failed')
+          state.recentHunyuanJobs.find(
+            (job: HunyuanJobStatus) => job.status === 'failed',
+          )
             ?.id ??
           state.recentHunyuanJobs[0]?.id ??
           ''
@@ -257,14 +249,9 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
 
   async function queueHunyuanJob(requestBody: Record<string, unknown>) {
     deps.appendPipelineLog('Queueing Hunyuan job', requestBody)
-    const queueResponse = await fetch(`${EDITOR_API_BASE}/api/hunyuan3d/jobs`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    })
-    const queuePayload = await deps.readJsonPayload(
-      queueResponse,
-      'Hunyuan job queue',
+    const queuePayload = await queueHunyuanJobRequest(
+      requestBody,
+      deps.readJsonPayload,
     )
 
     if (!queuePayload?.success || !queuePayload?.job?.id) {
@@ -282,12 +269,9 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
   }
 
   async function getHunyuanJobStatus(jobId: string) {
-    const statusResponse = await fetch(
-      `${EDITOR_API_BASE}/api/hunyuan3d/jobs?jobId=${encodeURIComponent(jobId)}`,
-    )
-    const statusPayload = await deps.readJsonPayload(
-      statusResponse,
-      'Hunyuan job status',
+    const statusPayload = await fetchHunyuanJobStatus(
+      jobId,
+      deps.readJsonPayload,
     )
 
     if (!statusPayload?.success || !statusPayload?.job) {
@@ -309,65 +293,44 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
     state.hunyuanActiveJobId = jobId
     void refreshHunyuanRecentJobs()
 
-    while (true) {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      const job = await getHunyuanJobStatus(jobId)
-      void refreshHunyuanRecentJobs()
-      const queuePosition = Number(job.queuePosition ?? 0)
-
-      if (job.status === 'queued') {
+    return waitForHunyuanJob({
+      jobId,
+      getJobStatus: getHunyuanJobStatus,
+      onPolled: () => {
+        void refreshHunyuanRecentJobs()
+      },
+      onQueued: job => {
         options?.onQueued?.(job)
-        state.hunyuanStatus =
-          queuePosition > 1
-            ? `Queued for AI generation. Position ${queuePosition} in line.`
-            : 'Queued for AI generation. Starting shortly…'
+        state.hunyuanStatus = getQueuedHunyuanStatusMessage(job)
         deps.setRuntimeDiagnostic('hunyuan', {
           level: 'loading',
           message: state.hunyuanStatus,
         })
-        continue
-      }
-
-      if (job.status === 'running') {
+      },
+      onRunning: job => {
         options?.onRunning?.(job)
-        state.hunyuanStatus =
-          'Generating asset with ComfyUI + Hunyuan… this can take a while.'
+        state.hunyuanStatus = getRunningHunyuanStatusMessage()
         deps.setRuntimeDiagnostic('hunyuan', {
           level: 'loading',
           message: state.hunyuanStatus,
         })
-        continue
-      }
-
-      if (job.status === 'failed') {
-        const result = job.result
-        state.hunyuanServiceReady = !!result?.status?.available
-        state.hunyuanBackendCanGenerate =
-          !!result?.status?.supportsReplacementGeneration
-        state.hunyuanBackendCanRetexture = !!result?.status?.supportsTextureWrap
-        if (result?.status?.message) {
-          state.hunyuanBackendStatus = result.status.message
+      },
+      onFailed: job => {
+        const backendStatus = getHunyuanBackendStatusFromResult(job.result)
+        state.hunyuanServiceReady = backendStatus.serviceReady
+        state.hunyuanBackendCanGenerate = backendStatus.canGenerate
+        state.hunyuanBackendCanRetexture = backendStatus.canRetexture
+        if (backendStatus.message) {
+          state.hunyuanBackendStatus = backendStatus.message
         }
-        throw new Error(job.error || result?.message || 'Hunyuan job failed.')
-      }
-
-      if (job.status === 'cancelled') {
-        throw new Error(job.error || 'Hunyuan job cancelled.')
-      }
-
-      if (job.status === 'succeeded') {
-        const result = job.result
-        if (result?.status?.message) {
-          state.hunyuanBackendStatus = result.status.message
+      },
+      onSucceeded: job => {
+        const backendStatus = getHunyuanBackendStatusFromResult(job.result)
+        if (backendStatus.message) {
+          state.hunyuanBackendStatus = backendStatus.message
         }
-        if (!result?.assetUrl) {
-          throw new Error(
-            result?.message ?? 'Hunyuan job completed without an asset URL.',
-          )
-        }
-        return result
-      }
-    }
+      },
+    })
   }
 
   async function queueAndWaitForHunyuanJob(
@@ -376,11 +339,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
     const queuedJob = await queueHunyuanJob(requestBody)
     state.hunyuanActiveJobId = queuedJob.id
     void refreshHunyuanRecentJobs()
-    const initialQueuePosition = Number(queuedJob.queuePosition ?? 0)
-    state.hunyuanStatus =
-      initialQueuePosition > 1
-        ? `Queued for AI generation. Position ${initialQueuePosition} in line.`
-        : 'Queued for AI generation. Starting shortly…'
+    state.hunyuanStatus = getQueuedHunyuanStatusMessage(queuedJob)
     deps.setRuntimeDiagnostic('hunyuan', {
       level: 'loading',
       message: state.hunyuanStatus,
@@ -411,21 +370,11 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
       .join('\n')
     const source = await deps.ensureSceneNodeSourceAsset(selectedNode)
     const targetAssetUrl = source.assetUrl
-    const editorNodes = deps.getEditorNodes()
-    const targetNodeFitData = await Promise.all(
-      targetNodeIds.map(async nodeId => {
-        const node = editorNodes.find(candidate => candidate.id === nodeId)
-        if (!node) return null
-        return {
-          nodeId,
-          sourceVisualBounds: await deps.getSceneNodeVisualBounds(
-            node,
-            targetAssetUrl,
-          ),
-          baseScale: [...node.scale] as [number, number, number],
-          descriptor: deps.getDefaultStyleDescriptor(node),
-        }
-      }),
+    const replacementPlan = await prepareGeneratedAssetReplacementPlan(
+      deps,
+      selectedNode,
+      targetNodeIds,
+      targetAssetUrl,
     )
 
     if (mode === 'texture' && !targetAssetUrl) {
@@ -468,68 +417,15 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
         workflowPath: state.selectedComfyWorkflowPath,
       })
 
-      const fitDataById = new Map(
-        targetNodeFitData
-          .filter(Boolean)
-          .map((entry: any) => [entry.nodeId, entry]),
+      const applicationResult = await applyGeneratedAssetReplacementPlan(
+        deps,
+        replacementPlan,
+        payload.assetUrl,
       )
-      const replacementPatches = await Promise.all(
-        targetNodeIds.map(async nodeId => {
-          const fitData = fitDataById.get(nodeId)
-          const fitResult = fitData
-            ? await deps.fitGeneratedAssetToSource(
-                nodeId,
-                fitData.sourceVisualBounds,
-                payload.assetUrl,
-                fitData.baseScale,
-              )
-            : null
-          if (fitResult?.report) {
-            state.hunyuanLastFitReport = fitResult.report
-          }
-          return {
-            nodeId,
-            patch: {
-              kind: 'asset' as const,
-              asset: { url: payload.assetUrl },
-              prefab: undefined,
-              primitive: undefined,
-              scale: fitResult?.appliedScale ?? fitData?.baseScale ?? [1, 1, 1],
-              generation: {
-                ...(editorNodes.find(candidate => candidate.id === nodeId)
-                  ?.generation ?? {}),
-                descriptor:
-                  fitData?.descriptor ??
-                  deps.getDefaultStyleDescriptor(selectedNode),
-                sourceVisualSize: fitData?.sourceVisualBounds?.size,
-                lastBakedAssetUrl: payload.assetUrl,
-                lastBakedAt: new Date().toISOString(),
-              },
-            },
-          }
-        }),
-      )
-
-      if (replacementPatches.length > 0) {
-        for (const entry of replacementPatches) {
-          deps.patchNode(entry.nodeId, entry.patch)
-        }
-        await deps.saveSceneDocumentToDisk(deps.getActiveSceneLevelId())
+      if (applicationResult.lastFitReport) {
+        state.hunyuanLastFitReport = applicationResult.lastFitReport
       }
 
-      deps.appendPipelineLog(
-        'Replaced node(s) with generated asset using preserved transform',
-        {
-          generatedAssetUrl: payload.assetUrl,
-          targets: targetNodeIds.map(id => {
-            const node = editorNodes.find(candidate => candidate.id === id)
-            return {
-              id,
-              transform: deps.getNodeTransformSnapshot(node ?? null),
-            }
-          }),
-        },
-      )
       state.hunyuanLastOutputUrl = payload.assetUrl
       state.hunyuanLastResultSummary =
         targetNodeIds.length > 1
@@ -617,7 +513,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
       await deps.refreshGeneratedAssetLibrary(payload.assetUrl)
 
       if (options?.addToScene) {
-        createGeneratedAssetNode(payload.assetUrl, sourceName)
+        createGeneratedAssetNode(deps, payload.assetUrl, sourceName)
       }
     } catch (error) {
       console.error('Hunyuan generation failed:', error)

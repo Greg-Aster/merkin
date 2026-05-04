@@ -6,6 +6,7 @@
 import { useThrelte } from '@threlte/core'
 import { onMount } from 'svelte'
 import * as THREE from 'three'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 
 // The path to the FOLDER containing your 6 cubemap images
 export let path: string = '/assets/hdri/skywip4-cubemap/' // Example path
@@ -21,7 +22,6 @@ export let files: [string, string, string, string, string, string] = [
 ]
 
 const { scene } = useThrelte()
-const isDev = import.meta.env.DEV
 
 onMount(() => {
   const loader = new THREE.CubeTextureLoader()
@@ -32,9 +32,7 @@ onMount(() => {
       // A cubemap texture is the ideal format for scene environments.
       scene.environment = cubeTexture
       scene.background = cubeTexture
-      if (isDev) {
-        console.log('✅ Cubemap skybox loaded successfully.')
-      }
+      runtimeDebugLog('✅ Cubemap skybox loaded successfully.')
     },
     undefined,
     error => {

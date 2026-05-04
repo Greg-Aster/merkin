@@ -6,7 +6,7 @@ import type {
   CollisionChannel,
   CollisionIntent,
   PrimitiveGeometryKind,
-} from '../engine'
+} from '../engine/types'
 import AssetTrimeshCollider from './AssetTrimeshCollider.svelte'
 import ColliderHelper from './ColliderHelper.svelte'
 import CollisionOverlayLabel from './CollisionOverlayLabel.svelte'

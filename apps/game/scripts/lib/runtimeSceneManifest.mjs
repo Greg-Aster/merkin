@@ -419,8 +419,35 @@ function isWalkableActor(actor) {
   return actor.physics?.collision.intent === 'walkable'
 }
 
+function getAuthoredRuntimeAssetContract(level) {
+  const runtimeAssets = level.settings?.level?.runtimeAssets
+  const toStringArray = value =>
+    Array.isArray(value) ? value.filter(item => typeof item === 'string') : []
+
+  return {
+    requiredActorIds: toStringArray(runtimeAssets?.requiredActorIds),
+    requiredAssetActorIds: [
+      ...toStringArray(runtimeAssets?.requiredRenderActorIds),
+      ...toStringArray(runtimeAssets?.requiredAssetActorIds),
+    ],
+  }
+}
+
+function uniqueStrings(values) {
+  return [...new Set(values)]
+}
+
 export function createLevelBuildReport(level) {
   const contract = getLevelRuntimeContract(level.id)
+  const authoredRuntimeContract = getAuthoredRuntimeAssetContract(level)
+  const requiredActorIds = uniqueStrings([
+    ...contract.requiredActorIds,
+    ...authoredRuntimeContract.requiredActorIds,
+  ])
+  const requiredAssetActorIds = uniqueStrings([
+    ...contract.requiredAssetActorIds,
+    ...authoredRuntimeContract.requiredAssetActorIds,
+  ])
   const warnings = []
   const errors = []
   const actorIds = new Set()
@@ -479,15 +506,18 @@ export function createLevelBuildReport(level) {
     errors.push(`Duplicate actor id "${actorId}" found in level definition.`)
   }
 
-  const missingRequiredActorIds = contract.requiredActorIds.filter(
+  const missingRequiredActorIds = requiredActorIds.filter(
     actorId => !actorsById.has(actorId) && !isSatisfiedByRuntimeSystem(level, actorId),
   )
   for (const actorId of missingRequiredActorIds) {
     errors.push(`Required actor "${actorId}" is missing.`)
   }
-  for (const actorId of contract.requiredAssetActorIds) {
+  for (const actorId of requiredAssetActorIds) {
     const actor = actorsById.get(actorId)
-    if (!actor) continue
+    if (!actor) {
+      errors.push(`Required actor "${actorId}" is missing.`)
+      continue
+    }
     if (actor.render?.visible === false) {
       errors.push(`Required actor "${actorId}" is not visible.`)
     }
@@ -550,8 +580,8 @@ export function createLevelBuildReport(level) {
     detailMeshActorCount,
     defaultCollisionActorCount,
     visualOnlyActorCount,
-    requiredActorCount: contract.requiredActorIds.length,
-    requiredRenderActorIds: [...contract.requiredAssetActorIds],
+    requiredActorCount: requiredActorIds.length,
+    requiredRenderActorIds: requiredAssetActorIds,
     missingRequiredActorIds,
     requiredAssetUrls: [...requiredAssetUrls].sort(),
     runtimeAssetUrls: [...runtimeAssetUrls].sort(),

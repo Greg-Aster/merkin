@@ -99,12 +99,11 @@ export function createEditorPrefabFactory(
           lightDecay: 1.25,
           spriteIntensity: 1.15,
           lightBurstBoost: 1.25,
-          title: 'Solitude',
+          title: 'Firefly Encounter',
           author: 'The Firefly',
-          location: 'The Solitude Plain',
-          excerpt:
-            'A patient glow waits where the ruined circle remembers its shape.',
-          body: 'This is a place for solitude. You are alone here.',
+          location: 'Current Level',
+          excerpt: 'A patient glow waits for authored dialogue.',
+          body: 'Write this firefly conversation for the current level.',
         },
       })
     },
