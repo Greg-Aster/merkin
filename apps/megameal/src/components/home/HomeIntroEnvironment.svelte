@@ -33,7 +33,9 @@ let lastPointerY = 0
 let activePointerId: number | null = null
 let activeTouchId: number | null = null
 let virtualWheel = 0
+let wheelVelocity = 0
 let scrollFrame = 0
+let lastScrollFrameAt = 0
 let activeScreenIndex = 0
 let revealProgress = 0
 let portraitMobile = false
@@ -44,6 +46,14 @@ let canvasDpr = 1
 let sceneQuality: SceneQuality = 'high'
 const backgroundRevealDelayMs = 1100
 const backgroundRevealFallbackDelayMs = 2600
+const wheelMomentumDecay = 2.4
+const wheelMomentumImpulse = 5.2
+const wheelMomentumMaxVelocity = 4.8
+const mouseWheelSensitivity = 1.15
+const mouseWheelMomentumImpulse = 3.6
+const mouseWheelMomentumMaxVelocity = 2.8
+const keyboardWheelStep = 0.82
+const pageWheelStep = 1.64
 const input: IntroInputState = {
   x: 0,
   y: 0,
@@ -187,13 +197,58 @@ function updateScrollDrivenWheel() {
   syncActiveScreenFromWheel(input.wheel)
 }
 
+function runScrollDrivenWheelFrame(timestamp: number) {
+  const delta = lastScrollFrameAt
+    ? Math.min(0.05, (timestamp - lastScrollFrameAt) / 1000)
+    : 1 / 60
+  lastScrollFrameAt = timestamp
+
+  if (Math.abs(wheelVelocity) > 0.001) {
+    const nextWheel = clamp(virtualWheel + wheelVelocity * delta, 0, maxWheel)
+    const hitScrollLimit =
+      nextWheel === virtualWheel &&
+      ((nextWheel <= 0 && wheelVelocity < 0) ||
+        (nextWheel >= maxWheel && wheelVelocity > 0))
+
+    virtualWheel = nextWheel
+    wheelVelocity = hitScrollLimit
+      ? 0
+      : wheelVelocity * Math.exp(-wheelMomentumDecay * delta)
+  }
+
+  updateScrollDrivenWheel()
+
+  if (Math.abs(wheelVelocity) > 0.001) {
+    scrollFrame = window.requestAnimationFrame(runScrollDrivenWheelFrame)
+  } else {
+    scrollFrame = 0
+    lastScrollFrameAt = 0
+  }
+}
+
 function scheduleScrollDrivenWheel() {
   if (scrollFrame) return
 
-  scrollFrame = window.requestAnimationFrame(() => {
-    scrollFrame = 0
-    updateScrollDrivenWheel()
-  })
+  scrollFrame = window.requestAnimationFrame(runScrollDrivenWheelFrame)
+}
+
+function smoothWheelStep(delta: number) {
+  const direction = Math.sign(delta)
+  if (
+    direction === 0 ||
+    (direction > 0 && virtualWheel >= maxWheel) ||
+    (direction < 0 && virtualWheel <= 0)
+  ) {
+    return false
+  }
+
+  wheelVelocity = clamp(
+    wheelVelocity + delta * wheelMomentumDecay,
+    -wheelMomentumMaxVelocity,
+    wheelMomentumMaxVelocity,
+  )
+  scheduleScrollDrivenWheel()
+  return true
 }
 
 function isInteractiveTarget(eventTarget: EventTarget | null) {
@@ -219,6 +274,7 @@ function applyDragDelta(
 
   input.dragX += deltaX / width
   input.dragY += deltaY / Math.max(wheelDistance, 1)
+  wheelVelocity = 0
   virtualWheel = clamp(
     virtualWheel - (deltaY / Math.max(wheelDistance, 1)) * 4.2,
     0,
@@ -234,6 +290,7 @@ function handlePointerDown(event: PointerEvent) {
   if (!isInsideShell(event.clientX, event.clientY)) return
 
   input.active = true
+  wheelVelocity = 0
   activePointerId = event.pointerId
   lastPointerX = event.clientX
   lastPointerY = event.clientY
@@ -298,6 +355,7 @@ function handleTouchStart(event: TouchEvent) {
   activeTouchId = touch.identifier
   activePointerId = null
   input.active = true
+  wheelVelocity = 0
   lastPointerX = touch.clientX
   lastPointerY = touch.clientY
   updatePointer(touch.clientX, touch.clientY)
@@ -330,12 +388,51 @@ function handleWheel(event: WheelEvent) {
 
   event.preventDefault()
   const viewportHeight = Math.max(window.innerHeight, 1)
-  virtualWheel = clamp(
-    virtualWheel + (event.deltaY / viewportHeight) * 2.4,
-    0,
-    maxWheel,
+  const wheelDelta = (event.deltaY / viewportHeight) * mouseWheelSensitivity
+  wheelVelocity = clamp(
+    wheelVelocity + wheelDelta * mouseWheelMomentumImpulse,
+    -mouseWheelMomentumMaxVelocity,
+    mouseWheelMomentumMaxVelocity,
   )
   scheduleScrollDrivenWheel()
+}
+
+function handleKeyboardScroll(event: KeyboardEvent) {
+  if (
+    event.altKey ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.shiftKey ||
+    isInteractiveTarget(event.target) ||
+    !isShellVisible()
+  ) {
+    return
+  }
+
+  const stepByKey: Record<string, number | undefined> = {
+    ArrowDown: keyboardWheelStep,
+    ArrowRight: keyboardWheelStep,
+    PageDown: pageWheelStep,
+    ' ': keyboardWheelStep,
+    Spacebar: keyboardWheelStep,
+    ArrowUp: -keyboardWheelStep,
+    ArrowLeft: -keyboardWheelStep,
+    PageUp: -pageWheelStep,
+  }
+  const step = stepByKey[event.key]
+  if (step === undefined) return
+
+  if (smoothWheelStep(step)) {
+    event.preventDefault()
+  }
+}
+
+function handlePortalAdvance(event: Event) {
+  if (!isShellVisible()) return
+
+  if (smoothWheelStep(keyboardWheelStep)) {
+    event.preventDefault()
+  }
 }
 
 function handleResize() {
@@ -394,6 +491,8 @@ onMount(() => {
   window.addEventListener('touchend', handleTouchEnd)
   window.addEventListener('touchcancel', handleTouchEnd)
   window.addEventListener('wheel', handleWheel, { passive: false })
+  window.addEventListener('keydown', handleKeyboardScroll)
+  window.addEventListener('merkin:portal-advance', handlePortalAdvance)
   window.addEventListener('resize', handleResize)
 
   return () => {
@@ -406,10 +505,13 @@ onMount(() => {
     window.removeEventListener('touchend', handleTouchEnd)
     window.removeEventListener('touchcancel', handleTouchEnd)
     window.removeEventListener('wheel', handleWheel)
+    window.removeEventListener('keydown', handleKeyboardScroll)
+    window.removeEventListener('merkin:portal-advance', handlePortalAdvance)
     window.removeEventListener('resize', handleResize)
     if (scrollFrame) {
       window.cancelAnimationFrame(scrollFrame)
       scrollFrame = 0
+      lastScrollFrameAt = 0
     }
     clearBackgroundRevealTimers()
   }
@@ -421,6 +523,7 @@ onDestroy(() => {
   if (scrollFrame) {
     window.cancelAnimationFrame(scrollFrame)
     scrollFrame = 0
+    lastScrollFrameAt = 0
   }
   clearBackgroundRevealTimers()
 })

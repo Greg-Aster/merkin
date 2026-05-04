@@ -9,6 +9,8 @@ export const homeIntroScreens = [
     ctaLabel: 'Begin Intake',
     href: '/',
     stillSrc: '/assets/banner/ComfyUI_00138_.webp',
+    webglStillSrc: '/assets/banner/home-intro-stills/home-intro.webp',
+    ktx2StillSrc: '/assets/banner/home-intro-stills/home-intro.ktx2',
     videoSrc: '/videos/title.webm',
   },
   {
@@ -21,6 +23,8 @@ export const homeIntroScreens = [
     ctaLabel: 'Open Timeline',
     href: '/timeline/',
     stillSrc: '/posts/timeline/universe.png',
+    webglStillSrc: '/assets/banner/home-intro-stills/timeline.webp',
+    ktx2StillSrc: '/assets/banner/home-intro-stills/timeline.ktx2',
     videoSrc: '/assets/banner/universbg0001-0121.webm',
   },
   {
@@ -33,6 +37,8 @@ export const homeIntroScreens = [
     ctaLabel: 'View Recipes',
     href: '/posts/cookbook/cookbook-index/',
     stillSrc: '/posts/cookbook/cookbook.png',
+    webglStillSrc: '/assets/banner/home-intro-stills/cookbook.webp',
+    ktx2StillSrc: '/assets/banner/home-intro-stills/cookbook.ktx2',
     videoSrc: '/assets/banner/cookbook-glitch0001-0049.webm',
   },
   {
@@ -45,6 +51,8 @@ export const homeIntroScreens = [
     ctaLabel: 'Open Archive',
     href: '/archive/',
     stillSrc: '/assets/banner/archive_still.png',
+    webglStillSrc: '/assets/banner/home-intro-stills/archive.webp',
+    ktx2StillSrc: '/assets/banner/home-intro-stills/archive.ktx2',
     videoSrc: '/assets/banner/archive_2.webm',
   },
   {
@@ -57,6 +65,8 @@ export const homeIntroScreens = [
     ctaLabel: 'Enter Game',
     href: '/game/',
     stillSrc: '/assets/banner/ComfyUI_0144.png',
+    webglStillSrc: '/assets/banner/home-intro-stills/game.webp',
+    ktx2StillSrc: '/assets/banner/home-intro-stills/game.ktx2',
     videoSrc: '/videos/starmap.webm',
   },
   {
@@ -69,6 +79,8 @@ export const homeIntroScreens = [
     ctaLabel: 'Browse Goods',
     href: '/store/',
     stillSrc: '/assets/banner/ultra-headquarters.png',
+    webglStillSrc: '/assets/banner/home-intro-stills/store.webp',
+    ktx2StillSrc: '/assets/banner/home-intro-stills/store.ktx2',
     videoSrc: '/assets/banner/store_glitch.webm',
   },
   {
@@ -81,6 +93,8 @@ export const homeIntroScreens = [
     ctaLabel: 'Open Channels',
     href: '/community/',
     stillSrc: '/posts/timeline/golden-era.png',
+    webglStillSrc: '/assets/banner/home-intro-stills/community.webp',
+    ktx2StillSrc: '/assets/banner/home-intro-stills/community.ktx2',
     videoSrc: '/assets/banner/golden-era.webm',
   },
   {
@@ -93,6 +107,8 @@ export const homeIntroScreens = [
     ctaLabel: 'Start Reading',
     href: '/posts/introducing-story-mode/',
     stillSrc: '/posts/building.png',
+    webglStillSrc: '/assets/banner/home-intro-stills/story-mode.webp',
+    ktx2StillSrc: '/assets/banner/home-intro-stills/story-mode.ktx2',
     videoSrc: '/assets/banner/golden-era.webm',
   },
 ] as const
@@ -101,6 +117,7 @@ export const homeIntroWheelToScreenRatio = 1.08
 export const homeIntroIntroOffsetScreens = 2.85
 export const homeIntroMobileIntroOffsetScreens = 3.75
 export const homeIntroWheelOverscanScreens = 1.8
+export const homeIntroBannerSceneHoldRadius = 0.3
 export const homeIntroScreenCount = homeIntroScreens.length
 export const homeIntroMinWheel =
   -homeIntroWheelOverscanScreens / homeIntroWheelToScreenRatio
@@ -110,3 +127,98 @@ export function homeIntroMaxWheelForOffset(offsetScreens = homeIntroIntroOffsetS
 export const homeIntroMaxWheel =
   (homeIntroScreenCount - 1 + homeIntroMobileIntroOffsetScreens) /
   homeIntroWheelToScreenRatio
+
+export function clampHomeIntroScreenIndex(value: number) {
+  return Math.min(homeIntroScreenCount - 1, Math.max(0, value))
+}
+
+export function getHomeIntroRestedScreenIndex(selectedIndex: number) {
+  const activeIndex = clampHomeIntroScreenIndex(Math.round(selectedIndex))
+  const delta = selectedIndex - activeIndex
+  const distance = Math.abs(delta)
+
+  if (distance <= 0.001 || distance >= 0.5) return selectedIndex
+
+  return activeIndex + Math.sign(delta) * Math.pow(distance / 0.5, 1.45) * 0.5
+}
+
+export function getHomeIntroBannerSyncState(selectedIndex: number) {
+  const clampedSelectedIndex = clampHomeIntroScreenIndex(selectedIndex)
+  const lowerScreenIndex = clampHomeIntroScreenIndex(Math.floor(clampedSelectedIndex))
+  const upperScreenIndex = clampHomeIntroScreenIndex(Math.ceil(clampedSelectedIndex))
+  const activeIndex = clampHomeIntroScreenIndex(Math.round(clampedSelectedIndex))
+  const distanceToActive = Math.abs(clampedSelectedIndex - activeIndex)
+
+  if (
+    distanceToActive <= homeIntroBannerSceneHoldRadius ||
+    lowerScreenIndex === upperScreenIndex
+  ) {
+    return {
+      activeIndex,
+      clampedSelectedIndex,
+      lowerScreenIndex,
+      mode: 'hold' as const,
+      upperScreenIndex,
+    }
+  }
+
+  const rawProgress =
+    (clampedSelectedIndex - lowerScreenIndex - homeIntroBannerSceneHoldRadius) /
+    Math.max(0.001, 1 - homeIntroBannerSceneHoldRadius * 2)
+  const normalizedProgress = Math.min(1, Math.max(0, rawProgress))
+  const progress =
+    normalizedProgress * normalizedProgress * (3 - normalizedProgress * 2)
+
+  return {
+    activeIndex,
+    clampedSelectedIndex,
+    lowerScreenIndex,
+    mode: 'transition' as const,
+    progress,
+    upperScreenIndex,
+  }
+}
+
+export function getHomeIntroBannerSyncEvent(selectedIndex: number) {
+  const bannerState = getHomeIntroBannerSyncState(selectedIndex)
+  const {
+    activeIndex,
+    clampedSelectedIndex,
+    lowerScreenIndex,
+    upperScreenIndex,
+  } = bannerState
+  const sceneId = homeIntroScreens[activeIndex]?.sceneId
+  const fromSceneId = homeIntroScreens[lowerScreenIndex]?.sceneId
+  const toSceneId = homeIntroScreens[upperScreenIndex]?.sceneId
+
+  if (!sceneId || !fromSceneId || !toSceneId) return null
+
+  if (bannerState.mode === 'hold') {
+    return {
+      detail: {
+        sceneId,
+        screenIndex: activeIndex,
+        selectedIndex: clampedSelectedIndex,
+      },
+      syncKey: `hold:${activeIndex}`,
+    }
+  }
+
+  return {
+    detail: {
+      sceneId,
+      screenIndex: activeIndex,
+      fromSceneId,
+      toSceneId,
+      fromScreenIndex: lowerScreenIndex,
+      toScreenIndex: upperScreenIndex,
+      progress: bannerState.progress,
+      selectedIndex: clampedSelectedIndex,
+    },
+    syncKey: [
+      lowerScreenIndex,
+      upperScreenIndex,
+      bannerState.progress.toFixed(4),
+    ].join(':'),
+  }
+}

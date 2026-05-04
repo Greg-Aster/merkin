@@ -26,6 +26,13 @@ import '../../styles/features/home/portal-hero-slide.css'
 
     cue.dataset.portalScrollCueBound = 'true'
     cue.addEventListener('click', () => {
+      const portalAdvanceEvent = new CustomEvent('merkin:portal-advance', {
+        bubbles: true,
+        cancelable: true,
+      })
+      window.dispatchEvent(portalAdvanceEvent)
+      if (portalAdvanceEvent.defaultPrevented) return
+
       const hero = document.getElementById('banner-container')
       const candidates = Array.from(
         document.querySelectorAll<HTMLElement>('.portal-snap-section, .portal-showcase, main#main'),

@@ -23,9 +23,26 @@ This file tracks the current state of the Megameal homepage portal effects work,
 - Removed unused generated alpha textures for screen panel media.
 - Skips decorative screen-panel frost, caustic, sheen, and reflection layers on `lean`.
 - Added stronger cleanup for WebGL resources when the scene unmounts.
+- Added generated WebGL-friendly carousel still variants:
+  - source stills ranged from `15.4 KiB` to `9,924.7 KiB`
+  - generated panel stills now range from `0.9 KiB` to `48.2 KiB`
+  - seven panel stills are `768x432`
+  - the small story-mode still is `400x224` to avoid upscaling and keep KTX2 dimensions block-friendly
+- The 3D portal scene now prefers `webglStillSrc` for panel textures while retaining the original `stillSrc` values.
+- Added an ETC1S KTX2 path for portal panel stills:
+  - generated KTX2 panel stills range from `3.2 KiB` to `79.7 KiB`
+  - non-lean scene quality tries KTX2 first, then falls back to WebP
+  - lean scene quality keeps WebP first to minimize transfer size
+  - Basis transcoder assets are generated under `public/assets/vendor/basis`
+- Added a runtime material pass for the optimized logo GLB:
+  - explicit sRGB/filtering/anisotropy settings for the baked logo texture
+  - modest emissive, roughness, metalness, and environment-intensity tuning
+  - shadows remain disabled on the logo mesh
 
 ## Verified
 
+- `pnpm --dir apps/megameal generate:home-intro-stills`
+- `pnpm --dir apps/megameal exec ktx2check` against generated panel KTX2 files
 - `pnpm --dir apps/megameal type-check`
 - `pnpm --dir apps/megameal audit:css:changed`
 - `pnpm --dir apps/megameal audit:css`
@@ -33,16 +50,20 @@ This file tracks the current state of the Megameal homepage portal effects work,
 - Playwright Chrome smoke test:
   - homepage loaded
   - one WebGL canvas present
+  - scrolling the portal requested seven `.ktx2` panel textures
+  - Basis transcoder JS/WASM requested successfully
   - optimized GLB requested successfully
   - no shader compile errors caught
+  - no KTX2 request failures caught
   - no logo-load errors caught
+  - canvas screenshot was nonblank after the logo/material pass
 
 ## Deferred
 
-- KTX2/GPU-compressed texture pipeline.
-- Dedicated logo material pass after visual review of the optimized mesh.
+- Broader KTX2 coverage for future WebGL-only textures after the scene stabilizes.
 - Very low-memory visual fallback mode.
-- Further carousel image optimization for WebGL panel textures.
+  - Intentionally skipped while the target floor remains 4 GB+ devices.
+- Per-quality variants for WebGL panel textures.
 - Bloom and heavy postprocessing remain deferred because the earlier test harmed transparency/performance tradeoffs.
 
 ## Notes

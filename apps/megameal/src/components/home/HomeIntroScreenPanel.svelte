@@ -1,5 +1,5 @@
 <script lang="ts">
-import { T, useTask } from '@threlte/core'
+import { T, useTask, useThrelte } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import {
   AdditiveBlending,
@@ -10,10 +10,16 @@ import {
   type CanvasTexture,
   type Group,
   type Texture,
+  type WebGLRenderer,
   TextureLoader,
 } from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import HomeIntroLogoReflections from './HomeIntroLogoReflections.svelte'
+import {
+  getHomeIntroKtx2Loader,
+  releaseHomeIntroKtx2Loader,
+  retainHomeIntroKtx2Loader,
+} from './homeIntroKtx2Loader'
 import {
   createCausticTexture,
   createFrostTexture,
@@ -27,8 +33,11 @@ export let index: number
 export let primary = false
 export let imageSrc = ''
 export let stillSrc = ''
+export let ktx2Src = ''
 export let shouldLoadMedia = primary
 export let sceneQuality: SceneQuality = 'high'
+
+const threlte = useThrelte()
 
 let titleTexture: Texture | null = null
 let stillTexture: Texture | null = null
@@ -40,7 +49,10 @@ let sheenSweep: Group | null = null
 let secondarySheenSweep: Group | null = null
 let loader: TextureLoader | null = null
 let stillTextureRequested = false
+let ktx2TextureRequested = false
 let titleTextureRequested = false
+let mounted = false
+let disposed = false
 
 const additiveBlending = AdditiveBlending
 const normalBlending = NormalBlending
@@ -102,6 +114,15 @@ const verticalHighlightGeometry = new RoundedBoxGeometry(
 
 $: panelGlassEnabled = sceneQuality !== 'lean'
 
+function getRenderer() {
+  const renderer = threlte.renderer as
+    | WebGLRenderer
+    | { current?: WebGLRenderer }
+    | null
+
+  return renderer && 'current' in renderer ? renderer.current ?? null : renderer
+}
+
 function disposeTitleTexture() {
   titleTexture?.dispose()
   titleTexture = null
@@ -149,23 +170,12 @@ function syncPanelGlassTextures() {
   grimeTexture ??= createGrimeTexture()
 }
 
-onMount(() => {
-  loader = new TextureLoader()
-  syncPanelGlassTextures()
-  ensureMediaTexturesLoaded()
+function cleanupPanel() {
+  if (disposed) return
 
-  return () => {
-    loader = null
-    disposeStillTexture()
-    disposeTitleTexture()
-    disposeFrostTexture()
-    disposeSheenTexture()
-    disposeCausticTexture()
-    disposeGrimeTexture()
-  }
-})
-
-onDestroy(() => {
+  disposed = true
+  mounted = false
+  releaseHomeIntroKtx2Loader()
   loader = null
   disposeStillTexture()
   disposeTitleTexture()
@@ -173,30 +183,85 @@ onDestroy(() => {
   disposeSheenTexture()
   disposeCausticTexture()
   disposeGrimeTexture()
+}
+
+onMount(() => {
+  mounted = true
+  disposed = false
+  retainHomeIntroKtx2Loader()
+  loader = new TextureLoader()
+  syncPanelGlassTextures()
+  ensureMediaTexturesLoaded()
+
+  return cleanupPanel
 })
+
+onDestroy(cleanupPanel)
 
 function ensureMediaTexturesLoaded() {
   if (!loader || !shouldLoadMedia) return
 
   const shouldLoadStill = stillSrc && (!primary || !imageSrc)
+  const shouldLoadKtx2Still =
+    shouldLoadStill && ktx2Src && sceneQuality !== 'lean'
 
-  if (shouldLoadStill && !stillTextureRequested) {
-    stillTextureRequested = true
-    stillTexture = loader.load(stillSrc, texture => {
-      texture.colorSpace = SRGBColorSpace
-      texture.needsUpdate = true
-      stillTexture = texture
-    })
+  if (shouldLoadKtx2Still && !stillTexture && !ktx2TextureRequested) {
+    const ktx2Loader = getHomeIntroKtx2Loader(getRenderer())
+
+    if (ktx2Loader) {
+      ktx2TextureRequested = true
+      ktx2Loader.load(
+        ktx2Src,
+        texture => {
+          if (!mounted) {
+            texture.dispose()
+            return
+          }
+          texture.colorSpace = SRGBColorSpace
+          texture.needsUpdate = true
+          stillTexture = texture
+        },
+        undefined,
+        () => {
+          if (!mounted || stillTextureRequested) return
+          loadStillTexture()
+        },
+      )
+      return
+    }
+  }
+
+  if (shouldLoadStill && !stillTexture && !stillTextureRequested) {
+    loadStillTexture()
   }
 
   if (primary && imageSrc && !titleTextureRequested) {
     titleTextureRequested = true
     titleTexture = loader.load(imageSrc, texture => {
+      if (!mounted) {
+        texture.dispose()
+        return
+      }
       texture.colorSpace = SRGBColorSpace
       texture.needsUpdate = true
       titleTexture = texture
     })
   }
+}
+
+function loadStillTexture() {
+  if (!loader || !stillSrc) return
+
+  stillTextureRequested = true
+  stillTexture = loader.load(stillSrc, texture => {
+    if (!mounted) {
+      texture.dispose()
+      return
+    }
+    texture.colorSpace = SRGBColorSpace
+    texture.needsUpdate = true
+    stillTexture = texture
+  })
 }
 
 $: if (loader && shouldLoadMedia) {
