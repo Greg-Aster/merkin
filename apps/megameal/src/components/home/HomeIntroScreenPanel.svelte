@@ -18,20 +18,20 @@ import {
   createCausticTexture,
   createFrostTexture,
   createGrimeTexture,
-  createImageAlphaTexture,
   createSheenTexture,
 } from './homeIntroGlassTextures'
+
+type SceneQuality = 'high' | 'balanced' | 'lean'
 
 export let index: number
 export let primary = false
 export let imageSrc = ''
 export let stillSrc = ''
 export let shouldLoadMedia = primary
+export let sceneQuality: SceneQuality = 'high'
 
 let titleTexture: Texture | null = null
 let stillTexture: Texture | null = null
-let titleAlphaTexture: CanvasTexture | null = null
-let stillAlphaTexture: CanvasTexture | null = null
 let frostTexture: CanvasTexture | null = null
 let sheenTexture: CanvasTexture | null = null
 let causticTexture: CanvasTexture | null = null
@@ -100,6 +100,8 @@ const verticalHighlightGeometry = new RoundedBoxGeometry(
   0.012,
 )
 
+$: panelGlassEnabled = sceneQuality !== 'lean'
+
 function disposeTitleTexture() {
   titleTexture?.dispose()
   titleTexture = null
@@ -108,16 +110,6 @@ function disposeTitleTexture() {
 function disposeStillTexture() {
   stillTexture?.dispose()
   stillTexture = null
-}
-
-function disposeTitleAlphaTexture() {
-  titleAlphaTexture?.dispose()
-  titleAlphaTexture = null
-}
-
-function disposeStillAlphaTexture() {
-  stillAlphaTexture?.dispose()
-  stillAlphaTexture = null
 }
 
 function disposeFrostTexture() {
@@ -140,20 +132,32 @@ function disposeGrimeTexture() {
   grimeTexture = null
 }
 
+function syncPanelGlassTextures() {
+  if (typeof document === 'undefined') return
+
+  if (!panelGlassEnabled) {
+    disposeFrostTexture()
+    disposeSheenTexture()
+    disposeCausticTexture()
+    disposeGrimeTexture()
+    return
+  }
+
+  frostTexture ??= createFrostTexture()
+  sheenTexture ??= createSheenTexture()
+  causticTexture ??= createCausticTexture()
+  grimeTexture ??= createGrimeTexture()
+}
+
 onMount(() => {
   loader = new TextureLoader()
-  frostTexture = createFrostTexture()
-  sheenTexture = createSheenTexture()
-  causticTexture = createCausticTexture()
-  grimeTexture = createGrimeTexture()
+  syncPanelGlassTextures()
   ensureMediaTexturesLoaded()
 
   return () => {
     loader = null
     disposeStillTexture()
     disposeTitleTexture()
-    disposeStillAlphaTexture()
-    disposeTitleAlphaTexture()
     disposeFrostTexture()
     disposeSheenTexture()
     disposeCausticTexture()
@@ -165,8 +169,6 @@ onDestroy(() => {
   loader = null
   disposeStillTexture()
   disposeTitleTexture()
-  disposeStillAlphaTexture()
-  disposeTitleAlphaTexture()
   disposeFrostTexture()
   disposeSheenTexture()
   disposeCausticTexture()
@@ -183,8 +185,6 @@ function ensureMediaTexturesLoaded() {
     stillTexture = loader.load(stillSrc, texture => {
       texture.colorSpace = SRGBColorSpace
       texture.needsUpdate = true
-      disposeStillAlphaTexture()
-      stillAlphaTexture = createImageAlphaTexture(texture.image)
       stillTexture = texture
     })
   }
@@ -194,8 +194,6 @@ function ensureMediaTexturesLoaded() {
     titleTexture = loader.load(imageSrc, texture => {
       texture.colorSpace = SRGBColorSpace
       texture.needsUpdate = true
-      disposeTitleAlphaTexture()
-      titleAlphaTexture = createImageAlphaTexture(texture.image)
       titleTexture = texture
     })
   }
@@ -204,6 +202,8 @@ function ensureMediaTexturesLoaded() {
 $: if (loader && shouldLoadMedia) {
   ensureMediaTexturesLoaded()
 }
+
+$: syncPanelGlassTextures()
 
 useTask(() => {
   const time = performance.now() * 0.001
@@ -266,18 +266,20 @@ useTask(() => {
 		/>
 	</T.Mesh>
 
-	<T.Mesh position={[0, 0, 0.018]}>
-		<T.PlaneGeometry args={[frameWidth * 0.94, frameHeight * 0.86]} />
-		<T.MeshBasicMaterial
-			map={frostTexture}
-			color="#dff7ff"
-			side={doubleSide}
-			transparent={true}
-			opacity={primary ? 0.07 : 0.055}
-			blending={normalBlending}
-			depthWrite={false}
-		/>
-	</T.Mesh>
+	{#if panelGlassEnabled}
+		<T.Mesh position={[0, 0, 0.018]}>
+			<T.PlaneGeometry args={[frameWidth * 0.94, frameHeight * 0.86]} />
+			<T.MeshBasicMaterial
+				map={frostTexture}
+				color="#dff7ff"
+				side={doubleSide}
+				transparent={true}
+				opacity={primary ? 0.07 : 0.055}
+				blending={normalBlending}
+				depthWrite={false}
+			/>
+		</T.Mesh>
+	{/if}
 
 	<T.Mesh position={[0, 0, -0.052]}>
 		<T.PlaneGeometry args={[frameWidth, frameHeight]} />
@@ -303,55 +305,61 @@ useTask(() => {
 		/>
 	</T.Mesh>
 
-	<T.Mesh position={[0, 0, 0.105]}>
-		<T.PlaneGeometry args={[causticWidth, causticHeight]} />
-		<T.MeshBasicMaterial
-			map={causticTexture}
-			color={primary ? "#e0f2fe" : "#c4b5fd"}
-			side={frontSide}
-			transparent={true}
-			opacity={primary ? 0.18 : 0.1}
-			blending={additiveBlending}
-			depthWrite={false}
-			depthTest={true}
-		/>
-	</T.Mesh>
-
-	<T.Group position={[0, 0, -0.18]} scale={[primary ? 1.08 : 0.9, primary ? 0.82 : 0.68, 1]}>
-		<HomeIntroLogoReflections atmosphereReveal={primary ? 0.42 : 0.26} />
-	</T.Group>
-
-	<T.Group bind:ref={sheenSweep} position={[-frameWidth * 0.5, 0, 0.132]} rotation={[0, 0, -0.48]}>
-		<T.Mesh>
-			<T.PlaneGeometry args={[sheenWidth, sheenHeight]} />
+	{#if panelGlassEnabled}
+		<T.Mesh position={[0, 0, 0.105]}>
+			<T.PlaneGeometry args={[causticWidth, causticHeight]} />
 			<T.MeshBasicMaterial
-				map={sheenTexture}
-				color="#dff7ff"
-				side={doubleSide}
+				map={causticTexture}
+				color={primary ? "#e0f2fe" : "#c4b5fd"}
+				side={frontSide}
 				transparent={true}
-				opacity={primary ? 0.14 : 0.08}
+				opacity={primary ? 0.18 : 0.1}
 				blending={additiveBlending}
 				depthWrite={false}
 				depthTest={true}
 			/>
 		</T.Mesh>
-	</T.Group>
+	{/if}
 
-	<T.Group bind:ref={secondarySheenSweep} position={[frameWidth * 0.3, 0, 0.128]} rotation={[0, 0, -0.48]}>
-		<T.Mesh>
-			<T.PlaneGeometry args={[sheenWidth * 0.56, sheenHeight * 0.92]} />
-			<T.MeshBasicMaterial
-				map={sheenTexture}
-				color="#c4b5fd"
-				side={doubleSide}
-				transparent={true}
-				opacity={primary ? 0.08 : 0.05}
-				blending={additiveBlending}
-				depthWrite={false}
-				depthTest={true}
-			/>
-		</T.Mesh>
-	</T.Group>
+	{#if panelGlassEnabled}
+		<T.Group position={[0, 0, -0.18]} scale={[primary ? 1.08 : 0.9, primary ? 0.82 : 0.68, 1]}>
+			<HomeIntroLogoReflections atmosphereReveal={primary ? 0.42 : 0.26} />
+		</T.Group>
+	{/if}
+
+	{#if panelGlassEnabled}
+		<T.Group bind:ref={sheenSweep} position={[-frameWidth * 0.5, 0, 0.132]} rotation={[0, 0, -0.48]}>
+			<T.Mesh>
+				<T.PlaneGeometry args={[sheenWidth, sheenHeight]} />
+				<T.MeshBasicMaterial
+					map={sheenTexture}
+					color="#dff7ff"
+					side={doubleSide}
+					transparent={true}
+					opacity={primary ? 0.14 : 0.08}
+					blending={additiveBlending}
+					depthWrite={false}
+					depthTest={true}
+				/>
+			</T.Mesh>
+		</T.Group>
+
+		<T.Group bind:ref={secondarySheenSweep} position={[frameWidth * 0.3, 0, 0.128]} rotation={[0, 0, -0.48]}>
+			<T.Mesh>
+				<T.PlaneGeometry args={[sheenWidth * 0.56, sheenHeight * 0.92]} />
+				<T.MeshBasicMaterial
+					map={sheenTexture}
+					color="#c4b5fd"
+					side={doubleSide}
+					transparent={true}
+					opacity={primary ? 0.08 : 0.05}
+					blending={additiveBlending}
+					depthWrite={false}
+					depthTest={true}
+				/>
+			</T.Mesh>
+		</T.Group>
+	{/if}
 
 	{#if primary && titleTexture}
 		<T.Mesh position={[0, 0.02, 0.158]}>

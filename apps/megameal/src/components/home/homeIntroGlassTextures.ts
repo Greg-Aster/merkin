@@ -39,7 +39,6 @@ export function createFrostTexture() {
 
   return texture
 }
-
 export function createCausticTexture() {
   const canvas = document.createElement('canvas')
   canvas.width = 256
@@ -176,49 +175,6 @@ export function createGrimeTexture() {
   texture.wrapS = RepeatWrapping
   texture.wrapT = RepeatWrapping
   texture.repeat.set(1.35, 0.9)
-  texture.needsUpdate = true
-
-  return texture
-}
-
-function smoothAlpha(value: number) {
-  const threshold = 0.035
-  const softness = 0.52
-  const normalized = Math.min(1, Math.max(0, (value - threshold) / softness))
-  const eased = normalized * normalized * (3 - normalized * 2)
-
-  return Math.pow(eased, 0.38)
-}
-
-export function createImageAlphaTexture(image: HTMLImageElement) {
-  const canvas = document.createElement('canvas')
-  canvas.width = Math.max(1, image.naturalWidth || image.width)
-  canvas.height = Math.max(1, image.naturalHeight || image.height)
-  const context = canvas.getContext('2d', { willReadFrequently: true })
-  if (!context) return null
-
-  context.drawImage(image, 0, 0, canvas.width, canvas.height)
-
-  const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
-  const { data } = imageData
-
-  for (let offset = 0; offset < data.length; offset += 4) {
-    const red = data[offset] / 255
-    const green = data[offset + 1] / 255
-    const blue = data[offset + 2] / 255
-    const luma = red * 0.2126 + green * 0.7152 + blue * 0.0722
-    const peak = Math.max(red, green, blue)
-    const alpha = Math.round(smoothAlpha(Math.max(luma, peak * 0.68)) * 255)
-
-    data[offset] = alpha
-    data[offset + 1] = alpha
-    data[offset + 2] = alpha
-    data[offset + 3] = 255
-  }
-
-  context.putImageData(imageData, 0, 0)
-
-  const texture = new CanvasTexture(canvas)
   texture.needsUpdate = true
 
   return texture

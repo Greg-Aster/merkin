@@ -84,6 +84,8 @@ import type { Group } from 'three'
 export let radius = 1
 export let count = 36
 export let color = '#67e8f9'
+export let hueCycleBase: number | null = null
+export let hueCycleSpeed = 0.01
 export let opacity = 0.18
 export let size = 0.16
 export let rotation: [number, number, number] = [0, 0, 0]
@@ -100,6 +102,7 @@ export let emitterFrontOffset = 1.35
 
 let group: Group | null = null
 let emitterGroup: Group | null = null
+let animatedColor = color
 
 const additiveBlending = AdditiveBlending
 const doubleSide = DoubleSide
@@ -129,6 +132,13 @@ useTask(() => {
   if (!group) return
 
   const time = performance.now() * 0.001
+  if (hueCycleBase !== null) {
+    const hue = (((hueCycleBase + time * hueCycleSpeed) % 1) + 1) % 1
+    animatedColor = `hsl(${Math.round(hue * 360)} 94% 72%)`
+  } else {
+    animatedColor = color
+  }
+
   group.rotation.set(rotation[0], rotation[1], rotation[2])
   group.rotation[spinAxis] += time * spinSpeed
 
@@ -160,7 +170,7 @@ useTask(() => {
     <T.PlaneGeometry args={[radius * 2.8, radius * 2.8]} />
     <T.MeshBasicMaterial
       map={ringGlowTexture}
-      color={color}
+      color={animatedColor}
       transparent={true}
       opacity={atmosphereReveal * haloOpacity}
       side={doubleSide}
@@ -173,7 +183,7 @@ useTask(() => {
     <T.Sprite position={[spark.x, spark.y, 0]} scale={[spark.size, spark.size, spark.size]}>
       <T.SpriteMaterial
         map={glowTexture}
-        color={color}
+        color={animatedColor}
         transparent={true}
         opacity={atmosphereReveal * opacity * (0.74 + Math.sin(spark.phase) * 0.08)}
         blending={additiveBlending}
@@ -186,7 +196,7 @@ useTask(() => {
       <T.Sprite scale={[emitterSize, emitterSize, emitterSize]}>
         <T.SpriteMaterial
           map={glowTexture}
-          color={color}
+          color={animatedColor}
           transparent={true}
           opacity={atmosphereReveal * emitterOpacity}
           blending={additiveBlending}

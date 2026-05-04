@@ -23,6 +23,8 @@ type IntroInputState = {
   active: boolean
 }
 
+type SceneQuality = 'high' | 'balanced' | 'lean'
+
 export let titleImageSrc = ''
 
 let shell: HTMLDivElement | null = null
@@ -39,6 +41,7 @@ let backgroundReady = false
 let backgroundRevealTimeout = 0
 let backgroundRevealFallbackTimeout = 0
 let canvasDpr = 1
+let sceneQuality: SceneQuality = 'high'
 const backgroundRevealDelayMs = 1100
 const backgroundRevealFallbackDelayMs = 2600
 const input: IntroInputState = {
@@ -140,11 +143,19 @@ function syncCanvasDpr() {
   const deviceMemory = getDeviceMemory()
   const lowMemoryDevice = typeof deviceMemory === 'number' && deviceMemory <= 4
   const compactViewport = window.innerWidth <= 760 || window.innerHeight <= 640
+  const reducedData = prefersReducedData()
 
   canvasDpr = Math.min(
     devicePixelRatio,
-    compactViewport || lowMemoryDevice || prefersReducedData() ? 1 : 1.25,
+    compactViewport || lowMemoryDevice || reducedData ? 1 : 1.25,
   )
+
+  sceneQuality =
+    reducedData || lowMemoryDevice || compactViewport
+      ? 'lean'
+      : devicePixelRatio > 1.5
+        ? 'balanced'
+        : 'high'
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -424,7 +435,7 @@ onDestroy(() => {
   <div class="home-intro-background-curtain" aria-hidden="true"></div>
 
 	<Canvas {createRenderer} dpr={canvasDpr}>
-		<HomeIntroEnvironmentScene {input} {titleImageSrc} onLogoReady={handleLogoReady} />
+		<HomeIntroEnvironmentScene {input} {titleImageSrc} {sceneQuality} onLogoReady={handleLogoReady} />
 	</Canvas>
 
 	<div class="home-intro-copy home-intro-copy--status" aria-live="polite">

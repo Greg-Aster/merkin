@@ -4,7 +4,7 @@ import { onDestroy, onMount } from 'svelte'
 import { Box3, Euler, Quaternion, Vector3 } from 'three'
 import type * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import HomeIntroParticle from './HomeIntroParticle.svelte'
+import HomeIntroParticleField from './HomeIntroParticleField.svelte'
 import HomeIntroRingGlow from './HomeIntroRingGlow.svelte'
 import HomeIntroScreenPanel from './HomeIntroScreenPanel.svelte'
 import {
@@ -24,8 +24,11 @@ type IntroInputState = {
   active: boolean
 }
 
+type SceneQuality = 'high' | 'balanced' | 'lean'
+
 export let input: IntroInputState
 export let titleImageSrc = ''
+export let sceneQuality: SceneQuality = 'high'
 export let onLogoReady: (() => void) | undefined
 
 let world: THREE.Group | null = null
@@ -69,7 +72,7 @@ const logoSize = new Vector3()
 const logoLightTarget = new Vector3(0, 0, -1.05)
 const logoSearchLightPosition = new Vector3()
 const logoTargetSize = new Vector3(4.68, 2.24, 1.44)
-const logoModelSrc = '/assets/3D/Hy3D_textured_00005_.glb'
+const logoModelSrc = '/assets/3D/Hy3D_textured_00005_optimized.glb'
 const logoIntroDuration = 2.05
 const logoImpactDuration = 0.42
 const logoRotationOffset = Math.PI
@@ -105,27 +108,18 @@ $: emblemBaseY = portraitMobile ? 0.08 : -0.04
 $: logoIntroStartPosition = portraitMobile
   ? ([0, 0.2, 2.65] as [number, number, number])
   : ([0, 0.08, 1.9] as [number, number, number])
+$: particleLimit =
+  sceneQuality === 'lean'
+    ? portraitMobile
+      ? 120
+      : 160
+    : sceneQuality === 'balanced'
+      ? 240
+      : particleCount
 
 function syncViewportMode() {
   if (typeof window === 'undefined') return
   portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
-
-  const connection = (navigator as Navigator & {
-    connection?: { saveData?: boolean; effectiveType?: string }
-  }).connection
-  const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory
-  const reducedData =
-    connection?.saveData === true ||
-    connection?.effectiveType === 'slow-2g' ||
-    connection?.effectiveType === '2g'
-  const lowMemoryDevice = typeof deviceMemory === 'number' && deviceMemory <= 4
-
-  particleLimit =
-    portraitMobile || reducedData
-      ? 180
-      : lowMemoryDevice
-        ? 240
-        : particleCount
 }
 
 function disposeObjectResources(object: THREE.Object3D) {
@@ -136,9 +130,20 @@ function disposeObjectResources(object: THREE.Object3D) {
 
     geometry?.dispose?.()
 
+    const disposeMaterialTextures = (item: THREE.Material) => {
+      Object.values(item).forEach(value => {
+        const texture = value as THREE.Texture | undefined
+        texture?.isTexture && texture.dispose()
+      })
+    }
+
     if (Array.isArray(material)) {
-      material.forEach(item => item.dispose())
+      material.forEach(item => {
+        disposeMaterialTextures(item)
+        item.dispose()
+      })
     } else {
+      material && disposeMaterialTextures(material)
       material?.dispose?.()
     }
   })
@@ -618,23 +623,21 @@ useTask(delta => {
 					stillSrc={screen.stillSrc}
 					primary={screen.primary}
 					shouldLoadMedia={screenMediaLoadStates[index]}
+					{sceneQuality}
 				/>
 			</T.Group>
 		{/each}
 	</T.Group>
 
   <T.Group bind:ref={starColumn} position={starColumnPosition} scale={starColumnScale}>
-		{#each visibleParticles as particle, index}
-			<HomeIntroParticle
-				{particle}
-				{index}
-				{input}
-				wheel={effectWheel}
-				scrollStep={effectScrollStepY}
-				scrollSpan={particleScrollSpan}
-				{atmosphereReveal}
-			/>
-		{/each}
+		<HomeIntroParticleField
+			particles={visibleParticles}
+			{input}
+			wheel={effectWheel}
+			scrollStep={effectScrollStepY}
+			scrollSpan={particleScrollSpan}
+			{atmosphereReveal}
+		/>
 	</T.Group>
 
 	<T.Group bind:ref={emblem} position={[0, emblemBaseY, -2.28]} scale={emblemScale}>
@@ -643,6 +646,8 @@ useTask(delta => {
 				radius={0.86}
 				count={0}
 				color="#67e8f9"
+				hueCycleBase={0.52}
+				hueCycleSpeed={0.01}
 				opacity={0.5}
 				size={0.3}
 				haloOpacity={0.96}
@@ -661,6 +666,8 @@ useTask(delta => {
 				radius={0.88}
 				count={0}
 				color="#8b5cf6"
+				hueCycleBase={0.72}
+				hueCycleSpeed={0.009}
 				opacity={0.9}
 				size={0.27}
 				haloOpacity={0.86}
@@ -679,6 +686,8 @@ useTask(delta => {
 				radius={0.82}
 				count={0}
 				color="#a78bfa"
+				hueCycleBase={0.78}
+				hueCycleSpeed={0.008}
 				opacity={0.9}
 				size={0.24}
 				haloOpacity={0.78}
