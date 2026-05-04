@@ -1,9 +1,17 @@
 ---
 import FactsWidget from '../components/widget/FactsWidget.astro'
+import PortalHeroBackgroundSlide from '../components/home/PortalHeroBackgroundSlide.astro'
+import PortalHeroSlide from '../components/home/PortalHeroSlide.astro'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
 ---
 
 <MainGridLayout homeLayout="test-portal" title="Test Portal">
+  <Fragment slot="banner-overlay-content">
+    <PortalHeroSlide />
+  </Fragment>
+  <Fragment slot="banner-slide-content">
+    <PortalHeroBackgroundSlide />
+  </Fragment>
   <FactsWidget
     slot="overlay"
     class="test-portal-sponsored-overlay"

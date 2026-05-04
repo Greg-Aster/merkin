@@ -57,33 +57,73 @@ const siteDevHost = process.env.SITE_DEV_HOST || '127.0.0.1';
 const siteDevPort = Number.parseInt(process.env.SITE_DEV_PORT || '4321', 10);
 
 function manualClientChunks(id) {
-  if (id.includes('node_modules')) {
-    if (id.includes('photoswipe')) return 'vendor-photoswipe';
-    if (id.includes('@swup') || id.includes('/swup/')) return 'vendor-swup';
-    if (id.includes('marked') || id.includes('markdown-it')) return 'vendor-markdown';
-    if (id.includes('katex')) return 'vendor-katex';
-    if (id.includes('mammoth')) return 'vendor-mammoth';
-    if (id.includes('overlayscrollbars')) return 'vendor-overlayscrollbars';
-    if (id.includes('howler')) return 'vendor-audio';
-    if (id.includes('chart.js')) return 'vendor-chart';
-    if (id.includes('peerjs')) return 'vendor-realtime';
-    if (id.includes('three/examples')) return 'vendor-3d-extras';
-    if (id.includes('/node_modules/three/')) return 'vendor-3d-core';
-    if (id.includes('@threlte')) return 'vendor-3d-extras';
+  const normalizedId = id.replaceAll('\\', '/');
+
+  if (normalizedId.includes('node_modules')) {
+    if (normalizedId.includes('photoswipe')) return 'vendor-photoswipe';
+    if (normalizedId.includes('@swup') || normalizedId.includes('/swup/')) return 'vendor-swup';
+    if (normalizedId.includes('marked') || normalizedId.includes('markdown-it')) return 'vendor-markdown';
+    if (normalizedId.includes('katex')) return 'vendor-katex';
+    if (normalizedId.includes('mammoth')) return 'vendor-mammoth';
+    if (normalizedId.includes('overlayscrollbars')) return 'vendor-overlayscrollbars';
+    if (normalizedId.includes('howler')) return 'vendor-audio';
+    if (normalizedId.includes('chart.js')) return 'vendor-chart';
+    if (normalizedId.includes('peerjs')) return 'vendor-realtime';
+    if (normalizedId.includes('three/examples')) return 'vendor-3d-extras';
+    if (normalizedId.includes('/node_modules/three/')) return 'vendor-3d-core';
+    if (normalizedId.includes('@threlte')) return 'vendor-3d-extras';
     return 'vendor';
   }
 
-  if (
-    id.includes('/src/components/home/') ||
-    id.includes('/src/components/banner-stage/')
-  ) {
-    return 'feature-home-banner';
+  if (normalizedId.includes('/src/utils/megamealRouteTransitions')) {
+    return 'feature-route-transitions';
   }
 
   if (
-    id.includes('/src/utils/site-audio') ||
-    id.includes('/src/utils/site-sfx') ||
-    id.includes('/src/components/client/SiteAudioControl.svelte')
+    normalizedId.includes('/src/stores/cartStore') ||
+    normalizedId.includes('/src/components/store/')
+  ) {
+    return 'feature-store';
+  }
+
+  if (normalizedId.includes('/src/components/banner-stage/')) {
+    return 'feature-banner-stage';
+  }
+
+  if (
+    normalizedId.includes('/src/components/home/featured-product/') ||
+    normalizedId.includes('/src/components/home/FeaturedProduct') ||
+    normalizedId.includes('/src/components/home/Procedural') ||
+    normalizedId.includes('/src/utils/flagship-product-showcase') ||
+    normalizedId.includes('/src/utils/product-banner-quirks')
+  ) {
+    return 'feature-featured-product';
+  }
+
+  if (
+    normalizedId.includes('/src/components/home/HomeIntro') ||
+    normalizedId.includes('/src/components/home/homeIntro') ||
+    normalizedId.includes('/src/components/home/PortalHeroSlide.astro')
+  ) {
+    return 'feature-home-intro';
+  }
+
+  if (normalizedId.includes('/src/components/home/PortalHeroBackgroundSlide.astro')) {
+    return 'feature-portal-background';
+  }
+
+  if (normalizedId.includes('/src/components/home/UniverseHeroSlide.astro')) {
+    return 'feature-universe-hero';
+  }
+
+  if (normalizedId.includes('/src/components/home/')) {
+    return 'feature-home-content';
+  }
+
+  if (
+    normalizedId.includes('/src/utils/site-audio') ||
+    normalizedId.includes('/src/utils/site-sfx') ||
+    normalizedId.includes('/src/components/client/SiteAudioControl.svelte')
   ) {
     return 'feature-audio';
   }

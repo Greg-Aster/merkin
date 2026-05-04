@@ -2,6 +2,8 @@
 import type { GetStaticPaths } from 'astro'
 import PostPage from '../components/PostPage.astro'
 import Pagination from '../components/control/Pagination.astro'
+import PortalHeroBackgroundSlide from '../components/home/PortalHeroBackgroundSlide.astro'
+import PortalHeroSlide from '../components/home/PortalHeroSlide.astro'
 import FactsWidget from '../components/widget/FactsWidget.astro'
 import { PAGE_SIZE } from '../constants/constants'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
@@ -23,6 +25,16 @@ import '../styles/pages/dynamic-page.css'
   homeLayout={isFirstPage ? 'portal' : 'default'}
   contentMode={isFirstPage ? 'banner-only' : 'default'}
 >
+  {isFirstPage && (
+    <Fragment slot="banner-overlay-content">
+      <PortalHeroSlide />
+    </Fragment>
+  )}
+  {isFirstPage && (
+    <Fragment slot="banner-slide-content">
+      <PortalHeroBackgroundSlide />
+    </Fragment>
+  )}
   {!isFirstPage && (
     <div class="dispatches-stream deferred-section">
       <PostPage page={page}></PostPage>

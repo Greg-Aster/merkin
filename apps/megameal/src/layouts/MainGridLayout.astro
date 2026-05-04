@@ -9,8 +9,6 @@ import {
 } from '@/config/timelineconfig'
 import Bleepy from '@components/bleepy/Bleepy.astro'
 import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
-import PortalHeroBackgroundSlide from '@components/home/PortalHeroBackgroundSlide.astro'
-import PortalHeroSlide from '@components/home/PortalHeroSlide.astro'
 import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
 import timelineManifest from '../../../../packages/shared-data/generated/timeline.json'
@@ -52,9 +50,8 @@ interface Props {
 
 const isTestPortalLayout = Astro.props.homeLayout === 'test-portal'
 const sharedHomeLayout = isTestPortalLayout ? 'portal' : Astro.props.homeLayout
-const shouldRenderPortalHero =
-  Astro.props.homeLayout === 'portal' || Astro.props.homeLayout === 'test-portal'
 const hasCustomBannerSlideContent = Astro.slots.has('banner-slide-content')
+const hasCustomBannerOverlayContent = Astro.slots.has('banner-overlay-content')
 const sharedProps = {
   ...Astro.props,
   homeLayout: sharedHomeLayout,
@@ -86,19 +83,15 @@ const sharedProps = {
       <Bleepy mascotContext={Astro.props.pageMascotContext} instanceIdentifier="LAYOUT_BLEEPY" />
     </Fragment>
   )}
-  {shouldRenderPortalHero && (
+  {hasCustomBannerOverlayContent && (
     <Fragment slot="banner-overlay-content">
-      <PortalHeroSlide />
+      <slot name="banner-overlay-content" />
     </Fragment>
   )}
   <Fragment slot="overlay">
     <slot name="overlay" />
   </Fragment>
-  {shouldRenderPortalHero ? (
-    <Fragment slot="banner-slide-content">
-      <PortalHeroBackgroundSlide />
-    </Fragment>
-  ) : hasCustomBannerSlideContent ? (
+  {hasCustomBannerSlideContent ? (
     <Fragment slot="banner-slide-content">
       <slot name="banner-slide-content" />
     </Fragment>
