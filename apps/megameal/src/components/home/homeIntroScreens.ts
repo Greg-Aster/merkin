@@ -7,7 +7,7 @@ export const homeIntroScreens = [
       'A cheerful multimedia nutrition concern about hunger, history, and the many ways a corporation can smile while measuring your bones.',
     stat: 'Public orientation feed',
     ctaLabel: 'Begin Intake',
-    href: '/',
+    href: '/videos/mega-meal-explained/',
     stillSrc: '/assets/banner/ComfyUI_00138_.webp',
     webglStillSrc: '/assets/banner/home-intro-stills/home-intro.webp',
     ktx2StillSrc: '/assets/banner/home-intro-stills/home-intro.ktx2',

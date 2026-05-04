@@ -179,7 +179,7 @@ const bannerEntries: BannerEntry[] = [
       preload: 'none', // Don't preload video until needed
       // playbackRate: 0.66,
     },
-    link: '/posts/mega-meal-explained/',
+    link: '/videos/mega-meal-explained/',
   },
   {
     item: {
@@ -326,7 +326,7 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
     stat: `${publishedTimelineCount} live timeline entries`,
     ctaLabel: 'Enter Timeline',
   },
-  '/posts/mega-meal-explained/': {
+  '/videos/mega-meal-explained/': {
     title: 'Welcome to MEGAMEAL',
     description:
       'Start with the core premise of the project, the setting, and the tone before moving into the deeper branches of the universe.',

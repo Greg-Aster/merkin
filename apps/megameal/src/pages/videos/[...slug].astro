@@ -1,0 +1,138 @@
+---
+import { getCollection } from 'astro:content'
+import MainGridLayout from '@layouts/MainGridLayout.astro'
+import Markdown from '@components/misc/Markdown.astro'
+import { Icon } from 'astro-icon/components'
+import PostMetadata from '../../components/PostMeta.astro'
+
+export async function getStaticPaths() {
+  const videos = await getCollection('videos', ({ data }) => data.draft !== true)
+
+  return videos.map(video => ({
+    params: { slug: video.slug },
+    props: { video },
+  }))
+}
+
+const { video } = Astro.props
+const { Content } = await video.render()
+const tags = video.data.tags ?? []
+const related = video.data.related ?? []
+const thumbnail =
+  video.data.image || `https://img.youtube.com/vi/${video.data.videoId}/hqdefault.jpg`
+const videoBannerPost = {
+  slug: video.slug,
+  data: {
+    title: video.data.title,
+    description: video.data.description,
+    image: thumbnail,
+    bannerType: 'video',
+    bannerData: {
+      videoId: video.data.videoId,
+    },
+    oneColumn: true,
+    showToc: false,
+  },
+}
+---
+
+<MainGridLayout
+  title={video.data.title}
+  description={video.data.description}
+  banner={thumbnail}
+  post={videoBannerPost}
+  backgroundImage={thumbnail}
+  oneColumn={true}
+>
+  <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mt-4 mb-4">
+    <article
+      id="video-container"
+      class="card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full"
+    >
+      <div class="flex flex-row flex-wrap text-black/30 dark:text-white/30 gap-5 mb-3 transition onload-animation">
+        <div class="flex flex-row items-center">
+          <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
+            <Icon name="material-symbols:movie-outline-rounded" />
+          </div>
+          <div class="text-sm">Video transmission</div>
+        </div>
+        <div class="flex flex-row items-center">
+          <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
+            <Icon name="material-symbols:campaign-outline-rounded" />
+          </div>
+          <div class="text-sm">{video.data.channelName ?? 'MEGA MEAL SAGA'}</div>
+        </div>
+      </div>
+
+      <div class="relative onload-animation">
+        <h1
+          data-pagefind-body
+          data-pagefind-weight="10"
+          data-pagefind-meta="title"
+          class="transition w-full block font-bold mb-3 text-3xl md:text-[2.25rem]/[2.75rem] text-black/90 dark:text-white/90 md:before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)] before:absolute before:top-[0.75rem] before:left-[-1.125rem]"
+        >
+          {video.data.title}
+        </h1>
+      </div>
+
+      <div class="onload-animation">
+        <PostMetadata
+          class="mb-5"
+          published={video.data.published}
+          tags={tags}
+          category={video.data.category}
+          hideUpdateDate={true}
+        />
+      </div>
+
+      <p class="mb-6 text-base md:text-lg leading-relaxed text-black/70 dark:text-white/70 onload-animation">
+        {video.data.description}
+      </p>
+
+      <Markdown class="mb-6 markdown-content onload-animation">
+        <Content />
+      </Markdown>
+    </article>
+  </div>
+
+  {related.length > 0 && (
+    <section class="mb-4 w-full" aria-label="Related MEGA MEAL transmissions">
+      <div class="mb-3 flex items-baseline justify-between gap-3 px-1 text-black/50 dark:text-white/50">
+        <div class="text-xs font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
+          Up Next
+        </div>
+        <div class="text-xs font-medium uppercase tracking-[0.08em]">
+          Corporate Queue
+        </div>
+      </div>
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {related.map(item => (
+          <a
+            href={item.href}
+            data-sfx-hover="hover-soft"
+            data-sfx-click="soft"
+            class="card-base btn-card rounded-2xl w-full min-h-[6rem] overflow-hidden active:scale-95 grid grid-cols-[7rem_minmax(0,1fr)] gap-3 p-3 text-left md:grid-cols-1 md:grid-rows-[auto_1fr]"
+          >
+            {item.image && (
+              <img
+                src={item.image}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                class="aspect-video w-full rounded-xl object-cover"
+              />
+            )}
+            <div class="min-w-0 self-center">
+              <div class="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
+                {item.eyebrow ?? 'Related'}
+              </div>
+              <div class="line-clamp-2 font-bold leading-tight text-black/80 transition dark:text-white/80">
+                {item.title}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+</MainGridLayout>

@@ -9,6 +9,7 @@ import {
 } from '@/config/timelineconfig'
 import Bleepy from '@components/bleepy/Bleepy.astro'
 import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
+import PortalHeroBackgroundSlide from '@components/home/PortalHeroBackgroundSlide.astro'
 import PortalHeroSlide from '@components/home/PortalHeroSlide.astro'
 import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
@@ -79,7 +80,9 @@ const sharedProps = {
     <PortalHeroSlide slot="banner-overlay-content" />
   )}
   <slot slot="overlay" name="overlay" />
-  {!shouldRenderPortalHero && (
+  {shouldRenderPortalHero ? (
+    <PortalHeroBackgroundSlide slot="banner-slide-content" />
+  ) : (
     <UniverseHeroSlide slot="banner-slide-content" />
   )}
 </SharedMainGridLayout>

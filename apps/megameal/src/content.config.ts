@@ -99,6 +99,31 @@ const postsCollection = defineCollection({
   schema: postsSchema,
 })
 
+const videosCollection = defineCollection({
+  schema: z.object({
+    title: z.string(),
+    published: z.date(),
+    description: z.string(),
+    videoId: z.string(),
+    channelName: z.string().optional(),
+    image: z.string().optional(),
+    tags: z.array(z.string()).optional().default([]),
+    category: z.string().optional().default('Video'),
+    draft: z.boolean().optional().default(false),
+    related: z
+      .array(
+        z.object({
+          title: z.string(),
+          href: z.string(),
+          eyebrow: z.string().optional(),
+          image: z.string().optional(),
+        }),
+      )
+      .optional()
+      .default([]),
+  }),
+})
+
 // Rest of collections remain unchanged
 const specCollection = defineCollection({
   schema: specSchema,
@@ -238,6 +263,7 @@ const quizzesCollection = defineCollection({
 // Export the collections
 export const collections = {
   posts: postsCollection,
+  videos: videosCollection,
   spec: specCollection,
   team: teamCollection,
   friends: friendsCollection,

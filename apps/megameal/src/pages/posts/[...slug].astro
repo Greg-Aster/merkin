@@ -51,6 +51,16 @@ export async function getStaticPaths() {
 }
 
 const { post, previousPost, nextPost } = Astro.props // Destructure `post` instead of `entry`
+const retiredPostRedirects: Record<string, string> = {
+  'mega-meal-explained': '/videos/mega-meal-explained/',
+  'mega-meal-3': '/videos/qarnivor-snuggloid-emergence/',
+}
+const retiredPostRedirect = retiredPostRedirects[post.slug]
+
+if (retiredPostRedirect) {
+  return Astro.redirect(retiredPostRedirect, 301)
+}
+
 console.log(
   'SLUG PAGE - mascotContext from frontmatter:',
   post.data.mascotContext,

@@ -17,6 +17,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import HomeIntroParticleField from './HomeIntroParticleField.svelte'
 import HomeIntroRingGlow from './HomeIntroRingGlow.svelte'
 import HomeIntroScreenPanel from './HomeIntroScreenPanel.svelte'
+import { getHomeIntroLogoModelSrc } from './homeIntroLogoAssets'
+import { homeIntroParticleClusters } from './homeIntroParticleClusters'
+import { hashHomeIntroUnit } from './homeIntroSceneMath'
 import {
   getHomeIntroBannerSyncEvent,
   getHomeIntroRestedScreenIndex,
@@ -62,6 +65,7 @@ let starColumn: THREE.Group | null = null
 let screenRail: THREE.Group | null = null
 const screenNodes: THREE.Group[] = []
 let portraitMobile = false
+let logoSceneMounted = false, activeLogoModelSrc = '', pendingLogoModelSrc = ''
 let particleLimit = 960
 let logoIntroStartedAt = 0
 let atmosphereReveal = 0
@@ -87,7 +91,6 @@ const logoSize = new Vector3()
 const logoLightTarget = new Vector3(0, 0, -1.05)
 const logoSearchLightPosition = new Vector3()
 const logoTargetSize = new Vector3(4.68, 2.24, 1.44)
-const logoModelSrc = '/assets/3D/Hy3D_textured_00005_optimized.glb'
 const logoIntroDuration = 2.05
 const logoImpactDuration = 0.42
 const logoRotationOffset = Math.PI
@@ -126,6 +129,7 @@ $: emblemBaseY = portraitMobile ? 0.08 : -0.04
 $: logoIntroStartPosition = portraitMobile
   ? ([0, 0.2, 2.65] as [number, number, number])
   : ([0, 0.08, 1.9] as [number, number, number])
+$: logoModelSrc = getHomeIntroLogoModelSrc(sceneQuality)
 $: particleLimit =
   sceneQuality === 'lean'
     ? portraitMobile
@@ -249,30 +253,48 @@ function attachLogoModel() {
   logoMeshRoot.add(logoModel)
 }
 
-async function loadLogoModel() {
+async function loadLogoModel(sourceUrl: string) {
+  pendingLogoModelSrc = sourceUrl
+
   try {
-    const gltf = await gltfLoader.loadAsync(logoModelSrc)
+    const gltf = await gltfLoader.loadAsync(sourceUrl)
     const model = gltf.scene ?? gltf.scenes?.[0]
-    if (!model) return
+    if (!model) {
+      if (pendingLogoModelSrc === sourceUrl) {
+        pendingLogoModelSrc = ''
+      }
+      return
+    }
+
+    if (pendingLogoModelSrc !== sourceUrl) {
+      disposeObjectResources(model)
+      return
+    }
 
     disposeLogoModel()
     logoModel = model
+    activeLogoModelSrc = sourceUrl
+    pendingLogoModelSrc = ''
     fitLogoModel(logoModel)
     tuneLogoModel(logoModel)
     attachLogoModel()
     logoIntroStartedAt = performance.now() * 0.001
     onLogoReady?.()
   } catch (error) {
+    if (pendingLogoModelSrc === sourceUrl) {
+      pendingLogoModelSrc = ''
+    }
     console.error('Failed to load portal logo mesh:', error)
   }
 }
 
 onMount(() => {
+  logoSceneMounted = true
   syncViewportMode()
   window.addEventListener('resize', syncViewportMode)
-  void loadLogoModel()
 
   return () => {
+    logoSceneMounted = false
     window.removeEventListener('resize', syncViewportMode)
   }
 })
@@ -285,41 +307,23 @@ onDestroy(() => {
 })
 
 $: attachLogoModel()
-
-const particleClusters = [
-  { x: -0.2, y: 0.08, z: -0.14, spread: 0.28, hue: 0.52 },
-  { x: 0.24, y: -1.22, z: -0.24, spread: 0.32, hue: 0.58 },
-  { x: -0.36, y: -2.62, z: -0.34, spread: 0.36, hue: 0.65 },
-  { x: 0.38, y: -4.02, z: -0.3, spread: 0.4, hue: 0.72 },
-  { x: -0.32, y: -5.46, z: -0.18, spread: 0.42, hue: 0.79 },
-  { x: 0.32, y: -6.94, z: 0.02, spread: 0.44, hue: 0.86 },
-  { x: 0, y: -8.42, z: -0.5, spread: 0.42, hue: 0.61 },
-  { x: -0.28, y: -9.92, z: 0.12, spread: 0.46, hue: 0.55 },
-  { x: 0.28, y: -11.46, z: 0.08, spread: 0.48, hue: 0.7 },
-  { x: -0.18, y: -13.04, z: -0.38, spread: 0.48, hue: 0.76 },
-  { x: 0.18, y: -14.66, z: -0.04, spread: 0.5, hue: 0.84 },
-  { x: 0, y: -16.34, z: 0.18, spread: 0.52, hue: 0.6 },
-  { x: -0.22, y: -18.08, z: -0.24, spread: 0.52, hue: 0.68 },
-  { x: 0.24, y: -19.88, z: 0.04, spread: 0.54, hue: 0.74 },
-  { x: -0.12, y: -21.74, z: -0.46, spread: 0.54, hue: 0.82 },
-  { x: 0.12, y: -23.66, z: -0.06, spread: 0.56, hue: 0.88 },
-  { x: -0.04, y: -25.64, z: 0.16, spread: 0.56, hue: 0.57 },
-  { x: 0.04, y: -27.68, z: -0.22, spread: 0.58, hue: 0.64 },
-]
-
-function hash01(seed: number) {
-  return (Math.sin(seed * 12.9898) * 43758.5453) % 1
+$: if (
+  logoSceneMounted &&
+  logoModelSrc !== activeLogoModelSrc &&
+  logoModelSrc !== pendingLogoModelSrc
+) {
+  void loadLogoModel(logoModelSrc)
 }
 
 const particles = Array.from({ length: particleCount }, (_, index) => {
   const cluster = index % particleClusterCount
-  const clusterCenter = particleClusters[cluster]
-  const randomA = Math.abs(hash01(index + 1))
-  const randomB = Math.abs(hash01(index + 17))
-  const randomC = Math.abs(hash01(index + 41))
-  const randomD = Math.abs(hash01(index + 79))
-  const randomE = Math.abs(hash01(index + 131))
-  const randomF = Math.abs(hash01(index + 181))
+  const clusterCenter = homeIntroParticleClusters[cluster]
+  const randomA = Math.abs(hashHomeIntroUnit(index + 1))
+  const randomB = Math.abs(hashHomeIntroUnit(index + 17))
+  const randomC = Math.abs(hashHomeIntroUnit(index + 41))
+  const randomD = Math.abs(hashHomeIntroUnit(index + 79))
+  const randomE = Math.abs(hashHomeIntroUnit(index + 131))
+  const randomF = Math.abs(hashHomeIntroUnit(index + 181))
   const radialT = randomA ** 1.25
   const angle = randomB * Math.PI * 2
   const verticalAngle = (randomC - 0.5) * Math.PI
@@ -371,6 +375,7 @@ const screens = Array.from({ length: screenCount }, (_, index) => {
     ctaLabel: portalScreens[index].ctaLabel,
     stillSrc: portalScreens[index].webglStillSrc ?? portalScreens[index].stillSrc,
     ktx2Src: portalScreens[index].ktx2StillSrc ?? '',
+    videoSrc: portalScreens[index].videoSrc,
     primary: index === primaryScreenIndex,
   }
 })
@@ -566,11 +571,17 @@ useTask(delta => {
 
   if (emblem) {
     const baseZ = portraitMobile ? -1.42 : -0.9
+    const emblemRestY =
+      emblemBaseY + logoScrollRise + Math.sin(time * 0.82) * 0.08
+    const emblemTargetY =
+      emblemBaseY + (emblemRestY - emblemBaseY) * logoIntroDrop
     emblem.rotation.x = Math.sin(time * 0.56) * 0.08 + input.dragY * 1.8
     emblem.rotation.y = spiralPhase + time * 0.18 + input.dragX * 2.6
     emblem.rotation.z = Math.sin(time * 0.32) * 0.045
     emblem.position.x += (0 - emblem.position.x) * ease
-    emblem.position.y += (emblemBaseY + Math.sin(time * 0.82) * 0.08 - emblem.position.y) * ease
+    emblem.position.y +=
+      ((logoIntroRaw < 1 ? emblemTargetY : emblemRestY) - emblem.position.y) *
+      ease
     emblem.position.z += (baseZ - emblem.position.z) * ease
   }
 
@@ -724,6 +735,7 @@ useTask(delta => {
 					imageSrc={screen.primary ? titleImageSrc : ""}
 					stillSrc={screen.stillSrc}
 					ktx2Src={screen.ktx2Src}
+					videoSrc={screen.videoSrc}
 					kicker={screen.kicker}
 					title={screen.title}
 					stat={screen.stat}

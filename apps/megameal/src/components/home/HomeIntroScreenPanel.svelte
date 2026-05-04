@@ -14,10 +14,10 @@ import {
   type Texture,
   type WebGLRenderer,
   TextureLoader,
+  VideoTexture,
 } from 'three'
 import type * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import HomeIntroLogoReflections from './HomeIntroLogoReflections.svelte'
 import {
   getHomeIntroKtx2Loader,
   releaseHomeIntroKtx2Loader,
@@ -35,6 +35,7 @@ export let primary = false
 export let imageSrc = ''
 export let stillSrc = ''
 export let ktx2Src = ''
+export let videoSrc = ''
 export let shouldLoadMedia = primary
 export let sceneQuality: SceneQuality = 'high'
 export let kicker = ''
@@ -48,6 +49,7 @@ const threlte = useThrelte()
 let titleTexture: Texture | null = null
 let stillTexture: Texture | null = null
 let screenTextTexture: CanvasTexture | null = null
+let videoTexture: VideoTexture | null = null
 let panelRoot: Group | null = null
 let sheenTexture: CanvasTexture | null = null
 let causticTexture: CanvasTexture | null = null
@@ -60,14 +62,18 @@ let screenModelRequested = false
 let stillTextureRequested = false
 let ktx2TextureRequested = false
 let titleTextureRequested = false
+let videoRequested = false
+let videoReady = false
 let mounted = false
 let disposed = false
 let hoverBlend = 0
 let mediaOpacity = 1
 let titleMediaOpacity = 1
+let videoMediaOpacity = 0
 let mediaGhostOpacity = 1
 let glassEffectOpacity = 1
 let textOpacity = primary ? 0.72 : 0.58
+let videoElement: HTMLVideoElement | null = null
 
 const additiveBlending = AdditiveBlending
 const normalBlending = NormalBlending
@@ -75,8 +81,8 @@ const doubleSide = DoubleSide
 const frontSide = FrontSide
 const frameWidth = 3.18
 const frameHeight = 1.78
-const glowWidth = 3.38
-const glowHeight = 1.98
+const glowWidth = frameWidth * 0.98
+const glowHeight = frameHeight * 0.98
 const mediaWidth = frameWidth * .95
 const mediaHeight = frameHeight * .95
 const titleWidth = mediaWidth
@@ -89,10 +95,10 @@ const causticWidth = frameWidth * 0.98
 const causticHeight = frameHeight * 0.92
 const glassMediaOffset = 0.014
 const glassMediaGhostScale = 1.012
-const mediaSurfaceZ = -0.094
-const mediaGhostNearZ = -0.1
-const mediaGhostFarZ = -0.106
-const textSurfaceZ = -0.028
+const mediaSurfaceZ = -0.034
+const mediaGhostNearZ = -0.042
+const mediaGhostFarZ = -0.05
+const textSurfaceZ = -0.018
 const textWidth = 2.54
 const textHeight = 1.24
 const screenModelSrc = '/assets/3D/screen.glb'
@@ -115,6 +121,20 @@ function getRenderer() {
 function disposeTitleTexture() {
   titleTexture?.dispose()
   titleTexture = null
+}
+
+function disposeVideoTexture() {
+  videoTexture?.dispose()
+  videoTexture = null
+}
+
+function disposeVideoElement() {
+  if (!videoElement) return
+
+  videoElement.pause()
+  videoElement.removeAttribute('src')
+  videoElement.load()
+  videoElement = null
 }
 
 function disposeScreenTextTexture() {
@@ -177,6 +197,55 @@ function configureMediaTexture(texture: Texture, invertY = false) {
   }
 
   texture.needsUpdate = true
+}
+
+function ensureHoverVideoLoaded() {
+  if (
+    videoRequested ||
+    typeof document === 'undefined' ||
+    !primary ||
+    !videoSrc
+  ) {
+    return
+  }
+
+  videoRequested = true
+  videoReady = false
+  const video = document.createElement('video')
+  video.muted = true
+  video.loop = true
+  video.playsInline = true
+  video.preload = 'metadata'
+  video.crossOrigin = 'anonymous'
+  video.src = videoSrc
+
+  video.addEventListener(
+    'canplay',
+    () => {
+      if (!mounted || videoElement !== video) return
+      videoReady = true
+    },
+    { once: true },
+  )
+
+  videoElement = video
+  videoTexture = new VideoTexture(video)
+  configureMediaTexture(videoTexture)
+  video.load()
+}
+
+function syncHoverVideoPlayback() {
+  if (!primary || !videoSrc) return
+
+  if (hovered) {
+    ensureHoverVideoLoaded()
+    videoElement?.play().catch(() => {
+      // The still image remains visible if autoplay is blocked.
+    })
+    return
+  }
+
+  videoElement?.pause()
 }
 
 function wrapCanvasText(
@@ -376,6 +445,8 @@ function cleanupPanel() {
   disposeScreenModel()
   disposeStillTexture()
   disposeTitleTexture()
+  disposeVideoTexture()
+  disposeVideoElement()
   disposeScreenTextTexture()
   disposeSheenTexture()
   disposeCausticTexture()
@@ -463,6 +534,10 @@ $: if (loader && shouldLoadMedia) {
   ensureMediaTexturesLoaded()
 }
 
+$: if (mounted && primary && videoSrc && (hovered || videoElement)) {
+  syncHoverVideoPlayback()
+}
+
 $: if (mounted && (kicker || title || stat || ctaLabel)) {
   syncScreenTextTexture()
 }
@@ -499,11 +574,19 @@ useTask(delta => {
   hoverBlend += ((hovered ? 1 : 0) - hoverBlend) * ease
   const baseTitleOpacity = panelGlassEnabled ? 0.76 : 1
   const baseMediaOpacity = panelGlassEnabled ? (primary ? 0.62 : 0.48) : 1
-  titleMediaOpacity = baseTitleOpacity + (1 - baseTitleOpacity) * hoverBlend
+  videoMediaOpacity = primary && videoReady ? hoverBlend : 0
+  titleMediaOpacity =
+    baseTitleOpacity +
+    (1 - baseTitleOpacity) * hoverBlend -
+    videoMediaOpacity * 0.72
   mediaOpacity = baseMediaOpacity + (1 - baseMediaOpacity) * hoverBlend
-  mediaGhostOpacity = 1
+  mediaGhostOpacity = panelGlassEnabled ? (primary ? 0.46 : 0.28) : 0
   glassEffectOpacity = 1
-  textOpacity = primary ? 0.96 : 0.88
+  textOpacity = primary && videoSrc
+    ? 0.96 * (1 - hoverBlend)
+    : primary
+      ? 0.96
+      : 0.88
 
   if (panelRoot) {
     panelRoot.position.z = hoverBlend * 0.045
@@ -550,26 +633,26 @@ useTask(delta => {
 
 	<T.Mesh position={[0, 0, -0.052]}>
 		<T.PlaneGeometry args={[frameWidth, frameHeight]} />
-		<T.MeshBasicMaterial
-			color="#f8fafc"
-			side={doubleSide}
-			transparent={true}
-			opacity={(primary ? 0.026 : 0.018) * glassEffectOpacity}
-			blending={normalBlending}
-			depthWrite={false}
-		/>
+			<T.MeshBasicMaterial
+				color="#f8fafc"
+				side={doubleSide}
+				transparent={true}
+				opacity={(primary ? 0.018 : 0.012) * glassEffectOpacity}
+				blending={normalBlending}
+				depthWrite={false}
+			/>
 	</T.Mesh>
 
 	<T.Mesh position={[0, 0, -0.045]}>
 		<T.PlaneGeometry args={[glowWidth, glowHeight]} />
-		<T.MeshBasicMaterial
-			color={primary ? "#1e1b4b" : "#172554"}
-			side={doubleSide}
-			transparent={true}
-			opacity={(primary ? 0.12 : 0.09) * glassEffectOpacity}
-			blending={additiveBlending}
-			depthWrite={false}
-		/>
+			<T.MeshBasicMaterial
+				color={primary ? "#1e1b4b" : "#172554"}
+				side={doubleSide}
+				transparent={true}
+				opacity={(primary ? 0.07 : 0.045) * glassEffectOpacity}
+				blending={additiveBlending}
+				depthWrite={false}
+			/>
 	</T.Mesh>
 
 	{#if panelGlassEnabled}
@@ -586,12 +669,6 @@ useTask(delta => {
 				depthTest={true}
 			/>
 		</T.Mesh>
-	{/if}
-
-	{#if panelGlassEnabled}
-		<T.Group position={[0, 0, -0.18]} scale={[primary ? 1.08 : 0.9, primary ? 0.82 : 0.68, 1]}>
-			<HomeIntroLogoReflections atmosphereReveal={primary ? 0.42 : 0.26} />
-		</T.Group>
 	{/if}
 
 	{#if panelGlassEnabled}
@@ -668,6 +745,19 @@ useTask(delta => {
 				depthWrite={!panelGlassEnabled}
 			/>
 		</T.Mesh>
+		{#if videoTexture}
+			<T.Mesh position={[0, 0.02, mediaSurfaceZ + 0.002]}>
+				<T.PlaneGeometry args={[titleWidth, titleHeight]} />
+				<T.MeshBasicMaterial
+					map={videoTexture}
+					side={frontSide}
+					transparent={true}
+					opacity={videoMediaOpacity}
+					blending={normalBlending}
+					depthWrite={false}
+				/>
+			</T.Mesh>
+		{/if}
 	{:else if stillTexture}
 		{#if panelGlassEnabled}
 			<T.Mesh position={[glassMediaOffset, -glassMediaOffset * 0.46, mediaGhostFarZ]} scale={[glassMediaGhostScale, glassMediaGhostScale, 1]}>
