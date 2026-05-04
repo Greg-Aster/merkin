@@ -6,10 +6,34 @@ import { url } from '@utils/url-utils'
 import { onMount } from 'svelte'
 import { getFriendContent, isFriendContentEnabled } from '../stores/friendStore'
 
+type PagefindResult = {
+  url: string
+  meta: {
+    title: string
+  }
+  excerpt: string
+  isFriendContent?: boolean
+  friendName?: string
+  friendUrl?: string
+}
+
+type PagefindApi = {
+  search: (keyword: string) => Promise<{
+    results: Array<{
+      data: () => Promise<PagefindResult>
+    }>
+  }>
+}
+
+declare global {
+  interface Window {
+    pagefind?: PagefindApi
+  }
+}
+
 let keywordDesktop = ''
 let keywordMobile = ''
-let result = []
-let friendResults = [] // Store friend search results separately
+let result: PagefindResult[] = []
 let isAuthenticated = false
 let friendContentEnabled = false
 export let hideMobileTrigger = false
@@ -32,7 +56,25 @@ const fakeResult = [
   },
 ]
 
-let search = (keyword: string, isDesktop: boolean) => {}
+let search = (_keyword: string, _isDesktop: boolean) => {}
+
+function waitForPagefind(timeoutMs = 2500) {
+  if (window.pagefind) return Promise.resolve(window.pagefind)
+
+  return new Promise<PagefindApi | null>(resolve => {
+    const timeoutId = window.setTimeout(() => {
+      window.removeEventListener('pagefind:ready', handleReady)
+      resolve(window.pagefind ?? null)
+    }, timeoutMs)
+
+    function handleReady() {
+      window.clearTimeout(timeoutId)
+      resolve(window.pagefind ?? null)
+    }
+
+    window.addEventListener('pagefind:ready', handleReady, { once: true })
+  })
+}
 
 onMount(() => {
   function hasValidAuth() {
@@ -64,6 +106,9 @@ onMount(() => {
 
     // Get standard search results
     if (import.meta.env.PROD) {
+      const pagefind = await waitForPagefind()
+      if (!pagefind) return
+
       const ret = await pagefind.search(keyword)
       for (const item of ret.results) {
         const pagefindResult = await item.data()
@@ -77,7 +122,7 @@ onMount(() => {
 
     // Get and add friend content results if enabled
     if (isAuthenticated && friendContentEnabled) {
-      friendResults = searchFriendPosts(keyword)
+      const friendResults = searchFriendPosts(keyword)
 
       // Convert friend results to the same format as pagefind results
       const formattedFriendResults = friendResults.map(post => ({

@@ -126,7 +126,7 @@ import '../styles/features/extracted/navbar.css'
         
         <div class="flex items-center justify-end">
             <!--<SearchPanel client:load>-->
-            <Search client:idle hideMobileTrigger={true}></Search>
+            <Search client:only="svelte" hideMobileTrigger={true}></Search>
             <div class="store-cart-nav-action hidden">
                 <StoreCartButton client:load />
             </div>
@@ -396,12 +396,17 @@ import '../styles/features/extracted/navbar.css'
     
     {import.meta.env.PROD && <script is:inline define:vars={{scriptUrl: url('/pagefind/pagefind.js')}}>
     async function loadPagefind() {
+        if (window.pagefind) {
+            window.dispatchEvent(new CustomEvent('pagefind:ready'))
+            return
+        }
         const pagefind = await import(scriptUrl)
         await pagefind.options({
             'excerptLength': 20
         })
         pagefind.init()
         window.pagefind = pagefind
+        window.dispatchEvent(new CustomEvent('pagefind:ready'))
         pagefind.search('')     // speed up the first search
     }
     loadPagefind()
