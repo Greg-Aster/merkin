@@ -59,6 +59,12 @@ import StarMap from '../systems/StarMap.svelte'
 import RuntimeActorBranch from './RuntimeActorBranch.svelte'
 import SceneLighting from './SceneLighting.svelte'
 
+type WorldPartitionSettings = {
+  partitionUrl?: string
+  cellSize?: number
+  activeRadius?: number
+}
+
 const dispatch = createEventDispatcher()
 
 export let levelId: string
@@ -111,6 +117,21 @@ const SKYBOX_PRESETS = {
     ] as [string, string, string, string, string, string],
   },
 } as const
+
+function getWorldPartitionSettings(
+  settings: SceneSettings,
+): WorldPartitionSettings | null {
+  const levelSettings = settings.level as
+    | (NonNullable<SceneSettings['level']> & {
+        worldPartition?: WorldPartitionSettings
+      })
+    | undefined
+  const legacySettings = settings as SceneSettings & {
+    worldPartition?: WorldPartitionSettings
+  }
+
+  return levelSettings?.worldPartition ?? legacySettings.worldPartition ?? null
+}
 
 function getActorRevealBatchSize() {
   switch (get(qualityLevelStore)) {
@@ -374,7 +395,9 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
     level,
     normalizedSceneSettings,
   )
-  worldPartition = await loadRuntimeWorldPartition(level)
+  worldPartition = getWorldPartitionSettings(normalizedSceneSettings)
+    ? await loadRuntimeWorldPartition(level)
+    : null
   if (token !== loadToken) return
 
   levelActors = levelDefinition.actors

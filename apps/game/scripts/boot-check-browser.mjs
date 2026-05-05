@@ -20,7 +20,7 @@ const deployedLevelIds = readDeployedLevelIds()
 function createLevelSmokeCheck(levelId) {
   return {
     name: `level:${levelId}`,
-    url: `${appOrigin}/?level=${levelId}&debug=1`,
+    url: `${appOrigin}/?level=${levelId}&debug=1&debugLogs=1`,
     postLoadDelayMs: 1000,
     interact: async (page, context) => {
       await page.mouse.click(24, 24)

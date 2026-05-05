@@ -19,7 +19,6 @@ export let actor: ActorDefinition
 export let levelId = ''
 export let interactionSystem: any = null
 export let interactiveEnabled = false
-export let hasChildren = false
 
 $: visible = actor.render?.visible ?? true
 $: collision = actor.physics?.collision ?? null
