@@ -108,6 +108,19 @@ function switchTheme() {
 }
 
 function loadButtonScript() {
+    function toggleFloatPanel(panel: HTMLElement | null) {
+        if (!panel) return;
+        const isClosed = panel.classList.contains('float-panel-closed');
+        if (isClosed) {
+            panel.hidden = false;
+            requestAnimationFrame(() => {
+                panel.classList.remove('float-panel-closed');
+            });
+        } else {
+            panel.classList.add('float-panel-closed');
+        }
+    }
+
     // Theme switch
     let switchBtn = document.getElementById("scheme-switch");
     if (switchBtn) {
@@ -121,9 +134,7 @@ function loadButtonScript() {
     if (settingBtn) {
         settingBtn.addEventListener("click", function () {
             let settingPanel = document.getElementById("display-setting");
-            if (settingPanel) {
-                settingPanel.classList.toggle("float-panel-closed");
-            }
+            toggleFloatPanel(settingPanel);
         });
     }
 
@@ -132,9 +143,7 @@ function loadButtonScript() {
     if (menuBtn) {
         menuBtn.addEventListener("click", function () {
             let menuPanel = document.getElementById("nav-menu-panel");
-            if (menuPanel) {
-                menuPanel.classList.toggle("float-panel-closed");
-            }
+            toggleFloatPanel(menuPanel);
         });
     }
 

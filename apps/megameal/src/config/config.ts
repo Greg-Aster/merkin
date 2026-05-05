@@ -51,6 +51,10 @@ export const navBarConfig: NavBarConfig = {
       url: '/timeline/',
     },
     {
+      name: 'Videos',
+      url: '/videos/',
+    },
+    {
       name: 'Game',
       url: '/game/',
     },

@@ -70,7 +70,7 @@ function isTimelineRoute(url: URL) {
   return url.pathname.replace(/\/$/, '') === '/timeline'
 }
 
-function getRouteContainers() {
+function getRouteReadyContainers() {
   return [
     document.querySelector<HTMLElement>('#banner-container'),
     document.querySelector<HTMLElement>('#main-grid'),
@@ -92,7 +92,9 @@ function wait(duration: number) {
 }
 
 function directNavigate(url: URL) {
-  window.location.assign(toRelativeHref(url))
+  const href = toRelativeHref(url)
+
+  window.location.assign(href)
 }
 
 function getFallbackRect() {
@@ -175,7 +177,7 @@ function waitForRouteReady(url: URL) {
     }
 
     const checkVisualReady = () => {
-      const containers = getRouteContainers()
+      const containers = getRouteReadyContainers()
       const pendingAnimation = containers.some(container =>
         !!container.querySelector('.onload-animation:not(.loaded)'),
       )
@@ -208,7 +210,7 @@ function waitForRouteReady(url: URL) {
 }
 
 function getVisibleImages() {
-  return getRouteContainers()
+  return getRouteReadyContainers()
     .flatMap(container => Array.from(container.querySelectorAll('img')))
     .filter(image => {
       const bounds = image.getBoundingClientRect()
@@ -299,7 +301,12 @@ export function navigateWithMegamealTransition(options: MegamealRouteTransitionO
 
   options.event?.preventDefault()
 
-  if (isSamePageHash(url) || getReducedMotionPreference()) {
+  if (isSamePageHash(url)) {
+    directNavigate(url)
+    return
+  }
+
+  if (getReducedMotionPreference()) {
     directNavigate(url)
     return
   }

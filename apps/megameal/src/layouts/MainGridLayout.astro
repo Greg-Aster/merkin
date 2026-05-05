@@ -49,10 +49,16 @@ interface Props {
 }
 
 const isTestPortalLayout = Astro.props.homeLayout === 'test-portal'
-const sharedHomeLayout = isTestPortalLayout ? 'portal' : Astro.props.homeLayout
+const sharedHomeLayout: 'default' | 'portal' | undefined = isTestPortalLayout
+  ? 'portal'
+  : Astro.props.homeLayout === 'test-portal'
+    ? undefined
+    : Astro.props.homeLayout
 const hasCustomBannerSlideContent = Astro.slots.has('banner-slide-content')
 const hasCustomBannerOverlayContent = Astro.slots.has('banner-overlay-content')
-const sharedProps = {
+const sharedProps: Omit<Props, 'homeLayout'> & {
+  homeLayout?: 'default' | 'portal'
+} = {
   ...Astro.props,
   homeLayout: sharedHomeLayout,
   contentMode: isTestPortalLayout ? 'banner-only' : Astro.props.contentMode,

@@ -1,8 +1,8 @@
 <script lang="ts">
+import '../../../styles/features/extracted/mock-signal-scene.css'
 import type { SceneProps } from '../types'
 
-import '../../../styles/features/extracted/mock-signal-scene.css'
-const { props }: { props: SceneProps } = $props()
+const props: SceneProps = $props()
 
 const accent = $derived(String(props.payload.accent ?? '#34d399'))
 const headline = $derived(String(props.payload.headline ?? 'Mock Banner Scene'))

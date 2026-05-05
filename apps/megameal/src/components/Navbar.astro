@@ -194,6 +194,19 @@ import '../styles/features/extracted/navbar.css'
     }
     
     function loadButtonScript() {
+        function toggleFloatPanel(panel: HTMLElement | null) {
+            if (!panel) return;
+            const isClosed = panel.classList.contains('float-panel-closed');
+            if (isClosed) {
+                panel.hidden = false;
+                requestAnimationFrame(() => {
+                    panel.classList.remove('float-panel-closed');
+                });
+            } else {
+                panel.classList.add('float-panel-closed');
+            }
+        }
+
         function updateMobileThemeLabel() {
             const label = document.getElementById('mobile-theme-action-label');
             if (!label) return;
@@ -215,9 +228,7 @@ import '../styles/features/extracted/navbar.css'
         if (settingBtn) {
             settingBtn.addEventListener("click", function () {
                 let settingPanel = document.getElementById("display-setting");
-                if (settingPanel) {
-                    settingPanel.classList.toggle("float-panel-closed");
-                }
+                toggleFloatPanel(settingPanel);
             });
         }
     
@@ -226,9 +237,7 @@ import '../styles/features/extracted/navbar.css'
         if (menuBtn) {
             menuBtn.addEventListener("click", function () {
                 let menuPanel = document.getElementById("nav-menu-panel");
-                if (menuPanel) {
-                    menuPanel.classList.toggle("float-panel-closed");
-                }
+                toggleFloatPanel(menuPanel);
             });
         }
 
@@ -383,7 +392,6 @@ import '../styles/features/extracted/navbar.css'
     // Initialize everything
     loadButtonScript();
     document.addEventListener('astro:page-load', syncStoreControlsVisibility);
-    document.addEventListener('astro:after-swap', syncStoreControlsVisibility);
 
     // SIMPLE TEST: Hide mascot by default - this is a bandaid fix as the mascot features has moves and im too lazy to fix it right now
     setTimeout(() => {

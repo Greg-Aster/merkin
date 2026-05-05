@@ -1,5 +1,4 @@
 ---
-import type { CollectionEntry } from 'astro:content'
 import { getPostUrlBySlug } from '@utils/url-utils'
 import { postCardConfig } from '../config/postcard.config'
 import { formatDateToYYYYMMDD } from '../utils/date-utils'
@@ -26,7 +25,6 @@ const animationEnabled = postCardConfig.localPosts.styling.animationEnabled
             <PostCard
                 entry={entry}
                 title={entry.data.title}
-                tags={entry.data.tags}
                 category={entry.data.category}
                 published={entry.data.published}
                 updated={entry.data.updated}

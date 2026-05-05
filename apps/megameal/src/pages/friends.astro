@@ -1,12 +1,12 @@
 ---
-import { getCollection } from 'astro:content'
+import { getCollection, type CollectionEntry } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import FriendManager from '../components/svelte/friends/FriendManager.svelte'
 import passwordConfig from '../config/password.config'
 import MainGridLayout from '../layouts/MainGridLayout.astro'
 
 // Get all saved friends from the content collection
-let savedFriends = []
+let savedFriends: CollectionEntry<'friends'>[] = []
 try {
   savedFriends = await getCollection('friends')
   console.log(
