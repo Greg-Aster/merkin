@@ -67,6 +67,8 @@ const screenNodes: THREE.Group[] = []
 let portraitMobile = false
 let logoSceneMounted = false, activeLogoModelSrc = '', pendingLogoModelSrc = ''
 let particleLimit = 960
+let introParticleLimit = 320
+let particleExpansionElapsed = 0
 let logoIntroStartedAt = 0
 let atmosphereReveal = 0
 let carouselMounted = false
@@ -75,6 +77,8 @@ let ScreenPanel: ScreenPanelComponent | null = null
 let carouselComponentPromise: Promise<void> | null = null
 
 const particleCount = 960
+const particleExpansionChunk = 64
+const particleExpansionInterval = 0.14
 const particleSizeMultiplier = 2.18
 const particleClusterCount = 18
 const primaryScreenIndex = 0
@@ -143,6 +147,12 @@ $: particleLimit =
     : sceneQuality === 'balanced'
       ? 600
       : particleCount
+$: introParticleLimit =
+  sceneQuality === 'lean'
+    ? particleLimit
+    : sceneQuality === 'balanced'
+      ? 260
+      : 320
 
 function syncViewportMode() {
   if (typeof window === 'undefined') return
@@ -160,6 +170,7 @@ function mountCarousel() {
   if (carouselMounted) return
 
   carouselMounted = true
+  particleExpansionElapsed = 0
   void loadCarouselComponent()
 }
 
@@ -349,58 +360,62 @@ $: if (
   void loadLogoModel(logoModelSrc)
 }
 
-function createParticles() {
-  return Array.from({ length: particleCount }, (_, index) => {
-    const cluster = index % particleClusterCount
-    const clusterCenter = homeIntroParticleClusters[cluster]
-    const randomA = Math.abs(hashHomeIntroUnit(index + 1))
-    const randomB = Math.abs(hashHomeIntroUnit(index + 17))
-    const randomC = Math.abs(hashHomeIntroUnit(index + 41))
-    const randomD = Math.abs(hashHomeIntroUnit(index + 79))
-    const randomE = Math.abs(hashHomeIntroUnit(index + 131))
-    const randomF = Math.abs(hashHomeIntroUnit(index + 181))
-    const radialT = randomA ** 1.25
-    const angle = randomB * Math.PI * 2
-    const verticalAngle = (randomC - 0.5) * Math.PI
-    const strayT =
-      randomE > 0.74 ? ((randomE - 0.74) / 0.26) ** 0.72 : 0
-    const edgeAngle = randomF * Math.PI * 2
-    const radius =
-      clusterCenter.spread * (0.1 + radialT * (0.82 + strayT * 1.45))
-    const anchorX =
-      clusterCenter.x * (1 - strayT * 0.58) + Math.cos(edgeAngle) * strayT * 2.8
-    const anchorZ =
-      clusterCenter.z + Math.sin(edgeAngle) * strayT * 1.25
+function createParticle(index: number) {
+  const cluster = index % particleClusterCount
+  const clusterCenter = homeIntroParticleClusters[cluster]
+  const randomA = Math.abs(hashHomeIntroUnit(index + 1))
+  const randomB = Math.abs(hashHomeIntroUnit(index + 17))
+  const randomC = Math.abs(hashHomeIntroUnit(index + 41))
+  const randomD = Math.abs(hashHomeIntroUnit(index + 79))
+  const randomE = Math.abs(hashHomeIntroUnit(index + 131))
+  const randomF = Math.abs(hashHomeIntroUnit(index + 181))
+  const radialT = randomA ** 1.25
+  const angle = randomB * Math.PI * 2
+  const verticalAngle = (randomC - 0.5) * Math.PI
+  const strayT =
+    randomE > 0.74 ? ((randomE - 0.74) / 0.26) ** 0.72 : 0
+  const edgeAngle = randomF * Math.PI * 2
+  const radius =
+    clusterCenter.spread * (0.1 + radialT * (0.82 + strayT * 1.45))
+  const anchorX =
+    clusterCenter.x * (1 - strayT * 0.58) + Math.cos(edgeAngle) * strayT * 2.8
+  const anchorZ =
+    clusterCenter.z + Math.sin(edgeAngle) * strayT * 1.25
 
-    return {
-      anchorX,
-      anchorY: clusterCenter.y,
-      anchorZ,
-      angle,
-      cluster,
-      clusterStrength: 0.26 + (1 - radialT) * 0.58,
-      height: Math.sin(verticalAngle) * clusterCenter.spread * 1.42,
-      radius,
-      phase: randomB * Math.PI * 2,
-      radialT,
-      speed: 0.038 + randomD * 0.072 + radialT * 0.032,
-      size:
-        (0.012 + (1 - radialT) * 0.024 + randomE * 0.014) *
-        (1 - strayT * 0.22) *
-        particleSizeMultiplier,
-      hueOffset: clusterCenter.hue + randomD * 0.08,
-      shape: randomE,
-      strayT,
-      zOffset:
-        Math.cos(verticalAngle) *
-        clusterCenter.spread *
-        (randomD - 0.5) *
-        (0.72 + strayT * 0.56),
-    }
-  })
+  return {
+    anchorX,
+    anchorY: clusterCenter.y,
+    anchorZ,
+    angle,
+    cluster,
+    clusterStrength: 0.26 + (1 - radialT) * 0.58,
+    height: Math.sin(verticalAngle) * clusterCenter.spread * 1.42,
+    radius,
+    phase: randomB * Math.PI * 2,
+    radialT,
+    speed: 0.038 + randomD * 0.072 + radialT * 0.032,
+    size:
+      (0.012 + (1 - radialT) * 0.024 + randomE * 0.014) *
+      (1 - strayT * 0.22) *
+      particleSizeMultiplier,
+    hueOffset: clusterCenter.hue + randomD * 0.08,
+    shape: randomE,
+    strayT,
+    zOffset:
+      Math.cos(verticalAngle) *
+      clusterCenter.spread *
+      (randomD - 0.5) *
+      (0.72 + strayT * 0.56),
+  }
 }
 
-const particles = createParticles()
+function createParticles(count: number) {
+  return Array.from({ length: Math.min(count, particleCount) }, (_, index) =>
+    createParticle(index),
+  )
+}
+
+let particles = createParticles(introParticleLimit)
 
 const screens = Array.from({ length: screenCount }, (_, index) => {
   return {
@@ -417,7 +432,44 @@ const screens = Array.from({ length: screenCount }, (_, index) => {
     primary: index === primaryScreenIndex,
   }
 })
-$: visibleParticles = particles.slice(0, particleLimit)
+$: syncParticleBudget(carouselMounted ? particles.length : introParticleLimit)
+$: visibleParticles = particles
+
+function syncParticleBudget(nextLimit: number) {
+  const targetLimit = Math.min(nextLimit, particleCount)
+  if (particles.length === targetLimit) return
+
+  if (particles.length > targetLimit) {
+    particles = particles.slice(0, targetLimit)
+    return
+  }
+
+  const nextParticles = particles.slice()
+  for (let index = particles.length; index < targetLimit; index += 1) {
+    nextParticles.push(createParticle(index))
+  }
+  particles = nextParticles
+}
+
+function updateParticleExpansion(delta: number) {
+  const targetLimit = carouselMounted ? particleLimit : introParticleLimit
+
+  if (particles.length > targetLimit) {
+    syncParticleBudget(targetLimit)
+    return
+  }
+
+  if (!carouselMounted || particles.length >= targetLimit) return
+
+  particleExpansionElapsed += delta
+  if (particleExpansionElapsed < particleExpansionInterval) return
+
+  const chunks = Math.floor(particleExpansionElapsed / particleExpansionInterval)
+  particleExpansionElapsed -= chunks * particleExpansionInterval
+  syncParticleBudget(
+    Math.min(targetLimit, particles.length + particleExpansionChunk * chunks),
+  )
+}
 
 function clampScreenIndex(value: number) {
   return Math.min(screenCount - 1, Math.max(0, value))
@@ -589,6 +641,7 @@ useTask(delta => {
   if (!carouselMounted && shouldMountCarousel()) {
     mountCarousel()
   }
+  updateParticleExpansion(delta)
 
   if (camera) {
     const shakeX =

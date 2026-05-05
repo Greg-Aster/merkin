@@ -122,6 +122,7 @@ let haloAlphas = new Float32Array(0)
 let particleCapacity = 0
 const color = new Color()
 const haloColor = new Color()
+const particleCapacityStep = 128
 const particleMotionScale = 0.62
 const particlePointSizeScale = 4.8
 const haloPointSizeScale = 3.05
@@ -175,13 +176,14 @@ function wrapCentered(value: number, span: number) {
 }
 
 function syncGeometryAttributes() {
-  if (particleCapacity === particles.length) {
+  if (particleCapacity >= particles.length) {
     coreGeometry.setDrawRange(0, particles.length)
     haloGeometry.setDrawRange(0, particles.length)
     return
   }
 
-  particleCapacity = particles.length
+  particleCapacity =
+    Math.ceil(particles.length / particleCapacityStep) * particleCapacityStep
   positions = new Float32Array(particleCapacity * 3)
   coreColors = new Float32Array(particleCapacity * 3)
   haloColors = new Float32Array(particleCapacity * 3)
