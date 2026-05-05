@@ -852,7 +852,7 @@ const gridLayoutClasses = [
     >
       <div
         id="main-grid"
-        class:list={[gridLayoutClasses, 'transition-swup-fade', { 'has-right-rail': shouldShowRightRail }]}
+        class:list={[gridLayoutClasses, { 'has-right-rail': shouldShowRightRail }]}
         style={`margin-top: ${mainContentOffset};`}
         data-one-column={oneColumnMode ? 'true' : 'false'}
         data-mobile-right-rail-hero={shouldShowMobilePortraitRightRailHero ? mobilePortraitRightRailHeroStyle : 'default'}

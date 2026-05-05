@@ -177,6 +177,7 @@ function mountCarousel() {
 function loadCarouselComponent() {
   carouselComponentPromise ??= import('./HomeIntroScreenPanel.svelte').then(
     screenPanelModule => {
+      primeScreenLayoutForCurrentWheel()
       ScreenPanel = screenPanelModule.default
       carouselComponentReady = true
     },
@@ -421,6 +422,7 @@ const screens = Array.from({ length: screenCount }, (_, index) => {
   return {
     position: [0, 0, 0] as [number, number, number],
     rotation: [0, 0, 0] as [number, number, number],
+    scale: 1,
     sceneId: portalScreens[index].sceneId,
     kicker: portalScreens[index].kicker,
     title: portalScreens[index].title,
@@ -564,6 +566,43 @@ function syncScreenMediaLoadStates(selectedIndex: number) {
   }
 }
 
+function getScreenOrbitTarget(index: number, visualSelectedIndex: number) {
+  const offset = index - visualSelectedIndex
+  const depth = Math.abs(offset)
+  const spiral = offset * screenAngleStep
+  const orbitRadiusX = screenOrbitRadiusX * (portraitMobile ? 0.96 : 1)
+  const orbitRadiusZ = screenOrbitRadiusZ * (portraitMobile ? 0.94 : 1)
+  const stepY = screenStepY * (portraitMobile ? 1.08 : 1)
+  const x = Math.sin(spiral) * orbitRadiusX
+  const y = -offset * stepY
+  const z =
+    screenOrbitCenterZ + Math.cos(spiral) * orbitRadiusZ - depth * 0.08
+  const outwardYaw = Math.atan2(
+    x / orbitRadiusX,
+    (z - screenOrbitCenterZ) / orbitRadiusZ,
+  )
+  const pitch = Math.sin(spiral) * -0.025
+  const roll = Math.sin(spiral) * 0.018
+  const scale = portraitMobile ? 1.0 : 1.12
+
+  return { x, y, z, pitch, yaw: outwardYaw, roll, scale }
+}
+
+function primeScreenLayoutForCurrentWheel() {
+  const wheel = Number.isFinite(input.wheel) ? input.wheel : effectWheel
+  const selectedIndex = getSelectedScreenIndex(wheel)
+  const visualSelectedIndex = getHomeIntroRestedScreenIndex(selectedIndex)
+  activeScreenIndex = clampScreenIndex(Math.round(selectedIndex))
+  syncScreenMediaLoadStates(selectedIndex)
+
+  screens.forEach((screen, index) => {
+    const target = getScreenOrbitTarget(index, visualSelectedIndex)
+    screen.position = [target.x, target.y, target.z]
+    screen.rotation = [target.pitch, target.yaw, target.roll]
+    screen.scale = target.scale
+  })
+}
+
 function updateScreenOrbit(wheel: number, ease: number) {
   const selectedIndex = getSelectedScreenIndex(wheel)
   const visualSelectedIndex = getHomeIntroRestedScreenIndex(selectedIndex)
@@ -575,32 +614,16 @@ function updateScreenOrbit(wheel: number, ease: number) {
     const screen = screenNodes[index]
     if (!screen) continue
 
-    const offset = index - visualSelectedIndex
-    const depth = Math.abs(offset)
-    const spiral = offset * screenAngleStep
-    const orbitRadiusX = screenOrbitRadiusX * (portraitMobile ? 0.96 : 1)
-    const orbitRadiusZ = screenOrbitRadiusZ * (portraitMobile ? 0.94 : 1)
-    const stepY = screenStepY * (portraitMobile ? 1.08 : 1)
-    const x = Math.sin(spiral) * orbitRadiusX
-    const y = -offset * stepY
-    const z =
-      screenOrbitCenterZ + Math.cos(spiral) * orbitRadiusZ - depth * 0.08
-    const targetScale = portraitMobile ? 1.0 : 1.12
-    const outwardYaw = Math.atan2(
-      x / orbitRadiusX,
-      (z - screenOrbitCenterZ) / orbitRadiusZ,
-    )
-    const targetPitch = Math.sin(spiral) * -0.025
-    const targetRoll = Math.sin(spiral) * 0.018
+    const target = getScreenOrbitTarget(index, visualSelectedIndex)
 
-    screen.position.x += (x - screen.position.x) * ease
-    screen.position.y += (y - screen.position.y) * ease
-    screen.position.z += (z - screen.position.z) * ease
-    targetScreenEuler.set(targetPitch, outwardYaw, targetRoll)
+    screen.position.x += (target.x - screen.position.x) * ease
+    screen.position.y += (target.y - screen.position.y) * ease
+    screen.position.z += (target.z - screen.position.z) * ease
+    targetScreenEuler.set(target.pitch, target.yaw, target.roll)
     targetScreenQuaternion.setFromEuler(targetScreenEuler)
     screen.quaternion.slerp(targetScreenQuaternion, ease)
 
-    const scale = screen.scale.x + (targetScale - screen.scale.x) * ease
+    const scale = screen.scale.x + (target.scale - screen.scale.x) * ease
     screen.scale.setScalar(scale)
   }
 }
@@ -829,7 +852,12 @@ useTask(delta => {
 	{#if carouselComponentReady && ScreenPanel}
 		<T.Group bind:ref={screenRail} position={railPosition}>
 			{#each screens as screen, index}
-				<T.Group bind:ref={screenNodes[index]} position={screen.position} rotation={screen.rotation}>
+				<T.Group
+					bind:ref={screenNodes[index]}
+					position={screen.position}
+					rotation={screen.rotation}
+					scale={[screen.scale, screen.scale, screen.scale]}
+				>
 					<svelte:component
 						this={ScreenPanel}
 						{index}

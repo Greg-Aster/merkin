@@ -69,17 +69,9 @@ const { title, description, ...rest } = Astro.props // Capture other potential p
   {/* Script specific to StoreLayout's parallax and animations */}
   <script>
     type StoreLayoutCleanup = () => void;
-    type SwupHookHandler = () => void;
-    type SwupLike = {
-      hooks?: {
-        on: (eventName: string, handler: SwupHookHandler) => void;
-      };
-    };
     type StoreLayoutWindow = Window &
       typeof globalThis & {
         __megamealStoreLayoutParallaxCleanup?: StoreLayoutCleanup;
-        __megamealStoreLayoutSwupBound?: boolean;
-        swup?: SwupLike;
       };
 
     function initStoreLayoutChrome() {
@@ -138,15 +130,5 @@ const { title, description, ...rest } = Astro.props // Capture other potential p
 
     initStoreLayoutChrome();
     document.addEventListener('astro:page-load', initStoreLayoutChrome);
-
-    const storeWindow = window as StoreLayoutWindow;
-    if (storeWindow.swup?.hooks && !storeWindow.__megamealStoreLayoutSwupBound) {
-      storeWindow.swup.hooks.on('page:view', initStoreLayoutChrome);
-      storeWindow.swup.hooks.on('visit:start', () => {
-        const cleanup = storeWindow.__megamealStoreLayoutParallaxCleanup;
-        if (typeof cleanup === 'function') cleanup();
-      });
-      storeWindow.__megamealStoreLayoutSwupBound = true;
-    }
   </script>
 </Layout>

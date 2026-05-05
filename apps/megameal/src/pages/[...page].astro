@@ -65,7 +65,6 @@ import '../styles/pages/dynamic-page.css'
   const portalScrollInitKey = '__megamealPortalScrollInit'
   const portalScrollResetKey = '__megamealPortalScrollReset'
   const portalScrollBoundKey = '__megamealPortalScrollBound'
-  const portalScrollSwupBoundKey = '__megamealPortalScrollSwupBound'
 
   const resetPortalScrollStages = () => {
     ;(window as any)[portalScrollCleanupKey]?.()
@@ -221,18 +220,5 @@ import '../styles/pages/dynamic-page.css'
     })
 
     ;(window as any)[portalScrollBoundKey] = true
-  }
-
-  const swup = (window as any)?.swup
-
-  if (swup?.hooks && !(window as any)[portalScrollSwupBoundKey]) {
-    swup.hooks.on('visit:start', () => {
-      ;(window as any)[portalScrollResetKey]?.()
-    })
-    swup.hooks.on('page:view', () => {
-      ;(window as any)[portalScrollInitKey]?.()
-    })
-
-    ;(window as any)[portalScrollSwupBoundKey] = true
   }
 </script>

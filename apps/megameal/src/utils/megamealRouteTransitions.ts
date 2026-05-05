@@ -8,25 +8,6 @@ export interface MegamealRouteTransitionOptions {
   event?: MouseEvent | PointerEvent
 }
 
-interface SwupLike {
-  navigate?: (
-    url: string,
-    options?: {
-      animate?: boolean
-      animation?: string
-      cache?: boolean | { read?: boolean; write?: boolean }
-    },
-    trigger?: { el?: Element | null; event?: Event },
-  ) => void
-  fetchPage?: (url: string) => Promise<{ url: string; html: string }>
-  cache?: {
-    set?: (url: string, page: { url: string; html: string }) => void
-  }
-  hooks?: {
-    once?: (eventName: string, handler: () => void) => void
-  }
-}
-
 interface MegamealRouteTransitionApi {
   navigate: (options: MegamealRouteTransitionOptions) => void
 }
@@ -35,16 +16,13 @@ declare global {
   interface Window {
     megamealRouteTransitions?: MegamealRouteTransitionApi
     __megamealRouteTransitionsInitialized?: boolean
-    swup?: SwupLike
   }
 }
 
 const arrivalStorageKey = 'megameal:route-transition-arrival'
 const revealDurationMs = 680
 const arrivalSettleDelayMs = 260
-const controlledSwapDelayMs = 300
 const hardNavigationDelayMs = 300
-const fallbackRevealDelayMs = 3000
 const routeReadyTimeoutMs = 3000
 const visualReadyTimeoutMs = 1600
 const visibleImageDecodeTimeoutMs = 1200
@@ -84,10 +62,6 @@ function shouldSkipEvent(event?: MouseEvent | PointerEvent) {
   )
 }
 
-function getSwup() {
-  return window.swup?.navigate ? window.swup : null
-}
-
 function toRelativeHref(url: URL) {
   return `${url.pathname}${url.search}${url.hash}`
 }
@@ -96,7 +70,7 @@ function isTimelineRoute(url: URL) {
   return url.pathname.replace(/\/$/, '') === '/timeline'
 }
 
-function getSwupContainers() {
+function getRouteContainers() {
   return [
     document.querySelector<HTMLElement>('#banner-container'),
     document.querySelector<HTMLElement>('#main-grid'),
@@ -117,39 +91,8 @@ function wait(duration: number) {
   })
 }
 
-function directNavigate(
-  url: URL,
-  event?: Event,
-  el?: Element | null,
-  options?: {
-    animate?: boolean
-    cache?: boolean | { read?: boolean; write?: boolean }
-  },
-) {
-  const swup = getSwup()
-  const href = toRelativeHref(url)
-
-  if (swup?.navigate) {
-    swup.navigate(href, options, { el, event })
-    return
-  }
-
-  window.location.assign(href)
-}
-
-function preloadSwupPage(url: URL) {
-  const swup = getSwup()
-  const href = toRelativeHref(url)
-
-  if (!swup?.fetchPage || !swup.cache?.set) return
-
-  void swup.fetchPage(href)
-    .then(page => {
-      swup.cache?.set?.(page.url, page)
-    })
-    .catch(() => {
-      // Navigation still works; it will fetch through Swup if preloading fails.
-    })
+function directNavigate(url: URL) {
+  window.location.assign(toRelativeHref(url))
 }
 
 function getFallbackRect() {
@@ -232,7 +175,7 @@ function waitForRouteReady(url: URL) {
     }
 
     const checkVisualReady = () => {
-      const containers = getSwupContainers()
+      const containers = getRouteContainers()
       const pendingAnimation = containers.some(container =>
         !!container.querySelector('.onload-animation:not(.loaded)'),
       )
@@ -246,8 +189,8 @@ function waitForRouteReady(url: URL) {
       const visualTimedOut = elapsed > visualReadyTimeoutMs
 
       if (
-        ((checkTimelineReady() || routeTimedOut) &&
-          (checkVisualReady() || visualTimedOut))
+        (checkTimelineReady() || routeTimedOut) &&
+        (checkVisualReady() || visualTimedOut)
       ) {
         void waitForVisibleImages().then(() => {
           void nextPaint().then(() => {
@@ -265,7 +208,7 @@ function waitForRouteReady(url: URL) {
 }
 
 function getVisibleImages() {
-  return getSwupContainers()
+  return getRouteContainers()
     .flatMap(container => Array.from(container.querySelectorAll('img')))
     .filter(image => {
       const bounds = image.getBoundingClientRect()
@@ -300,23 +243,6 @@ function waitForVisibleImages() {
   ])
 }
 
-function scheduleReveal(overlay: HTMLElement, url: URL) {
-  const swup = getSwup()
-  const revealAfterPaint = () => {
-    void waitForRouteReady(url).then(() => {
-      if (active) revealOverlay(overlay)
-    })
-  }
-
-  if (swup?.hooks?.once) {
-    swup.hooks.once('page:view', revealAfterPaint)
-  }
-
-  window.setTimeout(() => {
-    if (active) revealOverlay(overlay)
-  }, fallbackRevealDelayMs)
-}
-
 function storeHardNavigationArrival(url: URL) {
   try {
     window.sessionStorage.setItem(
@@ -324,7 +250,7 @@ function storeHardNavigationArrival(url: URL) {
       JSON.stringify({ pathname: url.pathname, search: url.search }),
     )
   } catch {
-    // The hard navigation still works if session storage is unavailable.
+    // The navigation still works if session storage is unavailable.
   }
 }
 
@@ -373,13 +299,8 @@ export function navigateWithMegamealTransition(options: MegamealRouteTransitionO
 
   options.event?.preventDefault()
 
-  if (isSamePageHash(url)) {
-    directNavigate(url, options.event)
-    return
-  }
-
-  if (getReducedMotionPreference()) {
-    directNavigate(url, options.event)
+  if (isSamePageHash(url) || getReducedMotionPreference()) {
+    directNavigate(url)
     return
   }
 
@@ -402,23 +323,9 @@ export function navigateWithMegamealTransition(options: MegamealRouteTransitionO
     overlay.dataset.state = 'entering'
   })
 
-  const swup = getSwup()
-  scheduleReveal(overlay, url)
-
-  if (swup) {
-    preloadSwupPage(url)
-    window.setTimeout(() => {
-      directNavigate(url, options.event, null, {
-        animate: false,
-        cache: { read: true, write: true },
-      })
-    }, controlledSwapDelayMs)
-    return
-  }
-
   window.setTimeout(() => {
     storeHardNavigationArrival(url)
-    directNavigate(url, options.event)
+    directNavigate(url)
   }, hardNavigationDelayMs)
 }
 

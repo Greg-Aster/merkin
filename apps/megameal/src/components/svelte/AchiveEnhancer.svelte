@@ -270,28 +270,6 @@ onMount(() => {
     setTimeout(enhanceArchive, 500)
   }
 
-  // Set up for Swup page transitions
-  if (typeof window !== 'undefined') {
-    // Function to handle Swup page transitions
-    const handlePageTransition = () => {
-      if (isAuthenticated && friendContentEnabled) {
-        // Use a delay to ensure DOM is ready
-        setTimeout(enhanceArchive, 500)
-      }
-    }
-
-    // Check if Swup is available
-    if (window.swup?.hooks) {
-      // Register with Swup hooks for page transitions
-      window.swup.hooks.on('page:view', handlePageTransition)
-    } else {
-      // Set up a listener for when Swup becomes available
-      document.addEventListener('swup:enable', () => {
-        window.swup.hooks.on('page:view', handlePageTransition)
-      })
-    }
-  }
-
   // Listen for content toggle events
   window.addEventListener('friend-content-toggled', handleFriendContentToggle)
 })
