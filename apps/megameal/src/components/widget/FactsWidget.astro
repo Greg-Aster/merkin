@@ -148,6 +148,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
             loop
             muted
             playsinline
+            preload="none"
             src={initialFact.video || ''}
           ></video>
           <img
@@ -155,6 +156,8 @@ import '../../styles/features/facts-widget/motion-responsive.css'
             data-fact-media-img
             src={initialFact.image || ''}
             alt={initialFact.headline || ''}
+            loading="lazy"
+            decoding="async"
           />
         </div>
 
@@ -399,6 +402,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
 
     const startRotation = () => {
       if (!facts.length) return
+      if (isOverlay) return
       // Respect prefers-reduced-motion: disable auto-rotation if user prefers reduced motion
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         return

@@ -101,9 +101,14 @@ function manualClientChunks(id) {
   }
 
   if (
+    normalizedId.includes('/src/components/home/HomeIntroEnvironmentLoader.svelte')
+  ) {
+    return 'feature-home-intro-loader';
+  }
+
+  if (
     normalizedId.includes('/src/components/home/HomeIntro') ||
-    normalizedId.includes('/src/components/home/homeIntro') ||
-    normalizedId.includes('/src/components/home/PortalHeroSlide.astro')
+    normalizedId.includes('/src/components/home/homeIntro')
   ) {
     return 'feature-home-intro';
   }

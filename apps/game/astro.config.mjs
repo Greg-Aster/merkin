@@ -118,7 +118,7 @@ export default defineConfig({
                 || id.includes('/src/threlte/stores/gameStateStore.ts')
                 || id.includes('/src/threlte/levels/levelRegistry.ts')
               ) {
-                return 'runtime-state'
+                return 'runtime-world'
               }
 
               if (

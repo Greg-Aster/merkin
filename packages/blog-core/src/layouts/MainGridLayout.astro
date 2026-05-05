@@ -987,16 +987,18 @@ const gridLayoutClasses = [
   <SidenavPanels client:idle siteConfig={siteConfig} />
   
   <!-- ⭐ UPDATED: Mobile profile overlay with custom author data -->
-  <MobileProfileOverlay 
-    client:idle 
-    postSlug={processedAuthorData.slug}
-    customAvatar={processedAuthorData.customAvatar}
-    customName={processedAuthorData.customName}
-    customBio={processedAuthorData.customBio}
-    customLink={processedAuthorData.customLink}
-    profileConfig={profileConfig}
-    avatarConfig={avatarConfig}
-  />
+  {!isPortalHome && (
+    <MobileProfileOverlay
+      client:idle
+      postSlug={processedAuthorData.slug}
+      customAvatar={processedAuthorData.customAvatar}
+      customName={processedAuthorData.customName}
+      customBio={processedAuthorData.customBio}
+      customLink={processedAuthorData.customLink}
+      profileConfig={profileConfig}
+      avatarConfig={avatarConfig}
+    />
+  )}
   
   <!-- ⭐ UPDATED: Special page features with oneColumn support -->
   <SpecialPageFeatures 
