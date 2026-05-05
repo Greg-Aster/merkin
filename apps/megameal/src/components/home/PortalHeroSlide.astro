@@ -1,12 +1,11 @@
 ---
-import mainTitleCard from '@/assets/banner/main-title.png'
 import HomeIntroEnvironment from './HomeIntroEnvironment.svelte'
 import '../../styles/features/home/portal-hero-slide.css'
 ---
 
 <section class="megameal-home-intro" aria-label="MEGAMEAL portal introduction">
   <div class="megameal-home-intro__environment" aria-hidden="true">
-    <HomeIntroEnvironment client:load titleImageSrc={mainTitleCard.src} />
+    <HomeIntroEnvironment client:load />
   </div>
 
   <div class="megameal-home-intro__screen-reader-copy">

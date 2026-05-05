@@ -5,16 +5,14 @@ import { siteConfig } from '@/config/config'
 <div class="megameal-portal-background-slide" aria-hidden="true">
   <video
     class="megameal-portal-background-slide__video"
-    autoplay
     loop
     muted
     playsinline
-    preload="metadata"
+    preload="none"
     poster={siteConfig.banner.src}
+    data-src={siteConfig.banner.video}
     data-playback-rate={siteConfig.banner.playbackRate ?? 1}
-  >
-    <source src={siteConfig.banner.video} type="video/webm" />
-  </video>
+  ></video>
   <div class="megameal-portal-background-slide__shade"></div>
 </div>
 
@@ -27,10 +25,36 @@ import { siteConfig } from '@/config/config'
     const configuredRate = Number(video.dataset.playbackRate)
     const playbackRate =
       Number.isFinite(configuredRate) && configuredRate > 0 ? configuredRate : 1
+    let loaded = false
 
     video.playbackRate = playbackRate
     video.addEventListener('play', () => {
       video.playbackRate = playbackRate
     })
+
+    const loadBackgroundVideo = () => {
+      if (loaded) return
+      const source = video.dataset.src
+      if (!source) return
+
+      loaded = true
+      video.src = source
+      video.removeAttribute('data-src')
+      video.load()
+      video.play().catch(() => {})
+    }
+
+    const loadAfterScroll = () => {
+      if (window.scrollY <= 80) return
+      window.removeEventListener('scroll', loadAfterScroll)
+      loadBackgroundVideo()
+    }
+
+    window.addEventListener('merkin:portal-advance', loadBackgroundVideo, {
+      once: true,
+    })
+    window.addEventListener('pointerdown', loadBackgroundVideo, { once: true })
+    window.addEventListener('keydown', loadBackgroundVideo, { once: true })
+    window.addEventListener('scroll', loadAfterScroll, { passive: true })
   }
 </script>

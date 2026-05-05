@@ -1295,6 +1295,10 @@ const transparentPixel =
     const standardBannerContainer = document.getElementById(
       'standard-banner-container',
     )
+    const standardBannerIsPortalControlled =
+      document
+        .getElementById('banner-container')
+        ?.classList.contains('portal-banner-mode') === true
     const slides = Array.from(
       standardBannerContainer?.querySelectorAll('.banner-slide') || [],
     )
@@ -2064,7 +2068,11 @@ const transparentPixel =
 
     if (standardBannerContainer && slides.length > 0) {
       showSlide(initialSlideIndex)
-      if (slides.length > 1 && animationConfig.enabled) {
+      if (
+        !standardBannerIsPortalControlled &&
+        slides.length > 1 &&
+        animationConfig.enabled
+      ) {
         queueNextSlide(getSlideDuration(initialSlideIndex))
       } else {
         dispatchBannerState()
