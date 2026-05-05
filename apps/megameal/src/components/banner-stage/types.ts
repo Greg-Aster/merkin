@@ -55,7 +55,9 @@ export interface SceneProps {
   requestSceneChange: (sceneId: string) => Promise<void>
 }
 
-export type BannerSceneComponent = Component<{ props: SceneProps }>
+export type BannerSceneComponent =
+  | Component<SceneProps>
+  | ((props: SceneProps) => unknown)
 
 export interface SceneSelectionContext {
   pagePath: string

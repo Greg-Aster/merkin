@@ -1,12 +1,15 @@
 ---
 interface Props {
   mascotContext?: string
+  class?: string
+  style?: string
 }
-const { mascotContext } = Astro.props
+const { mascotContext, style } = Astro.props
+const className = Astro.props.class
 import '../../styles/features/bleepy/BleepyPostWidget.css'
 ---
 
-<div id="bleepy-post-widget" class="card-base p-4 flex flex-col gap-4" data-page-context={mascotContext || ''}>
+<div id="bleepy-post-widget" class:list={[className, "card-base p-4 flex flex-col gap-4"]} style={style} data-page-context={mascotContext || ''}>
   <!-- Chat History Area with Initial Mascot Display -->
   <div id="widget-chat-history" class="chat-history flex-grow h-64 overflow-y-auto bg-[var(--surface-1)] p-3 rounded-md relative">
     <!-- Large mascot image shown on first load -->
@@ -95,4 +98,3 @@ import '../../styles/features/bleepy/BleepyPostWidget.css'
     }
   });
 </script>
-

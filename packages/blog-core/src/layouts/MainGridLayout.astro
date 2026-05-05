@@ -852,7 +852,7 @@ const gridLayoutClasses = [
     >
       <div
         id="main-grid"
-        class:list={[gridLayoutClasses, 'transition-swup-fade', { 'has-right-rail': shouldShowRightRail }]}
+        class:list={[gridLayoutClasses, { 'has-right-rail': shouldShowRightRail }]}
         style={`margin-top: ${mainContentOffset};`}
         data-one-column={oneColumnMode ? 'true' : 'false'}
         data-mobile-right-rail-hero={shouldShowMobilePortraitRightRailHero ? mobilePortraitRightRailHeroStyle : 'default'}
@@ -984,7 +984,7 @@ const gridLayoutClasses = [
   <!-- =============================================================== -->
   
   <!-- Sidenav panels with settings and navigation -->
-  <SidenavPanels client:idle siteConfig={siteConfig} />
+  {!isBannerOnly && <SidenavPanels client:idle siteConfig={siteConfig} />}
   
   <!-- ⭐ UPDATED: Mobile profile overlay with custom author data -->
   {!isPortalHome && (
@@ -1001,14 +1001,18 @@ const gridLayoutClasses = [
   )}
   
   <!-- ⭐ UPDATED: Special page features with oneColumn support -->
-  <SpecialPageFeatures 
-    client:idle 
-    currentPath={currentPath} 
-    oneColumn={oneColumnMode}
-  />
+  {!isBannerOnly && (
+    <SpecialPageFeatures
+      client:idle
+      currentPath={currentPath}
+      oneColumn={oneColumnMode}
+    />
+  )}
   
   <!-- Scroll effects and parallax -->
-  <ScrollEffects client:idle bannerConfig={bannerConfig} siteConfig={siteConfig} />
+  {!isBannerOnly && (
+    <ScrollEffects client:idle bannerConfig={bannerConfig} siteConfig={siteConfig} />
+  )}
   
   <!-- Page load animations -->
   <PageAnimations client:load />

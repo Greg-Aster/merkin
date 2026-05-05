@@ -525,7 +525,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
         window.clearTimeout(scrollIdleTimeoutId)
       }
 
-      document.addEventListener('astro:before-swap', cleanupOverlayActivityListeners, { once: true })
+      window.addEventListener('pagehide', cleanupOverlayActivityListeners, { once: true })
     }
   }
 </script>

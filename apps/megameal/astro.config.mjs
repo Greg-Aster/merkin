@@ -1,7 +1,6 @@
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import tailwind from "@astrojs/tailwind";
-import swup from "@swup/astro";
 import Compress from "astro-compress";
 import icon from "astro-icon";
 import { defineConfig } from "astro/config";
@@ -61,7 +60,6 @@ function manualClientChunks(id) {
 
   if (normalizedId.includes('node_modules')) {
     if (normalizedId.includes('photoswipe')) return 'vendor-photoswipe';
-    if (normalizedId.includes('@swup') || normalizedId.includes('/swup/')) return 'vendor-swup';
     if (normalizedId.includes('marked') || normalizedId.includes('markdown-it')) return 'vendor-markdown';
     if (normalizedId.includes('katex')) return 'vendor-katex';
     if (normalizedId.includes('mammoth')) return 'vendor-mammoth';
@@ -147,25 +145,6 @@ export default defineConfig({
   integrations: [
     corsMiddleware(),
     tailwind(),
-    swup({
-      theme: false,
-      animationClass: "transition-swup-",
-      containers: ["#banner-container", "#main-grid"],
-      smoothScrolling: {
-        animateScroll: {
-          betweenPages: false,
-          samePageWithHash: false,
-          samePage: true,
-        },
-        offset: 96,
-      },
-      cache: !isDev,
-      preload: !isDev,
-      accessibility: true,
-      updateHead: true,
-      updateBodyClass: false,
-      globalInstance: true,
-    }),
     icon({
       include: {
         "fa6-brands": ["*"],

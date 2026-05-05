@@ -149,7 +149,7 @@ const jsonLd = {
     : siteConfig.lang.replace('_', '-'),
   mainEntityOfPage: {
     '@type': 'WebPage',
-    '@id': new URL(getPostUrlBySlug(post.slug, 'posts'), Astro.site).toString(),
+    '@id': new URL(getPostUrlBySlug(post.slug), Astro.site).toString(),
   },
 }
 

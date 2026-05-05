@@ -6,6 +6,11 @@ import {
   profileConfig,
   siteConfig,
 } from '../config/config'
+import { aboutConfig } from '../config/about.config'
+import { avatarConfig } from '../config/avatar.config'
+import { bannerConfig } from '../config/banner.config'
+import { communityConfig } from '../config/community.config'
+import { postCardConfig } from '../config/postcard.config'
 import {
   defaultEraConfig,
   defaultTimelineViewConfig,
@@ -17,6 +22,12 @@ import MainGridLayout from '../layouts/MainGridLayout.astro'
 // Import a main Svelte component for the Config UI
 import AdminConfigPanel from '../components/svelte/admin/AdminConfigPanel.svelte'
 import passwordConfig from '../config/password.config'
+
+const addonsConfig = {
+  enabled: false,
+  availableAddons: [],
+  installedAddons: [],
+}
 ---
 
 <MainGridLayout title={i18n(I18nKey.configs)} description={i18n(I18nKey.configs)}>
@@ -75,6 +86,12 @@ import passwordConfig from '../config/password.config'
         eraConfig: defaultEraConfig,
         viewConfig: defaultTimelineViewConfig
       }}
+      avatarConfig={avatarConfig}
+      communityConfig={communityConfig}
+      aboutConfig={aboutConfig}
+      postCardConfig={postCardConfig}
+      bannerConfig={bannerConfig}
+      addonsConfig={addonsConfig}
     />
   </div>
 </MainGridLayout>

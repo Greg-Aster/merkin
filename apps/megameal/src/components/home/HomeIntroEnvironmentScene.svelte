@@ -75,6 +75,7 @@ let carouselMounted = false
 let carouselComponentReady = false
 let ScreenPanel: ScreenPanelComponent | null = null
 let carouselComponentPromise: Promise<void> | null = null
+let screenOrbitInitialized = false
 
 const particleCount = 960
 const particleExpansionChunk = 64
@@ -170,6 +171,7 @@ function mountCarousel() {
   if (carouselMounted) return
 
   carouselMounted = true
+  screenOrbitInitialized = false
   particleExpansionElapsed = 0
   void loadCarouselComponent()
 }
@@ -570,6 +572,8 @@ function updateScreenOrbit(wheel: number, ease: number) {
   activeScreenIndex = clampScreenIndex(Math.round(selectedIndex))
   syncBannerToFrontScreen(selectedIndex)
   syncScreenMediaLoadStates(selectedIndex)
+  const snapToTarget = !screenOrbitInitialized
+  let positionedAnyScreen = false
 
   for (let index = 0; index < screenCount; index += 1) {
     const screen = screenNodes[index]
@@ -593,15 +597,27 @@ function updateScreenOrbit(wheel: number, ease: number) {
     const targetPitch = Math.sin(spiral) * -0.025
     const targetRoll = Math.sin(spiral) * 0.018
 
-    screen.position.x += (x - screen.position.x) * ease
-    screen.position.y += (y - screen.position.y) * ease
-    screen.position.z += (z - screen.position.z) * ease
     targetScreenEuler.set(targetPitch, outwardYaw, targetRoll)
     targetScreenQuaternion.setFromEuler(targetScreenEuler)
-    screen.quaternion.slerp(targetScreenQuaternion, ease)
+    positionedAnyScreen = true
 
-    const scale = screen.scale.x + (targetScale - screen.scale.x) * ease
-    screen.scale.setScalar(scale)
+    if (snapToTarget) {
+      screen.position.set(x, y, z)
+      screen.quaternion.copy(targetScreenQuaternion)
+      screen.scale.setScalar(targetScale)
+    } else {
+      screen.position.x += (x - screen.position.x) * ease
+      screen.position.y += (y - screen.position.y) * ease
+      screen.position.z += (z - screen.position.z) * ease
+      screen.quaternion.slerp(targetScreenQuaternion, ease)
+
+      const scale = screen.scale.x + (targetScale - screen.scale.x) * ease
+      screen.scale.setScalar(scale)
+    }
+  }
+
+  if (snapToTarget && positionedAnyScreen) {
+    screenOrbitInitialized = true
   }
 }
 
@@ -827,7 +843,7 @@ useTask(delta => {
 
 <T.Group bind:ref={world} position={[0, 0, 0]} scale={[sceneScale, sceneScale, sceneScale]}>
 	{#if carouselComponentReady && ScreenPanel}
-		<T.Group bind:ref={screenRail} position={railPosition}>
+		<T.Group bind:ref={screenRail} position={railPosition} visible={screenOrbitInitialized}>
 			{#each screens as screen, index}
 				<T.Group bind:ref={screenNodes[index]} position={screen.position} rotation={screen.rotation}>
 					<svelte:component
