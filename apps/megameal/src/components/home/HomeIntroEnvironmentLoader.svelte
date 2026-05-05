@@ -8,52 +8,12 @@ let Environment: HomeIntroEnvironmentComponent | null = null
 let cleanup: (() => void) | null = null
 let loadStarted = false
 
-const mobileMediaQuery = '(max-width: 760px), (pointer: coarse)'
-
-function getConnection() {
-  return (navigator as Navigator & {
-    connection?: { saveData?: boolean; effectiveType?: string }
-  }).connection
-}
-
-function shouldDeferForDevice() {
-  const connection = getConnection()
-  const effectiveType = connection?.effectiveType ?? ''
-  const deviceMemory = (navigator as Navigator & { deviceMemory?: number })
-    .deviceMemory
-  const lowMemoryDevice =
-    typeof deviceMemory === 'number' && deviceMemory <= 4
-
-  return (
-    window.matchMedia(mobileMediaQuery).matches ||
-    connection?.saveData === true ||
-    /(^|-)2g$/.test(effectiveType) ||
-    effectiveType === '3g' ||
-    lowMemoryDevice
-  )
-}
-
 async function loadEnvironment() {
   if (loadStarted) return
   loadStarted = true
   cleanup?.()
   cleanup = null
   Environment = (await import('./HomeIntroEnvironment.svelte')).default
-}
-
-function scheduleWhenIdle() {
-  if ('requestIdleCallback' in window) {
-    const idleId = window.requestIdleCallback(() => {
-      void loadEnvironment()
-    }, { timeout: 2400 })
-    cleanup = () => window.cancelIdleCallback(idleId)
-    return
-  }
-
-  const timeoutId = window.setTimeout(() => {
-    void loadEnvironment()
-  }, 1200)
-  cleanup = () => window.clearTimeout(timeoutId)
 }
 
 function waitForIntent() {
@@ -78,12 +38,7 @@ function waitForIntent() {
 }
 
 onMount(() => {
-  if (shouldDeferForDevice()) {
-    waitForIntent()
-    return
-  }
-
-  scheduleWhenIdle()
+  waitForIntent()
 })
 
 onDestroy(() => {
@@ -93,4 +48,27 @@ onDestroy(() => {
 
 {#if Environment}
   <svelte:component this={Environment} />
+{:else}
+  <img
+    class="home-intro-environment-loader__still"
+    src="/assets/banner/home-intro-stills/home-intro.webp"
+    alt=""
+    loading="eager"
+    decoding="async"
+    fetchpriority="low"
+    aria-hidden="true"
+  />
 {/if}
+
+<style>
+  .home-intro-environment-loader__still {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0.72;
+    filter: saturate(1.05) contrast(1.04);
+  }
+</style>
