@@ -3,12 +3,10 @@ import { T, useTask, useThrelte } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import {
   AdditiveBlending,
-  Box3,
   DoubleSide,
   FrontSide,
   NormalBlending,
   SRGBColorSpace,
-  Vector3,
   CanvasTexture,
   type Group,
   type Texture,
@@ -17,7 +15,6 @@ import {
   VideoTexture,
 } from 'three'
 import type * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import {
   getHomeIntroKtx2Loader,
   releaseHomeIntroKtx2Loader,
@@ -27,6 +24,10 @@ import {
   createCausticTexture,
   createSheenTexture,
 } from './homeIntroGlassTextures'
+import {
+  disposeHomeIntroScreenModel,
+  loadHomeIntroScreenModelInstance,
+} from './homeIntroScreenModel'
 
 type SceneQuality = 'high' | 'balanced' | 'lean'
 
@@ -102,12 +103,7 @@ const mediaGhostFarZ = -0.05
 const textSurfaceZ = -0.018
 const textWidth = 2.54
 const textHeight = 1.24
-const screenModelSrc = '/assets/3D/screen.glb'
 const screenVideoPlaybackRate = 0.33
-const screenGltfLoader = new GLTFLoader()
-const screenBounds = new Box3()
-const screenCenter = new Vector3()
-const screenSize = new Vector3()
 
 $: panelGlassEnabled = sceneQuality !== 'lean'
 
@@ -159,34 +155,8 @@ function disposeCausticTexture() {
   causticTexture = null
 }
 
-function disposeMaterial(material: THREE.Material) {
-  Object.values(material).forEach(value => {
-    if (value && typeof value === 'object' && 'isTexture' in value) {
-      ;(value as Texture).dispose()
-    }
-  })
-  material.dispose()
-}
-
-function disposeObjectResources(object: THREE.Object3D | null) {
-  object?.traverse(item => {
-    const mesh = item as THREE.Mesh
-    if (!mesh.isMesh) return
-
-    mesh.geometry?.dispose()
-
-    const materials = Array.isArray(mesh.material)
-      ? mesh.material
-      : [mesh.material]
-
-    materials.forEach(material => {
-      if (material) disposeMaterial(material)
-    })
-  })
-}
-
 function disposeScreenModel() {
-  disposeObjectResources(screenModel)
+  disposeHomeIntroScreenModel(screenModel)
   screenModel = null
 }
 
@@ -358,59 +328,6 @@ function syncPanelGlassTextures() {
   causticTexture ??= createCausticTexture()
 }
 
-function fitScreenModel(model: THREE.Object3D) {
-  model.updateMatrixWorld(true)
-  screenBounds.setFromObject(model)
-  if (screenBounds.isEmpty()) return
-
-  screenBounds.getCenter(screenCenter)
-  screenBounds.getSize(screenSize)
-
-  const scale = Math.min(
-    frameWidth / Math.max(screenSize.x, 0.001),
-    frameHeight / Math.max(screenSize.y, 0.001),
-  )
-
-  model.scale.setScalar(scale)
-  model.position.set(
-    -screenCenter.x * scale,
-    -screenCenter.y * scale,
-    -screenCenter.z * scale,
-  )
-}
-
-function tuneScreenModel(model: THREE.Object3D) {
-  model.traverse(item => {
-    const mesh = item as THREE.Mesh
-    if (!mesh.isMesh) return
-
-    mesh.castShadow = false
-    mesh.receiveShadow = false
-    mesh.frustumCulled = false
-    mesh.renderOrder = 12
-
-    const materials = Array.isArray(mesh.material)
-      ? mesh.material
-      : [mesh.material]
-
-    materials.forEach((sourceMaterial, materialIndex) => {
-      if (!sourceMaterial) return
-
-      const material = sourceMaterial.clone() as THREE.MeshPhysicalMaterial
-      material.transparent = material.transparent || material.opacity < 1
-      material.depthWrite = false
-      material.side = DoubleSide
-      material.needsUpdate = true
-
-      if (Array.isArray(mesh.material)) {
-        mesh.material[materialIndex] = material
-      } else {
-        mesh.material = material
-      }
-    })
-  })
-}
-
 async function loadScreenModel() {
   if (screenModelRequested || typeof window === 'undefined') return
 
@@ -419,16 +336,13 @@ async function loadScreenModel() {
   screenLoadAbortController = controller
 
   try {
-    const gltf = await screenGltfLoader.loadAsync(screenModelSrc)
-    const model = gltf.scene ?? gltf.scenes?.[0] ?? null
+    const model = await loadHomeIntroScreenModelInstance(frameWidth, frameHeight)
 
     if (!mounted || controller.signal.aborted || !model) {
-      disposeObjectResources(model)
+      disposeHomeIntroScreenModel(model)
       return
     }
 
-    fitScreenModel(model)
-    tuneScreenModel(model)
     screenModel = model
   } catch {
     screenModel = null
@@ -749,7 +663,7 @@ useTask(delta => {
 				depthWrite={!panelGlassEnabled}
 			/>
 		</T.Mesh>
-		{#if videoTexture}
+		{#if videoTexture && videoReady}
 			<T.Mesh position={[0, 0.02, mediaSurfaceZ + 0.002]}>
 				<T.PlaneGeometry args={[titleWidth, titleHeight]} />
 				<T.MeshBasicMaterial
@@ -802,7 +716,7 @@ useTask(delta => {
 				depthWrite={!panelGlassEnabled}
 			/>
 		</T.Mesh>
-		{#if videoTexture}
+		{#if videoTexture && videoReady}
 			<T.Mesh position={[0, 0, mediaSurfaceZ + 0.002]}>
 				<T.PlaneGeometry args={[mediaWidth, mediaHeight]} />
 				<T.MeshBasicMaterial

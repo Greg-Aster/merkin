@@ -16,7 +16,6 @@ import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.j
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import HomeIntroParticleField from './HomeIntroParticleField.svelte'
 import HomeIntroRingGlow from './HomeIntroRingGlow.svelte'
-import HomeIntroScreenPanel from './HomeIntroScreenPanel.svelte'
 import { getHomeIntroLogoModelSrc } from './homeIntroLogoAssets'
 import { homeIntroParticleClusters } from './homeIntroParticleClusters'
 import { hashHomeIntroUnit } from './homeIntroSceneMath'
@@ -40,6 +39,7 @@ type IntroInputState = {
 }
 
 type SceneQuality = 'high' | 'balanced' | 'lean'
+type ScreenPanelComponent = typeof import('./HomeIntroScreenPanel.svelte').default
 
 export let input: IntroInputState
 export let titleImageSrc = ''
@@ -69,6 +69,10 @@ let logoSceneMounted = false, activeLogoModelSrc = '', pendingLogoModelSrc = ''
 let particleLimit = 960
 let logoIntroStartedAt = 0
 let atmosphereReveal = 0
+let carouselMounted = false
+let carouselComponentReady = false
+let ScreenPanel: ScreenPanelComponent | null = null
+let carouselComponentPromise: Promise<void> | null = null
 
 const particleCount = 960
 const particleSizeMultiplier = 2.18
@@ -143,6 +147,35 @@ $: particleLimit =
 function syncViewportMode() {
   if (typeof window === 'undefined') return
   portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
+}
+
+function shouldMountCarousel() {
+  const wheel = Number.isFinite(input.wheel) ? input.wheel : 0
+  const reveal = Number.isFinite(input.reveal) ? input.reveal : 0
+
+  return input.active || reveal > 0.01 || Math.abs(wheel) > 0.02
+}
+
+function mountCarousel() {
+  if (carouselMounted) return
+
+  carouselMounted = true
+  void loadCarouselComponent()
+}
+
+function loadCarouselComponent() {
+  carouselComponentPromise ??= import('./HomeIntroScreenPanel.svelte').then(
+    screenPanelModule => {
+      ScreenPanel = screenPanelModule.default
+      carouselComponentReady = true
+    },
+  ).catch(error => {
+    carouselMounted = false
+    carouselComponentReady = false
+    console.error('Failed to load portal carousel:', error)
+  })
+
+  return carouselComponentPromise
 }
 
 function disposeObjectResources(object: THREE.Object3D) {
@@ -316,54 +349,58 @@ $: if (
   void loadLogoModel(logoModelSrc)
 }
 
-const particles = Array.from({ length: particleCount }, (_, index) => {
-  const cluster = index % particleClusterCount
-  const clusterCenter = homeIntroParticleClusters[cluster]
-  const randomA = Math.abs(hashHomeIntroUnit(index + 1))
-  const randomB = Math.abs(hashHomeIntroUnit(index + 17))
-  const randomC = Math.abs(hashHomeIntroUnit(index + 41))
-  const randomD = Math.abs(hashHomeIntroUnit(index + 79))
-  const randomE = Math.abs(hashHomeIntroUnit(index + 131))
-  const randomF = Math.abs(hashHomeIntroUnit(index + 181))
-  const radialT = randomA ** 1.25
-  const angle = randomB * Math.PI * 2
-  const verticalAngle = (randomC - 0.5) * Math.PI
-  const strayT =
-    randomE > 0.74 ? ((randomE - 0.74) / 0.26) ** 0.72 : 0
-  const edgeAngle = randomF * Math.PI * 2
-  const radius =
-    clusterCenter.spread * (0.1 + radialT * (0.82 + strayT * 1.45))
-  const anchorX =
-    clusterCenter.x * (1 - strayT * 0.58) + Math.cos(edgeAngle) * strayT * 2.8
-  const anchorZ =
-    clusterCenter.z + Math.sin(edgeAngle) * strayT * 1.25
+function createParticles() {
+  return Array.from({ length: particleCount }, (_, index) => {
+    const cluster = index % particleClusterCount
+    const clusterCenter = homeIntroParticleClusters[cluster]
+    const randomA = Math.abs(hashHomeIntroUnit(index + 1))
+    const randomB = Math.abs(hashHomeIntroUnit(index + 17))
+    const randomC = Math.abs(hashHomeIntroUnit(index + 41))
+    const randomD = Math.abs(hashHomeIntroUnit(index + 79))
+    const randomE = Math.abs(hashHomeIntroUnit(index + 131))
+    const randomF = Math.abs(hashHomeIntroUnit(index + 181))
+    const radialT = randomA ** 1.25
+    const angle = randomB * Math.PI * 2
+    const verticalAngle = (randomC - 0.5) * Math.PI
+    const strayT =
+      randomE > 0.74 ? ((randomE - 0.74) / 0.26) ** 0.72 : 0
+    const edgeAngle = randomF * Math.PI * 2
+    const radius =
+      clusterCenter.spread * (0.1 + radialT * (0.82 + strayT * 1.45))
+    const anchorX =
+      clusterCenter.x * (1 - strayT * 0.58) + Math.cos(edgeAngle) * strayT * 2.8
+    const anchorZ =
+      clusterCenter.z + Math.sin(edgeAngle) * strayT * 1.25
 
-  return {
-    anchorX,
-    anchorY: clusterCenter.y,
-    anchorZ,
-    angle,
-    cluster,
-    clusterStrength: 0.26 + (1 - radialT) * 0.58,
-    height: Math.sin(verticalAngle) * clusterCenter.spread * 1.42,
-    radius,
-    phase: randomB * Math.PI * 2,
-    radialT,
-    speed: 0.038 + randomD * 0.072 + radialT * 0.032,
-    size:
-      (0.012 + (1 - radialT) * 0.024 + randomE * 0.014) *
-      (1 - strayT * 0.22) *
-      particleSizeMultiplier,
-    hueOffset: clusterCenter.hue + randomD * 0.08,
-    shape: randomE,
-    strayT,
-    zOffset:
-      Math.cos(verticalAngle) *
-      clusterCenter.spread *
-      (randomD - 0.5) *
-      (0.72 + strayT * 0.56),
-  }
-})
+    return {
+      anchorX,
+      anchorY: clusterCenter.y,
+      anchorZ,
+      angle,
+      cluster,
+      clusterStrength: 0.26 + (1 - radialT) * 0.58,
+      height: Math.sin(verticalAngle) * clusterCenter.spread * 1.42,
+      radius,
+      phase: randomB * Math.PI * 2,
+      radialT,
+      speed: 0.038 + randomD * 0.072 + radialT * 0.032,
+      size:
+        (0.012 + (1 - radialT) * 0.024 + randomE * 0.014) *
+        (1 - strayT * 0.22) *
+        particleSizeMultiplier,
+      hueOffset: clusterCenter.hue + randomD * 0.08,
+      shape: randomE,
+      strayT,
+      zOffset:
+        Math.cos(verticalAngle) *
+        clusterCenter.spread *
+        (randomD - 0.5) *
+        (0.72 + strayT * 0.56),
+    }
+  })
+}
+
+const particles = createParticles()
 
 const screens = Array.from({ length: screenCount }, (_, index) => {
   return {
@@ -547,6 +584,11 @@ useTask(delta => {
   const logoImpactStrength =
     logoImpactElapsed >= 0 && logoImpactRaw < 1 ? (1 - logoImpactRaw) ** 2 : 0
   atmosphereReveal = smoothstep((logoIntroRaw - 0.72) / 0.28)
+  activeScreenIndex = clampScreenIndex(Math.round(selectedIndex))
+
+  if (!carouselMounted && shouldMountCarousel()) {
+    mountCarousel()
+  }
 
   if (camera) {
     const shakeX =
@@ -693,7 +735,9 @@ useTask(delta => {
     screenRail.scale.setScalar(1)
   }
 
-  updateScreenOrbit(effectWheel, ease)
+  if (carouselComponentReady) {
+    updateScreenOrbit(effectWheel, ease)
+  }
 })
 </script>
 
@@ -729,28 +773,31 @@ useTask(delta => {
 />
 
 <T.Group bind:ref={world} position={[0, 0, 0]} scale={[sceneScale, sceneScale, sceneScale]}>
-	<T.Group bind:ref={screenRail} position={railPosition}>
-		{#each screens as screen, index}
-			<T.Group bind:ref={screenNodes[index]} position={screen.position} rotation={screen.rotation}>
-				<HomeIntroScreenPanel
-					{index}
-					imageSrc={screen.primary ? titleImageSrc : ""}
-					stillSrc={screen.stillSrc}
-					ktx2Src={screen.ktx2Src}
-					videoSrc={screen.videoSrc}
-					kicker={screen.kicker}
-					title={screen.title}
-					stat={screen.stat}
-					ctaLabel={screen.ctaLabel}
-					hovered={index === hoveredScreenIndex}
-					primary={screen.primary}
-					active={index === activeScreenIndex}
-					shouldLoadMedia={screenMediaLoadStates[index]}
-					{sceneQuality}
-				/>
-			</T.Group>
-		{/each}
-	</T.Group>
+	{#if carouselComponentReady && ScreenPanel}
+		<T.Group bind:ref={screenRail} position={railPosition}>
+			{#each screens as screen, index}
+				<T.Group bind:ref={screenNodes[index]} position={screen.position} rotation={screen.rotation}>
+					<svelte:component
+						this={ScreenPanel}
+						{index}
+						imageSrc={screen.primary ? titleImageSrc : ""}
+						stillSrc={screen.stillSrc}
+						ktx2Src={screen.ktx2Src}
+						videoSrc={screen.videoSrc}
+						kicker={screen.kicker}
+						title={screen.title}
+						stat={screen.stat}
+						ctaLabel={screen.ctaLabel}
+						hovered={index === hoveredScreenIndex}
+						primary={screen.primary}
+						active={index === activeScreenIndex}
+						shouldLoadMedia={screenMediaLoadStates[index]}
+						{sceneQuality}
+					/>
+				</T.Group>
+			{/each}
+		</T.Group>
+	{/if}
 
   <T.Group bind:ref={starColumn} position={starColumnPosition} scale={starColumnScale}>
 		<HomeIntroParticleField
