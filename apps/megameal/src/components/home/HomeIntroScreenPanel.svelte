@@ -37,6 +37,7 @@ export let stillSrc = ''
 export let ktx2Src = ''
 export let videoSrc = ''
 export let shouldLoadMedia = primary
+export let active = primary
 export let sceneQuality: SceneQuality = 'high'
 export let kicker = ''
 export let title = ''
@@ -102,6 +103,7 @@ const textSurfaceZ = -0.018
 const textWidth = 2.54
 const textHeight = 1.24
 const screenModelSrc = '/assets/3D/screen.glb'
+const screenVideoPlaybackRate = 0.33
 const screenGltfLoader = new GLTFLoader()
 const screenBounds = new Box3()
 const screenCenter = new Vector3()
@@ -199,11 +201,11 @@ function configureMediaTexture(texture: Texture, invertY = false) {
   texture.needsUpdate = true
 }
 
-function ensureHoverVideoLoaded() {
+function ensureVideoLoaded() {
   if (
     videoRequested ||
     typeof document === 'undefined' ||
-    !primary ||
+    !shouldLoadMedia ||
     !videoSrc
   ) {
     return
@@ -217,6 +219,7 @@ function ensureHoverVideoLoaded() {
   video.playsInline = true
   video.preload = 'metadata'
   video.crossOrigin = 'anonymous'
+  video.playbackRate = screenVideoPlaybackRate
   video.src = videoSrc
 
   video.addEventListener(
@@ -234,11 +237,14 @@ function ensureHoverVideoLoaded() {
   video.load()
 }
 
-function syncHoverVideoPlayback() {
-  if (!primary || !videoSrc) return
+function syncVideoPlayback() {
+  if (!videoSrc) return
 
-  if (hovered) {
-    ensureHoverVideoLoaded()
+  const shouldPlay = shouldLoadMedia && (active || hovered)
+
+  if (shouldPlay) {
+    ensureVideoLoaded()
+    if (videoElement) videoElement.playbackRate = screenVideoPlaybackRate
     videoElement?.play().catch(() => {
       // The still image remains visible if autoplay is blocked.
     })
@@ -534,8 +540,8 @@ $: if (loader && shouldLoadMedia) {
   ensureMediaTexturesLoaded()
 }
 
-$: if (mounted && primary && videoSrc && (hovered || videoElement)) {
-  syncHoverVideoPlayback()
+$: if (mounted && videoSrc && (active || hovered || videoElement)) {
+  syncVideoPlayback()
 }
 
 $: if (mounted && (kicker || title || stat || ctaLabel)) {
@@ -574,7 +580,8 @@ useTask(delta => {
   hoverBlend += ((hovered ? 1 : 0) - hoverBlend) * ease
   const baseTitleOpacity = panelGlassEnabled ? 0.76 : 1
   const baseMediaOpacity = panelGlassEnabled ? (primary ? 0.62 : 0.48) : 1
-  videoMediaOpacity = primary && videoReady ? hoverBlend : 0
+  const activeBlend = active ? 1 : hoverBlend
+  videoMediaOpacity = videoReady ? activeBlend : 0
   titleMediaOpacity =
     baseTitleOpacity +
     (1 - baseTitleOpacity) * hoverBlend -
@@ -582,11 +589,8 @@ useTask(delta => {
   mediaOpacity = baseMediaOpacity + (1 - baseMediaOpacity) * hoverBlend
   mediaGhostOpacity = panelGlassEnabled ? (primary ? 0.46 : 0.28) : 0
   glassEffectOpacity = 1
-  textOpacity = primary && videoSrc
-    ? 0.96 * (1 - hoverBlend)
-    : primary
-      ? 0.96
-      : 0.88
+  const baseTextOpacity = primary ? 0.96 : 0.88
+  textOpacity = videoSrc ? baseTextOpacity * (1 - hoverBlend) : baseTextOpacity
 
   if (panelRoot) {
     panelRoot.position.z = hoverBlend * 0.045
@@ -798,6 +802,19 @@ useTask(delta => {
 				depthWrite={!panelGlassEnabled}
 			/>
 		</T.Mesh>
+		{#if videoTexture}
+			<T.Mesh position={[0, 0, mediaSurfaceZ + 0.002]}>
+				<T.PlaneGeometry args={[mediaWidth, mediaHeight]} />
+				<T.MeshBasicMaterial
+					map={videoTexture}
+					side={frontSide}
+					transparent={true}
+					opacity={videoMediaOpacity}
+					blending={normalBlending}
+					depthWrite={false}
+				/>
+			</T.Mesh>
+		{/if}
 	{:else}
 		<T.Mesh position={[0, 0.02, mediaSurfaceZ]}>
 			<T.PlaneGeometry args={[fallbackWidth, fallbackHeight]} />

@@ -378,7 +378,28 @@ const transparentPixel =
       <div class="banner-aspect-container">
         <div class="banner-content-wrapper">
           <div id="standard-banner-container">
-            {bannerConfig.standardBannerConfig.bannerList.length > 0
+            {isPortalBannerMode ? (
+              <div
+                class="banner-slide absolute inset-0 w-full h-full transition-opacity"
+                style="opacity: 1; pointer-events: none;"
+                data-banner-index="0"
+                data-active="true"
+                data-scene-id="home-intro"
+              >
+                <div
+                  class="banner-link group w-full h-full relative"
+                  data-has-link="false"
+                  aria-label="MEGA MEAL SAGA portal"
+                >
+                  <div
+                    class="banner-media-layer w-full h-full overflow-hidden"
+                    data-banner-media-type="portal"
+                  >
+                    <slot name="banner-slide-content" />
+                  </div>
+                </div>
+              </div>
+            ) : bannerConfig.standardBannerConfig.bannerList.length > 0
               ? bannerConfig.standardBannerConfig.bannerList.map((item, index) => {
                   const bannerLink = bannerConfig.standardBannerConfig.getBannerLink(
                     index,

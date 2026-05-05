@@ -3,6 +3,10 @@ import { Canvas } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
 import { navigateWithMegamealTransition } from '@/utils/megamealRouteTransitions'
+import {
+  type SiteSfxId,
+  siteSfxManager,
+} from '@/utils/site-sfx'
 import HomeIntroEnvironmentScene from './HomeIntroEnvironmentScene.svelte'
 import {
   homeIntroMaxWheelForOffset,
@@ -50,6 +54,9 @@ let backgroundRevealFallbackTimeout = 0
 let canvasDpr = 1
 let sceneQuality: SceneQuality = 'high'
 let portalHoverActive = false
+let lastScreenSfxIndex = activeScreenIndex
+let lastPortalDragSfxAt = -Infinity
+let portalRevealSfxPlayed = false
 const backgroundRevealDelayMs = 1100
 const backgroundRevealFallbackDelayMs = 2600
 const wheelMomentumDecay = 2.4
@@ -101,7 +108,7 @@ function updatePointer(clientX: number, clientY: number) {
 
   input.x = ((clientX - bounds.left) / bounds.width - 0.5) * 2
   input.y = ((clientY - bounds.top) / bounds.height - 0.5) * 2
-  portalHoverActive = isPointerOverActiveScreen(clientX, clientY)
+  syncPortalHoverActive(isPointerOverActiveScreen(clientX, clientY))
 }
 
 function isInsideShell(clientX: number, clientY: number) {
@@ -202,10 +209,45 @@ function clampScreenIndex(value: number) {
   )
 }
 
+function playPortalSfx(id: SiteSfxId) {
+  if (typeof window === 'undefined') return
+
+  void siteSfxManager.unlockFromGesture().finally(() => {
+    siteSfxManager.play(id)
+  })
+}
+
+function playPortalDragSfx() {
+  if (typeof window === 'undefined') return
+
+  const now = window.performance.now()
+  if (now - lastPortalDragSfxAt < 420) return
+
+  lastPortalDragSfxAt = now
+  playPortalSfx('portal-drag')
+}
+
+function syncPortalHoverActive(nextActive: boolean) {
+  if (portalHoverActive === nextActive) return
+
+  portalHoverActive = nextActive
+  if (nextActive) {
+    playPortalSfx('portal-hover')
+  }
+}
+
 function syncActiveScreenFromWheel(wheel: number) {
-  activeScreenIndex = clampScreenIndex(
+  const nextScreenIndex = clampScreenIndex(
     Math.round(wheel * homeIntroWheelToScreenRatio - introOffsetScreens),
   )
+
+  if (nextScreenIndex === activeScreenIndex) return
+
+  activeScreenIndex = nextScreenIndex
+  if (activeScreenIndex !== lastScreenSfxIndex && input.reveal > 0.08) {
+    lastScreenSfxIndex = activeScreenIndex
+    playPortalSfx('portal-cycle')
+  }
 }
 
 function syncRevealProgress() {
@@ -270,6 +312,7 @@ function smoothWheelStep(delta: number) {
     -wheelMomentumMaxVelocity,
     wheelMomentumMaxVelocity,
   )
+  playPortalDragSfx()
   scheduleScrollDrivenWheel()
   return true
 }
@@ -322,6 +365,7 @@ function handlePointerDown(event: PointerEvent) {
   pointerDragDistance = 0
   pointerDownStartedOnScreen = isPointerOverActiveScreen(event.clientX, event.clientY)
   updatePointer(event.clientX, event.clientY)
+  playPortalDragSfx()
 
   try {
     shell?.setPointerCapture(event.pointerId)
@@ -356,6 +400,7 @@ function handlePointerMove(event: PointerEvent) {
 function navigateActiveScreen() {
   if (typeof window === 'undefined' || !activeScreen.href) return
 
+  playPortalSfx('portal-activate')
   navigateWithMegamealTransition({
     href: activeScreen.href,
     type: 'portal-zoom',
@@ -433,6 +478,7 @@ function handleTouchStart(event: TouchEvent) {
   lastPointerX = touch.clientX
   lastPointerY = touch.clientY
   updatePointer(touch.clientX, touch.clientY)
+  playPortalDragSfx()
 }
 
 function handleTouchMove(event: TouchEvent) {
@@ -468,6 +514,7 @@ function handleWheel(event: WheelEvent) {
     -mouseWheelMomentumMaxVelocity,
     mouseWheelMomentumMaxVelocity,
   )
+  playPortalDragSfx()
   scheduleScrollDrivenWheel()
 }
 
@@ -512,7 +559,7 @@ function handlePortalAdvance(event: Event) {
 function handleResize() {
   syncViewportMode()
   syncCanvasDpr()
-  portalHoverActive = false
+  syncPortalHoverActive(false)
   scheduleScrollDrivenWheel()
 }
 
@@ -534,6 +581,10 @@ function revealBackground() {
   if (backgroundReady) return
 
   backgroundReady = true
+  if (!portalRevealSfxPlayed) {
+    portalRevealSfxPlayed = true
+    playPortalSfx('portal-reveal')
+  }
   clearBackgroundRevealTimers()
 }
 
@@ -633,7 +684,12 @@ onDestroy(() => {
 		<h2>{activeScreen.title}</h2>
 		<p>{activeScreen.description}</p>
 		{#if activeScreen.href && activeScreen.ctaLabel}
-			<a href={activeScreen.href} class="home-intro-copy__button">
+			<a
+				href={activeScreen.href}
+				class="home-intro-copy__button"
+				data-sfx-hover="portal-hover"
+				data-sfx-click="portal-activate"
+			>
 				{activeScreen.ctaLabel}
 			</a>
 		{/if}

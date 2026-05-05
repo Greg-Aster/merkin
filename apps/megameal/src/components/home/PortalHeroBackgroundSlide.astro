@@ -9,7 +9,6 @@ import { siteConfig } from '@/config/config'
     muted
     playsinline
     preload="none"
-    poster={siteConfig.banner.src}
     data-src={siteConfig.banner.video}
     data-playback-rate={siteConfig.banner.playbackRate ?? 1}
   ></video>
@@ -38,6 +37,7 @@ import { siteConfig } from '@/config/config'
       if (!source) return
 
       loaded = true
+      window.removeEventListener('scroll', loadAfterScroll)
       video.src = source
       video.removeAttribute('data-src')
       video.load()
@@ -46,8 +46,42 @@ import { siteConfig } from '@/config/config'
 
     const loadAfterScroll = () => {
       if (window.scrollY <= 80) return
-      window.removeEventListener('scroll', loadAfterScroll)
       loadBackgroundVideo()
+    }
+
+    const shouldAutoloadBackgroundVideo = () => {
+      const nav = navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string }
+        deviceMemory?: number
+      }
+      const connection = nav.connection
+      const effectiveType = connection?.effectiveType ?? ''
+      const deviceMemory = nav.deviceMemory
+
+      return !(
+        connection?.saveData === true ||
+        /(^|-)2g$/.test(effectiveType) ||
+        effectiveType === '3g' ||
+        (typeof deviceMemory === 'number' && deviceMemory <= 2)
+      )
+    }
+
+    const scheduleBackgroundVideoLoad = () => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          const fallback = window.setTimeout(loadBackgroundVideo, 1400)
+
+          if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(
+              () => {
+                window.clearTimeout(fallback)
+                loadBackgroundVideo()
+              },
+              { timeout: 2200 },
+            )
+          }
+        })
+      })
     }
 
     window.addEventListener('merkin:portal-advance', loadBackgroundVideo, {
@@ -56,5 +90,9 @@ import { siteConfig } from '@/config/config'
     window.addEventListener('pointerdown', loadBackgroundVideo, { once: true })
     window.addEventListener('keydown', loadBackgroundVideo, { once: true })
     window.addEventListener('scroll', loadAfterScroll, { passive: true })
+
+    if (shouldAutoloadBackgroundVideo()) {
+      scheduleBackgroundVideoLoad()
+    }
   }
 </script>

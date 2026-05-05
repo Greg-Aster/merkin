@@ -51,13 +51,24 @@ import '../../styles/features/home/portal-route-effects.css'
     <div class="route-kicker">{eyebrow}</div>
     <h3>{title}</h3>
     <p>{description}</p>
-    <a href={href} class="route-link" data-sfx-click="sweep">
+    <a
+      href={href}
+      class="route-link"
+      data-sfx-hover="portal-hover"
+      data-sfx-click="portal-activate"
+    >
       <span>{linkLabel}</span>
       <Icon name="mdi:arrow-right" class="route-link__icon" />
     </a>
   </div>
 
-  <a href={href} class="route-viewport route-viewport--synthetic" data-sfx-click="sweep" aria-label={title}>
+  <a
+    href={href}
+    class="route-viewport route-viewport--synthetic"
+    data-sfx-hover="portal-hover"
+    data-sfx-click="portal-activate"
+    aria-label={title}
+  >
     <div class="route-scene">
       <div class="route-scene__grid"></div>
       {tone === 'game' && (

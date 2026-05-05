@@ -101,6 +101,7 @@ const gltfLoader = new GLTFLoader()
 gltfLoader.setMeshoptDecoder(MeshoptDecoder)
 let activeBannerSyncKey = ''
 let effectWheel = 0
+let activeScreenIndex = primaryScreenIndex
 const portalScreens = homeIntroScreens
 const screenCount = portalScreens.length
 let screenMediaLoadStates = Array.from(
@@ -477,6 +478,7 @@ function syncScreenMediaLoadStates(selectedIndex: number) {
 function updateScreenOrbit(wheel: number, ease: number) {
   const selectedIndex = getSelectedScreenIndex(wheel)
   const visualSelectedIndex = getHomeIntroRestedScreenIndex(selectedIndex)
+  activeScreenIndex = clampScreenIndex(Math.round(selectedIndex))
   syncBannerToFrontScreen(selectedIndex)
   syncScreenMediaLoadStates(selectedIndex)
 
@@ -742,6 +744,7 @@ useTask(delta => {
 					ctaLabel={screen.ctaLabel}
 					hovered={index === hoveredScreenIndex}
 					primary={screen.primary}
+					active={index === activeScreenIndex}
 					shouldLoadMedia={screenMediaLoadStates[index]}
 					{sceneQuality}
 				/>

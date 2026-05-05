@@ -33,6 +33,12 @@ export const AUDIO_SFX_IDS = [
   'error',
   'sweep',
   'scroll',
+  'portal-awaken',
+  'portal-reveal',
+  'portal-hover',
+  'portal-drag',
+  'portal-cycle',
+  'portal-activate',
 ] as const
 
 export type AudioSfxId = (typeof AUDIO_SFX_IDS)[number]
