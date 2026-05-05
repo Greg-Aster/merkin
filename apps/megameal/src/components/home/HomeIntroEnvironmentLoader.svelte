@@ -9,6 +9,7 @@ let Environment: HomeIntroEnvironmentComponent | null = null
 let cleanupCallbacks: Array<() => void> = []
 let loadStarted = false
 let awakenSfxPlayed = false
+const autoloadDelayMs = 1200
 
 function addCleanup(callback: () => void) {
   cleanupCallbacks.push(callback)
@@ -17,22 +18,6 @@ function addCleanup(callback: () => void) {
 function cleanupAll() {
   cleanupCallbacks.forEach((callback) => callback())
   cleanupCallbacks = []
-}
-
-function shouldAutoloadEnvironment() {
-  const connection = (navigator as Navigator & {
-    connection?: { saveData?: boolean; effectiveType?: string }
-  }).connection
-  const effectiveType = connection?.effectiveType ?? ''
-  const deviceMemory = (navigator as Navigator & { deviceMemory?: number })
-    .deviceMemory
-
-  return !(
-    connection?.saveData === true ||
-    /(^|-)2g$/.test(effectiveType) ||
-    effectiveType === '3g' ||
-    (typeof deviceMemory === 'number' && deviceMemory <= 2)
-  )
 }
 
 function playPortalAwakenSfx() {
@@ -78,6 +63,7 @@ function waitForIntent() {
 function scheduleAutoload() {
   let firstFrame = 0
   let secondFrame = 0
+  let delayTimeout = 0
   let idleId = 0
   let fallbackTimeout = 0
 
@@ -98,12 +84,15 @@ function scheduleAutoload() {
   }
 
   firstFrame = window.requestAnimationFrame(() => {
-    secondFrame = window.requestAnimationFrame(startWhenIdle)
+    secondFrame = window.requestAnimationFrame(() => {
+      delayTimeout = window.setTimeout(startWhenIdle, autoloadDelayMs)
+    })
   })
 
   addCleanup(() => {
     window.cancelAnimationFrame(firstFrame)
     window.cancelAnimationFrame(secondFrame)
+    window.clearTimeout(delayTimeout)
     window.clearTimeout(fallbackTimeout)
     if (idleId) {
       window.cancelIdleCallback(idleId)
@@ -113,9 +102,7 @@ function scheduleAutoload() {
 
 onMount(() => {
   waitForIntent()
-  if (shouldAutoloadEnvironment()) {
-    scheduleAutoload()
-  }
+  scheduleAutoload()
 })
 
 onDestroy(() => {
@@ -136,8 +123,7 @@ onDestroy(() => {
     display: grid;
     place-items: center;
     overflow: hidden;
-    background:
-      radial-gradient(circle at 50% 44%, rgb(8 47 73 / 0.36), transparent 62%),
-      linear-gradient(180deg, rgb(2 6 23), rgb(3 7 18));
+    pointer-events: none;
+    background: transparent;
   }
 </style>
