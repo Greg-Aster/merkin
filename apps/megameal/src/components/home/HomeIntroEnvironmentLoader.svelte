@@ -9,7 +9,6 @@ let Environment: HomeIntroEnvironmentComponent | null = null
 let cleanupCallbacks: Array<() => void> = []
 let loadStarted = false
 let awakenSfxPlayed = false
-const autoloadDelayMs = 1200
 
 function addCleanup(callback: () => void) {
   cleanupCallbacks.push(callback)
@@ -63,7 +62,6 @@ function waitForIntent() {
 function scheduleAutoload() {
   let firstFrame = 0
   let secondFrame = 0
-  let delayTimeout = 0
   let idleId = 0
   let fallbackTimeout = 0
 
@@ -84,15 +82,12 @@ function scheduleAutoload() {
   }
 
   firstFrame = window.requestAnimationFrame(() => {
-    secondFrame = window.requestAnimationFrame(() => {
-      delayTimeout = window.setTimeout(startWhenIdle, autoloadDelayMs)
-    })
+    secondFrame = window.requestAnimationFrame(startWhenIdle)
   })
 
   addCleanup(() => {
     window.cancelAnimationFrame(firstFrame)
     window.cancelAnimationFrame(secondFrame)
-    window.clearTimeout(delayTimeout)
     window.clearTimeout(fallbackTimeout)
     if (idleId) {
       window.cancelIdleCallback(idleId)
