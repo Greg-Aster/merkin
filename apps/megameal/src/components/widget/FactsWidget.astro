@@ -16,6 +16,7 @@ export interface Props {
   kicker?: string
   factTypes?: TimelineFact['type'][]
   showPrivacyNoticeFirst?: boolean
+  mobilePersistent?: boolean
 }
 
 const {
@@ -32,6 +33,7 @@ const {
       : 'Megameal Signal',
   factTypes = ['advertisement'],
   showPrivacyNoticeFirst = false,
+  mobilePersistent = false,
 } = Astro.props
 
 const filteredFacts = megaMealUniverseFacts.filter(fact =>
@@ -89,6 +91,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
   data-expanded={variant === 'overlay' ? 'false' : 'true'}
   data-pinned="false"
   data-scroll-idle={variant === 'overlay' ? 'false' : 'true'}
+  data-mobile-persistent={mobilePersistent ? 'true' : 'false'}
   data-storage-key={storageKey}
   data-dismissible={dismissible ? 'true' : 'false'}
 >
@@ -264,6 +267,11 @@ import '../../styles/features/facts-widget/motion-responsive.css'
     const isDismissible = widget.dataset.dismissible === 'true'
     const isOverlay = widget.classList.contains('facts-widget-overlay')
     const prefersTouchUi = window.matchMedia('(hover: none), (pointer: coarse)').matches
+    const mobilePersistentQuery = window.matchMedia('(max-width: 640px)')
+    const isMobilePersistentOverlay = () =>
+      isOverlay &&
+      widget.dataset.mobilePersistent === 'true' &&
+      mobilePersistentQuery.matches
     let currentIndex = -1
     let intervalId
     let expandTimeoutId
@@ -386,14 +394,61 @@ import '../../styles/features/facts-widget/motion-responsive.css'
       widget.dataset.scrollIdle = idle ? 'true' : 'false'
     }
 
+    const syncMobilePersistentAdVisibility = () => {
+      const root = document.documentElement
+      if (widget.dataset.mobilePersistent !== 'true') return
+
+      if (!isMobilePersistentOverlay()) {
+        delete root.dataset.megamealMobileAdVisible
+        root.style.removeProperty('--megameal-mobile-ad-clearance')
+        return
+      }
+
+      if (widget.classList.contains('is-dismissed')) {
+        root.dataset.megamealMobileAdVisible = 'false'
+        root.style.removeProperty('--megameal-mobile-ad-clearance')
+        return
+      }
+
+      root.dataset.megamealMobileAdVisible = 'true'
+      window.requestAnimationFrame(() => {
+        if (!isMobilePersistentOverlay() || widget.classList.contains('is-dismissed')) return
+
+        const bounds = widget.getBoundingClientRect()
+        const clearance = Math.max(0, window.innerHeight - bounds.top) + 24
+        root.style.setProperty('--megameal-mobile-ad-clearance', `${Math.ceil(clearance)}px`)
+      })
+    }
+
+    const syncMobilePersistentOverlay = () => {
+      if (!isMobilePersistentOverlay()) {
+        syncMobilePersistentAdVisibility()
+        return
+      }
+      setPinned(false)
+      setExpanded(false)
+      if (!widget.classList.contains('is-dismissed')) {
+        setScrollIdle(true)
+      }
+      syncMobilePersistentAdVisibility()
+    }
+
     const scheduleScrollIdle = (delay = overlayScrollIdleDelay) => {
       if (!isOverlay || widget.classList.contains('is-dismissed')) return
+      if (isMobilePersistentOverlay()) {
+        setScrollIdle(true)
+        return
+      }
       window.clearTimeout(scrollIdleTimeoutId)
       scrollIdleTimeoutId = window.setTimeout(() => setScrollIdle(true), delay)
     }
 
     const markUserIsNavigating = () => {
       if (!isOverlay) return
+      if (isMobilePersistentOverlay()) {
+        setScrollIdle(true)
+        return
+      }
       setScrollIdle(false)
       setPinned(false)
       setExpanded(false)
@@ -413,7 +468,11 @@ import '../../styles/features/facts-widget/motion-responsive.css'
 
     const dismissWidget = () => {
       widget.classList.add('is-dismissed')
-      window.sessionStorage.setItem(storageKey, 'true')
+      if (isMobilePersistentOverlay()) {
+        window.sessionStorage.removeItem(storageKey)
+      } else {
+        window.sessionStorage.setItem(storageKey, 'true')
+      }
       window.clearInterval(intervalId)
       window.clearTimeout(expandTimeoutId)
       window.clearTimeout(collapseTimeoutId)
@@ -422,6 +481,7 @@ import '../../styles/features/facts-widget/motion-responsive.css'
       setPinned(false)
       setExpanded(false)
       setScrollIdle(false)
+      syncMobilePersistentAdVisibility()
     }
 
     const restoreWidget = () => {
@@ -462,13 +522,25 @@ import '../../styles/features/facts-widget/motion-responsive.css'
       applyFact(fallbackFact)
     }
 
-    if (isDismissible && window.sessionStorage.getItem(storageKey) === 'true') {
+    syncMobilePersistentOverlay()
+    if (isMobilePersistentOverlay()) {
+      window.sessionStorage.removeItem(storageKey)
+    }
+
+    if (
+      isDismissible &&
+      window.sessionStorage.getItem(storageKey) === 'true' &&
+      !isMobilePersistentOverlay()
+    ) {
       widget.classList.add('is-dismissed')
     } else {
       setExpanded(isOverlay ? false : true)
       startRotation()
       scheduleScrollIdle()
     }
+    syncMobilePersistentAdVisibility()
+
+    mobilePersistentQuery.addEventListener?.('change', syncMobilePersistentOverlay)
 
     if (frameEl instanceof HTMLElement && isOverlay) {
       frameEl.addEventListener('click', event => {

@@ -572,9 +572,9 @@ function getScreenOrbitTarget(index: number, visualSelectedIndex: number) {
   const offset = index - visualSelectedIndex
   const depth = Math.abs(offset)
   const spiral = offset * screenAngleStep
-  const orbitRadiusX = screenOrbitRadiusX * (portraitMobile ? 0.96 : 1)
-  const orbitRadiusZ = screenOrbitRadiusZ * (portraitMobile ? 0.94 : 1)
-  const stepY = screenStepY * (portraitMobile ? 1.08 : 1)
+  const orbitRadiusX = screenOrbitRadiusX * (portraitMobile ? 0.52 : 1)
+  const orbitRadiusZ = screenOrbitRadiusZ * (portraitMobile ? 0.76 : 1)
+  const stepY = screenStepY * (portraitMobile ? 0.9 : 1)
   const x = Math.sin(spiral) * orbitRadiusX
   const y = -offset * stepY
   const z =
@@ -585,7 +585,7 @@ function getScreenOrbitTarget(index: number, visualSelectedIndex: number) {
   )
   const pitch = Math.sin(spiral) * -0.025
   const roll = Math.sin(spiral) * 0.018
-  const scale = portraitMobile ? 1.0 : 1.12
+  const scale = portraitMobile ? 0.88 : 1.12
 
   return { x, y, z, pitch, yaw: outwardYaw, roll, scale }
 }
@@ -657,7 +657,7 @@ useTask(delta => {
     visualSelectedIndex - primaryScreenIndex + introOffsetScreens
   const spiralPhase = visualSelectedIndex * screenAngleStep
   const logoCarouselPhase = visualScrollScreens * screenAngleStep
-  const screenVerticalStep = screenStepY * (portraitMobile ? 1.08 : 1)
+  const screenVerticalStep = screenStepY * (portraitMobile ? 0.9 : 1)
   const logoScrollRise =
     Math.max(0, visualScrollScreens) *
     screenVerticalStep

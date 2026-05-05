@@ -151,8 +151,8 @@
   }
 
   @media (max-width: 640px) and (orientation: portrait) {
-    .portal-sponsored-overlay.facts-widget-overlay,
-    .test-portal-sponsored-overlay.facts-widget-overlay {
+    .portal-sponsored-overlay.facts-widget-overlay:not([data-mobile-persistent='true']),
+    .test-portal-sponsored-overlay.facts-widget-overlay:not([data-mobile-persistent='true']) {
       display: none !important;
     }
   }
