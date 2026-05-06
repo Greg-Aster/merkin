@@ -94,6 +94,14 @@ const panelConfigSchema = z.object({
   title: z.string().optional(),
 })
 
+const timelineFrontmatterSchema = {
+  timelineYear: z.number().optional(),
+  timelineEra: z.string().optional(),
+  timelineLocation: z.string().optional(),
+  isKeyEvent: z.boolean().optional(),
+  showInTimeline: z.boolean().optional(),
+}
+
 // Define the 'posts' collection
 const postsCollection = defineCollection({
   schema: postsSchema,
@@ -110,6 +118,7 @@ const videosCollection = defineCollection({
     tags: z.array(z.string()).optional().default([]),
     category: z.string().optional().default('Video'),
     draft: z.boolean().optional().default(false),
+    ...timelineFrontmatterSchema,
     related: z
       .array(
         z.object({
@@ -146,6 +155,7 @@ const cookbookCollection = defineCollection({
     location: z.string().optional(),
     downloadable: z.boolean().optional().default(false),
     draft: z.boolean().optional().default(false),
+    ...timelineFrontmatterSchema,
     related: z.array(z.string()).optional().default([]),
   }),
 })
@@ -184,6 +194,7 @@ const productsCollection = defineCollection({
     price: z.number().optional(), // The price of the product, optional
     sku: z.string().optional(), // A unique stock keeping unit, optional
     draft: z.boolean().optional().default(false),
+    ...timelineFrontmatterSchema,
     oneColumn: z.boolean().optional().default(false),
     // Availability status — drives badge and CTA behavior
     availability: z

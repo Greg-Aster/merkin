@@ -49,6 +49,7 @@ export const postsSchema = z.object({
   timelineEra: z.string().optional(),
   timelineLocation: z.string().optional(),
   isKeyEvent: z.boolean().optional(),
+  showInTimeline: z.boolean().optional(),
   yIndex: z.number().optional(),
   prevTitle: z.string().default(''),
   prevSlug: z.string().default(''),

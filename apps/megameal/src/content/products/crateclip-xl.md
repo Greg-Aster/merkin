@@ -3,6 +3,11 @@ name: "CrateClip XL"
 tagline: "For when the shelf says it is fine and you know it is lying."
 brand: "Civic Basement Systems"
 draft: false
+showInTimeline: true
+timelineYear: 2023
+timelineEra: "ancient-epoch"
+timelineLocation: "Civic Basement Systems Catalog"
+isKeyEvent: false
 availability: "available"
 ctaMode: "cart"
 stripePaymentLink: ""

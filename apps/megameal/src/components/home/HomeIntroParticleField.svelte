@@ -106,6 +106,10 @@ export let wheel = 0
 export let scrollStep = 1
 export let scrollSpan = 10
 export let atmosphereReveal = 1
+export let axialSpinSpeed = 0
+export let axialSpinInputScale = 0
+export let pointSizeScale = 1
+export let opacityScale = 1
 
 let points: Points | null = null
 
@@ -212,6 +216,9 @@ useTask(() => {
   const motionTime = time * particleMotionScale
   const pointerX = Number.isFinite(input.x) ? input.x : 0
   const verticalScroll = wheel * scrollStep
+  const axialRotation = time * axialSpinSpeed + input.dragX * axialSpinInputScale
+  const axialCos = Math.cos(axialRotation)
+  const axialSin = Math.sin(axialRotation)
 
   const pixelRatio =
     typeof window === 'undefined' ? 1 : Math.min(1.6, window.devicePixelRatio || 1)
@@ -254,10 +261,16 @@ useTask(() => {
       strayOpacity *
       haloAlphaScale
 
-    positions[index * 3] =
+    const baseX =
       particle.anchorX +
       Math.cos(groupedSpin) * reactiveRadius +
       pointerX * 0.08
+    const baseZ =
+      particle.anchorZ +
+      particle.zOffset +
+      Math.sin(groupedSpin) * reactiveRadius * 0.72
+
+    positions[index * 3] = baseX * axialCos - baseZ * axialSin
     positions[index * 3 + 1] =
       wrapCentered(
         particle.anchorY + particle.height + verticalScroll,
@@ -265,10 +278,7 @@ useTask(() => {
       ) +
       Math.sin(motionTime * 1.1 + particle.phase) *
         (0.05 + particle.clusterStrength * 0.11)
-    positions[index * 3 + 2] =
-      particle.anchorZ +
-      particle.zOffset +
-      Math.sin(groupedSpin) * reactiveRadius * 0.72
+    positions[index * 3 + 2] = baseX * axialSin + baseZ * axialCos
 
     color.setHSL(hue, 0.86, 0.7 + centerWeight * 0.2)
     coreColors[index * 3] = color.r
@@ -281,10 +291,10 @@ useTask(() => {
     haloColors[index * 3 + 2] = haloColor.b
 
     const spriteScale = particle.size * flare * (1.26 + pulse * 0.5)
-    coreSizes[index] = spriteScale * particlePointSizeScale
+    coreSizes[index] = spriteScale * particlePointSizeScale * pointSizeScale
     haloSizes[index] = coreSizes[index] * haloPointSizeScale
-    coreAlphas[index] = coreAlpha
-    haloAlphas[index] = haloAlpha
+    coreAlphas[index] = coreAlpha * opacityScale
+    haloAlphas[index] = haloAlpha * opacityScale
   })
 
   const positionAttribute = coreGeometry.getAttribute('position')

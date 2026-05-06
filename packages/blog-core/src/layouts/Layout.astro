@@ -218,7 +218,7 @@ import {
 } from 'overlayscrollbars';
 import {getHue, getStoredTheme, setHue, setTheme} from '@/utils/setting-utils';
 import {pathsEqual, url} from '@/utils/url-utils';
-import { initTimelineViews } from '../components/timeline/TimelineViewModes/timelineViewClient.js';
+import { destroyTimelineViews, initTimelineViews } from '../components/timeline/TimelineViewModes/timelineViewClient.js';
 import { initTimelineBannerControls } from '../components/timeline/timelineBannerClient.js';
 
 function setClickOutsideToClose(panel: string, ignores: string[]) {
@@ -343,6 +343,7 @@ function syncScrollTargets() {
 }
 
 document.addEventListener('astro:page-load', syncScrollTargets);
+document.addEventListener('astro:before-swap', () => destroyTimelineViews());
 document.addEventListener('astro:page-load', initTimelineViews);
 document.addEventListener('astro:page-load', initTimelineBannerControls);
 

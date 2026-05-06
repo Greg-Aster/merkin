@@ -86,23 +86,43 @@ function normalizeBannerData(value: unknown): SharedBannerData | undefined {
   return normalized
 }
 
+function routeBaseForCollection(collection: string): string {
+  if (collection === 'products') return 'store'
+  if (collection === 'posts') return 'posts'
+  return collection
+}
+
+function buildContentUrl(collection: string, slug: string): string {
+  if (collection === 'cookbook' && slug === 'cookbook-index') return '/cookbook/'
+  return `/${routeBaseForCollection(collection)}/${slug}/`
+}
+
 export function normalizePost(input: {
   slug: string
   sourcePath: string
   frontmatter: SharedRawPostFrontmatter
+  collection?: string
 }): SharedPost {
-  const { slug, sourcePath, frontmatter } = input
-  const title = asString(frontmatter.title) ?? slug
-  const description = asString(frontmatter.description) ?? ''
+  const { sourcePath, frontmatter } = input
+  const collection = input.collection ?? 'posts'
+  const slug = asString(frontmatter.slug) ?? input.slug
+  const title = asString(frontmatter.title) ?? asString(frontmatter.name) ?? slug
+  const description =
+    asString(frontmatter.description) ?? asString(frontmatter.tagline) ?? ''
   const timelineYear = asNumber(frontmatter.timelineYear)
   const yIndex = asNumber(frontmatter.yIndex)
   const seriesPart = asNumber(frontmatter.seriesPart)
+  const showInTimeline =
+    typeof frontmatter.showInTimeline === 'boolean'
+      ? frontmatter.showInTimeline
+      : undefined
 
   return {
     id: slug,
     slug,
     sourcePath,
-    collection: 'posts',
+    collection,
+    url: buildContentUrl(collection, slug),
     title,
     description,
     published: asIsoDate(frontmatter.published),
@@ -118,6 +138,7 @@ export function normalizePost(input: {
     timelineEra: asString(frontmatter.timelineEra),
     timelineLocation: asString(frontmatter.timelineLocation),
     isKeyEvent: asBoolean(frontmatter.isKeyEvent, false),
+    showInTimeline,
     isLevel: asBoolean(frontmatter.isLevel, false),
     levelId: asString(frontmatter.levelId) ?? null,
     series: asString(frontmatter.series),
@@ -135,6 +156,8 @@ export function toTimelineEvent(
   const publishedYear = post.published ? new Date(post.published).getUTCFullYear() : undefined
   const fallbackYear = options.fallbackYear ?? new Date().getUTCFullYear()
 
+  if (post.showInTimeline === false) return null
+
   let year = post.timelineYear
 
   if (
@@ -146,6 +169,10 @@ export function toTimelineEvent(
     year = publishedYear ?? fallbackYear
   }
 
+  if (year === undefined && post.showInTimeline === true) {
+    year = publishedYear ?? fallbackYear
+  }
+
   if (year === undefined) return null
 
   return {
@@ -153,6 +180,9 @@ export function toTimelineEvent(
     description: post.description,
     slug: post.slug,
     sourcePath: post.sourcePath,
+    url: post.url,
+    contentType: post.collection === 'products' ? 'store' : post.collection,
+    sourceCollection: post.collection,
     year,
     era: post.timelineEra,
     category: post.category,
@@ -161,6 +191,7 @@ export function toTimelineEvent(
     levelId: post.levelId ?? null,
     location: post.timelineLocation,
     isDraft: post.draft,
+    showInTimeline: post.showInTimeline,
     tags: post.tags,
     timelineYear: year,
     timelineEra: post.timelineEra,

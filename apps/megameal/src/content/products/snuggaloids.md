@@ -3,6 +3,11 @@ name: "Snuggaloids"
 tagline: "They watch you sleep."
 brand: "Qarnivor Companion Division"
 draft: false
+showInTimeline: true
+timelineYear: 27995
+timelineEra: "conflict-epoch"
+timelineLocation: "Planet Qarnivor, Companion Division Catalog"
+isKeyEvent: false
 availability: "not_in_your_area"
 ctaMode: "none"
 image: ""

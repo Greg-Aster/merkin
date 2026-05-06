@@ -30,6 +30,23 @@ function parseJsonById(id, fallback) {
   }
 }
 
+const timelineCoreRegistry = new Map()
+
+function getInstanceKey(container) {
+  return container.id.replace(/-container$/, '')
+}
+
+function dispatchTimelineCoreReady(timelineId, instance, container) {
+  const detail = { timelineId, instance, container }
+  container.dispatchEvent(
+    new CustomEvent('timeline:core-ready', {
+      detail,
+      bubbles: true,
+    }),
+  )
+  document.dispatchEvent(new CustomEvent('timeline:core-ready', { detail }))
+}
+
 class TimelineCore {
   constructor(container) {
     this.container = container
@@ -58,12 +75,17 @@ class TimelineCore {
     this.currentEra = 'all-eras'
     this.selectedSlug = null
     this.hoveredSlug = null
-    this.highlightTimer = null
+    this.highlightInterval = null
+    this.highlightTimeouts = new Set()
     this.dragPointerId = null
     this.dragStartX = 0
     this.dragStartY = 0
     this.dragBaseX = 0
     this.dragBaseY = 0
+    this.boundCleanups = []
+    this.resizeHandler = () => {
+      if (this.currentEra) this.focusVisibleEvents(false)
+    }
 
     this.bindEvents()
     this.updateTransform(false)
@@ -72,39 +94,46 @@ class TimelineCore {
     this.bindBackgroundFallback()
   }
 
+  addListener(target, eventName, handler, options) {
+    target.addEventListener(eventName, handler, options)
+    this.boundCleanups.push(() => target.removeEventListener(eventName, handler, options))
+  }
+
   bindEvents() {
     this.container.querySelectorAll('.timeline-event-button').forEach((button) => {
-      button.addEventListener('pointerdown', (event) => {
+      const stopPointer = (event) => {
         event.stopPropagation()
-      })
-
-      button.addEventListener('click', () => {
+      }
+      const clickHandler = () => {
         const slug = button.getAttribute('data-slug')
         if (!slug) return
         this.selectEvent(slug, true)
-      })
-
-      button.addEventListener('mouseenter', () => {
+      }
+      const mouseEnterHandler = () => {
         const slug = button.getAttribute('data-slug')
         if (!slug || this.isMobile()) return
         this.setHovered(slug)
         if (!this.selectedSlug) this.showCard(slug, false)
-      })
-
-      button.addEventListener('mouseleave', () => {
+      }
+      const mouseLeaveHandler = () => {
         const slug = button.getAttribute('data-slug')
         if (!slug || this.isMobile()) return
         this.clearHovered(slug)
         if (!this.selectedSlug) this.hideCard()
-      })
+      }
+
+      this.addListener(button, 'pointerdown', stopPointer)
+      this.addListener(button, 'click', clickHandler)
+      this.addListener(button, 'mouseenter', mouseEnterHandler)
+      this.addListener(button, 'mouseleave', mouseLeaveHandler)
     })
 
-    this.container.addEventListener('click', (event) => {
+    this.addListener(this.container, 'click', (event) => {
       if (event.target.closest('.timeline-event-button') || event.target.closest('.timeline-active-card')) return
       this.clearSelection()
     })
 
-    this.container.addEventListener('pointerdown', (event) => {
+    this.addListener(this.container, 'pointerdown', (event) => {
       if (!this.stage) return
       if (event.target.closest('.timeline-event-button') || event.target.closest('.timeline-active-card')) return
       this.dragPointerId = event.pointerId
@@ -116,7 +145,7 @@ class TimelineCore {
       this.container.setPointerCapture?.(event.pointerId)
     })
 
-    this.container.addEventListener('pointermove', (event) => {
+    this.addListener(this.container, 'pointermove', (event) => {
       if (this.dragPointerId !== event.pointerId) return
       this.offsetX = this.dragBaseX + (event.clientX - this.dragStartX)
       this.offsetY = this.dragBaseY + (event.clientY - this.dragStartY)
@@ -130,10 +159,11 @@ class TimelineCore {
       this.container.releasePointerCapture?.(event.pointerId)
     }
 
-    this.container.addEventListener('pointerup', endDrag)
-    this.container.addEventListener('pointercancel', endDrag)
+    this.addListener(this.container, 'pointerup', endDrag)
+    this.addListener(this.container, 'pointercancel', endDrag)
 
-    this.container.addEventListener(
+    this.addListener(
+      this.container,
       'wheel',
       (event) => {
         if (!event.ctrlKey && !event.metaKey) return
@@ -145,14 +175,12 @@ class TimelineCore {
       { passive: false },
     )
 
-    window.addEventListener('resize', () => {
-      if (this.currentEra) this.focusVisibleEvents(false)
-    })
+    this.addListener(window, 'resize', this.resizeHandler)
   }
 
   bindBackgroundFallback() {
     if (!this.backgroundVideo || !this.backgroundImageWrapper) return
-    this.backgroundVideo.addEventListener('error', () => {
+    this.addListener(this.backgroundVideo, 'error', () => {
       this.backgroundVideo.classList.add('is-background-hidden')
       this.backgroundImageWrapper.classList.remove('is-background-hidden')
     })
@@ -176,14 +204,10 @@ class TimelineCore {
     const bgY = this.offsetY * -0.032
     const bgScale = 1.05 + Math.max(0, this.scale - 1) * 0.035
 
-    if (this.backgroundImage) {
-      this.backgroundImage.style.transition = transition
-      this.backgroundImage.style.transform = `translate3d(${bgX}px, ${bgY}px, 0) scale(${bgScale})`
-    }
-
-    if (this.backgroundVideo) {
-      this.backgroundVideo.style.transition = transition
-      this.backgroundVideo.style.transform = `translate3d(${bgX}px, ${bgY}px, 0) scale(${bgScale})`
+    for (const element of [this.backgroundImage, this.backgroundVideo]) {
+      if (!element) continue
+      element.style.transition = transition
+      element.style.transform = `translate3d(${bgX}px, ${bgY}px, 0) scale(${bgScale})`
     }
 
     if (this.nebulaLayer) {
@@ -315,9 +339,6 @@ class TimelineCore {
         if (this.backgroundVideo.getAttribute('src') !== nextVideo) {
           this.backgroundVideo.setAttribute('src', nextVideo)
           this.backgroundVideo.load()
-        }
-        if (!hasVideo && nextImage) {
-          this.backgroundVideo.setAttribute('poster', nextImage)
         }
         applyVideoPlaybackRate(this.backgroundVideo, nextVideoPlaybackRate)
         this.backgroundVideo.classList.remove('is-background-hidden')
@@ -463,13 +484,14 @@ class TimelineCore {
     const eraLabel = event.era
       ? `<div class="timeline-card-kicker">${this.escapeHtml(event.era.replaceAll('-', ' '))}</div>`
       : ''
+    const href = event.url || `/posts/${event.slug}/#post-container`
     return `
       <article class="timeline-event-card ${persistent ? 'is-persistent-card' : ''}">
         ${eraLabel}
         <h3>${this.escapeHtml(event.title)}</h3>
         ${yearLabel}
         <p>${this.escapeHtml(event.description || '')}</p>
-        <a href="/posts/${this.escapeHtml(event.slug)}/#post-container">View Event</a>
+        <a href="${this.escapeHtml(href)}">View Event</a>
       </article>
     `
   }
@@ -484,7 +506,7 @@ class TimelineCore {
   }
 
   startRandomHighlight() {
-    window.setInterval(() => {
+    this.highlightInterval = window.setInterval(() => {
       const visibleEntries = this.getVisibleEntries()
       if (!visibleEntries.length) return
       const targetEntry = visibleEntries[Math.floor(Math.random() * visibleEntries.length)]
@@ -493,23 +515,67 @@ class TimelineCore {
       )
       if (!target) return
       target.setAttribute('data-trigger-highlight', 'true')
-      window.setTimeout(() => {
+      const timeout = window.setTimeout(() => {
         target.setAttribute('data-trigger-highlight', 'false')
+        this.highlightTimeouts.delete(timeout)
       }, 1800)
+      this.highlightTimeouts.add(timeout)
     }, 3600)
+  }
+
+  destroy() {
+    if (this.highlightInterval) {
+      window.clearInterval(this.highlightInterval)
+      this.highlightInterval = null
+    }
+    for (const timeout of this.highlightTimeouts) {
+      window.clearTimeout(timeout)
+    }
+    this.highlightTimeouts.clear()
+    for (const cleanup of this.boundCleanups.splice(0)) {
+      cleanup()
+    }
+    this.backgroundVideo?.pause?.()
+    delete this.container.dataset.timelineInitialized
   }
 }
 
-export function initTimelineViews() {
-  document
+export function getTimelineCore(timelineId) {
+  return timelineCoreRegistry.get(timelineId) ?? null
+}
+
+export function destroyTimelineViews(root = document) {
+  for (const [timelineId, instance] of timelineCoreRegistry.entries()) {
+    if (root === document || root.contains?.(instance.container) || !instance.container.isConnected) {
+      instance.destroy()
+      timelineCoreRegistry.delete(timelineId)
+    }
+  }
+}
+
+export function initTimelineViews(root = document) {
+  for (const [timelineId, instance] of timelineCoreRegistry.entries()) {
+    if (!instance.container.isConnected) {
+      instance.destroy()
+      timelineCoreRegistry.delete(timelineId)
+    }
+  }
+
+  root
     .querySelectorAll('[data-timeline-shell="true"]')
     .forEach((container) => {
       if (!(container instanceof HTMLElement)) return
+      const instanceKey = getInstanceKey(container)
+      const existingInstance = timelineCoreRegistry.get(instanceKey)
+      if (existingInstance) {
+        dispatchTimelineCoreReady(instanceKey, existingInstance, container)
+        return
+      }
       if (container.dataset.timelineInitialized === 'true') return
 
       container.dataset.timelineInitialized = 'true'
       const instance = new TimelineCore(container)
-      const instanceKey = container.id.replace(/-container$/, '')
-      window[`timelineCore_${instanceKey}`] = instance
+      timelineCoreRegistry.set(instanceKey, instance)
+      dispatchTimelineCoreReady(instanceKey, instance, container)
     })
 }

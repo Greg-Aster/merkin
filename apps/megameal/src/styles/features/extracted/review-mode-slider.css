@@ -1,0 +1,427 @@
+/* ============================================================
+ * Review Mode Slider — MEGA MEAL film-critic descent control
+ * Drives [data-review-mode] on the article container, which
+ * gates visibility of [data-modes] sections in the MDX body.
+ * ============================================================ */
+
+.review-mode-slider {
+  position: sticky;
+  top: 4.5rem;
+  z-index: 30;
+  margin: 0 0 2rem;
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(
+      135deg,
+      oklch(0.18 0.04 260 / 0.92) 0%,
+      oklch(0.14 0.06 280 / 0.92) 50%,
+      oklch(0.16 0.08 320 / 0.92) 100%
+    );
+  border: 1px solid oklch(0.45 0.08 280 / 0.35);
+  box-shadow:
+    0 10px 30px -12px oklch(0 0 0 / 0.45),
+    inset 0 1px 0 oklch(1 0 0 / 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: oklch(0.95 0.01 260);
+  transition: border-color 320ms ease, box-shadow 320ms ease;
+}
+
+.review-mode-slider[data-active-mode='cosmic'] {
+  border-color: oklch(0.55 0.18 320 / 0.55);
+  box-shadow:
+    0 10px 40px -10px oklch(0.4 0.2 320 / 0.5),
+    inset 0 1px 0 oklch(1 0 0 / 0.06);
+}
+
+.review-mode-slider[data-active-mode='horror'] {
+  border-color: oklch(0.55 0.22 25 / 0.65);
+  box-shadow:
+    0 12px 48px -8px oklch(0.45 0.24 25 / 0.55),
+    inset 0 1px 0 oklch(1 0 0 / 0.07);
+  animation: review-slider-horror-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes review-slider-horror-pulse {
+  0%, 100% {
+    border-color: oklch(0.55 0.22 25 / 0.65);
+  }
+  50% {
+    border-color: oklch(0.6 0.26 15 / 0.85);
+  }
+}
+
+.review-mode-slider__inner {
+  padding: 1.25rem 1.5rem 1rem;
+}
+
+.review-mode-slider__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.review-mode-slider__eyebrow {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: oklch(0.78 0.12 280);
+}
+
+.review-mode-slider__hint {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: oklch(0.7 0.02 260);
+  max-width: 36rem;
+}
+
+/* ---------- Track + range input ---------- */
+
+.review-mode-slider__track-wrapper {
+  position: relative;
+  padding: 0.25rem 0.5rem 0;
+}
+
+.review-mode-slider__track {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    oklch(0.4 0.05 220) 0%,
+    oklch(0.4 0.06 260) 25%,
+    oklch(0.4 0.08 300) 50%,
+    oklch(0.4 0.14 330) 75%,
+    oklch(0.4 0.18 20) 100%
+  );
+  opacity: 0.6;
+}
+
+.review-mode-slider__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 25%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    oklch(0.7 0.14 220) 0%,
+    oklch(0.65 0.16 280) 50%,
+    oklch(0.6 0.22 330) 100%
+  );
+  box-shadow: 0 0 12px oklch(0.6 0.2 300 / 0.6);
+  transition: width 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.review-mode-slider__stop {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: default;
+  pointer-events: none;
+}
+
+.review-mode-slider__stop[data-stop='0'] { left: 0%; }
+.review-mode-slider__stop[data-stop='1'] { left: 25%; }
+.review-mode-slider__stop[data-stop='2'] { left: 50%; }
+.review-mode-slider__stop[data-stop='3'] { left: 75%; }
+.review-mode-slider__stop[data-stop='4'] { left: 100%; }
+
+.review-mode-slider__stop-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: oklch(0.55 0.04 260);
+  border: 1px solid oklch(0.7 0.04 260 / 0.6);
+  transition:
+    background 240ms ease,
+    transform 240ms ease,
+    box-shadow 240ms ease;
+}
+
+.review-mode-slider__stop.is-passed .review-mode-slider__stop-dot {
+  background: oklch(0.7 0.16 280);
+}
+
+.review-mode-slider__stop.is-active .review-mode-slider__stop-dot {
+  background: oklch(0.85 0.18 300);
+  transform: scale(1.6);
+  box-shadow: 0 0 14px oklch(0.7 0.22 320 / 0.8);
+}
+
+/* Native range input — overlay on track */
+
+.review-mode-slider__input {
+  position: absolute;
+  inset: 50% 0 auto 0;
+  transform: translateY(-50%);
+  width: 100%;
+  margin: 0;
+  height: 28px;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.review-mode-slider__input:focus {
+  outline: none;
+}
+
+.review-mode-slider__input::-webkit-slider-runnable-track {
+  height: 28px;
+  background: transparent;
+}
+
+.review-mode-slider__input::-moz-range-track {
+  height: 28px;
+  background: transparent;
+  border: 0;
+}
+
+.review-mode-slider__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background:
+    radial-gradient(
+      circle at 30% 30%,
+      oklch(0.95 0.04 280) 0%,
+      oklch(0.7 0.18 300) 60%,
+      oklch(0.45 0.18 320) 100%
+    );
+  border: 2px solid oklch(0.95 0.02 280 / 0.9);
+  box-shadow:
+    0 0 0 4px oklch(0.6 0.2 300 / 0.18),
+    0 4px 12px oklch(0 0 0 / 0.4);
+  cursor: grab;
+  transition: transform 160ms ease, box-shadow 200ms ease;
+}
+
+.review-mode-slider__input:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  transform: scale(1.08);
+}
+
+.review-mode-slider__input:focus-visible::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 4px oklch(0.7 0.18 280 / 0.45),
+    0 0 0 7px oklch(0.95 0.05 280 / 0.4),
+    0 4px 12px oklch(0 0 0 / 0.4);
+}
+
+.review-mode-slider__input::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background:
+    radial-gradient(
+      circle at 30% 30%,
+      oklch(0.95 0.04 280) 0%,
+      oklch(0.7 0.18 300) 60%,
+      oklch(0.45 0.18 320) 100%
+    );
+  border: 2px solid oklch(0.95 0.02 280 / 0.9);
+  box-shadow:
+    0 0 0 4px oklch(0.6 0.2 300 / 0.18),
+    0 4px 12px oklch(0 0 0 / 0.4);
+  cursor: grab;
+}
+
+.review-mode-slider[data-active-mode='horror'] .review-mode-slider__input::-webkit-slider-thumb,
+.review-mode-slider[data-active-mode='horror'] .review-mode-slider__input::-moz-range-thumb {
+  background:
+    radial-gradient(
+      circle at 30% 30%,
+      oklch(0.95 0.06 30) 0%,
+      oklch(0.7 0.24 25) 60%,
+      oklch(0.4 0.22 20) 100%
+    );
+  border-color: oklch(0.95 0.03 30 / 0.95);
+  box-shadow:
+    0 0 0 4px oklch(0.6 0.24 20 / 0.3),
+    0 4px 18px oklch(0.5 0.26 15 / 0.6);
+}
+
+/* ---------- Stop labels ---------- */
+
+.review-mode-slider__labels {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  margin-top: 1.25rem;
+  gap: 0.25rem;
+}
+
+.review-mode-slider__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.15rem;
+  background: transparent;
+  border: 0;
+  padding: 0.4rem 0.25rem;
+  border-radius: 0.5rem;
+  color: oklch(0.65 0.02 260);
+  cursor: pointer;
+  text-align: center;
+  transition: color 200ms ease, background 200ms ease, transform 200ms ease;
+  font: inherit;
+}
+
+.review-mode-slider__label:hover {
+  color: oklch(0.92 0.06 280);
+  background: oklch(0.5 0.06 280 / 0.15);
+}
+
+.review-mode-slider__label:focus-visible {
+  outline: 2px solid oklch(0.7 0.18 280);
+  outline-offset: 2px;
+}
+
+.review-mode-slider__label.is-active {
+  color: oklch(0.95 0.08 300);
+  transform: translateY(-1px);
+}
+
+.review-mode-slider__label-main {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.review-mode-slider__label-sub {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: oklch(0.55 0.02 260);
+}
+
+.review-mode-slider__label.is-active .review-mode-slider__label-sub {
+  color: oklch(0.78 0.1 300);
+}
+
+/* ---------- Readout ---------- */
+
+.review-mode-slider__readout {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid oklch(1 0 0 / 0.08);
+  font-size: 0.78rem;
+}
+
+.review-mode-slider__readout-label {
+  color: oklch(0.6 0.02 260);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.review-mode-slider__readout-mode {
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: oklch(0.92 0.1 290);
+}
+
+.review-mode-slider[data-active-mode='horror'] .review-mode-slider__readout-mode {
+  color: oklch(0.85 0.22 25);
+  text-shadow: 0 0 8px oklch(0.6 0.24 20 / 0.6);
+}
+
+/* ---------- Mode-section visibility ---------- */
+/* Default: hide all mode sections; reveal those whose data-modes
+ * token list contains the current mode on the article container. */
+
+[data-review-container] .review-mode-section {
+  display: none;
+}
+
+[data-review-container][data-review-mode='kiddie']
+  .review-mode-section[data-modes~='kiddie'],
+[data-review-container][data-review-mode='large']
+  .review-mode-section[data-modes~='large'],
+[data-review-container][data-review-mode='mega']
+  .review-mode-section[data-modes~='mega'],
+[data-review-container][data-review-mode='cosmic']
+  .review-mode-section[data-modes~='cosmic'],
+[data-review-container][data-review-mode='horror']
+  .review-mode-section[data-modes~='horror'] {
+  display: block;
+  animation: review-mode-fade-in 360ms ease both;
+}
+
+@keyframes review-mode-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Cosmic-mode flourish on the article container */
+[data-review-container][data-review-mode='cosmic'] .review-mode-section {
+  filter: hue-rotate(-12deg) saturate(1.05);
+}
+
+/* Horror-mode flourish */
+[data-review-container][data-review-mode='horror'] .review-mode-section {
+  filter: contrast(1.04) saturate(1.08);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
+  .review-mode-slider {
+    top: 3.5rem;
+    border-radius: 1rem;
+  }
+
+  .review-mode-slider__inner {
+    padding: 1rem 1rem 0.85rem;
+  }
+
+  .review-mode-slider__hint {
+    font-size: 0.72rem;
+  }
+
+  .review-mode-slider__label-main {
+    font-size: 0.72rem;
+  }
+
+  .review-mode-slider__label-sub {
+    display: none;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-mode-slider,
+  .review-mode-slider__fill,
+  .review-mode-slider__stop-dot,
+  .review-mode-slider__label,
+  [data-review-container] .review-mode-section {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,500 @@
+/* ============================================================
+ * Mega review longform essay layout
+ * ============================================================ */
+
+.review-essay {
+  max-width: 76rem;
+  margin: 0 auto 3rem;
+  color: oklch(0.18 0.02 260);
+}
+
+.dark .review-essay {
+  color: oklch(0.92 0.01 260);
+}
+
+.review-essay__masthead {
+  position: relative;
+  display: grid;
+  grid-template-areas:
+    "title dek";
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  column-gap: 2rem;
+  align-items: center;
+  max-width: 68rem;
+  margin: 0 auto 0.9rem;
+  padding: 2.6rem 0 1.45rem;
+  border-top: 2px solid oklch(0.54 0.13 255 / 0.7);
+  border-bottom: 2px solid oklch(0.54 0.13 255 / 0.7);
+  border-radius: 0;
+  background: transparent;
+}
+
+.dark .review-essay__masthead {
+  border-color: oklch(0.72 0.16 255 / 0.72);
+}
+
+.review-essay__kicker,
+.review-essay__section-label {
+  margin: 0 0 0.65rem;
+  font-size: 0.88rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: oklch(0.38 0.14 255);
+}
+
+.review-essay__kicker {
+  position: absolute;
+  top: 0.95rem;
+  left: 0;
+  margin: 0;
+}
+
+.dark .review-essay__kicker,
+.dark .review-essay__section-label {
+  color: oklch(0.78 0.16 255);
+}
+
+.review-essay__title {
+  grid-area: title;
+  max-width: 20ch;
+  margin: 0;
+  font-size: 2.2rem;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.review-essay__dek {
+  grid-area: dek;
+  max-width: 43rem;
+  margin: 0;
+  padding-top: 0;
+  font-size: 1.16rem;
+  line-height: 1.55;
+  color: oklch(0.28 0.03 260);
+}
+
+.dark .review-essay__dek {
+  color: oklch(0.82 0.02 260);
+}
+
+.review-essay__hero,
+.review-essay__spread,
+.review-essay__chapter,
+.review-essay__diptych,
+.review-essay__impact,
+.review-essay__montage,
+.review-essay__finale,
+.review-essay__closing,
+.review-essay__coda {
+  margin: 1.25rem auto;
+}
+
+.review-essay__hero {
+  max-width: 52rem;
+  margin-top: 0.9rem;
+}
+
+.review-essay__hero figcaption,
+.review-essay__coda figcaption {
+  max-width: 40rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: oklch(0.42 0.03 260);
+}
+
+.dark .review-essay__hero figcaption,
+.dark .review-essay__coda figcaption {
+  color: oklch(0.72 0.02 260);
+}
+
+.review-essay__image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid oklch(0.42 0.06 255 / 0.24);
+  border-radius: 0.45rem;
+  background: transparent;
+  box-shadow: 0 18px 42px -34px oklch(0 0 0 / 0.7);
+}
+
+.review-essay__image > img,
+.review-essay__image picture,
+.review-essay__image picture > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: cover;
+  object-position: center;
+}
+
+.review-essay .review-essay__image img {
+  margin: 0;
+}
+
+.dark .review-essay__image {
+  border-color: oklch(0.75 0.06 255 / 0.2);
+}
+
+.review-essay__image--hero {
+  aspect-ratio: 2.7 / 1;
+}
+
+.review-essay__image--wide {
+  aspect-ratio: 2.25 / 1;
+}
+
+.review-essay__image--span {
+  grid-column: 1 / -1;
+}
+
+.review-essay__image--tall {
+  grid-row: span 2;
+  aspect-ratio: auto;
+}
+
+.review-essay__chapter {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(16rem, 0.82fr);
+  gap: 1rem;
+  align-items: start;
+  max-width: 72rem;
+  padding: 1rem 0;
+  border-top: 1px solid oklch(0.5 0.05 255 / 0.24);
+}
+
+.review-essay__chapter--reverse {
+  grid-template-columns: minmax(16rem, 0.82fr) minmax(0, 1.18fr);
+}
+
+.review-essay__chapter--reverse .review-essay__chapter-copy {
+  order: 2;
+}
+
+.review-essay__chapter--reverse .review-essay__image-grid {
+  order: 1;
+}
+
+.review-essay__chapter-copy {
+  max-width: 44rem;
+}
+
+.review-essay h3 {
+  margin: 0 0 0.65rem;
+  font-size: 1.9rem;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.review-essay .review-essay__kicker,
+.review-essay .review-essay__section-label,
+.review-essay .review-essay__title,
+.review-essay .review-essay__dek,
+.review-essay .review-essay__pullquote p,
+.review-essay .review-essay__closing p {
+  margin-top: 0;
+}
+
+.review-essay__chapter-copy p:not(.review-essay__section-label),
+.review-essay__spread-note p:not(.review-essay__section-label),
+.review-essay__diptych p,
+.review-essay__impact p:last-child,
+.review-essay__montage-copy p,
+.review-essay__finale-copy p,
+.review-essay__closing p,
+.review-essay__coda p {
+  margin: 0 0 0.85rem;
+  font-size: 1rem;
+  line-height: 1.62;
+}
+
+.review-essay__image-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.review-essay__image-grid--stacked {
+  grid-template-columns: 1fr;
+}
+
+.review-essay__image-grid--stacked .review-essay__image {
+  aspect-ratio: 2.55 / 1;
+}
+
+.review-essay__spread {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(20rem, 1.05fr);
+  gap: 1rem;
+  align-items: center;
+  max-width: 72rem;
+}
+
+.review-essay__spread--right {
+  grid-template-columns: minmax(20rem, 1.05fr) minmax(0, 0.95fr);
+}
+
+.review-essay__spread--right .review-essay__image {
+  order: initial;
+}
+
+.review-essay__spread-note {
+  padding: 0.9rem;
+  border: 1px solid oklch(0.5 0.05 255 / 0.24);
+  border-radius: 0.45rem;
+  background: oklch(0.98 0.01 90 / 0.82);
+}
+
+.dark .review-essay__spread-note {
+  background: oklch(0.15 0.02 260 / 0.86);
+}
+
+.review-essay__pullquote {
+  max-width: 52rem;
+  padding: 0.85rem 0;
+  border-top: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+}
+
+.review-essay__pullquote blockquote,
+.review-essay__closing blockquote {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.review-essay__pullquote p {
+  max-width: 28ch;
+  margin: 0 auto 0.55rem;
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  font-size: 1.9rem;
+  font-weight: 900;
+  line-height: 1.08;
+  text-align: center;
+}
+
+.review-essay__pullquote cite,
+.review-essay__closing cite {
+  display: block;
+  margin: 0 auto;
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+  color: oklch(0.42 0.12 255);
+}
+
+.dark .review-essay__pullquote cite,
+.dark .review-essay__closing cite {
+  color: oklch(0.78 0.16 255);
+}
+
+.review-essay__diptych {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  max-width: 68rem;
+}
+
+.review-essay__diptych > div {
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+  padding: 0.85rem;
+  border: 1px solid oklch(0.5 0.05 255 / 0.22);
+  border-radius: 0.5rem;
+  background: oklch(0.98 0.01 90 / 0.7);
+}
+
+.dark .review-essay__diptych > div {
+  background: oklch(0.15 0.02 260 / 0.74);
+}
+
+.review-essay__impact {
+  max-width: 56rem;
+  padding: 1rem;
+  border: 2px solid oklch(0.54 0.22 28 / 0.42);
+  border-radius: 0.5rem;
+  background:
+    linear-gradient(180deg, oklch(0.98 0.02 65 / 0.9), oklch(0.95 0.02 28 / 0.8)),
+    oklch(0.98 0.01 90);
+}
+
+.dark .review-essay__impact {
+  background:
+    linear-gradient(180deg, oklch(0.2 0.04 28 / 0.96), oklch(0.12 0.02 260 / 0.98)),
+    oklch(0.13 0.02 260);
+}
+
+.review-essay__impact p:first-child {
+  margin: 0 0 0.75rem;
+  font-size: 2.4rem;
+  font-weight: 950;
+  line-height: 0.95;
+  text-align: center;
+  color: oklch(0.52 0.22 28);
+}
+
+.review-essay__impact .review-essay__image--wide {
+  max-width: 42rem;
+  margin: 0 auto;
+  aspect-ratio: 2.4 / 1;
+}
+
+.dark .review-essay__impact p:first-child {
+  color: oklch(0.72 0.18 28);
+}
+
+.review-essay__impact p:last-child {
+  max-width: 45rem;
+  margin: 0.75rem auto 0;
+  text-align: center;
+}
+
+.review-essay__finale {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 1fr);
+  gap: 1rem;
+  align-items: center;
+  max-width: 72rem;
+}
+
+.review-essay__closing {
+  max-width: 54rem;
+  padding: 1.25rem 0;
+  border-top: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  text-align: center;
+}
+
+.review-essay__closing p:first-child {
+  max-width: 46rem;
+  margin-right: auto;
+  margin-left: auto;
+  font-size: 1.18rem;
+  font-weight: 750;
+  line-height: 1.52;
+}
+
+.review-essay__stamp {
+  display: inline-block;
+  margin: 0.5rem auto 0.75rem;
+  padding: 0.45rem 0.75rem;
+  background: oklch(0.08 0.01 260);
+  color: oklch(0.98 0.01 90);
+  font-size: 3rem;
+  font-weight: 950;
+  line-height: 1;
+  transform: rotate(-1deg);
+}
+
+.review-essay__aside {
+  color: oklch(0.42 0.03 260);
+  font-size: 0.9rem;
+}
+
+.dark .review-essay__aside {
+  color: oklch(0.72 0.02 260);
+}
+
+.review-essay__coda {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(18rem, 0.82fr);
+  gap: 1rem;
+  max-width: 72rem;
+  padding-top: 1rem;
+  border-top: 1px solid oklch(0.5 0.05 255 / 0.24);
+}
+
+.review-essay__coda figure {
+  margin: 0;
+}
+
+.review-essay__coda-media {
+  align-self: stretch;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.review-essay__coda-media .review-essay__image {
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+
+@media (max-width: 900px) {
+  .review-essay__masthead {
+    grid-template-areas:
+      "title"
+      "dek";
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .review-essay__title {
+    max-width: 18ch;
+    font-size: 2.4rem;
+  }
+
+  .review-essay__dek {
+    margin-top: 0.8rem;
+  }
+
+  .review-essay__chapter,
+  .review-essay__chapter--reverse,
+  .review-essay__spread,
+  .review-essay__spread--right,
+  .review-essay__diptych,
+  .review-essay__montage,
+  .review-essay__finale,
+  .review-essay__coda {
+    grid-template-columns: 1fr;
+  }
+
+  .review-essay__chapter-copy,
+  .review-essay__chapter--reverse .review-essay__chapter-copy,
+  .review-essay__chapter--reverse .review-essay__image-grid,
+  .review-essay__spread--right .review-essay__image {
+    position: static;
+    order: initial;
+  }
+
+  .review-essay__image--wide,
+  .review-essay__image--hero {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+@media (max-width: 640px) {
+  .review-essay__masthead {
+    padding: 1.25rem;
+  }
+
+  .review-essay__title {
+    font-size: 2.25rem;
+  }
+
+  .review-essay__dek {
+    padding-top: 0;
+    font-size: 1.12rem;
+  }
+
+  .review-essay h3 {
+    font-size: 1.7rem;
+  }
+
+  .review-essay__image-grid,
+  .review-essay__mosaic {
+    grid-template-columns: 1fr;
+  }
+
+  .review-essay__pullquote p,
+  .review-essay__impact p:first-child,
+  .review-essay__stamp {
+    font-size: 2rem;
+  }
+}

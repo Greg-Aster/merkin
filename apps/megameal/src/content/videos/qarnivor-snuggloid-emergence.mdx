@@ -8,6 +8,11 @@ image: "/posts/Mega-Meal-3/title-2.jpg"
 tags: [MEGA MEAL, Qarnivor, Snuggloid, Video Essay, Field Report]
 category: "MEGA MEAL"
 draft: false
+showInTimeline: true
+timelineYear: 28144
+timelineEra: "conflict-epoch"
+timelineLocation: "Planet Qarnivor, Irradiated Wasteland"
+isKeyEvent: true
 related:
   - title: "MEGA MEAL Movie Trailer Explained"
     href: "/videos/mega-meal-explained/"
@@ -25,48 +30,39 @@ related:
 
 import ImageWrapper from '../../components/misc/ImageWrapper.astro'
 
-<section className="card-base2 overflow-hidden rounded-2xl p-0">
-  <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
-    <ImageWrapper
-      src="/posts/Mega-Meal-3/title-2.jpg"
-      alt="Qarnivor title frame"
-      class="min-h-[18rem]"
-    />
-    <div className="p-5 md:p-7">
-      <div className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-[var(--primary)]">
-        {'Appendix A'}
+<section className="card-base2 rounded-2xl p-5 md:p-7">
+  <div className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-[var(--primary)]">
+    {'Appendix A'}
+  </div>
+  <h2 className="mb-4 text-2xl font-black leading-tight text-black/90 dark:text-white/90 md:text-3xl">
+    {'A rare account from after the extinction event.'}
+  </h2>
+  <p className="mb-5 text-base leading-relaxed text-black/70 dark:text-white/70 md:text-lg">
+    {`Qarnivor plays less like a conventional sequel chapter and more like a contaminated document that escaped the archive. The transmission has the flat patience of a field report, but the images keep insisting on myth: a ruined planet, a witness whose reliability is already fractured, and small glowing bodies appearing where extinction should have left nothing soft enough to survive.`}
+  </p>
+  <div className="grid gap-3 sm:grid-cols-3">
+    <div className="rounded-xl border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.04]">
+      <div className="text-xs font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/45">
+        {'Source'}
       </div>
-      <h2 className="mb-4 text-2xl font-black leading-tight text-black/90 dark:text-white/90 md:text-3xl">
-        {'A rare account from after the extinction event.'}
-      </h2>
-      <p className="mb-4 text-base leading-relaxed text-black/70 dark:text-white/70 md:text-lg">
-        {`The old post was already closer to a field report than a normal article. This version keeps that archival tone, moves the video into the theater page system, and lets the Qarnivor incident sit beside the broader MEGA MEAL transmission archive.`}
-      </p>
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.04]">
-          <div className="text-xs font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/45">
-            {'Source'}
-          </div>
-          <div className="mt-1 font-bold text-black/85 dark:text-white/85">
-            {'Eyewitness account'}
-          </div>
-        </div>
-        <div className="rounded-xl border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.04]">
-          <div className="text-xs font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/45">
-            {'Location'}
-          </div>
-          <div className="mt-1 font-bold text-black/85 dark:text-white/85">
-            {'Qarnivor'}
-          </div>
-        </div>
-        <div className="rounded-xl border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.04]">
-          <div className="text-xs font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/45">
-            {'Anomaly'}
-          </div>
-          <div className="mt-1 font-bold text-black/85 dark:text-white/85">
-            {'Snuggloids'}
-          </div>
-        </div>
+      <div className="mt-1 font-bold text-black/85 dark:text-white/85">
+        {'Eyewitness account'}
+      </div>
+    </div>
+    <div className="rounded-xl border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.04]">
+      <div className="text-xs font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/45">
+        {'Location'}
+      </div>
+      <div className="mt-1 font-bold text-black/85 dark:text-white/85">
+        {'Qarnivor'}
+      </div>
+    </div>
+    <div className="rounded-xl border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.04]">
+      <div className="text-xs font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/45">
+        {'Anomaly'}
+      </div>
+      <div className="mt-1 font-bold text-black/85 dark:text-white/85">
+        {'Snuggloids'}
       </div>
     </div>
   </div>
@@ -76,9 +72,9 @@ import ImageWrapper from '../../components/misc/ImageWrapper.astro'
 
 Immediately following the events on planet Qarnivor after the Corporate Empire, there exists a single account of an encounter with the Snuggloids that is of some scholarly interest.
 
-Despite the incomplete transcript and unreliable nature of the narrator, the account is believed to come from the enigmatic figure mentioned in Qarnivor historical records as the name redacted for legal reasons. Her documented visit shortly after the nuclear devastation provides one of the only eyewitness reports of the Snuggloid emergence.
+Despite the incomplete transcript and unreliable nature of the narrator, the account is believed to come from the enigmatic figure mentioned in Qarnivor historical records as the name redacted for legal reasons. Her documented visit shortly after the nuclear devastation gives the film its best texture: not exposition, exactly, but the feeling of evidence being handled with gloves.
 
-Of particular note is the timeline between the emergence of the Snuggloids and the extinction of the Qarnivores. It was previously assumed there was no overlap between these two events. If this account is taken at face value and assumed correct, there may be some link between the two.
+Of particular note is the timeline between the emergence of the Snuggloids and the extinction of the Qarnivores. It was previously assumed there was no overlap between these two events. If this account is taken at face value and assumed correct, the movie is not simply documenting an aftermath. It is circling the moment one disaster becomes another species' origin story.
 
 <section className="card-base2 rounded-2xl p-5 md:p-6">
   <div className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
@@ -91,9 +87,9 @@ Of particular note is the timeline between the emergence of the Snuggloids and t
 
 ## The Witness Problem
 
-The narrator's description of glowing fur and entities that phased in and out of visibility aligns with later scientific observations of the Snuggloids. That does not make the account reliable. It makes it difficult to dismiss.
+The narrator's description of glowing fur and entities that phased in and out of visibility aligns with later scientific observations of the Snuggloids. That does not make the account reliable. It makes it difficult to dismiss, which is where the short film finds its best tension.
 
-There is also the Starbug reference, which appears in several other historical accounts across different extinction events. The problem with recurring impossible details is that they can be coincidence, contamination, or evidence. Historical departments prefer the first two options because they involve less paperwork.
+There is also the Starbug reference, which appears in several other historical accounts across different extinction events. The problem with recurring impossible details is that they can be coincidence, contamination, or evidence. Historical departments prefer the first two options because they involve less paperwork; Qarnivor keeps calmly offering the third anyway.
 
 <div className="my-6 grid gap-4 md:grid-cols-2">
   <ImageWrapper
@@ -114,7 +110,7 @@ If the witness account is correct, the Snuggloids were not simply discovered aft
 
 That changes the shape of the event. It suggests the Snuggloids were not only survivors, scavengers, or cute little post-apocalyptic anomalies. They may have been observers. They may have been participants. They may have been something waiting for the correct amount of ruin.
 
-The video does not resolve that question. It gives the account a place to breathe.
+Qarnivor does not resolve that question. It gives the account a place to breathe.
 
 <section className="grid gap-4 md:grid-cols-2">
   <a
@@ -150,7 +146,7 @@ The video does not resolve that question. It gives the account a place to breath
       {'Core Transmission'}
     </div>
     <div className="mt-1 text-lg font-black text-black/85 dark:text-white/85">
-      {'Return to the trailer explanation'}
+      {'Return to the core MEGA MEAL review'}
     </div>
   </a>
 </section>

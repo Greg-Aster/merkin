@@ -1,80 +1,13 @@
-// TimelineConfig.ts - Central configuration for all timeline services
+import {
+  defaultTimelineViewConfig,
+  type EraConfig,
+  type EraConfigMap,
+  type TimelineEvent,
+  type TimelineViewConfig,
+} from '@merkin/blog-core/services/TimelineConfig'
 
-// Define timeline event type
-export interface TimelineEvent {
-  title: string
-  description: string
-  slug: string
-  year: number
-  era?: string
-  category?: string
-  isKeyEvent: boolean
-  levelId?: string // The ID used by LevelManager to load the level
-  isLevel?: boolean
-  location?: string
-  isDraft?: boolean
-  bannerData?: {
-    category?: string
-    startYear?: number
-    endYear?: number
-    background?: string
-    eraConfig?: {
-      [eraKey: string]: {
-        displayName: string
-        startYear: number
-        endYear: number
-      }
-    }
-  }
-}
-
-// Timeline visualization behavior configuration
-export interface TimelineViewConfig {
-  defaultZoom: number
-  maxZoom: number
-  minZoom: number
-  zoomStep: number
-  padding: number
-  zoomRatioThresholds: {
-    verySmall: number // < 2% of timeline
-    small: number // 2-5% of timeline
-    medium: number // 5-10% of timeline
-    large: number // 10-25% of timeline
-    veryLarge: number // 25-50% of timeline
-  }
-  zoomLevels: {
-    verySmall: number
-    small: number
-    medium: number
-    large: number
-    veryLarge: number
-    full: number
-  }
-}
-
-// Default timeline view configuration
-export const defaultTimelineViewConfig: TimelineViewConfig = {
-  defaultZoom: 1,
-  maxZoom: 5,
-  minZoom: 0.5,
-  zoomStep: 0.2,
-  padding: 15, // percentage padding on timeline edges
-  zoomRatioThresholds: {
-    verySmall: 50,
-    small: 20,
-    medium: 10,
-    large: 4,
-    veryLarge: 2,
-  },
-  zoomLevels: {
-    verySmall: 4,
-    small: 3,
-    medium: 2.5,
-    large: 2,
-    veryLarge: 1.5,
-    full: 1.2,
-  },
-}
+export { defaultTimelineViewConfig }
+export type { EraConfig, EraConfigMap, TimelineEvent, TimelineViewConfig }
 
 // Define era display names with ability to customize
 export const defaultEraDisplayNames: { [key: string]: string } = {
@@ -86,27 +19,6 @@ export const defaultEraDisplayNames: { [key: string]: string } = {
   'transcendent-age': 'The Transcendent Age',
   'final-epoch': 'The Final Epoch',
   unknown: 'Unknown Era',
-}
-
-// Enhanced era configuration type
-export interface EraConfig {
-  displayName: string
-  startYear: number
-  endYear: number
-  colorClass?: string
-  badgeClass?: string
-  // New configuration options for visualization behavior
-  zoomLevel?: number // Custom zoom level for this era
-  panToYear?: number // Specific year to center on when viewing this era
-  customPadding?: number // Custom padding percentage for this era's view
-  backgroundImage?: string // Background image for this era
-  backgroundVideo?: string // Optional animated background for this era
-  backgroundVideoPlaybackRate?: number // Optional playback speed for the animated background
-}
-
-// Era configuration type mapping
-export interface EraConfigMap {
-  [eraKey: string]: EraConfig
 }
 
 // Default era configuration with years - CENTRALIZED DEFINITION

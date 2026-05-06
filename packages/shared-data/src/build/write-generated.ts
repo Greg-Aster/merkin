@@ -4,13 +4,24 @@ import { fileURLToPath } from 'node:url'
 
 import { buildGameStarsManifest } from './build-game-stars-manifest.ts'
 import { buildPostsManifest } from './build-posts-manifest.ts'
-import { buildTimelineManifest } from './build-timeline-manifest.ts'
+import { buildTimelineManifestFromContentRoots } from './build-timeline-manifest.ts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const sharedDataRoot = path.resolve(__dirname, '../..')
 const repoRoot = path.resolve(sharedDataRoot, '../..')
 const generatedRoot = path.join(sharedDataRoot, 'generated')
-const megamealPostsRoot = path.join(repoRoot, 'apps/megameal/src/content/posts')
+const megamealContentRoot = path.join(repoRoot, 'apps/megameal/src/content')
+const megamealPostsRoot = path.join(megamealContentRoot, 'posts')
+const timelineContentRoots = [
+  'posts',
+  'cookbook',
+  'videos',
+  'products',
+  'reader',
+].map(collection => ({
+  collection,
+  root: path.join(megamealContentRoot, collection),
+}))
 
 async function writeJsonFile(filePath: string, data: unknown) {
   await writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf8')
@@ -20,7 +31,7 @@ async function main() {
   await mkdir(generatedRoot, { recursive: true })
 
   const postsManifest = await buildPostsManifest(megamealPostsRoot)
-  const timelineManifest = buildTimelineManifest(postsManifest, {
+  const timelineManifest = await buildTimelineManifestFromContentRoots(timelineContentRoots, {
     includeBanners: true,
   })
   const gameStarsManifest = buildGameStarsManifest(timelineManifest)

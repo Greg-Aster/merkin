@@ -8,7 +8,9 @@ import {
   defaultEraConfig,
 } from '@/config/timelineconfig'
 import Bleepy from '@components/bleepy/Bleepy.astro'
+import CompactArchiveBanner from '@components/archive/CompactArchiveBanner.astro'
 import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
+import TimelinePortalCarousel from '@components/timeline/TimelinePortalCarousel.svelte'
 import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
 import timelineManifest from '../../../../packages/shared-data/generated/timeline.json'
@@ -56,10 +58,28 @@ const sharedHomeLayout: 'default' | 'portal' | undefined = isTestPortalLayout
     : Astro.props.homeLayout
 const hasCustomBannerSlideContent = Astro.slots.has('banner-slide-content')
 const hasCustomBannerOverlayContent = Astro.slots.has('banner-overlay-content')
+const isTimelineRoute = Astro.url.pathname.replace(/\/$/, '') === '/timeline'
+const originalPost = Astro.props.post as
+  | ({ data?: { bannerType?: string } } & Record<string, unknown>)
+  | undefined
+const shouldRouteTimelineBannerToArchive =
+  !isTimelineRoute && originalPost?.data?.bannerType === 'timeline'
+const layoutPost = shouldRouteTimelineBannerToArchive
+  ? {
+      ...originalPost,
+      data: {
+        ...originalPost.data,
+        bannerType: 'archive',
+      },
+    }
+  : originalPost
+const usesArchiveBanner =
+  layoutPost?.data?.bannerType === 'archive'
 const sharedProps: Omit<Props, 'homeLayout'> & {
   homeLayout?: 'default' | 'portal'
 } = {
   ...Astro.props,
+  post: layoutPost,
   homeLayout: sharedHomeLayout,
   contentMode: isTestPortalLayout ? 'banner-only' : Astro.props.contentMode,
 }
@@ -97,9 +117,22 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   <Fragment slot="overlay">
     <slot name="overlay" />
   </Fragment>
+  {isTimelineRoute && (
+    <Fragment slot="timeline-banner-content">
+      <TimelinePortalCarousel
+        events={timelineManifest.items}
+        eraConfig={defaultEraConfig}
+        client:only="svelte"
+      />
+    </Fragment>
+  )}
   {hasCustomBannerSlideContent ? (
     <Fragment slot="banner-slide-content">
       <slot name="banner-slide-content" />
+    </Fragment>
+  ) : usesArchiveBanner ? (
+    <Fragment slot="banner-slide-content">
+      <CompactArchiveBanner post={layoutPost as any} />
     </Fragment>
   ) : (
     <Fragment slot="banner-slide-content">

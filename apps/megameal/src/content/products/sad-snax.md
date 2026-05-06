@@ -3,6 +3,11 @@ name: "Sad Snax"
 tagline: "Shelf-stable disappointment for unplanned evenings."
 brand: "Emotional Nutrition Lab"
 draft: false
+showInTimeline: true
+timelineYear: 33120
+timelineEra: "golden-age"
+timelineLocation: "W Corporation Morale-Neutral Test Market"
+isKeyEvent: false
 availability: "coming_soon"
 ctaMode: "none"
 image: ""

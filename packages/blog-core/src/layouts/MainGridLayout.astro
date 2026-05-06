@@ -13,6 +13,7 @@ import TOC from '../components/widget/TOC.astro'
 import { siteConfig } from '@/config/config'
 import Layout from './Layout.astro'
 import '../styles/timeline-styles.css'
+import '../styles/timeline-feature.css'
 import { pathsEqual, url } from '../utils/url-utils'
 
 // Blog-core shared client components (relative imports)
@@ -831,6 +832,7 @@ const gridLayoutClasses = [
   >
     <slot name="banner-slide-content" slot="banner-slide-content" />
     <slot name="banner-overlay-content" slot="banner-overlay-content" />
+    <slot name="timeline-banner-content" slot="timeline-banner-content" />
     <RightRailContent
       slot="banner-mobile-right-rail"
       currentPath={currentPath}

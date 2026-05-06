@@ -3,6 +3,11 @@ name: "Puppy Rescue Rations"
 tagline: "A shelf-stable chili event with an unfortunate translation history."
 brand: "Protein Solutions Division"
 draft: false
+showInTimeline: true
+timelineYear: 28043
+timelineEra: "singularity-conflict"
+timelineLocation: "Post-Miranda Salvage Distribution Channels"
+isKeyEvent: false
 availability: "not_in_your_timeline"
 ctaMode: "none"
 image: ""

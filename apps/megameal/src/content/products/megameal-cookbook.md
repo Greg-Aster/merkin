@@ -3,6 +3,11 @@ name: "The MegaMeal Cookbook"
 tagline: "A first edition for kitchens, archivists, and the nervously curious."
 brand: "Temporal Culinary Archive"
 draft: false
+showInTimeline: true
+timelineYear: 35000
+timelineEra: "preservation-era"
+timelineLocation: "The Great Culinary Archives, Sector 7"
+isKeyEvent: false
 availability: "coming_soon"
 ctaMode: "none"
 image: ""

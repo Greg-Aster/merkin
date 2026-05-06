@@ -1,6 +1,7 @@
 import { toTimelineEvent } from '@merkin/shared-content'
 import type { SharedTimelineEvent } from '@merkin/shared-content'
 import type { SharedPostsManifest, SharedTimelineManifest } from '../types.ts'
+import { loadSharedPosts } from './build-posts-manifest.ts'
 
 function sortTimelineEvents(events: SharedTimelineEvent[]): SharedTimelineEvent[] {
   return [...events].sort((left, right) => {
@@ -22,6 +23,33 @@ export function buildTimelineManifest(
   return {
     generatedAt: new Date().toISOString(),
     sourceRoot: postsManifest.sourceRoot,
+    count: sortedItems.length,
+    items: sortedItems,
+  }
+}
+
+export async function buildTimelineManifestFromContentRoots(
+  contentRoots: Array<{ collection: string; root: string }>,
+  options: { includeBanners?: boolean } = {},
+): Promise<SharedTimelineManifest> {
+  const contentGroups = await Promise.all(
+    contentRoots.map(entry =>
+      loadSharedPosts(entry.root, {
+        collection: entry.collection,
+        sourcePathPrefix: entry.collection,
+      }),
+    ),
+  )
+  const items = contentGroups
+    .flat()
+    .map(content => toTimelineEvent(content, options))
+    .filter((event): event is SharedTimelineEvent => event !== null)
+
+  const sortedItems = sortTimelineEvents(items)
+
+  return {
+    generatedAt: new Date().toISOString(),
+    sourceRoot: contentRoots.map(entry => entry.root).join(';'),
     count: sortedItems.length,
     items: sortedItems,
   }

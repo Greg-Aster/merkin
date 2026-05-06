@@ -152,6 +152,7 @@ const {
 	bannerHeight,
 	bannerHeightMobile,
 } = Astro.props;
+const hasTimelineBannerSlot = Astro.slots.has("timeline-banner-content");
 
 const scene = resolveLegacyBannerScene(currentBannerType);
 
@@ -266,43 +267,47 @@ const transparentPixel =
               </div>
             </div>
 
-            <TimelineController
-              category={hasPostBanner && post?.data?.bannerType === 'timeline'
-                ? post.data.bannerData.category
-                : bannerDataSources.timelineBannerData?.category || 'MEGA MEAL'}
-              startYear={hasPostBanner && post?.data?.bannerType === 'timeline'
-                ? post.data.bannerData.startYear
-                : bannerDataSources.timelineBannerData?.startYear}
-              endYear={hasPostBanner && post?.data?.bannerType === 'timeline'
-                ? post.data.bannerData.endYear
-                : bannerDataSources.timelineBannerData?.endYear}
-              background={hasPostBanner && post?.data?.bannerType === 'timeline'
-                ? post.data.bannerData.background
-                : bannerDataSources.timelineBannerData?.background}
-              backgroundVideo={hasPostBanner && post?.data?.bannerType === 'timeline'
-                ? post.data.bannerData.backgroundVideo
-                : bannerDataSources.timelineBannerData?.backgroundVideo ||
-                    timelineEraConfig?.['all-eras']?.backgroundVideo ||
-                    timelineEraConfig?.['all-time']?.backgroundVideo}
-              backgroundVideoPlaybackRate={hasPostBanner &&
-              post?.data?.bannerType === 'timeline'
-                ? post.data.bannerData.backgroundVideoPlaybackRate
-                : bannerDataSources.timelineBannerData
-                    ?.backgroundVideoPlaybackRate ||
-                  timelineEraConfig?.['all-eras']?.backgroundVideoPlaybackRate ||
-                  timelineEraConfig?.['all-time']?.backgroundVideoPlaybackRate}
-              compact={hasPostBanner && post?.data?.bannerType === 'timeline'
-                ? post.data.bannerData.compact || false
-                : bannerDataSources.timelineBannerData?.compact || false}
-              events={timelineEvents}
-              eraConfig={timelineEraConfig}
-              constellationConfig={timelineConstellationConfig}
-              constellationPatterns={timelineConstellationPatterns}
-              connectionPatterns={timelineConnectionPatterns}
-              class="w-full h-full"
-              asBanner={true}
-              bannerHeight="100%"
-            />
+            {hasTimelineBannerSlot ? (
+              <slot name="timeline-banner-content" />
+            ) : (
+              <TimelineController
+                category={hasPostBanner && post?.data?.bannerType === 'timeline'
+                  ? post.data.bannerData.category
+                  : bannerDataSources.timelineBannerData?.category || 'MEGA MEAL'}
+                startYear={hasPostBanner && post?.data?.bannerType === 'timeline'
+                  ? post.data.bannerData.startYear
+                  : bannerDataSources.timelineBannerData?.startYear}
+                endYear={hasPostBanner && post?.data?.bannerType === 'timeline'
+                  ? post.data.bannerData.endYear
+                  : bannerDataSources.timelineBannerData?.endYear}
+                background={hasPostBanner && post?.data?.bannerType === 'timeline'
+                  ? post.data.bannerData.background
+                  : bannerDataSources.timelineBannerData?.background}
+                backgroundVideo={hasPostBanner && post?.data?.bannerType === 'timeline'
+                  ? post.data.bannerData.backgroundVideo
+                  : bannerDataSources.timelineBannerData?.backgroundVideo ||
+                      timelineEraConfig?.['all-eras']?.backgroundVideo ||
+                      timelineEraConfig?.['all-time']?.backgroundVideo}
+                backgroundVideoPlaybackRate={hasPostBanner &&
+                post?.data?.bannerType === 'timeline'
+                  ? post.data.bannerData.backgroundVideoPlaybackRate
+                  : bannerDataSources.timelineBannerData
+                      ?.backgroundVideoPlaybackRate ||
+                    timelineEraConfig?.['all-eras']?.backgroundVideoPlaybackRate ||
+                    timelineEraConfig?.['all-time']?.backgroundVideoPlaybackRate}
+                compact={hasPostBanner && post?.data?.bannerType === 'timeline'
+                  ? post.data.bannerData.compact || false
+                  : bannerDataSources.timelineBannerData?.compact || false}
+                events={timelineEvents}
+                eraConfig={timelineEraConfig}
+                constellationConfig={timelineConstellationConfig}
+                constellationPatterns={timelineConstellationPatterns}
+                connectionPatterns={timelineConnectionPatterns}
+                class="w-full h-full"
+                asBanner={true}
+                bannerHeight="100%"
+              />
+            )}
           </div>
         </div>
       </div>

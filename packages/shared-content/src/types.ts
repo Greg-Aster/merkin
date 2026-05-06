@@ -23,6 +23,9 @@ export type SharedBannerData = {
 
 export type SharedRawPostFrontmatter = Record<string, unknown> & {
   title?: unknown
+  name?: unknown
+  slug?: unknown
+  tagline?: unknown
   description?: unknown
   published?: unknown
   updated?: unknown
@@ -37,6 +40,7 @@ export type SharedRawPostFrontmatter = Record<string, unknown> & {
   timelineEra?: unknown
   timelineLocation?: unknown
   isKeyEvent?: unknown
+  showInTimeline?: unknown
   isLevel?: unknown
   levelId?: unknown
   series?: unknown
@@ -49,7 +53,8 @@ export type SharedPost = {
   id: string
   slug: string
   sourcePath: string
-  collection: 'posts'
+  collection: string
+  url: string
   title: string
   description: string
   published: string | null
@@ -65,6 +70,7 @@ export type SharedPost = {
   timelineEra?: string
   timelineLocation?: string
   isKeyEvent: boolean
+  showInTimeline?: boolean
   isLevel: boolean
   levelId?: string | null
   series?: string
@@ -78,6 +84,9 @@ export type SharedTimelineEvent = {
   description: string
   slug: string
   sourcePath: string
+  url: string
+  contentType: string
+  sourceCollection: string
   year: number
   era?: string
   category?: string
@@ -86,6 +95,7 @@ export type SharedTimelineEvent = {
   levelId?: string | null
   location?: string
   isDraft?: boolean
+  showInTimeline?: boolean
   tags: string[]
   timelineYear: number
   timelineEra?: string

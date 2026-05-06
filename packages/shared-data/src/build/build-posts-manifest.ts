@@ -48,16 +48,25 @@ function sortPosts(posts: SharedPost[]): SharedPost[] {
   })
 }
 
-export async function loadSharedPosts(contentRoot: string): Promise<SharedPost[]> {
+export async function loadSharedPosts(
+  contentRoot: string,
+  options: { collection?: string; sourcePathPrefix?: string } = {},
+): Promise<SharedPost[]> {
   const sourceFiles = await walkDirectory(contentRoot)
+  const collection = options.collection ?? 'posts'
+  const sourcePathPrefix = options.sourcePathPrefix
+    ? `${options.sourcePathPrefix.replace(/\/$/, '')}/`
+    : ''
 
   const posts = await Promise.all(
     sourceFiles.map(async sourceFile => {
       const fileContents = await readFile(sourceFile, 'utf8')
       const parsed = matter(fileContents)
+      const relativeSourcePath = toPosixPath(path.relative(contentRoot, sourceFile))
       return normalizePost({
         slug: toSlug(sourceFile, contentRoot),
-        sourcePath: toPosixPath(path.relative(contentRoot, sourceFile)),
+        sourcePath: `${sourcePathPrefix}${relativeSourcePath}`,
+        collection,
         frontmatter: parsed.data as SharedRawPostFrontmatter,
       })
     }),

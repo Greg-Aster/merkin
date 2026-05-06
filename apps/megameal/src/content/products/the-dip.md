@@ -3,6 +3,11 @@ name: "The Dip"
 tagline: "The top-selling sauce children ask for by name."
 brand: "W Corporation Condiment Group"
 draft: false
+showInTimeline: true
+timelineYear: 33900
+timelineEra: "golden-age"
+timelineLocation: "W Corporation Campaign Districts"
+isKeyEvent: false
 availability: "not_in_your_timeline"
 ctaMode: "none"
 image: ""

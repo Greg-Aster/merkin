@@ -1,0 +1,223 @@
+---
+import '../styles/features/extracted/review-mode-slider.css'
+import '../styles/features/extracted/review-brief.css'
+import '../styles/features/extracted/review-essay.css'
+import '../styles/features/extracted/review-essay-montage.css'
+import '../styles/features/extracted/review-cosmic.css'
+import '../styles/features/extracted/review-cosmic-constellation.css'
+import '../styles/features/extracted/review-cosmic-void.css'
+
+interface Props {
+  targetSelector?: string
+  defaultMode?: 'kiddie' | 'large' | 'mega' | 'cosmic' | 'horror'
+  storageKey?: string
+}
+
+const {
+  targetSelector = '[data-review-container]',
+  defaultMode = 'large',
+  storageKey = 'megameal-review-mode',
+} = Astro.props
+
+const modes = [
+  { id: 'kiddie', label: 'Kiddie', sub: 'TL;DR' },
+  { id: 'large', label: 'Large', sub: 'Standard Review' },
+  { id: 'mega', label: 'Mega', sub: 'The Director\u2019s Cut' },
+  { id: 'cosmic', label: 'Cosmic', sub: 'Reviewer Compromised' },
+  { id: 'horror', label: 'Horror', sub: 'Reality Breach' },
+] as const
+
+const defaultIndex = modes.findIndex(m => m.id === defaultMode)
+---
+
+<div
+  class="review-mode-slider"
+  data-target={targetSelector}
+  data-storage-key={storageKey}
+  data-default-mode={defaultMode}
+  role="region"
+  aria-label="Review intensity selector"
+>
+  <div class="review-mode-slider__inner">
+    <div class="review-mode-slider__heading">
+      <div class="review-mode-slider__eyebrow">Review Intensity</div>
+      <div class="review-mode-slider__hint">
+        Slide right at your own risk. The reviewer's grip on reality is not guaranteed.
+      </div>
+    </div>
+
+    <div class="review-mode-slider__track-wrapper">
+      <div class="review-mode-slider__track" aria-hidden="true">
+        <div class="review-mode-slider__fill" data-fill></div>
+        {modes.map((mode, i) => (
+          <button
+            type="button"
+            class="review-mode-slider__stop"
+            data-stop={i}
+            data-mode={mode.id}
+            tabindex="-1"
+            aria-hidden="true"
+          >
+            <span class="review-mode-slider__stop-dot"></span>
+          </button>
+        ))}
+      </div>
+
+      <input
+        type="range"
+        class="review-mode-slider__input"
+        min="0"
+        max={modes.length - 1}
+        step="1"
+        value={defaultIndex}
+        aria-label="Review intensity"
+        aria-valuemin="0"
+        aria-valuemax={modes.length - 1}
+        aria-valuenow={defaultIndex}
+      />
+
+      <div class="review-mode-slider__labels" aria-hidden="true">
+        {modes.map((mode, i) => (
+          <button
+            type="button"
+            class="review-mode-slider__label"
+            data-stop={i}
+            data-mode={mode.id}
+          >
+            <span class="review-mode-slider__label-main">{mode.label}</span>
+            <span class="review-mode-slider__label-sub">{mode.sub}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <div class="review-mode-slider__readout" data-readout aria-live="polite">
+      <span class="review-mode-slider__readout-label">Currently reading:</span>
+      <span class="review-mode-slider__readout-mode" data-readout-mode>
+        {modes[defaultIndex].label}
+      </span>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  const reviewModes = ['kiddie', 'large', 'mega', 'cosmic', 'horror']
+
+  function applyMode(slider, mode, persist) {
+    const target = document.querySelector(
+      slider.getAttribute('data-target') || '[data-review-container]',
+    )
+    if (!target) return
+
+    target.setAttribute('data-review-mode', mode)
+    slider.setAttribute('data-active-mode', mode)
+
+    const idx = reviewModes.indexOf(mode)
+    if (idx < 0) return
+
+    const input = slider.querySelector('.review-mode-slider__input')
+    if (input && Number(input.value) !== idx) {
+      input.value = String(idx)
+    }
+    input?.setAttribute('aria-valuenow', String(idx))
+
+    const fill = slider.querySelector('[data-fill]')
+    if (fill) {
+      const pct = (idx / (reviewModes.length - 1)) * 100
+      fill.style.width = pct + '%'
+    }
+
+    slider.querySelectorAll('[data-stop]').forEach(stop => {
+      const stopIdx = Number(stop.getAttribute('data-stop'))
+      stop.classList.toggle('is-active', stopIdx === idx)
+      stop.classList.toggle('is-passed', stopIdx < idx)
+    })
+
+    const readoutMode = slider.querySelector('[data-readout-mode]')
+    if (readoutMode) {
+      const labelEl = slider.querySelector(
+        `.review-mode-slider__label[data-mode="${mode}"] .review-mode-slider__label-main`,
+      )
+      readoutMode.textContent = labelEl ? labelEl.textContent : mode
+    }
+
+    if (persist) {
+      try {
+        const key = slider.getAttribute('data-storage-key')
+        if (key) localStorage.setItem(key, mode)
+      } catch (_) {
+        // localStorage may be unavailable
+      }
+    }
+
+    slider.dispatchEvent(
+      new CustomEvent('review-mode-change', {
+        detail: { mode },
+        bubbles: true,
+      }),
+    )
+  }
+
+  function initSlider(slider) {
+    if (slider.dataset.reviewSliderInit === 'true') return
+    slider.dataset.reviewSliderInit = 'true'
+
+    const input = slider.querySelector('.review-mode-slider__input')
+    const defaultMode = slider.getAttribute('data-default-mode') || 'large'
+    const storageKey = slider.getAttribute('data-storage-key')
+
+    let initialMode = defaultMode
+    try {
+      if (storageKey) {
+        const stored = localStorage.getItem(storageKey)
+        if (stored && reviewModes.includes(stored)) initialMode = stored
+      }
+    } catch (_) {}
+
+    applyMode(slider, initialMode, false)
+
+    if (input) {
+      input.addEventListener('input', () => {
+        const idx = Number(input.value)
+        const mode = reviewModes[idx]
+        if (mode) applyMode(slider, mode, true)
+      })
+    }
+
+    slider.querySelectorAll('.review-mode-slider__label').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.getAttribute('data-mode')
+        if (mode && reviewModes.includes(mode)) applyMode(slider, mode, true)
+      })
+    })
+  }
+
+  function initAll() {
+    document
+      .querySelectorAll('.review-mode-slider')
+      .forEach(slider => initSlider(slider))
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAll)
+  } else {
+    initAll()
+  }
+
+  const observer = new MutationObserver(mutations => {
+    if (
+      mutations.some(m =>
+        Array.from(m.addedNodes).some(
+          n =>
+            n instanceof HTMLElement &&
+            (n.classList?.contains('review-mode-slider') ||
+              n.querySelector?.('.review-mode-slider')),
+        ),
+      )
+    ) {
+      initAll()
+    }
+  })
+
+  observer.observe(document.body, { childList: true, subtree: true })
+</script>

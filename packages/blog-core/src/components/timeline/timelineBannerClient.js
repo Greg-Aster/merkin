@@ -1,3 +1,5 @@
+import { getTimelineCore } from './TimelineViewModes/timelineViewClient.js'
+
 export function initTimelineBannerControls() {
   const wrappers = document.querySelectorAll(
     '[data-timeline-banner-wrapper="true"]',
@@ -14,7 +16,6 @@ export function initTimelineBannerControls() {
     const zoomButtons = wrapper.querySelectorAll('[data-action]')
     const eraOptions = wrapper.querySelectorAll('[data-era-option]')
     const initialEra = wrapper.dataset.initialEra || ''
-    let syncRetryCount = 0
 
     const setActiveEra = eraKey => {
       for (const option of eraOptions) {
@@ -29,19 +30,11 @@ export function initTimelineBannerControls() {
       delete wrapper.dataset.timelineBannerInitializing
     }
 
-    const syncTimelineCore = () => {
-      const timelineCore = window[`timelineCore_${timelineId}`]
+    const syncTimelineCore = timelineCore => {
       if (!timelineCore) {
-        if (syncRetryCount < 12) {
-          syncRetryCount += 1
-          window.setTimeout(syncTimelineCore, 50)
-          return
-        }
-        finalizePendingInit()
         return
       }
 
-      syncRetryCount = 0
       wrapper.dataset.timelineBannerInitialized = 'true'
       finalizePendingInit()
 
@@ -87,9 +80,21 @@ export function initTimelineBannerControls() {
         const nextEra = event.detail?.era
         if (nextEra) setActiveEra(nextEra)
       })
+
+    }
+
+    const handleCoreReady = event => {
+      if (event.detail?.timelineId !== timelineId) return
+      document.removeEventListener('timeline:core-ready', handleCoreReady)
+      syncTimelineCore(event.detail.instance)
     }
 
     wrapper.dataset.timelineBannerInitializing = 'true'
-    syncTimelineCore()
+    const existingCore = getTimelineCore(timelineId)
+    if (existingCore) {
+      syncTimelineCore(existingCore)
+    } else {
+      document.addEventListener('timeline:core-ready', handleCoreReady)
+    }
   }
 }

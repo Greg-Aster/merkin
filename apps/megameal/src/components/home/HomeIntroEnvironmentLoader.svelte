@@ -1,6 +1,7 @@
 <script lang="ts">
 import { onDestroy, onMount } from 'svelte'
 import { siteSfxManager } from '@/utils/site-sfx'
+import '../../styles/features/extracted/home-intro-environment.css'
 
 type HomeIntroEnvironmentComponent =
   typeof import('./HomeIntroEnvironment.svelte').default
@@ -9,6 +10,9 @@ let Environment: HomeIntroEnvironmentComponent | null = null
 let cleanupCallbacks: Array<() => void> = []
 let loadStarted = false
 let awakenSfxPlayed = false
+let showLoadingWindow = false
+let loadFailed = false
+const loadingWindowDelayMs = 900
 
 function addCleanup(callback: () => void) {
   cleanupCallbacks.push(callback)
@@ -33,7 +37,14 @@ async function loadEnvironment() {
   loadStarted = true
   playPortalAwakenSfx()
   cleanupAll()
-  Environment = (await import('./HomeIntroEnvironment.svelte')).default
+
+  try {
+    Environment = (await import('./HomeIntroEnvironment.svelte')).default
+  } catch (error) {
+    loadFailed = true
+    showLoadingWindow = true
+    console.error('Failed to load portal environment:', error)
+  }
 }
 
 function waitForIntent() {
@@ -95,7 +106,16 @@ function scheduleAutoload() {
   })
 }
 
+function scheduleLoadingWindow() {
+  const timeout = window.setTimeout(() => {
+    if (!Environment) showLoadingWindow = true
+  }, loadingWindowDelayMs)
+
+  addCleanup(() => window.clearTimeout(timeout))
+}
+
 onMount(() => {
+  scheduleLoadingWindow()
   waitForIntent()
   scheduleAutoload()
 })
@@ -108,17 +128,30 @@ onDestroy(() => {
 {#if Environment}
   <svelte:component this={Environment} />
 {:else}
-  <div class="home-intro-environment-loader__placeholder" aria-hidden="true"></div>
+  <div class="home-intro-environment-loader__placeholder">
+    {#if showLoadingWindow}
+      <div
+        class="home-intro-environment-loader__panel"
+        role="status"
+        aria-live="polite"
+      >
+        <div class="home-intro-environment-loader__signal" aria-hidden="true">
+          <span></span>
+        </div>
+        <div class="home-intro-environment-loader__copy">
+          <p class="home-intro-environment-loader__kicker">
+            Commercial Portal
+          </p>
+          <p class="home-intro-environment-loader__title">
+            {loadFailed ? 'Signal Interrupted' : 'Signal Acquisition'}
+          </p>
+          <p class="home-intro-environment-loader__text">
+            {loadFailed
+              ? 'Portal systems are refusing the handshake.'
+              : 'Broadcast systems warming.'}
+          </p>
+        </div>
+      </div>
+    {/if}
+  </div>
 {/if}
-
-<style>
-  .home-intro-environment-loader__placeholder {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    overflow: hidden;
-    pointer-events: none;
-    background: transparent;
-  }
-</style>
