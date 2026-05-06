@@ -131,13 +131,13 @@ $: sfxVolumePercent = Math.round(audioState.sfxVolume * 100)
     aria-label={buttonLabel}
     aria-expanded={panelOpen}
     title={buttonTitle}
-    class="btn-plain scale-animation rounded-lg h-9 w-9 md:h-11 md:w-11 active:scale-90 site-audio-button"
+    class="nav-action-button btn-plain scale-animation rounded-lg active:scale-90 site-audio-button"
     class:site-audio-button--enabled={audioState.enabled}
     on:click={handleAudioButtonClick}
   >
     <Icon
       icon={audioState.enabled ? 'material-symbols:volume-up-rounded' : 'material-symbols:volume-off-rounded'}
-      class="text-[1.25rem]"
+      class="nav-action-icon"
     />
   </button>
 

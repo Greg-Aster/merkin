@@ -16,14 +16,14 @@ function toggleCart() {
   aria-label="Shopping Cart"
   data-sfx-hover="hover-soft"
   data-sfx-click="panel-open"
-  class="btn-plain scale-animation rounded-lg h-11 w-11 flex items-center justify-center active:scale-90 relative"
+  class="nav-action-button btn-plain scale-animation rounded-lg flex items-center justify-center active:scale-90 relative"
   onclick={toggleCart}
 >
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="currentColor"
-    class="h-5 w-5"
+    class="nav-action-icon"
     aria-hidden="true"
   >
     <path

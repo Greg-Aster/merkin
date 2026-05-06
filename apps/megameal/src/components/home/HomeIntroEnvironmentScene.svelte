@@ -130,7 +130,7 @@ $: starColumnPosition = portraitMobile
   ? ([0, 0.08, -2.02] as [number, number, number])
   : ([0, 0, -1.86] as [number, number, number])
 $: starColumnScale = portraitMobile
-  ? ([0.9, 1, 0.92] as [number, number, number])
+  ? ([1.58, 1, 1.08] as [number, number, number])
   : ([1.04, 1, 0.98] as [number, number, number])
 $: emblemScale = portraitMobile
   ? ([3.64, 3.64, 3.64] as [number, number, number])

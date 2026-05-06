@@ -50,27 +50,16 @@ import '../styles/features/extracted/navbar.css'
               target={homeLink.external ? "_blank" : null}
               data-sfx-hover="hover-emphasis"
               data-sfx-click="sweep"
-              class="group flex items-center overflow-visible rounded-xl px-1.5 md:px-2 py-1 md:py-1.5 transition-all duration-200 hover:bg-white/6 active:scale-[0.98]"
+              class="group flex items-center overflow-visible rounded-xl px-1.5 md:px-2 py-1 transition-all duration-200 hover:bg-white/6 active:scale-[0.98]"
             >
-                <span
-                  class="megameal-mark hidden md:block select-none rounded-[1rem] px-3.5 py-2.5 transition-all duration-300"
-                >
-                    <span class="megameal-mark__inner block leading-[0.9]" style="transform: skewX(-12deg);">
-                        <span
-                          class="megameal-mark__mega block text-[0.82rem] font-black uppercase tracking-[0.26em] transition-all duration-300"
-                        >
-                          MEGA
-                        </span>
-                        <span
-                          class="megameal-mark__meal block pl-3 text-[1rem] font-black uppercase tracking-[0.18em] transition-all duration-300"
-                        >
-                          MEAL
-                        </span>
-                    </span>
-                </span>
-                <span class="megameal-mark-mobile md:hidden select-none rounded-[0.75rem] px-2 py-1.5">
-                    <span class="megameal-mark-mobile__text">MEGAMEAL</span>
-                </span>
+                <img
+                  src={url('/thumb/megameal.webp')}
+                  width="377"
+                  height="180"
+                  alt="MEGA MEAL"
+                  decoding="async"
+                  class="block h-[40px] w-auto select-none opacity-40 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 md:h-[56px]"
+                />
             </a>
         </div>
         
@@ -132,8 +121,8 @@ import '../styles/features/extracted/navbar.css'
             </div>
             <SiteAudioControl client:idle />
             {!siteConfig.themeColor.fixed && (
-                    <button aria-label="Display Settings" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 hidden md:inline-flex" id="display-settings-switch">
-                        <Icon name="material-symbols:palette-outline" class="text-[1.25rem]"></Icon>
+                    <button aria-label="Display Settings" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="nav-action-button btn-plain scale-animation rounded-lg active:scale-90 !hidden md:!inline-flex" id="display-settings-switch">
+                        <Icon name="material-symbols:palette-outline" class="nav-action-icon"></Icon>
                     </button>
             )}
             
@@ -149,8 +138,8 @@ import '../styles/features/extracted/navbar.css'
             </button> -->
                         
             <!-- ⭐ RESTORED: Mobile Hamburger Menu Button -->
-            <button aria-label="Menu" name="Nav Menu" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="mobile-header-button btn-plain scale-animation rounded-lg w-9 h-9 md:w-11 md:h-11 active:scale-90 md:!hidden" id="nav-menu-switch">
-                <Icon name="material-symbols:menu-rounded" class="text-[1.25rem]"></Icon>
+            <button aria-label="Menu" name="Nav Menu" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="mobile-header-button nav-action-button btn-plain scale-animation rounded-lg active:scale-90 md:!hidden" id="nav-menu-switch">
+                <Icon name="material-symbols:menu-rounded" class="nav-action-icon"></Icon>
             </button>
         </div>
         

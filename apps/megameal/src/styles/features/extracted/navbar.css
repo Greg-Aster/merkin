@@ -1,23 +1,21 @@
-#navbar .megameal-mark-mobile {
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(119, 191, 255, 0.2);
-    background:
-      linear-gradient(180deg, rgba(7, 18, 34, 0.82), rgba(4, 10, 20, 0.72));
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.03),
-      0 0 16px rgba(44, 133, 255, 0.12);
+  #navbar {
+    --navbar-action-size: 44px;
+    --navbar-action-icon-size: 20px;
   }
 
-  #navbar .megameal-mark-mobile__text {
-    display: block;
-    font-size: 0.64rem;
-    line-height: 1;
-    font-weight: 900;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: rgba(228, 243, 255, 0.92);
-    text-shadow: 0 0 12px rgba(58, 160, 255, 0.22);
+  #navbar .nav-action-button {
+    width: var(--navbar-action-size);
+    min-width: var(--navbar-action-size);
+    height: var(--navbar-action-size);
+    min-height: var(--navbar-action-size);
+  }
+
+  #navbar .nav-action-icon,
+  #navbar .nav-action-button > svg {
+    width: var(--navbar-action-icon-size) !important;
+    min-width: var(--navbar-action-icon-size);
+    height: var(--navbar-action-icon-size) !important;
+    flex-shrink: 0;
   }
 
   #navbar .mobile-menu-tools {
@@ -46,96 +44,6 @@
     background: var(--btn-plain-bg-hover);
     color: var(--primary);
     outline: none;
-  }
-
-  #navbar .megameal-mark {
-    position: relative;
-    overflow: visible;
-    border: 1px solid rgba(125, 211, 252, 0.22);
-    outline: 1px solid rgba(255, 255, 255, 0.05);
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 08%),
-      radial-gradient(circle at 18% 22%, rgba(186, 230, 253, 0.1), transparent 04%),
-      linear-gradient(135deg, rgba(8, 47, 73, 0.9), rgba(21, 94, 117, 0.72) 34%, rgba(29, 78, 216, 0.58) 68%, rgba(224, 242, 254, 0.08));
-    box-shadow:
-      0 10px 22px rgba(2, 6, 23, 0.28),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      inset 0 -10px 24px rgba(3, 7, 18, 0.22),
-      0 0 10px rgba(34, 211, 238, 0.08);
-    opacity: 0.58;
-  }
-
-  #navbar .megameal-mark::before {
-    content: "";
-    position: absolute;
-    inset: 1px;
-    border-radius: 0.88rem;
-    background:
-      linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent),
-      repeating-linear-gradient(
-        -18deg,
-        rgba(255, 255, 255, 0.03) 0 2px,
-        rgba(255, 255, 255, 0) 2px 8px
-      );
-    mix-blend-mode: screen;
-    opacity: 0.58;
-    pointer-events: none;
-  }
-
-  #navbar .megameal-mark::after {
-    content: "";
-    position: absolute;
-    inset: -2px;
-    border-radius: 1rem;
-    border: 1px solid rgba(186, 230, 253, 0.08);
-    box-shadow:
-      0 0 10px rgba(56, 189, 248, 0.1),
-      0 0 18px rgba(14, 165, 233, 0.05);
-    opacity: 0.55;
-    pointer-events: none;
-  }
-
-  #navbar .megameal-mark__inner {
-    position: relative;
-    z-index: 1;
-  }
-
-  #navbar .megameal-mark__mega {
-    color: rgba(186, 230, 253, 0.82);
-    text-shadow:
-      0 0 4px rgba(125, 211, 252, 0.28),
-      0 0 10px rgba(56, 189, 248, 0.12),
-      1px 1px 0 rgba(8, 47, 73, 0.9);
-    opacity: 0.52;
-    filter: saturate(0.72);
-  }
-
-  #navbar .megameal-mark__meal {
-    color: rgba(240, 249, 255, 0.88);
-    text-shadow:
-      0 0 5px rgba(186, 230, 253, 0.32),
-      0 0 12px rgba(59, 130, 246, 0.16),
-      1px 1px 0 rgba(8, 47, 73, 0.88),
-      -1px -1px 0 rgba(12, 74, 110, 0.32);
-    filter: saturate(0.78);
-  }
-
-  #navbar .group:hover .megameal-mark {
-    border-color: rgba(var(--primary-rgb), 0.34);
-    box-shadow:
-      0 14px 28px rgba(2, 6, 23, 0.34),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      inset 0 -10px 24px rgba(3, 7, 18, 0.26),
-      0 0 14px rgba(var(--primary-rgb), 0.14);
-  }
-
-  #navbar .group:hover .megameal-mark__mega,
-  #navbar .group:hover .megameal-mark__meal {
-    color: color-mix(in srgb, var(--primary) 62%, white 20%);
-    text-shadow:
-      0 0 6px rgba(var(--primary-rgb), 0.28),
-      0 0 12px rgba(var(--primary-rgb), 0.14),
-      1px 1px 0 rgba(8, 47, 73, 0.9);
   }
 
   @media (max-width: 767px) {
@@ -193,40 +101,20 @@
       display: none !important;
     }
 
-    #navbar .megameal-mark {
-      border-radius: 0.8rem;
-    }
-
-    #navbar .mobile-header-button,
-    #navbar .store-cart-nav-action #cart-toggle-btn,
-    #navbar .site-audio-button,
-    #navbar #display-settings-switch {
-      width: 2.45rem;
-      min-width: 2.45rem;
-      height: 2.45rem;
-      min-height: 2.45rem;
+    #navbar .nav-action-button {
       border: 1px solid rgba(125, 211, 252, 0.14);
       background: rgba(15, 23, 42, 0.62);
       color: rgba(226, 232, 240, 0.88);
     }
 
-    #navbar .mobile-header-button:hover,
-    #navbar .store-cart-nav-action #cart-toggle-btn:hover,
-    #navbar .site-audio-button:hover,
-    #navbar #display-settings-switch:hover {
+    #navbar .nav-action-button:hover {
       border-color: rgba(125, 211, 252, 0.28);
       background: rgba(8, 47, 73, 0.52);
       color: rgb(226, 232, 240);
     }
 
-    #navbar .store-cart-nav-action #cart-toggle-btn svg,
-    #navbar .mobile-header-button svg,
-    #navbar .site-audio-button svg,
-    #navbar #display-settings-switch svg {
-      width: 1.18rem !important;
-      height: 1.18rem !important;
-      min-width: 1.18rem;
-      flex-shrink: 0;
+    #navbar .nav-action-icon,
+    #navbar .nav-action-button > svg {
       color: rgb(125 211 252);
     }
 
@@ -239,10 +127,4 @@
       border-radius: 1rem;
     }
 
-    #navbar .megameal-mark-mobile {
-      border-radius: 0.8rem;
-      box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.02),
-        0 0 12px rgba(44, 133, 255, 0.09);
-    }
   }
