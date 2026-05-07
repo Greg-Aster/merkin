@@ -1,7 +1,7 @@
 ---
-import SharedMapView from '@merkin/blog-core/components/timeline/TimelineViewModes/MapView.astro'
+import MapView from './MapView.svelte'
 
 const props = Astro.props
 ---
 
-<SharedMapView {...props} />
+<MapView {...props} client:load />

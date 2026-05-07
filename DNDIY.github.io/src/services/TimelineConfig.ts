@@ -14,4 +14,4 @@ export {
   type EraConfigMap,
   type TimelineEvent,
   type TimelineViewConfig,
-} from '@merkin/blog-core/services/TimelineConfig'
+} from '../config/timelineconfig.ts'

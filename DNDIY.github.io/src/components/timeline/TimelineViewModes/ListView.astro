@@ -1,7 +1,7 @@
 ---
-import SharedListView from '@merkin/blog-core/components/timeline/TimelineViewModes/ListView.astro'
+import ListView from './ListView.svelte'
 
 const props = Astro.props
 ---
 
-<SharedListView {...props} />
+<ListView {...props} client:load />
