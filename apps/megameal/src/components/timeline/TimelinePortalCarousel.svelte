@@ -2,6 +2,10 @@
 import { Canvas } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
+import {
+  createAdaptiveCanvasDprController,
+  type AdaptiveCanvasDprController,
+} from '@/utils/adaptiveCanvasDpr'
 import TimelineAutoplayButton from './TimelineAutoplayButton.svelte'
 import TimelineCameraPanControls from './TimelineCameraPanControls.svelte'
 import TimelineConstellationOverlay, {
@@ -60,6 +64,7 @@ let hoveredStarIndex = -1
 let portraitMobile = false
 let viewportWidth = 1440
 let canvasDpr = 1
+let adaptiveDprController: AdaptiveCanvasDprController | null = null
 let projectedStarPositions: TimelineStarScreenPosition[] = []
 let hasInitializedDefaultPosition = false
 let hasMounted = false
@@ -161,12 +166,28 @@ function syncViewportMode() {
   portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
 }
 
+function getTimelineMaxCanvasDpr() {
+  if (typeof window === 'undefined') return
+
+  const lowMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (lowMotion) return 1
+
+  return Math.min(Math.max(1, window.devicePixelRatio || 1), 1.5)
+}
+
+function setCanvasDpr(nextDpr: number) {
+  canvasDpr = nextDpr
+}
+
 function syncCanvasDpr() {
   if (typeof window === 'undefined') return
-  const lowMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  const compactViewport = window.innerWidth <= 760 || window.innerHeight <= 640
-  const dprCap = lowMotion ? 1 : 1.5
-  canvasDpr = Math.min(window.devicePixelRatio || 1, dprCap)
+
+  if (adaptiveDprController) {
+    adaptiveDprController.sync()
+    return
+  }
+
+  setCanvasDpr(getTimelineMaxCanvasDpr())
 }
 
 function updatePointer(clientX: number, clientY: number) {
@@ -689,7 +710,11 @@ function syncTimelineBackgroundVideoPlayback(event: Event) {
 onMount(() => {
   hasMounted = true
   syncViewportMode()
-  syncCanvasDpr()
+  adaptiveDprController = createAdaptiveCanvasDprController({
+    getMaxDpr: getTimelineMaxCanvasDpr,
+    setDpr: setCanvasDpr,
+  })
+  adaptiveDprController.start()
   updateScrollDrivenWheel()
   startInitialAutoplay()
   if (shell) shell.dataset.timelineInitialized = 'true'
@@ -716,6 +741,8 @@ onMount(() => {
     window.removeEventListener('keydown', handleKeyboardScroll)
     window.removeEventListener('resize', handleResize)
     if (scrollFrame) window.cancelAnimationFrame(scrollFrame)
+    adaptiveDprController?.stop()
+    adaptiveDprController = null
     pauseAutoplay()
     hasMounted = false
     timelineMobileWrapper?.classList.remove('timeline-mobile-active')
@@ -728,6 +755,8 @@ onDestroy(() => {
   lastTouchCenterY = null
   panPointerId = null
   if (scrollFrame) window.cancelAnimationFrame(scrollFrame)
+  adaptiveDprController?.stop()
+  adaptiveDprController = null
   pauseAutoplay()
 })
 </script>

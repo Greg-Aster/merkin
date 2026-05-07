@@ -7,6 +7,10 @@ import {
   type SiteSfxId,
   siteSfxManager,
 } from '@/utils/site-sfx'
+import {
+  createAdaptiveCanvasDprController,
+  type AdaptiveCanvasDprController,
+} from '@/utils/adaptiveCanvasDpr'
 import HomeIntroEnvironmentScene from './HomeIntroEnvironmentScene.svelte'
 import {
   homeIntroMaxWheelForOffset,
@@ -52,6 +56,7 @@ let backgroundReady = false
 let backgroundRevealTimeout = 0
 let backgroundRevealFallbackTimeout = 0
 let canvasDpr = 1
+let adaptiveDprController: AdaptiveCanvasDprController | null = null
 let sceneQuality: SceneQuality = 'high'
 let portalHoverActive = false
 let lastScreenSfxIndex = activeScreenIndex
@@ -176,24 +181,55 @@ function getDeviceMemory() {
   return (navigator as Navigator & { deviceMemory?: number }).deviceMemory
 }
 
-function syncCanvasDpr() {
-  if (typeof window === 'undefined') return
-
+function getHomeQualityContext() {
   const devicePixelRatio = Math.max(1, window.devicePixelRatio || 1)
   const deviceMemory = getDeviceMemory()
   const lowMemoryDevice = typeof deviceMemory === 'number' && deviceMemory <= 4
   const compactViewport = window.innerWidth <= 760 || window.innerHeight <= 640
   const reducedData = prefersReducedData()
 
-  const dprCap = lowMemoryDevice || reducedData ? 1 : 1.5
-  canvasDpr = Math.min(devicePixelRatio, dprCap)
+  return {
+    compactViewport,
+    devicePixelRatio,
+    lowMemoryDevice,
+    reducedData,
+  }
+}
 
-  sceneQuality =
-    reducedData || lowMemoryDevice || compactViewport
-      ? 'lean'
-      : devicePixelRatio > 1.5
-        ? 'balanced'
-        : 'high'
+function getHomeMaxCanvasDpr() {
+  if (typeof window === 'undefined') return 1
+
+  const { devicePixelRatio, lowMemoryDevice, reducedData } = getHomeQualityContext()
+  const dprCap = lowMemoryDevice || reducedData ? 1 : 1.5
+
+  return Math.min(devicePixelRatio, dprCap)
+}
+
+function getHomeSceneQuality(nextDpr: number): SceneQuality {
+  if (typeof window === 'undefined') return 'high'
+
+  const { compactViewport, devicePixelRatio, lowMemoryDevice, reducedData } = getHomeQualityContext()
+
+  if (reducedData || lowMemoryDevice || compactViewport || nextDpr <= 1.01) return 'lean'
+  if (devicePixelRatio > 1.5 || nextDpr < 1.45) return 'balanced'
+
+  return 'high'
+}
+
+function setCanvasDpr(nextDpr: number) {
+  canvasDpr = nextDpr
+  sceneQuality = getHomeSceneQuality(nextDpr)
+}
+
+function syncCanvasDpr() {
+  if (typeof window === 'undefined') return
+
+  if (adaptiveDprController) {
+    adaptiveDprController.sync()
+    return
+  }
+
+  setCanvasDpr(getHomeMaxCanvasDpr())
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -600,7 +636,11 @@ function handleLogoReady() {
 
 onMount(() => {
   syncViewportMode()
-  syncCanvasDpr()
+  adaptiveDprController = createAdaptiveCanvasDprController({
+    getMaxDpr: getHomeMaxCanvasDpr,
+    setDpr: setCanvasDpr,
+  })
+  adaptiveDprController.start()
   updateScrollDrivenWheel()
   backgroundRevealFallbackTimeout = window.setTimeout(() => {
     revealBackground()
@@ -637,6 +677,8 @@ onMount(() => {
       scrollFrame = 0
       lastScrollFrameAt = 0
     }
+    adaptiveDprController?.stop()
+    adaptiveDprController = null
     clearBackgroundRevealTimers()
   }
 })
@@ -649,6 +691,8 @@ onDestroy(() => {
     scrollFrame = 0
     lastScrollFrameAt = 0
   }
+  adaptiveDprController?.stop()
+  adaptiveDprController = null
   clearBackgroundRevealTimers()
 })
 </script>
