@@ -185,10 +185,8 @@ function syncCanvasDpr() {
   const compactViewport = window.innerWidth <= 760 || window.innerHeight <= 640
   const reducedData = prefersReducedData()
 
-  canvasDpr = Math.min(
-    devicePixelRatio,
-    compactViewport || lowMemoryDevice || reducedData ? 1 : 1.25,
-  )
+  const dprCap = lowMemoryDevice || reducedData ? 1 : 1.5
+  canvasDpr = Math.min(devicePixelRatio, dprCap)
 
   sceneQuality =
     reducedData || lowMemoryDevice || compactViewport

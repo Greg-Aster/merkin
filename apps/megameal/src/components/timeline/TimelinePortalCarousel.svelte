@@ -165,7 +165,8 @@ function syncCanvasDpr() {
   if (typeof window === 'undefined') return
   const lowMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const compactViewport = window.innerWidth <= 760 || window.innerHeight <= 640
-  canvasDpr = Math.min(window.devicePixelRatio || 1, compactViewport || lowMotion ? 1 : 1.25)
+  const dprCap = lowMotion ? 1 : 1.5
+  canvasDpr = Math.min(window.devicePixelRatio || 1, dprCap)
 }
 
 function updatePointer(clientX: number, clientY: number) {
