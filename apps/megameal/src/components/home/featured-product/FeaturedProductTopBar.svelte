@@ -5,13 +5,21 @@ export let product: FeaturedProduct
 export let showBannerControls = true
 export let kickerLabel = 'Featured Product'
 export let offerCode: string
-export let observedUnits: number
-export let activeWatchers: number
 export let bannerSlideIndex: number
 export let bannerSlideCount: number
 export let bannerPaused: boolean
 export let bannerProgress: number
 export let sendBannerControl: (action: 'previous' | 'next' | 'toggle-pause') => void
+
+function formatRegistryCount(value: number | null | undefined, fallback: string) {
+  return typeof value === 'number' ? value.toLocaleString() : fallback
+}
+
+$: availableUnitsText = formatRegistryCount(
+  product.stockRegistry?.unitsAvailable,
+  'N/A',
+)
+$: unitsSoldText = formatRegistryCount(product.stockRegistry?.unitsSold, 'No Data')
 </script>
 
 <div class="featured-product-utilitybar">
@@ -21,8 +29,8 @@ export let sendBannerControl: (action: 'previous' | 'next' | 'toggle-pause') => 
     <span>Offer valid until regional collapse.</span>
   </div>
   <div class="featured-product-utilitybar__meta">
-    <span>{observedUnits.toLocaleString()} units observed today</span>
-    <span>{activeWatchers.toLocaleString()} watchers in adjacent timelines</span>
+    <span>Available units: {availableUnitsText}</span>
+    <span>Units sold: {unitsSoldText}</span>
   </div>
 </div>
 

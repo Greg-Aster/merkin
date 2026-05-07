@@ -128,7 +128,7 @@ function getTimelineOrbitTexture() {
 import { T, useTask } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import type * as THREE from 'three'
-import { AdditiveBlending, Vector3 } from 'three'
+import { AdditiveBlending, Color, Vector3 } from 'three'
 import HomeIntroParticleField from '../home/HomeIntroParticleField.svelte'
 import { homeIntroParticleClusters } from '../home/homeIntroParticleClusters'
 import { hashHomeIntroUnit } from '../home/homeIntroSceneMath'
@@ -181,6 +181,7 @@ let starRail: THREE.Group | null = null
 let starColumn: THREE.Group | null = null
 let portraitMobile = false
 let starAnimationTime = 0
+let activeStarIntensities: number[] = []
 
 const screenOrbitRadiusX = 5.65
 const screenOrbitRadiusY = 3.85
@@ -201,6 +202,9 @@ const starGlowColor = '#0891b2'
 const additiveBlending = AdditiveBlending
 const timelineOrbitTexture = getTimelineOrbitTexture()
 const projectedStarPosition = new Vector3()
+const mixedStarColor = new Color()
+const mixedStarBaseColor = new Color()
+const mixedStarActiveColor = new Color(activeStarColor)
 let lastProjectedStarPositionSignature = ''
 
 $: sceneScale = portraitMobile ? 0.78 : 1
@@ -365,6 +369,15 @@ function getTimelineStarGlowColor(index: number, screen: TimelineCarouselScreen,
   return palette[paletteIndex]
 }
 
+function mixStarColor(baseColor: string, activeAmount: number) {
+  if (activeAmount <= 0.01) return baseColor
+  if (activeAmount >= 0.99) return activeStarColor
+
+  mixedStarBaseColor.set(baseColor)
+  mixedStarColor.copy(mixedStarBaseColor).lerp(mixedStarActiveColor, activeAmount)
+  return `#${mixedStarColor.getHexString()}`
+}
+
 function getTimelineStarSize(index: number, isKeyEvent: boolean) {
   const baseSize = 0.78 + getStarHash(index, 3319) * 0.58
   return isKeyEvent ? baseSize * 1.18 : baseSize
@@ -373,7 +386,7 @@ function getTimelineStarSize(index: number, isKeyEvent: boolean) {
 function getTimelineStarVisual(
   index: number,
   screen: TimelineCarouselScreen,
-  isActive: boolean,
+  activeAmount: number,
   animationTime: number,
 ) {
   const size = getTimelineStarSize(index, screen.isKeyEvent)
@@ -381,18 +394,20 @@ function getTimelineStarVisual(
     timelineStarTextureVariants.length - 1,
     Math.floor(getStarHash(index, 3571) * timelineStarTextureVariants.length),
   ) as TimelineStarTextureVariant
-  const activeScale = isActive ? 1.42 : 1
+  const activeScale = 1 + activeAmount * 0.42
   const keyScale = screen.isKeyEvent ? 1.12 : 1
   const rotation = getStarHash(index, 3907) * Math.PI
   const phase = getStarHash(index, 4211) * Math.PI * 2
-  const slowPulse = Math.sin(animationTime * 1.05 + phase) * (isActive ? 0.16 : 0.025)
-  const glowPulse = Math.sin(animationTime * 0.82 + phase) * (isActive ? 0.24 : 0.035)
+  const slowPulse = Math.sin(animationTime * 1.05 + phase) * (0.055 + activeAmount * 0.105)
+  const glowPulse = Math.sin(animationTime * 0.82 + phase) * (0.09 + activeAmount * 0.15)
   const pulse = 1 + slowPulse
   const drift = 1 + glowPulse
+  const baseColor = getTimelineStarColor(index, screen.eraKey, false, screen.isKeyEvent)
+  const baseGlowColor = getTimelineStarGlowColor(index, screen, false)
 
   return {
-    color: getTimelineStarColor(index, screen.eraKey, isActive, screen.isKeyEvent),
-    glowColor: getTimelineStarGlowColor(index, screen, isActive),
+    color: mixStarColor(baseColor, activeAmount),
+    glowColor: mixStarColor(baseGlowColor, activeAmount),
     texture: getTimelineStarTexture(variant),
     coreScale: [
       0.58 * size * activeScale * keyScale * pulse,
@@ -400,9 +415,9 @@ function getTimelineStarVisual(
       0.58 * size * activeScale * keyScale * pulse,
     ] as [number, number, number],
     glowScale: [
-      1.08 * size * activeScale * keyScale * (isActive ? 1.18 : 1) * drift,
-      1.08 * size * activeScale * keyScale * (isActive ? 1.18 : 1) * drift,
-      1.08 * size * activeScale * keyScale * (isActive ? 1.18 : 1) * drift,
+      1.08 * size * activeScale * keyScale * (1 + activeAmount * 0.18) * drift,
+      1.08 * size * activeScale * keyScale * (1 + activeAmount * 0.18) * drift,
+      1.08 * size * activeScale * keyScale * (1 + activeAmount * 0.18) * drift,
     ] as [number, number, number],
     glintScale: [
       0.22 * size * activeScale,
@@ -410,13 +425,14 @@ function getTimelineStarVisual(
       0.22 * size * activeScale,
     ] as [number, number, number],
     orbitScale: [
-      1.78 * size * (isActive ? 1.28 + glowPulse * 0.42 : 1) * keyScale,
-      1.78 * size * (isActive ? 1.28 + glowPulse * 0.42 : 1) * keyScale,
-      1.78 * size * (isActive ? 1.28 + glowPulse * 0.42 : 1) * keyScale,
+      1.78 * size * (1 + activeAmount * 0.28 + glowPulse * (0.32 + activeAmount * 0.1)) * keyScale,
+      1.78 * size * (1 + activeAmount * 0.28 + glowPulse * (0.32 + activeAmount * 0.1)) * keyScale,
+      1.78 * size * (1 + activeAmount * 0.28 + glowPulse * (0.32 + activeAmount * 0.1)) * keyScale,
     ] as [number, number, number],
+    orbitOpacity: (screen.isKeyEvent ? 0.32 : 0.16) + activeAmount * 0.4,
     rotation,
     glintRotation: rotation + Math.PI / 4,
-    orbitRotation: -rotation * 0.45 + animationTime * (isActive ? 0.18 : 0.08),
+    orbitRotation: -rotation * 0.45 + animationTime * (0.08 + activeAmount * 0.1),
   }
 }
 
@@ -571,6 +587,12 @@ useTask(delta => {
   const selectedIndex = Number.isFinite(input.wheel) ? input.wheel : 0
   const targetCameraPosition = getCameraTimelinePosition(selectedIndex)
   starAnimationTime += (time - starAnimationTime) * Math.min(1, delta * 6)
+  activeStarIntensities = screens.map((_, index) => {
+    const current = activeStarIntensities[index] ?? 0
+    const target = index === selectedScreenIndex || index === hoveredScreenIndex ? 1 : 0
+    const speed = target > current ? 2.15 : 2.85
+    return current + (target - current) * (1 - Math.exp(-delta * speed))
+  })
 
   if (camera) {
     camera.position.set(targetCameraPosition[0], targetCameraPosition[1], targetCameraPosition[2])
@@ -611,15 +633,16 @@ useTask(delta => {
   <T.Group bind:ref={starRail} position={railPosition}>
     {#each screens as screen, index}
       {@const star = getTimelineStarTarget(index, input.wheel)}
-      {@const starActive = index === selectedScreenIndex || index === hoveredScreenIndex}
-      {@const starVisual = getTimelineStarVisual(index, screen, starActive, starAnimationTime)}
+      {@const starActiveAmount = activeStarIntensities[index] ?? 0}
+      {@const starVisual = getTimelineStarVisual(index, screen, starActiveAmount, starAnimationTime)}
       <T.Group position={[star.x, star.y, star.z]} scale={[star.scale, star.scale, star.scale]}>
-        {#if timelineOrbitTexture && (starActive || screen.isKeyEvent)}
+        {#if timelineOrbitTexture}
           <T.Sprite scale={starVisual.orbitScale}>
             <T.SpriteMaterial
               map={timelineOrbitTexture}
               color={starVisual.glowColor}
               rotation={starVisual.orbitRotation}
+              opacity={starVisual.orbitOpacity}
               transparent={true}
               blending={additiveBlending}
               depthWrite={false}

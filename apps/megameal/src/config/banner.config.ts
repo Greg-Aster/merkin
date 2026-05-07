@@ -281,7 +281,7 @@ export const bannerConfig: BannerConfig = {
       cookbook: '5.5rem',
       archive: '5.5rem',
       reader: '5.5rem',
-      none: '-8rem', // ✅ Desktop spacing
+      none: '-7.5rem', // ✅ Desktop spacing
     },
     // No extra mobile banner offset: navbar stays in normal flow above the banner
     mobileBannerGap: '2.75rem',
@@ -330,6 +330,27 @@ export const bannerConfig: BannerConfig = {
 // RESTORED HELPER FUNCTIONS - WORKING VERSION
 // =====================================================================
 
+const articlePostBannerTypes = new Set<BannerType>([
+  'standard',
+  'image',
+  'video',
+  'assistant',
+  'cookbook',
+  'reader',
+  'none',
+])
+
+function isArticlePost(post: any): boolean {
+  return post?.collection === 'posts'
+}
+
+function wantsNoArticleBanner(post: any): boolean {
+  if (!isArticlePost(post)) return false
+
+  const bannerType = post?.data?.bannerType as BannerType | undefined
+  return !bannerType || !articlePostBannerTypes.has(bannerType)
+}
+
 export function isFullscreenModeActive(): boolean {
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
     return false
@@ -346,9 +367,10 @@ export function getBannerDataFromPost(post: any): PostBannerData | null {
     customName: post.data.authorName || '',
     customBio: post.data.authorBio || '',
     slug: post.slug || '',
-    // `showImageOnPost` only hides the inline cover image inside the article body.
-    // It should not disable the top banner or the site's fallback banner system.
-    wantsNoDefaultBanner: false,
+    // Article posts opt into banners with bannerType. Legacy archive/timeline
+    // article values are treated as no banner.
+    wantsNoDefaultBanner:
+      post.data.bannerType === 'none' || wantsNoArticleBanner(post),
   }
 }
 
@@ -356,20 +378,31 @@ export function determineBannerType(
   post: any,
   postData: PostBannerData | null,
 ): BannerDeterminationResult {
+  const explicitBannerType = post?.data?.bannerType
+
   // Check for post-specific banners
+  const hasPostStandardBanner =
+    explicitBannerType === 'standard' && !postData?.wantsNoDefaultBanner
   const hasPostTimelineBanner =
-    post?.data?.bannerType === 'timeline' && post?.data?.bannerData?.category
+    explicitBannerType === 'timeline' &&
+    !postData?.wantsNoDefaultBanner &&
+    post?.data?.bannerData?.category
   const hasPostVideoBanner =
-    post?.data?.bannerType === 'video' && post?.data?.bannerData?.videoId
-  const hasPostAssistantBanner = post?.data?.bannerType === 'assistant'
-  const hasPostCookbookBanner = post?.data?.bannerType === 'cookbook'
-  const hasPostArchiveBanner = post?.data?.bannerType === 'archive'
-  const hasPostReaderBanner = post?.data?.bannerType === 'reader'
+    explicitBannerType === 'video' &&
+    !postData?.wantsNoDefaultBanner &&
+    post?.data?.bannerData?.videoId
+  const hasPostAssistantBanner =
+    explicitBannerType === 'assistant' && !postData?.wantsNoDefaultBanner
+  const hasPostCookbookBanner =
+    explicitBannerType === 'cookbook' && !postData?.wantsNoDefaultBanner
+  const hasPostArchiveBanner =
+    explicitBannerType === 'archive' && !postData?.wantsNoDefaultBanner
+  const hasPostReaderBanner =
+    explicitBannerType === 'reader' && !postData?.wantsNoDefaultBanner
   const hasPostImageBanner =
     !postData?.wantsNoDefaultBanner &&
-    (post?.data?.image ||
-      (post?.data?.bannerType === 'image' &&
-        post?.data?.bannerData?.imageUrl)) &&
+    explicitBannerType === 'image' &&
+    (post?.data?.bannerData?.imageUrl || post?.data?.image) &&
     !hasPostVideoBanner &&
     !hasPostTimelineBanner &&
     !hasPostAssistantBanner &&
@@ -384,7 +417,8 @@ export function determineBannerType(
     hasPostAssistantBanner ||
     hasPostCookbookBanner ||
     hasPostArchiveBanner ||
-    hasPostReaderBanner
+    hasPostReaderBanner ||
+    hasPostStandardBanner
 
   // Check for default banners
   const useDefaultVideo =
@@ -424,7 +458,7 @@ export function determineBannerType(
   const hasCookbookBanner = hasPostCookbookBanner
   const hasArchiveBanner = hasPostArchiveBanner
   const hasReaderBanner = hasPostReaderBanner
-  const hasStandardBanner = useDefaultStandard
+  const hasStandardBanner = hasPostStandardBanner || useDefaultStandard
 
   const currentBannerType: BannerType = hasVideoBanner
     ? 'video'

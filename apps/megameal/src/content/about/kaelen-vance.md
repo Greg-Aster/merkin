@@ -21,8 +21,8 @@ backgroundImage: "/posts/timeline/diaspora.png"
 bannerType: "timeline"
 bannerData:
   category: "MEGA MEAL"
-  startYear: 24000
-  endYear: 26000
+  startYear: 2.4e4
+  endYear: 2.6e4
   background: "/posts/timeline/awakening-era.png"
 ---
 

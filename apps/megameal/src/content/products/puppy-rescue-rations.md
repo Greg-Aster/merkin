@@ -4,7 +4,7 @@ tagline: "A shelf-stable chili event with an unfortunate translation history."
 brand: "Protein Solutions Division"
 draft: false
 showInTimeline: true
-timelineYear: 28043
+timelineYear: 2.8043e4
 timelineEra: "singularity-conflict"
 timelineLocation: "Post-Miranda Salvage Distribution Channels"
 isKeyEvent: false

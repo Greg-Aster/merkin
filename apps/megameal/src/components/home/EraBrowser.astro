@@ -4,6 +4,7 @@
 // Pulls era config from timelineconfig.ts and counts posts per era.
 
 import { getCollection } from 'astro:content'
+import { formatTimelineYearRange } from '@merkin/shared-content'
 import { defaultEraConfig, eraColorMap } from '@/config/timelineconfig'
 
 // Get all non-draft posts
@@ -55,7 +56,7 @@ import '../../styles/features/home/era-browser.css'
   <div class="era-browser-header">
     <div class="era-browser-label">Explore by Era</div>
     <p class="era-browser-sub">
-      The MEGAMEAL universe spans Year 1 to Year 50,000. Click any era to read its stories.
+      The MEGAMEAL universe spans from its first record to the end of time. Click any era to read its stories.
     </p>
   </div>
 
@@ -71,7 +72,7 @@ import '../../styles/features/home/era-browser.css'
 
         <div class="era-card-content">
           <div class="era-years">
-            {era.config.startYear.toLocaleString()} – {era.config.endYear.toLocaleString()}
+            {formatTimelineYearRange(era.config.startYear, era.config.endYear)}
           </div>
           <h3 class="era-name">{era.config.displayName}</h3>
           <p class="era-tagline">{era.tagline}</p>

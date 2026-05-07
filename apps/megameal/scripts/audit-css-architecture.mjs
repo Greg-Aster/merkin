@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process'
+import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
@@ -69,14 +69,17 @@ function walk(dir, files = []) {
 function getChangedFiles() {
   let output = ''
   try {
-    output = execSync('git status --porcelain', {
+    output = execFileSync('git', ['status', '--porcelain', '--untracked-files=all'], {
       cwd: repoRoot,
       encoding: 'utf8',
-      shell: true,
     })
   } catch (error) {
-    changedScanUnavailable = true
-    return []
+    const errorOutput = error?.stdout?.toString?.() ?? ''
+    if (!errorOutput) {
+      changedScanUnavailable = true
+      return []
+    }
+    output = errorOutput
   }
 
   return output

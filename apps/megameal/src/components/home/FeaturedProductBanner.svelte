@@ -25,6 +25,7 @@ import '../../styles/features/home/featured-product-related-modal.css'
 
 export let product: FeaturedProduct
 export let showBannerControls = true
+export let showFullProductLink = true
 export let kickerLabel = 'Featured Product'
 export let relatedProducts: RelatedProduct[] = []
 
@@ -47,8 +48,6 @@ let refusalResetTimer: ReturnType<typeof setTimeout> | undefined
 let priceGlitchResetTimer: ReturnType<typeof setTimeout> | undefined
 let priceGlitchFrameTimers: Array<ReturnType<typeof setTimeout>> = []
 
-const observedUnits = 1044
-const activeWatchers = 2195
 const offerCode = 'ASCEND20'
 const financingLine = 'Orbit-approved financing from $45 / cycle'
 const trustSignals = [
@@ -108,9 +107,11 @@ $: previewTitle =
       : activePanel === 'qanda'
         ? 'Questions & Answers'
         : activePanel === 'reviews'
-          ? 'Field Reviews'
-          : activePanel === 'assurance'
-            ? 'Assurance'
+        ? 'Field Reviews'
+        : activePanel === 'assurance'
+          ? 'Assurance'
+          : activePanel === 'warnings'
+            ? 'Warnings'
             : null
 $: priceDriftQuirk = getPriceDriftQuirk(product.quirks, product.price)
 $: addToCartRefusalQuirk = getAddToCartRefusalQuirk(product.quirks)
@@ -332,8 +333,6 @@ onMount(() => {
     {showBannerControls}
     {kickerLabel}
     {offerCode}
-    {observedUnits}
-    {activeWatchers}
     {bannerSlideIndex}
     {bannerSlideCount}
     {bannerPaused}
@@ -356,8 +355,6 @@ onMount(() => {
       {currentTone}
       {activePanel}
       {hasIngredientsPanel}
-      {observedUnits}
-      {activeWatchers}
       {displayedPriceText}
       priceDriftActive={Boolean(priceDriftQuirk)}
       {priceGlitching}
@@ -365,6 +362,7 @@ onMount(() => {
       {refusalAnimating}
       {primaryButtonLabel}
       {ctaFeedback}
+      {showFullProductLink}
       {renderStars}
       {togglePanel}
       {handlePrimaryAction}

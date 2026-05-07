@@ -48,6 +48,14 @@ export type ProductActionLink = {
   href: string
 }
 
+export type ProductStockRegistry = {
+  registryId?: string
+  registryHref?: string
+  adoptionHref?: string
+  unitsAvailable?: number | null
+  unitsSold?: number | null
+}
+
 export type FeaturedProduct = {
   name: string
   tagline?: string
@@ -58,6 +66,7 @@ export type FeaturedProduct = {
   alternateAction?: ProductActionLink
   rating?: number
   sku?: string
+  stockRegistry?: ProductStockRegistry
   href: string
   media: ProductMedia[]
   specifications: ProductSpec[]
@@ -74,6 +83,7 @@ export type FeaturedProductPanel =
   | 'qanda'
   | 'reviews'
   | 'assurance'
+  | 'warnings'
 
 export type AvailabilityTone = {
   label: string

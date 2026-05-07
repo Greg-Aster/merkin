@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content'
+import { Icon } from 'astro-icon/components'
+import SnuggaloidRegistryList from '../../components/snuggaloids/SnuggaloidRegistryList.svelte'
+import StoreLayout from '../../layouts/store/StoreLayout.astro'
+
+const units = (
+  await getCollection('snuggaloids', ({ data }) => data.draft !== true)
+).sort((a, b) => a.data.unitId.localeCompare(b.data.unitId))
+
+const statusLabels: Record<string, string> = {
+  preview: 'Preview Only',
+  available: 'Available',
+  reserved: 'Reserved',
+  adopted: 'Adopted',
+  not_available: 'Not Available',
+}
+
+const registryUnits = units.map(unit => ({
+  id: unit.id,
+  name: unit.data.name,
+  unitId: unit.data.unitId,
+  adoptionStatus: unit.data.adoptionStatus,
+  statusLabel: statusLabels[unit.data.adoptionStatus],
+  image: unit.data.image,
+  temperament: unit.data.temperament,
+  size: unit.data.size,
+  exterior: unit.data.exterior,
+  traits: unit.data.traits,
+  registryNote: unit.data.registryNote,
+  adoptionNote: unit.data.adoptionNote,
+  warnings: unit.data.warnings,
+  easterEgg: unit.data.easterEgg,
+}))
+---
+
+<StoreLayout
+  title="Snuggaloid Registry"
+  description="Known Snuggaloid units, adoption status, bios, photos, and registry notes."
+>
+  <div class="container mx-auto max-w-6xl px-3 py-5 sm:px-4 md:py-6">
+    <nav class="mb-5 flex flex-wrap items-center gap-2 text-sm text-slate-500 md:mb-6" aria-label="Breadcrumb">
+      <a href="/" class="transition hover:text-[var(--primary)]">Home</a>
+      <Icon name="mdi:chevron-right" class="h-4 w-4" />
+      <a href="/store/" class="transition hover:text-[var(--primary)]">Store</a>
+      <Icon name="mdi:chevron-right" class="h-4 w-4" />
+      <span class="text-slate-300">Snuggaloid Registry</span>
+    </nav>
+
+    <section class="rounded-2xl border border-slate-700/50 bg-slate-950/80 p-4 shadow-2xl shadow-slate-950/30 sm:p-6 md:rounded-3xl md:p-8">
+      <SnuggaloidRegistryList client:load units={registryUnits} />
+    </section>
+  </div>
+</StoreLayout>

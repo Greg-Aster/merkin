@@ -21,83 +21,85 @@ export const defaultEraDisplayNames: { [key: string]: string } = {
   unknown: 'Unknown Era',
 }
 
-// Default era configuration with years - CENTRALIZED DEFINITION
+// Default era configuration with numeric years - CENTRALIZED DEFINITION.
+// Use finite numbers so sorting, filtering, and slider math stay simple; large
+// endpoints can be written as scientific notation in config and frontmatter.
 export const defaultEraConfig: EraConfigMap = {
   'all-time': {
     displayName: 'All-Time',
-    startYear: 1,
-    endYear: 50000,
+    startYear: 1e0,
+    endYear: 1e100,
     zoomLevel: 1,
-    panToYear: 25000,
+    panToYear: 2.5e4,
     backgroundImage: '/assets/banner/posters/universe-poster.webp',
     backgroundVideo: '/assets/banner/universbg0001-0121.webm',
     backgroundVideoPlaybackRate: 0.25,
   },
   'all-eras': {
     displayName: 'All-Eras',
-    startYear: 1,
-    endYear: 50000,
+    startYear: 1e0,
+    endYear: 1e100,
     zoomLevel: 1.3,
-    panToYear: 25000,
+    panToYear: 2.5e4,
     backgroundImage: '/assets/banner/posters/universe-poster.webp',
     backgroundVideo: '/assets/banner/universbg0001-0121.webm',
     backgroundVideoPlaybackRate: 0.25,
   },
   'ancient-epoch': {
     displayName: 'The Ancient Epoch',
-    startYear: 1,
-    endYear: 5000,
+    startYear: 1e0,
+    endYear: 5e3,
     zoomLevel: 3,
-    panToYear: 1,
+    panToYear: 1e0,
     backgroundImage: '/posts/timeline/singularity-conflict.png',
   },
   'awakening-era': {
     displayName: 'The Awakening Era',
-    startYear: 5001,
-    endYear: 15000,
+    startYear: 5.001e3,
+    endYear: 1.5e4,
     zoomLevel: 2.75,
-    panToYear: 1000,
+    panToYear: 1e4,
     backgroundImage: '/posts/timeline/awakening-era.png',
   },
   'golden-age': {
     displayName: 'The Corporate Golden Age',
-    startYear: 15001,
-    endYear: 25000,
+    startYear: 1.5001e4,
+    endYear: 2.5e4,
     zoomLevel: 2.75,
-    panToYear: 20000,
+    panToYear: 2e4,
     backgroundImage: '/assets/banner/posters/golden-era-poster.webp',
   },
   'conflict-epoch': {
     displayName: 'Extinction Epoch',
-    startYear: 25001,
-    endYear: 35000,
+    startYear: 2.5001e4,
+    endYear: 3.5e4,
     zoomLevel: 2.75,
-    panToYear: 30000,
+    panToYear: 3e4,
     backgroundImage: '/posts/timeline/conflict-era.png',
   },
   'transcendent-age': {
     displayName: 'The Transcendent Age',
-    startYear: 35001,
-    endYear: 45000,
+    startYear: 3.5001e4,
+    endYear: 4.5e4,
     zoomLevel: 2.75,
-    panToYear: 40000,
+    panToYear: 4e4,
     backgroundImage: '/posts/timeline/singularity-conflict.png',
   },
   // Overlapping era - spans multiple epochs
   'singularity-conflict': {
     displayName: 'Transtemporal Singularity Conflict',
-    startYear: 15000,
-    endYear: 48000,
+    startYear: 1.5e4,
+    endYear: 4.8e4,
     zoomLevel: 2,
-    panToYear: 30000,
+    panToYear: 3e4,
     backgroundImage: '/posts/timeline/singularity-conflict.png',
   },
   'final-epoch': {
     displayName: 'The Final Epoch',
-    startYear: 45001,
-    endYear: 50000,
+    startYear: 4.5001e4,
+    endYear: 1e100,
     zoomLevel: 2.5,
-    panToYear: 50000,
+    panToYear: 5e4,
     backgroundImage: '/posts/timeline/singularity-conflict.png',
   },
   unknown: {
@@ -133,13 +135,13 @@ export function getEraFromYear(
 
   // Find which era contains this year
   for (const [era, [startYear, endYear]] of Object.entries(config)) {
-    if (year >= startYear && year < endYear) {
+    if (year >= startYear && year <= endYear) {
       // Singularity conflict is a special case, priority given to main epoch eras
       if (era === 'singularity-conflict') {
         // Check if year also belongs to one of the main epochs
         if (
           year >= defaultRanges['conflict-epoch'][0] &&
-          year < defaultRanges['conflict-epoch'][1]
+          year <= defaultRanges['conflict-epoch'][1]
         ) {
           // Let the event decide its era - do not automatically assign to singularity-conflict
           continue

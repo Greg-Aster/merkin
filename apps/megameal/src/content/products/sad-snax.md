@@ -4,7 +4,7 @@ tagline: "Shelf-stable disappointment for unplanned evenings."
 brand: "Emotional Nutrition Lab"
 draft: false
 showInTimeline: true
-timelineYear: 33120
+timelineYear: 3.312e4
 timelineEra: "golden-age"
 timelineLocation: "W Corporation Morale-Neutral Test Market"
 isKeyEvent: false

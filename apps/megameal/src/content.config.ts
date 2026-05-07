@@ -64,6 +64,36 @@ const productActionLinkSchema = z.object({
   href: z.string(),
 })
 
+const productStockRegistrySchema = z.object({
+  registryId: z.string().optional(),
+  registryHref: z.string().optional(),
+  adoptionHref: z.string().optional(),
+  unitsAvailable: z.number().int().nonnegative().nullable().optional(),
+  unitsSold: z.number().int().nonnegative().nullable().optional(),
+})
+
+const snuggaloidRegistryCollection = defineCollection({
+  schema: z.object({
+    name: z.string(),
+    unitId: z.string(),
+    adoptionStatus: z
+      .enum(['preview', 'available', 'reserved', 'adopted', 'not_available'])
+      .optional()
+      .default('preview'),
+    image: z.string().optional(),
+    gallery: z.array(mediaAssetSchema).optional().default([]),
+    temperament: z.string().optional(),
+    size: z.string().optional(),
+    exterior: z.string().optional(),
+    traits: z.array(z.string()).optional().default([]),
+    registryNote: z.string().optional(),
+    adoptionNote: z.string().optional(),
+    warnings: z.array(z.string()).optional().default([]),
+    easterEgg: z.boolean().optional().default(false),
+    draft: z.boolean().optional().default(false),
+  }),
+})
+
 const quirkSchema = z.object({
   name: z.string(),
   params: z.record(z.string(), z.unknown()).optional(),
@@ -104,6 +134,19 @@ const timelineFrontmatterSchema = {
 
 const megamealPostsSchema = postsSchema.extend({
   oneColumn: z.boolean().optional().default(true),
+  bannerType: z
+    .enum([
+      'none',
+      'standard',
+      'image',
+      'video',
+      'timeline',
+      'assistant',
+      'cookbook',
+      'archive',
+      'reader',
+    ])
+    .optional(),
 })
 
 // Define the 'posts' collection
@@ -197,6 +240,7 @@ const productsCollection = defineCollection({
     description: z.string().optional(), // A more detailed description, optional
     price: z.number().optional(), // The price of the product, optional
     sku: z.string().optional(), // A unique stock keeping unit, optional
+    stockRegistry: productStockRegistrySchema.optional(),
     draft: z.boolean().optional().default(false),
     ...timelineFrontmatterSchema,
     oneColumn: z.boolean().optional().default(false),
@@ -316,6 +360,7 @@ export const collections = {
   friends: friendsCollection,
   about: aboutCollection, // NEW: About collection for dynamic author pages
   products: productsCollection,
+  snuggaloids: snuggaloidRegistryCollection,
   reviews: reviewsCollection,
   quizzes: quizzesCollection,
 }

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-07T01:35:42.567Z",
+  "generatedAt": "2026-05-07T22:51:05.778Z",
   "sourceRoot": "/home/greggles/Merkin/apps/megameal/src/content/posts;/home/greggles/Merkin/apps/megameal/src/content/cookbook;/home/greggles/Merkin/apps/megameal/src/content/videos;/home/greggles/Merkin/apps/megameal/src/content/products;/home/greggles/Merkin/apps/megameal/src/content/reader",
   "count": 55,
   "items": [
@@ -32,7 +32,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/universe.png"
       }
     },
@@ -66,7 +66,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/universe.png"
       }
     },
@@ -295,7 +295,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/awakening-era.png"
       }
     },
@@ -328,7 +328,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/awakening-era.png"
       }
     },
@@ -361,7 +361,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/awakening-era.png"
       }
     },
@@ -418,7 +418,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/chronos.png"
       }
     },
@@ -452,7 +452,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/chronos.png"
       }
     },
@@ -486,7 +486,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/chronos.png"
       }
     },
@@ -520,7 +520,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/chronos.png"
       }
     },
@@ -555,7 +555,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/chronos.png"
       }
     },
@@ -590,7 +590,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/chronos.png"
       }
     },
@@ -624,7 +624,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/chronos.png"
       }
     },
@@ -658,7 +658,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/chronos.png"
       }
     },
@@ -692,7 +692,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/chronos.png"
       }
     },
@@ -725,7 +725,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/awakening-era.png"
       }
     },
@@ -782,13 +782,13 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/awakening-era.png"
       }
     },
     {
       "title": "Snuggaloids",
-      "description": "Anxious home? Quiet children? Repeating sounds in the vents at 03:14? A licensed Snuggloid can smooth the domestic atmosphere with premium softness, persistent presence, and an unblinking calm your household will feel immediately. They are plush. They are patient. Bonding may be permanent. Separation fees apply.",
+      "description": "Anxious home? Quiet children? Unexplained screaming from the ventilation shaft? A licensed Snuggloid can help smooth the atmosphere. These companions offer a unique sense of presence. They're soft, they're silent, and their unblinking gaze is surprisingly comforting. Bonding may be permanent. Separation fees apply.",
       "slug": "snuggaloids",
       "sourcePath": "products/snuggaloids.md",
       "url": "/store/snuggaloids/",
@@ -899,7 +899,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/conflict-era.png"
       }
     },
@@ -990,7 +990,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       }
     },
@@ -1023,7 +1023,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       }
     },
@@ -1055,7 +1055,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       }
     },
@@ -1088,7 +1088,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       }
     },
@@ -1121,7 +1121,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       }
     },
@@ -1155,7 +1155,7 @@
         "videoId": "c-idCx4hqkA",
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       }
     },
@@ -1266,7 +1266,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       }
     },
@@ -1352,7 +1352,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/golden-era.png"
       }
     },
@@ -1437,7 +1437,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/golden-era.png"
       }
     },
@@ -1573,7 +1573,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       }
     },
@@ -1606,7 +1606,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       }
     },
@@ -1641,7 +1641,7 @@
       "url": "/posts/timelines/end-of-time/",
       "contentType": "posts",
       "sourceCollection": "posts",
-      "year": 50000,
+      "year": 1e+100,
       "era": "final-epoch",
       "category": "MEGA MEAL",
       "isKeyEvent": true,
@@ -1656,14 +1656,14 @@
         "Cosmology",
         "Heat Death"
       ],
-      "timelineYear": 50000,
+      "timelineYear": 1e+100,
       "timelineEra": "final-epoch",
       "timelineLocation": "Terminal Universe",
       "uniqueId": "timelines/end-of-time",
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/universe.png"
       }
     }

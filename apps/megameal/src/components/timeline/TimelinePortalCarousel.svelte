@@ -1,6 +1,7 @@
 <script lang="ts">
 import { Canvas } from '@threlte/core'
-import { onDestroy, onMount } from 'svelte'
+import { formatTimelineYear } from '@merkin/shared-content'
+import { onDestroy, onMount, tick } from 'svelte'
 import * as THREE from 'three'
 import {
   createAdaptiveCanvasDprController,
@@ -66,13 +67,15 @@ let viewportWidth = 1440
 let canvasDpr = 1
 let adaptiveDprController: AdaptiveCanvasDprController | null = null
 let projectedStarPositions: TimelineStarScreenPosition[] = []
+let selectedCardAnchor: { x: number; y: number } | null = null
+let selectedGuideLineFrame = 0
 let hasInitializedDefaultPosition = false
 let hasMounted = false
 let hasStartedInitialAutoplay = false
 let isAutoplaying = false
+let isAutoplayStopping = false
 let autoplayFrame = 0
 let lastAutoplayFrameAt = 0
-let nextAutoplaySelectionAt = 0
 let autoplayDirection: -1 | 1 = 1
 let autoplayVelocity = 0
 const wheelMomentumDecay = 2.4
@@ -90,8 +93,7 @@ const defaultTimelineEraKey = 'golden-age'
 const autoplaySpeed = 0.34
 const autoplayTurnMinSpeedScale = 0.14
 const autoplayVelocityEase = 2.4
-const autoplaySelectionIntervalMin = 2200
-const autoplaySelectionIntervalRange = 1900
+const autoplayStopVelocityThreshold = 0.006
 const timelineBackgroundVideoSrc = '/assets/banner/universbg0001-0121.webm'
 const timelineBackgroundPosterSrc = '/assets/banner/posters/universe-poster.webp'
 const timelineBackgroundVideoPlaybackRate = 0.25
@@ -137,8 +139,9 @@ $: constellationControls = projectedStarPositions
   .map(position => ({ ...position, screen: screens[position.index] }))
   .filter(position => !!position.screen && position.size > 0)
 $: constellationLines = getVisibleConstellationLines(constellationControls)
+$: selectedGuideLine = getSelectedGuideLine(selectedCardAnchor, selectedScreenIndex, projectedStarPositions, screens)
 $: timelinePositionText = activeTimelineEvent
-  ? `Y${activeTimelineEvent.year} / ${activeEraSegment?.displayName ?? 'Unknown Era'}`
+  ? `${formatTimelineYear(activeTimelineEvent.year)} / ${activeEraSegment?.displayName ?? 'Unknown Era'}`
   : 'Timeline position'
 $: if (!hasInitializedDefaultPosition && screens.length > 0) {
   initializeDefaultTimelinePosition()
@@ -265,23 +268,6 @@ function scheduleScrollDrivenWheel() {
   scrollFrame = window.requestAnimationFrame(runScrollDrivenWheelFrame)
 }
 
-function scheduleNextAutoplaySelection(timestamp: number) {
-  nextAutoplaySelectionAt =
-    timestamp + autoplaySelectionIntervalMin + Math.random() * autoplaySelectionIntervalRange
-}
-
-function selectRandomVisibleAutoplayStar(timestamp: number) {
-  const selectableControls = visibleStarControls.filter(control => control.index !== selectedScreenIndex)
-  const fallbackIndex = Math.round(clamp(input.wheel, 0, maxWheel))
-  const selectedIndex =
-    selectableControls.length > 0
-      ? selectableControls[Math.floor(Math.random() * selectableControls.length)].index
-      : fallbackIndex
-
-  selectStar(selectedIndex, 'autoplay')
-  scheduleNextAutoplaySelection(timestamp)
-}
-
 function getAutoplayTurnDistance() {
   return clamp(maxWheel * 0.1, 0.8, 2.4)
 }
@@ -297,9 +283,10 @@ function getAutoplayEdgeSpeedScale() {
 }
 
 function runAutoplayFrame(timestamp: number) {
-  if (!isAutoplaying) {
+  if (!isAutoplaying && !isAutoplayStopping) {
     autoplayFrame = 0
     lastAutoplayFrameAt = 0
+    autoplayVelocity = 0
     return
   }
 
@@ -309,9 +296,20 @@ function runAutoplayFrame(timestamp: number) {
   lastAutoplayFrameAt = timestamp
 
   wheelVelocity = 0
-  const targetVelocity = autoplayDirection * autoplaySpeed * getAutoplayEdgeSpeedScale()
+  const targetVelocity = isAutoplayStopping
+    ? 0
+    : autoplayDirection * autoplaySpeed * getAutoplayEdgeSpeedScale()
   const velocityEase = 1 - Math.exp(-delta * autoplayVelocityEase)
   autoplayVelocity += (targetVelocity - autoplayVelocity) * velocityEase
+
+  if (isAutoplayStopping && Math.abs(autoplayVelocity) <= autoplayStopVelocityThreshold) {
+    isAutoplayStopping = false
+    autoplayVelocity = 0
+    autoplayFrame = 0
+    lastAutoplayFrameAt = 0
+    updateScrollDrivenWheel()
+    return
+  }
 
   const nextWheel = virtualWheel + autoplayVelocity * delta
   if (nextWheel >= maxWheel) {
@@ -327,10 +325,6 @@ function runAutoplayFrame(timestamp: number) {
   }
   updateScrollDrivenWheel()
 
-  if (timestamp >= nextAutoplaySelectionAt) {
-    selectRandomVisibleAutoplayStar(timestamp)
-  }
-
   autoplayFrame = window.requestAnimationFrame(runAutoplayFrame)
 }
 
@@ -340,18 +334,24 @@ function playAutoplay() {
   if (virtualWheel <= 0) autoplayDirection = 1
 
   isAutoplaying = true
+  isAutoplayStopping = false
   wheelVelocity = 0
-  autoplayVelocity = 0
+  if (!autoplayFrame) autoplayVelocity = 0
   lastAutoplayFrameAt = 0
-  selectRandomVisibleAutoplayStar(performance.now())
   if (!autoplayFrame) autoplayFrame = window.requestAnimationFrame(runAutoplayFrame)
 }
 
-function pauseAutoplay() {
+function pauseAutoplay({ smooth = false } = {}) {
+  if (smooth && autoplayFrame && Math.abs(autoplayVelocity) > autoplayStopVelocityThreshold) {
+    isAutoplaying = false
+    isAutoplayStopping = true
+    return
+  }
+
   isAutoplaying = false
+  isAutoplayStopping = false
   autoplayVelocity = 0
   lastAutoplayFrameAt = 0
-  nextAutoplaySelectionAt = 0
   if (autoplayFrame) {
     window.cancelAnimationFrame(autoplayFrame)
     autoplayFrame = 0
@@ -360,7 +360,7 @@ function pauseAutoplay() {
 
 function toggleAutoplay() {
   if (isAutoplaying) {
-    pauseAutoplay()
+    pauseAutoplay({ smooth: true })
     return
   }
 
@@ -579,6 +579,7 @@ function handleResize() {
   syncViewportMode()
   syncCanvasDpr()
   scheduleScrollDrivenWheel()
+  scheduleSelectedGuideLineSync()
 }
 
 function getStarControlStyle(position: TimelineStarScreenPosition) {
@@ -593,11 +594,12 @@ function getStarControlStyle(position: TimelineStarScreenPosition) {
 
 function getEraMarkerStyle(eraSegment: (typeof eraSegments)[number]) {
   const percent = maxWheel > 0 ? (eraSegment.startIndex / maxWheel) * 100 : 0
+  const color = getEraMarkerColor(eraSegment.key)
   return [
     `left: ${percent}%`,
     `top: ${eraSegment.isOverlapping ? 'calc(50% + 0.72rem)' : '50%'}`,
-    `background-color: ${getEraMarkerColor(eraSegment.key)}`,
-    `color: ${getEraMarkerColor(eraSegment.key)}`,
+    `--timeline-marker-color: ${color}`,
+    `color: ${color}`,
   ].join(';')
 }
 
@@ -664,27 +666,115 @@ function getVisibleConstellationLines(
   })
 }
 
+function getSelectedGuideLine(
+  cardAnchor: { x: number; y: number } | null,
+  selectedIndex: number,
+  starPositions: TimelineStarScreenPosition[],
+  screenItems: typeof screens,
+): TimelineConstellationLine | null {
+  if (!cardAnchor || selectedIndex < 0) return null
+
+  const selectedPosition = starPositions.find(
+    position => position.index === selectedIndex && position.visible,
+  )
+  const selectedScreen = screenItems[selectedIndex]
+  if (!selectedPosition || !selectedScreen) return null
+
+  return {
+    id: `selected-guide-${selectedIndex}`,
+    x1: clampConstellationPoint(selectedPosition.x),
+    y1: clampConstellationPoint(selectedPosition.y),
+    x2: clampConstellationPoint(cardAnchor.x),
+    y2: clampConstellationPoint(cardAnchor.y),
+    eraKey: selectedScreen.eraKey,
+    isActive: true,
+    length: Math.hypot(cardAnchor.x - selectedPosition.x, cardAnchor.y - selectedPosition.y),
+  }
+}
+
 function clampConstellationPoint(value: number) {
   return clamp(value, -18, 118)
 }
 
 function handleStarPositions(event: TimelineStarPositionEvent) {
   projectedStarPositions = event.detail.positions
+  if (selectedScreenIndex >= 0 && !selectedCardAnchor) scheduleSelectedGuideLineSync()
 }
 
-function selectStar(index: number, source: 'user' | 'autoplay' = 'user') {
-  if (source === 'user') pauseAutoplay()
+function syncSelectedGuideLineAnchor() {
+  if (!shell || selectedScreenIndex < 0) {
+    selectedCardAnchor = null
+    return
+  }
+
+  const card = shell.querySelector<HTMLElement>('[data-timeline-selected-card]')
+  const selectedPosition = projectedStarPositions.find(position => position.index === selectedScreenIndex)
+  if (!card || !selectedPosition) {
+    selectedCardAnchor = null
+    return
+  }
+
+  const shellRect = shell.getBoundingClientRect()
+  const cardRect = card.getBoundingClientRect()
+  if (shellRect.width <= 0 || shellRect.height <= 0 || cardRect.width <= 0 || cardRect.height <= 0) {
+    selectedCardAnchor = null
+    return
+  }
+
+  const starX = shellRect.left + (selectedPosition.x / 100) * shellRect.width
+  const starY = shellRect.top + (selectedPosition.y / 100) * shellRect.height
+  const anchorX = clamp(starX, cardRect.left, cardRect.right)
+  const anchorY = clamp(starY, cardRect.top, cardRect.bottom)
+
+  selectedCardAnchor = {
+    x: ((anchorX - shellRect.left) / shellRect.width) * 100,
+    y: ((anchorY - shellRect.top) / shellRect.height) * 100,
+  }
+}
+
+function scheduleSelectedGuideLineSync() {
+  if (!hasMounted || selectedGuideLineFrame) return
+
+  selectedGuideLineFrame = window.requestAnimationFrame(() => {
+    selectedGuideLineFrame = 0
+    syncSelectedGuideLineAnchor()
+  })
+}
+
+function selectStar(index: number) {
+  pauseAutoplay({ smooth: true })
   selectedScreenIndex = index
+  void tick().then(scheduleSelectedGuideLineSync)
 }
 
 function clearSelectedStar() {
   selectedScreenIndex = -1
   hoveredStarIndex = -1
+  selectedCardAnchor = null
 }
 
 function handleStarPointerDown(event: PointerEvent, index: number) {
+  event.stopPropagation()
+  if (event.pointerType !== 'mouse' || event.button === 0) setHoveredStar(index)
+}
+
+function openTimelineRecord(index: number) {
+  const url = sortedEvents[index]?.url
+  if (!url || typeof window === 'undefined') return
+
+  window.location.href = url
+}
+
+function handleStarClick(event: MouseEvent, index: number) {
   event.preventDefault()
   event.stopPropagation()
+
+  if (selectedScreenIndex === index) {
+    pauseAutoplay()
+    openTimelineRecord(index)
+    return
+  }
+
   selectStar(index)
 }
 
@@ -745,6 +835,8 @@ onMount(() => {
     window.removeEventListener('keydown', handleKeyboardScroll)
     window.removeEventListener('resize', handleResize)
     if (scrollFrame) window.cancelAnimationFrame(scrollFrame)
+    if (selectedGuideLineFrame) window.cancelAnimationFrame(selectedGuideLineFrame)
+    selectedGuideLineFrame = 0
     adaptiveDprController?.stop()
     adaptiveDprController = null
     pauseAutoplay()
@@ -759,6 +851,8 @@ onDestroy(() => {
   lastTouchCenterY = null
   panPointerId = null
   if (scrollFrame) window.cancelAnimationFrame(scrollFrame)
+  if (selectedGuideLineFrame) window.cancelAnimationFrame(selectedGuideLineFrame)
+  selectedGuideLineFrame = 0
   adaptiveDprController?.stop()
   adaptiveDprController = null
   pauseAutoplay()
@@ -815,7 +909,7 @@ onDestroy(() => {
     aria-hidden="true"
   ></div>
 
-  <TimelineConstellationOverlay lines={constellationLines} />
+  <TimelineConstellationOverlay lines={constellationLines} guideLine={selectedGuideLine} />
 
   <div class="pointer-events-none absolute inset-0 z-[5]" data-timeline-interactive>
     {#each visibleStarControls as control (control.index)}
@@ -823,7 +917,7 @@ onDestroy(() => {
         type="button"
         class="pointer-events-auto absolute cursor-pointer rounded-full border-0 bg-transparent p-0 opacity-0 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
         style={getStarControlStyle(control)}
-        aria-label={`Open timeline record: ${control.screen.title}`}
+        aria-label={`${selectedScreenIndex === control.index ? 'Open' : 'Select'} timeline record: ${control.screen.title}`}
         title={control.screen.title}
         data-timeline-interactive
         on:mouseenter={() => setHoveredStar(control.index)}
@@ -831,7 +925,7 @@ onDestroy(() => {
         on:focus={() => setHoveredStar(control.index)}
         on:blur={() => clearHoveredStar(control.index)}
         on:pointerdown={(event) => handleStarPointerDown(event, control.index)}
-        on:click|stopPropagation={() => selectStar(control.index)}
+        on:click={(event) => handleStarClick(event, control.index)}
       ></button>
       {/each}
   </div>
@@ -845,9 +939,9 @@ onDestroy(() => {
       </div>
       <div class="timeline-mobile-readout__year">
         {#if activeTimelineEvent}
-          Y{activeTimelineEvent.year}
+          {formatTimelineYear(activeTimelineEvent.year)}
         {:else}
-          Y--
+          {formatTimelineYear(undefined)}
         {/if}
       </div>
     </div>
@@ -858,7 +952,7 @@ onDestroy(() => {
     data-timeline-dock
     data-timeline-interactive
   >
-    <div class="hidden min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-left font-mono uppercase tracking-[0.13em] text-slate-50 md:grid md:grid-cols-[minmax(0,1fr)_auto_auto] md:gap-3 md:tracking-[0.16em]">
+    <div class="hidden min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-left font-mono uppercase tracking-[0.13em] text-slate-50 md:grid md:gap-3 md:tracking-[0.16em]">
       <div class="grid min-w-0 flex-1 gap-1">
         <div class="truncate text-[0.68rem] font-extrabold text-cyan-200">
           {activeEraSegment?.displayName ?? 'Unknown Era'}
@@ -868,7 +962,7 @@ onDestroy(() => {
         </div>
       </div>
 
-      <div class="col-span-2 flex min-w-0 items-center justify-center gap-2 md:col-span-1">
+      <div class="flex min-w-0 items-center justify-center gap-2">
         <TimelineCameraPanControls
           step={cameraPanStep}
           on:pan={(event) => panCameraBy(event.detail.x, event.detail.y)}
@@ -878,21 +972,6 @@ onDestroy(() => {
         <TimelineViewModeButton on:click={pauseAutoplay} />
 
         <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />
-      </div>
-
-      <div class="col-start-2 row-start-1 grid min-w-0 shrink-0 gap-1 text-right md:col-start-auto md:row-start-auto">
-        <div class="text-lg font-black leading-none text-white md:text-2xl lg:text-3xl">
-          {#if activeTimelineEvent}
-            Y{activeTimelineEvent.year}
-          {:else}
-            Y--
-          {/if}
-        </div>
-        {#if activeEraSegment}
-          <div class="max-w-[9rem] truncate text-[0.55rem] font-bold tracking-[0.12em] text-slate-200/76 md:max-w-none md:text-[0.62rem]">
-            Y{activeEraSegment.startYear} - Y{activeEraSegment.endYear}
-          </div>
-        {/if}
       </div>
     </div>
 

@@ -45,15 +45,13 @@ export function getPriceDriftQuirk(
     return null
   }
 
-  const minPrice = numberParam(
-    quirk,
-    'minPrice',
-    Math.max(0.01, basePrice - 1.75),
-  )
-  const maxPrice = numberParam(quirk, 'maxPrice', basePrice + 1.75)
+  const defaultMinPrice = Math.max(0.01, basePrice - 1.75)
+  const defaultMaxPrice = basePrice + 1.75
+  const minPrice = numberParam(quirk, 'minPrice', defaultMinPrice)
+  const maxPrice = numberParam(quirk, 'maxPrice', defaultMaxPrice)
 
   return {
-    intervalMs: Math.max(10000, numberParam(quirk, 'intervalMs', 1000)),
+    intervalMs: Math.max(1000, numberParam(quirk, 'intervalMs', 2600)),
     minPrice: Math.min(minPrice, maxPrice),
     maxPrice: Math.max(minPrice, maxPrice),
   }

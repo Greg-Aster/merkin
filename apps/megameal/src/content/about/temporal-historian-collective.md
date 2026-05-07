@@ -21,8 +21,8 @@ backgroundImage: "/posts/timeline/collective-consciousness.png"
 bannerType: "timeline"
 bannerData:
   category: "MEGA MEAL"
-  startYear: 30000
-  endYear: 45000
+  startYear: 3e4
+  endYear: 4.5e4
   background: "/posts/timeline/singularity-conflict.png"
 ---
 

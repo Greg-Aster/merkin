@@ -12,3 +12,8 @@ export type {
 export { normalizePost, toTimelineEvent } from './normalize-post.ts'
 export { normalizeProduct } from './normalize-product.ts'
 export { normalizeQuiz } from './normalize-quiz.ts'
+export {
+  formatTimelineYear,
+  formatTimelineYearRange,
+  type TimelineYearFormatOptions,
+} from './timeline-year.ts'

@@ -21,8 +21,8 @@ backgroundImage: "/posts/timeline/archive.png"
 bannerType: "timeline"
 bannerData:
   category: "MEGA MEAL"
-  startYear: 6000
-  endYear: 7000
+  startYear: 6e3
+  endYear: 7e3
   background: "/posts/timeline/archive.png"
 ---
 

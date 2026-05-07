@@ -1,5 +1,6 @@
 ---
 import { Icon } from 'astro-icon/components'
+import { formatTimelineYear } from '@merkin/shared-content'
 import archiveManifest from '../../../../../packages/shared-data/generated/archive.json'
 
 type ArchivePost = (typeof archiveManifest.items)[number]
@@ -97,7 +98,7 @@ function formatYear(value: string | null | undefined) {
 }
 
 function getTimelineLabel(post: ArchivePost) {
-  if (typeof post.timelineYear === 'number') return `Y${post.timelineYear}`
+  if (typeof post.timelineYear === 'number') return formatTimelineYear(post.timelineYear)
   return formatYear(post.published)
 }
 

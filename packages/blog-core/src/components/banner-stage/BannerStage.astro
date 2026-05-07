@@ -419,6 +419,10 @@ const transparentPixel =
                   const isImageItem =
                     bannerConfig.standardBannerConfig.isImageBannerItem(item)
                   const isInitialSlide = index === 0
+                  const shouldShowPreviewCard =
+                    !!previewDetails &&
+                    item.showPreviewCard !== false &&
+                    (isClickable || !!item.sceneId)
 
                   return (
                     <div
@@ -555,7 +559,7 @@ const transparentPixel =
                             <slot name="banner-slide-content" />
                           )}
                         </div>
-                        {previewDetails && item.showPreviewCard !== false && (
+                        {shouldShowPreviewCard && previewDetails && (
                           item.sceneId === 'timeline-billboard' ? (
                             <div class="banner-billboard banner-billboard--timeline">
                               <div class="banner-billboard__timeline-panel">
@@ -1133,6 +1137,8 @@ const transparentPixel =
   #standard-banner-container {
     position: relative;
     isolation: isolate;
+    width: 100%;
+    height: 100%;
     --banner-portal-glitch-void: rgb(4 3 14 / 0.96);
     --banner-portal-glitch-blue: rgb(14 31 92 / 0.9);
     --banner-portal-glitch-cyan: rgb(12 74 110 / 0.82);
@@ -1140,6 +1146,12 @@ const transparentPixel =
     --banner-portal-glitch-purple: rgb(59 7 100 / 0.9);
     --banner-portal-glitch-magenta: rgb(76 5 75 / 0.86);
     --banner-portal-glitch-ghost: rgb(67 56 202 / 0.74);
+  }
+
+  #standard-banner-container .banner-slide,
+  #standard-banner-container .banner-link,
+  #standard-banner-container .banner-media-layer {
+    height: 100%;
   }
 
   #standard-banner-container.banner-portal-wiping {

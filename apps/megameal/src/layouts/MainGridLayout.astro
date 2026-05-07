@@ -67,18 +67,8 @@ const isTimeline2DRoute = normalizedPath === '/timeline/2d'
 const originalPost = Astro.props.post as
   | ({ data?: { bannerType?: string } } & Record<string, unknown>)
   | undefined
-const shouldRouteTimelineBannerToArchive =
-  !isTimelineRoute && !isTimeline2DRoute && originalPost?.data?.bannerType === 'timeline'
-const layoutPost = shouldRouteTimelineBannerToArchive
-  ? {
-      ...originalPost,
-      data: {
-        ...originalPost.data,
-        bannerType: 'archive',
-      },
-    }
-  : originalPost
 const isContentPost = Astro.props.isPostPage === true && Boolean(originalPost)
+const layoutPost = originalPost
 const postSourcePath =
   isContentPost && typeof (originalPost as any)?.id === 'string'
     ? path.join(
@@ -99,7 +89,7 @@ const resolvedOneColumn = isContentPost
   ? !postRequestsVisibleSidebar
   : Astro.props.oneColumn
 const usesArchiveBanner =
-  layoutPost?.data?.bannerType === 'archive'
+  !isContentPost && layoutPost?.data?.bannerType === 'archive'
 const sharedProps: Omit<Props, 'homeLayout'> & {
   homeLayout?: 'default' | 'portal'
 } = {

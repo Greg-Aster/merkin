@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-05-07T01:35:42.527Z",
+  "generatedAt": "2026-05-07T22:51:05.739Z",
   "sourceRoot": "/home/greggles/Merkin/apps/megameal/src/content/posts",
-  "count": 25,
+  "count": 26,
   "items": [
     {
       "id": "explainer",
@@ -27,7 +27,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/universe.png"
       },
       "timelineYear": 1000,
@@ -36,6 +36,39 @@
       "isKeyEvent": true,
       "isLevel": false,
       "levelId": null
+    },
+    {
+      "id": "snuggaloid-spec-sheet",
+      "slug": "snuggaloid-spec-sheet",
+      "sourcePath": "snuggaloid-spec-sheet.mdx",
+      "collection": "posts",
+      "url": "/posts/snuggaloid-spec-sheet/",
+      "title": "Snuggaloid Product Reference",
+      "description": "Working reference for the Snuggaloid art-plush build, registry model, and lore context.",
+      "published": "2026-05-07T00:00:00.000Z",
+      "updated": null,
+      "draft": true,
+      "tags": [
+        "Snuggaloid",
+        "Product Development",
+        "Art Plush",
+        "Blueprint",
+        "Qarnivor"
+      ],
+      "category": "MEGA MEAL",
+      "image": "/ads/snuggloids.png",
+      "bannerType": "archive",
+      "timelineYear": 27995,
+      "timelineEra": "conflict-epoch",
+      "timelineLocation": "MEGAMEAL Product Archive",
+      "isKeyEvent": false,
+      "showInTimeline": false,
+      "isLevel": false,
+      "levelId": null,
+      "series": "snuggloid-emergence",
+      "seriesPart": 3,
+      "seriesTitle": "The Snuggloid Emergence",
+      "contentFormat": "report"
     },
     {
       "id": "introducing-story-mode",
@@ -86,7 +119,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       },
       "timelineYear": 30000,
@@ -174,7 +207,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       },
       "timelineYear": 42000,
@@ -208,7 +241,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/awakening-era.png"
       },
       "timelineYear": 25000,
@@ -240,7 +273,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       },
       "timelineYear": 28042,
@@ -274,7 +307,7 @@
         "videoId": "c-idCx4hqkA",
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       },
       "timelineYear": 28042,
@@ -311,7 +344,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/awakening-era.png"
       },
       "timelineYear": 10000,
@@ -344,7 +377,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/awakening-era.png"
       },
       "timelineYear": 6500,
@@ -377,7 +410,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/awakening-era.png"
       },
       "timelineYear": 6800,
@@ -408,7 +441,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       },
       "timelineYear": 28042,
@@ -440,7 +473,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       },
       "timelineYear": 28042,
@@ -473,7 +506,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/awakening-era.png"
       },
       "timelineYear": 7000,
@@ -505,7 +538,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       },
       "timelineYear": 28042,
@@ -537,7 +570,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       },
       "timelineYear": 28042,
@@ -574,7 +607,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/universe.png"
       },
       "timelineYear": 1,
@@ -607,7 +640,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/golden-era.png"
       },
       "timelineYear": 33500,
@@ -643,10 +676,10 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/universe.png"
       },
-      "timelineYear": 50000,
+      "timelineYear": 1e+100,
       "timelineEra": "final-epoch",
       "timelineLocation": "Terminal Universe",
       "isKeyEvent": true,
@@ -675,7 +708,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/singularity-conflict.png"
       },
       "timelineYear": 37000,
@@ -743,7 +776,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/conflict-era.png"
       },
       "timelineYear": 28000,
@@ -776,7 +809,7 @@
       "bannerData": {
         "category": "MEGA MEAL",
         "startYear": 1,
-        "endYear": 50000,
+        "endYear": 1e+100,
         "background": "/posts/timeline/golden-era.png"
       },
       "timelineYear": 33000,

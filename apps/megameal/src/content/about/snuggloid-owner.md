@@ -21,8 +21,8 @@ backgroundImage: ""
 bannerType: "timeline"
 bannerData:
   category: "MEGA MEAL"
-  startYear: 27990
-  endYear: 28000
+  startYear: 2.799e4
+  endYear: 2.8e4
   background: "/posts/timeline/snuggloid-entity.png"
 ---
 

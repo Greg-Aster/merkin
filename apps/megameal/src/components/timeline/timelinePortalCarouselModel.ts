@@ -1,3 +1,5 @@
+import { formatTimelineYear } from '@merkin/shared-content'
+
 export type TimelinePortalEvent = {
   title: string
   description?: string
@@ -249,7 +251,7 @@ export function createTimelineCarouselScreen(
   return {
     kicker: `${eraLabel} / ${sourceLabel}`,
     title: event.title,
-    stat: `Y${event.year}${event.location ? ` / ${event.location}` : ''}`,
+    stat: `${formatTimelineYear(event.year)}${event.location ? ` / ${event.location}` : ''}`,
     ctaLabel: 'Open Record',
     stillSrc:
       event.bannerData?.background ||

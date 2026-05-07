@@ -35,7 +35,7 @@
      */
     :root {
         /* ðŸŽ¯ TRANSPARENCY & OPACITY SYSTEM */
-        --bg-opacity: 0.85; /* Default transparency value */
+        --bg-opacity: 0.89; /* Default transparency value */
         --card-border-opacity: 0.2; /* Default opacity for general cards */
         --card-border-subtle-opacity: 0.1; /* Subtle border opacity */
 
@@ -100,4 +100,3 @@
             --text-color-muted: oklch(0.6 0.01 var(--hue));
         }
     }
-

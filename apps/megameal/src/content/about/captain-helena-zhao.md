@@ -21,8 +21,8 @@ backgroundImage: ""
 bannerType: "timeline"
 bannerData:
   category: "MEGA MEAL"
-  startYear: 28040
-  endYear: 28045
+  startYear: 2.804e4
+  endYear: 2.8045e4
   background: "/posts/timeline/supernova.png"
 ---
 

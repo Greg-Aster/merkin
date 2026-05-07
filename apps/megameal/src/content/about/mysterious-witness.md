@@ -21,8 +21,8 @@ backgroundImage: "/posts/timeline/qarnivor-wasteland.png"
 bannerType: "timeline"
 bannerData:
   category: "MEGA MEAL"
-  startYear: 28000
-  endYear: 28100
+  startYear: 2.8e4
+  endYear: 2.81e4
   background: "/posts/timeline/qarnivor-wasteland.png"
 ---
 

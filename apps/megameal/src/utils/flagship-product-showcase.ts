@@ -142,6 +142,7 @@ export function buildFlagshipProductShowcase(
       alternateAction: product.data.alternateAction,
       rating: product.data.rating,
       sku: product.data.sku,
+      stockRegistry: product.data.stockRegistry,
       href: toHref(product),
       media,
       specifications: product.data.specifications ?? [],

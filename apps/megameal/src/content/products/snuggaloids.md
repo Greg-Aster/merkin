@@ -4,21 +4,27 @@ tagline: "They watch you sleep."
 brand: "Qarnivor Companion Division"
 draft: false
 showInTimeline: true
-timelineYear: 27995
+timelineYear: 2.7995e4
 timelineEra: "conflict-epoch"
 timelineLocation: "Planet Qarnivor, Companion Division Catalog"
 isKeyEvent: false
 availability: "not_in_your_area"
 ctaMode: "none"
 image: ""
-price: 24.99
+price: 104.99
 category: "companions"
 format: "physical"
 featured: false
 listingStyle: "showcase"
 listingLabel: "Flagship Listing"
 sku: "SNG-001"
-description: "Anxious home? Quiet children? Repeating sounds in the vents at 03:14? A licensed Snuggloid can smooth the domestic atmosphere with premium softness, persistent presence, and an unblinking calm your household will feel immediately. They are plush. They are patient. Bonding may be permanent. Separation fees apply."
+stockRegistry:
+  registryId: "snuggaloids"
+  registryHref: "/snuggaloids/#registry"
+  adoptionHref: "/snuggaloids/#adoption"
+  unitsAvailable: null
+  unitsSold: null
+description: "Anxious home? Quiet children? Unexplained screaming from the ventilation shaft? A licensed Snuggloid can help smooth the atmosphere. These companions offer a unique sense of presence. They're soft, they're silent, and their unblinking gaze is surprisingly comforting. Bonding may be permanent. Separation fees apply."
 realDescription: "Plush companions. Real, physical, holdable plush toys. The eyes are buttons. We want to be very clear about the buttons. Distribution is being expanded — your region is not yet approved but we are working on it."
 shippingNote: "Snuggloid distribution is currently limited to approved regions. Your area is not yet approved. They are patient. You should be too."
 rating: 4.6
@@ -41,37 +47,43 @@ media:
     caption: "A registered Snuggloid owner. Whereabouts currently unknown."
 specifications:
   - label: "Material"
-    value: "Ultra-soft polyester plush, button eyes (they are buttons)"
+    value: "Squshiy? Plush we think. "
   - label: "Dimensions"
-    value: "30cm domestic posture (field reports vary after sunset)"
+    value: "Varies. About the size of your fist."
   - label: "Weight"
-    value: "400g sealed mass (feels heavier when moved while observed)"
+    value: "???"
   - label: "Origin"
-    value: "Planet Qarnivor (pre-extinction media archive)"
+    value: "Planet Qarnivor"
   - label: "Care Instructions"
     value: "Surface wash only. Dry in indirect light. Do not make eye contact while rinsing."
   - label: "Age Rating"
-    value: "3+ (emotionally, for the adult in the room)"
+    value: "PG13"
+  - label: "Warning — Feeding"
+    value: "Do not feed after midnight."
+  - label: "Warning — Handling"
+    value: "Do not play hacky sack with a Snuggaloid."
+  - label: "Warning — Children"
+    value: "Keep out of reach of children. The Snuggaloid will not initiate contact, but proximity has been described as 'self-resolving.'"
+  - label: "Warning — Pets"
+    value: "Keep out of reach of pets. Household animals have shown unusual deference, including refusal to enter rooms where the Snuggaloid is present."
+  - label: "Warning — Bleeding"
+    value: "Snuggaloid may bleed if mishandled."
+  - label: "Warning — Misuse"
+    value: "Not for use as a kitchen scrubby."
   - label: "Bonding Classification"
     value: "Category II Companion (permanent attachment threshold begins at 72 hrs)"
   - label: "Lore Status"
     value: "Post-extinction entities; commercial origin confirmed"
 qanda:
-  - question: "What is the lore behind Snuggaloids?"
-    answer: "Snuggaloids entered the market as comfort companions on Planet Qarnivor shortly before the Pro-Spoon / Anti-Spoon exchange rendered the category historically complicated. Post-event field sightings describe entities bearing a near-commercial resemblance to the original mascot line. Whether the product predicted the phenomenon or commercialized it afterward remains under review."
+  - question: "Q. What is the lore behind Snuggaloids?"
+    answer: "A. Snuggaloids entered the market as comfort companions on Planet Qarnivor shortly before the Pro-Spoon / Anti-Spoon exchange rendered the category historically complicated. Post-event sightings describing entities bearing a  resemblance to the product are to be dissmissed as rumors."
     linkLabel: "Read the recovered emergence dossier"
     linkHref: "/posts/timelines/snuggaliod-emergence/"
     linkAccent: "creepy"
   - question: "Do they actually watch me?"
-    answer: "No. The eyes are buttons. Buttons do not watch. Internal compliance has confirmed this repeatedly and considers the matter closed, even in rooms where the unit appears to have changed orientation without assistance."
-    linkLabel: "Read the button-eye compliance clarification"
-    linkHref: "/about/snuggloid-owner/"
-    linkAccent: "signal"
+    answer: "If you are concered about the occular capacities a snuggaloid we may suggest getting a sonar sensing / non-ocular model."
   - question: "Why aren't they available in my area?"
-    answer: "Distribution is approved region by region. Your local fulfillment agreement remains pending due to unresolved habitat-readiness criteria. The Snuggaloids have been informed and are reportedly waiting with unusual patience."
-    linkLabel: "Review the regional exception bulletin"
-    linkHref: "/posts/explainer/"
-    linkAccent: "signal"
+    answer: "Distribution is approved region by region. Your local fulfillment agreement remains pending due to unresolved habitat-readiness criteria."
   - question: "Is there a waiting list?"
     answer: "Yes. The waiting list opens automatically when a household shows sustained interest. In most cases, the household has already been added before noticing the form."
   - question: "Can I buy more than one?"
@@ -80,11 +92,11 @@ preWrittenReviews:
   - author: "R. Holloway, Night Shift Worker"
     rating: 5
     date: "Recently"
-    comment: "I work nights, so my apartment used to have that wrong kind of quiet. The Snuggaloid fixed it immediately. Now the place feels occupied in a productive way. I sleep better knowing something is already awake."
+    comment: "I work nights, so my apartment used to have that wrong kind of quiet. The Snuggaloid fixed it immediately. Mine arrived from sealed pre-Spoon refugee stock — support says refugee units bond faster, and they were right. The place now feels occupied in a productive way. I sleep better knowing something is already awake."
   - author: "A Child (Age 7)"
     rating: 5
     date: "Last Birthday"
-    comment: "It is my best friend. It said the dark part of the hall is only a door when adults are looking at it. My parents say the Snuggaloid did not say that. We disagree."
+    comment: "It is my best friend. It speaks whale and knows thirty-seven languages We talk about what the neighbors doing because it can see though walls. My parents say the Snuggaloid can not do this. Yesterday my Snuggaloid told me my parents were having a special hug and it was okay to leave the house and wander for a while."
     linkLabel: "Recovered caregiver incident note"
     linkHref: "/about/snuggloid-owner/"
     flags:
@@ -92,40 +104,42 @@ preWrittenReviews:
   - author: "Someone's Parent (Name Withheld)"
     rating: 3
     date: "Filed Under: Concerns"
-    comment: "The toy itself is lovely and genuinely soft. My concern is that my child now refers to it by a name we did not choose and insists it dislikes being stored face-down. Three stars while we monitor household adaptation."
+    comment: "The toy itself is lovely and genuinely soft. My concern is that my child refers to it by a name we did not choose — 'SG-4471' — which they could not have read off the box because we paid for the unmarked variant. They also insist it dislikes being stored face-down and 'wants to see the sky.' Three stars."
   - author: "Dr. M. Fenwick, Xenopsychology Dept."
     rating: 4
     date: "Research Note"
-    comment: "Observed subjects develop measurable attachment within 48 hours and resist temporary removal by day three. Plush construction is excellent. The button eyes still register no measurable emissions, though several instruments now insist they were never powered on."
-    linkLabel: "Open laboratory appendix"
-    linkHref: "/posts/timelines/snuggaliod-emergence/"
+    comment: "Plush construction is excellent.  I adopted mine from a long time college of mine -- Dr Linda Sue prior to her unauthorized Qarnivor expedition; she asked me to take care of her Snuggaloid until her return. She did not return. Late at night my geiger counter has been going off, I have investigated the Snuggaloid and found it to be not the source. Yes, I've heard the rumors -- but I think they are just gamma ray bursts."
+    linkLabel: "Open Dr Sue's withdrawn appendix"
+    linkHref: "/about/linda-sue/"
     flags:
-      - "review retained by moderators"
+      - "co-author missing"
     verified: true
-  - author: "Mara Voss"
+  - author: "A Registered Snuggloid Owner (Missing Person #QN-7749)"
     authorHref: "/about/snuggloid-owner/"
     rating: 5
-    date: "Restored after removal"
-    comment: "Mine changed size twice during the second week. The fur went from nursery pink to reactor blue when the hallway lights failed. Support said bonded units do that sometimes. If Unit 7 still checks this page, I went back for the small one and it was already waiting by the crib."
-    linkLabel: "Read restored owner testimony"
+    date: "Final post — restored from cached archive"
+    comment: "The fur on mine shifted from nursery pink to reactor blue when the hallway lights cut. Support said they do that sometimes. So fun!"
+    linkLabel: "Open the missing person case file"
     linkHref: "/about/snuggloid-owner/"
     flags:
       - "removed and restored"
+      - "no further posts on record"
       - "author unreachable"
-  - author: "Civic Comfort Board Mirror"
+  - author: "Civic Comfort Board (Qarnivor Mirror)"
     rating: 4
     date: "Cached repost"
-    comment: "We approved this listing for domestic morale support after the third review cycle. Subsequent revisions to the product photo were not submitted through official channels, but household sentiment remained unusually high."
-    linkLabel: "Open cached civic notice"
-    linkHref: "/posts/explainer/"
+    comment: "I heard about the events on Qarnivore and I'm so sad! I have no doubt my snuggaloid will retain its during this time of market volitility. Snugglaoids thus far have retained their value well and I think they are a solid investment"
+    linkLabel: "Open Spork Uprising bulletin"
+    linkHref: "/posts/timelines/spork-uprising/"
     flags:
       - "reposted from external archive"
+      - "issuing body no longer extant"
 quirks:
   - name: "price-drift"
     params:
       intervalMs: 2600
-      minPrice: 24.41
-      maxPrice: 26.93
+      minPrice: 103.24
+      maxPrice: 106.74
   - name: "add-to-cart-refuses"
     params:
       message: "Regional fulfillment denied. This item cannot be added at this time."

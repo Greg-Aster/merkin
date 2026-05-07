@@ -4,7 +4,7 @@ tagline: "For when the shelf says it is fine and you know it is lying."
 brand: "Civic Basement Systems"
 draft: false
 showInTimeline: true
-timelineYear: 2023
+timelineYear: 2.023e3
 timelineEra: "ancient-epoch"
 timelineLocation: "Civic Basement Systems Catalog"
 isKeyEvent: false

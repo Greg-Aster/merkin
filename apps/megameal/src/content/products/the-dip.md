@@ -4,7 +4,7 @@ tagline: "The top-selling sauce children ask for by name."
 brand: "W Corporation Condiment Group"
 draft: false
 showInTimeline: true
-timelineYear: 33900
+timelineYear: 3.39e4
 timelineEra: "golden-age"
 timelineLocation: "W Corporation Campaign Districts"
 isKeyEvent: false

@@ -133,7 +133,7 @@ export type BlogPostData = {
   nextSlug?: string
   bannerLink?: string
   backgroundImage?: string
-  timelineYear?: string
+  timelineYear?: number
   timelineEra?: string
   isKeyEvent?: boolean
   timelineLocation?: string

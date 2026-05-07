@@ -13,6 +13,7 @@ export type TimelineConstellationLine = {
 }
 
 export let lines: TimelineConstellationLine[] = []
+export let guideLine: TimelineConstellationLine | null = null
 </script>
 
 <svg
@@ -73,4 +74,47 @@ export let lines: TimelineConstellationLine[] = []
       stroke-opacity={line.isActive ? 0.22 : 0.08}
     />
   {/each}
+  {#if guideLine}
+    <line
+      data-timeline-selected-guide
+      x1={guideLine.x1}
+      y1={guideLine.y1}
+      x2={guideLine.x2}
+      y2={guideLine.y2}
+      stroke={getEraMarkerColor(guideLine.eraKey)}
+      stroke-width="0.24"
+      stroke-linecap="round"
+      stroke-opacity="0.18"
+      filter="url(#timelineConstellationGlow)"
+    />
+    <line
+      data-timeline-selected-guide
+      x1={guideLine.x1}
+      y1={guideLine.y1}
+      x2={guideLine.x2}
+      y2={guideLine.y2}
+      stroke={getEraMarkerColor(guideLine.eraKey)}
+      stroke-width="0.085"
+      stroke-linecap="round"
+      stroke-dasharray="0.56 1.24"
+      stroke-opacity="0.48"
+      filter="url(#timelineConstellationGlow)"
+    >
+      <animate
+        attributeName="stroke-dashoffset"
+        values={`0;-${Math.max(2, guideLine.length * 0.18).toFixed(2)}`}
+        dur="10s"
+        repeatCount="indefinite"
+      />
+    </line>
+    <circle
+      data-timeline-selected-guide
+      cx={guideLine.x2}
+      cy={guideLine.y2}
+      r="0.28"
+      fill={getEraMarkerColor(guideLine.eraKey)}
+      fill-opacity="0.28"
+      filter="url(#timelineConstellationGlow)"
+    />
+  {/if}
 </svg>
