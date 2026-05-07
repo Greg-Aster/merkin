@@ -29,6 +29,8 @@ export type TimelinePortalEraConfig = Record<string, {
 export type TimelineCarouselInput = {
   x: number
   y: number
+  panX: number
+  panY: number
   dragX: number
   dragY: number
   wheel: number
@@ -80,6 +82,38 @@ const mainTimelineEraOrder = [
 
 export function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
+}
+
+export function getTimelineDockWidth(width: number) {
+  return Math.min(672, Math.max(308, width - 400), Math.max(0, width - 32))
+}
+
+export function getTimelineSideMargin(width: number) {
+  return Math.min(52, Math.max(10.5, width * 0.04))
+}
+
+export function getSelectedCardWidth(sideLaneWidth: number, sideMargin: number) {
+  const availableWidth = sideLaneWidth - sideMargin - 16
+  return Math.max(136, Math.min(280, availableWidth))
+}
+
+export function getStatusWidth(sideLaneWidth: number) {
+  const availableWidth = sideLaneWidth - 32
+  return Math.max(144, Math.min(320, availableWidth))
+}
+
+export function getEraMarkerColor(eraKey: string) {
+  const colors: Record<string, string> = {
+    'ancient-epoch': '#67e8f9',
+    'awakening-era': '#22d3ee',
+    'golden-age': '#facc15',
+    'conflict-epoch': '#fb7185',
+    'transcendent-age': '#a78bfa',
+    'final-epoch': '#e2e8f0',
+    'singularity-conflict': '#f0abfc',
+  }
+
+  return colors[eraKey] ?? '#94a3b8'
 }
 
 export function sortTimelinePortalEvents(events: TimelinePortalEvent[]) {

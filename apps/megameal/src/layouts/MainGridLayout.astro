@@ -1,4 +1,6 @@
 ---
+import fs from 'node:fs'
+import path from 'node:path'
 import '@fontsource/creepster'
 import '@fontsource/metal-mania'
 import {
@@ -10,6 +12,7 @@ import {
 import Bleepy from '@components/bleepy/Bleepy.astro'
 import CompactArchiveBanner from '@components/archive/CompactArchiveBanner.astro'
 import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
+import LegacyTimelineBanner from '@components/timeline/TimelineBanner.astro'
 import TimelinePortalCarousel from '@components/timeline/TimelinePortalCarousel.svelte'
 import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
@@ -58,12 +61,14 @@ const sharedHomeLayout: 'default' | 'portal' | undefined = isTestPortalLayout
     : Astro.props.homeLayout
 const hasCustomBannerSlideContent = Astro.slots.has('banner-slide-content')
 const hasCustomBannerOverlayContent = Astro.slots.has('banner-overlay-content')
-const isTimelineRoute = Astro.url.pathname.replace(/\/$/, '') === '/timeline'
+const normalizedPath = Astro.url.pathname.replace(/\/$/, '')
+const isTimelineRoute = normalizedPath === '/timeline'
+const isTimeline2DRoute = normalizedPath === '/timeline/2d'
 const originalPost = Astro.props.post as
   | ({ data?: { bannerType?: string } } & Record<string, unknown>)
   | undefined
 const shouldRouteTimelineBannerToArchive =
-  !isTimelineRoute && originalPost?.data?.bannerType === 'timeline'
+  !isTimelineRoute && !isTimeline2DRoute && originalPost?.data?.bannerType === 'timeline'
 const layoutPost = shouldRouteTimelineBannerToArchive
   ? {
       ...originalPost,
@@ -73,6 +78,26 @@ const layoutPost = shouldRouteTimelineBannerToArchive
       },
     }
   : originalPost
+const isContentPost = Astro.props.isPostPage === true && Boolean(originalPost)
+const postSourcePath =
+  isContentPost && typeof (originalPost as any)?.id === 'string'
+    ? path.join(
+        process.cwd(),
+        'src',
+        'content',
+        'posts',
+        (originalPost as any).id,
+      )
+    : ''
+const rawPostFrontmatter =
+  postSourcePath && fs.existsSync(postSourcePath)
+    ? (fs.readFileSync(postSourcePath, 'utf8').split('---')[1] ?? '')
+    : ''
+const postRequestsVisibleSidebar =
+  /^\s*oneColumn:\s*false\s*(?:#.*)?$/m.test(rawPostFrontmatter)
+const resolvedOneColumn = isContentPost
+  ? !postRequestsVisibleSidebar
+  : Astro.props.oneColumn
 const usesArchiveBanner =
   layoutPost?.data?.bannerType === 'archive'
 const sharedProps: Omit<Props, 'homeLayout'> & {
@@ -81,6 +106,7 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   ...Astro.props,
   post: layoutPost,
   homeLayout: sharedHomeLayout,
+  oneColumn: resolvedOneColumn,
   contentMode: isTestPortalLayout ? 'banner-only' : Astro.props.contentMode,
 }
 ---
@@ -117,13 +143,30 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   <Fragment slot="overlay">
     <slot name="overlay" />
   </Fragment>
-  {isTimelineRoute && (
+  {(isTimelineRoute || isTimeline2DRoute) && (
     <Fragment slot="timeline-banner-content">
-      <TimelinePortalCarousel
-        events={timelineManifest.items}
-        eraConfig={defaultEraConfig}
-        client:only="svelte"
-      />
+      {isTimelineRoute ? (
+        <TimelinePortalCarousel
+          events={timelineManifest.items}
+          eraConfig={defaultEraConfig}
+          client:only="svelte"
+        />
+      ) : (
+        <div class="relative h-full w-full">
+          <LegacyTimelineBanner
+            id="megameal-legacy-timeline"
+            bannerHeight="100%"
+            mobileHeight="100%"
+            compact={false}
+          />
+          <a
+            href="/timeline/"
+            class="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-lg border border-cyan-100/25 bg-slate-950/78 px-4 py-2 font-mono text-[0.68rem] font-black uppercase tracking-[0.18em] text-cyan-100 shadow-[0_0_1.2rem_rgba(8,145,178,0.24)] backdrop-blur-md transition hover:border-cyan-100/55 hover:bg-cyan-950/78 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200"
+          >
+            3D
+          </a>
+        </div>
+      )}
     </Fragment>
   )}
   {hasCustomBannerSlideContent ? (

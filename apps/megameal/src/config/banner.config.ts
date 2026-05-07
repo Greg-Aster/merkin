@@ -186,6 +186,7 @@ export interface BannerConfig {
       image: string
       timeline: string
       assistant: string
+      cookbook?: string
       archive?: string
       reader?: string
       standard: string // ⭐ THIS IS YOUR BANNER OVERLAP CONTROL!
@@ -247,7 +248,7 @@ export const bannerConfig: BannerConfig = {
     height: '90vh',
     mobileHeight: 'clamp(32rem, 76svh, 40rem)',
     maxWidth: 3840,
-    mainContentOffset: '.5rem',
+    mainContentOffset: '1rem',
   },
 
   // WORKING: Visual config used by existing code
@@ -290,13 +291,14 @@ export const bannerConfig: BannerConfig = {
   // 🎯 FIXED: THE REAL OVERLAP SYSTEM - NO MORE clamp() ISSUES
   panel: {
     top: {
-      video: '-0.5rem', // ✅ WORKING VALUE
-      image: '-0.5rem', // ✅ WORKING VALUE
-      timeline: '-0.5rem', // ✅ WORKING VALUE
-      assistant: '-0.5rem', // ✅ WORKING VALUE
-      archive: '-0.5rem',
-      reader: '-0.5rem',
-      standard: '-2rem', // ✅ Reduced overlap for better content visibility
+      video: '0',
+      image: '0',
+      timeline: '0',
+      assistant: '0',
+      cookbook: '0',
+      archive: '0',
+      reader: '0',
+      standard: '-1.5rem', // ✅ Reduced overlap for better content visibility
       none: '12rem', // ✅ WORKING VALUE
     },
   },
@@ -429,18 +431,18 @@ export function determineBannerType(
     : hasImageBanner
       ? 'image'
       : hasTimelineBanner
-      ? 'timeline'
-      : hasAssistantBanner
-        ? 'assistant'
-        : hasCookbookBanner
-          ? 'cookbook'
-          : hasArchiveBanner
-            ? 'archive'
-            : hasReaderBanner
-              ? 'reader'
-              : hasStandardBanner
-                ? 'standard'
-                : 'none'
+        ? 'timeline'
+        : hasAssistantBanner
+          ? 'assistant'
+          : hasCookbookBanner
+            ? 'cookbook'
+            : hasArchiveBanner
+              ? 'archive'
+              : hasReaderBanner
+                ? 'reader'
+                : hasStandardBanner
+                  ? 'standard'
+                  : 'none'
 
   return {
     hasTimelineBanner,
@@ -610,7 +612,14 @@ export function determineBannerConfiguration(
   const navbarSpacing =
     bannerConfig.navbar.spacing[bannerType.currentBannerType]
 
-  const bannerHeight = bannerConfig.layout.height
+  const bannerHeight =
+    bannerType.currentBannerType === 'cookbook'
+      ? 'clamp(28rem, 58vh, 38rem)'
+      : bannerConfig.layout.height
+  const bannerHeightMobile =
+    bannerType.currentBannerType === 'cookbook'
+      ? 'clamp(30rem, 62svh, 34rem)'
+      : bannerConfig.layout.mobileHeight ?? bannerConfig.layout.height
   const mainContentOffset = bannerConfig.layout.mainContentOffset
 
   const finalBannerLink = postData?.bannerLink || defaultBannerLink
@@ -623,8 +632,7 @@ export function determineBannerConfiguration(
       mainPanelTop, // 🎯 THIS CONTROLS OVERLAP! (RESTORED)
       navbarSpacing, // ⭐ SIMPLIFIED - CSS handles mobile portrait
       bannerHeight,
-      bannerHeightMobile:
-        bannerConfig.layout.mobileHeight ?? bannerConfig.layout.height,
+      bannerHeightMobile,
       bannerOverlap: '0', // Removed unused value
       dynamicOverlap: '0', // Removed unused value
       mainContentOffset,
@@ -667,7 +675,7 @@ export function getPanelTopPosition(bannerType: BannerType): string {
     case 'assistant':
       return bannerConfig.panel.top.assistant
     case 'cookbook':
-      return bannerConfig.panel.top.video
+      return bannerConfig.panel.top.cookbook ?? bannerConfig.panel.top.video
     case 'archive':
       return bannerConfig.panel.top.archive ?? bannerConfig.panel.top.video
     case 'reader':

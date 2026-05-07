@@ -5,31 +5,46 @@ export async function getStaticPaths() {
   const entries = await getCollection('cookbook')
 
   return entries
-    .filter(entry => entry.data.downloadable === true && entry.data.draft !== true)
-    .map(entry => ({
-      params: { slug: entry.slug },
-      props: { entry },
-    }))
+    .filter(
+      entry => entry.data.downloadable === true && entry.data.draft !== true,
+    )
+    .flatMap(entry => [
+      {
+        params: { slug: entry.slug },
+        props: { entry, recipeMode: 'terrestrial' },
+      },
+      {
+        params: { slug: `${entry.slug}/terrestrial` },
+        props: { entry, recipeMode: 'terrestrial' },
+      },
+      {
+        params: { slug: `${entry.slug}/original` },
+        props: { entry, recipeMode: 'original' },
+      },
+    ])
 }
 
-const { entry } = Astro.props
+const { entry, recipeMode = 'terrestrial' } = Astro.props
 const { Content } = await entry.render()
 const publishedDate =
   entry.data.published instanceof Date
     ? entry.data.published.toISOString().slice(0, 10)
     : String(entry.data.published)
+const recipeModeLabel =
+  recipeMode === 'original' ? 'Archive Original' : 'Terrestrial Kitchen'
 import '../../../styles/pages/pdf-post.css'
 ---
 <html lang="en" class="pdf-export-page">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{entry.data.title} - Recipe PDF</title>
+    <title>{entry.data.title} - {recipeModeLabel} Recipe PDF</title>
   </head>
   <body class="pdf-export-body">
-    <article class="pdf-article">
+    <article class="pdf-article" data-recipe-mode={recipeMode}>
       <h1>{entry.data.title}</h1>
       <p class="meta">Published: {publishedDate}</p>
+      <p class="meta">Recipe version: {recipeModeLabel}</p>
       {entry.data.description && <p class="description">{entry.data.description}</p>}
       {entry.data.image && (
         <img src={entry.data.image} alt={entry.data.title} loading="eager" />
@@ -38,3 +53,10 @@ import '../../../styles/pages/pdf-post.css'
     </article>
   </body>
 </html>
+
+<style is:global>
+  .pdf-article[data-recipe-mode='original'] [data-recipe-mode='terrestrial'],
+  .pdf-article[data-recipe-mode='terrestrial'] [data-recipe-mode='original'] {
+    display: none;
+  }
+</style>

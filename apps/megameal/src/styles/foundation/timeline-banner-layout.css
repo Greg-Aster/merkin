@@ -104,13 +104,6 @@
      * ===================================================================
      */
     
-    /* ðŸŽ¯ FULLSCREEN MODE - Banner adjustments */
-    .force-mobile-view #banner-container {
-        /* Ensure banner uses full width */
-        width: 100% !important;
-        margin-left: 0 !important;
-    }
-    
     /* ðŸŽ¯ FULLSCREEN MODE - Main panel wrapper adjustments */
     .force-mobile-view #main-panel-wrapper {
         /* Remove max-width constraints */
@@ -146,34 +139,3 @@
         /* Hide table of contents in fullscreen mode */
         display: none !important;
     }
-
-    /* ===================================================================
-     * â­ SIMPLIFIED: BANNER SYSTEM - USES WORKING INLINE STYLES
-     * ===================================================================
-     */
-    
-    /* Banner aspect containers - simple structure that works with restored system */
-    .banner-aspect-container {
-        position: relative;
-        width: 100%;
-        max-width: 100%;
-        margin: 0 auto;
-        padding: 0 clamp(0.0vw, 0vw, 4vw);
-    }
-    
-    .banner-aspect-container::before {
-        content: '';
-        display: block;
-        padding-bottom: 56.25%; /* Standard 16:9 aspect ratio */
-    }
-    
-    .banner-content-wrapper {
-        position: absolute;
-        top: 0;
-        left: clamp(0.0vw, 0vw, 4vw);
-        right: clamp(0.0vw, 0vw, 4vw);
-        bottom: 0;
-        border-radius: 0.5rem;
-        overflow: hidden;
-    }
-

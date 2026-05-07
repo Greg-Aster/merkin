@@ -1,9 +1,8 @@
 ---
 import { Icon } from 'astro-icon/components'
-import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
-import { getPostUrlBySlug } from '../../utils/url-utils'
+import archiveManifest from '../../../../../packages/shared-data/generated/archive.json'
 
-type ArchivePost = (typeof postsManifest.items)[number]
+type ArchivePost = (typeof archiveManifest.items)[number]
 
 interface Props {
   post?: {
@@ -46,7 +45,7 @@ function getTimelineLabel(item: ArchivePost) {
   return Number.isFinite(year) ? String(year) : 'undated'
 }
 
-const relatedRecords = postsManifest.items
+const relatedRecords = archiveManifest.items
   .filter(item => {
     if (currentSeries) return item.series === currentSeries
     if (currentCategory) return item.category === currentCategory
@@ -128,7 +127,7 @@ const archiveDescription =
             ? '#post-container'
             : isLocked
               ? '/archive/'
-              : getPostUrlBySlug(item.slug)
+              : item.url
           const content = (
             <>
               <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/8 text-[0.68rem] font-black text-cyan-100/76">

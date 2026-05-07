@@ -379,6 +379,7 @@ export interface BannerPanelConfig {
     timeline: string // CSS value for timeline banner type
     standard: string // CSS value for standard banner type
     assistant: string // CSS value for assistant banner type
+    cookbook?: string // CSS value for cookbook banner type
     archive?: string // CSS value for archive banner type
     reader?: string // CSS value for reader banner type
     none: string // CSS value for none banner type

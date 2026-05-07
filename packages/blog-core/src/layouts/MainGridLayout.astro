@@ -564,23 +564,23 @@ const getShouldShowParallaxBackground =
     : (bgImage?: string | null) =>
         !!(getDynamicBackgroundImage(bgImage) && bannerConfig.parallax.enabled)
 
-// =====================================================================
-// ⭐ NEW: Determine oneColumn mode from props or post data
-// =====================================================================
-const oneColumnMode = oneColumn || post?.data?.oneColumn || false
-if (import.meta.env.DEV) {
-}
-
-// =====================================================================
-// ⭐ RESTORED: Use working banner configuration system
-// =====================================================================
-
 // Get current path for page type determination
 const currentPath = Astro.url.pathname
 const basePath = import.meta.env.BASE_URL || '/'
 const isHomePage = pathsEqual(currentPath, basePath)
 const isPortalHome = isHomePage && homeLayout === 'portal'
 const isPostRoute = Boolean(post)
+
+// =====================================================================
+// ⭐ NEW: Determine oneColumn mode from props or post data
+// =====================================================================
+const oneColumnMode = oneColumn || post?.data?.oneColumn || isPostRoute
+if (import.meta.env.DEV) {
+}
+
+// =====================================================================
+// ⭐ RESTORED: Use working banner configuration system
+// =====================================================================
 
 // ⭐ RESTORED: Use the working banner configuration function
 const bannerConfiguration = determineBannerConfiguration(
@@ -718,13 +718,14 @@ if (post && post.data) {
 // Conditionally create the grid classes
 const gridLayoutClasses = [
   'transition duration-700 w-full left-0 right-0 grid mx-auto gap-4 md:gap-4 px-2 md:px-4 relative',
-  isPortalHome || isBannerOnly || oneColumnMode
+  isPortalHome || isBannerOnly
     ? 'grid-cols-1'
     : 'grid-cols-1 md:grid-cols-[16.5rem_auto]',
-  !isPortalHome && !isBannerOnly && !oneColumnMode && shouldShowRightRail
+  !isPortalHome && !isBannerOnly && shouldShowRightRail
     ? '2xl:grid-cols-[16.5rem_auto_var(--toc-width)]'
     : '',
 ].join(' ')
+const initialSidebarState = oneColumnMode ? 'hidden' : 'visible'
 ---
 
 <Layout 
@@ -856,13 +857,13 @@ const gridLayoutClasses = [
         id="main-grid"
         class:list={[gridLayoutClasses, { 'has-right-rail': shouldShowRightRail }]}
         style={`margin-top: ${mainContentOffset};`}
-        data-one-column={oneColumnMode ? 'true' : 'false'}
+        data-sidebar={initialSidebarState}
         data-mobile-right-rail-hero={shouldShowMobilePortraitRightRailHero ? mobilePortraitRightRailHeroStyle : 'default'}
       >
 
         <!-- Grid Item 1: SIDEBAR -->
-        {!isPortalHome && !isBannerOnly && !oneColumnMode && (
-        <div class="hidden md:block mb-4 col-span-1 md:max-w-[17.5rem] onload-animation mobile-support-column">
+        {!isPortalHome && !isBannerOnly && (
+        <div class="layout-sidebar hidden md:block mb-4 col-span-1 md:max-w-[17.5rem] onload-animation mobile-support-column">
           <section class="mobile-support-group mobile-support-profile-group">
             <div class="mobile-support-label">About</div>
             <div class="mb-4">
@@ -921,10 +922,10 @@ const gridLayoutClasses = [
         </main>
 
         <!-- Grid Item 3: RIGHT RAIL -->
-        {shouldShowRightRail && !isBannerOnly && !oneColumnMode && (
+        {shouldShowRightRail && !isBannerOnly && (
           <div
             id="toc-wrapper"
-            class="hidden 2xl:block z-0"
+            class="layout-right-rail hidden 2xl:block z-0"
             data-rail-mode={shouldShowToc ? 'toc' : 'widget'}
           >
             {shouldShowToc ? (
@@ -1074,79 +1075,14 @@ const gridLayoutClasses = [
     transition: top 0.3s ease;
   }
   
-  /* ⭐ ESSENTIAL: Banner spacing from navbar */
-  #banner-container {
-    margin-top: var(--navbar-spacing);
-    transition: margin-top 0.3s ease;
-  }
-
-  /* Shared source of truth for banner height */
-  #banner-container .banner-aspect-container {
-    height: var(--banner-height);
-  }
-
-  #banner-container.portal-banner-mode.banner-only-mode {
-    margin-top: 0;
-  }
-
-  #banner-container.portal-banner-mode.banner-only-mode .banner-aspect-container {
-    height: 100dvh;
-    min-height: 0;
-  }
-
-  #banner-container.portal-banner-mode.banner-only-mode .banner-content-wrapper,
-  #banner-container.portal-banner-mode.banner-only-mode #standard-banner-container,
-  #banner-container.portal-banner-mode.banner-only-mode .banner-slide,
-  #banner-container.portal-banner-mode.banner-only-mode .banner-link,
-  #banner-container.portal-banner-mode.banner-only-mode .banner-media-layer {
-    height: 100%;
-  }
-
   #main-panel-wrapper[data-content-mode='banner-only'] {
     display: none;
-  }
-
-  #banner-container.banner-only-mode.has-timeline-banner .banner-container-timeline,
-  #banner-container.banner-only-mode.has-timeline-banner .banner-content-wrapper,
-  #banner-container.banner-only-mode.has-timeline-banner #timeline-mobile-wrapper {
-    height: 100%;
-  }
-
-  #banner-container.banner-only-mode.has-timeline-banner .banner-aspect-container {
-    height: var(--banner-height);
-  }
-
-  #banner-container.banner-only-mode.has-timeline-banner .banner-content-wrapper--timeline-hero {
-    overflow: hidden;
-    border-radius: 1.5rem;
-  }
-
-  /* Disable legacy aspect-ratio sizing; height comes from config via MainGridLayout */
-  #banner-container .banner-aspect-container::before {
-    padding-bottom: 0 !important;
   }
   
   /* ⭐ SIMPLIFIED: Mobile spacing (navbar always visible now) */
   @media (max-width: 767px) {
     .responsive-panel-wrapper {
       top: var(--mobile-main-panel-top);
-    }
-
-    #banner-container {
-      margin-top: var(--mobile-navbar-spacing);
-    }
-
-    #banner-container .banner-aspect-container {
-      height: var(--banner-height-mobile, var(--banner-height));
-    }
-
-    #banner-container.portal-banner-mode.banner-only-mode {
-      margin-top: 0;
-    }
-
-    #banner-container.portal-banner-mode.banner-only-mode .banner-aspect-container {
-      height: 100dvh;
-      min-height: 0;
     }
   }
 
@@ -1954,16 +1890,16 @@ const gridLayoutClasses = [
     }
   }
 
-  #main-grid[data-one-column='true'] {
+  #main-grid[data-sidebar='hidden'] {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
-  #main-grid[data-one-column='true'] > div:first-child,
-  #main-grid[data-one-column='true'] #toc-wrapper {
+  #main-grid[data-sidebar='hidden'] > .layout-sidebar,
+  #main-grid[data-sidebar='hidden'] > .layout-right-rail {
     display: none !important;
   }
 
-  #main-grid[data-one-column='true'] main#main {
+  #main-grid[data-sidebar='hidden'] main#main {
     grid-column: 1 !important;
   }
 </style>

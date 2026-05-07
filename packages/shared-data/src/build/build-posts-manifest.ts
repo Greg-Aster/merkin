@@ -4,7 +4,7 @@ import path from 'node:path'
 
 import { normalizePost } from '@merkin/shared-content'
 import type { SharedPost, SharedRawPostFrontmatter } from '@merkin/shared-content'
-import type { SharedPostsManifest } from '../types.ts'
+import type { SharedArchiveManifest, SharedPostsManifest } from '../types.ts'
 
 const POST_EXTENSIONS = new Set(['.md', '.mdx'])
 
@@ -83,6 +83,27 @@ export async function buildPostsManifest(
   return {
     generatedAt: new Date().toISOString(),
     sourceRoot: toPosixPath(contentRoot),
+    count: items.length,
+    items,
+  }
+}
+
+export async function buildArchiveManifestFromContentRoots(
+  contentRoots: Array<{ collection: string; root: string }>,
+): Promise<SharedArchiveManifest> {
+  const contentGroups = await Promise.all(
+    contentRoots.map(entry =>
+      loadSharedPosts(entry.root, {
+        collection: entry.collection,
+        sourcePathPrefix: entry.collection,
+      }),
+    ),
+  )
+  const items = sortPosts(contentGroups.flat())
+
+  return {
+    generatedAt: new Date().toISOString(),
+    sourceRoot: contentRoots.map(entry => toPosixPath(entry.root)).join(';'),
     count: items.length,
     items,
   }

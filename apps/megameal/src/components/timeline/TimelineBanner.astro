@@ -16,7 +16,7 @@ const props: Props = Astro.props as Props
 ---
 
 <SharedTimelineBanner
-  events={timelineManifest.items}
+  events={timelineManifest.items as any}
   eraConfig={defaultEraConfig}
   constellationConfig={constellationConfig}
   constellationPatterns={constellationPatterns}

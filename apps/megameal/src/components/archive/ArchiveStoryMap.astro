@@ -1,9 +1,8 @@
 ---
-import { getPostUrlBySlug } from '@/utils/url-utils'
 import { Icon } from 'astro-icon/components'
-import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
+import archiveManifest from '../../../../../packages/shared-data/generated/archive.json'
 
-type ArchivePost = (typeof postsManifest.items)[number]
+type ArchivePost = (typeof archiveManifest.items)[number]
 
 interface ArchiveGroup {
   id: string
@@ -26,6 +25,11 @@ function getArchiveGroupTitle(post: ArchivePost) {
   if (post.series === 'first-contact-manual')
     return "The Interstellar Traveler's First Contact Manual"
   if (post.series) return post.series
+  if (post.collection === 'videos') return 'Video Archive'
+  if (post.collection === 'reader') return 'Reader Files'
+  if (post.collection === 'products') return 'Commercial Records'
+  if (post.collection === 'about') return 'Personnel Files'
+  if (post.collection === 'cookbook') return 'Galactic Cookbook'
   if (post.sourcePath?.includes('miranda-bloody-mary'))
     return 'The Miranda Incident'
   if (post.tags?.some(tag => /cookbook|recipe/i.test(tag)))
@@ -54,6 +58,12 @@ function getGroupDescription(title: string) {
       'A survival manual for contact with beings that do not care if you remain intact.',
     'Commercial Records':
       'Storefront debris, product records, and corporate commerce fragments.',
+    'Video Archive':
+      'Screening rooms, transmissions, commercials, and recovered moving-image evidence.',
+    'Reader Files':
+      'Long-form manuals, chapters, and serialized documents from the broader archive.',
+    'Personnel Files':
+      'Profiles, witnesses, departments, and known entities connected to the record.',
     'The Miranda Incident':
       'Recovered testimony, recipes, access denials, and contradictory evidence from a temporal catastrophe.',
     'The Snuggloid Emergence':
@@ -153,7 +163,7 @@ function getPreviewImages(posts: ArchivePost[], tone: string) {
 
 const grouped = new Map<string, ArchivePost[]>()
 
-for (const post of postsManifest.items) {
+for (const post of archiveManifest.items) {
   const groupTitle = getArchiveGroupTitle(post)
   if (!grouped.has(groupTitle)) grouped.set(groupTitle, [])
   grouped.get(groupTitle)?.push(post)
@@ -162,10 +172,13 @@ for (const post of postsManifest.items) {
 const preferredOrder = [
   'Core Entry Points',
   'The Miranda Incident',
+  'Video Archive',
   "The Interstellar Traveler's First Contact Manual",
+  'Reader Files',
   'Chronology Fragments',
   'Galactic Cookbook',
   'Commercial Records',
+  'Personnel Files',
   'The Snuggloid Emergence',
   'Site Transmissions',
 ]
@@ -201,8 +214,8 @@ const archiveGroups: ArchiveGroup[] = Array.from(grouped.entries())
     }),
   }))
 
-const publicCount = postsManifest.items.filter(post => !post.draft).length
-const restrictedCount = postsManifest.items.length - publicCount
+const publicCount = archiveManifest.items.filter(post => !post.draft).length
+const restrictedCount = archiveManifest.items.length - publicCount
 import '../../styles/features/archive/story-map-shell.css'
 import '../../styles/features/archive/story-map-nodes.css'
 import '../../styles/features/archive/story-map-records.css'
@@ -238,7 +251,7 @@ import '../../styles/features/archive/story-map-responsive.css'
         <strong>Restricted</strong>
       </div>
       <div>
-        <span>{postsManifest.items.length}</span>
+        <span>{archiveManifest.items.length}</span>
         <strong>Total Files</strong>
       </div>
     </div>
@@ -306,7 +319,7 @@ import '../../styles/features/archive/story-map-responsive.css'
                   <span class="archive-record-index">{String(index + 1).padStart(2, '0')}</span>
                   <span class="archive-record-main">
                     <strong>{post.title}</strong>
-                    <small>{getTimelineLabel(post)} · {isLocked ? 'Restricted record' : 'Public entry point'}</small>
+                    <small>{getTimelineLabel(post)} · {isLocked ? 'Restricted record' : `${post.collection} entry point`}</small>
                   </span>
                   <span class="archive-record-status">
                     <Icon name={isLocked ? 'mdi:lock-outline' : 'mdi:arrow-right'} />
@@ -322,7 +335,7 @@ import '../../styles/features/archive/story-map-responsive.css'
                       {content}
                     </div>
                   ) : (
-                    <a class="archive-record archive-record--open" href={getPostUrlBySlug(post.slug)} data-sfx-click="sweep">
+                    <a class="archive-record archive-record--open" href={post.url} data-sfx-click="sweep">
                       {content}
                     </a>
                   )}
@@ -364,4 +377,3 @@ import '../../styles/features/archive/story-map-responsive.css'
     }
   })
 </script>
-

@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-05-06T16:01:03.342Z",
+  "generatedAt": "2026-05-07T01:35:42.527Z",
   "sourceRoot": "/home/greggles/Merkin/apps/megameal/src/content/posts",
-  "count": 29,
+  "count": 25,
   "items": [
     {
       "id": "explainer",
@@ -106,7 +106,7 @@
       "description": "Demonstrating the new sentient desert, Cuppy Cake.",
       "published": "2025-05-22T00:00:00.000Z",
       "updated": null,
-      "draft": false,
+      "draft": true,
       "tags": [
         "AI",
         "Assistant",
@@ -754,38 +754,6 @@
       "levelId": null
     },
     {
-      "id": "mega-meal-3",
-      "slug": "mega-meal-3",
-      "sourcePath": "Mega-Meal-3.mdx",
-      "collection": "posts",
-      "url": "/posts/mega-meal-3/",
-      "title": "A MEGA MEAL SAGA | Qarnivor",
-      "description": "A rare first-hand account of the mysterious Snuggloid emergence on Qarnivor following the nuclear extinction event.",
-      "published": "2025-03-05T00:00:00.000Z",
-      "updated": null,
-      "draft": true,
-      "tags": [
-        "Fast Food",
-        "Parody",
-        "Short Video",
-        "Series",
-        "Snuggloid",
-        "Qarnivor"
-      ],
-      "category": "MEGA MEAL",
-      "image": "/posts/Mega-Meal-3/title-2.jpg",
-      "bannerType": "video",
-      "bannerData": {
-        "videoId": "uXagUhT1fb0"
-      },
-      "timelineYear": 28045,
-      "timelineEra": "conflict-epoch",
-      "timelineLocation": "Planet Qarnivor, Irradiated Wasteland",
-      "isKeyEvent": false,
-      "isLevel": false,
-      "levelId": null
-    },
-    {
       "id": "timelines/corporate-empire",
       "slug": "timelines/corporate-empire",
       "sourcePath": "timelines/corporate-empire.mdx",
@@ -819,97 +787,6 @@
       "levelId": null
     },
     {
-      "id": "mega-meal-explained",
-      "slug": "mega-meal-explained",
-      "sourcePath": "Mega-Meal-Explained.mdx",
-      "collection": "posts",
-      "url": "/posts/mega-meal-explained/",
-      "title": "MEGA MEAL Movie Trailer Explained",
-      "description": "A deep dive into the MEGA MEAL trailer, exploring its themes, characters, and the chaotic world of fast-food mascots.",
-      "published": "2025-02-19T00:00:00.000Z",
-      "updated": null,
-      "draft": true,
-      "tags": [
-        "Fast Food",
-        "Parody",
-        "Short Video",
-        "Fake Movie Trailer"
-      ],
-      "category": "MEGA MEAL",
-      "image": "/posts/Mega-Meal-Explained/mme-title.jpg",
-      "bannerType": "video",
-      "bannerData": {
-        "videoId": "4tR6VLaYJFA"
-      },
-      "timelineYear": 33900,
-      "timelineEra": "golden-age",
-      "timelineLocation": "Corporate Media Sector, Galactic Core",
-      "isKeyEvent": true,
-      "isLevel": false,
-      "levelId": null
-    },
-    {
-      "id": "megameal-movie-trailer-explained-cosmic",
-      "slug": "megameal-movie-trailer-explained-cosmic",
-      "sourcePath": "megameal-movie-trailer-explained-cosmic.mdx",
-      "collection": "posts",
-      "url": "/posts/megameal-movie-trailer-explained-cosmic/",
-      "title": "THE MEGA MEAL TRANSMISSION: Deciphering the Eldritch Broadcast",
-      "description": "An analysis of the cursed transmission known as MEGA MEAL - a glimpse into dimensions where corporate mascots have become cosmic horrors beyond mortal comprehension.",
-      "published": "2025-02-19T00:00:00.000Z",
-      "updated": null,
-      "draft": true,
-      "tags": [
-        "Eldritch",
-        "Transmission",
-        "Forbidden Knowledge",
-        "Cosmic Horror",
-        "MDX"
-      ],
-      "category": "MEGA MEAL",
-      "image": "/posts/Mega-Meal-Explained/mme-title.jpg",
-      "bannerType": "video",
-      "bannerData": {
-        "videoId": "4tR6VLaYJFA"
-      },
-      "timelineYear": 33900,
-      "timelineEra": "the-dark-between",
-      "timelineLocation": "Dimensional Rift 7, Beyond the Veil",
-      "isKeyEvent": true,
-      "isLevel": false,
-      "levelId": null
-    },
-    {
-      "id": "megameal-movie-trailer-explained-horror",
-      "slug": "megameal-movie-trailer-explained-horror",
-      "sourcePath": "megameal-movie-trailer-explained-horror.mdx",
-      "collection": "posts",
-      "url": "/posts/megameal-movie-trailer-explained-horror/",
-      "title": "THE MEGA MEAL TRANSMISSION: Deciphering the Eldritch Broadcast",
-      "description": "An analysis of the cursed transmission known as MEGA MEAL - a glimpse into dimensions where corporate mascots have become cosmic horrors beyond mortal comprehension.",
-      "published": "2025-02-19T00:00:00.000Z",
-      "updated": null,
-      "draft": true,
-      "tags": [
-        "Eldritch",
-        "Transmission",
-        "Forbidden Knowledge",
-        "Cosmic Horror"
-      ],
-      "category": "MEGA MEAL",
-      "image": "/posts/Mega-Meal-Explained/mme-title.jpg",
-      "bannerType": "video",
-      "bannerData": {
-        "videoId": "4tR6VLaYJFA"
-      },
-      "timelineYear": 33900,
-      "timelineEra": "the-dark-between",
-      "timelineLocation": "Dimensional Rift 7, Beyond the Veil",
-      "isKeyEvent": true,
-      "isLevel": false,
-      "levelId": null
-    },
-    {
       "id": "timelines/snuggaliod-emergence",
       "slug": "timelines/snuggaliod-emergence",
       "sourcePath": "timelines/Snuggaliod-Emergence.mdx",
@@ -927,13 +804,7 @@
       ],
       "category": "MEGA MEAL",
       "image": "/posts/generic/imagenotfoupng",
-      "bannerType": "timeline",
-      "bannerData": {
-        "category": "MEGA MEAL",
-        "startYear": 1,
-        "endYear": 50000,
-        "background": "/posts/timeline/conflict-era.png"
-      },
+      "bannerType": "archive",
       "timelineYear": 28144,
       "timelineEra": "conflict-epoch",
       "timelineLocation": "Planet Quarnivor, Irradiated Wasteland",

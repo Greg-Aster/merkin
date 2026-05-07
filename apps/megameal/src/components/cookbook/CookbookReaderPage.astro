@@ -2,8 +2,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import type { CollectionEntry } from 'astro:content'
-import MainGridLayout from '@layouts/MainGridLayout.astro'
 import Markdown from '@components/misc/Markdown.astro'
+import MainGridLayout from '@layouts/MainGridLayout.astro'
 import { Icon } from 'astro-icon/components'
 import { url } from '../../utils/url-utils'
 import CookbookBanner from './CookbookBanner.astro'
@@ -39,26 +39,43 @@ const cookbookBannerPost = {
 }
 
 const isRecipe = entry.data.kind === 'recipe'
-const localPdfPath = path.join(
+const originalPdfPath = path.join(
+  process.cwd(),
+  'public',
+  'downloads',
+  'cookbook',
+  `${entry.slug}.original.pdf`,
+)
+const terrestrialPdfPath = path.join(
+  process.cwd(),
+  'public',
+  'downloads',
+  'cookbook',
+  `${entry.slug}.terrestrial.pdf`,
+)
+const legacyPdfPath = path.join(
   process.cwd(),
   'public',
   'downloads',
   'cookbook',
   `${entry.slug}.pdf`,
 )
-const hasStaticPdf = fs.existsSync(localPdfPath)
-const recipeDownloadUrl = hasStaticPdf
-  ? url(`/downloads/cookbook/${entry.slug}.pdf`)
-  : url(`/pdf/cookbook/${entry.slug}/`)
-const recipeDownloadLabel = hasStaticPdf
-  ? 'Download Recipe PDF'
-  : 'Open Printable Recipe'
+const hasOriginalPdf =
+  fs.existsSync(originalPdfPath) || fs.existsSync(legacyPdfPath)
+const hasTerrestrialPdf = fs.existsSync(terrestrialPdfPath)
+const originalDownloadUrl = fs.existsSync(originalPdfPath)
+  ? url(`/downloads/cookbook/${entry.slug}.original.pdf`)
+  : fs.existsSync(legacyPdfPath)
+    ? url(`/downloads/cookbook/${entry.slug}.pdf`)
+    : url(`/pdf/cookbook/${entry.slug}/original/`)
+const terrestrialDownloadUrl = hasTerrestrialPdf
+  ? url(`/downloads/cookbook/${entry.slug}.terrestrial.pdf`)
+  : url(`/pdf/cookbook/${entry.slug}/terrestrial/`)
 
 function cookbookHref(item: CollectionEntry<'cookbook'> | null, anchor = '') {
   if (!item) return '#'
-  const href = item.slug === 'cookbook-index'
-    ? '/cookbook/'
-    : `/cookbook/${item.slug}/`
+  const href =
+    item.slug === 'cookbook-index' ? '/cookbook/' : `/cookbook/${item.slug}/`
   return anchor ? `${href}${anchor}` : href
 }
 ---
@@ -77,9 +94,9 @@ function cookbookHref(item: CollectionEntry<'cookbook'> | null, anchor = '') {
     activeSlug={entry.slug}
   />
 
-  <div class="w-full pt-6">
+  <div class="mx-auto w-full max-w-5xl">
     <main class="min-w-0">
-      <article id="cookbook-reader" class="card-base z-10 scroll-mt-24 rounded-lg px-5 py-5 md:px-9 md:py-7">
+      <article id="cookbook-reader" data-recipe-mode="original" class="card-base z-10 scroll-mt-24 rounded-lg px-5 py-5 [--bg-opacity:0.96] md:px-9 md:py-7">
         <nav class="mb-5 flex items-center justify-between gap-3 rounded-lg border border-black/10 bg-black/[0.03] p-2 dark:border-white/10 dark:bg-white/[0.06]" aria-label="Cookbook page controls">
           <a
             href={cookbookHref(previousEntry, '#cookbook-reader')}
@@ -167,6 +184,39 @@ function cookbookHref(item: CollectionEntry<'cookbook'> | null, anchor = '') {
           </section>
         )}
 
+        {isRecipe && (
+          <section class="my-6 rounded-lg border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.06]" aria-label="Recipe version controls">
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div class="text-xs font-black uppercase tracking-[0.14em] text-[var(--primary)]">
+                  Recipe Version
+                </div>
+                <p class="mt-1 text-sm leading-snug text-black/60 dark:text-white/60">
+                  Switch between the preserved archive recipe and an Earth-kitchen version.
+                </p>
+              </div>
+              <div class="grid grid-cols-2 gap-2 rounded-md bg-black/[0.05] p-1 dark:bg-white/[0.08]">
+                <button
+                  type="button"
+                  class="rounded px-3 py-2 text-xs font-black uppercase tracking-[0.1em] text-black/55 transition hover:text-black dark:text-white/55 dark:hover:text-white"
+                  data-recipe-mode-control="original"
+                  aria-pressed="true"
+                >
+                  Archive
+                </button>
+                <button
+                  type="button"
+                  class="rounded px-3 py-2 text-xs font-black uppercase tracking-[0.1em] text-black/55 transition hover:text-black dark:text-white/55 dark:hover:text-white"
+                  data-recipe-mode-control="terrestrial"
+                  aria-pressed="false"
+                >
+                  Terrestrial
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+
         <Markdown class="markdown-content">
           <Content />
         </Markdown>
@@ -215,19 +265,98 @@ function cookbookHref(item: CollectionEntry<'cookbook'> | null, anchor = '') {
       </article>
 
       {isRecipe && (
-        <a
-          href={recipeDownloadUrl}
-          download={hasStaticPdf ? `${entry.slug}.pdf` : undefined}
-          class="mt-4 block w-full overflow-hidden font-bold active:scale-95"
-          data-sfx-hover="hover-emphasis"
-          data-sfx-click="confirm"
-        >
-          <div class="card-base btn-card flex min-h-[4.5rem] w-full items-center justify-center gap-3 rounded-lg px-4 py-3">
-            <Icon name="material-symbols:download-rounded" class="shrink-0 text-[1.5rem] text-[var(--primary)]" />
-            <span class="text-black/80 dark:text-white/80">{recipeDownloadLabel}</span>
-          </div>
-        </a>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          <a
+            href={terrestrialDownloadUrl}
+            download={hasTerrestrialPdf ? `${entry.slug}.terrestrial.pdf` : undefined}
+            class="block w-full overflow-hidden font-bold active:scale-95"
+            data-recipe-download-mode="terrestrial"
+            data-sfx-hover="hover-emphasis"
+            data-sfx-click="confirm"
+          >
+            <div class="card-base btn-card flex min-h-[4.5rem] w-full items-center justify-center gap-3 rounded-lg px-4 py-3">
+              <Icon name="material-symbols:download-rounded" class="shrink-0 text-[1.5rem] text-[var(--primary)]" />
+              <span class="text-black/80 dark:text-white/80">Terrestrial Recipe PDF</span>
+            </div>
+          </a>
+
+          <a
+            href={originalDownloadUrl}
+            download={hasOriginalPdf ? `${entry.slug}.original.pdf` : undefined}
+            class="block w-full overflow-hidden font-bold active:scale-95"
+            data-recipe-download-mode="original"
+            data-sfx-hover="hover-emphasis"
+            data-sfx-click="confirm"
+          >
+            <div class="card-base btn-card flex min-h-[4.5rem] w-full items-center justify-center gap-3 rounded-lg px-4 py-3">
+              <Icon name="material-symbols:description-rounded" class="shrink-0 text-[1.5rem] text-[var(--primary)]" />
+              <span class="text-black/80 dark:text-white/80">Archive Recipe PDF</span>
+            </div>
+          </a>
+        </div>
       )}
     </main>
   </div>
 </MainGridLayout>
+
+<script>
+  function initCookbookRecipeMode() {
+    const reader = document.querySelector('#cookbook-reader')
+    if (!(reader instanceof HTMLElement)) return
+
+    const controls = Array.from(
+      reader.querySelectorAll('[data-recipe-mode-control]'),
+    )
+    const downloads = Array.from(
+      document.querySelectorAll('[data-recipe-download-mode]'),
+    )
+    const storageKey = 'megameal-cookbook-recipe-mode-v2'
+
+    const setMode = (mode) => {
+      const nextMode = mode === 'terrestrial' ? 'terrestrial' : 'original'
+      reader.dataset.recipeMode = nextMode
+      window.localStorage?.setItem(storageKey, nextMode)
+
+      controls.forEach((control) => {
+        const isActive = control.getAttribute('data-recipe-mode-control') === nextMode
+        control.setAttribute('aria-pressed', String(isActive))
+        control.classList.toggle('bg-white', isActive)
+        control.classList.toggle('text-black', isActive)
+        control.classList.toggle('shadow-sm', isActive)
+        control.classList.toggle('dark:bg-black/50', isActive)
+        control.classList.toggle('dark:text-white', isActive)
+      })
+
+      downloads.forEach((download) => {
+        const isActive =
+          download.getAttribute('data-recipe-download-mode') === nextMode
+        download.setAttribute('aria-current', isActive ? 'true' : 'false')
+      })
+    }
+
+    controls.forEach((control) => {
+      control.addEventListener('click', () => {
+        setMode(control.getAttribute('data-recipe-mode-control'))
+      })
+    })
+
+    setMode(window.localStorage?.getItem(storageKey))
+  }
+
+  document.addEventListener('DOMContentLoaded', initCookbookRecipeMode)
+  document.addEventListener('astro:page-load', initCookbookRecipeMode)
+  initCookbookRecipeMode()
+</script>
+
+<style is:global>
+  #cookbook-reader[data-recipe-mode='original'] [data-recipe-mode='terrestrial'],
+  #cookbook-reader[data-recipe-mode='terrestrial'] [data-recipe-mode='original'] {
+    display: none;
+  }
+
+  [data-recipe-download-mode][aria-current='true'] .card-base {
+    box-shadow:
+      inset 0 0 0 2px color-mix(in srgb, var(--primary) 58%, transparent),
+      inset 0 0 10px color-mix(in srgb, var(--primary) 28%, transparent);
+  }
+</style>

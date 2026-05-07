@@ -76,8 +76,7 @@ const hasMascotContext = !!mascotCtx
 // Extract backgroundImage from frontmatter for dynamic background support
 const backgroundImage = post.data.backgroundImage
 
-// ⭐ NEW: Extract oneColumn setting from frontmatter
-const oneColumnMode = post.data.oneColumn || false
+const oneColumnMode = post.data.oneColumn
 
 // Extract custom author data from frontmatter
 const customAuthorData = {

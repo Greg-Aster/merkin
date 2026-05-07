@@ -1,14 +1,15 @@
-/* Layout overrides driven by SpecialPageFeatures.svelte state classes. */
-body.one-column-mode #main-grid > div:first-child {
+/* Compatibility overrides for the app-local SpecialPageFeatures component. */
+#main-grid[data-sidebar='hidden'] > .layout-sidebar,
+#main-grid[data-sidebar='hidden'] > .layout-right-rail {
   display: none !important;
 }
 
-body.one-column-mode #main-grid {
+#main-grid[data-sidebar='hidden'] {
   grid-template-columns: 1fr !important;
 }
 
-body.fullscreen-mode #main-grid > div:first-child,
-body.fullscreen-mode #toc-wrapper,
+body.fullscreen-mode #main-grid > .layout-sidebar,
+body.fullscreen-mode #main-grid > .layout-right-rail,
 body.fullscreen-mode #banner-container {
   display: none !important;
 }

@@ -1,0 +1,25 @@
+---
+import MainGridLayout from '../../layouts/MainGridLayout.astro'
+
+const syntheticPost = {
+  slug: 'timeline-2d',
+  data: {
+    title: 'MEGAMEAL Timeline - 2D',
+    description:
+      'The legacy MEGAMEAL chronology map: eras, incidents, recipes, wars, corporate ascensions, and archival fragments.',
+    bannerType: 'timeline',
+    bannerData: {
+      category: 'MEGA MEAL',
+      compact: false,
+    },
+  },
+}
+---
+
+<MainGridLayout
+  title="Timeline - 2D"
+  description="The legacy MEGAMEAL chronology map: eras, incidents, recipes, wars, corporate ascensions, and archival fragments."
+  post={syntheticPost}
+  contentMode="banner-only"
+  showAssistantWidget={false}
+/>

@@ -10,6 +10,10 @@ export type SharedPostsManifest = SharedManifestMeta & {
   items: SharedPost[]
 }
 
+export type SharedArchiveManifest = SharedManifestMeta & {
+  items: SharedPost[]
+}
+
 export type SharedTimelineManifest = SharedManifestMeta & {
   items: SharedTimelineEvent[]
 }

@@ -870,12 +870,28 @@ const transparentPixel =
   }}
 >
   #banner-container {
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
     margin-top: var(--navbar-spacing);
     transition: margin-top 0.3s ease;
   }
 
   #banner-container .banner-aspect-container {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
     height: var(--banner-height);
+  }
+
+  #banner-container .banner-content-wrapper {
+    position: absolute;
+    inset: 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
   }
 
   #banner-container.portal-banner-mode.banner-only-mode {
@@ -911,6 +927,8 @@ const transparentPixel =
   }
 
   #banner-container .banner-aspect-container::before {
+    content: '';
+    display: block;
     padding-bottom: 0 !important;
   }
 

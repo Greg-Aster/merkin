@@ -102,9 +102,13 @@ const timelineFrontmatterSchema = {
   showInTimeline: z.boolean().optional(),
 }
 
+const megamealPostsSchema = postsSchema.extend({
+  oneColumn: z.boolean().optional().default(true),
+})
+
 // Define the 'posts' collection
 const postsCollection = defineCollection({
-  schema: postsSchema,
+  schema: megamealPostsSchema,
 })
 
 const videosCollection = defineCollection({

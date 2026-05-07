@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "node ./scripts/dev-app.mjs",
 		"start": "node ./scripts/dev-app.mjs",
-		"build": "astro build && node scripts/audit-built-html.mjs --dist dist && pagefind --site dist --root-selector \"[data-pagefind-body]\"",
+		"build": "pnpm --filter @merkin/shared-data build && astro build && node scripts/audit-built-html.mjs --dist dist && pagefind --site dist --root-selector \"[data-pagefind-body]\"",
 		"preview": "astro preview",
 		"astro": "astro",
 		"type-check": "tsc --noEmit",

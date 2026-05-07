@@ -8,6 +8,7 @@ export const oneColumn = false // From frontmatter - treated as INITIAL state
 let cookbookView = 'gallery' // 'gallery' or 'list'
 let isOneColumn = false
 let isTransitioning = false
+let pageDefaultOneColumn = false
 
 function hasFullscreenLayoutControl(): boolean {
   return !!document.getElementById('fullscreen-btn')
@@ -25,6 +26,15 @@ function getFullscreenLayoutMode(): boolean {
   }
 
   return hasControl && stored
+}
+
+function getRenderedSidebarState(): boolean | null {
+  const sidebarState = document.getElementById('main-grid')?.dataset.sidebar
+
+  if (sidebarState === 'hidden') return true
+  if (sidebarState === 'visible') return false
+
+  return null
 }
 
 onMount(() => {
@@ -57,8 +67,14 @@ onMount(() => {
     } else {
       // Page-first priority system - frontmatter overrides saved preferences
       let targetState: boolean
+      const renderedSidebarState = getRenderedSidebarState()
 
-      if (oneColumn !== undefined) {
+      if (renderedSidebarState !== null) {
+        targetState = renderedSidebarState
+        if (import.meta.env.DEV) {
+          console.log('Using rendered sidebar layout:', targetState)
+        }
+      } else if (oneColumn !== undefined) {
         // Frontmatter has highest priority - each page defines its intended layout
         targetState = oneColumn
         if (import.meta.env.DEV) {
@@ -83,6 +99,7 @@ onMount(() => {
 
       // Set initial state
       isOneColumn = targetState
+      pageDefaultOneColumn = targetState
       applyLayoutState(targetState, false)
     }
 
@@ -127,11 +144,7 @@ onMount(() => {
         applyLayoutState(true, true)
       } else {
         // Exiting fullscreen - restore page's intended state
-        const pageIntendedState =
-          oneColumn !== undefined
-            ? oneColumn
-            : currentPath.includes('cookbook') ||
-              currentPath.includes('first-contact')
+        const pageIntendedState = pageDefaultOneColumn
         isOneColumn = pageIntendedState
         applyLayoutState(pageIntendedState, false)
       }
@@ -195,12 +208,16 @@ function applyLayoutState(oneColumnMode: boolean, isFullscreenMode = false) {
     )
   }
 
-  // Update body classes for CSS targeting - let CSS handle the layout
+  // The grid owns sidebar layout. Body state stays for non-layout features
+  // that still read the historical mode flags.
   document.body.setAttribute(
     'data-layout-mode',
     oneColumnMode ? 'oneColumn' : 'twoColumn',
   )
   document.body.classList.toggle('one-column-mode', oneColumnMode)
+  document
+    .getElementById('main-grid')
+    ?.setAttribute('data-sidebar', oneColumnMode ? 'hidden' : 'visible')
 
   // Add fullscreen class for additional CSS targeting
   if (isFullscreenMode) {
@@ -300,21 +317,9 @@ export function resetSpecialPageState() {
 <div style="display: none;"></div>
 
 <style>
-  /* CSS handles layout changes - no more DOM manipulation */
-  
-  /* Hide sidebar in one column mode */
-  :global(body.one-column-mode #main-grid > div:first-child) {
-    display: none !important;
-  }
-  
-  /* Force single column grid in one column mode */
-  :global(body.one-column-mode #main-grid) {
-    grid-template-columns: 1fr !important;
-  }
-
   /* Fullscreen mode overrides - highest priority */
-  :global(body.fullscreen-mode #main-grid > div:first-child,
-          body.fullscreen-mode #toc-wrapper,
+  :global(body.fullscreen-mode #main-grid > .layout-sidebar,
+          body.fullscreen-mode #main-grid > .layout-right-rail,
           body.fullscreen-mode #banner-container) {
     display: none !important;
   }

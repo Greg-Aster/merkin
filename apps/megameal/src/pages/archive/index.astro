@@ -4,24 +4,24 @@ import ArchiveStoryMap from '@components/archive/ArchiveStoryMap.astro'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
+import archiveManifest from '../../../../../packages/shared-data/generated/archive.json'
 import gameStarsManifest from '../../../../../packages/shared-data/generated/game-stars.json'
-import postsManifest from '../../../../../packages/shared-data/generated/posts.json'
 import timelineManifest from '../../../../../packages/shared-data/generated/timeline.json'
 
-const allPosts = postsManifest.items
-const publishedPosts = postsManifest.items.filter(post => !post.draft)
-const restrictedPosts = postsManifest.items.filter(post => post.draft)
+const allRecords = archiveManifest.items
+const publishedRecords = archiveManifest.items.filter(record => !record.draft)
+const restrictedRecords = archiveManifest.items.filter(record => record.draft)
 const allTimelineItems = timelineManifest.items
 const allGameStars = gameStarsManifest.items
 const activeArcCount = new Set(
-  allPosts
-    .map(post => post.series)
+  allRecords
+    .map(record => record.series)
     .filter((seriesId): seriesId is string => Boolean(seriesId)),
 ).size
 
-const publicationYears = allPosts
-  .map(post =>
-    post.published ? new Date(post.published).getUTCFullYear() : null,
+const publicationYears = allRecords
+  .map(record =>
+    record.published ? new Date(record.published).getUTCFullYear() : null,
   )
   .filter((year): year is number => year !== null)
 
@@ -33,10 +33,10 @@ const earliestYear =
 const archiveStats = [
   {
     label: 'Archive Records',
-    value: String(allPosts.length),
+    value: String(allRecords.length),
     note:
       latestYear && earliestYear
-        ? `${publishedPosts.length} public, ${restrictedPosts.length} restricted`
+        ? `${publishedRecords.length} public, ${restrictedRecords.length} restricted`
         : 'Known archive scope',
   },
   {

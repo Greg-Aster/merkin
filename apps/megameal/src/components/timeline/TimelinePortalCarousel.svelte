@@ -1,12 +1,24 @@
 <script lang="ts">
 import { Canvas } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
-import { fade } from 'svelte/transition'
 import * as THREE from 'three'
+import TimelineAutoplayButton from './TimelineAutoplayButton.svelte'
+import TimelineCameraPanControls from './TimelineCameraPanControls.svelte'
+import TimelineConstellationOverlay, {
+  type TimelineConstellationLine,
+} from './TimelineConstellationOverlay.svelte'
 import TimelinePortalCarouselScene from './TimelinePortalCarouselScene.svelte'
+import TimelinePositionSlider from './TimelinePositionSlider.svelte'
+import TimelineSelectedRecord from './TimelineSelectedRecord.svelte'
+import TimelineViewModeButton from './TimelineViewModeButton.svelte'
 import {
   clamp,
   createTimelinePortalModel,
+  getEraMarkerColor,
+  getSelectedCardWidth,
+  getStatusWidth,
+  getTimelineDockWidth,
+  getTimelineSideMargin,
   type TimelineCarouselInput,
   type TimelinePortalEraConfig,
   type TimelinePortalEvent,
@@ -31,19 +43,10 @@ type TimelineStarPositionEvent = CustomEvent<{
   positions: TimelineStarScreenPosition[]
 }>
 
-type TimelineConstellationLine = {
-  id: string
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-  eraKey: string
-  isActive: boolean
-}
-
 let shell: HTMLDivElement | null = null
-let sliderTrack: HTMLDivElement | null = null
-let sliderPointerId: number | null = null
+let panPointerId: number | null = null
+let lastPanClientX = 0
+let lastPanClientY = 0
 let lastTouchCenterY: number | null = null
 let virtualWheel = 0
 let wheelVelocity = 0
@@ -52,9 +55,17 @@ let lastScrollFrameAt = 0
 let selectedScreenIndex = -1
 let hoveredStarIndex = -1
 let portraitMobile = false
+let viewportWidth = 1440
 let canvasDpr = 1
-let sceneQuality: 'high' | 'balanced' | 'lean' = 'balanced'
 let projectedStarPositions: TimelineStarScreenPosition[] = []
+let hasInitializedDefaultPosition = false
+let hasMounted = false
+let hasStartedInitialAutoplay = false
+let isAutoplaying = false
+let autoplayFrame = 0
+let lastAutoplayFrameAt = 0
+let nextAutoplaySelectionAt = 0
+let autoplayDirection: -1 | 1 = 1
 const wheelMomentumDecay = 2.4
 const wheelMomentumImpulse = 5.2
 const wheelMomentumMaxVelocity = 4.8
@@ -63,10 +74,20 @@ const mouseWheelMomentumImpulse = 3.6
 const mouseWheelMomentumMaxVelocity = 2.8
 const keyboardWheelStep = 0.82
 const pageWheelStep = 1.64
-const backgroundFadeDuration = 900
+const cameraPanStep = 0.2
+const cameraPanLimit = 1.18
+const defaultTimelineEraKey = 'golden-age'
+const autoplaySpeed = 0.34
+const autoplaySelectionIntervalMin = 2200
+const autoplaySelectionIntervalRange = 1900
+const timelineBackgroundVideoSrc = '/assets/banner/universbg0001-0121.webm'
+const timelineBackgroundPosterSrc = '/assets/banner/posters/universe-poster.webp'
+const timelineBackgroundVideoPlaybackRate = 0.25
 const input: TimelineCarouselInput = {
   x: 0,
   y: 0,
+  panX: 0,
+  panY: 0,
   dragX: 0,
   dragY: 0,
   wheel: 0,
@@ -82,8 +103,17 @@ $: selectedScreenView = selectedScreenIndex >= 0 ? screens[selectedScreenIndex] 
 $: maxWheel = Math.max(0, screens.length - 1)
 $: activeTimelineEvent = sortedEvents[Math.round(clamp(input.wheel, 0, maxWheel))] ?? null
 $: activeEraSegment = getActiveEraSegment(input.wheel)
-$: activeEraProgress = activeEraSegment ? getEraProgress(input.wheel, activeEraSegment) : 0
-$: eraBackgroundMediaStyle = getEraBackgroundMediaStyle(activeEraProgress)
+$: timelineDockWidth = getTimelineDockWidth(viewportWidth)
+$: timelineSideLaneWidth = Math.max(0, (viewportWidth - timelineDockWidth) / 2)
+$: timelineSideMargin = getTimelineSideMargin(viewportWidth)
+$: selectedCardWidth = getSelectedCardWidth(timelineSideLaneWidth, timelineSideMargin)
+$: selectedStatusWidth = getStatusWidth(timelineSideLaneWidth)
+$: selectedCardStyle = portraitMobile
+  ? 'bottom: max(8.75rem, calc(env(safe-area-inset-bottom) + 8.75rem)); max-width: min(15.25rem, calc(100% - 1.5rem))'
+  : `bottom: 1rem; width: ${selectedCardWidth}px; max-width: calc(100% - 2rem)`
+$: selectedStatusStyle = portraitMobile
+  ? 'display: none'
+  : `top: auto; bottom: 1rem; right: 1rem; width: ${selectedStatusWidth}px; min-width: 0; max-width: calc(100% - 2rem); text-align: right`
 $: visibleStarControls = projectedStarPositions
   .map(position => ({ ...position, screen: screens[position.index] }))
   .filter(({ screen, visible }) => !!screen && visible)
@@ -92,10 +122,12 @@ $: constellationControls = projectedStarPositions
   .map(position => ({ ...position, screen: screens[position.index] }))
   .filter(position => !!position.screen && position.size > 0)
 $: constellationLines = getVisibleConstellationLines(constellationControls)
-$: sliderPercent = maxWheel > 0 ? (input.wheel / maxWheel) * 100 : 0
 $: timelinePositionText = activeTimelineEvent
   ? `Y${activeTimelineEvent.year} / ${activeEraSegment?.displayName ?? 'Unknown Era'}`
   : 'Timeline position'
+$: if (!hasInitializedDefaultPosition && screens.length > 0) {
+  initializeDefaultTimelinePosition()
+}
 
 const createRenderer = (canvas: HTMLCanvasElement) => {
   const renderer = new THREE.WebGLRenderer({
@@ -115,6 +147,7 @@ const createRenderer = (canvas: HTMLCanvasElement) => {
 
 function syncViewportMode() {
   if (typeof window === 'undefined') return
+  viewportWidth = window.innerWidth
   portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
 }
 
@@ -123,7 +156,6 @@ function syncCanvasDpr() {
   const lowMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const compactViewport = window.innerWidth <= 760 || window.innerHeight <= 640
   canvasDpr = Math.min(window.devicePixelRatio || 1, compactViewport || lowMotion ? 1 : 1.25)
-  sceneQuality = compactViewport || lowMotion ? 'lean' : 'balanced'
 }
 
 function updatePointer(clientX: number, clientY: number) {
@@ -198,6 +230,93 @@ function scheduleScrollDrivenWheel() {
   scrollFrame = window.requestAnimationFrame(runScrollDrivenWheelFrame)
 }
 
+function scheduleNextAutoplaySelection(timestamp: number) {
+  nextAutoplaySelectionAt =
+    timestamp + autoplaySelectionIntervalMin + Math.random() * autoplaySelectionIntervalRange
+}
+
+function selectRandomVisibleAutoplayStar(timestamp: number) {
+  const selectableControls = visibleStarControls.filter(control => control.index !== selectedScreenIndex)
+  const fallbackIndex = Math.round(clamp(input.wheel, 0, maxWheel))
+  const selectedIndex =
+    selectableControls.length > 0
+      ? selectableControls[Math.floor(Math.random() * selectableControls.length)].index
+      : fallbackIndex
+
+  selectStar(selectedIndex, 'autoplay')
+  scheduleNextAutoplaySelection(timestamp)
+}
+
+function runAutoplayFrame(timestamp: number) {
+  if (!isAutoplaying) {
+    autoplayFrame = 0
+    lastAutoplayFrameAt = 0
+    return
+  }
+
+  const delta = lastAutoplayFrameAt
+    ? Math.min(0.08, (timestamp - lastAutoplayFrameAt) / 1000)
+    : 1 / 60
+  lastAutoplayFrameAt = timestamp
+
+  wheelVelocity = 0
+  const nextWheel = virtualWheel + autoplayDirection * autoplaySpeed * delta
+  if (nextWheel >= maxWheel) {
+    virtualWheel = maxWheel
+    autoplayDirection = -1
+  } else if (nextWheel <= 0) {
+    virtualWheel = 0
+    autoplayDirection = 1
+  } else {
+    virtualWheel = nextWheel
+  }
+  updateScrollDrivenWheel()
+
+  if (timestamp >= nextAutoplaySelectionAt) {
+    selectRandomVisibleAutoplayStar(timestamp)
+  }
+
+  autoplayFrame = window.requestAnimationFrame(runAutoplayFrame)
+}
+
+function playAutoplay() {
+  if (isAutoplaying || maxWheel <= 0) return
+  if (virtualWheel >= maxWheel) autoplayDirection = -1
+  if (virtualWheel <= 0) autoplayDirection = 1
+
+  isAutoplaying = true
+  wheelVelocity = 0
+  lastAutoplayFrameAt = 0
+  selectRandomVisibleAutoplayStar(performance.now())
+  if (!autoplayFrame) autoplayFrame = window.requestAnimationFrame(runAutoplayFrame)
+}
+
+function pauseAutoplay() {
+  isAutoplaying = false
+  lastAutoplayFrameAt = 0
+  nextAutoplaySelectionAt = 0
+  if (autoplayFrame) {
+    window.cancelAnimationFrame(autoplayFrame)
+    autoplayFrame = 0
+  }
+}
+
+function toggleAutoplay() {
+  if (isAutoplaying) {
+    pauseAutoplay()
+    return
+  }
+
+  playAutoplay()
+}
+
+function startInitialAutoplay() {
+  if (hasStartedInitialAutoplay || !hasMounted || !hasInitializedDefaultPosition || maxWheel <= 0) return
+
+  hasStartedInitialAutoplay = true
+  playAutoplay()
+}
+
 function isInteractiveTarget(eventTarget: EventTarget | null) {
   return (
     eventTarget instanceof Element &&
@@ -208,6 +327,7 @@ function isInteractiveTarget(eventTarget: EventTarget | null) {
 }
 
 function applyPositionDelta(deltaY: number, wheelDistance: number) {
+  pauseAutoplay()
   input.dragY += deltaY / Math.max(wheelDistance, 1)
   wheelVelocity = 0
   virtualWheel = clamp(
@@ -216,6 +336,76 @@ function applyPositionDelta(deltaY: number, wheelDistance: number) {
     maxWheel,
   )
   scheduleScrollDrivenWheel()
+}
+
+function setCameraPan(panX: number, panY: number) {
+  input.panX = clamp(panX, -cameraPanLimit, cameraPanLimit)
+  input.panY = clamp(panY, -cameraPanLimit, cameraPanLimit)
+}
+
+function panCameraBy(deltaX: number, deltaY: number) {
+  pauseAutoplay()
+  setCameraPan(input.panX + deltaX, input.panY + deltaY)
+}
+
+function resetCameraPan() {
+  pauseAutoplay()
+  setCameraPan(0, 0)
+}
+
+function applyCameraPanDrag(deltaX: number, deltaY: number) {
+  if (!shell) return
+  pauseAutoplay()
+
+  const bounds = shell.getBoundingClientRect()
+  const xDistance = Math.max(bounds.width, 1)
+  const yDistance = Math.max(bounds.height, 1)
+
+  setCameraPan(
+    input.panX - (deltaX / xDistance) * 3.1,
+    input.panY + (deltaY / yDistance) * 2.7,
+  )
+}
+
+function handleScenePointerDown(event: PointerEvent) {
+  if (!shell || event.button !== 0 || !event.isPrimary || isInteractiveTarget(event.target)) return
+
+  pauseAutoplay()
+  event.preventDefault()
+  event.stopPropagation()
+  panPointerId = event.pointerId
+  lastPanClientX = event.clientX
+  lastPanClientY = event.clientY
+  input.active = true
+  wheelVelocity = 0
+  updatePointer(event.clientX, event.clientY)
+  shell.setPointerCapture(event.pointerId)
+}
+
+function handleScenePointerMove(event: PointerEvent) {
+  if (panPointerId !== event.pointerId) return
+
+  event.preventDefault()
+  event.stopPropagation()
+  const deltaX = event.clientX - lastPanClientX
+  const deltaY = event.clientY - lastPanClientY
+  lastPanClientX = event.clientX
+  lastPanClientY = event.clientY
+  updatePointer(event.clientX, event.clientY)
+  applyCameraPanDrag(deltaX, deltaY)
+}
+
+function handleScenePointerUp(event: PointerEvent) {
+  if (panPointerId !== event.pointerId) return
+
+  try {
+    shell?.releasePointerCapture(event.pointerId)
+  } catch {
+    // Pointer capture may already be released by the browser.
+  }
+  event.stopPropagation()
+  panPointerId = null
+  input.active = false
 }
 
 function handlePointerMove(event: PointerEvent) {
@@ -262,6 +452,7 @@ function handleTouchEnd() {
 function handleWheel(event: WheelEvent) {
   if (!shell || (!isInsideShell(event.clientX, event.clientY) && !isShellVisible())) return
 
+  pauseAutoplay()
   event.preventDefault()
   const viewportHeight = Math.max(window.innerHeight, 1)
   const wheelDelta = -(event.deltaY / viewportHeight) * mouseWheelSensitivity
@@ -307,6 +498,7 @@ function handleKeyboardScroll(event: KeyboardEvent) {
     return
   }
 
+  pauseAutoplay()
   wheelVelocity = clamp(
     wheelVelocity + step * wheelMomentumDecay,
     -wheelMomentumMaxVelocity,
@@ -342,38 +534,6 @@ function getEraMarkerStyle(eraSegment: (typeof eraSegments)[number]) {
   ].join(';')
 }
 
-function getEraProgress(position: number, eraSegment: (typeof eraSegments)[number]) {
-  const span = Math.max(1, eraSegment.endIndex - eraSegment.startIndex)
-  return clamp((position - eraSegment.startIndex) / span, 0, 1)
-}
-
-function getEraBackgroundMediaStyle(progress: number) {
-  const zoom = 1 + progress * 0.25
-  const objectX = clamp(50 + input.x * 3.4, 44, 56)
-  const objectY = clamp(50 + input.y * 2.4 + (0.5 - progress) * 5, 42, 58)
-
-  return [
-    `transform: scale(${zoom.toFixed(4)})`,
-    'transform-origin: center',
-    `object-position: ${objectX.toFixed(2)}% ${objectY.toFixed(2)}%`,
-    'will-change: transform, object-position',
-  ].join(';')
-}
-
-function getEraMarkerColor(eraKey: string) {
-  const colors: Record<string, string> = {
-    'ancient-epoch': '#67e8f9',
-    'awakening-era': '#22d3ee',
-    'golden-age': '#facc15',
-    'conflict-epoch': '#fb7185',
-    'transcendent-age': '#a78bfa',
-    'final-epoch': '#e2e8f0',
-    'singularity-conflict': '#f0abfc',
-  }
-
-  return colors[eraKey] ?? '#94a3b8'
-}
-
 function getActiveEraSegment(position: number) {
   const mainSegments = eraSegments.filter(segment => !segment.isOverlapping)
   return (
@@ -388,6 +548,23 @@ function getActiveEraSegment(position: number) {
     eraSegments[0] ??
     null
   )
+}
+
+function getDefaultTimelinePosition() {
+  const preferredEra =
+    eraSegments.find(segment => segment.key === defaultTimelineEraKey && segment.eventCount > 0) ??
+    eraSegments.find(segment => segment.key === defaultTimelineEraKey)
+
+  return clamp(preferredEra?.centerIndex ?? 0, 0, maxWheel)
+}
+
+function initializeDefaultTimelinePosition() {
+  const defaultPosition = getDefaultTimelinePosition()
+  virtualWheel = defaultPosition
+  input.wheel = defaultPosition
+  hasInitializedDefaultPosition = true
+  autoplayDirection = defaultPosition >= maxWheel ? -1 : 1
+  startInitialAutoplay()
 }
 
 function getVisibleConstellationLines(
@@ -414,6 +591,7 @@ function getVisibleConstellationLines(
           y2: clampConstellationPoint(nextControl.y),
           eraKey,
           isActive: control.index === selectedScreenIndex || nextControl.index === selectedScreenIndex,
+          length: Math.hypot(nextControl.x - control.x, nextControl.y - control.y),
         }
       })
   })
@@ -427,7 +605,8 @@ function handleStarPositions(event: TimelineStarPositionEvent) {
   projectedStarPositions = event.detail.positions
 }
 
-function selectStar(index: number) {
+function selectStar(index: number, source: 'user' | 'autoplay' = 'user') {
+  if (source === 'user') pauseAutoplay()
   selectedScreenIndex = index
 }
 
@@ -446,77 +625,25 @@ function clearHoveredStar(index: number) {
 }
 
 function setTimelinePosition(value: number) {
+  pauseAutoplay()
   wheelVelocity = 0
   virtualWheel = clamp(value, 0, maxWheel)
   updateScrollDrivenWheel()
 }
 
-function setTimelinePositionFromClientX(clientX: number) {
-  if (!sliderTrack || maxWheel <= 0) return
-
-  const bounds = sliderTrack.getBoundingClientRect()
-  const ratio = clamp((clientX - bounds.left) / Math.max(bounds.width, 1), 0, 1)
-  setTimelinePosition(ratio * maxWheel)
-}
-
-function handleSliderPointerDown(event: PointerEvent) {
-  event.preventDefault()
-  sliderPointerId = event.pointerId
-  sliderTrack?.setPointerCapture(event.pointerId)
-  setTimelinePositionFromClientX(event.clientX)
-}
-
-function handleSliderPointerMove(event: PointerEvent) {
-  if (sliderPointerId !== event.pointerId) return
-
-  event.preventDefault()
-  setTimelinePositionFromClientX(event.clientX)
-}
-
-function handleSliderPointerUp(event: PointerEvent) {
-  if (sliderPointerId !== event.pointerId) return
-
-  try {
-    sliderTrack?.releasePointerCapture(event.pointerId)
-  } catch {
-    // Pointer capture may already be released by the browser.
+function syncTimelineBackgroundVideoPlayback(event: Event) {
+  const video = event.currentTarget
+  if (video instanceof HTMLVideoElement) {
+    video.playbackRate = timelineBackgroundVideoPlaybackRate
   }
-  sliderPointerId = null
-}
-
-function handleSliderKeydown(event: KeyboardEvent) {
-  const stepByKey: Record<string, number | undefined> = {
-    ArrowUp: keyboardWheelStep,
-    ArrowRight: keyboardWheelStep,
-    PageUp: pageWheelStep,
-    ArrowDown: -keyboardWheelStep,
-    ArrowLeft: -keyboardWheelStep,
-    PageDown: -pageWheelStep,
-  }
-
-  if (event.key === 'Home') {
-    setTimelinePosition(0)
-    event.preventDefault()
-    return
-  }
-
-  if (event.key === 'End') {
-    setTimelinePosition(maxWheel)
-    event.preventDefault()
-    return
-  }
-
-  const step = stepByKey[event.key]
-  if (step === undefined) return
-
-  setTimelinePosition(input.wheel + step)
-  event.preventDefault()
 }
 
 onMount(() => {
+  hasMounted = true
   syncViewportMode()
   syncCanvasDpr()
   updateScrollDrivenWheel()
+  startInitialAutoplay()
   if (shell) shell.dataset.timelineInitialized = 'true'
   const timelineMobileWrapper = shell?.closest<HTMLElement>('#timeline-mobile-wrapper')
   timelineMobileWrapper?.classList.remove('timeline-mobile-inactive')
@@ -541,6 +668,8 @@ onMount(() => {
     window.removeEventListener('keydown', handleKeyboardScroll)
     window.removeEventListener('resize', handleResize)
     if (scrollFrame) window.cancelAnimationFrame(scrollFrame)
+    pauseAutoplay()
+    hasMounted = false
     timelineMobileWrapper?.classList.remove('timeline-mobile-active')
     timelineMobileWrapper?.classList.add('timeline-mobile-inactive')
   }
@@ -549,17 +678,23 @@ onMount(() => {
 onDestroy(() => {
   input.active = false
   lastTouchCenterY = null
-  sliderPointerId = null
+  panPointerId = null
   if (scrollFrame) window.cancelAnimationFrame(scrollFrame)
+  pauseAutoplay()
 })
 </script>
 
 <div
   bind:this={shell}
-  class="home-intro-environment home-intro-environment--background-ready pointer-events-auto"
+  class="home-intro-environment home-intro-environment--background-ready pointer-events-auto touch-none cursor-grab"
   class:home-intro-environment--screen-hover={selectedScreenIndex >= 0}
+  class:cursor-grabbing={panPointerId !== null}
   style="--portal-reveal-progress: 1"
   data-timeline-shell="true"
+  on:pointerdown|capture={handleScenePointerDown}
+  on:pointermove|capture={handleScenePointerMove}
+  on:pointerup|capture={handleScenePointerUp}
+  on:pointercancel|capture={handleScenePointerUp}
 >
   <div class="home-intro-background-curtain" aria-hidden="true"></div>
 
@@ -569,62 +704,37 @@ onDestroy(() => {
       {screens}
       {selectedScreenIndex}
       hoveredScreenIndex={hoveredStarIndex}
-      {sceneQuality}
       on:starpositions={handleStarPositions}
     />
   </Canvas>
 
-  {#if activeEraSegment}
-    {#key activeEraSegment.key}
-      <div
-        class="pointer-events-none absolute inset-0 z-0 overflow-hidden"
-        data-timeline-era-background={activeEraSegment.key}
-        aria-hidden="true"
-        transition:fade={{ duration: backgroundFadeDuration }}
-      >
-        {#if activeEraSegment.backgroundVideo}
-          <video
-            class="h-full w-full object-cover brightness-[0.88] saturate-[1.12]"
-            style={eraBackgroundMediaStyle}
-            src={activeEraSegment.backgroundVideo}
-            poster={activeEraSegment.backgroundImage}
-            autoplay
-            muted
-            loop
-            playsinline
-          ></video>
-        {:else if activeEraSegment.backgroundImage}
-          <img
-            class="h-full w-full object-cover brightness-[0.88] saturate-[1.12]"
-            style={eraBackgroundMediaStyle}
-            src={activeEraSegment.backgroundImage}
-            alt=""
-            loading="eager"
-          />
-        {/if}
-        <div class="absolute inset-0 bg-slate-950/20"></div>
-      </div>
-    {/key}
-  {/if}
-
-  <svg
-    class="pointer-events-none absolute inset-0 z-[4] h-full w-full"
-    viewBox="0 0 100 100"
-    preserveAspectRatio="none"
+  <div
+    class="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+    data-timeline-background-video="universe"
     aria-hidden="true"
   >
-    {#each constellationLines as line (line.id)}
-      <line
-        x1={line.x1}
-        y1={line.y1}
-        x2={line.x2}
-        y2={line.y2}
-        stroke={getEraMarkerColor(line.eraKey)}
-        stroke-width={line.isActive ? 0.16 : 0.08}
-        stroke-opacity={line.isActive ? 0.7 : 0.34}
-      />
-    {/each}
-  </svg>
+    <video
+      class="h-full w-full object-cover brightness-[0.88] saturate-[1.12]"
+      src={timelineBackgroundVideoSrc}
+      poster={timelineBackgroundPosterSrc}
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      on:loadedmetadata={syncTimelineBackgroundVideoPlayback}
+      on:play={syncTimelineBackgroundVideoPlayback}
+    ></video>
+    <div class="absolute inset-0 bg-slate-950/20"></div>
+  </div>
+
+  <div
+    class="pointer-events-auto absolute inset-0 z-[3] cursor-grab touch-none"
+    class:cursor-grabbing={panPointerId !== null}
+    aria-hidden="true"
+  ></div>
+
+  <TimelineConstellationOverlay lines={constellationLines} />
 
   <div class="pointer-events-none absolute inset-0 z-[5]" data-timeline-interactive>
     {#each visibleStarControls as control (control.index)}
@@ -642,14 +752,15 @@ onDestroy(() => {
         on:pointerdown={(event) => handleStarPointerDown(event, control.index)}
         on:click|stopPropagation={() => selectStar(control.index)}
       ></button>
-    {/each}
+      {/each}
   </div>
 
   <div
     class="pointer-events-auto absolute bottom-4 left-1/2 z-[6] flex w-[min(42rem,calc(100%_-_2rem))] -translate-x-1/2 flex-col gap-3 rounded-lg border border-cyan-100/20 bg-slate-950/72 px-4 py-3 text-slate-50 shadow-[0_0_1.4rem_rgba(8,145,178,0.24)] backdrop-blur-md"
+    style={`width: ${timelineDockWidth}px`}
     data-timeline-interactive
   >
-    <div class="flex min-w-0 items-end justify-between gap-4 text-left font-mono uppercase tracking-[0.16em] text-slate-50">
+    <div class="flex min-w-0 items-center justify-between gap-3 text-left font-mono uppercase tracking-[0.16em] text-slate-50">
       <div class="grid min-w-0 flex-1 gap-1">
         <div class="truncate text-[0.68rem] font-extrabold text-cyan-200">
           {activeEraSegment?.displayName ?? 'Unknown Era'}
@@ -658,6 +769,17 @@ onDestroy(() => {
           {activeTimelineEvent?.title ?? 'No timeline record'}
         </div>
       </div>
+
+      <TimelineCameraPanControls
+        step={cameraPanStep}
+        on:pan={(event) => panCameraBy(event.detail.x, event.detail.y)}
+        on:reset={resetCameraPan}
+      />
+
+      <TimelineViewModeButton on:click={pauseAutoplay} />
+
+      <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />
+
       <div class="grid shrink-0 gap-1 text-right">
         <div class="text-2xl font-black leading-none text-white sm:text-3xl">
           {#if activeTimelineEvent}
@@ -674,81 +796,23 @@ onDestroy(() => {
       </div>
     </div>
 
-    <div
-      bind:this={sliderTrack}
-      role="slider"
-      tabindex="0"
-      aria-label="Timeline position"
-      aria-orientation="horizontal"
-      aria-valuemin="0"
-      aria-valuemax={maxWheel}
-      aria-valuenow={Math.round(input.wheel * 100) / 100}
-      aria-valuetext={timelinePositionText}
-      class="pointer-events-auto relative h-7 w-full cursor-ew-resize touch-none rounded-full border border-cyan-100/20 bg-cyan-950/45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
-      data-timeline-interactive
-      on:pointerdown={handleSliderPointerDown}
-      on:pointermove={handleSliderPointerMove}
-      on:pointerup={handleSliderPointerUp}
-      on:pointercancel={handleSliderPointerUp}
-      on:keydown={handleSliderKeydown}
-    >
-      <div
-        class="absolute left-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-cyan-200/70 shadow-[0_0_1rem_rgba(103,232,249,0.74)]"
-        style={`width: ${sliderPercent}%`}
-      ></div>
-      <div
-        class="absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border border-white/80 bg-cyan-100 shadow-[0_0_1.2rem_rgba(165,243,252,0.9)]"
-        style={`left: calc(${sliderPercent}% - 0.5rem)`}
-      ></div>
-      {#each eraSegments as eraSegment (eraSegment.key)}
-        <div
-          class="absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-slate-950/80 shadow-[0_0_0.75rem_currentColor]"
-          class:h-2={eraSegment.isOverlapping}
-          class:w-2={eraSegment.isOverlapping}
-          class:rotate-45={eraSegment.isOverlapping}
-          class:ring-2={activeEraSegment?.key === eraSegment.key}
-          class:ring-white={activeEraSegment?.key === eraSegment.key}
-          style={getEraMarkerStyle(eraSegment)}
-          title={`${eraSegment.displayName}: Y${eraSegment.startYear} - Y${eraSegment.endYear}`}
-          aria-hidden="true"
-        ></div>
-      {/each}
-    </div>
+    <TimelinePositionSlider
+      {eraSegments}
+      activeEraKey={activeEraSegment?.key}
+      {maxWheel}
+      value={input.wheel}
+      valueText={timelinePositionText}
+      keyboardStep={keyboardWheelStep}
+      pageStep={pageWheelStep}
+      {getEraMarkerStyle}
+      on:positionchange={(event) => setTimelinePosition(event.detail.value)}
+    />
   </div>
 
-  {#if selectedScreen && selectedScreenView}
-    <div class="home-intro-copy home-intro-copy--status" aria-live="polite">
-      <div class="home-intro-copy__label">{selectedScreenView.kicker}</div>
-      <div class="home-intro-copy__stat">{selectedScreenView.stat}</div>
-    </div>
-
-    <aside
-      class="home-intro-copy home-intro-copy--feature"
-      style="bottom: clamp(11rem, 22vh, 14rem)"
-      aria-label={`Timeline event: ${selectedScreen.title}`}
-      data-timeline-interactive
-    >
-      <div class="home-intro-copy__label">{selectedScreenView.kicker}</div>
-      {#if selectedScreenView.stillSrc}
-        <img
-          class="aspect-video w-full rounded-md border border-white/15 object-cover shadow-[0_0.8rem_1.8rem_rgb(0_0_0_/_0.32)]"
-          src={selectedScreenView.stillSrc}
-          alt=""
-          loading="lazy"
-        />
-      {/if}
-      <h2>{selectedScreen.title}</h2>
-      <p>{selectedScreen.description}</p>
-      {#if selectedScreen.url}
-        <a
-          href={selectedScreen.url}
-          class="home-intro-copy__button"
-          data-sfx-hover="portal-hover"
-          data-sfx-click="portal-activate"
-        >
-          Open Record
-        </a>
-      {/if}
-    </aside>
-  {/if}
+  <TimelineSelectedRecord
+    {selectedScreen}
+    {selectedScreenView}
+    {selectedCardStyle}
+    {selectedStatusStyle}
+  />
 </div>

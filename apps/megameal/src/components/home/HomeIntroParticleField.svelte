@@ -110,6 +110,7 @@ export let axialSpinSpeed = 0
 export let axialSpinInputScale = 0
 export let pointSizeScale = 1
 export let opacityScale = 1
+export let motionEnabled = true
 
 let points: Points | null = null
 
@@ -212,11 +213,12 @@ function syncGeometryAttributes() {
 $: syncGeometryAttributes()
 
 useTask(() => {
-  const time = performance.now() * 0.001
+  const time = motionEnabled ? performance.now() * 0.001 : 0
   const motionTime = time * particleMotionScale
-  const pointerX = Number.isFinite(input.x) ? input.x : 0
+  const pointerX = motionEnabled && Number.isFinite(input.x) ? input.x : 0
+  const inputDragX = motionEnabled && Number.isFinite(input.dragX) ? input.dragX : 0
   const verticalScroll = wheel * scrollStep
-  const axialRotation = time * axialSpinSpeed + input.dragX * axialSpinInputScale
+  const axialRotation = time * axialSpinSpeed + inputDragX * axialSpinInputScale
   const axialCos = Math.cos(axialRotation)
   const axialSin = Math.sin(axialRotation)
 
@@ -226,7 +228,7 @@ useTask(() => {
   haloMaterial.uniforms.pixelRatio.value = pixelRatio
 
   particles.forEach((particle, index) => {
-    const spin = particle.angle + motionTime * particle.speed + input.dragX * 0.42
+    const spin = particle.angle + motionTime * particle.speed + inputDragX * 0.42
     const pulse = Math.sin(time * 1.25 + index) * 0.22 + 0.78
     const centerWeight = 1 - particle.radialT
     const strayOpacity = 1 - particle.strayT * 0.42

@@ -31,7 +31,7 @@ export const defaultEraConfig: EraConfigMap = {
     panToYear: 25000,
     backgroundImage: '/assets/banner/posters/universe-poster.webp',
     backgroundVideo: '/assets/banner/universbg0001-0121.webm',
-    backgroundVideoPlaybackRate: 0.2,
+    backgroundVideoPlaybackRate: 0.25,
   },
   'all-eras': {
     displayName: 'All-Eras',
@@ -41,7 +41,7 @@ export const defaultEraConfig: EraConfigMap = {
     panToYear: 25000,
     backgroundImage: '/assets/banner/posters/universe-poster.webp',
     backgroundVideo: '/assets/banner/universbg0001-0121.webm',
-    backgroundVideoPlaybackRate: 0.2,
+    backgroundVideoPlaybackRate: 0.25,
   },
   'ancient-epoch': {
     displayName: 'The Ancient Epoch',
