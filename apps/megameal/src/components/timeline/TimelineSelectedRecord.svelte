@@ -16,12 +16,17 @@ export let selectedStatusStyle = ''
     <div class="home-intro-copy__stat">{selectedScreenView.stat}</div>
   </div>
 
-  <aside
-    class="home-intro-copy home-intro-copy--feature"
+  <svelte:element
+    this={selectedScreen.url ? 'a' : 'aside'}
+    href={selectedScreen.url || undefined}
+    class="home-intro-copy home-intro-copy--feature home-intro-copy--timeline-selected"
+    class:home-intro-copy--timeline-link={!!selectedScreen.url}
     style={selectedCardStyle}
     aria-label={`Timeline event: ${selectedScreen.title}`}
     data-timeline-selected-card
     data-timeline-interactive
+    data-sfx-hover={selectedScreen.url ? 'portal-hover' : undefined}
+    data-sfx-click={selectedScreen.url ? 'portal-activate' : undefined}
   >
     <div class="home-intro-copy__label">{selectedScreenView.kicker}</div>
     {#if selectedScreenView.stillSrc}
@@ -34,15 +39,5 @@ export let selectedStatusStyle = ''
     {/if}
     <h2>{selectedScreen.title}</h2>
     <p>{selectedScreen.description}</p>
-    {#if selectedScreen.url}
-      <a
-        href={selectedScreen.url}
-        class="home-intro-copy__button"
-        data-sfx-hover="portal-hover"
-        data-sfx-click="portal-activate"
-      >
-        Open Record
-      </a>
-    {/if}
-  </aside>
+  </svelte:element>
 {/if}

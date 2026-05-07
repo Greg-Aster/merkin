@@ -1,7 +1,7 @@
 ---
-import SharedTreeView from '@merkin/blog-core/components/timeline/TimelineViewModes/TreeView.astro'
+import TreeView from './TreeView.svelte'
 
 const props = Astro.props
 ---
 
-<SharedTreeView {...props} />
+<TreeView {...props} client:load />

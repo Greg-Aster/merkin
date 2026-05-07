@@ -85,6 +85,7 @@ export function clamp(value: number, min: number, max: number) {
 }
 
 export function getTimelineDockWidth(width: number) {
+  if (width < 768) return Math.max(0, width - 24)
   return Math.min(672, Math.max(308, width - 400), Math.max(0, width - 32))
 }
 

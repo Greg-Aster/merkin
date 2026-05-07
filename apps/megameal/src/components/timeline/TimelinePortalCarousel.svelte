@@ -47,6 +47,9 @@ let shell: HTMLDivElement | null = null
 let panPointerId: number | null = null
 let lastPanClientX = 0
 let lastPanClientY = 0
+let panStartClientX = 0
+let panStartClientY = 0
+let hasDraggedScenePan = false
 let lastTouchCenterY: number | null = null
 let virtualWheel = 0
 let wheelVelocity = 0
@@ -66,6 +69,7 @@ let autoplayFrame = 0
 let lastAutoplayFrameAt = 0
 let nextAutoplaySelectionAt = 0
 let autoplayDirection: -1 | 1 = 1
+let autoplayVelocity = 0
 const wheelMomentumDecay = 2.4
 const wheelMomentumImpulse = 5.2
 const wheelMomentumMaxVelocity = 4.8
@@ -74,10 +78,13 @@ const mouseWheelMomentumImpulse = 3.6
 const mouseWheelMomentumMaxVelocity = 2.8
 const keyboardWheelStep = 0.82
 const pageWheelStep = 1.64
+const clickAwayDragThreshold = 7
 const cameraPanStep = 0.2
 const cameraPanLimit = 1.18
 const defaultTimelineEraKey = 'golden-age'
 const autoplaySpeed = 0.34
+const autoplayTurnMinSpeedScale = 0.14
+const autoplayVelocityEase = 2.4
 const autoplaySelectionIntervalMin = 2200
 const autoplaySelectionIntervalRange = 1900
 const timelineBackgroundVideoSrc = '/assets/banner/universbg0001-0121.webm'
@@ -108,8 +115,11 @@ $: timelineSideLaneWidth = Math.max(0, (viewportWidth - timelineDockWidth) / 2)
 $: timelineSideMargin = getTimelineSideMargin(viewportWidth)
 $: selectedCardWidth = getSelectedCardWidth(timelineSideLaneWidth, timelineSideMargin)
 $: selectedStatusWidth = getStatusWidth(timelineSideLaneWidth)
+$: timelineDockStyle = portraitMobile
+  ? `bottom: max(0.75rem, calc(env(safe-area-inset-bottom) + 0.75rem)); width: ${timelineDockWidth}px`
+  : `width: ${timelineDockWidth}px`
 $: selectedCardStyle = portraitMobile
-  ? 'bottom: max(8.75rem, calc(env(safe-area-inset-bottom) + 8.75rem)); max-width: min(15.25rem, calc(100% - 1.5rem))'
+  ? 'bottom: max(7.65rem, calc(env(safe-area-inset-bottom) + 7.65rem)); width: min(24rem, calc(100% - 1.5rem)); max-width: calc(100% - 1.5rem)'
   : `bottom: 1rem; width: ${selectedCardWidth}px; max-width: calc(100% - 2rem)`
 $: selectedStatusStyle = portraitMobile
   ? 'display: none'
@@ -247,6 +257,20 @@ function selectRandomVisibleAutoplayStar(timestamp: number) {
   scheduleNextAutoplaySelection(timestamp)
 }
 
+function getAutoplayTurnDistance() {
+  return clamp(maxWheel * 0.1, 0.8, 2.4)
+}
+
+function getAutoplayEdgeSpeedScale() {
+  if (maxWheel <= 0) return 1
+
+  const edgeDistance = Math.min(virtualWheel, maxWheel - virtualWheel)
+  const edgeRatio = clamp(edgeDistance / getAutoplayTurnDistance(), 0, 1)
+  const smoothedRatio = edgeRatio * edgeRatio * (3 - 2 * edgeRatio)
+
+  return autoplayTurnMinSpeedScale + smoothedRatio * (1 - autoplayTurnMinSpeedScale)
+}
+
 function runAutoplayFrame(timestamp: number) {
   if (!isAutoplaying) {
     autoplayFrame = 0
@@ -260,13 +284,19 @@ function runAutoplayFrame(timestamp: number) {
   lastAutoplayFrameAt = timestamp
 
   wheelVelocity = 0
-  const nextWheel = virtualWheel + autoplayDirection * autoplaySpeed * delta
+  const targetVelocity = autoplayDirection * autoplaySpeed * getAutoplayEdgeSpeedScale()
+  const velocityEase = 1 - Math.exp(-delta * autoplayVelocityEase)
+  autoplayVelocity += (targetVelocity - autoplayVelocity) * velocityEase
+
+  const nextWheel = virtualWheel + autoplayVelocity * delta
   if (nextWheel >= maxWheel) {
     virtualWheel = maxWheel
     autoplayDirection = -1
+    autoplayVelocity = 0
   } else if (nextWheel <= 0) {
     virtualWheel = 0
     autoplayDirection = 1
+    autoplayVelocity = 0
   } else {
     virtualWheel = nextWheel
   }
@@ -286,6 +316,7 @@ function playAutoplay() {
 
   isAutoplaying = true
   wheelVelocity = 0
+  autoplayVelocity = 0
   lastAutoplayFrameAt = 0
   selectRandomVisibleAutoplayStar(performance.now())
   if (!autoplayFrame) autoplayFrame = window.requestAnimationFrame(runAutoplayFrame)
@@ -293,6 +324,7 @@ function playAutoplay() {
 
 function pauseAutoplay() {
   isAutoplaying = false
+  autoplayVelocity = 0
   lastAutoplayFrameAt = 0
   nextAutoplaySelectionAt = 0
   if (autoplayFrame) {
@@ -376,6 +408,9 @@ function handleScenePointerDown(event: PointerEvent) {
   panPointerId = event.pointerId
   lastPanClientX = event.clientX
   lastPanClientY = event.clientY
+  panStartClientX = event.clientX
+  panStartClientY = event.clientY
+  hasDraggedScenePan = false
   input.active = true
   wheelVelocity = 0
   updatePointer(event.clientX, event.clientY)
@@ -389,6 +424,11 @@ function handleScenePointerMove(event: PointerEvent) {
   event.stopPropagation()
   const deltaX = event.clientX - lastPanClientX
   const deltaY = event.clientY - lastPanClientY
+  const totalDeltaX = event.clientX - panStartClientX
+  const totalDeltaY = event.clientY - panStartClientY
+  if (Math.hypot(totalDeltaX, totalDeltaY) >= clickAwayDragThreshold) {
+    hasDraggedScenePan = true
+  }
   lastPanClientX = event.clientX
   lastPanClientY = event.clientY
   updatePointer(event.clientX, event.clientY)
@@ -404,7 +444,9 @@ function handleScenePointerUp(event: PointerEvent) {
     // Pointer capture may already be released by the browser.
   }
   event.stopPropagation()
+  if (!hasDraggedScenePan) clearSelectedStar()
   panPointerId = null
+  hasDraggedScenePan = false
   input.active = false
 }
 
@@ -610,6 +652,11 @@ function selectStar(index: number, source: 'user' | 'autoplay' = 'user') {
   selectedScreenIndex = index
 }
 
+function clearSelectedStar() {
+  selectedScreenIndex = -1
+  hoveredStarIndex = -1
+}
+
 function handleStarPointerDown(event: PointerEvent, index: number) {
   event.preventDefault()
   event.stopPropagation()
@@ -755,12 +802,29 @@ onDestroy(() => {
       {/each}
   </div>
 
+  <div class="timeline-mobile-readout pointer-events-none">
+      <div class="timeline-mobile-readout__era truncate">
+        {activeEraSegment?.displayName ?? 'Unknown Era'}
+      </div>
+      <div class="timeline-mobile-readout__title truncate">
+        {activeTimelineEvent?.title ?? 'No timeline record'}
+      </div>
+      <div class="timeline-mobile-readout__year">
+        {#if activeTimelineEvent}
+          Y{activeTimelineEvent.year}
+        {:else}
+          Y--
+        {/if}
+      </div>
+    </div>
+
   <div
-    class="pointer-events-auto absolute bottom-4 left-1/2 z-[6] flex w-[min(42rem,calc(100%_-_2rem))] -translate-x-1/2 flex-col gap-3 rounded-lg border border-cyan-100/20 bg-slate-950/72 px-4 py-3 text-slate-50 shadow-[0_0_1.4rem_rgba(8,145,178,0.24)] backdrop-blur-md"
-    style={`width: ${timelineDockWidth}px`}
+    class="pointer-events-auto absolute bottom-4 left-1/2 z-[6] flex w-[min(42rem,calc(100%_-_2rem))] -translate-x-1/2 flex-col gap-2 rounded-lg border border-cyan-100/20 bg-slate-950/72 px-3 py-2.5 text-slate-50 shadow-[0_0_1.4rem_rgba(8,145,178,0.24)] backdrop-blur-md md:gap-3 md:px-4 md:py-3"
+    style={timelineDockStyle}
+    data-timeline-dock
     data-timeline-interactive
   >
-    <div class="flex min-w-0 items-center justify-between gap-3 text-left font-mono uppercase tracking-[0.16em] text-slate-50">
+    <div class="hidden min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-left font-mono uppercase tracking-[0.13em] text-slate-50 md:grid md:grid-cols-[minmax(0,1fr)_auto_auto] md:gap-3 md:tracking-[0.16em]">
       <div class="grid min-w-0 flex-1 gap-1">
         <div class="truncate text-[0.68rem] font-extrabold text-cyan-200">
           {activeEraSegment?.displayName ?? 'Unknown Era'}
@@ -770,6 +834,35 @@ onDestroy(() => {
         </div>
       </div>
 
+      <div class="col-span-2 flex min-w-0 items-center justify-center gap-2 md:col-span-1">
+        <TimelineCameraPanControls
+          step={cameraPanStep}
+          on:pan={(event) => panCameraBy(event.detail.x, event.detail.y)}
+          on:reset={resetCameraPan}
+        />
+
+        <TimelineViewModeButton on:click={pauseAutoplay} />
+
+        <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />
+      </div>
+
+      <div class="col-start-2 row-start-1 grid min-w-0 shrink-0 gap-1 text-right md:col-start-auto md:row-start-auto">
+        <div class="text-lg font-black leading-none text-white md:text-2xl lg:text-3xl">
+          {#if activeTimelineEvent}
+            Y{activeTimelineEvent.year}
+          {:else}
+            Y--
+          {/if}
+        </div>
+        {#if activeEraSegment}
+          <div class="max-w-[9rem] truncate text-[0.55rem] font-bold tracking-[0.12em] text-slate-200/76 md:max-w-none md:text-[0.62rem]">
+            Y{activeEraSegment.startYear} - Y{activeEraSegment.endYear}
+          </div>
+        {/if}
+      </div>
+    </div>
+
+    <div class="flex min-w-0 items-center justify-center gap-2 md:hidden">
       <TimelineCameraPanControls
         step={cameraPanStep}
         on:pan={(event) => panCameraBy(event.detail.x, event.detail.y)}
@@ -779,21 +872,6 @@ onDestroy(() => {
       <TimelineViewModeButton on:click={pauseAutoplay} />
 
       <TimelineAutoplayButton {isAutoplaying} on:click={toggleAutoplay} />
-
-      <div class="grid shrink-0 gap-1 text-right">
-        <div class="text-2xl font-black leading-none text-white sm:text-3xl">
-          {#if activeTimelineEvent}
-            Y{activeTimelineEvent.year}
-          {:else}
-            Y--
-          {/if}
-        </div>
-        {#if activeEraSegment}
-          <div class="text-[0.62rem] font-bold text-slate-200/76">
-            Y{activeEraSegment.startYear} - Y{activeEraSegment.endYear}
-          </div>
-        {/if}
-      </div>
     </div>
 
     <TimelinePositionSlider

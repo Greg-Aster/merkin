@@ -146,11 +146,14 @@ const sharedProps: Omit<Props, 'homeLayout'> & {
   {(isTimelineRoute || isTimeline2DRoute) && (
     <Fragment slot="timeline-banner-content">
       {isTimelineRoute ? (
-        <TimelinePortalCarousel
-          events={timelineManifest.items}
-          eraConfig={defaultEraConfig}
-          client:only="svelte"
-        />
+        <>
+          <div id="megameal-timeline-route-marker" hidden></div>
+          <TimelinePortalCarousel
+            events={timelineManifest.items}
+            eraConfig={defaultEraConfig}
+            client:only="svelte"
+          />
+        </>
       ) : (
         <div class="relative h-full w-full">
           <LegacyTimelineBanner
