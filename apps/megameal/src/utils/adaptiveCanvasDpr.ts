@@ -1,6 +1,7 @@
 type AdaptiveCanvasDprOptions = {
   getMaxDpr: () => number
   setDpr: (dpr: number) => void
+  initialDpr?: number
   minDpr?: number
   slowFrameMs?: number
   stableFrameMs?: number
@@ -14,7 +15,7 @@ export type AdaptiveCanvasDprController = {
   sync: () => void
 }
 
-const defaultDprSteps = [1, 1.25, 1.5]
+const defaultDprSteps = [1, 1.25, 1.5, 1.75, 2]
 
 function getStepForDpr(dpr: number, minDpr: number) {
   return defaultDprSteps.find(step => step >= dpr && step >= minDpr) ?? defaultDprSteps[0]
@@ -40,15 +41,19 @@ function getNextHigherStep(currentDpr: number, maxDpr: number) {
 export function createAdaptiveCanvasDprController({
   getMaxDpr,
   setDpr,
+  initialDpr,
   minDpr = 1,
   slowFrameMs = 42,
-  stableFrameMs = 23,
+  stableFrameMs = 30,
   slowFrameCount = 24,
-  stableFrameCount = 240,
+  stableFrameCount = 180,
 }: AdaptiveCanvasDprOptions): AdaptiveCanvasDprController {
   let frame = 0
   let lastFrameAt = 0
-  let currentDpr = getBestStep(getMaxDpr(), minDpr)
+  let currentDpr = Math.min(
+    getStepForDpr(initialDpr ?? getMaxDpr(), minDpr),
+    getBestStep(getMaxDpr(), minDpr),
+  )
   let slowFrames = 0
   let stableFrames = 0
 

@@ -199,8 +199,8 @@ function getHomeQualityContext() {
 function getHomeMaxCanvasDpr() {
   if (typeof window === 'undefined') return 1
 
-  const { devicePixelRatio, lowMemoryDevice, reducedData } = getHomeQualityContext()
-  const dprCap = lowMemoryDevice || reducedData ? 1 : 1.5
+  const { compactViewport, devicePixelRatio, lowMemoryDevice, reducedData } = getHomeQualityContext()
+  const dprCap = lowMemoryDevice || reducedData ? 1 : compactViewport ? 1.5 : 2
 
   return Math.min(devicePixelRatio, dprCap)
 }
@@ -638,6 +638,7 @@ onMount(() => {
   syncViewportMode()
   adaptiveDprController = createAdaptiveCanvasDprController({
     getMaxDpr: getHomeMaxCanvasDpr,
+    initialDpr: 1.5,
     setDpr: setCanvasDpr,
   })
   adaptiveDprController.start()

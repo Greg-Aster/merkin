@@ -167,12 +167,15 @@ function syncViewportMode() {
 }
 
 function getTimelineMaxCanvasDpr() {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined') return 1
 
   const lowMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   if (lowMotion) return 1
 
-  return Math.min(Math.max(1, window.devicePixelRatio || 1), 1.5)
+  const compactViewport = window.innerWidth <= 760 || window.innerHeight <= 640
+  const dprCap = compactViewport ? 1.5 : 2
+
+  return Math.min(Math.max(1, window.devicePixelRatio || 1), dprCap)
 }
 
 function setCanvasDpr(nextDpr: number) {
@@ -712,6 +715,7 @@ onMount(() => {
   syncViewportMode()
   adaptiveDprController = createAdaptiveCanvasDprController({
     getMaxDpr: getTimelineMaxCanvasDpr,
+    initialDpr: 1.5,
     setDpr: setCanvasDpr,
   })
   adaptiveDprController.start()
