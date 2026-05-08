@@ -53,10 +53,7 @@ const videoBannerPost = featuredVideo
         description:
           'Browse MEGA MEAL video transmissions, trailer breakdowns, field reports, and corporate media fragments.',
         image: getVideoThumbnail(featuredVideo),
-        bannerType: 'video',
-        bannerData: {
-          videoId: featuredVideo.data.videoId,
-        },
+        bannerType: 'none',
         oneColumn: true,
         showToc: false,
       },
@@ -79,10 +76,10 @@ const videoBannerPost = featuredVideo
   description={videoBannerPost.data.description}
   banner={videoBannerPost.data.image}
   post={videoBannerPost}
-  backgroundImage={videoBannerPost.data.image}
+  backgroundImage="none"
   oneColumn={true}
 >
-  <section class="mt-3 w-full space-y-5 pb-8 sm:mt-6 sm:space-y-6 sm:pb-10">
+  <section data-videos-archive class="mt-2 w-full space-y-5 pb-8 sm:mt-2 sm:space-y-6 sm:pb-10">
     {featuredVideo && (
       <article
         class="card-base relative isolate -mx-4 min-h-[17.5rem] overflow-hidden rounded-none bg-black text-white onload-animation sm:mx-0 sm:min-h-[28rem] sm:rounded-2xl"
@@ -90,12 +87,12 @@ const videoBannerPost = featuredVideo
         <img
           src={getVideoThumbnail(featuredVideo)}
           alt=""
-          class="absolute inset-0 h-full w-full object-cover opacity-65"
+          class="absolute inset-0 h-full w-full object-cover opacity-100"
           loading="eager"
           decoding="async"
         />
-        <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.96)_0%,rgba(2,6,23,0.72)_42%,rgba(2,6,23,0.16)_100%)]"></div>
-        <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/45 to-transparent"></div>
+        <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.94)_0%,rgba(2,6,23,0.72)_30%,rgba(2,6,23,0.16)_70%)]"></div>
+        <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/55 to-transparent"></div>
 
         <div class="relative z-10 flex min-h-[17.5rem] max-w-3xl flex-col justify-end p-3.5 sm:min-h-[28rem] sm:p-7 lg:p-9">
           <div class="mb-2 inline-flex w-fit items-center gap-1.5 rounded-full border border-cyan-300/25 bg-black/45 px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.16em] text-cyan-100 sm:mb-3 sm:gap-2 sm:px-3 sm:text-[10px] sm:tracking-[0.22em]">
@@ -180,6 +177,16 @@ const videoBannerPost = featuredVideo
             <Icon name="material-symbols:chevron-right-rounded" class="h-8 w-8" />
           </button>
           <div
+            data-video-rail-affordance={`category-${slugify(row.category)}`}
+            aria-hidden="true"
+            hidden
+            class="pointer-events-none absolute -right-4 top-0 bottom-2 z-10 flex w-16 items-center justify-end bg-gradient-to-l from-[var(--page-bg)] to-transparent pr-3 sm:hidden"
+          >
+            <span class="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/65 text-white shadow-xl backdrop-blur">
+              <Icon name="material-symbols:chevron-right-rounded" class="h-6 w-6" />
+            </span>
+          </div>
+          <div
             data-video-rail={`category-${slugify(row.category)}`}
             class="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto overscroll-x-contain px-4 pb-2 scroll-smooth [scrollbar-width:none] [-webkit-overflow-scrolling:touch] sm:mx-0 sm:gap-4 sm:px-0 sm:pb-3 sm:[scrollbar-width:thin]"
           >
@@ -256,6 +263,16 @@ const videoBannerPost = featuredVideo
           <Icon name="material-symbols:chevron-right-rounded" class="h-8 w-8" />
         </button>
         <div
+          data-video-rail-affordance="all-transmissions"
+          aria-hidden="true"
+          hidden
+          class="pointer-events-none absolute -right-4 top-0 bottom-2 z-10 flex w-16 items-center justify-end bg-gradient-to-l from-[var(--page-bg)] to-transparent pr-3 sm:hidden"
+        >
+          <span class="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/65 text-white shadow-xl backdrop-blur">
+            <Icon name="material-symbols:chevron-right-rounded" class="h-6 w-6" />
+          </span>
+        </div>
+        <div
           data-video-rail="all-transmissions"
           class="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto overscroll-x-contain px-4 pb-2 scroll-smooth [scrollbar-width:none] [-webkit-overflow-scrolling:touch] sm:mx-0 sm:gap-4 sm:px-0 sm:pb-3 sm:[scrollbar-width:thin]"
         >
@@ -303,6 +320,9 @@ const videoBannerPost = featuredVideo
     const videoRails = Array.from(
       document.querySelectorAll<HTMLElement>('[data-video-rail]'),
     )
+    const videoRailAffordances = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-video-rail-affordance]'),
+    )
     const scrollEdgeTolerance = 6
 
     function getRailControls(rail: HTMLElement) {
@@ -310,6 +330,14 @@ const videoBannerPost = featuredVideo
 
       return videoRailControls.filter(control => {
         return control.dataset.videoRailTarget === target
+      })
+    }
+
+    function getRailAffordances(rail: HTMLElement) {
+      const target = rail.dataset.videoRail
+
+      return videoRailAffordances.filter(affordance => {
+        return affordance.dataset.videoRailAffordance === target
       })
     }
 
@@ -327,18 +355,22 @@ const videoBannerPost = featuredVideo
       const lastItemVisible =
         lastItemBounds &&
         lastItemBounds.right <= railBounds.right + scrollEdgeTolerance
+      const atStart =
+        firstItemVisible || rail.scrollLeft <= scrollEdgeTolerance
+      const atEnd =
+        lastItemVisible || rail.scrollLeft >= maxScroll - scrollEdgeTolerance
 
       getRailControls(rail).forEach(control => {
         const direction = Number(control.dataset.videoRailDirection || '1')
-        const atStart =
-          firstItemVisible || rail.scrollLeft <= scrollEdgeTolerance
-        const atEnd =
-          lastItemVisible || rail.scrollLeft >= maxScroll - scrollEdgeTolerance
 
         const shouldHide =
           !hasOverflow || (direction < 0 && atStart) || (direction > 0 && atEnd)
         control.hidden = shouldHide
         control.disabled = shouldHide
+      })
+
+      getRailAffordances(rail).forEach(affordance => {
+        affordance.hidden = !hasOverflow || atEnd
       })
     }
 
@@ -391,3 +423,19 @@ const videoBannerPost = featuredVideo
     updateAllRailControls()
   </script>
 </MainGridLayout>
+
+<style is:global>
+  body:has([data-videos-archive]) #banner-container {
+    margin-top: 0;
+  }
+
+  body:has([data-videos-archive]) #main-panel-wrapper {
+    top: 54px;
+  }
+
+  @media (min-width: 768px) {
+    body:has([data-videos-archive]) #main-panel-wrapper {
+      top: 4.5rem;
+    }
+  }
+</style>

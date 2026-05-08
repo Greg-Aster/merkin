@@ -17,6 +17,20 @@ const browserName = normalizeBrowserName(
 const appOrigin = `http://127.0.0.1:${process.env.GAME_DEV_PORT || 4322}`
 const deployedLevelIds = readDeployedLevelIds()
 
+function createEditorSmokeCheck(name, url) {
+  return {
+    name,
+    url,
+    postLoadDelayMs: 7000,
+    interact: async page => {
+      await page.locator('.editor-shell').first().waitFor({
+        state: 'visible',
+        timeout: 10000,
+      })
+    },
+  }
+}
+
 function createLevelSmokeCheck(levelId) {
   return {
     name: `level:${levelId}`,
@@ -53,11 +67,8 @@ const checks = [
     url: `${appOrigin}/`,
     postLoadDelayMs: 5000,
   },
-  {
-    name: 'editor',
-    url: `${appOrigin}/?editor=1`,
-    postLoadDelayMs: 7000,
-  },
+  createEditorSmokeCheck('editor', `${appOrigin}/?editor=1`),
+  createEditorSmokeCheck('editor-trailing-slash', `${appOrigin}/?editor=1/`),
   ...deployedLevelIds.map(createLevelSmokeCheck),
 ]
 

@@ -1,4 +1,8 @@
 @media (max-width: 768px) {
+  body:has(#banner-container[data-banner-scene='none']):not(:has([data-videos-archive])) #main-panel-wrapper {
+    top: 2.75rem !important;
+  }
+
   #banner-container.has-video-banner {
     margin-top: calc(3.375rem + 0.65rem) !important;
   }

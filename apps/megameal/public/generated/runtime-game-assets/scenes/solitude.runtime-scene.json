@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-02T01:30:09.509Z",
+  "generatedAt": "2026-05-08T00:25:17.729Z",
   "levelId": "solitude",
   "sceneId": "solitude",
   "source": {
@@ -54,6 +54,17 @@
             1.5,
             -24
           ]
+        },
+        "ground": {
+          "mode": "authored-ground",
+          "visualSource": "scene-actors",
+          "collisionSource": "baked-heightfield",
+          "groundActorIds": [
+            "solitude-ground-plateau",
+            "solitude-ground-dais"
+          ],
+          "terrainManifestUrl": "/terrain/solitude.manifest.json",
+          "requiredWalkableSurfaceId": "solitude-terrain"
         },
         "features": {
           "starMap": true,
@@ -170,6 +181,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb"
+          },
+          "material": {
+            "color": "#555e69",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.97,
+            "envMapIntensity": 0.18,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "editor": {
@@ -215,6 +239,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb"
+          },
+          "material": {
+            "color": "#555e69",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.97,
+            "envMapIntensity": 0.18,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "editor": {
@@ -1913,6 +1950,17 @@
       "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb"
     ],
     "terrainManifestUrl": "/terrain/solitude.manifest.json",
+    "ground": {
+      "mode": "authored-ground",
+      "visualSource": "scene-actors",
+      "collisionSource": "baked-heightfield",
+      "groundActorIds": [
+        "solitude-ground-plateau",
+        "solitude-ground-dais"
+      ],
+      "terrainManifestUrl": "/terrain/solitude.manifest.json",
+      "requiredWalkableSurfaceId": "solitude-terrain"
+    },
     "worldPartitionUrl": "/runtime-world-partitions/solitude.partition.json"
   }
 }

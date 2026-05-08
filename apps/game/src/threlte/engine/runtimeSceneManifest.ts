@@ -23,6 +23,7 @@ export interface RuntimeSceneManifest {
     requiredAssetUrls: string[]
     runtimeAssetUrls: string[]
     terrainManifestUrl?: string
+    ground?: Record<string, unknown>
     worldPartitionUrl?: string
   }
 }
@@ -39,6 +40,13 @@ export function getRuntimeSceneManifestUrl(levelId: string) {
 function getTerrainManifestUrl(levelDefinition: LevelDefinition) {
   const terrain = (levelDefinition.settings as any)?.level?.collision?.terrain
   return typeof terrain?.manifestUrl === 'string' ? terrain.manifestUrl : undefined
+}
+
+function getGroundContract(levelDefinition: LevelDefinition) {
+  const ground = (levelDefinition.settings as any)?.level?.ground
+  return ground && typeof ground === 'object'
+    ? (ground as Record<string, unknown>)
+    : undefined
 }
 
 export function createRuntimeSceneManifest(input: {
@@ -68,6 +76,7 @@ export function createRuntimeSceneManifest(input: {
       requiredAssetUrls: input.buildReport.requiredAssetUrls,
       runtimeAssetUrls: input.buildReport.runtimeAssetUrls,
       terrainManifestUrl: getTerrainManifestUrl(input.levelDefinition),
+      ground: getGroundContract(input.levelDefinition),
       worldPartitionUrl: input.worldPartitionUrl,
     },
   }
@@ -154,6 +163,9 @@ export function validateRuntimeSceneManifest(
     errors.push(
       'Runtime runtimeAssetUrls do not match build report runtimeAssetUrls.',
     )
+  }
+  if (!runtime.ground) {
+    errors.push('Runtime ground contract is missing.')
   }
 
   for (const url of [

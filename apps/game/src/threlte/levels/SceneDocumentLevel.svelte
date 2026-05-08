@@ -269,6 +269,23 @@ function getTerrainCollisionSettings(settings: SceneSettings) {
     | undefined
 }
 
+function shouldShowTerrainVisualChunks(level: string, settings: SceneSettings) {
+  const groundContract = settings.level?.ground
+  const visualSource = groundContract?.visualSource
+
+  if (groundContract?.mode === 'hybrid' || visualSource === 'terrain-chunks') {
+    return true
+  }
+
+  if (visualSource === 'scene-actors' || visualSource === 'none') {
+    return false
+  }
+
+  const workflow = getLevelCollisionWorkflow(level, settings)
+  if (workflow.terrainVisualChunks === 'off') return false
+  return true
+}
+
 async function loadSceneTerrainRuntimeData(
   level: string,
   settings: SceneSettings,
@@ -289,8 +306,8 @@ async function loadSceneTerrainRuntimeData(
   }
 
   const manifest = await response.json()
-  const workflow = getLevelCollisionWorkflow(level, settings)
-  const hasAuthoredGroundVisuals = (workflow.groundActorIds?.length ?? 0) > 0
+  const groundContract = settings.level?.ground
+  const hasAuthoredGroundVisuals = groundContract?.visualSource === 'scene-actors'
   return loadTerrainRuntimeComponentData({
     levelId: level,
     source: terrainSettings.runtimeSource ?? 'editor-manifest',
@@ -298,6 +315,7 @@ async function loadSceneTerrainRuntimeData(
     manifestUrl: terrainSettings.manifestUrl,
     boundsFallback: manifest.physics?.bounds ?? null,
     showVisualSurface: !hasAuthoredGroundVisuals,
+    showVisualChunks: shouldShowTerrainVisualChunks(level, settings),
   })
 }
 

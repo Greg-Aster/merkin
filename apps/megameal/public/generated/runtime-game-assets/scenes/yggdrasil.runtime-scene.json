@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-02T01:30:09.509Z",
+  "generatedAt": "2026-05-08T00:25:17.729Z",
   "levelId": "yggdrasil",
   "sceneId": "yggdrasil",
   "source": {
@@ -49,6 +49,20 @@
             3.7,
             -118
           ]
+        },
+        "ground": {
+          "mode": "authored-ground",
+          "visualSource": "scene-actors",
+          "collisionSource": "baked-heightfield",
+          "groundActorIds": [
+            "yggdrasil-ground",
+            "yggdrasil-island-shelf",
+            "yggdrasil-dais",
+            "yggdrasil-bifrost-path",
+            "yggdrasil-spawn-pad"
+          ],
+          "terrainManifestUrl": "/terrain/yggdrasil.manifest.json",
+          "requiredWalkableSurfaceId": "yggdrasil-ground"
         },
         "skyboxPreset": "observatory",
         "features": {
@@ -10080,6 +10094,20 @@
       "/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb"
     ],
     "terrainManifestUrl": "/terrain/yggdrasil.manifest.json",
+    "ground": {
+      "mode": "authored-ground",
+      "visualSource": "scene-actors",
+      "collisionSource": "baked-heightfield",
+      "groundActorIds": [
+        "yggdrasil-ground",
+        "yggdrasil-island-shelf",
+        "yggdrasil-dais",
+        "yggdrasil-bifrost-path",
+        "yggdrasil-spawn-pad"
+      ],
+      "terrainManifestUrl": "/terrain/yggdrasil.manifest.json",
+      "requiredWalkableSurfaceId": "yggdrasil-ground"
+    },
     "worldPartitionUrl": "/runtime-world-partitions/yggdrasil.partition.json"
   }
 }

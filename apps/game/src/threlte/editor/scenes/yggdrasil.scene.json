@@ -25,6 +25,20 @@
           -118
         ]
       },
+      "ground": {
+        "mode": "authored-ground",
+        "visualSource": "scene-actors",
+        "collisionSource": "baked-heightfield",
+        "groundActorIds": [
+          "yggdrasil-ground",
+          "yggdrasil-island-shelf",
+          "yggdrasil-dais",
+          "yggdrasil-bifrost-path",
+          "yggdrasil-spawn-pad"
+        ],
+        "terrainManifestUrl": "/terrain/yggdrasil.manifest.json",
+        "requiredWalkableSurfaceId": "yggdrasil-ground"
+      },
       "skyboxPreset": "observatory",
       "features": {
         "starMap": true,

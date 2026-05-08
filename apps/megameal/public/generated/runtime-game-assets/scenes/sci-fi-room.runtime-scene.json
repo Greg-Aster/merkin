@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-02T01:30:09.509Z",
+  "generatedAt": "2026-05-08T00:25:17.729Z",
   "levelId": "sci-fi-room",
   "sceneId": "sci-fi-room",
   "source": {
@@ -49,6 +49,18 @@
             3.31,
             0
           ]
+        },
+        "ground": {
+          "mode": "authored-ground",
+          "visualSource": "scene-actors",
+          "collisionSource": "baked-heightfield",
+          "groundActorIds": [
+            "sci-fi-floor-interior-slab",
+            "sci-fi-floor-courtyard-slab",
+            "sci-fi-floor-wasteland-tile-4-4"
+          ],
+          "terrainManifestUrl": "/terrain/sci-fi-room.manifest.json",
+          "requiredWalkableSurfaceId": "sci-fi-room-terrain"
         },
         "features": {
           "ocean": true,
@@ -2352,6 +2364,18 @@
       "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
       "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
     ],
-    "terrainManifestUrl": "/terrain/sci-fi-room.manifest.json"
+    "terrainManifestUrl": "/terrain/sci-fi-room.manifest.json",
+    "ground": {
+      "mode": "authored-ground",
+      "visualSource": "scene-actors",
+      "collisionSource": "baked-heightfield",
+      "groundActorIds": [
+        "sci-fi-floor-interior-slab",
+        "sci-fi-floor-courtyard-slab",
+        "sci-fi-floor-wasteland-tile-4-4"
+      ],
+      "terrainManifestUrl": "/terrain/sci-fi-room.manifest.json",
+      "requiredWalkableSurfaceId": "sci-fi-room-terrain"
+    }
   }
 }

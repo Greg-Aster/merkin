@@ -164,6 +164,14 @@ function normalizeLevelId(levelId: string | null | undefined) {
   return resolveRegistryLevelId(levelId, levelRegistry)
 }
 
+function getUrlFlagValue(params: URLSearchParams | null, key: string) {
+  return params?.get(key)?.trim().replace(/\/+$/, '') ?? ''
+}
+
+function isUrlFlagEnabled(params: URLSearchParams | null, key: string) {
+  return getUrlFlagValue(params, key) === '1'
+}
+
 function getLevelRenderConfig(levelId: string) {
   const normalizedLevel = normalizeLevelId(levelId)
   const levelEntry = getLevelRegistryEntry(normalizedLevel, levelRegistry)
@@ -781,8 +789,8 @@ async function initializeThrelte() {
       typeof window !== 'undefined'
         ? new URLSearchParams(window.location.search)
         : null
-    const shouldEnableEditor = urlParams?.get('editor') === '1'
-    const shouldShowDebugPanel = urlParams?.get('debug') === '1'
+    const shouldEnableEditor = isUrlFlagEnabled(urlParams, 'editor')
+    const shouldShowDebugPanel = isUrlFlagEnabled(urlParams, 'debug')
     const requestedLevel = normalizeLevelId(urlParams?.get('level'))
     editorEnabled = false
     collisionOverlayEnabled = false

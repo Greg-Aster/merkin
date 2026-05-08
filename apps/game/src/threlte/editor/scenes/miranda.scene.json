@@ -11,6 +11,16 @@
           -13.8
         ]
       },
+      "ground": {
+        "mode": "scene-authored",
+        "visualSource": "scene-actors",
+        "collisionSource": "scene-colliders",
+        "groundActorIds": [
+          "miranda-floor-main",
+          "miranda-floor-upper"
+        ],
+        "requiredWalkableSurfaceId": "miranda-floor-main"
+      },
       "skyboxPreset": "observatory",
       "features": {
         "styles": true,

@@ -511,6 +511,10 @@ function handleTouchStart(event: TouchEvent) {
   wheelVelocity = 0
   lastPointerX = touch.clientX
   lastPointerY = touch.clientY
+  pointerDownClientX = touch.clientX
+  pointerDownClientY = touch.clientY
+  pointerDragDistance = 0
+  pointerDownStartedOnScreen = isPointerOverActiveScreen(touch.clientX, touch.clientY)
   updatePointer(touch.clientX, touch.clientY)
   playPortalDragSfx()
 }
@@ -520,6 +524,13 @@ function handleTouchMove(event: TouchEvent) {
   if (!touch || activeTouchId === null) return
 
   event.preventDefault()
+  pointerDragDistance = Math.max(
+    pointerDragDistance,
+    Math.hypot(
+      touch.clientX - pointerDownClientX,
+      touch.clientY - pointerDownClientY,
+    ),
+  )
   const touchWheelDistance = Math.max(
     220,
     Math.min(window.innerHeight * 0.46, 360),
@@ -531,8 +542,22 @@ function handleTouchEnd(event: TouchEvent) {
   const touch = getChangedTouch(event)
   if (!touch) return
 
+  const shouldNavigate =
+    event.type === 'touchend' &&
+    activeTouchId !== null &&
+    pointerDownStartedOnScreen &&
+    pointerDragDistance <= 8 &&
+    isPointerOverActiveScreen(touch.clientX, touch.clientY)
+
   input.active = false
   activeTouchId = null
+  pointerDownStartedOnScreen = false
+  pointerDragDistance = 0
+
+  if (shouldNavigate) {
+    event.preventDefault()
+    navigateActiveScreen()
+  }
 }
 
 function handleWheel(event: WheelEvent) {
