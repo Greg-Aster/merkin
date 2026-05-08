@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-02T01:30:09.509Z",
+  "generatedAt": "2026-05-08T00:25:17.729Z",
   "levelId": "observatory",
   "sceneId": "observatory",
   "source": {
@@ -53,6 +53,14 @@
             1.8,
             -49.5
           ]
+        },
+        "ground": {
+          "mode": "terrain-chunks",
+          "visualSource": "terrain-chunks",
+          "collisionSource": "baked-heightfield",
+          "groundActorIds": [],
+          "terrainManifestUrl": "/terrain/observatory-environment.manifest.json",
+          "requiredWalkableSurfaceId": "observatory-terrain"
         },
         "features": {
           "ocean": true,
@@ -162,6 +170,14 @@
     "requiredRenderActorIds": [],
     "requiredAssetUrls": [],
     "runtimeAssetUrls": [],
-    "terrainManifestUrl": "/terrain/observatory-environment.manifest.json"
+    "terrainManifestUrl": "/terrain/observatory-environment.manifest.json",
+    "ground": {
+      "mode": "terrain-chunks",
+      "visualSource": "terrain-chunks",
+      "collisionSource": "baked-heightfield",
+      "groundActorIds": [],
+      "terrainManifestUrl": "/terrain/observatory-environment.manifest.json",
+      "requiredWalkableSurfaceId": "observatory-terrain"
+    }
   }
 }

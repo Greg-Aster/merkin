@@ -16,6 +16,7 @@ const SHARED_LEVEL_SETTING_KEYS = [
   'ambientParticles',
   'ambientAudio',
   'collision',
+  'ground',
   'terrainSculpt',
   'presets',
   'skyboxPreset',

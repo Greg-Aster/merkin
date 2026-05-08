@@ -33,13 +33,6 @@ const SOLITUDE_RUIN_BASE_MATERIAL: EditorMaterialData = {
   reflectivity: 0.18,
 }
 
-const SOLITUDE_FOUNDATION_MATERIAL: EditorMaterialData = {
-  ...SOLITUDE_RUIN_BASE_MATERIAL,
-  color: '#555e69',
-  roughness: 0.97,
-  envMapIntensity: 0.18,
-}
-
 const materialOverrideStore = writable<EditorMaterialData | null>(null)
 setContext(EDITOR_MATERIAL_OVERRIDE_CONTEXT, materialOverrideStore)
 
@@ -58,13 +51,6 @@ function getSolitudeAssetMaterial(
   node: EditorSceneNode,
 ): EditorMaterialData | null {
   if (node.kind !== 'asset' || !node.asset?.url) return null
-
-  if (
-    node.id === 'solitude-ground-plateau' ||
-    node.id === 'solitude-ground-dais'
-  ) {
-    return SOLITUDE_FOUNDATION_MATERIAL
-  }
 
   if (
     node.id.startsWith('solitude-pillar-') ||

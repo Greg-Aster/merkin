@@ -3,8 +3,9 @@
   display: grid;
   grid-template-rows: auto auto auto;
   gap: 0.55rem;
-  left: clamp(0.75rem, 2.2vw, 1.45rem) !important;
-  bottom: 1rem !important;
+  left: var(--timeline-selected-left, clamp(0.75rem, 2.2vw, 1.45rem)) !important;
+  top: var(--timeline-selected-top, auto) !important;
+  bottom: var(--timeline-selected-bottom, 1rem) !important;
   width: min(18rem, calc(100% - 1.5rem)) !important;
   max-width: calc(100% - 1.5rem) !important;
   min-width: 0;
@@ -30,6 +31,10 @@
     padding 260ms cubic-bezier(0.16, 1, 0.3, 1),
     gap 260ms cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 220ms ease;
+  transform: translate(
+    var(--timeline-selected-offset-x, 0),
+    calc(var(--timeline-selected-offset-y, 0px) + ((1 - var(--portal-reveal-progress)) * 0.75rem))
+  ) !important;
 }
 
 .home-intro-copy--timeline-selected::before {
@@ -233,6 +238,7 @@
   .home-intro-copy--timeline-selected {
     --timeline-selected-dock-clearance: max(6.95rem, calc(env(safe-area-inset-bottom) + 6.95rem));
     left: 50% !important;
+    top: auto !important;
     right: auto !important;
     bottom: var(--timeline-selected-dock-clearance) !important;
     grid-template-columns: minmax(0, 1fr);

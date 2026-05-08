@@ -11,6 +11,18 @@
           0
         ]
       },
+      "ground": {
+        "mode": "authored-ground",
+        "visualSource": "scene-actors",
+        "collisionSource": "baked-heightfield",
+        "groundActorIds": [
+          "sci-fi-floor-interior-slab",
+          "sci-fi-floor-courtyard-slab",
+          "sci-fi-floor-wasteland-tile-4-4"
+        ],
+        "terrainManifestUrl": "/terrain/sci-fi-room.manifest.json",
+        "requiredWalkableSurfaceId": "sci-fi-room-terrain"
+      },
       "features": {
         "ocean": true,
         "vegetation": true,

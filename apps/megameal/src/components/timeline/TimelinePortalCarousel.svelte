@@ -64,6 +64,7 @@ let selectedScreenIndex = -1
 let hoveredStarIndex = -1
 let portraitMobile = false
 let viewportWidth = 1440
+let viewportHeight = 900
 let canvasDpr = 1
 let adaptiveDprController: AdaptiveCanvasDprController | null = null
 let projectedStarPositions: TimelineStarScreenPosition[] = []
@@ -125,9 +126,12 @@ $: selectedStatusWidth = getStatusWidth(timelineSideLaneWidth)
 $: timelineDockStyle = portraitMobile
   ? `bottom: max(0.75rem, calc(env(safe-area-inset-bottom) + 0.75rem)); width: ${timelineDockWidth}px`
   : `width: ${timelineDockWidth}px`
+$: selectedStarPosition = selectedScreenIndex >= 0
+  ? projectedStarPositions.find(position => position.index === selectedScreenIndex && position.size > 0) ?? null
+  : null
 $: selectedCardStyle = portraitMobile
   ? 'bottom: max(7.65rem, calc(env(safe-area-inset-bottom) + 7.65rem)); width: min(24rem, calc(100% - 1.5rem)); max-width: calc(100% - 1.5rem)'
-  : `bottom: 1rem; width: ${selectedCardWidth}px; max-width: calc(100% - 2rem)`
+  : getDesktopSelectedCardStyle(selectedStarPosition, selectedCardWidth, viewportHeight)
 $: selectedStatusStyle = portraitMobile
   ? 'display: none'
   : `top: auto; bottom: 1rem; right: 1rem; width: ${selectedStatusWidth}px; min-width: 0; max-width: calc(100% - 2rem); text-align: right`
@@ -166,7 +170,36 @@ const createRenderer = (canvas: HTMLCanvasElement) => {
 function syncViewportMode() {
   if (typeof window === 'undefined') return
   viewportWidth = window.innerWidth
+  viewportHeight = window.innerHeight
   portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
+}
+
+function getDesktopSelectedCardStyle(
+  selectedPosition: TimelineStarScreenPosition | null,
+  cardWidth: number,
+  screenHeight: number,
+) {
+  const baseStyle = `width: ${cardWidth}px; max-width: calc(100% - 2rem)`
+  if (!selectedPosition) {
+    return `${baseStyle}; --timeline-selected-bottom: 1rem`
+  }
+
+  const safeX = clamp(selectedPosition.x, 5, 95)
+  const safeY = clamp(selectedPosition.y, 10, 86)
+  const offsetX = safeX > 58 ? 'calc(-100% - 1.25rem)' : '1.25rem'
+  const offsetY = safeY < 28 ? '0rem' : safeY > 68 ? '-100%' : '-50%'
+  const compactHeight = screenHeight < 720
+  const maxHeight = compactHeight ? 'min(32vh, 12rem)' : 'min(34vh, 15rem)'
+
+  return [
+    baseStyle,
+    `max-height: ${maxHeight}`,
+    '--timeline-selected-bottom: auto',
+    `--timeline-selected-left: ${safeX}%`,
+    `--timeline-selected-top: ${safeY}%`,
+    `--timeline-selected-offset-x: ${offsetX}`,
+    `--timeline-selected-offset-y: ${offsetY}`,
+  ].join('; ')
 }
 
 function getTimelineMaxCanvasDpr() {
@@ -675,7 +708,7 @@ function getSelectedGuideLine(
   if (!cardAnchor || selectedIndex < 0) return null
 
   const selectedPosition = starPositions.find(
-    position => position.index === selectedIndex && position.visible,
+    position => position.index === selectedIndex && position.size > 0,
   )
   const selectedScreen = screenItems[selectedIndex]
   if (!selectedPosition || !selectedScreen) return null
@@ -698,7 +731,7 @@ function clampConstellationPoint(value: number) {
 
 function handleStarPositions(event: TimelineStarPositionEvent) {
   projectedStarPositions = event.detail.positions
-  if (selectedScreenIndex >= 0 && !selectedCardAnchor) scheduleSelectedGuideLineSync()
+  if (selectedScreenIndex >= 0) scheduleSelectedGuideLineSync()
 }
 
 function syncSelectedGuideLineAnchor() {

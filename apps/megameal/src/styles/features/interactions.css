@@ -20,8 +20,7 @@
 }
 
 /* ============================================================
-   CARD-BASE — shared Megameal surfaces
-   Reusable glass/glow system for cards and floating widgets.
+   CARD SURFACES — separate static panels from interactive cards.
    ============================================================ */
 
 .card-base {
@@ -31,7 +30,16 @@
               background 0.3s ease !important;
 }
 
-.card-base:hover {
+.card-base:is(
+  .btn-card,
+  .card-base-interactive,
+  .product-card,
+  a,
+  button,
+  [role='button'],
+  [role='link'],
+  [data-card-interactive='true']
+):hover {
   transform: translateY(-3px);
   box-shadow:
     0 0 0 1px oklch(0.55 0.2 var(--hue) / 0.45),

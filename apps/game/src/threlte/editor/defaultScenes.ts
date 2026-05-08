@@ -14,10 +14,10 @@ const SCI_FI_PLANTER_B_ASSET_URL =
   '/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb'
 
 const PACKAGED_DEFAULT_SCENES: Record<string, EditorSceneDocument> = {
-  observatory: observatoryPackagedScene as EditorSceneDocument,
-  'sci-fi-room': sciFiRoomPackagedScene as EditorSceneDocument,
-  miranda: mirandaPackagedScene as EditorSceneDocument,
-  solitude: solitudePackagedScene as EditorSceneDocument,
+  observatory: observatoryPackagedScene as unknown as EditorSceneDocument,
+  'sci-fi-room': sciFiRoomPackagedScene as unknown as EditorSceneDocument,
+  miranda: mirandaPackagedScene as unknown as EditorSceneDocument,
+  solitude: solitudePackagedScene as unknown as EditorSceneDocument,
   yggdrasil: yggdrasilPackagedScene as unknown as EditorSceneDocument,
 }
 

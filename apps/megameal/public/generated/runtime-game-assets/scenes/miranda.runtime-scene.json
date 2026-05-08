@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-02T01:30:09.509Z",
+  "generatedAt": "2026-05-08T00:25:17.729Z",
   "levelId": "miranda",
   "sceneId": "miranda",
   "source": {
@@ -47,6 +47,16 @@
             4.25,
             -13.8
           ]
+        },
+        "ground": {
+          "mode": "scene-authored",
+          "visualSource": "scene-actors",
+          "collisionSource": "scene-colliders",
+          "groundActorIds": [
+            "miranda-floor-main",
+            "miranda-floor-upper"
+          ],
+          "requiredWalkableSurfaceId": "miranda-floor-main"
         },
         "skyboxPreset": "observatory",
         "features": {
@@ -3797,6 +3807,16 @@
   "runtime": {
     "requiredRenderActorIds": [],
     "requiredAssetUrls": [],
-    "runtimeAssetUrls": []
+    "runtimeAssetUrls": [],
+    "ground": {
+      "mode": "scene-authored",
+      "visualSource": "scene-actors",
+      "collisionSource": "scene-colliders",
+      "groundActorIds": [
+        "miranda-floor-main",
+        "miranda-floor-upper"
+      ],
+      "requiredWalkableSurfaceId": "miranda-floor-main"
+    }
   }
 }

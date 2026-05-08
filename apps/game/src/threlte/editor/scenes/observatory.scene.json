@@ -11,6 +11,14 @@
       "spawn": {
         "position": [-137.2, 1.8, -49.5]
       },
+      "ground": {
+        "mode": "terrain-chunks",
+        "visualSource": "terrain-chunks",
+        "collisionSource": "baked-heightfield",
+        "groundActorIds": [],
+        "terrainManifestUrl": "/terrain/observatory-environment.manifest.json",
+        "requiredWalkableSurfaceId": "observatory-terrain"
+      },
       "features": {
         "ocean": true,
         "vegetation": true,

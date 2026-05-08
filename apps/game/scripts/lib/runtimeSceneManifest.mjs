@@ -76,6 +76,7 @@ const sharedLevelSettingKeys = [
   'ambientParticles',
   'ambientAudio',
   'collision',
+  'ground',
   'terrainSculpt',
   'presets',
   'skyboxPreset',
@@ -397,6 +398,99 @@ function hasBakedTerrainRuntime(level) {
   )
 }
 
+function validateGroundContract(level, actorsById, errors) {
+  const ground = level.settings?.level?.ground
+  const terrain = level.settings?.level?.collision?.terrain
+  if (!ground) {
+    errors.push(
+      `${level.id}: settings.level.ground is required so visual ground and collision ownership are explicit.`,
+    )
+    return
+  }
+
+  const mode = ground.mode
+  const visualSource = ground.visualSource
+  const collisionSource = ground.collisionSource
+  const groundActorIds = Array.isArray(ground.groundActorIds)
+    ? ground.groundActorIds.filter(
+        actorId => typeof actorId === 'string' && actorId.trim(),
+      )
+    : []
+
+  if (
+    !['terrain-chunks', 'authored-ground', 'hybrid', 'scene-authored'].includes(
+      mode,
+    )
+  ) {
+    errors.push(`${level.id}: ground.mode "${mode}" is invalid.`)
+  }
+  if (!['terrain-chunks', 'scene-actors', 'none'].includes(visualSource)) {
+    errors.push(`${level.id}: ground.visualSource "${visualSource}" is invalid.`)
+  }
+  if (!['baked-heightfield', 'scene-colliders'].includes(collisionSource)) {
+    errors.push(
+      `${level.id}: ground.collisionSource "${collisionSource}" is invalid.`,
+    )
+  }
+
+  if (mode === 'terrain-chunks' && visualSource !== 'terrain-chunks') {
+    errors.push(`${level.id}: terrain-chunks ground must render terrain chunks.`)
+  }
+  if (mode === 'authored-ground' && visualSource !== 'scene-actors') {
+    errors.push(`${level.id}: authored-ground mode must render scene actors.`)
+  }
+  if (mode === 'scene-authored' && collisionSource !== 'scene-colliders') {
+    errors.push(
+      `${level.id}: scene-authored ground must use scene collider collision.`,
+    )
+  }
+  if (
+    mode !== 'hybrid' &&
+    visualSource === 'terrain-chunks' &&
+    groundActorIds.length > 0
+  ) {
+    errors.push(
+      `${level.id}: groundActorIds cannot be combined with terrain chunk visuals unless ground.mode is hybrid.`,
+    )
+  }
+
+  if (visualSource === 'scene-actors') {
+    if (groundActorIds.length === 0) {
+      errors.push(
+        `${level.id}: scene-actor ground visuals require ground.groundActorIds.`,
+      )
+    }
+
+    for (const actorId of groundActorIds) {
+      const actor = actorsById.get(actorId)
+      if (!actor) {
+        errors.push(`${level.id}: ground actor "${actorId}" is missing.`)
+      } else if (actor.render?.visible === false) {
+        errors.push(`${level.id}: ground actor "${actorId}" is not visible.`)
+      } else if (!actor.render && actor.kind !== 'empty') {
+        errors.push(`${level.id}: ground actor "${actorId}" has no render.`)
+      }
+    }
+  }
+
+  if (collisionSource === 'baked-heightfield') {
+    if (!hasBakedTerrainRuntime(level)) {
+      errors.push(
+        `${level.id}: baked-heightfield ground collision requires settings.level.collision.terrain.source=baked-heightmap and a manifestUrl.`,
+      )
+    }
+    if (
+      typeof ground.terrainManifestUrl === 'string' &&
+      terrain?.manifestUrl &&
+      ground.terrainManifestUrl !== terrain.manifestUrl
+    ) {
+      errors.push(
+        `${level.id}: ground.terrainManifestUrl must match collision.terrain.manifestUrl.`,
+      )
+    }
+  }
+}
+
 function isSatisfiedByRuntimeSystem(level, actorId) {
   if (actorId === `${level.id}-terrain` && hasBakedTerrainRuntime(level)) {
     return true
@@ -502,6 +596,8 @@ export function createLevelBuildReport(level) {
     }
   }
 
+  validateGroundContract(level, actorsById, errors)
+
   for (const actorId of duplicateActorIds) {
     errors.push(`Duplicate actor id "${actorId}" found in level definition.`)
   }
@@ -595,6 +691,11 @@ function getTerrainManifestUrl(levelDefinition) {
   return typeof terrain?.manifestUrl === 'string' ? terrain.manifestUrl : undefined
 }
 
+function getGroundContract(levelDefinition) {
+  const ground = levelDefinition.settings?.level?.ground
+  return ground && typeof ground === 'object' ? ground : undefined
+}
+
 export function createRuntimeSceneManifest(input) {
   return {
     schemaVersion: 1,
@@ -614,6 +715,7 @@ export function createRuntimeSceneManifest(input) {
       requiredAssetUrls: input.buildReport.requiredAssetUrls,
       runtimeAssetUrls: input.buildReport.runtimeAssetUrls,
       terrainManifestUrl: getTerrainManifestUrl(input.levelDefinition),
+      ground: getGroundContract(input.levelDefinition),
       worldPartitionUrl: input.worldPartitionUrl,
     },
   }

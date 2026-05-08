@@ -16,6 +16,17 @@
           -24
         ]
       },
+      "ground": {
+        "mode": "authored-ground",
+        "visualSource": "scene-actors",
+        "collisionSource": "baked-heightfield",
+        "groundActorIds": [
+          "solitude-ground-plateau",
+          "solitude-ground-dais"
+        ],
+        "terrainManifestUrl": "/terrain/solitude.manifest.json",
+        "requiredWalkableSurfaceId": "solitude-terrain"
+      },
       "features": {
         "starMap": true,
         "conversations": true,
@@ -126,6 +137,19 @@
         "intent": "none",
         "channel": "worldStatic"
       },
+      "material": {
+        "color": "#555e69",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.97,
+        "envMapIntensity": 0.18,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
+      },
       "generation": {
         "descriptor": "solitude plateau",
         "sourceVisualSize": [
@@ -167,6 +191,19 @@
         "friction": 0.94,
         "intent": "none",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#555e69",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.97,
+        "envMapIntensity": 0.18,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       },
       "generation": {
         "descriptor": "ruin dais",

@@ -1,0 +1,16 @@
+@media (max-width: 767px) {
+  body:has(.mobile-content-frame) main#main {
+    overflow: visible;
+  }
+
+  .mobile-content-frame-shell {
+    box-sizing: border-box;
+    width: calc(100vw - 0.75rem);
+    margin-inline: calc(50% - 50vw + 0.375rem);
+  }
+
+  .mobile-content-frame {
+    padding-inline: 1rem;
+    padding-top: 1.25rem;
+  }
+}

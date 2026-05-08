@@ -349,6 +349,18 @@ export type LevelCollisionDefaultPolicy =
   | 'authored-only'
   | 'none'
 export type LevelCollisionBudget = 'mobile' | 'balanced' | 'desktop'
+export type LevelGroundMode =
+  | 'terrain-chunks'
+  | 'authored-ground'
+  | 'hybrid'
+  | 'scene-authored'
+export type LevelGroundVisualSource =
+  | 'terrain-chunks'
+  | 'scene-actors'
+  | 'none'
+export type LevelGroundCollisionSource =
+  | 'baked-heightfield'
+  | 'scene-colliders'
 
 export interface LevelCollisionWorkflowSettings {
   actorCollision?: LevelCollisionDefaultPolicy
@@ -403,6 +415,17 @@ export interface SharedLevelCollisionSettings {
   }
 }
 
+export interface SharedLevelGroundSettings {
+  ground?: {
+    mode?: LevelGroundMode
+    visualSource?: LevelGroundVisualSource
+    collisionSource?: LevelGroundCollisionSource
+    groundActorIds?: string[]
+    terrainManifestUrl?: string
+    requiredWalkableSurfaceId?: string
+  }
+}
+
 export interface SharedLevelTerrainSculptSettings {
   terrainSculpt?: {
     heightOverrides?: Record<string, number>
@@ -439,6 +462,7 @@ export interface SharedLevelEditorSettings
     SharedLevelAmbientParticleSettings,
     SharedLevelAmbientAudioSettings,
     SharedLevelCollisionSettings,
+    SharedLevelGroundSettings,
     SharedLevelTerrainSculptSettings,
     SharedLevelPresetSettings,
     SharedLevelSkyboxSettings,
