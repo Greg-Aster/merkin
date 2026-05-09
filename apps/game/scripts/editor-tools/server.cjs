@@ -94,6 +94,7 @@ const ACTIVE_EDITOR_API_ENDPOINTS = new Set([
   '/api/editor-terrain/generate-heightmap',
   '/api/editor-terrain/bake-collision',
   '/api/editor-terrain/cook-chunks',
+  '/api/editor-terrain/publish-contracts',
   '/api/level-registry',
   '/api/editor/log',
 ]);

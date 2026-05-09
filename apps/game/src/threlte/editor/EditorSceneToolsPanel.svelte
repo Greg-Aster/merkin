@@ -3,8 +3,11 @@ import { getLevelCollisionWorkflow } from '../engine/levelCollisionWorkflow'
 import type {
   LevelCollisionBudget,
   LevelCollisionDefaultPolicy,
+  SharedLevelGroundSettings,
 } from '../engine/sceneDocumentTypes'
 import type { TerrainRuntimeComponentSource } from '../features/terrain'
+
+type GroundSettings = NonNullable<SharedLevelGroundSettings['ground']>
 
 export let levelId = ''
 export let pendingLevelId = ''
@@ -25,6 +28,11 @@ export let collisionOverlayEnabled = false
 export let collisionDefaultPolicy: LevelCollisionDefaultPolicy =
   'lightweight-auto'
 export let collisionBudget: LevelCollisionBudget = 'mobile'
+export let groundSettings: GroundSettings | null = null
+export let terrainSculptSettings: {
+  enabled?: boolean
+  autoBakeCollision?: boolean
+} | null = null
 export let terrainBrushMode = 'raise'
 export let terrainBrushSize = 24
 export let terrainBrushStrength = 0.35
@@ -44,7 +52,6 @@ export let terrainCollisionSettings: {
   colliderResolution?: number
   triangleCount?: number
   vertexCount?: number
-  autoBakeOnTerrainChange?: boolean
   dirty?: boolean
   lastGeneratedAt?: string
   heightOverrideCount?: number
@@ -56,6 +63,7 @@ export let terrainCollisionBakePending = false
 export let terrainHeightmapGeneratePending = false
 export let terrainChunkCookPending = false
 export let worldPartitionCookPending = false
+export let groundTerrainPublishPending = false
 export let selectedTerrainSourceName = ''
 export let selectedTerrainSourceAssetUrl = ''
 export let transformMode = 'translate'
@@ -89,6 +97,7 @@ export let onBakeTerrainCollision: () => void = () => {}
 export let onGenerateTerrainHeightmap: () => void = () => {}
 export let onCookTerrainChunks: () => void = () => {}
 export let onCookWorldPartition: () => void = () => {}
+export let onPublishGroundTerrainContracts: () => void = () => {}
 export let onSetTransformMode: (mode: string) => void = () => {}
 export let onSetTransformSpace: (mode: string) => void = () => {}
 export let onSetTransformAxis: (axis: string) => void = () => {}
@@ -109,9 +118,21 @@ $: hasBakedTerrainWorkflow =
   terrainCollisionSource === 'baked-heightmap' ||
   Boolean(terrainCollisionSettings?.manifestUrl)
 $: terrainSculptingAvailable =
-  Boolean(levelCollisionWorkflow.terrainSculpting) || hasBakedTerrainWorkflow
+  Boolean(terrainSculptSettings?.enabled) || hasBakedTerrainWorkflow
 $: terrainBakeToolsAvailable =
   terrainSculptingAvailable || Boolean(selectedTerrainSourceAssetUrl)
+$: groundActorIds = groundSettings?.groundActorIds ?? []
+$: groundContractWarnings = [
+  !groundSettings ? 'Ground contract missing.' : '',
+  groundSettings?.visualSource === 'scene-actors' && groundActorIds.length === 0
+    ? 'Scene-actor ground needs groundActorIds.'
+    : '',
+  groundSettings?.collisionSource === 'baked-heightfield' &&
+  !groundSettings?.terrainManifestUrl &&
+  !terrainCollisionSettings?.manifestUrl
+    ? 'Baked-heightfield ground needs a terrain manifest.'
+    : '',
+].filter(Boolean)
 </script>
 
 <div class="editor-section">
@@ -178,6 +199,19 @@ $: terrainBakeToolsAvailable =
 </div>
 
 <div class="editor-section">
+  <div class="label">Ground Contract</div>
+  <div class="save-message">Mode: {groundSettings?.mode ?? 'unconfigured'}</div>
+  <div class="save-message">Visual source: {groundSettings?.visualSource ?? 'unconfigured'}</div>
+  <div class="save-message">Collision source: {groundSettings?.collisionSource ?? 'unconfigured'}</div>
+  <div class="save-message">Required surface: {groundSettings?.requiredWalkableSurfaceId ?? 'none'}</div>
+  <div class="save-message">Terrain manifest: {groundSettings?.terrainManifestUrl ?? terrainCollisionSettings?.manifestUrl ?? 'none'}</div>
+  <div class="save-message">Ground actors: {groundActorIds.length ? groundActorIds.join(', ') : 'none'}</div>
+  {#each groundContractWarnings as warning}
+    <div class="save-message">{warning}</div>
+  {/each}
+</div>
+
+<div class="editor-section">
   <div class="label">World Partition</div>
   <button class="full" disabled={worldPartitionCookPending} data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onCookWorldPartition}>
     {worldPartitionCookPending ? 'Cooking Partition...' : 'Cook Actor Partition'}
@@ -185,10 +219,18 @@ $: terrainBakeToolsAvailable =
   <div class="save-message">Cooks visual-only actor roots into spatial runtime cells. Collision, gameplay, lights, audio, and never-cull actors stay resident.</div>
 </div>
 
+<div class="editor-section">
+  <div class="label">Runtime Publish</div>
+  <button class="full" disabled={groundTerrainPublishPending || terrainCollisionBakePending || terrainHeightmapGeneratePending || terrainChunkCookPending || worldPartitionCookPending} data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onPublishGroundTerrainContracts}>
+    {groundTerrainPublishPending ? 'Publishing Runtime...' : 'Publish Ground / Terrain Runtime'}
+  </button>
+  <div class="save-message">Saves the scene, regenerates runtime manifests, and runs the engine audit after the bake/cook actions above.</div>
+</div>
+
 {#if terrainBakeToolsAvailable}
   <div class="editor-section">
     <div class="label">Terrain Sculpt</div>
-    <label class="checkbox"><input type="checkbox" checked={terrainCollisionSettings?.autoBakeOnTerrainChange ?? false} data-sfx-click="soft" on:change={(event) => onSetTerrainAutoBake((event.currentTarget as HTMLInputElement).checked)} /> Auto Bake Collision</label>
+    <label class="checkbox"><input type="checkbox" checked={terrainSculptSettings?.autoBakeCollision ?? false} data-sfx-click="soft" on:change={(event) => onSetTerrainAutoBake((event.currentTarget as HTMLInputElement).checked)} /> Auto Bake Collision</label>
     <div class="button-row">
       <button class:active={terrainBrushMode === 'raise'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetTerrainBrushMode('raise')}>Raise / Lower</button>
       <button class:active={terrainBrushMode === 'smooth'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetTerrainBrushMode('smooth')}>Smooth</button>

@@ -72,8 +72,16 @@ function getAuthoredShape(input: CollisionPolicyInput): CollisionShape {
   return authoredShape
 }
 
-export function isTerrainVisualActor(actorId: string) {
-  return getActorCollisionRole({ actorId }) === 'visualOnly'
+export function isTerrainVisualActor(
+  actorId: string,
+  levelSettings?: SceneSettings | null,
+  levelId?: string | null,
+) {
+  return getActorCollisionRole({
+    actorId,
+    levelId,
+    settings: levelSettings,
+  }) === 'visualOnly'
 }
 
 export function getDefaultCollisionIntent(input: CollisionPolicyInput) {

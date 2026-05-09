@@ -4,6 +4,43 @@ Generated from `CRUFT_FILE_INVENTORY.md`. This is the explicit working checklist
 
 A checked item has had at least a file-level disposition assigned. Items marked `refactor` are intentionally checked here because they have been reviewed enough to know they still need architecture work; they remain open in the refactor queue below.
 
+## Current Ground And Graphics Pipeline Cleanup
+
+### Clean Or Fix Before More Features
+
+- [x] Move ground visual ownership out of level-specific rendering fixes and into `settings.level.ground`.
+- [x] Surface each level ground contract in the editor Scene tools panel.
+- [x] Centralize TS runtime/editor ground contract resolution and validation in `groundContract.ts`.
+- [x] Remove the legacy `terrainVisualChunks` workflow switch so ground visuals are controlled by the ground contract only.
+- [x] Move remaining level-specific collision role lists out of `levelCollisionWorkflow.ts` and into scene-authored collision contracts.
+- [x] Retire duplicated `.mjs` ground validation by sharing or generating the cooker validator from the TS contract source.
+- [x] Add an orphan/deprecated-field audit that fails if scenes depend on retired terrain/collision fields.
+- [x] Split terrain collision setup from editor terrain sculpting defaults so baking tools do not imply runtime render ownership.
+
+### Future AAA-Style Pipeline Steps
+
+- [x] Define hard per-level graphics budgets for runtime payload, triangles, draw calls, texture memory, material count, lights, and collider count.
+- [x] Add asset manifest metadata for LOD tier, required/optional status, material slots, texture dimensions, compression, and color space.
+- [x] Enforce render budgets in `audit:engine` and runtime asset cooking.
+- [x] Add LOD/impostor generation and runtime quality-tier selection.
+- [x] Add material validation for PBR slots, missing maps, oversized textures, and unsupported shader features.
+- [x] Expand world partition from actor cell cooking into staged render/collision streaming with readiness gates.
+- [x] Add screenshot-based visual smoke tests for representative levels, including Solitude authored ground.
+- [x] Add editor workflows for baking, validating, and publishing ground/terrain contracts without hand-editing JSON.
+
+### AAA Graphics Pipeline Roadmap
+
+- [x] Add runtime streaming telemetry and automated assertions for partitioned levels.
+- [x] Add visual regression baselines with camera bookmarks and artifact review.
+- [ ] Replace LOD/impostor placeholders with automated decimation, billboard atlas generation, and validation.
+- [ ] Raise material compliance from warnings to platform-tier gates with explicit exception lists.
+- [ ] Add asset-bundle streaming with prefetch, unload, and memory-pressure policy.
+- [ ] Add platform certification profiles and budgets for mobile, desktop, and TV.
+- [ ] Add content-build provenance, versioning, and rollback for generated runtime artifacts.
+- [ ] Add editor dashboards for budget, material, and streaming failures before publish.
+- [ ] Add collision/render parity debug overlays and tests for walkable surfaces and blockers.
+- [ ] Add production telemetry capture for frame time, draw calls, active cells, loaded assets, and memory.
+
 ## Status Summary
 
 | Status | Files |

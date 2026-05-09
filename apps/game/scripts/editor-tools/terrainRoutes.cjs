@@ -28,6 +28,29 @@ function parseLastJsonLine(stdout) {
   }
 }
 
+function runPnpmScript(repoRoot, scriptName, args, callback) {
+  const child = spawn('pnpm', ['--dir', 'apps/game', scriptName, ...args], {
+    cwd: repoRoot,
+    stdio: 'pipe',
+    shell: process.platform === 'win32',
+  });
+  let stdout = '';
+  let stderr = '';
+
+  child.stdout.on('data', chunk => {
+    stdout += chunk.toString();
+  });
+  child.stderr.on('data', chunk => {
+    stderr += chunk.toString();
+  });
+  child.on('close', code => {
+    callback(null, { code, stdout, stderr });
+  });
+  child.on('error', error => {
+    callback(error, { code: 1, stdout, stderr });
+  });
+}
+
 function handleTerrainRoutes(req, res, route, context) {
   const { pathname } = route;
   const {
@@ -380,6 +403,71 @@ function handleTerrainRoutes(req, res, route, context) {
         sendJson(res, 500, {
           success: false,
           message: `Terrain chunk cook failed: ${error.message}`,
+        });
+      }
+    });
+    return true;
+  }
+
+  if (pathname === '/api/editor-terrain/publish-contracts' && req.method === 'POST') {
+    readRequestBody(req, body => {
+      try {
+        const { levelId } = JSON.parse(body || '{}');
+        if (!levelId) {
+          sendJson(res, 400, { success: false, message: 'levelId is required' });
+          return;
+        }
+
+        runPnpmScript(REPO_ROOT, 'cook:runtime-assets', [], (cookError, cookResult) => {
+          if (cookError || cookResult.code !== 0) {
+            sendJson(res, 500, {
+              success: false,
+              levelId,
+              stage: 'cook-runtime-assets',
+              message:
+                cookError?.message ||
+                cookResult.stderr ||
+                cookResult.stdout ||
+                `Runtime asset cook failed with exit code ${cookResult.code}`,
+              cookStdout: cookResult.stdout,
+              cookStderr: cookResult.stderr,
+            });
+            return;
+          }
+
+          runPnpmScript(REPO_ROOT, 'audit:engine', [], (auditError, auditResult) => {
+            if (auditError || auditResult.code !== 0) {
+              sendJson(res, 500, {
+                success: false,
+                levelId,
+                stage: 'audit-engine',
+                message:
+                  auditError?.message ||
+                  auditResult.stderr ||
+                  auditResult.stdout ||
+                  `Engine audit failed with exit code ${auditResult.code}`,
+                cookStdout: cookResult.stdout,
+                auditStdout: auditResult.stdout,
+                auditStderr: auditResult.stderr,
+              });
+              return;
+            }
+
+            sendJson(res, 200, {
+              success: true,
+              levelId,
+              cookedRuntimeAssets: true,
+              engineAudit: true,
+              cookStdout: cookResult.stdout,
+              auditStdout: auditResult.stdout,
+            });
+          });
+        });
+      } catch (error) {
+        console.error('Editor terrain contract publish error:', error);
+        sendJson(res, 500, {
+          success: false,
+          message: `Ground/terrain contract publish failed: ${error.message}`,
         });
       }
     });

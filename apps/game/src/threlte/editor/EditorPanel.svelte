@@ -161,6 +161,7 @@ let terrainCollisionBakePending = false
 let terrainHeightmapGeneratePending = false
 let terrainChunkCookPending = false
 let worldPartitionCookPending = false
+let groundTerrainPublishPending = false
 const ASSET_LIBRARY_ROOT_MODELS = 'apps/megameal/public/models'
 const ASSET_LIBRARY_ROOT_GENERATED = 'apps/megameal/public/generated/hunyuan3d'
 const COMFY_WORKFLOW_LIBRARY_ROOT = 'apps/game/authoring/workflows/ref-image'
@@ -1362,6 +1363,8 @@ $: hasGroupSelection = selectedNodes.some(node => node.kind === 'group')
 $: levelSettings = editorScene?.settings?.level ?? {}
 $: observatorySettings = editorScene?.settings?.observatory ?? {}
 $: solitudeSettings = editorScene?.settings?.solitude ?? {}
+$: groundSettings = levelSettings.ground ?? null
+$: terrainSculptSettings = levelSettings.terrainSculpt ?? null
 $: terrainCollisionSettings = levelSettings.collision?.terrain ?? null
 $: collisionDefaultPolicy =
   (levelSettings.collision?.workflow?.actorCollision as
@@ -2423,18 +2426,18 @@ $: if (editorState?.dirty) {
 function setTerrainAutoBake(enabled: boolean) {
   updateLevelSceneSettings(settings => ({
     ...settings,
+    terrainSculpt: {
+      ...(settings.terrainSculpt ?? {}),
+      enabled: settings.terrainSculpt?.enabled ?? true,
+      autoBakeCollision: enabled,
+    },
     collision: {
       ...(settings.collision ?? {}),
-      workflow: {
-        ...(settings.collision?.workflow ?? {}),
-        autoBakeTerrain: enabled,
-      },
       terrain: {
         ...(settings.collision?.terrain ?? {}),
         source: 'baked-heightmap',
         runtimeSource:
           settings.collision?.terrain?.runtimeSource ?? 'editor-manifest',
-        autoBakeOnTerrainChange: enabled,
       },
     },
   }))
@@ -2526,8 +2529,6 @@ async function bakeTerrainCollision() {
             settings.collision?.terrain?.triangleCount,
           vertexCount:
             collision?.vertexCount ?? settings.collision?.terrain?.vertexCount,
-          autoBakeOnTerrainChange:
-            settings.collision?.terrain?.autoBakeOnTerrainChange ?? false,
           dirty: false,
           lastGeneratedAt: new Date().toISOString(),
           heightOverrideCount:
@@ -2610,8 +2611,6 @@ async function generateTerrainHeightmapFromSelection() {
             settings.collision?.terrain?.triangleCount,
           vertexCount:
             collision?.vertexCount ?? settings.collision?.terrain?.vertexCount,
-          autoBakeOnTerrainChange:
-            settings.collision?.terrain?.autoBakeOnTerrainChange ?? false,
           dirty: false,
           lastGeneratedAt: new Date().toISOString(),
           heightOverrideCount:
@@ -2725,6 +2724,38 @@ async function cookWorldPartition() {
       error instanceof Error ? error.message : 'World partition cook failed'
   } finally {
     worldPartitionCookPending = false
+  }
+}
+
+async function publishGroundTerrainContracts() {
+  if (groundTerrainPublishPending) return
+  groundTerrainPublishPending = true
+  saveMessage = 'Publishing ground and terrain runtime contracts...'
+
+  try {
+    await levelController.saveSceneDocumentToDisk(activeSceneLevelId)
+    const response = await fetch(
+      `${EDITOR_API_BASE}/api/editor-terrain/publish-contracts`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ levelId: activeSceneLevelId }),
+      },
+    )
+    const payload = await response.json()
+    if (!payload?.success) {
+      throw new Error(payload?.message ?? 'Ground/terrain publish failed')
+    }
+
+    saveMessage = 'Published runtime ground and terrain contracts'
+  } catch (error) {
+    console.error('Ground/terrain contract publish failed:', error)
+    saveMessage =
+      error instanceof Error
+        ? error.message
+        : 'Ground/terrain contract publish failed'
+  } finally {
+    groundTerrainPublishPending = false
   }
 }
 
@@ -2921,6 +2952,8 @@ $: editorPanelPropContext = {
   outlinerModeOptions,
   hierarchyFilter,
   outlinerRows,
+  groundSettings,
+  terrainSculptSettings,
   terrainCollisionSettings,
   collisionDefaultPolicy,
   collisionBudget,
@@ -2928,6 +2961,7 @@ $: editorPanelPropContext = {
   terrainHeightmapGeneratePending,
   terrainChunkCookPending,
   worldPartitionCookPending,
+  groundTerrainPublishPending,
   selectedTerrainSourceName,
   selectedTerrainSourceAssetUrl,
   editorStyleStudioComponent,
@@ -2997,6 +3031,7 @@ $: editorPanelPropContext = {
   generateTerrainHeightmapFromSelection,
   cookTerrainChunks,
   cookWorldPartition,
+  publishGroundTerrainContracts,
   switchEditorLevel,
   reloadFromDisk,
   loadPackagedLevelScene,

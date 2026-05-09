@@ -19,6 +19,20 @@
         "terrainManifestUrl": "/terrain/observatory-environment.manifest.json",
         "requiredWalkableSurfaceId": "observatory-terrain"
       },
+      "graphicsBudget": {
+        "maxRuntimeAssetBytes": 167772160,
+        "maxRuntimeAssetFileBytes": 41943040,
+        "maxGeometryActors": 0,
+        "maxPrimitiveActors": 8,
+        "maxNeverCullActors": 4,
+        "maxGameplayFireflies": 0,
+        "maxExplicitColliders": 0,
+        "maxLightActors": 0,
+        "maxEstimatedDrawCalls": 0,
+        "maxAuthoredMaterialSlots": 0,
+        "maxEstimatedTriangles": 0,
+        "maxAuthoredTextureBytes": 0
+      },
       "features": {
         "ocean": true,
         "vegetation": true,

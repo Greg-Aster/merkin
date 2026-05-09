@@ -98,6 +98,18 @@ function isStreamableRenderNode(node) {
   return ['asset', 'primitive', 'prefab'].includes(node.kind)
 }
 
+function isRenderableNode(node) {
+  return isStreamableRenderNode(node) || Boolean(node.light)
+}
+
+function isCollisionNode(node) {
+  return Boolean(node.collision) && node.collision.enabled !== false
+}
+
+function getNodeIdsByPredicate(nodes, predicate) {
+  return nodes.filter(predicate).map(node => node.id).sort()
+}
+
 function getNodeMap(nodes) {
   return new Map(nodes.map(node => [node.id, node]))
 }
@@ -148,6 +160,20 @@ function getCellKey(position, cellSize) {
 
 function parseCellKey(key) {
   return key.split(',').map(Number)
+}
+
+function getActiveCellKeysForPosition(position, cellSize, activeRadius) {
+  const centerX = Math.floor(position[0] / cellSize)
+  const centerZ = Math.floor(position[2] / cellSize)
+  const keys = []
+
+  for (let x = centerX - activeRadius; x <= centerX + activeRadius; x += 1) {
+    for (let z = centerZ - activeRadius; z <= centerZ + activeRadius; z += 1) {
+      keys.push(`${x},${z}`)
+    }
+  }
+
+  return new Set(keys)
 }
 
 function estimateNodeTriangles(node) {
@@ -203,6 +229,21 @@ function cookPartition(scene, { cellSize, activeRadius }) {
   const residentActorIds = nodes
     .map(node => node.id)
     .filter(id => !streamableActorIdSet.has(id))
+  const residentNodes = nodes.filter(node => residentActorIds.includes(node.id))
+  const residentRenderActorIds = getNodeIdsByPredicate(
+    residentNodes,
+    isRenderableNode,
+  )
+  const residentCollisionActorIds = getNodeIdsByPredicate(
+    residentNodes,
+    isCollisionNode,
+  )
+  const spawnPosition = scene.settings?.level?.spawn?.position ?? [0, 0, 0]
+  const initialCellKeys = getActiveCellKeysForPosition(
+    spawnPosition,
+    cellSize,
+    activeRadius,
+  )
 
   for (const { node, subtree } of selectedStreamables) {
     const position = getWorldPosition(node, nodeMap, positionCache)
@@ -213,10 +254,16 @@ function cookPartition(scene, { cellSize, activeRadius }) {
       x: parseCellKey(key)[0],
       z: parseCellKey(key)[1],
       actorIds: [],
+      renderActorIds: [],
+      collisionActorIds: [],
       actorCount: 0,
       estimatedTriangles: 0,
+      streamingStage: initialCellKeys.has(key) ? 'initial' : 'stream',
+      requiredForSpawn: initialCellKeys.has(key),
     }
     cell.actorIds.push(...actorIds)
+    cell.renderActorIds.push(...getNodeIdsByPredicate(subtree, isRenderableNode))
+    cell.collisionActorIds.push(...getNodeIdsByPredicate(subtree, isCollisionNode))
     cell.actorCount += actorIds.length
     cell.estimatedTriangles += subtree.reduce(
       (sum, node) => sum + estimateNodeTriangles(node),
@@ -224,6 +271,21 @@ function cookPartition(scene, { cellSize, activeRadius }) {
     )
     cells.set(key, cell)
   }
+  const sortedCells = [...cells.values()]
+    .map(cell => ({
+      ...cell,
+      actorIds: [...new Set(cell.actorIds)].sort(),
+      renderActorIds: [...new Set(cell.renderActorIds)].sort(),
+      collisionActorIds: [...new Set(cell.collisionActorIds)].sort(),
+    }))
+    .sort((left, right) => left.key.localeCompare(right.key))
+  const initialCells = sortedCells.filter(cell => cell.requiredForSpawn)
+  const initialRenderActorIds = [
+    ...new Set(initialCells.flatMap(cell => cell.renderActorIds)),
+  ].sort()
+  const initialCollisionActorIds = [
+    ...new Set(initialCells.flatMap(cell => cell.collisionActorIds)),
+  ].sort()
 
   return {
     version: 1,
@@ -232,11 +294,29 @@ function cookPartition(scene, { cellSize, activeRadius }) {
     generatedBy: 'cook-world-partition',
     cellSize,
     activeRadius,
+    streaming: {
+      mode: 'staged-render-collision',
+      stages: ['resident', 'initial-cells', 'stream-cells'],
+      readinessGates: [
+        'partition-manifest',
+        'resident-render',
+        'resident-collision',
+        'initial-cell-render',
+        'initial-cell-collision',
+      ],
+    },
+    readiness: {
+      requiredResidentRenderActorIds: residentRenderActorIds,
+      requiredResidentCollisionActorIds: residentCollisionActorIds,
+      requiredInitialCellKeys: [...initialCellKeys].filter(key =>
+        cells.has(key),
+      ).sort(),
+      requiredInitialRenderActorIds: initialRenderActorIds,
+      requiredInitialCollisionActorIds: initialCollisionActorIds,
+    },
     residentActorIds: residentActorIds.sort(),
     streamableActorIds: streamableActorIds.sort(),
-    cells: [...cells.values()].sort((left, right) =>
-      left.key.localeCompare(right.key),
-    ),
+    cells: sortedCells,
     budgets: {
       maxActorsPerCell: Math.max(
         0,

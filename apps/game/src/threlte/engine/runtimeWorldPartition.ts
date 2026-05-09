@@ -3,9 +3,20 @@ export interface RuntimeWorldPartitionCell {
   x: number
   z: number
   actorIds: string[]
+  renderActorIds: string[]
+  collisionActorIds: string[]
   actorCount: number
   estimatedTriangles: number
+  streamingStage: 'initial' | 'stream'
+  requiredForSpawn?: boolean
 }
+
+export type RuntimeWorldPartitionReadinessGate =
+  | 'partition-manifest'
+  | 'resident-render'
+  | 'resident-collision'
+  | 'initial-cell-render'
+  | 'initial-cell-collision'
 
 export interface RuntimeWorldPartition {
   version: number
@@ -14,6 +25,18 @@ export interface RuntimeWorldPartition {
   generatedBy?: string
   cellSize: number
   activeRadius: number
+  streaming?: {
+    mode: 'staged-render-collision'
+    stages: string[]
+    readinessGates: RuntimeWorldPartitionReadinessGate[]
+  }
+  readiness?: {
+    requiredResidentRenderActorIds: string[]
+    requiredResidentCollisionActorIds: string[]
+    requiredInitialCellKeys: string[]
+    requiredInitialRenderActorIds: string[]
+    requiredInitialCollisionActorIds: string[]
+  }
   residentActorIds: string[]
   streamableActorIds: string[]
   cells: RuntimeWorldPartitionCell[]
@@ -29,6 +52,13 @@ export function getRuntimeWorldPartitionUrl(levelId: string) {
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every(item => typeof item === 'string')
+}
+
+function hasReadinessGate(
+  value: unknown,
+  gate: RuntimeWorldPartitionReadinessGate,
+) {
+  return Array.isArray(value) && value.includes(gate)
 }
 
 function assertRuntimeWorldPartition(
@@ -69,6 +99,31 @@ function assertRuntimeWorldPartition(
   if (!Array.isArray(partition.cells)) {
     throw new Error(`${levelId}: world partition cells must be an array.`)
   }
+  if (partition.streaming?.mode !== 'staged-render-collision') {
+    throw new Error(
+      `${levelId}: world partition streaming.mode must be staged-render-collision.`,
+    )
+  }
+  for (const gate of [
+    'partition-manifest',
+    'resident-render',
+    'resident-collision',
+    'initial-cell-render',
+    'initial-cell-collision',
+  ] as const) {
+    if (!hasReadinessGate(partition.streaming?.readinessGates, gate)) {
+      throw new Error(`${levelId}: world partition missing readiness gate ${gate}.`)
+    }
+  }
+  if (
+    !isStringArray(partition.readiness?.requiredResidentRenderActorIds) ||
+    !isStringArray(partition.readiness?.requiredResidentCollisionActorIds) ||
+    !isStringArray(partition.readiness?.requiredInitialCellKeys) ||
+    !isStringArray(partition.readiness?.requiredInitialRenderActorIds) ||
+    !isStringArray(partition.readiness?.requiredInitialCollisionActorIds)
+  ) {
+    throw new Error(`${levelId}: world partition readiness arrays are invalid.`)
+  }
 
   const residentActorIds = new Set(partition.residentActorIds)
   for (const actorId of partition.streamableActorIds) {
@@ -85,7 +140,10 @@ function assertRuntimeWorldPartition(
       typeof cell.key !== 'string' ||
       !Number.isFinite(cell.x) ||
       !Number.isFinite(cell.z) ||
-      !isStringArray(cell.actorIds)
+      !isStringArray(cell.actorIds) ||
+      !isStringArray(cell.renderActorIds) ||
+      !isStringArray(cell.collisionActorIds) ||
+      !['initial', 'stream'].includes(cell.streamingStage)
     ) {
       throw new Error(`${levelId}: world partition contains an invalid cell.`)
     }
@@ -94,8 +152,9 @@ function assertRuntimeWorldPartition(
 
 export async function loadRuntimeWorldPartition(
   levelId: string,
+  url = getRuntimeWorldPartitionUrl(levelId),
 ): Promise<RuntimeWorldPartition | null> {
-  const response = await fetch(getRuntimeWorldPartitionUrl(levelId))
+  const response = await fetch(url)
   if (response.status === 404) return null
   if (!response.ok) {
     throw new Error(
@@ -108,27 +167,55 @@ export async function loadRuntimeWorldPartition(
   return partition
 }
 
-export function getActiveWorldPartitionActorIds({
+export function getWorldPartitionReadinessActorIds(
+  partition: RuntimeWorldPartition,
+) {
+  return new Set([
+    ...partition.residentActorIds,
+    ...(partition.readiness?.requiredResidentRenderActorIds ?? []),
+    ...(partition.readiness?.requiredResidentCollisionActorIds ?? []),
+    ...(partition.readiness?.requiredInitialRenderActorIds ?? []),
+    ...(partition.readiness?.requiredInitialCollisionActorIds ?? []),
+  ])
+}
+
+export function getActiveWorldPartitionCells({
   partition,
   playerPosition,
 }: {
   partition: RuntimeWorldPartition
   playerPosition: [number, number, number]
 }) {
-  const activeActorIds = new Set(partition.residentActorIds)
   const cellSize = Math.max(1, partition.cellSize)
   const radius = Math.max(0, partition.activeRadius)
   const playerCellX = Math.floor(playerPosition[0] / cellSize)
   const playerCellZ = Math.floor(playerPosition[2] / cellSize)
 
-  for (const cell of partition.cells) {
-    if (
+  return partition.cells.filter(
+    cell =>
       Math.abs(cell.x - playerCellX) <= radius &&
-      Math.abs(cell.z - playerCellZ) <= radius
-    ) {
-      for (const actorId of cell.actorIds) {
-        activeActorIds.add(actorId)
-      }
+      Math.abs(cell.z - playerCellZ) <= radius,
+  )
+}
+
+export function getActiveWorldPartitionCellKeys(input: {
+  partition: RuntimeWorldPartition
+  playerPosition: [number, number, number]
+}) {
+  return getActiveWorldPartitionCells(input)
+    .map(cell => cell.key)
+    .sort()
+}
+
+export function getActiveWorldPartitionActorIds(input: {
+  partition: RuntimeWorldPartition
+  playerPosition: [number, number, number]
+}) {
+  const activeActorIds = new Set(input.partition.residentActorIds)
+
+  for (const cell of getActiveWorldPartitionCells(input)) {
+    for (const actorId of cell.actorIds) {
+      activeActorIds.add(actorId)
     }
   }
 

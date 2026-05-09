@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-08T00:25:17.729Z",
+  "generatedAt": "2026-05-08T22:27:13.362Z",
   "levelId": "observatory",
   "sceneId": "observatory",
   "source": {
@@ -25,16 +25,12 @@
         "collision": {
           "workflow": {
             "actorCollision": "lightweight-auto",
-            "colliderBudget": "mobile",
-            "terrainSculpting": true,
-            "autoBakeTerrain": true,
-            "terrainVisualChunks": "auto"
+            "colliderBudget": "mobile"
           },
           "terrain": {
             "source": "baked-heightmap",
             "runtimeSource": "built-in-manifest",
             "manifestUrl": "/terrain/observatory-environment.manifest.json",
-            "autoBakeOnTerrainChange": true,
             "dirty": false
           },
           "defaults": {
@@ -42,6 +38,10 @@
             "defaultFriction": 0.7,
             "defaultRestitution": 0
           }
+        },
+        "terrainSculpt": {
+          "enabled": true,
+          "autoBakeCollision": true
         },
         "presets": {
           "atmosphere": "moon-archive",
@@ -61,6 +61,20 @@
           "groundActorIds": [],
           "terrainManifestUrl": "/terrain/observatory-environment.manifest.json",
           "requiredWalkableSurfaceId": "observatory-terrain"
+        },
+        "graphicsBudget": {
+          "maxRuntimeAssetBytes": 167772160,
+          "maxRuntimeAssetFileBytes": 41943040,
+          "maxGeometryActors": 0,
+          "maxPrimitiveActors": 8,
+          "maxNeverCullActors": 4,
+          "maxGameplayFireflies": 0,
+          "maxExplicitColliders": 0,
+          "maxLightActors": 0,
+          "maxEstimatedDrawCalls": 0,
+          "maxAuthoredMaterialSlots": 0,
+          "maxEstimatedTriangles": 0,
+          "maxAuthoredTextureBytes": 0
         },
         "features": {
           "ocean": true,

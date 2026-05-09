@@ -9,7 +9,7 @@ export const aboutConfig: AboutConfig = {
   // Match the original about.astro layout
   team: {
     ...defaultAboutConfig.team,
-    enabled: true,
+    enabled: false,
     title: 'Our Team',
     description: '', // The original didn't have a description
     layout: 'grid',

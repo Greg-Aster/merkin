@@ -1,3 +1,4 @@
+import { getRuntimeGroundContract } from './groundContract'
 import type { SceneDocument } from './sceneDocumentTypes'
 import type { LevelBuildReport, LevelDefinition } from './types'
 
@@ -42,13 +43,6 @@ function getTerrainManifestUrl(levelDefinition: LevelDefinition) {
   return typeof terrain?.manifestUrl === 'string' ? terrain.manifestUrl : undefined
 }
 
-function getGroundContract(levelDefinition: LevelDefinition) {
-  const ground = (levelDefinition.settings as any)?.level?.ground
-  return ground && typeof ground === 'object'
-    ? (ground as Record<string, unknown>)
-    : undefined
-}
-
 export function createRuntimeSceneManifest(input: {
   scene: SceneDocument
   sceneId: string
@@ -76,7 +70,7 @@ export function createRuntimeSceneManifest(input: {
       requiredAssetUrls: input.buildReport.requiredAssetUrls,
       runtimeAssetUrls: input.buildReport.runtimeAssetUrls,
       terrainManifestUrl: getTerrainManifestUrl(input.levelDefinition),
-      ground: getGroundContract(input.levelDefinition),
+      ground: getRuntimeGroundContract(input.levelDefinition),
       worldPartitionUrl: input.worldPartitionUrl,
     },
   }

@@ -8,6 +8,7 @@ import {
   normalizePublicUrl,
   tierConfigs,
 } from './lib/runtimeAssetCookManifest.mjs'
+import { auditRuntimeAssetManifestObject } from './lib/runtimeAssetManifestAudit.mjs'
 import { cookRuntimeAssetVariant } from './lib/runtimeAssetVariantCooker.mjs'
 
 const appRoot = join(import.meta.dirname, '..')
@@ -24,6 +25,12 @@ function getArg(name) {
 
 function printSummary(manifest) {
   const tierCoverage = manifest.summary.cookedTierCoverage ?? {}
+  const assetAudit = auditRuntimeAssetManifestObject({
+    manifest,
+    runtimeSceneManifests: manifest.runtimeSceneManifests.map(
+      entry => entry.manifest,
+    ),
+  })
   const runtimeSceneBuildErrorCount = Object.values(
     manifest.runtimeScenes,
   ).reduce((sum, scene) => sum + scene.buildErrors.length, 0)
@@ -37,6 +44,16 @@ function printSummary(manifest) {
   console.log(
     `tier coverage: high=${tierCoverage.high} medium=${tierCoverage.medium} low=${tierCoverage.low}`,
   )
+  console.log(
+    `required/optional assets: ${manifest.summary.requiredAssetCount}/${manifest.summary.optionalAssetCount}`,
+  )
+  console.log(
+    `metadata coverage: source=${manifest.summary.metadataAssetCount} variants=${manifest.summary.variantMetadataCount}`,
+  )
+  console.log(
+    `lod/impostor coverage: lod=${manifest.summary.lodAssetCount} impostors=${manifest.summary.impostorDescriptorCount}`,
+  )
+  console.log(`render budget errors: ${assetAudit.failures.length}`)
   console.log(
     `raw generated runtime assets: ${manifest.summary.rawGeneratedRuntimeAssetCount}`,
   )
@@ -124,11 +141,26 @@ if (manifest.summary.missingSourceAssetCount > 0) {
 }
 
 const runtimeSceneBuildErrors = getRuntimeSceneBuildErrors(manifest)
+const runtimeAssetManifestAudit = auditRuntimeAssetManifestObject({
+  manifest,
+  runtimeSceneManifests: manifest.runtimeSceneManifests.map(
+    entry => entry.manifest,
+  ),
+})
 
 if (runtimeSceneBuildErrors.length > 0) {
   console.error('')
   console.error('runtime scene manifest build errors')
   for (const error of runtimeSceneBuildErrors) {
+    console.error(`- ${error}`)
+  }
+  process.exitCode = 1
+}
+
+if (runtimeAssetManifestAudit.failures.length > 0) {
+  console.error('')
+  console.error('runtime asset manifest audit errors')
+  for (const error of runtimeAssetManifestAudit.failures) {
     console.error(`- ${error}`)
   }
   process.exitCode = 1

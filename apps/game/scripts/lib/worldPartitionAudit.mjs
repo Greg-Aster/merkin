@@ -17,6 +17,12 @@ export function auditWorldPartitions({
       residentActors: 0,
       streamableActors: 0,
       maxActorsPerCell: 0,
+      readinessGates: 0,
+      initialCells: 0,
+      residentRenderActors: 0,
+      residentCollisionActors: 0,
+      initialRenderActors: 0,
+      initialCollisionActors: 0,
     }
 
     if (!existsSync(fullPath)) {
@@ -29,6 +35,16 @@ export function auditWorldPartitions({
     report.residentActors = partition.residentActorIds?.length ?? 0
     report.streamableActors = partition.streamableActorIds?.length ?? 0
     report.maxActorsPerCell = partition.budgets?.maxActorsPerCell ?? 0
+    report.readinessGates = partition.streaming?.readinessGates?.length ?? 0
+    report.initialCells = partition.readiness?.requiredInitialCellKeys?.length ?? 0
+    report.residentRenderActors =
+      partition.readiness?.requiredResidentRenderActorIds?.length ?? 0
+    report.residentCollisionActors =
+      partition.readiness?.requiredResidentCollisionActorIds?.length ?? 0
+    report.initialRenderActors =
+      partition.readiness?.requiredInitialRenderActorIds?.length ?? 0
+    report.initialCollisionActors =
+      partition.readiness?.requiredInitialCollisionActorIds?.length ?? 0
     const partitionBudget = budgetByLevel[levelId] ?? {}
 
     if (partition.version !== 1) {
@@ -42,6 +58,34 @@ export function auditWorldPartitions({
     }
     if (report.streamableActors < 1) {
       failures.push(`${file}: expected at least one streamable actor`)
+    }
+    if (report.streamableActors > 0 && report.initialCells < 1) {
+      failures.push(`${file}: expected at least one initial streaming cell`)
+    }
+    if (partition.streaming?.mode !== 'staged-render-collision') {
+      failures.push(`${file}: streaming.mode must be staged-render-collision`)
+    }
+    for (const gate of [
+      'partition-manifest',
+      'resident-render',
+      'resident-collision',
+      'initial-cell-render',
+      'initial-cell-collision',
+    ]) {
+      if (!partition.streaming?.readinessGates?.includes(gate)) {
+        failures.push(`${file}: missing world-partition readiness gate ${gate}`)
+      }
+    }
+    if (!Array.isArray(partition.readiness?.requiredInitialCellKeys)) {
+      failures.push(`${file}: readiness.requiredInitialCellKeys must be an array`)
+    }
+    if (!Array.isArray(partition.readiness?.requiredInitialRenderActorIds)) {
+      failures.push(`${file}: readiness.requiredInitialRenderActorIds must be an array`)
+    }
+    if (!Array.isArray(partition.readiness?.requiredInitialCollisionActorIds)) {
+      failures.push(
+        `${file}: readiness.requiredInitialCollisionActorIds must be an array`,
+      )
     }
     if (
       Number.isFinite(partitionBudget.maxResidentActors) &&
@@ -79,6 +123,15 @@ export function auditWorldPartitions({
       if (!Array.isArray(cell.actorIds) || cell.actorIds.length === 0) {
         failures.push(`${file}: cell "${cell.key}" must contain actorIds`)
         continue
+      }
+      if (!Array.isArray(cell.renderActorIds)) {
+        failures.push(`${file}: cell "${cell.key}" must contain renderActorIds`)
+      }
+      if (!Array.isArray(cell.collisionActorIds)) {
+        failures.push(`${file}: cell "${cell.key}" must contain collisionActorIds`)
+      }
+      if (!['initial', 'stream'].includes(cell.streamingStage)) {
+        failures.push(`${file}: cell "${cell.key}" has invalid streamingStage`)
       }
       for (const actorId of cell.actorIds) {
         if (!streamableActorIds.has(actorId)) {

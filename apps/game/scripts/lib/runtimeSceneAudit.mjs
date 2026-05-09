@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
+import { findDeprecatedSceneFields } from './deprecatedSceneFields.mjs'
 import { readDeployedSceneLevels } from './levelRegistry.mjs'
 
 export function auditRuntimeScenes({
@@ -21,6 +22,8 @@ export function auditRuntimeScenes({
       requiredAssetCount: 0,
       runtimeAssetCount: 0,
       buildErrors: 0,
+      deprecatedFields: 0,
+      hasGraphicsBudget: false,
     }
 
     if (!report.exists) {
@@ -57,9 +60,20 @@ export function auditRuntimeScenes({
     report.requiredAssetCount = buildReport?.requiredAssetUrls?.length ?? 0
     report.runtimeAssetCount = buildReport?.runtimeAssetUrls?.length ?? 0
     report.buildErrors = buildReport?.errors?.length ?? 0
+    report.hasGraphicsBudget = !!levelDefinition?.settings?.level?.graphicsBudget
+    const deprecatedFields = findDeprecatedSceneFields(levelDefinition ?? {})
+    report.deprecatedFields = deprecatedFields.length
 
     if (report.buildErrors > 0) {
       failures.push(`${file}: cooked runtime scene has build errors`)
+    }
+    if (deprecatedFields.length > 0) {
+      failures.push(
+        `${file}: cooked runtime scene contains deprecated fields: ${deprecatedFields.join(', ')}`,
+      )
+    }
+    if (!report.hasGraphicsBudget) {
+      failures.push(`${file}: cooked runtime scene is missing graphicsBudget`)
     }
 
     return report
