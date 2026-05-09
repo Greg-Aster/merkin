@@ -1,28 +1,29 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { findDeprecatedSceneFields } from './deprecatedSceneFields.mjs'
 
-const runtimeAssetFileBudgetBytes = 40 * 1024 * 1024
-const sceneRuntimeAssetBudgetBytes = 160 * 1024 * 1024
-const visualBudgetDefaults = {
-  maxPrimitiveActors: 80,
-  maxNeverCullActors: 4,
-  maxGameplayFireflies: 40,
-}
-const visualBudgetByLevel = {
-  observatory: {
-    maxPrimitiveActors: 8,
-    maxGameplayFireflies: 0,
-  },
-  solitude: {
-    maxPrimitiveActors: 16,
-    maxGameplayFireflies: 16,
-  },
-  yggdrasil: {
-    maxPrimitiveActors: 80,
-    maxNeverCullActors: 4,
-    maxGameplayFireflies: 40,
-  },
-}
+const requiredGraphicsBudgetKeys = [
+  'maxRuntimeAssetBytes',
+  'maxRuntimeAssetFileBytes',
+  'maxGeometryActors',
+  'maxPrimitiveActors',
+  'maxNeverCullActors',
+  'maxGameplayFireflies',
+  'maxExplicitColliders',
+  'maxLightActors',
+  'maxEstimatedDrawCalls',
+  'maxAuthoredMaterialSlots',
+  'maxEstimatedTriangles',
+  'maxAuthoredTextureBytes',
+]
+const materialTextureKeys = [
+  'mapUrl',
+  'emissiveMapUrl',
+  'metalnessMapUrl',
+  'roughnessMapUrl',
+  'normalMapUrl',
+  'alphaMapUrl',
+]
 const collisionIntents = new Set([
   'none',
   'walkable',
@@ -37,13 +38,6 @@ const collisionChannels = new Set([
   'trigger',
   'detail',
 ])
-const visualOnlyActorIds = new Set([
-  'solitude-ground-plateau',
-  'solitude-ground-dais',
-  'yggdrasil-mound',
-  'yggdrasil-bifrost-ribbon-merged',
-])
-
 export function formatBytes(bytes) {
   return `${Math.round((bytes / (1024 * 1024)) * 10) / 10}MB`
 }
@@ -68,6 +62,61 @@ function isGeometryNode(node) {
   return ['asset', 'primitive', 'prefab'].includes(node.kind)
 }
 
+function isLightNode(node) {
+  return node.kind === 'light' || !!node.light
+}
+
+function getGraphicsBudget(scene) {
+  return scene.settings?.level?.graphicsBudget ?? null
+}
+
+function getMissingGraphicsBudgetKeys(graphicsBudget) {
+  return requiredGraphicsBudgetKeys.filter(
+    key => !Number.isFinite(graphicsBudget?.[key]),
+  )
+}
+
+function getBudgetLimit(graphicsBudget, key) {
+  const value = graphicsBudget?.[key]
+  return Number.isFinite(value) ? value : Number.POSITIVE_INFINITY
+}
+
+function estimatePrimitiveTriangles(node) {
+  const geometry = node.primitive?.geometry
+  const args = Array.isArray(node.primitive?.args) ? node.primitive.args : []
+
+  if (geometry === 'box') return 12
+  if (geometry === 'plane') return 2
+  if (geometry === 'sphere') {
+    const widthSegments = Number.isFinite(args[1]) ? args[1] : 32
+    const heightSegments = Number.isFinite(args[2]) ? args[2] : 16
+    return Math.max(8, Math.round(widthSegments * heightSegments * 2))
+  }
+  if (geometry === 'cylinder') {
+    const radialSegments = Number.isFinite(args[2]) ? args[2] : 32
+    return Math.max(12, Math.round(radialSegments * 4))
+  }
+  if (geometry === 'torus') {
+    const radialSegments = Number.isFinite(args[2]) ? args[2] : 8
+    const tubularSegments = Number.isFinite(args[3]) ? args[3] : 32
+    return Math.max(32, Math.round(radialSegments * tubularSegments * 2))
+  }
+
+  return 12
+}
+
+function getMaterialTextureUrls(nodes) {
+  return [
+    ...new Set(
+      nodes.flatMap(node =>
+        materialTextureKeys
+          .map(key => node.material?.[key])
+          .filter(value => typeof value === 'string' && value.length > 0),
+      ),
+    ),
+  ].sort()
+}
+
 export function isFiniteVec3(value) {
   return (
     Array.isArray(value) &&
@@ -90,9 +139,18 @@ function auditScene({ file, sceneDir, publicDir }) {
   const hasBom = source.startsWith('\uFEFF')
   const scene = JSON.parse(source.replace(/^\uFEFF/, ''))
   const nodes = Array.isArray(scene.nodes) ? scene.nodes : []
+  const deprecatedFields = findDeprecatedSceneFields(scene)
+  const graphicsBudget = getGraphicsBudget(scene)
+  const missingGraphicsBudgetKeys = getMissingGraphicsBudgetKeys(graphicsBudget)
+  const visualOnlyActorIds = new Set(
+    Array.isArray(scene.settings?.level?.collision?.roles?.visualOnlyActorIds)
+      ? scene.settings.level.collision.roles.visualOnlyActorIds
+      : [],
+  )
   const spawnPosition = scene.settings?.level?.spawn?.position
   const geometryNodes = nodes.filter(isGeometryNode)
   const primitiveNodes = nodes.filter(node => node.kind === 'primitive')
+  const lightNodes = nodes.filter(isLightNode)
   const neverCullNodes = nodes.filter(
     node => node.renderPolicy?.cullingPolicy === 'never',
   )
@@ -117,6 +175,32 @@ function auditScene({ file, sceneDir, publicDir }) {
   })
   const disabledCollision = explicitCollision.filter(
     node => node.collision?.enabled === false,
+  )
+  const authoredMaterialSlots = geometryNodes.filter(
+    node => node.material || node.primitive,
+  )
+  const estimatedTriangles = primitiveNodes.reduce(
+    (sum, node) => sum + estimatePrimitiveTriangles(node),
+    0,
+  )
+  const materialTextureUrls = getMaterialTextureUrls(nodes)
+  const materialTextureFiles = materialTextureUrls.map(url => {
+    const fullPath = resolvePublicAssetPath(publicDir, url)
+    const exists = existsSync(fullPath)
+    const sizeBytes = exists ? statSync(fullPath).size : 0
+
+    return {
+      url,
+      exists,
+      sizeBytes,
+    }
+  })
+  const missingMaterialTextureFiles = materialTextureFiles.filter(
+    texture => !texture.exists,
+  )
+  const authoredTextureBytes = materialTextureFiles.reduce(
+    (sum, texture) => sum + texture.sizeBytes,
+    0,
   )
   const detailMeshWithoutBudget = explicitCollision.filter(
     node =>
@@ -149,7 +233,9 @@ function auditScene({ file, sceneDir, publicDir }) {
   })
   const missingAssetFiles = assetFiles.filter(asset => !asset.exists)
   const oversizedAssetFiles = assetFiles.filter(
-    asset => asset.sizeBytes > runtimeAssetFileBudgetBytes,
+    asset =>
+      asset.sizeBytes >
+      getBudgetLimit(graphicsBudget, 'maxRuntimeAssetFileBytes'),
   )
   const totalRuntimeAssetBytes = assetFiles.reduce(
     (sum, asset) => sum + asset.sizeBytes,
@@ -165,11 +251,18 @@ function auditScene({ file, sceneDir, publicDir }) {
     file,
     sizeKb: Math.round(statSync(fullPath).size / 1024),
     nodes: nodes.length,
+    graphicsBudget,
+    missingGraphicsBudgetKeys,
     geometryNodes: geometryNodes.length,
     primitiveNodes: primitiveNodes.length,
+    lightNodes: lightNodes.length,
     neverCullNodes: neverCullNodes.length,
     gameplayFireflies: gameplayFireflies.length,
     explicitCollision: explicitCollision.length,
+    estimatedDrawCalls: geometryNodes.length,
+    authoredMaterialSlots: authoredMaterialSlots.length,
+    estimatedTriangles,
+    authoredTextureBytes,
     missingCollisionIntent: missingCollisionIntent.length,
     missingCollisionChannel: missingCollisionChannel.length,
     invalidCollisionChannel: invalidCollisionChannel.length,
@@ -190,8 +283,29 @@ function auditScene({ file, sceneDir, publicDir }) {
     detailMeshWithoutBudgetIds: detailMeshWithoutBudget.map(node => node.id),
     missingDefaultCollisionIds: missingDefaultCollision.map(node => node.id),
     missingAssetFileUrls: missingAssetFiles.map(asset => asset.url),
+    missingMaterialTextureFileUrls: missingMaterialTextureFiles.map(
+      texture => texture.url,
+    ),
+    deprecatedFields,
     oversizedAssetFiles,
   }
+}
+
+function pushBudgetFailure({
+  failures,
+  report,
+  metricKey,
+  budgetKey,
+  label,
+  guidance,
+}) {
+  const budget = report.graphicsBudget?.[budgetKey]
+  if (!Number.isFinite(budget)) return
+  if (report[metricKey] <= budget) return
+
+  failures.push(
+    `${report.file}: ${label} exceeds graphics budget ${report[metricKey]}/${budget}${guidance ? `; ${guidance}` : ''}`,
+  )
 }
 
 function validateSceneReport(report) {
@@ -225,6 +339,16 @@ function validateSceneReport(report) {
   if (report.hasBom) {
     failures.push(`${report.file}: scene file has a UTF-8 BOM`)
   }
+  if (report.deprecatedFields.length > 0) {
+    failures.push(
+      `${report.file}: deprecated scene fields must be removed: ${report.deprecatedFields.join(', ')}`,
+    )
+  }
+  if (report.missingGraphicsBudgetKeys.length > 0) {
+    failures.push(
+      `${report.file}: settings.level.graphicsBudget must define ${report.missingGraphicsBudgetKeys.join(', ')}`,
+    )
+  }
   if (report.missingDefaultCollisionIds.length > 0) {
     failures.push(
       `${report.file}: visible geometry must explicitly author collision or disable it: ${report.missingDefaultCollisionIds.join(', ')}`,
@@ -235,37 +359,104 @@ function validateSceneReport(report) {
       `${report.file}: asset URLs must resolve to public files: ${report.missingAssetFileUrls.join(', ')}`,
     )
   }
-  for (const asset of report.oversizedAssetFiles) {
+  if (report.missingMaterialTextureFileUrls.length > 0) {
     failures.push(
-      `${report.file}: runtime asset exceeds ${formatBytes(runtimeAssetFileBudgetBytes)} budget: ${asset.url} (${formatBytes(asset.sizeBytes)})`,
+      `${report.file}: material texture URLs must resolve to public files: ${report.missingMaterialTextureFileUrls.join(', ')}`,
     )
   }
-  if (report.totalRuntimeAssetBytes > sceneRuntimeAssetBudgetBytes) {
+  for (const asset of report.oversizedAssetFiles) {
     failures.push(
-      `${report.file}: scene runtime assets exceed ${formatBytes(sceneRuntimeAssetBudgetBytes)} budget: ${formatBytes(report.totalRuntimeAssetBytes)}`,
+      `${report.file}: runtime asset exceeds ${formatBytes(report.graphicsBudget.maxRuntimeAssetFileBytes)} budget: ${asset.url} (${formatBytes(asset.sizeBytes)})`,
+    )
+  }
+  if (
+    Number.isFinite(report.graphicsBudget?.maxRuntimeAssetBytes) &&
+    report.totalRuntimeAssetBytes > report.graphicsBudget.maxRuntimeAssetBytes
+  ) {
+    failures.push(
+      `${report.file}: scene runtime assets exceed ${formatBytes(report.graphicsBudget.maxRuntimeAssetBytes)} budget: ${formatBytes(report.totalRuntimeAssetBytes)}`,
     )
   }
 
-  const levelId = report.file.replace(/\.scene\.json$/, '')
-  const visualBudget = {
-    ...visualBudgetDefaults,
-    ...(visualBudgetByLevel[levelId] ?? {}),
-  }
-  if (report.primitiveNodes > visualBudget.maxPrimitiveActors) {
-    failures.push(
-      `${report.file}: primitive render actors exceed visual budget ${report.primitiveNodes}/${visualBudget.maxPrimitiveActors}; bake repeated primitives into runtime assets or chunks`,
-    )
-  }
-  if (report.neverCullNodes > visualBudget.maxNeverCullActors) {
-    failures.push(
-      `${report.file}: never-cull render actors exceed visual budget ${report.neverCullNodes}/${visualBudget.maxNeverCullActors}`,
-    )
-  }
-  if (report.gameplayFireflies > visualBudget.maxGameplayFireflies) {
-    failures.push(
-      `${report.file}: firefly gameplay actors exceed visual budget ${report.gameplayFireflies}/${visualBudget.maxGameplayFireflies}; use chunked/pooled marker presentation`,
-    )
-  }
+  pushBudgetFailure({
+    failures,
+    report,
+    metricKey: 'geometryNodes',
+    budgetKey: 'maxGeometryActors',
+    label: 'geometry actors',
+    guidance: 'chunk, merge, or stream repeated actors',
+  })
+  pushBudgetFailure({
+    failures,
+    report,
+    metricKey: 'primitiveNodes',
+    budgetKey: 'maxPrimitiveActors',
+    label: 'primitive render actors',
+    guidance: 'bake repeated primitives into runtime assets or chunks',
+  })
+  pushBudgetFailure({
+    failures,
+    report,
+    metricKey: 'neverCullNodes',
+    budgetKey: 'maxNeverCullActors',
+    label: 'never-cull render actors',
+  })
+  pushBudgetFailure({
+    failures,
+    report,
+    metricKey: 'gameplayFireflies',
+    budgetKey: 'maxGameplayFireflies',
+    label: 'firefly gameplay actors',
+    guidance: 'use chunked or pooled marker presentation',
+  })
+  pushBudgetFailure({
+    failures,
+    report,
+    metricKey: 'explicitCollision',
+    budgetKey: 'maxExplicitColliders',
+    label: 'explicit colliders',
+    guidance: 'merge collider proxies or move detail collision into baked artifacts',
+  })
+  pushBudgetFailure({
+    failures,
+    report,
+    metricKey: 'lightNodes',
+    budgetKey: 'maxLightActors',
+    label: 'light actors',
+    guidance: 'bake static lighting or reduce realtime lights',
+  })
+  pushBudgetFailure({
+    failures,
+    report,
+    metricKey: 'estimatedDrawCalls',
+    budgetKey: 'maxEstimatedDrawCalls',
+    label: 'estimated draw calls',
+    guidance: 'merge materials, instance repeated meshes, or chunk by stream cell',
+  })
+  pushBudgetFailure({
+    failures,
+    report,
+    metricKey: 'authoredMaterialSlots',
+    budgetKey: 'maxAuthoredMaterialSlots',
+    label: 'authored material slots',
+    guidance: 'merge compatible materials or bake atlases',
+  })
+  pushBudgetFailure({
+    failures,
+    report,
+    metricKey: 'estimatedTriangles',
+    budgetKey: 'maxEstimatedTriangles',
+    label: 'estimated primitive triangles',
+    guidance: 'bake primitives into optimized meshes or author LODs',
+  })
+  pushBudgetFailure({
+    failures,
+    report,
+    metricKey: 'authoredTextureBytes',
+    budgetKey: 'maxAuthoredTextureBytes',
+    label: 'authored texture bytes',
+    guidance: 'resize or compress scene-authored texture maps',
+  })
 
   return failures
 }
@@ -276,9 +467,18 @@ export function summarizeSceneReports(reports) {
       nodes: sum.nodes + report.nodes,
       geometryNodes: sum.geometryNodes + report.geometryNodes,
       primitiveNodes: sum.primitiveNodes + report.primitiveNodes,
+      lightNodes: sum.lightNodes + report.lightNodes,
       neverCullNodes: sum.neverCullNodes + report.neverCullNodes,
       gameplayFireflies: sum.gameplayFireflies + report.gameplayFireflies,
       explicitCollision: sum.explicitCollision + report.explicitCollision,
+      estimatedDrawCalls: sum.estimatedDrawCalls + report.estimatedDrawCalls,
+      authoredMaterialSlots:
+        sum.authoredMaterialSlots + report.authoredMaterialSlots,
+      estimatedTriangles: sum.estimatedTriangles + report.estimatedTriangles,
+      authoredTextureBytes:
+        sum.authoredTextureBytes + report.authoredTextureBytes,
+      missingGraphicsBudgetKeys:
+        sum.missingGraphicsBudgetKeys + report.missingGraphicsBudgetKeys.length,
       missingCollisionIntent:
         sum.missingCollisionIntent + report.missingCollisionIntent,
       missingCollisionChannel:
@@ -291,6 +491,7 @@ export function summarizeSceneReports(reports) {
       explicitTrimesh: sum.explicitTrimesh + report.explicitTrimesh,
       missingDefaultCollision:
         sum.missingDefaultCollision + report.missingDefaultCollision,
+      deprecatedFields: sum.deprecatedFields + report.deprecatedFields.length,
       assetFiles: sum.assetFiles + report.assetFiles,
       totalRuntimeAssetBytes:
         sum.totalRuntimeAssetBytes + report.totalRuntimeAssetBytes,
@@ -300,9 +501,15 @@ export function summarizeSceneReports(reports) {
       nodes: 0,
       geometryNodes: 0,
       primitiveNodes: 0,
+      lightNodes: 0,
       neverCullNodes: 0,
       gameplayFireflies: 0,
       explicitCollision: 0,
+      estimatedDrawCalls: 0,
+      authoredMaterialSlots: 0,
+      estimatedTriangles: 0,
+      authoredTextureBytes: 0,
+      missingGraphicsBudgetKeys: 0,
       missingCollisionIntent: 0,
       missingCollisionChannel: 0,
       invalidCollisionChannel: 0,
@@ -310,6 +517,7 @@ export function summarizeSceneReports(reports) {
       disabledCollision: 0,
       explicitTrimesh: 0,
       missingDefaultCollision: 0,
+      deprecatedFields: 0,
       assetFiles: 0,
       totalRuntimeAssetBytes: 0,
       bomFiles: 0,

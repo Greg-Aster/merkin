@@ -53,10 +53,10 @@ const unsubTerrain = terrainStore.subscribe(value => {
 })
 
 function isTerrainModeActive() {
-  const workflow = getLevelCollisionWorkflow(levelId, editorScene?.settings)
   const terrainCollisionSettings = editorScene?.settings?.level?.collision?.terrain
+  const terrainSculptSettings = editorScene?.settings?.level?.terrainSculpt
   const terrainSculptingAvailable =
-    Boolean(workflow.terrainSculpting) ||
+    Boolean(terrainSculptSettings?.enabled) ||
     terrainCollisionSettings?.source === 'baked-heightmap' ||
     Boolean(terrainCollisionSettings?.manifestUrl)
 
@@ -373,16 +373,13 @@ function commitSculptStroke() {
         source: 'baked-heightmap',
         runtimeSource:
           settings.collision?.terrain?.runtimeSource ?? 'editor-manifest',
-        autoBakeOnTerrainChange:
-          settings.collision?.terrain?.autoBakeOnTerrainChange ?? false,
         dirty: true,
       },
     },
   }))
 
   const autoBake =
-    editorScene?.settings?.level?.collision?.terrain
-      ?.autoBakeOnTerrainChange === true
+    editorScene?.settings?.level?.terrainSculpt?.autoBakeCollision === true
   if (autoBake) {
     void bakeTerrainCollisionFromEditor()
   }
@@ -428,8 +425,6 @@ async function bakeTerrainCollisionFromEditor() {
             settings.collision?.terrain?.triangleCount,
           vertexCount:
             collision?.vertexCount ?? settings.collision?.terrain?.vertexCount,
-          autoBakeOnTerrainChange:
-            settings.collision?.terrain?.autoBakeOnTerrainChange ?? true,
           dirty: false,
           lastGeneratedAt: new Date().toISOString(),
           heightOverrideCount:

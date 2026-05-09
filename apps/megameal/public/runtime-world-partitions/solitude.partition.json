@@ -1,10 +1,65 @@
 {
   "version": 1,
   "levelId": "solitude",
-  "generatedAt": "2026-05-01T18:51:52.911Z",
+  "generatedAt": "2026-05-08T21:59:25.925Z",
   "generatedBy": "cook-world-partition",
   "cellSize": 80,
-  "activeRadius": 0,
+  "activeRadius": 1,
+  "streaming": {
+    "mode": "staged-render-collision",
+    "stages": [
+      "resident",
+      "initial-cells",
+      "stream-cells"
+    ],
+    "readinessGates": [
+      "partition-manifest",
+      "resident-render",
+      "resident-collision",
+      "initial-cell-render",
+      "initial-cell-collision"
+    ]
+  },
+  "readiness": {
+    "requiredResidentRenderActorIds": [],
+    "requiredResidentCollisionActorIds": [],
+    "requiredInitialCellKeys": [
+      "0,0"
+    ],
+    "requiredInitialRenderActorIds": [
+      "solitude-ground-dais",
+      "solitude-ground-plateau",
+      "solitude-pillar-1",
+      "solitude-pillar-10",
+      "solitude-pillar-11",
+      "solitude-pillar-12",
+      "solitude-pillar-2",
+      "solitude-pillar-3",
+      "solitude-pillar-4",
+      "solitude-pillar-5",
+      "solitude-pillar-6",
+      "solitude-pillar-7",
+      "solitude-pillar-8",
+      "solitude-pillar-9",
+      "solitude-ring-fragment-east",
+      "solitude-ring-fragment-west"
+    ],
+    "requiredInitialCollisionActorIds": [
+      "solitude-pillar-1",
+      "solitude-pillar-10",
+      "solitude-pillar-11",
+      "solitude-pillar-12",
+      "solitude-pillar-2",
+      "solitude-pillar-3",
+      "solitude-pillar-4",
+      "solitude-pillar-5",
+      "solitude-pillar-6",
+      "solitude-pillar-8",
+      "solitude-pillar-9",
+      "solitude-ring-fragment-east",
+      "solitude-ring-fragment-west"
+    ]
+  },
   "residentActorIds": [
     "solitude-ambient-wind",
     "solitude-firefly",
@@ -48,11 +103,13 @@
       "x": 0,
       "z": 0,
       "actorIds": [
-        "solitude-ground-root",
-        "solitude-ground-plateau",
         "solitude-ground-dais",
-        "solitude-ruin-ring",
+        "solitude-ground-plateau",
+        "solitude-ground-root",
         "solitude-pillar-1",
+        "solitude-pillar-10",
+        "solitude-pillar-11",
+        "solitude-pillar-12",
         "solitude-pillar-2",
         "solitude-pillar-3",
         "solitude-pillar-4",
@@ -61,10 +118,10 @@
         "solitude-pillar-7",
         "solitude-pillar-8",
         "solitude-pillar-9",
-        "solitude-pillar-10",
-        "solitude-pillar-11",
-        "solitude-pillar-12",
         "solitude-pillar-firefly-1",
+        "solitude-pillar-firefly-10",
+        "solitude-pillar-firefly-11",
+        "solitude-pillar-firefly-12",
         "solitude-pillar-firefly-2",
         "solitude-pillar-firefly-3",
         "solitude-pillar-firefly-4",
@@ -73,14 +130,47 @@
         "solitude-pillar-firefly-7",
         "solitude-pillar-firefly-8",
         "solitude-pillar-firefly-9",
-        "solitude-pillar-firefly-10",
-        "solitude-pillar-firefly-11",
-        "solitude-pillar-firefly-12",
+        "solitude-ring-fragment-east",
+        "solitude-ring-fragment-west",
+        "solitude-ruin-ring"
+      ],
+      "renderActorIds": [
+        "solitude-ground-dais",
+        "solitude-ground-plateau",
+        "solitude-pillar-1",
+        "solitude-pillar-10",
+        "solitude-pillar-11",
+        "solitude-pillar-12",
+        "solitude-pillar-2",
+        "solitude-pillar-3",
+        "solitude-pillar-4",
+        "solitude-pillar-5",
+        "solitude-pillar-6",
+        "solitude-pillar-7",
+        "solitude-pillar-8",
+        "solitude-pillar-9",
+        "solitude-ring-fragment-east",
+        "solitude-ring-fragment-west"
+      ],
+      "collisionActorIds": [
+        "solitude-pillar-1",
+        "solitude-pillar-10",
+        "solitude-pillar-11",
+        "solitude-pillar-12",
+        "solitude-pillar-2",
+        "solitude-pillar-3",
+        "solitude-pillar-4",
+        "solitude-pillar-5",
+        "solitude-pillar-6",
+        "solitude-pillar-8",
+        "solitude-pillar-9",
         "solitude-ring-fragment-east",
         "solitude-ring-fragment-west"
       ],
       "actorCount": 30,
-      "estimatedTriangles": 40000
+      "estimatedTriangles": 40000,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     }
   ],
   "budgets": {

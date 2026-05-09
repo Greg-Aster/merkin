@@ -365,9 +365,6 @@ export type LevelGroundCollisionSource =
 export interface LevelCollisionWorkflowSettings {
   actorCollision?: LevelCollisionDefaultPolicy
   colliderBudget?: LevelCollisionBudget
-  terrainSculpting?: boolean
-  autoBakeTerrain?: boolean
-  terrainVisualChunks?: 'auto' | 'manual' | 'off'
 }
 
 export interface LevelCollisionRoleSettings {
@@ -395,7 +392,6 @@ export interface SharedLevelCollisionSettings {
       colliderResolution?: number
       triangleCount?: number
       vertexCount?: number
-      autoBakeOnTerrainChange?: boolean
       dirty?: boolean
       lastGeneratedAt?: string
       heightOverrideCount?: number
@@ -428,6 +424,8 @@ export interface SharedLevelGroundSettings {
 
 export interface SharedLevelTerrainSculptSettings {
   terrainSculpt?: {
+    enabled?: boolean
+    autoBakeCollision?: boolean
     heightOverrides?: Record<string, number>
   }
 }
@@ -452,6 +450,35 @@ export interface SharedLevelRuntimeAssetSettings {
   }
 }
 
+export interface SharedLevelWorldPartitionSettings {
+  worldPartition?: {
+    partitionUrl?: string
+    cellSize?: number
+    activeRadius?: number
+    cells?: number
+    residentActors?: number
+    streamableActors?: number
+    lastGeneratedAt?: string
+  }
+}
+
+export interface SharedLevelGraphicsBudgetSettings {
+  graphicsBudget?: {
+    maxRuntimeAssetBytes?: number
+    maxRuntimeAssetFileBytes?: number
+    maxGeometryActors?: number
+    maxPrimitiveActors?: number
+    maxNeverCullActors?: number
+    maxGameplayFireflies?: number
+    maxExplicitColliders?: number
+    maxLightActors?: number
+    maxEstimatedDrawCalls?: number
+    maxAuthoredMaterialSlots?: number
+    maxEstimatedTriangles?: number
+    maxAuthoredTextureBytes?: number
+  }
+}
+
 export interface SharedLevelEditorSettings
   extends SharedLevelSpawnSettings,
     SharedLevelPlayerSettings,
@@ -466,7 +493,9 @@ export interface SharedLevelEditorSettings
     SharedLevelTerrainSculptSettings,
     SharedLevelPresetSettings,
     SharedLevelSkyboxSettings,
-    SharedLevelRuntimeAssetSettings {}
+    SharedLevelRuntimeAssetSettings,
+    SharedLevelWorldPartitionSettings,
+    SharedLevelGraphicsBudgetSettings {}
 
 export interface ObservatoryEditorSettings extends SharedLevelEditorSettings {
   ocean?: SharedLevelWaterSettings['water']

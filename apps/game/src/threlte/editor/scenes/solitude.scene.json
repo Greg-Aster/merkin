@@ -27,6 +27,36 @@
         "terrainManifestUrl": "/terrain/solitude.manifest.json",
         "requiredWalkableSurfaceId": "solitude-terrain"
       },
+      "worldPartition": {
+        "partitionUrl": "/runtime-world-partitions/solitude.partition.json",
+        "cellSize": 80,
+        "activeRadius": 1,
+        "cells": 1,
+        "residentActors": 3,
+        "streamableActors": 30
+      },
+      "graphicsBudget": {
+        "maxRuntimeAssetBytes": 167772160,
+        "maxRuntimeAssetFileBytes": 41943040,
+        "maxGeometryActors": 18,
+        "maxPrimitiveActors": 16,
+        "maxNeverCullActors": 4,
+        "maxGameplayFireflies": 16,
+        "maxExplicitColliders": 16,
+        "maxLightActors": 0,
+        "maxEstimatedDrawCalls": 18,
+        "maxAuthoredMaterialSlots": 20,
+        "maxEstimatedTriangles": 750000,
+        "maxAuthoredTextureBytes": 0
+      },
+      "collision": {
+        "roles": {
+          "visualOnlyActorIds": [
+            "solitude-ground-plateau",
+            "solitude-ground-dais"
+          ]
+        }
+      },
       "features": {
         "starMap": true,
         "conversations": true,

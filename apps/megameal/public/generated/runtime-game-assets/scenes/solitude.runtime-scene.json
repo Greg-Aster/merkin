@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-08T00:25:17.729Z",
+  "generatedAt": "2026-05-08T22:27:13.362Z",
   "levelId": "solitude",
   "sceneId": "solitude",
   "source": {
@@ -25,23 +25,29 @@
         "collision": {
           "workflow": {
             "actorCollision": "lightweight-auto",
-            "colliderBudget": "mobile",
-            "terrainSculpting": false,
-            "autoBakeTerrain": true,
-            "terrainVisualChunks": "auto"
+            "colliderBudget": "mobile"
           },
           "terrain": {
             "source": "baked-heightmap",
             "runtimeSource": "built-in-manifest",
             "manifestUrl": "/terrain/solitude.manifest.json",
-            "autoBakeOnTerrainChange": true,
             "dirty": false
           },
           "defaults": {
             "solidObjectsByDefault": true,
             "defaultFriction": 0.7,
             "defaultRestitution": 0
+          },
+          "roles": {
+            "visualOnlyActorIds": [
+              "solitude-ground-plateau",
+              "solitude-ground-dais"
+            ]
           }
+        },
+        "terrainSculpt": {
+          "enabled": true,
+          "autoBakeCollision": true
         },
         "skyboxPreset": "observatory",
         "presets": {
@@ -65,6 +71,28 @@
           ],
           "terrainManifestUrl": "/terrain/solitude.manifest.json",
           "requiredWalkableSurfaceId": "solitude-terrain"
+        },
+        "worldPartition": {
+          "partitionUrl": "/runtime-world-partitions/solitude.partition.json",
+          "cellSize": 80,
+          "activeRadius": 1,
+          "cells": 1,
+          "residentActors": 3,
+          "streamableActors": 30
+        },
+        "graphicsBudget": {
+          "maxRuntimeAssetBytes": 167772160,
+          "maxRuntimeAssetFileBytes": 41943040,
+          "maxGeometryActors": 18,
+          "maxPrimitiveActors": 16,
+          "maxNeverCullActors": 4,
+          "maxGameplayFireflies": 16,
+          "maxExplicitColliders": 16,
+          "maxLightActors": 0,
+          "maxEstimatedDrawCalls": 18,
+          "maxAuthoredMaterialSlots": 20,
+          "maxEstimatedTriangles": 750000,
+          "maxAuthoredTextureBytes": 0
         },
         "features": {
           "starMap": true,

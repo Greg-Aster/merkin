@@ -15,6 +15,15 @@ if (!aboutPost) {
   throw new Error("About content not found in 'spec/about'")
 }
 const { Content, headings: aboutHeadings } = await aboutPost.render()
+const aboutBannerPost = {
+  slug: 'about',
+  data: {
+    title: i18n(I18nKey.about),
+    description:
+      'Explore the Mega Meal Saga Universe: A sprawling world of dystopian fast-food, cosmic entities, and surreal narratives. Learn about its creation and lore.',
+    bannerType: 'none',
+  },
+}
 
 // ⭐ NEW: Fetch all about pages dynamically
 const allAboutPages = await getCollection('about')
@@ -96,8 +105,25 @@ function isVideoMedia(src?: string) {
   title={i18n(I18nKey.about)} 
   description="Explore the Mega Meal Saga Universe: A sprawling world of dystopian fast-food, cosmic entities, and surreal narratives. Learn about its creation and lore."
   headings={aboutConfig.content.showTableOfContents ? aboutHeadings : undefined}
+  post={aboutBannerPost}
+  backgroundImage="none"
 >
-  
+
+  <!-- Dynamic Content Section (About/Team Member) -->
+  {aboutConfig.content.enabled && (
+    <div id="dynamic-content-section" class="card-base flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32 mb-4">
+      <div class="pl-6 md:pl-9 pr-6 md:pr-9 pt-6 md:pt-7 pb-6 w-full">
+        <h2 id="dynamic-section-title" class="text-2xl font-bold text-90 mb-4 text-[var(--primary)] dark:text-[var(--primary)]">{aboutConfig.content.defaultTitle}</h2>
+        <div id="about-content" class="mt-2">
+          <Markdown class="prose dark:prose-invert">
+            <Content />
+          </Markdown>
+        </div>
+        <div id="member-content" class="mt-2 hidden prose dark:prose-invert text-neutral-800 dark:text-neutral-200"></div>
+      </div>
+    </div>
+  )}
+
   <!-- Individual Authors Section - NOW DYNAMIC -->
   <div id="authors-section" class="card-base flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32 mb-4">
     <div class="pl-6 md:pl-9 pr-6 md:pr-9 pt-6 md:pt-7 pb-6 w-full">
@@ -198,21 +224,6 @@ function isVideoMedia(src?: string) {
             </div>
           ))}
         </div>
-      </div>
-    </div>
-  )}
-
-  <!-- Dynamic Content Section (About/Team Member) -->
-  {aboutConfig.content.enabled && (
-    <div id="dynamic-content-section" class="card-base flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32 mb-4">
-      <div class="pl-6 md:pl-9 pr-6 md:pr-9 pt-6 md:pt-7 pb-6 w-full">
-        <h2 id="dynamic-section-title" class="text-2xl font-bold text-90 mb-4 text-[var(--primary)] dark:text-[var(--primary)]">{aboutConfig.content.defaultTitle}</h2>
-        <div id="about-content" class="mt-2">
-          <Markdown class="prose dark:prose-invert">
-            <Content />
-          </Markdown>
-        </div>
-        <div id="member-content" class="mt-2 hidden prose dark:prose-invert text-neutral-800 dark:text-neutral-200"></div>
       </div>
     </div>
   )}

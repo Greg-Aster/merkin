@@ -7,6 +7,7 @@ import {
   isFiniteVec3,
 } from './lib/sceneArchitectureAudit.mjs'
 import { auditRuntimeScenes } from './lib/runtimeSceneAudit.mjs'
+import { auditRuntimeAssetManifest } from './lib/runtimeAssetManifestAudit.mjs'
 import { auditTerrainCollision } from './lib/terrainCollisionAudit.mjs'
 import { auditWorldPartitions } from './lib/worldPartitionAudit.mjs'
 
@@ -19,6 +20,10 @@ const gameEditorToolsBridgePath = join(
 const runtimeSceneDir = join(
   process.cwd(),
   '../megameal/public/generated/runtime-game-assets/scenes',
+)
+const runtimeAssetManifestPath = join(
+  process.cwd(),
+  '../megameal/public/generated/runtime-game-assets/manifest.json',
 )
 const worldPartitionDir = join(
   process.cwd(),
@@ -101,6 +106,14 @@ const runtimeSceneAudit = auditRuntimeScenes({
 const runtimeSceneReports = runtimeSceneAudit.reports
 failures.push(...runtimeSceneAudit.failures)
 
+const runtimeAssetManifestAudit = auditRuntimeAssetManifest({
+  manifestPath: runtimeAssetManifestPath,
+  runtimeSceneDir,
+  readJsonFile,
+})
+const runtimeAssetManifestReport = runtimeAssetManifestAudit.report
+failures.push(...runtimeAssetManifestAudit.failures)
+
 console.log('Engine architecture scene audit')
 console.log('================================')
 
@@ -119,9 +132,15 @@ for (const report of reports) {
       `nodes=${report.nodes}`,
       `geometry=${report.geometryNodes}`,
       `primitives=${report.primitiveNodes}`,
+      `lights=${report.lightNodes}`,
       `neverCull=${report.neverCullNodes}`,
       `fireflies=${report.gameplayFireflies}`,
       `explicitCollision=${report.explicitCollision}`,
+      `drawCallsEst=${report.estimatedDrawCalls}`,
+      `materialSlots=${report.authoredMaterialSlots}`,
+      `trianglesEst=${report.estimatedTriangles}`,
+      `textureSize=${formatBytes(report.authoredTextureBytes)}`,
+      `missingBudgetKeys=${report.missingGraphicsBudgetKeys.length}`,
       `missingIntent=${report.missingCollisionIntent}`,
       `missingChannel=${report.missingCollisionChannel}`,
       `invalidChannel=${report.invalidCollisionChannel}`,
@@ -129,6 +148,7 @@ for (const report of reports) {
       `disabledCollision=${report.disabledCollision}`,
       `explicitTrimesh=${report.explicitTrimesh}`,
       `missingDefaultCollision=${report.missingDefaultCollision}`,
+      `deprecatedFields=${report.deprecatedFields.length}`,
       `assetFiles=${report.assetFiles}`,
       `assetSize=${formatBytes(report.totalRuntimeAssetBytes)}`,
       `spawn=${report.hasValidSpawn ? `[${report.spawnPosition.join(',')}]` : 'invalid'}`,
@@ -152,9 +172,15 @@ console.log(
     `nodes=${totals.nodes}`,
     `geometry=${totals.geometryNodes}`,
     `primitives=${totals.primitiveNodes}`,
+    `lights=${totals.lightNodes}`,
     `neverCull=${totals.neverCullNodes}`,
     `fireflies=${totals.gameplayFireflies}`,
     `explicitCollision=${totals.explicitCollision}`,
+    `drawCallsEst=${totals.estimatedDrawCalls}`,
+    `materialSlots=${totals.authoredMaterialSlots}`,
+    `trianglesEst=${totals.estimatedTriangles}`,
+    `textureSize=${formatBytes(totals.authoredTextureBytes)}`,
+    `missingBudgetKeys=${totals.missingGraphicsBudgetKeys}`,
     `missingIntent=${totals.missingCollisionIntent}`,
     `missingChannel=${totals.missingCollisionChannel}`,
     `invalidChannel=${totals.invalidCollisionChannel}`,
@@ -162,6 +188,7 @@ console.log(
     `disabledCollision=${totals.disabledCollision}`,
     `explicitTrimesh=${totals.explicitTrimesh}`,
     `missingDefaultCollision=${totals.missingDefaultCollision}`,
+    `deprecatedFields=${totals.deprecatedFields}`,
     `assetFiles=${totals.assetFiles}`,
     `assetSize=${formatBytes(totals.totalRuntimeAssetBytes)}`,
     `bomFiles=${totals.bomFiles}`,
@@ -182,6 +209,47 @@ for (const report of runtimeSceneReports) {
       `requiredAssets=${report.requiredAssetCount}`,
       `runtimeAssets=${report.runtimeAssetCount}`,
       `buildErrors=${report.buildErrors}`,
+      `deprecatedFields=${report.deprecatedFields}`,
+      `graphicsBudget=${report.hasGraphicsBudget ? 'yes' : 'no'}`,
+    ].join('  '),
+  )
+}
+
+console.log('')
+console.log('Runtime asset manifest audit')
+console.log('============================')
+console.log(
+  [
+    `exists=${runtimeAssetManifestReport.exists ? 'yes' : 'no'}`,
+    `sourceAssets=${runtimeAssetManifestReport.sourceAssetCount}`,
+    `required=${runtimeAssetManifestReport.requiredAssetCount}`,
+    `optional=${runtimeAssetManifestReport.optionalAssetCount}`,
+    `metadata=${runtimeAssetManifestReport.metadataAssetCount}`,
+    `cookedVariants=${runtimeAssetManifestReport.cookedVariantCount}`,
+    `variantMetadata=${runtimeAssetManifestReport.variantMetadataCount}`,
+    `missingMetadata=${runtimeAssetManifestReport.missingMetadata}`,
+    `missingVariantMetadata=${runtimeAssetManifestReport.missingVariantMetadata}`,
+    `missingLodTier=${runtimeAssetManifestReport.missingLodTier}`,
+    `missingLodContract=${runtimeAssetManifestReport.missingLodContract}`,
+    `missingImpostor=${runtimeAssetManifestReport.missingImpostorDescriptor}`,
+    `missingStatus=${runtimeAssetManifestReport.missingStatus}`,
+    `missingTextureRefs=${runtimeAssetManifestReport.missingTextureReferences}`,
+    `missingRecommendedSlots=${runtimeAssetManifestReport.missingRecommendedMaterialSlots}`,
+    `unsupportedShaders=${runtimeAssetManifestReport.unsupportedShaderFeatures}`,
+    `oversizedTextures=${runtimeAssetManifestReport.oversizedTextures}`,
+  ].join('  '),
+)
+for (const report of runtimeAssetManifestReport.budgetReports) {
+  console.log(
+    [
+      `  ${report.levelId}`,
+      `tier=${report.tier}`,
+      `payload=${formatBytes(report.runtimeAssetBytes)}`,
+      `largest=${formatBytes(report.largestRuntimeAssetBytes)}`,
+      `drawCalls=${report.combinedDrawCalls}`,
+      `materialSlots=${report.combinedMaterialSlots}`,
+      `triangles=${report.combinedTriangles}`,
+      `textureSize=${formatBytes(report.combinedTextureBytes)}`,
     ].join('  '),
   )
 }
@@ -218,6 +286,12 @@ for (const report of worldPartitionReports) {
       `residentActors=${report.residentActors}`,
       `streamableActors=${report.streamableActors}`,
       `maxActorsPerCell=${report.maxActorsPerCell}`,
+      `readinessGates=${report.readinessGates}`,
+      `initialCells=${report.initialCells}`,
+      `residentRender=${report.residentRenderActors}`,
+      `residentCollision=${report.residentCollisionActors}`,
+      `initialRender=${report.initialRenderActors}`,
+      `initialCollision=${report.initialCollisionActors}`,
     ].join('  '),
   )
 }

@@ -10,7 +10,10 @@ import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
 import LevelManager from '../core/LevelManager.svelte'
 import type { PlayerLevelPositionDetail } from '../core/levelRuntimeEvents'
 import { createActorWorldMatrixResolver } from '../engine/actorHierarchy'
-import { getLevelCollisionWorkflow } from '../engine/levelCollisionWorkflow'
+import {
+  hasAuthoredGroundVisuals,
+  shouldRenderTerrainVisualChunks,
+} from '../engine/groundContract'
 import { createLevelBuildReport } from '../engine/levelValidation'
 import type { RuntimeGameplayData } from '../engine/runtimeGameplayTypes'
 import { traceRuntimeCulling } from '../engine/runtimeCullingTrace'
@@ -22,6 +25,9 @@ import { normalizeRuntimeLevelSceneSettings } from '../engine/runtimeLevelSettin
 import { loadRuntimeSceneDocument } from '../engine/runtimeSceneDocumentLoader'
 import {
   type RuntimeWorldPartition,
+  getActiveWorldPartitionCells,
+  getActiveWorldPartitionActorIds,
+  getWorldPartitionReadinessActorIds,
   loadRuntimeWorldPartition,
 } from '../engine/runtimeWorldPartition'
 import { withSceneEngineData } from '../engine/sceneDocumentRuntime'
@@ -49,6 +55,10 @@ import {
   setRuntimeLevelActors,
   setRequiredRuntimeRenderActors,
 } from '../stores/runtimeRenderRegistry'
+import {
+  clearRuntimeStreamingTelemetry,
+  setRuntimeStreamingTelemetry,
+} from '../stores/runtimeStreamingTelemetry'
 import { buildRuntimeVisualStyleFromLevelSettings } from '../styles/GameplayStyleProfiles'
 import {
   replaceRuntimeVisualStyle,
@@ -204,9 +214,11 @@ function revealNextActorBatch() {
   complete?.()
 }
 
-function startActorReveal(onComplete: () => void) {
+function startActorReveal(onComplete: () => void, actorIds?: Set<string>) {
   cancelActorReveal()
-  actorRevealOrder = buildActorRevealOrder(levelActors)
+  actorRevealOrder = buildActorRevealOrder(levelActors).filter(
+    actor => !actorIds || actorIds.has(actor.id),
+  )
   actorRevealIndex = 0
   visibleActorIds = new Set<string>()
   actorRevealComplete = onComplete
@@ -218,6 +230,20 @@ function startActorReveal(onComplete: () => void) {
   }
 
   actorRevealFrame = requestAnimationFrame(revealNextActorBatch)
+}
+
+function collectRenderAssetUrlsForActorIds(
+  actors: ActorDefinition[],
+  actorIds: Set<string>,
+) {
+  return [
+    ...new Set(
+      actors
+        .filter(actor => actorIds.has(actor.id))
+        .map(actor => actor.render?.asset?.url)
+        .filter((url): url is string => Boolean(url)),
+    ),
+  ]
 }
 
 function parseSceneColor(
@@ -269,23 +295,6 @@ function getTerrainCollisionSettings(settings: SceneSettings) {
     | undefined
 }
 
-function shouldShowTerrainVisualChunks(level: string, settings: SceneSettings) {
-  const groundContract = settings.level?.ground
-  const visualSource = groundContract?.visualSource
-
-  if (groundContract?.mode === 'hybrid' || visualSource === 'terrain-chunks') {
-    return true
-  }
-
-  if (visualSource === 'scene-actors' || visualSource === 'none') {
-    return false
-  }
-
-  const workflow = getLevelCollisionWorkflow(level, settings)
-  if (workflow.terrainVisualChunks === 'off') return false
-  return true
-}
-
 async function loadSceneTerrainRuntimeData(
   level: string,
   settings: SceneSettings,
@@ -306,16 +315,14 @@ async function loadSceneTerrainRuntimeData(
   }
 
   const manifest = await response.json()
-  const groundContract = settings.level?.ground
-  const hasAuthoredGroundVisuals = groundContract?.visualSource === 'scene-actors'
   return loadTerrainRuntimeComponentData({
     levelId: level,
     source: terrainSettings.runtimeSource ?? 'editor-manifest',
     manifest,
     manifestUrl: terrainSettings.manifestUrl,
     boundsFallback: manifest.physics?.bounds ?? null,
-    showVisualSurface: !hasAuthoredGroundVisuals,
-    showVisualChunks: shouldShowTerrainVisualChunks(level, settings),
+    showVisualSurface: !hasAuthoredGroundVisuals(settings),
+    showVisualChunks: shouldRenderTerrainVisualChunks(level, settings),
   })
 }
 
@@ -380,6 +387,7 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
   terrainRuntimeData = null
   terrainRuntimeReady = false
   worldPartition = null
+  clearRuntimeStreamingTelemetry(level)
   pendingSceneReady = false
   pendingSpawnPosition = null
   renderActorsReady = false
@@ -413,9 +421,30 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
     level,
     normalizedSceneSettings,
   )
-  worldPartition = getWorldPartitionSettings(normalizedSceneSettings)
-    ? await loadRuntimeWorldPartition(level)
+  const worldPartitionSettings = getWorldPartitionSettings(normalizedSceneSettings)
+  worldPartition = worldPartitionSettings
+    ? await loadRuntimeWorldPartition(level, worldPartitionSettings.partitionUrl)
     : null
+  setRuntimeDiagnostic('worldPartition', {
+    label: 'World Partition',
+    level: worldPartition ? 'ready' : 'idle',
+    message: worldPartition
+      ? `${level}: ${worldPartition.cells.length} streamed cell(s), ${worldPartition.residentActorIds.length} resident actor(s), ${worldPartition.streamableActorIds.length} streamable actor(s).`
+      : `${level}: world partition disabled.`,
+    meta: worldPartition
+      ? {
+          levelId: level,
+          cellSize: worldPartition.cellSize,
+          activeRadius: worldPartition.activeRadius,
+          cellCount: worldPartition.cells.length,
+          residentActorCount: worldPartition.residentActorIds.length,
+          streamableActorCount: worldPartition.streamableActorIds.length,
+          readinessGates: worldPartition.streaming?.readinessGates ?? [],
+          requiredInitialCellKeys:
+            worldPartition.readiness?.requiredInitialCellKeys ?? [],
+        }
+      : { levelId: level },
+  })
   if (token !== loadToken) return
 
   levelActors = levelDefinition.actors
@@ -454,9 +483,21 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
   }
   if (token !== loadToken) return
 
+  const spawnPosition = resolveSpawnPosition(levelDefinition)
+  playerPosition = spawnPosition
+  const worldPartitionReadinessActorIds = worldPartition
+    ? getWorldPartitionReadinessActorIds(worldPartition)
+    : new Set(levelActors.map(actor => actor.id))
+  const readinessAssetUrls = collectRenderAssetUrlsForActorIds(
+    levelActors,
+    worldPartitionReadinessActorIds,
+  )
+  const requiredAssetUrls = [
+    ...new Set([...buildReport.requiredAssetUrls, ...readinessAssetUrls]),
+  ]
   const preloadReport = await prepareRequiredLevelRenderAssets(
     level,
-    buildReport.requiredAssetUrls,
+    requiredAssetUrls,
     get(qualityLevelStore),
     {
       maxTier: getRuntimeAssetTierCap(normalizedSceneSettings),
@@ -470,6 +511,7 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
     culled: preloadReport.failures.length > 0,
     detail: {
       status: 'preload-complete',
+      worldPartitionReadinessActorIds: Array.from(worldPartitionReadinessActorIds),
       requiredResolvedUrls: preloadReport.requiredResolvedUrls,
       failureCount: preloadReport.failures.length,
       failures: preloadReport.failures,
@@ -504,15 +546,18 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
             cellSize: worldPartition.cellSize,
             residentActorCount: worldPartition.residentActorIds.length,
             streamableActorCount: worldPartition.streamableActorIds.length,
+            readinessActorCount: worldPartitionReadinessActorIds.size,
+            readinessGates: worldPartition.streaming?.readinessGates ?? [],
+            initialCells:
+              worldPartition.readiness?.requiredInitialCellKeys.length ?? 0,
           }
         : null,
     },
   })
-  const spawnPosition = resolveSpawnPosition(levelDefinition)
   startActorReveal(() => {
     if (token !== loadToken) return
     requestSceneGameplayActivation(level, spawnPosition)
-  })
+  }, worldPartitionReadinessActorIds)
 }
 
 async function loadSceneDocument(level: string, token: number) {
@@ -535,6 +580,7 @@ async function loadSceneDocument(level: string, token: number) {
     terrainRuntimeData = null
     terrainRuntimeReady = false
     worldPartition = null
+    clearRuntimeStreamingTelemetry(level)
     pendingSceneReady = false
     pendingSpawnPosition = null
     clearRuntimeRenderedActors(level)
@@ -618,12 +664,59 @@ $: effectiveAudioRegions = [
   ...presetAmbientAudioRegions,
   ...authoredAudioRegions,
 ]
-$: visibleRootActors = renderActorsReady
-  ? rootActors.filter(actor => visibleActorIds.has(actor.id))
+$: runtimeActiveActorIds = worldPartition
+  ? getActiveWorldPartitionActorIds({ partition: worldPartition, playerPosition })
+  : new Set(levelActors.map(actor => actor.id))
+$: runtimeActiveCells = worldPartition
+  ? getActiveWorldPartitionCells({ partition: worldPartition, playerPosition })
   : []
-$: runtimeActiveActorIds = new Set(levelActors.map(actor => actor.id))
+$: if (renderActorsReady && worldPartition) {
+  const nextVisibleActorIds = new Set(visibleActorIds)
+  let changed = false
+  for (const actorId of runtimeActiveActorIds) {
+    if (nextVisibleActorIds.has(actorId)) continue
+    nextVisibleActorIds.add(actorId)
+    changed = true
+  }
+  if (changed) visibleActorIds = nextVisibleActorIds
+}
+$: visibleActorIdsForRender = renderActorsReady
+  ? new Set(
+      Array.from(visibleActorIds).filter(actorId =>
+        runtimeActiveActorIds.has(actorId),
+      ),
+    )
+  : new Set<string>()
+$: visibleRootActors = renderActorsReady
+  ? rootActors.filter(actor => visibleActorIdsForRender.has(actor.id))
+  : []
 $: if (renderActorsReady) {
   setRuntimeActiveActors(levelId, Array.from(runtimeActiveActorIds))
+}
+$: activeRenderableActorCount = levelActors.filter(
+  actor =>
+    runtimeActiveActorIds.has(actor.id) &&
+    actor.render?.visible !== false &&
+    Boolean(
+      actor.render?.asset?.url ||
+        actor.render?.prefab ||
+        actor.render?.primitive ||
+        actor.light,
+    ),
+).length
+$: if (renderActorsReady) {
+  setRuntimeStreamingTelemetry(levelId, {
+    partitioned: Boolean(worldPartition),
+    activeCellKeys: runtimeActiveCells.map(cell => cell.key),
+    activeCellCount: runtimeActiveCells.length,
+    totalCellCount: worldPartition?.cells.length ?? 0,
+    residentActorCount: worldPartition?.residentActorIds.length ?? levelActors.length,
+    streamableActorCount: worldPartition?.streamableActorIds.length ?? 0,
+    activeActorCount: runtimeActiveActorIds.size,
+    activeRenderableActorCount,
+    readinessGateCount: worldPartition?.streaming?.readinessGates.length ?? 0,
+    initialCellCount: worldPartition?.readiness?.requiredInitialCellKeys.length ?? 0,
+  })
 }
 $: effectiveFog = (() => {
   const fogVolumes = authoredGameplayNodes.filter(
@@ -717,6 +810,7 @@ onMount(() => {
 onDestroy(() => {
   cancelActorReveal()
   endLevelRuntimeAssetScope(levelId)
+  clearRuntimeStreamingTelemetry(levelId)
   terrainRuntimeData = null
   terrainRuntimeReady = false
   pendingSceneReady = false
@@ -828,7 +922,7 @@ onDestroy(() => {
           {levelId}
           {interactionSystem}
           interactiveEnabled={true}
-          {visibleActorIds}
+          visibleActorIds={visibleActorIdsForRender}
           on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
           on:noteRead={(event) => dispatch('noteRead', event.detail)}
         />

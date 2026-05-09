@@ -23,6 +23,20 @@
         "terrainManifestUrl": "/terrain/sci-fi-room.manifest.json",
         "requiredWalkableSurfaceId": "sci-fi-room-terrain"
       },
+      "graphicsBudget": {
+        "maxRuntimeAssetBytes": 167772160,
+        "maxRuntimeAssetFileBytes": 41943040,
+        "maxGeometryActors": 45,
+        "maxPrimitiveActors": 4,
+        "maxNeverCullActors": 4,
+        "maxGameplayFireflies": 0,
+        "maxExplicitColliders": 40,
+        "maxLightActors": 0,
+        "maxEstimatedDrawCalls": 45,
+        "maxAuthoredMaterialSlots": 16,
+        "maxEstimatedTriangles": 260000,
+        "maxAuthoredTextureBytes": 12582912
+      },
       "features": {
         "ocean": true,
         "vegetation": true,

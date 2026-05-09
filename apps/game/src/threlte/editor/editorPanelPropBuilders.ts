@@ -140,6 +140,8 @@ export type EditorPanelPropBuilderContext = {
   outlinerModeOptions: OutlinerModeOption[]
   hierarchyFilter: string
   outlinerRows: OutlinerRow[]
+  groundSettings: Record<string, any> | null
+  terrainSculptSettings: Record<string, any> | null
   terrainCollisionSettings: Record<string, any> | null
   collisionDefaultPolicy: LevelCollisionDefaultPolicy
   collisionBudget: LevelCollisionBudget
@@ -147,6 +149,7 @@ export type EditorPanelPropBuilderContext = {
   terrainHeightmapGeneratePending: boolean
   terrainChunkCookPending: boolean
   worldPartitionCookPending: boolean
+  groundTerrainPublishPending: boolean
   selectedTerrainSourceName: string
   selectedTerrainSourceAssetUrl: string
   editorStyleStudioComponent: any
@@ -216,6 +219,7 @@ export type EditorPanelPropBuilderContext = {
   generateTerrainHeightmapFromSelection: () => Promise<void>
   cookTerrainChunks: () => Promise<void>
   cookWorldPartition: () => Promise<void>
+  publishGroundTerrainContracts: () => Promise<void>
   switchEditorLevel: () => void
   reloadFromDisk: () => Promise<void>
   loadPackagedLevelScene: () => void
@@ -336,11 +340,14 @@ export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
     collisionOverlayEnabled: editorState?.collisionOverlayEnabled ?? false,
     collisionDefaultPolicy: context.collisionDefaultPolicy,
     collisionBudget: context.collisionBudget,
+    groundSettings: context.groundSettings,
+    terrainSculptSettings: context.terrainSculptSettings,
     terrainCollisionSettings: context.terrainCollisionSettings,
     terrainCollisionBakePending: context.terrainCollisionBakePending,
     terrainHeightmapGeneratePending: context.terrainHeightmapGeneratePending,
     terrainChunkCookPending: context.terrainChunkCookPending,
     worldPartitionCookPending: context.worldPartitionCookPending,
+    groundTerrainPublishPending: context.groundTerrainPublishPending,
     selectedTerrainSourceName: context.selectedTerrainSourceName,
     selectedTerrainSourceAssetUrl: context.selectedTerrainSourceAssetUrl,
     terrainBrushMode: editorState?.terrainBrushMode ?? 'raise',
@@ -377,6 +384,8 @@ export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
       void context.generateTerrainHeightmapFromSelection(),
     onCookTerrainChunks: () => void context.cookTerrainChunks(),
     onCookWorldPartition: () => void context.cookWorldPartition(),
+    onPublishGroundTerrainContracts: () =>
+      void context.publishGroundTerrainContracts(),
     onSetTerrainBrushMode: (mode: string) =>
       context.setTerrainBrushMode(mode as 'raise' | 'smooth' | 'flatten'),
     onSetTerrainBrushSize: context.setTerrainBrushSize,

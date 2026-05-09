@@ -2,6 +2,7 @@
 import type {
   LevelCollisionBudget,
   LevelCollisionDefaultPolicy,
+  SharedLevelGroundSettings,
 } from '../engine/sceneDocumentTypes'
 import type { TerrainRuntimeComponentSource } from '../features/terrain'
 import EditorSceneToolsPanel from './EditorSceneToolsPanel.svelte'
@@ -28,13 +29,17 @@ type TerrainCollisionSettings = {
   colliderResolution?: number
   triangleCount?: number
   vertexCount?: number
-  autoBakeOnTerrainChange?: boolean
   dirty?: boolean
   lastGeneratedAt?: string
   heightOverrideCount?: number
   chunksPath?: string
   chunkGrid?: number
   chunkCount?: number
+}
+type GroundSettings = NonNullable<SharedLevelGroundSettings['ground']>
+type TerrainSculptSettings = {
+  enabled?: boolean
+  autoBakeCollision?: boolean
 }
 
 export let levelId = ''
@@ -51,11 +56,14 @@ export let collisionOverlayEnabled = false
 export let collisionDefaultPolicy: LevelCollisionDefaultPolicy =
   'lightweight-auto'
 export let collisionBudget: LevelCollisionBudget = 'mobile'
+export let groundSettings: GroundSettings | null = null
+export let terrainSculptSettings: TerrainSculptSettings | null = null
 export let terrainCollisionSettings: TerrainCollisionSettings | null = null
 export let terrainCollisionBakePending = false
 export let terrainHeightmapGeneratePending = false
 export let terrainChunkCookPending = false
 export let worldPartitionCookPending = false
+export let groundTerrainPublishPending = false
 export let selectedTerrainSourceName = ''
 export let selectedTerrainSourceAssetUrl = ''
 export let terrainBrushMode = 'raise'
@@ -89,6 +97,7 @@ export let onBakeTerrainCollision: () => void = () => {}
 export let onGenerateTerrainHeightmap: () => void = () => {}
 export let onCookTerrainChunks: () => void = () => {}
 export let onCookWorldPartition: () => void = () => {}
+export let onPublishGroundTerrainContracts: () => void = () => {}
 export let onSetTerrainBrushMode: (mode: string) => void = () => {}
 export let onSetTerrainBrushSize: (value: number) => void = () => {}
 export let onSetTerrainBrushStrength: (value: number) => void = () => {}
@@ -118,11 +127,14 @@ export let onSetSurfaceSnapOffset: (value: number) => void = () => {}
   {collisionOverlayEnabled}
   {collisionDefaultPolicy}
   {collisionBudget}
+  {groundSettings}
+  {terrainSculptSettings}
   {terrainCollisionSettings}
   {terrainCollisionBakePending}
   {terrainHeightmapGeneratePending}
   {terrainChunkCookPending}
   {worldPartitionCookPending}
+  {groundTerrainPublishPending}
   {selectedTerrainSourceName}
   {selectedTerrainSourceAssetUrl}
   {terrainBrushMode}
@@ -152,6 +164,7 @@ export let onSetSurfaceSnapOffset: (value: number) => void = () => {}
   {onGenerateTerrainHeightmap}
   {onCookTerrainChunks}
   {onCookWorldPartition}
+  {onPublishGroundTerrainContracts}
   {onSetTerrainBrushMode}
   {onSetTerrainBrushSize}
   {onSetTerrainBrushStrength}

@@ -21,6 +21,20 @@
         ],
         "requiredWalkableSurfaceId": "miranda-floor-main"
       },
+      "graphicsBudget": {
+        "maxRuntimeAssetBytes": 167772160,
+        "maxRuntimeAssetFileBytes": 41943040,
+        "maxGeometryActors": 60,
+        "maxPrimitiveActors": 44,
+        "maxNeverCullActors": 4,
+        "maxGameplayFireflies": 0,
+        "maxExplicitColliders": 48,
+        "maxLightActors": 4,
+        "maxEstimatedDrawCalls": 60,
+        "maxAuthoredMaterialSlots": 48,
+        "maxEstimatedTriangles": 600,
+        "maxAuthoredTextureBytes": 0
+      },
       "skyboxPreset": "observatory",
       "features": {
         "styles": true,

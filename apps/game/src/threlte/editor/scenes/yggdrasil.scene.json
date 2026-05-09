@@ -9,14 +9,30 @@
           "source": "baked-heightmap",
           "runtimeSource": "built-in-manifest",
           "manifestUrl": "/terrain/yggdrasil.manifest.json",
-          "autoBakeOnTerrainChange": false,
           "dirty": false
         },
         "defaults": {
           "solidObjectsByDefault": true,
           "defaultFriction": 0.7,
           "defaultRestitution": 0
+        },
+        "roles": {
+          "visualOnlyActorIds": [
+            "yggdrasil-mound",
+            "yggdrasil-bifrost-ribbon-merged"
+          ],
+          "groundActorIds": [
+            "yggdrasil-ground",
+            "yggdrasil-island-shelf",
+            "yggdrasil-dais",
+            "yggdrasil-bifrost-path",
+            "yggdrasil-spawn-pad"
+          ]
         }
+      },
+      "terrainSculpt": {
+        "enabled": true,
+        "autoBakeCollision": false
       },
       "spawn": {
         "position": [
@@ -38,6 +54,20 @@
         ],
         "terrainManifestUrl": "/terrain/yggdrasil.manifest.json",
         "requiredWalkableSurfaceId": "yggdrasil-ground"
+      },
+      "graphicsBudget": {
+        "maxRuntimeAssetBytes": 167772160,
+        "maxRuntimeAssetFileBytes": 41943040,
+        "maxGeometryActors": 120,
+        "maxPrimitiveActors": 80,
+        "maxNeverCullActors": 4,
+        "maxGameplayFireflies": 40,
+        "maxExplicitColliders": 110,
+        "maxLightActors": 0,
+        "maxEstimatedDrawCalls": 120,
+        "maxAuthoredMaterialSlots": 90,
+        "maxEstimatedTriangles": 500000,
+        "maxAuthoredTextureBytes": 0
       },
       "skyboxPreset": "observatory",
       "features": {
@@ -91,8 +121,12 @@
         "surfaceFogDensity": 0.00135
       },
       "worldPartition": {
+        "partitionUrl": "/runtime-world-partitions/yggdrasil.partition.json",
         "cellSize": 80,
-        "activeRadius": 5
+        "activeRadius": 5,
+        "cells": 23,
+        "residentActors": 59,
+        "streamableActors": 107
       },
       "runtimeAssets": {
         "maxTier": "medium",
@@ -7003,7 +7037,6 @@
               "source": "baked-heightmap",
               "runtimeSource": "built-in-manifest",
               "manifestUrl": "/terrain/yggdrasil.manifest.json",
-              "autoBakeOnTerrainChange": false,
               "dirty": false
             },
             "defaults": {

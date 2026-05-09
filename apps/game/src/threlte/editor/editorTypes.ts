@@ -28,6 +28,7 @@ export type {
   SharedLevelCollisionSettings,
   SharedLevelEditorSettings,
   SharedLevelFeatureSettings,
+  SharedLevelGraphicsBudgetSettings,
   SharedLevelLightingSettings,
   SharedLevelPlayerSettings,
   SharedLevelPresetSettings,

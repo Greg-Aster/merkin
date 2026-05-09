@@ -1,10 +1,276 @@
 {
   "version": 1,
   "levelId": "yggdrasil",
-  "generatedAt": "2026-05-02T00:45:11.744Z",
+  "generatedAt": "2026-05-08T21:58:38.738Z",
   "generatedBy": "cook-world-partition",
   "cellSize": 80,
   "activeRadius": 5,
+  "streaming": {
+    "mode": "staged-render-collision",
+    "stages": [
+      "resident",
+      "initial-cells",
+      "stream-cells"
+    ],
+    "readinessGates": [
+      "partition-manifest",
+      "resident-render",
+      "resident-collision",
+      "initial-cell-render",
+      "initial-cell-collision"
+    ]
+  },
+  "readiness": {
+    "requiredResidentRenderActorIds": [
+      "yggdrasil-bifrost-path",
+      "yggdrasil-crown-ascent-merged",
+      "yggdrasil-dais",
+      "yggdrasil-ground",
+      "yggdrasil-island-shelf",
+      "yggdrasil-portal-return",
+      "yggdrasil-spawn-pad",
+      "yggdrasil-tree-merged",
+      "yggdrasil-well-hvergelmir-pool",
+      "yggdrasil-well-mimir-pool",
+      "yggdrasil-well-urd-pool"
+    ],
+    "requiredResidentCollisionActorIds": [
+      "yggdrasil-bifrost-path",
+      "yggdrasil-crown-ascent-merged",
+      "yggdrasil-dais",
+      "yggdrasil-ground",
+      "yggdrasil-island-shelf",
+      "yggdrasil-spawn-pad",
+      "yggdrasil-tree-merged",
+      "yggdrasil-well-hvergelmir-pool",
+      "yggdrasil-well-mimir-pool",
+      "yggdrasil-well-urd-pool"
+    ],
+    "requiredInitialCellKeys": [
+      "-1,-1",
+      "-1,-2",
+      "-1,-4",
+      "-1,0",
+      "-1,1",
+      "-1,3",
+      "-2,-1",
+      "-2,-2",
+      "-2,0",
+      "-2,1",
+      "-3,2",
+      "-4,-1",
+      "0,-1",
+      "0,-2",
+      "0,-4",
+      "0,0",
+      "0,1",
+      "0,3",
+      "1,-1",
+      "1,-2",
+      "1,0",
+      "1,1",
+      "2,0"
+    ],
+    "requiredInitialRenderActorIds": [
+      "yggdrasil-arrival-arch",
+      "yggdrasil-arrival-column-left",
+      "yggdrasil-arrival-column-right",
+      "yggdrasil-arrival-foreground-right",
+      "yggdrasil-arrival-monolith-left",
+      "yggdrasil-arrival-monolith-right",
+      "yggdrasil-bifrost-ribbon-merged",
+      "yggdrasil-crown-halo",
+      "yggdrasil-crown-perch-rig",
+      "yggdrasil-crown-perch-ring",
+      "yggdrasil-crown-perch-spire",
+      "yggdrasil-drowned-monolith-north",
+      "yggdrasil-drowned-monolith-nw",
+      "yggdrasil-drowned-monolith-west",
+      "yggdrasil-drowned-ring-east",
+      "yggdrasil-drowned-ring-north",
+      "yggdrasil-drowned-ring-nw",
+      "yggdrasil-drowned-ring-south",
+      "yggdrasil-drowned-ring-west",
+      "yggdrasil-hvergelmir-depth-arch-1",
+      "yggdrasil-hvergelmir-depth-arch-2",
+      "yggdrasil-hvergelmir-depth-monolith-left",
+      "yggdrasil-hvergelmir-depth-monolith-right",
+      "yggdrasil-hvergelmir-depth-ring",
+      "yggdrasil-hvergelmir-tunnel-root-1",
+      "yggdrasil-hvergelmir-tunnel-root-2",
+      "yggdrasil-hvergelmir-tunnel-root-3",
+      "yggdrasil-islet-east",
+      "yggdrasil-islet-north",
+      "yggdrasil-islet-nw",
+      "yggdrasil-islet-south",
+      "yggdrasil-islet-west",
+      "yggdrasil-lore-crown",
+      "yggdrasil-lore-crown-ascent",
+      "yggdrasil-lore-crown-perch",
+      "yggdrasil-lore-hvergelmir",
+      "yggdrasil-lore-hvergelmir-depth",
+      "yggdrasil-lore-mimir",
+      "yggdrasil-lore-ratatoskr",
+      "yggdrasil-lore-stags",
+      "yggdrasil-lore-threshold",
+      "yggdrasil-lore-urd",
+      "yggdrasil-mound",
+      "yggdrasil-path-stone-1",
+      "yggdrasil-path-stone-2",
+      "yggdrasil-path-stone-3",
+      "yggdrasil-path-stone-4",
+      "yggdrasil-path-stone-5",
+      "yggdrasil-path-stone-6",
+      "yggdrasil-planter-hvergelmir",
+      "yggdrasil-planter-mimir",
+      "yggdrasil-planter-urd",
+      "yggdrasil-root-east",
+      "yggdrasil-root-north",
+      "yggdrasil-root-northeast",
+      "yggdrasil-root-northwest",
+      "yggdrasil-root-south",
+      "yggdrasil-root-southeast",
+      "yggdrasil-root-southwest",
+      "yggdrasil-root-west",
+      "yggdrasil-searoot-east",
+      "yggdrasil-searoot-ne",
+      "yggdrasil-searoot-north",
+      "yggdrasil-searoot-nw",
+      "yggdrasil-searoot-se",
+      "yggdrasil-searoot-south",
+      "yggdrasil-searoot-sw",
+      "yggdrasil-searoot-west",
+      "yggdrasil-shelfbreak-1",
+      "yggdrasil-shelfbreak-2",
+      "yggdrasil-shelfbreak-3",
+      "yggdrasil-shelfbreak-4",
+      "yggdrasil-shelfbreak-5",
+      "yggdrasil-shelfbreak-6",
+      "yggdrasil-shore-ring",
+      "yggdrasil-shorestone-1",
+      "yggdrasil-shorestone-10",
+      "yggdrasil-shorestone-11",
+      "yggdrasil-shorestone-12",
+      "yggdrasil-shorestone-13",
+      "yggdrasil-shorestone-14",
+      "yggdrasil-shorestone-2",
+      "yggdrasil-shorestone-3",
+      "yggdrasil-shorestone-4",
+      "yggdrasil-shorestone-5",
+      "yggdrasil-shorestone-6",
+      "yggdrasil-shorestone-7",
+      "yggdrasil-shorestone-8",
+      "yggdrasil-shorestone-9",
+      "yggdrasil-shrine-hvergelmir-bench",
+      "yggdrasil-shrine-hvergelmir-left",
+      "yggdrasil-shrine-hvergelmir-rig",
+      "yggdrasil-shrine-hvergelmir-right",
+      "yggdrasil-shrine-mimir-growth",
+      "yggdrasil-shrine-mimir-left",
+      "yggdrasil-shrine-mimir-rig",
+      "yggdrasil-shrine-mimir-right",
+      "yggdrasil-shrine-urd-growth",
+      "yggdrasil-shrine-urd-left",
+      "yggdrasil-shrine-urd-rig",
+      "yggdrasil-shrine-urd-right",
+      "yggdrasil-well-hvergelmir-ring",
+      "yggdrasil-well-mimir-ring",
+      "yggdrasil-well-urd-ring"
+    ],
+    "requiredInitialCollisionActorIds": [
+      "yggdrasil-arrival-arch",
+      "yggdrasil-arrival-column-left",
+      "yggdrasil-arrival-column-right",
+      "yggdrasil-arrival-foreground-right",
+      "yggdrasil-arrival-monolith-left",
+      "yggdrasil-arrival-monolith-right",
+      "yggdrasil-crown-halo",
+      "yggdrasil-crown-perch-rig",
+      "yggdrasil-crown-perch-ring",
+      "yggdrasil-crown-perch-spire",
+      "yggdrasil-drowned-monolith-north",
+      "yggdrasil-drowned-monolith-nw",
+      "yggdrasil-drowned-monolith-west",
+      "yggdrasil-drowned-ring-east",
+      "yggdrasil-drowned-ring-north",
+      "yggdrasil-drowned-ring-nw",
+      "yggdrasil-drowned-ring-south",
+      "yggdrasil-drowned-ring-west",
+      "yggdrasil-hvergelmir-depth-arch-1",
+      "yggdrasil-hvergelmir-depth-arch-2",
+      "yggdrasil-hvergelmir-depth-monolith-left",
+      "yggdrasil-hvergelmir-depth-monolith-right",
+      "yggdrasil-hvergelmir-depth-ring",
+      "yggdrasil-hvergelmir-tunnel-root-1",
+      "yggdrasil-hvergelmir-tunnel-root-2",
+      "yggdrasil-hvergelmir-tunnel-root-3",
+      "yggdrasil-islet-east",
+      "yggdrasil-islet-north",
+      "yggdrasil-islet-nw",
+      "yggdrasil-islet-south",
+      "yggdrasil-islet-west",
+      "yggdrasil-path-stone-1",
+      "yggdrasil-path-stone-2",
+      "yggdrasil-path-stone-3",
+      "yggdrasil-path-stone-4",
+      "yggdrasil-path-stone-5",
+      "yggdrasil-path-stone-6",
+      "yggdrasil-planter-hvergelmir",
+      "yggdrasil-planter-mimir",
+      "yggdrasil-planter-urd",
+      "yggdrasil-root-east",
+      "yggdrasil-root-north",
+      "yggdrasil-root-northeast",
+      "yggdrasil-root-northwest",
+      "yggdrasil-root-south",
+      "yggdrasil-root-southeast",
+      "yggdrasil-root-southwest",
+      "yggdrasil-root-west",
+      "yggdrasil-searoot-east",
+      "yggdrasil-searoot-ne",
+      "yggdrasil-searoot-north",
+      "yggdrasil-searoot-nw",
+      "yggdrasil-searoot-se",
+      "yggdrasil-searoot-south",
+      "yggdrasil-searoot-sw",
+      "yggdrasil-searoot-west",
+      "yggdrasil-shelfbreak-1",
+      "yggdrasil-shelfbreak-2",
+      "yggdrasil-shelfbreak-3",
+      "yggdrasil-shelfbreak-4",
+      "yggdrasil-shelfbreak-5",
+      "yggdrasil-shelfbreak-6",
+      "yggdrasil-shorestone-1",
+      "yggdrasil-shorestone-10",
+      "yggdrasil-shorestone-11",
+      "yggdrasil-shorestone-12",
+      "yggdrasil-shorestone-13",
+      "yggdrasil-shorestone-14",
+      "yggdrasil-shorestone-2",
+      "yggdrasil-shorestone-3",
+      "yggdrasil-shorestone-4",
+      "yggdrasil-shorestone-5",
+      "yggdrasil-shorestone-6",
+      "yggdrasil-shorestone-7",
+      "yggdrasil-shorestone-8",
+      "yggdrasil-shorestone-9",
+      "yggdrasil-shrine-hvergelmir-bench",
+      "yggdrasil-shrine-hvergelmir-left",
+      "yggdrasil-shrine-hvergelmir-rig",
+      "yggdrasil-shrine-hvergelmir-right",
+      "yggdrasil-shrine-mimir-growth",
+      "yggdrasil-shrine-mimir-left",
+      "yggdrasil-shrine-mimir-rig",
+      "yggdrasil-shrine-mimir-right",
+      "yggdrasil-shrine-urd-growth",
+      "yggdrasil-shrine-urd-left",
+      "yggdrasil-shrine-urd-rig",
+      "yggdrasil-shrine-urd-right",
+      "yggdrasil-well-hvergelmir-ring",
+      "yggdrasil-well-mimir-ring",
+      "yggdrasil-well-urd-ring"
+    ]
+  },
   "residentActorIds": [
     "yggdrasil-ambient-whispers",
     "yggdrasil-arrival-foreground-spark-left",
@@ -183,8 +449,16 @@
       "actorIds": [
         "yggdrasil-root-southwest"
       ],
+      "renderActorIds": [
+        "yggdrasil-root-southwest"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-root-southwest"
+      ],
       "actorCount": 1,
-      "estimatedTriangles": 96
+      "estimatedTriangles": 96,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "-1,-2",
@@ -193,11 +467,25 @@
       "actorIds": [
         "yggdrasil-arrival-column-left",
         "yggdrasil-arrival-monolith-left",
-        "yggdrasil-shorestone-11",
-        "yggdrasil-shelfbreak-5"
+        "yggdrasil-shelfbreak-5",
+        "yggdrasil-shorestone-11"
+      ],
+      "renderActorIds": [
+        "yggdrasil-arrival-column-left",
+        "yggdrasil-arrival-monolith-left",
+        "yggdrasil-shelfbreak-5",
+        "yggdrasil-shorestone-11"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-arrival-column-left",
+        "yggdrasil-arrival-monolith-left",
+        "yggdrasil-shelfbreak-5",
+        "yggdrasil-shorestone-11"
       ],
       "actorCount": 4,
-      "estimatedTriangles": 2524
+      "estimatedTriangles": 2524,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "-1,-4",
@@ -206,31 +494,71 @@
       "actorIds": [
         "yggdrasil-drowned-ring-south"
       ],
+      "renderActorIds": [
+        "yggdrasil-drowned-ring-south"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-drowned-ring-south"
+      ],
       "actorCount": 1,
-      "estimatedTriangles": 0
+      "estimatedTriangles": 0,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "-1,0",
       "x": -1,
       "z": 0,
       "actorIds": [
-        "yggdrasil-root-west",
-        "yggdrasil-root-northwest",
-        "yggdrasil-well-urd-ring",
+        "yggdrasil-hvergelmir-depth-monolith-left",
+        "yggdrasil-hvergelmir-tunnel-root-1",
+        "yggdrasil-lore-stags",
+        "yggdrasil-lore-urd",
         "yggdrasil-planter-urd",
-        "yggdrasil-shrine-urd-left",
-        "yggdrasil-shrine-urd-right",
-        "yggdrasil-shrine-urd-rig",
+        "yggdrasil-root-northwest",
+        "yggdrasil-root-west",
+        "yggdrasil-shrine-hvergelmir-bench",
         "yggdrasil-shrine-hvergelmir-left",
         "yggdrasil-shrine-urd-growth",
-        "yggdrasil-shrine-hvergelmir-bench",
-        "yggdrasil-lore-urd",
-        "yggdrasil-lore-stags",
+        "yggdrasil-shrine-urd-left",
+        "yggdrasil-shrine-urd-rig",
+        "yggdrasil-shrine-urd-right",
+        "yggdrasil-well-urd-ring"
+      ],
+      "renderActorIds": [
         "yggdrasil-hvergelmir-depth-monolith-left",
-        "yggdrasil-hvergelmir-tunnel-root-1"
+        "yggdrasil-hvergelmir-tunnel-root-1",
+        "yggdrasil-lore-stags",
+        "yggdrasil-lore-urd",
+        "yggdrasil-planter-urd",
+        "yggdrasil-root-northwest",
+        "yggdrasil-root-west",
+        "yggdrasil-shrine-hvergelmir-bench",
+        "yggdrasil-shrine-hvergelmir-left",
+        "yggdrasil-shrine-urd-growth",
+        "yggdrasil-shrine-urd-left",
+        "yggdrasil-shrine-urd-rig",
+        "yggdrasil-shrine-urd-right",
+        "yggdrasil-well-urd-ring"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-hvergelmir-depth-monolith-left",
+        "yggdrasil-hvergelmir-tunnel-root-1",
+        "yggdrasil-planter-urd",
+        "yggdrasil-root-northwest",
+        "yggdrasil-root-west",
+        "yggdrasil-shrine-hvergelmir-bench",
+        "yggdrasil-shrine-hvergelmir-left",
+        "yggdrasil-shrine-urd-growth",
+        "yggdrasil-shrine-urd-left",
+        "yggdrasil-shrine-urd-rig",
+        "yggdrasil-shrine-urd-right",
+        "yggdrasil-well-urd-ring"
       ],
       "actorCount": 14,
-      "estimatedTriangles": 5672
+      "estimatedTriangles": 5672,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "-1,1",
@@ -239,8 +567,16 @@
       "actorIds": [
         "yggdrasil-shorestone-5"
       ],
+      "renderActorIds": [
+        "yggdrasil-shorestone-5"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-shorestone-5"
+      ],
       "actorCount": 1,
-      "estimatedTriangles": 12
+      "estimatedTriangles": 12,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "-1,3",
@@ -249,19 +585,37 @@
       "actorIds": [
         "yggdrasil-drowned-ring-north"
       ],
+      "renderActorIds": [
+        "yggdrasil-drowned-ring-north"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-drowned-ring-north"
+      ],
       "actorCount": 1,
-      "estimatedTriangles": 0
+      "estimatedTriangles": 0,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "-2,-1",
       "x": -2,
       "z": -1,
       "actorIds": [
-        "yggdrasil-shorestone-8",
-        "yggdrasil-shelfbreak-4"
+        "yggdrasil-shelfbreak-4",
+        "yggdrasil-shorestone-8"
+      ],
+      "renderActorIds": [
+        "yggdrasil-shelfbreak-4",
+        "yggdrasil-shorestone-8"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-shelfbreak-4",
+        "yggdrasil-shorestone-8"
       ],
       "actorCount": 2,
-      "estimatedTriangles": 108
+      "estimatedTriangles": 108,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "-2,-2",
@@ -269,11 +623,23 @@
       "z": -2,
       "actorIds": [
         "yggdrasil-searoot-sw",
-        "yggdrasil-shorestone-9",
-        "yggdrasil-shorestone-10"
+        "yggdrasil-shorestone-10",
+        "yggdrasil-shorestone-9"
+      ],
+      "renderActorIds": [
+        "yggdrasil-searoot-sw",
+        "yggdrasil-shorestone-10",
+        "yggdrasil-shorestone-9"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-searoot-sw",
+        "yggdrasil-shorestone-10",
+        "yggdrasil-shorestone-9"
       ],
       "actorCount": 3,
-      "estimatedTriangles": 204
+      "estimatedTriangles": 204,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "-2,0",
@@ -281,11 +647,23 @@
       "z": 0,
       "actorIds": [
         "yggdrasil-searoot-west",
-        "yggdrasil-shorestone-7",
-        "yggdrasil-shelfbreak-3"
+        "yggdrasil-shelfbreak-3",
+        "yggdrasil-shorestone-7"
+      ],
+      "renderActorIds": [
+        "yggdrasil-searoot-west",
+        "yggdrasil-shelfbreak-3",
+        "yggdrasil-shorestone-7"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-searoot-west",
+        "yggdrasil-shelfbreak-3",
+        "yggdrasil-shorestone-7"
       ],
       "actorCount": 3,
-      "estimatedTriangles": 120
+      "estimatedTriangles": 120,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "-2,1",
@@ -295,66 +673,142 @@
         "yggdrasil-searoot-nw",
         "yggdrasil-shorestone-6"
       ],
+      "renderActorIds": [
+        "yggdrasil-searoot-nw",
+        "yggdrasil-shorestone-6"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-searoot-nw",
+        "yggdrasil-shorestone-6"
+      ],
       "actorCount": 2,
-      "estimatedTriangles": 192
+      "estimatedTriangles": 192,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "-3,2",
       "x": -3,
       "z": 2,
       "actorIds": [
-        "yggdrasil-islet-nw",
         "yggdrasil-drowned-monolith-nw",
-        "yggdrasil-drowned-ring-nw"
+        "yggdrasil-drowned-ring-nw",
+        "yggdrasil-islet-nw"
+      ],
+      "renderActorIds": [
+        "yggdrasil-drowned-monolith-nw",
+        "yggdrasil-drowned-ring-nw",
+        "yggdrasil-islet-nw"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-drowned-monolith-nw",
+        "yggdrasil-drowned-ring-nw",
+        "yggdrasil-islet-nw"
       ],
       "actorCount": 3,
-      "estimatedTriangles": 2596
+      "estimatedTriangles": 2596,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "-4,-1",
       "x": -4,
       "z": -1,
       "actorIds": [
-        "yggdrasil-islet-west",
         "yggdrasil-drowned-monolith-west",
-        "yggdrasil-drowned-ring-west"
+        "yggdrasil-drowned-ring-west",
+        "yggdrasil-islet-west"
+      ],
+      "renderActorIds": [
+        "yggdrasil-drowned-monolith-west",
+        "yggdrasil-drowned-ring-west",
+        "yggdrasil-islet-west"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-drowned-monolith-west",
+        "yggdrasil-drowned-ring-west",
+        "yggdrasil-islet-west"
       ],
       "actorCount": 3,
-      "estimatedTriangles": 2596
+      "estimatedTriangles": 2596,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "0,-1",
       "x": 0,
       "z": -1,
       "actorIds": [
-        "yggdrasil-root-south",
-        "yggdrasil-root-southeast",
+        "yggdrasil-bifrost-ribbon-merged",
         "yggdrasil-path-stone-2",
         "yggdrasil-path-stone-3",
         "yggdrasil-path-stone-4",
         "yggdrasil-path-stone-5",
         "yggdrasil-path-stone-6",
-        "yggdrasil-bifrost-ribbon-merged"
+        "yggdrasil-root-south",
+        "yggdrasil-root-southeast"
+      ],
+      "renderActorIds": [
+        "yggdrasil-bifrost-ribbon-merged",
+        "yggdrasil-path-stone-2",
+        "yggdrasil-path-stone-3",
+        "yggdrasil-path-stone-4",
+        "yggdrasil-path-stone-5",
+        "yggdrasil-path-stone-6",
+        "yggdrasil-root-south",
+        "yggdrasil-root-southeast"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-path-stone-2",
+        "yggdrasil-path-stone-3",
+        "yggdrasil-path-stone-4",
+        "yggdrasil-path-stone-5",
+        "yggdrasil-path-stone-6",
+        "yggdrasil-root-south",
+        "yggdrasil-root-southeast"
       ],
       "actorCount": 8,
-      "estimatedTriangles": 2752
+      "estimatedTriangles": 2752,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "0,-2",
       "x": 0,
       "z": -2,
       "actorIds": [
-        "yggdrasil-path-stone-1",
         "yggdrasil-arrival-arch",
         "yggdrasil-arrival-column-right",
+        "yggdrasil-arrival-foreground-right",
         "yggdrasil-arrival-monolith-right",
         "yggdrasil-lore-threshold",
+        "yggdrasil-path-stone-1",
+        "yggdrasil-searoot-south",
+        "yggdrasil-shorestone-12"
+      ],
+      "renderActorIds": [
+        "yggdrasil-arrival-arch",
+        "yggdrasil-arrival-column-right",
         "yggdrasil-arrival-foreground-right",
+        "yggdrasil-arrival-monolith-right",
+        "yggdrasil-lore-threshold",
+        "yggdrasil-path-stone-1",
+        "yggdrasil-searoot-south",
+        "yggdrasil-shorestone-12"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-arrival-arch",
+        "yggdrasil-arrival-column-right",
+        "yggdrasil-arrival-foreground-right",
+        "yggdrasil-arrival-monolith-right",
+        "yggdrasil-path-stone-1",
         "yggdrasil-searoot-south",
         "yggdrasil-shorestone-12"
       ],
       "actorCount": 8,
-      "estimatedTriangles": 5204
+      "estimatedTriangles": 5204,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "0,-4",
@@ -363,52 +817,121 @@
       "actorIds": [
         "yggdrasil-islet-south"
       ],
+      "renderActorIds": [
+        "yggdrasil-islet-south"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-islet-south"
+      ],
       "actorCount": 1,
-      "estimatedTriangles": 96
+      "estimatedTriangles": 96,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "0,0",
       "x": 0,
       "z": 0,
       "actorIds": [
-        "yggdrasil-shore-ring",
-        "yggdrasil-mound",
-        "yggdrasil-root-north",
-        "yggdrasil-root-east",
-        "yggdrasil-root-northeast",
         "yggdrasil-crown-halo",
-        "yggdrasil-well-mimir-ring",
-        "yggdrasil-planter-mimir",
-        "yggdrasil-well-hvergelmir-ring",
-        "yggdrasil-planter-hvergelmir",
-        "yggdrasil-shrine-mimir-left",
-        "yggdrasil-shrine-mimir-right",
-        "yggdrasil-shrine-mimir-rig",
-        "yggdrasil-shrine-hvergelmir-right",
-        "yggdrasil-shrine-hvergelmir-rig",
-        "yggdrasil-shrine-mimir-growth",
-        "yggdrasil-lore-mimir",
-        "yggdrasil-lore-hvergelmir",
-        "yggdrasil-lore-ratatoskr",
-        "yggdrasil-lore-crown",
         "yggdrasil-crown-perch-group",
-        "yggdrasil-crown-perch-ring",
         "yggdrasil-crown-perch-rig",
+        "yggdrasil-crown-perch-ring",
         "yggdrasil-crown-perch-spire",
-        "yggdrasil-lore-crown-perch",
-        "yggdrasil-spirit-eagle",
-        "yggdrasil-spirit-vedrfolnir",
         "yggdrasil-hvergelmir-depth-arch-1",
         "yggdrasil-hvergelmir-depth-arch-2",
-        "yggdrasil-hvergelmir-depth-ring",
         "yggdrasil-hvergelmir-depth-monolith-right",
+        "yggdrasil-hvergelmir-depth-ring",
         "yggdrasil-hvergelmir-tunnel-root-2",
         "yggdrasil-hvergelmir-tunnel-root-3",
+        "yggdrasil-lore-crown",
+        "yggdrasil-lore-crown-ascent",
+        "yggdrasil-lore-crown-perch",
+        "yggdrasil-lore-hvergelmir",
         "yggdrasil-lore-hvergelmir-depth",
-        "yggdrasil-lore-crown-ascent"
+        "yggdrasil-lore-mimir",
+        "yggdrasil-lore-ratatoskr",
+        "yggdrasil-mound",
+        "yggdrasil-planter-hvergelmir",
+        "yggdrasil-planter-mimir",
+        "yggdrasil-root-east",
+        "yggdrasil-root-north",
+        "yggdrasil-root-northeast",
+        "yggdrasil-shore-ring",
+        "yggdrasil-shrine-hvergelmir-rig",
+        "yggdrasil-shrine-hvergelmir-right",
+        "yggdrasil-shrine-mimir-growth",
+        "yggdrasil-shrine-mimir-left",
+        "yggdrasil-shrine-mimir-rig",
+        "yggdrasil-shrine-mimir-right",
+        "yggdrasil-spirit-eagle",
+        "yggdrasil-spirit-vedrfolnir",
+        "yggdrasil-well-hvergelmir-ring",
+        "yggdrasil-well-mimir-ring"
+      ],
+      "renderActorIds": [
+        "yggdrasil-crown-halo",
+        "yggdrasil-crown-perch-rig",
+        "yggdrasil-crown-perch-ring",
+        "yggdrasil-crown-perch-spire",
+        "yggdrasil-hvergelmir-depth-arch-1",
+        "yggdrasil-hvergelmir-depth-arch-2",
+        "yggdrasil-hvergelmir-depth-monolith-right",
+        "yggdrasil-hvergelmir-depth-ring",
+        "yggdrasil-hvergelmir-tunnel-root-2",
+        "yggdrasil-hvergelmir-tunnel-root-3",
+        "yggdrasil-lore-crown",
+        "yggdrasil-lore-crown-ascent",
+        "yggdrasil-lore-crown-perch",
+        "yggdrasil-lore-hvergelmir",
+        "yggdrasil-lore-hvergelmir-depth",
+        "yggdrasil-lore-mimir",
+        "yggdrasil-lore-ratatoskr",
+        "yggdrasil-mound",
+        "yggdrasil-planter-hvergelmir",
+        "yggdrasil-planter-mimir",
+        "yggdrasil-root-east",
+        "yggdrasil-root-north",
+        "yggdrasil-root-northeast",
+        "yggdrasil-shore-ring",
+        "yggdrasil-shrine-hvergelmir-rig",
+        "yggdrasil-shrine-hvergelmir-right",
+        "yggdrasil-shrine-mimir-growth",
+        "yggdrasil-shrine-mimir-left",
+        "yggdrasil-shrine-mimir-rig",
+        "yggdrasil-shrine-mimir-right",
+        "yggdrasil-well-hvergelmir-ring",
+        "yggdrasil-well-mimir-ring"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-crown-halo",
+        "yggdrasil-crown-perch-rig",
+        "yggdrasil-crown-perch-ring",
+        "yggdrasil-crown-perch-spire",
+        "yggdrasil-hvergelmir-depth-arch-1",
+        "yggdrasil-hvergelmir-depth-arch-2",
+        "yggdrasil-hvergelmir-depth-monolith-right",
+        "yggdrasil-hvergelmir-depth-ring",
+        "yggdrasil-hvergelmir-tunnel-root-2",
+        "yggdrasil-hvergelmir-tunnel-root-3",
+        "yggdrasil-planter-hvergelmir",
+        "yggdrasil-planter-mimir",
+        "yggdrasil-root-east",
+        "yggdrasil-root-north",
+        "yggdrasil-root-northeast",
+        "yggdrasil-shrine-hvergelmir-rig",
+        "yggdrasil-shrine-hvergelmir-right",
+        "yggdrasil-shrine-mimir-growth",
+        "yggdrasil-shrine-mimir-left",
+        "yggdrasil-shrine-mimir-rig",
+        "yggdrasil-shrine-mimir-right",
+        "yggdrasil-well-hvergelmir-ring",
+        "yggdrasil-well-mimir-ring"
       ],
       "actorCount": 35,
-      "estimatedTriangles": 14900
+      "estimatedTriangles": 14900,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "0,1",
@@ -416,33 +939,65 @@
       "z": 1,
       "actorIds": [
         "yggdrasil-searoot-north",
-        "yggdrasil-shorestone-4",
-        "yggdrasil-shelfbreak-2"
+        "yggdrasil-shelfbreak-2",
+        "yggdrasil-shorestone-4"
+      ],
+      "renderActorIds": [
+        "yggdrasil-searoot-north",
+        "yggdrasil-shelfbreak-2",
+        "yggdrasil-shorestone-4"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-searoot-north",
+        "yggdrasil-shelfbreak-2",
+        "yggdrasil-shorestone-4"
       ],
       "actorCount": 3,
-      "estimatedTriangles": 204
+      "estimatedTriangles": 204,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "0,3",
       "x": 0,
       "z": 3,
       "actorIds": [
-        "yggdrasil-islet-north",
-        "yggdrasil-drowned-monolith-north"
+        "yggdrasil-drowned-monolith-north",
+        "yggdrasil-islet-north"
+      ],
+      "renderActorIds": [
+        "yggdrasil-drowned-monolith-north",
+        "yggdrasil-islet-north"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-drowned-monolith-north",
+        "yggdrasil-islet-north"
       ],
       "actorCount": 2,
-      "estimatedTriangles": 2596
+      "estimatedTriangles": 2596,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "1,-1",
       "x": 1,
       "z": -1,
       "actorIds": [
-        "yggdrasil-shorestone-14",
-        "yggdrasil-shelfbreak-6"
+        "yggdrasil-shelfbreak-6",
+        "yggdrasil-shorestone-14"
+      ],
+      "renderActorIds": [
+        "yggdrasil-shelfbreak-6",
+        "yggdrasil-shorestone-14"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-shelfbreak-6",
+        "yggdrasil-shorestone-14"
       ],
       "actorCount": 2,
-      "estimatedTriangles": 108
+      "estimatedTriangles": 108,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "1,-2",
@@ -452,8 +1007,18 @@
         "yggdrasil-searoot-se",
         "yggdrasil-shorestone-13"
       ],
+      "renderActorIds": [
+        "yggdrasil-searoot-se",
+        "yggdrasil-shorestone-13"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-searoot-se",
+        "yggdrasil-shorestone-13"
+      ],
       "actorCount": 2,
-      "estimatedTriangles": 108
+      "estimatedTriangles": 108,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "1,0",
@@ -461,11 +1026,23 @@
       "z": 0,
       "actorIds": [
         "yggdrasil-searoot-east",
-        "yggdrasil-shorestone-1",
-        "yggdrasil-shelfbreak-1"
+        "yggdrasil-shelfbreak-1",
+        "yggdrasil-shorestone-1"
+      ],
+      "renderActorIds": [
+        "yggdrasil-searoot-east",
+        "yggdrasil-shelfbreak-1",
+        "yggdrasil-shorestone-1"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-searoot-east",
+        "yggdrasil-shelfbreak-1",
+        "yggdrasil-shorestone-1"
       ],
       "actorCount": 3,
-      "estimatedTriangles": 120
+      "estimatedTriangles": 120,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "1,1",
@@ -476,19 +1053,41 @@
         "yggdrasil-shorestone-2",
         "yggdrasil-shorestone-3"
       ],
+      "renderActorIds": [
+        "yggdrasil-searoot-ne",
+        "yggdrasil-shorestone-2",
+        "yggdrasil-shorestone-3"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-searoot-ne",
+        "yggdrasil-shorestone-2",
+        "yggdrasil-shorestone-3"
+      ],
       "actorCount": 3,
-      "estimatedTriangles": 204
+      "estimatedTriangles": 204,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     },
     {
       "key": "2,0",
       "x": 2,
       "z": 0,
       "actorIds": [
-        "yggdrasil-islet-east",
-        "yggdrasil-drowned-ring-east"
+        "yggdrasil-drowned-ring-east",
+        "yggdrasil-islet-east"
+      ],
+      "renderActorIds": [
+        "yggdrasil-drowned-ring-east",
+        "yggdrasil-islet-east"
+      ],
+      "collisionActorIds": [
+        "yggdrasil-drowned-ring-east",
+        "yggdrasil-islet-east"
       ],
       "actorCount": 2,
-      "estimatedTriangles": 96
+      "estimatedTriangles": 96,
+      "streamingStage": "initial",
+      "requiredForSpawn": true
     }
   ],
   "budgets": {

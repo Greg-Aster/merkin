@@ -24,8 +24,11 @@ function clampSize(value: number | undefined) {
   return Number.isFinite(size) ? Math.max(MIN_COLLIDER_SIZE, size) : 1
 }
 
-function isTerrainVisualNode(node: EditorSceneNode | null | undefined) {
-  return isTerrainVisualActor(node?.id ?? '')
+function isTerrainVisualNode(
+  node: EditorSceneNode | null | undefined,
+  levelSettings?: EditorSceneSettings | null,
+) {
+  return isTerrainVisualActor(node?.id ?? '', levelSettings)
 }
 
 export function getDefaultCollisionShape(
@@ -68,9 +71,11 @@ export function getDefaultCollisionIntent(
 
 export function getDefaultCollisionChannel(
   node: EditorSceneNode | null | undefined,
+  levelSettings?: EditorSceneSettings | null,
 ) {
   return getPolicyDefaultCollisionChannel({
-    intent: node?.collision?.intent ?? getDefaultCollisionIntent(node),
+    intent:
+      node?.collision?.intent ?? getDefaultCollisionIntent(node, levelSettings),
     bodyType: node?.physics?.bodyType,
   })
 }
@@ -105,10 +110,13 @@ export function isEditorGeometryNode(
   )
 }
 
-export function isDefaultSolidNode(node: EditorSceneNode | null | undefined) {
+export function isDefaultSolidNode(
+  node: EditorSceneNode | null | undefined,
+  levelSettings?: EditorSceneSettings | null,
+) {
   return (
     isEditorGeometryNode(node) &&
-    !isTerrainVisualNode(node) &&
+    !isTerrainVisualNode(node, levelSettings) &&
     node?.visible !== false &&
     !node?.gameplay &&
     node?.collision?.enabled !== false

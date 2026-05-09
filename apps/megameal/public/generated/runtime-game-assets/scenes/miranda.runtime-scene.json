@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-08T00:25:17.729Z",
+  "generatedAt": "2026-05-08T22:27:13.362Z",
   "levelId": "miranda",
   "sceneId": "miranda",
   "source": {
@@ -25,14 +25,10 @@
         "collision": {
           "workflow": {
             "actorCollision": "lightweight-auto",
-            "colliderBudget": "mobile",
-            "terrainSculpting": false,
-            "autoBakeTerrain": true,
-            "terrainVisualChunks": "auto"
+            "colliderBudget": "mobile"
           },
           "terrain": {
             "source": "scene-authored",
-            "autoBakeOnTerrainChange": true,
             "dirty": false
           },
           "defaults": {
@@ -40,6 +36,10 @@
             "defaultFriction": 0.7,
             "defaultRestitution": 0
           }
+        },
+        "terrainSculpt": {
+          "enabled": false,
+          "autoBakeCollision": true
         },
         "spawn": {
           "position": [
@@ -57,6 +57,20 @@
             "miranda-floor-upper"
           ],
           "requiredWalkableSurfaceId": "miranda-floor-main"
+        },
+        "graphicsBudget": {
+          "maxRuntimeAssetBytes": 167772160,
+          "maxRuntimeAssetFileBytes": 41943040,
+          "maxGeometryActors": 60,
+          "maxPrimitiveActors": 44,
+          "maxNeverCullActors": 4,
+          "maxGameplayFireflies": 0,
+          "maxExplicitColliders": 48,
+          "maxLightActors": 4,
+          "maxEstimatedDrawCalls": 60,
+          "maxAuthoredMaterialSlots": 48,
+          "maxEstimatedTriangles": 600,
+          "maxAuthoredTextureBytes": 0
         },
         "skyboxPreset": "observatory",
         "features": {

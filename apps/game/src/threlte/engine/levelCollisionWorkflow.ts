@@ -20,11 +20,8 @@ export interface LevelCollisionWorkflow {
   levelId: string
   terrainCollision: TerrainCollisionSource
   terrainManifestUrl?: string
-  terrainSculpting?: boolean
-  autoBakeTerrain?: boolean
   defaultActorCollision: CollisionDefaultPolicy
   colliderBudget: CollisionBudget
-  terrainVisualChunks?: 'auto' | 'manual' | 'off'
   visualOnlyActorIds?: string[]
   groundActorIds?: string[]
   platformActorIds?: string[]
@@ -37,8 +34,6 @@ const DEFAULT_WORKFLOW: LevelCollisionWorkflow = {
   terrainCollision: 'scene-authored',
   defaultActorCollision: 'lightweight-auto',
   colliderBudget: 'mobile',
-  autoBakeTerrain: true,
-  terrainVisualChunks: 'auto',
 }
 
 export const LEVEL_COLLISION_WORKFLOWS: Record<string, LevelCollisionWorkflow> =
@@ -47,7 +42,6 @@ export const LEVEL_COLLISION_WORKFLOWS: Record<string, LevelCollisionWorkflow> =
       levelId: 'observatory',
       terrainCollision: 'heightmap',
       terrainManifestUrl: '/terrain/observatory-environment.manifest.json',
-      terrainSculpting: true,
       defaultActorCollision: 'lightweight-auto',
       colliderBudget: 'mobile',
     },
@@ -57,7 +51,6 @@ export const LEVEL_COLLISION_WORKFLOWS: Record<string, LevelCollisionWorkflow> =
       terrainManifestUrl: '/terrain/solitude.manifest.json',
       defaultActorCollision: 'lightweight-auto',
       colliderBudget: 'mobile',
-      visualOnlyActorIds: ['solitude-ground-plateau', 'solitude-ground-dais'],
     },
     yggdrasil: {
       levelId: 'yggdrasil',
@@ -65,17 +58,6 @@ export const LEVEL_COLLISION_WORKFLOWS: Record<string, LevelCollisionWorkflow> =
       terrainManifestUrl: '/terrain/yggdrasil.manifest.json',
       defaultActorCollision: 'lightweight-auto',
       colliderBudget: 'mobile',
-      visualOnlyActorIds: [
-        'yggdrasil-mound',
-        'yggdrasil-bifrost-ribbon-merged',
-      ],
-      groundActorIds: [
-        'yggdrasil-ground',
-        'yggdrasil-island-shelf',
-        'yggdrasil-dais',
-        'yggdrasil-bifrost-path',
-        'yggdrasil-spawn-pad',
-      ],
     },
     miranda: {
       levelId: 'miranda',
@@ -147,22 +129,12 @@ function resolveWorkflowFromSettings(
       fallback.terrainCollision,
     ),
     terrainManifestUrl: terrainSettings?.manifestUrl ?? fallback.terrainManifestUrl,
-    terrainSculpting:
-      workflowSettings?.terrainSculpting ??
-      fallback.terrainSculpting ??
-      Boolean(terrainSettings?.manifestUrl),
-    autoBakeTerrain:
-      workflowSettings?.autoBakeTerrain ??
-      terrainSettings?.autoBakeOnTerrainChange ??
-      fallback.autoBakeTerrain,
     defaultActorCollision:
       workflowSettings?.actorCollision ??
       (solidObjectsByDefault === false
         ? 'authored-only'
         : fallback.defaultActorCollision),
     colliderBudget: workflowSettings?.colliderBudget ?? fallback.colliderBudget,
-    terrainVisualChunks:
-      workflowSettings?.terrainVisualChunks ?? fallback.terrainVisualChunks,
     visualOnlyActorIds: uniqueActorIds(
       fallback.visualOnlyActorIds,
       roleSettings?.visualOnlyActorIds,
