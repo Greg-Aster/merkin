@@ -2,7 +2,6 @@
 import { T } from '@threlte/core'
 import { getContext, onDestroy } from 'svelte'
 import * as THREE from 'three'
-import { runtimeRenderProfileStore } from '../stores/runtimeRenderProfileStore'
 import {
   EDITOR_MATERIAL_OVERRIDE_CONTEXT,
   type EditorMaterialOverrideStore,
@@ -153,8 +152,6 @@ $: needsPhysicalMaterial =
   resolvedThickness > 0.001 ||
   Math.abs(resolvedIor - 1.5) > 0.001 ||
   Math.abs(resolvedReflectivity - 0.5) > 0.001
-$: useBasicRuntimeMaterial =
-  !needsPhysicalMaterial && $runtimeRenderProfileStore.tier === 'desktop'
 $: void syncOverrideTextures()
 
 onDestroy(() => {
@@ -181,17 +178,7 @@ onDestroy(() => {
     <T.TorusGeometry args={args} />
   {/if}
 
-  {#if useBasicRuntimeMaterial}
-    <T.MeshBasicMaterial
-      color={resolvedColor}
-      transparent={resolvedTransparent}
-      opacity={resolvedOpacity}
-      wireframe={resolvedWireframe}
-      side={resolvedSide}
-      map={overrideTextures.map}
-      alphaMap={overrideTextures.alphaMap}
-    />
-  {:else if needsPhysicalMaterial}
+  {#if needsPhysicalMaterial}
     <T.MeshPhysicalMaterial
       color={resolvedColor}
       emissive={resolvedEmissive}

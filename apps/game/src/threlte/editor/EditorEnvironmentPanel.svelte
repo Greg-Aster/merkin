@@ -14,7 +14,10 @@ import type {
   SolitudeEditorSettings,
 } from './editorTypes'
 
-export let levelId: string
+type EnvironmentPanelProfile = NonNullable<
+  SharedLevelEditorSettings['editorPanels']
+>['environment']
+
 export let levelSettings: SharedLevelEditorSettings
 export let effectiveObservatorySettings: ObservatoryEditorSettings
 export let effectiveSolitudeSettings: SolitudeEditorSettings
@@ -35,6 +38,8 @@ export let applySolitudeAtmospherePreset: (
 $: solitudeProfile = getSolitudeAtmosphereProfile(
   effectiveSolitudeSettings?.presets?.atmosphere,
 )
+$: environmentPanelProfile = (levelSettings.editorPanels?.environment ??
+  'shared') as EnvironmentPanelProfile
 </script>
 
 <div class="editor-section">
@@ -103,7 +108,7 @@ $: solitudeProfile = getSolitudeAtmosphereProfile(
     </div>
   </div>
 
-  {#if levelId === 'observatory'}
+  {#if environmentPanelProfile === 'observatory'}
     <div class="editor-section">
       <div class="label">Observatory</div>
 
@@ -144,7 +149,7 @@ $: solitudeProfile = getSolitudeAtmosphereProfile(
       </div>
     </div>
 
-  {:else if levelId === 'solitude'}
+  {:else if environmentPanelProfile === 'solitude'}
     <div class="editor-section">
       <div class="label">Solitude</div>
 
@@ -253,7 +258,7 @@ $: solitudeProfile = getSolitudeAtmosphereProfile(
       <div class="save-message">Use the GLB / glTF Library below for authored models. Monolith and Broken Ring prefabs are quick ruin-building pieces.</div>
     </div>
 
-  {:else if levelId === 'sci-fi-room'}
+  {:else if environmentPanelProfile === 'sci-fi-room'}
     <div class="editor-section">
       <div class="label">Sci Fi Room</div>
       <div class="tuple-group">
@@ -283,7 +288,7 @@ $: solitudeProfile = getSolitudeAtmosphereProfile(
       <div class="save-message">Sci Fi Room now reads shared editor environment settings for spawn, skybox, fog, lighting, and star navigation.</div>
     </div>
 
-  {:else if levelId === 'miranda'}
+  {:else if environmentPanelProfile === 'miranda'}
     <div class="editor-section">
       <div class="label">Miranda Wreck</div>
       <div class="tuple-group">

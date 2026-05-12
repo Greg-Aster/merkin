@@ -82,3 +82,67 @@ export function createSheenTexture() {
 
   return texture
 }
+
+export function createFrostedScrimTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 512
+  canvas.height = 256
+  const context = canvas.getContext('2d')
+  if (!context) return null
+
+  context.clearRect(0, 0, canvas.width, canvas.height)
+
+  const base = context.createLinearGradient(0, 0, canvas.width, canvas.height)
+  base.addColorStop(0, 'rgb(219 234 254 / 0.16)')
+  base.addColorStop(0.42, 'rgb(125 211 252 / 0.08)')
+  base.addColorStop(0.72, 'rgb(167 139 250 / 0.06)')
+  base.addColorStop(1, 'rgb(255 255 255 / 0.02)')
+  context.fillStyle = base
+  context.fillRect(0, 0, canvas.width, canvas.height)
+
+  context.save()
+  context.filter = 'blur(18px)'
+  context.globalCompositeOperation = 'lighter'
+
+  for (let index = 0; index < 14; index += 1) {
+    const x = 28 + ((index * 79) % 520)
+    const y = 18 + ((index * 47) % 250)
+    const radiusX = 72 + (index % 5) * 22
+    const radiusY = 22 + (index % 4) * 13
+    const alpha = 0.045 + (index % 3) * 0.016
+    const glow = context.createRadialGradient(x, y, 0, x, y, radiusX)
+    glow.addColorStop(0, `rgb(255 255 255 / ${alpha})`)
+    glow.addColorStop(0.54, `rgb(125 211 252 / ${alpha * 0.52})`)
+    glow.addColorStop(1, 'rgb(255 255 255 / 0)')
+
+    context.save()
+    context.translate(x, y)
+    context.rotate((index % 6 - 2.5) * 0.18)
+    context.scale(1, radiusY / radiusX)
+    context.fillStyle = glow
+    context.beginPath()
+    context.arc(0, 0, radiusX, 0, Math.PI * 2)
+    context.fill()
+    context.restore()
+  }
+
+  context.restore()
+  context.globalCompositeOperation = 'source-over'
+
+  for (let index = 0; index < 900; index += 1) {
+    const x = (index * 131) % canvas.width
+    const y = (index * 197) % canvas.height
+    const alpha = 0.012 + ((index * 17) % 7) * 0.002
+    context.fillStyle = `rgb(255 255 255 / ${alpha})`
+    context.fillRect(x, y, 1, 1)
+  }
+
+  const texture = new CanvasTexture(canvas)
+  texture.colorSpace = SRGBColorSpace
+  texture.wrapS = RepeatWrapping
+  texture.wrapT = RepeatWrapping
+  texture.repeat.set(1.04, 1.18)
+  texture.needsUpdate = true
+
+  return texture
+}

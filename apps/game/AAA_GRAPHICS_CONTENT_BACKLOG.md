@@ -6,11 +6,19 @@ Generated from `apps/megameal/public/generated/runtime-game-assets/manifest.json
 
 ## LOD / Retopology Required
 
-Current audit count: `lodTargetMisses=0`. Tiny meshes below the LOD policy threshold and variants within the absolute/ratio tolerance are recorded in the runtime manifest as explicit validation exceptions. The remaining misses are real source-art work and need source retopology, manual LOD authoring, or replacement source meshes.
+Current audit count: `lodTargetMisses=9`. Tiny meshes below the LOD policy threshold and variants within the absolute/ratio tolerance are recorded in the runtime manifest as explicit validation exceptions. The remaining misses are real source-art work and need source retopology, manual LOD authoring, or replacement source meshes.
 
 | Asset | Tier | Source Tris | Variant Tris | Target Tris | Actual Ratio | Target Ratio |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| None | - | - | - | - | - | - |
+| `/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb` | high | 604 | 604 | 496 | 1 | 0.82 |
+| `/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb` | low | 604 | 267 | 170 | 0.4421 | 0.28 |
+| `/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb` | medium | 604 | 604 | 315 | 1 | 0.52 |
+| `/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb` | high | 604 | 604 | 496 | 1 | 0.82 |
+| `/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb` | low | 604 | 267 | 170 | 0.4421 | 0.28 |
+| `/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb` | medium | 604 | 604 | 315 | 1 | 0.52 |
+| `/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb` | high | 604 | 604 | 496 | 1 | 0.82 |
+| `/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb` | low | 604 | 267 | 170 | 0.4421 | 0.28 |
+| `/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb` | medium | 604 | 604 | 315 | 1 | 0.52 |
 
 ## Authored PBR Material Pass Required
 
@@ -44,15 +52,15 @@ Current audit count: `missingRecommendedSlots=262`, with `unapprovedRecommendedS
 | prefab/wasteland-archway | 1 | 6 |
 | prefab/wasteland-monolith | 1 | 6 |
 | prefab/broken-ring | 1 | 3 |
-| prefab/command-fin | 1 | 3 |
 | prefab/observation-rig | 1 | 3 |
+| style-lab/well-dais-2026-05-11T23-09-54-411Z | 1 | 3 |
 
 ### Remaining Fallbacks By Level
 
 | Level | Assets | Approved Missing Slots |
 | --- | ---: | ---: |
-| yggdrasil | 17 | 141 |
-| sci-fi-room | 16 | 131 |
+| yggdrasil | 18 | 144 |
+| sci-fi-room | 15 | 128 |
 | solitude | 6 | 48 |
 | miranda | 3 | 33 |
 
@@ -77,6 +85,7 @@ Current audit count: `missingRecommendedSlots=262`, with `unapprovedRecommendedS
 | `/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-green.glb` | prefab/anomaly-cluster | sci-fi-room | 64 | apps/game/scripts/bake-runtime-prefabs.mjs#anomaly-cluster-pbr |
 | `/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb` | prefab/anomaly-cluster | sci-fi-room | 64 | apps/game/scripts/bake-runtime-prefabs.mjs#anomaly-cluster-pbr |
 | `/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb` | prefab/anomaly-cluster | sci-fi-room | 64 | apps/game/scripts/bake-runtime-prefabs.mjs#anomaly-cluster-pbr |
+| `/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb` | prefab/command-fin | sci-fi-room | 64 | apps/game/scripts/bake-runtime-prefabs.mjs#command-fin-pbr |
 | `/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb` | prefab/story-marker | miranda, sci-fi-room, yggdrasil | 64 | apps/game/scripts/bake-runtime-prefabs.mjs#story-marker-pbr |
 | `/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb` | prefab/story-marker | miranda, sci-fi-room, yggdrasil | 64 | apps/game/scripts/bake-runtime-prefabs.mjs#story-marker-pbr |
 | `/generated/runtime-game-assets/prefabs/story-marker/story-marker-green.glb` | prefab/story-marker | sci-fi-room | 64 | apps/game/scripts/bake-runtime-prefabs.mjs#story-marker-pbr |
@@ -116,5 +125,5 @@ Current audit count: `missingRecommendedSlots=262`, with `unapprovedRecommendedS
 | `/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb` | prefab/wasteland-archway | sci-fi-room, yggdrasil | 6 |
 | `/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb` | prefab/wasteland-monolith | miranda, sci-fi-room | 6 |
 | `/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb` | prefab/broken-ring | sci-fi-room, yggdrasil | 3 |
-| `/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb` | prefab/command-fin | sci-fi-room | 3 |
 | `/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb` | prefab/observation-rig | sci-fi-room, yggdrasil | 3 |
+| `/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb` | style-lab/well-dais-2026-05-11T23-09-54-411Z | yggdrasil | 3 |

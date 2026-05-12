@@ -2,6 +2,10 @@
 import type { EditorSceneDocument } from '../engine/sceneDocumentTypes'
 import type { TerrainRuntimeComponentSource } from '../features/terrain'
 import EditorSceneToolsPanel from './EditorSceneToolsPanel.svelte'
+import {
+  type EditorPublishPipelineState,
+  createInitialEditorPublishPipelineState,
+} from './editorPublishReadinessContracts'
 
 type EditorLevelOption = {
   id: string
@@ -55,6 +59,8 @@ export let terrainHeightmapGeneratePending = false
 export let terrainChunkCookPending = false
 export let worldPartitionCookPending = false
 export let groundTerrainPublishPending = false
+export let publishPipelineState: EditorPublishPipelineState =
+  createInitialEditorPublishPipelineState()
 export let selectedTerrainSourceAssetUrl = ''
 export let terrainBrushMode = 'raise'
 export let terrainBrushSize = 24
@@ -77,6 +83,7 @@ export let onCreateLevel: () => void = () => {}
 export let onSetInteractionMode: (mode: string) => void = () => {}
 export let onSetViewportLightingMode: (mode: string) => void = () => {}
 export let onCookWorldPartition: () => void = () => {}
+export let onPublishLevel: () => void = () => {}
 export let onPublishGroundTerrainContracts: () => void = () => {}
 export let onSetTerrainBrushMode: (mode: string) => void = () => {}
 export let onSetTerrainBrushSize: (value: number) => void = () => {}
@@ -112,6 +119,7 @@ export let onSetSurfaceSnapOffset: (value: number) => void = () => {}
   {terrainChunkCookPending}
   {worldPartitionCookPending}
   {groundTerrainPublishPending}
+  {publishPipelineState}
   {selectedTerrainSourceAssetUrl}
   {terrainBrushMode}
   {terrainBrushSize}
@@ -133,6 +141,7 @@ export let onSetSurfaceSnapOffset: (value: number) => void = () => {}
   {onSetInteractionMode}
   {onSetViewportLightingMode}
   {onCookWorldPartition}
+  {onPublishLevel}
   {onPublishGroundTerrainContracts}
   {onSetTerrainBrushMode}
   {onSetTerrainBrushSize}

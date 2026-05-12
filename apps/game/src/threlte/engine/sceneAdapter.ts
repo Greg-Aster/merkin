@@ -31,12 +31,17 @@ function getSpawn(scene: SceneDocument): Vec3 {
 
 function getSpawnRotation(scene: SceneDocument): Vec3 {
   const rotation = scene.settings?.level?.spawn?.rotation
+  if (!rotation) {
+    return [0, 0, 0]
+  }
+
   if (
-    !rotation ||
     rotation.length !== 3 ||
     !rotation.every(component => Number.isFinite(component))
   ) {
-    return [0, 0, 0]
+    throw new Error(
+      `${scene.levelId}: settings.level.spawn.rotation must be a finite Vec3 when provided.`,
+    )
   }
 
   return rotation

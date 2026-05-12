@@ -24,6 +24,9 @@
         "partitionUrl": "/runtime-world-partitions/solitude.partition.json",
         "cellSize": 80,
         "activeRadius": 1,
+        "maxResidentActors": 8,
+        "minStreamableActors": 16,
+        "maxActorsPerCell": 30,
         "cells": 1,
         "residentActors": 3,
         "streamableActors": 30
@@ -40,7 +43,7 @@
         "maxEstimatedDrawCalls": 18,
         "maxAuthoredMaterialSlots": 20,
         "maxEstimatedTriangles": 750000,
-        "maxAuthoredTextureBytes": 0
+        "maxAuthoredTextureBytes": 1048576
       },
       "collision": {
         "roles": {
@@ -246,6 +249,9 @@
       },
       "player": {
         "lightIntensityScale": 3
+      },
+      "editorPanels": {
+        "environment": "solitude"
       }
     },
     "solitude": {}
@@ -297,6 +303,9 @@
       },
       "asset": {
         "url": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb"
+      },
+      "renderPolicy": {
+        "runtimeStyle": "skip"
       }
     },
     {
@@ -336,6 +345,9 @@
       },
       "asset": {
         "url": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb"
+      },
+      "renderPolicy": {
+        "runtimeStyle": "skip"
       }
     },
     {
@@ -375,6 +387,19 @@
         "sensor": false,
         "intent": "blocker",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {
@@ -405,6 +430,19 @@
         "sensor": false,
         "intent": "blocker",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {
@@ -435,6 +473,19 @@
         "sensor": false,
         "intent": "blocker",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {
@@ -465,6 +516,19 @@
         "sensor": false,
         "intent": "blocker",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {
@@ -495,6 +559,19 @@
         "sensor": false,
         "intent": "blocker",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {
@@ -525,6 +602,19 @@
         "sensor": false,
         "intent": "blocker",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {
@@ -546,6 +636,19 @@
         "sourceVisualSize": [
           2.048502260182655, 10.66420866250992, 1.0010815807331659
         ]
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {
@@ -576,6 +679,19 @@
         "sensor": false,
         "intent": "blocker",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {
@@ -606,6 +722,19 @@
         "sensor": false,
         "intent": "blocker",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {
@@ -636,6 +765,19 @@
         "sensor": false,
         "intent": "blocker",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {
@@ -666,6 +808,19 @@
         "sensor": false,
         "intent": "blocker",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {
@@ -696,6 +851,19 @@
         "sensor": false,
         "intent": "blocker",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {
@@ -975,6 +1143,19 @@
         "sensor": false,
         "intent": "blocker",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {
@@ -1005,6 +1186,19 @@
         "sensor": false,
         "intent": "blocker",
         "channel": "worldStatic"
+      },
+      "material": {
+        "color": "#5f6874",
+        "emissive": "#171b22",
+        "emissiveIntensity": 0,
+        "metalness": 0.04,
+        "roughness": 0.94,
+        "envMapIntensity": 0.22,
+        "transmission": 0,
+        "clearcoat": 0,
+        "clearcoatRoughness": 1,
+        "thickness": 0,
+        "reflectivity": 0.18
       }
     },
     {

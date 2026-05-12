@@ -7,7 +7,6 @@ import type {
   SolitudeEditorSettings,
 } from './editorTypes'
 
-export let levelId: string
 export let levelSettings: SharedLevelEditorSettings
 export let effectiveObservatorySettings: ObservatoryEditorSettings
 export let effectiveSolitudeSettings: SolitudeEditorSettings
@@ -27,7 +26,6 @@ export let applySolitudeAtmospherePreset: (
 </script>
 
 <EditorEnvironmentPanel
-  {levelId}
   {levelSettings}
   {effectiveObservatorySettings}
   {effectiveSolitudeSettings}

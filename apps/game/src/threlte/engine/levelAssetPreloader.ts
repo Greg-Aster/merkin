@@ -1,4 +1,3 @@
-import { loadCachedGltf } from '../utils/gltfAssetCache'
 import {
   type RuntimeAssetQualityTier,
   beginLevelRuntimeAssetScope,
@@ -27,9 +26,21 @@ export interface LevelAssetPrefetchResult {
   failures: Array<{ sourceUrl: string; resolvedUrl: string; message: string }>
 }
 
+export interface LevelAssetLoadOptions {
+  sizeBytes?: number
+  retention?: 'required' | 'streamed' | 'prefetch'
+  evictWhenUnused?: boolean
+}
+
+export type LevelGltfAssetLoader = (
+  url: string,
+  options?: LevelAssetLoadOptions,
+) => Promise<unknown>
+
 export interface LevelAssetPreloadOptions {
   maxTier?: RuntimeAssetQualityTier | string
   recordTiming?: (name: string, durationMs: number) => void
+  loadGltfAsset?: LevelGltfAssetLoader
 }
 
 function isGltfAsset(url: string) {
@@ -113,6 +124,9 @@ export async function prepareRequiredLevelRenderAssets(
       if (!isGltfAsset(resolvedUrl)) return
 
       try {
+        if (!options.loadGltfAsset) {
+          throw new Error('No GLTF asset loader configured.')
+        }
         traceRuntimeCulling({
           levelId,
           url: resolvedUrl,
@@ -124,7 +138,7 @@ export async function prepareRequiredLevelRenderAssets(
             resolvedUrl,
           },
         })
-        await loadCachedGltf(resolvedUrl, {
+        await options.loadGltfAsset(resolvedUrl, {
           sizeBytes,
           retention: 'required',
         })
@@ -244,6 +258,9 @@ export async function prefetchOptionalLevelRenderAssets(
   await Promise.all(
     resolvedPairs.map(async ({ sourceUrl, resolvedUrl, sizeBytes }) => {
       try {
+        if (!options.loadGltfAsset) {
+          throw new Error('No GLTF asset loader configured.')
+        }
         traceRuntimeCulling({
           levelId,
           url: resolvedUrl,
@@ -256,7 +273,7 @@ export async function prefetchOptionalLevelRenderAssets(
             qualityTier: resolvedQualityTier,
           },
         })
-        await loadCachedGltf(resolvedUrl, {
+        await options.loadGltfAsset(resolvedUrl, {
           sizeBytes,
           retention: 'prefetch',
           evictWhenUnused: true,

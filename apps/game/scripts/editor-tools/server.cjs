@@ -90,7 +90,9 @@ const ACTIVE_EDITOR_API_ENDPOINTS = new Set([
   '/api/browse',
   '/api/editor-scene/load',
   '/api/editor-scene/save',
+  '/api/editor-scene/publish-build',
   '/api/editor-scene/cook-world-partition',
+  '/api/editor-scene/audit-engine',
   '/api/editor-terrain/generate-heightmap',
   '/api/editor-terrain/bake-collision',
   '/api/editor-terrain/cook-chunks',
@@ -469,7 +471,6 @@ function fileToBase64(fullPath) {
 function hasMeaningfulSceneContent(scene) {
   if (!scene || typeof scene !== 'object') return false;
   if (Array.isArray(scene.nodes) && scene.nodes.length > 0) return true;
-  if (scene.settings && typeof scene.settings === 'object' && Object.keys(scene.settings).length > 0) return true;
   return false;
 }
 

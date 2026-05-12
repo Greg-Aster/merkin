@@ -24,8 +24,8 @@ stockRegistry:
   adoptionHref: "/snuggaloids/#adoption"
   unitsAvailable: null
   unitsSold: null
-description: "Anxious home? Quiet children? Unexplained screaming from the ventilation shaft? A licensed Snuggloid can help smooth the atmosphere. These companions offer a unique sense of presence. They're soft, they're silent, and their unblinking gaze is surprisingly comforting. Bonding may be permanent. Separation fees apply."
-realDescription: "Plush companions. Real, physical, holdable plush toys. The eyes are buttons. We want to be very clear about the buttons. Distribution is being expanded — your region is not yet approved but we are working on it."
+description: "Anxious home? Quiet children? Unexplained screaming from the ventilation shaft? A licensed Snuggloid can help smooth the atmosphere. These companions offer a unique sense of presence. They're soft, they're silent, and their unblinking gaze is surprisingly comforting."
+realDescription: "Distribution is being expanded — your region is not yet approved but we are working on it."
 shippingNote: "Snuggloid distribution is currently limited to approved regions. Your area is not yet approved. They are patient. You should be too."
 rating: 4.6
 media:

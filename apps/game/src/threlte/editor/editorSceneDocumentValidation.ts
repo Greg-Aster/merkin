@@ -44,6 +44,27 @@ function validateSceneShape(value: unknown) {
     return errors
   }
 
+  const levelSettings = isRecord(value.settings)
+    ? (value.settings.level as unknown)
+    : null
+  const spawn = isRecord(levelSettings)
+    ? (levelSettings.spawn as unknown)
+    : null
+  if (isRecord(spawn)) {
+    if (
+      spawn.position !== undefined &&
+      !isFiniteNumberArray(spawn.position, 3)
+    ) {
+      errors.push('settings.level.spawn.position must be a finite vec3.')
+    }
+    if (
+      spawn.rotation !== undefined &&
+      !isFiniteNumberArray(spawn.rotation, 3)
+    ) {
+      errors.push('settings.level.spawn.rotation must be a finite vec3.')
+    }
+  }
+
   const seenNodeIds = new Set<string>()
   for (const [index, node] of value.nodes.entries()) {
     if (!isRecord(node)) {
@@ -106,11 +127,47 @@ export function validateEditorSceneDocument(
   }
 }
 
+export function validatePublishableEditorSceneDocument(
+  value: unknown,
+): EditorSceneDocumentValidationResult {
+  const validation = validateEditorSceneDocument(value)
+  const errors = [...validation.errors]
+
+  if (
+    errors.length === 0 &&
+    (!isRecord(value) ||
+      !Array.isArray(value.nodes) ||
+      value.nodes.length === 0)
+  ) {
+    errors.push('Publish requires at least one authored scene node.')
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings: validation.warnings,
+  }
+}
+
 export function assertValidEditorSceneDocument(
   value: unknown,
   operation: string,
 ): EditorSceneDocument {
   const validation = validateEditorSceneDocument(value)
+  if (!validation.valid) {
+    throw new Error(
+      `${operation} validation failed: ${validation.errors.join(' ')}`,
+    )
+  }
+
+  return withEditorSceneEngineData(value as EditorSceneDocument)
+}
+
+export function assertPublishableEditorSceneDocument(
+  value: unknown,
+  operation: string,
+): EditorSceneDocument {
+  const validation = validatePublishableEditorSceneDocument(value)
   if (!validation.valid) {
     throw new Error(
       `${operation} validation failed: ${validation.errors.join(' ')}`,

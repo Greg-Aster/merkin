@@ -97,10 +97,12 @@ const sharedLevelSettingKeys = [
   'terrainSculpt',
   'worldPartition',
   'graphicsBudget',
+  'editorPanels',
   'runtimeAssets',
   'presets',
   'skyboxPreset',
 ]
+const legacySharedLevelSettingBuckets = ['observatory', 'solitude']
 const minColliderSize = 0.05
 const spawnSupportXzPadding = 0.15
 const spawnSupportMaxDrop = 2
@@ -247,6 +249,14 @@ function removeSharedLevelSettings(source) {
   return next
 }
 
+function collectLegacySharedLevelSettings(settings) {
+  return mergeLevelSettings(
+    ...legacySharedLevelSettingBuckets.map(bucket =>
+      pickSharedLevelSettings(settings?.[bucket]),
+    ),
+  )
+}
+
 function getLevelCollisionWorkflow(levelId) {
   return {
     levelId,
@@ -260,11 +270,9 @@ function getLevelCollisionWorkflow(levelId) {
 export function normalizeRuntimeLevelSceneSettings(levelId, settings = {}) {
   const normalized = clone(settings) ?? {}
   const workflow = getLevelCollisionWorkflow(levelId)
-  const legacySettings =
-    levelId === 'solitude' ? normalized.solitude : normalized.observatory
 
   normalized.level = mergeLevelSettings(
-    pickSharedLevelSettings(legacySettings),
+    collectLegacySharedLevelSettings(normalized),
     normalized.level ?? {},
   )
   normalized.level = mergeLevelSettings(
@@ -492,6 +500,11 @@ export function adaptSceneDocumentToLevelDefinition(scene) {
     )
   }
   const spawnRotation = scene.settings?.level?.spawn?.rotation
+  if (spawnRotation !== undefined && !isFiniteVec3(spawnRotation)) {
+    throw new Error(
+      `${scene.levelId}: settings.level.spawn.rotation must be a finite Vec3 when provided.`,
+    )
+  }
 
   return {
     id: scene.levelId,
@@ -499,7 +512,7 @@ export function adaptSceneDocumentToLevelDefinition(scene) {
     updatedAt: scene.updatedAt,
     spawn: {
       player: spawnPosition,
-      rotation: isFiniteVec3(spawnRotation) ? spawnRotation : [0, 0, 0],
+      rotation: spawnRotation ?? [0, 0, 0],
     },
     settings: scene.settings,
     actors: (scene.nodes ?? []).map(toActor),

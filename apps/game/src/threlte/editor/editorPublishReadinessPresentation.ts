@@ -5,9 +5,22 @@ import type {
   EditorPublishWorkflowStep,
 } from './editorPublishReadinessContracts'
 
+export type EditorPublishReadinessPipelineState =
+  | 'pending'
+  | 'success'
+  | 'warning'
+  | 'failure'
+  | 'next'
+
 export type EditorPublishReadinessGateFailure = {
   panel: EditorPublishReadinessPanel
   item: EditorPublishReadinessItem
+}
+
+export type EditorPublishReadinessPipelineStep = EditorPublishWorkflowStep & {
+  state: EditorPublishReadinessPipelineState
+  statusLabel: string
+  nextAction: string
 }
 
 export function getPublishReadinessRequiredActions(
@@ -36,6 +49,78 @@ export function getPublishReadinessBudgetIssues(
   viewModel: EditorPublishReadinessViewModel,
 ) {
   return viewModel.metrics.filter(metric => metric.overBudget)
+}
+
+export function getPublishReadinessPipelineSteps(
+  viewModel: EditorPublishReadinessViewModel,
+  options: {
+    loading: boolean
+    error: string
+    pipelinePending: boolean
+  },
+): EditorPublishReadinessPipelineStep[] {
+  if (options.loading) {
+    return [
+      {
+        id: 'load-contracts',
+        label: 'Load publish contracts',
+        command: 'Editor: Refresh Publish Readiness',
+        expectedOutput: 'Cooked manifest and scene contract status.',
+        reason: 'Publish readiness is still loading.',
+        required: true,
+        state: 'pending',
+        statusLabel: 'pending',
+        nextAction: 'Wait for the manifest and validation read to finish.',
+      },
+    ]
+  }
+
+  if (options.error) {
+    return [
+      {
+        id: 'load-contracts',
+        label: 'Load publish contracts',
+        command: 'Editor: Refresh Publish Readiness',
+        expectedOutput: 'Cooked manifest and scene contract status.',
+        reason: options.error,
+        required: true,
+        state: 'failure',
+        statusLabel: 'failure',
+        nextAction: 'Refresh readiness after fixing the manifest load error.',
+      },
+    ]
+  }
+
+  const requiredSteps = viewModel.workflow.filter(step => step.required)
+  const firstRequiredId = requiredSteps[0]?.id ?? ''
+
+  return viewModel.workflow.map(step => {
+    if (options.pipelinePending && step.required) {
+      return {
+        ...step,
+        state: 'pending',
+        statusLabel: 'pending',
+        nextAction: 'Wait for the active bake, cook, or publish command.',
+      }
+    }
+
+    if (step.required) {
+      const isNext = step.id === firstRequiredId
+      return {
+        ...step,
+        state: isNext ? 'next' : 'pending',
+        statusLabel: isNext ? 'next' : 'queued',
+        nextAction: isNext ? step.command : 'Run after earlier required steps.',
+      }
+    }
+
+    return {
+      ...step,
+      state: 'success',
+      statusLabel: 'ok',
+      nextAction: step.reason,
+    }
+  })
 }
 
 export function getPublishReadinessPublishBlockReason(

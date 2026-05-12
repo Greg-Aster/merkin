@@ -29,6 +29,18 @@ const criticalChunkExpectations = [
     chunk: 'runtime-world',
   },
   {
+    file: 'src/threlte/systems/SimplePostProcessing.svelte',
+    chunk: 'runtime-post-processing',
+  },
+  {
+    file: 'src/threlte/features/performance/stores/performanceStore.ts',
+    chunk: 'runtime-performance-state',
+  },
+  {
+    file: 'src/threlte/stores/runtimeRenderProfileStore.ts',
+    chunk: 'runtime-render-state',
+  },
+  {
     file: 'src/threlte/engine/runtimePrefabCatalog.ts',
     chunk: 'runtime-engine',
   },

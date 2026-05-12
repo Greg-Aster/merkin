@@ -35,18 +35,9 @@ function getActiveCamera(): THREE.Camera | null {
     : null
 }
 
-function isPersistentRuntimeNode() {
-  return (
-    node.id === 'yggdrasil-tree-merged' ||
-    node.id === 'yggdrasil-crown-ascent-merged' ||
-    node.generation?.family === 'yggdrasil-tree-merged' ||
-    node.generation?.family === 'yggdrasil-crown-ascent-merged'
-  )
-}
-
 function supportsRuntimeDistanceCulling() {
   return (
-    !isPersistentRuntimeNode() &&
+    node.renderPolicy?.cullingPolicy !== 'never' &&
     (node.kind === 'asset' ||
       node.kind === 'prefab' ||
       node.kind === 'primitive' ||

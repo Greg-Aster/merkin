@@ -55,6 +55,50 @@ function parseLodResolutions(value) {
     .map(resolution => (resolution % 2 === 0 ? resolution + 1 : resolution))
 }
 
+function getDefaultChunkActivation(chunkCount) {
+  const positiveChunkCount = Math.max(1, chunkCount)
+  const tierDefaults = {
+    ultra_low: 4,
+    low: 6,
+    medium: 8,
+    high: 9,
+    ultra: 12,
+  }
+
+  return {
+    maxActiveChunksByTier: Object.fromEntries(
+      Object.entries(tierDefaults).map(([tier, value]) => [
+        tier,
+        Math.min(value, positiveChunkCount),
+      ]),
+    ),
+  }
+}
+
+function normalizeTerrainChunkActivation(activation, chunkCount) {
+  const defaults = getDefaultChunkActivation(chunkCount)
+  const tierLimits = activation?.maxActiveChunksByTier ?? {}
+  const normalizedTierLimits = Object.fromEntries(
+    Object.entries(defaults.maxActiveChunksByTier).map(([tier, fallback]) => {
+      const value = tierLimits[tier]
+      return [
+        tier,
+        Number.isInteger(value) && value > 0
+          ? Math.min(value, chunkCount)
+          : fallback,
+      ]
+    }),
+  )
+  const maxActiveChunks = activation?.maxActiveChunks
+
+  return {
+    ...(Number.isInteger(maxActiveChunks) && maxActiveChunks > 0
+      ? { maxActiveChunks: Math.min(maxActiveChunks, chunkCount) }
+      : {}),
+    maxActiveChunksByTier: normalizedTierLimits,
+  }
+}
+
 function assertPngSignature(buffer) {
   if (buffer.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a') {
     throw new Error('Invalid PNG signature')
@@ -488,7 +532,10 @@ function writeGlb(path, mesh, material) {
 
 function updateManifest(manifest, { level, grid, lods, chunksPath, bounds }) {
   const width = bounds.max[0] - bounds.min[0]
-  const material = normalizeTerrainChunkMaterial(manifest.visualChunks?.material)
+  const material = normalizeTerrainChunkMaterial(
+    manifest.visualChunks?.material,
+  )
+  const chunkCount = grid * grid * lods.length
   return {
     ...manifest,
     assets: {
@@ -504,13 +551,17 @@ function updateManifest(manifest, { level, grid, lods, chunksPath, bounds }) {
     visualChunks: {
       generatedAt: new Date().toISOString(),
       generatedBy: 'cook-terrain-chunks',
-      chunkCount: grid * grid * lods.length,
+      chunkCount,
       material: {
         name: material.name,
         baseColorFactor: material.baseColorFactor,
         roughnessFactor: material.roughnessFactor,
         metallicFactor: material.metallicFactor,
       },
+      activation: normalizeTerrainChunkActivation(
+        manifest.visualChunks?.activation,
+        chunkCount,
+      ),
       lods: lods.map((lod, index) => ({
         level: index,
         distance: lod.distance,

@@ -83,6 +83,7 @@ import StarMap from '../systems/StarMap.svelte'
 import {
   evictUnusedGltfCacheEntries,
   getGltfCacheStats,
+  loadCachedGltf,
 } from '../utils/gltfAssetCache'
 import RuntimeActorBranch from './RuntimeActorBranch.svelte'
 import SceneLighting from './SceneLighting.svelte'
@@ -350,6 +351,7 @@ function queueRuntimeAssetPrefetch(
     uniqueSourceUrls,
     get(qualityLevelStore),
     {
+      loadGltfAsset: loadCachedGltf,
       maxTier: getRuntimeAssetTierCap(levelSettings),
       recordTiming: recordSystemTiming,
     },
@@ -414,6 +416,7 @@ function queueWorldPartitionCellPrefetch(
     sourceUrls,
     get(qualityLevelStore),
     {
+      loadGltfAsset: loadCachedGltf,
       maxTier: getRuntimeAssetTierCap(levelSettings),
       recordTiming: recordSystemTiming,
     },
@@ -824,6 +827,7 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
     requiredAssetUrls,
     get(qualityLevelStore),
     {
+      loadGltfAsset: loadCachedGltf,
       maxTier: getRuntimeAssetTierCap(runtimeSceneSettings),
       recordTiming: recordSystemTiming,
     },

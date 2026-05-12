@@ -40,6 +40,7 @@ import SettingsButton from './ui/SettingsButton.svelte'
 import TimelineCard from './ui/TimelineCard.svelte'
 
 import {
+  DEFAULT_LEVEL_ID,
   getLevelRegistryEntry,
   levelRegistryStore,
   resolveLevelId as resolveRegistryLevelId,
@@ -172,6 +173,8 @@ $: currentLevelRenderConfig = getLevelRenderConfig(currentLevel)
 // Reactive store subscriptions (these are reactive by default)
 $: currentLevel = $currentLevelStore
 $: levelRegistry = $levelRegistryStore
+$: homeLevelEntry = getLevelRegistryEntry(DEFAULT_LEVEL_ID, levelRegistry)
+$: homeLevelTitle = homeLevelEntry?.title ?? 'Home'
 $: selectedStar = $selectedStarStore
 $: isMobile = $isMobileStore
 $: error = $errorStore
@@ -257,10 +260,11 @@ async function checkForRoomJoin() {
 async function ensureLevelComponent(levelId: string) {
   const normalizedLevel = normalizeLevelId(levelId)
   const levelEntry = getLevelRegistryEntry(normalizedLevel, levelRegistry)
-  const levelSource = levelEntry?.source ?? {
-    kind: 'scene',
-    sceneId: 'observatory',
-  }
+  const levelSource = levelEntry?.source ??
+    homeLevelEntry?.source ?? {
+      kind: 'scene',
+      sceneId: DEFAULT_LEVEL_ID,
+    }
   const cacheKey = `scene:${levelSource.sceneId}:${normalizedLevel}`
   const requestId = ++activeLevelLoadRequest
   currentLevelComponent = null
@@ -821,8 +825,10 @@ onDestroy(() => {
       <RoomJoinOverlay
         {loadingMessage}
         {currentLevel}
-        on:returnToObservatory={() => {
-          transitionToLevel('observatory')
+        homeLevelId={DEFAULT_LEVEL_ID}
+        {homeLevelTitle}
+        on:returnHome={() => {
+          transitionToLevel(DEFAULT_LEVEL_ID)
         }}
       />
     {/if}

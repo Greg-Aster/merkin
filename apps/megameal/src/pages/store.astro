@@ -97,37 +97,37 @@ const companionCount = allProducts.filter(
 	title="Store — MEGA MEAL"
 	description="Browse the official MEGA MEAL artifact catalog. Some items are purchasable. Others exist only in adjacent timelines. We apologize for the inconvenience."
 >
-	<div class="container mx-auto max-w-[86rem] px-3 py-4 sm:px-4 md:py-8">
-		<div class="storefront-hero mb-4 grid gap-4 md:mb-8 xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.7fr)] xl:items-end">
-			<div class="space-y-4">
+	<div class="storefront-page-flow container mx-auto max-w-[86rem] px-3 py-4 sm:px-4 md:py-8">
+		<div class="storefront-hero mb-4 grid gap-4 md:mb-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.62fr)] xl:items-end">
+			<div class="space-y-3">
 				<div class="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-slate-900/60 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-200">
 					<span class="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.8)]"></span>
 					Catalog Portal
 				</div>
 				<div>
-					<h1 class="storefront-hero__title mb-2 text-3xl font-bold text-[var(--primary)] sm:text-4xl md:mb-3 md:text-5xl">
+					<h1 class="storefront-hero__title mb-2 text-3xl font-bold text-[var(--primary)] sm:text-4xl md:mb-2 md:text-4xl">
 						The Artifact Catalog
 					</h1>
 					<p class="storefront-hero__copy max-w-3xl text-sm leading-relaxed text-slate-300">
 						Official merchandise, domestic companions, relic hardware, and consumer spillover recovered from across the MEGA MEAL timeline. Browse by category, inspect listings, and proceed only if your household is certified for attachment-grade inventory.
 					</p>
 				</div>
-				<div class="storefront-hero__stats grid gap-3 min-[480px]:grid-cols-3">
-					<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-3">
+				<div class="storefront-hero__stats grid gap-2 min-[480px]:grid-cols-3">
+					<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-3 py-2">
 						<p class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
 							Products
 						</p>
 						<strong class="mt-1 block text-lg text-slate-100">{allProducts.length}</strong>
 						<span class="text-xs text-slate-400">Visible in this timeline</span>
 					</div>
-					<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-3">
+					<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-3 py-2">
 						<p class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
 							Immediate Purchase
 						</p>
 						<strong class="mt-1 block text-lg text-slate-100">{availableNowCount}</strong>
 						<span class="text-xs text-slate-400">Cleared for regional checkout</span>
 					</div>
-					<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-3">
+					<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-3 py-2">
 						<p class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
 							Restricted
 						</p>
@@ -137,19 +137,22 @@ const companionCount = allProducts.filter(
 				</div>
 			</div>
 
-			<aside class="storefront-advisory rounded-[1.6rem] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.96))] p-5 shadow-2xl">
+			<aside class="storefront-advisory rounded-[1.35rem] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.96))] p-4 shadow-2xl">
 				<p class="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-200">
 					Catalog Advisory
 				</p>
 				<p class="mt-3 text-sm leading-relaxed text-slate-300">
 					Items marked <em>Available Now</em> may be purchased in this timeline. Listings marked <em>Artifact Record</em>, <em>Not In Your Area</em>, or <em>Not In Your Timeline</em> remain viewable for research, longing, and extremely poor decision-making.
 				</p>
-				<div class="mt-4 flex flex-wrap gap-2">
+				<div class="mt-4 flex flex-wrap items-center gap-2">
 					{Object.entries(availabilityDisplay).slice(0, 4).map(([, label]) => (
 						<span class="rounded-full border border-slate-700/70 bg-slate-900/70 px-3 py-1 text-[11px] text-slate-300">
 							{label}
 						</span>
 					))}
+					<a href="#storefront-marketplace" class="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-cyan-100 transition hover:bg-cyan-400/20">
+						Browse listings
+					</a>
 				</div>
 			</aside>
 		</div>
@@ -276,7 +279,7 @@ const companionCount = allProducts.filter(
 			</section>
 		)}
 
-		<div class="storefront-marketplace">
+		<div id="storefront-marketplace" class="storefront-marketplace">
 			<aside class="storefront-marketplace__sidebar">
 				<section class="storefront-panel">
 					<div class="storefront-panel__header">
@@ -354,6 +357,7 @@ const companionCount = allProducts.filter(
 						<Icon name="mdi:magnify" class="h-4 w-4" />
 						<input
 							id="product-search"
+							class="product-search-control"
 							type="search"
 							placeholder="Search products"
 							autocomplete="off"
@@ -385,13 +389,24 @@ const companionCount = allProducts.filter(
 						</select>
 					</div>
 				</div>
-				<div class="storefront-toolbar">
-					<div>
-						<p class="storefront-toolbar__kicker">Marketplace Board</p>
-						<h2>Current Listings</h2>
-					</div>
-					<div class="storefront-toolbar__controls">
-						<span class="product-count">{allProducts.length} products</span>
+					<div class="storefront-toolbar">
+						<div>
+							<p class="storefront-toolbar__kicker">Marketplace Board</p>
+							<h2>Current Listings</h2>
+						</div>
+						<div class="storefront-toolbar__controls">
+							<label class="storefront-search-field storefront-search-field--desktop">
+								<span class="sr-only">Search products</span>
+								<Icon name="mdi:magnify" class="h-4 w-4" />
+								<input
+									class="product-search-control"
+									type="search"
+									placeholder="Search products"
+									autocomplete="off"
+									data-sfx-focus="focus-soft"
+								/>
+							</label>
+							<span class="product-count">{allProducts.length} products</span>
 							<select
 								data-sfx-focus="focus-soft"
 								class="storefront-sort-select sort-select-control"
@@ -501,7 +516,9 @@ const companionCount = allProducts.filter(
 		const categorySelects = Array.from(
 			document.querySelectorAll<HTMLSelectElement>(".category-select-control"),
 		);
-		const searchInput = document.getElementById("product-search") as HTMLInputElement | null;
+		const searchInputs = Array.from(
+			document.querySelectorAll<HTMLInputElement>(".product-search-control"),
+		);
 
 		let activeCategory = "all";
 		let activeSearch = "";
@@ -590,9 +607,14 @@ const companionCount = allProducts.filter(
 			});
 		});
 
-		searchInput?.addEventListener("input", () => {
-			activeSearch = searchInput.value.trim().toLowerCase();
-			applyFilter();
+		searchInputs.forEach((input) => {
+			input.addEventListener("input", () => {
+				activeSearch = input.value.trim().toLowerCase();
+				searchInputs.forEach((candidate) => {
+					if (candidate !== input) candidate.value = input.value;
+				});
+				applyFilter();
+			});
 		});
 
 		sortSelects.forEach((sortSelect) => {

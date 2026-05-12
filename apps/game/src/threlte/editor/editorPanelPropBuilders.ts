@@ -10,6 +10,7 @@ import type {
   OutlinerRow,
 } from './editorOutlinerTypes'
 import type { EditorPanelTab } from './editorPanelTabs'
+import type { EditorPublishPipelineState } from './editorPublishReadinessContracts'
 import type { EditorPrefabType } from './editorStore'
 import type {
   EditorMaterialData,
@@ -185,6 +186,7 @@ export type EditorPanelPropBuilderContext = {
   canUseAiMeshStudioSelection: boolean
   canRetextureSelection: (node: EditorSceneNode | null) => boolean
   saveMessage: string
+  publishPipelineState: EditorPublishPipelineState
   assetLibraryRootGenerated: string
   assetLibraryRootModels: string
   assetController: AnyController
@@ -350,6 +352,7 @@ export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
     terrainChunkCookPending: context.terrainChunkCookPending,
     worldPartitionCookPending: context.worldPartitionCookPending,
     groundTerrainPublishPending: context.groundTerrainPublishPending,
+    publishPipelineState: context.publishPipelineState,
     selectedTerrainSourceAssetUrl: context.selectedTerrainSourceAssetUrl,
     terrainBrushMode: editorState?.terrainBrushMode ?? 'raise',
     terrainBrushSize: editorState?.terrainBrushSize ?? 24,
@@ -377,6 +380,7 @@ export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
     onSetViewportLightingMode: (mode: string) =>
       context.setEditorViewportLightingMode(mode as 'authored' | 'workbench'),
     onCookWorldPartition: () => void context.cookWorldPartition(),
+    onPublishLevel: () => void context.levelController.publishLevel(),
     onPublishGroundTerrainContracts: () =>
       void context.publishGroundTerrainContracts(),
     onSetTerrainBrushMode: (mode: string) =>
@@ -432,7 +436,6 @@ export function buildEnvironmentTabProps(
   context: EditorPanelPropBuilderContext,
 ) {
   return {
-    levelId: context.levelId,
     levelSettings: context.levelSettings,
     effectiveObservatorySettings: context.effectiveObservatorySettings,
     effectiveSolitudeSettings: context.effectiveSolitudeSettings,

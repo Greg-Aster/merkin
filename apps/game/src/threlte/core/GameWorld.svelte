@@ -1,5 +1,6 @@
 <script lang="ts">
 import { createEventDispatcher } from 'svelte'
+import { DEFAULT_LEVEL_ID } from '../levels/levelRegistry'
 import { runtimeDebugLog } from '../utils/runtimeLog'
 import type {
   PlayerLevelPositionDetail,
@@ -11,7 +12,7 @@ const dispatch = createEventDispatcher()
 export let isMobile = false
 export let editorEnabled = false
 export let collisionOverlayEnabled = false
-export let currentLevel = 'observatory'
+export let currentLevel = DEFAULT_LEVEL_ID
 export let currentLevelComponent: any = null
 export let parsedTimelineEvents: any[] = []
 export let timelineEventsPayload = '[]'

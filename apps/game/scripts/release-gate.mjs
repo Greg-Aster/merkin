@@ -81,6 +81,10 @@ const baseSteps = [
     command: ['--dir', 'apps/game', 'type-check'],
   },
   {
+    name: 'Publish pipeline regression tests',
+    command: ['--dir', 'apps/game', 'test:publish-pipeline'],
+  },
+  {
     name: 'Check generated runtime asset drift',
     command: ['--dir', 'apps/game', 'check:generated-drift'],
   },

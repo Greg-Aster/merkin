@@ -53,6 +53,10 @@ export type TerrainManifest = {
   }
   visualChunks?: {
     chunkCount?: number
+    activation?: {
+      maxActiveChunks?: number
+      maxActiveChunksByTier?: Record<string, number>
+    }
     lods?: Array<{ level?: number; distance?: number; resolution?: number }>
   }
 }
@@ -91,6 +95,59 @@ export interface EditorPublishWorkflowStep {
   expectedOutput: string
   reason: string
   required: boolean
+}
+
+export type EditorPublishBakeStep =
+  | 'save-scene'
+  | 'bake-terrain-collision'
+  | 'cook-terrain-chunks'
+  | 'cook-world-partition'
+  | 'cook-runtime-assets'
+  | 'audit-engine'
+  | 'deploy-registry'
+
+export type EditorPublishBakeStepState =
+  | 'pending'
+  | 'running'
+  | 'passed'
+  | 'failed'
+  | 'skipped'
+
+export interface EditorPublishBakePlan {
+  levelId: string
+  steps: EditorPublishBakeStep[]
+  reasons: Record<EditorPublishBakeStep, string[]>
+  blockers: string[]
+  warnings: string[]
+}
+
+export interface EditorPublishBakeStepResult {
+  id: EditorPublishBakeStep
+  state: EditorPublishBakeStepState
+  message: string
+  stdout?: string
+  stderr?: string
+  artifacts?: string[]
+}
+
+export interface EditorPublishPipelineSummary {
+  levelId: string
+  title: string
+  stepsRun: EditorPublishBakeStep[]
+  artifacts: string[]
+  registryDeployed: boolean
+}
+
+export interface EditorPublishPipelineState {
+  running: boolean
+  plan: EditorPublishBakePlan | null
+  stepResults: Partial<
+    Record<EditorPublishBakeStep, EditorPublishBakeStepResult>
+  >
+  summary: EditorPublishPipelineSummary | null
+  error: string
+  startedAt: string
+  finishedAt: string
 }
 
 export interface EditorPublishReadinessMetric {
@@ -137,5 +194,17 @@ export function createEmptyEditorPublishReadinessViewModel(
     metrics: [],
     commands: [],
     workflow: [],
+  }
+}
+
+export function createInitialEditorPublishPipelineState(): EditorPublishPipelineState {
+  return {
+    running: false,
+    plan: null,
+    stepResults: {},
+    summary: null,
+    error: '',
+    startedAt: '',
+    finishedAt: '',
   }
 }

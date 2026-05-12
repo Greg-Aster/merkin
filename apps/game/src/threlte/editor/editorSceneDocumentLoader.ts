@@ -41,10 +41,6 @@ export function hasMeaningfulSceneContent(
     return true
   }
 
-  if (scene.settings && Object.keys(scene.settings).length > 0) {
-    return true
-  }
-
   return false
 }
 
@@ -91,12 +87,13 @@ export function loadImmediateEditorSceneDocument(
   const loadedLocalScene = includeLocalStorage
     ? getLocalEditorScene(levelId)
     : null
-  const localScene = loadedLocalScene
-    ? ({
-        scene: loadedLocalScene,
-        source: 'local-storage',
-      } satisfies EditorSceneDocumentLoadResult)
-    : null
+  const localScene =
+    loadedLocalScene && hasMeaningfulSceneContent(loadedLocalScene)
+      ? ({
+          scene: loadedLocalScene,
+          source: 'local-storage',
+        } satisfies EditorSceneDocumentLoadResult)
+      : null
   const packagedScene = includePackaged ? getPackagedEditorScene(levelId) : null
   const packagedResult =
     packagedScene && hasMeaningfulSceneContent(packagedScene)

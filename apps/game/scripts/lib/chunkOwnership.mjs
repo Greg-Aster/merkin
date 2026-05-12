@@ -2,7 +2,6 @@ export const localChunkOwnershipRules = [
   {
     chunk: 'runtime-world',
     patterns: [
-      '/src/threlte/stores/runtimeDiagnosticsStore.ts',
       '/src/threlte/stores/gameStateStore.ts',
       '/src/threlte/levels/levelRegistry.ts',
       '/src/threlte/features/conversation/conversationStores.ts',
@@ -17,6 +16,30 @@ export const localChunkOwnershipRules = [
     patterns: [
       '/src/threlte/features/conversation/ConversationDialog.svelte',
       '/src/threlte/features/conversation/FireflyAvatar.svelte',
+    ],
+  },
+  {
+    chunk: 'runtime-performance-state',
+    patterns: [
+      '/src/threlte/features/performance/OptimizationManager.ts',
+      '/src/threlte/features/performance/stores/performanceStore.ts',
+      '/src/threlte/utils/runtimeLog.ts',
+    ],
+  },
+  {
+    chunk: 'runtime-render-state',
+    patterns: [
+      '/src/threlte/stores/postProcessingStore.ts',
+      '/src/threlte/stores/runtimeDiagnosticsStore.ts',
+      '/src/threlte/stores/runtimeRenderProfileStore.ts',
+      '/src/threlte/stores/runtimeRenderRegistry.ts',
+    ],
+  },
+  {
+    chunk: 'runtime-post-processing',
+    patterns: [
+      '/src/threlte/features/performance/utils/runtimeVisualQualityPolicy.ts',
+      '/src/threlte/systems/SimplePostProcessing.svelte',
     ],
   },
   {

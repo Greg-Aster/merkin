@@ -247,6 +247,14 @@ function getTextureIndex(textureInfo) {
   return Number.isInteger(textureInfo?.index) ? textureInfo.index : null
 }
 
+function getTextureSourceIndex(texture) {
+  if (Number.isInteger(texture?.source)) return texture.source
+  const webpSource = texture?.extensions?.EXT_texture_webp?.source
+  if (Number.isInteger(webpSource)) return webpSource
+  const basisuSource = texture?.extensions?.KHR_texture_basisu?.source
+  return Number.isInteger(basisuSource) ? basisuSource : null
+}
+
 function getPbrSlot(textureIndex, fallbackFactors = []) {
   return {
     textureIndex,
@@ -451,7 +459,8 @@ export function readGltfAssetMetadata(path) {
     const { json, bin, rootDir } = source
     const textureRoles = collectTextureRoles(json.materials)
     const textures = (json.textures ?? []).map((texture, index) => {
-      const image = json.images?.[texture.source] ?? {}
+      const imageIndex = getTextureSourceIndex(texture)
+      const image = Number.isInteger(imageIndex) ? json.images?.[imageIndex] ?? {} : {}
       const imageBytes = readImageBytes({ json, bin, rootDir, image })
       const dimensions = getImageDimensions(imageBytes)
       const roles = [...(textureRoles.get(index) ?? [])].sort()
@@ -460,7 +469,7 @@ export function readGltfAssetMetadata(path) {
       return {
         index,
         name: texture.name ?? image.name,
-        imageIndex: Number.isInteger(texture.source) ? texture.source : null,
+        imageIndex,
         mimeType,
         width: dimensions?.width ?? null,
         height: dimensions?.height ?? null,

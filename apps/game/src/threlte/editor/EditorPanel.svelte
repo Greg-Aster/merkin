@@ -92,6 +92,10 @@ import {
   saveEditorSceneToLocalStorage,
 } from './editorPersistence'
 import {
+  type EditorPublishPipelineState,
+  createInitialEditorPublishPipelineState,
+} from './editorPublishReadinessContracts'
+import {
   type EditorMaterialData,
   type EditorSceneNode,
   type EditorStylePreset,
@@ -160,9 +164,9 @@ import {
   type EditorStyleSceneCandidate,
   buildStyleSceneCandidates,
   getCuratedStyleBatchCandidateIds,
+  getStyleBatchPresetById,
   reconcileStyleBatchSelection,
   stylePresetOptions,
-  yggdrasilDefaultStyleBrief,
 } from './editorStyleBatchSelection'
 import { createEditorStyleController } from './editorStyleController'
 
@@ -181,6 +185,8 @@ let canUndo = false
 let canRedo = false
 let importBuffer = ''
 let saveMessage = 'Local only'
+let publishPipelineState: EditorPublishPipelineState =
+  createInitialEditorPublishPipelineState()
 let terrainCollisionBakePending = false
 let terrainHeightmapGeneratePending = false
 let terrainChunkCookPending = false
@@ -569,6 +575,9 @@ const levelController = createEditorLevelController({
   transitionToLevel: gameActions.transitionToLevel,
   createEmptyScene,
   setEditorScene,
+  setPublishPipelineState: state => {
+    publishPipelineState = state
+  },
 })
 
 const groundTerrainRuntimePublisher = createGroundTerrainRuntimePublisher({
@@ -1777,7 +1786,7 @@ $: {
     styleSelectableSceneCandidates,
     styleBatchSelectionIds,
     styleBatchSelectionInitialized,
-    () => getCuratedStyleBatchCandidateIds(activeSceneLevelId, editorNodes),
+    () => getCuratedStyleBatchCandidateIds(editorNodes),
   )
   if (
     nextSelection.selectedIds !== styleBatchSelectionIds ||
@@ -1793,25 +1802,29 @@ $: styleSceneCandidates = styleSelectableSceneCandidates.map(candidate => ({
   selected: styleBatchSelectionIds.includes(candidate.id),
 }))
 
+$: levelStyleBatchPreset = getStyleBatchPresetById(
+  editorScene?.settings?.level?.style?.editorBatch?.presetId,
+)
+$: levelStyleBatchPresetKey = levelStyleBatchPreset
+  ? `${activeSceneLevelId}:${levelStyleBatchPreset.id}`
+  : ''
+
 $: if (
-  activeSceneLevelId === 'yggdrasil' &&
-  styleLevelDefaultsAppliedFor !== activeSceneLevelId &&
+  levelStyleBatchPreset &&
+  styleLevelDefaultsAppliedFor !== levelStyleBatchPresetKey &&
   !styleBatchSession
 ) {
-  styleProfileName = 'Abyssal Neon Cosmic Horror'
-  stylePrompt = yggdrasilDefaultStyleBrief.prompt
-  styleNegativePrompt = yggdrasilDefaultStyleBrief.negativePrompt
-  styleLoraNotes = yggdrasilDefaultStyleBrief.loraNotes
-  styleControlNetNotes = yggdrasilDefaultStyleBrief.controlNetNotes
-  styleBatchSelectionIds = getCuratedStyleBatchCandidateIds(
-    activeSceneLevelId,
-    editorNodes,
-  )
+  styleProfileName = levelStyleBatchPreset.label
+  stylePrompt = levelStyleBatchPreset.prompt
+  styleNegativePrompt = levelStyleBatchPreset.negativePrompt
+  styleLoraNotes = levelStyleBatchPreset.loraNotes
+  styleControlNetNotes = levelStyleBatchPreset.controlNetNotes
+  styleBatchSelectionIds = getCuratedStyleBatchCandidateIds(editorNodes)
   styleBatchSelectionInitialized = true
-  styleLevelDefaultsAppliedFor = activeSceneLevelId
+  styleLevelDefaultsAppliedFor = levelStyleBatchPresetKey
 } else if (
   styleLevelDefaultsAppliedFor &&
-  styleLevelDefaultsAppliedFor !== activeSceneLevelId
+  styleLevelDefaultsAppliedFor !== levelStyleBatchPresetKey
 ) {
   styleLevelDefaultsAppliedFor = ''
 }
@@ -2934,6 +2947,7 @@ $: editorPanelPropContext = {
   canUseAiMeshStudioSelection,
   canRetextureSelection,
   saveMessage,
+  publishPipelineState,
   assetLibraryRootGenerated: ASSET_LIBRARY_ROOT_GENERATED,
   assetLibraryRootModels: ASSET_LIBRARY_ROOT_MODELS,
   assetController,
@@ -3094,6 +3108,7 @@ onDestroy(() => {
       selectedNodeCount={editorState.selectedNodeIds.length}
       currentLevelId={activeSceneLevelId}
       levelOptions={editorLevelOptions}
+      publishLevelPending={publishPipelineState.running}
       onSetViewportShadingMode={setEditorViewportShadingMode}
       onSaveLevel={saveCurrentSceneToDisk}
       onSaveAsLevel={saveAsLevelFromMenu}

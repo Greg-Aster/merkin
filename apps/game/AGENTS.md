@@ -60,6 +60,27 @@ Keep these concerns separated:
 If a change crosses several of these boundaries, define the contract first and
 keep the implementation staged.
 
+## Level Coupling Guardrail
+
+Generic runtime, editor, loading, performance, and validation systems must not
+special-case level ids such as `observatory`, `solitude`, or `yggdrasil`.
+Level-specific data belongs in scene documents, the level registry, authored
+content metadata, validation fixtures, or clearly named one-off authoring
+scripts.
+
+Allowed places for direct level ids:
+
+- `src/threlte/levels/level-registry.json`
+- `src/threlte/editor/scenes/*.scene.json`
+- content-specific authoring scripts with the level or asset family in the file
+  name
+- tests, visual smoke fixtures, and migration code that explicitly documents
+  the legacy shape being migrated
+
+When generic code needs level behavior, read it from a registry entry, scene
+settings, runtime manifest, node metadata, or an explicit capability flag. Do
+not add `if (levelId === 'some-level')` branches to engine code as a bug fix.
+
 ## Asset Budgets And Performance
 
 All new levels and major assets need explicit budgets. For web runtime, prefer:

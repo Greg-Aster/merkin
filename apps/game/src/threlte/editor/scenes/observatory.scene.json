@@ -209,6 +209,9 @@
       },
       "player": {
         "lightIntensityScale": 2
+      },
+      "editorPanels": {
+        "environment": "observatory"
       }
     },
     "observatory": {

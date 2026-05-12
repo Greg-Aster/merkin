@@ -8,6 +8,7 @@
     "dev": "pnpm dev:app",
     "dev:app": "node ./scripts/dev-app.mjs",
     "build": "astro build && node -e \"require('node:fs').rmSync('dist/_redirects',{force:true})\"",
+    "test:publish-pipeline": "tsx ./scripts/test-publish-pipeline.ts",
     "smoke:engine": "node ./scripts/smoke-check.mjs",
     "smoke:boot": "node ./scripts/boot-check.mjs",
     "smoke:boot:firefox": "node ./scripts/boot-check.mjs --browser=firefox",

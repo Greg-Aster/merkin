@@ -2,6 +2,15 @@
 import { onDestroy, onMount } from 'svelte'
 import type { EditorSceneDocument } from '../engine/sceneDocumentTypes'
 import {
+  computeEditorPublishBakePlan,
+  createEditorPublishBakePlanMetadataFromReadiness,
+  getEditorPublishBakeStepRows,
+} from './editorPublishBakePlan'
+import {
+  type EditorPublishPipelineState,
+  createInitialEditorPublishPipelineState,
+} from './editorPublishReadinessContracts'
+import {
   createEditorPublishReadinessController,
   createInitialEditorPublishReadinessState,
 } from './editorPublishReadinessController'
@@ -9,6 +18,7 @@ import {
   getPublishReadinessAdvisoryActions,
   getPublishReadinessBudgetIssues,
   getPublishReadinessGateFailures,
+  getPublishReadinessPipelineSteps,
   getPublishReadinessPublishBlockReason,
   getPublishReadinessRequiredActions,
 } from './editorPublishReadinessPresentation'
@@ -18,6 +28,9 @@ export let editorScene: EditorSceneDocument | null = null
 export let groundTerrainPublishPending = false
 export let terrainPipelinePending = false
 export let worldPartitionCookPending = false
+export let publishPipelineState: EditorPublishPipelineState =
+  createInitialEditorPublishPipelineState()
+export let onPublishLevel: () => void = () => {}
 export let onPublishGroundTerrainContracts: () => void = () => {}
 
 let publishReadiness = createInitialEditorPublishReadinessState()
@@ -59,7 +72,8 @@ $: budgetIssues = getPublishReadinessBudgetIssues(publishReadiness)
 $: pipelinePending =
   groundTerrainPublishPending ||
   terrainPipelinePending ||
-  worldPartitionCookPending
+  worldPartitionCookPending ||
+  publishPipelineState.running
 $: publishBlockReason = getPublishReadinessPublishBlockReason(
   publishReadiness,
   {
@@ -68,7 +82,30 @@ $: publishBlockReason = getPublishReadinessPublishBlockReason(
     pipelinePending,
   },
 )
-$: publishDisabled = Boolean(publishBlockReason)
+$: pipelineSteps = getPublishReadinessPipelineSteps(publishReadiness, {
+  loading: publishReadiness.loading,
+  error: publishReadiness.error,
+  pipelinePending,
+})
+$: bakePlan =
+  publishPipelineState.plan?.levelId === levelId
+    ? publishPipelineState.plan
+    : computeEditorPublishBakePlan({
+        levelId,
+        scene: editorScene,
+        metadata:
+          createEditorPublishBakePlanMetadataFromReadiness(publishReadiness),
+      })
+$: bakeStepRows = getEditorPublishBakeStepRows(bakePlan, publishPipelineState)
+$: publishSummary = publishPipelineState.summary
+$: publishRunBlockReason = publishReadiness.loading
+  ? 'Readiness check is still loading.'
+  : publishReadiness.error
+    ? publishReadiness.error
+    : pipelinePending
+      ? 'A bake, cook, or publish operation is still running.'
+      : bakePlan.blockers[0] || ''
+$: publishDisabled = Boolean(publishRunBlockReason)
 </script>
 
 <div class="editor-section" aria-live="polite">
@@ -85,6 +122,73 @@ $: publishDisabled = Boolean(publishBlockReason)
     </div>
     <div class="save-message">Build: {publishReadiness.buildId || 'unversioned'}</div>
     <div class="save-message">Generated: {publishReadiness.generatedAt || 'unknown'}</div>
+
+    <div class="editor-status-card">
+      <div class="editor-status-title">Publish Build Plan</div>
+      {#each bakeStepRows as step (step.id)}
+        <div class="editor-chip-row" aria-label={`${step.label}: ${step.statusLabel}`}>
+          <span class:ready={step.state === 'passed'} class:warn={step.state === 'pending' || step.state === 'running' || step.state === 'skipped'} class:danger={step.state === 'failed'} class="editor-chip">{step.statusLabel}</span>
+          <span class="save-message">{step.label}</span>
+        </div>
+        {#each step.reasons as reason}
+          <div class="save-message">{reason}</div>
+        {/each}
+        {#if step.message}
+          <div class="save-message" class:error-message={step.state === 'failed'}>{step.message}</div>
+        {/if}
+        {#if step.artifacts.length}
+          <div class="save-message">Artifacts: {step.artifacts.join(', ')}</div>
+        {/if}
+        {#if step.stdout || step.stderr}
+          <details>
+            <summary class="save-message">Command output</summary>
+            <textarea readonly rows="5">{[step.stdout, step.stderr].filter(Boolean).join('\n')}</textarea>
+          </details>
+        {/if}
+      {/each}
+      {#if bakePlan.warnings.length}
+        {#each bakePlan.warnings as warning}
+          <div class="save-message error-message">{warning}</div>
+        {/each}
+      {/if}
+      {#if bakePlan.blockers.length}
+        {#each bakePlan.blockers as blocker}
+          <div class="save-message error-message">{blocker}</div>
+        {/each}
+      {/if}
+    </div>
+
+    {#if publishSummary}
+      <div class="editor-status-card">
+        <div class="editor-status-title">Publish Summary</div>
+        <div class="save-message">{publishSummary.title} ({publishSummary.levelId}) runtime published.</div>
+        <div class="save-message">Steps run: {publishSummary.stepsRun.length}</div>
+        <div class="save-message">Registry deployed: {publishSummary.registryDeployed ? 'yes' : 'no'}</div>
+        {#if publishSummary.artifacts.length}
+          <div class="save-message">Generated artifacts: {publishSummary.artifacts.join(', ')}</div>
+        {/if}
+      </div>
+    {/if}
+
+    {#if publishPipelineState.error}
+      <div class="editor-status-card">
+        <div class="editor-status-title">Publish Failure</div>
+        <div class="save-message error-message">{publishPipelineState.error}</div>
+      </div>
+    {/if}
+
+    <div class="editor-status-card">
+      <div class="editor-status-title">Production Flow</div>
+      {#each pipelineSteps as step (step.id)}
+        <div class="editor-chip-row" aria-label={`${step.label}: ${step.statusLabel}`}>
+          <span class:ready={step.state === 'success'} class:warn={step.state === 'warning' || step.state === 'pending' || step.state === 'next'} class:danger={step.state === 'failure'} class="editor-chip">{step.statusLabel}</span>
+          <span class="save-message">{step.label}: {step.reason}</span>
+        </div>
+        {#if step.nextAction}
+          <div class="save-message">Next: {step.nextAction}</div>
+        {/if}
+      {/each}
+    </div>
 
     {#if gateFailures.length}
       <div class="editor-status-card">
@@ -131,15 +235,6 @@ $: publishDisabled = Boolean(publishBlockReason)
       </div>
     {/if}
 
-    {#if publishReadiness.commands.length}
-      <div class="editor-status-card">
-        <div class="editor-status-title">Command Queue</div>
-        {#each publishReadiness.commands as command (command.id)}
-          <div class="save-message">{command.command} - {command.reason}</div>
-        {/each}
-      </div>
-    {/if}
-
     {#if publishReadiness.panels.length}
       <div class="editor-chip-row" aria-label="Production gate status">
         {#each publishReadiness.panels as panel (panel.id)}
@@ -160,15 +255,26 @@ $: publishDisabled = Boolean(publishBlockReason)
       disabled={publishDisabled}
       data-sfx-hover="hover-emphasis"
       data-sfx-click="confirm"
+      on:click={onPublishLevel}
+    >
+      {publishPipelineState.running ? 'Publishing Level...' : 'Publish Level'}
+    </button>
+    {#if publishRunBlockReason}
+      <div class="save-message error-message">{publishRunBlockReason}</div>
+    {:else if publishBlockReason}
+      <div class="save-message">{publishBlockReason} Publish can run the build, but deployment waits for build and audit success.</div>
+    {:else}
+      <div class="save-message">Publish will save the scene, run required bake and cook steps, audit the runtime, then deploy the registry.</div>
+    {/if}
+    <button
+      class="full"
+      disabled={groundTerrainPublishPending || publishPipelineState.running}
+      data-sfx-hover="hover-soft"
+      data-sfx-click="confirm"
       on:click={onPublishGroundTerrainContracts}
     >
-      {groundTerrainPublishPending ? 'Publishing Runtime...' : 'Publish Runtime Contracts'}
+      {groundTerrainPublishPending ? 'Publishing Runtime Contracts...' : 'Publish Terrain Contracts'}
     </button>
-    {#if publishBlockReason}
-      <div class="save-message error-message">{publishBlockReason}</div>
-    {:else}
-      <div class="save-message">Publish will save the scene, regenerate runtime manifests, and run the engine audit.</div>
-    {/if}
   {/if}
   <div class="button-row compact editor-mt-sm">
     <button data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={() => refreshPublishReadiness(true)}>Refresh</button>

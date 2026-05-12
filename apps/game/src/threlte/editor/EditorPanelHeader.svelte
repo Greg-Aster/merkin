@@ -20,6 +20,7 @@ export let canRedo = false
 export let selectedNodeCount = 0
 export let currentLevelId = ''
 export let levelOptions: LevelMenuOption[] = []
+export let publishLevelPending = false
 export let onSetViewportShadingMode: (mode: EditorViewportShadingMode) => void =
   () => {}
 export let onSaveLevel: CommandHandler = () => {}
@@ -86,7 +87,9 @@ function handleMenuKeydown(event: KeyboardEvent) {
           <button class="menu-item" on:click={() => runCommand(onNewLevel)}>New Level...</button>
           <button class="menu-item" on:click={() => runCommand(onCopySceneJson)}>Copy Scene JSON</button>
           <div class="menu-separator"></div>
-          <button class="menu-item" on:click={() => runCommand(onPublishLevel)}>Publish Level</button>
+          <button class="menu-item" disabled={publishLevelPending} on:click={() => runCommand(onPublishLevel)}>
+            {publishLevelPending ? 'Publishing Level...' : 'Publish Level...'}
+          </button>
           <button class="menu-item" on:click={() => runCommand(onMarkDraft)}>Mark As Draft</button>
           <button class="menu-item" on:click={() => runCommand(onReloadDisk)}>Reload Current Level</button>
           <button class="menu-item" on:click={() => runCommand(onOpenSaveTools)}>Level File Tools</button>

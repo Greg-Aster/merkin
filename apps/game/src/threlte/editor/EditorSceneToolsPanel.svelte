@@ -3,6 +3,10 @@ import { getLevelCollisionWorkflow } from '../engine/levelCollisionWorkflow'
 import type { EditorSceneDocument } from '../engine/sceneDocumentTypes'
 import type { TerrainRuntimeComponentSource } from '../features/terrain'
 import EditorPublishReadinessPanel from './EditorPublishReadinessPanel.svelte'
+import {
+  type EditorPublishPipelineState,
+  createInitialEditorPublishPipelineState,
+} from './editorPublishReadinessContracts'
 
 export let levelId = ''
 export let editorScene: EditorSceneDocument | null = null
@@ -55,6 +59,8 @@ export let terrainHeightmapGeneratePending = false
 export let terrainChunkCookPending = false
 export let worldPartitionCookPending = false
 export let groundTerrainPublishPending = false
+export let publishPipelineState: EditorPublishPipelineState =
+  createInitialEditorPublishPipelineState()
 export let selectedTerrainSourceAssetUrl = ''
 export let transformMode = 'translate'
 export let transformSpace = 'world'
@@ -77,6 +83,7 @@ export let onSetTerrainBrushSize: (value: number) => void = () => {}
 export let onSetTerrainBrushStrength: (value: number) => void = () => {}
 export let onSetTerrainBrushFalloff: (value: number) => void = () => {}
 export let onCookWorldPartition: () => void = () => {}
+export let onPublishLevel: () => void = () => {}
 export let onPublishGroundTerrainContracts: () => void = () => {}
 export let onSetTransformMode: (mode: string) => void = () => {}
 export let onSetTransformSpace: (mode: string) => void = () => {}
@@ -168,6 +175,8 @@ $: terrainBakeToolsAvailable =
   {groundTerrainPublishPending}
   terrainPipelinePending={terrainCollisionBakePending || terrainHeightmapGeneratePending || terrainChunkCookPending}
   {worldPartitionCookPending}
+  {publishPipelineState}
+  {onPublishLevel}
   {onPublishGroundTerrainContracts}
 />
 

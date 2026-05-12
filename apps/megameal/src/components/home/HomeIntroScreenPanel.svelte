@@ -22,8 +22,13 @@ import {
 } from './homeIntroKtx2Loader'
 import {
   createCausticTexture,
+  createFrostedScrimTexture,
   createSheenTexture,
 } from './homeIntroGlassTextures'
+import {
+  createScreenTextTexture,
+  createTextMediaBlurTextureController,
+} from './homeIntroScreenTextTextures'
 import {
   disposeHomeIntroScreenModel,
   loadHomeIntroScreenModelInstance,
@@ -52,7 +57,9 @@ let titleTexture: Texture | null = null
 let stillTexture: Texture | null = null
 let screenTextTexture: CanvasTexture | null = null
 let videoTexture: VideoTexture | null = null
+let textMediaBlurTexture: CanvasTexture | null = null
 let panelRoot: Group | null = null
+let frostedScrimTexture: CanvasTexture | null = null
 let sheenTexture: CanvasTexture | null = null
 let causticTexture: CanvasTexture | null = null
 let screenModel: THREE.Object3D | null = null
@@ -75,12 +82,16 @@ let videoMediaOpacity = 0
 let mediaGhostOpacity = 1
 let glassEffectOpacity = 1
 let textOpacity = primary ? 0.72 : 0.58
+let textScrimOpacity = primary ? 0.34 : 0.42
+let textMediaBlurOpacity = primary ? 0.42 : 0.46
+let textFrostOpacity = primary ? 0.16 : 0.18
 let videoElement: HTMLVideoElement | null = null
 
 const additiveBlending = AdditiveBlending
 const normalBlending = NormalBlending
 const doubleSide = DoubleSide
 const frontSide = FrontSide
+const textMediaBlurController = createTextMediaBlurTextureController()
 const frameWidth = 3.18
 const frameHeight = 1.78
 const glowWidth = frameWidth * 0.98
@@ -100,6 +111,9 @@ const glassMediaGhostScale = 1.012
 const mediaSurfaceZ = -0.034
 const mediaGhostNearZ = -0.042
 const mediaGhostFarZ = -0.05
+const textScrimSurfaceZ = -0.028
+const textMediaBlurSurfaceZ = -0.026
+const textFrostSurfaceZ = -0.024
 const textSurfaceZ = -0.018
 const textWidth = 2.54
 const textHeight = 1.24
@@ -124,6 +138,11 @@ function disposeTitleTexture() {
 function disposeVideoTexture() {
   videoTexture?.dispose()
   videoTexture = null
+}
+
+function disposeTextMediaBlurTexture() {
+  textMediaBlurController.dispose()
+  textMediaBlurTexture = null
 }
 
 function disposeVideoElement() {
@@ -153,6 +172,11 @@ function disposeSheenTexture() {
 function disposeCausticTexture() {
   causticTexture?.dispose()
   causticTexture = null
+}
+
+function disposeFrostedScrimTexture() {
+  frostedScrimTexture?.dispose()
+  frostedScrimTexture = null
 }
 
 function disposeScreenModel() {
@@ -210,10 +234,13 @@ function ensureVideoLoaded() {
 function syncVideoPlayback() {
   if (!videoSrc) return
 
-  const shouldPlay = shouldLoadMedia && (active || hovered)
+  if (shouldLoadMedia && (active || hovered)) {
+    ensureVideoLoaded()
+  }
+
+  const shouldPlay = shouldLoadMedia && hovered
 
   if (shouldPlay) {
-    ensureVideoLoaded()
     if (videoElement) videoElement.playbackRate = screenVideoPlaybackRate
     videoElement?.play().catch(() => {
       // The still image remains visible if autoplay is blocked.
@@ -224,95 +251,16 @@ function syncVideoPlayback() {
   videoElement?.pause()
 }
 
-function wrapCanvasText(
-  context: CanvasRenderingContext2D,
-  value: string,
-  maxWidth: number,
-) {
-  const words = value.split(/\s+/).filter(Boolean)
-  const lines: string[] = []
-  let line = ''
-
-  words.forEach(word => {
-    const nextLine = line ? `${line} ${word}` : word
-    if (context.measureText(nextLine).width <= maxWidth || !line) {
-      line = nextLine
-      return
-    }
-
-    lines.push(line)
-    line = word
-  })
-
-  if (line) lines.push(line)
-  return lines
-}
-
-function createScreenTextTexture() {
-  if (typeof document === 'undefined') return null
-
-  const canvas = document.createElement('canvas')
-  canvas.width = 1024
-  canvas.height = 512
-  const context = canvas.getContext('2d')
-  if (!context) return null
-
-  context.clearRect(0, 0, canvas.width, canvas.height)
-
-  const maxWidth = 820
-  const x = 92
-  let y = 120
-
-  context.textBaseline = 'top'
-  context.fillStyle = 'rgb(103 232 249 / 0.86)'
-  context.font = '700 28px "JetBrains Mono", ui-monospace, monospace'
-  context.fillText((kicker || stat || 'PORTAL').toUpperCase(), x, y)
-
-  y += 54
-  context.fillStyle = 'rgb(248 250 252 / 0.96)'
-  context.shadowColor = 'rgb(103 232 249 / 0.42)'
-  context.shadowBlur = 18
-  context.font = '800 76px Inter, ui-sans-serif, system-ui, sans-serif'
-
-  wrapCanvasText(context, title || 'MEGA MEAL SAGA', maxWidth)
-    .slice(0, 2)
-    .forEach(line => {
-      context.fillText(line, x, y)
-      y += 82
-    })
-
-  context.shadowBlur = 0
-  context.fillStyle = 'rgb(226 232 240 / 0.78)'
-  context.font = '600 24px "JetBrains Mono", ui-monospace, monospace'
-  const detail = stat || ctaLabel
-  if (detail) {
-    context.fillText(detail.toUpperCase(), x, 372)
-  }
-
-  if (ctaLabel) {
-    const label = ctaLabel.toUpperCase()
-    context.fillStyle = 'rgb(15 23 42 / 0.78)'
-    context.fillRect(x, 420, Math.min(420, context.measureText(label).width + 66), 52)
-    context.strokeStyle = 'rgb(103 232 249 / 0.72)'
-    context.lineWidth = 2
-    context.strokeRect(x, 420, Math.min(420, context.measureText(label).width + 66), 52)
-    context.fillStyle = 'rgb(224 242 254 / 0.94)'
-    context.font = '800 24px "JetBrains Mono", ui-monospace, monospace'
-    context.fillText(label, x + 28, 434)
-  }
-
-  const texture = new CanvasTexture(canvas)
-  texture.colorSpace = SRGBColorSpace
-  texture.needsUpdate = true
-
-  return texture
-}
-
 function syncScreenTextTexture() {
   if (!mounted) return
 
   disposeScreenTextTexture()
-  screenTextTexture = createScreenTextTexture()
+  screenTextTexture = createScreenTextTexture({
+    ctaLabel,
+    kicker,
+    stat,
+    title,
+  })
 }
 
 function syncPanelGlassTextures() {
@@ -321,11 +269,13 @@ function syncPanelGlassTextures() {
   if (!panelGlassEnabled) {
     disposeSheenTexture()
     disposeCausticTexture()
+    disposeFrostedScrimTexture()
     return
   }
 
   sheenTexture ??= createSheenTexture()
   causticTexture ??= createCausticTexture()
+  frostedScrimTexture ??= createFrostedScrimTexture()
 }
 
 async function loadScreenModel() {
@@ -366,10 +316,12 @@ function cleanupPanel() {
   disposeStillTexture()
   disposeTitleTexture()
   disposeVideoTexture()
+  disposeTextMediaBlurTexture()
   disposeVideoElement()
   disposeScreenTextTexture()
   disposeSheenTexture()
   disposeCausticTexture()
+  disposeFrostedScrimTexture()
 }
 
 onMount(() => {
@@ -491,11 +443,15 @@ useTask(delta => {
     causticTexture.rotation = Math.sin(time * 0.08 + index) * 0.035
   }
 
+  if (frostedScrimTexture) {
+    frostedScrimTexture.offset.x = time * 0.004 + index * 0.021
+    frostedScrimTexture.offset.y = Math.sin(time * 0.12 + index) * 0.012
+  }
+
   hoverBlend += ((hovered ? 1 : 0) - hoverBlend) * ease
   const baseTitleOpacity = panelGlassEnabled ? 0.76 : 1
   const baseMediaOpacity = panelGlassEnabled ? (primary ? 0.62 : 0.48) : 1
-  const activeBlend = active ? 1 : hoverBlend
-  videoMediaOpacity = videoReady ? activeBlend : 0
+  videoMediaOpacity = videoReady ? hoverBlend : 0
   titleMediaOpacity =
     baseTitleOpacity +
     (1 - baseTitleOpacity) * hoverBlend -
@@ -505,6 +461,20 @@ useTask(delta => {
   glassEffectOpacity = 1
   const baseTextOpacity = primary ? 0.96 : 0.88
   textOpacity = videoSrc ? baseTextOpacity * (1 - hoverBlend) : baseTextOpacity
+  const baseTextScrimOpacity = panelGlassEnabled ? (primary ? 0.48 : 0.54) : 0.56
+  textScrimOpacity = videoSrc ? baseTextScrimOpacity * (1 - hoverBlend) : baseTextScrimOpacity
+  const baseTextMediaBlurOpacity = panelGlassEnabled ? (primary ? 0.52 : 0.58) : 0
+  textMediaBlurOpacity = videoSrc
+    ? baseTextMediaBlurOpacity * (1 - hoverBlend)
+    : baseTextMediaBlurOpacity
+  const baseTextFrostOpacity = panelGlassEnabled ? (primary ? 0.22 : 0.26) : 0
+  textFrostOpacity = videoSrc ? baseTextFrostOpacity * (1 - hoverBlend) : baseTextFrostOpacity
+  textMediaBlurTexture = textMediaBlurController.update(
+    time,
+    videoElement,
+    textMediaBlurOpacity,
+    panelGlassEnabled,
+  )
 
   if (panelRoot) {
     panelRoot.position.z = hoverBlend * 0.045
@@ -739,6 +709,52 @@ useTask(delta => {
 				opacity={primary ? 0.32 : 0.16}
 				blending={additiveBlending}
 				depthWrite={false}
+			/>
+		</T.Mesh>
+	{/if}
+
+	{#if screenTextTexture}
+		<T.Mesh position={[0, primary ? 0.02 : 0, textScrimSurfaceZ]} renderOrder={20}>
+			<T.PlaneGeometry args={[primary ? titleWidth : mediaWidth, primary ? titleHeight : mediaHeight]} />
+			<T.MeshBasicMaterial
+				color="#020617"
+				side={doubleSide}
+				transparent={true}
+				opacity={textScrimOpacity}
+				blending={normalBlending}
+				depthWrite={false}
+				depthTest={false}
+			/>
+		</T.Mesh>
+	{/if}
+
+	{#if screenTextTexture && textMediaBlurTexture}
+		<T.Mesh position={[0, primary ? 0.02 : 0, textMediaBlurSurfaceZ]} renderOrder={20}>
+			<T.PlaneGeometry args={[primary ? titleWidth : mediaWidth, primary ? titleHeight : mediaHeight]} />
+			<T.MeshBasicMaterial
+				map={textMediaBlurTexture}
+				side={doubleSide}
+				transparent={true}
+				opacity={textMediaBlurOpacity}
+				blending={normalBlending}
+				depthWrite={false}
+				depthTest={false}
+			/>
+		</T.Mesh>
+	{/if}
+
+	{#if screenTextTexture && frostedScrimTexture}
+		<T.Mesh position={[0, primary ? 0.02 : 0, textFrostSurfaceZ]} renderOrder={20}>
+			<T.PlaneGeometry args={[primary ? titleWidth : mediaWidth, primary ? titleHeight : mediaHeight]} />
+			<T.MeshBasicMaterial
+				map={frostedScrimTexture}
+				color="#dbeafe"
+				side={doubleSide}
+				transparent={true}
+				opacity={textFrostOpacity}
+				blending={normalBlending}
+				depthWrite={false}
+				depthTest={false}
 			/>
 		</T.Mesh>
 	{/if}

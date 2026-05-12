@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { auditSourceGuards } from './lib/engineAuditSourceGuards.mjs'
 import { auditRuntimeAssetManifest } from './lib/runtimeAssetManifestAudit.mjs'
@@ -44,19 +44,6 @@ const chunkedTerrainRequiredManifests = new Set([
   'solitude.manifest.json',
   'yggdrasil.manifest.json',
 ])
-const requiredWorldPartitionLevels = ['solitude', 'yggdrasil']
-const worldPartitionBudgetByLevel = {
-  solitude: {
-    maxResidentActors: 8,
-    minStreamableActors: 16,
-    maxActorsPerCell: 30,
-  },
-  yggdrasil: {
-    maxResidentActors: 80,
-    minStreamableActors: 64,
-    maxActorsPerCell: 35,
-  },
-}
 const terrainTriangleBudget = 50_000
 const sceneAudit = auditSceneArchitecture({
   sceneDir,
@@ -85,6 +72,39 @@ function readJsonFile(fullPath) {
   return JSON.parse(stripBom(readFileSync(fullPath, 'utf8')))
 }
 
+function getFiniteNumber(value) {
+  return Number.isFinite(value) ? value : undefined
+}
+
+function getWorldPartitionAuditRequirements() {
+  const requiredLevels = []
+  const budgetByLevel = {}
+
+  for (const file of readdirSync(sceneDir).sort()) {
+    if (!file.endsWith('.scene.json')) continue
+
+    const scene = readJsonFile(join(sceneDir, file))
+    const levelId = typeof scene.levelId === 'string' ? scene.levelId : ''
+    const worldPartition = scene.settings?.level?.worldPartition
+    if (
+      !levelId ||
+      typeof worldPartition?.partitionUrl !== 'string' ||
+      !worldPartition.partitionUrl.trim()
+    ) {
+      continue
+    }
+
+    requiredLevels.push(levelId)
+    budgetByLevel[levelId] = {
+      maxResidentActors: getFiniteNumber(worldPartition.maxResidentActors),
+      minStreamableActors: getFiniteNumber(worldPartition.minStreamableActors),
+      maxActorsPerCell: getFiniteNumber(worldPartition.maxActorsPerCell),
+    }
+  }
+
+  return { requiredLevels, budgetByLevel }
+}
+
 const terrainAudit = auditTerrainCollision({
   terrainDir,
   publicDir,
@@ -96,10 +116,11 @@ const terrainReports = terrainAudit.terrainReports
 const legacyTerrainManifestReports = terrainAudit.legacyTerrainManifestReports
 failures.push(...terrainAudit.failures)
 
+const worldPartitionRequirements = getWorldPartitionAuditRequirements()
 const worldPartitionAudit = auditWorldPartitions({
   worldPartitionDir,
-  requiredLevels: requiredWorldPartitionLevels,
-  budgetByLevel: worldPartitionBudgetByLevel,
+  requiredLevels: worldPartitionRequirements.requiredLevels,
+  budgetByLevel: worldPartitionRequirements.budgetByLevel,
   readJsonFile,
 })
 const worldPartitionReports = worldPartitionAudit.reports

@@ -19,20 +19,6 @@ $: primitiveNode = node.kind === 'primitive' ? node.primitive ?? null : null
 $: lightNode = node.kind === 'light' ? node.light ?? null : null
 $: renderKey = `${node.id}:${node.kind}:${assetNode?.url ?? prefabNode?.type ?? primitiveNode?.geometry ?? lightNode?.color ?? 'group'}`
 
-const SOLITUDE_RUIN_BASE_MATERIAL: EditorMaterialData = {
-  color: '#5f6874',
-  emissive: '#171b22',
-  emissiveIntensity: 0,
-  metalness: 0.04,
-  roughness: 0.94,
-  envMapIntensity: 0.22,
-  transmission: 0,
-  clearcoat: 0,
-  clearcoatRoughness: 1,
-  thickness: 0,
-  reflectivity: 0.18,
-}
-
 const materialOverrideStore = writable<EditorMaterialData | null>(null)
 setContext(EDITOR_MATERIAL_OVERRIDE_CONTEXT, materialOverrideStore)
 
@@ -45,21 +31,6 @@ function mergeMaterialOverrides(
     ...(base ?? {}),
     ...(override ?? {}),
   }
-}
-
-function getSolitudeAssetMaterial(
-  node: EditorSceneNode,
-): EditorMaterialData | null {
-  if (node.kind !== 'asset' || !node.asset?.url) return null
-
-  if (
-    node.id.startsWith('solitude-pillar-') ||
-    node.id.startsWith('solitude-ring-fragment-')
-  ) {
-    return SOLITUDE_RUIN_BASE_MATERIAL
-  }
-
-  return null
 }
 
 function getPrimitiveFallbackMaterial(
@@ -98,10 +69,7 @@ function getPrimitiveFallbackMaterial(
 $: materialOverrideStore.set(
   primitiveNode
     ? getPrimitiveFallbackMaterial(node)
-    : mergeMaterialOverrides(
-        getSolitudeAssetMaterial(node),
-        node.material ?? null,
-      ),
+    : mergeMaterialOverrides(null, node.material ?? null),
 )
 </script>
 
@@ -113,9 +81,7 @@ $: materialOverrideStore.set(
   {:else if primitiveNode}
     <ProceduralMesh
       name={node.name}
-      userData={node.id === 'solitude-ground-plateau' || node.id === 'solitude-ground-dais'
-        ? { renderStyleSkip: true }
-        : {}}
+      userData={node.renderPolicy?.runtimeStyle === 'skip' ? { renderStyleSkip: true } : {}}
       geometry={primitiveNode.geometry}
       args={primitiveNode.args}
       position={[0, 0, 0]}

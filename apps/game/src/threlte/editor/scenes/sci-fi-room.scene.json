@@ -206,6 +206,9 @@
             "settleMs": 2000
           }
         ]
+      },
+      "editorPanels": {
+        "environment": "sci-fi-room"
       }
     },
     "observatory": {

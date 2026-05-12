@@ -1,0 +1,13 @@
+{
+  "materialAuthoring": {
+    "workflow": "apps/game/scripts/bake-runtime-prefabs.mjs#command-fin-pbr",
+    "authoredAt": "2026-05-11",
+    "textureSize": 64,
+    "slotsAuthored": [
+      "baseColorTexture",
+      "metallicRoughnessTexture",
+      "normalTexture"
+    ],
+    "provenance": "Procedural PBR maps authored from the runtime prefab material palette during prefab baking so command-fin no longer relies on approved material-factor fallbacks."
+  }
+}

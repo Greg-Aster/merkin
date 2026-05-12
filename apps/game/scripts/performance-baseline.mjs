@@ -355,6 +355,72 @@ function compareAgainstBudgets(summary, budgets, timings = {}, profile = {}) {
   return failures
 }
 
+function classifyPerformanceBottlenecks(result) {
+  const bottlenecks = new Set()
+  const failures = result.budgetFailures ?? []
+  const messages = result.messages ?? []
+  const summary = result.summary ?? {}
+  const timings = result.timings ?? {}
+
+  if (messages.some(message => message.startsWith('[profile-error]'))) {
+    bottlenecks.add('spawn/readiness-timeout')
+  }
+
+  for (const failure of failures) {
+    if (/averageFps|lowestFps|averageFrameTimeMs/.test(failure)) {
+      bottlenecks.add('frame-rate/frame-time')
+    }
+    if (/maxDrawCalls/.test(failure)) bottlenecks.add('draw-calls')
+    if (/maxTriangles/.test(failure)) bottlenecks.add('triangle-count')
+    if (/maxTextures/.test(failure)) bottlenecks.add('texture-count')
+    if (/maxLongTasks/.test(failure)) bottlenecks.add('main-thread-long-tasks')
+    if (/maxLoadedGltfCacheBytes/.test(failure)) {
+      bottlenecks.add('runtime-asset-payload/cache')
+    }
+    if (/maxActiveStreamingCells/.test(failure)) {
+      bottlenecks.add('chunk-loading/streaming-cells')
+    }
+    if (/timeToPlayableMs|domContentLoadedMs/.test(failure)) {
+      bottlenecks.add('spawn/readiness-delay')
+    }
+    if (/selectedAssetTier|finalQuality|expectedRuntimeTier/.test(failure)) {
+      bottlenecks.add('device-tier-selection')
+    }
+  }
+
+  const slowTimings = summary.slowestSystemTimings ?? []
+  const hasSlowTiming = (pattern, thresholdMs) =>
+    slowTimings.some(
+      timing =>
+        pattern.test(timing.name) && Number(timing.maxMs) >= thresholdMs,
+    )
+
+  if (hasSlowTiming(/asset\.gltf\.load|prefetchAssets\.load/, 1_000)) {
+    bottlenecks.add('runtime-asset-payload/cache')
+  }
+  if (
+    hasSlowTiming(/requiredAssets\.preload|requiredAssets\.manifest/, 1_000)
+  ) {
+    bottlenecks.add('spawn/readiness-delay')
+  }
+  if (Number(timings.timeToPlayableMs) > 30000) {
+    bottlenecks.add('spawn/readiness-delay')
+  }
+
+  return [...bottlenecks]
+}
+
+function summarizeBottlenecks(results) {
+  const counts = new Map()
+  for (const result of results) {
+    for (const bottleneck of result.bottlenecks ?? []) {
+      counts.set(bottleneck, (counts.get(bottleneck) ?? 0) + 1)
+    }
+  }
+
+  return Object.fromEntries([...counts.entries()].sort((a, b) => b[1] - a[1]))
+}
+
 async function readBrowserTimings(page) {
   return page.evaluate(() => {
     const nav = performance.getEntriesByType('navigation')[0]
@@ -535,6 +601,7 @@ function printResult(result) {
       `assetTierExpected=${result.effectiveExpectedAssetTier ?? 'n/a'}`,
       `assetTier=${summary.selectedAssetTier ?? 'n/a'}`,
       `renderProfile=${summary.renderProfileTier ?? 'n/a'}`,
+      `bottlenecks=${result.bottlenecks?.length ? result.bottlenecks.join(',') : 'none'}`,
     ].join(' '),
   )
 
@@ -691,6 +758,7 @@ function writeJsonReport(results, baseline, baselineConfig) {
         sampleSeconds: baseline.sampleSeconds,
         sampleIntervalMs: baseline.sampleIntervalMs,
         levels: baselineConfig.levels,
+        bottleneckSummary: summarizeBottlenecks(results),
         profiles: baselineConfig.profiles.map(profile => ({
           id: profile.id,
           browser: profile.browser ?? 'chromium',
@@ -776,7 +844,7 @@ async function run() {
               browserName,
             )
           } catch (error) {
-            if (!baselineConfig.reportingOnly) throw error
+            if (strict) throw error
             result = createProfileLevelErrorResult(
               profile,
               levelId,
@@ -790,17 +858,20 @@ async function run() {
             message.startsWith('[profile-error]'),
           )
           result.reportingOnly = baselineConfig.reportingOnly
+          result.bottlenecks = classifyPerformanceBottlenecks(result)
           result.gateStatus = baselineConfig.reportingOnly
             ? resultErrored
               ? 'reporting-error'
               : resultFailed
                 ? 'reporting-warning'
                 : 'reporting-ok'
-            : resultFailed
-              ? strict
-                ? 'fail'
-                : 'warn'
-              : 'ok'
+            : resultErrored
+              ? 'error'
+              : resultFailed
+                ? strict
+                  ? 'fail'
+                  : 'warn'
+                : 'ok'
           results.push(result)
           printResult(result)
         }

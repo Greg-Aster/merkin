@@ -186,6 +186,9 @@
             "settleMs": 2000
           }
         ]
+      },
+      "editorPanels": {
+        "environment": "miranda"
       }
     }
   },

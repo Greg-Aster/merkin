@@ -106,6 +106,7 @@ export interface EditorMaterialData {
 export interface EditorRenderPolicyData {
   cullingPolicy?: RenderCullingPolicy
   physicsAttachment?: RenderPhysicsAttachmentPolicy
+  runtimeStyle?: 'inherit' | 'skip'
 }
 
 export type EditorRigidBodyType = 'fixed' | 'dynamic' | 'kinematicPosition'
@@ -178,6 +179,7 @@ export interface EditorGameplayData {
 export interface EditorGenerationData {
   descriptor?: string
   family?: string
+  styleBatch?: 'include' | 'exclude'
   sourceVisualSize?: [number, number, number]
   lastBakedAssetUrl?: string
   lastBakedAt?: string
@@ -262,6 +264,9 @@ export interface SharedLevelStyleSettings {
     bloom?: {
       intensity?: number
       threshold?: number
+    }
+    editorBatch?: {
+      presetId?: string
     }
   }
 }
@@ -537,6 +542,8 @@ export interface SharedLevelRuntimeAssetSettings {
     requiredActorIds?: string[]
     requiredAssetActorIds?: string[]
     requiredRenderActorIds?: string[]
+    dirty?: boolean
+    assetUrlsDirty?: boolean
   }
 }
 
@@ -545,10 +552,15 @@ export interface SharedLevelWorldPartitionSettings {
     partitionUrl?: string
     cellSize?: number
     activeRadius?: number
+    maxResidentActors?: number
+    minStreamableActors?: number
+    maxActorsPerCell?: number
     cells?: number
     residentActors?: number
     streamableActors?: number
     lastGeneratedAt?: string
+    dirty?: boolean
+    actorTransformsDirty?: boolean
   }
 }
 
@@ -569,6 +581,17 @@ export interface SharedLevelGraphicsBudgetSettings {
   }
 }
 
+export interface SharedLevelEditorPanelSettings {
+  editorPanels?: {
+    environment?:
+      | 'shared'
+      | 'observatory'
+      | 'solitude'
+      | 'sci-fi-room'
+      | 'miranda'
+  }
+}
+
 export interface SharedLevelEditorSettings
   extends SharedLevelSpawnSettings,
     SharedLevelPlayerSettings,
@@ -586,7 +609,8 @@ export interface SharedLevelEditorSettings
     SharedLevelSkyboxSettings,
     SharedLevelRuntimeAssetSettings,
     SharedLevelWorldPartitionSettings,
-    SharedLevelGraphicsBudgetSettings {}
+    SharedLevelGraphicsBudgetSettings,
+    SharedLevelEditorPanelSettings {}
 
 export interface ObservatoryEditorSettings extends SharedLevelEditorSettings {
   ocean?: SharedLevelWaterSettings['water']

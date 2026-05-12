@@ -4,6 +4,7 @@ import { createEventDispatcher } from 'svelte'
 import GameWorld from './core/GameWorld.svelte'
 import { qualitySettingsStore } from './features/performance/stores/performanceStore'
 import PerformanceSystem from './features/performance/systems/Performance.svelte'
+import { DEFAULT_LEVEL_ID } from './levels/levelRegistry'
 import {
   setRuntimePostProcessingDiagnostics,
   setRuntimeRenderLifecyclePhase,
@@ -13,7 +14,6 @@ import AssetLoader from './systems/AssetLoader.svelte'
 import EventBus from './systems/EventBus.svelte'
 import InteractionSystem from './systems/InteractionSystem.svelte'
 import Renderer from './systems/Renderer.svelte'
-import SimplePostProcessing from './systems/SimplePostProcessing.svelte'
 import Time from './systems/Time.svelte'
 
 const dispatch = createEventDispatcher()
@@ -23,7 +23,7 @@ export let error: string | null = null
 export let isMobile = false
 export let editorEnabled = false
 export let collisionOverlayEnabled = false
-export let currentLevel = 'observatory'
+export let currentLevel = DEFAULT_LEVEL_ID
 export let currentLevelComponent: any = null
 export let parsedTimelineEvents: any[] = []
 export let timelineEventsPayload = '[]'
@@ -52,14 +52,41 @@ export let gameplayEnabled = false
 
 export let normalizeLevelId: (levelId: string) => string = levelId => levelId
 
+let postProcessingComponent: any = null
+let postProcessingComponentPromise: Promise<any> | null = null
+
 function forward(type: string, detail: unknown) {
   dispatch(type, detail)
+}
+
+async function ensurePostProcessingComponent() {
+  if (postProcessingComponent) return postProcessingComponent
+
+  if (!postProcessingComponentPromise) {
+    postProcessingComponentPromise = import(
+      './systems/SimplePostProcessing.svelte'
+    )
+      .then(module => {
+        postProcessingComponent = module.default
+        return postProcessingComponent
+      })
+      .catch(error => {
+        postProcessingComponentPromise = null
+        console.warn('Failed to load post-processing system:', error)
+        return null
+      })
+  }
+
+  return postProcessingComponentPromise
 }
 
 $: postProcessingEligible =
   $qualitySettingsStore.enablePostProcessing &&
   staticWorldReady &&
   (editorEnabled || gameplayEnabled)
+$: if (postProcessingEligible && !postProcessingComponent) {
+  void ensurePostProcessingComponent()
+}
 $: if (staticWorldReady && !postProcessingEligible) {
   setRuntimePostProcessingDiagnostics(currentLevel, {
     enabled: false,
@@ -107,8 +134,9 @@ $: if (staticWorldReady && !postProcessingEligible) {
       <AssetLoader />
       <Renderer />
 
-      {#if postProcessingEligible}
-        <SimplePostProcessing
+      {#if postProcessingEligible && postProcessingComponent}
+        <svelte:component
+          this={postProcessingComponent}
           levelId={currentLevel}
           toneMappingExposure={1.0}
         />

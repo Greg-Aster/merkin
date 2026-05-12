@@ -77,6 +77,28 @@ function createBuildCruftGatePlugin() {
   }
 }
 
+function createClientManualChunksPlugin() {
+  return {
+    name: 'merkin-client-manual-chunks',
+    apply: 'build',
+    config(_config, env) {
+      if (env.isSsrBuild) {
+        return
+      }
+
+      return {
+        build: {
+          rollupOptions: {
+            output: {
+              manualChunks: resolveGameManualChunk,
+            },
+          },
+        },
+      }
+    },
+  }
+}
+
 export default defineConfig({
   site: siteUrl,
   base: normalizedBasePath,
@@ -102,6 +124,7 @@ export default defineConfig({
       createDevRuntimePlugin('game', gameDevHost),
       createEditorToolsApiPlugin(),
       createBuildCruftGatePlugin(),
+      createClientManualChunksPlugin(),
     ],
     optimizeDeps: {
       exclude: ['three', '@dimforge/rapier3d', '@dimforge/rapier3d-compat'],
@@ -116,9 +139,6 @@ export default defineConfig({
             return
           }
           warn(warning)
-        },
-        output: {
-          manualChunks: resolveGameManualChunk,
         },
       },
     },

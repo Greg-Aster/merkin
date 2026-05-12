@@ -26,6 +26,8 @@ function getPackagedDefaultScene(levelId: string) {
   return scene ? (structuredClone(scene) as EditorSceneDocument) : null
 }
 
+// Legacy migration: early sci-fi-room scene documents stored this planter as a
+// prefab even though the runtime expects the authored GLB asset.
 function normalizeSciFiPlanterB(
   scene: EditorSceneDocument,
 ): EditorSceneDocument {

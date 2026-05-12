@@ -21,9 +21,15 @@ const SHARED_LEVEL_SETTING_KEYS = [
   'terrainSculpt',
   'worldPartition',
   'graphicsBudget',
+  'editorPanels',
   'presets',
   'skyboxPreset',
 ] as const satisfies ReadonlyArray<keyof SharedLevelEditorSettings>
+
+const LEGACY_SHARED_SETTING_BUCKETS = [
+  'observatory',
+  'solitude',
+] as const satisfies ReadonlyArray<keyof EditorSceneSettings>
 
 function mergeDeepRecords(
   base: Record<string, unknown>,
@@ -100,17 +106,25 @@ function hasSettingsEntries(
   return !!source && Object.keys(source).length > 0
 }
 
+function collectLegacySharedLevelSettings(
+  settings: EditorSceneSettings,
+): SharedLevelEditorSettings {
+  return mergeLevelSettings<SharedLevelEditorSettings>(
+    ...LEGACY_SHARED_SETTING_BUCKETS.map(bucket =>
+      pickSharedLevelSettings(settings[bucket] as SharedLevelEditorSettings),
+    ),
+  )
+}
+
 export function normalizeLevelSceneSettings(
   levelId: string,
   settings?: EditorSceneSettings,
 ): EditorSceneSettings {
   const normalized = structuredClone(settings ?? {}) as EditorSceneSettings
   const workflow = getLevelCollisionWorkflow(levelId)
-  const sourceSharedSettings =
-    levelId === 'solitude' ? normalized.solitude : normalized.observatory
 
   normalized.level = mergeLevelSettings<SharedLevelEditorSettings>(
-    pickSharedLevelSettings(sourceSharedSettings),
+    collectLegacySharedLevelSettings(normalized),
     normalized.level ?? {},
   )
 

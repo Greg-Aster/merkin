@@ -6,7 +6,23 @@ import type {
   LevelRegistryEntry,
 } from '../levels/levelRegistry'
 import { createDefaultSceneForLevel } from './defaultScenes'
-import { assertValidEditorSceneDocument } from './editorSceneDocumentValidation'
+import {
+  EDITOR_PUBLISH_BAKE_STEP_LABELS,
+  computeEditorPublishBakePlan,
+  createEditorPublishBakePlanMetadataFromReadiness,
+} from './editorPublishBakePlan'
+import {
+  type EditorPublishBakePlan,
+  type EditorPublishBakeStep,
+  type EditorPublishBakeStepResult,
+  type EditorPublishPipelineState,
+  createInitialEditorPublishPipelineState,
+} from './editorPublishReadinessContracts'
+import { loadEditorPublishReadiness } from './editorPublishReadinessDataSource'
+import {
+  assertPublishableEditorSceneDocument,
+  assertValidEditorSceneDocument,
+} from './editorSceneDocumentValidation'
 import type { EditorSceneDocument } from './editorTypes'
 
 interface EditorLevelControllerDeps {
@@ -43,9 +59,77 @@ interface EditorLevelControllerDeps {
   transitionToLevel: (levelId: string) => void
   createEmptyScene: (levelId: string) => any
   setEditorScene: (scene: any) => void
+  setPublishPipelineState?: (state: EditorPublishPipelineState) => void
 }
 
 export function createEditorLevelController(deps: EditorLevelControllerDeps) {
+  let publishPipelineState = createInitialEditorPublishPipelineState()
+
+  function clonePublishPipelineState() {
+    return {
+      ...publishPipelineState,
+      stepResults: { ...publishPipelineState.stepResults },
+      summary: publishPipelineState.summary
+        ? {
+            ...publishPipelineState.summary,
+            stepsRun: [...publishPipelineState.summary.stepsRun],
+            artifacts: [...publishPipelineState.summary.artifacts],
+          }
+        : null,
+    }
+  }
+
+  function setPublishPipelineState(next: EditorPublishPipelineState) {
+    publishPipelineState = next
+    deps.setPublishPipelineState?.(clonePublishPipelineState())
+  }
+
+  function startPublishPipeline(plan: EditorPublishBakePlan) {
+    setPublishPipelineState({
+      running: true,
+      plan,
+      stepResults: Object.fromEntries(
+        plan.steps.map(step => [
+          step,
+          {
+            id: step,
+            state: 'pending',
+            message: `${EDITOR_PUBLISH_BAKE_STEP_LABELS[step]} queued.`,
+          } satisfies EditorPublishBakeStepResult,
+        ]),
+      ) as EditorPublishPipelineState['stepResults'],
+      summary: null,
+      error: '',
+      startedAt: new Date().toISOString(),
+      finishedAt: '',
+    })
+  }
+
+  function updatePublishStep(
+    step: EditorPublishBakeStep,
+    result: Omit<EditorPublishBakeStepResult, 'id'>,
+  ) {
+    setPublishPipelineState({
+      ...publishPipelineState,
+      stepResults: {
+        ...publishPipelineState.stepResults,
+        [step]: {
+          id: step,
+          ...result,
+        },
+      },
+    })
+  }
+
+  function finishPublishPipeline(error = '') {
+    setPublishPipelineState({
+      ...publishPipelineState,
+      running: false,
+      error,
+      finishedAt: new Date().toISOString(),
+    })
+  }
+
   async function refreshLevelRegistryFromDisk() {
     try {
       const response = await fetch(`${EDITOR_API_BASE}/api/level-registry`)
@@ -102,12 +186,6 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
   function hasMeaningfulSceneContent(scene: any) {
     if (!scene) return false
     if (Array.isArray(scene.nodes) && scene.nodes.length > 0) return true
-    if (
-      scene.settings &&
-      typeof scene.settings === 'object' &&
-      Object.keys(scene.settings).length > 0
-    )
-      return true
     return false
   }
 
@@ -179,20 +257,227 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
     return payload
   }
 
-  async function cookRuntimeAssets(targetLevelId: string) {
+  function getPayloadArtifacts(payload: any) {
+    return [
+      payload?.path,
+      payload?.manifestPath,
+      payload?.manifestUrl,
+      payload?.partitionUrl,
+      payload?.chunksPath,
+      payload?.collision?.url,
+      payload?.collision?.metadataUrl,
+      payload?.runtimeAssetManifestUrl,
+      ...(Array.isArray(payload?.artifacts) ? payload.artifacts : []),
+    ].filter((artifact): artifact is string => Boolean(artifact))
+  }
+
+  async function postPublishStep(
+    step: EditorPublishBakeStep,
+    url: string,
+    body: Record<string, unknown>,
+  ) {
+    updatePublishStep(step, {
+      state: 'running',
+      message: `${EDITOR_PUBLISH_BAKE_STEP_LABELS[step]} running.`,
+    })
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    const payload = await response.json()
+    const stdout = String(
+      payload?.stdout ?? payload?.auditStdout ?? payload?.cookStdout ?? '',
+    )
+    const stderr = String(
+      payload?.stderr ?? payload?.auditStderr ?? payload?.cookStderr ?? '',
+    )
+
+    if (!response.ok || !payload?.success) {
+      const message =
+        payload?.message ??
+        `${EDITOR_PUBLISH_BAKE_STEP_LABELS[step]} failed with ${response.status}`
+      updatePublishStep(step, {
+        state: 'failed',
+        message,
+        stdout,
+        stderr,
+        artifacts: getPayloadArtifacts(payload),
+      })
+      throw new Error(message)
+    }
+
+    updatePublishStep(step, {
+      state: 'passed',
+      message:
+        payload?.message ?? `${EDITOR_PUBLISH_BAKE_STEP_LABELS[step]} passed.`,
+      stdout,
+      stderr,
+      artifacts: getPayloadArtifacts(payload),
+    })
+    return payload
+  }
+
+  function getBackendPublishSteps(plan: EditorPublishBakePlan) {
+    return plan.steps.filter(
+      step => step !== 'save-scene' && step !== 'deploy-registry',
+    )
+  }
+
+  async function runPublishBuildEndpoint(
+    plan: EditorPublishBakePlan,
+    targetLevelId: string,
+  ) {
+    const backendSteps = getBackendPublishSteps(plan)
+    for (const step of backendSteps) {
+      updatePublishStep(step, {
+        state: 'running',
+        message: `${EDITOR_PUBLISH_BAKE_STEP_LABELS[step]} queued in publish build.`,
+      })
+    }
+
     const response = await fetch(
-      `${EDITOR_API_BASE}/api/editor-scene/cook-runtime-assets`,
+      `${EDITOR_API_BASE}/api/editor-scene/publish-build`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ levelId: targetLevelId }),
+        body: JSON.stringify({
+          levelId: targetLevelId,
+          plan: {
+            ...plan,
+            steps: backendSteps,
+          },
+        }),
       },
     )
     const payload = await response.json()
-    if (!payload?.success) {
-      throw new Error(payload?.message ?? 'Runtime asset cook failed')
+    const stepResults = (
+      Array.isArray(payload?.steps) ? payload.steps : []
+    ) as Array<{
+      id?: EditorPublishBakeStep
+      success?: boolean
+      message?: string
+      stdout?: string
+      stderr?: string
+      artifacts?: string[]
+    }>
+
+    for (const result of stepResults) {
+      const step = result?.id as EditorPublishBakeStep | undefined
+      if (!step || step === 'save-scene' || step === 'deploy-registry') {
+        continue
+      }
+
+      updatePublishStep(step, {
+        state: result.success ? 'passed' : 'failed',
+        message:
+          result.message ??
+          `${EDITOR_PUBLISH_BAKE_STEP_LABELS[step]} ${result.success ? 'passed' : 'failed'}.`,
+        stdout: String(result.stdout ?? ''),
+        stderr: String(result.stderr ?? ''),
+        artifacts: getPayloadArtifacts(result),
+      })
     }
+
+    if (!response.ok || !payload?.success) {
+      const failedStep = payload?.failedStep as
+        | EditorPublishBakeStep
+        | undefined
+      const message =
+        payload?.message ??
+        (failedStep
+          ? `${EDITOR_PUBLISH_BAKE_STEP_LABELS[failedStep]} failed.`
+          : 'Publish build failed.')
+
+      if (
+        failedStep &&
+        failedStep !== 'save-scene' &&
+        failedStep !== 'deploy-registry' &&
+        !stepResults.some(result => result?.id === failedStep)
+      ) {
+        updatePublishStep(failedStep, {
+          state: 'failed',
+          message,
+        })
+      }
+
+      throw new Error(message)
+    }
+
     return payload
+  }
+
+  async function runPublishBakeStep(
+    step: EditorPublishBakeStep,
+    targetLevelId: string,
+    scene: EditorSceneDocument,
+  ) {
+    if (step === 'save-scene') {
+      updatePublishStep(step, {
+        state: 'running',
+        message: 'Saving the authoring scene before runtime publish.',
+      })
+      try {
+        const payload = await saveSceneDocumentToDisk(targetLevelId, scene)
+        updatePublishStep(step, {
+          state: 'passed',
+          message: 'Scene saved to disk. Runtime publish has not deployed yet.',
+          artifacts: getPayloadArtifacts(payload),
+        })
+        return payload
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Scene save failed'
+        updatePublishStep(step, {
+          state: 'failed',
+          message,
+        })
+        throw error
+      }
+    }
+
+    if (step === 'bake-terrain-collision') {
+      return postPublishStep(
+        step,
+        `${EDITOR_API_BASE}/api/editor-terrain/bake-collision`,
+        { levelId: targetLevelId },
+      )
+    }
+
+    if (step === 'cook-terrain-chunks') {
+      return postPublishStep(
+        step,
+        `${EDITOR_API_BASE}/api/editor-terrain/cook-chunks`,
+        { levelId: targetLevelId },
+      )
+    }
+
+    if (step === 'cook-world-partition') {
+      return postPublishStep(
+        step,
+        `${EDITOR_API_BASE}/api/editor-scene/cook-world-partition`,
+        { levelId: targetLevelId },
+      )
+    }
+
+    if (step === 'cook-runtime-assets') {
+      return postPublishStep(
+        step,
+        `${EDITOR_API_BASE}/api/editor-scene/cook-runtime-assets`,
+        { levelId: targetLevelId },
+      )
+    }
+
+    if (step === 'audit-engine') {
+      return postPublishStep(
+        step,
+        `${EDITOR_API_BASE}/api/editor-scene/audit-engine`,
+        { levelId: targetLevelId },
+      )
+    }
+
+    return null
   }
 
   function saveScene() {
@@ -201,7 +486,7 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
   }
 
   async function overwriteLevelScene() {
-    const scene = get(deps.getEditorSceneStore())
+    const scene = get(deps.getEditorSceneStore()) as EditorSceneDocument | null
     if (!scene) {
       deps.setSaveMessage('Nothing to overwrite')
       return
@@ -219,7 +504,12 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
   }
 
   async function publishLevel() {
-    const scene = get(deps.getEditorSceneStore())
+    if (publishPipelineState.running) {
+      deps.setSaveMessage('Publish is already running')
+      return
+    }
+
+    const scene = get(deps.getEditorSceneStore()) as EditorSceneDocument | null
     if (!scene) {
       deps.setSaveMessage('Nothing to publish')
       return
@@ -233,6 +523,30 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
         .find(entry => entry.id === targetLevelId)
       const title =
         state.metadataTitle.trim() || existingEntry?.title || targetLevelId
+      deps.setSaveMessage(`Checking publish readiness for ${title}`)
+      const readiness = await loadEditorPublishReadiness({
+        levelId: targetLevelId,
+        scene,
+      })
+      const bakePlan = computeEditorPublishBakePlan({
+        levelId: targetLevelId,
+        scene,
+        metadata: createEditorPublishBakePlanMetadataFromReadiness(readiness),
+      })
+      const publishBlocker = bakePlan.blockers[0]
+      if (publishBlocker) {
+        throw new Error(publishBlocker)
+      }
+      assertPublishableEditorSceneDocument(
+        {
+          ...scene,
+          levelId: targetLevelId,
+        },
+        'Publish',
+      )
+
+      startPublishPipeline(bakePlan)
+
       const nextEntry: LevelRegistryEntry = {
         id: targetLevelId,
         title,
@@ -253,20 +567,64 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
         },
       }
 
-      deps.setSaveMessage(`Publishing ${title}: saving level`)
-      await saveSceneDocumentToDisk(targetLevelId, scene)
-      deps.setSaveMessage(`Publishing ${title}: cooking runtime manifest`)
-      await cookRuntimeAssets(targetLevelId)
-      await persistLevelRegistryEntries(replaceRegistryEntry(nextEntry))
+      if (bakePlan.steps.includes('save-scene')) {
+        deps.setSaveMessage(
+          `Publishing ${title}: ${EDITOR_PUBLISH_BAKE_STEP_LABELS['save-scene']}`,
+        )
+        await runPublishBakeStep('save-scene', targetLevelId, scene)
+      }
+
+      deps.setSaveMessage(`Publishing ${title}: running publish build`)
+      await runPublishBuildEndpoint(bakePlan, targetLevelId)
+
+      updatePublishStep('deploy-registry', {
+        state: 'running',
+        message: 'Deploying registry entry after successful build and audit.',
+      })
+      try {
+        await persistLevelRegistryEntries(replaceRegistryEntry(nextEntry))
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Registry deploy failed'
+        updatePublishStep('deploy-registry', {
+          state: 'failed',
+          message,
+        })
+        throw error
+      }
+      updatePublishStep('deploy-registry', {
+        state: 'passed',
+        message: `${title} is active and deployed in the level registry.`,
+        artifacts: ['apps/game/src/threlte/levels/level-registry.json'],
+      })
       deps.setMetadataState({
         metadataStatus: 'active',
         metadataDeployed: true,
         metadataStarMapEnabled: true,
       })
-      deps.setSaveMessage(`Published ${title}`)
+      setPublishPipelineState({
+        ...publishPipelineState,
+        summary: {
+          levelId: targetLevelId,
+          title,
+          stepsRun: bakePlan.steps,
+          artifacts: Array.from(
+            new Set(
+              Object.values(publishPipelineState.stepResults).flatMap(
+                result => result?.artifacts ?? [],
+              ),
+            ),
+          ),
+          registryDeployed: true,
+        },
+      })
+      finishPublishPipeline()
+      deps.setSaveMessage(`Published ${title}: runtime deployed`)
     } catch (error) {
       console.error('Publish level failed:', error)
-      deps.setSaveMessage('Publish failed')
+      const message = error instanceof Error ? error.message : 'Publish failed'
+      finishPublishPipeline(message)
+      deps.setSaveMessage(`Publish failed: ${message}`)
     }
   }
 

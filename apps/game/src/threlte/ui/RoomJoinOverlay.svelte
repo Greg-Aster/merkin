@@ -3,10 +3,16 @@ import { createEventDispatcher } from 'svelte'
 
 export let loadingMessage = ''
 export let currentLevel = ''
+export let homeLevelId = ''
+export let homeLevelTitle = 'Home'
 
 const dispatch = createEventDispatcher<{
-  returnToObservatory: undefined
+  returnHome: undefined
 }>()
+
+$: canReturnHome = Boolean(
+  homeLevelId && currentLevel && currentLevel !== homeLevelId,
+)
 </script>
 
 <div
@@ -16,12 +22,12 @@ const dispatch = createEventDispatcher<{
   <div class="text-center text-white">
     <div class="mx-auto h-32 w-32 animate-spin rounded-full border-b-2 border-white"></div>
     <p class="mt-4 text-lg">{loadingMessage}</p>
-    {#if currentLevel !== 'observatory'}
+    {#if canReturnHome}
       <button
         class="mt-6 rounded bg-gray-700 px-4 py-2 text-sm hover:bg-gray-600"
-        on:click={() => dispatch('returnToObservatory')}
+        on:click={() => dispatch('returnHome')}
       >
-        Return to Observatory
+        Return to {homeLevelTitle}
       </button>
     {/if}
   </div>

@@ -69,18 +69,28 @@ export const stylePresetOptions: EditorStyleBriefPreset[] = [
   },
 ]
 
-export const yggdrasilDefaultStyleBrief: Omit<
-  EditorStyleBriefPreset,
-  'id' | 'label'
-> = {
-  prompt:
-    'extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread',
-  negativePrompt:
-    'daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence',
-  loraNotes:
-    'Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred',
-  controlNetNotes:
-    'Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.',
+export const levelStyleBatchPresets: EditorStyleBriefPreset[] = [
+  {
+    id: 'yggdrasil-abyssal-neon',
+    label: 'Abyssal Neon Cosmic Horror',
+    prompt:
+      'extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread',
+    negativePrompt:
+      'daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence',
+    loraNotes:
+      'Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred',
+    controlNetNotes:
+      'Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.',
+  },
+]
+
+export function getStyleBatchPresetById(presetId: string | null | undefined) {
+  if (!presetId) return null
+  return (
+    levelStyleBatchPresets.find(preset => preset.id === presetId) ??
+    stylePresetOptions.find(preset => preset.id === presetId) ??
+    null
+  )
 }
 
 function getStyleCandidateKindLabel(node: EditorSceneNode) {
@@ -90,12 +100,9 @@ function getStyleCandidateKindLabel(node: EditorSceneNode) {
   return node.kind
 }
 
-function isCuratedYggdrasilStyleCandidate(node: EditorSceneNode) {
+function isCuratedStyleCandidate(node: EditorSceneNode) {
+  if (node.generation?.styleBatch === 'exclude') return false
   if (node.gameplay) return false
-  if (node.id === 'yggdrasil-spawn-pad') return false
-  if (node.id.startsWith('yggdrasil-arrival-group')) return false
-  if (node.id.startsWith('yggdrasil-crown-perch-group')) return false
-  if (node.id.startsWith('yggdrasil-hvergelmir-depth-group')) return false
   if (node.prefab?.type === 'story-marker') return false
   if (node.prefab?.type === 'portal-apparatus') return false
   if (node.prefab?.type === 'observation-rig') return false
@@ -120,17 +127,9 @@ export function buildStyleSceneCandidates(
     }))
 }
 
-export function getCuratedStyleBatchCandidateIds(
-  levelId: string,
-  nodes: EditorSceneNode[],
-) {
-  const bakeableNodes = nodes.filter(node => canBakeSceneNode(node))
-  if (levelId !== 'yggdrasil') {
-    return bakeableNodes.map(node => node.id)
-  }
-
-  return bakeableNodes
-    .filter(node => isCuratedYggdrasilStyleCandidate(node))
+export function getCuratedStyleBatchCandidateIds(nodes: EditorSceneNode[]) {
+  return nodes
+    .filter(node => canBakeSceneNode(node) && isCuratedStyleCandidate(node))
     .map(node => node.id)
 }
 

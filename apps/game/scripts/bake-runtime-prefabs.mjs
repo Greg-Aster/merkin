@@ -37,7 +37,11 @@ const auditCommand = 'pnpm --dir apps/game audit:runtime-prefabs'
 const generatedUrlRoot = '/generated/runtime-game-assets/prefabs'
 const anomalyClusterVariants = ['magenta', 'green', 'cyan', 'rose']
 const storyMarkerVariants = ['cyan', 'amber', 'green', 'red', 'magenta']
-const authoredPbrPrefabTypes = new Set(['anomaly-cluster', 'story-marker'])
+const authoredPbrPrefabTypes = new Set([
+  'anomaly-cluster',
+  'command-fin',
+  'story-marker',
+])
 const prefabPbrTextureSize = 64
 const prefabPbrAuthoredAt = '2026-05-11'
 const defaultVariantByType = {
@@ -56,9 +60,7 @@ const transpiledBakeSourceFiles = [
   'runtimePrefabProceduralMeshes.ts',
 ]
 
-const transpiledEngineFiles = [
-  'primitiveGeometry.ts',
-]
+const transpiledEngineFiles = ['primitiveGeometry.ts']
 
 const bakePlan = [
   ...anomalyClusterVariants.map(variant => ({
@@ -96,10 +98,7 @@ const bakePlan = [
   },
   {
     type: 'command-console',
-    preserveSourceMeshIds: [
-      'screen--0.5',
-      'screen-0.5',
-    ],
+    preserveSourceMeshIds: ['screen--0.5', 'screen-0.5'],
     reason:
       'animation-ready command console with static body and antennae merged and named screen VFX parts',
   },
@@ -109,11 +108,7 @@ const bakePlan = [
   },
   {
     type: 'portal-apparatus',
-    preserveSourceMeshIds: [
-      'outer-ring',
-      'inner-ring',
-      'core',
-    ],
+    preserveSourceMeshIds: ['outer-ring', 'inner-ring', 'core'],
     reason:
       'animation-ready portal apparatus with static base and struts merged and named ring and core VFX parts',
   },
@@ -736,6 +731,144 @@ function createStoryMarkerTextureSet({ label, pbr, seed }) {
   }
 }
 
+function commandFinHeight(x, y, seed, textureSize) {
+  const u = x / textureSize - 0.5
+  const v = y / textureSize - 0.5
+  const centerRidge = Math.max(0, 1 - Math.abs(u) * 7.5)
+  const bevel = Math.max(0, Math.abs(u) - 0.36) * 2.4
+  const scanline = Math.max(0, Math.cos((v + 0.5) * Math.PI * 18)) * 0.12
+  const diagonal = Math.max(0, 1 - Math.abs(u + v * 0.42) * 8) * 0.18
+  const grain = seededNoise(x, y, seed + 131) * 2 - 1
+  return centerRidge * 0.42 + bevel + scanline + diagonal + grain * 0.08
+}
+
+function createCommandFinBaseColorTexture(
+  { baseColor, alpha },
+  seed,
+  textureSize,
+) {
+  const pixels = Buffer.alloc(textureSize * textureSize * 4)
+  for (let y = 0; y < textureSize; y += 1) {
+    for (let x = 0; x < textureSize; x += 1) {
+      const height = commandFinHeight(x, y, seed, textureSize)
+      const edgeWear = Math.max(0, height - 0.62) * 0.38
+      const coolOxide = seededNoise(x, y, seed + 37) * 0.08
+      const shade = 0.58 + height * 0.28
+      const offset = (y * textureSize + x) * 4
+      pixels[offset] = channel(baseColor[0] * shade + edgeWear * 0.22)
+      pixels[offset + 1] = channel(
+        baseColor[1] * (shade + coolOxide) + edgeWear * 0.38,
+      )
+      pixels[offset + 2] = channel(
+        baseColor[2] * (shade + 0.08) + edgeWear * 0.52,
+      )
+      pixels[offset + 3] = channel(alpha)
+    }
+  }
+  return writePng({
+    width: textureSize,
+    height: textureSize,
+    channels: 4,
+    pixels,
+  })
+}
+
+function createCommandFinMetallicRoughnessTexture(
+  { metallic, roughness },
+  seed,
+  textureSize,
+) {
+  const pixels = Buffer.alloc(textureSize * textureSize * 3)
+  for (let y = 0; y < textureSize; y += 1) {
+    for (let x = 0; x < textureSize; x += 1) {
+      const height = commandFinHeight(x, y, seed, textureSize)
+      const wornEdge = Math.max(0, height - 0.58) * 0.24
+      const finePitting = seededNoise(x, y, seed + 71) * 0.1
+      const offset = (y * textureSize + x) * 3
+      pixels[offset] = 0
+      pixels[offset + 1] = channel(roughness + finePitting - wornEdge)
+      pixels[offset + 2] = channel(metallic)
+    }
+  }
+  return writePng({
+    width: textureSize,
+    height: textureSize,
+    channels: 3,
+    pixels,
+  })
+}
+
+function createCommandFinNormalTexture(seed, textureSize) {
+  const pixels = Buffer.alloc(textureSize * textureSize * 3)
+  const strength = 0.28
+  for (let y = 0; y < textureSize; y += 1) {
+    for (let x = 0; x < textureSize; x += 1) {
+      const left = commandFinHeight(Math.max(0, x - 1), y, seed, textureSize)
+      const right = commandFinHeight(
+        Math.min(textureSize - 1, x + 1),
+        y,
+        seed,
+        textureSize,
+      )
+      const down = commandFinHeight(x, Math.max(0, y - 1), seed, textureSize)
+      const up = commandFinHeight(
+        x,
+        Math.min(textureSize - 1, y + 1),
+        seed,
+        textureSize,
+      )
+      const dx = (right - left) * strength
+      const dy = (up - down) * strength
+      const dz = 1
+      const length = Math.hypot(dx, dy, dz) || 1
+      const offset = (y * textureSize + x) * 3
+      pixels[offset] = channel((dx / length) * 0.5 + 0.5)
+      pixels[offset + 1] = channel((dy / length) * 0.5 + 0.5)
+      pixels[offset + 2] = channel((dz / length) * 0.5 + 0.5)
+    }
+  }
+  return writePng({
+    width: textureSize,
+    height: textureSize,
+    channels: 3,
+    pixels,
+  })
+}
+
+function createCommandFinTextureSet({ label, pbr, seed, textureSize }) {
+  const baseColor = pbr.baseColorFactor ?? [0.05, 0.09, 0.14, 1]
+  const alpha = baseColor[3] ?? 1
+  const metallic = pbr.metallicFactor ?? 0.65
+  const roughness = pbr.roughnessFactor ?? 0.35
+
+  return {
+    baseColor: {
+      name: `${label}-command-fin-basecolor`,
+      imageBytes: createCommandFinBaseColorTexture(
+        { baseColor, alpha },
+        seed,
+        textureSize,
+      ),
+      factor: [1, 1, 1, alpha],
+    },
+    metallicRoughness: {
+      name: `${label}-command-fin-metalrough`,
+      imageBytes: createCommandFinMetallicRoughnessTexture(
+        { metallic, roughness },
+        seed,
+        textureSize,
+      ),
+      metallicFactor: 1,
+      roughnessFactor: 1,
+    },
+    normal: {
+      name: `${label}-command-fin-normal`,
+      imageBytes: createCommandFinNormalTexture(seed, textureSize),
+      scale: 0.58,
+    },
+  }
+}
+
 function anomalyClusterHeight(x, y, seed, textureSize) {
   const u = x / textureSize - 0.5
   const v = y / textureSize - 0.5
@@ -743,7 +876,10 @@ function anomalyClusterHeight(x, y, seed, textureSize) {
   const angle = Math.atan2(v, u)
   const core = Math.max(0, 1 - radius * 2.6)
   const facets = Math.max(0, Math.cos(angle * 8 + seed * 0.37)) * 0.22
-  const fracture = Math.max(0, 1 - Math.abs(Math.sin((u - v) * 18 + seed)) * 1.4)
+  const fracture = Math.max(
+    0,
+    1 - Math.abs(Math.sin((u - v) * 18 + seed)) * 1.4,
+  )
   const grain = seededNoise(x, y, seed + 191) * 2 - 1
   return core * 0.58 + facets + fracture * 0.16 + grain * 0.08
 }
@@ -804,14 +940,24 @@ function createAnomalyClusterNormalTexture(seed, textureSize) {
   const strength = 0.34
   for (let y = 0; y < textureSize; y += 1) {
     for (let x = 0; x < textureSize; x += 1) {
-      const left = anomalyClusterHeight(Math.max(0, x - 1), y, seed, textureSize)
+      const left = anomalyClusterHeight(
+        Math.max(0, x - 1),
+        y,
+        seed,
+        textureSize,
+      )
       const right = anomalyClusterHeight(
         Math.min(textureSize - 1, x + 1),
         y,
         seed,
         textureSize,
       )
-      const down = anomalyClusterHeight(x, Math.max(0, y - 1), seed, textureSize)
+      const down = anomalyClusterHeight(
+        x,
+        Math.max(0, y - 1),
+        seed,
+        textureSize,
+      )
       const up = anomalyClusterHeight(
         x,
         Math.min(textureSize - 1, y + 1),
@@ -918,7 +1064,8 @@ function authorPrefabPbrMaps(planEntry) {
     return authorSourceGlbPbrMaps({
       publicRoot,
       assetUrl: getPrefabUrl(planEntry),
-      workflow: 'apps/game/scripts/bake-runtime-prefabs.mjs#anomaly-cluster-pbr',
+      workflow:
+        'apps/game/scripts/bake-runtime-prefabs.mjs#anomaly-cluster-pbr',
       authoredAt: prefabPbrAuthoredAt,
       textureSize: prefabPbrTextureSize,
       slotsAuthored: [
@@ -949,6 +1096,22 @@ function authorPrefabPbrMaps(planEntry) {
       sidecarProvenance:
         'Procedural PBR maps authored from the runtime prefab material palette during prefab baking so story-marker prefabs no longer rely on approved material-factor fallbacks.',
       createTextureSet: createStoryMarkerTextureSet,
+    }).changed
+  }
+
+  if (planEntry.type === 'command-fin') {
+    return authorSourceGlbPbrMaps({
+      publicRoot,
+      assetUrl: getPrefabUrl(planEntry),
+      workflow: 'apps/game/scripts/bake-runtime-prefabs.mjs#command-fin-pbr',
+      authoredAt: prefabPbrAuthoredAt,
+      textureSize: prefabPbrTextureSize,
+      materialPrefix: getPrefabFileBase(planEntry),
+      description:
+        'Embedded procedural command-fin base color, metallic-roughness, and normal maps for dark brushed sci-fi fixture panels.',
+      sidecarProvenance:
+        'Procedural PBR maps authored from the runtime prefab material palette during prefab baking so command-fin no longer relies on approved material-factor fallbacks.',
+      createTextureSet: createCommandFinTextureSet,
     }).changed
   }
 

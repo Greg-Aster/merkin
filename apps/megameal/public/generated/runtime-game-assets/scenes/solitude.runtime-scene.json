@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-12T00:43:21.216Z",
+  "generatedAt": "2026-05-12T17:50:22.648Z",
   "levelId": "solitude",
   "sceneId": "solitude",
   "source": {
@@ -81,6 +81,9 @@
           "partitionUrl": "/runtime-world-partitions/solitude.partition.json",
           "cellSize": 80,
           "activeRadius": 1,
+          "maxResidentActors": 8,
+          "minStreamableActors": 16,
+          "maxActorsPerCell": 30,
           "cells": 1,
           "residentActors": 3,
           "streamableActors": 30
@@ -97,7 +100,7 @@
           "maxEstimatedDrawCalls": 18,
           "maxAuthoredMaterialSlots": 20,
           "maxEstimatedTriangles": 750000,
-          "maxAuthoredTextureBytes": 0
+          "maxAuthoredTextureBytes": 1048576
         },
         "features": {
           "starMap": true,
@@ -318,6 +321,9 @@
         },
         "player": {
           "lightIntensityScale": 3
+        },
+        "editorPanels": {
+          "environment": "solitude"
         }
       },
       "solitude": {}
@@ -483,6 +489,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "physics": {
@@ -525,6 +544,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "physics": {
@@ -567,6 +599,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "physics": {
@@ -609,6 +654,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "physics": {
@@ -651,6 +709,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "physics": {
@@ -693,6 +764,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "physics": {
@@ -735,6 +819,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         }
       },
@@ -766,6 +863,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "physics": {
@@ -808,6 +918,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "physics": {
@@ -850,6 +973,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "physics": {
@@ -892,6 +1028,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "physics": {
@@ -934,6 +1083,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "physics": {
@@ -1582,6 +1744,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "physics": {
@@ -1624,6 +1799,19 @@
           "physicsAttachment": "outside-collider",
           "asset": {
             "url": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb"
+          },
+          "material": {
+            "color": "#5f6874",
+            "emissive": "#171b22",
+            "emissiveIntensity": 0,
+            "metalness": 0.04,
+            "roughness": 0.94,
+            "envMapIntensity": 0.22,
+            "transmission": 0,
+            "clearcoat": 0,
+            "clearcoatRoughness": 1,
+            "thickness": 0,
+            "reflectivity": 0.18
           }
         },
         "physics": {
