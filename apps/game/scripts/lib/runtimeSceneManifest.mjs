@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import {
   getRuntimeGroundContract,
   validateLevelGroundContract,
@@ -10,6 +13,15 @@ const collisionChannels = new Set([
   'trigger',
   'detail',
 ])
+const moduleDir = dirname(fileURLToPath(import.meta.url))
+const prefabCatalog = JSON.parse(
+  readFileSync(
+    join(moduleDir, '../../src/threlte/engine/runtimePrefabCatalog.json'),
+    'utf8',
+  ),
+)
+const prefabAssetUrls = prefabCatalog.assetUrls ?? {}
+const prefabAssetVariants = prefabCatalog.assetVariants ?? {}
 
 const defaultRuntimeContract = {
   levelId: '*',
@@ -76,6 +88,7 @@ const sharedLevelSettingKeys = [
   'features',
   'style',
   'lighting',
+  'renderProfile',
   'water',
   'ambientParticles',
   'ambientAudio',
@@ -84,9 +97,19 @@ const sharedLevelSettingKeys = [
   'terrainSculpt',
   'worldPartition',
   'graphicsBudget',
+  'runtimeAssets',
   'presets',
   'skyboxPreset',
 ]
+const minColliderSize = 0.05
+const spawnSupportXzPadding = 0.15
+const spawnSupportMaxDrop = 2
+const spawnSupportMaxPenetration = 0.25
+const defaultMaxWalkableSlopeDegrees = 50
+const degToRad = Math.PI / 180
+const generatedColliderRoot = '/generated/runtime-game-assets/collision/'
+const terrainColliderRoot = '/terrain/collision/'
+const colliderUrlSuffix = '.collider.glb'
 
 function clone(value) {
   return value === undefined ? undefined : structuredClone(value)
@@ -98,6 +121,84 @@ function isFiniteVec3(value) {
     value.length === 3 &&
     value.every(component => Number.isFinite(component))
   )
+}
+
+function clampColliderSize(value) {
+  const size = Math.abs(Number(value ?? 1))
+  return Number.isFinite(size) ? Math.max(minColliderSize, size) : 1
+}
+
+function getColliderUrlConventionError(value) {
+  const colliderUrl = String(value ?? '').trim()
+  if (!colliderUrl) return 'collision.colliderUrl is required.'
+  if (!colliderUrl.startsWith('/')) {
+    return 'collision.colliderUrl must be a public absolute URL.'
+  }
+  if (
+    !colliderUrl.startsWith(generatedColliderRoot) &&
+    !colliderUrl.startsWith(terrainColliderRoot)
+  ) {
+    return `collision.colliderUrl must live under ${generatedColliderRoot} or ${terrainColliderRoot}.`
+  }
+  if (!colliderUrl.endsWith(colliderUrlSuffix)) {
+    return `collision.colliderUrl must end with ${colliderUrlSuffix}.`
+  }
+  return ''
+}
+
+function getPrimitiveVisualSize(actor) {
+  const primitive = actor.render?.primitive
+  const scale = actor.transform?.scale ?? [1, 1, 1]
+
+  if (primitive?.geometry === 'box') {
+    const [width = 1, height = 1, depth = 1] = primitive.args ?? []
+    return [
+      clampColliderSize(width * scale[0]),
+      clampColliderSize(height * scale[1]),
+      clampColliderSize(depth * scale[2]),
+    ]
+  }
+
+  if (primitive?.geometry === 'cylinder') {
+    const [radiusTop = 0.5, radiusBottom = 0.5, height = 1] =
+      primitive.args ?? []
+    const radius = Math.max(Math.abs(radiusTop), Math.abs(radiusBottom))
+    return [
+      clampColliderSize(radius * 2 * scale[0]),
+      clampColliderSize(height * scale[1]),
+      clampColliderSize(radius * 2 * scale[2]),
+    ]
+  }
+
+  if (
+    primitive &&
+    ['octahedron', 'tetrahedron', 'icosahedron', 'dodecahedron'].includes(
+      primitive.geometry,
+    )
+  ) {
+    const [radius = 0.5] = primitive.args ?? []
+    return [
+      clampColliderSize(radius * 2 * scale[0]),
+      clampColliderSize(radius * 2 * scale[1]),
+      clampColliderSize(radius * 2 * scale[2]),
+    ]
+  }
+
+  if (primitive?.geometry === 'torus') {
+    const [radius = 0.5, tube = 0.2] = primitive.args ?? []
+    const outerRadius = Math.abs(radius) + Math.abs(tube)
+    return [
+      clampColliderSize(outerRadius * 2 * scale[0]),
+      clampColliderSize(Math.abs(tube) * 2 * scale[1]),
+      clampColliderSize(outerRadius * 2 * scale[2]),
+    ]
+  }
+
+  return [
+    clampColliderSize(scale[0]),
+    clampColliderSize(scale[1]),
+    clampColliderSize(scale[2]),
+  ]
 }
 
 function mergeDeepRecords(base, overrides) {
@@ -263,6 +364,29 @@ function getPrimitiveMaterial(node) {
   }
 }
 
+export function getRuntimePrefabAssetUrl(type, variant = null) {
+  if (
+    typeof type === 'string' &&
+    typeof variant === 'string' &&
+    typeof prefabAssetVariants[type]?.[variant] === 'string'
+  ) {
+    return prefabAssetVariants[type][variant]
+  }
+  return typeof type === 'string' && typeof prefabAssetUrls[type] === 'string'
+    ? prefabAssetUrls[type]
+    : ''
+}
+
+function getActorRuntimeAssetUrl(actor) {
+  const assetUrl = actor.render?.asset?.url
+  if (assetUrl) return assetUrl
+
+  return getRuntimePrefabAssetUrl(
+    actor.render?.prefab?.type,
+    actor.render?.prefab?.variant,
+  )
+}
+
 function getCollision(node) {
   if (!node.collision || node.collision.enabled === false) return null
 
@@ -271,6 +395,7 @@ function getCollision(node) {
     channel: node.collision.channel,
     shape: node.collision.shape,
     size: node.collision.size,
+    colliderUrl: node.collision.colliderUrl,
     friction: node.collision.friction,
     restitution: node.collision.restitution,
     sensor: node.collision.sensor,
@@ -356,12 +481,6 @@ function toActor(node) {
             falloff: node.gameplay.regionFalloff,
           }
         : undefined,
-    editor: {
-      legacyKind: node.kind,
-      locked: node.locked,
-      generation: node.generation,
-      collisionSource: collision ? 'authored' : 'none',
-    },
   }
 }
 
@@ -372,6 +491,7 @@ export function adaptSceneDocumentToLevelDefinition(scene) {
       `${scene.levelId}: scene is missing a finite settings.level.spawn.position Vec3.`,
     )
   }
+  const spawnRotation = scene.settings?.level?.spawn?.rotation
 
   return {
     id: scene.levelId,
@@ -379,6 +499,7 @@ export function adaptSceneDocumentToLevelDefinition(scene) {
     updatedAt: scene.updatedAt,
     spawn: {
       player: spawnPosition,
+      rotation: isFiniteVec3(spawnRotation) ? spawnRotation : [0, 0, 0],
     },
     settings: scene.settings,
     actors: (scene.nodes ?? []).map(toActor),
@@ -396,9 +517,12 @@ function getLevelRuntimeContract(levelId) {
 
 function hasBakedTerrainRuntime(level) {
   const terrain = level.settings?.level?.collision?.terrain
+  const ground = level.settings?.level?.ground
   return (
-    terrain?.source === 'baked-heightmap' &&
-    typeof terrain.manifestUrl === 'string'
+    (terrain?.source === 'baked-heightmap' &&
+      typeof terrain.manifestUrl === 'string') ||
+    (ground?.collisionSource === 'baked-heightfield' &&
+      typeof ground.terrainManifestUrl === 'string')
   )
 }
 
@@ -406,22 +530,152 @@ function isSatisfiedByRuntimeSystem(level, actorId) {
   if (actorId === `${level.id}-terrain` && hasBakedTerrainRuntime(level)) {
     return true
   }
-  if (actorId === `${level.id}-player-spawn` && isFiniteVec3(level.spawn.player)) {
+  if (
+    actorId === `${level.id}-player-spawn` &&
+    isFiniteVec3(level.spawn.player)
+  ) {
     return true
   }
   return false
 }
 
-function isVisualOnlyActor(actor) {
-  return actor.editor?.collisionSource === 'none' && !actor.physics
-}
+function getCollisionDiagnostics(level) {
+  const actorsById = new Map(level.actors.map(actor => [actor.id, actor]))
+  const roleSettings = level.settings?.level?.collision?.roles
+  const visualOnlyActorIds = new Set(
+    Array.isArray(roleSettings?.visualOnlyActorIds)
+      ? roleSettings.visualOnlyActorIds.filter(
+          actorId => typeof actorId === 'string',
+        )
+      : [],
+  )
 
-function isDefaultCollisionActor(actor) {
-  return actor.editor?.collisionSource === 'default'
+  return {
+    authoredActorIds: level.actors
+      .filter(actor => Boolean(actor.physics))
+      .filter(actor => !visualOnlyActorIds.has(actor.id))
+      .map(actor => actor.id)
+      .sort(),
+    defaultActorIds: [],
+    visualOnlyActorIds: [...visualOnlyActorIds]
+      .filter(actorId => actorsById.has(actorId))
+      .sort(),
+  }
 }
 
 function isWalkableActor(actor) {
   return actor.physics?.collision.intent === 'walkable'
+}
+
+function getMaxWalkableSlopeRadians(level) {
+  const degrees = Number(
+    level.settings?.level?.collision?.walkability?.maxSlopeDegrees,
+  )
+  const resolvedDegrees = Number.isFinite(degrees)
+    ? degrees
+    : defaultMaxWalkableSlopeDegrees
+  return Math.max(0, Math.min(89, resolvedDegrees)) * degToRad
+}
+
+function getWalkabilitySamples(level) {
+  const samples = [
+    {
+      id: 'player-spawn',
+      position: level.spawn.player,
+    },
+  ]
+  const configuredSamples =
+    level.settings?.level?.collision?.walkability?.samples
+
+  if (Array.isArray(configuredSamples)) {
+    for (const [index, sample] of configuredSamples.entries()) {
+      if (!isFiniteVec3(sample?.position)) continue
+      samples.push({
+        id:
+          typeof sample.id === 'string' && sample.id.trim()
+            ? sample.id.trim()
+            : `sample-${index}`,
+        position: sample.position,
+      })
+    }
+  }
+
+  return samples
+}
+
+function getActorColliderWorldSize(actor) {
+  return isFiniteVec3(actor.physics?.collision.size)
+    ? actor.physics.collision.size
+    : getPrimitiveVisualSize(actor)
+}
+
+function actorSupportsWalkabilitySample(actor, samplePosition) {
+  const collision = actor.physics?.collision
+  if (!collision || collision.sensor || collision.intent !== 'walkable') {
+    return false
+  }
+  if (collision.shape === 'trimesh') return false
+
+  const [x, y, z] = samplePosition
+  const [width, height, depth] = getActorColliderWorldSize(actor)
+  const [actorX, actorY, actorZ] = actor.transform.position
+  const halfWidth = width / 2 + spawnSupportXzPadding
+  const halfDepth = depth / 2 + spawnSupportXzPadding
+  const topY = actorY + height / 2
+
+  if (collision.shape === 'cylinder') {
+    const normalizedX = (x - actorX) / halfWidth
+    const normalizedZ = (z - actorZ) / halfDepth
+    if (normalizedX * normalizedX + normalizedZ * normalizedZ > 1) {
+      return false
+    }
+  } else if (
+    Math.abs(x - actorX) > halfWidth ||
+    Math.abs(z - actorZ) > halfDepth
+  ) {
+    return false
+  }
+
+  return (
+    y >= topY - spawnSupportMaxPenetration && y <= topY + spawnSupportMaxDrop
+  )
+}
+
+function getWalkabilityContractIssues(level, actors) {
+  const errors = []
+  const warnings = []
+  const walkableActors = actors.filter(isWalkableActor)
+  const maxSlopeRadians = getMaxWalkableSlopeRadians(level)
+
+  for (const actor of walkableActors) {
+    const [pitch = 0, , roll = 0] = actor.transform.rotation ?? []
+    const steepestAxis = Math.max(Math.abs(pitch), Math.abs(roll))
+    if (steepestAxis > maxSlopeRadians) {
+      errors.push(
+        `Walkable actor "${actor.id}" exceeds max slope ${Math.round(maxSlopeRadians / degToRad)}deg.`,
+      )
+    }
+  }
+
+  for (const sample of getWalkabilitySamples(level)) {
+    if (!isFiniteVec3(sample.position)) continue
+    const supportingActor = walkableActors.find(actor =>
+      actorSupportsWalkabilitySample(actor, sample.position),
+    )
+    if (!supportingActor) {
+      if (hasBakedTerrainRuntime(level)) {
+        warnings.push(
+          `Walkability sample "${sample.id}" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime.`,
+        )
+      } else {
+        errors.push(
+          `Walkability sample "${sample.id}" does not land on authored walkable collision.`,
+        )
+      }
+    }
+  }
+
+  return { errors, warnings }
 }
 
 function getAuthoredRuntimeAssetContract(level) {
@@ -445,6 +699,9 @@ function uniqueStrings(values) {
 export function createLevelBuildReport(level) {
   const contract = getLevelRuntimeContract(level.id)
   const authoredRuntimeContract = getAuthoredRuntimeAssetContract(level)
+  const collisionDiagnostics = getCollisionDiagnostics(level)
+  const defaultCollisionActorIds = new Set(collisionDiagnostics.defaultActorIds)
+  const visualOnlyActorIds = new Set(collisionDiagnostics.visualOnlyActorIds)
   const requiredActorIds = uniqueStrings([
     ...contract.requiredActorIds,
     ...authoredRuntimeContract.requiredActorIds,
@@ -470,7 +727,8 @@ export function createLevelBuildReport(level) {
   let detailMeshActorCount = 0
   let visualOnlyActorCount = 0
 
-  if (!isFiniteVec3(level.spawn.player)) errors.push('Player spawn must be a finite Vec3.')
+  if (!isFiniteVec3(level.spawn.player))
+    errors.push('Player spawn must be a finite Vec3.')
 
   for (const actor of level.actors) {
     if (actorIds.has(actor.id)) duplicateActorIds.add(actor.id)
@@ -481,12 +739,15 @@ export function createLevelBuildReport(level) {
     if (actor.kind === 'primitive') primitiveActorCount += 1
     if (actor.render?.cullingPolicy === 'never') neverCullActorCount += 1
     if (actor.gameplay?.type === 'firefly') gameplayFireflyActorCount += 1
-    if (actor.render?.asset?.url) runtimeAssetUrls.add(actor.render.asset.url)
+    const runtimeAssetUrl = getActorRuntimeAssetUrl(actor)
+    if (runtimeAssetUrl) runtimeAssetUrls.add(runtimeAssetUrl)
     if (actor.kind === 'asset' && !actor.render?.asset?.url) {
       errors.push(`Asset actor "${actor.id}" is missing a runtime asset URL.`)
     }
-    if (isDefaultCollisionActor(actor)) defaultCollisionActorCount += 1
-    if (isVisualOnlyActor(actor)) visualOnlyActorCount += 1
+    if (defaultCollisionActorIds.has(actor.id)) defaultCollisionActorCount += 1
+    if (visualOnlyActorIds.has(actor.id) || (!actor.physics && actor.render)) {
+      visualOnlyActorCount += 1
+    }
     if (!actor.physics) continue
 
     physicsActorCount += 1
@@ -496,13 +757,25 @@ export function createLevelBuildReport(level) {
     if (actor.physics.collision.intent === 'detailMesh') {
       detailMeshActorCount += 1
       if (actor.physics.collision.triangleBudget === undefined) {
-        errors.push(`Detail mesh actor "${actor.id}" has no explicit triangle budget.`)
+        errors.push(
+          `Detail mesh actor "${actor.id}" has no explicit triangle budget.`,
+        )
       }
     }
     if (actor.physics.collision.shape === 'trimesh') {
       trimeshActorCount += 1
       if (actor.physics.collision.triangleBudget === undefined) {
-        errors.push(`Trimesh actor "${actor.id}" has no explicit triangle budget.`)
+        errors.push(
+          `Trimesh actor "${actor.id}" has no explicit triangle budget.`,
+        )
+      }
+      if (actor.kind === 'asset') {
+        const conventionError = getColliderUrlConventionError(
+          actor.physics.collision.colliderUrl,
+        )
+        if (conventionError) {
+          errors.push(`Trimesh asset actor "${actor.id}" ${conventionError}`)
+        }
       }
     }
   }
@@ -514,7 +787,8 @@ export function createLevelBuildReport(level) {
   }
 
   const missingRequiredActorIds = requiredActorIds.filter(
-    actorId => !actorsById.has(actorId) && !isSatisfiedByRuntimeSystem(level, actorId),
+    actorId =>
+      !actorsById.has(actorId) && !isSatisfiedByRuntimeSystem(level, actorId),
   )
   for (const actorId of missingRequiredActorIds) {
     errors.push(`Required actor "${actorId}" is missing.`)
@@ -528,15 +802,20 @@ export function createLevelBuildReport(level) {
     if (actor.render?.visible === false) {
       errors.push(`Required actor "${actorId}" is not visible.`)
     }
-    if (!actor.render?.asset?.url) {
+    const runtimeAssetUrl = getActorRuntimeAssetUrl(actor)
+    if (!runtimeAssetUrl) {
       errors.push(`Required actor "${actorId}" has no runtime asset URL.`)
     } else {
-      requiredAssetUrls.add(actor.render.asset.url)
+      requiredAssetUrls.add(runtimeAssetUrl)
     }
   }
   for (const actorId of contract.requiredWalkableActorIds) {
     const actor = actorsById.get(actorId)
-    if (!actor && actorId === `${level.id}-terrain` && hasBakedTerrainRuntime(level)) {
+    if (
+      !actor &&
+      actorId === `${level.id}-terrain` &&
+      hasBakedTerrainRuntime(level)
+    ) {
       continue
     }
     if (!actor) continue
@@ -544,6 +823,9 @@ export function createLevelBuildReport(level) {
       errors.push(`Required actor "${actorId}" is not walkable collision.`)
     }
   }
+  const walkabilityIssues = getWalkabilityContractIssues(level, level.actors)
+  errors.push(...walkabilityIssues.errors)
+  warnings.push(...walkabilityIssues.warnings)
   if (defaultCollisionActorCount > contract.maxDefaultCollisionActors) {
     errors.push(
       `${defaultCollisionActorCount} actors are using implicit default collision; contract allows ${contract.maxDefaultCollisionActors}.`,
@@ -592,6 +874,7 @@ export function createLevelBuildReport(level) {
     missingRequiredActorIds,
     requiredAssetUrls: [...requiredAssetUrls].sort(),
     runtimeAssetUrls: [...runtimeAssetUrls].sort(),
+    collisionDiagnostics,
     errors,
     warnings,
   }
@@ -599,7 +882,21 @@ export function createLevelBuildReport(level) {
 
 function getTerrainManifestUrl(levelDefinition) {
   const terrain = levelDefinition.settings?.level?.collision?.terrain
-  return typeof terrain?.manifestUrl === 'string' ? terrain.manifestUrl : undefined
+  return typeof terrain?.manifestUrl === 'string'
+    ? terrain.manifestUrl
+    : undefined
+}
+
+function getRuntimeRenderProfile(levelDefinition) {
+  return levelDefinition.settings?.level?.renderProfile ?? null
+}
+
+function getRuntimeAssetTierCap(levelDefinition) {
+  const levelSettings = levelDefinition.settings?.level
+  const tier =
+    levelSettings?.runtimeAssets?.maxTier ??
+    levelSettings?.performance?.assetTierCap
+  return ['low', 'medium', 'high'].includes(tier) ? tier : undefined
 }
 
 export function createRuntimeSceneManifest(input) {
@@ -620,8 +917,10 @@ export function createRuntimeSceneManifest(input) {
       requiredRenderActorIds: input.buildReport.requiredRenderActorIds,
       requiredAssetUrls: input.buildReport.requiredAssetUrls,
       runtimeAssetUrls: input.buildReport.runtimeAssetUrls,
+      assetTierCap: getRuntimeAssetTierCap(input.levelDefinition),
       terrainManifestUrl: getTerrainManifestUrl(input.levelDefinition),
       ground: getRuntimeGroundContract(input.levelDefinition),
+      renderProfile: getRuntimeRenderProfile(input.levelDefinition),
       worldPartitionUrl: input.worldPartitionUrl,
     },
   }

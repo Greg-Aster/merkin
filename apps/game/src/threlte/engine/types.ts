@@ -88,6 +88,7 @@ export interface CollisionComponent {
   channel: CollisionChannel
   shape: CollisionShape
   size?: Vec3
+  colliderUrl?: string
   friction?: number
   restitution?: number
   sensor?: boolean
@@ -136,6 +137,12 @@ export interface SpawnPointComponent {
   priority?: number
 }
 
+export interface CollisionDiagnosticsReport {
+  authoredActorIds: string[]
+  defaultActorIds: string[]
+  visualOnlyActorIds: string[]
+}
+
 export interface ActorDefinition {
   id: string
   name: string
@@ -150,7 +157,6 @@ export interface ActorDefinition {
   audioRegion?: AudioRegionComponent
   terrain?: TerrainComponent
   spawnPoint?: SpawnPointComponent
-  editor?: Record<string, unknown>
 }
 
 export interface LevelDefinition {
@@ -160,6 +166,7 @@ export interface LevelDefinition {
   updatedAt?: string
   spawn: {
     player: Vec3
+    rotation?: Vec3
   }
   actors: ActorDefinition[]
   settings?: Record<string, unknown>
@@ -182,6 +189,7 @@ export interface LevelBuildReport {
   missingRequiredActorIds: string[]
   requiredAssetUrls: string[]
   runtimeAssetUrls: string[]
+  collisionDiagnostics: CollisionDiagnosticsReport
   errors: string[]
   warnings: string[]
 }

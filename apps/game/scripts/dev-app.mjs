@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
+import { createServer } from 'node:net'
 import { fileURLToPath } from 'node:url'
 import { getHealthyRuntimeOrigin } from '../../../scripts/dev-runtime.mjs'
 
@@ -29,6 +30,27 @@ async function cleanupViteCache() {
   await removeIfPresent(viteCacheDir)
 }
 
+async function assertRequestedPortAvailable() {
+  await new Promise((resolve, reject) => {
+    const server = createServer()
+
+    server.once('error', error => {
+      reject(error)
+    })
+    server.listen(Number(port), host, () => {
+      server.close(resolve)
+    })
+  }).catch(error => {
+    if (error?.code === 'EADDRINUSE') {
+      throw new Error(
+        `Requested game dev port ${port} is already in use, but no reusable healthy game server is available at ${appUrl}. Stop the existing server or set GAME_DEV_PORT to a free port.`,
+      )
+    }
+
+    throw error
+  })
+}
+
 async function keepAliveForExistingApp(origin) {
   console.log(`🎮 Reusing existing game dev server at: ${origin}`)
 
@@ -47,6 +69,12 @@ async function keepAliveForExistingApp(origin) {
 async function hasReusableAppServer() {
   const origin = await getHealthyRuntimeOrigin('game', appUrl)
   if (!origin) {
+    return ''
+  }
+  if (origin !== appUrl) {
+    console.warn(
+      `⚠️ Ignoring existing game dev server at ${origin}; requested ${appUrl}.`,
+    )
     return ''
   }
 
@@ -82,6 +110,7 @@ async function main() {
   }
 
   await cleanupViteCache()
+  await assertRequestedPortAvailable()
 
   const astroProcess = spawnCommand('pnpm', ['astro', 'dev', '--host', host, '--port', port], {
     env: {

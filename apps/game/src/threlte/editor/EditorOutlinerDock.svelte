@@ -17,6 +17,7 @@ export let rows: OutlinerRow[] = []
 export let dragEnabled = false
 export let currentDropTargetId: string | null = null
 export let selectedNodeIds: string[] = []
+export let hasGroupSelection = false
 
 export let onModeChange: (mode: OutlinerDisplayMode) => void = () => {}
 export let onFilterChange: (value: string) => void = () => {}
@@ -38,6 +39,8 @@ export let onRowDragOver: (row: OutlinerRow, event: DragEvent) => void =
   () => {}
 export let onRowDragLeave: (row: OutlinerRow) => void = () => {}
 export let onRowDrop: (row: OutlinerRow, event: DragEvent) => void = () => {}
+export let onGroupSelection: () => void = () => {}
+export let onUngroupSelection: () => void = () => {}
 export let getRowActionState: (row: OutlinerRow) => OutlinerRowActionState =
   () => ({
     allVisible: false,
@@ -69,6 +72,10 @@ export let getRowActionState: (row: OutlinerRow) => OutlinerRowActionState =
     {onRowDragOver}
     {onRowDragLeave}
     {onRowDrop}
+    {onGroupSelection}
+    {onUngroupSelection}
+    {hasGroupSelection}
+    selectedNodeCount={selectedNodeIds.length}
     isRowSelected={(row) => isOutlinerRowSelected(row, selectedNodeIds)}
     {getRowActionState}
   />

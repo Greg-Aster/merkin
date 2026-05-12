@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - "apps/game/**"
+      - "apps/megameal/public/generated/hunyuan3d/**"
+      - "apps/megameal/public/generated/runtime-game-assets/**"
+      - "apps/megameal/public/generated/style-lab/**"
       - "apps/megameal/public/terrain/**"
       - "packages/shared-audio/**"
       - "packages/shared-data/**"
@@ -14,11 +17,16 @@ on:
       - dev
     paths:
       - "apps/game/**"
+      - "apps/megameal/public/generated/hunyuan3d/**"
+      - "apps/megameal/public/generated/runtime-game-assets/**"
+      - "apps/megameal/public/generated/style-lab/**"
       - "apps/megameal/public/terrain/**"
       - "packages/shared-audio/**"
       - "packages/shared-data/**"
       - ".github/workflows/game-engine-ci.yml"
   workflow_dispatch:
+  schedule:
+    - cron: "23 9 * * *"
 
 permissions:
   contents: read
@@ -28,8 +36,8 @@ env:
   PNPM_VERSION: "9.14.4"
 
 jobs:
-  engine-audit:
-    name: Type Check And Engine Audit
+  release-gate:
+    name: Fast Release Gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -49,14 +57,97 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Type check game
-        run: pnpm --dir apps/game type-check
+      - name: Run game release gate
+        run: pnpm --dir apps/game release:gate:ci
 
-      - name: Audit engine architecture
-        run: pnpm --dir apps/game audit:engine
+      - name: Upload release reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-release-reports
+          path: apps/game/reports/
+          if-no-files-found: ignore
+
+  browser-smoke:
+    name: Browser Smoke Reports
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright Chromium
         run: pnpm --dir apps/game exec playwright install --with-deps chromium
 
-      - name: Runtime smoke check migrated levels
-        run: pnpm --dir apps/game smoke:boot
+      - name: Run browser release gate
+        run: pnpm --dir apps/game release:gate:browser
+
+      - name: Upload visual smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-visual-smoke
+          path: apps/game/.visual-smoke/
+          if-no-files-found: ignore
+
+      - name: Upload browser release reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-browser-release-reports
+          path: apps/game/reports/
+          if-no-files-found: ignore
+
+  performance-certification:
+    name: Performance Telemetry Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm --dir apps/game exec playwright install --with-deps chromium
+
+      - name: Run reporting-only performance telemetry
+        run: pnpm --dir apps/game certify:performance -- --level=miranda --profile=desktop-high-chromium-1080p
+
+      - name: Run resource profile report
+        if: always()
+        run: pnpm --dir apps/game profile:resources -- --levels=miranda --write-json=reports/resource-profile-miranda.json
+
+      - name: Upload performance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-performance-reports
+          path: apps/game/reports/
+          if-no-files-found: ignore

@@ -1,6 +1,16 @@
 <script lang="ts">
 import { onMount } from 'svelte'
+import {
+  type RuntimeInputActionId,
+  formatRuntimeInputCodeLabel,
+  isRuntimeInputCodeAllowed,
+} from '../engine/runtimeInputBindings'
 import PerformancePanel from '../features/performance/ui/PerformancePanel.svelte'
+import {
+  rebindRuntimeInputAction,
+  resetRuntimeInputBindings,
+  runtimeInputBindingRows,
+} from '../stores/runtimeInputBindingsStore'
 import {
   ambienceVolumeSetting,
   isSettingsMenuOpen,
@@ -11,6 +21,7 @@ import {
 
 let multiplayerControlsComponent: any = null
 let multiplayerUnavailableReason = ''
+let pendingInputAction: RuntimeInputActionId | null = null
 
 onMount(() => {
   void ensureMultiplayerControls()
@@ -21,10 +32,37 @@ function closeSettings() {
 }
 
 function handleOverlayKeydown(event: KeyboardEvent) {
+  if (pendingInputAction) return
   if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
     closeSettings()
   }
+}
+
+function beginInputCapture(actionId: RuntimeInputActionId) {
+  pendingInputAction = actionId
+}
+
+function handleInputCaptureKeydown(event: KeyboardEvent) {
+  if (!$isSettingsMenuOpen || !pendingInputAction) return
+
+  event.preventDefault()
+  event.stopPropagation()
+
+  if (event.code === 'Escape') {
+    pendingInputAction = null
+    return
+  }
+
+  if (!isRuntimeInputCodeAllowed(event.code)) return
+
+  rebindRuntimeInputAction(pendingInputAction, event.code)
+  pendingInputAction = null
+}
+
+function handleInputReset() {
+  pendingInputAction = null
+  resetRuntimeInputBindings()
 }
 
 async function ensureMultiplayerControls() {
@@ -45,6 +83,8 @@ async function ensureMultiplayerControls() {
   }
 }
 </script>
+
+<svelte:window on:keydown|capture={handleInputCaptureKeydown} />
 
 {#if $isSettingsMenuOpen}
   <div
@@ -95,6 +135,47 @@ async function ensureMultiplayerControls() {
                 <div class="status-copy">Preparing multiplayer controls…</div>
               </div>
             {/if}
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <div class="settings-section-header">
+            <h3>Controls</h3>
+            <button
+              class="secondary-button"
+              type="button"
+              data-sfx-hover="hover-soft"
+              data-sfx-click="soft"
+              on:click={handleInputReset}
+            >
+              Reset
+            </button>
+          </div>
+          <div class="section-content">
+            <div class="binding-list">
+              {#each $runtimeInputBindingRows as binding}
+                <div class="binding-row">
+                  <div>
+                    <div class="binding-label">{binding.label}</div>
+                    <div class="binding-category">{binding.category}</div>
+                  </div>
+                  <button
+                    class:capturing={pendingInputAction === binding.id}
+                    class="binding-button"
+                    type="button"
+                    data-sfx-hover="hover-soft"
+                    data-sfx-click="soft"
+                    on:click={() => beginInputCapture(binding.id)}
+                  >
+                    {pendingInputAction === binding.id
+                      ? 'Press a key'
+                      : binding.keyboardCodes
+                          .map(formatRuntimeInputCodeLabel)
+                          .join(' / ')}
+                  </button>
+                </div>
+              {/each}
+            </div>
           </div>
         </section>
 
@@ -254,8 +335,77 @@ async function ensureMultiplayerControls() {
     font-weight: 500;
   }
 
+  .settings-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 16px;
+  }
+
+  .settings-section-header h3 {
+    margin: 0;
+  }
+
   .section-content {
     color: white;
+  }
+
+  .binding-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .binding-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(148px, auto);
+    gap: 12px;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .binding-label {
+    font-size: 14px;
+    line-height: 1.2;
+    color: rgba(255, 255, 255, 0.94);
+  }
+
+  .binding-category {
+    margin-top: 3px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .binding-button,
+  .secondary-button {
+    min-height: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .binding-button {
+    padding: 6px 10px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .binding-button.capturing {
+    border-color: rgba(126, 216, 255, 0.75);
+    background: rgba(126, 216, 255, 0.14);
+  }
+
+  .secondary-button {
+    padding: 6px 12px;
+    font-size: 13px;
   }
 
   .status-block {

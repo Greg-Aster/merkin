@@ -23,6 +23,7 @@ import {
   clearSelection,
   deactivateCircleSelect,
   duplicateNodes,
+  editorViewportFocusStore,
   editorCircleSelectStore,
   editorNodeViewportStateStore,
   editorNodesStore,
@@ -97,6 +98,12 @@ let circleSelectRadius = 48
 let circleSelectSelecting = false
 let circleSelectSubtracting = false
 let duplicateDragModifier = false
+let viewportFocusRequest: {
+  requestId: number
+  position: [number, number, number]
+  distance?: number
+} | null = null
+let handledViewportFocusRequestId = 0
 const initialObjectMatrices = new Map<
   string,
   { worldMatrix: THREE.Matrix4; parentInverse: THREE.Matrix4 }
@@ -109,6 +116,8 @@ const modalPointerStart = new THREE.Vector2()
 const initialPivotPosition = new THREE.Vector3()
 const initialPivotQuaternion = new THREE.Quaternion()
 const initialPivotScale = new THREE.Vector3(1, 1, 1)
+const lastPickScreen = new THREE.Vector2(Number.NaN, Number.NaN)
+let lastPickNodeIds: string[] = []
 
 type ModalTransformSession = {
   active: boolean
@@ -174,6 +183,10 @@ const unsubscribeCircleSelect = editorCircleSelectStore.subscribe(state => {
     orbitControls.enabled = enabled && orbitEnabled && !circleSelectActive
   }
 })
+const unsubscribeViewportFocus = editorViewportFocusStore.subscribe(request => {
+  viewportFocusRequest = request
+  handleViewportFocusRequest()
+})
 const unsubscribeNodes = editorNodesStore.subscribe(value => {
   editorNodes = value
 })
@@ -207,6 +220,83 @@ function getSelectableEditorObjectsForViewport() {
   return getSelectableEditorObjects().filter(object =>
     isNodeViewportPickable(getNodeIdForObject(object)),
   )
+}
+
+function setOrbitShiftPanMode(enabled: boolean) {
+  if (!orbitControls) return
+  orbitControls.mouseButtons.LEFT = enabled
+    ? THREE.MOUSE.PAN
+    : THREE.MOUSE.ROTATE
+  orbitControls.mouseButtons.MIDDLE = THREE.MOUSE.DOLLY
+  orbitControls.mouseButtons.RIGHT = THREE.MOUSE.PAN
+}
+
+function isShiftPanEvent(event: MouseEvent | PointerEvent) {
+  return (
+    enabled &&
+    interactionMode === 'objects' &&
+    event.button === 0 &&
+    event.shiftKey &&
+    !boxSelectArmed &&
+    !circleSelectActive &&
+    !modalSession &&
+    !transformControls?.dragging
+  )
+}
+
+function isAdditiveSelectionEvent(event: MouseEvent | PointerEvent) {
+  return (
+    event.metaKey ||
+    event.ctrlKey ||
+    event.getModifierState('Meta') ||
+    event.getModifierState('Control')
+  )
+}
+
+function getViewportHitNodeIds() {
+  const intersects = raycaster.intersectObjects(
+    getSelectableEditorObjectsForViewport(),
+    true,
+  )
+  const hitNodeIds: string[] = []
+  for (const intersection of intersects) {
+    const nodeId = getNodeIdForObject(intersection.object)
+    if (nodeId && isNodeSelectable(nodeId) && !hitNodeIds.includes(nodeId)) {
+      hitNodeIds.push(nodeId)
+    }
+  }
+  return hitNodeIds
+}
+
+function samePickStack(nextNodeIds: string[]) {
+  return (
+    nextNodeIds.length === lastPickNodeIds.length &&
+    nextNodeIds.every((nodeId, index) => nodeId === lastPickNodeIds[index])
+  )
+}
+
+function getCycledHitNodeId(
+  hitNodeIds: string[],
+  event: PointerEvent,
+  additive: boolean,
+) {
+  if (hitNodeIds.length === 0) return null
+  if (additive) return hitNodeIds[0]
+
+  const sameScreenPoint =
+    Number.isFinite(lastPickScreen.x) &&
+    Math.hypot(
+      event.clientX - lastPickScreen.x,
+      event.clientY - lastPickScreen.y,
+    ) <= 8
+  const canCycle = sameScreenPoint && samePickStack(hitNodeIds)
+  lastPickScreen.set(event.clientX, event.clientY)
+  lastPickNodeIds = hitNodeIds
+
+  if (!canCycle || hitNodeIds.length === 1) return hitNodeIds[0]
+
+  const currentIndex = selectedNodeId ? hitNodeIds.indexOf(selectedNodeId) : -1
+  return hitNodeIds[(currentIndex + 1) % hitNodeIds.length]
 }
 
 function hideSelectedNodes() {
@@ -552,12 +642,17 @@ function handleWindowPointerMove(event: PointerEvent) {
 }
 
 function handleWindowPointerUp(event: PointerEvent) {
+  setOrbitShiftPanMode(event.shiftKey)
   if (circleSelectActive && event.button === 0 && circleSelectSelecting) {
     setCircleSelectSelecting(false)
   }
   if (!marqueeSelecting) return
   finalizeMarqueeSelection(event.clientX, event.clientY)
   stopMarqueeSelection()
+}
+
+function handleCanvasPointerDownCapture(event: PointerEvent) {
+  setOrbitShiftPanMode(isShiftPanEvent(event))
 }
 
 function handleGlobalPointerDown(event: PointerEvent) {
@@ -634,7 +729,11 @@ function handleCanvasPointerDown(event: PointerEvent) {
 
   if (event.button !== 0) return
 
-  if (event.shiftKey || boxSelectArmed) {
+  if (isShiftPanEvent(event)) {
+    return
+  }
+
+  if (boxSelectArmed) {
     event.preventDefault()
     startMarqueeSelection(event, { fromBoxTool: boxSelectArmed })
     boxSelectArmed = false
@@ -647,23 +746,18 @@ function handleCanvasPointerDown(event: PointerEvent) {
   pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
 
   raycaster.setFromCamera(pointer, camera)
-  const intersects = raycaster.intersectObjects(
-    getSelectableEditorObjectsForViewport(),
-    true,
-  )
-  const hit = intersects.find(intersection =>
-    isNodeSelectable(getNodeIdForObject(intersection.object)),
-  )
-  const nodeId = hit ? getNodeIdForObject(hit.object) : null
+  const additive = isAdditiveSelectionEvent(event)
+  const nodeId = getCycledHitNodeId(getViewportHitNodeIds(), event, additive)
 
   if (!nodeId) {
+    lastPickNodeIds = []
+    lastPickScreen.set(Number.NaN, Number.NaN)
     clearSelection()
     return
   }
 
   selectEditorNode(nodeId, {
-    additive: false,
-    toggle: event.metaKey || event.ctrlKey,
+    additive,
   })
 }
 
@@ -756,6 +850,41 @@ function frameSelection() {
   }
 
   orbitControls.update()
+}
+
+function framePoint(
+  position: [number, number, number],
+  distance = 18,
+) {
+  if (!orbitControls || !(camera instanceof THREE.PerspectiveCamera)) return
+
+  const target = new THREE.Vector3(
+    position[0],
+    position[1] + 1.2,
+    position[2],
+  )
+  const currentDirection = camera.position.clone().sub(orbitControls.target)
+  if (currentDirection.lengthSq() < 0.0001) {
+    currentDirection.set(0.45, 0.35, 1)
+  }
+  currentDirection.normalize()
+
+  orbitControls.target.copy(target)
+  camera.position.copy(target.clone().add(currentDirection.multiplyScalar(distance)))
+  orbitControls.update()
+}
+
+function handleViewportFocusRequest() {
+  if (
+    !controlsInitialized ||
+    !viewportFocusRequest ||
+    viewportFocusRequest.requestId === handledViewportFocusRequestId
+  ) {
+    return
+  }
+
+  handledViewportFocusRequestId = viewportFocusRequest.requestId
+  framePoint(viewportFocusRequest.position, viewportFocusRequest.distance)
 }
 
 function cacheInitialSelectionState() {
@@ -1067,6 +1196,9 @@ function cancelModalTransform() {
 function handleKeyDown(event: KeyboardEvent) {
   if (!enabled) return
   duplicateDragModifier = event.altKey
+  if (event.key === 'Shift') {
+    setOrbitShiftPanMode(true)
+  }
   const target = event.target as HTMLElement | null
   const tag = target?.tagName?.toLowerCase()
   if (tag === 'input' || tag === 'textarea' || target?.isContentEditable) return
@@ -1271,6 +1403,9 @@ function handleKeyUp(event: KeyboardEvent) {
   if (event.key === 'Alt' || !event.altKey) {
     duplicateDragModifier = false
   }
+  if (event.key === 'Shift' || !event.shiftKey) {
+    setOrbitShiftPanMode(false)
+  }
 }
 
 function setupControls() {
@@ -1279,6 +1414,7 @@ function setupControls() {
   orbitControls = new OrbitControls(camera, renderer.domElement)
   orbitControls.enableDamping = true
   orbitControls.dampingFactor = 0.08
+  setOrbitShiftPanMode(false)
   orbitControls.target.set(0, 2, 0)
   orbitControls.update()
 
@@ -1298,6 +1434,9 @@ function setupControls() {
   )
   transformControlsHelper = transformControls.getHelper()
   if (transformControlsHelper instanceof THREE.Object3D) {
+    transformControlsHelper.traverse(object => {
+      object.userData.editorViewportOverlay = true
+    })
     scene.add(transformControlsHelper)
   } else {
     if (import.meta.env.DEV) {
@@ -1308,6 +1447,11 @@ function setupControls() {
     transformControlsHelper = null
   }
   scene.add(selectionPivot)
+  renderer.domElement.addEventListener(
+    'pointerdown',
+    handleCanvasPointerDownCapture,
+    { capture: true },
+  )
   renderer.domElement.addEventListener('pointerdown', handleCanvasPointerDown)
   renderer.domElement.addEventListener('pointermove', handleCanvasPointerMove)
   window.addEventListener('keydown', handleKeyDown)
@@ -1319,6 +1463,7 @@ function setupControls() {
 
   controlsInitialized = true
   syncSelectionAttachment()
+  handleViewportFocusRequest()
 }
 
 $: if (enabled && camera && renderer && scene && !controlsInitialized) {
@@ -1327,6 +1472,7 @@ $: if (enabled && camera && renderer && scene && !controlsInitialized) {
 
 $: if (controlsInitialized) {
   syncSelectionAttachment()
+  handleViewportFocusRequest()
   if (orbitControls && !marqueeSelecting) {
     orbitControls.enabled = enabled && orbitEnabled && !circleSelectActive
   }
@@ -1346,11 +1492,17 @@ onDestroy(() => {
   unsubscribe()
   unsubscribeViewportState()
   unsubscribeCircleSelect()
+  unsubscribeViewportFocus()
   unsubscribeNodes()
   stopMarqueeSelection()
   deactivateCircleSelectTool()
 
   if (renderer) {
+    renderer.domElement.removeEventListener(
+      'pointerdown',
+      handleCanvasPointerDownCapture,
+      { capture: true },
+    )
     renderer.domElement.removeEventListener(
       'pointerdown',
       handleCanvasPointerDown,

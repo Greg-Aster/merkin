@@ -62,7 +62,8 @@ function normalizeSceneDocument(
   return withEditorSceneEngineData({
     ...generated,
     nodes: generated.nodes.map(node => {
-      if (!isDefaultSolidNode(node, generated.settings) || node.collision) return node
+      if (!isDefaultSolidNode(node, generated.settings) || node.collision)
+        return node
       const shape = getDefaultCollisionShape(node)
       return {
         ...node,

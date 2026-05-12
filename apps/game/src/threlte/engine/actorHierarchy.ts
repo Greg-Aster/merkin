@@ -1,8 +1,8 @@
-import type { ActorDefinition } from './types'
 import {
-  createWorldMatrixResolver,
   type HierarchyNodeTransform,
+  createWorldMatrixResolver,
 } from './hierarchyTransforms'
+import type { ActorDefinition } from './types'
 
 export function createActorWorldMatrixResolver(actors: ActorDefinition[]) {
   return createWorldMatrixResolver(

@@ -31,6 +31,8 @@ type GeneratedVariantItem = {
 }
 
 export let propertiesShelfOpen = false
+export let outlinerOpen = true
+export let toolPanelOpen = true
 
 export let outlinerSubtitle = ''
 export let outlinerMode: OutlinerDisplayMode = 'view-layer'
@@ -41,6 +43,7 @@ export let outlinerRows: OutlinerRow[] = []
 export let outlinerDragEnabled = false
 export let hierarchyDropTargetId: string | null = null
 export let selectedNodeIds: string[] = []
+export let hasGroupSelection = false
 export let onOutlinerModeChange: (mode: OutlinerDisplayMode) => void = () => {}
 export let onOutlinerFilterChange: (value: string) => void = () => {}
 export let onOutlinerRowDisclosure: (
@@ -75,6 +78,8 @@ export let onOutlinerRowDragOver: (row: OutlinerRow, event: DragEvent) => void =
 export let onOutlinerRowDragLeave: (row: OutlinerRow) => void = () => {}
 export let onOutlinerRowDrop: (row: OutlinerRow, event: DragEvent) => void =
   () => {}
+export let onOutlinerGroupSelection: () => void = () => {}
+export let onOutlinerUngroupSelection: () => void = () => {}
 export let getOutlinerRowActionState: (
   row: OutlinerRow,
 ) => OutlinerRowActionState = () => ({
@@ -165,32 +170,37 @@ export let onTextureBrowserOpenDirectory: (path: string) => void = () => {}
 export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
 </script>
 
-<div class="editor-side-stack">
-  <EditorOutlinerDock
-    subtitle={outlinerSubtitle}
-    mode={outlinerMode}
-    modeOptions={outlinerModeOptions}
-    filter={hierarchyFilter}
-    filterPlaceholder={outlinerFilterPlaceholder}
-    rows={outlinerRows}
-    dragEnabled={outlinerDragEnabled}
-    currentDropTargetId={hierarchyDropTargetId}
-    {selectedNodeIds}
-    onModeChange={onOutlinerModeChange}
-    onFilterChange={onOutlinerFilterChange}
-    onRowDisclosure={onOutlinerRowDisclosure}
-    onRowSelect={onOutlinerRowSelect}
-    onRowVisibility={onOutlinerRowVisibility}
-    onRowSelectable={onOutlinerRowSelectable}
-    onRowIsolation={onOutlinerRowIsolation}
-    onRowDragStart={onOutlinerRowDragStart}
-    onRowDragEnd={onOutlinerRowDragEnd}
-    onRowDragEnter={onOutlinerRowDragEnter}
-    onRowDragOver={onOutlinerRowDragOver}
-    onRowDragLeave={onOutlinerRowDragLeave}
-    onRowDrop={onOutlinerRowDrop}
-    getRowActionState={getOutlinerRowActionState}
-  />
+<div class="editor-side-stack" class:expanded={!toolPanelOpen}>
+  {#if outlinerOpen}
+    <EditorOutlinerDock
+      subtitle={outlinerSubtitle}
+      mode={outlinerMode}
+      modeOptions={outlinerModeOptions}
+      filter={hierarchyFilter}
+      filterPlaceholder={outlinerFilterPlaceholder}
+      rows={outlinerRows}
+      dragEnabled={outlinerDragEnabled}
+      currentDropTargetId={hierarchyDropTargetId}
+      {selectedNodeIds}
+      onModeChange={onOutlinerModeChange}
+      onFilterChange={onOutlinerFilterChange}
+      onRowDisclosure={onOutlinerRowDisclosure}
+      onRowSelect={onOutlinerRowSelect}
+      onRowVisibility={onOutlinerRowVisibility}
+      onRowSelectable={onOutlinerRowSelectable}
+      onRowIsolation={onOutlinerRowIsolation}
+      onRowDragStart={onOutlinerRowDragStart}
+      onRowDragEnd={onOutlinerRowDragEnd}
+      onRowDragEnter={onOutlinerRowDragEnter}
+      onRowDragOver={onOutlinerRowDragOver}
+      onRowDragLeave={onOutlinerRowDragLeave}
+      onRowDrop={onOutlinerRowDrop}
+      onGroupSelection={onOutlinerGroupSelection}
+      onUngroupSelection={onOutlinerUngroupSelection}
+      {hasGroupSelection}
+      getRowActionState={getOutlinerRowActionState}
+    />
+  {/if}
 
   {#if propertiesShelfOpen}
     <EditorPropertiesDock
@@ -269,6 +279,10 @@ export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
     width: 23rem;
     height: min(25vh, 14rem);
     z-index: 78;
+  }
+
+  .editor-side-stack.expanded {
+    height: calc(100vh - 5.15rem);
   }
 
   @media (max-width: 1280px) {

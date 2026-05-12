@@ -1,0 +1,14 @@
+{
+  "materialAuthoring": {
+    "workflow": "apps/game/scripts/bake-runtime-prefabs.mjs#anomaly-cluster-pbr",
+    "authoredAt": "2026-05-11",
+    "textureSize": 64,
+    "slotsAuthored": [
+      "baseColorTexture",
+      "metallicRoughnessTexture",
+      "normalTexture",
+      "emissiveTexture"
+    ],
+    "provenance": "Procedural PBR and emissive maps authored from the runtime prefab material palette during prefab baking so anomaly-cluster prefabs no longer rely on approved material-factor fallbacks."
+  }
+}

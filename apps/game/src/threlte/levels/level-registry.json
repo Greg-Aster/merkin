@@ -4,9 +4,7 @@
     "title": "Miranda Wreck",
     "status": "active",
     "deployed": true,
-    "aliases": [
-      "miranda-ship-level"
-    ],
+    "aliases": ["miranda-ship-level"],
     "source": {
       "kind": "scene",
       "sceneId": "miranda"
@@ -44,9 +42,7 @@
     "title": "Sci Fi Room",
     "status": "active",
     "deployed": true,
-    "aliases": [
-      "sci-fi-room-level"
-    ],
+    "aliases": ["sci-fi-room-level"],
     "source": {
       "kind": "scene",
       "sceneId": "sci-fi-room"
@@ -63,9 +59,7 @@
     "title": "Solitude",
     "status": "active",
     "deployed": true,
-    "aliases": [
-      "solitude-level"
-    ],
+    "aliases": ["solitude-level"],
     "source": {
       "kind": "scene",
       "sceneId": "solitude"
@@ -82,10 +76,7 @@
     "title": "Yggdrasil",
     "status": "active",
     "deployed": true,
-    "aliases": [
-      "yggdrasil-level",
-      "world-tree"
-    ],
+    "aliases": ["yggdrasil-level", "world-tree"],
     "source": {
       "kind": "scene",
       "sceneId": "yggdrasil"

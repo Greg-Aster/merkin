@@ -26,6 +26,8 @@ Runtime visual styling is data-driven. Level profiles and authored scene setting
 
 Runtime interaction has one boundary: `src/threlte/systems/InteractionSystem.svelte`. Stars, fireflies, editor gameplay markers, and future interactable objects register with that central system instead of attaching separate canvas listeners or maintaining local raycaster loops.
 
+Runtime prefabs are asset-only. Bake source geometry lives under `scripts/lib/runtimePrefabBakeSources` and is consumed by `scripts/bake-runtime-prefabs.mjs`; gameplay imports only the prefab catalog, asset URLs, animation descriptors, VFX descriptors, and generated GLBs. `RuntimePrefabNode.svelte` must not import bake descriptor modules or render procedural fallback geometry.
+
 Engine CI runs game type-checking, the architecture audit, and browser smoke checks. The smoke check boots gameplay, editor mode, and each migrated level through Playwright; migrated levels must reach the explicit world lifecycle/player-spawn readiness signal without console warnings or errors.
 
 Level components publish construction data through `src/threlte/core/levelRuntimeEvents.ts`. They emit `staticWorldReady` when their authored render/collision world is available and `playerSpawnRequested` with spawn data. `GameWorld.svelte` owns the spawn and gameplay-enable phases and calls `SpawnSystem` only after the static world, physics world, and player component are ready. `SpawnSystem` executes a single spawn command immediately; it does not queue, retry, or own lifecycle timing.
@@ -42,8 +44,9 @@ Level components publish construction data through `src/threlte/core/levelRuntim
 - Editor scene import, export, local save, and disk save run document validation through `src/threlte/editor/editorSceneDocumentValidation.ts`, including runtime `LevelDefinition` build-report validation.
 - Scene-authored runtime levels render from `LevelDefinition.actors` through the runtime actor renderer. Editor scene nodes are source data only after adaptation; gameplay must not walk editor nodes during runtime scene playback.
 - Component-authored runtime levels create a canonical `LevelDefinition` before player spawn. Observatory and Solitude publish terrain, spawn, and system actors through `src/threlte/engine/componentLevelDefinition.ts`, then validate the result with the same build-report path as scene-authored levels.
-- Star map level entries are validated before they become navigation stars. Scene-source entries must have packaged scene data that adapts to a valid `LevelDefinition`; component-source entries remain warned legacy sources until they migrate.
+- Star map level entries are validated before they become navigation stars. Scene-source entries must have cooked runtime scene manifests that contain a valid `LevelDefinition`; gameplay no longer falls back to packaged editor scene data.
 - Runtime files should import narrow editor stores/selectors when editor-authored data is still required. Avoid importing the broad editor barrel from runtime systems because it pulls in persistence and authoring helpers that are not needed for gameplay.
+- Runtime files must not import bake-only prefab geometry descriptors from `scripts/lib/runtimePrefabBakeSources` or legacy `runtimePrefab*Meshes` source paths; `audit:chunks` enforces this boundary.
 - Terrain rendering, terrain collision, and terrain authoring must share one runtime boundary.
 - Collision is authored intent, not a side effect of visible geometry.
 
@@ -78,7 +81,6 @@ Contract failures are engine errors. They should block player spawn and playable
 
 ## Current Migration Priority
 
-1. Move all scene-authored levels through `LevelDefinition` validation.
-2. Ensure every level follows the same unload, static world, physics, spawn, playable lifecycle.
-3. Cook Yggdrasil into required render chunks plus explicit collision proxies.
-4. Move level-specific manifest loading into shared runtime loaders.
+1. Make `Game.svelte` an app shell only.
+2. Close the runtime asset content backlog: missing recommended variants, LOD target misses, and explicit collision proxies.
+3. Keep editor-authored defaults as authoring data only; gameplay must require cooked runtime manifests.

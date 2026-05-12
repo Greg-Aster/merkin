@@ -10,7 +10,9 @@ const unsub = editorStateStore.subscribe(value => {
 })
 
 $: workbenchEnabled =
-  !!editorState?.enabled && editorState.viewportLightingMode === 'workbench'
+  !!editorState?.enabled &&
+  (editorState.viewportLightingMode === 'workbench' ||
+    editorState.viewportShadingMode === 'solid')
 
 onDestroy(() => {
   unsub()

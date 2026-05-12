@@ -2,6 +2,7 @@
 import { T } from '@threlte/core'
 import { getContext, onDestroy } from 'svelte'
 import * as THREE from 'three'
+import { runtimeRenderProfileStore } from '../stores/runtimeRenderProfileStore'
 import {
   EDITOR_MATERIAL_OVERRIDE_CONTEXT,
   type EditorMaterialOverrideStore,
@@ -146,6 +147,14 @@ $: resolvedClearcoatRoughness =
   editorMaterialOverride?.clearcoatRoughness ?? clearcoatRoughness
 $: resolvedThickness = editorMaterialOverride?.thickness ?? thickness
 $: resolvedReflectivity = editorMaterialOverride?.reflectivity ?? reflectivity
+$: needsPhysicalMaterial =
+  resolvedTransmission > 0.001 ||
+  resolvedClearcoat > 0.001 ||
+  resolvedThickness > 0.001 ||
+  Math.abs(resolvedIor - 1.5) > 0.001 ||
+  Math.abs(resolvedReflectivity - 0.5) > 0.001
+$: useBasicRuntimeMaterial =
+  !needsPhysicalMaterial && $runtimeRenderProfileStore.tier === 'desktop'
 $: void syncOverrideTextures()
 
 onDestroy(() => {
@@ -172,29 +181,61 @@ onDestroy(() => {
     <T.TorusGeometry args={args} />
   {/if}
 
-  <T.MeshPhysicalMaterial
-    color={resolvedColor}
-    emissive={resolvedEmissive}
-    emissiveIntensity={resolvedEmissiveIntensity}
-    metalness={resolvedMetalness}
-    metalnessMap={overrideTextures.metalnessMap}
-    roughness={resolvedRoughness}
-    roughnessMap={overrideTextures.roughnessMap}
-    transparent={resolvedTransparent}
-    opacity={resolvedOpacity}
-    wireframe={resolvedWireframe}
-    side={resolvedSide}
-    flatShading={resolvedFlatShading}
-    envMapIntensity={resolvedEnvMapIntensity}
-    map={overrideTextures.map}
-    normalMap={overrideTextures.normalMap}
-    emissiveMap={overrideTextures.emissiveMap}
-    alphaMap={overrideTextures.alphaMap}
-    transmission={resolvedTransmission}
-    ior={resolvedIor}
-    clearcoat={resolvedClearcoat}
-    clearcoatRoughness={resolvedClearcoatRoughness}
-    thickness={resolvedThickness}
-    reflectivity={resolvedReflectivity}
-  />
+  {#if useBasicRuntimeMaterial}
+    <T.MeshBasicMaterial
+      color={resolvedColor}
+      transparent={resolvedTransparent}
+      opacity={resolvedOpacity}
+      wireframe={resolvedWireframe}
+      side={resolvedSide}
+      map={overrideTextures.map}
+      alphaMap={overrideTextures.alphaMap}
+    />
+  {:else if needsPhysicalMaterial}
+    <T.MeshPhysicalMaterial
+      color={resolvedColor}
+      emissive={resolvedEmissive}
+      emissiveIntensity={resolvedEmissiveIntensity}
+      metalness={resolvedMetalness}
+      metalnessMap={overrideTextures.metalnessMap}
+      roughness={resolvedRoughness}
+      roughnessMap={overrideTextures.roughnessMap}
+      transparent={resolvedTransparent}
+      opacity={resolvedOpacity}
+      wireframe={resolvedWireframe}
+      side={resolvedSide}
+      flatShading={resolvedFlatShading}
+      envMapIntensity={resolvedEnvMapIntensity}
+      map={overrideTextures.map}
+      normalMap={overrideTextures.normalMap}
+      emissiveMap={overrideTextures.emissiveMap}
+      alphaMap={overrideTextures.alphaMap}
+      transmission={resolvedTransmission}
+      ior={resolvedIor}
+      clearcoat={resolvedClearcoat}
+      clearcoatRoughness={resolvedClearcoatRoughness}
+      thickness={resolvedThickness}
+      reflectivity={resolvedReflectivity}
+    />
+  {:else}
+    <T.MeshStandardMaterial
+      color={resolvedColor}
+      emissive={resolvedEmissive}
+      emissiveIntensity={resolvedEmissiveIntensity}
+      metalness={resolvedMetalness}
+      metalnessMap={overrideTextures.metalnessMap}
+      roughness={resolvedRoughness}
+      roughnessMap={overrideTextures.roughnessMap}
+      transparent={resolvedTransparent}
+      opacity={resolvedOpacity}
+      wireframe={resolvedWireframe}
+      side={resolvedSide}
+      flatShading={resolvedFlatShading}
+      envMapIntensity={resolvedEnvMapIntensity}
+      map={overrideTextures.map}
+      normalMap={overrideTextures.normalMap}
+      emissiveMap={overrideTextures.emissiveMap}
+      alphaMap={overrideTextures.alphaMap}
+    />
+  {/if}
 </T.Mesh>

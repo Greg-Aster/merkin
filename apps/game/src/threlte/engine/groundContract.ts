@@ -1,8 +1,3 @@
-import type {
-  SharedLevelGroundSettings,
-  SceneSettings,
-} from './sceneDocumentTypes'
-import type { ActorDefinition, LevelDefinition } from './types'
 import {
   getLevelGroundContract as getLevelGroundContractCore,
   getRuntimeGroundContract as getRuntimeGroundContractCore,
@@ -10,8 +5,15 @@ import {
   shouldRenderTerrainVisualChunks as shouldRenderTerrainVisualChunksCore,
   validateLevelGroundContract as validateLevelGroundContractCore,
 } from './groundContractCore.mjs'
+import type {
+  SceneSettings,
+  SharedLevelGroundSettings,
+} from './sceneDocumentTypes'
+import type { ActorDefinition, LevelDefinition } from './types'
 
-export type LevelGroundContract = NonNullable<SharedLevelGroundSettings['ground']>
+export type LevelGroundContract = NonNullable<
+  SharedLevelGroundSettings['ground']
+>
 
 export function getLevelGroundContract(
   settings: SceneSettings | Record<string, unknown> | null | undefined,
@@ -31,7 +33,10 @@ export function hasAuthoredGroundVisuals(
   return hasAuthoredGroundVisualsCore(settings)
 }
 
-export function shouldRenderTerrainVisualChunks(levelId: string, settings: SceneSettings) {
+export function shouldRenderTerrainVisualChunks(
+  levelId: string,
+  settings: SceneSettings,
+) {
   return shouldRenderTerrainVisualChunksCore(levelId, settings)
 }
 

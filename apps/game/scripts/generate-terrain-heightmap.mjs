@@ -64,6 +64,47 @@ function makeNodeMatrix({ position, rotation, scale }) {
   return matrix
 }
 
+function parseMatrix(value) {
+  if (!value) return null
+  const parsed = Array.isArray(value) ? value : JSON.parse(value)
+  if (!Array.isArray(parsed) || parsed.length !== 16) return null
+  return new THREE.Matrix4().fromArray(parsed.map(Number))
+}
+
+function getSourceMatrix(source) {
+  const matrix = parseMatrix(source.matrix)
+  if (matrix) return matrix
+
+  return makeNodeMatrix({
+    position: Array.isArray(source.position) ? source.position : [0, 0, 0],
+    rotation: Array.isArray(source.rotation) ? source.rotation : [0, 0, 0],
+    scale: Array.isArray(source.scale) ? source.scale : [1, 1, 1],
+  })
+}
+
+function parseSources() {
+  const sourcesArg = getArg('sources')
+  if (sourcesArg) {
+    const parsed = JSON.parse(sourcesArg)
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      throw new Error('--sources must be a non-empty array')
+    }
+    return parsed
+  }
+
+  const sourceUrl = getArg('source')
+  return [
+    {
+      sourceAssetUrl: sourceUrl,
+      sourceName:
+        getArg('sourceName', sourceUrl.split('/').pop() ?? 'terrain-source'),
+      position: parseVec3(getArg('position'), [0, 0, 0]),
+      rotation: parseVec3(getArg('rotation'), [0, 0, 0]),
+      scale: parseVec3(getArg('scale'), [1, 1, 1]),
+    },
+  ]
+}
+
 async function loadGltfScene(sourcePath) {
   const buffer = readFileSync(sourcePath)
   const loader = new GLTFLoader()
@@ -75,6 +116,35 @@ async function loadGltfScene(sourcePath) {
       reject,
     )
   })
+}
+
+function createPrimitiveGeometry(primitive) {
+  const geometry = primitive?.geometry ?? ''
+  const args = Array.isArray(primitive?.args) ? primitive.args : []
+  switch (geometry) {
+    case 'box':
+      return new THREE.BoxGeometry(...(args.length ? args : [1, 1, 1]))
+    case 'cylinder':
+      return new THREE.CylinderGeometry(...(args.length ? args : [1, 1, 1, 32]))
+    case 'octahedron':
+      return new THREE.OctahedronGeometry(...(args.length ? args : [1, 0]))
+    case 'tetrahedron':
+      return new THREE.TetrahedronGeometry(...(args.length ? args : [1, 0]))
+    case 'icosahedron':
+      return new THREE.IcosahedronGeometry(...(args.length ? args : [1, 0]))
+    case 'dodecahedron':
+      return new THREE.DodecahedronGeometry(...(args.length ? args : [1, 0]))
+    case 'torus':
+      return new THREE.TorusGeometry(...(args.length ? args : [1, 0.4, 12, 48]))
+    default:
+      throw new Error(`Unsupported primitive terrain source geometry: ${geometry}`)
+  }
+}
+
+function createPrimitiveScene(primitive) {
+  const geometry = createPrimitiveGeometry(primitive)
+  const mesh = new THREE.Mesh(geometry)
+  return { scene: mesh, dispose: () => geometry.dispose() }
 }
 
 function collectTriangles(scene, rootMatrix) {
@@ -309,8 +379,12 @@ function updateManifest(manifest, publicHeightmapPath, bounds, minHeight, maxHei
 }
 
 const levelId = getArg('level')
-const sourceUrl = getArg('source')
-const sourceName = getArg('sourceName', sourceUrl.split('/').pop() ?? 'terrain-source')
+const sourceDescriptors = parseSources()
+const sourceUrl = sourceDescriptors[0]?.sourceAssetUrl ?? ''
+const sourceName =
+  sourceDescriptors.length === 1
+    ? (sourceDescriptors[0]?.sourceName ?? sourceUrl.split('/').pop() ?? 'terrain-source')
+    : `${sourceDescriptors.length} terrain sources`
 const resolution = Math.max(
   64,
   Math.min(2048, Number.parseInt(getArg('resolution', `${DEFAULT_RESOLUTION}`), 10)),
@@ -327,23 +401,44 @@ if (!level) {
     `Unknown terrain heightmap level: ${levelId}. Known terrain levels: ${formatTerrainLevelList(terrainLevels)}`,
   )
 }
-if (!sourceUrl) {
-  throw new Error('Expected --source=/public/source.glb')
+if (sourceDescriptors.length === 0) {
+  throw new Error('Expected --source=/public/source.glb or --sources=[...]')
 }
 
-const sourcePath = resolvePublicPath(sourceUrl)
-if (!existsSync(sourcePath)) {
-  throw new Error(`Source mesh not found: ${sourceUrl}`)
+const triangles = []
+const sourceBounds = new THREE.Box3()
+const sourceAssetUrls = []
+const sourceNodeIds = []
+
+for (const source of sourceDescriptors) {
+  const rootMatrix = getSourceMatrix(source)
+  let sourceScene
+  let disposeSource = () => {}
+
+  if (source.sourceAssetUrl) {
+    const sourcePath = resolvePublicPath(source.sourceAssetUrl)
+    if (!existsSync(sourcePath)) {
+      throw new Error(`Source mesh not found: ${source.sourceAssetUrl}`)
+    }
+    sourceScene = await loadGltfScene(sourcePath)
+    sourceAssetUrls.push(source.sourceAssetUrl)
+  } else if (source.primitive) {
+    const primitiveSource = createPrimitiveScene(source.primitive)
+    sourceScene = primitiveSource.scene
+    disposeSource = primitiveSource.dispose
+  } else {
+    throw new Error(
+      `Terrain source "${source.sourceName ?? source.nodeId ?? '<unknown>'}" must provide sourceAssetUrl or primitive`,
+    )
+  }
+
+  if (source.nodeId) sourceNodeIds.push(source.nodeId)
+  const collected = collectTriangles(sourceScene, rootMatrix)
+  triangles.push(...collected.triangles)
+  sourceBounds.union(collected.bounds)
+  disposeSource()
 }
 
-const rootMatrix = makeNodeMatrix({
-  position: parseVec3(getArg('position'), [0, 0, 0]),
-  rotation: parseVec3(getArg('rotation'), [0, 0, 0]),
-  scale: parseVec3(getArg('scale'), [1, 1, 1]),
-})
-
-const sourceScene = await loadGltfScene(sourcePath)
-const { triangles, bounds: sourceBounds } = collectTriangles(sourceScene, rootMatrix)
 const bounds = {
   min: [sourceBounds.min.x, sourceBounds.min.y, sourceBounds.min.z],
   max: [sourceBounds.max.x, sourceBounds.max.y, sourceBounds.max.z],
@@ -370,6 +465,8 @@ writeJson(configPath, {
   generatedAt: new Date().toISOString(),
   generatedBy: 'editor-terrain-heightmap-generator',
   sourceAssetUrl: sourceUrl,
+  sourceAssetUrls,
+  sourceNodeIds,
   sourceName,
   sourceTriangleCount: triangles.length,
   resolution,
@@ -384,6 +481,8 @@ console.log(
     heightmapUrl: publicHeightmapPath,
     configUrl: publicHeightmapPath.replace('_heightmap.png', '_config.json'),
     sourceAssetUrl: sourceUrl,
+    sourceAssetUrls,
+    sourceNodeIds,
     sourceName,
     sourceTriangleCount: triangles.length,
     resolution,

@@ -44,14 +44,13 @@ backgroundImage: "/images/creator-bg.jpg"
           </div>
         </div>
 
-        <div className="grid gap-2 font-jetbrains-mono text-xs uppercase sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+        <div className="grid gap-2 font-jetbrains-mono text-xs uppercase sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <div className="border border-[var(--primary)]/45 bg-black/20 p-2"><div className="text-[0.65rem] text-neutral-400">Alias</div><div className="mt-1 font-black text-white">Greg the Mechanic</div></div>
           <div className="border border-[var(--primary)]/45 bg-black/20 p-2"><div className="text-[0.65rem] text-neutral-400">Species</div><div className="mt-1 font-black text-white">Human, probably</div></div>
-          <div className="border border-[var(--primary)]/45 bg-black/20 p-2"><div className="text-[0.65rem] text-neutral-400">Class</div><div className="mt-1 font-black text-white">Artificer / Videographer</div></div>
+          <div className="border border-[var(--primary)]/45 bg-black/20 p-2"><div className="text-[0.65rem] text-neutral-400">Class</div><div className="mt-1 font-black text-white">Mechanic-Filmmaker</div></div>
           <div className="border border-[var(--primary)]/45 bg-black/20 p-2"><div className="text-[0.65rem] text-neutral-400">Background</div><div className="mt-1 font-black text-white">Garage-Born Mythmaker</div></div>
           <div className="border border-[var(--primary)]/45 bg-black/20 p-2"><div className="text-[0.65rem] text-neutral-400">Level</div><div className="mt-1 font-black text-white">Mechanic 23 / Filmmaker 13</div></div>
           <div className="border border-[var(--primary)]/45 bg-black/20 p-2"><div className="text-[0.65rem] text-neutral-400">Alignment</div><div className="mt-1 font-black text-white">Chaotic Constructive</div></div>
-          <div className="border border-[var(--primary)]/45 bg-black/20 p-2"><div className="text-[0.65rem] text-neutral-400">Origin</div><div className="mt-1 font-black text-white">PNW Garage Ecosystem</div></div>
         </div>
       </div>
     </header>
@@ -99,7 +98,6 @@ backgroundImage: "/images/creator-bg.jpg"
       <dl className="grid gap-2 border border-[var(--primary)]/40 bg-black/25 p-3 text-sm">
         <div className="border-b border-[var(--line-divider)] pb-1"><dt className="font-jetbrains-mono text-[0.65rem] uppercase text-neutral-400">Condition</dt><dd>Operational / overextended.</dd></div>
         <div className="border-b border-[var(--line-divider)] pb-1"><dt className="font-jetbrains-mono text-[0.65rem] uppercase text-neutral-400">Armor</dt><dd>Work clothes, boots, stubbornness.</dd></div>
-        <div className="border-b border-[var(--line-divider)] pb-1"><dt className="font-jetbrains-mono text-[0.65rem] uppercase text-neutral-400">Senses</dt><dd>Passive Awareness 8.</dd></div>
         <div className="border-b border-[var(--line-divider)] pb-1"><dt className="font-jetbrains-mono text-[0.65rem] uppercase text-neutral-400">Terrain</dt><dd>Garage, trail, film set, abandoned infrastructure.</dd></div>
       </dl>
     </section>
@@ -138,66 +136,40 @@ backgroundImage: "/images/creator-bg.jpg"
           <div className="grid grid-cols-[1fr_3rem] border-b border-[var(--line-divider)] pb-1"><span>Game Structure</span><strong className="text-right text-white">+4</strong></div>
           <div className="grid grid-cols-[1fr_3rem] border-b border-[var(--line-divider)] pb-1"><span>Product Mythology</span><strong className="text-right text-white">+5</strong></div>
           <div className="grid grid-cols-[1fr_3rem] border-b border-[var(--line-divider)] pb-1"><span>Promotion</span><strong className="text-right text-white">-2</strong></div>
-          <div className="grid grid-cols-[1fr_3rem] border-b border-[var(--line-divider)] pb-1"><span>Networking</span><strong className="text-right text-white">-3</strong></div>
         </div>
       </div>
     </section>
 
-    <section className="mt-4 grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
+    <section className="mt-4 grid gap-4 lg:grid-cols-[1fr_2fr]">
       <div className="border border-[var(--primary)]/40 bg-black/25 p-3">
         <h3 className="border-b border-[var(--primary)]/45 pb-1 font-jetbrains-mono text-sm font-black uppercase text-white">Proficiencies</h3>
-        <div className="mt-3 grid gap-4 text-sm md:grid-cols-2">
-          <div>
-            <h4 className="font-jetbrains-mono text-xs font-black uppercase text-[var(--primary)]">Tools</h4>
-            <ul className="mt-2 grid gap-2">
-              <li className="border-b border-[var(--line-divider)] pb-1">Mechanic's tools</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">Welder / fabrication tools</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">Electrical diagnostics</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">Camera equipment</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">3D printer</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">Shop tools</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-jetbrains-mono text-xs font-black uppercase text-[var(--primary)]">Systems &amp; Dialects</h4>
-            <ul className="mt-2 grid gap-2">
-              <li className="border-b border-[var(--line-divider)] pb-1">Spoken language: English</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">Mechanic shorthand</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">Linux terminal</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">Camera menus</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">DaVinci Resolve</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">Blender half-fluency</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">Node graph lab</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">Git / GitHub workflows</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">Signal workflow</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">Cat negotiations</li>
-            </ul>
-          </div>
-        </div>
+        <ul className="mt-3 grid gap-y-2 text-sm">
+          <li className="border-b border-[var(--line-divider)] pb-1">Spoken language: English</li>
+          <li className="border-b border-[var(--line-divider)] pb-1">Mechanic's tools and shorthand</li>
+          <li className="border-b border-[var(--line-divider)] pb-1">Welder / fabrication tools</li>
+          <li className="border-b border-[var(--line-divider)] pb-1">Electrical diagnostics</li>
+          <li className="border-b border-[var(--line-divider)] pb-1">Camera equipment and menus</li>
+          <li className="border-b border-[var(--line-divider)] pb-1">DaVinci Resolve</li>
+          <li className="border-b border-[var(--line-divider)] pb-1">Blender half-fluency</li>
+          <li className="border-b border-[var(--line-divider)] pb-1">Node graph lab</li>
+          <li className="border-b border-[var(--line-divider)] pb-1">Linux terminal</li>
+          <li className="border-b border-[var(--line-divider)] pb-1">3D printer and shop tools</li>
+          <li className="border-b border-[var(--line-divider)] pb-1">Cat negotiations</li>
+        </ul>
       </div>
 
       <div className="border border-[var(--primary)]/40 bg-black/25 p-3">
         <h3 className="border-b border-[var(--primary)]/45 pb-1 font-jetbrains-mono text-sm font-black uppercase text-white">Feats / Special Abilities</h3>
-        <div className="mt-3 grid gap-3 text-sm md:grid-cols-2">
-          <div className="border border-[var(--line-divider)] bg-black/20 p-3"><h4 className="font-jetbrains-mono text-xs font-black uppercase text-[var(--primary)]">Improvised Repair</h4><p className="mt-1">Can make broken objects function long enough to finish the job, scene, trip, or bad idea.</p></div>
-          <div className="border border-[var(--line-divider)] bg-black/20 p-3"><h4 className="font-jetbrains-mono text-xs font-black uppercase text-[var(--primary)]">Workhorse Mode</h4><p className="mt-1">Can continue difficult physical or creative work after normal morale checks fail.</p></div>
-          <div className="border border-[var(--line-divider)] bg-black/20 p-3"><h4 className="font-jetbrains-mono text-xs font-black uppercase text-[var(--primary)]">Garage Artificer</h4><p className="mt-1">Converts junk, tools, cameras, software, and unsafe ideas into props, films, websites, or devices.</p></div>
-          <div className="border border-[var(--line-divider)] bg-black/20 p-3"><h4 className="font-jetbrains-mono text-xs font-black uppercase text-[var(--primary)]">Portal Architect</h4><p className="mt-1">Restructures scattered stories, posts, products, and game ideas into navigable world systems.</p></div>
-          <div className="border border-[var(--line-divider)] bg-black/20 p-3"><h4 className="font-jetbrains-mono text-xs font-black uppercase text-[var(--primary)]">Reality-to-Lore Converter</h4><p className="mt-1">Turns tools, trail notes, products, and broken workflows into lore-bearing artifacts.</p></div>
-          <div className="border border-[var(--line-divider)] bg-black/20 p-3"><h4 className="font-jetbrains-mono text-xs font-black uppercase text-[var(--primary)]">Local-First Signalwright</h4><p className="mt-1">Prefers self-hosted tools, open systems, and controllable workflows. Gains +2 against vendor lock-in.</p></div>
-          <div className="border border-[var(--line-divider)] bg-black/20 p-3"><h4 className="font-jetbrains-mono text-xs font-black uppercase text-[var(--primary)]">Product Cryptobiologist</h4><p className="mt-1">Designs fictional commercial lifeforms and artifact-products that can cross into the real world.</p></div>
-          <div className="border border-[var(--line-divider)] bg-black/20 p-3"><h4 className="font-jetbrains-mono text-xs font-black uppercase text-[var(--primary)]">Anti-Hype Filter</h4><p className="mt-1">Advantage on detecting stale advice, marketing fog, and generic recommendations.</p></div>
-          <div className="border border-[var(--line-divider)] bg-black/20 p-3"><h4 className="font-jetbrains-mono text-xs font-black uppercase text-[var(--primary)]">Physical Limit Tester</h4><p className="mt-1">Can push far past normal mileage or project duration, then must make a Self-Maintenance check.</p></div>
-        </div>
-
-        <h4 className="mt-4 border-b border-[var(--line-divider)] pb-1 font-jetbrains-mono text-xs font-black uppercase text-[var(--primary)]">Actions</h4>
-        <div className="mt-3 grid gap-x-4 gap-y-2 text-sm md:grid-cols-2">
-          <div className="grid gap-1 border-b border-[var(--line-divider)] pb-2"><strong className="text-white">Wrench Logic</strong><span>Repair, modify, diagnose, or forcibly persuade a mechanical object.</span></div>
-          <div className="grid gap-1 border-b border-[var(--line-divider)] pb-2"><strong className="text-white">Build the Prop</strong><span>Create a physical artifact from available tools, scrap, bad plans, and stubbornness.</span></div>
-          <div className="grid gap-1 border-b border-[var(--line-divider)] pb-2"><strong className="text-white">Render the Vision</strong><span>Use video, animation, procedural tools, editing, and visual effects to convert an idea into media.</span></div>
-          <div className="grid gap-1 border-b border-[var(--line-divider)] pb-2"><strong className="text-white">Publish Dispatch</strong><span>Turn field experience, project notes, or strange lore into public writing.</span></div>
-          <div className="grid gap-1 border-b border-[var(--line-divider)] pb-2"><strong className="text-white">Summon Device</strong><span>Produce a flamethrower, vehicle, submarine, cursed prop, or similar object.</span></div>
-          <div className="grid gap-1 border-b border-[var(--line-divider)] pb-2"><strong className="text-white">Rant Into Architecture</strong><span>Convert frustration into a new system, workflow, website structure, or mythology layer.</span></div>
+        <div className="mt-3 grid gap-2 text-sm md:grid-cols-2 xl:grid-cols-3">
+          <div className="border border-[var(--line-divider)] bg-black/20 p-2"><h3 className="font-jetbrains-mono text-[0.68rem] font-black uppercase text-[var(--primary)]">Wrench Logic</h3><p className="mt-1">Repair, modify, diagnose, or keep broken objects working long enough to finish the job.</p></div>
+          <div className="border border-[var(--line-divider)] bg-black/20 p-2"><h3 className="font-jetbrains-mono text-[0.68rem] font-black uppercase text-[var(--primary)]">Workhorse Mode</h3><p className="mt-1">Continue difficult physical or creative work after normal morale checks fail.</p></div>
+          <div className="border border-[var(--line-divider)] bg-black/20 p-2"><h4 className="font-jetbrains-mono text-[0.68rem] font-black uppercase text-[var(--primary)]">Garage Artificer</h4><p className="mt-1">Convert junk, tools, cameras, software, and unsafe ideas into props, films, sites, or devices.</p></div>
+          <div className="border border-[var(--line-divider)] bg-black/20 p-2"><h4 className="font-jetbrains-mono text-[0.68rem] font-black uppercase text-[var(--primary)]">Portal Architect</h4><p className="mt-1">Restructure scattered stories, posts, products, and game ideas into navigable world systems.</p></div>
+          <div className="border border-[var(--line-divider)] bg-black/20 p-2"><h4 className="font-jetbrains-mono text-[0.68rem] font-black uppercase text-[var(--primary)]">Reality-to-Lore Converter</h4><p className="mt-1">Turn tools, trail notes, products, and broken workflows into lore-bearing artifacts.</p></div>
+          <div className="border border-[var(--line-divider)] bg-black/20 p-2"><h4 className="font-jetbrains-mono text-[0.68rem] font-black uppercase text-[var(--primary)]">Local-First Signalwright</h4><p className="mt-1">Favor self-hosted tools, open systems, controllable workflows, and vendor lock-in resistance.</p></div>
+          <div className="border border-[var(--line-divider)] bg-black/20 p-2"><h4 className="font-jetbrains-mono text-[0.68rem] font-black uppercase text-[var(--primary)]">Product Cryptobiologist</h4><p className="mt-1">Design fictional commercial lifeforms and artifact-products that can cross into the real world.</p></div>
+          <div className="border border-[var(--line-divider)] bg-black/20 p-2"><h4 className="font-jetbrains-mono text-[0.68rem] font-black uppercase text-[var(--primary)]">Anti-Hype Filter</h4><p className="mt-1">Detect stale advice, marketing fog, generic recommendations, and dodged questions.</p></div>
+          <div className="border border-[var(--line-divider)] bg-black/20 p-2"><h4 className="font-jetbrains-mono text-[0.68rem] font-black uppercase text-[var(--primary)]">Physical Limit Tester</h4><p className="mt-1">Push past normal mileage or project duration, then make a Self-Maintenance check.</p></div>
         </div>
       </div>
     </section>
@@ -227,26 +199,6 @@ backgroundImage: "/images/creator-bg.jpg"
       </div>
     </section>
 
-    <section className="mt-4 grid gap-4 border-t border-[var(--line-divider)] pt-4 lg:grid-cols-[1fr_1fr]">
-      <div className="border border-[var(--primary)]/40 bg-black/25 p-3">
-        <h3 className="border-b border-[var(--primary)]/45 pb-1 font-jetbrains-mono text-sm font-black uppercase text-white">Campaign State</h3>
-        <p className="mt-3 text-sm leading-relaxed">The character has entered a systems-building arc. Recent work has focused on turning scattered creative projects into structured worlds, sites, tools, products, and workflows. The old mode was make strange things. The current mode is build the machinery that lets the strange things keep growing.</p>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-400">Current pressures include website redesign, game architecture, local-first creative machinery, mobile publishing, physical endurance, store and product development, and the constant threat of turning every small fix into a complete infrastructure refactor.</p>
-      </div>
-
-      <div className="border border-[var(--primary)]/40 bg-black/25 p-3">
-        <h3 className="border-b border-[var(--primary)]/45 pb-1 font-jetbrains-mono text-sm font-black uppercase text-white">Recent Level-Ups</h3>
-        <ul className="mt-3 grid gap-2 text-sm md:grid-cols-2">
-          <li className="border-b border-[var(--line-divider)] pb-1">Shifted MEGAMEAL toward portal, game, store, and world-map architecture.</li>
-          <li className="border-b border-[var(--line-divider)] pb-1">Started treating mobile publishing as a field system.</li>
-          <li className="border-b border-[var(--line-divider)] pb-1">Developed stronger local-first signal instincts and controllable pipelines.</li>
-          <li className="border-b border-[var(--line-divider)] pb-1">Pushed video experimentation deeper into node graphs and cosmic signal transformation.</li>
-          <li className="border-b border-[var(--line-divider)] pb-1">Turned the store into a hybrid fictional-commercial archive.</li>
-          <li className="border-b border-[var(--line-divider)] pb-1">Reframed the game as a web-first experience for phones, televisions, and low-barrier players.</li>
-        </ul>
-      </div>
-    </section>
-
     <section className="mt-4">
       <div className="border border-[var(--primary)]/40 bg-black/25 p-3">
         <h3 className="border-b border-[var(--primary)]/45 pb-1 font-jetbrains-mono text-sm font-black uppercase text-white">Completed Quests</h3>
@@ -266,7 +218,6 @@ backgroundImage: "/images/creator-bg.jpg"
               <li className="border-b border-[var(--line-divider)] pb-1">Built art projects for large-scale events.</li>
               <li className="border-b border-[var(--line-divider)] pb-1">Built cars for the Gambler 500, Burning Man, and Adult Soapbox Derby.</li>
               <li className="border-b border-[var(--line-divider)] pb-1">Built a personal submarine.</li>
-              <li className="border-b border-[var(--line-divider)] pb-1">Owns several flamethrowers.</li>
             </ul>
           </div>
           <div>
@@ -317,5 +268,20 @@ backgroundImage: "/images/creator-bg.jpg"
         <div><dt className="font-jetbrains-mono text-[0.65rem] font-bold uppercase text-neutral-400">YouTube</dt><dd className="break-words font-bold text-white">youtube.com/dndiy</dd></div>
       </dl>
     </section>
+
+    <footer className="mt-6 grid gap-3 border-t-2 border-double border-[var(--primary)]/60 pt-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 font-jetbrains-mono text-[0.6rem] uppercase tracking-[0.2em] text-neutral-500">
+        <span>Doc Ref · PCR-001-GA</span>
+        <span>Issued · 2024-10-15</span>
+        <span>Rev · 005</span>
+        <span>Clearance · Public Echo</span>
+      </div>
+      <div className="h-8 w-full opacity-60 bg-[repeating-linear-gradient(90deg,var(--primary)_0,var(--primary)_2px,transparent_2px,transparent_5px,var(--primary)_5px,var(--primary)_6px,transparent_6px,transparent_9px,var(--primary)_9px,var(--primary)_12px,transparent_12px,transparent_14px,var(--primary)_14px,var(--primary)_15px,transparent_15px,transparent_19px,var(--primary)_19px,var(--primary)_20px,transparent_20px,transparent_24px)]"></div>
+      <div className="flex flex-wrap items-center justify-between gap-2 font-jetbrains-mono text-[0.6rem] uppercase tracking-[0.3em] text-neutral-500">
+        <span>0xAA-7C-FF-2E</span>
+        <span className="text-[var(--primary)]">// END OF RECORD //</span>
+        <span>VERIFY ◇ ▣ ◈</span>
+      </div>
+    </footer>
   </div>
 </section>

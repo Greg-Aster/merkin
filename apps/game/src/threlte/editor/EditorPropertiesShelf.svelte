@@ -146,6 +146,7 @@ export let onCollisionEnabledChange: (value: boolean) => void = () => {}
 export let onCollisionIntentChange: (value: CollisionIntent) => void = () => {}
 export let onCollisionChannelChange: (value: CollisionChannel) => void =
   () => {}
+export let onColliderUrlChange: (value: string) => void = () => {}
 export let onPhysicsBodyTypeChange: (value: string) => void = () => {}
 export let onColliderSizeChange: (index: number, value: string) => void =
   () => {}
@@ -601,6 +602,9 @@ $: canConvertSelectedToMesh = !!(
             <input class="tuple-input" type="number" min="0.05" step="0.05" value={colliderSize[index]} data-sfx-focus="focus-soft" on:change={(e) => onColliderSizeChange(index, (e.currentTarget as HTMLInputElement).value)} />
           {/each}
         </div>
+      {:else if effectiveCollision}
+        <div class="tuple-label editor-mt-sm">Collider Asset URL</div>
+        <input class="text-input" value={effectiveCollision.colliderUrl ?? ''} placeholder="/generated/collision/asset.collider.glb" data-sfx-focus="focus-soft" on:change={(e) => onColliderUrlChange((e.currentTarget as HTMLInputElement).value)} />
       {/if}
     </div>
   {/if}

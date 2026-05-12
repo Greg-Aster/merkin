@@ -172,7 +172,12 @@
     "chunkCount": 48,
     "material": {
       "name": "terrain-chunk-sci-fi-floor",
-      "baseColorFactor": [0.12, 0.13, 0.15, 1],
+      "baseColorFactor": [
+        0.12,
+        0.13,
+        0.15,
+        1
+      ],
       "roughnessFactor": 0.72,
       "metallicFactor": 0
     },

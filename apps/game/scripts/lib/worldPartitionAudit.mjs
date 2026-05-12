@@ -1,6 +1,25 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
+function isFiniteVec2(value) {
+  return (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    value.every(component => Number.isFinite(component))
+  )
+}
+
+function hasValidBounds(cell) {
+  return (
+    cell?.bounds &&
+    typeof cell.bounds === 'object' &&
+    isFiniteVec2(cell.bounds.min) &&
+    isFiniteVec2(cell.bounds.max) &&
+    cell.bounds.max[0] > cell.bounds.min[0] &&
+    cell.bounds.max[1] > cell.bounds.min[1]
+  )
+}
+
 export function auditWorldPartitions({
   worldPartitionDir,
   requiredLevels,
@@ -36,7 +55,8 @@ export function auditWorldPartitions({
     report.streamableActors = partition.streamableActorIds?.length ?? 0
     report.maxActorsPerCell = partition.budgets?.maxActorsPerCell ?? 0
     report.readinessGates = partition.streaming?.readinessGates?.length ?? 0
-    report.initialCells = partition.readiness?.requiredInitialCellKeys?.length ?? 0
+    report.initialCells =
+      partition.readiness?.requiredInitialCellKeys?.length ?? 0
     report.residentRenderActors =
       partition.readiness?.requiredResidentRenderActorIds?.length ?? 0
     report.residentCollisionActors =
@@ -48,7 +68,9 @@ export function auditWorldPartitions({
     const partitionBudget = budgetByLevel[levelId] ?? {}
 
     if (partition.version !== 1) {
-      failures.push(`${file}: unsupported partition version ${partition.version}`)
+      failures.push(
+        `${file}: unsupported partition version ${partition.version}`,
+      )
     }
     if (partition.levelId !== levelId) {
       failures.push(`${file}: levelId mismatch ${partition.levelId}`)
@@ -77,10 +99,14 @@ export function auditWorldPartitions({
       }
     }
     if (!Array.isArray(partition.readiness?.requiredInitialCellKeys)) {
-      failures.push(`${file}: readiness.requiredInitialCellKeys must be an array`)
+      failures.push(
+        `${file}: readiness.requiredInitialCellKeys must be an array`,
+      )
     }
     if (!Array.isArray(partition.readiness?.requiredInitialRenderActorIds)) {
-      failures.push(`${file}: readiness.requiredInitialRenderActorIds must be an array`)
+      failures.push(
+        `${file}: readiness.requiredInitialRenderActorIds must be an array`,
+      )
     }
     if (!Array.isArray(partition.readiness?.requiredInitialCollisionActorIds)) {
       failures.push(
@@ -116,10 +142,45 @@ export function auditWorldPartitions({
     const streamableActorIds = new Set(partition.streamableActorIds ?? [])
     for (const actorId of streamableActorIds) {
       if (residentActorIds.has(actorId)) {
-        failures.push(`${file}: actor "${actorId}" is both resident and streamable`)
+        failures.push(
+          `${file}: actor "${actorId}" is both resident and streamable`,
+        )
+      }
+    }
+    const cellsByKey = new Map(
+      (partition.cells ?? []).map(cell => [cell.key, cell]),
+    )
+    for (const cellKey of partition.readiness?.requiredInitialCellKeys ?? []) {
+      if (!cellsByKey.has(cellKey)) {
+        failures.push(
+          `${file}: readiness.requiredInitialCellKeys references missing cell "${cellKey}"`,
+        )
+      }
+    }
+    for (const actorId of [
+      ...(partition.readiness?.requiredResidentRenderActorIds ?? []),
+      ...(partition.readiness?.requiredResidentCollisionActorIds ?? []),
+    ]) {
+      if (!residentActorIds.has(actorId)) {
+        failures.push(
+          `${file}: resident readiness actor "${actorId}" is not resident`,
+        )
+      }
+    }
+    for (const actorId of [
+      ...(partition.readiness?.requiredInitialRenderActorIds ?? []),
+      ...(partition.readiness?.requiredInitialCollisionActorIds ?? []),
+    ]) {
+      if (!streamableActorIds.has(actorId)) {
+        failures.push(
+          `${file}: initial readiness actor "${actorId}" is not streamable`,
+        )
       }
     }
     for (const cell of partition.cells ?? []) {
+      if (!hasValidBounds(cell)) {
+        failures.push(`${file}: cell "${cell.key}" must include finite bounds`)
+      }
       if (!Array.isArray(cell.actorIds) || cell.actorIds.length === 0) {
         failures.push(`${file}: cell "${cell.key}" must contain actorIds`)
         continue
@@ -128,7 +189,9 @@ export function auditWorldPartitions({
         failures.push(`${file}: cell "${cell.key}" must contain renderActorIds`)
       }
       if (!Array.isArray(cell.collisionActorIds)) {
-        failures.push(`${file}: cell "${cell.key}" must contain collisionActorIds`)
+        failures.push(
+          `${file}: cell "${cell.key}" must contain collisionActorIds`,
+        )
       }
       if (!['initial', 'stream'].includes(cell.streamingStage)) {
         failures.push(`${file}: cell "${cell.key}" has invalid streamingStage`)
@@ -137,6 +200,16 @@ export function auditWorldPartitions({
         if (!streamableActorIds.has(actorId)) {
           failures.push(
             `${file}: cell "${cell.key}" references non-streamable actor "${actorId}"`,
+          )
+        }
+      }
+      for (const actorId of [
+        ...(cell.renderActorIds ?? []),
+        ...(cell.collisionActorIds ?? []),
+      ]) {
+        if (!cell.actorIds.includes(actorId)) {
+          failures.push(
+            `${file}: cell "${cell.key}" references actor "${actorId}" outside actorIds`,
           )
         }
       }

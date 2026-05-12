@@ -5,11 +5,11 @@ import { hostStore, initializeHost, registerRoom } from '../stores/hostStore'
 import { playerNameStore } from '../stores/playerNameStore'
 import LogTerminal from './LogTerminal.svelte'
 
-$: isRegistered = $hostStore.isRoomRegistered
-$: sanitizedRoomName = sanitizeRoomName(roomNameInput)
-
 let roomNameInput = ''
 let copyButtonText = '📋 Copy Join Link'
+
+$: isRegistered = $hostStore.isRoomRegistered
+$: sanitizedRoomName = sanitizeRoomName(roomNameInput)
 
 onMount(() => {
   initializeHost()

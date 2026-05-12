@@ -10,20 +10,13 @@
         "audio": "lonely-wind"
       },
       "spawn": {
-        "position": [
-          0,
-          1.5,
-          -24
-        ]
+        "position": [0, 1.5, -24]
       },
       "ground": {
         "mode": "authored-ground",
         "visualSource": "scene-actors",
         "collisionSource": "baked-heightfield",
-        "groundActorIds": [
-          "solitude-ground-plateau",
-          "solitude-ground-dais"
-        ],
+        "groundActorIds": ["solitude-ground-plateau", "solitude-ground-dais"],
         "terrainManifestUrl": "/terrain/solitude.manifest.json",
         "requiredWalkableSurfaceId": "solitude-terrain"
       },
@@ -90,6 +83,146 @@
         "keyLightIntensity": 0.96,
         "fillLightIntensity": 0.34
       },
+      "renderProfile": {
+        "id": "solitude-abyssal-neon-ground",
+        "defaultTier": "desktop",
+        "lighting": {
+          "ambientColor": "#7e7bff",
+          "skyColor": "#5e58d9",
+          "groundColor": "#12071f",
+          "keyLightColor": "#ff58d2",
+          "fillLightColor": "#4ce6ff",
+          "keyLightPosition": [12, 18, -18],
+          "fillLightPosition": [-18, 9, 14]
+        },
+        "shadows": {
+          "enabled": true,
+          "maxCastingLights": 1,
+          "mapSize": 1024,
+          "cameraSize": 44,
+          "cameraFar": 92
+        },
+        "reflections": {
+          "mode": "static-environment",
+          "textureSize": 256,
+          "maxPlanarSurfaces": 0,
+          "environmentIntensity": 0.85
+        },
+        "postProcessing": {
+          "enabled": true,
+          "passes": [
+            "tone-mapping",
+            "ambient-occlusion",
+            "color-grading",
+            "bloom",
+            "vignette"
+          ],
+          "maxEnabledPasses": 5,
+          "ambientOcclusion": {
+            "enabled": true,
+            "intensity": 0.72,
+            "radius": 8,
+            "minDistance": 0.006,
+            "maxDistance": 0.12
+          },
+          "bloom": {
+            "intensity": 1.15,
+            "threshold": 0.82
+          },
+          "toneMappingExposure": 0.92,
+          "vignetteStrength": 1
+        },
+        "qualityTiers": {
+          "mobile": {
+            "shadows": {
+              "enabled": false,
+              "maxCastingLights": 0
+            },
+            "reflections": {
+              "mode": "none",
+              "textureSize": 0,
+              "maxPlanarSurfaces": 0,
+              "environmentIntensity": 0.7
+            },
+            "postProcessing": {
+              "passes": ["tone-mapping", "color-grading"],
+              "maxEnabledPasses": 2
+            }
+          },
+          "desktop": {
+            "shadows": {
+              "enabled": true,
+              "maxCastingLights": 1,
+              "mapSize": 1024
+            },
+            "reflections": {
+              "mode": "static-environment",
+              "textureSize": 256,
+              "maxPlanarSurfaces": 0
+            },
+            "postProcessing": {
+              "passes": [
+                "tone-mapping",
+                "ambient-occlusion",
+                "color-grading",
+                "bloom",
+                "vignette"
+              ],
+              "maxEnabledPasses": 5,
+              "ambientOcclusion": {
+                "enabled": true,
+                "intensity": 0.72,
+                "radius": 8,
+                "minDistance": 0.006,
+                "maxDistance": 0.12
+              }
+            }
+          },
+          "tv": {
+            "shadows": {
+              "enabled": true,
+              "maxCastingLights": 1,
+              "mapSize": 2048
+            },
+            "reflections": {
+              "mode": "static-environment",
+              "textureSize": 512,
+              "maxPlanarSurfaces": 0
+            },
+            "postProcessing": {
+              "passes": [
+                "tone-mapping",
+                "ambient-occlusion",
+                "color-grading",
+                "bloom",
+                "vignette"
+              ],
+              "maxEnabledPasses": 5,
+              "ambientOcclusion": {
+                "enabled": true,
+                "intensity": 0.86,
+                "radius": 10,
+                "minDistance": 0.005,
+                "maxDistance": 0.15
+              }
+            }
+          }
+        },
+        "visualBookmarks": [
+          {
+            "id": "spawn-default",
+            "label": "Solitude ground and plateau",
+            "playerPosition": [0, 1.5, -24],
+            "cameraPosition": [0, 3.1, -24],
+            "cameraTarget": [0, 1.6, -4],
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "settleMs": 2000
+          }
+        ]
+      },
       "water": {
         "enabled": false,
         "level": -1,
@@ -122,21 +255,9 @@
       "id": "solitude-ground-root",
       "name": "Solitude Ground",
       "kind": "group",
-      "position": [
-        0,
-        0,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true
     },
     {
@@ -144,21 +265,9 @@
       "name": "Solitude Plateau",
       "kind": "asset",
       "parentId": "solitude-ground-root",
-      "position": [
-        0,
-        -2.341023377783173,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        128.45490162495452,
-        1.2186824496366455,
-        132.4415601615787
-      ],
+      "position": [0, -2.341023377783173, 0],
+      "rotation": [0, 0, 0],
+      "scale": [128.45490162495452, 1.2186824496366455, 132.4415601615787],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -182,11 +291,7 @@
       },
       "generation": {
         "descriptor": "solitude plateau",
-        "sourceVisualSize": [
-          240,
-          2.4000000953674316,
-          240
-        ],
+        "sourceVisualSize": [240, 2.4000000953674316, 240],
         "lastBakedAssetUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
         "lastBakedAt": "2026-04-22T23:27:04.009Z"
       },
@@ -199,21 +304,9 @@
       "name": "Ruin Dais",
       "kind": "asset",
       "parentId": "solitude-ground-root",
-      "position": [
-        0,
-        -10.461897931581928,
-        0.2305610401047442
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        23.249915454852893,
-        0.4255953077697364,
-        22.39938096256249
-      ],
+      "position": [0, -10.461897931581928, 0.2305610401047442],
+      "rotation": [0, 0, 0],
+      "scale": [23.249915454852893, 0.4255953077697364, 22.39938096256249],
       "visible": true,
       "collision": {
         "shape": "cuboid",
@@ -237,11 +330,7 @@
       },
       "generation": {
         "descriptor": "ruin dais",
-        "sourceVisualSize": [
-          44,
-          0.800000011920929,
-          44
-        ],
+        "sourceVisualSize": [44, 0.800000011920929, 44],
         "lastBakedAssetUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
         "lastBakedAt": "2026-04-19T23:21:08.714Z"
       },
@@ -253,21 +342,9 @@
       "id": "solitude-ruin-ring",
       "name": "Ruin Ring",
       "kind": "group",
-      "position": [
-        0,
-        0,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
+      "position": [0, 0, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
       "visible": true
     },
     {
@@ -275,21 +352,9 @@
       "name": "Solitude Pillar 1",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        18,
-        2.7,
-        0
-      ],
-      "rotation": [
-        0,
-        0.12,
-        0
-      ],
-      "scale": [
-        1.176876615899879,
-        5.399175170517698,
-        1.247534910504039
-      ],
+      "position": [18, 2.7, 0],
+      "rotation": [0, 0.12, 0],
+      "scale": [1.176876615899879, 5.399175170517698, 1.247534910504039],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb"
@@ -299,9 +364,7 @@
         "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
         "lastBakedAt": "2026-04-19T23:24:10.590Z",
         "sourceVisualSize": [
-          1.8120840005656795,
-          10.661103308200836,
-          1.9252208245880431
+          1.8120840005656795, 10.661103308200836, 1.9252208245880431
         ]
       },
       "collision": {
@@ -319,21 +382,9 @@
       "name": "Solitude Pillar 2",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        15.588457268119896,
-        2.05,
-        8.999999999999998
-      ],
-      "rotation": [
-        0,
-        0.3635987755982988,
-        0
-      ],
-      "scale": [
-        1.3275875829990536,
-        4.100767625067262,
-        2.326408840670427
-      ],
+      "position": [15.588457268119896, 2.05, 8.999999999999998],
+      "rotation": [0, 0.3635987755982988, 0],
+      "scale": [1.3275875829990536, 4.100767625067262, 2.326408840670427],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb"
@@ -343,9 +394,7 @@
         "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
         "lastBakedAt": "2026-04-19T23:27:08.491Z",
         "sourceVisualSize": [
-          1.547170569227097,
-          8.09762179851532,
-          2.033607023983647
+          1.547170569227097, 8.09762179851532, 2.033607023983647
         ]
       },
       "collision": {
@@ -363,21 +412,9 @@
       "name": "Solitude Pillar 3",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        9.000000000000002,
-        2.35,
-        15.588457268119894
-      ],
-      "rotation": [
-        0,
-        1.1671975511965975,
-        0
-      ],
-      "scale": [
-        1.82318551463849,
-        4.541626836699268,
-        2.1804927683731457
-      ],
+      "position": [9.000000000000002, 2.35, 15.588457268119894],
+      "rotation": [0, 1.1671975511965975, 0],
+      "scale": [1.82318551463849, 4.541626836699268, 2.1804927683731457],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb"
@@ -387,9 +424,7 @@
         "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
         "lastBakedAt": "2026-04-19T23:30:16.846Z",
         "sourceVisualSize": [
-          2.140638576447344,
-          8.96598886847496,
-          2.8588440686140313
+          2.140638576447344, 8.96598886847496, 2.8588440686140313
         ]
       },
       "collision": {
@@ -407,21 +442,9 @@
       "name": "Solitude Pillar 4",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        1.102182119232618e-15,
-        2.7,
-        18
-      ],
-      "rotation": [
-        0,
-        1.4107963267948966,
-        0
-      ],
-      "scale": [
-        0.6317086416147826,
-        5.4013789026340415,
-        0.9264312352195843
-      ],
+      "position": [1.102182119232618e-15, 2.7, 18],
+      "rotation": [0, 1.4107963267948966, 0],
+      "scale": [0.6317086416147826, 5.4013789026340415, 0.9264312352195843],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb"
@@ -431,9 +454,7 @@
         "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
         "lastBakedAt": "2026-04-19T23:33:32.633Z",
         "sourceVisualSize": [
-          1.090126968661798,
-          10.65800085067749,
-          1.582826293997364
+          1.090126968661798, 10.65800085067749, 1.582826293997364
         ]
       },
       "collision": {
@@ -451,21 +472,9 @@
       "name": "Solitude Pillar 5",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        -8.999999999999996,
-        2.35,
-        15.588457268119896
-      ],
-      "rotation": [
-        0,
-        2.2143951023931954,
-        0
-      ],
-      "scale": [
-        2.7658015247962195,
-        4.067986342809933,
-        2.4735594761611996
-      ],
+      "position": [-8.999999999999996, 2.35, 15.588457268119896],
+      "rotation": [0, 2.2143951023931954, 0],
+      "scale": [2.7658015247962195, 4.067986342809933, 2.4735594761611996],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb"
@@ -475,9 +484,7 @@
         "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
         "lastBakedAt": "2026-04-19T23:36:32.968Z",
         "sourceVisualSize": [
-          2.8466735613812606,
-          7.9913964509964,
-          2.856070713554768
+          2.8466735613812606, 7.9913964509964, 2.856070713554768
         ]
       },
       "collision": {
@@ -495,21 +502,9 @@
       "name": "Solitude Pillar 6",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        -15.588457268119896,
-        2.05,
-        8.999999999999998
-      ],
-      "rotation": [
-        0,
-        2.4579938779914943,
-        0
-      ],
-      "scale": [
-        1.4106454896824248,
-        4.096974976478102,
-        1.3191009035089452
-      ],
+      "position": [-15.588457268119896, 2.05, 8.999999999999998],
+      "rotation": [0, 2.4579938779914943, 0],
+      "scale": [1.4106454896824248, 4.096974976478102, 1.3191009035089452],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb"
@@ -519,9 +514,7 @@
         "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
         "lastBakedAt": "2026-04-19T23:39:42.736Z",
         "sourceVisualSize": [
-          1.659850121889722,
-          8.087592482566833,
-          1.4857561116582652
+          1.659850121889722, 8.087592482566833, 1.4857561116582652
         ]
       },
       "collision": {
@@ -539,21 +532,9 @@
       "name": "Solitude Pillar 7",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        -18,
-        2.7,
-        2.204364238465236e-15
-      ],
-      "rotation": [
-        0,
-        3.2615926535897932,
-        0
-      ],
-      "scale": [
-        1.594611922548461,
-        5.402279947776577,
-        0.7804000535814137
-      ],
+      "position": [-18, 2.7, 2.204364238465236e-15],
+      "rotation": [0, 3.2615926535897932, 0],
+      "scale": [1.594611922548461, 5.402279947776577, 0.7804000535814137],
       "visible": false,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb"
@@ -563,9 +544,7 @@
         "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb",
         "lastBakedAt": "2026-04-19T23:42:42.470Z",
         "sourceVisualSize": [
-          2.048502260182655,
-          10.66420866250992,
-          1.0010815807331659
+          2.048502260182655, 10.66420866250992, 1.0010815807331659
         ]
       }
     },
@@ -574,21 +553,9 @@
       "name": "Solitude Pillar 8",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        -15.588457268119894,
-        2.05,
-        -9.000000000000002
-      ],
-      "rotation": [
-        0,
-        3.505191429188092,
-        0
-      ],
-      "scale": [
-        3.4243974152931123,
-        4.101659902850659,
-        3.0427017582967277
-      ],
+      "position": [-15.588457268119894, 2.05, -9.000000000000002],
+      "rotation": [0, 3.505191429188092, 0],
+      "scale": [3.4243974152931123, 4.101659902850659, 3.0427017582967277],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb"
@@ -598,9 +565,7 @@
         "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
         "lastBakedAt": "2026-04-19T23:45:20.357Z",
         "sourceVisualSize": [
-          2.6273346729094875,
-          8.096020382642745,
-          2.4290496676834437
+          2.6273346729094875, 8.096020382642745, 2.4290496676834437
         ]
       },
       "collision": {
@@ -618,21 +583,9 @@
       "name": "Solitude Pillar 9",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        -9.000000000000007,
-        2.35,
-        -15.588457268119893
-      ],
-      "rotation": [
-        0,
-        4.308790204786391,
-        0
-      ],
-      "scale": [
-        1.3911570917694691,
-        4.699374310351889,
-        1.9311849816683708
-      ],
+      "position": [-9.000000000000007, 2.35, -15.588457268119893],
+      "rotation": [0, 4.308790204786391, 0],
+      "scale": [1.3911570917694691, 4.699374310351889, 1.9311849816683708],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb"
@@ -642,9 +595,7 @@
         "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
         "lastBakedAt": "2026-04-19T23:48:12.259Z",
         "sourceVisualSize": [
-          1.4561241279551034,
-          9.277974700927734,
-          2.2778326858778435
+          1.4561241279551034, 9.277974700927734, 2.2778326858778435
         ]
       },
       "collision": {
@@ -662,21 +613,9 @@
       "name": "Solitude Pillar 10",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        -3.3065463576978533e-15,
-        2.7,
-        -18
-      ],
-      "rotation": [
-        0,
-        4.5523889803846895,
-        0
-      ],
-      "scale": [
-        0.8250862169964819,
-        5.399335818736372,
-        1.3990170625896017
-      ],
+      "position": [-3.3065463576978533e-15, 2.7, -18],
+      "rotation": [0, 4.5523889803846895, 0],
+      "scale": [0.8250862169964819, 5.399335818736372, 1.3990170625896017],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb"
@@ -686,9 +625,7 @@
         "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb",
         "lastBakedAt": "2026-04-19T23:51:16.041Z",
         "sourceVisualSize": [
-          0.9394101632235144,
-          10.659800720214845,
-          2.4164662115285154
+          0.9394101632235144, 10.659800720214845, 2.4164662115285154
         ]
       },
       "collision": {
@@ -706,28 +643,14 @@
       "name": "Solitude Pillar 11",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        9.000000000000002,
-        2.35,
-        -15.588457268119894
-      ],
-      "rotation": [
-        0,
-        5.355987755982989,
-        0
-      ],
-      "scale": [
-        0.863039290993997,
-        2.720321683216463,
-        0.9213443477307205
-      ],
+      "position": [9.000000000000002, 2.35, -15.588457268119894],
+      "rotation": [0, 5.355987755982989, 0],
+      "scale": [0.863039290993997, 2.720321683216463, 0.9213443477307205],
       "visible": true,
       "generation": {
         "descriptor": "weathered monolith pillar",
         "sourceVisualSize": [
-          1.6020425750863367,
-          5.35799999369681,
-          1.696158090398347
+          1.6020425750863367, 5.35799999369681, 1.696158090398347
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
         "lastBakedAt": "2026-04-19T23:54:25.895Z"
@@ -750,28 +673,14 @@
       "name": "Solitude Pillar 12",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        15.58845726811989,
-        2.05,
-        -9.000000000000007
-      ],
-      "rotation": [
-        0,
-        5.599586531581287,
-        0
-      ],
-      "scale": [
-        1.376042815682601,
-        2.3673973796048617,
-        1.3818057467012466
-      ],
+      "position": [15.58845726811989, 2.05, -9.000000000000007],
+      "rotation": [0, 5.599586531581287, 0],
+      "scale": [1.376042815682601, 2.3673973796048617, 1.3818057467012466],
       "visible": true,
       "generation": {
         "descriptor": "weathered monolith pillar",
         "sourceVisualSize": [
-          1.7622154714757663,
-          4.673999994501471,
-          1.7152354733802575
+          1.7622154714757663, 4.673999994501471, 1.7152354733802575
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
         "lastBakedAt": "2026-04-19T23:57:43.866Z"
@@ -794,21 +703,9 @@
       "name": "Solitude Pillar 1 Firefly",
       "kind": "group",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        18,
-        7.833111385848278,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        2,
-        2,
-        2
-      ],
+      "position": [18, 7.833111385848278, 0],
+      "rotation": [0, 0, 0],
+      "scale": [2, 2, 2],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -827,21 +724,9 @@
       "name": "Solitude Pillar 2 Firefly",
       "kind": "group",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        15.588457268119896,
-        6.241312110903529,
-        8.999999999999998
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        2,
-        2,
-        2
-      ],
+      "position": [15.588457268119896, 6.241312110903529, 8.999999999999998],
+      "rotation": [0, 0, 0],
+      "scale": [2, 2, 2],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -860,21 +745,9 @@
       "name": "Solitude Pillar 3 Firefly",
       "kind": "group",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        9.000000000000002,
-        7.130711803508328,
-        15.588457268119894
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        2,
-        2,
-        2
-      ],
+      "position": [9.000000000000002, 7.130711803508328, 15.588457268119894],
+      "rotation": [0, 0, 0],
+      "scale": [2, 2, 2],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -893,21 +766,9 @@
       "name": "Solitude Pillar 4 Firefly",
       "kind": "group",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        1.102182119232618e-15,
-        7.216781280751897,
-        18
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        2,
-        2,
-        2
-      ],
+      "position": [1.102182119232618e-15, 7.216781280751897, 18],
+      "rotation": [0, 0, 0],
+      "scale": [2, 2, 2],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -926,21 +787,9 @@
       "name": "Solitude Pillar 5 Firefly",
       "kind": "group",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        -8.999999999999996,
-        6.493299067874669,
-        15.588457268119896
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        2,
-        2,
-        2
-      ],
+      "position": [-8.999999999999996, 6.493299067874669, 15.588457268119896],
+      "rotation": [0, 0, 0],
+      "scale": [2, 2, 2],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -959,21 +808,9 @@
       "name": "Solitude Pillar 6 Firefly",
       "kind": "group",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        -15.588457268119896,
-        6.546596201092679,
-        8.999999999999998
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        2,
-        2,
-        2
-      ],
+      "position": [-15.588457268119896, 6.546596201092679, 8.999999999999998],
+      "rotation": [0, 0, 0],
+      "scale": [2, 2, 2],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -992,21 +829,9 @@
       "name": "Solitude Pillar 7 Firefly",
       "kind": "group",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        -18,
-        6.2,
-        2.204364238465236e-15
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        2,
-        2,
-        2
-      ],
+      "position": [-18, 6.2, 2.204364238465236e-15],
+      "rotation": [0, 0, 0],
+      "scale": [2, 2, 2],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -1024,21 +849,9 @@
       "name": "Solitude Pillar 8 Firefly",
       "kind": "group",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        -15.588457268119898,
-        5.988514727005818,
-        -8.999999999999995
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        2,
-        2,
-        2
-      ],
+      "position": [-15.588457268119898, 5.988514727005818, -8.999999999999995],
+      "rotation": [0, 0, 0],
+      "scale": [2, 2, 2],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -1056,21 +869,9 @@
       "name": "Solitude Pillar 9 Firefly",
       "kind": "group",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        -9.000000000000007,
-        7.3,
-        -15.58845726811989
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        2,
-        2,
-        2
-      ],
+      "position": [-9.000000000000007, 7.3, -15.58845726811989],
+      "rotation": [0, 0, 0],
+      "scale": [2, 2, 2],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -1089,21 +890,9 @@
       "name": "Solitude Pillar 10 Firefly",
       "kind": "group",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        0.30124533753965016,
-        8.099268252624608,
-        -18.026192120473944
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        2,
-        2,
-        2
-      ],
+      "position": [0.30124533753965016, 8.099268252624608, -18.026192120473944],
+      "rotation": [0, 0, 0],
+      "scale": [2, 2, 2],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -1121,21 +910,9 @@
       "name": "Solitude Pillar 11 Firefly",
       "kind": "group",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        9.000000000000002,
-        5.5,
-        -15.588457268119894
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        2,
-        2,
-        2
-      ],
+      "position": [9.000000000000002, 5.5, -15.588457268119894],
+      "rotation": [0, 0, 0],
+      "scale": [2, 2, 2],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -1154,21 +931,9 @@
       "name": "Solitude Pillar 12 Firefly",
       "kind": "group",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        15.58845726811989,
-        4.9,
-        -9.000000000000007
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        2,
-        2,
-        2
-      ],
+      "position": [15.58845726811989, 4.9, -9.000000000000007],
+      "rotation": [0, 0, 0],
+      "scale": [2, 2, 2],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -1187,28 +952,14 @@
       "name": "Ring Fragment East",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        11.5,
-        0.28,
-        0.8
-      ],
-      "rotation": [
-        0,
-        0.62,
-        0
-      ],
-      "scale": [
-        8.283422090117261,
-        1.5099177251804317,
-        1.8821363311989647
-      ],
+      "position": [11.5, 0.28, 0.8],
+      "rotation": [0, 0.62, 0],
+      "scale": [8.283422090117261, 1.5099177251804317, 1.8821363311989647],
       "visible": true,
       "generation": {
         "descriptor": "broken ancient stone ring ruin",
         "sourceVisualSize": [
-          4.922340742831281,
-          2.8499999046325684,
-          3.708636712447688
+          4.922340742831281, 2.8499999046325684, 3.708636712447688
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
         "lastBakedAt": "2026-04-20T00:01:48.287Z"
@@ -1231,28 +982,14 @@
       "name": "Ring Fragment West",
       "kind": "asset",
       "parentId": "solitude-ruin-ring",
-      "position": [
-        -10.8,
-        0.2,
-        -1.4
-      ],
-      "rotation": [
-        0,
-        -1.04,
-        0
-      ],
-      "scale": [
-        1.4080127607778838,
-        1.398903736189978,
-        2.307027349504379
-      ],
+      "position": [-10.8, 0.2, -1.4],
+      "rotation": [0, -1.04, 0],
+      "scale": [1.4080127607778838, 1.398903736189978, 2.307027349504379],
       "visible": true,
       "generation": {
         "descriptor": "broken ancient stone ring ruin",
         "sourceVisualSize": [
-          2.7769109270613583,
-          2.3939999198913573,
-          4.336473168316391
+          2.7769109270613583, 2.3939999198913573, 4.336473168316391
         ],
         "lastBakedAssetUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
         "lastBakedAt": "2026-04-20T00:06:10.174Z"
@@ -1274,21 +1011,9 @@
       "id": "solitude-firefly",
       "name": "Firefly of Solitude",
       "kind": "group",
-      "position": [
-        0,
-        2.6,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        2,
-        2,
-        2
-      ],
+      "position": [0, 2.6, 0],
+      "rotation": [0, 0, 0],
+      "scale": [2, 2, 2],
       "visible": true,
       "gameplay": {
         "type": "firefly",
@@ -1312,21 +1037,9 @@
       "id": "solitude-ambient-wind",
       "name": "Solitude Wind Region",
       "kind": "group",
-      "position": [
-        0,
-        4,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        120,
-        18,
-        120
-      ],
+      "position": [0, 4, 0],
+      "rotation": [0, 0, 0],
+      "scale": [120, 18, 120],
       "visible": false,
       "gameplay": {
         "type": "audio-region",
@@ -1341,21 +1054,9 @@
       "id": "solitude-ring-haze",
       "name": "Ring Haze Volume",
       "kind": "group",
-      "position": [
-        0,
-        4,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        52,
-        12,
-        52
-      ],
+      "position": [0, 4, 0],
+      "rotation": [0, 0, 0],
+      "scale": [52, 12, 52],
       "visible": false,
       "gameplay": {
         "type": "fog-volume",

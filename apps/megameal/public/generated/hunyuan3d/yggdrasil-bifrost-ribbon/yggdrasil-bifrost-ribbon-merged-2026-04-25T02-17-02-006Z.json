@@ -16,5 +16,18 @@
   "createdAt": "2026-04-25T02:17:02.007Z",
   "assetUrl": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
   "source": "scene-direct-merge",
-  "collisionNote": "Visual merge only. Source ribbon nodes had no collision."
+  "collisionNote": "Visual merge only. Source ribbon nodes had no collision.",
+  "materialAuthoring": {
+    "workflow": "apps/game/scripts/author-yggdrasil-bifrost-ribbon-pbr.mjs",
+    "authoredAt": "2026-05-11",
+    "textureSize": 64,
+    "slotsAuthored": [
+      "baseColorTexture",
+      "metallicRoughnessTexture",
+      "normalTexture",
+      "emissiveTexture"
+    ],
+    "provenance": "Procedural luminous-ribbon PBR and emissive maps authored from the existing Bifrost material palette, consolidated to one runtime material, and embedded in the source GLB before runtime variant cooking.",
+    "runtimeMaterialStrategy": "single authored ribbon material for joined runtime variants"
+  }
 }

@@ -29,6 +29,7 @@ export interface CollisionPolicyInput {
     channel?: CollisionChannel
     enabled?: boolean
     size?: [number, number, number]
+    colliderUrl?: string
     friction?: number
     restitution?: number
     sensor?: boolean
@@ -72,16 +73,23 @@ function getAuthoredShape(input: CollisionPolicyInput): CollisionShape {
   return authoredShape
 }
 
+function normalizeColliderUrl(value: string | undefined) {
+  const normalized = String(value ?? '').trim()
+  return normalized.length > 0 ? normalized : undefined
+}
+
 export function isTerrainVisualActor(
   actorId: string,
   levelSettings?: SceneSettings | null,
   levelId?: string | null,
 ) {
-  return getActorCollisionRole({
-    actorId,
-    levelId,
-    settings: levelSettings,
-  }) === 'visualOnly'
+  return (
+    getActorCollisionRole({
+      actorId,
+      levelId,
+      settings: levelSettings,
+    }) === 'visualOnly'
+  )
 }
 
 export function getDefaultCollisionIntent(input: CollisionPolicyInput) {
@@ -144,6 +152,7 @@ export function resolveCollisionPolicy(
         }),
         shape,
         size: input.authoredCollision.size,
+        colliderUrl: normalizeColliderUrl(input.authoredCollision.colliderUrl),
         friction: input.authoredCollision.friction,
         restitution: input.authoredCollision.restitution,
         sensor: intent === 'trigger' ? true : input.authoredCollision.sensor,
@@ -178,7 +187,8 @@ export function resolveCollisionPolicy(
           bodyType: input.bodyType,
         }),
         shape: getDefaultCollisionShape(input),
-        friction: input.levelSettings?.level?.collision?.defaults?.defaultFriction,
+        friction:
+          input.levelSettings?.level?.collision?.defaults?.defaultFriction,
         restitution:
           input.levelSettings?.level?.collision?.defaults?.defaultRestitution,
         sensor: intent === 'trigger',

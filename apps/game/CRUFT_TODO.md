@@ -4,6 +4,61 @@ Generated from `CRUFT_FILE_INVENTORY.md`. This is the explicit working checklist
 
 A checked item has had at least a file-level disposition assigned. Items marked `refactor` are intentionally checked here because they have been reviewed enough to know they still need architecture work; they remain open in the refactor queue below.
 
+For the shorter operational progress board and dated refactor log, use `AAA_GRAPHICS_REFACTOR_TRACKER.md`.
+
+## 2026-05-11 Repo And Asset Sprawl Pass
+
+- [x] Read `apps/game/AGENTS.md` and `apps/megameal/AGENTS.md` for game-facing asset rules.
+- [x] Inventoried changed and untracked files with `git status --short`.
+- [x] Classified active game source/config/script changes separately from generated runtime assets and unrelated Megameal content.
+- [x] Verified `apps/megameal/public/generated/runtime-game-assets/**` is reproducible/current via `pnpm --dir apps/game check:generated-drift`.
+- [x] Verified engine-facing generated outputs via `pnpm --dir apps/game audit:engine`.
+- [x] Kept `apps/megameal/public/generated/runtime-game-assets/manifest.previous.json` as rollback metadata, not local cruft.
+- [x] Documented runtime asset path ownership: prefab bake-source assets may live under `generated/runtime-game-assets/prefabs/**`, but cooked variants stay under that same single runtime root and must not create doubled runtime-root paths.
+- [x] Left Megameal banner, Snuggaloids, and content changes untouched as unrelated content.
+- [x] Made no cleanup deletion because no extra obsolete file was proven unreferenced and reproducible.
+
+## 2026-05-11 Review Fix 06 Follow-up
+
+- [x] Captured starting worktree entry count: `git status --short | wc -l` = 380.
+- [x] Captured ending worktree entry count: `git status --short | wc -l` = 381.
+- [x] Proved `apps/game/tmp/miranda-resources*.json` had no references with `rg`.
+- [x] Removed `apps/game/tmp/miranda-resources.json` and `apps/game/tmp/miranda-resources-after.json` as local reproducible report snapshots.
+- [x] Added `.gitignore` coverage for `apps/game/tmp/`.
+- [x] Reclassified doubled runtime-root generated output as obsolete after Fix 03 removed current and rollback manifest references.
+- [x] Removed `apps/megameal/public/generated/runtime-game-assets/generated/runtime-game-assets/` as obsolete untracked cooked-output sprawl.
+- [x] Left historical runtime asset path ownership notes in `docs/archive/aaa/AAA_REVIEW_FIX_03_RUNTIME_ASSET_PATH_OWNERSHIP.md`; active path ownership now lives in the target docs, tracker, and runtime asset cook/audit code.
+- [x] Consolidated stale or overlapping `AAA_*` review/next/remaining docs into `docs/archive/aaa/`. Owner: review coordination/docs cleanup.
+- [ ] Move or externalize `apps/megameal/public/generated/hunyuan3d/**` source/generated asset ownership only after cooker/import paths are migrated. Owner: cooked asset path ownership.
+- [ ] Keep unrelated Megameal banner/Snuggaloids/content changes out of game cleanup commits. Owner: Megameal content work.
+
+## 2026-05-11 Completion Fix 05 Closeout
+
+- [x] Captured starting worktree entry count: `git status --short | wc -l` = 397.
+- [x] Captured ending worktree entry count: `git status --short | wc -l` = 401.
+- [x] Observed count drift during the pass: later snapshots reached 400 and then 401 while additional untracked generated/editor files were present.
+- [x] Grouped remaining dirty files into completion docs, historical coordination docs, active game source/config/scripts, generated runtime assets, source/generated authoring assets, local reports, unrelated Megameal content, and no-delete candidates.
+- [x] Verified `apps/game/reports/**` is ignored local report output and referenced by release/performance commands, so it should remain ignored rather than committed or manually deleted for status-count reduction.
+- [x] Checked the untracked `apps/megameal/public/generated/style-lab/sources/world-root-basin-2026-05-11T18-48-35-298Z/` directory. It is untracked generated source/authoring material and was left for asset-owner review rather than deleted as cruft.
+- [x] Made no safe deletions. No visible `git status` entry was both clearly obsolete and safe to remove without crossing generated runtime/source asset ownership.
+- [ ] Commit or delegate active completion docs and engine source changes as coherent workstreams. Owner: completion coordination.
+- [x] Consolidated historical `AAA_AUDIT_*`, `AAA_REVIEW_*`, `AAA_NEXT_*`, `AAA_REMAINING_*`, `AAA_WEB_ENGINE_*`, and `AAA_GAP_*` docs into `docs/archive/aaa/`; current instructions now start from `AAA_TARGET_*.md`, `AAA_COMPLETION_*.md`, `AAA_GRAPHICS_REFACTOR_TRACKER.md`, and `AAA_GRAPHICS_CONTENT_BACKLOG.md`. Owner: docs cleanup.
+- [ ] Decide whether timestamped style-lab source directories such as `world-root-basin-2026-05-11T18-48-35-298Z` are retained authoring inputs, moved to an authoring root, or removed by an asset-owner cleanup. Owner: asset authoring/path ownership.
+
+## 2026-05-11 Target 05 Doc Sprawl Consolidation
+
+- [x] Captured starting worktree entry count: `git status --short | wc -l` = 421.
+- [x] Captured ending worktree entry count: `git status --short | wc -l` = 391.
+- [x] Moved superseded top-level instruction docs to `apps/game/docs/archive/aaa/` instead of deleting uncertain context.
+- [x] Archived `AAA_AUDIT_FIX_*`, `AAA_REVIEW_FIX_*`, `AAA_NEXT_*`, `AAA_REMAINING_*`, `AAA_WEB_ENGINE_*`, `AAA_GAP_*`, `AAA_INTEGRATION_AGENT_INSTRUCTIONS.md`, and `AAA_PARALLEL_AGENT_COORDINATION.md`.
+- [x] Added `docs/archive/aaa/README.md` to state that archived docs are historical only.
+- [x] Updated `AAA_GRAPHICS_REFACTOR_TRACKER.md` to point at `AAA_TARGET_*.md` and the current generated backlog count.
+- [x] Updated `AAA_TARGET_04_EDITOR_PRODUCTION_UX.md` so its gap-doc reference points at the archive path.
+- [x] Left generated runtime assets, rollback metadata, ignored reports, source authoring assets, and unrelated Megameal content untouched.
+- [x] Ran `pnpm --dir apps/game audit:engine`; it passed.
+- [x] Ran `pnpm --dir apps/game check:generated-drift`; it failed on runtime asset manifest material-compliance drift for the Yggdrasil bifrost ribbon, so generated assets were left unchanged for the owning asset pipeline task.
+- [ ] Commit or delegate the remaining active target/completion docs and engine source changes as coherent workstreams. Owner: completion coordination.
+
 ## Current Ground And Graphics Pipeline Cleanup
 
 ### Clean Or Fix Before More Features
@@ -27,34 +82,75 @@ A checked item has had at least a file-level disposition assigned. Items marked 
 - [x] Expand world partition from actor cell cooking into staged render/collision streaming with readiness gates.
 - [x] Add screenshot-based visual smoke tests for representative levels, including Solitude authored ground.
 - [x] Add editor workflows for baking, validating, and publishing ground/terrain contracts without hand-editing JSON.
+- [x] Add an audit gate requiring every non-baked runtime prefab to declare an explicit procedural runtime contract.
+- [x] Move `story-marker` off live procedural runtime meshes into baked color-variant GLBs plus a runtime root animation descriptor.
+- [x] Move `anomaly-cluster` off live procedural runtime meshes into baked color-variant GLBs plus a runtime node animation descriptor.
+- [x] Move `bench-growth` off live procedural runtime meshes into a partially merged baked GLB plus a runtime node animation descriptor.
+- [x] Move `growth-planter` off live procedural runtime meshes into a partially merged baked GLB plus a runtime node animation descriptor.
+- [x] Move `courtyard-fountain` off live procedural runtime meshes into a baked GLB plus a runtime VFX descriptor.
+- [x] Move `command-console` off live procedural runtime meshes into a baked GLB plus a runtime VFX descriptor.
+- [x] Move `portal-apparatus` off live procedural runtime meshes into a baked GLB plus a runtime VFX descriptor.
+- [x] Replace contracted animated procedural prefabs with authored GLB/VFX assets and runtime animation descriptors.
 
 ### AAA Graphics Pipeline Roadmap
 
 - [x] Add runtime streaming telemetry and automated assertions for partitioned levels.
 - [x] Add visual regression baselines with camera bookmarks and artifact review.
-- [ ] Replace LOD/impostor placeholders with automated decimation, billboard atlas generation, and validation.
-- [ ] Raise material compliance from warnings to platform-tier gates with explicit exception lists.
-- [ ] Add asset-bundle streaming with prefetch, unload, and memory-pressure policy.
-- [ ] Add platform certification profiles and budgets for mobile, desktop, and TV.
-- [ ] Add content-build provenance, versioning, and rollback for generated runtime artifacts.
-- [ ] Add editor dashboards for budget, material, and streaming failures before publish.
-- [ ] Add collision/render parity debug overlays and tests for walkable surfaces and blockers.
-- [ ] Add production telemetry capture for frame time, draw calls, active cells, loaded assets, and memory.
+- [x] Replace LOD/impostor placeholders with automated decimation, billboard atlas generation, and validation.
+  - [x] Generate a runtime bounds-billboard impostor atlas and atlas manifest during `cook:runtime-assets`.
+  - [x] Add LOD validation metadata for cooked variants and enforce monotonic high/medium/low triangle order.
+  - [x] Improve mesh simplification settings for the current cooker pass (`lodTargetMisses=86` -> `11`).
+  - [x] Add an explicit LOD validation tolerance policy so tiny meshes and near-threshold variants do not create false source-art blockers.
+  - [x] Track remaining source-art retopology/replacement work in `AAA_GRAPHICS_CONTENT_BACKLOG.md` (`lodTargetMisses=0`).
+  - [x] Add `report:graphics-backlog:write` so the AAA source-art backlog is regenerated from the cooked manifest instead of hand-maintained.
+- [x] Raise material compliance from warnings to platform-tier gates with explicit exception lists.
+  - [x] Fail unapproved missing material slots in `audit:engine`.
+  - [x] Record approved generated-asset PBR fallback exceptions in the runtime asset manifest.
+  - [x] Track approved generated fallback exceptions that need authored PBR maps in `AAA_GRAPHICS_CONTENT_BACKLOG.md` (`missingRecommendedSlots=289`, `unapprovedRecommendedSlots=0`).
+- [x] Add asset-bundle streaming with prefetch, unload, and memory-pressure policy.
+  - [x] Add a cooked runtime asset streaming policy to the manifest and audit it.
+  - [x] Prefetch active-cell GLB bundles after required render assets pass the readiness gate.
+  - [x] Add byte-aware GLTF cache eviction with stricter low-memory behavior.
+- [x] Add platform certification profiles and budgets for mobile, desktop, and TV.
+  - [x] Add cooked mobile, desktop, and TV certification profiles with platform-specific default LOD tiers.
+  - [x] Validate platform profile payload, file, triangle, draw-call, material, and texture budgets in `audit:engine`.
+- [x] Add content-build provenance, versioning, and rollback for generated runtime artifacts.
+  - [x] Add cooked build id, git metadata, input fingerprint, and builder command to the runtime asset manifest.
+  - [x] Write `manifest.previous.json` before publishing a new runtime asset manifest.
+  - [x] Validate content-build provenance and rollback metadata in `audit:engine`.
+- [x] Add editor dashboards for budget, material, and streaming failures before publish.
+  - [x] Add a Scene tools publish-readiness panel backed by the cooked runtime asset manifest.
+  - [x] Surface build id, generation time, active-level runtime/required asset counts, LOD misses, material fallback exceptions, and missing runtime contracts before publish.
+- [x] Add collision/render parity debug overlays and tests for walkable surfaces and blockers.
+  - [x] Keep the editor collision overlay available from Scene tools.
+  - [x] Add an `audit:engine` render/collision parity gate for invisible walkable/blocker colliders.
+- [x] Add production telemetry capture for frame time, draw calls, active cells, loaded assets, and memory.
+  - [x] Capture a rolling runtime telemetry ring on `window.__megamealProductionTelemetry`.
+  - [x] Include FPS, frame time, quality tier, renderer draw calls/triangles, Three memory, active streaming cells/actors, and GLTF cache byte counts.
+- [x] Bake high-value procedural runtime prefabs into generated assets with explicit runtime asset manifest entries.
+- [x] Contract remaining animated procedural prefabs with migration targets and source-mesh/triangle budgets.
+- [x] Bake story-marker prefab variants into generated assets and retain only a typed root animation descriptor at runtime.
+- [x] Bake anomaly-cluster prefab variants into animation-ready generated assets and retain only a typed node animation descriptor at runtime.
+- [x] Bake bench-growth into a generated animation-ready asset and retain only typed node animation descriptors for tendril and halo motion at runtime.
+- [x] Bake growth-planter into a generated animation-ready asset and retain only typed node animation descriptors for rim, leaf, and spoke motion at runtime.
+- [x] Bake courtyard-fountain into a generated animation-ready asset and retain only typed VFX descriptors for water, core, and halo effects at runtime.
+- [x] Bake command-console into a generated animation-ready asset and retain only typed VFX descriptors for screen effects at runtime.
+- [x] Bake portal-apparatus into a generated animation-ready asset and retain only typed VFX descriptors for ring and core effects at runtime.
 
 ## Status Summary
 
 | Status | Files |
 | --- | ---: |
 | delete | 15 |
-| keep | 340 |
-| refactor | 38 |
-| total | 393 |
+| keep | 354 |
+| refactor | 36 |
+| total | 405 |
 
 ## Refactor Queue
 
-- [ ] `astro.config.mjs`
+- [x] `astro.config.mjs` - moved manual chunk ownership into `scripts/lib/chunkOwnership.mjs`; `audit:chunks` now checks static chunk cycles and critical ownership drift, and `audit:engine` runs it.
 - [ ] `src/threlte/Game.svelte`
-- [ ] `src/threlte/collision/AssetTrimeshCollider.svelte`
+- [x] `src/threlte/collision/AssetTrimeshCollider.svelte` - added separate `collision.colliderUrl` runtime/editor contract and validation so asset trimesh collision can migrate away from render mesh ownership.
 - [ ] `src/threlte/components/HeroProp.svelte`
 - [ ] `src/threlte/editor/EditorEnvironmentPanel.svelte`
 - [ ] `src/threlte/editor/EditorInspectTabHost.svelte`
@@ -81,11 +177,11 @@ A checked item has had at least a file-level disposition assigned. Items marked 
 - [ ] `src/threlte/features/conversation/characters/CharacterComponent.ts`
 - [ ] `src/threlte/features/conversation/characters/index.ts`
 - [ ] `src/threlte/features/conversation/conversationStores.ts`
-- [ ] `src/threlte/features/conversation/index.ts`
+- [x] `src/threlte/features/conversation/index.ts` - split conversation exports into runtime, UI, and authoring entrypoints; compatibility barrel no longer re-exports character authoring code.
 - [ ] `src/threlte/features/ocean/components/OceanComponent.svelte`
 - [ ] `src/threlte/features/player/Player.svelte`
 - [ ] `src/threlte/features/player/ThrelteMobileControls.svelte`
-- [ ] `src/threlte/levels/RuntimePrefabNode.svelte`
+- [x] `src/threlte/levels/RuntimePrefabNode.svelte` - prefab type catalog, asset URL lookup, variant rules, and procedural mesh descriptors now live in shared engine modules; runtime rendering and editor bake source consume the shared resolver.
 - [ ] `src/threlte/systems/Audio.svelte`
 - [ ] `src/threlte/systems/EventBus.svelte`
 - [ ] `src/threlte/systems/InteractionSystem.svelte`
@@ -101,7 +197,7 @@ A checked item has had at least a file-level disposition assigned. Items marked 
 - [x] `CRUFT_TODO.md` - keep
 - [x] `ENGINE_ARCHITECTURE.md` - keep
 - [x] `ENGINE_MIGRATION_CHECKLIST.md` - keep
-- [x] `astro.config.mjs` - refactor
+- [x] `astro.config.mjs` - keep
 - [x] `biome.json` - keep
 - [x] `package.json` - keep
 - [x] `performance-baselines.json` - keep
@@ -187,6 +283,8 @@ A checked item has had at least a file-level disposition assigned. Items marked 
 ### Scripts
 
 - [x] `scripts/audit-engine-architecture.mjs` - keep
+- [x] `scripts/audit-chunk-ownership.mjs` - keep
+- [x] `scripts/bake-runtime-prefabs.mjs` - keep
 - [x] `scripts/bake-terrain-collision.mjs` - keep
 - [x] `scripts/boot-check-browser.mjs` - keep
 - [x] `scripts/boot-check.mjs` - keep
@@ -205,9 +303,18 @@ A checked item has had at least a file-level disposition assigned. Items marked 
 - [x] `scripts/generate-terrain-heightmap.mjs` - keep
 - [x] `scripts/lib/authoringSceneSource.mjs` - keep
 - [x] `scripts/lib/browserHarness.mjs` - keep
+- [x] `scripts/lib/chunkOwnership.mjs` - keep
 - [x] `scripts/lib/dependencyGraph.mjs` - keep
 - [x] `scripts/lib/engineAuditSourceGuards.mjs` - keep
 - [x] `scripts/lib/levelRegistry.mjs` - keep
+- [x] `scripts/lib/runtimePrefabBakeSources/runtimePrefabAnomalyMeshes.ts` - keep (bake-only prefab descriptor source; runtime gameplay must not import)
+- [x] `scripts/lib/runtimePrefabBakeSources/runtimePrefabBakeTypes.ts` - keep (bake-only prefab descriptor types)
+- [x] `scripts/lib/runtimePrefabBakeSources/runtimePrefabCourtyardMeshes.ts` - keep (bake-only prefab descriptor source; runtime gameplay must not import)
+- [x] `scripts/lib/runtimePrefabBakeSources/runtimePrefabGrowthMeshes.ts` - keep (bake-only prefab descriptor source; runtime gameplay must not import)
+- [x] `scripts/lib/runtimePrefabBakeSources/runtimePrefabMeshFactory.ts` - keep (bake-only prefab descriptor helper; runtime gameplay must not import)
+- [x] `scripts/lib/runtimePrefabBakeSources/runtimePrefabProceduralMeshes.ts` - keep (bake-only prefab descriptor resolver; runtime gameplay must not import)
+- [x] `scripts/lib/runtimePrefabBakeSources/runtimePrefabTechMeshes.ts` - keep (bake-only prefab descriptor source; runtime gameplay must not import)
+- [x] `scripts/lib/runtimePrefabBakeSources/runtimePrefabWastelandMeshes.ts` - keep (bake-only prefab descriptor source; runtime gameplay must not import)
 - [x] `scripts/lib/runtimeAssetCookManifest.mjs` - keep
 - [x] `scripts/lib/runtimeAssetVariantCooker.mjs` - keep
 - [x] `scripts/lib/runtimeSceneAudit.mjs` - keep
@@ -260,9 +367,13 @@ A checked item has had at least a file-level disposition assigned. Items marked 
 - [x] `src/threlte/components/VegetationSystem.svelte` - delete
 - [x] `src/threlte/constants/physics.ts` - keep
 - [x] `src/threlte/core/ECSIntegration.ts` - keep
+- [x] `src/threlte/core/GameRuntimeDiagnostics.svelte` - keep
 - [x] `src/threlte/core/GameWorld.svelte` - keep
 - [x] `src/threlte/core/LevelManager.svelte` - keep
 - [x] `src/threlte/core/LevelSystem.ts` - keep
+- [x] `src/threlte/core/gameRuntimeFeatureLoader.ts` - keep
+- [x] `src/threlte/core/gameShellBootstrap.ts` - keep
+- [x] `src/threlte/core/gameShellUiState.ts` - keep
 - [x] `src/threlte/core/gameWorldLifecycle.ts` - keep
 - [x] `src/threlte/core/levelRuntimeEvents.ts` - keep
 - [x] `src/threlte/core/levelRuntimeReset.ts` - keep
@@ -374,12 +485,23 @@ A checked item has had at least a file-level disposition assigned. Items marked 
 - [x] `src/threlte/engine/levelCollisionWorkflow.ts` - keep
 - [x] `src/threlte/engine/levelContracts.ts` - keep
 - [x] `src/threlte/engine/levelValidation.ts` - keep
-- [x] `src/threlte/engine/packagedSceneDocuments.ts` - keep
+- [x] `src/threlte/engine/packagedSceneDocuments.ts` - delete (removed runtime packaged-scene fallback; gameplay now requires cooked runtime scene manifests)
 - [x] `src/threlte/engine/primitiveGeometry.ts` - keep
 - [x] `src/threlte/engine/runtimeAssetManifest.ts` - keep
 - [x] `src/threlte/engine/runtimeCullingTrace.ts` - keep
 - [x] `src/threlte/engine/runtimeGameplayTypes.ts` - keep
-- [x] `src/threlte/engine/runtimeLevelSettings.ts` - keep
+- [x] `src/threlte/engine/runtimeLevelSettings.ts` - delete (removed unused runtime settings compatibility module; settings normalize during cooking/editor load)
+- [x] `src/threlte/engine/runtimePrefabAnomalyMeshes.ts` - delete (moved to `scripts/lib/runtimePrefabBakeSources`; bake-only descriptor source)
+- [x] `src/threlte/engine/runtimePrefabCatalog.json` - keep
+- [x] `src/threlte/engine/runtimePrefabCatalog.ts` - keep (runtime asset/descriptor catalog only; no bake geometry imports)
+- [x] `src/threlte/engine/runtimePrefabCourtyardMeshes.ts` - delete (moved to `scripts/lib/runtimePrefabBakeSources`; bake-only descriptor source)
+- [x] `src/threlte/engine/runtimePrefabGrowthMeshes.ts` - delete (moved to `scripts/lib/runtimePrefabBakeSources`; bake-only descriptor source)
+- [x] `src/threlte/engine/runtimePrefabMeshFactory.ts` - delete (moved to `scripts/lib/runtimePrefabBakeSources`; bake-only descriptor helper)
+- [x] `src/threlte/engine/runtimePrefabProceduralMeshes.ts` - delete (moved to `scripts/lib/runtimePrefabBakeSources`; bake-only descriptor resolver)
+- [x] `src/threlte/engine/runtimePrefabRegistry.ts` - keep
+- [x] `src/threlte/engine/runtimePrefabTechMeshes.ts` - delete (moved to `scripts/lib/runtimePrefabBakeSources`; bake-only descriptor source)
+- [x] `src/threlte/engine/runtimePrefabTypes.ts` - keep (runtime prefab asset, animation, and VFX contracts only)
+- [x] `src/threlte/engine/runtimePrefabWastelandMeshes.ts` - delete (moved to `scripts/lib/runtimePrefabBakeSources`; bake-only descriptor source)
 - [x] `src/threlte/engine/runtimeSceneDocumentLoader.ts` - keep
 - [x] `src/threlte/engine/runtimeSceneManifest.ts` - keep
 - [x] `src/threlte/engine/runtimeWorldPartition.ts` - keep
@@ -461,7 +583,7 @@ A checked item has had at least a file-level disposition assigned. Items marked 
 - [x] `src/threlte/levels/RuntimeActorRenderContent.svelte` - keep
 - [x] `src/threlte/levels/RuntimeActorVisualAudit.svelte` - delete
 - [x] `src/threlte/levels/RuntimeGameplayRenderer.svelte` - keep
-- [x] `src/threlte/levels/RuntimePrefabNode.svelte` - refactor
+- [x] `src/threlte/levels/RuntimePrefabNode.svelte` - keep
 - [x] `src/threlte/levels/SceneDocumentLevel.svelte` - keep
 - [x] `src/threlte/levels/SceneLighting.svelte` - keep
 - [x] `src/threlte/levels/level-registry.json` - keep
@@ -488,7 +610,12 @@ A checked item has had at least a file-level disposition assigned. Items marked 
 - [x] `src/threlte/systems/StarMap.svelte` - refactor
 - [x] `src/threlte/systems/Time.svelte` - keep
 - [x] `src/threlte/tests/validate-performance.ts` - delete
+- [x] `src/threlte/ui/GameDebugPanel.svelte` - keep
+- [x] `src/threlte/ui/GameErrorOverlay.svelte` - keep
+- [x] `src/threlte/ui/LevelNoteOverlay.svelte` - keep
+- [x] `src/threlte/ui/LevelReturnDialog.svelte` - keep
 - [x] `src/threlte/ui/MobileEnhancements.svelte` - keep
+- [x] `src/threlte/ui/RoomJoinOverlay.svelte` - keep
 - [x] `src/threlte/ui/RuntimeDiagnosticsPanel.svelte` - keep
 - [x] `src/threlte/ui/SettingsButton.svelte` - keep
 - [x] `src/threlte/ui/SettingsPanel.svelte` - keep

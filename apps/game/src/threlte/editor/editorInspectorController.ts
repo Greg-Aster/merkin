@@ -521,6 +521,28 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     })
   }
 
+  function updateCollisionStringField(field: 'colliderUrl', value: string) {
+    const selectedNode = deps.getSelectedNode()
+    if (!selectedNode) return
+    const defaultShape = deps.getDefaultCollisionShape(selectedNode)
+    const normalized = value.trim()
+
+    deps.patchNode(selectedNode.id, {
+      collision: {
+        ...(selectedNode.collision ?? {
+          shape: defaultShape,
+          intent: deps.getDefaultCollisionIntent(selectedNode),
+          channel: deps.getDefaultCollisionChannel(selectedNode),
+          ...(defaultShape === 'trimesh'
+            ? {}
+            : { size: deps.getNodeVisualColliderSize(selectedNode) }),
+        }),
+        enabled: true,
+        [field]: normalized || undefined,
+      },
+    })
+  }
+
   function updateCollisionSize(index: number, value: string) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode) return
@@ -791,6 +813,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     updateCollisionIntent,
     updateCollisionChannel,
     updateCollisionNumericField,
+    updateCollisionStringField,
     updateCollisionSize,
     updateCollisionBooleanField,
     recalculateCollisionFromVisual,

@@ -11,6 +11,7 @@ import {
 } from './editorHierarchyUtils'
 import type { EditorSceneNode } from './editorStore'
 import {
+  type EditorWorkspaceEntry,
   browseEditorWorkspace,
   getPublicAssetDirectoryPath,
   isGeneratedModelFile,
@@ -18,7 +19,6 @@ import {
   isModelWorkspaceEntry,
   resolvePublicAssetUrl,
   sortWorkspaceEntriesByDirectoryAndName,
-  type EditorWorkspaceEntry,
 } from './editorWorkspaceBrowser'
 
 interface EditorAssetControllerDeps {
@@ -149,8 +149,7 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       state.selectedGeneratedVariantUrl =
         state.generatedVariantItems.find(
           (item: { url: string }) => item.url === assetUrl,
-        )
-          ?.url ??
+        )?.url ??
         state.generatedVariantItems[0]?.url ??
         ''
     } catch (error) {
@@ -500,7 +499,10 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       }
     }
 
-    const prefabAssetUrl = getPrefabAssetUrl(node.prefab?.type)
+    const prefabAssetUrl = getPrefabAssetUrl(
+      node.prefab?.type,
+      node.prefab?.variant,
+    )
     if (prefabAssetUrl) {
       return {
         assetUrl: prefabAssetUrl,
@@ -525,7 +527,10 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     try {
       deps.setSaveMessage(`Converting ${selectedNode.name} to mesh…`)
       const source = await stageSceneNodeSourceAsset(selectedNode)
-      const prefabAssetUrl = getPrefabAssetUrl(selectedNode.prefab?.type)
+      const prefabAssetUrl = getPrefabAssetUrl(
+        selectedNode.prefab?.type,
+        selectedNode.prefab?.variant,
+      )
       const scaleWasBakedIntoMesh =
         !!selectedNode.primitive || (!!selectedNode.prefab && !prefabAssetUrl)
       const previousCollision = selectedNode.collision

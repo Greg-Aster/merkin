@@ -19,7 +19,7 @@ import {
   currentNPCPersonality,
   isConversationActive,
   isProcessingResponse,
-} from './conversationStores'
+} from './runtime'
 import type { NPCEmotion } from './types'
 
 const dispatch = createEventDispatcher()

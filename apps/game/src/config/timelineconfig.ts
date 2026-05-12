@@ -135,7 +135,10 @@ export const constellationConfig: Record<string, ConstellationConfig> = {
   },
 }
 
-export const constellationPatterns: Record<string, ConstellationPatternPoint[]> = {
+export const constellationPatterns: Record<
+  string,
+  ConstellationPatternPoint[]
+> = {
   ancient_wisdom: [
     { azOffset: 0, elOffset: 0 },
     { azOffset: -15, elOffset: 10 },

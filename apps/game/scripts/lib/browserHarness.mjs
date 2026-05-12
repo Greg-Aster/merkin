@@ -1,4 +1,5 @@
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
+import { createServer } from 'node:net'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium, firefox, webkit } from 'playwright'
 export { readDeployedLevelIds } from './levelRegistry.mjs'
@@ -98,6 +99,51 @@ export function createContextOptions(profile, browserName = 'chromium') {
   return options
 }
 
+export function createRuntimeProfileOverride(profile = {}) {
+  if (!profile || typeof profile !== 'object') return null
+
+  const profileId = typeof profile.id === 'string' ? profile.id : null
+  const platformProfile =
+    typeof profile.platformProfile === 'string' ? profile.platformProfile : null
+  const expectedRuntimeTier =
+    typeof profile.expectedRuntimeTier === 'string'
+      ? profile.expectedRuntimeTier
+      : null
+  const runtimeAssetTier =
+    typeof profile.runtimeAssetTier === 'string'
+      ? profile.runtimeAssetTier
+      : typeof profile.expectedAssetTier === 'string'
+        ? profile.expectedAssetTier
+        : null
+
+  if (
+    !profileId &&
+    !platformProfile &&
+    !expectedRuntimeTier &&
+    !runtimeAssetTier
+  ) {
+    return null
+  }
+
+  return {
+    id: profileId ?? 'adhoc-runtime-profile',
+    targetClass:
+      typeof profile.targetClass === 'string' ? profile.targetClass : null,
+    platformProfile,
+    expectedRuntimeTier,
+    runtimeAssetTier,
+  }
+}
+
+export async function installRuntimeProfileOverride(page, profile = {}) {
+  const runtimeProfile = createRuntimeProfileOverride(profile)
+  if (!runtimeProfile) return
+
+  await page.addInitScript(profileOverride => {
+    window.__gameRuntimeProfile = profileOverride
+  }, runtimeProfile)
+}
+
 export function shouldIgnoreConsoleMessage(text) {
   return ignoredConsolePatterns.some(pattern => pattern.test(text))
 }
@@ -116,6 +162,71 @@ export function spawnGameDev(repoRoot) {
     stdio: 'inherit',
     shell: useShell,
     env: process.env,
+  })
+}
+
+export function runGameBuild(repoRoot) {
+  const result = spawnSync(pnpmBin, ['--dir', 'apps/game', 'build'], {
+    cwd: repoRoot,
+    stdio: 'inherit',
+    shell: useShell,
+    env: process.env,
+  })
+
+  if (result.error) {
+    throw result.error
+  }
+
+  if (result.status !== 0) {
+    throw new Error(`Game build failed with exit code ${result.status}`)
+  }
+}
+
+export function spawnGamePreview(
+  repoRoot,
+  port = process.env.GAME_DEV_PORT || 4322,
+) {
+  return spawn(
+    pnpmBin,
+    [
+      '--dir',
+      'apps/game',
+      'exec',
+      'astro',
+      'preview',
+      '--host',
+      '127.0.0.1',
+      '--port',
+      String(port),
+      '--strictPort',
+    ],
+    {
+      cwd: repoRoot,
+      stdio: 'inherit',
+      shell: useShell,
+      env: process.env,
+    },
+  )
+}
+
+export async function assertPortAvailable(port, host = '127.0.0.1') {
+  await new Promise((resolve, reject) => {
+    const server = createServer()
+
+    server.once('error', error => {
+      reject(error)
+    })
+    server.listen(Number(port), host, () => {
+      server.close(resolve)
+    })
+  }).catch(error => {
+    if (error?.code === 'EADDRINUSE') {
+      throw new Error(
+        `Requested game performance port ${port} is already in use. Stop the existing server, set GAME_DEV_PORT to a free port, or pass --no-server intentionally.`,
+      )
+    }
+
+    throw error
   })
 }
 
@@ -165,43 +276,75 @@ export async function waitForPlayableLevel(page, levelId, options = {}) {
     currentLevelTimeoutMs = 15000,
     gameplayTimeoutMs = 90000,
     playerConsoleTimeoutMs = 60000,
+    requireDebugPanel = true,
   } = options
   const playableConsoleSignal = consoleMessages
     ? waitForConsoleMessage(
         consoleMessages,
         message => message.includes(playerReadyConsoleSignal),
         playerConsoleTimeoutMs,
+      ).then(
+        () => true,
+        () => false,
       )
     : null
 
-  await page
-    .locator('.runtime-diagnostics-panel')
-    .first()
-    .waitFor({ state: 'attached', timeout: diagnosticsTimeoutMs })
-  await waitForPageText(
-    page,
-    `Current Level: ${levelId}`,
-    currentLevelTimeoutMs,
-  )
-
-  try {
+  if (requireDebugPanel) {
+    await page
+      .locator('.runtime-diagnostics-panel')
+      .first()
+      .waitFor({ state: 'attached', timeout: diagnosticsTimeoutMs })
     await waitForPageText(
       page,
-      `Gameplay is enabled on ${levelId}.`,
-      gameplayTimeoutMs,
+      `Current Level: ${levelId}`,
+      currentLevelTimeoutMs,
     )
-  } catch (error) {
-    if (!playableConsoleSignal) throw error
-    await playableConsoleSignal
+
+    try {
+      await waitForPageText(
+        page,
+        `Gameplay is enabled on ${levelId}.`,
+        gameplayTimeoutMs,
+      )
+    } catch (error) {
+      if (!playableConsoleSignal) throw error
+      if (!(await playableConsoleSignal)) throw error
+    }
+  } else {
+    await page.waitForFunction(
+      level => {
+        const state = window.__gameRuntimeRenderState
+        const summary = state?.summaries?.[level]
+        const lifecycle = state?.lifecycle?.[level]
+        const phase = lifecycle?.phase ?? summary?.lifecyclePhase
+        const readyPhases = new Set([
+          'diagnostics-ready',
+          'player-activation-ready',
+        ])
+
+        return Boolean(
+          window.__megamealDiagnostics &&
+            summary &&
+            readyPhases.has(phase) &&
+            summary.requiredRenderedActorCount === summary.requiredActorCount,
+        )
+      },
+      levelId,
+      { timeout: gameplayTimeoutMs },
+    )
   }
 
   if (playableConsoleSignal) {
     await playableConsoleSignal
   }
 
-  await page.waitForFunction(() => Boolean(window.__megamealDiagnostics), null, {
-    timeout: diagnosticsTimeoutMs,
-  })
+  await page.waitForFunction(
+    () => Boolean(window.__megamealDiagnostics),
+    null,
+    {
+      timeout: diagnosticsTimeoutMs,
+    },
+  )
 }
 
 export async function assertRequiredRenderActors(page, levelId) {
@@ -228,6 +371,70 @@ export async function assertRequiredRenderActors(page, levelId) {
   if (missingActorIds.length > 0) {
     throw new Error(
       `${levelId} missing required rendered actors: ${missingActorIds.join(', ')}`,
+    )
+  }
+}
+
+export async function assertRuntimeRenderLifecycle(page, levelId) {
+  await page.waitForFunction(
+    level => {
+      const state = window.__gameRuntimeRenderState
+      const summary = state?.summaries?.[level]
+      const lifecycle = state?.lifecycle?.[level]
+      const renderProfile = state?.renderProfiles?.[level]
+      const postProcessing = state?.postProcessing?.[level]
+      const readyPhases = new Set([
+        'diagnostics-ready',
+        'player-activation-ready',
+      ])
+
+      return Boolean(
+        summary &&
+          lifecycle &&
+          readyPhases.has(summary.lifecyclePhase) &&
+          readyPhases.has(lifecycle.phase) &&
+          renderProfile?.profileId &&
+          postProcessing &&
+          summary.requiredRenderedActorCount === summary.requiredActorCount,
+      )
+    },
+    levelId,
+    { timeout: 30000 },
+  )
+
+  const lifecycleReport = await page.evaluate(level => {
+    const state = window.__gameRuntimeRenderState
+    const summary = state?.summaries?.[level]
+    const lifecycle = state?.lifecycle?.[level]
+    const renderProfile = state?.renderProfiles?.[level]
+    const postProcessing = state?.postProcessing?.[level]
+
+    return {
+      summary,
+      lifecycle,
+      renderProfile,
+      postProcessing,
+    }
+  }, levelId)
+
+  const { summary, lifecycle, renderProfile, postProcessing } = lifecycleReport
+  const failures = []
+  if (!summary) failures.push('missing render summary')
+  if (!lifecycle) failures.push('missing render lifecycle')
+  if (!renderProfile?.profileId) failures.push('missing active render profile')
+  if (!postProcessing) failures.push('missing post-processing diagnostics')
+  if (
+    summary &&
+    summary.requiredRenderedActorCount !== summary.requiredActorCount
+  ) {
+    failures.push(
+      `required rendered actors ${summary.requiredRenderedActorCount}/${summary.requiredActorCount}`,
+    )
+  }
+
+  if (failures.length > 0) {
+    throw new Error(
+      `${levelId} runtime render lifecycle failed: ${failures.join('; ')}`,
     )
   }
 }

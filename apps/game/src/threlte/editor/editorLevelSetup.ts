@@ -12,6 +12,7 @@ const SHARED_LEVEL_SETTING_KEYS = [
   'features',
   'style',
   'lighting',
+  'renderProfile',
   'water',
   'ambientParticles',
   'ambientAudio',
@@ -105,11 +106,11 @@ export function normalizeLevelSceneSettings(
 ): EditorSceneSettings {
   const normalized = structuredClone(settings ?? {}) as EditorSceneSettings
   const workflow = getLevelCollisionWorkflow(levelId)
-  const legacySettings =
+  const sourceSharedSettings =
     levelId === 'solitude' ? normalized.solitude : normalized.observatory
 
   normalized.level = mergeLevelSettings<SharedLevelEditorSettings>(
-    pickSharedLevelSettings(legacySettings),
+    pickSharedLevelSettings(sourceSharedSettings),
     normalized.level ?? {},
   )
 

@@ -49,6 +49,20 @@ export interface QualitySettings {
   maxVegetationInstances: number
 }
 
+export interface RuntimeProfileOverride {
+  id?: string | null
+  targetClass?: string | null
+  platformProfile?: string | null
+  expectedRuntimeTier?: string | null
+  runtimeAssetTier?: string | null
+}
+
+declare global {
+  interface Window {
+    __gameRuntimeProfile?: RuntimeProfileOverride
+  }
+}
+
 export class OptimizationManager {
   private static instance: OptimizationManager | null = null
 
@@ -312,6 +326,12 @@ export class OptimizationManager {
   private autoSetOptimizationLevel(): void {
     if (!this.deviceCapabilities) return
 
+    const profileLevel = this.getProfileOptimizationLevel()
+    if (profileLevel) {
+      this.setOptimizationLevel(profileLevel)
+      return
+    }
+
     const {
       isMobile,
       isLowEnd,
@@ -351,6 +371,66 @@ export class OptimizationManager {
     this.setOptimizationLevel(level)
   }
 
+  private normalizeOptimizationLevel(
+    value: string | null | undefined,
+  ): OptimizationLevel | null {
+    if (!value) return null
+    const normalized = value
+      .trim()
+      .toLowerCase()
+      .replace(/[-\s]+/g, '_')
+
+    if (
+      normalized === OptimizationLevel.ULTRA_LOW ||
+      normalized === OptimizationLevel.LOW ||
+      normalized === OptimizationLevel.MEDIUM ||
+      normalized === OptimizationLevel.HIGH ||
+      normalized === OptimizationLevel.ULTRA
+    ) {
+      return normalized as OptimizationLevel
+    }
+
+    return null
+  }
+
+  private getRuntimeProfileOverride(): RuntimeProfileOverride | null {
+    if (typeof window === 'undefined') return null
+    return window.__gameRuntimeProfile ?? null
+  }
+
+  private getProfileOptimizationLevel(): OptimizationLevel | null {
+    const profile = this.getRuntimeProfileOverride()
+    if (!profile) return null
+
+    const explicitTier = this.normalizeOptimizationLevel(
+      profile.expectedRuntimeTier,
+    )
+    if (explicitTier) return explicitTier
+
+    switch (profile.platformProfile) {
+      case 'mobile':
+        return OptimizationLevel.LOW
+      case 'desktop':
+        return OptimizationLevel.HIGH
+      case 'tv':
+        return OptimizationLevel.MEDIUM
+      default:
+        break
+    }
+
+    if (profile.targetClass?.startsWith('mobile-low')) {
+      return OptimizationLevel.LOW
+    }
+    if (profile.targetClass?.startsWith('desktop-high')) {
+      return OptimizationLevel.HIGH
+    }
+    if (profile.targetClass?.startsWith('tv-medium')) {
+      return OptimizationLevel.MEDIUM
+    }
+
+    return null
+  }
+
   public setOptimizationLevel(level: OptimizationLevel): void {
     this.currentOptimizationLevel = level
     this.currentQualitySettings = this.buildQualitySettings(level)
@@ -385,9 +465,25 @@ export class OptimizationManager {
     return this.deviceCapabilities
   }
 
+  public getRuntimeProfile(): RuntimeProfileOverride | null {
+    return this.getRuntimeProfileOverride()
+  }
+
   private buildQualitySettings(level: OptimizationLevel): QualitySettings {
     const baseSettings = this.baseQualityProfiles[level]
-    return { ...baseSettings } as QualitySettings
+    const profile = this.getRuntimeProfileOverride()
+    const profileSettings: Partial<QualitySettings> =
+      profile?.targetClass === 'desktop-high' &&
+      level === OptimizationLevel.HIGH
+        ? {
+            canvasScale: 0.25,
+            enableShadows: false,
+            enableDynamicLighting: false,
+            shadowMapSize: 0,
+          }
+        : {}
+
+    return { ...baseSettings, ...profileSettings } as QualitySettings
   }
 }
 

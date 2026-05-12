@@ -1,3 +1,4 @@
+import type { HunyuanJobStatus } from './editorHunyuanJobPolling'
 import {
   getOutlinerFilterPlaceholder,
   getOutlinerSubtitle,
@@ -12,11 +13,11 @@ import type { EditorPanelTab } from './editorPanelTabs'
 import type { EditorPrefabType } from './editorStore'
 import type {
   EditorMaterialData,
+  EditorSceneDocument,
   EditorSceneNode,
   LevelCollisionBudget,
   LevelCollisionDefaultPolicy,
 } from './editorTypes'
-import type { HunyuanJobStatus } from './editorHunyuanJobPolling'
 
 type AnyFunction = (...args: any[]) => any
 type AnyController = Record<string, AnyFunction>
@@ -39,6 +40,8 @@ type TextureField =
   | 'alphaMapUrl'
 type EditorPanelState = {
   propertiesShelfOpen?: boolean
+  outlinerOpen?: boolean
+  controlsOverlayOpen?: boolean
   selectedNodeIds?: string[]
   isolatedNodeIds?: string[]
   interactionMode?: string
@@ -61,6 +64,7 @@ type EditorPanelState = {
 
 export type EditorPanelPropBuilderContext = {
   levelId: string
+  editorScene: EditorSceneDocument | null
   editorState: EditorPanelState | null | undefined
   editorNodes: EditorSceneNode[]
   editorLevelOptions: Array<any>
@@ -152,6 +156,7 @@ export type EditorPanelPropBuilderContext = {
   groundTerrainPublishPending: boolean
   selectedTerrainSourceName: string
   selectedTerrainSourceAssetUrl: string
+  heightmapSourceNodes: EditorSceneNode[]
   editorStyleStudioComponent: any
   stylePresetOptions: Array<any>
   styleBusy: boolean
@@ -332,15 +337,12 @@ export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
   const editorState = context.editorState
   return {
     levelId: context.levelId,
+    editorScene: context.editorScene,
     editorLevelOptions: context.editorLevelOptions,
     canUndo: context.canUndo,
     canRedo: context.canRedo,
     interactionMode: editorState?.interactionMode ?? 'objects',
     viewportLightingMode: editorState?.viewportLightingMode ?? 'authored',
-    collisionOverlayEnabled: editorState?.collisionOverlayEnabled ?? false,
-    collisionDefaultPolicy: context.collisionDefaultPolicy,
-    collisionBudget: context.collisionBudget,
-    groundSettings: context.groundSettings,
     terrainSculptSettings: context.terrainSculptSettings,
     terrainCollisionSettings: context.terrainCollisionSettings,
     terrainCollisionBakePending: context.terrainCollisionBakePending,
@@ -348,7 +350,6 @@ export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
     terrainChunkCookPending: context.terrainChunkCookPending,
     worldPartitionCookPending: context.worldPartitionCookPending,
     groundTerrainPublishPending: context.groundTerrainPublishPending,
-    selectedTerrainSourceName: context.selectedTerrainSourceName,
     selectedTerrainSourceAssetUrl: context.selectedTerrainSourceAssetUrl,
     terrainBrushMode: editorState?.terrainBrushMode ?? 'raise',
     terrainBrushSize: editorState?.terrainBrushSize ?? 24,
@@ -375,14 +376,6 @@ export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
       context.setEditorInteractionMode(mode as 'objects' | 'terrain'),
     onSetViewportLightingMode: (mode: string) =>
       context.setEditorViewportLightingMode(mode as 'authored' | 'workbench'),
-    onSetCollisionOverlayEnabled: context.setCollisionOverlayEnabled,
-    onSetCollisionDefaultPolicy: context.setCollisionDefaultPolicy,
-    onSetCollisionBudget: context.setCollisionBudget,
-    onSetTerrainAutoBake: context.setTerrainAutoBake,
-    onBakeTerrainCollision: () => void context.bakeTerrainCollision(),
-    onGenerateTerrainHeightmap: () =>
-      void context.generateTerrainHeightmapFromSelection(),
-    onCookTerrainChunks: () => void context.cookTerrainChunks(),
     onCookWorldPartition: () => void context.cookWorldPartition(),
     onPublishGroundTerrainContracts: () =>
       void context.publishGroundTerrainContracts(),
@@ -403,6 +396,35 @@ export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
     onSetScaleSnap: context.setScaleSnap,
     onSetSurfaceSnapEnabled: context.setSurfaceSnapEnabled,
     onSetSurfaceSnapOffset: context.setSurfaceSnapOffset,
+  }
+}
+
+export function buildCollisionTabProps(context: EditorPanelPropBuilderContext) {
+  const editorState = context.editorState
+  return {
+    levelId: context.levelId,
+    collisionOverlayEnabled: editorState?.collisionOverlayEnabled ?? false,
+    collisionDefaultPolicy: context.collisionDefaultPolicy,
+    collisionBudget: context.collisionBudget,
+    groundSettings: context.groundSettings,
+    terrainSculptSettings: context.terrainSculptSettings,
+    terrainCollisionSettings: context.terrainCollisionSettings,
+    terrainCollisionBakePending: context.terrainCollisionBakePending,
+    terrainHeightmapGeneratePending: context.terrainHeightmapGeneratePending,
+    terrainChunkCookPending: context.terrainChunkCookPending,
+    selectedNode: context.selectedNode,
+    selectedNodes: context.selectedNodes,
+    heightmapSourceNodes: context.heightmapSourceNodes,
+    selectedTerrainSourceName: context.selectedTerrainSourceName,
+    selectedTerrainSourceAssetUrl: context.selectedTerrainSourceAssetUrl,
+    onSetCollisionOverlayEnabled: context.setCollisionOverlayEnabled,
+    onSetCollisionDefaultPolicy: context.setCollisionDefaultPolicy,
+    onSetCollisionBudget: context.setCollisionBudget,
+    onSetTerrainAutoBake: context.setTerrainAutoBake,
+    onBakeTerrainCollision: () => void context.bakeTerrainCollision(),
+    onGenerateTerrainHeightmap: () =>
+      void context.generateTerrainHeightmapFromSelection(),
+    onCookTerrainChunks: () => void context.cookTerrainChunks(),
   }
 }
 
@@ -630,6 +652,8 @@ export function buildInspectTabProps(context: EditorPanelPropBuilderContext) {
     onCollisionSizeChange: context.inspectorController.updateCollisionSize,
     onCollisionNumericChange:
       context.inspectorController.updateCollisionNumericField,
+    onCollisionStringChange:
+      context.inspectorController.updateCollisionStringField,
     onCollisionBooleanChange:
       context.inspectorController.updateCollisionBooleanField,
     onRecalculateCollision:
@@ -817,6 +841,7 @@ export function buildSaveTabProps(context: EditorPanelPropBuilderContext) {
 export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
   return {
     propertiesShelfOpen: context.editorState?.propertiesShelfOpen ?? false,
+    outlinerOpen: context.editorState?.outlinerOpen ?? true,
     outlinerSubtitle: getOutlinerSubtitle(
       context.outlinerDisplayMode,
       context.editorNodes,
@@ -833,6 +858,7 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
     outlinerDragEnabled: context.outlinerDisplayMode === 'view-layer',
     hierarchyDropTargetId: context.hierarchyDropTargetId,
     selectedNodeIds: context.editorState?.selectedNodeIds ?? [],
+    hasGroupSelection: context.hasGroupSelection,
     onOutlinerModeChange: context.outlinerController.setDisplayMode,
     onOutlinerFilterChange: (value: string) => {
       context.setHierarchyFilter(value)
@@ -864,6 +890,8 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
     onOutlinerRowDrop: (row: OutlinerRow, event: DragEvent) => {
       if (row.nodeId) context.outlinerController.drop(event, row.nodeId)
     },
+    onOutlinerGroupSelection: context.createController.groupSelection,
+    onOutlinerUngroupSelection: context.createController.ungroupSelection,
     getOutlinerRowActionState: context.outlinerController.getRowActionState,
     selectedNode: context.selectedNode,
     selectedNodes: context.selectedNodes,
@@ -948,6 +976,11 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
       context.inspectorController.updateCollisionChannel,
     onPhysicsBodyTypeChange: (value: string) =>
       context.inspectorController.updatePhysicsField('bodyType', value),
+    onColliderUrlChange: (value: string) =>
+      context.inspectorController.updateCollisionStringField(
+        'colliderUrl',
+        value,
+      ),
     onColliderSizeChange: context.inspectorController.updateCollisionSize,
     onTextureBrowserUp: context.inspectorController.goUpTextureBrowser,
     onTextureBrowserRefresh: () =>

@@ -172,7 +172,9 @@ export class CharacterRegistry {
       return true
     }
 
-    return Boolean(characterDefinitionModules[`./definitions/${normalizedId}.ts`])
+    return Boolean(
+      characterDefinitionModules[`./definitions/${normalizedId}.ts`],
+    )
   }
 
   /**

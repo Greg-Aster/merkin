@@ -107,7 +107,10 @@ function isCollisionNode(node) {
 }
 
 function getNodeIdsByPredicate(nodes, predicate) {
-  return nodes.filter(predicate).map(node => node.id).sort()
+  return nodes
+    .filter(predicate)
+    .map(node => node.id)
+    .sort()
 }
 
 function getNodeMap(nodes) {
@@ -162,6 +165,13 @@ function parseCellKey(key) {
   return key.split(',').map(Number)
 }
 
+function getCellBounds({ x, z, cellSize }) {
+  return {
+    min: [x * cellSize, z * cellSize],
+    max: [(x + 1) * cellSize, (z + 1) * cellSize],
+  }
+}
+
 function getActiveCellKeysForPosition(position, cellSize, activeRadius) {
   const centerX = Math.floor(position[0] / cellSize)
   const centerZ = Math.floor(position[2] / cellSize)
@@ -190,7 +200,7 @@ function getScenePartitionSettings(scene) {
   return scene.settings?.level?.worldPartition ?? {}
 }
 
-function cookPartition(scene, { cellSize, activeRadius }) {
+function cookPartition(scene, { cellSize, activeRadius, maxActorsPerCell }) {
   const nodes = scene.nodes ?? []
   const nodeMap = getNodeMap(nodes)
   const childrenByParent = getChildrenByParent(nodes)
@@ -210,7 +220,10 @@ function cookPartition(scene, { cellSize, activeRadius }) {
   const streamableCandidateIds = new Set(
     streamableCandidates.map(candidate => candidate.node.id),
   )
-  const selectedStreamables = streamableCandidates.filter(candidate => {
+  const streamableCandidateById = new Map(
+    streamableCandidates.map(candidate => [candidate.node.id, candidate]),
+  )
+  let selectedStreamables = streamableCandidates.filter(candidate => {
     let parentId = candidate.node.parentId
     while (parentId) {
       if (streamableCandidateIds.has(parentId)) return false
@@ -218,6 +231,71 @@ function cookPartition(scene, { cellSize, activeRadius }) {
     }
     return true
   })
+
+  const hasDescendantStreamableCandidate = candidate =>
+    candidate.subtree.some(
+      node =>
+        node.id !== candidate.node.id && streamableCandidateIds.has(node.id),
+    )
+  const getLeafStreamableCandidates = candidate =>
+    candidate.subtree
+      .map(node => streamableCandidateById.get(node.id))
+      .filter(Boolean)
+      .filter(candidate => !hasDescendantStreamableCandidate(candidate))
+  const getCandidateCellKey = candidate =>
+    getCellKey(
+      getWorldPosition(candidate.node, nodeMap, positionCache),
+      cellSize,
+    )
+  const getCellActorCounts = candidates => {
+    const actorIdsByCell = new Map()
+    for (const candidate of candidates) {
+      const key = getCandidateCellKey(candidate)
+      const actorIds = actorIdsByCell.get(key) ?? new Set()
+      for (const node of candidate.subtree) {
+        actorIds.add(node.id)
+      }
+      actorIdsByCell.set(key, actorIds)
+    }
+    return new Map(
+      [...actorIdsByCell.entries()].map(([key, actorIds]) => [
+        key,
+        actorIds.size,
+      ]),
+    )
+  }
+
+  if (Number.isFinite(maxActorsPerCell) && maxActorsPerCell > 0) {
+    for (;;) {
+      const oversizedCellKeys = new Set(
+        [...getCellActorCounts(selectedStreamables).entries()]
+          .filter(([, actorCount]) => actorCount > maxActorsPerCell)
+          .map(([key]) => key),
+      )
+      if (oversizedCellKeys.size === 0) break
+
+      let changed = false
+      const nextSelection = []
+      for (const candidate of selectedStreamables) {
+        if (
+          oversizedCellKeys.has(getCandidateCellKey(candidate)) &&
+          hasDescendantStreamableCandidate(candidate)
+        ) {
+          nextSelection.push(...getLeafStreamableCandidates(candidate))
+          changed = true
+        } else {
+          nextSelection.push(candidate)
+        }
+      }
+      if (!changed) break
+
+      selectedStreamables = [
+        ...new Map(
+          nextSelection.map(candidate => [candidate.node.id, candidate]),
+        ).values(),
+      ]
+    }
+  }
   const streamableActorIds = [
     ...new Set(
       selectedStreamables.flatMap(candidate =>
@@ -249,10 +327,16 @@ function cookPartition(scene, { cellSize, activeRadius }) {
     const position = getWorldPosition(node, nodeMap, positionCache)
     const actorIds = subtree.map(node => node.id)
     const key = getCellKey(position, cellSize)
+    const [cellX, cellZ] = parseCellKey(key)
     const cell = cells.get(key) ?? {
       key,
-      x: parseCellKey(key)[0],
-      z: parseCellKey(key)[1],
+      x: cellX,
+      z: cellZ,
+      bounds: getCellBounds({
+        x: cellX,
+        z: cellZ,
+        cellSize,
+      }),
       actorIds: [],
       renderActorIds: [],
       collisionActorIds: [],
@@ -262,8 +346,12 @@ function cookPartition(scene, { cellSize, activeRadius }) {
       requiredForSpawn: initialCellKeys.has(key),
     }
     cell.actorIds.push(...actorIds)
-    cell.renderActorIds.push(...getNodeIdsByPredicate(subtree, isRenderableNode))
-    cell.collisionActorIds.push(...getNodeIdsByPredicate(subtree, isCollisionNode))
+    cell.renderActorIds.push(
+      ...getNodeIdsByPredicate(subtree, isRenderableNode),
+    )
+    cell.collisionActorIds.push(
+      ...getNodeIdsByPredicate(subtree, isCollisionNode),
+    )
     cell.actorCount += actorIds.length
     cell.estimatedTriangles += subtree.reduce(
       (sum, node) => sum + estimateNodeTriangles(node),
@@ -308,9 +396,9 @@ function cookPartition(scene, { cellSize, activeRadius }) {
     readiness: {
       requiredResidentRenderActorIds: residentRenderActorIds,
       requiredResidentCollisionActorIds: residentCollisionActorIds,
-      requiredInitialCellKeys: [...initialCellKeys].filter(key =>
-        cells.has(key),
-      ).sort(),
+      requiredInitialCellKeys: [...initialCellKeys]
+        .filter(key => cells.has(key))
+        .sort(),
       requiredInitialRenderActorIds: initialRenderActorIds,
       requiredInitialCollisionActorIds: initialCollisionActorIds,
     },
@@ -334,36 +422,58 @@ const requestedLevel = getArg('level') || process.argv[2]
 const cellSizeArg = getArg('cell-size')
 const activeRadiusArg = getArg('active-radius')
 const dryRun = hasFlag('dry-run')
-const level = resolveLevel(requestedLevel)
 
-if (!requestedLevel || !level) {
-  throw new Error(`Expected --level to be one of: ${formatSceneLevelList()}`)
+function getPartitionLevels() {
+  if (requestedLevel) {
+    const level = resolveLevel(requestedLevel)
+    if (!level) {
+      throw new Error(
+        `Expected --level to be one of: ${formatSceneLevelList()}`,
+      )
+    }
+    return [level]
+  }
+
+  return readSceneLevels({ appRoot }).filter(level => {
+    const scenePath = getScenePath(level)
+    if (!existsSync(scenePath)) return false
+    const scene = readJson(scenePath)
+    return Boolean(getScenePartitionSettings(scene).partitionUrl)
+  })
 }
 
-const scenePath = getScenePath(level)
-if (!existsSync(scenePath)) {
-  throw new Error(`Scene file not found: ${scenePath}`)
-}
+const results = getPartitionLevels().map(level => {
+  const scenePath = getScenePath(level)
+  if (!existsSync(scenePath)) {
+    throw new Error(`Scene file not found: ${scenePath}`)
+  }
 
-const scene = readJson(scenePath)
-const scenePartitionSettings = getScenePartitionSettings(scene)
-const cellSize = Math.max(
-  20,
-  parsePositiveNumber(cellSizeArg, scenePartitionSettings.cellSize ?? 120),
-)
-const activeRadius = parseNonNegativeInteger(
-  activeRadiusArg,
-  scenePartitionSettings.activeRadius ?? 1,
-)
-const partition = cookPartition(scene, { cellSize, activeRadius })
-const outputUrl = `/runtime-world-partitions/${level.id}.partition.json`
-const outputPath = join(publicRoot, outputUrl.replace(/^\//, ''))
-if (!dryRun) {
-  writeJson(outputPath, partition)
-}
+  const scene = readJson(scenePath)
+  const scenePartitionSettings = getScenePartitionSettings(scene)
+  const cellSize = Math.max(
+    20,
+    parsePositiveNumber(cellSizeArg, scenePartitionSettings.cellSize ?? 120),
+  )
+  const maxActorsPerCell = parseNonNegativeInteger(
+    scenePartitionSettings.maxActorsPerCell,
+    0,
+  )
+  const activeRadius = parseNonNegativeInteger(
+    activeRadiusArg,
+    scenePartitionSettings.activeRadius ?? 1,
+  )
+  const partition = cookPartition(scene, {
+    cellSize,
+    activeRadius,
+    maxActorsPerCell,
+  })
+  const outputUrl = `/runtime-world-partitions/${level.id}.partition.json`
+  const outputPath = join(publicRoot, outputUrl.replace(/^\//, ''))
+  if (!dryRun) {
+    writeJson(outputPath, partition)
+  }
 
-console.log(
-  JSON.stringify({
+  return {
     success: true,
     dryRun,
     levelId: level.id,
@@ -374,5 +484,21 @@ console.log(
     residentActors: partition.residentActorIds.length,
     streamableActors: partition.streamableActorIds.length,
     budgets: partition.budgets,
-  }),
+  }
+})
+
+if (results.length === 0) {
+  throw new Error('No levels with worldPartition settings were found.')
+}
+
+console.log(
+  JSON.stringify(
+    {
+      success: true,
+      dryRun,
+      cooked: results,
+    },
+    null,
+    2,
+  ),
 )

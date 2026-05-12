@@ -1,5 +1,9 @@
 import { EDITOR_API_BASE } from '@config/editorApi'
-import type { EditorSceneNode } from './editorStore'
+import {
+  applyGeneratedAssetReplacementPlan,
+  createGeneratedAssetNode,
+  prepareGeneratedAssetReplacementPlan,
+} from './editorGeneratedAssetApplication'
 import {
   fetchComfyUiServiceStatus,
   fetchHunyuanJobStatus,
@@ -14,11 +18,7 @@ import {
   getRunningHunyuanStatusMessage,
   waitForHunyuanJob,
 } from './editorHunyuanJobPolling'
-import {
-  applyGeneratedAssetReplacementPlan,
-  createGeneratedAssetNode,
-  prepareGeneratedAssetReplacementPlan,
-} from './editorGeneratedAssetApplication'
+import type { EditorSceneNode } from './editorStore'
 
 interface EditorAiControllerDeps {
   state: Record<string, any>
@@ -41,9 +41,7 @@ interface EditorAiControllerDeps {
     node: EditorSceneNode,
     sourceAssetUrl?: string,
   ) => Promise<{ size: [number, number, number]; maxDimension: number }>
-  inspectGeneratedAssetBounds: (
-    assetUrl: string,
-  ) => Promise<{
+  inspectGeneratedAssetBounds: (assetUrl: string) => Promise<{
     size: [number, number, number]
     maxDimension: number
   } | null>
@@ -233,8 +231,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
         state.selectedHunyuanJobId =
           state.recentHunyuanJobs.find(
             (job: HunyuanJobStatus) => job.status === 'failed',
-          )
-            ?.id ??
+          )?.id ??
           state.recentHunyuanJobs[0]?.id ??
           ''
       }

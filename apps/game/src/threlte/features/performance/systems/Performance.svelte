@@ -5,6 +5,13 @@
 <script lang="ts">
 import { useTask, useThrelte } from '@threlte/core'
 import { createEventDispatcher, onMount } from 'svelte'
+import { setRuntimeDiagnostic } from '../../../stores/runtimeDiagnosticsStore'
+import { recordRuntimeProductionTelemetry } from '../../../stores/runtimeProductionTelemetry'
+import {
+  evictUnusedGltfCacheEntries,
+  getGltfCacheStats,
+} from '../../../utils/gltfAssetCache'
+import { runtimeDebugLog } from '../../../utils/runtimeLog'
 import { OptimizationLevel, optimizationManager } from '../OptimizationManager'
 import {
   fpsStore,
@@ -16,11 +23,6 @@ import {
   renderInfoStore,
   systemTimingsStore,
 } from '../stores/performanceStore'
-import {
-  evictUnusedGltfCacheEntries,
-  getGltfCacheStats,
-} from '../../../utils/gltfAssetCache'
-import { runtimeDebugLog } from '../../../utils/runtimeLog'
 
 // Props — matching what Game.svelte passes
 export let enablePerformanceMonitoring = true
@@ -108,6 +110,64 @@ function collectSceneStats() {
   return stats
 }
 
+function collectStreamingStats() {
+  if (typeof window === 'undefined') {
+    return {
+      selectedRuntimeProfileId: null,
+      selectedPlatformProfile: null,
+      requestedAssetTier: null,
+      levelAssetTierCap: null,
+      selectedAssetTier: 'unknown',
+      renderQualityTier: optimizationManager.getOptimizationLevel(),
+      renderProfileId: null,
+      renderProfileTier: null,
+      activeCellCount: 0,
+      activeActorCount: 0,
+      activeRenderableActorCount: 0,
+      requiredAssetCount: 0,
+      deferredOptionalAssetCount: 0,
+      gltfCacheBytes: 0,
+    }
+  }
+
+  const levels = Object.values(window.__gameRuntimeStreamingState?.levels ?? {})
+  const activeLevel = levels.at(-1)
+  const aggregate = levels.reduce(
+    (sum, level) => ({
+      activeCellCount: sum.activeCellCount + level.activeCellCount,
+      activeActorCount: sum.activeActorCount + level.activeActorCount,
+      activeRenderableActorCount:
+        sum.activeRenderableActorCount + level.activeRenderableActorCount,
+      requiredAssetCount: sum.requiredAssetCount + level.requiredAssetCount,
+      deferredOptionalAssetCount:
+        sum.deferredOptionalAssetCount + level.deferredOptionalAssetCount,
+      gltfCacheBytes: sum.gltfCacheBytes + level.gltfCacheBytes,
+    }),
+    {
+      activeCellCount: 0,
+      activeActorCount: 0,
+      activeRenderableActorCount: 0,
+      requiredAssetCount: 0,
+      deferredOptionalAssetCount: 0,
+      gltfCacheBytes: 0,
+    },
+  )
+
+  return {
+    selectedRuntimeProfileId: activeLevel?.selectedRuntimeProfileId ?? null,
+    selectedPlatformProfile: activeLevel?.selectedPlatformProfile ?? null,
+    requestedAssetTier: activeLevel?.requestedAssetTier ?? null,
+    levelAssetTierCap: activeLevel?.levelAssetTierCap ?? null,
+    selectedAssetTier: activeLevel?.selectedAssetTier ?? 'unknown',
+    renderQualityTier:
+      activeLevel?.renderQualityTier ??
+      optimizationManager.getOptimizationLevel(),
+    renderProfileId: activeLevel?.renderProfileId ?? null,
+    renderProfileTier: activeLevel?.renderProfileTier ?? null,
+    ...aggregate,
+  }
+}
+
 const TIER_ORDER: OptimizationLevel[] = [
   OptimizationLevel.ULTRA_LOW,
   OptimizationLevel.LOW,
@@ -125,11 +185,25 @@ function getEffectiveTargetFPS(): number {
   return 60
 }
 
+function getProfileMinimumQualityLevel() {
+  const profile = optimizationManager.getRuntimeProfile()
+  if (!profile?.expectedRuntimeTier) return null
+  const normalized = profile.expectedRuntimeTier
+    .trim()
+    .toLowerCase()
+    .replace(/[-\s]+/g, '_')
+  return TIER_ORDER.includes(normalized as OptimizationLevel)
+    ? (normalized as OptimizationLevel)
+    : null
+}
+
 function stepQualityDown() {
   const current = optimizationManager.getOptimizationLevel()
   const idx = TIER_ORDER.indexOf(current)
-  if (idx <= 0) return
-  const next = TIER_ORDER[idx - 1]
+  const minimum = getProfileMinimumQualityLevel()
+  const minimumIdx = minimum ? TIER_ORDER.indexOf(minimum) : 0
+  if (idx <= minimumIdx) return
+  const next = TIER_ORDER[Math.max(minimumIdx, idx - 1)]
   runtimeDebugLog(`🔽 Performance: stepping quality down ${current} → ${next}`)
   optimizationManager.setOptimizationLevel(next)
   dispatch('qualityChanged', { from: current, to: next, reason: 'fps_low' })
@@ -188,6 +262,7 @@ onMount(() => {
             }
           : null,
         scene: collectSceneStats(),
+        streaming: collectStreamingStats(),
         gltfCache: getGltfCacheStats(),
         quality: optimizationManager.getOptimizationLevel(),
       }),
@@ -210,9 +285,26 @@ useTask(() => {
 
   if (currentTime - lastGltfCacheEvictionTime >= 5000) {
     lastGltfCacheEvictionTime = currentTime
+    const deviceMemory =
+      typeof navigator !== 'undefined'
+        ? (navigator as any).deviceMemory
+        : undefined
+    const memoryPressure =
+      typeof deviceMemory === 'number' && deviceMemory <= 4
+        ? 'high'
+        : typeof deviceMemory === 'number' && deviceMemory <= 8
+          ? 'medium'
+          : 'normal'
     evictUnusedGltfCacheEntries({
-      maxUnreferencedEntries: 4,
-      maxUnusedAgeMs: 8000,
+      maxUnreferencedEntries: memoryPressure === 'high' ? 1 : 4,
+      maxUnusedAgeMs: memoryPressure === 'high' ? 2000 : 8000,
+      maxUnreferencedBytes:
+        memoryPressure === 'high'
+          ? 32 * 1024 * 1024
+          : memoryPressure === 'medium'
+            ? 64 * 1024 * 1024
+            : 128 * 1024 * 1024,
+      memoryPressure,
     })
   }
 
@@ -224,16 +316,38 @@ useTask(() => {
     frameTimeStore.set(currentFrameTime)
 
     if (renderer.info) {
-      memoryStore.set({
+      const memory = {
         geometries: renderer.info.memory.geometries,
         textures: renderer.info.memory.textures,
         programs: renderer.info.programs?.length || 0,
-      })
-      renderInfoStore.set({
+      }
+      const renderInfo = {
         calls: renderer.info.render.calls,
         triangles: renderer.info.render.triangles,
         points: renderer.info.render.points,
         lines: renderer.info.render.lines,
+      }
+      memoryStore.set(memory)
+      renderInfoStore.set(renderInfo)
+      recordRuntimeProductionTelemetry({
+        timestamp: Date.now(),
+        fps: currentFps,
+        frameTimeMs: currentFrameTime,
+        quality: optimizationManager.getOptimizationLevel(),
+        renderInfo,
+        memory,
+        streaming: collectStreamingStats(),
+        gltfCache: getGltfCacheStats(),
+      })
+      setRuntimeDiagnostic('rendererFrame', {
+        label: 'Renderer Frame',
+        level: 'ready',
+        message: `${renderInfo.calls} draw call(s), ${renderInfo.triangles} triangle(s), ${memory.textures} texture(s).`,
+        meta: {
+          renderInfo,
+          memory,
+          scene: collectSceneStats(),
+        },
       })
     }
   }

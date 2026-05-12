@@ -2,7 +2,12 @@
 import { T } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
+import EditorHeightmapSourceOverlay from './EditorHeightmapSourceOverlay.svelte'
+import EditorPlayerSpawnMarker from './EditorPlayerSpawnMarker.svelte'
 import EditorSceneBranch from './EditorSceneBranch.svelte'
+import EditorSelectionOutlineOverlay from './EditorSelectionOutlineOverlay.svelte'
+import EditorViewportShadingOverlay from './EditorViewportShadingOverlay.svelte'
+import { heightmapSourcePreviewNodeIdsStore } from './editorHeightmapSourcePreview'
 import {
   loadEditorSceneDocument,
   loadImmediateEditorSceneDocument,
@@ -47,12 +52,14 @@ async function loadEditorScene(level: string) {
 
   const immediateScene = loadImmediateEditorSceneDocument(level, {
     includeLocalStorage: true,
+    preferLocalStorage: true,
   })
   setEditorScene(immediateScene.scene)
 
   try {
     const loadedScene = await loadEditorSceneDocument(level, {
       includeLocalStorage: true,
+      preferLocalStorage: true,
     })
     if (loadToken !== activeLoadToken) return
     setEditorScene(loadedScene.scene)
@@ -75,6 +82,7 @@ async function loadEditorScene(level: string) {
     })
     const fallbackScene = loadImmediateEditorSceneDocument(level, {
       includeLocalStorage: true,
+      preferLocalStorage: true,
     })
     setEditorScene(fallbackScene.scene)
   }
@@ -105,6 +113,7 @@ onDestroy(() => {
   {#if editorEnabled}
     <T.GridHelper args={[200, 80, '#3a5266', '#243241']} position={[0, -0.01, 0]} />
     <T.AxesHelper args={[5]} position={[0, 0.02, 0]} />
+    <EditorPlayerSpawnMarker />
   {/if}
 
   {#each rootNodes as node (node.id)}
@@ -120,4 +129,16 @@ onDestroy(() => {
       on:noteRead={(event) => dispatch('noteRead', event.detail)}
     />
   {/each}
+
+  {#if editorEnabled && $heightmapSourcePreviewNodeIdsStore.length > 0}
+    <EditorHeightmapSourceOverlay />
+  {/if}
+
+  {#if editorEnabled && selectedNodeIds.length > 0}
+    <EditorSelectionOutlineOverlay {selectedNodeId} {selectedNodeIds} />
+  {/if}
+
+  {#if editorEnabled}
+    <EditorViewportShadingOverlay />
+  {/if}
 </T.Group>

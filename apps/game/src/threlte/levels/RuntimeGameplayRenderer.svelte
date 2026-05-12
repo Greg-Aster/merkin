@@ -7,7 +7,10 @@ import GroundMistLayer from '../components/GroundMistLayer.svelte'
 import ProceduralMesh from '../components/ProceduralMesh.svelte'
 import StarSprite from '../components/StarSprite.svelte'
 import type { RuntimeGameplayRenderNode } from '../engine/runtimeGameplayTypes'
-import { activeConversationSession } from '../features/conversation/conversationStores'
+import {
+  activeConversationSession,
+  conversationActions,
+} from '../features/conversation/runtime'
 import { gameActions } from '../stores/gameStateStore'
 import {
   getRuntimeNodeAnimationPhase,
@@ -31,23 +34,11 @@ let fireflyConversationSelected = false
 let fireflyInteractionSelected = false
 let fireflySelectionBlend = 0
 let fireflySelectionTimeoutId: ReturnType<typeof setTimeout> | null = null
-let conversationFeaturePromise: Promise<
-  typeof import('../features/conversation')
-> | null = null
 const gameplayPointLightScale = 0.22
 
 let fireflyPresentation = resolveRuntimeFireflyPresentation(node)
 
-function loadConversationFeature() {
-  if (!conversationFeaturePromise) {
-    conversationFeaturePromise = import('../features/conversation')
-  }
-
-  return conversationFeaturePromise
-}
-
 async function startFireflyDialogue() {
-  const { conversationActions } = await loadConversationFeature()
   const npcId = getFireflyConversationId()
   const readOnlyDuration = 7000
 
@@ -140,8 +131,7 @@ function registerInteractiveMarker(sprite: THREE.Sprite) {
       ) => {
         lightBurstGlow = Math.max(
           lightBurstGlow,
-          (0.45 + burst.strength * 0.75) *
-            fireflyPresentation.lightBurstBoost,
+          (0.45 + burst.strength * 0.75) * fireflyPresentation.lightBurstBoost,
         )
         if (fireflyPresentation.shockwaveEnabled) {
           shockwaveIgnited = true
@@ -383,6 +373,22 @@ onDestroy(() => {
         driftSpeed={node.gameplay.mistDriftSpeed ?? 0.05}
       />
     {/if}
+  {:else if node.gameplay.type === 'note'}
+    <StarSprite
+      position={[0, 0.16, 0]}
+      color={node.gameplay.markerColor ?? '#7ecbff'}
+      size={(node.gameplay.markerSize ?? 0.7) * (markerHovered ? 1.12 : 1 + lightBurstGlow * 0.1)}
+      intensity={Math.max(markerHovered ? 1.08 : 0.9, 0.9 + lightBurstGlow * 0.75)}
+      twinkleSpeed={1}
+      animationOffset={0}
+      starType="sparkle"
+      isKeyElement={true}
+      enableTwinkle={true}
+      opacity={1}
+      isClickable={interactiveEnabled}
+      isHovered={markerHovered}
+      onSpriteReady={registerInteractiveMarker}
+    />
   {:else}
     <ProceduralMesh
       geometry="torus"

@@ -1,7 +1,9 @@
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
+import { retopologizeGlbLodByTriangleArea } from './gltfLodRetopology.mjs'
 import {
+  getAssetCookTierConfig,
   getCookedPublicUrl,
   resolvePublicPath,
 } from './runtimeAssetCookManifest.mjs'
@@ -15,6 +17,7 @@ export function cookRuntimeAssetVariant({
   const inputPath = resolvePublicPath(context, sourceUrl)
   const outputUrl = getCookedPublicUrl(sourceUrl, tier.id)
   const outputPath = resolvePublicPath(context, outputUrl)
+  const cookTier = getAssetCookTierConfig(sourceUrl, tier)
 
   if (!existsSync(inputPath)) {
     throw new Error(`Missing source asset: ${sourceUrl}`)
@@ -38,13 +41,15 @@ export function cookRuntimeAssetVariant({
     '--texture-compress',
     'webp',
     '--texture-size',
-    String(tier.textureSize),
+    String(cookTier.textureSize),
     '--simplify',
     'true',
     '--simplify-ratio',
-    String(tier.simplifyRatio),
+    String(cookTier.simplifyRatio),
     '--simplify-error',
-    String(tier.simplifyError),
+    String(cookTier.simplifyError),
+    '--simplify-lock-border',
+    String(cookTier.simplifyLockBorder ?? false),
   ]
 
   const result = spawnSync('pnpm', args, {
@@ -57,5 +62,17 @@ export function cookRuntimeAssetVariant({
     throw new Error(
       `Failed to cook ${sourceUrl} ${tier.id} with exit code ${result.status}`,
     )
+  }
+
+  if (cookTier.retopology?.strategy === 'largest-triangle-area-prune') {
+    const report = retopologizeGlbLodByTriangleArea({
+      path: outputPath,
+      maxTriangles: cookTier.retopology.maxTriangles,
+    })
+    if (report.changed) {
+      console.log(
+        `[cook-runtime-assets] retopology ${outputUrl} triangles=${report.sourceTriangleCount}->${report.triangleCount} vertices=${report.vertexCount}`,
+      )
+    }
   }
 }

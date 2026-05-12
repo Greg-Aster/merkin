@@ -3,24 +3,39 @@
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 
 import GameCanvasStage from './GameCanvasStage.svelte'
+import GameRuntimeDiagnostics from './core/GameRuntimeDiagnostics.svelte'
+import { createGameRuntimeFeatureLoader } from './core/gameRuntimeFeatureLoader'
+import {
+  type GameShellBootstrapState,
+  createDeprecatedJoinErrorMessage,
+  createGameShellBootstrapState,
+  createRoomJoinErrorMessage,
+  createRoomJoinLoadingMessage,
+} from './core/gameShellBootstrap'
+import {
+  type ActiveLevelNote,
+  type PendingLevelReturn,
+  createPendingLevelReturn,
+  createTimelineEventFromStar,
+  extractSelectedStar,
+} from './core/gameShellUiState'
 import ThrelteMobileControls from './features/player/ThrelteMobileControls.svelte'
 
 import {
   conversationActions,
   conversationUIState,
   isConversationActive,
-} from './features/conversation/conversationStores'
+} from './features/conversation/runtime'
 
 import MobileEnhancements from './ui/MobileEnhancements.svelte'
 
-import {
-  createGameWorldLifecycleDiagnostics,
-  createGameWorldLifecycleSnapshot,
-  getGameWorldDiagnostic,
-  isGameWorldPlayable,
-} from './core/gameWorldLifecycle'
 import { resetLevelRuntime } from './core/levelRuntimeReset'
 
+import GameDebugPanel from './ui/GameDebugPanel.svelte'
+import GameErrorOverlay from './ui/GameErrorOverlay.svelte'
+import LevelNoteOverlay from './ui/LevelNoteOverlay.svelte'
+import LevelReturnDialog from './ui/LevelReturnDialog.svelte'
+import RoomJoinOverlay from './ui/RoomJoinOverlay.svelte'
 import SettingsButton from './ui/SettingsButton.svelte'
 import TimelineCard from './ui/TimelineCard.svelte'
 
@@ -30,11 +45,9 @@ import {
   resolveLevelId as resolveRegistryLevelId,
 } from './levels/levelRegistry'
 import {
-  type StarData,
   currentLevelStore,
   errorStore,
   gameActions,
-  gameStatsStore,
   isMobileStore,
   loadGameState,
   selectedStarStore,
@@ -44,9 +57,9 @@ import {
   resetRuntimeDiagnostics,
   setRuntimeDiagnostic,
 } from './stores/runtimeDiagnosticsStore'
-import { runtimeDebugLog } from './utils/runtimeLog'
 // Import UI state store
 import { isSettingsMenuOpen } from './stores/uiStore'
+import { runtimeDebugLog } from './utils/runtimeLog'
 
 const dispatch = createEventDispatcher()
 
@@ -89,6 +102,7 @@ let showDebugPanel = false
 // Room joining state
 let isJoiningRoom = false
 let roomJoinError = ''
+let shellBootstrapState: GameShellBootstrapState | null = null
 
 let currentLevelComponent: any = null
 let settingsPanelComponent: any = null
@@ -117,13 +131,7 @@ let interactionSystem: any = null // Reference to centralized InteractionSystem
 let chatBoxComponent: any = null // Reference to ChatBox component instance
 let editorEnabled = false
 let collisionOverlayEnabled = false
-let activeLevelNote: {
-  title: string
-  author: string
-  location: string
-  excerpt: string
-  body: string
-} | null = null
+let activeLevelNote: ActiveLevelNote | null = null
 let levelRegistry = []
 
 let physicsReady = false
@@ -131,45 +139,17 @@ let staticWorldReady = false
 let worldUnloading = false
 let lastRuntimeResetLevel = ''
 let activeLevelLoadRequest = 0
-let editorFeaturesPromise: Promise<void> | null = null
-let sceneLayerComponentPromise: Promise<void> | null = null
 let deferredAudioCleanup: (() => void) | null = null
 let deferredGameplayCoreCleanup: (() => void) | null = null
-let gameplayCorePromise: Promise<void> | null = null
 let editorSessionCleanup: (() => void) | null = null
-let pendingLevelReturn: {
-  levelType: string
-  title: string
-  message: string
-  confirmLabel: string
-  cancelLabel: string
-} | null = null
+let pendingLevelReturn: PendingLevelReturn | null = null
 
-const levelComponentCache = new Map<string, any>()
-
-function getModuleDefault<T>(module: T | undefined | null, label: string) {
-  if (
-    !module ||
-    typeof module !== 'object' ||
-    !('default' in module) ||
-    !(module as any).default
-  ) {
-    throw new Error(`Failed to load ${label}.`)
-  }
-
-  return (module as any).default
-}
+const runtimeFeatureLoader = createGameRuntimeFeatureLoader()
+let editorFeatureLoader: any = null
+let editorFeatureLoaderPromise: Promise<any> | null = null
 
 function normalizeLevelId(levelId: string | null | undefined) {
   return resolveRegistryLevelId(levelId, levelRegistry)
-}
-
-function getUrlFlagValue(params: URLSearchParams | null, key: string) {
-  return params?.get(key)?.trim().replace(/\/+$/, '') ?? ''
-}
-
-function isUrlFlagEnabled(params: URLSearchParams | null, key: string) {
-  return getUrlFlagValue(params, key) === '1'
 }
 
 function getLevelRenderConfig(levelId: string) {
@@ -193,83 +173,12 @@ $: currentLevelRenderConfig = getLevelRenderConfig(currentLevel)
 $: currentLevel = $currentLevelStore
 $: levelRegistry = $levelRegistryStore
 $: selectedStar = $selectedStarStore
-$: gameStats = $gameStatsStore
 $: isMobile = $isMobileStore
 $: error = $errorStore
 $: if (currentLevel && currentLevel !== lastRuntimeResetLevel) {
   resetRuntimeForLevelTransition(currentLevel)
 }
 $: playerReady = Boolean(playerComponent)
-$: setRuntimeDiagnostic('mode', {
-  level: 'ready',
-  message: editorEnabled ? 'Editor mode active.' : 'Gameplay mode active.',
-})
-$: gameWorldLifecycle = createGameWorldLifecycleSnapshot({
-  levelId: currentLevel,
-  shellReady: isInitialized,
-  levelComponentReady: Boolean(currentLevelComponent),
-  staticWorldReady,
-  physicsReady,
-  playerComponentReady: editorEnabled || playerReady,
-  gameplayEnabled: editorEnabled || gameplayEnabled,
-  editorEnabled,
-  unloading: worldUnloading,
-  error,
-})
-$: gameWorldDiagnostic = getGameWorldDiagnostic(gameWorldLifecycle)
-$: gameWorldLifecycleDiagnostics =
-  createGameWorldLifecycleDiagnostics(gameWorldLifecycle)
-$: setRuntimeDiagnostic('world', {
-  label: 'Game World',
-  level: gameWorldDiagnostic.level,
-  message: gameWorldDiagnostic.message,
-  meta: gameWorldLifecycle as unknown as Record<string, unknown>,
-})
-$: gameWorldLifecycleDiagnostics.forEach(entry => {
-  setRuntimeDiagnostic(entry.key, {
-    label: entry.label,
-    level: entry.level,
-    message: entry.message,
-    meta: {
-      active: entry.active,
-      phase: gameWorldLifecycle.phase,
-      levelId: gameWorldLifecycle.levelId,
-    },
-  })
-})
-$: setRuntimeDiagnostic('engine', {
-  level: isGameWorldPlayable(gameWorldLifecycle) ? 'ready' : 'loading',
-  message: isGameWorldPlayable(gameWorldLifecycle)
-    ? `Engine ready on level ${currentLevel}.`
-    : `Engine waiting for world phase: ${gameWorldLifecycle.phase}.`,
-})
-$: setRuntimeDiagnostic('staticWorld', {
-  label: 'Static World',
-  level: staticWorldReady ? 'ready' : 'loading',
-  message: staticWorldReady
-    ? 'Static render/collision world is ready.'
-    : 'Waiting for active level static world readiness.',
-})
-$: setRuntimeDiagnostic('physics', {
-  level: physicsReady ? 'ready' : 'loading',
-  message: physicsReady
-    ? 'Physics world is active.'
-    : 'Waiting for physics world to initialize.',
-})
-$: setRuntimeDiagnostic('player', {
-  level: editorEnabled ? 'idle' : playerReady ? 'ready' : 'loading',
-  message: editorEnabled
-    ? 'Player runtime disabled while editor mode is active.'
-    : playerReady
-      ? 'Player component is ready at the level position.'
-      : 'Waiting for player component readiness.',
-})
-$: setRuntimeDiagnostic('editor', {
-  level: editorEnabled ? 'ready' : 'idle',
-  message: editorEnabled
-    ? 'Editor subsystems active.'
-    : 'Editor subsystems inactive.',
-})
 
 // Reactive level and star tracking - debug logs removed for performance
 $: if (currentLevel) {
@@ -280,63 +189,7 @@ $: if (selectedStar) {
   debugLog('⭐ Star selected:', selectedStar.title)
 }
 
-// Modern dialog system now handled by ConversationDialog component
-
-/**
- * Convert cardClass string to position type
- */
-function getPositionFromCardClass(
-  cardClass?: string,
-): 'top' | 'bottom' | 'left' | 'right' | undefined {
-  if (!cardClass) return undefined
-
-  if (cardClass.includes('top')) return 'top'
-  if (cardClass.includes('bottom')) return 'bottom'
-  if (cardClass.includes('left')) return 'left'
-  if (cardClass.includes('right')) return 'right'
-
-  return undefined
-}
-
-function extractSelectedStar(detail: any): StarData | null {
-  if (!detail) return null
-
-  const baseStar = detail.star ?? detail.eventData ?? detail
-  if (!baseStar) return null
-
-  const mergedScreenPosition = {
-    ...(baseStar.screenPosition ?? {}),
-    ...(detail.screenPosition ?? {}),
-  }
-
-  return {
-    ...baseStar,
-    screenPosition:
-      Object.keys(mergedScreenPosition).length > 0
-        ? mergedScreenPosition
-        : undefined,
-  }
-}
-
-// Convert StarData to TimelineEvent for the TimelineCard
-$: selectedEvent = selectedStar
-  ? {
-      id: selectedStar.uniqueId,
-      title: selectedStar.title,
-      description: selectedStar.description,
-      slug: selectedStar.slug,
-      year: selectedStar.timelineYear,
-      era: selectedStar.timelineEra,
-      location: selectedStar.timelineLocation,
-      isKeyEvent: selectedStar.isKeyEvent,
-      isLevel: selectedStar.isLevel,
-      levelId: selectedStar.levelId,
-      tags: selectedStar.tags,
-      category: selectedStar.category,
-      unlocked: true,
-      screenPosition: selectedStar.screenPosition,
-    }
-  : null
+$: selectedEvent = createTimelineEventFromStar(selectedStar)
 
 $: if (typeof window !== 'undefined' && isInitialized && currentLevel) {
   void ensureLevelComponent(currentLevel)
@@ -361,16 +214,11 @@ $: if (
   void ensureConversationDialogComponent()
 }
 
-$: if (
-  editorEnabled &&
-  currentLevel &&
-  !editorSceneLayerComponent &&
-  !sceneLayerComponentPromise
-) {
+$: if (editorEnabled && currentLevel && !editorSceneLayerComponent) {
   void ensureSceneLayerComponent()
 }
 
-$: if (editorEnabled && !editorFeaturesPromise) {
+$: if (editorEnabled && !editorPanelComponent) {
   void ensureEditorFeatures()
 }
 
@@ -378,33 +226,31 @@ $: if (editorEnabled && !editorFeaturesPromise) {
  * Check URL parameters for room joining
  */
 async function checkForRoomJoin() {
-  if (typeof window === 'undefined') return
+  if (!shellBootstrapState) return
+  const { roomName, deprecatedJoinParam } = shellBootstrapState
 
-  const urlParams = new URLSearchParams(window.location.search)
-  const roomParam = urlParams.get('room')
-  const joinParam = urlParams.get('join') // Legacy support
-
-  if (roomParam) {
-    debugLog(`🎮 Found room parameter: ${roomParam}`)
+  if (roomName) {
+    debugLog(`🎮 Found room parameter: ${roomName}`)
     isJoiningRoom = true
-    loadingMessage = `Joining room "${roomParam}"...`
+    loadingMessage = createRoomJoinLoadingMessage(roomName)
 
     try {
-      debugLog(`🎮 Joining room: ${roomParam}`)
+      debugLog(`🎮 Joining room: ${roomName}`)
       await ensureMultiplayerFeatures()
-      initializeClientFn?.(roomParam)
-      debugLog(`✅ Initiated join for room "${roomParam}"`)
+      initializeClientFn?.(roomName)
+      debugLog(`✅ Initiated join for room "${roomName}"`)
     } catch (error) {
-      roomJoinError = `Failed to join room "${roomParam}". Please try again.`
-      console.error(`❌ Failed to join room "${roomParam}":`, error)
+      roomJoinError = createRoomJoinErrorMessage(roomName)
+      console.error(`❌ Failed to join room "${roomName}":`, error)
     } finally {
       isJoiningRoom = false
     }
-  } else if (joinParam) {
+  } else if (deprecatedJoinParam) {
     // Legacy support for direct host ID joining is deprecated
-    roomJoinError =
-      'Direct host ID joining is no longer supported. Please use room names instead.'
-    console.warn(`⚠️ Legacy join parameter "${joinParam}" is deprecated`)
+    roomJoinError = createDeprecatedJoinErrorMessage()
+    console.warn(
+      `⚠️ Legacy join parameter "${deprecatedJoinParam}" is deprecated`,
+    )
   }
 }
 
@@ -416,22 +262,12 @@ async function ensureLevelComponent(levelId: string) {
     sceneId: 'observatory',
   }
   const cacheKey = `scene:${levelSource.sceneId}:${normalizedLevel}`
-  const cached = levelComponentCache.get(cacheKey)
-  if (cached) {
-    currentLevelComponent = cached
-    worldUnloading = false
-    return
-  }
-
   const requestId = ++activeLevelLoadRequest
   currentLevelComponent = null
 
-  const module = await import('./levels/SceneDocumentLevel.svelte')
-
-  levelComponentCache.set(cacheKey, module.default)
-
+  const levelComponent = await runtimeFeatureLoader.loadLevelComponent(cacheKey)
   if (requestId === activeLevelLoadRequest) {
-    currentLevelComponent = module.default
+    currentLevelComponent = levelComponent
     worldUnloading = false
   }
 }
@@ -439,8 +275,8 @@ async function ensureLevelComponent(levelId: string) {
 async function ensureSettingsPanelComponent() {
   if (settingsPanelComponent) return
   try {
-    const module = await import('./ui/SettingsPanel.svelte')
-    settingsPanelComponent = getModuleDefault(module, 'settings panel')
+    settingsPanelComponent =
+      await runtimeFeatureLoader.loadSettingsPanelComponent()
   } catch (error) {
     console.warn('Failed to load settings panel:', error)
   }
@@ -449,13 +285,8 @@ async function ensureSettingsPanelComponent() {
 async function ensureConversationDialogComponent() {
   if (conversationDialogComponent) return
   try {
-    const module = await import(
-      './features/conversation/ConversationDialog.svelte'
-    )
-    conversationDialogComponent = getModuleDefault(
-      module,
-      'conversation dialog',
-    )
+    conversationDialogComponent =
+      await runtimeFeatureLoader.loadConversationDialogComponent()
   } catch (error) {
     console.warn('Failed to load conversation dialog:', error)
   }
@@ -464,41 +295,46 @@ async function ensureConversationDialogComponent() {
 async function ensureRuntimeDiagnosticsPanelComponent() {
   if (runtimeDiagnosticsPanelComponent) return
   try {
-    const module = await import('./ui/RuntimeDiagnosticsPanel.svelte')
-    runtimeDiagnosticsPanelComponent = getModuleDefault(
-      module,
-      'runtime diagnostics panel',
-    )
+    runtimeDiagnosticsPanelComponent =
+      await runtimeFeatureLoader.loadRuntimeDiagnosticsPanelComponent()
   } catch (error) {
     console.warn('Failed to load runtime diagnostics panel:', error)
   }
 }
 
-async function ensureSceneLayerComponent() {
-  if (editorSceneLayerComponent) return
+async function ensureEditorFeatureLoader() {
+  if (editorFeatureLoader) return editorFeatureLoader
 
-  if (!sceneLayerComponentPromise) {
-    sceneLayerComponentPromise = import('./editor/EditorSceneLayer.svelte')
+  if (!editorFeatureLoaderPromise) {
+    editorFeatureLoaderPromise = import('./editor/gameEditorFeatureLoader')
       .then(module => {
-        editorSceneLayerComponent = getModuleDefault(
-          module,
-          'editor scene layer',
-        )
+        editorFeatureLoader = module.createGameEditorFeatureLoader()
+        return editorFeatureLoader
       })
       .catch(error => {
-        console.warn('Failed to load scene layer:', error)
-        sceneLayerComponentPromise = null
+        editorFeatureLoaderPromise = null
+        throw error
       })
   }
 
-  await sceneLayerComponentPromise
+  return editorFeatureLoaderPromise
+}
+
+async function ensureSceneLayerComponent() {
+  if (editorSceneLayerComponent) return
+
+  try {
+    const editorLoader = await ensureEditorFeatureLoader()
+    editorSceneLayerComponent = await editorLoader.loadSceneLayerComponent()
+  } catch (error) {
+    console.warn('Failed to load scene layer:', error)
+  }
 }
 
 async function ensureChatBoxComponent() {
   if (chatBoxComponentClass) return
   try {
-    const module = await import('./features/multiplayer/ui/ChatBox.svelte')
-    chatBoxComponentClass = getModuleDefault(module, 'chat box')
+    chatBoxComponentClass = await runtimeFeatureLoader.loadChatBoxComponent()
   } catch (error) {
     console.warn('Failed to load chat box:', error)
   }
@@ -507,8 +343,7 @@ async function ensureChatBoxComponent() {
 async function ensureAudioSystemComponent() {
   if (audioSystemComponent) return
   try {
-    const module = await import('./systems/Audio.svelte')
-    audioSystemComponent = getModuleDefault(module, 'audio system')
+    audioSystemComponent = await runtimeFeatureLoader.loadAudioSystemComponent()
   } catch (error) {
     console.warn('Failed to load audio system:', error)
   }
@@ -517,90 +352,42 @@ async function ensureAudioSystemComponent() {
 async function ensureEditorFeatures() {
   if (editorPanelComponent && editorViewportControlsComponent) return
 
-  if (!editorFeaturesPromise) {
-    editorFeaturesPromise = Promise.all([
-      import('./editor/EditorPanel.svelte'),
-      import('./editor/EditorControlsOverlay.svelte'),
-      import('./editor/EditorCollisionOverlay.svelte'),
-      import('./editor/EditorCircleSelectOverlay.svelte'),
-      import('./editor/EditorMarqueeOverlay.svelte'),
-      import('./editor/EditorSceneLayer.svelte'),
-      import('./editor/EditorTerrainSculptLayer.svelte'),
-      import('./editor/EditorViewportControls.svelte'),
-      import('./editor/EditorWorkbenchLighting.svelte'),
-    ])
-      .then(
-        ([
-          editorPanelModule,
-          editorControlsOverlayModule,
-          editorCollisionOverlayModule,
-          editorCircleSelectOverlayModule,
-          editorMarqueeOverlayModule,
-          editorSceneLayerModule,
-          editorTerrainSculptLayerModule,
-          editorViewportControlsModule,
-          editorWorkbenchLightingModule,
-        ]) => {
-          editorPanelComponent = getModuleDefault(
-            editorPanelModule,
-            'editor panel',
-          )
-          editorControlsOverlayComponent = getModuleDefault(
-            editorControlsOverlayModule,
-            'editor controls overlay',
-          )
-          editorCollisionOverlayComponent = getModuleDefault(
-            editorCollisionOverlayModule,
-            'editor collision overlay',
-          )
-          editorCircleSelectOverlayComponent = getModuleDefault(
-            editorCircleSelectOverlayModule,
-            'editor circle select overlay',
-          )
-          editorMarqueeOverlayComponent = getModuleDefault(
-            editorMarqueeOverlayModule,
-            'editor marquee overlay',
-          )
-          editorSceneLayerComponent = getModuleDefault(
-            editorSceneLayerModule,
-            'editor scene layer',
-          )
-          editorTerrainSculptLayerComponent = getModuleDefault(
-            editorTerrainSculptLayerModule,
-            'editor terrain sculpt layer',
-          )
-          editorViewportControlsComponent = getModuleDefault(
-            editorViewportControlsModule,
-            'editor viewport controls',
-          )
-          editorWorkbenchLightingComponent = getModuleDefault(
-            editorWorkbenchLightingModule,
-            'editor workbench lighting',
-          )
-        },
-      )
-      .catch(error => {
-        console.warn('Failed to load editor features:', error)
-        editorFeaturesPromise = null
-      })
+  try {
+    const editorLoader = await ensureEditorFeatureLoader()
+    const editorFeatures = await editorLoader.loadEditorFeatures()
+    editorPanelComponent = editorFeatures.editorPanelComponent
+    editorControlsOverlayComponent =
+      editorFeatures.editorControlsOverlayComponent
+    editorCollisionOverlayComponent =
+      editorFeatures.editorCollisionOverlayComponent
+    editorCircleSelectOverlayComponent =
+      editorFeatures.editorCircleSelectOverlayComponent
+    editorMarqueeOverlayComponent = editorFeatures.editorMarqueeOverlayComponent
+    editorSceneLayerComponent = editorFeatures.editorSceneLayerComponent
+    editorTerrainSculptLayerComponent =
+      editorFeatures.editorTerrainSculptLayerComponent
+    editorViewportControlsComponent =
+      editorFeatures.editorViewportControlsComponent
+    editorWorkbenchLightingComponent =
+      editorFeatures.editorWorkbenchLightingComponent
+  } catch (error) {
+    console.warn('Failed to load editor features:', error)
   }
-
-  await editorFeaturesPromise
 }
 
 async function enableEditorSession() {
   if (editorSessionCleanup) return
 
-  const module = await import('./editor/editorSessionStore')
-  const unsubscribe = module.editorStateStore.subscribe(state => {
-    editorEnabled = state.enabled
-    collisionOverlayEnabled = state.collisionOverlayEnabled
-  })
-
-  module.initializeEditor(true)
+  const editorLoader = await ensureEditorFeatureLoader()
+  editorSessionCleanup = await editorLoader.enableEditorSession(
+    (state: { enabled: boolean; collisionOverlayEnabled: boolean }) => {
+      editorEnabled = state.enabled
+      collisionOverlayEnabled = state.collisionOverlayEnabled
+    },
+  )
+  const cleanup = editorSessionCleanup
   editorSessionCleanup = () => {
-    module.initializeEditor(false)
-    unsubscribe()
+    cleanup()
     editorEnabled = false
     collisionOverlayEnabled = false
   }
@@ -609,44 +396,24 @@ async function enableEditorSession() {
 async function ensureGameplayCore() {
   if (physicsSystemComponent && playerComponentClass) return
 
-  if (!gameplayCorePromise) {
-    gameplayCorePromise = Promise.all([
-      import('./systems/Physics.svelte'),
-      import('./features/player/Player.svelte'),
-    ])
-      .then(([physicsModule, playerModule]) => {
-        physicsSystemComponent = getModuleDefault(
-          physicsModule,
-          'physics system',
-        )
-        playerComponentClass = getModuleDefault(
-          playerModule,
-          'player component',
-        )
-      })
-      .catch(error => {
-        console.warn('Failed to load gameplay core:', error)
-        gameplayCorePromise = null
-      })
+  try {
+    const gameplayCore = await runtimeFeatureLoader.loadGameplayCore()
+    physicsSystemComponent = gameplayCore.physicsSystemComponent
+    playerComponentClass = gameplayCore.playerComponentClass
+  } catch (error) {
+    console.warn('Failed to load gameplay core:', error)
   }
-
-  await gameplayCorePromise
 }
 
 async function ensureMultiplayerFeatures() {
   if (multiplayerManagerComponent && initializeClientFn) return
 
   try {
-    const [componentModule, serviceModule] = await Promise.all([
-      import('./features/multiplayer/components/MultiplayerManager.svelte'),
-      import('./features/multiplayer/services/MultiplayerService'),
-    ])
-
-    multiplayerManagerComponent = getModuleDefault(
-      componentModule,
-      'multiplayer manager',
-    )
-    initializeClientFn = serviceModule.initializeClient
+    const multiplayerFeatures =
+      await runtimeFeatureLoader.loadMultiplayerFeatures()
+    multiplayerManagerComponent =
+      multiplayerFeatures.multiplayerManagerComponent
+    initializeClientFn = multiplayerFeatures.initializeClientFn
     void ensureChatBoxComponent()
   } catch (error) {
     console.warn('Failed to load multiplayer features:', error)
@@ -785,42 +552,36 @@ async function initializeThrelte() {
     })
     loadingMessage = 'Initializing MEGAMEAL...'
 
-    const urlParams =
-      typeof window !== 'undefined'
-        ? new URLSearchParams(window.location.search)
-        : null
-    const shouldEnableEditor = isUrlFlagEnabled(urlParams, 'editor')
-    const shouldShowDebugPanel = isUrlFlagEnabled(urlParams, 'debug')
-    const requestedLevel = normalizeLevelId(urlParams?.get('level'))
+    const bootstrap = createGameShellBootstrapState({
+      currentLevel: $currentLevelStore,
+      normalizeLevelId,
+      search: typeof window !== 'undefined' ? window.location.search : '',
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+    })
+    shellBootstrapState = bootstrap
     editorEnabled = false
     collisionOverlayEnabled = false
-    if (shouldEnableEditor) {
+    if (bootstrap.shouldEnableEditor) {
       await enableEditorSession()
     }
-    showDebugPanel = shouldShowDebugPanel
+    showDebugPanel = bootstrap.shouldShowDebugPanel
 
     // Detect mobile and update store
-    const isMobileDevice =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent,
-      )
-    gameActions.setMobile(isMobileDevice)
+    gameActions.setMobile(bootstrap.isMobileDevice)
 
     loadingMessage = 'Building world...'
 
     // Load saved game state
     loadGameState()
 
-    if (requestedLevel !== 'observatory') {
-      gameActions.transitionToLevel(requestedLevel)
-    } else if (!$currentLevelStore || $currentLevelStore === '') {
-      gameActions.transitionToLevel('observatory')
+    if (bootstrap.initialLevelId) {
+      gameActions.transitionToLevel(bootstrap.initialLevelId)
     }
 
     // Set up Threlte-based state management
     setupStateUpdates()
 
-    if (shouldEnableEditor) {
+    if (bootstrap.shouldEnableEditor) {
       await ensureGameplayCore()
     }
 
@@ -832,7 +593,7 @@ async function initializeThrelte() {
       level: 'ready',
       message: 'Game shell initialized. Waiting for runtime subsystems.',
     })
-    if (!shouldEnableEditor) {
+    if (!bootstrap.shouldEnableEditor) {
       deferredAudioCleanup = setupDeferredAudioLoading()
       deferredGameplayCoreCleanup = setupDeferredGameplayCoreLoading()
     }
@@ -878,14 +639,7 @@ function handleLevelReturnRequest(detail: {
   confirmLabel?: string
   cancelLabel?: string
 }) {
-  pendingLevelReturn = {
-    levelType: detail.levelType || 'observatory',
-    title: detail.title || 'Return to Observatory?',
-    message:
-      detail.message || 'Leave this level and travel back to the observatory?',
-    confirmLabel: detail.confirmLabel || 'Return',
-    cancelLabel: detail.cancelLabel || 'Cancel',
-  }
+  pendingLevelReturn = createPendingLevelReturn(detail)
 }
 
 function cancelPendingLevelReturn() {
@@ -998,6 +752,18 @@ onDestroy(() => {
   
   <!-- Game Container - Allow input to pass through to Player component -->
   <div class="w-full h-full relative bg-black overflow-hidden" style="pointer-events: none;">
+    <GameRuntimeDiagnostics
+      {currentLevel}
+      shellReady={isInitialized}
+      levelComponentReady={Boolean(currentLevelComponent)}
+      {staticWorldReady}
+      {physicsReady}
+      {playerReady}
+      {gameplayEnabled}
+      {editorEnabled}
+      unloading={worldUnloading}
+      {error}
+    />
     
     <!-- Threlte Canvas - Enable input for 3D scene -->
     {#if isInitialized && !error}
@@ -1052,58 +818,35 @@ onDestroy(() => {
   
     <!-- Room Join Screen -->
     {#if isJoiningRoom}
-      <div class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50" style="pointer-events: auto;">
-        <div class="text-center text-white">
-          <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto"></div>
-          <p class="mt-4 text-lg">{loadingMessage}</p>
-          {#if currentLevel !== 'observatory'}
-            <button
-              class="mt-6 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm"
-              on:click={() => { transitionToLevel('observatory') }}
-            >
-              ← Return to Observatory
-            </button>
-          {/if}
-        </div>
-      </div>
+      <RoomJoinOverlay
+        {loadingMessage}
+        {currentLevel}
+        on:returnToObservatory={() => {
+          transitionToLevel('observatory')
+        }}
+      />
     {/if}
   
     <!-- Modern Error Screen -->
     {#if error || roomJoinError}
-      <div class="fixed inset-0 bg-red-900 bg-opacity-90 flex items-center justify-center z-50" style="pointer-events: auto;">
-        <div class="text-center text-white p-8 rounded-lg bg-red-800">
-          <h2 class="text-2xl font-bold mb-4">⚠️ {roomJoinError ? 'Room Join Error' : 'Error'}</h2>
-          <p class="text-lg">{roomJoinError || error}</p>
-          <button class="mt-4 px-4 py-2 bg-red-600 hover:bg-red-500 rounded" 
-                  on:click={() => location.reload()}>
-            Reload Game
-          </button>
-          {#if roomJoinError}
-            <button class="mt-2 ml-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded" 
-                    on:click={() => roomJoinError = ''}>
-              Continue Without Joining
-            </button>
-          {/if}
-        </div>
-      </div>
+      <GameErrorOverlay
+        errorMessage={error}
+        {roomJoinError}
+        on:reload={() => location.reload()}
+        on:clearRoomError={() => {
+          roomJoinError = ''
+        }}
+      />
     {/if}
   
     <!-- Modern Minimal Debug Panel -->
     {#if isInitialized && !error && showDebugPanel}
-      <div class="fixed top-4 right-4 bg-black bg-opacity-80 text-white p-4 rounded" style="pointer-events: auto;">
-        <h3 class="font-bold">🔧 Debug Info</h3>
-        <p>Game State: {isInitialized ? 'Ready' : 'Initializing'}</p>
-        <p>Current Level: {currentLevel}</p>
-        <p>Mobile: {isMobile ? 'Yes' : 'No'}</p>
-        {#if runtimeDiagnosticsPanelComponent}
-          <div class="mt-3">
-            <svelte:component
-              this={runtimeDiagnosticsPanelComponent}
-              compact={true}
-            />
-          </div>
-        {/if}
-      </div>
+      <GameDebugPanel
+        {isInitialized}
+        {currentLevel}
+        {isMobile}
+        {runtimeDiagnosticsPanelComponent}
+      />
     {/if}
       
   
@@ -1135,41 +878,20 @@ onDestroy(() => {
         />
 
         {#if activeLevelNote}
-          <div class="miranda-note-overlay">
-            <div class="miranda-note-panel">
-              <button
-                class="miranda-note-close"
-                aria-label="Close note"
-                on:click={() => {
-                  activeLevelNote = null
-                }}
-              >
-                ×
-              </button>
-              <div class="miranda-note-kicker">{activeLevelNote.location}</div>
-              <h3 class="miranda-note-title">{activeLevelNote.title}</h3>
-              <div class="miranda-note-author">{activeLevelNote.author}</div>
-              <p class="miranda-note-excerpt">{activeLevelNote.excerpt}</p>
-              <div class="miranda-note-body">{activeLevelNote.body}</div>
-            </div>
-          </div>
+          <LevelNoteOverlay
+            note={activeLevelNote}
+            on:close={() => {
+              activeLevelNote = null
+            }}
+          />
         {/if}
 
         {#if pendingLevelReturn}
-          <div class="level-return-overlay">
-            <div class="level-return-dialog">
-              <h3 class="level-return-title">{pendingLevelReturn.title}</h3>
-              <p class="level-return-message">{pendingLevelReturn.message}</p>
-              <div class="level-return-actions">
-                <button class="level-return-button secondary" on:click={cancelPendingLevelReturn}>
-                  {pendingLevelReturn.cancelLabel}
-                </button>
-                <button class="level-return-button primary" on:click={confirmPendingLevelReturn}>
-                  {pendingLevelReturn.confirmLabel}
-                </button>
-              </div>
-            </div>
-          </div>
+          <LevelReturnDialog
+            pendingReturn={pendingLevelReturn}
+            on:cancel={cancelPendingLevelReturn}
+            on:confirm={confirmPendingLevelReturn}
+          />
         {/if}
 
         <!-- Settings Button -->
@@ -1207,180 +929,3 @@ onDestroy(() => {
         </div>
       {/if}
   </div>
-  
-  <style>
-    /* Minimal styles - most styling is handled by components */
-
-    .miranda-note-overlay {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      display: flex;
-      align-items: flex-end;
-      justify-content: flex-start;
-      padding: 1.25rem;
-      z-index: 45;
-    }
-
-    .miranda-note-panel {
-      position: relative;
-      pointer-events: auto;
-      width: min(30rem, calc(100vw - 2rem));
-      max-height: min(32rem, 72vh);
-      overflow: auto;
-      padding: 1rem 1rem 1.1rem;
-      border: 1px solid rgba(255, 214, 180, 0.28);
-      border-radius: 1rem;
-      background:
-        linear-gradient(180deg, rgba(33, 20, 19, 0.96), rgba(10, 9, 13, 0.96)),
-        rgba(0, 0, 0, 0.86);
-      box-shadow:
-        0 18px 48px rgba(0, 0, 0, 0.52),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06);
-      color: rgba(255, 244, 232, 0.96);
-      backdrop-filter: blur(14px);
-    }
-
-    .miranda-note-kicker {
-      font-size: 0.7rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: rgba(255, 180, 138, 0.82);
-      margin-bottom: 0.45rem;
-    }
-
-    .miranda-note-title {
-      margin: 0;
-      font-size: 1.15rem;
-      line-height: 1.2;
-    }
-
-    .miranda-note-author {
-      margin-top: 0.25rem;
-      font-size: 0.8rem;
-      color: rgba(196, 215, 255, 0.78);
-    }
-
-    .miranda-note-excerpt {
-      margin: 0.8rem 0 0.65rem;
-      font-size: 0.95rem;
-      color: rgba(255, 219, 196, 0.88);
-    }
-
-    .miranda-note-body {
-      white-space: pre-line;
-      font-size: 0.9rem;
-      line-height: 1.5;
-      color: rgba(255, 244, 232, 0.92);
-    }
-
-    .miranda-note-close {
-      position: absolute;
-      top: 0.6rem;
-      right: 0.7rem;
-      width: 2rem;
-      height: 2rem;
-      border: 0;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      color: rgba(255, 244, 232, 0.88);
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
-
-    .miranda-note-close:hover {
-      background: rgba(255, 255, 255, 0.16);
-    }
-
-    .level-return-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 55;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.25rem;
-      background: rgba(3, 6, 12, 0.7);
-      backdrop-filter: blur(10px);
-      pointer-events: auto;
-    }
-
-    .level-return-dialog {
-      width: min(26rem, calc(100vw - 2rem));
-      padding: 1.2rem 1.2rem 1rem;
-      border: 1px solid rgba(143, 214, 255, 0.2);
-      border-radius: 1rem;
-      background: linear-gradient(180deg, rgba(10, 16, 28, 0.96), rgba(5, 9, 16, 0.94));
-      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
-      color: #eef6ff;
-    }
-
-    .level-return-title {
-      margin: 0 0 0.5rem;
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-    }
-
-    .level-return-message {
-      margin: 0;
-      color: rgba(226, 237, 250, 0.78);
-      line-height: 1.5;
-      font-size: 0.95rem;
-    }
-
-    .level-return-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      margin-top: 1.1rem;
-    }
-
-    .level-return-button {
-      border: none;
-      border-radius: 999px;
-      padding: 0.7rem 1rem;
-      font: inherit;
-      cursor: pointer;
-      transition: transform 140ms ease, opacity 140ms ease, background 140ms ease;
-    }
-
-    .level-return-button:hover {
-      transform: translateY(-1px);
-    }
-
-    .level-return-button.secondary {
-      background: rgba(118, 136, 164, 0.18);
-      color: #d6e4f5;
-    }
-
-    .level-return-button.primary {
-      background: linear-gradient(135deg, #7fd3ff, #a4b6ff);
-      color: #05121d;
-      font-weight: 700;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .miranda-note-overlay {
-        padding: 0.75rem;
-      }
-
-      .miranda-note-panel {
-        width: min(100%, 28rem);
-        max-height: 58vh;
-        padding-bottom: 1rem;
-      }
-
-      .level-return-dialog {
-        width: min(100%, 25rem);
-      }
-    }
-  </style>

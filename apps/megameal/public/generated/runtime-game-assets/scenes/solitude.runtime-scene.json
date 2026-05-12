@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-08T22:27:13.362Z",
+  "generatedAt": "2026-05-12T00:43:21.216Z",
   "levelId": "solitude",
   "sceneId": "solitude",
   "source": {
@@ -18,6 +18,11 @@
         0,
         1.5,
         -24
+      ],
+      "rotation": [
+        0,
+        0,
+        0
       ]
     },
     "settings": {
@@ -127,6 +132,169 @@
           "keyLightIntensity": 0.96,
           "fillLightIntensity": 0.34
         },
+        "renderProfile": {
+          "id": "solitude-abyssal-neon-ground",
+          "defaultTier": "desktop",
+          "lighting": {
+            "ambientColor": "#7e7bff",
+            "skyColor": "#5e58d9",
+            "groundColor": "#12071f",
+            "keyLightColor": "#ff58d2",
+            "fillLightColor": "#4ce6ff",
+            "keyLightPosition": [
+              12,
+              18,
+              -18
+            ],
+            "fillLightPosition": [
+              -18,
+              9,
+              14
+            ]
+          },
+          "shadows": {
+            "enabled": true,
+            "maxCastingLights": 1,
+            "mapSize": 1024,
+            "cameraSize": 44,
+            "cameraFar": 92
+          },
+          "reflections": {
+            "mode": "static-environment",
+            "textureSize": 256,
+            "maxPlanarSurfaces": 0,
+            "environmentIntensity": 0.85
+          },
+          "postProcessing": {
+            "enabled": true,
+            "passes": [
+              "tone-mapping",
+              "ambient-occlusion",
+              "color-grading",
+              "bloom",
+              "vignette"
+            ],
+            "maxEnabledPasses": 5,
+            "ambientOcclusion": {
+              "enabled": true,
+              "intensity": 0.72,
+              "radius": 8,
+              "minDistance": 0.006,
+              "maxDistance": 0.12
+            },
+            "bloom": {
+              "intensity": 1.15,
+              "threshold": 0.82
+            },
+            "toneMappingExposure": 0.92,
+            "vignetteStrength": 1
+          },
+          "qualityTiers": {
+            "mobile": {
+              "shadows": {
+                "enabled": false,
+                "maxCastingLights": 0
+              },
+              "reflections": {
+                "mode": "none",
+                "textureSize": 0,
+                "maxPlanarSurfaces": 0,
+                "environmentIntensity": 0.7
+              },
+              "postProcessing": {
+                "passes": [
+                  "tone-mapping",
+                  "color-grading"
+                ],
+                "maxEnabledPasses": 2
+              }
+            },
+            "desktop": {
+              "shadows": {
+                "enabled": true,
+                "maxCastingLights": 1,
+                "mapSize": 1024
+              },
+              "reflections": {
+                "mode": "static-environment",
+                "textureSize": 256,
+                "maxPlanarSurfaces": 0
+              },
+              "postProcessing": {
+                "passes": [
+                  "tone-mapping",
+                  "ambient-occlusion",
+                  "color-grading",
+                  "bloom",
+                  "vignette"
+                ],
+                "maxEnabledPasses": 5,
+                "ambientOcclusion": {
+                  "enabled": true,
+                  "intensity": 0.72,
+                  "radius": 8,
+                  "minDistance": 0.006,
+                  "maxDistance": 0.12
+                }
+              }
+            },
+            "tv": {
+              "shadows": {
+                "enabled": true,
+                "maxCastingLights": 1,
+                "mapSize": 2048
+              },
+              "reflections": {
+                "mode": "static-environment",
+                "textureSize": 512,
+                "maxPlanarSurfaces": 0
+              },
+              "postProcessing": {
+                "passes": [
+                  "tone-mapping",
+                  "ambient-occlusion",
+                  "color-grading",
+                  "bloom",
+                  "vignette"
+                ],
+                "maxEnabledPasses": 5,
+                "ambientOcclusion": {
+                  "enabled": true,
+                  "intensity": 0.86,
+                  "radius": 10,
+                  "minDistance": 0.005,
+                  "maxDistance": 0.15
+                }
+              }
+            }
+          },
+          "visualBookmarks": [
+            {
+              "id": "spawn-default",
+              "label": "Solitude ground and plateau",
+              "playerPosition": [
+                0,
+                1.5,
+                -24
+              ],
+              "cameraPosition": [
+                0,
+                3.1,
+                -24
+              ],
+              "cameraTarget": [
+                0,
+                1.6,
+                -4
+              ],
+              "viewport": {
+                "width": 1280,
+                "height": 720
+              },
+              "settleMs": 2000
+            }
+          ]
+        },
         "water": {
           "enabled": false,
           "level": -1,
@@ -175,10 +343,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -223,20 +387,6 @@
             "thickness": 0,
             "reflectivity": 0.18
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "solitude plateau",
-            "sourceVisualSize": [
-              240,
-              2.4000000953674316,
-              240
-            ],
-            "lastBakedAssetUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
-            "lastBakedAt": "2026-04-22T23:27:04.009Z"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -281,20 +431,6 @@
             "thickness": 0,
             "reflectivity": 0.18
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "ruin dais",
-            "sourceVisualSize": [
-              44,
-              0.800000011920929,
-              44
-            ],
-            "lastBakedAssetUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
-            "lastBakedAt": "2026-04-19T23:21:08.714Z"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -317,10 +453,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -363,20 +495,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Solitude Pillar 1",
-            "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
-            "lastBakedAt": "2026-04-19T23:24:10.590Z",
-            "sourceVisualSize": [
-              1.8120840005656795,
-              10.661103308200836,
-              1.9252208245880431
-            ]
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -419,20 +537,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Solitude Pillar 2",
-            "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
-            "lastBakedAt": "2026-04-19T23:27:08.491Z",
-            "sourceVisualSize": [
-              1.547170569227097,
-              8.09762179851532,
-              2.033607023983647
-            ]
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -475,20 +579,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Solitude Pillar 3",
-            "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
-            "lastBakedAt": "2026-04-19T23:30:16.846Z",
-            "sourceVisualSize": [
-              2.140638576447344,
-              8.96598886847496,
-              2.8588440686140313
-            ]
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -531,20 +621,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Solitude Pillar 4",
-            "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
-            "lastBakedAt": "2026-04-19T23:33:32.633Z",
-            "sourceVisualSize": [
-              1.090126968661798,
-              10.65800085067749,
-              1.582826293997364
-            ]
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -587,20 +663,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Solitude Pillar 5",
-            "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
-            "lastBakedAt": "2026-04-19T23:36:32.968Z",
-            "sourceVisualSize": [
-              2.8466735613812606,
-              7.9913964509964,
-              2.856070713554768
-            ]
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -643,20 +705,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Solitude Pillar 6",
-            "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
-            "lastBakedAt": "2026-04-19T23:39:42.736Z",
-            "sourceVisualSize": [
-              1.659850121889722,
-              8.087592482566833,
-              1.4857561116582652
-            ]
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -688,20 +736,6 @@
           "asset": {
             "url": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb"
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Solitude Pillar 7",
-            "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb",
-            "lastBakedAt": "2026-04-19T23:42:42.470Z",
-            "sourceVisualSize": [
-              2.048502260182655,
-              10.66420866250992,
-              1.0010815807331659
-            ]
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -744,20 +778,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Solitude Pillar 8",
-            "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
-            "lastBakedAt": "2026-04-19T23:45:20.357Z",
-            "sourceVisualSize": [
-              2.6273346729094875,
-              8.096020382642745,
-              2.4290496676834437
-            ]
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -800,20 +820,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Solitude Pillar 9",
-            "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
-            "lastBakedAt": "2026-04-19T23:48:12.259Z",
-            "sourceVisualSize": [
-              1.4561241279551034,
-              9.277974700927734,
-              2.2778326858778435
-            ]
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -856,20 +862,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Solitude Pillar 10",
-            "lastBakedAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb",
-            "lastBakedAt": "2026-04-19T23:51:16.041Z",
-            "sourceVisualSize": [
-              0.9394101632235144,
-              10.659800720214845,
-              2.4164662115285154
-            ]
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -912,20 +904,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "weathered monolith pillar",
-            "sourceVisualSize": [
-              1.6020425750863367,
-              5.35799999369681,
-              1.696158090398347
-            ],
-            "lastBakedAssetUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
-            "lastBakedAt": "2026-04-19T23:54:25.895Z"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -968,20 +946,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "weathered monolith pillar",
-            "sourceVisualSize": [
-              1.7622154714757663,
-              4.673999994501471,
-              1.7152354733802575
-            ],
-            "lastBakedAssetUrl": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
-            "lastBakedAt": "2026-04-19T23:57:43.866Z"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1033,10 +997,6 @@
             "body": "A solitary firefly keeps watch above Solitude Pillar 1.",
             "lightIntensity": 4
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1088,10 +1048,6 @@
             "body": "A solitary firefly keeps watch above Solitude Pillar 2.",
             "lightIntensity": 4
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1143,10 +1099,6 @@
             "body": "A solitary firefly keeps watch above Solitude Pillar 3.",
             "lightIntensity": 4
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1198,10 +1150,6 @@
             "body": "A solitary firefly keeps watch above Solitude Pillar 4.",
             "lightIntensity": 4
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1253,10 +1201,6 @@
             "body": "A solitary firefly keeps watch above Solitude Pillar 5.",
             "lightIntensity": 4
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1308,10 +1252,6 @@
             "body": "A solitary firefly keeps watch above Solitude Pillar 6.",
             "lightIntensity": 4
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1361,10 +1301,6 @@
             "excerpt": "A patient glow hovers above Solitude Pillar 7.",
             "body": "A solitary firefly keeps watch above Solitude Pillar 7."
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1414,10 +1350,6 @@
             "excerpt": "A patient glow hovers above Solitude Pillar 8.",
             "body": "A solitary firefly keeps watch above Solitude Pillar 8."
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1469,10 +1401,6 @@
             "body": "A solitary firefly keeps watch above Solitude Pillar 9.",
             "lightIntensity": 4
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1522,10 +1450,6 @@
             "excerpt": "A patient glow hovers above Solitude Pillar 10.",
             "body": "A solitary firefly keeps watch above Solitude Pillar 10."
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1577,10 +1501,6 @@
             "body": "A solitary firefly keeps watch above Solitude Pillar 11.",
             "lightIntensity": 4
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1632,10 +1552,6 @@
             "body": "A solitary firefly keeps watch above Solitude Pillar 12.",
             "lightIntensity": 4
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1678,20 +1594,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "broken ancient stone ring ruin",
-            "sourceVisualSize": [
-              4.922340742831281,
-              2.8499999046325684,
-              3.708636712447688
-            ],
-            "lastBakedAssetUrl": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
-            "lastBakedAt": "2026-04-20T00:01:48.287Z"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1734,20 +1636,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "broken ancient stone ring ruin",
-            "sourceVisualSize": [
-              2.7769109270613583,
-              2.3939999198913573,
-              4.336473168316391
-            ],
-            "lastBakedAssetUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
-            "lastBakedAt": "2026-04-20T00:06:10.174Z"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1810,10 +1698,6 @@
             "spriteIntensity": 1.95,
             "lightBurstBoost": 2
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1863,10 +1747,6 @@
           "track": "/audio/ambient/Wicked Shadows Whisper.mp3",
           "volume": 0.28,
           "falloff": 24
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1911,10 +1791,6 @@
             "fogDensity": 0.0026,
             "regionFalloff": 10
           }
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       }
     ]
@@ -1930,7 +1806,7 @@
     "trimeshActorCount": 0,
     "detailMeshActorCount": 0,
     "defaultCollisionActorCount": 0,
-    "visualOnlyActorCount": 20,
+    "visualOnlyActorCount": 3,
     "requiredActorCount": 2,
     "requiredRenderActorIds": [],
     "missingRequiredActorIds": [],
@@ -1953,8 +1829,32 @@
       "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
       "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb"
     ],
+    "collisionDiagnostics": {
+      "authoredActorIds": [
+        "solitude-pillar-1",
+        "solitude-pillar-10",
+        "solitude-pillar-11",
+        "solitude-pillar-12",
+        "solitude-pillar-2",
+        "solitude-pillar-3",
+        "solitude-pillar-4",
+        "solitude-pillar-5",
+        "solitude-pillar-6",
+        "solitude-pillar-8",
+        "solitude-pillar-9",
+        "solitude-ring-fragment-east",
+        "solitude-ring-fragment-west"
+      ],
+      "defaultActorIds": [],
+      "visualOnlyActorIds": [
+        "solitude-ground-dais",
+        "solitude-ground-plateau"
+      ]
+    },
     "errors": [],
-    "warnings": []
+    "warnings": [
+      "Walkability sample \"player-spawn\" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime."
+    ]
   },
   "runtime": {
     "requiredRenderActorIds": [],
@@ -1988,6 +1888,169 @@
       ],
       "terrainManifestUrl": "/terrain/solitude.manifest.json",
       "requiredWalkableSurfaceId": "solitude-terrain"
+    },
+    "renderProfile": {
+      "id": "solitude-abyssal-neon-ground",
+      "defaultTier": "desktop",
+      "lighting": {
+        "ambientColor": "#7e7bff",
+        "skyColor": "#5e58d9",
+        "groundColor": "#12071f",
+        "keyLightColor": "#ff58d2",
+        "fillLightColor": "#4ce6ff",
+        "keyLightPosition": [
+          12,
+          18,
+          -18
+        ],
+        "fillLightPosition": [
+          -18,
+          9,
+          14
+        ]
+      },
+      "shadows": {
+        "enabled": true,
+        "maxCastingLights": 1,
+        "mapSize": 1024,
+        "cameraSize": 44,
+        "cameraFar": 92
+      },
+      "reflections": {
+        "mode": "static-environment",
+        "textureSize": 256,
+        "maxPlanarSurfaces": 0,
+        "environmentIntensity": 0.85
+      },
+      "postProcessing": {
+        "enabled": true,
+        "passes": [
+          "tone-mapping",
+          "ambient-occlusion",
+          "color-grading",
+          "bloom",
+          "vignette"
+        ],
+        "maxEnabledPasses": 5,
+        "ambientOcclusion": {
+          "enabled": true,
+          "intensity": 0.72,
+          "radius": 8,
+          "minDistance": 0.006,
+          "maxDistance": 0.12
+        },
+        "bloom": {
+          "intensity": 1.15,
+          "threshold": 0.82
+        },
+        "toneMappingExposure": 0.92,
+        "vignetteStrength": 1
+      },
+      "qualityTiers": {
+        "mobile": {
+          "shadows": {
+            "enabled": false,
+            "maxCastingLights": 0
+          },
+          "reflections": {
+            "mode": "none",
+            "textureSize": 0,
+            "maxPlanarSurfaces": 0,
+            "environmentIntensity": 0.7
+          },
+          "postProcessing": {
+            "passes": [
+              "tone-mapping",
+              "color-grading"
+            ],
+            "maxEnabledPasses": 2
+          }
+        },
+        "desktop": {
+          "shadows": {
+            "enabled": true,
+            "maxCastingLights": 1,
+            "mapSize": 1024
+          },
+          "reflections": {
+            "mode": "static-environment",
+            "textureSize": 256,
+            "maxPlanarSurfaces": 0
+          },
+          "postProcessing": {
+            "passes": [
+              "tone-mapping",
+              "ambient-occlusion",
+              "color-grading",
+              "bloom",
+              "vignette"
+            ],
+            "maxEnabledPasses": 5,
+            "ambientOcclusion": {
+              "enabled": true,
+              "intensity": 0.72,
+              "radius": 8,
+              "minDistance": 0.006,
+              "maxDistance": 0.12
+            }
+          }
+        },
+        "tv": {
+          "shadows": {
+            "enabled": true,
+            "maxCastingLights": 1,
+            "mapSize": 2048
+          },
+          "reflections": {
+            "mode": "static-environment",
+            "textureSize": 512,
+            "maxPlanarSurfaces": 0
+          },
+          "postProcessing": {
+            "passes": [
+              "tone-mapping",
+              "ambient-occlusion",
+              "color-grading",
+              "bloom",
+              "vignette"
+            ],
+            "maxEnabledPasses": 5,
+            "ambientOcclusion": {
+              "enabled": true,
+              "intensity": 0.86,
+              "radius": 10,
+              "minDistance": 0.005,
+              "maxDistance": 0.15
+            }
+          }
+        }
+      },
+      "visualBookmarks": [
+        {
+          "id": "spawn-default",
+          "label": "Solitude ground and plateau",
+          "playerPosition": [
+            0,
+            1.5,
+            -24
+          ],
+          "cameraPosition": [
+            0,
+            3.1,
+            -24
+          ],
+          "cameraTarget": [
+            0,
+            1.6,
+            -4
+          ],
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "settleMs": 2000
+        }
+      ]
     },
     "worldPartitionUrl": "/runtime-world-partitions/solitude.partition.json"
   }

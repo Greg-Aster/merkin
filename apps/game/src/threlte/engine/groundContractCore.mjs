@@ -4,7 +4,11 @@ const GROUND_MODES = new Set([
   'hybrid',
   'scene-authored',
 ])
-const GROUND_VISUAL_SOURCES = new Set(['terrain-chunks', 'scene-actors', 'none'])
+const GROUND_VISUAL_SOURCES = new Set([
+  'terrain-chunks',
+  'scene-actors',
+  'none',
+])
 const GROUND_COLLISION_SOURCES = new Set([
   'baked-heightfield',
   'scene-colliders',

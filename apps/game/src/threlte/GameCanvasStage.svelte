@@ -4,6 +4,10 @@ import { createEventDispatcher } from 'svelte'
 import GameWorld from './core/GameWorld.svelte'
 import { qualitySettingsStore } from './features/performance/stores/performanceStore'
 import PerformanceSystem from './features/performance/systems/Performance.svelte'
+import {
+  setRuntimePostProcessingDiagnostics,
+  setRuntimeRenderLifecyclePhase,
+} from './stores/runtimeRenderRegistry'
 import { isSettingsMenuOpen } from './stores/uiStore'
 import AssetLoader from './systems/AssetLoader.svelte'
 import EventBus from './systems/EventBus.svelte'
@@ -51,6 +55,30 @@ export let normalizeLevelId: (levelId: string) => string = levelId => levelId
 function forward(type: string, detail: unknown) {
   dispatch(type, detail)
 }
+
+$: postProcessingEligible =
+  $qualitySettingsStore.enablePostProcessing &&
+  staticWorldReady &&
+  (editorEnabled || gameplayEnabled)
+$: if (staticWorldReady && !postProcessingEligible) {
+  setRuntimePostProcessingDiagnostics(currentLevel, {
+    enabled: false,
+    passes: [],
+    reason: $qualitySettingsStore.enablePostProcessing
+      ? 'waiting-for-gameplay-or-editor'
+      : 'quality-disabled',
+  })
+  setRuntimeRenderLifecyclePhase({
+    levelId: currentLevel,
+    phase: 'post-processing-ready',
+    message: `${currentLevel}: post-processing disabled for current quality or activation state.`,
+    detail: {
+      enablePostProcessing: $qualitySettingsStore.enablePostProcessing,
+      editorEnabled,
+      gameplayEnabled,
+    },
+  })
+}
 </script>
 
 {#if isInitialized && !error}
@@ -79,8 +107,11 @@ function forward(type: string, detail: unknown) {
       <AssetLoader />
       <Renderer />
 
-      {#if $qualitySettingsStore.enablePostProcessing && staticWorldReady && (editorEnabled || gameplayEnabled)}
-        <SimplePostProcessing toneMappingExposure={1.0} />
+      {#if postProcessingEligible}
+        <SimplePostProcessing
+          levelId={currentLevel}
+          toneMappingExposure={1.0}
+        />
       {/if}
 
       {#if audioSystemComponent}

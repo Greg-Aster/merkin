@@ -6,12 +6,32 @@ import {
   mergeSolitudeEditorSettings,
 } from './editorLevelSetup'
 import { editorStateStore } from './editorSessionStore'
+import type { EditorSceneNode } from './editorTypes'
 
 export interface EditorNodeViewportState {
   effectiveVisible: boolean
   isolated: boolean
   dimmed: boolean
   locked: boolean
+}
+
+function isHierarchyVisible(
+  nodeId: string,
+  lookup: Map<string, EditorSceneNode>,
+) {
+  const visited = new Set<string>()
+  let currentNode = lookup.get(nodeId)
+
+  while (currentNode) {
+    if (currentNode.visible === false) return false
+    if (visited.has(currentNode.id)) return false
+    visited.add(currentNode.id)
+    currentNode = currentNode.parentId
+      ? lookup.get(currentNode.parentId)
+      : undefined
+  }
+
+  return true
 }
 
 export const editorSceneSettingsStore = derived(
@@ -100,7 +120,8 @@ export const editorNodeViewportStateStore = derived(
         node.id,
         {
           effectiveVisible:
-            node.visible && (isolatedSet.size === 0 || allowedSet.has(node.id)),
+            isHierarchyVisible(node.id, lookup) &&
+            (isolatedSet.size === 0 || allowedSet.has(node.id)),
           isolated: isolatedSet.has(node.id),
           dimmed: isolatedSet.size > 0 && !allowedSet.has(node.id),
           locked: node.locked ?? false,

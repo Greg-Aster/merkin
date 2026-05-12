@@ -1,13 +1,13 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { auditSourceGuards } from './lib/engineAuditSourceGuards.mjs'
+import { auditRuntimeAssetManifest } from './lib/runtimeAssetManifestAudit.mjs'
+import { auditRuntimeScenes } from './lib/runtimeSceneAudit.mjs'
 import {
   auditSceneArchitecture,
   formatBytes,
   isFiniteVec3,
 } from './lib/sceneArchitectureAudit.mjs'
-import { auditRuntimeScenes } from './lib/runtimeSceneAudit.mjs'
-import { auditRuntimeAssetManifest } from './lib/runtimeAssetManifestAudit.mjs'
 import { auditTerrainCollision } from './lib/terrainCollisionAudit.mjs'
 import { auditWorldPartitions } from './lib/worldPartitionAudit.mjs'
 
@@ -30,6 +30,10 @@ const worldPartitionDir = join(
   '../megameal/public/runtime-world-partitions',
 )
 const publicDir = join(process.cwd(), '../megameal/public')
+const prefabCatalogPath = join(
+  process.cwd(),
+  'src/threlte/engine/runtimePrefabCatalog.json',
+)
 const bakedTerrainManifests = [
   'observatory-environment.manifest.json',
   'solitude.manifest.json',
@@ -54,7 +58,11 @@ const worldPartitionBudgetByLevel = {
   },
 }
 const terrainTriangleBudget = 50_000
-const sceneAudit = auditSceneArchitecture({ sceneDir, publicDir })
+const sceneAudit = auditSceneArchitecture({
+  sceneDir,
+  publicDir,
+  prefabCatalogPath,
+})
 const reports = sceneAudit.reports
 const nonRuntimeSceneJsonFiles = sceneAudit.nonRuntimeSceneJsonFiles
 const failures = [...sceneAudit.failures]
@@ -131,6 +139,8 @@ for (const report of reports) {
       `${report.sizeKb}KB`,
       `nodes=${report.nodes}`,
       `geometry=${report.geometryNodes}`,
+      `prefabs=${report.prefabNodes}`,
+      `unknownPrefabs=${report.unknownPrefabReferences}`,
       `primitives=${report.primitiveNodes}`,
       `lights=${report.lightNodes}`,
       `neverCull=${report.neverCullNodes}`,
@@ -146,7 +156,10 @@ for (const report of reports) {
       `invalidChannel=${report.invalidCollisionChannel}`,
       `detailMeshWithoutBudget=${report.detailMeshWithoutBudget}`,
       `disabledCollision=${report.disabledCollision}`,
+      `renderCollisionParity=${report.collisionRenderParityFailures}`,
       `explicitTrimesh=${report.explicitTrimesh}`,
+      `missingColliderUrl=${report.assetTrimeshMissingCollider}`,
+      `colliderUrlConvention=${report.assetTrimeshColliderConventionFailures}`,
       `missingDefaultCollision=${report.missingDefaultCollision}`,
       `deprecatedFields=${report.deprecatedFields.length}`,
       `assetFiles=${report.assetFiles}`,
@@ -171,6 +184,8 @@ console.log(
     'TOTAL',
     `nodes=${totals.nodes}`,
     `geometry=${totals.geometryNodes}`,
+    `prefabs=${totals.prefabNodes}`,
+    `unknownPrefabs=${totals.unknownPrefabReferences}`,
     `primitives=${totals.primitiveNodes}`,
     `lights=${totals.lightNodes}`,
     `neverCull=${totals.neverCullNodes}`,
@@ -186,7 +201,10 @@ console.log(
     `invalidChannel=${totals.invalidCollisionChannel}`,
     `detailMeshWithoutBudget=${totals.detailMeshWithoutBudget}`,
     `disabledCollision=${totals.disabledCollision}`,
+    `renderCollisionParity=${totals.collisionRenderParityFailures}`,
     `explicitTrimesh=${totals.explicitTrimesh}`,
+    `missingColliderUrl=${totals.assetTrimeshMissingCollider}`,
+    `colliderUrlConvention=${totals.assetTrimeshColliderConventionFailures}`,
     `missingDefaultCollision=${totals.missingDefaultCollision}`,
     `deprecatedFields=${totals.deprecatedFields}`,
     `assetFiles=${totals.assetFiles}`,
@@ -211,6 +229,7 @@ for (const report of runtimeSceneReports) {
       `buildErrors=${report.buildErrors}`,
       `deprecatedFields=${report.deprecatedFields}`,
       `graphicsBudget=${report.hasGraphicsBudget ? 'yes' : 'no'}`,
+      `renderProfile=${report.hasRenderProfile ? 'yes' : 'no'}`,
     ].join('  '),
   )
 }
@@ -231,10 +250,20 @@ console.log(
     `missingVariantMetadata=${runtimeAssetManifestReport.missingVariantMetadata}`,
     `missingLodTier=${runtimeAssetManifestReport.missingLodTier}`,
     `missingLodContract=${runtimeAssetManifestReport.missingLodContract}`,
+    `missingLodValidation=${runtimeAssetManifestReport.missingLodValidation}`,
+    `lodTargetMisses=${runtimeAssetManifestReport.lodTargetMisses}`,
+    `lodOrderFailures=${runtimeAssetManifestReport.lodTriangleOrderFailures}`,
     `missingImpostor=${runtimeAssetManifestReport.missingImpostorDescriptor}`,
+    `missingImpostorAtlas=${runtimeAssetManifestReport.missingImpostorAtlas}`,
+    `missingStreamingPolicy=${runtimeAssetManifestReport.missingStreamingPolicy}`,
+    `missingPlatformProfiles=${runtimeAssetManifestReport.missingPlatformProfiles}`,
+    `missingContentBuild=${runtimeAssetManifestReport.missingContentBuildProvenance}`,
+    `missingRenderProfiles=${runtimeAssetManifestReport.missingRenderProfiles}`,
+    `impostorAtlasEntries=${runtimeAssetManifestReport.impostorAtlasEntryCount}`,
     `missingStatus=${runtimeAssetManifestReport.missingStatus}`,
     `missingTextureRefs=${runtimeAssetManifestReport.missingTextureReferences}`,
     `missingRecommendedSlots=${runtimeAssetManifestReport.missingRecommendedMaterialSlots}`,
+    `unapprovedRecommendedSlots=${runtimeAssetManifestReport.unapprovedMissingRecommendedMaterialSlots}`,
     `unsupportedShaders=${runtimeAssetManifestReport.unsupportedShaderFeatures}`,
     `oversizedTextures=${runtimeAssetManifestReport.oversizedTextures}`,
   ].join('  '),
@@ -243,6 +272,21 @@ for (const report of runtimeAssetManifestReport.budgetReports) {
   console.log(
     [
       `  ${report.levelId}`,
+      `tier=${report.tier}`,
+      `payload=${formatBytes(report.runtimeAssetBytes)}`,
+      `largest=${formatBytes(report.largestRuntimeAssetBytes)}`,
+      `drawCalls=${report.combinedDrawCalls}`,
+      `materialSlots=${report.combinedMaterialSlots}`,
+      `triangles=${report.combinedTriangles}`,
+      `textureSize=${formatBytes(report.combinedTextureBytes)}`,
+    ].join('  '),
+  )
+}
+for (const report of runtimeAssetManifestReport.platformBudgetReports) {
+  console.log(
+    [
+      `  ${report.levelId}`,
+      `profile=${report.profileId}`,
       `tier=${report.tier}`,
       `payload=${formatBytes(report.runtimeAssetBytes)}`,
       `largest=${formatBytes(report.largestRuntimeAssetBytes)}`,

@@ -150,6 +150,75 @@ function handleSceneRoutes(req, res, route, context) {
     return true;
   }
 
+  if (pathname === '/api/editor-scene/cook-runtime-assets' && req.method === 'POST') {
+    readRequestBody(req, body => {
+      let levelId = 'current level';
+      try {
+        const payload = body ? JSON.parse(body) : {};
+        if (payload.levelId) levelId = String(payload.levelId);
+
+        const child = spawn('pnpm', [
+          '--dir',
+          'apps/game',
+          'cook:runtime-assets',
+        ], {
+          cwd: REPO_ROOT,
+          stdio: 'pipe',
+          shell: process.platform === 'win32',
+        });
+
+        let stdout = '';
+        let stderr = '';
+
+        child.stdout.on('data', chunk => {
+          stdout += chunk.toString();
+        });
+        child.stderr.on('data', chunk => {
+          stderr += chunk.toString();
+        });
+
+        child.on('error', error => {
+          sendJson(res, 500, {
+            success: false,
+            levelId,
+            message: `Runtime asset cook failed: ${error.message}`,
+            stdout,
+            stderr,
+          });
+        });
+
+        child.on('close', code => {
+          if (code !== 0) {
+            sendJson(res, 500, {
+              success: false,
+              levelId,
+              message: stderr || stdout || `Runtime asset cook failed with exit code ${code}`,
+              stdout,
+              stderr,
+            });
+            return;
+          }
+
+          sendJson(res, 200, {
+            success: true,
+            levelId,
+            message: `Cooked runtime scene manifests for ${levelId}.`,
+            stdout,
+            stderr,
+          });
+        });
+      } catch (error) {
+        console.error('Runtime asset cook request failed:', error);
+        sendJson(res, 500, {
+          success: false,
+          levelId,
+          message: `Runtime asset cook request failed: ${error.message}`,
+        });
+      }
+    });
+    return true;
+  }
+
   if (pathname === '/api/editor/log' && req.method === 'POST') {
     readRequestBody(req, body => {
       try {

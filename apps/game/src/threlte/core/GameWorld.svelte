@@ -1,10 +1,10 @@
 <script lang="ts">
 import { createEventDispatcher } from 'svelte'
+import { runtimeDebugLog } from '../utils/runtimeLog'
 import type {
   PlayerLevelPositionDetail,
   StaticWorldReadyDetail,
 } from './levelRuntimeEvents'
-import { runtimeDebugLog } from '../utils/runtimeLog'
 
 const dispatch = createEventDispatcher()
 
@@ -43,6 +43,7 @@ let activeLevelKey = currentLevel
 let activeLevelComponent = currentLevelComponent
 let worldSessionId = 0
 let levelPlayerPosition: PlayerLevelPositionDetail['position'] | null = null
+let levelPlayerRotation: PlayerLevelPositionDetail['rotation'] | null = null
 let playerSettings: {
   moveSpeed?: number
   jumpForce?: number
@@ -65,9 +66,11 @@ function handleStaticWorldReady(detail: StaticWorldReadyDetail) {
 
 function handlePlayerLevelPosition(detail: PlayerLevelPositionDetail) {
   levelPlayerPosition = detail.position
+  levelPlayerRotation = detail.rotation ?? [0, 0, 0]
   runtimeDebugLog('GameWorld: Player level position resolved', {
     levelId: detail.levelId,
     position: detail.position,
+    rotation: detail.rotation,
     reason: detail.reason,
   })
 }
@@ -82,6 +85,7 @@ function resetWorldSession() {
   gameplayEnabled = false
   playerComponentRef = null
   levelPlayerPosition = null
+  levelPlayerRotation = null
   playerSettings = {}
 }
 
@@ -137,11 +141,12 @@ $: if (
 
       {#if editorEnabled && editorViewportControlsComponent}
         <svelte:component this={editorViewportControlsComponent} enabled={true} />
-      {:else if staticWorldReady && levelPlayerPosition}
+      {:else if levelPlayerPosition}
         <svelte:component
           this={playerComponentClass}
           bind:this={playerComponentRef}
           position={levelPlayerPosition}
+          rotation={levelPlayerRotation ?? [0, 0, 0]}
           speed={playerMoveSpeed}
           jumpForce={playerJumpForce}
           lightIntensityScale={playerLightIntensityScale}

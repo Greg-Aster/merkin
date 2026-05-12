@@ -9,12 +9,15 @@ import type {
   EditorTransformAxis,
   EditorTransformMode,
   EditorViewportLightingMode,
+  EditorViewportShadingMode,
 } from './editorTypes'
 
 const DEFAULT_EDITOR_STATE: EditorState = {
   enabled: false,
   panelOpen: true,
   propertiesShelfOpen: true,
+  outlinerOpen: true,
+  controlsOverlayOpen: true,
   currentLevelId: null,
   selectedNodeId: null,
   selectedNodeIds: [],
@@ -22,6 +25,7 @@ const DEFAULT_EDITOR_STATE: EditorState = {
   selectionAnchorId: null,
   interactionMode: 'objects',
   viewportLightingMode: 'authored',
+  viewportShadingMode: 'rendered',
   transformMode: 'translate',
   transformSpace: 'world',
   transformAxis: 'all',
@@ -66,6 +70,13 @@ export const editorMarqueeStore = writable<EditorMarqueeState>(
 export const editorCircleSelectStore = writable<EditorCircleSelectState>(
   DEFAULT_CIRCLE_SELECT_STATE,
 )
+export const editorViewportFocusStore = writable<{
+  requestId: number
+  position: [number, number, number]
+  distance?: number
+} | null>(null)
+
+let editorViewportFocusRequestId = 0
 
 export function initializeEditor(enabled: boolean) {
   editorStateStore.update(state => ({
@@ -73,6 +84,18 @@ export function initializeEditor(enabled: boolean) {
     enabled,
     panelOpen: enabled ? state.panelOpen : false,
   }))
+}
+
+export function requestEditorViewportFocus(
+  position: [number, number, number],
+  distance = 18,
+) {
+  editorViewportFocusRequestId += 1
+  editorViewportFocusStore.set({
+    requestId: editorViewportFocusRequestId,
+    position: [position[0], position[1], position[2]],
+    distance,
+  })
 }
 
 export function setEditorLevel(levelId: string) {
@@ -230,6 +253,10 @@ export function setEditorViewportLightingMode(
   editorStateStore.update(state => ({ ...state, viewportLightingMode: mode }))
 }
 
+export function setEditorViewportShadingMode(mode: EditorViewportShadingMode) {
+  editorStateStore.update(state => ({ ...state, viewportShadingMode: mode }))
+}
+
 export function setTransformSpace(space: EditorSpace) {
   editorStateStore.update(state => ({ ...state, transformSpace: space }))
 }
@@ -282,11 +309,27 @@ export function togglePanelOpen() {
   editorStateStore.update(state => ({ ...state, panelOpen: !state.panelOpen }))
 }
 
+export function setPanelOpen(open: boolean) {
+  editorStateStore.update(state => ({ ...state, panelOpen: open }))
+}
+
 export function togglePropertiesShelfOpen() {
   editorStateStore.update(state => ({
     ...state,
     propertiesShelfOpen: !state.propertiesShelfOpen,
   }))
+}
+
+export function setPropertiesShelfOpen(open: boolean) {
+  editorStateStore.update(state => ({ ...state, propertiesShelfOpen: open }))
+}
+
+export function setOutlinerOpen(open: boolean) {
+  editorStateStore.update(state => ({ ...state, outlinerOpen: open }))
+}
+
+export function setControlsOverlayOpen(open: boolean) {
+  editorStateStore.update(state => ({ ...state, controlsOverlayOpen: open }))
 }
 
 export function setSnappingEnabled(enabled: boolean) {

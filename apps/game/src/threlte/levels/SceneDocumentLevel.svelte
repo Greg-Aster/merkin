@@ -14,27 +14,34 @@ import {
   hasAuthoredGroundVisuals,
   shouldRenderTerrainVisualChunks,
 } from '../engine/groundContract'
+import {
+  prefetchOptionalLevelRenderAssets,
+  prepareRequiredLevelRenderAssets,
+} from '../engine/levelAssetPreloader'
 import { createLevelBuildReport } from '../engine/levelValidation'
-import type { RuntimeGameplayData } from '../engine/runtimeGameplayTypes'
+import {
+  endLevelRuntimeAssetScope,
+  getLevelRuntimeAssetTier,
+  getRuntimeProfileAssetTierForProfile,
+} from '../engine/runtimeAssetManifest'
 import { traceRuntimeCulling } from '../engine/runtimeCullingTrace'
-import { adaptSceneDocumentToLevelDefinition } from '../engine/sceneAdapter'
-import type { ActorDefinition, LevelDefinition } from '../engine/types'
-import { prepareRequiredLevelRenderAssets } from '../engine/levelAssetPreloader'
-import { endLevelRuntimeAssetScope } from '../engine/runtimeAssetManifest'
-import { normalizeRuntimeLevelSceneSettings } from '../engine/runtimeLevelSettings'
+import { usesLightweightRuntimeGameplayMarker } from '../engine/runtimeGameplayRenderPolicy'
+import type { RuntimeGameplayData } from '../engine/runtimeGameplayTypes'
+import { getRuntimePrefabAssetUrl } from '../engine/runtimePrefabRegistry'
 import { loadRuntimeSceneDocument } from '../engine/runtimeSceneDocumentLoader'
 import {
   type RuntimeWorldPartition,
-  getActiveWorldPartitionCells,
-  getActiveWorldPartitionActorIds,
+  type RuntimeWorldPartitionCell,
+  type RuntimeWorldPartitionCellRuntimeState,
   getWorldPartitionReadinessActorIds,
   loadRuntimeWorldPartition,
+  resolveRuntimeWorldPartitionStreamingState,
 } from '../engine/runtimeWorldPartition'
-import { withSceneEngineData } from '../engine/sceneDocumentRuntime'
 import type {
-  SceneDocument,
+  RenderProfileVisualBookmark,
   SceneSettings,
 } from '../engine/sceneDocumentTypes'
+import type { ActorDefinition, LevelDefinition } from '../engine/types'
 import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
 import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
 import {
@@ -50,10 +57,17 @@ import {
 import { playerStateStore } from '../stores/gameStateStore'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 import {
+  replaceRuntimeRenderProfile,
+  resetRuntimeRenderProfile,
+  resolveRuntimeRenderProfile,
+} from '../stores/runtimeRenderProfileStore'
+import {
   clearRuntimeRenderedActors,
+  setRequiredRuntimeRenderActors,
   setRuntimeActiveActors,
   setRuntimeLevelActors,
-  setRequiredRuntimeRenderActors,
+  setRuntimeRenderLifecyclePhase,
+  setRuntimeRenderProfileDiagnostics,
 } from '../stores/runtimeRenderRegistry'
 import {
   clearRuntimeStreamingTelemetry,
@@ -66,6 +80,10 @@ import {
 } from '../styles/runtimeVisualStyleStore'
 import Skybox from '../systems/Skybox.svelte'
 import StarMap from '../systems/StarMap.svelte'
+import {
+  evictUnusedGltfCacheEntries,
+  getGltfCacheStats,
+} from '../utils/gltfAssetCache'
 import RuntimeActorBranch from './RuntimeActorBranch.svelte'
 import SceneLighting from './SceneLighting.svelte'
 
@@ -83,7 +101,6 @@ export let editorEnabled = false
 export let interactionSystem: any = null
 export let timelineEvents: any[] = []
 
-let sceneDocument: SceneDocument | null = null
 let levelDefinition: LevelDefinition | null = null
 let levelActors: ActorDefinition[] = []
 let rootActors: ActorDefinition[] = []
@@ -94,6 +111,7 @@ let actorRevealIndex = 0
 let actorRevealFrame = 0
 let actorRevealComplete: (() => void) | null = null
 let playerPosition: [number, number, number] = [0, 0, 0]
+let previousPlayerPosition: [number, number, number] | null = null
 let starMapComponent: any = null
 let starMapRef: Group
 let loadToken = 0
@@ -102,6 +120,16 @@ let terrainRuntimeReady = false
 let worldPartition: RuntimeWorldPartition | null = null
 let pendingSceneReady = false
 let pendingSpawnPosition: [number, number, number] | null = null
+let lastRuntimeAssetPrefetchKey = ''
+let lastWorldPartitionPrefetchKey = ''
+let lastWorldPartitionEvictionKey = ''
+let selectedRuntimeAssetTier = 'medium'
+let requiredRuntimeAssetCount = 0
+let deferredOptionalRuntimeAssetCount = 0
+let worldPartitionCellStates = new Map<
+  string,
+  RuntimeWorldPartitionCellRuntimeState
+>()
 
 const SKYBOX_PRESETS = {
   observatory: {
@@ -136,11 +164,8 @@ function getWorldPartitionSettings(
         worldPartition?: WorldPartitionSettings
       })
     | undefined
-  const legacySettings = settings as SceneSettings & {
-    worldPartition?: WorldPartitionSettings
-  }
 
-  return levelSettings?.worldPartition ?? legacySettings.worldPartition ?? null
+  return levelSettings?.worldPartition ?? null
 }
 
 function getActorRevealBatchSize() {
@@ -240,10 +265,191 @@ function collectRenderAssetUrlsForActorIds(
     ...new Set(
       actors
         .filter(actor => actorIds.has(actor.id))
-        .map(actor => actor.render?.asset?.url)
+        .flatMap(actor => {
+          const urls = []
+          const assetUrl = actor.render?.asset?.url
+          if (assetUrl) urls.push(assetUrl)
+
+          const prefab = actor.render?.prefab
+          if (!usesLightweightRuntimeGameplayMarker(actor)) {
+            const prefabAssetUrl = getRuntimePrefabAssetUrl(
+              prefab?.type,
+              prefab?.variant,
+            )
+            if (prefabAssetUrl) urls.push(prefabAssetUrl)
+          }
+
+          return urls
+        })
         .filter((url): url is string => Boolean(url)),
     ),
   ]
+}
+
+function collectActorIdsForPartitionCells(
+  cells: Array<{ actorIds: string[] }>,
+) {
+  return new Set(cells.flatMap(cell => cell.actorIds))
+}
+
+function setWorldPartitionCellState(
+  cellKeys: string[],
+  state: RuntimeWorldPartitionCellRuntimeState,
+) {
+  if (cellKeys.length === 0) return
+
+  const nextStates = new Map(worldPartitionCellStates)
+  for (const cellKey of cellKeys) {
+    nextStates.set(cellKey, state)
+  }
+  worldPartitionCellStates = nextStates
+}
+
+function clearWorldPartitionCellStates(cellKeys: string[]) {
+  if (cellKeys.length === 0) return
+
+  const nextStates = new Map(worldPartitionCellStates)
+  let changed = false
+  for (const cellKey of cellKeys) {
+    changed = nextStates.delete(cellKey) || changed
+  }
+  if (changed) worldPartitionCellStates = nextStates
+}
+
+function runWorldPartitionEviction(level: string, evictableCellKeys: string[]) {
+  const evictionKey = `${level}|${evictableCellKeys.sort().join('|')}`
+  if (evictionKey === lastWorldPartitionEvictionKey) return
+  lastWorldPartitionEvictionKey = evictionKey
+
+  setWorldPartitionCellState(evictableCellKeys, 'evicting')
+  evictUnusedGltfCacheEntries({
+    maxUnusedAgeMs: 2_000,
+    maxUnreferencedEntries: 3,
+    maxUnreferencedBytes: 64 * 1024 * 1024,
+  })
+  setWorldPartitionCellState(evictableCellKeys, 'evicted')
+}
+
+function queueRuntimeAssetPrefetch(
+  level: string,
+  sourceUrls: string[],
+  reason: string,
+) {
+  const uniqueSourceUrls = [...new Set(sourceUrls)].filter(Boolean).sort()
+  const prefetchKey = `${level}|${reason}|${uniqueSourceUrls.join('|')}`
+  if (
+    uniqueSourceUrls.length === 0 ||
+    prefetchKey === lastRuntimeAssetPrefetchKey
+  ) {
+    return
+  }
+  lastRuntimeAssetPrefetchKey = prefetchKey
+
+  void prefetchOptionalLevelRenderAssets(
+    level,
+    uniqueSourceUrls,
+    get(qualityLevelStore),
+    {
+      maxTier: getRuntimeAssetTierCap(levelSettings),
+      recordTiming: recordSystemTiming,
+    },
+  ).then(report => {
+    setRuntimeDiagnostic('assetStreaming', {
+      label: 'Asset Streaming',
+      level: report.failures.length > 0 ? 'warning' : 'ready',
+      message:
+        report.failures.length > 0
+          ? `${level}: ${report.failures.length} prefetched asset(s) failed for ${reason}.`
+          : `${level}: prefetched ${report.resolvedUrls.length} active asset(s) for ${reason}.`,
+      meta: {
+        reason,
+        prefetchBytes: report.prefetchBytes,
+        sourceUrls: report.sourceUrls,
+        resolvedUrls: report.resolvedUrls,
+        failures: report.failures,
+      },
+    })
+  })
+}
+
+function queueWorldPartitionCellPrefetch(
+  level: string,
+  cells: RuntimeWorldPartitionCell[],
+) {
+  const candidateCells = cells.filter(
+    cell => worldPartitionCellStates.get(cell.key) !== 'ready',
+  )
+  const cellKeys = candidateCells.map(cell => cell.key).sort()
+  const prefetchKey = `${level}|${cellKeys.join('|')}`
+  if (
+    candidateCells.length === 0 ||
+    prefetchKey === lastWorldPartitionPrefetchKey
+  ) {
+    return
+  }
+  lastWorldPartitionPrefetchKey = prefetchKey
+  setWorldPartitionCellState(cellKeys, 'requested')
+
+  const sourceUrlsByCell = new Map(
+    candidateCells.map(cell => [
+      cell.key,
+      collectRenderAssetUrlsForActorIds(
+        levelActors,
+        new Set(cell.actorIds),
+      ).sort(),
+    ]),
+  )
+  const sourceUrls = [
+    ...new Set(Array.from(sourceUrlsByCell.values()).flat()),
+  ].sort()
+
+  if (sourceUrls.length === 0) {
+    setWorldPartitionCellState(cellKeys, 'ready')
+    return
+  }
+
+  setWorldPartitionCellState(cellKeys, 'loading')
+  void prefetchOptionalLevelRenderAssets(
+    level,
+    sourceUrls,
+    get(qualityLevelStore),
+    {
+      maxTier: getRuntimeAssetTierCap(levelSettings),
+      recordTiming: recordSystemTiming,
+    },
+  ).then(report => {
+    const failedSourceUrls = new Set(
+      report.failures.map(failure => failure.sourceUrl),
+    )
+    const failedCellKeys = cellKeys.filter(cellKey =>
+      sourceUrlsByCell
+        .get(cellKey)
+        ?.some(sourceUrl => failedSourceUrls.has(sourceUrl)),
+    )
+    const readyCellKeys = cellKeys.filter(
+      cellKey => !failedCellKeys.includes(cellKey),
+    )
+    setWorldPartitionCellState(readyCellKeys, 'ready')
+    setWorldPartitionCellState(failedCellKeys, 'failed')
+    setRuntimeDiagnostic('assetStreaming', {
+      label: 'Asset Streaming',
+      level: report.failures.length > 0 ? 'warning' : 'ready',
+      message:
+        report.failures.length > 0
+          ? `${level}: ${report.failures.length} prefetched asset(s) failed for ${cellKeys.length} partition cell(s).`
+          : `${level}: prefetched ${report.resolvedUrls.length} asset(s) for ${cellKeys.length} partition cell(s).`,
+      meta: {
+        reason: 'prefetch-cells',
+        cellKeys,
+        readyCellKeys,
+        failedCellKeys,
+        prefetchBytes: report.prefetchBytes,
+        sourceUrls: report.sourceUrls,
+        resolvedUrls: report.resolvedUrls,
+        failures: report.failures,
+      },
+    })
+  })
 }
 
 function parseSceneColor(
@@ -272,13 +478,50 @@ function resolveSpawnPosition(
   return [position[0], position[1], position[2]]
 }
 
+function resolveSpawnRotation(
+  definition: LevelDefinition,
+): [number, number, number] {
+  const rotation = definition.spawn.rotation
+  if (!rotation || !rotation.every(component => Number.isFinite(component))) {
+    return [0, 0, 0]
+  }
+
+  return [rotation[0], rotation[1], rotation[2]]
+}
+
+function getRequestedVisualBookmarkId() {
+  if (typeof window === 'undefined') return null
+  const params = new URLSearchParams(window.location.search)
+  return params.get('visualBookmark')
+}
+
+function getVisualBookmarkSpawnPosition(
+  definition: LevelDefinition,
+  fallback: [number, number, number],
+): [number, number, number] {
+  const bookmarkId = getRequestedVisualBookmarkId()
+  if (!bookmarkId) return fallback
+
+  const settings = (definition.settings ?? {}) as SceneSettings
+  const bookmarks = settings.level?.renderProfile?.visualBookmarks ?? []
+  const bookmark = bookmarks.find(
+    (entry: RenderProfileVisualBookmark) => entry.id === bookmarkId,
+  )
+  const position = bookmark?.playerPosition
+  if (!position) return fallback
+
+  return [position[0], position[1], position[2]]
+}
+
 function dispatchPlayerLevelPosition(
   level: string,
   spawnPosition: [number, number, number],
+  spawnRotation: [number, number, number],
 ) {
   const detail: PlayerLevelPositionDetail = {
     levelId: level,
     position: spawnPosition,
+    rotation: spawnRotation,
     reason: 'level_load',
     metadata: { levelName: level },
   }
@@ -330,7 +573,15 @@ function activateSceneGameplay(
   level: string,
   spawnPosition: [number, number, number],
 ) {
-  dispatchPlayerLevelPosition(level, spawnPosition)
+  setRuntimeRenderLifecyclePhase({
+    levelId: level,
+    phase: 'player-activation-ready',
+    message: `${level}: render lifecycle ready for player activation.`,
+    detail: {
+      spawnPosition,
+      terrainRuntime: Boolean(terrainRuntimeData),
+    },
+  })
   dispatch('staticWorldReady', {
     levelId: level,
     source: terrainRuntimeData ? 'scene-document-terrain' : 'scene-document',
@@ -380,7 +631,24 @@ function getRuntimeAssetTierCap(settings: SceneSettings) {
   )
 }
 
+function getRuntimeProfileOverride() {
+  if (typeof window === 'undefined') return null
+  return window.__gameRuntimeProfile ?? null
+}
+
+function getSelectedPlatformProfile() {
+  const profile = getRuntimeProfileOverride()
+  if (profile?.platformProfile) return profile.platformProfile
+  const renderTier = resolvedRenderProfile?.tier
+  return renderTier ?? null
+}
+
 async function loadSceneDocumentUnchecked(level: string, token: number) {
+  setRuntimeRenderLifecyclePhase({
+    levelId: level,
+    phase: 'manifest-loading',
+    message: `${level}: loading runtime scene manifest.`,
+  })
   const loadedScene = await loadRuntimeSceneDocument(level)
   if (token !== loadToken) return
 
@@ -394,36 +662,47 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
   visibleActorIds = new Set<string>()
   actorRevealOrder = []
   actorRevealIndex = 0
+  previousPlayerPosition = null
+  lastRuntimeAssetPrefetchKey = ''
+  lastWorldPartitionPrefetchKey = ''
+  lastWorldPartitionEvictionKey = ''
+  selectedRuntimeAssetTier = 'medium'
+  requiredRuntimeAssetCount = 0
+  deferredOptionalRuntimeAssetCount = 0
+  worldPartitionCellStates = new Map()
   cancelActorReveal()
 
-  let normalizedSceneSettings: SceneSettings
+  levelDefinition = loadedScene.levelDefinition
+  const runtimeSceneSettings = (levelDefinition.settings ?? {}) as SceneSettings
+  setRuntimeRenderLifecyclePhase({
+    levelId: level,
+    phase: 'manifest-ready',
+    message: `${level}: runtime scene manifest loaded.`,
+    detail: {
+      actorCount: levelDefinition.actors.length,
+      sceneVersion: levelDefinition.version,
+    },
+  })
 
-  if (loadedScene.source === 'runtime-manifest') {
-    levelDefinition = loadedScene.levelDefinition
-    normalizedSceneSettings = (levelDefinition.settings ?? {}) as SceneSettings
-    sceneDocument = null
-  } else {
-    const baseScene = loadedScene.scene
-    normalizedSceneSettings = normalizeRuntimeLevelSceneSettings(
-      level,
-      baseScene.settings,
-    )
-    sceneDocument = withSceneEngineData({
-      ...baseScene,
-      settings: normalizedSceneSettings,
-    })
-    levelDefinition =
-      sceneDocument.engine?.levelDefinition ??
-      adaptSceneDocumentToLevelDefinition(sceneDocument)
-  }
+  const defaultSpawnPosition = resolveSpawnPosition(levelDefinition)
+  const spawnPosition = getVisualBookmarkSpawnPosition(
+    levelDefinition,
+    defaultSpawnPosition,
+  )
+  const spawnRotation = resolveSpawnRotation(levelDefinition)
+  playerPosition = spawnPosition
+  dispatchPlayerLevelPosition(level, spawnPosition, spawnRotation)
 
   terrainRuntimeData = await loadSceneTerrainRuntimeData(
     level,
-    normalizedSceneSettings,
+    runtimeSceneSettings,
   )
-  const worldPartitionSettings = getWorldPartitionSettings(normalizedSceneSettings)
+  const worldPartitionSettings = getWorldPartitionSettings(runtimeSceneSettings)
   worldPartition = worldPartitionSettings
-    ? await loadRuntimeWorldPartition(level, worldPartitionSettings.partitionUrl)
+    ? await loadRuntimeWorldPartition(
+        level,
+        worldPartitionSettings.partitionUrl,
+      )
     : null
   setRuntimeDiagnostic('worldPartition', {
     label: 'World Partition',
@@ -483,35 +762,88 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
   }
   if (token !== loadToken) return
 
-  const spawnPosition = resolveSpawnPosition(levelDefinition)
-  playerPosition = spawnPosition
   const worldPartitionReadinessActorIds = worldPartition
     ? getWorldPartitionReadinessActorIds(worldPartition)
     : new Set(levelActors.map(actor => actor.id))
+  const initialStreamingState = resolveRuntimeWorldPartitionStreamingState({
+    partition: worldPartition,
+    playerPosition: spawnPosition,
+    allActorIds: levelActors.map(actor => actor.id),
+  })
+  if (
+    worldPartition &&
+    initialStreamingState.pendingRequiredCellKeys.length > 0
+  ) {
+    setRuntimeRenderLifecyclePhase({
+      levelId: level,
+      phase: 'error',
+      message: `${level}: spawn is outside required initial streaming cells.`,
+      detail: {
+        spawnPosition,
+        pendingRequiredCellKeys: initialStreamingState.pendingRequiredCellKeys,
+        requiredCellKeys: initialStreamingState.requiredCellKeys,
+        activeCellKeys: initialStreamingState.activeCellKeys,
+      },
+    })
+    setRuntimeDiagnostic('worldPartitionStreaming', {
+      label: 'Partition Streaming',
+      level: 'error',
+      message: `${level}: ${initialStreamingState.pendingRequiredCellKeys.length} required initial cell(s) are not active at spawn.`,
+      meta: {
+        spawnPosition,
+        pendingRequiredCellKeys: initialStreamingState.pendingRequiredCellKeys,
+        requiredCellKeys: initialStreamingState.requiredCellKeys,
+        activeCellKeys: initialStreamingState.activeCellKeys,
+      },
+    })
+    return
+  }
+  const initialActiveActorIds = initialStreamingState.activeActorIds
   const readinessAssetUrls = collectRenderAssetUrlsForActorIds(
     levelActors,
     worldPartitionReadinessActorIds,
   )
+  const initialActiveAssetUrls = collectRenderAssetUrlsForActorIds(
+    levelActors,
+    initialActiveActorIds,
+  )
   const requiredAssetUrls = [
     ...new Set([...buildReport.requiredAssetUrls, ...readinessAssetUrls]),
   ]
+  setRuntimeRenderLifecyclePhase({
+    levelId: level,
+    phase: 'assets-preloading',
+    message: `${level}: preloading ${requiredAssetUrls.length} required render asset(s).`,
+    detail: {
+      requiredAssetUrls,
+      readinessActorCount: worldPartitionReadinessActorIds.size,
+    },
+  })
   const preloadReport = await prepareRequiredLevelRenderAssets(
     level,
     requiredAssetUrls,
     get(qualityLevelStore),
     {
-      maxTier: getRuntimeAssetTierCap(normalizedSceneSettings),
+      maxTier: getRuntimeAssetTierCap(runtimeSceneSettings),
       recordTiming: recordSystemTiming,
     },
   )
   if (token !== loadToken) return
+  selectedRuntimeAssetTier = String(preloadReport.qualityTier)
+  requiredRuntimeAssetCount = preloadReport.requiredSourceUrls.length
+  deferredOptionalRuntimeAssetCount = Math.max(
+    0,
+    new Set(buildReport.runtimeAssetUrls).size - requiredRuntimeAssetCount,
+  )
   traceRuntimeCulling({
     levelId: level,
     reason: 'level-render-gate',
     culled: preloadReport.failures.length > 0,
     detail: {
       status: 'preload-complete',
-      worldPartitionReadinessActorIds: Array.from(worldPartitionReadinessActorIds),
+      worldPartitionReadinessActorIds: Array.from(
+        worldPartitionReadinessActorIds,
+      ),
       requiredResolvedUrls: preloadReport.requiredResolvedUrls,
       failureCount: preloadReport.failures.length,
       failures: preloadReport.failures,
@@ -529,10 +861,65 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
   })
 
   if (preloadReport.failures.length > 0) {
+    setRuntimeRenderLifecyclePhase({
+      levelId: level,
+      phase: 'error',
+      message: `${level}: required render asset preload failed.`,
+      detail: {
+        failures: preloadReport.failures,
+      },
+    })
     return
   }
+  setRuntimeRenderLifecyclePhase({
+    levelId: level,
+    phase: 'assets-ready',
+    message: `${level}: required render assets ready for ${preloadReport.qualityTier}.`,
+    detail: {
+      requiredResolvedUrls: preloadReport.requiredResolvedUrls,
+      requiredBytes: preloadReport.requiredBytes,
+    },
+  })
+
+  queueRuntimeAssetPrefetch(
+    level,
+    initialActiveAssetUrls.filter(url => !requiredAssetUrls.includes(url)),
+    'initial-active-cells',
+  )
 
   renderActorsReady = true
+  setRuntimeRenderLifecyclePhase({
+    levelId: level,
+    phase: 'scene-graph-ready',
+    message: `${level}: scene graph render gate opened.`,
+    detail: {
+      rootActorCount: rootActors.length,
+      readinessActorCount: worldPartitionReadinessActorIds.size,
+    },
+  })
+  const activeRenderProfile = resolveRuntimeRenderProfile(
+    runtimeSceneSettings.level?.renderProfile,
+    get(qualityLevelStore),
+  )
+  setRuntimeRenderProfileDiagnostics(level, {
+    profileId: activeRenderProfile.id,
+    tier: activeRenderProfile.tier,
+    shadowsEnabled: activeRenderProfile.shadows.enabled,
+    maxShadowCastingLights: activeRenderProfile.shadows.maxCastingLights,
+    shadowMapSize: activeRenderProfile.shadows.mapSize,
+    reflectionMode: activeRenderProfile.reflections.mode,
+  })
+  setRuntimeRenderLifecyclePhase({
+    levelId: level,
+    phase: 'lighting-profile-ready',
+    message: `${level}: render profile ${activeRenderProfile.id} applied for ${activeRenderProfile.tier}.`,
+    detail: {
+      profileId: activeRenderProfile.id,
+      tier: activeRenderProfile.tier,
+      reflectionMode: activeRenderProfile.reflections.mode,
+      shadowMapSize: activeRenderProfile.shadows.mapSize,
+    },
+  })
   traceRuntimeCulling({
     levelId: level,
     reason: 'level-render-gate',
@@ -556,6 +943,15 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
   })
   startActorReveal(() => {
     if (token !== loadToken) return
+    setRuntimeRenderLifecyclePhase({
+      levelId: level,
+      phase: 'diagnostics-ready',
+      message: `${level}: runtime render diagnostics are publishing actor readiness.`,
+      detail: {
+        visibleActorCount: visibleActorIds.size,
+        requiredRenderActorCount: buildReport.requiredRenderActorIds.length,
+      },
+    })
     requestSceneGameplayActivation(level, spawnPosition)
   }, worldPartitionReadinessActorIds)
 }
@@ -570,7 +966,6 @@ async function loadSceneDocument(level: string, token: number) {
       error instanceof Error ? error.message : 'Unknown level load error.'
     console.error('Failed to load runtime scene document:', error)
     levelDefinition = null
-    sceneDocument = null
     levelActors = []
     rootActors = []
     renderActorsReady = false
@@ -580,10 +975,19 @@ async function loadSceneDocument(level: string, token: number) {
     terrainRuntimeData = null
     terrainRuntimeReady = false
     worldPartition = null
+    previousPlayerPosition = null
+    lastWorldPartitionPrefetchKey = ''
+    lastWorldPartitionEvictionKey = ''
+    worldPartitionCellStates = new Map()
     clearRuntimeStreamingTelemetry(level)
     pendingSceneReady = false
     pendingSpawnPosition = null
     clearRuntimeRenderedActors(level)
+    setRuntimeRenderLifecyclePhase({
+      levelId: level,
+      phase: 'error',
+      message,
+    })
     setRuntimeDiagnostic('levelDefinition', {
       label: 'Level Definition',
       level: 'error',
@@ -664,13 +1068,46 @@ $: effectiveAudioRegions = [
   ...presetAmbientAudioRegions,
   ...authoredAudioRegions,
 ]
-$: runtimeActiveActorIds = worldPartition
-  ? getActiveWorldPartitionActorIds({ partition: worldPartition, playerPosition })
-  : new Set(levelActors.map(actor => actor.id))
-$: runtimeActiveCells = worldPartition
-  ? getActiveWorldPartitionCells({ partition: worldPartition, playerPosition })
-  : []
+$: runtimeRequestedCellKeys = Array.from(worldPartitionCellStates.entries())
+  .filter(([, state]) => state === 'requested')
+  .map(([cellKey]) => cellKey)
+$: runtimeLoadingCellKeys = Array.from(worldPartitionCellStates.entries())
+  .filter(([, state]) => state === 'loading')
+  .map(([cellKey]) => cellKey)
+$: runtimeReadyCellKeys = Array.from(worldPartitionCellStates.entries())
+  .filter(([, state]) => state === 'ready')
+  .map(([cellKey]) => cellKey)
+$: runtimeEvictingCellKeys = Array.from(worldPartitionCellStates.entries())
+  .filter(([, state]) => state === 'evicting')
+  .map(([cellKey]) => cellKey)
+$: runtimeEvictedCellKeys = Array.from(worldPartitionCellStates.entries())
+  .filter(([, state]) => state === 'evicted')
+  .map(([cellKey]) => cellKey)
+$: runtimeFailedCellKeys = Array.from(worldPartitionCellStates.entries())
+  .filter(([, state]) => state === 'failed')
+  .map(([cellKey]) => cellKey)
+$: runtimeStreamingState = resolveRuntimeWorldPartitionStreamingState({
+  partition: worldPartition,
+  playerPosition,
+  previousPlayerPosition,
+  allActorIds: levelActors.map(actor => actor.id),
+  requestedCellKeys: runtimeRequestedCellKeys,
+  loadingCellKeys: runtimeLoadingCellKeys,
+  readyCellKeys: runtimeReadyCellKeys,
+  evictingCellKeys: runtimeEvictingCellKeys,
+  evictedCellKeys: runtimeEvictedCellKeys,
+  failedCellKeys: runtimeFailedCellKeys,
+})
+$: runtimeActiveActorIds = runtimeStreamingState.activeActorIds
+$: runtimeActiveCells = runtimeStreamingState.activeCells
+$: runtimeActiveCellKeys = runtimeStreamingState.activeCellKeys
+$: runtimePrefetchCells = runtimeStreamingState.prefetchCells
+$: runtimePrefetchCellKeys = runtimeStreamingState.prefetchCellKeys
+$: runtimeCellStates = runtimeStreamingState.cellStates
+$: runtimeCellStateCounts = runtimeStreamingState.cellStateCounts
+$: evictableCellKeys = runtimeStreamingState.evictableCellKeys
 $: if (renderActorsReady && worldPartition) {
+  clearWorldPartitionCellStates(runtimeActiveCellKeys)
   const nextVisibleActorIds = new Set(visibleActorIds)
   let changed = false
   for (const actorId of runtimeActiveActorIds) {
@@ -693,6 +1130,50 @@ $: visibleRootActors = renderActorsReady
 $: if (renderActorsReady) {
   setRuntimeActiveActors(levelId, Array.from(runtimeActiveActorIds))
 }
+$: if (renderActorsReady && levelDefinition) {
+  queueRuntimeAssetPrefetch(
+    levelId,
+    collectRenderAssetUrlsForActorIds(levelActors, runtimeActiveActorIds),
+    'active-cells',
+  )
+}
+$: if (
+  renderActorsReady &&
+  levelDefinition &&
+  runtimePrefetchCells.length > 0
+) {
+  queueWorldPartitionCellPrefetch(levelId, runtimePrefetchCells)
+}
+$: if (renderActorsReady && worldPartition) {
+  runWorldPartitionEviction(levelId, evictableCellKeys)
+}
+$: if (renderActorsReady && worldPartition) {
+  setRuntimeDiagnostic('worldPartitionStreaming', {
+    label: 'Partition Streaming',
+    level:
+      runtimeStreamingState.failedRequiredCellKeys.length > 0
+        ? 'error'
+        : 'ready',
+    message:
+      runtimeStreamingState.failedRequiredCellKeys.length > 0
+        ? `${levelId}: ${runtimeStreamingState.failedRequiredCellKeys.length} required streaming cell(s) failed.`
+        : `${levelId}: ${runtimeActiveCellKeys.length} active, ${runtimeLoadingCellKeys.length} loading, ${runtimeReadyCellKeys.length} ready, ${evictableCellKeys.length} evictable cell(s).`,
+    meta: {
+      activeCellKeys: runtimeActiveCellKeys,
+      prefetchCellKeys: runtimePrefetchCellKeys,
+      requestedCellKeys: runtimeRequestedCellKeys,
+      loadingCellKeys: runtimeLoadingCellKeys,
+      readyCellKeys: runtimeReadyCellKeys,
+      evictingCellKeys: runtimeEvictingCellKeys,
+      failedCellKeys: runtimeFailedCellKeys,
+      evictableCellKeys,
+      pendingRequiredCellKeys: runtimeStreamingState.pendingRequiredCellKeys,
+      failedRequiredCellKeys: runtimeStreamingState.failedRequiredCellKeys,
+      cellStateCounts: runtimeCellStateCounts,
+      cellStates: runtimeCellStates,
+    },
+  })
+}
 $: activeRenderableActorCount = levelActors.filter(
   actor =>
     runtimeActiveActorIds.has(actor.id) &&
@@ -704,18 +1185,55 @@ $: activeRenderableActorCount = levelActors.filter(
         actor.light,
     ),
 ).length
+$: selectedRuntimeAssetTier = getLevelRuntimeAssetTier(
+  levelId,
+  $qualityLevelStore,
+)
 $: if (renderActorsReady) {
+  const cacheStats = getGltfCacheStats()
+  const runtimeProfile = getRuntimeProfileOverride()
+  const levelAssetTierCap = getRuntimeAssetTierCap(levelSettings) ?? null
   setRuntimeStreamingTelemetry(levelId, {
+    selectedRuntimeProfileId: runtimeProfile?.id ?? null,
+    selectedPlatformProfile: getSelectedPlatformProfile(),
+    requestedAssetTier: getRuntimeProfileAssetTierForProfile(runtimeProfile),
+    levelAssetTierCap,
+    selectedAssetTier: selectedRuntimeAssetTier,
+    renderQualityTier: $qualityLevelStore,
+    renderProfileId: resolvedRenderProfile.id,
+    renderProfileTier: resolvedRenderProfile.tier,
+    requiredAssetCount: requiredRuntimeAssetCount,
+    deferredOptionalAssetCount: deferredOptionalRuntimeAssetCount,
     partitioned: Boolean(worldPartition),
-    activeCellKeys: runtimeActiveCells.map(cell => cell.key),
+    activeCellKeys: runtimeActiveCellKeys,
+    prefetchCellKeys: runtimePrefetchCellKeys,
+    evictableCellKeys,
     activeCellCount: runtimeActiveCells.length,
+    prefetchCellCount: runtimePrefetchCells.length,
+    evictableCellCount: evictableCellKeys.length,
     totalCellCount: worldPartition?.cells.length ?? 0,
-    residentActorCount: worldPartition?.residentActorIds.length ?? levelActors.length,
+    residentActorCount:
+      worldPartition?.residentActorIds.length ?? levelActors.length,
     streamableActorCount: worldPartition?.streamableActorIds.length ?? 0,
     activeActorCount: runtimeActiveActorIds.size,
     activeRenderableActorCount,
+    pendingRequiredCellKeys: runtimeStreamingState.pendingRequiredCellKeys,
     readinessGateCount: worldPartition?.streaming?.readinessGates.length ?? 0,
-    initialCellCount: worldPartition?.readiness?.requiredInitialCellKeys.length ?? 0,
+    initialCellCount:
+      worldPartition?.readiness?.requiredInitialCellKeys.length ?? 0,
+    loadedRenderAssetCount: cacheStats.loadedEntries,
+    loadedCollisionAssetCount: 0,
+    gltfCacheEntries: cacheStats.entries,
+    gltfCacheLoadedEntries: cacheStats.loadedEntries,
+    gltfCachePendingEntries: cacheStats.pendingEntries,
+    gltfCacheReferencedEntries: cacheStats.referencedEntries,
+    gltfCacheUnreferencedEntries: cacheStats.unreferencedEntries,
+    gltfCacheLoadedBytes: cacheStats.loadedBytes,
+    gltfCacheBytes: cacheStats.loadedBytes,
+    gltfCachePendingBytes: cacheStats.pendingBytes,
+    gltfCacheReferencedBytes: cacheStats.referencedBytes,
+    gltfCacheUnreferencedBytes: cacheStats.unreferencedBytes,
+    cellStateCounts: runtimeCellStateCounts,
   })
 }
 $: effectiveFog = (() => {
@@ -770,7 +1288,14 @@ $: keyLightIntensity =
   sharedLevelSettings.lighting?.keyLightIntensity ??
   sharedLevelSettings.lighting?.sunIntensity ??
   0.65
-$: fillLightIntensity = sharedLevelSettings.lighting?.fillLightIntensity ?? 0.2
+$: fillLightIntensity =
+  sharedLevelSettings.lighting?.fillLightIntensity ??
+  sharedLevelSettings.lighting?.fillIntensity ??
+  0.2
+$: resolvedRenderProfile = resolveRuntimeRenderProfile(
+  sharedLevelSettings.renderProfile,
+  $qualityLevelStore,
+)
 $: waterSettings =
   observatorySettings?.ocean ?? sharedLevelSettings.water ?? null
 $: waterEnabled =
@@ -792,10 +1317,22 @@ $: if (levelDefinition) {
   replaceRuntimeVisualStyle(
     buildRuntimeVisualStyleFromLevelSettings(sharedLevelSettings),
   )
+  replaceRuntimeRenderProfile(resolvedRenderProfile)
+}
+$: if (levelDefinition && renderActorsReady) {
+  setRuntimeRenderProfileDiagnostics(levelId, {
+    profileId: resolvedRenderProfile.id,
+    tier: resolvedRenderProfile.tier,
+    shadowsEnabled: resolvedRenderProfile.shadows.enabled,
+    maxShadowCastingLights: resolvedRenderProfile.shadows.maxCastingLights,
+    shadowMapSize: resolvedRenderProfile.shadows.mapSize,
+    reflectionMode: resolvedRenderProfile.reflections.mode,
+  })
 }
 onMount(() => {
   const token = ++loadToken
   const unsubscribePlayer = playerStateStore.subscribe(state => {
+    previousPlayerPosition = playerPosition
     playerPosition = state.position
   })
 
@@ -811,6 +1348,7 @@ onDestroy(() => {
   cancelActorReveal()
   endLevelRuntimeAssetScope(levelId)
   clearRuntimeStreamingTelemetry(levelId)
+  resetRuntimeRenderProfile()
   terrainRuntimeData = null
   terrainRuntimeReady = false
   pendingSceneReady = false
@@ -831,6 +1369,7 @@ onDestroy(() => {
       {ambientIntensity}
       {keyLightIntensity}
       {fillLightIntensity}
+      renderProfile={resolvedRenderProfile}
     />
 
     {#if terrainRuntimeData}
@@ -866,7 +1405,9 @@ onDestroy(() => {
         surfaceFogDensity={waterSettings.surfaceFogDensity ?? 0.001}
         metalness={0.08}
         roughness={0.04}
-        envMapIntensity={1.8}
+        envMapIntensity={resolvedRenderProfile.reflections.environmentIntensity}
+        enablePlanarReflections={resolvedRenderProfile.reflections.mode === 'planar'}
+        reflectionTextureSize={resolvedRenderProfile.reflections.textureSize}
       />
       {#if $underwaterStateStore.isUnderwater || $underwaterStateStore.transitionProgress > 0}
         <UnderwaterOverlay />

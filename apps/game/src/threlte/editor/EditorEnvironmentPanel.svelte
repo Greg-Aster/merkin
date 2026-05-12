@@ -91,7 +91,7 @@ $: solitudeProfile = getSolitudeAtmosphereProfile(
       <label class="editor-field"><span class="editor-field-label">Brightness</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.style?.colorGrading?.brightness ?? 0.92} on:change={(event) => updateLevelNumericSetting(['style', 'colorGrading', 'brightness'], (event.currentTarget as HTMLInputElement).value)} /></label>
       <label class="editor-field"><span class="editor-field-label">Warmth</span><input class="tuple-input" type="number" step="0.05" value={levelSettings.style?.colorGrading?.warmth ?? 0.9} on:change={(event) => updateLevelNumericSetting(['style', 'colorGrading', 'warmth'], (event.currentTarget as HTMLInputElement).value)} /></label>
     </div>
-    <div class="save-message">These controls drive the runtime atmosphere directly: fog, low haze, mist, color grading, and bloom. Ambient occlusion is not wired into the live renderer yet.</div>
+    <div class="save-message">These controls drive the runtime atmosphere directly: fog, low haze, mist, color grading, bloom, and tiered ambient occlusion.</div>
   </div>
 
   <div class="tuple-group">

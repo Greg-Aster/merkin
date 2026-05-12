@@ -11,8 +11,10 @@ function getAppPath(pathname: string) {
     import.meta.env.BASE_URL === '/'
       ? '/'
       : `/${import.meta.env.BASE_URL.replace(/^\/+|\/+$/g, '')}/`
-  return new URL(pathname.replace(/^\/+/, ''), `${window.location.origin}${basePath}`)
-    .toString()
+  return new URL(
+    pathname.replace(/^\/+/, ''),
+    `${window.location.origin}${basePath}`,
+  ).toString()
 }
 
 type MultiplayerPlayerListItem = {
@@ -41,7 +43,9 @@ type MultiplayerMessage =
     }
 
 class EventEmitter<Events extends Record<string, unknown[]>> {
-  private listeners: { [EventName in keyof Events]?: Array<(...args: Events[EventName]) => void> } = {}
+  private listeners: {
+    [EventName in keyof Events]?: Array<(...args: Events[EventName]) => void>
+  } = {}
 
   on<EventName extends keyof Events>(
     event: EventName,

@@ -1,9 +1,5 @@
 <script lang="ts">
-import type {
-  LevelCollisionBudget,
-  LevelCollisionDefaultPolicy,
-  SharedLevelGroundSettings,
-} from '../engine/sceneDocumentTypes'
+import type { EditorSceneDocument } from '../engine/sceneDocumentTypes'
 import type { TerrainRuntimeComponentSource } from '../features/terrain'
 import EditorSceneToolsPanel from './EditorSceneToolsPanel.svelte'
 
@@ -36,13 +32,13 @@ type TerrainCollisionSettings = {
   chunkGrid?: number
   chunkCount?: number
 }
-type GroundSettings = NonNullable<SharedLevelGroundSettings['ground']>
 type TerrainSculptSettings = {
   enabled?: boolean
   autoBakeCollision?: boolean
 }
 
 export let levelId = ''
+export let editorScene: EditorSceneDocument | null = null
 export let pendingLevelId = ''
 export let editorLevelOptions: EditorLevelOption[] = []
 export let newLevelTitle = ''
@@ -52,11 +48,6 @@ export let canUndo = false
 export let canRedo = false
 export let interactionMode = 'objects'
 export let viewportLightingMode = 'authored'
-export let collisionOverlayEnabled = false
-export let collisionDefaultPolicy: LevelCollisionDefaultPolicy =
-  'lightweight-auto'
-export let collisionBudget: LevelCollisionBudget = 'mobile'
-export let groundSettings: GroundSettings | null = null
 export let terrainSculptSettings: TerrainSculptSettings | null = null
 export let terrainCollisionSettings: TerrainCollisionSettings | null = null
 export let terrainCollisionBakePending = false
@@ -64,7 +55,6 @@ export let terrainHeightmapGeneratePending = false
 export let terrainChunkCookPending = false
 export let worldPartitionCookPending = false
 export let groundTerrainPublishPending = false
-export let selectedTerrainSourceName = ''
 export let selectedTerrainSourceAssetUrl = ''
 export let terrainBrushMode = 'raise'
 export let terrainBrushSize = 24
@@ -86,16 +76,6 @@ export let onSwitchLevel: () => void = () => {}
 export let onCreateLevel: () => void = () => {}
 export let onSetInteractionMode: (mode: string) => void = () => {}
 export let onSetViewportLightingMode: (mode: string) => void = () => {}
-export let onSetCollisionOverlayEnabled: (value: boolean) => void = () => {}
-export let onSetCollisionDefaultPolicy: (
-  value: LevelCollisionDefaultPolicy,
-) => void = () => {}
-export let onSetCollisionBudget: (value: LevelCollisionBudget) => void =
-  () => {}
-export let onSetTerrainAutoBake: (value: boolean) => void = () => {}
-export let onBakeTerrainCollision: () => void = () => {}
-export let onGenerateTerrainHeightmap: () => void = () => {}
-export let onCookTerrainChunks: () => void = () => {}
 export let onCookWorldPartition: () => void = () => {}
 export let onPublishGroundTerrainContracts: () => void = () => {}
 export let onSetTerrainBrushMode: (mode: string) => void = () => {}
@@ -115,6 +95,7 @@ export let onSetSurfaceSnapOffset: (value: number) => void = () => {}
 
 <EditorSceneToolsPanel
   {levelId}
+  {editorScene}
   bind:pendingLevelId
   {editorLevelOptions}
   bind:newLevelTitle
@@ -124,10 +105,6 @@ export let onSetSurfaceSnapOffset: (value: number) => void = () => {}
   {canRedo}
   {interactionMode}
   {viewportLightingMode}
-  {collisionOverlayEnabled}
-  {collisionDefaultPolicy}
-  {collisionBudget}
-  {groundSettings}
   {terrainSculptSettings}
   {terrainCollisionSettings}
   {terrainCollisionBakePending}
@@ -135,7 +112,6 @@ export let onSetSurfaceSnapOffset: (value: number) => void = () => {}
   {terrainChunkCookPending}
   {worldPartitionCookPending}
   {groundTerrainPublishPending}
-  {selectedTerrainSourceName}
   {selectedTerrainSourceAssetUrl}
   {terrainBrushMode}
   {terrainBrushSize}
@@ -156,13 +132,6 @@ export let onSetSurfaceSnapOffset: (value: number) => void = () => {}
   {onCreateLevel}
   {onSetInteractionMode}
   {onSetViewportLightingMode}
-  {onSetCollisionOverlayEnabled}
-  {onSetCollisionDefaultPolicy}
-  {onSetCollisionBudget}
-  {onSetTerrainAutoBake}
-  {onBakeTerrainCollision}
-  {onGenerateTerrainHeightmap}
-  {onCookTerrainChunks}
   {onCookWorldPartition}
   {onPublishGroundTerrainContracts}
   {onSetTerrainBrushMode}

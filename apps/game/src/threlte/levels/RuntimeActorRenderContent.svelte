@@ -3,12 +3,13 @@ import { onDestroy, onMount } from 'svelte'
 import AdaptivePointLight from '../components/AdaptivePointLight.svelte'
 import HeroProp from '../components/HeroProp.svelte'
 import ProceduralMesh from '../components/ProceduralMesh.svelte'
-import type { ActorDefinition } from '../engine/types'
+import { usesLightweightRuntimeGameplayMarker } from '../engine/runtimeGameplayRenderPolicy'
+import type { ActorDefinition, RenderCullingPolicy } from '../engine/types'
 import {
-  markRuntimeAssetActorLoaded,
   markRuntimeActorRendered,
-  unmarkRuntimeAssetActorLoaded,
+  markRuntimeAssetActorLoaded,
   unmarkRuntimeActorRendered,
+  unmarkRuntimeAssetActorLoaded,
 } from '../stores/runtimeRenderRegistry'
 import RuntimePrefabNode from './RuntimePrefabNode.svelte'
 
@@ -20,10 +21,25 @@ $: material = (render?.material ?? {}) as Record<string, any>
 $: primitive = render?.primitive ?? null
 $: asset = render?.asset ?? null
 $: prefab = render?.prefab ?? null
+$: runtimePrefab = usesLightweightRuntimeGameplayMarker(actor) ? null : prefab
 $: light = actor.light ?? null
+$: runtimePropCulling = resolveRuntimePropCulling(render?.cullingPolicy)
+
+function resolveRuntimePropCulling(
+  cullingPolicy: RenderCullingPolicy | undefined,
+) {
+  // Actor culling policies are resolved by the actor/partition layer. Keep
+  // nested GLB culling disabled so HeroProp does not become a second owner.
+  switch (cullingPolicy) {
+    case 'runtime-budget':
+    case 'never':
+    default:
+      return false
+  }
+}
 
 function hasImmediateRenderContent() {
-  return Boolean(prefab || primitive || light)
+  return Boolean(runtimePrefab || primitive || light)
 }
 
 function handleAssetLoad() {
@@ -55,12 +71,16 @@ onDestroy(() => {
     url={asset.url}
     {levelId}
     materialOverride={material}
-    runtimeCulling={false}
+    runtimeCulling={runtimePropCulling}
     on:load={handleAssetLoad}
     on:error={handleAssetError}
   />
-{:else if prefab}
-  <RuntimePrefabNode {prefab} />
+{:else if runtimePrefab}
+  <RuntimePrefabNode
+    prefab={runtimePrefab}
+    {levelId}
+    runtimeCulling={runtimePropCulling}
+  />
 {:else if primitive}
   <ProceduralMesh
     name={actor.name}

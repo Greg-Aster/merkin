@@ -82,7 +82,11 @@ async function loadColliderPatches(nextUrl: string) {
     patches = nextPatches
   } catch (error) {
     if (!disposed) {
-      console.warn('Failed to build asset trimesh collider:', nextUrl, error)
+      console.warn(
+        'Failed to build authored asset trimesh collider:',
+        nextUrl,
+        error,
+      )
     }
     patches = []
   }

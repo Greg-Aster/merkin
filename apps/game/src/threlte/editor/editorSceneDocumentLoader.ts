@@ -74,6 +74,11 @@ function getLocalEditorScene(levelId: string) {
   return loadEditorSceneFromLocalStorage(levelId)
 }
 
+function getSceneUpdatedAtTime(scene: EditorSceneDocument | null | undefined) {
+  const time = scene?.updatedAt ? Date.parse(scene.updatedAt) : Number.NaN
+  return Number.isFinite(time) ? time : 0
+}
+
 export function loadImmediateEditorSceneDocument(
   levelId: string,
   options: EditorSceneDocumentLoadOptions = {},
@@ -152,6 +157,16 @@ export async function loadEditorSceneDocument(
           source: 'disk',
         } satisfies EditorSceneDocumentLoadResult)
       : null
+
+  if (
+    options.preferLocalStorage &&
+    immediate.source === 'local-storage' &&
+    diskResult &&
+    getSceneUpdatedAtTime(immediate.scene) >=
+      getSceneUpdatedAtTime(diskResult.scene)
+  ) {
+    return immediate
+  }
 
   return diskResult ?? immediate
 }

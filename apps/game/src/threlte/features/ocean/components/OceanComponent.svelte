@@ -26,13 +26,13 @@ import {
   type SystemMessage,
 } from '../../../core/LevelSystem'
 import { playerStateStore } from '../../../stores/gameStateStore'
+import { runtimeDebugLog } from '../../../utils/runtimeLog'
 import { qualityLevelStore, qualitySettingsStore } from '../../performance'
 import UnderwaterEffect from '../effects/UnderwaterEffect.svelte'
 import {
   underwaterActions,
   underwaterStateStore,
 } from '../stores/underwaterStore'
-import { runtimeDebugLog } from '../../../utils/runtimeLog'
 
 // --- PROPS (Enhanced with legacy features) ---
 export let size = { width: 2000, height: 2000 }

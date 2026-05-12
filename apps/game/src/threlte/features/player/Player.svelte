@@ -5,7 +5,13 @@ import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
 import { Euler, Group, PerspectiveCamera, Quaternion, Vector3 } from 'three'
 import { PLAYER_GROUP } from '../../constants/physics'
+import {
+  type RuntimeInputActionId,
+  isRuntimeInputActionActive,
+  shouldPreventDefaultForRuntimeInputCode,
+} from '../../engine/runtimeInputBindings'
 import { gameActions } from '../../stores/gameStateStore'
+import { runtimeInputBindingsStore } from '../../stores/runtimeInputBindingsStore'
 import {
   isSoundEnabled,
   masterVolumeSetting,
@@ -55,6 +61,7 @@ const rapier = useRapier()
 
 // --- Props ---
 export let position: [number, number, number]
+export let rotation: [number, number, number] = [0, 0, 0]
 export let speed = 5
 export let jumpForce = 10
 export let lightIntensityScale = 60
@@ -107,6 +114,7 @@ let multiplayerServicePromise: Promise<void> | null = null
 let networkSyncElapsed = 0
 let lastReportedPlayerReady = false
 let appliedLevelPositionKey = ''
+let inputBindingSignature = ''
 
 const tempAxisY = new Vector3(0, 1, 0)
 const tempDesiredTranslation = new Vector3()
@@ -114,6 +122,8 @@ const tempHorizontalVelocity = new Vector3()
 const tempBodyPosition = new Vector3()
 const tempBodyRotation = new Quaternion()
 const tempDeltaRotation = new Quaternion()
+const tempSpawnRotation = new Quaternion()
+const tempSpawnEuler = new Euler()
 const nextTranslation = { x: 0, y: 0, z: 0 }
 const keyboardMovement = { x: 0, z: 0 }
 const gamepadState = {
@@ -183,22 +193,28 @@ $: if (!dragToLook && surfaceTouchId !== null) {
 }
 
 // --- Input Handlers ---
+function clearActiveKeyboardState() {
+  for (const code of Object.keys(keyStates)) {
+    keyStates[code] = false
+  }
+}
+
+function isInputActionPressed(actionId: RuntimeInputActionId) {
+  return isRuntimeInputActionActive(
+    actionId,
+    keyStates,
+    $runtimeInputBindingsStore,
+  )
+}
+
 function handleKeydown(event: KeyboardEvent) {
   if (!gameplayEnabled) return
   if ($uiStore.isInputFocused) return
   if (
-    [
-      'ArrowUp',
-      'ArrowDown',
-      'ArrowLeft',
-      'ArrowRight',
-      'KeyW',
-      'KeyA',
-      'KeyS',
-      'KeyD',
-      'Space',
-      'KeyF',
-    ].includes(event.code)
+    shouldPreventDefaultForRuntimeInputCode(
+      event.code,
+      $runtimeInputBindingsStore,
+    )
   ) {
     event.preventDefault()
   }
@@ -374,24 +390,32 @@ function handleTouchEnd(event: TouchEvent) {
 }
 
 function handleWindowBlur() {
-  keyStates.KeyF = false
+  clearActiveKeyboardState()
   isMouseDown = false
 }
 
-$: if ($uiStore.isInputFocused && keyStates.KeyF) {
-  keyStates.KeyF = false
+$: if ($uiStore.isInputFocused) {
+  clearActiveKeyboardState()
+}
+
+$: {
+  const nextInputBindingSignature = JSON.stringify($runtimeInputBindingsStore)
+  if (nextInputBindingSignature !== inputBindingSignature) {
+    inputBindingSignature = nextInputBindingSignature
+    clearActiveKeyboardState()
+  }
 }
 
 function updateMovementFromKeys() {
   keyboardMovement.x = 0
   keyboardMovement.z = 0
-  if (keyStates['KeyW'] || keyStates['ArrowUp'] || mobileMovement.z < -0.1)
+  if (isInputActionPressed('moveForward') || mobileMovement.z < -0.1)
     keyboardMovement.z -= 1
-  if (keyStates['KeyS'] || keyStates['ArrowDown'] || mobileMovement.z > 0.1)
+  if (isInputActionPressed('moveBackward') || mobileMovement.z > 0.1)
     keyboardMovement.z += 1
-  if (keyStates['KeyA'] || keyStates['ArrowLeft'] || mobileMovement.x < -0.1)
+  if (isInputActionPressed('moveLeft') || mobileMovement.x < -0.1)
     keyboardMovement.x -= 1
-  if (keyStates['KeyD'] || keyStates['ArrowRight'] || mobileMovement.x > 0.1)
+  if (isInputActionPressed('moveRight') || mobileMovement.x > 0.1)
     keyboardMovement.x += 1
   return keyboardMovement
 }
@@ -459,7 +483,11 @@ function getGamepadInput() {
 }
 
 function getLightChargeInputActive(gamepadInput: typeof gamepadState) {
-  return keyStates['KeyF'] || mobilePulsePressed || gamepadInput.pulse
+  return (
+    isInputActionPressed('lightPulse') ||
+    mobilePulsePressed ||
+    gamepadInput.pulse
+  )
 }
 
 function resolvePlayerSfxVolume(baseVolume: number) {
@@ -769,16 +797,38 @@ function spawnLightShockwave(
 function applyLevelPosition() {
   if (!isPlayerPhysicsReady()) return false
   const [x, y, z] = position
-  const positionKey = position.join(',')
+  const spawnRotation = rotation ?? [0, 0, 0]
+  const positionKey = `${position.join(',')}|${spawnRotation.join(',')}`
   if (positionKey === appliedLevelPositionKey) return true
   appliedLevelPositionKey = positionKey
   const pos = { x, y, z }
+  const pitch = Math.max(
+    -Math.PI / 2,
+    Math.min(Math.PI / 2, spawnRotation[0] ?? 0),
+  )
+  const yaw = spawnRotation[1] ?? 0
+  tempSpawnEuler.set(0, yaw, 0)
+  tempSpawnRotation.setFromEuler(tempSpawnEuler)
   rigidBody.setTranslation(pos, true)
   rigidBody.setNextKinematicTranslation(pos)
+  if (typeof rigidBody.setRotation === 'function') {
+    rigidBody.setRotation(tempSpawnRotation, true)
+  }
+  if (typeof rigidBody.setNextKinematicRotation === 'function') {
+    rigidBody.setNextKinematicRotation(tempSpawnRotation)
+  }
   playerVelocity.set(0, 0, 0)
   gameActions.updatePlayerPosition([pos.x, pos.y, pos.z])
+  gameActions.updatePlayerRotation([pitch, yaw, spawnRotation[2] ?? 0])
+  cameraRotationX = pitch
+  accumulatedRotationX = 0
+  accumulatedRotationY = 0
   if (visualGroup) {
     visualGroup.position.set(pos.x, pos.y, pos.z)
+    visualGroup.quaternion.copy(tempSpawnRotation)
+  }
+  if (cameraPivot) {
+    cameraPivot.quaternion.setFromEuler(tempSpawnEuler.set(pitch, 0, 0))
   }
   return true
 }
@@ -980,7 +1030,7 @@ useTask(delta => {
   // 2. Handle Vertical Movement (Gravity & Jump)
   playerVelocity.y -= GRAVITY * delta
   const wantsToJump =
-    keyStates['Space'] || mobileJumpPressed || gamepadInput.jump
+    isInputActionPressed('jump') || mobileJumpPressed || gamepadInput.jump
   if (wantsToJump && isGrounded) {
     playerVelocity.y = jumpForce
   }
@@ -994,9 +1044,7 @@ useTask(delta => {
     input.z = gamepadInput.moveZ
 
   const moveSpeed =
-    keyStates['ShiftLeft'] || keyStates['ShiftRight'] || gamepadInput.sprint
-      ? speed * 2
-      : speed
+    isInputActionPressed('sprint') || gamepadInput.sprint ? speed * 2 : speed
   tempHorizontalVelocity.set(input.x, 0, input.z)
   if (isMobile)
     tempHorizontalVelocity.set(mobileMovement.x, 0, mobileMovement.z)

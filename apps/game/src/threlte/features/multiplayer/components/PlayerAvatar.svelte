@@ -3,6 +3,8 @@
 import { T, useTask } from '@threlte/core'
 import * as THREE from 'three'
 import StarSprite from '../../../components/StarSprite.svelte'
+import { runtimeRenderProfileStore } from '../../../stores/runtimeRenderProfileStore'
+import { qualitySettingsStore } from '../../performance/stores/performanceStore'
 
 // This prop allows the parent component to set the position.
 export let position: [number, number, number] = [0, 0, 0]
@@ -34,6 +36,10 @@ let spriteIntensity = baseSpriteIntensity
 let spriteSize = playerSize
 let chargeCoreIntensity = 0
 let chargeCoreSize = playerSize * 0.6
+
+$: playerPointLightEnabled =
+  $qualitySettingsStore.enableDynamicLighting &&
+  $runtimeRenderProfileStore.tier !== 'desktop'
 
 // Animate the light's intensity and the avatar's position.
 useTask(() => {
@@ -92,12 +98,14 @@ useTask(() => {
   />
 
   <!-- The integrated light source for the firefly -->
-  <T.PointLight
-    bind:ref={pointLight}
-    color={currentLightColor}
-    intensity={lightIntensity * lightIntensityScale}
-    distance={lightDistance}
-    decay={lightDecay}
-    castShadow={false}
-  />
+  {#if playerPointLightEnabled}
+    <T.PointLight
+      bind:ref={pointLight}
+      color={currentLightColor}
+      intensity={lightIntensity * lightIntensityScale}
+      distance={lightDistance}
+      decay={lightDecay}
+      castShadow={false}
+    />
+  {/if}
 </T.Group>
