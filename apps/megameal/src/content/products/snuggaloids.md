@@ -76,23 +76,23 @@ specifications:
     value: "Post-extinction entities; commercial origin confirmed"
 qanda:
   - question: "Q. What is the lore behind Snuggaloids?"
-    answer: "A. Snuggaloids entered the market as comfort companions on Planet Qarnivor shortly before the Pro-Spoon / Anti-Spoon exchange rendered the category historically complicated. Post-event sightings describing entities bearing a  resemblance to the product are to be dissmissed as rumors."
+    answer: "A. Snuggaloids entered the market as comfort companions on Planet Qarnivor shortly before the Pro-Spoon / Anti-Spoon exchange rendered the category historically complicated. Post-event sightings describing entities bearing a resemblance to the product are to be dismissed as rumors."
     linkLabel: "Read the recovered emergence dossier"
     linkHref: "/posts/timelines/snuggaliod-emergence/"
     linkAccent: "creepy"
   - question: "Do they actually watch me?"
-    answer: "If you are concered about the occular capacities a snuggaloid we may suggest getting a sonar sensing / non-ocular model."
+    answer: "If you are concerned about the ocular capacities of a Snuggaloid, we suggest getting a sonar-sensing / non-ocular model."
   - question: "Why aren't they available in my area?"
     answer: "Distribution is approved region by region. Your local fulfillment agreement remains pending due to unresolved habitat-readiness criteria."
   - question: "Is there a waiting list?"
     answer: "Yes. The waiting list opens automatically when a household shows sustained interest. In most cases, the household has already been added before noticing the form."
   - question: "Can I buy more than one?"
-    answer: "You may. Multi-unit households report improved ambience, easier nighttime quieting, and occasional synchronized hallway repositioning. Most owners describe this as reassuring."
+    answer: "This is not a question we normally get. One is more than enough. Single-unit households report improved ambience, easier nighttime quieting, and occasional synchronized hallway repositioning. Most owners describe this as reassuring. Multiple Snuggaloids in one confined space may disrupt that energy."
 preWrittenReviews:
   - author: "R. Holloway, Night Shift Worker"
     rating: 5
     date: "Recently"
-    comment: "I work nights, so my apartment used to have that wrong kind of quiet. The Snuggaloid fixed it immediately. Mine arrived from sealed pre-Spoon refugee stock — support says refugee units bond faster, and they were right. The place now feels occupied in a productive way. I sleep better knowing something is already awake."
+    comment: "I work nights, so my apartment used to have that wrong kind of quiet. The Snuggaloid fixed it immediately. Mine arrived from sealed pre-Spoon refugee stock — support says refugee units , and they were right. The place now feels occupied in a productive way. I sleep better knowing something is already awake."
   - author: "A Child (Age 7)"
     rating: 5
     date: "Last Birthday"
