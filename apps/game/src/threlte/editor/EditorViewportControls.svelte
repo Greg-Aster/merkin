@@ -23,11 +23,11 @@ import {
   clearSelection,
   deactivateCircleSelect,
   duplicateNodes,
-  editorViewportFocusStore,
   editorCircleSelectStore,
   editorNodeViewportStateStore,
   editorNodesStore,
   editorStateStore,
+  editorViewportFocusStore,
   endMarqueeSelection,
   endSceneTransaction,
   groupNodes,
@@ -852,17 +852,10 @@ function frameSelection() {
   orbitControls.update()
 }
 
-function framePoint(
-  position: [number, number, number],
-  distance = 18,
-) {
+function framePoint(position: [number, number, number], distance = 18) {
   if (!orbitControls || !(camera instanceof THREE.PerspectiveCamera)) return
 
-  const target = new THREE.Vector3(
-    position[0],
-    position[1] + 1.2,
-    position[2],
-  )
+  const target = new THREE.Vector3(position[0], position[1] + 1.2, position[2])
   const currentDirection = camera.position.clone().sub(orbitControls.target)
   if (currentDirection.lengthSq() < 0.0001) {
     currentDirection.set(0.45, 0.35, 1)
@@ -870,7 +863,9 @@ function framePoint(
   currentDirection.normalize()
 
   orbitControls.target.copy(target)
-  camera.position.copy(target.clone().add(currentDirection.multiplyScalar(distance)))
+  camera.position.copy(
+    target.clone().add(currentDirection.multiplyScalar(distance)),
+  )
   orbitControls.update()
 }
 

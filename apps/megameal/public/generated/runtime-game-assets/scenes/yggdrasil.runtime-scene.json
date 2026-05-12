@@ -7,17 +7,17 @@
     "kind": "scene-document",
     "path": "apps/game/src/threlte/editor/scenes/yggdrasil.scene.json",
     "version": 1,
-    "updatedAt": "2026-05-12T00:46:35.139Z"
+    "updatedAt": "2026-05-12T01:04:37.697Z"
   },
   "levelDefinition": {
     "id": "yggdrasil",
     "version": 1,
-    "updatedAt": "2026-05-12T00:46:35.139Z",
+    "updatedAt": "2026-05-12T01:04:37.697Z",
     "spawn": {
       "player": [
-        10,
-        10.7,
-        -118
+        5,
+        20,
+        -150
       ],
       "rotation": [
         0,
@@ -63,9 +63,14 @@
         },
         "spawn": {
           "position": [
-            10,
-            10.7,
-            -118
+            5,
+            20,
+            -150
+          ],
+          "rotation": [
+            0,
+            0,
+            0
           ]
         },
         "ground": {
@@ -691,7 +696,7 @@
         "transform": {
           "position": [
             -4.440892098500626e-16,
-            9.762699578820738,
+            7.532066987851826,
             1.1102230246251565e-16
           ],
           "rotation": [

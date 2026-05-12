@@ -64585,9 +64585,7 @@
       "requiredRenderActorCount": 13,
       "requiredAssetCount": 12,
       "runtimeAssetCount": 24,
-      "buildErrors": [
-        "Actor \"yggdrasil-dais\" has an invalid collision channel."
-      ],
+      "buildErrors": [],
       "buildWarnings": [
         "Walkability sample \"player-spawn\" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime."
       ]

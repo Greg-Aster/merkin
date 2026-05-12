@@ -104,7 +104,7 @@ preWrittenReviews:
   - author: "Someone's Parent (Name Withheld)"
     rating: 3
     date: "Filed Under: Concerns"
-    comment: "The toy itself is lovely and genuinely soft. My concern is that my child refers to it by a name we did not choose — 'SG-4471' — which they could not have read off the box because we paid for the unmarked variant. They also insist it dislikes being stored face-down and 'wants to see the sky.' Three stars."
+    comment: "The toy itself is lovely and genuinely soft. My concern is that my child refers to it by a name we did not choose — 'SG-4471' — which they could not have read off the box because we paid for the unmarked variant. They also insist it dislikes being stored face-down and 'wants to see the sky.' Regardless, our child has been more compliant. Three stars."
   - author: "Dr. M. Fenwick, Xenopsychology Dept."
     rating: 4
     date: "Research Note"
@@ -128,7 +128,7 @@ preWrittenReviews:
   - author: "Civic Comfort Board (Qarnivor Mirror)"
     rating: 4
     date: "Cached repost"
-    comment: "I heard about the events on Qarnivore and I'm so sad! I have no doubt my snuggaloid will retain its during this time of market volitility. Snugglaoids thus far have retained their value well and I think they are a solid investment"
+    comment: "I heard about the events on Qarnivore. Tragic! I have no doubt my Snuggaloid will increase in value during this time of market volatility. Snuggaloids thus far have been an excellent investment."
     linkLabel: "Open Spork Uprising bulletin"
     linkHref: "/posts/timelines/spork-uprising/"
     flags:
