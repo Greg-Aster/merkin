@@ -13,6 +13,7 @@ export interface StaticWorldReadyDetail {
 export interface PlayerLevelPositionDetail {
   levelId: string
   position: Vec3
+  rotation?: Vec3
   reason: 'level_load' | 'level_transition' | 'editor_preview'
   metadata?: Record<string, unknown>
 }

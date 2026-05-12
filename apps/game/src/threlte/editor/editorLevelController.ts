@@ -127,16 +127,18 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
       .find(entry => entry.id === targetLevelId)
     const nextTitle =
       state.metadataTitle.trim() || existingEntry?.title || targetLevelId
+    const published =
+      state.metadataStatus === 'active' && state.metadataDeployed
 
     return {
       id: targetLevelId,
       title: nextTitle,
       status: state.metadataStatus,
-      deployed: state.metadataDeployed,
+      deployed: published,
       aliases: existingEntry?.aliases ?? [],
       source: { kind: 'scene', sceneId: targetLevelId },
       starMap: {
-        enabled: state.metadataStarMapEnabled,
+        enabled: published && state.metadataStarMapEnabled,
         year: Number.isFinite(Number(state.metadataStarMapYear))
           ? Number(state.metadataStarMapYear)
           : 2100,
@@ -177,6 +179,22 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
     return payload
   }
 
+  async function cookRuntimeAssets(targetLevelId: string) {
+    const response = await fetch(
+      `${EDITOR_API_BASE}/api/editor-scene/cook-runtime-assets`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ levelId: targetLevelId }),
+      },
+    )
+    const payload = await response.json()
+    if (!payload?.success) {
+      throw new Error(payload?.message ?? 'Runtime asset cook failed')
+    }
+    return payload
+  }
+
   function saveScene() {
     const saved = deps.saveSceneToLocalStorage(deps.getActiveSceneLevelId())
     deps.setSaveMessage(saved ? `Saved ${saved.updatedAt}` : 'Save failed')
@@ -197,6 +215,100 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
     } catch (error) {
       console.error('Overwrite level failed:', error)
       deps.setSaveMessage('Overwrite failed')
+    }
+  }
+
+  async function publishLevel() {
+    const scene = get(deps.getEditorSceneStore())
+    if (!scene) {
+      deps.setSaveMessage('Nothing to publish')
+      return
+    }
+
+    try {
+      const targetLevelId = deps.getActiveSceneLevelId()
+      const state = deps.getMetadataState()
+      const existingEntry = deps
+        .getLevelRegistryEntries()
+        .find(entry => entry.id === targetLevelId)
+      const title =
+        state.metadataTitle.trim() || existingEntry?.title || targetLevelId
+      const nextEntry: LevelRegistryEntry = {
+        id: targetLevelId,
+        title,
+        status: 'active',
+        deployed: true,
+        aliases: existingEntry?.aliases ?? [],
+        source: { kind: 'scene', sceneId: targetLevelId },
+        starMap: {
+          enabled: true,
+          year: Number.isFinite(Number(state.metadataStarMapYear))
+            ? Number(state.metadataStarMapYear)
+            : existingEntry?.starMap?.year ?? 2100,
+          era: existingEntry?.starMap?.era ?? 'unknown',
+          description:
+            state.metadataStarMapDescription.trim() ||
+            existingEntry?.starMap?.description ||
+            `Enter ${title}`,
+        },
+      }
+
+      deps.setSaveMessage(`Publishing ${title}: saving level`)
+      await saveSceneDocumentToDisk(targetLevelId, scene)
+      deps.setSaveMessage(`Publishing ${title}: cooking runtime manifest`)
+      await cookRuntimeAssets(targetLevelId)
+      await persistLevelRegistryEntries(replaceRegistryEntry(nextEntry))
+      deps.setMetadataState({
+        metadataStatus: 'active',
+        metadataDeployed: true,
+        metadataStarMapEnabled: true,
+      })
+      deps.setSaveMessage(`Published ${title}`)
+    } catch (error) {
+      console.error('Publish level failed:', error)
+      deps.setSaveMessage('Publish failed')
+    }
+  }
+
+  async function markLevelDraft() {
+    try {
+      const targetLevelId = deps.getActiveSceneLevelId()
+      const state = deps.getMetadataState()
+      const existingEntry = deps
+        .getLevelRegistryEntries()
+        .find(entry => entry.id === targetLevelId)
+      const title =
+        state.metadataTitle.trim() || existingEntry?.title || targetLevelId
+      const nextEntry: LevelRegistryEntry = {
+        id: targetLevelId,
+        title,
+        status: 'draft',
+        deployed: false,
+        aliases: existingEntry?.aliases ?? [],
+        source: { kind: 'scene', sceneId: targetLevelId },
+        starMap: {
+          enabled: false,
+          year: Number.isFinite(Number(state.metadataStarMapYear))
+            ? Number(state.metadataStarMapYear)
+            : existingEntry?.starMap?.year ?? 2100,
+          era: existingEntry?.starMap?.era ?? 'unknown',
+          description:
+            state.metadataStarMapDescription.trim() ||
+            existingEntry?.starMap?.description ||
+            `Enter ${title}`,
+        },
+      }
+
+      await persistLevelRegistryEntries(replaceRegistryEntry(nextEntry))
+      deps.setMetadataState({
+        metadataStatus: 'draft',
+        metadataDeployed: false,
+        metadataStarMapEnabled: false,
+      })
+      deps.setSaveMessage(`Marked ${title} as draft`)
+    } catch (error) {
+      console.error('Mark draft failed:', error)
+      deps.setSaveMessage('Mark draft failed')
     }
   }
 
@@ -337,6 +449,8 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
     saveSceneDocumentToDisk,
     saveScene,
     overwriteLevelScene,
+    publishLevel,
+    markLevelDraft,
     saveAsNewLevel,
     createNewLevel,
     saveLevelMetadata,

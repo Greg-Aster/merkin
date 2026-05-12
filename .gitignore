@@ -52,6 +52,9 @@ blog-pusher-sync/
 apps/game/src/threlte/editor/scenes/*.backup.json
 apps/game/src/threlte/editor/scenes/*.pre-restore.json
 apps/game/.visual-smoke/
+apps/game/performance-certification-report.json
+apps/game/reports/
+apps/game/tmp/
 
 # Local source audio libraries and downloaded packs
 Archive/audio-packs/

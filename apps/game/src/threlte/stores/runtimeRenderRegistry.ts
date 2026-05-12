@@ -1,6 +1,51 @@
 import type { ActorDefinition } from '../engine/types'
+import { setRuntimeDiagnostic } from './runtimeDiagnosticsStore'
 
-type RuntimeActorRenderKind = 'asset' | 'prefab' | 'primitive' | 'light' | 'none'
+type RuntimeActorRenderKind =
+  | 'asset'
+  | 'prefab'
+  | 'primitive'
+  | 'light'
+  | 'none'
+
+export type RuntimeRenderLifecyclePhase =
+  | 'idle'
+  | 'manifest-loading'
+  | 'manifest-ready'
+  | 'assets-preloading'
+  | 'assets-ready'
+  | 'scene-graph-ready'
+  | 'lighting-profile-ready'
+  | 'post-processing-ready'
+  | 'diagnostics-ready'
+  | 'player-activation-ready'
+  | 'error'
+
+type RuntimeRenderLifecycleRecord = {
+  levelId: string
+  phase: RuntimeRenderLifecyclePhase
+  updatedAt: number
+  message?: string
+  detail?: Record<string, unknown>
+}
+
+type RuntimeRenderProfileDiagnosticRecord = {
+  profileId: string
+  tier: string
+  shadowsEnabled: boolean
+  maxShadowCastingLights: number
+  shadowMapSize: number
+  reflectionMode: string
+}
+
+type RuntimePostProcessingDiagnosticRecord = {
+  enabled: boolean
+  profileId?: string
+  passes: string[]
+  ambientOcclusionEnabled?: boolean
+  bloomEnabled?: boolean
+  reason?: string
+}
 
 type RuntimeActorRenderRecord = {
   id: string
@@ -24,6 +69,9 @@ type RuntimeRenderAuditSummary = {
   loadedAssetActorCount: number
   requiredActorCount: number
   requiredRenderedActorCount: number
+  lifecyclePhase: RuntimeRenderLifecyclePhase
+  activeRenderProfile?: RuntimeRenderProfileDiagnosticRecord
+  postProcessing?: RuntimePostProcessingDiagnosticRecord
   partitionInactiveRenderableActors: RuntimeActorRenderRecord[]
   missingMountedActors: RuntimeActorRenderRecord[]
   missingRenderedActors: RuntimeActorRenderRecord[]
@@ -38,6 +86,9 @@ type RuntimeRenderState = {
   mounted: Record<string, string[]>
   rendered: Record<string, string[]>
   loadedAssets: Record<string, string[]>
+  lifecycle: Record<string, RuntimeRenderLifecycleRecord>
+  renderProfiles: Record<string, RuntimeRenderProfileDiagnosticRecord>
+  postProcessing: Record<string, RuntimePostProcessingDiagnosticRecord>
   summaries: Record<string, RuntimeRenderAuditSummary>
 }
 
@@ -48,11 +99,42 @@ declare global {
 }
 
 const requiredActorsByLevel = new Map<string, Set<string>>()
-const authoredActorsByLevel = new Map<string, Map<string, RuntimeActorRenderRecord>>()
+const authoredActorsByLevel = new Map<
+  string,
+  Map<string, RuntimeActorRenderRecord>
+>()
 const activeActorsByLevel = new Map<string, Set<string>>()
 const mountedActorsByLevel = new Map<string, Set<string>>()
 const renderedActorsByLevel = new Map<string, Set<string>>()
 const loadedAssetActorsByLevel = new Map<string, Set<string>>()
+const lifecycleByLevel = new Map<string, RuntimeRenderLifecycleRecord>()
+const renderProfileByLevel = new Map<
+  string,
+  RuntimeRenderProfileDiagnosticRecord
+>()
+const postProcessingByLevel = new Map<
+  string,
+  RuntimePostProcessingDiagnosticRecord
+>()
+
+const READY_PHASES = new Set<RuntimeRenderLifecyclePhase>([
+  'post-processing-ready',
+  'diagnostics-ready',
+  'player-activation-ready',
+])
+const PHASE_ORDER: Record<RuntimeRenderLifecyclePhase, number> = {
+  idle: 0,
+  'manifest-loading': 1,
+  'manifest-ready': 2,
+  'assets-preloading': 3,
+  'assets-ready': 4,
+  'scene-graph-ready': 5,
+  'lighting-profile-ready': 6,
+  'post-processing-ready': 7,
+  'diagnostics-ready': 8,
+  'player-activation-ready': 9,
+  error: 10,
+}
 
 function toRecord(source: Map<string, Set<string>>) {
   return Object.fromEntries(
@@ -61,6 +143,10 @@ function toRecord(source: Map<string, Set<string>>) {
       Array.from(actors).sort(),
     ]),
   )
+}
+
+function mapToRecord<T>(source: Map<string, T>) {
+  return Object.fromEntries(source.entries())
 }
 
 function authoredToRecord() {
@@ -115,6 +201,7 @@ function summarizeLevelRenderAudit(levelId: string): RuntimeRenderAuditSummary {
   const loadedAssetActors =
     loadedAssetActorsByLevel.get(levelId) ?? new Set<string>()
   const requiredActors = requiredActorsByLevel.get(levelId) ?? new Set<string>()
+  const lifecycle = lifecycleByLevel.get(levelId)
   const missingMountedActors = authoredActorList.filter(
     actor => isActiveActor(actor) && !mountedActors.has(actor.id),
   )
@@ -145,6 +232,9 @@ function summarizeLevelRenderAudit(levelId: string): RuntimeRenderAuditSummary {
     requiredRenderedActorCount: Array.from(requiredActors).filter(actorId =>
       renderedActors.has(actorId),
     ).length,
+    lifecyclePhase: lifecycle?.phase ?? 'idle',
+    activeRenderProfile: renderProfileByLevel.get(levelId),
+    postProcessing: postProcessingByLevel.get(levelId),
     partitionInactiveRenderableActors,
     missingMountedActors,
     missingRenderedActors,
@@ -172,12 +262,91 @@ function publishRuntimeRenderState() {
     mounted: toRecord(mountedActorsByLevel),
     rendered: toRecord(renderedActorsByLevel),
     loadedAssets: toRecord(loadedAssetActorsByLevel),
+    lifecycle: mapToRecord(lifecycleByLevel),
+    renderProfiles: mapToRecord(renderProfileByLevel),
+    postProcessing: mapToRecord(postProcessingByLevel),
     summaries: summariesToRecord(),
   }
 }
 
 function publishRuntimeRenderAudit() {
   publishRuntimeRenderState()
+
+  const summaries = summariesToRecord()
+  const activeSummary = Object.values(summaries).sort((left, right) => {
+    const leftUpdated = lifecycleByLevel.get(left.levelId)?.updatedAt ?? 0
+    const rightUpdated = lifecycleByLevel.get(right.levelId)?.updatedAt ?? 0
+    return rightUpdated - leftUpdated
+  })[0]
+  if (!activeSummary) return
+
+  const missingRequired = activeSummary.missingRequiredRenderedActors.length
+  const phase = activeSummary.lifecyclePhase
+  const phaseReady = READY_PHASES.has(phase)
+  const level =
+    phase === 'error'
+      ? 'error'
+      : phaseReady && missingRequired > 0
+        ? 'error'
+        : phaseReady
+          ? 'ready'
+          : 'loading'
+
+  setRuntimeDiagnostic('runtimeRender', {
+    label: 'Runtime Render',
+    level,
+    message:
+      level === 'error'
+        ? `${activeSummary.levelId}: render phase ${phase} has ${missingRequired} missing required actor(s).`
+        : `${activeSummary.levelId}: render phase ${phase}, ${activeSummary.renderedActorCount}/${activeSummary.activeRenderableActorCount} active renderable actor(s) drawn.`,
+    meta: activeSummary as unknown as Record<string, unknown>,
+  })
+}
+
+export function setRuntimeRenderLifecyclePhase({
+  levelId,
+  phase,
+  message,
+  detail,
+}: {
+  levelId: string
+  phase: RuntimeRenderLifecyclePhase
+  message?: string
+  detail?: Record<string, unknown>
+}) {
+  const current = lifecycleByLevel.get(levelId)
+  if (
+    current &&
+    phase !== 'error' &&
+    PHASE_ORDER[phase] < PHASE_ORDER[current.phase]
+  ) {
+    return
+  }
+
+  lifecycleByLevel.set(levelId, {
+    levelId,
+    phase,
+    message,
+    detail,
+    updatedAt: Date.now(),
+  })
+  publishRuntimeRenderAudit()
+}
+
+export function setRuntimeRenderProfileDiagnostics(
+  levelId: string,
+  profile: RuntimeRenderProfileDiagnosticRecord,
+) {
+  renderProfileByLevel.set(levelId, profile)
+  publishRuntimeRenderAudit()
+}
+
+export function setRuntimePostProcessingDiagnostics(
+  levelId: string,
+  postProcessing: RuntimePostProcessingDiagnosticRecord,
+) {
+  postProcessingByLevel.set(levelId, postProcessing)
+  publishRuntimeRenderAudit()
 }
 
 export function setRuntimeLevelActors(
@@ -192,6 +361,7 @@ export function setRuntimeLevelActors(
   renderedActorsByLevel.delete(levelId)
   loadedAssetActorsByLevel.delete(levelId)
   activeActorsByLevel.delete(levelId)
+  postProcessingByLevel.delete(levelId)
   publishRuntimeRenderAudit()
 }
 
@@ -212,6 +382,7 @@ export function clearRuntimeRenderedActors(levelId: string) {
   mountedActorsByLevel.delete(levelId)
   renderedActorsByLevel.delete(levelId)
   loadedAssetActorsByLevel.delete(levelId)
+  postProcessingByLevel.delete(levelId)
   publishRuntimeRenderAudit()
 }
 
@@ -253,7 +424,10 @@ export function markRuntimeAssetActorLoaded(levelId: string, actorId: string) {
   publishRuntimeRenderAudit()
 }
 
-export function unmarkRuntimeAssetActorLoaded(levelId: string, actorId: string) {
+export function unmarkRuntimeAssetActorLoaded(
+  levelId: string,
+  actorId: string,
+) {
   const loadedAssetActors = loadedAssetActorsByLevel.get(levelId)
   if (!loadedAssetActors) return
 

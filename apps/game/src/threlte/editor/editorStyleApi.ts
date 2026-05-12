@@ -97,10 +97,13 @@ export async function reimportStyleAssetFromBlender(
   request: BlenderReimportRequest,
   readJsonPayload: EditorJsonReader,
 ) {
-  const response = await fetch(`${EDITOR_API_BASE}/api/style/reimport-blender`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(request),
-  })
+  const response = await fetch(
+    `${EDITOR_API_BASE}/api/style/reimport-blender`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    },
+  )
   return readJsonPayload(response, 'Blender reimport packaging')
 }

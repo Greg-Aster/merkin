@@ -68,7 +68,7 @@ onDestroy(() => {
       friction={collision.friction ?? 0.7}
       restitution={collision.restitution ?? 0}
       sensor={collision.sensor ?? false}
-      assetUrl={actor.render?.asset?.url ?? ''}
+      colliderUrl={collision.colliderUrl ?? ''}
       primitiveGeometry={actor.render?.primitive?.geometry}
       primitiveArgs={actor.render?.primitive?.args ?? []}
     >
@@ -92,7 +92,7 @@ onDestroy(() => {
       friction={collision.friction ?? 0.7}
       restitution={collision.restitution ?? 0}
       sensor={collision.sensor ?? false}
-      assetUrl={actor.render?.asset?.url ?? ''}
+      colliderUrl={collision.colliderUrl ?? ''}
       primitiveGeometry={actor.render?.primitive?.geometry}
       primitiveArgs={actor.render?.primitive?.args ?? []}
     />
@@ -101,15 +101,17 @@ onDestroy(() => {
     <RuntimeActorRenderContent {actor} {levelId} />
   {/if}
 
-  <RuntimeGameplayRenderer
-    node={gameplayNode}
-    selected={false}
-    editorEnabled={false}
-    {interactionSystem}
-    {interactiveEnabled}
-    on:portalTransition
-    on:noteRead
-  />
+  {#if actor.gameplay?.data}
+    <RuntimeGameplayRenderer
+      node={gameplayNode}
+      selected={false}
+      editorEnabled={false}
+      {interactionSystem}
+      {interactiveEnabled}
+      on:portalTransition
+      on:noteRead
+    />
+  {/if}
 
   <slot />
 </T.Group>

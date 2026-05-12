@@ -1,0 +1,13 @@
+{
+  "materialAuthoring": {
+    "workflow": "apps/game/scripts/bake-runtime-prefabs.mjs#story-marker-pbr",
+    "authoredAt": "2026-05-11",
+    "textureSize": 64,
+    "slotsAuthored": [
+      "baseColorTexture",
+      "metallicRoughnessTexture",
+      "normalTexture"
+    ],
+    "provenance": "Procedural PBR maps authored from the runtime prefab material palette during prefab baking so story-marker prefabs no longer rely on approved material-factor fallbacks."
+  }
+}

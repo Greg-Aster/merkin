@@ -1,5 +1,4 @@
 <script lang="ts">
-import './editor-ui.css'
 import { onDestroy } from 'svelte'
 import {
   type EditorSceneNode,
@@ -60,7 +59,7 @@ onDestroy(() => {
 })
 </script>
 
-{#if editorState?.enabled}
+{#if editorState?.enabled && editorState.controlsOverlayOpen}
   <div class="editor-controls-overlay">
     <div class="editor-controls-header">
       <div>

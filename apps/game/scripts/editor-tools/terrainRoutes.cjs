@@ -72,6 +72,7 @@ function handleTerrainRoutes(req, res, route, context) {
           levelId,
           nodeId,
           sourceAssetUrl,
+          sources,
           resolution = 512,
           bakeCollision = true,
         } = JSON.parse(body || '{}');
@@ -90,17 +91,32 @@ function handleTerrainRoutes(req, res, route, context) {
           ? scene.nodes.find(node => node.id === nodeId)
           : null;
         const resolvedSourceUrl = sourceAssetUrl || sourceNode?.asset?.url || '';
+        const sourceList = Array.isArray(sources) ? sources : [];
 
-        if (!resolvedSourceUrl) {
+        if (!resolvedSourceUrl && sourceList.length === 0) {
           sendJson(res, 400, {
             success: false,
-            message: 'Select an asset node or provide sourceAssetUrl before generating a terrain heightmap.',
+            message: 'Select an asset, primitive, or group before generating a terrain heightmap.',
           });
           return;
         }
 
-        const sourcePath = resolvePublicAssetPath(resolvedSourceUrl);
-        if (!fs.existsSync(sourcePath)) {
+        const assetSources = sourceList.length > 0
+          ? sourceList.filter(source => source?.sourceAssetUrl)
+          : [{ sourceAssetUrl: resolvedSourceUrl }];
+        for (const source of assetSources) {
+          const sourcePath = resolvePublicAssetPath(source.sourceAssetUrl);
+          if (!fs.existsSync(sourcePath)) {
+            sendJson(res, 400, {
+              success: false,
+              message: `Source mesh not found: ${source.sourceAssetUrl}`,
+            });
+            return;
+          }
+        }
+
+        const sourcePath = resolvedSourceUrl ? resolvePublicAssetPath(resolvedSourceUrl) : '';
+        if (resolvedSourceUrl && !fs.existsSync(sourcePath)) {
           sendJson(res, 400, {
             success: false,
             message: `Source mesh not found: ${resolvedSourceUrl}`,
@@ -114,13 +130,19 @@ function handleTerrainRoutes(req, res, route, context) {
           'generate:terrain-heightmap',
           '--',
           `--level=${levelId}`,
-          `--source=${resolvedSourceUrl}`,
-          `--sourceName=${sourceNode?.name || path.basename(sourcePath)}`,
           `--resolution=${resolution}`,
-          `--position=${JSON.stringify(sourceNode?.position || [0, 0, 0])}`,
-          `--rotation=${JSON.stringify(sourceNode?.rotation || [0, 0, 0])}`,
-          `--scale=${JSON.stringify(sourceNode?.scale || [1, 1, 1])}`,
         ];
+        if (sourceList.length > 0) {
+          args.push(`--sources=${JSON.stringify(sourceList)}`);
+        } else {
+          args.push(
+            `--source=${resolvedSourceUrl}`,
+            `--sourceName=${sourceNode?.name || path.basename(sourcePath)}`,
+            `--position=${JSON.stringify(sourceNode?.position || [0, 0, 0])}`,
+            `--rotation=${JSON.stringify(sourceNode?.rotation || [0, 0, 0])}`,
+            `--scale=${JSON.stringify(sourceNode?.scale || [1, 1, 1])}`,
+          );
+        }
 
         const child = spawn('pnpm', args, {
           cwd: REPO_ROOT,

@@ -1,13 +1,14 @@
 import * as THREE from 'three'
 import { canBakeSceneNode, getPrefabAssetUrl } from './editorBakeSource'
+import { applyGeneratedAssetToNode } from './editorGeneratedAssetApplication'
+import { cancelHunyuanJobs } from './editorHunyuanApi'
 import {
   type PersistedStyleBatchEntry,
   type PersistedStyleBatchSession,
   saveEditorSceneToLocalStorage,
 } from './editorPersistence'
-import { cancelHunyuanJobs } from './editorHunyuanApi'
-import { createEditorStyleBatchSessionController } from './editorStyleBatchSession'
-import { applyGeneratedAssetToNode } from './editorGeneratedAssetApplication'
+import { getEditorObject } from './editorRegistry'
+import type { EditorSceneNode } from './editorStore'
 import {
   exportStyleAssetForBlender,
   fetchLatestStyleWorkspace,
@@ -16,8 +17,7 @@ import {
   reimportStyleAssetFromBlender,
   simplifyStyleAsset,
 } from './editorStyleApi'
-import { getEditorObject } from './editorRegistry'
-import type { EditorSceneNode } from './editorStore'
+import { createEditorStyleBatchSessionController } from './editorStyleBatchSession'
 
 interface EditorStyleControllerDeps {
   state: Record<string, any>
@@ -136,7 +136,9 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       : `Scene regeneration finished for ${session.entries.length} object${session.entries.length === 1 ? '' : 's'}. The scene file was saved to disk.`
   }
 
-  async function completeStyleBatchSession(session: PersistedStyleBatchSession) {
+  async function completeStyleBatchSession(
+    session: PersistedStyleBatchSession,
+  ) {
     await deps.saveSceneDocumentToDisk(deps.getActiveSceneLevelId())
     const finalSession = state.styleBatchSession
     const hasIncompleteEntries = !!finalSession?.entries.some(
@@ -452,7 +454,10 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       Math.abs(node.scale[1]),
       Math.abs(node.scale[2]),
     ] as [number, number, number]
-    const prefabAssetUrl = getPrefabAssetUrl(node.prefab?.type)
+    const prefabAssetUrl = getPrefabAssetUrl(
+      node.prefab?.type,
+      node.prefab?.variant,
+    )
     const sourceBounds = sourceAssetUrl
       ? await inspectAssetBounds(sourceAssetUrl)
       : null
@@ -981,7 +986,8 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
         if (entry.status === 'failed') {
           setStyleBatchNodeStatus(
             entry.nodeId,
-            entry.error || 'This batch item failed earlier and was not resumed.',
+            entry.error ||
+              'This batch item failed earlier and was not resumed.',
           )
           continue
         }

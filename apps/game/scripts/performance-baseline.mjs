@@ -1,14 +1,18 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 import {
-  createFilterSet,
+  assertPortAvailable,
   createContextOptions,
+  createFilterSet,
+  installRuntimeProfileOverride,
   launchBrowser,
   normalizeBrowserName,
   parseArgValue,
+  runGameBuild,
   shouldIgnoreConsoleMessage,
   spawnGameDev,
+  spawnGamePreview,
   stopChildProcess,
   waitForPlayableLevel,
   waitForUrl,
@@ -27,13 +31,38 @@ const editorApiBase = String(
 const argv = process.argv.slice(2)
 const args = new Set(argv)
 const strict = args.has('--strict') || process.env.GAME_PERF_STRICT === '1'
-const noServer = args.has('--no-server')
-const browserFilter = parseArgValue(argv, 'browser', process.env.GAME_BROWSER || '')
-const levelFilter = parseArgValue(argv, 'level', process.env.GAME_PERF_LEVEL || '')
+const noServer = args.has('--no-server') || process.env.GAME_NO_SERVER === '1'
+const certificationMode =
+  args.has('--certification') || process.env.GAME_PERF_CERTIFICATION === '1'
+const certificationCoverage = parseArgValue(
+  argv,
+  'coverage',
+  process.env.GAME_PERF_COVERAGE || '',
+)
+const serverMode = noServer
+  ? 'none'
+  : parseArgValue(argv, 'server', process.env.GAME_PERF_SERVER || 'preview')
+const skipBuild =
+  args.has('--skip-build') || process.env.GAME_PERF_SKIP_BUILD === '1'
+const browserFilter = parseArgValue(
+  argv,
+  'browser',
+  process.env.GAME_BROWSER || '',
+)
+const levelFilter = parseArgValue(
+  argv,
+  'level',
+  process.env.GAME_PERF_LEVEL || '',
+)
 const profileFilter = parseArgValue(
   argv,
   'profile',
   process.env.GAME_PERF_PROFILE || '',
+)
+const jsonReportPath = parseArgValue(
+  argv,
+  'write-json',
+  process.env.GAME_PERF_JSON || '',
 )
 
 function readBaselines() {
@@ -44,12 +73,98 @@ function getNumber(value, fallback = 0) {
   return Number.isFinite(value) ? value : fallback
 }
 
+function formatBytes(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return '0MB'
+  return `${Math.round((bytes / (1024 * 1024)) * 10) / 10}MB`
+}
+
+const runtimeTierOrder = ['ultra_low', 'low', 'medium', 'high']
+const runtimeTierRank = new Map(
+  runtimeTierOrder.map((tier, index) => [tier, index]),
+)
+const assetTierOrder = ['low', 'medium', 'high']
+const assetTierRank = new Map(
+  assetTierOrder.map((tier, index) => [tier, index]),
+)
+
+function normalizeRuntimeTier(value) {
+  if (typeof value !== 'string') return null
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[-\s]+/g, '_')
+  return normalized || null
+}
+
+function getRuntimeTierRank(value) {
+  const tier = normalizeRuntimeTier(value)
+  if (!tier) return null
+  return runtimeTierRank.has(tier) ? runtimeTierRank.get(tier) : null
+}
+
+function normalizeAssetTier(value) {
+  const tier = normalizeRuntimeTier(value)
+  return tier && assetTierRank.has(tier) ? tier : null
+}
+
+function getEffectiveExpectedAssetTier(requestedTier, levelCap) {
+  const requested = normalizeAssetTier(requestedTier)
+  if (!requested) return null
+
+  const cap = normalizeAssetTier(levelCap)
+  if (!cap) return requested
+
+  return assetTierRank.get(requested) > assetTierRank.get(cap) ? cap : requested
+}
+
+function getAssetTierSemantics(summary, profile = {}) {
+  const requestedAssetTier = normalizeAssetTier(
+    profile.runtimeAssetTier ??
+      profile.expectedAssetTier ??
+      summary.requestedAssetTier,
+  )
+  const levelAssetTierCap = normalizeAssetTier(summary.levelAssetTierCap)
+  const effectiveExpectedAssetTier = getEffectiveExpectedAssetTier(
+    requestedAssetTier,
+    levelAssetTierCap,
+  )
+
+  return {
+    requestedAssetTier,
+    levelAssetTierCap,
+    effectiveExpectedAssetTier,
+    selectedAssetTier: normalizeAssetTier(summary.selectedAssetTier),
+  }
+}
+
+function formatAssetTierExpectationFailure({
+  selectedAssetTier,
+  effectiveExpectedAssetTier,
+  requestedAssetTier,
+  levelAssetTierCap,
+}) {
+  const capDetail =
+    levelAssetTierCap && requestedAssetTier !== effectiveExpectedAssetTier
+      ? ` (profile requested ${requestedAssetTier}, level cap ${levelAssetTierCap})`
+      : ''
+  return `selectedAssetTier ${selectedAssetTier ?? 'unknown'} expected ${effectiveExpectedAssetTier}${capDetail}`
+}
+
+function normalizeAllowedRuntimeTiers(value) {
+  if (!Array.isArray(value)) return null
+  return new Set(
+    value.map(normalizeRuntimeTier).filter(tier => typeof tier === 'string'),
+  )
+}
+
 function summarizeSamples(samples) {
   const fps = samples.map(sample => getNumber(sample.fps))
   const frameTimes = samples.map(sample => getNumber(sample.frameTime))
   const renderInfo = samples.map(sample => sample.renderInfo ?? {})
   const longTasks = samples.map(sample => sample.longTasks ?? {})
   const systemTimings = samples.at(-1)?.systemTimings ?? {}
+  const gltfCache = samples.map(sample => sample.gltfCache ?? {})
+  const streaming = samples.map(sample => sample.streaming ?? {})
 
   return {
     averageFps:
@@ -74,8 +189,21 @@ function summarizeSamples(samples) {
       ...renderInfo.map(info => getNumber(info.textures)),
       0,
     ),
-    maxLongTasks: Math.max(
-      ...longTasks.map(info => getNumber(info.count)),
+    maxLongTasks: Math.max(...longTasks.map(info => getNumber(info.count)), 0),
+    maxLoadedGltfCacheBytes: Math.max(
+      ...gltfCache.map(info => getNumber(info.loadedBytes)),
+      0,
+    ),
+    maxUnreferencedGltfCacheBytes: Math.max(
+      ...gltfCache.map(info => getNumber(info.unreferencedBytes)),
+      0,
+    ),
+    maxActiveStreamingCells: Math.max(
+      ...streaming.map(info => getNumber(info.activeCellCount)),
+      0,
+    ),
+    maxActiveRenderableActors: Math.max(
+      ...streaming.map(info => getNumber(info.activeRenderableActorCount)),
       0,
     ),
     slowestSystemTimings: Object.entries(systemTimings)
@@ -87,11 +215,93 @@ function summarizeSamples(samples) {
       }))
       .sort((a, b) => b.maxMs - a.maxMs)
       .slice(0, 4),
-    finalQuality: samples.at(-1)?.quality ?? 'unknown',
+    finalQuality: normalizeRuntimeTier(samples.at(-1)?.quality) ?? 'unknown',
+    selectedPlatformProfile:
+      samples.at(-1)?.streaming?.selectedPlatformProfile ?? null,
+    requestedAssetTier: samples.at(-1)?.streaming?.requestedAssetTier ?? null,
+    levelAssetTierCap: samples.at(-1)?.streaming?.levelAssetTierCap ?? null,
+    selectedAssetTier: samples.at(-1)?.streaming?.selectedAssetTier ?? null,
+    renderProfileTier: samples.at(-1)?.streaming?.renderProfileTier ?? null,
   }
 }
 
-function compareAgainstBudgets(summary, budgets) {
+function createEmptySummary() {
+  return {
+    averageFps: 0,
+    lowestFps: 0,
+    averageFrameTimeMs: 0,
+    maxDrawCalls: 0,
+    maxTriangles: 0,
+    maxTextures: 0,
+    maxLongTasks: 0,
+    maxLoadedGltfCacheBytes: 0,
+    maxUnreferencedGltfCacheBytes: 0,
+    maxActiveStreamingCells: 0,
+    maxActiveRenderableActors: 0,
+    slowestSystemTimings: [],
+    finalQuality: 'unknown',
+    selectedPlatformProfile: null,
+    requestedAssetTier: null,
+    levelAssetTierCap: null,
+    selectedAssetTier: null,
+    renderProfileTier: null,
+  }
+}
+
+function compareRuntimeTierExpectation(summary, profile = {}) {
+  const failures = []
+  const expectedTier = normalizeRuntimeTier(profile.expectedRuntimeTier)
+  const finalTier = normalizeRuntimeTier(summary.finalQuality)
+  const assetTierSemantics = getAssetTierSemantics(summary, profile)
+  const allowedTiers = normalizeAllowedRuntimeTiers(profile.allowedRuntimeTiers)
+
+  if (allowedTiers && (!finalTier || !allowedTiers.has(finalTier))) {
+    failures.push(
+      `finalQuality ${finalTier ?? 'unknown'} expected one of ${Array.from(
+        allowedTiers,
+      ).join(', ')}`,
+    )
+  }
+
+  if (!expectedTier || (finalTier && allowedTiers?.has(finalTier))) {
+    if (
+      assetTierSemantics.effectiveExpectedAssetTier &&
+      assetTierSemantics.selectedAssetTier !==
+        assetTierSemantics.effectiveExpectedAssetTier
+    ) {
+      failures.push(formatAssetTierExpectationFailure(assetTierSemantics))
+    }
+    return failures
+  }
+
+  const expectedRank = getRuntimeTierRank(expectedTier)
+  const finalRank = getRuntimeTierRank(finalTier)
+
+  if (expectedRank === null) {
+    failures.push(
+      `expectedRuntimeTier ${expectedTier} is not in tier order ${runtimeTierOrder.join(' < ')}`,
+    )
+    return failures
+  }
+
+  if (finalRank === null || finalRank < expectedRank) {
+    failures.push(
+      `finalQuality >= ${expectedTier} expected, actual ${finalTier ?? 'unknown'}`,
+    )
+  }
+
+  if (
+    assetTierSemantics.effectiveExpectedAssetTier &&
+    assetTierSemantics.selectedAssetTier !==
+      assetTierSemantics.effectiveExpectedAssetTier
+  ) {
+    failures.push(formatAssetTierExpectationFailure(assetTierSemantics))
+  }
+
+  return failures
+}
+
+function compareAgainstBudgets(summary, budgets, timings = {}, profile = {}) {
   const failures = []
   const checks = [
     ['averageFps', '>=', budgets.minAverageFps, summary.averageFps],
@@ -106,6 +316,30 @@ function compareAgainstBudgets(summary, budgets) {
     ['maxTriangles', '<=', budgets.maxTriangles, summary.maxTriangles],
     ['maxTextures', '<=', budgets.maxTextures, summary.maxTextures],
     ['maxLongTasks', '<=', budgets.maxLongTasks, summary.maxLongTasks],
+    [
+      'maxLoadedGltfCacheBytes',
+      '<=',
+      budgets.maxLoadedGltfCacheBytes,
+      summary.maxLoadedGltfCacheBytes,
+    ],
+    [
+      'maxActiveStreamingCells',
+      '<=',
+      budgets.maxActiveStreamingCells,
+      summary.maxActiveStreamingCells,
+    ],
+    [
+      'domContentLoadedMs',
+      '<=',
+      budgets.maxDomContentLoadedMs,
+      timings.domContentLoadedMs,
+    ],
+    [
+      'timeToPlayableMs',
+      '<=',
+      budgets.maxTimeToPlayableMs,
+      timings.timeToPlayableMs,
+    ],
   ]
 
   for (const [metric, operator, expected, actual] of checks) {
@@ -116,7 +350,25 @@ function compareAgainstBudgets(summary, budgets) {
     }
   }
 
+  failures.push(...compareRuntimeTierExpectation(summary, profile))
+
   return failures
+}
+
+async function readBrowserTimings(page) {
+  return page.evaluate(() => {
+    const nav = performance.getEntriesByType('navigation')[0]
+    return {
+      domContentLoadedMs: nav
+        ? Math.round(nav.domContentLoadedEventEnd - nav.startTime)
+        : null,
+      loadEventMs:
+        nav && nav.loadEventEnd > 0
+          ? Math.round(nav.loadEventEnd - nav.startTime)
+          : null,
+      timeToPlayableMs: Math.round(performance.now()),
+    }
+  })
 }
 
 async function collectSamples(page, baseline) {
@@ -126,22 +378,46 @@ async function collectSamples(page, baseline) {
     Math.ceil((baseline.sampleSeconds * 1000) / baseline.sampleIntervalMs),
   )
 
-  for (let index = 0; index < sampleCount; index += 1) {
+  for (let index = 0; index < sampleCount; ) {
     await delay(baseline.sampleIntervalMs)
-    samples.push(
-      await page.evaluate(() => window.__megamealDiagnostics.getSnapshot()),
-    )
+    try {
+      samples.push(
+        await page.evaluate(() => window.__megamealDiagnostics.getSnapshot()),
+      )
+      index += 1
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      if (
+        !/Execution context was destroyed|Cannot find context/i.test(message)
+      ) {
+        throw error
+      }
+      await page.waitForFunction(
+        () => Boolean(window.__megamealDiagnostics),
+        null,
+        {
+          timeout: 15000,
+        },
+      )
+    }
   }
 
   return samples
 }
 
-async function runProfileLevel(browser, baseline, profile, levelId, browserName) {
+async function runProfileLevel(
+  browser,
+  baseline,
+  profile,
+  levelId,
+  browserName,
+) {
   const context = await browser.newContext(
     createContextOptions(profile, browserName),
   )
   const page = await context.newPage()
   const messages = []
+  await installRuntimeProfileOverride(page, profile)
 
   page.on('console', msg => {
     const type = msg.type()
@@ -155,19 +431,36 @@ async function runProfileLevel(browser, baseline, profile, levelId, browserName)
     messages.push(`[pageerror] ${error.message}`)
   })
 
-  const url = `${appOrigin}/?level=${levelId}&debug=1`
+  const url = `${appOrigin}/?level=${levelId}`
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
-    await waitForPlayableLevel(page, levelId)
+    await waitForPlayableLevel(page, levelId, { requireDebugPanel: false })
+    await page.evaluate(() => window.__megamealProductionTelemetry?.clear?.())
     const samples = await collectSamples(page, baseline)
     const summary = summarizeSamples(samples)
-    const budgetFailures = compareAgainstBudgets(summary, profile.budgets ?? {})
+    const assetTierSemantics = getAssetTierSemantics(summary, profile)
+    const browserTimings = await readBrowserTimings(page)
+    const budgetFailures = compareAgainstBudgets(
+      summary,
+      profile.budgets ?? {},
+      browserTimings,
+      profile,
+    )
 
     return {
       profile: profile.id,
+      targetClass: profile.targetClass ?? null,
+      platformProfile: profile.platformProfile ?? null,
+      expectedRuntimeTier: profile.expectedRuntimeTier ?? null,
+      expectedAssetTier: assetTierSemantics.requestedAssetTier,
+      requestedAssetTier: assetTierSemantics.requestedAssetTier,
+      levelAssetTierCap: assetTierSemantics.levelAssetTierCap,
+      effectiveExpectedAssetTier: assetTierSemantics.effectiveExpectedAssetTier,
+      allowedRuntimeTiers: profile.allowedRuntimeTiers ?? null,
       browser: browserName,
       levelId,
       url,
+      timings: browserTimings,
       summary,
       messages,
       budgetFailures,
@@ -177,14 +470,48 @@ async function runProfileLevel(browser, baseline, profile, levelId, browserName)
   }
 }
 
+function createProfileLevelErrorResult(profile, levelId, browserName, error) {
+  const message = error instanceof Error ? error.message : String(error)
+  const assetTierSemantics = getAssetTierSemantics(
+    createEmptySummary(),
+    profile,
+  )
+
+  return {
+    profile: profile.id,
+    targetClass: profile.targetClass ?? null,
+    platformProfile: profile.platformProfile ?? null,
+    expectedRuntimeTier: profile.expectedRuntimeTier ?? null,
+    expectedAssetTier: assetTierSemantics.requestedAssetTier,
+    requestedAssetTier: assetTierSemantics.requestedAssetTier,
+    levelAssetTierCap: assetTierSemantics.levelAssetTierCap,
+    effectiveExpectedAssetTier: assetTierSemantics.effectiveExpectedAssetTier,
+    allowedRuntimeTiers: profile.allowedRuntimeTiers ?? null,
+    browser: browserName,
+    levelId,
+    url: `${appOrigin}/?level=${levelId}`,
+    timings: {
+      timeToPlayableMs: null,
+    },
+    summary: createEmptySummary(),
+    messages: [`[profile-error] ${message}`],
+    budgetFailures: [],
+  }
+}
+
 function printResult(result) {
   const { summary } = result
-  const status =
+  const playableMs =
+    typeof result.timings?.timeToPlayableMs === 'number'
+      ? `${result.timings.timeToPlayableMs}ms`
+      : 'n/a'
+  const inferredStatus =
     result.messages.length === 0 && result.budgetFailures.length === 0
       ? 'ok'
       : strict
         ? 'fail'
         : 'warn'
+  const status = result.gateStatus ?? inferredStatus
   console.log(
     [
       `[perf:${status}]`,
@@ -198,7 +525,16 @@ function printResult(result) {
       `tris=${summary.maxTriangles}`,
       `textures=${summary.maxTextures}`,
       `longTasks=${summary.maxLongTasks}`,
+      `gltfCache=${formatBytes(summary.maxLoadedGltfCacheBytes)}`,
+      `streamCells=${summary.maxActiveStreamingCells}`,
+      `playable=${playableMs}`,
       `quality=${summary.finalQuality}`,
+      `platform=${summary.selectedPlatformProfile ?? 'n/a'}`,
+      `assetTierRequested=${result.requestedAssetTier ?? 'n/a'}`,
+      `assetTierCap=${result.levelAssetTierCap ?? 'none'}`,
+      `assetTierExpected=${result.effectiveExpectedAssetTier ?? 'n/a'}`,
+      `assetTier=${summary.selectedAssetTier ?? 'n/a'}`,
+      `renderProfile=${summary.renderProfileTier ?? 'n/a'}`,
     ].join(' '),
   )
 
@@ -216,25 +552,202 @@ function printResult(result) {
   }
 }
 
+function getBaselineConfig(baseline) {
+  if (!certificationMode) {
+    return {
+      mode: 'baseline',
+      coverage: 'baseline',
+      levels: baseline.levels ?? [],
+      profiles: baseline.profiles ?? [],
+      reportingOnly: false,
+    }
+  }
+
+  const normalizedCoverage = certificationCoverage
+    .trim()
+    .toLowerCase()
+    .replace(/[_\s]+/g, '-')
+
+  if (
+    normalizedCoverage === 'all-level-reporting' ||
+    normalizedCoverage === 'all-levels' ||
+    normalizedCoverage === 'reporting'
+  ) {
+    const reporting = baseline.certification?.allLevelReporting ?? {}
+    const profileIds = new Set(reporting.profiles ?? [])
+    const allProfiles = baseline.certification?.profiles ?? []
+
+    return {
+      mode: 'certification',
+      coverage: 'all-level-reporting',
+      levels: reporting.levels ?? baseline.certification?.levels ?? [],
+      profiles:
+        profileIds.size > 0
+          ? allProfiles.filter(profile => profileIds.has(profile.id))
+          : allProfiles,
+      reportingOnly: true,
+      policy: reporting.policy ?? null,
+    }
+  }
+
+  const strictGate = baseline.certification?.strictGate ?? {}
+  const strictProfileIds = new Set(strictGate.profiles ?? [])
+  const certificationProfiles = baseline.certification?.profiles ?? []
+
+  return {
+    mode: 'certification',
+    coverage: 'strict-gate',
+    levels: strictGate.levels ?? baseline.certification?.levels ?? [],
+    profiles:
+      strictProfileIds.size > 0
+        ? certificationProfiles.filter(profile =>
+            strictProfileIds.has(profile.id),
+          )
+        : certificationProfiles,
+    reportingOnly: false,
+    policy: strictGate.policy ?? null,
+  }
+}
+
+function validateCertificationBudgets(profiles) {
+  const failures = []
+
+  for (const profile of profiles) {
+    const budgets = profile.budgets ?? {}
+    const targetClass = profile.targetClass ?? profile.id
+
+    if (
+      targetClass === 'desktop-high' &&
+      (budgets.minAverageFps < 30 ||
+        budgets.minLowestFps < 18 ||
+        budgets.maxAverageFrameTimeMs > 34)
+    ) {
+      failures.push(
+        `${profile.id}: desktop-high certification budget must be at least avg>=30fps, lowest>=18fps, avgFrame<=34ms`,
+      )
+    }
+    if (
+      targetClass === 'mobile-low' &&
+      (budgets.minAverageFps < 24 ||
+        budgets.minLowestFps < 15 ||
+        budgets.maxAverageFrameTimeMs > 44)
+    ) {
+      failures.push(
+        `${profile.id}: mobile-low certification budget must be at least avg>=24fps, lowest>=15fps, avgFrame<=44ms`,
+      )
+    }
+    if (
+      targetClass === 'tv-medium' &&
+      (budgets.minAverageFps < 24 ||
+        budgets.minLowestFps < 15 ||
+        budgets.maxAverageFrameTimeMs > 44)
+    ) {
+      failures.push(
+        `${profile.id}: tv-medium certification budget must be at least avg>=24fps, lowest>=15fps, avgFrame<=44ms`,
+      )
+    }
+  }
+
+  if (failures.length > 0) {
+    throw new Error(
+      `Certified performance profiles use placeholder budgets:\n${failures
+        .map(failure => `- ${failure}`)
+        .join('\n')}`,
+    )
+  }
+}
+
+function writeJsonReport(results, baseline, baselineConfig) {
+  if (!jsonReportPath) return
+
+  const outputPath = resolve(appRoot, jsonReportPath)
+  mkdirSync(dirname(outputPath), { recursive: true })
+  writeFileSync(
+    outputPath,
+    `${JSON.stringify(
+      {
+        schemaVersion: 1,
+        generatedAt: new Date().toISOString(),
+        mode: baselineConfig.mode,
+        coverage: baselineConfig.coverage,
+        strict,
+        serverMode,
+        gatePolicy: baseline.certification?.gatePolicy ?? null,
+        coveragePolicy: baselineConfig.policy ?? null,
+        reportingOnly: baselineConfig.reportingOnly,
+        strictGate: baseline.certification?.strictGate ?? null,
+        allLevelReporting: baseline.certification?.allLevelReporting ?? null,
+        nonCertifiedScopes: baseline.certification?.nonCertifiedScopes ?? [],
+        certified:
+          strict &&
+          baselineConfig.mode === 'certification' &&
+          !baselineConfig.reportingOnly
+            ? results.every(
+                result =>
+                  result.messages.length === 0 &&
+                  result.budgetFailures.length === 0,
+              )
+            : false,
+        sampleSeconds: baseline.sampleSeconds,
+        sampleIntervalMs: baseline.sampleIntervalMs,
+        levels: baselineConfig.levels,
+        profiles: baselineConfig.profiles.map(profile => ({
+          id: profile.id,
+          browser: profile.browser ?? 'chromium',
+          targetClass: profile.targetClass ?? null,
+          platformProfile: profile.platformProfile ?? null,
+          expectedRuntimeTier: profile.expectedRuntimeTier ?? null,
+          expectedAssetTier:
+            profile.runtimeAssetTier ?? profile.expectedAssetTier ?? null,
+          requestedAssetTier:
+            profile.runtimeAssetTier ?? profile.expectedAssetTier ?? null,
+          allowedRuntimeTiers: profile.allowedRuntimeTiers ?? null,
+        })),
+        results,
+      },
+      null,
+      2,
+    )}\n`,
+  )
+  console.log(`[perf] wrote ${outputPath}`)
+}
+
 async function run() {
   const baseline = readBaselines()
-  let devProcess = null
+  const baselineConfig = getBaselineConfig(baseline)
+  let serverProcess = null
 
-  if (!noServer) {
-    devProcess = spawnGameDev(repoRoot)
+  if (baselineConfig.mode === 'certification') {
+    validateCertificationBudgets(baselineConfig.profiles)
+  }
+
+  if (serverMode === 'preview') {
+    await assertPortAvailable(gameDevPort)
+    if (!skipBuild) {
+      runGameBuild(repoRoot)
+    }
+    serverProcess = spawnGamePreview(repoRoot, gameDevPort)
+  } else if (serverMode === 'dev') {
+    serverProcess = spawnGameDev(repoRoot)
+  } else if (serverMode !== 'none') {
+    throw new Error(
+      `Unsupported performance server mode "${serverMode}". Expected dev, preview, or none.`,
+    )
   }
 
   try {
     await waitForUrl(`${appOrigin}/`)
-    await waitForUrl(`${editorApiBase}/api/level-registry`)
+    if (serverMode !== 'preview') {
+      await waitForUrl(`${editorApiBase}/api/level-registry`)
+    }
 
     const results = []
     const levelFilters = createFilterSet(levelFilter)
     const profileFilters = createFilterSet(profileFilter)
-    const profiles = baseline.profiles.filter(
+    const profiles = baselineConfig.profiles.filter(
       profile => profileFilters.size === 0 || profileFilters.has(profile.id),
     )
-    const levels = baseline.levels.filter(
+    const levels = baselineConfig.levels.filter(
       levelId => levelFilters.size === 0 || levelFilters.has(levelId),
     )
 
@@ -253,13 +766,41 @@ async function run() {
 
       try {
         for (const levelId of levels) {
-          const result = await runProfileLevel(
-            browser,
-            baseline,
-            profile,
-            levelId,
-            browserName,
+          let result
+          try {
+            result = await runProfileLevel(
+              browser,
+              baseline,
+              profile,
+              levelId,
+              browserName,
+            )
+          } catch (error) {
+            if (!baselineConfig.reportingOnly) throw error
+            result = createProfileLevelErrorResult(
+              profile,
+              levelId,
+              browserName,
+              error,
+            )
+          }
+          const resultFailed =
+            result.messages.length > 0 || result.budgetFailures.length > 0
+          const resultErrored = result.messages.some(message =>
+            message.startsWith('[profile-error]'),
           )
+          result.reportingOnly = baselineConfig.reportingOnly
+          result.gateStatus = baselineConfig.reportingOnly
+            ? resultErrored
+              ? 'reporting-error'
+              : resultFailed
+                ? 'reporting-warning'
+                : 'reporting-ok'
+            : resultFailed
+              ? strict
+                ? 'fail'
+                : 'warn'
+              : 'ok'
           results.push(result)
           printResult(result)
         }
@@ -269,9 +810,9 @@ async function run() {
     }
 
     const failed = results.filter(
-      result =>
-        result.messages.length > 0 || result.budgetFailures.length > 0,
+      result => result.messages.length > 0 || result.budgetFailures.length > 0,
     )
+    writeJsonReport(results, baseline, baselineConfig)
 
     if (strict && failed.length > 0) {
       throw new Error(`${failed.length} performance baseline check(s) failed.`)
@@ -282,10 +823,10 @@ async function run() {
         `[perf] ${failed.length} baseline warning(s). Re-run with --strict to fail on budget drift.`,
       )
     } else {
-      console.log('[perf] all browser/mobile baselines passed')
+      console.log(`[perf] all ${baselineConfig.mode} checks passed`)
     }
   } finally {
-    await stopChildProcess(devProcess)
+    await stopChildProcess(serverProcess)
   }
 }
 

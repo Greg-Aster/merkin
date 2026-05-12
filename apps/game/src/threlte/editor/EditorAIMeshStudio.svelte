@@ -270,7 +270,7 @@ function emit(type: string) {
             <button disabled={!canApplyGeneratedAssetToSelection} on:click={() => emit('applyGeneratedAsset')}>Apply To Selection</button>
           </div>
           <div class="button-row compact editor-mt-sm">
-            <button on:click={() => emit('saveGeneratedResult')}>Overwrite Level</button>
+            <button on:click={() => emit('saveGeneratedResult')}>Save Level</button>
           </div>
         </div>
       {/if}
@@ -298,7 +298,7 @@ function emit(type: string) {
       <div class="button-row compact editor-mt-sm">
         <button on:click={() => emit('openGeneratedAsset')}>Open In Generated Assets</button>
         <button disabled={!canApplyGeneratedAssetToSelection} on:click={() => emit('applyGeneratedAsset')}>Apply To Selection</button>
-        <button on:click={() => emit('saveGeneratedResult')}>Overwrite Level</button>
+        <button on:click={() => emit('saveGeneratedResult')}>Save Level</button>
       </div>
     </div>
   {/if}

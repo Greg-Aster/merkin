@@ -53,7 +53,8 @@ const unsubTerrain = terrainStore.subscribe(value => {
 })
 
 function isTerrainModeActive() {
-  const terrainCollisionSettings = editorScene?.settings?.level?.collision?.terrain
+  const terrainCollisionSettings =
+    editorScene?.settings?.level?.collision?.terrain
   const terrainSculptSettings = editorScene?.settings?.level?.terrainSculpt
   const terrainSculptingAvailable =
     Boolean(terrainSculptSettings?.enabled) ||

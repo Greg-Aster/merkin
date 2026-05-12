@@ -81,7 +81,7 @@ $: if (editorEnabled && collisionOverlayEnabled) {
     friction={effectiveCollision?.friction ?? 0.7}
     restitution={effectiveCollision?.restitution ?? 0}
     sensor={effectiveCollision?.sensor ?? false}
-    assetUrl={node.asset?.url ?? ''}
+    colliderUrl={effectiveCollision?.colliderUrl ?? ''}
     primitiveGeometry={node.primitive?.geometry}
     primitiveArgs={node.primitive?.args ?? []}
   >
@@ -100,7 +100,7 @@ $: if (editorEnabled && collisionOverlayEnabled) {
     channel={effectiveCollision?.channel ?? 'worldStatic'}
     triangleBudget={effectiveCollision?.triangleBudget}
     args={getColliderArgs()}
-    assetUrl={node.asset?.url ?? ''}
+    colliderUrl={effectiveCollision?.colliderUrl ?? ''}
     primitiveGeometry={node.primitive?.geometry}
     primitiveArgs={node.primitive?.args ?? []}
   />

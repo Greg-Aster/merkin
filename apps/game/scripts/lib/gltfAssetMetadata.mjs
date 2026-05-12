@@ -35,6 +35,7 @@ function emptyMetadata(path, error) {
       missingRecommendedSlots: [],
       unsupportedExtensions: [],
     },
+    materialAuthoring: null,
     textureCount: 0,
     imageCount: 0,
     textureBytes: 0,
@@ -516,6 +517,7 @@ export function readGltfAssetMetadata(path) {
       materialSlots,
       materials,
       materialValidation,
+      materialAuthoring: json.extras?.materialAuthoring ?? null,
       textureCount: json.textures?.length ?? 0,
       imageCount: json.images?.length ?? 0,
       textureBytes: textures.reduce(

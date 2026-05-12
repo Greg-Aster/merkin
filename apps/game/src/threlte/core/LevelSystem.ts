@@ -70,7 +70,9 @@ export class SystemRegistry {
       this.unregisterComponent(component.id)
     }
 
-    runtimeDebugLog(`Registering component: ${component.id} (${component.type})`)
+    runtimeDebugLog(
+      `Registering component: ${component.id} (${component.type})`,
+    )
 
     this.components.set(component.id, component)
 

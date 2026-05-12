@@ -24,9 +24,14 @@ const isMobile =
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent,
   )
+const runtimeTargetClass =
+  typeof window !== 'undefined'
+    ? window.__gameRuntimeProfile?.targetClass
+    : null
 
 const config = {
-  antialias: isMobile ? false : antialias,
+  antialias:
+    isMobile || runtimeTargetClass === 'desktop-high' ? false : antialias,
   alpha,
   powerPreference: isMobile ? 'low-power' : powerPreference,
   maxPixelRatio: isMobile ? 1.5 : maxPixelRatio,

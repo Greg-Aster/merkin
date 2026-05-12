@@ -1,5 +1,5 @@
-import type { EditorSceneDocument, EditorSceneNode } from './editorTypes'
 import { collectDescendantIds } from './editorHierarchyUtils'
+import type { EditorSceneDocument, EditorSceneNode } from './editorTypes'
 
 export interface EditorNodeTransformPatch {
   position?: EditorSceneNode['position']

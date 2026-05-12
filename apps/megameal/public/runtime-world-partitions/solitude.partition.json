@@ -1,7 +1,7 @@
 {
   "version": 1,
   "levelId": "solitude",
-  "generatedAt": "2026-05-08T21:59:25.925Z",
+  "generatedAt": "2026-05-12T00:47:04.527Z",
   "generatedBy": "cook-world-partition",
   "cellSize": 80,
   "activeRadius": 1,
@@ -102,6 +102,16 @@
       "key": "0,0",
       "x": 0,
       "z": 0,
+      "bounds": {
+        "min": [
+          0,
+          0
+        ],
+        "max": [
+          80,
+          80
+        ]
+      },
       "actorIds": [
         "solitude-ground-dais",
         "solitude-ground-plateau",

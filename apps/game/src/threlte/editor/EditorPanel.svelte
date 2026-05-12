@@ -1,5 +1,4 @@
 <script lang="ts">
-import './editor-ui.css'
 import { EDITOR_API_BASE } from '@config/editorApi'
 import { onDestroy, onMount } from 'svelte'
 import { get } from 'svelte/store'
@@ -17,6 +16,7 @@ import {
   setRuntimeDiagnostic,
 } from '../stores/runtimeDiagnosticsStore'
 import EditorAiTabHost from './EditorAiTabHost.svelte'
+import EditorCollisionTabHost from './EditorCollisionTabHost.svelte'
 import EditorCreateTabHost from './EditorCreateTabHost.svelte'
 import EditorEnvironmentTabHost from './EditorEnvironmentTabHost.svelte'
 import EditorHierarchyTabHost from './EditorHierarchyTabHost.svelte'
@@ -40,11 +40,18 @@ import {
   getNodeVisualColliderSize,
   resolveNodeCollision,
 } from './editorCollisionDefaults'
+import { createPrefabGroups } from './editorCreateCatalog'
 import { createEditorCreateController } from './editorCreateController'
 import {
   EDITOR_PREFAB_GENERATION_LABELS,
   inferNodeGenerationDescriptor,
 } from './editorGeneration'
+import { createGroundTerrainRuntimePublisher } from './editorGroundTerrainRuntimePublisher'
+import {
+  collectSubtreeIds,
+  createWorldMatrixResolver,
+  getTopLevelNodeIds,
+} from './editorHierarchyUtils'
 import { createEditorInspectorController } from './editorInspectorController'
 import { createEditorLevelController } from './editorLevelController'
 import {
@@ -66,6 +73,7 @@ import type {
 } from './editorOutlinerTypes'
 import {
   buildAiTabProps,
+  buildCollisionTabProps,
   buildCreateTabProps,
   buildEnvironmentTabProps,
   buildHierarchyTabProps,
@@ -112,14 +120,20 @@ import {
   removeNodes,
   reparentNodes,
   saveSceneToLocalStorage,
+  selectAllNodes,
   selectEditorNode,
   selectedEditorNodeStore,
   selectedEditorNodesStore,
   setCollisionOverlayEnabled,
+  setControlsOverlayOpen,
   setEditorInteractionMode,
   setEditorScene,
   setEditorViewportLightingMode,
+  setEditorViewportShadingMode,
   setIsolatedNodes,
+  setOutlinerOpen,
+  setPanelOpen,
+  setPropertiesShelfOpen,
   setRotateSnap,
   setScaleSnap,
   setSelectedNodes,
@@ -142,6 +156,14 @@ import {
   ungroupNodes,
   updateLevelSceneSettings,
 } from './editorStore'
+import {
+  type EditorStyleSceneCandidate,
+  buildStyleSceneCandidates,
+  getCuratedStyleBatchCandidateIds,
+  reconcileStyleBatchSelection,
+  stylePresetOptions,
+  yggdrasilDefaultStyleBrief,
+} from './editorStyleBatchSelection'
 import { createEditorStyleController } from './editorStyleController'
 
 export let levelId: string
@@ -153,6 +175,8 @@ let levelRegistryEntries: LevelRegistryEntry[] = []
 let nodeViewportStateById = new Map<string, OutlinerNodeViewportState>()
 let selectedNode: EditorSceneNode | null = null
 let selectedNodes: EditorSceneNode[] = []
+let heightmapSourceNodes: EditorSceneNode[] = []
+let heightmapSourceDescriptors: HeightmapSourceDescriptor[] = []
 let canUndo = false
 let canRedo = false
 let importBuffer = ''
@@ -167,6 +191,14 @@ const ASSET_LIBRARY_ROOT_GENERATED = 'apps/megameal/public/generated/hunyuan3d'
 const COMFY_WORKFLOW_LIBRARY_ROOT = 'apps/game/authoring/workflows/ref-image'
 const DEFAULT_COMFY_WORKFLOW_PATH =
   'apps/game/authoring/workflows/ref-image/Hunyaun example.json'
+
+type HeightmapSourceDescriptor = {
+  nodeId: string
+  sourceName: string
+  sourceAssetUrl?: string
+  primitive?: EditorSceneNode['primitive']
+  matrix: number[]
+}
 let assetBrowserPath = ASSET_LIBRARY_ROOT_MODELS
 let assetBrowserItems: Array<{
   name: string
@@ -332,14 +364,8 @@ let styleBatchNodeStatusById: Record<string, string> = {}
 let styleBatchSession: PersistedStyleBatchSession | null = null
 let styleBatchResumePromise: Promise<void> | null = null
 let styleBatchPendingResume: PersistedStyleBatchSession | null = null
-let styleSceneCandidates: Array<{
-  id: string
-  name: string
-  kindLabel: string
-  descriptor: string
-  selected: boolean
-  status: string
-}> = []
+let styleSelectableSceneCandidates: EditorStyleSceneCandidate[] = []
+let styleSceneCandidates: EditorStyleSceneCandidate[] = []
 
 function sendPipelineLogToTerminal(message: string, detail?: unknown) {
   void fetch(`${EDITOR_API_BASE}/api/editor/log`, {
@@ -543,6 +569,19 @@ const levelController = createEditorLevelController({
   transitionToLevel: gameActions.transitionToLevel,
   createEmptyScene,
   setEditorScene,
+})
+
+const groundTerrainRuntimePublisher = createGroundTerrainRuntimePublisher({
+  editorApiBase: EDITOR_API_BASE,
+  getActiveSceneLevelId: () => activeSceneLevelId,
+  saveSceneDocumentToDisk: levelController.saveSceneDocumentToDisk,
+  getPending: () => groundTerrainPublishPending,
+  setPending: pending => {
+    groundTerrainPublishPending = pending
+  },
+  setSaveMessage: message => {
+    saveMessage = message
+  },
 })
 
 const textureFilePattern = /\.(png|jpe?g|webp|gif|bmp|tga|avif)$/i
@@ -1396,8 +1435,78 @@ $: selectedNodeStyleDescriptor = getDefaultStyleDescriptor(selectedNode)
 $: selectedNodeColliderSize =
   resolveNodeCollision(selectedNode, editorScene?.settings)?.size ??
   getNodeVisualColliderSize(selectedNode)
-$: selectedTerrainSourceName = selectedNode?.asset?.url ? selectedNode.name : ''
-$: selectedTerrainSourceAssetUrl = selectedNode?.asset?.url ?? ''
+
+function canBakeHeightmapSource(node: EditorSceneNode) {
+  return Boolean(
+    node.asset?.url ||
+      node.primitive ||
+      (node.prefab && getPrefabAssetUrl(node.prefab.type, node.prefab.variant)),
+  )
+}
+
+function resolveHeightmapSourceAssetUrl(node: EditorSceneNode) {
+  if (node.asset?.url) return node.asset.url
+  if (node.prefab)
+    return getPrefabAssetUrl(node.prefab.type, node.prefab.variant)
+  return ''
+}
+
+function getHeightmapSelectionRootIds() {
+  const roots = selectedNodes.length
+    ? selectedNodes
+    : selectedNode
+      ? [selectedNode]
+      : []
+  return getTopLevelNodeIds(
+    editorNodes,
+    roots.map(node => node.id),
+  )
+}
+
+function getHeightmapSourceNodes() {
+  const sourceIds = new Set<string>()
+  const rootIds = getHeightmapSelectionRootIds()
+
+  for (const rootId of rootIds) {
+    collectSubtreeIds(editorNodes, rootId).forEach(nodeId => {
+      const viewportState = nodeViewportStateById.get(nodeId)
+      if (viewportState && !viewportState.effectiveVisible) return
+      sourceIds.add(nodeId)
+    })
+  }
+
+  return editorNodes.filter(
+    node => sourceIds.has(node.id) && canBakeHeightmapSource(node),
+  )
+}
+
+function getHeightmapSourceDescriptors() {
+  if (heightmapSourceNodes.length === 0) return []
+
+  const getWorldMatrix = createWorldMatrixResolver(editorNodes)
+  return heightmapSourceNodes.map(node => {
+    const sourceAssetUrl = resolveHeightmapSourceAssetUrl(node)
+    return {
+      nodeId: node.id,
+      sourceName: node.name,
+      ...(sourceAssetUrl ? { sourceAssetUrl } : {}),
+      ...(node.primitive ? { primitive: node.primitive } : {}),
+      matrix: getWorldMatrix(node.id).toArray(),
+    } satisfies HeightmapSourceDescriptor
+  })
+}
+
+$: heightmapSourceNodes = getHeightmapSourceNodes()
+$: heightmapSourceDescriptors = getHeightmapSourceDescriptors()
+$: selectedTerrainSourceName =
+  heightmapSourceNodes.length === 0
+    ? ''
+    : heightmapSourceNodes.length === 1
+      ? heightmapSourceNodes[0].name
+      : `${selectedNode?.name ?? 'Selection'} (${heightmapSourceNodes.length} sources)`
+$: selectedTerrainSourceAssetUrl =
+  heightmapSourceDescriptors[0]?.sourceAssetUrl ??
+  (heightmapSourceDescriptors.length > 0 ? 'procedural-terrain-sources' : '')
 $: canUseStyleStudioSelection = canUseStyleStudio(selectedNode)
 $: canUseAiMeshStudioSelection = canUseAiMeshStudio(selectedNode)
 $: selectedLibraryItemPath = selectedLibraryItem?.path ?? ''
@@ -1466,51 +1575,6 @@ const ambientAudioLibrary = [
   { label: 'Untitled', src: '/audio/ambient/Untitled.mp3' },
 ]
 
-const stylePresetOptions = [
-  {
-    id: 'yggdrasil-abyssal-neon',
-    label: 'Yggdrasil · Abyssal Neon Horror',
-    prompt:
-      'extremely dark cosmic horror sacred material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread',
-    negativePrompt: '',
-    loraNotes:
-      'Favor blackened, abyssal , violet-magenta rune glow, cosmic dread, monumental sacred architecture, and Norse myth gravitas over generic fantasy prettiness.',
-    controlNetNotes:
-      'Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.',
-  },
-  {
-    id: 'yggdrasil-sacred-natural',
-    label: 'Yggdrasil · Sacred Mythic Natural',
-    prompt:
-      'ancient sacred material language, weathered cosmic wood, rune-carved stone, moss, lichen, cold mist, restrained gold accents, monumental age, painterly but grounded, cohesive mythic surfaces, reverent atmosphere, carved history, readable forms',
-    negativePrompt: '',
-    loraNotes:
-      'Lean toward mythic Scandinavian sacred landscape and old ritual craft rather than generic high fantasy prettiness.',
-    controlNetNotes:
-      'Preserve silhouette, climbability, collision readability, path readability, and landmark hierarchy.',
-  },
-  {
-    id: 'painterly-storybook',
-    label: 'Painterly Storybook',
-    prompt:
-      'hand-painted storybook environment art, unified surface language, stylized materials, painterly wear, broad readable forms',
-    negativePrompt: '',
-    loraNotes: '',
-    controlNetNotes:
-      'Preserve silhouette and major surface breakup from the source asset.',
-  },
-  {
-    id: 'ruin-cathedral-neon',
-    label: 'Ruin Cathedral · Neon Rune',
-    prompt:
-      'dark ruin cathedral environment, sacred stone, fractured monoliths, magenta and cyan emissive rune channels, cold volumetric haze, monumental forms, restrained sci-fantasy glow, painterly surfaces',
-    negativePrompt: '',
-    loraNotes: 'Emphasize rune emissives and monumental ruin silhouettes.',
-    controlNetNotes:
-      'Preserve landmark readability and broad architecture masses.',
-  },
-]
-
 const editorPanelTabs: Array<{
   id: EditorPanelTab
   icon: string
@@ -1518,6 +1582,7 @@ const editorPanelTabs: Array<{
 }> = [
   { id: 'workflow', icon: '→', label: 'Workflow' },
   { id: 'scene', icon: '◫', label: 'Scene' },
+  { id: 'collision', icon: '◇', label: 'Collision' },
   { id: 'environment', icon: '☼', label: 'Environment' },
   { id: 'player', icon: '⚑', label: 'Player' },
   { id: 'create', icon: '+', label: 'Create' },
@@ -1607,107 +1672,9 @@ const createQuickNodeActions = [
   },
 ]
 
-const createPrefabGroups = [
-  {
-    label: 'Sci-Fi / Tech',
-    items: [
-      {
-        label: 'Anomaly Cluster',
-        type: 'anomaly-cluster' as const,
-        position: [0, 2, 0] as [number, number, number],
-      },
-      {
-        label: 'Command Console',
-        type: 'command-console' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-      {
-        label: 'Command Fin',
-        type: 'command-fin' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-      {
-        label: 'Support Column',
-        type: 'support-column' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-      {
-        label: 'Hanging Light',
-        type: 'hanging-light' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-    ],
-  },
-  {
-    label: 'Architecture / World',
-    items: [
-      {
-        label: 'Interior Archway',
-        type: 'interior-archway' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-      {
-        label: 'Courtyard Pylon',
-        type: 'courtyard-pylon' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-      {
-        label: 'Wasteland Archway',
-        type: 'wasteland-archway' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-      {
-        label: 'Portal Apparatus',
-        type: 'portal-apparatus' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-    ],
-  },
-  {
-    label: 'Ruins / Nature / Story',
-    items: [
-      {
-        label: 'Story Marker',
-        type: 'story-marker' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-      {
-        label: 'Courtyard Fountain',
-        type: 'courtyard-fountain' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-      {
-        label: 'Observation Rig',
-        type: 'observation-rig' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-      {
-        label: 'Bench Growth',
-        type: 'bench-growth' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-      {
-        label: 'Growth Planter',
-        type: 'growth-planter' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-      {
-        label: 'Monolith',
-        type: 'wasteland-monolith' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-      {
-        label: 'Broken Ring',
-        type: 'broken-ring' as const,
-        position: [0, 0, 0] as [number, number, number],
-      },
-    ],
-  },
-]
-
 function getAiSourceAssetUrl(node: EditorSceneNode | null) {
   if (node?.asset?.url) return node.asset.url
-  return getPrefabAssetUrl(node?.prefab?.type)
+  return getPrefabAssetUrl(node?.prefab?.type, node?.prefab?.variant)
 }
 
 function getAiSourceName(node: EditorSceneNode | null) {
@@ -1745,56 +1712,16 @@ function updateNodeStyleDescriptor(nodeId: string, value: string) {
   })
 }
 
-function getStyleSceneCandidates(nodes: EditorSceneNode[]) {
-  return nodes
-    .filter(node => canBakeSceneNode(node))
-    .map(node => ({
-      id: node.id,
-      name: node.name,
-      kindLabel: node.asset
-        ? 'Imported asset'
-        : node.prefab
-          ? `Prefab · ${node.prefab.type}`
-          : node.primitive
-            ? `Primitive · ${node.primitive.geometry}`
-            : node.kind,
-      descriptor: getDefaultStyleDescriptor(node),
-      selected: styleBatchSelectionIds.includes(node.id),
-      status: styleBatchNodeStatusById[node.id] ?? '',
-    }))
-}
-
-function getCuratedStyleBatchCandidateIds(
-  levelId: string,
-  nodes: EditorSceneNode[],
-) {
-  const bakeableNodes = nodes.filter(node => canBakeSceneNode(node))
-  if (levelId !== 'yggdrasil') {
-    return bakeableNodes.map(node => node.id)
-  }
-
-  return bakeableNodes
-    .filter(node => {
-      if (node.gameplay) return false
-      if (node.id === 'yggdrasil-spawn-pad') return false
-      if (node.id.startsWith('yggdrasil-arrival-group')) return false
-      if (node.id.startsWith('yggdrasil-crown-perch-group')) return false
-      if (node.id.startsWith('yggdrasil-hvergelmir-depth-group')) return false
-      if (node.prefab?.type === 'story-marker') return false
-      if (node.prefab?.type === 'portal-apparatus') return false
-      if (node.prefab?.type === 'observation-rig') return false
-      return true
-    })
-    .map(node => node.id)
-}
-
 function handleHierarchySelection(nodeId: string, event: MouseEvent) {
   const additive = event.shiftKey
-  const toggle = event.metaKey || event.ctrlKey
+  const modifierAdditive =
+    event.metaKey ||
+    event.ctrlKey ||
+    event.getModifierState('Meta') ||
+    event.getModifierState('Control')
   const order = filteredFlattenedNodes.map(node => node.id)
   selectEditorNode(nodeId, {
-    additive,
-    toggle,
+    additive: additive || modifierAdditive,
     rangeOrder: additive ? order : undefined,
   })
 }
@@ -1836,32 +1763,35 @@ function getSimilarNodeLabel(node: EditorSceneNode | null) {
 $: similarNodeIds = getSimilarNodeIds(selectedNode)
 $: similarNodeCount = similarNodeIds.length
 $: similarNodeLabel = getSimilarNodeLabel(selectedNode)
-$: styleSceneCandidates =
-  (styleBatchSelectionKey, getStyleSceneCandidates(editorNodes))
+$: styleSelectableSceneCandidates =
+  (styleBatchSelectionKey,
+  buildStyleSceneCandidates(
+    editorNodes,
+    [],
+    styleBatchNodeStatusById,
+    getDefaultStyleDescriptor,
+  ))
 
 $: {
-  const candidateIds = styleSceneCandidates.map(candidate => candidate.id)
-  const retained = styleBatchSelectionIds.filter(id =>
-    candidateIds.includes(id),
+  const nextSelection = reconcileStyleBatchSelection(
+    styleSelectableSceneCandidates,
+    styleBatchSelectionIds,
+    styleBatchSelectionInitialized,
+    () => getCuratedStyleBatchCandidateIds(activeSceneLevelId, editorNodes),
   )
   if (
-    (!styleBatchSelectionInitialized ||
-      (candidateIds.length > 0 &&
-        retained.length === 0 &&
-        styleBatchSelectionIds.length > 0)) &&
-    candidateIds.length > 0
+    nextSelection.selectedIds !== styleBatchSelectionIds ||
+    nextSelection.initialized !== styleBatchSelectionInitialized
   ) {
-    styleBatchSelectionIds = getCuratedStyleBatchCandidateIds(
-      activeSceneLevelId,
-      editorNodes,
-    )
-    styleBatchSelectionInitialized = true
-  } else if (retained.length !== styleBatchSelectionIds.length) {
-    styleBatchSelectionIds = retained
-  } else if (candidateIds.length === 0) {
-    styleBatchSelectionInitialized = false
+    styleBatchSelectionIds = nextSelection.selectedIds
+    styleBatchSelectionInitialized = nextSelection.initialized
   }
 }
+
+$: styleSceneCandidates = styleSelectableSceneCandidates.map(candidate => ({
+  ...candidate,
+  selected: styleBatchSelectionIds.includes(candidate.id),
+}))
 
 $: if (
   activeSceneLevelId === 'yggdrasil' &&
@@ -1869,14 +1799,10 @@ $: if (
   !styleBatchSession
 ) {
   styleProfileName = 'Abyssal Neon Cosmic Horror'
-  stylePrompt =
-    'extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread'
-  styleNegativePrompt =
-    'daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence'
-  styleLoraNotes =
-    'Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred'
-  styleControlNetNotes =
-    'Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.'
+  stylePrompt = yggdrasilDefaultStyleBrief.prompt
+  styleNegativePrompt = yggdrasilDefaultStyleBrief.negativePrompt
+  styleLoraNotes = yggdrasilDefaultStyleBrief.loraNotes
+  styleControlNetNotes = yggdrasilDefaultStyleBrief.controlNetNotes
   styleBatchSelectionIds = getCuratedStyleBatchCandidateIds(
     activeSceneLevelId,
     editorNodes,
@@ -2074,6 +2000,30 @@ $: canApplyGeneratedAssetToSelection =
 
 async function saveCurrentSceneToDisk() {
   await levelController.overwriteLevelScene()
+}
+
+function openNewLevelTools() {
+  setPanelOpen(true)
+  setActiveEditorTab('scene')
+  saveMessage = 'Enter a title and level ID, then create the level'
+}
+
+function saveAsLevelFromMenu() {
+  if (saveAsLevelId.trim()) {
+    void levelController.saveAsNewLevel()
+    return
+  }
+
+  saveAsTitle = metadataTitle ? `${metadataTitle} Copy` : ''
+  saveAsLevelId = sanitizeLevelId(`${activeSceneLevelId}-copy`)
+  setPanelOpen(true)
+  setActiveEditorTab('save')
+  saveMessage = 'Review Save As fields, then save the new level file'
+}
+
+function loadEditorLevelFromMenu(levelId: string) {
+  pendingLevelId = levelId
+  switchEditorLevel()
 }
 
 $: selectedHunyuanJob =
@@ -2549,13 +2499,14 @@ async function bakeTerrainCollision() {
 
 async function generateTerrainHeightmapFromSelection() {
   if (terrainHeightmapGeneratePending) return
-  if (!selectedNode?.asset?.url) {
-    saveMessage = 'Select a mesh asset to generate the terrain heightmap'
+  if (heightmapSourceDescriptors.length === 0) {
+    saveMessage =
+      'Select a mesh asset, primitive, prefab, or group to generate the terrain heightmap'
     return
   }
 
   terrainHeightmapGeneratePending = true
-  saveMessage = `Generating terrain heightmap from ${selectedNode.name}...`
+  saveMessage = `Generating terrain heightmap from ${selectedTerrainSourceName}...`
 
   try {
     const response = await fetch(
@@ -2565,7 +2516,8 @@ async function generateTerrainHeightmapFromSelection() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           levelId: activeSceneLevelId,
-          nodeId: selectedNode.id,
+          nodeId: selectedNode?.id,
+          sources: heightmapSourceDescriptors,
           resolution: terrainCollisionSettings?.heightmapResolution ?? 512,
           bakeCollision: true,
         }),
@@ -2593,9 +2545,16 @@ async function generateTerrainHeightmapFromSelection() {
           heightmapResolution:
             payload.resolution ??
             settings.collision?.terrain?.heightmapResolution,
-          sourceAssetUrl: payload.sourceAssetUrl ?? selectedNode.asset?.url,
-          sourceNodeId: selectedNode.id,
-          sourceName: payload.sourceName ?? selectedNode.name,
+          sourceAssetUrl:
+            payload.sourceAssetUrl ??
+            settings.collision?.terrain?.sourceAssetUrl,
+          sourceAssetUrls:
+            payload.sourceAssetUrls ??
+            settings.collision?.terrain?.sourceAssetUrls,
+          sourceNodeId: selectedNode?.id,
+          sourceNodeIds:
+            payload.sourceNodeIds ?? settings.collision?.terrain?.sourceNodeIds,
+          sourceName: payload.sourceName ?? selectedTerrainSourceName,
           sourceTriangleCount:
             payload.sourceTriangleCount ??
             settings.collision?.terrain?.sourceTriangleCount,
@@ -2619,7 +2578,7 @@ async function generateTerrainHeightmapFromSelection() {
         },
       },
     }))
-    saveMessage = `Generated heightmap and collision from ${selectedNode.name}`
+    saveMessage = `Generated heightmap and collision from ${selectedTerrainSourceName}`
   } catch (error) {
     console.error('Terrain heightmap generation failed:', error)
     saveMessage =
@@ -2728,35 +2687,7 @@ async function cookWorldPartition() {
 }
 
 async function publishGroundTerrainContracts() {
-  if (groundTerrainPublishPending) return
-  groundTerrainPublishPending = true
-  saveMessage = 'Publishing ground and terrain runtime contracts...'
-
-  try {
-    await levelController.saveSceneDocumentToDisk(activeSceneLevelId)
-    const response = await fetch(
-      `${EDITOR_API_BASE}/api/editor-terrain/publish-contracts`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ levelId: activeSceneLevelId }),
-      },
-    )
-    const payload = await response.json()
-    if (!payload?.success) {
-      throw new Error(payload?.message ?? 'Ground/terrain publish failed')
-    }
-
-    saveMessage = 'Published runtime ground and terrain contracts'
-  } catch (error) {
-    console.error('Ground/terrain contract publish failed:', error)
-    saveMessage =
-      error instanceof Error
-        ? error.message
-        : 'Ground/terrain contract publish failed'
-  } finally {
-    groundTerrainPublishPending = false
-  }
+  await groundTerrainRuntimePublisher.publishGroundTerrainContracts()
 }
 
 async function reloadFromDisk() {
@@ -2871,8 +2802,18 @@ function setHunyuanApplyToSimilarNodesValue(value: boolean) {
   hunyuanApplyToSimilarNodes = value
 }
 
+function handleEditorMenuShortcut(event: KeyboardEvent) {
+  if (!editorState?.enabled) return
+  const mod = event.metaKey || event.ctrlKey
+  if (!mod || event.key.toLowerCase() !== 's') return
+
+  event.preventDefault()
+  void saveCurrentSceneToDisk()
+}
+
 $: editorPanelPropContext = {
   levelId,
+  editorScene,
   editorState,
   editorNodes,
   editorLevelOptions,
@@ -2964,6 +2905,7 @@ $: editorPanelPropContext = {
   groundTerrainPublishPending,
   selectedTerrainSourceName,
   selectedTerrainSourceAssetUrl,
+  heightmapSourceNodes,
   editorStyleStudioComponent,
   stylePresetOptions,
   styleBusy,
@@ -3067,6 +3009,7 @@ $: editorPanelPropContext = {
 
 $: workflowTabProps = buildWorkflowTabProps(editorPanelPropContext)
 $: sceneTabProps = buildSceneTabProps(editorPanelPropContext)
+$: collisionTabProps = buildCollisionTabProps(editorPanelPropContext)
 $: environmentTabProps = buildEnvironmentTabProps(editorPanelPropContext)
 $: playerTabProps = buildPlayerTabProps(editorPanelPropContext)
 $: createTabProps = buildCreateTabProps(editorPanelPropContext)
@@ -3136,23 +3079,58 @@ onDestroy(() => {
 })
 </script>
 
+<svelte:window on:keydown={handleEditorMenuShortcut} />
+
 {#if editorState?.enabled}
   <div class="editor-shell" class:collapsed={!editorState.panelOpen}>
     <EditorPanelHeader
       panelOpen={editorState.panelOpen}
       propertiesShelfOpen={editorState.propertiesShelfOpen}
+      outlinerOpen={editorState.outlinerOpen}
+      controlsOverlayOpen={editorState.controlsOverlayOpen}
+      viewportShadingMode={editorState.viewportShadingMode}
+      {canUndo}
+      {canRedo}
+      selectedNodeCount={editorState.selectedNodeIds.length}
+      currentLevelId={activeSceneLevelId}
+      levelOptions={editorLevelOptions}
+      onSetViewportShadingMode={setEditorViewportShadingMode}
+      onSaveLevel={saveCurrentSceneToDisk}
+      onSaveAsLevel={saveAsLevelFromMenu}
+      onNewLevel={openNewLevelTools}
+      onLoadLevel={loadEditorLevelFromMenu}
+      onPublishLevel={levelController.publishLevel}
+      onMarkDraft={levelController.markLevelDraft}
+      onReloadDisk={reloadFromDisk}
+      onCopySceneJson={levelController.copySceneJson}
+      onOpenSaveTools={() => setActiveEditorTab('save')}
+      onUndo={() => {
+        if (undoScene()) saveMessage = 'Undo'
+      }}
+      onRedo={() => {
+        if (redoScene()) saveMessage = 'Redo'
+      }}
+      onSelectAll={selectAllNodes}
+      onClearSelection={clearSelection}
+      onDuplicateSelection={() => duplicateNodes(editorState.selectedNodeIds)}
+      onDeleteSelection={() => removeNodes(editorState.selectedNodeIds)}
+      onSetPanelOpen={setPanelOpen}
+      onSetPropertiesShelfOpen={setPropertiesShelfOpen}
+      onSetOutlinerOpen={setOutlinerOpen}
+      onSetControlsOverlayOpen={setControlsOverlayOpen}
       onTogglePropertiesShelf={togglePropertiesShelfOpen}
       onTogglePanel={togglePanelOpen}
     />
 
-    {#if editorState.panelOpen}
+    {#if editorState.panelOpen || editorState.outlinerOpen || editorState.propertiesShelfOpen}
       <div class="editor-body">
-        <EditorPanelToolsDock
-          tabs={editorPanelTabs}
-          activeTab={activeEditorTab}
-          onTabSelect={setActiveEditorTab}
-          bind:contentElement={editorTabContentElement}
-        >
+        {#if editorState.panelOpen}
+          <EditorPanelToolsDock
+            tabs={editorPanelTabs}
+            activeTab={activeEditorTab}
+            onTabSelect={setActiveEditorTab}
+            bind:contentElement={editorTabContentElement}
+          >
       {#if activeEditorTab === 'workflow'}
         <EditorWorkflowTabHost
           {...workflowTabProps}
@@ -3169,6 +3147,11 @@ onDestroy(() => {
           bind:newLevelIdInput
           bind:newLevelTemplateId
         />
+
+      {/if}
+
+      {#if activeEditorTab === 'collision'}
+        <EditorCollisionTabHost {...collisionTabProps} />
 
       {/if}
 
@@ -3256,13 +3239,17 @@ onDestroy(() => {
         />
       {/if}
 
-        </EditorPanelToolsDock>
+          </EditorPanelToolsDock>
+        {/if}
 
-        <EditorSideStackHost
-          {...sideStackProps}
-          bind:selectedGeneratedVariantUrl
-          bind:hunyuanPrompt
-        />
+        {#if editorState.outlinerOpen || editorState.propertiesShelfOpen}
+          <EditorSideStackHost
+            {...sideStackProps}
+            toolPanelOpen={editorState.panelOpen}
+            bind:selectedGeneratedVariantUrl
+            bind:hunyuanPrompt
+          />
+        {/if}
       </div>
     {/if}
   </div>
@@ -3280,14 +3267,15 @@ onDestroy(() => {
     max-width: calc(100vw - 2rem);
     height: calc(100vh - 2rem);
     color: #e8f5ff;
-    z-index: 80;
+    z-index: 88;
   }
   .editor-shell.collapsed { width: 15rem; height: auto; }
   .editor-body {
     flex: 1 1 auto;
     position: relative;
     width: 23rem;
-    height: calc(100vh - 4.5rem);
+    height: calc(100vh - 7.5rem);
+    margin-top: 3rem;
   }
   @media (max-width: 1280px) {
     .editor-shell {

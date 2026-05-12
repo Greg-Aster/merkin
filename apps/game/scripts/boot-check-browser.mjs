@@ -1,5 +1,6 @@
 import {
   assertRequiredRenderActors,
+  assertRuntimeRenderLifecycle,
   isTransientConsoleMessage,
   launchBrowser,
   normalizeBrowserName,
@@ -27,6 +28,40 @@ function createEditorSmokeCheck(name, url) {
         state: 'visible',
         timeout: 10000,
       })
+      await page
+        .locator('.editor-tab-rail')
+        .getByRole('button', { name: 'Scene', exact: true })
+        .click()
+      await page.getByText('Publish Readiness').waitFor({
+        state: 'visible',
+        timeout: 10000,
+      })
+      await page.getByText(/Validation (Gates|Failures)/).waitFor({
+        state: 'visible',
+        timeout: 15000,
+      })
+      await page.getByText('Required Publish Actions').waitFor({
+        state: 'visible',
+        timeout: 10000,
+      })
+      await page.locator('select.text-input').first().waitFor({
+        state: 'visible',
+        timeout: 10000,
+      })
+      await page
+        .locator('.editor-tab-rail')
+        .getByRole('button', { name: 'Inspect', exact: true })
+        .click()
+      await page
+        .locator('.editor-tools-panel .editor-tab-content')
+        .getByText(
+          'Select an object in the viewport or outliner to inspect it here.',
+        )
+        .first()
+        .waitFor({
+          state: 'visible',
+          timeout: 10000,
+        })
     },
   }
 }
@@ -45,6 +80,7 @@ function createLevelSmokeCheck(levelId) {
         gameplayTimeoutMs: 45000,
       })
       await assertRequiredRenderActors(page, levelId)
+      await assertRuntimeRenderLifecycle(page, levelId)
 
       try {
         const summaryText = await page

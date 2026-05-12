@@ -1,6 +1,7 @@
 export type EditorPanelTab =
   | 'workflow'
   | 'scene'
+  | 'collision'
   | 'environment'
   | 'player'
   | 'create'

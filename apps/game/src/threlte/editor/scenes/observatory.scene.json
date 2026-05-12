@@ -67,6 +67,146 @@
         "fallbackMoonlightIntensity": 0.62,
         "fallbackFillLightIntensity": 0.24
       },
+      "renderProfile": {
+        "id": "observatory-water-moon-archive",
+        "defaultTier": "desktop",
+        "lighting": {
+          "ambientColor": "#bcd6ff",
+          "skyColor": "#dce8ff",
+          "groundColor": "#172033",
+          "keyLightColor": "#d9e7ff",
+          "fillLightColor": "#61789e",
+          "keyLightPosition": [18, 24, -12],
+          "fillLightPosition": [-22, 12, 20]
+        },
+        "shadows": {
+          "enabled": true,
+          "maxCastingLights": 1,
+          "mapSize": 1024,
+          "cameraSize": 96,
+          "cameraFar": 180
+        },
+        "reflections": {
+          "mode": "static-environment",
+          "textureSize": 512,
+          "maxPlanarSurfaces": 0,
+          "environmentIntensity": 1.8
+        },
+        "postProcessing": {
+          "enabled": true,
+          "passes": [
+            "tone-mapping",
+            "ambient-occlusion",
+            "color-grading",
+            "bloom",
+            "vignette"
+          ],
+          "maxEnabledPasses": 5,
+          "ambientOcclusion": {
+            "enabled": true,
+            "intensity": 0.76,
+            "radius": 8,
+            "minDistance": 0.006,
+            "maxDistance": 0.13
+          },
+          "bloom": {
+            "intensity": 0.85,
+            "threshold": 0.9
+          },
+          "toneMappingExposure": 0.95,
+          "vignetteStrength": 0.75
+        },
+        "qualityTiers": {
+          "mobile": {
+            "shadows": {
+              "enabled": false,
+              "maxCastingLights": 0
+            },
+            "reflections": {
+              "mode": "none",
+              "textureSize": 0,
+              "maxPlanarSurfaces": 0,
+              "environmentIntensity": 1.1
+            },
+            "postProcessing": {
+              "passes": ["tone-mapping", "color-grading"],
+              "maxEnabledPasses": 2
+            }
+          },
+          "desktop": {
+            "shadows": {
+              "enabled": true,
+              "maxCastingLights": 1,
+              "mapSize": 1024
+            },
+            "reflections": {
+              "mode": "static-environment",
+              "textureSize": 512,
+              "maxPlanarSurfaces": 0
+            },
+            "postProcessing": {
+              "passes": [
+                "tone-mapping",
+                "ambient-occlusion",
+                "color-grading",
+                "bloom",
+                "vignette"
+              ],
+              "maxEnabledPasses": 5,
+              "ambientOcclusion": {
+                "enabled": true,
+                "intensity": 0.76,
+                "radius": 8,
+                "minDistance": 0.006,
+                "maxDistance": 0.13
+              }
+            }
+          },
+          "tv": {
+            "shadows": {
+              "enabled": true,
+              "maxCastingLights": 1,
+              "mapSize": 2048
+            },
+            "reflections": {
+              "mode": "planar",
+              "textureSize": 512,
+              "maxPlanarSurfaces": 1
+            },
+            "postProcessing": {
+              "passes": [
+                "tone-mapping",
+                "ambient-occlusion",
+                "color-grading",
+                "bloom",
+                "vignette"
+              ],
+              "maxEnabledPasses": 5,
+              "ambientOcclusion": {
+                "enabled": true,
+                "intensity": 0.9,
+                "radius": 10,
+                "minDistance": 0.005,
+                "maxDistance": 0.16
+              }
+            }
+          }
+        },
+        "visualBookmarks": [
+          {
+            "id": "spawn-default",
+            "label": "Observatory terrain and water",
+            "playerPosition": [-137.2, 1.8, -49.5],
+            "cameraPosition": [-137.2, 3.4, -49.5],
+            "cameraTarget": [-112, 2.4, -38],
+            "viewport": {
+              "width": 1280,
+              "height": 720
+            },
+            "settleMs": 2000
+          }
+        ]
+      },
       "player": {
         "lightIntensityScale": 2
       }

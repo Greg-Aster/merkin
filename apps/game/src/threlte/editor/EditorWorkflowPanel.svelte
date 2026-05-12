@@ -167,12 +167,12 @@ $: generateLabel = selectedNode?.asset
   <div class="label">Save</div>
   <div class="save-message">Persist your work explicitly after a good generation pass.</div>
   <div class="button-row compact editor-mt-sm">
-    <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onSaveLocal}>Save Local</button>
-    <button data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onOverwriteLevel}>Overwrite Level</button>
+    <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onSaveLocal}>Save Local Recovery</button>
+    <button data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onOverwriteLevel}>Save Level</button>
   </div>
   <div class="button-row compact editor-mt-sm">
-    <button data-sfx-hover="hover-soft" data-sfx-click="warning" on:click={onReloadDisk}>Reload Disk</button>
-    <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenSaveTools}>Open Save Tools</button>
+    <button data-sfx-hover="hover-soft" data-sfx-click="warning" on:click={onReloadDisk}>Load Current Level</button>
+    <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenSaveTools}>Open Level File Tools</button>
   </div>
 </div>
 

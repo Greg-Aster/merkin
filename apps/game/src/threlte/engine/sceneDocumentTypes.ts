@@ -1,3 +1,4 @@
+import type { RuntimePrefabType } from './runtimePrefabCatalog'
 import type {
   CollisionChannel,
   CollisionIntent,
@@ -46,23 +47,7 @@ export type EditorAudioPresetId =
   | 'signal-bloom'
   | 'control-room'
   | 'cathedral-deck'
-export type EditorPrefabType =
-  | 'anomaly-cluster'
-  | 'command-console'
-  | 'command-fin'
-  | 'hanging-light'
-  | 'portal-apparatus'
-  | 'courtyard-fountain'
-  | 'observation-rig'
-  | 'bench-growth'
-  | 'growth-planter'
-  | 'support-column'
-  | 'interior-archway'
-  | 'courtyard-pylon'
-  | 'story-marker'
-  | 'wasteland-archway'
-  | 'wasteland-monolith'
-  | 'broken-ring'
+export type EditorPrefabType = RuntimePrefabType
 
 export interface EditorPrimitiveData {
   geometry: PrimitiveGeometryKind
@@ -142,6 +127,7 @@ export interface EditorNodeCollisionData {
   channel?: CollisionChannel
   enabled?: boolean
   size?: [number, number, number]
+  colliderUrl?: string
   friction?: number
   restitution?: number
   sensor?: boolean
@@ -222,6 +208,7 @@ export interface EditorSceneNode {
 export interface SharedLevelSpawnSettings {
   spawn?: {
     position?: [number, number, number]
+    rotation?: [number, number, number]
   }
 }
 
@@ -292,6 +279,112 @@ export interface SharedLevelLightingSettings {
   }
 }
 
+export type RenderProfilePlatformTier = 'mobile' | 'desktop' | 'tv'
+export type RenderProfileReflectionMode =
+  | 'none'
+  | 'static-environment'
+  | 'screen-space'
+  | 'planar'
+  | 'probe'
+export type RenderProfileReflectionSource =
+  | 'none'
+  | 'skybox'
+  | 'generated-cubemap'
+  | 'planar-water'
+  | 'screen-space'
+  | 'probe'
+export type RenderProfilePostPass =
+  | 'tone-mapping'
+  | 'ambient-occlusion'
+  | 'bloom'
+  | 'color-grading'
+  | 'vignette'
+  | 'anti-aliasing'
+  | 'depth-fog'
+
+export interface RenderProfileShadowSettings {
+  enabled?: boolean
+  maxCastingLights?: number
+  mapSize?: number
+  cameraSize?: number
+  cameraFar?: number
+}
+
+export interface RenderProfileReflectionSettings {
+  mode?: RenderProfileReflectionMode
+  source?: RenderProfileReflectionSource
+  intent?: string
+  textureSize?: number
+  maxPlanarSurfaces?: number
+  environmentIntensity?: number
+  requiredAssetUrls?: string[]
+  estimatedTextureBytes?: number
+  estimatedRenderPasses?: number
+}
+
+export interface RenderProfilePostProcessingSettings {
+  enabled?: boolean
+  passes?: RenderProfilePostPass[]
+  maxEnabledPasses?: number
+  bloom?: {
+    intensity?: number
+    threshold?: number
+  }
+  ambientOcclusion?: {
+    enabled?: boolean
+    intensity?: number
+    radius?: number
+    minDistance?: number
+    maxDistance?: number
+  }
+  toneMappingExposure?: number
+  vignetteStrength?: number
+}
+
+export interface RenderProfileLightingSettings {
+  ambientColor?: string
+  skyColor?: string
+  groundColor?: string
+  keyLightColor?: string
+  fillLightColor?: string
+  keyLightPosition?: [number, number, number]
+  fillLightPosition?: [number, number, number]
+}
+
+export interface RenderProfileVisualBookmark {
+  id: string
+  label?: string
+  playerPosition?: [number, number, number]
+  cameraPosition: [number, number, number]
+  cameraTarget: [number, number, number]
+  viewport?: {
+    width?: number
+    height?: number
+  }
+  settleMs?: number
+}
+
+export interface RenderProfileTierSettings {
+  shadows?: RenderProfileShadowSettings
+  reflections?: RenderProfileReflectionSettings
+  postProcessing?: RenderProfilePostProcessingSettings
+}
+
+export interface SharedLevelRenderProfileSettings {
+  renderProfile?: {
+    id?: string
+    defaultTier?: RenderProfilePlatformTier
+    lighting?: RenderProfileLightingSettings
+    shadows?: RenderProfileShadowSettings
+    reflections?: RenderProfileReflectionSettings
+    postProcessing?: RenderProfilePostProcessingSettings
+    visualBookmarks?: RenderProfileVisualBookmark[]
+    qualityTiers?: Partial<
+      Record<RenderProfilePlatformTier, RenderProfileTierSettings>
+    >
+  }
+}
+
 export interface SharedLevelWaterSettings {
   water?: {
     size?: {
@@ -354,13 +447,8 @@ export type LevelGroundMode =
   | 'authored-ground'
   | 'hybrid'
   | 'scene-authored'
-export type LevelGroundVisualSource =
-  | 'terrain-chunks'
-  | 'scene-actors'
-  | 'none'
-export type LevelGroundCollisionSource =
-  | 'baked-heightfield'
-  | 'scene-colliders'
+export type LevelGroundVisualSource = 'terrain-chunks' | 'scene-actors' | 'none'
+export type LevelGroundCollisionSource = 'baked-heightfield' | 'scene-colliders'
 
 export interface LevelCollisionWorkflowSettings {
   actorCollision?: LevelCollisionDefaultPolicy
@@ -384,7 +472,9 @@ export interface SharedLevelCollisionSettings {
       heightmapUrl?: string
       heightmapResolution?: number
       sourceAssetUrl?: string
+      sourceAssetUrls?: string[]
       sourceNodeId?: string
+      sourceNodeIds?: string[]
       sourceName?: string
       sourceTriangleCount?: number
       colliderUrl?: string
@@ -485,6 +575,7 @@ export interface SharedLevelEditorSettings
     SharedLevelFeatureSettings,
     SharedLevelStyleSettings,
     SharedLevelLightingSettings,
+    SharedLevelRenderProfileSettings,
     SharedLevelWaterSettings,
     SharedLevelAmbientParticleSettings,
     SharedLevelAmbientAudioSettings,

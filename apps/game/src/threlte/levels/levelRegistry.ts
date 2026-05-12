@@ -82,11 +82,14 @@ export const levelRegistryStore = writable<LevelRegistryEntry[]>(
 )
 
 export const playableLevelsStore = derived(levelRegistryStore, $entries =>
-  $entries.filter(entry => entry.deployed),
+  $entries.filter(entry => entry.status === 'active' && entry.deployed),
 )
 
 export const starMapLevelsStore = derived(levelRegistryStore, $entries =>
-  $entries.filter(entry => entry.deployed && entry.starMap?.enabled),
+  $entries.filter(
+    entry =>
+      entry.status === 'active' && entry.deployed && entry.starMap?.enabled,
+  ),
 )
 
 export function sanitizeLevelId(value: string) {
@@ -146,7 +149,7 @@ export function isPlayableLevel(
   entries = getLevelRegistry(),
 ) {
   const matched = getLevelRegistryEntry(levelId, entries)
-  return Boolean(matched?.deployed)
+  return Boolean(matched?.status === 'active' && matched?.deployed)
 }
 
 export function validateLevelRegistryEntry(
@@ -182,6 +185,7 @@ export function createStarMapLevelEvents(entries = getLevelRegistry()) {
   return entries
     .filter(
       entry =>
+        entry.status === 'active' &&
         entry.deployed &&
         entry.starMap?.enabled &&
         isLevelRegistryEntryValidForStarMap(entry),

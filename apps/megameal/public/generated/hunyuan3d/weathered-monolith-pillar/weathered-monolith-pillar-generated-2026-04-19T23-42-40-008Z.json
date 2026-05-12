@@ -10,5 +10,16 @@
   "mode": "generate",
   "shapeModel": "hunyuan3d-dit-v2-0",
   "paintModel": null,
-  "generatedAt": "2026-04-19T23:42:41.447Z"
+  "generatedAt": "2026-04-19T23:42:41.447Z",
+  "materialAuthoring": {
+    "workflow": "apps/game/scripts/author-weathered-monolith-pbr.mjs",
+    "authoredAt": "2026-05-10",
+    "textureSize": 64,
+    "slotsAuthored": [
+      "baseColorTexture",
+      "metallicRoughnessTexture",
+      "normalTexture"
+    ],
+    "provenance": "Procedural weathered-stone PBR maps authored from the existing material palette and embedded in the source GLB before runtime variant cooking."
+  }
 }

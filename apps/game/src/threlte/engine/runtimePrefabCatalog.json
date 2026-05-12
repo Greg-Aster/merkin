@@ -1,0 +1,646 @@
+{
+  "types": [
+    "anomaly-cluster",
+    "command-console",
+    "command-fin",
+    "hanging-light",
+    "portal-apparatus",
+    "courtyard-fountain",
+    "observation-rig",
+    "bench-growth",
+    "growth-planter",
+    "support-column",
+    "interior-archway",
+    "courtyard-pylon",
+    "story-marker",
+    "wasteland-archway",
+    "wasteland-monolith",
+    "broken-ring"
+  ],
+  "assetUrls": {
+    "anomaly-cluster": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+    "command-console": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+    "command-fin": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
+    "hanging-light": "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+    "portal-apparatus": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+    "courtyard-fountain": "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+    "observation-rig": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+    "bench-growth": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+    "growth-planter": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+    "support-column": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+    "interior-archway": "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+    "courtyard-pylon": "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+    "story-marker": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+    "wasteland-archway": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+    "wasteland-monolith": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+    "broken-ring": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb"
+  },
+  "assetVariants": {
+    "anomaly-cluster": {
+      "cyan": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-cyan.glb",
+      "green": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-green.glb",
+      "magenta": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+      "rose": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb"
+    },
+    "story-marker": {
+      "amber": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+      "cyan": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+      "green": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-green.glb",
+      "magenta": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+      "red": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb"
+    }
+  },
+  "assetAnimations": {
+    "anomaly-cluster": {
+      "mode": "node-loop-transform",
+      "status": "runtime-animation-descriptor",
+      "reason": "Anomaly cluster variants are baked as named mesh parts; runtime animation only applies declarative part transforms.",
+      "animationChannels": [
+        "root.rotation.y",
+        "shell.rotation",
+        "shell.position.y",
+        "ring.rotation",
+        "orbital.rotation",
+        "orbital.position.y"
+      ],
+      "root": {
+        "rotationY": {
+          "speed": 0.3
+        }
+      },
+      "nodes": [
+        {
+          "name": "shell",
+          "position": {
+            "y": {
+              "speed": 0.7,
+              "amplitude": 0.18
+            }
+          },
+          "rotation": {
+            "x": {
+              "speed": 0.55
+            },
+            "y": {
+              "speed": 0.34
+            },
+            "z": {
+              "speed": 0.18
+            }
+          }
+        },
+        {
+          "name": "ring",
+          "rotation": {
+            "x": {
+              "speed": 0.25,
+              "base": 1.5707963267948966,
+              "amplitude": 0.25
+            },
+            "y": {
+              "speed": 0.25
+            }
+          }
+        },
+        {
+          "name": "orbital-0",
+          "position": {
+            "y": {
+              "speed": 0.85,
+              "amplitude": 0.16
+            }
+          },
+          "rotation": {
+            "x": {
+              "speed": 0.7
+            },
+            "z": {
+              "speed": 0.35
+            }
+          }
+        },
+        {
+          "name": "orbital-1",
+          "position": {
+            "y": {
+              "speed": 0.85,
+              "amplitude": 0.16,
+              "phase": 1
+            }
+          },
+          "rotation": {
+            "x": {
+              "speed": 0.7
+            },
+            "z": {
+              "speed": 0.35
+            }
+          }
+        },
+        {
+          "name": "orbital-2",
+          "position": {
+            "y": {
+              "speed": 0.85,
+              "amplitude": 0.16,
+              "phase": 2
+            }
+          },
+          "rotation": {
+            "x": {
+              "speed": 0.7
+            },
+            "z": {
+              "speed": 0.35
+            }
+          }
+        },
+        {
+          "name": "orbital-3",
+          "position": {
+            "y": {
+              "speed": 0.85,
+              "amplitude": 0.16,
+              "phase": 3
+            }
+          },
+          "rotation": {
+            "x": {
+              "speed": 0.7
+            },
+            "z": {
+              "speed": 0.35
+            }
+          }
+        }
+      ]
+    },
+    "bench-growth": {
+      "mode": "node-loop-transform",
+      "status": "runtime-animation-descriptor",
+      "reason": "Bench growth is baked as named mesh parts; runtime animation only applies declarative tendril and halo transforms.",
+      "animationChannels": ["growth.rotation.z", "growth-halo.rotation.y"],
+      "nodes": [
+        {
+          "name": "growth-0",
+          "rotation": {
+            "z": {
+              "speed": 0.6,
+              "amplitude": 0.18
+            }
+          }
+        },
+        {
+          "name": "growth-1",
+          "rotation": {
+            "z": {
+              "speed": 0.6,
+              "amplitude": 0.18,
+              "phase": 1
+            }
+          }
+        },
+        {
+          "name": "growth-2",
+          "rotation": {
+            "z": {
+              "speed": 0.6,
+              "amplitude": 0.18,
+              "phase": 2
+            }
+          }
+        },
+        {
+          "name": "growth-3",
+          "rotation": {
+            "z": {
+              "speed": 0.6,
+              "amplitude": 0.18,
+              "phase": 3
+            }
+          }
+        },
+        {
+          "name": "growth-halo",
+          "rotation": {
+            "y": {
+              "speed": 0.32
+            }
+          }
+        }
+      ]
+    },
+    "growth-planter": {
+      "mode": "node-loop-transform",
+      "status": "runtime-animation-descriptor",
+      "reason": "Growth planter is baked with a merged static pot; runtime animation only applies declarative rim, leaf, and spoke transforms.",
+      "animationChannels": [
+        "rim.rotation.y",
+        "leaf-cluster.rotation.y",
+        "spoke.position",
+        "spoke.rotation"
+      ],
+      "nodes": [
+        {
+          "name": "rim",
+          "rotation": {
+            "y": {
+              "speed": 0.45
+            }
+          }
+        },
+        {
+          "name": "growth-planter-emissive",
+          "rotation": {
+            "y": {
+              "speed": 0.3
+            }
+          }
+        },
+        {
+          "name": "spoke-0",
+          "position": {
+            "x": {
+              "speed": 0.18,
+              "base": 0,
+              "amplitude": 0.42,
+              "phase": 1.5707963267948966
+            },
+            "y": {
+              "speed": 0.9,
+              "base": 1.55,
+              "amplitude": 0.12
+            },
+            "z": {
+              "speed": 0.18,
+              "base": 0,
+              "amplitude": 0.42,
+              "phase": 0
+            }
+          },
+          "rotation": {
+            "x": {
+              "speed": 0.35
+            },
+            "y": {
+              "speed": 0.28
+            }
+          }
+        },
+        {
+          "name": "spoke-1",
+          "position": {
+            "x": {
+              "speed": 0.18,
+              "base": 0,
+              "amplitude": 0.45,
+              "phase": 2.617993877991494
+            },
+            "z": {
+              "speed": 0.18,
+              "base": 0,
+              "amplitude": 0.45,
+              "phase": 1.0471975511965976
+            },
+            "y": {
+              "speed": 0.9,
+              "base": 1.67,
+              "amplitude": 0.12,
+              "phase": 1
+            }
+          },
+          "rotation": {
+            "x": {
+              "speed": 0.35
+            },
+            "y": {
+              "speed": 0.28
+            }
+          }
+        },
+        {
+          "name": "spoke-2",
+          "position": {
+            "x": {
+              "speed": 0.18,
+              "base": 0,
+              "amplitude": 0.48,
+              "phase": 3.665191429188092
+            },
+            "z": {
+              "speed": 0.18,
+              "base": 0,
+              "amplitude": 0.48,
+              "phase": 2.0943951023931953
+            },
+            "y": {
+              "speed": 0.9,
+              "base": 1.79,
+              "amplitude": 0.12,
+              "phase": 2
+            }
+          },
+          "rotation": {
+            "x": {
+              "speed": 0.35
+            },
+            "y": {
+              "speed": 0.28
+            }
+          }
+        },
+        {
+          "name": "spoke-3",
+          "position": {
+            "x": {
+              "speed": 0.18,
+              "base": 0,
+              "amplitude": 0.51,
+              "phase": 4.71238898038469
+            },
+            "y": {
+              "speed": 0.9,
+              "base": 1.91,
+              "amplitude": 0.12,
+              "phase": 3
+            },
+            "z": {
+              "speed": 0.18,
+              "base": 0,
+              "amplitude": 0.51,
+              "phase": 3.141592653589793
+            }
+          },
+          "rotation": {
+            "x": {
+              "speed": 0.35
+            },
+            "y": {
+              "speed": 0.28
+            }
+          }
+        },
+        {
+          "name": "spoke-4",
+          "position": {
+            "x": {
+              "speed": 0.18,
+              "base": 0,
+              "amplitude": 0.54,
+              "phase": 5.759586531581287
+            },
+            "z": {
+              "speed": 0.18,
+              "base": 0,
+              "amplitude": 0.54,
+              "phase": 4.1887902047863905
+            },
+            "y": {
+              "speed": 0.9,
+              "base": 2.0300000000000002,
+              "amplitude": 0.12,
+              "phase": 4
+            }
+          },
+          "rotation": {
+            "x": {
+              "speed": 0.35
+            },
+            "y": {
+              "speed": 0.28
+            }
+          }
+        },
+        {
+          "name": "spoke-5",
+          "position": {
+            "x": {
+              "speed": 0.18,
+              "base": 0,
+              "amplitude": 0.57,
+              "phase": 6.8067840827778845
+            },
+            "z": {
+              "speed": 0.18,
+              "base": 0,
+              "amplitude": 0.57,
+              "phase": 5.235987755982988
+            },
+            "y": {
+              "speed": 0.9,
+              "base": 2.15,
+              "amplitude": 0.12,
+              "phase": 5
+            }
+          },
+          "rotation": {
+            "x": {
+              "speed": 0.35
+            },
+            "y": {
+              "speed": 0.28
+            }
+          }
+        }
+      ]
+    },
+    "story-marker": {
+      "mode": "root-loop-transform",
+      "status": "runtime-animation-descriptor",
+      "reason": "Story marker variants are baked static assets; the runtime keeps only the low-cost interaction pulse on the prefab root.",
+      "animationChannels": ["rotation.y", "scale.uniform", "position.y"],
+      "root": {
+        "rotationY": {
+          "speed": 0.45
+        },
+        "scale": {
+          "base": 1,
+          "amplitude": 0.08,
+          "speed": 0.8
+        },
+        "positionY": {
+          "amplitude": 0.04,
+          "speed": 0.8
+        }
+      }
+    }
+  },
+  "assetVfx": {
+    "command-console": {
+      "status": "runtime-vfx-descriptor",
+      "reason": "Command console is baked as an asset; runtime VFX is limited to declarative screen, antenna, and halo loops.",
+      "targets": [
+        {
+          "name": "screen--0.5",
+          "material": {
+            "emissiveIntensity": {
+              "base": 0.85,
+              "amplitude": 0.18,
+              "speed": 2,
+              "phase": -0.5
+            }
+          }
+        },
+        {
+          "name": "screen-0.5",
+          "material": {
+            "emissiveIntensity": {
+              "base": 0.85,
+              "amplitude": 0.18,
+              "speed": 2,
+              "phase": 0.5
+            }
+          }
+        }
+      ]
+    },
+    "courtyard-fountain": {
+      "status": "runtime-vfx-descriptor",
+      "reason": "Courtyard fountain is baked as an asset; runtime VFX is limited to declarative water, core, and halo loops.",
+      "targets": [
+        {
+          "name": "water-ring",
+          "material": {
+            "emissiveIntensity": {
+              "base": 0.48,
+              "amplitude": 0.12,
+              "speed": 1.4
+            }
+          },
+          "transform": {
+            "rotation": {
+              "z": {
+                "speed": 0.18
+              }
+            }
+          }
+        },
+        {
+          "name": "water-surface",
+          "material": {
+            "opacity": {
+              "base": 0.7,
+              "amplitude": 0.08,
+              "speed": 1.5
+            },
+            "emissiveIntensity": {
+              "base": 0.6,
+              "amplitude": 0.16,
+              "speed": 1.5
+            }
+          },
+          "transform": {
+            "position": {
+              "y": {
+                "amplitude": 0.1,
+                "speed": 1.5
+              }
+            }
+          }
+        },
+        {
+          "name": "core",
+          "material": {
+            "emissiveIntensity": {
+              "base": 1,
+              "amplitude": 0.22,
+              "speed": 0.9
+            }
+          }
+        },
+        {
+          "name": "upper-halo",
+          "material": {
+            "emissiveIntensity": {
+              "base": 1.3,
+              "amplitude": 0.2,
+              "speed": 0.7
+            }
+          },
+          "transform": {
+            "position": {
+              "y": {
+                "amplitude": 0.08,
+                "speed": 0.35
+              }
+            },
+            "rotation": {
+              "y": {
+                "speed": 0.25
+              }
+            }
+          }
+        }
+      ]
+    },
+    "portal-apparatus": {
+      "status": "runtime-vfx-descriptor",
+      "reason": "Portal apparatus is baked as an asset; runtime VFX is limited to declarative ring and core loops.",
+      "targets": [
+        {
+          "name": "outer-ring",
+          "material": {
+            "opacity": {
+              "base": 0.7,
+              "amplitude": 0.08,
+              "speed": 0.8
+            },
+            "emissiveIntensity": {
+              "base": 0.48,
+              "amplitude": 0.1,
+              "speed": 0.8
+            }
+          },
+          "transform": {
+            "rotation": {
+              "x": {
+                "base": 1.5707963267948966,
+                "amplitude": 0.25,
+                "speed": 0.25
+              },
+              "y": {
+                "speed": -0.55
+              },
+              "z": {
+                "speed": 0.18
+              }
+            }
+          }
+        },
+        {
+          "name": "inner-ring",
+          "material": {
+            "emissiveIntensity": {
+              "base": 2.1,
+              "amplitude": 0.2,
+              "speed": 1.4
+            }
+          },
+          "transform": {
+            "rotation": {
+              "y": {
+                "speed": -1.4
+              }
+            }
+          }
+        },
+        {
+          "name": "core",
+          "material": {
+            "emissiveIntensity": {
+              "base": 1.4,
+              "amplitude": 0.18,
+              "speed": 0.9
+            },
+            "opacity": {
+              "base": 0.8,
+              "amplitude": 0.08,
+              "speed": 0.9
+            }
+          }
+        }
+      ]
+    }
+  },
+  "proceduralRuntime": {}
+}

@@ -1,9 +1,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { inflateSync } from 'node:zlib'
 import {
   assertRequiredRenderActors,
+  assertRuntimeRenderLifecycle,
   createFilterSet,
   isTransientConsoleMessage,
   launchBrowser,
@@ -16,20 +17,27 @@ import {
 
 const PNG_SIGNATURE = '89504e470d0a1a0a'
 const DEFAULT_LEVELS = ['solitude', 'yggdrasil', 'sci-fi-room']
+const AVAILABLE_LEVELS = [...DEFAULT_LEVELS, 'miranda']
 const repoRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const args = process.argv.slice(2)
 const browserName = normalizeBrowserName(
   parseArgValue(args, 'browser', process.env.GAME_BROWSER || 'chromium'),
 )
 const appOrigin = `http://127.0.0.1:${process.env.GAME_DEV_PORT || 4322}`
-const levelFilter = parseArgValue(args, 'level', process.env.GAME_VISUAL_LEVEL || '')
+const levelFilter = parseArgValue(
+  args,
+  'level',
+  process.env.GAME_VISUAL_LEVEL || '',
+)
 const writeArtifacts =
-  args.includes('--write-artifacts') || process.env.GAME_VISUAL_ARTIFACTS === '1'
+  args.includes('--write-artifacts') ||
+  process.env.GAME_VISUAL_ARTIFACTS === '1'
 const updateBaselines =
   args.includes('--update-baselines') ||
   process.env.GAME_VISUAL_UPDATE_BASELINES === '1'
 const useBaselines =
-  !args.includes('--skip-baselines') && process.env.GAME_VISUAL_BASELINES !== '0'
+  !args.includes('--skip-baselines') &&
+  process.env.GAME_VISUAL_BASELINES !== '0'
 const artifactDir = resolve(
   repoRoot,
   parseArgValue(
@@ -47,7 +55,9 @@ const baselinePath = resolve(
   ),
 )
 const requestedLevels = levelFilter
-  ? DEFAULT_LEVELS.filter(levelId => createFilterSet(levelFilter).has(levelId))
+  ? AVAILABLE_LEVELS.filter(levelId =>
+      createFilterSet(levelFilter).has(levelId),
+    )
   : DEFAULT_LEVELS
 
 const levelContracts = {
@@ -89,7 +99,20 @@ const levelContracts = {
     minUniqueColorBuckets: 24,
     minLumaStdDev: 6,
   },
+  miranda: {
+    cameraBookmark: {
+      id: 'spawn-default',
+      viewport: { width: 1280, height: 720 },
+      settleMs: 2000,
+    },
+    requiredRenderedActors: ['miranda-floor-main', 'miranda-floor-upper'],
+    minUniqueColorBuckets: 24,
+    minLumaStdDev: 6,
+  },
 }
+const sceneVisualBookmarks = Object.fromEntries(
+  AVAILABLE_LEVELS.map(levelId => [levelId, loadSceneVisualBookmark(levelId)]),
+)
 
 const visualBaselines = loadVisualBaselines()
 
@@ -123,7 +146,12 @@ function decodePng(buffer) {
       const compression = data[10]
       const filter = data[11]
       const interlace = data[12]
-      if (bitDepth !== 8 || compression !== 0 || filter !== 0 || interlace !== 0) {
+      if (
+        bitDepth !== 8 ||
+        compression !== 0 ||
+        filter !== 0 ||
+        interlace !== 0
+      ) {
         throw new Error('Unsupported PNG format for visual smoke analysis.')
       }
     } else if (type === 'IDAT') {
@@ -228,8 +256,14 @@ function analyzeScreenshot(buffer) {
       const green = pixels[index + 1]
       const blue = pixels[index + 2]
       const luma = 0.2126 * red + 0.7152 * green + 0.0722 * blue
-      const tileX = Math.min(tileGridSize - 1, Math.floor((x / width) * tileGridSize))
-      const tileY = Math.min(tileGridSize - 1, Math.floor((y / height) * tileGridSize))
+      const tileX = Math.min(
+        tileGridSize - 1,
+        Math.floor((x / width) * tileGridSize),
+      )
+      const tileY = Math.min(
+        tileGridSize - 1,
+        Math.floor((y / height) * tileGridSize),
+      )
       const tile = tileStats[tileY * tileGridSize + tileX]
       tile.count += 1
       tile.red += red
@@ -277,7 +311,8 @@ function analyzeScreenshot(buffer) {
     lumaStdDev: Math.round(Math.sqrt(Math.max(0, lumaVariance)) * 10) / 10,
     lightPixelRatio: opaquePixels > 0 ? lightPixels / opaquePixels : 1,
     darkPixelRatio: opaquePixels > 0 ? darkPixels / opaquePixels : 1,
-    edgeScore: edgeSamples > 0 ? Math.round((edgeSum / edgeSamples) * 10) / 10 : 0,
+    edgeScore:
+      edgeSamples > 0 ? Math.round((edgeSum / edgeSamples) * 10) / 10 : 0,
     tiles: tileStats.map(tile => ({
       red: tile.count > 0 ? Math.round(tile.red / tile.count) : 0,
       green: tile.count > 0 ? Math.round(tile.green / tile.count) : 0,
@@ -299,14 +334,59 @@ function loadVisualBaselines() {
   }
 
   const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'))
-  if (baseline.version !== 1 || !baseline.levels || typeof baseline.levels !== 'object') {
+  if (
+    baseline.version !== 1 ||
+    !baseline.levels ||
+    typeof baseline.levels !== 'object'
+  ) {
     throw new Error(`${baselinePath} is not a supported visual baseline file.`)
   }
   return baseline
 }
 
+function isFiniteVec3(value) {
+  return (
+    Array.isArray(value) &&
+    value.length === 3 &&
+    value.every(component => Number.isFinite(component))
+  )
+}
+
+function loadSceneVisualBookmark(levelId) {
+  const scenePath = join(
+    repoRoot,
+    'apps/game/src/threlte/editor/scenes',
+    `${levelId}.scene.json`,
+  )
+  if (!existsSync(scenePath)) return null
+
+  const scene = JSON.parse(readFileSync(scenePath, 'utf8'))
+  const bookmarks = scene.settings?.level?.renderProfile?.visualBookmarks
+  if (!Array.isArray(bookmarks) || bookmarks.length === 0) return null
+
+  const bookmark = bookmarks[0]
+  if (
+    typeof bookmark.id !== 'string' ||
+    bookmark.id.length === 0 ||
+    !isFiniteVec3(bookmark.cameraPosition) ||
+    !isFiniteVec3(bookmark.cameraTarget)
+  ) {
+    throw new Error(`${levelId}: malformed renderProfile.visualBookmarks[0]`)
+  }
+
+  return {
+    id: bookmark.id,
+    viewport: {
+      width: bookmark.viewport?.width ?? 1280,
+      height: bookmark.viewport?.height ?? 720,
+    },
+    settleMs: bookmark.settleMs ?? 2000,
+  }
+}
+
 function getCameraBookmark(levelId) {
   return (
+    sceneVisualBookmarks[levelId] ??
     levelContracts[levelId]?.cameraBookmark ?? {
       id: 'spawn-default',
       viewport: { width: 1280, height: 720 },
@@ -381,7 +461,9 @@ function assertVisualBaseline(levelId, metrics, bookmark) {
       `viewport ${metrics.width}x${metrics.height} !== baseline ${expected.width}x${expected.height}`,
     )
   }
-  if (metrics.uniqueColorBuckets < Math.floor(expected.uniqueColorBuckets * 0.55)) {
+  if (
+    metrics.uniqueColorBuckets < Math.floor(expected.uniqueColorBuckets * 0.55)
+  ) {
     failures.push(
       `color buckets ${metrics.uniqueColorBuckets} < baseline floor ${Math.floor(expected.uniqueColorBuckets * 0.55)}`,
     )
@@ -469,10 +551,14 @@ function assertVisualMetrics(levelId, metrics) {
   const minEdgeScore = contract.minEdgeScore ?? 2
 
   if (metrics.width < 320 || metrics.height < 240) {
-    failures.push(`canvas screenshot too small ${metrics.width}x${metrics.height}`)
+    failures.push(
+      `canvas screenshot too small ${metrics.width}x${metrics.height}`,
+    )
   }
   if (metrics.opaquePixels < minOpaquePixels) {
-    failures.push(`opaque pixel count ${metrics.opaquePixels} < ${minOpaquePixels}`)
+    failures.push(
+      `opaque pixel count ${metrics.opaquePixels} < ${minOpaquePixels}`,
+    )
   }
   if (metrics.uniqueColorBuckets < minUniqueColorBuckets) {
     failures.push(
@@ -497,17 +583,22 @@ function assertVisualMetrics(levelId, metrics) {
   }
 
   if (failures.length > 0) {
-    throw new Error(`${levelId} visual screenshot failed: ${failures.join('; ')}`)
+    throw new Error(
+      `${levelId} visual screenshot failed: ${failures.join('; ')}`,
+    )
   }
 }
 
 async function assertRenderedActors(page, levelId) {
-  const requiredRenderedActors = levelContracts[levelId]?.requiredRenderedActors ?? []
+  const requiredRenderedActors =
+    levelContracts[levelId]?.requiredRenderedActors ?? []
   if (requiredRenderedActors.length === 0) return
 
   const missingActorIds = await page.evaluate(
     ({ level, actors }) => {
-      const rendered = new Set(window.__gameRuntimeRenderState?.rendered?.[level] ?? [])
+      const rendered = new Set(
+        window.__gameRuntimeRenderState?.rendered?.[level] ?? [],
+      )
       return actors.filter(actorId => !rendered.has(actorId))
     },
     { level: levelId, actors: requiredRenderedActors },
@@ -529,7 +620,9 @@ async function assertStreamingTelemetry(page, levelId) {
     levelId,
   )
   if (!telemetry) {
-    throw new Error(`${levelId} visual smoke missing runtime streaming telemetry.`)
+    throw new Error(
+      `${levelId} visual smoke missing runtime streaming telemetry.`,
+    )
   }
 
   const failures = []
@@ -630,15 +723,17 @@ async function runLevel(browser, levelId) {
     const url = request.url()
     const errorText = request.failure()?.errorText || 'unknown error'
     if (!shouldIgnoreRequestFailure(url, errorText)) {
-      messages.push(`[requestfailed] ${request.method()} ${url} :: ${errorText}`)
+      messages.push(
+        `[requestfailed] ${request.method()} ${url} :: ${errorText}`,
+      )
     }
   })
 
   async function loadAndCapture() {
-    const response = await page.goto(
-      buildLevelUrl(levelId, bookmark),
-      { waitUntil: 'domcontentloaded', timeout: 30000 },
-    )
+    const response = await page.goto(buildLevelUrl(levelId, bookmark), {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+    })
     if (!response || !response.ok()) {
       messages.push(
         `[navigation] ${levelId} returned ${response?.status?.() ?? 'no response'}`,
@@ -653,6 +748,7 @@ async function runLevel(browser, levelId) {
       gameplayTimeoutMs: 60000,
     })
     await assertRequiredRenderActors(page, levelId)
+    await assertRuntimeRenderLifecycle(page, levelId)
     await assertRenderedActors(page, levelId)
     await assertStreamingTelemetry(page, levelId)
     await page.waitForTimeout(bookmark.settleMs ?? 2000)

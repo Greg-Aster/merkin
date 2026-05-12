@@ -128,7 +128,8 @@ function resolveWorkflowFromSettings(
       terrainSettings?.source,
       fallback.terrainCollision,
     ),
-    terrainManifestUrl: terrainSettings?.manifestUrl ?? fallback.terrainManifestUrl,
+    terrainManifestUrl:
+      terrainSettings?.manifestUrl ?? fallback.terrainManifestUrl,
     defaultActorCollision:
       workflowSettings?.actorCollision ??
       (solidObjectsByDefault === false
@@ -167,11 +168,10 @@ export function getLevelCollisionWorkflow(
   settings?: SceneSettings | null,
 ) {
   const resolvedLevelId = levelId || DEFAULT_WORKFLOW.levelId
-  const fallback =
-    LEVEL_COLLISION_WORKFLOWS[resolvedLevelId] ?? {
-      ...DEFAULT_WORKFLOW,
-      levelId: resolvedLevelId,
-    }
+  const fallback = LEVEL_COLLISION_WORKFLOWS[resolvedLevelId] ?? {
+    ...DEFAULT_WORKFLOW,
+    levelId: resolvedLevelId,
+  }
   return resolveWorkflowFromSettings(resolvedLevelId, fallback, settings)
 }
 

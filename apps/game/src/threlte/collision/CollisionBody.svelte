@@ -1,6 +1,7 @@
 <script lang="ts">
 import { T } from '@threlte/core'
 import { Collider, RigidBody } from '@threlte/rapier'
+import { getCollisionOverlayColor } from '../engine/collisionAuthoring'
 import type { EditorRigidBodyType } from '../engine/sceneDocumentTypes'
 import type {
   CollisionChannel,
@@ -35,18 +36,31 @@ export let lockTranslations = false
 export let friction = 0.7
 export let restitution = 0
 export let sensor = false
-export let assetUrl = ''
+export let colliderUrl = ''
 export let primitiveGeometry: PrimitiveGeometryKind | undefined = undefined
 export let primitiveArgs: number[] = []
-export let overlayColor = '#ff8c63'
+export let overlayColor = ''
 
-$: isAssetTrimesh = shape === 'trimesh' && assetUrl.length > 0
+$: assetColliderUrl = colliderUrl
+$: isAssetTrimesh = shape === 'trimesh' && assetColliderUrl.length > 0
 $: isPrimitiveTrimesh = shape === 'trimesh' && !!primitiveGeometry
+$: missingAssetTrimeshCollider =
+  shape === 'trimesh' && !primitiveGeometry && assetColliderUrl.length === 0
+$: resolvedOverlayColor =
+  overlayColor ||
+  (missingAssetTrimeshCollider
+    ? '#ff3344'
+    : getCollisionOverlayColor({ intent, channel }))
 $: overlayLabelLines = [
   `shape: ${shape}`,
   `intent: ${intent}`,
   `channel: ${channel}`,
   `budget: ${triangleBudget ?? 'n/a'}`,
+  missingAssetTrimeshCollider
+    ? 'missing: collision.colliderUrl'
+    : colliderUrl
+      ? 'source: authored collider'
+      : 'source: primitive proxy',
 ]
 $: overlayLabelPosition = [
   0,
@@ -69,7 +83,7 @@ $: overlayLabelPosition = [
     >
       {#if isAssetTrimesh}
         <AssetTrimeshCollider
-          url={assetUrl}
+          url={assetColliderUrl}
           {friction}
           {restitution}
           {sensor}
@@ -107,13 +121,13 @@ $: overlayLabelPosition = [
 
   {#if showOverlay}
     {#if isAssetTrimesh}
-      <MeshColliderHelper url={assetUrl} color={overlayColor} />
+      <MeshColliderHelper url={assetColliderUrl} color={resolvedOverlayColor} />
     {:else if isPrimitiveTrimesh}
       <PrimitiveTrimeshHelper geometry={primitiveGeometry} args={primitiveArgs} />
     {:else if shape === 'cylinder'}
-      <ColliderHelper shape="cylinder" {args} color={overlayColor} />
+      <ColliderHelper shape="cylinder" {args} color={resolvedOverlayColor} />
     {:else}
-      <ColliderHelper shape="cuboid" {args} color={overlayColor} />
+      <ColliderHelper shape="cuboid" {args} color={resolvedOverlayColor} />
     {/if}
     <CollisionOverlayLabel
       lines={overlayLabelLines}

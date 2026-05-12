@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-08T22:27:13.362Z",
+  "generatedAt": "2026-05-12T00:43:21.216Z",
   "levelId": "sci-fi-room",
   "sceneId": "sci-fi-room",
   "source": {
@@ -17,6 +17,11 @@
       "player": [
         0,
         3.31,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
         0
       ]
     },
@@ -71,8 +76,8 @@
           "maxGameplayFireflies": 0,
           "maxExplicitColliders": 40,
           "maxLightActors": 0,
-          "maxEstimatedDrawCalls": 45,
-          "maxAuthoredMaterialSlots": 16,
+          "maxEstimatedDrawCalls": 83,
+          "maxAuthoredMaterialSlots": 83,
           "maxEstimatedTriangles": 260000,
           "maxAuthoredTextureBytes": 12582912
         },
@@ -109,6 +114,169 @@
           "fallbackAmbientIntensity": 4.8,
           "fallbackMoonlightIntensity": 0.45,
           "fallbackFillLightIntensity": 0.2
+        },
+        "renderProfile": {
+          "id": "sci-fi-room-interior-courtyard",
+          "defaultTier": "desktop",
+          "lighting": {
+            "ambientColor": "#bfe8ff",
+            "skyColor": "#c9efff",
+            "groundColor": "#202a34",
+            "keyLightColor": "#e8f7ff",
+            "fillLightColor": "#79d2ff",
+            "keyLightPosition": [
+              10,
+              16,
+              -8
+            ],
+            "fillLightPosition": [
+              -12,
+              8,
+              14
+            ]
+          },
+          "shadows": {
+            "enabled": true,
+            "maxCastingLights": 1,
+            "mapSize": 1024,
+            "cameraSize": 38,
+            "cameraFar": 78
+          },
+          "reflections": {
+            "mode": "static-environment",
+            "textureSize": 256,
+            "maxPlanarSurfaces": 0,
+            "environmentIntensity": 1.2
+          },
+          "postProcessing": {
+            "enabled": true,
+            "passes": [
+              "tone-mapping",
+              "ambient-occlusion",
+              "color-grading",
+              "bloom",
+              "vignette"
+            ],
+            "maxEnabledPasses": 5,
+            "ambientOcclusion": {
+              "enabled": true,
+              "intensity": 0.74,
+              "radius": 8,
+              "minDistance": 0.006,
+              "maxDistance": 0.12
+            },
+            "bloom": {
+              "intensity": 0.7,
+              "threshold": 0.9
+            },
+            "toneMappingExposure": 1,
+            "vignetteStrength": 0.55
+          },
+          "qualityTiers": {
+            "mobile": {
+              "shadows": {
+                "enabled": false,
+                "maxCastingLights": 0
+              },
+              "reflections": {
+                "mode": "none",
+                "textureSize": 0,
+                "maxPlanarSurfaces": 0,
+                "environmentIntensity": 0.85
+              },
+              "postProcessing": {
+                "passes": [
+                  "tone-mapping",
+                  "color-grading"
+                ],
+                "maxEnabledPasses": 2
+              }
+            },
+            "desktop": {
+              "shadows": {
+                "enabled": true,
+                "maxCastingLights": 1,
+                "mapSize": 1024
+              },
+              "reflections": {
+                "mode": "static-environment",
+                "textureSize": 256,
+                "maxPlanarSurfaces": 0
+              },
+              "postProcessing": {
+                "passes": [
+                  "tone-mapping",
+                  "ambient-occlusion",
+                  "color-grading",
+                  "bloom",
+                  "vignette"
+                ],
+                "maxEnabledPasses": 5,
+                "ambientOcclusion": {
+                  "enabled": true,
+                  "intensity": 0.74,
+                  "radius": 8,
+                  "minDistance": 0.006,
+                  "maxDistance": 0.12
+                }
+              }
+            },
+            "tv": {
+              "shadows": {
+                "enabled": true,
+                "maxCastingLights": 1,
+                "mapSize": 2048
+              },
+              "reflections": {
+                "mode": "screen-space",
+                "textureSize": 512,
+                "maxPlanarSurfaces": 0
+              },
+              "postProcessing": {
+                "passes": [
+                  "tone-mapping",
+                  "ambient-occlusion",
+                  "color-grading",
+                  "bloom",
+                  "vignette"
+                ],
+                "maxEnabledPasses": 5,
+                "ambientOcclusion": {
+                  "enabled": true,
+                  "intensity": 0.88,
+                  "radius": 10,
+                  "minDistance": 0.005,
+                  "maxDistance": 0.15
+                }
+              }
+            }
+          },
+          "visualBookmarks": [
+            {
+              "id": "spawn-default",
+              "label": "Sci-fi room interior",
+              "playerPosition": [
+                0,
+                3.31,
+                0
+              ],
+              "cameraPosition": [
+                0,
+                4.91,
+                0
+              ],
+              "cameraTarget": [
+                0,
+                3.8,
+                -18
+              ],
+              "viewport": {
+                "width": 1280,
+                "height": 720
+              },
+              "settleMs": 2000
+            }
+          ]
         }
       },
       "observatory": {
@@ -149,10 +317,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -176,10 +340,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -232,13 +392,6 @@
             "shape": "cuboid",
             "friction": 0.9
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "interior floor slab"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -262,10 +415,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -316,13 +465,6 @@
             "shape": "cuboid",
             "friction": 0.7
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "courtyard floor slab"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -346,10 +488,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -411,13 +549,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "wasteland tile"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -460,13 +591,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "anomalous floating crystal cluster"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -509,13 +633,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "anomalous floating crystal cluster"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -558,13 +675,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "anomalous floating crystal cluster"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -607,13 +717,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "anomalous floating crystal cluster"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -655,13 +758,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "retro-futurist command console"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -711,13 +807,6 @@
             "markerColor": "#ff8cff",
             "markerSize": 1.1
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "occult portal apparatus"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -775,13 +864,6 @@
             "excerpt": "The pillar hums first, like a machine trying to remember the language of prayer.",
             "body": "The pillar hums first, like a machine trying to remember the language of prayer.\n\nIts glow is not decorative. It pulses in measured intervals, as if syncing itself to some vanished crew protocol.\n\nEven here, the room seems to prefer ritual to utility."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -839,13 +921,6 @@
             "excerpt": "The bench offers a pause before the open sky, its carved warning almost tender: look up before you go farther.",
             "body": "The bench offers a pause before the open sky, its carved warning almost tender: look up before you go farther.\n\nWhatever was built here expected hesitation.\n\nIt wanted people to stop, adjust to the stars, and only then continue."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -903,13 +978,6 @@
             "excerpt": "At the courtyard heart, the fountain mirrors the constellations, as if the room is learning to become an observatory.",
             "body": "At the courtyard heart, the fountain mirrors the constellations, as if the room is learning to become an observatory.\n\nThe basin does not reflect what is above so much as rehearse it.\n\nThis place is less a room than a machine for becoming sky-aware."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -967,13 +1035,6 @@
             "excerpt": "The spiral plants lean toward one particular star cluster, suggesting the garden knows the route better than you do.",
             "body": "The spiral plants lean toward one particular star cluster, suggesting the garden knows the route better than you do.\n\nTheir motion is too deliberate for weather and too patient for machinery.\n\nSomething in this level still tracks the sky with devotion."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -1031,13 +1092,6 @@
             "excerpt": "Deep in the wasteland, the debris resolves into intent: this ruin was not abandoned, it was aimed at the heavens and left mid-sentence.",
             "body": "Deep in the wasteland, the debris resolves into intent: this ruin was not abandoned, it was aimed at the heavens and left mid-sentence.\n\nThe broken shapes form vectors, not rubble.\n\nWhatever failed here was trying to point beyond the room."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -1079,13 +1133,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "dark retro-futurist fin pillar"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1127,13 +1174,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "dark retro-futurist fin pillar"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1175,13 +1215,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ornate hanging industrial light"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1223,13 +1256,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ornate hanging industrial light"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1271,13 +1297,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Command Aircon"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1319,13 +1338,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "retro-futurist support column"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1367,13 +1379,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "retro-futurist support column"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1415,13 +1420,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "retro-futurist support column"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1463,13 +1461,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "retro-futurist support column"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1511,13 +1502,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ancient interior archway ruin"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1559,13 +1543,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "weathered courtyard pylon"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1607,13 +1584,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "weathered courtyard pylon"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1655,13 +1625,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "wasteland stone archway"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1703,13 +1666,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "strange luminous courtyard fountain"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1751,13 +1707,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "cosmic observation rig"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1799,13 +1748,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Courtyard Utility Unit"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1847,13 +1789,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Growth Planter A"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1895,13 +1830,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Growth Planter B"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1943,13 +1871,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Growth Planter C"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1991,13 +1912,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Growth Planter D"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2039,13 +1953,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "overgrown haunted bench"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2087,13 +1994,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "weathered monolith pillar"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2135,13 +2035,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "weathered monolith pillar"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2183,13 +2076,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "weathered monolith pillar"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2231,13 +2117,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "broken ancient stone ring ruin"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2279,13 +2158,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Wasteland Barrel"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2327,13 +2199,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "asset",
-          "generation": {
-            "descriptor": "Concrete Barrier"
-          },
-          "collisionSource": "authored"
         }
       }
     ]
@@ -2349,7 +2214,7 @@
     "trimeshActorCount": 0,
     "detailMeshActorCount": 0,
     "defaultCollisionActorCount": 0,
-    "visualOnlyActorCount": 10,
+    "visualOnlyActorCount": 6,
     "requiredActorCount": 0,
     "requiredRenderActorIds": [],
     "missingRequiredActorIds": [],
@@ -2359,12 +2224,77 @@
       "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb",
       "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
       "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+      "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-cyan.glb",
+      "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-green.glb",
+      "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+      "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb",
+      "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+      "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+      "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+      "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
+      "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+      "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+      "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+      "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+      "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-green.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+      "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+      "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+      "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
       "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+      "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
       "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
       "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
     ],
+    "collisionDiagnostics": {
+      "authoredActorIds": [
+        "sci-fi-aircon-command",
+        "sci-fi-anomaly-a",
+        "sci-fi-anomaly-b",
+        "sci-fi-anomaly-c",
+        "sci-fi-anomaly-d",
+        "sci-fi-barrel",
+        "sci-fi-barrier",
+        "sci-fi-bench",
+        "sci-fi-broken-ring",
+        "sci-fi-command-fin-left",
+        "sci-fi-command-fin-right",
+        "sci-fi-console",
+        "sci-fi-courtyard-aircon",
+        "sci-fi-courtyard-pylon-left",
+        "sci-fi-courtyard-pylon-right",
+        "sci-fi-floor-courtyard-slab",
+        "sci-fi-floor-interior-slab",
+        "sci-fi-floor-wasteland-tile-4-4",
+        "sci-fi-fountain",
+        "sci-fi-hanging-light-left",
+        "sci-fi-hanging-light-right",
+        "sci-fi-interior-archway",
+        "sci-fi-monolith-a",
+        "sci-fi-monolith-b",
+        "sci-fi-monolith-c",
+        "sci-fi-observation-rig",
+        "sci-fi-planter-a",
+        "sci-fi-planter-b",
+        "sci-fi-planter-c",
+        "sci-fi-planter-d",
+        "sci-fi-support-column-a",
+        "sci-fi-support-column-b",
+        "sci-fi-support-column-c",
+        "sci-fi-support-column-d",
+        "sci-fi-wasteland-archway"
+      ],
+      "defaultActorIds": [],
+      "visualOnlyActorIds": []
+    },
     "errors": [],
-    "warnings": []
+    "warnings": [
+      "Walkability sample \"player-spawn\" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime."
+    ]
   },
   "runtime": {
     "requiredRenderActorIds": [],
@@ -2374,7 +2304,29 @@
       "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb",
       "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
       "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+      "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-cyan.glb",
+      "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-green.glb",
+      "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+      "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb",
+      "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+      "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+      "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+      "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
+      "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+      "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+      "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+      "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+      "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-green.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+      "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+      "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+      "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
       "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+      "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
       "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
       "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
     ],
@@ -2390,6 +2342,169 @@
       ],
       "terrainManifestUrl": "/terrain/sci-fi-room.manifest.json",
       "requiredWalkableSurfaceId": "sci-fi-room-terrain"
+    },
+    "renderProfile": {
+      "id": "sci-fi-room-interior-courtyard",
+      "defaultTier": "desktop",
+      "lighting": {
+        "ambientColor": "#bfe8ff",
+        "skyColor": "#c9efff",
+        "groundColor": "#202a34",
+        "keyLightColor": "#e8f7ff",
+        "fillLightColor": "#79d2ff",
+        "keyLightPosition": [
+          10,
+          16,
+          -8
+        ],
+        "fillLightPosition": [
+          -12,
+          8,
+          14
+        ]
+      },
+      "shadows": {
+        "enabled": true,
+        "maxCastingLights": 1,
+        "mapSize": 1024,
+        "cameraSize": 38,
+        "cameraFar": 78
+      },
+      "reflections": {
+        "mode": "static-environment",
+        "textureSize": 256,
+        "maxPlanarSurfaces": 0,
+        "environmentIntensity": 1.2
+      },
+      "postProcessing": {
+        "enabled": true,
+        "passes": [
+          "tone-mapping",
+          "ambient-occlusion",
+          "color-grading",
+          "bloom",
+          "vignette"
+        ],
+        "maxEnabledPasses": 5,
+        "ambientOcclusion": {
+          "enabled": true,
+          "intensity": 0.74,
+          "radius": 8,
+          "minDistance": 0.006,
+          "maxDistance": 0.12
+        },
+        "bloom": {
+          "intensity": 0.7,
+          "threshold": 0.9
+        },
+        "toneMappingExposure": 1,
+        "vignetteStrength": 0.55
+      },
+      "qualityTiers": {
+        "mobile": {
+          "shadows": {
+            "enabled": false,
+            "maxCastingLights": 0
+          },
+          "reflections": {
+            "mode": "none",
+            "textureSize": 0,
+            "maxPlanarSurfaces": 0,
+            "environmentIntensity": 0.85
+          },
+          "postProcessing": {
+            "passes": [
+              "tone-mapping",
+              "color-grading"
+            ],
+            "maxEnabledPasses": 2
+          }
+        },
+        "desktop": {
+          "shadows": {
+            "enabled": true,
+            "maxCastingLights": 1,
+            "mapSize": 1024
+          },
+          "reflections": {
+            "mode": "static-environment",
+            "textureSize": 256,
+            "maxPlanarSurfaces": 0
+          },
+          "postProcessing": {
+            "passes": [
+              "tone-mapping",
+              "ambient-occlusion",
+              "color-grading",
+              "bloom",
+              "vignette"
+            ],
+            "maxEnabledPasses": 5,
+            "ambientOcclusion": {
+              "enabled": true,
+              "intensity": 0.74,
+              "radius": 8,
+              "minDistance": 0.006,
+              "maxDistance": 0.12
+            }
+          }
+        },
+        "tv": {
+          "shadows": {
+            "enabled": true,
+            "maxCastingLights": 1,
+            "mapSize": 2048
+          },
+          "reflections": {
+            "mode": "screen-space",
+            "textureSize": 512,
+            "maxPlanarSurfaces": 0
+          },
+          "postProcessing": {
+            "passes": [
+              "tone-mapping",
+              "ambient-occlusion",
+              "color-grading",
+              "bloom",
+              "vignette"
+            ],
+            "maxEnabledPasses": 5,
+            "ambientOcclusion": {
+              "enabled": true,
+              "intensity": 0.88,
+              "radius": 10,
+              "minDistance": 0.005,
+              "maxDistance": 0.15
+            }
+          }
+        }
+      },
+      "visualBookmarks": [
+        {
+          "id": "spawn-default",
+          "label": "Sci-fi room interior",
+          "playerPosition": [
+            0,
+            3.31,
+            0
+          ],
+          "cameraPosition": [
+            0,
+            4.91,
+            0
+          ],
+          "cameraTarget": [
+            0,
+            3.8,
+            -18
+          ],
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "settleMs": 2000
+        }
+      ]
     }
   }
 }

@@ -109,7 +109,7 @@ $: materialOverrideStore.set(
   {#if assetNode}
     <HeroProp url={assetNode.url} runtimeCulling={false} />
   {:else if prefabNode}
-    <RuntimePrefabNode prefab={prefabNode} />
+    <RuntimePrefabNode prefab={prefabNode} runtimeCulling={false} />
   {:else if primitiveNode}
     <ProceduralMesh
       name={node.name}

@@ -38,6 +38,35 @@ const collisionChannels = new Set([
   'trigger',
   'detail',
 ])
+const generatedColliderRoot = '/generated/runtime-game-assets/collision/'
+const terrainColliderRoot = '/terrain/collision/'
+const colliderUrlSuffix = '.collider.glb'
+const parityCollisionIntents = new Set(['walkable', 'blocker'])
+const renderProfilePlatformTiers = ['mobile', 'desktop', 'tv']
+const reflectionModes = new Set([
+  'none',
+  'static-environment',
+  'screen-space',
+  'planar',
+  'probe',
+])
+const reflectionSources = new Set([
+  'none',
+  'skybox',
+  'generated-cubemap',
+  'planar-water',
+  'screen-space',
+  'probe',
+])
+const postProcessingPasses = new Set([
+  'tone-mapping',
+  'ambient-occlusion',
+  'bloom',
+  'color-grading',
+  'vignette',
+  'anti-aliasing',
+  'depth-fog',
+])
 export function formatBytes(bytes) {
   return `${Math.round((bytes / (1024 * 1024)) * 10) / 10}MB`
 }
@@ -68,6 +97,10 @@ function isLightNode(node) {
 
 function getGraphicsBudget(scene) {
   return scene.settings?.level?.graphicsBudget ?? null
+}
+
+function getRenderProfile(scene) {
+  return scene.settings?.level?.renderProfile ?? null
 }
 
 function getMissingGraphicsBudgetKeys(graphicsBudget) {
@@ -117,6 +150,290 @@ function getMaterialTextureUrls(nodes) {
   ].sort()
 }
 
+function isPositiveInteger(value) {
+  return Number.isInteger(value) && value > 0
+}
+
+function isNonNegativeInteger(value) {
+  return Number.isInteger(value) && value >= 0
+}
+
+function getColliderUrlConventionError(value) {
+  const colliderUrl = String(value ?? '').trim()
+  if (!colliderUrl) return 'missing colliderUrl'
+  if (!colliderUrl.startsWith('/')) return 'colliderUrl must be absolute'
+  if (
+    !colliderUrl.startsWith(generatedColliderRoot) &&
+    !colliderUrl.startsWith(terrainColliderRoot)
+  ) {
+    return `colliderUrl must live under ${generatedColliderRoot} or ${terrainColliderRoot}`
+  }
+  if (!colliderUrl.endsWith(colliderUrlSuffix)) {
+    return `colliderUrl must end with ${colliderUrlSuffix}`
+  }
+  return ''
+}
+
+function getVisualBookmarkFailures({ file, renderProfile }) {
+  const failures = []
+  const bookmarks = renderProfile.visualBookmarks
+  if (!Array.isArray(bookmarks) || bookmarks.length === 0) {
+    return [`${file}: renderProfile.visualBookmarks must define at least one visual regression camera bookmark`]
+  }
+
+  const ids = new Set()
+  for (const [index, bookmark] of bookmarks.entries()) {
+    const path = `renderProfile.visualBookmarks[${index}]`
+    if (typeof bookmark?.id !== 'string' || bookmark.id.length === 0) {
+      failures.push(`${file}: ${path}.id must be a non-empty string`)
+    } else if (ids.has(bookmark.id)) {
+      failures.push(`${file}: ${path}.id must be unique`)
+    } else {
+      ids.add(bookmark.id)
+    }
+    if (!isFiniteVec3(bookmark?.cameraPosition)) {
+      failures.push(`${file}: ${path}.cameraPosition must be a finite Vec3`)
+    }
+    if (!isFiniteVec3(bookmark?.cameraTarget)) {
+      failures.push(`${file}: ${path}.cameraTarget must be a finite Vec3`)
+    }
+    if (
+      bookmark?.playerPosition !== undefined &&
+      !isFiniteVec3(bookmark.playerPosition)
+    ) {
+      failures.push(`${file}: ${path}.playerPosition must be a finite Vec3`)
+    }
+    const viewport = bookmark?.viewport
+    if (
+      viewport !== undefined &&
+      (!isPositiveInteger(viewport.width) ||
+        !isPositiveInteger(viewport.height))
+    ) {
+      failures.push(`${file}: ${path}.viewport must use positive integer width and height`)
+    }
+    if (
+      bookmark?.settleMs !== undefined &&
+      !isNonNegativeInteger(bookmark.settleMs)
+    ) {
+      failures.push(`${file}: ${path}.settleMs must be a non-negative integer`)
+    }
+  }
+
+  return failures
+}
+
+function getReflectionProfileFailures({ file, renderProfile, publicDir }) {
+  const failures = []
+  const reflections = renderProfile.reflections ?? {}
+  const reflectionMode = reflections.mode
+  const reflectionSource = reflections.source
+
+  if (!reflectionModes.has(reflectionMode)) {
+    failures.push(`${file}: renderProfile.reflections.mode is invalid`)
+  }
+  if (
+    reflectionSource !== undefined &&
+    !reflectionSources.has(reflectionSource)
+  ) {
+    failures.push(`${file}: renderProfile.reflections.source is invalid`)
+  }
+  if (
+    reflections.intent !== undefined &&
+    (typeof reflections.intent !== 'string' || reflections.intent.length === 0)
+  ) {
+    failures.push(`${file}: renderProfile.reflections.intent must be a non-empty string`)
+  }
+  if (
+    reflections.estimatedTextureBytes !== undefined &&
+    !isNonNegativeInteger(reflections.estimatedTextureBytes)
+  ) {
+    failures.push(`${file}: renderProfile.reflections.estimatedTextureBytes must be a non-negative integer`)
+  }
+  if (
+    reflections.estimatedRenderPasses !== undefined &&
+    !isNonNegativeInteger(reflections.estimatedRenderPasses)
+  ) {
+    failures.push(`${file}: renderProfile.reflections.estimatedRenderPasses must be a non-negative integer`)
+  }
+
+  const requiredAssetUrls = reflections.requiredAssetUrls
+  if (requiredAssetUrls !== undefined && !Array.isArray(requiredAssetUrls)) {
+    failures.push(`${file}: renderProfile.reflections.requiredAssetUrls must be an array`)
+    return failures
+  }
+  for (const [index, url] of (requiredAssetUrls ?? []).entries()) {
+    if (typeof url !== 'string' || url.length === 0) {
+      failures.push(`${file}: renderProfile.reflections.requiredAssetUrls[${index}] must be a non-empty string`)
+      continue
+    }
+    if (!existsSync(resolvePublicAssetPath(publicDir, url))) {
+      failures.push(`${file}: renderProfile reflection asset must resolve to a public file: ${url}`)
+    }
+  }
+
+  return failures
+}
+
+function getRenderProfileFailures({ file, renderProfile, graphicsBudget, publicDir }) {
+  const failures = []
+  if (!renderProfile || typeof renderProfile !== 'object') {
+    return [`${file}: settings.level.renderProfile must define an authored runtime render profile`]
+  }
+
+  if (typeof renderProfile.id !== 'string' || renderProfile.id.length === 0) {
+    failures.push(`${file}: renderProfile.id must be a non-empty string`)
+  }
+  if (!renderProfilePlatformTiers.includes(renderProfile.defaultTier)) {
+    failures.push(
+      `${file}: renderProfile.defaultTier must be mobile, desktop, or tv`,
+    )
+  }
+  const qualityTiers = renderProfile.qualityTiers ?? {}
+  for (const tier of renderProfilePlatformTiers) {
+    if (!qualityTiers[tier]) {
+      failures.push(`${file}: renderProfile.qualityTiers.${tier} is required`)
+    }
+  }
+
+  const baseShadows = renderProfile.shadows ?? {}
+  if (!isNonNegativeInteger(baseShadows.maxCastingLights)) {
+    failures.push(`${file}: renderProfile.shadows.maxCastingLights is required`)
+  }
+  if (baseShadows.enabled && !isPositiveInteger(baseShadows.mapSize)) {
+    failures.push(`${file}: renderProfile.shadows.mapSize is required when shadows are enabled`)
+  }
+  const lightBudget = graphicsBudget?.maxLightActors
+  if (
+    Number.isFinite(lightBudget) &&
+    Number.isFinite(baseShadows.maxCastingLights) &&
+    baseShadows.maxCastingLights > Math.max(1, lightBudget)
+  ) {
+    failures.push(
+      `${file}: renderProfile shadow-casting lights exceed light budget ${baseShadows.maxCastingLights}/${Math.max(1, lightBudget)}`,
+    )
+  }
+
+  failures.push(
+    ...getReflectionProfileFailures({ file, renderProfile, publicDir }),
+  )
+
+  const basePost = renderProfile.postProcessing ?? {}
+  if (!Array.isArray(basePost.passes)) {
+    failures.push(`${file}: renderProfile.postProcessing.passes is required`)
+  } else {
+    const invalidPasses = basePost.passes.filter(
+      pass => !postProcessingPasses.has(pass),
+    )
+    if (invalidPasses.length > 0) {
+      failures.push(
+        `${file}: renderProfile.postProcessing.passes has invalid entries: ${invalidPasses.join(', ')}`,
+      )
+    }
+    if (
+      Number.isFinite(basePost.maxEnabledPasses) &&
+      basePost.passes.length > basePost.maxEnabledPasses
+    ) {
+      failures.push(
+        `${file}: renderProfile post passes exceed base budget ${basePost.passes.length}/${basePost.maxEnabledPasses}`,
+      )
+    }
+  }
+
+  failures.push(...getVisualBookmarkFailures({ file, renderProfile }))
+
+  for (const tier of renderProfilePlatformTiers) {
+    const tierSettings = qualityTiers[tier] ?? {}
+    const tierShadows = tierSettings.shadows ?? {}
+    if (
+      tierShadows.mapSize !== undefined &&
+      !isPositiveInteger(tierShadows.mapSize)
+    ) {
+      failures.push(`${file}: renderProfile.qualityTiers.${tier}.shadows.mapSize must be positive`)
+    }
+    if (
+      Number.isFinite(tierShadows.mapSize) &&
+      Number.isFinite(baseShadows.mapSize) &&
+      tier !== 'tv' &&
+      tierShadows.mapSize > baseShadows.mapSize
+    ) {
+      failures.push(
+        `${file}: renderProfile.qualityTiers.${tier}.shadows.mapSize exceeds base shadow map size`,
+      )
+    }
+    const tierReflectionMode = tierSettings.reflections?.mode
+    if (
+      tierReflectionMode !== undefined &&
+      !reflectionModes.has(tierReflectionMode)
+    ) {
+      failures.push(`${file}: renderProfile.qualityTiers.${tier}.reflections.mode is invalid`)
+    }
+    const tierReflectionSource = tierSettings.reflections?.source
+    if (
+      tierReflectionSource !== undefined &&
+      !reflectionSources.has(tierReflectionSource)
+    ) {
+      failures.push(`${file}: renderProfile.qualityTiers.${tier}.reflections.source is invalid`)
+    }
+    const tierRequiredReflectionAssetUrls =
+      tierSettings.reflections?.requiredAssetUrls
+    if (
+      tierRequiredReflectionAssetUrls !== undefined &&
+      !Array.isArray(tierRequiredReflectionAssetUrls)
+    ) {
+      failures.push(`${file}: renderProfile.qualityTiers.${tier}.reflections.requiredAssetUrls must be an array`)
+    } else {
+      for (const [index, url] of (
+        tierRequiredReflectionAssetUrls ?? []
+      ).entries()) {
+        if (typeof url !== 'string' || url.length === 0) {
+          failures.push(`${file}: renderProfile.qualityTiers.${tier}.reflections.requiredAssetUrls[${index}] must be a non-empty string`)
+          continue
+        }
+        if (!existsSync(resolvePublicAssetPath(publicDir, url))) {
+          failures.push(`${file}: renderProfile.qualityTiers.${tier} reflection asset must resolve to a public file: ${url}`)
+        }
+      }
+    }
+    const tierEstimatedTextureBytes =
+      tierSettings.reflections?.estimatedTextureBytes
+    if (
+      tierEstimatedTextureBytes !== undefined &&
+      !isNonNegativeInteger(tierEstimatedTextureBytes)
+    ) {
+      failures.push(`${file}: renderProfile.qualityTiers.${tier}.reflections.estimatedTextureBytes must be a non-negative integer`)
+    }
+    const tierEstimatedRenderPasses =
+      tierSettings.reflections?.estimatedRenderPasses
+    if (
+      tierEstimatedRenderPasses !== undefined &&
+      !isNonNegativeInteger(tierEstimatedRenderPasses)
+    ) {
+      failures.push(`${file}: renderProfile.qualityTiers.${tier}.reflections.estimatedRenderPasses must be a non-negative integer`)
+    }
+    const tierPasses = tierSettings.postProcessing?.passes
+    const tierMaxPasses = tierSettings.postProcessing?.maxEnabledPasses
+    if (tierPasses !== undefined && !Array.isArray(tierPasses)) {
+      failures.push(`${file}: renderProfile.qualityTiers.${tier}.postProcessing.passes must be an array`)
+    } else if (Array.isArray(tierPasses)) {
+      const invalidPasses = tierPasses.filter(
+        pass => !postProcessingPasses.has(pass),
+      )
+      if (invalidPasses.length > 0) {
+        failures.push(
+          `${file}: renderProfile.qualityTiers.${tier}.postProcessing.passes has invalid entries: ${invalidPasses.join(', ')}`,
+        )
+      }
+      if (Number.isFinite(tierMaxPasses) && tierPasses.length > tierMaxPasses) {
+        failures.push(
+          `${file}: renderProfile.qualityTiers.${tier} post passes exceed budget ${tierPasses.length}/${tierMaxPasses}`,
+        )
+      }
+    }
+  }
+
+  return failures
+}
+
 export function isFiniteVec3(value) {
   return (
     Array.isArray(value) &&
@@ -129,11 +446,47 @@ function getAssetUrl(node) {
   return typeof node.asset?.url === 'string' ? node.asset.url : null
 }
 
+function getPrefabAssetUrl(node, runtimePrefabCatalog) {
+  const type = node.prefab?.type
+  const variant = node.prefab?.variant
+  if (
+    typeof type === 'string' &&
+    typeof variant === 'string' &&
+    typeof runtimePrefabCatalog.assetVariants[type]?.[variant] === 'string'
+  ) {
+    return runtimePrefabCatalog.assetVariants[type][variant]
+  }
+  return typeof type === 'string' &&
+    typeof runtimePrefabCatalog.assetUrls[type] === 'string'
+    ? runtimePrefabCatalog.assetUrls[type]
+    : null
+}
+
 function resolvePublicAssetPath(publicDir, url) {
   return join(publicDir, normalizePublicPath(url))
 }
 
-function auditScene({ file, sceneDir, publicDir }) {
+function readPrefabCatalog(prefabCatalogPath) {
+  const source = readFileSync(prefabCatalogPath, 'utf8')
+  const catalog = JSON.parse(source)
+  return {
+    types: new Set(
+      Array.isArray(catalog.types)
+        ? catalog.types.filter(type => typeof type === 'string')
+        : [],
+    ),
+    assetUrls:
+      catalog.assetUrls && typeof catalog.assetUrls === 'object'
+        ? catalog.assetUrls
+        : {},
+    assetVariants:
+      catalog.assetVariants && typeof catalog.assetVariants === 'object'
+        ? catalog.assetVariants
+        : {},
+  }
+}
+
+function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
   const fullPath = join(sceneDir, file)
   const source = readFileSync(fullPath, 'utf8')
   const hasBom = source.startsWith('\uFEFF')
@@ -141,6 +494,7 @@ function auditScene({ file, sceneDir, publicDir }) {
   const nodes = Array.isArray(scene.nodes) ? scene.nodes : []
   const deprecatedFields = findDeprecatedSceneFields(scene)
   const graphicsBudget = getGraphicsBudget(scene)
+  const renderProfile = getRenderProfile(scene)
   const missingGraphicsBudgetKeys = getMissingGraphicsBudgetKeys(graphicsBudget)
   const visualOnlyActorIds = new Set(
     Array.isArray(scene.settings?.level?.collision?.roles?.visualOnlyActorIds)
@@ -149,6 +503,12 @@ function auditScene({ file, sceneDir, publicDir }) {
   )
   const spawnPosition = scene.settings?.level?.spawn?.position
   const geometryNodes = nodes.filter(isGeometryNode)
+  const prefabNodes = nodes.filter(
+    node => node.kind === 'prefab' || node.prefab,
+  )
+  const unknownPrefabNodes = prefabNodes.filter(
+    node => !runtimePrefabCatalog.types.has(node.prefab?.type),
+  )
   const primitiveNodes = nodes.filter(node => node.kind === 'primitive')
   const lightNodes = nodes.filter(isLightNode)
   const neverCullNodes = nodes.filter(
@@ -175,6 +535,12 @@ function auditScene({ file, sceneDir, publicDir }) {
   })
   const disabledCollision = explicitCollision.filter(
     node => node.collision?.enabled === false,
+  )
+  const collisionRenderParityFailures = explicitCollision.filter(
+    node =>
+      node.collision?.enabled !== false &&
+      parityCollisionIntents.has(node.collision?.intent) &&
+      node.visible === false,
   )
   const authoredMaterialSlots = geometryNodes.filter(
     node => node.material || node.primitive,
@@ -212,6 +578,14 @@ function auditScene({ file, sceneDir, publicDir }) {
     node =>
       node.collision?.enabled !== false && node.collision?.shape === 'trimesh',
   )
+  const assetTrimeshMissingCollider = explicitTrimesh.filter(
+    node => node.kind === 'asset' && !node.collision?.colliderUrl,
+  )
+  const assetTrimeshColliderConventionFailures = explicitTrimesh.filter(
+    node =>
+      node.kind === 'asset' &&
+      getColliderUrlConventionError(node.collision?.colliderUrl),
+  )
   const missingDefaultCollision = geometryNodes.filter(
     node =>
       node.visible !== false &&
@@ -219,7 +593,16 @@ function auditScene({ file, sceneDir, publicDir }) {
       !node.collision &&
       !visualOnlyActorIds.has(node.id),
   )
-  const assetUrls = [...new Set(nodes.map(getAssetUrl).filter(Boolean))].sort()
+  const assetUrls = [
+    ...new Set(
+      nodes
+        .flatMap(node => [
+          getAssetUrl(node),
+          getPrefabAssetUrl(node, runtimePrefabCatalog),
+        ])
+        .filter(Boolean),
+    ),
+  ].sort()
   const assetFiles = assetUrls.map(url => {
     const fullPath = resolvePublicAssetPath(publicDir, url)
     const exists = existsSync(fullPath)
@@ -249,11 +632,15 @@ function auditScene({ file, sceneDir, publicDir }) {
 
   return {
     file,
+    publicDir,
     sizeKb: Math.round(statSync(fullPath).size / 1024),
     nodes: nodes.length,
     graphicsBudget,
+    renderProfile,
     missingGraphicsBudgetKeys,
     geometryNodes: geometryNodes.length,
+    prefabNodes: prefabNodes.length,
+    unknownPrefabReferences: unknownPrefabNodes.length,
     primitiveNodes: primitiveNodes.length,
     lightNodes: lightNodes.length,
     neverCullNodes: neverCullNodes.length,
@@ -268,7 +655,11 @@ function auditScene({ file, sceneDir, publicDir }) {
     invalidCollisionChannel: invalidCollisionChannel.length,
     detailMeshWithoutBudget: detailMeshWithoutBudget.length,
     disabledCollision: disabledCollision.length,
+    collisionRenderParityFailures: collisionRenderParityFailures.length,
     explicitTrimesh: explicitTrimesh.length,
+    assetTrimeshMissingCollider: assetTrimeshMissingCollider.length,
+    assetTrimeshColliderConventionFailures:
+      assetTrimeshColliderConventionFailures.length,
     missingDefaultCollision: missingDefaultCollision.length,
     assetFiles: assetFiles.length,
     totalRuntimeAssetBytes,
@@ -277,11 +668,25 @@ function auditScene({ file, sceneDir, publicDir }) {
     spawnPosition,
     hasValidSpawn: isFiniteVec3(spawnPosition),
     explicitTrimeshIds: explicitTrimesh.map(node => node.id),
+    assetTrimeshMissingColliderIds: assetTrimeshMissingCollider.map(
+      node => node.id,
+    ),
+    assetTrimeshColliderConventionFailureIds:
+      assetTrimeshColliderConventionFailures.map(
+        node =>
+          `${node.id}: ${getColliderUrlConventionError(node.collision?.colliderUrl)}`,
+      ),
     missingCollisionIntentIds: missingCollisionIntent.map(node => node.id),
     missingCollisionChannelIds: missingCollisionChannel.map(node => node.id),
     invalidCollisionChannelIds: invalidCollisionChannel.map(node => node.id),
     detailMeshWithoutBudgetIds: detailMeshWithoutBudget.map(node => node.id),
+    collisionRenderParityFailureIds: collisionRenderParityFailures.map(
+      node => node.id,
+    ),
     missingDefaultCollisionIds: missingDefaultCollision.map(node => node.id),
+    unknownPrefabReferenceIds: unknownPrefabNodes.map(
+      node => `${node.id}:${node.prefab?.type ?? 'missing-type'}`,
+    ),
     missingAssetFileUrls: missingAssetFiles.map(asset => asset.url),
     missingMaterialTextureFileUrls: missingMaterialTextureFiles.map(
       texture => texture.url,
@@ -321,6 +726,11 @@ function validateSceneReport(report) {
       `${report.file}: collision entries must declare intent: ${report.missingCollisionIntentIds.join(', ')}`,
     )
   }
+  if (report.unknownPrefabReferenceIds.length > 0) {
+    failures.push(
+      `${report.file}: prefab nodes must reference registered runtime prefab types: ${report.unknownPrefabReferenceIds.join(', ')}`,
+    )
+  }
   if (report.missingCollisionChannelIds.length > 0) {
     failures.push(
       `${report.file}: collision entries must declare channel: ${report.missingCollisionChannelIds.join(', ')}`,
@@ -336,6 +746,16 @@ function validateSceneReport(report) {
       `${report.file}: detailMesh collision requires triangleBudget: ${report.detailMeshWithoutBudgetIds.join(', ')}`,
     )
   }
+  if (report.assetTrimeshMissingColliderIds.length > 0) {
+    failures.push(
+      `${report.file}: asset trimesh collision must use separate collision.colliderUrl, never the render mesh: ${report.assetTrimeshMissingColliderIds.join(', ')}`,
+    )
+  }
+  if (report.assetTrimeshColliderConventionFailureIds.length > 0) {
+    failures.push(
+      `${report.file}: asset trimesh collider URLs must follow collider asset conventions: ${report.assetTrimeshColliderConventionFailureIds.join(', ')}`,
+    )
+  }
   if (report.hasBom) {
     failures.push(`${report.file}: scene file has a UTF-8 BOM`)
   }
@@ -349,9 +769,22 @@ function validateSceneReport(report) {
       `${report.file}: settings.level.graphicsBudget must define ${report.missingGraphicsBudgetKeys.join(', ')}`,
     )
   }
+  failures.push(
+    ...getRenderProfileFailures({
+      file: report.file,
+      renderProfile: report.renderProfile,
+      graphicsBudget: report.graphicsBudget,
+      publicDir: report.publicDir,
+    }),
+  )
   if (report.missingDefaultCollisionIds.length > 0) {
     failures.push(
       `${report.file}: visible geometry must explicitly author collision or disable it: ${report.missingDefaultCollisionIds.join(', ')}`,
+    )
+  }
+  if (report.collisionRenderParityFailureIds.length > 0) {
+    failures.push(
+      `${report.file}: walkable/blocker collision must have visible render parity or move the collider to a visible proxy: ${report.collisionRenderParityFailureIds.join(', ')}`,
     )
   }
   if (report.missingAssetFileUrls.length > 0) {
@@ -415,7 +848,8 @@ function validateSceneReport(report) {
     metricKey: 'explicitCollision',
     budgetKey: 'maxExplicitColliders',
     label: 'explicit colliders',
-    guidance: 'merge collider proxies or move detail collision into baked artifacts',
+    guidance:
+      'merge collider proxies or move detail collision into baked artifacts',
   })
   pushBudgetFailure({
     failures,
@@ -431,7 +865,8 @@ function validateSceneReport(report) {
     metricKey: 'estimatedDrawCalls',
     budgetKey: 'maxEstimatedDrawCalls',
     label: 'estimated draw calls',
-    guidance: 'merge materials, instance repeated meshes, or chunk by stream cell',
+    guidance:
+      'merge materials, instance repeated meshes, or chunk by stream cell',
   })
   pushBudgetFailure({
     failures,
@@ -466,6 +901,9 @@ export function summarizeSceneReports(reports) {
     (sum, report) => ({
       nodes: sum.nodes + report.nodes,
       geometryNodes: sum.geometryNodes + report.geometryNodes,
+      prefabNodes: sum.prefabNodes + report.prefabNodes,
+      unknownPrefabReferences:
+        sum.unknownPrefabReferences + report.unknownPrefabReferences,
       primitiveNodes: sum.primitiveNodes + report.primitiveNodes,
       lightNodes: sum.lightNodes + report.lightNodes,
       neverCullNodes: sum.neverCullNodes + report.neverCullNodes,
@@ -488,7 +926,15 @@ export function summarizeSceneReports(reports) {
       detailMeshWithoutBudget:
         sum.detailMeshWithoutBudget + report.detailMeshWithoutBudget,
       disabledCollision: sum.disabledCollision + report.disabledCollision,
+      collisionRenderParityFailures:
+        sum.collisionRenderParityFailures +
+        report.collisionRenderParityFailures,
       explicitTrimesh: sum.explicitTrimesh + report.explicitTrimesh,
+      assetTrimeshMissingCollider:
+        sum.assetTrimeshMissingCollider + report.assetTrimeshMissingCollider,
+      assetTrimeshColliderConventionFailures:
+        sum.assetTrimeshColliderConventionFailures +
+        report.assetTrimeshColliderConventionFailures,
       missingDefaultCollision:
         sum.missingDefaultCollision + report.missingDefaultCollision,
       deprecatedFields: sum.deprecatedFields + report.deprecatedFields.length,
@@ -500,6 +946,8 @@ export function summarizeSceneReports(reports) {
     {
       nodes: 0,
       geometryNodes: 0,
+      prefabNodes: 0,
+      unknownPrefabReferences: 0,
       primitiveNodes: 0,
       lightNodes: 0,
       neverCullNodes: 0,
@@ -515,7 +963,10 @@ export function summarizeSceneReports(reports) {
       invalidCollisionChannel: 0,
       detailMeshWithoutBudget: 0,
       disabledCollision: 0,
+      collisionRenderParityFailures: 0,
       explicitTrimesh: 0,
+      assetTrimeshMissingCollider: 0,
+      assetTrimeshColliderConventionFailures: 0,
       missingDefaultCollision: 0,
       deprecatedFields: 0,
       assetFiles: 0,
@@ -525,9 +976,14 @@ export function summarizeSceneReports(reports) {
   )
 }
 
-export function auditSceneArchitecture({ sceneDir, publicDir }) {
+export function auditSceneArchitecture({
+  sceneDir,
+  publicDir,
+  prefabCatalogPath,
+}) {
+  const runtimePrefabCatalog = readPrefabCatalog(prefabCatalogPath)
   const reports = getSceneFiles(sceneDir).map(file =>
-    auditScene({ file, sceneDir, publicDir }),
+    auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }),
   )
   const nonRuntimeSceneJsonFiles = getNonRuntimeSceneJsonFiles(sceneDir)
   const failures = nonRuntimeSceneJsonFiles.map(

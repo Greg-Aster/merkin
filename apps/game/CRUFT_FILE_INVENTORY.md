@@ -13,6 +13,101 @@ find apps/game \
 Status key: `unreviewed`, `keep`, `refactor`, `move`, `merge`, `delete`,
 `externalize`, `defer`.
 
+## 2026-05-11 Worktree Sprawl Snapshot
+
+This snapshot classifies the current dirty/untracked worktree without deleting
+or reverting user work.
+
+| Classification | Disposition |
+| --- | --- |
+| Game source code and config under `apps/game/src`, `apps/game/scripts`, `apps/game/package.json`, `apps/game/astro.config.mjs`, and `.github/workflows/game-engine-ci.yml` | Keep as active engine work. Treat broad runtime/editor/source changes as feature/refactor scope, not cleanup-only deletion candidates. |
+| Game docs and trackers, including new `AAA_*` files | Keep as active coordination/generated tracker material for now. Candidate follow-up: consolidate stale or overlapping AAA tracker docs after the related work lands. |
+| `apps/game/authoring/assets/README.md` and `apps/game/authoring/assets/import-manifest.json` | Keep as source authoring/import contract. The runtime asset manifest records this import manifest as a source input. |
+| `apps/megameal/public/generated/runtime-game-assets/**`, `apps/megameal/public/runtime-world-partitions/**`, and game-facing `apps/megameal/public/terrain/*.manifest.json` | Keep as generated runtime artifacts that ship through Megameal public and are validated by game audits. Do not ignore or delete just because they are generated. |
+| `apps/megameal/public/generated/runtime-game-assets/prefabs/**` | Keep as prefab bake-source assets owned by the runtime asset pipeline. Cooked variants live beside that source under the single runtime asset root; doubled runtime-root output is obsolete and should not be referenced. |
+| `apps/megameal/public/generated/runtime-game-assets/manifest.previous.json` | Keep as generated rollback metadata. `check-generated-drift` validates that the current manifest points to this rollback file. |
+| `apps/megameal/public/generated/hunyuan3d/**` | Keep as current generated/source asset inputs. Candidate follow-up: move source/import ownership out of Megameal public only after manifest paths and cooker inputs are migrated. |
+| Megameal banners, Snuggaloids media, and Megameal content files | Leave untouched as unrelated Megameal content. They are outside the game cleanup deletion scope. |
+| `.gitignore` additions for `apps/game/performance-certification-report.json` and `apps/game/reports/` | Keep as local generated report ignores. These are release/performance report outputs, not required runtime assets. |
+
+No additional deletion set was proven safe in this pass. The generated runtime
+asset, runtime scene, prefab, impostor, world partition, terrain, collision,
+and manifest surfaces were validated instead of hand-edited.
+
+### Review Fix 06 Follow-up
+
+Starting `git status --short | wc -l`: 380.
+Ending `git status --short | wc -l`: 381. The count did not fall below the
+starting point because unrelated game source entries appeared while this pass
+was running; the safe deletion set below was still removed.
+
+| Classification | Disposition |
+| --- | --- |
+| `apps/game/tmp/miranda-resources.json` and `apps/game/tmp/miranda-resources-after.json` | Safe to delete. These were local performance/resource report snapshots, had no `rg` references in `apps/game`, `apps/megameal`, or `.gitignore`, and are reproducible report output. |
+| `apps/game/tmp/` | Ignore as local generated report scratch space. It is not source, authoring input, or deployed runtime payload. |
+| Doubled runtime-root generated asset output | Deleted after `rg` proved current and rollback runtime manifests no longer reference it. This was cooked-output sprawl, not a source authoring root. |
+| Untracked `AAA_REVIEW_FIX_*`, `AAA_WEB_ENGINE_*`, `AAA_NEXT_*`, `AAA_REMAINING_*`, and `AAA_GAP_*` docs | Archived in `docs/archive/aaa/` by Target 05. They are historical context only; active work now starts from `AAA_TARGET_*.md`, completion docs, the graphics tracker, and generated content backlog. |
+
+Remaining ambiguous files are now owner-tagged rather than unclassified:
+
+- Historical cooked asset path ownership notes: `docs/archive/aaa/AAA_REVIEW_FIX_03_RUNTIME_ASSET_PATH_OWNERSHIP.md`.
+- Historical review-fix tracker coordination: `docs/archive/aaa/AAA_REVIEW_FIX_AGENT_COORDINATION.md`.
+- Unrelated Megameal content: Megameal owner, not game cleanup.
+
+### Completion Fix 05 Closeout
+
+Starting `git status --short | wc -l`: 397. Ending
+`git status --short | wc -l`: 401. During this pass the count was also
+observed at 400 as additional untracked generated/editor files appeared; no
+unrelated files were reverted or deleted.
+
+The remaining dirty state is intentionally grouped as follows:
+
+| Classification | Current disposition |
+| --- | --- |
+| Completion-fix docs (`AAA_COMPLETION_*`) | Keep as the active review-closeout source of truth. |
+| Historical coordination docs (`AAA_AUDIT_*`, `AAA_REVIEW_*`, `AAA_NEXT_*`, `AAA_REMAINING_*`, `AAA_WEB_ENGINE_*`, `AAA_GAP_*`, and older graphics trackers) | Archived in `docs/archive/aaa/`. Do not execute archived docs as current instructions unless a live target or completion doc explicitly references them. |
+| Active game source/config/scripts under `apps/game/src`, `apps/game/scripts`, `.github`, `package.json`, `astro.config.mjs`, and performance baselines | Keep as active engine/editor/runtime work. These are commit/delegation units, not cleanup deletion candidates. |
+| Generated runtime assets under `apps/megameal/public/generated/runtime-game-assets/**`, runtime world partitions, and terrain manifests | Keep. They are validated runtime artifacts and must not be hand-deleted while referenced by manifests or audits. |
+| Source/generated authoring assets under `apps/megameal/public/generated/hunyuan3d/**` and `apps/megameal/public/generated/style-lab/**` | Keep as source/authoring outputs unless an import-path migration or asset-owner cleanup explicitly retires a specific family. The untracked `world-root-basin-2026-05-11T18-48-35-298Z` style-lab source is owner-review material, not automatic cruft. |
+| `apps/game/reports/**` | Ignore and leave local-only. These files are generated release/performance reports; command paths reference them and `.gitignore` already excludes them from status. |
+| Megameal banners, Snuggaloids media, and Megameal content files | Leave untouched as unrelated Megameal content. |
+| Safe deletion candidates | None removed in this pass. No status-count-reducing file was both clearly obsolete and safe to delete without crossing into generated runtime/source asset ownership. |
+
+Reference checks performed:
+
+- `rg -n "performance-all-level-report|performance-certification-report|release-gate-ci|release-gate-quick" apps/game apps/megameal .github .gitignore` showed report paths are referenced as generated command outputs and ignored.
+- `rg -n "world-root-basin-2026-05-11T18-48-35-298Z|world-root-basin" apps/game apps/megameal .github .gitignore` showed the broader `world-root-basin` family is existing style-lab/source-authoring material; the new timestamped source needs asset-owner review before deletion.
+
+### Target 05 Doc Sprawl Consolidation
+
+Starting `git status --short | wc -l`: 421. Ending
+`git status --short | wc -l`: 391.
+
+The top-level `apps/game/AAA_*` instruction surface is now reduced to active
+completion docs, active target docs, the graphics tracker, and the generated
+graphics content backlog. Superseded instruction docs were moved, not deleted,
+to `apps/game/docs/archive/aaa/`.
+
+| Classification | Current disposition |
+| --- | --- |
+| Current instruction docs | Keep at top level: `AAA_TARGET_*.md`, `AAA_COMPLETION_*.md`, `AAA_GRAPHICS_REFACTOR_TRACKER.md`, and `AAA_GRAPHICS_CONTENT_BACKLOG.md`. |
+| Stale instruction docs | Archived under `docs/archive/aaa/`: `AAA_AUDIT_FIX_*`, `AAA_REVIEW_FIX_*`, `AAA_NEXT_*`, `AAA_REMAINING_*`, `AAA_WEB_ENGINE_*`, `AAA_GAP_*`, `AAA_INTEGRATION_AGENT_INSTRUCTIONS.md`, and `AAA_PARALLEL_AGENT_COORDINATION.md`. |
+| Current backlog count | `AAA_GRAPHICS_CONTENT_BACKLOG.md` is the source of truth and currently reports `missingRecommendedSlots=289`, `unapprovedRecommendedSlots=0`, and `lodTargetMisses=0`. |
+| Generated runtime assets | Left untouched. Runtime manifests, cooked assets, prefab outputs, impostors, rollback metadata, world partitions, and terrain manifests remain owned by the generation/audit pipeline. |
+| Ignored local reports | Left ignored/local-only under `apps/game/reports/**` and `apps/game/tmp/**`. |
+| Unrelated Megameal content | Left untouched. |
+
+No files were deleted in this pass. The archive move is reversible and keeps
+older baselines available without presenting them as active instructions.
+
+Validation result:
+
+- `pnpm --dir apps/game audit:engine` passed.
+- `pnpm --dir apps/game check:generated-drift` failed on pre-existing runtime
+  asset manifest material-compliance drift for the Yggdrasil bifrost ribbon.
+  Runtime assets were not regenerated in this doc-sprawl pass.
+
 ## Root
 
 | Status | File |
@@ -307,12 +402,12 @@ file-level outcomes without hiding work behind directory globs.
 | keep | `src/threlte/engine/levelCollisionWorkflow.ts` |
 | keep | `src/threlte/engine/levelContracts.ts` |
 | keep | `src/threlte/engine/levelValidation.ts` |
-| keep | `src/threlte/engine/packagedSceneDocuments.ts` |
+| delete | `src/threlte/engine/packagedSceneDocuments.ts` |
 | keep | `src/threlte/engine/primitiveGeometry.ts` |
 | keep | `src/threlte/engine/runtimeAssetManifest.ts` |
 | keep | `src/threlte/engine/runtimeCullingTrace.ts` |
 | keep | `src/threlte/engine/runtimeGameplayTypes.ts` |
-| keep | `src/threlte/engine/runtimeLevelSettings.ts` |
+| delete | `src/threlte/engine/runtimeLevelSettings.ts` |
 | keep | `src/threlte/engine/runtimeSceneDocumentLoader.ts` |
 | keep | `src/threlte/engine/runtimeSceneManifest.ts` |
 | keep | `src/threlte/engine/runtimeWorldPartition.ts` |

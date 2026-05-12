@@ -1,15 +1,43 @@
 export type RuntimeStreamingLevelTelemetry = {
   levelId: string
+  selectedRuntimeProfileId: string | null
+  selectedPlatformProfile: string | null
+  requestedAssetTier: string | null
+  levelAssetTierCap: string | null
+  selectedAssetTier: string
+  renderQualityTier: string
+  renderProfileId: string | null
+  renderProfileTier: string | null
+  requiredAssetCount: number
+  deferredOptionalAssetCount: number
   partitioned: boolean
   activeCellKeys: string[]
+  prefetchCellKeys: string[]
+  evictableCellKeys: string[]
   activeCellCount: number
+  prefetchCellCount: number
+  evictableCellCount: number
   totalCellCount: number
   residentActorCount: number
   streamableActorCount: number
   activeActorCount: number
   activeRenderableActorCount: number
+  pendingRequiredCellKeys: string[]
   readinessGateCount: number
   initialCellCount: number
+  loadedRenderAssetCount: number
+  loadedCollisionAssetCount: number
+  gltfCacheEntries: number
+  gltfCacheLoadedEntries: number
+  gltfCachePendingEntries: number
+  gltfCacheReferencedEntries: number
+  gltfCacheUnreferencedEntries: number
+  gltfCacheLoadedBytes: number
+  gltfCacheBytes: number
+  gltfCachePendingBytes: number
+  gltfCacheReferencedBytes: number
+  gltfCacheUnreferencedBytes: number
+  cellStateCounts: Record<string, number>
   lastUpdatedAt: number
 }
 
@@ -35,6 +63,11 @@ function publishRuntimeStreamingTelemetry() {
         {
           ...telemetry,
           activeCellKeys: [...telemetry.activeCellKeys].sort(),
+          prefetchCellKeys: [...telemetry.prefetchCellKeys].sort(),
+          evictableCellKeys: [...telemetry.evictableCellKeys].sort(),
+          pendingRequiredCellKeys: [
+            ...telemetry.pendingRequiredCellKeys,
+          ].sort(),
         },
       ]),
     ),

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-08T22:27:13.362Z",
+  "generatedAt": "2026-05-12T00:43:21.216Z",
   "levelId": "miranda",
   "sceneId": "miranda",
   "source": {
@@ -18,6 +18,11 @@
         0,
         4.25,
         -13.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
       ]
     },
     "settings": {
@@ -68,9 +73,9 @@
           "maxExplicitColliders": 48,
           "maxLightActors": 4,
           "maxEstimatedDrawCalls": 60,
-          "maxAuthoredMaterialSlots": 48,
-          "maxEstimatedTriangles": 600,
-          "maxAuthoredTextureBytes": 0
+          "maxAuthoredMaterialSlots": 59,
+          "maxEstimatedTriangles": 6928,
+          "maxAuthoredTextureBytes": 131072
         },
         "skyboxPreset": "observatory",
         "features": {
@@ -90,6 +95,169 @@
           "ambientIntensity": 0.38,
           "keyLightIntensity": 1.15,
           "fillLightIntensity": 0.42
+        },
+        "renderProfile": {
+          "id": "miranda-exterior-markers",
+          "defaultTier": "desktop",
+          "lighting": {
+            "ambientColor": "#9eb6d6",
+            "skyColor": "#d8e6ff",
+            "groundColor": "#080b12",
+            "keyLightColor": "#f4f7ff",
+            "fillLightColor": "#6f8fb8",
+            "keyLightPosition": [
+              11,
+              18,
+              -9
+            ],
+            "fillLightPosition": [
+              -16,
+              8,
+              14
+            ]
+          },
+          "shadows": {
+            "enabled": true,
+            "maxCastingLights": 1,
+            "mapSize": 1024,
+            "cameraSize": 42,
+            "cameraFar": 86
+          },
+          "reflections": {
+            "mode": "static-environment",
+            "textureSize": 256,
+            "maxPlanarSurfaces": 0,
+            "environmentIntensity": 1.05
+          },
+          "postProcessing": {
+            "enabled": true,
+            "passes": [
+              "tone-mapping",
+              "ambient-occlusion",
+              "color-grading",
+              "bloom",
+              "vignette"
+            ],
+            "maxEnabledPasses": 5,
+            "ambientOcclusion": {
+              "enabled": true,
+              "intensity": 0.68,
+              "radius": 7,
+              "minDistance": 0.006,
+              "maxDistance": 0.11
+            },
+            "bloom": {
+              "intensity": 0.62,
+              "threshold": 0.88
+            },
+            "toneMappingExposure": 0.92,
+            "vignetteStrength": 0.85
+          },
+          "qualityTiers": {
+            "mobile": {
+              "shadows": {
+                "enabled": false,
+                "maxCastingLights": 0
+              },
+              "reflections": {
+                "mode": "none",
+                "textureSize": 0,
+                "maxPlanarSurfaces": 0,
+                "environmentIntensity": 0.7
+              },
+              "postProcessing": {
+                "passes": [
+                  "tone-mapping",
+                  "color-grading"
+                ],
+                "maxEnabledPasses": 2
+              }
+            },
+            "desktop": {
+              "shadows": {
+                "enabled": true,
+                "maxCastingLights": 1,
+                "mapSize": 1024
+              },
+              "reflections": {
+                "mode": "static-environment",
+                "textureSize": 256,
+                "maxPlanarSurfaces": 0
+              },
+              "postProcessing": {
+                "passes": [
+                  "tone-mapping",
+                  "ambient-occlusion",
+                  "color-grading",
+                  "bloom",
+                  "vignette"
+                ],
+                "maxEnabledPasses": 5,
+                "ambientOcclusion": {
+                  "enabled": true,
+                  "intensity": 0.68,
+                  "radius": 7,
+                  "minDistance": 0.006,
+                  "maxDistance": 0.11
+                }
+              }
+            },
+            "tv": {
+              "shadows": {
+                "enabled": true,
+                "maxCastingLights": 1,
+                "mapSize": 2048
+              },
+              "reflections": {
+                "mode": "static-environment",
+                "textureSize": 512,
+                "maxPlanarSurfaces": 0
+              },
+              "postProcessing": {
+                "passes": [
+                  "tone-mapping",
+                  "ambient-occlusion",
+                  "color-grading",
+                  "bloom",
+                  "vignette"
+                ],
+                "maxEnabledPasses": 5,
+                "ambientOcclusion": {
+                  "enabled": true,
+                  "intensity": 0.82,
+                  "radius": 9,
+                  "minDistance": 0.005,
+                  "maxDistance": 0.14
+                }
+              }
+            }
+          },
+          "visualBookmarks": [
+            {
+              "id": "spawn-default",
+              "label": "Miranda portal and console",
+              "playerPosition": [
+                0,
+                4.25,
+                -13.8
+              ],
+              "cameraPosition": [
+                0,
+                5.85,
+                -13.8
+              ],
+              "cameraTarget": [
+                0,
+                4.6,
+                8
+              ],
+              "viewport": {
+                "width": 1280,
+                "height": 720
+              },
+              "settleMs": 2000
+            }
+          ]
         }
       }
     },
@@ -114,10 +282,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -165,18 +329,11 @@
         "physics": {
           "bodyType": "fixed",
           "collision": {
-            "intent": "blocker",
+            "intent": "walkable",
             "channel": "worldStatic",
             "shape": "cuboid",
             "friction": 0.88
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "main deck floor"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -224,18 +381,11 @@
         "physics": {
           "bodyType": "fixed",
           "collision": {
-            "intent": "blocker",
+            "intent": "walkable",
             "channel": "worldStatic",
             "shape": "cuboid",
             "friction": 0.88
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "upper deck plate"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -258,10 +408,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -291,10 +437,6 @@
           "intensity": 8,
           "distance": 20,
           "decay": 2
-        },
-        "editor": {
-          "legacyKind": "light",
-          "collisionSource": "none"
         }
       },
       {
@@ -317,10 +459,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -363,13 +501,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "retro-futurist command console"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -424,13 +555,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "cockpit glow panel left"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -485,13 +609,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "cockpit glow panel center"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -546,13 +663,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "cockpit glow panel right"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -611,13 +721,6 @@
             "excerpt": "There is nothing to salvage. Only debris, salt, and the taste of a vanished system.",
             "body": "This is Captain Helena Zhao of the salvage vessel Second Breakfast.\n\nMiranda's primary sun went supernova without warning. Inner planets vaporized. Outer planetoids were thrown into cold darkness. We entered the debris field expecting a graveyard and found something worse: a silence that feels arranged.\n\nSome say you can still taste celery salt in the dust. I laughed when I first heard it. I am not laughing now."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -640,10 +743,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -698,13 +797,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "bunk port a"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -759,13 +851,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "bunk port b"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -820,13 +905,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "bunk starboard a"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -881,13 +959,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "bunk starboard b"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -942,13 +1013,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "locker bank"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1007,13 +1071,6 @@
             "excerpt": "Headaches, nausea, deja vu. Nobody wants to say the symptoms out loud twice.",
             "body": "Three crew reported headaches after handling drone returns from the debris field. Two described dreams of a bar they have never visited. One woke up repeating a drink order in a voice he claims was not his own.\n\nNo abnormalities on scans. No fever. No infection. The fear is the only thing progressing.\n\nRecommendation: limit direct exposure to recovered signal caches, especially any reference to a Bloody Mary and any insistence on pickle prohibition."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -1036,10 +1093,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1094,13 +1147,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "captain's desk"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1156,13 +1202,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "captain's chair"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1217,13 +1256,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "recipe safe"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1282,13 +1314,6 @@
             "excerpt": "The captain looks composed until someone mentions drinks, dreams, or card players.",
             "body": "The captain has not slept properly in eleven cycles. She denies it, but the evidence is in the way she freezes whenever recovered transcripts mention the saloon.\n\nTwice now she has asked whether anyone else has seen three old men through the bridge glass. There was nobody there. On the second occasion she also asked whether the ship kept a safe for paper records.\n\nIt does now."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -1347,13 +1372,6 @@
             "excerpt": "The page keeps moving. The phrase keeps returning. The paper smells faintly of tomato, iron, and smoke.",
             "body": "Cross-reference from the mechanical observer and the old man's account suggests a causality nexus formed around a drink completed at the instant of Miranda's destruction.\n\nHardcopy fragment secured in captain's vault after digital copies exhibited instability. Crew instructed not to vocalize the activation phrase aloud.\n\nFragment note: \"Bloody Mary, no pickles, make it a double.\"\n\nIf this page is found outside the safe again, burn it and do not discuss the ash."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -1376,10 +1394,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1430,13 +1444,6 @@
             "markerColor": "#7fd3ff",
             "markerSize": 1.05
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "occult portal apparatus"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -1459,10 +1466,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1518,13 +1521,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "engine core"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1580,13 +1576,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "engine column a"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1642,13 +1631,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "engine column b"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1704,13 +1686,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "engine column c"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1766,13 +1741,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "engine column d"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1831,13 +1799,6 @@
             "excerpt": "The ship is humming in sympathy with transmissions that should no longer exist.",
             "body": "Reactor output remains nominal, but the harmonic drift is wrong. Every time we pass through a dense pocket of Miranda ash, the engine room resonates with carrier bands matching the dead system's final RF burst.\n\nIt sounds like traffic stacked above an atmosphere that is no longer there. Queue chatter. Clearance loops. Repeated holds.\n\nI have shut down three relays and the sound still comes through the deck."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -1860,10 +1821,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -1920,13 +1877,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "med pod a"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -1983,13 +1933,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "med pod b"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2046,13 +1989,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "med pod c"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2109,13 +2045,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "med pod d"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2174,13 +2103,6 @@
             "excerpt": "The sleepers are not dead. The ship still refuses to classify them as living.",
             "body": "We sealed three crew inside the aft medbay after the Miranda ash dreams escalated into waking fugues. They answer to their names, but only after a delay, as if translating from somewhere farther away.\n\nTheir body temperatures fall whenever the Bloody Mary phrase is spoken near the pods. The glass frosts from the inside first.\n\nI have ordered the quarantine lamps to stay red until somebody can explain why the EEG spikes match the ship's own telemetry."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -2203,10 +2125,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -2261,13 +2179,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "mess table a"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2322,13 +2233,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "mess table b"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2383,13 +2287,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "mess counter"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2448,13 +2345,6 @@
             "excerpt": "We ran out of clean water before we ran out of stories about the bar.",
             "body": "Nobody eats in the mess unless the speakers are playing static. If the channels are quiet, people start hearing the card table again.\n\nThe bowls rattle whenever we cross a dense ash current. Plates slide toward the aft corridor as if the ship itself leans toward Miranda.\n\nI locked the pantry and still found celery salt on the floor this morning."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -2477,10 +2367,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -2523,13 +2409,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "weathered monolith pillar"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2572,13 +2451,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "weathered monolith pillar"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2633,13 +2505,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "chapel altar"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2662,10 +2527,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -2720,13 +2581,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "brig cell a"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2781,13 +2635,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "brig cell b"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2842,13 +2689,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "brig cell c"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2903,13 +2743,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "brig cell d"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -2964,13 +2797,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "brig desk"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -3029,13 +2855,6 @@
             "excerpt": "I was not trying to open the safe. I was trying to put the page back.",
             "body": "They locked me in the brig because I kept leaving the corridor at night and waking up near the captain's office with soot under my nails.\n\nThe truth is smaller and worse: every time I close my eyes, I can hear a voice asking me to return a recipe card to its proper era.\n\nThe bars hum when the engines drift. The hum knows my name."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       },
       {
@@ -3058,10 +2877,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -3116,13 +2931,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "cargo stack a"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -3177,13 +2985,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "cargo stack b"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -3238,13 +3039,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "cargo stack c"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -3299,13 +3093,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "cargo stack d"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -3328,10 +3115,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -3361,10 +3144,6 @@
           "intensity": 4.6,
           "distance": 15,
           "decay": 2
-        },
-        "editor": {
-          "legacyKind": "light",
-          "collisionSource": "none"
         }
       },
       {
@@ -3387,10 +3166,6 @@
             1,
             1
           ]
-        },
-        "editor": {
-          "legacyKind": "group",
-          "collisionSource": "none"
         }
       },
       {
@@ -3445,13 +3220,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "server bank a"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -3506,13 +3274,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "server bank b"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -3567,13 +3328,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "server bank c"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -3628,13 +3382,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "server bank d"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -3689,13 +3436,6 @@
             "restitution": 0,
             "sensor": false
           }
-        },
-        "editor": {
-          "legacyKind": "primitive",
-          "generation": {
-            "descriptor": "server bank e"
-          },
-          "collisionSource": "authored"
         }
       },
       {
@@ -3725,10 +3465,6 @@
           "intensity": 5,
           "distance": 16,
           "decay": 2
-        },
-        "editor": {
-          "legacyKind": "light",
-          "collisionSource": "none"
         }
       },
       {
@@ -3787,13 +3523,6 @@
             "excerpt": "Each copied transcript diverges the second time it is opened.",
             "body": "The upper archive is no longer storing files. It is growing variants.\n\nOpen one Miranda transcript and you receive an account. Open it again and the witness order changes. Open it a third time and there is a fourth witness seated at the table.\n\nI moved the worst logs to the upper stacks and disconnected them from the main grid. The lights in this gallery still blink in answers."
           }
-        },
-        "editor": {
-          "legacyKind": "prefab",
-          "generation": {
-            "descriptor": "ritual story marker obelisk"
-          },
-          "collisionSource": "none"
         }
       }
     ]
@@ -3809,19 +3538,84 @@
     "trimeshActorCount": 0,
     "detailMeshActorCount": 0,
     "defaultCollisionActorCount": 0,
-    "visualOnlyActorCount": 27,
+    "visualOnlyActorCount": 10,
     "requiredActorCount": 0,
     "requiredRenderActorIds": [],
     "missingRequiredActorIds": [],
     "requiredAssetUrls": [],
-    "runtimeAssetUrls": [],
+    "runtimeAssetUrls": [
+      "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+      "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+      "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb"
+    ],
+    "collisionDiagnostics": {
+      "authoredActorIds": [
+        "miranda-brig-cell-a",
+        "miranda-brig-cell-b",
+        "miranda-brig-cell-c",
+        "miranda-brig-cell-d",
+        "miranda-brig-desk",
+        "miranda-bunk-port-a",
+        "miranda-bunk-port-b",
+        "miranda-bunk-starboard-a",
+        "miranda-bunk-starboard-b",
+        "miranda-captains-chair",
+        "miranda-captains-desk",
+        "miranda-cargo-stack-a",
+        "miranda-cargo-stack-b",
+        "miranda-cargo-stack-c",
+        "miranda-cargo-stack-d",
+        "miranda-chapel-altar",
+        "miranda-chapel-monolith-a",
+        "miranda-chapel-monolith-b",
+        "miranda-cockpit-console",
+        "miranda-cockpit-panel-center",
+        "miranda-cockpit-panel-left",
+        "miranda-cockpit-panel-right",
+        "miranda-engine-column-a",
+        "miranda-engine-column-b",
+        "miranda-engine-column-c",
+        "miranda-engine-column-d",
+        "miranda-engine-core",
+        "miranda-floor-main",
+        "miranda-floor-upper",
+        "miranda-locker-bank",
+        "miranda-med-pod-a",
+        "miranda-med-pod-b",
+        "miranda-med-pod-c",
+        "miranda-med-pod-d",
+        "miranda-mess-counter",
+        "miranda-mess-table-a",
+        "miranda-mess-table-b",
+        "miranda-safe",
+        "miranda-server-bank-a",
+        "miranda-server-bank-b",
+        "miranda-server-bank-c",
+        "miranda-server-bank-d",
+        "miranda-server-bank-e"
+      ],
+      "defaultActorIds": [],
+      "visualOnlyActorIds": []
+    },
     "errors": [],
     "warnings": []
   },
   "runtime": {
     "requiredRenderActorIds": [],
     "requiredAssetUrls": [],
-    "runtimeAssetUrls": [],
+    "runtimeAssetUrls": [
+      "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+      "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+      "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb"
+    ],
     "ground": {
       "mode": "scene-authored",
       "visualSource": "scene-actors",
@@ -3831,6 +3625,169 @@
         "miranda-floor-upper"
       ],
       "requiredWalkableSurfaceId": "miranda-floor-main"
+    },
+    "renderProfile": {
+      "id": "miranda-exterior-markers",
+      "defaultTier": "desktop",
+      "lighting": {
+        "ambientColor": "#9eb6d6",
+        "skyColor": "#d8e6ff",
+        "groundColor": "#080b12",
+        "keyLightColor": "#f4f7ff",
+        "fillLightColor": "#6f8fb8",
+        "keyLightPosition": [
+          11,
+          18,
+          -9
+        ],
+        "fillLightPosition": [
+          -16,
+          8,
+          14
+        ]
+      },
+      "shadows": {
+        "enabled": true,
+        "maxCastingLights": 1,
+        "mapSize": 1024,
+        "cameraSize": 42,
+        "cameraFar": 86
+      },
+      "reflections": {
+        "mode": "static-environment",
+        "textureSize": 256,
+        "maxPlanarSurfaces": 0,
+        "environmentIntensity": 1.05
+      },
+      "postProcessing": {
+        "enabled": true,
+        "passes": [
+          "tone-mapping",
+          "ambient-occlusion",
+          "color-grading",
+          "bloom",
+          "vignette"
+        ],
+        "maxEnabledPasses": 5,
+        "ambientOcclusion": {
+          "enabled": true,
+          "intensity": 0.68,
+          "radius": 7,
+          "minDistance": 0.006,
+          "maxDistance": 0.11
+        },
+        "bloom": {
+          "intensity": 0.62,
+          "threshold": 0.88
+        },
+        "toneMappingExposure": 0.92,
+        "vignetteStrength": 0.85
+      },
+      "qualityTiers": {
+        "mobile": {
+          "shadows": {
+            "enabled": false,
+            "maxCastingLights": 0
+          },
+          "reflections": {
+            "mode": "none",
+            "textureSize": 0,
+            "maxPlanarSurfaces": 0,
+            "environmentIntensity": 0.7
+          },
+          "postProcessing": {
+            "passes": [
+              "tone-mapping",
+              "color-grading"
+            ],
+            "maxEnabledPasses": 2
+          }
+        },
+        "desktop": {
+          "shadows": {
+            "enabled": true,
+            "maxCastingLights": 1,
+            "mapSize": 1024
+          },
+          "reflections": {
+            "mode": "static-environment",
+            "textureSize": 256,
+            "maxPlanarSurfaces": 0
+          },
+          "postProcessing": {
+            "passes": [
+              "tone-mapping",
+              "ambient-occlusion",
+              "color-grading",
+              "bloom",
+              "vignette"
+            ],
+            "maxEnabledPasses": 5,
+            "ambientOcclusion": {
+              "enabled": true,
+              "intensity": 0.68,
+              "radius": 7,
+              "minDistance": 0.006,
+              "maxDistance": 0.11
+            }
+          }
+        },
+        "tv": {
+          "shadows": {
+            "enabled": true,
+            "maxCastingLights": 1,
+            "mapSize": 2048
+          },
+          "reflections": {
+            "mode": "static-environment",
+            "textureSize": 512,
+            "maxPlanarSurfaces": 0
+          },
+          "postProcessing": {
+            "passes": [
+              "tone-mapping",
+              "ambient-occlusion",
+              "color-grading",
+              "bloom",
+              "vignette"
+            ],
+            "maxEnabledPasses": 5,
+            "ambientOcclusion": {
+              "enabled": true,
+              "intensity": 0.82,
+              "radius": 9,
+              "minDistance": 0.005,
+              "maxDistance": 0.14
+            }
+          }
+        }
+      },
+      "visualBookmarks": [
+        {
+          "id": "spawn-default",
+          "label": "Miranda portal and console",
+          "playerPosition": [
+            0,
+            4.25,
+            -13.8
+          ],
+          "cameraPosition": [
+            0,
+            5.85,
+            -13.8
+          ],
+          "cameraTarget": [
+            0,
+            4.6,
+            8
+          ],
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "settleMs": 2000
+        }
+      ]
     }
   }
 }

@@ -35,6 +35,10 @@ export let onRowDragOver: (row: OutlinerRow, event: DragEvent) => void =
   () => {}
 export let onRowDragLeave: (row: OutlinerRow) => void = () => {}
 export let onRowDrop: (row: OutlinerRow, event: DragEvent) => void = () => {}
+export let onGroupSelection: () => void = () => {}
+export let onUngroupSelection: () => void = () => {}
+export let selectedNodeCount = 0
+export let hasGroupSelection = false
 export let isRowSelected: (row: OutlinerRow) => boolean = () => false
 export let getRowActionState: (row: OutlinerRow) => OutlinerRowActionState =
   () => ({
@@ -67,6 +71,10 @@ function handleFilterInput(event: Event) {
     </div>
     <div class="outliner-search-row">
       <input class="outliner-search" value={filter} placeholder={filterPlaceholder} on:input={handleFilterInput} />
+    </div>
+    <div class="outliner-command-row">
+      <button disabled={selectedNodeCount === 0} on:click={onGroupSelection}>Group</button>
+      <button disabled={!hasGroupSelection} on:click={onUngroupSelection}>Ungroup</button>
     </div>
   </div>
 
@@ -177,6 +185,16 @@ function handleFilterInput(event: Event) {
   .outliner-mode-button.active {
     background: rgba(86, 148, 192, 0.24);
     border-color: rgba(126, 203, 255, 0.36);
+  }
+  .outliner-command-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem;
+  }
+  .outliner-command-row button {
+    min-width: 0;
+    padding: 0.28rem 0.35rem;
+    font-size: 0.66rem;
   }
   .outliner-search-row {
     display: block;

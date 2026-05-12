@@ -10,7 +10,7 @@ This checklist is the working migration path from the current mixed Threlte/edit
 - [x] Add a central collision policy module.
 - [x] Add level runtime contracts for required actors, required assets, collision budgets, and asset count budgets.
 - [x] Add build-report validation that can emit blocking engine errors before gameplay starts.
-- [ ] Move all runtime level loading to consume `LevelDefinition`.
+- [x] Move all runtime level loading to consume `LevelDefinition`.
 - [ ] Make `Game.svelte` an app shell only.
 - [x] Make `GameCanvasStage.svelte` delegate world construction to `GameWorld.svelte`.
 
@@ -73,10 +73,12 @@ This checklist is the working migration path from the current mixed Threlte/edit
 - [x] Remove unused/obsolete helpers and comments that refer to old architecture.
 - [x] Add an engine architecture audit script to CI.
 - [x] Add runtime smoke checks for each migrated level.
+- [x] Add all-level browser performance reporting coverage for every migrated level without weakening the Miranda strict certification target.
 
 ## Definition Of Done
 
 - All levels boot through one world lifecycle.
+- All migrated levels have reporting-only browser performance coverage, with strict certification separated from advisory reporting.
 - Runtime and editor consume the same actor/component schema.
 - Player spawning is a construction step, not a timed retry.
 - Terrain has one runtime interface.

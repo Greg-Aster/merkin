@@ -1,9 +1,9 @@
+import { resolveCollisionPolicy } from './collisionPolicy'
 import type {
   SceneDocument,
   SceneNode,
   SceneNodeCollisionData,
 } from './sceneDocumentTypes'
-import { resolveCollisionPolicy } from './collisionPolicy'
 import type {
   ActorDefinition,
   CollisionShape,
@@ -27,6 +27,19 @@ function getSpawn(scene: SceneDocument): Vec3 {
   }
 
   return position
+}
+
+function getSpawnRotation(scene: SceneDocument): Vec3 {
+  const rotation = scene.settings?.level?.spawn?.rotation
+  if (
+    !rotation ||
+    rotation.length !== 3 ||
+    !rotation.every(component => Number.isFinite(component))
+  ) {
+    return [0, 0, 0]
+  }
+
+  return rotation
 }
 
 function getActorKind(node: SceneNode): ActorDefinition['kind'] {
@@ -201,12 +214,6 @@ function toActor(
             falloff: node.gameplay.regionFalloff,
           }
         : undefined,
-    editor: {
-      legacyKind: node.kind,
-      locked: node.locked,
-      generation: node.generation,
-      collisionSource: collisionResult.source,
-    },
   }
 
   return {
@@ -225,6 +232,7 @@ export function adaptSceneDocumentToLevelDefinition(
     updatedAt: scene.updatedAt,
     spawn: {
       player: getSpawn(scene),
+      rotation: getSpawnRotation(scene),
     },
     settings: scene.settings as Record<string, unknown>,
     actors: scene.nodes.map(node => toActor(scene, node).actor),

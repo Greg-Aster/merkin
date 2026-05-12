@@ -37,6 +37,7 @@ type PhysicsBooleanField =
   | 'lockRotations'
   | 'lockTranslations'
 type CollisionNumericField = 'friction' | 'restitution' | 'triangleBudget'
+type CollisionStringField = 'colliderUrl'
 type CollisionBooleanField = 'sensor'
 type LightNumericField = 'intensity' | 'distance' | 'decay'
 type GameplayField =
@@ -145,6 +146,10 @@ export let onCollisionSizeChange: (index: number, value: string) => void =
   () => {}
 export let onCollisionNumericChange: (
   field: CollisionNumericField,
+  value: string,
+) => void = () => {}
+export let onCollisionStringChange: (
+  field: CollisionStringField,
   value: string,
 ) => void = () => {}
 export let onCollisionBooleanChange: (
@@ -420,6 +425,8 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
           {/if}
           <button on:click={onRecalculateCollision}>Match Collider To Visual</button>
         {:else if effectiveCollision}
+          <div class="tuple-label">Collider Asset URL</div>
+          <input class="text-input" value={effectiveCollision.colliderUrl ?? ''} placeholder="/generated/collision/asset.collider.glb" on:change={(e) => onCollisionStringChange('colliderUrl', (e.currentTarget as HTMLInputElement).value)} />
           <div class="tuple-row">
             <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.friction ?? 0.7} on:change={(e) => onCollisionNumericChange('friction', (e.currentTarget as HTMLInputElement).value)} />
             <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.restitution ?? 0} on:change={(e) => onCollisionNumericChange('restitution', (e.currentTarget as HTMLInputElement).value)} />
@@ -666,5 +673,10 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
         {/each}
       </select>
     </div>
+  </div>
+{:else}
+  <div class="editor-section">
+    <div class="label">Inspector</div>
+    <div class="save-message">Select an object in the viewport or outliner to inspect it here.</div>
   </div>
 {/if}

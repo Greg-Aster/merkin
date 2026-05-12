@@ -10,6 +10,7 @@ const cacheUrlKey = '__gltfCacheUrl'
 const cacheDisposedKey = '__gltfCacheDisposed'
 const sharedMaterialsKey = '__gltfSharedMaterials'
 const maxConcurrentGltfLoads = 2
+const unknownAssetSizeBytes = 8 * 1024 * 1024
 
 interface GltfCacheEntry {
   promise: Promise<GLTF>
@@ -17,10 +18,18 @@ interface GltfCacheEntry {
   refCount: number
   evictWhenUnused: boolean
   lastUsedAt: number
+  sizeBytes: number
+  retention: 'required' | 'streamed' | 'prefetch'
 }
 
 export interface CloneCachedGltfSceneOptions {
   cloneMaterials?: boolean
+}
+
+export interface LoadCachedGltfOptions {
+  sizeBytes?: number
+  retention?: 'required' | 'streamed' | 'prefetch'
+  evictWhenUnused?: boolean
 }
 
 const gltfCache = new Map<string, GltfCacheEntry>()
@@ -130,6 +139,57 @@ function normalizeGltfUrl(url: string) {
   return url.trim()
 }
 
+function normalizeAssetSizeBytes(sizeBytes: number | undefined) {
+  return Number.isFinite(sizeBytes) && Number(sizeBytes) > 0
+    ? Number(sizeBytes)
+    : unknownAssetSizeBytes
+}
+
+function getRetentionRank(retention: GltfCacheEntry['retention']) {
+  switch (retention) {
+    case 'prefetch':
+      return 0
+    case 'streamed':
+      return 1
+    case 'required':
+      return 2
+    default:
+      return 1
+  }
+}
+
+function getRuntimeMemoryPressureLevel() {
+  if (typeof navigator === 'undefined') return 'normal'
+  const connection = (navigator as any).connection
+  const memory = (navigator as any).deviceMemory
+  const cores = navigator.hardwareConcurrency
+
+  if (connection?.saveData) return 'high'
+  if (typeof memory === 'number' && memory <= 4) return 'high'
+  if (typeof cores === 'number' && cores > 0 && cores <= 4) return 'high'
+  if (['slow-2g', '2g', '3g'].includes(connection?.effectiveType)) return 'high'
+  if (typeof memory === 'number' && memory <= 8) return 'medium'
+  return 'normal'
+}
+
+function updateEntryPolicy(
+  entry: GltfCacheEntry,
+  options: LoadCachedGltfOptions,
+) {
+  entry.sizeBytes = Math.max(
+    entry.sizeBytes,
+    normalizeAssetSizeBytes(options.sizeBytes),
+  )
+  const nextRetention = options.retention ?? entry.retention
+  if (getRetentionRank(nextRetention) > getRetentionRank(entry.retention)) {
+    entry.retention = nextRetention
+  }
+  entry.evictWhenUnused =
+    nextRetention === 'required'
+      ? false
+      : entry.evictWhenUnused || Boolean(options.evictWhenUnused)
+}
+
 function pumpGltfLoadQueue() {
   while (
     activeGltfLoads < maxConcurrentGltfLoads &&
@@ -156,19 +216,27 @@ function loadGltfWithBudget(url: string) {
   })
 }
 
-export function loadCachedGltf(url: string) {
+export function loadCachedGltf(
+  url: string,
+  options: LoadCachedGltfOptions = {},
+) {
   const normalizedUrl = normalizeGltfUrl(url)
   if (!normalizedUrl) return Promise.reject(new Error('Missing GLTF URL.'))
 
   const cached = gltfCache.get(normalizedUrl)
-  if (cached) return cached.promise
+  if (cached) {
+    updateEntryPolicy(cached, options)
+    return cached.promise
+  }
 
   const entry: GltfCacheEntry = {
     promise: Promise.resolve(null as unknown as GLTF),
     gltf: null,
     refCount: 0,
-    evictWhenUnused: false,
+    evictWhenUnused: Boolean(options.evictWhenUnused),
     lastUsedAt: nowMs(),
+    sizeBytes: normalizeAssetSizeBytes(options.sizeBytes),
+    retention: options.retention ?? 'streamed',
   }
 
   entry.promise = loadGltfWithBudget(normalizedUrl)
@@ -239,16 +307,36 @@ export function disposeCachedGltfScene(root: THREE.Object3D | null) {
   releaseEntryIfUnused(url, entry)
 }
 
-export function evictUnusedGltfCacheEntries(options: {
-  maxUnreferencedEntries?: number
-  maxUnusedAgeMs?: number
-} = {}) {
-  const maxUnreferencedEntries = options.maxUnreferencedEntries ?? 4
-  const maxUnusedAgeMs = options.maxUnusedAgeMs ?? 8_000
+export function evictUnusedGltfCacheEntries(
+  options: {
+    maxUnreferencedEntries?: number
+    maxUnusedAgeMs?: number
+    maxUnreferencedBytes?: number
+    memoryPressure?: 'normal' | 'medium' | 'high'
+  } = {},
+) {
+  const pressure = options.memoryPressure ?? getRuntimeMemoryPressureLevel()
+  const maxUnreferencedEntries =
+    options.maxUnreferencedEntries ??
+    (pressure === 'high' ? 1 : pressure === 'medium' ? 2 : 4)
+  const maxUnusedAgeMs =
+    options.maxUnusedAgeMs ??
+    (pressure === 'high' ? 2_000 : pressure === 'medium' ? 5_000 : 8_000)
+  const maxUnreferencedBytes =
+    options.maxUnreferencedBytes ??
+    (pressure === 'high'
+      ? 32 * 1024 * 1024
+      : pressure === 'medium'
+        ? 64 * 1024 * 1024
+        : 128 * 1024 * 1024)
   const currentTime = nowMs()
   const unusedEntries = Array.from(gltfCache.entries())
     .filter(([, entry]) => entry.gltf && entry.refCount === 0)
-    .sort(([, left], [, right]) => left.lastUsedAt - right.lastUsedAt)
+    .sort(
+      ([, left], [, right]) =>
+        getRetentionRank(left.retention) - getRetentionRank(right.retention) ||
+        left.lastUsedAt - right.lastUsedAt,
+    )
   const overBudgetCount = Math.max(
     0,
     unusedEntries.length - Math.max(0, maxUnreferencedEntries),
@@ -256,10 +344,27 @@ export function evictUnusedGltfCacheEntries(options: {
   const overBudgetUrls = new Set(
     unusedEntries.slice(0, overBudgetCount).map(([url]) => url),
   )
+  let unusedBytes = unusedEntries.reduce(
+    (sum, [, entry]) => sum + entry.sizeBytes,
+    0,
+  )
+  const overByteBudgetUrls = new Set<string>()
+  for (const [url, entry] of unusedEntries) {
+    if (unusedBytes <= maxUnreferencedBytes) break
+    overByteBudgetUrls.add(url)
+    unusedBytes -= entry.sizeBytes
+  }
 
   for (const [url, entry] of unusedEntries) {
     const stale = currentTime - entry.lastUsedAt >= maxUnusedAgeMs
-    if (!stale && !overBudgetUrls.has(url)) continue
+    if (
+      !stale &&
+      !overBudgetUrls.has(url) &&
+      !overByteBudgetUrls.has(url) &&
+      !(pressure === 'high' && entry.retention === 'prefetch')
+    ) {
+      continue
+    }
 
     entry.evictWhenUnused = true
     releaseEntryIfUnused(url, entry)
@@ -282,17 +387,36 @@ export function getGltfCacheStats() {
       loaded: Boolean(entry.gltf),
       refCount: entry.refCount,
       evictWhenUnused: entry.evictWhenUnused,
+      retention: entry.retention,
+      sizeBytes: entry.sizeBytes,
     }),
+  )
+  const loadedEntries = retainedEntries.filter(entry => entry.loaded)
+  const pendingEntries = retainedEntries.filter(entry => !entry.loaded)
+  const referencedEntries = retainedEntries.filter(entry => entry.refCount > 0)
+  const unreferencedEntries = retainedEntries.filter(
+    entry => entry.refCount === 0,
   )
 
   return {
     entries: gltfCache.size,
-    loadedEntries: retainedEntries.filter(entry => entry.loaded).length,
-    pendingEntries: retainedEntries.filter(entry => !entry.loaded).length,
-    referencedEntries: retainedEntries.filter(entry => entry.refCount > 0)
-      .length,
-    unreferencedEntries: retainedEntries.filter(entry => entry.refCount === 0)
-      .length,
+    loadedEntries: loadedEntries.length,
+    pendingEntries: pendingEntries.length,
+    referencedEntries: referencedEntries.length,
+    unreferencedEntries: unreferencedEntries.length,
+    loadedBytes: loadedEntries.reduce((sum, entry) => sum + entry.sizeBytes, 0),
+    pendingBytes: pendingEntries.reduce(
+      (sum, entry) => sum + entry.sizeBytes,
+      0,
+    ),
+    referencedBytes: referencedEntries.reduce(
+      (sum, entry) => sum + entry.sizeBytes,
+      0,
+    ),
+    unreferencedBytes: unreferencedEntries.reduce(
+      (sum, entry) => sum + entry.sizeBytes,
+      0,
+    ),
     retainedEntries,
   }
 }

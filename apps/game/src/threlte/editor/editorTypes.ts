@@ -46,11 +46,14 @@ export type EditorTransformAxis = 'all' | 'x' | 'y' | 'z'
 export type EditorInteractionMode = 'objects' | 'terrain'
 export type EditorTerrainBrushMode = 'raise' | 'smooth' | 'flatten'
 export type EditorViewportLightingMode = 'authored' | 'workbench'
+export type EditorViewportShadingMode = 'rendered' | 'solid' | 'wireframe'
 
 export interface EditorState {
   enabled: boolean
   panelOpen: boolean
   propertiesShelfOpen: boolean
+  outlinerOpen: boolean
+  controlsOverlayOpen: boolean
   currentLevelId: string | null
   selectedNodeId: string | null
   selectedNodeIds: string[]
@@ -58,6 +61,7 @@ export interface EditorState {
   selectionAnchorId: string | null
   interactionMode: EditorInteractionMode
   viewportLightingMode: EditorViewportLightingMode
+  viewportShadingMode: EditorViewportShadingMode
   transformMode: EditorTransformMode
   transformSpace: EditorSpace
   transformAxis: EditorTransformAxis

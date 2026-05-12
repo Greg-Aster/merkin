@@ -41,6 +41,7 @@ export let url: string
 export let levelId: string | null = null
 export let runtimeCulling = true
 export let materialOverride: SceneMaterialData | null = null
+export let cloneMaterials = false
 
 const { camera } = useThrelte()
 let scene: THREE.Group | null = null
@@ -55,6 +56,7 @@ let editorMaterialOverride = null
 const materialOverrideState = createObjectMaterialOverrideState()
 const textureLoader = new THREE.TextureLoader()
 let textureLoadToken = 0
+let lastOverrideTextureKey = ''
 let overrideTextures: {
   map: THREE.Texture | null
   normalMap: THREE.Texture | null
@@ -192,6 +194,17 @@ function snapshotSceneMeshes(root: THREE.Group) {
   }
 }
 
+function disableImportedRuntimeLights(root: THREE.Group) {
+  if (inEditorContext) return
+
+  root.traverse(child => {
+    const light = child as THREE.Light
+    if (!light.isLight) return
+    light.visible = false
+    light.intensity = 0
+  })
+}
+
 function getScaledBoundingRadius() {
   if (!scene) return Math.max(1, propBoundingSphere.radius)
 
@@ -313,13 +326,24 @@ async function syncOverrideTextures() {
   applyOverrideTexturesToScene()
 }
 
+function getOverrideTextureKey() {
+  return [
+    editorMaterialOverride?.mapUrl ?? '',
+    editorMaterialOverride?.normalMapUrl ?? '',
+    editorMaterialOverride?.roughnessMapUrl ?? '',
+    editorMaterialOverride?.metalnessMapUrl ?? '',
+    editorMaterialOverride?.emissiveMapUrl ?? '',
+    editorMaterialOverride?.alphaMapUrl ?? '',
+  ].join('|')
+}
+
 async function loadSceneFromUrl(nextUrl: string) {
   const token = ++activeLoadToken
   const startedAt = performance.now()
 
   try {
     const nextScene = await cloneCachedGltfScene(nextUrl, {
-      cloneMaterials: inEditorContext,
+      cloneMaterials: inEditorContext || cloneMaterials,
     })
     recordSystemTiming('asset.gltf.load', performance.now() - startedAt)
     if (disposed || token !== activeLoadToken) {
@@ -337,6 +361,7 @@ async function loadSceneFromUrl(nextUrl: string) {
       child.frustumCulled = !inEditorContext
     })
 
+    disableImportedRuntimeLights(scene)
     snapshotSceneMeshes(scene)
     applyRuntimePropBudget()
     applyRuntimeMaterialStyle()
@@ -348,11 +373,7 @@ async function loadSceneFromUrl(nextUrl: string) {
         materialOverrideState,
       )
     } else {
-      syncObjectMaterialOverride(
-        scene,
-        materialOverride,
-        materialOverrideState,
-      )
+      syncObjectMaterialOverride(scene, materialOverride, materialOverrideState)
     }
     applyOverrideTexturesToScene()
 
@@ -437,7 +458,13 @@ $: if (scene) {
   applyRuntimeMaterialStyle()
 }
 
-$: void syncOverrideTextures()
+$: {
+  const overrideTextureKey = getOverrideTextureKey()
+  if (overrideTextureKey !== lastOverrideTextureKey) {
+    lastOverrideTextureKey = overrideTextureKey
+    void syncOverrideTextures()
+  }
+}
 
 useTask(delta => {
   const activeCamera = getActiveCamera()

@@ -335,12 +335,12 @@ Runtime/editor boundary scan started on 2026-04-30:
 - Added `src/threlte/engine/sceneDocumentTypes.ts` as the neutral scene document contract for runtime and editor.
 - `editor/editorTypes.ts` now re-exports scene document data contracts and keeps editor UI/session state local.
 - Runtime and runtime-adjacent files now import scene document/material/collision body types from `engine/sceneDocumentTypes` instead of `editor/editorTypes`.
-- `runtimeLevelSettings.ts` now treats `terrainSculpt` as shared level settings, matching the editor terrain sculpt save path.
-- Added `src/threlte/engine/packagedSceneDocuments.ts` as the single packaged scene discovery contract. Runtime loading and registry validation no longer duplicate direct `editor/scenes` glob ownership.
+- Runtime level setting normalization now happens in the cook pipeline; the unused runtime `runtimeLevelSettings.ts` compatibility module was removed.
+- The previous runtime `packagedSceneDocuments.ts` fallback was removed. Gameplay now requires cooked runtime scene manifests; packaged scene JSON remains editor authoring/default data only.
 - Removed the runtime-only `runtimeSceneDocumentUpgrade.ts` shim. Its current `sci-fi-room` planter transform was baked into the source scene document so runtime loading no longer patches one level at activation time.
 - Added neutral `SceneDocument`, `SceneSettings`, `SceneNode`, and related shared scene contract aliases. Runtime modules now use the neutral names; editor aliases remain for editor-specific code until the editor architecture wave.
 - Added `src/threlte/engine/runtimeSceneManifest.ts` and `scripts/lib/runtimeSceneManifest.mjs` for cooked runtime scene manifests. `cook:runtime-assets` now writes `apps/megameal/public/generated/runtime-game-assets/scenes/*.runtime-scene.json`, runtime loading prefers those manifests, and `audit:engine` fails deployed levels without cooked runtime scenes.
-- Remaining boundary work: remove the packaged editor-scene fallback after cooked manifests are fully required in all dev/deploy paths, then eventually rename the underlying shared schema declarations away from `Editor*` names.
+- Remaining boundary work: eventually rename the underlying shared schema declarations away from `Editor*` names.
 
 Universal collision workflow pass on 2026-04-30:
 
@@ -417,7 +417,7 @@ Runtime engine source batch on 2026-05-01:
 - `actorHierarchy.ts` now delegates actor world-matrix resolution to the shared hierarchy transform resolver instead of carrying duplicate matrix/cache logic.
 - `levelAssetPreloader.ts` no longer imports the performance feature store directly; timing is injected by `SceneDocumentLevel.svelte`, keeping the engine layer neutral.
 - `runtimeWorldPartition.ts` now validates fetched partition manifests for schema version, level id, cell sizing, actor arrays, cell shape, and resident/streamable overlap before runtime streaming uses them.
-- Import scan found no engine dependency on editor modules except `packagedSceneDocuments.ts`, which remains the deliberate packaged-scene fallback adapter until cooked runtime scene manifests fully replace that path.
+- Import scan found no engine dependency on editor modules; the packaged-scene runtime fallback adapter has been removed and cooked runtime scene manifests are the gameplay path.
 
 Runtime levels source batch on 2026-05-01:
 

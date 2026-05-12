@@ -75,7 +75,8 @@ export const qualityLevelStore: Writable<string> = writable(
 
 if (typeof window !== 'undefined') {
   window.addEventListener('optimizationLevelChanged', event => {
-    const { qualitySettings, level } = (event as OptimizationLevelChangedEvent).detail
+    const { qualitySettings, level } = (event as OptimizationLevelChangedEvent)
+      .detail
     qualitySettingsStore.set(qualitySettings)
     qualityLevelStore.set(level)
   })

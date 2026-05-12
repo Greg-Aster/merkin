@@ -1,11 +1,13 @@
-import { mkdirSync, writeFileSync } from 'node:fs'
-import { join, relative } from 'node:path'
+import { copyFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { dirname, join, relative } from 'node:path'
 import {
   buildRuntimeAssetManifest,
+  createImpostorAtlasSvg,
   createRuntimeAssetCookContext,
   formatBytes,
   getRuntimeSceneBuildErrors,
   normalizePublicUrl,
+  resolvePublicPath,
   tierConfigs,
 } from './lib/runtimeAssetCookManifest.mjs'
 import { auditRuntimeAssetManifestObject } from './lib/runtimeAssetManifestAudit.mjs'
@@ -51,7 +53,13 @@ function printSummary(manifest) {
     `metadata coverage: source=${manifest.summary.metadataAssetCount} variants=${manifest.summary.variantMetadataCount}`,
   )
   console.log(
+    `import metadata: assets=${manifest.importValidation.report.metadataAssetCount} missing=${manifest.importValidation.report.missingImportMetadata} warnings=${manifest.importValidation.warnings.length}`,
+  )
+  console.log(
     `lod/impostor coverage: lod=${manifest.summary.lodAssetCount} impostors=${manifest.summary.impostorDescriptorCount}`,
+  )
+  console.log(
+    `impostor atlas entries: ${manifest.summary.impostorAtlasEntryCount ?? 0}`,
   )
   console.log(`render budget errors: ${assetAudit.failures.length}`)
   console.log(
@@ -84,9 +92,36 @@ function writeManifestOutputs(manifest) {
   }
 
   const { runtimeSceneManifests, ...assetManifest } = manifest
+  const previousManifestPath = join(
+    dirname(context.manifestPath),
+    'manifest.previous.json',
+  )
+  if (existsSync(context.manifestPath)) {
+    copyFileSync(context.manifestPath, previousManifestPath)
+    console.log(`wrote ${relative(context.repoRoot, previousManifestPath)}`)
+  }
   writeFileSync(context.manifestPath, `${JSON.stringify(assetManifest, null, 2)}\n`)
   console.log('')
   console.log(`wrote ${relative(context.repoRoot, context.manifestPath)}`)
+
+  if (manifest.impostorAtlas) {
+    const atlasManifestPath = resolvePublicPath(
+      context,
+      manifest.impostorAtlas.manifestUrl,
+    )
+    const atlasImagePath = resolvePublicPath(
+      context,
+      manifest.impostorAtlas.imageUrl,
+    )
+    mkdirSync(dirname(atlasManifestPath), { recursive: true })
+    writeFileSync(
+      atlasManifestPath,
+      `${JSON.stringify(manifest.impostorAtlas, null, 2)}\n`,
+    )
+    writeFileSync(atlasImagePath, `${createImpostorAtlasSvg(manifest.impostorAtlas)}\n`)
+    console.log(`wrote ${relative(context.repoRoot, atlasManifestPath)}`)
+    console.log(`wrote ${relative(context.repoRoot, atlasImagePath)}`)
+  }
 }
 
 const shouldCook = hasFlag('--cook')
@@ -138,6 +173,28 @@ if (shouldWriteManifest) {
 
 if (manifest.summary.missingSourceAssetCount > 0) {
   process.exitCode = 1
+}
+
+if (manifest.importValidation.failures.length > 0) {
+  console.error('')
+  console.error('runtime asset import manifest errors')
+  for (const error of manifest.importValidation.failures) {
+    console.error(`- ${error}`)
+  }
+  process.exitCode = 1
+}
+
+if (manifest.importValidation.warnings.length > 0) {
+  console.warn('')
+  console.warn('runtime asset import manifest warnings')
+  for (const warning of manifest.importValidation.warnings.slice(0, 20)) {
+    console.warn(`- ${warning}`)
+  }
+  if (manifest.importValidation.warnings.length > 20) {
+    console.warn(
+      `- ... ${manifest.importValidation.warnings.length - 20} additional warning(s)`,
+    )
+  }
 }
 
 const runtimeSceneBuildErrors = getRuntimeSceneBuildErrors(manifest)

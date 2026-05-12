@@ -1,5 +1,5 @@
-import type { SceneDocument } from './sceneDocumentTypes'
 import { adaptSceneDocumentToLevelDefinition } from './sceneAdapter'
+import type { SceneDocument } from './sceneDocumentTypes'
 import type { LevelDefinition } from './types'
 
 export interface SceneEngineData {

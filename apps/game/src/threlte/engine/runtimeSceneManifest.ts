@@ -23,8 +23,10 @@ export interface RuntimeSceneManifest {
     requiredRenderActorIds: string[]
     requiredAssetUrls: string[]
     runtimeAssetUrls: string[]
+    assetTierCap?: 'low' | 'medium' | 'high'
     terrainManifestUrl?: string
     ground?: Record<string, unknown>
+    renderProfile?: Record<string, unknown> | null
     worldPartitionUrl?: string
   }
 }
@@ -40,7 +42,23 @@ export function getRuntimeSceneManifestUrl(levelId: string) {
 
 function getTerrainManifestUrl(levelDefinition: LevelDefinition) {
   const terrain = (levelDefinition.settings as any)?.level?.collision?.terrain
-  return typeof terrain?.manifestUrl === 'string' ? terrain.manifestUrl : undefined
+  return typeof terrain?.manifestUrl === 'string'
+    ? terrain.manifestUrl
+    : undefined
+}
+
+function getRuntimeAssetTierCap(levelDefinition: LevelDefinition) {
+  const levelSettings = (levelDefinition.settings as any)?.level
+  const tier =
+    levelSettings?.runtimeAssets?.maxTier ??
+    levelSettings?.performance?.assetTierCap
+  return tier === 'low' || tier === 'medium' || tier === 'high'
+    ? tier
+    : undefined
+}
+
+function getRuntimeRenderProfile(levelDefinition: LevelDefinition) {
+  return (levelDefinition.settings as any)?.level?.renderProfile ?? null
 }
 
 export function createRuntimeSceneManifest(input: {
@@ -69,8 +87,10 @@ export function createRuntimeSceneManifest(input: {
       requiredRenderActorIds: input.buildReport.requiredRenderActorIds,
       requiredAssetUrls: input.buildReport.requiredAssetUrls,
       runtimeAssetUrls: input.buildReport.runtimeAssetUrls,
+      assetTierCap: getRuntimeAssetTierCap(input.levelDefinition),
       terrainManifestUrl: getTerrainManifestUrl(input.levelDefinition),
       ground: getRuntimeGroundContract(input.levelDefinition),
+      renderProfile: getRuntimeRenderProfile(input.levelDefinition),
       worldPartitionUrl: input.worldPartitionUrl,
     },
   }
@@ -107,6 +127,13 @@ function sameStringSet(left: string[], right: string[]) {
   return left.every(value => rightSet.has(value))
 }
 
+const forbiddenRuntimeActorFields = new Set([
+  'editor',
+  'legacyKind',
+  'locked',
+  'generation',
+])
+
 export function validateRuntimeSceneManifest(
   manifest: RuntimeSceneManifest,
   expectedLevelId = manifest.levelId,
@@ -133,6 +160,12 @@ export function validateRuntimeSceneManifest(
   if (!isFiniteVec3(manifest.levelDefinition.spawn?.player)) {
     errors.push('Level definition has no finite player spawn Vec3.')
   }
+  if (
+    manifest.levelDefinition.spawn?.rotation !== undefined &&
+    !isFiniteVec3(manifest.levelDefinition.spawn.rotation)
+  ) {
+    errors.push('Level definition player spawn rotation must be a finite Vec3.')
+  }
   if (buildReport.errors.length > 0) {
     errors.push(
       `Cooked level build report contains ${buildReport.errors.length} error(s).`,
@@ -148,7 +181,9 @@ export function validateRuntimeSceneManifest(
       'Runtime requiredRenderActorIds do not match build report requiredRenderActorIds.',
     )
   }
-  if (!sameStringSet(runtime.requiredAssetUrls, buildReport.requiredAssetUrls)) {
+  if (
+    !sameStringSet(runtime.requiredAssetUrls, buildReport.requiredAssetUrls)
+  ) {
     errors.push(
       'Runtime requiredAssetUrls do not match build report requiredAssetUrls.',
     )
@@ -160,6 +195,16 @@ export function validateRuntimeSceneManifest(
   }
   if (!runtime.ground) {
     errors.push('Runtime ground contract is missing.')
+  }
+
+  for (const actor of manifest.levelDefinition.actors) {
+    for (const field of forbiddenRuntimeActorFields) {
+      if (Object.hasOwn(actor, field)) {
+        errors.push(
+          `Runtime actor "${actor.id}" contains forbidden field "${field}".`,
+        )
+      }
+    }
   }
 
   for (const url of [

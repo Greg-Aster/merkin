@@ -9,6 +9,7 @@ export interface RuntimeCullingTraceEvent {
     | 'distance-budget'
     | 'hero-prop-budget'
     | 'required-asset-preload'
+    | 'asset-bundle-prefetch'
     | 'level-render-gate'
   culled: boolean
   detail?: Record<string, unknown>
@@ -61,7 +62,8 @@ export function traceRuntimeCulling(event: RuntimeCullingTraceEvent) {
 
   const entries = traceWindow.__megamealCullTrace ?? []
   entries.push(event)
-  if (entries.length > traceLimit) entries.splice(0, entries.length - traceLimit)
+  if (entries.length > traceLimit)
+    entries.splice(0, entries.length - traceLimit)
   traceWindow.__megamealCullTrace = entries
 
   console.info(

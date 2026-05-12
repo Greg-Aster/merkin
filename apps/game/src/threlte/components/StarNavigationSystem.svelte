@@ -93,7 +93,10 @@ function handleExternalStarDeselection(event: any) {
 
 function handleStarSelectionChange(star: StarData | null) {
   if (star) {
-    runtimeDebugLog('⭐ Star navigation system processing selection:', star.title)
+    runtimeDebugLog(
+      '⭐ Star navigation system processing selection:',
+      star.title,
+    )
 
     // Record analytics/metrics
     recordStarInteraction(star)

@@ -1,30 +1,238 @@
+import { getColliderUrlConventionError } from './collisionAuthoring'
 import {
   isCollisionChannel,
   resolveCollisionChannel,
 } from './collisionChannels'
 import { validateLevelGroundContract } from './groundContract'
 import { getLevelRuntimeContract } from './levelContracts'
+import { getRuntimePrefabAssetUrl } from './runtimePrefabRegistry'
 import type {
   ActorDefinition,
   LevelBuildReport,
   LevelDefinition,
+  PrimitiveGeometryKind,
   Vec3,
 } from './types'
+
+const MIN_COLLIDER_SIZE = 0.05
+const SPAWN_SUPPORT_XZ_PADDING = 0.15
+const SPAWN_SUPPORT_MAX_DROP = 2
+const SPAWN_SUPPORT_MAX_PENETRATION = 0.25
+const DEFAULT_MAX_WALKABLE_SLOPE_DEGREES = 50
+const DEG_TO_RAD = Math.PI / 180
 
 function isFiniteVec3(value: Vec3): boolean {
   return value.every(component => Number.isFinite(component))
 }
 
-function isVisualOnlyActor(actor: ActorDefinition): boolean {
-  return actor.editor?.collisionSource === 'none' && !actor.physics
+function isFiniteVec3Value(value: unknown): value is Vec3 {
+  return (
+    Array.isArray(value) &&
+    value.length === 3 &&
+    value.every(component => Number.isFinite(component))
+  )
 }
 
-function isDefaultCollisionActor(actor: ActorDefinition): boolean {
-  return actor.editor?.collisionSource === 'default'
+function clampColliderSize(value: number | undefined) {
+  const size = Math.abs(Number(value ?? 1))
+  return Number.isFinite(size) ? Math.max(MIN_COLLIDER_SIZE, size) : 1
+}
+
+function getPrimitiveVisualSize(input: {
+  geometry?: PrimitiveGeometryKind
+  args?: number[]
+  scale: Vec3
+}): Vec3 {
+  const { geometry, args = [], scale } = input
+
+  if (geometry === 'box') {
+    const [width = 1, height = 1, depth = 1] = args
+    return [
+      clampColliderSize(width * scale[0]),
+      clampColliderSize(height * scale[1]),
+      clampColliderSize(depth * scale[2]),
+    ]
+  }
+
+  if (geometry === 'cylinder') {
+    const [radiusTop = 0.5, radiusBottom = 0.5, height = 1] = args
+    const radius = Math.max(Math.abs(radiusTop), Math.abs(radiusBottom))
+    return [
+      clampColliderSize(radius * 2 * scale[0]),
+      clampColliderSize(height * scale[1]),
+      clampColliderSize(radius * 2 * scale[2]),
+    ]
+  }
+
+  if (
+    geometry &&
+    ['octahedron', 'tetrahedron', 'icosahedron', 'dodecahedron'].includes(
+      geometry,
+    )
+  ) {
+    const [radius = 0.5] = args
+    return [
+      clampColliderSize(radius * 2 * scale[0]),
+      clampColliderSize(radius * 2 * scale[1]),
+      clampColliderSize(radius * 2 * scale[2]),
+    ]
+  }
+
+  if (geometry === 'torus') {
+    const [radius = 0.5, tube = 0.2] = args
+    const outerRadius = Math.abs(radius) + Math.abs(tube)
+    return [
+      clampColliderSize(outerRadius * 2 * scale[0]),
+      clampColliderSize(Math.abs(tube) * 2 * scale[1]),
+      clampColliderSize(outerRadius * 2 * scale[2]),
+    ]
+  }
+
+  return [
+    clampColliderSize(scale[0]),
+    clampColliderSize(scale[1]),
+    clampColliderSize(scale[2]),
+  ]
 }
 
 function isWalkableActor(actor: ActorDefinition): boolean {
   return actor.physics?.collision.intent === 'walkable'
+}
+
+function getMaxWalkableSlopeRadians(level: LevelDefinition) {
+  const policy = (level.settings as any)?.level?.collision?.walkability
+  const degrees = Number(policy?.maxSlopeDegrees)
+  const resolvedDegrees = Number.isFinite(degrees)
+    ? degrees
+    : DEFAULT_MAX_WALKABLE_SLOPE_DEGREES
+  return Math.max(0, Math.min(89, resolvedDegrees)) * DEG_TO_RAD
+}
+
+function getWalkabilitySamples(level: LevelDefinition) {
+  const configuredSamples = (level.settings as any)?.level?.collision
+    ?.walkability?.samples
+  const samples = [
+    {
+      id: 'player-spawn',
+      position: level.spawn.player,
+    },
+  ]
+
+  if (Array.isArray(configuredSamples)) {
+    for (const [index, sample] of configuredSamples.entries()) {
+      if (!isFiniteVec3Value(sample?.position)) continue
+      samples.push({
+        id:
+          typeof sample.id === 'string' && sample.id.trim()
+            ? sample.id.trim()
+            : `sample-${index}`,
+        position: sample.position,
+      })
+    }
+  }
+
+  return samples
+}
+
+function getActorColliderWorldSize(actor: ActorDefinition): Vec3 {
+  const authoredSize = actor.physics?.collision.size
+  if (isFiniteVec3Value(authoredSize)) return authoredSize
+
+  return getPrimitiveVisualSize({
+    geometry: actor.render?.primitive?.geometry,
+    args: actor.render?.primitive?.args,
+    scale: actor.transform.scale,
+  })
+}
+
+function actorSupportsWalkabilitySample(
+  actor: ActorDefinition,
+  samplePosition: Vec3,
+) {
+  const collision = actor.physics?.collision
+  if (!collision || collision.sensor || collision.intent !== 'walkable') {
+    return false
+  }
+  if (collision.shape === 'trimesh') return false
+
+  const [x, y, z] = samplePosition
+  const [width, height, depth] = getActorColliderWorldSize(actor)
+  const [actorX, actorY, actorZ] = actor.transform.position
+  const halfWidth = width / 2 + SPAWN_SUPPORT_XZ_PADDING
+  const halfDepth = depth / 2 + SPAWN_SUPPORT_XZ_PADDING
+  const topY = actorY + height / 2
+
+  if (collision.shape === 'cylinder') {
+    const normalizedX = (x - actorX) / halfWidth
+    const normalizedZ = (z - actorZ) / halfDepth
+    if (normalizedX * normalizedX + normalizedZ * normalizedZ > 1) {
+      return false
+    }
+  } else if (
+    Math.abs(x - actorX) > halfWidth ||
+    Math.abs(z - actorZ) > halfDepth
+  ) {
+    return false
+  }
+
+  return (
+    y >= topY - SPAWN_SUPPORT_MAX_PENETRATION &&
+    y <= topY + SPAWN_SUPPORT_MAX_DROP
+  )
+}
+
+function getWalkabilityContractIssues(
+  level: LevelDefinition,
+  actors: ActorDefinition[],
+) {
+  const errors: string[] = []
+  const warnings: string[] = []
+  const walkableActors = actors.filter(isWalkableActor)
+  const maxSlopeRadians = getMaxWalkableSlopeRadians(level)
+
+  for (const actor of walkableActors) {
+    const [pitch, , roll] = actor.transform.rotation
+    const steepestAxis = Math.max(Math.abs(pitch), Math.abs(roll))
+    if (steepestAxis > maxSlopeRadians) {
+      errors.push(
+        `Walkable actor "${actor.id}" exceeds max slope ${Math.round(maxSlopeRadians / DEG_TO_RAD)}deg.`,
+      )
+    }
+  }
+
+  for (const sample of getWalkabilitySamples(level)) {
+    if (!isFiniteVec3Value(sample.position)) continue
+    const supportingActor = walkableActors.find(actor =>
+      actorSupportsWalkabilitySample(actor, sample.position),
+    )
+    if (!supportingActor) {
+      if (hasBakedTerrainRuntime(level)) {
+        warnings.push(
+          `Walkability sample "${sample.id}" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime.`,
+        )
+      } else {
+        errors.push(
+          `Walkability sample "${sample.id}" does not land on authored walkable collision.`,
+        )
+      }
+    }
+  }
+
+  return { errors, warnings }
+}
+
+function hasAuthoredColliderAsset(actor: ActorDefinition): boolean {
+  return String(actor.physics?.collision.colliderUrl ?? '').trim().length > 0
+}
+
+function getActorRuntimeAssetUrl(actor: ActorDefinition): string {
+  const assetUrl = actor.render?.asset?.url
+  if (assetUrl) return assetUrl
+
+  return getRuntimePrefabAssetUrl(
+    actor.render?.prefab?.type,
+    actor.render?.prefab?.variant,
+  )
 }
 
 function getRequiredActorError(actorId: string, reason: string) {
@@ -33,9 +241,12 @@ function getRequiredActorError(actorId: string, reason: string) {
 
 function hasBakedTerrainRuntime(level: LevelDefinition) {
   const terrain = (level.settings as any)?.level?.collision?.terrain
+  const ground = (level.settings as any)?.level?.ground
   return (
-    terrain?.source === 'baked-heightmap' &&
-    typeof terrain.manifestUrl === 'string'
+    (terrain?.source === 'baked-heightmap' &&
+      typeof terrain.manifestUrl === 'string') ||
+    (ground?.collisionSource === 'baked-heightfield' &&
+      typeof ground.terrainManifestUrl === 'string')
   )
 }
 
@@ -83,11 +294,38 @@ function uniqueStrings(values: string[]) {
   return [...new Set(values)]
 }
 
+function getCollisionDiagnostics(level: LevelDefinition) {
+  const actorsById = new Map(level.actors.map(actor => [actor.id, actor]))
+  const roleSettings = (level.settings as any)?.level?.collision?.roles
+  const visualOnlyActorIds = new Set<string>(
+    Array.isArray(roleSettings?.visualOnlyActorIds)
+      ? roleSettings.visualOnlyActorIds.filter(
+          (actorId: unknown): actorId is string => typeof actorId === 'string',
+        )
+      : [],
+  )
+
+  return {
+    authoredActorIds: level.actors
+      .filter(actor => Boolean(actor.physics))
+      .filter(actor => !visualOnlyActorIds.has(actor.id))
+      .map(actor => actor.id)
+      .sort(),
+    defaultActorIds: [] as string[],
+    visualOnlyActorIds: [...visualOnlyActorIds]
+      .filter(actorId => actorsById.has(actorId))
+      .sort(),
+  }
+}
+
 export function createLevelBuildReport(
   level: LevelDefinition,
 ): LevelBuildReport {
   const contract = getLevelRuntimeContract(level.id)
   const authoredRuntimeContract = getAuthoredRuntimeAssetContract(level)
+  const collisionDiagnostics = getCollisionDiagnostics(level)
+  const defaultCollisionActorIds = new Set(collisionDiagnostics.defaultActorIds)
+  const visualOnlyActorIds = new Set(collisionDiagnostics.visualOnlyActorIds)
   const requiredActorIds = uniqueStrings([
     ...contract.requiredActorIds,
     ...authoredRuntimeContract.requiredActorIds,
@@ -138,19 +376,20 @@ export function createLevelBuildReport(
       gameplayFireflyActorCount += 1
     }
 
-    if (actor.render?.asset?.url) {
-      runtimeAssetUrls.add(actor.render.asset.url)
+    const runtimeAssetUrl = getActorRuntimeAssetUrl(actor)
+    if (runtimeAssetUrl) {
+      runtimeAssetUrls.add(runtimeAssetUrl)
     }
 
     if (actor.kind === 'asset' && !actor.render?.asset?.url) {
       errors.push(`Asset actor "${actor.id}" is missing a runtime asset URL.`)
     }
 
-    if (isDefaultCollisionActor(actor)) {
+    if (defaultCollisionActorIds.has(actor.id)) {
       defaultCollisionActorCount += 1
     }
 
-    if (isVisualOnlyActor(actor)) {
+    if (visualOnlyActorIds.has(actor.id) || (!actor.physics && actor.render)) {
       visualOnlyActorCount += 1
     }
 
@@ -185,6 +424,18 @@ export function createLevelBuildReport(
           `Trimesh actor "${actor.id}" has no explicit triangle budget.`,
         )
       }
+      if (actor.kind === 'asset' && !hasAuthoredColliderAsset(actor)) {
+        errors.push(
+          `Trimesh asset actor "${actor.id}" must use collision.colliderUrl instead of deriving collision from the render mesh.`,
+        )
+      } else if (actor.kind === 'asset') {
+        const conventionError = getColliderUrlConventionError(
+          actor.physics.collision.colliderUrl,
+        )
+        if (conventionError) {
+          errors.push(`Trimesh asset actor "${actor.id}" ${conventionError}`)
+        }
+      }
     }
   }
 
@@ -214,10 +465,11 @@ export function createLevelBuildReport(
       errors.push(getRequiredActorError(actorId, 'is not visible'))
     }
 
-    if (!actor.render?.asset?.url) {
+    const runtimeAssetUrl = getActorRuntimeAssetUrl(actor)
+    if (!runtimeAssetUrl) {
       errors.push(getRequiredActorError(actorId, 'has no runtime asset URL'))
     } else {
-      requiredAssetUrls.add(actor.render.asset.url)
+      requiredAssetUrls.add(runtimeAssetUrl)
     }
   }
 
@@ -236,6 +488,10 @@ export function createLevelBuildReport(
       errors.push(getRequiredActorError(actorId, 'is not walkable collision'))
     }
   }
+
+  const walkabilityIssues = getWalkabilityContractIssues(level, level.actors)
+  errors.push(...walkabilityIssues.errors)
+  warnings.push(...walkabilityIssues.warnings)
 
   if (defaultCollisionActorCount > contract.maxDefaultCollisionActors) {
     errors.push(
@@ -290,6 +546,7 @@ export function createLevelBuildReport(
     missingRequiredActorIds,
     requiredAssetUrls: [...requiredAssetUrls].sort(),
     runtimeAssetUrls: [...runtimeAssetUrls].sort(),
+    collisionDiagnostics,
     errors,
     warnings,
   }

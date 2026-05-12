@@ -1,4 +1,5 @@
 <script lang="ts">
+import { requestEditorViewportFocus } from './editorStore'
 import type { SharedLevelEditorSettings } from './editorTypes'
 
 export let levelSettings: SharedLevelEditorSettings
@@ -8,6 +9,23 @@ export let updateLevelNumericSetting: (
 ) => void
 
 const AXIS_LABELS = ['X', 'Y', 'Z']
+const ROTATION_LABELS = ['Pitch', 'Yaw', 'Roll']
+
+function getSpawnPosition() {
+  const position = levelSettings.spawn?.position
+  if (!position || position.length !== 3 || !position.every(Number.isFinite)) {
+    return null
+  }
+  return position
+}
+
+function frameSpawn() {
+  const position = getSpawnPosition()
+  if (!position) return
+  requestEditorViewportFocus(position, 18)
+}
+
+$: spawnPosition = getSpawnPosition()
 </script>
 
 <div class="editor-section">
@@ -25,6 +43,34 @@ const AXIS_LABELS = ['X', 'Y', 'Z']
             step="0.1"
             value={levelSettings.spawn?.position?.[index] ?? ''}
             on:change={(event) => updateLevelNumericSetting(['spawn', 'position', index], (event.currentTarget as HTMLInputElement).value)}
+          />
+        </label>
+      {/each}
+    </div>
+    <div class="button-row compact editor-mt-sm">
+      <button
+        data-sfx-hover="hover-soft"
+        data-sfx-click="select"
+        on:click={frameSpawn}
+        disabled={!spawnPosition}
+      >
+        Frame Spawn
+      </button>
+    </div>
+  </div>
+
+  <div class="tuple-group">
+    <div class="tuple-label">Spawn View Rotation</div>
+    <div class="editor-field-grid editor-field-grid--triple">
+      {#each [0, 1, 2] as index}
+        <label class="editor-field">
+          <span class="editor-field-label">{ROTATION_LABELS[index]}</span>
+          <input
+            class="tuple-input"
+            type="number"
+            step="0.01"
+            value={levelSettings.spawn?.rotation?.[index] ?? 0}
+            on:change={(event) => updateLevelNumericSetting(['spawn', 'rotation', index], (event.currentTarget as HTMLInputElement).value)}
           />
         </label>
       {/each}
@@ -76,5 +122,5 @@ const AXIS_LABELS = ['X', 'Y', 'Z']
     </div>
   </div>
 
-  <div class="save-message">Spawn, movement, and player glow tuning live here now. Environment only controls the world mood.</div>
+  <div class="save-message">Spawn position, view rotation, movement, and player glow tuning live here now. Environment only controls the world mood.</div>
 </div>
