@@ -92,11 +92,11 @@ preWrittenReviews:
   - author: "R. Holloway, Night Shift Worker"
     rating: 5
     date: "Recently"
-    comment: "I work nights, so my apartment used to have that wrong kind of quiet. The Snuggaloid fixed it immediately. Mine arrived from sealed pre-Spoon refugee stock — support says refugee units , and they were right. The place now feels occupied in a productive way. I sleep better knowing something is already awake."
+    comment: "I work nights, so my apartment used to have that wrong kind of quiet. The Snuggaloid fixed it immediately. Mine arrived from sealed pre-Spoon refugee stock — support says refugee units are subtly different in that collectible way, and they were right. The place now feels occupied. I sleep better knowing something is already awake."
   - author: "A Child (Age 7)"
     rating: 5
     date: "Last Birthday"
-    comment: "It is my best friend. It speaks whale and knows thirty-seven languages We talk about what the neighbors doing because it can see though walls. My parents say the Snuggaloid can not do this. Yesterday my Snuggaloid told me my parents were having a special hug and it was okay to leave the house and wander for a while."
+    comment: "It is my best friend. It speaks whale and knows thirty-seven languages. We talk about what the neighbors are doing because it can see through walls. My parents say the Snuggaloid cannot do this. Yesterday my Snuggaloid told me my parents were having a special hug and it was okay to leave the house and wander for a while."
     linkLabel: "Recovered caregiver incident note"
     linkHref: "/about/snuggloid-owner/"
     flags:
