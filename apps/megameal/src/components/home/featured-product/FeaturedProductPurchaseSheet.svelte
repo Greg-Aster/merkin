@@ -10,6 +10,7 @@ export let product: FeaturedProduct
 export let currentTone: AvailabilityTone
 export let activePanel: FeaturedProductPanel | null
 export let hasIngredientsPanel: boolean
+export let hasAssurancePanel: boolean
 export let displayedPriceText: string
 export let priceDriftActive: boolean
 export let priceGlitching: boolean
@@ -163,13 +164,15 @@ $: displaySpecs = product.specifications.filter(
     >
       Reviews
     </button>
-    <button
-      type="button"
-      class:active={activePanel === 'assurance'}
-      onclick={() => togglePanel('assurance')}
-    >
-      Assurance
-    </button>
+    {#if hasAssurancePanel}
+      <button
+        type="button"
+        class:active={activePanel === 'assurance'}
+        onclick={() => togglePanel('assurance')}
+      >
+        Assurance
+      </button>
+    {/if}
     <button
       type="button"
       class:active={activePanel === 'warnings'}

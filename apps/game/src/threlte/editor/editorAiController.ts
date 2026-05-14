@@ -510,7 +510,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
       await deps.refreshGeneratedAssetLibrary(payload.assetUrl)
 
       if (options?.addToScene) {
-        createGeneratedAssetNode(deps, payload.assetUrl, sourceName)
+        await createGeneratedAssetNode(deps, payload.assetUrl, sourceName)
       }
     } catch (error) {
       console.error('Hunyuan generation failed:', error)

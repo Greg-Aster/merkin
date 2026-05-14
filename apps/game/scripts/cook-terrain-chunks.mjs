@@ -6,6 +6,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { dirname, join } from 'node:path'
 import { inflateSync } from 'node:zlib'
 import {
@@ -40,6 +41,79 @@ function writeJson(path, value) {
   const tempPath = `${path}.tmp`
   writeFileSync(tempPath, `${JSON.stringify(value, null, 2)}\n`)
   renameSync(tempPath, path)
+}
+
+function fingerprintFile(path) {
+  return {
+    algorithm: 'sha256',
+    value: createHash('sha256').update(readFileSync(path)).digest('hex'),
+  }
+}
+
+function normalizePublicUrl(value) {
+  return typeof value === 'string' && value.startsWith('/') ? value : ''
+}
+
+function resolvePublicPath(publicUrl) {
+  const normalizedUrl = normalizePublicUrl(publicUrl)
+  if (!normalizedUrl) return ''
+  const fullPath = join(publicRoot, normalizedUrl.replace(/^\/+/, ''))
+  return fullPath.startsWith(publicRoot) ? fullPath : ''
+}
+
+function fingerprintPublicAsset(publicUrl) {
+  const path = resolvePublicPath(publicUrl)
+  if (!path || !existsSync(path)) return null
+  return fingerprintFile(path)
+}
+
+function uniqueStrings(values) {
+  return [...new Set(values.filter(value => typeof value === 'string' && value))]
+}
+
+function resolveTerrainSourceAssetUrls(manifest, heightConfig) {
+  return uniqueStrings([
+    ...(Array.isArray(heightConfig.sourceAssetUrls)
+      ? heightConfig.sourceAssetUrls
+      : []),
+    heightConfig.sourceAssetUrl,
+    manifest.assets?.environment,
+  ].map(normalizePublicUrl))
+}
+
+function buildTerrainSourceContract({ manifest, heightConfig, heightmapUrl, bounds }) {
+  const sourceAssetUrls = resolveTerrainSourceAssetUrls(manifest, heightConfig)
+  const sourceAssetFingerprints = sourceAssetUrls
+    .map(url => ({
+      url,
+      fingerprint: fingerprintPublicAsset(url),
+    }))
+    .filter(entry => entry.fingerprint)
+  const heightmapFingerprint = fingerprintPublicAsset(heightmapUrl)
+  const fingerprintedSourceUrl = sourceAssetFingerprints[0]?.url
+  const sourceAssetUrl = fingerprintedSourceUrl || heightmapUrl
+  const sourceAssetFingerprint =
+    sourceAssetFingerprints.find(entry => entry.url === sourceAssetUrl)
+      ?.fingerprint ?? heightmapFingerprint
+
+  return {
+    schemaVersion: 1,
+    terrainSourceType: sourceAssetUrls.length > 0
+      ? 'heightfield-terrain'
+      : 'heightfield-procedural',
+    sourceAssetUrl,
+    sourceAssetUrls: uniqueStrings([sourceAssetUrl, ...sourceAssetUrls]),
+    ...(sourceAssetUrls.length > 0 ? { authoredSourceAssetUrls: sourceAssetUrls } : {}),
+    ...(sourceAssetFingerprint ? { sourceAssetFingerprint } : {}),
+    ...(sourceAssetFingerprints.length > 0
+      ? { sourceAssetFingerprints }
+      : {}),
+    heightmapUrl,
+    ...(heightmapFingerprint ? { heightmapFingerprint } : {}),
+    sourceCoordinateSystem: 'three-y-up-xz-ground',
+    sourceBounds: bounds,
+    renderBakeMode: 'heightfield-chunk-mesh',
+  }
 }
 
 function parsePositiveInt(value, fallback) {
@@ -530,7 +604,7 @@ function writeGlb(path, mesh, material) {
   )
 }
 
-function updateManifest(manifest, { level, grid, lods, chunksPath, bounds }) {
+function updateManifest(manifest, { level, grid, lods, chunksPath, bounds, sourceContract }) {
   const width = bounds.max[0] - bounds.min[0]
   const material = normalizeTerrainChunkMaterial(
     manifest.visualChunks?.material,
@@ -552,6 +626,7 @@ function updateManifest(manifest, { level, grid, lods, chunksPath, bounds }) {
       generatedAt: new Date().toISOString(),
       generatedBy: 'cook-terrain-chunks',
       chunkCount,
+      sourceContract,
       material: {
         name: material.name,
         baseColorFactor: material.baseColorFactor,
@@ -628,6 +703,12 @@ const nextManifest = updateManifest(manifest, {
   lods,
   chunksPath: publicChunksPath,
   bounds,
+  sourceContract: buildTerrainSourceContract({
+    manifest,
+    heightConfig,
+    heightmapUrl: manifest.assets.heightmap,
+    bounds,
+  }),
 })
 
 if (!dryRun) {

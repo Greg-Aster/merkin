@@ -1,8 +1,16 @@
 <script lang="ts">
 import type { CollisionChannel, CollisionIntent } from '../engine/types'
 import EditorAssetPreview from './EditorAssetPreview.svelte'
-import { resolveNodeCollision } from './editorCollisionDefaults'
-import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
+import {
+  describeNodeCollisionSource,
+  resolveNodeCollision,
+} from './editorCollisionDefaults'
+import type {
+  EditorMaterialData,
+  EditorNodeCollisionData,
+  EditorSceneNode,
+  EditorSceneSettings,
+} from './editorTypes'
 
 type TextureField =
   | 'mapUrl'
@@ -18,11 +26,20 @@ type TextureBrowserItem = {
   isDirectory: boolean
 }
 
+type AssetBrowserItem = {
+  name: string
+  path: string
+  isDirectory: boolean
+}
+
 type GeneratedVariantItem = {
   name: string
   path: string
   url: string
+  sourceLabel?: string
+  isOriginalSource?: boolean
 }
+type CollisionShape = EditorNodeCollisionData['shape']
 
 type LightNumericField = 'intensity' | 'distance' | 'decay'
 type GameplayTextField =
@@ -61,11 +78,24 @@ type GameplayBooleanField = 'wanderEnabled'
 
 export let selectedNode: EditorSceneNode | null = null
 export let selectedNodes: EditorSceneNode[] = []
+export let sceneSettings: EditorSceneSettings | null = null
+export let sceneObjectCount = 0
+export let sceneAssetNodeCount = 0
+export let sceneColliderCount = 0
 export let parentCandidates: EditorSceneNode[] = []
 export let selectedNodeMaterial: EditorMaterialData = {}
 export let selectedNodePreviewAssetUrl = ''
 export let selectedGeneratedVariantUrl = ''
 export let styleDescriptor = ''
+export let assetPickerTargetNodeId = ''
+export let assetBrowserPath = ''
+export let assetBrowserItems: AssetBrowserItem[] = []
+export let assetBrowserFilter = ''
+export let assetBrowserError = ''
+export let assetBrowserLoading = false
+export let selectedLibraryItemPath = ''
+export let generatedRootPath = 'apps/megameal/public/generated/hunyuan3d'
+export let modelsRootPath = 'apps/megameal/public/models'
 export let canUseStyleStudioSelection = false
 export let canUseAiMeshStudioSelection = false
 export let hunyuanBusy = false
@@ -86,11 +116,13 @@ export let colliderSize: [number, number, number] = [1, 1, 1]
 export let onNameChange: (value: string) => void = () => {}
 export let onOpenStyleTab: () => void = () => {}
 export let onOpenAiTab: () => void = () => {}
+export let onOpenCreateTab: () => void = () => {}
 export let onConvertSelectedToMesh: () => void = () => {}
 export let onReimagineSelected: () => void = () => {}
 export let onDuplicate: () => void = () => {}
 export let onDelete: () => void = () => {}
 export let onVisibleChange: (value: boolean) => void = () => {}
+export let onSelectableChange: (value: boolean) => void = () => {}
 export let onTransformChange: (
   field: 'position' | 'rotation' | 'scale',
   index: number,
@@ -100,6 +132,13 @@ export let onParentChange: (value: string) => void = () => {}
 export let onAssetUrlChange: (value: string) => void = () => {}
 export let onOpenGeneratedAssetPicker: () => void = () => {}
 export let onOpenImportedAssetPicker: () => void = () => {}
+export let onAssetLibraryRootSelect: (path: string) => void = () => {}
+export let onAssetBrowserUp: () => void = () => {}
+export let onAssetBrowserRefresh: () => void = () => {}
+export let onAssetBrowserFilterChange: (value: string) => void = () => {}
+export let onAssetLibraryItemSelect: (item: AssetBrowserItem) => void = () => {}
+export let onApplySelectedLibraryAsset: () => void = () => {}
+export let onCancelAssetPicker: () => void = () => {}
 export let onPrefabVariantChange: (value: string) => void = () => {}
 export let onPrimitiveGeometryChange: (value: string) => void = () => {}
 export let onPrimitiveArgChange: (index: number, value: string) => void =
@@ -141,8 +180,13 @@ export let onMaterialTextureChange: (field: 'mapUrl', value: string) => void =
 export let onOpenTexturePicker: (field: TextureField) => void = () => {}
 export let onResetMaterialOverrides: () => void = () => {}
 
-$: effectiveCollision = resolveNodeCollision(selectedNode)
+$: effectiveCollision = resolveNodeCollision(selectedNode, sceneSettings)
+$: collisionSourceStatus = describeNodeCollisionSource(
+  selectedNode,
+  sceneSettings,
+)
 export let onCollisionEnabledChange: (value: boolean) => void = () => {}
+export let onCollisionShapeChange: (value: CollisionShape) => void = () => {}
 export let onCollisionIntentChange: (value: CollisionIntent) => void = () => {}
 export let onCollisionChannelChange: (value: CollisionChannel) => void =
   () => {}
@@ -150,6 +194,13 @@ export let onColliderUrlChange: (value: string) => void = () => {}
 export let onPhysicsBodyTypeChange: (value: string) => void = () => {}
 export let onColliderSizeChange: (index: number, value: string) => void =
   () => {}
+export let onRecalculateCollision: () => void = () => {}
+export let onSetCollisionVisualOnly: () => void = () => {}
+export let onSetCollisionBlocker: () => void = () => {}
+export let onSetCollisionWalkable: () => void = () => {}
+export let onSetCollisionTrigger: () => void = () => {}
+export let onSetCollisionDetail: () => void = () => {}
+export let onBakeMeshCollider: () => void = () => {}
 export let onTextureBrowserUp: () => void = () => {}
 export let onTextureBrowserRefresh: () => void = () => {}
 export let onTextureBrowserOpenDirectory: (path: string) => void = () => {}
@@ -178,9 +229,15 @@ const collisionChannelOptions: Array<{
   { value: 'trigger', label: 'Trigger' },
   { value: 'detail', label: 'Detail' },
 ]
+const collisionShapeOptions: Array<{ value: CollisionShape; label: string }> = [
+  { value: 'cuboid', label: 'Box' },
+  { value: 'cylinder', label: 'Cylinder' },
+  { value: 'trimesh', label: 'Trimesh Asset' },
+]
 
 $: hasSingleSelection = !!selectedNode && selectedNodes.length <= 1
 $: hasMultiSelection = selectedNodes.length > 1
+$: selectedNodeType = selectedNode?.kind ?? 'scene'
 $: hasGeometryNode = !!(
   selectedNode?.asset ||
   selectedNode?.prefab ||
@@ -189,51 +246,230 @@ $: hasGeometryNode = !!(
 $: canConvertSelectedToMesh = !!(
   selectedNode?.primitive || selectedNode?.prefab
 )
+$: canBakeSelectedMeshCollider = !!selectedNode?.asset?.url
+$: selectedCollisionShape =
+  selectedNode?.asset || selectedNode?.prefab
+    ? 'trimesh'
+    : selectedNode?.collision?.shape ??
+      effectiveCollision?.shape ??
+      (hasGeometryNode ? 'trimesh' : 'cuboid')
+$: collisionShapeOptionsForSelection =
+  selectedNode?.asset || selectedNode?.prefab
+    ? [{ value: 'trimesh' as CollisionShape, label: 'Baked Trimesh' }]
+    : collisionShapeOptions
+$: collisionMode =
+  selectedNode?.renderPolicy?.runtimeStyle === 'skip' && effectiveCollision
+    ? 'proxy'
+    : effectiveCollision?.intent === 'walkable'
+      ? 'walkable'
+      : effectiveCollision?.intent === 'blocker'
+        ? 'blocker'
+        : effectiveCollision?.intent === 'trigger'
+          ? 'trigger'
+          : effectiveCollision?.intent === 'detailMesh'
+            ? 'detail'
+            : selectedNode?.visible === false
+              ? 'disabled'
+              : 'visualOnly'
+$: selectedSourceSummary = selectedNode?.asset?.url
+  ? selectedNode.asset.url
+  : selectedNode?.prefab
+    ? selectedNode.prefab.variant
+      ? `${selectedNode.prefab.type} / ${selectedNode.prefab.variant}`
+      : selectedNode.prefab.type
+    : selectedNode?.primitive
+      ? `${selectedNode.primitive.geometry} (${selectedNode.primitive.args.join(', ')})`
+      : 'scene-authored'
+$: selectedGameplaySummary = selectedNode?.gameplay
+  ? selectedNode.gameplay.title
+    ? `${selectedNode.gameplay.type}: ${selectedNode.gameplay.title}`
+    : selectedNode.gameplay.type
+  : 'none'
+$: filteredAssetBrowserItems = assetBrowserItems.filter(
+  item =>
+    !assetBrowserFilter.trim() ||
+    item.name.toLowerCase().includes(assetBrowserFilter.trim().toLowerCase()),
+)
+$: isSelectedGeneratedAsset = Boolean(
+  selectedNode?.asset?.url?.startsWith('/generated/'),
+)
+$: generatedVariantPreviewUrl =
+  selectedGeneratedVariantUrl || selectedNode?.asset?.url || ''
+$: selectedGeneratedVariantIndex = generatedVariantItems.findIndex(
+  item => item.url === generatedVariantPreviewUrl,
+)
+$: normalizedGeneratedVariantIndex =
+  selectedGeneratedVariantIndex >= 0 ? selectedGeneratedVariantIndex : 0
+$: selectedGeneratedVariantItem =
+  selectedGeneratedVariantIndex >= 0
+    ? generatedVariantItems[selectedGeneratedVariantIndex] ?? null
+    : null
+$: originalGeneratedVariantItem =
+  generatedVariantItems.find(item => item.isOriginalSource) ?? null
+$: generatedVariantCount = generatedVariantItems.filter(
+  item => !item.isOriginalSource,
+).length
+$: generatedVariantLabel =
+  selectedGeneratedVariantItem?.name?.replace(/\.(gltf|glb)$/i, '') ??
+  selectedNode?.name ??
+  'Variant'
+$: generatedVariantSourceLabel = selectedGeneratedVariantItem?.sourceLabel ?? ''
+$: isPreviewingCurrentGeneratedAsset =
+  Boolean(selectedNode?.asset?.url) &&
+  generatedVariantPreviewUrl === selectedNode?.asset?.url
+$: canApplyGeneratedVariant =
+  Boolean(generatedVariantPreviewUrl) && !isPreviewingCurrentGeneratedAsset
+$: canReturnToOriginalMesh = Boolean(
+  originalGeneratedVariantItem &&
+    selectedNode?.asset?.url &&
+    selectedNode.asset.url !== originalGeneratedVariantItem.url,
+)
+
+function selectGeneratedVariantAt(index: number) {
+  if (generatedVariantItems.length === 0) return
+  const wrappedIndex =
+    (index + generatedVariantItems.length) % generatedVariantItems.length
+  const item = generatedVariantItems[wrappedIndex]
+  if (item) {
+    onSelectGeneratedVariant(item.url)
+  }
+}
+
+function stepGeneratedVariant(offset: number) {
+  if (selectedGeneratedVariantIndex < 0) {
+    selectGeneratedVariantAt(offset > 0 ? 0 : generatedVariantItems.length - 1)
+    return
+  }
+  selectGeneratedVariantAt(selectedGeneratedVariantIndex + offset)
+}
 </script>
 
 {#if hasSingleSelection && selectedNode}
   <div class="editor-section compact-surface">
-    <div class="label">Selected Object</div>
+    <div class="label">Edit Selected Object</div>
+    <div class="editor-status-card">
+      <div class="editor-status-title">{selectedNode.name}</div>
+      <div class="save-message">{selectedNodeType} · {selectedSourceSummary}</div>
+      <div class="editor-chip-row">
+        <span class="editor-chip ready">transform editable</span>
+        <span class:ready={Boolean(effectiveCollision)} class:warn={!effectiveCollision} class="editor-chip">collision: {effectiveCollision ? collisionMode : 'none'}</span>
+        <span class:ready={Boolean(selectedNode.gameplay)} class="editor-chip">gameplay: {selectedNode.gameplay ? 'configured' : 'none'}</span>
+      </div>
+      <div class="save-message">Gameplay: {selectedGameplaySummary}</div>
+    </div>
+    <div class="save-message">Next: adjust transform, visibility, material, collision, or gameplay details below.</div>
+  </div>
+
+  <div class="editor-section compact-surface">
+    <div class="label">Details</div>
+    <div class="save-message">Selected {selectedNodeType}</div>
     <input class="text-input" value={selectedNode.name} data-sfx-focus="focus-soft" on:input={(e) => onNameChange((e.currentTarget as HTMLInputElement).value)} />
+    <div class="tuple-row editor-mt-sm">
+      <label class="checkbox"><input type="checkbox" checked={selectedNode.visible} data-sfx-click="soft" on:change={(e) => onVisibleChange((e.currentTarget as HTMLInputElement).checked)} /> Visible</label>
+      <label class="checkbox"><input type="checkbox" checked={!(selectedNode.locked ?? false)} data-sfx-click="soft" on:change={(e) => onSelectableChange((e.currentTarget as HTMLInputElement).checked)} /> Selectable</label>
+    </div>
     <div class="button-row compact editor-mt-sm">
-      <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenStyleTab} disabled={!canUseStyleStudioSelection}>Style</button>
-      <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenAiTab} disabled={!canUseAiMeshStudioSelection}>AI</button>
       <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onDuplicate}>Duplicate</button>
       <button class="danger" data-danger="true" data-sfx-hover="hover-emphasis" data-sfx-click="warning" on:click={onDelete}>Delete</button>
     </div>
-    {#if hasGeometryNode}
-      <div class="tuple-group editor-mt-sm">
-        <div class="tuple-label">Object Description</div>
-        <input class="text-input" value={styleDescriptor} data-sfx-focus="focus-soft" on:input={(e) => onStyleDescriptorChange((e.currentTarget as HTMLInputElement).value)} />
-      </div>
-      <div class="tuple-group">
-        <div class="tuple-label">Style Prompt</div>
-        <textarea
-          rows="3"
-          bind:value={hunyuanPrompt}
-          data-sfx-focus="focus-soft"
-          placeholder="Describe the new style, material, shape language, or mood for this object."
-        ></textarea>
-      </div>
-      <div class="button-row compact editor-mt-sm">
-        <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onConvertSelectedToMesh} disabled={!canConvertSelectedToMesh}>Convert To Mesh</button>
-        <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onReimagineSelected} disabled={!canUseAiMeshStudioSelection || hunyuanBusy}>
-          {hunyuanBusy ? 'Reimagining…' : 'Reimagine Selected'}
-        </button>
-      </div>
-    {/if}
-    <label class="checkbox editor-mt-sm"><input type="checkbox" checked={selectedNode.visible} data-sfx-click="soft" on:change={(e) => onVisibleChange((e.currentTarget as HTMLInputElement).checked)} /> Visible</label>
   </div>
 
   {#if selectedNodePreviewAssetUrl}
     <EditorAssetPreview
-      assetUrl={selectedGeneratedVariantUrl || selectedNodePreviewAssetUrl}
+      assetUrl={selectedNodePreviewAssetUrl}
       label="Selection Preview"
-      hint={selectedGeneratedVariantUrl && selectedGeneratedVariantUrl !== selectedNodePreviewAssetUrl
-        ? 'Previewing the highlighted variant. Apply it to replace the current mesh.'
-        : 'Live preview of the selected object mesh.'}
+      hint={selectedSourceSummary}
       height={170}
     />
+  {/if}
+
+  {#if isSelectedGeneratedAsset}
+    <div class="editor-section compact-surface generated-variant-browser">
+      <div class="variant-browser-header">
+        <div>
+          <div class="label">Generated Variants</div>
+          <div class="save-message">{generatedVariantCount} generated variant{generatedVariantCount === 1 ? '' : 's'}{originalGeneratedVariantItem ? ' plus original mesh' : ''}</div>
+        </div>
+        {#if generatedVariantItems.length > 0}
+          <div class="variant-browser-count">
+            {selectedGeneratedVariantIndex >= 0 ? normalizedGeneratedVariantIndex + 1 : 'current'} / {generatedVariantItems.length}
+          </div>
+        {/if}
+      </div>
+
+      {#if generatedVariantError}
+        <div class="save-message error-message">{generatedVariantError}</div>
+      {/if}
+
+      <div class="button-row compact editor-mt-sm">
+        <button
+          type="button"
+          data-sfx-hover="hover-emphasis"
+          data-sfx-click="confirm"
+          on:click={onReimagineSelected}
+          disabled={!canUseAiMeshStudioSelection || hunyuanBusy}
+        >
+          {hunyuanBusy ? 'Making Variant...' : 'Make New Variant'}
+        </button>
+        {#if canReturnToOriginalMesh && originalGeneratedVariantItem}
+          <button
+            type="button"
+            data-sfx-hover="hover-soft"
+            data-sfx-click="panel-back"
+            on:click={() => onApplyGeneratedVariant(originalGeneratedVariantItem.url)}
+          >
+            Return To Original Mesh
+          </button>
+        {/if}
+      </div>
+
+      {#if generatedVariantLoading}
+        <div class="save-message">Loading variants...</div>
+      {:else if generatedVariantItems.length === 0}
+        <div class="save-message">No related GLB variants found.</div>
+      {:else}
+        <EditorAssetPreview
+          assetUrl={generatedVariantPreviewUrl}
+          label={isPreviewingCurrentGeneratedAsset ? 'Current Mesh' : 'Variant Preview'}
+          hint={generatedVariantSourceLabel ? `${generatedVariantLabel} - ${generatedVariantSourceLabel}` : generatedVariantLabel}
+          height={230}
+        />
+
+        <div class="variant-browser-controls">
+          <button type="button" data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={() => stepGeneratedVariant(-1)}>Previous</button>
+          <button
+            type="button"
+            data-sfx-hover="hover-emphasis"
+            data-sfx-click="confirm"
+            on:click={() => onApplyGeneratedVariant(generatedVariantPreviewUrl)}
+            disabled={!canApplyGeneratedVariant}
+          >
+            Apply Variant
+          </button>
+          <button type="button" data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={() => stepGeneratedVariant(1)}>Next</button>
+        </div>
+
+        <div class="variant-strip" aria-label="Generated mesh variants">
+          {#each generatedVariantItems as item, index (item.path)}
+            <button
+              type="button"
+              class:active={generatedVariantPreviewUrl === item.url}
+              class:current={item.url === selectedNode.asset?.url}
+              data-sfx-hover="hover-soft"
+              data-sfx-click="select"
+              on:click={() => selectGeneratedVariantAt(index)}
+            >
+              <span>{item.name.replace(/\.(gltf|glb)$/i, '')}</span>
+              <span class="kind">{item.url === selectedNode.asset?.url ? 'current' : item.sourceLabel ?? 'variant'}</span>
+            </button>
+          {/each}
+        </div>
+
+        {#if !isPreviewingCurrentGeneratedAsset}
+          <button class="full" type="button" data-sfx-hover="hover-soft" data-sfx-click="panel-back" on:click={onResetGeneratedVariantPreview}>Return To Current Mesh</button>
+        {/if}
+      {/if}
+    </div>
   {/if}
 
   <div class="editor-section compact-surface">
@@ -255,10 +491,6 @@ $: canConvertSelectedToMesh = !!(
         </div>
       </div>
     {/each}
-  </div>
-
-  <div class="editor-section compact-surface">
-    <div class="label">Object</div>
     <div class="tuple-group">
       <div class="tuple-label">Parent</div>
       <select class="text-input" value={selectedNode.parentId ?? ''} data-sfx-focus="focus-soft" on:change={(e) => onParentChange((e.currentTarget as HTMLSelectElement).value)}>
@@ -268,16 +500,60 @@ $: canConvertSelectedToMesh = !!(
         {/each}
       </select>
     </div>
+  </div>
+
+  <div class="editor-section compact-surface">
+    <div class="label">Mesh Source</div>
     {#if selectedNode.asset}
-      <div class="tuple-group">
-        <div class="tuple-label">Asset URL</div>
-        <input class="text-input" value={selectedNode.asset.url} data-sfx-focus="focus-soft" on:input={(e) => onAssetUrlChange((e.currentTarget as HTMLInputElement).value)} />
+      <div class="editor-status-card">
+        <div class="editor-status-title">{selectedNode.asset.url.split('/').pop()}</div>
+        <div class="save-message path-label">{selectedNode.asset.url}</div>
       </div>
       <div class="button-row compact editor-mt-sm">
-        <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenGeneratedAssetPicker}>Select Generated</button>
+        <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenGeneratedAssetPicker}>Browse Generated</button>
         <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenImportedAssetPicker}>Browse Imported</button>
       </div>
-      <div class="save-message editor-mt-sm">Select Generated opens the current generated asset folder when possible so you can swap between sibling outputs quickly.</div>
+      <div class="tuple-group">
+        <details>
+          <summary class="tuple-label">Manual Asset URL</summary>
+          <input class="text-input editor-mt-sm" value={selectedNode.asset.url} data-sfx-focus="focus-soft" on:input={(e) => onAssetUrlChange((e.currentTarget as HTMLInputElement).value)} />
+        </details>
+      </div>
+      {#if assetPickerTargetNodeId === selectedNode.id}
+        <div class="editor-subsection editor-mt-sm">
+          <div class="tuple-label">Asset Browser</div>
+          <div class="button-row compact editor-mb-sm">
+            <button class:active={assetBrowserPath.startsWith(generatedRootPath)} data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={() => onAssetLibraryRootSelect(generatedRootPath)}>Generated Assets</button>
+            <button class:active={assetBrowserPath.startsWith(modelsRootPath)} data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={() => onAssetLibraryRootSelect(modelsRootPath)}>Imported Models</button>
+            <button data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onAssetBrowserUp}>Up</button>
+            <button data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onAssetBrowserRefresh}>Refresh</button>
+          </div>
+          <div class="save-message path-label">{assetBrowserPath}</div>
+          <div class="tuple-group editor-mb-sm">
+            <div class="tuple-label">Filter</div>
+            <input class="text-input" value={assetBrowserFilter} placeholder="Filter asset names" data-sfx-focus="focus-soft" on:input={(e) => onAssetBrowserFilterChange((e.currentTarget as HTMLInputElement).value)} />
+          </div>
+          {#if assetBrowserError}
+            <div class="save-message error-message">{assetBrowserError}</div>
+          {/if}
+          <div class="hierarchy-list asset-browser-list">
+            {#if assetBrowserLoading}
+              <div class="save-message">Loading assets…</div>
+            {:else}
+              {#each filteredAssetBrowserItems as item (item.path)}
+                <button class:active={selectedLibraryItemPath === item.path} data-sfx-hover="hover-soft" data-sfx-click={item.isDirectory ? 'soft' : 'select'} on:click={() => onAssetLibraryItemSelect(item)}>
+                  <span class="node-label">{item.isDirectory ? 'Folder' : 'Asset'} {item.name}</span>
+                  <span class="kind">{item.isDirectory ? 'dir' : 'asset'}</span>
+                </button>
+              {/each}
+            {/if}
+          </div>
+          <div class="button-row compact editor-mt-sm">
+            <button data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onApplySelectedLibraryAsset} disabled={!selectedLibraryItemPath}>Apply Selected Asset</button>
+            <button data-sfx-hover="hover-soft" data-sfx-click="panel-back" on:click={onCancelAssetPicker}>Cancel</button>
+          </div>
+        </div>
+      {/if}
     {:else if selectedNode.prefab}
       <div class="tuple-group">
         <div class="tuple-label">Prefab Type</div>
@@ -306,6 +582,10 @@ $: canConvertSelectedToMesh = !!(
       <div class="tuple-group">
         <div class="tuple-label">Style Descriptor</div>
         <input class="text-input" value={styleDescriptor} data-sfx-focus="focus-soft" on:input={(e) => onStyleDescriptorChange((e.currentTarget as HTMLInputElement).value)} />
+      </div>
+      <div class="button-row compact editor-mt-sm">
+        <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onConvertSelectedToMesh} disabled={!canConvertSelectedToMesh}>Convert To Mesh</button>
+        <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenAiTab} disabled={!canUseAiMeshStudioSelection || hunyuanBusy}>Open AI Mesh Studio</button>
       </div>
     {/if}
   </div>
@@ -493,60 +773,6 @@ $: canConvertSelectedToMesh = !!(
     </div>
   {/if}
 
-  {#if selectedNode.asset?.url?.startsWith('/generated/')}
-    <div class="editor-section compact-surface">
-      <div class="label">Generated Variants</div>
-      {#if generatedVariantError}
-        <div class="save-message error-message">{generatedVariantError}</div>
-      {/if}
-      {#if generatedVariantLoading}
-        <div class="save-message">Loading sibling variants…</div>
-      {:else if generatedVariantItems.length === 0}
-        <div class="save-message">No sibling `.glb` variants found in this folder.</div>
-      {:else}
-        <EditorAssetPreview
-          assetUrl={selectedGeneratedVariantUrl || selectedNode.asset.url}
-          label="Variant Preview"
-          hint="Click any sibling version below to preview it, then apply it to the selected object."
-          height={150}
-        />
-        <div class="hierarchy-list variant-list editor-mt-sm">
-          {#each generatedVariantItems as item (item.path)}
-            <button class:active={selectedGeneratedVariantUrl === item.url} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSelectGeneratedVariant(item.url)}>
-              <span class="node-label">{item.name}</span>
-              <span class="kind">{item.url === selectedNode.asset.url ? 'current' : 'variant'}</span>
-            </button>
-          {/each}
-        </div>
-        <div class="button-row compact editor-mt-sm">
-          <button data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={() => onApplyGeneratedVariant(selectedGeneratedVariantUrl)} disabled={!selectedGeneratedVariantUrl || selectedGeneratedVariantUrl === selectedNode.asset.url}>Apply Highlighted Variant</button>
-          <button data-sfx-hover="hover-soft" data-sfx-click="panel-back" on:click={onResetGeneratedVariantPreview}>Reset Preview</button>
-        </div>
-      {/if}
-    </div>
-  {/if}
-
-  {#if canUseStyleStudioSelection}
-    <div class="editor-section compact-surface">
-      <div class="label">Blender Companion</div>
-      <div class="button-row compact editor-mb-sm">
-        <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenSelectedInBlender} disabled={styleBusy}>Open Selected In Blender</button>
-        <button data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onExportBlenderPackage} disabled={styleBusy}>Export Package</button>
-      </div>
-      <div class="button-row compact">
-        <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onReimportBlenderOutput} disabled={styleBusy}>Reimport Latest Blender Output</button>
-        <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenStyleTab}>Open Style Studio</button>
-      </div>
-      {#if styleBlenderExportPath}
-        <div class="save-message editor-mt-sm path-label">{styleBlenderExportPath}</div>
-      {/if}
-      {#if styleBlenderOpenCommand}
-        <div class="save-message path-label">{styleBlenderOpenCommand}</div>
-      {/if}
-      <div class="save-message">{styleStatus}</div>
-    </div>
-  {/if}
-
   {#if hasGeometryNode}
     <div class="editor-section compact-surface">
       <div class="label">Material</div>
@@ -578,8 +804,28 @@ $: canConvertSelectedToMesh = !!(
 
   {#if hasGeometryNode}
     <div class="editor-section compact-surface">
-      <div class="label">Physics</div>
-      <label class="checkbox"><input type="checkbox" checked={!!effectiveCollision} data-sfx-click="soft" on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Solid / Collider</label>
+      <div class="label">Collision</div>
+      <div class="save-message" class:error-message={collisionSourceStatus.tone === 'warning'}>
+        Collision Source: {collisionSourceStatus.label}. {collisionSourceStatus.detail}
+      </div>
+      <div class="button-row compact editor-mt-sm">
+        <button class:active={collisionMode === 'visualOnly'} data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onSetCollisionVisualOnly}>Visual Only</button>
+        <button class:active={collisionMode === 'blocker'} data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onSetCollisionBlocker}>Blocker</button>
+        <button class:active={collisionMode === 'walkable'} data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onSetCollisionWalkable}>Walkable</button>
+        <button class:active={collisionMode === 'trigger'} data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onSetCollisionTrigger}>Trigger</button>
+        <button class:active={collisionMode === 'detail'} data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onSetCollisionDetail}>Detail</button>
+        {#if canBakeSelectedMeshCollider}
+          <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onBakeMeshCollider}>Bake Mesh Collider</button>
+        {/if}
+        <button class:active={collisionMode === 'disabled'} data-sfx-hover="hover-soft" data-sfx-click="warning" on:click={() => onCollisionEnabledChange(false)}>Disabled</button>
+      </div>
+      <label class="checkbox"><input type="checkbox" checked={!!effectiveCollision} data-sfx-click="soft" on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Collider Enabled</label>
+      <div class="save-message">Default is collidable. Visual Only or Disabled is the explicit opt-out. Asset meshes use baked trimesh collision; no box fallback is used.</div>
+      <select class="text-input" value={selectedCollisionShape} data-sfx-focus="focus-soft" on:change={(e) => onCollisionShapeChange((e.currentTarget as HTMLSelectElement).value as CollisionShape)}>
+        {#each collisionShapeOptionsForSelection as option}
+          <option value={option.value}>{option.label}</option>
+        {/each}
+      </select>
       <select class="text-input" value={selectedNode.collision?.intent ?? effectiveCollision?.intent ?? 'none'} data-sfx-focus="focus-soft" on:change={(e) => onCollisionIntentChange((e.currentTarget as HTMLSelectElement).value as CollisionIntent)}>
         {#each collisionIntentOptions as option}
           <option value={option.value}>{option.label}</option>
@@ -602,6 +848,7 @@ $: canConvertSelectedToMesh = !!(
             <input class="tuple-input" type="number" min="0.05" step="0.05" value={colliderSize[index]} data-sfx-focus="focus-soft" on:change={(e) => onColliderSizeChange(index, (e.currentTarget as HTMLInputElement).value)} />
           {/each}
         </div>
+        <button class="editor-mt-sm" data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onRecalculateCollision}>Match Collider To Visual</button>
       {:else if effectiveCollision}
         <div class="tuple-label editor-mt-sm">Collider Asset URL</div>
         <input class="text-input" value={effectiveCollision.colliderUrl ?? ''} placeholder="/generated/collision/asset.collider.glb" data-sfx-focus="focus-soft" on:change={(e) => onColliderUrlChange((e.currentTarget as HTMLInputElement).value)} />
@@ -634,10 +881,84 @@ $: canConvertSelectedToMesh = !!(
   {/if}
 {:else if hasMultiSelection}
   <div class="editor-section compact-surface">
-    <div class="save-message">{selectedNodes.length} objects selected. Use the outliner, transform shortcuts, and scene tools for batch edits.</div>
+    <div class="label">Multi-Selection</div>
+    <div class="save-message">{selectedNodes.length} objects selected. Shared transform, duplicate, delete, group, and visibility actions are available.</div>
+    <div class="button-row compact editor-mt-sm">
+      <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onDuplicate}>Duplicate</button>
+      <button class="danger" data-danger="true" data-sfx-hover="hover-emphasis" data-sfx-click="warning" on:click={onDelete}>Delete</button>
+    </div>
   </div>
 {:else}
   <div class="editor-section compact-surface">
-    <div class="save-message">Select an object in the viewport or outliner to inspect it here.</div>
+    <div class="label">Scene Summary</div>
+    <div class="save-message">{sceneObjectCount} object{sceneObjectCount === 1 ? '' : 's'} · {sceneAssetNodeCount} asset node{sceneAssetNodeCount === 1 ? '' : 's'} · {sceneColliderCount} collider{sceneColliderCount === 1 ? '' : 's'}</div>
+    <div class="save-message editor-mt-sm">Select an object in the viewport or outliner to inspect it here.</div>
+    <div class="button-row compact editor-mt-sm">
+      <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenCreateTab}>Create Object</button>
+    </div>
   </div>
 {/if}
+
+<style>
+  .variant-browser-header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .variant-browser-count {
+    flex: 0 0 auto;
+    padding: 0.18rem 0.42rem;
+    border: 1px solid rgba(126, 203, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(20, 34, 48, 0.82);
+    color: #cfeaff;
+    font-size: 0.68rem;
+  }
+
+  .variant-browser-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 0.32rem;
+    margin-top: 0.42rem;
+  }
+
+  .variant-strip {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(8.5rem, 11rem);
+    gap: 0.38rem;
+    margin-top: 0.46rem;
+    overflow-x: auto;
+    padding-bottom: 0.35rem;
+    scrollbar-width: thin;
+  }
+
+  .variant-strip button {
+    display: grid;
+    gap: 0.22rem;
+    min-height: 3.4rem;
+    text-align: left;
+  }
+
+  .variant-strip button.active {
+    border-color: rgba(128, 221, 163, 0.44);
+    background: rgba(15, 46, 28, 0.78);
+  }
+
+  .variant-strip button.current:not(.active) {
+    border-color: rgba(255, 210, 120, 0.28);
+  }
+
+  @media (max-width: 760px) {
+    .variant-browser-controls {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .variant-browser-controls button:nth-child(2) {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+</style>

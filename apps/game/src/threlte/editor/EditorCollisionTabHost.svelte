@@ -1,9 +1,13 @@
 <script lang="ts">
 import { onDestroy } from 'svelte'
+import {
+  type CollisionReviewFinding,
+  reviewCollisionContracts,
+} from '../engine/collisionReview'
 import { getLevelCollisionWorkflow } from '../engine/levelCollisionWorkflow'
 import type {
+  EditorSceneDocument,
   LevelCollisionBudget,
-  LevelCollisionDefaultPolicy,
   SharedLevelGroundSettings,
 } from '../engine/sceneDocumentTypes'
 import type { TerrainRuntimeComponentSource } from '../features/terrain'
@@ -11,12 +15,16 @@ import {
   clearHeightmapSourcePreviewNodeIds,
   setHeightmapSourcePreviewNodeIds,
 } from './editorHeightmapSourcePreview'
+import {
+  type EditorTerrainStatusSnapshot,
+  describeEditorTerrainPipeline,
+} from './editorTerrainPipeline'
 import type { EditorSceneNode } from './editorTypes'
 
 type GroundSettings = NonNullable<SharedLevelGroundSettings['ground']>
 
 type TerrainCollisionSettings = {
-  source?: 'baked-heightmap' | 'scene-authored' | 'none'
+  source?: 'baked-heightmap' | 'source-glb' | 'scene-authored' | 'none'
   runtimeSource?: TerrainRuntimeComponentSource
   manifestUrl?: string
   heightmapUrl?: string
@@ -27,23 +35,29 @@ type TerrainCollisionSettings = {
   sourceNodeIds?: string[]
   sourceName?: string
   sourceTriangleCount?: number
+  sourceBounds?: {
+    min: [number, number, number]
+    max: [number, number, number]
+  }
   colliderUrl?: string
   metadataUrl?: string
   colliderResolution?: number
   triangleCount?: number
   vertexCount?: number
   dirty?: boolean
+  heightmapDirty?: boolean
   lastGeneratedAt?: string
   heightOverrideCount?: number
   chunksPath?: string
   chunkGrid?: number
   chunkCount?: number
+  chunkLods?: number[]
+  lastChunksGeneratedAt?: string
 }
 
 export let levelId = ''
+export let editorScene: EditorSceneDocument | null = null
 export let collisionOverlayEnabled = false
-export let collisionDefaultPolicy: LevelCollisionDefaultPolicy =
-  'lightweight-auto'
 export let collisionBudget: LevelCollisionBudget = 'mobile'
 export let groundSettings: GroundSettings | null = null
 export let terrainSculptSettings: {
@@ -51,25 +65,33 @@ export let terrainSculptSettings: {
   autoBakeCollision?: boolean
 } | null = null
 export let terrainCollisionSettings: TerrainCollisionSettings | null = null
+export let terrainStatus: EditorTerrainStatusSnapshot | null = null
 export let terrainCollisionBakePending = false
 export let terrainHeightmapGeneratePending = false
 export let terrainChunkCookPending = false
 export let selectedNode: EditorSceneNode | null = null
 export let selectedNodes: EditorSceneNode[] = []
 export let heightmapSourceNodes: EditorSceneNode[] = []
+export let heightmapCandidateNodes: EditorSceneNode[] = []
 export let selectedTerrainSourceName = ''
 export let selectedTerrainSourceAssetUrl = ''
 
 export let onSetCollisionOverlayEnabled: (value: boolean) => void = () => {}
-export let onSetCollisionDefaultPolicy: (
-  value: LevelCollisionDefaultPolicy,
-) => void = () => {}
 export let onSetCollisionBudget: (value: LevelCollisionBudget) => void =
   () => {}
 export let onSetTerrainAutoBake: (value: boolean) => void = () => {}
+export let onAddSelectedTerrainSources: () => void = () => {}
+export let onRemoveTerrainSource: (nodeId: string) => void = () => {}
+export let onClearTerrainSources: () => void = () => {}
 export let onBakeTerrainCollision: () => void = () => {}
 export let onGenerateTerrainHeightmap: () => void = () => {}
 export let onCookTerrainChunks: () => void = () => {}
+export let onSelectCollisionReviewActor: (actorId: string) => void = () => {}
+
+type Vec3 = [number, number, number]
+type Bounds = { min: Vec3; max: Vec3 }
+
+const VISIBLE_REVIEW_FINDINGS = 5
 
 function getHeightmapUrlFromManifestUrl(manifestUrl: string | undefined) {
   if (!manifestUrl) return ''
@@ -78,10 +100,93 @@ function getHeightmapUrlFromManifestUrl(manifestUrl: string | undefined) {
   return terrainId ? `/terrain/heightmaps/${terrainId}_heightmap.png` : ''
 }
 
+function formatVec3(value: Vec3) {
+  return value.map(component => component.toFixed(1)).join(', ')
+}
+
+function getPrimitiveTriangleEstimate(node: EditorSceneNode) {
+  const geometry = node.primitive?.geometry
+  if (geometry === 'box') return 12
+  if (geometry === 'cylinder') return 96
+  if (geometry === 'tetrahedron') return 4
+  if (geometry === 'octahedron') return 8
+  if (geometry === 'icosahedron') return 20
+  if (geometry === 'dodecahedron') return 36
+  if (geometry === 'torus') return 1152
+  return 0
+}
+
+function getApproximateNodeSize(node: EditorSceneNode): Vec3 {
+  const args = node.primitive?.args ?? []
+  if (node.primitive?.geometry === 'box') {
+    return [
+      Math.abs(Number(args[0] ?? 1) * node.scale[0]),
+      Math.abs(Number(args[1] ?? 1) * node.scale[1]),
+      Math.abs(Number(args[2] ?? 1) * node.scale[2]),
+    ]
+  }
+  if (node.primitive?.geometry === 'cylinder') {
+    const radius = Math.abs(Number(args[0] ?? args[1] ?? 1))
+    const height = Math.abs(Number(args[2] ?? 1))
+    return [
+      radius * 2 * Math.abs(node.scale[0]),
+      height * Math.abs(node.scale[1]),
+      radius * 2 * Math.abs(node.scale[2]),
+    ]
+  }
+  return [
+    Math.max(1, Math.abs(node.scale[0])),
+    Math.max(1, Math.abs(node.scale[1])),
+    Math.max(1, Math.abs(node.scale[2])),
+  ]
+}
+
+function getApproximateSourceBounds(nodes: EditorSceneNode[]): Bounds | null {
+  if (nodes.length === 0) return null
+  const min: Vec3 = [Infinity, Infinity, Infinity]
+  const max: Vec3 = [-Infinity, -Infinity, -Infinity]
+  for (const node of nodes) {
+    const size = getApproximateNodeSize(node)
+    for (let axis = 0; axis < 3; axis += 1) {
+      min[axis] = Math.min(min[axis], node.position[axis] - size[axis] / 2)
+      max[axis] = Math.max(max[axis], node.position[axis] + size[axis] / 2)
+    }
+  }
+  return { min, max }
+}
+
+function hasSameSourceIds(nodes: EditorSceneNode[]) {
+  const sourceNodeIds = terrainCollisionSettings?.sourceNodeIds ?? []
+  if (nodes.length !== sourceNodeIds.length) return false
+  const sourceIdSet = new Set(sourceNodeIds)
+  return nodes.every(node => sourceIdSet.has(node.id))
+}
+
+function getTriangleEstimate(nodes: EditorSceneNode[]) {
+  if (
+    hasSameSourceIds(nodes) &&
+    terrainCollisionSettings?.sourceTriangleCount
+  ) {
+    return `${terrainCollisionSettings.sourceTriangleCount.toLocaleString()} last generated`
+  }
+  const primitiveTriangles = nodes.reduce(
+    (sum, node) => sum + getPrimitiveTriangleEstimate(node),
+    0,
+  )
+  const assetCount = nodes.filter(node => node.asset?.url || node.prefab).length
+  if (assetCount > 0 && primitiveTriangles > 0) {
+    return `${primitiveTriangles.toLocaleString()} primitive plus ${assetCount} asset source(s) counted during generation`
+  }
+  if (assetCount > 0) {
+    return `${assetCount} asset source(s) counted during generation`
+  }
+  return `${primitiveTriangles.toLocaleString()} estimated`
+}
+
 function getSelectedHeightmapNodes() {
   const seen = new Set<string>()
-  const nodes = heightmapSourceNodes.length
-    ? heightmapSourceNodes
+  const nodes = heightmapCandidateNodes.length
+    ? heightmapCandidateNodes
     : selectedNodes.length
       ? selectedNodes
       : selectedNode
@@ -101,15 +206,26 @@ function getHeightmapSelectionStatus(node: EditorSceneNode) {
     if (node.primitive) return 'included primitive'
     return 'included'
   }
-  if (node.id === selectedNode?.id) return 'not a terrain source'
-  return 'not active source'
+  if (heightmapCandidateNodes.some(candidate => candidate.id === node.id)) {
+    return 'candidate'
+  }
+  if (node.id === selectedNode?.id) return 'not bakeable'
+  return 'not in basket'
 }
 
 function getHeightmapSourcePreviewIds() {
   return heightmapSourceNodes.map(node => node.id)
 }
 
-$: levelCollisionWorkflow = getLevelCollisionWorkflow(levelId)
+function selectReviewFinding(finding: CollisionReviewFinding) {
+  if (!finding.actorId) return
+  onSelectCollisionReviewActor(finding.actorId)
+}
+
+$: levelCollisionWorkflow = getLevelCollisionWorkflow(
+  levelId,
+  editorScene?.settings,
+)
 $: terrainCollisionSource =
   terrainCollisionSettings?.source ??
   (levelCollisionWorkflow.terrainCollision === 'heightmap'
@@ -132,6 +248,16 @@ $: heightmapLabel =
   'manifest heightmap'
 $: heightmapSelectedNodes = getSelectedHeightmapNodes()
 $: heightmapIncludedNodeCount = heightmapSourceNodes.length
+$: heightmapExcludedSelectedNodes = heightmapCandidateNodes.filter(
+  candidate => !heightmapSourceNodes.some(source => source.id === candidate.id),
+)
+$: sourceBounds =
+  terrainCollisionSettings?.sourceBounds ??
+  getApproximateSourceBounds(heightmapSourceNodes)
+$: sourceBoundsLabel = sourceBounds
+  ? `min [${formatVec3(sourceBounds.min)}], max [${formatVec3(sourceBounds.max)}]`
+  : 'none'
+$: sourceTriangleEstimate = getTriangleEstimate(heightmapSourceNodes)
 $: heightmapSourcePreviewNodeIds = getHeightmapSourcePreviewIds()
 $: setHeightmapSourcePreviewNodeIds(heightmapSourcePreviewNodeIds)
 $: groundActorIds = groundSettings?.groundActorIds ?? []
@@ -140,10 +266,88 @@ $: groundContractWarnings = [
   groundSettings?.visualSource === 'scene-actors' && groundActorIds.length === 0
     ? 'Scene-actor ground needs groundActorIds.'
     : '',
-  groundSettings?.collisionSource === 'baked-heightfield' &&
+  (groundSettings?.collisionSource === 'baked-heightfield' ||
+    groundSettings?.collisionSource === 'source-linked-terrain-collision') &&
   !groundSettings?.terrainManifestUrl &&
   !terrainCollisionSettings?.manifestUrl
-    ? 'Baked-heightfield ground needs a terrain manifest.'
+    ? 'Terrain ground collision needs a terrain manifest.'
+    : '',
+  groundSettings?.collisionSource === 'baked-heightfield' &&
+  groundSettings?.visualSource === 'scene-actors' &&
+  groundActorIds.length > 0 &&
+  terrainCollisionSettings?.colliderUrl
+    ? 'Scene ground actors are visual ground while baked terrain owns physics; keep large blocker collision off those actors.'
+    : '',
+  groundSettings?.collisionSource === 'baked-heightfield' &&
+  !groundSettings?.requiredWalkableSurfaceId
+    ? 'Baked-heightfield ground should name a required walkable surface.'
+    : '',
+].filter(Boolean)
+$: collisionReview = reviewCollisionContracts({ scene: editorScene })
+$: collisionReviewFindings = collisionReview.findings.slice(0, 12)
+$: visibleReviewFindings = collisionReviewFindings.slice(
+  0,
+  VISIBLE_REVIEW_FINDINGS,
+)
+$: hiddenReviewFindings = collisionReviewFindings.slice(VISIBLE_REVIEW_FINDINGS)
+$: extraReviewFindings = Math.max(
+  0,
+  collisionReview.findings.length - collisionReviewFindings.length,
+)
+$: terrainChunksStale =
+  Boolean(terrainCollisionSettings?.lastGeneratedAt) &&
+  (!terrainCollisionSettings?.lastChunksGeneratedAt ||
+    Date.parse(terrainCollisionSettings.lastChunksGeneratedAt) <
+      Date.parse(terrainCollisionSettings.lastGeneratedAt ?? ''))
+$: terrainRuntimeData =
+  terrainCollisionSettings?.runtimeSource ??
+  (terrainSculptingAvailable ? 'built-in-manifest' : 'scene-authored')
+$: terrainPipeline = describeEditorTerrainPipeline({
+  scene: editorScene,
+  selectedTerrainSourceName,
+  selectedTerrainSourceAssetUrl,
+  terrainStatus,
+})
+$: terrainPipelineSteps = [
+  {
+    label: 'terrain authority',
+    ready: terrainPipeline.publishStatus.state !== 'blocked',
+    detail: terrainPipeline.authoritySummary,
+  },
+  {
+    label: 'visual authority',
+    ready: terrainPipeline.renderChunkStatus.state !== 'blocked',
+    detail: terrainPipeline.renderChunkStatus.detail,
+  },
+  {
+    label: 'collision authority',
+    ready: terrainPipeline.collisionStatus.state === 'ready',
+    detail: terrainPipeline.collisionStatus.detail,
+  },
+  {
+    label: 'required action',
+    ready: terrainPipeline.publishStatus.state === 'ready',
+    detail: terrainPipeline.requiredAction,
+  },
+]
+$: selectedCollisionIntent =
+  selectedNode?.collision?.intent ??
+  (selectedNode?.collision?.enabled ? 'blocker' : 'none')
+$: selectedCollisionSummary = selectedNode
+  ? `${selectedNode.name}: ${selectedCollisionIntent}`
+  : 'Select a scene actor to author or verify collision.'
+$: requiredCollisionActions = [
+  !collisionOverlayEnabled
+    ? 'Enable the collision overlay to verify results.'
+    : '',
+  collisionReview.summary.error + collisionReview.summary.warning > 0
+    ? `${collisionReview.summary.error + collisionReview.summary.warning} blocker/warning item(s) need review.`
+    : '',
+  terrainCollisionSettings?.dirty
+    ? 'Bake terrain collision before publish.'
+    : '',
+  !selectedNode
+    ? 'Select an actor, then choose collision intent in details.'
     : '',
 ].filter(Boolean)
 
@@ -153,103 +357,300 @@ onDestroy(() => {
 </script>
 
 <div class="editor-section">
+  <div class="label">Author Walkable Collision</div>
+  <div class="editor-status-card">
+    <div class="editor-status-title">{requiredCollisionActions[0] ?? 'Collision workflow ready'}</div>
+    <div class="editor-chip-row">
+      <span class:ready={collisionOverlayEnabled} class:warn={!collisionOverlayEnabled} class="editor-chip">overlay {collisionOverlayEnabled ? 'on' : 'off'}</span>
+      <span class="editor-chip">authored collision only</span>
+      <span class:warn={collisionReview.summary.error + collisionReview.summary.warning > 0} class:ready={collisionReview.summary.error + collisionReview.summary.warning === 0} class="editor-chip">
+        {collisionReview.summary.error + collisionReview.summary.warning} blocker/warning item(s)
+      </span>
+    </div>
+    <div class="save-message">Selected actor: {selectedCollisionSummary}</div>
+    {#each requiredCollisionActions.slice(1, 4) as action}
+      <div class="save-message">Next: {action}</div>
+    {/each}
+  </div>
+</div>
+
+<div class="editor-section">
   <div class="label">Collision View</div>
   <label class="checkbox"><input type="checkbox" checked={collisionOverlayEnabled} data-sfx-click="soft" on:change={(event) => onSetCollisionOverlayEnabled((event.currentTarget as HTMLInputElement).checked)} /> Collision Overlay</label>
-  <div class="button-row compact-three-columns editor-mt-sm">
-    <button class:active={collisionDefaultPolicy === 'lightweight-auto'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionDefaultPolicy('lightweight-auto')}>Auto</button>
-    <button class:active={collisionDefaultPolicy === 'authored-only'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionDefaultPolicy('authored-only')}>Authored</button>
-    <button class:active={collisionDefaultPolicy === 'none'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionDefaultPolicy('none')}>Off</button>
-  </div>
-  <div class="button-row compact-three-columns editor-mt-sm">
+  <div class="collision-sublabel">Performance Budget</div>
+  <div class="button-row compact-three-columns">
     <button class:active={collisionBudget === 'mobile'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionBudget('mobile')}>Mobile</button>
     <button class:active={collisionBudget === 'balanced'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionBudget('balanced')}>Balanced</button>
     <button class:active={collisionBudget === 'desktop'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionBudget('desktop')}>Desktop</button>
   </div>
-  <div class="save-message">Collision source: {terrainCollisionSource}{terrainCollisionSettings?.dirty ? ' - terrain bake needed' : ''}</div>
-  <div class="save-message">Terrain component data: {terrainCollisionSettings?.runtimeSource ?? (terrainSculptingAvailable ? 'built-in-manifest' : 'scene-authored')}</div>
+  <div class="save-message">Source: {terrainCollisionSource}{terrainCollisionSettings?.dirty ? ' - bake needed' : ''}; runtime: {terrainRuntimeData}</div>
+</div>
+
+<div class="editor-section">
+  <div class="label">Collision Review</div>
+  <div class="collision-review-summary">
+    <span class:error={collisionReview.summary.error > 0}>Errors {collisionReview.summary.error}</span>
+    <span class:warning={collisionReview.summary.warning > 0}>Warnings {collisionReview.summary.warning}</span>
+    <span>Info {collisionReview.summary.info}</span>
+  </div>
+  <div class="collision-review-list">
+    {#if visibleReviewFindings.length}
+      {#each visibleReviewFindings as finding (finding.id)}
+        <button
+          class="collision-review-row"
+          class:selectable={Boolean(finding.actorId)}
+          disabled={!finding.actorId}
+          data-sfx-hover="hover-soft"
+          data-sfx-click="select"
+          on:click={() => selectReviewFinding(finding)}
+        >
+          <span class={`collision-review-severity ${finding.severity}`}>{finding.severity}</span>
+          <span class="collision-review-message">{finding.message}</span>
+        </button>
+      {/each}
+    {:else}
+      <div class="save-message">No collision review findings.</div>
+    {/if}
+  </div>
+  {#if hiddenReviewFindings.length || extraReviewFindings > 0}
+    <details class="editor-disclosure">
+      <summary>{hiddenReviewFindings.length + extraReviewFindings} more finding(s)</summary>
+      <div class="collision-review-list editor-mt-sm">
+        {#each hiddenReviewFindings as finding (finding.id)}
+          <button
+            class="collision-review-row"
+            class:selectable={Boolean(finding.actorId)}
+            disabled={!finding.actorId}
+            data-sfx-hover="hover-soft"
+            data-sfx-click="select"
+            on:click={() => selectReviewFinding(finding)}
+          >
+            <span class={`collision-review-severity ${finding.severity}`}>{finding.severity}</span>
+            <span class="collision-review-message">{finding.message}</span>
+          </button>
+        {/each}
+        {#if extraReviewFindings > 0}
+          <div class="save-message">{extraReviewFindings} additional finding(s) in audit output.</div>
+        {/if}
+      </div>
+    </details>
+  {/if}
 </div>
 
 <div class="editor-section">
   <div class="label">Ground Contract</div>
-  <div class="save-message">Mode: {groundSettings?.mode ?? 'unconfigured'}</div>
-  <div class="save-message">Visual source: {groundSettings?.visualSource ?? 'unconfigured'}</div>
-  <div class="save-message">Collision source: {groundSettings?.collisionSource ?? 'unconfigured'}</div>
-  <div class="save-message">Required surface: {groundSettings?.requiredWalkableSurfaceId ?? 'none'}</div>
-  <div class="save-message">Terrain manifest: {terrainManifestUrl ?? 'none'}</div>
-  <div class="save-message">Ground actors: {groundActorIds.length ? groundActorIds.join(', ') : 'none'}</div>
-  {#each groundContractWarnings as warning}
-    <div class="save-message">{warning}</div>
-  {/each}
+  <div class="editor-chip-row">
+    <span class="editor-chip">{terrainPipeline.modeLabel}</span>
+    <span class:ready={terrainPipeline.publishStatus.state === 'ready'} class:warn={terrainPipeline.publishStatus.state === 'warning'} class:danger={terrainPipeline.publishStatus.state === 'blocked'} class="editor-chip">publish {terrainPipeline.publishStatus.state}</span>
+  </div>
+  <div class="save-message">Authoritative visual source: {terrainPipeline.authoritativeVisualSource}</div>
+  {#if groundContractWarnings.length}
+    {#each groundContractWarnings as warning}
+      <div class="save-message warning">{warning}</div>
+    {/each}
+  {:else}
+    <div class="save-message">Mode: {groundSettings?.mode ?? 'unconfigured'} - no contract warnings.</div>
+  {/if}
+  <details class="editor-disclosure">
+    <summary>Configuration details</summary>
+    <div class="save-message">Mode: {groundSettings?.mode ?? 'unconfigured'}</div>
+    <div class="save-message">Visual source: {groundSettings?.visualSource ?? 'unconfigured'}</div>
+    <div class="save-message">Collision source: {groundSettings?.collisionSource ?? 'unconfigured'}</div>
+    <div class="save-message">Required surface: {groundSettings?.requiredWalkableSurfaceId ?? 'none'}</div>
+    <div class="save-message">Terrain manifest: {terrainManifestUrl ?? 'none'}</div>
+    <div class="save-message">Ground actors: {groundActorIds.length ? groundActorIds.join(', ') : 'none'}</div>
+  </details>
 </div>
 
 <div class="editor-section">
-  <div class="label">Terrain Heightmap</div>
-  <div class="heightmap-preview-window">
-    {#if heightmapPreviewUrl}
-      <img src={heightmapPreviewUrl} alt={`${levelId} heightmap preview`} />
-    {:else}
-      <div class="heightmap-empty">No heightmap</div>
-    {/if}
+  <div class="label">Terrain Pipeline</div>
+  <div class="editor-chip-row" aria-label="Terrain product contract">
+    <span class="editor-chip">{terrainPipeline.modeLabel}</span>
+    <span class:ready={terrainPipeline.renderChunkStatus.state === 'ready'} class:warn={terrainPipeline.renderChunkStatus.state === 'warning' || terrainPipeline.renderChunkStatus.state === 'inactive'} class:danger={terrainPipeline.renderChunkStatus.state === 'blocked'} class="editor-chip">render {terrainPipeline.renderChunkStatus.state}</span>
+    <span class:ready={terrainPipeline.collisionStatus.state === 'ready'} class:warn={terrainPipeline.collisionStatus.state === 'warning' || terrainPipeline.collisionStatus.state === 'inactive'} class:danger={terrainPipeline.collisionStatus.state === 'blocked'} class="editor-chip">collision {terrainPipeline.collisionStatus.state}</span>
   </div>
-  <div class="heightmap-selection-list">
-    <div class="heightmap-selection-header">
-      <span>Selected Items</span>
-      <span>{heightmapIncludedNodeCount} included</span>
-    </div>
-    {#if heightmapSelectedNodes.length}
-      {#each heightmapSelectedNodes as node (node.id)}
-        <div class:included={heightmapSourceNodes.some(source => source.id === node.id)} class="heightmap-selection-row">
-          <span class="heightmap-selection-name">{node.name}</span>
-          <span class="heightmap-selection-meta">{node.kind} - {getHeightmapSelectionStatus(node)}</span>
-        </div>
-      {/each}
-    {:else}
-      <div class="heightmap-selection-empty">Select a mesh, primitive, prefab, or group to define the heightmap sources.</div>
-    {/if}
+  <div class="save-message">Source GLB/GLTF: {terrainPipeline.sourceGlbUrls[0] ?? 'none recorded'}</div>
+  <div class="save-message">Source provenance: {terrainPipeline.sourceHash || terrainPipeline.sourceProvenance}</div>
+  <div class="save-message">Fallback surface: {terrainPipeline.fallbackSurfaceStatus.detail}</div>
+  <div class="heightmap-pipeline-list" aria-label="Terrain pipeline state">
+    {#each terrainPipelineSteps as step (step.label)}
+      <div class:ready={step.ready} class:blocked={!step.ready} class="heightmap-pipeline-row">
+        <span>{step.label}</span>
+        <span>{step.ready ? 'ready' : 'needs work'} - {step.detail}</span>
+      </div>
+    {/each}
   </div>
-  <button class="full" disabled={terrainHeightmapGeneratePending || !selectedTerrainSourceAssetUrl} data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onGenerateTerrainHeightmap}>
-    {terrainHeightmapGeneratePending ? 'Generating Heightmap...' : 'Generate Heightmap From Selection'}
+  {#if terrainChunksStale}
+    <div class="save-message warning">Visual chunks are older than the heightmap or collision bake; cook chunks before publishing.</div>
+  {/if}
+  {#if terrainPipeline.mode === 'heightfield-terrain'}
+  <button class="full" disabled={terrainHeightmapGeneratePending || !terrainPipeline.commands.find(command => command.id === 'generate-heightmap')?.enabled} title={terrainPipeline.commands.find(command => command.id === 'generate-heightmap')?.reason} data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onGenerateTerrainHeightmap}>
+    {terrainHeightmapGeneratePending ? 'Generating Heightmap...' : 'Generate Heightmap'}
   </button>
-  <div class="save-message">
-    Source: {selectedTerrainSourceName || terrainCollisionSettings?.sourceName || 'select terrain source objects'}
-  </div>
-  <div class="save-message">
-    Viewport outline: {selectedTerrainSourceAssetUrl ? 'included heightmap sources while this utility is open' : 'none'}
-  </div>
-  {#if heightmapPreviewUrl || terrainManifestUrl}
-    <div class="save-message">
-      Heightmap: {heightmapLabel} {terrainCollisionSettings?.heightmapResolution ? `(${terrainCollisionSettings.heightmapResolution})` : ''}; manifest: {terrainManifestUrl ?? 'none'}
-    </div>
-  {/if}
-  {#if terrainCollisionSettings?.sourceTriangleCount}
-    <div class="save-message">Source mesh triangles: {terrainCollisionSettings.sourceTriangleCount}</div>
-  {/if}
-</div>
-
-<div class="editor-section">
-  <div class="label">Terrain Collision</div>
-  <label class="checkbox"><input type="checkbox" checked={terrainSculptSettings?.autoBakeCollision ?? false} data-sfx-click="soft" on:change={(event) => onSetTerrainAutoBake((event.currentTarget as HTMLInputElement).checked)} /> Auto Bake Collision</label>
-  <button class="full" disabled={terrainCollisionBakePending} data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onBakeTerrainCollision}>
+  <button class="full" disabled={terrainCollisionBakePending || !terrainPipeline.commands.find(command => command.id === 'bake-terrain-collision')?.enabled} title={terrainPipeline.commands.find(command => command.id === 'bake-terrain-collision')?.reason} data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onBakeTerrainCollision}>
     {terrainCollisionBakePending ? 'Baking Collision...' : 'Bake Terrain Collision'}
   </button>
-  <button class="full" disabled={terrainChunkCookPending || !(terrainCollisionSettings?.heightmapUrl || terrainManifestUrl)} data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onCookTerrainChunks}>
-    {terrainChunkCookPending ? 'Cooking Chunks...' : 'Cook Visual Chunks'}
+  <button class="full" disabled={terrainChunkCookPending || !terrainPipeline.commands.find(command => command.id === 'cook-heightfield-chunks')?.enabled} title={terrainPipeline.commands.find(command => command.id === 'cook-heightfield-chunks')?.reason} data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onCookTerrainChunks}>
+    {terrainChunkCookPending ? 'Cooking Heightfield Chunks...' : 'Cook Heightfield Chunks'}
   </button>
-  <div class="save-message">
-    {#if terrainCollisionSettings?.colliderUrl}
-      collider {terrainCollisionSettings.colliderResolution ?? 0}, {terrainCollisionSettings.triangleCount ?? 0} triangles, {terrainCollisionSettings.heightOverrideCount ?? 0} height edits
-    {:else}
-      No baked terrain collision artifact is recorded for this scene.
+  {:else if terrainPipeline.mode === 'glb-chunk-terrain'}
+  <button class="full" disabled={terrainChunkCookPending || !terrainPipeline.commands.find(command => command.id === 'cook-glb-chunks')?.enabled} title={terrainPipeline.commands.find(command => command.id === 'cook-glb-chunks')?.reason} data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onCookTerrainChunks}>
+    {terrainChunkCookPending ? 'Cooking GLB Chunks...' : 'Cook GLB Chunks'}
+  </button>
+  <button class="full" disabled={terrainCollisionBakePending || !terrainPipeline.commands.find(command => command.id === 'bake-terrain-collision')?.enabled} title={terrainPipeline.commands.find(command => command.id === 'bake-terrain-collision')?.reason} data-sfx-hover="hover-emphasis" data-sfx-click="confirm" on:click={onBakeTerrainCollision}>
+    {terrainCollisionBakePending ? 'Baking Source-Linked Collision...' : 'Bake Source-Linked Collision'}
+  </button>
+  {/if}
+  {#each terrainPipeline.blockers as blocker}
+    <div class="save-message error-message">{blocker}</div>
+  {/each}
+  {#if terrainPipeline.mode === 'heightfield-terrain'}
+    <div class="button-row compact-two-columns editor-mt-sm">
+      <button disabled={heightmapCandidateNodes.length === 0} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={onAddSelectedTerrainSources}>Add Selection ({heightmapCandidateNodes.length})</button>
+      <button disabled={heightmapSourceNodes.length === 0} data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onClearTerrainSources}>Clear Basket ({heightmapIncludedNodeCount})</button>
+    </div>
+    <div class="save-message">
+      Source: {selectedTerrainSourceName || terrainCollisionSettings?.sourceName || 'select terrain source objects'}
+    </div>
+
+    <details class="editor-disclosure">
+    <summary>Source basket ({heightmapIncludedNodeCount} included, {heightmapExcludedSelectedNodes.length} excluded)</summary>
+    <div class="heightmap-selection-list editor-mt-sm">
+      <div class="heightmap-selection-header">
+        <span>Included sources</span>
+        <span>{heightmapIncludedNodeCount} included</span>
+      </div>
+      {#if heightmapSourceNodes.length}
+        {#each heightmapSourceNodes as node (node.id)}
+          <div class="heightmap-selection-row included">
+            <span class="heightmap-selection-name">{node.name}</span>
+            <span class="heightmap-selection-meta">{node.kind} - {getHeightmapSelectionStatus(node)}</span>
+            <button data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={() => onRemoveTerrainSource(node.id)}>Remove</button>
+          </div>
+        {/each}
+      {:else}
+        <div class="heightmap-selection-empty">Add selected bakeable nodes to define the heightmap sources.</div>
+      {/if}
+      <div class="save-message">Source bounds: {sourceBoundsLabel}</div>
+      <div class="save-message">Triangle estimate: {sourceTriangleEstimate}</div>
+      <div class="save-message">Viewport outline: {heightmapSourceNodes.length ? 'included basket while utility open' : 'none'}</div>
+    </div>
+    <div class="heightmap-selection-list editor-mt-sm">
+      <div class="heightmap-selection-header">
+        <span>Selected candidates</span>
+        <span>{heightmapExcludedSelectedNodes.length} excluded</span>
+      </div>
+      {#if heightmapSelectedNodes.length}
+        {#each heightmapSelectedNodes as node (node.id)}
+          <div class:included={heightmapSourceNodes.some(source => source.id === node.id)} class="heightmap-selection-row">
+            <span class="heightmap-selection-name">{node.name}</span>
+            <span class="heightmap-selection-meta">{node.kind} - {getHeightmapSelectionStatus(node)}</span>
+          </div>
+        {/each}
+      {:else}
+        <div class="heightmap-selection-empty">Select a mesh, primitive, prefab, or group to review terrain source candidates.</div>
+      {/if}
+    </div>
+    </details>
+  {/if}
+
+  {#if terrainPipeline.mode === 'heightfield-terrain'}
+  <details class="editor-disclosure">
+    <summary>Bake artifacts &amp; preview</summary>
+    <div class="heightmap-preview-window editor-mt-sm">
+      {#if heightmapPreviewUrl}
+        <img src={heightmapPreviewUrl} alt={`${levelId} heightmap preview`} />
+      {:else}
+        <div class="heightmap-empty">No heightmap</div>
+      {/if}
+    </div>
+    <label class="checkbox"><input type="checkbox" checked={terrainSculptSettings?.autoBakeCollision ?? false} data-sfx-click="soft" on:change={(event) => onSetTerrainAutoBake((event.currentTarget as HTMLInputElement).checked)} /> Auto Bake Collision</label>
+    <div class="save-message">
+      Auto-bake runs after sculpt height edits and writes baked terrain artifacts. Source basket changes still require Generate Heightmap.
+    </div>
+    {#if heightmapPreviewUrl || terrainManifestUrl}
+      <div class="save-message">
+        Heightmap: {heightmapLabel} {terrainCollisionSettings?.heightmapResolution ? `(${terrainCollisionSettings.heightmapResolution})` : ''}; manifest: {terrainManifestUrl ?? 'none'}
+      </div>
     {/if}
-  </div>
-  {#if terrainCollisionSettings?.chunksPath}
-    <div class="save-message">Chunks: {terrainCollisionSettings.chunkCount ?? 0} files at {terrainCollisionSettings.chunksPath}</div>
+    {#if terrainCollisionSettings?.colliderUrl}
+      <div class="save-message">Collider {terrainCollisionSettings.colliderResolution ?? 0}, {terrainCollisionSettings.triangleCount ?? 0} triangles, {terrainCollisionSettings.heightOverrideCount ?? 0} height edits</div>
+    {:else}
+      <div class="save-message">No baked terrain collision artifact recorded for this scene.</div>
+    {/if}
+    {#if terrainCollisionSettings?.chunksPath}
+      <div class="save-message">Chunks: {terrainCollisionSettings.chunkCount ?? 0} files at {terrainCollisionSettings.chunksPath}</div>
+    {/if}
+    {#if terrainCollisionSettings?.sourceTriangleCount}
+      <div class="save-message">Source mesh triangles: {terrainCollisionSettings.sourceTriangleCount}</div>
+    {/if}
+  </details>
   {/if}
 </div>
 
 <style>
+  .collision-sublabel {
+    margin-top: 0.5rem;
+    margin-bottom: 0.22rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #7fa8c4;
+  }
+
+  .editor-disclosure {
+    margin-top: 0.55rem;
+    border: 1px solid rgba(126, 203, 255, 0.14);
+    border-radius: 0.4rem;
+    background: rgba(5, 9, 20, 0.32);
+  }
+
+  .editor-disclosure > summary {
+    cursor: pointer;
+    padding: 0.4rem 0.55rem;
+    color: rgba(226, 244, 255, 0.78);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    list-style: none;
+  }
+
+  .editor-disclosure > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .editor-disclosure > summary::before {
+    content: '▸';
+    display: inline-block;
+    margin-right: 0.4rem;
+    color: rgba(126, 203, 255, 0.7);
+    transition: transform 120ms ease;
+  }
+
+  .editor-disclosure[open] > summary::before {
+    transform: rotate(90deg);
+  }
+
+  .editor-disclosure[open] > summary {
+    border-bottom: 1px solid rgba(126, 203, 255, 0.12);
+  }
+
+  .editor-disclosure > :global(*:not(summary)) {
+    margin-left: 0.55rem;
+    margin-right: 0.55rem;
+  }
+
+  .editor-disclosure > :global(*:last-child) {
+    margin-bottom: 0.55rem;
+  }
+
+  .save-message.warning {
+    color: #ffd27a;
+  }
+
   .heightmap-preview-window {
     width: 100%;
+    max-height: 160px;
     aspect-ratio: 1;
     display: grid;
     place-items: center;
@@ -278,6 +679,35 @@ onDestroy(() => {
     margin-bottom: 0.55rem;
   }
 
+  .heightmap-pipeline-list {
+    display: grid;
+    gap: 0.3rem;
+    margin-bottom: 0.55rem;
+  }
+
+  .heightmap-pipeline-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    border: 1px solid rgba(126, 203, 255, 0.16);
+    border-radius: 0.35rem;
+    padding: 0.3rem 0.45rem;
+    background: rgba(5, 9, 20, 0.42);
+    color: rgba(226, 244, 255, 0.68);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+  }
+
+  .heightmap-pipeline-row.ready {
+    border-color: rgba(104, 255, 194, 0.28);
+    color: rgba(226, 244, 255, 0.86);
+  }
+
+  .heightmap-pipeline-row.blocked {
+    border-color: rgba(255, 199, 104, 0.28);
+  }
+
   .heightmap-selection-header,
   .heightmap-selection-row {
     display: flex;
@@ -298,6 +728,10 @@ onDestroy(() => {
     border-radius: 0.35rem;
     padding: 0.38rem 0.45rem;
     background: rgba(5, 9, 20, 0.48);
+  }
+
+  .heightmap-selection-row button {
+    flex: 0 0 auto;
   }
 
   .heightmap-selection-row.included {
@@ -329,5 +763,75 @@ onDestroy(() => {
     border: 1px dashed rgba(126, 203, 255, 0.2);
     border-radius: 0.35rem;
     padding: 0.5rem;
+  }
+
+  .collision-review-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem;
+    margin-bottom: 0.55rem;
+    color: rgba(226, 244, 255, 0.7);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+  }
+
+  .collision-review-summary .error {
+    color: #ff8c8c;
+  }
+
+  .collision-review-summary .warning {
+    color: #ffd27a;
+  }
+
+  .collision-review-list {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .collision-review-row {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 0.45rem;
+    width: 100%;
+    border: 1px solid rgba(126, 203, 255, 0.16);
+    border-radius: 0.35rem;
+    padding: 0.42rem 0.45rem;
+    background: rgba(5, 9, 20, 0.48);
+    color: inherit;
+    text-align: left;
+  }
+
+  .collision-review-row.selectable {
+    cursor: pointer;
+  }
+
+  .collision-review-row:disabled {
+    cursor: default;
+    opacity: 1;
+  }
+
+  .collision-review-severity {
+    font-size: 0.64rem;
+    line-height: 1rem;
+    text-transform: uppercase;
+  }
+
+  .collision-review-severity.error {
+    color: #ff8c8c;
+  }
+
+  .collision-review-severity.warning {
+    color: #ffd27a;
+  }
+
+  .collision-review-severity.info {
+    color: rgba(126, 203, 255, 0.86);
+  }
+
+  .collision-review-message {
+    min-width: 0;
+    color: rgba(226, 244, 255, 0.84);
+    font-size: 0.72rem;
+    line-height: 1.15rem;
   }
 </style>

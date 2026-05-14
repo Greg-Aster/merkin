@@ -1,5 +1,40 @@
+import type {
+  AssetLocalBounds,
+  AssetLocalTransformMetadata,
+} from '../engine/assetLocalTransform'
 import type { RuntimeAssetManifest } from '../engine/runtimeAssetManifest'
+import type { TerrainSourceContract } from '../features/terrain/TerrainManager'
+import type { EditorTerrainSourceAssetStatus } from './editorTerrainPipeline'
 import type { EditorSceneDocument } from './editorTypes'
+
+export type MeshColliderBakeMetadata = {
+  schemaVersion?: number
+  generatedAt?: string
+  sourceActorId?: string
+  sourceAssetUrl?: string
+  sourceAssetFingerprint?: {
+    algorithm?: string
+    value?: string
+  }
+  colliderUrl?: string
+  metadataUrl?: string
+  triangleCount?: number
+  vertexCount?: number
+  visualLocalBounds?: AssetLocalBounds | null
+  colliderLocalBounds?: AssetLocalBounds | null
+  bounds?: AssetLocalBounds | null
+  assetLocalTransform?: AssetLocalTransformMetadata | null
+  provenance?: {
+    sourceActorId?: string
+    sourceAssetUrl?: string
+    sourceAssetFingerprint?: {
+      algorithm?: string
+      value?: string
+    }
+    bakeConfig?: Record<string, unknown>
+    generatedAt?: string
+  }
+}
 
 export type RuntimeAssetCookManifest = RuntimeAssetManifest & {
   generatedAt?: string
@@ -38,9 +73,38 @@ export type RuntimePrefabManifest = {
 
 export type TerrainManifest = {
   id?: string
+  runtime?: {
+    mode?: 'scene-authored' | 'heightfield-terrain' | 'glb-chunk-terrain'
+    visualSource?:
+      | 'scene-actors'
+      | 'heightmap-surface'
+      | 'generated-heightmap-chunks'
+      | 'source-glb-chunks'
+      | 'none'
+    fallbackSurfacePolicy?:
+      | 'disabled'
+      | 'debug-only'
+      | 'until-required-chunks-ready'
+      | 'always'
+  }
   assets?: {
     heightmap?: string
     chunksPath?: string
+    sourceGlb?: string
+    sourceAssetUrl?: string
+    sourceAssetHash?: string
+    sourceAssetFingerprint?: {
+      algorithm?: string
+      value?: string
+    }
+  }
+  source?: {
+    assetUrl?: string
+    assetHash?: string
+    assetFingerprint?: {
+      algorithm?: string
+      value?: string
+    }
   }
   collision?: {
     terrain?: {
@@ -49,10 +113,26 @@ export type TerrainManifest = {
       triangleCount?: number
       vertexCount?: number
       colliderResolution?: number
+      sourceContract?: TerrainSourceContract
     }
+    product?: Record<string, unknown>
   }
   visualChunks?: {
     chunkCount?: number
+    sourceContract?: TerrainSourceContract
+    source?: 'generated-heightmap' | 'source-glb'
+    preservesSourceUvs?: boolean
+    preservesSourceMaterialSlots?: boolean
+    product?: {
+      type?: 'heightfield-terrain' | 'glb-chunk-terrain'
+      chunksPath?: string
+      chunkCount?: number
+      sourceAssetUrl?: string
+      sourceHash?: string
+      preservesSourceUvs?: boolean
+      preservesSourceMaterialSlots?: boolean
+      textureReferencesPreserved?: boolean
+    }
     activation?: {
       maxActiveChunks?: number
       maxActiveChunksByTier?: Record<string, number>
@@ -99,8 +179,10 @@ export interface EditorPublishWorkflowStep {
 
 export type EditorPublishBakeStep =
   | 'save-scene'
+  | 'generate-heightmap'
   | 'bake-terrain-collision'
   | 'cook-terrain-chunks'
+  | 'cook-terrain-glb-chunks'
   | 'cook-world-partition'
   | 'cook-runtime-assets'
   | 'audit-engine'
@@ -175,6 +257,8 @@ export interface EditorPublishReadinessViewModel {
 export interface LoadEditorPublishReadinessInput {
   levelId: string
   scene: EditorSceneDocument | null
+  terrainSourceAssets?: EditorTerrainSourceAssetStatus[]
+  missingTerrainSourceAssets?: EditorTerrainSourceAssetStatus[]
   fetchImpl?: typeof fetch
 }
 

@@ -19,155 +19,29 @@ export interface RuntimeFireflyPresentation {
   shockwaveEnabled: boolean
 }
 
-function isLegacySolitudeFirefly(node: RuntimeGameplayRenderNode) {
-  return node.gameplay?.type === 'firefly' && node.id.startsWith('solitude-')
-}
-
-function isLegacyYggdrasilFirefly(node: RuntimeGameplayRenderNode) {
-  return node.gameplay?.type === 'firefly' && node.id.startsWith('yggdrasil-')
-}
-
-function isLegacySolitudeHeroFirefly(node: RuntimeGameplayRenderNode) {
-  return node.id === 'solitude-firefly'
-}
-
-function resolveLegacyFireflySetting<T>(
+function resolveFireflyNumberSetting(
   node: RuntimeGameplayRenderNode,
-  authored: T | undefined,
-  legacyValue: T,
-  tunedValue: T,
-  fallbackValue: T,
+  field: string,
+  fallbackValue: number,
+  minimumValue?: number,
 ) {
-  if (
-    isLegacySolitudeFirefly(node) &&
-    (authored === undefined || authored === legacyValue)
-  ) {
-    return tunedValue
-  }
-  return authored ?? fallbackValue
+  const authored = node.gameplay?.[field]
+  const resolved =
+    typeof authored === 'number' && Number.isFinite(authored)
+      ? authored
+      : fallbackValue
+  return minimumValue === undefined
+    ? resolved
+    : Math.max(minimumValue, resolved)
 }
 
-function resolveFireflyLightIntensity(node: RuntimeGameplayRenderNode) {
-  if (isLegacyYggdrasilFirefly(node)) {
-    return resolveLegacyFireflySetting(
-      node,
-      node.gameplay?.lightIntensity,
-      4,
-      0.32,
-      0.32,
-    )
-  }
-  if (isLegacySolitudeHeroFirefly(node)) {
-    return resolveLegacyFireflySetting(
-      node,
-      node.gameplay?.lightIntensity,
-      5,
-      1.45,
-      1.15,
-    )
-  }
-  return resolveLegacyFireflySetting(
-    node,
-    node.gameplay?.lightIntensity,
-    4,
-    1.15,
-    1.15,
-  )
-}
-
-function resolveFireflyLightDistance(node: RuntimeGameplayRenderNode) {
-  if (isLegacyYggdrasilFirefly(node)) {
-    return resolveLegacyFireflySetting(
-      node,
-      node.gameplay?.lightDistance,
-      6,
-      2.2,
-      2.2,
-    )
-  }
-  if (isLegacySolitudeHeroFirefly(node)) {
-    return resolveLegacyFireflySetting(
-      node,
-      node.gameplay?.lightDistance,
-      2,
-      4.6,
-      4.6,
-    )
-  }
-  return resolveLegacyFireflySetting(
-    node,
-    node.gameplay?.lightDistance,
-    6,
-    4.6,
-    4.6,
-  )
-}
-
-function resolveFireflyLightDecay(node: RuntimeGameplayRenderNode) {
-  if (isLegacyYggdrasilFirefly(node)) {
-    return resolveLegacyFireflySetting(
-      node,
-      node.gameplay?.lightDecay,
-      1.6,
-      1.9,
-      1.9,
-    )
-  }
-  if (isLegacySolitudeHeroFirefly(node)) {
-    return resolveLegacyFireflySetting(
-      node,
-      node.gameplay?.lightDecay,
-      2,
-      1.25,
-      1.25,
-    )
-  }
-  return resolveLegacyFireflySetting(
-    node,
-    node.gameplay?.lightDecay,
-    1.6,
-    1.25,
-    1.25,
-  )
-}
-
-function resolveFireflySpriteIntensity(node: RuntimeGameplayRenderNode) {
-  if (isLegacyYggdrasilFirefly(node)) {
-    return resolveLegacyFireflySetting(
-      node,
-      node.gameplay?.spriteIntensity,
-      0.95,
-      0.72,
-      0.72,
-    )
-  }
-  if (isLegacySolitudeHeroFirefly(node)) {
-    return resolveLegacyFireflySetting(
-      node,
-      node.gameplay?.spriteIntensity,
-      1.95,
-      1.2,
-      1.15,
-    )
-  }
-  return resolveLegacyFireflySetting(
-    node,
-    node.gameplay?.spriteIntensity,
-    0.95,
-    1.15,
-    1.15,
-  )
-}
-
-function resolveFireflyLightBurstBoost(node: RuntimeGameplayRenderNode) {
-  const authored = node.gameplay?.lightBurstBoost
-  if (typeof authored === 'number' && Number.isFinite(authored)) {
-    return Math.max(0, authored)
-  }
-  if (isLegacySolitudeHeroFirefly(node)) return 1.75
-  if (isLegacyYggdrasilFirefly(node)) return 0.38
-  if (isLegacySolitudeFirefly(node)) return 1.4
-  return 1
+function resolveFireflyBooleanSetting(
+  node: RuntimeGameplayRenderNode,
+  field: string,
+  fallbackValue: boolean,
+) {
+  const authored = node.gameplay?.[field]
+  return typeof authored === 'boolean' ? authored : fallbackValue
 }
 
 function supportsShockwaveFireflyIgnition(node: RuntimeGameplayRenderNode) {
@@ -194,78 +68,39 @@ export function resolveRuntimeFireflyPresentation(
   node: RuntimeGameplayRenderNode,
 ): RuntimeFireflyPresentation {
   const authoredColor = node.gameplay?.markerColor
-  const baseColor =
-    isLegacySolitudeFirefly(node) &&
-    (!authoredColor || authoredColor === '#f5f1a8')
-      ? '#ff4658'
-      : authoredColor ?? '#ff4658'
+  const baseColor = authoredColor ?? '#ff4658'
 
   return {
     baseColor,
-    lightIntensity: resolveFireflyLightIntensity(node),
-    lightDistance: resolveFireflyLightDistance(node),
-    lightDecay: resolveFireflyLightDecay(node),
-    spriteIntensity: resolveFireflySpriteIntensity(node),
-    lightBurstBoost: resolveFireflyLightBurstBoost(node),
-    twinkleSpeed: isLegacySolitudeHeroFirefly(node)
-      ? resolveLegacyFireflySetting(
-          node,
-          node.gameplay?.twinkleSpeed,
-          0.5,
-          0.9,
-          0.9,
-        )
-      : resolveLegacyFireflySetting(
-          node,
-          node.gameplay?.twinkleSpeed,
-          1.6,
-          0.9,
-          0.9,
-        ),
-    hoverHeight: resolveLegacyFireflySetting(
+    lightIntensity: resolveFireflyNumberSetting(node, 'lightIntensity', 1.15),
+    lightDistance: resolveFireflyNumberSetting(node, 'lightDistance', 4.6),
+    lightDecay: resolveFireflyNumberSetting(node, 'lightDecay', 1.25),
+    spriteIntensity: resolveFireflyNumberSetting(node, 'spriteIntensity', 1.15),
+    lightBurstBoost: resolveFireflyNumberSetting(
       node,
-      node.gameplay?.hoverHeight,
-      0.36,
-      0.28,
-      0.28,
+      'lightBurstBoost',
+      1,
+      0,
     ),
-    bobAmplitude: resolveLegacyFireflySetting(
+    twinkleSpeed: resolveFireflyNumberSetting(node, 'twinkleSpeed', 0.9),
+    hoverHeight: resolveFireflyNumberSetting(node, 'hoverHeight', 0.28),
+    bobAmplitude: resolveFireflyNumberSetting(node, 'bobAmplitude', 0.08),
+    bobSpeed: resolveFireflyNumberSetting(node, 'bobSpeed', 0.55),
+    wanderEnabled: resolveFireflyBooleanSetting(node, 'wanderEnabled', true),
+    wanderRadius: resolveFireflyNumberSetting(node, 'wanderRadius', 0.16),
+    wanderSpeed: resolveFireflyNumberSetting(node, 'wanderSpeed', 0.18),
+    selectionLightBoost: resolveFireflyNumberSetting(
       node,
-      node.gameplay?.bobAmplitude,
-      0.14,
-      0.08,
-      0.08,
+      'selectionLightBoost',
+      3,
+      0,
     ),
-    bobSpeed: resolveLegacyFireflySetting(
+    lightBurstSpriteBoost: resolveFireflyNumberSetting(
       node,
-      node.gameplay?.bobSpeed,
-      1.4,
+      'lightBurstSpriteBoost',
       0.55,
-      0.55,
+      0,
     ),
-    wanderEnabled: resolveLegacyFireflySetting(
-      node,
-      node.gameplay?.wanderEnabled,
-      false,
-      true,
-      true,
-    ),
-    wanderRadius: resolveLegacyFireflySetting(
-      node,
-      node.gameplay?.wanderRadius,
-      0.35,
-      0.16,
-      0.16,
-    ),
-    wanderSpeed: resolveLegacyFireflySetting(
-      node,
-      node.gameplay?.wanderSpeed,
-      0.45,
-      0.18,
-      0.18,
-    ),
-    selectionLightBoost: isLegacyYggdrasilFirefly(node) ? 0.65 : 3,
-    lightBurstSpriteBoost: isLegacyYggdrasilFirefly(node) ? 0.18 : 0.55,
     shockwaveEnabled: supportsShockwaveFireflyIgnition(node),
   }
 }

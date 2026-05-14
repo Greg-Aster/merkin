@@ -2,18 +2,26 @@
 import { T } from '@threlte/core'
 import { onDestroy } from 'svelte'
 import * as THREE from 'three'
+import type { AssetLocalTransformMetadata } from '../engine/assetLocalTransform'
+import { applyAssetLocalTransformToObject } from '../engine/assetLocalTransform'
 import {
   cloneCachedGltfScene,
   disposeCachedGltfScene,
 } from '../utils/gltfAssetCache'
+import {
+  loadAssetLocalTransformMetadata,
+  validateInlineAssetLocalTransform,
+} from './assetTrimeshColliderMetadata'
 
 export let url = ''
+export let metadataUrl = ''
+export let assetLocalTransform: AssetLocalTransformMetadata | null = null
 export let color = '#4df0ff'
 
 let scene: THREE.Group | null = null
 let disposed = false
 let loadToken = 0
-let loadedUrl = ''
+let loadedKey = ''
 
 function disposeScene(root: THREE.Object3D | null) {
   if (!root) return
@@ -29,21 +37,44 @@ function disposeMeshMaterial(material: THREE.Material | THREE.Material[]) {
   material.dispose?.()
 }
 
-async function loadHelperScene(nextUrl: string) {
+async function loadHelperScene(
+  nextUrl: string,
+  nextMetadataUrl: string,
+  inlineAssetLocalTransform: AssetLocalTransformMetadata | null,
+) {
   const token = ++loadToken
 
   try {
-    const nextScene = await cloneCachedGltfScene(nextUrl)
+    const [nextScene, metadataValidation] = await Promise.all([
+      cloneCachedGltfScene(nextUrl),
+      nextMetadataUrl
+        ? loadAssetLocalTransformMetadata(nextMetadataUrl)
+        : Promise.resolve(
+            validateInlineAssetLocalTransform(inlineAssetLocalTransform),
+          ),
+    ])
     if (disposed || token !== loadToken) {
       disposeScene(nextScene)
       return
     }
 
+    if (
+      metadataValidation.state === 'malformed' ||
+      metadataValidation.state === 'invalid'
+    ) {
+      console.warn(
+        'Invalid asset-local collider metadata; helper uses legacy placement:',
+        nextUrl,
+        metadataValidation.errors,
+      )
+    }
+    applyAssetLocalTransformToObject(nextScene, metadataValidation.metadata)
+
     const helperMaterial = new THREE.MeshBasicMaterial({
       color,
       depthTest: false,
       depthWrite: false,
-      opacity: 0.42,
+      opacity: 0.82,
       transparent: true,
       wireframe: true,
     })
@@ -69,9 +100,13 @@ async function loadHelperScene(nextUrl: string) {
   }
 }
 
-$: if (url && url !== loadedUrl) {
-  loadedUrl = url
-  void loadHelperScene(url)
+$: inlineMatrix =
+  assetLocalTransform?.visualToPhysicsLocalMatrix ??
+  assetLocalTransform?.visualToPhysicsMatrix
+$: loadKey = `${url}|${metadataUrl}|${inlineMatrix ? JSON.stringify(inlineMatrix) : ''}`
+$: if (url && loadKey !== loadedKey) {
+  loadedKey = loadKey
+  void loadHelperScene(url, metadataUrl, assetLocalTransform)
 }
 
 onDestroy(() => {

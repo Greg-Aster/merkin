@@ -86,6 +86,8 @@ export let getRowActionState: (row: OutlinerRow) => OutlinerRowActionState =
     display: flex;
     flex-direction: column;
     min-height: 0;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     background: rgba(9, 14, 24, 0.92);
     border: 1px solid rgba(126, 203, 255, 0.28);

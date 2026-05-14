@@ -8,14 +8,19 @@ import RuntimeGameplayRenderer from '../levels/RuntimeGameplayRenderer.svelte'
 import EditorNodeGizmos from './EditorNodeGizmos.svelte'
 import EditorNodePhysicsBody from './EditorNodePhysicsBody.svelte'
 import EditorNodeRenderContent from './EditorNodeRenderContent.svelte'
-import { getNodeVisualColliderSize } from './editorCollisionDefaults'
+import {
+  getNodeVisualColliderSize,
+  resolveNodeCollision,
+} from './editorCollisionDefaults'
 import { registerEditorObject, unregisterEditorObject } from './editorRegistry'
 import { editorNodeViewportStateStore, editorStateStore } from './editorStore'
 import type { EditorSceneNode } from './editorStore'
+import type { EditorSceneSettings } from './editorTypes'
 
 export let node: EditorSceneNode
 export let editorEnabled = false
 export let selected = false
+export let sceneSettings: EditorSceneSettings | null = null
 export let interactionSystem: any = null
 export let interactiveEnabled = false
 
@@ -24,6 +29,8 @@ let group: THREE.Group
 let viewportVisible = true
 let runtimeDistanceVisible = true
 let effectiveVisible = true
+let collisionOverlayVisible = false
+let groupVisible = true
 const nodeWorldPosition = new THREE.Vector3()
 let distanceCullAccumulator = 0
 
@@ -91,10 +98,15 @@ useTask(delta => {
 $: viewportVisible =
   $editorNodeViewportStateStore.get(node.id)?.effectiveVisible ?? node.visible
 $: effectiveVisible = viewportVisible && runtimeDistanceVisible
+$: collisionOverlayVisible =
+  editorEnabled &&
+  $editorStateStore.collisionOverlayEnabled &&
+  Boolean(resolveNodeCollision(node, sceneSettings))
+$: groupVisible = effectiveVisible || collisionOverlayVisible
 
 $: if (group) {
   registerEditorObject(node.id, group)
-  group.visible = effectiveVisible
+  group.visible = groupVisible
   group.position.set(...node.position)
   group.rotation.set(...node.rotation)
   group.scale.set(...node.scale)
@@ -105,15 +117,32 @@ onDestroy(() => {
 })
 </script>
 
-<T.Group bind:ref={group} visible={effectiveVisible}>
+{#if !editorEnabled}
   <EditorNodePhysicsBody
     {node}
     {editorEnabled}
-    visible={effectiveVisible}
+    {sceneSettings}
     collisionOverlayEnabled={$editorStateStore.collisionOverlayEnabled}
-  >
-    <EditorNodeRenderContent {node} {editorEnabled} />
-  </EditorNodePhysicsBody>
+  />
+{/if}
+
+<T.Group bind:ref={group} visible={groupVisible}>
+  {#if editorEnabled}
+    <EditorNodePhysicsBody
+      {node}
+      {editorEnabled}
+      {sceneSettings}
+      collisionOverlayEnabled={$editorStateStore.collisionOverlayEnabled}
+    >
+      {#if effectiveVisible}
+        <EditorNodeRenderContent {node} {editorEnabled} />
+      {/if}
+    </EditorNodePhysicsBody>
+  {:else}
+    {#if effectiveVisible}
+      <EditorNodeRenderContent {node} {editorEnabled} />
+    {/if}
+  {/if}
 
   <EditorNodeGizmos {selected} />
 

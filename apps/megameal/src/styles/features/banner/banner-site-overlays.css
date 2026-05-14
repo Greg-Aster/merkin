@@ -1,0 +1,463 @@
+#standard-banner-container {
+  --banner-overlay-text: rgb(247 250 255 / 0.98);
+  --banner-overlay-muted: rgb(224 233 244 / 0.82);
+  --banner-overlay-faint: rgb(204 222 239 / 0.64);
+  --banner-overlay-accent: rgb(96 221 255 / 0.86);
+  --banner-overlay-edge: rgb(126 229 255 / 0.24);
+}
+
+#standard-banner-container .banner-billboard {
+  display: grid;
+  align-items: end;
+  justify-items: start;
+  padding: clamp(1rem, 3.2vw, 3rem);
+  overflow: hidden;
+  color: var(--banner-overlay-text);
+  isolation: isolate;
+}
+
+#standard-banner-container .banner-billboard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 0% 100%, rgb(57 203 255 / 0.18), transparent 38%),
+    linear-gradient(90deg, rgb(0 0 0 / 0.72), rgb(0 0 0 / 0.42) 38%, transparent 68%),
+    linear-gradient(0deg, rgb(0 0 0 / 0.72), rgb(0 0 0 / 0.28) 48%, transparent 78%);
+  pointer-events: none;
+}
+
+#standard-banner-container .banner-billboard > * {
+  position: relative;
+  z-index: 1;
+}
+
+#standard-banner-container :is(
+  .banner-billboard--timeline,
+  .banner-billboard--archive,
+  .banner-billboard--cookbook,
+  .banner-billboard--game,
+  .banner-billboard--story-mode,
+  .banner-billboard--community
+) {
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  align-items: end;
+  justify-items: start;
+  align-content: stretch;
+  justify-content: stretch;
+  padding: clamp(1rem, 3.2vw, 3rem);
+}
+
+#standard-banner-container :is(
+  .banner-billboard__timeline-panel,
+  .banner-billboard__archive-card,
+  .banner-billboard__cookbook-slab,
+  .banner-billboard__game-surface,
+  .banner-billboard__story-mode-panel,
+  .banner-billboard__community-window
+) {
+  display: grid;
+  align-self: end;
+  justify-self: start;
+  align-content: end;
+  gap: 0.75rem;
+  width: min(43rem, calc(100vw - clamp(2rem, 6vw, 6rem)));
+  min-height: 0;
+  padding: 0 0 0 1.05rem;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  text-align: left;
+  transform: none;
+  backdrop-filter: none;
+  overflow: visible;
+}
+
+#standard-banner-container :is(
+  .banner-billboard__timeline-panel,
+  .banner-billboard__archive-card,
+  .banner-billboard__cookbook-slab,
+  .banner-billboard__game-surface,
+  .banner-billboard__story-mode-panel,
+  .banner-billboard__community-window
+)::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--banner-overlay-accent), rgb(255 255 255 / 0.18));
+  box-shadow: 0 0 28px rgb(96 221 255 / 0.34);
+  pointer-events: none;
+}
+
+#standard-banner-container .banner-billboard__game-surface::before,
+#standard-banner-container .banner-billboard__game-surface::after,
+#standard-banner-container .banner-billboard__story-mode-panel::before {
+  content: none;
+}
+
+#standard-banner-container :is(
+  .banner-billboard__game-reticle,
+  .banner-billboard__game-watermark,
+  .banner-billboard__community-marquee
+) {
+  display: none;
+}
+
+#standard-banner-container :is(
+  .banner-billboard__timeline-topline,
+  .banner-billboard__archive-header,
+  .banner-billboard__cookbook-topline,
+  .banner-billboard__game-topline,
+  .banner-billboard__story-mode-header,
+  .banner-billboard__community-topline
+) {
+  display: flex;
+  grid-template-columns: none;
+  align-items: center;
+  gap: 0.62rem;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+#standard-banner-container .banner-billboard .banner-title-sigil {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 0.45rem;
+  background: rgb(8 16 28 / 0.42);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+  color: rgb(190 239 255 / 0.94);
+  transform: none;
+}
+
+#standard-banner-container .banner-billboard .banner-title-sigil svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+#standard-banner-container .banner-billboard .banner-title-kicker {
+  margin: 0;
+  color: rgb(121 231 255 / 0.92);
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  font-size: clamp(0.68rem, 0.72vw, 0.78rem);
+  font-weight: 850;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+#standard-banner-container :is(
+  .banner-billboard__timeline-statline,
+  .banner-billboard__archive-stamp,
+  .banner-billboard__game-statline
+) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.7rem;
+  padding: 0.25rem 0.62rem;
+  border: 1px solid var(--banner-overlay-edge);
+  border-radius: 0.45rem;
+  background: rgb(3 13 24 / 0.36);
+  color: var(--banner-overlay-faint);
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+#standard-banner-container :is(
+  .banner-billboard__timeline-copy,
+  .banner-billboard__cookbook-copy,
+  .banner-billboard__game-copy,
+  .banner-billboard__game-hero
+) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: end;
+  align-items: end;
+  gap: 0.72rem;
+  width: 100%;
+  min-height: 0;
+}
+
+#standard-banner-container :is(
+  .banner-billboard h3,
+  .banner-billboard__store-headline h3,
+  .banner-billboard__timeline-copy h3,
+  .banner-billboard__archive-card h3,
+  .banner-billboard__cookbook-copy h3,
+  .banner-billboard__game-hero h3,
+  .banner-billboard__story-mode-panel h3,
+  .banner-billboard__community-window h3
+) {
+  max-width: 12ch;
+  margin: 0;
+  color: var(--banner-overlay-text);
+  font-family: 'Roboto', system-ui, sans-serif;
+  font-size: clamp(2.6rem, 6vw, 6.35rem);
+  font-weight: 900;
+  line-height: 0.84;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-shadow:
+    0 2px 1px rgb(0 0 0 / 0.34),
+    0 20px 48px rgb(0 0 0 / 0.58),
+    0 0 34px rgb(83 216 255 / 0.16);
+  text-wrap: balance;
+}
+
+#standard-banner-container :is(
+  .banner-billboard p,
+  .banner-billboard__timeline-copy p,
+  .banner-billboard__archive-card p,
+  .banner-billboard__cookbook-copy p,
+  .banner-billboard__game-sidecar p,
+  .banner-billboard__story-mode-panel p,
+  .banner-billboard__community-window p,
+  .banner-billboard__store-deck p
+) {
+  max-width: 33rem;
+  margin: 0;
+  color: var(--banner-overlay-muted);
+  font-family: 'Roboto', system-ui, sans-serif;
+  font-size: clamp(0.94rem, 1.25vw, 1.1rem);
+  line-height: 1.48;
+  text-align: left;
+  text-wrap: pretty;
+}
+
+#standard-banner-container .banner-billboard__game-sidecar {
+  display: grid;
+  align-self: auto;
+  align-content: start;
+  gap: 0.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#standard-banner-container :is(
+  .banner-billboard__timeline-footer,
+  .banner-billboard__cookbook-footer,
+  .banner-billboard__story-mode-footer,
+  .banner-billboard__store-offer,
+  .banner-title-meta
+) {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0.1rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+#standard-banner-container :is(
+  .banner-title-stat,
+  .banner-title-cta,
+  .banner-billboard__timeline-cta,
+  .banner-billboard__archive-footer,
+  .banner-billboard__community-cta
+) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.05rem;
+  padding: 0.42rem 0.75rem;
+  border: 1px solid var(--banner-overlay-edge);
+  border-radius: 0.45rem;
+  background: rgb(7 21 35 / 0.46);
+  color: rgb(216 245 255 / 0.92);
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+#standard-banner-container .banner-title-cta {
+  border-color: rgb(92 225 255 / 0.42);
+  background: linear-gradient(90deg, rgb(25 186 225 / 0.24), rgb(255 255 255 / 0.08));
+  color: rgb(239 251 255 / 0.98);
+}
+
+#standard-banner-container .banner-billboard--store {
+  align-content: end;
+  justify-content: start;
+  gap: 0.75rem;
+}
+
+#standard-banner-container .banner-billboard--store .banner-title-sigil {
+  display: none;
+}
+
+#standard-banner-container :is(
+  .banner-billboard__store-headline,
+  .banner-billboard__store-deck
+) {
+  width: min(43rem, calc(100vw - clamp(2rem, 6vw, 6rem)));
+  justify-self: start;
+  min-height: 0;
+  padding: 0 0 0 1.05rem;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  text-align: left;
+}
+
+#standard-banner-container .banner-billboard__store-headline {
+  position: relative;
+  display: grid;
+  gap: 0.58rem;
+}
+
+#standard-banner-container .banner-billboard__store-headline::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--banner-overlay-accent), rgb(255 255 255 / 0.18));
+  box-shadow: 0 0 28px rgb(96 221 255 / 0.34);
+  pointer-events: none;
+}
+
+#standard-banner-container .banner-billboard__store-headline h3 {
+  margin-inline: 0;
+}
+
+#standard-banner-container .banner-billboard__store-deck {
+  display: grid;
+  gap: 0.78rem;
+}
+
+#standard-banner-container .banner-title-display {
+  top: auto;
+  right: auto;
+  bottom: clamp(1rem, 3.2vw, 3rem);
+  left: clamp(1rem, 3.2vw, 3rem);
+  justify-items: start;
+  align-content: end;
+  width: min(38rem, calc(100% - clamp(2rem, 6.4vw, 6rem)));
+  max-width: min(38rem, calc(100% - clamp(2rem, 6.4vw, 6rem)));
+  padding: 0 0 0 1.05rem;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  text-align: left;
+  transform: none;
+  backdrop-filter: none;
+}
+
+#standard-banner-container .banner-title-display::before {
+  inset: -3rem -10rem -3rem -3rem;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 0% 100%, rgb(57 203 255 / 0.18), transparent 38%),
+    linear-gradient(90deg, rgb(0 0 0 / 0.7), rgb(0 0 0 / 0.28) 62%, transparent);
+  opacity: 1;
+  mix-blend-mode: normal;
+}
+
+#standard-banner-container .banner-title-display::after {
+  inset: 0 auto 0 0;
+  width: 2px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--banner-overlay-accent), rgb(255 255 255 / 0.18));
+  box-shadow: 0 0 28px rgb(96 221 255 / 0.34);
+}
+
+#standard-banner-container .banner-title-display h3 {
+  max-width: 12ch;
+  color: var(--banner-overlay-text);
+  font-size: clamp(2.35rem, 5vw, 5.4rem);
+  font-weight: 900;
+  line-height: 0.86;
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+#standard-banner-container .banner-title-display p {
+  max-width: 32rem;
+  color: var(--banner-overlay-muted);
+  font-size: clamp(0.94rem, 1.2vw, 1.08rem);
+  line-height: 1.48;
+  text-align: left;
+}
+
+#standard-banner-container .banner-title-display .banner-title-meta {
+  justify-content: flex-start;
+}
+
+@media (max-width: 760px) {
+  #standard-banner-container .banner-billboard {
+    padding: 1rem 1rem clamp(7.5rem, 18vh, 9rem);
+  }
+
+  #standard-banner-container :is(
+    .banner-billboard__timeline-panel,
+    .banner-billboard__archive-card,
+    .banner-billboard__cookbook-slab,
+    .banner-billboard__game-surface,
+    .banner-billboard__story-mode-panel,
+    .banner-billboard__community-window,
+    .banner-billboard__store-headline,
+    .banner-billboard__store-deck
+  ) {
+    width: min(100%, 34rem);
+    padding-left: 0.85rem;
+  }
+
+  #standard-banner-container :is(
+    .banner-billboard h3,
+    .banner-billboard__store-headline h3,
+    .banner-billboard__timeline-copy h3,
+    .banner-billboard__archive-card h3,
+    .banner-billboard__cookbook-copy h3,
+    .banner-billboard__game-hero h3,
+    .banner-billboard__story-mode-panel h3,
+    .banner-billboard__community-window h3,
+    .banner-title-display h3
+  ) {
+    max-width: 11ch;
+    font-size: clamp(1.85rem, 10vw, 3.4rem);
+    line-height: 0.88;
+  }
+
+  #standard-banner-container :is(
+    .banner-billboard p,
+    .banner-title-display p
+  ) {
+    max-width: 28rem;
+    font-size: 0.9rem;
+    line-height: 1.42;
+  }
+
+  #standard-banner-container .banner-title-display {
+    bottom: clamp(7.5rem, 18vh, 9rem);
+    left: 1rem;
+    width: calc(100% - 2rem);
+    max-width: calc(100% - 2rem);
+    padding-left: 0.85rem;
+  }
+
+  #standard-banner-container .banner-title-sigil {
+    width: 2rem;
+    height: 2rem;
+  }
+}

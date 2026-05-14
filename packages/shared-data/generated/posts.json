@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-07T22:51:05.739Z",
+  "generatedAt": "2026-05-14T00:18:20.892Z",
   "sourceRoot": "/home/greggles/Merkin/apps/megameal/src/content/posts",
   "count": 26,
   "items": [
@@ -43,8 +43,8 @@
       "sourcePath": "snuggaloid-spec-sheet.mdx",
       "collection": "posts",
       "url": "/posts/snuggaloid-spec-sheet/",
-      "title": "Snuggaloid Product Reference",
-      "description": "Working reference for the Snuggaloid art-plush build, registry model, and lore context.",
+      "title": "Snuggaloidipedia",
+      "description": "Concise reference on Snuggaloids -- in-universe history, post-extinction emergence, and the real-world art-plush program.",
       "published": "2026-05-07T00:00:00.000Z",
       "updated": null,
       "draft": true,

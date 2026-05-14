@@ -18,8 +18,8 @@ featured: false
 listingStyle: "showcase"
 listingLabel: "Top Seller"
 sku: "DIP-001"
-description: "The Dip is W Corporation's flagship dipping sauce: sweet, savory, fluorescently persuasive, and marketed with the kind of saturation normally reserved for planetary elections. It is sold as a family condiment, a lunchbox essential, and a behavior-compatible treat for growing children. Demand remains extreme. So do the rumors."
-realDescription: "A heavily promoted bottled dipping sauce tied to W Corporation's more unsettling brand ecosystem. Parents report unusually intense repeat cravings in children, widespread fatigue the morning after consumption, and occasional nighttime wandering with no remembered cause. Internal review has not confirmed a causal link."
+description: "The Dip is W Corporation's best selling dipping sauce: sweet, savory, fluorescently persuasive, and marketed with the kind of saturation normally reserved for planetary elections. It is sold as a family condiment, a lunchbox essential, and a behavior-compatible treat for growing children. Demand remains extreme. So do the rumors."
+realDescription: "A heavily promoted dipping sauce tied to W Corporation's more unsettling brand ecosystem. Parents report unusually intense repeat cravings in children, widespread fatigue the morning after consumption."
 shippingNote: "Distribution remains strong in approved sectors. Parent-led opposition groups report elevated disappearance rates, though the company denies any relation to fulfillment operations."
 rating: 4.8
 media:
@@ -41,13 +41,7 @@ specifications:
   - label: "Flavor Profile"
     value: "Sweet smoke, engineered umami, trace heat, escalating insistence"
   - label: "Use Case"
-    value: "Fries, nuggets, vegetables, fingers, unauthorized bulk consumption"
-  - label: "Distribution"
-    value: "W Corporation omnichannel campaign with school-zone proximity emphasis"
-  - label: "Sleep Advisory"
-    value: "No direct link to sleepwalking has been admitted by the manufacturer"
-  - label: "Opposition Status"
-    value: "Parent objections recorded; several organizers no longer reachable"
+    value: "Fries, nuggets, vegetables, fingers, add to your favorite beverage, unauthorized bulk consumption"
 ingredients:
   - "Tomato paste"
   - "Corn syrup"
@@ -78,25 +72,30 @@ nutritionFacts:
     value: "10g"
   - label: "Protein"
     value: "0g"
+assurances:
+  - label: "Availability Assurance"
+    value: "The Dip is not available in this timeline. Listings remain visible for market research, parental warning, and campaign-pattern review."
+  - label: "Manufacturer Position"
+    value: "W Corporation does not admit a direct link between consumption, fatigue, organizer attrition, or warehouse congregation."
+  - label: "Household Guidance"
+    value: "Parents are advised to monitor repeat requests, late-night silhouettes, and jars that appear after disposal."
 qanda:
   - question: "Why is The Dip so popular with children?"
     answer: "W Corporation describes the flavor as 'compliance-forward' and 'optimally memorable.' Parents tend to use simpler language, usually after the third request in a single afternoon."
-  - question: "Is it true children have been wandering at night after eating it?"
-    answer: "There are recurring reports of children standing in dark rooms, moving in loose groups through neighborhoods, and gathering inside unused commercial spaces with no memory of doing so the next day. The company attributes this to rumor, ordinary childhood behavior, and insufficient parental confidence."
+  - question: "Are the rumors true?"
+    answer: "The reports of children standing in dark rooms, moving in loose groups through neighborhoods, and gathering inside unused commercial spaces an not proven. The company attributes this to rumor, ordinary childhood behavior, and insufficient parental confidence."
     linkLabel: "Read the W Corporation field imagery"
     linkHref: "/videos/mega-meal-explained/"
     linkAccent: "creepy"
-  - question: "What are they building in warehouses?"
-    answer: "No official statement has clarified this. Accounts differ on whether the children are stacking packaging, arranging playground components, or simply standing in formation around something already there."
   - question: "Why isn't it available in my timeline?"
     answer: "Several timelines suspended import after clustered parent complaints, school-board hearings, and an uncomfortable number of disappearances among local organizers. W Corporation calls the issue temporary and regrettably political."
   - question: "Should parents be concerned?"
-    answer: "Only if they object to late-night silhouettes, sudden bulk-order requests, or a child saying they are still hungry immediately after finishing the jar."
+    answer: "..."
 preWrittenReviews:
   - author: "Rhea, Parent of Two"
     rating: 2
     date: "Submitted, then reposted"
-    comment: "My kids love it in a way that feels less like preference and more like instruction. They ask for it at breakfast, then complain they feel exhausted the next morning. I threw one jar away and the replacement was on the porch before noon."
+    comment: "My kids love it in a way that feels less like preference and more like instruction. They ask for it, then complain, the seem exhausted lately. I threw somew away and there was a replacemt in the fridge the next day"
     flags:
       - "original poster unreachable"
   - author: "District Lunch Coordinator"
@@ -107,20 +106,16 @@ preWrittenReviews:
   - author: "Anonymous Neighborhood Watch"
     rating: 1
     date: "After midnight"
-    comment: "Three nights in a row the children were out again, barefoot and silent, all heading toward the old W Corporation storage annex. In daylight they remembered nothing except wanting more sauce."
+    comment: "Three nights in a row the children were out again, barefoot and silent, all heading toward the old W Corporation storage annex. In daylight they claimed to remember nothing."
     linkLabel: "Open the campaign dossier"
     linkHref: "/videos/mega-meal-explained/"
     flags:
       - "community report"
       - "warehouse activity ongoing"
-  - author: "Consumer Satisfaction Office, W Corporation"
-    rating: 5
-    date: "Approved statement"
-    comment: "The Dip continues to outperform every internal projection across repeat-purchase metrics, family loyalty signals, and youth engagement benchmarks. Concerns regarding fatigue, sleepwalking, or organizer attrition remain anecdotal."
   - author: "M. Vale, Parent Action Committee"
     rating: 1
     date: "Recovered copy"
-    comment: "We met to discuss getting it out of the school district. Two people failed to make it home. I am posting this again because the first version disappeared and I do not trust the jar in my refrigerator."
+    comment: "We met to discuss getting it out of the school district. Two people failed to make it home. I am posting this again because the first version disappeared."
     flags:
       - "removed and restored"
       - "author missing"

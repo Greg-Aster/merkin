@@ -1,4 +1,5 @@
 <script lang="ts">
+import { DEFAULT_RUNTIME_PLAYER_SETTINGS } from '../engine/runtimePlayerSettings'
 import { requestEditorViewportFocus } from './editorStore'
 import type { SharedLevelEditorSettings } from './editorTypes'
 
@@ -87,8 +88,19 @@ $: spawnPosition = getSpawnPosition()
           type="number"
           min="0"
           step="0.1"
-          value={levelSettings.player?.moveSpeed ?? 5}
+          value={levelSettings.player?.moveSpeed ?? DEFAULT_RUNTIME_PLAYER_SETTINGS.moveSpeed}
           on:change={(event) => updateLevelNumericSetting(['player', 'moveSpeed'], (event.currentTarget as HTMLInputElement).value)}
+        />
+      </label>
+      <label class="editor-field">
+        <span class="editor-field-label">Sprint Multiplier</span>
+        <input
+          class="tuple-input"
+          type="number"
+          min="1"
+          step="0.1"
+          value={levelSettings.player?.sprintMultiplier ?? DEFAULT_RUNTIME_PLAYER_SETTINGS.sprintMultiplier}
+          on:change={(event) => updateLevelNumericSetting(['player', 'sprintMultiplier'], (event.currentTarget as HTMLInputElement).value)}
         />
       </label>
       <label class="editor-field">
@@ -98,7 +110,7 @@ $: spawnPosition = getSpawnPosition()
           type="number"
           min="0"
           step="0.1"
-          value={levelSettings.player?.jumpForce ?? 8}
+          value={levelSettings.player?.jumpForce ?? DEFAULT_RUNTIME_PLAYER_SETTINGS.jumpForce}
           on:change={(event) => updateLevelNumericSetting(['player', 'jumpForce'], (event.currentTarget as HTMLInputElement).value)}
         />
       </label>
@@ -115,7 +127,7 @@ $: spawnPosition = getSpawnPosition()
           type="number"
           min="0"
           step="1"
-          value={levelSettings.player?.lightIntensityScale ?? 60}
+          value={levelSettings.player?.lightIntensityScale ?? DEFAULT_RUNTIME_PLAYER_SETTINGS.lightIntensityScale}
           on:change={(event) => updateLevelNumericSetting(['player', 'lightIntensityScale'], (event.currentTarget as HTMLInputElement).value)}
         />
       </label>

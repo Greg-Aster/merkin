@@ -6,6 +6,7 @@ import type {
   LevelRegistryEntry,
 } from '../levels/levelRegistry'
 import { createDefaultSceneForLevel } from './defaultScenes'
+import { stripEditorSceneRuntimeData } from './editorPersistence'
 import {
   EDITOR_PUBLISH_BAKE_STEP_LABELS,
   computeEditorPublishBakePlan,
@@ -173,13 +174,15 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
   ) {
     const clonedScene = structuredClone(sourceScene) as EditorSceneDocument
 
-    return assertValidEditorSceneDocument(
-      withEditorSceneEngineData({
-        ...clonedScene,
-        levelId: targetLevelId,
-        updatedAt: new Date().toISOString(),
-      }),
-      'Scene disk save',
+    return stripEditorSceneRuntimeData(
+      assertValidEditorSceneDocument(
+        withEditorSceneEngineData({
+          ...clonedScene,
+          levelId: targetLevelId,
+          updatedAt: new Date().toISOString(),
+        }),
+        'Scene disk save',
+      ),
     )
   }
 
@@ -257,6 +260,22 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
     return payload
   }
 
+  async function cookRuntimeSceneManifests(targetLevelId: string) {
+    const response = await fetch(
+      `${EDITOR_API_BASE}/api/editor-scene/cook-runtime-assets`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ levelId: targetLevelId }),
+      },
+    )
+    const payload = await response.json()
+    if (!payload?.success) {
+      throw new Error(payload?.message ?? 'Runtime manifest cook failed')
+    }
+    return payload
+  }
+
   function getPayloadArtifacts(payload: any) {
     return [
       payload?.path,
@@ -321,7 +340,10 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
 
   function getBackendPublishSteps(plan: EditorPublishBakePlan) {
     return plan.steps.filter(
-      step => step !== 'save-scene' && step !== 'deploy-registry',
+      step =>
+        step !== 'save-scene' &&
+        step !== 'generate-heightmap' &&
+        step !== 'deploy-registry',
     )
   }
 
@@ -445,6 +467,14 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
       )
     }
 
+    if (step === 'generate-heightmap') {
+      return postPublishStep(
+        step,
+        `${EDITOR_API_BASE}/api/editor-terrain/generate-heightmap`,
+        { levelId: targetLevelId, bakeCollision: false },
+      )
+    }
+
     if (step === 'cook-terrain-chunks') {
       return postPublishStep(
         step,
@@ -494,12 +524,19 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
 
     try {
       const nextEntry = buildMetadataEntry(deps.getActiveSceneLevelId())
-      await saveSceneDocumentToDisk(deps.getActiveSceneLevelId(), scene)
+      const targetLevelId = deps.getActiveSceneLevelId()
+      await saveSceneDocumentToDisk(targetLevelId, scene)
+      deps.setSaveMessage(`Saved ${nextEntry.title}; cooking runtime manifest`)
+      await cookRuntimeSceneManifests(targetLevelId)
       await persistLevelRegistryEntries(replaceRegistryEntry(nextEntry))
-      deps.setSaveMessage(`Overwrote level ${nextEntry.title}`)
+      deps.setSaveMessage(
+        `Saved ${nextEntry.title} and cooked runtime manifest`,
+      )
     } catch (error) {
       console.error('Overwrite level failed:', error)
-      deps.setSaveMessage('Overwrite failed')
+      const message =
+        error instanceof Error ? error.message : 'Save and cook failed'
+      deps.setSaveMessage(`Save failed: ${message}`)
     }
   }
 
@@ -572,6 +609,13 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
           `Publishing ${title}: ${EDITOR_PUBLISH_BAKE_STEP_LABELS['save-scene']}`,
         )
         await runPublishBakeStep('save-scene', targetLevelId, scene)
+      }
+
+      if (bakePlan.steps.includes('generate-heightmap')) {
+        deps.setSaveMessage(
+          `Publishing ${title}: ${EDITOR_PUBLISH_BAKE_STEP_LABELS['generate-heightmap']}`,
+        )
+        await runPublishBakeStep('generate-heightmap', targetLevelId, scene)
       }
 
       deps.setSaveMessage(`Publishing ${title}: running publish build`)

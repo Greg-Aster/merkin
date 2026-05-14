@@ -17,6 +17,10 @@ const configuredBasePath =
   process.env.GAME_BASE_PATH || process.env.PUBLIC_BASE_PATH || '/'
 const gameDevHost = process.env.GAME_DEV_HOST || '127.0.0.1'
 const gameDevPort = Number.parseInt(process.env.GAME_DEV_PORT || '4322', 10)
+const gameDevManualRefresh =
+  process.env.GAME_DEV_MANUAL_REFRESH === '1' ||
+  process.env.GAME_DEV_HMR === '0' ||
+  process.env.GAME_DEV_NO_HMR === '1'
 const normalizedBasePath =
   configuredBasePath === '/'
     ? '/'
@@ -118,10 +122,17 @@ export default defineConfig({
     server: {
       host: gameDevHost,
       port: gameDevPort,
+      hmr: gameDevManualRefresh ? false : undefined,
+      watch: {
+        ignored: ['**/src/threlte/editor/scenes/**/*.scene.json'],
+      },
     },
     plugins: [
       wasm(),
-      createDevRuntimePlugin('game', gameDevHost),
+      createDevRuntimePlugin('game', gameDevHost, {
+        manualRefresh: gameDevManualRefresh,
+        hmr: !gameDevManualRefresh,
+      }),
       createEditorToolsApiPlugin(),
       createBuildCruftGatePlugin(),
       createClientManualChunksPlugin(),

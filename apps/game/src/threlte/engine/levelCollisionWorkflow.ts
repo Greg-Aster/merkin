@@ -9,10 +9,10 @@ export type CollisionRole =
   | 'visualOnly'
   | 'detail'
 
-export type TerrainCollisionSource = 'heightmap' | 'scene-authored' | 'none'
-export type CollisionDefaultPolicy =
-  | 'lightweight-auto'
-  | 'authored-only'
+export type TerrainCollisionSource =
+  | 'heightmap'
+  | 'source-glb'
+  | 'scene-authored'
   | 'none'
 export type CollisionBudget = 'mobile' | 'balanced' | 'desktop'
 
@@ -20,7 +20,6 @@ export interface LevelCollisionWorkflow {
   levelId: string
   terrainCollision: TerrainCollisionSource
   terrainManifestUrl?: string
-  defaultActorCollision: CollisionDefaultPolicy
   colliderBudget: CollisionBudget
   visualOnlyActorIds?: string[]
   groundActorIds?: string[]
@@ -32,51 +31,8 @@ export interface LevelCollisionWorkflow {
 const DEFAULT_WORKFLOW: LevelCollisionWorkflow = {
   levelId: 'default',
   terrainCollision: 'scene-authored',
-  defaultActorCollision: 'lightweight-auto',
   colliderBudget: 'mobile',
 }
-
-export const LEVEL_COLLISION_WORKFLOWS: Record<string, LevelCollisionWorkflow> =
-  {
-    observatory: {
-      levelId: 'observatory',
-      terrainCollision: 'heightmap',
-      terrainManifestUrl: '/terrain/observatory-environment.manifest.json',
-      defaultActorCollision: 'lightweight-auto',
-      colliderBudget: 'mobile',
-    },
-    solitude: {
-      levelId: 'solitude',
-      terrainCollision: 'heightmap',
-      terrainManifestUrl: '/terrain/solitude.manifest.json',
-      defaultActorCollision: 'lightweight-auto',
-      colliderBudget: 'mobile',
-    },
-    yggdrasil: {
-      levelId: 'yggdrasil',
-      terrainCollision: 'heightmap',
-      terrainManifestUrl: '/terrain/yggdrasil.manifest.json',
-      defaultActorCollision: 'lightweight-auto',
-      colliderBudget: 'mobile',
-    },
-    miranda: {
-      levelId: 'miranda',
-      terrainCollision: 'scene-authored',
-      defaultActorCollision: 'lightweight-auto',
-      colliderBudget: 'mobile',
-    },
-    'sci-fi-room': {
-      levelId: 'sci-fi-room',
-      terrainCollision: 'heightmap',
-      terrainManifestUrl: '/terrain/sci-fi-room.manifest.json',
-      defaultActorCollision: 'lightweight-auto',
-      colliderBudget: 'mobile',
-    },
-  }
-
-const LEVEL_ID_PREFIXES = Object.keys(LEVEL_COLLISION_WORKFLOWS).sort(
-  (a, b) => b.length - a.length,
-)
 
 function hasActorId(
   workflow: LevelCollisionWorkflow,
@@ -105,7 +61,13 @@ function resolveTerrainCollisionSource(
   fallback: TerrainCollisionSource,
 ): TerrainCollisionSource {
   if (source === 'baked-heightmap') return 'heightmap'
-  if (source === 'scene-authored' || source === 'none') return source
+  if (
+    source === 'source-glb' ||
+    source === 'scene-authored' ||
+    source === 'none'
+  ) {
+    return source
+  }
   return fallback
 }
 
@@ -118,8 +80,6 @@ function resolveWorkflowFromSettings(
   const terrainSettings = collisionSettings?.terrain
   const workflowSettings = collisionSettings?.workflow
   const roleSettings = collisionSettings?.roles
-  const solidObjectsByDefault =
-    collisionSettings?.defaults?.solidObjectsByDefault
 
   return {
     ...fallback,
@@ -130,11 +90,6 @@ function resolveWorkflowFromSettings(
     ),
     terrainManifestUrl:
       terrainSettings?.manifestUrl ?? fallback.terrainManifestUrl,
-    defaultActorCollision:
-      workflowSettings?.actorCollision ??
-      (solidObjectsByDefault === false
-        ? 'authored-only'
-        : fallback.defaultActorCollision),
     colliderBudget: workflowSettings?.colliderBudget ?? fallback.colliderBudget,
     visualOnlyActorIds: uniqueActorIds(
       fallback.visualOnlyActorIds,
@@ -159,16 +114,12 @@ function resolveWorkflowFromSettings(
   }
 }
 
-export function inferLevelIdFromActorId(actorId: string) {
-  return LEVEL_ID_PREFIXES.find(levelId => actorId.startsWith(`${levelId}-`))
-}
-
 export function getLevelCollisionWorkflow(
   levelId?: string | null,
   settings?: SceneSettings | null,
 ) {
   const resolvedLevelId = levelId || DEFAULT_WORKFLOW.levelId
-  const fallback = LEVEL_COLLISION_WORKFLOWS[resolvedLevelId] ?? {
+  const fallback = {
     ...DEFAULT_WORKFLOW,
     levelId: resolvedLevelId,
   }
@@ -182,8 +133,7 @@ export function getActorCollisionRole(input: {
   sensor?: boolean
   shape?: string
 }): CollisionRole {
-  const levelId = input.levelId ?? inferLevelIdFromActorId(input.actorId)
-  const workflow = getLevelCollisionWorkflow(levelId, input.settings)
+  const workflow = getLevelCollisionWorkflow(input.levelId, input.settings)
 
   if (hasActorId(workflow, 'visualOnlyActorIds', input.actorId)) {
     return 'visualOnly'

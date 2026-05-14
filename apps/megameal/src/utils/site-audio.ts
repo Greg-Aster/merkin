@@ -59,6 +59,8 @@ class SiteAudioManager {
   private suspendedHowl: Howl | null = null
   private youtubeApiPromise: Promise<void> | null = null
   private boundYouTubeFrames = new WeakSet<HTMLIFrameElement>()
+  private youtubeFrameIds = new WeakMap<HTMLIFrameElement, string>()
+  private youtubeMutationObserver: MutationObserver | null = null
   private youtubeFrameCounter = 0
 
   initialize(): void {
@@ -538,10 +540,7 @@ class SiteAudioManager {
 
   private bindYouTubeEmbeds(): void {
     const bindFrames = () => {
-      const frames = Array.from(document.querySelectorAll('iframe')).filter(
-        (frame): frame is HTMLIFrameElement =>
-          frame instanceof HTMLIFrameElement && this.isYouTubeEmbed(frame),
-      )
+      const frames = this.getYouTubeFrames(document)
 
       if (frames.length === 0) return
 
@@ -552,6 +551,62 @@ class SiteAudioManager {
 
     bindFrames()
     document.addEventListener('astro:page-load', bindFrames)
+
+    if (this.youtubeMutationObserver || !document.body) return
+
+    this.youtubeMutationObserver = new MutationObserver(mutations => {
+      const addedFrames: HTMLIFrameElement[] = []
+      let removedActiveFrame = false
+
+      for (const mutation of mutations) {
+        mutation.addedNodes.forEach(node => {
+          addedFrames.push(...this.getYouTubeFrames(node))
+        })
+
+        mutation.removedNodes.forEach(node => {
+          for (const frame of this.getYouTubeFrames(node)) {
+            const frameId = this.youtubeFrameIds.get(frame) ?? frame.id
+            if (frameId && this.activeYouTubePlayers.delete(frameId)) {
+              removedActiveFrame = true
+            }
+          }
+        })
+      }
+
+      if (addedFrames.length > 0) {
+        void this.ensureYouTubeIframeApi().then(() => {
+          addedFrames.forEach(frame => this.attachYouTubePlayer(frame))
+        })
+      }
+
+      if (removedActiveFrame) {
+        this.syncEmbeddedMediaSuspension()
+      }
+    })
+
+    this.youtubeMutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+    })
+  }
+
+  private getYouTubeFrames(root: ParentNode | Node): HTMLIFrameElement[] {
+    const frames: HTMLIFrameElement[] = []
+
+    if (root instanceof HTMLIFrameElement && this.isYouTubeEmbed(root)) {
+      frames.push(root)
+    }
+
+    if ('querySelectorAll' in root) {
+      frames.push(
+        ...Array.from(root.querySelectorAll('iframe')).filter(
+          (frame): frame is HTMLIFrameElement =>
+            frame instanceof HTMLIFrameElement && this.isYouTubeEmbed(frame),
+        ),
+      )
+    }
+
+    return frames
   }
 
   private async ensureYouTubeIframeApi(): Promise<void> {
@@ -603,6 +658,7 @@ class SiteAudioManager {
     }
 
     this.boundYouTubeFrames.add(frame)
+    this.youtubeFrameIds.set(frame, frame.id)
 
     new youtubeApi.Player(frame, {
       events: {

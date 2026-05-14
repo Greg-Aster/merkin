@@ -4,6 +4,7 @@ import {
   exportSceneNodesToMergedGlb,
   getPrefabAssetUrl,
 } from './editorBakeSource'
+import { getNodeVisualColliderSize } from './editorCollisionDefaults'
 import {
   getCenteredGroupTransform,
   getSharedParentId,
@@ -58,6 +59,14 @@ interface EditorAssetControllerDeps {
   ) => void
   setActiveEditorTab: (tab: string) => void
   setSaveMessage: (message: string) => void
+}
+
+type GeneratedVariantItem = {
+  name: string
+  path: string
+  url: string
+  sourceLabel?: string
+  isOriginalSource?: boolean
 }
 
 export function createEditorAssetController(deps: EditorAssetControllerDeps) {
@@ -118,9 +127,233 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     state.selectedGeneratedVariantUrl = ''
   }
 
+  function stripModelExtension(name: string) {
+    return name.replace(/\.(gltf|glb)$/i, '')
+  }
+
+  function getPathFileName(path: string) {
+    return path.split('/').filter(Boolean).pop() ?? ''
+  }
+
+  function getPathDirectoryName(path: string) {
+    const parts = path.split('/').filter(Boolean)
+    return parts[parts.length - 1] ?? ''
+  }
+
+  function getOriginalGeneratedSourceUrl(node: EditorSceneNode) {
+    const originalAssetUrl =
+      node.generation?.originalAssetUrl ??
+      node.collision?.assetLocalTransform?.sourceAssetUrl ??
+      ''
+    return originalAssetUrl.startsWith('/generated/') ? originalAssetUrl : ''
+  }
+
+  function createOriginalGeneratedVariantItem(
+    node: EditorSceneNode,
+  ): GeneratedVariantItem | null {
+    const url = getOriginalGeneratedSourceUrl(node)
+    const directoryPath = getPublicAssetDirectoryPath(url)
+    const fileName = getPathFileName(url)
+    if (!url || !directoryPath || !fileName) return null
+
+    return {
+      name: 'Original Mesh',
+      path: `${directoryPath}/${fileName}`,
+      url,
+      sourceLabel: 'original mesh',
+      isOriginalSource: true,
+    }
+  }
+
+  function normalizeGeneratedVariantSlug(value: string) {
+    return stripModelExtension(value)
+      .replace(/-generated-\d{4}-\d{2}-\d{2}t.+$/i, '')
+      .replace(/-\d{4}-\d{2}-\d{2}t.+$/i, '')
+      .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+  }
+
+  function normalizeGeneratedVariantLabel(value: string) {
+    return stripModelExtension(value)
+      .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+  }
+
+  function getGeneratedVariantSlugCandidates(
+    node: EditorSceneNode,
+    assetUrl: string,
+    directoryPath: string,
+  ) {
+    const candidates = [
+      normalizeGeneratedVariantSlug(getPathFileName(assetUrl)),
+      normalizeGeneratedVariantSlug(getPathDirectoryName(directoryPath)),
+      normalizeGeneratedVariantSlug(deps.getAiSourceName(node)),
+      normalizeGeneratedVariantSlug(node.name),
+    ].filter(Boolean)
+
+    return Array.from(new Set(candidates))
+  }
+
+  function createGeneratedVariantItem(
+    entry: EditorWorkspaceEntry,
+    directoryPath: string,
+    sourceLabel: string,
+    slugCandidates: string[],
+  ): GeneratedVariantItem {
+    const fileLabel = stripModelExtension(entry.name)
+    const directoryLabel = getPathDirectoryName(directoryPath)
+    const normalizedFileLabel = normalizeGeneratedVariantLabel(fileLabel)
+    const name = slugCandidates.includes(normalizedFileLabel)
+      ? directoryLabel || entry.name
+      : entry.name
+
+    return {
+      name,
+      path: entry.path,
+      url: resolvePublicAssetUrl(entry.path, entry.name),
+      sourceLabel,
+    }
+  }
+
+  async function loadGeneratedVariantDirectory(
+    directoryPath: string,
+    sourceLabel: string,
+    slugCandidates: string[],
+  ) {
+    const items = await browseWorkspaceEntries(directoryPath)
+    return items
+      .filter(isGeneratedModelFile)
+      .sort((left, right) => right.name.localeCompare(left.name))
+      .map(item =>
+        createGeneratedVariantItem(
+          item,
+          directoryPath,
+          sourceLabel,
+          slugCandidates,
+        ),
+      )
+  }
+
+  function addGeneratedVariantItem(
+    itemMap: Map<string, GeneratedVariantItem>,
+    item: GeneratedVariantItem,
+  ) {
+    if (!item.url || itemMap.has(item.url)) return
+    itemMap.set(item.url, item)
+  }
+
+  async function addGeneratedVariantDirectory(
+    itemMap: Map<string, GeneratedVariantItem>,
+    directoryPath: string,
+    sourceLabel: string,
+    slugCandidates: string[],
+  ) {
+    try {
+      const items = await loadGeneratedVariantDirectory(
+        directoryPath,
+        sourceLabel,
+        slugCandidates,
+      )
+      items.forEach(item => addGeneratedVariantItem(itemMap, item))
+    } catch (error) {
+      console.debug('Generated variant directory unavailable:', {
+        directoryPath,
+        error,
+      })
+    }
+  }
+
+  async function getGeneratedVariantDirectoryItems(
+    directoryPath: string,
+    sourceLabel: string,
+    slugCandidates: string[],
+  ) {
+    try {
+      return await loadGeneratedVariantDirectory(
+        directoryPath,
+        sourceLabel,
+        slugCandidates,
+      )
+    } catch (error) {
+      return []
+    }
+  }
+
+  async function collectRelatedGeneratedVariantItems(
+    node: EditorSceneNode,
+    assetUrl: string,
+    directoryPath: string,
+  ) {
+    const slugCandidates = getGeneratedVariantSlugCandidates(
+      node,
+      assetUrl,
+      directoryPath,
+    )
+    const primarySlug = slugCandidates[0] ?? ''
+    const itemMap = new Map<string, GeneratedVariantItem>()
+    const originalItem = createOriginalGeneratedVariantItem(node)
+
+    function withOriginalItem(items: GeneratedVariantItem[]) {
+      if (!originalItem || items.some(item => item.url === originalItem.url)) {
+        return items
+      }
+      return [originalItem, ...items]
+    }
+
+    if (directoryPath.startsWith(deps.assetLibraryRootGenerated)) {
+      const currentGeneratedFolderItems =
+        await getGeneratedVariantDirectoryItems(
+          directoryPath,
+          'generated folder',
+          slugCandidates,
+        )
+
+      if (currentGeneratedFolderItems.length > 0) {
+        return withOriginalItem(currentGeneratedFolderItems)
+      }
+    }
+
+    if (primarySlug) {
+      const generatedFolderItems = await getGeneratedVariantDirectoryItems(
+        `${deps.assetLibraryRootGenerated}/${primarySlug}`,
+        `${primarySlug} generated`,
+        slugCandidates,
+      )
+
+      if (generatedFolderItems.length > 0) {
+        return withOriginalItem(generatedFolderItems)
+      }
+    }
+
+    await addGeneratedVariantDirectory(
+      itemMap,
+      directoryPath,
+      'current folder',
+      slugCandidates,
+    )
+
+    const currentItem = itemMap.get(assetUrl)
+    const variantItems = Array.from(itemMap.values()).filter(
+      item => item.url !== assetUrl,
+    )
+
+    return withOriginalItem(
+      currentItem ? [currentItem, ...variantItems] : variantItems,
+    )
+  }
+
   async function loadGeneratedVariantsForSelectedNode(
     node: EditorSceneNode | null = deps.getSelectedNode(),
   ) {
+    if (!node) {
+      clearGeneratedVariantState()
+      return
+    }
+
     const assetUrl = node?.asset?.url ?? ''
     if (!assetUrl.startsWith('/generated/')) {
       clearGeneratedVariantState()
@@ -137,15 +370,11 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     state.generatedVariantError = ''
 
     try {
-      const items = await browseWorkspaceEntries(directoryPath)
-      state.generatedVariantItems = items
-        .filter(isGeneratedModelFile)
-        .sort((left, right) => right.name.localeCompare(left.name))
-        .map(item => ({
-          name: item.name,
-          path: item.path,
-          url: resolvePublicAssetUrl(item.path, item.name),
-        }))
+      state.generatedVariantItems = await collectRelatedGeneratedVariantItems(
+        node,
+        assetUrl,
+        directoryPath,
+      )
       state.selectedGeneratedVariantUrl =
         state.generatedVariantItems.find(
           (item: { url: string }) => item.url === assetUrl,
@@ -538,6 +767,8 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
         previousCollision?.shape && previousCollision.shape !== 'trimesh'
           ? previousCollision.shape
           : 'cuboid'
+      const proxyCollisionSize =
+        previousCollision?.size ?? getNodeVisualColliderSize(selectedNode)
       deps.patchNode(selectedNode.id, {
         kind: 'asset',
         asset: { url: source.assetUrl },
@@ -557,7 +788,10 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
                   previousCollision?.intent ??
                   (previousCollision?.sensor ? 'trigger' : 'blocker'),
                 enabled: true,
-                size: previousCollision?.size,
+                proxy: true,
+                bakeStatus: 'needsBake',
+                sourceAssetUrl: source.assetUrl,
+                size: proxyCollisionSize,
                 friction: previousCollision?.friction ?? 0.7,
                 restitution: previousCollision?.restitution ?? 0,
                 sensor: previousCollision?.sensor ?? false,

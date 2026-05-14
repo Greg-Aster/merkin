@@ -5,14 +5,16 @@ import {
   getRuntimeGroundContract,
   validateLevelGroundContract,
 } from '../../src/threlte/engine/groundContractCore.mjs'
-
-const collisionChannels = new Set([
-  'worldStatic',
-  'worldDynamic',
-  'player',
-  'trigger',
-  'detail',
-])
+import {
+  getActorDefinitionCollisionWorldSize,
+} from '../../src/threlte/engine/colliderGeometryCore.mjs'
+import {
+  describeCollisionPolicyIssue,
+  getCollisionPolicyIssues,
+} from '../../src/threlte/engine/collisionPolicyIssuesCore.mjs'
+import {
+  getLevelRuntimeContract,
+} from '../../src/threlte/engine/levelContractsCore.mjs'
 const moduleDir = dirname(fileURLToPath(import.meta.url))
 const prefabCatalog = JSON.parse(
   readFileSync(
@@ -23,87 +25,6 @@ const prefabCatalog = JSON.parse(
 const prefabAssetUrls = prefabCatalog.assetUrls ?? {}
 const prefabAssetVariants = prefabCatalog.assetVariants ?? {}
 
-const defaultRuntimeContract = {
-  levelId: '*',
-  requiredActorIds: [],
-  requiredAssetActorIds: [],
-  requiredWalkableActorIds: [],
-  maxDefaultCollisionActors: 0,
-  maxTrimeshActors: 0,
-  maxRuntimeAssetCount: 60,
-  maxPrimitiveActorCount: 80,
-  maxNeverCullActorCount: 4,
-  maxGameplayFireflyCount: 40,
-}
-
-const levelRuntimeContracts = {
-  observatory: {
-    requiredActorIds: ['observatory-terrain', 'observatory-player-spawn'],
-    requiredWalkableActorIds: ['observatory-terrain'],
-    maxRuntimeAssetCount: 0,
-    maxPrimitiveActorCount: 8,
-    maxGameplayFireflyCount: 0,
-  },
-  solitude: {
-    requiredActorIds: ['solitude-terrain', 'solitude-player-spawn'],
-    requiredWalkableActorIds: ['solitude-terrain'],
-    maxRuntimeAssetCount: 24,
-    maxPrimitiveActorCount: 16,
-    maxGameplayFireflyCount: 16,
-  },
-  yggdrasil: {
-    requiredActorIds: [
-      'yggdrasil-ground',
-      'yggdrasil-spawn-pad',
-      'yggdrasil-tree-merged',
-    ],
-    requiredAssetActorIds: ['yggdrasil-tree-merged'],
-    requiredWalkableActorIds: ['yggdrasil-ground', 'yggdrasil-spawn-pad'],
-    maxRuntimeAssetCount: 24,
-  },
-}
-
-const levelCollisionWorkflows = {
-  observatory: {
-    terrainCollision: 'heightmap',
-    terrainManifestUrl: '/terrain/observatory-environment.manifest.json',
-  },
-  solitude: {
-    terrainCollision: 'heightmap',
-    terrainManifestUrl: '/terrain/solitude.manifest.json',
-  },
-  yggdrasil: {
-    terrainCollision: 'heightmap',
-    terrainManifestUrl: '/terrain/yggdrasil.manifest.json',
-  },
-  'sci-fi-room': {
-    terrainCollision: 'heightmap',
-    terrainManifestUrl: '/terrain/sci-fi-room.manifest.json',
-  },
-}
-
-const sharedLevelSettingKeys = [
-  'spawn',
-  'player',
-  'features',
-  'style',
-  'lighting',
-  'renderProfile',
-  'water',
-  'ambientParticles',
-  'ambientAudio',
-  'collision',
-  'ground',
-  'terrainSculpt',
-  'worldPartition',
-  'graphicsBudget',
-  'editorPanels',
-  'runtimeAssets',
-  'presets',
-  'skyboxPreset',
-]
-const legacySharedLevelSettingBuckets = ['observatory', 'solitude']
-const minColliderSize = 0.05
 const spawnSupportXzPadding = 0.15
 const spawnSupportMaxDrop = 2
 const spawnSupportMaxPenetration = 0.25
@@ -125,11 +46,6 @@ function isFiniteVec3(value) {
   )
 }
 
-function clampColliderSize(value) {
-  const size = Math.abs(Number(value ?? 1))
-  return Number.isFinite(size) ? Math.max(minColliderSize, size) : 1
-}
-
 function getColliderUrlConventionError(value) {
   const colliderUrl = String(value ?? '').trim()
   if (!colliderUrl) return 'collision.colliderUrl is required.'
@@ -146,61 +62,6 @@ function getColliderUrlConventionError(value) {
     return `collision.colliderUrl must end with ${colliderUrlSuffix}.`
   }
   return ''
-}
-
-function getPrimitiveVisualSize(actor) {
-  const primitive = actor.render?.primitive
-  const scale = actor.transform?.scale ?? [1, 1, 1]
-
-  if (primitive?.geometry === 'box') {
-    const [width = 1, height = 1, depth = 1] = primitive.args ?? []
-    return [
-      clampColliderSize(width * scale[0]),
-      clampColliderSize(height * scale[1]),
-      clampColliderSize(depth * scale[2]),
-    ]
-  }
-
-  if (primitive?.geometry === 'cylinder') {
-    const [radiusTop = 0.5, radiusBottom = 0.5, height = 1] =
-      primitive.args ?? []
-    const radius = Math.max(Math.abs(radiusTop), Math.abs(radiusBottom))
-    return [
-      clampColliderSize(radius * 2 * scale[0]),
-      clampColliderSize(height * scale[1]),
-      clampColliderSize(radius * 2 * scale[2]),
-    ]
-  }
-
-  if (
-    primitive &&
-    ['octahedron', 'tetrahedron', 'icosahedron', 'dodecahedron'].includes(
-      primitive.geometry,
-    )
-  ) {
-    const [radius = 0.5] = primitive.args ?? []
-    return [
-      clampColliderSize(radius * 2 * scale[0]),
-      clampColliderSize(radius * 2 * scale[1]),
-      clampColliderSize(radius * 2 * scale[2]),
-    ]
-  }
-
-  if (primitive?.geometry === 'torus') {
-    const [radius = 0.5, tube = 0.2] = primitive.args ?? []
-    const outerRadius = Math.abs(radius) + Math.abs(tube)
-    return [
-      clampColliderSize(outerRadius * 2 * scale[0]),
-      clampColliderSize(Math.abs(tube) * 2 * scale[1]),
-      clampColliderSize(outerRadius * 2 * scale[2]),
-    ]
-  }
-
-  return [
-    clampColliderSize(scale[0]),
-    clampColliderSize(scale[1]),
-    clampColliderSize(scale[2]),
-  ]
 }
 
 function mergeDeepRecords(base, overrides) {
@@ -232,88 +93,33 @@ function mergeLevelSettings(...sources) {
   )
 }
 
-function pickSharedLevelSettings(source) {
-  const picked = {}
-  for (const key of sharedLevelSettingKeys) {
-    if (source?.[key] !== undefined) picked[key] = clone(source[key])
-  }
-  return picked
-}
-
-function removeSharedLevelSettings(source) {
-  if (!source) return source
-  const next = clone(source)
-  for (const key of sharedLevelSettingKeys) {
-    delete next[key]
-  }
-  return next
-}
-
-function collectLegacySharedLevelSettings(settings) {
-  return mergeLevelSettings(
-    ...legacySharedLevelSettingBuckets.map(bucket =>
-      pickSharedLevelSettings(settings?.[bucket]),
-    ),
-  )
-}
-
-function getLevelCollisionWorkflow(levelId) {
-  return {
-    levelId,
-    terrainCollision: 'scene-authored',
-    defaultActorCollision: 'lightweight-auto',
-    colliderBudget: 'mobile',
-    ...(levelCollisionWorkflows[levelId] ?? {}),
-  }
-}
-
 export function normalizeRuntimeLevelSceneSettings(levelId, settings = {}) {
+  void levelId
   const normalized = clone(settings) ?? {}
-  const workflow = getLevelCollisionWorkflow(levelId)
 
-  normalized.level = mergeLevelSettings(
-    collectLegacySharedLevelSettings(normalized),
-    normalized.level ?? {},
-  )
   normalized.level = mergeLevelSettings(
     {
       collision: {
         workflow: {
-          actorCollision: workflow.defaultActorCollision,
-          colliderBudget: workflow.colliderBudget,
+          colliderBudget: 'mobile',
         },
         terrain: {
-          source:
-            workflow.terrainCollision === 'heightmap'
-              ? 'baked-heightmap'
-              : workflow.terrainCollision,
-          runtimeSource:
-            workflow.terrainCollision === 'heightmap'
-              ? 'built-in-manifest'
-              : undefined,
-          manifestUrl: workflow.terrainManifestUrl,
+          source: 'scene-authored',
           dirty: false,
         },
         defaults: {
-          solidObjectsByDefault: true,
+          solidObjectsByDefault: false,
           defaultFriction: 0.7,
           defaultRestitution: 0,
         },
       },
       terrainSculpt: {
-        enabled: workflow.terrainCollision === 'heightmap',
+        enabled: false,
         autoBakeCollision: true,
       },
     },
     normalized.level,
   )
-
-  if (normalized.observatory) {
-    normalized.observatory = removeSharedLevelSettings(normalized.observatory)
-  }
-  if (normalized.solitude) {
-    normalized.solitude = removeSharedLevelSettings(normalized.solitude)
-  }
 
   return normalized
 }
@@ -404,10 +210,15 @@ function getCollision(node) {
     shape: node.collision.shape,
     size: node.collision.size,
     colliderUrl: node.collision.colliderUrl,
+    colliderMetadataUrl: node.collision.colliderMetadataUrl,
+    assetLocalTransform: node.collision.assetLocalTransform,
+    sourceAssetUrl: node.collision.sourceAssetUrl,
     friction: node.collision.friction,
     restitution: node.collision.restitution,
     sensor: node.collision.sensor,
     triangleBudget: node.collision.triangleBudget,
+    triangleCount: node.collision.triangleCount,
+    vertexCount: node.collision.vertexCount,
   }
 }
 
@@ -519,22 +330,14 @@ export function adaptSceneDocumentToLevelDefinition(scene) {
   }
 }
 
-function getLevelRuntimeContract(levelId) {
-  const normalizedLevelId = levelId.trim().toLowerCase()
-  return {
-    ...defaultRuntimeContract,
-    ...(levelRuntimeContracts[normalizedLevelId] ?? {}),
-    levelId: normalizedLevelId || defaultRuntimeContract.levelId,
-  }
-}
-
 function hasBakedTerrainRuntime(level) {
   const terrain = level.settings?.level?.collision?.terrain
   const ground = level.settings?.level?.ground
   return (
-    (terrain?.source === 'baked-heightmap' &&
+    ((terrain?.source === 'baked-heightmap' || terrain?.source === 'source-glb') &&
       typeof terrain.manifestUrl === 'string') ||
-    (ground?.collisionSource === 'baked-heightfield' &&
+    ((ground?.collisionSource === 'baked-heightfield' ||
+      ground?.collisionSource === 'source-linked-terrain-collision') &&
       typeof ground.terrainManifestUrl === 'string')
   )
 }
@@ -617,9 +420,7 @@ function getWalkabilitySamples(level) {
 }
 
 function getActorColliderWorldSize(actor) {
-  return isFiniteVec3(actor.physics?.collision.size)
-    ? actor.physics.collision.size
-    : getPrimitiveVisualSize(actor)
+  return getActorDefinitionCollisionWorldSize(actor)
 }
 
 function actorSupportsWalkabilitySample(actor, samplePosition) {
@@ -627,7 +428,6 @@ function actorSupportsWalkabilitySample(actor, samplePosition) {
   if (!collision || collision.sensor || collision.intent !== 'walkable') {
     return false
   }
-  if (collision.shape === 'trimesh') return false
 
   const [x, y, z] = samplePosition
   const [width, height, depth] = getActorColliderWorldSize(actor)
@@ -764,8 +564,17 @@ export function createLevelBuildReport(level) {
     if (!actor.physics) continue
 
     physicsActorCount += 1
-    if (!collisionChannels.has(actor.physics.collision.channel)) {
-      errors.push(`Actor "${actor.id}" has an invalid collision channel.`)
+    for (const issue of getCollisionPolicyIssues({
+      collision: actor.physics.collision,
+      bodyType: actor.physics.bodyType,
+    })) {
+      errors.push(
+        describeCollisionPolicyIssue(issue, {
+          actorId: actor.id,
+          actorName: actor.name,
+          collision: actor.physics.collision,
+        }).buildGateMessage,
+      )
     }
     if (actor.physics.collision.intent === 'detailMesh') {
       detailMeshActorCount += 1
@@ -790,6 +599,14 @@ export function createLevelBuildReport(level) {
           errors.push(`Trimesh asset actor "${actor.id}" ${conventionError}`)
         }
       }
+    }
+    if (
+      actor.kind === 'asset' &&
+      actor.physics.collision.shape !== 'trimesh'
+    ) {
+      errors.push(
+        `Asset actor "${actor.id}" must use baked trimesh collision instead of primitive collision.`,
+      )
     }
   }
 

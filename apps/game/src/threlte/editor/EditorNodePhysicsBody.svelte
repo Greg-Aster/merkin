@@ -5,20 +5,21 @@ import {
   resolveNodeCollision,
 } from './editorCollisionDefaults'
 import type { EditorSceneNode } from './editorStore'
+import type { EditorSceneSettings } from './editorTypes'
 
 export let node: EditorSceneNode
 export let editorEnabled = false
-export let visible = true
+export let sceneSettings: EditorSceneSettings | null = null
 export let collisionOverlayEnabled = false
 
 let collisionOverlayLogSignature = ''
 
 function hasPhysicsBody() {
-  return !!resolveNodeCollision(node)
+  return !!effectiveCollision
 }
 
 function hasLiveCollisionBody() {
-  return hasPhysicsBody() && visible
+  return hasPhysicsBody()
 }
 
 function getRigidBodyType() {
@@ -26,7 +27,7 @@ function getRigidBodyType() {
 }
 
 function getColliderArgs() {
-  return getNodeColliderArgs(node)
+  return getNodeColliderArgs(node, sceneSettings)
 }
 
 function logCollisionOverlaySource() {
@@ -55,7 +56,7 @@ function logCollisionOverlaySource() {
   })
 }
 
-$: effectiveCollision = resolveNodeCollision(node)
+$: effectiveCollision = resolveNodeCollision(node, sceneSettings)
 $: if (editorEnabled && collisionOverlayEnabled) {
   logCollisionOverlaySource()
 } else {
@@ -65,6 +66,11 @@ $: if (editorEnabled && collisionOverlayEnabled) {
 
 {#if !editorEnabled && hasLiveCollisionBody()}
   <CollisionBody
+    transformMode="physics-explicit"
+    applyScaleToPhysics={true}
+    position={node.position}
+    rotation={node.rotation}
+    scale={node.scale}
     shape={effectiveCollision?.shape ?? 'cuboid'}
     intent={effectiveCollision?.intent ?? 'blocker'}
     channel={effectiveCollision?.channel ?? 'worldStatic'}
@@ -82,14 +88,15 @@ $: if (editorEnabled && collisionOverlayEnabled) {
     restitution={effectiveCollision?.restitution ?? 0}
     sensor={effectiveCollision?.sensor ?? false}
     colliderUrl={effectiveCollision?.colliderUrl ?? ''}
+    colliderMetadataUrl={effectiveCollision?.colliderMetadataUrl ?? ''}
+    assetLocalTransform={effectiveCollision?.assetLocalTransform ?? null}
+    proxy={effectiveCollision?.proxy ?? false}
+    bakeStatus={effectiveCollision?.bakeStatus ?? ''}
     primitiveGeometry={node.primitive?.geometry}
     primitiveArgs={node.primitive?.args ?? []}
-  >
-    <slot />
-  </CollisionBody>
-{:else}
-  <slot />
+  />
 {/if}
+<slot />
 
 {#if hasLiveCollisionBody() && editorEnabled && collisionOverlayEnabled}
   <CollisionBody
@@ -101,6 +108,10 @@ $: if (editorEnabled && collisionOverlayEnabled) {
     triangleBudget={effectiveCollision?.triangleBudget}
     args={getColliderArgs()}
     colliderUrl={effectiveCollision?.colliderUrl ?? ''}
+    colliderMetadataUrl={effectiveCollision?.colliderMetadataUrl ?? ''}
+    assetLocalTransform={effectiveCollision?.assetLocalTransform ?? null}
+    proxy={effectiveCollision?.proxy ?? false}
+    bakeStatus={effectiveCollision?.bakeStatus ?? ''}
     primitiveGeometry={node.primitive?.geometry}
     primitiveArgs={node.primitive?.args ?? []}
   />

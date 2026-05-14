@@ -52,7 +52,7 @@ const report = {
       'runtime purity',
       'runtime asset manifest audit',
       'runtime prefab audit',
-      'engine audit',
+      'engine audit with terrain ownership contract checks',
       'build smoke',
     ],
     strictPerformanceGate:

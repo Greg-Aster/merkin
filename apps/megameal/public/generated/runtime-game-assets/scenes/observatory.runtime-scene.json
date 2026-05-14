@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-12T17:50:22.648Z",
+  "generatedAt": "2026-05-13T22:31:20.893Z",
   "levelId": "observatory",
   "sceneId": "observatory",
   "source": {
     "kind": "scene-document",
     "path": "apps/game/src/threlte/editor/scenes/observatory.scene.json",
     "version": 1,
-    "updatedAt": "2026-04-24T23:03:07.450Z"
+    "updatedAt": "2026-05-13T02:27:29.404Z"
   },
   "levelDefinition": {
     "id": "observatory",
     "version": 1,
-    "updatedAt": "2026-04-24T23:03:07.450Z",
+    "updatedAt": "2026-05-13T02:27:29.404Z",
     "spawn": {
       "player": [
         -137.2,
@@ -29,24 +29,68 @@
       "level": {
         "collision": {
           "workflow": {
-            "actorCollision": "lightweight-auto",
             "colliderBudget": "mobile"
           },
           "terrain": {
-            "source": "baked-heightmap",
+            "source": "source-glb",
             "runtimeSource": "built-in-manifest",
             "manifestUrl": "/terrain/observatory-environment.manifest.json",
-            "dirty": false
+            "dirty": false,
+            "runtimeMode": "glb-chunk-terrain",
+            "visualSource": "source-glb-chunks",
+            "fallbackSurfacePolicy": "disabled",
+            "sourceAssetUrl": "/models/levels/observatory-environment.glb",
+            "renderChunks": {
+              "type": "glb-chunk-terrain",
+              "visualSource": "source-glb-chunks",
+              "manifestUrl": "/terrain/observatory-environment.manifest.json",
+              "chunksPath": "/terrain/levels/observatory-environment/",
+              "chunkCount": 16,
+              "lods": [
+                0
+              ],
+              "generatedBy": "cook-terrain-glb-chunks",
+              "sourceAssetUrl": "/models/levels/observatory-environment.glb",
+              "sourceHash": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae",
+              "preservesSourceUvs": true,
+              "preservesSourceMaterialSlots": true,
+              "preservesSourceNormals": true,
+              "preservesSourceTangents": false,
+              "preservesSourceMeshGroups": true,
+              "textureReferencesPreserved": true
+            },
+            "sourceAssetHash": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae",
+            "sourceAssetFingerprint": {
+              "algorithm": "sha256",
+              "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
+            },
+            "approvedHeightfieldException": true
           },
           "defaults": {
-            "solidObjectsByDefault": true,
+            "solidObjectsByDefault": false,
             "defaultFriction": 0.7,
             "defaultRestitution": 0
           }
         },
         "terrainSculpt": {
-          "enabled": true,
-          "autoBakeCollision": true
+          "enabled": false,
+          "autoBakeCollision": false
+        },
+        "water": {
+          "size": {
+            "width": 4000,
+            "height": 4000
+          },
+          "color": "#050b14",
+          "opacity": 0.92,
+          "enableRising": true,
+          "initialLevel": -2,
+          "targetLevel": 5,
+          "riseRate": 0.01,
+          "enableAnimation": true,
+          "underwaterFogDensity": 0.1,
+          "underwaterFogColor": "#020711",
+          "surfaceFogDensity": 0.001
         },
         "presets": {
           "atmosphere": "moon-archive",
@@ -61,11 +105,87 @@
         },
         "ground": {
           "mode": "terrain-chunks",
-          "visualSource": "terrain-chunks",
-          "collisionSource": "baked-heightfield",
+          "visualSource": "source-glb-chunks",
+          "terrainRuntimeMode": "glb-chunk-terrain",
+          "terrainVisualSource": "source-glb-chunks",
+          "collisionSource": "source-linked-terrain-collision",
+          "fallbackSurfacePolicy": "disabled",
+          "preserveSourceUvs": true,
+          "preserveSourceMaterialSlots": true,
           "groundActorIds": [],
           "terrainManifestUrl": "/terrain/observatory-environment.manifest.json",
-          "requiredWalkableSurfaceId": "observatory-terrain"
+          "requiredWalkableSurfaceId": "observatory-terrain",
+          "sourceAssetUrl": "/models/levels/observatory-environment.glb",
+          "sourceAssetHash": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae",
+          "sourceAssetFingerprint": {
+            "algorithm": "sha256",
+            "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
+          },
+          "renderChunks": {
+            "type": "glb-chunk-terrain",
+            "visualSource": "source-glb-chunks",
+            "manifestUrl": "/terrain/observatory-environment.manifest.json",
+            "chunksPath": "/terrain/levels/observatory-environment/",
+            "chunkCount": 16,
+            "lods": [
+              0
+            ],
+            "generatedBy": "cook-terrain-glb-chunks",
+            "sourceAssetUrl": "/models/levels/observatory-environment.glb",
+            "sourceHash": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae",
+            "preservesSourceUvs": true,
+            "preservesSourceMaterialSlots": true,
+            "preservesSourceNormals": true,
+            "preservesSourceTangents": false,
+            "preservesSourceMeshGroups": true,
+            "textureReferencesPreserved": true
+          },
+          "collisionProduct": {
+            "url": "/terrain/collision/observatory-environment.collider.bin",
+            "metadataUrl": "/terrain/collision/observatory-environment.collider.meta.json",
+            "manifestUrl": "/terrain/observatory-environment.manifest.json",
+            "triangleCount": 32768,
+            "vertexCount": 16641,
+            "colliderResolution": 129,
+            "generatedBy": "bake-terrain-collision"
+          },
+          "approvedHeightfieldException": true
+        },
+        "terrainMigration": {
+          "currentMode": "glb-chunk-terrain",
+          "authoritativeVisualSource": "source-glb-chunks",
+          "collisionSource": "source-linked-terrain-collision",
+          "approvedHeightfieldException": true,
+          "renderChunks": {
+            "present": true,
+            "authoritative": true,
+            "source": "source-glb"
+          },
+          "fallbackSurfacePolicy": "disabled",
+          "targetMode": "glb-chunk-terrain",
+          "status": "complete",
+          "blockers": [],
+          "generatedTerrainProducts": {
+            "heightmap": {
+              "path": "/terrain/heightmaps/observatory-environment_heightmap.png",
+              "status": "source-derived-collision-input",
+              "reason": "The heightmap is retained as the intermediate collision mesh input for source-linked terrain collision.",
+              "targetRemovalCondition": "Remove only if replaced by a dedicated simplified collision mesh cooked from the same source GLB."
+            },
+            "visualChunks": {
+              "path": "/terrain/levels/observatory-environment/",
+              "status": "source-glb-authoritative",
+              "reason": "Source GLB chunk cook succeeded and produced UV/material-preserving runtime visual chunks.",
+              "targetRemovalCondition": "Retire only if replaced by a newer source GLB chunk cook with equivalent preservation metadata."
+            },
+            "collision": {
+              "path": "/terrain/collision/observatory-environment.collider.bin",
+              "status": "source-linked-terrain-collision",
+              "reason": "Gameplay collision is heightfield-projected from an intermediate derived from the same source GLB as the visual chunks.",
+              "targetRemovalCondition": "Replace only with a newer source-linked collision cook or dedicated simplified source-GLB collider."
+            }
+          },
+          "warningsBecomeBlockersAfterMigration": []
         },
         "graphicsBudget": {
           "maxRuntimeAssetBytes": 167772160,
@@ -81,13 +201,180 @@
           "maxEstimatedTriangles": 0,
           "maxAuthoredTextureBytes": 0
         },
+        "renderProfile": {
+          "id": "observatory-source-glb-terrain",
+          "defaultTier": "desktop",
+          "lighting": {
+            "ambientColor": "#c9d8f2",
+            "skyColor": "#e6eefc",
+            "groundColor": "#273043",
+            "keyLightColor": "#f5f7ff",
+            "fillLightColor": "#8aa7d0",
+            "keyLightPosition": [
+              40,
+              80,
+              -35
+            ],
+            "fillLightPosition": [
+              -55,
+              32,
+              48
+            ]
+          },
+          "shadows": {
+            "enabled": false,
+            "maxCastingLights": 0
+          },
+          "reflections": {
+            "mode": "static-environment",
+            "source": "skybox",
+            "intent": "Reflect the night sky cubemap across near-black observatory water without adding runtime capture passes.",
+            "textureSize": 512,
+            "maxPlanarSurfaces": 0,
+            "environmentIntensity": 1.65,
+            "requiredAssetUrls": [
+              "/assets/hdri/skywip4-cubemap/px.webp",
+              "/assets/hdri/skywip4-cubemap/nx.webp",
+              "/assets/hdri/skywip4-cubemap/py.webp",
+              "/assets/hdri/skywip4-cubemap/ny.webp",
+              "/assets/hdri/skywip4-cubemap/pz.webp",
+              "/assets/hdri/skywip4-cubemap/nz.webp"
+            ],
+            "estimatedTextureBytes": 6291456,
+            "estimatedRenderPasses": 0
+          },
+          "postProcessing": {
+            "enabled": true,
+            "passes": [
+              "tone-mapping",
+              "color-grading"
+            ],
+            "maxEnabledPasses": 2,
+            "toneMappingExposure": 0.94
+          },
+          "qualityTiers": {
+            "mobile": {
+              "shadows": {
+                "enabled": false,
+                "maxCastingLights": 0
+              },
+              "reflections": {
+                "mode": "static-environment",
+                "source": "skybox",
+                "textureSize": 256,
+                "maxPlanarSurfaces": 0,
+                "environmentIntensity": 1.1,
+                "requiredAssetUrls": [
+                  "/assets/hdri/skywip4-cubemap/px.webp",
+                  "/assets/hdri/skywip4-cubemap/nx.webp",
+                  "/assets/hdri/skywip4-cubemap/py.webp",
+                  "/assets/hdri/skywip4-cubemap/ny.webp",
+                  "/assets/hdri/skywip4-cubemap/pz.webp",
+                  "/assets/hdri/skywip4-cubemap/nz.webp"
+                ],
+                "estimatedTextureBytes": 1572864,
+                "estimatedRenderPasses": 0
+              },
+              "postProcessing": {
+                "passes": [
+                  "tone-mapping"
+                ],
+                "maxEnabledPasses": 1
+              }
+            },
+            "desktop": {
+              "shadows": {
+                "enabled": false,
+                "maxCastingLights": 0
+              },
+              "reflections": {
+                "mode": "static-environment",
+                "source": "skybox",
+                "textureSize": 512,
+                "maxPlanarSurfaces": 0,
+                "requiredAssetUrls": [
+                  "/assets/hdri/skywip4-cubemap/px.webp",
+                  "/assets/hdri/skywip4-cubemap/nx.webp",
+                  "/assets/hdri/skywip4-cubemap/py.webp",
+                  "/assets/hdri/skywip4-cubemap/ny.webp",
+                  "/assets/hdri/skywip4-cubemap/pz.webp",
+                  "/assets/hdri/skywip4-cubemap/nz.webp"
+                ],
+                "estimatedTextureBytes": 6291456,
+                "estimatedRenderPasses": 0
+              },
+              "postProcessing": {
+                "passes": [
+                  "tone-mapping",
+                  "color-grading"
+                ],
+                "maxEnabledPasses": 2
+              }
+            },
+            "tv": {
+              "shadows": {
+                "enabled": false,
+                "maxCastingLights": 0
+              },
+              "reflections": {
+                "mode": "static-environment",
+                "source": "skybox",
+                "textureSize": 512,
+                "maxPlanarSurfaces": 0,
+                "requiredAssetUrls": [
+                  "/assets/hdri/skywip4-cubemap/px.webp",
+                  "/assets/hdri/skywip4-cubemap/nx.webp",
+                  "/assets/hdri/skywip4-cubemap/py.webp",
+                  "/assets/hdri/skywip4-cubemap/ny.webp",
+                  "/assets/hdri/skywip4-cubemap/pz.webp",
+                  "/assets/hdri/skywip4-cubemap/nz.webp"
+                ],
+                "estimatedTextureBytes": 6291456,
+                "estimatedRenderPasses": 0
+              },
+              "postProcessing": {
+                "passes": [
+                  "tone-mapping",
+                  "color-grading"
+                ],
+                "maxEnabledPasses": 2
+              }
+            }
+          },
+          "visualBookmarks": [
+            {
+              "id": "spawn-terrain-gate",
+              "label": "Observatory terrain gate",
+              "playerPosition": [
+                -137.2,
+                1.8,
+                -49.5
+              ],
+              "cameraPosition": [
+                -132,
+                7.5,
+                -41
+              ],
+              "cameraTarget": [
+                -137.2,
+                2.2,
+                -49.5
+              ],
+              "viewport": {
+                "width": 1280,
+                "height": 720
+              },
+              "settleMs": 2000
+            }
+          ]
+        },
         "features": {
-          "ocean": true,
           "vegetation": true,
           "fireflies": true,
           "starMap": true,
           "conversations": true,
-          "styles": true
+          "styles": true,
+          "water": true
         },
         "style": {
           "preset": "monument",
@@ -115,190 +402,8 @@
           "fallbackMoonlightIntensity": 0.62,
           "fallbackFillLightIntensity": 0.24
         },
-        "renderProfile": {
-          "id": "observatory-water-moon-archive",
-          "defaultTier": "desktop",
-          "lighting": {
-            "ambientColor": "#bcd6ff",
-            "skyColor": "#dce8ff",
-            "groundColor": "#172033",
-            "keyLightColor": "#d9e7ff",
-            "fillLightColor": "#61789e",
-            "keyLightPosition": [
-              18,
-              24,
-              -12
-            ],
-            "fillLightPosition": [
-              -22,
-              12,
-              20
-            ]
-          },
-          "shadows": {
-            "enabled": true,
-            "maxCastingLights": 1,
-            "mapSize": 1024,
-            "cameraSize": 96,
-            "cameraFar": 180
-          },
-          "reflections": {
-            "mode": "static-environment",
-            "textureSize": 512,
-            "maxPlanarSurfaces": 0,
-            "environmentIntensity": 1.8
-          },
-          "postProcessing": {
-            "enabled": true,
-            "passes": [
-              "tone-mapping",
-              "ambient-occlusion",
-              "color-grading",
-              "bloom",
-              "vignette"
-            ],
-            "maxEnabledPasses": 5,
-            "ambientOcclusion": {
-              "enabled": true,
-              "intensity": 0.76,
-              "radius": 8,
-              "minDistance": 0.006,
-              "maxDistance": 0.13
-            },
-            "bloom": {
-              "intensity": 0.85,
-              "threshold": 0.9
-            },
-            "toneMappingExposure": 0.95,
-            "vignetteStrength": 0.75
-          },
-          "qualityTiers": {
-            "mobile": {
-              "shadows": {
-                "enabled": false,
-                "maxCastingLights": 0
-              },
-              "reflections": {
-                "mode": "none",
-                "textureSize": 0,
-                "maxPlanarSurfaces": 0,
-                "environmentIntensity": 1.1
-              },
-              "postProcessing": {
-                "passes": [
-                  "tone-mapping",
-                  "color-grading"
-                ],
-                "maxEnabledPasses": 2
-              }
-            },
-            "desktop": {
-              "shadows": {
-                "enabled": true,
-                "maxCastingLights": 1,
-                "mapSize": 1024
-              },
-              "reflections": {
-                "mode": "static-environment",
-                "textureSize": 512,
-                "maxPlanarSurfaces": 0
-              },
-              "postProcessing": {
-                "passes": [
-                  "tone-mapping",
-                  "ambient-occlusion",
-                  "color-grading",
-                  "bloom",
-                  "vignette"
-                ],
-                "maxEnabledPasses": 5,
-                "ambientOcclusion": {
-                  "enabled": true,
-                  "intensity": 0.76,
-                  "radius": 8,
-                  "minDistance": 0.006,
-                  "maxDistance": 0.13
-                }
-              }
-            },
-            "tv": {
-              "shadows": {
-                "enabled": true,
-                "maxCastingLights": 1,
-                "mapSize": 2048
-              },
-              "reflections": {
-                "mode": "planar",
-                "textureSize": 512,
-                "maxPlanarSurfaces": 1
-              },
-              "postProcessing": {
-                "passes": [
-                  "tone-mapping",
-                  "ambient-occlusion",
-                  "color-grading",
-                  "bloom",
-                  "vignette"
-                ],
-                "maxEnabledPasses": 5,
-                "ambientOcclusion": {
-                  "enabled": true,
-                  "intensity": 0.9,
-                  "radius": 10,
-                  "minDistance": 0.005,
-                  "maxDistance": 0.16
-                }
-              }
-            }
-          },
-          "visualBookmarks": [
-            {
-              "id": "spawn-default",
-              "label": "Observatory terrain and water",
-              "playerPosition": [
-                -137.2,
-                1.8,
-                -49.5
-              ],
-              "cameraPosition": [
-                -137.2,
-                3.4,
-                -49.5
-              ],
-              "cameraTarget": [
-                -112,
-                2.4,
-                -38
-              ],
-              "viewport": {
-                "width": 1280,
-                "height": 720
-              },
-              "settleMs": 2000
-            }
-          ]
-        },
         "player": {
           "lightIntensityScale": 2
-        },
-        "editorPanels": {
-          "environment": "observatory"
-        }
-      },
-      "observatory": {
-        "ocean": {
-          "size": {
-            "width": 4000,
-            "height": 4000
-          },
-          "enableRising": true,
-          "initialLevel": -2,
-          "targetLevel": 5,
-          "riseRate": 0.01,
-          "enableAnimation": true,
-          "underwaterFogDensity": 0.1,
-          "underwaterFogColor": 533536,
-          "surfaceFogDensity": 0.001
         }
       }
     },
@@ -319,9 +424,9 @@
             0
           ],
           "scale": [
-            1,
-            1,
-            1
+            0.1808657926171221,
+            0.1808657926171221,
+            0.1808657926171221
           ]
         }
       }
@@ -361,68 +466,102 @@
     "terrainManifestUrl": "/terrain/observatory-environment.manifest.json",
     "ground": {
       "mode": "terrain-chunks",
-      "visualSource": "terrain-chunks",
-      "collisionSource": "baked-heightfield",
+      "visualSource": "source-glb-chunks",
+      "terrainRuntimeMode": "glb-chunk-terrain",
+      "terrainVisualSource": "source-glb-chunks",
+      "collisionSource": "source-linked-terrain-collision",
+      "fallbackSurfacePolicy": "disabled",
+      "preserveSourceUvs": true,
+      "preserveSourceMaterialSlots": true,
       "groundActorIds": [],
       "terrainManifestUrl": "/terrain/observatory-environment.manifest.json",
-      "requiredWalkableSurfaceId": "observatory-terrain"
+      "requiredWalkableSurfaceId": "observatory-terrain",
+      "sourceAssetUrl": "/models/levels/observatory-environment.glb",
+      "sourceAssetHash": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae",
+      "sourceAssetFingerprint": {
+        "algorithm": "sha256",
+        "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
+      },
+      "renderChunks": {
+        "type": "glb-chunk-terrain",
+        "visualSource": "source-glb-chunks",
+        "manifestUrl": "/terrain/observatory-environment.manifest.json",
+        "chunksPath": "/terrain/levels/observatory-environment/",
+        "chunkCount": 16,
+        "lods": [
+          0
+        ],
+        "generatedBy": "cook-terrain-glb-chunks",
+        "sourceAssetUrl": "/models/levels/observatory-environment.glb",
+        "sourceHash": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae",
+        "preservesSourceUvs": true,
+        "preservesSourceMaterialSlots": true,
+        "preservesSourceNormals": true,
+        "preservesSourceTangents": false,
+        "preservesSourceMeshGroups": true,
+        "textureReferencesPreserved": true
+      },
+      "collisionProduct": {
+        "url": "/terrain/collision/observatory-environment.collider.bin",
+        "metadataUrl": "/terrain/collision/observatory-environment.collider.meta.json",
+        "manifestUrl": "/terrain/observatory-environment.manifest.json",
+        "triangleCount": 32768,
+        "vertexCount": 16641,
+        "colliderResolution": 129,
+        "generatedBy": "bake-terrain-collision"
+      },
+      "approvedHeightfieldException": true
     },
     "renderProfile": {
-      "id": "observatory-water-moon-archive",
+      "id": "observatory-source-glb-terrain",
       "defaultTier": "desktop",
       "lighting": {
-        "ambientColor": "#bcd6ff",
-        "skyColor": "#dce8ff",
-        "groundColor": "#172033",
-        "keyLightColor": "#d9e7ff",
-        "fillLightColor": "#61789e",
+        "ambientColor": "#c9d8f2",
+        "skyColor": "#e6eefc",
+        "groundColor": "#273043",
+        "keyLightColor": "#f5f7ff",
+        "fillLightColor": "#8aa7d0",
         "keyLightPosition": [
-          18,
-          24,
-          -12
+          40,
+          80,
+          -35
         ],
         "fillLightPosition": [
-          -22,
-          12,
-          20
+          -55,
+          32,
+          48
         ]
       },
       "shadows": {
-        "enabled": true,
-        "maxCastingLights": 1,
-        "mapSize": 1024,
-        "cameraSize": 96,
-        "cameraFar": 180
+        "enabled": false,
+        "maxCastingLights": 0
       },
       "reflections": {
         "mode": "static-environment",
+        "source": "skybox",
+        "intent": "Reflect the night sky cubemap across near-black observatory water without adding runtime capture passes.",
         "textureSize": 512,
         "maxPlanarSurfaces": 0,
-        "environmentIntensity": 1.8
+        "environmentIntensity": 1.65,
+        "requiredAssetUrls": [
+          "/assets/hdri/skywip4-cubemap/px.webp",
+          "/assets/hdri/skywip4-cubemap/nx.webp",
+          "/assets/hdri/skywip4-cubemap/py.webp",
+          "/assets/hdri/skywip4-cubemap/ny.webp",
+          "/assets/hdri/skywip4-cubemap/pz.webp",
+          "/assets/hdri/skywip4-cubemap/nz.webp"
+        ],
+        "estimatedTextureBytes": 6291456,
+        "estimatedRenderPasses": 0
       },
       "postProcessing": {
         "enabled": true,
         "passes": [
           "tone-mapping",
-          "ambient-occlusion",
-          "color-grading",
-          "bloom",
-          "vignette"
+          "color-grading"
         ],
-        "maxEnabledPasses": 5,
-        "ambientOcclusion": {
-          "enabled": true,
-          "intensity": 0.76,
-          "radius": 8,
-          "minDistance": 0.006,
-          "maxDistance": 0.13
-        },
-        "bloom": {
-          "intensity": 0.85,
-          "threshold": 0.9
-        },
-        "toneMappingExposure": 0.95,
-        "vignetteStrength": 0.75
+        "maxEnabledPasses": 2,
+        "toneMappingExposure": 0.94
       },
       "qualityTiers": {
         "mobile": {
@@ -431,10 +570,49 @@
             "maxCastingLights": 0
           },
           "reflections": {
-            "mode": "none",
-            "textureSize": 0,
+            "mode": "static-environment",
+            "source": "skybox",
+            "textureSize": 256,
             "maxPlanarSurfaces": 0,
-            "environmentIntensity": 1.1
+            "environmentIntensity": 1.1,
+            "requiredAssetUrls": [
+              "/assets/hdri/skywip4-cubemap/px.webp",
+              "/assets/hdri/skywip4-cubemap/nx.webp",
+              "/assets/hdri/skywip4-cubemap/py.webp",
+              "/assets/hdri/skywip4-cubemap/ny.webp",
+              "/assets/hdri/skywip4-cubemap/pz.webp",
+              "/assets/hdri/skywip4-cubemap/nz.webp"
+            ],
+            "estimatedTextureBytes": 1572864,
+            "estimatedRenderPasses": 0
+          },
+          "postProcessing": {
+            "passes": [
+              "tone-mapping"
+            ],
+            "maxEnabledPasses": 1
+          }
+        },
+        "desktop": {
+          "shadows": {
+            "enabled": false,
+            "maxCastingLights": 0
+          },
+          "reflections": {
+            "mode": "static-environment",
+            "source": "skybox",
+            "textureSize": 512,
+            "maxPlanarSurfaces": 0,
+            "requiredAssetUrls": [
+              "/assets/hdri/skywip4-cubemap/px.webp",
+              "/assets/hdri/skywip4-cubemap/nx.webp",
+              "/assets/hdri/skywip4-cubemap/py.webp",
+              "/assets/hdri/skywip4-cubemap/ny.webp",
+              "/assets/hdri/skywip4-cubemap/pz.webp",
+              "/assets/hdri/skywip4-cubemap/nz.webp"
+            ],
+            "estimatedTextureBytes": 6291456,
+            "estimatedRenderPasses": 0
           },
           "postProcessing": {
             "passes": [
@@ -444,83 +622,54 @@
             "maxEnabledPasses": 2
           }
         },
-        "desktop": {
+        "tv": {
           "shadows": {
-            "enabled": true,
-            "maxCastingLights": 1,
-            "mapSize": 1024
+            "enabled": false,
+            "maxCastingLights": 0
           },
           "reflections": {
             "mode": "static-environment",
+            "source": "skybox",
             "textureSize": 512,
-            "maxPlanarSurfaces": 0
+            "maxPlanarSurfaces": 0,
+            "requiredAssetUrls": [
+              "/assets/hdri/skywip4-cubemap/px.webp",
+              "/assets/hdri/skywip4-cubemap/nx.webp",
+              "/assets/hdri/skywip4-cubemap/py.webp",
+              "/assets/hdri/skywip4-cubemap/ny.webp",
+              "/assets/hdri/skywip4-cubemap/pz.webp",
+              "/assets/hdri/skywip4-cubemap/nz.webp"
+            ],
+            "estimatedTextureBytes": 6291456,
+            "estimatedRenderPasses": 0
           },
           "postProcessing": {
             "passes": [
               "tone-mapping",
-              "ambient-occlusion",
-              "color-grading",
-              "bloom",
-              "vignette"
+              "color-grading"
             ],
-            "maxEnabledPasses": 5,
-            "ambientOcclusion": {
-              "enabled": true,
-              "intensity": 0.76,
-              "radius": 8,
-              "minDistance": 0.006,
-              "maxDistance": 0.13
-            }
-          }
-        },
-        "tv": {
-          "shadows": {
-            "enabled": true,
-            "maxCastingLights": 1,
-            "mapSize": 2048
-          },
-          "reflections": {
-            "mode": "planar",
-            "textureSize": 512,
-            "maxPlanarSurfaces": 1
-          },
-          "postProcessing": {
-            "passes": [
-              "tone-mapping",
-              "ambient-occlusion",
-              "color-grading",
-              "bloom",
-              "vignette"
-            ],
-            "maxEnabledPasses": 5,
-            "ambientOcclusion": {
-              "enabled": true,
-              "intensity": 0.9,
-              "radius": 10,
-              "minDistance": 0.005,
-              "maxDistance": 0.16
-            }
+            "maxEnabledPasses": 2
           }
         }
       },
       "visualBookmarks": [
         {
-          "id": "spawn-default",
-          "label": "Observatory terrain and water",
+          "id": "spawn-terrain-gate",
+          "label": "Observatory terrain gate",
           "playerPosition": [
             -137.2,
             1.8,
             -49.5
           ],
           "cameraPosition": [
-            -137.2,
-            3.4,
-            -49.5
+            -132,
+            7.5,
+            -41
           ],
           "cameraTarget": [
-            -112,
-            2.4,
-            -38
+            -137.2,
+            2.2,
+            -49.5
           ],
           "viewport": {
             "width": 1280,

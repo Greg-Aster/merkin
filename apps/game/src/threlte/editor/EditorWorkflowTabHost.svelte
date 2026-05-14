@@ -1,108 +1,63 @@
 <script lang="ts">
+import type { EditorSceneDocument } from '../engine/sceneDocumentTypes'
 import EditorWorkflowPanel from './EditorWorkflowPanel.svelte'
-import type { HunyuanJobStatus } from './editorHunyuanJobPolling'
-import type { EditorSceneNode } from './editorStore'
+import {
+  type EditorPublishPipelineState,
+  createInitialEditorPublishPipelineState,
+} from './editorPublishReadinessContracts'
+import type { EditorTerrainStatusSnapshot } from './editorTerrainPipeline'
 
-type WorkflowBrowserItem = {
-  name: string
-  path: string
-  isDirectory: boolean
-}
+export let editorScene: EditorSceneDocument | null = null
+export let levelId = ''
+export let terrainCollisionBakePending = false
+export let terrainHeightmapGeneratePending = false
+export let terrainChunkCookPending = false
+export let worldPartitionCookPending = false
+export let groundTerrainPublishPending = false
+export let selectedTerrainSourceName = ''
+export let selectedTerrainSourceAssetUrl = ''
+export let terrainCollisionSettings: Record<string, any> | null = null
+export let terrainStatus: EditorTerrainStatusSnapshot | null = null
+export let publishPipelineState: EditorPublishPipelineState =
+  createInitialEditorPublishPipelineState()
+export let saveMessage = ''
 
-export let workflowBrowserPath = ''
-export let workflowBrowserItems: WorkflowBrowserItem[] = []
-export let workflowBrowserError = ''
-export let workflowBrowserLoading = false
-export let selectedComfyWorkflowPath = ''
-export let workflowSelectionSummary = ''
-export let mergeDescriptor = ''
-export let selectedNode: EditorSceneNode | null = null
-export let selectedNodes: EditorSceneNode[] = []
-export let similarNodeCount = 0
-export let comfyWorkflowEditorStatus = ''
-export let hunyuanStatus = ''
-export let hunyuanBusy = false
-export let workflowCanGenerateSelection = false
-export let workflowCanRetextureSelection = false
-export let canApplyGeneratedAssetToSelection = false
-export let hunyuanLastOutputUrl = ''
-export let selectedHunyuanJob: HunyuanJobStatus | null = null
-export let canShowAll = false
-
-export let onResetWorkflowPath: () => void = () => {}
-export let onWorkflowBrowserUp: () => void = () => {}
-export let onWorkflowBrowserRefresh: () => void = () => {}
-export let onSelectWorkflowItem: (item: WorkflowBrowserItem) => void = () => {}
-export let onOutlinerFocus: () => void = () => {}
-export let onSelectSimilar: () => void = () => {}
-export let onAddFireflyToSelection: () => void = () => {}
-export let onClearSelection: () => void = () => {}
-export let onHideSelected: () => void = () => {}
-export let onHideUnselected: () => void = () => {}
-export let onShowAll: () => void = () => {}
-export let onMergeSelectionToAsset: () => void = () => {}
-export let onGenerateSelection: () => void = () => {}
-export let onTextureSelection: () => void = () => {}
-export let onOpenAiTab: () => void = () => {}
-export let onRefreshBackend: () => void = () => {}
-export let onEditGenerateWorkflow: () => void = () => {}
-export let onEditTextureWorkflow: () => void = () => {}
-export let onOpenGeneratedAssets: () => void = () => {}
-export let onAddLatestGenerated: () => void = () => {}
-export let onApplyLatestToSelection: () => void = () => {}
-export let onOpenAssetLibrary: () => void = () => {}
-export let onSaveLocal: () => void = () => {}
-export let onOverwriteLevel: () => void = () => {}
-export let onReloadDisk: () => void = () => {}
+export let onOpenCollisionTools: () => void = () => {}
+export let onBakeTerrain: () => void = () => {}
+export let onGenerateTerrainHeightmap: () => void = () => {}
+export let onBakeTerrainCollision: () => void = () => {}
+export let onCookTerrainChunks: () => void = () => {}
+export let onCookWorldPartition: () => void = () => {}
+export let onValidateTerrainContract: () => void = () => {}
+export let onPublishLevel: () => void = () => {}
+export let onPublishGroundTerrainContracts: () => void = () => {}
 export let onOpenSaveTools: () => void = () => {}
-export let onRefreshJobs: () => void = () => {}
+export let onOpenOutput: () => void = () => {}
 </script>
 
 <EditorWorkflowPanel
-  {workflowBrowserPath}
-  {workflowBrowserItems}
-  {workflowBrowserError}
-  {workflowBrowserLoading}
-  {selectedComfyWorkflowPath}
-  {workflowSelectionSummary}
-  bind:mergeDescriptor
-  {selectedNode}
-  {selectedNodes}
-  {similarNodeCount}
-  {comfyWorkflowEditorStatus}
-  {hunyuanStatus}
-  {hunyuanBusy}
-  {workflowCanGenerateSelection}
-  {workflowCanRetextureSelection}
-  {canApplyGeneratedAssetToSelection}
-  {hunyuanLastOutputUrl}
-  {selectedHunyuanJob}
-  {canShowAll}
-  {onResetWorkflowPath}
-  {onWorkflowBrowserUp}
-  {onWorkflowBrowserRefresh}
-  {onSelectWorkflowItem}
-  {onOutlinerFocus}
-  {onSelectSimilar}
-  {onAddFireflyToSelection}
-  {onClearSelection}
-  {onHideSelected}
-  {onHideUnselected}
-  {onShowAll}
-  {onMergeSelectionToAsset}
-  {onGenerateSelection}
-  {onTextureSelection}
-  {onOpenAiTab}
-  {onRefreshBackend}
-  {onEditGenerateWorkflow}
-  {onEditTextureWorkflow}
-  {onOpenGeneratedAssets}
-  {onAddLatestGenerated}
-  {onApplyLatestToSelection}
-  {onOpenAssetLibrary}
-  {onSaveLocal}
-  {onOverwriteLevel}
-  {onReloadDisk}
+  {editorScene}
+  {levelId}
+  {terrainCollisionBakePending}
+  {terrainHeightmapGeneratePending}
+  {terrainChunkCookPending}
+  {worldPartitionCookPending}
+  {groundTerrainPublishPending}
+  {selectedTerrainSourceName}
+  {selectedTerrainSourceAssetUrl}
+  {terrainCollisionSettings}
+  {terrainStatus}
+  {publishPipelineState}
+  {saveMessage}
+  {onOpenCollisionTools}
+  {onBakeTerrain}
+  {onGenerateTerrainHeightmap}
+  {onBakeTerrainCollision}
+  {onCookTerrainChunks}
+  {onCookWorldPartition}
+  {onValidateTerrainContract}
+  {onPublishLevel}
+  {onPublishGroundTerrainContracts}
   {onOpenSaveTools}
-  {onRefreshJobs}
+  {onOpenOutput}
 />

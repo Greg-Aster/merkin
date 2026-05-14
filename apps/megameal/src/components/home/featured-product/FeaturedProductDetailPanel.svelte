@@ -4,7 +4,6 @@ import type { FeaturedProduct, FeaturedProductPanel } from './types'
 export let product: FeaturedProduct
 export let activePanel: FeaturedProductPanel
 export let previewTitle: string | null
-export let trustSignals: string[]
 export let renderStars: (rating?: number) => boolean[]
 export let closePanel: () => void
 
@@ -144,10 +143,10 @@ function warningHeader(kind: WarningKind): string {
     </div>
   {:else if activePanel === 'assurance'}
     <div class="featured-product-assurance">
-      {#each trustSignals as signal}
+      {#each product.assurances ?? [] as assurance}
         <article>
-          <strong>Assurance</strong>
-          <p>{signal}</p>
+          <strong>{assurance.label}</strong>
+          <p>{assurance.value}</p>
         </article>
       {/each}
     </div>

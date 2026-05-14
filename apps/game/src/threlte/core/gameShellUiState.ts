@@ -1,3 +1,4 @@
+import { DEFAULT_LEVEL_ID } from '../levels/levelRegistry'
 import type { StarData } from '../stores/gameStateStore'
 
 export type ActiveLevelNote = {
@@ -67,7 +68,7 @@ export function createPendingLevelReturn(
   } = {},
 ): PendingLevelReturn {
   return {
-    levelType: detail.levelType || 'observatory',
+    levelType: detail.levelType || DEFAULT_LEVEL_ID,
     title: detail.title || 'Return to Observatory?',
     message:
       detail.message || 'Leave this level and travel back to the observatory?',

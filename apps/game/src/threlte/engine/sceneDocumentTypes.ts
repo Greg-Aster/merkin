@@ -1,3 +1,4 @@
+import type { AssetLocalTransformMetadata } from './assetLocalTransform'
 import type { RuntimePrefabType } from './runtimePrefabCatalog'
 import type {
   CollisionChannel,
@@ -63,6 +64,7 @@ export interface EditorPrimitiveData {
 
 export interface EditorAssetData {
   url: string
+  assetLocalTransform?: AssetLocalTransformMetadata | null
 }
 
 export interface EditorLightData {
@@ -129,10 +131,17 @@ export interface EditorNodeCollisionData {
   enabled?: boolean
   size?: [number, number, number]
   colliderUrl?: string
+  colliderMetadataUrl?: string
+  assetLocalTransform?: AssetLocalTransformMetadata | null
+  proxy?: boolean
+  bakeStatus?: 'ready' | 'needsBake' | 'stale' | 'notRequired'
+  sourceAssetUrl?: string
   friction?: number
   restitution?: number
   sensor?: boolean
   triangleBudget?: number
+  triangleCount?: number
+  vertexCount?: number
 }
 
 export interface EditorGameplayData {
@@ -180,6 +189,7 @@ export interface EditorGenerationData {
   descriptor?: string
   family?: string
   styleBatch?: 'include' | 'exclude'
+  originalAssetUrl?: string
   sourceVisualSize?: [number, number, number]
   lastBakedAssetUrl?: string
   lastBakedAt?: string
@@ -217,6 +227,7 @@ export interface SharedLevelSpawnSettings {
 export interface SharedLevelPlayerSettings {
   player?: {
     moveSpeed?: number
+    sprintMultiplier?: number
     jumpForce?: number
     lightIntensityScale?: number
   }
@@ -224,7 +235,6 @@ export interface SharedLevelPlayerSettings {
 
 export interface SharedLevelFeatureSettings {
   features?: {
-    ocean?: boolean
     vegetation?: boolean
     fireflies?: boolean
     starMap?: boolean
@@ -442,21 +452,88 @@ export type TerrainRuntimeComponentSource =
   | 'built-in-manifest'
   | 'editor-manifest'
   | 'generated-heightmap'
-export type LevelCollisionDefaultPolicy =
-  | 'lightweight-auto'
-  | 'authored-only'
-  | 'none'
 export type LevelCollisionBudget = 'mobile' | 'balanced' | 'desktop'
 export type LevelGroundMode =
   | 'terrain-chunks'
-  | 'authored-ground'
   | 'hybrid'
   | 'scene-authored'
-export type LevelGroundVisualSource = 'terrain-chunks' | 'scene-actors' | 'none'
-export type LevelGroundCollisionSource = 'baked-heightfield' | 'scene-colliders'
+export type TerrainRuntimeMode =
+  | 'scene-authored'
+  | 'heightfield-terrain'
+  | 'glb-chunk-terrain'
+export type TerrainVisualSource =
+  | 'scene-actors'
+  | 'heightmap-surface'
+  | 'generated-heightmap-chunks'
+  | 'source-glb-chunks'
+  | 'none'
+export type TerrainFallbackSurfacePolicy =
+  | 'disabled'
+  | 'debug-only'
+  | 'until-required-chunks-ready'
+  | 'always'
+export type LevelGroundVisualSource = TerrainVisualSource | 'terrain-chunks'
+export type LevelGroundCollisionSource =
+  | 'baked-heightfield'
+  | 'scene-colliders'
+  | 'source-linked-terrain-collision'
+export type TerrainMigrationStatus = 'complete' | 'transitional' | 'planned'
+export type TerrainMigrationCollisionSource = LevelGroundCollisionSource
+
+export interface TerrainSourceAssetFingerprint {
+  algorithm?: 'sha256' | string
+  value?: string
+}
+
+export interface TerrainRenderChunkProductMetadata {
+  type?: 'heightfield-terrain' | 'glb-chunk-terrain'
+  visualSource?: TerrainVisualSource
+  url?: string
+  chunksPath?: string
+  manifestUrl?: string
+  chunkCount?: number
+  lods?: number[]
+  generatedAt?: string
+  generatedBy?: string
+  sourceAssetUrl?: string
+  sourceHash?: string
+  textureReferenceCount?: number
+  preservesSourceUvs?: boolean
+  preservesSourceMaterialSlots?: boolean
+  preservesSourceNormals?: boolean
+  preservesSourceTangents?: boolean
+  preservesSourceMeshGroups?: boolean
+  textureReferencesPreserved?: boolean
+}
+
+export interface TerrainCollisionProductMetadata {
+  url?: string
+  metadataUrl?: string
+  manifestUrl?: string
+  triangleCount?: number
+  vertexCount?: number
+  colliderResolution?: number
+  generatedAt?: string
+  generatedBy?: string
+}
+
+export interface TerrainMigrationSettings {
+  currentMode?: TerrainRuntimeMode
+  authoritativeVisualSource?: TerrainVisualSource
+  collisionSource?: TerrainMigrationCollisionSource
+  renderChunks?: {
+    present?: boolean
+    authoritative?: boolean
+    source?: 'none' | 'generated-heightmap' | 'source-glb'
+  }
+  fallbackSurfacePolicy?: TerrainFallbackSurfacePolicy
+  targetMode?: TerrainRuntimeMode
+  status?: TerrainMigrationStatus
+  blockers?: string[]
+  warningsBecomeBlockersAfterMigration?: string[]
+}
 
 export interface LevelCollisionWorkflowSettings {
-  actorCollision?: LevelCollisionDefaultPolicy
   colliderBudget?: LevelCollisionBudget
 }
 
@@ -471,23 +548,33 @@ export interface LevelCollisionRoleSettings {
 export interface SharedLevelCollisionSettings {
   collision?: {
     terrain?: {
-      source?: 'baked-heightmap' | 'scene-authored' | 'none'
+      source?: 'baked-heightmap' | 'source-glb' | 'scene-authored' | 'none'
       runtimeSource?: TerrainRuntimeComponentSource
+      runtimeMode?: TerrainRuntimeMode
+      visualSource?: TerrainVisualSource
+      fallbackSurfacePolicy?: TerrainFallbackSurfacePolicy
       manifestUrl?: string
       heightmapUrl?: string
       heightmapResolution?: number
       sourceAssetUrl?: string
       sourceAssetUrls?: string[]
+      sourceAssetHash?: string
+      sourceAssetFingerprint?: TerrainSourceAssetFingerprint
       sourceNodeId?: string
       sourceNodeIds?: string[]
       sourceName?: string
       sourceTriangleCount?: number
+      sourceBounds?: {
+        min: [number, number, number]
+        max: [number, number, number]
+      }
       colliderUrl?: string
       metadataUrl?: string
       colliderResolution?: number
       triangleCount?: number
       vertexCount?: number
       dirty?: boolean
+      heightmapDirty?: boolean
       lastGeneratedAt?: string
       heightOverrideCount?: number
       chunksPath?: string
@@ -495,6 +582,9 @@ export interface SharedLevelCollisionSettings {
       chunkCount?: number
       chunkLods?: number[]
       lastChunksGeneratedAt?: string
+      renderChunks?: TerrainRenderChunkProductMetadata
+      collisionProduct?: TerrainCollisionProductMetadata
+      approvedHeightfieldException?: boolean
     }
     workflow?: LevelCollisionWorkflowSettings
     roles?: LevelCollisionRoleSettings
@@ -511,6 +601,17 @@ export interface SharedLevelGroundSettings {
     mode?: LevelGroundMode
     visualSource?: LevelGroundVisualSource
     collisionSource?: LevelGroundCollisionSource
+    terrainRuntimeMode?: TerrainRuntimeMode
+    terrainVisualSource?: TerrainVisualSource
+    fallbackSurfacePolicy?: TerrainFallbackSurfacePolicy
+    preserveSourceUvs?: boolean
+    preserveSourceMaterialSlots?: boolean
+    sourceAssetUrl?: string
+    sourceAssetHash?: string
+    sourceAssetFingerprint?: TerrainSourceAssetFingerprint
+    renderChunks?: TerrainRenderChunkProductMetadata
+    collisionProduct?: TerrainCollisionProductMetadata
+    approvedHeightfieldException?: boolean
     groundActorIds?: string[]
     terrainManifestUrl?: string
     requiredWalkableSurfaceId?: string
@@ -523,6 +624,10 @@ export interface SharedLevelTerrainSculptSettings {
     autoBakeCollision?: boolean
     heightOverrides?: Record<string, number>
   }
+}
+
+export interface SharedLevelTerrainMigrationSettings {
+  terrainMigration?: TerrainMigrationSettings
 }
 
 export interface SharedLevelPresetSettings {
@@ -605,6 +710,7 @@ export interface SharedLevelEditorSettings
     SharedLevelCollisionSettings,
     SharedLevelGroundSettings,
     SharedLevelTerrainSculptSettings,
+    SharedLevelTerrainMigrationSettings,
     SharedLevelPresetSettings,
     SharedLevelSkyboxSettings,
     SharedLevelRuntimeAssetSettings,
@@ -612,9 +718,7 @@ export interface SharedLevelEditorSettings
     SharedLevelGraphicsBudgetSettings,
     SharedLevelEditorPanelSettings {}
 
-export interface ObservatoryEditorSettings extends SharedLevelEditorSettings {
-  ocean?: SharedLevelWaterSettings['water']
-}
+export interface ObservatoryEditorSettings extends SharedLevelEditorSettings {}
 
 export interface SolitudeEditorSettings extends SharedLevelEditorSettings {}
 

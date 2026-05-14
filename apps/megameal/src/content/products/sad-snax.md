@@ -67,6 +67,13 @@ nutritionFacts:
     value: "2g"
   - label: "Significant Source Of"
     value: "Nothing in particular"
+assurances:
+  - label: "Flavor Assurance"
+    value: "Sad Snax are not formulated to delight. Product satisfaction should be measured against availability, shelf stability, and the absence of better choices."
+  - label: "Morale Neutrality"
+    value: "The flavor suppression team is still confirming that no meaningful pleasure spike occurs during ordinary consumption."
+  - label: "Pantry Assurance"
+    value: "Unopened product is intended for emergency drawers, quiet cabinets, and moments when eating something is preferable to continuing without ceremony."
 qanda:
   - question: "What do Sad Snax actually taste like?"
     answer: "Like a conversation that ended too early. The flavor is intentionally muted, the finish is brief, and the aftertaste suggests you should have eaten something else."

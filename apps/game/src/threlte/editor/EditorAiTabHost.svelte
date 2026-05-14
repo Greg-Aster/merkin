@@ -11,6 +11,14 @@ export let comfyUiBusy = false
 export let comfyUiReady = false
 export let comfyWorkflowEditorStatus = ''
 export let selectedComfyWorkflowPath = ''
+export let workflowBrowserPath = ''
+export let workflowBrowserItems: Array<{
+  name: string
+  path: string
+  isDirectory: boolean
+}> = []
+export let workflowBrowserError = ''
+export let workflowBrowserLoading = false
 export let hunyuanApiUrl = ''
 export let hunyuanStatus = ''
 export let hunyuanBackendStatus = ''
@@ -24,7 +32,6 @@ export let hunyuanLastFitReport = ''
 export let hunyuanSupportsReplacement = false
 export let hunyuanSupportsTextureWrap = false
 export let canApplyGeneratedAssetToSelection = false
-export let runtimeAssetFailures: Array<any> = []
 export let recentHunyuanJobs: Array<any> = []
 export let hunyuanJobsLoading = false
 export let hunyuanJobsError = ''
@@ -54,8 +61,14 @@ export let onGenerateScratch: () => void = () => {}
 export let onInspectSelection: () => void = () => {}
 export let onGenerateSelection: () => void = () => {}
 export let onTextureSelection: () => void = () => {}
-export let onOpenWorkflowTab: () => void = () => {}
 export let onResetWorkflowPath: () => void = () => {}
+export let onWorkflowBrowserUp: () => void = () => {}
+export let onWorkflowBrowserRefresh: () => void = () => {}
+export let onSelectWorkflowItem: (item: {
+  name: string
+  path: string
+  isDirectory: boolean
+}) => void = () => {}
 export let onEditGenerateWorkflow: () => void = () => {}
 export let onEditTextureWorkflow: () => void = () => {}
 export let onOpenGeneratedAsset: () => void = () => {}
@@ -73,6 +86,10 @@ export let onRefreshRecentJobs: () => void = () => {}
     {comfyUiReady}
     {comfyWorkflowEditorStatus}
     {selectedComfyWorkflowPath}
+    {workflowBrowserPath}
+    {workflowBrowserItems}
+    {workflowBrowserError}
+    {workflowBrowserLoading}
     bind:hunyuanApiUrl
     {hunyuanStatus}
     {hunyuanBackendStatus}
@@ -86,7 +103,6 @@ export let onRefreshRecentJobs: () => void = () => {}
     {hunyuanSupportsReplacement}
     {hunyuanSupportsTextureWrap}
     {canApplyGeneratedAssetToSelection}
-    {runtimeAssetFailures}
     {recentHunyuanJobs}
     {hunyuanJobsLoading}
     {hunyuanJobsError}
@@ -113,8 +129,10 @@ export let onRefreshRecentJobs: () => void = () => {}
     on:inspectSelection={onInspectSelection}
     on:generateSelection={onGenerateSelection}
     on:textureSelection={onTextureSelection}
-    on:openWorkflowTab={onOpenWorkflowTab}
     on:resetWorkflowPath={onResetWorkflowPath}
+    {onWorkflowBrowserUp}
+    {onWorkflowBrowserRefresh}
+    {onSelectWorkflowItem}
     on:editGenerateWorkflow={onEditGenerateWorkflow}
     on:editTextureWorkflow={onEditTextureWorkflow}
     on:openGeneratedAsset={onOpenGeneratedAsset}

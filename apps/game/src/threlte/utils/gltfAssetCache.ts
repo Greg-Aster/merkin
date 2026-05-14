@@ -9,7 +9,6 @@ const gltfLoader = new GLTFLoader()
 const cacheUrlKey = '__gltfCacheUrl'
 const cacheDisposedKey = '__gltfCacheDisposed'
 const sharedMaterialsKey = '__gltfSharedMaterials'
-const maxConcurrentGltfLoads = 2
 const unknownAssetSizeBytes = 8 * 1024 * 1024
 
 interface GltfCacheEntry {
@@ -172,6 +171,17 @@ function getRuntimeMemoryPressureLevel() {
   return 'normal'
 }
 
+function getConcurrentGltfLoadLimit() {
+  switch (getRuntimeMemoryPressureLevel()) {
+    case 'high':
+      return 2
+    case 'medium':
+      return 3
+    default:
+      return 4
+  }
+}
+
 function updateEntryPolicy(
   entry: GltfCacheEntry,
   options: LoadCachedGltfOptions,
@@ -191,6 +201,8 @@ function updateEntryPolicy(
 }
 
 function pumpGltfLoadQueue() {
+  const maxConcurrentGltfLoads = getConcurrentGltfLoadLimit()
+
   while (
     activeGltfLoads < maxConcurrentGltfLoads &&
     pendingGltfLoads.length > 0

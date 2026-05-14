@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "bake-mesh-collider",
+  "generatedAt": "2026-05-13T01:03:56.036Z",
+  "sourceLevelId": "yggdrasil",
+  "sourceActorId": "yggdrasil-drowned-monolith-nw",
+  "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "34503f4f4e547b9eb2b4837a0878afcb7e72967d30187c5c29d26726a9ac3cbf"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-monolith-nw.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-monolith-nw.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-drowned-monolith-nw.collider.meta.json",
+  "triangleCount": 19000,
+  "vertexCount": 14866,
+  "bounds": {
+    "min": [
+      -0.7623974084854126,
+      -1.0008857250213623,
+      -0.3713674545288086
+    ],
+    "max": [
+      0.7417284250259399,
+      0.973598301410675,
+      0.43148958683013916
+    ],
+    "size": [
+      1.5041258335113525,
+      1.9744840264320374,
+      0.8028570413589478
+    ],
+    "center": [
+      -0.010334491729736328,
+      -0.013643711805343628,
+      0.030061066150665283
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.7623974084854126,
+      -1.000954031944275,
+      -0.3713674545288086
+    ],
+    "max": [
+      0.7417284250259399,
+      0.9738994240760803,
+      0.43148958683013916
+    ],
+    "size": [
+      1.5041258335113525,
+      1.9748534560203552,
+      0.8028570413589478
+    ],
+    "center": [
+      -0.010334491729736328,
+      -0.01352730393409729,
+      0.030061066150665283
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.7623974084854126,
+      -1.0008857250213623,
+      -0.3713674545288086
+    ],
+    "max": [
+      0.7417284250259399,
+      0.973598301410675,
+      0.43148958683013916
+    ],
+    "size": [
+      1.5041258335113525,
+      1.9744840264320374,
+      0.8028570413589478
+    ],
+    "center": [
+      -0.010334491729736328,
+      -0.013643711805343628,
+      0.030061066150665283
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+    "sourceNodeName": "Drowned Monolith nw",
+    "visualLocalBounds": {
+      "min": [
+        -0.7623974084854126,
+        -1.000954031944275,
+        -0.3713674545288086
+      ],
+      "max": [
+        0.7417284250259399,
+        0.9738994240760803,
+        0.43148958683013916
+      ],
+      "size": [
+        1.5041258335113525,
+        1.9748534560203552,
+        0.8028570413589478
+      ],
+      "center": [
+        -0.010334491729736328,
+        -0.01352730393409729,
+        0.030061066150665283
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.7623974084854126,
+        -1.0008857250213623,
+        -0.3713674545288086
+      ],
+      "max": [
+        0.7417284250259399,
+        0.973598301410675,
+        0.43148958683013916
+      ],
+      "size": [
+        1.5041258335113525,
+        1.9744840264320374,
+        0.8028570413589478
+      ],
+      "center": [
+        -0.010334491729736328,
+        -0.013643711805343628,
+        0.030061066150665283
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "yggdrasil-drowned-monolith-nw",
+    "sourceActorName": "Drowned Monolith nw",
+    "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "34503f4f4e547b9eb2b4837a0878afcb7e72967d30187c5c29d26726a9ac3cbf"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "yggdrasil",
+      "nodeId": "yggdrasil-drowned-monolith-nw",
+      "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 20000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-13T01:03:56.036Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 20000
+  },
+  "simplification": {
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 50000,
+    "targetTriangleBudget": 20000,
+    "ratio": 0.38,
+    "tool": "gltf-transform",
+    "prepass": "weld",
+    "error": 0.05
+  }
+}

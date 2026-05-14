@@ -3,7 +3,6 @@ import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
 import MarketplaceListingCard from '../components/store/MarketplaceListingCard.astro'
 import StoreLayout from '../layouts/store/StoreLayout.astro'
-import { buildFlagshipProductShowcase } from '../utils/flagship-product-showcase'
 import { url } from '../utils/url-utils'
 
 const allProducts = await getCollection(
@@ -40,9 +39,9 @@ allProducts.sort((a, b) => {
 })
 
 const featuredProduct = allProducts.find(p => p.data.featured)
-const featuredShowcase = featuredProduct
-  ? buildFlagshipProductShowcase(featuredProduct, allProducts)
-  : null
+const featuredPrimaryVisual = featuredProduct
+  ? getPrimaryVisual(featuredProduct)
+  : undefined
 const spotlightProducts = allProducts
   .filter(product => product.id !== featuredProduct?.id)
   .slice(0, 3)
@@ -112,172 +111,54 @@ const companionCount = allProducts.filter(
 						Official merchandise, domestic companions, relic hardware, and consumer spillover recovered from across the MEGA MEAL timeline. Browse by category, inspect listings, and proceed only if your household is certified for attachment-grade inventory.
 					</p>
 				</div>
-				<div class="storefront-hero__stats grid gap-2 min-[480px]:grid-cols-3">
-					<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-3 py-2">
-						<p class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
-							Products
-						</p>
-						<strong class="mt-1 block text-lg text-slate-100">{allProducts.length}</strong>
-						<span class="text-xs text-slate-400">Visible in this timeline</span>
-					</div>
-					<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-3 py-2">
-						<p class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
-							Immediate Purchase
-						</p>
-						<strong class="mt-1 block text-lg text-slate-100">{availableNowCount}</strong>
-						<span class="text-xs text-slate-400">Cleared for regional checkout</span>
-					</div>
-					<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-3 py-2">
-						<p class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
-							Restricted
-						</p>
-						<strong class="mt-1 block text-lg text-slate-100">{restrictedCount}</strong>
-						<span class="text-xs text-slate-400">Visible, delayed, or unavailable</span>
-					</div>
 				</div>
-			</div>
 
-			<aside class="storefront-advisory rounded-[1.35rem] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.96))] p-4 shadow-2xl">
-				<p class="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-200">
-					Catalog Advisory
-				</p>
-				<p class="mt-3 text-sm leading-relaxed text-slate-300">
-					Items marked <em>Available Now</em> may be purchased in this timeline. Listings marked <em>Artifact Record</em>, <em>Not In Your Area</em>, or <em>Not In Your Timeline</em> remain viewable for research, longing, and extremely poor decision-making.
-				</p>
-				<div class="mt-4 flex flex-wrap items-center gap-2">
-					{Object.entries(availabilityDisplay).slice(0, 4).map(([, label]) => (
-						<span class="rounded-full border border-slate-700/70 bg-slate-900/70 px-3 py-1 text-[11px] text-slate-300">
-							{label}
-						</span>
-					))}
-					<a href="#storefront-marketplace" class="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-cyan-100 transition hover:bg-cyan-400/20">
-						Browse listings
-					</a>
-				</div>
-			</aside>
-		</div>
-
-		{featuredProduct && featuredShowcase && (
-			<section class="storefront-featured-listing mb-5 md:mb-10">
-				<div class="storefront-featured-listing__inner overflow-hidden rounded-[1.4rem] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.94),rgba(2,6,23,0.98))] shadow-[0_30px_80px_rgba(2,6,23,0.45)] sm:rounded-[1.9rem]">
-					<div class="relative p-4 sm:p-6 md:p-8">
-					<div class="storefront-featured-listing__badge absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-[var(--primary)]/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
-						Featured Listing
-					</div>
-					<div class="grid items-center gap-8 pt-8 xl:grid-cols-[minmax(0,1.1fr)_minmax(24rem,0.9fr)]">
-						<div class="storefront-featured-listing__media relative aspect-[16/10] overflow-hidden rounded-[1.4rem] border border-slate-700/60 bg-slate-900">
-							{(() => {
-								const media = featuredProduct.data.media;
-								const img = featuredProduct.data.image;
-								const first = Array.isArray(media) && media.length > 0 ? media[0] : null;
-								if (first?.type === "youtube") {
-									return (
-										<div class="relative h-full w-full">
-											<img
-												src={`https://img.youtube.com/vi/${first.videoId}/hqdefault.jpg`}
-												alt={featuredProduct.data.name}
-												class="h-full w-full object-cover"
-											/>
-											<div class="absolute inset-0 flex items-center justify-center bg-black/30">
-												<a
-													href={getProductHref(featuredProduct)}
-													data-sfx-hover="hover-emphasis"
-													data-sfx-click="sweep"
-													class="flex h-16 w-16 items-center justify-center rounded-full bg-red-600/90 shadow-xl transition hover:bg-red-600"
-													aria-label="View product"
-												>
-													<svg viewBox="0 0 24 24" fill="white" class="ml-1 h-8 w-8">
-														<path d="M8 5v14l11-7z"></path>
-													</svg>
-												</a>
-											</div>
-										</div>
-									);
-								}
-								const src = first?.type === "image" ? resolveAsset(first.src) : resolveAsset(img);
-								return src ? (
-									<img src={src} alt={featuredProduct.data.name} class="h-full w-full object-cover" />
-								) : (
-									<div class="flex h-full w-full items-center justify-center text-slate-600">
-										<Icon name="mdi:image-off-outline" class="h-12 w-12 opacity-30" />
-									</div>
-								);
-							})()}
+			{featuredProduct && (
+				<aside class="storefront-featured-teaser overflow-hidden rounded-[1.35rem] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.96))] shadow-2xl">
+					<a href={getProductHref(featuredProduct)} data-sfx-hover="hover-emphasis" data-sfx-click="sweep" class="grid grid-cols-[8.75rem_minmax(0,1fr)] gap-3 p-3 text-slate-100 transition hover:bg-cyan-400/5">
+						<div class="relative overflow-hidden rounded-[1rem] border border-slate-700/70 bg-slate-900">
+							{featuredPrimaryVisual ? (
+								<img
+									src={featuredPrimaryVisual}
+									alt={featuredProduct.data.name}
+									class="aspect-square h-full w-full object-cover"
+								/>
+							) : (
+								<div class="grid aspect-square place-items-center text-slate-600">
+									<Icon name="mdi:image-off-outline" class="h-10 w-10 opacity-40" />
+								</div>
+							)}
+							<span class="absolute left-2 top-2 rounded-full bg-[var(--primary)]/90 px-2 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-white">
+								Featured
+							</span>
 						</div>
-						<div class="storefront-featured-listing__body space-y-4">
-							<div class="storefront-featured-listing__meta flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
-								<span>{featuredProduct.data.category ?? "Product"}</span>
-								<span>•</span>
-								<span>{availabilityDisplay[featuredProduct.data.availability ?? "coming_soon"] ?? "Catalog Entry"}</span>
-								{featuredProduct.data.rating && (
-									<>
-										<span>•</span>
-										<span>{featuredProduct.data.rating.toFixed(1)} rating</span>
-									</>
-								)}
-							</div>
-							<h2 class="text-2xl font-bold text-slate-100 sm:text-3xl">{featuredProduct.data.name}</h2>
-							{featuredProduct.data.tagline && (
-								<p class="text-sm italic text-slate-300">"{featuredProduct.data.tagline}"</p>
-							)}
-							{featuredProduct.data.description && (
-								<p class="text-sm leading-relaxed text-slate-300">
-									{featuredProduct.data.description}
+						<div class="grid min-w-0 content-center gap-2">
+							<p class="m-0 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-200">
+								Featured Listing
+							</p>
+							<div>
+								<h2 class="m-0 line-clamp-2 text-lg font-bold leading-tight text-slate-100">
+									{featuredProduct.data.name}
+								</h2>
+								<p class="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-300">
+									{featuredProduct.data.tagline ?? featuredProduct.data.description}
 								</p>
-							)}
-							<div class="storefront-featured-listing__signals grid gap-3 min-[540px]:grid-cols-3">
-								<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-3">
-									<p class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
-										Primary Asset
-									</p>
-									<strong class="mt-1 block text-sm text-slate-100">
-										{featuredShowcase.product.media[0]?.type ?? "listing"}
-									</strong>
-									<span class="text-xs text-slate-400">First contact surface</span>
-								</div>
-								<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-3">
-									<p class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
-										Reviews
-									</p>
-									<strong class="mt-1 block text-sm text-slate-100">
-										{featuredShowcase.product.reviews.length}
-									</strong>
-									<span class="text-xs text-slate-400">Consumer accounts on file</span>
-								</div>
-								<div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-3">
-									<p class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
-										Questions
-									</p>
-									<strong class="mt-1 block text-sm text-slate-100">
-										{featuredShowcase.product.qanda.length}
-									</strong>
-									<span class="text-xs text-slate-400">Clarifications available</span>
-								</div>
 							</div>
-							<div class="flex flex-wrap items-center gap-3 sm:gap-4">
+							<div class="flex flex-wrap items-center gap-2">
 								{featuredProduct.data.price && (
-									<span class="text-xl font-bold text-emerald-400">
+									<strong class="text-base text-emerald-400">
 										${featuredProduct.data.price.toFixed(2)}
-									</span>
+									</strong>
 								)}
-									<a
-										href={getProductHref(featuredProduct)}
-										data-sfx-hover="hover-emphasis"
-										data-sfx-click="sweep"
-										class="btn-primary w-full rounded-[var(--radius-medium)] px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-[var(--primary-hover)] sm:w-auto"
-									>
-									View Product
-								</a>
-								<span class="text-xs text-slate-500">
-									Use the full listing to inspect media, reviews, and attached disclosures.
+								<span class="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-cyan-100">
+									View product
 								</span>
 							</div>
 						</div>
-					</div>
-				</div>
-				</div>
-			</section>
-		)}
+					</a>
+				</aside>
+			)}
+		</div>
 
 		<div id="storefront-marketplace" class="storefront-marketplace">
 			<aside class="storefront-marketplace__sidebar">
@@ -380,15 +261,15 @@ const companionCount = allProducts.filter(
 							data-sfx-focus="focus-soft"
 							class="storefront-sort-select sort-select-control"
 							aria-label="Sort products"
-						>
-							<option value="featured">Featured</option>
-							<option value="rating">Top Rated</option>
-							<option value="price-asc">Price: Low to High</option>
-							<option value="price-desc">Price: High to Low</option>
-							<option value="available">Available First</option>
-						</select>
+							>
+								<option value="featured">Featured</option>
+								<option value="rating">Top Rated</option>
+								<option value="price-asc">Price: Low to High</option>
+								<option value="price-desc">Price: High to Low</option>
+								<option value="available">Available First</option>
+							</select>
+						</div>
 					</div>
-				</div>
 					<div class="storefront-toolbar">
 						<div>
 							<p class="storefront-toolbar__kicker">Marketplace Board</p>
@@ -412,16 +293,16 @@ const companionCount = allProducts.filter(
 								class="storefront-sort-select sort-select-control"
 								aria-label="Sort products"
 							>
-							<option value="featured">Featured</option>
-							<option value="rating">Top Rated</option>
-							<option value="price-asc">Price: Low to High</option>
-							<option value="price-desc">Price: High to Low</option>
-							<option value="available">Available First</option>
-						</select>
+								<option value="featured">Featured</option>
+								<option value="rating">Top Rated</option>
+								<option value="price-asc">Price: Low to High</option>
+								<option value="price-desc">Price: High to Low</option>
+								<option value="available">Available First</option>
+							</select>
+						</div>
 					</div>
-				</div>
 
-				{spotlightProducts.length > 0 && (
+					{spotlightProducts.length > 0 && (
 					<section class="storefront-spotlight">
 						<div class="storefront-panel__header">
 							<p>Sponsored Shelf</p>

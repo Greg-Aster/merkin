@@ -22,20 +22,6 @@
   display: none;
 }
 
-.storefront-featured-listing {
-  order: 3;
-  position: relative;
-  width: 100vw;
-  margin-top: 1.5rem;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-  padding-inline: clamp(1rem, 4vw, 2rem);
-}
-
-.storefront-featured-listing__inner {
-  width: 100%;
-}
-
 .storefront-marketplace__sidebar,
 .storefront-marketplace__main {
   display: grid;

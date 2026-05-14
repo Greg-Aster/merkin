@@ -4,13 +4,14 @@ import { onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
 import { getLevelCollisionWorkflow } from '../engine/levelCollisionWorkflow'
 import { terrainStore } from '../features/terrain/terrainStore'
-import { editorStateStore } from './editorStore'
+import { editorSceneStore, editorStateStore } from './editorStore'
 
 export let levelId: string
 
 const { scene } = useThrelte()
 
 let editorState
+let editorScene
 let terrainState
 let terrainMesh: THREE.Mesh | null = null
 let terrainGeometry: THREE.BufferGeometry | null = null
@@ -22,12 +23,16 @@ const unsubEditor = editorStateStore.subscribe(value => {
   editorState = value
 })
 
+const unsubScene = editorSceneStore.subscribe(value => {
+  editorScene = value
+})
+
 const unsubTerrain = terrainStore.subscribe(value => {
   terrainState = value
 })
 
 function shouldShowTerrainOverlay() {
-  const workflow = getLevelCollisionWorkflow(levelId)
+  const workflow = getLevelCollisionWorkflow(levelId, editorScene?.settings)
   return (
     !!editorState?.enabled &&
     !!editorState?.collisionOverlayEnabled &&
@@ -188,6 +193,7 @@ $: if (boundsMesh) {
 
 onDestroy(() => {
   unsubEditor()
+  unsubScene()
   unsubTerrain()
   terrainGeometry?.dispose()
   terrainMaterial?.dispose()

@@ -116,23 +116,59 @@ function collectLegacySharedLevelSettings(
   )
 }
 
+function migrateLegacyFeatureAliases(settings: SharedLevelEditorSettings) {
+  const features = settings.features as
+    | (NonNullable<SharedLevelEditorSettings['features']> & {
+        ocean?: boolean
+      })
+    | undefined
+
+  if (!features || features.ocean === undefined) return
+
+  if (features.water === undefined) {
+    features.water = features.ocean
+  }
+  features.ocean = undefined
+}
+
+function migrateLegacyObservatorySettings(settings: EditorSceneSettings): void {
+  const observatory = settings.observatory as
+    | (ObservatoryEditorSettings & {
+        ocean?: ObservatoryEditorSettings['water']
+      })
+    | undefined
+
+  if (!observatory?.ocean) return
+
+  settings.level = mergeLevelSettings<SharedLevelEditorSettings>(
+    {
+      water: observatory.ocean,
+    },
+    settings.level ?? {},
+  )
+  observatory.ocean = undefined
+}
+
 export function normalizeLevelSceneSettings(
   levelId: string,
   settings?: EditorSceneSettings,
 ): EditorSceneSettings {
   const normalized = structuredClone(settings ?? {}) as EditorSceneSettings
-  const workflow = getLevelCollisionWorkflow(levelId)
 
   normalized.level = mergeLevelSettings<SharedLevelEditorSettings>(
     collectLegacySharedLevelSettings(normalized),
     normalized.level ?? {},
   )
 
+  migrateLegacyObservatorySettings(normalized)
+  migrateLegacyFeatureAliases(normalized.level)
+
+  const workflow = getLevelCollisionWorkflow(levelId, normalized)
+
   normalized.level = mergeLevelSettings<SharedLevelEditorSettings>(
     {
       collision: {
         workflow: {
-          actorCollision: workflow.defaultActorCollision,
           colliderBudget: workflow.colliderBudget,
         },
         terrain: {
@@ -141,14 +177,15 @@ export function normalizeLevelSceneSettings(
               ? 'baked-heightmap'
               : workflow.terrainCollision,
           runtimeSource:
-            workflow.terrainCollision === 'heightmap'
+            workflow.terrainCollision === 'heightmap' ||
+            workflow.terrainCollision === 'source-glb'
               ? 'built-in-manifest'
               : undefined,
           manifestUrl: workflow.terrainManifestUrl,
           dirty: false,
         },
         defaults: {
-          solidObjectsByDefault: true,
+          solidObjectsByDefault: false,
           defaultFriction: 0.7,
           defaultRestitution: 0,
         },

@@ -9,6 +9,7 @@ import {
   isFiniteVec3,
 } from './lib/sceneArchitectureAudit.mjs'
 import { auditTerrainCollision } from './lib/terrainCollisionAudit.mjs'
+import { auditTerrainContracts } from './lib/terrainContractAudit.mjs'
 import { auditWorldPartitions } from './lib/worldPartitionAudit.mjs'
 
 const sceneDir = join(process.cwd(), 'src/threlte/editor/scenes')
@@ -36,13 +37,9 @@ const prefabCatalogPath = join(
 )
 const bakedTerrainManifests = [
   'observatory-environment.manifest.json',
-  'solitude.manifest.json',
-  'sci-fi-room.manifest.json',
-  'yggdrasil.manifest.json',
 ]
 const chunkedTerrainRequiredManifests = new Set([
-  'solitude.manifest.json',
-  'yggdrasil.manifest.json',
+  'observatory-environment.manifest.json',
 ])
 const terrainTriangleBudget = 50_000
 const sceneAudit = auditSceneArchitecture({
@@ -116,6 +113,14 @@ const terrainReports = terrainAudit.terrainReports
 const legacyTerrainManifestReports = terrainAudit.legacyTerrainManifestReports
 failures.push(...terrainAudit.failures)
 
+const terrainContractAudit = auditTerrainContracts({
+  sceneDir,
+  publicDir,
+  runtimeSceneDir,
+})
+const terrainContractReports = terrainContractAudit.reports
+failures.push(...terrainContractAudit.failures)
+
 const worldPartitionRequirements = getWorldPartitionAuditRequirements()
 const worldPartitionAudit = auditWorldPartitions({
   worldPartitionDir,
@@ -175,13 +180,22 @@ for (const report of reports) {
       `missingIntent=${report.missingCollisionIntent}`,
       `missingChannel=${report.missingCollisionChannel}`,
       `invalidChannel=${report.invalidCollisionChannel}`,
+      `unmappedRuntimeCollision=${report.unmappedRuntimeCollision}`,
+      `triggerWithoutSensor=${report.triggerWithoutSensor}`,
+      `detailMeshBlocking=${report.detailMeshBlocking}`,
       `detailMeshWithoutBudget=${report.detailMeshWithoutBudget}`,
       `disabledCollision=${report.disabledCollision}`,
+      `collisionOnly=${report.collisionOnlyProxies}`,
       `renderCollisionParity=${report.collisionRenderParityFailures}`,
       `explicitTrimesh=${report.explicitTrimesh}`,
+      `assetPrimitiveCollision=${report.assetPrimitiveCollision}`,
       `missingColliderUrl=${report.assetTrimeshMissingCollider}`,
       `colliderUrlConvention=${report.assetTrimeshColliderConventionFailures}`,
+      `colliderArtifact=${report.assetTrimeshColliderArtifactFailures}`,
+      `legacyColliderMetadata=${report.assetTrimeshLegacyColliderMetadata}`,
       `missingDefaultCollision=${report.missingDefaultCollision}`,
+      `terrainAuthorityWarnings=${report.terrainAuthorityWarnings.length}`,
+      `terrainAuthorityErrors=${report.terrainAuthorityErrors.length}`,
       `deprecatedFields=${report.deprecatedFields.length}`,
       `assetFiles=${report.assetFiles}`,
       `assetSize=${formatBytes(report.totalRuntimeAssetBytes)}`,
@@ -220,13 +234,22 @@ console.log(
     `missingIntent=${totals.missingCollisionIntent}`,
     `missingChannel=${totals.missingCollisionChannel}`,
     `invalidChannel=${totals.invalidCollisionChannel}`,
+    `unmappedRuntimeCollision=${totals.unmappedRuntimeCollision}`,
+    `triggerWithoutSensor=${totals.triggerWithoutSensor}`,
+    `detailMeshBlocking=${totals.detailMeshBlocking}`,
     `detailMeshWithoutBudget=${totals.detailMeshWithoutBudget}`,
     `disabledCollision=${totals.disabledCollision}`,
+    `collisionOnly=${totals.collisionOnlyProxies}`,
     `renderCollisionParity=${totals.collisionRenderParityFailures}`,
     `explicitTrimesh=${totals.explicitTrimesh}`,
+    `assetPrimitiveCollision=${totals.assetPrimitiveCollision}`,
     `missingColliderUrl=${totals.assetTrimeshMissingCollider}`,
     `colliderUrlConvention=${totals.assetTrimeshColliderConventionFailures}`,
+    `colliderArtifact=${totals.assetTrimeshColliderArtifactFailures}`,
+    `legacyColliderMetadata=${totals.assetTrimeshLegacyColliderMetadata}`,
     `missingDefaultCollision=${totals.missingDefaultCollision}`,
+    `terrainAuthorityWarnings=${totals.terrainAuthorityWarnings}`,
+    `terrainAuthorityErrors=${totals.terrainAuthorityErrors}`,
     `deprecatedFields=${totals.deprecatedFields}`,
     `assetFiles=${totals.assetFiles}`,
     `assetSize=${formatBytes(totals.totalRuntimeAssetBytes)}`,
@@ -373,6 +396,37 @@ for (const report of legacyTerrainManifestReports) {
       `legacyTrimesh=${report.hasLegacyTrimesh ? 'yes' : 'no'}`,
     ].join('  '),
   )
+}
+
+console.log('')
+console.log('Terrain ownership contract audit')
+console.log('================================')
+
+for (const report of terrainContractReports) {
+  console.log(
+    [
+      report.file,
+      `mode=${report.mode}`,
+      `visual=${report.visualSource}`,
+      `collision=${report.collisionSource}`,
+      `mixedAuthority=${report.mixedAuthority ? 'yes' : 'no'}`,
+      `chunks=${report.renderChunks ? 'present' : 'none'}`,
+      `chunksAuthoritative=${report.renderChunksAuthoritative ? 'yes' : 'no'}`,
+      `fallback=${report.fallbackSurfacePolicy}`,
+      `target=${report.migrationTarget}`,
+      `status=${report.migrationStatus}`,
+      `blockers=${report.blockers}`,
+    ].join('  '),
+  )
+}
+
+if (terrainContractAudit.warnings.length > 0) {
+  console.log('')
+  console.log('Terrain ownership transition warnings')
+  console.log('=====================================')
+  for (const warning of terrainContractAudit.warnings) {
+    console.log(`- ${warning}`)
+  }
 }
 
 if (failures.length > 0) {

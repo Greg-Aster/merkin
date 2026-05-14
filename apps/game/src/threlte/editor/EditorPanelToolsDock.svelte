@@ -3,7 +3,7 @@ import EditorPanelTabRail from './EditorPanelTabRail.svelte'
 import type { EditorPanelTab, EditorPanelTabItem } from './editorPanelTabs'
 
 export let tabs: EditorPanelTabItem[] = []
-export let activeTab: EditorPanelTab = 'workflow'
+export let activeTab: EditorPanelTab = 'scene'
 export let contentElement: HTMLDivElement | null = null
 export let onTabSelect: (tab: EditorPanelTab) => void = () => {}
 </script>
@@ -27,16 +27,11 @@ export let onTabSelect: (tab: EditorPanelTab) => void = () => {}
     border-radius: 0.75rem;
     backdrop-filter: blur(10px);
     box-shadow: 0 16px 60px rgba(0, 0, 0, 0.35);
-    position: fixed;
-    top: calc(4.15rem + min(25vh, 14rem) + 0.7rem);
-    right: 1rem;
     display: grid;
-    grid-template-columns: 4.25rem minmax(0, 1fr);
-    width: 23rem;
-    min-width: 23rem;
-    height: calc(100vh - (4.15rem + min(25vh, 14rem) + 1.7rem));
-    max-height: calc(100vh - (4.15rem + min(25vh, 14rem) + 1.7rem));
-    z-index: 78;
+    grid-template-rows: auto minmax(0, 1fr);
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
   }
 
   .editor-tab-panel {
@@ -71,21 +66,5 @@ export let onTabSelect: (tab: EditorPanelTab) => void = () => {}
 
   .editor-tools-panel :global(.editor-section) {
     padding: 0.62rem 0.72rem;
-  }
-
-  @media (max-width: 1280px) {
-    .editor-tools-panel {
-      position: static;
-      width: auto;
-      min-width: 0;
-      height: auto;
-      max-height: none;
-    }
-  }
-
-  @media (max-width: 900px) {
-    .editor-tools-panel {
-      grid-template-columns: 3.7rem minmax(0, 1fr);
-    }
   }
 </style>

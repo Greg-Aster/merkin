@@ -72,6 +72,13 @@ nutritionFacts:
     value: "29g"
   - label: "Fiber"
     value: "7g"
+assurances:
+  - label: "Ingredient Assurance"
+    value: "The ration is chili-adjacent preserved food. Current evidence supports beans, tomato concentrate, protein matter, and translation failure rather than the literal reading of the export label."
+  - label: "Stock Assurance"
+    value: "Remaining cans are new old stock, salvage inventory, or warehouse recoveries. Distribution paperwork may be incomplete after the Miranda corridor failure."
+  - label: "Seal Assurance"
+    value: "Consumption guidance assumes an intact can, stable seal, and no visible compromise. If the container argues back, do not heat it."
 qanda:
   - question: "Is this actually made from puppies?"
     answer: "Probably not. The most widely accepted interpretation is that the original phrase referred to a rescue-meal ration distributed during juvenile evacuation drives. Less careful translators chose speed over dignity, and the export label has been wrong ever since."

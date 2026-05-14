@@ -43,22 +43,28 @@ export interface PersistedStyleBatchSession {
   entries: PersistedStyleBatchEntry[]
 }
 
+export function stripEditorSceneRuntimeData(scene: EditorSceneDocument) {
+  const { engine: _engine, ...authoringScene } = scene
+  return authoringScene as EditorSceneDocument
+}
+
 export function saveEditorSceneToLocalStorage(
   levelId: string,
   scene: EditorSceneDocument,
 ) {
+  const authoringScene = stripEditorSceneRuntimeData({
+    ...scene,
+    levelId,
+    updatedAt: new Date().toISOString(),
+  })
   const payload: EditorSceneDocument = assertValidEditorSceneDocument(
-    withEditorSceneEngineData({
-      ...scene,
-      levelId,
-      updatedAt: new Date().toISOString(),
-    }),
+    withEditorSceneEngineData(authoringScene),
     'Scene save',
   )
 
   localStorage.setItem(
     `${SCENE_STORAGE_PREFIX}${levelId}`,
-    JSON.stringify(payload),
+    JSON.stringify(stripEditorSceneRuntimeData(payload)),
   )
   return payload
 }
@@ -124,7 +130,11 @@ export function clearAllStyleBatchSessionsFromLocalStorage() {
 
 export function exportEditorSceneJson(scene: EditorSceneDocument | null) {
   return JSON.stringify(
-    scene ? assertValidEditorSceneDocument(scene, 'Scene export') : null,
+    scene
+      ? stripEditorSceneRuntimeData(
+          assertValidEditorSceneDocument(scene, 'Scene export'),
+        )
+      : null,
     null,
     2,
   )

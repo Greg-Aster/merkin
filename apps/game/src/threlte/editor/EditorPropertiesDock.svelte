@@ -1,7 +1,11 @@
 <script lang="ts">
 import type { CollisionChannel, CollisionIntent } from '../engine/types'
 import EditorPropertiesShelf from './EditorPropertiesShelf.svelte'
-import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
+import type {
+  EditorMaterialData,
+  EditorSceneNode,
+  EditorSceneSettings,
+} from './editorTypes'
 
 type TextureField =
   | 'mapUrl'
@@ -17,19 +21,40 @@ type TextureBrowserItem = {
   isDirectory: boolean
 }
 
+type AssetBrowserItem = {
+  name: string
+  path: string
+  isDirectory: boolean
+}
+
 type GeneratedVariantItem = {
   name: string
   path: string
   url: string
+  sourceLabel?: string
+  isOriginalSource?: boolean
 }
 
 export let selectedNode: EditorSceneNode | null = null
 export let selectedNodes: EditorSceneNode[] = []
+export let sceneSettings: EditorSceneSettings | null = null
+export let sceneObjectCount = 0
+export let sceneAssetNodeCount = 0
+export let sceneColliderCount = 0
 export let parentCandidates: EditorSceneNode[] = []
 export let selectedNodeMaterial: EditorMaterialData = {}
 export let selectedNodePreviewAssetUrl = ''
 export let selectedGeneratedVariantUrl = ''
 export let styleDescriptor = ''
+export let assetPickerTargetNodeId = ''
+export let assetBrowserPath = ''
+export let assetBrowserItems: AssetBrowserItem[] = []
+export let assetBrowserFilter = ''
+export let assetBrowserError = ''
+export let assetBrowserLoading = false
+export let selectedLibraryItemPath = ''
+export let generatedRootPath = 'apps/megameal/public/generated/hunyuan3d'
+export let modelsRootPath = 'apps/megameal/public/models'
 export let canUseStyleStudioSelection = false
 export let canUseAiMeshStudioSelection = false
 export let generatedVariantItems: GeneratedVariantItem[] = []
@@ -50,11 +75,13 @@ export let colliderSize: [number, number, number] = [1, 1, 1]
 export let onNameChange: (value: string) => void = () => {}
 export let onOpenStyleTab: () => void = () => {}
 export let onOpenAiTab: () => void = () => {}
+export let onOpenCreateTab: () => void = () => {}
 export let onConvertSelectedToMesh: () => void = () => {}
 export let onReimagineSelected: () => void = () => {}
 export let onDuplicate: () => void = () => {}
 export let onDelete: () => void = () => {}
 export let onVisibleChange: (value: boolean) => void = () => {}
+export let onSelectableChange: (value: boolean) => void = () => {}
 export let onTransformChange: (
   field: 'position' | 'rotation' | 'scale',
   index: number,
@@ -64,6 +91,13 @@ export let onParentChange: (value: string) => void = () => {}
 export let onAssetUrlChange: (value: string) => void = () => {}
 export let onOpenGeneratedAssetPicker: () => void = () => {}
 export let onOpenImportedAssetPicker: () => void = () => {}
+export let onAssetLibraryRootSelect: (path: string) => void = () => {}
+export let onAssetBrowserUp: () => void = () => {}
+export let onAssetBrowserRefresh: () => void = () => {}
+export let onAssetBrowserFilterChange: (value: string) => void = () => {}
+export let onAssetLibraryItemSelect: (item: AssetBrowserItem) => void = () => {}
+export let onApplySelectedLibraryAsset: () => void = () => {}
+export let onCancelAssetPicker: () => void = () => {}
 export let onPrefabVariantChange: (value: string) => void = () => {}
 export let onPrimitiveGeometryChange: (value: string) => void = () => {}
 export let onPrimitiveArgChange: (index: number, value: string) => void =
@@ -93,12 +127,21 @@ export let onMaterialTextureChange: (field: 'mapUrl', value: string) => void =
 export let onOpenTexturePicker: (field: TextureField) => void = () => {}
 export let onResetMaterialOverrides: () => void = () => {}
 export let onCollisionEnabledChange: (value: boolean) => void = () => {}
+export let onCollisionShapeChange: (value: any) => void = () => {}
 export let onCollisionIntentChange: (value: CollisionIntent) => void = () => {}
 export let onCollisionChannelChange: (value: CollisionChannel) => void =
   () => {}
+export let onColliderUrlChange: (value: string) => void = () => {}
 export let onPhysicsBodyTypeChange: (value: string) => void = () => {}
 export let onColliderSizeChange: (index: number, value: string) => void =
   () => {}
+export let onRecalculateCollision: () => void = () => {}
+export let onSetCollisionVisualOnly: () => void = () => {}
+export let onSetCollisionBlocker: () => void = () => {}
+export let onSetCollisionWalkable: () => void = () => {}
+export let onSetCollisionTrigger: () => void = () => {}
+export let onSetCollisionDetail: () => void = () => {}
+export let onBakeMeshCollider: () => void = () => {}
 export let onTextureBrowserUp: () => void = () => {}
 export let onTextureBrowserRefresh: () => void = () => {}
 export let onTextureBrowserOpenDirectory: (path: string) => void = () => {}
@@ -110,11 +153,24 @@ export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
     <EditorPropertiesShelf
       {selectedNode}
       {selectedNodes}
+      {sceneSettings}
+      {sceneObjectCount}
+      {sceneAssetNodeCount}
+      {sceneColliderCount}
       {parentCandidates}
       {selectedNodeMaterial}
       {selectedNodePreviewAssetUrl}
       bind:selectedGeneratedVariantUrl
       {styleDescriptor}
+      {assetPickerTargetNodeId}
+      {assetBrowserPath}
+      {assetBrowserItems}
+      {assetBrowserFilter}
+      {assetBrowserError}
+      {assetBrowserLoading}
+      {selectedLibraryItemPath}
+      {generatedRootPath}
+      {modelsRootPath}
       {canUseStyleStudioSelection}
       {canUseAiMeshStudioSelection}
       {generatedVariantItems}
@@ -134,16 +190,25 @@ export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
       {onNameChange}
       {onOpenStyleTab}
       {onOpenAiTab}
+      {onOpenCreateTab}
       {onConvertSelectedToMesh}
       {onReimagineSelected}
       {onDuplicate}
       {onDelete}
       {onVisibleChange}
+      {onSelectableChange}
       {onTransformChange}
       {onParentChange}
       {onAssetUrlChange}
       {onOpenGeneratedAssetPicker}
       {onOpenImportedAssetPicker}
+      {onAssetLibraryRootSelect}
+      {onAssetBrowserUp}
+      {onAssetBrowserRefresh}
+      {onAssetBrowserFilterChange}
+      {onAssetLibraryItemSelect}
+      {onApplySelectedLibraryAsset}
+      {onCancelAssetPicker}
       {onPrefabVariantChange}
       {onPrimitiveGeometryChange}
       {onPrimitiveArgChange}
@@ -165,10 +230,19 @@ export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
       {onOpenTexturePicker}
       {onResetMaterialOverrides}
       {onCollisionEnabledChange}
+      {onCollisionShapeChange}
       {onCollisionIntentChange}
       {onCollisionChannelChange}
+      {onColliderUrlChange}
       {onPhysicsBodyTypeChange}
       {onColliderSizeChange}
+      {onRecalculateCollision}
+      {onSetCollisionVisualOnly}
+      {onSetCollisionBlocker}
+      {onSetCollisionWalkable}
+      {onSetCollisionTrigger}
+      {onSetCollisionDetail}
+      {onBakeMeshCollider}
       {onTextureBrowserUp}
       {onTextureBrowserRefresh}
       {onTextureBrowserOpenDirectory}
@@ -191,6 +265,7 @@ export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
   }
 
   .editor-side-content {
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -231,21 +306,14 @@ export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
   }
 
   .editor-properties-panel {
-    position: fixed;
-    top: 4.15rem;
-    right: 24.75rem;
-    width: 19rem;
-    height: calc(100vh - 5rem);
-    max-height: calc(100vh - 5rem);
-    z-index: 79;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
   }
 
   @media (max-width: 1280px) {
     .editor-properties-panel {
-      position: static;
-      width: auto;
-      height: auto;
-      max-height: none;
+      width: 100%;
     }
   }
 </style>

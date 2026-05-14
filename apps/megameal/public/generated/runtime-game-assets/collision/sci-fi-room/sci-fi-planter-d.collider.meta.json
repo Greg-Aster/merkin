@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "bake-mesh-collider",
+  "generatedAt": "2026-05-13T01:03:24.997Z",
+  "sourceLevelId": "sci-fi-room",
+  "sourceActorId": "sci-fi-planter-d",
+  "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "f4681f68333eb9a21e779a3f24cdddc7c919763e3cdf4faf906f6ae54bcccbac"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.meta.json",
+  "triangleCount": 19000,
+  "vertexCount": 16545,
+  "bounds": {
+    "min": [
+      -0.6667150855064392,
+      -1.0002450942993164,
+      -0.5741834044456482
+    ],
+    "max": [
+      0.6377129554748535,
+      0.9705517292022705,
+      0.5826324820518494
+    ],
+    "size": [
+      1.3044280409812927,
+      1.970796823501587,
+      1.1568158864974976
+    ],
+    "center": [
+      -0.014501065015792847,
+      -0.01484668254852295,
+      0.004224538803100586
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.6667150855064392,
+      -1.0003488063812256,
+      -0.5741834044456482
+    ],
+    "max": [
+      0.6377129554748535,
+      0.9705517292022705,
+      0.5826324820518494
+    ],
+    "size": [
+      1.3044280409812927,
+      1.970900535583496,
+      1.1568158864974976
+    ],
+    "center": [
+      -0.014501065015792847,
+      -0.014898538589477539,
+      0.004224538803100586
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.6667150855064392,
+      -1.0002450942993164,
+      -0.5741834044456482
+    ],
+    "max": [
+      0.6377129554748535,
+      0.9705517292022705,
+      0.5826324820518494
+    ],
+    "size": [
+      1.3044280409812927,
+      1.970796823501587,
+      1.1568158864974976
+    ],
+    "center": [
+      -0.014501065015792847,
+      -0.01484668254852295,
+      0.004224538803100586
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+    "sourceNodeName": "Growth Planter D",
+    "visualLocalBounds": {
+      "min": [
+        -0.6667150855064392,
+        -1.0003488063812256,
+        -0.5741834044456482
+      ],
+      "max": [
+        0.6377129554748535,
+        0.9705517292022705,
+        0.5826324820518494
+      ],
+      "size": [
+        1.3044280409812927,
+        1.970900535583496,
+        1.1568158864974976
+      ],
+      "center": [
+        -0.014501065015792847,
+        -0.014898538589477539,
+        0.004224538803100586
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.6667150855064392,
+        -1.0002450942993164,
+        -0.5741834044456482
+      ],
+      "max": [
+        0.6377129554748535,
+        0.9705517292022705,
+        0.5826324820518494
+      ],
+      "size": [
+        1.3044280409812927,
+        1.970796823501587,
+        1.1568158864974976
+      ],
+      "center": [
+        -0.014501065015792847,
+        -0.01484668254852295,
+        0.004224538803100586
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "sci-fi-planter-d",
+    "sourceActorName": "Growth Planter D",
+    "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "f4681f68333eb9a21e779a3f24cdddc7c919763e3cdf4faf906f6ae54bcccbac"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "sci-fi-room",
+      "nodeId": "sci-fi-planter-d",
+      "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 20000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-13T01:03:24.997Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 20000
+  },
+  "simplification": {
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 50000,
+    "targetTriangleBudget": 20000,
+    "ratio": 0.38,
+    "tool": "gltf-transform",
+    "prepass": "weld",
+    "error": 0.05
+  }
+}

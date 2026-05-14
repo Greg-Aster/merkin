@@ -10,6 +10,7 @@ import {
   isRuntimeInputActionActive,
   shouldPreventDefaultForRuntimeInputCode,
 } from '../../engine/runtimeInputBindings'
+import { DEFAULT_RUNTIME_PLAYER_SETTINGS } from '../../engine/runtimePlayerSettings'
 import { gameActions } from '../../stores/gameStateStore'
 import { runtimeInputBindingsStore } from '../../stores/runtimeInputBindingsStore'
 import {
@@ -38,6 +39,8 @@ const GAMEPAD_LOOK_DEADZONE = 0.12
 const GAMEPAD_LOOK_SPEED = 2.2
 const PLAYER_CAPSULE_HALF_HEIGHT = 0.9
 const PLAYER_CAPSULE_RADIUS = 0.45
+const SPAWN_GROUND_PROBE_DISTANCE = 80
+const SPAWN_GROUND_EPSILON = 0.001
 
 // --- Visual Constants ---
 const CAMERA_SMOOTH_SPEED = 0.2 // How quickly visuals catch up to physics
@@ -62,11 +65,15 @@ const rapier = useRapier()
 // --- Props ---
 export let position: [number, number, number]
 export let rotation: [number, number, number] = [0, 0, 0]
-export let speed = 5
-export let jumpForce = 10
-export let lightIntensityScale = 60
+export let speed = DEFAULT_RUNTIME_PLAYER_SETTINGS.moveSpeed
+export let sprintMultiplier = DEFAULT_RUNTIME_PLAYER_SETTINGS.sprintMultiplier
+export let jumpForce = DEFAULT_RUNTIME_PLAYER_SETTINGS.jumpForce
+export let lightIntensityScale =
+  DEFAULT_RUNTIME_PLAYER_SETTINGS.lightIntensityScale
 export let mouseSensitivity = 0.002
 export let gameplayEnabled = true
+export let cameraEnabled = true
+export let snapSpawnToGround = true
 
 // --- Player State ---
 let rigidBody: any // Physics body reference
@@ -124,6 +131,7 @@ const tempBodyRotation = new Quaternion()
 const tempDeltaRotation = new Quaternion()
 const tempSpawnRotation = new Quaternion()
 const tempSpawnEuler = new Euler()
+const tempPlayerPoseEuler = new Euler()
 const nextTranslation = { x: 0, y: 0, z: 0 }
 const keyboardMovement = { x: 0, z: 0 }
 const gamepadState = {
@@ -794,11 +802,83 @@ function spawnLightShockwave(
   })
 }
 
+function getCurrentPlayerPose() {
+  if (!rigidBody) return null
+  let currentPosition
+  let currentRotation
+  try {
+    currentPosition = rigidBody.translation()
+    currentRotation = rigidBody.rotation()
+  } catch {
+    return null
+  }
+  tempPlayerPoseEuler.setFromQuaternion(
+    tempBodyRotation.set(
+      currentRotation.x,
+      currentRotation.y,
+      currentRotation.z,
+      currentRotation.w,
+    ),
+    'YXZ',
+  )
+
+  return {
+    position: [currentPosition.x, currentPosition.y, currentPosition.z] as [
+      number,
+      number,
+      number,
+    ],
+    rotation: [
+      cameraRotationX,
+      tempPlayerPoseEuler.y,
+      tempPlayerPoseEuler.z,
+    ] as [number, number, number],
+  }
+}
+
+function emitPlayerPose() {
+  const pose = getCurrentPlayerPose()
+  if (!pose) return null
+  gameActions.updatePlayerPosition(pose.position)
+  gameActions.updatePlayerRotation(pose.rotation)
+  dispatch('playerPoseChange', pose)
+  return pose
+}
+
+function resolveSpawnGrounding(pos: { x: number; y: number; z: number }) {
+  if (!snapSpawnToGround || !characterController || !rigidBody) return pos
+
+  const collider = rigidBody.collider(0)
+  if (!collider) return pos
+
+  try {
+    tempDesiredTranslation.set(0, -SPAWN_GROUND_PROBE_DISTANCE, 0)
+    characterController.computeColliderMovement(
+      collider,
+      tempDesiredTranslation,
+      rapier.rapier.QueryFilterFlags.EXCLUDE_SENSORS,
+    )
+
+    if (!characterController.computedGrounded()) return pos
+
+    const correctedMovement = characterController.computedMovement()
+    if (correctedMovement.y >= -SPAWN_GROUND_EPSILON) return pos
+
+    return {
+      x: pos.x,
+      y: pos.y + correctedMovement.y,
+      z: pos.z,
+    }
+  } catch {
+    return pos
+  }
+}
+
 function applyLevelPosition() {
   if (!isPlayerPhysicsReady()) return false
   const [x, y, z] = position
   const spawnRotation = rotation ?? [0, 0, 0]
-  const positionKey = `${position.join(',')}|${spawnRotation.join(',')}`
+  const positionKey = `${position.join(',')}|${spawnRotation.join(',')}|snap:${snapSpawnToGround}`
   if (positionKey === appliedLevelPositionKey) return true
   appliedLevelPositionKey = positionKey
   const pos = { x, y, z }
@@ -811,6 +891,12 @@ function applyLevelPosition() {
   tempSpawnRotation.setFromEuler(tempSpawnEuler)
   rigidBody.setTranslation(pos, true)
   rigidBody.setNextKinematicTranslation(pos)
+  const groundedPos = resolveSpawnGrounding(pos)
+  const spawnWasGrounded = groundedPos !== pos
+  if (groundedPos !== pos) {
+    rigidBody.setTranslation(groundedPos, true)
+    rigidBody.setNextKinematicTranslation(groundedPos)
+  }
   if (typeof rigidBody.setRotation === 'function') {
     rigidBody.setRotation(tempSpawnRotation, true)
   }
@@ -818,13 +904,18 @@ function applyLevelPosition() {
     rigidBody.setNextKinematicRotation(tempSpawnRotation)
   }
   playerVelocity.set(0, 0, 0)
-  gameActions.updatePlayerPosition([pos.x, pos.y, pos.z])
+  isGrounded = spawnWasGrounded
+  gameActions.updatePlayerPosition([
+    groundedPos.x,
+    groundedPos.y,
+    groundedPos.z,
+  ])
   gameActions.updatePlayerRotation([pitch, yaw, spawnRotation[2] ?? 0])
   cameraRotationX = pitch
   accumulatedRotationX = 0
   accumulatedRotationY = 0
   if (visualGroup) {
-    visualGroup.position.set(pos.x, pos.y, pos.z)
+    visualGroup.position.set(groundedPos.x, groundedPos.y, groundedPos.z)
     visualGroup.quaternion.copy(tempSpawnRotation)
   }
   if (cameraPivot) {
@@ -1044,7 +1135,9 @@ useTask(delta => {
     input.z = gamepadInput.moveZ
 
   const moveSpeed =
-    isInputActionPressed('sprint') || gamepadInput.sprint ? speed * 2 : speed
+    isInputActionPressed('sprint') || gamepadInput.sprint
+      ? speed * Math.max(1, sprintMultiplier)
+      : speed
   tempHorizontalVelocity.set(input.x, 0, input.z)
   if (isMobile)
     tempHorizontalVelocity.set(mobileMovement.x, 0, mobileMovement.z)
@@ -1116,18 +1209,13 @@ useTask(delta => {
   networkSyncElapsed += delta * 1000
   if (networkSyncElapsed >= 100) {
     networkSyncElapsed = 0
-    const currentPosition = rigidBody.translation()
-    // Keep global player position store in sync (used by terrain/ocean systems)
-    gameActions.updatePlayerPosition([
-      currentPosition.x,
-      currentPosition.y,
-      currentPosition.z,
-    ])
+    const pose = emitPlayerPose()
+    if (!pose) return
 
     // Throttle multiplayer updates to ~10fps when connected
     if ($multiplayerStore.isConnected && sendPlayerUpdateFn) {
       sendPlayerUpdateFn({
-        position: [currentPosition.x, currentPosition.y, currentPosition.z],
+        position: pose.position,
       })
     }
   }
@@ -1163,6 +1251,7 @@ onMount(() => {
 })
 
 onDestroy(() => {
+  emitPlayerPose()
   stopChargeAudio()
   window.removeEventListener('gamepadconnected', handleGamepadConnected)
   window.removeEventListener('gamepaddisconnected', handleGamepadDisconnected)
@@ -1221,7 +1310,7 @@ onDestroy(() => {
   />
   <T.Group bind:ref={cameraPivot}>
     <T.PerspectiveCamera
-      makeDefault
+      makeDefault={cameraEnabled}
       bind:ref={camera}
       {fov}
       {near}

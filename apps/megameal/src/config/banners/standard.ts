@@ -230,7 +230,7 @@ const bannerEntries: BannerEntry[] = [
       alt: 'Enter the Star Observatory',
       preload: 'none',
     },
-    link: '/game/',
+    link: 'https://game.megameal.org/',
   },
   {
     item: {
@@ -358,7 +358,7 @@ export const linkPreviewData: Record<string, LinkPreviewInfo> = {
     stat: `${activeArcCount} sanitized arcs`,
     ctaLabel: 'Open Archive',
   },
-  '/game/': {
+  'https://game.megameal.org/': {
     title: 'Game Mode',
     description:
       'Navigate the cosmic menu board yourself. Management reminds you that falling through spacetime is not covered by the meal plan.',

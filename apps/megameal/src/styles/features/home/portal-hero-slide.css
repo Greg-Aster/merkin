@@ -8,6 +8,15 @@
     pointer-events: none;
     overflow: hidden;
     isolation: isolate;
+    transition:
+      opacity 260ms ease,
+      visibility 260ms ease;
+  }
+
+  html.megameal-home-standard-banner-phase .megameal-home-intro {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
   }
 
   .megameal-portal-background-slide {
@@ -114,8 +123,8 @@
     animation: portal-scroll-cue-float 1600ms ease-in-out 2200ms infinite;
   }
 
-  #banner-container.banner-only-mode #standard-banner-container .banner-billboard,
-  #banner-container.banner-only-mode #standard-banner-container .banner-title-display {
+  html:not(.megameal-home-standard-banner-phase) #banner-container.banner-only-mode #standard-banner-container .banner-billboard,
+  html:not(.megameal-home-standard-banner-phase) #banner-container.banner-only-mode #standard-banner-container .banner-title-display {
     display: none !important;
   }
 

@@ -119,7 +119,7 @@ export async function fitGeneratedAssetToSource(
   return { appliedScale, report, usedFallback: false }
 }
 
-export function createGeneratedAssetNode(
+export async function createGeneratedAssetNode(
   deps: EditorGeneratedAssetApplicationDeps,
   assetUrl: string,
   name: string,
@@ -136,6 +136,11 @@ export function createGeneratedAssetNode(
     anchorPosition[1],
     anchorPosition[2],
   ]
+  const generatedBounds = await deps.inspectGeneratedAssetBounds(assetUrl)
+  const sourceVisualSize =
+    generatedBounds?.size?.length === 3
+      ? ([...generatedBounds.size] as Vector3Tuple)
+      : undefined
 
   deps.addNode({
     id: `asset-${Date.now()}`,
@@ -147,6 +152,15 @@ export function createGeneratedAssetNode(
     scale: [1, 1, 1],
     visible: true,
     asset: { url: assetUrl },
+    ...(sourceVisualSize
+      ? {
+          generation: {
+            sourceVisualSize,
+            lastBakedAssetUrl: assetUrl,
+            lastBakedAt: new Date().toISOString(),
+          },
+        }
+      : {}),
   })
 }
 

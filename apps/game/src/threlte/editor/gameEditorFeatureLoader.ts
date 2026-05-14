@@ -3,6 +3,7 @@ type RuntimeComponent = any
 type EditorSessionState = {
   enabled: boolean
   collisionOverlayEnabled: boolean
+  viewportMode?: 'edit' | 'playtest'
 }
 
 export type RuntimeEditorFeatureComponents = {

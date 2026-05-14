@@ -1,8 +1,9 @@
+import type { AssetLocalTransformMetadata } from './assetLocalTransform'
 import { resolveCollisionChannel } from './collisionChannels'
+import { isEditorProxyCollision } from './editorProxyCollision'
 import {
   getActorCollisionRole,
   getCollisionIntentForRole,
-  getLevelCollisionWorkflow,
 } from './levelCollisionWorkflow'
 import type { SceneSettings } from './sceneDocumentTypes'
 import type {
@@ -30,10 +31,15 @@ export interface CollisionPolicyInput {
     enabled?: boolean
     size?: [number, number, number]
     colliderUrl?: string
+    colliderMetadataUrl?: string
+    assetLocalTransform?: AssetLocalTransformMetadata | null
+    sourceAssetUrl?: string
     friction?: number
     restitution?: number
     sensor?: boolean
     triangleBudget?: number
+    triangleCount?: number
+    vertexCount?: number
   } | null
 }
 
@@ -46,12 +52,12 @@ export interface CollisionPolicyResult {
 export function getDefaultCollisionShape(
   input: CollisionPolicyInput,
 ): CollisionShape {
-  if (input.actorKind === 'asset') return 'cuboid'
   if (
-    input.actorKind === 'primitive' &&
-    input.primitiveGeometry === 'cylinder'
+    input.actorKind === 'asset' ||
+    input.actorKind === 'prefab' ||
+    input.actorKind === 'primitive'
   ) {
-    return 'cylinder'
+    return 'trimesh'
   }
   return 'cuboid'
 }
@@ -65,7 +71,8 @@ function getAuthoredShape(input: CollisionPolicyInput): CollisionShape {
   if (
     authoredShape === 'cuboid' &&
     defaultShape !== 'cuboid' &&
-    !input.authoredCollision?.size
+    !input.authoredCollision?.size &&
+    !isEditorProxyCollision(input.authoredCollision)
   ) {
     return defaultShape
   }
@@ -120,8 +127,6 @@ export function resolveCollisionPolicy(
     sensor: input.authoredCollision?.sensor,
     shape: authoredShape,
   })
-  const workflow = getLevelCollisionWorkflow(input.levelId, input.levelSettings)
-
   if (role === 'visualOnly') {
     return { collision: null, source: 'none' }
   }
@@ -153,10 +158,17 @@ export function resolveCollisionPolicy(
         shape,
         size: input.authoredCollision.size,
         colliderUrl: normalizeColliderUrl(input.authoredCollision.colliderUrl),
+        colliderMetadataUrl: normalizeColliderUrl(
+          input.authoredCollision.colliderMetadataUrl,
+        ),
+        assetLocalTransform: input.authoredCollision.assetLocalTransform,
+        sourceAssetUrl: input.authoredCollision.sourceAssetUrl,
         friction: input.authoredCollision.friction,
         restitution: input.authoredCollision.restitution,
         sensor: intent === 'trigger' ? true : input.authoredCollision.sensor,
         triangleBudget: input.authoredCollision.triangleBudget,
+        triangleCount: input.authoredCollision.triangleCount,
+        vertexCount: input.authoredCollision.vertexCount,
       },
     }
   }
@@ -170,30 +182,6 @@ export function resolveCollisionPolicy(
 
   if (!solidByDefault) {
     return { collision: null, source: 'none' }
-  }
-
-  if (workflow.defaultActorCollision === 'lightweight-auto') {
-    const intent = getCollisionIntentForRole(role)
-    if (intent === 'none') {
-      return { collision: null, source: 'none' }
-    }
-
-    return {
-      source: 'default',
-      collision: {
-        intent,
-        channel: resolveCollisionChannel({
-          intent,
-          bodyType: input.bodyType,
-        }),
-        shape: getDefaultCollisionShape(input),
-        friction:
-          input.levelSettings?.level?.collision?.defaults?.defaultFriction,
-        restitution:
-          input.levelSettings?.level?.collision?.defaults?.defaultRestitution,
-        sensor: intent === 'trigger',
-      },
-    }
   }
 
   return {

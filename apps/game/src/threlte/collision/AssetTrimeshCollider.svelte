@@ -1,85 +1,69 @@
 <script lang="ts">
-import { T } from '@threlte/core'
 import { Collider } from '@threlte/rapier'
 import { onDestroy } from 'svelte'
-import * as THREE from 'three'
+import type { AssetLocalTransformMetadata } from '../engine/assetLocalTransform'
 import { loadCachedGltf } from '../utils/gltfAssetCache'
+import {
+  type MeshColliderPatch,
+  buildAssetTrimeshColliderPatches,
+} from './assetTrimeshColliderGeometry'
+import {
+  loadAssetLocalTransformMetadata,
+  validateInlineAssetLocalTransform,
+} from './assetTrimeshColliderMetadata'
 
 export let url = ''
+export let metadataUrl = ''
+export let assetLocalTransform: AssetLocalTransformMetadata | null = null
 export let friction = 0.7
 export let restitution = 0
 export let sensor = false
-
-type MeshColliderPatch = {
-  id: string
-  vertices: Float32Array
-  indices: Uint32Array
-  position: [number, number, number]
-  rotation: [number, number, number]
-  scale: [number, number, number]
-}
+export let collisionGroups: number | undefined = undefined
+export let scale: [number, number, number] = [1, 1, 1]
 
 let patches: MeshColliderPatch[] = []
 let disposed = false
 let loadToken = 0
-let loadedUrl = ''
+let loadedKey = ''
 
-function getGeometryPatch(
-  mesh: THREE.Mesh,
-  index: number,
-): MeshColliderPatch | null {
-  const geometry = mesh.geometry
-  const positionAttribute = geometry?.getAttribute('position')
-  if (!positionAttribute || positionAttribute.count < 3) return null
-
-  const vertices = new Float32Array(positionAttribute.count * 3)
-  for (let i = 0; i < positionAttribute.count; i += 1) {
-    vertices[i * 3] = positionAttribute.getX(i)
-    vertices[i * 3 + 1] = positionAttribute.getY(i)
-    vertices[i * 3 + 2] = positionAttribute.getZ(i)
-  }
-
-  const geometryIndex = geometry.index
-  const indices = geometryIndex
-    ? new Uint32Array(Array.from(geometryIndex.array))
-    : new Uint32Array(
-        Array.from({ length: positionAttribute.count }, (_, i) => i),
-      )
-
-  if (indices.length < 3) return null
-
-  const position = new THREE.Vector3()
-  const quaternion = new THREE.Quaternion()
-  const scale = new THREE.Vector3()
-  mesh.matrixWorld.decompose(position, quaternion, scale)
-  const rotation = new THREE.Euler().setFromQuaternion(quaternion, 'XYZ')
-
-  return {
-    id: `${mesh.name || 'mesh'}-${index}`,
-    vertices,
-    indices,
-    position: [position.x, position.y, position.z],
-    rotation: [rotation.x, rotation.y, rotation.z],
-    scale: [scale.x, scale.y, scale.z],
-  }
-}
-
-async function loadColliderPatches(nextUrl: string) {
+async function loadColliderPatches(
+  nextUrl: string,
+  nextMetadataUrl: string,
+  inlineAssetLocalTransform: AssetLocalTransformMetadata | null,
+) {
   const token = ++loadToken
 
   try {
-    const gltf = await loadCachedGltf(nextUrl)
+    const [gltf, metadataValidation] = await Promise.all([
+      loadCachedGltf(nextUrl),
+      nextMetadataUrl
+        ? loadAssetLocalTransformMetadata(nextMetadataUrl)
+        : Promise.resolve(
+            validateInlineAssetLocalTransform(inlineAssetLocalTransform),
+          ),
+    ])
     if (disposed || token !== loadToken) return
 
-    const nextPatches: MeshColliderPatch[] = []
-    gltf.scene.updateWorldMatrix(true, true)
-    gltf.scene.traverse(child => {
-      if (!(child instanceof THREE.Mesh)) return
-      const patch = getGeometryPatch(child, nextPatches.length)
-      if (patch) nextPatches.push(patch)
-    })
+    if (
+      metadataValidation.state === 'malformed' ||
+      metadataValidation.state === 'invalid'
+    ) {
+      console.warn(
+        'Invalid asset-local collider metadata; using legacy collider placement:',
+        nextUrl,
+        metadataValidation.errors,
+      )
+    } else if (metadataValidation.state === 'missing') {
+      console.warn(
+        'Missing asset-local collider metadata; using legacy collider placement:',
+        nextUrl,
+      )
+    }
 
-    patches = nextPatches
+    patches = buildAssetTrimeshColliderPatches(gltf.scene, {
+      assetLocalTransform: metadataValidation.metadata,
+      scale,
+    })
   } catch (error) {
     if (!disposed) {
       console.warn(
@@ -92,9 +76,14 @@ async function loadColliderPatches(nextUrl: string) {
   }
 }
 
-$: if (url && url !== loadedUrl) {
-  loadedUrl = url
-  void loadColliderPatches(url)
+$: inlineMatrix =
+  assetLocalTransform?.visualToPhysicsLocalMatrix ??
+  assetLocalTransform?.visualToPhysicsMatrix
+$: scaleKey = JSON.stringify(scale)
+$: loadKey = `${url}|${metadataUrl}|${inlineMatrix ? JSON.stringify(inlineMatrix) : ''}|${scaleKey}`
+$: if (url && loadKey !== loadedKey) {
+  loadedKey = loadKey
+  void loadColliderPatches(url, metadataUrl, assetLocalTransform)
 }
 
 onDestroy(() => {
@@ -104,13 +93,12 @@ onDestroy(() => {
 </script>
 
 {#each patches as patch (patch.id)}
-  <T.Group position={patch.position} rotation={patch.rotation} scale={patch.scale}>
-    <Collider
-      shape="trimesh"
-      args={[patch.vertices, patch.indices]}
-      {friction}
-      {restitution}
-      {sensor}
-    />
-  </T.Group>
+  <Collider
+    shape="trimesh"
+    args={[patch.vertices, patch.indices]}
+    {collisionGroups}
+    {friction}
+    {restitution}
+    {sensor}
+  />
 {/each}

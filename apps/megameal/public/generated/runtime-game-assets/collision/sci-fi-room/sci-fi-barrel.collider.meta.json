@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "bake-mesh-collider",
+  "generatedAt": "2026-05-13T01:03:25.733Z",
+  "sourceLevelId": "sci-fi-room",
+  "sourceActorId": "sci-fi-barrel",
+  "sourceAssetUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+  "sourceAssetPath": "apps/megameal/public/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "e084945dedd6a3379c6f3e97842cac89df7169797707e123a5e5b42c135d6888"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.meta.json",
+  "triangleCount": 2682,
+  "vertexCount": 2052,
+  "bounds": {
+    "min": [
+      -0.2815175950527191,
+      -0.006614277604967356,
+      -0.28151750564575195
+    ],
+    "max": [
+      0.28151753544807434,
+      0.8733857274055481,
+      0.28151771426200867
+    ],
+    "size": [
+      0.5630351305007935,
+      0.8800000050105155,
+      0.5630352199077606
+    ],
+    "center": [
+      -2.9802322387695312e-8,
+      0.43338572490029037,
+      1.043081283569336e-7
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.2815175950527191,
+      -0.006614277604967356,
+      -0.28151750564575195
+    ],
+    "max": [
+      0.28151753544807434,
+      0.8733857274055481,
+      0.28151771426200867
+    ],
+    "size": [
+      0.5630351305007935,
+      0.8800000050105155,
+      0.5630352199077606
+    ],
+    "center": [
+      -2.9802322387695312e-8,
+      0.43338572490029037,
+      1.043081283569336e-7
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.2815175950527191,
+      -0.006614277604967356,
+      -0.28151750564575195
+    ],
+    "max": [
+      0.28151753544807434,
+      0.8733857274055481,
+      0.28151771426200867
+    ],
+    "size": [
+      0.5630351305007935,
+      0.8800000050105155,
+      0.5630352199077606
+    ],
+    "center": [
+      -2.9802322387695312e-8,
+      0.43338572490029037,
+      1.043081283569336e-7
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+    "sourceNodeName": "Wasteland Barrel",
+    "visualLocalBounds": {
+      "min": [
+        -0.2815175950527191,
+        -0.006614277604967356,
+        -0.28151750564575195
+      ],
+      "max": [
+        0.28151753544807434,
+        0.8733857274055481,
+        0.28151771426200867
+      ],
+      "size": [
+        0.5630351305007935,
+        0.8800000050105155,
+        0.5630352199077606
+      ],
+      "center": [
+        -2.9802322387695312e-8,
+        0.43338572490029037,
+        1.043081283569336e-7
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.2815175950527191,
+        -0.006614277604967356,
+        -0.28151750564575195
+      ],
+      "max": [
+        0.28151753544807434,
+        0.8733857274055481,
+        0.28151771426200867
+      ],
+      "size": [
+        0.5630351305007935,
+        0.8800000050105155,
+        0.5630352199077606
+      ],
+      "center": [
+        -2.9802322387695312e-8,
+        0.43338572490029037,
+        1.043081283569336e-7
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "sci-fi-barrel",
+    "sourceActorName": "Wasteland Barrel",
+    "sourceAssetUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+    "sourceAssetPath": "apps/megameal/public/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "e084945dedd6a3379c6f3e97842cac89df7169797707e123a5e5b42c135d6888"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "sci-fi-room",
+      "nodeId": "sci-fi-barrel",
+      "sourceAssetUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 20000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-13T01:03:25.733Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 20000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 2682,
+    "targetTriangleBudget": 20000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

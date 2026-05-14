@@ -30,19 +30,23 @@ function createEditorSmokeCheck(name, url) {
       })
       await page
         .locator('.editor-tab-rail')
-        .getByRole('button', { name: 'Scene', exact: true })
+        .getByRole('button', { name: 'Save / Publish', exact: true })
         .click()
       await page.getByText('Publish Readiness').waitFor({
         state: 'visible',
         timeout: 10000,
       })
-      await page.getByText(/Validation (Gates|Failures)/).waitFor({
+      await page.getByText('Publish Build Plan').waitFor({
         state: 'visible',
         timeout: 15000,
       })
-      await page.getByText('Required Publish Actions').waitFor({
+      await page.getByText('Production Flow').waitFor({
         state: 'visible',
-        timeout: 10000,
+        timeout: 15000,
+      })
+      await page.getByText(/Validation (Gates|Failures|Sections)/).waitFor({
+        state: 'visible',
+        timeout: 15000,
       })
       await page.locator('select.text-input').first().waitFor({
         state: 'visible',
@@ -55,7 +59,7 @@ function createEditorSmokeCheck(name, url) {
       await page
         .locator('.editor-tools-panel .editor-tab-content')
         .getByText(
-          'Select an object in the viewport or outliner to inspect it here.',
+          'Select an object in the viewport or outliner, then use the right-side Details shelf for properties.',
         )
         .first()
         .waitFor({

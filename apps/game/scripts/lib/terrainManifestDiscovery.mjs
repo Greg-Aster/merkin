@@ -79,10 +79,71 @@ function resolveSceneSettingsKey(repoRoot, level) {
   if (!existsSync(scenePath)) return 'level'
 
   const settings = readJson(scenePath).settings ?? {}
-  for (const key of [level.id, sceneId, 'level']) {
-    if (settings[key]) return key
+  if (settings.level) return 'level'
+
+  for (const key of [level.id, sceneId]) {
+    const value = settings[key]
+    if (
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      Object.keys(value).length > 0
+    ) {
+      return key
+    }
   }
   return 'level'
+}
+
+export function readTerrainSceneSettings(repoRoot, level) {
+  const sceneId = level.sceneId ?? level.source?.sceneId ?? level.id
+  const scenePath = join(
+    repoRoot,
+    'apps/game/src/threlte/editor/scenes',
+    `${sceneId}.scene.json`,
+  )
+  if (!existsSync(scenePath)) return {}
+
+  const scene = readJson(scenePath)
+  const settings = scene.settings ?? {}
+  const key = level.sceneSettingsKey ?? resolveSceneSettingsKey(repoRoot, level)
+  return settings[key] ?? settings.level ?? {}
+}
+
+function firstString(...values) {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim()
+    if (Array.isArray(value)) {
+      const match = value.find(
+        item => typeof item === 'string' && item.trim(),
+      )
+      if (match) return match.trim()
+    }
+  }
+  return ''
+}
+
+export function resolveTerrainSourceAssetUrl({ repoRoot, level, manifest }) {
+  const settings = readTerrainSceneSettings(repoRoot, level)
+  const terrainSettings = settings.collision?.terrain ?? {}
+  const renderProduct =
+    manifest.visualChunks?.renderProduct ??
+    manifest.visualChunks?.product ??
+    manifest.renderProducts?.terrain ??
+    manifest.renderProducts?.visualTerrain
+
+  return firstString(
+    terrainSettings.sourceAssetUrl,
+    terrainSettings.sourceAssetUrls,
+    manifest.assets?.sourceGlb,
+    manifest.assets?.sourceGltf,
+    manifest.assets?.terrainSource,
+    renderProduct?.sourceAssetUrl,
+    renderProduct?.source?.url,
+    manifest.visualChunks?.sourceAsset?.url,
+    manifest.visualChunks?.sourceAssetUrl,
+    manifest.assets?.environment,
+  )
 }
 
 export function discoverTerrainLevels({

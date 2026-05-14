@@ -12,6 +12,7 @@ import {
   Vector3,
 } from 'three'
 import type * as THREE from 'three'
+import { siteSfxManager } from '@/utils/site-sfx'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import HomeIntroParticleField from './HomeIntroParticleField.svelte'
@@ -76,6 +77,7 @@ let carouselComponentReady = false
 let ScreenPanel: ScreenPanelComponent | null = null
 let carouselComponentPromise: Promise<void> | null = null
 let screenOrbitInitialized = false
+let logoImpactSfxIntroStartedAt = 0
 
 const particleCount = 960
 const particleExpansionChunk = 64
@@ -299,6 +301,21 @@ function attachLogoModel() {
   if (!logoMeshRoot || !logoModel || logoModel.parent === logoMeshRoot) return
   logoModel.parent?.remove(logoModel)
   logoMeshRoot.add(logoModel)
+}
+
+function playLogoImpactSfx(introStartedAt: number) {
+  if (
+    typeof window === 'undefined' ||
+    !introStartedAt ||
+    logoImpactSfxIntroStartedAt === introStartedAt
+  ) {
+    return
+  }
+
+  logoImpactSfxIntroStartedAt = introStartedAt
+  void siteSfxManager.unlockFromGesture().finally(() => {
+    siteSfxManager.play('portal-impact')
+  })
 }
 
 async function loadLogoModel(sourceUrl: string) {
@@ -673,6 +690,9 @@ useTask(delta => {
     logoImpactElapsed >= 0 ? clamp01(logoImpactElapsed / logoImpactDuration) : 1
   const logoImpactStrength =
     logoImpactElapsed >= 0 && logoImpactRaw < 1 ? (1 - logoImpactRaw) ** 2 : 0
+  if (logoImpactElapsed >= 0) {
+    playLogoImpactSfx(logoIntroStartedAt)
+  }
   atmosphereReveal = smoothstep((logoIntroRaw - 0.72) / 0.28)
   activeScreenIndex = clampScreenIndex(Math.round(selectedIndex))
 

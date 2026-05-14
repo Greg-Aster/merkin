@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-12T17:50:22.648Z",
+  "generatedAt": "2026-05-13T22:31:20.893Z",
   "levelId": "miranda",
   "sceneId": "miranda",
   "source": {
@@ -29,7 +29,6 @@
       "level": {
         "collision": {
           "workflow": {
-            "actorCollision": "lightweight-auto",
             "colliderBudget": "mobile"
           },
           "terrain": {
@@ -37,7 +36,7 @@
             "dirty": false
           },
           "defaults": {
-            "solidObjectsByDefault": true,
+            "solidObjectsByDefault": false,
             "defaultFriction": 0.7,
             "defaultRestitution": 0
           }
@@ -56,12 +55,30 @@
         "ground": {
           "mode": "scene-authored",
           "visualSource": "scene-actors",
+          "terrainRuntimeMode": "scene-authored",
+          "terrainVisualSource": "scene-actors",
           "collisionSource": "scene-colliders",
+          "fallbackSurfacePolicy": "disabled",
           "groundActorIds": [
             "miranda-floor-main",
             "miranda-floor-upper"
           ],
           "requiredWalkableSurfaceId": "miranda-floor-main"
+        },
+        "terrainMigration": {
+          "currentMode": "scene-authored",
+          "authoritativeVisualSource": "scene-actors",
+          "collisionSource": "scene-colliders",
+          "renderChunks": {
+            "present": false,
+            "authoritative": false,
+            "source": "none"
+          },
+          "fallbackSurfacePolicy": "disabled",
+          "targetMode": "scene-authored",
+          "status": "complete",
+          "blockers": [],
+          "warningsBecomeBlockersAfterMigration": []
         },
         "graphicsBudget": {
           "maxRuntimeAssetBytes": 167772160,
@@ -335,6 +352,11 @@
             "intent": "walkable",
             "channel": "worldStatic",
             "shape": "cuboid",
+            "size": [
+              40,
+              1.2,
+              92
+            ],
             "friction": 0.88
           }
         }
@@ -387,6 +409,11 @@
             "intent": "walkable",
             "channel": "worldStatic",
             "shape": "cuboid",
+            "size": [
+              18,
+              0.9,
+              18
+            ],
             "friction": 0.88
           }
         }
@@ -3622,7 +3649,10 @@
     "ground": {
       "mode": "scene-authored",
       "visualSource": "scene-actors",
+      "terrainRuntimeMode": "scene-authored",
+      "terrainVisualSource": "scene-actors",
       "collisionSource": "scene-colliders",
+      "fallbackSurfacePolicy": "disabled",
       "groundActorIds": [
         "miranda-floor-main",
         "miranda-floor-upper"

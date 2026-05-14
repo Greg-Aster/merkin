@@ -19,7 +19,6 @@ export type {
   EditorSceneSettings,
   EditorStylePreset,
   LevelCollisionBudget,
-  LevelCollisionDefaultPolicy,
   LevelCollisionRoleSettings,
   LevelCollisionWorkflowSettings,
   ObservatoryEditorSettings,
@@ -35,33 +34,55 @@ export type {
   SharedLevelSkyboxSettings,
   SharedLevelSpawnSettings,
   SharedLevelStyleSettings,
+  SharedLevelTerrainMigrationSettings,
   SharedLevelTerrainSculptSettings,
   SharedLevelWaterSettings,
   SolitudeEditorSettings,
+  TerrainMigrationSettings,
+  TerrainMigrationStatus,
 } from '../engine/sceneDocumentTypes'
 
 export type EditorTransformMode = 'translate' | 'rotate' | 'scale'
+export type EditorObjectToolMode = 'select' | 'translate' | 'rotate' | 'scale'
 export type EditorSpace = 'world' | 'local'
 export type EditorTransformAxis = 'all' | 'x' | 'y' | 'z'
 export type EditorInteractionMode = 'objects' | 'terrain'
 export type EditorTerrainBrushMode = 'raise' | 'smooth' | 'flatten'
+export type EditorViewportMode = 'edit' | 'playtest'
 export type EditorViewportLightingMode = 'authored' | 'workbench'
 export type EditorViewportShadingMode = 'rendered' | 'solid' | 'wireframe'
+export type EditorLayoutPreset =
+  | 'default'
+  | 'create'
+  | 'collision'
+  | 'build'
+  | 'minimal-viewport'
 
 export interface EditorState {
   enabled: boolean
+  layoutPreset: EditorLayoutPreset
+  responsiveSplitPinned: boolean
   panelOpen: boolean
   propertiesShelfOpen: boolean
   outlinerOpen: boolean
   controlsOverlayOpen: boolean
+  toolsDockWidth: number
+  toolsDockHeight: number
+  sideDockWidth: number
+  sideDockHeight: number
+  sideStackSplitRatio: number
+  layoutCustomized: boolean
+  dockHeightCustomized: boolean
   currentLevelId: string | null
   selectedNodeId: string | null
   selectedNodeIds: string[]
   isolatedNodeIds: string[]
   selectionAnchorId: string | null
+  viewportMode: EditorViewportMode
   interactionMode: EditorInteractionMode
   viewportLightingMode: EditorViewportLightingMode
   viewportShadingMode: EditorViewportShadingMode
+  objectToolMode: EditorObjectToolMode
   transformMode: EditorTransformMode
   transformSpace: EditorSpace
   transformAxis: EditorTransformAxis

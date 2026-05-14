@@ -131,6 +131,7 @@ let gameplayEnabled = false
 let interactionSystem: any = null // Reference to centralized InteractionSystem
 let chatBoxComponent: any = null // Reference to ChatBox component instance
 let editorEnabled = false
+let editorPlaytestEnabled = false
 let collisionOverlayEnabled = false
 let activeLevelNote: ActiveLevelNote | null = null
 let levelRegistry = []
@@ -157,7 +158,7 @@ function getLevelRenderConfig(levelId: string) {
   const normalizedLevel = normalizeLevelId(levelId)
   const levelEntry = getLevelRegistryEntry(normalizedLevel, levelRegistry)
 
-  if (levelEntry?.source.kind === 'scene') {
+  if (levelEntry?.source?.kind === 'scene') {
     return {
       offset: [0, 0, 0] as [number, number, number],
     }
@@ -384,8 +385,13 @@ async function enableEditorSession() {
 
   const editorLoader = await ensureEditorFeatureLoader()
   editorSessionCleanup = await editorLoader.enableEditorSession(
-    (state: { enabled: boolean; collisionOverlayEnabled: boolean }) => {
+    (state: {
+      enabled: boolean
+      collisionOverlayEnabled: boolean
+      viewportMode?: 'edit' | 'playtest'
+    }) => {
       editorEnabled = state.enabled
+      editorPlaytestEnabled = state.enabled && state.viewportMode === 'playtest'
       collisionOverlayEnabled = state.collisionOverlayEnabled
     },
   )
@@ -393,6 +399,7 @@ async function enableEditorSession() {
   editorSessionCleanup = () => {
     cleanup()
     editorEnabled = false
+    editorPlaytestEnabled = false
     collisionOverlayEnabled = false
   }
 }
@@ -564,6 +571,7 @@ async function initializeThrelte() {
     })
     shellBootstrapState = bootstrap
     editorEnabled = false
+    editorPlaytestEnabled = false
     collisionOverlayEnabled = false
     if (bootstrap.shouldEnableEditor) {
       await enableEditorSession()
@@ -776,6 +784,7 @@ onDestroy(() => {
         {error}
         {isMobile}
         {editorEnabled}
+        {editorPlaytestEnabled}
         {collisionOverlayEnabled}
         currentLevel={$currentLevelStore}
         {currentLevelComponent}

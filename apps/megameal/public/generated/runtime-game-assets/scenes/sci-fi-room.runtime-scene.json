@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-12T17:50:22.648Z",
+  "generatedAt": "2026-05-13T22:31:20.893Z",
   "levelId": "sci-fi-room",
   "sceneId": "sci-fi-room",
   "source": {
     "kind": "scene-document",
     "path": "apps/game/src/threlte/editor/scenes/sci-fi-room.scene.json",
     "version": 5,
-    "updatedAt": "2026-04-26T19:03:13.2665345Z"
+    "updatedAt": "2026-05-13T18:42:10.476Z"
   },
   "levelDefinition": {
     "id": "sci-fi-room",
     "version": 5,
-    "updatedAt": "2026-04-26T19:03:13.2665345Z",
+    "updatedAt": "2026-05-13T18:42:10.476Z",
     "spawn": {
       "player": [
         0,
-        3.31,
+        1.5,
         0
       ],
       "rotation": [
@@ -29,43 +29,69 @@
       "level": {
         "collision": {
           "workflow": {
-            "actorCollision": "lightweight-auto",
             "colliderBudget": "mobile"
           },
           "terrain": {
-            "source": "baked-heightmap",
-            "runtimeSource": "built-in-manifest",
-            "manifestUrl": "/terrain/sci-fi-room.manifest.json",
-            "dirty": false
+            "source": "scene-authored",
+            "dirty": false,
+            "runtimeMode": "scene-authored",
+            "visualSource": "scene-actors",
+            "fallbackSurfacePolicy": "disabled"
           },
           "defaults": {
-            "solidObjectsByDefault": true,
+            "solidObjectsByDefault": false,
             "defaultFriction": 0.7,
             "defaultRestitution": 0
+          },
+          "roles": {
+            "visualOnlyActorIds": [],
+            "groundActorIds": [
+              "sci-fi-floor-interior-slab",
+              "sci-fi-floor-courtyard-slab",
+              "sci-fi-floor-wasteland-tile-4-4"
+            ]
           }
         },
         "terrainSculpt": {
-          "enabled": true,
-          "autoBakeCollision": true
+          "enabled": false,
+          "autoBakeCollision": false
         },
         "spawn": {
           "position": [
             0,
-            3.31,
+            1.5,
             0
           ]
         },
         "ground": {
           "mode": "authored-ground",
           "visualSource": "scene-actors",
-          "collisionSource": "baked-heightfield",
+          "terrainRuntimeMode": "scene-authored",
+          "terrainVisualSource": "scene-actors",
+          "collisionSource": "scene-colliders",
+          "fallbackSurfacePolicy": "disabled",
           "groundActorIds": [
             "sci-fi-floor-interior-slab",
             "sci-fi-floor-courtyard-slab",
             "sci-fi-floor-wasteland-tile-4-4"
           ],
-          "terrainManifestUrl": "/terrain/sci-fi-room.manifest.json",
-          "requiredWalkableSurfaceId": "sci-fi-room-terrain"
+          "requiredWalkableSurfaceId": "sci-fi-floor-interior-slab"
+        },
+        "terrainMigration": {
+          "currentMode": "scene-authored",
+          "authoritativeVisualSource": "scene-actors",
+          "collisionSource": "scene-colliders",
+          "renderChunks": {
+            "present": false,
+            "authoritative": false,
+            "source": "none"
+          },
+          "fallbackSurfacePolicy": "disabled",
+          "targetMode": "scene-authored",
+          "status": "complete",
+          "blockers": [],
+          "generatedTerrainProducts": {},
+          "warningsBecomeBlockersAfterMigration": []
         },
         "graphicsBudget": {
           "maxRuntimeAssetBytes": 167772160,
@@ -82,7 +108,6 @@
           "maxAuthoredTextureBytes": 12582912
         },
         "features": {
-          "ocean": true,
           "vegetation": true,
           "fireflies": true,
           "starMap": true,
@@ -281,22 +306,6 @@
         "editorPanels": {
           "environment": "sci-fi-room"
         }
-      },
-      "observatory": {
-        "ocean": {
-          "size": {
-            "width": 4000,
-            "height": 4000
-          },
-          "enableRising": true,
-          "initialLevel": -2,
-          "targetLevel": 5,
-          "riseRate": 0.01,
-          "enableAnimation": true,
-          "underwaterFogDensity": 0.1,
-          "underwaterFogColor": 533536,
-          "surfaceFogDensity": 0.001
-        }
       }
     },
     "actors": [
@@ -390,10 +399,16 @@
         "physics": {
           "bodyType": "fixed",
           "collision": {
-            "intent": "blocker",
+            "intent": "walkable",
             "channel": "worldStatic",
             "shape": "cuboid",
-            "friction": 0.9
+            "size": [
+              21.56,
+              0.48,
+              18.52
+            ],
+            "friction": 0.88,
+            "sensor": false
           }
         }
       },
@@ -463,10 +478,16 @@
         "physics": {
           "bodyType": "fixed",
           "collision": {
-            "intent": "blocker",
+            "intent": "walkable",
             "channel": "worldStatic",
             "shape": "cuboid",
-            "friction": 0.7
+            "size": [
+              25.871999999999996,
+              0.48,
+              25.871999999999996
+            ],
+            "friction": 0.88,
+            "sensor": false
           }
         }
       },
@@ -540,7 +561,7 @@
         "physics": {
           "bodyType": "fixed",
           "collision": {
-            "intent": "blocker",
+            "intent": "walkable",
             "channel": "worldStatic",
             "shape": "cuboid",
             "size": [
@@ -548,8 +569,7 @@
               0.384,
               204.55558463188981
             ],
-            "friction": 0.5,
-            "restitution": 0,
+            "friction": 0.88,
             "sensor": false
           }
         }
@@ -1295,10 +1315,99 @@
           "collision": {
             "intent": "blocker",
             "channel": "worldStatic",
-            "shape": "cuboid",
+            "shape": "trimesh",
+            "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.glb",
+            "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.meta.json",
+            "assetLocalTransform": {
+              "schemaVersion": 1,
+              "coordinateSpaceVersion": 1,
+              "sourceAssetUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
+              "sourceNodeName": "Command Aircon",
+              "visualLocalBounds": {
+                "min": [
+                  -0.392697811126709,
+                  -0.32006561756134033,
+                  -0.21596616506576538
+                ],
+                "max": [
+                  0.4072735011577606,
+                  0.6078314781188965,
+                  0.15819303691387177
+                ],
+                "size": [
+                  0.7999713122844696,
+                  0.9278970956802368,
+                  0.37415920197963715
+                ],
+                "center": [
+                  0.007287845015525818,
+                  0.14388293027877808,
+                  -0.028886564075946808
+                ]
+              },
+              "colliderLocalBounds": {
+                "min": [
+                  -0.392697811126709,
+                  -0.32006561756134033,
+                  -0.21596616506576538
+                ],
+                "max": [
+                  0.4072735011577606,
+                  0.6078314781188965,
+                  0.15819303691387177
+                ],
+                "size": [
+                  0.7999713122844696,
+                  0.9278970956802368,
+                  0.37415920197963715
+                ],
+                "center": [
+                  0.007287845015525818,
+                  0.14388293027877808,
+                  -0.028886564075946808
+                ]
+              },
+              "visualToPhysicsMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "visualToPhysicsLocalMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            },
             "friction": 0.7,
             "restitution": 0,
-            "sensor": false
+            "sensor": false,
+            "triangleBudget": 20000
           }
         }
       },
@@ -1746,10 +1855,99 @@
           "collision": {
             "intent": "blocker",
             "channel": "worldStatic",
-            "shape": "cuboid",
+            "shape": "trimesh",
+            "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-courtyard-aircon.collider.glb",
+            "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-courtyard-aircon.collider.meta.json",
+            "assetLocalTransform": {
+              "schemaVersion": 1,
+              "coordinateSpaceVersion": 1,
+              "sourceAssetUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
+              "sourceNodeName": "Courtyard Utility Unit",
+              "visualLocalBounds": {
+                "min": [
+                  -0.392697811126709,
+                  -0.32006561756134033,
+                  -0.21596616506576538
+                ],
+                "max": [
+                  0.4072735011577606,
+                  0.6078314781188965,
+                  0.15819303691387177
+                ],
+                "size": [
+                  0.7999713122844696,
+                  0.9278970956802368,
+                  0.37415920197963715
+                ],
+                "center": [
+                  0.007287845015525818,
+                  0.14388293027877808,
+                  -0.028886564075946808
+                ]
+              },
+              "colliderLocalBounds": {
+                "min": [
+                  -0.392697811126709,
+                  -0.32006561756134033,
+                  -0.21596616506576538
+                ],
+                "max": [
+                  0.4072735011577606,
+                  0.6078314781188965,
+                  0.15819303691387177
+                ],
+                "size": [
+                  0.7999713122844696,
+                  0.9278970956802368,
+                  0.37415920197963715
+                ],
+                "center": [
+                  0.007287845015525818,
+                  0.14388293027877808,
+                  -0.028886564075946808
+                ]
+              },
+              "visualToPhysicsMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "visualToPhysicsLocalMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            },
             "friction": 0.7,
             "restitution": 0,
-            "sensor": false
+            "sensor": false,
+            "triangleBudget": 20000
           }
         }
       },
@@ -1787,10 +1985,99 @@
           "collision": {
             "intent": "blocker",
             "channel": "worldStatic",
-            "shape": "cuboid",
+            "shape": "trimesh",
+            "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-a.collider.glb",
+            "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-a.collider.meta.json",
+            "assetLocalTransform": {
+              "schemaVersion": 1,
+              "coordinateSpaceVersion": 1,
+              "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb",
+              "sourceNodeName": "Growth Planter A",
+              "visualLocalBounds": {
+                "min": [
+                  -0.8443078994750977,
+                  -0.9999665021896362,
+                  -0.7100440859794617
+                ],
+                "max": [
+                  0.8238810896873474,
+                  0.9713085293769836,
+                  0.6921294331550598
+                ],
+                "size": [
+                  1.668188989162445,
+                  1.9712750315666199,
+                  1.4021735191345215
+                ],
+                "center": [
+                  -0.010213404893875122,
+                  -0.014328986406326294,
+                  -0.008957326412200928
+                ]
+              },
+              "colliderLocalBounds": {
+                "min": [
+                  -0.8443078994750977,
+                  -0.9999299645423889,
+                  -0.7100440859794617
+                ],
+                "max": [
+                  0.8238810896873474,
+                  0.9713085293769836,
+                  0.6921294331550598
+                ],
+                "size": [
+                  1.668188989162445,
+                  1.9712384939193726,
+                  1.4021735191345215
+                ],
+                "center": [
+                  -0.010213404893875122,
+                  -0.014310717582702637,
+                  -0.008957326412200928
+                ]
+              },
+              "visualToPhysicsMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "visualToPhysicsLocalMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            },
             "friction": 0.7,
             "restitution": 0,
-            "sensor": false
+            "sensor": false,
+            "triangleBudget": 20000
           }
         }
       },
@@ -1828,10 +2115,99 @@
           "collision": {
             "intent": "blocker",
             "channel": "worldStatic",
-            "shape": "cuboid",
+            "shape": "trimesh",
+            "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-b.collider.glb",
+            "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-b.collider.meta.json",
+            "assetLocalTransform": {
+              "schemaVersion": 1,
+              "coordinateSpaceVersion": 1,
+              "sourceAssetUrl": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+              "sourceNodeName": "Growth Planter B",
+              "visualLocalBounds": {
+                "min": [
+                  -0.8023393750190735,
+                  -1.0004256963729858,
+                  -0.5317336916923523
+                ],
+                "max": [
+                  0.7701928019523621,
+                  0.9740477204322815,
+                  0.5507553815841675
+                ],
+                "size": [
+                  1.5725321769714355,
+                  1.9744734168052673,
+                  1.0824890732765198
+                ],
+                "center": [
+                  -0.016073286533355713,
+                  -0.013188987970352173,
+                  0.009510844945907593
+                ]
+              },
+              "colliderLocalBounds": {
+                "min": [
+                  -0.8023393750190735,
+                  -1.0001178979873657,
+                  -0.5317336916923523
+                ],
+                "max": [
+                  0.7701928019523621,
+                  0.9740477204322815,
+                  0.5507553815841675
+                ],
+                "size": [
+                  1.5725321769714355,
+                  1.9741656184196472,
+                  1.0824890732765198
+                ],
+                "center": [
+                  -0.016073286533355713,
+                  -0.013035088777542114,
+                  0.009510844945907593
+                ]
+              },
+              "visualToPhysicsMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "visualToPhysicsLocalMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            },
             "friction": 0.7,
             "restitution": 0,
-            "sensor": false
+            "sensor": false,
+            "triangleBudget": 20000
           }
         }
       },
@@ -1869,10 +2245,99 @@
           "collision": {
             "intent": "blocker",
             "channel": "worldStatic",
-            "shape": "cuboid",
+            "shape": "trimesh",
+            "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-c.collider.glb",
+            "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-c.collider.meta.json",
+            "assetLocalTransform": {
+              "schemaVersion": 1,
+              "coordinateSpaceVersion": 1,
+              "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+              "sourceNodeName": "Growth Planter C",
+              "visualLocalBounds": {
+                "min": [
+                  -0.7556721568107605,
+                  -1.0000663995742798,
+                  -0.6454210877418518
+                ],
+                "max": [
+                  0.7232809066772461,
+                  0.9731586575508118,
+                  0.6983928680419922
+                ],
+                "size": [
+                  1.4789530634880066,
+                  1.9732250571250916,
+                  1.343813955783844
+                ],
+                "center": [
+                  -0.016195625066757202,
+                  -0.013453871011734009,
+                  0.02648589015007019
+                ]
+              },
+              "colliderLocalBounds": {
+                "min": [
+                  -0.7556721568107605,
+                  -0.9996722340583801,
+                  -0.6453370451927185
+                ],
+                "max": [
+                  0.7226167917251587,
+                  0.9731417894363403,
+                  0.6983928680419922
+                ],
+                "size": [
+                  1.4782889485359192,
+                  1.9728140234947205,
+                  1.3437299132347107
+                ],
+                "center": [
+                  -0.016527682542800903,
+                  -0.013265222311019897,
+                  0.02652791142463684
+                ]
+              },
+              "visualToPhysicsMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "visualToPhysicsLocalMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            },
             "friction": 0.7,
             "restitution": 0,
-            "sensor": false
+            "sensor": false,
+            "triangleBudget": 20000
           }
         }
       },
@@ -1910,10 +2375,99 @@
           "collision": {
             "intent": "blocker",
             "channel": "worldStatic",
-            "shape": "cuboid",
+            "shape": "trimesh",
+            "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.glb",
+            "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.meta.json",
+            "assetLocalTransform": {
+              "schemaVersion": 1,
+              "coordinateSpaceVersion": 1,
+              "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+              "sourceNodeName": "Growth Planter D",
+              "visualLocalBounds": {
+                "min": [
+                  -0.6667150855064392,
+                  -1.0003488063812256,
+                  -0.5741834044456482
+                ],
+                "max": [
+                  0.6377129554748535,
+                  0.9705517292022705,
+                  0.5826324820518494
+                ],
+                "size": [
+                  1.3044280409812927,
+                  1.970900535583496,
+                  1.1568158864974976
+                ],
+                "center": [
+                  -0.014501065015792847,
+                  -0.014898538589477539,
+                  0.004224538803100586
+                ]
+              },
+              "colliderLocalBounds": {
+                "min": [
+                  -0.6667150855064392,
+                  -1.0002450942993164,
+                  -0.5741834044456482
+                ],
+                "max": [
+                  0.6377129554748535,
+                  0.9705517292022705,
+                  0.5826324820518494
+                ],
+                "size": [
+                  1.3044280409812927,
+                  1.970796823501587,
+                  1.1568158864974976
+                ],
+                "center": [
+                  -0.014501065015792847,
+                  -0.01484668254852295,
+                  0.004224538803100586
+                ]
+              },
+              "visualToPhysicsMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "visualToPhysicsLocalMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            },
             "friction": 0.7,
             "restitution": 0,
-            "sensor": false
+            "sensor": false,
+            "triangleBudget": 20000
           }
         }
       },
@@ -2156,10 +2710,99 @@
           "collision": {
             "intent": "blocker",
             "channel": "worldStatic",
-            "shape": "cuboid",
+            "shape": "trimesh",
+            "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.glb",
+            "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.meta.json",
+            "assetLocalTransform": {
+              "schemaVersion": 1,
+              "coordinateSpaceVersion": 1,
+              "sourceAssetUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+              "sourceNodeName": "Wasteland Barrel",
+              "visualLocalBounds": {
+                "min": [
+                  -0.2815175950527191,
+                  -0.006614277604967356,
+                  -0.28151750564575195
+                ],
+                "max": [
+                  0.28151753544807434,
+                  0.8733857274055481,
+                  0.28151771426200867
+                ],
+                "size": [
+                  0.5630351305007935,
+                  0.8800000050105155,
+                  0.5630352199077606
+                ],
+                "center": [
+                  -2.9802322387695312e-8,
+                  0.43338572490029037,
+                  1.043081283569336e-7
+                ]
+              },
+              "colliderLocalBounds": {
+                "min": [
+                  -0.2815175950527191,
+                  -0.006614277604967356,
+                  -0.28151750564575195
+                ],
+                "max": [
+                  0.28151753544807434,
+                  0.8733857274055481,
+                  0.28151771426200867
+                ],
+                "size": [
+                  0.5630351305007935,
+                  0.8800000050105155,
+                  0.5630352199077606
+                ],
+                "center": [
+                  -2.9802322387695312e-8,
+                  0.43338572490029037,
+                  1.043081283569336e-7
+                ]
+              },
+              "visualToPhysicsMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "visualToPhysicsLocalMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            },
             "friction": 0.7,
             "restitution": 0,
-            "sensor": false
+            "sensor": false,
+            "triangleBudget": 20000
           }
         }
       },
@@ -2197,10 +2840,99 @@
           "collision": {
             "intent": "blocker",
             "channel": "worldStatic",
-            "shape": "cuboid",
+            "shape": "trimesh",
+            "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrier.collider.glb",
+            "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrier.collider.meta.json",
+            "assetLocalTransform": {
+              "schemaVersion": 1,
+              "coordinateSpaceVersion": 1,
+              "sourceAssetUrl": "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
+              "sourceNodeName": "Concrete Barrier",
+              "visualLocalBounds": {
+                "min": [
+                  -0.7761769890785217,
+                  -0.0027944163884967566,
+                  -0.2540489733219147
+                ],
+                "max": [
+                  0.7892323732376099,
+                  1.1091585159301758,
+                  0.18809300661087036
+                ],
+                "size": [
+                  1.5654093623161316,
+                  1.1119529323186725,
+                  0.44214197993278503
+                ],
+                "center": [
+                  0.006527692079544067,
+                  0.5531820497708395,
+                  -0.032977983355522156
+                ]
+              },
+              "colliderLocalBounds": {
+                "min": [
+                  -0.7761769890785217,
+                  -0.0027944163884967566,
+                  -0.2540489733219147
+                ],
+                "max": [
+                  0.7892323732376099,
+                  1.1091585159301758,
+                  0.18809300661087036
+                ],
+                "size": [
+                  1.5654093623161316,
+                  1.1119529323186725,
+                  0.44214197993278503
+                ],
+                "center": [
+                  0.006527692079544067,
+                  0.5531820497708395,
+                  -0.032977983355522156
+                ]
+              },
+              "visualToPhysicsMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "visualToPhysicsLocalMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            },
             "friction": 0.7,
             "restitution": 0,
-            "sensor": false
+            "sensor": false,
+            "triangleBudget": 20000
           }
         }
       }
@@ -2214,11 +2946,11 @@
     "neverCullActorCount": 0,
     "gameplayFireflyActorCount": 0,
     "physicsActorCount": 35,
-    "trimeshActorCount": 0,
+    "trimeshActorCount": 8,
     "detailMeshActorCount": 0,
     "defaultCollisionActorCount": 0,
     "visualOnlyActorCount": 6,
-    "requiredActorCount": 0,
+    "requiredActorCount": 4,
     "requiredRenderActorIds": [],
     "missingRequiredActorIds": [],
     "requiredAssetUrls": [],
@@ -2295,9 +3027,7 @@
       "visualOnlyActorIds": []
     },
     "errors": [],
-    "warnings": [
-      "Walkability sample \"player-spawn\" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime."
-    ]
+    "warnings": []
   },
   "runtime": {
     "requiredRenderActorIds": [],
@@ -2333,18 +3063,19 @@
       "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
       "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
     ],
-    "terrainManifestUrl": "/terrain/sci-fi-room.manifest.json",
     "ground": {
       "mode": "authored-ground",
       "visualSource": "scene-actors",
-      "collisionSource": "baked-heightfield",
+      "terrainRuntimeMode": "scene-authored",
+      "terrainVisualSource": "scene-actors",
+      "collisionSource": "scene-colliders",
+      "fallbackSurfacePolicy": "disabled",
       "groundActorIds": [
         "sci-fi-floor-interior-slab",
         "sci-fi-floor-courtyard-slab",
         "sci-fi-floor-wasteland-tile-4-4"
       ],
-      "terrainManifestUrl": "/terrain/sci-fi-room.manifest.json",
-      "requiredWalkableSurfaceId": "sci-fi-room-terrain"
+      "requiredWalkableSurfaceId": "sci-fi-floor-interior-slab"
     },
     "renderProfile": {
       "id": "sci-fi-room-interior-courtyard",

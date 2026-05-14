@@ -4,6 +4,7 @@ import {
   createEmptyEditorPublishReadinessViewModel,
 } from './editorPublishReadinessContracts'
 import { loadEditorPublishReadiness } from './editorPublishReadinessDataSource'
+import type { EditorTerrainSourceAssetStatus } from './editorTerrainPipeline'
 
 export type EditorPublishReadinessState = EditorPublishReadinessViewModel & {
   loading: boolean
@@ -13,6 +14,8 @@ export type EditorPublishReadinessState = EditorPublishReadinessViewModel & {
 type RefreshInput = {
   levelId: string
   scene: EditorSceneDocument | null
+  terrainSourceAssets?: EditorTerrainSourceAssetStatus[]
+  missingTerrainSourceAssets?: EditorTerrainSourceAssetStatus[]
 }
 
 type RefreshOptions = {
@@ -34,7 +37,7 @@ export function createInitialEditorPublishReadinessState(
 }
 
 function getReadinessInputKey(input: RefreshInput) {
-  return `${input.levelId}::${input.scene?.updatedAt ?? ''}`
+  return `${input.levelId}::${input.scene?.updatedAt ?? ''}::${JSON.stringify(input.missingTerrainSourceAssets ?? [])}`
 }
 
 export function createEditorPublishReadinessController(deps: ControllerDeps) {

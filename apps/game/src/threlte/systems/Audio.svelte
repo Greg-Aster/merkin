@@ -320,14 +320,9 @@ function ensureSound(id: string, src: string | string[], options: any = {}) {
 function resolveAudioSrc(src: string): string {
   if (/^(https?:)?\/\//.test(src)) return src
 
-  const runtimeBase =
-    typeof window !== 'undefined'
-      ? window.location.pathname === '/game' ||
-        window.location.pathname.startsWith('/game/')
-        ? '/game/'
-        : '/'
-      : GAME_AUDIO_BASE
-  const basePath = runtimeBase.endsWith('/') ? runtimeBase : `${runtimeBase}/`
+  const basePath = GAME_AUDIO_BASE.endsWith('/')
+    ? GAME_AUDIO_BASE
+    : `${GAME_AUDIO_BASE}/`
   const relativePath = src.replace(/^\/+/, '')
   return new URL(relativePath, `http://megameal.local${basePath}`).pathname
 }

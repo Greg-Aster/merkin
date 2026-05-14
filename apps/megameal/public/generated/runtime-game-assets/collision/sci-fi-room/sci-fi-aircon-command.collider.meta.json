@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "bake-mesh-collider",
+  "generatedAt": "2026-05-13T01:03:17.714Z",
+  "sourceLevelId": "sci-fi-room",
+  "sourceActorId": "sci-fi-aircon-command",
+  "sourceAssetUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
+  "sourceAssetPath": "apps/megameal/public/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "f19d85c76948903047c2846068aeaa376d5e956a410675268cb6cb6aac5d97c2"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.meta.json",
+  "triangleCount": 18986,
+  "vertexCount": 13682,
+  "bounds": {
+    "min": [
+      -0.392697811126709,
+      -0.32006561756134033,
+      -0.21596616506576538
+    ],
+    "max": [
+      0.4072735011577606,
+      0.6078314781188965,
+      0.15819303691387177
+    ],
+    "size": [
+      0.7999713122844696,
+      0.9278970956802368,
+      0.37415920197963715
+    ],
+    "center": [
+      0.007287845015525818,
+      0.14388293027877808,
+      -0.028886564075946808
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.392697811126709,
+      -0.32006561756134033,
+      -0.21596616506576538
+    ],
+    "max": [
+      0.4072735011577606,
+      0.6078314781188965,
+      0.15819303691387177
+    ],
+    "size": [
+      0.7999713122844696,
+      0.9278970956802368,
+      0.37415920197963715
+    ],
+    "center": [
+      0.007287845015525818,
+      0.14388293027877808,
+      -0.028886564075946808
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.392697811126709,
+      -0.32006561756134033,
+      -0.21596616506576538
+    ],
+    "max": [
+      0.4072735011577606,
+      0.6078314781188965,
+      0.15819303691387177
+    ],
+    "size": [
+      0.7999713122844696,
+      0.9278970956802368,
+      0.37415920197963715
+    ],
+    "center": [
+      0.007287845015525818,
+      0.14388293027877808,
+      -0.028886564075946808
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
+    "sourceNodeName": "Command Aircon",
+    "visualLocalBounds": {
+      "min": [
+        -0.392697811126709,
+        -0.32006561756134033,
+        -0.21596616506576538
+      ],
+      "max": [
+        0.4072735011577606,
+        0.6078314781188965,
+        0.15819303691387177
+      ],
+      "size": [
+        0.7999713122844696,
+        0.9278970956802368,
+        0.37415920197963715
+      ],
+      "center": [
+        0.007287845015525818,
+        0.14388293027877808,
+        -0.028886564075946808
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.392697811126709,
+        -0.32006561756134033,
+        -0.21596616506576538
+      ],
+      "max": [
+        0.4072735011577606,
+        0.6078314781188965,
+        0.15819303691387177
+      ],
+      "size": [
+        0.7999713122844696,
+        0.9278970956802368,
+        0.37415920197963715
+      ],
+      "center": [
+        0.007287845015525818,
+        0.14388293027877808,
+        -0.028886564075946808
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "sci-fi-aircon-command",
+    "sourceActorName": "Command Aircon",
+    "sourceAssetUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
+    "sourceAssetPath": "apps/megameal/public/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "f19d85c76948903047c2846068aeaa376d5e956a410675268cb6cb6aac5d97c2"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "sci-fi-room",
+      "nodeId": "sci-fi-aircon-command",
+      "sourceAssetUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 20000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-13T01:03:17.714Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 20000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 18986,
+    "targetTriangleBudget": 20000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

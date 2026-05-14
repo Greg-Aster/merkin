@@ -1,5 +1,7 @@
 <script lang="ts">
-import type { EditorViewportShadingMode } from './editorStore'
+import type { EditorCommand } from './editorCommandRegistry'
+import { getEditorCommand } from './editorCommandRegistry'
+import type { EditorLayoutPreset } from './editorStore'
 
 type MenuId = 'file' | 'edit' | 'window'
 type CommandHandler = () => void | Promise<void>
@@ -14,15 +16,21 @@ export let panelOpen = false
 export let propertiesShelfOpen = false
 export let outlinerOpen = true
 export let controlsOverlayOpen = true
-export let viewportShadingMode: EditorViewportShadingMode = 'rendered'
+export let layoutPreset: EditorLayoutPreset = 'default'
+export let layoutPresetOptions: Array<{
+  id: EditorLayoutPreset
+  label: string
+}> = []
+export let responsiveSplitPinned = false
 export let canUndo = false
 export let canRedo = false
 export let selectedNodeCount = 0
 export let currentLevelId = ''
 export let levelOptions: LevelMenuOption[] = []
 export let publishLevelPending = false
-export let onSetViewportShadingMode: (mode: EditorViewportShadingMode) => void =
-  () => {}
+export let commands: EditorCommand[] = []
+export let onRunCommand: (commandId: string) => void = () => {}
+export let onOpenCommandPalette: () => void = () => {}
 export let onSaveLevel: CommandHandler = () => {}
 export let onSaveAsLevel: CommandHandler = () => {}
 export let onNewLevel: CommandHandler = () => {}
@@ -31,6 +39,8 @@ export let onPublishLevel: CommandHandler = () => {}
 export let onMarkDraft: CommandHandler = () => {}
 export let onReloadDisk: CommandHandler = () => {}
 export let onCopySceneJson: CommandHandler = () => {}
+export let onExportLevel: CommandHandler = () => {}
+export let onImportLevel: CommandHandler = () => {}
 export let onOpenSaveTools: CommandHandler = () => {}
 export let onUndo: CommandHandler = () => {}
 export let onRedo: CommandHandler = () => {}
@@ -42,6 +52,10 @@ export let onSetPanelOpen: (open: boolean) => void = () => {}
 export let onSetPropertiesShelfOpen: (open: boolean) => void = () => {}
 export let onSetOutlinerOpen: (open: boolean) => void = () => {}
 export let onSetControlsOverlayOpen: (open: boolean) => void = () => {}
+export let onApplyLayoutPreset: (preset: EditorLayoutPreset) => void = () => {}
+export let onResetLayoutPreset: () => void = () => {}
+export let onSetResponsiveSplitPinned: (pinned: boolean) => void = () => {}
+export let onResetDockLayout: CommandHandler = () => {}
 export let onTogglePropertiesShelf: () => void = () => {}
 export let onTogglePanel: () => void = () => {}
 
@@ -58,6 +72,46 @@ function closeMenus() {
 function runCommand(action: CommandHandler) {
   closeMenus()
   void action()
+}
+
+function runRegisteredCommand(commandId: string, fallback: CommandHandler) {
+  const command = getEditorCommand(commands, commandId)
+  closeMenus()
+  if (command?.enabled) {
+    onRunCommand(command.id)
+    return
+  }
+  void fallback()
+}
+
+function commandDisabled(commandId: string, fallbackDisabled = false) {
+  const command = getEditorCommand(commands, commandId)
+  return command ? !command.enabled : fallbackDisabled
+}
+
+function runCheckedCommand(event: Event, action: (checked: boolean) => void) {
+  action((event.currentTarget as HTMLInputElement).checked)
+  closeMenus()
+}
+
+function runLayoutPresetCommand(preset: EditorLayoutPreset) {
+  closeMenus()
+  const command = getEditorCommand(commands, `layout-${preset}`)
+  if (command?.enabled) {
+    onRunCommand(command.id)
+    return
+  }
+  onApplyLayoutPreset(preset)
+}
+
+function runLayoutResetCommand() {
+  closeMenus()
+  const command = getEditorCommand(commands, 'layout-reset')
+  if (command?.enabled) {
+    onRunCommand(command.id)
+    return
+  }
+  onResetLayoutPreset()
 }
 
 function handleMenuKeydown(event: KeyboardEvent) {
@@ -79,20 +133,22 @@ function handleMenuKeydown(event: KeyboardEvent) {
       </button>
       {#if openMenu === 'file'}
         <div class="menu-popover">
-          <button class="menu-item" on:click={() => runCommand(onSaveLevel)}>
+          <button class="menu-item" disabled={commandDisabled('save-level')} on:click={() => runRegisteredCommand('save-level', onSaveLevel)}>
             <span class="menu-label">Save</span>
             <span class="menu-shortcut">Ctrl+S</span>
           </button>
-          <button class="menu-item" on:click={() => runCommand(onSaveAsLevel)}>Save As...</button>
-          <button class="menu-item" on:click={() => runCommand(onNewLevel)}>New Level...</button>
-          <button class="menu-item" on:click={() => runCommand(onCopySceneJson)}>Copy Scene JSON</button>
+          <button class="menu-item" disabled={commandDisabled('save-as-level')} on:click={() => runRegisteredCommand('save-as-level', onSaveAsLevel)}>Save As...</button>
+          <button class="menu-item" disabled={commandDisabled('new-level')} on:click={() => runRegisteredCommand('new-level', onNewLevel)}>New Level...</button>
+          <button class="menu-item" disabled={commandDisabled('copy-scene-json')} on:click={() => runRegisteredCommand('copy-scene-json', onCopySceneJson)}>Copy Scene JSON</button>
+          <button class="menu-item" disabled={commandDisabled('export-level')} on:click={() => runRegisteredCommand('export-level', onExportLevel)}>Export Level...</button>
+          <button class="menu-item" disabled={commandDisabled('import-level')} on:click={() => runRegisteredCommand('import-level', onImportLevel)}>Import Level...</button>
           <div class="menu-separator"></div>
-          <button class="menu-item" disabled={publishLevelPending} on:click={() => runCommand(onPublishLevel)}>
+          <button class="menu-item" disabled={commandDisabled('publish-level', publishLevelPending)} on:click={() => runRegisteredCommand('publish-level', onPublishLevel)}>
             {publishLevelPending ? 'Publishing Level...' : 'Publish Level...'}
           </button>
-          <button class="menu-item" on:click={() => runCommand(onMarkDraft)}>Mark As Draft</button>
-          <button class="menu-item" on:click={() => runCommand(onReloadDisk)}>Reload Current Level</button>
-          <button class="menu-item" on:click={() => runCommand(onOpenSaveTools)}>Level File Tools</button>
+          <button class="menu-item" disabled={commandDisabled('mark-level-draft')} on:click={() => runRegisteredCommand('mark-level-draft', onMarkDraft)}>Mark As Draft</button>
+          <button class="menu-item" disabled={commandDisabled('reload-current-level')} on:click={() => runRegisteredCommand('reload-current-level', onReloadDisk)}>Reload Current Level</button>
+          <button class="menu-item" disabled={commandDisabled('open-save-tools')} on:click={() => runRegisteredCommand('open-save-tools', onOpenSaveTools)}>Level File Tools</button>
           <div class="menu-separator"></div>
           <div class="menu-heading">Load Level</div>
           {#each levelOptions as option (option.id)}
@@ -119,28 +175,28 @@ function handleMenuKeydown(event: KeyboardEvent) {
       </button>
       {#if openMenu === 'edit'}
         <div class="menu-popover">
-          <button class="menu-item" disabled={!canUndo} on:click={() => runCommand(onUndo)}>
+          <button class="menu-item" disabled={commandDisabled('undo', !canUndo)} on:click={() => runRegisteredCommand('undo', onUndo)}>
             <span class="menu-label">Undo</span>
             <span class="menu-shortcut">Ctrl+Z</span>
           </button>
-          <button class="menu-item" disabled={!canRedo} on:click={() => runCommand(onRedo)}>
+          <button class="menu-item" disabled={commandDisabled('redo', !canRedo)} on:click={() => runRegisteredCommand('redo', onRedo)}>
             <span class="menu-label">Redo</span>
             <span class="menu-shortcut">Ctrl+Shift+Z</span>
           </button>
           <div class="menu-separator"></div>
-          <button class="menu-item" on:click={() => runCommand(onSelectAll)}>
+          <button class="menu-item" disabled={commandDisabled('select-all')} on:click={() => runRegisteredCommand('select-all', onSelectAll)}>
             <span class="menu-label">Select All</span>
             <span class="menu-shortcut">Ctrl+A</span>
           </button>
-          <button class="menu-item" disabled={selectedNodeCount === 0} on:click={() => runCommand(onClearSelection)}>
+          <button class="menu-item" disabled={commandDisabled('clear-selection', selectedNodeCount === 0)} on:click={() => runRegisteredCommand('clear-selection', onClearSelection)}>
             <span class="menu-label">Clear Selection</span>
             <span class="menu-shortcut">Esc</span>
           </button>
-          <button class="menu-item" disabled={selectedNodeCount === 0} on:click={() => runCommand(onDuplicateSelection)}>
+          <button class="menu-item" disabled={commandDisabled('duplicate-selection', selectedNodeCount === 0)} on:click={() => runRegisteredCommand('duplicate-selection', onDuplicateSelection)}>
             <span class="menu-label">Duplicate Selection</span>
             <span class="menu-shortcut">Ctrl+D</span>
           </button>
-          <button class="menu-item danger" disabled={selectedNodeCount === 0} on:click={() => runCommand(onDeleteSelection)}>
+          <button class="menu-item danger" disabled={commandDisabled('delete-selection', selectedNodeCount === 0)} on:click={() => runRegisteredCommand('delete-selection', onDeleteSelection)}>
             <span class="menu-label">Delete Selection</span>
             <span class="menu-shortcut">Del</span>
           </button>
@@ -158,92 +214,111 @@ function handleMenuKeydown(event: KeyboardEvent) {
       </button>
       {#if openMenu === 'window'}
         <div class="menu-popover">
+          <div class="menu-heading">Layout Presets</div>
+          {#each layoutPresetOptions as option (option.id)}
+            <button
+              class="menu-item"
+              class:active-item={option.id === layoutPreset}
+              on:click={() => runLayoutPresetCommand(option.id)}
+            >
+              <span class="menu-label">{option.label}</span>
+              <span class="menu-shortcut">{option.id === layoutPreset ? 'active' : ''}</span>
+            </button>
+          {/each}
+          <button class="menu-item" on:click={runLayoutResetCommand}>Reset Layout Preset</button>
+          <div class="menu-separator"></div>
           <label class="menu-check">
-            <input type="checkbox" checked={panelOpen} on:change={(event) => onSetPanelOpen((event.currentTarget as HTMLInputElement).checked)} />
+            <input type="checkbox" checked={panelOpen} on:change={(event) => runCheckedCommand(event, onSetPanelOpen)} />
             Tool Panel
           </label>
           <label class="menu-check">
-            <input type="checkbox" checked={outlinerOpen} on:change={(event) => onSetOutlinerOpen((event.currentTarget as HTMLInputElement).checked)} />
+            <input type="checkbox" checked={outlinerOpen} on:change={(event) => runCheckedCommand(event, onSetOutlinerOpen)} />
             Outliner
           </label>
           <label class="menu-check">
-            <input type="checkbox" checked={propertiesShelfOpen} on:change={(event) => onSetPropertiesShelfOpen((event.currentTarget as HTMLInputElement).checked)} />
+            <input type="checkbox" checked={propertiesShelfOpen} on:change={(event) => runCheckedCommand(event, onSetPropertiesShelfOpen)} />
             Properties Shelf
           </label>
           <label class="menu-check">
-            <input type="checkbox" checked={controlsOverlayOpen} on:change={(event) => onSetControlsOverlayOpen((event.currentTarget as HTMLInputElement).checked)} />
+            <input type="checkbox" checked={controlsOverlayOpen} on:change={(event) => runCheckedCommand(event, onSetControlsOverlayOpen)} />
             Controls HUD
           </label>
+          <label class="menu-check">
+            <input type="checkbox" checked={responsiveSplitPinned} on:change={(event) => runCheckedCommand(event, onSetResponsiveSplitPinned)} />
+            Pin Split Layout
+          </label>
+          <div class="menu-separator"></div>
+          <button class="menu-item" disabled={commandDisabled('reset-dock-layout')} on:click={() => runRegisteredCommand('reset-dock-layout', onResetDockLayout)}>
+            Reset Dock Layout
+          </button>
         </div>
       {/if}
     </div>
   </nav>
 
   <div class="editor-header-actions">
-    <div class="shading-controls" aria-label="Viewport shading">
-      <button
-        class="shading-btn"
-        class:active={viewportShadingMode === 'rendered'}
-        title="Rendered view"
-        on:click={() => onSetViewportShadingMode('rendered')}
+    <label class="layout-picker">
+      <span>Layout</span>
+      <select
+        value={layoutPreset}
+        aria-label="Editor layout preset"
+        on:change={(event) => runLayoutPresetCommand((event.currentTarget as HTMLSelectElement).value as EditorLayoutPreset)}
       >
-        Render
-      </button>
-      <button
-        class="shading-btn"
-        class:active={viewportShadingMode === 'solid'}
-        title="Solid view"
-        on:click={() => onSetViewportShadingMode('solid')}
-      >
-        Solid
-      </button>
-      <button
-        class="shading-btn"
-        class:active={viewportShadingMode === 'wireframe'}
-        title="Wireframe view"
-        on:click={() => onSetViewportShadingMode('wireframe')}
-      >
-        Wire
-      </button>
-    </div>
-    <button
-      class="collapse-btn"
-      on:click={onTogglePropertiesShelf}
-      disabled={!panelOpen}
-    >
-      {propertiesShelfOpen ? 'Hide Shelf' : 'Show Shelf'}
+        {#each layoutPresetOptions as option (option.id)}
+          <option value={option.id}>{option.label}</option>
+        {/each}
+      </select>
+    </label>
+    <button class="collapse-btn command-btn" on:click={onOpenCommandPalette}>
+      Commands
+      <span class="menu-shortcut">Ctrl+K</span>
     </button>
-    <button class="collapse-btn" on:click={onTogglePanel}>
-      {panelOpen ? 'Collapse' : 'Open'}
-    </button>
+    <label class="header-check">
+      <input
+        type="checkbox"
+        checked={propertiesShelfOpen}
+        disabled={commandDisabled('toggle-details-shelf', !panelOpen)}
+        on:change={() => runRegisteredCommand('toggle-details-shelf', onTogglePropertiesShelf)}
+      />
+      Details
+    </label>
+    <label class="header-check">
+      <input
+        type="checkbox"
+        checked={panelOpen}
+        on:change={() => runRegisteredCommand('toggle-tool-panel', onTogglePanel)}
+      />
+      Tools
+    </label>
   </div>
 </div>
 
 <style>
   .editor-header {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    right: 1rem;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     gap: 0.5rem;
     padding: 0;
-    margin-bottom: 0.5rem;
-    width: auto;
+    min-width: 0;
+    width: max-content;
+    max-width: 100%;
+    position: relative;
+    z-index: 180;
+    overflow: visible;
     background: transparent;
     border: none;
     border-radius: 0;
     backdrop-filter: none;
     box-shadow: none;
+    pointer-events: auto;
   }
 
   .editor-menu-bar,
   .editor-header-actions {
     background: rgba(9, 14, 24, 0.92);
     border: 1px solid rgba(126, 203, 255, 0.24);
-    border-radius: 0.7rem;
+    border-radius: 0.55rem;
     backdrop-filter: blur(10px);
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
   }
@@ -252,7 +327,11 @@ function handleMenuKeydown(event: KeyboardEvent) {
     display: flex;
     align-items: center;
     gap: 0.08rem;
-    padding: 0.28rem;
+    padding: 0.2rem;
+    min-width: 0;
+    position: relative;
+    z-index: 2;
+    overflow: visible;
   }
 
   .menu-root {
@@ -267,8 +346,8 @@ function handleMenuKeydown(event: KeyboardEvent) {
   }
 
   .menu-trigger {
-    min-width: 3.35rem;
-    padding: 0.42rem 0.58rem;
+    min-width: 2.75rem;
+    padding: 0.34rem 0.46rem;
     border: 1px solid transparent;
     border-radius: 0.42rem;
     background: transparent;
@@ -286,7 +365,7 @@ function handleMenuKeydown(event: KeyboardEvent) {
     position: absolute;
     top: calc(100% + 0.35rem);
     left: 0;
-    z-index: 4;
+    z-index: 40;
     display: grid;
     min-width: 12.5rem;
     padding: 0.35rem;
@@ -294,6 +373,7 @@ function handleMenuKeydown(event: KeyboardEvent) {
     border-radius: 0.55rem;
     background: rgba(6, 10, 18, 0.98);
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.42);
+    pointer-events: auto;
   }
 
   .menu-item,
@@ -364,62 +444,72 @@ function handleMenuKeydown(event: KeyboardEvent) {
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    padding: 0.35rem;
+    padding: 0.22rem;
+    min-width: 0;
   }
 
-  .shading-controls {
+  .layout-picker {
     display: flex;
-    gap: 0.18rem;
-    padding-right: 0.35rem;
-    margin-right: 0.15rem;
-    border-right: 1px solid rgba(126, 203, 255, 0.18);
-  }
-
-  .shading-btn {
-    min-width: 3rem;
-    padding: 0.42rem 0.55rem;
-    border: 1px solid rgba(126, 203, 255, 0.18);
-    border-radius: 0.42rem;
-    color: rgba(232, 245, 255, 0.78);
-    background: rgba(126, 203, 255, 0.08);
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 1.8rem;
+    padding: 0 0.38rem;
+    color: rgba(232, 245, 255, 0.72);
     font-size: 0.72rem;
-    line-height: 1;
+    white-space: nowrap;
   }
 
-  .shading-btn.active {
-    color: #07101c;
-    border-color: rgba(126, 203, 255, 0.72);
-    background: #7ecbff;
+  .layout-picker select {
+    max-width: 9.5rem;
+    border: 1px solid rgba(126, 203, 255, 0.16);
+    border-radius: 0.38rem;
+    background: rgba(7, 12, 18, 0.88);
+    color: #ecf7ff;
+    padding: 0.26rem 0.32rem;
+    font-size: 0.74rem;
+  }
+
+  .header-check {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 1.8rem;
+    padding: 0 0.36rem;
+    color: rgba(232, 245, 255, 0.78);
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .header-check input {
+    width: 0.85rem;
+    height: 0.85rem;
+    accent-color: #7ecbff;
   }
 
   @media (max-width: 1280px) {
     .editor-header {
-      width: auto;
+      gap: 0.35rem;
+    }
+
+    .header-check {
+      padding-inline: 0.28rem;
     }
   }
 
   @media (max-width: 900px) {
     .editor-header {
-      top: 0.5rem;
-      left: 0.5rem;
-      right: 0.5rem;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       justify-content: flex-end;
     }
 
     .editor-menu-bar {
-      order: 2;
-      max-width: 100%;
-      overflow-x: auto;
+      overflow: visible;
     }
 
     .editor-header-actions {
       padding: 0.28rem;
+      overflow-x: auto;
     }
 
-    .shading-btn {
-      min-width: 2.65rem;
-      padding-inline: 0.4rem;
-    }
   }
 </style>

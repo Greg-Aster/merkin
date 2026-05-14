@@ -50,11 +50,6 @@ let priceGlitchFrameTimers: Array<ReturnType<typeof setTimeout>> = []
 
 const offerCode = 'ASCEND20'
 const financingLine = 'Orbit-approved financing from $45 / cycle'
-const trustSignals = [
-  'Free interzone dispatch on qualified terrors.',
-  'Temporal returns accepted within 30 standard days.',
-  'Verified companion warranty included.',
-]
 
 const availabilityTone: Record<string, AvailabilityTone> = {
   available: {
@@ -126,6 +121,7 @@ $: primaryButtonLabel = addToCartRefusalQuirk
 $: hasIngredientsPanel =
   (product.ingredients?.length ?? 0) > 0 ||
   (product.nutritionFacts?.length ?? 0) > 0
+$: hasAssurancePanel = (product.assurances?.length ?? 0) > 0
 
 function selectMedia(index: number) {
   selectedIndex = index
@@ -355,6 +351,7 @@ onMount(() => {
       {currentTone}
       {activePanel}
       {hasIngredientsPanel}
+      {hasAssurancePanel}
       {displayedPriceText}
       priceDriftActive={Boolean(priceDriftQuirk)}
       {priceGlitching}
@@ -374,7 +371,6 @@ onMount(() => {
       {product}
       {activePanel}
       {previewTitle}
-      {trustSignals}
       {renderStars}
       {closePanel}
     />

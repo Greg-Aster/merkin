@@ -15,26 +15,35 @@ type EditorLevelOption = {
 }
 
 type TerrainCollisionSettings = {
-  source?: 'baked-heightmap' | 'scene-authored' | 'none'
+  source?: 'baked-heightmap' | 'source-glb' | 'scene-authored' | 'none'
   runtimeSource?: TerrainRuntimeComponentSource
   manifestUrl?: string
   heightmapUrl?: string
   heightmapResolution?: number
   sourceAssetUrl?: string
+  sourceAssetUrls?: string[]
   sourceNodeId?: string
+  sourceNodeIds?: string[]
   sourceName?: string
   sourceTriangleCount?: number
+  sourceBounds?: {
+    min: [number, number, number]
+    max: [number, number, number]
+  }
   colliderUrl?: string
   metadataUrl?: string
   colliderResolution?: number
   triangleCount?: number
   vertexCount?: number
   dirty?: boolean
+  heightmapDirty?: boolean
   lastGeneratedAt?: string
   heightOverrideCount?: number
   chunksPath?: string
   chunkGrid?: number
   chunkCount?: number
+  chunkLods?: number[]
+  lastChunksGeneratedAt?: string
 }
 type TerrainSculptSettings = {
   enabled?: boolean

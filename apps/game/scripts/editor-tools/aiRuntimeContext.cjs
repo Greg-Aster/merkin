@@ -1971,6 +1971,7 @@ function detectReferenceImageForAsset(assetUrl) {
     copyFileToComfyUiInput,
     createHunyuanJob,
     detectReferenceImageForAsset,
+    ensureDirectory,
     ensureComfyUiReferenceImage,
     ensureComfyUiServer,
     findComfyUiGeneratedMesh,

@@ -33,6 +33,8 @@ public/downloads/
 # Cache
 .pnpm-store/
 *.tsbuildinfo
+__pycache__/
+*.pyc
 
 # Non-monorepo sibling projects in this folder
 Mesh_Hair_Generator/
@@ -52,9 +54,12 @@ blog-pusher-sync/
 apps/game/src/threlte/editor/scenes/*.backup.json
 apps/game/src/threlte/editor/scenes/*.pre-restore.json
 apps/game/.visual-smoke/
+apps/game/.editor-exports/
 apps/game/performance-certification-report.json
 apps/game/reports/
 apps/game/tmp/
+apps/blender/scene-packages/
+apps/blender/hunyuan3d-direct/outputs/
 
 # Local source audio libraries and downloaded packs
 Archive/audio-packs/

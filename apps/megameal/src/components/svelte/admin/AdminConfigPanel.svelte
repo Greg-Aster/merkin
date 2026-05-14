@@ -329,7 +329,7 @@ onMount(() => {
           enabled: true,
           title: 'Get In Touch',
           description:
-            "Have questions, ideas, or want to collaborate? We'd love to hear from you!",
+            "Have questions, ideas, or want to collaborate?",
           contactInfo: {
             email: 'contact@example.com',
           },

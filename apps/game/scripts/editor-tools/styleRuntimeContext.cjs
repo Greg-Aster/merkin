@@ -330,6 +330,7 @@ function findLatestModelInDirectory(directory) {
     copyModelToGlb,
     createGeneratedStyleDirectory,
     detectBlenderExecutable,
+    ensureDirectory,
     extractBoundingBoxFromInspectReport,
     findLatestBlenderExportForSource,
     findLatestModelInDirectory,

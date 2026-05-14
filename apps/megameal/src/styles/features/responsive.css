@@ -82,79 +82,7 @@
     display: none;
   }
 
-  .storefront-advisory {
-    display: none;
-  }
-
-  .storefront-featured-listing {
-    padding-inline: 0.75rem;
-  }
-
-  .storefront-featured-listing__inner {
-    border-radius: 1.1rem;
-  }
-
-  .storefront-featured-listing__inner > .relative {
-    padding: 0.8rem;
-  }
-
-  .storefront-featured-listing__badge {
-    position: static;
-    width: fit-content;
-    margin-bottom: 0.65rem;
-    font-size: 0.62rem;
-    letter-spacing: 0.12em;
-  }
-
-  .storefront-featured-listing__badge + .grid {
-    grid-template-columns: 6.8rem minmax(0, 1fr);
-    gap: 0.85rem;
-    padding-top: 0;
-  }
-
-  .storefront-featured-listing__media {
-    aspect-ratio: 1 / 1;
-    border-radius: 0.9rem;
-  }
-
-  .storefront-featured-listing__body {
-    gap: 0.45rem;
-    min-width: 0;
-  }
-
-  .storefront-featured-listing__meta {
-    gap: 0.35rem;
-    font-size: 0.62rem;
-    letter-spacing: 0.12em;
-  }
-
-  .storefront-featured-listing__body h2 {
-    font-size: 1.1rem;
-    line-height: 1.12;
-  }
-
-  .storefront-featured-listing__body > p:not(:first-child) {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-height: 1.4;
-  }
-
-  .storefront-featured-listing__signals {
-    display: none;
-  }
-
-  .storefront-featured-listing__body .text-xl {
-    font-size: 1rem;
-  }
-
-  .storefront-featured-listing__body .btn-primary {
-    width: auto;
-    padding: 0.55rem 0.8rem;
-  }
-
-  .storefront-featured-listing__body .btn-primary + span {
+  .storefront-featured-teaser {
     display: none;
   }
 
@@ -405,7 +333,7 @@
   }
 
   .storefront-hero__stats,
-  .storefront-featured-listing {
+  .storefront-featured-teaser {
     display: none;
   }
 

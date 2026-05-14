@@ -25,5 +25,74 @@
     0,
     -0.5087890625
   ],
-  "heightOverrideCount": 0
+  "heightOverrideCount": 0,
+  "sourceContract": {
+    "schemaVersion": 1,
+    "terrainSourceType": "glb-chunk-terrain",
+    "sourceAssetUrl": "/models/levels/observatory-environment.glb",
+    "sourceAssetUrls": [
+      "/models/levels/observatory-environment.glb"
+    ],
+    "authoredSourceAssetUrls": [
+      "/models/levels/observatory-environment.glb"
+    ],
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
+    },
+    "sourceAssetFingerprints": [
+      {
+        "url": "/models/levels/observatory-environment.glb",
+        "fingerprint": {
+          "algorithm": "sha256",
+          "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
+        }
+      }
+    ],
+    "heightmapUrl": "/terrain/heightmaps/observatory-environment_heightmap.png",
+    "heightmapFingerprint": {
+      "algorithm": "sha256",
+      "value": "9940d42617657bb0ed767695abc55f424a688dee1b4e6005a84eaa8e63c89f6f"
+    },
+    "sourceCoordinateSystem": "three-y-up-xz-ground",
+    "sourceBounds": {
+      "min": [
+        -199.5517120361328,
+        -1.8438290357589722,
+        -195.1022491455078
+      ],
+      "max": [
+        194.0009765625,
+        56.307861328125,
+        194.0846710205078
+      ]
+    },
+    "renderBakeMode": "source-glb-chunk-mesh",
+    "collisionBakeMode": "heightfield-projection",
+    "collisionMeshSource": {
+      "type": "heightmap",
+      "url": "/terrain/heightmaps/observatory-environment_heightmap.png",
+      "fingerprint": {
+        "algorithm": "sha256",
+        "value": "9940d42617657bb0ed767695abc55f424a688dee1b4e6005a84eaa8e63c89f6f"
+      }
+    },
+    "collisionCoverageBounds": {
+      "min": [
+        -199.5517120361328,
+        -1.8438290357589722,
+        -195.1022491455078
+      ],
+      "max": [
+        194.0009765625,
+        56.307861328125,
+        194.0846710205078
+      ]
+    },
+    "role": "walkable",
+    "vertexCount": 16641,
+    "triangleCount": 32768,
+    "approvedHeightfieldException": true,
+    "approvedHeightfieldExceptionReason": "Collision is heightfield-projected from a source-derived heightmap while visual chunks are authored from the same source GLB."
+  }
 }

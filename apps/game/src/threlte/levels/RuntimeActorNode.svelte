@@ -2,6 +2,11 @@
 import { T } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
 import CollisionBody from '../collision/CollisionBody.svelte'
+import {
+  shouldMountActorCollision,
+  shouldRenderActorVisual,
+  shouldRenderVisualInsideCollider,
+} from '../engine/actorPresence'
 import type {
   RuntimeGameplayData,
   RuntimeGameplayRenderNode,
@@ -20,11 +25,15 @@ export let levelId = ''
 export let interactionSystem: any = null
 export let interactiveEnabled = false
 
-$: visible = actor.render?.visible ?? true
 $: collision = actor.physics?.collision ?? null
 $: bodyType = actor.physics?.bodyType ?? 'fixed'
-$: renderVisualOutsideCollider =
-  actor.render?.physicsAttachment === 'outside-collider'
+$: renderVisual = shouldRenderActorVisual(actor)
+$: mountCollision = shouldMountActorCollision(actor)
+$: renderVisualInsideCollider = shouldRenderVisualInsideCollider(actor)
+$: renderVisualOutsideCollider = renderVisual && !renderVisualInsideCollider
+$: useHeadlessStaticCollision =
+  Boolean(collision && mountCollision) && bodyType === 'fixed'
+$: groupVisible = actor.render?.visible ?? true
 $: gameplayNode = {
   id: actor.id,
   name: actor.name,
@@ -43,14 +52,45 @@ onDestroy(() => {
 })
 </script>
 
+{#if collision && mountCollision && useHeadlessStaticCollision}
+  <CollisionBody
+    transformMode="physics-explicit"
+    applyScaleToPhysics={true}
+    position={actor.transform.position}
+    rotation={actor.transform.rotation}
+    scale={actor.transform.scale}
+    shape={collision.shape}
+    intent={collision.intent}
+    channel={collision.channel}
+    triangleBudget={collision.triangleBudget}
+    args={getRuntimeActorColliderArgs(actor)}
+    {bodyType}
+    gravityScale={actor.physics?.gravityScale ?? 1}
+    canSleep={actor.physics?.canSleep ?? true}
+    ccd={actor.physics?.ccd ?? false}
+    linearDamping={actor.physics?.linearDamping ?? 0}
+    angularDamping={actor.physics?.angularDamping ?? 0}
+    lockRotations={actor.physics?.lockRotations ?? false}
+    lockTranslations={actor.physics?.lockTranslations ?? false}
+    friction={collision.friction ?? 0.7}
+    restitution={collision.restitution ?? 0}
+    sensor={collision.sensor ?? false}
+    colliderUrl={collision.colliderUrl ?? ''}
+    colliderMetadataUrl={collision.colliderMetadataUrl ?? ''}
+    assetLocalTransform={collision.assetLocalTransform ?? null}
+    primitiveGeometry={actor.render?.primitive?.geometry}
+    primitiveArgs={actor.render?.primitive?.args ?? []}
+  />
+{/if}
+
 <T.Group
   name={actor.name}
   position={actor.transform.position}
   rotation={actor.transform.rotation}
   scale={actor.transform.scale}
-  {visible}
+  visible={groupVisible}
 >
-  {#if collision && visible && !renderVisualOutsideCollider}
+  {#if collision && mountCollision && !useHeadlessStaticCollision && renderVisualInsideCollider}
     <CollisionBody
       shape={collision.shape}
       intent={collision.intent}
@@ -69,12 +109,14 @@ onDestroy(() => {
       restitution={collision.restitution ?? 0}
       sensor={collision.sensor ?? false}
       colliderUrl={collision.colliderUrl ?? ''}
+      colliderMetadataUrl={collision.colliderMetadataUrl ?? ''}
+      assetLocalTransform={collision.assetLocalTransform ?? null}
       primitiveGeometry={actor.render?.primitive?.geometry}
       primitiveArgs={actor.render?.primitive?.args ?? []}
     >
       <RuntimeActorRenderContent {actor} {levelId} />
     </CollisionBody>
-  {:else if collision && visible && renderVisualOutsideCollider}
+  {:else if collision && mountCollision && !useHeadlessStaticCollision}
     <CollisionBody
       shape={collision.shape}
       intent={collision.intent}
@@ -93,11 +135,15 @@ onDestroy(() => {
       restitution={collision.restitution ?? 0}
       sensor={collision.sensor ?? false}
       colliderUrl={collision.colliderUrl ?? ''}
+      colliderMetadataUrl={collision.colliderMetadataUrl ?? ''}
+      assetLocalTransform={collision.assetLocalTransform ?? null}
       primitiveGeometry={actor.render?.primitive?.geometry}
       primitiveArgs={actor.render?.primitive?.args ?? []}
     />
-    <RuntimeActorRenderContent {actor} {levelId} />
-  {:else if visible}
+    {#if renderVisualOutsideCollider}
+      <RuntimeActorRenderContent {actor} {levelId} />
+    {/if}
+  {:else if renderVisual}
     <RuntimeActorRenderContent {actor} {levelId} />
   {/if}
 

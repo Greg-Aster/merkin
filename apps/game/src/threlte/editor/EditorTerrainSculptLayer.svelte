@@ -410,7 +410,8 @@ async function bakeTerrainCollisionFromEditor() {
           ...(settings.collision?.terrain ?? {}),
           source: 'baked-heightmap',
           runtimeSource: 'editor-manifest',
-          manifestUrl: getLevelCollisionWorkflow(levelId).terrainManifestUrl,
+          manifestUrl: getLevelCollisionWorkflow(levelId, editorScene?.settings)
+            .terrainManifestUrl,
           heightmapUrl:
             metadata?.sourceHeightmap ??
             settings.collision?.terrain?.heightmapUrl,

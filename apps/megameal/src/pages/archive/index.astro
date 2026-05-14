@@ -1,5 +1,5 @@
 ---
-import ArchiveBanner from '@components/archive/ArchiveBanner.astro'
+import ArchiveAtmosphere from '@components/archive/ArchiveAtmosphere.svelte'
 import ArchiveStoryMap from '@components/archive/ArchiveStoryMap.astro'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
@@ -56,14 +56,14 @@ const archiveStats = [
   },
 ]
 
-const archiveBannerPost = {
+const archivePagePost = {
   slug: 'archive',
   data: {
     title: i18n(I18nKey.archive),
     description:
       'A connected record of posts, timeline entries, story arcs, and star map destinations across the Mega Meal Saga.',
     image: '/assets/banner/archive_still.png',
-    bannerType: 'archive',
+    bannerType: 'none',
     oneColumn: true,
     showToc: false,
   },
@@ -74,18 +74,18 @@ import '../../styles/pages/archive-index.css'
 
 <MainGridLayout
   title={i18n(I18nKey.archive)}
-  description={archiveBannerPost.data.description}
-  post={archiveBannerPost}
+  description={archivePagePost.data.description}
+  post={archivePagePost}
   oneColumn={true}
   backgroundImage="none"
 >
-    <ArchiveBanner slot="banner-slide-content" stats={archiveStats} />
-    <section class="archive-summary card-base">
+    <ArchiveAtmosphere slot="overlay" client:load />
+    <section class="archive-summary card-base" aria-labelledby="archive-page-title">
       <div class="archive-summary-head">
-        <div class="archive-kicker">Archive Overview</div>
-        <h1 class="archive-title">One story graph, multiple ways in.</h1>
+        <div class="archive-kicker">Archive</div>
+        <h1 id="archive-page-title" class="archive-title">MEGA MEAL SAGA Archive</h1>
         <p class="archive-copy">
-          The archive keeps the reading surface, the timeline, and the star observatory aligned to the same shared record.
+          One story graph, multiple ways in. Browse public records, restricted files, timeline entries, and star-map nodes from the same shared index.
         </p>
       </div>
 

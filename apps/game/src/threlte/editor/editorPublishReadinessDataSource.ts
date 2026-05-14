@@ -10,10 +10,12 @@ import type {
   EditorPublishReadinessViewModel,
   LoadEditorPublishReadinessInput,
   LoadedManifest,
+  MeshColliderBakeMetadata,
   RuntimeAssetCookManifest,
   RuntimePrefabManifest,
   TerrainManifest,
 } from './editorPublishReadinessContracts'
+import type { EditorTerrainSourceAssetStatus } from './editorTerrainPipeline'
 
 async function fetchJson<T>(
   fetchImpl: typeof fetch,
@@ -30,6 +32,50 @@ async function fetchJson<T>(
       value: null,
       error: error instanceof Error ? error.message : `${url} fetch failed`,
     }
+  }
+}
+
+async function fetchTerrainStatus(
+  fetchImpl: typeof fetch,
+  input: LoadEditorPublishReadinessInput,
+): Promise<{
+  sourceAssets: EditorTerrainSourceAssetStatus[]
+  missingSourceAssets: EditorTerrainSourceAssetStatus[]
+}> {
+  if (input.terrainSourceAssets || input.missingTerrainSourceAssets) {
+    return {
+      sourceAssets: input.terrainSourceAssets ?? [],
+      missingSourceAssets:
+        input.missingTerrainSourceAssets ??
+        (input.terrainSourceAssets ?? []).filter(
+          source => source.exists === false,
+        ),
+    }
+  }
+
+  try {
+    const response = await fetchImpl('/api/editor-terrain/status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        levelId: input.levelId,
+        scene: input.scene,
+      }),
+    })
+    if (!response.ok) return { sourceAssets: [], missingSourceAssets: [] }
+    const payload = await response.json()
+    if (!payload?.success) return { sourceAssets: [], missingSourceAssets: [] }
+    const sourceAssets: EditorTerrainSourceAssetStatus[] = Array.isArray(
+      payload.sourceAssets,
+    )
+      ? payload.sourceAssets
+      : []
+    const missingSourceAssets = Array.isArray(payload.missingSourceAssets)
+      ? payload.missingSourceAssets
+      : sourceAssets.filter(source => source.exists === false)
+    return { sourceAssets, missingSourceAssets }
+  } catch {
+    return { sourceAssets: [], missingSourceAssets: [] }
   }
 }
 
@@ -58,6 +104,22 @@ export async function loadEditorPublishReadiness(
   const terrainManifest = terrainManifestUrl
     ? await fetchJson<TerrainManifest>(fetchImpl, terrainManifestUrl)
     : { value: null, error: '' }
+  const terrainStatus = await fetchTerrainStatus(fetchImpl, input)
+  const colliderMetadataEntries = await Promise.all(
+    [
+      ...new Set(
+        (input.scene?.nodes ?? [])
+          .map(node => node.collision?.colliderMetadataUrl?.trim() ?? '')
+          .filter(Boolean),
+      ),
+    ].map(
+      async url =>
+        [
+          url,
+          await fetchJson<MeshColliderBakeMetadata>(fetchImpl, url),
+        ] as const,
+    ),
+  )
 
   return buildEditorPublishReadinessViewModel({
     levelId: input.levelId,
@@ -70,5 +132,8 @@ export async function loadEditorPublishReadiness(
     prefabError: prefabManifest.error,
     terrainManifest: terrainManifest.value,
     terrainError: terrainManifest.error,
+    terrainSourceAssets: terrainStatus.sourceAssets,
+    missingTerrainSourceAssets: terrainStatus.missingSourceAssets,
+    colliderMetadata: Object.fromEntries(colliderMetadataEntries),
   })
 }

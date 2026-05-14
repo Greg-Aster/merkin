@@ -3,7 +3,9 @@ const path = require('path');
 const fs = require('fs');
 const { Readable, Writable } = require('stream');
 const { handleSceneRoutes } = require('./sceneRoutes.cjs');
+const { handleSceneBlenderRoutes } = require('./sceneBlenderRoutes.cjs');
 const { handleTerrainRoutes } = require('./terrainRoutes.cjs');
+const { handleCollisionRoutes } = require('./collisionRoutes.cjs');
 const { handleBrowseRoutes } = require('./browseRoutes.cjs');
 const { handleStyleRoutes } = require('./styleRoutes.cjs');
 const { createStyleRouteContext } = require('./styleRuntimeContext.cjs');
@@ -93,6 +95,10 @@ const ACTIVE_EDITOR_API_ENDPOINTS = new Set([
   '/api/editor-scene/publish-build',
   '/api/editor-scene/cook-world-partition',
   '/api/editor-scene/audit-engine',
+  '/api/editor-scene/blender-export',
+  '/api/editor-scene/blender-import-delta',
+  '/api/editor-collision/bake-mesh-collider',
+  '/api/editor-terrain/status',
   '/api/editor-terrain/generate-heightmap',
   '/api/editor-terrain/bake-collision',
   '/api/editor-terrain/cook-chunks',
@@ -102,6 +108,7 @@ const ACTIVE_EDITOR_API_ENDPOINTS = new Set([
 ]);
 
 const ACTIVE_EDITOR_API_PREFIXES = [
+  '/api/editor-scene/',
   '/api/hunyuan3d/',
   '/api/comfyui/',
   '/api/style/',
@@ -478,9 +485,11 @@ function createEditorToolsRouteContext() {
   return {
     EDITOR_SCENES_ROOT,
     EDITOR_SCENE_BACKUPS_ROOT,
+    GAME_APP_ROOT,
     GAME_PUBLIC_ROOT,
     LEVEL_REGISTRY_PATH,
     REPO_ROOT,
+    ensureDirectory,
     ensureTerrainManifestForLevel,
     getEditorScenePath,
     getLatestEditorSceneBackupPath,
@@ -555,7 +564,14 @@ async function handleEditorToolsRequest(req, res) {
   if (handleSceneRoutes(req, res, route, context)) {
     return;
   }
+
+  if (handleSceneBlenderRoutes(req, res, route, context)) {
+    return;
+  }
   if (handleTerrainRoutes(req, res, route, context)) {
+    return;
+  }
+  if (handleCollisionRoutes(req, res, route, context)) {
     return;
   }
   if (handleBrowseRoutes(req, res, route, context)) {

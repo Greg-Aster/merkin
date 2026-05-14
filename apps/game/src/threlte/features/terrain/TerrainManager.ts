@@ -11,6 +11,63 @@
 import * as THREE from 'three'
 import { OptimizationLevel, optimizationManager } from '../performance'
 
+export type TerrainSourceContract = {
+  schemaVersion?: number
+  terrainSourceType?:
+    | 'heightfield-terrain'
+    | 'heightfield-procedural'
+    | 'glb-chunk-terrain'
+    | 'scene-authored-collision'
+  sourceAssetUrl?: string
+  sourceAssetUrls?: string[]
+  authoredSourceAssetUrls?: string[]
+  sourceAssetFingerprint?: {
+    algorithm?: string
+    value?: string
+  }
+  sourceAssetFingerprints?: Array<{
+    url?: string
+    fingerprint?: {
+      algorithm?: string
+      value?: string
+    }
+  }>
+  heightmapUrl?: string
+  heightmapFingerprint?: {
+    algorithm?: string
+    value?: string
+  }
+  sourceCoordinateSystem?: string
+  sourceBounds?: {
+    min: [number, number, number]
+    max: [number, number, number]
+  }
+  renderBakeMode?: 'heightfield-chunk-mesh' | 'source-glb-chunk-mesh'
+  collisionBakeMode?:
+    | 'heightfield-projection'
+    | 'dedicated-collision-glb'
+    | 'simplified-source-glb'
+    | 'selected-terrain-walkable-mesh'
+    | 'scene-authored-collision'
+  collisionMeshSource?: {
+    type?: 'heightmap' | 'dedicated-glb' | 'source-glb' | 'scene-actors'
+    url?: string
+    fingerprint?: {
+      algorithm?: string
+      value?: string
+    }
+  }
+  collisionCoverageBounds?: {
+    min: [number, number, number]
+    max: [number, number, number]
+  }
+  role?: 'walkable' | 'blocker' | 'detail'
+  vertexCount?: number
+  triangleCount?: number
+  approvedHeightfieldException?: boolean
+  approvedHeightfieldExceptionReason?: string
+}
+
 export interface TerrainConfig {
   heightmapUrl: string
   worldSize: number
@@ -30,11 +87,19 @@ export interface TerrainConfig {
     sampleStep?: number
     bounds?: { min: [number, number, number]; max: [number, number, number] }
     center?: [number, number, number]
+    sourceContract?: TerrainSourceContract
   }
   chunkPathTemplate?: string
   chunkSize?: number
   gridSize?: [number, number]
   lods?: Array<{ level: number; distance: number }>
+  visualChunkMaterial?: {
+    color?: string
+    roughness?: number
+    metalness?: number
+    opacity?: number
+    transparent?: boolean
+  }
   chunkActivation?: {
     maxActiveChunks?: number
     maxActiveChunksByTier?: Partial<Record<OptimizationLevel, number>>
@@ -224,7 +289,10 @@ export class TerrainManager {
     const candidates: Array<{ chunk: TerrainChunk; distance: number }> = []
 
     this.chunks.forEach(chunk => {
-      const distance = playerPosition.distanceTo(chunk.position)
+      const distance = Math.hypot(
+        playerPosition.x - chunk.position.x,
+        playerPosition.z - chunk.position.z,
+      )
       let newLod = -1
 
       for (let i = this.config!.lods!.length - 1; i >= 0; i--) {
@@ -258,11 +326,16 @@ export class TerrainManager {
       }
     }
 
-    return this.chunks.filter(chunk => chunk.currentLod !== -1)
+    return candidates
+      .filter(candidate => candidate.chunk.currentLod !== -1)
+      .sort((a, b) => a.distance - b.distance)
+      .map(candidate => candidate.chunk)
   }
 
   private getMaxActiveChunks(): number | null {
     if (!this.config?.chunkActivation) return null
+    // Small authored terrain grids should stream completely; activation caps are for large worlds.
+    if (this.chunks.length <= 16) return null
 
     const currentLevel = optimizationManager.getOptimizationLevel()
     const tierLimit =

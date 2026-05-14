@@ -63,7 +63,7 @@ export const homeIntroScreens = [
       'Navigate the cosmic menu board yourself. Management reminds you that falling through spacetime is not covered by the meal plan.',
     stat: 'Player agency detected',
     ctaLabel: 'Enter Game',
-    href: '/game/',
+    href: 'https://game.megameal.org/',
     stillSrc: '/assets/banner/game.webp',
     webglStillSrc: '/assets/banner/game.webp',
     videoSrc: '/videos/starmap.webm',
@@ -116,6 +116,7 @@ export const homeIntroMobileIntroOffsetScreens = 3.75
 export const homeIntroWheelOverscanScreens = 1.8
 export const homeIntroBannerSceneHoldRadius = 0.3
 export const homeIntroScreenCount = homeIntroScreens.length
+export const homeIntroStandardBannerPhaseScreens = 1.1
 export const homeIntroMinWheel =
   -homeIntroWheelOverscanScreens / homeIntroWheelToScreenRatio
 export function homeIntroMaxWheelForOffset(offsetScreens = homeIntroIntroOffsetScreens) {
@@ -177,6 +178,29 @@ export function getHomeIntroBannerSyncState(selectedIndex: number) {
 }
 
 export function getHomeIntroBannerSyncEvent(selectedIndex: number) {
+  const standardBannerPhaseStart = homeIntroScreenCount - 1
+  const standardBannerProgress =
+    (selectedIndex - standardBannerPhaseStart) /
+    homeIntroStandardBannerPhaseScreens
+
+  if (standardBannerProgress > 0) {
+    const clampedProgress = Math.min(1, Math.max(0, standardBannerProgress))
+    const progress =
+      clampedProgress * clampedProgress * (3 - clampedProgress * 2)
+    const lastScreen = homeIntroScreens[homeIntroScreenCount - 1]
+
+    return {
+      detail: {
+        phase: 'standard-banner',
+        progress,
+        fromSceneId: lastScreen?.sceneId,
+        fromScreenIndex: homeIntroScreenCount - 1,
+        selectedIndex,
+      },
+      syncKey: `standard-banner:${progress.toFixed(4)}`,
+    }
+  }
+
   const bannerState = getHomeIntroBannerSyncState(selectedIndex)
   const {
     activeIndex,

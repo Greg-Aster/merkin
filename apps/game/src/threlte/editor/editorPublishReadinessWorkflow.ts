@@ -161,8 +161,20 @@ export function addPublishReadinessWorkflow(
   })
 
   addWorkflowStep(viewModel, {
+    id: 'generate-heightmap',
+    label: 'Generate Heightmap',
+    command: 'pnpm --dir apps/game generate:terrain-heightmap',
+    expectedOutput:
+      'Heightmap image, terrain manifest bounds, and source provenance.',
+    reason: commandIds.has('generate-heightmap')
+      ? 'Terrain source basket changed.'
+      : 'Required only when heightfield terrain sources changed.',
+    required: commandIds.has('generate-heightmap'),
+  })
+
+  addWorkflowStep(viewModel, {
     id: 'bake-terrain-collision',
-    label: 'Bake terrain collision',
+    label: 'Bake Terrain Collision',
     command: 'pnpm --dir apps/game bake:terrain-collision',
     expectedOutput: 'Terrain collision manifest and collider artifacts.',
     reason: terrainDirty
@@ -173,7 +185,7 @@ export function addPublishReadinessWorkflow(
 
   addWorkflowStep(viewModel, {
     id: 'cook-terrain-chunks',
-    label: 'Cook terrain chunks',
+    label: 'Cook Heightfield Chunks',
     command: 'pnpm --dir apps/game cook:terrain-chunks',
     expectedOutput:
       'Runtime terrain chunk meshes referenced by terrain manifest.',
@@ -214,7 +226,7 @@ export function addPublishReadinessWorkflow(
 
   addWorkflowStep(viewModel, {
     id: 'run-audits',
-    label: 'Run engine audits',
+    label: 'Validate Terrain Contract',
     command: 'pnpm --dir apps/game audit:engine',
     expectedOutput:
       'Engine architecture, runtime asset, terrain, and partition audit report.',

@@ -17,22 +17,28 @@ import {
 } from '../stores/runtimeDiagnosticsStore'
 import EditorAiTabHost from './EditorAiTabHost.svelte'
 import EditorCollisionTabHost from './EditorCollisionTabHost.svelte'
+import EditorCommandPalette from './EditorCommandPalette.svelte'
 import EditorCreateTabHost from './EditorCreateTabHost.svelte'
-import EditorEnvironmentTabHost from './EditorEnvironmentTabHost.svelte'
 import EditorHierarchyTabHost from './EditorHierarchyTabHost.svelte'
 import EditorInspectTabHost from './EditorInspectTabHost.svelte'
+import EditorMainToolbar from './EditorMainToolbar.svelte'
+import EditorOutputTabHost from './EditorOutputTabHost.svelte'
 import EditorPanelHeader from './EditorPanelHeader.svelte'
 import EditorPanelToolsDock from './EditorPanelToolsDock.svelte'
-import EditorPlayerTabHost from './EditorPlayerTabHost.svelte'
 import EditorSaveTabHost from './EditorSaveTabHost.svelte'
 import EditorSceneTabHost from './EditorSceneTabHost.svelte'
 import EditorSideStackHost from './EditorSideStackHost.svelte'
 import EditorStyleTabHost from './EditorStyleTabHost.svelte'
 import EditorWorkflowTabHost from './EditorWorkflowTabHost.svelte'
+import EditorWorldTabHost from './EditorWorldTabHost.svelte'
 import { createDefaultSceneForLevel } from './defaultScenes'
 import { createEditorAiController } from './editorAiController'
 import { createEditorAssetController } from './editorAssetController'
 import { canBakeSceneNode, getPrefabAssetUrl } from './editorBakeSource'
+import {
+  exportBlenderScenePackage,
+  importBlenderSceneDelta,
+} from './editorBlenderSceneBridge'
 import {
   getDefaultCollisionChannel,
   getDefaultCollisionIntent,
@@ -40,6 +46,7 @@ import {
   getNodeVisualColliderSize,
   resolveNodeCollision,
 } from './editorCollisionDefaults'
+import type { EditorCommand } from './editorCommandRegistry'
 import { createPrefabGroups } from './editorCreateCatalog'
 import { createEditorCreateController } from './editorCreateController'
 import {
@@ -96,13 +103,17 @@ import {
   createInitialEditorPublishPipelineState,
 } from './editorPublishReadinessContracts'
 import {
+  EDITOR_LAYOUT_PRESETS,
+  EDITOR_LAYOUT_PRESET_OPTIONS,
+  type EditorLayoutPreset,
   type EditorMaterialData,
+  type EditorSceneDocument,
   type EditorSceneNode,
   type EditorStylePreset,
   type LevelCollisionBudget,
-  type LevelCollisionDefaultPolicy,
   addEmptyNode,
   addNode,
+  applyEditorLayoutPreset,
   canRedoStore,
   canUndoStore,
   clearIsolatedNodes,
@@ -116,6 +127,7 @@ import {
   editorStateStore,
   endSceneTransaction,
   exportSceneJson,
+  getProtectedSceneNodeRemovalIds,
   groupNodes,
   importSceneJson,
   patchNode,
@@ -123,6 +135,9 @@ import {
   redoScene,
   removeNodes,
   reparentNodes,
+  requestEditorViewportFocus,
+  resetEditorDockLayout,
+  resetEditorLayoutPreset,
   saveSceneToLocalStorage,
   selectAllNodes,
   selectEditorNode,
@@ -130,14 +145,18 @@ import {
   selectedEditorNodesStore,
   setCollisionOverlayEnabled,
   setControlsOverlayOpen,
+  setEditorDockLayout,
   setEditorInteractionMode,
   setEditorScene,
   setEditorViewportLightingMode,
+  setEditorViewportMode,
   setEditorViewportShadingMode,
   setIsolatedNodes,
+  setObjectToolMode,
   setOutlinerOpen,
   setPanelOpen,
   setPropertiesShelfOpen,
+  setResponsiveSplitPinned,
   setRotateSnap,
   setScaleSnap,
   setSelectedNodes,
@@ -169,6 +188,20 @@ import {
   stylePresetOptions,
 } from './editorStyleBatchSelection'
 import { createEditorStyleController } from './editorStyleController'
+import { isGeneratedHeightmapChunkTerrain } from './editorTerrainModeGuards'
+import {
+  type EditorTerrainStatusSnapshot,
+  describeEditorTerrainPipeline,
+  planEditorTerrainBakeSteps,
+} from './editorTerrainPipeline'
+import {
+  type HeightmapSourceDescriptor,
+  applyTerrainChunkCookPayload,
+  applyTerrainCollisionBakePayload,
+  applyTerrainHeightmapPayload,
+  buildTerrainChunkCookRequest,
+  buildTerrainHeightmapRequest,
+} from './editorTerrainPipelineRunner'
 
 export let levelId: string
 
@@ -179,12 +212,31 @@ let levelRegistryEntries: LevelRegistryEntry[] = []
 let nodeViewportStateById = new Map<string, OutlinerNodeViewportState>()
 let selectedNode: EditorSceneNode | null = null
 let selectedNodes: EditorSceneNode[] = []
+let commandPaletteOpen = false
+let editorCommands: EditorCommand[] = []
+let dockResizeTarget: {
+  dock: 'tools' | 'side'
+  axis: 'x' | 'y'
+} | null = null
+let editorViewportWidth = 1440
+let editorViewportHeight = 900
+let lastAppliedLayoutPreset: EditorLayoutPreset = 'default'
+let buildWorkflowOpen = true
+let buildOutputOpen = false
 let heightmapSourceNodes: EditorSceneNode[] = []
+let heightmapCandidateNodes: EditorSceneNode[] = []
 let heightmapSourceDescriptors: HeightmapSourceDescriptor[] = []
 let canUndo = false
 let canRedo = false
 let importBuffer = ''
 let saveMessage = 'Local only'
+let blenderSceneExportResult: {
+  packagePath: string
+  packageDirectory: string
+  nodeCount: number
+  assetCount: number
+  warningCount: number
+} | null = null
 let publishPipelineState: EditorPublishPipelineState =
   createInitialEditorPublishPipelineState()
 let terrainCollisionBakePending = false
@@ -192,19 +244,15 @@ let terrainHeightmapGeneratePending = false
 let terrainChunkCookPending = false
 let worldPartitionCookPending = false
 let groundTerrainPublishPending = false
+let terrainStatusSnapshot: EditorTerrainStatusSnapshot | null = null
+let terrainStatusKey = ''
+let terrainStatusRequestId = 0
 const ASSET_LIBRARY_ROOT_MODELS = 'apps/megameal/public/models'
 const ASSET_LIBRARY_ROOT_GENERATED = 'apps/megameal/public/generated/hunyuan3d'
 const COMFY_WORKFLOW_LIBRARY_ROOT = 'apps/game/authoring/workflows/ref-image'
 const DEFAULT_COMFY_WORKFLOW_PATH =
   'apps/game/authoring/workflows/ref-image/Hunyaun example.json'
 
-type HeightmapSourceDescriptor = {
-  nodeId: string
-  sourceName: string
-  sourceAssetUrl?: string
-  primitive?: EditorSceneNode['primitive']
-  matrix: number[]
-}
 let assetBrowserPath = ASSET_LIBRARY_ROOT_MODELS
 let assetBrowserItems: Array<{
   name: string
@@ -236,8 +284,13 @@ let activeTextureMaterialField:
   | 'emissiveMapUrl'
   | 'alphaMapUrl'
   | null = null
-let generatedVariantItems: Array<{ name: string; path: string; url: string }> =
-  []
+let generatedVariantItems: Array<{
+  name: string
+  path: string
+  url: string
+  sourceLabel?: string
+  isOriginalSource?: boolean
+}> = []
 let generatedVariantLoading = false
 let generatedVariantError = ''
 let selectedGeneratedVariantUrl = ''
@@ -302,7 +355,7 @@ let metadataStarMapYear = 2100
 let metadataStarMapDescription = ''
 let metadataSourceKind: 'scene' = 'scene'
 let loadedMetadataLevelId = ''
-let activeEditorTab: EditorPanelTab = 'workflow'
+let activeEditorTab: EditorPanelTab = 'scene'
 let hierarchyFilter = ''
 let outlinerDisplayMode: OutlinerDisplayMode = 'view-layer'
 let outlinerExpandedIdsByMode: Record<OutlinerDisplayMode, string[]> = {
@@ -1315,10 +1368,13 @@ aiController = createEditorAiController({
 })
 
 const inspectorController = createEditorInspectorController({
+  getLevelId: () => activeSceneLevelId,
   getSelectedNode: () => selectedNode,
   getSelectedNodes: () => selectedNodes,
   getEditorNodes: () => editorNodes,
+  addNode,
   patchNode,
+  updateLevelSettings: updateLevelSceneSettings,
   reparentNodes,
   selectEditorNode,
   setSaveMessage: message => {
@@ -1354,6 +1410,7 @@ const inspectorController = createEditorInspectorController({
   setActiveEditorTab: tab => {
     activeEditorTab = tab
   },
+  setPropertiesShelfOpen,
   setHunyuanSelectionKey: value => {
     hunyuanSelectionKey = value
   },
@@ -1362,12 +1419,18 @@ const inspectorController = createEditorInspectorController({
   },
   inspectSelectedAssetForHunyuan:
     assetController.inspectSelectedAssetForHunyuan,
+  getSceneNodeVisualBounds: styleController.getSceneNodeVisualBounds,
+  inspectGeneratedAssetBounds: styleController.inspectAssetBounds,
+  getDefaultStyleDescriptor,
+  appendPipelineLog,
+  getNodeTransformSnapshot: styleController.getNodeTransformSnapshot,
   setSelectedGeneratedVariantUrl: assetUrl => {
     selectedGeneratedVariantUrl = assetUrl
   },
   setHunyuanLastOutputUrl: assetUrl => {
     hunyuanLastOutputUrl = assetUrl
   },
+  saveSceneDocumentToDisk: levelController.saveSceneDocumentToDisk,
 })
 
 $: flattenedNodes = flattenNodes(editorNodes)
@@ -1414,13 +1477,6 @@ $: solitudeSettings = editorScene?.settings?.solitude ?? {}
 $: groundSettings = levelSettings.ground ?? null
 $: terrainSculptSettings = levelSettings.terrainSculpt ?? null
 $: terrainCollisionSettings = levelSettings.collision?.terrain ?? null
-$: collisionDefaultPolicy =
-  (levelSettings.collision?.workflow?.actorCollision as
-    | LevelCollisionDefaultPolicy
-    | undefined) ??
-  (levelSettings.collision?.defaults?.solidObjectsByDefault === false
-    ? 'authored-only'
-    : 'lightweight-auto')
 $: collisionBudget =
   (levelSettings.collision?.workflow?.colliderBudget as
     | LevelCollisionBudget
@@ -1473,6 +1529,18 @@ function getHeightmapSelectionRootIds() {
 }
 
 function getHeightmapSourceNodes() {
+  const basketIds = terrainCollisionSettings?.sourceNodeIds ?? []
+  if (basketIds.length > 0) {
+    const idSet = new Set(basketIds)
+    return editorNodes.filter(
+      node => idSet.has(node.id) && canBakeHeightmapSource(node),
+    )
+  }
+
+  return []
+}
+
+function getHeightmapCandidateNodes() {
   const sourceIds = new Set<string>()
   const rootIds = getHeightmapSelectionRootIds()
 
@@ -1505,6 +1573,7 @@ function getHeightmapSourceDescriptors() {
   })
 }
 
+$: heightmapCandidateNodes = getHeightmapCandidateNodes()
 $: heightmapSourceNodes = getHeightmapSourceNodes()
 $: heightmapSourceDescriptors = getHeightmapSourceDescriptors()
 $: selectedTerrainSourceName =
@@ -1516,6 +1585,119 @@ $: selectedTerrainSourceName =
 $: selectedTerrainSourceAssetUrl =
   heightmapSourceDescriptors[0]?.sourceAssetUrl ??
   (heightmapSourceDescriptors.length > 0 ? 'procedural-terrain-sources' : '')
+$: nextTerrainStatusKey = JSON.stringify({
+  levelId: activeSceneLevelId || levelId || editorScene?.levelId || '',
+  updatedAt: editorScene?.updatedAt ?? '',
+  selectedTerrainSourceAssetUrl,
+  sourceAssetUrl: terrainCollisionSettings?.sourceAssetUrl ?? '',
+  sourceAssetUrls: terrainCollisionSettings?.sourceAssetUrls ?? [],
+  sourceNodeId: terrainCollisionSettings?.sourceNodeId ?? '',
+  sourceNodeIds: terrainCollisionSettings?.sourceNodeIds ?? [],
+})
+$: if (nextTerrainStatusKey !== terrainStatusKey) {
+  terrainStatusKey = nextTerrainStatusKey
+  terrainStatusSnapshot = null
+  if (activeSceneLevelId || levelId || editorScene?.levelId) {
+    void refreshTerrainStatusSnapshot(nextTerrainStatusKey, editorScene)
+  }
+}
+
+function setTerrainSourceBasket(sourceNodes: EditorSceneNode[]) {
+  const sourceNodeIds = Array.from(new Set(sourceNodes.map(node => node.id)))
+  const sourceAssetUrls = Array.from(
+    new Set(
+      sourceNodes
+        .map(resolveHeightmapSourceAssetUrl)
+        .filter((url): url is string => Boolean(url)),
+    ),
+  )
+  const sourceName =
+    sourceNodes.length === 0
+      ? ''
+      : sourceNodes.length === 1
+        ? sourceNodes[0].name
+        : `${sourceNodes.length} terrain sources`
+
+  updateLevelSceneSettings(settings => {
+    const terrain = settings.collision?.terrain ?? {}
+    const baseTerrain = {
+      ...terrain,
+      source: 'baked-heightmap' as const,
+      runtimeSource: terrain.runtimeSource ?? 'editor-manifest',
+      sourceNodeIds,
+      sourceNodeId: sourceNodeIds[0],
+      sourceAssetUrls,
+      sourceAssetUrl: sourceAssetUrls[0],
+      sourceName,
+    }
+    const nextTerrain =
+      sourceNodeIds.length > 0
+        ? {
+            ...baseTerrain,
+            dirty: true,
+            heightmapDirty: true,
+          }
+        : {
+            ...baseTerrain,
+            sourceAssetUrl: undefined,
+            sourceAssetUrls: [],
+            sourceBounds: undefined,
+            sourceName: '',
+            sourceNodeId: undefined,
+            sourceNodeIds: [],
+            sourceTriangleCount: undefined,
+            heightmapUrl: undefined,
+            heightmapResolution: undefined,
+            manifestUrl: undefined,
+            colliderUrl: undefined,
+            metadataUrl: undefined,
+            colliderResolution: undefined,
+            triangleCount: undefined,
+            vertexCount: undefined,
+            chunksPath: undefined,
+            chunkGrid: undefined,
+            chunkCount: undefined,
+            chunkLods: undefined,
+            heightOverrideCount: undefined,
+            lastGeneratedAt: undefined,
+            lastChunksGeneratedAt: undefined,
+            dirty: true,
+            heightmapDirty: true,
+          }
+
+    return {
+      ...settings,
+      collision: {
+        ...(settings.collision ?? {}),
+        terrain: nextTerrain,
+      },
+    }
+  })
+}
+
+function addSelectedTerrainSourcesToBasket() {
+  if (heightmapCandidateNodes.length === 0) {
+    saveMessage =
+      'Select terrain source meshes, primitives, prefabs, or groups first'
+    return
+  }
+
+  setTerrainSourceBasket([...heightmapSourceNodes, ...heightmapCandidateNodes])
+  saveMessage = `Added ${heightmapCandidateNodes.length} terrain source candidate(s)`
+}
+
+function removeTerrainSourceFromBasket(nodeId: string) {
+  setTerrainSourceBasket(
+    heightmapSourceNodes.filter(node => node.id !== nodeId),
+  )
+  saveMessage = 'Removed terrain source from basket'
+}
+
+function clearTerrainSourceBasket() {
+  setTerrainSourceBasket([])
+  saveMessage =
+    'Cleared terrain source basket and invalidated baked terrain artifacts'
+}
 $: canUseStyleStudioSelection = canUseStyleStudio(selectedNode)
 $: canUseAiMeshStudioSelection = canUseAiMeshStudio(selectedNode)
 $: selectedLibraryItemPath = selectedLibraryItem?.path ?? ''
@@ -1588,24 +1770,50 @@ const editorPanelTabs: Array<{
   id: EditorPanelTab
   icon: string
   label: string
+  description: string
 }> = [
-  { id: 'workflow', icon: '→', label: 'Workflow' },
-  { id: 'scene', icon: '◫', label: 'Scene' },
-  { id: 'collision', icon: '◇', label: 'Collision' },
-  { id: 'environment', icon: '☼', label: 'Environment' },
-  { id: 'player', icon: '⚑', label: 'Player' },
-  { id: 'create', icon: '+', label: 'Create' },
-  { id: 'inspect', icon: '⌕', label: 'Inspect' },
-  { id: 'style', icon: '✎', label: 'Style' },
-  { id: 'ai', icon: '✦', label: 'AI Mesh' },
-  { id: 'save', icon: '↧', label: 'Save' },
+  {
+    id: 'scene',
+    icon: '◫',
+    label: 'Scene',
+    description: 'Hierarchy, selection, transform, and object details',
+  },
+  {
+    id: 'create',
+    icon: '+',
+    label: 'Create',
+    description: 'Primitives, prefabs, content browser, and asset preview',
+  },
+  {
+    id: 'world',
+    icon: '☼',
+    label: 'World',
+    description: 'Environment, terrain, atmosphere, audio, and player setup',
+  },
+  {
+    id: 'collision',
+    icon: '◇',
+    label: 'Collision',
+    description: 'Collision policy, authoring, review, overlay, and bake entry',
+  },
+  {
+    id: 'build',
+    icon: '↧',
+    label: 'Build',
+    description: 'Save, validation, bake/cook, publish, and diagnostics',
+  },
+  {
+    id: 'ai',
+    icon: '✦',
+    label: 'AI Lab',
+    description: 'ComfyUI, Hunyuan jobs, generated outputs, and experiments',
+  },
 ]
 
 function setActiveEditorTab(tab: EditorPanelTab) {
   activeEditorTab = tab
   if (tab === 'ai') {
     void ensureEditorAIMeshStudio()
-  } else if (tab === 'style') {
     void ensureEditorStyleStudio()
   }
   requestAnimationFrame(() => {
@@ -2030,14 +2238,942 @@ function saveAsLevelFromMenu() {
   saveAsTitle = metadataTitle ? `${metadataTitle} Copy` : ''
   saveAsLevelId = sanitizeLevelId(`${activeSceneLevelId}-copy`)
   setPanelOpen(true)
-  setActiveEditorTab('save')
+  setActiveEditorTab('build')
   saveMessage = 'Review Save As fields, then save the new level file'
+}
+
+async function exportLevelForBlender() {
+  const scene = get(editorSceneStore)
+  if (!scene) {
+    saveMessage = 'No level scene loaded'
+    return
+  }
+
+  try {
+    saveMessage = `Exporting ${activeSceneLevelId} for Blender...`
+    const payload = await exportBlenderScenePackage(activeSceneLevelId, scene)
+    blenderSceneExportResult = {
+      packagePath: payload.packagePath ?? '',
+      packageDirectory: payload.packageDirectory ?? '',
+      nodeCount: payload.nodeCount ?? 0,
+      assetCount: payload.assetCount ?? 0,
+      warningCount: payload.warnings?.length ?? 0,
+    }
+    if (payload.packagePath) {
+      void navigator.clipboard?.writeText?.(payload.packagePath)
+    }
+    setPanelOpen(true)
+    setActiveEditorTab('build')
+    saveMessage = payload.packagePath
+      ? `Saved Blender package: ${payload.packagePath}. Path copied to clipboard.`
+      : payload.message ?? 'Saved Blender package'
+  } catch (error) {
+    console.error('Blender level export failed:', error)
+    blenderSceneExportResult = null
+    saveMessage =
+      error instanceof Error ? error.message : 'Blender level export failed'
+  }
+}
+
+function readFileAsText(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.addEventListener('load', () => {
+      resolve(String(reader.result ?? ''))
+    })
+    reader.addEventListener('error', () => {
+      reject(reader.error ?? new Error('File read failed'))
+    })
+    reader.readAsText(file)
+  })
+}
+
+async function importLevelFromBlenderDeltaFile(file: File) {
+  const scene = get(editorSceneStore)
+  if (!scene) {
+    saveMessage = 'No level scene loaded'
+    return
+  }
+
+  try {
+    saveMessage = `Importing Blender delta: ${file.name}`
+    const deltaText = await readFileAsText(file)
+    const delta = JSON.parse(deltaText)
+    const payload = await importBlenderSceneDelta(scene, delta)
+    if (!payload.scene) {
+      throw new Error(
+        payload.message ?? 'Blender scene import returned no scene',
+      )
+    }
+    importSceneJson(JSON.stringify(payload.scene))
+    saveMessage = payload.unknownNodeIds?.length
+      ? `Imported ${payload.updatedCount ?? 0} node(s); ignored ${payload.unknownNodeIds.length} unknown node(s)`
+      : `Imported Blender delta for ${payload.updatedCount ?? 0} node(s)`
+  } catch (error) {
+    console.error('Blender level import failed:', error)
+    saveMessage =
+      error instanceof Error ? error.message : 'Blender level import failed'
+  }
+}
+
+function importLevelFromBlender() {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.json,application/json'
+  input.addEventListener('change', () => {
+    const [file] = Array.from(input.files ?? [])
+    if (file) void importLevelFromBlenderDeltaFile(file)
+  })
+  input.click()
 }
 
 function loadEditorLevelFromMenu(levelId: string) {
   pendingLevelId = levelId
   switchEditorLevel()
 }
+
+function getMinimumDockWidth(viewportWidth: number) {
+  return viewportWidth <= 1100 ? 220 : 240
+}
+
+function getDefaultDockWidth(viewportWidth: number) {
+  return Math.round(
+    Math.min(
+      320,
+      Math.max(getMinimumDockWidth(viewportWidth), viewportWidth * 0.205),
+    ),
+  )
+}
+
+function getMaximumDockWidth(viewportWidth: number) {
+  return Math.round(Math.min(420, viewportWidth * 0.32))
+}
+
+function getMinimumDockHeight(viewportHeight: number) {
+  return viewportHeight <= 680 ? 180 : 240
+}
+
+function getDefaultDockHeight(viewportHeight: number) {
+  const usableHeight = Math.max(
+    getMinimumDockHeight(viewportHeight),
+    viewportHeight - 132,
+  )
+  const preferredHeight = Math.max(
+    getMinimumDockHeight(viewportHeight),
+    viewportHeight * 0.72,
+  )
+  return Math.round(Math.min(preferredHeight, usableHeight))
+}
+
+function getMaximumDockHeight(viewportHeight: number) {
+  return Math.round(
+    Math.max(getMinimumDockHeight(viewportHeight), viewportHeight - 96),
+  )
+}
+
+function clampDockWidth(
+  width: number,
+  target: 'tools' | 'side',
+  viewportWidth: number,
+) {
+  const minWidth = getMinimumDockWidth(viewportWidth)
+  const maxWidth = getMaximumDockWidth(viewportWidth)
+  const otherDockOpen =
+    target === 'tools'
+      ? editorState?.outlinerOpen || editorState?.propertiesShelfOpen
+      : editorState?.panelOpen
+  const otherDockWidth =
+    target === 'tools'
+      ? getEffectiveDockWidth('side', viewportWidth, false)
+      : getEffectiveDockWidth('tools', viewportWidth, false)
+  const combinedLimit = Math.max(
+    minWidth,
+    Math.floor(viewportWidth * 0.55) - (otherDockOpen ? otherDockWidth : 0),
+  )
+
+  return Math.round(
+    Math.min(Math.max(width, minWidth), maxWidth, combinedLimit),
+  )
+}
+
+function getEffectiveDockWidth(
+  target: 'tools' | 'side',
+  viewportWidth: number,
+  clampAgainstOther = true,
+) {
+  const storedWidth =
+    target === 'tools'
+      ? editorState?.toolsDockWidth
+      : editorState?.sideDockWidth
+  const requestedWidth = editorState?.layoutCustomized
+    ? storedWidth
+    : getDefaultDockWidth(viewportWidth)
+  const finiteWidth =
+    typeof requestedWidth === 'number' && Number.isFinite(requestedWidth)
+      ? requestedWidth
+      : getDefaultDockWidth(viewportWidth)
+
+  if (!clampAgainstOther) {
+    return Math.round(
+      Math.min(
+        Math.max(finiteWidth, getMinimumDockWidth(viewportWidth)),
+        getMaximumDockWidth(viewportWidth),
+      ),
+    )
+  }
+
+  return clampDockWidth(finiteWidth, target, viewportWidth)
+}
+
+function clampDockHeight(height: number, viewportHeight: number) {
+  const minHeight = getMinimumDockHeight(viewportHeight)
+  const maxHeight = getMaximumDockHeight(viewportHeight)
+  return Math.round(Math.min(Math.max(height, minHeight), maxHeight))
+}
+
+function getEffectiveDockHeight(
+  target: 'tools' | 'side',
+  viewportHeight: number,
+) {
+  const storedHeight =
+    target === 'tools'
+      ? editorState?.toolsDockHeight
+      : editorState?.sideDockHeight
+  const requestedHeight =
+    editorState?.dockHeightCustomized &&
+    typeof storedHeight === 'number' &&
+    Number.isFinite(storedHeight) &&
+    storedHeight > 0
+      ? storedHeight
+      : getDefaultDockHeight(viewportHeight)
+
+  return clampDockHeight(requestedHeight, viewportHeight)
+}
+
+function resetDockLayoutFromMenu() {
+  resetEditorDockLayout()
+  saveMessage = 'Editor dock layout reset'
+}
+
+function getLayoutPresetWorkspace(preset: EditorLayoutPreset): EditorPanelTab {
+  if (preset === 'create') return 'create'
+  if (preset === 'collision') return 'collision'
+  if (preset === 'build') return 'build'
+  return 'scene'
+}
+
+function applyLayoutPresetFromMenu(preset: EditorLayoutPreset) {
+  applyEditorLayoutPreset(preset)
+  setActiveEditorTab(getLayoutPresetWorkspace(preset))
+  if (preset === 'collision') setCollisionOverlayEnabled(true)
+  saveMessage = `Layout preset: ${EDITOR_LAYOUT_PRESETS[preset].label}`
+}
+
+function resetLayoutPresetFromMenu() {
+  resetEditorLayoutPreset()
+  setActiveEditorTab('scene')
+  saveMessage = 'Editor layout preset reset'
+}
+
+function beginDockResize(
+  target: 'tools' | 'side',
+  axis: 'x' | 'y',
+  event: PointerEvent,
+) {
+  if (!editorState?.enabled) return
+  event.preventDefault()
+  event.stopPropagation()
+  dockResizeTarget = { dock: target, axis }
+}
+
+function resizeDockFromPointer(event: PointerEvent) {
+  if (!dockResizeTarget || !editorState) return
+  event.preventDefault()
+
+  const editorBody = document.querySelector('.editor-body')
+  if (!editorBody) return
+  const rect = editorBody.getBoundingClientRect()
+  if (dockResizeTarget.axis === 'y') {
+    const region = document.querySelector(
+      `.editor-${dockResizeTarget.dock}-region`,
+    )
+    if (!region) return
+    const regionRect = region.getBoundingClientRect()
+    const height = event.clientY - regionRect.top
+    const clampedHeight = clampDockHeight(height, editorViewportHeight)
+    setEditorDockLayout(
+      dockResizeTarget.dock === 'tools'
+        ? { toolsDockHeight: clampedHeight }
+        : { sideDockHeight: clampedHeight },
+    )
+    return
+  }
+
+  const width =
+    dockResizeTarget.dock === 'tools'
+      ? event.clientX - rect.left
+      : rect.right - event.clientX
+
+  const clampedWidth = clampDockWidth(
+    width,
+    dockResizeTarget.dock,
+    editorViewportWidth,
+  )
+  setEditorDockLayout(
+    dockResizeTarget.dock === 'tools'
+      ? { toolsDockWidth: clampedWidth }
+      : { sideDockWidth: clampedWidth },
+  )
+}
+
+function endDockResize() {
+  dockResizeTarget = null
+}
+
+function hasFiniteVec3(value: unknown): value is [number, number, number] {
+  return (
+    Array.isArray(value) && value.length === 3 && value.every(Number.isFinite)
+  )
+}
+
+function getSpawnPosition() {
+  const position = levelSettings?.spawn?.position
+  return hasFiniteVec3(position) ? position : null
+}
+
+function selectionStatus() {
+  return editorState.selectedNodeIds.length > 0
+    ? { enabled: true, disabledReason: undefined, status: 'ready' as const }
+    : {
+        enabled: false,
+        disabledReason: 'Select one or more scene objects first.',
+        status: 'needs-selection' as const,
+      }
+}
+
+function deletionStatus() {
+  const selected = selectionStatus()
+  if (!selected.enabled) return selected
+
+  const protectedIds = getProtectedSceneNodeRemovalIds(
+    editorScene,
+    editorState.selectedNodeIds,
+  )
+  if (protectedIds.length === 0) return selected
+
+  return {
+    enabled: false,
+    disabledReason: `Required level actor${protectedIds.length === 1 ? '' : 's'} cannot be deleted: ${protectedIds.join(', ')}.`,
+    status: 'experimental' as const,
+  }
+}
+
+function backendStatus() {
+  if (hunyuanBusy) {
+    return {
+      enabled: false,
+      disabledReason: 'AI backend is busy.',
+      status: 'experimental' as const,
+    }
+  }
+  if (!hunyuanServiceReady) {
+    return {
+      enabled: false,
+      disabledReason: 'AI backend is offline.',
+      status: 'offline' as const,
+    }
+  }
+  return { enabled: true, disabledReason: undefined, status: 'ready' as const }
+}
+
+function openOwnerWorkspace(tab: EditorPanelTab) {
+  setPanelOpen(true)
+  setActiveEditorTab(tab)
+}
+
+function openBuildOutput() {
+  setPanelOpen(true)
+  buildOutputOpen = true
+  setActiveEditorTab('build')
+}
+
+function buildEditorCommands(): EditorCommand[] {
+  const selected = selectionStatus()
+  const deletion = deletionStatus()
+  const backend = backendStatus()
+  const spawnPosition = getSpawnPosition()
+  const terrainPipeline = describeEditorTerrainPipeline({
+    scene: get(editorSceneStore),
+    selectedTerrainSourceName,
+    selectedTerrainSourceAssetUrl,
+    terrainStatus: terrainStatusSnapshot,
+  })
+  const terrainPipelineBusy =
+    terrainCollisionBakePending ||
+    terrainHeightmapGeneratePending ||
+    terrainChunkCookPending
+  const terrainCommand = (id: string) =>
+    terrainPipeline.commands.find(command => command.id === id)
+  const bakeTerrainCommand = terrainCommand('bake-terrain')
+  const generateHeightmapCommand = terrainCommand('generate-heightmap')
+  const bakeTerrainCollisionCommand = terrainCommand('bake-terrain-collision')
+  const heightfieldChunkCommand = terrainCommand('cook-heightfield-chunks')
+  const glbChunkCommand = terrainCommand('cook-glb-chunks')
+  const cookChunkCommand =
+    terrainPipeline.mode === 'glb-chunk-terrain' || !heightfieldChunkCommand
+      ? glbChunkCommand
+      : heightfieldChunkCommand
+
+  return [
+    {
+      id: 'open-command-palette',
+      label: 'Open Command Palette',
+      description: 'Search editor commands by owner, state, or shortcut.',
+      category: 'Diagnostics',
+      ownerWorkspace: 'header',
+      enabled: true,
+      status: 'ready',
+      shortcut: 'Ctrl+K',
+      run: () => {
+        commandPaletteOpen = true
+      },
+    },
+    {
+      id: 'save-level',
+      label: 'Save Level',
+      description: 'Overwrite the active level scene document on disk.',
+      category: 'Build',
+      ownerWorkspace: 'build',
+      enabled: true,
+      status: 'ready',
+      shortcut: 'Ctrl+S',
+      run: saveCurrentSceneToDisk,
+    },
+    {
+      id: 'save-as-level',
+      label: 'Save As Level',
+      description: 'Prepare a copied level file with a new ID.',
+      category: 'Build',
+      ownerWorkspace: 'build',
+      enabled: true,
+      status: 'ready',
+      run: saveAsLevelFromMenu,
+    },
+    {
+      id: 'new-level',
+      label: 'New Level',
+      description: 'Open the new-level tools in the Scene workspace.',
+      category: 'World',
+      ownerWorkspace: 'scene',
+      enabled: true,
+      status: 'ready',
+      run: openNewLevelTools,
+    },
+    {
+      id: 'copy-scene-json',
+      label: 'Copy Scene JSON',
+      description: 'Copy the active scene JSON payload.',
+      category: 'Diagnostics',
+      ownerWorkspace: 'build',
+      enabled: true,
+      status: 'ready',
+      run: levelController.copySceneJson,
+    },
+    {
+      id: 'publish-level',
+      label: 'Publish Level',
+      description: 'Run publish checks and deploy the active level metadata.',
+      category: 'Build',
+      ownerWorkspace: 'build',
+      enabled: !publishPipelineState.running,
+      disabledReason: publishPipelineState.running
+        ? 'Publish is already running.'
+        : undefined,
+      status: publishPipelineState.running ? 'experimental' : 'danger',
+      run: () => {
+        openOwnerWorkspace('build')
+        void levelController.publishLevel()
+      },
+    },
+    {
+      id: 'bake-terrain',
+      label: 'Bake Terrain',
+      description:
+        'Make runtime terrain current: generate heightmap if needed, bake collision, cook chunks, then validate.',
+      category: 'World',
+      ownerWorkspace: 'build',
+      enabled: !terrainPipelineBusy && Boolean(bakeTerrainCommand?.enabled),
+      disabledReason: terrainPipelineBusy
+        ? 'Terrain bake, cook, or validation is already running.'
+        : bakeTerrainCommand?.enabled
+          ? undefined
+          : bakeTerrainCommand?.reason ?? 'Terrain pipeline is blocked.',
+      status: terrainPipelineBusy
+        ? 'experimental'
+        : bakeTerrainCommand?.enabled
+          ? 'ready'
+          : 'experimental',
+      run: () => {
+        openOwnerWorkspace('build')
+        void bakeTerrainPipeline()
+      },
+    },
+    {
+      id: 'generate-terrain-heightmap',
+      label: 'Generate Heightmap',
+      description:
+        generateHeightmapCommand?.reason ??
+        'Generate a heightmap from the selected terrain source.',
+      category: 'World',
+      ownerWorkspace: 'build',
+      enabled:
+        !terrainHeightmapGeneratePending &&
+        Boolean(generateHeightmapCommand?.enabled),
+      disabledReason: terrainHeightmapGeneratePending
+        ? 'Terrain heightmap generation is already running.'
+        : generateHeightmapCommand?.enabled
+          ? undefined
+          : generateHeightmapCommand?.reason ??
+            'Terrain heightmap generation is blocked.',
+      status: terrainHeightmapGeneratePending
+        ? 'experimental'
+        : generateHeightmapCommand?.enabled
+          ? 'ready'
+          : 'experimental',
+      run: () => {
+        openOwnerWorkspace('build')
+        void generateTerrainHeightmapFromSelection()
+      },
+    },
+    {
+      id: 'bake-terrain-collision',
+      label: 'Bake Terrain Collision',
+      description:
+        bakeTerrainCollisionCommand?.reason ??
+        'Bake runtime collision from the current terrain contract.',
+      category: 'Collision',
+      ownerWorkspace: 'collision',
+      enabled:
+        !terrainCollisionBakePending &&
+        Boolean(bakeTerrainCollisionCommand?.enabled),
+      disabledReason: terrainCollisionBakePending
+        ? 'Terrain collision baking is already running.'
+        : bakeTerrainCollisionCommand?.enabled
+          ? undefined
+          : bakeTerrainCollisionCommand?.reason ??
+            'Terrain collision baking is blocked.',
+      status: terrainCollisionBakePending
+        ? 'experimental'
+        : bakeTerrainCollisionCommand?.enabled
+          ? 'ready'
+          : 'experimental',
+      run: () => {
+        openOwnerWorkspace('collision')
+        void bakeTerrainCollision()
+      },
+    },
+    {
+      id: 'cook-terrain-chunks',
+      label: 'Cook Terrain Chunks',
+      description:
+        cookChunkCommand?.reason ??
+        'Cook runtime render chunks for the current terrain source.',
+      category: 'World',
+      ownerWorkspace: 'build',
+      enabled: !terrainChunkCookPending && Boolean(cookChunkCommand?.enabled),
+      disabledReason: terrainChunkCookPending
+        ? 'Terrain chunk cooking is already running.'
+        : cookChunkCommand?.enabled
+          ? undefined
+          : cookChunkCommand?.reason ?? 'Terrain chunk cooking is blocked.',
+      status: terrainChunkCookPending
+        ? 'experimental'
+        : cookChunkCommand?.enabled
+          ? 'ready'
+          : 'experimental',
+      run: () => {
+        openOwnerWorkspace('build')
+        void cookTerrainChunks()
+      },
+    },
+    {
+      id: 'cook-world-partition',
+      label: 'Cook World Partition',
+      description:
+        'Cook world-partition metadata for the active level runtime.',
+      category: 'World',
+      ownerWorkspace: 'build',
+      enabled: !worldPartitionCookPending,
+      disabledReason: worldPartitionCookPending
+        ? 'World partition cooking is already running.'
+        : undefined,
+      status: worldPartitionCookPending ? 'experimental' : 'ready',
+      run: () => {
+        openOwnerWorkspace('build')
+        void cookWorldPartition()
+      },
+    },
+    {
+      id: 'bake-mesh-collider',
+      label: 'Bake Mesh Collider',
+      description: 'Bake a collider asset for the selected mesh object.',
+      category: 'Collision',
+      ownerWorkspace: 'collision',
+      enabled: selected.enabled,
+      disabledReason: selected.disabledReason,
+      status: selected.enabled ? 'ready' : 'needs-selection',
+      run: () => {
+        openOwnerWorkspace('collision')
+        void inspectorController.bakeMeshColliderFromSelection()
+      },
+    },
+    {
+      id: 'validate-terrain-contract',
+      label: 'Validate Terrain Contract',
+      description:
+        terrainCommand('validate-terrain-contract')?.reason ??
+        'Validate visual ownership, collision, chunks, and fallback state.',
+      category: 'Diagnostics',
+      ownerWorkspace: 'build',
+      enabled: true,
+      status: 'ready',
+      run: () => {
+        openOwnerWorkspace('build')
+        void validateTerrainContract()
+      },
+    },
+    {
+      id: 'mark-level-draft',
+      label: 'Mark Level As Draft',
+      description: 'Switch the active level registry entry back to draft.',
+      category: 'Build',
+      ownerWorkspace: 'build',
+      enabled: true,
+      status: 'danger',
+      run: () => {
+        openOwnerWorkspace('build')
+        void levelController.markLevelDraft()
+      },
+    },
+    {
+      id: 'reload-current-level',
+      label: 'Reload Current Level',
+      description: 'Reload the active level document from disk.',
+      category: 'Build',
+      ownerWorkspace: 'build',
+      enabled: true,
+      status: 'danger',
+      run: () => {
+        openOwnerWorkspace('build')
+        void reloadFromDisk()
+      },
+    },
+    {
+      id: 'open-save-tools',
+      label: 'Open Level File Tools',
+      description: 'Open save, import, registry, and publish tools.',
+      category: 'Build',
+      ownerWorkspace: 'build',
+      enabled: true,
+      status: 'ready',
+      run: () => openOwnerWorkspace('build'),
+    },
+    {
+      id: 'undo',
+      label: 'Undo',
+      description: 'Undo the last scene edit.',
+      category: 'Object',
+      ownerWorkspace: 'viewport',
+      enabled: canUndo,
+      disabledReason: canUndo ? undefined : 'Nothing to undo.',
+      status: canUndo ? 'ready' : 'experimental',
+      shortcut: 'Ctrl+Z',
+      run: () => {
+        if (undoScene()) saveMessage = 'Undo'
+      },
+    },
+    {
+      id: 'redo',
+      label: 'Redo',
+      description: 'Redo the last undone scene edit.',
+      category: 'Object',
+      ownerWorkspace: 'viewport',
+      enabled: canRedo,
+      disabledReason: canRedo ? undefined : 'Nothing to redo.',
+      status: canRedo ? 'ready' : 'experimental',
+      shortcut: 'Ctrl+Shift+Z',
+      run: () => {
+        if (redoScene()) saveMessage = 'Redo'
+      },
+    },
+    {
+      id: 'select-all',
+      label: 'Select All',
+      description: 'Select every object in the scene hierarchy.',
+      category: 'Selection',
+      ownerWorkspace: 'outliner',
+      enabled: editorNodes.length > 0,
+      disabledReason:
+        editorNodes.length > 0 ? undefined : 'No scene objects to select.',
+      status: editorNodes.length > 0 ? 'ready' : 'experimental',
+      shortcut: 'Ctrl+A',
+      run: selectAllNodes,
+    },
+    {
+      id: 'clear-selection',
+      label: 'Clear Selection',
+      description: 'Clear the current object selection.',
+      category: 'Selection',
+      ownerWorkspace: 'outliner',
+      ...selected,
+      shortcut: 'Esc',
+      run: clearSelection,
+    },
+    {
+      id: 'select-similar',
+      label: 'Select Similar',
+      description: `Select ${similarNodeLabel} in the scene.`,
+      category: 'Selection',
+      ownerWorkspace: 'outliner',
+      enabled: similarNodeCount > 0,
+      disabledReason:
+        similarNodeCount > 0
+          ? undefined
+          : 'Select an object with similar matches first.',
+      status: similarNodeCount > 0 ? 'ready' : 'needs-selection',
+      run: () => setSelectedNodes(similarNodeIds),
+    },
+    {
+      id: 'duplicate-selection',
+      label: 'Duplicate Selection',
+      description: 'Duplicate selected scene objects.',
+      category: 'Object',
+      ownerWorkspace: 'viewport',
+      ...selected,
+      shortcut: 'Ctrl+D',
+      run: () => duplicateNodes(editorState.selectedNodeIds),
+    },
+    {
+      id: 'delete-selection',
+      label: 'Delete Selection',
+      description: 'Delete selected scene objects.',
+      category: 'Object',
+      ownerWorkspace: 'viewport',
+      ...deletion,
+      status: deletion.enabled ? 'danger' : deletion.status,
+      shortcut: 'Del',
+      run: () => removeNodes(editorState.selectedNodeIds),
+    },
+    {
+      id: 'frame-spawn',
+      label: 'Frame Player Spawn',
+      description:
+        'Move the editor viewport focus to the configured player spawn.',
+      category: 'View',
+      ownerWorkspace: 'scene',
+      enabled: Boolean(spawnPosition),
+      disabledReason: spawnPosition
+        ? undefined
+        : 'No finite player spawn is configured.',
+      status: spawnPosition ? 'ready' : 'experimental',
+      run: () => {
+        if (spawnPosition) requestEditorViewportFocus(spawnPosition, 18)
+      },
+    },
+    {
+      id: 'bake-collision',
+      label: 'Open Collision Bake Tools',
+      description:
+        'Review generated collider and collision defaults before baking.',
+      category: 'Collision',
+      ownerWorkspace: 'collision',
+      enabled: true,
+      status: 'experimental',
+      run: () => openOwnerWorkspace('collision'),
+    },
+    {
+      id: 'generate-asset',
+      label: 'Open Asset Generator',
+      description:
+        'Open the Create workspace for prefab and AI-assisted asset creation.',
+      category: 'Create',
+      ownerWorkspace: 'create',
+      enabled: backend.enabled,
+      disabledReason: backend.disabledReason,
+      status: backend.status,
+      run: () => openOwnerWorkspace('create'),
+    },
+    {
+      id: 'generate-selection-asset',
+      label: 'Generate Asset For Selection',
+      description: 'Open AI tools for the selected object.',
+      category: 'AI',
+      ownerWorkspace: 'ai',
+      enabled: selected.enabled && backend.enabled,
+      disabledReason: selected.disabledReason ?? backend.disabledReason,
+      status: selected.enabled ? backend.status : selected.status,
+      run: () => openOwnerWorkspace('ai'),
+    },
+    {
+      id: 'texture-selection-asset',
+      label: 'Texture Selection',
+      description: 'Open AI texture and style tools for the selected object.',
+      category: 'AI',
+      ownerWorkspace: 'ai',
+      enabled: selected.enabled && backend.enabled,
+      disabledReason: selected.disabledReason ?? backend.disabledReason,
+      status: selected.enabled ? backend.status : selected.status,
+      run: () => openOwnerWorkspace('ai'),
+    },
+    {
+      id: 'open-asset-library',
+      label: 'Open Asset Library',
+      description: 'Open the Create workspace asset browser.',
+      category: 'Asset',
+      ownerWorkspace: 'create',
+      enabled: true,
+      status: 'ready',
+      run: () => openOwnerWorkspace('create'),
+    },
+    {
+      id: 'view-rendered',
+      label: 'Rendered View',
+      description: 'Use rendered viewport shading.',
+      category: 'View',
+      ownerWorkspace: 'viewport',
+      enabled: editorState.viewportShadingMode !== 'rendered',
+      disabledReason:
+        editorState.viewportShadingMode === 'rendered'
+          ? 'Rendered view is already active.'
+          : undefined,
+      status: 'ready',
+      run: () => setEditorViewportShadingMode('rendered'),
+    },
+    {
+      id: 'view-solid',
+      label: 'Solid View',
+      description: 'Use solid viewport shading.',
+      category: 'View',
+      ownerWorkspace: 'viewport',
+      enabled: editorState.viewportShadingMode !== 'solid',
+      disabledReason:
+        editorState.viewportShadingMode === 'solid'
+          ? 'Solid view is already active.'
+          : undefined,
+      status: 'ready',
+      run: () => setEditorViewportShadingMode('solid'),
+    },
+    {
+      id: 'view-wireframe',
+      label: 'Wireframe View',
+      description: 'Use wireframe viewport shading.',
+      category: 'View',
+      ownerWorkspace: 'viewport',
+      enabled: editorState.viewportShadingMode !== 'wireframe',
+      disabledReason:
+        editorState.viewportShadingMode === 'wireframe'
+          ? 'Wireframe view is already active.'
+          : undefined,
+      status: 'ready',
+      run: () => setEditorViewportShadingMode('wireframe'),
+    },
+    {
+      id: 'toggle-details-shelf',
+      label: editorState.propertiesShelfOpen
+        ? 'Hide Details Shelf'
+        : 'Show Details Shelf',
+      description: 'Toggle the selected-object details shelf.',
+      category: 'View',
+      ownerWorkspace: 'header',
+      enabled: editorState.panelOpen,
+      disabledReason: editorState.panelOpen
+        ? undefined
+        : 'Open the tool panel first.',
+      status: 'ready',
+      run: togglePropertiesShelfOpen,
+    },
+    {
+      id: 'toggle-tool-panel',
+      label: editorState.panelOpen ? 'Collapse Tool Panel' : 'Open Tool Panel',
+      description: 'Toggle the main editor tool panel.',
+      category: 'View',
+      ownerWorkspace: 'header',
+      enabled: true,
+      status: 'ready',
+      run: togglePanelOpen,
+    },
+    ...EDITOR_LAYOUT_PRESET_OPTIONS.map(preset => ({
+      id: `layout-${preset.id}`,
+      label: `Layout: ${preset.label}`,
+      description: `Apply the ${preset.label} editor layout preset.`,
+      category: 'View' as const,
+      ownerWorkspace: 'header' as const,
+      enabled: true,
+      status: 'ready' as const,
+      run: () => applyLayoutPresetFromMenu(preset.id),
+    })),
+    {
+      id: 'layout-reset',
+      label: 'Reset Layout Preset',
+      description: 'Restore the default editor layout preset and dock sizes.',
+      category: 'View',
+      ownerWorkspace: 'header',
+      enabled: true,
+      status: 'ready',
+      run: resetLayoutPresetFromMenu,
+    },
+    {
+      id: 'reset-dock-layout',
+      label: 'Reset Dock Layout',
+      description: 'Restore default editor dock widths.',
+      category: 'View',
+      ownerWorkspace: 'header',
+      enabled: editorState.layoutCustomized,
+      disabledReason: editorState.layoutCustomized
+        ? undefined
+        : 'Dock layout is already using defaults.',
+      status: 'ready',
+      run: resetDockLayoutFromMenu,
+    },
+  ]
+}
+
+function runEditorCommand(commandId: string) {
+  const command = editorCommands.find(item => item.id === commandId)
+  if (!command || !command.enabled) return
+  commandPaletteOpen = false
+  void command.run()
+}
+
+$: if (editorState) {
+  editorCommands = buildEditorCommands()
+}
+
+$: if (
+  editorState?.layoutPreset &&
+  editorState.layoutPreset !== lastAppliedLayoutPreset
+) {
+  lastAppliedLayoutPreset = editorState.layoutPreset
+  setActiveEditorTab(getLayoutPresetWorkspace(editorState.layoutPreset))
+}
+
+$: editorDockStyle = editorState
+  ? `--editor-tools-width: ${getEffectiveDockWidth('tools', editorViewportWidth)}px; --editor-side-width: ${getEffectiveDockWidth('side', editorViewportWidth)}px; --editor-tools-height: ${getEffectiveDockHeight('tools', editorViewportHeight)}px; --editor-side-height: ${getEffectiveDockHeight('side', editorViewportHeight)}px;`
+  : ''
+$: responsiveSingleSideDock =
+  Boolean(editorState) &&
+  editorViewportWidth <= 1024 &&
+  editorState.layoutPreset !== 'default' &&
+  !editorState.responsiveSplitPinned &&
+  editorState.outlinerOpen &&
+  editorState.propertiesShelfOpen
+$: effectiveOutlinerOpen =
+  Boolean(editorState?.outlinerOpen) &&
+  !(responsiveSingleSideDock && editorState.selectedNodeIds.length > 0)
+$: effectivePropertiesShelfOpen =
+  Boolean(editorState?.propertiesShelfOpen) &&
+  !(responsiveSingleSideDock && editorState.selectedNodeIds.length === 0)
+$: effectiveSideOpen = effectiveOutlinerOpen || effectivePropertiesShelfOpen
 
 $: selectedHunyuanJob =
   recentHunyuanJobs.find(job => job.id === selectedHunyuanJobId) ?? null
@@ -2365,8 +3501,7 @@ $: if (
 }
 
 $: {
-  const nextComfyUiStatusKey =
-    activeEditorTab === 'ai' || activeEditorTab === 'style' ? comfyUiApiUrl : ''
+  const nextComfyUiStatusKey = activeEditorTab === 'ai' ? comfyUiApiUrl : ''
   if (nextComfyUiStatusKey && nextComfyUiStatusKey !== comfyUiStatusKey) {
     comfyUiStatusKey = nextComfyUiStatusKey
     void aiController.refreshComfyUiServiceStatus(false)
@@ -2380,8 +3515,10 @@ $: if (editorState?.dirty) {
     window.clearTimeout(autoSaveTimeout)
   }
   autoSaveTimeout = window.setTimeout(() => {
-    saveSceneToLocalStorage(activeSceneLevelId)
-    saveMessage = 'Autosaved locally'
+    const saved = saveSceneToLocalStorage(activeSceneLevelId)
+    saveMessage = saved
+      ? 'Autosaved locally'
+      : 'Autosave skipped: fix scene validation errors first'
     autoSaveTimeout = null
   }, 1200)
 }
@@ -2409,29 +3546,6 @@ function setTerrainAutoBake(enabled: boolean) {
     : 'Terrain collision auto-bake disabled'
 }
 
-function setCollisionDefaultPolicy(policy: LevelCollisionDefaultPolicy) {
-  updateLevelSceneSettings(settings => ({
-    ...settings,
-    collision: {
-      ...(settings.collision ?? {}),
-      workflow: {
-        ...(settings.collision?.workflow ?? {}),
-        actorCollision: policy,
-      },
-      defaults: {
-        ...(settings.collision?.defaults ?? {}),
-        solidObjectsByDefault: policy === 'lightweight-auto',
-      },
-    },
-  }))
-  saveMessage =
-    policy === 'lightweight-auto'
-      ? 'Default lightweight colliders enabled'
-      : policy === 'authored-only'
-        ? 'Only authored colliders will run'
-        : 'Default runtime colliders disabled'
-}
-
 function setCollisionBudget(budget: LevelCollisionBudget) {
   updateLevelSceneSettings(settings => ({
     ...settings,
@@ -2447,7 +3561,7 @@ function setCollisionBudget(budget: LevelCollisionBudget) {
 }
 
 async function bakeTerrainCollision() {
-  if (terrainCollisionBakePending) return
+  if (terrainCollisionBakePending) return false
   terrainCollisionBakePending = true
   saveMessage = 'Baking terrain collision...'
 
@@ -2465,57 +3579,32 @@ async function bakeTerrainCollision() {
       throw new Error(payload?.message ?? 'Terrain collision bake failed')
     }
 
-    const collision = payload.collision
-    const metadata = payload.metadata
-    updateLevelSceneSettings(settings => ({
-      ...settings,
-      collision: {
-        ...(settings.collision ?? {}),
-        terrain: {
-          ...(settings.collision?.terrain ?? {}),
-          source: 'baked-heightmap',
-          runtimeSource: 'editor-manifest',
-          manifestUrl:
-            payload.manifestUrl ?? settings.collision?.terrain?.manifestUrl,
-          heightmapUrl:
-            metadata?.sourceHeightmap ??
-            settings.collision?.terrain?.heightmapUrl,
-          colliderUrl:
-            collision?.url ?? settings.collision?.terrain?.colliderUrl,
-          metadataUrl:
-            collision?.metadataUrl ?? settings.collision?.terrain?.metadataUrl,
-          colliderResolution:
-            collision?.colliderResolution ??
-            settings.collision?.terrain?.colliderResolution,
-          triangleCount:
-            collision?.triangleCount ??
-            settings.collision?.terrain?.triangleCount,
-          vertexCount:
-            collision?.vertexCount ?? settings.collision?.terrain?.vertexCount,
-          dirty: false,
-          lastGeneratedAt: new Date().toISOString(),
-          heightOverrideCount:
-            metadata?.heightOverrideCount ??
-            settings.collision?.terrain?.heightOverrideCount,
-        },
-      },
-    }))
-    saveMessage = 'Terrain collision baked'
+    const sourceStillDirty = Boolean(terrainCollisionSettings?.heightmapDirty)
+    updateLevelSceneSettings(settings =>
+      applyTerrainCollisionBakePayload(settings, payload, {
+        sourceStillDirty,
+      }),
+    )
+    saveMessage = sourceStillDirty
+      ? 'Terrain collision baked from existing heightmap; source basket still needs heightmap generation'
+      : 'Terrain collision baked'
+    return true
   } catch (error) {
     console.error('Terrain collision bake failed:', error)
     saveMessage =
       error instanceof Error ? error.message : 'Terrain collision bake failed'
+    return false
   } finally {
     terrainCollisionBakePending = false
   }
 }
 
 async function generateTerrainHeightmapFromSelection() {
-  if (terrainHeightmapGeneratePending) return
+  if (terrainHeightmapGeneratePending) return false
   if (heightmapSourceDescriptors.length === 0) {
     saveMessage =
       'Select a mesh asset, primitive, prefab, or group to generate the terrain heightmap'
-    return
+    return false
   }
 
   terrainHeightmapGeneratePending = true
@@ -2527,13 +3616,14 @@ async function generateTerrainHeightmapFromSelection() {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          levelId: activeSceneLevelId,
-          nodeId: selectedNode?.id,
-          sources: heightmapSourceDescriptors,
-          resolution: terrainCollisionSettings?.heightmapResolution ?? 512,
-          bakeCollision: true,
-        }),
+        body: JSON.stringify(
+          buildTerrainHeightmapRequest({
+            levelId: activeSceneLevelId,
+            nodeId: selectedNode?.id,
+            sources: heightmapSourceDescriptors,
+            resolution: terrainCollisionSettings?.heightmapResolution ?? 512,
+          }),
+        ),
       },
     )
     const payload = await response.json()
@@ -2541,76 +3631,133 @@ async function generateTerrainHeightmapFromSelection() {
       throw new Error(payload?.message ?? 'Terrain heightmap generation failed')
     }
 
-    const collision = payload.collision
-    const metadata = payload.collisionMetadata
-    updateLevelSceneSettings(settings => ({
-      ...settings,
-      collision: {
-        ...(settings.collision ?? {}),
-        terrain: {
-          ...(settings.collision?.terrain ?? {}),
-          source: 'baked-heightmap',
-          runtimeSource: 'generated-heightmap',
-          manifestUrl:
-            payload.manifestUrl ?? settings.collision?.terrain?.manifestUrl,
-          heightmapUrl:
-            payload.heightmapUrl ?? settings.collision?.terrain?.heightmapUrl,
-          heightmapResolution:
-            payload.resolution ??
-            settings.collision?.terrain?.heightmapResolution,
-          sourceAssetUrl:
-            payload.sourceAssetUrl ??
-            settings.collision?.terrain?.sourceAssetUrl,
-          sourceAssetUrls:
-            payload.sourceAssetUrls ??
-            settings.collision?.terrain?.sourceAssetUrls,
-          sourceNodeId: selectedNode?.id,
-          sourceNodeIds:
-            payload.sourceNodeIds ?? settings.collision?.terrain?.sourceNodeIds,
-          sourceName: payload.sourceName ?? selectedTerrainSourceName,
-          sourceTriangleCount:
-            payload.sourceTriangleCount ??
-            settings.collision?.terrain?.sourceTriangleCount,
-          colliderUrl:
-            collision?.url ?? settings.collision?.terrain?.colliderUrl,
-          metadataUrl:
-            collision?.metadataUrl ?? settings.collision?.terrain?.metadataUrl,
-          colliderResolution:
-            collision?.colliderResolution ??
-            settings.collision?.terrain?.colliderResolution,
-          triangleCount:
-            collision?.triangleCount ??
-            settings.collision?.terrain?.triangleCount,
-          vertexCount:
-            collision?.vertexCount ?? settings.collision?.terrain?.vertexCount,
-          dirty: false,
-          lastGeneratedAt: new Date().toISOString(),
-          heightOverrideCount:
-            metadata?.heightOverrideCount ??
-            settings.collision?.terrain?.heightOverrideCount,
-        },
-      },
-    }))
+    updateLevelSceneSettings(settings =>
+      applyTerrainHeightmapPayload(settings, payload, {
+        selectedNodeId: selectedNode?.id,
+        selectedTerrainSourceName,
+      }),
+    )
     saveMessage = `Generated heightmap and collision from ${selectedTerrainSourceName}`
+    return true
   } catch (error) {
     console.error('Terrain heightmap generation failed:', error)
     saveMessage =
       error instanceof Error
         ? error.message
         : 'Terrain heightmap generation failed'
+    return false
   } finally {
     terrainHeightmapGeneratePending = false
   }
 }
 
+async function loadTerrainStatusSnapshot(
+  scene: EditorSceneDocument | null,
+): Promise<EditorTerrainStatusSnapshot | null> {
+  try {
+    const response = await fetch(
+      `${EDITOR_API_BASE}/api/editor-terrain/status`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          levelId: activeSceneLevelId,
+          scene,
+        }),
+      },
+    )
+    const payload = await response.json()
+    if (!payload?.success) return null
+    const sourceAssets = Array.isArray(payload.sourceAssets)
+      ? payload.sourceAssets
+      : []
+    const missingSourceAssets = Array.isArray(payload.missingSourceAssets)
+      ? payload.missingSourceAssets
+      : sourceAssets.filter(source => source.exists === false)
+    return { sourceAssets, missingSourceAssets }
+  } catch {
+    return null
+  }
+}
+
+async function refreshTerrainStatusSnapshot(
+  key: string,
+  scene: EditorSceneDocument | null,
+) {
+  const requestId = ++terrainStatusRequestId
+  const snapshot = await loadTerrainStatusSnapshot(scene)
+  if (requestId !== terrainStatusRequestId || key !== terrainStatusKey) return
+  terrainStatusSnapshot = snapshot
+}
+
 async function cookTerrainChunks() {
-  if (terrainChunkCookPending) return
+  if (terrainChunkCookPending) return false
+  const scene = get(editorSceneStore)
+  const terrainStatus = await loadTerrainStatusSnapshot(scene)
+  const pipeline = describeEditorTerrainPipeline({
+    scene,
+    selectedTerrainSourceName,
+    selectedTerrainSourceAssetUrl,
+    terrainStatus,
+  })
+  const cookCommand = pipeline.commands.find(
+    command =>
+      command.id === 'cook-glb-chunks' ||
+      command.id === 'cook-heightfield-chunks',
+  )
+  if (pipeline.mode === 'glb-chunk-terrain' && !cookCommand?.enabled) {
+    saveMessage = cookCommand?.reason ?? 'Terrain chunk cook is blocked'
+    return false
+  }
+  const sourceGlbCook = pipeline.mode === 'glb-chunk-terrain'
   terrainChunkCookPending = true
-  saveMessage = 'Cooking terrain visual chunks...'
+  saveMessage = sourceGlbCook
+    ? 'Cooking source GLB terrain chunks...'
+    : 'Cooking terrain visual chunks...'
 
   try {
     const response = await fetch(
       `${EDITOR_API_BASE}/api/editor-terrain/cook-chunks`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          buildTerrainChunkCookRequest({
+            levelId: activeSceneLevelId,
+            sourceGlbCook,
+          }),
+        ),
+      },
+    )
+    const payload = await response.json()
+    if (!payload?.success) {
+      throw new Error(payload?.message ?? 'Terrain chunk cook failed')
+    }
+
+    updateLevelSceneSettings(settings =>
+      applyTerrainChunkCookPayload(settings, payload, {
+        sourceGlbCook,
+      }),
+    )
+    saveMessage = sourceGlbCook
+      ? `Cooked ${payload.chunkCount ?? 0} source GLB terrain chunks`
+      : `Cooked ${payload.chunkCount ?? 0} terrain visual chunks`
+    return true
+  } catch (error) {
+    console.error('Terrain chunk cook failed:', error)
+    saveMessage =
+      error instanceof Error ? error.message : 'Terrain chunk cook failed'
+    return false
+  } finally {
+    terrainChunkCookPending = false
+  }
+}
+
+async function validateTerrainContract() {
+  saveMessage = 'Validating terrain contract...'
+  try {
+    const response = await fetch(
+      `${EDITOR_API_BASE}/api/editor-scene/audit-engine`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2619,38 +3766,138 @@ async function cookTerrainChunks() {
     )
     const payload = await response.json()
     if (!payload?.success) {
-      throw new Error(payload?.message ?? 'Terrain chunk cook failed')
+      throw new Error(payload?.message ?? 'Terrain validation failed')
     }
-
-    updateLevelSceneSettings(settings => ({
-      ...settings,
-      collision: {
-        ...(settings.collision ?? {}),
-        terrain: {
-          ...(settings.collision?.terrain ?? {}),
-          source: 'baked-heightmap',
-          runtimeSource:
-            settings.collision?.terrain?.runtimeSource ?? 'editor-manifest',
-          manifestUrl:
-            payload.manifestUrl ?? settings.collision?.terrain?.manifestUrl,
-          chunksPath:
-            payload.chunksPath ?? settings.collision?.terrain?.chunksPath,
-          chunkGrid: payload.grid ?? settings.collision?.terrain?.chunkGrid,
-          chunkCount:
-            payload.chunkCount ?? settings.collision?.terrain?.chunkCount,
-          chunkLods: payload.lods ?? settings.collision?.terrain?.chunkLods,
-          lastChunksGeneratedAt: new Date().toISOString(),
-        },
-      },
-    }))
-    saveMessage = `Cooked ${payload.chunkCount ?? 0} terrain visual chunks`
+    saveMessage = 'Terrain contract validation passed'
+    return true
   } catch (error) {
-    console.error('Terrain chunk cook failed:', error)
+    console.error('Terrain contract validation failed:', error)
     saveMessage =
-      error instanceof Error ? error.message : 'Terrain chunk cook failed'
-  } finally {
-    terrainChunkCookPending = false
+      error instanceof Error ? error.message : 'Terrain validation failed'
+    return false
   }
+}
+
+async function bakeTerrainPipeline() {
+  if (
+    terrainCollisionBakePending ||
+    terrainHeightmapGeneratePending ||
+    terrainChunkCookPending
+  ) {
+    saveMessage = 'Terrain pipeline is already running'
+    return
+  }
+
+  const scene = get(editorSceneStore)
+  const terrainStatus = await loadTerrainStatusSnapshot(scene)
+  const pipeline = describeEditorTerrainPipeline({
+    scene,
+    selectedTerrainSourceName,
+    selectedTerrainSourceAssetUrl,
+    terrainStatus,
+  })
+  const bakeCommand = pipeline.commands.find(
+    command => command.id === 'bake-terrain',
+  )
+  if (!bakeCommand?.enabled) {
+    saveMessage = bakeCommand?.reason ?? 'Terrain pipeline is blocked'
+    return
+  }
+
+  const steps = planEditorTerrainBakeSteps({
+    pipeline,
+    terrain: terrainCollisionSettings,
+    terrainSculptEnabled: terrainSculptSettings?.enabled,
+    groundMode: groundSettings?.mode,
+    groundVisualSource: groundSettings?.visualSource,
+    groundTerrainVisualSource: groundSettings?.terrainVisualSource,
+    groundTerrainRuntimeMode: groundSettings?.terrainRuntimeMode,
+    terrainRuntimeMode: terrainCollisionSettings?.runtimeMode,
+    terrainVisualSource: terrainCollisionSettings?.visualSource,
+    renderChunkType:
+      terrainCollisionSettings?.renderChunks?.type ??
+      groundSettings?.renderChunks?.type,
+  })
+  const appendStepBeforeValidation = (step: (typeof steps)[number]) => {
+    if (steps.includes(step)) return
+    const validationIndex = steps.indexOf('validation')
+    if (validationIndex === -1) {
+      steps.push(step)
+    } else {
+      steps.splice(validationIndex, 0, step)
+    }
+  }
+  saveMessage =
+    pipeline.mode === 'scene-authored'
+      ? 'Validating scene-authored terrain...'
+      : 'Baking terrain runtime products...'
+
+  if (pipeline.mode === 'scene-authored') {
+    if (!(await validateTerrainContract())) return
+    saveMessage = `Terrain runtime products current: ${steps.join(', ')}`
+    return
+  }
+
+  if (pipeline.mode === 'glb-chunk-terrain') {
+    if (steps.includes('source-glb-chunks') && !(await cookTerrainChunks())) {
+      return
+    }
+    if (steps.includes('validation') && !(await validateTerrainContract())) {
+      return
+    }
+    saveMessage = `Terrain runtime products current: ${steps.join(', ')}`
+    return
+  }
+
+  if (steps.includes('heightmap')) {
+    if (!(await generateTerrainHeightmapFromSelection())) return
+  }
+
+  const currentTerrain =
+    get(editorSceneStore)?.settings?.level?.collision?.terrain
+  if (
+    steps.includes('collision') ||
+    Boolean(currentTerrain?.dirty) ||
+    !currentTerrain?.colliderUrl ||
+    !currentTerrain?.metadataUrl
+  ) {
+    appendStepBeforeValidation('collision')
+    if (!(await bakeTerrainCollision())) return
+  }
+
+  const refreshedTerrain =
+    get(editorSceneStore)?.settings?.level?.collision?.terrain
+  const chunksStale =
+    Boolean(refreshedTerrain?.lastGeneratedAt) &&
+    (!refreshedTerrain?.lastChunksGeneratedAt ||
+      Date.parse(String(refreshedTerrain.lastChunksGeneratedAt)) <
+        Date.parse(String(refreshedTerrain.lastGeneratedAt)))
+  const terrainChunkRuntimeRequested = isGeneratedHeightmapChunkTerrain({
+    terrainSculptEnabled: terrainSculptSettings?.enabled,
+    groundMode: groundSettings?.mode,
+    groundVisualSource: groundSettings?.visualSource,
+    groundTerrainVisualSource: groundSettings?.terrainVisualSource,
+    groundTerrainRuntimeMode: groundSettings?.terrainRuntimeMode,
+    terrainRuntimeMode: refreshedTerrain?.runtimeMode,
+    terrainVisualSource: refreshedTerrain?.visualSource,
+    renderChunkType:
+      refreshedTerrain?.renderChunks?.type ??
+      groundSettings?.renderChunks?.type,
+    terrainSource: refreshedTerrain?.source,
+    hasHeightfieldChunks: Boolean(refreshedTerrain?.chunksPath),
+  })
+  const needsChunks =
+    terrainChunkRuntimeRequested &&
+    (chunksStale ||
+      !refreshedTerrain?.chunksPath ||
+      !refreshedTerrain?.chunkCount)
+  if (steps.includes('chunks') || needsChunks) {
+    appendStepBeforeValidation('chunks')
+    if (!(await cookTerrainChunks())) return
+  }
+
+  if (steps.includes('validation') && !(await validateTerrainContract())) return
+  saveMessage = `Terrain runtime products current: ${steps.join(', ')}`
 }
 
 async function cookWorldPartition() {
@@ -2785,7 +4032,13 @@ function switchEditorLevel() {
     autoSaveTimeout = null
   }
 
-  saveSceneToLocalStorage(activeSceneLevelId)
+  if (editorState?.dirty) {
+    const saved = saveSceneToLocalStorage(activeSceneLevelId)
+    if (!saved) {
+      saveMessage = 'Fix scene validation errors before switching levels'
+      return
+    }
+  }
   clearSelection()
   saveMessage = `Switching to ${editorLevelOptions.find(option => option.id === pendingLevelId)?.label ?? pendingLevelId}`
   gameActions.transitionToLevel(pendingLevelId)
@@ -2818,10 +4071,18 @@ function setHunyuanApplyToSimilarNodesValue(value: boolean) {
 function handleEditorMenuShortcut(event: KeyboardEvent) {
   if (!editorState?.enabled) return
   const mod = event.metaKey || event.ctrlKey
-  if (!mod || event.key.toLowerCase() !== 's') return
+  if (!mod) return
 
-  event.preventDefault()
-  void saveCurrentSceneToDisk()
+  if (event.key.toLowerCase() === 'k') {
+    event.preventDefault()
+    commandPaletteOpen = true
+    return
+  }
+
+  if (event.key.toLowerCase() === 's') {
+    event.preventDefault()
+    runEditorCommand('save-level')
+  }
 }
 
 $: editorPanelPropContext = {
@@ -2909,16 +4170,17 @@ $: editorPanelPropContext = {
   groundSettings,
   terrainSculptSettings,
   terrainCollisionSettings,
-  collisionDefaultPolicy,
   collisionBudget,
   terrainCollisionBakePending,
   terrainHeightmapGeneratePending,
   terrainChunkCookPending,
+  terrainStatusSnapshot,
   worldPartitionCookPending,
   groundTerrainPublishPending,
   selectedTerrainSourceName,
   selectedTerrainSourceAssetUrl,
   heightmapSourceNodes,
+  heightmapCandidateNodes,
   editorStyleStudioComponent,
   stylePresetOptions,
   styleBusy,
@@ -2961,7 +4223,9 @@ $: editorPanelPropContext = {
   clearIsolatedNodes,
   setEditorInteractionMode,
   setEditorViewportLightingMode,
+  setEditorViewportShadingMode,
   setCollisionOverlayEnabled,
+  setObjectToolMode,
   setTerrainBrushMode,
   setTerrainBrushSize,
   setTerrainBrushStrength,
@@ -2981,13 +4245,18 @@ $: editorPanelPropContext = {
   updateLevelNumericSetting,
   applySolitudeAtmospherePreset,
   setTerrainAutoBake,
-  setCollisionDefaultPolicy,
+  addSelectedTerrainSourcesToBasket,
+  removeTerrainSourceFromBasket,
+  clearTerrainSourceBasket,
   setCollisionBudget,
   bakeTerrainCollision,
+  bakeTerrainPipeline,
+  validateTerrainContract,
   generateTerrainHeightmapFromSelection,
   cookTerrainChunks,
   cookWorldPartition,
   publishGroundTerrainContracts,
+  openBuildOutput,
   switchEditorLevel,
   reloadFromDisk,
   loadPackagedLevelScene,
@@ -3013,6 +4282,8 @@ $: editorPanelPropContext = {
   resetSelectedWorkflowPath: assetController.resetSelectedWorkflowPath,
   saveCurrentSceneToDisk,
   setActiveEditorTab,
+  setPanelOpen,
+  setPropertiesShelfOpen,
   setSaveMessage: setSaveMessageValue,
   setHierarchyFilter: setHierarchyFilterValue,
   setHierarchyRootDropActive: setHierarchyRootDropActiveValue,
@@ -3021,7 +4292,6 @@ $: editorPanelPropContext = {
   setHunyuanApplyToSimilarNodes: setHunyuanApplyToSimilarNodesValue,
 }
 
-$: workflowTabProps = buildWorkflowTabProps(editorPanelPropContext)
 $: sceneTabProps = buildSceneTabProps(editorPanelPropContext)
 $: collisionTabProps = buildCollisionTabProps(editorPanelPropContext)
 $: environmentTabProps = buildEnvironmentTabProps(editorPanelPropContext)
@@ -3032,6 +4302,7 @@ $: inspectTabProps = buildInspectTabProps(editorPanelPropContext)
 $: styleTabProps = buildStyleTabProps(editorPanelPropContext)
 $: aiTabProps = buildAiTabProps(editorPanelPropContext)
 $: saveTabProps = buildSaveTabProps(editorPanelPropContext)
+$: workflowTabProps = buildWorkflowTabProps(editorPanelPropContext)
 $: sideStackProps = buildSideStackProps(editorPanelPropContext)
 onMount(() => {
   if (typeof window !== 'undefined') {
@@ -3093,177 +4364,384 @@ onDestroy(() => {
 })
 </script>
 
-<svelte:window on:keydown={handleEditorMenuShortcut} />
+<svelte:window
+  bind:innerWidth={editorViewportWidth}
+  bind:innerHeight={editorViewportHeight}
+  on:keydown={handleEditorMenuShortcut}
+  on:pointermove={resizeDockFromPointer}
+  on:pointerup={endDockResize}
+  on:pointercancel={endDockResize}
+/>
 
 {#if editorState?.enabled}
-  <div class="editor-shell" class:collapsed={!editorState.panelOpen}>
-    <EditorPanelHeader
-      panelOpen={editorState.panelOpen}
-      propertiesShelfOpen={editorState.propertiesShelfOpen}
-      outlinerOpen={editorState.outlinerOpen}
-      controlsOverlayOpen={editorState.controlsOverlayOpen}
-      viewportShadingMode={editorState.viewportShadingMode}
-      {canUndo}
-      {canRedo}
-      selectedNodeCount={editorState.selectedNodeIds.length}
-      currentLevelId={activeSceneLevelId}
-      levelOptions={editorLevelOptions}
-      publishLevelPending={publishPipelineState.running}
-      onSetViewportShadingMode={setEditorViewportShadingMode}
-      onSaveLevel={saveCurrentSceneToDisk}
-      onSaveAsLevel={saveAsLevelFromMenu}
-      onNewLevel={openNewLevelTools}
-      onLoadLevel={loadEditorLevelFromMenu}
-      onPublishLevel={levelController.publishLevel}
-      onMarkDraft={levelController.markLevelDraft}
-      onReloadDisk={reloadFromDisk}
-      onCopySceneJson={levelController.copySceneJson}
-      onOpenSaveTools={() => setActiveEditorTab('save')}
-      onUndo={() => {
-        if (undoScene()) saveMessage = 'Undo'
+  <div
+    class="editor-shell"
+    class:collapsed={!editorState.panelOpen}
+    class:resizing-dock={dockResizeTarget !== null}
+    class:resizing-dock-y={dockResizeTarget?.axis === 'y'}
+    style={editorDockStyle}
+  >
+    <div class="editor-top-chrome">
+      <EditorPanelHeader
+        panelOpen={editorState.panelOpen}
+        propertiesShelfOpen={editorState.propertiesShelfOpen}
+        outlinerOpen={editorState.outlinerOpen}
+        controlsOverlayOpen={editorState.controlsOverlayOpen}
+        layoutPreset={editorState.layoutPreset}
+        layoutPresetOptions={EDITOR_LAYOUT_PRESET_OPTIONS}
+        responsiveSplitPinned={editorState.responsiveSplitPinned}
+        {canUndo}
+        {canRedo}
+        selectedNodeCount={editorState.selectedNodeIds.length}
+        currentLevelId={activeSceneLevelId}
+        levelOptions={editorLevelOptions}
+        publishLevelPending={publishPipelineState.running}
+        commands={editorCommands}
+        onRunCommand={runEditorCommand}
+        onOpenCommandPalette={() => {
+          commandPaletteOpen = true
+        }}
+        onSaveLevel={saveCurrentSceneToDisk}
+        onSaveAsLevel={saveAsLevelFromMenu}
+        onNewLevel={openNewLevelTools}
+        onLoadLevel={loadEditorLevelFromMenu}
+        onPublishLevel={levelController.publishLevel}
+        onMarkDraft={levelController.markLevelDraft}
+        onReloadDisk={reloadFromDisk}
+        onCopySceneJson={levelController.copySceneJson}
+        onExportLevel={exportLevelForBlender}
+        onImportLevel={importLevelFromBlender}
+        onOpenSaveTools={() => setActiveEditorTab('build')}
+        onUndo={() => {
+          if (undoScene()) saveMessage = 'Undo'
+        }}
+        onRedo={() => {
+          if (redoScene()) saveMessage = 'Redo'
+        }}
+        onSelectAll={selectAllNodes}
+        onClearSelection={clearSelection}
+        onDuplicateSelection={() => duplicateNodes(editorState.selectedNodeIds)}
+        onDeleteSelection={() => removeNodes(editorState.selectedNodeIds)}
+        onSetPanelOpen={setPanelOpen}
+        onSetPropertiesShelfOpen={setPropertiesShelfOpen}
+        onSetOutlinerOpen={setOutlinerOpen}
+        onSetControlsOverlayOpen={setControlsOverlayOpen}
+        onApplyLayoutPreset={applyLayoutPresetFromMenu}
+        onResetLayoutPreset={resetLayoutPresetFromMenu}
+        onSetResponsiveSplitPinned={setResponsiveSplitPinned}
+        onResetDockLayout={resetDockLayoutFromMenu}
+        onTogglePropertiesShelf={togglePropertiesShelfOpen}
+        onTogglePanel={togglePanelOpen}
+      />
+
+      <EditorMainToolbar
+        viewportMode={editorState.viewportMode}
+        interactionMode={editorState.interactionMode}
+        objectToolMode={editorState.objectToolMode}
+        transformSpace={editorState.transformSpace}
+        transformAxis={editorState.transformAxis}
+        snappingEnabled={editorState.snappingEnabled}
+        translateSnap={editorState.translateSnap}
+        rotateSnap={editorState.rotateSnap}
+        scaleSnap={editorState.scaleSnap}
+        surfaceSnapEnabled={editorState.surfaceSnapEnabled}
+        surfaceSnapOffset={editorState.surfaceSnapOffset}
+        viewportShadingMode={editorState.viewportShadingMode}
+        viewportLightingMode={editorState.viewportLightingMode}
+        collisionOverlayEnabled={editorState.collisionOverlayEnabled}
+        terrainModeAvailable={Boolean(terrainSculptSettings?.enabled) || Boolean(terrainCollisionSettings?.manifestUrl) || Boolean(selectedTerrainSourceAssetUrl)}
+        terrainBrushMode={editorState.terrainBrushMode}
+        terrainBrushSize={editorState.terrainBrushSize}
+        terrainBrushStrength={editorState.terrainBrushStrength}
+        terrainBrushFalloff={editorState.terrainBrushFalloff}
+        commands={editorCommands}
+        onSetViewportMode={setEditorViewportMode}
+        onSetInteractionMode={setEditorInteractionMode}
+        onSetObjectToolMode={setObjectToolMode}
+        onSetTransformSpace={setTransformSpace}
+        onSetTransformAxis={setTransformAxis}
+        onSetSnappingEnabled={setSnappingEnabled}
+        onSetTranslateSnap={setTranslateSnap}
+        onSetRotateSnap={setRotateSnap}
+        onSetScaleSnap={setScaleSnap}
+        onSetSurfaceSnapEnabled={setSurfaceSnapEnabled}
+        onSetSurfaceSnapOffset={setSurfaceSnapOffset}
+        onSetViewportShadingMode={setEditorViewportShadingMode}
+        onSetViewportLightingMode={setEditorViewportLightingMode}
+        onSetCollisionOverlayEnabled={setCollisionOverlayEnabled}
+        onSetTerrainBrushMode={setTerrainBrushMode}
+        onSetTerrainBrushSize={setTerrainBrushSize}
+        onSetTerrainBrushStrength={setTerrainBrushStrength}
+        onSetTerrainBrushFalloff={setTerrainBrushFalloff}
+        onRunCommand={runEditorCommand}
+      />
+    </div>
+
+    <EditorCommandPalette
+      open={commandPaletteOpen}
+      commands={editorCommands}
+      onRunCommand={runEditorCommand}
+      onClose={() => {
+        commandPaletteOpen = false
       }}
-      onRedo={() => {
-        if (redoScene()) saveMessage = 'Redo'
-      }}
-      onSelectAll={selectAllNodes}
-      onClearSelection={clearSelection}
-      onDuplicateSelection={() => duplicateNodes(editorState.selectedNodeIds)}
-      onDeleteSelection={() => removeNodes(editorState.selectedNodeIds)}
-      onSetPanelOpen={setPanelOpen}
-      onSetPropertiesShelfOpen={setPropertiesShelfOpen}
-      onSetOutlinerOpen={setOutlinerOpen}
-      onSetControlsOverlayOpen={setControlsOverlayOpen}
-      onTogglePropertiesShelf={togglePropertiesShelfOpen}
-      onTogglePanel={togglePanelOpen}
     />
 
-    {#if editorState.panelOpen || editorState.outlinerOpen || editorState.propertiesShelfOpen}
-      <div class="editor-body">
+    {#if editorState.panelOpen || effectiveSideOpen}
+      <div
+        class="editor-body"
+        data-layout={editorState.panelOpen && effectiveSideOpen
+          ? 'both'
+          : editorState.panelOpen
+            ? 'tools'
+            : 'side'}
+        data-preset={editorState.layoutPreset}
+        data-responsive-single={responsiveSingleSideDock}
+      >
         {#if editorState.panelOpen}
-          <EditorPanelToolsDock
-            tabs={editorPanelTabs}
-            activeTab={activeEditorTab}
-            onTabSelect={setActiveEditorTab}
-            bind:contentElement={editorTabContentElement}
-          >
-      {#if activeEditorTab === 'workflow'}
-        <EditorWorkflowTabHost
-          {...workflowTabProps}
-          bind:mergeDescriptor
-        />
-
-      {/if}
-
+          <div class="editor-tools-region">
+            <EditorPanelToolsDock
+              tabs={editorPanelTabs}
+              activeTab={activeEditorTab}
+              onTabSelect={setActiveEditorTab}
+              bind:contentElement={editorTabContentElement}
+            >
       {#if activeEditorTab === 'scene'}
-        <EditorSceneTabHost
-          {...sceneTabProps}
-          bind:pendingLevelId
-          bind:newLevelTitle
-          bind:newLevelIdInput
-          bind:newLevelTemplateId
-        />
-
-      {/if}
-
-      {#if activeEditorTab === 'collision'}
-        <EditorCollisionTabHost {...collisionTabProps} />
-
-      {/if}
-
-      {#if activeEditorTab === 'environment'}
-        <EditorEnvironmentTabHost {...environmentTabProps} />
-
-      {/if}
-
-      {#if activeEditorTab === 'player'}
-        <EditorPlayerTabHost {...playerTabProps} />
+        <section class="editor-workspace" aria-label="Scene workspace">
+          <div class="editor-workspace-heading">
+            <div class="label">Scene Workspace</div>
+            <p>Scene status, selection guidance, and current editing mode.</p>
+          </div>
+          <EditorSceneTabHost
+            {...sceneTabProps}
+            bind:pendingLevelId
+            bind:newLevelTitle
+            bind:newLevelIdInput
+            bind:newLevelTemplateId
+          />
+          <details class="editor-section" open>
+            <summary class="label">Hierarchy &amp; Selection</summary>
+            <EditorHierarchyTabHost
+              {...hierarchyTabProps}
+              bind:hierarchyFilter
+            />
+          </details>
+          <details class="editor-section" open>
+            <summary class="label">Inspector &amp; Object Details</summary>
+            <EditorInspectTabHost {...inspectTabProps} bind:hunyuanPrompt />
+          </details>
+        </section>
 
       {/if}
 
       {#if activeEditorTab === 'create'}
-        <EditorCreateTabHost
-          {...createTabProps}
-          bind:hunyuanStatus
-          bind:hunyuanPrompt
-          bind:hunyuanReferenceImageUrl
-          bind:hunyuanScratchName
-          bind:hunyuanScratchReferenceImageUrl
-          bind:hunyuanScratchPrompt
-          bind:assetBrowserFilter
-        />
+        <section class="editor-workspace" aria-label="Create workspace">
+          <div class="editor-workspace-heading">
+            <div class="label">Create Workspace</div>
+            <p>Primitives, prefabs, content browser, asset preview, and add/apply actions.</p>
+          </div>
+          <EditorCreateTabHost
+            {...createTabProps}
+            bind:hunyuanStatus
+            bind:hunyuanPrompt
+            bind:hunyuanReferenceImageUrl
+            bind:hunyuanScratchName
+            bind:hunyuanScratchReferenceImageUrl
+            bind:hunyuanScratchPrompt
+            bind:assetBrowserFilter
+            bind:mergeDescriptor
+          />
+        </section>
 
       {/if}
 
-      {#if activeEditorTab === 'hierarchy'}
-        <EditorHierarchyTabHost
-          {...hierarchyTabProps}
-          bind:hierarchyFilter
-        />
-
+      {#if activeEditorTab === 'world'}
+        <section class="editor-workspace" aria-label="World workspace">
+          <div class="editor-workspace-heading">
+            <div class="label">World Workspace</div>
+            <p>Level settings, terrain tools, environment, player spawn, and gameplay world controls.</p>
+          </div>
+          <EditorWorldTabHost
+            {levelId}
+            {editorScene}
+            {terrainSculptSettings}
+            {terrainCollisionSettings}
+            terrainStatus={terrainStatusSnapshot}
+            {selectedTerrainSourceName}
+            {selectedTerrainSourceAssetUrl}
+            {worldPartitionCookPending}
+            {environmentTabProps}
+            {playerTabProps}
+            onCookWorldPartition={() => void cookWorldPartition()}
+            onBakeTerrain={() => void bakeTerrainPipeline()}
+          />
+        </section>
       {/if}
 
-      {#if activeEditorTab === 'inspect'}
-        <EditorInspectTabHost
-          {...inspectTabProps}
-          bind:hunyuanPrompt
-        />
+      {#if activeEditorTab === 'collision'}
+        <section class="editor-workspace" aria-label="Collision workspace">
+          <div class="editor-workspace-heading">
+            <div class="label">Collision Workspace</div>
+            <p>Collision policy, authoring, review, runtime overlay, and bake entry points.</p>
+          </div>
+          <EditorCollisionTabHost {...collisionTabProps} />
+        </section>
       {/if}
 
-      {#if activeEditorTab === 'style'}
-        <EditorStyleTabHost
-          {...styleTabProps}
-          bind:styleProfileName
-          bind:stylePrompt
-          bind:styleNegativePrompt
-          bind:styleLoraNotes
-          bind:styleControlNetNotes
-          bind:styleReferenceImageUrl
-          bind:styleSimplifyRatio
-          bind:styleSimplifyError
-        />
+      {#if activeEditorTab === 'build'}
+        <section class="editor-workspace" aria-label="Build workspace">
+          <div class="editor-workspace-heading">
+            <div class="label">Build Workspace</div>
+            <p>Save, validation, publish, bake/cook output, diagnostics, and legacy automation.</p>
+          </div>
+          <EditorSaveTabHost
+            {...saveTabProps}
+            bind:metadataTitle
+            bind:metadataStatus
+            bind:metadataDeployed
+            bind:metadataStarMapEnabled
+            bind:metadataStarMapYear
+            bind:metadataStarMapDescription
+            bind:metadataSourceKind
+            bind:saveAsTitle
+            bind:saveAsLevelId
+            bind:importBuffer
+          />
+          {#if blenderSceneExportResult}
+            <div class="editor-section editor-status-card">
+              <div class="label">Blender Export Ready</div>
+              <p>
+                Exported {blenderSceneExportResult.nodeCount} node(s) and
+                {blenderSceneExportResult.assetCount} asset(s).
+                {#if blenderSceneExportResult.warningCount > 0}
+                  {blenderSceneExportResult.warningCount} warning(s) need review.
+                {/if}
+              </p>
+              <label>
+                <span>Package Manifest</span>
+                <input class="text-input" value={blenderSceneExportResult.packagePath} readonly />
+              </label>
+              <div class="button-row compact editor-mt-sm">
+                <button
+                  data-sfx-hover="hover-soft"
+                  data-sfx-click="soft"
+                  on:click={() => void navigator.clipboard?.writeText?.(blenderSceneExportResult?.packagePath ?? '')}
+                >
+                  Copy Manifest Path
+                </button>
+                <button
+                  data-sfx-hover="hover-soft"
+                  data-sfx-click="soft"
+                  on:click={() => {
+                    if (blenderSceneExportResult) saveMessage = `Import this in Blender: ${blenderSceneExportResult.packagePath}`
+                  }}
+                >
+                  Show Next Step
+                </button>
+              </div>
+              <div class="save-message">
+                In Blender, use Merkin > Import Merkin Scene Package and select this manifest.
+              </div>
+            </div>
+          {/if}
+          <details class="editor-section" bind:open={buildWorkflowOpen}>
+            <summary class="label">Pipelines, Bake &amp; Publish Tools</summary>
+            <EditorWorkflowTabHost {...workflowTabProps} />
+          </details>
+          <details class="editor-section" bind:open={buildOutputOpen}>
+            <summary class="label">Diagnostics &amp; AI Output</summary>
+            <EditorOutputTabHost
+              {saveMessage}
+              {runtimeAssetFailures}
+              {recentHunyuanJobs}
+              {hunyuanJobsLoading}
+              {hunyuanJobsError}
+              bind:selectedHunyuanJobId
+              {publishPipelineState}
+              onRefreshRecentJobs={() =>
+                void aiController.refreshHunyuanRecentJobs()}
+            />
+          </details>
+        </section>
       {/if}
 
       {#if activeEditorTab === 'ai'}
-        <EditorAiTabHost
-          {...aiTabProps}
-          bind:comfyUiApiUrl
-          bind:hunyuanApiUrl
-          bind:selectedHunyuanJobId
-          bind:hunyuanReferenceImageUrl
-          bind:hunyuanPrompt
-          bind:hunyuanScratchName
-          bind:hunyuanScratchReferenceImageUrl
-          bind:hunyuanScratchPrompt
-          bind:hunyuanApplyToSimilarNodes
-        />
-      {/if}
-
-      {#if activeEditorTab === 'save'}
-        <EditorSaveTabHost
-          {...saveTabProps}
-          bind:metadataTitle
-          bind:metadataStatus
-          bind:metadataDeployed
-          bind:metadataStarMapEnabled
-          bind:metadataStarMapYear
-          bind:metadataStarMapDescription
-          bind:metadataSourceKind
-          bind:saveAsTitle
-          bind:saveAsLevelId
-          bind:importBuffer
-        />
+        <section class="editor-workspace" aria-label="AI Lab workspace">
+          <div class="editor-workspace-heading">
+            <div class="label">Asset Regeneration</div>
+            <p>Scope the run, set art direction, regenerate assets, review output, then save and validate.</p>
+          </div>
+          <EditorStyleTabHost
+            {...styleTabProps}
+            bind:styleProfileName
+            bind:stylePrompt
+            bind:styleNegativePrompt
+            bind:styleLoraNotes
+            bind:styleControlNetNotes
+            bind:styleReferenceImageUrl
+            bind:styleSimplifyRatio
+            bind:styleSimplifyError
+          />
+          <details class="editor-section editor-advanced-block">
+            <summary class="label">Advanced AI Tools</summary>
+            <div class="save-message">Legacy scratch generation, workflow-template browsing, direct Hunyuan job inspection, and manual apply controls live here.</div>
+            <EditorAiTabHost
+              {...aiTabProps}
+              bind:comfyUiApiUrl
+              bind:hunyuanApiUrl
+              bind:selectedHunyuanJobId
+              bind:hunyuanReferenceImageUrl
+              bind:hunyuanPrompt
+              bind:hunyuanScratchName
+              bind:hunyuanScratchReferenceImageUrl
+              bind:hunyuanScratchPrompt
+              bind:hunyuanApplyToSimilarNodes
+            />
+          </details>
+        </section>
       {/if}
 
           </EditorPanelToolsDock>
+            <button
+              class="editor-dock-resize-handle tools-resize-handle"
+              type="button"
+              aria-label="Resize tools dock"
+              on:pointerdown={(event) => beginDockResize('tools', 'x', event)}
+            ></button>
+            <button
+              class="editor-dock-height-resize-handle"
+              type="button"
+              aria-label="Resize tools dock height"
+              on:pointerdown={(event) => beginDockResize('tools', 'y', event)}
+            ></button>
+          </div>
         {/if}
 
-        {#if editorState.outlinerOpen || editorState.propertiesShelfOpen}
-          <EditorSideStackHost
-            {...sideStackProps}
-            toolPanelOpen={editorState.panelOpen}
-            bind:selectedGeneratedVariantUrl
-            bind:hunyuanPrompt
-          />
+        {#if effectiveSideOpen}
+          <div class="editor-side-region">
+            <button
+              class="editor-dock-resize-handle side-resize-handle"
+              type="button"
+              aria-label="Resize details dock"
+              on:pointerdown={(event) => beginDockResize('side', 'x', event)}
+            ></button>
+            <EditorSideStackHost
+              {...sideStackProps}
+              outlinerOpen={effectiveOutlinerOpen}
+              propertiesShelfOpen={effectivePropertiesShelfOpen}
+              sideStackSplitRatio={editorState.sideStackSplitRatio}
+              toolPanelOpen={editorState.panelOpen}
+              bind:selectedGeneratedVariantUrl
+              bind:hunyuanPrompt
+              onSideStackSplitRatioChange={(ratio) =>
+                setEditorDockLayout({ sideStackSplitRatio: ratio })}
+            />
+            <button
+              class="editor-dock-height-resize-handle"
+              type="button"
+              aria-label="Resize details dock height"
+              on:pointerdown={(event) => beginDockResize('side', 'y', event)}
+            ></button>
+          </div>
         {/if}
       </div>
     {/if}
@@ -3273,43 +4751,232 @@ onDestroy(() => {
 <style>
   .editor-shell {
     position: fixed;
-    top: 1rem;
-    right: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    width: auto;
-    max-width: calc(100vw - 2rem);
-    height: calc(100vh - 2rem);
+    inset: 0.75rem;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.5rem;
+    min-width: 0;
+    min-height: 0;
     color: #e8f5ff;
     z-index: 88;
+    pointer-events: none;
+    --editor-dock-gap: 0.5rem;
+    --editor-tools-width: 320px;
+    --editor-side-width: 320px;
+    --editor-tools-height: 72vh;
+    --editor-side-height: 72vh;
   }
-  .editor-shell.collapsed { width: 15rem; height: auto; }
-  .editor-body {
-    flex: 1 1 auto;
+
+  .editor-shell.collapsed {
+    grid-template-rows: auto;
+  }
+
+  .editor-top-chrome {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.45rem;
+    align-items: center;
+    min-width: 0;
     position: relative;
-    width: 23rem;
-    height: calc(100vh - 7.5rem);
-    margin-top: 3rem;
+    z-index: 120;
+    pointer-events: auto;
+    isolation: isolate;
   }
+
+  .editor-body {
+    display: grid;
+    gap: var(--editor-dock-gap);
+    min-width: 0;
+    min-height: 0;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .editor-body[data-layout='both'] {
+    grid-template-columns: minmax(0, var(--editor-tools-width)) minmax(45vw, 1fr) minmax(0, var(--editor-side-width));
+    grid-template-areas: 'tools viewport side';
+    align-items: start;
+  }
+
+  .editor-body[data-layout='tools'] {
+    grid-template-columns: minmax(0, var(--editor-tools-width)) minmax(45vw, 1fr);
+    grid-template-areas: 'tools viewport';
+    align-items: start;
+  }
+
+  .editor-body[data-layout='side'] {
+    grid-template-columns: minmax(45vw, 1fr) minmax(0, var(--editor-side-width));
+    grid-template-areas: 'viewport side';
+    align-items: start;
+  }
+
+  .editor-tools-region,
+  .editor-side-region {
+    min-width: 0;
+    min-height: 0;
+    pointer-events: auto;
+    align-self: start;
+    max-height: 100%;
+    position: relative;
+  }
+
+  .editor-tools-region {
+    grid-area: tools;
+    height: var(--editor-tools-height);
+  }
+
+  .editor-side-region {
+    grid-area: side;
+    height: var(--editor-side-height);
+  }
+
+  .editor-dock-resize-handle {
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    z-index: 4;
+    width: 0.55rem;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(126, 203, 255, 0.12);
+    cursor: col-resize;
+    opacity: 0.55;
+    transition:
+      background 0.12s ease,
+      opacity 0.12s ease;
+    touch-action: none;
+  }
+
+  .editor-dock-resize-handle:hover,
+  .editor-dock-resize-handle:focus-visible,
+  .editor-shell.resizing-dock .editor-dock-resize-handle {
+    background: rgba(126, 203, 255, 0.42);
+    opacity: 1;
+  }
+
+  .tools-resize-handle {
+    right: -0.525rem;
+  }
+
+  .side-resize-handle {
+    left: -0.525rem;
+  }
+
+  .editor-shell.resizing-dock {
+    cursor: col-resize;
+    user-select: none;
+  }
+
+  .editor-shell.resizing-dock-y {
+    cursor: row-resize;
+    user-select: none;
+  }
+
+  .editor-dock-height-resize-handle {
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: -0.525rem;
+    z-index: 5;
+    height: 0.55rem;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(126, 203, 255, 0.12);
+    cursor: row-resize;
+    opacity: 0.55;
+    transition:
+      background 0.12s ease,
+      opacity 0.12s ease;
+    touch-action: none;
+  }
+
+  .editor-dock-height-resize-handle:hover,
+  .editor-dock-height-resize-handle:focus-visible,
+  .editor-shell.resizing-dock-y .editor-dock-height-resize-handle {
+    background: rgba(126, 203, 255, 0.42);
+    opacity: 1;
+  }
+
   @media (max-width: 1280px) {
     .editor-shell {
-      width: min(96vw, 56rem);
-      height: calc(100vh - 2rem);
-      align-items: stretch;
+      inset: 0.6rem;
     }
-    .editor-body {
-      width: auto;
-      height: calc(100vh - 4.5rem);
+
+    .editor-top-chrome {
+      grid-template-columns: minmax(18rem, auto) minmax(0, 1fr);
+      gap: 0.38rem;
+    }
+
+    .editor-tools-region,
+    .editor-side-region {
+      max-height: 100%;
     }
   }
 
   @media (max-width: 900px) {
     .editor-shell {
-      width: min(96vw, 32rem);
-      height: calc(100vh - 1rem);
-      top: 0.5rem;
-      right: 0.5rem;
+      inset: 0.5rem;
+      gap: 0.4rem;
+      --editor-dock-gap: 0.4rem;
+    }
+
+    .editor-top-chrome {
+      grid-template-columns: minmax(14rem, auto) minmax(0, 1fr);
+      gap: 0.35rem;
+    }
+
+    .editor-tools-region,
+    .editor-side-region {
+      max-height: 100%;
+    }
+
+    .editor-body[data-layout='both'] {
+      grid-template-columns: minmax(12rem, 1fr) minmax(0, max(var(--editor-tools-width), var(--editor-side-width)));
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        'viewport tools'
+        'viewport side';
+    }
+
+    .editor-body[data-layout='tools'] {
+      grid-template-columns: minmax(12rem, 1fr) minmax(0, var(--editor-tools-width));
+      grid-template-areas: 'viewport tools';
+    }
+
+    .editor-body[data-layout='side'] {
+      grid-template-columns: minmax(12rem, 1fr) minmax(0, var(--editor-side-width));
+      grid-template-areas: 'viewport side';
+    }
+  }
+
+  @media (max-width: 680px) {
+    .editor-top-chrome {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .editor-body[data-layout='both'],
+    .editor-body[data-layout='tools'],
+    .editor-body[data-layout='side'] {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .editor-body[data-layout='both'] {
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        'tools'
+        'side';
+    }
+
+    .editor-body[data-layout='tools'] {
+      grid-template-areas: 'tools';
+    }
+
+    .editor-body[data-layout='side'] {
+      grid-template-areas: 'side';
     }
   }
 </style>

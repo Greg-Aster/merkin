@@ -1,13 +1,11 @@
 import { type Writable, get, writable } from 'svelte/store'
+import { getLevelRuntimeContract } from '../engine/levelContracts'
 import { withEditorSceneEngineData } from '../engine/sceneDocumentRuntime'
 import { upgradeLegacySceneDocument } from './defaultScenes'
 import {
-  getDefaultCollisionChannel,
-  getDefaultCollisionIntent,
-  getDefaultCollisionShape,
-  getNodeVisualColliderSize,
-  isDefaultSolidNode,
-} from './editorCollisionDefaults'
+  applyCollisionLifecycleToPatch,
+  materializeEditorNodeCollision,
+} from './editorCollisionLifecycle'
 import {
   type EditorNodeTransformPatch,
   type EditorSceneCommand,
@@ -61,30 +59,9 @@ function normalizeSceneDocument(
 
   return withEditorSceneEngineData({
     ...generated,
-    nodes: generated.nodes.map(node => {
-      if (!isDefaultSolidNode(node, generated.settings) || node.collision)
-        return node
-      const shape = getDefaultCollisionShape(node)
-      return {
-        ...node,
-        physics: {
-          bodyType: 'fixed',
-          ...(node.physics ?? {}),
-        },
-        collision: {
-          shape,
-          intent: getDefaultCollisionIntent(node, generated.settings),
-          channel: getDefaultCollisionChannel(node, generated.settings),
-          enabled: true,
-          ...(shape === 'trimesh'
-            ? {}
-            : { size: getNodeVisualColliderSize(node) }),
-          friction: 0.7,
-          restitution: 0,
-          sensor: false,
-        },
-      }
-    }),
+    nodes: generated.nodes.map(node =>
+      materializeEditorNodeCollision(node, generated.settings),
+    ),
   })
 }
 
@@ -92,6 +69,48 @@ function cloneScene(scene: EditorSceneDocument | null) {
   return scene
     ? normalizeSceneDocument(structuredClone(scene) as EditorSceneDocument)
     : null
+}
+
+function toStringArray(value: unknown) {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : []
+}
+
+export function getRequiredEditorActorIds(scene: EditorSceneDocument | null) {
+  if (!scene) return []
+
+  const contract = getLevelRuntimeContract(scene.levelId)
+  const runtimeAssets = scene.settings?.level?.runtimeAssets
+  return Array.from(
+    new Set([
+      ...contract.requiredActorIds,
+      ...contract.requiredAssetActorIds,
+      ...toStringArray(runtimeAssets?.requiredActorIds),
+      ...toStringArray(runtimeAssets?.requiredRenderActorIds),
+      ...toStringArray(runtimeAssets?.requiredAssetActorIds),
+    ]),
+  )
+}
+
+export function getProtectedSceneNodeRemovalIds(
+  scene: EditorSceneDocument | null,
+  nodeIds: string[],
+) {
+  if (!scene || nodeIds.length === 0) return []
+
+  const requiredActorIds = new Set(getRequiredEditorActorIds(scene))
+  if (requiredActorIds.size === 0) return []
+
+  const idsToRemove = new Set<string>()
+  for (const nodeId of Array.from(new Set(nodeIds))) {
+    idsToRemove.add(nodeId)
+    for (const descendantId of collectDescendantIds(scene.nodes, nodeId)) {
+      idsToRemove.add(descendantId)
+    }
+  }
+
+  return [...idsToRemove].filter(nodeId => requiredActorIds.has(nodeId))
 }
 
 const editorHistory = createEditorHistory<EditorSceneDocument>({
@@ -189,7 +208,11 @@ export function updateLevelSceneSettings(
   }))
 }
 export function addNode(node: EditorSceneNode) {
-  const normalizedNode = ensureNodeGeneration(node)
+  const scene = get(editorSceneStore)
+  const normalizedNode = materializeEditorNodeCollision(
+    ensureNodeGeneration(node),
+    scene?.settings,
+  )
   const applied = executeSceneCommand({
     type: 'add-node',
     node: normalizedNode,
@@ -226,10 +249,16 @@ function updateNode(
 }
 
 export function patchNode(nodeId: string, patch: EditorSceneNodePatch) {
+  const scene = get(editorSceneStore)
+  const currentNode = scene?.nodes.find(node => node.id === nodeId)
+  const normalizedPatch = currentNode
+    ? applyCollisionLifecycleToPatch(currentNode, patch, scene?.settings)
+    : patch
+
   return executeSceneCommand({
     type: 'patch-node',
     nodeId,
-    patch,
+    patch: normalizedPatch,
   })
 }
 
@@ -238,11 +267,17 @@ export function patchNodes(nodeIds: string[], patch: EditorSceneNodePatch) {
   if (uniqueNodeIds.length === 0) return false
 
   return executeSceneCommands(
-    uniqueNodeIds.map(nodeId => ({
-      type: 'patch-node',
-      nodeId,
-      patch,
-    })),
+    uniqueNodeIds.map(nodeId => {
+      const scene = get(editorSceneStore)
+      const currentNode = scene?.nodes.find(node => node.id === nodeId)
+      return {
+        type: 'patch-node',
+        nodeId,
+        patch: currentNode
+          ? applyCollisionLifecycleToPatch(currentNode, patch, scene?.settings)
+          : patch,
+      }
+    }),
   )
 }
 
@@ -254,17 +289,19 @@ export function patchNodeTransform(
 }
 
 export function removeNode(nodeId: string) {
-  const applied = executeSceneCommand({
-    type: 'remove-nodes',
-    nodeIds: [nodeId],
-  })
-
-  if (applied) {
-    clearSelection()
-  }
+  return removeNodes([nodeId])
 }
 
 export function removeNodes(nodeIds: string[]) {
+  const scene = get(editorSceneStore)
+  const protectedIds = getProtectedSceneNodeRemovalIds(scene, nodeIds)
+  if (protectedIds.length > 0) {
+    console.warn(
+      `Blocked deletion of required level actor${protectedIds.length === 1 ? '' : 's'}: ${protectedIds.join(', ')}`,
+    )
+    return false
+  }
+
   const applied = executeSceneCommand({
     type: 'remove-nodes',
     nodeIds,
@@ -273,6 +310,8 @@ export function removeNodes(nodeIds: string[]) {
   if (applied) {
     clearSelection()
   }
+
+  return applied
 }
 
 export function addEmptyNode(
@@ -608,7 +647,14 @@ export function saveSceneToLocalStorage(levelId: string) {
   const scene = get(editorSceneStore)
   if (!scene) return null
 
-  const payload = saveEditorSceneToLocalStorage(levelId, scene)
+  let payload: EditorSceneDocument
+  try {
+    payload = saveEditorSceneToLocalStorage(levelId, scene)
+  } catch (error) {
+    console.error('Scene local save failed:', error)
+    return null
+  }
+
   editorSceneStore.set(payload)
   editorStateStore.update(state => ({
     ...state,

@@ -55,6 +55,7 @@ export function auditSourceGuards({
   editorApiRoutePaths = [],
 }) {
   const failures = []
+  const sourceSceneDir = join(appRoot, 'src/threlte/editor/scenes')
 
   for (const file of forbiddenLegacyStyleFiles) {
     if (existsSync(join(appRoot, file))) {
@@ -98,6 +99,19 @@ export function auditSourceGuards({
             `${routeSourcePath}: retired route handler ${endpoint} must stay deleted`,
           )
         }
+      }
+    }
+  }
+
+  if (existsSync(sourceSceneDir)) {
+    for (const file of readdirSync(sourceSceneDir).sort()) {
+      if (!file.endsWith('.scene.json')) continue
+      const scenePath = join(sourceSceneDir, file)
+      const scene = JSON.parse(readFileSync(scenePath, 'utf8'))
+      if (scene && Object.prototype.hasOwnProperty.call(scene, 'engine')) {
+        failures.push(
+          `${file}: source scene documents must not persist generated engine.levelDefinition data; generate runtime engine data in memory or cooked manifests only`,
+        )
       }
     }
   }

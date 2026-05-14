@@ -38,6 +38,7 @@ export const AUDIO_SFX_IDS = [
   'portal-hover',
   'portal-drag',
   'portal-cycle',
+  'portal-impact',
   'portal-activate',
 ] as const
 

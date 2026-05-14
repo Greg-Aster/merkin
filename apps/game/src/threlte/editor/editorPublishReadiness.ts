@@ -1,3 +1,12 @@
+import {
+  compareAssetLocalBounds,
+  validateAssetLocalTransformMetadata,
+} from '../engine/assetLocalTransform'
+import { isEditorProxyCollision } from '../engine/editorProxyCollision'
+import {
+  classifyTerrainAuthority,
+  getTerrainAuthorityDiagnostics,
+} from '../engine/groundContract'
 import { createLevelBuildReport } from '../engine/levelValidation'
 import {
   type RuntimeSceneManifest,
@@ -5,20 +14,28 @@ import {
 } from '../engine/runtimeSceneManifest'
 import { withEditorSceneEngineData } from '../engine/sceneDocumentRuntime'
 import {
+  type TerrainManifest,
+  validateTerrainManifestCollisionContract,
+} from '../features/terrain/terrainManifest'
+import {
   type EditorPublishReadinessCommand,
   type EditorPublishReadinessItem,
   type EditorPublishReadinessViewModel,
+  type LoadedManifest,
+  type MeshColliderBakeMetadata,
   type RuntimeAssetCookManifest,
   type RuntimePrefabManifest,
-  type TerrainManifest,
   createEmptyEditorPublishReadinessViewModel,
 } from './editorPublishReadinessContracts'
 import {
   addPublishReadinessProductionPanels,
   addPublishReadinessWorkflow,
 } from './editorPublishReadinessWorkflow'
+import { isSourceGlbChunkTerrain } from './editorTerrainModeGuards'
+import type { EditorTerrainSourceAssetStatus } from './editorTerrainPipeline'
 import type {
   EditorSceneDocument,
+  EditorSceneNode,
   SharedLevelGraphicsBudgetSettings,
 } from './editorTypes'
 
@@ -470,6 +487,190 @@ function addImportMetadataSection(
   }
 }
 
+function isVisualOnlyActor(scene: EditorSceneDocument, nodeId: string) {
+  const actorIds = scene.settings?.level?.collision?.roles?.visualOnlyActorIds
+  return Array.isArray(actorIds) && actorIds.includes(nodeId)
+}
+
+function getCollisionValidationSeverity(node: EditorSceneNode) {
+  const intent = node.collision?.intent
+  return intent === 'detailMesh' || intent === 'none' ? 'warning' : 'blocker'
+}
+
+function pushColliderMetadataIssue(
+  viewModel: EditorPublishReadinessViewModel,
+  node: EditorSceneNode,
+  detail: string,
+) {
+  pushIssue(viewModel, {
+    id: `mesh-collider-${node.id}-${viewModel.blockers.length + viewModel.warnings.length}`,
+    label: 'Mesh Collider Metadata',
+    severity: getCollisionValidationSeverity(node),
+    detail: `Actor "${node.id}": ${detail}`,
+  })
+}
+
+function addMeshColliderMetadataSection(
+  viewModel: EditorPublishReadinessViewModel,
+  scene: EditorSceneDocument | null,
+  colliderMetadata: Record<string, LoadedManifest<MeshColliderBakeMetadata>>,
+) {
+  const assetCollisionNodes = (scene?.nodes ?? []).filter(
+    node =>
+      node.kind === 'asset' &&
+      node.collision?.enabled !== false &&
+      node.collision?.intent !== 'none' &&
+      !isVisualOnlyActor(scene!, node.id),
+  )
+  let validCount = 0
+  let legacyCount = 0
+  let staleCount = 0
+  let driftCount = 0
+  let missingCount = 0
+
+  for (const node of assetCollisionNodes) {
+    const collision = node.collision
+    if (!collision) continue
+    if (isEditorProxyCollision(collision)) {
+      missingCount += 1
+      pushColliderMetadataIssue(
+        viewModel,
+        node,
+        'uses an editor proxy collider and needs a baked mesh collider before publishing.',
+      )
+      continue
+    }
+    if (collision.shape !== 'trimesh') continue
+    if (!collision.colliderUrl) {
+      missingCount += 1
+      pushColliderMetadataIssue(
+        viewModel,
+        node,
+        'missing collision.colliderUrl.',
+      )
+      continue
+    }
+    if (!collision.colliderMetadataUrl && !collision.assetLocalTransform) {
+      legacyCount += 1
+      pushColliderMetadataIssue(
+        viewModel,
+        node,
+        'missing collision.colliderMetadataUrl and inline asset-local metadata.',
+      )
+      continue
+    }
+
+    const loaded = collision.colliderMetadataUrl
+      ? colliderMetadata[collision.colliderMetadataUrl]
+      : null
+    if (collision.colliderMetadataUrl && !loaded?.value) {
+      missingCount += 1
+      pushColliderMetadataIssue(
+        viewModel,
+        node,
+        `collider metadata could not be loaded: ${loaded?.error || collision.colliderMetadataUrl}.`,
+      )
+      continue
+    }
+
+    const metadata: MeshColliderBakeMetadata = loaded?.value ?? {
+      assetLocalTransform: collision.assetLocalTransform,
+    }
+    const transformValidation = validateAssetLocalTransformMetadata(metadata)
+    if (transformValidation.state === 'missing') {
+      legacyCount += 1
+      pushColliderMetadataIssue(
+        viewModel,
+        node,
+        'collider metadata is legacy and has no asset-local transform contract.',
+      )
+      continue
+    }
+    if (!transformValidation.valid || !transformValidation.metadata) {
+      missingCount += 1
+      pushColliderMetadataIssue(
+        viewModel,
+        node,
+        `asset-local transform metadata is malformed: ${transformValidation.errors.join(' ')}`,
+      )
+      continue
+    }
+
+    const sourceAssetUrl =
+      metadata.sourceAssetUrl ?? transformValidation.metadata.sourceAssetUrl
+    if (node.asset?.url && sourceAssetUrl !== node.asset.url) {
+      staleCount += 1
+      pushColliderMetadataIssue(
+        viewModel,
+        node,
+        `stale source asset URL ${sourceAssetUrl || 'unknown'} does not match ${node.asset.url}.`,
+      )
+    }
+
+    const boundsComparison = compareAssetLocalBounds({
+      visualLocalBounds:
+        transformValidation.metadata.visualLocalBounds ??
+        metadata.visualLocalBounds,
+      colliderLocalBounds:
+        transformValidation.metadata.colliderLocalBounds ??
+        metadata.colliderLocalBounds ??
+        metadata.bounds,
+      tolerance: 0.05,
+    })
+    if (!boundsComparison.withinTolerance) {
+      driftCount += 1
+      pushColliderMetadataIssue(
+        viewModel,
+        node,
+        `visual/collider local bounds drift exceeds tolerance (${boundsComparison.maxDelta.toFixed(3)}).`,
+      )
+    }
+
+    if (
+      Number.isFinite(metadata.triangleCount) &&
+      Number.isFinite(collision.triangleBudget) &&
+      Number(metadata.triangleCount) > Number(collision.triangleBudget)
+    ) {
+      pushColliderMetadataIssue(
+        viewModel,
+        node,
+        `collider has ${metadata.triangleCount} triangles, exceeding budget ${collision.triangleBudget}.`,
+      )
+    }
+
+    if (
+      sourceAssetUrl === node.asset?.url &&
+      boundsComparison.withinTolerance
+    ) {
+      validCount += 1
+    }
+  }
+
+  const issueCount = legacyCount + staleCount + driftCount + missingCount
+  addSection(viewModel, {
+    id: 'mesh-collider-metadata',
+    label: 'Mesh Collider Metadata',
+    severity: viewModel.blockers.some(
+      issue => issue.label === 'Mesh Collider Metadata',
+    )
+      ? 'blocker'
+      : issueCount
+        ? 'warning'
+        : 'ready',
+    detail: issueCount
+      ? `${validCount} valid, ${legacyCount} legacy, ${staleCount} stale, ${driftCount} bounds drift, ${missingCount} missing or malformed.`
+      : `${validCount} asset-local mesh collider contract(s) are valid.`,
+  })
+
+  if (issueCount) {
+    addUniqueCommand(viewModel.commands, {
+      id: 'bake-scene-mesh-colliders',
+      command: `pnpm --dir apps/game bake:scene-mesh-colliders -- --level=${viewModel.levelId} --force`,
+      reason: 'Regenerate stale or legacy mesh collider metadata.',
+    })
+  }
+}
+
 function addSpawnSection(
   viewModel: EditorPublishReadinessViewModel,
   scene: EditorSceneDocument | null,
@@ -510,37 +711,103 @@ function addTerrainSection(
   runtimeScene: RuntimeSceneManifest | null,
   terrainManifest: TerrainManifest | null,
   terrainError: string,
+  missingTerrainSourceAssets: EditorTerrainSourceAssetStatus[],
 ) {
   const terrainSettings = scene?.settings?.level?.collision?.terrain
+  const groundSettings = scene?.settings?.level?.ground
+  const renderChunks =
+    terrainSettings?.renderChunks ?? groundSettings?.renderChunks
+  const glbChunkTerrainRequested = isSourceGlbChunkTerrain({
+    terrainRuntimeMode: terrainSettings?.runtimeMode,
+    groundTerrainRuntimeMode: groundSettings?.terrainRuntimeMode,
+    terrainVisualSource: terrainSettings?.visualSource,
+    groundTerrainVisualSource: groundSettings?.terrainVisualSource,
+    groundVisualSource: groundSettings?.visualSource,
+    renderChunkType: renderChunks?.type,
+    terrainSource: terrainSettings?.source,
+  })
+  const missingRequiredTerrainSourceAssets = glbChunkTerrainRequested
+    ? missingTerrainSourceAssets.filter(
+        source => source.sourceType === 'asset' || Boolean(source.url),
+      )
+    : []
+  const firstMissingSource = missingRequiredTerrainSourceAssets[0]
+  const missingSourceAssetMessage = firstMissingSource
+    ? `Source asset missing: ${firstMissingSource.url || firstMissingSource.path || firstMissingSource.sourceName || 'unknown source'}. Place the exported source under apps/megameal/public or update the terrain source URL.`
+    : ''
+  const levelDefinition = scene
+    ? withEditorSceneEngineData(scene).engine?.levelDefinition
+    : runtimeScene?.levelDefinition
   const terrainManifestUrl = getEditorPublishReadinessTerrainManifestUrl(
     scene,
     runtimeScene,
   )
+  const terrainAuthorityDiagnostics = levelDefinition
+    ? getTerrainAuthorityDiagnostics({
+        level: levelDefinition,
+        manifest: terrainManifest,
+        manifestUrl: terrainManifestUrl,
+        enforceFinalAuthority: true,
+      })
+    : { errors: [], warnings: [] }
+  const terrainAuthority = levelDefinition
+    ? classifyTerrainAuthority({
+        level: levelDefinition,
+        manifest: terrainManifest,
+        manifestUrl: terrainManifestUrl,
+      })
+    : null
+  const terrainCollisionContractDiagnostics = terrainManifest
+    ? validateTerrainManifestCollisionContract({
+        manifest: terrainManifest,
+        levelId: scene?.levelId ?? runtimeScene?.levelId,
+        spawnPoint: levelDefinition?.spawn.player,
+      })
+    : { errors: [], warnings: [] }
   const requiresBakedTerrain =
-    terrainSettings?.source === 'baked-heightmap' ||
-    scene?.settings?.level?.ground?.collisionSource === 'baked-heightfield' ||
-    Boolean(terrainManifestUrl)
+    terrainAuthority?.mode === 'heightfield-terrain' ||
+    terrainAuthority?.collisionSource === 'source-linked-terrain-collision'
+  const terrainManifestRequired =
+    requiresBakedTerrain || terrainAuthority?.mode === 'glb-chunk-terrain'
+  const terrainProductsRequired = terrainAuthority?.mode !== 'scene-authored'
+  const terrainChunksStale =
+    Boolean(terrainSettings?.lastGeneratedAt) &&
+    (!terrainSettings?.lastChunksGeneratedAt ||
+      Date.parse(terrainSettings.lastChunksGeneratedAt) <
+        Date.parse(terrainSettings.lastGeneratedAt ?? ''))
   const blockers = [
-    requiresBakedTerrain && !terrainManifestUrl
+    missingSourceAssetMessage,
+    terrainManifestRequired && !terrainManifestUrl
       ? 'Terrain manifest URL is missing.'
       : '',
-    terrainSettings?.dirty
+    terrainProductsRequired && terrainSettings?.heightmapDirty
+      ? 'Terrain source basket changed; generate the heightmap before publishing.'
+      : '',
+    terrainProductsRequired && terrainSettings?.dirty
       ? 'Terrain collision has editor changes that need a bake.'
       : '',
-    requiresBakedTerrain && terrainManifestUrl && !terrainManifest
+    terrainManifestRequired && terrainManifestUrl && !terrainManifest
       ? `Terrain manifest is unavailable: ${terrainError || terrainManifestUrl}.`
       : '',
-    requiresBakedTerrain &&
+    terrainManifestRequired &&
     terrainManifest &&
     !terrainManifest.collision?.terrain?.url
       ? 'Terrain manifest is missing a baked collision artifact.'
       : '',
+    ...terrainAuthorityDiagnostics.errors,
+    ...terrainCollisionContractDiagnostics.errors,
   ].filter(Boolean)
   const warnings = [
-    requiresBakedTerrain &&
+    ...terrainAuthorityDiagnostics.warnings,
+    ...terrainCollisionContractDiagnostics.warnings,
+    terrainManifestRequired &&
     terrainManifest &&
-    !terrainManifest.visualChunks?.chunkCount
+    !terrainManifest.visualChunks?.chunkCount &&
+    terrainAuthority?.mode !== 'heightfield-terrain'
       ? 'Terrain manifest has no cooked visual chunks.'
+      : '',
+    requiresBakedTerrain && terrainChunksStale
+      ? 'Terrain visual chunks are older than the current heightmap/collision state.'
       : '',
   ].filter(Boolean)
 
@@ -555,7 +822,7 @@ function addTerrainSection(
     detail:
       blockers[0] ??
       warnings[0] ??
-      (requiresBakedTerrain
+      (terrainManifestRequired
         ? `Baked terrain collision ${terrainManifest?.collision?.terrain?.url ?? terrainManifestUrl} with ${terrainManifest?.visualChunks?.chunkCount ?? 0} visual chunks.`
         : 'Scene-authored collision path is active.'),
   })
@@ -567,11 +834,32 @@ function addTerrainSection(
       reason: 'Bake dirty terrain collision edits.',
     })
   }
-  if (warnings.length) {
+  if (terrainSettings?.heightmapDirty) {
     addUniqueCommand(viewModel.commands, {
-      id: 'cook-terrain-chunks',
-      command: 'pnpm --dir apps/game cook:terrain-chunks',
-      reason: 'Cook missing terrain visual chunks.',
+      id: 'generate-heightmap',
+      command: 'pnpm --dir apps/game generate:terrain-heightmap',
+      reason: 'Generate Heightmap from the recorded terrain source.',
+    })
+  }
+  if (warnings.length || terrainChunksStale) {
+    addUniqueCommand(viewModel.commands, {
+      id: glbChunkTerrainRequested
+        ? 'cook-terrain-glb-chunks'
+        : 'cook-terrain-chunks',
+      command: glbChunkTerrainRequested
+        ? 'pnpm --dir apps/game cook:terrain-glb-chunks'
+        : 'pnpm --dir apps/game cook:terrain-chunks',
+      reason: terrainChunksStale
+        ? 'Cook terrain visual chunks after heightmap or collision changes.'
+        : 'Cook missing terrain visual chunks.',
+    })
+  }
+  if (missingRequiredTerrainSourceAssets.length > 0) {
+    addUniqueCommand(viewModel.commands, {
+      id: 'cook-terrain-glb-chunks',
+      command: 'pnpm --dir apps/game cook:terrain-glb-chunks',
+      reason:
+        'Restore the recorded source GLB/GLTF before cooking terrain chunks.',
     })
   }
 }
@@ -700,6 +988,9 @@ export function buildEditorPublishReadinessViewModel(input: {
   prefabError?: string
   terrainManifest: TerrainManifest | null
   terrainError?: string
+  terrainSourceAssets?: EditorTerrainSourceAssetStatus[]
+  missingTerrainSourceAssets?: EditorTerrainSourceAssetStatus[]
+  colliderMetadata?: Record<string, LoadedManifest<MeshColliderBakeMetadata>>
 }): EditorPublishReadinessViewModel {
   const viewModel = createEmptyEditorPublishReadinessViewModel(input.levelId)
   const authoringReport = addAuthoringSceneSection(viewModel, input.scene)
@@ -725,6 +1016,11 @@ export function buildEditorPublishReadinessViewModel(input: {
     input.runtimeAssetManifest,
     input.runtimeScene,
   )
+  addMeshColliderMetadataSection(
+    viewModel,
+    input.scene,
+    input.colliderMetadata ?? {},
+  )
   addSpawnSection(viewModel, input.scene, input.runtimeScene)
   addTerrainSection(
     viewModel,
@@ -732,6 +1028,7 @@ export function buildEditorPublishReadinessViewModel(input: {
     input.runtimeScene,
     input.terrainManifest,
     input.terrainError ?? '',
+    input.missingTerrainSourceAssets ?? [],
   )
   addGraphicsSection(
     viewModel,

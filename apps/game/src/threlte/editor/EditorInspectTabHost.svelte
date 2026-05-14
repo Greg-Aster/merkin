@@ -1,7 +1,10 @@
 <script lang="ts">
 import type { CollisionChannel, CollisionIntent } from '../engine/types'
-import EditorInspectorForm from './EditorInspectorForm.svelte'
-import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
+import type {
+  EditorMaterialData,
+  EditorSceneNode,
+  EditorSceneSettings,
+} from './editorTypes'
 
 type BrowserItem = {
   name: string
@@ -16,6 +19,7 @@ type AmbientAudioTrack = {
 
 export let selectedNode: EditorSceneNode | null = null
 export let selectedNodes: EditorSceneNode[] = []
+export let sceneSettings: EditorSceneSettings | null = null
 export let parentCandidates: EditorSceneNode[] = []
 export let multiParentCandidates: EditorSceneNode[] = []
 export let selectedNodeMaterial: EditorMaterialData = {}
@@ -59,6 +63,7 @@ export let onPrimitiveGeometryChange: (value: string) => void = () => {}
 export let onPrimitiveArgChange: (index: number, value: string) => void =
   () => {}
 export let onCollisionEnabledChange: (value: boolean) => void = () => {}
+export let onCollisionShapeChange: (value: any) => void = () => {}
 export let onCollisionIntentChange: (value: CollisionIntent) => void = () => {}
 export let onCollisionChannelChange: (value: CollisionChannel) => void =
   () => {}
@@ -74,6 +79,12 @@ export let onCollisionNumericChange: (field: any, value: string) => void =
 export let onCollisionBooleanChange: (field: any, value: boolean) => void =
   () => {}
 export let onRecalculateCollision: () => void = () => {}
+export let onSetCollisionVisualOnly: () => void = () => {}
+export let onSetCollisionBlocker: () => void = () => {}
+export let onSetCollisionWalkable: () => void = () => {}
+export let onSetCollisionTrigger: () => void = () => {}
+export let onSetCollisionDetail: () => void = () => {}
+export let onBakeMeshCollider: () => void = () => {}
 export let onMaterialColorChange: (field: any, value: string) => void = () => {}
 export let onMaterialNumericChange: (field: any, value: string) => void =
   () => {}
@@ -102,77 +113,19 @@ export let onTransformChange: (
 ) => void = () => {}
 export let onDuplicate: () => void = () => {}
 export let onDelete: () => void = () => {}
+export let onOpenDetailsPanel: () => void = () => {}
 </script>
 
-<EditorInspectorForm
-  {selectedNode}
-  {selectedNodes}
-  {parentCandidates}
-  {multiParentCandidates}
-  {selectedNodeMaterial}
-  {selectedNodeColliderSize}
-  {styleDescriptor}
-  {assetPickerTargetNodeId}
-  {assetBrowserPath}
-  {assetBrowserItems}
-  {assetBrowserFilter}
-  {assetBrowserError}
-  {assetBrowserLoading}
-  {selectedLibraryItemPath}
-  {activeTextureMaterialField}
-  {textureBrowserPath}
-  {textureBrowserItems}
-  {textureBrowserError}
-  {textureBrowserLoading}
-  {ambientAudioLibrary}
-  {canUseAiMeshStudioSelection}
-  {hunyuanBusy}
-  bind:hunyuanPrompt
-  {onNameChange}
-  {onVisibleChange}
-  {onParentChange}
-  {onPrefabVariantChange}
-  {onAssetUrlChange}
-  {onOpenGeneratedAssetPicker}
-  {onOpenImportedAssetPicker}
-  {onAssetLibraryRootSelect}
-  {onAssetBrowserUp}
-  {onAssetBrowserRefresh}
-  {onAssetBrowserFilterChange}
-  {onAssetLibraryItemSelect}
-  {onApplySelectedLibraryAsset}
-  {onCancelAssetPicker}
-  {onStyleDescriptorChange}
-  {onConvertSelectedToMesh}
-  {onReimagineSelected}
-  {onPrimitiveGeometryChange}
-  {onPrimitiveArgChange}
-  {onCollisionEnabledChange}
-  {onCollisionIntentChange}
-  {onCollisionChannelChange}
-  {onPhysicsBodyTypeChange}
-  {onPhysicsNumericChange}
-  {onPhysicsBooleanChange}
-  {onCollisionSizeChange}
-  {onCollisionNumericChange}
-  {onCollisionBooleanChange}
-  {onRecalculateCollision}
-  {onMaterialColorChange}
-  {onMaterialNumericChange}
-  {onMaterialBooleanChange}
-  {onMaterialTextureChange}
-  {onOpenTexturePicker}
-  {onTextureBrowserUp}
-  {onTextureBrowserRefresh}
-  {onTextureBrowserOpenDirectory}
-  {onTextureBrowserPick}
-  {onResetMaterialOverrides}
-  {onLightFieldChange}
-  {onLightNumericChange}
-  {onGameplayFieldChange}
-  {onGameplayBooleanChange}
-  {onGameplayNumericChange}
-  {onTransformChange}
-  {onDuplicate}
-  {onDelete}
-/>
+<div class="editor-section">
+  <div class="label">Inspect</div>
+  {#if selectedNodes.length > 1}
+    <div class="save-message">{selectedNodes.length} objects selected. Use the Details shelf for shared selection context and the outliner for batch visibility or selectability.</div>
+  {:else if selectedNode}
+    <div class="save-message">Details for {selectedNode.name} are edited in the right-side Details shelf.</div>
+  {:else}
+    <div class="save-message">Select an object in the viewport or outliner, then use the right-side Details shelf for properties.</div>
+  {/if}
+  <div class="button-row compact editor-mt-sm">
+    <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenDetailsPanel}>Open Details Shelf</button>
+  </div>
+</div>

@@ -1,7 +1,7 @@
 {
   "levelId": "solitude",
   "version": 1,
-  "updatedAt": "2026-04-26T19:03:13.3115211Z",
+  "updatedAt": "2026-05-13T18:42:10.477Z",
   "settings": {
     "level": {
       "skyboxPreset": "observatory",
@@ -10,15 +10,33 @@
         "audio": "lonely-wind"
       },
       "spawn": {
-        "position": [0, 1.5, -24]
+        "position": [0, 0.8, -24]
       },
       "ground": {
-        "mode": "authored-ground",
+        "mode": "scene-authored",
         "visualSource": "scene-actors",
-        "collisionSource": "baked-heightfield",
+        "terrainRuntimeMode": "scene-authored",
+        "terrainVisualSource": "scene-actors",
+        "collisionSource": "scene-colliders",
+        "fallbackSurfacePolicy": "disabled",
         "groundActorIds": ["solitude-ground-plateau", "solitude-ground-dais"],
-        "terrainManifestUrl": "/terrain/solitude.manifest.json",
-        "requiredWalkableSurfaceId": "solitude-terrain"
+        "requiredWalkableSurfaceId": "solitude-ground-plateau"
+      },
+      "terrainMigration": {
+        "currentMode": "scene-authored",
+        "authoritativeVisualSource": "scene-actors",
+        "collisionSource": "scene-colliders",
+        "renderChunks": {
+          "present": false,
+          "authoritative": false,
+          "source": "none"
+        },
+        "fallbackSurfacePolicy": "disabled",
+        "targetMode": "scene-authored",
+        "status": "complete",
+        "blockers": [],
+        "generatedTerrainProducts": {},
+        "warningsBecomeBlockersAfterMigration": []
       },
       "worldPartition": {
         "partitionUrl": "/runtime-world-partitions/solitude.partition.json",
@@ -47,10 +65,18 @@
       },
       "collision": {
         "roles": {
-          "visualOnlyActorIds": [
-            "solitude-ground-plateau",
-            "solitude-ground-dais"
-          ]
+          "visualOnlyActorIds": [],
+          "groundActorIds": ["solitude-ground-plateau", "solitude-ground-dais"]
+        },
+        "workflow": {
+          "colliderBudget": "mobile"
+        },
+        "terrain": {
+          "source": "scene-authored",
+          "runtimeMode": "scene-authored",
+          "visualSource": "scene-actors",
+          "fallbackSurfacePolicy": "disabled",
+          "dirty": false
         }
       },
       "features": {
@@ -252,9 +278,12 @@
       },
       "editorPanels": {
         "environment": "solitude"
+      },
+      "terrainSculpt": {
+        "enabled": false,
+        "autoBakeCollision": false
       }
-    },
-    "solitude": {}
+    }
   },
   "nodes": [
     {
@@ -275,13 +304,6 @@
       "rotation": [0, 0, 0],
       "scale": [128.45490162495452, 1.2186824496366455, 132.4415601615787],
       "visible": true,
-      "collision": {
-        "shape": "cuboid",
-        "enabled": false,
-        "friction": 0.92,
-        "intent": "none",
-        "channel": "worldStatic"
-      },
       "material": {
         "color": "#555e69",
         "emissive": "#171b22",
@@ -306,6 +328,54 @@
       },
       "renderPolicy": {
         "runtimeStyle": "skip"
+      },
+      "collision": {
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.meta.json",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+          "sourceNodeName": "Solitude Plateau",
+          "visualLocalBounds": {
+            "min": [
+              -0.9005722403526306, -1.0030039548873901, -0.9492046236991882
+            ],
+            "max": [0.8823164701461792, 0.9736996293067932, 0.9215630292892456],
+            "size": [
+              1.7828887104988098, 1.9767035841941833, 1.8707676529884338
+            ],
+            "center": [
+              -0.009127885103225708, -0.014652162790298462,
+              -0.013820797204971313
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.8996759057044983, -1.0030039548873901, -0.9492046236991882
+            ],
+            "max": [0.8806980848312378, 0.97152179479599, 0.9208857417106628],
+            "size": [1.780373990535736, 1.9745257496833801, 1.870090365409851],
+            "center": [
+              -0.009488910436630249, -0.015741080045700073,
+              -0.014159440994262695
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        },
+        "triangleBudget": 20000,
+        "intent": "walkable",
+        "channel": "worldStatic",
+        "enabled": true,
+        "sensor": false,
+        "friction": 0.7,
+        "restitution": 0
       }
     },
     {
@@ -317,13 +387,6 @@
       "rotation": [0, 0, 0],
       "scale": [23.249915454852893, 0.4255953077697364, 22.39938096256249],
       "visible": true,
-      "collision": {
-        "shape": "cuboid",
-        "enabled": false,
-        "friction": 0.94,
-        "intent": "none",
-        "channel": "worldStatic"
-      },
       "material": {
         "color": "#555e69",
         "emissive": "#171b22",
@@ -348,6 +411,55 @@
       },
       "renderPolicy": {
         "runtimeStyle": "skip"
+      },
+      "collision": {
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.meta.json",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+          "sourceNodeName": "Ruin Dais",
+          "visualLocalBounds": {
+            "min": [
+              -0.9581931829452515, -0.9524890184402466, -0.996408998966217
+            ],
+            "max": [0.9342905879020691, 0.9272300004959106, 0.9679255485534668],
+            "size": [
+              1.8924837708473206, 1.8797190189361572, 1.9643345475196838
+            ],
+            "center": [
+              -0.011951297521591187, -0.012629508972167969,
+              -0.014241725206375122
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.9581931829452515, -0.9518071413040161, -0.9956570267677307
+            ],
+            "max": [0.9329316020011902, 0.9272300004959106, 0.9679255485534668],
+            "size": [
+              1.8911247849464417, 1.8790371417999268, 1.9635825753211975
+            ],
+            "center": [
+              -0.01263079047203064, -0.012288570404052734, -0.013865739107131958
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        },
+        "triangleBudget": 12000,
+        "intent": "walkable",
+        "channel": "worldStatic",
+        "enabled": true,
+        "sensor": false,
+        "friction": 0.7,
+        "restitution": 0
       }
     },
     {
@@ -380,13 +492,50 @@
         ]
       },
       "collision": {
-        "shape": "cuboid",
+        "shape": "trimesh",
         "enabled": true,
         "friction": 0.7,
         "restitution": 0,
         "sensor": false,
         "intent": "blocker",
-        "channel": "worldStatic"
+        "channel": "worldStatic",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-1.collider.meta.json",
+        "triangleBudget": 20000,
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
+          "sourceNodeName": "Solitude Pillar 1",
+          "visualLocalBounds": {
+            "min": [
+              -0.7825126647949219, -1.0004767179489136, -0.782132089138031
+            ],
+            "max": [0.7572198510169983, 0.9741035103797913, 0.7610894441604614],
+            "size": [
+              1.5397325158119202, 1.9745802283287048, 1.5432215332984924
+            ],
+            "center": [
+              -0.012646406888961792, -0.013186603784561157, -0.01052132248878479
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.7818410992622375, -1.0003089904785156, -0.7820741534233093
+            ],
+            "max": [0.7567057609558105, 0.9738057255744934, 0.7610894441604614],
+            "size": [1.538546860218048, 1.974114716053009, 1.5431635975837708],
+            "center": [
+              -0.012567669153213501, -0.013251632452011108, -0.01049235463142395
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        }
       },
       "material": {
         "color": "#5f6874",
@@ -423,13 +572,50 @@
         ]
       },
       "collision": {
-        "shape": "cuboid",
+        "shape": "trimesh",
         "enabled": true,
         "friction": 0.7,
         "restitution": 0,
         "sensor": false,
         "intent": "blocker",
-        "channel": "worldStatic"
+        "channel": "worldStatic",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-2.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-2.collider.meta.json",
+        "triangleBudget": 20000,
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
+          "sourceNodeName": "Solitude Pillar 2",
+          "visualLocalBounds": {
+            "min": [
+              -0.5962746739387512, -1.0003606081008911, -0.44824808835983276
+            ],
+            "max": [0.5691162943840027, 0.9743054509162903, 0.4258885681629181],
+            "size": [1.165390968322754, 1.9746660590171814, 0.8741366565227509],
+            "center": [
+              -0.013579189777374268, -0.013027578592300415,
+              -0.011179760098457336
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.5962746739387512, -1.0003606081008911, -0.44824808835983276
+            ],
+            "max": [0.5688255429267883, 0.9738825559616089, 0.4258885681629181],
+            "size": [1.1651002168655396, 1.9742431640625, 0.8741366565227509],
+            "center": [
+              -0.013724565505981445, -0.013239026069641113,
+              -0.011179760098457336
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        }
       },
       "material": {
         "color": "#5f6874",
@@ -466,13 +652,53 @@
         ]
       },
       "collision": {
-        "shape": "cuboid",
+        "shape": "trimesh",
         "enabled": true,
         "friction": 0.7,
         "restitution": 0,
         "sensor": false,
         "intent": "blocker",
-        "channel": "worldStatic"
+        "channel": "worldStatic",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-3.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-3.collider.meta.json",
+        "triangleBudget": 20000,
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
+          "sourceNodeName": "Solitude Pillar 3",
+          "visualLocalBounds": {
+            "min": [
+              -0.6000218391418457, -1.0001929998397827, -0.6678562164306641
+            ],
+            "max": [0.574096143245697, 0.9739822745323181, 0.6432415246963501],
+            "size": [
+              1.1741179823875427, 1.9741752743721008, 1.3110977411270142
+            ],
+            "center": [
+              -0.01296284794807434, -0.0131053626537323, -0.012307345867156982
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.5999825596809387, -1.0000436305999756, -0.6674226522445679
+            ],
+            "max": [0.5738534331321716, 0.9737609624862671, 0.6430646777153015],
+            "size": [
+              1.1738359928131104, 1.9738045930862427, 1.3104873299598694
+            ],
+            "center": [
+              -0.013064563274383545, -0.013141334056854248,
+              -0.012178987264633179
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        }
       },
       "material": {
         "color": "#5f6874",
@@ -509,13 +735,50 @@
         ]
       },
       "collision": {
-        "shape": "cuboid",
+        "shape": "trimesh",
         "enabled": true,
         "friction": 0.7,
         "restitution": 0,
         "sensor": false,
         "intent": "blocker",
-        "channel": "worldStatic"
+        "channel": "worldStatic",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-4.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-4.collider.meta.json",
+        "triangleBudget": 20000,
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
+          "sourceNodeName": "Solitude Pillar 4",
+          "visualLocalBounds": {
+            "min": [
+              -0.8772475719451904, -1.0007864236831665, -0.8618723154067993
+            ],
+            "max": [0.8484272360801697, 0.9724119305610657, 0.8466414213180542],
+            "size": [1.72567480802536, 1.9731983542442322, 1.7085137367248535],
+            "center": [
+              -0.014410167932510376, -0.014187246561050415,
+              -0.007615447044372559
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.8772475719451904, -1.0006649494171143, -0.8618723154067993
+            ],
+            "max": [0.8478924632072449, 0.9724119305610657, 0.8466414213180542],
+            "size": [1.7251400351524353, 1.97307687997818, 1.7085137367248535],
+            "center": [
+              -0.014677554368972778, -0.014126509428024292,
+              -0.007615447044372559
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        }
       },
       "material": {
         "color": "#5f6874",
@@ -552,13 +815,53 @@
         ]
       },
       "collision": {
-        "shape": "cuboid",
+        "shape": "trimesh",
         "enabled": true,
         "friction": 0.7,
         "restitution": 0,
         "sensor": false,
         "intent": "blocker",
-        "channel": "worldStatic"
+        "channel": "worldStatic",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-5.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-5.collider.meta.json",
+        "triangleBudget": 20000,
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
+          "sourceNodeName": "Solitude Pillar 5",
+          "visualLocalBounds": {
+            "min": [
+              -0.528046727180481, -1.0001945495605469, -0.590805172920227
+            ],
+            "max": [0.5011919736862183, 0.9642621874809265, 0.5638434290885925],
+            "size": [
+              1.0292387008666992, 1.9644567370414734, 1.1546486020088196
+            ],
+            "center": [
+              -0.013427376747131348, -0.01796618103981018, -0.01348087191581726
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.528046727180481, -1.0000303983688354, -0.590406596660614
+            ],
+            "max": [0.5011919736862183, 0.96397864818573, 0.5638132095336914],
+            "size": [
+              1.0292387008666992, 1.9640090465545654, 1.1542198061943054
+            ],
+            "center": [
+              -0.013427376747131348, -0.018025875091552734,
+              -0.013296693563461304
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        }
       },
       "material": {
         "color": "#5f6874",
@@ -595,13 +898,51 @@
         ]
       },
       "collision": {
-        "shape": "cuboid",
+        "shape": "trimesh",
         "enabled": true,
         "friction": 0.7,
         "restitution": 0,
         "sensor": false,
         "intent": "blocker",
-        "channel": "worldStatic"
+        "channel": "worldStatic",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-6.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-6.collider.meta.json",
+        "triangleBudget": 20000,
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
+          "sourceNodeName": "Solitude Pillar 6",
+          "visualLocalBounds": {
+            "min": [
+              -0.600238561630249, -1.0002777576446533, -0.5648727416992188
+            ],
+            "max": [0.5764304995536804, 0.9737722277641296, 0.5614635944366455],
+            "size": [1.1766690611839294, 1.974049985408783, 1.1263363361358643],
+            "center": [
+              -0.011904031038284302, -0.01325276494026184, -0.001704573631286621
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.600238561630249, -1.0002777576446533, -0.5648727416992188
+            ],
+            "max": [0.5764304995536804, 0.9736989140510559, 0.5614635944366455],
+            "size": [
+              1.1766690611839294, 1.9739766716957092, 1.1263363361358643
+            ],
+            "center": [
+              -0.011904031038284302, -0.013289421796798706,
+              -0.001704573631286621
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        }
       },
       "material": {
         "color": "#5f6874",
@@ -672,13 +1013,50 @@
         ]
       },
       "collision": {
-        "shape": "cuboid",
+        "shape": "trimesh",
         "enabled": true,
         "friction": 0.7,
         "restitution": 0,
         "sensor": false,
         "intent": "blocker",
-        "channel": "worldStatic"
+        "channel": "worldStatic",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.meta.json",
+        "triangleBudget": 20000,
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+          "sourceNodeName": "Solitude Pillar 8",
+          "visualLocalBounds": {
+            "min": [
+              -0.3966028690338135, -1.0001673698425293, -0.4122299253940582
+            ],
+            "max": [0.3706434965133667, 0.9736790657043457, 0.3860882818698883],
+            "size": [0.7672463655471802, 1.973846435546875, 0.7983182072639465],
+            "center": [
+              -0.012979686260223389, -0.013244152069091797,
+              -0.013070821762084961
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.3966028690338135, -1.0001206398010254, -0.4122239053249359
+            ],
+            "max": [0.3706410229206085, 0.9736790657043457, 0.3860188126564026],
+            "size": [0.767243891954422, 1.973799705505371, 0.7982427179813385],
+            "center": [
+              -0.012980923056602478, -0.013220787048339844,
+              -0.013102546334266663
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        }
       },
       "material": {
         "color": "#5f6874",
@@ -715,13 +1093,50 @@
         ]
       },
       "collision": {
-        "shape": "cuboid",
+        "shape": "trimesh",
         "enabled": true,
         "friction": 0.7,
         "restitution": 0,
         "sensor": false,
         "intent": "blocker",
-        "channel": "worldStatic"
+        "channel": "worldStatic",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-9.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-9.collider.meta.json",
+        "triangleBudget": 20000,
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
+          "sourceNodeName": "Solitude Pillar 9",
+          "visualLocalBounds": {
+            "min": [
+              -0.5359225273132324, -1.0002118349075317, -0.6033742427825928
+            ],
+            "max": [0.5107831954956055, 0.9740860462188721, 0.5761327147483826],
+            "size": [1.046705722808838, 1.9742978811264038, 1.1795069575309753],
+            "center": [
+              -0.012569665908813477, -0.013062894344329834,
+              -0.013620764017105103
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.5357434749603271, -1.000184178352356, -0.6031821370124817
+            ],
+            "max": [0.5104746222496033, 0.9740860462188721, 0.5759872198104858],
+            "size": [1.0462180972099304, 1.974270224571228, 1.1791693568229675],
+            "center": [
+              -0.012634426355361938, -0.013049066066741943,
+              -0.013597458600997925
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        }
       },
       "material": {
         "color": "#5f6874",
@@ -758,13 +1173,49 @@
         ]
       },
       "collision": {
-        "shape": "cuboid",
+        "shape": "trimesh",
         "enabled": true,
         "friction": 0.7,
         "restitution": 0,
         "sensor": false,
         "intent": "blocker",
-        "channel": "worldStatic"
+        "channel": "worldStatic",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-10.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-10.collider.meta.json",
+        "triangleBudget": 20000,
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb",
+          "sourceNodeName": "Solitude Pillar 10",
+          "visualLocalBounds": {
+            "min": [
+              -0.5818926095962524, -1.0005899667739868, -0.8734685182571411
+            ],
+            "max": [0.5566704273223877, 0.9736887812614441, 0.8537846803665161],
+            "size": [1.1385630369186401, 1.974278748035431, 1.7272531986236572],
+            "center": [
+              -0.012611091136932373, -0.013450592756271362, -0.0098419189453125
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.5815596580505371, -1.000173568725586, -0.8734685182571411
+            ],
+            "max": [0.5566704273223877, 0.9736887812614441, 0.8525734543800354],
+            "size": [1.1382300853729248, 1.97386234998703, 1.7260419726371765],
+            "center": [
+              -0.012444615364074707, -0.013242393732070923,
+              -0.010447531938552856
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        }
       },
       "material": {
         "color": "#5f6874",
@@ -801,13 +1252,52 @@
         "url": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb"
       },
       "collision": {
-        "shape": "cuboid",
+        "shape": "trimesh",
         "enabled": true,
         "friction": 0.7,
         "restitution": 0,
         "sensor": false,
         "intent": "blocker",
-        "channel": "worldStatic"
+        "channel": "worldStatic",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-11.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-11.collider.meta.json",
+        "triangleBudget": 20000,
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+          "sourceNodeName": "Solitude Pillar 11",
+          "visualLocalBounds": {
+            "min": [
+              -0.9434459209442139, -0.9954308867454529, -0.9447097182273865
+            ],
+            "max": [0.912825882434845, 0.9741824865341187, 0.8962405323982239],
+            "size": [
+              1.8562718033790588, 1.9696133732795715, 1.8409502506256104
+            ],
+            "center": [
+              -0.015310019254684448, -0.010624200105667114, -0.0242345929145813
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.9434459209442139, -0.9950268268585205, -0.9447097182273865
+            ],
+            "max": [0.912825882434845, 0.9735915064811707, 0.8962405323982239],
+            "size": [
+              1.8562718033790588, 1.9686183333396912, 1.8409502506256104
+            ],
+            "center": [
+              -0.015310019254684448, -0.010717660188674927, -0.0242345929145813
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        }
       },
       "material": {
         "color": "#5f6874",
@@ -844,13 +1334,50 @@
         "url": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb"
       },
       "collision": {
-        "shape": "cuboid",
+        "shape": "trimesh",
         "enabled": true,
         "friction": 0.7,
         "restitution": 0,
         "sensor": false,
         "intent": "blocker",
-        "channel": "worldStatic"
+        "channel": "worldStatic",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-12.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-12.collider.meta.json",
+        "triangleBudget": 20000,
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
+          "sourceNodeName": "Solitude Pillar 12",
+          "visualLocalBounds": {
+            "min": [
+              -0.6531798243522644, -1.0002329349517822, -0.6166970133781433
+            ],
+            "max": [0.6274647116661072, 0.9740968346595764, 0.6246123909950256],
+            "size": [1.2806445360183716, 1.9743297696113586, 1.241309404373169],
+            "center": [
+              -0.012857556343078613, -0.013068050146102905, 0.003957688808441162
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.6525620818138123, -0.999964714050293, -0.6165773868560791
+            ],
+            "max": [0.6271432638168335, 0.9737651944160461, 0.6246123909950256],
+            "size": [
+              1.2797053456306458, 1.9737299084663391, 1.2411897778511047
+            ],
+            "center": [
+              -0.01270940899848938, -0.013099759817123413, 0.004017502069473267
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        }
       },
       "material": {
         "color": "#5f6874",
@@ -877,14 +1404,25 @@
       "visible": true,
       "gameplay": {
         "type": "firefly",
-        "markerColor": "#f5f1a8",
+        "markerColor": "#ff4658",
         "markerSize": 0.52,
         "title": "Solitude Pillar 1",
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 1.",
         "body": "A solitary firefly keeps watch above Solitude Pillar 1.",
-        "lightIntensity": 4
+        "lightIntensity": 1.15,
+        "lightDistance": 4.6,
+        "lightDecay": 1.25,
+        "spriteIntensity": 1.15,
+        "lightBurstBoost": 1.4,
+        "twinkleSpeed": 0.9,
+        "hoverHeight": 0.28,
+        "bobAmplitude": 0.08,
+        "bobSpeed": 0.55,
+        "wanderEnabled": true,
+        "wanderRadius": 0.16,
+        "wanderSpeed": 0.18
       }
     },
     {
@@ -898,14 +1436,25 @@
       "visible": true,
       "gameplay": {
         "type": "firefly",
-        "markerColor": "#f5f1a8",
+        "markerColor": "#ff4658",
         "markerSize": 0.52,
         "title": "Solitude Pillar 2",
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 2.",
         "body": "A solitary firefly keeps watch above Solitude Pillar 2.",
-        "lightIntensity": 4
+        "lightIntensity": 1.15,
+        "lightDistance": 4.6,
+        "lightDecay": 1.25,
+        "spriteIntensity": 1.15,
+        "lightBurstBoost": 1.4,
+        "twinkleSpeed": 0.9,
+        "hoverHeight": 0.28,
+        "bobAmplitude": 0.08,
+        "bobSpeed": 0.55,
+        "wanderEnabled": true,
+        "wanderRadius": 0.16,
+        "wanderSpeed": 0.18
       }
     },
     {
@@ -919,14 +1468,25 @@
       "visible": true,
       "gameplay": {
         "type": "firefly",
-        "markerColor": "#f5f1a8",
+        "markerColor": "#ff4658",
         "markerSize": 0.52,
         "title": "Solitude Pillar 3",
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 3.",
         "body": "A solitary firefly keeps watch above Solitude Pillar 3.",
-        "lightIntensity": 4
+        "lightIntensity": 1.15,
+        "lightDistance": 4.6,
+        "lightDecay": 1.25,
+        "spriteIntensity": 1.15,
+        "lightBurstBoost": 1.4,
+        "twinkleSpeed": 0.9,
+        "hoverHeight": 0.28,
+        "bobAmplitude": 0.08,
+        "bobSpeed": 0.55,
+        "wanderEnabled": true,
+        "wanderRadius": 0.16,
+        "wanderSpeed": 0.18
       }
     },
     {
@@ -940,14 +1500,25 @@
       "visible": true,
       "gameplay": {
         "type": "firefly",
-        "markerColor": "#f5f1a8",
+        "markerColor": "#ff4658",
         "markerSize": 0.52,
         "title": "Solitude Pillar 4",
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 4.",
         "body": "A solitary firefly keeps watch above Solitude Pillar 4.",
-        "lightIntensity": 4
+        "lightIntensity": 1.15,
+        "lightDistance": 4.6,
+        "lightDecay": 1.25,
+        "spriteIntensity": 1.15,
+        "lightBurstBoost": 1.4,
+        "twinkleSpeed": 0.9,
+        "hoverHeight": 0.28,
+        "bobAmplitude": 0.08,
+        "bobSpeed": 0.55,
+        "wanderEnabled": true,
+        "wanderRadius": 0.16,
+        "wanderSpeed": 0.18
       }
     },
     {
@@ -961,14 +1532,25 @@
       "visible": true,
       "gameplay": {
         "type": "firefly",
-        "markerColor": "#f5f1a8",
+        "markerColor": "#ff4658",
         "markerSize": 0.52,
         "title": "Solitude Pillar 5",
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 5.",
         "body": "A solitary firefly keeps watch above Solitude Pillar 5.",
-        "lightIntensity": 4
+        "lightIntensity": 1.15,
+        "lightDistance": 4.6,
+        "lightDecay": 1.25,
+        "spriteIntensity": 1.15,
+        "lightBurstBoost": 1.4,
+        "twinkleSpeed": 0.9,
+        "hoverHeight": 0.28,
+        "bobAmplitude": 0.08,
+        "bobSpeed": 0.55,
+        "wanderEnabled": true,
+        "wanderRadius": 0.16,
+        "wanderSpeed": 0.18
       }
     },
     {
@@ -982,14 +1564,25 @@
       "visible": true,
       "gameplay": {
         "type": "firefly",
-        "markerColor": "#f5f1a8",
+        "markerColor": "#ff4658",
         "markerSize": 0.52,
         "title": "Solitude Pillar 6",
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 6.",
         "body": "A solitary firefly keeps watch above Solitude Pillar 6.",
-        "lightIntensity": 4
+        "lightIntensity": 1.15,
+        "lightDistance": 4.6,
+        "lightDecay": 1.25,
+        "spriteIntensity": 1.15,
+        "lightBurstBoost": 1.4,
+        "twinkleSpeed": 0.9,
+        "hoverHeight": 0.28,
+        "bobAmplitude": 0.08,
+        "bobSpeed": 0.55,
+        "wanderEnabled": true,
+        "wanderRadius": 0.16,
+        "wanderSpeed": 0.18
       }
     },
     {
@@ -1003,13 +1596,25 @@
       "visible": true,
       "gameplay": {
         "type": "firefly",
-        "markerColor": "#f5f1a8",
+        "markerColor": "#ff4658",
         "markerSize": 0.52,
         "title": "Solitude Pillar 7",
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 7.",
-        "body": "A solitary firefly keeps watch above Solitude Pillar 7."
+        "body": "A solitary firefly keeps watch above Solitude Pillar 7.",
+        "lightIntensity": 1.15,
+        "lightDistance": 4.6,
+        "lightDecay": 1.25,
+        "spriteIntensity": 1.15,
+        "lightBurstBoost": 1.4,
+        "twinkleSpeed": 0.9,
+        "hoverHeight": 0.28,
+        "bobAmplitude": 0.08,
+        "bobSpeed": 0.55,
+        "wanderEnabled": true,
+        "wanderRadius": 0.16,
+        "wanderSpeed": 0.18
       }
     },
     {
@@ -1023,13 +1628,25 @@
       "visible": true,
       "gameplay": {
         "type": "firefly",
-        "markerColor": "#f5f1a8",
+        "markerColor": "#ff4658",
         "markerSize": 0.52,
         "title": "Solitude Pillar 8",
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 8.",
-        "body": "A solitary firefly keeps watch above Solitude Pillar 8."
+        "body": "A solitary firefly keeps watch above Solitude Pillar 8.",
+        "lightIntensity": 1.15,
+        "lightDistance": 4.6,
+        "lightDecay": 1.25,
+        "spriteIntensity": 1.15,
+        "lightBurstBoost": 1.4,
+        "twinkleSpeed": 0.9,
+        "hoverHeight": 0.28,
+        "bobAmplitude": 0.08,
+        "bobSpeed": 0.55,
+        "wanderEnabled": true,
+        "wanderRadius": 0.16,
+        "wanderSpeed": 0.18
       }
     },
     {
@@ -1043,14 +1660,25 @@
       "visible": true,
       "gameplay": {
         "type": "firefly",
-        "markerColor": "#f5f1a8",
+        "markerColor": "#ff4658",
         "markerSize": 0.52,
         "title": "Solitude Pillar 9",
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 9.",
         "body": "A solitary firefly keeps watch above Solitude Pillar 9.",
-        "lightIntensity": 4
+        "lightIntensity": 1.15,
+        "lightDistance": 4.6,
+        "lightDecay": 1.25,
+        "spriteIntensity": 1.15,
+        "lightBurstBoost": 1.4,
+        "twinkleSpeed": 0.9,
+        "hoverHeight": 0.28,
+        "bobAmplitude": 0.08,
+        "bobSpeed": 0.55,
+        "wanderEnabled": true,
+        "wanderRadius": 0.16,
+        "wanderSpeed": 0.18
       }
     },
     {
@@ -1064,13 +1692,25 @@
       "visible": true,
       "gameplay": {
         "type": "firefly",
-        "markerColor": "#f5f1a8",
+        "markerColor": "#ff4658",
         "markerSize": 0.52,
         "title": "Solitude Pillar 10",
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 10.",
-        "body": "A solitary firefly keeps watch above Solitude Pillar 10."
+        "body": "A solitary firefly keeps watch above Solitude Pillar 10.",
+        "lightIntensity": 1.15,
+        "lightDistance": 4.6,
+        "lightDecay": 1.25,
+        "spriteIntensity": 1.15,
+        "lightBurstBoost": 1.4,
+        "twinkleSpeed": 0.9,
+        "hoverHeight": 0.28,
+        "bobAmplitude": 0.08,
+        "bobSpeed": 0.55,
+        "wanderEnabled": true,
+        "wanderRadius": 0.16,
+        "wanderSpeed": 0.18
       }
     },
     {
@@ -1084,14 +1724,25 @@
       "visible": true,
       "gameplay": {
         "type": "firefly",
-        "markerColor": "#f5f1a8",
+        "markerColor": "#ff4658",
         "markerSize": 0.52,
         "title": "Solitude Pillar 11",
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 11.",
         "body": "A solitary firefly keeps watch above Solitude Pillar 11.",
-        "lightIntensity": 4
+        "lightIntensity": 1.15,
+        "lightDistance": 4.6,
+        "lightDecay": 1.25,
+        "spriteIntensity": 1.15,
+        "lightBurstBoost": 1.4,
+        "twinkleSpeed": 0.9,
+        "hoverHeight": 0.28,
+        "bobAmplitude": 0.08,
+        "bobSpeed": 0.55,
+        "wanderEnabled": true,
+        "wanderRadius": 0.16,
+        "wanderSpeed": 0.18
       }
     },
     {
@@ -1105,14 +1756,25 @@
       "visible": true,
       "gameplay": {
         "type": "firefly",
-        "markerColor": "#f5f1a8",
+        "markerColor": "#ff4658",
         "markerSize": 0.52,
         "title": "Solitude Pillar 12",
         "author": "Pillar Firefly",
         "location": "The Solitude Plain",
         "excerpt": "A patient glow hovers above Solitude Pillar 12.",
         "body": "A solitary firefly keeps watch above Solitude Pillar 12.",
-        "lightIntensity": 4
+        "lightIntensity": 1.15,
+        "lightDistance": 4.6,
+        "lightDecay": 1.25,
+        "spriteIntensity": 1.15,
+        "lightBurstBoost": 1.4,
+        "twinkleSpeed": 0.9,
+        "hoverHeight": 0.28,
+        "bobAmplitude": 0.08,
+        "bobSpeed": 0.55,
+        "wanderEnabled": true,
+        "wanderRadius": 0.16,
+        "wanderSpeed": 0.18
       }
     },
     {
@@ -1136,13 +1798,56 @@
         "url": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb"
       },
       "collision": {
-        "shape": "cuboid",
+        "shape": "trimesh",
         "enabled": true,
         "friction": 0.7,
         "restitution": 0,
         "sensor": false,
         "intent": "blocker",
-        "channel": "worldStatic"
+        "channel": "worldStatic",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-east.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-east.collider.meta.json",
+        "triangleBudget": 20000,
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
+          "sourceNodeName": "Ring Fragment East",
+          "visualLocalBounds": {
+            "min": [
+              -0.30635887384414673, -0.9567339420318604, -0.997004508972168
+            ],
+            "max": [
+              0.28787562251091003, 0.9307903051376343, 0.9734286069869995
+            ],
+            "size": [
+              0.5942344963550568, 1.8875242471694946, 1.9704331159591675
+            ],
+            "center": [
+              -0.009241625666618347, -0.012971818447113037,
+              -0.011787950992584229
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.30635887384414673, -0.9563766717910767, -0.997004508972168
+            ],
+            "max": [
+              0.28787562251091003, 0.9307903051376343, 0.9734286069869995
+            ],
+            "size": [0.5942344963550568, 1.887166976928711, 1.9704331159591675],
+            "center": [
+              -0.009241625666618347, -0.012793183326721191,
+              -0.011787950992584229
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        }
       },
       "material": {
         "color": "#5f6874",
@@ -1179,13 +1884,50 @@
         "url": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb"
       },
       "collision": {
-        "shape": "cuboid",
+        "shape": "trimesh",
         "enabled": true,
         "friction": 0.7,
         "restitution": 0,
         "sensor": false,
         "intent": "blocker",
-        "channel": "worldStatic"
+        "channel": "worldStatic",
+        "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-west.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-west.collider.meta.json",
+        "triangleBudget": 20000,
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
+          "sourceNodeName": "Ring Fragment West",
+          "visualLocalBounds": {
+            "min": [
+              -0.99843829870224, -0.8751745223999023, -0.9793640375137329
+            ],
+            "max": [0.9737838506698608, 0.8361713290214539, 0.9003127217292786],
+            "size": [
+              1.9722221493721008, 1.7113458514213562, 1.8796767592430115
+            ],
+            "center": [
+              -0.012327224016189575, -0.019501596689224243, -0.03952565789222717
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.99843829870224, -0.8751745223999023, -0.9793640375137329
+            ],
+            "max": [0.9737838506698608, 0.8356838822364807, 0.9003065228462219],
+            "size": [1.9722221493721008, 1.710858404636383, 1.8796705603599548],
+            "center": [
+              -0.012327224016189575, -0.019745320081710815, -0.03952875733375549
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+          ]
+        }
       },
       "material": {
         "color": "#5f6874",
@@ -1211,7 +1953,7 @@
       "visible": true,
       "gameplay": {
         "type": "firefly",
-        "markerColor": "#f5f1a8",
+        "markerColor": "#ff4658",
         "markerSize": 0.62,
         "title": "Solitude",
         "author": "The Firefly",
@@ -1219,12 +1961,17 @@
         "excerpt": "A single patient glow waits at the center of the ruined ring.",
         "body": "This is a place for solitude. You are alone here.\n\nThe pillars keep their distance so the sky can speak without interruption.",
         "bobSpeed": 0.5,
-        "twinkleSpeed": 0.5,
+        "twinkleSpeed": 0.9,
         "lightDistance": 30,
         "lightIntensity": 15,
         "lightDecay": 1,
-        "spriteIntensity": 1.95,
-        "lightBurstBoost": 2
+        "spriteIntensity": 1.2,
+        "lightBurstBoost": 2,
+        "hoverHeight": 0.28,
+        "bobAmplitude": 0.08,
+        "wanderEnabled": true,
+        "wanderRadius": 0.16,
+        "wanderSpeed": 0.18
       }
     },
     {

@@ -1,6 +1,5 @@
 <script lang="ts">
 import { createEventDispatcher } from 'svelte'
-import RuntimeDiagnosticsPanel from '../ui/RuntimeDiagnosticsPanel.svelte'
 import EditorAssetPreview from './EditorAssetPreview.svelte'
 import type { HunyuanJobStatus } from './editorHunyuanJobPolling'
 import type { EditorSceneNode } from './editorStore'
@@ -13,6 +12,14 @@ export let comfyUiBusy = false
 export let comfyUiReady = false
 export let comfyWorkflowEditorStatus = ''
 export let selectedComfyWorkflowPath = ''
+export let workflowBrowserPath = ''
+export let workflowBrowserItems: Array<{
+  name: string
+  path: string
+  isDirectory: boolean
+}> = []
+export let workflowBrowserError = ''
+export let workflowBrowserLoading = false
 
 export let hunyuanApiUrl = ''
 export let hunyuanStatus = ''
@@ -48,12 +55,13 @@ export let canUseAiMeshStudio: (node: EditorSceneNode | null) => boolean = () =>
 export let canRetextureSelection: (node: EditorSceneNode | null) => boolean =
   () => false
 export let canApplyGeneratedAssetToSelection = false
-export let runtimeAssetFailures: Array<{
-  id: string
-  source: string
-  message: string
-  updatedAt: number
-}> = []
+export let onWorkflowBrowserUp: () => void = () => {}
+export let onWorkflowBrowserRefresh: () => void = () => {}
+export let onSelectWorkflowItem: (item: {
+  name: string
+  path: string
+  isDirectory: boolean
+}) => void = () => {}
 
 $: selectedHunyuanJob =
   recentHunyuanJobs.find(job => job.id === selectedHunyuanJobId) ?? null
@@ -62,6 +70,21 @@ $: currentReferencePreviewUrl =
   hunyuanReferenceImageUrl || hunyuanDetectedReferenceImageUrl || ''
 $: latestJobReferenceImageUrl =
   selectedHunyuanJob?.result?.referenceImageUrl || ''
+$: aiServiceSummary =
+  comfyUiReady && hunyuanServiceReady
+    ? 'ready'
+    : comfyUiBusy || hunyuanBusy
+      ? 'checking services'
+      : 'service setup required'
+$: aiNextAction = !comfyUiReady
+  ? 'Start or refresh ComfyUI.'
+  : !hunyuanServiceReady
+    ? 'Start or refresh the mesh backend.'
+    : hunyuanLastOutputUrl
+      ? 'Review the latest output, then add or apply it.'
+      : canUseAiMeshStudio(selectedNode)
+        ? 'Choose generate or retexture for the selected source.'
+        : 'Provide a scratch prompt or select a supported mesh source.'
 
 function getJobSummary(job: HunyuanJobStatus | null) {
   if (!job) return ''
@@ -79,9 +102,16 @@ function emit(type: string) {
 </script>
 
 <div class="editor-section">
-  <div class="label">AI Mesh Studio</div>
-
-  <RuntimeDiagnosticsPanel title="Engine Status" compact={true} />
+  <div class="label">Experimental AI Lab</div>
+  <div class="editor-status-card">
+    <div class="editor-status-title">{aiNextAction}</div>
+    <div class="save-message">Experimental service-backed workflow: check services, choose generate or retexture, provide prompt/reference, run job, review output, then add or apply.</div>
+    <div class="editor-chip-row">
+      <span class:ready={comfyUiReady} class:warn={!comfyUiReady} class="editor-chip">ComfyUI {comfyUiReady ? 'ready' : 'not ready'}</span>
+      <span class:ready={hunyuanServiceReady} class:warn={!hunyuanServiceReady} class="editor-chip">mesh backend {hunyuanServiceReady ? 'ready' : 'not ready'}</span>
+      <span class:warn={hunyuanBusy || comfyUiBusy} class:ready={!hunyuanBusy && !comfyUiBusy} class="editor-chip">{aiServiceSummary}</span>
+    </div>
+  </div>
 
   <div class="tuple-group">
     <div class="tuple-label">ComfyUI</div>
@@ -100,13 +130,35 @@ function emit(type: string) {
     <input class="text-input" bind:value={comfyUiApiUrl} />
   </div>
   <div class="tuple-group">
-    <div class="tuple-label">Default Workflow</div>
+    <div class="tuple-label">AI Pipeline Template</div>
     <input class="text-input" value={selectedComfyWorkflowPath} readonly />
   </div>
   <div class="button-row compact editor-mt-sm">
-    <button on:click={() => emit('openWorkflowTab')}>Select Workflow</button>
     <button on:click={() => emit('resetWorkflowPath')}>Use Built-In</button>
   </div>
+  <details class="editor-mt-sm">
+    <summary class="save-message">Pipeline Template Browser</summary>
+    <div class="button-row compact editor-mt-sm">
+      <button data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onWorkflowBrowserUp}>Up</button>
+      <button data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onWorkflowBrowserRefresh}>Refresh</button>
+    </div>
+    <div class="save-message path-label">{workflowBrowserPath}</div>
+    {#if workflowBrowserError}
+      <div class="save-message error-message">{workflowBrowserError}</div>
+    {/if}
+    <div class="hierarchy-list asset-browser-list">
+      {#if workflowBrowserLoading}
+        <div class="save-message">Loading workflows...</div>
+      {:else}
+        {#each workflowBrowserItems as item (item.path)}
+          <button class:active={selectedComfyWorkflowPath === item.path} data-sfx-hover="hover-soft" data-sfx-click={item.isDirectory ? 'soft' : 'select'} on:click={() => onSelectWorkflowItem(item)}>
+            <span class="node-label">{item.isDirectory ? 'dir' : 'workflow'} {item.name}</span>
+            <span class="kind">{item.isDirectory ? 'dir' : 'workflow'}</span>
+          </button>
+        {/each}
+      {/if}
+    </div>
+  </details>
 
   <div class="tuple-group">
     <div class="tuple-label">Mesh Backend</div>
@@ -127,7 +179,7 @@ function emit(type: string) {
 
   <div class="button-row compact">
     <button disabled={hunyuanBusy || !hunyuanBackendCanGenerate} on:click={() => emit('generateScratch')}>
-      {hunyuanBusy ? 'Working…' : 'Generate To Library Only'}
+      {hunyuanBusy ? 'Working…' : 'Generate And Add To Scene'}
     </button>
     <button disabled={hunyuanBusy} on:click={() => emit('editGenerateWorkflow')}>
       Edit Generate Workflow
@@ -141,7 +193,7 @@ function emit(type: string) {
     <div class="tuple-label">Scratch Reference Image</div>
     <input class="text-input" bind:value={hunyuanScratchReferenceImageUrl} placeholder="/models/.../reference.png" />
   </div>
-  <div class="save-message">Creates a brand-new asset in the generated library. This does not replace the current selection.</div>
+  <div class="save-message">Creates a brand-new asset in the generated library and adds it to the scene without replacing the current selection.</div>
   <div class="tuple-group">
     <div class="tuple-label">Scratch Prompt</div>
     <textarea
@@ -300,16 +352,6 @@ function emit(type: string) {
         <button disabled={!canApplyGeneratedAssetToSelection} on:click={() => emit('applyGeneratedAsset')}>Apply To Selection</button>
         <button on:click={() => emit('saveGeneratedResult')}>Save Level</button>
       </div>
-    </div>
-  {/if}
-
-  {#if runtimeAssetFailures.length > 0}
-    <div class="editor-subsection">
-      <div class="tuple-label">Recent Asset Failures</div>
-      <div class="save-message">If an object vanished after replacement, the engine reports load/render failures here.</div>
-      {#each runtimeAssetFailures.slice(0, 5) as failure (failure.id)}
-        <div class="save-message error-message">{failure.source}: {failure.message}</div>
-      {/each}
     </div>
   {/if}
 

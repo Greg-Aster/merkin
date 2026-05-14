@@ -30,6 +30,7 @@ export type {
   TerrainManifest,
   TerrainRuntimeComponentData,
   TerrainRuntimeComponentSource,
+  TerrainRuntimeVisualContract,
 } from './terrainManifest'
 
 // Types

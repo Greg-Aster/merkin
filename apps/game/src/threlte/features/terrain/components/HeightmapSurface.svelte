@@ -9,6 +9,7 @@ export let resolution = 0
 export let worldSize = 1
 export let worldSizeX: number | undefined = undefined
 export let worldSizeZ: number | undefined = undefined
+export let verticalOffset = 0
 export let bounds: {
   min: [number, number, number]
   max: [number, number, number]
@@ -236,10 +237,10 @@ $: if (heightData && resolution > 1 && terrainStyleSignature) {
 $: surfacePosition = bounds
   ? [
       (bounds.min[0] + bounds.max[0]) / 2,
-      0,
+      verticalOffset,
       (bounds.min[2] + bounds.max[2]) / 2,
     ]
-  : [0, 0, 0]
+  : [0, verticalOffset, 0]
 
 onDestroy(() => {
   disposeResources()

@@ -13,6 +13,7 @@ import {
 } from './editorRegistry'
 import {
   type EditorInteractionMode,
+  type EditorObjectToolMode,
   type EditorSpace,
   type EditorTransformAxis,
   type EditorTransformMode,
@@ -65,6 +66,7 @@ let transformControlsHelper: THREE.Object3D | null = null
 let controlsInitialized = false
 let selectedNodeId: string | null = null
 let selectedNodeIds: string[] = []
+let objectToolMode: EditorObjectToolMode = 'translate'
 let transformMode: EditorTransformMode = 'translate'
 let transformSpace: EditorSpace = 'world'
 let transformAxis: EditorTransformAxis = 'all'
@@ -131,6 +133,7 @@ const unsubscribe = editorStateStore.subscribe(state => {
   selectedNodeId = state.selectedNodeId
   selectedNodeIds = state.selectedNodeIds
   interactionMode = state.interactionMode
+  objectToolMode = state.objectToolMode
   viewportLightingMode = state.viewportLightingMode
   transformMode = state.transformMode
   transformSpace = state.transformSpace
@@ -324,6 +327,11 @@ function showAllNodes() {
 
 function syncSelectionAttachment() {
   if (!transformControls) return
+  if (objectToolMode === 'select') {
+    multiSelectionActive = false
+    transformControls.detach()
+    return
+  }
 
   const transformableSelectedNodeIds = getTransformableSelectedNodeIds()
 
@@ -1471,6 +1479,18 @@ $: if (controlsInitialized) {
   if (orbitControls && !marqueeSelecting) {
     orbitControls.enabled = enabled && orbitEnabled && !circleSelectActive
   }
+  if (transformControls) {
+    transformControls.enabled = enabled
+  }
+  if (transformControlsHelper) {
+    transformControlsHelper.visible = enabled
+  }
+}
+
+$: if (!enabled && controlsInitialized) {
+  if (marqueeSelecting) stopMarqueeSelection()
+  if (circleSelectActive) deactivateCircleSelectTool()
+  if (modalSession) cancelModalTransform()
 }
 
 $: if (interactionMode !== 'objects' && circleSelectActive) {
@@ -1534,13 +1554,11 @@ onDestroy(() => {
 })
 </script>
 
-{#if enabled}
-  <T.PerspectiveCamera
-    makeDefault
-    bind:ref={camera}
-    position={[8, 6, 12]}
-    fov={55}
-    near={0.1}
-    far={5000}
-  />
-{/if}
+<T.PerspectiveCamera
+  makeDefault={enabled}
+  bind:ref={camera}
+  position={[8, 6, 12]}
+  fov={55}
+  near={0.1}
+  far={5000}
+/>

@@ -1,6 +1,14 @@
 <script lang="ts">
+import type { EditorSceneDocument } from '../engine/sceneDocumentTypes'
 import EditorSavePanel from './EditorSavePanel.svelte'
+import {
+  type EditorPublishPipelineState,
+  createInitialEditorPublishPipelineState,
+} from './editorPublishReadinessContracts'
+import type { EditorTerrainStatusSnapshot } from './editorTerrainPipeline'
 
+export let levelId = ''
+export let editorScene: EditorSceneDocument | null = null
 export let metadataTitle = ''
 export let metadataStatus: 'active' | 'draft' | 'archived' = 'draft'
 export let metadataDeployed = false
@@ -12,6 +20,12 @@ export let saveAsTitle = ''
 export let saveAsLevelId = ''
 export let importBuffer = ''
 export let saveMessage = ''
+export let groundTerrainPublishPending = false
+export let terrainStatus: EditorTerrainStatusSnapshot | null = null
+export let terrainPipelinePending = false
+export let worldPartitionCookPending = false
+export let publishPipelineState: EditorPublishPipelineState =
+  createInitialEditorPublishPipelineState()
 
 export let onSaveLevelMetadata: () => void = () => {}
 export let onSaveLocal: () => void = () => {}
@@ -23,9 +37,13 @@ export let onLoadOriginalSnapshot: () => void = () => {}
 export let onLoadBackupSnapshot: () => void = () => {}
 export let onSaveAsNewLevel: () => void = () => {}
 export let onApplyImport: () => void = () => {}
+export let onPublishLevel: () => void = () => {}
+export let onPublishGroundTerrainContracts: () => void = () => {}
 </script>
 
 <EditorSavePanel
+  {levelId}
+  {editorScene}
   bind:metadataTitle
   bind:metadataStatus
   bind:metadataDeployed
@@ -37,6 +55,11 @@ export let onApplyImport: () => void = () => {}
   bind:saveAsLevelId
   bind:importBuffer
   {saveMessage}
+  {groundTerrainPublishPending}
+  {terrainStatus}
+  {terrainPipelinePending}
+  {worldPartitionCookPending}
+  {publishPipelineState}
   {onSaveLevelMetadata}
   {onSaveLocal}
   {onOverwriteLevel}
@@ -47,4 +70,6 @@ export let onApplyImport: () => void = () => {}
   {onLoadBackupSnapshot}
   {onSaveAsNewLevel}
   {onApplyImport}
+  {onPublishLevel}
+  {onPublishGroundTerrainContracts}
 />

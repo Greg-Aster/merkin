@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "bake-mesh-collider",
+  "generatedAt": "2026-05-13T01:03:37.969Z",
+  "sourceLevelId": "yggdrasil",
+  "sourceActorId": "yggdrasil-planter-urd",
+  "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "e6091a80676c00090994d52260cdef6ee6b39f5d80996b7e396195ddb65a1d9c"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-planter-urd.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-planter-urd.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-planter-urd.collider.meta.json",
+  "triangleCount": 19000,
+  "vertexCount": 14172,
+  "bounds": {
+    "min": [
+      -0.7556721568107605,
+      -0.9996722340583801,
+      -0.6453370451927185
+    ],
+    "max": [
+      0.7226167917251587,
+      0.9731417894363403,
+      0.6983928680419922
+    ],
+    "size": [
+      1.4782889485359192,
+      1.9728140234947205,
+      1.3437299132347107
+    ],
+    "center": [
+      -0.016527682542800903,
+      -0.013265222311019897,
+      0.02652791142463684
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.7556721568107605,
+      -1.0000663995742798,
+      -0.6454210877418518
+    ],
+    "max": [
+      0.7232809066772461,
+      0.9731586575508118,
+      0.6983928680419922
+    ],
+    "size": [
+      1.4789530634880066,
+      1.9732250571250916,
+      1.343813955783844
+    ],
+    "center": [
+      -0.016195625066757202,
+      -0.013453871011734009,
+      0.02648589015007019
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.7556721568107605,
+      -0.9996722340583801,
+      -0.6453370451927185
+    ],
+    "max": [
+      0.7226167917251587,
+      0.9731417894363403,
+      0.6983928680419922
+    ],
+    "size": [
+      1.4782889485359192,
+      1.9728140234947205,
+      1.3437299132347107
+    ],
+    "center": [
+      -0.016527682542800903,
+      -0.013265222311019897,
+      0.02652791142463684
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+    "sourceNodeName": "Well of Urd Root Shrine",
+    "visualLocalBounds": {
+      "min": [
+        -0.7556721568107605,
+        -1.0000663995742798,
+        -0.6454210877418518
+      ],
+      "max": [
+        0.7232809066772461,
+        0.9731586575508118,
+        0.6983928680419922
+      ],
+      "size": [
+        1.4789530634880066,
+        1.9732250571250916,
+        1.343813955783844
+      ],
+      "center": [
+        -0.016195625066757202,
+        -0.013453871011734009,
+        0.02648589015007019
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.7556721568107605,
+        -0.9996722340583801,
+        -0.6453370451927185
+      ],
+      "max": [
+        0.7226167917251587,
+        0.9731417894363403,
+        0.6983928680419922
+      ],
+      "size": [
+        1.4782889485359192,
+        1.9728140234947205,
+        1.3437299132347107
+      ],
+      "center": [
+        -0.016527682542800903,
+        -0.013265222311019897,
+        0.02652791142463684
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "yggdrasil-planter-urd",
+    "sourceActorName": "Well of Urd Root Shrine",
+    "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "e6091a80676c00090994d52260cdef6ee6b39f5d80996b7e396195ddb65a1d9c"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "yggdrasil",
+      "nodeId": "yggdrasil-planter-urd",
+      "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 20000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-13T01:03:37.969Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 20000
+  },
+  "simplification": {
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 50000,
+    "targetTriangleBudget": 20000,
+    "ratio": 0.38,
+    "tool": "gltf-transform",
+    "prepass": "weld",
+    "error": 0.05
+  }
+}

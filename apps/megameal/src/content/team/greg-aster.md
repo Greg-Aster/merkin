@@ -2,7 +2,7 @@
 name: "Gregory Aster"
 role: "Experimental Videographer & Cosmic Storyteller"
 image: "/assets/avatar/avatar.png" 
-email: "greg@dndiy.org"
+email: "Greg@megameal.org"
 featured: true
 order: 1
 ---

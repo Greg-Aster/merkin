@@ -6,6 +6,7 @@ import type {
   TerrainChunk,
   TerrainConfig,
   TerrainManager,
+  TerrainSourceContract,
 } from './TerrainManager'
 
 export type { TerrainConfig, TerrainChunk }
@@ -36,11 +37,20 @@ export interface TerrainRuntimeReadyDetail {
   heightmapUrl: string
   heightmapReady: boolean
   collisionReady: boolean
+  visualReady?: boolean
   bounds: TerrainState['bounds']
   resolution: number
   worldSize: number
   worldSizeX?: number
   worldSizeZ?: number
+  visual?: {
+    authoritativeSource: string
+    fallbackSurfacePolicy: string
+    fallbackSurfaceActive: boolean
+    activeChunkCount?: number
+    loadedChunkCount?: number
+    failedChunkCount?: number
+  }
   collision?: {
     type: 'baked-terrain-mesh'
     authoredException: true
@@ -49,5 +59,6 @@ export interface TerrainRuntimeReadyDetail {
     colliderResolution: number
     sampleStep: number
     triangleCount: number
+    sourceContract?: TerrainSourceContract
   }
 }

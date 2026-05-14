@@ -61,6 +61,18 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.editor-action-grid,
+.editor-regeneration-grid,
+.editor-scope-summary {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.editor-regeneration-grid,
+.editor-action-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .text-input,
 .tuple-input,
 .editor-shell textarea,
@@ -188,6 +200,46 @@
 .editor-workflow-step-danger {
   border-color: rgba(255, 120, 140, 0.28);
   background: rgba(28, 12, 18, 0.55);
+}
+
+.editor-regeneration-hero {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.editor-action-card,
+.editor-scope-summary > div {
+  padding: 0.52rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(126, 203, 255, 0.12);
+  background: rgba(10, 16, 24, 0.62);
+}
+
+.editor-action-card.recommended {
+  border-color: rgba(128, 221, 163, 0.28);
+  background: rgba(10, 26, 18, 0.5);
+}
+
+.editor-action-card.danger {
+  border-color: rgba(255, 120, 140, 0.28);
+  background: rgba(28, 12, 18, 0.5);
+}
+
+.editor-advanced-block {
+  border-color: rgba(126, 203, 255, 0.1);
+}
+
+.editor-advanced-block > summary {
+  cursor: pointer;
+}
+
+.editor-run-log {
+  max-height: 10rem;
+  overflow: auto;
+  padding: 0.42rem 0.52rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(126, 203, 255, 0.1);
+  background: rgba(4, 7, 11, 0.72);
 }
 
 .editor-status-title,
@@ -338,4 +390,11 @@
   align-items: center;
   gap: 0.45rem;
   font-weight: 600;
+}
+
+@media (max-width: 56rem) {
+  .editor-regeneration-grid,
+  .editor-action-grid {
+    grid-template-columns: 1fr;
+  }
 }

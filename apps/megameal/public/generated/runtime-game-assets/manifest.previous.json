@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-12T17:50:22.648Z",
+  "generatedAt": "2026-05-13T22:31:20.893Z",
   "contentBuild": {
     "schemaVersion": 1,
-    "buildId": "runtime-assets-2026-05-12T17-50-22-648Z-dfa54a29a284",
-    "generatedAt": "2026-05-12T17:50:22.648Z",
+    "buildId": "runtime-assets-2026-05-13T22-31-20-893Z-47244152bd4c",
+    "generatedAt": "2026-05-13T22:31:20.893Z",
     "builder": {
       "name": "cook-runtime-assets",
       "command": "pnpm --dir apps/game cook:runtime-assets"
     },
     "git": {
       "branch": "dev",
-      "commit": "d5ad7f034afff23633f06731a7628db0ab9debb2",
+      "commit": "54069e7207761cd367e6becb57e5f495cf9cb4ab",
       "dirty": true
     },
-    "fingerprint": "dfa54a29a284f4bf3ec81d639510431750ff1b982d7bd6d9f015f24c81c3b720",
+    "fingerprint": "47244152bd4c34b6687c61f3e1d8b91d8d7385147d96cb699387a4edbe5e7c4a",
     "rollback": {
       "strategy": "single-previous-manifest",
       "currentManifestUrl": "/generated/runtime-game-assets/manifest.json",
@@ -137,21 +137,21 @@
   },
   "summary": {
     "sourceAssetCount": 58,
-    "sourceAssetBytes": 122801273,
-    "sourceAssetSize": "117.1MB",
-    "cookedAssetCount": 58,
-    "cookedVariantCount": 174,
+    "sourceAssetBytes": 127728929,
+    "sourceAssetSize": "121.8MB",
+    "cookedAssetCount": 57,
+    "cookedVariantCount": 171,
     "cookedTierCoverage": {
-      "high": 58,
-      "medium": 58,
-      "low": 58
+      "high": 57,
+      "medium": 57,
+      "low": 57
     },
     "missingSourceAssetCount": 0,
     "rawGeneratedRuntimeAssetCount": 54,
     "requiredAssetCount": 12,
     "optionalAssetCount": 46,
     "metadataAssetCount": 58,
-    "variantMetadataCount": 174,
+    "variantMetadataCount": 171,
     "lodAssetCount": 58,
     "impostorDescriptorCount": 58,
     "impostorAtlasEntryCount": 58,
@@ -160,7 +160,7 @@
   "impostorAtlas": {
     "schemaVersion": 1,
     "strategy": "bounds-billboard-atlas",
-    "generatedAt": "2026-05-12T17:50:22.648Z",
+    "generatedAt": "2026-05-13T22:31:20.893Z",
     "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
     "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
     "tileSize": 256,
@@ -533,9 +533,9 @@
         }
       },
       {
-        "sourceUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+        "sourceUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
         "index": 8,
-        "color": "hsl(259 75% 49%)",
+        "color": "hsl(197 57% 59%)",
         "cell": {
           "x": 0,
           "y": 256,
@@ -546,6 +546,51 @@
           "u0": 0,
           "v0": 0.125,
           "u1": 0.125,
+          "v1": 0.25
+        },
+        "billboardRect": {
+          "x": 30.72,
+          "y": 54.81,
+          "width": 194.56,
+          "height": 146.37
+        },
+        "bounds": {
+          "min": [
+            -0.9992300868034363,
+            -0.7572119832038879,
+            -0.9886918663978577
+          ],
+          "max": [
+            0.9740453362464905,
+            0.727324903011322,
+            0.9728116989135742
+          ],
+          "size": [
+            1.9732754230499268,
+            1.48453688621521,
+            1.9615035653114319
+          ],
+          "center": [
+            -0.0125923752784729,
+            -0.014943540096282959,
+            -0.007940083742141724
+          ]
+        }
+      },
+      {
+        "sourceUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+        "index": 9,
+        "color": "hsl(259 75% 49%)",
+        "cell": {
+          "x": 256,
+          "y": 256,
+          "width": 256,
+          "height": 256
+        },
+        "uv": {
+          "u0": 0.125,
+          "v0": 0.125,
+          "u1": 0.25,
           "v1": 0.25
         },
         "billboardRect": {
@@ -579,18 +624,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
-        "index": 9,
+        "index": 10,
         "color": "hsl(157 57% 55%)",
         "cell": {
-          "x": 256,
+          "x": 512,
           "y": 256,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.125,
+          "u0": 0.25,
           "v0": 0.125,
-          "u1": 0.25,
+          "u1": 0.375,
           "v1": 0.25
         },
         "billboardRect": {
@@ -624,18 +669,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
-        "index": 10,
+        "index": 11,
         "color": "hsl(275 67% 47%)",
         "cell": {
-          "x": 512,
+          "x": 768,
           "y": 256,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.25,
+          "u0": 0.375,
           "v0": 0.125,
-          "u1": 0.375,
+          "u1": 0.5,
           "v1": 0.25
         },
         "billboardRect": {
@@ -669,18 +714,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
-        "index": 11,
+        "index": 12,
         "color": "hsl(108 68% 42%)",
         "cell": {
-          "x": 768,
+          "x": 1024,
           "y": 256,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.375,
+          "u0": 0.5,
           "v0": 0.125,
-          "u1": 0.5,
+          "u1": 0.625,
           "v1": 0.25
         },
         "billboardRect": {
@@ -714,18 +759,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
-        "index": 12,
+        "index": 13,
         "color": "hsl(31 67% 55%)",
         "cell": {
-          "x": 1024,
+          "x": 1280,
           "y": 256,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.5,
+          "u0": 0.625,
           "v0": 0.125,
-          "u1": 0.625,
+          "u1": 0.75,
           "v1": 0.25
         },
         "billboardRect": {
@@ -759,18 +804,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
-        "index": 13,
+        "index": 14,
         "color": "hsl(338 54% 56%)",
         "cell": {
-          "x": 1280,
+          "x": 1536,
           "y": 256,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.625,
+          "u0": 0.75,
           "v0": 0.125,
-          "u1": 0.75,
+          "u1": 0.875,
           "v1": 0.25
         },
         "billboardRect": {
@@ -804,18 +849,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
-        "index": 14,
+        "index": 15,
         "color": "hsl(323 51% 59%)",
         "cell": {
-          "x": 1536,
+          "x": 1792,
           "y": 256,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.75,
+          "u0": 0.875,
           "v0": 0.125,
-          "u1": 0.875,
+          "u1": 1,
           "v1": 0.25
         },
         "billboardRect": {
@@ -849,19 +894,19 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
-        "index": 15,
+        "index": 16,
         "color": "hsl(96 56% 48%)",
         "cell": {
-          "x": 1792,
-          "y": 256,
+          "x": 0,
+          "y": 512,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.875,
-          "v0": 0.125,
-          "u1": 1,
-          "v1": 0.25
+          "u0": 0,
+          "v0": 0.25,
+          "u1": 0.125,
+          "v1": 0.375
         },
         "billboardRect": {
           "x": 94.27,
@@ -894,18 +939,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb",
-        "index": 16,
+        "index": 17,
         "color": "hsl(300 72% 54%)",
         "cell": {
-          "x": 0,
+          "x": 256,
           "y": 512,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0,
+          "u0": 0.125,
           "v0": 0.25,
-          "u1": 0.125,
+          "u1": 0.25,
           "v1": 0.375
         },
         "billboardRect": {
@@ -939,18 +984,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
-        "index": 17,
+        "index": 18,
         "color": "hsl(301 69% 55%)",
         "cell": {
-          "x": 256,
+          "x": 512,
           "y": 512,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.125,
+          "u0": 0.25,
           "v0": 0.25,
-          "u1": 0.25,
+          "u1": 0.375,
           "v1": 0.375
         },
         "billboardRect": {
@@ -984,18 +1029,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
-        "index": 18,
+        "index": 19,
         "color": "hsl(94 54% 46%)",
         "cell": {
-          "x": 512,
+          "x": 768,
           "y": 512,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.25,
+          "u0": 0.375,
           "v0": 0.25,
-          "u1": 0.375,
+          "u1": 0.5,
           "v1": 0.375
         },
         "billboardRect": {
@@ -1029,18 +1074,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
-        "index": 19,
+        "index": 20,
         "color": "hsl(45 61% 51%)",
         "cell": {
-          "x": 768,
+          "x": 1024,
           "y": 512,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.375,
+          "u0": 0.5,
           "v0": 0.25,
-          "u1": 0.5,
+          "u1": 0.625,
           "v1": 0.375
         },
         "billboardRect": {
@@ -1074,18 +1119,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
-        "index": 20,
+        "index": 21,
         "color": "hsl(226 58% 52%)",
         "cell": {
-          "x": 1024,
+          "x": 1280,
           "y": 512,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.5,
+          "u0": 0.625,
           "v0": 0.25,
-          "u1": 0.625,
+          "u1": 0.75,
           "v1": 0.375
         },
         "billboardRect": {
@@ -1119,18 +1164,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
-        "index": 21,
+        "index": 22,
         "color": "hsl(41 61% 47%)",
         "cell": {
-          "x": 1280,
+          "x": 1536,
           "y": 512,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.625,
+          "u0": 0.75,
           "v0": 0.25,
-          "u1": 0.75,
+          "u1": 0.875,
           "v1": 0.375
         },
         "billboardRect": {
@@ -1164,18 +1209,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
-        "index": 22,
+        "index": 23,
         "color": "hsl(258 50% 48%)",
         "cell": {
-          "x": 1536,
+          "x": 1792,
           "y": 512,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.75,
+          "u0": 0.875,
           "v0": 0.25,
-          "u1": 0.875,
+          "u1": 1,
           "v1": 0.375
         },
         "billboardRect": {
@@ -1209,19 +1254,19 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb",
-        "index": 23,
+        "index": 24,
         "color": "hsl(359 51% 59%)",
         "cell": {
-          "x": 1792,
-          "y": 512,
+          "x": 0,
+          "y": 768,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.875,
-          "v0": 0.25,
-          "u1": 1,
-          "v1": 0.375
+          "u0": 0,
+          "v0": 0.375,
+          "u1": 0.125,
+          "v1": 0.5
         },
         "billboardRect": {
           "x": 64.69,
@@ -1254,18 +1299,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
-        "index": 24,
+        "index": 25,
         "color": "hsl(162 50% 42%)",
         "cell": {
-          "x": 0,
+          "x": 256,
           "y": 768,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0,
+          "u0": 0.125,
           "v0": 0.375,
-          "u1": 0.125,
+          "u1": 0.25,
           "v1": 0.5
         },
         "billboardRect": {
@@ -1299,18 +1344,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
-        "index": 25,
+        "index": 26,
         "color": "hsl(115 55% 49%)",
         "cell": {
-          "x": 256,
+          "x": 512,
           "y": 768,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.125,
+          "u0": 0.25,
           "v0": 0.375,
-          "u1": 0.25,
+          "u1": 0.375,
           "v1": 0.5
         },
         "billboardRect": {
@@ -1344,18 +1389,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb",
-        "index": 26,
+        "index": 27,
         "color": "hsl(308 60% 44%)",
         "cell": {
-          "x": 512,
+          "x": 768,
           "y": 768,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.25,
+          "u0": 0.375,
           "v0": 0.375,
-          "u1": 0.375,
+          "u1": 0.5,
           "v1": 0.5
         },
         "billboardRect": {
@@ -1389,18 +1434,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
-        "index": 27,
+        "index": 28,
         "color": "hsl(294 50% 48%)",
         "cell": {
-          "x": 768,
+          "x": 1024,
           "y": 768,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.375,
+          "u0": 0.5,
           "v0": 0.375,
-          "u1": 0.5,
+          "u1": 0.625,
           "v1": 0.5
         },
         "billboardRect": {
@@ -1434,18 +1479,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
-        "index": 28,
+        "index": 29,
         "color": "hsl(346 74% 46%)",
         "cell": {
-          "x": 1024,
+          "x": 1280,
           "y": 768,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.5,
+          "u0": 0.625,
           "v0": 0.375,
-          "u1": 0.625,
+          "u1": 0.75,
           "v1": 0.5
         },
         "billboardRect": {
@@ -1479,18 +1524,18 @@
       },
       {
         "sourceUrl": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
-        "index": 29,
+        "index": 30,
         "color": "hsl(189 65% 51%)",
         "cell": {
-          "x": 1280,
+          "x": 1536,
           "y": 768,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.625,
+          "u0": 0.75,
           "v0": 0.375,
-          "u1": 0.75,
+          "u1": 0.875,
           "v1": 0.5
         },
         "billboardRect": {
@@ -1524,18 +1569,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-cyan.glb",
-        "index": 30,
+        "index": 31,
         "color": "hsl(146 74% 44%)",
         "cell": {
-          "x": 1536,
+          "x": 1792,
           "y": 768,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.75,
+          "u0": 0.875,
           "v0": 0.375,
-          "u1": 0.875,
+          "u1": 1,
           "v1": 0.5
         },
         "billboardRect": {
@@ -1569,19 +1614,19 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-green.glb",
-        "index": 31,
+        "index": 32,
         "color": "hsl(54 66% 42%)",
         "cell": {
-          "x": 1792,
-          "y": 768,
+          "x": 0,
+          "y": 1024,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.875,
-          "v0": 0.375,
-          "u1": 1,
-          "v1": 0.5
+          "u0": 0,
+          "v0": 0.5,
+          "u1": 0.125,
+          "v1": 0.625
         },
         "billboardRect": {
           "x": 30.72,
@@ -1614,18 +1659,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
-        "index": 32,
+        "index": 33,
         "color": "hsl(274 62% 46%)",
         "cell": {
-          "x": 0,
+          "x": 256,
           "y": 1024,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0,
+          "u0": 0.125,
           "v0": 0.5,
-          "u1": 0.125,
+          "u1": 0.25,
           "v1": 0.625
         },
         "billboardRect": {
@@ -1659,18 +1704,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb",
-        "index": 33,
+        "index": 34,
         "color": "hsl(162 66% 42%)",
         "cell": {
-          "x": 256,
+          "x": 512,
           "y": 1024,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.125,
+          "u0": 0.25,
           "v0": 0.5,
-          "u1": 0.25,
+          "u1": 0.375,
           "v1": 0.625
         },
         "billboardRect": {
@@ -1704,18 +1749,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
-        "index": 34,
+        "index": 35,
         "color": "hsl(198 62% 42%)",
         "cell": {
-          "x": 512,
+          "x": 768,
           "y": 1024,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.25,
+          "u0": 0.375,
           "v0": 0.5,
-          "u1": 0.375,
+          "u1": 0.5,
           "v1": 0.625
         },
         "billboardRect": {
@@ -1749,18 +1794,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-        "index": 35,
+        "index": 36,
         "color": "hsl(128 60% 44%)",
         "cell": {
-          "x": 768,
+          "x": 1024,
           "y": 1024,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.375,
+          "u0": 0.5,
           "v0": 0.5,
-          "u1": 0.5,
+          "u1": 0.625,
           "v1": 0.625
         },
         "billboardRect": {
@@ -1794,18 +1839,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
-        "index": 36,
+        "index": 37,
         "color": "hsl(96 52% 48%)",
         "cell": {
-          "x": 1024,
+          "x": 1280,
           "y": 1024,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.5,
+          "u0": 0.625,
           "v0": 0.5,
-          "u1": 0.625,
+          "u1": 0.75,
           "v1": 0.625
         },
         "billboardRect": {
@@ -1839,18 +1884,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
-        "index": 37,
+        "index": 38,
         "color": "hsl(284 52% 56%)",
         "cell": {
-          "x": 1280,
+          "x": 1536,
           "y": 1024,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.625,
+          "u0": 0.75,
           "v0": 0.5,
-          "u1": 0.75,
+          "u1": 0.875,
           "v1": 0.625
         },
         "billboardRect": {
@@ -1884,18 +1929,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
-        "index": 38,
+        "index": 39,
         "color": "hsl(258 50% 48%)",
         "cell": {
-          "x": 1536,
+          "x": 1792,
           "y": 1024,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.75,
+          "u0": 0.875,
           "v0": 0.5,
-          "u1": 0.875,
+          "u1": 1,
           "v1": 0.625
         },
         "billboardRect": {
@@ -1929,19 +1974,19 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
-        "index": 39,
+        "index": 40,
         "color": "hsl(284 56% 56%)",
         "cell": {
-          "x": 1792,
-          "y": 1024,
+          "x": 0,
+          "y": 1280,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.875,
-          "v0": 0.5,
-          "u1": 1,
-          "v1": 0.625
+          "u0": 0,
+          "v0": 0.625,
+          "u1": 0.125,
+          "v1": 0.75
         },
         "billboardRect": {
           "x": 121.11,
@@ -1974,18 +2019,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
-        "index": 40,
+        "index": 41,
         "color": "hsl(278 58% 50%)",
         "cell": {
-          "x": 0,
+          "x": 256,
           "y": 1280,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0,
+          "u0": 0.125,
           "v0": 0.625,
-          "u1": 0.125,
+          "u1": 0.25,
           "v1": 0.75
         },
         "billboardRect": {
@@ -2019,18 +2064,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
-        "index": 41,
+        "index": 42,
         "color": "hsl(290 70% 44%)",
         "cell": {
-          "x": 256,
+          "x": 512,
           "y": 1280,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.125,
+          "u0": 0.25,
           "v0": 0.625,
-          "u1": 0.25,
+          "u1": 0.375,
           "v1": 0.75
         },
         "billboardRect": {
@@ -2064,18 +2109,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
-        "index": 42,
+        "index": 43,
         "color": "hsl(100 68% 52%)",
         "cell": {
-          "x": 512,
+          "x": 768,
           "y": 1280,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.25,
+          "u0": 0.375,
           "v0": 0.625,
-          "u1": 0.375,
+          "u1": 0.5,
           "v1": 0.75
         },
         "billboardRect": {
@@ -2109,18 +2154,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
-        "index": 43,
+        "index": 44,
         "color": "hsl(318 74% 54%)",
         "cell": {
-          "x": 768,
+          "x": 1024,
           "y": 1280,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.375,
+          "u0": 0.5,
           "v0": 0.625,
-          "u1": 0.5,
+          "u1": 0.625,
           "v1": 0.75
         },
         "billboardRect": {
@@ -2154,53 +2199,8 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
-        "index": 44,
-        "color": "hsl(220 60% 46%)",
-        "cell": {
-          "x": 1024,
-          "y": 1280,
-          "width": 256,
-          "height": 256
-        },
-        "uv": {
-          "u0": 0.5,
-          "v0": 0.625,
-          "u1": 0.625,
-          "v1": 0.75
-        },
-        "billboardRect": {
-          "x": 30.72,
-          "y": 101.77,
-          "width": 194.56,
-          "height": 52.46
-        },
-        "bounds": {
-          "min": [
-            -0.36000001430511475,
-            -1.4901161415892261e-9,
-            -0.4688721001148224
-          ],
-          "max": [
-            0.4449999928474426,
-            0.21707090735435486,
-            0.47316426038742065
-          ],
-          "size": [
-            0.8050000071525574,
-            0.217070908844471,
-            0.942036360502243
-          ],
-          "center": [
-            0.04249998927116394,
-            0.10853545293211936,
-            0.0021460801362991333
-          ]
-        }
-      },
-      {
-        "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
         "index": 45,
-        "color": "hsl(40 64% 46%)",
+        "color": "hsl(220 60% 46%)",
         "cell": {
           "x": 1280,
           "y": 1280,
@@ -2243,9 +2243,9 @@
         }
       },
       {
-        "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-green.glb",
+        "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
         "index": 46,
-        "color": "hsl(252 48% 42%)",
+        "color": "hsl(40 64% 46%)",
         "cell": {
           "x": 1536,
           "y": 1280,
@@ -2288,9 +2288,9 @@
         }
       },
       {
-        "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+        "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-green.glb",
         "index": 47,
-        "color": "hsl(12 68% 54%)",
+        "color": "hsl(252 48% 42%)",
         "cell": {
           "x": 1792,
           "y": 1280,
@@ -2333,9 +2333,9 @@
         }
       },
       {
-        "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+        "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
         "index": 48,
-        "color": "hsl(72 72% 42%)",
+        "color": "hsl(12 68% 54%)",
         "cell": {
           "x": 0,
           "y": 1536,
@@ -2378,9 +2378,9 @@
         }
       },
       {
-        "sourceUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
         "index": 49,
-        "color": "hsl(126 70% 42%)",
+        "color": "hsl(72 72% 42%)",
         "cell": {
           "x": 256,
           "y": 1536,
@@ -2391,6 +2391,51 @@
           "u0": 0.125,
           "v0": 0.75,
           "u1": 0.25,
+          "v1": 0.875
+        },
+        "billboardRect": {
+          "x": 30.72,
+          "y": 101.77,
+          "width": 194.56,
+          "height": 52.46
+        },
+        "bounds": {
+          "min": [
+            -0.36000001430511475,
+            -1.4901161415892261e-9,
+            -0.4688721001148224
+          ],
+          "max": [
+            0.4449999928474426,
+            0.21707090735435486,
+            0.47316426038742065
+          ],
+          "size": [
+            0.8050000071525574,
+            0.217070908844471,
+            0.942036360502243
+          ],
+          "center": [
+            0.04249998927116394,
+            0.10853545293211936,
+            0.0021460801362991333
+          ]
+        }
+      },
+      {
+        "sourceUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "index": 50,
+        "color": "hsl(126 70% 42%)",
+        "cell": {
+          "x": 512,
+          "y": 1536,
+          "width": 256,
+          "height": 256
+        },
+        "uv": {
+          "u0": 0.25,
+          "v0": 0.75,
+          "u1": 0.375,
           "v1": 0.875
         },
         "billboardRect": {
@@ -2424,18 +2469,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
-        "index": 50,
+        "index": 51,
         "color": "hsl(40 56% 46%)",
         "cell": {
-          "x": 512,
+          "x": 768,
           "y": 1536,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.25,
+          "u0": 0.375,
           "v0": 0.75,
-          "u1": 0.375,
+          "u1": 0.5,
           "v1": 0.875
         },
         "billboardRect": {
@@ -2469,18 +2514,18 @@
       },
       {
         "sourceUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
-        "index": 51,
+        "index": 52,
         "color": "hsl(238 50% 46%)",
         "cell": {
-          "x": 768,
+          "x": 1024,
           "y": 1536,
           "width": 256,
           "height": 256
         },
         "uv": {
-          "u0": 0.375,
+          "u0": 0.5,
           "v0": 0.75,
-          "u1": 0.5,
+          "u1": 0.625,
           "v1": 0.875
         },
         "billboardRect": {
@@ -2509,51 +2554,6 @@
             0,
             0.06999999284744263,
             0.02000001072883606
-          ]
-        }
-      },
-      {
-        "sourceUrl": "/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb",
-        "index": 52,
-        "color": "hsl(308 60% 44%)",
-        "cell": {
-          "x": 1024,
-          "y": 1536,
-          "width": 256,
-          "height": 256
-        },
-        "uv": {
-          "u0": 0.5,
-          "v0": 0.75,
-          "u1": 0.625,
-          "v1": 0.875
-        },
-        "billboardRect": {
-          "x": 30.72,
-          "y": 120.81,
-          "width": 194.56,
-          "height": 14.37
-        },
-        "bounds": {
-          "min": [
-            -88,
-            -6.5,
-            -88
-          ],
-          "max": [
-            88,
-            6.5,
-            88
-          ],
-          "size": [
-            176,
-            13,
-            176
-          ],
-          "center": [
-            0,
-            0,
-            0
           ]
         }
       },
@@ -9647,6 +9647,436 @@
         }
       }
     },
+    "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb": {
+      "sourceUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+      "status": "required",
+      "required": true,
+      "sourceExists": true,
+      "sourceSizeBytes": 4937116,
+      "sourcePath": "apps/megameal/public/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+      "scenes": [
+        {
+          "sceneId": "yggdrasil",
+          "nodeIds": [
+            "yggdrasil-mound"
+          ],
+          "status": "required"
+        }
+      ],
+      "lod": {
+        "strategy": "mesh-simplification",
+        "sourceTier": "source",
+        "defaultTier": "medium",
+        "fallbackOrder": [
+          "medium",
+          "high",
+          "low"
+        ],
+        "tiers": [
+          {
+            "id": "high",
+            "index": 0,
+            "role": "near",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.002,
+            "simplifyLockBorder": false
+          },
+          {
+            "id": "medium",
+            "index": 1,
+            "role": "mid",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.005,
+            "simplifyLockBorder": false
+          },
+          {
+            "id": "low",
+            "index": 2,
+            "role": "far",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.01,
+            "simplifyLockBorder": false
+          }
+        ]
+      },
+      "impostor": {
+        "generated": true,
+        "strategy": "bounds-billboard",
+        "sourceTier": "low",
+        "textureSize": 256,
+        "bounds": {
+          "min": [
+            -0.9992300868034363,
+            -0.7572119832038879,
+            -0.9886918663978577
+          ],
+          "max": [
+            0.9740453362464905,
+            0.727324903011322,
+            0.9728116989135742
+          ],
+          "size": [
+            1.9732754230499268,
+            1.48453688621521,
+            1.9615035653114319
+          ],
+          "center": [
+            -0.0125923752784729,
+            -0.014943540096282959,
+            -0.007940083742141724
+          ]
+        },
+        "atlas": {
+          "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
+          "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
+          "index": 8,
+          "cell": {
+            "x": 0,
+            "y": 256,
+            "width": 256,
+            "height": 256
+          },
+          "uv": {
+            "u0": 0,
+            "v0": 0.125,
+            "u1": 0.125,
+            "v1": 0.25
+          },
+          "billboardRect": {
+            "x": 30.72,
+            "y": 54.81,
+            "width": 194.56,
+            "height": 146.37
+          }
+        },
+        "reason": "generated from source mesh bounds into runtime impostor atlas"
+      },
+      "materialCompliance": {
+        "policy": "pbr-slots-required-with-approved-exceptions",
+        "status": "approved-fallback",
+        "materialAuthoring": null,
+        "approvedMissingRecommendedSlots": [
+          {
+            "scope": "source",
+            "materialIndex": 0,
+            "slot": "metallicRoughness",
+            "fallback": "factor",
+            "reason": "AI generated runtime asset uses texture/factor fallback material slots pending authored PBR pass."
+          },
+          {
+            "scope": "source",
+            "materialIndex": 0,
+            "slot": "normal",
+            "fallback": "default",
+            "reason": "AI generated runtime asset uses texture/factor fallback material slots pending authored PBR pass."
+          }
+        ]
+      },
+      "importMetadata": {
+        "schemaVersion": 1,
+        "id": "hunyuan3d-generated-source:root-mound/root-mound-generated-2026-04-19T16-41-26-944Z",
+        "familyId": "hunyuan3d-generated-source",
+        "sourceUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+        "sourcePath": "apps/megameal/public/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+        "sourceRoot": "apps/megameal/public/generated/hunyuan3d",
+        "sourceKind": "render-source",
+        "authoringTool": "Hunyuan3D + local GLB postprocess",
+        "sourceNote": "Generated art source selected for runtime level dressing.",
+        "license": "project-generated",
+        "owner": "art-pipeline",
+        "status": "candidate",
+        "intendedLevels": [
+          "sci-fi-room",
+          "solitude",
+          "yggdrasil"
+        ],
+        "materialPolicy": {
+          "mode": "generated-pbr-review",
+          "provenance": "Generated texture/factor material slots pending authored PBR pass.",
+          "missingRecommendedSlots": "allowed-with-approved-exception"
+        },
+        "collisionPolicy": {
+          "kind": "render-only",
+          "pairing": "terrain-or-scene-collider"
+        },
+        "targetBudgets": {
+          "maxSourceBytes": 62914560,
+          "maxRuntimeVariantBytes": 41943040,
+          "maxTextureSize": 4096,
+          "defaultTier": "medium"
+        },
+        "naming": {
+          "rule": "<asset-folder>/<asset-name>-generated-<timestamp>.glb",
+          "deterministicCookOutput": true
+        }
+      },
+      "metadata": {
+        "format": "glb",
+        "valid": true,
+        "errors": [],
+        "nodeCount": 2,
+        "meshCount": 1,
+        "meshPrimitiveCount": 1,
+        "vertexCount": 33510,
+        "triangleCount": 50000,
+        "bounds": {
+          "min": [
+            -0.9992300868034363,
+            -0.7572119832038879,
+            -0.9886918663978577
+          ],
+          "max": [
+            0.9740453362464905,
+            0.727324903011322,
+            0.9728116989135742
+          ],
+          "size": [
+            1.9732754230499268,
+            1.48453688621521,
+            1.9615035653114319
+          ],
+          "center": [
+            -0.0125923752784729,
+            -0.014943540096282959,
+            -0.007940083742141724
+          ]
+        },
+        "materialCount": 1,
+        "materialSlots": 1,
+        "materials": [
+          {
+            "index": 0,
+            "alphaMode": "OPAQUE",
+            "doubleSided": false,
+            "pbrSlots": {
+              "baseColor": {
+                "textureIndex": 0,
+                "hasTexture": true,
+                "hasFactor": false,
+                "state": "texture"
+              },
+              "metallicRoughness": {
+                "textureIndex": null,
+                "hasTexture": false,
+                "hasFactor": true,
+                "state": "factor"
+              },
+              "normal": {
+                "textureIndex": null,
+                "hasTexture": false,
+                "hasFactor": false,
+                "state": "default"
+              },
+              "occlusion": {
+                "textureIndex": null,
+                "hasTexture": false,
+                "hasFactor": false,
+                "state": "default"
+              },
+              "emissive": {
+                "textureIndex": null,
+                "hasTexture": false,
+                "hasFactor": false,
+                "state": "default"
+              }
+            },
+            "extensions": [],
+            "unsupportedExtensions": []
+          }
+        ],
+        "materialValidation": {
+          "missingTextureReferences": [],
+          "missingRecommendedSlots": [
+            {
+              "materialIndex": 0,
+              "slot": "metallicRoughness",
+              "fallback": "factor"
+            },
+            {
+              "materialIndex": 0,
+              "slot": "normal",
+              "fallback": "default"
+            }
+          ],
+          "unsupportedExtensions": []
+        },
+        "materialAuthoring": null,
+        "textureCount": 1,
+        "imageCount": 1,
+        "textureBytes": 3665592,
+        "textures": [
+          {
+            "index": 0,
+            "imageIndex": 0,
+            "mimeType": "image/png",
+            "width": 2048,
+            "height": 2048,
+            "byteLength": 3665592,
+            "roles": [
+              "baseColor"
+            ],
+            "colorSpace": "srgb",
+            "compression": "none"
+          }
+        ],
+        "compression": {
+          "extensionsUsed": [],
+          "geometry": {
+            "dracoPrimitiveCount": 0,
+            "meshoptAccessorCount": 0,
+            "quantized": false
+          },
+          "textures": {
+            "basisuTextureCount": 0,
+            "webpTextureCount": 0,
+            "mimeTypes": {
+              "image/png": 1
+            }
+          }
+        }
+      },
+      "rawGeneratedRuntimeAsset": true,
+      "qualityVariants": {
+        "high": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.high.glb",
+          "lodTier": "high",
+          "lodIndex": 0,
+          "lodRole": "near",
+          "status": "required",
+          "required": true,
+          "exists": false,
+          "sizeBytes": 0,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 2048,
+            "simplifyRatio": 0.82,
+            "simplifyError": 0.002,
+            "simplifyLockBorder": false,
+            "recipe": null,
+            "retopology": null
+          },
+          "lodValidation": {
+            "generator": "gltf-transform optimize",
+            "generated": false,
+            "policy": {
+              "schemaVersion": 1,
+              "minSourceTrianglesForRatioTarget": 500,
+              "ratioTolerance": 0.005,
+              "absoluteTriangleTolerance": 64
+            },
+            "sourceTriangleCount": 50000,
+            "variantTriangleCount": 0,
+            "targetTriangleCount": 41000,
+            "actualRatio": 0,
+            "targetRatio": 0.82,
+            "triangleOverage": 0,
+            "ratioOverage": 0,
+            "exemptionReason": null,
+            "meetsTarget": false,
+            "monotonicOrder": [
+              "high",
+              "medium",
+              "low"
+            ]
+          }
+        },
+        "medium": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.medium.glb",
+          "lodTier": "medium",
+          "lodIndex": 1,
+          "lodRole": "mid",
+          "status": "required",
+          "required": true,
+          "exists": false,
+          "sizeBytes": 0,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 1024,
+            "simplifyRatio": 0.52,
+            "simplifyError": 0.005,
+            "simplifyLockBorder": false,
+            "recipe": null,
+            "retopology": null
+          },
+          "lodValidation": {
+            "generator": "gltf-transform optimize",
+            "generated": false,
+            "policy": {
+              "schemaVersion": 1,
+              "minSourceTrianglesForRatioTarget": 500,
+              "ratioTolerance": 0.005,
+              "absoluteTriangleTolerance": 64
+            },
+            "sourceTriangleCount": 50000,
+            "variantTriangleCount": 0,
+            "targetTriangleCount": 26000,
+            "actualRatio": 0,
+            "targetRatio": 0.52,
+            "triangleOverage": 0,
+            "ratioOverage": 0,
+            "exemptionReason": null,
+            "meetsTarget": false,
+            "monotonicOrder": [
+              "high",
+              "medium",
+              "low"
+            ]
+          }
+        },
+        "low": {
+          "url": "/generated/runtime-game-assets/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.low.glb",
+          "lodTier": "low",
+          "lodIndex": 2,
+          "lodRole": "far",
+          "status": "required",
+          "required": true,
+          "exists": false,
+          "sizeBytes": 0,
+          "pipeline": {
+            "command": "gltf-transform optimize",
+            "compress": "quantize",
+            "textureCompress": "webp",
+            "textureSize": 512,
+            "simplifyRatio": 0.28,
+            "simplifyError": 0.01,
+            "simplifyLockBorder": false,
+            "recipe": null,
+            "retopology": null
+          },
+          "lodValidation": {
+            "generator": "gltf-transform optimize",
+            "generated": false,
+            "policy": {
+              "schemaVersion": 1,
+              "minSourceTrianglesForRatioTarget": 500,
+              "ratioTolerance": 0.005,
+              "absoluteTriangleTolerance": 64
+            },
+            "sourceTriangleCount": 50000,
+            "variantTriangleCount": 0,
+            "targetTriangleCount": 14001,
+            "actualRatio": 0,
+            "targetRatio": 0.28,
+            "triangleOverage": 0,
+            "ratioOverage": 0,
+            "exemptionReason": null,
+            "meetsTarget": false,
+            "monotonicOrder": [
+              "high",
+              "medium",
+              "low"
+            ]
+          }
+        }
+      }
+    },
     "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb": {
       "sourceUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
       "status": "optional",
@@ -9732,17 +10162,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 8,
+          "index": 9,
           "cell": {
-            "x": 0,
+            "x": 256,
             "y": 256,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0,
+            "u0": 0.125,
             "v0": 0.125,
-            "u1": 0.125,
+            "u1": 0.25,
             "v1": 0.25
           },
           "billboardRect": {
@@ -10588,17 +11018,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 9,
+          "index": 10,
           "cell": {
-            "x": 256,
+            "x": 512,
             "y": 256,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.125,
+            "u0": 0.25,
             "v0": 0.125,
-            "u1": 0.25,
+            "u1": 0.375,
             "v1": 0.25
           },
           "billboardRect": {
@@ -11444,17 +11874,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 10,
+          "index": 11,
           "cell": {
-            "x": 512,
+            "x": 768,
             "y": 256,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.25,
+            "u0": 0.375,
             "v0": 0.125,
-            "u1": 0.375,
+            "u1": 0.5,
             "v1": 0.25
           },
           "billboardRect": {
@@ -12300,17 +12730,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 11,
+          "index": 12,
           "cell": {
-            "x": 768,
+            "x": 1024,
             "y": 256,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.375,
+            "u0": 0.5,
             "v0": 0.125,
-            "u1": 0.5,
+            "u1": 0.625,
             "v1": 0.25
           },
           "billboardRect": {
@@ -13156,17 +13586,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 12,
+          "index": 13,
           "cell": {
-            "x": 1024,
+            "x": 1280,
             "y": 256,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.5,
+            "u0": 0.625,
             "v0": 0.125,
-            "u1": 0.625,
+            "u1": 0.75,
             "v1": 0.25
           },
           "billboardRect": {
@@ -14014,17 +14444,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 13,
+          "index": 14,
           "cell": {
-            "x": 1280,
+            "x": 1536,
             "y": 256,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.625,
+            "u0": 0.75,
             "v0": 0.125,
-            "u1": 0.75,
+            "u1": 0.875,
             "v1": 0.25
           },
           "billboardRect": {
@@ -14870,17 +15300,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 14,
+          "index": 15,
           "cell": {
-            "x": 1536,
+            "x": 1792,
             "y": 256,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.75,
+            "u0": 0.875,
             "v0": 0.125,
-            "u1": 0.875,
+            "u1": 1,
             "v1": 0.25
           },
           "billboardRect": {
@@ -15726,18 +16156,18 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 15,
+          "index": 16,
           "cell": {
-            "x": 1792,
-            "y": 256,
+            "x": 0,
+            "y": 512,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.875,
-            "v0": 0.125,
-            "u1": 1,
-            "v1": 0.25
+            "u0": 0,
+            "v0": 0.25,
+            "u1": 0.125,
+            "v1": 0.375
           },
           "billboardRect": {
             "x": 94.27,
@@ -16583,17 +17013,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 16,
+          "index": 17,
           "cell": {
-            "x": 0,
+            "x": 256,
             "y": 512,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0,
+            "u0": 0.125,
             "v0": 0.25,
-            "u1": 0.125,
+            "u1": 0.25,
             "v1": 0.375
           },
           "billboardRect": {
@@ -17539,17 +17969,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 17,
+          "index": 18,
           "cell": {
-            "x": 256,
+            "x": 512,
             "y": 512,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.125,
+            "u0": 0.25,
             "v0": 0.25,
-            "u1": 0.25,
+            "u1": 0.375,
             "v1": 0.375
           },
           "billboardRect": {
@@ -18495,17 +18925,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 18,
+          "index": 19,
           "cell": {
-            "x": 512,
+            "x": 768,
             "y": 512,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.25,
+            "u0": 0.375,
             "v0": 0.25,
-            "u1": 0.375,
+            "u1": 0.5,
             "v1": 0.375
           },
           "billboardRect": {
@@ -19451,17 +19881,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 19,
+          "index": 20,
           "cell": {
-            "x": 768,
+            "x": 1024,
             "y": 512,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.375,
+            "u0": 0.5,
             "v0": 0.25,
-            "u1": 0.5,
+            "u1": 0.625,
             "v1": 0.375
           },
           "billboardRect": {
@@ -20407,17 +20837,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 20,
+          "index": 21,
           "cell": {
-            "x": 1024,
+            "x": 1280,
             "y": 512,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.5,
+            "u0": 0.625,
             "v0": 0.25,
-            "u1": 0.625,
+            "u1": 0.75,
             "v1": 0.375
           },
           "billboardRect": {
@@ -21363,17 +21793,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 21,
+          "index": 22,
           "cell": {
-            "x": 1280,
+            "x": 1536,
             "y": 512,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.625,
+            "u0": 0.75,
             "v0": 0.25,
-            "u1": 0.75,
+            "u1": 0.875,
             "v1": 0.375
           },
           "billboardRect": {
@@ -22319,17 +22749,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 22,
+          "index": 23,
           "cell": {
-            "x": 1536,
+            "x": 1792,
             "y": 512,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.75,
+            "u0": 0.875,
             "v0": 0.25,
-            "u1": 0.875,
+            "u1": 1,
             "v1": 0.375
           },
           "billboardRect": {
@@ -23275,18 +23705,18 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 23,
+          "index": 24,
           "cell": {
-            "x": 1792,
-            "y": 512,
+            "x": 0,
+            "y": 768,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.875,
-            "v0": 0.25,
-            "u1": 1,
-            "v1": 0.375
+            "u0": 0,
+            "v0": 0.375,
+            "u1": 0.125,
+            "v1": 0.5
           },
           "billboardRect": {
             "x": 64.69,
@@ -24231,17 +24661,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 24,
+          "index": 25,
           "cell": {
-            "x": 0,
+            "x": 256,
             "y": 768,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0,
+            "u0": 0.125,
             "v0": 0.375,
-            "u1": 0.125,
+            "u1": 0.25,
             "v1": 0.5
           },
           "billboardRect": {
@@ -25187,17 +25617,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 25,
+          "index": 26,
           "cell": {
-            "x": 256,
+            "x": 512,
             "y": 768,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.125,
+            "u0": 0.25,
             "v0": 0.375,
-            "u1": 0.25,
+            "u1": 0.375,
             "v1": 0.5
           },
           "billboardRect": {
@@ -26143,17 +26573,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 26,
+          "index": 27,
           "cell": {
-            "x": 512,
+            "x": 768,
             "y": 768,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.25,
+            "u0": 0.375,
             "v0": 0.375,
-            "u1": 0.375,
+            "u1": 0.5,
             "v1": 0.5
           },
           "billboardRect": {
@@ -27099,17 +27529,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 27,
+          "index": 28,
           "cell": {
-            "x": 768,
+            "x": 1024,
             "y": 768,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.375,
+            "u0": 0.5,
             "v0": 0.375,
-            "u1": 0.5,
+            "u1": 0.625,
             "v1": 0.5
           },
           "billboardRect": {
@@ -28126,17 +28556,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 28,
+          "index": 29,
           "cell": {
-            "x": 1024,
+            "x": 1280,
             "y": 768,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.5,
+            "u0": 0.625,
             "v0": 0.375,
-            "u1": 0.625,
+            "u1": 0.75,
             "v1": 0.5
           },
           "billboardRect": {
@@ -40796,17 +41226,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 29,
+          "index": 30,
           "cell": {
-            "x": 1280,
+            "x": 1536,
             "y": 768,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.625,
+            "u0": 0.75,
             "v0": 0.375,
-            "u1": 0.75,
+            "u1": 0.875,
             "v1": 0.5
           },
           "billboardRect": {
@@ -41653,17 +42083,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 30,
+          "index": 31,
           "cell": {
-            "x": 1536,
+            "x": 1792,
             "y": 768,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.75,
+            "u0": 0.875,
             "v0": 0.375,
-            "u1": 0.875,
+            "u1": 1,
             "v1": 0.5
           },
           "billboardRect": {
@@ -43526,18 +43956,18 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 31,
+          "index": 32,
           "cell": {
-            "x": 1792,
-            "y": 768,
+            "x": 0,
+            "y": 1024,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.875,
-            "v0": 0.375,
-            "u1": 1,
-            "v1": 0.5
+            "u0": 0,
+            "v0": 0.5,
+            "u1": 0.125,
+            "v1": 0.625
           },
           "billboardRect": {
             "x": 30.72,
@@ -45399,17 +45829,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 32,
+          "index": 33,
           "cell": {
-            "x": 0,
+            "x": 256,
             "y": 1024,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0,
+            "u0": 0.125,
             "v0": 0.5,
-            "u1": 0.125,
+            "u1": 0.25,
             "v1": 0.625
           },
           "billboardRect": {
@@ -47272,17 +47702,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 33,
+          "index": 34,
           "cell": {
-            "x": 256,
+            "x": 512,
             "y": 1024,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.125,
+            "u0": 0.25,
             "v0": 0.5,
-            "u1": 0.25,
+            "u1": 0.375,
             "v1": 0.625
           },
           "billboardRect": {
@@ -49152,17 +49582,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 34,
+          "index": 35,
           "cell": {
-            "x": 512,
+            "x": 768,
             "y": 1024,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.25,
+            "u0": 0.375,
             "v0": 0.5,
-            "u1": 0.375,
+            "u1": 0.5,
             "v1": 0.625
           },
           "billboardRect": {
@@ -51050,17 +51480,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 35,
+          "index": 36,
           "cell": {
-            "x": 768,
+            "x": 1024,
             "y": 1024,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.375,
+            "u0": 0.5,
             "v0": 0.5,
-            "u1": 0.5,
+            "u1": 0.625,
             "v1": 0.625
           },
           "billboardRect": {
@@ -51935,17 +52365,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 36,
+          "index": 37,
           "cell": {
-            "x": 1024,
+            "x": 1280,
             "y": 1024,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.5,
+            "u0": 0.625,
             "v0": 0.5,
-            "u1": 0.625,
+            "u1": 0.75,
             "v1": 0.625
           },
           "billboardRect": {
@@ -54158,17 +54588,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 37,
+          "index": 38,
           "cell": {
-            "x": 1280,
+            "x": 1536,
             "y": 1024,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.625,
+            "u0": 0.75,
             "v0": 0.5,
-            "u1": 0.75,
+            "u1": 0.875,
             "v1": 0.625
           },
           "billboardRect": {
@@ -55116,17 +55546,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 38,
+          "index": 39,
           "cell": {
-            "x": 1536,
+            "x": 1792,
             "y": 1024,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.75,
+            "u0": 0.875,
             "v0": 0.5,
-            "u1": 0.875,
+            "u1": 1,
             "v1": 0.625
           },
           "billboardRect": {
@@ -57553,18 +57983,18 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 39,
+          "index": 40,
           "cell": {
-            "x": 1792,
-            "y": 1024,
+            "x": 0,
+            "y": 1280,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.875,
-            "v0": 0.5,
-            "u1": 1,
-            "v1": 0.625
+            "u0": 0,
+            "v0": 0.625,
+            "u1": 0.125,
+            "v1": 0.75
           },
           "billboardRect": {
             "x": 121.11,
@@ -58768,17 +59198,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 40,
+          "index": 41,
           "cell": {
-            "x": 0,
+            "x": 256,
             "y": 1280,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0,
+            "u0": 0.125,
             "v0": 0.625,
-            "u1": 0.125,
+            "u1": 0.25,
             "v1": 0.75
           },
           "billboardRect": {
@@ -60666,17 +61096,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 41,
+          "index": 42,
           "cell": {
-            "x": 256,
+            "x": 512,
             "y": 1280,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.125,
+            "u0": 0.25,
             "v0": 0.625,
-            "u1": 0.25,
+            "u1": 0.375,
             "v1": 0.75
           },
           "billboardRect": {
@@ -61890,17 +62320,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 42,
+          "index": 43,
           "cell": {
-            "x": 512,
+            "x": 768,
             "y": 1280,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.25,
+            "u0": 0.375,
             "v0": 0.625,
-            "u1": 0.375,
+            "u1": 0.5,
             "v1": 0.75
           },
           "billboardRect": {
@@ -62783,17 +63213,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 43,
+          "index": 44,
           "cell": {
-            "x": 768,
+            "x": 1024,
             "y": 1280,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.375,
+            "u0": 0.5,
             "v0": 0.625,
-            "u1": 0.5,
+            "u1": 0.625,
             "v1": 0.75
           },
           "billboardRect": {
@@ -64685,17 +65115,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 44,
+          "index": 45,
           "cell": {
-            "x": 1024,
+            "x": 1280,
             "y": 1280,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.5,
+            "u0": 0.625,
             "v0": 0.625,
-            "u1": 0.625,
+            "u1": 0.75,
             "v1": 0.75
           },
           "billboardRect": {
@@ -66031,17 +66461,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 45,
+          "index": 46,
           "cell": {
-            "x": 1280,
+            "x": 1536,
             "y": 1280,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.625,
+            "u0": 0.75,
             "v0": 0.625,
-            "u1": 0.75,
+            "u1": 0.875,
             "v1": 0.75
           },
           "billboardRect": {
@@ -67355,17 +67785,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 46,
+          "index": 47,
           "cell": {
-            "x": 1536,
+            "x": 1792,
             "y": 1280,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.75,
+            "u0": 0.875,
             "v0": 0.625,
-            "u1": 0.875,
+            "u1": 1,
             "v1": 0.75
           },
           "billboardRect": {
@@ -68693,18 +69123,18 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 47,
+          "index": 48,
           "cell": {
-            "x": 1792,
-            "y": 1280,
+            "x": 0,
+            "y": 1536,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.875,
-            "v0": 0.625,
-            "u1": 1,
-            "v1": 0.75
+            "u0": 0,
+            "v0": 0.75,
+            "u1": 0.125,
+            "v1": 0.875
           },
           "billboardRect": {
             "x": 30.72,
@@ -70026,17 +70456,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 48,
+          "index": 49,
           "cell": {
-            "x": 0,
+            "x": 256,
             "y": 1536,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0,
+            "u0": 0.125,
             "v0": 0.75,
-            "u1": 0.125,
+            "u1": 0.25,
             "v1": 0.875
           },
           "billboardRect": {
@@ -71368,17 +71798,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 49,
+          "index": 50,
           "cell": {
-            "x": 256,
+            "x": 512,
             "y": 1536,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.125,
+            "u0": 0.25,
             "v0": 0.75,
-            "u1": 0.25,
+            "u1": 0.375,
             "v1": 0.875
           },
           "billboardRect": {
@@ -72589,17 +73019,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 50,
+          "index": 51,
           "cell": {
-            "x": 512,
+            "x": 768,
             "y": 1536,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.25,
+            "u0": 0.375,
             "v0": 0.75,
-            "u1": 0.375,
+            "u1": 0.5,
             "v1": 0.875
           },
           "billboardRect": {
@@ -73813,17 +74243,17 @@
         "atlas": {
           "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
           "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 51,
+          "index": 52,
           "cell": {
-            "x": 768,
+            "x": 1024,
             "y": 1536,
             "width": 256,
             "height": 256
           },
           "uv": {
-            "u0": 0.375,
+            "u0": 0.5,
             "v0": 0.75,
-            "u1": 0.5,
+            "u1": 0.625,
             "v1": 0.875
           },
           "billboardRect": {
@@ -74931,862 +75361,6 @@
             "targetRatio": 0.28,
             "triangleOverage": 43,
             "ratioOverage": 0.72,
-            "exemptionReason": "source-below-min-triangle-policy",
-            "meetsTarget": true,
-            "monotonicOrder": [
-              "high",
-              "medium",
-              "low"
-            ]
-          }
-        }
-      }
-    },
-    "/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb": {
-      "sourceUrl": "/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb",
-      "status": "required",
-      "required": true,
-      "sourceExists": true,
-      "sourceSizeBytes": 9460,
-      "sourcePath": "apps/megameal/public/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb",
-      "scenes": [
-        {
-          "sceneId": "yggdrasil",
-          "nodeIds": [
-            "yggdrasil-mound"
-          ],
-          "status": "required"
-        }
-      ],
-      "lod": {
-        "strategy": "mesh-simplification",
-        "sourceTier": "source",
-        "defaultTier": "medium",
-        "fallbackOrder": [
-          "medium",
-          "high",
-          "low"
-        ],
-        "tiers": [
-          {
-            "id": "high",
-            "index": 0,
-            "role": "near",
-            "textureSize": 2048,
-            "simplifyRatio": 0.82,
-            "simplifyError": 0.002,
-            "simplifyLockBorder": false
-          },
-          {
-            "id": "medium",
-            "index": 1,
-            "role": "mid",
-            "textureSize": 1024,
-            "simplifyRatio": 0.52,
-            "simplifyError": 0.005,
-            "simplifyLockBorder": false
-          },
-          {
-            "id": "low",
-            "index": 2,
-            "role": "far",
-            "textureSize": 512,
-            "simplifyRatio": 0.28,
-            "simplifyError": 0.01,
-            "simplifyLockBorder": false
-          }
-        ]
-      },
-      "impostor": {
-        "generated": true,
-        "strategy": "bounds-billboard",
-        "sourceTier": "low",
-        "textureSize": 256,
-        "bounds": {
-          "min": [
-            -88,
-            -6.5,
-            -88
-          ],
-          "max": [
-            88,
-            6.5,
-            88
-          ],
-          "size": [
-            176,
-            13,
-            176
-          ],
-          "center": [
-            0,
-            0,
-            0
-          ]
-        },
-        "atlas": {
-          "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
-          "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
-          "index": 52,
-          "cell": {
-            "x": 1024,
-            "y": 1536,
-            "width": 256,
-            "height": 256
-          },
-          "uv": {
-            "u0": 0.5,
-            "v0": 0.75,
-            "u1": 0.625,
-            "v1": 0.875
-          },
-          "billboardRect": {
-            "x": 30.72,
-            "y": 120.81,
-            "width": 194.56,
-            "height": 14.37
-          }
-        },
-        "reason": "generated from source mesh bounds into runtime impostor atlas"
-      },
-      "materialCompliance": {
-        "policy": "pbr-slots-required-with-approved-exceptions",
-        "status": "approved-fallback",
-        "materialAuthoring": null,
-        "approvedMissingRecommendedSlots": [
-          {
-            "scope": "source",
-            "materialIndex": 0,
-            "slot": "baseColor",
-            "fallback": "factor",
-            "reason": "Style lab generated runtime asset uses simplified material slots pending authored PBR pass."
-          },
-          {
-            "scope": "source",
-            "materialIndex": 0,
-            "slot": "metallicRoughness",
-            "fallback": "factor",
-            "reason": "Style lab generated runtime asset uses simplified material slots pending authored PBR pass."
-          },
-          {
-            "scope": "source",
-            "materialIndex": 0,
-            "slot": "normal",
-            "fallback": "default",
-            "reason": "Style lab generated runtime asset uses simplified material slots pending authored PBR pass."
-          },
-          {
-            "scope": "variant:high",
-            "materialIndex": 0,
-            "slot": "baseColor",
-            "fallback": "factor",
-            "reason": "Style lab generated runtime asset uses simplified material slots pending authored PBR pass."
-          },
-          {
-            "scope": "variant:high",
-            "materialIndex": 0,
-            "slot": "metallicRoughness",
-            "fallback": "factor",
-            "reason": "Style lab generated runtime asset uses simplified material slots pending authored PBR pass."
-          },
-          {
-            "scope": "variant:high",
-            "materialIndex": 0,
-            "slot": "normal",
-            "fallback": "default",
-            "reason": "Style lab generated runtime asset uses simplified material slots pending authored PBR pass."
-          },
-          {
-            "scope": "variant:medium",
-            "materialIndex": 0,
-            "slot": "baseColor",
-            "fallback": "factor",
-            "reason": "Style lab generated runtime asset uses simplified material slots pending authored PBR pass."
-          },
-          {
-            "scope": "variant:medium",
-            "materialIndex": 0,
-            "slot": "metallicRoughness",
-            "fallback": "factor",
-            "reason": "Style lab generated runtime asset uses simplified material slots pending authored PBR pass."
-          },
-          {
-            "scope": "variant:medium",
-            "materialIndex": 0,
-            "slot": "normal",
-            "fallback": "default",
-            "reason": "Style lab generated runtime asset uses simplified material slots pending authored PBR pass."
-          },
-          {
-            "scope": "variant:low",
-            "materialIndex": 0,
-            "slot": "baseColor",
-            "fallback": "factor",
-            "reason": "Style lab generated runtime asset uses simplified material slots pending authored PBR pass."
-          },
-          {
-            "scope": "variant:low",
-            "materialIndex": 0,
-            "slot": "metallicRoughness",
-            "fallback": "factor",
-            "reason": "Style lab generated runtime asset uses simplified material slots pending authored PBR pass."
-          },
-          {
-            "scope": "variant:low",
-            "materialIndex": 0,
-            "slot": "normal",
-            "fallback": "default",
-            "reason": "Style lab generated runtime asset uses simplified material slots pending authored PBR pass."
-          }
-        ]
-      },
-      "importMetadata": {
-        "schemaVersion": 1,
-        "id": "style-lab-source:root-mound-2026-04-26T01-47-59-418Z/root-mound",
-        "familyId": "style-lab-source",
-        "sourceUrl": "/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb",
-        "sourcePath": "apps/megameal/public/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.glb",
-        "sourceRoot": "apps/megameal/public/generated/style-lab/sources",
-        "sourceKind": "render-source",
-        "authoringTool": "Style Lab",
-        "sourceNote": "Style Lab source GLB selected for runtime level dressing.",
-        "license": "project-generated",
-        "owner": "style-pipeline",
-        "status": "candidate",
-        "intendedLevels": [
-          "yggdrasil"
-        ],
-        "materialPolicy": {
-          "mode": "style-lab-generated",
-          "provenance": "Style Lab generated material slots pending authored PBR pass.",
-          "missingRecommendedSlots": "allowed-with-approved-exception"
-        },
-        "collisionPolicy": {
-          "kind": "render-only",
-          "pairing": "terrain-or-scene-collider"
-        },
-        "targetBudgets": {
-          "maxSourceBytes": 62914560,
-          "maxRuntimeVariantBytes": 41943040,
-          "maxTextureSize": 4096,
-          "defaultTier": "medium"
-        },
-        "naming": {
-          "rule": "<prompt-id>/<asset-name>.glb",
-          "deterministicCookOutput": true
-        }
-      },
-      "metadata": {
-        "format": "glb",
-        "valid": true,
-        "errors": [],
-        "nodeCount": 1,
-        "meshCount": 1,
-        "meshPrimitiveCount": 1,
-        "vertexCount": 220,
-        "triangleCount": 144,
-        "bounds": {
-          "min": [
-            -88,
-            -6.5,
-            -88
-          ],
-          "max": [
-            88,
-            6.5,
-            88
-          ],
-          "size": [
-            176,
-            13,
-            176
-          ],
-          "center": [
-            0,
-            0,
-            0
-          ]
-        },
-        "materialCount": 1,
-        "materialSlots": 1,
-        "materials": [
-          {
-            "index": 0,
-            "alphaMode": "OPAQUE",
-            "doubleSided": false,
-            "pbrSlots": {
-              "baseColor": {
-                "textureIndex": null,
-                "hasTexture": false,
-                "hasFactor": true,
-                "state": "factor"
-              },
-              "metallicRoughness": {
-                "textureIndex": null,
-                "hasTexture": false,
-                "hasFactor": true,
-                "state": "factor"
-              },
-              "normal": {
-                "textureIndex": null,
-                "hasTexture": false,
-                "hasFactor": false,
-                "state": "default"
-              },
-              "occlusion": {
-                "textureIndex": null,
-                "hasTexture": false,
-                "hasFactor": false,
-                "state": "default"
-              },
-              "emissive": {
-                "textureIndex": null,
-                "hasTexture": false,
-                "hasFactor": true,
-                "state": "factor"
-              }
-            },
-            "extensions": [
-              "KHR_materials_emissive_strength",
-              "KHR_materials_ior"
-            ],
-            "unsupportedExtensions": []
-          }
-        ],
-        "materialValidation": {
-          "missingTextureReferences": [],
-          "missingRecommendedSlots": [
-            {
-              "materialIndex": 0,
-              "slot": "baseColor",
-              "fallback": "factor"
-            },
-            {
-              "materialIndex": 0,
-              "slot": "metallicRoughness",
-              "fallback": "factor"
-            },
-            {
-              "materialIndex": 0,
-              "slot": "normal",
-              "fallback": "default"
-            }
-          ],
-          "unsupportedExtensions": []
-        },
-        "materialAuthoring": null,
-        "textureCount": 0,
-        "imageCount": 0,
-        "textureBytes": 0,
-        "textures": [],
-        "compression": {
-          "extensionsUsed": [
-            "KHR_materials_emissive_strength",
-            "KHR_materials_ior"
-          ],
-          "geometry": {
-            "dracoPrimitiveCount": 0,
-            "meshoptAccessorCount": 0,
-            "quantized": false
-          },
-          "textures": {
-            "basisuTextureCount": 0,
-            "webpTextureCount": 0,
-            "mimeTypes": {}
-          }
-        }
-      },
-      "rawGeneratedRuntimeAsset": true,
-      "qualityVariants": {
-        "high": {
-          "url": "/generated/runtime-game-assets/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.high.glb",
-          "lodTier": "high",
-          "lodIndex": 0,
-          "lodRole": "near",
-          "status": "required",
-          "required": true,
-          "exists": true,
-          "sizeBytes": 4616,
-          "metadata": {
-            "format": "glb",
-            "valid": true,
-            "errors": [],
-            "nodeCount": 1,
-            "meshCount": 1,
-            "meshPrimitiveCount": 1,
-            "vertexCount": 150,
-            "triangleCount": 144,
-            "bounds": {
-              "min": [
-                -32767,
-                -2420,
-                -32767
-              ],
-              "max": [
-                32767,
-                2420,
-                32767
-              ],
-              "size": [
-                65534,
-                4840,
-                65534
-              ],
-              "center": [
-                0,
-                0,
-                0
-              ]
-            },
-            "materialCount": 1,
-            "materialSlots": 1,
-            "materials": [
-              {
-                "index": 0,
-                "alphaMode": "OPAQUE",
-                "doubleSided": false,
-                "pbrSlots": {
-                  "baseColor": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": true,
-                    "state": "factor"
-                  },
-                  "metallicRoughness": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": true,
-                    "state": "factor"
-                  },
-                  "normal": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": false,
-                    "state": "default"
-                  },
-                  "occlusion": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": false,
-                    "state": "default"
-                  },
-                  "emissive": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": true,
-                    "state": "factor"
-                  }
-                },
-                "extensions": [
-                  "KHR_materials_emissive_strength",
-                  "KHR_materials_ior"
-                ],
-                "unsupportedExtensions": []
-              }
-            ],
-            "materialValidation": {
-              "missingTextureReferences": [],
-              "missingRecommendedSlots": [
-                {
-                  "materialIndex": 0,
-                  "slot": "baseColor",
-                  "fallback": "factor"
-                },
-                {
-                  "materialIndex": 0,
-                  "slot": "metallicRoughness",
-                  "fallback": "factor"
-                },
-                {
-                  "materialIndex": 0,
-                  "slot": "normal",
-                  "fallback": "default"
-                }
-              ],
-              "unsupportedExtensions": []
-            },
-            "materialAuthoring": null,
-            "textureCount": 0,
-            "imageCount": 0,
-            "textureBytes": 0,
-            "textures": [],
-            "compression": {
-              "extensionsUsed": [
-                "KHR_materials_emissive_strength",
-                "KHR_materials_ior",
-                "KHR_mesh_quantization"
-              ],
-              "geometry": {
-                "dracoPrimitiveCount": 0,
-                "meshoptAccessorCount": 0,
-                "quantized": true
-              },
-              "textures": {
-                "basisuTextureCount": 0,
-                "webpTextureCount": 0,
-                "mimeTypes": {}
-              }
-            }
-          },
-          "pipeline": {
-            "command": "gltf-transform optimize",
-            "compress": "quantize",
-            "textureCompress": "webp",
-            "textureSize": 2048,
-            "simplifyRatio": 0.82,
-            "simplifyError": 0.002,
-            "simplifyLockBorder": false,
-            "recipe": null,
-            "retopology": null
-          },
-          "lodValidation": {
-            "generator": "gltf-transform optimize",
-            "generated": true,
-            "policy": {
-              "schemaVersion": 1,
-              "minSourceTrianglesForRatioTarget": 500,
-              "ratioTolerance": 0.005,
-              "absoluteTriangleTolerance": 64
-            },
-            "sourceTriangleCount": 144,
-            "variantTriangleCount": 144,
-            "targetTriangleCount": 119,
-            "actualRatio": 1,
-            "targetRatio": 0.82,
-            "triangleOverage": 25,
-            "ratioOverage": 0.18,
-            "exemptionReason": "source-below-min-triangle-policy",
-            "meetsTarget": true,
-            "monotonicOrder": [
-              "high",
-              "medium",
-              "low"
-            ]
-          }
-        },
-        "medium": {
-          "url": "/generated/runtime-game-assets/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.medium.glb",
-          "lodTier": "medium",
-          "lodIndex": 1,
-          "lodRole": "mid",
-          "status": "required",
-          "required": true,
-          "exists": true,
-          "sizeBytes": 3824,
-          "metadata": {
-            "format": "glb",
-            "valid": true,
-            "errors": [],
-            "nodeCount": 1,
-            "meshCount": 1,
-            "meshPrimitiveCount": 1,
-            "vertexCount": 114,
-            "triangleCount": 108,
-            "bounds": {
-              "min": [
-                -32767,
-                -2420,
-                -32767
-              ],
-              "max": [
-                32767,
-                2420,
-                32767
-              ],
-              "size": [
-                65534,
-                4840,
-                65534
-              ],
-              "center": [
-                0,
-                0,
-                0
-              ]
-            },
-            "materialCount": 1,
-            "materialSlots": 1,
-            "materials": [
-              {
-                "index": 0,
-                "alphaMode": "OPAQUE",
-                "doubleSided": false,
-                "pbrSlots": {
-                  "baseColor": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": true,
-                    "state": "factor"
-                  },
-                  "metallicRoughness": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": true,
-                    "state": "factor"
-                  },
-                  "normal": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": false,
-                    "state": "default"
-                  },
-                  "occlusion": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": false,
-                    "state": "default"
-                  },
-                  "emissive": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": true,
-                    "state": "factor"
-                  }
-                },
-                "extensions": [
-                  "KHR_materials_emissive_strength",
-                  "KHR_materials_ior"
-                ],
-                "unsupportedExtensions": []
-              }
-            ],
-            "materialValidation": {
-              "missingTextureReferences": [],
-              "missingRecommendedSlots": [
-                {
-                  "materialIndex": 0,
-                  "slot": "baseColor",
-                  "fallback": "factor"
-                },
-                {
-                  "materialIndex": 0,
-                  "slot": "metallicRoughness",
-                  "fallback": "factor"
-                },
-                {
-                  "materialIndex": 0,
-                  "slot": "normal",
-                  "fallback": "default"
-                }
-              ],
-              "unsupportedExtensions": []
-            },
-            "materialAuthoring": null,
-            "textureCount": 0,
-            "imageCount": 0,
-            "textureBytes": 0,
-            "textures": [],
-            "compression": {
-              "extensionsUsed": [
-                "KHR_materials_emissive_strength",
-                "KHR_materials_ior",
-                "KHR_mesh_quantization"
-              ],
-              "geometry": {
-                "dracoPrimitiveCount": 0,
-                "meshoptAccessorCount": 0,
-                "quantized": true
-              },
-              "textures": {
-                "basisuTextureCount": 0,
-                "webpTextureCount": 0,
-                "mimeTypes": {}
-              }
-            }
-          },
-          "pipeline": {
-            "command": "gltf-transform optimize",
-            "compress": "quantize",
-            "textureCompress": "webp",
-            "textureSize": 1024,
-            "simplifyRatio": 0.52,
-            "simplifyError": 0.005,
-            "simplifyLockBorder": false,
-            "recipe": null,
-            "retopology": null
-          },
-          "lodValidation": {
-            "generator": "gltf-transform optimize",
-            "generated": true,
-            "policy": {
-              "schemaVersion": 1,
-              "minSourceTrianglesForRatioTarget": 500,
-              "ratioTolerance": 0.005,
-              "absoluteTriangleTolerance": 64
-            },
-            "sourceTriangleCount": 144,
-            "variantTriangleCount": 108,
-            "targetTriangleCount": 75,
-            "actualRatio": 0.75,
-            "targetRatio": 0.52,
-            "triangleOverage": 33,
-            "ratioOverage": 0.23,
-            "exemptionReason": "source-below-min-triangle-policy",
-            "meetsTarget": true,
-            "monotonicOrder": [
-              "high",
-              "medium",
-              "low"
-            ]
-          }
-        },
-        "low": {
-          "url": "/generated/runtime-game-assets/generated/style-lab/sources/root-mound-2026-04-26T01-47-59-418Z/root-mound.low.glb",
-          "lodTier": "low",
-          "lodIndex": 2,
-          "lodRole": "far",
-          "status": "required",
-          "required": true,
-          "exists": true,
-          "sizeBytes": 2636,
-          "metadata": {
-            "format": "glb",
-            "valid": true,
-            "errors": [],
-            "nodeCount": 1,
-            "meshCount": 1,
-            "meshPrimitiveCount": 1,
-            "vertexCount": 60,
-            "triangleCount": 54,
-            "bounds": {
-              "min": [
-                -32271,
-                -2420,
-                -32767
-              ],
-              "max": [
-                32271,
-                2420,
-                32767
-              ],
-              "size": [
-                64542,
-                4840,
-                65534
-              ],
-              "center": [
-                0,
-                0,
-                0
-              ]
-            },
-            "materialCount": 1,
-            "materialSlots": 1,
-            "materials": [
-              {
-                "index": 0,
-                "alphaMode": "OPAQUE",
-                "doubleSided": false,
-                "pbrSlots": {
-                  "baseColor": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": true,
-                    "state": "factor"
-                  },
-                  "metallicRoughness": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": true,
-                    "state": "factor"
-                  },
-                  "normal": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": false,
-                    "state": "default"
-                  },
-                  "occlusion": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": false,
-                    "state": "default"
-                  },
-                  "emissive": {
-                    "textureIndex": null,
-                    "hasTexture": false,
-                    "hasFactor": true,
-                    "state": "factor"
-                  }
-                },
-                "extensions": [
-                  "KHR_materials_emissive_strength",
-                  "KHR_materials_ior"
-                ],
-                "unsupportedExtensions": []
-              }
-            ],
-            "materialValidation": {
-              "missingTextureReferences": [],
-              "missingRecommendedSlots": [
-                {
-                  "materialIndex": 0,
-                  "slot": "baseColor",
-                  "fallback": "factor"
-                },
-                {
-                  "materialIndex": 0,
-                  "slot": "metallicRoughness",
-                  "fallback": "factor"
-                },
-                {
-                  "materialIndex": 0,
-                  "slot": "normal",
-                  "fallback": "default"
-                }
-              ],
-              "unsupportedExtensions": []
-            },
-            "materialAuthoring": null,
-            "textureCount": 0,
-            "imageCount": 0,
-            "textureBytes": 0,
-            "textures": [],
-            "compression": {
-              "extensionsUsed": [
-                "KHR_materials_emissive_strength",
-                "KHR_materials_ior",
-                "KHR_mesh_quantization"
-              ],
-              "geometry": {
-                "dracoPrimitiveCount": 0,
-                "meshoptAccessorCount": 0,
-                "quantized": true
-              },
-              "textures": {
-                "basisuTextureCount": 0,
-                "webpTextureCount": 0,
-                "mimeTypes": {}
-              }
-            }
-          },
-          "pipeline": {
-            "command": "gltf-transform optimize",
-            "compress": "quantize",
-            "textureCompress": "webp",
-            "textureSize": 512,
-            "simplifyRatio": 0.28,
-            "simplifyError": 0.01,
-            "simplifyLockBorder": false,
-            "recipe": null,
-            "retopology": null
-          },
-          "lodValidation": {
-            "generator": "gltf-transform optimize",
-            "generated": true,
-            "policy": {
-              "schemaVersion": 1,
-              "minSourceTrianglesForRatioTarget": 500,
-              "ratioTolerance": 0.005,
-              "absoluteTriangleTolerance": 64
-            },
-            "sourceTriangleCount": 144,
-            "variantTriangleCount": 54,
-            "targetTriangleCount": 41,
-            "actualRatio": 0.375,
-            "targetRatio": 0.28,
-            "triangleOverage": 13,
-            "ratioOverage": 0.095,
             "exemptionReason": "source-below-min-triangle-policy",
             "meetsTarget": true,
             "monotonicOrder": [
@@ -81220,9 +80794,7 @@
       "requiredAssetCount": 0,
       "runtimeAssetCount": 29,
       "buildErrors": [],
-      "buildWarnings": [
-        "Walkability sample \"player-spawn\" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime."
-      ]
+      "buildWarnings": []
     },
     "solitude": {
       "url": "/generated/runtime-game-assets/scenes/solitude.runtime-scene.json",
@@ -81232,9 +80804,7 @@
       "requiredAssetCount": 0,
       "runtimeAssetCount": 16,
       "buildErrors": [],
-      "buildWarnings": [
-        "Walkability sample \"player-spawn\" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime."
-      ]
+      "buildWarnings": []
     },
     "yggdrasil": {
       "url": "/generated/runtime-game-assets/scenes/yggdrasil.runtime-scene.json",
@@ -81244,9 +80814,7 @@
       "requiredAssetCount": 12,
       "runtimeAssetCount": 24,
       "buildErrors": [],
-      "buildWarnings": [
-        "Walkability sample \"player-spawn\" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime."
-      ]
+      "buildWarnings": []
     }
   }
 }

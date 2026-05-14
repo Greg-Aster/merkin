@@ -14,6 +14,7 @@ export type BakedTerrainCollider = {
 
 const MAGIC = 0x4d4d5443
 const VERSION = 1
+const colliderBufferCache = new Map<string, Promise<ArrayBuffer>>()
 
 function readHeader(view: DataView) {
   const magic = view.getUint32(0, true)
@@ -81,15 +82,28 @@ export function parseBakedTerrainCollider(
 export async function loadBakedTerrainCollider(
   collisionConfig: NonNullable<TerrainConfig['collision']>,
 ) {
-  const response = await fetch(collisionConfig.url)
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch ${collisionConfig.url}: ${response.status}`,
-    )
-  }
-
   return parseBakedTerrainCollider(
-    await response.arrayBuffer(),
+    await loadBakedTerrainColliderBuffer(collisionConfig.url),
     collisionConfig,
   )
+}
+
+function loadBakedTerrainColliderBuffer(url: string) {
+  const cachedBuffer = colliderBufferCache.get(url)
+  if (cachedBuffer) return cachedBuffer
+
+  const bufferPromise = fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}: ${response.status}`)
+      }
+      return response.arrayBuffer()
+    })
+    .catch(error => {
+      colliderBufferCache.delete(url)
+      throw error
+    })
+
+  colliderBufferCache.set(url, bufferPromise)
+  return bufferPromise
 }

@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "bake-mesh-collider",
+  "generatedAt": "2026-05-13T18:28:08.250Z",
+  "sourceLevelId": "yggdrasil",
+  "sourceActorId": "yggdrasil-dais",
+  "sourceAssetUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "d688da798fe6bca82a669d215af2befab9e383f1bf26e073b46ad1c58316cdbf"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.meta.json",
+  "triangleCount": 112,
+  "vertexCount": 172,
+  "bounds": {
+    "min": [
+      -36,
+      -1.600000023841858,
+      -36
+    ],
+    "max": [
+      36,
+      1.600000023841858,
+      36
+    ],
+    "size": [
+      72,
+      3.200000047683716,
+      72
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -36,
+      -1.600000023841858,
+      -36
+    ],
+    "max": [
+      36,
+      1.600000023841858,
+      36
+    ],
+    "size": [
+      72,
+      3.200000047683716,
+      72
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -36,
+      -1.600000023841858,
+      -36
+    ],
+    "max": [
+      36,
+      1.600000023841858,
+      36
+    ],
+    "size": [
+      72,
+      3.200000047683716,
+      72
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
+    "sourceNodeName": "Well Dais",
+    "visualLocalBounds": {
+      "min": [
+        -36,
+        -1.600000023841858,
+        -36
+      ],
+      "max": [
+        36,
+        1.600000023841858,
+        36
+      ],
+      "size": [
+        72,
+        3.200000047683716,
+        72
+      ],
+      "center": [
+        0,
+        0,
+        0
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -36,
+        -1.600000023841858,
+        -36
+      ],
+      "max": [
+        36,
+        1.600000023841858,
+        36
+      ],
+      "size": [
+        72,
+        3.200000047683716,
+        72
+      ],
+      "center": [
+        0,
+        0,
+        0
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "yggdrasil-dais",
+    "sourceActorName": "Well Dais",
+    "sourceAssetUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "d688da798fe6bca82a669d215af2befab9e383f1bf26e073b46ad1c58316cdbf"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "yggdrasil",
+      "nodeId": "yggdrasil-dais",
+      "sourceAssetUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
+      "intent": "walkable",
+      "channel": "worldStatic",
+      "triangleBudget": 12000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-13T18:28:08.250Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "walkable",
+    "channel": "worldStatic",
+    "triangleBudget": 12000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 112,
+    "targetTriangleBudget": 12000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

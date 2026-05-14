@@ -10,6 +10,14 @@ type GroundTerrainRuntimePublisherDeps = {
 type PublishContractsResponse = {
   success?: boolean
   message?: string
+  terrainProducts?: {
+    heightmapUrl?: string
+    colliderUrl?: string
+    chunksPath?: string
+    dirty?: boolean
+    heightmapDirty?: boolean
+    chunksStale?: boolean
+  }
 }
 
 async function readPublishContractsResponse(
@@ -43,7 +51,9 @@ export function createGroundTerrainRuntimePublisher(
         throw new Error(payload?.message ?? 'Ground/terrain publish failed')
       }
 
-      deps.setSaveMessage('Published runtime ground and terrain contracts')
+      deps.setSaveMessage(
+        payload.message ?? 'Published runtime ground and terrain contracts',
+      )
     } catch (error) {
       console.error('Ground/terrain contract publish failed:', error)
       deps.setSaveMessage(

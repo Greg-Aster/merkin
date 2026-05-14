@@ -22,11 +22,16 @@ import {
   getPublishReadinessPublishBlockReason,
   getPublishReadinessRequiredActions,
 } from './editorPublishReadinessPresentation'
+import {
+  type EditorTerrainStatusSnapshot,
+  describeEditorTerrainPipeline,
+} from './editorTerrainPipeline'
 
 export let levelId = ''
 export let editorScene: EditorSceneDocument | null = null
 export let groundTerrainPublishPending = false
 export let terrainPipelinePending = false
+export let terrainStatus: EditorTerrainStatusSnapshot | null = null
 export let worldPartitionCookPending = false
 export let publishPipelineState: EditorPublishPipelineState =
   createInitialEditorPublishPipelineState()
@@ -47,6 +52,8 @@ function refreshPublishReadiness(force = false) {
     {
       levelId,
       scene: editorScene,
+      terrainSourceAssets: terrainStatus?.sourceAssets,
+      missingTerrainSourceAssets: terrainStatus?.missingSourceAssets,
     },
     { force },
   )
@@ -106,6 +113,10 @@ $: publishRunBlockReason = publishReadiness.loading
       ? 'A bake, cook, or publish operation is still running.'
       : bakePlan.blockers[0] || ''
 $: publishDisabled = Boolean(publishRunBlockReason)
+$: terrainPipeline = describeEditorTerrainPipeline({
+  scene: editorScene,
+  terrainStatus,
+})
 </script>
 
 <div class="editor-section" aria-live="polite">
@@ -122,6 +133,30 @@ $: publishDisabled = Boolean(publishRunBlockReason)
     </div>
     <div class="save-message">Build: {publishReadiness.buildId || 'unversioned'}</div>
     <div class="save-message">Generated: {publishReadiness.generatedAt || 'unknown'}</div>
+
+    <div class="editor-status-card">
+      <div class="editor-status-title">Terrain Contract</div>
+      <div class="editor-chip-row">
+        <span class="editor-chip">{terrainPipeline.modeLabel}</span>
+        <span class:ready={terrainPipeline.renderChunkStatus.state === 'ready'} class:warn={terrainPipeline.renderChunkStatus.state === 'warning' || terrainPipeline.renderChunkStatus.state === 'inactive'} class:danger={terrainPipeline.renderChunkStatus.state === 'blocked'} class="editor-chip">render {terrainPipeline.renderChunkStatus.state}</span>
+        <span class:ready={terrainPipeline.collisionStatus.state === 'ready'} class:warn={terrainPipeline.collisionStatus.state === 'warning' || terrainPipeline.collisionStatus.state === 'inactive'} class:danger={terrainPipeline.collisionStatus.state === 'blocked'} class="editor-chip">collision {terrainPipeline.collisionStatus.state}</span>
+        <span class:ready={terrainPipeline.publishStatus.state === 'ready'} class:warn={terrainPipeline.publishStatus.state === 'warning'} class:danger={terrainPipeline.publishStatus.state === 'blocked'} class="editor-chip">publish {terrainPipeline.publishStatus.state}</span>
+      </div>
+      <div class="save-message">Authoritative visual source: {terrainPipeline.authoritativeVisualSource}</div>
+      <div class="save-message">Authority: {terrainPipeline.authoritySummary}</div>
+      <div class="save-message">Required action: {terrainPipeline.requiredAction}</div>
+      <div class="save-message">Source GLB/GLTF: {terrainPipeline.sourceGlbUrls[0] ?? 'none recorded'}</div>
+      <div class="save-message">Source existence: {terrainPipeline.sourceExistenceStatus.detail}</div>
+      <div class="save-message">Source provenance: {terrainPipeline.sourceHash || terrainPipeline.sourceProvenance}</div>
+      <div class="save-message">Runtime manifest: {terrainPipeline.manifestUrl || 'none recorded'}</div>
+      <div class="save-message">Fallback surface: {terrainPipeline.fallbackSurfaceStatus.detail}</div>
+      {#each terrainPipeline.blockers as blocker}
+        <div class="save-message error-message">{blocker}</div>
+      {/each}
+      {#each terrainPipeline.warnings as warning}
+        <div class="save-message">{warning}</div>
+      {/each}
+    </div>
 
     <div class="editor-status-card">
       <div class="editor-status-title">Publish Build Plan</div>

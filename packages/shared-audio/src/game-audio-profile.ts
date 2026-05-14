@@ -194,6 +194,15 @@ export const gameAudioProfile: GameAudioProfile = {
       interrupt: false,
       preload: true,
     },
+    'portal-impact': {
+      id: 'portal-impact',
+      src: '/audio/sfx/portal-impact.mp3',
+      volume: 0.44,
+      rate: 0.75,
+      cooldownMs: 1200,
+      interrupt: false,
+      preload: true,
+    },
     'portal-activate': {
       id: 'portal-activate',
       src: '/audio/sfx/portal-activate.mp3',

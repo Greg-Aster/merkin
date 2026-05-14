@@ -1,8 +1,19 @@
+import { EDITOR_API_BASE } from '@config/editorApi'
+import { getPrefabAssetUrl } from './editorBakeSource'
+import {
+  getNodeVisualColliderSizeSource,
+  isEditorGeometryNode,
+} from './editorCollisionDefaults'
+import {
+  type GeneratedAssetVisualBounds,
+  fitGeneratedAssetToSource,
+} from './editorGeneratedAssetApplication'
 import type {
   EditorNodeCollisionData,
   EditorPrimitiveData,
   EditorRigidBodyType,
   EditorSceneNode,
+  SharedLevelEditorSettings,
 } from './editorTypes'
 
 type TextureField =
@@ -20,21 +31,23 @@ type LibraryItem = {
 }
 
 type EditorPanelTab =
-  | 'workflow'
   | 'scene'
-  | 'environment'
   | 'create'
-  | 'hierarchy'
-  | 'inspect'
-  | 'style'
+  | 'world'
+  | 'collision'
+  | 'build'
   | 'ai'
-  | 'save'
 
 type InspectorControllerDeps = {
+  getLevelId: () => string
   getSelectedNode: () => EditorSceneNode | null
   getSelectedNodes: () => EditorSceneNode[]
   getEditorNodes: () => EditorSceneNode[]
+  addNode: (node: EditorSceneNode) => string
   patchNode: (nodeId: string, patch: Partial<EditorSceneNode>) => void
+  updateLevelSettings: (
+    updater: (settings: SharedLevelEditorSettings) => SharedLevelEditorSettings,
+  ) => void
   reparentNodes: (nodeIds: string[], parentId: string | null) => boolean
   selectEditorNode: (nodeId: string) => void
   setSaveMessage: (message: string) => void
@@ -72,17 +85,180 @@ type InspectorControllerDeps = {
   setAssetPickerTargetNodeId: (nodeId: string) => void
   getAssetPickerTargetNodeId: () => string
   setActiveEditorTab: (tab: EditorPanelTab) => void
+  setPropertiesShelfOpen?: (open: boolean) => void
   setHunyuanSelectionKey: (value: string) => void
   setLastInspectedHunyuanAsset: (value: string) => void
   inspectSelectedAssetForHunyuan: (
     assetUrl: string,
     selectionKey: string,
   ) => Promise<unknown>
+  getSceneNodeVisualBounds: (
+    node: EditorSceneNode,
+    sourceAssetUrl?: string,
+  ) => Promise<GeneratedAssetVisualBounds>
+  inspectGeneratedAssetBounds: (
+    assetUrl: string,
+  ) => Promise<GeneratedAssetVisualBounds | null>
+  getDefaultStyleDescriptor: (node: EditorSceneNode | null) => string
+  appendPipelineLog: (message: string, detail?: unknown) => void
+  getNodeTransformSnapshot: (node: EditorSceneNode | null) => {
+    position: [number, number, number]
+    rotation: [number, number, number]
+    scale: [number, number, number]
+  } | null
   setSelectedGeneratedVariantUrl: (assetUrl: string) => void
   setHunyuanLastOutputUrl: (assetUrl: string) => void
+  saveSceneDocumentToDisk: (levelId: string) => Promise<unknown>
 }
 
 export function createEditorInspectorController(deps: InspectorControllerDeps) {
+  function getEditableGeometrySelection() {
+    const selectedNodes = deps.getSelectedNodes().filter(isEditorGeometryNode)
+    const selectedNode = deps.getSelectedNode()
+
+    if (selectedNodes.length > 0) return selectedNodes
+    return isEditorGeometryNode(selectedNode) ? [selectedNode] : []
+  }
+
+  function getCollisionSizeForShape(
+    node: EditorSceneNode,
+    shape: EditorNodeCollisionData['shape'],
+  ) {
+    return shape === 'trimesh'
+      ? {}
+      : {
+          size: node.collision?.size ?? deps.getNodeVisualColliderSize(node),
+        }
+  }
+
+  function updateVisualOnlyRoleForNodes(
+    nodes: EditorSceneNode[],
+    visualOnly: boolean,
+  ) {
+    const nodeIds = new Set(nodes.map(node => node.id).filter(Boolean))
+    if (nodeIds.size === 0) return
+
+    deps.updateLevelSettings(settings => {
+      const collision = settings.collision ?? {}
+      const roles = collision.roles ?? {}
+      const visualOnlyActorIds = roles.visualOnlyActorIds ?? []
+      const nextVisualOnlyActorIds = visualOnly
+        ? Array.from(new Set([...visualOnlyActorIds, ...nodeIds]))
+        : visualOnlyActorIds.filter(actorId => !nodeIds.has(actorId))
+      const nextCollisionGroundActorIds = roles.groundActorIds?.filter(
+        actorId => !visualOnly || !nodeIds.has(actorId),
+      )
+      const nextGroundActorIds = settings.ground?.groundActorIds?.filter(
+        actorId => !visualOnly || !nodeIds.has(actorId),
+      )
+
+      return {
+        ...settings,
+        collision: {
+          ...collision,
+          roles: {
+            ...roles,
+            visualOnlyActorIds: nextVisualOnlyActorIds,
+            ...(nextCollisionGroundActorIds
+              ? { groundActorIds: nextCollisionGroundActorIds }
+              : {}),
+          },
+        },
+        ...(settings.ground
+          ? {
+              ground: {
+                ...settings.ground,
+                ...(nextGroundActorIds
+                  ? { groundActorIds: nextGroundActorIds }
+                  : {}),
+              },
+            }
+          : {}),
+      }
+    })
+  }
+
+  function enableCollisionRoleForNodes(nodes: EditorSceneNode[]) {
+    updateVisualOnlyRoleForNodes(nodes, false)
+  }
+
+  function disableCollisionRoleForNodes(nodes: EditorSceneNode[]) {
+    updateVisualOnlyRoleForNodes(nodes, true)
+  }
+
+  function buildCollisionPreset(
+    node: EditorSceneNode,
+    intent: NonNullable<EditorNodeCollisionData['intent']>,
+    options: Partial<EditorNodeCollisionData> = {},
+  ): EditorNodeCollisionData {
+    const defaultShape = deps.getDefaultCollisionShape(node)
+    const previousShape =
+      options.shape ??
+      (node.kind === 'asset' || node.kind === 'prefab'
+        ? defaultShape
+        : node.collision?.shape) ??
+      defaultShape
+    const shape =
+      intent === 'detailMesh'
+        ? options.shape ??
+          (node.kind === 'asset' || node.kind === 'prefab'
+            ? defaultShape
+            : node.collision?.shape) ??
+          'trimesh'
+        : previousShape
+    const channel =
+      options.channel ??
+      (intent === 'trigger'
+        ? 'trigger'
+        : intent === 'detailMesh'
+          ? 'detail'
+          : 'worldStatic')
+
+    return {
+      ...(node.collision ?? {}),
+      shape,
+      intent,
+      channel,
+      enabled: true,
+      sensor: options.sensor ?? intent === 'trigger',
+      friction: options.friction ?? node.collision?.friction ?? 0.7,
+      restitution: options.restitution ?? node.collision?.restitution ?? 0,
+      triangleBudget:
+        intent === 'detailMesh'
+          ? options.triangleBudget ?? node.collision?.triangleBudget ?? 0
+          : node.collision?.triangleBudget,
+      ...getCollisionSizeForShape(node, shape),
+      ...options,
+    }
+  }
+
+  function applyCollisionPresetToSelection(
+    intent: NonNullable<EditorNodeCollisionData['intent']>,
+    message: string,
+    options: Partial<EditorNodeCollisionData> = {},
+  ) {
+    const nodes = getEditableGeometrySelection()
+    if (nodes.length === 0) {
+      deps.setSaveMessage('Select geometry before changing collision mode')
+      return
+    }
+
+    for (const node of nodes) {
+      deps.patchNode(node.id, {
+        collision: buildCollisionPreset(node, intent, options),
+        physics: {
+          ...(node.physics ?? {}),
+          bodyType: node.physics?.bodyType ?? 'fixed',
+        },
+      })
+    }
+
+    enableCollisionRoleForNodes(nodes)
+    deps.setSaveMessage(
+      nodes.length === 1 ? message : `${message} on ${nodes.length} objects`,
+    )
+  }
+
   function resolveWorkspaceAssetCandidates(assetUrl: string) {
     if (typeof assetUrl !== 'string' || !assetUrl.startsWith('/')) return []
 
@@ -207,7 +383,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     deps.setAssetPickerTargetNodeId(selectedNode.id)
     deps.setSelectedLibraryItem(null)
     deps.setAssetBrowserFilter('')
-    deps.setActiveEditorTab('inspect')
+    deps.setPropertiesShelfOpen?.(true)
 
     const items = await deps.loadAssetBrowser(directoryPath)
     const currentAssetItem = selectedAssetPath
@@ -274,7 +450,56 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     deps.setSaveMessage('Asset replacement picker closed')
   }
 
-  function applyGeneratedVariantToSelectedNode(assetUrl: string) {
+  function getCollisionVisualBounds(
+    node: EditorSceneNode,
+  ): GeneratedAssetVisualBounds | null {
+    const size = node.collision?.assetLocalTransform?.visualLocalBounds?.size
+    if (!Array.isArray(size) || size.length !== 3) return null
+
+    const scaledSize = size.map((value, index) => {
+      const numericValue = Math.abs(Number(value))
+      const scale = Math.abs(Number(node.scale[index] ?? 1))
+      return numericValue * (Number.isFinite(scale) ? scale : 1)
+    }) as [number, number, number]
+    const maxDimension = Math.max(...scaledSize)
+
+    if (!Number.isFinite(maxDimension) || maxDimension <= 0.0001) {
+      return null
+    }
+
+    return { size: scaledSize, maxDimension }
+  }
+
+  function getStoredSourceVisualBounds(
+    node: EditorSceneNode,
+  ): GeneratedAssetVisualBounds | null {
+    const size = node.generation?.sourceVisualSize
+    if (!Array.isArray(size) || size.length !== 3) return null
+
+    const sourceSize = size.map(value => Math.abs(Number(value))) as [
+      number,
+      number,
+      number,
+    ]
+    const maxDimension = Math.max(...sourceSize)
+
+    if (!Number.isFinite(maxDimension) || maxDimension <= 0.0001) {
+      return null
+    }
+
+    return { size: sourceSize, maxDimension }
+  }
+
+  function getOriginalAssetUrl(node: EditorSceneNode) {
+    return (
+      node.generation?.originalAssetUrl ??
+      node.collision?.assetLocalTransform?.sourceAssetUrl ??
+      node.asset?.url ??
+      ''
+    )
+  }
+
+  async function applyGeneratedVariantToSelectedNode(assetUrl: string) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode?.asset) {
       deps.setSaveMessage(
@@ -284,18 +509,45 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     }
     if (!assetUrl) return
 
+    deps.setSaveMessage(`Fitting variant to ${selectedNode.name}...`)
+    const sourceVisualBounds =
+      getStoredSourceVisualBounds(selectedNode) ??
+      getCollisionVisualBounds(selectedNode) ??
+      (await deps.getSceneNodeVisualBounds(
+        selectedNode,
+        selectedNode.asset.url,
+      ))
+    const originalAssetUrl = getOriginalAssetUrl(selectedNode)
+    const fitResult = await fitGeneratedAssetToSource(
+      deps,
+      selectedNode.id,
+      sourceVisualBounds,
+      assetUrl,
+      [...selectedNode.scale] as [number, number, number],
+    )
+
     deps.patchNode(selectedNode.id, {
       kind: 'asset',
       asset: { url: assetUrl },
+      scale: fitResult.appliedScale,
       prefab: undefined,
       primitive: undefined,
       generation: {
         ...(selectedNode.generation ?? {}),
+        descriptor: deps.getDefaultStyleDescriptor(selectedNode),
+        originalAssetUrl,
+        sourceVisualSize: sourceVisualBounds.size,
         lastBakedAssetUrl: assetUrl,
         lastBakedAt: new Date().toISOString(),
       },
     })
 
+    deps.appendPipelineLog('Applied generated variant with visual fit', {
+      nodeId: selectedNode.id,
+      assetUrl,
+      fitReport: fitResult.report,
+      transform: deps.getNodeTransformSnapshot(selectedNode),
+    })
     deps.setSelectedGeneratedVariantUrl(assetUrl)
     deps.setHunyuanLastOutputUrl(assetUrl)
     deps.setSaveMessage(`Applied variant to ${selectedNode.name}`)
@@ -406,6 +658,12 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     const defaultShape = deps.getDefaultCollisionShape(selectedNode)
     const defaultIntent = deps.getDefaultCollisionIntent(selectedNode)
 
+    if (value) {
+      enableCollisionRoleForNodes([selectedNode])
+    } else {
+      disableCollisionRoleForNodes([selectedNode])
+    }
+
     deps.patchNode(selectedNode.id, {
       collision: value
         ? {
@@ -435,11 +693,50 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     })
   }
 
+  function updateCollisionShape(value: string) {
+    const selectedNode = deps.getSelectedNode()
+    if (!selectedNode || !isEditorGeometryNode(selectedNode)) return
+    const requestedShape = value as EditorNodeCollisionData['shape']
+    const shape =
+      selectedNode.kind === 'asset' || selectedNode.kind === 'prefab'
+        ? 'trimesh'
+        : requestedShape
+    enableCollisionRoleForNodes([selectedNode])
+    const baseCollision =
+      selectedNode.collision ??
+      buildCollisionPreset(
+        selectedNode,
+        deps.getDefaultCollisionIntent(selectedNode),
+        { shape },
+      )
+
+    deps.patchNode(selectedNode.id, {
+      collision: {
+        ...baseCollision,
+        shape,
+        enabled: baseCollision.intent !== 'none',
+        ...(shape === 'trimesh'
+          ? { size: undefined }
+          : {
+              size:
+                selectedNode.collision?.size ??
+                deps.getNodeVisualColliderSize(selectedNode),
+            }),
+      },
+    })
+  }
+
   function updateCollisionIntent(value: string) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode) return
     const defaultShape = deps.getDefaultCollisionShape(selectedNode)
     const intent = value as EditorNodeCollisionData['intent']
+
+    if (intent === 'none') {
+      disableCollisionRoleForNodes([selectedNode])
+    } else {
+      enableCollisionRoleForNodes([selectedNode])
+    }
 
     deps.patchNode(selectedNode.id, {
       collision:
@@ -479,6 +776,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode) return
     const defaultShape = deps.getDefaultCollisionShape(selectedNode)
+    enableCollisionRoleForNodes([selectedNode])
 
     deps.patchNode(selectedNode.id, {
       collision: {
@@ -504,6 +802,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     const numeric = Number(value)
     if (Number.isNaN(numeric)) return
     const defaultShape = deps.getDefaultCollisionShape(selectedNode)
+    enableCollisionRoleForNodes([selectedNode])
 
     deps.patchNode(selectedNode.id, {
       collision: {
@@ -526,6 +825,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     if (!selectedNode) return
     const defaultShape = deps.getDefaultCollisionShape(selectedNode)
     const normalized = value.trim()
+    enableCollisionRoleForNodes([selectedNode])
 
     deps.patchNode(selectedNode.id, {
       collision: {
@@ -548,6 +848,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     if (!selectedNode) return
     const numeric = Number(value)
     if (Number.isNaN(numeric)) return
+    enableCollisionRoleForNodes([selectedNode])
     const size = [
       ...(selectedNode.collision?.size ??
         deps.getNodeVisualColliderSize(selectedNode)),
@@ -571,6 +872,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode) return
     const defaultShape = deps.getDefaultCollisionShape(selectedNode)
+    enableCollisionRoleForNodes([selectedNode])
     deps.patchNode(selectedNode.id, {
       collision: {
         ...(selectedNode.collision ?? {
@@ -597,14 +899,198 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
   }
 
   function recalculateCollisionFromVisual() {
+    fitColliderToVisualBounds()
+  }
+
+  function setVisualOnly() {
+    const nodes = getEditableGeometrySelection()
+    if (nodes.length === 0) {
+      deps.setSaveMessage('Select geometry before changing collision mode')
+      return
+    }
+
+    for (const node of nodes) {
+      deps.patchNode(node.id, {
+        collision: {
+          ...(node.collision ?? { shape: deps.getDefaultCollisionShape(node) }),
+          intent: 'none',
+          channel: node.collision?.channel ?? 'worldStatic',
+          enabled: false,
+          sensor: false,
+        },
+      })
+    }
+
+    disableCollisionRoleForNodes(nodes)
+    deps.setSaveMessage(
+      nodes.length === 1
+        ? 'Marked object as visual only'
+        : `Marked ${nodes.length} objects as visual only`,
+    )
+  }
+
+  function setBlocker() {
+    applyCollisionPresetToSelection('blocker', 'Set collision mode to blocker')
+  }
+
+  function setWalkable() {
+    applyCollisionPresetToSelection(
+      'walkable',
+      'Set collision mode to walkable',
+    )
+  }
+
+  function setTrigger() {
+    applyCollisionPresetToSelection('trigger', 'Set collision mode to trigger')
+  }
+
+  function setDetail() {
+    applyCollisionPresetToSelection(
+      'detailMesh',
+      'Set collision mode to detail',
+    )
+  }
+
+  async function bakeMeshColliderFromSelection() {
     const selectedNode = deps.getSelectedNode()
-    if (!selectedNode) return
-    const defaultShape = deps.getDefaultCollisionShape(selectedNode)
+    if (
+      !selectedNode ||
+      (selectedNode.kind !== 'asset' && selectedNode.kind !== 'prefab')
+    ) {
+      deps.setSaveMessage(
+        'Select one asset or prefab mesh before baking a mesh collider',
+      )
+      return
+    }
+
+    const assetUrl =
+      selectedNode.kind === 'prefab'
+        ? getPrefabAssetUrl(
+            selectedNode.prefab?.type,
+            selectedNode.prefab?.variant,
+          )?.trim()
+        : selectedNode.asset?.url?.trim()
+    if (!assetUrl) {
+      deps.setSaveMessage('Selected node has no source asset URL to bake from')
+      return
+    }
+
+    try {
+      await deps.saveSceneDocumentToDisk(deps.getLevelId())
+    } catch (error) {
+      console.error('Pre-bake scene save failed:', error)
+      deps.setSaveMessage(
+        error instanceof Error
+          ? `Cannot bake: scene save failed (${error.message})`
+          : 'Cannot bake: scene save failed',
+      )
+      return
+    }
+
+    const intent =
+      selectedNode.collision?.intent && selectedNode.collision.intent !== 'none'
+        ? selectedNode.collision.intent
+        : 'blocker'
+    const channel =
+      selectedNode.collision?.channel ??
+      (intent === 'trigger'
+        ? 'trigger'
+        : intent === 'detailMesh'
+          ? 'detail'
+          : 'worldStatic')
+    const triangleBudget =
+      selectedNode.collision?.triangleBudget ??
+      (intent === 'detailMesh' ? 20000 : 5000)
+
+    deps.setSaveMessage(`Baking mesh collider for ${selectedNode.name}...`)
+    enableCollisionRoleForNodes([selectedNode])
+
+    try {
+      const response = await fetch(
+        `${EDITOR_API_BASE}/api/editor-collision/bake-mesh-collider`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            levelId: deps.getLevelId(),
+            nodeId: selectedNode.id,
+            assetUrl,
+            intent,
+            channel,
+            triangleBudget,
+          }),
+        },
+      )
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.message ?? 'Mesh collider bake failed')
+      }
+
+      const collision = payload.collision ?? {}
+      deps.patchNode(selectedNode.id, {
+        collision: {
+          ...(selectedNode.collision ?? {}),
+          shape: 'trimesh',
+          colliderUrl: payload.colliderUrl ?? collision.colliderUrl,
+          colliderMetadataUrl:
+            payload.metadataUrl ?? collision.colliderMetadataUrl,
+          assetLocalTransform:
+            collision.assetLocalTransform ??
+            payload.assetLocalTransform ??
+            selectedNode.collision?.assetLocalTransform ??
+            null,
+          triangleBudget: collision.triangleBudget ?? triangleBudget,
+          triangleCount: collision.triangleCount ?? payload.triangleCount,
+          intent: collision.intent ?? intent,
+          channel: collision.channel ?? channel,
+          enabled: true,
+          proxy: false,
+          bakeStatus: 'ready',
+          sourceAssetUrl: assetUrl,
+          sensor:
+            collision.sensor ??
+            (intent === 'trigger' || intent === 'detailMesh'),
+          friction:
+            collision.friction ?? selectedNode.collision?.friction ?? 0.7,
+          restitution:
+            collision.restitution ?? selectedNode.collision?.restitution ?? 0,
+        },
+      })
+
+      deps.setSaveMessage(
+        payload.message ?? `Baked mesh collider for ${selectedNode.name}`,
+      )
+    } catch (error) {
+      console.error('Mesh collider bake failed:', error)
+      deps.setSaveMessage(
+        error instanceof Error ? error.message : 'Mesh collider bake failed',
+      )
+    }
+  }
+
+  function fitColliderToVisualBounds() {
+    const selectedNode = deps.getSelectedNode()
+    if (!selectedNode || !isEditorGeometryNode(selectedNode)) return
+    const shape =
+      selectedNode.collision?.shape ??
+      deps.getDefaultCollisionShape(selectedNode)
+
+    if (shape === 'trimesh') {
+      deps.setSaveMessage(
+        'Trimesh collision uses a collider asset URL; no bounds were fitted',
+      )
+      return
+    }
+
+    const sizeSource = getNodeVisualColliderSizeSource(selectedNode)
+    const size = deps.getNodeVisualColliderSize(selectedNode)
 
     deps.patchNode(selectedNode.id, {
       collision: {
-        ...(selectedNode.collision ?? { shape: defaultShape }),
-        shape: defaultShape,
+        ...(selectedNode.collision ?? { shape }),
+        shape,
         intent:
           selectedNode.collision?.intent ??
           deps.getDefaultCollisionIntent(selectedNode),
@@ -612,14 +1098,18 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
           selectedNode.collision?.channel ??
           deps.getDefaultCollisionChannel(selectedNode),
         enabled: true,
-        ...(defaultShape === 'trimesh'
-          ? { size: undefined }
-          : { size: deps.getNodeVisualColliderSize(selectedNode) }),
+        size,
         friction: selectedNode.collision?.friction ?? 0.7,
         restitution: selectedNode.collision?.restitution ?? 0,
         sensor: selectedNode.collision?.sensor ?? false,
       },
     })
+
+    deps.setSaveMessage(
+      sizeSource === 'transform-scale'
+        ? 'Matched collider to transform scale because visual bounds metadata is missing'
+        : 'Matched collider to visual bounds',
+    )
   }
 
   function updatePhysicsField(field: 'bodyType', value: string) {
@@ -810,6 +1300,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     updateNodeMaterialBooleanField,
     clearNodeMaterialOverrides,
     updateCollisionEnabled,
+    updateCollisionShape,
     updateCollisionIntent,
     updateCollisionChannel,
     updateCollisionNumericField,
@@ -817,6 +1308,13 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     updateCollisionSize,
     updateCollisionBooleanField,
     recalculateCollisionFromVisual,
+    setVisualOnly,
+    setBlocker,
+    setWalkable,
+    setTrigger,
+    setDetail,
+    bakeMeshColliderFromSelection,
+    fitColliderToVisualBounds,
     updatePhysicsField,
     updatePhysicsNumericField,
     updatePhysicsBooleanField,

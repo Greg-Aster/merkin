@@ -109,7 +109,7 @@ export const megaMealUniverseFacts: TimelineFact[] = [
     headline: 'Enter Star Observatory Training',
     text: 'Pilots, drifters, and suspicious optimists are invited to report for simulation duty. Survival is considered a premium feature.',
     ctaText: 'Launch The Game',
-    href: '/game/',
+    href: 'https://game.megameal.org/',
     sponsor: 'Observatory Personnel Division',
     finePrint: 'External deployment. Emotional damage billed separately.',
     theme: 'observatory',

@@ -17,6 +17,7 @@ import {
   homeIntroIntroOffsetScreens,
   homeIntroMobileIntroOffsetScreens,
   homeIntroScreens,
+  homeIntroStandardBannerPhaseScreens,
   homeIntroWheelToScreenRatio,
 } from './homeIntroScreens'
 
@@ -86,7 +87,9 @@ $: introOffsetScreens = portraitMobile
   ? homeIntroMobileIntroOffsetScreens
   : homeIntroIntroOffsetScreens
 $: carouselRevealWheelSpan = introOffsetScreens / homeIntroWheelToScreenRatio
-$: maxWheel = homeIntroMaxWheelForOffset(introOffsetScreens)
+$: maxWheel =
+  homeIntroMaxWheelForOffset(introOffsetScreens) +
+  homeIntroStandardBannerPhaseScreens / homeIntroWheelToScreenRatio
 $: activeScreen = homeIntroScreens[activeScreenIndex] ?? homeIntroScreens[0]
 
 const createRenderer = (canvas: HTMLCanvasElement) => {
@@ -289,10 +292,26 @@ function syncRevealProgress() {
   revealProgress = input.reveal
 }
 
+function syncStandardBannerPhaseClass() {
+  if (typeof document === 'undefined') return
+
+  const selectedIndex =
+    input.wheel * homeIntroWheelToScreenRatio - introOffsetScreens
+  const phaseProgress =
+    (selectedIndex - (homeIntroScreens.length - 1)) /
+    homeIntroStandardBannerPhaseScreens
+
+  document.documentElement.classList.toggle(
+    'megameal-home-standard-banner-phase',
+    phaseProgress > 0.18,
+  )
+}
+
 function updateScrollDrivenWheel() {
   input.introOffsetScreens = introOffsetScreens
   input.wheel = clamp(virtualWheel, 0, maxWheel)
   syncRevealProgress()
+  syncStandardBannerPhaseClass()
   syncActiveScreenFromWheel(input.wheel)
 }
 
@@ -705,6 +724,7 @@ onMount(() => {
     }
     adaptiveDprController?.stop()
     adaptiveDprController = null
+    document.documentElement.classList.remove('megameal-home-standard-banner-phase')
     clearBackgroundRevealTimers()
   }
 })
@@ -719,6 +739,9 @@ onDestroy(() => {
   }
   adaptiveDprController?.stop()
   adaptiveDprController = null
+  if (typeof document !== 'undefined') {
+    document.documentElement.classList.remove('megameal-home-standard-banner-phase')
+  }
   clearBackgroundRevealTimers()
 })
 </script>

@@ -114,11 +114,25 @@ $: environmentPanelProfile = (levelSettings.editorPanels?.environment ??
 
       <div class="tuple-group">
         <div class="tuple-label">Features</div>
-        <label class="checkbox"><input type="checkbox" checked={effectiveObservatorySettings.features?.ocean ?? true} on:change={(event) => updateLevelSetting(['features', 'ocean'], (event.currentTarget as HTMLInputElement).checked)} /> Ocean</label>
+        <label class="checkbox"><input type="checkbox" checked={effectiveObservatorySettings.features?.water ?? true} on:change={(event) => updateLevelSetting(['features', 'water'], (event.currentTarget as HTMLInputElement).checked)} /> Water</label>
         <label class="checkbox"><input type="checkbox" checked={effectiveObservatorySettings.features?.vegetation ?? true} on:change={(event) => updateLevelSetting(['features', 'vegetation'], (event.currentTarget as HTMLInputElement).checked)} /> Vegetation</label>
         <label class="checkbox"><input type="checkbox" checked={effectiveObservatorySettings.features?.fireflies ?? true} on:change={(event) => updateLevelSetting(['features', 'fireflies'], (event.currentTarget as HTMLInputElement).checked)} /> Fireflies</label>
         <label class="checkbox"><input type="checkbox" checked={effectiveObservatorySettings.features?.starMap ?? true} on:change={(event) => updateLevelSetting(['features', 'starMap'], (event.currentTarget as HTMLInputElement).checked)} /> Star Map</label>
         <label class="checkbox"><input type="checkbox" checked={effectiveObservatorySettings.features?.conversations ?? true} on:change={(event) => updateLevelSetting(['features', 'conversations'], (event.currentTarget as HTMLInputElement).checked)} /> Conversations</label>
+      </div>
+
+      <div class="tuple-group">
+        <div class="tuple-label">Water</div>
+        <div class="editor-field-grid">
+          <label class="editor-field"><span class="editor-field-label">Initial Level</span><input class="tuple-input" type="number" step="0.1" value={effectiveObservatorySettings.water?.initialLevel ?? -2} on:change={(event) => updateLevelNumericSetting(['water', 'initialLevel'], (event.currentTarget as HTMLInputElement).value)} /></label>
+          <label class="editor-field"><span class="editor-field-label">Target Level</span><input class="tuple-input" type="number" step="0.1" value={effectiveObservatorySettings.water?.targetLevel ?? 5} on:change={(event) => updateLevelNumericSetting(['water', 'targetLevel'], (event.currentTarget as HTMLInputElement).value)} /></label>
+          <label class="editor-field"><span class="editor-field-label">Rise Rate</span><input class="tuple-input" type="number" step="0.001" value={effectiveObservatorySettings.water?.riseRate ?? 0.01} on:change={(event) => updateLevelNumericSetting(['water', 'riseRate'], (event.currentTarget as HTMLInputElement).value)} /></label>
+          <label class="editor-field"><span class="editor-field-label">Width</span><input class="tuple-input" type="number" step="1" value={effectiveObservatorySettings.water?.size?.width ?? 4000} on:change={(event) => updateLevelNumericSetting(['water', 'size', 'width'], (event.currentTarget as HTMLInputElement).value)} /></label>
+          <label class="editor-field"><span class="editor-field-label">Height</span><input class="tuple-input" type="number" step="1" value={effectiveObservatorySettings.water?.size?.height ?? 4000} on:change={(event) => updateLevelNumericSetting(['water', 'size', 'height'], (event.currentTarget as HTMLInputElement).value)} /></label>
+          <label class="editor-field"><span class="editor-field-label">Opacity</span><input class="tuple-input" type="number" step="0.01" value={effectiveObservatorySettings.water?.opacity ?? 0.86} on:change={(event) => updateLevelNumericSetting(['water', 'opacity'], (event.currentTarget as HTMLInputElement).value)} /></label>
+        </div>
+        <label class="checkbox"><input type="checkbox" checked={effectiveObservatorySettings.water?.enableRising ?? true} on:change={(event) => updateLevelSetting(['water', 'enableRising'], (event.currentTarget as HTMLInputElement).checked)} /> Rising Water</label>
+        <label class="checkbox"><input type="checkbox" checked={effectiveObservatorySettings.water?.enableAnimation ?? true} on:change={(event) => updateLevelSetting(['water', 'enableAnimation'], (event.currentTarget as HTMLInputElement).checked)} /> Animate Water</label>
       </div>
 
       <div class="tuple-group">

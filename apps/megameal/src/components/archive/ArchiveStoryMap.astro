@@ -215,46 +215,28 @@ const archiveGroups: ArchiveGroup[] = Array.from(grouped.entries())
     }),
   }))
 
-const publicCount = archiveManifest.items.filter(post => !post.draft).length
-const restrictedCount = archiveManifest.items.length - publicCount
 import '../../styles/features/archive/story-map-shell.css'
 import '../../styles/features/archive/story-map-nodes.css'
 import '../../styles/features/archive/story-map-records.css'
 import '../../styles/features/archive/story-map-responsive.css'
 ---
 
-<section class="story-archive-map" data-view="node" aria-labelledby="story-archive-map-title">
-  <div class="archive-map-hero">
-    <div class="archive-map-hero__copy">
-      <div class="archive-map-kicker">Story Archive</div>
-      <h2 id="story-archive-map-title">A restricted map of the known story graph.</h2>
-      <p>
-        Public records are open entry points. Restricted records are visible as locked nodes so the scale of the universe is readable before every file is cleared for release.
-      </p>
-      <div class="archive-view-switch" role="group" aria-label="Archive display mode">
-        <button type="button" class="archive-view-switch__button is-active" data-archive-view-button data-view-target="node" data-sfx-hover="hover-soft" data-sfx-click="soft" aria-pressed="true">
-          <Icon name="mdi:vector-polyline" />
-          <span>Node View</span>
-        </button>
-        <button type="button" class="archive-view-switch__button" data-archive-view-button data-view-target="list" data-sfx-hover="hover-soft" data-sfx-click="soft" aria-pressed="false">
-          <Icon name="mdi:format-list-bulleted-square" />
-          <span>List View</span>
-        </button>
-      </div>
+<section class="story-archive-map" data-view="list" aria-labelledby="story-archive-map-title">
+  <div class="archive-map-toolbar">
+    <div class="archive-map-toolbar__copy">
+      <div class="archive-map-kicker">Browse Records</div>
+      <h2 id="story-archive-map-title">Choose a route through the records.</h2>
+      <p>List view is built for scanning. Node view shows how each archive file sits inside the broader story graph.</p>
     </div>
-    <div class="archive-map-ledger" aria-label={`${publicCount} open records and ${restrictedCount} restricted records`}>
-      <div>
-        <span>{publicCount}</span>
-        <strong>Open</strong>
-      </div>
-      <div>
-        <span>{restrictedCount}</span>
-        <strong>Restricted</strong>
-      </div>
-      <div>
-        <span>{archiveManifest.items.length}</span>
-        <strong>Total Files</strong>
-      </div>
+    <div class="archive-view-switch" role="group" aria-label="Archive display mode">
+      <button type="button" class="archive-view-switch__button is-active" data-archive-view-button data-view-target="list" data-sfx-hover="hover-soft" data-sfx-click="soft" aria-pressed="true">
+        <Icon name="mdi:format-list-bulleted-square" />
+        <span>List View</span>
+      </button>
+      <button type="button" class="archive-view-switch__button" data-archive-view-button data-view-target="node" data-sfx-hover="hover-soft" data-sfx-click="soft" aria-pressed="false">
+        <Icon name="mdi:vector-polyline" />
+        <span>Node View</span>
+      </button>
     </div>
   </div>
 
@@ -355,7 +337,6 @@ import '../../styles/features/archive/story-map-responsive.css'
 
   archiveMaps.forEach((map) => {
     const buttons = map.querySelectorAll('[data-archive-view-button]')
-    const prefersListView = window.matchMedia('(max-width: 640px)').matches
 
     const setView = (nextView: string) => {
       map.setAttribute('data-view', nextView)
@@ -372,9 +353,5 @@ import '../../styles/features/archive/story-map-responsive.css'
         setView(nextView)
       })
     })
-
-    if (prefersListView) {
-      setView('list')
-    }
   })
 </script>

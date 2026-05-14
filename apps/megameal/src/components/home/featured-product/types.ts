@@ -72,6 +72,7 @@ export type FeaturedProduct = {
   specifications: ProductSpec[]
   ingredients?: string[]
   nutritionFacts?: ProductSpec[]
+  assurances?: ProductSpec[]
   qanda: ProductQuestion[]
   reviews: ProductReview[]
   quirks?: Quirk[]

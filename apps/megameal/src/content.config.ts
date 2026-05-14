@@ -291,6 +291,7 @@ const productsCollection = defineCollection({
       .optional(),
     ingredients: z.array(z.string()).optional(),
     nutritionFacts: z.array(productDataPointSchema).optional(),
+    assurances: z.array(productDataPointSchema).optional(),
     qanda: z.array(productQuestionSchema).optional(),
     preWrittenReviews: z.array(productReviewSchema).optional(),
     sheet: z.array(productFieldSchema).optional(),

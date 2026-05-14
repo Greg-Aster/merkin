@@ -17,7 +17,7 @@ import {
 
 const PNG_SIGNATURE = '89504e470d0a1a0a'
 const DEFAULT_LEVELS = ['solitude', 'yggdrasil', 'sci-fi-room']
-const AVAILABLE_LEVELS = [...DEFAULT_LEVELS, 'miranda']
+const AVAILABLE_LEVELS = [...DEFAULT_LEVELS, 'miranda', 'observatory']
 const repoRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const args = process.argv.slice(2)
 const browserName = normalizeBrowserName(
@@ -108,6 +108,15 @@ const levelContracts = {
     requiredRenderedActors: ['miranda-floor-main', 'miranda-floor-upper'],
     minUniqueColorBuckets: 24,
     minLumaStdDev: 6,
+  },
+  observatory: {
+    cameraBookmark: {
+      id: 'spawn-default',
+      viewport: { width: 1280, height: 720 },
+      settleMs: 2000,
+    },
+    minUniqueColorBuckets: 24,
+    minLumaStdDev: 5,
   },
 }
 const sceneVisualBookmarks = Object.fromEntries(

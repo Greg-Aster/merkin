@@ -12,12 +12,12 @@ import type {
 import type { EditorPanelTab } from './editorPanelTabs'
 import type { EditorPublishPipelineState } from './editorPublishReadinessContracts'
 import type { EditorPrefabType } from './editorStore'
+import type { EditorTerrainStatusSnapshot } from './editorTerrainPipeline'
 import type {
   EditorMaterialData,
   EditorSceneDocument,
   EditorSceneNode,
   LevelCollisionBudget,
-  LevelCollisionDefaultPolicy,
 } from './editorTypes'
 
 type AnyFunction = (...args: any[]) => any
@@ -31,6 +31,8 @@ type GeneratedVariantItem = {
   name: string
   path: string
   url: string
+  sourceLabel?: string
+  isOriginalSource?: boolean
 }
 type TextureField =
   | 'mapUrl'
@@ -48,6 +50,7 @@ type EditorPanelState = {
   interactionMode?: string
   viewportLightingMode?: string
   collisionOverlayEnabled?: boolean
+  objectToolMode?: string
   terrainBrushMode?: string
   terrainBrushSize?: number
   terrainBrushStrength?: number
@@ -148,16 +151,17 @@ export type EditorPanelPropBuilderContext = {
   groundSettings: Record<string, any> | null
   terrainSculptSettings: Record<string, any> | null
   terrainCollisionSettings: Record<string, any> | null
-  collisionDefaultPolicy: LevelCollisionDefaultPolicy
   collisionBudget: LevelCollisionBudget
   terrainCollisionBakePending: boolean
   terrainHeightmapGeneratePending: boolean
   terrainChunkCookPending: boolean
+  terrainStatusSnapshot: EditorTerrainStatusSnapshot | null
   worldPartitionCookPending: boolean
   groundTerrainPublishPending: boolean
   selectedTerrainSourceName: string
   selectedTerrainSourceAssetUrl: string
   heightmapSourceNodes: EditorSceneNode[]
+  heightmapCandidateNodes: EditorSceneNode[]
   editorStyleStudioComponent: any
   stylePresetOptions: Array<any>
   styleBusy: boolean
@@ -201,7 +205,6 @@ export type EditorPanelPropBuilderContext = {
   setEditorInteractionMode: (mode: 'objects' | 'terrain') => void
   setEditorViewportLightingMode: (mode: 'authored' | 'workbench') => void
   setCollisionOverlayEnabled: (value: boolean) => void
-  setCollisionDefaultPolicy: (value: LevelCollisionDefaultPolicy) => void
   setCollisionBudget: (value: LevelCollisionBudget) => void
   setTerrainBrushMode: (mode: 'raise' | 'smooth' | 'flatten') => void
   setTerrainBrushSize: (value: number) => void
@@ -222,11 +225,17 @@ export type EditorPanelPropBuilderContext = {
   updateLevelNumericSetting: AnyFunction
   applySolitudeAtmospherePreset: AnyFunction
   setTerrainAutoBake: (value: boolean) => void
+  addSelectedTerrainSourcesToBasket: () => void
+  removeTerrainSourceFromBasket: (nodeId: string) => void
+  clearTerrainSourceBasket: () => void
   bakeTerrainCollision: () => Promise<void>
+  bakeTerrainPipeline: () => Promise<void>
+  validateTerrainContract: () => Promise<void>
   generateTerrainHeightmapFromSelection: () => Promise<void>
   cookTerrainChunks: () => Promise<void>
   cookWorldPartition: () => Promise<void>
   publishGroundTerrainContracts: () => Promise<void>
+  openBuildOutput: () => void
   switchEditorLevel: () => void
   reloadFromDisk: () => Promise<void>
   loadPackagedLevelScene: () => void
@@ -252,87 +261,14 @@ export type EditorPanelPropBuilderContext = {
   resetSelectedWorkflowPath: () => void
   saveCurrentSceneToDisk: () => Promise<void>
   setActiveEditorTab: (tab: EditorPanelTab) => void
+  setPanelOpen: (open: boolean) => void
+  setPropertiesShelfOpen: (open: boolean) => void
   setSaveMessage: (value: string) => void
   setHierarchyFilter: (value: string) => void
   setHierarchyRootDropActive: (value: boolean) => void
   setHierarchyDropTargetId: (value: string | null) => void
   setAssetBrowserFilter: (value: string) => void
   setHunyuanApplyToSimilarNodes: (value: boolean) => void
-}
-
-export function buildWorkflowTabProps(context: EditorPanelPropBuilderContext) {
-  return {
-    workflowBrowserPath: context.workflowBrowserPath,
-    workflowBrowserItems: context.workflowBrowserItems,
-    workflowBrowserError: context.workflowBrowserError,
-    workflowBrowserLoading: context.workflowBrowserLoading,
-    selectedComfyWorkflowPath: context.selectedComfyWorkflowPath,
-    workflowSelectionSummary: context.workflowSelectionSummary,
-    selectedNode: context.selectedNode,
-    selectedNodes: context.selectedNodes,
-    similarNodeCount: context.similarNodeCount,
-    comfyWorkflowEditorStatus: context.comfyWorkflowEditorStatus,
-    hunyuanStatus: context.hunyuanStatus,
-    hunyuanBusy: context.hunyuanBusy,
-    workflowCanGenerateSelection: context.workflowCanGenerateSelection,
-    workflowCanRetextureSelection: context.workflowCanRetextureSelection,
-    canApplyGeneratedAssetToSelection:
-      context.canApplyGeneratedAssetToSelection,
-    hunyuanLastOutputUrl: context.hunyuanLastOutputUrl,
-    selectedHunyuanJob: context.selectedHunyuanJob,
-    canShowAll: context.canWorkflowShowAll,
-    onResetWorkflowPath: context.assetController.resetSelectedWorkflowPath,
-    onWorkflowBrowserUp: context.assetController.goUpWorkflowBrowser,
-    onWorkflowBrowserRefresh: () =>
-      void context.assetController.loadWorkflowBrowser(
-        context.workflowBrowserPath,
-      ),
-    onSelectWorkflowItem: context.assetController.selectWorkflowPath,
-    onOutlinerFocus: () => {
-      context.setHierarchyFilter('')
-      context.setSaveMessage(
-        'Use the outliner at the top right for scene hierarchy.',
-      )
-    },
-    onSelectSimilar: context.selectSimilarNodes,
-    onAddFireflyToSelection: context.createController.addFireflyToSelection,
-    onClearSelection: context.clearSelection,
-    onHideSelected: context.hideSelectedNodes,
-    onHideUnselected: context.isolateSelection,
-    onShowAll: () => {
-      context.unhideAllNodes()
-      context.clearIsolatedNodes()
-    },
-    onMergeSelectionToAsset: () =>
-      void context.assetController.mergeSelectionToAsset(
-        context.mergeDescriptor,
-      ),
-    onGenerateSelection: () =>
-      void context.aiController.runHunyuanForSelection('generate'),
-    onTextureSelection: () =>
-      void context.aiController.runHunyuanForSelection('texture'),
-    onOpenAiTab: () => context.setActiveEditorTab('ai'),
-    onRefreshBackend: () =>
-      void context.aiController.refreshHunyuanServiceStatus(true),
-    onEditGenerateWorkflow: () =>
-      void context.aiController.openComfyUiWorkflowEditor('generate'),
-    onEditTextureWorkflow: () =>
-      void context.aiController.openComfyUiWorkflowEditor('texture'),
-    onOpenGeneratedAssets: () =>
-      void context.assetController.openGeneratedAssetInLibrary(),
-    onAddLatestGenerated: context.addLatestGeneratedAssetToScene,
-    onApplyLatestToSelection: () =>
-      void context.assetController.applyGeneratedAssetToSelection(),
-    onOpenAssetLibrary: () => context.setActiveEditorTab('create'),
-    onSaveLocal: context.levelController.saveScene,
-    onOverwriteLevel: () =>
-      void context.levelController.saveSceneDocumentToDisk(
-        context.activeSceneLevelId,
-      ),
-    onReloadDisk: context.reloadFromDisk,
-    onOpenSaveTools: () => context.setActiveEditorTab('save'),
-    onRefreshJobs: () => void context.aiController.refreshHunyuanRecentJobs(),
-  }
 }
 
 export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
@@ -350,9 +286,6 @@ export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
     terrainCollisionBakePending: context.terrainCollisionBakePending,
     terrainHeightmapGeneratePending: context.terrainHeightmapGeneratePending,
     terrainChunkCookPending: context.terrainChunkCookPending,
-    worldPartitionCookPending: context.worldPartitionCookPending,
-    groundTerrainPublishPending: context.groundTerrainPublishPending,
-    publishPipelineState: context.publishPipelineState,
     selectedTerrainSourceAssetUrl: context.selectedTerrainSourceAssetUrl,
     terrainBrushMode: editorState?.terrainBrushMode ?? 'raise',
     terrainBrushSize: editorState?.terrainBrushSize ?? 24,
@@ -379,10 +312,6 @@ export function buildSceneTabProps(context: EditorPanelPropBuilderContext) {
       context.setEditorInteractionMode(mode as 'objects' | 'terrain'),
     onSetViewportLightingMode: (mode: string) =>
       context.setEditorViewportLightingMode(mode as 'authored' | 'workbench'),
-    onCookWorldPartition: () => void context.cookWorldPartition(),
-    onPublishLevel: () => void context.levelController.publishLevel(),
-    onPublishGroundTerrainContracts: () =>
-      void context.publishGroundTerrainContracts(),
     onSetTerrainBrushMode: (mode: string) =>
       context.setTerrainBrushMode(mode as 'raise' | 'smooth' | 'flatten'),
     onSetTerrainBrushSize: context.setTerrainBrushSize,
@@ -407,28 +336,35 @@ export function buildCollisionTabProps(context: EditorPanelPropBuilderContext) {
   const editorState = context.editorState
   return {
     levelId: context.levelId,
+    editorScene: context.editorScene,
     collisionOverlayEnabled: editorState?.collisionOverlayEnabled ?? false,
-    collisionDefaultPolicy: context.collisionDefaultPolicy,
     collisionBudget: context.collisionBudget,
     groundSettings: context.groundSettings,
     terrainSculptSettings: context.terrainSculptSettings,
     terrainCollisionSettings: context.terrainCollisionSettings,
+    terrainStatus: context.terrainStatusSnapshot,
     terrainCollisionBakePending: context.terrainCollisionBakePending,
     terrainHeightmapGeneratePending: context.terrainHeightmapGeneratePending,
     terrainChunkCookPending: context.terrainChunkCookPending,
     selectedNode: context.selectedNode,
     selectedNodes: context.selectedNodes,
     heightmapSourceNodes: context.heightmapSourceNodes,
+    heightmapCandidateNodes: context.heightmapCandidateNodes,
     selectedTerrainSourceName: context.selectedTerrainSourceName,
     selectedTerrainSourceAssetUrl: context.selectedTerrainSourceAssetUrl,
     onSetCollisionOverlayEnabled: context.setCollisionOverlayEnabled,
-    onSetCollisionDefaultPolicy: context.setCollisionDefaultPolicy,
     onSetCollisionBudget: context.setCollisionBudget,
     onSetTerrainAutoBake: context.setTerrainAutoBake,
+    onAddSelectedTerrainSources: context.addSelectedTerrainSourcesToBasket,
+    onRemoveTerrainSource: context.removeTerrainSourceFromBasket,
+    onClearTerrainSources: context.clearTerrainSourceBasket,
     onBakeTerrainCollision: () => void context.bakeTerrainCollision(),
+    onBakeTerrain: () => void context.bakeTerrainPipeline(),
     onGenerateTerrainHeightmap: () =>
       void context.generateTerrainHeightmapFromSelection(),
     onCookTerrainChunks: () => void context.cookTerrainChunks(),
+    onSelectCollisionReviewActor: (actorId: string) =>
+      context.handleHierarchySelection(actorId, new MouseEvent('click')),
   }
 }
 
@@ -487,6 +423,10 @@ export function buildCreateTabProps(context: EditorPanelPropBuilderContext) {
         position,
       ),
     onAddCuratedAsset: context.createController.addAssetPrefab,
+    onMergeSelectionToAsset: () =>
+      void context.assetController.mergeSelectionToAsset(
+        context.mergeDescriptor,
+      ),
     onGenerateToLibrary: () => void context.aiController.runHunyuanToLibrary(),
     onGenerateAndAdd: () =>
       void context.aiController.runHunyuanToLibrary({ addToScene: true }),
@@ -513,6 +453,7 @@ export function buildCreateTabProps(context: EditorPanelPropBuilderContext) {
       void context.aiController.runHunyuanForLibraryAsset('generate'),
     onRunLibraryTexture: () =>
       void context.aiController.runHunyuanForLibraryAsset('texture'),
+    onOpenAiTab: () => context.setActiveEditorTab('ai'),
   }
 }
 
@@ -585,6 +526,13 @@ export function buildInspectTabProps(context: EditorPanelPropBuilderContext) {
   return {
     selectedNode: context.selectedNode,
     selectedNodes: context.selectedNodes,
+    sceneSettings: context.editorScene?.settings ?? null,
+    sceneObjectCount: context.editorNodes.length,
+    sceneAssetNodeCount: context.editorNodes.filter(node => !!node.asset)
+      .length,
+    sceneColliderCount: context.editorNodes.filter(
+      node => node.collision?.enabled !== false && !!node.collision,
+    ).length,
     parentCandidates: context.selectedParentCandidates,
     multiParentCandidates: context.multiSelectionParentCandidates,
     selectedNodeMaterial: context.selectedNodeMaterial,
@@ -643,6 +591,7 @@ export function buildInspectTabProps(context: EditorPanelPropBuilderContext) {
     onPrimitiveArgChange: context.inspectorController.updatePrimitiveArg,
     onCollisionEnabledChange:
       context.inspectorController.updateCollisionEnabled,
+    onCollisionShapeChange: context.inspectorController.updateCollisionShape,
     onCollisionIntentChange: context.inspectorController.updateCollisionIntent,
     onCollisionChannelChange:
       context.inspectorController.updateCollisionChannel,
@@ -661,6 +610,13 @@ export function buildInspectTabProps(context: EditorPanelPropBuilderContext) {
       context.inspectorController.updateCollisionBooleanField,
     onRecalculateCollision:
       context.inspectorController.recalculateCollisionFromVisual,
+    onSetCollisionVisualOnly: context.inspectorController.setVisualOnly,
+    onSetCollisionBlocker: context.inspectorController.setBlocker,
+    onSetCollisionWalkable: context.inspectorController.setWalkable,
+    onSetCollisionTrigger: context.inspectorController.setTrigger,
+    onSetCollisionDetail: context.inspectorController.setDetail,
+    onBakeMeshCollider: () =>
+      void context.inspectorController.bakeMeshColliderFromSelection(),
     onMaterialColorChange: context.inspectorController.updateNodeMaterialField,
     onMaterialNumericChange:
       context.inspectorController.updateNodeMaterialNumericField,
@@ -689,6 +645,7 @@ export function buildInspectTabProps(context: EditorPanelPropBuilderContext) {
     onTransformChange: context.updateTupleField,
     onDuplicate: context.createController.duplicateSelection,
     onDelete: context.createController.deleteSelection,
+    onOpenDetailsPanel: () => context.setPropertiesShelfOpen(true),
   }
 }
 
@@ -765,6 +722,10 @@ export function buildAiTabProps(context: EditorPanelPropBuilderContext) {
     comfyUiReady: context.comfyUiReady,
     comfyWorkflowEditorStatus: context.comfyWorkflowEditorStatus,
     selectedComfyWorkflowPath: context.selectedComfyWorkflowPath,
+    workflowBrowserPath: context.workflowBrowserPath,
+    workflowBrowserItems: context.workflowBrowserItems,
+    workflowBrowserError: context.workflowBrowserError,
+    workflowBrowserLoading: context.workflowBrowserLoading,
     hunyuanStatus: context.hunyuanStatus,
     hunyuanBackendStatus: context.hunyuanBackendStatus,
     hunyuanBusy: context.hunyuanBusy,
@@ -778,7 +739,6 @@ export function buildAiTabProps(context: EditorPanelPropBuilderContext) {
     hunyuanSupportsTextureWrap: context.hunyuanSupportsTextureWrap,
     canApplyGeneratedAssetToSelection:
       context.canApplyGeneratedAssetToSelection,
-    runtimeAssetFailures: context.runtimeAssetFailures,
     recentHunyuanJobs: context.recentHunyuanJobs,
     hunyuanJobsLoading: context.hunyuanJobsLoading,
     hunyuanJobsError: context.hunyuanJobsError,
@@ -809,8 +769,13 @@ export function buildAiTabProps(context: EditorPanelPropBuilderContext) {
       context.aiController.runHunyuanForSelection('generate'),
     onTextureSelection: () =>
       context.aiController.runHunyuanForSelection('texture'),
-    onOpenWorkflowTab: () => context.setActiveEditorTab('workflow'),
     onResetWorkflowPath: context.resetSelectedWorkflowPath,
+    onWorkflowBrowserUp: context.assetController.goUpWorkflowBrowser,
+    onWorkflowBrowserRefresh: () =>
+      void context.assetController.loadWorkflowBrowser(
+        context.workflowBrowserPath,
+      ),
+    onSelectWorkflowItem: context.assetController.selectWorkflowPath,
     onEditGenerateWorkflow: () =>
       void context.aiController.openComfyUiWorkflowEditor('generate'),
     onEditTextureWorkflow: () =>
@@ -827,7 +792,17 @@ export function buildAiTabProps(context: EditorPanelPropBuilderContext) {
 
 export function buildSaveTabProps(context: EditorPanelPropBuilderContext) {
   return {
+    levelId: context.levelId,
+    editorScene: context.editorScene,
     saveMessage: context.saveMessage,
+    groundTerrainPublishPending: context.groundTerrainPublishPending,
+    terrainStatus: context.terrainStatusSnapshot,
+    terrainPipelinePending:
+      context.terrainCollisionBakePending ||
+      context.terrainHeightmapGeneratePending ||
+      context.terrainChunkCookPending,
+    worldPartitionCookPending: context.worldPartitionCookPending,
+    publishPipelineState: context.publishPipelineState,
     onSaveLevelMetadata: () => void context.levelController.saveLevelMetadata(),
     onSaveLocal: context.levelController.saveScene,
     onOverwriteLevel: () => void context.levelController.overwriteLevelScene(),
@@ -838,6 +813,46 @@ export function buildSaveTabProps(context: EditorPanelPropBuilderContext) {
     onLoadBackupSnapshot: () => void context.loadBackupSnapshot(),
     onSaveAsNewLevel: () => void context.levelController.saveAsNewLevel(),
     onApplyImport: context.levelController.applyImport,
+    onPublishLevel: () => void context.levelController.publishLevel(),
+    onPublishGroundTerrainContracts: () =>
+      void context.publishGroundTerrainContracts(),
+  }
+}
+
+export function buildWorkflowTabProps(context: EditorPanelPropBuilderContext) {
+  return {
+    levelId: context.levelId,
+    editorScene: context.editorScene,
+    terrainCollisionBakePending: context.terrainCollisionBakePending,
+    terrainHeightmapGeneratePending: context.terrainHeightmapGeneratePending,
+    terrainChunkCookPending: context.terrainChunkCookPending,
+    worldPartitionCookPending: context.worldPartitionCookPending,
+    groundTerrainPublishPending: context.groundTerrainPublishPending,
+    selectedTerrainSourceName: context.selectedTerrainSourceName,
+    selectedTerrainSourceAssetUrl: context.selectedTerrainSourceAssetUrl,
+    terrainCollisionSettings: context.terrainCollisionSettings,
+    terrainStatus: context.terrainStatusSnapshot,
+    publishPipelineState: context.publishPipelineState,
+    saveMessage: context.saveMessage,
+    onOpenCollisionTools: () => {
+      context.setPanelOpen(true)
+      context.setActiveEditorTab('collision')
+    },
+    onBakeTerrain: () => void context.bakeTerrainPipeline(),
+    onGenerateTerrainHeightmap: () =>
+      void context.generateTerrainHeightmapFromSelection(),
+    onBakeTerrainCollision: () => void context.bakeTerrainCollision(),
+    onCookTerrainChunks: () => void context.cookTerrainChunks(),
+    onCookWorldPartition: () => void context.cookWorldPartition(),
+    onValidateTerrainContract: () => void context.validateTerrainContract(),
+    onPublishLevel: () => void context.levelController.publishLevel(),
+    onPublishGroundTerrainContracts: () =>
+      void context.publishGroundTerrainContracts(),
+    onOpenSaveTools: () => {
+      context.setPanelOpen(true)
+      context.setActiveEditorTab('build')
+    },
+    onOpenOutput: context.openBuildOutput,
   }
 }
 
@@ -898,10 +913,20 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
     getOutlinerRowActionState: context.outlinerController.getRowActionState,
     selectedNode: context.selectedNode,
     selectedNodes: context.selectedNodes,
+    sceneSettings: context.editorScene?.settings ?? null,
     parentCandidates: context.selectedParentCandidates,
     selectedNodeMaterial: context.selectedNodeMaterial,
     selectedNodePreviewAssetUrl: context.selectedNodePreviewAssetUrl,
     styleDescriptor: context.selectedNodeStyleDescriptor,
+    assetPickerTargetNodeId: context.assetPickerTargetNodeId,
+    assetBrowserPath: context.assetBrowserPath,
+    assetBrowserItems: context.assetBrowserItems,
+    assetBrowserFilter: context.assetBrowserFilter,
+    assetBrowserError: context.assetBrowserError,
+    assetBrowserLoading: context.assetBrowserLoading,
+    selectedLibraryItemPath: context.selectedLibraryItemPath,
+    generatedRootPath: context.assetLibraryRootGenerated,
+    modelsRootPath: context.assetLibraryRootModels,
     canUseStyleStudioSelection: context.canUseStyleStudioSelection,
     canUseAiMeshStudioSelection: context.canUseAiMeshStudioSelection,
     generatedVariantItems: context.generatedVariantItems,
@@ -918,8 +943,12 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
     textureBrowserItems: context.textureBrowserItems,
     colliderSize: context.selectedNodeColliderSize,
     onNameChange: context.inspectorController.updateNodeName,
-    onOpenStyleTab: () => context.setActiveEditorTab('style'),
+    onOpenStyleTab: () => context.setActiveEditorTab('ai'),
     onOpenAiTab: () => context.setActiveEditorTab('ai'),
+    onOpenCreateTab: () => {
+      context.setPanelOpen(true)
+      context.setActiveEditorTab('create')
+    },
     onConvertSelectedToMesh: () =>
       void context.assetController.convertSelectedNodeToMesh(),
     onReimagineSelected: () => {
@@ -929,6 +958,14 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
     onDuplicate: context.createController.duplicateSelection,
     onDelete: context.createController.deleteSelection,
     onVisibleChange: context.inspectorController.updateVisible,
+    onSelectableChange: (selectable: boolean) => {
+      if (
+        context.selectedNode &&
+        (context.selectedNode.locked ?? false) === selectable
+      ) {
+        context.toggleNodeLocked(context.selectedNode.id)
+      }
+    },
     onTransformChange: context.updateTupleField,
     onParentChange: context.inspectorController.updateParent,
     onAssetUrlChange: context.inspectorController.updateAssetUrl,
@@ -940,6 +977,18 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
       context.inspectorController.openAssetPickerForSelectedNode(
         context.assetLibraryRootModels,
       ),
+    onAssetLibraryRootSelect:
+      context.inspectorController.selectAssetLibraryRoot,
+    onAssetBrowserUp: context.inspectorController.goUpAssetBrowser,
+    onAssetBrowserRefresh: () =>
+      void context.assetController.loadAssetBrowser(context.assetBrowserPath),
+    onAssetBrowserFilterChange: (value: string) => {
+      context.setAssetBrowserFilter(value)
+    },
+    onAssetLibraryItemSelect: context.inspectorController.selectLibraryItem,
+    onApplySelectedLibraryAsset:
+      context.inspectorController.applySelectedLibraryAssetToTargetNode,
+    onCancelAssetPicker: context.inspectorController.cancelAssetPickerTarget,
     onPrefabVariantChange: context.inspectorController.updatePrefabVariant,
     onPrimitiveGeometryChange: (value: string) =>
       context.inspectorController.updatePrimitiveField('geometry', value),
@@ -974,6 +1023,7 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
       context.inspectorController.clearNodeMaterialOverrides,
     onCollisionEnabledChange:
       context.inspectorController.updateCollisionEnabled,
+    onCollisionShapeChange: context.inspectorController.updateCollisionShape,
     onCollisionIntentChange: context.inspectorController.updateCollisionIntent,
     onCollisionChannelChange:
       context.inspectorController.updateCollisionChannel,
@@ -985,6 +1035,15 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
         value,
       ),
     onColliderSizeChange: context.inspectorController.updateCollisionSize,
+    onRecalculateCollision:
+      context.inspectorController.recalculateCollisionFromVisual,
+    onSetCollisionVisualOnly: context.inspectorController.setVisualOnly,
+    onSetCollisionBlocker: context.inspectorController.setBlocker,
+    onSetCollisionWalkable: context.inspectorController.setWalkable,
+    onSetCollisionTrigger: context.inspectorController.setTrigger,
+    onSetCollisionDetail: context.inspectorController.setDetail,
+    onBakeMeshCollider: () =>
+      void context.inspectorController.bakeMeshColliderFromSelection(),
     onTextureBrowserUp: context.inspectorController.goUpTextureBrowser,
     onTextureBrowserRefresh: () =>
       void context.assetController.loadTextureBrowser(

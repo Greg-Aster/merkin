@@ -1,12 +1,11 @@
 <!--
-  OceanComponent - Modern ECS Architecture with Legacy Visual Features
+  OceanComponent - Modern ECS Water Surface Architecture
 
-  This component migrates all the beautiful features from the legacy ocean systems
-  while maintaining modern ECS integration and component architecture:
+  Runtime water surface with modern ECS integration and component architecture:
   - Water level rise system with dynamic animation
   - Advanced procedural textures with multi-layered wave noise  
   - Intelligent device-aware optimization using OptimizationManager
-  - Perfect legacy wave timing (slow, realistic movement)
+  - Slow wave timing for large-scale water movement
   - ECS firefly reflection integration for real-time lighting
   - Vertex wave displacement with multiple wave layers
   - Clean, maintainable, DRY codebase following modern practices
@@ -16,7 +15,7 @@ import { T } from '@threlte/core'
 import { Collider, RigidBody } from '@threlte/rapier'
 import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
-import { TERRAIN_GROUP } from '../../../constants/physics'
+import { TRIGGER_GROUP } from '../../../constants/physics'
 import {
   BaseLevelComponent,
   ComponentType,
@@ -34,13 +33,13 @@ import {
   underwaterStateStore,
 } from '../stores/underwaterStore'
 
-// --- PROPS (Enhanced with legacy features) ---
+// --- PROPS ---
 export let size = { width: 2000, height: 2000 }
-export let color = 0x006994 // Deep ocean blue from legacy
-export let opacity = 0.95
+export let color = 0x050b14 // Near-black night water
+export let opacity = 0.92
 export let position: [number, number, number] = [0, 0, 0]
 export let enableAnimation = true
-export let animationSpeed = 0.1 // Legacy uses much slower speeds for realism
+export let animationSpeed = 0.1
 export let segments = { width: 24, height: 24 } // Default ocean segments
 
 // --- WATER LEVEL RISE SYSTEM (Modern Props) ---
@@ -56,13 +55,13 @@ export let underwaterFogDensity: number = 0.08 // How thick the underwater fog i
 export let underwaterFogColor: number = 0x0a1922 // Dark blue-gray fog color
 export let surfaceFogDensity: number = 0.003 // Normal surface fog density
 
-// --- LEGACY VISUAL ENHANCEMENT PROPS ---
-export let metalness = 0.02 // Very low metalness for water (from legacy)
-export let roughness = 0.05 // Very smooth for reflections (from legacy)
+// --- VISUAL ENHANCEMENT PROPS ---
+export let metalness = 0.02 // Very low metalness for water
+export let roughness = 0.025 // Smooth enough to carry star reflections
 export let envMap: THREE.CubeTexture | null = null
-export let envMapIntensity = 1.5 // Higher reflection intensity like legacy
-export let reflectionStrength = 1.0 // Reflection intensity tuning multiplier
-export let fresnelPower = 5.0 // Approximate fresnel bias for reflection-heavy water
+export let envMapIntensity = 1.7
+export let reflectionStrength = 1.35 // Reflection intensity tuning multiplier
+export let fresnelPower = 7.0 // Approximate fresnel bias for reflection-heavy water
 
 // --- PLANAR REFLECTIONS (optional) ---
 // MeshStandardMaterial + envMap reflects only the skybox/environment, not dynamic scene geometry.
@@ -346,7 +345,7 @@ class OceanComponent extends BaseLevelComponent {
       )
 
       // ALWAYS use MeshStandardMaterial for proper Threlte lighting integration
-      const textureData = this.createLegacyWaveTextures()
+      const textureData = this.createWaveTextures()
 
       oceanMaterial = new THREE.MeshStandardMaterial({
         color: color,
@@ -429,8 +428,8 @@ class OceanComponent extends BaseLevelComponent {
     // No manual uniform updates needed - Three.js handles everything!
   }
 
-  // --- LEGACY PROCEDURAL TEXTURE GENERATION (Enhanced Multi-Layer) ---
-  private createLegacyWaveTextures(): {
+  // --- PROCEDURAL TEXTURE GENERATION (Enhanced Multi-Layer) ---
+  private createWaveTextures(): {
     displacementMap: THREE.DataTexture
     normalMap: THREE.DataTexture
     colorTexture: THREE.CanvasTexture
@@ -438,11 +437,10 @@ class OceanComponent extends BaseLevelComponent {
     const size = textureSize
     // Texture generation (logging removed for performance)
 
-    // Multi-layered noise function exactly matching legacy OceanSystem
-    const legacyWaveNoise = (x: number, y: number, time = 0): number => {
+    const layeredWaveNoise = (x: number, y: number, time = 0): number => {
       let value = 0
 
-      // Large ocean swells (legacy parameters)
+      // Large ocean swells
       value += Math.sin(x * 0.02 + y * 0.01 + time * 0.5) * 0.4
       value += Math.cos(x * 0.015 - y * 0.02 + time * 0.3) * 0.3
 
@@ -461,12 +459,12 @@ class OceanComponent extends BaseLevelComponent {
       return (value + 1) / 2 // Normalize to 0-1 range
     }
 
-    // Generate height map with legacy algorithm
+    // Generate height map
     const heightMap: number[][] = []
     for (let y = 0; y < size; y++) {
       heightMap[y] = []
       for (let x = 0; x < size; x++) {
-        heightMap[y][x] = legacyWaveNoise(x, y)
+        heightMap[y][x] = layeredWaveNoise(x, y)
       }
     }
 
@@ -479,10 +477,10 @@ class OceanComponent extends BaseLevelComponent {
         const index = (y * size + x) * 4
 
         // Multi-layer displacement data
-        const height1 = legacyWaveNoise(x, y, 0) * 255
-        const height2 = legacyWaveNoise(x * 0.7, y * 0.7, 1) * 255
-        const height3 = legacyWaveNoise(x * 1.5, y * 1.5, 2) * 255
-        const height4 = legacyWaveNoise(x * 2.0, y * 2.0, 3) * 255
+        const height1 = layeredWaveNoise(x, y, 0) * 255
+        const height2 = layeredWaveNoise(x * 0.7, y * 0.7, 1) * 255
+        const height3 = layeredWaveNoise(x * 1.5, y * 1.5, 2) * 255
+        const height4 = layeredWaveNoise(x * 2.0, y * 2.0, 3) * 255
 
         displacementData[index] = height1 // R: Large waves
         displacementData[index + 1] = height2 // G: Medium waves
@@ -507,7 +505,7 @@ class OceanComponent extends BaseLevelComponent {
       }
     }
 
-    // Create legacy color texture with exact original colors
+    // Create color texture
     const canvas = document.createElement('canvas')
     canvas.width = canvas.height = size
     const ctx = canvas.getContext('2d')!
@@ -518,7 +516,7 @@ class OceanComponent extends BaseLevelComponent {
       for (let x = 0; x < size; x++) {
         const wave = heightMap[y][x]
 
-        // Exact legacy color values from OceanSystem
+        // Layered water color values
         const blueBase = 20
         const greenBase = 50
         const blue = Math.floor(blueBase + wave * 120)
@@ -534,7 +532,7 @@ class OceanComponent extends BaseLevelComponent {
     }
     ctx.putImageData(colorImageData, 0, 0)
 
-    // Create Three.js textures with legacy settings
+    // Create Three.js textures
     const displacementTexture = new THREE.DataTexture(
       displacementData,
       size,
@@ -607,7 +605,7 @@ onDestroy(() => {
 
 // --- REACTIVE UPDATES for new props ---
 $: if (oceanMaterial instanceof THREE.MeshStandardMaterial) {
-  oceanMaterial.envMapIntensity = envMapIntensity
+  oceanMaterial.envMapIntensity = effectiveReflectionIntensity
   oceanMaterial.metalness = metalness
   oceanMaterial.roughness = roughness
   if (envMap) oceanMaterial.envMap = envMap
@@ -658,7 +656,7 @@ $: if (
         shape="cuboid"
         args={[waterCollisionSize[0] / 2, waterCollisionSize[1] / 2, waterCollisionSize[2] / 2]}
         sensor={true}
-        collisionGroups={TERRAIN_GROUP}
+        collisionGroups={TRIGGER_GROUP}
         activeEvents="INTERSECTION_EVENTS"
         userData={{ isOceanSensor: true, type: 'ocean-sensor' }}
         on:intersectionenter={handleIntersectionEnter}

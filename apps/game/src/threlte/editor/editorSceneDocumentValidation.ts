@@ -1,3 +1,4 @@
+import { isEditorProxyCollision } from '../engine/editorProxyCollision'
 import { createLevelBuildReport } from '../engine/levelValidation'
 import { withEditorSceneEngineData } from '../engine/sceneDocumentRuntime'
 import type { EditorSceneDocument } from './editorTypes'
@@ -6,6 +7,17 @@ export interface EditorSceneDocumentValidationResult {
   valid: boolean
   errors: string[]
   warnings: string[]
+}
+
+function getLevelBuildReportForScene(value: unknown) {
+  const scene = withEditorSceneEngineData(value as EditorSceneDocument)
+  return createLevelBuildReport(scene.engine!.levelDefinition)
+}
+
+function isAuthoringOnlyCollisionError(error: string) {
+  return error.includes(
+    'must use baked trimesh collision instead of primitive collision',
+  )
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -105,6 +117,23 @@ function validateSceneShape(value: unknown) {
   return errors
 }
 
+function getEditorProxyCollisionIssues(value: unknown) {
+  if (!isRecord(value) || !Array.isArray(value.nodes)) return []
+
+  const issues: string[] = []
+  for (const node of value.nodes) {
+    if (!isRecord(node) || !isRecord(node.collision)) continue
+    const collision = node.collision
+    if (isEditorProxyCollision(collision)) {
+      const nodeId = typeof node.id === 'string' ? node.id : 'unknown'
+      issues.push(
+        `Actor "${nodeId}" uses editor proxy collision; bake or assign a runtime collider before publishing.`,
+      )
+    }
+  }
+  return issues
+}
+
 export function validateEditorSceneDocument(
   value: unknown,
 ): EditorSceneDocumentValidationResult {
@@ -112,11 +141,21 @@ export function validateEditorSceneDocument(
   const warnings: string[] = []
 
   if (errors.length === 0) {
-    const scene = withEditorSceneEngineData(value as EditorSceneDocument)
-    const buildReport = createLevelBuildReport(scene.engine!.levelDefinition)
-    errors.push(...buildReport.errors.map(error => `LevelDefinition: ${error}`))
+    const buildReport = getLevelBuildReportForScene(value)
+    for (const error of buildReport.errors) {
+      if (isAuthoringOnlyCollisionError(error)) {
+        warnings.push(`LevelDefinition: ${error}`)
+      } else {
+        errors.push(`LevelDefinition: ${error}`)
+      }
+    }
     warnings.push(
       ...buildReport.warnings.map(warning => `LevelDefinition: ${warning}`),
+    )
+    warnings.push(
+      ...getEditorProxyCollisionIssues(value).map(
+        warning => `SceneDocument: ${warning}`,
+      ),
     )
   }
 
@@ -130,8 +169,21 @@ export function validateEditorSceneDocument(
 export function validatePublishableEditorSceneDocument(
   value: unknown,
 ): EditorSceneDocumentValidationResult {
-  const validation = validateEditorSceneDocument(value)
-  const errors = [...validation.errors]
+  const errors = validateSceneShape(value)
+  const warnings: string[] = []
+
+  if (errors.length === 0) {
+    const buildReport = getLevelBuildReportForScene(value)
+    errors.push(...buildReport.errors.map(error => `LevelDefinition: ${error}`))
+    warnings.push(
+      ...buildReport.warnings.map(warning => `LevelDefinition: ${warning}`),
+    )
+    errors.push(
+      ...getEditorProxyCollisionIssues(value).map(
+        error => `SceneDocument: ${error}`,
+      ),
+    )
+  }
 
   if (
     errors.length === 0 &&
@@ -145,7 +197,7 @@ export function validatePublishableEditorSceneDocument(
   return {
     valid: errors.length === 0,
     errors,
-    warnings: validation.warnings,
+    warnings,
   }
 }
 

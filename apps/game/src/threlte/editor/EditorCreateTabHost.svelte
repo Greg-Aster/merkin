@@ -21,6 +21,7 @@ export let createPrefabGroups: Array<{
 }> = []
 export let assetOptions: Array<{ label: string; url: string }> = []
 export let selectedNodesCount = 0
+export let mergeDescriptor = ''
 export let hunyuanBusy = false
 export let hunyuanBackendCanGenerate = false
 export let hunyuanBackendCanRetexture = false
@@ -51,6 +52,7 @@ export let onAddPrefab: (
   position: [number, number, number],
 ) => void = () => {}
 export let onAddCuratedAsset: (label: string, url: string) => void = () => {}
+export let onMergeSelectionToAsset: () => void = () => {}
 export let onGenerateToLibrary: () => void = () => {}
 export let onGenerateAndAdd: () => void = () => {}
 export let onOpenGeneratedAssets: () => void = () => {}
@@ -65,6 +67,7 @@ export let onInspectSelectedLibraryAsset: () => void = () => {}
 export let onApplySelectedLibraryAsset: () => void = () => {}
 export let onRunLibraryGenerate: () => void = () => {}
 export let onRunLibraryTexture: () => void = () => {}
+export let onOpenAiTab: () => void = () => {}
 </script>
 
 <EditorCreatePanel
@@ -72,6 +75,7 @@ export let onRunLibraryTexture: () => void = () => {}
   {createPrefabGroups}
   {assetOptions}
   {selectedNodesCount}
+  bind:mergeDescriptor
   {hunyuanBusy}
   {hunyuanBackendCanGenerate}
   {hunyuanBackendCanRetexture}
@@ -97,6 +101,7 @@ export let onRunLibraryTexture: () => void = () => {}
   {onAddFireflyToSelection}
   {onAddPrefab}
   {onAddCuratedAsset}
+  {onMergeSelectionToAsset}
   {onGenerateToLibrary}
   {onGenerateAndAdd}
   {onOpenGeneratedAssets}
@@ -111,4 +116,5 @@ export let onRunLibraryTexture: () => void = () => {}
   {onApplySelectedLibraryAsset}
   {onRunLibraryGenerate}
   {onRunLibraryTexture}
+  {onOpenAiTab}
 />

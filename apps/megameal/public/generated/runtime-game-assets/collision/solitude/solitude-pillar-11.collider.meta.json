@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "bake-mesh-collider",
+  "generatedAt": "2026-05-13T01:03:53.966Z",
+  "sourceLevelId": "solitude",
+  "sourceActorId": "solitude-pillar-11",
+  "sourceAssetUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "52d46e35c3fd5a0c38abc9c77f3cb7c8160299a99ba695a65865f5924275f592"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-11.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/solitude/solitude-pillar-11.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-11.collider.meta.json",
+  "triangleCount": 19000,
+  "vertexCount": 15312,
+  "bounds": {
+    "min": [
+      -0.9434459209442139,
+      -0.9950268268585205,
+      -0.9447097182273865
+    ],
+    "max": [
+      0.912825882434845,
+      0.9735915064811707,
+      0.8962405323982239
+    ],
+    "size": [
+      1.8562718033790588,
+      1.9686183333396912,
+      1.8409502506256104
+    ],
+    "center": [
+      -0.015310019254684448,
+      -0.010717660188674927,
+      -0.0242345929145813
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.9434459209442139,
+      -0.9954308867454529,
+      -0.9447097182273865
+    ],
+    "max": [
+      0.912825882434845,
+      0.9741824865341187,
+      0.8962405323982239
+    ],
+    "size": [
+      1.8562718033790588,
+      1.9696133732795715,
+      1.8409502506256104
+    ],
+    "center": [
+      -0.015310019254684448,
+      -0.010624200105667114,
+      -0.0242345929145813
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.9434459209442139,
+      -0.9950268268585205,
+      -0.9447097182273865
+    ],
+    "max": [
+      0.912825882434845,
+      0.9735915064811707,
+      0.8962405323982239
+    ],
+    "size": [
+      1.8562718033790588,
+      1.9686183333396912,
+      1.8409502506256104
+    ],
+    "center": [
+      -0.015310019254684448,
+      -0.010717660188674927,
+      -0.0242345929145813
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+    "sourceNodeName": "Solitude Pillar 11",
+    "visualLocalBounds": {
+      "min": [
+        -0.9434459209442139,
+        -0.9954308867454529,
+        -0.9447097182273865
+      ],
+      "max": [
+        0.912825882434845,
+        0.9741824865341187,
+        0.8962405323982239
+      ],
+      "size": [
+        1.8562718033790588,
+        1.9696133732795715,
+        1.8409502506256104
+      ],
+      "center": [
+        -0.015310019254684448,
+        -0.010624200105667114,
+        -0.0242345929145813
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.9434459209442139,
+        -0.9950268268585205,
+        -0.9447097182273865
+      ],
+      "max": [
+        0.912825882434845,
+        0.9735915064811707,
+        0.8962405323982239
+      ],
+      "size": [
+        1.8562718033790588,
+        1.9686183333396912,
+        1.8409502506256104
+      ],
+      "center": [
+        -0.015310019254684448,
+        -0.010717660188674927,
+        -0.0242345929145813
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "solitude-pillar-11",
+    "sourceActorName": "Solitude Pillar 11",
+    "sourceAssetUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "52d46e35c3fd5a0c38abc9c77f3cb7c8160299a99ba695a65865f5924275f592"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "solitude",
+      "nodeId": "solitude-pillar-11",
+      "sourceAssetUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 20000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-13T01:03:53.966Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 20000
+  },
+  "simplification": {
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 50000,
+    "targetTriangleBudget": 20000,
+    "ratio": 0.38,
+    "tool": "gltf-transform",
+    "prepass": "weld",
+    "error": 0.05
+  }
+}

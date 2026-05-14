@@ -1,3 +1,5 @@
+import type { AssetLocalTransformMetadata } from './assetLocalTransform'
+
 export type RuntimeAssetQualityTier =
   | 'ultra_low'
   | 'low'
@@ -130,6 +132,7 @@ export interface RuntimeAssetMetadata {
     size: [number, number, number]
     center: [number, number, number]
   } | null
+  assetLocalTransform?: AssetLocalTransformMetadata | null
   materialCount: number
   materialSlots: number
   materials: RuntimeAssetMaterialMetadata[]

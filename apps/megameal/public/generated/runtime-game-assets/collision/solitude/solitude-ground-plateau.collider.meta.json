@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "bake-mesh-collider",
+  "generatedAt": "2026-05-13T18:40:28.725Z",
+  "sourceLevelId": "solitude",
+  "sourceActorId": "solitude-ground-plateau",
+  "sourceAssetUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "68f63130f6fa1763b9b2c888e91296a96c2f7f48c97268c997664f61d8e8a0cc"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.meta.json",
+  "triangleCount": 19000,
+  "vertexCount": 22218,
+  "bounds": {
+    "min": [
+      -0.8996759057044983,
+      -1.0030039548873901,
+      -0.9492046236991882
+    ],
+    "max": [
+      0.8806980848312378,
+      0.97152179479599,
+      0.9208857417106628
+    ],
+    "size": [
+      1.780373990535736,
+      1.9745257496833801,
+      1.870090365409851
+    ],
+    "center": [
+      -0.009488910436630249,
+      -0.015741080045700073,
+      -0.014159440994262695
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.9005722403526306,
+      -1.0030039548873901,
+      -0.9492046236991882
+    ],
+    "max": [
+      0.8823164701461792,
+      0.9736996293067932,
+      0.9215630292892456
+    ],
+    "size": [
+      1.7828887104988098,
+      1.9767035841941833,
+      1.8707676529884338
+    ],
+    "center": [
+      -0.009127885103225708,
+      -0.014652162790298462,
+      -0.013820797204971313
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.8996759057044983,
+      -1.0030039548873901,
+      -0.9492046236991882
+    ],
+    "max": [
+      0.8806980848312378,
+      0.97152179479599,
+      0.9208857417106628
+    ],
+    "size": [
+      1.780373990535736,
+      1.9745257496833801,
+      1.870090365409851
+    ],
+    "center": [
+      -0.009488910436630249,
+      -0.015741080045700073,
+      -0.014159440994262695
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+    "sourceNodeName": "Solitude Plateau",
+    "visualLocalBounds": {
+      "min": [
+        -0.9005722403526306,
+        -1.0030039548873901,
+        -0.9492046236991882
+      ],
+      "max": [
+        0.8823164701461792,
+        0.9736996293067932,
+        0.9215630292892456
+      ],
+      "size": [
+        1.7828887104988098,
+        1.9767035841941833,
+        1.8707676529884338
+      ],
+      "center": [
+        -0.009127885103225708,
+        -0.014652162790298462,
+        -0.013820797204971313
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.8996759057044983,
+        -1.0030039548873901,
+        -0.9492046236991882
+      ],
+      "max": [
+        0.8806980848312378,
+        0.97152179479599,
+        0.9208857417106628
+      ],
+      "size": [
+        1.780373990535736,
+        1.9745257496833801,
+        1.870090365409851
+      ],
+      "center": [
+        -0.009488910436630249,
+        -0.015741080045700073,
+        -0.014159440994262695
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "solitude-ground-plateau",
+    "sourceActorName": "Solitude Plateau",
+    "sourceAssetUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "68f63130f6fa1763b9b2c888e91296a96c2f7f48c97268c997664f61d8e8a0cc"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "solitude",
+      "nodeId": "solitude-ground-plateau",
+      "sourceAssetUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+      "intent": "walkable",
+      "channel": "worldStatic",
+      "triangleBudget": 20000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-13T18:40:28.725Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "walkable",
+    "channel": "worldStatic",
+    "triangleBudget": 20000
+  },
+  "simplification": {
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 50000,
+    "targetTriangleBudget": 20000,
+    "ratio": 0.38,
+    "tool": "gltf-transform",
+    "prepass": "weld",
+    "error": 0.05
+  }
+}

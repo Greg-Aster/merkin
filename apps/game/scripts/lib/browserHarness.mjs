@@ -231,16 +231,28 @@ export async function assertPortAvailable(port, host = '127.0.0.1') {
 }
 
 export async function waitForUrl(url, attempts = 80, intervalMs = 500) {
+  let lastStatus = null
+  let lastError = null
+
   for (let index = 0; index < attempts; index += 1) {
     try {
       const response = await fetch(url, { signal: AbortSignal.timeout(1500) })
+      lastStatus = `${response.status} ${response.statusText}`.trim()
+      lastError = null
       if (response.ok || response.status === 204) return
-    } catch {}
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error)
+    }
 
     await delay(intervalMs)
   }
 
-  throw new Error(`Timed out waiting for ${url}`)
+  const detail = lastError
+    ? `last fetch error: ${lastError}`
+    : lastStatus
+      ? `last status: ${lastStatus}`
+      : 'no response was received'
+  throw new Error(`Timed out waiting for ${url} (${detail})`)
 }
 
 export async function waitForPageText(page, text, timeout) {

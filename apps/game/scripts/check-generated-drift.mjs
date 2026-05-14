@@ -6,6 +6,7 @@ import {
   resolvePublicPath,
 } from './lib/runtimeAssetCookManifest.mjs'
 import { auditRuntimeAssetManifestObject } from './lib/runtimeAssetManifestAudit.mjs'
+import { auditTerrainContracts } from './lib/terrainContractAudit.mjs'
 
 const appRoot = join(import.meta.dirname, '..')
 const context = createRuntimeAssetCookContext({ appRoot })
@@ -177,6 +178,13 @@ const currentAssetManifest = existsSync(context.manifestPath)
   : null
 
 const failures = []
+
+const terrainContractAudit = auditTerrainContracts({
+  sceneDir: context.sceneDir,
+  publicDir: context.publicRoot,
+  runtimeSceneDir: context.runtimeSceneRoot,
+})
+failures.push(...terrainContractAudit.failures)
 
 if (currentAssetManifest) {
   const audit = auditRuntimeAssetManifestObject({

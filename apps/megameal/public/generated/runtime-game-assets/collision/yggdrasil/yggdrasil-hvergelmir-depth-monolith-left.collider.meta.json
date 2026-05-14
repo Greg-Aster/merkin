@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "bake-mesh-collider",
+  "generatedAt": "2026-05-13T01:03:47.737Z",
+  "sourceLevelId": "yggdrasil",
+  "sourceActorId": "yggdrasil-hvergelmir-depth-monolith-left",
+  "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "167b5823afe67463f7ecf51681c316ceb8d2ba6353029dacedad2290f1f28598"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-monolith-left.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-monolith-left.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-monolith-left.collider.meta.json",
+  "triangleCount": 19000,
+  "vertexCount": 12643,
+  "bounds": {
+    "min": [
+      -0.35499057173728943,
+      -1.0000004768371582,
+      -0.35906779766082764
+    ],
+    "max": [
+      0.3292587399482727,
+      0.9737810492515564,
+      0.33214256167411804
+    ],
+    "size": [
+      0.6842493116855621,
+      1.9737815260887146,
+      0.6912103593349457
+    ],
+    "center": [
+      -0.012865915894508362,
+      -0.013109713792800903,
+      -0.013462617993354797
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.35514986515045166,
+      -1.0000571012496948,
+      -0.35906779766082764
+    ],
+    "max": [
+      0.3292587399482727,
+      0.97386634349823,
+      0.33214256167411804
+    ],
+    "size": [
+      0.6844086050987244,
+      1.9739234447479248,
+      0.6912103593349457
+    ],
+    "center": [
+      -0.012945562601089478,
+      -0.013095378875732422,
+      -0.013462617993354797
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.35499057173728943,
+      -1.0000004768371582,
+      -0.35906779766082764
+    ],
+    "max": [
+      0.3292587399482727,
+      0.9737810492515564,
+      0.33214256167411804
+    ],
+    "size": [
+      0.6842493116855621,
+      1.9737815260887146,
+      0.6912103593349457
+    ],
+    "center": [
+      -0.012865915894508362,
+      -0.013109713792800903,
+      -0.013462617993354797
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+    "sourceNodeName": "Depth Monolith Left",
+    "visualLocalBounds": {
+      "min": [
+        -0.35514986515045166,
+        -1.0000571012496948,
+        -0.35906779766082764
+      ],
+      "max": [
+        0.3292587399482727,
+        0.97386634349823,
+        0.33214256167411804
+      ],
+      "size": [
+        0.6844086050987244,
+        1.9739234447479248,
+        0.6912103593349457
+      ],
+      "center": [
+        -0.012945562601089478,
+        -0.013095378875732422,
+        -0.013462617993354797
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.35499057173728943,
+        -1.0000004768371582,
+        -0.35906779766082764
+      ],
+      "max": [
+        0.3292587399482727,
+        0.9737810492515564,
+        0.33214256167411804
+      ],
+      "size": [
+        0.6842493116855621,
+        1.9737815260887146,
+        0.6912103593349457
+      ],
+      "center": [
+        -0.012865915894508362,
+        -0.013109713792800903,
+        -0.013462617993354797
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "yggdrasil-hvergelmir-depth-monolith-left",
+    "sourceActorName": "Depth Monolith Left",
+    "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "167b5823afe67463f7ecf51681c316ceb8d2ba6353029dacedad2290f1f28598"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "yggdrasil",
+      "nodeId": "yggdrasil-hvergelmir-depth-monolith-left",
+      "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 20000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-13T01:03:47.737Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 20000
+  },
+  "simplification": {
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 50000,
+    "targetTriangleBudget": 20000,
+    "ratio": 0.38,
+    "tool": "gltf-transform",
+    "prepass": "weld",
+    "error": 0.05
+  }
+}

@@ -1,3 +1,5 @@
+import type { AssetLocalTransformMetadata } from './assetLocalTransform'
+
 export type Vec3 = [number, number, number]
 export type Euler3 = [number, number, number]
 
@@ -63,6 +65,7 @@ export interface RenderComponent {
   }
   asset?: {
     url: string
+    assetLocalTransform?: AssetLocalTransformMetadata | null
   }
   prefab?: {
     type: string
@@ -89,10 +92,15 @@ export interface CollisionComponent {
   shape: CollisionShape
   size?: Vec3
   colliderUrl?: string
+  colliderMetadataUrl?: string
+  assetLocalTransform?: AssetLocalTransformMetadata | null
+  sourceAssetUrl?: string
   friction?: number
   restitution?: number
   sensor?: boolean
   triangleBudget?: number
+  triangleCount?: number
+  vertexCount?: number
 }
 
 export interface InteractionComponent {
@@ -141,6 +149,8 @@ export interface CollisionDiagnosticsReport {
   authoredActorIds: string[]
   defaultActorIds: string[]
   visualOnlyActorIds: string[]
+  legacyAssetLocalMetadataActorIds?: string[]
+  missingColliderMetadataActorIds?: string[]
 }
 
 export interface ActorDefinition {

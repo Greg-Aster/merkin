@@ -1,5 +1,9 @@
 <script lang="ts">
 import { createEventDispatcher } from 'svelte'
+import {
+  type RuntimePlayerSettings,
+  resolveRuntimePlayerSettings,
+} from '../engine/runtimePlayerSettings'
 import { DEFAULT_LEVEL_ID } from '../levels/levelRegistry'
 import { runtimeDebugLog } from '../utils/runtimeLog'
 import type {
@@ -11,6 +15,7 @@ const dispatch = createEventDispatcher()
 
 export let isMobile = false
 export let editorEnabled = false
+export let editorPlaytestEnabled = false
 export let collisionOverlayEnabled = false
 export let currentLevel = DEFAULT_LEVEL_ID
 export let currentLevelComponent: any = null
@@ -42,25 +47,37 @@ export let normalizeLevelId: (levelId: string) => string = levelId => levelId
 
 let activeLevelKey = currentLevel
 let activeLevelComponent = currentLevelComponent
+let activeEditorPlaytestMode = editorPlaytestEnabled
+let previousEditorPlaytestEnabled = editorPlaytestEnabled
+let editorPlaytestRuntimeReady = false
 let worldSessionId = 0
 let levelPlayerPosition: PlayerLevelPositionDetail['position'] | null = null
 let levelPlayerRotation: PlayerLevelPositionDetail['rotation'] | null = null
-let playerSettings: {
-  moveSpeed?: number
-  jumpForce?: number
-  lightIntensityScale?: number
-} = {}
+let runtimePlayerSettings: RuntimePlayerSettings =
+  resolveRuntimePlayerSettings(null)
+let editorPlaytestSpawnPosition: PlayerLevelPositionDetail['position'] | null =
+  null
+let editorPlaytestSpawnRotation: PlayerLevelPositionDetail['rotation'] | null =
+  null
+let editorPlaytestResumePosition: PlayerLevelPositionDetail['position'] | null =
+  null
+let editorPlaytestResumeRotation: PlayerLevelPositionDetail['rotation'] | null =
+  null
+let editorPlaytestStartPosition: PlayerLevelPositionDetail['position'] | null =
+  null
+let editorPlaytestStartRotation: PlayerLevelPositionDetail['rotation'] | null =
+  null
+let editorPlaytestPlayerSettings: RuntimePlayerSettings =
+  resolveRuntimePlayerSettings(null)
 
 function forward(type: string, detail: unknown) {
   dispatch(type, detail)
 }
 
 function handleStaticWorldReady(detail: StaticWorldReadyDetail) {
-  const nextPlayerSettings = detail.metadata?.player
-  playerSettings =
-    nextPlayerSettings && typeof nextPlayerSettings === 'object'
-      ? (nextPlayerSettings as typeof playerSettings)
-      : {}
+  if (editorEnabled && activeEditorPlaytestMode) return
+
+  runtimePlayerSettings = resolveRuntimePlayerSettings(detail.metadata?.player)
   staticWorldReady = true
   forward('staticWorldReady', detail)
 }
@@ -76,28 +93,125 @@ function handlePlayerLevelPosition(detail: PlayerLevelPositionDetail) {
   })
 }
 
-function resetWorldSession() {
-  worldSessionId += 1
-  activeLevelKey = currentLevel
-  activeLevelComponent = currentLevelComponent
+function handleEditorPlaytestSpawn(detail: PlayerLevelPositionDetail) {
+  editorPlaytestSpawnPosition = detail.position
+  editorPlaytestSpawnRotation = detail.rotation ?? [0, 0, 0]
+  editorPlaytestPlayerSettings = resolveRuntimePlayerSettings(
+    detail.metadata?.player,
+  )
+  runtimeDebugLog('GameWorld: Editor playtest spawn resolved', {
+    levelId: detail.levelId,
+    position: detail.position,
+    rotation: detail.rotation,
+  })
+}
+
+function handleEditorPlaytestReady(detail: StaticWorldReadyDetail) {
+  if (!editorEnabled || !activeEditorPlaytestMode) return
+
+  editorPlaytestPlayerSettings = resolveRuntimePlayerSettings(
+    detail.metadata?.player,
+  )
+  editorPlaytestRuntimeReady = true
+  staticWorldReady = true
+  forward('staticWorldReady', detail)
+}
+
+function handlePlayerPoseChange(detail: {
+  position?: [number, number, number]
+  rotation?: [number, number, number]
+}) {
+  if (!editorEnabled || !detail.position) return
+  editorPlaytestResumePosition = detail.position
+  editorPlaytestResumeRotation = detail.rotation ?? editorPlaytestResumeRotation
+}
+
+function resetPhysicsReadiness() {
   staticWorldReady = false
   physicsReady = false
   playerReady = false
   gameplayEnabled = false
   playerComponentRef = null
-  levelPlayerPosition = null
-  levelPlayerRotation = null
-  playerSettings = {}
+  editorPlaytestRuntimeReady = false
 }
 
-$: playerMoveSpeed = playerSettings.moveSpeed ?? 5
-$: playerJumpForce = playerSettings.jumpForce ?? 8
-$: playerLightIntensityScale = playerSettings.lightIntensityScale ?? 60
+function resetWorldSession() {
+  worldSessionId += 1
+  activeLevelKey = currentLevel
+  activeLevelComponent = currentLevelComponent
+  activeEditorPlaytestMode = editorPlaytestEnabled
+  previousEditorPlaytestEnabled = editorPlaytestEnabled
+  resetPhysicsReadiness()
+  levelPlayerPosition = null
+  levelPlayerRotation = null
+  runtimePlayerSettings = resolveRuntimePlayerSettings(null)
+  editorPlaytestSpawnPosition = null
+  editorPlaytestSpawnRotation = null
+  editorPlaytestResumePosition = null
+  editorPlaytestResumeRotation = null
+  editorPlaytestStartPosition = null
+  editorPlaytestStartRotation = null
+  editorPlaytestPlayerSettings = resolveRuntimePlayerSettings(null)
+}
+
+$: editorEditPlayerPosition =
+  editorPlaytestResumePosition ??
+  editorPlaytestSpawnPosition ??
+  levelPlayerPosition
+$: editorEditPlayerRotation =
+  editorPlaytestResumeRotation ??
+  editorPlaytestSpawnRotation ??
+  levelPlayerRotation
+$: editorRuntimePlayerPosition =
+  editorPlaytestStartPosition ??
+  editorPlaytestSpawnPosition ??
+  levelPlayerPosition
+$: editorRuntimePlayerRotation =
+  editorPlaytestStartRotation ??
+  editorPlaytestSpawnRotation ??
+  levelPlayerRotation
+$: activePlayerPosition = editorEnabled
+  ? activeEditorPlaytestMode
+    ? editorRuntimePlayerPosition
+    : editorEditPlayerPosition
+  : levelPlayerPosition
+$: activePlayerRotation = editorEnabled
+  ? activeEditorPlaytestMode
+    ? editorRuntimePlayerRotation
+    : editorEditPlayerRotation
+  : levelPlayerRotation
+$: activePlayerSettings = editorEnabled
+  ? editorPlaytestPlayerSettings
+  : runtimePlayerSettings
+$: playerMoveSpeed = activePlayerSettings.moveSpeed
+$: playerSprintMultiplier = activePlayerSettings.sprintMultiplier
+$: playerJumpForce = activePlayerSettings.jumpForce
+$: playerLightIntensityScale = activePlayerSettings.lightIntensityScale
 $: if (!playerComponentRef) {
   playerReady = false
 }
+$: if (editorPlaytestEnabled !== previousEditorPlaytestEnabled) {
+  activeEditorPlaytestMode = editorPlaytestEnabled
+  if (activeEditorPlaytestMode) {
+    editorPlaytestStartPosition =
+      editorPlaytestResumePosition ?? editorPlaytestSpawnPosition
+    editorPlaytestStartRotation =
+      editorPlaytestResumeRotation ?? editorPlaytestSpawnRotation
+    editorPlaytestRuntimeReady = false
+  } else {
+    editorPlaytestStartPosition = null
+    editorPlaytestStartRotation = null
+  }
+  previousEditorPlaytestEnabled = editorPlaytestEnabled
+}
+$: playerLevelReady =
+  editorEnabled && activeEditorPlaytestMode
+    ? editorPlaytestRuntimeReady
+    : staticWorldReady
 $: gameplayEnabled = Boolean(
-  !editorEnabled && staticWorldReady && levelPlayerPosition,
+  (!editorEnabled || activeEditorPlaytestMode) &&
+    playerLevelReady &&
+    activePlayerPosition,
 )
 $: if (
   currentLevel !== activeLevelKey ||
@@ -141,22 +255,30 @@ $: if (
       {/if}
 
       {#if editorEnabled && editorViewportControlsComponent}
-        <svelte:component this={editorViewportControlsComponent} enabled={true} />
-      {:else if levelPlayerPosition}
+        <svelte:component
+          this={editorViewportControlsComponent}
+          enabled={!activeEditorPlaytestMode}
+        />
+      {/if}
+
+      {#if staticWorldReady && activePlayerPosition}
         <svelte:component
           this={playerComponentClass}
           bind:this={playerComponentRef}
-          position={levelPlayerPosition}
-          rotation={levelPlayerRotation ?? [0, 0, 0]}
+          position={activePlayerPosition}
+          rotation={activePlayerRotation ?? [0, 0, 0]}
           speed={playerMoveSpeed}
+          sprintMultiplier={playerSprintMultiplier}
           jumpForce={playerJumpForce}
           lightIntensityScale={playerLightIntensityScale}
           {gameplayEnabled}
+          cameraEnabled={!editorEnabled || activeEditorPlaytestMode}
           on:playerReadyChange={(e) => {
             playerReady = Boolean(e.detail?.ready)
           }}
           on:interaction={(e) => forward('playerInteraction', e.detail)}
           on:lightBurst={(e) => forward('lightBurst', e.detail)}
+          on:playerPoseChange={(e) => handlePlayerPoseChange(e.detail)}
         />
       {/if}
 
@@ -172,16 +294,21 @@ $: if (
           <svelte:component
             this={editorSceneLayerComponent}
             levelId={currentLevel}
-            {editorEnabled}
+            editorEnabled={!activeEditorPlaytestMode}
+            playtestEnabled={activeEditorPlaytestMode}
+            playtestPlayerPosition={editorPlaytestResumePosition}
+            playtestPlayerRotation={editorPlaytestResumeRotation}
             interactionSystem={interactionSystemRef}
             on:portalTransition={(e) => forward('portalTransition', e.detail)}
             on:noteRead={(e) => forward('noteRead', e.detail)}
+            on:editorPlaytestSpawn={(e) => handleEditorPlaytestSpawn(e.detail)}
+            on:editorPlaytestReady={(e) => handleEditorPlaytestReady(e.detail)}
           />
         {/if}
-        {#if editorEnabled && editorCollisionOverlayComponent}
+        {#if editorEnabled && !activeEditorPlaytestMode && editorCollisionOverlayComponent}
           <svelte:component this={editorCollisionOverlayComponent} levelId={currentLevel} />
         {/if}
-        {#if editorEnabled && editorTerrainSculptLayerComponent}
+        {#if editorEnabled && !activeEditorPlaytestMode && editorTerrainSculptLayerComponent}
           <svelte:component this={editorTerrainSculptLayerComponent} levelId={currentLevel} />
         {/if}
       {/if}

@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "bake-mesh-collider",
+  "generatedAt": "2026-05-13T18:40:12.802Z",
+  "sourceLevelId": "solitude",
+  "sourceActorId": "solitude-ground-dais",
+  "sourceAssetUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "e68a3b4987c59e03667e641decde57d5039206d2b7322ec11b475df729d03580"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.meta.json",
+  "triangleCount": 11400,
+  "vertexCount": 11036,
+  "bounds": {
+    "min": [
+      -0.9581931829452515,
+      -0.9518071413040161,
+      -0.9956570267677307
+    ],
+    "max": [
+      0.9329316020011902,
+      0.9272300004959106,
+      0.9679255485534668
+    ],
+    "size": [
+      1.8911247849464417,
+      1.8790371417999268,
+      1.9635825753211975
+    ],
+    "center": [
+      -0.01263079047203064,
+      -0.012288570404052734,
+      -0.013865739107131958
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.9581931829452515,
+      -0.9524890184402466,
+      -0.996408998966217
+    ],
+    "max": [
+      0.9342905879020691,
+      0.9272300004959106,
+      0.9679255485534668
+    ],
+    "size": [
+      1.8924837708473206,
+      1.8797190189361572,
+      1.9643345475196838
+    ],
+    "center": [
+      -0.011951297521591187,
+      -0.012629508972167969,
+      -0.014241725206375122
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.9581931829452515,
+      -0.9518071413040161,
+      -0.9956570267677307
+    ],
+    "max": [
+      0.9329316020011902,
+      0.9272300004959106,
+      0.9679255485534668
+    ],
+    "size": [
+      1.8911247849464417,
+      1.8790371417999268,
+      1.9635825753211975
+    ],
+    "center": [
+      -0.01263079047203064,
+      -0.012288570404052734,
+      -0.013865739107131958
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+    "sourceNodeName": "Ruin Dais",
+    "visualLocalBounds": {
+      "min": [
+        -0.9581931829452515,
+        -0.9524890184402466,
+        -0.996408998966217
+      ],
+      "max": [
+        0.9342905879020691,
+        0.9272300004959106,
+        0.9679255485534668
+      ],
+      "size": [
+        1.8924837708473206,
+        1.8797190189361572,
+        1.9643345475196838
+      ],
+      "center": [
+        -0.011951297521591187,
+        -0.012629508972167969,
+        -0.014241725206375122
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.9581931829452515,
+        -0.9518071413040161,
+        -0.9956570267677307
+      ],
+      "max": [
+        0.9329316020011902,
+        0.9272300004959106,
+        0.9679255485534668
+      ],
+      "size": [
+        1.8911247849464417,
+        1.8790371417999268,
+        1.9635825753211975
+      ],
+      "center": [
+        -0.01263079047203064,
+        -0.012288570404052734,
+        -0.013865739107131958
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "solitude-ground-dais",
+    "sourceActorName": "Ruin Dais",
+    "sourceAssetUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "e68a3b4987c59e03667e641decde57d5039206d2b7322ec11b475df729d03580"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "solitude",
+      "nodeId": "solitude-ground-dais",
+      "sourceAssetUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+      "intent": "walkable",
+      "channel": "worldStatic",
+      "triangleBudget": 12000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-13T18:40:12.802Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "walkable",
+    "channel": "worldStatic",
+    "triangleBudget": 12000
+  },
+  "simplification": {
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 50000,
+    "targetTriangleBudget": 12000,
+    "ratio": 0.22799999999999998,
+    "tool": "gltf-transform",
+    "prepass": "weld",
+    "error": 0.05
+  }
+}

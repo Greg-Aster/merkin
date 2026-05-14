@@ -15,6 +15,12 @@ function sendJson(res, status, payload) {
   res.end(JSON.stringify(payload))
 }
 
+function stripGeneratedSceneRuntimeData(scene) {
+  if (!scene || typeof scene !== 'object') return scene
+  const { engine: _engine, ...authoringScene } = scene
+  return authoringScene
+}
+
 function parseLastJsonLine(stdout) {
   try {
     const jsonLine = stdout
@@ -36,6 +42,11 @@ const publishBuildStepCommands = {
   ],
   'cook-terrain-chunks': levelId => [
     'cook:terrain-chunks',
+    '--',
+    `--level=${levelId}`,
+  ],
+  'cook-terrain-glb-chunks': levelId => [
+    'cook:terrain-glb-chunks',
     '--',
     `--level=${levelId}`,
   ],
@@ -148,15 +159,26 @@ function runPublishBuildStep({
       stderr += chunk.toString()
     })
     child.on('close', code => {
+      const parsed = parseLastJsonLine(stdout) || {}
+      const artifacts = [
+        parsed.manifestPath,
+        parsed.manifestUrl,
+        parsed.chunksPath,
+        parsed.collision?.url,
+        parsed.collision?.metadataUrl,
+      ].filter(Boolean)
       resolve({
         id: step.id,
         success: code === 0,
         exitCode: code,
         stdout,
         stderr,
+        artifacts,
         message:
           code === 0
-            ? `${step.id} passed.`
+            ? artifacts.length
+              ? `${step.id} passed: ${artifacts.join(', ')}.`
+              : `${step.id} passed.`
             : stderr || stdout || `${step.id} failed with exit code ${code}`,
       })
     })
@@ -628,7 +650,11 @@ function handleSceneRoutes(req, res, route, context) {
           }
         }
 
-        fs.writeFileSync(scenePath, JSON.stringify(scene, null, 2), 'utf8')
+        fs.writeFileSync(
+          scenePath,
+          JSON.stringify(stripGeneratedSceneRuntimeData(scene), null, 2),
+          'utf8',
+        )
         sendJson(res, 200, {
           success: true,
           path: toRepoRelative(scenePath),

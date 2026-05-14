@@ -51,6 +51,186 @@ function runPnpmScript(repoRoot, scriptName, args, callback) {
   })
 }
 
+function isIsoDateBefore(left, right) {
+  if (!left || !right) return false
+  const leftTime = Date.parse(left)
+  const rightTime = Date.parse(right)
+  return Number.isFinite(leftTime) && Number.isFinite(rightTime)
+    ? leftTime < rightTime
+    : false
+}
+
+function getSceneTerrainPublishState(scene) {
+  const terrain = scene?.settings?.level?.collision?.terrain ?? null
+  const ground = scene?.settings?.level?.ground ?? null
+  const terrainRuntimeMode = terrain?.runtimeMode ?? ground?.terrainRuntimeMode
+  const terrainVisualSource = terrain?.visualSource ?? ground?.terrainVisualSource
+  const renderChunks = terrain?.renderChunks ?? ground?.renderChunks
+  const glbChunkTerrain =
+    terrainRuntimeMode === 'glb-chunk-terrain' ||
+    terrainVisualSource === 'source-glb-chunks' ||
+    renderChunks?.type === 'glb-chunk-terrain'
+  const heightfieldTerrain =
+    terrainRuntimeMode === 'heightfield-terrain' ||
+    ground?.terrainRuntimeMode === 'heightfield-terrain'
+  const sceneAuthoredTerrain =
+    terrainRuntimeMode === 'scene-authored' ||
+    ground?.terrainRuntimeMode === 'scene-authored' ||
+    ground?.collisionSource === 'scene-colliders'
+  const bakedTerrainEnabled =
+    !sceneAuthoredTerrain &&
+    !glbChunkTerrain &&
+    (heightfieldTerrain ||
+      terrain?.source === 'baked-heightmap' ||
+      terrain?.runtimeSource === 'generated-heightmap' ||
+      terrain?.runtimeSource === 'editor-manifest' ||
+      ground?.collisionSource === 'baked-heightfield')
+  const chunksStale =
+    Boolean(terrain?.lastGeneratedAt) &&
+    (!terrain?.lastChunksGeneratedAt ||
+      isIsoDateBefore(terrain.lastChunksGeneratedAt, terrain.lastGeneratedAt))
+  const staleReasons = [
+    terrain?.heightmapDirty
+      ? 'terrain source basket changed after the last generated heightmap'
+      : '',
+    terrain?.dirty ? 'terrain collision is marked dirty' : '',
+    bakedTerrainEnabled && !terrain?.colliderUrl
+      ? 'baked terrain collision artifact is missing'
+      : '',
+    bakedTerrainEnabled && !terrain?.metadataUrl
+      ? 'baked terrain collision metadata is missing'
+      : '',
+    bakedTerrainEnabled && chunksStale
+      ? 'terrain visual chunks are older than the current heightmap/collision state'
+      : '',
+  ].filter(Boolean)
+
+  return {
+    bakedTerrainEnabled,
+    staleReasons,
+    products: {
+      heightmapUrl: terrain?.heightmapUrl ?? '',
+      colliderUrl: terrain?.colliderUrl ?? '',
+      metadataUrl: terrain?.metadataUrl ?? '',
+      chunksPath: terrain?.chunksPath ?? '',
+      lastGeneratedAt: terrain?.lastGeneratedAt ?? '',
+      lastChunksGeneratedAt: terrain?.lastChunksGeneratedAt ?? '',
+      heightmapDirty: Boolean(terrain?.heightmapDirty),
+      dirty: Boolean(terrain?.dirty),
+      chunksStale,
+    },
+  }
+}
+
+function sceneUsesSourceGlbTerrain(scene) {
+  const terrain = scene?.settings?.level?.collision?.terrain ?? null
+  const ground = scene?.settings?.level?.ground ?? null
+  const renderChunks = terrain?.renderChunks ?? ground?.renderChunks ?? null
+
+  return (
+    terrain?.runtimeMode === 'glb-chunk-terrain' ||
+    ground?.terrainRuntimeMode === 'glb-chunk-terrain' ||
+    terrain?.visualSource === 'source-glb-chunks' ||
+    ground?.terrainVisualSource === 'source-glb-chunks' ||
+    renderChunks?.type === 'glb-chunk-terrain'
+  )
+}
+
+function getTerrainSourceDescriptorsFromScene(scene) {
+  const terrain = scene?.settings?.level?.collision?.terrain ?? null
+  const nodes = Array.isArray(scene?.nodes) ? scene.nodes : []
+  const sourceNodeIds = Array.isArray(terrain?.sourceNodeIds)
+    ? terrain.sourceNodeIds
+    : terrain?.sourceNodeId
+      ? [terrain.sourceNodeId]
+      : []
+  const sourceAssetUrls = Array.isArray(terrain?.sourceAssetUrls)
+    ? terrain.sourceAssetUrls
+    : terrain?.sourceAssetUrl
+      ? [terrain.sourceAssetUrl]
+      : []
+
+  if (sourceNodeIds.length > 0) {
+    return sourceNodeIds
+      .map((nodeId, index) => {
+        const node = nodes.find(candidate => candidate.id === nodeId)
+        if (!node) return null
+        const sourceAssetUrl =
+          node.asset?.url || sourceAssetUrls[index] || sourceAssetUrls[0] || ''
+        if (!sourceAssetUrl && !node.primitive) return null
+        return {
+          nodeId: node.id,
+          sourceName: node.name || node.id,
+          ...(sourceAssetUrl ? { sourceAssetUrl } : {}),
+          ...(node.primitive ? { primitive: node.primitive } : {}),
+          position: node.position || [0, 0, 0],
+          rotation: node.rotation || [0, 0, 0],
+          scale: node.scale || [1, 1, 1],
+        }
+      })
+      .filter(Boolean)
+  }
+
+  if (sourceAssetUrls.length > 0) {
+    return sourceAssetUrls.map((sourceAssetUrl, index) => ({
+      sourceAssetUrl,
+      sourceName:
+        index === 0 && terrain?.sourceName
+          ? terrain.sourceName
+          : path.basename(sourceAssetUrl),
+    }))
+  }
+
+  return []
+}
+
+function getTerrainSourceAssetStatus(scene, resolvePublicAssetPath) {
+  const descriptors = getTerrainSourceDescriptorsFromScene(scene)
+  const seen = new Set()
+
+  return descriptors
+    .map(source => {
+      const sourceAssetUrl = source?.sourceAssetUrl || ''
+      if (!sourceAssetUrl) {
+        return {
+          nodeId: source?.nodeId || '',
+          sourceName: source?.sourceName || source?.nodeId || 'primitive',
+          sourceType: source?.primitive ? 'primitive' : 'scene-node',
+          exists: true,
+          detail: source?.primitive
+            ? 'primitive terrain source is authored in the scene'
+            : 'scene terrain source has no external asset URL',
+        }
+      }
+      if (seen.has(sourceAssetUrl)) return null
+      seen.add(sourceAssetUrl)
+      try {
+        const sourcePath = resolvePublicAssetPath(sourceAssetUrl)
+        return {
+          nodeId: source?.nodeId || '',
+          sourceName: source?.sourceName || path.basename(sourceAssetUrl),
+          sourceType: 'asset',
+          url: sourceAssetUrl,
+          exists: fs.existsSync(sourcePath),
+          path: sourcePath,
+          detail: fs.existsSync(sourcePath)
+            ? 'source asset exists'
+            : 'source asset file is missing',
+        }
+      } catch (error) {
+        return {
+          nodeId: source?.nodeId || '',
+          sourceName: source?.sourceName || path.basename(sourceAssetUrl),
+          sourceType: 'asset',
+          url: sourceAssetUrl,
+          exists: false,
+          detail: error.message,
+        }
+      }
+    })
+    .filter(Boolean)
+}
+
 function handleTerrainRoutes(req, res, route, context) {
   const { pathname } = route
   const {
@@ -64,6 +244,42 @@ function handleTerrainRoutes(req, res, route, context) {
     toPublicAssetUrl,
     toRepoRelative,
   } = context
+
+  if (pathname === '/api/editor-terrain/status' && req.method === 'POST') {
+    readRequestBody(req, body => {
+      try {
+        const { levelId, scene: payloadScene } = JSON.parse(body || '{}')
+        if (!levelId && !payloadScene?.levelId) {
+          sendJson(res, 400, { success: false, message: 'levelId is required' })
+          return
+        }
+
+        const scene =
+          payloadScene ||
+          (fs.existsSync(getEditorScenePath(levelId))
+            ? readJsonFile(getEditorScenePath(levelId))
+            : null)
+        const sourceAssets = getTerrainSourceAssetStatus(
+          scene,
+          resolvePublicAssetPath,
+        )
+
+        sendJson(res, 200, {
+          success: true,
+          levelId: levelId || scene?.levelId || '',
+          sourceAssets,
+          missingSourceAssets: sourceAssets.filter(source => !source.exists),
+        })
+      } catch (error) {
+        console.error('Editor terrain status error:', error)
+        sendJson(res, 500, {
+          success: false,
+          message: `Terrain status failed: ${error.message}`,
+        })
+      }
+    })
+    return true
+  }
 
   if (
     pathname === '/api/editor-terrain/generate-heightmap' &&
@@ -93,7 +309,10 @@ function handleTerrainRoutes(req, res, route, context) {
             ? scene.nodes.find(node => node.id === nodeId)
             : null
         const resolvedSourceUrl = sourceAssetUrl || sourceNode?.asset?.url || ''
-        const sourceList = Array.isArray(sources) ? sources : []
+        const sceneSourceList = getTerrainSourceDescriptorsFromScene(scene)
+        const sourceList = Array.isArray(sources) && sources.length > 0
+          ? sources
+          : sceneSourceList
 
         if (!resolvedSourceUrl && sourceList.length === 0) {
           sendJson(res, 400, {
@@ -402,6 +621,7 @@ function handleTerrainRoutes(req, res, route, context) {
           levelId,
           grid = 4,
           lodResolutions = '33,17,9',
+          mode = '',
         } = JSON.parse(body || '{}')
         if (!levelId) {
           sendJson(res, 400, { success: false, message: 'levelId is required' })
@@ -416,18 +636,30 @@ function handleTerrainRoutes(req, res, route, context) {
           })
           return
         }
+        const scenePath = getEditorScenePath(levelId)
+        const scene = fs.existsSync(scenePath) ? readJsonFile(scenePath) : null
+        const useSourceGlbCook =
+          mode === 'glb-chunk-terrain' ||
+          mode === 'source-glb-chunks' ||
+          sceneUsesSourceGlbTerrain(scene)
+        const scriptName = useSourceGlbCook
+          ? 'cook:terrain-glb-chunks'
+          : 'cook:terrain-chunks'
+        const cookArgs = [
+          '--dir',
+          'apps/game',
+          scriptName,
+          '--',
+          `--level=${levelId}`,
+          `--grid=${grid}`,
+        ]
+        if (!useSourceGlbCook) {
+          cookArgs.push(`--lod-resolutions=${lodResolutions}`)
+        }
 
         const child = spawn(
           'pnpm',
-          [
-            '--dir',
-            'apps/game',
-            'cook:terrain-chunks',
-            '--',
-            `--level=${levelId}`,
-            `--grid=${grid}`,
-            `--lod-resolutions=${lodResolutions}`,
-          ],
+          cookArgs,
           {
             cwd: REPO_ROOT,
             stdio: 'pipe',
@@ -493,6 +725,20 @@ function handleTerrainRoutes(req, res, route, context) {
           sendJson(res, 400, { success: false, message: 'levelId is required' })
           return
         }
+        const scenePath = getEditorScenePath(levelId)
+        const scene = fs.existsSync(scenePath) ? readJsonFile(scenePath) : null
+        const terrainPublishState = getSceneTerrainPublishState(scene)
+
+        if (terrainPublishState.staleReasons.length > 0) {
+          sendJson(res, 409, {
+            success: false,
+            levelId,
+            stage: 'terrain-products',
+            message: `Terrain products are stale: ${terrainPublishState.staleReasons.join('; ')}.`,
+            terrainProducts: terrainPublishState.products,
+          })
+          return
+        }
 
         runPnpmScript(
           REPO_ROOT,
@@ -542,6 +788,10 @@ function handleTerrainRoutes(req, res, route, context) {
                   levelId,
                   cookedRuntimeAssets: true,
                   engineAudit: true,
+                  terrainProducts: terrainPublishState.products,
+                  message: terrainPublishState.bakedTerrainEnabled
+                    ? 'Published with current terrain heightmap, baked collision, and cooked visual chunk products.'
+                    : 'Published without baked terrain products; scene-authored ground is active.',
                   cookStdout: cookResult.stdout,
                   auditStdout: auditResult.stdout,
                 })

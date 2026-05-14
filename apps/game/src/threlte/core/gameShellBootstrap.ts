@@ -1,3 +1,5 @@
+import { DEFAULT_LEVEL_ID } from '../levels/levelRegistry'
+
 export type NormalizeLevelId = (levelId: string | null | undefined) => string
 
 export type GameShellRouteState = {
@@ -54,10 +56,10 @@ export function createGameShellBootstrapState({
   const routeState = getGameShellRouteState(search)
   const requestedLevelId = normalizeLevelId(routeState.levelParam)
   const initialLevelId =
-    requestedLevelId !== 'observatory'
+    requestedLevelId !== DEFAULT_LEVEL_ID
       ? requestedLevelId
       : !currentLevel
-        ? 'observatory'
+        ? DEFAULT_LEVEL_ID
         : null
 
   return {

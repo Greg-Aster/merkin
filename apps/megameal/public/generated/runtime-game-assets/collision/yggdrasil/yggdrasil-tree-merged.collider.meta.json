@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "bake-mesh-collider",
+  "generatedAt": "2026-05-13T01:03:57.646Z",
+  "sourceLevelId": "yggdrasil",
+  "sourceActorId": "yggdrasil-tree-merged",
+  "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "2d66fb3b91bab7abc629e8e4eef75d2f5f9de04c5c854aa14c0118c374f3c1bd"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.meta.json",
+  "triangleCount": 18998,
+  "vertexCount": 26496,
+  "bounds": {
+    "min": [
+      -0.997320294380188,
+      -0.9788752794265747,
+      -0.9813200831413269
+    ],
+    "max": [
+      0.9687815308570862,
+      0.9673465490341187,
+      0.9718799591064453
+    ],
+    "size": [
+      1.9661018252372742,
+      1.9462218284606934,
+      1.9532000422477722
+    ],
+    "center": [
+      -0.014269381761550903,
+      -0.005764365196228027,
+      -0.004720062017440796
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.997320294380188,
+      -0.9800900220870972,
+      -0.9813200831413269
+    ],
+    "max": [
+      0.9689310193061829,
+      0.9673465490341187,
+      0.9718799591064453
+    ],
+    "size": [
+      1.9662513136863708,
+      1.9474365711212158,
+      1.9532000422477722
+    ],
+    "center": [
+      -0.014194637537002563,
+      -0.006371736526489258,
+      -0.004720062017440796
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.997320294380188,
+      -0.9788752794265747,
+      -0.9813200831413269
+    ],
+    "max": [
+      0.9687815308570862,
+      0.9673465490341187,
+      0.9718799591064453
+    ],
+    "size": [
+      1.9661018252372742,
+      1.9462218284606934,
+      1.9532000422477722
+    ],
+    "center": [
+      -0.014269381761550903,
+      -0.005764365196228027,
+      -0.004720062017440796
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "sourceNodeName": "Yggdrasil World Tree Merged",
+    "visualLocalBounds": {
+      "min": [
+        -0.997320294380188,
+        -0.9800900220870972,
+        -0.9813200831413269
+      ],
+      "max": [
+        0.9689310193061829,
+        0.9673465490341187,
+        0.9718799591064453
+      ],
+      "size": [
+        1.9662513136863708,
+        1.9474365711212158,
+        1.9532000422477722
+      ],
+      "center": [
+        -0.014194637537002563,
+        -0.006371736526489258,
+        -0.004720062017440796
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.997320294380188,
+        -0.9788752794265747,
+        -0.9813200831413269
+      ],
+      "max": [
+        0.9687815308570862,
+        0.9673465490341187,
+        0.9718799591064453
+      ],
+      "size": [
+        1.9661018252372742,
+        1.9462218284606934,
+        1.9532000422477722
+      ],
+      "center": [
+        -0.014269381761550903,
+        -0.005764365196228027,
+        -0.004720062017440796
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "yggdrasil-tree-merged",
+    "sourceActorName": "Yggdrasil World Tree Merged",
+    "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "2d66fb3b91bab7abc629e8e4eef75d2f5f9de04c5c854aa14c0118c374f3c1bd"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "yggdrasil",
+      "nodeId": "yggdrasil-tree-merged",
+      "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 20000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-13T01:03:57.646Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 20000
+  },
+  "simplification": {
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 50000,
+    "targetTriangleBudget": 20000,
+    "ratio": 0.38,
+    "tool": "gltf-transform",
+    "prepass": "weld",
+    "error": 0.05
+  }
+}

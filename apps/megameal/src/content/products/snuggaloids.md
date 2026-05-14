@@ -74,6 +74,13 @@ specifications:
     value: "Category II Companion (permanent attachment threshold begins at 72 hrs)"
   - label: "Lore Status"
     value: "Post-extinction entities; commercial origin confirmed"
+assurances:
+  - label: "Regional Fulfillment"
+    value: "Snuggloid distribution remains limited to approved regions. Your household may view the listing before local habitat-readiness clearance is granted."
+  - label: "Companion Registry"
+    value: "Registry status is tracked separately from ordinary cart inventory. Unit availability, adoption routing, and bonded-unit history may update outside the store checkout flow."
+  - label: "Care Boundary"
+    value: "Assurance covers catalog handling guidance only. It does not guarantee sleep quality, wall privacy, hallway stability, or continued confidence in household silence."
 qanda:
   - question: "Q. What is the lore behind Snuggaloids?"
     answer: "A. Snuggaloids entered the market as comfort companions on Planet Qarnivor shortly before the Pro-Spoon / Anti-Spoon exchange rendered the category historically complicated. Post-event sightings describing entities bearing a resemblance to the product are to be dismissed as rumors."

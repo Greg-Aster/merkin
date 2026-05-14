@@ -1,4 +1,11 @@
-import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from 'node:fs'
+import { createHash } from 'node:crypto'
 import { dirname, join } from 'node:path'
 import { inflateSync } from 'node:zlib'
 import {
@@ -24,6 +31,169 @@ function writeJson(path, value) {
   const tempPath = `${path}.tmp`
   writeFileSync(tempPath, `${JSON.stringify(value, null, 2)}\n`)
   renameSync(tempPath, path)
+}
+
+function fingerprintFile(path) {
+  return {
+    algorithm: 'sha256',
+    value: createHash('sha256').update(readFileSync(path)).digest('hex'),
+  }
+}
+
+function normalizePublicUrl(value) {
+  return typeof value === 'string' && value.startsWith('/') ? value : ''
+}
+
+function resolvePublicPath(publicUrl) {
+  const normalizedUrl = normalizePublicUrl(publicUrl)
+  if (!normalizedUrl) return ''
+  const fullPath = join(publicRoot, normalizedUrl.replace(/^\/+/, ''))
+  return fullPath.startsWith(publicRoot) ? fullPath : ''
+}
+
+function fingerprintPublicAsset(publicUrl) {
+  const path = resolvePublicPath(publicUrl)
+  if (!path || !existsSync(path)) return null
+  return fingerprintFile(path)
+}
+
+function uniqueStrings(values) {
+  return [...new Set(values.filter(value => typeof value === 'string' && value))]
+}
+
+function firstString(...values) {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim()
+    if (Array.isArray(value)) {
+      const match = value.find(
+        item => typeof item === 'string' && item.trim(),
+      )
+      if (match) return match.trim()
+    }
+  }
+  return ''
+}
+
+function getTerrainRuntimeMode(manifest) {
+  return manifest.runtime?.mode
+}
+
+function getTerrainVisualSource(manifest) {
+  return manifest.runtime?.visualSource
+}
+
+function isGlbChunkTerrainContract(manifest) {
+  return (
+    getTerrainRuntimeMode(manifest) === 'glb-chunk-terrain' ||
+    getTerrainVisualSource(manifest) === 'source-glb-chunks' ||
+    manifest.visualChunks?.source === 'source-glb' ||
+    manifest.visualChunks?.product?.type === 'glb-chunk-terrain'
+  )
+}
+
+function resolvePrimaryTerrainSourceAssetUrl(manifest, heightConfig) {
+  return normalizePublicUrl(
+    firstString(
+      manifest.source?.assetUrl,
+      manifest.assets?.sourceGlb,
+      manifest.assets?.sourceGltf,
+      manifest.assets?.sourceAssetUrl,
+      manifest.assets?.terrainSource,
+      manifest.visualChunks?.product?.sourceAssetUrl,
+      manifest.assets?.environment,
+      heightConfig.sourceAssetUrl,
+      heightConfig.sourceAssetUrls,
+    ),
+  )
+}
+
+function resolveTerrainSourceAssetUrls(manifest, heightConfig) {
+  return uniqueStrings([
+    resolvePrimaryTerrainSourceAssetUrl(manifest, heightConfig),
+    ...(Array.isArray(heightConfig.sourceAssetUrls)
+      ? heightConfig.sourceAssetUrls
+      : []),
+    heightConfig.sourceAssetUrl,
+    manifest.source?.assetUrl,
+    manifest.assets?.sourceGlb,
+    manifest.assets?.sourceGltf,
+    manifest.assets?.sourceAssetUrl,
+    manifest.assets?.terrainSource,
+    manifest.visualChunks?.product?.sourceAssetUrl,
+    manifest.assets?.environment,
+  ].map(normalizePublicUrl))
+}
+
+function buildTerrainSourceContract({
+  manifest,
+  heightConfig,
+  heightmapUrl,
+  bounds,
+  collisionBounds,
+  vertexCount,
+  triangleCount,
+}) {
+  const sourceAssetUrls = resolveTerrainSourceAssetUrls(manifest, heightConfig)
+  const glbChunkTerrain = isGlbChunkTerrainContract(manifest)
+  const primarySourceAssetUrl = glbChunkTerrain
+    ? resolvePrimaryTerrainSourceAssetUrl(manifest, heightConfig)
+    : ''
+  const sourceAssetFingerprints = sourceAssetUrls
+    .map(url => ({
+      url,
+      fingerprint: fingerprintPublicAsset(url),
+    }))
+    .filter(entry => entry.fingerprint)
+  const heightmapFingerprint = fingerprintPublicAsset(heightmapUrl)
+  const fingerprintedSourceUrl =
+    (primarySourceAssetUrl &&
+      sourceAssetFingerprints.find(entry => entry.url === primarySourceAssetUrl)
+        ?.url) ||
+    sourceAssetFingerprints[0]?.url
+  const sourceAssetUrl = fingerprintedSourceUrl || heightmapUrl
+  const sourceAssetFingerprint =
+    sourceAssetFingerprints.find(entry => entry.url === sourceAssetUrl)
+      ?.fingerprint ?? heightmapFingerprint
+
+  return {
+    schemaVersion: 1,
+    terrainSourceType: glbChunkTerrain
+      ? 'glb-chunk-terrain'
+      : sourceAssetUrls.length > 0
+        ? 'heightfield-terrain'
+        : 'heightfield-procedural',
+    sourceAssetUrl,
+    sourceAssetUrls: uniqueStrings([sourceAssetUrl, ...sourceAssetUrls]),
+    ...(sourceAssetUrls.length > 0 ? { authoredSourceAssetUrls: sourceAssetUrls } : {}),
+    ...(sourceAssetFingerprint ? { sourceAssetFingerprint } : {}),
+    ...(sourceAssetFingerprints.length > 0
+      ? { sourceAssetFingerprints }
+      : {}),
+    heightmapUrl,
+    ...(heightmapFingerprint ? { heightmapFingerprint } : {}),
+    sourceCoordinateSystem: 'three-y-up-xz-ground',
+    sourceBounds: bounds,
+    renderBakeMode: glbChunkTerrain
+      ? 'source-glb-chunk-mesh'
+      : 'heightfield-chunk-mesh',
+    collisionBakeMode: 'heightfield-projection',
+    collisionMeshSource: {
+      type: 'heightmap',
+      url: heightmapUrl,
+      ...(heightmapFingerprint ? { fingerprint: heightmapFingerprint } : {}),
+    },
+    collisionCoverageBounds: collisionBounds,
+    role: 'walkable',
+    vertexCount,
+    triangleCount,
+    ...(glbChunkTerrain
+      ? {
+          approvedHeightfieldException: true,
+          approvedHeightfieldExceptionReason:
+            'Collision is heightfield-projected from a source-derived heightmap while visual chunks are authored from the same source GLB.',
+        }
+      : {}),
+  }
 }
 
 function assertPngSignature(buffer) {
@@ -203,7 +373,13 @@ function getHeightData(manifest, heightConfig, png, heightOverrides) {
   }
 }
 
-function buildCollider(manifest, heightConfig, png, targetResolution, heightOverrides = {}) {
+function buildCollider(
+  manifest,
+  heightConfig,
+  png,
+  targetResolution,
+  heightOverrides = {},
+) {
   const { resolution, heightData, heightOverrideCount } = getHeightData(
     manifest,
     heightConfig,
@@ -324,8 +500,18 @@ function updateManifestCollision(manifest, publicBinaryPath, publicMetaPath, met
         sampleStep: meta.sampleStep,
         bounds: meta.bounds,
         center: meta.center,
+        sourceContract: meta.sourceContract,
       },
     },
+    visualChunks: manifest.visualChunks
+      ? {
+          ...manifest.visualChunks,
+          sourceContract:
+            manifest.visualChunks.source === 'source-glb'
+              ? manifest.visualChunks.sourceContract ?? meta.sourceContract
+              : meta.sourceContract,
+        }
+      : manifest.visualChunks,
     physics: {
       ...physicsWithoutLegacyTrimesh,
       type: 'baked-terrain-mesh',
@@ -365,6 +551,15 @@ for (const level of levelsToBake) {
     level.targetResolution,
     heightOverrides,
   )
+  collider.meta.sourceContract = buildTerrainSourceContract({
+    manifest,
+    heightConfig,
+    heightmapUrl: manifest.assets.heightmap,
+    bounds: heightConfig.bounds ?? manifest.physics?.bounds ?? collider.meta.bounds,
+    collisionBounds: collider.meta.bounds,
+    vertexCount: collider.meta.vertexCount,
+    triangleCount: collider.meta.triangleCount,
+  })
   const publicBinaryPath = `/terrain/collision/${level.id}.collider.bin`
   const publicMetaPath = `/terrain/collision/${level.id}.collider.meta.json`
   const binaryPath = join(publicRoot, publicBinaryPath.replace(/^\//, ''))
@@ -379,5 +574,20 @@ for (const level of levelsToBake) {
 
   console.log(
     `[bake-terrain-collision] ${level.id}: ${collider.meta.vertexCount} vertices, ${collider.meta.triangleCount} triangles, ${collider.meta.heightOverrideCount} editor height overrides -> ${publicBinaryPath}`,
+  )
+  console.log(
+    JSON.stringify({
+      success: true,
+      levelId: level.levelId,
+      manifestUrl: `/terrain/${level.id}.manifest.json`,
+      collision: {
+        url: publicBinaryPath,
+        metadataUrl: publicMetaPath,
+        triangleCount: collider.meta.triangleCount,
+        vertexCount: collider.meta.vertexCount,
+        colliderResolution: collider.meta.colliderResolution,
+      },
+      metadata: collider.meta,
+    }),
   )
 }

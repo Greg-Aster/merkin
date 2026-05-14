@@ -1,3 +1,4 @@
+import { classifyTerrainAuthority } from '../engine/groundContract'
 import type {
   EditorPublishBakePlan,
   EditorPublishBakeStep,
@@ -6,6 +7,10 @@ import type {
   EditorPublishPipelineState,
   EditorPublishReadinessViewModel,
 } from './editorPublishReadinessContracts'
+import {
+  isGeneratedHeightmapChunkTerrain,
+  isSourceGlbChunkTerrain,
+} from './editorTerrainModeGuards'
 import type { EditorSceneDocument } from './editorTypes'
 
 export type EditorPublishBakePlanMetadata = {
@@ -22,6 +27,7 @@ export type EditorPublishBakePlanMetadata = {
   terrainManifestMissing?: boolean
   terrainCollisionMissing?: boolean
   terrainChunksMissing?: boolean
+  terrainSourceMissing?: boolean
   worldPartitionMissing?: boolean
   authoringRuntimeAssetUrls?: string[]
   dirty?: {
@@ -52,6 +58,12 @@ export function createEditorPublishBakePlanMetadataFromReadiness(
         section => section.id === id && section.severity === severity,
       ),
     )
+  const hasSectionDetail = (id: string, pattern: RegExp) =>
+    Boolean(
+      readiness?.sections.some(
+        section => section.id === id && pattern.test(section.detail),
+      ),
+    )
 
   return {
     requiredCommandIds: commandIds,
@@ -60,7 +72,13 @@ export function createEditorPublishBakePlanMetadataFromReadiness(
       'blocker',
     ),
     terrainCollisionMissing: hasSection('terrain-collision', 'blocker'),
-    terrainChunksMissing: hasCommand('cook-terrain-chunks'),
+    terrainSourceMissing: hasSectionDetail(
+      'terrain-collision',
+      /^Source asset missing:/,
+    ),
+    terrainChunksMissing:
+      hasCommand('cook-terrain-chunks') ||
+      hasCommand('cook-terrain-glb-chunks'),
     dirty: {
       runtimeManifest:
         hasCommand('cook-runtime-assets') ||
@@ -71,8 +89,10 @@ export function createEditorPublishBakePlanMetadataFromReadiness(
 
 export const EDITOR_PUBLISH_BAKE_STEPS: EditorPublishBakeStep[] = [
   'save-scene',
+  'generate-heightmap',
   'bake-terrain-collision',
   'cook-terrain-chunks',
+  'cook-terrain-glb-chunks',
   'cook-world-partition',
   'cook-runtime-assets',
   'audit-engine',
@@ -84,19 +104,25 @@ export const EDITOR_PUBLISH_BAKE_STEP_LABELS: Record<
   string
 > = {
   'save-scene': 'Save authoring scene',
-  'bake-terrain-collision': 'Bake terrain collision',
-  'cook-terrain-chunks': 'Cook terrain chunks',
+  'generate-heightmap': 'Generate Heightmap',
+  'bake-terrain-collision': 'Bake Terrain Collision',
+  'cook-terrain-chunks': 'Cook Heightfield Chunks',
+  'cook-terrain-glb-chunks': 'Cook Source GLB Chunks',
   'cook-world-partition': 'Cook world partition',
   'cook-runtime-assets': 'Cook runtime manifests',
-  'audit-engine': 'Run engine audit',
-  'deploy-registry': 'Deploy level registry',
+  'audit-engine': 'Validate Terrain Contract',
+  'deploy-registry': 'Publish Level',
 }
 
 const SKIPPED_REASONS: Record<EditorPublishBakeStep, string> = {
   'save-scene': 'Scene save is always required before publish.',
+  'generate-heightmap':
+    'Terrain source heightmap is current or the selected mode does not use heightmaps.',
   'bake-terrain-collision':
     'Terrain collision inputs do not require a fresh bake.',
-  'cook-terrain-chunks': 'Terrain visual chunks are already represented.',
+  'cook-terrain-chunks': 'Heightfield visual chunks are already represented.',
+  'cook-terrain-glb-chunks':
+    'Source GLB visual chunks are already represented.',
   'cook-world-partition':
     'World partition settings are not enabled for this scene.',
   'cook-runtime-assets': 'Runtime manifests are always cooked before publish.',
@@ -108,8 +134,10 @@ const SKIPPED_REASONS: Record<EditorPublishBakeStep, string> = {
 function emptyReasons(): Record<EditorPublishBakeStep, string[]> {
   return {
     'save-scene': [],
+    'generate-heightmap': [],
     'bake-terrain-collision': [],
     'cook-terrain-chunks': [],
+    'cook-terrain-glb-chunks': [],
     'cook-world-partition': [],
     'cook-runtime-assets': [],
     'audit-engine': [],
@@ -137,6 +165,15 @@ function collectExplicitSceneAssetUrls(scene: EditorSceneDocument | null) {
   )
 }
 
+function isIsoDateBefore(left: string | undefined, right: string | undefined) {
+  if (!left || !right) return false
+  const leftTime = Date.parse(left)
+  const rightTime = Date.parse(right)
+  return Number.isFinite(leftTime) && Number.isFinite(rightTime)
+    ? leftTime < rightTime
+    : false
+}
+
 export function computeEditorPublishBakePlan(
   input: ComputeEditorPublishBakePlanInput,
 ): EditorPublishBakePlan {
@@ -155,18 +192,64 @@ export function computeEditorPublishBakePlan(
   const runtimeAssets = levelSettings?.runtimeAssets
   const terrainSculptEnabled = Boolean(levelSettings?.terrainSculpt?.enabled)
   const terrainDirty = Boolean(terrain?.dirty)
+  const terrainHeightmapDirty = Boolean(terrain?.heightmapDirty)
+  const terrainVisualSource =
+    terrain?.visualSource ?? ground?.terrainVisualSource ?? null
+  const terrainRenderChunks = terrain?.renderChunks ?? ground?.renderChunks
+  const terrainAuthority = classifyTerrainAuthority({
+    level: {
+      id: scene?.levelId ?? '',
+      settings: scene?.settings as Record<string, unknown> | undefined,
+    },
+  })
+  const glbChunkTerrainRequested =
+    terrainAuthority.mode === 'glb-chunk-terrain' ||
+    isSourceGlbChunkTerrain({
+      terrainRuntimeMode: terrain?.runtimeMode,
+      groundTerrainRuntimeMode: ground?.terrainRuntimeMode,
+      terrainVisualSource: terrain?.visualSource,
+      groundTerrainVisualSource: ground?.terrainVisualSource,
+      groundVisualSource: ground?.visualSource,
+      renderChunkType: terrainRenderChunks?.type,
+      terrainSource: terrain?.source,
+    })
+  const terrainChunksStale =
+    Boolean(terrain?.lastGeneratedAt) &&
+    (!terrain?.lastChunksGeneratedAt ||
+      isIsoDateBefore(terrain.lastChunksGeneratedAt, terrain.lastGeneratedAt))
+  const terrainHasSource =
+    Boolean(terrain?.sourceAssetUrl) ||
+    Number(terrain?.sourceAssetUrls?.length ?? 0) > 0 ||
+    Boolean(terrain?.sourceNodeId) ||
+    Number(terrain?.sourceNodeIds?.length ?? 0) > 0
   const explicitAssetUrls = collectExplicitSceneAssetUrls(scene)
   const bakedTerrainEnabled =
-    terrain?.source === 'baked-heightmap' ||
-    terrain?.runtimeSource === 'generated-heightmap' ||
-    terrain?.runtimeSource === 'editor-manifest' ||
-    Boolean(terrain?.manifestUrl)
-  const terrainChunkRuntimeRequested =
-    terrainSculptEnabled ||
-    ground?.mode === 'terrain-chunks' ||
-    ground?.mode === 'hybrid' ||
-    ground?.visualSource === 'terrain-chunks' ||
-    Boolean(terrain?.chunksPath)
+    terrainAuthority.mode === 'heightfield-terrain' ||
+    (!glbChunkTerrainRequested &&
+      terrainAuthority.mode !== 'scene-authored' &&
+      (terrain?.source === 'baked-heightmap' ||
+        terrain?.runtimeSource === 'generated-heightmap' ||
+        terrain?.runtimeSource === 'editor-manifest' ||
+        Boolean(terrain?.manifestUrl)))
+  const terrainChunkRuntimeRequested = isGeneratedHeightmapChunkTerrain({
+    terrainSculptEnabled,
+    groundMode: ground?.mode,
+    groundVisualSource: ground?.visualSource,
+    groundTerrainVisualSource: ground?.terrainVisualSource,
+    groundTerrainRuntimeMode: ground?.terrainRuntimeMode,
+    terrainRuntimeMode: terrain?.runtimeMode,
+    terrainVisualSource,
+    renderChunkType: terrainRenderChunks?.type,
+    terrainSource: terrain?.source,
+    hasHeightfieldChunks: Boolean(terrain?.chunksPath),
+  })
+  const sourceGlbChunksCurrent =
+    Boolean(terrainRenderChunks?.chunksPath ?? terrain?.chunksPath) &&
+    Boolean(terrainRenderChunks?.chunkCount ?? terrain?.chunkCount) &&
+    terrainRenderChunks?.preservesSourceUvs === true &&
+    terrainRenderChunks?.preservesSourceMaterialSlots === true &&
+    Boolean(terrainRenderChunks?.sourceAssetUrl ?? terrain?.sourceAssetUrl) &&
+    Boolean(terrainRenderChunks?.sourceHash ?? terrain?.sourceAssetHash)
 
   steps.add('save-scene')
   reasons['save-scene'].push(
@@ -179,9 +262,28 @@ export function computeEditorPublishBakePlan(
     blockers.push('Scene has no authored nodes and cannot be published.')
   }
 
+  if (bakedTerrainEnabled && terrainHeightmapDirty) {
+    if (terrainHasSource) {
+      steps.add('generate-heightmap')
+      reasons['generate-heightmap'].push(
+        'Terrain source basket changed and the heightmap must be regenerated before collision and chunks publish.',
+      )
+    } else {
+      blockers.push(
+        'Terrain source basket changed, but no terrain source is recorded for Generate Heightmap.',
+      )
+      reasons['generate-heightmap'].push(
+        'No sourceAssetUrl, sourceAssetUrls, sourceNodeId, or sourceNodeIds are recorded.',
+      )
+    }
+  } else {
+    reasons['generate-heightmap'].push(SKIPPED_REASONS['generate-heightmap'])
+  }
+
   if (
     bakedTerrainEnabled &&
     (terrainDirty ||
+      terrainHeightmapDirty ||
       !terrain?.colliderUrl ||
       !terrain?.metadataUrl ||
       metadata.terrainManifestMissing ||
@@ -192,6 +294,11 @@ export function computeEditorPublishBakePlan(
     if (terrainDirty) {
       reasons['bake-terrain-collision'].push(
         'Terrain collision has dirty editor edits.',
+      )
+    }
+    if (terrainHeightmapDirty) {
+      reasons['bake-terrain-collision'].push(
+        'Terrain source basket changed and heightmap generation is required before collision can be current.',
       )
     }
     if (!terrain?.colliderUrl || !terrain?.metadataUrl) {
@@ -219,6 +326,8 @@ export function computeEditorPublishBakePlan(
     bakedTerrainEnabled &&
     terrainChunkRuntimeRequested &&
     (terrainDirty ||
+      terrainHeightmapDirty ||
+      terrainChunksStale ||
       !terrain?.chunksPath ||
       !terrain?.chunkCount ||
       metadata.terrainChunksMissing ||
@@ -228,6 +337,16 @@ export function computeEditorPublishBakePlan(
     if (terrainDirty) {
       reasons['cook-terrain-chunks'].push(
         'Terrain visuals may be stale because terrain inputs are dirty.',
+      )
+    }
+    if (terrainHeightmapDirty) {
+      reasons['cook-terrain-chunks'].push(
+        'Terrain source basket changed and visual chunks must wait for heightmap generation.',
+      )
+    }
+    if (terrainChunksStale) {
+      reasons['cook-terrain-chunks'].push(
+        'Terrain visual chunks are older than the latest heightmap or collision bake.',
       )
     }
     if (!terrain?.chunksPath || !terrain?.chunkCount) {
@@ -247,6 +366,69 @@ export function computeEditorPublishBakePlan(
     }
   } else {
     reasons['cook-terrain-chunks'].push(SKIPPED_REASONS['cook-terrain-chunks'])
+  }
+
+  if (glbChunkTerrainRequested) {
+    if (!terrainHasSource) {
+      blockers.push(
+        'Source GLB chunk terrain requires a recorded sourceAssetUrl or sourceAssetUrls entry.',
+      )
+      reasons['cook-terrain-glb-chunks'].push(
+        'No source GLB/GLTF URL is recorded for the terrain cook.',
+      )
+    }
+    if (metadata.terrainSourceMissing) {
+      blockers.push(
+        'Source asset missing: place the exported source under apps/megameal/public or update the terrain source URL before publishing.',
+      )
+      reasons['cook-terrain-glb-chunks'].push(
+        'Publish readiness reports that the recorded source GLB/GLTF file is missing.',
+      )
+    }
+
+    if (
+      terrainDirty ||
+      terrainChunksStale ||
+      !sourceGlbChunksCurrent ||
+      metadata.terrainSourceMissing ||
+      metadata.terrainChunksMissing ||
+      commandIds.has('cook-terrain-glb-chunks')
+    ) {
+      steps.add('cook-terrain-glb-chunks')
+      if (terrainDirty) {
+        reasons['cook-terrain-glb-chunks'].push(
+          'Terrain inputs are dirty and source GLB chunks must be recooked.',
+        )
+      }
+      if (terrainChunksStale) {
+        reasons['cook-terrain-glb-chunks'].push(
+          'Terrain visual chunks are older than the latest terrain source state.',
+        )
+      }
+      if (!sourceGlbChunksCurrent) {
+        reasons['cook-terrain-glb-chunks'].push(
+          'Current render chunk metadata does not prove source GLB hash, UV preservation, and material slot preservation.',
+        )
+      }
+      if (metadata.terrainChunksMissing) {
+        reasons['cook-terrain-glb-chunks'].push(
+          'Terrain manifest metadata reports missing visual chunks.',
+        )
+      }
+      if (commandIds.has('cook-terrain-glb-chunks')) {
+        reasons['cook-terrain-glb-chunks'].push(
+          'Publish readiness requires a source GLB terrain chunk cook.',
+        )
+      }
+    } else {
+      reasons['cook-terrain-glb-chunks'].push(
+        'Source GLB chunk metadata proves source hash, UV preservation, and material slot preservation.',
+      )
+    }
+  } else {
+    reasons['cook-terrain-glb-chunks'].push(
+      SKIPPED_REASONS['cook-terrain-glb-chunks'],
+    )
   }
 
   if (

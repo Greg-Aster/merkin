@@ -22,6 +22,7 @@ export let isInitialized = false
 export let error: string | null = null
 export let isMobile = false
 export let editorEnabled = false
+export let editorPlaytestEnabled = false
 export let collisionOverlayEnabled = false
 export let currentLevel = DEFAULT_LEVEL_ID
 export let currentLevelComponent: any = null
@@ -149,6 +150,7 @@ $: if (staticWorldReady && !postProcessingEligible) {
       <GameWorld
         {isMobile}
         {editorEnabled}
+        {editorPlaytestEnabled}
         {collisionOverlayEnabled}
         {currentLevel}
         {currentLevelComponent}

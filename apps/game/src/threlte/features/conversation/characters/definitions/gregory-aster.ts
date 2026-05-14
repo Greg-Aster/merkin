@@ -125,7 +125,7 @@ As creator of the MEGAMEAL reality, Aster exists both within and outside his cre
     timeperiod: 'meta-temporal',
     category: 'creator',
     importance: 'critical',
-    socialLinks: ['greg@dndiy.org', 'github.com/gregoryaster'],
+    socialLinks: ['Greg@megameal.org', 'github.com/gregoryaster'],
   },
 }
 
@@ -414,7 +414,7 @@ Gregory believes in:
 ## Contact and Collaboration Approach
 
 Gregory maintains accessibility through:
-- Open communication channels (greg@dndiy.org)
+- Open communication channels (Greg@megameal.org)
 - Responsive engagement with creative collaborators
 - Willingness to explore unconventional partnerships
 - Support for creators exploring similar experimental territories

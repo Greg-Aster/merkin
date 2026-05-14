@@ -9,7 +9,6 @@ import {
   resolveRuntimePointLightVisibility,
   resolveRuntimeVisibilityPolicy,
 } from '../features/performance/utils/runtimeSceneBudget'
-import { runtimeRenderProfileStore } from '../stores/runtimeRenderProfileStore'
 
 export let position: [number, number, number] = [0, 0, 0]
 export let color = '#ffffff'
@@ -37,9 +36,7 @@ function getActiveCamera(): THREE.Camera | null {
 function applyLightBudget() {
   const policy = resolveRuntimeVisibilityPolicy($qualityLevelStore, {
     ...$qualitySettingsStore,
-    enableDynamicLighting:
-      $runtimeRenderProfileStore.tier !== 'desktop' &&
-      $qualitySettingsStore.enableDynamicLighting,
+    enableDynamicLighting: $qualitySettingsStore.enableDynamicLighting,
   })
   const lightVisibility = resolveRuntimePointLightVisibility({
     policy,

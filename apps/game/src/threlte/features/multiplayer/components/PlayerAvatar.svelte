@@ -3,7 +3,6 @@
 import { T, useTask } from '@threlte/core'
 import * as THREE from 'three'
 import StarSprite from '../../../components/StarSprite.svelte'
-import { runtimeRenderProfileStore } from '../../../stores/runtimeRenderProfileStore'
 import { qualitySettingsStore } from '../../performance/stores/performanceStore'
 
 // This prop allows the parent component to set the position.
@@ -37,9 +36,7 @@ let spriteSize = playerSize
 let chargeCoreIntensity = 0
 let chargeCoreSize = playerSize * 0.6
 
-$: playerPointLightEnabled =
-  $qualitySettingsStore.enableDynamicLighting &&
-  $runtimeRenderProfileStore.tier !== 'desktop'
+$: playerPointLightEnabled = $qualitySettingsStore.enableDynamicLighting
 
 // Animate the light's intensity and the avatar's position.
 useTask(() => {

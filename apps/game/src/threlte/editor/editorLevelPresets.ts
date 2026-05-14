@@ -181,14 +181,14 @@ export const observatoryAtmospherePresets: ObservatoryAtmospherePresetDefinition
           fallbackFillLightIntensity: 0.2,
         },
         features: {
-          ocean: true,
+          water: true,
           vegetation: true,
           fireflies: true,
           starMap: true,
           conversations: true,
           styles: true,
         },
-        ocean: {
+        water: {
           size: {
             width: 4000,
             height: 4000,
@@ -235,7 +235,7 @@ export const observatoryAtmospherePresets: ObservatoryAtmospherePresetDefinition
           fallbackMoonlightIntensity: 0.42,
           fallbackFillLightIntensity: 0.18,
         },
-        ocean: {
+        water: {
           size: {
             width: 4200,
             height: 4200,
@@ -284,7 +284,7 @@ export const observatoryAtmospherePresets: ObservatoryAtmospherePresetDefinition
           fallbackFillLightIntensity: 0.24,
         },
         features: {
-          ocean: true,
+          water: true,
           vegetation: true,
           fireflies: true,
           starMap: true,
@@ -315,7 +315,7 @@ export const observatoryAtmospherePresets: ObservatoryAtmospherePresetDefinition
           fallbackMoonlightIntensity: 0.48,
           fallbackFillLightIntensity: 0.22,
         },
-        ocean: {
+        water: {
           size: {
             width: 4400,
             height: 4400,

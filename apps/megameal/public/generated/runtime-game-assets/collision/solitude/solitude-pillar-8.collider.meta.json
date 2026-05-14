@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "bake-mesh-collider",
+  "generatedAt": "2026-05-13T01:03:49.044Z",
+  "sourceLevelId": "solitude",
+  "sourceActorId": "solitude-pillar-8",
+  "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "2b251350dafe10c4891ed180721aff24eab4cde505fad41daf5876af6ea31791"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.meta.json",
+  "triangleCount": 19000,
+  "vertexCount": 12948,
+  "bounds": {
+    "min": [
+      -0.3966028690338135,
+      -1.0001206398010254,
+      -0.4122239053249359
+    ],
+    "max": [
+      0.3706410229206085,
+      0.9736790657043457,
+      0.3860188126564026
+    ],
+    "size": [
+      0.767243891954422,
+      1.973799705505371,
+      0.7982427179813385
+    ],
+    "center": [
+      -0.012980923056602478,
+      -0.013220787048339844,
+      -0.013102546334266663
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.3966028690338135,
+      -1.0001673698425293,
+      -0.4122299253940582
+    ],
+    "max": [
+      0.3706434965133667,
+      0.9736790657043457,
+      0.3860882818698883
+    ],
+    "size": [
+      0.7672463655471802,
+      1.973846435546875,
+      0.7983182072639465
+    ],
+    "center": [
+      -0.012979686260223389,
+      -0.013244152069091797,
+      -0.013070821762084961
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.3966028690338135,
+      -1.0001206398010254,
+      -0.4122239053249359
+    ],
+    "max": [
+      0.3706410229206085,
+      0.9736790657043457,
+      0.3860188126564026
+    ],
+    "size": [
+      0.767243891954422,
+      1.973799705505371,
+      0.7982427179813385
+    ],
+    "center": [
+      -0.012980923056602478,
+      -0.013220787048339844,
+      -0.013102546334266663
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+    "sourceNodeName": "Solitude Pillar 8",
+    "visualLocalBounds": {
+      "min": [
+        -0.3966028690338135,
+        -1.0001673698425293,
+        -0.4122299253940582
+      ],
+      "max": [
+        0.3706434965133667,
+        0.9736790657043457,
+        0.3860882818698883
+      ],
+      "size": [
+        0.7672463655471802,
+        1.973846435546875,
+        0.7983182072639465
+      ],
+      "center": [
+        -0.012979686260223389,
+        -0.013244152069091797,
+        -0.013070821762084961
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.3966028690338135,
+        -1.0001206398010254,
+        -0.4122239053249359
+      ],
+      "max": [
+        0.3706410229206085,
+        0.9736790657043457,
+        0.3860188126564026
+      ],
+      "size": [
+        0.767243891954422,
+        1.973799705505371,
+        0.7982427179813385
+      ],
+      "center": [
+        -0.012980923056602478,
+        -0.013220787048339844,
+        -0.013102546334266663
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "solitude-pillar-8",
+    "sourceActorName": "Solitude Pillar 8",
+    "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "2b251350dafe10c4891ed180721aff24eab4cde505fad41daf5876af6ea31791"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "solitude",
+      "nodeId": "solitude-pillar-8",
+      "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 20000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-13T01:03:49.044Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 20000
+  },
+  "simplification": {
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 50000,
+    "targetTriangleBudget": 20000,
+    "ratio": 0.38,
+    "tool": "gltf-transform",
+    "prepass": "weld",
+    "error": 0.05
+  }
+}

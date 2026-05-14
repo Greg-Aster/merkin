@@ -1,6 +1,8 @@
 import {
+  classifyTerrainAuthority as classifyTerrainAuthorityCore,
   getLevelGroundContract as getLevelGroundContractCore,
   getRuntimeGroundContract as getRuntimeGroundContractCore,
+  getTerrainAuthorityDiagnostics as getTerrainAuthorityDiagnosticsCore,
   hasAuthoredGroundVisuals as hasAuthoredGroundVisualsCore,
   shouldRenderTerrainVisualChunks as shouldRenderTerrainVisualChunksCore,
   validateLevelGroundContract as validateLevelGroundContractCore,
@@ -14,6 +16,9 @@ import type { ActorDefinition, LevelDefinition } from './types'
 export type LevelGroundContract = NonNullable<
   SharedLevelGroundSettings['ground']
 >
+type TerrainAuthorityInputLevel =
+  | LevelDefinition
+  | { id?: string; settings?: unknown }
 
 export function getLevelGroundContract(
   settings: SceneSettings | Record<string, unknown> | null | undefined,
@@ -38,6 +43,36 @@ export function shouldRenderTerrainVisualChunks(
   settings: SceneSettings,
 ) {
   return shouldRenderTerrainVisualChunksCore(levelId, settings)
+}
+
+export function classifyTerrainAuthority(
+  input:
+    | {
+        level?: TerrainAuthorityInputLevel | null
+        manifest?: unknown
+        manifestUrl?: string | null
+        enforceFinalAuthority?: boolean | null
+      }
+    | TerrainAuthorityInputLevel
+    | null
+    | undefined,
+) {
+  return classifyTerrainAuthorityCore(input)
+}
+
+export function getTerrainAuthorityDiagnostics(
+  input:
+    | {
+        level?: TerrainAuthorityInputLevel | null
+        manifest?: unknown
+        manifestUrl?: string | null
+        enforceFinalAuthority?: boolean | null
+      }
+    | TerrainAuthorityInputLevel
+    | null
+    | undefined,
+) {
+  return getTerrainAuthorityDiagnosticsCore(input)
 }
 
 export function validateLevelGroundContract(

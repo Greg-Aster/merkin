@@ -87,7 +87,11 @@ export async function getHealthyRuntimeOrigin(name, fallbackOrigin = '') {
   return ''
 }
 
-export function createDevRuntimePlugin(name, fallbackHost = '127.0.0.1') {
+export function createDevRuntimePlugin(
+  name,
+  fallbackHost = '127.0.0.1',
+  metadata = {},
+) {
   return {
     name: `merkin-dev-runtime-${name}`,
     apply: 'serve',
@@ -106,6 +110,7 @@ export function createDevRuntimePlugin(name, fallbackHost = '127.0.0.1') {
           host,
           port,
           origin,
+          ...metadata,
           updatedAt: new Date().toISOString(),
         })
       }

@@ -14,12 +14,8 @@
   }
 
   @media (max-width: 56rem) {
-    .archive-map-hero {
+    .archive-map-toolbar {
       grid-template-columns: 1fr;
-    }
-
-    .archive-map-ledger {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .story-archive-map[data-view='list'] .archive-record-list {
@@ -32,36 +28,31 @@
       gap: 0.85rem;
     }
 
-    .archive-map-hero,
+    .archive-map-toolbar,
     .archive-arc-card {
       border-radius: 1rem;
       padding: 1rem;
       backdrop-filter: blur(10px) saturate(1.04);
     }
 
-    .archive-map-hero::before,
+    .archive-map-toolbar::before,
     .archive-arc-card::before {
       inset: -0.75rem;
       filter: blur(14px);
     }
 
-    .archive-map-hero h2 {
-      font-size: clamp(1.35rem, 8vw, 2rem);
+    .archive-map-toolbar h2 {
+      font-size: 1.2rem;
     }
 
-    .archive-map-hero p,
+    .archive-map-toolbar p,
     .archive-arc-description {
       font-size: 0.9rem;
       line-height: 1.55;
     }
 
-    .archive-map-ledger {
-      grid-template-columns: 1fr;
-      gap: 0.55rem;
-    }
-
     .archive-arc-card__header {
-      display: grid;
+      align-items: flex-start;
     }
 
     .archive-record {
@@ -73,8 +64,13 @@
     }
 
     .archive-view-switch {
-      display: grid;
-      grid-template-columns: 1fr;
+      display: flex;
+      width: 100%;
+    }
+
+    .archive-view-switch__button {
+      flex: 1 1 0;
+      justify-content: center;
     }
 
     .archive-node-map,

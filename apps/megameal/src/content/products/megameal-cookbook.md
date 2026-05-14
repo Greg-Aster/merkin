@@ -52,6 +52,13 @@ specifications:
     value: "One early appendix removed from standard first-edition distribution"
   - label: "Shelf Life"
     value: "Indefinite. The book ages better than most empires."
+assurances:
+  - label: "Recipe Usability"
+    value: "The cookbook is intended as a real kitchen object. Fictional framing, margin notes, and incident context do not replace ordinary cooking judgment."
+  - label: "Edition Control"
+    value: "First printing remains pending until recipe count, layout, substitutions, and regional compliance notes are locked."
+  - label: "Appendix Handling"
+    value: "Restricted appendix material is excluded from the standard first edition until it can be classified without endangering dinner guests."
 qanda:
   - question: "Is this connected to the MEGA MEAL story?"
     answer: "Yes. The cookbook is framed as a preserved first edition assembled by Culinary Archivist Zara Chen, but the material reaches into the wider site: recipe pages, restaurant criticism, incident records, and culinary debris from multiple eras."

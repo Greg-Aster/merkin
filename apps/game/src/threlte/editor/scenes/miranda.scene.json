@@ -10,9 +10,27 @@
       "ground": {
         "mode": "scene-authored",
         "visualSource": "scene-actors",
+        "terrainRuntimeMode": "scene-authored",
+        "terrainVisualSource": "scene-actors",
         "collisionSource": "scene-colliders",
+        "fallbackSurfacePolicy": "disabled",
         "groundActorIds": ["miranda-floor-main", "miranda-floor-upper"],
         "requiredWalkableSurfaceId": "miranda-floor-main"
+      },
+      "terrainMigration": {
+        "currentMode": "scene-authored",
+        "authoritativeVisualSource": "scene-actors",
+        "collisionSource": "scene-colliders",
+        "renderChunks": {
+          "present": false,
+          "authoritative": false,
+          "source": "none"
+        },
+        "fallbackSurfacePolicy": "disabled",
+        "targetMode": "scene-authored",
+        "status": "complete",
+        "blockers": [],
+        "warningsBecomeBlockersAfterMigration": []
       },
       "graphicsBudget": {
         "maxRuntimeAssetBytes": 167772160,
@@ -214,6 +232,7 @@
       "collision": {
         "shape": "cuboid",
         "friction": 0.88,
+        "size": [40, 1.2, 92],
         "intent": "walkable",
         "channel": "worldStatic"
       },
@@ -242,6 +261,7 @@
       "collision": {
         "shape": "cuboid",
         "friction": 0.88,
+        "size": [18, 0.9, 18],
         "intent": "walkable",
         "channel": "worldStatic"
       },

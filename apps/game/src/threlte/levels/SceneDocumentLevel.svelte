@@ -10,10 +10,7 @@ import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
 import LevelManager from '../core/LevelManager.svelte'
 import type { PlayerLevelPositionDetail } from '../core/levelRuntimeEvents'
 import { createActorWorldMatrixResolver } from '../engine/actorHierarchy'
-import {
-  hasAuthoredGroundVisuals,
-  shouldRenderTerrainVisualChunks,
-} from '../engine/groundContract'
+import { getLevelGroundContract } from '../engine/groundContract'
 import {
   prefetchOptionalLevelRenderAssets,
   prepareRequiredLevelRenderAssets,
@@ -27,6 +24,7 @@ import {
 import { traceRuntimeCulling } from '../engine/runtimeCullingTrace'
 import { usesLightweightRuntimeGameplayMarker } from '../engine/runtimeGameplayRenderPolicy'
 import type { RuntimeGameplayData } from '../engine/runtimeGameplayTypes'
+import { resolveRuntimePlayerSettings } from '../engine/runtimePlayerSettings'
 import { getRuntimePrefabAssetUrl } from '../engine/runtimePrefabRegistry'
 import { loadRuntimeSceneDocument } from '../engine/runtimeSceneDocumentLoader'
 import {
@@ -51,7 +49,6 @@ import {
 import TerrainRuntime from '../features/terrain/TerrainRuntime.svelte'
 import {
   type TerrainRuntimeComponentData,
-  type TerrainRuntimeComponentSource,
   loadTerrainRuntimeComponentData,
 } from '../features/terrain/terrainManifest'
 import { playerStateStore } from '../stores/gameStateStore'
@@ -87,6 +84,7 @@ import {
 } from '../utils/gltfAssetCache'
 import RuntimeActorBranch from './RuntimeActorBranch.svelte'
 import SceneLighting from './SceneLighting.svelte'
+import { getSceneTerrainRuntimeRequest } from './sceneTerrainRuntime'
 
 type WorldPartitionSettings = {
   partitionUrl?: string
@@ -531,44 +529,30 @@ function dispatchPlayerLevelPosition(
   dispatch('playerLevelPosition', detail)
 }
 
-function getTerrainCollisionSettings(settings: SceneSettings) {
-  return settings.level?.collision?.terrain as
-    | {
-        source?: string
-        runtimeSource?: TerrainRuntimeComponentSource
-        manifestUrl?: string
-      }
-    | undefined
-}
-
 async function loadSceneTerrainRuntimeData(
   level: string,
   settings: SceneSettings,
 ) {
-  const terrainSettings = getTerrainCollisionSettings(settings)
-  if (
-    terrainSettings?.source !== 'baked-heightmap' ||
-    !terrainSettings.manifestUrl
-  ) {
+  const runtimeRequest = getSceneTerrainRuntimeRequest(settings)
+  if (!runtimeRequest) {
     return null
   }
 
-  const response = await fetch(terrainSettings.manifestUrl)
+  const response = await fetch(runtimeRequest.manifestUrl)
   if (!response.ok) {
     throw new Error(
-      `${level}: failed to load terrain manifest ${terrainSettings.manifestUrl} (${response.status})`,
+      `${level}: failed to load terrain manifest ${runtimeRequest.manifestUrl} (${response.status})`,
     )
   }
 
   const manifest = await response.json()
   return loadTerrainRuntimeComponentData({
     levelId: level,
-    source: terrainSettings.runtimeSource ?? 'editor-manifest',
+    source: runtimeRequest.source,
     manifest,
-    manifestUrl: terrainSettings.manifestUrl,
+    manifestUrl: runtimeRequest.manifestUrl,
     boundsFallback: manifest.physics?.bounds ?? null,
-    showVisualSurface: !hasAuthoredGroundVisuals(settings),
-    showVisualChunks: shouldRenderTerrainVisualChunks(level, settings),
+    groundContract: getLevelGroundContract(settings),
   })
 }
 
@@ -591,7 +575,7 @@ function activateSceneGameplay(
     metadata: {
       actorCount: levelActors.length,
       terrainRuntime: Boolean(terrainRuntimeData),
-      player: sharedLevelSettings.player ?? null,
+      player: resolveRuntimePlayerSettings(sharedLevelSettings.player),
     },
   })
 }
@@ -1003,7 +987,6 @@ async function loadSceneDocument(level: string, token: number) {
 
 $: levelSettings = (levelDefinition?.settings ?? {}) as SceneSettings
 $: sharedLevelSettings = levelSettings.level ?? {}
-$: observatorySettings = levelSettings.observatory ?? {}
 $: activeSkyboxPreset =
   SKYBOX_PRESETS[
     sharedLevelSettings.skyboxPreset as keyof typeof SKYBOX_PRESETS
@@ -1300,8 +1283,7 @@ $: resolvedRenderProfile = resolveRuntimeRenderProfile(
   sharedLevelSettings.renderProfile,
   $qualityLevelStore,
 )
-$: waterSettings =
-  observatorySettings?.ocean ?? sharedLevelSettings.water ?? null
+$: waterSettings = sharedLevelSettings.water ?? null
 $: waterEnabled =
   sharedLevelSettings.features?.water ??
   sharedLevelSettings.water?.enabled ??
@@ -1312,7 +1294,7 @@ $: ambientParticlesEnabled =
   false
 $: sceneStarMapEnabled = sharedLevelSettings.features?.starMap ?? false
 $: waterLevel = waterSettings?.level ?? waterSettings?.initialLevel ?? -0.16
-$: waterColor = parseSceneColor(waterSettings?.color, 0x425d72)
+$: waterColor = parseSceneColor(waterSettings?.color, 0x050b14)
 $: underwaterFogColor = parseSceneColor(
   waterSettings?.underwaterFogColor,
   0x0a1922,
@@ -1380,8 +1362,7 @@ onDestroy(() => {
       <TerrainRuntime
         levelId={levelId}
         config={terrainRuntimeData.config}
-        showVisualChunks={terrainRuntimeData.runtime.showVisualChunks}
-        showVisualSurface={terrainRuntimeData.runtime.showVisualSurface}
+        visualContract={terrainRuntimeData.runtime.visualContract}
         collisionStrategy={terrainRuntimeData.runtime.collisionStrategy}
         on:terrainRuntimeReady={handleTerrainRuntimeReady}
       />
@@ -1395,8 +1376,11 @@ onDestroy(() => {
         }}
         position={[0, waterLevel, 0]}
         initialLevel={waterLevel}
+        enableRising={waterSettings.enableRising ?? false}
+        targetLevel={waterSettings.targetLevel ?? waterLevel}
+        riseRate={waterSettings.riseRate ?? 0.01}
         color={waterColor}
-        opacity={waterSettings.opacity ?? 0.86}
+        opacity={waterSettings.opacity ?? 0.92}
         enableAnimation={waterSettings.enableAnimation ?? true}
         enableUnderwaterEffects={true}
         waterCollisionSize={[
@@ -1407,9 +1391,11 @@ onDestroy(() => {
         underwaterFogDensity={waterSettings.underwaterFogDensity ?? 0.08}
         underwaterFogColor={underwaterFogColor}
         surfaceFogDensity={waterSettings.surfaceFogDensity ?? 0.001}
-        metalness={0.08}
-        roughness={0.04}
+        metalness={0.02}
+        roughness={0.025}
         envMapIntensity={resolvedRenderProfile.reflections.environmentIntensity}
+        reflectionStrength={1.35}
+        fresnelPower={7.0}
         enablePlanarReflections={resolvedRenderProfile.reflections.mode === 'planar'}
         reflectionTextureSize={resolvedRenderProfile.reflections.textureSize}
       />

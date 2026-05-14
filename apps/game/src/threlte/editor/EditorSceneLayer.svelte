@@ -1,9 +1,13 @@
 <script lang="ts">
 import { T } from '@threlte/core'
-import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+import { createEventDispatcher, onDestroy, onMount, tick } from 'svelte'
+import { resolveRuntimePlayerSettings } from '../engine/runtimePlayerSettings'
+import { adaptSceneDocumentToLevelDefinition } from '../engine/sceneAdapter'
+import type { ActorDefinition, LevelDefinition } from '../engine/types'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 import EditorHeightmapSourceOverlay from './EditorHeightmapSourceOverlay.svelte'
 import EditorPlayerSpawnMarker from './EditorPlayerSpawnMarker.svelte'
+import EditorPlaytestPlayerMarker from './EditorPlaytestPlayerMarker.svelte'
 import EditorSceneBranch from './EditorSceneBranch.svelte'
 import EditorSelectionOutlineOverlay from './EditorSelectionOutlineOverlay.svelte'
 import EditorViewportShadingOverlay from './EditorViewportShadingOverlay.svelte'
@@ -15,23 +19,40 @@ import {
 import {
   editorNodesStore,
   editorRootNodesStore,
+  editorSceneStore,
   editorStateStore,
   selectEditorNode,
   setEditorLevel,
   setEditorScene,
 } from './editorStore'
+import type { EditorSceneDocument } from './editorTypes'
 
 const dispatch = createEventDispatcher()
 
 export let levelId: string
 export let editorEnabled = false
+export let playtestEnabled = false
 export let interactionSystem: any = null
+export let playtestPlayerPosition: [number, number, number] | null = null
+export let playtestPlayerRotation: [number, number, number] | null = null
 
 let editorNodes = []
 let rootNodes = []
+let editorScene: EditorSceneDocument | null = null
+let playtestLevelDefinition: LevelDefinition | null = null
+let playtestActors: ActorDefinition[] = []
+let playtestRootActors: ActorDefinition[] = []
+let lastPlaytestScene: EditorSceneDocument | null = null
+let lastPlaytestEnabled = false
+let lastPlaytestLevelId = ''
+let RuntimeActorBranchComponent: any = null
+let runtimeActorBranchComponentPromise: Promise<void> | null = null
 let selectedNodeId: string | null = null
 let selectedNodeIds: string[] = []
 let activeLoadToken = 0
+let playtestSpawnSignature = ''
+let playtestReadySignature = ''
+let playtestReadyToken = 0
 
 const unsubscribeNodes = editorNodesStore.subscribe(value => {
   editorNodes = value
@@ -44,6 +65,10 @@ const unsubscribeState = editorStateStore.subscribe(state => {
 
 const unsubscribeRoots = editorRootNodesStore.subscribe(value => {
   rootNodes = value
+})
+
+const unsubscribeScene = editorSceneStore.subscribe(value => {
+  editorScene = value
 })
 
 async function loadEditorScene(level: string) {
@@ -88,11 +113,219 @@ async function loadEditorScene(level: string) {
   }
 }
 
+function toFiniteVec3(value: unknown): [number, number, number] | null {
+  if (
+    Array.isArray(value) &&
+    value.length === 3 &&
+    value.every(component => Number.isFinite(component))
+  ) {
+    return [value[0], value[1], value[2]]
+  }
+
+  return null
+}
+
+function dispatchEditorPlaytestSpawn() {
+  if (!playtestEnabled || !editorScene || editorScene.levelId !== levelId)
+    return
+
+  const levelSettings = editorScene.settings?.level ?? {}
+  const position = toFiniteVec3(levelSettings.spawn?.position)
+  if (!position) {
+    setRuntimeDiagnostic('editorPlaytest', {
+      label: 'Editor Playtest',
+      level: 'error',
+      message: `${levelId}: live playtest needs a finite authoring spawn position.`,
+      meta: { levelId },
+    })
+    return
+  }
+
+  const rotation = toFiniteVec3(levelSettings.spawn?.rotation) ?? [0, 0, 0]
+  const signature = JSON.stringify({
+    levelId,
+    position,
+    rotation,
+    player: levelSettings.player ?? null,
+    updatedAt: editorScene.updatedAt,
+  })
+  if (signature === playtestSpawnSignature) return
+  playtestSpawnSignature = signature
+
+  dispatch('editorPlaytestSpawn', {
+    levelId,
+    position,
+    rotation,
+    reason: 'editor_playtest',
+    metadata: {
+      levelName: levelId,
+      player: resolveRuntimePlayerSettings(levelSettings.player),
+    },
+  })
+}
+
+function clearPlaytestRuntimeScene() {
+  playtestLevelDefinition = null
+  playtestActors = []
+  playtestRootActors = []
+  playtestReadySignature = ''
+  playtestReadyToken += 1
+}
+
+async function waitForRuntimeActorMountGate(token: number) {
+  await tick()
+  await tick()
+  await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+
+  return (
+    token === playtestReadyToken &&
+    playtestEnabled &&
+    RuntimeActorBranchComponent &&
+    editorScene?.levelId === levelId &&
+    playtestLevelDefinition
+  )
+}
+
+function scheduleEditorPlaytestReady() {
+  if (
+    !playtestEnabled ||
+    !RuntimeActorBranchComponent ||
+    !editorScene ||
+    !playtestLevelDefinition ||
+    editorScene.levelId !== levelId
+  ) {
+    return
+  }
+
+  const signature = JSON.stringify({
+    levelId,
+    updatedAt: playtestLevelDefinition.updatedAt,
+    version: playtestLevelDefinition.version,
+    actorCount: playtestActors.length,
+  })
+  if (signature === playtestReadySignature) return
+
+  playtestReadySignature = signature
+  const token = ++playtestReadyToken
+  void waitForRuntimeActorMountGate(token).then(isReady => {
+    if (!isReady || !playtestLevelDefinition || !editorScene) return
+
+    dispatch('editorPlaytestReady', {
+      levelId,
+      source: 'editor-live-playtest',
+      metadata: {
+        actorCount: playtestActors.length,
+        player: resolveRuntimePlayerSettings(
+          editorScene.settings?.level?.player,
+        ),
+      },
+    })
+  })
+}
+
+function loadRuntimeActorBranchComponent() {
+  if (RuntimeActorBranchComponent || runtimeActorBranchComponentPromise) {
+    return runtimeActorBranchComponentPromise
+  }
+
+  runtimeActorBranchComponentPromise = import(
+    '../levels/RuntimeActorBranch.svelte'
+  )
+    .then(module => {
+      RuntimeActorBranchComponent = module.default
+    })
+    .catch(error => {
+      runtimeActorBranchComponentPromise = null
+      setRuntimeDiagnostic('editorPlaytestRender', {
+        label: 'Editor Playtest Render',
+        level: 'error',
+        message:
+          error instanceof Error
+            ? error.message
+            : `${levelId}: live playtest could not load the runtime actor renderer.`,
+        meta: { levelId },
+      })
+    })
+
+  return runtimeActorBranchComponentPromise
+}
+
+function syncPlaytestRuntimeScene() {
+  if (!playtestEnabled || !editorScene || editorScene.levelId !== levelId) {
+    clearPlaytestRuntimeScene()
+    return
+  }
+
+  try {
+    const nextLevelDefinition = adaptSceneDocumentToLevelDefinition(editorScene)
+    playtestLevelDefinition = nextLevelDefinition
+    playtestActors = nextLevelDefinition.actors
+    playtestRootActors = playtestActors.filter(actor => !actor.parentId)
+    setRuntimeDiagnostic('editorPlaytestRender', {
+      label: 'Editor Playtest Render',
+      level: 'ready',
+      message: `${levelId}: live playtest rendering ${playtestActors.length} actor(s) through the runtime actor path.`,
+      meta: {
+        levelId,
+        actorCount: playtestActors.length,
+        rootActorCount: playtestRootActors.length,
+        sceneVersion: playtestLevelDefinition.version,
+        updatedAt: playtestLevelDefinition.updatedAt,
+      },
+    })
+  } catch (error) {
+    clearPlaytestRuntimeScene()
+    setRuntimeDiagnostic('editorPlaytestRender', {
+      label: 'Editor Playtest Render',
+      level: 'error',
+      message:
+        error instanceof Error
+          ? error.message
+          : `${levelId}: live playtest could not adapt the editor scene.`,
+      meta: { levelId },
+    })
+  }
+}
+
 let previousLevelId: string | null = null
 
 $: if (levelId && levelId !== previousLevelId) {
   previousLevelId = levelId
+  playtestSpawnSignature = ''
   void loadEditorScene(levelId)
+}
+
+$: if (playtestEnabled && editorScene) {
+  dispatchEditorPlaytestSpawn()
+}
+
+$: if (playtestEnabled && !RuntimeActorBranchComponent) {
+  void loadRuntimeActorBranchComponent()
+}
+
+$: if (
+  editorScene !== lastPlaytestScene ||
+  playtestEnabled !== lastPlaytestEnabled ||
+  levelId !== lastPlaytestLevelId
+) {
+  lastPlaytestScene = editorScene
+  lastPlaytestEnabled = playtestEnabled
+  lastPlaytestLevelId = levelId
+  syncPlaytestRuntimeScene()
+}
+
+$: if (!playtestEnabled) {
+  playtestSpawnSignature = ''
+  playtestReadySignature = ''
+  playtestReadyToken += 1
+}
+
+$: if (
+  playtestEnabled &&
+  RuntimeActorBranchComponent &&
+  playtestLevelDefinition
+) {
+  scheduleEditorPlaytestReady()
 }
 
 onMount(() => {
@@ -104,6 +337,7 @@ onMount(() => {
 onDestroy(() => {
   unsubscribeNodes()
   unsubscribeRoots()
+  unsubscribeScene()
   unsubscribeState()
   selectEditorNode(null)
 })
@@ -114,21 +348,43 @@ onDestroy(() => {
     <T.GridHelper args={[200, 80, '#3a5266', '#243241']} position={[0, -0.01, 0]} />
     <T.AxesHelper args={[5]} position={[0, 0.02, 0]} />
     <EditorPlayerSpawnMarker />
+    <EditorPlaytestPlayerMarker
+      position={playtestPlayerPosition}
+      rotation={playtestPlayerRotation}
+    />
   {/if}
 
-  {#each rootNodes as node (node.id)}
-    <EditorSceneBranch
-      node={node}
-      nodes={editorNodes}
-      {editorEnabled}
-      {selectedNodeId}
-      {selectedNodeIds}
-      {interactionSystem}
-      interactiveEnabled={!editorEnabled}
-      on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
-      on:noteRead={(event) => dispatch('noteRead', event.detail)}
-    />
-  {/each}
+  {#if playtestEnabled}
+    {#if RuntimeActorBranchComponent}
+      {#each playtestRootActors as actor (actor.id)}
+        <svelte:component
+          this={RuntimeActorBranchComponent}
+          {actor}
+          actors={playtestActors}
+          {levelId}
+          {interactionSystem}
+          interactiveEnabled={true}
+          on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
+          on:noteRead={(event) => dispatch('noteRead', event.detail)}
+        />
+      {/each}
+    {/if}
+  {:else}
+    {#each rootNodes as node (node.id)}
+      <EditorSceneBranch
+        node={node}
+        nodes={editorNodes}
+        {editorEnabled}
+        {selectedNodeId}
+        {selectedNodeIds}
+        sceneSettings={editorScene?.settings ?? null}
+        {interactionSystem}
+        interactiveEnabled={!editorEnabled}
+        on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
+        on:noteRead={(event) => dispatch('noteRead', event.detail)}
+      />
+    {/each}
+  {/if}
 
   {#if editorEnabled && $heightmapSourcePreviewNodeIdsStore.length > 0}
     <EditorHeightmapSourceOverlay />

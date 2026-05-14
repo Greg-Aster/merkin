@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 2,
+  "generatedBy": "bake-mesh-collider",
+  "generatedAt": "2026-05-13T01:03:46.038Z",
+  "sourceLevelId": "yggdrasil",
+  "sourceActorId": "yggdrasil-hvergelmir-depth-arch-1",
+  "sourceAssetUrl": "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "bcdef90d8d43a6cfda747b9e9167ec4d98ed273a9e711b7a40d4bb39151a438b"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-1.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-1.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-1.collider.meta.json",
+  "triangleCount": 19000,
+  "vertexCount": 15505,
+  "bounds": {
+    "min": [
+      -1.0003303289413452,
+      -0.9483675360679626,
+      -0.9891880750656128
+    ],
+    "max": [
+      0.974608838558197,
+      0.9086316227912903,
+      0.9604860544204712
+    ],
+    "size": [
+      1.9749391674995422,
+      1.856999158859253,
+      1.949674129486084
+    ],
+    "center": [
+      -0.012860745191574097,
+      -0.01986795663833618,
+      -0.0143510103225708
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -1.0004512071609497,
+      -0.9483675360679626,
+      -0.9891880750656128
+    ],
+    "max": [
+      0.9750154614448547,
+      0.9092457890510559,
+      0.9604860544204712
+    ],
+    "size": [
+      1.9754666686058044,
+      1.8576133251190186,
+      1.949674129486084
+    ],
+    "center": [
+      -0.012717872858047485,
+      -0.01956087350845337,
+      -0.0143510103225708
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -1.0003303289413452,
+      -0.9483675360679626,
+      -0.9891880750656128
+    ],
+    "max": [
+      0.974608838558197,
+      0.9086316227912903,
+      0.9604860544204712
+    ],
+    "size": [
+      1.9749391674995422,
+      1.856999158859253,
+      1.949674129486084
+    ],
+    "center": [
+      -0.012860745191574097,
+      -0.01986795663833618,
+      -0.0143510103225708
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+    "sourceNodeName": "Lower Root Arch",
+    "visualLocalBounds": {
+      "min": [
+        -1.0004512071609497,
+        -0.9483675360679626,
+        -0.9891880750656128
+      ],
+      "max": [
+        0.9750154614448547,
+        0.9092457890510559,
+        0.9604860544204712
+      ],
+      "size": [
+        1.9754666686058044,
+        1.8576133251190186,
+        1.949674129486084
+      ],
+      "center": [
+        -0.012717872858047485,
+        -0.01956087350845337,
+        -0.0143510103225708
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -1.0003303289413452,
+        -0.9483675360679626,
+        -0.9891880750656128
+      ],
+      "max": [
+        0.974608838558197,
+        0.9086316227912903,
+        0.9604860544204712
+      ],
+      "size": [
+        1.9749391674995422,
+        1.856999158859253,
+        1.949674129486084
+      ],
+      "center": [
+        -0.012860745191574097,
+        -0.01986795663833618,
+        -0.0143510103225708
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "yggdrasil-hvergelmir-depth-arch-1",
+    "sourceActorName": "Lower Root Arch",
+    "sourceAssetUrl": "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "bcdef90d8d43a6cfda747b9e9167ec4d98ed273a9e711b7a40d4bb39151a438b"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "yggdrasil",
+      "nodeId": "yggdrasil-hvergelmir-depth-arch-1",
+      "sourceAssetUrl": "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 20000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-13T01:03:46.038Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 20000
+  },
+  "simplification": {
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 50000,
+    "targetTriangleBudget": 20000,
+    "ratio": 0.38,
+    "tool": "gltf-transform",
+    "prepass": "weld",
+    "error": 0.05
+  }
+}

@@ -1,8 +1,16 @@
 <script lang="ts">
 import type { CollisionChannel, CollisionIntent } from '../engine/types'
 import EditorAssetPreview from './EditorAssetPreview.svelte'
-import { resolveNodeCollision } from './editorCollisionDefaults'
-import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
+import {
+  describeNodeCollisionSource,
+  resolveNodeCollision,
+} from './editorCollisionDefaults'
+import type {
+  EditorMaterialData,
+  EditorNodeCollisionData,
+  EditorSceneNode,
+  EditorSceneSettings,
+} from './editorTypes'
 
 type TextureField =
   | 'mapUrl'
@@ -39,6 +47,7 @@ type PhysicsBooleanField =
 type CollisionNumericField = 'friction' | 'restitution' | 'triangleBudget'
 type CollisionStringField = 'colliderUrl'
 type CollisionBooleanField = 'sensor'
+type CollisionShape = EditorNodeCollisionData['shape']
 type LightNumericField = 'intensity' | 'distance' | 'decay'
 type GameplayField =
   | 'title'
@@ -86,6 +95,7 @@ type AmbientAudioTrack = {
 
 export let selectedNode: EditorSceneNode | null = null
 export let selectedNodes: EditorSceneNode[] = []
+export let sceneSettings: EditorSceneSettings | null = null
 export let parentCandidates: EditorSceneNode[] = []
 export let multiParentCandidates: EditorSceneNode[] = []
 export let selectedNodeMaterial: EditorMaterialData = {}
@@ -130,6 +140,7 @@ export let onPrimitiveGeometryChange: (value: string) => void = () => {}
 export let onPrimitiveArgChange: (index: number, value: string) => void =
   () => {}
 export let onCollisionEnabledChange: (value: boolean) => void = () => {}
+export let onCollisionShapeChange: (value: CollisionShape) => void = () => {}
 export let onCollisionIntentChange: (value: CollisionIntent) => void = () => {}
 export let onCollisionChannelChange: (value: CollisionChannel) => void =
   () => {}
@@ -157,8 +168,18 @@ export let onCollisionBooleanChange: (
   value: boolean,
 ) => void = () => {}
 export let onRecalculateCollision: () => void = () => {}
+export let onSetCollisionVisualOnly: () => void = () => {}
+export let onSetCollisionBlocker: () => void = () => {}
+export let onSetCollisionWalkable: () => void = () => {}
+export let onSetCollisionTrigger: () => void = () => {}
+export let onSetCollisionDetail: () => void = () => {}
+export let onBakeMeshCollider: () => void = () => {}
 
-$: effectiveCollision = resolveNodeCollision(selectedNode)
+$: effectiveCollision = resolveNodeCollision(selectedNode, sceneSettings)
+$: collisionSourceStatus = describeNodeCollisionSource(
+  selectedNode,
+  sceneSettings,
+)
 export let onMaterialColorChange: (
   field: 'color' | 'emissive',
   value: string,
@@ -234,6 +255,11 @@ const collisionChannelOptions: Array<{
   { value: 'trigger', label: 'Trigger' },
   { value: 'detail', label: 'Detail' },
 ]
+const collisionShapeOptions: Array<{ value: CollisionShape; label: string }> = [
+  { value: 'cuboid', label: 'Box' },
+  { value: 'cylinder', label: 'Cylinder' },
+  { value: 'trimesh', label: 'Trimesh Asset' },
+]
 
 $: hasSingleSelection = !!selectedNode && selectedNodes.length <= 1
 $: hasMultiSelection = selectedNodes.length > 1
@@ -245,6 +271,31 @@ $: hasGeometryNode = !!(
 $: canConvertSelectedToMesh = !!(
   selectedNode?.primitive || selectedNode?.prefab
 )
+$: canBakeSelectedMeshCollider = !!selectedNode?.asset?.url
+$: selectedCollisionShape =
+  selectedNode?.asset || selectedNode?.prefab
+    ? 'trimesh'
+    : selectedNode?.collision?.shape ??
+      effectiveCollision?.shape ??
+      (hasGeometryNode ? 'trimesh' : 'cuboid')
+$: collisionShapeOptionsForSelection =
+  selectedNode?.asset || selectedNode?.prefab
+    ? [{ value: 'trimesh' as CollisionShape, label: 'Baked Trimesh' }]
+    : collisionShapeOptions
+$: collisionMode =
+  selectedNode?.renderPolicy?.runtimeStyle === 'skip' && effectiveCollision
+    ? 'proxy'
+    : effectiveCollision?.intent === 'walkable'
+      ? 'walkable'
+      : effectiveCollision?.intent === 'blocker'
+        ? 'blocker'
+        : effectiveCollision?.intent === 'trigger'
+          ? 'trigger'
+          : effectiveCollision?.intent === 'detailMesh'
+            ? 'detail'
+            : selectedNode?.visible === false
+              ? 'disabled'
+              : 'visualOnly'
 $: filteredAssetBrowserItems = assetBrowserItems.filter(
   item =>
     !assetBrowserFilter.trim() ||
@@ -376,8 +427,28 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
 
     {#if hasGeometryNode}
       <div class="tuple-group">
-        <div class="tuple-label">Physics</div>
-        <label class="checkbox"><input type="checkbox" checked={!!effectiveCollision} on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Solid / Collider</label>
+        <div class="tuple-label">Collision Mode</div>
+        <div class="save-message" class:error-message={collisionSourceStatus.tone === 'warning'}>
+          Collision Source: {collisionSourceStatus.label}. {collisionSourceStatus.detail}
+        </div>
+        <div class="button-row compact editor-mb-sm">
+          <button class:active={collisionMode === 'visualOnly'} on:click={onSetCollisionVisualOnly}>Visual Only</button>
+          <button class:active={collisionMode === 'blocker'} on:click={onSetCollisionBlocker}>Blocker</button>
+          <button class:active={collisionMode === 'walkable'} on:click={onSetCollisionWalkable}>Walkable</button>
+          <button class:active={collisionMode === 'trigger'} on:click={onSetCollisionTrigger}>Trigger</button>
+          <button class:active={collisionMode === 'detail'} on:click={onSetCollisionDetail}>Detail</button>
+          {#if canBakeSelectedMeshCollider}
+            <button on:click={onBakeMeshCollider}>Bake Mesh Collider</button>
+          {/if}
+          <button class:active={collisionMode === 'disabled'} on:click={() => onCollisionEnabledChange(false)}>Disabled</button>
+        </div>
+        <label class="checkbox"><input type="checkbox" checked={!!effectiveCollision} on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Collider Enabled</label>
+        <div class="save-message">Default is collidable. Visual Only or Disabled is the explicit opt-out. Asset meshes use baked trimesh collision; no box fallback is used.</div>
+        <select class="text-input" value={selectedCollisionShape} on:change={(e) => onCollisionShapeChange((e.currentTarget as HTMLSelectElement).value as CollisionShape)}>
+          {#each collisionShapeOptionsForSelection as option}
+            <option value={option.value}>{option.label}</option>
+          {/each}
+        </select>
         <select class="text-input" value={selectedNode.collision?.intent ?? effectiveCollision?.intent ?? 'none'} on:change={(e) => onCollisionIntentChange((e.currentTarget as HTMLSelectElement).value as CollisionIntent)}>
           {#each collisionIntentOptions as option}
             <option value={option.value}>{option.label}</option>

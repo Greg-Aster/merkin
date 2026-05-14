@@ -130,6 +130,20 @@ For game code changes, run the most relevant checks available, usually:
 pnpm --dir apps/game type-check
 ```
 
+## Dev Server Coordination
+
+- The shared game dev server port is `4322` by default.
+- Use `pnpm --dir apps/game dev` to start or attach to the dev server. The
+  wrapper coordinates concurrent agent startup and reuses a healthy server.
+- Do not respond to a `4322` port collision by starting extra servers on random
+  ports. If `4322` is occupied but unhealthy, report that condition and stop or
+  reuse the existing process intentionally.
+- For browser smoke checks against an already-running server, prefer
+  `GAME_NO_SERVER=1 GAME_DEV_PORT=4322 pnpm --dir apps/game smoke:boot` or pass
+  `--no-server` where the script supports it.
+- Use an alternate `GAME_DEV_PORT` only when the task explicitly needs an
+  isolated server, and report the port in the handoff.
+
 For asset, level, collision, or manifest changes, also run or update the
 relevant audit/bake/validation script. If no validation script exists for the
 changed surface, call that out and consider adding one.

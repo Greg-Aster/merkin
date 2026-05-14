@@ -48,7 +48,7 @@ function stopPreviewLoop() {
   }
 }
 
-function destroyRenderer(invalidateLoad = true) {
+function destroyRenderer(invalidateLoad = true, releaseContext = false) {
   if (invalidateLoad) {
     loadToken += 1
   }
@@ -68,7 +68,9 @@ function destroyRenderer(invalidateLoad = true) {
 
   if (renderer) {
     renderer.dispose()
-    renderer.forceContextLoss?.()
+    if (releaseContext) {
+      renderer.forceContextLoss?.()
+    }
     renderer = null
   }
 }
@@ -179,7 +181,7 @@ async function loadMeshPreview() {
   }
 }
 
-$: if (previewMode === 'mesh' && canvas) {
+$: if (previewMode === 'mesh' && canvas && resolvedMeshUrl) {
   void loadMeshPreview()
 } else if (previewMode !== 'mesh') {
   destroyRenderer()
@@ -187,7 +189,7 @@ $: if (previewMode === 'mesh' && canvas) {
 }
 
 onDestroy(() => {
-  destroyRenderer()
+  destroyRenderer(true, true)
 })
 </script>
 

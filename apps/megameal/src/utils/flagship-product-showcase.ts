@@ -148,6 +148,7 @@ export function buildFlagshipProductShowcase(
       specifications: product.data.specifications ?? [],
       ingredients: product.data.ingredients ?? [],
       nutritionFacts: product.data.nutritionFacts ?? [],
+      assurances: product.data.assurances ?? [],
       qanda: product.data.qanda ?? [],
       reviews: product.data.preWrittenReviews ?? [],
       quirks: product.data.quirks,
