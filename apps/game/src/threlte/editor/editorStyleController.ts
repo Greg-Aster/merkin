@@ -842,8 +842,8 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       state.hunyuanLastOutputUrl &&
       state.hunyuanLastOutputUrl !== previousOutputUrl
         ? mode === 'texture'
-          ? 'Style bake finished. The selected node now points to a newly styled asset.'
-          : 'Mesh replacement finished. The selected node now points to a new AI-generated asset variant.'
+          ? 'Style bake finished. The selected node now points to a newly styled asset; collision preserved.'
+          : 'Mesh replacement finished. The selected node now points to a new AI-generated asset variant; collision preserved.'
         : state.hunyuanStatus
   }
 
@@ -871,7 +871,8 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       {
         sourceAssetUrl: entry.sourceAssetUrl,
         descriptor: entry.descriptor,
-        logMessage: 'Applied style batch result with preserved transform',
+        logMessage:
+          'Applied style batch result with preserved transform and collision',
       },
     )
     state.hunyuanLastFitReport = applicationResult.fitReport

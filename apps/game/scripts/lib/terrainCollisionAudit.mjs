@@ -170,10 +170,8 @@ function auditTerrainManifest({
   if (collision?.type !== 'baked-terrain-mesh') {
     failures.push(`${file}: collision.terrain.type must be baked-terrain-mesh`)
   }
-  if (collision?.authoredException !== true) {
-    failures.push(
-      `${file}: baked terrain collision must set authoredException=true`,
-    )
+  if (collision?.sourceLinked !== true) {
+    failures.push(`${file}: baked terrain collision must set sourceLinked=true`)
   }
   if (requiredChunkedManifests.has(file) && !manifest.assets?.chunksPath) {
     failures.push(`${file}: terrain visual chunks are required`)

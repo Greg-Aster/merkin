@@ -4,22 +4,50 @@ import {
   getCollisionPolicyIssues,
 } from './collisionPolicyIssues'
 import { resolveCollisionPolicy } from './collisionPolicy'
-import { isEditorProxyCollision } from './editorProxyCollision'
 import {
   actorColliderAabbContainsPoint,
   actorSupportsWalkabilitySample,
 } from './collisionSpatialQueries'
+import { getSceneNodeMeshRenderSource } from './actorRenderSource'
+import { requiresExplicitCollisionClassification } from './levelValidation'
 import { adaptSceneDocumentToLevelDefinition } from './sceneAdapter'
 import type { SceneDocument, SceneNode } from './sceneDocumentTypes'
 import { hasTerrainRuntimeCollision } from './terrainRuntimeCollision'
 import type {
   ActorDefinition,
+  CollisionClassification,
   CollisionIntent,
   LevelDefinition,
   Vec3,
 } from './types'
 
 export type CollisionReviewSeverity = 'error' | 'warning' | 'info'
+export type CollisionReviewActorStatus =
+  | 'walkable'
+  | 'blocker'
+  | 'trigger'
+  | 'detailMesh'
+  | 'collisionOnly'
+  | 'visualOnly'
+  | 'missingCollision'
+  | 'disabled'
+
+export interface CollisionReviewActorRow {
+  actorId: string
+  actorName: string
+  actorKind: ActorDefinition['kind']
+  visible: boolean
+  hasRender: boolean
+  runtimeCollision: boolean
+  collisionIntent: CollisionIntent | 'none'
+  collisionShape?: string
+  collisionChannel?: string
+  collisionSource: 'authored' | 'default' | 'none' | 'runtime'
+  status: CollisionReviewActorStatus
+  statusLabel: string
+  detail: string
+  findingCounts: Record<CollisionReviewSeverity, number>
+}
 
 export interface CollisionReviewFinding {
   id: string
@@ -33,7 +61,9 @@ export interface CollisionReviewFinding {
 
 export interface CollisionReviewReport {
   levelId: string
+  actors: CollisionReviewActorRow[]
   findings: CollisionReviewFinding[]
+  classification: Record<CollisionClassification, string[]>
   summary: Record<CollisionReviewSeverity, number>
 }
 
@@ -106,21 +136,25 @@ function getReviewSettings(level: LevelDefinition) {
   }
 }
 
-function getScenePolicySource(scene: SceneDocument, node: SceneNode) {
-  const result = resolveCollisionPolicy({
+function getScenePolicyResult(scene: SceneDocument, node: SceneNode) {
+  const renderSource = getSceneNodeMeshRenderSource(node)
+  const actorKind =
+    renderSource.kind !== 'none'
+      ? renderSource.kind
+      : node.kind === 'light'
+        ? 'light'
+        : 'empty'
+  return resolveCollisionPolicy({
     levelId: scene.levelId,
     actorId: node.id,
-    actorKind:
-      node.kind === 'asset' ||
-      node.kind === 'primitive' ||
-      node.kind === 'prefab' ||
-      node.kind === 'light'
-        ? node.kind
-        : 'empty',
+    actorKind,
     visible: node.visible,
     hasGameplay: Boolean(node.gameplay),
     bodyType: node.physics?.bodyType ?? 'fixed',
-    primitiveGeometry: node.primitive?.geometry,
+    primitiveGeometry:
+      renderSource.kind === 'primitive'
+        ? renderSource.primitive.geometry
+        : undefined,
     levelSettings: scene.settings,
     authoredCollision: node.collision
       ? {
@@ -129,7 +163,10 @@ function getScenePolicySource(scene: SceneDocument, node: SceneNode) {
         }
       : null,
   })
-  return result.source
+}
+
+function getScenePolicySource(scene: SceneDocument, node: SceneNode) {
+  return getScenePolicyResult(scene, node).source
 }
 
 function getCollisionLabel(actor: ActorDefinition) {
@@ -160,6 +197,145 @@ function createFinding(
   })
 }
 
+function createClassificationSummary(
+  actors: ActorDefinition[],
+): Record<CollisionClassification, string[]> {
+  const classification: Record<CollisionClassification, string[]> = {
+    collidable: [],
+    'visual-only': [],
+    disabled: [],
+    'missing-collision': [],
+    'collision-only-proxy': [],
+  }
+
+  for (const actor of actors) {
+    if (!actor.collisionClassification) continue
+    classification[actor.collisionClassification].push(actor.id)
+  }
+
+  for (const actorIds of Object.values(classification)) {
+    actorIds.sort()
+  }
+
+  return classification
+}
+
+function createFindingCounts(
+  findings: CollisionReviewFinding[],
+  actorId: string,
+) {
+  return findings.reduce<Record<CollisionReviewSeverity, number>>(
+    (counts, finding) => {
+      if (finding.actorId === actorId) counts[finding.severity] += 1
+      return counts
+    },
+    { error: 0, warning: 0, info: 0 },
+  )
+}
+
+function getActorStatus(input: {
+  actor: ActorDefinition
+  scene?: SceneDocument | null
+  sceneNode?: SceneNode
+  settings: ReturnType<typeof getReviewSettings>
+}): {
+  status: CollisionReviewActorStatus
+  statusLabel: string
+  detail: string
+  collisionSource: CollisionReviewActorRow['collisionSource']
+} {
+  const { actor, scene, sceneNode, settings } = input
+  const collision = actor.physics?.collision
+  const scenePolicy =
+    scene && sceneNode ? getScenePolicyResult(scene, sceneNode) : null
+  const collisionSource =
+    scenePolicy?.source ?? (collision ? 'runtime' : 'none')
+
+  if (collision) {
+    if (
+      actor.render?.visible === false ||
+      sceneNode?.renderPolicy?.runtimeStyle === 'skip'
+    ) {
+      return {
+        status: 'collisionOnly',
+        statusLabel: 'Collision-only',
+        detail: `${collision.intent} ${collision.shape} mounts in playtest without visible render geometry.`,
+        collisionSource,
+      }
+    }
+
+    return {
+      status: collision.intent as CollisionReviewActorStatus,
+      statusLabel:
+        collision.intent === 'detailMesh' ? 'Detail mesh' : collision.intent,
+      detail: `${collision.intent} ${collision.shape} is active in playtest.`,
+      collisionSource,
+    }
+  }
+
+  if (settings.visualOnlyActorIds.has(actor.id)) {
+    return {
+      status: 'visualOnly',
+      statusLabel: 'Visual-only',
+      detail:
+        'Visible render geometry is intentionally excluded from runtime collision.',
+      collisionSource,
+    }
+  }
+
+  if (scenePolicy?.warning && actor.render?.visible !== false) {
+    return {
+      status: 'missingCollision',
+      statusLabel: 'Missing collision',
+      detail: scenePolicy.warning,
+      collisionSource,
+    }
+  }
+
+  return {
+    status: 'disabled',
+    statusLabel: 'Disabled',
+    detail: 'No runtime collision mounts for this actor.',
+    collisionSource,
+  }
+}
+
+function createActorRows(input: {
+  level: LevelDefinition
+  scene?: SceneDocument | null
+  sceneNodeById: Map<string, SceneNode>
+  settings: ReturnType<typeof getReviewSettings>
+  findings: CollisionReviewFinding[]
+}): CollisionReviewActorRow[] {
+  return input.level.actors.map(actor => {
+    const sceneNode = input.sceneNodeById.get(actor.id)
+    const collision = actor.physics?.collision
+    const status = getActorStatus({
+      actor,
+      scene: input.scene,
+      sceneNode,
+      settings: input.settings,
+    })
+
+    return {
+      actorId: actor.id,
+      actorName: actor.name,
+      actorKind: actor.kind,
+      visible: actor.render?.visible !== false,
+      hasRender: Boolean(actor.render),
+      runtimeCollision: Boolean(collision),
+      collisionIntent: collision?.intent ?? 'none',
+      collisionShape: collision?.shape,
+      collisionChannel: collision?.channel,
+      collisionSource: status.collisionSource,
+      status: status.status,
+      statusLabel: status.statusLabel,
+      detail: status.detail,
+      findingCounts: createFindingCounts(input.findings, actor.id),
+    }
+  })
+}
+
 export function reviewCollisionContracts(input: {
   scene?: SceneDocument | null
   levelDefinition?: LevelDefinition | null
@@ -172,6 +348,7 @@ export function reviewCollisionContracts(input: {
   if (!level) {
     return {
       levelId: 'unknown',
+      actors: [],
       findings: [
         {
           id: 'missing-level-definition',
@@ -180,6 +357,13 @@ export function reviewCollisionContracts(input: {
           message: 'Collision review needs a scene document or runtime scene.',
         },
       ],
+      classification: {
+        collidable: [],
+        'visual-only': [],
+        disabled: [],
+        'missing-collision': [],
+        'collision-only-proxy': [],
+      },
       summary: { error: 1, warning: 0, info: 0 },
     }
   }
@@ -190,6 +374,9 @@ export function reviewCollisionContracts(input: {
   const actorById = new Map(level.actors.map(actor => [actor.id, actor]))
   const settings = getReviewSettings(level)
   const findings: CollisionReviewFinding[] = []
+  const classification = createClassificationSummary(level.actors)
+  const missingCollisionSeverity: CollisionReviewSeverity =
+    requiresExplicitCollisionClassification(level) ? 'error' : 'warning'
   const bakedTerrainActive = hasTerrainRuntimeCollision(level, {
     runtimeTerrainManifestUrl: input.runtimeScene?.runtime?.terrainManifestUrl,
   })
@@ -205,16 +392,15 @@ export function reviewCollisionContracts(input: {
 
   if (
     terrainRuntimeMode === 'glb-chunk-terrain' &&
-    terrainCollisionSource === 'baked-heightfield' &&
-    terrainSettings?.approvedHeightfieldException !== true
+    terrainCollisionSource === 'baked-heightfield'
   ) {
     createFinding(findings, {
       code: 'glb-terrain-heightfield-collision',
       severity: 'error',
       message:
-        'GLB chunk terrain is configured with heightfield collision without an approved exception.',
+        'GLB chunk terrain is configured with generic heightfield collision.',
       recommendation:
-        'Bake a dedicated terrain collision GLB, simplified source GLB collider, or selected walkable mesh collider.',
+        'Use source-linked terrain collision from the same GLB contract, a dedicated collision GLB, a simplified source GLB collider, or a selected walkable mesh collider.',
     })
   }
 
@@ -228,6 +414,10 @@ export function reviewCollisionContracts(input: {
     }
 
     if (!collision) {
+      const scenePolicy =
+        input.scene && sceneNode
+          ? getScenePolicyResult(input.scene, sceneNode)
+          : null
       if (
         sceneNode?.collision &&
         settings.visualOnlyActorIds.has(actor.id) &&
@@ -243,6 +433,21 @@ export function reviewCollisionContracts(input: {
             'Remove the authored collision block or move the actor out of visualOnlyActorIds.',
         })
       }
+      if (
+        actor.collisionClassification === 'missing-collision' ||
+        (scenePolicy?.warning &&
+          actor.render?.visible !== false &&
+          !settings.visualOnlyActorIds.has(actor.id))
+      ) {
+        createFinding(findings, {
+          code: 'unclassified-visible-geometry',
+          severity: missingCollisionSeverity,
+          ...actorMeta,
+          message: `Visible actor "${actorName}" has no collision and no explicit visual-only or disabled classification.`,
+          recommendation:
+            'Author collision, mark it visual-only, or explicitly disable collision before publishing.',
+        })
+      }
       continue
     }
 
@@ -254,17 +459,6 @@ export function reviewCollisionContracts(input: {
         message: `Hidden actor "${actorName}" mounts ${getCollisionLabel(actor)} collision.`,
         recommendation:
           'Keep this only for intentional collision-only proxies and verify it in the overlay.',
-      })
-    }
-
-    if (isEditorProxyCollision(sceneNode?.collision)) {
-      createFinding(findings, {
-        code: 'editor-proxy-collision-in-runtime',
-        severity: 'error',
-        ...actorMeta,
-        message: `Actor "${actorName}" uses editor proxy collision.`,
-        recommendation:
-          'Bake or assign a runtime collider before publishing this scene.',
       })
     }
 
@@ -295,17 +489,6 @@ export function reviewCollisionContracts(input: {
         message: `Trimesh asset actor "${actorName}" is missing collision.colliderUrl.`,
         recommendation:
           'Bake or assign a collider asset instead of deriving collision from the render mesh.',
-      })
-    }
-
-    if (actor.kind === 'asset' && collision.shape !== 'trimesh') {
-      createFinding(findings, {
-        code: 'asset-primitive-collision',
-        severity: 'error',
-        ...actorMeta,
-        message: `Asset actor "${actorName}" uses ${collision.shape} collision instead of a baked trimesh collider.`,
-        recommendation:
-          'Bake a mesh collider asset, mark the actor visual-only, or remove collision. Do not use primitive collision as the automatic fallback for visible asset meshes.',
       })
     }
 
@@ -347,10 +530,10 @@ export function reviewCollisionContracts(input: {
 
     if (bakedTerrainActive && collision.intent === 'walkable') {
       createFinding(findings, {
-        code: 'walkable-overlaps-baked-terrain',
+        code: 'walkable-overlaps-terrain-collision',
         severity: settings.groundActorIds.has(actor.id) ? 'warning' : 'info',
         ...actorMeta,
-        message: `Walkable actor "${actorName}" coexists with baked terrain collision.`,
+        message: `Walkable actor "${actorName}" coexists with runtime terrain collision.`,
         recommendation:
           'Confirm whether this actor is supplemental platform collision or should be visual-only terrain detail.',
       })
@@ -390,14 +573,14 @@ export function reviewCollisionContracts(input: {
         message:
           'Player spawn is not supported by authored walkable collision.',
         recommendation:
-          'Add a walkable actor beneath the spawn or configure baked terrain collision.',
+          'Add a walkable actor beneath the spawn or configure runtime terrain collision.',
       })
     } else if (!hasAuthoredSupport && bakedTerrainActive) {
       createFinding(findings, {
-        code: 'spawn-relies-on-baked-terrain',
+        code: 'spawn-relies-on-terrain-collision',
         severity: 'info',
         message:
-          'Player spawn is not supported by primitive walkable collision and relies on baked terrain coverage.',
+          'Player spawn is not supported by primitive walkable collision and relies on runtime terrain collision coverage.',
         recommendation:
           'Verify the terrain manifest covers the spawn point before publishing.',
       })
@@ -406,7 +589,15 @@ export function reviewCollisionContracts(input: {
 
   return {
     levelId: level.id,
+    actors: createActorRows({
+      level,
+      scene: input.scene,
+      sceneNodeById,
+      settings,
+      findings,
+    }),
     findings,
+    classification,
     summary: createSummary(findings),
   }
 }

@@ -137,6 +137,13 @@ type TerrainRuntimeGroundContractInput = {
   fallbackSurfacePolicy?: TerrainFallbackSurfacePolicy
 }
 
+const GLB_TERRAIN_COLLISION_BAKE_MODES = new Set([
+  'source-glb-heightfield-projection',
+  'dedicated-collision-glb',
+  'simplified-source-glb',
+  'selected-terrain-walkable-mesh',
+])
+
 export type TerrainRuntimeVisualContract = {
   mode: TerrainRuntimeMode
   visualSource: TerrainVisualSource
@@ -421,21 +428,16 @@ export function validateTerrainManifestCollisionContract(input: {
   }
 
   if (visualContract) {
-    const hasApprovedHeightfieldException =
-      collisionContract.collisionBakeMode === 'heightfield-projection' &&
-      collisionContract.approvedHeightfieldException === true
     if (
       visualContract.sourceAssetUrl &&
       collisionContract.sourceAssetUrl &&
-      visualContract.sourceAssetUrl !== collisionContract.sourceAssetUrl &&
-      !hasApprovedHeightfieldException
+      visualContract.sourceAssetUrl !== collisionContract.sourceAssetUrl
     ) {
       errors.push(
         `${levelId}: terrain render chunks and collision use different source assets.`,
       )
     }
     if (
-      !hasApprovedHeightfieldException &&
       !fingerprintsMatch(
         visualContract.sourceAssetFingerprint,
         collisionContract.sourceAssetFingerprint,
@@ -458,6 +460,15 @@ export function validateTerrainManifestCollisionContract(input: {
       )
     }
     if (visualContract.terrainSourceType === 'glb-chunk-terrain') {
+      if (
+        !GLB_TERRAIN_COLLISION_BAKE_MODES.has(
+          String(collisionContract.collisionBakeMode),
+        )
+      ) {
+        errors.push(
+          `${levelId}: glb-chunk-terrain collision bake mode must be source-linked.`,
+        )
+      }
       if (
         !contractReferencesSourceAsset(
           collisionContract,
@@ -496,11 +507,10 @@ export function validateTerrainManifestCollisionContract(input: {
     }
     if (
       visualContract.terrainSourceType === 'glb-chunk-terrain' &&
-      collisionContract.collisionBakeMode === 'heightfield-projection' &&
-      collisionContract.approvedHeightfieldException !== true
+      collisionContract.collisionBakeMode === 'heightfield-projection'
     ) {
       errors.push(
-        `${levelId}: glb-chunk-terrain cannot use heightfield collision without an approved exception.`,
+        `${levelId}: glb-chunk-terrain must use source-linked collision, not generic heightfield projection.`,
       )
     }
   } else {

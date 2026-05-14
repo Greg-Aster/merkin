@@ -149,9 +149,19 @@ export interface CollisionDiagnosticsReport {
   authoredActorIds: string[]
   defaultActorIds: string[]
   visualOnlyActorIds: string[]
+  disabledActorIds: string[]
+  missingCollisionActorIds: string[]
+  collisionOnlyProxyActorIds: string[]
   legacyAssetLocalMetadataActorIds?: string[]
   missingColliderMetadataActorIds?: string[]
 }
+
+export type CollisionClassification =
+  | 'collidable'
+  | 'visual-only'
+  | 'disabled'
+  | 'missing-collision'
+  | 'collision-only-proxy'
 
 export interface ActorDefinition {
   id: string
@@ -161,6 +171,7 @@ export interface ActorDefinition {
   transform: TransformComponent
   render?: RenderComponent
   physics?: PhysicsComponent
+  collisionClassification?: CollisionClassification
   interaction?: InteractionComponent
   gameplay?: GameplayComponent
   light?: LightComponent
@@ -220,7 +231,7 @@ export interface LevelRuntimeActivationStatus {
 }
 
 export interface LevelRuntimeReadinessContract {
-  schemaVersion: 1
+  schemaVersion: 2
   levelId: string
   publish: {
     ready: boolean
@@ -250,13 +261,8 @@ export interface LevelRuntimeReadinessContract {
     satisfiedByRuntimeSystem: boolean
   }
   requiredActorIds: string[]
-  requiredRenderActorIds: string[]
-  requiredCollisionActorIds: string[]
-  requiredColliderUrls: string[]
   requiredWalkableActorIds: string[]
-  requiredInitialCellKeys: string[]
   runtimeAssetUrls: string[]
-  requiredAssetUrls: string[]
   missingRequiredActorIds: string[]
   missingRequiredRenderActorIds: string[]
   missingRequiredCollisionActorIds: string[]
@@ -276,10 +282,7 @@ export interface LevelBuildReport {
   defaultCollisionActorCount: number
   visualOnlyActorCount: number
   requiredActorCount: number
-  requiredRenderActorIds: string[]
   missingRequiredActorIds: string[]
-  requiredAssetUrls: string[]
-  runtimeAssetUrls: string[]
   runtimeReadinessContract: LevelRuntimeReadinessContract
   collisionDiagnostics: CollisionDiagnosticsReport
   errors: string[]

@@ -79,10 +79,7 @@ export function getBuildReportRequiredRenderActorIds(
   buildReport: LevelBuildReport | null | undefined,
 ): string[] {
   return firstPresentStringArray(
-    (buildReport as any)?.runtimeReadinessContract?.runtime
-      ?.requiredRenderActorIds,
-    (buildReport as any)?.runtimeReadinessContract?.requiredRenderActorIds,
-    buildReport?.requiredRenderActorIds,
+    buildReport?.runtimeReadinessContract?.runtime?.requiredRenderActorIds,
   )
 }
 
@@ -90,9 +87,7 @@ export function getBuildReportRequiredAssetUrls(
   buildReport: LevelBuildReport | null | undefined,
 ): string[] {
   return firstPresentStringArray(
-    (buildReport as any)?.runtimeReadinessContract?.runtime?.requiredAssetUrls,
-    (buildReport as any)?.runtimeReadinessContract?.requiredAssetUrls,
-    buildReport?.requiredAssetUrls,
+    buildReport?.runtimeReadinessContract?.runtime?.requiredAssetUrls,
   )
 }
 
@@ -100,8 +95,7 @@ export function getBuildReportRuntimeAssetUrls(
   buildReport: LevelBuildReport | null | undefined,
 ): string[] {
   return firstPresentStringArray(
-    (buildReport as any)?.runtimeReadinessContract?.runtimeAssetUrls,
-    buildReport?.runtimeAssetUrls,
+    buildReport?.runtimeReadinessContract?.runtimeAssetUrls,
   )
 }
 
@@ -109,11 +103,8 @@ export function getRuntimeSceneRequiredRenderActorIds(
   manifest: RuntimeSceneManifest | null | undefined,
 ): string[] {
   return firstPresentStringArray(
-    (manifest?.buildReport as any)?.runtimeReadinessContract?.runtime
+    manifest?.buildReport?.runtimeReadinessContract?.runtime
       ?.requiredRenderActorIds,
-    (manifest?.buildReport as any)?.runtimeReadinessContract
-      ?.requiredRenderActorIds,
-    manifest?.buildReport?.requiredRenderActorIds,
     manifest?.runtime?.requiredRenderActorIds,
   )
 }
@@ -122,11 +113,7 @@ export function getRuntimeSceneRequiredAssetUrls(
   manifest: RuntimeSceneManifest | null | undefined,
 ): string[] {
   return firstPresentStringArray(
-    (manifest?.buildReport as any)?.runtimeReadinessContract?.runtime
-      ?.requiredAssetUrls,
-    (manifest?.buildReport as any)?.runtimeReadinessContract
-      ?.requiredAssetUrls,
-    manifest?.buildReport?.requiredAssetUrls,
+    manifest?.buildReport?.runtimeReadinessContract?.runtime?.requiredAssetUrls,
     manifest?.runtime?.requiredAssetUrls,
   )
 }
@@ -135,8 +122,7 @@ export function getRuntimeSceneRuntimeAssetUrls(
   manifest: RuntimeSceneManifest | null | undefined,
 ): string[] {
   return firstPresentStringArray(
-    (manifest?.buildReport as any)?.runtimeReadinessContract?.runtimeAssetUrls,
-    manifest?.buildReport?.runtimeAssetUrls,
+    manifest?.buildReport?.runtimeReadinessContract?.runtimeAssetUrls,
     manifest?.runtime?.runtimeAssetUrls,
   )
 }

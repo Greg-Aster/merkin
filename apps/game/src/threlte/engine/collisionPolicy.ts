@@ -1,6 +1,5 @@
 import type { AssetLocalTransformMetadata } from './assetLocalTransform'
 import { resolveCollisionChannel } from './collisionChannels'
-import { isEditorProxyCollision } from './editorProxyCollision'
 import {
   getActorCollisionRole,
   getCollisionIntentForRole,
@@ -52,12 +51,15 @@ export interface CollisionPolicyResult {
 export function getDefaultCollisionShape(
   input: CollisionPolicyInput,
 ): CollisionShape {
+  if (input.primitiveGeometry === 'cylinder') {
+    return 'cylinder'
+  }
   if (
     input.actorKind === 'asset' ||
     input.actorKind === 'prefab' ||
     input.actorKind === 'primitive'
   ) {
-    return 'trimesh'
+    return 'cuboid'
   }
   return 'cuboid'
 }
@@ -66,15 +68,8 @@ function getAuthoredShape(input: CollisionPolicyInput): CollisionShape {
   const defaultShape = getDefaultCollisionShape(input)
   const authoredShape = input.authoredCollision?.shape
 
-  if (!authoredShape) return defaultShape
-
-  if (
-    authoredShape === 'cuboid' &&
-    defaultShape !== 'cuboid' &&
-    !input.authoredCollision?.size &&
-    !isEditorProxyCollision(input.authoredCollision)
-  ) {
-    return defaultShape
+  if (!authoredShape) {
+    return input.authoredCollision?.colliderUrl ? 'trimesh' : defaultShape
   }
 
   return authoredShape

@@ -52,6 +52,11 @@ for (const { file, report } of reports) {
       `warnings=${report.summary.warning}`,
       `info=${report.summary.info}`,
       `findings=${report.findings.length}`,
+      `collidable=${report.classification.collidable.length}`,
+      `visual-only=${report.classification['visual-only'].length}`,
+      `disabled=${report.classification.disabled.length}`,
+      `missing-collision=${report.classification['missing-collision'].length}`,
+      `collision-only-proxy=${report.classification['collision-only-proxy'].length}`,
     ].join('  '),
   )
 

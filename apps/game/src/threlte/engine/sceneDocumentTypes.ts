@@ -133,8 +133,6 @@ export interface EditorNodeCollisionData {
   colliderUrl?: string
   colliderMetadataUrl?: string
   assetLocalTransform?: AssetLocalTransformMetadata | null
-  proxy?: boolean
-  bakeStatus?: 'ready' | 'needsBake' | 'stale' | 'notRequired'
   sourceAssetUrl?: string
   friction?: number
   restitution?: number
@@ -584,12 +582,11 @@ export interface SharedLevelCollisionSettings {
       lastChunksGeneratedAt?: string
       renderChunks?: TerrainRenderChunkProductMetadata
       collisionProduct?: TerrainCollisionProductMetadata
-      approvedHeightfieldException?: boolean
     }
     workflow?: LevelCollisionWorkflowSettings
     roles?: LevelCollisionRoleSettings
     defaults?: {
-      solidObjectsByDefault?: boolean
+      primitiveCollisionByDefault?: boolean
       defaultFriction?: number
       defaultRestitution?: number
     }
@@ -611,7 +608,6 @@ export interface SharedLevelGroundSettings {
     sourceAssetFingerprint?: TerrainSourceAssetFingerprint
     renderChunks?: TerrainRenderChunkProductMetadata
     collisionProduct?: TerrainCollisionProductMetadata
-    approvedHeightfieldException?: boolean
     groundActorIds?: string[]
     terrainManifestUrl?: string
     requiredWalkableSurfaceId?: string
@@ -645,7 +641,6 @@ export interface SharedLevelRuntimeAssetSettings {
   runtimeAssets?: {
     maxTier?: 'low' | 'medium' | 'high'
     requiredActorIds?: string[]
-    requiredAssetActorIds?: string[]
     requiredRenderActorIds?: string[]
     dirty?: boolean
     assetUrlsDirty?: boolean

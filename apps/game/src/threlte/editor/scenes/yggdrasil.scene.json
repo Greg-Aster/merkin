@@ -1,7 +1,7 @@
 {
   "levelId": "yggdrasil",
   "version": 1,
-  "updatedAt": "2026-05-14T00:33:10.574Z",
+  "updatedAt": "2026-05-14T16:35:00.000Z",
   "settings": {
     "level": {
       "collision": {
@@ -16,7 +16,7 @@
           "fallbackSurfacePolicy": "disabled"
         },
         "defaults": {
-          "solidObjectsByDefault": false,
+          "primitiveCollisionByDefault": true,
           "defaultFriction": 0.7,
           "defaultRestitution": 0
         },
@@ -46,6 +46,22 @@
             "yggdrasil-dais",
             "yggdrasil-bifrost-path",
             "yggdrasil-spawn-pad"
+          ],
+          "sensorActorIds": [
+            "yggdrasil-lore-crown",
+            "yggdrasil-lore-crown-ascent",
+            "yggdrasil-lore-crown-perch",
+            "yggdrasil-lore-hvergelmir",
+            "yggdrasil-lore-hvergelmir-depth",
+            "yggdrasil-lore-mimir",
+            "yggdrasil-lore-ratatoskr",
+            "yggdrasil-lore-stags",
+            "yggdrasil-lore-threshold",
+            "yggdrasil-lore-urd",
+            "yggdrasil-portal-return",
+            "yggdrasil-well-hvergelmir-pool",
+            "yggdrasil-well-mimir-pool",
+            "yggdrasil-well-urd-pool"
           ]
         }
       },
@@ -55,8 +71,8 @@
       },
       "spawn": {
         "position": [
-          2.2990735192896574,
-          2.6,
+          0,
+          3.7,
           -118
         ],
         "rotation": [
@@ -378,7 +394,7 @@
       },
       "runtimeAssets": {
         "maxTier": "medium",
-        "requiredAssetActorIds": [
+        "requiredRenderActorIds": [
           "yggdrasil-mound",
           "yggdrasil-planter-urd",
           "yggdrasil-planter-mimir",
@@ -437,6 +453,17 @@
       },
       "generation": {
         "descriptor": "low circular shoreline perimeter ring made of eroded ritual stone, broad horizontal boundary element at the island edge"
+      },
+      "collision": {
+        "shape": "cylinder",
+        "enabled": false,
+        "intent": "none",
+        "channel": "worldStatic",
+        "size": [
+          430,
+          1,
+          430
+        ]
       }
     },
     {
@@ -3045,6 +3072,18 @@
       },
       "generation": {
         "descriptor": "portal frame or ceremonial gateway apparatus"
+      },
+      "collision": {
+        "shape": "cuboid",
+        "enabled": true,
+        "intent": "trigger",
+        "channel": "trigger",
+        "sensor": true,
+        "size": [
+          4.4,
+          3.2,
+          4.4
+        ]
       }
     },
     {
@@ -3084,6 +3123,18 @@
       },
       "generation": {
         "descriptor": "story marker pedestal or lore obelisk"
+      },
+      "collision": {
+        "shape": "cuboid",
+        "enabled": true,
+        "intent": "trigger",
+        "channel": "trigger",
+        "sensor": true,
+        "size": [
+          2.4,
+          2.4,
+          2.4
+        ]
       }
     },
     {
@@ -3627,6 +3678,18 @@
       },
       "generation": {
         "descriptor": "story marker pedestal or lore obelisk"
+      },
+      "collision": {
+        "shape": "cuboid",
+        "enabled": true,
+        "intent": "trigger",
+        "channel": "trigger",
+        "sensor": true,
+        "size": [
+          2.2,
+          2.2,
+          2.2
+        ]
       }
     },
     {
@@ -3666,6 +3729,18 @@
       },
       "generation": {
         "descriptor": "story marker pedestal or lore obelisk"
+      },
+      "collision": {
+        "shape": "cuboid",
+        "enabled": true,
+        "intent": "trigger",
+        "channel": "trigger",
+        "sensor": true,
+        "size": [
+          2.2,
+          2.2,
+          2.2
+        ]
       }
     },
     {
@@ -3705,6 +3780,18 @@
       },
       "generation": {
         "descriptor": "story marker pedestal or lore obelisk"
+      },
+      "collision": {
+        "shape": "cuboid",
+        "enabled": true,
+        "intent": "trigger",
+        "channel": "trigger",
+        "sensor": true,
+        "size": [
+          2.2,
+          2.2,
+          2.2
+        ]
       }
     },
     {
@@ -3744,6 +3831,18 @@
       },
       "generation": {
         "descriptor": "story marker pedestal or lore obelisk"
+      },
+      "collision": {
+        "shape": "cuboid",
+        "enabled": true,
+        "intent": "trigger",
+        "channel": "trigger",
+        "sensor": true,
+        "size": [
+          2.2,
+          2.2,
+          2.2
+        ]
       }
     },
     {
@@ -3783,6 +3882,18 @@
       },
       "generation": {
         "descriptor": "story marker pedestal or lore obelisk"
+      },
+      "collision": {
+        "shape": "cuboid",
+        "enabled": true,
+        "intent": "trigger",
+        "channel": "trigger",
+        "sensor": true,
+        "size": [
+          2.8,
+          2.8,
+          2.8
+        ]
       }
     },
     {
@@ -3822,6 +3933,18 @@
       },
       "generation": {
         "descriptor": "story marker pedestal or lore obelisk"
+      },
+      "collision": {
+        "shape": "cuboid",
+        "enabled": true,
+        "intent": "trigger",
+        "channel": "trigger",
+        "sensor": true,
+        "size": [
+          2.8,
+          2.8,
+          2.8
+        ]
       }
     },
     {
@@ -4422,6 +4545,18 @@
       },
       "generation": {
         "descriptor": "story marker pedestal or lore obelisk"
+      },
+      "collision": {
+        "shape": "cuboid",
+        "enabled": true,
+        "intent": "trigger",
+        "channel": "trigger",
+        "sensor": true,
+        "size": [
+          2.8,
+          2.8,
+          2.8
+        ]
       }
     },
     {
@@ -5216,6 +5351,18 @@
       },
       "generation": {
         "descriptor": "story marker pedestal or lore obelisk"
+      },
+      "collision": {
+        "shape": "cuboid",
+        "enabled": true,
+        "intent": "trigger",
+        "channel": "trigger",
+        "sensor": true,
+        "size": [
+          2.2,
+          2.2,
+          2.2
+        ]
       }
     },
     {
@@ -5718,6 +5865,18 @@
       },
       "generation": {
         "descriptor": "story marker pedestal or lore obelisk"
+      },
+      "collision": {
+        "shape": "cuboid",
+        "enabled": true,
+        "intent": "trigger",
+        "channel": "trigger",
+        "sensor": true,
+        "size": [
+          2.2,
+          2.2,
+          2.2
+        ]
       }
     },
     {
@@ -5861,9 +6020,9 @@
       "kind": "primitive",
       "parentId": "yggdrasil-terrain-group",
       "position": [
-        2.2990735192896574,
-        2.1298012153951102,
-        -163.1469166128633
+        0,
+        1.9858620742907687,
+        -118
       ],
       "rotation": [
         0,
@@ -9097,7 +9256,18 @@
         "descriptor": "merged luminous Bifrost rainbow runway ribbons embedded in the approach path"
       },
       "lastBakedAssetUrl": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
-      "lastBakedAt": "2026-04-25T02:17:02.008Z"
+      "lastBakedAt": "2026-04-25T02:17:02.008Z",
+      "collision": {
+        "shape": "cuboid",
+        "enabled": false,
+        "intent": "none",
+        "channel": "worldStatic",
+        "size": [
+          16,
+          0.25,
+          118
+        ]
+      }
     },
     {
       "id": "group-1778552325032-sf79v1",

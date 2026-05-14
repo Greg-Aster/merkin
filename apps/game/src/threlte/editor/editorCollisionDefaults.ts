@@ -10,10 +10,7 @@ import {
   isTerrainVisualActor,
   resolveCollisionPolicy,
 } from '../engine/collisionPolicy'
-import {
-  isEditorProxyCollision,
-  isEditorProxyCollisionNeedingBake,
-} from '../engine/editorProxyCollision'
+import { getSceneNodeMeshRenderSource } from '../engine/actorRenderSource'
 import type {
   EditorNodeCollisionData,
   EditorSceneNode,
@@ -34,12 +31,17 @@ function isTerrainVisualNode(
 }
 
 function getPolicyActorKind(node: EditorSceneNode | null | undefined) {
-  return node?.kind === 'asset' ||
-    node?.kind === 'primitive' ||
-    node?.kind === 'prefab' ||
-    node?.kind === 'light'
-    ? node.kind
-    : 'empty'
+  if (!node) return 'empty'
+  const renderSource = getSceneNodeMeshRenderSource(node)
+  if (renderSource.kind !== 'none') return renderSource.kind
+  return node.kind === 'light' ? 'light' : 'empty'
+}
+
+function getPolicyPrimitiveGeometry(node: EditorSceneNode | null | undefined) {
+  const renderSource = node ? getSceneNodeMeshRenderSource(node) : null
+  return renderSource?.kind === 'primitive'
+    ? renderSource.primitive.geometry
+    : undefined
 }
 
 function resolveNodeCollisionPolicy(
@@ -52,7 +54,7 @@ function resolveNodeCollisionPolicy(
     visible: node?.visible,
     hasGameplay: Boolean(node?.gameplay),
     bodyType: node?.physics?.bodyType,
-    primitiveGeometry: node?.primitive?.geometry,
+    primitiveGeometry: getPolicyPrimitiveGeometry(node),
     levelSettings,
     authoredCollision: node?.collision,
   })
@@ -64,7 +66,7 @@ export function getDefaultCollisionShape(
   return getPolicyDefaultCollisionShape({
     actorId: node?.id ?? '',
     actorKind: getPolicyActorKind(node),
-    primitiveGeometry: node?.primitive?.geometry,
+    primitiveGeometry: getPolicyPrimitiveGeometry(node),
   })
 }
 
@@ -78,7 +80,7 @@ export function getDefaultCollisionIntent(
     visible: node?.visible,
     hasGameplay: Boolean(node?.gameplay),
     bodyType: node?.physics?.bodyType,
-    primitiveGeometry: node?.primitive?.geometry,
+    primitiveGeometry: getPolicyPrimitiveGeometry(node),
     levelSettings,
     authoredCollision: node?.collision,
   })
@@ -106,8 +108,7 @@ export function resolveAuthoredCollisionShape(
   if (
     authoredShape === 'cuboid' &&
     defaultShape !== 'cuboid' &&
-    !node.collision?.size &&
-    !isEditorProxyCollision(node.collision)
+    !node.collision?.size
   ) {
     return defaultShape
   }
@@ -126,12 +127,23 @@ export function isEditorGeometryNode(
   )
 }
 
-export function isDefaultSolidNode(
+function isPrimitiveCollisionDefaultEnabled(
+  levelSettings?: EditorSceneSettings | null,
+) {
+  return (
+    levelSettings?.level?.collision?.defaults?.primitiveCollisionByDefault ??
+    true
+  )
+}
+
+export function shouldAuthorPrimitiveCollisionByDefault(
   node: EditorSceneNode | null | undefined,
   levelSettings?: EditorSceneSettings | null,
 ) {
   return (
+    node?.kind === 'primitive' &&
     isEditorGeometryNode(node) &&
+    isPrimitiveCollisionDefaultEnabled(levelSettings) &&
     !isTerrainVisualNode(node, levelSettings) &&
     node?.visible !== false &&
     !node?.gameplay &&
@@ -155,8 +167,6 @@ export function resolveNodeCollision(
     size: result.collision.size,
     colliderUrl: result.collision.colliderUrl,
     colliderMetadataUrl: result.collision.colliderMetadataUrl,
-    proxy: node.collision?.proxy,
-    bakeStatus: node.collision?.bakeStatus,
     sourceAssetUrl: result.collision.sourceAssetUrl,
     friction: result.collision.friction,
     restitution: result.collision.restitution,
@@ -207,15 +217,6 @@ export function describeNodeCollisionSource(
     }
   }
 
-  if (isEditorProxyCollisionNeedingBake(authoredCollision)) {
-    return {
-      label: 'Editor proxy collider',
-      detail:
-        'This actor has playtest collision from visual bounds. Bake a mesh collider before publishing.',
-      tone: 'warning',
-    }
-  }
-
   if (
     shape === 'trimesh' &&
     collision &&
@@ -230,7 +231,7 @@ export function describeNodeCollisionSource(
 
   if (collision && node.renderPolicy?.runtimeStyle === 'skip') {
     return {
-      label: 'Collision proxy',
+      label: 'Collision-only actor',
       detail: 'Render is skipped while authored collision remains active.',
       tone: 'ok',
     }
@@ -242,15 +243,6 @@ export function describeNodeCollisionSource(
       detail:
         'This actor uses explicit collision values from the scene document.',
       tone: 'ok',
-    }
-  }
-
-  if (result.source === 'default' && collision) {
-    return {
-      label: 'Default policy',
-      detail:
-        'Collision is inferred by the level workflow; asset meshes still require a baked collider asset.',
-      tone: 'muted',
     }
   }
 
@@ -267,8 +259,9 @@ export function describeNodeCollisionSource(
 
   if (result.warning) {
     return {
-      label: 'Disabled',
-      detail: result.warning,
+      label: 'Missing collision',
+      detail:
+        'Visible geometry has no authored runtime collision. Add an authored primitive collider or baked mesh collider if this actor should block, support, or trigger gameplay.',
       tone: 'warning',
     }
   }

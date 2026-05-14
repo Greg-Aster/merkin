@@ -1,5 +1,20 @@
 import { getLevelRuntimeContract } from './levelContractsCore.mjs'
 
+export const LEVEL_RUNTIME_ACTIVATION_GATE_IDS = Object.freeze([
+  'publish-contract-ready',
+  'manifest-loaded',
+  'required-render-assets-loaded',
+  'required-render-actors-mounted',
+  'required-collision-mounted',
+  'required-collider-assets-loaded',
+  'terrain-collision-mounted',
+  'required-initial-world-partition-cells-ready',
+  'spawn-resolved',
+  'physics-world-ready',
+  'player-body-ready',
+  'gameplay-enabled',
+])
+
 function isFiniteVec3(value) {
   return (
     Array.isArray(value) &&
@@ -26,10 +41,10 @@ function getAuthoredRuntimeAssetContract(level) {
   const runtimeAssets = level?.settings?.level?.runtimeAssets
   return {
     requiredActorIds: toStringArray(runtimeAssets?.requiredActorIds),
-    requiredRenderActorIds: [
-      ...toStringArray(runtimeAssets?.requiredRenderActorIds),
-      ...toStringArray(runtimeAssets?.requiredAssetActorIds),
-    ],
+    requiredRenderActorIds: toStringArray(runtimeAssets?.requiredRenderActorIds),
+    legacyRequiredAssetActorIds: toStringArray(
+      runtimeAssets?.requiredAssetActorIds,
+    ),
   }
 }
 
@@ -140,7 +155,7 @@ export function createLevelRuntimeReadinessContract(level, options = {}) {
     ...authoredContract.requiredActorIds,
   ])
   const requiredRenderActorIds = uniqueStrings([
-    ...staticContract.requiredAssetActorIds,
+    ...staticContract.requiredRenderActorIds,
     ...authoredContract.requiredRenderActorIds,
   ])
   const requiredWalkableActorIds = uniqueStrings(
@@ -213,6 +228,16 @@ export function createLevelRuntimeReadinessContract(level, options = {}) {
   const terrainRuntimeCollisionDeclared = !terrainRequired || terrainRuntimeCollision
   const publishGates = [
     createGate({
+      id: 'legacy-required-asset-actor-ids-absent',
+      label: 'Legacy Required Asset Actor Ids Absent',
+      satisfied: authoredContract.legacyRequiredAssetActorIds.length === 0,
+      evidence: {
+        actorIds: authoredContract.legacyRequiredAssetActorIds,
+      },
+      blocker:
+        'runtimeAssets.requiredAssetActorIds is no longer supported; use runtimeAssets.requiredRenderActorIds.',
+    }),
+    createGate({
       id: 'spawn-valid',
       label: 'Spawn Valid',
       satisfied: spawnValid,
@@ -280,23 +305,10 @@ export function createLevelRuntimeReadinessContract(level, options = {}) {
     }),
   ]
   const publishBlockers = publishGates.flatMap(gate => gate.blockers)
-  const runtimeGateIds = [
-    'publish-contract-ready',
-    'manifest-loaded',
-    'required-render-assets-loaded',
-    'required-render-actors-mounted',
-    'required-collision-mounted',
-    'required-collider-assets-loaded',
-    'terrain-collision-mounted',
-    'required-initial-world-partition-cells-ready',
-    'spawn-resolved',
-    'physics-world-ready',
-    'player-body-ready',
-    'gameplay-enabled',
-  ]
+  const runtimeGateIds = [...LEVEL_RUNTIME_ACTIVATION_GATE_IDS]
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     levelId: levelId || '*',
     publish: {
       ready: publishBlockers.length === 0,
@@ -336,13 +348,8 @@ export function createLevelRuntimeReadinessContract(level, options = {}) {
       ),
     },
     requiredActorIds,
-    requiredRenderActorIds,
-    requiredCollisionActorIds,
-    requiredColliderUrls,
     requiredWalkableActorIds,
-    requiredInitialCellKeys,
     runtimeAssetUrls,
-    requiredAssetUrls,
     missingRequiredActorIds,
     missingRequiredRenderActorIds,
     missingRequiredCollisionActorIds,
@@ -352,23 +359,19 @@ export function createLevelRuntimeReadinessContract(level, options = {}) {
 
 export function evaluateLevelRuntimeActivation(contract, state = {}) {
   const requiredAssetUrls = toStringArray(
-    contract?.runtime?.requiredAssetUrls ?? contract?.requiredAssetUrls,
+    contract?.runtime?.requiredAssetUrls,
   )
   const requiredRenderActorIds = toStringArray(
-    contract?.runtime?.requiredRenderActorIds ??
-      contract?.requiredRenderActorIds,
+    contract?.runtime?.requiredRenderActorIds,
   )
   const requiredCollisionActorIds = toStringArray(
-    contract?.runtime?.requiredCollisionActorIds ??
-      contract?.requiredCollisionActorIds ??
-      contract?.requiredWalkableActorIds,
+    contract?.runtime?.requiredCollisionActorIds,
   )
   const requiredInitialCellKeys = toStringArray(
-    contract?.runtime?.requiredInitialCellKeys ??
-      contract?.requiredInitialCellKeys,
+    contract?.runtime?.requiredInitialCellKeys,
   )
   const requiredColliderUrls = toStringArray(
-    contract?.runtime?.requiredColliderUrls ?? contract?.requiredColliderUrls,
+    contract?.runtime?.requiredColliderUrls,
   )
   const terrainRequired = Boolean(
     contract?.runtime?.requiredTerrain ??
@@ -518,6 +521,7 @@ export function evaluateLevelRuntimeActivation(contract, state = {}) {
       blocker: 'Gameplay is not enabled.',
     }),
   ]
+  assertGatesMatchDeclaredIds(gates)
   const blockers = gates.flatMap(gate => gate.blockers)
 
   return {
@@ -525,5 +529,18 @@ export function evaluateLevelRuntimeActivation(contract, state = {}) {
     ready: blockers.length === 0,
     gates,
     blockers,
+  }
+}
+
+function assertGatesMatchDeclaredIds(gates) {
+  const actualIds = gates.map(gate => gate.id)
+  const declaredIds = LEVEL_RUNTIME_ACTIVATION_GATE_IDS
+  if (
+    actualIds.length !== declaredIds.length ||
+    actualIds.some((id, index) => id !== declaredIds[index])
+  ) {
+    throw new Error(
+      `Runtime activation gate ids drifted from LEVEL_RUNTIME_ACTIVATION_GATE_IDS. Declared: [${declaredIds.join(', ')}]. Actual: [${actualIds.join(', ')}].`,
+    )
   }
 }

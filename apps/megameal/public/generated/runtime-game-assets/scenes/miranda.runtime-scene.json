@@ -36,7 +36,7 @@
             "dirty": false
           },
           "defaults": {
-            "solidObjectsByDefault": false,
+            "primitiveCollisionByDefault": true,
             "defaultFriction": 0.7,
             "defaultRestitution": 0
           }
@@ -3570,18 +3570,153 @@
     "defaultCollisionActorCount": 0,
     "visualOnlyActorCount": 10,
     "requiredActorCount": 0,
-    "requiredRenderActorIds": [],
     "missingRequiredActorIds": [],
-    "requiredAssetUrls": [],
-    "runtimeAssetUrls": [
-      "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
-      "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
-      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
-      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
-      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
-      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
-      "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb"
-    ],
+    "runtimeReadinessContract": {
+      "schemaVersion": 2,
+      "levelId": "miranda",
+      "publish": {
+        "ready": true,
+        "gates": [
+          {
+            "id": "legacy-required-asset-actor-ids-absent",
+            "label": "Legacy Required Asset Actor Ids Absent",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "spawn-valid",
+            "label": "Spawn Valid",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "miranda-player-spawn",
+              "player": [
+                0,
+                4.25,
+                -13.8
+              ]
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-actors-present",
+            "label": "Required Actors Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-render-actors-present",
+            "label": "Required Render Actors Present",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "assetUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-walkable-collision-present",
+            "label": "Required Walkable Collision Present",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-collision-present",
+            "label": "Required Collision Present",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "colliderUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "terrain-runtime-collision-declared",
+            "label": "Terrain Runtime Collision Declared",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "miranda-terrain",
+              "manifestUrl": ""
+            },
+            "blockers": []
+          }
+        ],
+        "blockers": []
+      },
+      "runtime": {
+        "activationRequired": true,
+        "requiredGateIds": [
+          "publish-contract-ready",
+          "manifest-loaded",
+          "required-render-assets-loaded",
+          "required-render-actors-mounted",
+          "required-collision-mounted",
+          "required-collider-assets-loaded",
+          "terrain-collision-mounted",
+          "required-initial-world-partition-cells-ready",
+          "spawn-resolved",
+          "physics-world-ready",
+          "player-body-ready",
+          "gameplay-enabled"
+        ],
+        "requiredRenderActorIds": [],
+        "requiredCollisionActorIds": [],
+        "requiredAssetUrls": [],
+        "requiredColliderUrls": [],
+        "requiredInitialCellKeys": [],
+        "requiredTerrain": false,
+        "terrainManifestUrl": ""
+      },
+      "spawn": {
+        "player": [
+          0,
+          4.25,
+          -13.8
+        ],
+        "valid": true,
+        "runtimeActorId": "miranda-player-spawn",
+        "satisfiedByRuntimeSystem": true
+      },
+      "terrain": {
+        "runtimeActorId": "miranda-terrain",
+        "runtimeCollision": false,
+        "satisfiedByRuntimeSystem": false
+      },
+      "requiredActorIds": [],
+      "requiredWalkableActorIds": [],
+      "runtimeAssetUrls": [
+        "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+        "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+        "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb"
+      ],
+      "missingRequiredActorIds": [],
+      "missingRequiredRenderActorIds": [],
+      "missingRequiredCollisionActorIds": [],
+      "missingRequiredWalkableActorIds": []
+    },
     "collisionDiagnostics": {
       "authoredActorIds": [
         "miranda-brig-cell-a",
@@ -3629,12 +3764,172 @@
         "miranda-server-bank-e"
       ],
       "defaultActorIds": [],
-      "visualOnlyActorIds": []
+      "visualOnlyActorIds": [],
+      "disabledActorIds": [],
+      "missingCollisionActorIds": [
+        "miranda-archive-note",
+        "miranda-brig-note",
+        "miranda-captain-log",
+        "miranda-crew-note",
+        "miranda-engine-note",
+        "miranda-first-officer-note",
+        "miranda-medbay-note",
+        "miranda-mess-note",
+        "miranda-return-portal",
+        "miranda-vault-fragment"
+      ],
+      "collisionOnlyProxyActorIds": []
     },
     "errors": [],
     "warnings": []
   },
   "runtime": {
+    "readinessContract": {
+      "schemaVersion": 2,
+      "levelId": "miranda",
+      "publish": {
+        "ready": true,
+        "gates": [
+          {
+            "id": "legacy-required-asset-actor-ids-absent",
+            "label": "Legacy Required Asset Actor Ids Absent",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "spawn-valid",
+            "label": "Spawn Valid",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "miranda-player-spawn",
+              "player": [
+                0,
+                4.25,
+                -13.8
+              ]
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-actors-present",
+            "label": "Required Actors Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-render-actors-present",
+            "label": "Required Render Actors Present",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "assetUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-walkable-collision-present",
+            "label": "Required Walkable Collision Present",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-collision-present",
+            "label": "Required Collision Present",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "colliderUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "terrain-runtime-collision-declared",
+            "label": "Terrain Runtime Collision Declared",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "miranda-terrain",
+              "manifestUrl": ""
+            },
+            "blockers": []
+          }
+        ],
+        "blockers": []
+      },
+      "runtime": {
+        "activationRequired": true,
+        "requiredGateIds": [
+          "publish-contract-ready",
+          "manifest-loaded",
+          "required-render-assets-loaded",
+          "required-render-actors-mounted",
+          "required-collision-mounted",
+          "required-collider-assets-loaded",
+          "terrain-collision-mounted",
+          "required-initial-world-partition-cells-ready",
+          "spawn-resolved",
+          "physics-world-ready",
+          "player-body-ready",
+          "gameplay-enabled"
+        ],
+        "requiredRenderActorIds": [],
+        "requiredCollisionActorIds": [],
+        "requiredAssetUrls": [],
+        "requiredColliderUrls": [],
+        "requiredInitialCellKeys": [],
+        "requiredTerrain": false,
+        "terrainManifestUrl": ""
+      },
+      "spawn": {
+        "player": [
+          0,
+          4.25,
+          -13.8
+        ],
+        "valid": true,
+        "runtimeActorId": "miranda-player-spawn",
+        "satisfiedByRuntimeSystem": true
+      },
+      "terrain": {
+        "runtimeActorId": "miranda-terrain",
+        "runtimeCollision": false,
+        "satisfiedByRuntimeSystem": false
+      },
+      "requiredActorIds": [],
+      "requiredWalkableActorIds": [],
+      "runtimeAssetUrls": [
+        "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+        "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+        "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb"
+      ],
+      "missingRequiredActorIds": [],
+      "missingRequiredRenderActorIds": [],
+      "missingRequiredCollisionActorIds": [],
+      "missingRequiredWalkableActorIds": []
+    },
     "requiredRenderActorIds": [],
     "requiredAssetUrls": [],
     "runtimeAssetUrls": [

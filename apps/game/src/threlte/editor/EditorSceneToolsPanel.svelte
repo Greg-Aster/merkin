@@ -88,15 +88,20 @@ $: gameplayNodeCount = sceneNodes.filter(node => Boolean(node.gameplay)).length
 $: colliderNodeCount = sceneNodes.filter(
   node => Boolean(node.collision) && node.collision?.enabled !== false,
 ).length
+$: hiddenNodeCount = sceneNodes.filter(node => node.visible === false).length
+$: lockedNodeCount = sceneNodes.filter(node => node.locked ?? false).length
 </script>
 
 <div class="editor-section">
-  <div class="label">Scene</div>
+  <div class="label">Scene Status</div>
   <div class="save-message">
     {levelId || 'Untitled scene'} · {sceneNodes.length} object{sceneNodes.length === 1 ? '' : 's'} · {assetNodeCount} asset node{assetNodeCount === 1 ? '' : 's'}
   </div>
   <div class="save-message">
     {gameplayNodeCount} gameplay · {colliderNodeCount} collider{colliderNodeCount === 1 ? '' : 's'}
+  </div>
+  <div class="save-message">
+    {hiddenNodeCount} hidden · {lockedNodeCount} locked
   </div>
 </div>
 

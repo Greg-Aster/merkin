@@ -99,8 +99,6 @@ function hasBakedTrimeshCollision(node) {
   return (
     node.collision?.enabled !== false &&
     node.collision?.shape === 'trimesh' &&
-    node.collision?.proxy !== true &&
-    !['needsBake', 'stale'].includes(node.collision?.bakeStatus) &&
     typeof node.collision?.colliderUrl === 'string' &&
     node.collision.colliderUrl.trim().length > 0
   )

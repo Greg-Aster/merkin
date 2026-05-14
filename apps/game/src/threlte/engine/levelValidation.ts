@@ -16,6 +16,7 @@ import {
 import { hasTerrainRuntimeCollision } from './terrainRuntimeCollision'
 import type {
   ActorDefinition,
+  CollisionClassification,
   LevelBuildReport,
   LevelDefinition,
   Vec3,
@@ -102,7 +103,7 @@ function getWalkabilityContractIssues(
     if (!supportingActor) {
       if (hasTerrainRuntimeCollision(level)) {
         warnings.push(
-          `Walkability sample "${sample.id}" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime.`,
+          `Walkability sample "${sample.id}" is not supported by an authored primitive walkable collider; runtime terrain collision must cover it.`,
         )
       } else {
         errors.push(
@@ -134,6 +135,32 @@ function isTerrainRuntimeActorId(level: LevelDefinition, actorId: string) {
   return actorId === `${level.id}-terrain`
 }
 
+export function requiresExplicitCollisionClassification(
+  level: Pick<LevelDefinition, 'settings'>,
+) {
+  const collisionSettings = (level.settings as any)?.level?.collision
+  return (
+    collisionSettings?.review?.requireExplicitClassification === true ||
+    collisionSettings?.defaults?.primitiveCollisionByDefault === false
+  )
+}
+
+function getActorCollisionClassification(
+  actor: ActorDefinition,
+  visualOnlyActorIds: Set<string>,
+): CollisionClassification | undefined {
+  if (actor.collisionClassification) return actor.collisionClassification
+  const hasVisibleRender = Boolean(actor.render && actor.render.visible !== false)
+  const hasCollision = Boolean(actor.physics?.collision)
+
+  if (hasCollision) {
+    return hasVisibleRender ? 'collidable' : 'collision-only-proxy'
+  }
+  if (!hasVisibleRender) return undefined
+  if (visualOnlyActorIds.has(actor.id)) return 'visual-only'
+  return 'missing-collision'
+}
+
 function getCollisionDiagnostics(level: LevelDefinition) {
   const actorsById = new Map(level.actors.map(actor => [actor.id, actor]))
   const roleSettings = (level.settings as any)?.level?.collision?.roles
@@ -144,16 +171,33 @@ function getCollisionDiagnostics(level: LevelDefinition) {
         )
       : [],
   )
+  const classifications = new Map(
+    level.actors.map(actor => [
+      actor.id,
+      getActorCollisionClassification(actor, visualOnlyActorIds),
+    ]),
+  )
 
   return {
     authoredActorIds: level.actors
-      .filter(actor => Boolean(actor.physics))
-      .filter(actor => !visualOnlyActorIds.has(actor.id))
+      .filter(actor => classifications.get(actor.id) === 'collidable')
       .map(actor => actor.id)
       .sort(),
     defaultActorIds: [] as string[],
     visualOnlyActorIds: [...visualOnlyActorIds]
       .filter(actorId => actorsById.has(actorId))
+      .sort(),
+    disabledActorIds: level.actors
+      .filter(actor => classifications.get(actor.id) === 'disabled')
+      .map(actor => actor.id)
+      .sort(),
+    missingCollisionActorIds: level.actors
+      .filter(actor => classifications.get(actor.id) === 'missing-collision')
+      .map(actor => actor.id)
+      .sort(),
+    collisionOnlyProxyActorIds: level.actors
+      .filter(actor => classifications.get(actor.id) === 'collision-only-proxy')
+      .map(actor => actor.id)
       .sort(),
     missingColliderMetadataActorIds: level.actors
       .filter(actor => actor.kind === 'asset')
@@ -174,9 +218,11 @@ export function createLevelBuildReport(
   const defaultCollisionActorIds = new Set(collisionDiagnostics.defaultActorIds)
   const visualOnlyActorIds = new Set(collisionDiagnostics.visualOnlyActorIds)
   const requiredActorIds = runtimeReadinessContract.requiredActorIds
-  const requiredAssetActorIds = runtimeReadinessContract.requiredRenderActorIds
+  const requiredRenderActorIds =
+    runtimeReadinessContract.runtime.requiredRenderActorIds
   const warnings: string[] = []
   const errors: string[] = []
+  const runtimeAssets = (level.settings as any)?.level?.runtimeAssets
   const actorIds = new Set<string>()
   const duplicateActorIds = new Set<string>()
   const actorsById = new Map<string, ActorDefinition>()
@@ -192,6 +238,19 @@ export function createLevelBuildReport(
 
   if (!isFiniteVec3(level.spawn.player)) {
     errors.push('Player spawn must be a finite Vec3.')
+  }
+  if (Array.isArray(runtimeAssets?.requiredAssetActorIds)) {
+    errors.push(
+      'runtimeAssets.requiredAssetActorIds is no longer supported; use runtimeAssets.requiredRenderActorIds.',
+    )
+  }
+  if (
+    requiresExplicitCollisionClassification(level) &&
+    collisionDiagnostics.missingCollisionActorIds.length > 0
+  ) {
+    errors.push(
+      `Visible geometry must be classified as collidable, visual-only, or disabled before publish: ${collisionDiagnostics.missingCollisionActorIds.join(', ')}.`,
+    )
   }
 
   for (const actor of level.actors) {
@@ -223,7 +282,7 @@ export function createLevelBuildReport(
       defaultCollisionActorCount += 1
     }
 
-    if (visualOnlyActorIds.has(actor.id) || (!actor.physics && actor.render)) {
+    if (visualOnlyActorIds.has(actor.id)) {
       visualOnlyActorCount += 1
     }
 
@@ -275,11 +334,6 @@ export function createLevelBuildReport(
         }
       }
     }
-    if (actor.kind === 'asset' && actor.physics.collision.shape !== 'trimesh') {
-      errors.push(
-        `Asset actor "${actor.id}" must use baked trimesh collision instead of primitive collision.`,
-      )
-    }
   }
 
   errors.push(...validateLevelGroundContract(level, actorsById))
@@ -299,7 +353,7 @@ export function createLevelBuildReport(
     errors.push(getRequiredActorError(actorId, 'is missing'))
   }
 
-  for (const actorId of requiredAssetActorIds) {
+  for (const actorId of requiredRenderActorIds) {
     const actor = actorsById.get(actorId)
     if (!actor) {
       errors.push(getRequiredActorError(actorId, 'is missing'))
@@ -397,10 +451,7 @@ export function createLevelBuildReport(
     defaultCollisionActorCount,
     visualOnlyActorCount,
     requiredActorCount: requiredActorIds.length,
-    requiredRenderActorIds: requiredAssetActorIds,
     missingRequiredActorIds,
-    requiredAssetUrls: runtimeReadinessContract.requiredAssetUrls,
-    runtimeAssetUrls: runtimeReadinessContract.runtimeAssetUrls,
     runtimeReadinessContract,
     collisionDiagnostics,
     errors,

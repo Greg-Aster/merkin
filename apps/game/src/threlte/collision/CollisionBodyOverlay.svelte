@@ -21,8 +21,6 @@ export let colliderMetadataUrl = ''
 export let assetLocalTransform: AssetLocalTransformMetadata | null = null
 export let primitiveGeometry: PrimitiveGeometryKind | undefined = undefined
 export let primitiveArgs: number[] = []
-export let proxy = false
-export let bakeStatus: 'ready' | 'needsBake' | 'stale' | 'notRequired' | '' = ''
 export let overlayColor = ''
 
 $: isAssetTrimesh = shape === 'trimesh' && colliderUrl.length > 0
@@ -41,11 +39,9 @@ $: overlayLabelLines = [
   `budget: ${triangleBudget ?? 'n/a'}`,
   missingAssetTrimeshCollider
     ? 'missing: collision.colliderUrl'
-    : proxy
-      ? `source: editor proxy${bakeStatus ? ` (${bakeStatus})` : ''}`
-      : colliderUrl
-        ? 'source: authored collider'
-        : 'source: explicit primitive volume',
+    : colliderUrl
+      ? 'source: authored collider'
+      : 'source: explicit primitive volume',
   isAssetTrimesh && !colliderMetadataUrl && !assetLocalTransform
     ? 'asset-local: legacy metadata missing'
     : '',

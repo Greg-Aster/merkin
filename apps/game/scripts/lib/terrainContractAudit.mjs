@@ -26,6 +26,12 @@ const collisionSources = new Set([
   'source-linked-terrain-collision',
 ])
 const transitionWarningStatuses = new Set(['transitional', 'planned'])
+const glbTerrainCollisionBakeModes = new Set([
+  'source-glb-heightfield-projection',
+  'dedicated-collision-glb',
+  'simplified-source-glb',
+  'selected-terrain-walkable-mesh',
+])
 
 function stripBom(source) {
   return source.replace(/^\uFEFF/, '')
@@ -117,6 +123,11 @@ function validateSourceLinkedCollisionContract({ failures, file, manifest }) {
   if (collisionContract.terrainSourceType !== 'glb-chunk-terrain') {
     failures.push(
       `${file}: source-linked terrain collision requires glb-chunk-terrain collision provenance`,
+    )
+  }
+  if (!glbTerrainCollisionBakeModes.has(String(collisionContract.collisionBakeMode))) {
+    failures.push(
+      `${file}: source-linked terrain collision requires a source-linked collision bake mode`,
     )
   }
   if (
@@ -391,23 +402,12 @@ function validateTerrainMigration({
   }
 
   if (migration.currentMode === 'glb-chunk-terrain') {
-    const approvedHeightfieldException =
-      migration.approvedHeightfieldException === true ||
-      ground.approvedHeightfieldException === true ||
-      terrain?.approvedHeightfieldException === true
     if (migration.authoritativeVisualSource !== 'source-glb-chunks') {
       failures.push(`${file}: glb-chunk-terrain requires source-glb-chunks visuals`)
     }
-    if (
-      migration.collisionSource !== 'source-linked-terrain-collision' &&
-      !(
-        migration.collisionSource === 'baked-heightfield' &&
-        approvedHeightfieldException &&
-        transitionWarningStatuses.has(migration.status)
-      )
-    ) {
+    if (migration.collisionSource !== 'source-linked-terrain-collision') {
       failures.push(
-        `${file}: glb-chunk-terrain requires source-linked-terrain-collision or an approved transitional baked-heightfield exception`,
+        `${file}: glb-chunk-terrain requires source-linked-terrain-collision`,
       )
     }
     if (migration.collisionSource === 'source-linked-terrain-collision') {

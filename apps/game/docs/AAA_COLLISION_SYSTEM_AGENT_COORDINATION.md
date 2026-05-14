@@ -71,6 +71,10 @@ pipeline, not compensate for missing engine behavior.
 
 ## Shared Guardrails
 
+- Follow `AAA_ENGINE_UPDATE_PROTOCOL.md` when changing shared collision,
+  physics, terrain, readiness, or scene-document contracts. Keep an impact map
+  and update affected runtime, editor, generated data, diagnostics, and audits
+  in a staged change set.
 - Do not add `if (levelId === 'yggdrasil')` or similar branches to generic
   runtime, editor, loading, or validation code.
 - Do not assume visible render meshes are correct collision meshes.
@@ -122,6 +126,7 @@ pnpm --dir apps/game check:generated-drift
 
 Each agent must report:
 
+- impact map for any shared contract changed
 - files changed
 - exact behavior changed
 - how render, collision, spawn, terrain, and readiness were considered

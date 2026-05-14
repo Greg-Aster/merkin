@@ -82,7 +82,7 @@ function dispatchReady() {
     worldSizeZ: terrainWorldSizeZ,
     collision: {
       type: 'baked-terrain-mesh',
-      authoredException: true,
+      sourceLinked: collision.sourceLinked,
       url: collision.url,
       sourceResolution: bakedCollider.sourceResolution,
       colliderResolution: bakedCollider.colliderResolution,

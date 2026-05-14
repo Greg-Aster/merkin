@@ -6,6 +6,7 @@ import * as THREE from 'three'
 import AdaptivePointLight from '../components/AdaptivePointLight.svelte'
 import HeroProp from '../components/HeroProp.svelte'
 import ProceduralMesh from '../components/ProceduralMesh.svelte'
+import { getSceneNodeMeshRenderSource } from '../engine/actorRenderSource'
 import RuntimePrefabNode from '../levels/RuntimePrefabNode.svelte'
 import { EDITOR_MATERIAL_OVERRIDE_CONTEXT } from '../utils/materialOverrideContext'
 import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
@@ -13,9 +14,10 @@ import type { EditorMaterialData, EditorSceneNode } from './editorTypes'
 export let node: EditorSceneNode
 export let editorEnabled = false
 
-$: assetNode = node.kind === 'asset' ? node.asset ?? null : null
-$: prefabNode = node.kind === 'prefab' ? node.prefab ?? null : null
-$: primitiveNode = node.kind === 'primitive' ? node.primitive ?? null : null
+$: meshSource = getSceneNodeMeshRenderSource(node)
+$: assetNode = meshSource.kind === 'asset' ? meshSource.asset : null
+$: prefabNode = meshSource.kind === 'prefab' ? meshSource.prefab : null
+$: primitiveNode = meshSource.kind === 'primitive' ? meshSource.primitive : null
 $: lightNode = node.kind === 'light' ? node.light ?? null : null
 $: renderKey = `${node.id}:${node.kind}:${assetNode?.url ?? prefabNode?.type ?? primitiveNode?.geometry ?? lightNode?.color ?? 'group'}`
 

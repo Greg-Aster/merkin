@@ -232,7 +232,7 @@ const collisionChannelOptions: Array<{
 const collisionShapeOptions: Array<{ value: CollisionShape; label: string }> = [
   { value: 'cuboid', label: 'Box' },
   { value: 'cylinder', label: 'Cylinder' },
-  { value: 'trimesh', label: 'Trimesh Asset' },
+  { value: 'trimesh', label: 'Baked Mesh' },
 ]
 
 $: hasSingleSelection = !!selectedNode && selectedNodes.length <= 1
@@ -248,15 +248,10 @@ $: canConvertSelectedToMesh = !!(
 )
 $: canBakeSelectedMeshCollider = !!selectedNode?.asset?.url
 $: selectedCollisionShape =
-  selectedNode?.asset || selectedNode?.prefab
-    ? 'trimesh'
-    : selectedNode?.collision?.shape ??
-      effectiveCollision?.shape ??
-      (hasGeometryNode ? 'trimesh' : 'cuboid')
-$: collisionShapeOptionsForSelection =
-  selectedNode?.asset || selectedNode?.prefab
-    ? [{ value: 'trimesh' as CollisionShape, label: 'Baked Trimesh' }]
-    : collisionShapeOptions
+  selectedNode?.collision?.shape ??
+  effectiveCollision?.shape ??
+  (hasGeometryNode ? 'cuboid' : 'cuboid')
+$: collisionShapeOptionsForSelection = collisionShapeOptions
 $: collisionMode =
   selectedNode?.renderPolicy?.runtimeStyle === 'skip' && effectiveCollision
     ? 'proxy'
@@ -584,7 +579,7 @@ function stepGeneratedVariant(offset: number) {
         <input class="text-input" value={styleDescriptor} data-sfx-focus="focus-soft" on:input={(e) => onStyleDescriptorChange((e.currentTarget as HTMLInputElement).value)} />
       </div>
       <div class="button-row compact editor-mt-sm">
-        <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onConvertSelectedToMesh} disabled={!canConvertSelectedToMesh}>Convert To Mesh</button>
+        <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onConvertSelectedToMesh} disabled={!canConvertSelectedToMesh}>Replace Visual Source</button>
         <button data-sfx-hover="hover-soft" data-sfx-click="panel-open" on:click={onOpenAiTab} disabled={!canUseAiMeshStudioSelection || hunyuanBusy}>Open AI Mesh Studio</button>
       </div>
     {/if}
@@ -820,7 +815,7 @@ function stepGeneratedVariant(offset: number) {
         <button class:active={collisionMode === 'disabled'} data-sfx-hover="hover-soft" data-sfx-click="warning" on:click={() => onCollisionEnabledChange(false)}>Disabled</button>
       </div>
       <label class="checkbox"><input type="checkbox" checked={!!effectiveCollision} data-sfx-click="soft" on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Collider Enabled</label>
-      <div class="save-message">Default is collidable. Visual Only or Disabled is the explicit opt-out. Asset meshes use baked trimesh collision; no box fallback is used.</div>
+      <div class="save-message">Collision is independent from the visual source. Keep simple box or cylinder collision when replacing blockout meshes with GLB assets; use Baked Mesh only when the collider needs authored mesh detail.</div>
       <select class="text-input" value={selectedCollisionShape} data-sfx-focus="focus-soft" on:change={(e) => onCollisionShapeChange((e.currentTarget as HTMLSelectElement).value as CollisionShape)}>
         {#each collisionShapeOptionsForSelection as option}
           <option value={option.value}>{option.label}</option>

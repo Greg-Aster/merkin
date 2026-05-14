@@ -45,13 +45,20 @@ export type TerrainSourceContract = {
   renderBakeMode?: 'heightfield-chunk-mesh' | 'source-glb-chunk-mesh'
   collisionBakeMode?:
     | 'heightfield-projection'
+    | 'source-glb-heightfield-projection'
     | 'dedicated-collision-glb'
     | 'simplified-source-glb'
     | 'selected-terrain-walkable-mesh'
     | 'scene-authored-collision'
   collisionMeshSource?: {
-    type?: 'heightmap' | 'dedicated-glb' | 'source-glb' | 'scene-actors'
+    type?:
+      | 'heightmap'
+      | 'dedicated-glb'
+      | 'source-glb'
+      | 'source-glb-heightfield-projection'
+      | 'scene-actors'
     url?: string
+    projectionHeightmapUrl?: string
     fingerprint?: {
       algorithm?: string
       value?: string
@@ -64,8 +71,6 @@ export type TerrainSourceContract = {
   role?: 'walkable' | 'blocker' | 'detail'
   vertexCount?: number
   triangleCount?: number
-  approvedHeightfieldException?: boolean
-  approvedHeightfieldExceptionReason?: string
 }
 
 export interface TerrainConfig {
@@ -78,7 +83,7 @@ export interface TerrainConfig {
   bounds?: { min: [number, number, number]; max: [number, number, number] }
   collision?: {
     type: 'baked-terrain-mesh'
-    authoredException: true
+    sourceLinked?: true
     url: string
     metadataUrl?: string
     triangleCount?: number

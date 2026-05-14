@@ -2,7 +2,6 @@ import {
   compareAssetLocalBounds,
   validateAssetLocalTransformMetadata,
 } from '../engine/assetLocalTransform'
-import { isEditorProxyCollision } from '../engine/editorProxyCollision'
 import {
   classifyTerrainAuthority,
   getTerrainAuthorityDiagnostics,
@@ -525,6 +524,7 @@ function addMeshColliderMetadataSection(
       node.kind === 'asset' &&
       node.collision?.enabled !== false &&
       node.collision?.intent !== 'none' &&
+      node.collision?.shape === 'trimesh' &&
       !isVisualOnlyActor(scene!, node.id),
   )
   let validCount = 0
@@ -536,15 +536,6 @@ function addMeshColliderMetadataSection(
   for (const node of assetCollisionNodes) {
     const collision = node.collision
     if (!collision) continue
-    if (isEditorProxyCollision(collision)) {
-      missingCount += 1
-      pushColliderMetadataIssue(
-        viewModel,
-        node,
-        'uses an editor proxy collider and needs a baked mesh collider before publishing.',
-      )
-      continue
-    }
     if (collision.shape !== 'trimesh') continue
     if (!collision.colliderUrl) {
       missingCount += 1

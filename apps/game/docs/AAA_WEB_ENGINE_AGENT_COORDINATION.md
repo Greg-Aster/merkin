@@ -38,19 +38,24 @@ Related existing target docs:
 
 1. Read `apps/game/AGENTS.md` before editing game code, scene data, generated
    runtime assets, or game-facing assets under `apps/megameal/public`.
-2. Keep changes scoped to the assigned file. If another agent owns the surface,
-   document the dependency instead of editing through it.
-3. Do not weaken budgets, gates, or audits to get a pass.
-4. Do not hand-edit generated runtime JSON as the primary fix. Change source
+2. For core engine contract changes, follow
+   `AAA_ENGINE_UPDATE_PROTOCOL.md`: maintain an impact map and update affected
+   runtime, editor, generated data, diagnostics, and validation surfaces in a
+   staged way.
+3. Keep changes scoped to the assigned file and the impact map. If another
+   agent owns the surface, document the dependency instead of editing through
+   it.
+4. Do not weaken budgets, gates, or audits to get a pass.
+5. Do not hand-edit generated runtime JSON as the primary fix. Change source
    data or scripts, then regenerate through the owning command.
-5. Do not couple runtime gameplay to editor-only code.
-6. Do not introduce broad barrel imports that pull editor/debug code into the
+6. Do not couple runtime gameplay to editor-only code.
+7. Do not introduce broad barrel imports that pull editor/debug code into the
    player runtime.
-7. Do not add hardcoded level-id branches to generic engine/editor systems.
+8. Do not add hardcoded level-id branches to generic engine/editor systems.
    Level-specific behavior belongs in scene data, registry metadata, capability
    flags, validation fixtures, or explicitly named authoring scripts.
-8. Do not revert unrelated dirty work.
-9. Prefer deleting dead paths over wrapping them in compatibility layers, but
+9. Do not revert unrelated dirty work.
+10. Prefer deleting dead paths over wrapping them in compatibility layers, but
    only after proving no live import or manifest reference remains.
 
 ## Coordination Order
@@ -101,6 +106,7 @@ pnpm --dir apps/megameal audit:css
 Each agent must report:
 
 - assigned file addressed
+- impact map for any core engine contract changed
 - files changed
 - source-of-truth data changed
 - generated files changed and command used to regenerate them

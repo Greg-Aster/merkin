@@ -185,7 +185,7 @@ export function normalizeLevelSceneSettings(
           dirty: false,
         },
         defaults: {
-          solidObjectsByDefault: false,
+          primitiveCollisionByDefault: true,
           defaultFriction: 0.7,
           defaultRestitution: 0,
         },

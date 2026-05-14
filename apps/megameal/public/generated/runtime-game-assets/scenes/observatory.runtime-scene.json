@@ -33,12 +33,12 @@
           },
           "terrain": {
             "source": "source-glb",
-            "runtimeSource": "built-in-manifest",
-            "manifestUrl": "/terrain/observatory-environment.manifest.json",
             "dirty": false,
             "runtimeMode": "glb-chunk-terrain",
             "visualSource": "source-glb-chunks",
             "fallbackSurfacePolicy": "disabled",
+            "runtimeSource": "built-in-manifest",
+            "manifestUrl": "/terrain/observatory-environment.manifest.json",
             "sourceAssetUrl": "/models/levels/observatory-environment.glb",
             "renderChunks": {
               "type": "glb-chunk-terrain",
@@ -63,11 +63,10 @@
             "sourceAssetFingerprint": {
               "algorithm": "sha256",
               "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
-            },
-            "approvedHeightfieldException": true
+            }
           },
           "defaults": {
-            "solidObjectsByDefault": false,
+            "primitiveCollisionByDefault": true,
             "defaultFriction": 0.7,
             "defaultRestitution": 0
           }
@@ -148,14 +147,12 @@
             "vertexCount": 16641,
             "colliderResolution": 129,
             "generatedBy": "bake-terrain-collision"
-          },
-          "approvedHeightfieldException": true
+          }
         },
         "terrainMigration": {
           "currentMode": "glb-chunk-terrain",
           "authoritativeVisualSource": "source-glb-chunks",
           "collisionSource": "source-linked-terrain-collision",
-          "approvedHeightfieldException": true,
           "renderChunks": {
             "present": true,
             "authoritative": true,
@@ -181,7 +178,7 @@
             "collision": {
               "path": "/terrain/collision/observatory-environment.collider.bin",
               "status": "source-linked-terrain-collision",
-              "reason": "Gameplay collision is heightfield-projected from an intermediate derived from the same source GLB as the visual chunks.",
+              "reason": "Gameplay collision is source-linked projected terrain derived from the same source GLB contract as the visual chunks.",
               "targetRemovalCondition": "Replace only with a newer source-linked collision cook or dedicated simplified source-GLB collider."
             }
           },
@@ -445,21 +442,325 @@
     "defaultCollisionActorCount": 0,
     "visualOnlyActorCount": 0,
     "requiredActorCount": 2,
-    "requiredRenderActorIds": [],
     "missingRequiredActorIds": [],
-    "requiredAssetUrls": [],
-    "runtimeAssetUrls": [],
+    "runtimeReadinessContract": {
+      "schemaVersion": 2,
+      "levelId": "observatory",
+      "publish": {
+        "ready": true,
+        "gates": [
+          {
+            "id": "legacy-required-asset-actor-ids-absent",
+            "label": "Legacy Required Asset Actor Ids Absent",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "spawn-valid",
+            "label": "Spawn Valid",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "observatory-player-spawn",
+              "player": [
+                -137.2,
+                1.8,
+                -49.5
+              ]
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-actors-present",
+            "label": "Required Actors Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "observatory-terrain",
+                "observatory-player-spawn"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-render-actors-present",
+            "label": "Required Render Actors Present",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "assetUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-walkable-collision-present",
+            "label": "Required Walkable Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "observatory-terrain"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-collision-present",
+            "label": "Required Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "observatory-terrain"
+              ],
+              "colliderUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "terrain-runtime-collision-declared",
+            "label": "Terrain Runtime Collision Declared",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "observatory-terrain",
+              "manifestUrl": "/terrain/observatory-environment.manifest.json"
+            },
+            "blockers": []
+          }
+        ],
+        "blockers": []
+      },
+      "runtime": {
+        "activationRequired": true,
+        "requiredGateIds": [
+          "publish-contract-ready",
+          "manifest-loaded",
+          "required-render-assets-loaded",
+          "required-render-actors-mounted",
+          "required-collision-mounted",
+          "required-collider-assets-loaded",
+          "terrain-collision-mounted",
+          "required-initial-world-partition-cells-ready",
+          "spawn-resolved",
+          "physics-world-ready",
+          "player-body-ready",
+          "gameplay-enabled"
+        ],
+        "requiredRenderActorIds": [],
+        "requiredCollisionActorIds": [
+          "observatory-terrain"
+        ],
+        "requiredAssetUrls": [],
+        "requiredColliderUrls": [],
+        "requiredInitialCellKeys": [],
+        "requiredTerrain": true,
+        "terrainManifestUrl": "/terrain/observatory-environment.manifest.json"
+      },
+      "spawn": {
+        "player": [
+          -137.2,
+          1.8,
+          -49.5
+        ],
+        "valid": true,
+        "runtimeActorId": "observatory-player-spawn",
+        "satisfiedByRuntimeSystem": true
+      },
+      "terrain": {
+        "runtimeActorId": "observatory-terrain",
+        "runtimeCollision": true,
+        "satisfiedByRuntimeSystem": true
+      },
+      "requiredActorIds": [
+        "observatory-terrain",
+        "observatory-player-spawn"
+      ],
+      "requiredWalkableActorIds": [
+        "observatory-terrain"
+      ],
+      "runtimeAssetUrls": [],
+      "missingRequiredActorIds": [],
+      "missingRequiredRenderActorIds": [],
+      "missingRequiredCollisionActorIds": [],
+      "missingRequiredWalkableActorIds": []
+    },
     "collisionDiagnostics": {
       "authoredActorIds": [],
       "defaultActorIds": [],
-      "visualOnlyActorIds": []
+      "visualOnlyActorIds": [],
+      "disabledActorIds": [],
+      "missingCollisionActorIds": [],
+      "collisionOnlyProxyActorIds": []
     },
     "errors": [],
     "warnings": [
-      "Walkability sample \"player-spawn\" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime."
+      "Walkability sample \"player-spawn\" is not supported by an authored primitive walkable collider; runtime terrain collision must cover it."
     ]
   },
   "runtime": {
+    "readinessContract": {
+      "schemaVersion": 2,
+      "levelId": "observatory",
+      "publish": {
+        "ready": true,
+        "gates": [
+          {
+            "id": "legacy-required-asset-actor-ids-absent",
+            "label": "Legacy Required Asset Actor Ids Absent",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "spawn-valid",
+            "label": "Spawn Valid",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "observatory-player-spawn",
+              "player": [
+                -137.2,
+                1.8,
+                -49.5
+              ]
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-actors-present",
+            "label": "Required Actors Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "observatory-terrain",
+                "observatory-player-spawn"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-render-actors-present",
+            "label": "Required Render Actors Present",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "assetUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-walkable-collision-present",
+            "label": "Required Walkable Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "observatory-terrain"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-collision-present",
+            "label": "Required Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "observatory-terrain"
+              ],
+              "colliderUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "terrain-runtime-collision-declared",
+            "label": "Terrain Runtime Collision Declared",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "observatory-terrain",
+              "manifestUrl": "/terrain/observatory-environment.manifest.json"
+            },
+            "blockers": []
+          }
+        ],
+        "blockers": []
+      },
+      "runtime": {
+        "activationRequired": true,
+        "requiredGateIds": [
+          "publish-contract-ready",
+          "manifest-loaded",
+          "required-render-assets-loaded",
+          "required-render-actors-mounted",
+          "required-collision-mounted",
+          "required-collider-assets-loaded",
+          "terrain-collision-mounted",
+          "required-initial-world-partition-cells-ready",
+          "spawn-resolved",
+          "physics-world-ready",
+          "player-body-ready",
+          "gameplay-enabled"
+        ],
+        "requiredRenderActorIds": [],
+        "requiredCollisionActorIds": [
+          "observatory-terrain"
+        ],
+        "requiredAssetUrls": [],
+        "requiredColliderUrls": [],
+        "requiredInitialCellKeys": [],
+        "requiredTerrain": true,
+        "terrainManifestUrl": "/terrain/observatory-environment.manifest.json"
+      },
+      "spawn": {
+        "player": [
+          -137.2,
+          1.8,
+          -49.5
+        ],
+        "valid": true,
+        "runtimeActorId": "observatory-player-spawn",
+        "satisfiedByRuntimeSystem": true
+      },
+      "terrain": {
+        "runtimeActorId": "observatory-terrain",
+        "runtimeCollision": true,
+        "satisfiedByRuntimeSystem": true
+      },
+      "requiredActorIds": [
+        "observatory-terrain",
+        "observatory-player-spawn"
+      ],
+      "requiredWalkableActorIds": [
+        "observatory-terrain"
+      ],
+      "runtimeAssetUrls": [],
+      "missingRequiredActorIds": [],
+      "missingRequiredRenderActorIds": [],
+      "missingRequiredCollisionActorIds": [],
+      "missingRequiredWalkableActorIds": []
+    },
     "requiredRenderActorIds": [],
     "requiredAssetUrls": [],
     "runtimeAssetUrls": [],
@@ -509,8 +810,7 @@
         "vertexCount": 16641,
         "colliderResolution": 129,
         "generatedBy": "bake-terrain-collision"
-      },
-      "approvedHeightfieldException": true
+      }
     },
     "renderProfile": {
       "id": "observatory-source-glb-terrain",

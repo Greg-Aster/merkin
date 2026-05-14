@@ -19,7 +19,6 @@ import EditorAiTabHost from './EditorAiTabHost.svelte'
 import EditorCollisionTabHost from './EditorCollisionTabHost.svelte'
 import EditorCommandPalette from './EditorCommandPalette.svelte'
 import EditorCreateTabHost from './EditorCreateTabHost.svelte'
-import EditorHierarchyTabHost from './EditorHierarchyTabHost.svelte'
 import EditorInspectTabHost from './EditorInspectTabHost.svelte'
 import EditorMainToolbar from './EditorMainToolbar.svelte'
 import EditorOutputTabHost from './EditorOutputTabHost.svelte'
@@ -83,7 +82,6 @@ import {
   buildCollisionTabProps,
   buildCreateTabProps,
   buildEnvironmentTabProps,
-  buildHierarchyTabProps,
   buildInspectTabProps,
   buildPlayerTabProps,
   buildSaveTabProps,
@@ -1776,7 +1774,7 @@ const editorPanelTabs: Array<{
     id: 'scene',
     icon: '◫',
     label: 'Scene',
-    description: 'Hierarchy, selection, transform, and object details',
+    description: 'Scene status, editing mode, and object details',
   },
   {
     id: 'create',
@@ -4297,7 +4295,6 @@ $: collisionTabProps = buildCollisionTabProps(editorPanelPropContext)
 $: environmentTabProps = buildEnvironmentTabProps(editorPanelPropContext)
 $: playerTabProps = buildPlayerTabProps(editorPanelPropContext)
 $: createTabProps = buildCreateTabProps(editorPanelPropContext)
-$: hierarchyTabProps = buildHierarchyTabProps(editorPanelPropContext)
 $: inspectTabProps = buildInspectTabProps(editorPanelPropContext)
 $: styleTabProps = buildStyleTabProps(editorPanelPropContext)
 $: aiTabProps = buildAiTabProps(editorPanelPropContext)
@@ -4509,7 +4506,7 @@ onDestroy(() => {
         <section class="editor-workspace" aria-label="Scene workspace">
           <div class="editor-workspace-heading">
             <div class="label">Scene Workspace</div>
-            <p>Scene status, selection guidance, and current editing mode.</p>
+            <p>Scene status, current editing mode, and object details.</p>
           </div>
           <EditorSceneTabHost
             {...sceneTabProps}
@@ -4518,13 +4515,6 @@ onDestroy(() => {
             bind:newLevelIdInput
             bind:newLevelTemplateId
           />
-          <details class="editor-section" open>
-            <summary class="label">Hierarchy &amp; Selection</summary>
-            <EditorHierarchyTabHost
-              {...hierarchyTabProps}
-              bind:hierarchyFilter
-            />
-          </details>
           <details class="editor-section" open>
             <summary class="label">Inspector &amp; Object Details</summary>
             <EditorInspectTabHost {...inspectTabProps} bind:hunyuanPrompt />

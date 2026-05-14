@@ -120,6 +120,13 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     return isEditorGeometryNode(selectedNode) ? [selectedNode] : []
   }
 
+  function getEditableGeometryNodesByIds(nodeIds: string[]) {
+    const idSet = new Set(nodeIds)
+    return deps
+      .getEditorNodes()
+      .filter(node => idSet.has(node.id) && isEditorGeometryNode(node))
+  }
+
   function getCollisionSizeForShape(
     node: EditorSceneNode,
     shape: EditorNodeCollisionData['shape'],
@@ -238,6 +245,15 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     options: Partial<EditorNodeCollisionData> = {},
   ) {
     const nodes = getEditableGeometrySelection()
+    applyCollisionPresetToNodes(nodes, intent, message, options)
+  }
+
+  function applyCollisionPresetToNodes(
+    nodes: EditorSceneNode[],
+    intent: NonNullable<EditorNodeCollisionData['intent']>,
+    message: string,
+    options: Partial<EditorNodeCollisionData> = {},
+  ) {
     if (nodes.length === 0) {
       deps.setSaveMessage('Select geometry before changing collision mode')
       return
@@ -440,7 +456,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     deps.selectEditorNode(targetNode.id)
     deps.setAssetPickerTargetNodeId('')
     deps.setSaveMessage(
-      `Replaced ${targetNode.name} with ${selectedLibraryItem.name}`,
+      `Replaced ${targetNode.name} with ${selectedLibraryItem.name}; collision preserved`,
     )
     void deps.inspectSelectedAssetForHunyuan(url, targetNode.id)
   }
@@ -545,12 +561,15 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     deps.appendPipelineLog('Applied generated variant with visual fit', {
       nodeId: selectedNode.id,
       assetUrl,
+      collisionPreserved: Boolean(selectedNode.collision),
       fitReport: fitResult.report,
       transform: deps.getNodeTransformSnapshot(selectedNode),
     })
     deps.setSelectedGeneratedVariantUrl(assetUrl)
     deps.setHunyuanLastOutputUrl(assetUrl)
-    deps.setSaveMessage(`Applied variant to ${selectedNode.name}`)
+    deps.setSaveMessage(
+      `Applied variant to ${selectedNode.name}; collision preserved`,
+    )
     void deps.inspectSelectedAssetForHunyuan(assetUrl, selectedNode.id)
   }
 
@@ -902,8 +921,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     fitColliderToVisualBounds()
   }
 
-  function setVisualOnly() {
-    const nodes = getEditableGeometrySelection()
+  function setVisualOnlyForNodes(nodes: EditorSceneNode[]) {
     if (nodes.length === 0) {
       deps.setSaveMessage('Select geometry before changing collision mode')
       return
@@ -929,6 +947,36 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     )
   }
 
+  function setVisualOnly() {
+    setVisualOnlyForNodes(getEditableGeometrySelection())
+  }
+
+  function disableCollisionForNodes(nodes: EditorSceneNode[]) {
+    if (nodes.length === 0) {
+      deps.setSaveMessage('Select geometry before disabling collision')
+      return
+    }
+
+    for (const node of nodes) {
+      deps.patchNode(node.id, {
+        collision: {
+          ...(node.collision ?? { shape: deps.getDefaultCollisionShape(node) }),
+          intent: 'none',
+          channel: node.collision?.channel ?? 'worldStatic',
+          enabled: false,
+          sensor: false,
+        },
+      })
+    }
+
+    enableCollisionRoleForNodes(nodes)
+    deps.setSaveMessage(
+      nodes.length === 1
+        ? 'Disabled collision'
+        : `Disabled collision on ${nodes.length} objects`,
+    )
+  }
+
   function setBlocker() {
     applyCollisionPresetToSelection('blocker', 'Set collision mode to blocker')
   }
@@ -951,8 +999,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     )
   }
 
-  async function bakeMeshColliderFromSelection() {
-    const selectedNode = deps.getSelectedNode()
+  async function bakeMeshColliderForNode(selectedNode: EditorSceneNode | null) {
     if (
       !selectedNode ||
       (selectedNode.kind !== 'asset' && selectedNode.kind !== 'prefab')
@@ -1046,8 +1093,6 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
           intent: collision.intent ?? intent,
           channel: collision.channel ?? channel,
           enabled: true,
-          proxy: false,
-          bakeStatus: 'ready',
           sourceAssetUrl: assetUrl,
           sensor:
             collision.sensor ??
@@ -1070,8 +1115,21 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     }
   }
 
-  function fitColliderToVisualBounds() {
-    const selectedNode = deps.getSelectedNode()
+  async function bakeMeshColliderFromSelection() {
+    await bakeMeshColliderForNode(deps.getSelectedNode())
+  }
+
+  async function bakeMeshColliderForNodeId(nodeId: string) {
+    const node = deps
+      .getEditorNodes()
+      .find(candidate => candidate.id === nodeId)
+    deps.selectEditorNode(nodeId)
+    await bakeMeshColliderForNode(node ?? null)
+  }
+
+  function fitColliderToVisualBoundsForNode(
+    selectedNode: EditorSceneNode | null,
+  ) {
     if (!selectedNode || !isEditorGeometryNode(selectedNode)) return
     const shape =
       selectedNode.collision?.shape ??
@@ -1110,6 +1168,40 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
         ? 'Matched collider to transform scale because visual bounds metadata is missing'
         : 'Matched collider to visual bounds',
     )
+  }
+
+  function fitColliderToVisualBounds() {
+    fitColliderToVisualBoundsForNode(deps.getSelectedNode())
+  }
+
+  function fitColliderToVisualBoundsForNodeId(nodeId: string) {
+    const node = deps
+      .getEditorNodes()
+      .find(candidate => candidate.id === nodeId)
+    deps.selectEditorNode(nodeId)
+    fitColliderToVisualBoundsForNode(node ?? null)
+  }
+
+  function setCollisionPresetForNodeId(
+    nodeId: string,
+    intent: NonNullable<EditorNodeCollisionData['intent']>,
+    message: string,
+  ) {
+    const nodes = getEditableGeometryNodesByIds([nodeId])
+    deps.selectEditorNode(nodeId)
+    applyCollisionPresetToNodes(nodes, intent, message)
+  }
+
+  function setVisualOnlyForNodeId(nodeId: string) {
+    const nodes = getEditableGeometryNodesByIds([nodeId])
+    deps.selectEditorNode(nodeId)
+    setVisualOnlyForNodes(nodes)
+  }
+
+  function disableCollisionForNodeId(nodeId: string) {
+    const nodes = getEditableGeometryNodesByIds([nodeId])
+    deps.selectEditorNode(nodeId)
+    disableCollisionForNodes(nodes)
   }
 
   function updatePhysicsField(field: 'bodyType', value: string) {
@@ -1313,8 +1405,30 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     setWalkable,
     setTrigger,
     setDetail,
+    setBlockerForNodeId: (nodeId: string) =>
+      setCollisionPresetForNodeId(
+        nodeId,
+        'blocker',
+        'Set collision mode to blocker',
+      ),
+    setWalkableForNodeId: (nodeId: string) =>
+      setCollisionPresetForNodeId(
+        nodeId,
+        'walkable',
+        'Set collision mode to walkable',
+      ),
+    setTriggerForNodeId: (nodeId: string) =>
+      setCollisionPresetForNodeId(
+        nodeId,
+        'trigger',
+        'Set collision mode to trigger',
+      ),
+    setVisualOnlyForNodeId,
+    disableCollisionForNodeId,
     bakeMeshColliderFromSelection,
+    bakeMeshColliderForNodeId,
     fitColliderToVisualBounds,
+    fitColliderToVisualBoundsForNodeId,
     updatePhysicsField,
     updatePhysicsNumericField,
     updatePhysicsBooleanField,

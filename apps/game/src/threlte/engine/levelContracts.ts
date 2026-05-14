@@ -3,7 +3,7 @@ import { getLevelRuntimeContract as getLevelRuntimeContractCore } from './levelC
 export interface LevelRuntimeContract {
   levelId: string
   requiredActorIds: string[]
-  requiredAssetActorIds: string[]
+  requiredRenderActorIds: string[]
   requiredWalkableActorIds: string[]
   maxDefaultCollisionActors: number
   maxTrimeshActors: number

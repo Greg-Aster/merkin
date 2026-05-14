@@ -426,22 +426,22 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
       state.hunyuanLastOutputUrl = payload.assetUrl
       state.hunyuanLastResultSummary =
         targetNodeIds.length > 1
-          ? `Generated and replaced ${targetNodeIds.length} matching nodes.`
-          : 'Generated and replaced the selected node.'
+          ? `Generated and replaced ${targetNodeIds.length} matching nodes; collision preserved.`
+          : 'Generated and replaced the selected node; collision preserved.'
       state.hunyuanServiceReady = true
-      state.hunyuanStatus =
-        payload.message ??
-        (targetNodeIds.length > 1
-          ? `Generated asset applied to ${targetNodeIds.length} matching nodes.`
-          : 'Generated asset imported into the selected node.')
+      state.hunyuanStatus = payload.message
+        ? `${payload.message} Collision preserved.`
+        : targetNodeIds.length > 1
+          ? `Generated asset applied to ${targetNodeIds.length} matching nodes; collision preserved.`
+          : 'Generated asset imported into the selected node; collision preserved.'
       deps.setRuntimeDiagnostic('hunyuan', {
         level: 'ready',
         message: state.hunyuanStatus,
       })
       state.saveMessage =
         targetNodeIds.length > 1
-          ? `AI asset applied to ${targetNodeIds.length} nodes and saved: ${payload.assetUrl}`
-          : `AI asset applied and saved: ${payload.assetUrl}`
+          ? `AI asset applied to ${targetNodeIds.length} nodes and saved; collision preserved: ${payload.assetUrl}`
+          : `AI asset applied and saved; collision preserved: ${payload.assetUrl}`
       await deps.refreshGeneratedAssetLibrary(payload.assetUrl)
       if (deps.getSelectedNode()?.id === targetNodeId) {
         void deps.inspectSelectedAssetForHunyuan(payload.assetUrl, targetNodeId)

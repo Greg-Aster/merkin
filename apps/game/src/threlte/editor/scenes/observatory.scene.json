@@ -38,11 +38,10 @@
           "sourceAssetFingerprint": {
             "algorithm": "sha256",
             "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
-          },
-          "approvedHeightfieldException": true
+          }
         },
         "defaults": {
-          "solidObjectsByDefault": false,
+          "primitiveCollisionByDefault": true,
           "defaultFriction": 0.7,
           "defaultRestitution": 0
         }
@@ -117,14 +116,12 @@
           "vertexCount": 16641,
           "colliderResolution": 129,
           "generatedBy": "bake-terrain-collision"
-        },
-        "approvedHeightfieldException": true
+        }
       },
       "terrainMigration": {
         "currentMode": "glb-chunk-terrain",
         "authoritativeVisualSource": "source-glb-chunks",
         "collisionSource": "source-linked-terrain-collision",
-        "approvedHeightfieldException": true,
         "renderChunks": {
           "present": true,
           "authoritative": true,
@@ -150,7 +147,7 @@
           "collision": {
             "path": "/terrain/collision/observatory-environment.collider.bin",
             "status": "source-linked-terrain-collision",
-            "reason": "Gameplay collision is heightfield-projected from an intermediate derived from the same source GLB as the visual chunks.",
+            "reason": "Gameplay collision is source-linked projected terrain derived from the same source GLB contract as the visual chunks.",
             "targetRemovalCondition": "Replace only with a newer source-linked collision cook or dedicated simplified source-GLB collider."
           }
         },

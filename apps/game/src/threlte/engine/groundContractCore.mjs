@@ -485,14 +485,9 @@ export function validateLevelGroundContract(level, actorsById) {
     collisionSource === 'baked-heightfield' ||
     collisionSource === 'source-linked-terrain-collision'
   ) {
-    if (
-      runtimeMode === 'glb-chunk-terrain' &&
-      collisionSource === 'baked-heightfield' &&
-      terrain?.approvedHeightfieldException !== true &&
-      ground?.approvedHeightfieldException !== true
-    ) {
+    if (runtimeMode === 'glb-chunk-terrain' && collisionSource === 'baked-heightfield') {
       errors.push(
-        `${levelId}: glb-chunk-terrain cannot use baked-heightfield collision without an approved exception.`,
+        `${levelId}: glb-chunk-terrain must use source-linked terrain collision.`,
       )
     }
     if (!hasBakedTerrainRuntime(level)) {

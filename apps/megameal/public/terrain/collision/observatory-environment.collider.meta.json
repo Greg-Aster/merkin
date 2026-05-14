@@ -68,13 +68,14 @@
       ]
     },
     "renderBakeMode": "source-glb-chunk-mesh",
-    "collisionBakeMode": "heightfield-projection",
+    "collisionBakeMode": "source-glb-heightfield-projection",
     "collisionMeshSource": {
-      "type": "heightmap",
-      "url": "/terrain/heightmaps/observatory-environment_heightmap.png",
+      "type": "source-glb-heightfield-projection",
+      "url": "/models/levels/observatory-environment.glb",
+      "projectionHeightmapUrl": "/terrain/heightmaps/observatory-environment_heightmap.png",
       "fingerprint": {
         "algorithm": "sha256",
-        "value": "9940d42617657bb0ed767695abc55f424a688dee1b4e6005a84eaa8e63c89f6f"
+        "value": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae"
       }
     },
     "collisionCoverageBounds": {
@@ -91,8 +92,6 @@
     },
     "role": "walkable",
     "vertexCount": 16641,
-    "triangleCount": 32768,
-    "approvedHeightfieldException": true,
-    "approvedHeightfieldExceptionReason": "Collision is heightfield-projected from a source-derived heightmap while visual chunks are authored from the same source GLB."
+    "triangleCount": 32768
   }
 }

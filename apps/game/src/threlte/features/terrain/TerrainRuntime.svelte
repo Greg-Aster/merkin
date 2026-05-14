@@ -311,11 +311,8 @@ onMount(async () => {
       bakedCollider = await loadBakedTerrainCollider(config.collision)
     }
 
-    if (
-      collisionStrategy === 'baked-terrain-mesh' &&
-      (!config.collision?.url || config.collision.authoredException !== true)
-    ) {
-      const message = `TerrainRuntime ${levelId} requires an authored baked terrain collision exception with an artifact URL.`
+    if (collisionStrategy === 'baked-terrain-mesh' && !config.collision?.url) {
+      const message = `TerrainRuntime ${levelId} requires a baked terrain collision artifact URL.`
       console.error(message)
       terrainStore.update(state => ({
         ...state,
@@ -363,6 +360,7 @@ onMount(async () => {
         worldSizeZ: manager.getWorldSizeZ(),
         collision: {
           type: 'baked-terrain-mesh',
+          sourceLinked: config.collision.sourceLinked,
           url: config.collision.url,
           sourceResolution: bakedCollider.sourceResolution,
           colliderResolution: bakedCollider.colliderResolution,

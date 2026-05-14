@@ -154,6 +154,21 @@ function buildTerrainSourceContract({
   const sourceAssetFingerprint =
     sourceAssetFingerprints.find(entry => entry.url === sourceAssetUrl)
       ?.fingerprint ?? heightmapFingerprint
+  const collisionBakeMode = glbChunkTerrain
+    ? 'source-glb-heightfield-projection'
+    : 'heightfield-projection'
+  const collisionMeshSource = glbChunkTerrain
+    ? {
+        type: 'source-glb-heightfield-projection',
+        url: sourceAssetUrl,
+        projectionHeightmapUrl: heightmapUrl,
+        ...(sourceAssetFingerprint ? { fingerprint: sourceAssetFingerprint } : {}),
+      }
+    : {
+        type: 'heightmap',
+        url: heightmapUrl,
+        ...(heightmapFingerprint ? { fingerprint: heightmapFingerprint } : {}),
+      }
 
   return {
     schemaVersion: 1,
@@ -176,23 +191,12 @@ function buildTerrainSourceContract({
     renderBakeMode: glbChunkTerrain
       ? 'source-glb-chunk-mesh'
       : 'heightfield-chunk-mesh',
-    collisionBakeMode: 'heightfield-projection',
-    collisionMeshSource: {
-      type: 'heightmap',
-      url: heightmapUrl,
-      ...(heightmapFingerprint ? { fingerprint: heightmapFingerprint } : {}),
-    },
+    collisionBakeMode,
+    collisionMeshSource,
     collisionCoverageBounds: collisionBounds,
     role: 'walkable',
     vertexCount,
     triangleCount,
-    ...(glbChunkTerrain
-      ? {
-          approvedHeightfieldException: true,
-          approvedHeightfieldExceptionReason:
-            'Collision is heightfield-projected from a source-derived heightmap while visual chunks are authored from the same source GLB.',
-        }
-      : {}),
   }
 }
 
@@ -491,7 +495,7 @@ function updateManifestCollision(manifest, publicBinaryPath, publicMetaPath, met
       ...(manifest.collision ?? {}),
       terrain: {
         type: 'baked-terrain-mesh',
-        authoredException: true,
+        sourceLinked: Boolean(meta.sourceContract?.sourceAssetUrl),
         url: publicBinaryPath,
         metadataUrl: publicMetaPath,
         triangleCount: meta.triangleCount,

@@ -37,8 +37,6 @@ export let levelId = ''
 export let colliderUrl = ''
 export let colliderMetadataUrl = ''
 export let assetLocalTransform: AssetLocalTransformMetadata | null = null
-export let proxy = false
-export let bakeStatus: 'ready' | 'needsBake' | 'stale' | 'notRequired' | '' = ''
 export let primitiveGeometry: PrimitiveGeometryKind | undefined = undefined
 export let primitiveArgs: number[] = []
 export let overlayColor = ''
@@ -109,8 +107,6 @@ $: physicsScale = applyScaleToPhysics
         {assetLocalTransform}
         {primitiveGeometry}
         {primitiveArgs}
-        {proxy}
-        {bakeStatus}
         {overlayColor}
       />
     {/if}

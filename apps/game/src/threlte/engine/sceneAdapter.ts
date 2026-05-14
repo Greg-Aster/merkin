@@ -1,3 +1,7 @@
+import {
+  getSceneNodeMeshRenderSource,
+  hasMeshRenderSource,
+} from './actorRenderSource'
 import { resolveCollisionPolicy } from './collisionPolicy'
 import type {
   SceneDocument,
@@ -6,6 +10,7 @@ import type {
 } from './sceneDocumentTypes'
 import type {
   ActorDefinition,
+  CollisionClassification,
   CollisionShape,
   LevelDefinition,
   PhysicsBodyType,
@@ -50,7 +55,28 @@ function getSpawnRotation(scene: SceneDocument): Vec3 {
 function getActorKind(node: SceneNode): ActorDefinition['kind'] {
   if (node.light) return 'light'
   if (node.gameplay?.type === 'audio-region') return 'volume'
+  const meshSource = getSceneNodeMeshRenderSource(node)
+  if (meshSource.kind === 'asset') return 'asset'
+  if (meshSource.kind === 'prefab') return 'prefab'
+  if (meshSource.kind === 'primitive') return 'primitive'
   return node.kind === 'group' ? 'empty' : node.kind
+}
+
+function getCollisionPolicyActorKind(node: SceneNode) {
+  const actorKind = getActorKind(node)
+  return actorKind === 'asset' ||
+    actorKind === 'primitive' ||
+    actorKind === 'prefab' ||
+    actorKind === 'light'
+    ? actorKind
+    : 'empty'
+}
+
+function getCollisionPolicyPrimitiveGeometry(node: SceneNode) {
+  const meshSource = getSceneNodeMeshRenderSource(node)
+  return meshSource.kind === 'primitive'
+    ? meshSource.primitive.geometry
+    : undefined
 }
 
 function getPhysicsBodyType(node: SceneNode): PhysicsBodyType {
@@ -110,6 +136,34 @@ function getPrimitiveMaterial(node: SceneNode) {
   } satisfies Record<string, unknown>
 }
 
+function getCollisionClassification(input: {
+  scene: SceneDocument
+  node: SceneNode
+  actor: Pick<ActorDefinition, 'render' | 'physics'>
+}): CollisionClassification | undefined {
+  const hasVisibleRender = Boolean(
+    input.actor.render && input.actor.render.visible !== false,
+  )
+  const hasCollision = Boolean(input.actor.physics?.collision)
+  const visualOnlyActorIds =
+    input.scene.settings?.level?.collision?.roles?.visualOnlyActorIds ?? []
+  const isVisualOnly = visualOnlyActorIds.includes(input.node.id)
+
+  if (hasCollision) {
+    return hasVisibleRender ? 'collidable' : 'collision-only-proxy'
+  }
+  if (!hasVisibleRender) return undefined
+  if (isVisualOnly) return 'visual-only'
+  if (
+    input.node.collision?.enabled === false ||
+    input.node.collision?.intent === 'none'
+  ) {
+    return 'disabled'
+  }
+  if (input.node.collision) return 'disabled'
+  return 'missing-collision'
+}
+
 function toActor(
   scene: SceneDocument,
   node: SceneNode,
@@ -121,17 +175,11 @@ function toActor(
   const collisionResult = resolveCollisionPolicy({
     levelId: scene.levelId,
     actorId: node.id,
-    actorKind:
-      node.kind === 'asset' ||
-      node.kind === 'primitive' ||
-      node.kind === 'prefab' ||
-      node.kind === 'light'
-        ? node.kind
-        : 'empty',
+    actorKind: getCollisionPolicyActorKind(node),
     visible: node.visible,
     hasGameplay: Boolean(node.gameplay),
     bodyType: getPhysicsBodyType(node),
-    primitiveGeometry: node.primitive?.geometry,
+    primitiveGeometry: getCollisionPolicyPrimitiveGeometry(node),
     levelSettings: scene.settings,
     authoredCollision: node.collision
       ? {
@@ -152,9 +200,7 @@ function toActor(
       scale: node.scale,
     },
     render:
-      node.kind === 'primitive' ||
-      node.kind === 'asset' ||
-      node.kind === 'prefab'
+      hasMeshRenderSource(node)
         ? {
             visible: node.visible,
             cullingPolicy: getRenderCullingPolicy(node),
@@ -220,6 +266,12 @@ function toActor(
           }
         : undefined,
   }
+
+  actor.collisionClassification = getCollisionClassification({
+    scene,
+    node,
+    actor,
+  })
 
   return {
     actor,

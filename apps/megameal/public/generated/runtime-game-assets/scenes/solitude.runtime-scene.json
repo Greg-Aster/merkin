@@ -39,7 +39,7 @@
             "fallbackSurfacePolicy": "disabled"
           },
           "defaults": {
-            "solidObjectsByDefault": false,
+            "primitiveCollisionByDefault": true,
             "defaultFriction": 0.7,
             "defaultRestitution": 0
           },
@@ -68,7 +68,7 @@
           ]
         },
         "ground": {
-          "mode": "authored-ground",
+          "mode": "scene-authored",
           "visualSource": "scene-actors",
           "terrainRuntimeMode": "scene-authored",
           "terrainVisualSource": "scene-actors",
@@ -3651,27 +3651,188 @@
     "defaultCollisionActorCount": 0,
     "visualOnlyActorCount": 1,
     "requiredActorCount": 3,
-    "requiredRenderActorIds": [],
     "missingRequiredActorIds": [],
-    "requiredAssetUrls": [],
-    "runtimeAssetUrls": [
-      "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
-      "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
-      "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
-      "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
-      "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
-      "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb"
-    ],
+    "runtimeReadinessContract": {
+      "schemaVersion": 2,
+      "levelId": "solitude",
+      "publish": {
+        "ready": true,
+        "gates": [
+          {
+            "id": "legacy-required-asset-actor-ids-absent",
+            "label": "Legacy Required Asset Actor Ids Absent",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "spawn-valid",
+            "label": "Spawn Valid",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "solitude-player-spawn",
+              "player": [
+                0,
+                0.8,
+                -24
+              ]
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-actors-present",
+            "label": "Required Actors Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "solitude-ground-plateau",
+                "solitude-ground-dais",
+                "solitude-player-spawn"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-render-actors-present",
+            "label": "Required Render Actors Present",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "assetUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-walkable-collision-present",
+            "label": "Required Walkable Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "solitude-ground-plateau",
+                "solitude-ground-dais"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-collision-present",
+            "label": "Required Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "solitude-ground-plateau",
+                "solitude-ground-dais"
+              ],
+              "colliderUrls": [
+                "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.glb",
+                "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "terrain-runtime-collision-declared",
+            "label": "Terrain Runtime Collision Declared",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "solitude-terrain",
+              "manifestUrl": ""
+            },
+            "blockers": []
+          }
+        ],
+        "blockers": []
+      },
+      "runtime": {
+        "activationRequired": true,
+        "requiredGateIds": [
+          "publish-contract-ready",
+          "manifest-loaded",
+          "required-render-assets-loaded",
+          "required-render-actors-mounted",
+          "required-collision-mounted",
+          "required-collider-assets-loaded",
+          "terrain-collision-mounted",
+          "required-initial-world-partition-cells-ready",
+          "spawn-resolved",
+          "physics-world-ready",
+          "player-body-ready",
+          "gameplay-enabled"
+        ],
+        "requiredRenderActorIds": [],
+        "requiredCollisionActorIds": [
+          "solitude-ground-plateau",
+          "solitude-ground-dais"
+        ],
+        "requiredAssetUrls": [],
+        "requiredColliderUrls": [
+          "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.glb",
+          "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb"
+        ],
+        "requiredInitialCellKeys": [],
+        "requiredTerrain": false,
+        "terrainManifestUrl": ""
+      },
+      "spawn": {
+        "player": [
+          0,
+          0.8,
+          -24
+        ],
+        "valid": true,
+        "runtimeActorId": "solitude-player-spawn",
+        "satisfiedByRuntimeSystem": true
+      },
+      "terrain": {
+        "runtimeActorId": "solitude-terrain",
+        "runtimeCollision": false,
+        "satisfiedByRuntimeSystem": false
+      },
+      "requiredActorIds": [
+        "solitude-ground-plateau",
+        "solitude-ground-dais",
+        "solitude-player-spawn"
+      ],
+      "requiredWalkableActorIds": [
+        "solitude-ground-plateau",
+        "solitude-ground-dais"
+      ],
+      "runtimeAssetUrls": [
+        "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
+        "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
+        "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+        "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+        "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
+        "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb"
+      ],
+      "missingRequiredActorIds": [],
+      "missingRequiredRenderActorIds": [],
+      "missingRequiredCollisionActorIds": [],
+      "missingRequiredWalkableActorIds": []
+    },
     "collisionDiagnostics": {
       "authoredActorIds": [
         "solitude-ground-dais",
@@ -3691,12 +3852,196 @@
         "solitude-ring-fragment-west"
       ],
       "defaultActorIds": [],
-      "visualOnlyActorIds": []
+      "visualOnlyActorIds": [],
+      "disabledActorIds": [],
+      "missingCollisionActorIds": [],
+      "collisionOnlyProxyActorIds": []
     },
     "errors": [],
     "warnings": []
   },
   "runtime": {
+    "readinessContract": {
+      "schemaVersion": 2,
+      "levelId": "solitude",
+      "publish": {
+        "ready": true,
+        "gates": [
+          {
+            "id": "legacy-required-asset-actor-ids-absent",
+            "label": "Legacy Required Asset Actor Ids Absent",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "spawn-valid",
+            "label": "Spawn Valid",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "solitude-player-spawn",
+              "player": [
+                0,
+                0.8,
+                -24
+              ]
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-actors-present",
+            "label": "Required Actors Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "solitude-ground-plateau",
+                "solitude-ground-dais",
+                "solitude-player-spawn"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-render-actors-present",
+            "label": "Required Render Actors Present",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "assetUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-walkable-collision-present",
+            "label": "Required Walkable Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "solitude-ground-plateau",
+                "solitude-ground-dais"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-collision-present",
+            "label": "Required Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "solitude-ground-plateau",
+                "solitude-ground-dais"
+              ],
+              "colliderUrls": [
+                "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.glb",
+                "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "terrain-runtime-collision-declared",
+            "label": "Terrain Runtime Collision Declared",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "solitude-terrain",
+              "manifestUrl": ""
+            },
+            "blockers": []
+          }
+        ],
+        "blockers": []
+      },
+      "runtime": {
+        "activationRequired": true,
+        "requiredGateIds": [
+          "publish-contract-ready",
+          "manifest-loaded",
+          "required-render-assets-loaded",
+          "required-render-actors-mounted",
+          "required-collision-mounted",
+          "required-collider-assets-loaded",
+          "terrain-collision-mounted",
+          "required-initial-world-partition-cells-ready",
+          "spawn-resolved",
+          "physics-world-ready",
+          "player-body-ready",
+          "gameplay-enabled"
+        ],
+        "requiredRenderActorIds": [],
+        "requiredCollisionActorIds": [
+          "solitude-ground-plateau",
+          "solitude-ground-dais"
+        ],
+        "requiredAssetUrls": [],
+        "requiredColliderUrls": [
+          "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.glb",
+          "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb"
+        ],
+        "requiredInitialCellKeys": [],
+        "requiredTerrain": false,
+        "terrainManifestUrl": ""
+      },
+      "spawn": {
+        "player": [
+          0,
+          0.8,
+          -24
+        ],
+        "valid": true,
+        "runtimeActorId": "solitude-player-spawn",
+        "satisfiedByRuntimeSystem": true
+      },
+      "terrain": {
+        "runtimeActorId": "solitude-terrain",
+        "runtimeCollision": false,
+        "satisfiedByRuntimeSystem": false
+      },
+      "requiredActorIds": [
+        "solitude-ground-plateau",
+        "solitude-ground-dais",
+        "solitude-player-spawn"
+      ],
+      "requiredWalkableActorIds": [
+        "solitude-ground-plateau",
+        "solitude-ground-dais"
+      ],
+      "runtimeAssetUrls": [
+        "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
+        "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
+        "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+        "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+        "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
+        "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb"
+      ],
+      "missingRequiredActorIds": [],
+      "missingRequiredRenderActorIds": [],
+      "missingRequiredCollisionActorIds": [],
+      "missingRequiredWalkableActorIds": []
+    },
     "requiredRenderActorIds": [],
     "requiredAssetUrls": [],
     "runtimeAssetUrls": [
@@ -3718,7 +4063,7 @@
       "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb"
     ],
     "ground": {
-      "mode": "authored-ground",
+      "mode": "scene-authored",
       "visualSource": "scene-actors",
       "terrainRuntimeMode": "scene-authored",
       "terrainVisualSource": "scene-actors",

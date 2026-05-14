@@ -88,9 +88,13 @@ export function auditRuntimeScenes({
 
     report.actorCount = levelDefinition?.actors?.length ?? 0
     report.requiredRenderActorCount =
-      buildReport?.requiredRenderActorIds?.length ?? 0
-    report.requiredAssetCount = buildReport?.requiredAssetUrls?.length ?? 0
-    report.runtimeAssetCount = buildReport?.runtimeAssetUrls?.length ?? 0
+      buildReport?.runtimeReadinessContract?.runtime?.requiredRenderActorIds
+        ?.length ?? 0
+    report.requiredAssetCount =
+      buildReport?.runtimeReadinessContract?.runtime?.requiredAssetUrls
+        ?.length ?? 0
+    report.runtimeAssetCount =
+      buildReport?.runtimeReadinessContract?.runtimeAssetUrls?.length ?? 0
     report.buildErrors = buildReport?.errors?.length ?? 0
     report.hasGraphicsBudget = !!levelDefinition?.settings?.level?.graphicsBudget
     report.hasRenderProfile =

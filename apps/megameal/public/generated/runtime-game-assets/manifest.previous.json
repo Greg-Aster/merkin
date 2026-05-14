@@ -11,7 +11,7 @@
     },
     "git": {
       "branch": "dev",
-      "commit": "54069e7207761cd367e6becb57e5f495cf9cb4ab",
+      "commit": "fe2f21c4b2ebb23cc3a67945219f09b42bd34c97",
       "dirty": true
     },
     "fingerprint": "47244152bd4c34b6687c61f3e1d8b91d8d7385147d96cb699387a4edbe5e7c4a",
@@ -80783,7 +80783,7 @@
       "runtimeAssetCount": 0,
       "buildErrors": [],
       "buildWarnings": [
-        "Walkability sample \"player-spawn\" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime."
+        "Walkability sample \"player-spawn\" is not supported by an authored primitive walkable collider; runtime terrain collision must cover it."
       ]
     },
     "sci-fi-room": {

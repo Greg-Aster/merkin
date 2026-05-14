@@ -53,7 +53,7 @@ export interface TerrainRuntimeReadyDetail {
   }
   collision?: {
     type: 'baked-terrain-mesh'
-    authoredException: true
+    sourceLinked?: true
     url: string
     sourceResolution: number
     colliderResolution: number

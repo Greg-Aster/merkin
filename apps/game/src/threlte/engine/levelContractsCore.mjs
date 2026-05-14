@@ -1,7 +1,7 @@
 const DEFAULT_RUNTIME_CONTRACT = {
   levelId: '*',
   requiredActorIds: [],
-  requiredAssetActorIds: [],
+  requiredRenderActorIds: [],
   requiredWalkableActorIds: [],
   maxDefaultCollisionActors: 0,
   maxTrimeshActors: 32,
@@ -14,7 +14,7 @@ const DEFAULT_RUNTIME_CONTRACT = {
 const LEVEL_RUNTIME_CONTRACTS = {
   observatory: {
     requiredActorIds: ['observatory-terrain', 'observatory-player-spawn'],
-    requiredAssetActorIds: [],
+    requiredRenderActorIds: [],
     requiredWalkableActorIds: ['observatory-terrain'],
     maxDefaultCollisionActors: 0,
     maxTrimeshActors: 0,
@@ -28,7 +28,7 @@ const LEVEL_RUNTIME_CONTRACTS = {
       'solitude-ground-dais',
       'solitude-player-spawn',
     ],
-    requiredAssetActorIds: [],
+    requiredRenderActorIds: [],
     requiredWalkableActorIds: [
       'solitude-ground-plateau',
       'solitude-ground-dais',
@@ -63,7 +63,7 @@ const LEVEL_RUNTIME_CONTRACTS = {
       'yggdrasil-spawn-pad',
       'yggdrasil-tree-merged',
     ],
-    requiredAssetActorIds: ['yggdrasil-tree-merged'],
+    requiredRenderActorIds: ['yggdrasil-tree-merged'],
     requiredWalkableActorIds: [
       'yggdrasil-ground',
       'yggdrasil-island-shelf',

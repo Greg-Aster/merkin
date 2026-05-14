@@ -85,10 +85,9 @@ export function getRequiredEditorActorIds(scene: EditorSceneDocument | null) {
   return Array.from(
     new Set([
       ...contract.requiredActorIds,
-      ...contract.requiredAssetActorIds,
+      ...contract.requiredRenderActorIds,
       ...toStringArray(runtimeAssets?.requiredActorIds),
       ...toStringArray(runtimeAssets?.requiredRenderActorIds),
-      ...toStringArray(runtimeAssets?.requiredAssetActorIds),
     ]),
   )
 }

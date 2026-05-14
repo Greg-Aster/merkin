@@ -4,7 +4,7 @@ bl_info = {
     "version": (0, 1, 0),
     "blender": (5, 0, 0),
     "location": "View3D > Sidebar > Merkin",
-    "description": "Import Merkin scene packages and export transform deltas.",
+    "description": "Import Merkin scene packages and export transform/collision deltas.",
     "category": "Import-Export",
 }
 
@@ -21,6 +21,7 @@ from mathutils import Euler, Matrix, Vector
 PACKAGE_FILE_NAME = "merkin-scene-package.json"
 DELTA_FILE_NAME = "merkin-scene-delta.json"
 BLENDER_APP_MARKER = "apps/blender"
+MIN_COLLISION_SIZE = 0.05
 
 
 def game_to_blender_axis_matrix():
@@ -65,6 +66,22 @@ def set_merkin_props(obj, node):
     obj["merkin_collision_intent"] = collision.get("intent", "")
     obj["merkin_collision_channel"] = collision.get("channel", "")
     obj["merkin_export_mode"] = "transform-only"
+
+
+def set_merkin_collision_proxy_props(obj, node):
+    collision = node.get("collision") or {}
+    obj["merkin_node_id"] = node.get("id", "")
+    obj["merkin_node_name"] = node.get("name", "")
+    obj["merkin_kind"] = "collision"
+    obj["merkin_parent_id"] = node.get("id", "")
+    obj["merkin_collision_shape"] = collision.get("shape", "")
+    obj["merkin_collision_intent"] = collision.get("intent", "")
+    obj["merkin_collision_channel"] = collision.get("channel", "")
+    obj["merkin_collision_enabled"] = collision.get("enabled", True) is not False
+    obj["merkin_collision_sensor"] = bool(collision.get("sensor", False))
+    obj["merkin_collision_friction"] = float(collision.get("friction", 0.7) or 0.7)
+    obj["merkin_collision_restitution"] = float(collision.get("restitution", 0.0) or 0.0)
+    obj["merkin_export_mode"] = "collision"
 
 
 def get_package_directory(package_path):
@@ -264,6 +281,30 @@ def create_primitive_material(node):
             principled.inputs["Emission Color"].default_value = (er, eg, eb, 1.0)
         if "Emission Strength" in principled.inputs:
             principled.inputs["Emission Strength"].default_value = emissive_intensity
+
+    return material
+
+
+def get_collision_material():
+    material = bpy.data.materials.get("Merkin Collision Proxy Material")
+    if material:
+        return material
+
+    material = bpy.data.materials.new("Merkin Collision Proxy Material")
+    material.diffuse_color = (0.1, 0.65, 1.0, 0.22)
+    material.use_nodes = True
+    material.blend_method = "BLEND"
+
+    principled = material.node_tree.nodes.get("Principled BSDF")
+    if principled:
+        if "Base Color" in principled.inputs:
+            principled.inputs["Base Color"].default_value = (0.1, 0.65, 1.0, 0.22)
+        if "Alpha" in principled.inputs:
+            principled.inputs["Alpha"].default_value = 0.22
+        if "Metallic" in principled.inputs:
+            principled.inputs["Metallic"].default_value = 0.0
+        if "Roughness" in principled.inputs:
+            principled.inputs["Roughness"].default_value = 0.35
 
     return material
 
@@ -534,6 +575,179 @@ def create_primitive_child(node, root, collection):
     return child
 
 
+def finite_number(value, fallback):
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return float(fallback)
+    if not math.isfinite(number):
+        return float(fallback)
+    return number
+
+
+def finite_vec3(value, fallback):
+    if not isinstance(value, list) or len(value) != 3:
+        return list(fallback)
+    return [finite_number(value[index], fallback[index]) for index in range(3)]
+
+
+def clamp_size(value):
+    return max(MIN_COLLISION_SIZE, abs(finite_number(value, 1.0)))
+
+
+def safe_scale_vec3(value):
+    scale = finite_vec3(value, [1.0, 1.0, 1.0])
+    return [
+        abs(component) if abs(component) > 0.0001 else 1.0
+        for component in scale
+    ]
+
+
+def get_collision_world_size(node):
+    collision = node.get("collision") or {}
+    if isinstance(collision.get("size"), list):
+        return [
+            clamp_size(component)
+            for component in finite_vec3(collision.get("size"), [1.0, 1.0, 1.0])
+        ]
+
+    primitive = node.get("primitive") or {}
+    geometry = primitive.get("geometry")
+    args = primitive.get("args") or []
+    scale = safe_scale_vec3(node.get("scale", [1.0, 1.0, 1.0]))
+
+    if geometry == "box":
+        return [
+            clamp_size(number_arg(args, 0, 1.0) * scale[0]),
+            clamp_size(number_arg(args, 1, 1.0) * scale[1]),
+            clamp_size(number_arg(args, 2, 1.0) * scale[2]),
+        ]
+
+    if geometry == "cylinder":
+        radius = max(abs(number_arg(args, 0, 0.5)), abs(number_arg(args, 1, 0.5)))
+        return [
+            clamp_size(radius * 2.0 * scale[0]),
+            clamp_size(number_arg(args, 2, 1.0) * scale[1]),
+            clamp_size(radius * 2.0 * scale[2]),
+        ]
+
+    return [clamp_size(component) for component in scale]
+
+
+def local_collision_size_from_game_size(world_size, node_scale):
+    scale = safe_scale_vec3(node_scale)
+    return [
+        clamp_size(world_size[0] / scale[0]),
+        clamp_size(world_size[1] / scale[1]),
+        clamp_size(world_size[2] / scale[2]),
+    ]
+
+
+def create_collision_proxy_child(node, root, collection):
+    collision = node.get("collision") or {}
+    shape = collision.get("shape")
+    if collision.get("enabled") is False or collision.get("intent") == "none":
+        return None
+    if shape not in {"cuboid", "cylinder"}:
+        return None
+
+    local_size = local_collision_size_from_game_size(
+        get_collision_world_size(node),
+        node.get("scale", [1.0, 1.0, 1.0]),
+    )
+    name = f"{node.get('name', node.get('id', 'node'))} Collision"
+
+    if shape == "cylinder":
+        radius = max(local_size[0], local_size[2]) / 2.0
+        bpy.ops.mesh.primitive_cylinder_add(
+            vertices=32,
+            radius=radius,
+            depth=local_size[1],
+            location=(0.0, 0.0, 0.0),
+        )
+        child = bpy.context.object
+        child.scale.x = max(
+            local_size[0] / max(radius * 2.0, MIN_COLLISION_SIZE),
+            MIN_COLLISION_SIZE,
+        )
+        child.scale.y = max(
+            local_size[2] / max(radius * 2.0, MIN_COLLISION_SIZE),
+            MIN_COLLISION_SIZE,
+        )
+    else:
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0.0, 0.0, 0.0))
+        child = bpy.context.object
+        child.scale = (local_size[0], local_size[2], local_size[1])
+
+    child.name = name
+    child.display_type = "WIRE"
+    child.show_wire = True
+    child.show_in_front = True
+    child.parent = root
+    child.matrix_parent_inverse.identity()
+    child.location = (0.0, 0.0, 0.0)
+    child.rotation_euler = (0.0, 0.0, 0.0)
+    child.data.materials.append(get_collision_material())
+    set_merkin_collision_proxy_props(child, node)
+    link_object_to_collection(child, collection)
+    return child
+
+
+def get_object_collection(obj):
+    if obj and obj.users_collection:
+        return obj.users_collection[0]
+    return bpy.context.scene.collection
+
+
+def build_default_collision_node_from_object(obj):
+    transform = game_transform_from_matrix(obj.matrix_local)
+    return {
+        "id": obj.get("merkin_node_id", ""),
+        "name": obj.get("merkin_node_name", obj.name),
+        "scale": transform.get("scale", [1.0, 1.0, 1.0]),
+        "collision": {
+            "shape": "cuboid",
+            "intent": obj.get("merkin_collision_intent", "blocker") or "blocker",
+            "channel": obj.get("merkin_collision_channel", "worldStatic") or "worldStatic",
+            "enabled": True,
+            "size": [
+                clamp_size(component)
+                for component in transform.get("scale", [1.0, 1.0, 1.0])
+            ],
+            "friction": 0.7,
+            "restitution": 0.0,
+            "sensor": False,
+        },
+    }
+
+
+def get_object_local_dimensions(obj):
+    if not obj or not getattr(obj, "bound_box", None):
+        return [1.0, 1.0, 1.0]
+
+    points = [Vector(point) for point in obj.bound_box]
+    minimum = Vector(
+        (
+            min(point.x for point in points),
+            min(point.y for point in points),
+            min(point.z for point in points),
+        )
+    )
+    maximum = Vector(
+        (
+            max(point.x for point in points),
+            max(point.y for point in points),
+            max(point.z for point in points),
+        )
+    )
+    size = maximum - minimum
+    return [
+        clamp_size(size.x * abs(obj.scale.x)),
+        clamp_size(size.y * abs(obj.scale.y)),
+        clamp_size(size.z * abs(obj.scale.z)),
+    ]
+
+
 def import_asset_child(node, root, collection, package_directory):
     asset_path = node.get("assetPackagePath") or ""
     if not asset_path:
@@ -620,6 +834,7 @@ class MERKIN_OT_import_scene_package(bpy.types.Operator):
                 import_asset_child(node, root, collection, package_directory)
             elif kind == "primitive":
                 create_primitive_child(node, root, collection)
+            create_collision_proxy_child(node, root, collection)
 
         for node in nodes:
             parent_id = node.get("parentId")
@@ -665,30 +880,78 @@ class MERKIN_OT_export_scene_delta(bpy.types.Operator):
             return {"CANCELLED"}
 
         package_path = str(Path(package_path).resolve())
-        output_path = Path(self.filepath).resolve() if self.filepath else Path(package_path).with_name(DELTA_FILE_NAME)
+        output_path = (
+            Path(self.filepath).resolve()
+            if self.filepath
+            else Path(package_path).with_name(DELTA_FILE_NAME)
+        )
 
-        changes = []
+        changes_by_node_id = {}
         for obj in bpy.data.objects:
             node_id = obj.get("merkin_node_id")
             export_mode = obj.get("merkin_export_mode", "transform-only")
             if not node_id or export_mode == "ignore":
                 continue
 
-            transform = game_transform_from_matrix(obj.matrix_local)
-            changes.append(
+            change = changes_by_node_id.setdefault(
+                node_id,
                 {
                     "nodeId": node_id,
                     "name": obj.get("merkin_node_name", obj.name),
                     "exportMode": export_mode,
-                    **transform,
-                }
+                },
+            )
+
+            if export_mode == "collision":
+                shape = obj.get("merkin_collision_shape", "")
+                if shape in {"cuboid", "cylinder"}:
+                    owner = obj.parent
+                    owner_scale = (
+                        game_transform_from_matrix(owner.matrix_local)["scale"]
+                        if owner
+                        else [1.0, 1.0, 1.0]
+                    )
+                    dimensions = get_object_local_dimensions(obj)
+                    change["collision"] = {
+                        "shape": shape,
+                        "intent": obj.get("merkin_collision_intent", ""),
+                        "channel": obj.get("merkin_collision_channel", ""),
+                        "enabled": bool(obj.get("merkin_collision_enabled", True)),
+                        "sensor": bool(obj.get("merkin_collision_sensor", False)),
+                        "friction": round(
+                            float(obj.get("merkin_collision_friction", 0.7) or 0.7),
+                            6,
+                        ),
+                        "restitution": round(
+                            float(
+                                obj.get("merkin_collision_restitution", 0.0) or 0.0
+                            ),
+                            6,
+                        ),
+                        "size": [
+                            round(clamp_size(dimensions[0] * abs(owner_scale[0])), 6),
+                            round(clamp_size(dimensions[2] * abs(owner_scale[1])), 6),
+                            round(clamp_size(dimensions[1] * abs(owner_scale[2])), 6),
+                        ],
+                    }
+                    change["exportMode"] = (
+                        "transform-and-collision"
+                        if "position" in change
+                        else "collision"
+                    )
+                continue
+
+            transform = game_transform_from_matrix(obj.matrix_local)
+            change.update(transform)
+            change["exportMode"] = (
+                "transform-and-collision" if "collision" in change else export_mode
             )
 
         output = {
             "schema": "merkin.sceneDelta.v1",
             "levelId": context.scene.get("merkin_level_id", ""),
             "sourcePackagePath": package_path,
-            "changes": sorted(changes, key=lambda item: item["nodeId"]),
+            "changes": sorted(changes_by_node_id.values(), key=lambda item: item["nodeId"]),
         }
         output_path.write_text(json.dumps(output, indent=2), encoding="utf-8")
         self.report({"INFO"}, f"Exported Merkin scene delta: {output_path}")
@@ -700,6 +963,38 @@ class MERKIN_OT_export_scene_delta(bpy.types.Operator):
             self.filepath = str(Path(package_path).with_name(DELTA_FILE_NAME))
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
+
+
+class MERKIN_OT_add_collision_proxy(bpy.types.Operator):
+    bl_idname = "merkin.add_collision_proxy"
+    bl_label = "Add Collision Proxy"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        selected = context.object
+        if not selected or not selected.get("merkin_node_id"):
+            self.report({"ERROR"}, "Select a Merkin node or collision proxy first.")
+            return {"CANCELLED"}
+
+        owner = (
+            selected.parent
+            if selected.get("merkin_export_mode") == "collision"
+            else selected
+        )
+        if not owner or not owner.get("merkin_node_id"):
+            self.report({"ERROR"}, "Could not resolve the selected Merkin node root.")
+            return {"CANCELLED"}
+
+        node = build_default_collision_node_from_object(owner)
+        proxy = create_collision_proxy_child(node, owner, get_object_collection(owner))
+        if not proxy:
+            self.report({"ERROR"}, "Could not create collision proxy.")
+            return {"CANCELLED"}
+
+        context.view_layer.objects.active = proxy
+        proxy.select_set(True)
+        self.report({"INFO"}, f"Added collision proxy for {node.get('id')}")
+        return {"FINISHED"}
 
 
 class MERKIN_PT_scene_bridge_panel(bpy.types.Panel):
@@ -716,6 +1011,7 @@ class MERKIN_PT_scene_bridge_panel(bpy.types.Panel):
 
         layout.operator(MERKIN_OT_import_scene_package.bl_idname, icon="IMPORT")
         layout.operator(MERKIN_OT_export_scene_delta.bl_idname, icon="EXPORT")
+        layout.operator(MERKIN_OT_add_collision_proxy.bl_idname, icon="MOD_PHYSICS")
         layout.label(text=f"Import file: {PACKAGE_FILE_NAME}")
 
         if level_id:
@@ -730,11 +1026,20 @@ class MERKIN_PT_scene_bridge_panel(bpy.types.Panel):
             box.label(text=f"ID: {obj.get('merkin_node_id')}")
             box.label(text=f"Kind: {obj.get('merkin_kind', '')}")
             box.prop(obj, '["merkin_export_mode"]', text="Export Mode")
+            if obj.get("merkin_export_mode") == "collision":
+                box.prop(obj, '["merkin_collision_shape"]', text="Shape")
+                box.prop(obj, '["merkin_collision_intent"]', text="Intent")
+                box.prop(obj, '["merkin_collision_channel"]', text="Channel")
+                box.prop(obj, '["merkin_collision_enabled"]', text="Enabled")
+                box.prop(obj, '["merkin_collision_sensor"]', text="Sensor")
+                box.prop(obj, '["merkin_collision_friction"]', text="Friction")
+                box.prop(obj, '["merkin_collision_restitution"]', text="Restitution")
 
 
 classes = (
     MERKIN_OT_import_scene_package,
     MERKIN_OT_export_scene_delta,
+    MERKIN_OT_add_collision_proxy,
     MERKIN_PT_scene_bridge_panel,
 )
 

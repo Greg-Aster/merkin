@@ -4,7 +4,7 @@ import {
   exportSceneNodesToMergedGlb,
   getPrefabAssetUrl,
 } from './editorBakeSource'
-import { getNodeVisualColliderSize } from './editorCollisionDefaults'
+import { preserveCollisionForVisualReplacement } from './editorCollisionLifecycle'
 import {
   getCenteredGroupTransform,
   getSharedParentId,
@@ -580,25 +580,31 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     }
 
     deps.appendPipelineLog(
-      'Applied generated asset to selection with preserved transform',
+      'Applied generated asset to selection with preserved transform and collision',
       {
         assetUrl: state.hunyuanLastOutputUrl,
         targets: targetNodeIds.map(id => {
           const node = deps
             .getEditorNodes()
             .find(candidate => candidate.id === id)
-          return { id, transform: deps.getNodeTransformSnapshot(node ?? null) }
+          return {
+            id,
+            collisionPreserved: Boolean(node?.collision),
+            transform: deps.getNodeTransformSnapshot(node ?? null),
+          }
         }),
       },
     )
 
-    state.hunyuanStatus = `Applied generated asset to ${targetNodeIds.length} node${targetNodeIds.length === 1 ? '' : 's'}.`
+    state.hunyuanStatus = `Applied generated asset to ${targetNodeIds.length} node${targetNodeIds.length === 1 ? '' : 's'}; collision preserved.`
     state.hunyuanLastResultSummary = state.hunyuanStatus
     deps.setRuntimeDiagnostic('hunyuan', {
       level: 'ready',
       message: state.hunyuanStatus,
     })
-    deps.setSaveMessage(`AI asset applied: ${state.hunyuanLastOutputUrl}`)
+    deps.setSaveMessage(
+      `AI asset applied; collision preserved: ${state.hunyuanLastOutputUrl}`,
+    )
 
     const selectedNode = deps.getSelectedNode()
     if (selectedNode && targetNodeIds.includes(selectedNode.id)) {
@@ -745,16 +751,18 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
   async function convertSelectedNodeToMesh() {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode) {
-      deps.setSaveMessage('Select one object before converting to mesh')
+      deps.setSaveMessage(
+        'Select one object before replacing the visual source',
+      )
       return
     }
     if (!selectedNode.primitive && !selectedNode.prefab) {
-      deps.setSaveMessage('Selected object is already a mesh asset')
+      deps.setSaveMessage('Selected object is already using a mesh asset')
       return
     }
 
     try {
-      deps.setSaveMessage(`Converting ${selectedNode.name} to mesh…`)
+      deps.setSaveMessage(`Replacing ${selectedNode.name} visual source…`)
       const source = await stageSceneNodeSourceAsset(selectedNode)
       const prefabAssetUrl = getPrefabAssetUrl(
         selectedNode.prefab?.type,
@@ -762,40 +770,16 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       )
       const scaleWasBakedIntoMesh =
         !!selectedNode.primitive || (!!selectedNode.prefab && !prefabAssetUrl)
-      const previousCollision = selectedNode.collision
-      const preservedCollisionShape =
-        previousCollision?.shape && previousCollision.shape !== 'trimesh'
-          ? previousCollision.shape
-          : 'cuboid'
-      const proxyCollisionSize =
-        previousCollision?.size ?? getNodeVisualColliderSize(selectedNode)
+      const collision = preserveCollisionForVisualReplacement(selectedNode, {
+        visualScaleBakedIntoMesh: scaleWasBakedIntoMesh,
+      })
       deps.patchNode(selectedNode.id, {
         kind: 'asset',
         asset: { url: source.assetUrl },
         primitive: undefined,
         prefab: undefined,
         scale: scaleWasBakedIntoMesh ? [1, 1, 1] : selectedNode.scale,
-        collision:
-          previousCollision?.enabled === false
-            ? {
-                shape: preservedCollisionShape,
-                intent: 'none',
-                enabled: false,
-              }
-            : {
-                shape: preservedCollisionShape,
-                intent:
-                  previousCollision?.intent ??
-                  (previousCollision?.sensor ? 'trigger' : 'blocker'),
-                enabled: true,
-                proxy: true,
-                bakeStatus: 'needsBake',
-                sourceAssetUrl: source.assetUrl,
-                size: proxyCollisionSize,
-                friction: previousCollision?.friction ?? 0.7,
-                restitution: previousCollision?.restitution ?? 0,
-                sensor: previousCollision?.sensor ?? false,
-              },
+        ...(collision ? { collision } : {}),
         generation: {
           ...(selectedNode.generation ?? {}),
           descriptor: deps.getDefaultStyleDescriptor(selectedNode),
@@ -803,17 +787,19 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
           lastBakedAt: new Date().toISOString(),
         },
       })
-      deps.appendPipelineLog('Converted selected object to mesh asset', {
+      deps.appendPipelineLog('Replaced selected object visual source', {
         nodeId: selectedNode.id,
         assetUrl: source.assetUrl,
+        collisionPreserved: Boolean(collision),
+        collisionShape: collision?.shape,
       })
-      deps.setSaveMessage(`Converted ${selectedNode.name} to mesh`)
-    } catch (error) {
-      console.error('Convert object to mesh failed:', error)
       deps.setSaveMessage(
-        error instanceof Error
-          ? error.message
-          : 'Convert object to mesh failed',
+        `Replaced ${selectedNode.name} visual source; collision preserved`,
+      )
+    } catch (error) {
+      console.error('Replace visual source failed:', error)
+      deps.setSaveMessage(
+        error instanceof Error ? error.message : 'Replace visual source failed',
       )
     }
   }

@@ -39,7 +39,7 @@
             "fallbackSurfacePolicy": "disabled"
           },
           "defaults": {
-            "solidObjectsByDefault": false,
+            "primitiveCollisionByDefault": true,
             "defaultFriction": 0.7,
             "defaultRestitution": 0
           },
@@ -64,7 +64,7 @@
           ]
         },
         "ground": {
-          "mode": "authored-ground",
+          "mode": "scene-authored",
           "visualSource": "scene-actors",
           "terrainRuntimeMode": "scene-authored",
           "terrainVisualSource": "scene-actors",
@@ -2951,40 +2951,201 @@
     "defaultCollisionActorCount": 0,
     "visualOnlyActorCount": 6,
     "requiredActorCount": 4,
-    "requiredRenderActorIds": [],
     "missingRequiredActorIds": [],
-    "requiredAssetUrls": [],
-    "runtimeAssetUrls": [
-      "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
-      "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb",
-      "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
-      "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
-      "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-cyan.glb",
-      "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-green.glb",
-      "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
-      "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb",
-      "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
-      "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-      "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
-      "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
-      "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
-      "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
-      "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
-      "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
-      "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
-      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
-      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
-      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-green.glb",
-      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
-      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
-      "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-      "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
-      "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
-      "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
-      "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
-      "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
-      "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
-    ],
+    "runtimeReadinessContract": {
+      "schemaVersion": 2,
+      "levelId": "sci-fi-room",
+      "publish": {
+        "ready": true,
+        "gates": [
+          {
+            "id": "legacy-required-asset-actor-ids-absent",
+            "label": "Legacy Required Asset Actor Ids Absent",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "spawn-valid",
+            "label": "Spawn Valid",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "sci-fi-room-player-spawn",
+              "player": [
+                0,
+                1.5,
+                0
+              ]
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-actors-present",
+            "label": "Required Actors Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "sci-fi-floor-interior-slab",
+                "sci-fi-floor-courtyard-slab",
+                "sci-fi-floor-wasteland-tile-4-4",
+                "sci-fi-room-player-spawn"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-render-actors-present",
+            "label": "Required Render Actors Present",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "assetUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-walkable-collision-present",
+            "label": "Required Walkable Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "sci-fi-floor-interior-slab",
+                "sci-fi-floor-courtyard-slab",
+                "sci-fi-floor-wasteland-tile-4-4"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-collision-present",
+            "label": "Required Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "sci-fi-floor-interior-slab",
+                "sci-fi-floor-courtyard-slab",
+                "sci-fi-floor-wasteland-tile-4-4"
+              ],
+              "colliderUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "terrain-runtime-collision-declared",
+            "label": "Terrain Runtime Collision Declared",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "sci-fi-room-terrain",
+              "manifestUrl": ""
+            },
+            "blockers": []
+          }
+        ],
+        "blockers": []
+      },
+      "runtime": {
+        "activationRequired": true,
+        "requiredGateIds": [
+          "publish-contract-ready",
+          "manifest-loaded",
+          "required-render-assets-loaded",
+          "required-render-actors-mounted",
+          "required-collision-mounted",
+          "required-collider-assets-loaded",
+          "terrain-collision-mounted",
+          "required-initial-world-partition-cells-ready",
+          "spawn-resolved",
+          "physics-world-ready",
+          "player-body-ready",
+          "gameplay-enabled"
+        ],
+        "requiredRenderActorIds": [],
+        "requiredCollisionActorIds": [
+          "sci-fi-floor-interior-slab",
+          "sci-fi-floor-courtyard-slab",
+          "sci-fi-floor-wasteland-tile-4-4"
+        ],
+        "requiredAssetUrls": [],
+        "requiredColliderUrls": [],
+        "requiredInitialCellKeys": [],
+        "requiredTerrain": false,
+        "terrainManifestUrl": ""
+      },
+      "spawn": {
+        "player": [
+          0,
+          1.5,
+          0
+        ],
+        "valid": true,
+        "runtimeActorId": "sci-fi-room-player-spawn",
+        "satisfiedByRuntimeSystem": true
+      },
+      "terrain": {
+        "runtimeActorId": "sci-fi-room-terrain",
+        "runtimeCollision": false,
+        "satisfiedByRuntimeSystem": false
+      },
+      "requiredActorIds": [
+        "sci-fi-floor-interior-slab",
+        "sci-fi-floor-courtyard-slab",
+        "sci-fi-floor-wasteland-tile-4-4",
+        "sci-fi-room-player-spawn"
+      ],
+      "requiredWalkableActorIds": [
+        "sci-fi-floor-interior-slab",
+        "sci-fi-floor-courtyard-slab",
+        "sci-fi-floor-wasteland-tile-4-4"
+      ],
+      "runtimeAssetUrls": [
+        "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+        "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb",
+        "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+        "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+        "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-cyan.glb",
+        "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-green.glb",
+        "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+        "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb",
+        "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+        "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+        "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+        "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
+        "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+        "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+        "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+        "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+        "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-green.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+        "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+        "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+        "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+        "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+        "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
+        "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
+      ],
+      "missingRequiredActorIds": [],
+      "missingRequiredRenderActorIds": [],
+      "missingRequiredCollisionActorIds": [],
+      "missingRequiredWalkableActorIds": []
+    },
     "collisionDiagnostics": {
       "authoredActorIds": [
         "sci-fi-aircon-command",
@@ -3024,12 +3185,216 @@
         "sci-fi-wasteland-archway"
       ],
       "defaultActorIds": [],
-      "visualOnlyActorIds": []
+      "visualOnlyActorIds": [],
+      "disabledActorIds": [],
+      "missingCollisionActorIds": [
+        "sci-fi-portal",
+        "sci-fi-story-bench",
+        "sci-fi-story-fountain",
+        "sci-fi-story-junk",
+        "sci-fi-story-pillar",
+        "sci-fi-story-plant"
+      ],
+      "collisionOnlyProxyActorIds": []
     },
     "errors": [],
     "warnings": []
   },
   "runtime": {
+    "readinessContract": {
+      "schemaVersion": 2,
+      "levelId": "sci-fi-room",
+      "publish": {
+        "ready": true,
+        "gates": [
+          {
+            "id": "legacy-required-asset-actor-ids-absent",
+            "label": "Legacy Required Asset Actor Ids Absent",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "spawn-valid",
+            "label": "Spawn Valid",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "sci-fi-room-player-spawn",
+              "player": [
+                0,
+                1.5,
+                0
+              ]
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-actors-present",
+            "label": "Required Actors Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "sci-fi-floor-interior-slab",
+                "sci-fi-floor-courtyard-slab",
+                "sci-fi-floor-wasteland-tile-4-4",
+                "sci-fi-room-player-spawn"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-render-actors-present",
+            "label": "Required Render Actors Present",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [],
+              "assetUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-walkable-collision-present",
+            "label": "Required Walkable Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "sci-fi-floor-interior-slab",
+                "sci-fi-floor-courtyard-slab",
+                "sci-fi-floor-wasteland-tile-4-4"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-collision-present",
+            "label": "Required Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "sci-fi-floor-interior-slab",
+                "sci-fi-floor-courtyard-slab",
+                "sci-fi-floor-wasteland-tile-4-4"
+              ],
+              "colliderUrls": [],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "terrain-runtime-collision-declared",
+            "label": "Terrain Runtime Collision Declared",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "sci-fi-room-terrain",
+              "manifestUrl": ""
+            },
+            "blockers": []
+          }
+        ],
+        "blockers": []
+      },
+      "runtime": {
+        "activationRequired": true,
+        "requiredGateIds": [
+          "publish-contract-ready",
+          "manifest-loaded",
+          "required-render-assets-loaded",
+          "required-render-actors-mounted",
+          "required-collision-mounted",
+          "required-collider-assets-loaded",
+          "terrain-collision-mounted",
+          "required-initial-world-partition-cells-ready",
+          "spawn-resolved",
+          "physics-world-ready",
+          "player-body-ready",
+          "gameplay-enabled"
+        ],
+        "requiredRenderActorIds": [],
+        "requiredCollisionActorIds": [
+          "sci-fi-floor-interior-slab",
+          "sci-fi-floor-courtyard-slab",
+          "sci-fi-floor-wasteland-tile-4-4"
+        ],
+        "requiredAssetUrls": [],
+        "requiredColliderUrls": [],
+        "requiredInitialCellKeys": [],
+        "requiredTerrain": false,
+        "terrainManifestUrl": ""
+      },
+      "spawn": {
+        "player": [
+          0,
+          1.5,
+          0
+        ],
+        "valid": true,
+        "runtimeActorId": "sci-fi-room-player-spawn",
+        "satisfiedByRuntimeSystem": true
+      },
+      "terrain": {
+        "runtimeActorId": "sci-fi-room-terrain",
+        "runtimeCollision": false,
+        "satisfiedByRuntimeSystem": false
+      },
+      "requiredActorIds": [
+        "sci-fi-floor-interior-slab",
+        "sci-fi-floor-courtyard-slab",
+        "sci-fi-floor-wasteland-tile-4-4",
+        "sci-fi-room-player-spawn"
+      ],
+      "requiredWalkableActorIds": [
+        "sci-fi-floor-interior-slab",
+        "sci-fi-floor-courtyard-slab",
+        "sci-fi-floor-wasteland-tile-4-4"
+      ],
+      "runtimeAssetUrls": [
+        "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+        "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb",
+        "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+        "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+        "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-cyan.glb",
+        "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-green.glb",
+        "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+        "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb",
+        "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+        "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+        "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+        "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
+        "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+        "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+        "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+        "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+        "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-green.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+        "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+        "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+        "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+        "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+        "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
+        "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
+      ],
+      "missingRequiredActorIds": [],
+      "missingRequiredRenderActorIds": [],
+      "missingRequiredCollisionActorIds": [],
+      "missingRequiredWalkableActorIds": []
+    },
     "requiredRenderActorIds": [],
     "requiredAssetUrls": [],
     "runtimeAssetUrls": [
@@ -3064,7 +3429,7 @@
       "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
     ],
     "ground": {
-      "mode": "authored-ground",
+      "mode": "scene-authored",
       "visualSource": "scene-actors",
       "terrainRuntimeMode": "scene-authored",
       "terrainVisualSource": "scene-actors",

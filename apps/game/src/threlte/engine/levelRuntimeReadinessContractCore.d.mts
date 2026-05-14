@@ -1,3 +1,5 @@
+export const LEVEL_RUNTIME_ACTIVATION_GATE_IDS: readonly string[]
+
 export function getActorRuntimeAssetUrl(
   actor: any,
   options?: {
@@ -27,7 +29,7 @@ export function createLevelRuntimeReadinessContract(
     ) => string | undefined
   },
 ): {
-  schemaVersion: 1
+  schemaVersion: 2
   levelId: string
   publish: {
     ready: boolean
@@ -64,13 +66,8 @@ export function createLevelRuntimeReadinessContract(
     satisfiedByRuntimeSystem: boolean
   }
   requiredActorIds: string[]
-  requiredRenderActorIds: string[]
-  requiredCollisionActorIds: string[]
-  requiredColliderUrls: string[]
   requiredWalkableActorIds: string[]
-  requiredInitialCellKeys: string[]
   runtimeAssetUrls: string[]
-  requiredAssetUrls: string[]
   missingRequiredActorIds: string[]
   missingRequiredRenderActorIds: string[]
   missingRequiredCollisionActorIds: string[]

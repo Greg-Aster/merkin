@@ -155,7 +155,7 @@ function buildPackage(scene, scenePath, packageRoot, options) {
     sourceSceneUpdatedAt: scene.updatedAt || '',
     packageRoot: repoRelative(packageRoot),
     axisConversion: 'game-y-up-to-blender-z-up',
-    roundTripMode: 'transform-delta-v1',
+    roundTripMode: 'transform-and-simple-collision-delta-v1',
     nodes,
     assets: [...copiedAssetByUrl.values()],
     warnings: nodes

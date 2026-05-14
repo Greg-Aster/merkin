@@ -3,6 +3,7 @@ import { onDestroy, onMount } from 'svelte'
 import AdaptivePointLight from '../components/AdaptivePointLight.svelte'
 import HeroProp from '../components/HeroProp.svelte'
 import ProceduralMesh from '../components/ProceduralMesh.svelte'
+import { getActorMeshRenderSource } from '../engine/actorRenderSource'
 import { usesLightweightRuntimeGameplayMarker } from '../engine/runtimeGameplayRenderPolicy'
 import type { ActorDefinition, RenderCullingPolicy } from '../engine/types'
 import {
@@ -18,9 +19,10 @@ export let levelId = ''
 
 $: render = actor.render ?? null
 $: material = (render?.material ?? {}) as Record<string, any>
-$: primitive = render?.primitive ?? null
-$: asset = render?.asset ?? null
-$: prefab = render?.prefab ?? null
+$: meshSource = getActorMeshRenderSource(actor)
+$: primitive = meshSource.kind === 'primitive' ? meshSource.primitive : null
+$: asset = meshSource.kind === 'asset' ? meshSource.asset : null
+$: prefab = meshSource.kind === 'prefab' ? meshSource.prefab : null
 $: runtimePrefab = usesLightweightRuntimeGameplayMarker(actor) ? null : prefab
 $: light = actor.light ?? null
 $: runtimePropCulling = resolveRuntimePropCulling(render?.cullingPolicy)

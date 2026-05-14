@@ -203,10 +203,12 @@ export async function applyGeneratedAssetToNode(
   })
 
   deps.appendPipelineLog(
-    options.logMessage ?? 'Applied generated asset with preserved transform',
+    options.logMessage ??
+      'Applied generated asset with preserved transform and collision',
     {
       nodeId: node.id,
       assetUrl: generatedAssetUrl,
+      collisionPreserved: Boolean(node.collision),
       transform: deps.getNodeTransformSnapshot(node),
     },
   )
@@ -307,13 +309,14 @@ export async function applyGeneratedAssetReplacementPlan(
   }
 
   deps.appendPipelineLog(
-    'Replaced node(s) with generated asset using preserved transform',
+    'Replaced node(s) with generated asset using preserved transform and collision',
     {
       generatedAssetUrl,
       targets: plan.targetNodeIds.map(id => {
         const node = plan.editorNodes.find(candidate => candidate.id === id)
         return {
           id,
+          collisionPreserved: Boolean(node?.collision),
           transform: deps.getNodeTransformSnapshot(node ?? null),
         }
       }),

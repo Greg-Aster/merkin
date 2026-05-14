@@ -370,8 +370,6 @@ function updateSceneNode({
     intent,
     channel,
     enabled: true,
-    proxy: false,
-    bakeStatus: 'ready',
     triangleCount,
     sensor: intent === 'trigger' || intent === 'detailMesh',
     friction: node.collision?.friction ?? 0.7,
@@ -448,7 +446,7 @@ function main() {
   }
   if (sourceMetadata.triangleCount > triangleBudget && !args.simplify) {
     throw new Error(
-      `Source asset has ${sourceMetadata.triangleCount} triangles, exceeding budget ${triangleBudget}; enable simplification or author a simpler proxy.`,
+      `Source asset has ${sourceMetadata.triangleCount} triangles, exceeding budget ${triangleBudget}; enable simplification or author a simpler collision mesh.`,
     )
   }
 

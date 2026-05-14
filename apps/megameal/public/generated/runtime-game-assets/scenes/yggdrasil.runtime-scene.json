@@ -7,16 +7,16 @@
     "kind": "scene-document",
     "path": "apps/game/src/threlte/editor/scenes/yggdrasil.scene.json",
     "version": 1,
-    "updatedAt": "2026-05-14T00:33:10.574Z"
+    "updatedAt": "2026-05-14T16:35:00.000Z"
   },
   "levelDefinition": {
     "id": "yggdrasil",
     "version": 1,
-    "updatedAt": "2026-05-14T00:33:10.574Z",
+    "updatedAt": "2026-05-14T16:35:00.000Z",
     "spawn": {
       "player": [
-        2.2990735192896574,
-        2.6,
+        0,
+        3.7,
         -118
       ],
       "rotation": [
@@ -39,7 +39,7 @@
             "fallbackSurfacePolicy": "disabled"
           },
           "defaults": {
-            "solidObjectsByDefault": false,
+            "primitiveCollisionByDefault": true,
             "defaultFriction": 0.7,
             "defaultRestitution": 0
           },
@@ -69,6 +69,22 @@
               "yggdrasil-dais",
               "yggdrasil-bifrost-path",
               "yggdrasil-spawn-pad"
+            ],
+            "sensorActorIds": [
+              "yggdrasil-lore-crown",
+              "yggdrasil-lore-crown-ascent",
+              "yggdrasil-lore-crown-perch",
+              "yggdrasil-lore-hvergelmir",
+              "yggdrasil-lore-hvergelmir-depth",
+              "yggdrasil-lore-mimir",
+              "yggdrasil-lore-ratatoskr",
+              "yggdrasil-lore-stags",
+              "yggdrasil-lore-threshold",
+              "yggdrasil-lore-urd",
+              "yggdrasil-portal-return",
+              "yggdrasil-well-hvergelmir-pool",
+              "yggdrasil-well-mimir-pool",
+              "yggdrasil-well-urd-pool"
             ]
           }
         },
@@ -78,8 +94,8 @@
         },
         "spawn": {
           "position": [
-            2.2990735192896574,
-            2.6,
+            0,
+            3.7,
             -118
           ],
           "rotation": [
@@ -89,7 +105,7 @@
           ]
         },
         "ground": {
-          "mode": "authored-ground",
+          "mode": "scene-authored",
           "visualSource": "scene-actors",
           "terrainRuntimeMode": "scene-authored",
           "terrainVisualSource": "scene-actors",
@@ -401,7 +417,7 @@
         },
         "runtimeAssets": {
           "maxTier": "medium",
-          "requiredAssetActorIds": [
+          "requiredRenderActorIds": [
             "yggdrasil-mound",
             "yggdrasil-planter-urd",
             "yggdrasil-planter-mimir",
@@ -2852,6 +2868,20 @@
             "type": "portal-apparatus"
           }
         },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "trigger",
+            "channel": "trigger",
+            "shape": "cuboid",
+            "size": [
+              4.4,
+              3.2,
+              4.4
+            ],
+            "sensor": true
+          }
+        },
         "gameplay": {
           "type": "portal",
           "data": {
@@ -2901,6 +2931,20 @@
           "prefab": {
             "type": "story-marker",
             "variant": "cyan"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "trigger",
+            "channel": "trigger",
+            "shape": "cuboid",
+            "size": [
+              2.4,
+              2.4,
+              2.4
+            ],
+            "sensor": true
           }
         },
         "gameplay": {
@@ -3525,6 +3569,20 @@
             "variant": "cyan"
           }
         },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "trigger",
+            "channel": "trigger",
+            "shape": "cuboid",
+            "size": [
+              2.2,
+              2.2,
+              2.2
+            ],
+            "sensor": true
+          }
+        },
         "gameplay": {
           "type": "note",
           "data": {
@@ -3581,6 +3639,20 @@
           "prefab": {
             "type": "story-marker",
             "variant": "cyan"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "trigger",
+            "channel": "trigger",
+            "shape": "cuboid",
+            "size": [
+              2.2,
+              2.2,
+              2.2
+            ],
+            "sensor": true
           }
         },
         "gameplay": {
@@ -3641,6 +3713,20 @@
             "variant": "cyan"
           }
         },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "trigger",
+            "channel": "trigger",
+            "shape": "cuboid",
+            "size": [
+              2.2,
+              2.2,
+              2.2
+            ],
+            "sensor": true
+          }
+        },
         "gameplay": {
           "type": "note",
           "data": {
@@ -3697,6 +3783,20 @@
           "prefab": {
             "type": "story-marker",
             "variant": "cyan"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "trigger",
+            "channel": "trigger",
+            "shape": "cuboid",
+            "size": [
+              2.2,
+              2.2,
+              2.2
+            ],
+            "sensor": true
           }
         },
         "gameplay": {
@@ -3757,6 +3857,20 @@
             "variant": "cyan"
           }
         },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "trigger",
+            "channel": "trigger",
+            "shape": "cuboid",
+            "size": [
+              2.8,
+              2.8,
+              2.8
+            ],
+            "sensor": true
+          }
+        },
         "gameplay": {
           "type": "note",
           "data": {
@@ -3813,6 +3927,20 @@
           "prefab": {
             "type": "story-marker",
             "variant": "cyan"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "trigger",
+            "channel": "trigger",
+            "shape": "cuboid",
+            "size": [
+              2.8,
+              2.8,
+              2.8
+            ],
+            "sensor": true
           }
         },
         "gameplay": {
@@ -4722,6 +4850,20 @@
             "variant": "amber"
           }
         },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "trigger",
+            "channel": "trigger",
+            "shape": "cuboid",
+            "size": [
+              2.8,
+              2.8,
+              2.8
+            ],
+            "sensor": true
+          }
+        },
         "gameplay": {
           "type": "note",
           "data": {
@@ -5348,6 +5490,20 @@
           "prefab": {
             "type": "story-marker",
             "variant": "magenta"
+          }
+        },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "trigger",
+            "channel": "trigger",
+            "shape": "cuboid",
+            "size": [
+              2.2,
+              2.2,
+              2.2
+            ],
+            "sensor": true
           }
         },
         "gameplay": {
@@ -5987,6 +6143,20 @@
             "variant": "cyan"
           }
         },
+        "physics": {
+          "bodyType": "fixed",
+          "collision": {
+            "intent": "trigger",
+            "channel": "trigger",
+            "shape": "cuboid",
+            "size": [
+              2.2,
+              2.2,
+              2.2
+            ],
+            "sensor": true
+          }
+        },
         "gameplay": {
           "type": "note",
           "data": {
@@ -6246,9 +6416,9 @@
         "parentId": "yggdrasil-terrain-group",
         "transform": {
           "position": [
-            2.2990735192896574,
-            2.1298012153951102,
-            -163.1469166128633
+            0,
+            1.9858620742907687,
+            -118
           ],
           "rotation": [
             0,
@@ -9678,68 +9848,266 @@
     "primitiveActorCount": 63,
     "neverCullActorCount": 2,
     "gameplayFireflyActorCount": 32,
-    "physicsActorCount": 87,
+    "physicsActorCount": 98,
     "trimeshActorCount": 1,
     "detailMeshActorCount": 0,
     "defaultCollisionActorCount": 0,
-    "visualOnlyActorCount": 28,
+    "visualOnlyActorCount": 17,
     "requiredActorCount": 3,
-    "requiredRenderActorIds": [
-      "yggdrasil-tree-merged",
-      "yggdrasil-mound",
-      "yggdrasil-planter-urd",
-      "yggdrasil-planter-mimir",
-      "yggdrasil-planter-hvergelmir",
-      "yggdrasil-arrival-monolith-left",
-      "yggdrasil-arrival-monolith-right",
-      "yggdrasil-arrival-foreground-right",
-      "yggdrasil-hvergelmir-depth-arch-1",
-      "yggdrasil-hvergelmir-depth-monolith-left",
-      "yggdrasil-hvergelmir-depth-monolith-right",
-      "yggdrasil-crown-ascent-merged",
-      "yggdrasil-bifrost-ribbon-merged"
-    ],
     "missingRequiredActorIds": [],
-    "requiredAssetUrls": [
-      "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
-      "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
-      "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
-      "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
-      "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
-      "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
-      "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
-      "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb"
-    ],
-    "runtimeAssetUrls": [
-      "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
-      "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
-      "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
-      "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
-      "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
-      "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb",
-      "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
-      "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
-      "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
-      "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
-      "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-      "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
-      "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
-      "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
-      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
-      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
-      "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
-      "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-      "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
-      "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb"
-    ],
+    "runtimeReadinessContract": {
+      "schemaVersion": 2,
+      "levelId": "yggdrasil",
+      "publish": {
+        "ready": true,
+        "gates": [
+          {
+            "id": "legacy-required-asset-actor-ids-absent",
+            "label": "Legacy Required Asset Actor Ids Absent",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "spawn-valid",
+            "label": "Spawn Valid",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "yggdrasil-player-spawn",
+              "player": [
+                0,
+                3.7,
+                -118
+              ]
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-actors-present",
+            "label": "Required Actors Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "yggdrasil-ground",
+                "yggdrasil-spawn-pad",
+                "yggdrasil-tree-merged"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-render-actors-present",
+            "label": "Required Render Actors Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "yggdrasil-tree-merged",
+                "yggdrasil-mound",
+                "yggdrasil-planter-urd",
+                "yggdrasil-planter-mimir",
+                "yggdrasil-planter-hvergelmir",
+                "yggdrasil-arrival-monolith-left",
+                "yggdrasil-arrival-monolith-right",
+                "yggdrasil-arrival-foreground-right",
+                "yggdrasil-hvergelmir-depth-arch-1",
+                "yggdrasil-hvergelmir-depth-monolith-left",
+                "yggdrasil-hvergelmir-depth-monolith-right",
+                "yggdrasil-crown-ascent-merged",
+                "yggdrasil-bifrost-ribbon-merged"
+              ],
+              "assetUrls": [
+                "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+                "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+                "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
+                "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+                "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+                "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
+                "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+                "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
+                "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+                "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+                "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+                "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-walkable-collision-present",
+            "label": "Required Walkable Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "yggdrasil-ground",
+                "yggdrasil-island-shelf",
+                "yggdrasil-dais",
+                "yggdrasil-bifrost-path",
+                "yggdrasil-spawn-pad"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-collision-present",
+            "label": "Required Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "yggdrasil-ground",
+                "yggdrasil-island-shelf",
+                "yggdrasil-dais",
+                "yggdrasil-bifrost-path",
+                "yggdrasil-spawn-pad"
+              ],
+              "colliderUrls": [
+                "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "terrain-runtime-collision-declared",
+            "label": "Terrain Runtime Collision Declared",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "yggdrasil-terrain",
+              "manifestUrl": ""
+            },
+            "blockers": []
+          }
+        ],
+        "blockers": []
+      },
+      "runtime": {
+        "activationRequired": true,
+        "requiredGateIds": [
+          "publish-contract-ready",
+          "manifest-loaded",
+          "required-render-assets-loaded",
+          "required-render-actors-mounted",
+          "required-collision-mounted",
+          "required-collider-assets-loaded",
+          "terrain-collision-mounted",
+          "required-initial-world-partition-cells-ready",
+          "spawn-resolved",
+          "physics-world-ready",
+          "player-body-ready",
+          "gameplay-enabled"
+        ],
+        "requiredRenderActorIds": [
+          "yggdrasil-tree-merged",
+          "yggdrasil-mound",
+          "yggdrasil-planter-urd",
+          "yggdrasil-planter-mimir",
+          "yggdrasil-planter-hvergelmir",
+          "yggdrasil-arrival-monolith-left",
+          "yggdrasil-arrival-monolith-right",
+          "yggdrasil-arrival-foreground-right",
+          "yggdrasil-hvergelmir-depth-arch-1",
+          "yggdrasil-hvergelmir-depth-monolith-left",
+          "yggdrasil-hvergelmir-depth-monolith-right",
+          "yggdrasil-crown-ascent-merged",
+          "yggdrasil-bifrost-ribbon-merged"
+        ],
+        "requiredCollisionActorIds": [
+          "yggdrasil-ground",
+          "yggdrasil-island-shelf",
+          "yggdrasil-dais",
+          "yggdrasil-bifrost-path",
+          "yggdrasil-spawn-pad"
+        ],
+        "requiredAssetUrls": [
+          "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+          "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+          "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
+          "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+          "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+          "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
+          "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+          "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
+          "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+          "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+          "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+          "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb"
+        ],
+        "requiredColliderUrls": [
+          "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb"
+        ],
+        "requiredInitialCellKeys": [],
+        "requiredTerrain": false,
+        "terrainManifestUrl": ""
+      },
+      "spawn": {
+        "player": [
+          0,
+          3.7,
+          -118
+        ],
+        "valid": true,
+        "runtimeActorId": "yggdrasil-player-spawn",
+        "satisfiedByRuntimeSystem": true
+      },
+      "terrain": {
+        "runtimeActorId": "yggdrasil-terrain",
+        "runtimeCollision": false,
+        "satisfiedByRuntimeSystem": false
+      },
+      "requiredActorIds": [
+        "yggdrasil-ground",
+        "yggdrasil-spawn-pad",
+        "yggdrasil-tree-merged"
+      ],
+      "requiredWalkableActorIds": [
+        "yggdrasil-ground",
+        "yggdrasil-island-shelf",
+        "yggdrasil-dais",
+        "yggdrasil-bifrost-path",
+        "yggdrasil-spawn-pad"
+      ],
+      "runtimeAssetUrls": [
+        "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+        "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+        "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
+        "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+        "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb",
+        "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+        "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+        "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+        "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+        "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+        "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+        "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+        "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+        "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+        "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb"
+      ],
+      "missingRequiredActorIds": [],
+      "missingRequiredRenderActorIds": [],
+      "missingRequiredCollisionActorIds": [],
+      "missingRequiredWalkableActorIds": []
+    },
     "collisionDiagnostics": {
       "authoredActorIds": [
         "yggdrasil-arrival-arch",
@@ -9768,12 +10136,23 @@
         "yggdrasil-islet-nw",
         "yggdrasil-islet-south",
         "yggdrasil-islet-west",
+        "yggdrasil-lore-crown",
+        "yggdrasil-lore-crown-ascent",
+        "yggdrasil-lore-crown-perch",
+        "yggdrasil-lore-hvergelmir",
+        "yggdrasil-lore-hvergelmir-depth",
+        "yggdrasil-lore-mimir",
+        "yggdrasil-lore-ratatoskr",
+        "yggdrasil-lore-stags",
+        "yggdrasil-lore-threshold",
+        "yggdrasil-lore-urd",
         "yggdrasil-path-stone-1",
         "yggdrasil-path-stone-2",
         "yggdrasil-path-stone-3",
         "yggdrasil-path-stone-4",
         "yggdrasil-path-stone-5",
         "yggdrasil-path-stone-6",
+        "yggdrasil-portal-return",
         "yggdrasil-root-east",
         "yggdrasil-root-north",
         "yggdrasil-root-northeast",
@@ -9849,12 +10228,268 @@
         "yggdrasil-planter-urd",
         "yggdrasil-shore-ring",
         "yggdrasil-tree-merged"
-      ]
+      ],
+      "disabledActorIds": [],
+      "missingCollisionActorIds": [],
+      "collisionOnlyProxyActorIds": []
     },
     "errors": [],
     "warnings": []
   },
   "runtime": {
+    "readinessContract": {
+      "schemaVersion": 2,
+      "levelId": "yggdrasil",
+      "publish": {
+        "ready": true,
+        "gates": [
+          {
+            "id": "legacy-required-asset-actor-ids-absent",
+            "label": "Legacy Required Asset Actor Ids Absent",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "spawn-valid",
+            "label": "Spawn Valid",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "yggdrasil-player-spawn",
+              "player": [
+                0,
+                3.7,
+                -118
+              ]
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-actors-present",
+            "label": "Required Actors Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "yggdrasil-ground",
+                "yggdrasil-spawn-pad",
+                "yggdrasil-tree-merged"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-render-actors-present",
+            "label": "Required Render Actors Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "yggdrasil-tree-merged",
+                "yggdrasil-mound",
+                "yggdrasil-planter-urd",
+                "yggdrasil-planter-mimir",
+                "yggdrasil-planter-hvergelmir",
+                "yggdrasil-arrival-monolith-left",
+                "yggdrasil-arrival-monolith-right",
+                "yggdrasil-arrival-foreground-right",
+                "yggdrasil-hvergelmir-depth-arch-1",
+                "yggdrasil-hvergelmir-depth-monolith-left",
+                "yggdrasil-hvergelmir-depth-monolith-right",
+                "yggdrasil-crown-ascent-merged",
+                "yggdrasil-bifrost-ribbon-merged"
+              ],
+              "assetUrls": [
+                "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+                "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+                "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
+                "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+                "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+                "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
+                "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+                "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
+                "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+                "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+                "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+                "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-walkable-collision-present",
+            "label": "Required Walkable Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "yggdrasil-ground",
+                "yggdrasil-island-shelf",
+                "yggdrasil-dais",
+                "yggdrasil-bifrost-path",
+                "yggdrasil-spawn-pad"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "required-collision-present",
+            "label": "Required Collision Present",
+            "required": true,
+            "satisfied": true,
+            "evidence": {
+              "actorIds": [
+                "yggdrasil-ground",
+                "yggdrasil-island-shelf",
+                "yggdrasil-dais",
+                "yggdrasil-bifrost-path",
+                "yggdrasil-spawn-pad"
+              ],
+              "colliderUrls": [
+                "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb"
+              ],
+              "missingActorIds": []
+            },
+            "blockers": []
+          },
+          {
+            "id": "terrain-runtime-collision-declared",
+            "label": "Terrain Runtime Collision Declared",
+            "required": false,
+            "satisfied": true,
+            "evidence": {
+              "runtimeActorId": "yggdrasil-terrain",
+              "manifestUrl": ""
+            },
+            "blockers": []
+          }
+        ],
+        "blockers": []
+      },
+      "runtime": {
+        "activationRequired": true,
+        "requiredGateIds": [
+          "publish-contract-ready",
+          "manifest-loaded",
+          "required-render-assets-loaded",
+          "required-render-actors-mounted",
+          "required-collision-mounted",
+          "required-collider-assets-loaded",
+          "terrain-collision-mounted",
+          "required-initial-world-partition-cells-ready",
+          "spawn-resolved",
+          "physics-world-ready",
+          "player-body-ready",
+          "gameplay-enabled"
+        ],
+        "requiredRenderActorIds": [
+          "yggdrasil-tree-merged",
+          "yggdrasil-mound",
+          "yggdrasil-planter-urd",
+          "yggdrasil-planter-mimir",
+          "yggdrasil-planter-hvergelmir",
+          "yggdrasil-arrival-monolith-left",
+          "yggdrasil-arrival-monolith-right",
+          "yggdrasil-arrival-foreground-right",
+          "yggdrasil-hvergelmir-depth-arch-1",
+          "yggdrasil-hvergelmir-depth-monolith-left",
+          "yggdrasil-hvergelmir-depth-monolith-right",
+          "yggdrasil-crown-ascent-merged",
+          "yggdrasil-bifrost-ribbon-merged"
+        ],
+        "requiredCollisionActorIds": [
+          "yggdrasil-ground",
+          "yggdrasil-island-shelf",
+          "yggdrasil-dais",
+          "yggdrasil-bifrost-path",
+          "yggdrasil-spawn-pad"
+        ],
+        "requiredAssetUrls": [
+          "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+          "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+          "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
+          "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+          "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+          "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
+          "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+          "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
+          "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+          "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+          "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+          "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb"
+        ],
+        "requiredColliderUrls": [
+          "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-dais.collider.glb"
+        ],
+        "requiredInitialCellKeys": [],
+        "requiredTerrain": false,
+        "terrainManifestUrl": ""
+      },
+      "spawn": {
+        "player": [
+          0,
+          3.7,
+          -118
+        ],
+        "valid": true,
+        "runtimeActorId": "yggdrasil-player-spawn",
+        "satisfiedByRuntimeSystem": true
+      },
+      "terrain": {
+        "runtimeActorId": "yggdrasil-terrain",
+        "runtimeCollision": false,
+        "satisfiedByRuntimeSystem": false
+      },
+      "requiredActorIds": [
+        "yggdrasil-ground",
+        "yggdrasil-spawn-pad",
+        "yggdrasil-tree-merged"
+      ],
+      "requiredWalkableActorIds": [
+        "yggdrasil-ground",
+        "yggdrasil-island-shelf",
+        "yggdrasil-dais",
+        "yggdrasil-bifrost-path",
+        "yggdrasil-spawn-pad"
+      ],
+      "runtimeAssetUrls": [
+        "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
+        "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+        "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
+        "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+        "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
+        "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb",
+        "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+        "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+        "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+        "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+        "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+        "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+        "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+        "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+        "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+        "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+        "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb"
+      ],
+      "missingRequiredActorIds": [],
+      "missingRequiredRenderActorIds": [],
+      "missingRequiredCollisionActorIds": [],
+      "missingRequiredWalkableActorIds": []
+    },
     "requiredRenderActorIds": [
       "yggdrasil-tree-merged",
       "yggdrasil-mound",
@@ -9912,7 +10547,7 @@
     ],
     "assetTierCap": "medium",
     "ground": {
-      "mode": "authored-ground",
+      "mode": "scene-authored",
       "visualSource": "scene-actors",
       "terrainRuntimeMode": "scene-authored",
       "terrainVisualSource": "scene-actors",

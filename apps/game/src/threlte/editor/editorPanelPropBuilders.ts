@@ -365,6 +365,20 @@ export function buildCollisionTabProps(context: EditorPanelPropBuilderContext) {
     onCookTerrainChunks: () => void context.cookTerrainChunks(),
     onSelectCollisionReviewActor: (actorId: string) =>
       context.handleHierarchySelection(actorId, new MouseEvent('click')),
+    onSetCollisionReviewBlocker:
+      context.inspectorController.setBlockerForNodeId,
+    onSetCollisionReviewWalkable:
+      context.inspectorController.setWalkableForNodeId,
+    onSetCollisionReviewTrigger:
+      context.inspectorController.setTriggerForNodeId,
+    onSetCollisionReviewVisualOnly:
+      context.inspectorController.setVisualOnlyForNodeId,
+    onDisableCollisionReviewActor:
+      context.inspectorController.disableCollisionForNodeId,
+    onFitCollisionReviewCollider:
+      context.inspectorController.fitColliderToVisualBoundsForNodeId,
+    onBakeCollisionReviewMeshCollider:
+      context.inspectorController.bakeMeshColliderForNodeId,
   }
 }
 

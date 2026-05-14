@@ -109,7 +109,7 @@ export function normalizeRuntimeLevelSceneSettings(levelId, settings = {}) {
           dirty: false,
         },
         defaults: {
-          solidObjectsByDefault: false,
+          primitiveCollisionByDefault: true,
           defaultFriction: 0.7,
           defaultRestitution: 0,
         },
@@ -348,6 +348,14 @@ function getCollisionDiagnostics(level) {
     visualOnlyActorIds: [...visualOnlyActorIds]
       .filter(actorId => actorsById.has(actorId))
       .sort(),
+    disabledActorIds: [],
+    missingCollisionActorIds: level.actors
+      .filter(actor => Boolean(actor.render) && !actor.physics)
+      .filter(actor => actor.render?.visible !== false)
+      .filter(actor => !visualOnlyActorIds.has(actor.id))
+      .map(actor => actor.id)
+      .sort(),
+    collisionOnlyProxyActorIds: [],
   }
 }
 
@@ -415,7 +423,7 @@ function getWalkabilityContractIssues(level, actors, runtimeReadinessContract) {
     if (!supportingActor) {
       if (runtimeReadinessContract.terrain.runtimeCollision) {
         warnings.push(
-          `Walkability sample "${sample.id}" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime.`,
+          `Walkability sample "${sample.id}" is not supported by an authored primitive walkable collider; runtime terrain collision must cover it.`,
         )
       } else {
         errors.push(
@@ -437,9 +445,11 @@ export function createLevelBuildReport(level) {
   const defaultCollisionActorIds = new Set(collisionDiagnostics.defaultActorIds)
   const visualOnlyActorIds = new Set(collisionDiagnostics.visualOnlyActorIds)
   const requiredActorIds = runtimeReadinessContract.requiredActorIds
-  const requiredAssetActorIds = runtimeReadinessContract.requiredRenderActorIds
+  const requiredRenderActorIds =
+    runtimeReadinessContract.runtime.requiredRenderActorIds
   const warnings = []
   const errors = []
+  const runtimeAssets = level.settings?.level?.runtimeAssets
   const actorIds = new Set()
   const duplicateActorIds = new Set()
   const actorsById = new Map()
@@ -455,6 +465,11 @@ export function createLevelBuildReport(level) {
 
   if (!isFiniteVec3(level.spawn.player))
     errors.push('Player spawn must be a finite Vec3.')
+  if (Array.isArray(runtimeAssets?.requiredAssetActorIds)) {
+    errors.push(
+      'runtimeAssets.requiredAssetActorIds is no longer supported; use runtimeAssets.requiredRenderActorIds.',
+    )
+  }
 
   for (const actor of level.actors) {
     if (actorIds.has(actor.id)) duplicateActorIds.add(actor.id)
@@ -511,14 +526,6 @@ export function createLevelBuildReport(level) {
         }
       }
     }
-    if (
-      actor.kind === 'asset' &&
-      actor.physics.collision.shape !== 'trimesh'
-    ) {
-      errors.push(
-        `Asset actor "${actor.id}" must use baked trimesh collision instead of primitive collision.`,
-      )
-    }
   }
 
   errors.push(...validateLevelGroundContract(level, actorsById))
@@ -534,7 +541,7 @@ export function createLevelBuildReport(level) {
   for (const actorId of missingRequiredActorIds) {
     errors.push(`Required actor "${actorId}" is missing.`)
   }
-  for (const actorId of requiredAssetActorIds) {
+  for (const actorId of requiredRenderActorIds) {
     const actor = actorsById.get(actorId)
     if (!actor) {
       errors.push(`Required actor "${actorId}" is missing.`)
@@ -615,10 +622,7 @@ export function createLevelBuildReport(level) {
     defaultCollisionActorCount,
     visualOnlyActorCount,
     requiredActorCount: requiredActorIds.length,
-    requiredRenderActorIds: requiredAssetActorIds,
     missingRequiredActorIds,
-    requiredAssetUrls: runtimeReadinessContract.requiredAssetUrls,
-    runtimeAssetUrls: runtimeReadinessContract.runtimeAssetUrls,
     runtimeReadinessContract,
     collisionDiagnostics,
     errors,
@@ -661,9 +665,11 @@ export function createRuntimeSceneManifest(input) {
     buildReport: input.buildReport,
     runtime: {
       readinessContract: input.buildReport.runtimeReadinessContract,
-      requiredRenderActorIds: input.buildReport.requiredRenderActorIds,
-      requiredAssetUrls: input.buildReport.requiredAssetUrls,
-      runtimeAssetUrls: input.buildReport.runtimeAssetUrls,
+      requiredRenderActorIds:
+        input.buildReport.runtimeReadinessContract.runtime.requiredRenderActorIds,
+      requiredAssetUrls:
+        input.buildReport.runtimeReadinessContract.runtime.requiredAssetUrls,
+      runtimeAssetUrls: input.buildReport.runtimeReadinessContract.runtimeAssetUrls,
       assetTierCap: getRuntimeAssetTierCap(input.levelDefinition),
       terrainManifestUrl: getTerrainManifestUrl(input.levelDefinition),
       ground: getRuntimeGroundContract(input.levelDefinition),

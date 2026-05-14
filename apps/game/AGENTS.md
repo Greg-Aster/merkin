@@ -23,6 +23,38 @@ authoring assets
 Do not add systems that depend on runtime hope, implicit ordering, hidden side
 effects, or components directly doing unrelated engine work.
 
+## Core Engine Update Protocol
+
+When changing a core engine contract, update the dependent systems that consume
+that contract in the same staged change set. Do not leave adapters, validators,
+editor tools, manifests, generated outputs, tests, or diagnostics using the old
+shape unless the handoff explicitly marks them as a temporary compatibility
+surface with an owner and removal condition.
+
+Before editing, write down the impact map in the task notes or handoff:
+
+- core contract being changed
+- runtime consumers affected
+- editor or authoring consumers affected
+- manifest, generated asset, or source data changes required
+- validation, audit, or test updates required
+- compatibility code that will be deleted or intentionally retained
+
+Keep the implementation staged:
+
+1. Update the shared type, schema, service, or manifest contract first.
+2. Update the narrow runtime adapter path that consumes it.
+3. Update editor, authoring, diagnostics, and validation surfaces that depend on
+   that path.
+4. Regenerate generated outputs only through the owning script.
+5. Delete superseded compatibility code after proving no live import, manifest,
+   or test fixture still depends on it.
+
+Do not broaden the patch to unrelated cleanup, styling, renames, or speculative
+abstractions. If the impact map reveals a large peripheral dependency, create a
+separate clearly owned work packet instead of mixing unrelated systems in one
+patch.
+
 ## Non-Negotiable Rules
 
 - Separate source assets from runtime assets. Large `.blend`, raw captures, and

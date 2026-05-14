@@ -6,6 +6,10 @@ Purpose: shared audit notes for simplifying the collision system before rebuild 
 
 This file started as a removal scratchpad. As of 2026-05-13 it is also the coordination note for the collision/readiness contract that protects runtime playability.
 
+Correction 2026-05-14: The attempted Observatory replacement that rewrote shared terrain contracts to generic `baked-heightfield` was rejected and reverted. The accepted fix is now in place: Observatory keeps `glb-chunk-terrain` visuals and `source-linked-terrain-collision`, with collider provenance recorded as `source-glb-heightfield-projection` from the same source GLB contract. Do not reintroduce generic GLB terrain heightfield exceptions.
+
+Owner note 2026-05-14: Codex completed the Observatory terrain exception removal, runtime smoke/profile follow-up, and full editor proxy removal. Mesh assets without authored runtime collision now resolve to no collider and surface a missing-collision diagnostic; fake editor proxy collider data is rejected if it reappears.
+
 The intended engine contract is two-sided:
 
 1. **Publish/build readiness** proves the level definition is shippable before a runtime manifest is accepted.
@@ -27,7 +31,8 @@ Current implementation files:
 
 Current readiness contract shape:
 
-- Legacy-compatible top-level fields remain: `requiredActorIds`, `requiredRenderActorIds`, `requiredWalkableActorIds`, `runtimeAssetUrls`, `requiredAssetUrls`, and missing-required summaries.
+- Top-level fields are publish/diagnostic surfaces only: `requiredActorIds`, `requiredWalkableActorIds`, `runtimeAssetUrls`, and missing-required summaries.
+- Runtime activation inputs are canonical under `runtime.*`; deprecated top-level runtime mirrors have been removed.
 - New publish surface: `runtimeReadinessContract.publish`.
   - `ready`: true only when publish gates have no blockers.
   - `gates`: structured gate diagnostics with ids, labels, required flags, evidence, and blockers.
@@ -69,11 +74,11 @@ Important interpretation rules:
 Known constraints after this pass:
 
 - Runtime activation evaluation gates `GameWorld.svelte` gameplay enablement when a scene provides `runtimeReadinessContract`, and the browser now publishes the full runtime activation diagnostic snapshot from the existing activation status.
-- ACCEPTED: Spawn readiness for terrain-backed scenes still relies on terrain collision coverage proof. Observatory currently reports an info-level reliance on baked terrain coverage; changing that requires the protected Observatory terrain replacement target, not more generic readiness wiring.
+- ACCEPTED: Spawn readiness for terrain-backed scenes still relies on terrain collision coverage proof. Observatory now uses source-linked GLB terrain collision as the accepted terrain authority; do not replace that by broad-editing engine vocabulary.
 - World partition readiness is enforced in `SceneDocumentLevel.svelte`, and the readiness contract now serializes required initial cell keys when a loaded world-partition manifest provides them. Runtime activation receives observed active/ready/failed initial cell keys instead of treating required keys as observed keys.
 - Asset collider URLs are build-gated for trimesh actors, and the readiness contract now reports `requiredColliderUrls` for required collision actors with explicit collider assets. Runtime activation now blocks on `required-collider-assets-loaded` when required collider URLs have not been reported loaded.
 - ACCEPTED: Runtime collision actor registration is still inferred from required physics/walkable actors. The current pass added loaded collider URL observation for asset-trimesh colliders; a full collision actor registry is a separate schema/runtime registration migration.
-- ACCEPTED: The contract schema is still version `1` for compatibility. A schema `2` migration should rename legacy fields only when runtime manifests and editor consumers are ready.
+- ACCEPTED: The runtime readiness contract schema is version `2`; runtime activation inputs are canonical under `runtime.*`, and legacy top-level runtime-shaped mirrors have been removed from the contract/build-report surface.
 - Editor GLB collision overlays now draw wireframe geometry from `buildAssetTrimeshColliderPatches(...)`, matching the runtime asset trimesh collider path instead of cloning collider GLBs as generic render scenes.
 
 Recommended validation commands for this area:
@@ -96,6 +101,8 @@ pnpm --dir apps/game audit:collision
 - Current repo audit after wiring runtime scene manifests to the readiness contract on 2026-05-13: same result, with no new errors or warnings.
 - Current repo audit after verifying runtime/editor asset-list consumers on 2026-05-14: same result, with no new errors or warnings.
 - Current repo audit after closing the world-partition initial-cell and loaded-collider URL activation gates on 2026-05-14: same result, with no new errors or warnings.
+- REVERTED 2026-05-14: The attempted Observatory source-linked terrain replacement via generic `baked-heightfield` was rolled back as a regression.
+- DONE 2026-05-14: Observatory no longer uses the `approvedHeightfieldException` / `authoredException` transition path. `audit:collision` now reports the remaining Observatory spawn note as `spawn-relies-on-terrain-collision`, not baked-terrain exception vocabulary.
 - Scene inventory:
   - `miranda`: 70 nodes, 43 authored collisions, scene-collider ground.
   - `observatory`: 1 group node, 0 authored collisions, source-linked terrain collision. `lightweight-auto` was enabled but effectively unused for actors; first removal pass normalized it to `authored-only`.
@@ -111,7 +118,7 @@ Authoring/editor flow:
 
 1. Scene document nodes store optional `node.collision`, `node.physics`, `node.renderPolicy`, and level collision settings.
 2. `editorCollisionDefaults.ts` derives default shapes/intents/channels and editor collider args.
-3. `editorCollisionLifecycle.ts` materializes editor proxy collision and marks stale or missing mesh collider states.
+3. `editorCollisionLifecycle.ts` materializes only real primitive default collision for primitive authoring nodes. Mesh assets without authored collision stay collider-free and report missing collision in editor diagnostics.
 4. Bake scripts write mesh/terrain collider products and patch scene metadata.
 5. Publish/runtime adaptation sends scene documents through `sceneAdapter.ts`.
 
@@ -135,8 +142,7 @@ Runtime flow:
 - DONE: `lightweight-auto` default collision branch and editor control.
 - DONE: Dead `actorCollision` workflow field and default-policy editor plumbing after implicit defaults were removed.
 - DONE: Stale `proxy: false` / `bakeStatus: notRequired` scene metadata was removed from `yggdrasil.scene.json`.
-- DONE 2026-05-13: Editor proxy collision no longer leaks into `CollisionComponent`, runtime scene manifests, or open-coded runtime policy checks. Scene documents may still keep proxy/bake metadata only for editor lifecycle and publish readiness.
-  - DONE 2026-05-13: Proxy/bake-state detection is centralized in `src/threlte/engine/editorProxyCollision.ts`; readiness, scene validation, collision review, and editor collision source display now use shared helpers instead of open-coded field checks.
+- DONE 2026-05-14: Editor proxy collision has been removed. Scene documents may not keep proxy/bake/authoring proxy metadata; validation rejects it, and `src/threlte/engine/editorProxyCollision.ts` was deleted.
 - DONE: Duplicate collider sizing math is centralized through `src/threlte/engine/colliderGeometryCore.mjs` and the typed `src/threlte/engine/colliderGeometry.ts` wrapper.
   - DONE: `src/threlte/levels/runtimeActorCollision.ts`
   - DONE: `src/threlte/editor/editorCollisionDefaults.ts`
@@ -150,8 +156,8 @@ Runtime flow:
   - DONE: Runtime rigid-body transform mode and scene-slot parenting moved to `src/threlte/collision/RuntimeCollisionBody.svelte`.
 - DONE: Source-GLB terrain chunk authority no longer has to masquerade as generated `terrain-chunks` visuals.
   - `groundContractCore.mjs` accepts `source-glb-chunks` as a terrain chunk visual source.
-  - `terrain.source === "source-glb"` classifies as `source-linked-terrain-collision` when no explicit ground collision source is present.
   - Observatory source and runtime scene settings now use `ground.visualSource: "source-glb-chunks"`.
+- REVERTED 2026-05-14: The attempted Observatory terrain replacement that changed shared contracts to generic baked-heightfield was removed. The next attempt must fix Observatory level/content first, not engine vocabulary.
 - DONE: Editor terrain chunk predicate cleanup.
   - Added `src/threlte/editor/editorTerrainModeGuards.ts`.
   - `editorTerrainPipeline.ts`, `editorPublishBakePlan.ts`, `EditorPanel.svelte`, and `editorPublishReadiness.ts` now route source-GLB/generated-heightmap chunk checks through shared helpers.
@@ -185,17 +191,17 @@ Runtime flow:
 Stop broad simplification once the repo holds this contract:
 
 1. Runtime actor collision is explicit scene-authored collision only; no implicit `lightweight-auto` or level-id actor inference.
-2. Runtime terrain collision supports the protected Observatory source-linked terrain path and scene-authored ground actors. Other terrain modes are authoring/migration data until a rebuild target chooses them.
-3. Runtime publishing strips editor-only proxy/bake state from `CollisionComponent`; editor proxy metadata may remain only as editor lifecycle/readiness metadata until there is a replacement authoring flow.
+2. Runtime terrain collision supports scene-authored ground actors and Observatory's source-linked GLB terrain path without heightfield exception flags.
+3. Runtime/editor publishing strips and rejects editor-only proxy/bake state. Meshes without real authored collision show no collider plus a missing-collision diagnostic.
 4. `runtimeSceneManifest.mjs` remains Node-safe and delegates shared collision sizing, spatial queries, channel, group, policy issue, level contract, and terrain contract logic to `.mjs` cores instead of carrying local copies.
 5. Collision review remains human-facing diagnostics; level validation remains build-gating. They may share pure helpers, but do not need to become one system.
 
 Accepted constraints after this simplification pass:
 
-- `groundContractCore.mjs` still carries protected transition vocabulary for Observatory/source-linked terrain and chunked terrain mode. The legacy `ground.visualSource: "terrain-chunks"` alias is no longer accepted, and terrain authority migration warnings now fail as errors.
+- `groundContractCore.mjs` still recognizes Observatory's active `source-linked-terrain-collision` and `ground.mode: "terrain-chunks"` terrain authority. The legacy `ground.visualSource: "terrain-chunks"` alias is rejected, and terrain authority migration warnings fail as errors.
 - `runtimeSceneManifest.mjs` remains the Node-safe build-report adapter until a replacement manifest validator exists. It now delegates terrain contracts, collider sizing, walkability/spawn support spatial queries, collision policy issues, collision channel resolution, runtime collision group mapping, and level runtime contracts to shared cores.
-- ACCEPTED 2026-05-13: Editor proxy metadata remains editor-only lifecycle/readiness state; runtime policy input, runtime manifests, and `CollisionComponent` no longer expose it.
-- Observatory terrain is still a protected special case because it is the only working terrain.
+- ACCEPTED 2026-05-14: Editor proxy metadata no longer remains as lifecycle/readiness state. Runtime policy input, runtime manifests, `CollisionComponent`, editor overlay plumbing, bake scripts, and scene validation do not use it.
+- Observatory terrain is the active source-linked GLB terrain case. It is no longer protected by `approvedHeightfieldException`.
 - Other agents are actively touching terrain/runtime slices, so continuing broad cleanup risks conflicts.
 
 Decision point: do not keep doing generic cleanup after these blockers are either resolved or consciously accepted. Pick the next rebuild target, then delete only the legacy paths that conflict with that target.
@@ -205,13 +211,12 @@ Simplification pass status: DONE ENOUGH. Stop broad cleanup here.
 Accepted deferrals:
 
 - Keep `runtimeSceneManifest.mjs` as the Node-safe build-report adapter until a replacement build manifest validator exists. It now delegates terrain contracts, collider sizing, walkability/spawn support spatial queries, collision policy issues, collision channel resolution, collision group mapping, and level runtime contracts to shared cores.
-- Keep editor proxy metadata as editor lifecycle/readiness state until the editor has a replacement authoring flow. It no longer publishes into runtime `CollisionComponent`, and proxy-state detection is centralized.
-- Keep Observatory source-linked terrain collision protected until a new terrain collision target replaces it. It is the only working terrain path and resource/collision checks now pass with one terrain collider load.
-- Keep `ground.mode: "terrain-chunks"` as the chunked-terrain workflow mode for now. Visual source is explicit; the legacy `ground.visualSource: "terrain-chunks"` alias is rejected.
+- Do not reintroduce editor proxy metadata. Missing mesh collision should stay missing until the user authors a primitive collider or bakes a mesh collider.
+- Keep Observatory source-linked terrain collision aligned with its source GLB projection manifest. Do not claim generic baked-heightfield as a replacement.
 
 Next work should be target-driven, not cleanup-driven:
 
-1. Pick the rebuild target: Observatory source-linked terrain replacement, scene-authored primitive-only collision, or editor proxy authoring replacement.
+1. Pick the rebuild target: Observatory content/performance optimization or a focused runtime manifest validator replacement.
 2. Delete only the legacy paths that conflict with that chosen target.
 3. Keep `audit:collision`, `test:publish-pipeline`, and Observatory resource profiling as gates.
 
@@ -219,9 +224,17 @@ Next work should be target-driven, not cleanup-driven:
 
 Goal: the final product is a fully unified collision/readiness system across the entire runtime/editor/level stack. Every level should publish through one contract, every runtime/editor readiness surface should read that contract, and no legacy helper should independently redefine required actors, required render assets, collision readiness, terrain readiness, spawn validity, physics/player readiness, or gameplay activation criteria.
 
-Status owner note: Codex finished the world-partition initial-cell readiness and loaded-collider URL activation slices and is not actively editing another unified-contract slice unless requested. Other agents can pick any future READY item below. Continue treating `levelRuntimeReadinessContractCore.mjs` plus `evaluateLevelRuntimeActivation(...)` as the shared API and avoid duplicating required actor, render asset, collision, terrain, spawn, physics, player, world-partition, collider URL, or gameplay readiness logic in scripts.
+Status owner note: Codex completed the Observatory terrain exception removal slice. Observatory now stays in `glb-chunk-terrain` with `source-linked-terrain-collision`, but its collision product declares `source-glb-heightfield-projection` provenance from the same source GLB contract instead of using `approvedHeightfieldException` / `authoredException` escape hatches. Other agents may edit Observatory scene/terrain manifests again, but preserve the source-linked collision bake mode and source hash validation.
 
 - NOTE 2026-05-13: Future READY-item work needs its own scratchpad owner note before code edits so parallel agents can avoid conflicts.
+- DONE 2026-05-14: Observatory moved to the unified terrain authority without `approvedHeightfieldException`. The terrain collider was regenerated through `bake-terrain-collision`; manifest and metadata now mark the product as `sourceLinked: true` with `collisionBakeMode: "source-glb-heightfield-projection"` and source GLB fingerprint provenance. Runtime, audit, manifest validation, and ground contract code no longer accept the old approved heightfield exception path.
+- CLOSED 2026-05-14: The rejected generic baked-heightfield Observatory attempt remains historical context only. The accepted Observatory state is source GLB chunks plus source-linked terrain collision provenance; no additional level/content replacement is required to remove the old exception path.
+- DONE 2026-05-14: Schema v2 Step 1. The readiness contract now emits `schemaVersion: 2`, keeps deprecated top-level runtime mirror fields temporarily, and preserves behavior/readers unchanged. `type-check`, `test:publish-pipeline`, and `audit:collision` passed; audit needed the usual escalated rerun for the `tsx` IPC pipe and still reports only the known Observatory info.
+- DONE 2026-05-14: Schema v2 Step 2. Runtime/editor/build readers now use canonical `runtime.*` readiness fields. Typed manifest helper fallback chains no longer probe top-level readiness-contract mirrors. `type-check`, `test:publish-pipeline`, and `audit:collision` passed; audit still reports only the known Observatory info.
+- DONE 2026-05-14: Schema v2 Step 3. The readiness contract no longer emits deprecated top-level runtime mirror fields (`requiredRenderActorIds`, `requiredCollisionActorIds`, `requiredAssetUrls`, `requiredColliderUrls`, `requiredInitialCellKeys`). Tests now assert those mirrors are absent and use canonical `runtime.*` paths. `type-check`, `test:publish-pipeline`, and `audit:collision` passed; audit still reports only the known Observatory info.
+- DONE 2026-05-14: Schema v2 Step 4. Authored `runtimeAssets.requiredAssetActorIds` is rejected with a publish/build error, static level contracts now use `requiredRenderActorIds`, and scene data was migrated to `runtimeAssets.requiredRenderActorIds`. `type-check`, `test:publish-pipeline`, and `audit:collision` passed; audit still reports only the known Observatory info.
+- DONE 2026-05-14: Schema v2 Step 5. Removed runtime-shaped `LevelBuildReport` mirror fields (`requiredRenderActorIds`, `requiredAssetUrls`, `runtimeAssetUrls`); runtime scene builders/audits now read `buildReport.runtimeReadinessContract`. `type-check`, `test:publish-pipeline`, `audit:collision`, and `git diff --check` passed. `profile:resources` could not complete reliably against the shared dev server after this slice: an in-sandbox run could not fetch localhost, an escalated multi-profile run reached Observatory with `terrainColliders=1` for two profiles then timed out waiting for playable state on a later profile, and a focused desktop profile also timed out waiting for playable state. This needs dev-server/runtime smoke follow-up and may overlap with the active Observatory terrain replacement slice.
+- DONE 2026-05-14: Runtime smoke/profile follow-up from the 2026-05-15 TODO. Removed the dead hidden `observatory-terrain-collider` scene node that pointed at the 31 MB source GLB but was not present in the cooked runtime actor list. Reran `GAME_NO_SERVER=1 GAME_DEV_PORT=4322 pnpm --dir apps/game profile:resources --levels=observatory --profile=desktop-high-chromium-1080p --settle-ms=500`; it passed, reached playable Observatory runtime, and reported `terrainColliders=1`. Existing non-strict warnings remain: pending GLTF cache entries, triangles slightly over desktop budget, long task max, and low RAF FPS. Standard checks also passed: `type-check`, `test:publish-pipeline`, `audit:collision`, and `git diff --check`.
 - DONE 2026-05-14: Added runtime loaded-collider URL observation so activation can verify `requiredColliderUrls`. `AssetTrimeshCollider` reports loaded collider URLs through `runtimeCollisionRegistry`; `GameWorld` forwards them into `evaluateLevelRuntimeActivation(...)`; focused publish-pipeline coverage verifies the gate.
 - DONE 2026-05-14: Added world-partition required initial cell keys to the runtime readiness contract from the existing world-partition readiness schema. Scope stayed to contract/types/tests and forwarding observed active/ready/failed initial cell state into runtime activation; world-partition streaming behavior was unchanged.
 - DONE 2026-05-13: Published the full runtime activation diagnostic snapshot from the browser gameplay-enable point. `GameWorld.svelte` now emits `runtimeActivation` diagnostics from the existing `runtimeActivationStatus`, including gate/blocker state and observed runtime state, without creating a parallel readiness vocabulary.
@@ -234,15 +247,18 @@ Status owner note: Codex finished the world-partition initial-cell readiness and
 - DONE 2026-05-13: Added runtime activation criteria plus `evaluateLevelRuntimeActivation(...)` so runtime/test code can evaluate observed manifest, render, collision, terrain, spawn, physics, player, and gameplay state against the contract.
 - DONE 2026-05-13: `SceneDocumentLevel.svelte` forwards the readiness contract in `staticWorldReady` metadata and `GameWorld.svelte` evaluates it before enabling gameplay.
 - DONE 2026-05-13: Published the runtime activation diagnostic snapshot from `GameWorld.svelte` using the existing `runtimeActivationStatus`, including gate status, blockers, and observed runtime state at the gameplay-enable gate.
-- DONE 2026-05-13: Added a focused regression test for a non-Observatory scene-authored primitive floor/spawn contract so the unified contract is not only proven by the protected Observatory terrain path.
+- DONE 2026-05-13: Added a focused regression test for a non-Observatory scene-authored primitive floor/spawn contract so the unified contract is not only proven by the Observatory source-linked terrain path.
 - DONE 2026-05-13: Updated runtime manifest readers, editor publish readiness surfaces, and the scene runtime preload surface to prefer `buildReport.runtimeReadinessContract` asset fields while preserving top-level manifest/build-report compatibility. Owner: Codex.
 - DONE 2026-05-13: Added `requiredColliderUrls` to the contract from required collision actors with explicit collider assets. Superseded by the 2026-05-14 runtime loaded-collider URL observation and activation gate.
 - DONE 2026-05-14: Added world-partition required initial cell keys to the contract if the manifest/schema already exposes a single source of truth. Scope stayed to contract/types/tests and existing world-partition readiness metadata; streaming behavior was unchanged.
 - DONE 2026-05-13: Added runtime loaded-collider URL observation for asset trimesh colliders and made activation verify `requiredColliderUrls` when the contract declares required collider assets.
-- DONE 2026-05-13: Decided not to broad-rename `requiredAssetActorIds` in schema version 1. `requiredRenderActorIds` is the canonical runtime/readiness field; `requiredAssetActorIds` remains a compatibility alias only for legacy scene runtime asset settings and static level contract data until a schema version 2 migration can remove it.
-- HOLD: Do not remove Observatory `source-linked-terrain-collision`, `ground.mode: "terrain-chunks"`, or editor proxy lifecycle metadata in this contract slice.
+- DONE 2026-05-13: Decided not to broad-rename `requiredAssetActorIds` during schema version 1. Superseded by Schema v2 on 2026-05-14: `requiredAssetActorIds` is now rejected in authored runtime asset settings and static level contracts use `requiredRenderActorIds`.
+- DONE 2026-05-14: Editor proxy lifecycle metadata has been removed entirely. `collision.proxy`, `collision.bakeStatus`, and `collision.authoring` are rejected by scene validation. Observatory `source-linked-terrain-collision` and `ground.mode: "terrain-chunks"` are active contract values, not exception placeholders.
+- DONE 2026-05-14: Removed `(buildReport as any)` casts in `src/threlte/engine/runtimeSceneManifest.ts`. `runtimeReadinessContract` is now a declared field on `LevelBuildReport`, so all reader helpers traverse it through normal optional chaining. Scope: typed-reader cleanup only; readiness contract behavior and field locations unchanged.
+- DONE 2026-05-14: Made `runtimeGateIds` in the readiness contract derive from a single shared constant `LEVEL_RUNTIME_ACTIVATION_GATE_IDS` in `levelRuntimeReadinessContractCore.mjs`. The evaluator now asserts at runtime that its built gates match the declared id list. Any future gate added to the evaluator without updating the constant will throw immediately. Scope: drift-guard only; gate semantics unchanged.
+- DONE 2026-05-14: Added bidirectional compile-time `Equals<...>` structural assertion in `levelRuntimeReadinessContract.ts` between the `.d.mts` core return shapes (`createLevelRuntimeReadinessContract`, `evaluateLevelRuntimeActivation`) and the typed `LevelRuntimeReadinessContract` / `LevelRuntimeActivationStatus` in `engine/types.ts`. The wrapper already enforced one direction implicitly; the new assertion catches the reverse case where extra fields added to the core would otherwise be invisible to typed callers. Scope: drift-guard only; no runtime behavior change.
 
-Unified contract slice status: DONE. There are no remaining broad-cleanup READY items for this pass. Next work should be an explicit target decision: schema version 2 compatibility removal, Observatory terrain replacement, or editor proxy authoring replacement.
+Unified contract slice status: DONE. Schema v2 compatibility removal is complete for the readiness contract/build-report surface, and editor proxy lifecycle state has been removed rather than replaced. Remaining work is target-specific: Observatory performance/content optimization or a focused runtime manifest validator replacement.
 
 1. Freeze a small target contract: scene-authored cuboid/cylinder primitive collision plus source-linked Observatory terrain. Do not touch asset trimesh or terrain products yet.
 2. Remove unused implicit default collision first:
@@ -261,33 +277,39 @@ Unified contract slice status: DONE. There are no remaining broad-cleanup READY 
 5. Centralize collider geometry helpers:
    - DONE: One shared function set for primitive visual size, actor collision world size, and collider args across TypeScript runtime/editor/review/validation.
    - DONE: One shared walkability/spawn support helper for audits and validation.
-6. Retire editor proxy runtime fields:
-   - DONE 2026-05-13: Editor still needs proxy/bake metadata for live editor materialization and publish readiness, so it remains editor-only scene metadata and preview state.
-   - DONE: Stop publishing `proxy`/`bakeStatus` as runtime collision fields; publish/readiness checks now read scene metadata directly.
+6. Retire editor proxy runtime/editor fields:
+   - DONE 2026-05-14: `collision.proxy`, `collision.bakeStatus`, `collision.authoring`, `editorProxyCollision.ts`, editor overlay proxy props, bake-script proxy writes/reads, and proxy lifecycle resizing were removed.
+   - DONE: Mesh assets without authored collision resolve to no collider and report missing collision.
 
 ## Specific Friction Points
 
 - DONE: `SceneDocumentLevel.svelte` terrain runtime loading now accepts `collision.terrain.source === "source-glb"` when a manifest URL is present. The shared rule lives in `src/threlte/levels/sceneTerrainRuntime.ts`.
-- DONE: `groundContractCore.mjs` validation copy now says source-linked/baked ground collision accepts `source=baked-heightmap` or `source-glb` with a manifest URL.
-- DONE: `groundContractCore.mjs` treats `collision.terrain.source === "source-glb"` as source-linked terrain collision and accepts source-GLB chunk visuals without legacy `terrain-chunks` visual aliasing.
-- DONE 2026-05-13: `groundContractCore.mjs` no longer accepts the `authored-ground` mode alias or `ground.visualSource: "terrain-chunks"` alias, and terrain authority migration issues now fail as errors. `ground.mode: "terrain-chunks"` and `source-linked-terrain-collision` remain accepted constraints for Observatory and chunked terrain workflows.
+- REVERTED 2026-05-14: Do not change `groundContractCore.mjs` to hide Observatory behind generic baked-heightfield. The replacement must come from level/content data first.
+- DONE 2026-05-13: `groundContractCore.mjs` no longer accepts the `authored-ground` mode alias or `ground.visualSource: "terrain-chunks"` alias, and terrain authority migration issues now fail as errors. Observatory still uses explicit `ground.mode: "terrain-chunks"` plus `source-linked-terrain-collision` as its active GLB terrain authority.
 - DONE 2026-05-13: `collisionReview.ts` and `levelValidation.ts` share collision channel/group/sensor/detail policy wording through `describeCollisionPolicyIssue(...)`; `collisionReview` remains human-facing and `levelValidation` remains build-gating.
 - ACCEPTED 2026-05-13: `scripts/lib/runtimeSceneManifest.mjs` still owns Node-safe build-report assembly until a replacement manifest validator exists. It now delegates primitive/collider sizing, walkability/spawn support spatial queries, collision-channel validation/defaulting, runtime collision group mapping, collision policy issue wording, terrain contracts, and level runtime contracts to shared Node-safe cores.
 - DONE: `EditorCollisionTabHost.svelte` and `EditorPanel.svelte` no longer expose `Legacy Auto` / `lightweight-auto`.
 
 ## Things Not To Remove Blindly
 
-- Terrain/source-linked collision products still used by Observatory.
+- Source-GLB chunk visual products and source-linked collision vocabulary are active Observatory runtime content and should not be removed unless Observatory moves to a different explicit terrain authority.
 - Collision group matrix in `constants/physics.ts`; this is a compact runtime contract.
 - Existing audits until replacements exist; they are useful guardrails while deleting code.
 - Baked mesh collider metadata fields until asset trimesh runtime is replaced or retired.
-- `source-linked-terrain-collision` and `approvedHeightfieldException` are transitional, but Observatory currently depends on them.
+- `source-linked-terrain-collision` remains the explicit terrain collision authority for Observatory GLB chunk terrain. The old `approvedHeightfieldException` transition vocabulary has been removed from runtime/audit/content.
 - Scene `groundActorIds` are active for scene-authored levels and should not be removed with the workflow table.
 
 ## Agent Coordination Notes
 
+- CLOSED 2026-05-14: The editor proxy lifecycle has been removed, not migrated. `editorProxyCollision.ts` was deleted; `CollisionBody`/overlay proxy props were removed; bake scripts no longer read/write proxy/bake fields; scene validation rejects `collision.proxy`, `collision.bakeStatus`, and `collision.authoring`.
+- DONE 2026-05-14: Mesh assets without authored runtime collision now resolve to no collider and show a missing-collision diagnostic in editor collision source status. No fake collision is shown in the normal level editor view.
+- LEVEL DATA CHECK 2026-05-14: `rg '"proxy"|"bakeStatus"|"authoring"' apps/game/src/threlte/editor/scenes apps/megameal/public/generated/runtime-game-assets/scenes` returns no matches. No current authored or cooked level file needed a proxy/bakeStatus/authoring migration.
+- DONE 2026-05-14: Removed `approvedHeightfieldException` guards after replacing them with source-linked collision bake provenance (`source-glb-heightfield-projection`) and source hash validation.
+- SUPERSEDED 2026-05-14: Earlier notes that described `collision.authoring` as the active editor proxy lifecycle API are historical and should not be followed.
+- REVERTED 2026-05-14: Assist removed the wrong Observatory terrain replacement attempt. Broad engine/schema/audit edits around generic baked-heightfield should not be repeated.
+- SUPERSEDED 2026-05-14: Earlier editor-proxy first-slice notes do not match the current checked code after full proxy removal; re-audit before editing this area.
 - DONE 2026-05-13: Assist added runtime loaded-collider URL observation and optional activation verification for `requiredColliderUrls`. Asset trimesh colliders now report loaded collider URLs by level, `GameWorld.svelte` feeds those URLs into `evaluateLevelRuntimeActivation(...)`, and activation blocks only when the contract declares required collider assets that have not loaded. World-partition streaming and terrain collider behavior were not changed.
-- DONE 2026-05-13: Assist resolved the `requiredAssetActorIds` naming decision in the scratchpad/schema guidance. Current code already canonicalizes authored `requiredRenderActorIds` plus legacy `requiredAssetActorIds` aliases into `requiredRenderActorIds`; no broad string migration was performed.
+- DONE 2026-05-13: Assist resolved the `requiredAssetActorIds` naming decision in the scratchpad/schema guidance. Superseded by Schema v2 on 2026-05-14: authored `requiredAssetActorIds` is rejected rather than canonicalized.
 - DONE 2026-05-13: Assist verified `requiredColliderUrls` is present in the readiness contract, typed declarations, and focused publish-pipeline assertions. No additional runtime collider registry or terrain replacement work was added.
 - DONE 2026-05-13: Assist finished the browser runtime activation diagnostic snapshot using the existing `runtimeActivationStatus` in `GameWorld.svelte`. Scope was diagnostic publication only; the already-added activation gate behavior and scene contract forwarding were left intact.
 - DONE 2026-05-13: Assist updated runtime scene manifest, editor publish readiness, and scene runtime preload asset-list readers to prefer `runtimeReadinessContract` fields while preserving legacy manifest/build-report compatibility. Added regression coverage that intentionally clears legacy build-report asset-list fields and verifies runtime manifests still use the readiness contract. Scope stayed to narrow helper/reader substitution and did not alter the existing browser activation metadata work in `SceneDocumentLevel.svelte`.
@@ -298,8 +320,8 @@ Unified contract slice status: DONE. There are no remaining broad-cleanup READY 
 - DONE 2026-05-13: Wired `scripts/lib/runtimeSceneManifest.mjs` to the unified readiness contract. Manifest build reports now expose `runtimeReadinessContract` and derive required actor/render/walkable actor lists plus required/runtime asset URL arrays from `levelRuntimeReadinessContractCore.mjs`; publish-pipeline coverage compares the Node manifest report against the typed engine contract.
 - DONE 2026-05-13: Removed duplicated walkability/spawn support geometry from `scripts/lib/runtimeSceneManifest.mjs` by extracting Node-safe `collisionSpatialQueriesCore.mjs` used by both the manifest script and typed engine wrapper.
 - DONE 2026-05-13: Removed level-specific legacy settings buckets and the local no-op collision workflow shim from `scripts/lib/runtimeSceneManifest.mjs`. Scope was runtime manifest normalization only; editor environment preset compatibility was not part of this slice.
-- DONE 2026-05-13: Assist removed the remaining `authored-ground` ground mode alias by migrating scene settings and fixtures to `scene-authored`, then tightening `groundContractCore.mjs` and `sceneDocumentTypes.ts`. Scope was only the ground mode alias; Observatory's `terrain-chunks` ground mode remains protected.
-- DONE 2026-05-13: Tightened `groundContractCore.mjs` by removing legacy `ground.visualSource: "terrain-chunks"` as an accepted visual-source value and promoting terrain authority migration warnings to errors. Scope was limited to visual-source vocabulary, authority diagnostics, and tests; `ground.mode: "terrain-chunks"` remains for the chunked terrain workflow and Observatory remains protected via explicit `visualSource: "source-glb-chunks"`.
+- DONE 2026-05-13: Assist removed the remaining `authored-ground` ground mode alias by migrating scene settings and fixtures to `scene-authored`, then tightening `groundContractCore.mjs` and `sceneDocumentTypes.ts`. `ground.mode: "terrain-chunks"` remains active for Observatory's source-GLB terrain authority.
+- DONE 2026-05-13: Tightened `groundContractCore.mjs` by removing legacy `ground.visualSource: "terrain-chunks"` as an accepted visual-source value and promoting terrain authority migration warnings to errors. Scope stayed to the visual-source alias; source-GLB chunk visuals still use explicit `terrainVisualSource: "source-glb-chunks"`.
 - DONE 2026-05-13: Assist removed duplicated collision-policy issue wording from `collisionReview.ts` and `levelValidation.ts` by adding shared policy issue descriptions next to `collisionPolicyIssues.ts`. Scope stayed limited to channel/group/sensor/detail policy messages; review stays human-facing and validation stays build-gating.
 - DONE 2026-05-13: Removed the duplicated level runtime contract table from `scripts/lib/runtimeSceneManifest.mjs` by extracting Node-safe `levelContractsCore.mjs` and keeping `levelContracts.ts` as the typed wrapper. Scope was limited to runtime contract lookup; avoided ground contract vocabulary and migration-reference audit slices.
 - DONE 2026-05-13: Removed hard-coded default level ids from clean generic core helpers by importing `DEFAULT_LEVEL_ID` in `gameShellBootstrap.ts` and `gameShellUiState.ts`. Scope was limited to default-level fallback constants; no terrain, manifest, or migration audit files were touched.
@@ -318,25 +340,25 @@ Unified contract slice status: DONE. There are no remaining broad-cleanup READY 
 - DONE: Duplicated baked/source-linked terrain runtime detection shared by `collisionReview.ts` and `levelValidation.ts` now lives in `src/threlte/engine/terrainRuntimeCollision.ts`. Scope was limited to a small engine helper plus those two callers; runtime manifest sizing and browser-smoke files were not touched.
 - DONE: The scene loader now instantiates `TerrainRuntime` from source-GLB terrain manifests via `getSceneTerrainRuntimeRequest(...)`; keep this aligned with `hasBakedTerrainRuntime(...)` before tightening `groundContractCore.mjs`.
 - DONE: `CollisionBody.svelte` runtime rigid-body ownership split is complete. Scope was limited to collision wrapper files; `boot-check-browser.mjs` and `browserHarness.mjs` were left untouched because those browser-smoke files are already active.
-- Avoid deleting `source-linked-terrain-collision` until it has a replacement. It is still the declared collision source for Observatory and the audits currently treat its spawn coverage as an info finding, not a blocker.
+- DONE 2026-05-14: The `source-linked-terrain-collision` cleanup is complete for Observatory exception removal. Observatory now uses source GLB chunks plus source-linked collision provenance (`source-glb-heightfield-projection`) and source hash validation; future Observatory work is performance/content optimization, not exception removal.
 - If the next work is deduplication, prefer extracting shared pure helpers for review/validation first. `collisionReview.ts` is useful as human-facing diagnostics, while `levelValidation.ts` is build-gating; they can share support classification without merging their reporting surfaces.
 - If the next work is script cleanup, keep `scripts/lib/runtimeSceneManifest.mjs` runnable in Node without TypeScript loader assumptions. A shared `.mjs`/`.mts` core or generated JS helper is safer than importing `src/threlte/engine/colliderGeometry.ts` directly from the script.
-- Terrain cleanup note: Observatory still uses `ground.mode: "terrain-chunks"` as a broad chunked-terrain mode, but its visual source is now the explicit `source-glb-chunks`. Removing or renaming the `terrain-chunks` ground mode is a larger schema migration because editor commands and bake-plan code still use it for chunked terrain workflows.
+- NOTE 2026-05-14: Observatory still uses `ground.mode: "terrain-chunks"` as the active source-GLB chunk terrain authority. Do not remove this unless Observatory moves to another explicit terrain authority.
 - Completed work note: editor-side predicates now distinguish source-GLB chunk terrain from generated-heightmap chunk terrain through `editorTerrainModeGuards.ts`. This was intentionally not a schema migration.
-- Completed audit note: remaining level-specific names in generic-looking paths are currently accepted where they serve release/smoke fixtures, packaged scene defaults, runtime contract data, editor compatibility/preset migration, content-specific authoring, or protected Observatory terrain. The next deletion should be driven by a selected rebuild target rather than broad string cleanup.
+- Completed audit note: remaining level-specific names in generic-looking paths are currently accepted where they serve release/smoke fixtures, packaged scene defaults, runtime contract data, editor compatibility/preset migration, content-specific authoring, or Observatory's active source-linked GLB terrain contract.
 
 ## Open Questions
 
 - ANSWERED 2026-05-13: The first rebuild target is not part of this collision-removal scratchpad. Stop broad cleanup here and choose the next target explicitly before deleting more legacy support.
-- ANSWERED 2026-05-13: Scene-authored primitive collision is the small target contract for actor collision, but asset trimesh colliders and protected Observatory terrain remain supported until a replacement target is chosen.
-- ANSWERED 2026-05-13: Observatory source-linked terrain collision is protected until a replacement terrain collision target exists.
-- ANSWERED 2026-05-13: The editor still needs live proxy/bake metadata for generated-asset collision materialization and publish readiness, but that metadata must stay out of runtime collision manifests and runtime policy input.
+- ANSWERED 2026-05-14: Scene-authored primitive collision is the small target contract for actor collision, asset trimesh colliders remain supported, and Observatory terrain exception removal is complete through source-linked GLB collision provenance.
+- ANSWERED 2026-05-14: Observatory source-linked terrain collision is the accepted replacement for the old heightfield exception path; generic baked-heightfield was rejected.
+- ANSWERED 2026-05-14: The editor does not need live proxy/bake metadata. Meshes without real authored collision should show no collider plus a missing-collision diagnostic; publish/readiness must reject removed proxy metadata if it reappears.
 
 ## Assist Notes 2026-05-13
 
 - DONE: `loadSceneTerrainRuntimeData(...)` accepts `terrainSettings.source === "source-glb"` when a `manifestUrl` is present. `terrainManifest.ts` already normalizes source-GLB chunk manifests, and Observatory's scene settings already supply `runtimeSource: "built-in-manifest"`.
 - DONE: Observatory live runtime smoke now has a focused single-profile resource pass after the baked terrain collider loader cache. The pass reached playable runtime, loaded terrain collision, and reports `terrainColliders=1`; existing non-strict performance/resource warnings remain unrelated.
-- Keep Observatory source-linked collision artifacts protected for now. They are the only active runtime terrain collider path for that level and the collision audit still reports the spawn as relying on baked terrain coverage.
+- Observatory uses the source-linked terrain collision path. The collision audit reports the spawn as relying on runtime terrain collision coverage.
 - DONE: `RuntimeCollisionBody.svelte` now owns the rigid-body props and explicit-transform branch while `CollisionBody.svelte` remains the compatibility facade.
 
 ## Verification Log
@@ -475,3 +497,14 @@ Unified contract slice status: DONE. There are no remaining broad-cleanup READY 
 - `pnpm --dir apps/game exec tsx ./scripts/test-editor-collision-lifecycle.ts` passes after closing the world-partition initial-cell readiness slice.
 - `git diff --check` passes after closing the world-partition initial-cell readiness slice.
 - `pnpm --dir apps/game audit:collision` passes after closing the world-partition initial-cell readiness slice; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.
+- `pnpm --dir apps/game type-check` passes after removing Observatory's heightfield exception path.
+- `pnpm --dir apps/game test:publish-pipeline` passes after removing Observatory's heightfield exception path; focused coverage now rejects generic `heightfield-projection` for GLB chunk terrain.
+- `pnpm --dir apps/game audit:collision` passes after removing Observatory's heightfield exception path; Observatory now reports only `spawn-relies-on-terrain-collision`.
+- `pnpm --dir apps/game audit:engine` passes after removing Observatory's heightfield exception path, including terrain collision and terrain ownership contract audits.
+- `GAME_NO_SERVER=1 GAME_DEV_PORT=4322 pnpm --dir apps/game profile:resources --levels=observatory --profile=desktop-high-chromium-1080p --settle-ms=500` passes after removing Observatory's heightfield exception path. Observatory reaches playable runtime and loads one terrain collider. Remaining non-strict warnings: pending GLTF cache entries, triangles over desktop budget, long task max, and low RAF FPS.
+- `pnpm --dir apps/game exec tsx ./scripts/test-editor-collision-lifecycle.ts` passes after full editor proxy removal. Mesh assets without authored collision resolve to no collider and report missing collision.
+- `pnpm --dir apps/game type-check` passes after full editor proxy removal.
+- `pnpm --dir apps/game test:publish-pipeline` passes after full editor proxy removal and scene validation now rejects removed proxy metadata.
+- `pnpm --dir apps/game audit:collision` passes after full editor proxy removal; Observatory still reports only `spawn-relies-on-terrain-collision`.
+- `pnpm --dir apps/game audit:engine` passes after full editor proxy removal.
+- `rg '"proxy"|"bakeStatus"|"authoring"' apps/game/src/threlte/editor/scenes apps/megameal/public/generated/runtime-game-assets/scenes` returns no matches after full editor proxy removal.

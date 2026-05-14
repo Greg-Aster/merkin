@@ -1,7 +1,16 @@
+import assert from 'node:assert/strict'
 import { EventEmitter } from 'node:events'
 import { createRequire } from 'node:module'
 import test from 'node:test'
-import assert from 'node:assert/strict'
+import {
+  applyCollisionLifecycleToPatch,
+  materializeEditorNodeCollision,
+  preserveCollisionForVisualReplacement,
+} from '../src/threlte/editor/editorCollisionLifecycle.ts'
+import {
+  applyGeneratedAssetToNode,
+  createGeneratedAssetNode,
+} from '../src/threlte/editor/editorGeneratedAssetApplication.ts'
 import {
   computeEditorPublishBakePlan,
   createEditorPublishBakePlanMetadataFromReadiness,
@@ -11,43 +20,39 @@ import {
   validateEditorSceneDocument,
   validatePublishableEditorSceneDocument,
 } from '../src/threlte/editor/editorSceneDocumentValidation.ts'
-import { getSceneTerrainRuntimeRequest } from '../src/threlte/levels/sceneTerrainRuntime.ts'
-import {
-  type TerrainManifest,
-  validateTerrainManifestCollisionContract,
-} from '../src/threlte/features/terrain/terrainManifest.ts'
 import {
   describeEditorTerrainPipeline,
   planEditorTerrainBakeSteps,
 } from '../src/threlte/editor/editorTerrainPipeline.ts'
-import { createLevelBuildReport } from '../src/threlte/engine/levelValidation.ts'
-import {
-  createLevelRuntimeReadinessContract,
-  evaluateLevelRuntimeActivation,
-} from '../src/threlte/engine/levelRuntimeReadinessContract.ts'
-import {
-  createRuntimeSceneManifest,
-  getRuntimeSceneRequiredAssetUrls,
-  getRuntimeSceneRuntimeAssetUrls,
-  validateRuntimeSceneManifest,
-} from '../src/threlte/engine/runtimeSceneManifest.ts'
-import {
-  classifyTerrainAuthority,
-  getTerrainAuthorityDiagnostics,
-} from '../src/threlte/engine/groundContract.ts'
 import {
   applyTerrainChunkCookPayload,
   applyTerrainHeightmapPayload,
   buildTerrainChunkCookRequest,
   buildTerrainHeightmapRequest,
 } from '../src/threlte/editor/editorTerrainPipelineRunner.ts'
-import {
-  applyCollisionLifecycleToPatch,
-  materializeEditorNodeCollision,
-} from '../src/threlte/editor/editorCollisionLifecycle.ts'
-import { createGeneratedAssetNode } from '../src/threlte/editor/editorGeneratedAssetApplication.ts'
 import type { EditorSceneDocument } from '../src/threlte/editor/editorTypes.ts'
+import { reviewCollisionContracts } from '../src/threlte/engine/collisionReview.ts'
+import {
+  classifyTerrainAuthority,
+  getTerrainAuthorityDiagnostics,
+} from '../src/threlte/engine/groundContract.ts'
+import {
+  createLevelRuntimeReadinessContract,
+  evaluateLevelRuntimeActivation,
+} from '../src/threlte/engine/levelRuntimeReadinessContract.ts'
+import { createLevelBuildReport } from '../src/threlte/engine/levelValidation.ts'
+import {
+  createRuntimeSceneManifest,
+  getRuntimeSceneRequiredAssetUrls,
+  getRuntimeSceneRuntimeAssetUrls,
+  validateRuntimeSceneManifest,
+} from '../src/threlte/engine/runtimeSceneManifest.ts'
 import type { LevelDefinition } from '../src/threlte/engine/types.ts'
+import {
+  type TerrainManifest,
+  validateTerrainManifestCollisionContract,
+} from '../src/threlte/features/terrain/terrainManifest.ts'
+import { getSceneTerrainRuntimeRequest } from '../src/threlte/levels/sceneTerrainRuntime.ts'
 
 const require = createRequire(import.meta.url)
 const {
@@ -55,9 +60,8 @@ const {
   normalizePublishBuildPlan,
   runPublishBuildPlan,
 } = require('./editor-tools/sceneRoutes.cjs')
-const {
-  createLevelBuildReport: createRuntimeSceneLevelBuildReport,
-} = await import('./lib/runtimeSceneManifest.mjs')
+const { createLevelBuildReport: createRuntimeSceneLevelBuildReport } =
+  await import('./lib/runtimeSceneManifest.mjs')
 
 function createScene(
   overrides: Partial<EditorSceneDocument> = {},
@@ -105,7 +109,7 @@ const fixtureHeightmapFingerprint = {
   value: 'b'.repeat(64),
 }
 
-test('collision lifecycle invalidates variant asset changes before scale-only proxy resizing', () => {
+test('collision lifecycle preserves authored collision when the visual asset changes', () => {
   const currentNode: EditorSceneDocument['nodes'][number] = {
     id: 'variant-asset',
     name: 'Variant Asset',
@@ -126,9 +130,6 @@ test('collision lifecycle invalidates variant asset changes before scale-only pr
       channel: 'worldStatic',
       enabled: true,
       size: [10, 4, 10],
-      proxy: true,
-      bakeStatus: 'needsBake',
-      sourceAssetUrl: '/generated/style-lab/old.glb',
     },
   }
 
@@ -142,13 +143,10 @@ test('collision lifecycle invalidates variant asset changes before scale-only pr
     },
   })
 
-  assert.deepEqual(patch.collision?.size, [12, 3, 14])
-  assert.equal(patch.collision?.proxy, true)
-  assert.equal(patch.collision?.bakeStatus, 'needsBake')
-  assert.equal(patch.collision?.sourceAssetUrl, '/generated/style-lab/new.glb')
+  assert.equal(patch.collision, undefined)
 })
 
-test('collision lifecycle keeps scale-only edits resizing existing editor proxies', () => {
+test('collision lifecycle does not rewrite authored collision on scale-only edits', () => {
   const currentNode: EditorSceneDocument['nodes'][number] = {
     id: 'scaled-asset',
     name: 'Scaled Asset',
@@ -166,9 +164,6 @@ test('collision lifecycle keeps scale-only edits resizing existing editor proxie
       channel: 'worldStatic',
       enabled: true,
       size: [10, 4, 10],
-      proxy: true,
-      bakeStatus: 'ready',
-      sourceAssetUrl: '/generated/style-lab/asset.glb',
     },
   }
 
@@ -176,11 +171,232 @@ test('collision lifecycle keeps scale-only edits resizing existing editor proxie
     scale: [4, 1, 2],
   })
 
-  assert.deepEqual(patch.collision?.size, [20, 2, 10])
-  assert.equal(patch.collision?.bakeStatus, 'stale')
+  assert.equal(patch.collision, undefined)
 })
 
-test('editor validation allows generated variant proxy collision before publish bake', () => {
+test('collision lifecycle keeps authored simple collision during visual source replacement', () => {
+  const currentNode: EditorSceneDocument['nodes'][number] = {
+    id: 'blockout-wall',
+    name: 'Blockout Wall',
+    kind: 'primitive',
+    position: [0, 0, 0],
+    rotation: [0, 0, 0],
+    scale: [1, 1, 1],
+    visible: true,
+    primitive: {
+      geometry: 'box',
+      args: [4, 3, 0.4],
+    },
+    collision: {
+      shape: 'cuboid',
+      intent: 'blocker',
+      channel: 'worldStatic',
+      enabled: true,
+      size: [4, 3, 0.4],
+    },
+  }
+
+  const patch = applyCollisionLifecycleToPatch(currentNode, {
+    kind: 'asset',
+    asset: {
+      url: '/generated/runtime-game-assets/blockout-wall-final.glb',
+    },
+    primitive: undefined,
+  })
+
+  assert.equal(patch.collision, undefined)
+})
+
+test('collision lifecycle keeps primitive walkable collision during visual replacement', () => {
+  const currentNode: EditorSceneDocument['nodes'][number] = {
+    id: 'blockout-floor',
+    name: 'Blockout Floor',
+    kind: 'primitive',
+    position: [0, 0, 0],
+    rotation: [0, 0, 0],
+    scale: [1, 1, 1],
+    visible: true,
+    primitive: {
+      geometry: 'box',
+      args: [8, 0.5, 8],
+    },
+    collision: {
+      shape: 'cuboid',
+      intent: 'walkable',
+      channel: 'worldStatic',
+      enabled: true,
+      size: [8, 0.5, 8],
+    },
+  }
+
+  const patch = applyCollisionLifecycleToPatch(currentNode, {
+    kind: 'asset',
+    asset: {
+      url: '/generated/runtime-game-assets/blockout-floor-final.glb',
+    },
+    primitive: undefined,
+  })
+  const nextNode = { ...currentNode, ...patch }
+
+  assert.equal(nextNode.collision?.intent, 'walkable')
+  assert.deepEqual(nextNode.collision, currentNode.collision)
+})
+
+test('collision lifecycle keeps disabled collision during visual replacement', () => {
+  const currentNode: EditorSceneDocument['nodes'][number] = {
+    id: 'disabled-prop',
+    name: 'Disabled Prop',
+    kind: 'asset',
+    position: [0, 0, 0],
+    rotation: [0, 0, 0],
+    scale: [1, 1, 1],
+    visible: true,
+    asset: {
+      url: '/generated/runtime-game-assets/old-prop.glb',
+    },
+    collision: {
+      shape: 'cuboid',
+      intent: 'none',
+      channel: 'worldStatic',
+      enabled: false,
+      size: [2, 2, 2],
+    },
+  }
+
+  const patch = applyCollisionLifecycleToPatch(currentNode, {
+    asset: {
+      url: '/generated/runtime-game-assets/new-prop.glb',
+    },
+  })
+  const nextNode = { ...currentNode, ...patch }
+
+  assert.equal(nextNode.collision?.enabled, false)
+  assert.deepEqual(nextNode.collision, currentNode.collision)
+})
+
+test('collision lifecycle keeps visual-only replacement visual-only', () => {
+  const currentNode: EditorSceneDocument['nodes'][number] = {
+    id: 'visual-prop',
+    name: 'Visual Prop',
+    kind: 'asset',
+    position: [0, 0, 0],
+    rotation: [0, 0, 0],
+    scale: [1, 1, 1],
+    visible: true,
+    asset: {
+      url: '/generated/runtime-game-assets/old-visual.glb',
+    },
+  }
+  const settings: EditorSceneDocument['settings'] = {
+    level: {
+      collision: {
+        roles: {
+          visualOnlyActorIds: ['visual-prop'],
+        },
+      },
+    },
+  }
+
+  const patch = applyCollisionLifecycleToPatch(
+    currentNode,
+    {
+      asset: {
+        url: '/generated/runtime-game-assets/new-visual.glb',
+      },
+    },
+    settings,
+  )
+  const nextNode = { ...currentNode, ...patch }
+
+  assert.equal(nextNode.collision, undefined)
+})
+
+test('visual replacement helper preserves primitive collision world size when scale is baked', () => {
+  const currentNode: EditorSceneDocument['nodes'][number] = {
+    id: 'scaled-blockout',
+    name: 'Scaled Blockout',
+    kind: 'primitive',
+    position: [0, 0, 0],
+    rotation: [0, 0, 0],
+    scale: [2, 3, 4],
+    visible: true,
+    primitive: {
+      geometry: 'box',
+      args: [1, 1, 1],
+    },
+    collision: {
+      shape: 'cuboid',
+      intent: 'blocker',
+      channel: 'worldStatic',
+      enabled: true,
+    },
+  }
+
+  const collision = preserveCollisionForVisualReplacement(currentNode, {
+    visualScaleBakedIntoMesh: true,
+  })
+
+  assert.equal(collision?.shape, 'cuboid')
+  assert.deepEqual(collision?.size, [2, 3, 4])
+})
+
+test('generated AI replacement keeps authored collision during visual replacement', async () => {
+  const currentNode: EditorSceneDocument['nodes'][number] = {
+    id: 'ai-target',
+    name: 'AI Target',
+    kind: 'asset',
+    position: [0, 0, 0],
+    rotation: [0, 0, 0],
+    scale: [1, 1, 1],
+    visible: true,
+    asset: {
+      url: '/generated/runtime-game-assets/old-ai-target.glb',
+    },
+    collision: {
+      shape: 'cuboid',
+      intent: 'blocker',
+      channel: 'worldStatic',
+      enabled: true,
+      size: [3, 4, 5],
+    },
+  }
+  let capturedPatch:
+    | Parameters<typeof applyCollisionLifecycleToPatch>[1]
+    | null = null
+
+  await applyGeneratedAssetToNode(
+    {
+      getSceneNodeVisualBounds: async () => ({
+        size: [3, 4, 5],
+        maxDimension: 5,
+      }),
+      inspectGeneratedAssetBounds: async () => ({
+        size: [1, 1, 1],
+        maxDimension: 1,
+      }),
+      patchNode: (_nodeId, patch) => {
+        capturedPatch = patch
+      },
+      appendPipelineLog: () => {},
+      getNodeTransformSnapshot: () => ({
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+      }),
+    },
+    currentNode,
+    '/generated/runtime-game-assets/new-ai-target.glb',
+    { descriptor: 'fixture target' },
+  )
+
+  assert.ok(capturedPatch)
+  assert.equal(capturedPatch.collision, undefined)
+  const patch = applyCollisionLifecycleToPatch(currentNode, capturedPatch)
+  const nextNode = { ...currentNode, ...patch }
+  assert.deepEqual(nextNode.collision, currentNode.collision)
+})
+
+test('editor validation rejects removed proxy collision metadata', () => {
   const scene = createScene({
     nodes: [
       {
@@ -200,38 +416,185 @@ test('editor validation allows generated variant proxy collision before publish 
           channel: 'worldStatic',
           enabled: true,
           size: [10, 4, 10],
-          proxy: true,
-          bakeStatus: 'needsBake',
-          sourceAssetUrl:
-            '/generated/hunyuan3d/root-mound/root-mound-generated.glb',
+          authoring: {
+            kind: 'editor-proxy',
+            bakeStatus: 'needsBake',
+            sourceAssetUrl:
+              '/generated/hunyuan3d/root-mound/root-mound-generated.glb',
+          },
         },
       },
     ],
   })
 
   const editorValidation = validateEditorSceneDocument(scene)
-  assert.equal(
-    editorValidation.errors.some(error =>
-      error.includes('uses editor proxy collision'),
-    ),
-    false,
-  )
+  assert.equal(editorValidation.valid, false)
   assert.ok(
-    editorValidation.warnings.some(warning =>
-      warning.includes('uses editor proxy collision'),
+    editorValidation.errors.some(error =>
+      error.includes('removed editor proxy collision metadata'),
     ),
   )
+})
+
+test('editor validation rejects legacy proxy collision fields', () => {
+  const scene = createScene({
+    nodes: [
+      {
+        id: 'legacy-proxy',
+        name: 'Legacy Proxy',
+        kind: 'asset',
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+        visible: true,
+        asset: {
+          url: '/generated/hunyuan3d/root-mound/root-mound-generated.glb',
+        },
+        collision: {
+          shape: 'cuboid',
+          intent: 'blocker',
+          channel: 'worldStatic',
+          enabled: true,
+          size: [10, 4, 10],
+          proxy: true,
+          bakeStatus: 'needsBake',
+        },
+      } as EditorSceneDocument['nodes'][number],
+    ],
+  })
+
+  const editorValidation = validateEditorSceneDocument(scene)
+  assert.equal(editorValidation.valid, false)
+  assert.ok(
+    editorValidation.errors.some(error =>
+      error.includes('removed editor proxy collision metadata'),
+    ),
+  )
+})
+
+function createSceneAuthoredCollisionScene(
+  decorOverrides: Partial<EditorSceneDocument['nodes'][number]> = {},
+) {
+  return createScene({
+    nodes: [
+      {
+        id: 'fixture-ground',
+        name: 'Fixture Ground',
+        kind: 'primitive',
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+        visible: true,
+        primitive: {
+          geometry: 'box',
+          args: [8, 0.5, 8],
+          color: '#808080',
+        },
+        collision: {
+          shape: 'cuboid',
+          intent: 'walkable',
+          channel: 'worldStatic',
+          enabled: true,
+          size: [8, 0.5, 8],
+        },
+      },
+      {
+        id: 'fixture-decor',
+        name: 'Fixture Decor',
+        kind: 'asset',
+        position: [2, 0.5, 0],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+        visible: true,
+        asset: {
+          url: '/generated/runtime-game-assets/fixture-decor.glb',
+        },
+        ...decorOverrides,
+      },
+    ],
+    settings: {
+      level: {
+        spawn: {
+          position: [0, 1, 0],
+          rotation: [0, 0, 0],
+        },
+        ground: {
+          mode: 'scene-authored',
+          visualSource: 'scene-actors',
+          terrainRuntimeMode: 'scene-authored',
+          terrainVisualSource: 'scene-actors',
+          collisionSource: 'scene-colliders',
+          fallbackSurfacePolicy: 'disabled',
+          groundActorIds: ['fixture-ground'],
+        },
+        collision: {
+          review: {
+            requireExplicitClassification: true,
+          },
+          defaults: {
+            primitiveCollisionByDefault: true,
+          },
+          roles: {
+            groundActorIds: ['fixture-ground'],
+            visualOnlyActorIds: [],
+          },
+          terrain: {
+            source: 'scene-authored',
+            runtimeMode: 'scene-authored',
+            visualSource: 'scene-actors',
+            fallbackSurfacePolicy: 'disabled',
+          },
+        },
+      },
+    },
+  })
+}
+
+test('WIP scene with visible unclassified geometry can save but cannot publish', () => {
+  const scene = createSceneAuthoredCollisionScene()
+
+  const editorValidation = validateEditorSceneDocument(scene)
+  assert.equal(editorValidation.valid, true)
 
   const publishValidation = validatePublishableEditorSceneDocument(scene)
   assert.equal(publishValidation.valid, false)
   assert.ok(
     publishValidation.errors.some(error =>
-      error.includes('uses editor proxy collision'),
+      error.includes('Visible geometry must be classified'),
+    ),
+  )
+
+  const review = reviewCollisionContracts({ scene })
+  assert.deepEqual(review.classification['missing-collision'], [
+    'fixture-decor',
+  ])
+  assert.ok(
+    review.findings.some(
+      finding =>
+        finding.code === 'unclassified-visible-geometry' &&
+        finding.severity === 'error',
     ),
   )
 })
 
-test('collision lifecycle repairs stale baked mesh collision on scene load', () => {
+test('visible no-collision geometry can publish when explicitly classified', () => {
+  const scene = createSceneAuthoredCollisionScene({
+    collision: {
+      shape: 'cuboid',
+      intent: 'none',
+      enabled: false,
+    },
+  })
+
+  const publishValidation = validatePublishableEditorSceneDocument(scene)
+  assert.equal(publishValidation.valid, true)
+
+  const review = reviewCollisionContracts({ scene })
+  assert.deepEqual(review.classification.disabled, ['fixture-decor'])
+  assert.deepEqual(review.classification['missing-collision'], [])
+})
+
+test('collision lifecycle keeps authored baked mesh collision on scene load', () => {
   const node: EditorSceneDocument['nodes'][number] = {
     id: 'stale-mesh',
     name: 'Stale Mesh',
@@ -255,16 +618,14 @@ test('collision lifecycle repairs stale baked mesh collision on scene load', () 
 
   const materialized = materializeEditorNodeCollision(node)
 
-  assert.equal(materialized.collision?.shape, 'cuboid')
-  assert.equal(materialized.collision?.proxy, true)
-  assert.equal(materialized.collision?.bakeStatus, 'needsBake')
+  assert.equal(materialized.collision?.shape, 'trimesh')
   assert.equal(
-    materialized.collision?.sourceAssetUrl,
-    '/generated/hunyuan3d/root-mound/root-mound-generated.glb',
+    materialized.collision?.colliderUrl,
+    '/generated/runtime-game-assets/collision/root-mound.glb',
   )
 })
 
-test('generated asset add-to-scene records visual bounds for proxy sizing', async () => {
+test('generated asset add-to-scene records visual bounds for diagnostics', async () => {
   let addedNode: EditorSceneDocument['nodes'][number] | null = null
 
   await createGeneratedAssetNode(
@@ -420,14 +781,21 @@ test('runtime readiness contract captures required terrain and spawn gates', () 
 
   const readiness = createLevelRuntimeReadinessContract(level)
 
-  assert.equal(readiness.schemaVersion, 1)
+  assert.equal(readiness.schemaVersion, 2)
+  assert.equal(Object.hasOwn(readiness, 'requiredRenderActorIds'), false)
+  assert.equal(Object.hasOwn(readiness, 'requiredCollisionActorIds'), false)
+  assert.equal(Object.hasOwn(readiness, 'requiredAssetUrls'), false)
+  assert.equal(Object.hasOwn(readiness, 'requiredColliderUrls'), false)
+  assert.equal(Object.hasOwn(readiness, 'requiredInitialCellKeys'), false)
   assert.equal(readiness.spawn.valid, true)
   assert.equal(readiness.spawn.satisfiedByRuntimeSystem, true)
   assert.equal(readiness.terrain.runtimeCollision, true)
   assert.equal(readiness.terrain.satisfiedByRuntimeSystem, true)
   assert.equal(readiness.publish.ready, true)
   assert.equal(readiness.runtime.requiredTerrain, true)
-  assert.deepEqual(readiness.requiredCollisionActorIds, ['observatory-terrain'])
+  assert.deepEqual(readiness.runtime.requiredCollisionActorIds, [
+    'observatory-terrain',
+  ])
   assert.deepEqual(readiness.requiredActorIds, [
     'observatory-terrain',
     'observatory-player-spawn',
@@ -465,14 +833,9 @@ test('runtime readiness contract captures required terrain and spawn gates', () 
 
   const runtimeSceneReport = createRuntimeSceneLevelBuildReport(level)
   assert.deepEqual(runtimeSceneReport.runtimeReadinessContract, readiness)
-  assert.deepEqual(
-    runtimeSceneReport.requiredAssetUrls,
-    readiness.requiredAssetUrls,
-  )
-  assert.deepEqual(
-    runtimeSceneReport.runtimeAssetUrls,
-    readiness.runtimeAssetUrls,
-  )
+  assert.equal(Object.hasOwn(runtimeSceneReport, 'requiredRenderActorIds'), false)
+  assert.equal(Object.hasOwn(runtimeSceneReport, 'requiredAssetUrls'), false)
+  assert.equal(Object.hasOwn(runtimeSceneReport, 'runtimeAssetUrls'), false)
 })
 
 test('runtime readiness contract covers scene-authored primitive floor activation', () => {
@@ -597,10 +960,10 @@ test('runtime readiness contract covers scene-authored primitive floor activatio
     'fixture-required-collider',
     'fixture-level-player-spawn',
   ])
-  assert.deepEqual(readiness.requiredRenderActorIds, [
+  assert.deepEqual(readiness.runtime.requiredRenderActorIds, [
     'fixture-required-asset',
   ])
-  assert.deepEqual(readiness.requiredAssetUrls, [
+  assert.deepEqual(readiness.runtime.requiredAssetUrls, [
     '/generated/runtime-game-assets/fixture-required.glb',
   ])
   assert.deepEqual(readiness.runtimeAssetUrls, [
@@ -608,12 +971,9 @@ test('runtime readiness contract covers scene-authored primitive floor activatio
     '/generated/runtime-game-assets/fixture-required.glb',
   ])
   assert.deepEqual(readiness.missingRequiredActorIds, [])
-  assert.deepEqual(readiness.requiredCollisionActorIds, [
+  assert.deepEqual(readiness.runtime.requiredCollisionActorIds, [
     'fixture-ground',
     'fixture-required-collider',
-  ])
-  assert.deepEqual(readiness.requiredColliderUrls, [
-    '/generated/runtime-game-assets/collision/fixture-required-collider.collider.glb',
   ])
   assert.deepEqual(readiness.runtime.requiredColliderUrls, [
     '/generated/runtime-game-assets/collision/fixture-required-collider.collider.glb',
@@ -650,9 +1010,6 @@ test('runtime readiness contract covers scene-authored primitive floor activatio
     levelDefinition: level,
     buildReport: {
       ...report,
-      requiredRenderActorIds: [],
-      requiredAssetUrls: [],
-      runtimeAssetUrls: [],
     },
     generatedAt: '2026-05-13T00:00:00.000Z',
   })
@@ -724,11 +1081,8 @@ test('runtime readiness contract reports required collider urls', () => {
 
   const readiness = createLevelRuntimeReadinessContract(level)
 
-  assert.deepEqual(readiness.requiredCollisionActorIds, [
+  assert.deepEqual(readiness.runtime.requiredCollisionActorIds, [
     'fixture-collision-mesh',
-  ])
-  assert.deepEqual(readiness.requiredColliderUrls, [
-    '/generated/runtime-game-assets/collision/fixture-collision-mesh.collider.glb',
   ])
   assert.deepEqual(readiness.runtime.requiredColliderUrls, [
     '/generated/runtime-game-assets/collision/fixture-collision-mesh.collider.glb',
@@ -736,8 +1090,113 @@ test('runtime readiness contract reports required collider urls', () => {
   assert.deepEqual(
     readiness.publish.gates.find(gate => gate.id === 'required-collision-present')
       ?.evidence.colliderUrls,
-    readiness.requiredColliderUrls,
+    readiness.runtime.requiredColliderUrls,
   )
+})
+
+test('asset actors can use authored simple collision without baked mesh collider requirements', () => {
+  const level: LevelDefinition = {
+    id: 'fixture-level',
+    version: 1,
+    title: 'Fixture Level',
+    spawn: {
+      player: [0, 1, 0] as [number, number, number],
+    },
+    actors: [
+      {
+        id: 'fixture-ground',
+        name: 'Fixture Ground',
+        kind: 'primitive',
+        transform: {
+          position: [0, -0.25, 0] as [number, number, number],
+          rotation: [0, 0, 0] as [number, number, number],
+          scale: [1, 1, 1] as [number, number, number],
+        },
+        render: {
+          visible: true,
+          cullingPolicy: 'runtime-budget',
+          physicsAttachment: 'inside-collider',
+          primitive: {
+            geometry: 'box',
+            args: [8, 0.5, 8],
+          },
+        },
+        physics: {
+          bodyType: 'fixed',
+          collision: {
+            shape: 'cuboid',
+            size: [8, 0.5, 8] as [number, number, number],
+            intent: 'walkable',
+            channel: 'worldStatic',
+          },
+        },
+      },
+      {
+        id: 'fixture-glb-blockout',
+        name: 'Fixture GLB Blockout',
+        kind: 'asset',
+        transform: {
+          position: [0, 0, 0] as [number, number, number],
+          rotation: [0, 0, 0] as [number, number, number],
+          scale: [1, 1, 1] as [number, number, number],
+        },
+        render: {
+          visible: true,
+          cullingPolicy: 'runtime-budget',
+          physicsAttachment: 'outside-collider',
+          asset: {
+            url: '/generated/runtime-game-assets/fixture-glb-blockout.glb',
+          },
+        },
+        physics: {
+          bodyType: 'fixed',
+          collision: {
+            shape: 'cuboid',
+            size: [4, 3, 0.5] as [number, number, number],
+            intent: 'blocker',
+            channel: 'worldStatic',
+          },
+        },
+      },
+    ],
+    settings: {
+      level: {
+        runtimeAssets: {
+          requiredActorIds: [
+            'fixture-ground',
+            'fixture-glb-blockout',
+            'fixture-level-player-spawn',
+          ],
+        },
+        ground: {
+          mode: 'scene-authored',
+          visualSource: 'scene-actors',
+          terrainRuntimeMode: 'scene-authored',
+          terrainVisualSource: 'scene-actors',
+          collisionSource: 'scene-colliders',
+          fallbackSurfacePolicy: 'disabled',
+          groundActorIds: ['fixture-ground'],
+        },
+      },
+    },
+  }
+
+  const readiness = createLevelRuntimeReadinessContract(level)
+
+  assert.ok(
+    readiness.runtime.requiredCollisionActorIds.includes(
+      'fixture-glb-blockout',
+    ),
+  )
+  assert.deepEqual(readiness.runtime.requiredColliderUrls, [])
+  assert.equal(readiness.publish.ready, true)
+
+  const report = createLevelBuildReport(level)
+  assert.deepEqual(report.errors, [])
+
+  const runtimeSceneReport = createRuntimeSceneLevelBuildReport(level)
+  assert.deepEqual(runtimeSceneReport.errors, [])
+  assert.deepEqual(runtimeSceneReport.runtimeReadinessContract, readiness)
 })
 
 test('runtime readiness contract reports world partition initial cells', () => {
@@ -761,7 +1220,6 @@ test('runtime readiness contract reports world partition initial cells', () => {
     },
   })
 
-  assert.deepEqual(readiness.requiredInitialCellKeys, ['0:0', '1:0'])
   assert.deepEqual(readiness.runtime.requiredInitialCellKeys, ['0:0', '1:0'])
   assert.ok(
     readiness.runtime.requiredGateIds.includes(
@@ -816,6 +1274,39 @@ test('runtime readiness contract reports world partition initial cells', () => {
   assert.equal(ready.ready, true)
 })
 
+test('runtime readiness contract rejects legacy requiredAssetActorIds input', () => {
+  const level = {
+    id: 'fixture-level',
+    version: 1,
+    title: 'Fixture Level',
+    spawn: {
+      player: [0, 1, 0] as [number, number, number],
+    },
+    actors: [],
+    settings: {
+      level: {
+        runtimeAssets: {
+          requiredAssetActorIds: ['legacy-required-render-actor'],
+        },
+      },
+    },
+  } as LevelDefinition
+
+  const readiness = createLevelRuntimeReadinessContract(level)
+  assert.equal(readiness.publish.ready, false)
+  assert.ok(
+    readiness.publish.blockers.some(blocker =>
+      blocker.includes('requiredAssetActorIds'),
+    ),
+  )
+  assert.deepEqual(readiness.runtime.requiredRenderActorIds, [])
+
+  const report = createLevelBuildReport(level)
+  assert.ok(
+    report.errors.some(error => error.includes('requiredAssetActorIds')),
+  )
+})
+
 test('legacy terrain-chunks ground visual source is rejected', () => {
   const level = {
     id: 'fixture-level',
@@ -857,6 +1348,19 @@ test('legacy terrain-chunks ground visual source is rejected', () => {
   assert.ok(
     report.errors.some(error =>
       error.includes('ground.visualSource "terrain-chunks" is invalid'),
+    ),
+  )
+})
+
+test('legacy authored-ground ground mode is rejected for publish', () => {
+  const scene = createSceneAuthoredCollisionScene()
+  scene.settings!.level!.ground!.mode = 'authored-ground' as any
+
+  const publishValidation = validatePublishableEditorSceneDocument(scene)
+  assert.equal(publishValidation.valid, false)
+  assert.ok(
+    publishValidation.errors.some(error =>
+      error.includes('ground.mode "authored-ground" is invalid'),
     ),
   )
 })
@@ -930,7 +1434,7 @@ function createGlbTerrainManifest(
         sourceCoordinateSystem: 'three-y-up-xz-ground',
         sourceBounds: fixtureBounds,
         renderBakeMode: 'source-glb-chunk-mesh',
-        collisionBakeMode: 'heightfield-projection',
+        collisionBakeMode: 'source-glb-heightfield-projection',
         collisionCoverageBounds: fixtureBounds,
         role: 'walkable',
         vertexCount: 128,
@@ -940,7 +1444,7 @@ function createGlbTerrainManifest(
     collision: {
       terrain: {
         type: 'baked-terrain-mesh',
-        authoredException: true,
+        sourceLinked: true,
         url: '/terrain/collision/fixture-level.collider.bin',
         metadataUrl: '/terrain/collision/fixture-level.collider.meta.json',
         vertexCount: 81,
@@ -964,17 +1468,18 @@ function createGlbTerrainManifest(
           sourceCoordinateSystem: 'three-y-up-xz-ground',
           sourceBounds: fixtureBounds,
           renderBakeMode: 'source-glb-chunk-mesh',
-          collisionBakeMode: 'heightfield-projection',
+          collisionBakeMode: 'source-glb-heightfield-projection',
           collisionMeshSource: {
-            type: 'heightmap',
-            url: '/terrain/heightmaps/fixture-level_heightmap.png',
-            fingerprint: fixtureHeightmapFingerprint,
+            type: 'source-glb-heightfield-projection',
+            url: '/models/levels/fixture-level.glb',
+            projectionHeightmapUrl:
+              '/terrain/heightmaps/fixture-level_heightmap.png',
+            fingerprint: fixtureSourceFingerprint,
           },
           collisionCoverageBounds: fixtureBounds,
           role: 'walkable',
           vertexCount: 81,
           triangleCount: 128,
-          approvedHeightfieldException: true,
           ...collisionSourceContractOverrides,
         },
       },
@@ -1391,6 +1896,21 @@ test('GLB terrain collision contract accepts matching source-derived provenance'
   })
 
   assert.deepEqual(diagnostics.errors, [])
+})
+
+test('GLB terrain collision contract rejects generic heightfield projection', () => {
+  const diagnostics = validateTerrainManifestCollisionContract({
+    manifest: createGlbTerrainManifest({
+      collisionBakeMode: 'heightfield-projection',
+    }),
+    levelId: 'fixture-level',
+    spawnPoint: [5, 1, 5],
+  })
+
+  assert.match(
+    diagnostics.errors.join('\n'),
+    /must use source-linked collision, not generic heightfield projection/,
+  )
 })
 
 test('GLB terrain collision contract requires render source hash provenance', () => {
