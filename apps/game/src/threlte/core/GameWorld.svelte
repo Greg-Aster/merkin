@@ -4,12 +4,22 @@ import {
   type RuntimePlayerSettings,
   resolveRuntimePlayerSettings,
 } from '../engine/runtimePlayerSettings'
+import { evaluateLevelRuntimeActivation } from '../engine/levelRuntimeReadinessContract'
+import type {
+  LevelRuntimeActivationState,
+  LevelRuntimeActivationStatus,
+  LevelRuntimeReadinessContract,
+} from '../engine/types'
 import { DEFAULT_LEVEL_ID } from '../levels/levelRegistry'
 import { runtimeDebugLog } from '../utils/runtimeLog'
 import type {
   PlayerLevelPositionDetail,
   StaticWorldReadyDetail,
 } from './levelRuntimeEvents'
+import {
+  runtimeLoadedColliderUrlsStore,
+} from '../stores/runtimeCollisionRegistry'
+import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 
 const dispatch = createEventDispatcher()
 
@@ -55,6 +65,20 @@ let levelPlayerPosition: PlayerLevelPositionDetail['position'] | null = null
 let levelPlayerRotation: PlayerLevelPositionDetail['rotation'] | null = null
 let runtimePlayerSettings: RuntimePlayerSettings =
   resolveRuntimePlayerSettings(null)
+let levelRuntimeReadinessContract: LevelRuntimeReadinessContract | null = null
+let staticWorldRuntimeState: LevelRuntimeActivationState = {
+  manifestLoaded: false,
+  requiredRenderAssetsLoaded: false,
+  requiredRenderActorsMounted: false,
+  requiredCollisionMounted: false,
+  terrainCollisionMounted: false,
+  activeInitialCellKeys: [],
+  readyInitialCellKeys: [],
+  failedInitialCellKeys: [],
+  spawnResolved: false,
+}
+let runtimeActivationStatus: LevelRuntimeActivationStatus | null = null
+let lastRuntimeActivationDiagnosticKey = ''
 let editorPlaytestSpawnPosition: PlayerLevelPositionDetail['position'] | null =
   null
 let editorPlaytestSpawnRotation: PlayerLevelPositionDetail['rotation'] | null =
@@ -74,9 +98,53 @@ function forward(type: string, detail: unknown) {
   dispatch(type, detail)
 }
 
+function getStringArray(value: unknown) {
+  return Array.isArray(value)
+    ? value.filter(item => typeof item === 'string')
+    : []
+}
+
 function handleStaticWorldReady(detail: StaticWorldReadyDetail) {
   if (editorEnabled && activeEditorPlaytestMode) return
 
+  const runtimeReadinessContract = detail.metadata?.runtimeReadinessContract
+  levelRuntimeReadinessContract =
+    runtimeReadinessContract &&
+    typeof runtimeReadinessContract === 'object' &&
+    'schemaVersion' in runtimeReadinessContract
+      ? (runtimeReadinessContract as LevelRuntimeReadinessContract)
+      : null
+  const worldPartitionReadiness = detail.metadata?.worldPartitionReadiness as
+    | {
+        requiredInitialCellsActive?: unknown
+        activeInitialCellKeys?: unknown
+        readyInitialCellKeys?: unknown
+        failedInitialCellKeys?: unknown
+      }
+    | undefined
+  staticWorldRuntimeState = {
+    manifestLoaded: true,
+    requiredRenderAssetsLoaded: true,
+    requiredRenderActorsMounted: true,
+    requiredCollisionMounted: true,
+    terrainCollisionMounted:
+      !levelRuntimeReadinessContract?.runtime.requiredTerrain ||
+      Boolean(detail.metadata?.terrainRuntime),
+    requiredInitialCellsActive:
+      typeof worldPartitionReadiness?.requiredInitialCellsActive === 'boolean'
+        ? worldPartitionReadiness.requiredInitialCellsActive
+        : undefined,
+    activeInitialCellKeys: getStringArray(
+      worldPartitionReadiness?.activeInitialCellKeys,
+    ),
+    readyInitialCellKeys: getStringArray(
+      worldPartitionReadiness?.readyInitialCellKeys,
+    ),
+    failedInitialCellKeys: getStringArray(
+      worldPartitionReadiness?.failedInitialCellKeys,
+    ),
+    spawnResolved: Boolean(levelPlayerPosition),
+  }
   runtimePlayerSettings = resolveRuntimePlayerSettings(detail.metadata?.player)
   staticWorldReady = true
   forward('staticWorldReady', detail)
@@ -117,6 +185,38 @@ function handleEditorPlaytestReady(detail: StaticWorldReadyDetail) {
   forward('staticWorldReady', detail)
 }
 
+function publishRuntimeActivationDiagnostic(
+  status: LevelRuntimeActivationStatus,
+) {
+  const diagnosticKey = `${status.levelId}:${status.ready}:${status.gates
+    .map(gate => `${gate.id}:${gate.required}:${gate.satisfied}`)
+    .join('|')}:${status.blockers.join('|')}`
+  if (diagnosticKey === lastRuntimeActivationDiagnosticKey) return
+  lastRuntimeActivationDiagnosticKey = diagnosticKey
+
+  setRuntimeDiagnostic('runtimeActivation', {
+    label: 'Runtime Activation',
+    level: status.ready ? 'ready' : 'loading',
+    message: status.ready
+      ? `${status.levelId}: runtime activation gates are satisfied; gameplay is enabled.`
+      : `${status.levelId}: ${status.blockers.length} runtime activation gate(s) are blocking gameplay.`,
+    meta: {
+      levelId: status.levelId,
+      ready: status.ready,
+      gates: status.gates,
+      blockers: status.blockers,
+      observedState: {
+        ...staticWorldRuntimeState,
+        loadedColliderUrls:
+          $runtimeLoadedColliderUrlsStore[activeLevelKey] ?? [],
+        physicsWorldReady: physicsReady,
+        playerBodyReady: playerReady,
+        gameplayEnabled: gameplayActivationRequested,
+      },
+    },
+  })
+}
+
 function handlePlayerPoseChange(detail: {
   position?: [number, number, number]
   rotation?: [number, number, number]
@@ -145,6 +245,20 @@ function resetWorldSession() {
   levelPlayerPosition = null
   levelPlayerRotation = null
   runtimePlayerSettings = resolveRuntimePlayerSettings(null)
+  levelRuntimeReadinessContract = null
+  staticWorldRuntimeState = {
+    manifestLoaded: false,
+    requiredRenderAssetsLoaded: false,
+    requiredRenderActorsMounted: false,
+    requiredCollisionMounted: false,
+    terrainCollisionMounted: false,
+    activeInitialCellKeys: [],
+    readyInitialCellKeys: [],
+    failedInitialCellKeys: [],
+    spawnResolved: false,
+  }
+  runtimeActivationStatus = null
+  lastRuntimeActivationDiagnosticKey = ''
   editorPlaytestSpawnPosition = null
   editorPlaytestSpawnRotation = null
   editorPlaytestResumePosition = null
@@ -208,11 +322,29 @@ $: playerLevelReady =
   editorEnabled && activeEditorPlaytestMode
     ? editorPlaytestRuntimeReady
     : staticWorldReady
-$: gameplayEnabled = Boolean(
+$: gameplayActivationRequested = Boolean(
   (!editorEnabled || activeEditorPlaytestMode) &&
     playerLevelReady &&
-    activePlayerPosition,
+    activePlayerPosition &&
+    physicsReady &&
+    playerReady,
 )
+$: runtimeActivationStatus = levelRuntimeReadinessContract
+  ? evaluateLevelRuntimeActivation(levelRuntimeReadinessContract, {
+      ...staticWorldRuntimeState,
+      loadedColliderUrls:
+        $runtimeLoadedColliderUrlsStore[activeLevelKey] ?? [],
+      physicsWorldReady: physicsReady,
+      playerBodyReady: playerReady,
+      gameplayEnabled: gameplayActivationRequested,
+    })
+  : null
+$: gameplayEnabled = runtimeActivationStatus
+  ? runtimeActivationStatus.ready
+  : gameplayActivationRequested
+$: if (runtimeActivationStatus) {
+  publishRuntimeActivationDiagnostic(runtimeActivationStatus)
+}
 $: if (
   currentLevel !== activeLevelKey ||
   currentLevelComponent !== activeLevelComponent

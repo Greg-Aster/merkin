@@ -16,6 +16,13 @@ import {
   prepareRequiredLevelRenderAssets,
 } from '../engine/levelAssetPreloader'
 import { createLevelBuildReport } from '../engine/levelValidation'
+import { createLevelRuntimeReadinessContract } from '../engine/levelRuntimeReadinessContract'
+import {
+  getBuildReportRequiredAssetUrls,
+  getBuildReportRequiredRenderActorIds,
+  getBuildReportRuntimeAssetUrls,
+} from '../engine/runtimeSceneManifest'
+import type { LevelRuntimeReadinessContract } from '../engine/types'
 import {
   endLevelRuntimeAssetScope,
   getLevelRuntimeAssetTier,
@@ -52,6 +59,7 @@ import {
   loadTerrainRuntimeComponentData,
 } from '../features/terrain/terrainManifest'
 import { playerStateStore } from '../stores/gameStateStore'
+import { clearRuntimeColliderUrls } from '../stores/runtimeCollisionRegistry'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 import {
   replaceRuntimeRenderProfile,
@@ -116,6 +124,7 @@ let starMapRef: Group
 let loadToken = 0
 let terrainRuntimeData: TerrainRuntimeComponentData | null = null
 let terrainRuntimeReady = false
+let activeRuntimeReadinessContract: LevelRuntimeReadinessContract | null = null
 let worldPartition: RuntimeWorldPartition | null = null
 let pendingSceneReady = false
 let pendingSpawnPosition: [number, number, number] | null = null
@@ -575,6 +584,16 @@ function activateSceneGameplay(
     metadata: {
       actorCount: levelActors.length,
       terrainRuntime: Boolean(terrainRuntimeData),
+      runtimeReadinessContract: activeRuntimeReadinessContract,
+      worldPartitionReadiness: {
+        requiredInitialCellKeys: runtimeStreamingState.requiredCellKeys,
+        activeInitialCellKeys: runtimeStreamingState.activeCellKeys,
+        readyInitialCellKeys: runtimeReadyCellKeys,
+        failedInitialCellKeys: runtimeStreamingState.failedRequiredCellKeys,
+        requiredInitialCellsActive:
+          runtimeStreamingState.pendingRequiredCellKeys.length === 0 &&
+          runtimeStreamingState.failedRequiredCellKeys.length === 0,
+      },
       player: resolveRuntimePlayerSettings(sharedLevelSettings.player),
     },
   })
@@ -641,6 +660,7 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
 
   terrainRuntimeData = null
   terrainRuntimeReady = false
+  activeRuntimeReadinessContract = null
   worldPartition = null
   clearRuntimeStreamingTelemetry(level)
   pendingSceneReady = false
@@ -719,8 +739,19 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
   if (token !== loadToken) return
 
   const buildReport = createLevelBuildReport(levelDefinition)
+  activeRuntimeReadinessContract = createLevelRuntimeReadinessContract(
+    levelDefinition,
+    {
+      worldPartitionReadiness: worldPartition?.readiness ?? null,
+    },
+  )
+  const requiredRenderActorIds =
+    getBuildReportRequiredRenderActorIds(buildReport)
+  const buildRequiredAssetUrls = getBuildReportRequiredAssetUrls(buildReport)
+  const buildRuntimeAssetUrls = getBuildReportRuntimeAssetUrls(buildReport)
   clearRuntimeRenderedActors(level)
-  setRequiredRuntimeRenderActors(level, buildReport.requiredRenderActorIds)
+  clearRuntimeColliderUrls(level)
+  setRequiredRuntimeRenderActors(level, requiredRenderActorIds)
   traceRuntimeCulling({
     levelId: level,
     reason: 'level-render-gate',
@@ -728,8 +759,8 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
     detail: {
       status: 'contract',
       actorCount: buildReport.actorCount,
-      requiredRenderActorIds: buildReport.requiredRenderActorIds,
-      requiredAssetUrls: buildReport.requiredAssetUrls,
+      requiredRenderActorIds,
+      requiredAssetUrls: buildRequiredAssetUrls,
       buildErrors: buildReport.errors,
     },
   })
@@ -795,7 +826,7 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
     initialActiveActorIds,
   )
   const requiredAssetUrls = [
-    ...new Set([...buildReport.requiredAssetUrls, ...readinessAssetUrls]),
+    ...new Set([...buildRequiredAssetUrls, ...readinessAssetUrls]),
   ]
   setRuntimeRenderLifecyclePhase({
     levelId: level,
@@ -821,7 +852,7 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
   requiredRuntimeAssetCount = preloadReport.requiredSourceUrls.length
   deferredOptionalRuntimeAssetCount = Math.max(
     0,
-    new Set(buildReport.runtimeAssetUrls).size - requiredRuntimeAssetCount,
+    new Set(buildRuntimeAssetUrls).size - requiredRuntimeAssetCount,
   )
   traceRuntimeCulling({
     levelId: level,
@@ -937,7 +968,7 @@ async function loadSceneDocumentUnchecked(level: string, token: number) {
       message: `${level}: runtime render diagnostics are publishing actor readiness.`,
       detail: {
         visibleActorCount: visibleActorIds.size,
-        requiredRenderActorCount: buildReport.requiredRenderActorIds.length,
+        requiredRenderActorCount: requiredRenderActorIds.length,
       },
     })
     requestSceneGameplayActivation(level, spawnPosition)
@@ -962,6 +993,7 @@ async function loadSceneDocument(level: string, token: number) {
     actorRevealIndex = 0
     terrainRuntimeData = null
     terrainRuntimeReady = false
+    activeRuntimeReadinessContract = null
     worldPartition = null
     previousPlayerPosition = null
     lastWorldPartitionPrefetchKey = ''
@@ -1337,6 +1369,7 @@ onDestroy(() => {
   resetRuntimeRenderProfile()
   terrainRuntimeData = null
   terrainRuntimeReady = false
+  activeRuntimeReadinessContract = null
   pendingSceneReady = false
   pendingSpawnPosition = null
   resetRuntimeVisualStyle()

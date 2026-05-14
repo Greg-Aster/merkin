@@ -10,6 +10,10 @@ import {
 import { createLevelBuildReport } from '../engine/levelValidation'
 import {
   type RuntimeSceneManifest,
+  getBuildReportRequiredAssetUrls,
+  getBuildReportRuntimeAssetUrls,
+  getRuntimeSceneRequiredAssetUrls,
+  getRuntimeSceneRuntimeAssetUrls,
   validateRuntimeSceneManifest,
 } from '../engine/runtimeSceneManifest'
 import { withEditorSceneEngineData } from '../engine/sceneDocumentRuntime'
@@ -124,7 +128,7 @@ function getRuntimeAssetsForScene(
   runtimeScene: RuntimeSceneManifest | null,
 ) {
   const assets = runtimeAssetManifest?.assets ?? {}
-  return (runtimeScene?.runtime.runtimeAssetUrls ?? [])
+  return getRuntimeSceneRuntimeAssetUrls(runtimeScene)
     .map(url => assets[url])
     .filter((asset): asset is NonNullable<typeof asset> => Boolean(asset))
 }
@@ -333,7 +337,7 @@ function addAuthoringSceneSection(
         ? `${report.errors.length} authoring contract issue(s): ${report.errors
             .slice(0, 2)
             .join(' ')}`
-        : `${report.actorCount} actors, ${report.runtimeAssetUrls.length} runtime assets, ${report.requiredAssetUrls.length} required assets.`,
+        : `${report.actorCount} actors, ${getBuildReportRuntimeAssetUrls(report).length} runtime assets, ${getBuildReportRequiredAssetUrls(report).length} required assets.`,
   })
 
   for (const error of report.errors) {
@@ -380,13 +384,15 @@ function addRuntimeSceneSection(
   const assetMismatch =
     authoringReport !== null &&
     (!sameStringSet(
-      authoringReport.requiredAssetUrls,
-      runtimeScene.runtime.requiredAssetUrls,
+      getBuildReportRequiredAssetUrls(authoringReport),
+      getRuntimeSceneRequiredAssetUrls(runtimeScene),
     ) ||
       !sameStringSet(
-        authoringReport.runtimeAssetUrls,
-        runtimeScene.runtime.runtimeAssetUrls,
+        getBuildReportRuntimeAssetUrls(authoringReport),
+        getRuntimeSceneRuntimeAssetUrls(runtimeScene),
       ))
+  const runtimeAssetUrls = getRuntimeSceneRuntimeAssetUrls(runtimeScene)
+  const requiredAssetUrls = getRuntimeSceneRequiredAssetUrls(runtimeScene)
   const blockerDetails = [
     ...validation.errors,
     stale
@@ -403,7 +409,7 @@ function addRuntimeSceneSection(
     severity: blockerDetails.length ? 'blocker' : 'ready',
     detail: blockerDetails.length
       ? blockerDetails.slice(0, 2).join(' ')
-      : `${runtimeScene.runtime.runtimeAssetUrls.length} cooked runtime assets, ${runtimeScene.runtime.requiredAssetUrls.length} required.`,
+      : `${runtimeAssetUrls.length} cooked runtime assets, ${requiredAssetUrls.length} required.`,
   })
 
   if (blockerDetails.length) {
@@ -422,14 +428,13 @@ function addRequiredAssetsSection(
   runtimeScene: RuntimeSceneManifest | null,
 ) {
   const assets = runtimeAssetManifest?.assets ?? {}
-  const missing = (runtimeScene?.runtime.requiredAssetUrls ?? []).filter(
-    url => {
-      const asset = assets[url]
-      if (!asset) return true
-      const variants = Object.values(asset.qualityVariants ?? {})
-      return variants.length > 0 && !variants.some(variant => variant?.exists)
-    },
-  )
+  const requiredAssetUrls = getRuntimeSceneRequiredAssetUrls(runtimeScene)
+  const missing = requiredAssetUrls.filter(url => {
+    const asset = assets[url]
+    if (!asset) return true
+    const variants = Object.values(asset.qualityVariants ?? {})
+    return variants.length > 0 && !variants.some(variant => variant?.exists)
+  })
 
   addSection(viewModel, {
     id: 'required-assets',
@@ -437,7 +442,7 @@ function addRequiredAssetsSection(
     severity: missing.length ? 'blocker' : 'ready',
     detail: missing.length
       ? `${missing.length} required runtime asset(s) are missing from the manifest: ${missing.slice(0, 3).join(', ')}.`
-      : `${runtimeScene?.runtime.requiredAssetUrls.length ?? 0} required assets are present in cooked contracts.`,
+      : `${requiredAssetUrls.length} required assets are present in cooked contracts.`,
   })
 
   if (missing.length) {
@@ -455,7 +460,7 @@ function addImportMetadataSection(
   runtimeScene: RuntimeSceneManifest | null,
 ) {
   const assets = runtimeAssetManifest?.assets ?? {}
-  const sceneAssetUrls = runtimeScene?.runtime.runtimeAssetUrls ?? []
+  const sceneAssetUrls = getRuntimeSceneRuntimeAssetUrls(runtimeScene)
   const sceneAssets = sceneAssetUrls.map(url => assets[url]).filter(Boolean)
   const missing = sceneAssetUrls.filter(url => !assets[url]?.importMetadata?.id)
   const warnings = (

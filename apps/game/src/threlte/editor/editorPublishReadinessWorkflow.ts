@@ -1,4 +1,7 @@
-import type { RuntimeSceneManifest } from '../engine/runtimeSceneManifest'
+import {
+  getRuntimeSceneRuntimeAssetUrls,
+  type RuntimeSceneManifest,
+} from '../engine/runtimeSceneManifest'
 import type {
   EditorPublishReadinessItem,
   EditorPublishReadinessPanel,
@@ -40,7 +43,7 @@ function getRuntimeAssetsForScene(
   runtimeScene: RuntimeSceneManifest | null,
 ) {
   const assets = runtimeAssetManifest?.assets ?? {}
-  return (runtimeScene?.runtime.runtimeAssetUrls ?? [])
+  return getRuntimeSceneRuntimeAssetUrls(runtimeScene)
     .map(url => assets[url])
     .filter((asset): asset is NonNullable<typeof asset> => Boolean(asset))
 }

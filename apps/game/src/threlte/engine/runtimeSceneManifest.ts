@@ -61,6 +61,86 @@ function getRuntimeRenderProfile(levelDefinition: LevelDefinition) {
   return (levelDefinition.settings as any)?.level?.renderProfile ?? null
 }
 
+function toStringArray(value: unknown): string[] | undefined {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : undefined
+}
+
+function firstPresentStringArray(...values: unknown[]): string[] {
+  for (const value of values) {
+    const strings = toStringArray(value)
+    if (strings) return strings
+  }
+  return []
+}
+
+export function getBuildReportRequiredRenderActorIds(
+  buildReport: LevelBuildReport | null | undefined,
+): string[] {
+  return firstPresentStringArray(
+    (buildReport as any)?.runtimeReadinessContract?.runtime
+      ?.requiredRenderActorIds,
+    (buildReport as any)?.runtimeReadinessContract?.requiredRenderActorIds,
+    buildReport?.requiredRenderActorIds,
+  )
+}
+
+export function getBuildReportRequiredAssetUrls(
+  buildReport: LevelBuildReport | null | undefined,
+): string[] {
+  return firstPresentStringArray(
+    (buildReport as any)?.runtimeReadinessContract?.runtime?.requiredAssetUrls,
+    (buildReport as any)?.runtimeReadinessContract?.requiredAssetUrls,
+    buildReport?.requiredAssetUrls,
+  )
+}
+
+export function getBuildReportRuntimeAssetUrls(
+  buildReport: LevelBuildReport | null | undefined,
+): string[] {
+  return firstPresentStringArray(
+    (buildReport as any)?.runtimeReadinessContract?.runtimeAssetUrls,
+    buildReport?.runtimeAssetUrls,
+  )
+}
+
+export function getRuntimeSceneRequiredRenderActorIds(
+  manifest: RuntimeSceneManifest | null | undefined,
+): string[] {
+  return firstPresentStringArray(
+    (manifest?.buildReport as any)?.runtimeReadinessContract?.runtime
+      ?.requiredRenderActorIds,
+    (manifest?.buildReport as any)?.runtimeReadinessContract
+      ?.requiredRenderActorIds,
+    manifest?.buildReport?.requiredRenderActorIds,
+    manifest?.runtime?.requiredRenderActorIds,
+  )
+}
+
+export function getRuntimeSceneRequiredAssetUrls(
+  manifest: RuntimeSceneManifest | null | undefined,
+): string[] {
+  return firstPresentStringArray(
+    (manifest?.buildReport as any)?.runtimeReadinessContract?.runtime
+      ?.requiredAssetUrls,
+    (manifest?.buildReport as any)?.runtimeReadinessContract
+      ?.requiredAssetUrls,
+    manifest?.buildReport?.requiredAssetUrls,
+    manifest?.runtime?.requiredAssetUrls,
+  )
+}
+
+export function getRuntimeSceneRuntimeAssetUrls(
+  manifest: RuntimeSceneManifest | null | undefined,
+): string[] {
+  return firstPresentStringArray(
+    (manifest?.buildReport as any)?.runtimeReadinessContract?.runtimeAssetUrls,
+    manifest?.buildReport?.runtimeAssetUrls,
+    manifest?.runtime?.runtimeAssetUrls,
+  )
+}
+
 export function createRuntimeSceneManifest(input: {
   scene: SceneDocument
   sceneId: string
@@ -84,9 +164,11 @@ export function createRuntimeSceneManifest(input: {
     levelDefinition: input.levelDefinition,
     buildReport: input.buildReport,
     runtime: {
-      requiredRenderActorIds: input.buildReport.requiredRenderActorIds,
-      requiredAssetUrls: input.buildReport.requiredAssetUrls,
-      runtimeAssetUrls: input.buildReport.runtimeAssetUrls,
+      requiredRenderActorIds: getBuildReportRequiredRenderActorIds(
+        input.buildReport,
+      ),
+      requiredAssetUrls: getBuildReportRequiredAssetUrls(input.buildReport),
+      runtimeAssetUrls: getBuildReportRuntimeAssetUrls(input.buildReport),
       assetTierCap: getRuntimeAssetTierCap(input.levelDefinition),
       terrainManifestUrl: getTerrainManifestUrl(input.levelDefinition),
       ground: getRuntimeGroundContract(input.levelDefinition),
@@ -174,23 +256,31 @@ export function validateRuntimeSceneManifest(
   if (
     !sameStringSet(
       runtime.requiredRenderActorIds,
-      buildReport.requiredRenderActorIds,
+      getBuildReportRequiredRenderActorIds(buildReport),
     )
   ) {
     errors.push(
-      'Runtime requiredRenderActorIds do not match build report requiredRenderActorIds.',
+      'Runtime requiredRenderActorIds do not match build report readiness contract.',
     )
   }
   if (
-    !sameStringSet(runtime.requiredAssetUrls, buildReport.requiredAssetUrls)
+    !sameStringSet(
+      runtime.requiredAssetUrls,
+      getBuildReportRequiredAssetUrls(buildReport),
+    )
   ) {
     errors.push(
-      'Runtime requiredAssetUrls do not match build report requiredAssetUrls.',
+      'Runtime requiredAssetUrls do not match build report readiness contract.',
     )
   }
-  if (!sameStringSet(runtime.runtimeAssetUrls, buildReport.runtimeAssetUrls)) {
+  if (
+    !sameStringSet(
+      runtime.runtimeAssetUrls,
+      getBuildReportRuntimeAssetUrls(buildReport),
+    )
+  ) {
     errors.push(
-      'Runtime runtimeAssetUrls do not match build report runtimeAssetUrls.',
+      'Runtime runtimeAssetUrls do not match build report readiness contract.',
     )
   }
   if (!runtime.ground) {
@@ -208,8 +298,8 @@ export function validateRuntimeSceneManifest(
   }
 
   for (const url of [
-    ...runtime.requiredAssetUrls,
-    ...runtime.runtimeAssetUrls,
+    ...getRuntimeSceneRequiredAssetUrls(manifest),
+    ...getRuntimeSceneRuntimeAssetUrls(manifest),
   ]) {
     if (!url.startsWith('/')) {
       errors.push(`Runtime asset URL "${url}" must be a public absolute path.`)

@@ -26,6 +26,7 @@ export let friction = 0.7
 export let restitution = 0
 export let sensor = false
 export let collisionGroups: number | undefined = undefined
+export let levelId = ''
 export let colliderUrl = ''
 export let colliderMetadataUrl = ''
 export let assetLocalTransform: AssetLocalTransformMetadata | null = null
@@ -56,6 +57,7 @@ $: useExplicitPhysicsTransform = transformMode === 'physics-explicit'
       {restitution}
       {sensor}
       {collisionGroups}
+      {levelId}
       {colliderUrl}
       {colliderMetadataUrl}
       {assetLocalTransform}
@@ -86,6 +88,7 @@ $: useExplicitPhysicsTransform = transformMode === 'physics-explicit'
         {restitution}
         {sensor}
         {collisionGroups}
+        {levelId}
         {colliderUrl}
         {colliderMetadataUrl}
         {assetLocalTransform}

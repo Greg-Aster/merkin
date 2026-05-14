@@ -33,6 +33,7 @@ export let lockTranslations = false
 export let friction = 0.7
 export let restitution = 0
 export let sensor = false
+export let levelId = ''
 export let colliderUrl = ''
 export let colliderMetadataUrl = ''
 export let assetLocalTransform: AssetLocalTransformMetadata | null = null
@@ -85,6 +86,7 @@ $: physicsScale = applyScaleToPhysics
   {restitution}
   {sensor}
   {collisionGroups}
+  {levelId}
   colliderUrl={assetColliderUrl}
   {colliderMetadataUrl}
   {assetLocalTransform}

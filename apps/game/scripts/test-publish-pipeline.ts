@@ -22,6 +22,16 @@ import {
 } from '../src/threlte/editor/editorTerrainPipeline.ts'
 import { createLevelBuildReport } from '../src/threlte/engine/levelValidation.ts'
 import {
+  createLevelRuntimeReadinessContract,
+  evaluateLevelRuntimeActivation,
+} from '../src/threlte/engine/levelRuntimeReadinessContract.ts'
+import {
+  createRuntimeSceneManifest,
+  getRuntimeSceneRequiredAssetUrls,
+  getRuntimeSceneRuntimeAssetUrls,
+  validateRuntimeSceneManifest,
+} from '../src/threlte/engine/runtimeSceneManifest.ts'
+import {
   classifyTerrainAuthority,
   getTerrainAuthorityDiagnostics,
 } from '../src/threlte/engine/groundContract.ts'
@@ -37,6 +47,7 @@ import {
 } from '../src/threlte/editor/editorCollisionLifecycle.ts'
 import { createGeneratedAssetNode } from '../src/threlte/editor/editorGeneratedAssetApplication.ts'
 import type { EditorSceneDocument } from '../src/threlte/editor/editorTypes.ts'
+import type { LevelDefinition } from '../src/threlte/engine/types.ts'
 
 const require = createRequire(import.meta.url)
 const {
@@ -44,6 +55,9 @@ const {
   normalizePublishBuildPlan,
   runPublishBuildPlan,
 } = require('./editor-tools/sceneRoutes.cjs')
+const {
+  createLevelBuildReport: createRuntimeSceneLevelBuildReport,
+} = await import('./lib/runtimeSceneManifest.mjs')
 
 function createScene(
   overrides: Partial<EditorSceneDocument> = {},
@@ -365,6 +379,441 @@ test('source GLB chunk ground is accepted by level validation', () => {
 
   const report = createLevelBuildReport(level)
   assert.deepEqual(report.errors, [])
+})
+
+test('runtime readiness contract captures required terrain and spawn gates', () => {
+  const level = {
+    id: 'observatory',
+    version: 1,
+    name: 'Observatory',
+    spawn: {
+      player: [0, 1, 0] as [number, number, number],
+    },
+    actors: [],
+    settings: {
+      level: {
+        ground: {
+          mode: 'terrain-chunks',
+          visualSource: 'source-glb-chunks',
+          terrainRuntimeMode: 'glb-chunk-terrain',
+          terrainVisualSource: 'source-glb-chunks',
+          collisionSource: 'source-linked-terrain-collision',
+          fallbackSurfacePolicy: 'disabled',
+          terrainManifestUrl: '/terrain/observatory-environment.manifest.json',
+          sourceAssetUrl: '/models/levels/observatory-environment.glb',
+          sourceAssetHash: fixtureSourceFingerprint.value,
+        },
+        collision: {
+          terrain: {
+            source: 'source-glb',
+            runtimeMode: 'glb-chunk-terrain',
+            visualSource: 'source-glb-chunks',
+            fallbackSurfacePolicy: 'disabled',
+            manifestUrl: '/terrain/observatory-environment.manifest.json',
+            sourceAssetUrl: '/models/levels/observatory-environment.glb',
+            sourceAssetHash: fixtureSourceFingerprint.value,
+          },
+        },
+      },
+    },
+  }
+
+  const readiness = createLevelRuntimeReadinessContract(level)
+
+  assert.equal(readiness.schemaVersion, 1)
+  assert.equal(readiness.spawn.valid, true)
+  assert.equal(readiness.spawn.satisfiedByRuntimeSystem, true)
+  assert.equal(readiness.terrain.runtimeCollision, true)
+  assert.equal(readiness.terrain.satisfiedByRuntimeSystem, true)
+  assert.equal(readiness.publish.ready, true)
+  assert.equal(readiness.runtime.requiredTerrain, true)
+  assert.deepEqual(readiness.requiredCollisionActorIds, ['observatory-terrain'])
+  assert.deepEqual(readiness.requiredActorIds, [
+    'observatory-terrain',
+    'observatory-player-spawn',
+  ])
+  assert.deepEqual(readiness.missingRequiredActorIds, [])
+
+  const blockedActivation = evaluateLevelRuntimeActivation(readiness, {
+    manifestLoaded: true,
+    spawnResolved: true,
+    terrainCollisionMounted: true,
+  })
+  assert.equal(blockedActivation.ready, false)
+  assert.ok(
+    blockedActivation.blockers.some(blocker =>
+      blocker.includes('Physics world is not ready'),
+    ),
+  )
+
+  const readyActivation = evaluateLevelRuntimeActivation(readiness, {
+    manifestLoaded: true,
+    requiredRenderAssetsLoaded: true,
+    requiredRenderActorsMounted: true,
+    requiredCollisionMounted: true,
+    terrainCollisionMounted: true,
+    spawnResolved: true,
+    physicsWorldReady: true,
+    playerBodyReady: true,
+    gameplayEnabled: true,
+  })
+  assert.equal(readyActivation.ready, true)
+  assert.deepEqual(readyActivation.blockers, [])
+
+  const report = createLevelBuildReport(level)
+  assert.deepEqual(report.runtimeReadinessContract, readiness)
+
+  const runtimeSceneReport = createRuntimeSceneLevelBuildReport(level)
+  assert.deepEqual(runtimeSceneReport.runtimeReadinessContract, readiness)
+  assert.deepEqual(
+    runtimeSceneReport.requiredAssetUrls,
+    readiness.requiredAssetUrls,
+  )
+  assert.deepEqual(
+    runtimeSceneReport.runtimeAssetUrls,
+    readiness.runtimeAssetUrls,
+  )
+})
+
+test('runtime readiness contract covers scene-authored primitive floor activation', () => {
+  const level: LevelDefinition = {
+    id: 'fixture-level',
+    version: 1,
+    title: 'Fixture Level',
+    spawn: {
+      player: [0, 1.1, 0] as [number, number, number],
+    },
+    actors: [
+      {
+        id: 'fixture-ground',
+        name: 'Fixture Ground',
+        kind: 'primitive',
+        transform: {
+          position: [0, 0, 0] as [number, number, number],
+          rotation: [0, 0, 0] as [number, number, number],
+          scale: [1, 1, 1] as [number, number, number],
+        },
+        render: {
+          visible: true,
+          cullingPolicy: 'runtime-budget',
+          physicsAttachment: 'inside-collider',
+          primitive: {
+            geometry: 'box',
+            args: [8, 0.4, 8],
+          },
+        },
+        physics: {
+          bodyType: 'fixed',
+          collision: {
+            shape: 'cuboid',
+            size: [8, 0.4, 8] as [number, number, number],
+            intent: 'walkable',
+            channel: 'worldStatic',
+          },
+        },
+      },
+      {
+        id: 'fixture-required-asset',
+        name: 'Fixture Required Asset',
+        kind: 'asset',
+        transform: {
+          position: [2, 0.5, 0] as [number, number, number],
+          rotation: [0, 0, 0] as [number, number, number],
+          scale: [1, 1, 1] as [number, number, number],
+        },
+        render: {
+          visible: true,
+          cullingPolicy: 'runtime-budget',
+          physicsAttachment: 'outside-collider',
+          asset: {
+            url: '/generated/runtime-game-assets/fixture-required.glb',
+          },
+        },
+      },
+      {
+        id: 'fixture-required-collider',
+        name: 'Fixture Required Collider',
+        kind: 'asset',
+        transform: {
+          position: [-2, 0.5, 0] as [number, number, number],
+          rotation: [0, 0, 0] as [number, number, number],
+          scale: [1, 1, 1] as [number, number, number],
+        },
+        render: {
+          visible: true,
+          cullingPolicy: 'runtime-budget',
+          physicsAttachment: 'outside-collider',
+          asset: {
+            url: '/generated/runtime-game-assets/fixture-collider-visual.glb',
+          },
+        },
+        physics: {
+          bodyType: 'fixed',
+          collision: {
+            shape: 'trimesh',
+            intent: 'blocker',
+            channel: 'worldStatic',
+            colliderUrl:
+              '/generated/runtime-game-assets/collision/fixture-required-collider.collider.glb',
+            colliderMetadataUrl:
+              '/generated/runtime-game-assets/collision/fixture-required-collider.collider.json',
+            triangleBudget: 500,
+          },
+        },
+      },
+    ],
+    settings: {
+      level: {
+        runtimeAssets: {
+          requiredActorIds: [
+            'fixture-ground',
+            'fixture-required-collider',
+            'fixture-level-player-spawn',
+          ],
+          requiredRenderActorIds: ['fixture-required-asset'],
+        },
+        ground: {
+          mode: 'scene-authored',
+          visualSource: 'scene-actors',
+          terrainRuntimeMode: 'scene-authored',
+          terrainVisualSource: 'scene-actors',
+          collisionSource: 'scene-colliders',
+          fallbackSurfacePolicy: 'disabled',
+          groundActorIds: ['fixture-ground'],
+        },
+      },
+    },
+  }
+
+  const readiness = createLevelRuntimeReadinessContract(level)
+
+  assert.equal(readiness.publish.ready, true)
+  assert.equal(readiness.spawn.valid, true)
+  assert.equal(readiness.spawn.satisfiedByRuntimeSystem, true)
+  assert.equal(readiness.terrain.runtimeCollision, false)
+  assert.equal(readiness.terrain.satisfiedByRuntimeSystem, false)
+  assert.deepEqual(readiness.requiredActorIds, [
+    'fixture-ground',
+    'fixture-required-collider',
+    'fixture-level-player-spawn',
+  ])
+  assert.deepEqual(readiness.requiredRenderActorIds, [
+    'fixture-required-asset',
+  ])
+  assert.deepEqual(readiness.requiredAssetUrls, [
+    '/generated/runtime-game-assets/fixture-required.glb',
+  ])
+  assert.deepEqual(readiness.runtimeAssetUrls, [
+    '/generated/runtime-game-assets/fixture-collider-visual.glb',
+    '/generated/runtime-game-assets/fixture-required.glb',
+  ])
+  assert.deepEqual(readiness.missingRequiredActorIds, [])
+  assert.deepEqual(readiness.requiredCollisionActorIds, [
+    'fixture-ground',
+    'fixture-required-collider',
+  ])
+  assert.deepEqual(readiness.requiredColliderUrls, [
+    '/generated/runtime-game-assets/collision/fixture-required-collider.collider.glb',
+  ])
+  assert.deepEqual(readiness.runtime.requiredColliderUrls, [
+    '/generated/runtime-game-assets/collision/fixture-required-collider.collider.glb',
+  ])
+  assert.deepEqual(readiness.requiredWalkableActorIds, [])
+
+  const activation = evaluateLevelRuntimeActivation(readiness, {
+    manifestLoaded: true,
+    loadedAssetUrls: ['/generated/runtime-game-assets/fixture-required.glb'],
+    mountedRenderActorIds: ['fixture-required-asset'],
+    mountedCollisionActorIds: ['fixture-ground', 'fixture-required-collider'],
+    loadedColliderUrls: [
+      '/generated/runtime-game-assets/collision/fixture-required-collider.collider.glb',
+    ],
+    spawnResolved: true,
+    physicsWorldReady: true,
+    playerBodyReady: true,
+    gameplayEnabled: true,
+  })
+  assert.equal(activation.ready, true)
+
+  const report = createLevelBuildReport(level)
+  assert.deepEqual(report.errors, [])
+  assert.deepEqual(report.warnings, [])
+  assert.deepEqual(report.runtimeReadinessContract, readiness)
+
+  const runtimeSceneReport = createRuntimeSceneLevelBuildReport(level)
+  assert.deepEqual(runtimeSceneReport.runtimeReadinessContract, readiness)
+
+  const manifest = createRuntimeSceneManifest({
+    scene: createScene({ levelId: level.id }) as any,
+    sceneId: level.id,
+    sourcePath: '/src/threlte/editor/scenes/fixture-level.scene.json',
+    levelDefinition: level,
+    buildReport: {
+      ...report,
+      requiredRenderActorIds: [],
+      requiredAssetUrls: [],
+      runtimeAssetUrls: [],
+    },
+    generatedAt: '2026-05-13T00:00:00.000Z',
+  })
+  assert.deepEqual(manifest.runtime.requiredAssetUrls, [
+    '/generated/runtime-game-assets/fixture-required.glb',
+  ])
+  assert.deepEqual(getRuntimeSceneRequiredAssetUrls(manifest), [
+    '/generated/runtime-game-assets/fixture-required.glb',
+  ])
+  assert.deepEqual(getRuntimeSceneRuntimeAssetUrls(manifest), [
+    '/generated/runtime-game-assets/fixture-collider-visual.glb',
+    '/generated/runtime-game-assets/fixture-required.glb',
+  ])
+  assert.deepEqual(validateRuntimeSceneManifest(manifest, level.id).errors, [])
+})
+
+test('runtime readiness contract reports required collider urls', () => {
+  const level: LevelDefinition = {
+    id: 'fixture-level',
+    version: 1,
+    title: 'Fixture Level',
+    spawn: {
+      player: [0, 1, 0] as [number, number, number],
+    },
+    actors: [
+      {
+        id: 'fixture-collision-mesh',
+        name: 'Fixture Collision Mesh',
+        kind: 'asset',
+        transform: {
+          position: [0, 0, 0] as [number, number, number],
+          rotation: [0, 0, 0] as [number, number, number],
+          scale: [1, 1, 1] as [number, number, number],
+        },
+        render: {
+          visible: true,
+          cullingPolicy: 'runtime-budget',
+          physicsAttachment: 'outside-collider',
+          asset: {
+            url: '/generated/runtime-game-assets/fixture-collision-mesh.glb',
+          },
+        },
+        physics: {
+          bodyType: 'fixed',
+          collision: {
+            shape: 'trimesh',
+            intent: 'blocker',
+            channel: 'worldStatic',
+            colliderUrl:
+              '/generated/runtime-game-assets/collision/fixture-collision-mesh.collider.glb',
+            colliderMetadataUrl:
+              '/generated/runtime-game-assets/collision/fixture-collision-mesh.collider.meta.json',
+            triangleBudget: 128,
+          },
+        },
+      },
+    ],
+    settings: {
+      level: {
+        runtimeAssets: {
+          requiredActorIds: [
+            'fixture-collision-mesh',
+            'fixture-level-player-spawn',
+          ],
+        },
+      },
+    },
+  }
+
+  const readiness = createLevelRuntimeReadinessContract(level)
+
+  assert.deepEqual(readiness.requiredCollisionActorIds, [
+    'fixture-collision-mesh',
+  ])
+  assert.deepEqual(readiness.requiredColliderUrls, [
+    '/generated/runtime-game-assets/collision/fixture-collision-mesh.collider.glb',
+  ])
+  assert.deepEqual(readiness.runtime.requiredColliderUrls, [
+    '/generated/runtime-game-assets/collision/fixture-collision-mesh.collider.glb',
+  ])
+  assert.deepEqual(
+    readiness.publish.gates.find(gate => gate.id === 'required-collision-present')
+      ?.evidence.colliderUrls,
+    readiness.requiredColliderUrls,
+  )
+})
+
+test('runtime readiness contract reports world partition initial cells', () => {
+  const level: LevelDefinition = {
+    id: 'fixture-level',
+    version: 1,
+    title: 'Fixture Level',
+    spawn: {
+      player: [0, 1, 0] as [number, number, number],
+    },
+    actors: [],
+    settings: {
+      level: {},
+    },
+  }
+
+  const readiness = createLevelRuntimeReadinessContract(level, {
+    requiredInitialCellKeys: ['1:0'],
+    worldPartitionReadiness: {
+      requiredInitialCellKeys: ['0:0', '1:0', '0:0'],
+    },
+  })
+
+  assert.deepEqual(readiness.requiredInitialCellKeys, ['0:0', '1:0'])
+  assert.deepEqual(readiness.runtime.requiredInitialCellKeys, ['0:0', '1:0'])
+  assert.ok(
+    readiness.runtime.requiredGateIds.includes(
+      'required-initial-world-partition-cells-ready',
+    ),
+  )
+
+  const blocked = evaluateLevelRuntimeActivation(readiness, {
+    manifestLoaded: true,
+    requiredRenderAssetsLoaded: true,
+    requiredRenderActorsMounted: true,
+    requiredCollisionMounted: true,
+    spawnResolved: true,
+    physicsWorldReady: true,
+    playerBodyReady: true,
+    gameplayEnabled: true,
+  })
+  assert.equal(blocked.ready, false)
+  assert.ok(
+    blocked.blockers.some(blocker =>
+      blocker.includes('required initial world partition cell'),
+    ),
+  )
+
+  const failed = evaluateLevelRuntimeActivation(readiness, {
+    manifestLoaded: true,
+    requiredRenderAssetsLoaded: true,
+    requiredRenderActorsMounted: true,
+    requiredCollisionMounted: true,
+    activeInitialCellKeys: ['0:0'],
+    readyInitialCellKeys: ['1:0'],
+    failedInitialCellKeys: ['0:0'],
+    spawnResolved: true,
+    physicsWorldReady: true,
+    playerBodyReady: true,
+    gameplayEnabled: true,
+  })
+  assert.equal(failed.ready, false)
+
+  const ready = evaluateLevelRuntimeActivation(readiness, {
+    manifestLoaded: true,
+    requiredRenderAssetsLoaded: true,
+    requiredRenderActorsMounted: true,
+    requiredCollisionMounted: true,
+    activeInitialCellKeys: ['0:0'],
+    readyInitialCellKeys: ['1:0'],
+    spawnResolved: true,
+    physicsWorldReady: true,
+    playerBodyReady: true,
+    gameplayEnabled: true,
+  })
+  assert.equal(ready.ready, true)
 })
 
 test('legacy terrain-chunks ground visual source is rejected', () => {

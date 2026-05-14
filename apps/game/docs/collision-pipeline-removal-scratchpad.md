@@ -2,12 +2,100 @@
 
 Purpose: shared audit notes for simplifying the collision system before rebuild work. Keep this file current as agents inspect or remove code.
 
+## Current Source Of Truth: Collision + Readiness
+
+This file started as a removal scratchpad. As of 2026-05-13 it is also the coordination note for the collision/readiness contract that protects runtime playability.
+
+The intended engine contract is two-sided:
+
+1. **Publish/build readiness** proves the level definition is shippable before a runtime manifest is accepted.
+2. **Runtime activation readiness** proves the browser has actually loaded and mounted the pieces needed before gameplay input is enabled.
+
+Those are related, but they are not the same gate. Publish readiness can prove that required actors, terrain declarations, spawn data, asset URLs, and collision metadata exist. Runtime activation must still prove that the manifest loaded, required render assets loaded, required render actors mounted, required collision mounted, terrain collision mounted when needed, spawn resolved, physics is ready, the player body exists, and gameplay is enabled.
+
+Current implementation files:
+
+- `src/threlte/engine/levelContractsCore.mjs`: static per-level authored contract and budgets.
+- `src/threlte/engine/levelRuntimeReadinessContractCore.mjs`: Node-safe contract builder and runtime activation evaluator.
+- `src/threlte/engine/levelRuntimeReadinessContract.ts`: typed browser/editor wrapper around the Node-safe core.
+- `src/threlte/engine/levelValidation.ts`: publish/build gate that consumes the readiness contract.
+- `scripts/lib/runtimeSceneManifest.mjs`: Node build-report adapter; it must stay Node-safe and consume shared `.mjs` cores instead of duplicating engine logic.
+- `scripts/test-publish-pipeline.ts`: regression coverage for publish contracts and runtime activation evaluation.
+- `src/threlte/core/GameWorld.svelte`: browser-level readiness owner for physics/player/gameplay activation; evaluates the readiness contract before setting `gameplayEnabled`.
+- `src/threlte/core/gameWorldLifecycle.ts`: high-level shell/level/static-world/physics/player/playable phase resolver.
+- `src/threlte/levels/SceneDocumentLevel.svelte`: scene-document runtime loader that gates static-world readiness on manifest, required render assets, world partition initial cells, actor reveal, terrain runtime readiness, and build-report errors.
+
+Current readiness contract shape:
+
+- Legacy-compatible top-level fields remain: `requiredActorIds`, `requiredRenderActorIds`, `requiredWalkableActorIds`, `runtimeAssetUrls`, `requiredAssetUrls`, and missing-required summaries.
+- New publish surface: `runtimeReadinessContract.publish`.
+  - `ready`: true only when publish gates have no blockers.
+  - `gates`: structured gate diagnostics with ids, labels, required flags, evidence, and blockers.
+  - `blockers`: flattened publish blockers for build/report consumers.
+- New runtime surface: `runtimeReadinessContract.runtime`.
+  - `activationRequired`: whether the level must pass activation gates before gameplay.
+  - `requiredGateIds`: the runtime gates expected before play.
+  - `requiredRenderActorIds`, `requiredCollisionActorIds`, `requiredAssetUrls`.
+  - `requiredTerrain` and `terrainManifestUrl`.
+- Runtime evaluator: `evaluateLevelRuntimeActivation(contract, state)`.
+  - This is a pure helper. It does not load assets or mount physics.
+  - It answers whether observed runtime state satisfies the contract.
+  - It returns structured gate status plus blockers.
+
+Runtime activation gates currently modeled:
+
+1. `publish-contract-ready`: publish/build contract has no blockers.
+2. `manifest-loaded`: runtime scene manifest loaded.
+3. `required-render-assets-loaded`: required render URLs resolved/loaded.
+4. `required-render-actors-mounted`: required render actors mounted.
+5. `required-collision-mounted`: required collision actors mounted.
+6. `required-collider-assets-loaded`: required collider asset URLs loaded when explicit collider assets are required.
+7. `terrain-collision-mounted`: required terrain runtime collider mounted.
+8. `required-initial-world-partition-cells-ready`: required initial world-partition cells are active or ready, with no required cell failed.
+9. `spawn-resolved`: runtime player spawn resolved.
+10. `physics-world-ready`: Rapier world ready.
+11. `player-body-ready`: player body/controller ready.
+12. `gameplay-enabled`: gameplay/input activation allowed.
+
+Important interpretation rules:
+
+- `staticWorldReady` is not the same thing as `playable`.
+- `publish.ready` is not the same thing as runtime activation.
+- Render meshes and collision meshes remain separate assets. Do not let a render-only actor satisfy a collision gate.
+- Observatory `observatory-terrain` and `observatory-player-spawn` are virtual runtime-system actors. They are valid only when backed by terrain runtime collision and finite spawn data.
+- Required first-play assets should gate activation. Optional, streamed, or prefetched assets should not block initial play unless marked required by the manifest/contract.
+- Generic engine code must not add new `if (levelId === ...)` branches. Level-specific requirements belong in contracts, scene settings, registry data, fixtures, or migration scripts.
+
+Known constraints after this pass:
+
+- Runtime activation evaluation gates `GameWorld.svelte` gameplay enablement when a scene provides `runtimeReadinessContract`, and the browser now publishes the full runtime activation diagnostic snapshot from the existing activation status.
+- ACCEPTED: Spawn readiness for terrain-backed scenes still relies on terrain collision coverage proof. Observatory currently reports an info-level reliance on baked terrain coverage; changing that requires the protected Observatory terrain replacement target, not more generic readiness wiring.
+- World partition readiness is enforced in `SceneDocumentLevel.svelte`, and the readiness contract now serializes required initial cell keys when a loaded world-partition manifest provides them. Runtime activation receives observed active/ready/failed initial cell keys instead of treating required keys as observed keys.
+- Asset collider URLs are build-gated for trimesh actors, and the readiness contract now reports `requiredColliderUrls` for required collision actors with explicit collider assets. Runtime activation now blocks on `required-collider-assets-loaded` when required collider URLs have not been reported loaded.
+- ACCEPTED: Runtime collision actor registration is still inferred from required physics/walkable actors. The current pass added loaded collider URL observation for asset-trimesh colliders; a full collision actor registry is a separate schema/runtime registration migration.
+- ACCEPTED: The contract schema is still version `1` for compatibility. A schema `2` migration should rename legacy fields only when runtime manifests and editor consumers are ready.
+- Editor GLB collision overlays now draw wireframe geometry from `buildAssetTrimeshColliderPatches(...)`, matching the runtime asset trimesh collider path instead of cloning collider GLBs as generic render scenes.
+
+Recommended validation commands for this area:
+
+```bash
+pnpm --dir apps/game type-check
+pnpm --dir apps/game test:publish-pipeline
+pnpm --dir apps/game audit:collision
+```
+
+`audit:collision` may need an escalated rerun in this environment when `tsx` cannot create its `/tmp/tsx-1000/*.pipe` IPC file. A passing result with the known Observatory info finding is currently acceptable.
+
 ## Current Audit Status
 
 - Scope: `apps/game` collision runtime, editor collision lifecycle, terrain collision workflow, and audit scripts.
 - Current repo audit before removals: `pnpm --dir apps/game audit:collision` passed with one info finding: Observatory player spawn relies on baked terrain coverage.
 - Current repo audit after first removals: same result, with no new errors or warnings.
 - Current repo audit after assist pass on 2026-05-13: same result, with no new errors or warnings.
+- Current repo audit after final scratchpad close-out on 2026-05-13: same result, with no new errors or warnings.
+- Current repo audit after wiring runtime scene manifests to the readiness contract on 2026-05-13: same result, with no new errors or warnings.
+- Current repo audit after verifying runtime/editor asset-list consumers on 2026-05-14: same result, with no new errors or warnings.
+- Current repo audit after closing the world-partition initial-cell and loaded-collider URL activation gates on 2026-05-14: same result, with no new errors or warnings.
 - Scene inventory:
   - `miranda`: 70 nodes, 43 authored collisions, scene-collider ground.
   - `observatory`: 1 group node, 0 authored collisions, source-linked terrain collision. `lightweight-auto` was enabled but effectively unused for actors; first removal pass normalized it to `authored-only`.
@@ -99,13 +187,13 @@ Stop broad simplification once the repo holds this contract:
 1. Runtime actor collision is explicit scene-authored collision only; no implicit `lightweight-auto` or level-id actor inference.
 2. Runtime terrain collision supports the protected Observatory source-linked terrain path and scene-authored ground actors. Other terrain modes are authoring/migration data until a rebuild target chooses them.
 3. Runtime publishing strips editor-only proxy/bake state from `CollisionComponent`; editor proxy metadata may remain only as editor lifecycle/readiness metadata until there is a replacement authoring flow.
-4. `runtimeSceneManifest.mjs` remains Node-safe and delegates shared collision sizing, channel, group, and terrain contract logic to `.mjs` cores instead of carrying local copies.
+4. `runtimeSceneManifest.mjs` remains Node-safe and delegates shared collision sizing, spatial queries, channel, group, policy issue, level contract, and terrain contract logic to `.mjs` cores instead of carrying local copies.
 5. Collision review remains human-facing diagnostics; level validation remains build-gating. They may share pure helpers, but do not need to become one system.
 
 Accepted constraints after this simplification pass:
 
 - `groundContractCore.mjs` still carries protected transition vocabulary for Observatory/source-linked terrain and chunked terrain mode. The legacy `ground.visualSource: "terrain-chunks"` alias is no longer accepted, and terrain authority migration warnings now fail as errors.
-- `runtimeSceneManifest.mjs` remains the Node-safe build-report adapter until a replacement manifest validator exists. It now delegates terrain contracts, collider sizing, collision policy issues, collision channel resolution, runtime collision group mapping, and level runtime contracts to shared cores.
+- `runtimeSceneManifest.mjs` remains the Node-safe build-report adapter until a replacement manifest validator exists. It now delegates terrain contracts, collider sizing, walkability/spawn support spatial queries, collision policy issues, collision channel resolution, runtime collision group mapping, and level runtime contracts to shared cores.
 - ACCEPTED 2026-05-13: Editor proxy metadata remains editor-only lifecycle/readiness state; runtime policy input, runtime manifests, and `CollisionComponent` no longer expose it.
 - Observatory terrain is still a protected special case because it is the only working terrain.
 - Other agents are actively touching terrain/runtime slices, so continuing broad cleanup risks conflicts.
@@ -116,7 +204,7 @@ Simplification pass status: DONE ENOUGH. Stop broad cleanup here.
 
 Accepted deferrals:
 
-- Keep `runtimeSceneManifest.mjs` as the Node-safe build-report adapter until a replacement build manifest validator exists. It now delegates terrain contracts, collider sizing, collision policy issues, collision channel resolution, collision group mapping, and level runtime contracts to shared cores.
+- Keep `runtimeSceneManifest.mjs` as the Node-safe build-report adapter until a replacement build manifest validator exists. It now delegates terrain contracts, collider sizing, walkability/spawn support spatial queries, collision policy issues, collision channel resolution, collision group mapping, and level runtime contracts to shared cores.
 - Keep editor proxy metadata as editor lifecycle/readiness state until the editor has a replacement authoring flow. It no longer publishes into runtime `CollisionComponent`, and proxy-state detection is centralized.
 - Keep Observatory source-linked terrain collision protected until a new terrain collision target replaces it. It is the only working terrain path and resource/collision checks now pass with one terrain collider load.
 - Keep `ground.mode: "terrain-chunks"` as the chunked-terrain workflow mode for now. Visual source is explicit; the legacy `ground.visualSource: "terrain-chunks"` alias is rejected.
@@ -126,6 +214,35 @@ Next work should be target-driven, not cleanup-driven:
 1. Pick the rebuild target: Observatory source-linked terrain replacement, scene-authored primitive-only collision, or editor proxy authoring replacement.
 2. Delete only the legacy paths that conflict with that chosen target.
 3. Keep `audit:collision`, `test:publish-pipeline`, and Observatory resource profiling as gates.
+
+## Current Unified Contract TODO
+
+Goal: the final product is a fully unified collision/readiness system across the entire runtime/editor/level stack. Every level should publish through one contract, every runtime/editor readiness surface should read that contract, and no legacy helper should independently redefine required actors, required render assets, collision readiness, terrain readiness, spawn validity, physics/player readiness, or gameplay activation criteria.
+
+Status owner note: Codex finished the world-partition initial-cell readiness and loaded-collider URL activation slices and is not actively editing another unified-contract slice unless requested. Other agents can pick any future READY item below. Continue treating `levelRuntimeReadinessContractCore.mjs` plus `evaluateLevelRuntimeActivation(...)` as the shared API and avoid duplicating required actor, render asset, collision, terrain, spawn, physics, player, world-partition, collider URL, or gameplay readiness logic in scripts.
+
+- NOTE 2026-05-13: Future READY-item work needs its own scratchpad owner note before code edits so parallel agents can avoid conflicts.
+- DONE 2026-05-14: Added runtime loaded-collider URL observation so activation can verify `requiredColliderUrls`. `AssetTrimeshCollider` reports loaded collider URLs through `runtimeCollisionRegistry`; `GameWorld` forwards them into `evaluateLevelRuntimeActivation(...)`; focused publish-pipeline coverage verifies the gate.
+- DONE 2026-05-14: Added world-partition required initial cell keys to the runtime readiness contract from the existing world-partition readiness schema. Scope stayed to contract/types/tests and forwarding observed active/ready/failed initial cell state into runtime activation; world-partition streaming behavior was unchanged.
+- DONE 2026-05-13: Published the full runtime activation diagnostic snapshot from the browser gameplay-enable point. `GameWorld.svelte` now emits `runtimeActivation` diagnostics from the existing `runtimeActivationStatus`, including gate/blocker state and observed runtime state, without creating a parallel readiness vocabulary.
+- DONE 2026-05-13: Added `requiredColliderUrls` to the runtime readiness contract from required collision actors with explicit `collision.colliderUrl` values. Superseded by the 2026-05-14 loaded-collider URL observation work, which now lets runtime activation verify these URLs.
+- DONE 2026-05-13: Add `levelRuntimeReadinessContractCore.mjs` plus typed wrapper and expose `runtimeReadinessContract` on `LevelBuildReport`.
+- DONE 2026-05-13: Make `levelValidation.ts` consume the readiness contract for required actors, required render actors, required walkable actors, required/loaded asset URLs, and runtime asset budget count.
+- DONE 2026-05-13: Add publish-pipeline coverage for Observatory source-linked terrain plus runtime spawn readiness.
+- DONE 2026-05-13: Wired `scripts/lib/runtimeSceneManifest.mjs` to consume `levelRuntimeReadinessContractCore.mjs` for the same required actor/render/walkable/asset URL summary instead of keeping its local build-report copy. The script stays Node-safe and imports only `.mjs` cores.
+- DONE 2026-05-13: Added `publish` gates to `LevelRuntimeReadinessContract` so build/report consumers can distinguish publish blockers from runtime activation blockers.
+- DONE 2026-05-13: Added runtime activation criteria plus `evaluateLevelRuntimeActivation(...)` so runtime/test code can evaluate observed manifest, render, collision, terrain, spawn, physics, player, and gameplay state against the contract.
+- DONE 2026-05-13: `SceneDocumentLevel.svelte` forwards the readiness contract in `staticWorldReady` metadata and `GameWorld.svelte` evaluates it before enabling gameplay.
+- DONE 2026-05-13: Published the runtime activation diagnostic snapshot from `GameWorld.svelte` using the existing `runtimeActivationStatus`, including gate status, blockers, and observed runtime state at the gameplay-enable gate.
+- DONE 2026-05-13: Added a focused regression test for a non-Observatory scene-authored primitive floor/spawn contract so the unified contract is not only proven by the protected Observatory terrain path.
+- DONE 2026-05-13: Updated runtime manifest readers, editor publish readiness surfaces, and the scene runtime preload surface to prefer `buildReport.runtimeReadinessContract` asset fields while preserving top-level manifest/build-report compatibility. Owner: Codex.
+- DONE 2026-05-13: Added `requiredColliderUrls` to the contract from required collision actors with explicit collider assets. Superseded by the 2026-05-14 runtime loaded-collider URL observation and activation gate.
+- DONE 2026-05-14: Added world-partition required initial cell keys to the contract if the manifest/schema already exposes a single source of truth. Scope stayed to contract/types/tests and existing world-partition readiness metadata; streaming behavior was unchanged.
+- DONE 2026-05-13: Added runtime loaded-collider URL observation for asset trimesh colliders and made activation verify `requiredColliderUrls` when the contract declares required collider assets.
+- DONE 2026-05-13: Decided not to broad-rename `requiredAssetActorIds` in schema version 1. `requiredRenderActorIds` is the canonical runtime/readiness field; `requiredAssetActorIds` remains a compatibility alias only for legacy scene runtime asset settings and static level contract data until a schema version 2 migration can remove it.
+- HOLD: Do not remove Observatory `source-linked-terrain-collision`, `ground.mode: "terrain-chunks"`, or editor proxy lifecycle metadata in this contract slice.
+
+Unified contract slice status: DONE. There are no remaining broad-cleanup READY items for this pass. Next work should be an explicit target decision: schema version 2 compatibility removal, Observatory terrain replacement, or editor proxy authoring replacement.
 
 1. Freeze a small target contract: scene-authored cuboid/cylinder primitive collision plus source-linked Observatory terrain. Do not touch asset trimesh or terrain products yet.
 2. Remove unused implicit default collision first:
@@ -155,7 +272,7 @@ Next work should be target-driven, not cleanup-driven:
 - DONE: `groundContractCore.mjs` treats `collision.terrain.source === "source-glb"` as source-linked terrain collision and accepts source-GLB chunk visuals without legacy `terrain-chunks` visual aliasing.
 - DONE 2026-05-13: `groundContractCore.mjs` no longer accepts the `authored-ground` mode alias or `ground.visualSource: "terrain-chunks"` alias, and terrain authority migration issues now fail as errors. `ground.mode: "terrain-chunks"` and `source-linked-terrain-collision` remain accepted constraints for Observatory and chunked terrain workflows.
 - DONE 2026-05-13: `collisionReview.ts` and `levelValidation.ts` share collision channel/group/sensor/detail policy wording through `describeCollisionPolicyIssue(...)`; `collisionReview` remains human-facing and `levelValidation` remains build-gating.
-- ACCEPTED 2026-05-13: `scripts/lib/runtimeSceneManifest.mjs` still owns Node-safe build-report assembly until a replacement manifest validator exists. It now delegates primitive/collider sizing, collision-channel validation/defaulting, runtime collision group mapping, collision policy issue wording, terrain contracts, and level runtime contracts to shared Node-safe cores.
+- ACCEPTED 2026-05-13: `scripts/lib/runtimeSceneManifest.mjs` still owns Node-safe build-report assembly until a replacement manifest validator exists. It now delegates primitive/collider sizing, walkability/spawn support spatial queries, collision-channel validation/defaulting, runtime collision group mapping, collision policy issue wording, terrain contracts, and level runtime contracts to shared Node-safe cores.
 - DONE: `EditorCollisionTabHost.svelte` and `EditorPanel.svelte` no longer expose `Legacy Auto` / `lightweight-auto`.
 
 ## Things Not To Remove Blindly
@@ -169,17 +286,27 @@ Next work should be target-driven, not cleanup-driven:
 
 ## Agent Coordination Notes
 
-- IN PROGRESS 2026-05-13: Implementing the first unified runtime readiness contract slice. Scope is a Node-safe engine core that summarizes required actors, required render assets, runtime asset URLs, spawn readiness, and terrain runtime collision readiness for a level; wire TypeScript validation to report it without changing runtime mounting behavior.
-- IN PROGRESS 2026-05-13: Assist is removing level-specific legacy settings buckets and the local no-op collision workflow shim from `scripts/lib/runtimeSceneManifest.mjs`. Scope is runtime manifest normalization only; editor environment preset compatibility is not part of this slice.
+- DONE 2026-05-13: Assist added runtime loaded-collider URL observation and optional activation verification for `requiredColliderUrls`. Asset trimesh colliders now report loaded collider URLs by level, `GameWorld.svelte` feeds those URLs into `evaluateLevelRuntimeActivation(...)`, and activation blocks only when the contract declares required collider assets that have not loaded. World-partition streaming and terrain collider behavior were not changed.
+- DONE 2026-05-13: Assist resolved the `requiredAssetActorIds` naming decision in the scratchpad/schema guidance. Current code already canonicalizes authored `requiredRenderActorIds` plus legacy `requiredAssetActorIds` aliases into `requiredRenderActorIds`; no broad string migration was performed.
+- DONE 2026-05-13: Assist verified `requiredColliderUrls` is present in the readiness contract, typed declarations, and focused publish-pipeline assertions. No additional runtime collider registry or terrain replacement work was added.
+- DONE 2026-05-13: Assist finished the browser runtime activation diagnostic snapshot using the existing `runtimeActivationStatus` in `GameWorld.svelte`. Scope was diagnostic publication only; the already-added activation gate behavior and scene contract forwarding were left intact.
+- DONE 2026-05-13: Assist updated runtime scene manifest, editor publish readiness, and scene runtime preload asset-list readers to prefer `runtimeReadinessContract` fields while preserving legacy manifest/build-report compatibility. Added regression coverage that intentionally clears legacy build-report asset-list fields and verifies runtime manifests still use the readiness contract. Scope stayed to narrow helper/reader substitution and did not alter the existing browser activation metadata work in `SceneDocumentLevel.svelte`.
+- DONE 2026-05-13: Assist repaired the existing partial non-Observatory scene-authored primitive floor/spawn regression in `scripts/test-publish-pipeline.ts`. The fixture now uses current `LevelDefinition` primitive render fields, valid `worldStatic` collision, `scene-colliders` ground settings, finite spawn readiness, and build-report/runtime-scene contract equality checks. No runtime manifest/preload/editor readiness surfaces were changed in this slice.
+- DONE 2026-05-13: Extended the unified readiness contract with publish gates, runtime activation criteria, `requiredCollisionActorIds`, and `evaluateLevelRuntimeActivation(...)`. Added Observatory terrain-runtime activation coverage and non-Observatory scene-authored primitive floor activation coverage. `SceneDocumentLevel.svelte` now forwards the contract to `GameWorld.svelte`, and `GameWorld.svelte` evaluates it before enabling gameplay.
+- DONE 2026-05-13: GLB mesh collision overlay now uses the same asset trimesh patch builder as runtime collision, so editor overlays for baked GLB colliders should render as wireframe collider geometry instead of depending on a cloned helper scene.
+- DONE 2026-05-13: Implemented the first unified runtime readiness contract slice. `levelRuntimeReadinessContractCore.mjs` summarizes required actors, required render assets, required walkable actors, runtime asset URLs, spawn readiness, and terrain runtime collision readiness; `levelValidation.ts` now uses that contract as the source of truth for required actors, required render actors, asset URL reports, runtime asset budget count, and missing required walkable actors without changing runtime mounting behavior.
+- DONE 2026-05-13: Wired `scripts/lib/runtimeSceneManifest.mjs` to the unified readiness contract. Manifest build reports now expose `runtimeReadinessContract` and derive required actor/render/walkable actor lists plus required/runtime asset URL arrays from `levelRuntimeReadinessContractCore.mjs`; publish-pipeline coverage compares the Node manifest report against the typed engine contract.
+- DONE 2026-05-13: Removed duplicated walkability/spawn support geometry from `scripts/lib/runtimeSceneManifest.mjs` by extracting Node-safe `collisionSpatialQueriesCore.mjs` used by both the manifest script and typed engine wrapper.
+- DONE 2026-05-13: Removed level-specific legacy settings buckets and the local no-op collision workflow shim from `scripts/lib/runtimeSceneManifest.mjs`. Scope was runtime manifest normalization only; editor environment preset compatibility was not part of this slice.
 - DONE 2026-05-13: Assist removed the remaining `authored-ground` ground mode alias by migrating scene settings and fixtures to `scene-authored`, then tightening `groundContractCore.mjs` and `sceneDocumentTypes.ts`. Scope was only the ground mode alias; Observatory's `terrain-chunks` ground mode remains protected.
 - DONE 2026-05-13: Tightened `groundContractCore.mjs` by removing legacy `ground.visualSource: "terrain-chunks"` as an accepted visual-source value and promoting terrain authority migration warnings to errors. Scope was limited to visual-source vocabulary, authority diagnostics, and tests; `ground.mode: "terrain-chunks"` remains for the chunked terrain workflow and Observatory remains protected via explicit `visualSource: "source-glb-chunks"`.
 - DONE 2026-05-13: Assist removed duplicated collision-policy issue wording from `collisionReview.ts` and `levelValidation.ts` by adding shared policy issue descriptions next to `collisionPolicyIssues.ts`. Scope stayed limited to channel/group/sensor/detail policy messages; review stays human-facing and validation stays build-gating.
 - DONE 2026-05-13: Removed the duplicated level runtime contract table from `scripts/lib/runtimeSceneManifest.mjs` by extracting Node-safe `levelContractsCore.mjs` and keeping `levelContracts.ts` as the typed wrapper. Scope was limited to runtime contract lookup; avoided ground contract vocabulary and migration-reference audit slices.
-- IN PROGRESS 2026-05-13: Assist is removing hard-coded default level ids from clean generic core helpers by importing `DEFAULT_LEVEL_ID` in `gameShellBootstrap.ts` and `gameShellUiState.ts`. Scope is limited to default-level fallback constants; no terrain, manifest, or migration audit files.
+- DONE 2026-05-13: Removed hard-coded default level ids from clean generic core helpers by importing `DEFAULT_LEVEL_ID` in `gameShellBootstrap.ts` and `gameShellUiState.ts`. Scope was limited to default-level fallback constants; no terrain, manifest, or migration audit files were touched.
 - DONE 2026-05-13: Removed level-id/id-prefix firefly presentation branches from `src/threlte/levels/runtimeGameplayPresentation.ts`. Scope was limited to moving the existing Solitude/Yggdrasil firefly presentation values into authored scene gameplay data plus the generic resolver cleanup; terrain runtime, runtime manifest, ground contract, collision policy, and proxy metadata slices were not touched.
 - DONE 2026-05-13: Closed the remaining editor proxy metadata runtime-policy leak by routing `collisionPolicy.ts` proxy/bake checks through `editorProxyCollision.ts` and removing editor-only `proxy`/`bakeStatus` from the runtime policy input type. Scope stayed limited to collision policy helper use plus scratchpad verification; scene documents and editor lifecycle behavior stayed intact.
 - DONE 2026-05-13: Started the editor proxy metadata retirement by centralizing proxy/bake-state detection in shared `src/threlte/engine/editorProxyCollision.ts`. Scope was limited to replacing open-coded `proxy`/`bakeStatus` checks in readiness, validation, review, and editor collision defaults; scene fields were not deleted because editor lifecycle tests still depend on them.
-- IN PROGRESS 2026-05-13: Auditing level-specific migration references that remain in generic runtime/script paths. Scope is scratchpad inventory and recommendations only; no code edits while terrain runtime, runtime manifest, ground contract, and collision policy files are dirty in other active slices.
+- DONE 2026-05-13: Audited level-specific migration references that remain in generic runtime/script paths. Remaining references are accepted as tests/fixtures, release/smoke coverage, content-specific authoring scripts, editor preset/compatibility paths, protected terrain vocabulary, or target-driven cleanup outside this collision-removal pass.
 - DONE 2026-05-13: Cleaned stale scratchpad pipeline-map wording after the completed collision body and workflow-authority removals. Scope was documentation-only in this scratchpad; active terrain runtime, runtime manifest, and collision policy files were not touched.
 - DONE 2026-05-13: Removed the local runtime collision-group mapping duplicate from `scripts/lib/runtimeSceneManifest.mjs` by extracting Node-safe `physicsGroupsCore.mjs` and keeping `constants/physics.ts` as the typed Rapier wrapper. Scope was limited to runtime collision layer/group mapping and manifest imports; avoided the active Observatory collider-fetch work and collision review/validation classification files.
 - DONE 2026-05-13: Fixed the duplicate Observatory terrain collider fetch follow-up by caching fetched baked terrain collider buffers by URL in `bakedTerrainCollider.ts`. Scope stayed limited to terrain runtime collider loading/cache behavior; runtime manifest physics-group work was left untouched.
@@ -196,6 +323,7 @@ Next work should be target-driven, not cleanup-driven:
 - If the next work is script cleanup, keep `scripts/lib/runtimeSceneManifest.mjs` runnable in Node without TypeScript loader assumptions. A shared `.mjs`/`.mts` core or generated JS helper is safer than importing `src/threlte/engine/colliderGeometry.ts` directly from the script.
 - Terrain cleanup note: Observatory still uses `ground.mode: "terrain-chunks"` as a broad chunked-terrain mode, but its visual source is now the explicit `source-glb-chunks`. Removing or renaming the `terrain-chunks` ground mode is a larger schema migration because editor commands and bake-plan code still use it for chunked terrain workflows.
 - Completed work note: editor-side predicates now distinguish source-GLB chunk terrain from generated-heightmap chunk terrain through `editorTerrainModeGuards.ts`. This was intentionally not a schema migration.
+- Completed audit note: remaining level-specific names in generic-looking paths are currently accepted where they serve release/smoke fixtures, packaged scene defaults, runtime contract data, editor compatibility/preset migration, content-specific authoring, or protected Observatory terrain. The next deletion should be driven by a selected rebuild target rather than broad string cleanup.
 
 ## Open Questions
 
@@ -294,6 +422,12 @@ Next work should be target-driven, not cleanup-driven:
 - `pnpm --dir apps/game type-check` passes after extracting `levelContractsCore.mjs`.
 - `pnpm --dir apps/game test:publish-pipeline` passes after extracting `levelContractsCore.mjs`.
 - `pnpm --dir apps/game audit:collision` passes after extracting `levelContractsCore.mjs`; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.
+- `pnpm --dir apps/game type-check` passes after routing generic core default-level fallbacks through `DEFAULT_LEVEL_ID`.
+- `pnpm --dir apps/game test:publish-pipeline` passes after routing generic core default-level fallbacks through `DEFAULT_LEVEL_ID`.
+- `pnpm --dir apps/game audit:collision` passes after routing generic core default-level fallbacks through `DEFAULT_LEVEL_ID`; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.
+- `pnpm --dir apps/game type-check` passes with the runtime readiness contract, collision spatial query core, and runtime manifest normalization slices present.
+- `pnpm --dir apps/game test:publish-pipeline` passes with the runtime readiness contract, collision spatial query core, and runtime manifest normalization slices present.
+- `pnpm --dir apps/game audit:collision` passes with the runtime readiness contract, collision spatial query core, and runtime manifest normalization slices present; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.
 - `pnpm --dir apps/game type-check` passes after routing runtime policy proxy/bake checks through `editorProxyCollision.ts`.
 - `pnpm --dir apps/game test:publish-pipeline` passes after routing runtime policy proxy/bake checks through `editorProxyCollision.ts`.
 - `pnpm --dir apps/game exec tsx ./scripts/test-editor-collision-lifecycle.ts` passes after routing runtime policy proxy/bake checks through `editorProxyCollision.ts`.
@@ -302,3 +436,42 @@ Next work should be target-driven, not cleanup-driven:
 - `pnpm --dir apps/game test:publish-pipeline` passes after removing editor-only `proxy`/`bakeStatus` from `CollisionPolicyInput`.
 - `pnpm --dir apps/game exec tsx ./scripts/test-editor-collision-lifecycle.ts` passes after removing editor-only `proxy`/`bakeStatus` from `CollisionPolicyInput`.
 - `pnpm --dir apps/game audit:collision` passes after removing editor-only `proxy`/`bakeStatus` from `CollisionPolicyInput`; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.
+- `pnpm --dir apps/game type-check` passes after the final runtime manifest cleanup and spatial-query core declaration fix.
+- `pnpm --dir apps/game test:publish-pipeline` passes after the final runtime manifest cleanup and spatial-query core declaration fix.
+- `pnpm --dir apps/game audit:collision` passes after the final scratchpad close-out; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.
+- `pnpm --dir apps/game type-check` passes after making `levelValidation.ts` consume the unified runtime readiness contract as the source of truth.
+- `pnpm --dir apps/game test:publish-pipeline` passes after making `levelValidation.ts` consume the unified runtime readiness contract as the source of truth.
+- `pnpm --dir apps/game exec tsx ./scripts/test-editor-collision-lifecycle.ts` passes after making `levelValidation.ts` consume the unified runtime readiness contract as the source of truth.
+- `pnpm --dir apps/game audit:collision` passes after making `levelValidation.ts` consume the unified runtime readiness contract as the source of truth; Observatory still reports only `spawn-relies-on-baked-terrain`.
+- `pnpm --dir apps/game test:publish-pipeline` passes after wiring `runtimeSceneManifest.mjs` to `levelRuntimeReadinessContractCore.mjs`.
+- `pnpm --dir apps/game type-check` passes after wiring `runtimeSceneManifest.mjs` to `levelRuntimeReadinessContractCore.mjs`.
+- `pnpm --dir apps/game exec tsx ./scripts/test-editor-collision-lifecycle.ts` passes after wiring `runtimeSceneManifest.mjs` to `levelRuntimeReadinessContractCore.mjs`.
+- `pnpm --dir apps/game audit:collision` passes after wiring `runtimeSceneManifest.mjs` to `levelRuntimeReadinessContractCore.mjs`; Observatory still reports only `spawn-relies-on-baked-terrain`.
+- `pnpm --dir apps/game profile:resources` could not complete after wiring `runtimeSceneManifest.mjs` to `levelRuntimeReadinessContractCore.mjs`: the default run found port 4322 already in use, and two `GAME_NO_SERVER=1 GAME_DEV_PORT=4322` retries timed out in `browserHarness.mjs` while waiting for `/`. A direct `curl -I http://127.0.0.1:4322/` returned `200 OK`, so this needs follow-up on the shared dev server/harness state rather than a manifest-contract code change.
+- `pnpm --dir apps/game type-check` passes after adding publish gates, runtime activation criteria, `evaluateLevelRuntimeActivation(...)`, and GameWorld gameplay-enable wiring.
+- `pnpm --dir apps/game test:publish-pipeline` passes after adding Observatory and scene-authored primitive-floor activation coverage.
+- `pnpm --dir apps/game audit:collision` passes after adding publish/runtime readiness gates and GameWorld gameplay-enable wiring; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.
+- `pnpm --dir apps/game type-check` passes after repairing the non-Observatory scene-authored primitive floor/spawn regression fixture.
+- `pnpm --dir apps/game test:publish-pipeline` passes after repairing the non-Observatory scene-authored primitive floor/spawn regression fixture.
+- `pnpm --dir apps/game audit:collision` passes after repairing the non-Observatory scene-authored primitive floor/spawn regression fixture; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.
+- `pnpm --dir apps/game type-check` passes after verifying runtime/editor asset-list consumers prefer readiness-contract fields.
+- `pnpm --dir apps/game test:publish-pipeline` passes after verifying runtime/editor asset-list consumers prefer readiness-contract fields.
+- `pnpm --dir apps/game exec tsx ./scripts/test-editor-collision-lifecycle.ts` passes after verifying runtime/editor asset-list consumers prefer readiness-contract fields.
+- `pnpm --dir apps/game audit:collision` passes after verifying runtime/editor asset-list consumers prefer readiness-contract fields; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.
+- `pnpm --dir apps/game type-check` passes after updating runtime scene manifest, editor publish readiness, and scene runtime preload asset-list readers to prefer readiness-contract fields.
+- `pnpm --dir apps/game test:publish-pipeline` passes after updating runtime scene manifest, editor publish readiness, and scene runtime preload asset-list readers to prefer readiness-contract fields.
+- `pnpm --dir apps/game audit:collision` passes after updating runtime scene manifest, editor publish readiness, and scene runtime preload asset-list readers to prefer readiness-contract fields; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.
+- `pnpm --dir apps/game type-check` passes after publishing the runtime activation diagnostic snapshot from `GameWorld.svelte`.
+- `pnpm --dir apps/game test:publish-pipeline` passes after publishing the runtime activation diagnostic snapshot from `GameWorld.svelte`.
+- `pnpm --dir apps/game audit:collision` passes after publishing the runtime activation diagnostic snapshot from `GameWorld.svelte`; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.
+- `pnpm --dir apps/game type-check` passes with `requiredColliderUrls` present in the runtime readiness contract.
+- `pnpm --dir apps/game test:publish-pipeline` passes with `requiredColliderUrls` present in the runtime readiness contract.
+- `pnpm --dir apps/game audit:collision` passes with `requiredColliderUrls` present in the runtime readiness contract; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.
+- `pnpm --dir apps/game type-check` passes after adding runtime loaded-collider URL observation and optional activation verification for `requiredColliderUrls`.
+- `pnpm --dir apps/game test:publish-pipeline` passes after adding runtime loaded-collider URL observation and optional activation verification for `requiredColliderUrls`.
+- `pnpm --dir apps/game audit:collision` passes after adding runtime loaded-collider URL observation and optional activation verification for `requiredColliderUrls`; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.
+- `pnpm --dir apps/game type-check` passes after forwarding observed world-partition active/ready/failed initial cell state into runtime activation.
+- `pnpm --dir apps/game test:publish-pipeline` passes after adding focused coverage for required initial world-partition cell gating.
+- `pnpm --dir apps/game exec tsx ./scripts/test-editor-collision-lifecycle.ts` passes after closing the world-partition initial-cell readiness slice.
+- `git diff --check` passes after closing the world-partition initial-cell readiness slice.
+- `pnpm --dir apps/game audit:collision` passes after closing the world-partition initial-cell readiness slice; Observatory still reports only `spawn-relies-on-baked-terrain`. Initial sandbox run failed because `tsx` could not create `/tmp/tsx-1000/*.pipe`, then passed when rerun outside the sandbox.

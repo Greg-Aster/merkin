@@ -6,15 +6,19 @@ import {
   validateLevelGroundContract,
 } from '../../src/threlte/engine/groundContractCore.mjs'
 import {
-  getActorDefinitionCollisionWorldSize,
-} from '../../src/threlte/engine/colliderGeometryCore.mjs'
-import {
   describeCollisionPolicyIssue,
   getCollisionPolicyIssues,
 } from '../../src/threlte/engine/collisionPolicyIssuesCore.mjs'
 import {
+  actorSupportsWalkabilitySample,
+} from '../../src/threlte/engine/collisionSpatialQueriesCore.mjs'
+import {
   getLevelRuntimeContract,
 } from '../../src/threlte/engine/levelContractsCore.mjs'
+import {
+  createLevelRuntimeReadinessContract,
+  getActorRuntimeAssetUrl as getActorRuntimeAssetUrlCore,
+} from '../../src/threlte/engine/levelRuntimeReadinessContractCore.mjs'
 const moduleDir = dirname(fileURLToPath(import.meta.url))
 const prefabCatalog = JSON.parse(
   readFileSync(
@@ -25,9 +29,6 @@ const prefabCatalog = JSON.parse(
 const prefabAssetUrls = prefabCatalog.assetUrls ?? {}
 const prefabAssetVariants = prefabCatalog.assetVariants ?? {}
 
-const spawnSupportXzPadding = 0.15
-const spawnSupportMaxDrop = 2
-const spawnSupportMaxPenetration = 0.25
 const defaultMaxWalkableSlopeDegrees = 50
 const degToRad = Math.PI / 180
 const generatedColliderRoot = '/generated/runtime-game-assets/collision/'
@@ -192,13 +193,9 @@ export function getRuntimePrefabAssetUrl(type, variant = null) {
 }
 
 function getActorRuntimeAssetUrl(actor) {
-  const assetUrl = actor.render?.asset?.url
-  if (assetUrl) return assetUrl
-
-  return getRuntimePrefabAssetUrl(
-    actor.render?.prefab?.type,
-    actor.render?.prefab?.variant,
-  )
+  return getActorRuntimeAssetUrlCore(actor, {
+    resolvePrefabAssetUrl: getRuntimePrefabAssetUrl,
+  })
 }
 
 function getCollision(node) {
@@ -330,31 +327,6 @@ export function adaptSceneDocumentToLevelDefinition(scene) {
   }
 }
 
-function hasBakedTerrainRuntime(level) {
-  const terrain = level.settings?.level?.collision?.terrain
-  const ground = level.settings?.level?.ground
-  return (
-    ((terrain?.source === 'baked-heightmap' || terrain?.source === 'source-glb') &&
-      typeof terrain.manifestUrl === 'string') ||
-    ((ground?.collisionSource === 'baked-heightfield' ||
-      ground?.collisionSource === 'source-linked-terrain-collision') &&
-      typeof ground.terrainManifestUrl === 'string')
-  )
-}
-
-function isSatisfiedByRuntimeSystem(level, actorId) {
-  if (actorId === `${level.id}-terrain` && hasBakedTerrainRuntime(level)) {
-    return true
-  }
-  if (
-    actorId === `${level.id}-player-spawn` &&
-    isFiniteVec3(level.spawn.player)
-  ) {
-    return true
-  }
-  return false
-}
-
 function getCollisionDiagnostics(level) {
   const actorsById = new Map(level.actors.map(actor => [actor.id, actor]))
   const roleSettings = level.settings?.level?.collision?.roles
@@ -419,42 +391,7 @@ function getWalkabilitySamples(level) {
   return samples
 }
 
-function getActorColliderWorldSize(actor) {
-  return getActorDefinitionCollisionWorldSize(actor)
-}
-
-function actorSupportsWalkabilitySample(actor, samplePosition) {
-  const collision = actor.physics?.collision
-  if (!collision || collision.sensor || collision.intent !== 'walkable') {
-    return false
-  }
-
-  const [x, y, z] = samplePosition
-  const [width, height, depth] = getActorColliderWorldSize(actor)
-  const [actorX, actorY, actorZ] = actor.transform.position
-  const halfWidth = width / 2 + spawnSupportXzPadding
-  const halfDepth = depth / 2 + spawnSupportXzPadding
-  const topY = actorY + height / 2
-
-  if (collision.shape === 'cylinder') {
-    const normalizedX = (x - actorX) / halfWidth
-    const normalizedZ = (z - actorZ) / halfDepth
-    if (normalizedX * normalizedX + normalizedZ * normalizedZ > 1) {
-      return false
-    }
-  } else if (
-    Math.abs(x - actorX) > halfWidth ||
-    Math.abs(z - actorZ) > halfDepth
-  ) {
-    return false
-  }
-
-  return (
-    y >= topY - spawnSupportMaxPenetration && y <= topY + spawnSupportMaxDrop
-  )
-}
-
-function getWalkabilityContractIssues(level, actors) {
+function getWalkabilityContractIssues(level, actors, runtimeReadinessContract) {
   const errors = []
   const warnings = []
   const walkableActors = actors.filter(isWalkableActor)
@@ -476,7 +413,7 @@ function getWalkabilityContractIssues(level, actors) {
       actorSupportsWalkabilitySample(actor, sample.position),
     )
     if (!supportingActor) {
-      if (hasBakedTerrainRuntime(level)) {
+      if (runtimeReadinessContract.terrain.runtimeCollision) {
         warnings.push(
           `Walkability sample "${sample.id}" is not supported by an authored primitive walkable collider; baked terrain collision must cover it at runtime.`,
         )
@@ -491,45 +428,21 @@ function getWalkabilityContractIssues(level, actors) {
   return { errors, warnings }
 }
 
-function getAuthoredRuntimeAssetContract(level) {
-  const runtimeAssets = level.settings?.level?.runtimeAssets
-  const toStringArray = value =>
-    Array.isArray(value) ? value.filter(item => typeof item === 'string') : []
-
-  return {
-    requiredActorIds: toStringArray(runtimeAssets?.requiredActorIds),
-    requiredAssetActorIds: [
-      ...toStringArray(runtimeAssets?.requiredRenderActorIds),
-      ...toStringArray(runtimeAssets?.requiredAssetActorIds),
-    ],
-  }
-}
-
-function uniqueStrings(values) {
-  return [...new Set(values)]
-}
-
 export function createLevelBuildReport(level) {
   const contract = getLevelRuntimeContract(level.id)
-  const authoredRuntimeContract = getAuthoredRuntimeAssetContract(level)
+  const runtimeReadinessContract = createLevelRuntimeReadinessContract(level, {
+    resolvePrefabAssetUrl: getRuntimePrefabAssetUrl,
+  })
   const collisionDiagnostics = getCollisionDiagnostics(level)
   const defaultCollisionActorIds = new Set(collisionDiagnostics.defaultActorIds)
   const visualOnlyActorIds = new Set(collisionDiagnostics.visualOnlyActorIds)
-  const requiredActorIds = uniqueStrings([
-    ...contract.requiredActorIds,
-    ...authoredRuntimeContract.requiredActorIds,
-  ])
-  const requiredAssetActorIds = uniqueStrings([
-    ...contract.requiredAssetActorIds,
-    ...authoredRuntimeContract.requiredAssetActorIds,
-  ])
+  const requiredActorIds = runtimeReadinessContract.requiredActorIds
+  const requiredAssetActorIds = runtimeReadinessContract.requiredRenderActorIds
   const warnings = []
   const errors = []
   const actorIds = new Set()
   const duplicateActorIds = new Set()
   const actorsById = new Map()
-  const runtimeAssetUrls = new Set()
-  const requiredAssetUrls = new Set()
   let assetActorCount = 0
   let primitiveActorCount = 0
   let neverCullActorCount = 0
@@ -552,8 +465,6 @@ export function createLevelBuildReport(level) {
     if (actor.kind === 'primitive') primitiveActorCount += 1
     if (actor.render?.cullingPolicy === 'never') neverCullActorCount += 1
     if (actor.gameplay?.type === 'firefly') gameplayFireflyActorCount += 1
-    const runtimeAssetUrl = getActorRuntimeAssetUrl(actor)
-    if (runtimeAssetUrl) runtimeAssetUrls.add(runtimeAssetUrl)
     if (actor.kind === 'asset' && !actor.render?.asset?.url) {
       errors.push(`Asset actor "${actor.id}" is missing a runtime asset URL.`)
     }
@@ -616,10 +527,10 @@ export function createLevelBuildReport(level) {
     errors.push(`Duplicate actor id "${actorId}" found in level definition.`)
   }
 
-  const missingRequiredActorIds = requiredActorIds.filter(
-    actorId =>
-      !actorsById.has(actorId) && !isSatisfiedByRuntimeSystem(level, actorId),
-  )
+  const missingRequiredActorIds =
+    runtimeReadinessContract.missingRequiredActorIds
+  const missingRequiredActorIdSet = new Set(missingRequiredActorIds)
+
   for (const actorId of missingRequiredActorIds) {
     errors.push(`Required actor "${actorId}" is missing.`)
   }
@@ -635,25 +546,26 @@ export function createLevelBuildReport(level) {
     const runtimeAssetUrl = getActorRuntimeAssetUrl(actor)
     if (!runtimeAssetUrl) {
       errors.push(`Required actor "${actorId}" has no runtime asset URL.`)
-    } else {
-      requiredAssetUrls.add(runtimeAssetUrl)
     }
   }
-  for (const actorId of contract.requiredWalkableActorIds) {
+  for (const actorId of runtimeReadinessContract.requiredWalkableActorIds) {
     const actor = actorsById.get(actorId)
-    if (
-      !actor &&
-      actorId === `${level.id}-terrain` &&
-      hasBakedTerrainRuntime(level)
-    ) {
-      continue
-    }
     if (!actor) continue
     if (!isWalkableActor(actor)) {
       errors.push(`Required actor "${actorId}" is not walkable collision.`)
     }
   }
-  const walkabilityIssues = getWalkabilityContractIssues(level, level.actors)
+  for (
+    const actorId of runtimeReadinessContract.missingRequiredWalkableActorIds
+  ) {
+    if (missingRequiredActorIdSet.has(actorId)) continue
+    errors.push(`Required actor "${actorId}" is missing walkable collision.`)
+  }
+  const walkabilityIssues = getWalkabilityContractIssues(
+    level,
+    level.actors,
+    runtimeReadinessContract,
+  )
   errors.push(...walkabilityIssues.errors)
   warnings.push(...walkabilityIssues.warnings)
   if (defaultCollisionActorCount > contract.maxDefaultCollisionActors) {
@@ -666,9 +578,12 @@ export function createLevelBuildReport(level) {
       `${trimeshActorCount} actors are using trimesh collision; contract allows ${contract.maxTrimeshActors}.`,
     )
   }
-  if (runtimeAssetUrls.size > contract.maxRuntimeAssetCount) {
+  if (
+    runtimeReadinessContract.runtimeAssetUrls.length >
+    contract.maxRuntimeAssetCount
+  ) {
     errors.push(
-      `${runtimeAssetUrls.size} runtime assets exceed contract budget of ${contract.maxRuntimeAssetCount}.`,
+      `${runtimeReadinessContract.runtimeAssetUrls.length} runtime assets exceed contract budget of ${contract.maxRuntimeAssetCount}.`,
     )
   }
   if (primitiveActorCount > contract.maxPrimitiveActorCount) {
@@ -702,8 +617,9 @@ export function createLevelBuildReport(level) {
     requiredActorCount: requiredActorIds.length,
     requiredRenderActorIds: requiredAssetActorIds,
     missingRequiredActorIds,
-    requiredAssetUrls: [...requiredAssetUrls].sort(),
-    runtimeAssetUrls: [...runtimeAssetUrls].sort(),
+    requiredAssetUrls: runtimeReadinessContract.requiredAssetUrls,
+    runtimeAssetUrls: runtimeReadinessContract.runtimeAssetUrls,
+    runtimeReadinessContract,
     collisionDiagnostics,
     errors,
     warnings,
@@ -744,6 +660,7 @@ export function createRuntimeSceneManifest(input) {
     levelDefinition: input.levelDefinition,
     buildReport: input.buildReport,
     runtime: {
+      readinessContract: input.buildReport.runtimeReadinessContract,
       requiredRenderActorIds: input.buildReport.requiredRenderActorIds,
       requiredAssetUrls: input.buildReport.requiredAssetUrls,
       runtimeAssetUrls: input.buildReport.runtimeAssetUrls,

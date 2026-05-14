@@ -9,7 +9,10 @@ import {
   validateLevelGroundContract,
 } from './groundContract'
 import { getLevelRuntimeContract } from './levelContracts'
-import { getRuntimePrefabAssetUrl } from './runtimePrefabRegistry'
+import {
+  createLevelRuntimeReadinessContract,
+  getActorRuntimeAssetUrl,
+} from './levelRuntimeReadinessContract'
 import { hasTerrainRuntimeCollision } from './terrainRuntimeCollision'
 import type {
   ActorDefinition,
@@ -123,62 +126,12 @@ function hasAuthoredColliderMetadata(actor: ActorDefinition): boolean {
   )
 }
 
-function getActorRuntimeAssetUrl(actor: ActorDefinition): string {
-  const assetUrl = actor.render?.asset?.url
-  if (assetUrl) return assetUrl
-
-  return getRuntimePrefabAssetUrl(
-    actor.render?.prefab?.type,
-    actor.render?.prefab?.variant,
-  )
-}
-
 function getRequiredActorError(actorId: string, reason: string) {
   return `Required actor "${actorId}" ${reason}.`
 }
 
 function isTerrainRuntimeActorId(level: LevelDefinition, actorId: string) {
   return actorId === `${level.id}-terrain`
-}
-
-function isSpawnRuntimeActorId(level: LevelDefinition, actorId: string) {
-  return actorId === `${level.id}-player-spawn`
-}
-
-function isSatisfiedByRuntimeSystem(level: LevelDefinition, actorId: string) {
-  if (
-    isTerrainRuntimeActorId(level, actorId) &&
-    hasTerrainRuntimeCollision(level)
-  ) {
-    return true
-  }
-  if (
-    isSpawnRuntimeActorId(level, actorId) &&
-    isFiniteVec3(level.spawn.player)
-  ) {
-    return true
-  }
-  return false
-}
-
-function getAuthoredRuntimeAssetContract(level: LevelDefinition) {
-  const runtimeAssets = (level.settings as any)?.level?.runtimeAssets
-  const toStringArray = (value: unknown) =>
-    Array.isArray(value)
-      ? value.filter((item): item is string => typeof item === 'string')
-      : []
-
-  return {
-    requiredActorIds: toStringArray(runtimeAssets?.requiredActorIds),
-    requiredAssetActorIds: [
-      ...toStringArray(runtimeAssets?.requiredRenderActorIds),
-      ...toStringArray(runtimeAssets?.requiredAssetActorIds),
-    ],
-  }
-}
-
-function uniqueStrings(values: string[]) {
-  return [...new Set(values)]
 }
 
 function getCollisionDiagnostics(level: LevelDefinition) {
@@ -216,25 +169,17 @@ export function createLevelBuildReport(
   level: LevelDefinition,
 ): LevelBuildReport {
   const contract = getLevelRuntimeContract(level.id)
-  const authoredRuntimeContract = getAuthoredRuntimeAssetContract(level)
+  const runtimeReadinessContract = createLevelRuntimeReadinessContract(level)
   const collisionDiagnostics = getCollisionDiagnostics(level)
   const defaultCollisionActorIds = new Set(collisionDiagnostics.defaultActorIds)
   const visualOnlyActorIds = new Set(collisionDiagnostics.visualOnlyActorIds)
-  const requiredActorIds = uniqueStrings([
-    ...contract.requiredActorIds,
-    ...authoredRuntimeContract.requiredActorIds,
-  ])
-  const requiredAssetActorIds = uniqueStrings([
-    ...contract.requiredAssetActorIds,
-    ...authoredRuntimeContract.requiredAssetActorIds,
-  ])
+  const requiredActorIds = runtimeReadinessContract.requiredActorIds
+  const requiredAssetActorIds = runtimeReadinessContract.requiredRenderActorIds
   const warnings: string[] = []
   const errors: string[] = []
   const actorIds = new Set<string>()
   const duplicateActorIds = new Set<string>()
   const actorsById = new Map<string, ActorDefinition>()
-  const runtimeAssetUrls = new Set<string>()
-  const requiredAssetUrls = new Set<string>()
   let assetActorCount = 0
   let primitiveActorCount = 0
   let neverCullActorCount = 0
@@ -268,11 +213,6 @@ export function createLevelBuildReport(
     }
     if (actor.gameplay?.type === 'firefly') {
       gameplayFireflyActorCount += 1
-    }
-
-    const runtimeAssetUrl = getActorRuntimeAssetUrl(actor)
-    if (runtimeAssetUrl) {
-      runtimeAssetUrls.add(runtimeAssetUrl)
     }
 
     if (actor.kind === 'asset' && !actor.render?.asset?.url) {
@@ -351,10 +291,9 @@ export function createLevelBuildReport(
     errors.push(`Duplicate actor id "${actorId}" found in level definition.`)
   }
 
-  const missingRequiredActorIds = requiredActorIds.filter(
-    actorId =>
-      !actorsById.has(actorId) && !isSatisfiedByRuntimeSystem(level, actorId),
-  )
+  const missingRequiredActorIds =
+    runtimeReadinessContract.missingRequiredActorIds
+  const missingRequiredActorIdSet = new Set(missingRequiredActorIds)
 
   for (const actorId of missingRequiredActorIds) {
     errors.push(getRequiredActorError(actorId, 'is missing'))
@@ -374,12 +313,10 @@ export function createLevelBuildReport(
     const runtimeAssetUrl = getActorRuntimeAssetUrl(actor)
     if (!runtimeAssetUrl) {
       errors.push(getRequiredActorError(actorId, 'has no runtime asset URL'))
-    } else {
-      requiredAssetUrls.add(runtimeAssetUrl)
     }
   }
 
-  for (const actorId of contract.requiredWalkableActorIds) {
+  for (const actorId of runtimeReadinessContract.requiredWalkableActorIds) {
     const actor = actorsById.get(actorId)
     if (
       !actor &&
@@ -393,6 +330,15 @@ export function createLevelBuildReport(
     if (!isWalkableActor(actor)) {
       errors.push(getRequiredActorError(actorId, 'is not walkable collision'))
     }
+  }
+
+  for (
+    const actorId of runtimeReadinessContract.missingRequiredWalkableActorIds
+  ) {
+    if (missingRequiredActorIdSet.has(actorId)) continue
+    errors.push(
+      getRequiredActorError(actorId, 'is missing walkable collision'),
+    )
   }
 
   const walkabilityIssues = getWalkabilityContractIssues(level, level.actors)
@@ -411,9 +357,12 @@ export function createLevelBuildReport(
     )
   }
 
-  if (runtimeAssetUrls.size > contract.maxRuntimeAssetCount) {
+  if (
+    runtimeReadinessContract.runtimeAssetUrls.length >
+    contract.maxRuntimeAssetCount
+  ) {
     errors.push(
-      `${runtimeAssetUrls.size} runtime assets exceed contract budget of ${contract.maxRuntimeAssetCount}.`,
+      `${runtimeReadinessContract.runtimeAssetUrls.length} runtime assets exceed contract budget of ${contract.maxRuntimeAssetCount}.`,
     )
   }
 
@@ -450,8 +399,9 @@ export function createLevelBuildReport(
     requiredActorCount: requiredActorIds.length,
     requiredRenderActorIds: requiredAssetActorIds,
     missingRequiredActorIds,
-    requiredAssetUrls: [...requiredAssetUrls].sort(),
-    runtimeAssetUrls: [...runtimeAssetUrls].sort(),
+    requiredAssetUrls: runtimeReadinessContract.requiredAssetUrls,
+    runtimeAssetUrls: runtimeReadinessContract.runtimeAssetUrls,
+    runtimeReadinessContract,
     collisionDiagnostics,
     errors,
     warnings,

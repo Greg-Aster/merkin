@@ -11,7 +11,12 @@ import {
   loadAssetLocalTransformMetadata,
   validateInlineAssetLocalTransform,
 } from './assetTrimeshColliderMetadata'
+import {
+  markRuntimeColliderUrlLoaded,
+  unmarkRuntimeColliderUrlLoaded,
+} from '../stores/runtimeCollisionRegistry'
 
+export let levelId = ''
 export let url = ''
 export let metadataUrl = ''
 export let assetLocalTransform: AssetLocalTransformMetadata | null = null
@@ -25,6 +30,20 @@ let patches: MeshColliderPatch[] = []
 let disposed = false
 let loadToken = 0
 let loadedKey = ''
+let registeredColliderUrl = ''
+
+function unregisterLoadedCollider() {
+  if (!levelId || !registeredColliderUrl) return
+  unmarkRuntimeColliderUrlLoaded(levelId, registeredColliderUrl)
+  registeredColliderUrl = ''
+}
+
+function registerLoadedCollider(nextUrl: string) {
+  if (!levelId || !nextUrl || registeredColliderUrl === nextUrl) return
+  unregisterLoadedCollider()
+  registeredColliderUrl = nextUrl
+  markRuntimeColliderUrlLoaded(levelId, nextUrl)
+}
 
 async function loadColliderPatches(
   nextUrl: string,
@@ -64,6 +83,11 @@ async function loadColliderPatches(
       assetLocalTransform: metadataValidation.metadata,
       scale,
     })
+    if (patches.length > 0) {
+      registerLoadedCollider(nextUrl)
+    } else {
+      unregisterLoadedCollider()
+    }
   } catch (error) {
     if (!disposed) {
       console.warn(
@@ -73,6 +97,7 @@ async function loadColliderPatches(
       )
     }
     patches = []
+    unregisterLoadedCollider()
   }
 }
 
@@ -83,12 +108,14 @@ $: scaleKey = JSON.stringify(scale)
 $: loadKey = `${url}|${metadataUrl}|${inlineMatrix ? JSON.stringify(inlineMatrix) : ''}|${scaleKey}`
 $: if (url && loadKey !== loadedKey) {
   loadedKey = loadKey
+  unregisterLoadedCollider()
   void loadColliderPatches(url, metadataUrl, assetLocalTransform)
 }
 
 onDestroy(() => {
   disposed = true
   loadToken += 1
+  unregisterLoadedCollider()
 })
 </script>
 

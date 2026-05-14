@@ -3,11 +3,11 @@ import { T } from '@threlte/core'
 import { onDestroy } from 'svelte'
 import * as THREE from 'three'
 import type { AssetLocalTransformMetadata } from '../engine/assetLocalTransform'
-import { applyAssetLocalTransformToObject } from '../engine/assetLocalTransform'
+import { loadCachedGltf } from '../utils/gltfAssetCache'
 import {
-  cloneCachedGltfScene,
-  disposeCachedGltfScene,
-} from '../utils/gltfAssetCache'
+  type MeshColliderPatch,
+  buildAssetTrimeshColliderPatches,
+} from './assetTrimeshColliderGeometry'
 import {
   loadAssetLocalTransformMetadata,
   validateInlineAssetLocalTransform,
@@ -18,26 +18,48 @@ export let metadataUrl = ''
 export let assetLocalTransform: AssetLocalTransformMetadata | null = null
 export let color = '#4df0ff'
 
-let scene: THREE.Group | null = null
+type HelperPatch = {
+  id: string
+  geometry: THREE.BufferGeometry
+}
+
+let patches: HelperPatch[] = []
+let material: THREE.MeshBasicMaterial | null = null
 let disposed = false
 let loadToken = 0
 let loadedKey = ''
+let materialColor = ''
 
-function disposeScene(root: THREE.Object3D | null) {
-  if (!root) return
-  disposeCachedGltfScene(root)
-}
-
-function disposeMeshMaterial(material: THREE.Material | THREE.Material[]) {
-  if (Array.isArray(material)) {
-    material.forEach(entry => entry.dispose?.())
-    return
+function disposePatches(nextPatches: HelperPatch[]) {
+  for (const patch of nextPatches) {
+    patch.geometry.dispose()
   }
-
-  material.dispose?.()
 }
 
-async function loadHelperScene(
+function createHelperGeometry(patch: MeshColliderPatch) {
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.BufferAttribute(patch.vertices, 3))
+  geometry.setIndex(new THREE.BufferAttribute(patch.indices, 1))
+  geometry.computeBoundingSphere()
+  return geometry
+}
+
+function refreshMaterial() {
+  if (material && materialColor === color) return
+
+  material?.dispose()
+  materialColor = color
+  material = new THREE.MeshBasicMaterial({
+    color,
+    depthTest: false,
+    depthWrite: false,
+    opacity: 0.82,
+    transparent: true,
+    wireframe: true,
+  })
+}
+
+async function loadHelperPatches(
   nextUrl: string,
   nextMetadataUrl: string,
   inlineAssetLocalTransform: AssetLocalTransformMetadata | null,
@@ -45,8 +67,8 @@ async function loadHelperScene(
   const token = ++loadToken
 
   try {
-    const [nextScene, metadataValidation] = await Promise.all([
-      cloneCachedGltfScene(nextUrl),
+    const [gltf, metadataValidation] = await Promise.all([
+      loadCachedGltf(nextUrl),
       nextMetadataUrl
         ? loadAssetLocalTransformMetadata(nextMetadataUrl)
         : Promise.resolve(
@@ -54,7 +76,6 @@ async function loadHelperScene(
           ),
     ])
     if (disposed || token !== loadToken) {
-      disposeScene(nextScene)
       return
     }
 
@@ -68,35 +89,23 @@ async function loadHelperScene(
         metadataValidation.errors,
       )
     }
-    applyAssetLocalTransformToObject(nextScene, metadataValidation.metadata)
 
-    const helperMaterial = new THREE.MeshBasicMaterial({
-      color,
-      depthTest: false,
-      depthWrite: false,
-      opacity: 0.82,
-      transparent: true,
-      wireframe: true,
-    })
+    const nextPatches = buildAssetTrimeshColliderPatches(gltf.scene, {
+      assetLocalTransform: metadataValidation.metadata,
+    }).map(patch => ({
+      id: patch.id,
+      geometry: createHelperGeometry(patch),
+    }))
 
-    nextScene.traverse(child => {
-      if (!(child instanceof THREE.Mesh)) return
-      disposeMeshMaterial(child.material)
-      child.material = helperMaterial
-      child.renderOrder = 18
-      child.frustumCulled = false
-    })
-
-    const previousScene = scene
-    scene = nextScene
-    if (previousScene && previousScene !== scene) {
-      disposeScene(previousScene)
-    }
+    const previousPatches = patches
+    patches = nextPatches
+    disposePatches(previousPatches)
   } catch (error) {
     if (!disposed) {
       console.warn('Failed to load mesh collision helper:', nextUrl, error)
     }
-    scene = null
+    disposePatches(patches)
+    patches = []
   }
 }
 
@@ -104,18 +113,27 @@ $: inlineMatrix =
   assetLocalTransform?.visualToPhysicsLocalMatrix ??
   assetLocalTransform?.visualToPhysicsMatrix
 $: loadKey = `${url}|${metadataUrl}|${inlineMatrix ? JSON.stringify(inlineMatrix) : ''}`
+$: refreshMaterial()
 $: if (url && loadKey !== loadedKey) {
   loadedKey = loadKey
-  void loadHelperScene(url, metadataUrl, assetLocalTransform)
+  void loadHelperPatches(url, metadataUrl, assetLocalTransform)
 }
 
 onDestroy(() => {
   disposed = true
   loadToken += 1
-  disposeScene(scene)
+  disposePatches(patches)
+  material?.dispose()
 })
 </script>
 
-{#if scene}
-  <T is={scene} />
+{#if material}
+  {#each patches as patch (patch.id)}
+    <T.Mesh
+      geometry={patch.geometry}
+      {material}
+      renderOrder={18}
+      frustumCulled={false}
+    />
+  {/each}
 {/if}

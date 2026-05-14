@@ -60,6 +60,7 @@ onDestroy(() => {
     rotation={actor.transform.rotation}
     scale={actor.transform.scale}
     shape={collision.shape}
+    {levelId}
     intent={collision.intent}
     channel={collision.channel}
     triangleBudget={collision.triangleBudget}
@@ -93,6 +94,7 @@ onDestroy(() => {
   {#if collision && mountCollision && !useHeadlessStaticCollision && renderVisualInsideCollider}
     <CollisionBody
       shape={collision.shape}
+      {levelId}
       intent={collision.intent}
       channel={collision.channel}
       triangleBudget={collision.triangleBudget}
@@ -119,6 +121,7 @@ onDestroy(() => {
   {:else if collision && mountCollision && !useHeadlessStaticCollision}
     <CollisionBody
       shape={collision.shape}
+      {levelId}
       intent={collision.intent}
       channel={collision.channel}
       triangleBudget={collision.triangleBudget}
