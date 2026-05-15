@@ -55,10 +55,12 @@ import {
   updateMarqueeSelection,
 } from './editorStore'
 
-const { scene, renderer } = useThrelte()
+const { scene, renderer, camera: activeThrelteCamera } = useThrelte()
 
 export let enabled = false
+export let useActiveCamera = false
 
+let editorCamera: THREE.PerspectiveCamera
 let camera: THREE.PerspectiveCamera
 let orbitControls: OrbitControls | null = null
 let transformControls: TransformControls | null = null
@@ -121,6 +123,15 @@ const initialPivotScale = new THREE.Vector3(1, 1, 1)
 const lastPickScreen = new THREE.Vector2(Number.NaN, Number.NaN)
 let lastPickNodeIds: string[] = []
 
+function getActiveCamera() {
+  const candidate = (activeThrelteCamera as any)?.current ?? activeThrelteCamera
+  return candidate instanceof THREE.PerspectiveCamera ? candidate : null
+}
+
+function shouldEnableOrbitControls() {
+  return enabled && orbitEnabled && !useActiveCamera
+}
+
 type ModalTransformSession = {
   active: boolean
   mode: EditorTransformMode
@@ -160,7 +171,7 @@ const unsubscribe = editorStateStore.subscribe(state => {
   }
 
   if (orbitControls && !marqueeSelecting) {
-    orbitControls.enabled = enabled && orbitEnabled
+    orbitControls.enabled = shouldEnableOrbitControls()
   }
 
   if (controlsInitialized) {
@@ -183,7 +194,7 @@ const unsubscribeCircleSelect = editorCircleSelectStore.subscribe(state => {
   circleSelectSubtracting = state.subtracting
 
   if (orbitControls && !marqueeSelecting) {
-    orbitControls.enabled = enabled && orbitEnabled && !circleSelectActive
+    orbitControls.enabled = shouldEnableOrbitControls() && !circleSelectActive
   }
 })
 const unsubscribeViewportFocus = editorViewportFocusStore.subscribe(request => {
@@ -193,6 +204,12 @@ const unsubscribeViewportFocus = editorViewportFocusStore.subscribe(request => {
 const unsubscribeNodes = editorNodesStore.subscribe(value => {
   editorNodes = value
 })
+
+$: camera = (useActiveCamera ? getActiveCamera() : null) ?? editorCamera
+
+$: if (controlsInitialized && transformControls && camera) {
+  transformControls.camera = camera
+}
 
 function isNodeSelectable(nodeId: string | null) {
   if (!nodeId) return false
@@ -624,7 +641,7 @@ function stopMarqueeSelection() {
   marqueeStartedFromBoxTool = false
   endMarqueeSelection()
   if (orbitControls) {
-    orbitControls.enabled = enabled && orbitEnabled
+    orbitControls.enabled = shouldEnableOrbitControls()
   }
   window.removeEventListener('pointerup', handleWindowPointerUp)
 }
@@ -1181,7 +1198,7 @@ function confirmModalTransform() {
   setModalTransformActive(false)
   syncSelectionAttachment()
   if (orbitControls && !marqueeSelecting) {
-    orbitControls.enabled = enabled && orbitEnabled
+    orbitControls.enabled = shouldEnableOrbitControls()
   }
 }
 
@@ -1192,7 +1209,7 @@ function cancelModalTransform() {
   setModalTransformActive(false)
   syncSelectionAttachment()
   if (orbitControls && !marqueeSelecting) {
-    orbitControls.enabled = enabled && orbitEnabled
+    orbitControls.enabled = shouldEnableOrbitControls()
   }
 }
 
@@ -1207,6 +1224,11 @@ function handleKeyDown(event: KeyboardEvent) {
   if (tag === 'input' || tag === 'textarea' || target?.isContentEditable) return
 
   const mod = event.metaKey || event.ctrlKey
+  const key = event.key.toLowerCase()
+
+  if (useActiveCamera && !mod && !modalSession && ['w', 'a', 's', 'd'].includes(key)) {
+    return
+  }
 
   if (modalSession) {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -1221,19 +1243,19 @@ function handleKeyDown(event: KeyboardEvent) {
       return
     }
 
-    if (!mod && event.key.toLowerCase() === 'x') {
+    if (!mod && key === 'x') {
       event.preventDefault()
       setTransformAxis(transformAxis === 'x' ? 'all' : 'x')
       updateModalTransform(pointerScreen.x, pointerScreen.y)
       return
     }
-    if (!mod && event.key.toLowerCase() === 'y') {
+    if (!mod && key === 'y') {
       event.preventDefault()
       setTransformAxis(transformAxis === 'y' ? 'all' : 'y')
       updateModalTransform(pointerScreen.x, pointerScreen.y)
       return
     }
-    if (!mod && event.key.toLowerCase() === 'z') {
+    if (!mod && key === 'z') {
       event.preventDefault()
       setTransformAxis(transformAxis === 'z' ? 'all' : 'z')
       updateModalTransform(pointerScreen.x, pointerScreen.y)
@@ -1241,27 +1263,27 @@ function handleKeyDown(event: KeyboardEvent) {
     }
   }
 
-  if (mod && event.key.toLowerCase() === 'z' && !event.shiftKey) {
+  if (mod && key === 'z' && !event.shiftKey) {
     event.preventDefault()
     undoScene()
     return
   }
   if (
-    (mod && event.key.toLowerCase() === 'z' && event.shiftKey) ||
-    (mod && event.key.toLowerCase() === 'y')
+    (mod && key === 'z' && event.shiftKey) ||
+    (mod && key === 'y')
   ) {
     event.preventDefault()
     redoScene()
     return
   }
-  if (mod && event.key.toLowerCase() === 'd') {
+  if (mod && key === 'd') {
     event.preventDefault()
     const transformableSelectedNodeIds = getTransformableSelectedNodeIds()
     if (transformableSelectedNodeIds.length > 0)
       duplicateNodes(transformableSelectedNodeIds)
     return
   }
-  if (mod && event.key.toLowerCase() === 'g') {
+  if (mod && key === 'g') {
     event.preventDefault()
     if (event.shiftKey) {
       if (selectedNodeIds.length > 0) ungroupNodes(selectedNodeIds)
@@ -1270,7 +1292,7 @@ function handleKeyDown(event: KeyboardEvent) {
     }
     return
   }
-  if (mod && event.key.toLowerCase() === 'a') {
+  if (mod && key === 'a') {
     event.preventDefault()
     selectAllNodes()
     return
@@ -1285,29 +1307,29 @@ function handleKeyDown(event: KeyboardEvent) {
   }
 
   if (!mod && getTransformableSelectedNodeIds().length > 0) {
-    if (event.key.toLowerCase() === 'b' && interactionMode === 'objects') {
+    if (key === 'b' && interactionMode === 'objects') {
       event.preventDefault()
       boxSelectArmed = true
       return
     }
-    if (event.key.toLowerCase() === 'x') {
+    if (key === 'x') {
       event.preventDefault()
       setTransformAxis(transformAxis === 'x' ? 'all' : 'x')
       return
     }
-    if (event.key.toLowerCase() === 'y') {
+    if (key === 'y') {
       event.preventDefault()
       setTransformAxis(transformAxis === 'y' ? 'all' : 'y')
       return
     }
-    if (event.key.toLowerCase() === 'z') {
+    if (key === 'z') {
       event.preventDefault()
       setTransformAxis(transformAxis === 'z' ? 'all' : 'z')
       return
     }
   }
 
-  switch (event.key.toLowerCase()) {
+  switch (key) {
     case 'b':
       if (interactionMode === 'objects') {
         event.preventDefault()
@@ -1477,7 +1499,7 @@ $: if (controlsInitialized) {
   syncSelectionAttachment()
   handleViewportFocusRequest()
   if (orbitControls && !marqueeSelecting) {
-    orbitControls.enabled = enabled && orbitEnabled && !circleSelectActive
+    orbitControls.enabled = shouldEnableOrbitControls() && !circleSelectActive
   }
   if (transformControls) {
     transformControls.enabled = enabled
@@ -1498,7 +1520,7 @@ $: if (interactionMode !== 'objects' && circleSelectActive) {
 }
 
 useTask(() => {
-  if (enabled && orbitControls) {
+  if (shouldEnableOrbitControls() && orbitControls) {
     orbitControls.update()
   }
 })
@@ -1555,8 +1577,8 @@ onDestroy(() => {
 </script>
 
 <T.PerspectiveCamera
-  makeDefault={enabled}
-  bind:ref={camera}
+  makeDefault={enabled && !useActiveCamera}
+  bind:ref={editorCamera}
   position={[8, 6, 12]}
   fov={55}
   near={0.1}

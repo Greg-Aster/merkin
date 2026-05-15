@@ -9,6 +9,7 @@ export let comfyUiApiUrl = ''
 export let comfyUiStatus = ''
 export let comfyUiBusy = false
 export let comfyUiReady = false
+export let comfyUiLowVramMode = false
 export let comfyWorkflowEditorStatus = ''
 export let selectedComfyWorkflowPath = ''
 export let workflowBrowserPath = ''
@@ -84,6 +85,7 @@ export let onRefreshRecentJobs: () => void = () => {}
     {comfyUiStatus}
     {comfyUiBusy}
     {comfyUiReady}
+    bind:comfyUiLowVramMode
     {comfyWorkflowEditorStatus}
     {selectedComfyWorkflowPath}
     {workflowBrowserPath}

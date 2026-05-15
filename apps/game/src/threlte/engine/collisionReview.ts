@@ -8,6 +8,7 @@ import {
   actorColliderAabbContainsPoint,
   actorSupportsWalkabilitySample,
 } from './collisionSpatialQueries'
+import type { WalkableSupportOptions } from './collisionSpatialQueries'
 import { getSceneNodeMeshRenderSource } from './actorRenderSource'
 import { requiresExplicitCollisionClassification } from './levelValidation'
 import { adaptSceneDocumentToLevelDefinition } from './sceneAdapter'
@@ -23,6 +24,10 @@ import type {
 
 export type CollisionReviewSeverity = 'error' | 'warning' | 'info'
 export type CollisionReviewActorStatus =
+  | 'ready'
+  | 'dirty'
+  | 'generating'
+  | 'failed'
   | 'walkable'
   | 'blocker'
   | 'trigger'
@@ -42,6 +47,10 @@ export interface CollisionReviewActorRow {
   collisionIntent: CollisionIntent | 'none'
   collisionShape?: string
   collisionChannel?: string
+  collisionQuality?: string
+  collisionLodSourceTier?: string
+  generationStatus?: 'ready' | 'dirty' | 'generating' | 'failed'
+  generationLastError?: string
   collisionSource: 'authored' | 'default' | 'none' | 'runtime'
   status: CollisionReviewActorStatus
   statusLabel: string
@@ -134,6 +143,15 @@ function getReviewSettings(level: LevelDefinition) {
         ? ratio
         : DEFAULT_OVERSIZED_COLLIDER_RATIO,
   }
+}
+
+function getWalkableSupportOptions(level: LevelDefinition) {
+  const policy = (level.settings as any)?.level?.collision?.walkability
+  return {
+    xzPadding: policy?.supportXzPadding,
+    maxDrop: policy?.supportMaxDrop,
+    maxPenetration: policy?.supportMaxPenetration,
+  } satisfies WalkableSupportOptions
 }
 
 function getScenePolicyResult(scene: SceneDocument, node: SceneNode) {
@@ -253,6 +271,26 @@ function getActorStatus(input: {
 
   if (collision) {
     if (
+      collision.generationStatus === 'failed' ||
+      collision.generationStatus === 'dirty' ||
+      collision.generationStatus === 'generating'
+    ) {
+      return {
+        status: collision.generationStatus,
+        statusLabel:
+          collision.generationStatus === 'dirty'
+            ? 'Dirty'
+            : collision.generationStatus === 'generating'
+              ? 'Generating'
+              : 'Failed',
+        detail:
+          collision.generationLastError ??
+          'Mesh-derived collision product is not ready for publish.',
+        collisionSource,
+      }
+    }
+
+    if (
       actor.render?.visible === false ||
       sceneNode?.renderPolicy?.runtimeStyle === 'skip'
     ) {
@@ -327,6 +365,10 @@ function createActorRows(input: {
       collisionIntent: collision?.intent ?? 'none',
       collisionShape: collision?.shape,
       collisionChannel: collision?.channel,
+      collisionQuality: collision?.quality,
+      collisionLodSourceTier: collision?.lodSourceTier,
+      generationStatus: collision?.generationStatus,
+      generationLastError: collision?.generationLastError,
       collisionSource: status.collisionSource,
       status: status.status,
       statusLabel: status.statusLabel,
@@ -373,6 +415,7 @@ export function reviewCollisionContracts(input: {
   )
   const actorById = new Map(level.actors.map(actor => [actor.id, actor]))
   const settings = getReviewSettings(level)
+  const walkableSupportOptions = getWalkableSupportOptions(level)
   const findings: CollisionReviewFinding[] = []
   const classification = createClassificationSummary(level.actors)
   const missingCollisionSeverity: CollisionReviewSeverity =
@@ -463,6 +506,22 @@ export function reviewCollisionContracts(input: {
     }
 
     if (
+      collision.generationStatus === 'dirty' ||
+      collision.generationStatus === 'generating' ||
+      collision.generationStatus === 'failed'
+    ) {
+      createFinding(findings, {
+        code: 'collision-generation-not-ready',
+        severity: 'error',
+        ...actorMeta,
+        message: `Actor "${actorName}" collision generation status is ${collision.generationStatus}.`,
+        recommendation:
+          collision.generationLastError ??
+          'Regenerate mesh-derived collision before publishing.',
+      })
+    }
+
+    if (
       input.scene &&
       sceneNode &&
       getScenePolicySource(input.scene, sceneNode) === 'default'
@@ -480,7 +539,8 @@ export function reviewCollisionContracts(input: {
     if (
       actor.kind === 'asset' &&
       collision.shape === 'trimesh' &&
-      !collision.colliderUrl
+      !collision.colliderUrl &&
+      !collision.generatedProduct
     ) {
       createFinding(findings, {
         code: 'missing-trimesh-collider-url',
@@ -564,7 +624,7 @@ export function reviewCollisionContracts(input: {
     }
 
     const hasAuthoredSupport = level.actors.some(actor =>
-      actorSupportsWalkabilitySample(actor, spawn),
+      actorSupportsWalkabilitySample(actor, spawn, walkableSupportOptions),
     )
     if (!hasAuthoredSupport && !bakedTerrainActive) {
       createFinding(findings, {

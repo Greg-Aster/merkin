@@ -69,8 +69,12 @@ export function createEditorStyleBatchSessionController(
   }
 
   function createStyleBatchSession(
-    mode: 'texture' | 'generate',
+    mode: 'texture' | 'generate' | 'procedural-material' | 'blender-geometry',
     candidateIds: string[],
+    options: {
+      scope?: 'batch-selection' | 'selected-objects' | 'visible' | 'level'
+      force?: boolean
+    } = {},
   ) {
     const entries: PersistedStyleBatchEntry[] = candidateIds
       .map(nodeId => deps.getEditorNodes().find(node => node.id === nodeId))
@@ -89,6 +93,8 @@ export function createEditorStyleBatchSessionController(
     return {
       levelId: deps.getActiveSceneLevelId(),
       mode,
+      scope: options.scope,
+      force: !!options.force,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       styleProfileName: state.styleProfileName,
@@ -98,6 +104,7 @@ export function createEditorStyleBatchSessionController(
       styleControlNetNotes: state.styleControlNetNotes,
       styleReferenceImageUrl: state.styleReferenceImageUrl,
       comfyUiApiUrl: state.comfyUiApiUrl,
+      comfyUiLowVramMode: !!state.comfyUiLowVramMode,
       hunyuanApiUrl: state.hunyuanApiUrl,
       workflowPath: state.selectedComfyWorkflowPath,
       entries,

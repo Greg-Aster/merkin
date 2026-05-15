@@ -22,7 +22,9 @@
             "manifestUrl": "/terrain/observatory-environment.manifest.json",
             "chunksPath": "/terrain/levels/observatory-environment/",
             "chunkCount": 16,
-            "lods": [0],
+            "lods": [
+              0
+            ],
             "generatedBy": "cook-terrain-glb-chunks",
             "sourceAssetUrl": "/models/levels/observatory-environment.glb",
             "sourceHash": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae",
@@ -71,7 +73,11 @@
         "audio": "courtyard-breeze"
       },
       "spawn": {
-        "position": [-137.2, 1.8, -49.5]
+        "position": [
+          -137.2,
+          1.8,
+          -49.5
+        ]
       },
       "ground": {
         "mode": "terrain-chunks",
@@ -97,7 +103,9 @@
           "manifestUrl": "/terrain/observatory-environment.manifest.json",
           "chunksPath": "/terrain/levels/observatory-environment/",
           "chunkCount": 16,
-          "lods": [0],
+          "lods": [
+            0
+          ],
           "generatedBy": "cook-terrain-glb-chunks",
           "sourceAssetUrl": "/models/levels/observatory-environment.glb",
           "sourceHash": "09459cb38a6bee5db5143a5ddce1c3a086e722781450f15cad79ed2c3e1972ae",
@@ -176,8 +184,16 @@
           "groundColor": "#273043",
           "keyLightColor": "#f5f7ff",
           "fillLightColor": "#8aa7d0",
-          "keyLightPosition": [40, 80, -35],
-          "fillLightPosition": [-55, 32, 48]
+          "keyLightPosition": [
+            40,
+            80,
+            -35
+          ],
+          "fillLightPosition": [
+            -55,
+            32,
+            48
+          ]
         },
         "shadows": {
           "enabled": false,
@@ -203,7 +219,10 @@
         },
         "postProcessing": {
           "enabled": true,
-          "passes": ["tone-mapping", "color-grading"],
+          "passes": [
+            "tone-mapping",
+            "color-grading"
+          ],
           "maxEnabledPasses": 2,
           "toneMappingExposure": 0.94
         },
@@ -231,7 +250,9 @@
               "estimatedRenderPasses": 0
             },
             "postProcessing": {
-              "passes": ["tone-mapping"],
+              "passes": [
+                "tone-mapping"
+              ],
               "maxEnabledPasses": 1
             }
           },
@@ -257,7 +278,10 @@
               "estimatedRenderPasses": 0
             },
             "postProcessing": {
-              "passes": ["tone-mapping", "color-grading"],
+              "passes": [
+                "tone-mapping",
+                "color-grading"
+              ],
               "maxEnabledPasses": 2
             }
           },
@@ -283,7 +307,10 @@
               "estimatedRenderPasses": 0
             },
             "postProcessing": {
-              "passes": ["tone-mapping", "color-grading"],
+              "passes": [
+                "tone-mapping",
+                "color-grading"
+              ],
               "maxEnabledPasses": 2
             }
           }
@@ -292,9 +319,21 @@
           {
             "id": "spawn-terrain-gate",
             "label": "Observatory terrain gate",
-            "playerPosition": [-137.2, 1.8, -49.5],
-            "cameraPosition": [-132, 7.5, -41],
-            "cameraTarget": [-137.2, 2.2, -49.5],
+            "playerPosition": [
+              -137.2,
+              1.8,
+              -49.5
+            ],
+            "cameraPosition": [
+              -132,
+              7.5,
+              -41
+            ],
+            "cameraTarget": [
+              -137.2,
+              2.2,
+              -49.5
+            ],
             "viewport": {
               "width": 1280,
               "height": 720
@@ -347,9 +386,21 @@
       "id": "observatory-ground-root",
       "name": "Observatory Grounds",
       "kind": "group",
-      "position": [0, 0, 0],
-      "rotation": [0, 0, 0],
-      "scale": [0.1808657926171221, 0.1808657926171221, 0.1808657926171221],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.1808657926171221,
+        0.1808657926171221,
+        0.1808657926171221
+      ],
       "visible": true
     }
   ]

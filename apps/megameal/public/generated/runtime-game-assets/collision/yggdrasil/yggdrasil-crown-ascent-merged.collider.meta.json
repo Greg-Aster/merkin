@@ -1,7 +1,8 @@
 {
-  "schemaVersion": 2,
-  "generatedBy": "bake-mesh-collider",
-  "generatedAt": "2026-05-13T01:03:58.467Z",
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-15T02:11:14.522Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-crown-ascent-merged",
   "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
@@ -10,9 +11,17 @@
     "algorithm": "sha256",
     "value": "cae20f1bc1678777710a19e5b5cd280073d0aa47e4d13efa9965677db7fecad8"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "4fdf765845405bf900fdb5987c4b885be1bee8c875e2c3984ff3519e82cac0b2"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-ascent-merged.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-ascent-merged.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-ascent-merged.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v2:4fdf765845405bf900fdb5987c4b885be1bee8c875e2c3984ff3519e82cac0b2:e37bc69a079b08177269f1d571be2fca7bad9203a8d09e75b47e8e5fcf7e30d1:c99d3fbf9e4068877391e488774737d5ac08477ae3c0ca2359ff1634b3be3cc0",
   "triangleCount": 396,
   "vertexCount": 792,
   "bounds": {
@@ -30,6 +39,28 @@
       12.744000434875488,
       1.100000023841858,
       20.08799934387207
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -32767,
+      -4148,
+      -32767
+    ],
+    "max": [
+      32767,
+      4148,
+      32767
+    ],
+    "size": [
+      65534,
+      8296,
+      65534
     ],
     "center": [
       0,
@@ -176,30 +207,90 @@
       "algorithm": "sha256",
       "value": "cae20f1bc1678777710a19e5b5cd280073d0aa47e4d13efa9965677db7fecad8"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "4fdf765845405bf900fdb5987c4b885be1bee8c875e2c3984ff3519e82cac0b2"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "yggdrasil",
       "nodeId": "yggdrasil-crown-ascent-merged",
       "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
-      "intent": "blocker",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
+      "lodSourceTier": "low",
+      "intent": "walkable",
       "channel": "worldStatic",
-      "triangleBudget": 20000,
+      "triangleBudget": 5000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-13T01:03:58.467Z"
+    "generatedAt": "2026-05-15T02:11:14.522Z"
   },
   "collision": {
     "shape": "trimesh",
-    "intent": "blocker",
+    "intent": "walkable",
     "channel": "worldStatic",
-    "triangleBudget": 20000
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
+  },
+  "collisionProduct": {
+    "actorId": "yggdrasil-crown-ascent-merged",
+    "cacheKey": "mesh-collision-manager-v2:4fdf765845405bf900fdb5987c4b885be1bee8c875e2c3984ff3519e82cac0b2:e37bc69a079b08177269f1d571be2fca7bad9203a8d09e75b47e8e5fcf7e30d1:c99d3fbf9e4068877391e488774737d5ac08477ae3c0ca2359ff1634b3be3cc0",
+    "mode": "auto",
+    "productId": "yggdrasil-crown-ascent-merged:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v2",
+    "sourceKind": "asset",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "4fdf765845405bf900fdb5987c4b885be1bee8c875e2c3984ff3519e82cac0b2"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "e37bc69a079b08177269f1d571be2fca7bad9203a8d09e75b47e8e5fcf7e30d1"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "c99d3fbf9e4068877391e488774737d5ac08477ae3c0ca2359ff1634b3be3cc0"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -6.372000217437744,
+        -0.550000011920929,
+        -10.043999671936035
+      ],
+      "max": [
+        6.372000217437744,
+        0.550000011920929,
+        10.043999671936035
+      ],
+      "size": [
+        12.744000434875488,
+        1.100000023841858,
+        20.08799934387207
+      ],
+      "center": [
+        0,
+        0,
+        0
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-ascent-merged.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-crown-ascent-merged.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.low.glb",
+    "visualSourceMeshUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+    "triangleCount": 396,
+    "vertexCount": 792,
+    "triangleBudget": 5000
   },
   "simplification": {
     "requested": false,
     "applied": false,
     "sourceTriangleCount": 396,
-    "targetTriangleBudget": 20000,
+    "targetTriangleBudget": 5000,
     "ratio": 1,
     "tool": "gltf-transform",
     "prepass": "none",

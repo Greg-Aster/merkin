@@ -1,0 +1,15 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/approach-stone-4-2026-05-14T23-50-59-517Z/approach-stone-4.glb",
+  "sourceName": "Approach Stone 4",
+  "sourceReferenceImageUrl": "/generated/hunyuan3d/references/approach-stone-4-reference-2026-05-14T23-54-04-295Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": false,
+  "promptId": "merkin-1778802844398-fylz2t",
+  "prompt": "object description: broad rectangular stepping slab set into the main approach route, a flat walkable path stone\nApproach Stone 4",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-05-14T23:54:50.103Z"
+}

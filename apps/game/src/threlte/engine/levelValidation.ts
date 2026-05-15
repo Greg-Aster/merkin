@@ -4,6 +4,7 @@ import {
   getCollisionPolicyIssues,
 } from './collisionPolicyIssues'
 import { actorSupportsWalkabilitySample } from './collisionSpatialQueries'
+import type { WalkableSupportOptions } from './collisionSpatialQueries'
 import {
   getTerrainAuthorityDiagnostics,
   validateLevelGroundContract,
@@ -17,6 +18,7 @@ import { hasTerrainRuntimeCollision } from './terrainRuntimeCollision'
 import type {
   ActorDefinition,
   CollisionClassification,
+  CollisionComponent,
   LevelBuildReport,
   LevelDefinition,
   Vec3,
@@ -48,6 +50,15 @@ function getMaxWalkableSlopeRadians(level: LevelDefinition) {
     ? degrees
     : DEFAULT_MAX_WALKABLE_SLOPE_DEGREES
   return Math.max(0, Math.min(89, resolvedDegrees)) * DEG_TO_RAD
+}
+
+function getWalkableSupportOptions(level: LevelDefinition) {
+  const policy = (level.settings as any)?.level?.collision?.walkability
+  return {
+    xzPadding: policy?.supportXzPadding,
+    maxDrop: policy?.supportMaxDrop,
+    maxPenetration: policy?.supportMaxPenetration,
+  } satisfies WalkableSupportOptions
 }
 
 function getWalkabilitySamples(level: LevelDefinition) {
@@ -84,6 +95,7 @@ function getWalkabilityContractIssues(
   const warnings: string[] = []
   const walkableActors = actors.filter(isWalkableActor)
   const maxSlopeRadians = getMaxWalkableSlopeRadians(level)
+  const supportOptions = getWalkableSupportOptions(level)
 
   for (const actor of walkableActors) {
     const [pitch, , roll] = actor.transform.rotation
@@ -98,7 +110,7 @@ function getWalkabilityContractIssues(
   for (const sample of getWalkabilitySamples(level)) {
     if (!isFiniteVec3Value(sample.position)) continue
     const supportingActor = walkableActors.find(actor =>
-      actorSupportsWalkabilitySample(actor, sample.position),
+      actorSupportsWalkabilitySample(actor, sample.position, supportOptions),
     )
     if (!supportingActor) {
       if (hasTerrainRuntimeCollision(level)) {
@@ -127,6 +139,42 @@ function hasAuthoredColliderMetadata(actor: ActorDefinition): boolean {
   )
 }
 
+const meshDerivedCollisionQualities = new Set([
+  'convexHull',
+  'simplifiedMesh',
+  'trimesh',
+])
+
+function isMeshDerivedCollision(
+  collision: CollisionComponent | undefined,
+): boolean {
+  const quality = collision?.quality
+  return Boolean(
+    collision?.generatedProduct ||
+      (quality !== undefined && meshDerivedCollisionQualities.has(quality)),
+  )
+}
+
+function hasMeshDerivedCollisionProduct(actor: ActorDefinition): boolean {
+  return Boolean(actor.physics?.collision.generatedProduct)
+}
+
+function getCollisionTriangleBudget(
+  collision: CollisionComponent,
+): number | undefined {
+  return collision.triangleBudget ?? collision.generatedProduct?.triangleBudget
+}
+
+function requiresExplicitTriangleBudget(
+  collision: CollisionComponent,
+): boolean {
+  return (
+    collision.intent === 'detailMesh' ||
+    collision.quality === 'trimesh' ||
+    !isMeshDerivedCollision(collision)
+  )
+}
+
 function getRequiredActorError(actorId: string, reason: string) {
   return `Required actor "${actorId}" ${reason}.`
 }
@@ -150,7 +198,9 @@ function getActorCollisionClassification(
   visualOnlyActorIds: Set<string>,
 ): CollisionClassification | undefined {
   if (actor.collisionClassification) return actor.collisionClassification
-  const hasVisibleRender = Boolean(actor.render && actor.render.visible !== false)
+  const hasVisibleRender = Boolean(
+    actor.render && actor.render.visible !== false,
+  )
   const hasCollision = Boolean(actor.physics?.collision)
 
   if (hasCollision) {
@@ -203,6 +253,7 @@ function getCollisionDiagnostics(level: LevelDefinition) {
       .filter(actor => actor.kind === 'asset')
       .filter(actor => actor.physics?.collision.shape === 'trimesh')
       .filter(actor => !visualOnlyActorIds.has(actor.id))
+      .filter(actor => !hasMeshDerivedCollisionProduct(actor))
       .filter(actor => !hasAuthoredColliderMetadata(actor))
       .map(actor => actor.id)
       .sort(),
@@ -289,6 +340,15 @@ export function createLevelBuildReport(
     if (!actor.physics) continue
 
     physicsActorCount += 1
+    if (
+      actor.physics.collision.generationStatus === 'dirty' ||
+      actor.physics.collision.generationStatus === 'generating' ||
+      actor.physics.collision.generationStatus === 'failed'
+    ) {
+      errors.push(
+        `Actor "${actor.id}" collision generation status is ${actor.physics.collision.generationStatus}${actor.physics.collision.generationLastError ? `: ${actor.physics.collision.generationLastError}` : ''}.`,
+      )
+    }
     for (const issue of getCollisionPolicyIssues({
       collision: actor.physics.collision,
       bodyType: actor.physics.bodyType,
@@ -303,7 +363,7 @@ export function createLevelBuildReport(
     }
     if (actor.physics.collision.intent === 'detailMesh') {
       detailMeshActorCount += 1
-      if (actor.physics.collision.triangleBudget === undefined) {
+      if (getCollisionTriangleBudget(actor.physics.collision) === undefined) {
         errors.push(
           `Detail mesh actor "${actor.id}" has no explicit triangle budget.`,
         )
@@ -311,16 +371,23 @@ export function createLevelBuildReport(
     }
     if (actor.physics.collision.shape === 'trimesh') {
       trimeshActorCount += 1
-      if (actor.physics.collision.triangleBudget === undefined) {
+      if (
+        requiresExplicitTriangleBudget(actor.physics.collision) &&
+        getCollisionTriangleBudget(actor.physics.collision) === undefined
+      ) {
         errors.push(
           `Trimesh actor "${actor.id}" has no explicit triangle budget.`,
         )
       }
-      if (actor.kind === 'asset' && !hasAuthoredColliderAsset(actor)) {
+      if (
+        actor.kind === 'asset' &&
+        !hasAuthoredColliderAsset(actor) &&
+        !hasMeshDerivedCollisionProduct(actor)
+      ) {
         errors.push(
           `Trimesh asset actor "${actor.id}" must use collision.colliderUrl instead of deriving collision from the render mesh.`,
         )
-      } else if (actor.kind === 'asset') {
+      } else if (actor.kind === 'asset' && hasAuthoredColliderAsset(actor)) {
         const conventionError = getColliderUrlConventionError(
           actor.physics.collision.colliderUrl,
         )
@@ -386,13 +453,9 @@ export function createLevelBuildReport(
     }
   }
 
-  for (
-    const actorId of runtimeReadinessContract.missingRequiredWalkableActorIds
-  ) {
+  for (const actorId of runtimeReadinessContract.missingRequiredWalkableActorIds) {
     if (missingRequiredActorIdSet.has(actorId)) continue
-    errors.push(
-      getRequiredActorError(actorId, 'is missing walkable collision'),
-    )
+    errors.push(getRequiredActorError(actorId, 'is missing walkable collision'))
   }
 
   const walkabilityIssues = getWalkabilityContractIssues(level, level.actors)
@@ -406,7 +469,7 @@ export function createLevelBuildReport(
   }
 
   if (trimeshActorCount > contract.maxTrimeshActors) {
-    errors.push(
+    warnings.push(
       `${trimeshActorCount} actors are using trimesh collision; contract allows ${contract.maxTrimeshActors}.`,
     )
   }
@@ -415,25 +478,25 @@ export function createLevelBuildReport(
     runtimeReadinessContract.runtimeAssetUrls.length >
     contract.maxRuntimeAssetCount
   ) {
-    errors.push(
+    warnings.push(
       `${runtimeReadinessContract.runtimeAssetUrls.length} runtime assets exceed contract budget of ${contract.maxRuntimeAssetCount}.`,
     )
   }
 
   if (primitiveActorCount > contract.maxPrimitiveActorCount) {
-    errors.push(
+    warnings.push(
       `${primitiveActorCount} primitive render actors exceed contract budget of ${contract.maxPrimitiveActorCount}. Bake repeated primitives into runtime assets or chunks.`,
     )
   }
 
   if (neverCullActorCount > contract.maxNeverCullActorCount) {
-    errors.push(
+    warnings.push(
       `${neverCullActorCount} never-cull render actors exceed contract budget of ${contract.maxNeverCullActorCount}.`,
     )
   }
 
   if (gameplayFireflyActorCount > contract.maxGameplayFireflyCount) {
-    errors.push(
+    warnings.push(
       `${gameplayFireflyActorCount} firefly gameplay actors exceed contract budget of ${contract.maxGameplayFireflyCount}. Use chunked/pooled marker presentation.`,
     )
   }

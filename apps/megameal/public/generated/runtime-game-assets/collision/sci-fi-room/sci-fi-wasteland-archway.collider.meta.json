@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:37:02.908Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "sci-fi-room",
+  "sourceActorId": "sci-fi-wasteland-archway",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "615a1598f293233119865abc2743b600c77bb3a7d6a9a99f8fdeeda3d708a217"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-wasteland-archway.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-wasteland-archway.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-wasteland-archway.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:615a1598f293233119865abc2743b600c77bb3a7d6a9a99f8fdeeda3d708a217:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+  "triangleCount": 96,
+  "vertexCount": 288,
+  "bounds": {
+    "min": [
+      -1.649999976158142,
+      -0.1599999964237213,
+      -0.3100000023841858
+    ],
+    "max": [
+      1.649999976158142,
+      8.100000381469727,
+      0.3100000023841858
+    ],
+    "size": [
+      3.299999952316284,
+      8.260000377893448,
+      0.6200000047683716
+    ],
+    "center": [
+      0,
+      3.9700001925230026,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -1.649999976158142,
+      -0.1599999964237213,
+      -0.3100000023841858
+    ],
+    "max": [
+      1.649999976158142,
+      8.100000381469727,
+      0.3100000023841858
+    ],
+    "size": [
+      3.299999952316284,
+      8.260000377893448,
+      0.6200000047683716
+    ],
+    "center": [
+      0,
+      3.9700001925230026,
+      0
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -1.649999976158142,
+      -0.1599999964237213,
+      -0.3100000023841858
+    ],
+    "max": [
+      1.649999976158142,
+      8.100000381469727,
+      0.3100000023841858
+    ],
+    "size": [
+      3.299999952316284,
+      8.260000377893448,
+      0.6200000047683716
+    ],
+    "center": [
+      0,
+      3.9700001925230026,
+      0
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+    "sourceNodeName": "Wasteland Archway",
+    "visualLocalBounds": {
+      "min": [
+        -1.649999976158142,
+        -0.1599999964237213,
+        -0.3100000023841858
+      ],
+      "max": [
+        1.649999976158142,
+        8.100000381469727,
+        0.3100000023841858
+      ],
+      "size": [
+        3.299999952316284,
+        8.260000377893448,
+        0.6200000047683716
+      ],
+      "center": [
+        0,
+        3.9700001925230026,
+        0
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -1.649999976158142,
+        -0.1599999964237213,
+        -0.3100000023841858
+      ],
+      "max": [
+        1.649999976158142,
+        8.100000381469727,
+        0.3100000023841858
+      ],
+      "size": [
+        3.299999952316284,
+        8.260000377893448,
+        0.6200000047683716
+      ],
+      "center": [
+        0,
+        3.9700001925230026,
+        0
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "sci-fi-wasteland-archway",
+    "sourceActorName": "Wasteland Archway",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "615a1598f293233119865abc2743b600c77bb3a7d6a9a99f8fdeeda3d708a217"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "sci-fi-room",
+      "nodeId": "sci-fi-wasteland-archway",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:37:02.908Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "sci-fi-wasteland-archway",
+    "mode": "auto",
+    "productId": "sci-fi-wasteland-archway:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "615a1598f293233119865abc2743b600c77bb3a7d6a9a99f8fdeeda3d708a217"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -1.649999976158142,
+        -0.1599999964237213,
+        -0.3100000023841858
+      ],
+      "max": [
+        1.649999976158142,
+        8.100000381469727,
+        0.3100000023841858
+      ],
+      "size": [
+        3.299999952316284,
+        8.260000377893448,
+        0.6200000047683716
+      ],
+      "center": [
+        0,
+        3.9700001925230026,
+        0
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-wasteland-archway.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-wasteland-archway.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+    "generatedAt": "2026-05-14T21:37:02.908Z",
+    "triangleCount": 96,
+    "vertexCount": 288,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 96,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

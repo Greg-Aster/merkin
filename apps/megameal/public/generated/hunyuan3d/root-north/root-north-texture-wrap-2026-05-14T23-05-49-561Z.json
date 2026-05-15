@@ -1,0 +1,15 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/root-north/root-north-generated-2026-04-19T06-07-51-983Z.glb",
+  "sourceName": "Root north",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/root-north-2026-05-14T23-03-01-774Z/reference/root-north-reference-2026-05-14T23-04-34-674Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1778799874704-w68ky7",
+  "prompt": "object: huge buttress root of ancient sacred wood spreading out from the trunk, a heavy structural tree root rather than a branch. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "texture",
+  "shapeModel": null,
+  "paintModel": "hunyuan3d-paint-v2-0-turbo",
+  "generatedAt": "2026-05-14T23:06:00.025Z"
+}

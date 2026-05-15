@@ -23,6 +23,9 @@ export const localChunkOwnershipRules = [
     patterns: [
       '/src/threlte/features/performance/OptimizationManager.ts',
       '/src/threlte/features/performance/stores/performanceStore.ts',
+      '/src/threlte/features/performance/utils/runtimePerformancePressure.ts',
+      '/src/threlte/features/performance/utils/runtimeFrameRatePolicy.ts',
+      '/src/threlte/features/performance/utils/runtimeSceneBudget.ts',
       '/src/threlte/utils/runtimeLog.ts',
     ],
   },
@@ -58,7 +61,10 @@ export const localChunkOwnershipRules = [
       '/src/threlte/features/terrain/',
       '/src/threlte/levels/Runtime',
     ],
-    patterns: ['/src/threlte/levels/runtimeActorCollision.ts'],
+    patterns: [
+      '/src/threlte/features/performance/systems/Performance.svelte',
+      '/src/threlte/levels/runtimeActorCollision.ts',
+    ],
   },
   {
     chunk: 'runtime-assets',
@@ -66,14 +72,6 @@ export const localChunkOwnershipRules = [
       '/src/threlte/utils/materialUtils.ts',
       '/src/threlte/utils/gltfAssetCache.ts',
     ],
-  },
-  {
-    chunk: 'runtime-world',
-    prefixes: [
-      '/src/threlte/features/performance/stores/',
-      '/src/threlte/features/performance/utils/',
-    ],
-    patterns: ['/src/threlte/features/performance/OptimizationManager.ts'],
   },
   {
     chunk: 'style-runtime',

@@ -10,6 +10,7 @@ export let comfyUiStatus = ''
 export let comfyUiApiUrl = ''
 export let comfyUiBusy = false
 export let comfyUiReady = false
+export let comfyUiLowVramMode = false
 export let comfyWorkflowEditorStatus = ''
 export let selectedComfyWorkflowPath = ''
 export let workflowBrowserPath = ''
@@ -108,6 +109,7 @@ function emit(type: string) {
     <div class="save-message">Experimental service-backed workflow: check services, choose generate or retexture, provide prompt/reference, run job, review output, then add or apply.</div>
     <div class="editor-chip-row">
       <span class:ready={comfyUiReady} class:warn={!comfyUiReady} class="editor-chip">ComfyUI {comfyUiReady ? 'ready' : 'not ready'}</span>
+      <span class:warn={comfyUiLowVramMode} class="editor-chip">{comfyUiLowVramMode ? 'low VRAM launch' : 'standard launch'}</span>
       <span class:ready={hunyuanServiceReady} class:warn={!hunyuanServiceReady} class="editor-chip">mesh backend {hunyuanServiceReady ? 'ready' : 'not ready'}</span>
       <span class:warn={hunyuanBusy || comfyUiBusy} class:ready={!hunyuanBusy && !comfyUiBusy} class="editor-chip">{aiServiceSummary}</span>
     </div>
@@ -125,6 +127,11 @@ function emit(type: string) {
       Refresh ComfyUI
     </button>
   </div>
+  <label class="checkbox">
+    <input type="checkbox" bind:checked={comfyUiLowVramMode} disabled={comfyUiBusy || hunyuanBusy} />
+    <span>Low VRAM launch mode</span>
+  </label>
+  <div class="save-message">Applies when the editor starts ComfyUI. Stop an already-running ComfyUI process before switching modes.</div>
   <div class="tuple-group">
     <div class="tuple-label">ComfyUI API</div>
     <input class="text-input" bind:value={comfyUiApiUrl} />

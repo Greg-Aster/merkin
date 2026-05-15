@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
   "strategy": "bounds-billboard-atlas",
-  "generatedAt": "2026-05-13T22:31:20.893Z",
+  "generatedAt": "2026-05-15T16:01:26.306Z",
   "imageUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.svg",
   "manifestUrl": "/generated/runtime-game-assets/impostors/bounds-billboard-atlas.json",
   "tileSize": 256,
   "imageSize": {
-    "width": 2048,
-    "height": 2048
+    "width": 2560,
+    "height": 2304
   },
-  "columns": 8,
-  "rows": 8,
-  "entryCount": 58,
+  "columns": 10,
+  "rows": 9,
+  "entryCount": 83,
   "entries": [
     {
-      "sourceUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+      "sourceUrl": "/generated/hunyuan3d/approach-stone-1/approach-stone-1-texture-wrap-2026-05-15T00-00-50-964Z.glb",
       "index": 0,
-      "color": "hsl(256 72% 46%)",
+      "color": "hsl(162 70% 42%)",
       "cell": {
         "x": 0,
         "y": 0,
@@ -26,8 +26,233 @@
       "uv": {
         "u0": 0,
         "v0": 0,
-        "u1": 0.125,
-        "v1": 0.125
+        "u1": 0.1,
+        "v1": 0.1111
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 119.16,
+        "width": 194.56,
+        "height": 17.69
+      },
+      "bounds": {
+        "min": [
+          -7.574202537536621,
+          -0.688563883304596,
+          -4.957659721374512
+        ],
+        "max": [
+          7.574202537536621,
+          0.688563883304596,
+          4.957659721374512
+        ],
+        "size": [
+          15.148405075073242,
+          1.377127766609192,
+          9.915319442749023
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/approach-stone-2/approach-stone-2-texture-wrap-2026-05-15T00-03-07-372Z.glb",
+      "index": 1,
+      "color": "hsl(38 66% 44%)",
+      "cell": {
+        "x": 256,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.1,
+        "v0": 0,
+        "u1": 0.2,
+        "v1": 0.1111
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 118.27,
+        "width": 194.56,
+        "height": 19.46
+      },
+      "bounds": {
+        "min": [
+          -6.88563871383667,
+          -0.688563883304596,
+          -4.957659721374512
+        ],
+        "max": [
+          6.88563871383667,
+          0.688563883304596,
+          4.957659721374512
+        ],
+        "size": [
+          13.77127742767334,
+          1.377127766609192,
+          9.915319442749023
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/approach-stone-3/approach-stone-3-generated-2026-05-15T00-25-27-710Z.glb",
+      "index": 2,
+      "color": "hsl(255 51% 45%)",
+      "cell": {
+        "x": 512,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.2,
+        "v0": 0,
+        "u1": 0.3,
+        "v1": 0.1111
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 104.12,
+        "width": 194.56,
+        "height": 47.77
+      },
+      "bounds": {
+        "min": [
+          -0.5310975313186646,
+          -0.14104443788528442,
+          -1.0000903606414795
+        ],
+        "max": [
+          0.5053315162658691,
+          0.11342137306928635,
+          0.9738728404045105
+        ],
+        "size": [
+          1.0364290475845337,
+          0.25446581095457077,
+          1.97396320104599
+        ],
+        "center": [
+          -0.012883007526397705,
+          -0.013811532407999039,
+          -0.013108760118484497
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/approach-stone-4/approach-stone-4-generated-2026-05-14T23-54-49-347Z.glb",
+      "index": 3,
+      "color": "hsl(251 51% 59%)",
+      "cell": {
+        "x": 768,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.3,
+        "v0": 0,
+        "u1": 0.4,
+        "v1": 0.1111
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 119.42,
+        "width": 194.56,
+        "height": 17.17
+      },
+      "bounds": {
+        "min": [
+          -9.364469528198242,
+          -0.8262767195701599,
+          -9.364469528198242
+        ],
+        "max": [
+          9.364469528198242,
+          0.8262767195701599,
+          9.364469528198242
+        ],
+        "size": [
+          18.728939056396484,
+          1.6525534391403198,
+          18.728939056396484
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/approach-stone-5/approach-stone-5-texture-wrap-2026-05-15T00-10-37-442Z.glb",
+      "index": 4,
+      "color": "hsl(195 63% 57%)",
+      "cell": {
+        "x": 1024,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.4,
+        "v0": 0,
+        "u1": 0.5,
+        "v1": 0.1111
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 119.16,
+        "width": 194.56,
+        "height": 17.69
+      },
+      "bounds": {
+        "min": [
+          -7.574202537536621,
+          -0.688563883304596,
+          -4.957659721374512
+        ],
+        "max": [
+          7.574202537536621,
+          0.688563883304596,
+          4.957659721374512
+        ],
+        "size": [
+          15.148405075073242,
+          1.377127766609192,
+          9.915319442749023
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
+      "index": 5,
+      "color": "hsl(256 72% 46%)",
+      "cell": {
+        "x": 1280,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.5,
+        "v0": 0,
+        "u1": 0.6,
+        "v1": 0.1111
       },
       "billboardRect": {
         "x": 63.62,
@@ -60,19 +285,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb",
-      "index": 1,
+      "index": 6,
       "color": "hsl(230 62% 56%)",
       "cell": {
-        "x": 256,
+        "x": 1536,
         "y": 0,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.125,
+        "u0": 0.6,
         "v0": 0,
-        "u1": 0.25,
-        "v1": 0.125
+        "u1": 0.7,
+        "v1": 0.1111
       },
       "billboardRect": {
         "x": 45.68,
@@ -105,19 +330,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
-      "index": 2,
+      "index": 7,
       "color": "hsl(105 65% 57%)",
       "cell": {
-        "x": 512,
+        "x": 1792,
         "y": 0,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.25,
+        "u0": 0.7,
         "v0": 0,
-        "u1": 0.375,
-        "v1": 0.125
+        "u1": 0.8,
+        "v1": 0.1111
       },
       "billboardRect": {
         "x": 55.09,
@@ -149,20 +374,65 @@
       }
     },
     {
-      "sourceUrl": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
-      "index": 3,
-      "color": "hsl(44 60% 50%)",
+      "sourceUrl": "/generated/hunyuan3d/crown-halo/crown-halo-texture-wrap-2026-05-14T23-31-40-865Z.glb",
+      "index": 8,
+      "color": "hsl(179 71% 59%)",
       "cell": {
-        "x": 768,
+        "x": 2048,
         "y": 0,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.375,
+        "u0": 0.8,
         "v0": 0,
-        "u1": 0.5,
-        "v1": 0.125
+        "u1": 0.9,
+        "v1": 0.1111
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 30.72,
+        "width": 194.56,
+        "height": 194.56
+      },
+      "bounds": {
+        "min": [
+          -42.29732894897461,
+          -42.29732894897461,
+          -0.9195070862770081
+        ],
+        "max": [
+          42.29732894897461,
+          42.29732894897461,
+          0.9195070862770081
+        ],
+        "size": [
+          84.59465789794922,
+          84.59465789794922,
+          1.8390141725540161
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
+      "index": 9,
+      "color": "hsl(44 60% 50%)",
+      "cell": {
+        "x": 2304,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.9,
+        "v0": 0,
+        "u1": 1,
+        "v1": 0.1111
       },
       "billboardRect": {
         "x": 50.52,
@@ -195,19 +465,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
-      "index": 4,
+      "index": 10,
       "color": "hsl(318 66% 54%)",
       "cell": {
-        "x": 1024,
-        "y": 0,
+        "x": 0,
+        "y": 256,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.5,
-        "v0": 0,
-        "u1": 0.625,
-        "v1": 0.125
+        "u0": 0,
+        "v0": 0.1111,
+        "u1": 0.1,
+        "v1": 0.2222
       },
       "billboardRect": {
         "x": 50.52,
@@ -240,19 +510,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
-      "index": 5,
+      "index": 11,
       "color": "hsl(309 61% 45%)",
       "cell": {
-        "x": 1280,
-        "y": 0,
+        "x": 256,
+        "y": 256,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.625,
-        "v0": 0,
-        "u1": 0.75,
-        "v1": 0.125
+        "u0": 0.1,
+        "v0": 0.1111,
+        "u1": 0.2,
+        "v1": 0.2222
       },
       "billboardRect": {
         "x": 30.72,
@@ -285,19 +555,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/ring-fragment-east/ring-fragment-east-generated-2026-04-20T00-01-43-946Z.glb",
-      "index": 6,
+      "index": 12,
       "color": "hsl(43 63% 49%)",
       "cell": {
-        "x": 1536,
-        "y": 0,
+        "x": 512,
+        "y": 256,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.75,
-        "v0": 0,
-        "u1": 0.875,
-        "v1": 0.125
+        "u0": 0.2,
+        "v0": 0.1111,
+        "u1": 0.3,
+        "v1": 0.2222
       },
       "billboardRect": {
         "x": 97.37,
@@ -330,19 +600,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
-      "index": 7,
+      "index": 13,
       "color": "hsl(65 53% 53%)",
       "cell": {
-        "x": 1792,
-        "y": 0,
+        "x": 768,
+        "y": 256,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.875,
-        "v0": 0,
-        "u1": 1,
-        "v1": 0.125
+        "u0": 0.3,
+        "v0": 0.1111,
+        "u1": 0.4,
+        "v1": 0.2222
       },
       "billboardRect": {
         "x": 30.72,
@@ -374,65 +644,425 @@
       }
     },
     {
-      "sourceUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
-      "index": 8,
-      "color": "hsl(197 57% 59%)",
+      "sourceUrl": "/generated/hunyuan3d/root-east/root-east-generated-2026-04-19T17-05-01-813Z.glb",
+      "index": 14,
+      "color": "hsl(350 74% 50%)",
+      "cell": {
+        "x": 1024,
+        "y": 256,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.4,
+        "v0": 0.1111,
+        "u1": 0.5,
+        "v1": 0.2222
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 40.59,
+        "width": 194.56,
+        "height": 174.81
+      },
+      "bounds": {
+        "min": [
+          -0.9963653683662415,
+          -0.8972012400627136,
+          -1.0004150867462158
+        ],
+        "max": [
+          0.9705613255500793,
+          0.870082437992096,
+          0.9739353060722351
+        ],
+        "size": [
+          1.9669266939163208,
+          1.7672836780548096,
+          1.974350392818451
+        ],
+        "center": [
+          -0.012902021408081055,
+          -0.013559401035308838,
+          -0.013239890336990356
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.glb",
+      "index": 15,
+      "color": "hsl(109 73% 43%)",
+      "cell": {
+        "x": 1280,
+        "y": 256,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.5,
+        "v0": 0.1111,
+        "u1": 0.6,
+        "v1": 0.2222
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 38.26,
+        "width": 194.56,
+        "height": 179.47
+      },
+      "bounds": {
+        "min": [
+          -0.9982271194458008,
+          -0.9227015972137451,
+          -0.9965185523033142
+        ],
+        "max": [
+          0.9734020233154297,
+          0.8960287570953369,
+          0.9474106431007385
+        ],
+        "size": [
+          1.9716291427612305,
+          1.818730354309082,
+          1.9439291954040527
+        ],
+        "center": [
+          -0.012412548065185547,
+          -0.013336420059204102,
+          -0.024553954601287842
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/root-north/root-north-generated-2026-04-19T06-07-51-983Z.glb",
+      "index": 16,
+      "color": "hsl(285 53% 57%)",
+      "cell": {
+        "x": 1536,
+        "y": 256,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.6,
+        "v0": 0.1111,
+        "u1": 0.7,
+        "v1": 0.2222
+      },
+      "billboardRect": {
+        "x": 33.95,
+        "y": 30.72,
+        "width": 188.1,
+        "height": 194.56
+      },
+      "bounds": {
+        "min": [
+          -0.9908386468887329,
+          -0.9953568577766418,
+          -0.9913585782051086
+        ],
+        "max": [
+          0.9114814400672913,
+          0.9723033308982849,
+          0.9495976567268372
+        ],
+        "size": [
+          1.9023200869560242,
+          1.9676601886749268,
+          1.9409562349319458
+        ],
+        "center": [
+          -0.039678603410720825,
+          -0.011526763439178467,
+          -0.020880460739135742
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/root-northeast/root-northeast-generated-2026-04-19T17-10-26-920Z.glb",
+      "index": 17,
+      "color": "hsl(2 66% 44%)",
+      "cell": {
+        "x": 1792,
+        "y": 256,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.7,
+        "v0": 0.1111,
+        "u1": 0.8,
+        "v1": 0.2222
+      },
+      "billboardRect": {
+        "x": 30.98,
+        "y": 30.72,
+        "width": 194.04,
+        "height": 194.56
+      },
+      "bounds": {
+        "min": [
+          -0.993611216545105,
+          -0.998850405216217,
+          -0.9982514977455139
+        ],
+        "max": [
+          0.9746454954147339,
+          0.9747152328491211,
+          0.97148197889328
+        ],
+        "size": [
+          1.9682567119598389,
+          1.9735656380653381,
+          1.969733476638794
+        ],
+        "center": [
+          -0.009482860565185547,
+          -0.012067586183547974,
+          -0.013384759426116943
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/root-northwest/root-northwest-generated-2026-04-19T17-13-41-911Z.glb",
+      "index": 18,
+      "color": "hsl(214 58% 58%)",
+      "cell": {
+        "x": 2048,
+        "y": 256,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.8,
+        "v0": 0.1111,
+        "u1": 0.9,
+        "v1": 0.2222
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 32.04,
+        "width": 194.56,
+        "height": 191.91
+      },
+      "bounds": {
+        "min": [
+          -0.9972171187400818,
+          -0.9831674695014954,
+          -0.9902541637420654
+        ],
+        "max": [
+          0.9742372035980225,
+          0.9614537358283997,
+          0.9381932020187378
+        ],
+        "size": [
+          1.9714543223381042,
+          1.944621205329895,
+          1.9284473657608032
+        ],
+        "center": [
+          -0.011489957571029663,
+          -0.010856866836547852,
+          -0.02603048086166382
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/root-south/root-south-generated-2026-04-19T05-48-05-767Z.glb",
+      "index": 19,
+      "color": "hsl(156 64% 54%)",
+      "cell": {
+        "x": 2304,
+        "y": 256,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.9,
+        "v0": 0.1111,
+        "u1": 1,
+        "v1": 0.2222
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 37.54,
+        "width": 194.56,
+        "height": 180.92
+      },
+      "bounds": {
+        "min": [
+          -0.9977015852928162,
+          -0.9302552342414856,
+          -0.995581328868866
+        ],
+        "max": [
+          0.9707555770874023,
+          0.900166392326355,
+          0.9611034989356995
+        ],
+        "size": [
+          1.9684571623802185,
+          1.8304216265678406,
+          1.9566848278045654
+        ],
+        "center": [
+          -0.01347300410270691,
+          -0.015044420957565308,
+          -0.017238914966583252
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/root-southeast/root-southeast-generated-2026-04-19T17-16-26-636Z.glb",
+      "index": 20,
+      "color": "hsl(78 74% 48%)",
       "cell": {
         "x": 0,
-        "y": 256,
+        "y": 512,
         "width": 256,
         "height": 256
       },
       "uv": {
         "u0": 0,
-        "v0": 0.125,
-        "u1": 0.125,
-        "v1": 0.25
+        "v0": 0.2222,
+        "u1": 0.1,
+        "v1": 0.3333
       },
       "billboardRect": {
-        "x": 30.72,
-        "y": 54.81,
-        "width": 194.56,
-        "height": 146.37
+        "x": 39.03,
+        "y": 30.72,
+        "width": 177.94,
+        "height": 194.56
       },
       "bounds": {
         "min": [
-          -0.9992300868034363,
-          -0.7572119832038879,
-          -0.9886918663978577
+          -0.9108462929725647,
+          -0.9933103919029236,
+          -0.9014293551445007
         ],
         "max": [
-          0.9740453362464905,
-          0.727324903011322,
-          0.9728116989135742
+          0.8878462910652161,
+          0.9734369516372681,
+          0.8700723648071289
         ],
         "size": [
-          1.9732754230499268,
-          1.48453688621521,
-          1.9615035653114319
+          1.7986925840377808,
+          1.9667473435401917,
+          1.7715017199516296
         ],
         "center": [
-          -0.0125923752784729,
-          -0.014943540096282959,
-          -0.007940083742141724
+          -0.011500000953674316,
+          -0.009936720132827759,
+          -0.015678495168685913
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/root-southwest/root-southwest-generated-2026-04-19T17-19-22-220Z.glb",
+      "index": 21,
+      "color": "hsl(210 58% 54%)",
+      "cell": {
+        "x": 256,
+        "y": 512,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.1,
+        "v0": 0.2222,
+        "u1": 0.2,
+        "v1": 0.3333
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 34.23,
+        "width": 194.56,
+        "height": 187.54
+      },
+      "bounds": {
+        "min": [
+          -0.9956318140029907,
+          -0.9641566276550293,
+          -0.9965624809265137
+        ],
+        "max": [
+          0.9709997773170471,
+          0.9314737915992737,
+          0.9553384184837341
+        ],
+        "size": [
+          1.9666315913200378,
+          1.895630419254303,
+          1.9519008994102478
+        ],
+        "center": [
+          -0.012316018342971802,
+          -0.016341418027877808,
+          -0.02061203122138977
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/root-west/root-west-generated-2026-04-19T05-56-16-947Z.glb",
+      "index": 22,
+      "color": "hsl(93 53% 45%)",
+      "cell": {
+        "x": 512,
+        "y": 512,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.2,
+        "v0": 0.2222,
+        "u1": 0.3,
+        "v1": 0.3333
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 30.75,
+        "width": 194.56,
+        "height": 194.51
+      },
+      "bounds": {
+        "min": [
+          -0.99910569190979,
+          -0.998805582523346,
+          -0.8342506885528564
+        ],
+        "max": [
+          0.9709059596061707,
+          0.9706739783287048,
+          0.8042434453964233
+        ],
+        "size": [
+          1.9700116515159607,
+          1.9694795608520508,
+          1.6384941339492798
+        ],
+        "center": [
+          -0.014099866151809692,
+          -0.014065802097320557,
+          -0.015003621578216553
         ]
       }
     },
     {
       "sourceUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
-      "index": 9,
+      "index": 23,
       "color": "hsl(259 75% 49%)",
       "cell": {
-        "x": 256,
-        "y": 256,
+        "x": 768,
+        "y": 512,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.125,
-        "v0": 0.125,
-        "u1": 0.25,
-        "v1": 0.25
+        "u0": 0.3,
+        "v0": 0.2222,
+        "u1": 0.4,
+        "v1": 0.3333
       },
       "billboardRect": {
         "x": 30.72,
@@ -464,20 +1094,65 @@
       }
     },
     {
-      "sourceUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
-      "index": 10,
-      "color": "hsl(157 57% 55%)",
+      "sourceUrl": "/generated/hunyuan3d/shore-ring/shore-ring-generated-2026-04-19T06-22-12-051Z.glb",
+      "index": 24,
+      "color": "hsl(7 71% 49%)",
       "cell": {
-        "x": 512,
-        "y": 256,
+        "x": 1024,
+        "y": 512,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.25,
-        "v0": 0.125,
-        "u1": 0.375,
-        "v1": 0.25
+        "u0": 0.4,
+        "v0": 0.2222,
+        "u1": 0.5,
+        "v1": 0.3333
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 30.82,
+        "width": 194.56,
+        "height": 194.36
+      },
+      "bounds": {
+        "min": [
+          -0.9996529817581177,
+          -0.9911274909973145,
+          -0.2379826158285141
+        ],
+        "max": [
+          0.9677689075469971,
+          0.9742323756217957,
+          0.24087129533290863
+        ],
+        "size": [
+          1.9674218893051147,
+          1.96535986661911,
+          0.47885391116142273
+        ],
+        "center": [
+          -0.015942037105560303,
+          -0.0084475576877594,
+          0.0014443397521972656
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/solitude-pillar-11/solitude-pillar-11-generated-2026-04-19T23-54-22-571Z.glb",
+      "index": 25,
+      "color": "hsl(157 57% 55%)",
+      "cell": {
+        "x": 1280,
+        "y": 512,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.5,
+        "v0": 0.2222,
+        "u1": 0.6,
+        "v1": 0.3333
       },
       "billboardRect": {
         "x": 36.32,
@@ -510,19 +1185,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/solitude-pillar-12/solitude-pillar-12-generated-2026-04-19T23-57-40-585Z.glb",
-      "index": 11,
+      "index": 26,
       "color": "hsl(275 67% 47%)",
       "cell": {
-        "x": 768,
-        "y": 256,
+        "x": 1536,
+        "y": 512,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.375,
-        "v0": 0.125,
-        "u1": 0.5,
-        "v1": 0.25
+        "u0": 0.6,
+        "v0": 0.2222,
+        "u1": 0.7,
+        "v1": 0.3333
       },
       "billboardRect": {
         "x": 64.9,
@@ -555,19 +1230,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
-      "index": 12,
+      "index": 27,
       "color": "hsl(108 68% 42%)",
       "cell": {
-        "x": 1024,
-        "y": 256,
+        "x": 1792,
+        "y": 512,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.5,
-        "v0": 0.125,
-        "u1": 0.625,
-        "v1": 0.25
+        "u0": 0.7,
+        "v0": 0.2222,
+        "u1": 0.8,
+        "v1": 0.3333
       },
       "billboardRect": {
         "x": 40.26,
@@ -600,19 +1275,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-35-29-989Z.glb",
-      "index": 13,
+      "index": 28,
       "color": "hsl(31 67% 55%)",
       "cell": {
-        "x": 1280,
-        "y": 256,
+        "x": 2048,
+        "y": 512,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.625,
-        "v0": 0.125,
-        "u1": 0.75,
-        "v1": 0.25
+        "u0": 0.8,
+        "v0": 0.2222,
+        "u1": 0.9,
+        "v1": 0.3333
       },
       "billboardRect": {
         "x": 30.72,
@@ -645,19 +1320,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-generated-2026-04-19T00-42-38-513Z.glb",
-      "index": 14,
+      "index": 29,
       "color": "hsl(338 54% 56%)",
       "cell": {
-        "x": 1536,
-        "y": 256,
+        "x": 2304,
+        "y": 512,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.75,
-        "v0": 0.125,
-        "u1": 0.875,
-        "v1": 0.25
+        "u0": 0.9,
+        "v0": 0.2222,
+        "u1": 1,
+        "v1": 0.3333
       },
       "billboardRect": {
         "x": 53.91,
@@ -690,19 +1365,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T22-48-19-209Z.glb",
-      "index": 15,
+      "index": 30,
       "color": "hsl(323 51% 59%)",
       "cell": {
-        "x": 1792,
-        "y": 256,
+        "x": 0,
+        "y": 768,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.875,
-        "v0": 0.125,
-        "u1": 1,
-        "v1": 0.25
+        "u0": 0,
+        "v0": 0.3333,
+        "u1": 0.1,
+        "v1": 0.4444
       },
       "billboardRect": {
         "x": 94.27,
@@ -735,19 +1410,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z/weathered-monolith-pillar-generated-2026-04-18t22-01-36-007z-texture-wrap-2026-04-18T23-14-30-195Z.glb",
-      "index": 16,
+      "index": 31,
       "color": "hsl(96 56% 48%)",
       "cell": {
-        "x": 0,
-        "y": 512,
+        "x": 256,
+        "y": 768,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0,
-        "v0": 0.25,
-        "u1": 0.125,
-        "v1": 0.375
+        "u0": 0.1,
+        "v0": 0.3333,
+        "u1": 0.2,
+        "v1": 0.4444
       },
       "billboardRect": {
         "x": 94.27,
@@ -780,19 +1455,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-18T22-01-36-007Z.glb",
-      "index": 17,
+      "index": 32,
       "color": "hsl(300 72% 54%)",
       "cell": {
-        "x": 256,
-        "y": 512,
+        "x": 512,
+        "y": 768,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.125,
-        "v0": 0.25,
-        "u1": 0.25,
-        "v1": 0.375
+        "u0": 0.2,
+        "v0": 0.3333,
+        "u1": 0.3,
+        "v1": 0.4444
       },
       "billboardRect": {
         "x": 94.27,
@@ -825,19 +1500,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-24-06-758Z.glb",
-      "index": 18,
+      "index": 33,
       "color": "hsl(301 69% 55%)",
       "cell": {
-        "x": 512,
-        "y": 512,
+        "x": 768,
+        "y": 768,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.25,
-        "v0": 0.25,
-        "u1": 0.375,
-        "v1": 0.375
+        "u0": 0.3,
+        "v0": 0.3333,
+        "u1": 0.4,
+        "v1": 0.4444
       },
       "billboardRect": {
         "x": 52.14,
@@ -870,19 +1545,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-27-04-251Z.glb",
-      "index": 19,
+      "index": 34,
       "color": "hsl(94 54% 46%)",
       "cell": {
-        "x": 768,
-        "y": 512,
+        "x": 1024,
+        "y": 768,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.375,
-        "v0": 0.25,
+        "u0": 0.4,
+        "v0": 0.3333,
         "u1": 0.5,
-        "v1": 0.375
+        "v1": 0.4444
       },
       "billboardRect": {
         "x": 70.59,
@@ -915,19 +1590,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-30-13-924Z.glb",
-      "index": 20,
+      "index": 35,
       "color": "hsl(45 61% 51%)",
       "cell": {
-        "x": 1024,
-        "y": 512,
+        "x": 1280,
+        "y": 768,
         "width": 256,
         "height": 256
       },
       "uv": {
         "u0": 0.5,
-        "v0": 0.25,
-        "u1": 0.625,
-        "v1": 0.375
+        "v0": 0.3333,
+        "u1": 0.6,
+        "v1": 0.4444
       },
       "billboardRect": {
         "x": 70.14,
@@ -960,19 +1635,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-33-28-476Z.glb",
-      "index": 21,
+      "index": 36,
       "color": "hsl(226 58% 52%)",
       "cell": {
-        "x": 1280,
-        "y": 512,
+        "x": 1536,
+        "y": 768,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.625,
-        "v0": 0.25,
-        "u1": 0.75,
-        "v1": 0.375
+        "u0": 0.6,
+        "v0": 0.3333,
+        "u1": 0.7,
+        "v1": 0.4444
       },
       "billboardRect": {
         "x": 42.92,
@@ -1005,19 +1680,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-36-30-619Z.glb",
-      "index": 22,
+      "index": 37,
       "color": "hsl(41 61% 47%)",
       "cell": {
-        "x": 1536,
-        "y": 512,
+        "x": 1792,
+        "y": 768,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.75,
-        "v0": 0.25,
-        "u1": 0.875,
-        "v1": 0.375
+        "u0": 0.7,
+        "v0": 0.3333,
+        "u1": 0.8,
+        "v1": 0.4444
       },
       "billboardRect": {
         "x": 77.03,
@@ -1050,19 +1725,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-39-39-599Z.glb",
-      "index": 23,
+      "index": 38,
       "color": "hsl(258 50% 48%)",
       "cell": {
-        "x": 1792,
-        "y": 512,
+        "x": 2048,
+        "y": 768,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.875,
-        "v0": 0.25,
-        "u1": 1,
-        "v1": 0.375
+        "u0": 0.8,
+        "v0": 0.3333,
+        "u1": 0.9,
+        "v1": 0.4444
       },
       "billboardRect": {
         "x": 70.01,
@@ -1095,19 +1770,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-42-40-008Z.glb",
-      "index": 24,
+      "index": 39,
       "color": "hsl(359 51% 59%)",
       "cell": {
-        "x": 0,
+        "x": 2304,
         "y": 768,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0,
-        "v0": 0.375,
-        "u1": 0.125,
-        "v1": 0.5
+        "u0": 0.9,
+        "v0": 0.3333,
+        "u1": 1,
+        "v1": 0.4444
       },
       "billboardRect": {
         "x": 64.69,
@@ -1140,19 +1815,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
-      "index": 25,
+      "index": 40,
       "color": "hsl(162 50% 42%)",
       "cell": {
-        "x": 256,
-        "y": 768,
+        "x": 0,
+        "y": 1024,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.125,
-        "v0": 0.375,
-        "u1": 0.25,
-        "v1": 0.5
+        "u0": 0,
+        "v0": 0.4444,
+        "u1": 0.1,
+        "v1": 0.5556
       },
       "billboardRect": {
         "x": 90.19,
@@ -1185,19 +1860,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-48-08-244Z.glb",
-      "index": 26,
+      "index": 41,
       "color": "hsl(115 55% 49%)",
       "cell": {
-        "x": 512,
-        "y": 768,
+        "x": 256,
+        "y": 1024,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.25,
-        "v0": 0.375,
-        "u1": 0.375,
-        "v1": 0.5
+        "u0": 0.1,
+        "v0": 0.4444,
+        "u1": 0.2,
+        "v1": 0.5556
       },
       "billboardRect": {
         "x": 76.43,
@@ -1230,19 +1905,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-51-13-313Z.glb",
-      "index": 27,
+      "index": 42,
       "color": "hsl(308 60% 44%)",
       "cell": {
-        "x": 768,
-        "y": 768,
+        "x": 512,
+        "y": 1024,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.375,
-        "v0": 0.375,
-        "u1": 0.5,
-        "v1": 0.5
+        "u0": 0.2,
+        "v0": 0.4444,
+        "u1": 0.3,
+        "v1": 0.5556
       },
       "billboardRect": {
         "x": 71.9,
@@ -1274,20 +1949,110 @@
       }
     },
     {
-      "sourceUrl": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
-      "index": 28,
-      "color": "hsl(294 50% 48%)",
+      "sourceUrl": "/generated/hunyuan3d/well-of-urd-ring/well-of-urd-ring-texture-wrap-2026-05-14T23-34-00-441Z.glb",
+      "index": 43,
+      "color": "hsl(80 68% 50%)",
+      "cell": {
+        "x": 768,
+        "y": 1024,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.3,
+        "v0": 0.4444,
+        "u1": 0.4,
+        "v1": 0.5556
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 31.43,
+        "width": 194.56,
+        "height": 193.14
+      },
+      "bounds": {
+        "min": [
+          -11.705586433410645,
+          -11.6202392578125,
+          -0.688563883304596
+        ],
+        "max": [
+          11.705586433410645,
+          11.6202392578125,
+          0.688563883304596
+        ],
+        "size": [
+          23.41117286682129,
+          23.240478515625,
+          1.377127766609192
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
+      "index": 44,
+      "color": "hsl(112 68% 46%)",
       "cell": {
         "x": 1024,
-        "y": 768,
+        "y": 1024,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.4,
+        "v0": 0.4444,
+        "u1": 0.5,
+        "v1": 0.5556
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 107.66,
+        "width": 194.56,
+        "height": 40.69
+      },
+      "bounds": {
+        "min": [
+          -1.0003788471221924,
+          -0.22010308504104614,
+          -0.9986506700515747
+        ],
+        "max": [
+          0.973609447479248,
+          0.19270119071006775,
+          0.9739821553230286
+        ],
+        "size": [
+          1.9739882946014404,
+          0.4128042757511139,
+          1.9726328253746033
+        ],
+        "center": [
+          -0.013384699821472168,
+          -0.013700947165489197,
+          -0.012334257364273071
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/hunyuan3d/yggdrasil-bifrost-ribbon/yggdrasil-bifrost-ribbon-merged-2026-04-25T02-17-02-006Z.glb",
+      "index": 45,
+      "color": "hsl(294 50% 48%)",
+      "cell": {
+        "x": 1280,
+        "y": 1024,
         "width": 256,
         "height": 256
       },
       "uv": {
         "u0": 0.5,
-        "v0": 0.375,
-        "u1": 0.625,
-        "v1": 0.5
+        "v0": 0.4444,
+        "u1": 0.6,
+        "v1": 0.5556
       },
       "billboardRect": {
         "x": 30.72,
@@ -1320,19 +2085,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
-      "index": 29,
+      "index": 46,
       "color": "hsl(346 74% 46%)",
       "cell": {
-        "x": 1280,
-        "y": 768,
+        "x": 1536,
+        "y": 1024,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.625,
-        "v0": 0.375,
-        "u1": 0.75,
-        "v1": 0.5
+        "u0": 0.6,
+        "v0": 0.4444,
+        "u1": 0.7,
+        "v1": 0.5556
       },
       "billboardRect": {
         "x": 30.72,
@@ -1365,19 +2130,19 @@
     },
     {
       "sourceUrl": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
-      "index": 30,
+      "index": 47,
       "color": "hsl(189 65% 51%)",
       "cell": {
-        "x": 1536,
-        "y": 768,
+        "x": 1792,
+        "y": 1024,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.75,
-        "v0": 0.375,
-        "u1": 0.875,
-        "v1": 0.5
+        "u0": 0.7,
+        "v0": 0.4444,
+        "u1": 0.8,
+        "v1": 0.5556
       },
       "billboardRect": {
         "x": 30.72,
@@ -1410,19 +2175,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-cyan.glb",
-      "index": 31,
+      "index": 48,
       "color": "hsl(146 74% 44%)",
       "cell": {
-        "x": 1792,
-        "y": 768,
+        "x": 2048,
+        "y": 1024,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.875,
-        "v0": 0.375,
-        "u1": 1,
-        "v1": 0.5
+        "u0": 0.8,
+        "v0": 0.4444,
+        "u1": 0.9,
+        "v1": 0.5556
       },
       "billboardRect": {
         "x": 30.72,
@@ -1455,19 +2220,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-green.glb",
-      "index": 32,
+      "index": 49,
       "color": "hsl(54 66% 42%)",
       "cell": {
-        "x": 0,
+        "x": 2304,
         "y": 1024,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0,
-        "v0": 0.5,
-        "u1": 0.125,
-        "v1": 0.625
+        "u0": 0.9,
+        "v0": 0.4444,
+        "u1": 1,
+        "v1": 0.5556
       },
       "billboardRect": {
         "x": 30.72,
@@ -1500,19 +2265,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
-      "index": 33,
+      "index": 50,
       "color": "hsl(274 62% 46%)",
       "cell": {
-        "x": 256,
-        "y": 1024,
+        "x": 0,
+        "y": 1280,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.125,
-        "v0": 0.5,
-        "u1": 0.25,
-        "v1": 0.625
+        "u0": 0,
+        "v0": 0.5556,
+        "u1": 0.1,
+        "v1": 0.6667
       },
       "billboardRect": {
         "x": 30.72,
@@ -1545,19 +2310,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb",
-      "index": 34,
+      "index": 51,
       "color": "hsl(162 66% 42%)",
       "cell": {
-        "x": 512,
-        "y": 1024,
+        "x": 256,
+        "y": 1280,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.25,
-        "v0": 0.5,
-        "u1": 0.375,
-        "v1": 0.625
+        "u0": 0.1,
+        "v0": 0.5556,
+        "u1": 0.2,
+        "v1": 0.6667
       },
       "billboardRect": {
         "x": 30.72,
@@ -1590,19 +2355,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
-      "index": 35,
+      "index": 52,
       "color": "hsl(198 62% 42%)",
       "cell": {
-        "x": 768,
-        "y": 1024,
+        "x": 512,
+        "y": 1280,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.375,
-        "v0": 0.5,
-        "u1": 0.5,
-        "v1": 0.625
+        "u0": 0.2,
+        "v0": 0.5556,
+        "u1": 0.3,
+        "v1": 0.6667
       },
       "billboardRect": {
         "x": 37.38,
@@ -1635,19 +2400,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
-      "index": 36,
+      "index": 53,
       "color": "hsl(128 60% 44%)",
       "cell": {
-        "x": 1024,
-        "y": 1024,
+        "x": 768,
+        "y": 1280,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.5,
-        "v0": 0.5,
-        "u1": 0.625,
-        "v1": 0.625
+        "u0": 0.3,
+        "v0": 0.5556,
+        "u1": 0.4,
+        "v1": 0.6667
       },
       "billboardRect": {
         "x": 30.72,
@@ -1680,19 +2445,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
-      "index": 37,
+      "index": 54,
       "color": "hsl(96 52% 48%)",
       "cell": {
-        "x": 1280,
-        "y": 1024,
+        "x": 1024,
+        "y": 1280,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.625,
-        "v0": 0.5,
-        "u1": 0.75,
-        "v1": 0.625
+        "u0": 0.4,
+        "v0": 0.5556,
+        "u1": 0.5,
+        "v1": 0.6667
       },
       "billboardRect": {
         "x": 30.72,
@@ -1725,19 +2490,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
-      "index": 38,
+      "index": 55,
       "color": "hsl(284 52% 56%)",
       "cell": {
-        "x": 1536,
-        "y": 1024,
+        "x": 1280,
+        "y": 1280,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.75,
-        "v0": 0.5,
-        "u1": 0.875,
-        "v1": 0.625
+        "u0": 0.5,
+        "v0": 0.5556,
+        "u1": 0.6,
+        "v1": 0.6667
       },
       "billboardRect": {
         "x": 122.06,
@@ -1770,19 +2535,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
-      "index": 39,
+      "index": 56,
       "color": "hsl(258 50% 48%)",
       "cell": {
-        "x": 1792,
-        "y": 1024,
+        "x": 1536,
+        "y": 1280,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.875,
-        "v0": 0.5,
-        "u1": 1,
-        "v1": 0.625
+        "u0": 0.6,
+        "v0": 0.5556,
+        "u1": 0.7,
+        "v1": 0.6667
       },
       "billboardRect": {
         "x": 30.72,
@@ -1815,19 +2580,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
-      "index": 40,
+      "index": 57,
       "color": "hsl(284 56% 56%)",
       "cell": {
-        "x": 0,
+        "x": 1792,
         "y": 1280,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0,
-        "v0": 0.625,
-        "u1": 0.125,
-        "v1": 0.75
+        "u0": 0.7,
+        "v0": 0.5556,
+        "u1": 0.8,
+        "v1": 0.6667
       },
       "billboardRect": {
         "x": 121.11,
@@ -1860,19 +2625,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
-      "index": 41,
+      "index": 58,
       "color": "hsl(278 58% 50%)",
       "cell": {
-        "x": 256,
+        "x": 2048,
         "y": 1280,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.125,
-        "v0": 0.625,
-        "u1": 0.25,
-        "v1": 0.75
+        "u0": 0.8,
+        "v0": 0.5556,
+        "u1": 0.9,
+        "v1": 0.6667
       },
       "billboardRect": {
         "x": 95.57,
@@ -1905,19 +2670,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
-      "index": 42,
+      "index": 59,
       "color": "hsl(290 70% 44%)",
       "cell": {
-        "x": 512,
+        "x": 2304,
         "y": 1280,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.25,
-        "v0": 0.625,
-        "u1": 0.375,
-        "v1": 0.75
+        "u0": 0.9,
+        "v0": 0.5556,
+        "u1": 1,
+        "v1": 0.6667
       },
       "billboardRect": {
         "x": 82.31,
@@ -1950,19 +2715,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
-      "index": 43,
+      "index": 60,
       "color": "hsl(100 68% 52%)",
       "cell": {
-        "x": 768,
-        "y": 1280,
+        "x": 0,
+        "y": 1536,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.375,
-        "v0": 0.625,
-        "u1": 0.5,
-        "v1": 0.75
+        "u0": 0,
+        "v0": 0.6667,
+        "u1": 0.1,
+        "v1": 0.7778
       },
       "billboardRect": {
         "x": 76.91,
@@ -1995,19 +2760,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
-      "index": 44,
+      "index": 61,
       "color": "hsl(318 74% 54%)",
       "cell": {
-        "x": 1024,
-        "y": 1280,
+        "x": 256,
+        "y": 1536,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.5,
-        "v0": 0.625,
-        "u1": 0.625,
-        "v1": 0.75
+        "u0": 0.1,
+        "v0": 0.6667,
+        "u1": 0.2,
+        "v1": 0.7778
       },
       "billboardRect": {
         "x": 30.76,
@@ -2040,19 +2805,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
-      "index": 45,
+      "index": 62,
       "color": "hsl(220 60% 46%)",
       "cell": {
-        "x": 1280,
-        "y": 1280,
+        "x": 512,
+        "y": 1536,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.625,
-        "v0": 0.625,
-        "u1": 0.75,
-        "v1": 0.75
+        "u0": 0.2,
+        "v0": 0.6667,
+        "u1": 0.3,
+        "v1": 0.7778
       },
       "billboardRect": {
         "x": 30.72,
@@ -2085,19 +2850,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
-      "index": 46,
+      "index": 63,
       "color": "hsl(40 64% 46%)",
       "cell": {
-        "x": 1536,
-        "y": 1280,
+        "x": 768,
+        "y": 1536,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.75,
-        "v0": 0.625,
-        "u1": 0.875,
-        "v1": 0.75
+        "u0": 0.3,
+        "v0": 0.6667,
+        "u1": 0.4,
+        "v1": 0.7778
       },
       "billboardRect": {
         "x": 30.72,
@@ -2130,19 +2895,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-green.glb",
-      "index": 47,
+      "index": 64,
       "color": "hsl(252 48% 42%)",
       "cell": {
-        "x": 1792,
-        "y": 1280,
+        "x": 1024,
+        "y": 1536,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.875,
-        "v0": 0.625,
-        "u1": 1,
-        "v1": 0.75
+        "u0": 0.4,
+        "v0": 0.6667,
+        "u1": 0.5,
+        "v1": 0.7778
       },
       "billboardRect": {
         "x": 30.72,
@@ -2175,19 +2940,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
-      "index": 48,
+      "index": 65,
       "color": "hsl(12 68% 54%)",
       "cell": {
-        "x": 0,
+        "x": 1280,
         "y": 1536,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0,
-        "v0": 0.75,
-        "u1": 0.125,
-        "v1": 0.875
+        "u0": 0.5,
+        "v0": 0.6667,
+        "u1": 0.6,
+        "v1": 0.7778
       },
       "billboardRect": {
         "x": 30.72,
@@ -2220,19 +2985,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
-      "index": 49,
+      "index": 66,
       "color": "hsl(72 72% 42%)",
       "cell": {
-        "x": 256,
+        "x": 1536,
         "y": 1536,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.125,
-        "v0": 0.75,
-        "u1": 0.25,
-        "v1": 0.875
+        "u0": 0.6,
+        "v0": 0.6667,
+        "u1": 0.7,
+        "v1": 0.7778
       },
       "billboardRect": {
         "x": 30.72,
@@ -2265,19 +3030,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
-      "index": 50,
+      "index": 67,
       "color": "hsl(126 70% 42%)",
       "cell": {
-        "x": 512,
+        "x": 1792,
         "y": 1536,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.25,
-        "v0": 0.75,
-        "u1": 0.375,
-        "v1": 0.875
+        "u0": 0.7,
+        "v0": 0.6667,
+        "u1": 0.8,
+        "v1": 0.7778
       },
       "billboardRect": {
         "x": 109.82,
@@ -2310,19 +3075,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
-      "index": 51,
+      "index": 68,
       "color": "hsl(40 56% 46%)",
       "cell": {
-        "x": 768,
+        "x": 2048,
         "y": 1536,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.375,
-        "v0": 0.75,
-        "u1": 0.5,
-        "v1": 0.875
+        "u0": 0.8,
+        "v0": 0.6667,
+        "u1": 0.9,
+        "v1": 0.7778
       },
       "billboardRect": {
         "x": 89.14,
@@ -2355,19 +3120,19 @@
     },
     {
       "sourceUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
-      "index": 52,
+      "index": 69,
       "color": "hsl(238 50% 46%)",
       "cell": {
-        "x": 1024,
+        "x": 2304,
         "y": 1536,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.5,
-        "v0": 0.75,
-        "u1": 0.625,
-        "v1": 0.875
+        "u0": 0.9,
+        "v0": 0.6667,
+        "u1": 1,
+        "v1": 0.7778
       },
       "billboardRect": {
         "x": 30.72,
@@ -2399,20 +3164,380 @@
       }
     },
     {
-      "sourceUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
-      "index": 53,
-      "color": "hsl(17 49% 59%)",
+      "sourceUrl": "/generated/style-lab/sources/broken-root-islet-2026-05-14T23-57-07-772Z/broken-root-islet.glb",
+      "index": 70,
+      "color": "hsl(275 51% 47%)",
       "cell": {
-        "x": 1280,
-        "y": 1536,
+        "x": 0,
+        "y": 1792,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.625,
-        "v0": 0.75,
-        "u1": 0.75,
-        "v1": 0.875
+        "u0": 0,
+        "v0": 0.7778,
+        "u1": 0.1,
+        "v1": 0.8889
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 116.53,
+        "width": 194.56,
+        "height": 22.93
+      },
+      "bounds": {
+        "min": [
+          -17.81678581237793,
+          -2.0999999046325684,
+          -18
+        ],
+        "max": [
+          17.81678581237793,
+          2.0999999046325684,
+          18
+        ],
+        "size": [
+          35.63357162475586,
+          4.199999809265137,
+          36
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/style-lab/sources/eagle-crown-ring-2026-05-15T00-12-50-055Z/eagle-crown-ring.glb",
+      "index": 71,
+      "color": "hsl(348 68% 48%)",
+      "cell": {
+        "x": 256,
+        "y": 1792,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.1,
+        "v0": 0.7778,
+        "u1": 0.2,
+        "v1": 0.8889
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 30.72,
+        "width": 194.56,
+        "height": 194.56
+      },
+      "bounds": {
+        "min": [
+          -12.472319602966309,
+          -12.472319602966309,
+          -0.36688485741615295
+        ],
+        "max": [
+          12.472319602966309,
+          12.472319602966309,
+          0.36688485741615295
+        ],
+        "size": [
+          24.944639205932617,
+          24.944639205932617,
+          0.7337697148323059
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/style-lab/sources/outer-shoal-west-2026-05-14T23-57-16-228Z/outer-shoal-west.glb",
+      "index": 72,
+      "color": "hsl(51 71% 57%)",
+      "cell": {
+        "x": 512,
+        "y": 1792,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.2,
+        "v0": 0.7778,
+        "u1": 0.3,
+        "v1": 0.8889
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 120.06,
+        "width": 194.56,
+        "height": 15.88
+      },
+      "bounds": {
+        "min": [
+          -25.7353572845459,
+          -2.0999999046325684,
+          -26
+        ],
+        "max": [
+          25.7353572845459,
+          2.0999999046325684,
+          26
+        ],
+        "size": [
+          51.4707145690918,
+          4.199999809265137,
+          52
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/style-lab/sources/sea-root-east-2026-05-15T00-11-30-669Z/sea-root-east.glb",
+      "index": 73,
+      "color": "hsl(348 48% 48%)",
+      "cell": {
+        "x": 768,
+        "y": 1792,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.3,
+        "v0": 0.7778,
+        "u1": 0.4,
+        "v1": 0.8889
+      },
+      "billboardRect": {
+        "x": 108.54,
+        "y": 30.72,
+        "width": 38.91,
+        "height": 194.56
+      },
+      "bounds": {
+        "min": [
+          -4.400000095367432,
+          -22,
+          -4.400000095367432
+        ],
+        "max": [
+          4.400000095367432,
+          22,
+          4.400000095367432
+        ],
+        "size": [
+          8.800000190734863,
+          44,
+          8.800000190734863
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/style-lab/sources/sea-root-west-2026-05-14T23-56-36-932Z/sea-root-west.glb",
+      "index": 74,
+      "color": "hsl(290 66% 44%)",
+      "cell": {
+        "x": 1024,
+        "y": 1792,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.4,
+        "v0": 0.7778,
+        "u1": 0.5,
+        "v1": 0.8889
+      },
+      "billboardRect": {
+        "x": 108.54,
+        "y": 30.72,
+        "width": 38.91,
+        "height": 194.56
+      },
+      "bounds": {
+        "min": [
+          -4.400000095367432,
+          -22,
+          -4.400000095367432
+        ],
+        "max": [
+          4.400000095367432,
+          22,
+          4.400000095367432
+        ],
+        "size": [
+          8.800000190734863,
+          44,
+          8.800000190734863
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/style-lab/sources/shore-stone-7-2026-05-15T00-08-17-541Z/shore-stone-7.glb",
+      "index": 75,
+      "color": "hsl(180 68% 42%)",
+      "cell": {
+        "x": 1280,
+        "y": 1792,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.5,
+        "v0": 0.7778,
+        "u1": 0.6,
+        "v1": 0.8889
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 102.06,
+        "width": 194.56,
+        "height": 51.88
+      },
+      "bounds": {
+        "min": [
+          -4.5,
+          -1.2000000476837158,
+          -3.5
+        ],
+        "max": [
+          4.5,
+          1.2000000476837158,
+          3.5
+        ],
+        "size": [
+          9,
+          2.4000000953674316,
+          7
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/style-lab/sources/shore-stone-8-2026-05-14T23-56-45-130Z/shore-stone-8.glb",
+      "index": 76,
+      "color": "hsl(302 74% 56%)",
+      "cell": {
+        "x": 1536,
+        "y": 1792,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.6,
+        "v0": 0.7778,
+        "u1": 0.7,
+        "v1": 0.8889
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 103.91,
+        "width": 194.56,
+        "height": 48.17
+      },
+      "bounds": {
+        "min": [
+          -5.6545820236206055,
+          -1.399999976158142,
+          -5.800000190734863
+        ],
+        "max": [
+          5.6545820236206055,
+          1.399999976158142,
+          5.800000190734863
+        ],
+        "size": [
+          11.309164047241211,
+          2.799999952316284,
+          11.600000381469727
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/style-lab/sources/shore-stone-9-2026-05-14T23-56-49-651Z/shore-stone-9.glb",
+      "index": 77,
+      "color": "hsl(216 60% 42%)",
+      "cell": {
+        "x": 1792,
+        "y": 1792,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.7,
+        "v0": 0.7778,
+        "u1": 0.8,
+        "v1": 0.8889
+      },
+      "billboardRect": {
+        "x": 30.72,
+        "y": 106.78,
+        "width": 194.56,
+        "height": 42.45
+      },
+      "bounds": {
+        "min": [
+          -5.5,
+          -1.2000000476837158,
+          -3.5
+        ],
+        "max": [
+          5.5,
+          1.2000000476837158,
+          3.5
+        ],
+        "size": [
+          11,
+          2.4000000953674316,
+          7
+        ],
+        "center": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "sourceUrl": "/generated/style-lab/sources/well-dais-2026-05-11T23-09-54-411Z/well-dais.glb",
+      "index": 78,
+      "color": "hsl(17 49% 59%)",
+      "cell": {
+        "x": 2048,
+        "y": 1792,
+        "width": 256,
+        "height": 256
+      },
+      "uv": {
+        "u0": 0.8,
+        "v0": 0.7778,
+        "u1": 0.9,
+        "v1": 0.8889
       },
       "billboardRect": {
         "x": 30.72,
@@ -2445,19 +3570,19 @@
     },
     {
       "sourceUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
-      "index": 54,
+      "index": 79,
       "color": "hsl(309 73% 45%)",
       "cell": {
-        "x": 1536,
-        "y": 1536,
+        "x": 2304,
+        "y": 1792,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.75,
-        "v0": 0.75,
-        "u1": 0.875,
-        "v1": 0.875
+        "u0": 0.9,
+        "v0": 0.7778,
+        "u1": 1,
+        "v1": 0.8889
       },
       "billboardRect": {
         "x": 65.76,
@@ -2490,19 +3615,19 @@
     },
     {
       "sourceUrl": "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
-      "index": 55,
+      "index": 80,
       "color": "hsl(89 65% 59%)",
       "cell": {
-        "x": 1792,
-        "y": 1536,
+        "x": 0,
+        "y": 2048,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.875,
-        "v0": 0.75,
-        "u1": 1,
-        "v1": 0.875
+        "u0": 0,
+        "v0": 0.8889,
+        "u1": 0.1,
+        "v1": 1
       },
       "billboardRect": {
         "x": 30.72,
@@ -2535,18 +3660,18 @@
     },
     {
       "sourceUrl": "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
-      "index": 56,
+      "index": 81,
       "color": "hsl(21 49% 45%)",
       "cell": {
-        "x": 0,
-        "y": 1792,
+        "x": 256,
+        "y": 2048,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0,
-        "v0": 0.875,
-        "u1": 0.125,
+        "u0": 0.1,
+        "v0": 0.8889,
+        "u1": 0.2,
         "v1": 1
       },
       "billboardRect": {
@@ -2580,18 +3705,18 @@
     },
     {
       "sourceUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
-      "index": 57,
+      "index": 82,
       "color": "hsl(259 63% 49%)",
       "cell": {
-        "x": 256,
-        "y": 1792,
+        "x": 512,
+        "y": 2048,
         "width": 256,
         "height": 256
       },
       "uv": {
-        "u0": 0.125,
-        "v0": 0.875,
-        "u1": 0.25,
+        "u0": 0.2,
+        "v0": 0.8889,
+        "u1": 0.3,
         "v1": 1
       },
       "billboardRect": {

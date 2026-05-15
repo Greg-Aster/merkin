@@ -164,10 +164,17 @@ export function resolveNodeCollision(
     intent: result.collision.intent,
     channel: result.collision.channel,
     enabled: true,
+    quality: result.collision.quality,
+    lodTier: result.collision.lodSourceTier,
+    generationStatus: result.collision.generationStatus,
+    generationLastError: result.collision.generationLastError,
     size: result.collision.size,
     colliderUrl: result.collision.colliderUrl,
     colliderMetadataUrl: result.collision.colliderMetadataUrl,
+    colliderCacheKey: result.collision.colliderCacheKey,
     sourceAssetUrl: result.collision.sourceAssetUrl,
+    colliderSourceAssetUrl: result.collision.colliderSourceAssetUrl,
+    lockToObject: result.collision.lockToObject,
     friction: result.collision.friction,
     restitution: result.collision.restitution,
     sensor: result.collision.sensor,
@@ -200,6 +207,25 @@ export function describeNodeCollisionSource(
       label: 'Collision disabled by level role',
       detail:
         'This level marks the actor as visual-only; enabling collision or choosing Blocker/Walkable removes that override.',
+      tone: 'warning',
+    }
+  }
+
+  if (
+    collision?.generationStatus === 'failed' ||
+    collision?.generationStatus === 'dirty' ||
+    collision?.generationStatus === 'generating'
+  ) {
+    return {
+      label:
+        collision.generationStatus === 'failed'
+          ? 'Generation failed'
+          : collision.generationStatus === 'dirty'
+            ? 'Regeneration required'
+            : 'Generating',
+      detail:
+        collision.generationLastError ||
+        'Mesh-derived collision product is not ready for publish.',
       tone: 'warning',
     }
   }
@@ -313,7 +339,7 @@ export function getNodeColliderArgs(
   if (!node || !collision) return [0.5, 0.5, 0.5]
 
   return getColliderLocalArgs({
-    shape: collision.shape,
+    shape: collision.shape ?? getDefaultCollisionShape(node) ?? 'cuboid',
     worldSize: collision.size ?? getNodeVisualColliderSize(node),
     scale: node.scale,
   })

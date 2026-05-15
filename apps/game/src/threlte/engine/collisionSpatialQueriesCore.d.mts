@@ -61,4 +61,9 @@ export function actorSupportsWalkabilitySample(
     }
   },
   samplePosition: Vec3,
+  options?: {
+    xzPadding?: number
+    maxDrop?: number
+    maxPenetration?: number
+  },
 ): boolean

@@ -1,7 +1,8 @@
 {
-  "schemaVersion": 2,
-  "generatedBy": "bake-mesh-collider",
-  "generatedAt": "2026-05-13T01:03:27.250Z",
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:28:39.508Z",
+  "generatorVersion": "mesh-collision-manager-v1",
   "sourceLevelId": "sci-fi-room",
   "sourceActorId": "sci-fi-barrier",
   "sourceAssetUrl": "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
@@ -13,27 +14,28 @@
   "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrier.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrier.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrier.collider.meta.json",
-  "triangleCount": 19000,
-  "vertexCount": 10059,
+  "colliderCacheKey": "mesh-collision-manager-v1:52d13b5105ce861db5dd1413a1a924ad5594dee5a8eb37dbe1a9df441fcd7caf:fd03f64338ca0560e7390b6fb954dfc198943f450c2ae67f1a336ec07b0af4a5:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+  "triangleCount": 4748,
+  "vertexCount": 2711,
   "bounds": {
     "min": [
-      -0.7761769890785217,
+      -0.775051474571228,
       -0.0027944163884967566,
       -0.2540489733219147
     ],
     "max": [
-      0.7892323732376099,
-      1.1091585159301758,
+      0.7887017130851746,
+      1.1083526611328125,
       0.18809300661087036
     ],
     "size": [
-      1.5654093623161316,
-      1.1119529323186725,
+      1.5637531876564026,
+      1.1111470775213093,
       0.44214197993278503
     ],
     "center": [
-      0.006527692079544067,
-      0.5531820497708395,
+      0.006825119256973267,
+      0.5527791223721579,
       -0.032977983355522156
     ]
   },
@@ -61,23 +63,23 @@
   },
   "colliderLocalBounds": {
     "min": [
-      -0.7761769890785217,
+      -0.775051474571228,
       -0.0027944163884967566,
       -0.2540489733219147
     ],
     "max": [
-      0.7892323732376099,
-      1.1091585159301758,
+      0.7887017130851746,
+      1.1083526611328125,
       0.18809300661087036
     ],
     "size": [
-      1.5654093623161316,
-      1.1119529323186725,
+      1.5637531876564026,
+      1.1111470775213093,
       0.44214197993278503
     ],
     "center": [
-      0.006527692079544067,
-      0.5531820497708395,
+      0.006825119256973267,
+      0.5527791223721579,
       -0.032977983355522156
     ]
   },
@@ -110,23 +112,23 @@
     },
     "colliderLocalBounds": {
       "min": [
-        -0.7761769890785217,
+        -0.775051474571228,
         -0.0027944163884967566,
         -0.2540489733219147
       ],
       "max": [
-        0.7892323732376099,
-        1.1091585159301758,
+        0.7887017130851746,
+        1.1083526611328125,
         0.18809300661087036
       ],
       "size": [
-        1.5654093623161316,
-        1.1119529323186725,
+        1.5637531876564026,
+        1.1111470775213093,
         0.44214197993278503
       ],
       "center": [
-        0.006527692079544067,
-        0.5531820497708395,
+        0.006825119256973267,
+        0.5527791223721579,
         -0.032977983355522156
       ]
     },
@@ -183,24 +185,73 @@
       "sourceAssetUrl": "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
       "intent": "blocker",
       "channel": "worldStatic",
-      "triangleBudget": 20000,
+      "triangleBudget": 5000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-13T01:03:27.250Z"
+    "generatedAt": "2026-05-14T21:28:39.508Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
-    "triangleBudget": 20000
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "sci-fi-barrier",
+    "mode": "auto",
+    "productId": "sci-fi-barrier:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "generatedAt": "2026-05-14T21:28:39.508Z",
+    "sourceKind": "asset",
+    "sourceMeshUrl": "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "52d13b5105ce861db5dd1413a1a924ad5594dee5a8eb37dbe1a9df441fcd7caf"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "fd03f64338ca0560e7390b6fb954dfc198943f450c2ae67f1a336ec07b0af4a5"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+    },
+    "shape": "trimesh",
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrier.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrier.collider.meta.json",
+    "localBounds": {
+      "min": [
+        -0.775051474571228,
+        -0.0027944163884967566,
+        -0.2540489733219147
+      ],
+      "max": [
+        0.7887017130851746,
+        1.1083526611328125,
+        0.18809300661087036
+      ],
+      "size": [
+        1.5637531876564026,
+        1.1111470775213093,
+        0.44214197993278503
+      ],
+      "center": [
+        0.006825119256973267,
+        0.5527791223721579,
+        -0.032977983355522156
+      ]
+    },
+    "triangleCount": 4748,
+    "vertexCount": 2711,
+    "triangleBudget": 5000
   },
   "simplification": {
     "requested": true,
     "applied": true,
     "sourceTriangleCount": 23822,
-    "targetTriangleBudget": 20000,
-    "ratio": 0.7975820669968936,
+    "targetTriangleBudget": 5000,
+    "ratio": 0.1993955167492234,
     "tool": "gltf-transform",
     "prepass": "weld",
     "error": 0.05

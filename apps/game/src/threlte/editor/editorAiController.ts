@@ -80,6 +80,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
         apiUrl: state.hunyuanApiUrl,
         comfyUiApiUrl: state.comfyUiApiUrl,
         ensure,
+        lowVram: !!state.comfyUiLowVramMode,
       })
 
       if (!payload?.success || !payload?.status) {
@@ -123,6 +124,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
       const payload = await fetchComfyUiServiceStatus({
         apiUrl: state.comfyUiApiUrl,
         ensure,
+        lowVram: !!state.comfyUiLowVramMode,
       })
 
       if (!payload?.success || !payload?.status) {
@@ -245,9 +247,13 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
   }
 
   async function queueHunyuanJob(requestBody: Record<string, unknown>) {
-    deps.appendPipelineLog('Queueing Hunyuan job', requestBody)
+    const normalizedRequestBody = {
+      comfyUiLowVramMode: !!state.comfyUiLowVramMode,
+      ...requestBody,
+    }
+    deps.appendPipelineLog('Queueing Hunyuan job', normalizedRequestBody)
     const queuePayload = await queueHunyuanJobRequest(
-      requestBody,
+      normalizedRequestBody,
       deps.readJsonPayload,
     )
 
@@ -412,6 +418,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
         prompt,
         referenceImageUrl: state.hunyuanReferenceImageUrl,
         workflowPath: state.selectedComfyWorkflowPath,
+        comfyUiLowVramMode: !!state.comfyUiLowVramMode,
       })
 
       const applicationResult = await applyGeneratedAssetReplacementPlan(
@@ -426,22 +433,22 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
       state.hunyuanLastOutputUrl = payload.assetUrl
       state.hunyuanLastResultSummary =
         targetNodeIds.length > 1
-          ? `Generated and replaced ${targetNodeIds.length} matching nodes; collision preserved.`
-          : 'Generated and replaced the selected node; collision preserved.'
+          ? `Generated and replaced ${targetNodeIds.length} matching nodes.`
+          : 'Generated and replaced the selected node.'
       state.hunyuanServiceReady = true
       state.hunyuanStatus = payload.message
-        ? `${payload.message} Collision preserved.`
+        ? payload.message
         : targetNodeIds.length > 1
-          ? `Generated asset applied to ${targetNodeIds.length} matching nodes; collision preserved.`
-          : 'Generated asset imported into the selected node; collision preserved.'
+          ? `Generated asset applied to ${targetNodeIds.length} matching nodes.`
+          : 'Generated asset imported into the selected node.'
       deps.setRuntimeDiagnostic('hunyuan', {
         level: 'ready',
         message: state.hunyuanStatus,
       })
       state.saveMessage =
         targetNodeIds.length > 1
-          ? `AI asset applied to ${targetNodeIds.length} nodes and saved; collision preserved: ${payload.assetUrl}`
-          : `AI asset applied and saved; collision preserved: ${payload.assetUrl}`
+          ? `AI asset applied to ${targetNodeIds.length} nodes and saved: ${payload.assetUrl}`
+          : `AI asset applied and saved: ${payload.assetUrl}`
       await deps.refreshGeneratedAssetLibrary(payload.assetUrl)
       if (deps.getSelectedNode()?.id === targetNodeId) {
         void deps.inspectSelectedAssetForHunyuan(payload.assetUrl, targetNodeId)
@@ -492,6 +499,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
         prompt,
         referenceImageUrl,
         workflowPath: state.selectedComfyWorkflowPath,
+        comfyUiLowVramMode: !!state.comfyUiLowVramMode,
       })
 
       state.hunyuanLastOutputUrl = payload.assetUrl
@@ -588,6 +596,7 @@ export function createEditorAiController(deps: EditorAiControllerDeps) {
         prompt: (state.hunyuanPrompt || sourceName).trim(),
         referenceImageUrl: state.hunyuanReferenceImageUrl,
         workflowPath: state.selectedComfyWorkflowPath,
+        comfyUiLowVramMode: !!state.comfyUiLowVramMode,
       })
 
       state.hunyuanLastOutputUrl = payload.assetUrl

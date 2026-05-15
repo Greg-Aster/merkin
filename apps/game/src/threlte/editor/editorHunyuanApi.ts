@@ -4,11 +4,13 @@ export interface HunyuanStatusRequest {
   apiUrl: string
   comfyUiApiUrl: string
   ensure?: boolean
+  lowVram?: boolean
 }
 
 export interface ComfyUiStatusRequest {
   apiUrl: string
   ensure?: boolean
+  lowVram?: boolean
 }
 
 export type EditorJsonReader = (
@@ -20,9 +22,10 @@ export async function fetchHunyuanServiceStatus({
   apiUrl,
   comfyUiApiUrl,
   ensure = false,
+  lowVram = false,
 }: HunyuanStatusRequest) {
   const response = await fetch(
-    `${EDITOR_API_BASE}/api/hunyuan3d/status?apiUrl=${encodeURIComponent(apiUrl)}&comfyUiApiUrl=${encodeURIComponent(comfyUiApiUrl)}${ensure ? '&ensure=1' : ''}`,
+    `${EDITOR_API_BASE}/api/hunyuan3d/status?apiUrl=${encodeURIComponent(apiUrl)}&comfyUiApiUrl=${encodeURIComponent(comfyUiApiUrl)}${ensure ? '&ensure=1' : ''}${lowVram ? '&lowVram=1' : ''}`,
   )
   return response.json()
 }
@@ -30,9 +33,10 @@ export async function fetchHunyuanServiceStatus({
 export async function fetchComfyUiServiceStatus({
   apiUrl,
   ensure = false,
+  lowVram = false,
 }: ComfyUiStatusRequest) {
   const response = await fetch(
-    `${EDITOR_API_BASE}/api/comfyui/status?apiUrl=${encodeURIComponent(apiUrl)}${ensure ? '&ensure=1' : ''}`,
+    `${EDITOR_API_BASE}/api/comfyui/status?apiUrl=${encodeURIComponent(apiUrl)}${ensure ? '&ensure=1' : ''}${lowVram ? '&lowVram=1' : ''}`,
   )
   return response.json()
 }

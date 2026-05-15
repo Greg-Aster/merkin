@@ -104,6 +104,7 @@ $: materialOverrideStore.set(
       intensity={lightNode.intensity}
       distance={lightNode.distance}
       decay={lightNode.decay}
+      runtimeBudgeted={!editorEnabled}
     />
     <ProceduralMesh
       geometry="icosahedron"

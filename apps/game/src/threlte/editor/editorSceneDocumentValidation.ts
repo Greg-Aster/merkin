@@ -25,6 +25,46 @@ function isFiniteNumberArray(value: unknown, length: number) {
   )
 }
 
+const collisionPolicyModes = new Set(['auto', 'none', 'trigger'])
+const collisionGenerationQualities = new Set([
+  'primitive',
+  'convexHull',
+  'simplifiedMesh',
+  'trimesh',
+])
+const collisionGenerationStatuses = new Set([
+  'ready',
+  'dirty',
+  'generating',
+  'failed',
+])
+const legacyCollisionSourceFields = [
+  'enabled',
+  'size',
+  'sourceAssetFingerprint',
+  'assetLocalTransformFingerprint',
+  'lockToObject',
+  'lodSourceTier',
+  'triangleBudget',
+]
+const generatedCollisionProductFields = [
+  'colliderUrl',
+  'colliderMetadataUrl',
+  'colliderCacheKey',
+  'sourceAssetUrl',
+  'colliderSourceAssetUrl',
+  'assetLocalTransform',
+  'triangleCount',
+  'vertexCount',
+]
+
+function getPresentFields(
+  value: Record<string, unknown>,
+  fields: readonly string[],
+) {
+  return fields.filter(field => Object.hasOwn(value, field))
+}
+
 function validateSceneShape(value: unknown) {
   const errors: string[] = []
 
@@ -106,6 +146,12 @@ function validateSceneShape(value: unknown) {
       errors.push(`Node ${id || index} must declare a vec3 scale.`)
     }
 
+    if (isRecord(node.generation) && 'originalCollision' in node.generation) {
+      errors.push(
+        `Node ${id || index} uses removed generated collision source truth; delete generation.originalCollision.`,
+      )
+    }
+
     if (isRecord(node.collision)) {
       if (
         'proxy' in node.collision ||
@@ -114,6 +160,65 @@ function validateSceneShape(value: unknown) {
       ) {
         errors.push(
           `Node ${id || index} uses removed editor proxy collision metadata; delete collision.proxy, collision.bakeStatus, and collision.authoring.`,
+        )
+      }
+
+      const legacyFields = getPresentFields(
+        node.collision,
+        legacyCollisionSourceFields,
+      )
+      if (legacyFields.length > 0) {
+        errors.push(
+          `Node ${id || index} uses removed authored collider geometry fields: collision.${legacyFields.join(', collision.')}. Author collision policy instead.`,
+        )
+      }
+
+      if (node.collision.shape !== undefined) {
+        const generatedFields = getPresentFields(
+          node.collision,
+          generatedCollisionProductFields,
+        )
+        if (node.collision.shape !== 'trimesh' || generatedFields.length === 0) {
+          errors.push(
+            `Node ${id || index} collision.shape is only allowed as generated mesh collision product metadata.`,
+          )
+        }
+      }
+
+      if (
+        node.collision.mode !== undefined &&
+        !collisionPolicyModes.has(String(node.collision.mode))
+      ) {
+        errors.push(
+          `Node ${id || index} collision.mode must be auto, none, or trigger.`,
+        )
+      }
+
+      if (
+        node.collision.quality !== undefined &&
+        !collisionGenerationQualities.has(String(node.collision.quality))
+      ) {
+        errors.push(
+          `Node ${id || index} collision.quality must be primitive, convexHull, simplifiedMesh, or trimesh.`,
+        )
+      }
+
+      if (
+        node.collision.generationStatus !== undefined &&
+        !collisionGenerationStatuses.has(String(node.collision.generationStatus))
+      ) {
+        errors.push(
+          `Node ${id || index} collision.generationStatus must be ready, dirty, generating, or failed.`,
+        )
+      }
+
+      if (
+        node.collision.maxTriangles !== undefined &&
+        (!Number.isFinite(node.collision.maxTriangles) ||
+          Number(node.collision.maxTriangles) < 0)
+      ) {
+        errors.push(
+          `Node ${id || index} collision.maxTriangles must be a non-negative finite number.`,
         )
       }
     }

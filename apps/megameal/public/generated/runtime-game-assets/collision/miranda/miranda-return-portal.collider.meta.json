@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:36:38.849Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "miranda",
+  "sourceActorId": "miranda-return-portal",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "8a17ad979b9128655a6f2494f5365f3eedb5e30afa82052af4a420250fddfbf0"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-return-portal.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/miranda/miranda-return-portal.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-return-portal.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:8a17ad979b9128655a6f2494f5365f3eedb5e30afa82052af4a420250fddfbf0:5794ee5e0f0f7ffca972ee693ceb932f15c9af46929f481753a1b200ba3a109c:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+  "triangleCount": 3648,
+  "vertexCount": 4990,
+  "bounds": {
+    "min": [
+      -1.6200000047683716,
+      -1.6200000047683716,
+      -1.4408957958221436
+    ],
+    "max": [
+      1.6200000047683716,
+      1.6213747262954712,
+      1.20192289352417
+    ],
+    "size": [
+      3.240000009536743,
+      3.2413747310638428,
+      2.6428186893463135
+    ],
+    "center": [
+      0,
+      0.0006873607635498047,
+      -0.11948645114898682
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -1.6200000047683716,
+      -1.6200000047683716,
+      -1.4408957958221436
+    ],
+    "max": [
+      1.6200000047683716,
+      1.6213747262954712,
+      1.20192289352417
+    ],
+    "size": [
+      3.240000009536743,
+      3.2413747310638428,
+      2.6428186893463135
+    ],
+    "center": [
+      0,
+      0.0006873607635498047,
+      -0.11948645114898682
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -1.6200000047683716,
+      -1.6200000047683716,
+      -1.4408957958221436
+    ],
+    "max": [
+      1.6200000047683716,
+      1.6213747262954712,
+      1.20192289352417
+    ],
+    "size": [
+      3.240000009536743,
+      3.2413747310638428,
+      2.6428186893463135
+    ],
+    "center": [
+      0,
+      0.0006873607635498047,
+      -0.11948645114898682
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+    "sourceNodeName": "Return to Observatory",
+    "visualLocalBounds": {
+      "min": [
+        -1.6200000047683716,
+        -1.6200000047683716,
+        -1.4408957958221436
+      ],
+      "max": [
+        1.6200000047683716,
+        1.6213747262954712,
+        1.20192289352417
+      ],
+      "size": [
+        3.240000009536743,
+        3.2413747310638428,
+        2.6428186893463135
+      ],
+      "center": [
+        0,
+        0.0006873607635498047,
+        -0.11948645114898682
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -1.6200000047683716,
+        -1.6200000047683716,
+        -1.4408957958221436
+      ],
+      "max": [
+        1.6200000047683716,
+        1.6213747262954712,
+        1.20192289352417
+      ],
+      "size": [
+        3.240000009536743,
+        3.2413747310638428,
+        2.6428186893463135
+      ],
+      "center": [
+        0,
+        0.0006873607635498047,
+        -0.11948645114898682
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "miranda-return-portal",
+    "sourceActorName": "Return to Observatory",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "8a17ad979b9128655a6f2494f5365f3eedb5e30afa82052af4a420250fddfbf0"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "miranda",
+      "nodeId": "miranda-return-portal",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+      "intent": "trigger",
+      "channel": "trigger",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:36:38.849Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "trigger",
+    "channel": "trigger",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "miranda-return-portal",
+    "mode": "trigger",
+    "productId": "miranda-return-portal:trigger:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "8a17ad979b9128655a6f2494f5365f3eedb5e30afa82052af4a420250fddfbf0"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "5794ee5e0f0f7ffca972ee693ceb932f15c9af46929f481753a1b200ba3a109c"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -1.6200000047683716,
+        -1.6200000047683716,
+        -1.4408957958221436
+      ],
+      "max": [
+        1.6200000047683716,
+        1.6213747262954712,
+        1.20192289352417
+      ],
+      "size": [
+        3.240000009536743,
+        3.2413747310638428,
+        2.6428186893463135
+      ],
+      "center": [
+        0,
+        0.0006873607635498047,
+        -0.11948645114898682
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-return-portal.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-return-portal.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+    "generatedAt": "2026-05-14T21:36:38.849Z",
+    "triangleCount": 3648,
+    "vertexCount": 4990,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 3648,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

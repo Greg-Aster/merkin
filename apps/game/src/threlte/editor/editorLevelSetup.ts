@@ -24,6 +24,7 @@ const SHARED_LEVEL_SETTING_KEYS = [
   'editorPanels',
   'presets',
   'skyboxPreset',
+  'skybox',
 ] as const satisfies ReadonlyArray<keyof SharedLevelEditorSettings>
 
 const LEGACY_SHARED_SETTING_BUCKETS = [

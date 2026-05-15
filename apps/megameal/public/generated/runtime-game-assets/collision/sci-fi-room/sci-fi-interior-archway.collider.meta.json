@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:37:00.792Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "sci-fi-room",
+  "sourceActorId": "sci-fi-interior-archway",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "7d17c1eee87c34f0aeb6b8d439a63afe180d833f8899ef5d652366269e245a8a"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-interior-archway.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-interior-archway.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-interior-archway.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:7d17c1eee87c34f0aeb6b8d439a63afe180d833f8899ef5d652366269e245a8a:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+  "triangleCount": 144,
+  "vertexCount": 432,
+  "bounds": {
+    "min": [
+      -1.9630868434906006,
+      -0.12000000476837158,
+      -0.3100000023841858
+    ],
+    "max": [
+      1.9630868434906006,
+      8.239999771118164,
+      0.3100000023841858
+    ],
+    "size": [
+      3.926173686981201,
+      8.359999775886536,
+      0.6200000047683716
+    ],
+    "center": [
+      0,
+      4.059999883174896,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -1.9630868434906006,
+      -0.12000000476837158,
+      -0.3100000023841858
+    ],
+    "max": [
+      1.9630868434906006,
+      8.239999771118164,
+      0.3100000023841858
+    ],
+    "size": [
+      3.926173686981201,
+      8.359999775886536,
+      0.6200000047683716
+    ],
+    "center": [
+      0,
+      4.059999883174896,
+      0
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -1.9630868434906006,
+      -0.12000000476837158,
+      -0.3100000023841858
+    ],
+    "max": [
+      1.9630868434906006,
+      8.239999771118164,
+      0.3100000023841858
+    ],
+    "size": [
+      3.926173686981201,
+      8.359999775886536,
+      0.6200000047683716
+    ],
+    "center": [
+      0,
+      4.059999883174896,
+      0
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+    "sourceNodeName": "Interior Archway",
+    "visualLocalBounds": {
+      "min": [
+        -1.9630868434906006,
+        -0.12000000476837158,
+        -0.3100000023841858
+      ],
+      "max": [
+        1.9630868434906006,
+        8.239999771118164,
+        0.3100000023841858
+      ],
+      "size": [
+        3.926173686981201,
+        8.359999775886536,
+        0.6200000047683716
+      ],
+      "center": [
+        0,
+        4.059999883174896,
+        0
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -1.9630868434906006,
+        -0.12000000476837158,
+        -0.3100000023841858
+      ],
+      "max": [
+        1.9630868434906006,
+        8.239999771118164,
+        0.3100000023841858
+      ],
+      "size": [
+        3.926173686981201,
+        8.359999775886536,
+        0.6200000047683716
+      ],
+      "center": [
+        0,
+        4.059999883174896,
+        0
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "sci-fi-interior-archway",
+    "sourceActorName": "Interior Archway",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "7d17c1eee87c34f0aeb6b8d439a63afe180d833f8899ef5d652366269e245a8a"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "sci-fi-room",
+      "nodeId": "sci-fi-interior-archway",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:37:00.792Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "sci-fi-interior-archway",
+    "mode": "auto",
+    "productId": "sci-fi-interior-archway:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "7d17c1eee87c34f0aeb6b8d439a63afe180d833f8899ef5d652366269e245a8a"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -1.9630868434906006,
+        -0.12000000476837158,
+        -0.3100000023841858
+      ],
+      "max": [
+        1.9630868434906006,
+        8.239999771118164,
+        0.3100000023841858
+      ],
+      "size": [
+        3.926173686981201,
+        8.359999775886536,
+        0.6200000047683716
+      ],
+      "center": [
+        0,
+        4.059999883174896,
+        0
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-interior-archway.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-interior-archway.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+    "generatedAt": "2026-05-14T21:37:00.792Z",
+    "triangleCount": 144,
+    "vertexCount": 432,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 144,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

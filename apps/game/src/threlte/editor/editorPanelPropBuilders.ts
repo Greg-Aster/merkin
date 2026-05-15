@@ -12,11 +12,20 @@ import type {
 import type { EditorPanelTab } from './editorPanelTabs'
 import type { EditorPublishPipelineState } from './editorPublishReadinessContracts'
 import type { EditorPrefabType } from './editorStore'
+import type {
+  EditorStyleBakeBackend,
+  EditorStyleBakeBatchScope,
+  EditorStyleBakeOutputTier,
+  EditorStyleBakeProduct,
+  EditorStyleBakeStatus,
+} from './editorStyleBakeTypes'
 import type { EditorTerrainStatusSnapshot } from './editorTerrainPipeline'
 import type {
   EditorMaterialData,
   EditorSceneDocument,
   EditorSceneNode,
+  EditorViewportLightingMode,
+  EditorViewportShadingMode,
   LevelCollisionBudget,
 } from './editorTypes'
 
@@ -33,6 +42,9 @@ type GeneratedVariantItem = {
   url: string
   sourceLabel?: string
   isOriginalSource?: boolean
+  mode?: string
+  generatedAt?: string
+  metadataUrl?: string
 }
 type TextureField =
   | 'mapUrl'
@@ -48,7 +60,8 @@ type EditorPanelState = {
   selectedNodeIds?: string[]
   isolatedNodeIds?: string[]
   interactionMode?: string
-  viewportLightingMode?: string
+  viewportLightingMode?: EditorViewportLightingMode
+  viewportShadingMode?: EditorViewportShadingMode
   collisionOverlayEnabled?: boolean
   objectToolMode?: string
   terrainBrushMode?: string
@@ -172,6 +185,24 @@ export type EditorPanelPropBuilderContext = {
   styleWorkspaceSourceAssetUrl: string
   styleGeneratedReferenceImageUrl: string
   styleSimplifiedAssetUrl: string
+  styleBakedAssetUrl: string
+  styleBakeBackend: EditorStyleBakeBackend
+  styleBakeTextureSize: number
+  styleBakeLineStrength: number
+  styleBakeBrushStrength: number
+  styleBakeAoStrength: number
+  styleBakeCavityStrength: number
+  styleBakeCurvatureStrength: number
+  styleBakeGeometrySimplification: number
+  styleBakeOutputTier: EditorStyleBakeOutputTier
+  styleBakeForceRefresh: boolean
+  styleBakeCurrentSourceAssetUrl: string
+  styleBakeProduct: EditorStyleBakeProduct | null
+  styleBakeProductStatus: EditorStyleBakeStatus
+  styleBakeLastError: string
+  styleBakeLastSuccessfulAt: string
+  styleBakeCanApply: boolean
+  styleBakeCanRevert: boolean
   styleBlenderExportPath: string
   styleBlenderOpenCommand: string
   styleBatchBusy: boolean
@@ -183,6 +214,7 @@ export type EditorPanelPropBuilderContext = {
   comfyUiStatus: string
   comfyUiBusy: boolean
   comfyUiReady: boolean
+  comfyUiLowVramMode: boolean
   editorAIMeshStudioComponent: any
   canUseStyleStudio: (node: EditorSceneNode | null) => boolean
   canUseAiMeshStudio: (node: EditorSceneNode | null) => boolean
@@ -203,7 +235,8 @@ export type EditorPanelPropBuilderContext = {
   clearSelection: () => void
   clearIsolatedNodes: () => void
   setEditorInteractionMode: (mode: 'objects' | 'terrain') => void
-  setEditorViewportLightingMode: (mode: 'authored' | 'workbench') => void
+  setEditorViewportLightingMode: (mode: EditorViewportLightingMode) => void
+  setEditorViewportShadingMode: (mode: EditorViewportShadingMode) => void
   setCollisionOverlayEnabled: (value: boolean) => void
   setCollisionBudget: (value: LevelCollisionBudget) => void
   setTerrainBrushMode: (mode: 'raise' | 'smooth' | 'flatten') => void
@@ -375,8 +408,6 @@ export function buildCollisionTabProps(context: EditorPanelPropBuilderContext) {
       context.inspectorController.setVisualOnlyForNodeId,
     onDisableCollisionReviewActor:
       context.inspectorController.disableCollisionForNodeId,
-    onFitCollisionReviewCollider:
-      context.inspectorController.fitColliderToVisualBoundsForNodeId,
     onBakeCollisionReviewMeshCollider:
       context.inspectorController.bakeMeshColliderForNodeId,
   }
@@ -385,6 +416,7 @@ export function buildCollisionTabProps(context: EditorPanelPropBuilderContext) {
 export function buildEnvironmentTabProps(
   context: EditorPanelPropBuilderContext,
 ) {
+  const editorState = context.editorState
   return {
     levelSettings: context.levelSettings,
     effectiveObservatorySettings: context.effectiveObservatorySettings,
@@ -394,12 +426,17 @@ export function buildEnvironmentTabProps(
     updateLevelSetting: context.updateLevelSetting,
     updateLevelNumericSetting: context.updateLevelNumericSetting,
     applySolitudeAtmospherePreset: context.applySolitudeAtmospherePreset,
+    viewportLightingMode: editorState?.viewportLightingMode ?? 'authored',
+    viewportShadingMode: editorState?.viewportShadingMode ?? 'rendered',
+    onSetViewportLightingMode: context.setEditorViewportLightingMode,
+    onSetViewportShadingMode: context.setEditorViewportShadingMode,
   }
 }
 
 export function buildPlayerTabProps(context: EditorPanelPropBuilderContext) {
   return {
     levelSettings: context.levelSettings,
+    updateLevelSetting: context.updateLevelSetting,
     updateLevelNumericSetting: context.updateLevelNumericSetting,
   }
 }
@@ -552,6 +589,9 @@ export function buildInspectTabProps(context: EditorPanelPropBuilderContext) {
     selectedNodeMaterial: context.selectedNodeMaterial,
     selectedNodeColliderSize: context.selectedNodeColliderSize,
     styleDescriptor: context.selectedNodeStyleDescriptor,
+    viewportLightingMode:
+      context.editorState?.viewportLightingMode ?? 'authored',
+    viewportShadingMode: context.editorState?.viewportShadingMode ?? 'rendered',
     assetPickerTargetNodeId: context.assetPickerTargetNodeId,
     assetBrowserPath: context.assetBrowserPath,
     assetBrowserItems: context.assetBrowserItems,
@@ -600,12 +640,21 @@ export function buildInspectTabProps(context: EditorPanelPropBuilderContext) {
       context.setHunyuanApplyToSimilarNodes(false)
       void context.aiController.runHunyuanForSelection('generate')
     },
+    onAddPointLightToSelection:
+      context.createController.addPointLightToSelection,
+    onSetViewportLightingMode: context.setEditorViewportLightingMode,
+    onSetViewportShadingMode: context.setEditorViewportShadingMode,
     onPrimitiveGeometryChange: (value: string) =>
       context.inspectorController.updatePrimitiveField('geometry', value),
     onPrimitiveArgChange: context.inspectorController.updatePrimitiveArg,
     onCollisionEnabledChange:
       context.inspectorController.updateCollisionEnabled,
+    onCollisionModeChange: context.inspectorController.updateCollisionMode,
     onCollisionShapeChange: context.inspectorController.updateCollisionShape,
+    onCollisionQualityChange:
+      context.inspectorController.updateCollisionQuality,
+    onCollisionLodSourceTierChange:
+      context.inspectorController.updateCollisionLodSourceTier,
     onCollisionIntentChange: context.inspectorController.updateCollisionIntent,
     onCollisionChannelChange:
       context.inspectorController.updateCollisionChannel,
@@ -615,20 +664,17 @@ export function buildInspectTabProps(context: EditorPanelPropBuilderContext) {
       context.inspectorController.updatePhysicsNumericField,
     onPhysicsBooleanChange:
       context.inspectorController.updatePhysicsBooleanField,
-    onCollisionSizeChange: context.inspectorController.updateCollisionSize,
     onCollisionNumericChange:
       context.inspectorController.updateCollisionNumericField,
-    onCollisionStringChange:
-      context.inspectorController.updateCollisionStringField,
     onCollisionBooleanChange:
       context.inspectorController.updateCollisionBooleanField,
-    onRecalculateCollision:
-      context.inspectorController.recalculateCollisionFromVisual,
     onSetCollisionVisualOnly: context.inspectorController.setVisualOnly,
     onSetCollisionBlocker: context.inspectorController.setBlocker,
     onSetCollisionWalkable: context.inspectorController.setWalkable,
     onSetCollisionTrigger: context.inspectorController.setTrigger,
     onSetCollisionDetail: context.inspectorController.setDetail,
+    onForceRegenerateCollision: () =>
+      void context.inspectorController.forceRegenerateCollisionFromSelection(),
     onBakeMeshCollider: () =>
       void context.inspectorController.bakeMeshColliderFromSelection(),
     onMaterialColorChange: context.inspectorController.updateNodeMaterialField,
@@ -651,6 +697,8 @@ export function buildInspectTabProps(context: EditorPanelPropBuilderContext) {
       context.inspectorController.clearNodeMaterialOverrides,
     onLightFieldChange: context.inspectorController.updateLightField,
     onLightNumericChange: context.inspectorController.updateLightNumericField,
+    onPlaceLightAtParentBounds:
+      context.inspectorController.placeSelectedLightAtParentBounds,
     onGameplayFieldChange: context.inspectorController.updateGameplayField,
     onGameplayBooleanChange:
       context.inspectorController.updateGameplayBooleanField,
@@ -675,6 +723,24 @@ export function buildStyleTabProps(context: EditorPanelPropBuilderContext) {
     styleWorkspaceSourceAssetUrl: context.styleWorkspaceSourceAssetUrl,
     styleGeneratedReferenceImageUrl: context.styleGeneratedReferenceImageUrl,
     styleSimplifiedAssetUrl: context.styleSimplifiedAssetUrl,
+    styleBakedAssetUrl: context.styleBakedAssetUrl,
+    styleBakeBackend: context.styleBakeBackend,
+    styleBakeTextureSize: context.styleBakeTextureSize,
+    styleBakeLineStrength: context.styleBakeLineStrength,
+    styleBakeBrushStrength: context.styleBakeBrushStrength,
+    styleBakeAoStrength: context.styleBakeAoStrength,
+    styleBakeCavityStrength: context.styleBakeCavityStrength,
+    styleBakeCurvatureStrength: context.styleBakeCurvatureStrength,
+    styleBakeGeometrySimplification: context.styleBakeGeometrySimplification,
+    styleBakeOutputTier: context.styleBakeOutputTier,
+    styleBakeForceRefresh: context.styleBakeForceRefresh,
+    styleBakeCurrentSourceAssetUrl: context.styleBakeCurrentSourceAssetUrl,
+    styleBakeProduct: context.styleBakeProduct,
+    styleBakeProductStatus: context.styleBakeProductStatus,
+    styleBakeLastError: context.styleBakeLastError,
+    styleBakeLastSuccessfulAt: context.styleBakeLastSuccessfulAt,
+    styleBakeCanApply: context.styleBakeCanApply,
+    styleBakeCanRevert: context.styleBakeCanRevert,
     styleBlenderExportPath: context.styleBlenderExportPath,
     styleBlenderOpenCommand: context.styleBlenderOpenCommand,
     styleBatchBusy: context.styleBatchBusy,
@@ -687,6 +753,7 @@ export function buildStyleTabProps(context: EditorPanelPropBuilderContext) {
     comfyUiStatus: context.comfyUiStatus,
     comfyUiBusy: context.comfyUiBusy,
     comfyUiReady: context.comfyUiReady,
+    comfyUiLowVramMode: context.comfyUiLowVramMode,
     hunyuanBackendStatus: context.hunyuanBackendStatus,
     hunyuanBusy: context.hunyuanBusy,
     hunyuanServiceReady: context.hunyuanServiceReady,
@@ -708,6 +775,12 @@ export function buildStyleTabProps(context: EditorPanelPropBuilderContext) {
     onPrepareWorkspace: () => context.styleController.prepareStyleWorkspace(),
     onSimplifyAsset: () =>
       context.styleController.simplifySelectedAssetForStyle(),
+    onBakeProceduralStyle: () =>
+      context.styleController.bakeSelectedAssetProceduralStyle(),
+    onApplyStyleBakePreview: () =>
+      context.styleController.applyStyleBakePreviewForSelection(),
+    onRevertStyleBakePreview: () =>
+      context.styleController.revertStyleBakePreviewForSelection(),
     onExportBlender: () =>
       context.styleController.exportSelectedAssetForBlender(),
     onRunRetexture: () => context.styleController.runStyleBake('texture'),
@@ -723,6 +796,11 @@ export function buildStyleTabProps(context: EditorPanelPropBuilderContext) {
       void context.styleController.runStyleBatch('texture'),
     onRunBatchReimagine: () =>
       void context.styleController.runStyleBatch('generate'),
+    onRunProceduralBatch: (scope: string, force: boolean) =>
+      void context.styleController.runProceduralStyleBatch(
+        scope as EditorStyleBakeBatchScope,
+        { force },
+      ),
     onToggleBatchCandidate: context.toggleStyleBatchCandidate,
     onUpdateBatchDescriptor: context.updateNodeStyleDescriptor,
   }
@@ -734,6 +812,7 @@ export function buildAiTabProps(context: EditorPanelPropBuilderContext) {
     comfyUiStatus: context.comfyUiStatus,
     comfyUiBusy: context.comfyUiBusy,
     comfyUiReady: context.comfyUiReady,
+    comfyUiLowVramMode: context.comfyUiLowVramMode,
     comfyWorkflowEditorStatus: context.comfyWorkflowEditorStatus,
     selectedComfyWorkflowPath: context.selectedComfyWorkflowPath,
     workflowBrowserPath: context.workflowBrowserPath,
@@ -932,6 +1011,9 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
     selectedNodeMaterial: context.selectedNodeMaterial,
     selectedNodePreviewAssetUrl: context.selectedNodePreviewAssetUrl,
     styleDescriptor: context.selectedNodeStyleDescriptor,
+    viewportLightingMode:
+      context.editorState?.viewportLightingMode ?? 'authored',
+    viewportShadingMode: context.editorState?.viewportShadingMode ?? 'rendered',
     assetPickerTargetNodeId: context.assetPickerTargetNodeId,
     assetBrowserPath: context.assetBrowserPath,
     assetBrowserItems: context.assetBrowserItems,
@@ -1010,6 +1092,8 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
     onLightColorChange: (value: string) =>
       context.inspectorController.updateLightField('color', value),
     onLightNumericChange: context.inspectorController.updateLightNumericField,
+    onPlaceLightAtParentBounds:
+      context.inspectorController.placeSelectedLightAtParentBounds,
     onGameplayFieldChange: context.inspectorController.updateGameplayField,
     onGameplayNumericChange:
       context.inspectorController.updateGameplayNumericField,
@@ -1027,6 +1111,10 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
       void context.styleController.exportSelectedAssetForBlender(),
     onReimportBlenderOutput: () =>
       void context.styleController.reimportLatestBlenderOutputForSelection(),
+    onAddPointLightToSelection:
+      context.createController.addPointLightToSelection,
+    onSetViewportLightingMode: context.setEditorViewportLightingMode,
+    onSetViewportShadingMode: context.setEditorViewportShadingMode,
     onMaterialColorChange: context.inspectorController.updateNodeMaterialField,
     onMaterialNumericChange:
       context.inspectorController.updateNodeMaterialNumericField,
@@ -1037,27 +1125,26 @@ export function buildSideStackProps(context: EditorPanelPropBuilderContext) {
       context.inspectorController.clearNodeMaterialOverrides,
     onCollisionEnabledChange:
       context.inspectorController.updateCollisionEnabled,
+    onCollisionModeChange: context.inspectorController.updateCollisionMode,
     onCollisionShapeChange: context.inspectorController.updateCollisionShape,
+    onCollisionQualityChange:
+      context.inspectorController.updateCollisionQuality,
+    onCollisionLodSourceTierChange:
+      context.inspectorController.updateCollisionLodSourceTier,
     onCollisionIntentChange: context.inspectorController.updateCollisionIntent,
     onCollisionChannelChange:
       context.inspectorController.updateCollisionChannel,
+    onCollisionNumericChange:
+      context.inspectorController.updateCollisionNumericField,
     onPhysicsBodyTypeChange: (value: string) =>
       context.inspectorController.updatePhysicsField('bodyType', value),
-    onColliderUrlChange: (value: string) =>
-      context.inspectorController.updateCollisionStringField(
-        'colliderUrl',
-        value,
-      ),
-    onColliderSizeChange: context.inspectorController.updateCollisionSize,
-    onRecalculateCollision:
-      context.inspectorController.recalculateCollisionFromVisual,
     onSetCollisionVisualOnly: context.inspectorController.setVisualOnly,
     onSetCollisionBlocker: context.inspectorController.setBlocker,
     onSetCollisionWalkable: context.inspectorController.setWalkable,
     onSetCollisionTrigger: context.inspectorController.setTrigger,
     onSetCollisionDetail: context.inspectorController.setDetail,
-    onBakeMeshCollider: () =>
-      void context.inspectorController.bakeMeshColliderFromSelection(),
+    onForceRegenerateCollision: () =>
+      void context.inspectorController.forceRegenerateCollisionFromSelection(),
     onTextureBrowserUp: context.inspectorController.goUpTextureBrowser,
     onTextureBrowserRefresh: () =>
       void context.assetController.loadTextureBrowser(

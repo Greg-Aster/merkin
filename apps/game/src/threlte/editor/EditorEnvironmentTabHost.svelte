@@ -2,6 +2,8 @@
 import EditorEnvironmentPanel from './EditorEnvironmentPanel.svelte'
 import type {
   EditorStylePreset,
+  EditorViewportLightingMode,
+  EditorViewportShadingMode,
   ObservatoryEditorSettings,
   SharedLevelEditorSettings,
   SolitudeEditorSettings,
@@ -23,6 +25,13 @@ export let updateLevelNumericSetting: (
 export let applySolitudeAtmospherePreset: (
   presetId: string | undefined,
 ) => void = () => {}
+export let viewportLightingMode: EditorViewportLightingMode = 'authored'
+export let viewportShadingMode: EditorViewportShadingMode = 'rendered'
+export let onSetViewportLightingMode: (
+  mode: EditorViewportLightingMode,
+) => void = () => {}
+export let onSetViewportShadingMode: (mode: EditorViewportShadingMode) => void =
+  () => {}
 </script>
 
 <EditorEnvironmentPanel
@@ -34,4 +43,8 @@ export let applySolitudeAtmospherePreset: (
   {updateLevelSetting}
   {updateLevelNumericSetting}
   {applySolitudeAtmospherePreset}
+  {viewportLightingMode}
+  {viewportShadingMode}
+  {onSetViewportLightingMode}
+  {onSetViewportShadingMode}
 />

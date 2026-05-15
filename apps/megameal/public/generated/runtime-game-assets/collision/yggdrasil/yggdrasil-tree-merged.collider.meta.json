@@ -1,7 +1,8 @@
 {
-  "schemaVersion": 2,
-  "generatedBy": "bake-mesh-collider",
-  "generatedAt": "2026-05-13T01:03:57.646Z",
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-15T02:11:13.599Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-tree-merged",
   "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
@@ -10,31 +11,61 @@
     "algorithm": "sha256",
     "value": "2d66fb3b91bab7abc629e8e4eef75d2f5f9de04c5c854aa14c0118c374f3c1bd"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.meta.json",
-  "triangleCount": 18998,
-  "vertexCount": 26496,
+  "colliderCacheKey": "mesh-collision-manager-v2:ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+  "triangleCount": 14000,
+  "vertexCount": 21237,
   "bounds": {
     "min": [
       -0.997320294380188,
-      -0.9788752794265747,
+      -0.9800900220870972,
       -0.9813200831413269
     ],
     "max": [
-      0.9687815308570862,
+      0.9689310193061829,
       0.9673465490341187,
       0.9718799591064453
     ],
     "size": [
-      1.9661018252372742,
-      1.9462218284606934,
+      1.9662513136863708,
+      1.9474365711212158,
       1.9532000422477722
     ],
     "center": [
-      -0.014269381761550903,
-      -0.005764365196228027,
+      -0.014194637537002563,
+      -0.006371736526489258,
       -0.004720062017440796
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -32767,
+      -32475,
+      -32591
+    ],
+    "max": [
+      32767,
+      32475,
+      32591
+    ],
+    "size": [
+      65534,
+      64950,
+      65182
+    ],
+    "center": [
+      0,
+      0,
+      0
     ]
   },
   "visualLocalBounds": {
@@ -62,22 +93,22 @@
   "colliderLocalBounds": {
     "min": [
       -0.997320294380188,
-      -0.9788752794265747,
+      -0.9800900220870972,
       -0.9813200831413269
     ],
     "max": [
-      0.9687815308570862,
+      0.9689310193061829,
       0.9673465490341187,
       0.9718799591064453
     ],
     "size": [
-      1.9661018252372742,
-      1.9462218284606934,
+      1.9662513136863708,
+      1.9474365711212158,
       1.9532000422477722
     ],
     "center": [
-      -0.014269381761550903,
-      -0.005764365196228027,
+      -0.014194637537002563,
+      -0.006371736526489258,
       -0.004720062017440796
     ]
   },
@@ -111,22 +142,22 @@
     "colliderLocalBounds": {
       "min": [
         -0.997320294380188,
-        -0.9788752794265747,
+        -0.9800900220870972,
         -0.9813200831413269
       ],
       "max": [
-        0.9687815308570862,
+        0.9689310193061829,
         0.9673465490341187,
         0.9718799591064453
       ],
       "size": [
-        1.9661018252372742,
-        1.9462218284606934,
+        1.9662513136863708,
+        1.9474365711212158,
         1.9532000422477722
       ],
       "center": [
-        -0.014269381761550903,
-        -0.005764365196228027,
+        -0.014194637537002563,
+        -0.006371736526489258,
         -0.004720062017440796
       ]
     },
@@ -176,33 +207,93 @@
       "algorithm": "sha256",
       "value": "2d66fb3b91bab7abc629e8e4eef75d2f5f9de04c5c854aa14c0118c374f3c1bd"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "yggdrasil",
       "nodeId": "yggdrasil-tree-merged",
       "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.low.glb",
+      "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
       "triangleBudget": 20000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-13T01:03:57.646Z"
+    "generatedAt": "2026-05-15T02:11:13.599Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
+    "triangleBudget": 20000,
+    "lodSourceTier": "low"
+  },
+  "collisionProduct": {
+    "actorId": "yggdrasil-tree-merged",
+    "cacheKey": "mesh-collision-manager-v2:ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586:87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+    "mode": "auto",
+    "productId": "yggdrasil-tree-merged:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v2",
+    "sourceKind": "asset",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "ca36533c3f3c7bf828b0499c95ff4d68eba82b9b26c756418d58ea1cecba9586"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "87c970fcf4317484e7770aca3e5e2e6f598d8c7f0f9205ed757692fdf7729aa1"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -0.997320294380188,
+        -0.9800900220870972,
+        -0.9813200831413269
+      ],
+      "max": [
+        0.9689310193061829,
+        0.9673465490341187,
+        0.9718799591064453
+      ],
+      "size": [
+        1.9662513136863708,
+        1.9474365711212158,
+        1.9532000422477722
+      ],
+      "center": [
+        -0.014194637537002563,
+        -0.006371736526489258,
+        -0.004720062017440796
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-tree-merged.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.low.glb",
+    "visualSourceMeshUrl": "/generated/hunyuan3d/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z/yggdrasil-world-tree-merged-2026-04-25t02-07-36-925z-generated-2026-04-25T02-24-40-321Z.glb",
+    "triangleCount": 14000,
+    "vertexCount": 21237,
     "triangleBudget": 20000
   },
   "simplification": {
-    "requested": true,
-    "applied": true,
-    "sourceTriangleCount": 50000,
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 14000,
     "targetTriangleBudget": 20000,
-    "ratio": 0.38,
+    "ratio": 1,
     "tool": "gltf-transform",
-    "prepass": "weld",
+    "prepass": "none",
     "error": 0.05
   }
 }

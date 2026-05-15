@@ -15,6 +15,7 @@ export let color = '#ffffff'
 export let intensity = 1
 export let distance = 0
 export let decay = 2
+export let runtimeBudgeted = true
 
 const { camera } = useThrelte()
 const worldPosition = new THREE.Vector3()
@@ -34,6 +35,13 @@ function getActiveCamera(): THREE.Camera | null {
 }
 
 function applyLightBudget() {
+  if (!runtimeBudgeted) {
+    visible = true
+    effectiveIntensity = intensity
+    effectiveDistance = distance
+    return
+  }
+
   const policy = resolveRuntimeVisibilityPolicy($qualityLevelStore, {
     ...$qualitySettingsStore,
     enableDynamicLighting: $qualitySettingsStore.enableDynamicLighting,

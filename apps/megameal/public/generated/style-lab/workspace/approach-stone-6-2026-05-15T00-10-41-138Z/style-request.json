@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-05-15T00:12:18.526Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "Approach Stone 6",
+  "sourceAssetUrl": "/generated/style-lab/sources/approach-stone-6-2026-05-15T00-10-41-122Z/approach-stone-6.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/style-lab/sources/approach-stone-6-2026-05-15T00-10-41-122Z/approach-stone-6.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/approach-stone-6-2026-05-15T00-10-41-138Z/source/approach-stone-6.glb",
+  "prompt": "object: broad rectangular stepping slab set into the main approach route, a flat walkable path stone. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/approach-stone-6-reference-2026-05-15T00-12-18-519Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/approach-stone-6-2026-05-15T00-10-41-138Z/reference/approach-stone-6-reference-2026-05-15T00-12-18-519Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/approach-stone-6-reference-2026-05-15T00-12-18-519Z.png"
+}

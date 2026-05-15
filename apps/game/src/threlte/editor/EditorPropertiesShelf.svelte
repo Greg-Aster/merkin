@@ -6,10 +6,15 @@ import {
   resolveNodeCollision,
 } from './editorCollisionDefaults'
 import type {
+  EditorCollisionLodSourceTier,
+  EditorCollisionMode,
+  EditorCollisionQuality,
   EditorMaterialData,
   EditorNodeCollisionData,
   EditorSceneNode,
   EditorSceneSettings,
+  EditorViewportLightingMode,
+  EditorViewportShadingMode,
 } from './editorTypes'
 
 type TextureField =
@@ -38,8 +43,24 @@ type GeneratedVariantItem = {
   url: string
   sourceLabel?: string
   isOriginalSource?: boolean
+  mode?: string
+  generatedAt?: string
+  metadataUrl?: string
 }
 type CollisionShape = EditorNodeCollisionData['shape']
+type CollisionNumericField = 'friction' | 'restitution' | 'maxTriangles'
+type MaterialNumericField =
+  | 'emissiveIntensity'
+  | 'metalness'
+  | 'roughness'
+  | 'opacity'
+  | 'envMapIntensity'
+  | 'transmission'
+  | 'ior'
+  | 'clearcoat'
+  | 'clearcoatRoughness'
+  | 'thickness'
+  | 'reflectivity'
 
 type LightNumericField = 'intensity' | 'distance' | 'decay'
 type GameplayTextField =
@@ -87,6 +108,8 @@ export let selectedNodeMaterial: EditorMaterialData = {}
 export let selectedNodePreviewAssetUrl = ''
 export let selectedGeneratedVariantUrl = ''
 export let styleDescriptor = ''
+export let viewportLightingMode: EditorViewportLightingMode = 'authored'
+export let viewportShadingMode: EditorViewportShadingMode = 'rendered'
 export let assetPickerTargetNodeId = ''
 export let assetBrowserPath = ''
 export let assetBrowserItems: AssetBrowserItem[] = []
@@ -119,6 +142,12 @@ export let onOpenAiTab: () => void = () => {}
 export let onOpenCreateTab: () => void = () => {}
 export let onConvertSelectedToMesh: () => void = () => {}
 export let onReimagineSelected: () => void = () => {}
+export let onAddPointLightToSelection: () => void = () => {}
+export let onSetViewportLightingMode: (
+  mode: EditorViewportLightingMode,
+) => void = () => {}
+export let onSetViewportShadingMode: (mode: EditorViewportShadingMode) => void =
+  () => {}
 export let onDuplicate: () => void = () => {}
 export let onDelete: () => void = () => {}
 export let onVisibleChange: (value: boolean) => void = () => {}
@@ -148,6 +177,7 @@ export let onLightNumericChange: (
   field: LightNumericField,
   value: string,
 ) => void = () => {}
+export let onPlaceLightAtParentBounds: () => void = () => {}
 export let onGameplayFieldChange: (
   field: GameplayTextField,
   value: string,
@@ -172,7 +202,7 @@ export let onMaterialColorChange: (
   value: string,
 ) => void = () => {}
 export let onMaterialNumericChange: (
-  field: 'metalness' | 'roughness' | 'opacity',
+  field: MaterialNumericField,
   value: string,
 ) => void = () => {}
 export let onMaterialTextureChange: (field: 'mapUrl', value: string) => void =
@@ -186,21 +216,28 @@ $: collisionSourceStatus = describeNodeCollisionSource(
   sceneSettings,
 )
 export let onCollisionEnabledChange: (value: boolean) => void = () => {}
+export let onCollisionModeChange: (value: EditorCollisionMode) => void =
+  () => {}
 export let onCollisionShapeChange: (value: CollisionShape) => void = () => {}
+export let onCollisionQualityChange: (value: EditorCollisionQuality) => void =
+  () => {}
+export let onCollisionLodSourceTierChange: (
+  value: EditorCollisionLodSourceTier,
+) => void = () => {}
 export let onCollisionIntentChange: (value: CollisionIntent) => void = () => {}
 export let onCollisionChannelChange: (value: CollisionChannel) => void =
   () => {}
-export let onColliderUrlChange: (value: string) => void = () => {}
+export let onCollisionNumericChange: (
+  field: CollisionNumericField,
+  value: string,
+) => void = () => {}
 export let onPhysicsBodyTypeChange: (value: string) => void = () => {}
-export let onColliderSizeChange: (index: number, value: string) => void =
-  () => {}
-export let onRecalculateCollision: () => void = () => {}
 export let onSetCollisionVisualOnly: () => void = () => {}
 export let onSetCollisionBlocker: () => void = () => {}
 export let onSetCollisionWalkable: () => void = () => {}
 export let onSetCollisionTrigger: () => void = () => {}
 export let onSetCollisionDetail: () => void = () => {}
-export let onBakeMeshCollider: () => void = () => {}
+export let onForceRegenerateCollision: () => void = () => {}
 export let onTextureBrowserUp: () => void = () => {}
 export let onTextureBrowserRefresh: () => void = () => {}
 export let onTextureBrowserOpenDirectory: (path: string) => void = () => {}
@@ -213,11 +250,10 @@ const transformFields: Array<'position' | 'rotation' | 'scale'> = [
 ]
 const collisionIntentOptions: Array<{ value: CollisionIntent; label: string }> =
   [
-    { value: 'none', label: 'None' },
     { value: 'walkable', label: 'Walkable' },
     { value: 'blocker', label: 'Blocker' },
     { value: 'trigger', label: 'Trigger' },
-    { value: 'detailMesh', label: 'Detail Mesh' },
+    { value: 'detailMesh', label: 'Detail' },
   ]
 const collisionChannelOptions: Array<{
   value: CollisionChannel
@@ -229,10 +265,31 @@ const collisionChannelOptions: Array<{
   { value: 'trigger', label: 'Trigger' },
   { value: 'detail', label: 'Detail' },
 ]
-const collisionShapeOptions: Array<{ value: CollisionShape; label: string }> = [
-  { value: 'cuboid', label: 'Box' },
-  { value: 'cylinder', label: 'Cylinder' },
-  { value: 'trimesh', label: 'Baked Mesh' },
+const collisionModeOptions: Array<{
+  value: EditorCollisionMode
+  label: string
+}> = [
+  { value: 'auto', label: 'Auto' },
+  { value: 'trigger', label: 'Trigger' },
+  { value: 'none', label: 'Disabled' },
+]
+const collisionQualityOptions: Array<{
+  value: EditorCollisionQuality
+  label: string
+}> = [
+  { value: 'primitive', label: 'Primitive' },
+  { value: 'convexHull', label: 'Convex Hull' },
+  { value: 'simplifiedMesh', label: 'Simplified Mesh' },
+  { value: 'trimesh', label: 'Trimesh' },
+]
+const collisionLodSourceTierOptions: Array<{
+  value: EditorCollisionLodSourceTier
+  label: string
+}> = [
+  { value: 'source', label: 'Source' },
+  { value: 'high', label: 'High' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'low', label: 'Low' },
 ]
 
 $: hasSingleSelection = !!selectedNode && selectedNodes.length <= 1
@@ -243,29 +300,51 @@ $: hasGeometryNode = !!(
   selectedNode?.prefab ||
   selectedNode?.primitive
 )
+$: lightPreviewMasked =
+  viewportLightingMode !== 'authored' || viewportShadingMode !== 'rendered'
+$: lightPreviewMaskReason =
+  viewportShadingMode !== 'rendered'
+    ? `View is ${viewportShadingMode}`
+    : `Light is ${viewportLightingMode}`
 $: canConvertSelectedToMesh = !!(
   selectedNode?.primitive || selectedNode?.prefab
 )
-$: canBakeSelectedMeshCollider = !!selectedNode?.asset?.url
+$: canBakeSelectedMeshCollider = !!(
+  selectedNode?.asset?.url || selectedNode?.prefab
+)
 $: selectedCollisionShape =
   selectedNode?.collision?.shape ??
   effectiveCollision?.shape ??
   (hasGeometryNode ? 'cuboid' : 'cuboid')
-$: collisionShapeOptionsForSelection = collisionShapeOptions
-$: collisionMode =
-  selectedNode?.renderPolicy?.runtimeStyle === 'skip' && effectiveCollision
-    ? 'proxy'
-    : effectiveCollision?.intent === 'walkable'
-      ? 'walkable'
-      : effectiveCollision?.intent === 'blocker'
-        ? 'blocker'
-        : effectiveCollision?.intent === 'trigger'
-          ? 'trigger'
-          : effectiveCollision?.intent === 'detailMesh'
-            ? 'detail'
-            : selectedNode?.visible === false
-              ? 'disabled'
-              : 'visualOnly'
+$: selectedCollisionMode =
+  selectedNode?.collision?.mode ??
+  (effectiveCollision?.intent === 'trigger'
+    ? 'trigger'
+    : effectiveCollision
+      ? 'auto'
+      : 'none')
+$: selectedCollisionIntent = (
+  selectedNode?.collision?.intent && selectedNode.collision.intent !== 'none'
+    ? selectedNode.collision.intent
+    : effectiveCollision?.intent && effectiveCollision.intent !== 'none'
+      ? effectiveCollision.intent
+      : 'blocker'
+) as CollisionIntent
+$: selectedCollisionQuality =
+  selectedNode?.collision?.quality ??
+  (selectedCollisionShape === 'trimesh' ? 'simplifiedMesh' : 'primitive')
+$: selectedCollisionLodSourceTier = selectedNode?.collision?.lodTier ?? 'source'
+$: selectedCollisionGenerationStatus =
+  selectedNode?.collision?.mode === 'none' || !effectiveCollision
+    ? 'disabled'
+    : selectedNode?.collision?.generationStatus ?? 'ready'
+$: selectedCollisionGenerationDetail =
+  selectedNode?.collision?.generationLastError ??
+  (selectedCollisionGenerationStatus === 'ready'
+    ? 'Generated product is ready for publish.'
+    : selectedCollisionGenerationStatus === 'disabled'
+      ? 'Collision is explicitly off for this visual object.'
+      : 'Collision product needs regeneration before publish.')
 $: selectedSourceSummary = selectedNode?.asset?.url
   ? selectedNode.asset.url
   : selectedNode?.prefab
@@ -309,6 +388,12 @@ $: generatedVariantLabel =
   selectedNode?.name ??
   'Variant'
 $: generatedVariantSourceLabel = selectedGeneratedVariantItem?.sourceLabel ?? ''
+$: generatedVariantApplyLabel =
+  selectedGeneratedVariantItem?.mode === 'generate'
+    ? 'Apply Replacement Mesh'
+    : selectedGeneratedVariantItem?.mode === 'texture'
+      ? 'Apply Texture Variant'
+      : 'Apply Variant'
 $: isPreviewingCurrentGeneratedAsset =
   Boolean(selectedNode?.asset?.url) &&
   generatedVariantPreviewUrl === selectedNode?.asset?.url
@@ -337,6 +422,11 @@ function stepGeneratedVariant(offset: number) {
   }
   selectGeneratedVariantAt(selectedGeneratedVariantIndex + offset)
 }
+
+function useAuthoredRenderedLightPreview() {
+  onSetViewportShadingMode('rendered')
+  onSetViewportLightingMode('authored')
+}
 </script>
 
 {#if hasSingleSelection && selectedNode}
@@ -347,7 +437,7 @@ function stepGeneratedVariant(offset: number) {
       <div class="save-message">{selectedNodeType} · {selectedSourceSummary}</div>
       <div class="editor-chip-row">
         <span class="editor-chip ready">transform editable</span>
-        <span class:ready={Boolean(effectiveCollision)} class:warn={!effectiveCollision} class="editor-chip">collision: {effectiveCollision ? collisionMode : 'none'}</span>
+        <span class:ready={Boolean(effectiveCollision)} class:warn={!effectiveCollision} class="editor-chip">collision: {selectedCollisionMode}</span>
         <span class:ready={Boolean(selectedNode.gameplay)} class="editor-chip">gameplay: {selectedNode.gameplay ? 'configured' : 'none'}</span>
       </div>
       <div class="save-message">Gameplay: {selectedGameplaySummary}</div>
@@ -439,7 +529,7 @@ function stepGeneratedVariant(offset: number) {
             on:click={() => onApplyGeneratedVariant(generatedVariantPreviewUrl)}
             disabled={!canApplyGeneratedVariant}
           >
-            Apply Variant
+            {generatedVariantApplyLabel}
           </button>
           <button type="button" data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={() => stepGeneratedVariant(1)}>Next</button>
         </div>
@@ -588,22 +678,42 @@ function stepGeneratedVariant(offset: number) {
   {#if selectedNode.light}
     <div class="editor-section compact-surface">
       <div class="label">Light</div>
+      <div class="save-message">Edit mode previews this light at full authored range. Runtime playtest may still apply performance light culling.</div>
+      {#if lightPreviewMasked}
+        <div class="save-message">
+          Point light preview is currently masked ({lightPreviewMaskReason}). Use rendered/authored preview to see this light against authored materials.
+        </div>
+        <button
+          class="full"
+          data-sfx-hover="hover-emphasis"
+          data-sfx-click="select"
+          on:click={useAuthoredRenderedLightPreview}
+        >
+          Use Rendered Authored Preview
+        </button>
+      {/if}
       <div class="tuple-group">
         <div class="tuple-label">Light Color</div>
-        <input class="text-input" value={selectedNode.light.color} on:input={(e) => onLightColorChange((e.currentTarget as HTMLInputElement).value)} />
+        <input class="text-input" type="color" value={selectedNode.light.color} on:input={(e) => onLightColorChange((e.currentTarget as HTMLInputElement).value)} />
       </div>
       <div class="tuple-group">
         <div class="tuple-label">Light Intensity</div>
-        <input class="tuple-input" type="number" step="0.1" value={selectedNode.light.intensity} on:change={(e) => onLightNumericChange('intensity', (e.currentTarget as HTMLInputElement).value)} />
+        <input class="tuple-input" type="number" min="0" step="0.1" value={selectedNode.light.intensity} on:input={(e) => onLightNumericChange('intensity', (e.currentTarget as HTMLInputElement).value)} />
       </div>
       <div class="tuple-group">
         <div class="tuple-label">Light Distance</div>
-        <input class="tuple-input" type="number" step="0.1" value={selectedNode.light.distance} on:change={(e) => onLightNumericChange('distance', (e.currentTarget as HTMLInputElement).value)} />
+        <input class="tuple-input" type="number" min="0" step="0.1" value={selectedNode.light.distance} on:input={(e) => onLightNumericChange('distance', (e.currentTarget as HTMLInputElement).value)} />
       </div>
       <div class="tuple-group">
         <div class="tuple-label">Light Decay</div>
-        <input class="tuple-input" type="number" step="0.1" value={selectedNode.light.decay} on:change={(e) => onLightNumericChange('decay', (e.currentTarget as HTMLInputElement).value)} />
+        <input class="tuple-input" type="number" min="0" step="0.1" value={selectedNode.light.decay} on:input={(e) => onLightNumericChange('decay', (e.currentTarget as HTMLInputElement).value)} />
       </div>
+      <div class="save-message">Distance is the point light radius. Move the light node if it is inside the mesh.</div>
+      {#if selectedNode.parentId}
+        <div class="button-row compact editor-mt-sm">
+          <button data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onPlaceLightAtParentBounds}>Place Outside Parent</button>
+        </div>
+      {/if}
     </div>
   {/if}
 
@@ -725,9 +835,15 @@ function stepGeneratedVariant(offset: number) {
           <div class="tuple-label">Ambient Track</div>
           <input class="text-input" value={selectedNode.gameplay.audioTrack ?? ''} on:input={(e) => onGameplayFieldChange('audioTrack', (e.currentTarget as HTMLInputElement).value)} />
         </div>
-        <div class="tuple-row">
-          <input class="tuple-input" type="number" step="0.01" value={selectedNode.gameplay.audioVolume ?? 0.24} on:change={(e) => onGameplayNumericChange('audioVolume', (e.currentTarget as HTMLInputElement).value)} />
-          <input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.regionFalloff ?? 12} on:change={(e) => onGameplayNumericChange('regionFalloff', (e.currentTarget as HTMLInputElement).value)} />
+        <div class="editor-field-grid editor-mt-sm">
+          <label class="editor-field">
+            <span class="editor-field-label">Volume</span>
+            <input class="tuple-input" type="number" step="0.01" value={selectedNode.gameplay.audioVolume ?? 0.24} on:change={(e) => onGameplayNumericChange('audioVolume', (e.currentTarget as HTMLInputElement).value)} />
+          </label>
+          <label class="editor-field">
+            <span class="editor-field-label">Falloff</span>
+            <input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.regionFalloff ?? 12} on:change={(e) => onGameplayNumericChange('regionFalloff', (e.currentTarget as HTMLInputElement).value)} />
+          </label>
         </div>
       {:else if selectedNode.gameplay.type === 'fog-volume'}
         <div class="tuple-group">
@@ -736,11 +852,17 @@ function stepGeneratedVariant(offset: number) {
         </div>
         <div class="tuple-group">
           <div class="tuple-label">Fog Color</div>
-          <input class="text-input" value={selectedNode.gameplay.fogColor ?? '#9ba9bb'} on:input={(e) => onGameplayFieldChange('fogColor', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="text-input" type="color" value={selectedNode.gameplay.fogColor ?? '#9ba9bb'} on:input={(e) => onGameplayFieldChange('fogColor', (e.currentTarget as HTMLInputElement).value)} />
         </div>
-        <div class="tuple-row">
-          <input class="tuple-input" type="number" step="0.0001" value={selectedNode.gameplay.fogDensity ?? 0.0025} on:change={(e) => onGameplayNumericChange('fogDensity', (e.currentTarget as HTMLInputElement).value)} />
-          <input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.regionFalloff ?? 8} on:change={(e) => onGameplayNumericChange('regionFalloff', (e.currentTarget as HTMLInputElement).value)} />
+        <div class="editor-field-grid editor-mt-sm">
+          <label class="editor-field">
+            <span class="editor-field-label">Fog Density</span>
+            <input class="tuple-input" type="number" step="0.0001" value={selectedNode.gameplay.fogDensity ?? 0.0025} on:change={(e) => onGameplayNumericChange('fogDensity', (e.currentTarget as HTMLInputElement).value)} />
+          </label>
+          <label class="editor-field">
+            <span class="editor-field-label">Edge Falloff</span>
+            <input class="tuple-input" type="number" step="0.1" value={selectedNode.gameplay.regionFalloff ?? 8} on:change={(e) => onGameplayNumericChange('regionFalloff', (e.currentTarget as HTMLInputElement).value)} />
+          </label>
         </div>
       {:else if selectedNode.gameplay.type === 'mist-region'}
         <div class="tuple-group">
@@ -749,15 +871,27 @@ function stepGeneratedVariant(offset: number) {
         </div>
         <div class="tuple-group">
           <div class="tuple-label">Mist Color</div>
-          <input class="text-input" value={selectedNode.gameplay.mistColor ?? '#241557'} on:input={(e) => onGameplayFieldChange('mistColor', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="text-input" type="color" value={selectedNode.gameplay.mistColor ?? '#241557'} on:input={(e) => onGameplayFieldChange('mistColor', (e.currentTarget as HTMLInputElement).value)} />
         </div>
-        <div class="tuple-row">
-          <input class="tuple-input" type="number" step="0.01" value={selectedNode.gameplay.mistOpacity ?? 0.14} on:change={(e) => onGameplayNumericChange('mistOpacity', (e.currentTarget as HTMLInputElement).value)} />
-          <input class="tuple-input" type="number" step="1" value={selectedNode.gameplay.mistLayers ?? 3} on:change={(e) => onGameplayNumericChange('mistLayers', (e.currentTarget as HTMLInputElement).value)} />
+        <div class="editor-field-grid editor-mt-sm">
+          <label class="editor-field">
+            <span class="editor-field-label">Mist Opacity</span>
+            <input class="tuple-input" type="number" step="0.01" value={selectedNode.gameplay.mistOpacity ?? 0.14} on:change={(e) => onGameplayNumericChange('mistOpacity', (e.currentTarget as HTMLInputElement).value)} />
+          </label>
+          <label class="editor-field">
+            <span class="editor-field-label">Mist Layers</span>
+            <input class="tuple-input" type="number" step="1" value={selectedNode.gameplay.mistLayers ?? 3} on:change={(e) => onGameplayNumericChange('mistLayers', (e.currentTarget as HTMLInputElement).value)} />
+          </label>
         </div>
-        <div class="tuple-row editor-mt-sm">
-          <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.mistSpacing ?? 0.45} on:change={(e) => onGameplayNumericChange('mistSpacing', (e.currentTarget as HTMLInputElement).value)} />
-          <input class="tuple-input" type="number" step="10" value={selectedNode.gameplay.mistScale ?? 360} on:change={(e) => onGameplayNumericChange('mistScale', (e.currentTarget as HTMLInputElement).value)} />
+        <div class="editor-field-grid editor-mt-sm">
+          <label class="editor-field">
+            <span class="editor-field-label">Layer Spacing</span>
+            <input class="tuple-input" type="number" step="0.05" value={selectedNode.gameplay.mistSpacing ?? 0.45} on:change={(e) => onGameplayNumericChange('mistSpacing', (e.currentTarget as HTMLInputElement).value)} />
+          </label>
+          <label class="editor-field">
+            <span class="editor-field-label">Mist Scale</span>
+            <input class="tuple-input" type="number" step="10" value={selectedNode.gameplay.mistScale ?? 360} on:change={(e) => onGameplayNumericChange('mistScale', (e.currentTarget as HTMLInputElement).value)} />
+          </label>
         </div>
         <div class="tuple-group editor-mt-sm">
           <div class="tuple-label">Mist Drift</div>
@@ -770,19 +904,76 @@ function stepGeneratedVariant(offset: number) {
 
   {#if hasGeometryNode}
     <div class="editor-section compact-surface">
+      <div class="label">Light Emitter</div>
+      <div class="save-message">Material emission changes visible glow only. Add a child point light for actual scene lighting.</div>
+      <div class="button-row compact editor-mt-sm">
+        <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onAddPointLightToSelection}>Add Child Point Light</button>
+      </div>
+    </div>
+
+    <div class="editor-section compact-surface">
       <div class="label">Material</div>
-      <div class="tuple-group">
-        <div class="tuple-label">Base Color</div>
-        <input class="text-input" type="color" value={selectedNodeMaterial.color ?? '#ffffff'} on:input={(e) => onMaterialColorChange('color', (e.currentTarget as HTMLInputElement).value)} />
+      <div class="editor-field-grid">
+        <label class="editor-field">
+          <span class="editor-field-label">Base Color</span>
+          <input class="text-input" type="color" value={selectedNodeMaterial.color ?? '#ffffff'} on:input={(e) => onMaterialColorChange('color', (e.currentTarget as HTMLInputElement).value)} />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">Emissive Color</span>
+          <input class="text-input" type="color" value={selectedNodeMaterial.emissive ?? '#000000'} on:input={(e) => onMaterialColorChange('emissive', (e.currentTarget as HTMLInputElement).value)} />
+        </label>
       </div>
-      <div class="tuple-group">
-        <div class="tuple-label">Emissive</div>
-        <input class="text-input" type="color" value={selectedNodeMaterial.emissive ?? '#000000'} on:input={(e) => onMaterialColorChange('emissive', (e.currentTarget as HTMLInputElement).value)} />
+      <div class="editor-field-grid editor-mt-sm">
+        <label class="editor-field">
+          <span class="editor-field-label">Emit Intensity</span>
+          <input class="tuple-input" type="number" step="0.05" value={selectedNodeMaterial.emissiveIntensity ?? 0} on:change={(e) => onMaterialNumericChange('emissiveIntensity', (e.currentTarget as HTMLInputElement).value)} />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">Env Reflections</span>
+          <input class="tuple-input" type="number" step="0.05" value={selectedNodeMaterial.envMapIntensity ?? 1} on:change={(e) => onMaterialNumericChange('envMapIntensity', (e.currentTarget as HTMLInputElement).value)} />
+        </label>
       </div>
-      <div class="tuple-row">
-        <input class="tuple-input" type="number" step="0.05" value={selectedNodeMaterial.metalness ?? 0.5} on:change={(e) => onMaterialNumericChange('metalness', (e.currentTarget as HTMLInputElement).value)} />
-        <input class="tuple-input" type="number" step="0.05" value={selectedNodeMaterial.roughness ?? 0.5} on:change={(e) => onMaterialNumericChange('roughness', (e.currentTarget as HTMLInputElement).value)} />
-        <input class="tuple-input" type="number" step="0.05" value={selectedNodeMaterial.opacity ?? 1} on:change={(e) => onMaterialNumericChange('opacity', (e.currentTarget as HTMLInputElement).value)} />
+      <div class="editor-field-grid editor-field-grid--triple editor-mt-sm">
+        <label class="editor-field">
+          <span class="editor-field-label">Metalness</span>
+          <input class="tuple-input" type="number" step="0.05" value={selectedNodeMaterial.metalness ?? 0.5} on:change={(e) => onMaterialNumericChange('metalness', (e.currentTarget as HTMLInputElement).value)} />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">Roughness</span>
+          <input class="tuple-input" type="number" step="0.05" value={selectedNodeMaterial.roughness ?? 0.5} on:change={(e) => onMaterialNumericChange('roughness', (e.currentTarget as HTMLInputElement).value)} />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">Opacity</span>
+          <input class="tuple-input" type="number" step="0.05" value={selectedNodeMaterial.opacity ?? 1} on:change={(e) => onMaterialNumericChange('opacity', (e.currentTarget as HTMLInputElement).value)} />
+        </label>
+      </div>
+      <div class="editor-field-grid editor-field-grid--triple editor-mt-sm">
+        <label class="editor-field">
+          <span class="editor-field-label">Transmission</span>
+          <input class="tuple-input" type="number" min="0" max="1" step="0.05" value={selectedNodeMaterial.transmission ?? 0} on:change={(e) => onMaterialNumericChange('transmission', (e.currentTarget as HTMLInputElement).value)} />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">IOR</span>
+          <input class="tuple-input" type="number" min="1" max="2.5" step="0.05" value={selectedNodeMaterial.ior ?? 1.5} on:change={(e) => onMaterialNumericChange('ior', (e.currentTarget as HTMLInputElement).value)} />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">Reflectivity</span>
+          <input class="tuple-input" type="number" min="0" max="1" step="0.05" value={selectedNodeMaterial.reflectivity ?? 0.5} on:change={(e) => onMaterialNumericChange('reflectivity', (e.currentTarget as HTMLInputElement).value)} />
+        </label>
+      </div>
+      <div class="editor-field-grid editor-field-grid--triple editor-mt-sm">
+        <label class="editor-field">
+          <span class="editor-field-label">Clearcoat</span>
+          <input class="tuple-input" type="number" min="0" max="1" step="0.05" value={selectedNodeMaterial.clearcoat ?? 0} on:change={(e) => onMaterialNumericChange('clearcoat', (e.currentTarget as HTMLInputElement).value)} />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">Coat Roughness</span>
+          <input class="tuple-input" type="number" min="0" max="1" step="0.05" value={selectedNodeMaterial.clearcoatRoughness ?? 0} on:change={(e) => onMaterialNumericChange('clearcoatRoughness', (e.currentTarget as HTMLInputElement).value)} />
+        </label>
+        <label class="editor-field">
+          <span class="editor-field-label">Thickness</span>
+          <input class="tuple-input" type="number" min="0" step="0.05" value={selectedNodeMaterial.thickness ?? 0} on:change={(e) => onMaterialNumericChange('thickness', (e.currentTarget as HTMLInputElement).value)} />
+        </label>
       </div>
       <div class="tuple-group">
         <div class="tuple-label">Base Color Map</div>
@@ -803,30 +994,30 @@ function stepGeneratedVariant(offset: number) {
       <div class="save-message" class:error-message={collisionSourceStatus.tone === 'warning'}>
         Collision Source: {collisionSourceStatus.label}. {collisionSourceStatus.detail}
       </div>
-      <div class="button-row compact editor-mt-sm">
-        <button class:active={collisionMode === 'visualOnly'} data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onSetCollisionVisualOnly}>Visual Only</button>
-        <button class:active={collisionMode === 'blocker'} data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onSetCollisionBlocker}>Blocker</button>
-        <button class:active={collisionMode === 'walkable'} data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onSetCollisionWalkable}>Walkable</button>
-        <button class:active={collisionMode === 'trigger'} data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onSetCollisionTrigger}>Trigger</button>
-        <button class:active={collisionMode === 'detail'} data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onSetCollisionDetail}>Detail</button>
-        {#if canBakeSelectedMeshCollider}
-          <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onBakeMeshCollider}>Bake Mesh Collider</button>
-        {/if}
-        <button class:active={collisionMode === 'disabled'} data-sfx-hover="hover-soft" data-sfx-click="warning" on:click={() => onCollisionEnabledChange(false)}>Disabled</button>
-      </div>
-      <label class="checkbox"><input type="checkbox" checked={!!effectiveCollision} data-sfx-click="soft" on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Collider Enabled</label>
-      <div class="save-message">Collision is independent from the visual source. Keep simple box or cylinder collision when replacing blockout meshes with GLB assets; use Baked Mesh only when the collider needs authored mesh detail.</div>
-      <select class="text-input" value={selectedCollisionShape} data-sfx-focus="focus-soft" on:change={(e) => onCollisionShapeChange((e.currentTarget as HTMLSelectElement).value as CollisionShape)}>
-        {#each collisionShapeOptionsForSelection as option}
+      <select class="text-input" value={selectedCollisionMode} data-sfx-focus="focus-soft" on:change={(e) => onCollisionModeChange((e.currentTarget as HTMLSelectElement).value as EditorCollisionMode)}>
+        {#each collisionModeOptions as option}
           <option value={option.value}>{option.label}</option>
         {/each}
       </select>
-      <select class="text-input" value={selectedNode.collision?.intent ?? effectiveCollision?.intent ?? 'none'} data-sfx-focus="focus-soft" on:change={(e) => onCollisionIntentChange((e.currentTarget as HTMLSelectElement).value as CollisionIntent)}>
+      <div class="button-row compact editor-mt-sm">
+        <button data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onSetCollisionVisualOnly}>Visual Only</button>
+      </div>
+      <select class="text-input" value={selectedCollisionIntent} disabled={selectedCollisionMode === 'none'} data-sfx-focus="focus-soft" on:change={(e) => onCollisionIntentChange((e.currentTarget as HTMLSelectElement).value as CollisionIntent)}>
         {#each collisionIntentOptions as option}
           <option value={option.value}>{option.label}</option>
         {/each}
       </select>
-      <select class="text-input" value={selectedNode.collision?.channel ?? effectiveCollision?.channel ?? 'worldStatic'} data-sfx-focus="focus-soft" on:change={(e) => onCollisionChannelChange((e.currentTarget as HTMLSelectElement).value as CollisionChannel)}>
+      <select class="text-input" value={selectedCollisionQuality} disabled={selectedCollisionMode === 'none'} data-sfx-focus="focus-soft" on:change={(e) => onCollisionQualityChange((e.currentTarget as HTMLSelectElement).value as EditorCollisionQuality)}>
+        {#each collisionQualityOptions as option}
+          <option value={option.value}>{option.label}</option>
+        {/each}
+      </select>
+      <select class="text-input" value={selectedCollisionLodSourceTier} disabled={selectedCollisionMode === 'none'} data-sfx-focus="focus-soft" on:change={(e) => onCollisionLodSourceTierChange((e.currentTarget as HTMLSelectElement).value as EditorCollisionLodSourceTier)}>
+        {#each collisionLodSourceTierOptions as option}
+          <option value={option.value}>{option.label}</option>
+        {/each}
+      </select>
+      <select class="text-input" value={selectedNode.collision?.channel ?? effectiveCollision?.channel ?? 'worldStatic'} disabled={selectedCollisionMode === 'none'} data-sfx-focus="focus-soft" on:change={(e) => onCollisionChannelChange((e.currentTarget as HTMLSelectElement).value as CollisionChannel)}>
         {#each collisionChannelOptions as option}
           <option value={option.value}>{option.label}</option>
         {/each}
@@ -836,17 +1027,25 @@ function stepGeneratedVariant(offset: number) {
         <option value="dynamic">Dynamic</option>
         <option value="kinematicPosition">Kinematic</option>
       </select>
-      {#if effectiveCollision && effectiveCollision.shape !== 'trimesh'}
-        <div class="tuple-label editor-mt-sm">Collider Size</div>
-        <div class="tuple-row">
-          {#each [0, 1, 2] as index}
-            <input class="tuple-input" type="number" min="0.05" step="0.05" value={colliderSize[index]} data-sfx-focus="focus-soft" on:change={(e) => onColliderSizeChange(index, (e.currentTarget as HTMLInputElement).value)} />
-          {/each}
+      {#if effectiveCollision}
+        <div class="tuple-row editor-mt-sm">
+          <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.friction ?? 0.7} data-sfx-focus="focus-soft" on:change={(e) => onCollisionNumericChange('friction', (e.currentTarget as HTMLInputElement).value)} />
+          <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.restitution ?? 0} data-sfx-focus="focus-soft" on:change={(e) => onCollisionNumericChange('restitution', (e.currentTarget as HTMLInputElement).value)} />
         </div>
-        <button class="editor-mt-sm" data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={onRecalculateCollision}>Match Collider To Visual</button>
-      {:else if effectiveCollision}
-        <div class="tuple-label editor-mt-sm">Collider Asset URL</div>
-        <input class="text-input" value={effectiveCollision.colliderUrl ?? ''} placeholder="/generated/collision/asset.collider.glb" data-sfx-focus="focus-soft" on:change={(e) => onColliderUrlChange((e.currentTarget as HTMLInputElement).value)} />
+        <div class="tuple-row">
+          <input class="tuple-input" type="number" min="0" step="1" value={selectedNode.collision?.maxTriangles ?? effectiveCollision.triangleBudget ?? 0} data-sfx-focus="focus-soft" on:change={(e) => onCollisionNumericChange('maxTriangles', (e.currentTarget as HTMLInputElement).value)} />
+        </div>
+        <div class="save-message" class:error-message={selectedCollisionGenerationStatus === 'failed'}>
+          Status: {selectedCollisionGenerationStatus}. {selectedCollisionGenerationDetail}
+        </div>
+        {#if effectiveCollision.triangleCount}
+          <div class="save-message">Generated triangles: {effectiveCollision.triangleCount.toLocaleString()}</div>
+        {/if}
+        {#if canBakeSelectedMeshCollider}
+          <button data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={onForceRegenerateCollision} disabled={selectedCollisionMode === 'none' || selectedCollisionQuality === 'primitive'}>Force Regenerate</button>
+        {/if}
+      {:else}
+        <div class="save-message">Status: disabled. Collision is explicitly off for this visual object.</div>
       {/if}
     </div>
   {/if}

@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:36:59.348Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "sci-fi-room",
+  "sourceActorId": "sci-fi-support-column-c",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-support-column-c.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-support-column-c.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-support-column-c.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+  "triangleCount": 764,
+  "vertexCount": 2292,
+  "bounds": {
+    "min": [
+      -0.7400000095367432,
+      -3.7200000286102295,
+      -0.7400000095367432
+    ],
+    "max": [
+      0.7400000095367432,
+      4.199999809265137,
+      0.7400000095367432
+    ],
+    "size": [
+      1.4800000190734863,
+      7.919999837875366,
+      1.4800000190734863
+    ],
+    "center": [
+      0,
+      0.2399998903274536,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.7400000095367432,
+      -3.7200000286102295,
+      -0.7400000095367432
+    ],
+    "max": [
+      0.7400000095367432,
+      4.199999809265137,
+      0.7400000095367432
+    ],
+    "size": [
+      1.4800000190734863,
+      7.919999837875366,
+      1.4800000190734863
+    ],
+    "center": [
+      0,
+      0.2399998903274536,
+      0
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.7400000095367432,
+      -3.7200000286102295,
+      -0.7400000095367432
+    ],
+    "max": [
+      0.7400000095367432,
+      4.199999809265137,
+      0.7400000095367432
+    ],
+    "size": [
+      1.4800000190734863,
+      7.919999837875366,
+      1.4800000190734863
+    ],
+    "center": [
+      0,
+      0.2399998903274536,
+      0
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+    "sourceNodeName": "Support Column C",
+    "visualLocalBounds": {
+      "min": [
+        -0.7400000095367432,
+        -3.7200000286102295,
+        -0.7400000095367432
+      ],
+      "max": [
+        0.7400000095367432,
+        4.199999809265137,
+        0.7400000095367432
+      ],
+      "size": [
+        1.4800000190734863,
+        7.919999837875366,
+        1.4800000190734863
+      ],
+      "center": [
+        0,
+        0.2399998903274536,
+        0
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.7400000095367432,
+        -3.7200000286102295,
+        -0.7400000095367432
+      ],
+      "max": [
+        0.7400000095367432,
+        4.199999809265137,
+        0.7400000095367432
+      ],
+      "size": [
+        1.4800000190734863,
+        7.919999837875366,
+        1.4800000190734863
+      ],
+      "center": [
+        0,
+        0.2399998903274536,
+        0
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "sci-fi-support-column-c",
+    "sourceActorName": "Support Column C",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "sci-fi-room",
+      "nodeId": "sci-fi-support-column-c",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:36:59.348Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "sci-fi-support-column-c",
+    "mode": "auto",
+    "productId": "sci-fi-support-column-c:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -0.7400000095367432,
+        -3.7200000286102295,
+        -0.7400000095367432
+      ],
+      "max": [
+        0.7400000095367432,
+        4.199999809265137,
+        0.7400000095367432
+      ],
+      "size": [
+        1.4800000190734863,
+        7.919999837875366,
+        1.4800000190734863
+      ],
+      "center": [
+        0,
+        0.2399998903274536,
+        0
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-support-column-c.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-support-column-c.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+    "generatedAt": "2026-05-14T21:36:59.348Z",
+    "triangleCount": 764,
+    "vertexCount": 2292,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 764,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

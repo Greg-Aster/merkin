@@ -103,6 +103,38 @@ function createClientManualChunksPlugin() {
   }
 }
 
+const physicsRuntimeHotUpdatePatterns = [
+  /\/src\/threlte\/collision\/.*\.(svelte|ts)$/,
+  /\/src\/threlte\/core\/GameWorld\.svelte$/,
+  /\/src\/threlte\/features\/ocean\/.*\.(svelte|ts)$/,
+  /\/src\/threlte\/features\/player\/.*\.(svelte|ts)$/,
+  /\/src\/threlte\/features\/terrain\/.*\.(svelte|ts)$/,
+  /\/src\/threlte\/levels\/(RuntimeActorBranch|RuntimeActorNode|SceneDocumentLevel)\.svelte$/,
+  /\/src\/threlte\/systems\/Physics\.svelte$/,
+]
+
+function createPhysicsRuntimeFullReloadPlugin() {
+  return {
+    name: 'merkin-physics-runtime-full-reload',
+    apply: 'serve',
+    enforce: 'pre',
+    handleHotUpdate(ctx) {
+      if (gameDevManualRefresh) return
+
+      const file = ctx.file.replaceAll('\\', '/')
+      if (!physicsRuntimeHotUpdatePatterns.some(pattern => pattern.test(file))) {
+        return
+      }
+
+      ctx.server.ws.send({
+        type: 'full-reload',
+        path: '*',
+      })
+      return []
+    },
+  }
+}
+
 export default defineConfig({
   site: siteUrl,
   base: normalizedBasePath,
@@ -134,6 +166,7 @@ export default defineConfig({
         hmr: !gameDevManualRefresh,
       }),
       createEditorToolsApiPlugin(),
+      createPhysicsRuntimeFullReloadPlugin(),
       createBuildCruftGatePlugin(),
       createClientManualChunksPlugin(),
     ],

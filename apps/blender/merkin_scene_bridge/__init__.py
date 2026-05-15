@@ -1,8 +1,8 @@
 bl_info = {
     "name": "Merkin Scene Bridge",
     "author": "Merkin",
-    "version": (0, 1, 0),
-    "blender": (5, 0, 0),
+    "version": (0, 2, 2),
+    "blender": (4, 0, 0),
     "location": "View3D > Sidebar > Merkin",
     "description": "Import Merkin scene packages and export transform/collision deltas.",
     "category": "Import-Export",
@@ -14,6 +14,7 @@ import math
 from pathlib import Path
 
 import bpy
+from bpy.app.handlers import persistent
 from bpy.props import BoolProperty, StringProperty
 from mathutils import Euler, Matrix, Vector
 
@@ -22,6 +23,7 @@ PACKAGE_FILE_NAME = "merkin-scene-package.json"
 DELTA_FILE_NAME = "merkin-scene-delta.json"
 BLENDER_APP_MARKER = "apps/blender"
 MIN_COLLISION_SIZE = 0.05
+SELECTION_REDIRECT_ACTIVE = False
 
 
 def game_to_blender_axis_matrix():
@@ -66,6 +68,7 @@ def set_merkin_props(obj, node):
     obj["merkin_collision_intent"] = collision.get("intent", "")
     obj["merkin_collision_channel"] = collision.get("channel", "")
     obj["merkin_export_mode"] = "transform-only"
+    obj["merkin_children_locked"] = True
 
 
 def set_merkin_collision_proxy_props(obj, node):
@@ -81,7 +84,90 @@ def set_merkin_collision_proxy_props(obj, node):
     obj["merkin_collision_sensor"] = bool(collision.get("sensor", False))
     obj["merkin_collision_friction"] = float(collision.get("friction", 0.7) or 0.7)
     obj["merkin_collision_restitution"] = float(collision.get("restitution", 0.0) or 0.0)
+    obj["merkin_collision_collider_url"] = collision.get("colliderUrl", "")
+    obj["merkin_collision_metadata_url"] = collision.get("colliderMetadataUrl", "")
+    obj["merkin_collision_source_asset_url"] = collision.get("sourceAssetUrl", "")
+    obj["merkin_collision_triangle_budget"] = int(collision.get("triangleBudget", 0) or 0)
+    obj["merkin_collision_triangle_count"] = int(collision.get("triangleCount", 0) or 0)
+    obj["merkin_collision_vertex_count"] = int(collision.get("vertexCount", 0) or 0)
     obj["merkin_export_mode"] = "collision"
+
+
+def set_transform_locks(obj, locked):
+    obj.hide_select = False
+    for index in range(3):
+        obj.lock_location[index] = bool(locked)
+        obj.lock_rotation[index] = bool(locked)
+        obj.lock_scale[index] = bool(locked)
+
+
+def lock_child_to_node_root(obj, root, child_kind):
+    obj["merkin_node_id"] = root.get("merkin_node_id", "")
+    obj["merkin_node_name"] = root.get("merkin_node_name", root.name)
+    obj["merkin_node_root"] = root.name
+    obj["merkin_child_kind"] = child_kind
+    obj["merkin_linked_to_node_root"] = True
+    set_transform_locks(obj, True)
+
+
+def is_merkin_node_root(obj):
+    return bool(obj and obj.get("merkin_export_mode") == "transform-only")
+
+
+def find_merkin_node_root(obj):
+    current = obj
+    while current:
+        if is_merkin_node_root(current):
+            return current
+        current = current.parent
+    return None
+
+
+def set_node_children_locked(root, locked):
+    if not root:
+        return 0
+
+    count = 0
+    for child in walk_descendants(root):
+        if child.get("merkin_linked_to_node_root"):
+            set_transform_locks(child, locked)
+            count += 1
+    root["merkin_children_locked"] = bool(locked)
+    return count
+
+
+@persistent
+def merkin_selection_redirect_handler(scene, depsgraph=None):
+    global SELECTION_REDIRECT_ACTIVE
+    if SELECTION_REDIRECT_ACTIVE:
+        return
+
+    selected = list(bpy.context.selected_objects)
+    roots = []
+    child_selected = False
+    for obj in selected:
+        if not obj.get("merkin_linked_to_node_root"):
+            continue
+        root = find_merkin_node_root(obj)
+        if root and root.get("merkin_children_locked", True):
+            child_selected = True
+            if root not in roots:
+                roots.append(root)
+
+    if not child_selected:
+        return
+
+    SELECTION_REDIRECT_ACTIVE = True
+    try:
+        for obj in selected:
+            if obj.get("merkin_linked_to_node_root"):
+                obj.select_set(False)
+        for root in roots:
+            root.select_set(True)
+        if roots:
+            bpy.context.view_layer.objects.active = roots[0]
+    finally:
+        SELECTION_REDIRECT_ACTIVE = False
 
 
 def get_package_directory(package_path):
@@ -176,15 +262,14 @@ def clear_merkin_collection(collection_name):
     if not existing:
         return
 
-    for obj in list(existing.objects):
-        bpy.data.objects.remove(obj, do_unlink=True)
-
-    for child in list(existing.children):
-        for obj in list(child.objects):
+    def remove_collection_tree(collection):
+        for child in list(collection.children):
+            remove_collection_tree(child)
+        for obj in list(collection.objects):
             bpy.data.objects.remove(obj, do_unlink=True)
-        bpy.data.collections.remove(child)
+        bpy.data.collections.remove(collection)
 
-    bpy.data.collections.remove(existing)
+    remove_collection_tree(existing)
 
 
 def link_object_to_collection(obj, collection):
@@ -199,11 +284,36 @@ def create_collection(name):
     return collection
 
 
+def get_or_create_child_collection(parent, name):
+    collection = parent.children.get(name)
+    if collection:
+        return collection
+
+    collection = bpy.data.collections.new(name)
+    parent.children.link(collection)
+    return collection
+
+
+def create_scene_collections(level_id):
+    root = bpy.data.collections.get(f"Merkin Level - {level_id}") or create_collection(
+        f"Merkin Level - {level_id}"
+    )
+    return {
+        "root": root,
+        "nodes": get_or_create_child_collection(root, "Node Roots"),
+        "visuals": get_or_create_child_collection(root, "Visual Meshes"),
+        "collisions": get_or_create_child_collection(root, "Collision Proxies"),
+    }
+
+
 def create_node_root(node, collection):
     empty = bpy.data.objects.new(node.get("name") or node.get("id") or "Merkin Node", None)
-    empty.empty_display_type = "PLAIN_AXES"
-    empty.empty_display_size = 0.6
+    empty.empty_display_type = "CUBE"
+    empty.empty_display_size = 1.0
+    empty.show_name = True
+    empty.show_in_front = True
     set_merkin_props(empty, node)
+    set_transform_locks(empty, False)
     collection.objects.link(empty)
     return empty
 
@@ -571,6 +681,8 @@ def create_primitive_child(node, root, collection):
     child.rotation_euler = (0.0, 0.0, 0.0)
     if child.type == "MESH":
         child["merkin_primitive_geometry"] = (node.get("primitive") or {}).get("geometry", "box")
+    child["merkin_export_mode"] = "ignore"
+    lock_child_to_node_root(child, root, "visual")
     link_object_to_collection(child, collection)
     return child
 
@@ -593,6 +705,20 @@ def finite_vec3(value, fallback):
 
 def clamp_size(value):
     return max(MIN_COLLISION_SIZE, abs(finite_number(value, 1.0)))
+
+
+def slugify_filename(value, fallback="collision"):
+    text = str(value or fallback).strip().lower()
+    output = []
+    previous_dash = False
+    for character in text:
+        if character.isalnum():
+            output.append(character)
+            previous_dash = False
+        elif not previous_dash:
+            output.append("-")
+            previous_dash = True
+    return "".join(output).strip("-") or fallback
 
 
 def safe_scale_vec3(value):
@@ -643,11 +769,81 @@ def local_collision_size_from_game_size(world_size, node_scale):
     ]
 
 
-def create_collision_proxy_child(node, root, collection):
+def set_collision_proxy_display(obj):
+    obj.display_type = "WIRE"
+    obj.show_wire = True
+    obj.show_in_front = True
+    if obj.type == "MESH":
+        obj.data.materials.append(get_collision_material())
+
+
+def resolve_package_child_path(package_directory, package_path):
+    if not package_path:
+        return None
+    candidate = (package_directory / package_path).resolve()
+    if candidate.exists():
+        return candidate
+    return None
+
+
+def import_trimesh_collision_proxy_child(node, root, collection, package_directory):
+    collision = node.get("collision") or {}
+    name = f"{node.get('name', node.get('id', 'node'))} Collision"
+    proxy_root = bpy.data.objects.new(name, None)
+    proxy_root.empty_display_type = "CUBE"
+    proxy_root.empty_display_size = 1.0
+    proxy_root.parent = root
+    proxy_root.matrix_parent_inverse.identity()
+    set_merkin_collision_proxy_props(proxy_root, node)
+    lock_child_to_node_root(proxy_root, root, "collision")
+    collection.objects.link(proxy_root)
+
+    collider_path = resolve_package_child_path(
+        package_directory,
+        collision.get("colliderPackagePath", ""),
+    )
+
+    if not collider_path:
+        return [proxy_root]
+
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=str(collider_path))
+    imported = [obj for obj in bpy.data.objects if obj not in before]
+    mesh_index = 0
+    node_index = 0
+
+    for obj in imported:
+        if obj.type == "MESH":
+            mesh_index += 1
+            obj.name = f"{name} Mesh" if mesh_index == 1 else f"{name} Mesh {mesh_index:02d}"
+            obj.data.name = f"{obj.name} Data"
+            set_collision_proxy_display(obj)
+        else:
+            node_index += 1
+            obj.name = f"{name} Node" if node_index == 1 else f"{name} Node {node_index:02d}"
+
+        obj["merkin_export_mode"] = "ignore"
+        if obj.parent is None:
+            obj.parent = proxy_root
+            obj.matrix_parent_inverse.identity()
+        lock_child_to_node_root(obj, root, "collision-mesh")
+        link_object_to_collection(obj, collection)
+
+    return [proxy_root, *imported]
+
+
+def create_collision_proxy_child(node, root, collection, package_directory=None):
     collision = node.get("collision") or {}
     shape = collision.get("shape")
     if collision.get("enabled") is False or collision.get("intent") == "none":
         return None
+    if shape == "trimesh":
+        return import_trimesh_collision_proxy_child(
+            node,
+            root,
+            collection,
+            package_directory or Path("."),
+        )
     if shape not in {"cuboid", "cylinder"}:
         return None
 
@@ -680,15 +876,13 @@ def create_collision_proxy_child(node, root, collection):
         child.scale = (local_size[0], local_size[2], local_size[1])
 
     child.name = name
-    child.display_type = "WIRE"
-    child.show_wire = True
-    child.show_in_front = True
+    set_collision_proxy_display(child)
     child.parent = root
     child.matrix_parent_inverse.identity()
     child.location = (0.0, 0.0, 0.0)
     child.rotation_euler = (0.0, 0.0, 0.0)
-    child.data.materials.append(get_collision_material())
     set_merkin_collision_proxy_props(child, node)
+    lock_child_to_node_root(child, root, "collision")
     link_object_to_collection(child, collection)
     return child
 
@@ -717,6 +911,9 @@ def build_default_collision_node_from_object(obj):
             "friction": 0.7,
             "restitution": 0.0,
             "sensor": False,
+            "colliderUrl": "",
+            "colliderMetadataUrl": "",
+            "sourceAssetUrl": obj.get("merkin_asset_url", ""),
         },
     }
 
@@ -748,6 +945,72 @@ def get_object_local_dimensions(obj):
     ]
 
 
+def walk_descendants(obj):
+    for child in obj.children:
+        yield child
+        yield from walk_descendants(child)
+
+
+def get_collision_owner_root(obj):
+    current = obj
+    while current and current.parent:
+        if current.parent.get("merkin_node_id") == obj.get("merkin_node_id"):
+            return current.parent
+        current = current.parent
+    return obj.parent
+
+
+def export_trimesh_collision_package(obj, package_directory, node_id):
+    mesh_sources = [
+        candidate
+        for candidate in [obj, *walk_descendants(obj)]
+        if candidate.type == "MESH"
+    ]
+    if not mesh_sources:
+        return ""
+
+    collision_directory = package_directory / "collision-delta"
+    collision_directory.mkdir(parents=True, exist_ok=True)
+    output_path = collision_directory / f"{slugify_filename(node_id)}.collider.glb"
+
+    owner_root = get_collision_owner_root(obj)
+    basis = owner_root.matrix_world.inverted() if owner_root else Matrix.Identity(4)
+    duplicates = []
+    previous_active = bpy.context.view_layer.objects.active
+    previous_selected = list(bpy.context.selected_objects)
+
+    try:
+        bpy.ops.object.select_all(action="DESELECT")
+        for source in mesh_sources:
+            duplicate = bpy.data.objects.new(source.name, source.data.copy())
+            duplicate.matrix_world = basis @ source.matrix_world
+            bpy.context.scene.collection.objects.link(duplicate)
+            duplicate.select_set(True)
+            duplicates.append(duplicate)
+
+        if duplicates:
+            bpy.context.view_layer.objects.active = duplicates[0]
+        bpy.ops.export_scene.gltf(
+            filepath=str(output_path),
+            export_format="GLB",
+            use_selection=True,
+        )
+    finally:
+        bpy.ops.object.select_all(action="DESELECT")
+        for duplicate in duplicates:
+            mesh = duplicate.data
+            bpy.data.objects.remove(duplicate, do_unlink=True)
+            if mesh and mesh.users == 0:
+                bpy.data.meshes.remove(mesh)
+        for selected in previous_selected:
+            if selected.name in bpy.data.objects:
+                selected.select_set(True)
+        if previous_active and previous_active.name in bpy.data.objects:
+            bpy.context.view_layer.objects.active = previous_active
+
+    return output_path.relative_to(package_directory).as_posix()
+
+
 def import_asset_child(node, root, collection, package_directory):
     asset_path = node.get("assetPackagePath") or ""
     if not asset_path:
@@ -776,6 +1039,8 @@ def import_asset_child(node, root, collection, package_directory):
         if obj.parent is None:
             obj.parent = root
             obj.matrix_parent_inverse.identity()
+        obj["merkin_export_mode"] = "ignore"
+        lock_child_to_node_root(obj, root, "visual")
         link_object_to_collection(obj, collection)
 
     return imported
@@ -820,21 +1085,31 @@ class MERKIN_OT_import_scene_package(bpy.types.Operator):
         if self.clear_existing:
             clear_merkin_collection(collection_name)
 
-        collection = bpy.data.collections.get(collection_name) or create_collection(collection_name)
+        collections = create_scene_collections(level_id)
         package_directory = get_package_directory(package_path)
         nodes = package.get("nodes", [])
         roots_by_id = {}
 
         for node in nodes:
-            root = create_node_root(node, collection)
+            root = create_node_root(node, collections["nodes"])
             roots_by_id[node.get("id")] = root
 
             kind = node.get("kind")
             if kind == "asset":
-                import_asset_child(node, root, collection, package_directory)
+                import_asset_child(
+                    node,
+                    root,
+                    collections["visuals"],
+                    package_directory,
+                )
             elif kind == "primitive":
-                create_primitive_child(node, root, collection)
-            create_collision_proxy_child(node, root, collection)
+                create_primitive_child(node, root, collections["visuals"])
+            create_collision_proxy_child(
+                node,
+                root,
+                collections["collisions"],
+                package_directory,
+            )
 
         for node in nodes:
             parent_id = node.get("parentId")
@@ -904,15 +1179,9 @@ class MERKIN_OT_export_scene_delta(bpy.types.Operator):
 
             if export_mode == "collision":
                 shape = obj.get("merkin_collision_shape", "")
-                if shape in {"cuboid", "cylinder"}:
+                if shape in {"cuboid", "cylinder", "trimesh"}:
                     owner = obj.parent
-                    owner_scale = (
-                        game_transform_from_matrix(owner.matrix_local)["scale"]
-                        if owner
-                        else [1.0, 1.0, 1.0]
-                    )
-                    dimensions = get_object_local_dimensions(obj)
-                    change["collision"] = {
+                    collision = {
                         "shape": shape,
                         "intent": obj.get("merkin_collision_intent", ""),
                         "channel": obj.get("merkin_collision_channel", ""),
@@ -928,12 +1197,41 @@ class MERKIN_OT_export_scene_delta(bpy.types.Operator):
                             ),
                             6,
                         ),
-                        "size": [
+                    }
+                    if shape in {"cuboid", "cylinder"}:
+                        owner_scale = (
+                            game_transform_from_matrix(owner.matrix_local)["scale"]
+                            if owner
+                            else [1.0, 1.0, 1.0]
+                        )
+                        dimensions = get_object_local_dimensions(obj)
+                        collision["size"] = [
                             round(clamp_size(dimensions[0] * abs(owner_scale[0])), 6),
                             round(clamp_size(dimensions[2] * abs(owner_scale[1])), 6),
                             round(clamp_size(dimensions[1] * abs(owner_scale[2])), 6),
-                        ],
-                    }
+                        ]
+                    if shape == "trimesh":
+                        collision["colliderUrl"] = obj.get("merkin_collision_collider_url", "")
+                        collision["colliderMetadataUrl"] = obj.get("merkin_collision_metadata_url", "")
+                        collision["sourceAssetUrl"] = obj.get("merkin_collision_source_asset_url", "")
+                        collider_package_path = export_trimesh_collision_package(
+                            obj,
+                            output_path.parent,
+                            node_id,
+                        )
+                        if collider_package_path:
+                            collision["colliderPackagePath"] = collider_package_path
+                        triangle_budget = int(obj.get("merkin_collision_triangle_budget", 0) or 0)
+                        triangle_count = int(obj.get("merkin_collision_triangle_count", 0) or 0)
+                        vertex_count = int(obj.get("merkin_collision_vertex_count", 0) or 0)
+                        if triangle_budget > 0:
+                            collision["triangleBudget"] = triangle_budget
+                        if triangle_count > 0:
+                            collision["triangleCount"] = triangle_count
+                        if vertex_count > 0:
+                            collision["vertexCount"] = vertex_count
+
+                    change["collision"] = collision
                     change["exportMode"] = (
                         "transform-and-collision"
                         if "position" in change
@@ -976,11 +1274,7 @@ class MERKIN_OT_add_collision_proxy(bpy.types.Operator):
             self.report({"ERROR"}, "Select a Merkin node or collision proxy first.")
             return {"CANCELLED"}
 
-        owner = (
-            selected.parent
-            if selected.get("merkin_export_mode") == "collision"
-            else selected
-        )
+        owner = find_merkin_node_root(selected)
         if not owner or not owner.get("merkin_node_id"):
             self.report({"ERROR"}, "Could not resolve the selected Merkin node root.")
             return {"CANCELLED"}
@@ -991,9 +1285,41 @@ class MERKIN_OT_add_collision_proxy(bpy.types.Operator):
             self.report({"ERROR"}, "Could not create collision proxy.")
             return {"CANCELLED"}
 
-        context.view_layer.objects.active = proxy
-        proxy.select_set(True)
+        context.view_layer.objects.active = owner
+        owner.select_set(True)
         self.report({"INFO"}, f"Added collision proxy for {node.get('id')}")
+        return {"FINISHED"}
+
+
+class MERKIN_OT_unlock_node_children(bpy.types.Operator):
+    bl_idname = "merkin.unlock_node_children"
+    bl_label = "Unlock Selected Node Children"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        root = find_merkin_node_root(context.object)
+        if not root:
+            self.report({"ERROR"}, "Select a Merkin node root or linked child first.")
+            return {"CANCELLED"}
+
+        count = set_node_children_locked(root, False)
+        self.report({"INFO"}, f"Unlocked {count} linked child object(s) for {root.name}.")
+        return {"FINISHED"}
+
+
+class MERKIN_OT_lock_node_children(bpy.types.Operator):
+    bl_idname = "merkin.lock_node_children"
+    bl_label = "Lock Selected Node Children"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        root = find_merkin_node_root(context.object)
+        if not root:
+            self.report({"ERROR"}, "Select a Merkin node root or linked child first.")
+            return {"CANCELLED"}
+
+        count = set_node_children_locked(root, True)
+        self.report({"INFO"}, f"Locked {count} linked child object(s) to {root.name}.")
         return {"FINISHED"}
 
 
@@ -1012,6 +1338,8 @@ class MERKIN_PT_scene_bridge_panel(bpy.types.Panel):
         layout.operator(MERKIN_OT_import_scene_package.bl_idname, icon="IMPORT")
         layout.operator(MERKIN_OT_export_scene_delta.bl_idname, icon="EXPORT")
         layout.operator(MERKIN_OT_add_collision_proxy.bl_idname, icon="MOD_PHYSICS")
+        layout.operator(MERKIN_OT_unlock_node_children.bl_idname, icon="UNLOCKED")
+        layout.operator(MERKIN_OT_lock_node_children.bl_idname, icon="LOCKED")
         layout.label(text=f"Import file: {PACKAGE_FILE_NAME}")
 
         if level_id:
@@ -1034,12 +1362,21 @@ class MERKIN_PT_scene_bridge_panel(bpy.types.Panel):
                 box.prop(obj, '["merkin_collision_sensor"]', text="Sensor")
                 box.prop(obj, '["merkin_collision_friction"]', text="Friction")
                 box.prop(obj, '["merkin_collision_restitution"]', text="Restitution")
+                if obj.get("merkin_collision_shape") == "trimesh":
+                    box.prop(obj, '["merkin_collision_collider_url"]', text="Collider URL")
+                    box.prop(obj, '["merkin_collision_metadata_url"]', text="Metadata URL")
+                    box.prop(obj, '["merkin_collision_source_asset_url"]', text="Source URL")
+                    box.prop(obj, '["merkin_collision_triangle_budget"]', text="Triangle Budget")
+                    box.prop(obj, '["merkin_collision_triangle_count"]', text="Triangle Count")
+                    box.prop(obj, '["merkin_collision_vertex_count"]', text="Vertex Count")
 
 
 classes = (
     MERKIN_OT_import_scene_package,
     MERKIN_OT_export_scene_delta,
     MERKIN_OT_add_collision_proxy,
+    MERKIN_OT_unlock_node_children,
+    MERKIN_OT_lock_node_children,
     MERKIN_PT_scene_bridge_panel,
 )
 
@@ -1047,9 +1384,13 @@ classes = (
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
+    if merkin_selection_redirect_handler not in bpy.app.handlers.depsgraph_update_post:
+        bpy.app.handlers.depsgraph_update_post.append(merkin_selection_redirect_handler)
 
 
 def unregister():
+    if merkin_selection_redirect_handler in bpy.app.handlers.depsgraph_update_post:
+        bpy.app.handlers.depsgraph_update_post.remove(merkin_selection_redirect_handler)
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 

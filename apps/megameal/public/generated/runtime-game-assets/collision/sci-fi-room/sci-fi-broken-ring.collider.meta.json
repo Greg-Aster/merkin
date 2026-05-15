@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:37:07.922Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "sci-fi-room",
+  "sourceActorId": "sci-fi-broken-ring",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "4391139b734ad56f9b5f59d74f5caff18244cd68e4e42da589018d90c6eee135"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-broken-ring.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-broken-ring.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-broken-ring.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:4391139b734ad56f9b5f59d74f5caff18244cd68e4e42da589018d90c6eee135:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+  "triangleCount": 784,
+  "vertexCount": 2352,
+  "bounds": {
+    "min": [
+      -2.8499999046325684,
+      0,
+      -0.24373197555541992
+    ],
+    "max": [
+      2.8499999046325684,
+      2.8499999046325684,
+      0.24373197555541992
+    ],
+    "size": [
+      5.699999809265137,
+      2.8499999046325684,
+      0.48746395111083984
+    ],
+    "center": [
+      0,
+      1.4249999523162842,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -2.8499999046325684,
+      0,
+      -0.24373197555541992
+    ],
+    "max": [
+      2.8499999046325684,
+      2.8499999046325684,
+      0.24373197555541992
+    ],
+    "size": [
+      5.699999809265137,
+      2.8499999046325684,
+      0.48746395111083984
+    ],
+    "center": [
+      0,
+      1.4249999523162842,
+      0
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -2.8499999046325684,
+      0,
+      -0.24373197555541992
+    ],
+    "max": [
+      2.8499999046325684,
+      2.8499999046325684,
+      0.24373197555541992
+    ],
+    "size": [
+      5.699999809265137,
+      2.8499999046325684,
+      0.48746395111083984
+    ],
+    "center": [
+      0,
+      1.4249999523162842,
+      0
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+    "sourceNodeName": "Broken Ring",
+    "visualLocalBounds": {
+      "min": [
+        -2.8499999046325684,
+        0,
+        -0.24373197555541992
+      ],
+      "max": [
+        2.8499999046325684,
+        2.8499999046325684,
+        0.24373197555541992
+      ],
+      "size": [
+        5.699999809265137,
+        2.8499999046325684,
+        0.48746395111083984
+      ],
+      "center": [
+        0,
+        1.4249999523162842,
+        0
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -2.8499999046325684,
+        0,
+        -0.24373197555541992
+      ],
+      "max": [
+        2.8499999046325684,
+        2.8499999046325684,
+        0.24373197555541992
+      ],
+      "size": [
+        5.699999809265137,
+        2.8499999046325684,
+        0.48746395111083984
+      ],
+      "center": [
+        0,
+        1.4249999523162842,
+        0
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "sci-fi-broken-ring",
+    "sourceActorName": "Broken Ring",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "4391139b734ad56f9b5f59d74f5caff18244cd68e4e42da589018d90c6eee135"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "sci-fi-room",
+      "nodeId": "sci-fi-broken-ring",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:37:07.922Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "sci-fi-broken-ring",
+    "mode": "auto",
+    "productId": "sci-fi-broken-ring:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "4391139b734ad56f9b5f59d74f5caff18244cd68e4e42da589018d90c6eee135"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -2.8499999046325684,
+        0,
+        -0.24373197555541992
+      ],
+      "max": [
+        2.8499999046325684,
+        2.8499999046325684,
+        0.24373197555541992
+      ],
+      "size": [
+        5.699999809265137,
+        2.8499999046325684,
+        0.48746395111083984
+      ],
+      "center": [
+        0,
+        1.4249999523162842,
+        0
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-broken-ring.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-broken-ring.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+    "generatedAt": "2026-05-14T21:37:07.922Z",
+    "triangleCount": 784,
+    "vertexCount": 2352,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 784,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

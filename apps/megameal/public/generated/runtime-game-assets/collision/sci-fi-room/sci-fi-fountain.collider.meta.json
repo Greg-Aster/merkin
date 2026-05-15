@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:37:03.630Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "sci-fi-room",
+  "sourceActorId": "sci-fi-fountain",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "aed7d091f99136743a02b069652b1d267398531d8397baad376528b3d22183d9"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-fountain.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-fountain.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-fountain.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:aed7d091f99136743a02b069652b1d267398531d8397baad376528b3d22183d9:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+  "triangleCount": 2896,
+  "vertexCount": 2212,
+  "bounds": {
+    "min": [
+      -2.430000066757202,
+      -2.430000066757202,
+      -2.049999952316284
+    ],
+    "max": [
+      2.430000066757202,
+      2.430000066757202,
+      2.049999952316284
+    ],
+    "size": [
+      4.860000133514404,
+      4.860000133514404,
+      4.099999904632568
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -2.430000066757202,
+      -2.430000066757202,
+      -2.049999952316284
+    ],
+    "max": [
+      2.430000066757202,
+      2.430000066757202,
+      2.049999952316284
+    ],
+    "size": [
+      4.860000133514404,
+      4.860000133514404,
+      4.099999904632568
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -2.430000066757202,
+      -2.430000066757202,
+      -2.049999952316284
+    ],
+    "max": [
+      2.430000066757202,
+      2.430000066757202,
+      2.049999952316284
+    ],
+    "size": [
+      4.860000133514404,
+      4.860000133514404,
+      4.099999904632568
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+    "sourceNodeName": "Courtyard Fountain",
+    "visualLocalBounds": {
+      "min": [
+        -2.430000066757202,
+        -2.430000066757202,
+        -2.049999952316284
+      ],
+      "max": [
+        2.430000066757202,
+        2.430000066757202,
+        2.049999952316284
+      ],
+      "size": [
+        4.860000133514404,
+        4.860000133514404,
+        4.099999904632568
+      ],
+      "center": [
+        0,
+        0,
+        0
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -2.430000066757202,
+        -2.430000066757202,
+        -2.049999952316284
+      ],
+      "max": [
+        2.430000066757202,
+        2.430000066757202,
+        2.049999952316284
+      ],
+      "size": [
+        4.860000133514404,
+        4.860000133514404,
+        4.099999904632568
+      ],
+      "center": [
+        0,
+        0,
+        0
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "sci-fi-fountain",
+    "sourceActorName": "Courtyard Fountain",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "aed7d091f99136743a02b069652b1d267398531d8397baad376528b3d22183d9"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "sci-fi-room",
+      "nodeId": "sci-fi-fountain",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:37:03.630Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "sci-fi-fountain",
+    "mode": "auto",
+    "productId": "sci-fi-fountain:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "aed7d091f99136743a02b069652b1d267398531d8397baad376528b3d22183d9"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -2.430000066757202,
+        -2.430000066757202,
+        -2.049999952316284
+      ],
+      "max": [
+        2.430000066757202,
+        2.430000066757202,
+        2.049999952316284
+      ],
+      "size": [
+        4.860000133514404,
+        4.860000133514404,
+        4.099999904632568
+      ],
+      "center": [
+        0,
+        0,
+        0
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-fountain.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-fountain.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+    "generatedAt": "2026-05-14T21:37:03.630Z",
+    "triangleCount": 2896,
+    "vertexCount": 2212,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 2896,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

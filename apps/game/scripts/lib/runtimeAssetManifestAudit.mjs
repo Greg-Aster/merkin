@@ -585,8 +585,8 @@ function getSceneGeometryDrawCalls(sceneManifest) {
   )
 }
 
-function addBudgetFailure({
-  failures,
+function addBudgetWarning({
+  warnings,
   levelId,
   label,
   actual,
@@ -594,7 +594,7 @@ function addBudgetFailure({
   format = value => value,
 }) {
   if (!Number.isFinite(budget) || actual <= budget) return
-  failures.push(
+  warnings.push(
     `${levelId}: ${label} exceeds graphicsBudget ${format(actual)}/${format(budget)}`,
   )
 }
@@ -616,6 +616,61 @@ function getRuntimeAssetBudgetSource(asset, tier) {
   }
 
   return null
+}
+
+function auditStyleBakeAsset({ failures, warnings, report, sourceUrl, asset }) {
+  const styleBake = asset.styleBake
+  if (!styleBake) return
+
+  report.styleBakeAssetCount += 1
+
+  if (!styleBake.metadataUrl) {
+    report.styleBakeMissingMetadata += 1
+    failures.push(`${sourceUrl}: style-baked asset is missing metadataUrl`)
+  }
+  if (styleBake.status === 'missing-generated-metadata') {
+    report.styleBakeMissingMetadata += 1
+    failures.push(`${sourceUrl}: generated style metadata is missing`)
+  }
+  if (styleBake.status === 'missing-generated-asset') {
+    report.styleBakeMissingGeneratedAsset += 1
+    failures.push(`${sourceUrl}: generated style-baked GLB is missing`)
+  }
+  if (styleBake.status === 'missing-source-asset') {
+    report.styleBakeMissingSource += 1
+    failures.push(`${sourceUrl}: style bake source asset is missing`)
+  }
+  if (styleBake.sourceAssetFingerprintMatches === false) {
+    report.styleBakeStaleSource += 1
+    failures.push(
+      `${sourceUrl}: style bake source fingerprint is stale against metadata`,
+    )
+  }
+  if (styleBake.styleSettingsFingerprintMatches === false) {
+    report.styleBakeStaleSettings += 1
+    failures.push(
+      `${sourceUrl}: style settings fingerprint is stale against metadata`,
+    )
+  }
+  if (styleBake.runtimeCookRequired && !styleBake.runtimeCooked) {
+    report.styleBakeNotCooked += 1
+    failures.push(`${sourceUrl}: style-baked GLB has not been runtime-cooked`)
+  }
+
+  const unusedTextureCount = Number(styleBake.budget?.unusedTextureCount ?? 0)
+  if (unusedTextureCount > 0) {
+    report.unusedTexturePayloads += unusedTextureCount
+    const message = `${sourceUrl}: style-baked GLB contains ${unusedTextureCount} unused texture payload(s) after prune/optimize`
+    if (asset.required) {
+      failures.push(message)
+    } else {
+      warnings.push(message)
+    }
+  }
+
+  for (const diagnostic of styleBake.diagnostics ?? []) {
+    warnings.push(`${sourceUrl}: ${diagnostic}`)
+  }
 }
 
 function createRuntimeAssetBudgetReportForTier({
@@ -671,6 +726,7 @@ export function auditRuntimeAssetManifestObject({
   runtimeSceneManifests = [],
 }) {
   const failures = []
+  const warnings = []
   const report = {
     exists: true,
     sourceAssetCount: 0,
@@ -704,6 +760,14 @@ export function auditRuntimeAssetManifestObject({
     heroAuthoredPbrRegressions: 0,
     unsupportedShaderFeatures: 0,
     oversizedTextures: 0,
+    unusedTexturePayloads: 0,
+    styleBakeAssetCount: 0,
+    styleBakeMissingMetadata: 0,
+    styleBakeMissingGeneratedAsset: 0,
+    styleBakeMissingSource: 0,
+    styleBakeStaleSource: 0,
+    styleBakeStaleSettings: 0,
+    styleBakeNotCooked: 0,
     budgetReports: [],
     platformBudgetReports: [],
   }
@@ -772,6 +836,7 @@ export function auditRuntimeAssetManifestObject({
     }
     if (asset.required) report.requiredAssetCount += 1
     else report.optionalAssetCount += 1
+    auditStyleBakeAsset({ failures, warnings, report, sourceUrl, asset })
 
     if (!asset.importMetadata?.id) {
       report.missingImportMetadata += 1
@@ -843,7 +908,13 @@ export function auditRuntimeAssetManifestObject({
           `${sourceUrl}: ${tier} variant URL is nested under the runtime asset root`,
         )
       }
-      if (!variant?.exists) continue
+      if (!variant?.exists) {
+        report.missingVariantMetadata += 1
+        failures.push(
+          `${sourceUrl}: ${tier} LOD variant is missing; publish requires high, medium, and low cooked meshes`,
+        )
+        continue
+      }
 
       report.cookedVariantCount += 1
       if (variant.lodTier !== tier) {
@@ -929,45 +1000,45 @@ export function auditRuntimeAssetManifestObject({
     failures.push(...budgetSourceFailures)
     report.budgetReports.push(budgetReport)
 
-    addBudgetFailure({
-      failures,
+    addBudgetWarning({
+      warnings,
       levelId,
       label: `${tier} runtime asset payload`,
       actual: budgetReport.runtimeAssetBytes,
       budget: budget?.maxRuntimeAssetBytes,
       format: formatBytes,
     })
-    addBudgetFailure({
-      failures,
+    addBudgetWarning({
+      warnings,
       levelId,
       label: `${tier} runtime asset file`,
       actual: budgetReport.largestRuntimeAssetBytes,
       budget: budget?.maxRuntimeAssetFileBytes,
       format: formatBytes,
     })
-    addBudgetFailure({
-      failures,
+    addBudgetWarning({
+      warnings,
       levelId,
       label: 'combined draw calls',
       actual: budgetReport.combinedDrawCalls,
       budget: budget?.maxEstimatedDrawCalls,
     })
-    addBudgetFailure({
-      failures,
+    addBudgetWarning({
+      warnings,
       levelId,
       label: 'combined material slots',
       actual: budgetReport.combinedMaterialSlots,
       budget: budget?.maxAuthoredMaterialSlots,
     })
-    addBudgetFailure({
-      failures,
+    addBudgetWarning({
+      warnings,
       levelId,
       label: 'combined triangles',
       actual: budgetReport.combinedTriangles,
       budget: budget?.maxEstimatedTriangles,
     })
-    addBudgetFailure({
-      failures,
+    addBudgetWarning({
+      warnings,
       levelId,
       label: 'combined texture bytes',
       actual: budgetReport.combinedTextureBytes,
@@ -988,45 +1059,45 @@ export function auditRuntimeAssetManifestObject({
       })
       failures.push(...profileBudgetSourceFailures)
       report.platformBudgetReports.push(profileBudgetReport)
-      addBudgetFailure({
-        failures,
+      addBudgetWarning({
+        warnings,
         levelId,
         label: `${profileId} certification payload`,
         actual: profileBudgetReport.runtimeAssetBytes,
         budget: profile.maxRuntimeAssetBytes,
         format: formatBytes,
       })
-      addBudgetFailure({
-        failures,
+      addBudgetWarning({
+        warnings,
         levelId,
         label: `${profileId} certification file`,
         actual: profileBudgetReport.largestRuntimeAssetBytes,
         budget: profile.maxRuntimeAssetFileBytes,
         format: formatBytes,
       })
-      addBudgetFailure({
-        failures,
+      addBudgetWarning({
+        warnings,
         levelId,
         label: `${profileId} certification draw calls`,
         actual: profileBudgetReport.combinedDrawCalls,
         budget: profile.maxCombinedDrawCalls,
       })
-      addBudgetFailure({
-        failures,
+      addBudgetWarning({
+        warnings,
         levelId,
         label: `${profileId} certification material slots`,
         actual: profileBudgetReport.combinedMaterialSlots,
         budget: profile.maxCombinedMaterialSlots,
       })
-      addBudgetFailure({
-        failures,
+      addBudgetWarning({
+        warnings,
         levelId,
         label: `${profileId} certification triangles`,
         actual: profileBudgetReport.combinedTriangles,
         budget: profile.maxCombinedTriangles,
       })
-      addBudgetFailure({
-        failures,
+      addBudgetWarning({
+        warnings,
         levelId,
         label: `${profileId} certification texture bytes`,
         actual: profileBudgetReport.combinedTextureBytes,
@@ -1036,7 +1107,7 @@ export function auditRuntimeAssetManifestObject({
     }
   }
 
-  return { failures, report }
+  return { failures, warnings, report }
 }
 
 export function auditRuntimeAssetManifest({
@@ -1047,6 +1118,7 @@ export function auditRuntimeAssetManifest({
   if (!existsSync(manifestPath)) {
     return {
       failures: ['runtime asset manifest is missing'],
+      warnings: [],
       report: {
         exists: false,
         sourceAssetCount: 0,
@@ -1080,6 +1152,14 @@ export function auditRuntimeAssetManifest({
         heroAuthoredPbrRegressions: 0,
         unsupportedShaderFeatures: 0,
         oversizedTextures: 0,
+        unusedTexturePayloads: 0,
+        styleBakeAssetCount: 0,
+        styleBakeMissingMetadata: 0,
+        styleBakeMissingGeneratedAsset: 0,
+        styleBakeMissingSource: 0,
+        styleBakeStaleSource: 0,
+        styleBakeStaleSettings: 0,
+        styleBakeNotCooked: 0,
         budgetReports: [],
         platformBudgetReports: [],
       },

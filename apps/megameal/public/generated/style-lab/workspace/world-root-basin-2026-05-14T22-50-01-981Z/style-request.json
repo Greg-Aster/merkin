@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-05-14T22:51:37.368Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "World Root Basin",
+  "sourceAssetUrl": "/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/world-root-basin-2026-05-14T22-50-01-981Z/source/world-root-basin.glb",
+  "prompt": "object: very large circular island ground mass of dark earth and embedded sacred stone, the main foundation surface of the level. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/world-root-basin-reference-2026-05-14T22-51-37-342Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/world-root-basin-2026-05-14T22-50-01-981Z/reference/world-root-basin-reference-2026-05-14T22-51-37-342Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/world-root-basin-reference-2026-05-14T22-51-37-342Z.png"
+}

@@ -2,9 +2,13 @@
 import { T, useTask } from '@threlte/core'
 import { onDestroy } from 'svelte'
 import * as THREE from 'three'
+import { DEFAULT_RUNTIME_ATMOSPHERE } from '../atmosphere/buildRuntimeAtmosphere'
+import type { RuntimeAtmosphereDefinition } from '../atmosphere/runtimeAtmosphereTypes'
 import { OptimizationLevel } from '../features/performance/OptimizationManager'
 import { qualityLevelStore } from '../features/performance/stores/performanceStore'
+import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 
+export let atmosphere: RuntimeAtmosphereDefinition = DEFAULT_RUNTIME_ATMOSPHERE
 export let enabled = true
 export let color = '#241557'
 export let opacity = 0.14
@@ -17,6 +21,7 @@ export let driftSpeed = 0.05
 let mistTexture: THREE.Texture | null = null
 let mistPlanes: Array<THREE.Mesh | null> = []
 let animationTime = 0
+let mistDiagnosticSignature = ''
 
 function createMistTexture() {
   const canvas = document.createElement('canvas')
@@ -55,29 +60,72 @@ function createMistTexture() {
 }
 
 $: effectiveLayers = (() => {
+  const requestedLayers = atmosphere.mist.enabled
+    ? atmosphere.mist.layers
+    : layers
   switch ($qualityLevelStore) {
     case OptimizationLevel.ULTRA_LOW:
-      return Math.max(0, Math.min(1, layers - 2))
+      return Math.max(0, Math.min(1, requestedLayers - 2))
     case OptimizationLevel.LOW:
-      return Math.max(1, Math.min(2, layers - 1))
+      return Math.max(1, Math.min(2, requestedLayers - 1))
     case OptimizationLevel.MEDIUM:
-      return Math.max(1, Math.min(3, layers))
+      return Math.max(1, Math.min(3, requestedLayers))
     default:
-      return Math.max(1, layers)
+      return Math.max(1, requestedLayers)
   }
 })()
+$: resolvedEnabled = enabled && atmosphere.enabled && atmosphere.mist.enabled
+$: resolvedColor = atmosphere.mist.color ?? color
+$: resolvedOpacity = atmosphere.mist.opacity ?? opacity
+$: resolvedBaseHeight = atmosphere.heightFog.floor + atmosphere.mist.height
+$: resolvedHeightStep = atmosphere.mist.spacing ?? heightStep
+$: resolvedScale = atmosphere.mist.scale ?? scale
+$: resolvedDriftSpeed = atmosphere.mist.driftSpeed ?? driftSpeed
 
-$: if (enabled && !mistTexture && typeof document !== 'undefined') {
+$: if (resolvedEnabled && !mistTexture && typeof document !== 'undefined') {
   mistTexture = createMistTexture()
 }
 
+$: mistDiagnosticKey = [
+  resolvedEnabled,
+  resolvedColor,
+  resolvedOpacity,
+  effectiveLayers,
+  resolvedBaseHeight,
+  resolvedHeightStep,
+  resolvedScale,
+  resolvedDriftSpeed,
+].join('|')
+
+$: if (mistDiagnosticKey !== mistDiagnosticSignature) {
+  mistDiagnosticSignature = mistDiagnosticKey
+  setRuntimeDiagnostic('mistAtmosphere', {
+    label: 'Mist Atmosphere',
+    level: resolvedEnabled && effectiveLayers > 0 ? 'ready' : 'idle',
+    message:
+      resolvedEnabled && effectiveLayers > 0
+        ? `Ground mist consumes runtime atmosphere: ${effectiveLayers} layer(s), opacity ${resolvedOpacity.toFixed(3)}.`
+        : 'Ground mist disabled by runtime atmosphere.',
+    meta: {
+      atmosphereId: atmosphere.id,
+      layers: effectiveLayers,
+      color: resolvedColor,
+      opacity: resolvedOpacity,
+      baseHeight: resolvedBaseHeight,
+      heightStep: resolvedHeightStep,
+      scale: resolvedScale,
+      driftSpeed: resolvedDriftSpeed,
+    },
+  })
+}
+
 useTask(delta => {
-  if (!enabled || !mistPlanes.length) return
+  if (!resolvedEnabled || !mistPlanes.length) return
 
   animationTime += delta
   mistPlanes.forEach((plane, index) => {
     if (!plane) return
-    const drift = animationTime * driftSpeed * (1 + index * 0.15)
+    const drift = animationTime * resolvedDriftSpeed * (1 + index * 0.15)
     plane.position.x =
       Math.sin(drift + index * 1.2) * (3.5 + (index % 6) * 1.25)
     plane.position.z =
@@ -93,21 +141,21 @@ onDestroy(() => {
 })
 </script>
 
-{#if enabled && mistTexture && effectiveLayers > 0}
+{#if resolvedEnabled && mistTexture && effectiveLayers > 0}
   <T.Group>
     {#each Array.from({ length: effectiveLayers }) as _, index}
       <T.Mesh
         bind:ref={mistPlanes[index * 2]}
-        position={[0, baseHeight + index * heightStep, 0]}
+        position={[0, resolvedBaseHeight + index * resolvedHeightStep, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
         renderOrder={18 + index}
       >
-        <T.PlaneGeometry args={[scale, scale, 1, 1]} />
+        <T.PlaneGeometry args={[resolvedScale, resolvedScale, 1, 1]} />
         <T.MeshBasicMaterial
           map={mistTexture}
-          color={color}
+          color={resolvedColor}
           transparent={true}
-          opacity={opacity * (1 - index * 0.14)}
+          opacity={resolvedOpacity * (1 - index * 0.14)}
           depthWrite={false}
           side={THREE.DoubleSide}
           fog={true}
@@ -116,16 +164,16 @@ onDestroy(() => {
       </T.Mesh>
       <T.Mesh
         bind:ref={mistPlanes[(index * 2) + 1]}
-        position={[0, baseHeight + index * heightStep + 0.08, 0]}
+        position={[0, resolvedBaseHeight + index * resolvedHeightStep + 0.08, 0]}
         rotation={[-Math.PI / 2, 0, Math.PI / 2]}
         renderOrder={18 + index}
       >
-        <T.PlaneGeometry args={[scale * 0.92, scale * 0.92, 1, 1]} />
+        <T.PlaneGeometry args={[resolvedScale * 0.92, resolvedScale * 0.92, 1, 1]} />
         <T.MeshBasicMaterial
           map={mistTexture}
-          color={color}
+          color={resolvedColor}
           transparent={true}
-          opacity={opacity * 0.7 * (1 - index * 0.14)}
+          opacity={resolvedOpacity * 0.7 * (1 - index * 0.14)}
           depthWrite={false}
           side={THREE.DoubleSide}
           fog={true}

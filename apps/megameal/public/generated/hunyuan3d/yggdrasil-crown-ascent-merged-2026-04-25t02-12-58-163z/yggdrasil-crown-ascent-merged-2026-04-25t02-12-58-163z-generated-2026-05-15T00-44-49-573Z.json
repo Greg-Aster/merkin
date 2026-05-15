@@ -1,0 +1,15 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/yggdrasil-crown-ascent/yggdrasil-crown-ascent-merged-2026-04-25T02-12-58-163Z.glb",
+  "sourceName": "Yggdrasil Crown Ascent Merged",
+  "sourceReferenceImageUrl": "/generated/hunyuan3d/references/yggdrasil-crown-ascent-merged-2026-04-25t02-12-58-163z-reference-2026-05-15T00-41-20-793Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": false,
+  "promptId": "merkin-1778805680821-5rw3bi",
+  "prompt": "object description: walkway with ramps, landings, final platform, and short crown bridge\nYggdrasil Crown Ascent Merged",
+  "mode": "generate",
+  "shapeModel": "hunyuan3d-dit-v2-0",
+  "paintModel": null,
+  "generatedAt": "2026-05-15T00:44:51.568Z"
+}

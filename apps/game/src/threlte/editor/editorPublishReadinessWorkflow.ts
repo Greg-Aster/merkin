@@ -12,6 +12,8 @@ import type {
 } from './editorPublishReadinessContracts'
 import type { EditorSceneDocument } from './editorTypes'
 
+const requiredRuntimeAssetLodTiers = ['high', 'medium', 'low'] as const
+
 function getWorstSeverity(
   items: EditorPublishReadinessItem[],
 ): EditorPublishReadinessSeverity {
@@ -58,21 +60,22 @@ function countSceneAssetsByStatus(
   )
   let required = 0
   let optional = 0
-  let missingVariants = 0
+  let missingLodVariants = 0
 
   for (const asset of sceneAssets) {
     if (asset.required) required += 1
     else optional += 1
-    const variants = Object.values(asset.qualityVariants ?? {})
-    if (variants.length > 0 && !variants.some(variant => variant?.exists)) {
-      missingVariants += 1
+    for (const tier of requiredRuntimeAssetLodTiers) {
+      if (!asset.qualityVariants?.[tier]?.exists) {
+        missingLodVariants += 1
+      }
     }
   }
 
   return {
     required,
     optional,
-    missingVariants,
+    missingLodVariants,
     total: sceneAssets.length,
   }
 }
@@ -93,13 +96,14 @@ export function addPublishReadinessProductionPanels(
       'runtime-scene-manifest',
       'required-assets',
       'prefab-contract',
+      'style-bake-products',
     ]),
     {
       id: 'scene-runtime-asset-status',
       label: 'Scene Asset Coverage',
       severity:
-        assetStatus.missingVariants > 0 ? 'blocker' : ('ready' as const),
-      detail: `${assetStatus.total} runtime assets in scene, ${assetStatus.required} required, ${assetStatus.optional} optional, ${assetStatus.missingVariants} missing cooked variants.`,
+        assetStatus.missingLodVariants > 0 ? 'blocker' : ('ready' as const),
+      detail: `${assetStatus.total} runtime assets in scene, ${assetStatus.required} required, ${assetStatus.optional} optional, ${assetStatus.missingLodVariants} missing cooked LOD variant(s).`,
     },
   ]
 
@@ -116,12 +120,16 @@ export function addPublishReadinessProductionPanels(
   addPanel(viewModel, {
     id: 'lod-impostors',
     label: 'LOD And Impostor Status',
-    items: getSectionsById(viewModel.sections, ['lod-impostors']),
+    items: getSectionsById(viewModel.sections, [
+      'lod-impostors',
+      'style-bake-products',
+    ]),
   })
   addPanel(viewModel, {
     id: 'collision-render-parity',
     label: 'Collision / Render Parity',
     items: getSectionsById(viewModel.sections, [
+      'mesh-collider-metadata',
       'terrain-collision',
       'spawn-readiness',
     ]),
@@ -187,6 +195,18 @@ export function addPublishReadinessWorkflow(
   })
 
   addWorkflowStep(viewModel, {
+    id: 'bake-scene-mesh-colliders',
+    label: 'Bake scene mesh colliders',
+    command: `pnpm --dir apps/game bake:scene-mesh-colliders -- --level=${scene?.levelId ?? '<level-id>'}`,
+    expectedOutput:
+      'Generated collision GLBs, collider metadata, and scene collision product references.',
+    reason: commandIds.has('bake-scene-mesh-colliders')
+      ? 'Mesh-derived collision products are dirty, stale, missing, malformed, or over budget.'
+      : 'Required only when scene mesh collision products changed.',
+    required: commandIds.has('bake-scene-mesh-colliders'),
+  })
+
+  addWorkflowStep(viewModel, {
     id: 'cook-terrain-chunks',
     label: 'Cook Heightfield Chunks',
     command: 'pnpm --dir apps/game cook:terrain-chunks',
@@ -210,13 +230,24 @@ export function addPublishReadinessWorkflow(
   })
 
   addWorkflowStep(viewModel, {
+    id: 'bake-style-assets',
+    label: 'Bake style assets',
+    command: 'Editor: Style Bake required stale objects',
+    expectedOutput:
+      'Generated style GLBs with companion metadata and source/settings fingerprints.',
+    reason: commandIds.has('bake-style-assets')
+      ? 'Required style-baked products are missing, stale, malformed, or over texture payload policy.'
+      : 'Required only when style-baked products changed.',
+    required: commandIds.has('bake-style-assets'),
+  })
+
+  addWorkflowStep(viewModel, {
     id: 'cook-runtime-assets',
     label: 'Cook runtime assets and manifests',
-    command: commandIds.has('cook-runtime-assets-build')
-      ? 'pnpm --dir apps/game cook:runtime-assets:build'
-      : 'pnpm --dir apps/game cook:runtime-assets',
+    command:
+      `pnpm --dir apps/game cook:runtime-assets -- --level=${viewModel.levelId}`,
     expectedOutput:
-      'Runtime asset manifest, scene manifests, LOD metadata, and impostor atlas.',
+      'Runtime asset LOD GLBs, asset manifest, scene manifests, LOD metadata, and impostor atlas.',
     reason: commandIds.has('cook-runtime-assets')
       ? 'Cooked runtime contracts are missing or stale.'
       : commandIds.has('cook-runtime-assets-build')

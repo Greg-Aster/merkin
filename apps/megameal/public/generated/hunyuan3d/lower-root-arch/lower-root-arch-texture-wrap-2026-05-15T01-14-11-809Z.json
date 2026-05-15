@@ -1,0 +1,15 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/lower-root-arch/lower-root-arch-generated-2026-04-26T02-38-26-370Z.glb",
+  "sourceName": "Lower Root Arch",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/lower-root-arch-2026-05-15T01-11-23-115Z/reference/lower-root-arch-reference-2026-05-15T01-12-49-905Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1778807569970-ggcpkd",
+  "prompt": "object: arched entry structure marking the descent into Hvergelmir. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "texture",
+  "shapeModel": null,
+  "paintModel": "hunyuan3d-paint-v2-0-turbo",
+  "generatedAt": "2026-05-15T01:14:13.510Z"
+}

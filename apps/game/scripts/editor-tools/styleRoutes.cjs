@@ -14,6 +14,56 @@ function sendJson(res, status, payload) {
   res.end(JSON.stringify(payload));
 }
 
+function requestFlag(value) {
+  return value === true || value === '1' || value === 'true' || value === 'yes';
+}
+
+function requestObject(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
+
+function fingerprintValue(value) {
+  if (typeof value === 'string') return value.trim();
+  if (value && typeof value === 'object' && typeof value.value === 'string') {
+    return value.value.trim();
+  }
+  return '';
+}
+
+function fingerprintAlgorithm(value) {
+  if (value && typeof value === 'object' && typeof value.algorithm === 'string') {
+    return value.algorithm.trim();
+  }
+  return '';
+}
+
+function assertRequestedFingerprintMatches(label, requested, expected) {
+  const requestedValue = fingerprintValue(requested);
+  if (!requestedValue) return;
+
+  const expectedValue = fingerprintValue(expected);
+  const requestedAlgorithm = fingerprintAlgorithm(requested);
+  const expectedAlgorithm = fingerprintAlgorithm(expected);
+  if (
+    requestedValue !== expectedValue ||
+    (requestedAlgorithm && expectedAlgorithm && requestedAlgorithm !== expectedAlgorithm)
+  ) {
+    const error = new Error(`${label} fingerprint mismatch. Refresh the style bake input and retry.`);
+    error.statusCode = 409;
+    throw error;
+  }
+}
+
+function assertRequestedCacheKeyMatches(requestedCacheKey, expectedCacheKey) {
+  const requestedValue =
+    typeof requestedCacheKey === 'string' ? requestedCacheKey.trim() : '';
+  if (!requestedValue) return;
+  if (requestedValue === String(expectedCacheKey)) return;
+  const error = new Error('Style bake cache key mismatch. Refresh the style bake input and retry.');
+  error.statusCode = 409;
+  throw error;
+}
+
 async function handleStyleRoutes(req, res, route, context) {
   const { pathname, parsedUrl } = route;
   const {
@@ -21,6 +71,7 @@ async function handleStyleRoutes(req, res, route, context) {
     DEFAULT_COMFYUI_PORT,
     DEFAULT_HUNYUAN_PORT,
     GENERATED_BLENDER_REIMPORT_ROOT,
+    GENERATED_STYLE_LAB_ROOT,
     buildSafeAssetSlug,
     clampNumber,
     copyModelToGlb,
@@ -41,7 +92,9 @@ async function handleStyleRoutes(req, res, route, context) {
     resolveBlenderExportDirectory,
     resolveInspectableModelAsset,
     resolvePublicAssetPath,
+    runBlenderStyleBakeAsset,
     runGltfTransform,
+    runStyleBakeAsset,
     slugify,
     timestampKey,
     toPublicAssetUrl,
@@ -88,6 +141,36 @@ async function handleStyleRoutes(req, res, route, context) {
       console.error('Style inspect error:', error);
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: false, message: `Style inspect failed: ${error.message}` }));
+    }
+    return;
+  }
+
+  if (pathname === '/api/style/fingerprint' && req.method === 'GET') {
+    try {
+      const assetUrl = parsedUrl.query.assetUrl;
+
+      if (!assetUrl) {
+        sendJson(res, 400, { success: false, message: 'assetUrl is required' });
+        return;
+      }
+
+      const { fingerprintFile } = await import('../lib/styleBakeProducts.mjs');
+      const source = resolveInspectableModelAsset(assetUrl);
+      const stats = fs.statSync(source.assetPath);
+      const sourceAssetFingerprint = fingerprintFile(source.assetPath);
+
+      sendJson(res, 200, {
+        success: true,
+        assetUrl,
+        sourceAssetPath: toRepoRelative(source.assetPath),
+        sourceAssetFingerprint,
+        fingerprint: sourceAssetFingerprint,
+        sizeBytes: stats.size,
+        modifiedAt: stats.mtime.toISOString(),
+      });
+    } catch (error) {
+      console.error('Style fingerprint error:', error);
+      sendJson(res, 500, { success: false, message: `Style fingerprint failed: ${error.message}` });
     }
     return;
   }
@@ -168,6 +251,595 @@ async function handleStyleRoutes(req, res, route, context) {
         console.error('Style simplify error:', error);
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, message: `Style simplify failed: ${error.message}` }));
+      }
+    });
+    return;
+  }
+
+  if (pathname === '/api/style/bake-procedural' && req.method === 'POST') {
+    readRequestBody(req, async (body) => {
+      try {
+        const {
+          createStyleBakeProduct,
+          fingerprintFile,
+          getStyleBakeCacheKey,
+          getStyleBakeProductStatus,
+          getStyleBakeSettingsFingerprint,
+          normalizeStyleBakeMode,
+          normalizeStyleBakeSettings,
+          readStyleBakeProductMetadata,
+          styleBakeProceduralGenerator,
+        } = await import('../lib/styleBakeProducts.mjs');
+        const {
+          assetUrl,
+          outputName = '',
+          styleProfileName = 'Painterly Storybook',
+          prompt = '',
+          textureSize = 256,
+          lineStrength = 0.2,
+          brushStrength = 0.2,
+          aoStrength = 0,
+          cavityStrength = 0,
+          curvatureStrength = 0,
+          geometrySimplification = 0,
+          outputTier = 'runtime',
+          mode = 'procedural-material',
+          bakeMode = mode,
+          sourceAssetFingerprint: requestedSourceAssetFingerprint = '',
+          sourceNodeTransform = null,
+          sourceLocalBounds = null,
+          settings: requestedSettings = null,
+          settingsFingerprint: requestedSettingsFingerprint = null,
+          cacheKey: requestedCacheKey = '',
+          levelId = '',
+          nodeId = '',
+          force = false,
+        } = JSON.parse(body);
+
+        if (!assetUrl) {
+          sendJson(res, 400, { success: false, message: 'assetUrl is required' });
+          return;
+        }
+        let normalizedBakeMode;
+        try {
+          normalizedBakeMode = bakeMode === 'procedural'
+            ? 'procedural-material'
+            : normalizeStyleBakeMode(bakeMode);
+        } catch (modeError) {
+          sendJson(res, 400, {
+            success: false,
+            message: modeError.message,
+          });
+          return;
+        }
+
+        if (normalizedBakeMode === 'blender-geometry') {
+          sendJson(res, 400, {
+            success: false,
+            message:
+              'Use /api/style/bake-blender for blender-geometry style bakes.',
+          });
+          return;
+        }
+        if (normalizedBakeMode === 'ai-texture-source') {
+          sendJson(res, 400, {
+            success: false,
+            message:
+              'AI texture source generation is optional art-source input and is not a deterministic procedural style bake backend.',
+          });
+          return;
+        }
+
+        const source = resolveInspectableModelAsset(assetUrl);
+        const settings = normalizeStyleBakeSettings({
+          styleProfileName,
+          prompt,
+          textureSize,
+          lineStrength,
+          brushStrength,
+          aoStrength,
+          cavityStrength,
+          curvatureStrength,
+          geometrySimplification,
+          outputTier,
+          ...requestObject(requestedSettings),
+        });
+        const sourceAssetFingerprint = fingerprintFile(source.assetPath);
+        assertRequestedFingerprintMatches(
+          'Style source',
+          requestedSourceAssetFingerprint,
+          { algorithm: 'sha256', value: sourceAssetFingerprint },
+        );
+        const settingsFingerprint = getStyleBakeSettingsFingerprint(settings);
+        assertRequestedFingerprintMatches(
+          'Style settings',
+          requestedSettingsFingerprint,
+          settingsFingerprint,
+        );
+        const cacheKey = getStyleBakeCacheKey({
+          sourceAssetFingerprint,
+          settingsFingerprint,
+          mode: normalizedBakeMode,
+          generator: styleBakeProceduralGenerator,
+        });
+        assertRequestedCacheKeyMatches(requestedCacheKey, cacheKey);
+        const cacheSlug = buildSafeAssetSlug(cacheKey, 80);
+        const outputDirectory = path.join(GENERATED_STYLE_LAB_ROOT, 'baked-style', cacheSlug);
+        ensureDirectory(outputDirectory);
+        const outputFilePath = path.join(outputDirectory, `${cacheSlug}-style-baked.glb`);
+        const metadataPath = outputFilePath.replace(/\.glb$/i, '.json');
+        const cachedMetadata = readStyleBakeProductMetadata(metadataPath);
+        const cachedProduct = cachedMetadata?.product ?? cachedMetadata?.styleBakeProduct ?? null;
+        const cachedStatus = getStyleBakeProductStatus({
+          product: cachedProduct,
+          assetPath: outputFilePath,
+          metadataPath,
+          sourceAssetFingerprint,
+          settingsFingerprint,
+          cacheKey,
+          generator: styleBakeProceduralGenerator,
+        });
+
+        if (!requestFlag(force) && cachedStatus === 'clean') {
+          const outputStats = fs.statSync(outputFilePath);
+          const inspectReport = await inspectGltfAsset(outputFilePath).catch((inspectError) => (
+            `glTF inspection unavailable: ${inspectError.message}`
+          ));
+          const product = createStyleBakeProduct({
+            assetUrl: toPublicAssetUrl(outputFilePath),
+            metadataUrl: toPublicAssetUrl(metadataPath),
+            sourceAssetUrl: assetUrl,
+            sourceAssetPath: toRepoRelative(source.assetPath),
+            sourceAssetFingerprint,
+            nodeId,
+            levelId,
+            sourceNodeTransform,
+            sourceLocalBounds,
+            settings,
+            generatedAt: cachedProduct.generatedAt || cachedMetadata?.createdAt || fs.statSync(metadataPath).mtime.toISOString(),
+            cacheKey,
+            settingsFingerprint,
+            status: 'clean',
+            mode: normalizedBakeMode,
+            generator: styleBakeProceduralGenerator,
+          });
+          sendJson(res, 200, {
+            success: true,
+            cached: true,
+            cacheStatus: 'clean',
+            message: `Reused cached procedural style bake at ${toPublicAssetUrl(outputFilePath)}`,
+            assetUrl: toPublicAssetUrl(outputFilePath),
+            assetPath: toRepoRelative(outputFilePath),
+            metadataUrl: toPublicAssetUrl(metadataPath),
+            metadataPath: toRepoRelative(metadataPath),
+            product,
+            sizeBytes: outputStats.size,
+            sizeFormatted: formatBytes(outputStats.size),
+            inspectReport,
+          });
+          return;
+        }
+
+        await copyModelToGlb(source.assetPath, outputFilePath);
+        const bakeResult = await runStyleBakeAsset([
+          '--input',
+          outputFilePath,
+          '--output',
+          outputFilePath,
+          '--metadata-output',
+          metadataPath,
+          '--style-profile-name',
+          String(settings.styleProfileName),
+          '--prompt',
+          String(settings.prompt),
+          '--texture-size',
+          String(settings.textureSize),
+          '--line-strength',
+          String(settings.lineStrength),
+          '--brush-strength',
+          String(settings.brushStrength),
+          '--ao-strength',
+          String(settings.aoStrength),
+          '--cavity-strength',
+          String(settings.cavityStrength),
+          '--curvature-strength',
+          String(settings.curvatureStrength),
+          '--geometry-simplification',
+          String(settings.geometrySimplification),
+          '--output-tier',
+          String(settings.outputTier),
+          '--source-asset-url',
+          String(assetUrl),
+          '--asset-url',
+          toPublicAssetUrl(outputFilePath),
+          '--metadata-url',
+          toPublicAssetUrl(metadataPath),
+          '--level-id',
+          String(levelId),
+          '--node-id',
+          String(nodeId),
+        ]);
+
+        if (bakeResult.code !== 0) {
+          throw new Error(bakeResult.stderr || bakeResult.stdout || 'Procedural style bake failed.');
+        }
+
+        const prunedOutputFilePath = outputFilePath.replace(/\.glb$/i, '.pruned.glb');
+        const pruneResult = await runGltfTransform([
+          'prune',
+          outputFilePath,
+          prunedOutputFilePath,
+        ]);
+        if (pruneResult.code !== 0) {
+          throw new Error(pruneResult.stderr || pruneResult.stdout || 'Procedural style bake prune failed.');
+        }
+        fs.copyFileSync(prunedOutputFilePath, outputFilePath);
+        fs.unlinkSync(prunedOutputFilePath);
+
+        const inspectReport = await inspectGltfAsset(outputFilePath).catch((inspectError) => (
+          `glTF inspection unavailable: ${inspectError.message}`
+        ));
+        const outputStats = fs.statSync(outputFilePath);
+        const bakeMetadata = fs.existsSync(metadataPath)
+          ? JSON.parse(fs.readFileSync(metadataPath, 'utf8'))
+          : {};
+        const generatedAt = new Date().toISOString();
+        const product = createStyleBakeProduct({
+          assetUrl: toPublicAssetUrl(outputFilePath),
+          metadataUrl: toPublicAssetUrl(metadataPath),
+          sourceAssetUrl: assetUrl,
+          sourceAssetPath: toRepoRelative(source.assetPath),
+          sourceAssetFingerprint,
+          nodeId,
+          levelId,
+          sourceNodeTransform,
+          sourceLocalBounds,
+          settings,
+          generatedAt,
+          cacheKey,
+          settingsFingerprint,
+          status: 'clean',
+          mode: normalizedBakeMode,
+          generator: styleBakeProceduralGenerator,
+        });
+
+        fs.writeFileSync(metadataPath, JSON.stringify({
+          ...bakeMetadata,
+          createdAt: generatedAt,
+          sourceAssetUrl: assetUrl,
+          sourceAssetPath: toRepoRelative(source.assetPath),
+          outputAssetUrl: toPublicAssetUrl(outputFilePath),
+          outputAssetPath: toRepoRelative(outputFilePath),
+          sourceAssetFingerprint: product.sourceAssetFingerprint,
+          styleSettingsFingerprint: product.settingsFingerprint,
+          styleProfileName: settings.styleProfileName,
+          prompt: settings.prompt,
+          textureSize: settings.textureSize,
+          lineStrength: settings.lineStrength,
+          brushStrength: settings.brushStrength,
+          aoStrength: settings.aoStrength,
+          cavityStrength: settings.cavityStrength,
+          curvatureStrength: settings.curvatureStrength,
+          geometrySimplification: settings.geometrySimplification,
+          outputTier: settings.outputTier,
+          generator: styleBakeProceduralGenerator.label,
+          styleBakeProduct: product,
+          product,
+        }, null, 2));
+
+        sendJson(res, 200, {
+          success: true,
+          cached: false,
+          cacheStatus: cachedStatus,
+          message: `Baked procedural style asset at ${toPublicAssetUrl(outputFilePath)}`,
+          assetUrl: toPublicAssetUrl(outputFilePath),
+          assetPath: toRepoRelative(outputFilePath),
+          metadataUrl: toPublicAssetUrl(metadataPath),
+          metadataPath: toRepoRelative(metadataPath),
+          product,
+          sizeBytes: outputStats.size,
+          sizeFormatted: formatBytes(outputStats.size),
+          inspectReport,
+        });
+      } catch (error) {
+        if (!error.statusCode || error.statusCode >= 500) {
+          console.error('Procedural style bake error:', error);
+        }
+        sendJson(res, error.statusCode || 500, { success: false, message: `Procedural style bake failed: ${error.message}` });
+      }
+    });
+    return;
+  }
+
+  if (pathname === '/api/style/bake-blender' && req.method === 'POST') {
+    readRequestBody(req, async (body) => {
+      try {
+        const {
+          createStyleBakeProduct,
+          fingerprintFile,
+          getStyleBakeCacheKey,
+          getStyleBakeProductStatus,
+          getStyleBakeSettingsFingerprint,
+          normalizeStyleBakeSettings,
+          readStyleBakeProductMetadata,
+          styleBakeBlenderGeometryGenerator,
+        } = await import('../lib/styleBakeProducts.mjs');
+        const {
+          assetUrl,
+          mode = 'blender-geometry',
+          bakeMode = mode,
+          styleProfileName = 'Painterly Storybook',
+          profileId = '',
+          prompt = '',
+          textureSize = 512,
+          lineStrength = 0.35,
+          brushStrength = 0.25,
+          aoStrength = 0.8,
+          cavityStrength = 0.65,
+          curvatureStrength = 0.45,
+          geometrySimplification = 0,
+          outputTier = 'runtime',
+          bevelCleanup = false,
+          weightedNormalCleanup = true,
+          lineGeometry = false,
+          settings: requestedSettings = null,
+          sourceAssetFingerprint: requestedSourceAssetFingerprint = '',
+          sourceNodeTransform = null,
+          sourceLocalBounds = null,
+          settingsFingerprint: requestedSettingsFingerprint = null,
+          cacheKey: requestedCacheKey = '',
+          levelId = '',
+          nodeId = '',
+          force = false,
+        } = JSON.parse(body);
+
+        if (!assetUrl) {
+          sendJson(res, 400, { success: false, message: 'assetUrl is required' });
+          return;
+        }
+        if (bakeMode !== 'blender-geometry') {
+          sendJson(res, 400, {
+            success: false,
+            message:
+              'Use /api/style/bake-procedural for procedural-material style bakes.',
+          });
+          return;
+        }
+
+        const blenderExecutable = detectBlenderExecutable();
+        if (!blenderExecutable) {
+          sendJson(res, 503, {
+            success: false,
+            mode: 'blender-geometry',
+            message: 'Blender executable not found. Install Blender or set BLENDER_PATH to enable blender-geometry style bakes.',
+          });
+          return;
+        }
+
+        const source = resolveInspectableModelAsset(assetUrl);
+        const settings = normalizeStyleBakeSettings({
+          styleProfileName: profileId || styleProfileName,
+          profileId: profileId || styleProfileName,
+          prompt,
+          textureSize,
+          lineStrength,
+          brushStrength,
+          aoStrength,
+          cavityStrength,
+          curvatureStrength,
+          geometrySimplification,
+          outputTier,
+          bevelCleanup,
+          weightedNormalCleanup,
+          lineGeometry,
+          ...requestObject(requestedSettings),
+        });
+        const sourceAssetFingerprint = fingerprintFile(source.assetPath);
+        assertRequestedFingerprintMatches(
+          'Style source',
+          requestedSourceAssetFingerprint,
+          { algorithm: 'sha256', value: sourceAssetFingerprint },
+        );
+        const settingsFingerprint = getStyleBakeSettingsFingerprint(settings);
+        assertRequestedFingerprintMatches(
+          'Style settings',
+          requestedSettingsFingerprint,
+          settingsFingerprint,
+        );
+        const cacheKey = getStyleBakeCacheKey({
+          sourceAssetFingerprint,
+          mode: 'blender-geometry',
+          settingsFingerprint,
+          generator: styleBakeBlenderGeometryGenerator,
+        });
+        assertRequestedCacheKeyMatches(requestedCacheKey, cacheKey);
+        const cacheSlug = buildSafeAssetSlug(cacheKey, 96);
+        const outputDirectory = path.join(GENERATED_STYLE_LAB_ROOT, 'baked-style', 'blender-geometry', cacheSlug);
+        ensureDirectory(outputDirectory);
+        const outputFilePath = path.join(outputDirectory, `${cacheSlug}-blender-style.glb`);
+        const metadataPath = outputFilePath.replace(/\.glb$/i, '.json');
+        const cachedMetadata = readStyleBakeProductMetadata(metadataPath);
+        const cachedProduct = cachedMetadata?.product ?? cachedMetadata?.styleBakeProduct ?? null;
+        const cachedStatus = getStyleBakeProductStatus({
+          product: cachedProduct,
+          assetPath: outputFilePath,
+          metadataPath,
+          sourceAssetFingerprint,
+          settingsFingerprint,
+          cacheKey,
+          generator: styleBakeBlenderGeometryGenerator,
+        });
+
+        if (!requestFlag(force) && cachedStatus === 'clean') {
+          const outputStats = fs.statSync(outputFilePath);
+          const inspectReport = await inspectGltfAsset(outputFilePath).catch((inspectError) => (
+            `glTF inspection unavailable: ${inspectError.message}`
+          ));
+          const product = createStyleBakeProduct({
+            mode: 'blender-geometry',
+            assetUrl: toPublicAssetUrl(outputFilePath),
+            metadataUrl: toPublicAssetUrl(metadataPath),
+            sourceAssetUrl: assetUrl,
+            sourceAssetFingerprint,
+            nodeId,
+            levelId,
+            sourceNodeTransform,
+            sourceLocalBounds,
+            settings,
+            generatedAt: cachedProduct.generatedAt || cachedMetadata?.createdAt || fs.statSync(metadataPath).mtime.toISOString(),
+            cacheKey,
+            settingsFingerprint,
+            status: 'clean',
+            generator: styleBakeBlenderGeometryGenerator,
+          });
+          sendJson(res, 200, {
+            success: true,
+            cached: true,
+            cacheStatus: 'clean',
+            mode: 'blender-geometry',
+            message: `Reused cached Blender style bake at ${toPublicAssetUrl(outputFilePath)}`,
+            assetUrl: toPublicAssetUrl(outputFilePath),
+            assetPath: toRepoRelative(outputFilePath),
+            metadataUrl: toPublicAssetUrl(metadataPath),
+            metadataPath: toRepoRelative(metadataPath),
+            blenderExecutable,
+            product,
+            sizeBytes: outputStats.size,
+            sizeFormatted: formatBytes(outputStats.size),
+            inspectReport,
+          });
+          return;
+        }
+
+        const blenderArgs = [
+          '--input',
+          source.assetPath,
+          '--output',
+          outputFilePath,
+          '--metadata-output',
+          metadataPath,
+          '--profile-id',
+          String(settings.profileId || settings.styleProfileName),
+          '--texture-size',
+          String(settings.textureSize),
+          '--ao-strength',
+          String(settings.aoStrength),
+          '--cavity-strength',
+          String(settings.cavityStrength),
+          '--curvature-strength',
+          String(settings.curvatureStrength),
+          '--line-strength',
+          String(settings.lineStrength),
+          '--brush-strength',
+          String(settings.brushStrength),
+          '--geometry-simplification',
+          String(settings.geometrySimplification),
+          '--output-tier',
+          String(settings.outputTier),
+          '--source-asset-url',
+          String(assetUrl),
+          '--asset-url',
+          toPublicAssetUrl(outputFilePath),
+          '--metadata-url',
+          toPublicAssetUrl(metadataPath),
+          '--level-id',
+          String(levelId),
+          '--node-id',
+          String(nodeId),
+        ];
+        if (requestFlag(bevelCleanup)) blenderArgs.push('--bevel-cleanup');
+        if (requestFlag(weightedNormalCleanup)) {
+          blenderArgs.push('--weighted-normal-cleanup');
+        } else {
+          blenderArgs.push('--no-weighted-normal-cleanup');
+        }
+        if (requestFlag(lineGeometry)) blenderArgs.push('--line-geometry');
+
+        const bakeResult = await runBlenderStyleBakeAsset(blenderArgs);
+        if (bakeResult.code !== 0) {
+          const message = bakeResult.stderr || bakeResult.stdout || 'Blender geometry style bake failed.';
+          throw new Error(message.trim());
+        }
+
+        const prunedOutputFilePath = outputFilePath.replace(/\.glb$/i, '.pruned.glb');
+        const pruneResult = await runGltfTransform([
+          'prune',
+          outputFilePath,
+          prunedOutputFilePath,
+        ]);
+        if (pruneResult.code !== 0) {
+          throw new Error(pruneResult.stderr || pruneResult.stdout || 'Blender style bake prune failed.');
+        }
+        fs.copyFileSync(prunedOutputFilePath, outputFilePath);
+        fs.unlinkSync(prunedOutputFilePath);
+
+        const inspectReport = await inspectGltfAsset(outputFilePath).catch((inspectError) => (
+          `glTF inspection unavailable: ${inspectError.message}`
+        ));
+        const outputStats = fs.statSync(outputFilePath);
+        const bakeMetadata = fs.existsSync(metadataPath)
+          ? JSON.parse(fs.readFileSync(metadataPath, 'utf8'))
+          : {};
+        const generatedAt = new Date().toISOString();
+        const product = createStyleBakeProduct({
+          mode: 'blender-geometry',
+          assetUrl: toPublicAssetUrl(outputFilePath),
+          metadataUrl: toPublicAssetUrl(metadataPath),
+          sourceAssetUrl: assetUrl,
+          sourceAssetFingerprint,
+          nodeId,
+          levelId,
+          sourceNodeTransform,
+          sourceLocalBounds,
+          settings,
+          generatedAt,
+          cacheKey,
+          settingsFingerprint,
+          status: 'clean',
+          generator: styleBakeBlenderGeometryGenerator,
+        });
+
+        fs.writeFileSync(metadataPath, JSON.stringify({
+          ...bakeMetadata,
+          createdAt: generatedAt,
+          sourceAssetUrl: assetUrl,
+          sourceAssetPath: toRepoRelative(source.assetPath),
+          outputAssetUrl: toPublicAssetUrl(outputFilePath),
+          outputAssetPath: toRepoRelative(outputFilePath),
+          sourceAssetFingerprint: product.sourceAssetFingerprint,
+          styleSettingsFingerprint: product.settingsFingerprint,
+          styleProfileName: settings.styleProfileName,
+          profileId: settings.profileId,
+          prompt: settings.prompt,
+          textureSize: settings.textureSize,
+          outputTier: settings.outputTier,
+          blenderExecutable,
+          generator: styleBakeBlenderGeometryGenerator.label,
+          styleBakeProduct: product,
+          product,
+        }, null, 2));
+
+        sendJson(res, 200, {
+          success: true,
+          cached: false,
+          cacheStatus: cachedStatus,
+          mode: 'blender-geometry',
+          message: `Baked Blender geometry style asset at ${toPublicAssetUrl(outputFilePath)}`,
+          assetUrl: toPublicAssetUrl(outputFilePath),
+          assetPath: toRepoRelative(outputFilePath),
+          metadataUrl: toPublicAssetUrl(metadataPath),
+          metadataPath: toRepoRelative(metadataPath),
+          blenderExecutable,
+          product,
+          sizeBytes: outputStats.size,
+          sizeFormatted: formatBytes(outputStats.size),
+          inspectReport,
+        });
+      } catch (error) {
+        if (!error.statusCode || error.statusCode >= 500) {
+          console.error('Blender style bake error:', error);
+        }
+        sendJson(res, error.statusCode || 500, { success: false, message: `Blender style bake failed: ${error.message}` });
       }
     });
     return;
@@ -352,6 +1024,7 @@ async function handleStyleRoutes(req, res, route, context) {
           controlNetNotes = '',
           referenceImageUrl = '',
           comfyUiApiUrl = `http://127.0.0.1:${DEFAULT_COMFYUI_PORT}`,
+          comfyUiLowVramMode = false,
           hunyuanApiUrl = `http://127.0.0.1:${DEFAULT_HUNYUAN_PORT}`,
           generateReferenceIfMissing = true,
         } = JSON.parse(body);
@@ -376,9 +1049,12 @@ async function handleStyleRoutes(req, res, route, context) {
         let selectedReferencePath = selectedReferenceUrl ? resolvePublicAssetPath(selectedReferenceUrl) : '';
         let generatedReference = null;
         let referenceGenerationWarning = '';
+        const lowVramMode = requestFlag(comfyUiLowVramMode);
 
         if (!selectedReferencePath && generateReferenceIfMissing && prompt.trim()) {
-          const serverState = await getHunyuanBackendStatus(hunyuanApiUrl, comfyUiApiUrl, true).catch(() => null);
+          const serverState = await getHunyuanBackendStatus(hunyuanApiUrl, comfyUiApiUrl, true, {
+            lowVram: lowVramMode,
+          }).catch(() => null);
           const comfyUiRoot = getComfyUiInstallRoot(serverState);
           if (comfyUiRoot) {
             try {
@@ -419,6 +1095,7 @@ async function handleStyleRoutes(req, res, route, context) {
           negativePrompt,
           loraNotes,
           controlNetNotes,
+          comfyUiLowVramMode: lowVramMode,
           referenceGenerationWarning,
           referenceImageUrl: selectedReferenceUrl,
           workspaceReferenceImageUrl: workspaceReferencePublicUrl,

@@ -12,6 +12,16 @@ import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readGltfAssetMetadata } from './lib/gltfAssetMetadata.mjs'
+import {
+  createGeneratedCollisionProduct,
+  meshCollisionGeneratorVersion,
+} from './lib/meshCollisionProducts.mjs'
+import {
+  createRuntimeAssetCookContext,
+  getCookedPublicUrl,
+  tierConfigs,
+} from './lib/runtimeAssetCookManifest.mjs'
+import { cookRuntimeAssetVariant } from './lib/runtimeAssetVariantCooker.mjs'
 
 const repoRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const appRoot = resolve(repoRoot, 'apps/game')
@@ -25,6 +35,7 @@ const defaultTriangleBudget = 5000
 const detailMeshTriangleBudget = 20000
 const hardColliderTriangleBudget = 20000
 const defaultSimplifyError = 0.05
+const defaultCollisionLodSourceTier = 'low'
 const assetLocalCoordinateSpaceVersion = 1
 const assetLocalIdentityMatrix = [
   1, 0, 0, 0,
@@ -60,6 +71,14 @@ function parseArgs(argv) {
       parsed.simplify = false
       continue
     }
+    if (arg === '--no-cook-lod-source') {
+      parsed.cookLodSource = false
+      continue
+    }
+    if (arg === '--force-lod-source') {
+      parsed.forceLodSource = true
+      continue
+    }
     if (arg === '--dry-run') {
       parsed.writeScene = false
       parsed.dryRun = true
@@ -88,6 +107,9 @@ Options:
   --channel=<channel>        worldStatic, worldDynamic, trigger, or detail.
   --triangle-budget=<count>  Maximum collider triangles.
   --simplify-error=<value>   gltf-transform simplify error threshold.
+  --lod-source-tier=<tier>   source, low, medium, or high. Defaults to low.
+  --no-cook-lod-source       Require the selected LOD source to already exist.
+  --force-lod-source         Rebuild the selected LOD source before collider bake.
   --no-simplify             Fail instead of simplifying over-budget assets.
   --dry-run                 Write artifacts but do not update the scene file.
   --help                    Show this help.
@@ -126,6 +148,33 @@ function normalizePublicUrl(url) {
   return normalized
 }
 
+function normalizeLodSourceTier(value) {
+  const normalized = String(value || defaultCollisionLodSourceTier)
+  if (normalized === 'source') return normalized
+  if (tierConfigs.some(tier => tier.id === normalized)) return normalized
+  throw new Error('lod source tier must be source, low, medium, or high.')
+}
+
+function getRequestedLodSourceTier(args, node) {
+  if (args['lod-source-tier']) return args['lod-source-tier']
+
+  const authoredTier = node.collision?.lodSourceTier ?? node.collision?.lodTier
+  return authoredTier === 'source' ? defaultCollisionLodSourceTier : authoredTier
+}
+
+function stripCookedLodTier(url) {
+  return normalizePublicUrl(url).replace(
+    /\.(low|medium|high)(?=\.(glb|gltf)$)/i,
+    '',
+  )
+}
+
+function isCookedLodTierUrl(url, tier) {
+  return new RegExp(`\\.${tier}\\.(glb|gltf)$`, 'i').test(
+    normalizePublicUrl(url).split('?')[0],
+  )
+}
+
 function resolvePublicAssetPath(publicRoot, url) {
   const normalized = decodeURIComponent(url.split('?')[0]).replace(/^\/+/, '')
   const fullPath = resolve(publicRoot, normalized)
@@ -137,6 +186,69 @@ function resolvePublicAssetPath(publicRoot, url) {
     throw new Error('Asset path resolves outside the public directory.')
   }
   return fullPath
+}
+
+function prepareCollisionSourceAsset({
+  publicRoot,
+  visualSourceAssetUrl,
+  lodSourceTier,
+  cookLodSource,
+  forceLodSource,
+}) {
+  if (lodSourceTier === 'source') {
+    return {
+      colliderSourceAssetUrl: visualSourceAssetUrl,
+      colliderSourceTier: 'source',
+      cooked: false,
+    }
+  }
+  if (isCookedLodTierUrl(visualSourceAssetUrl, lodSourceTier)) {
+    return {
+      colliderSourceAssetUrl: visualSourceAssetUrl,
+      colliderSourceTier: lodSourceTier,
+      cooked: false,
+    }
+  }
+
+  const sourceAssetUrl = stripCookedLodTier(visualSourceAssetUrl)
+  const colliderSourceAssetUrl = getCookedPublicUrl(
+    sourceAssetUrl,
+    lodSourceTier,
+  )
+  const colliderSourcePath = resolvePublicAssetPath(
+    publicRoot,
+    colliderSourceAssetUrl,
+  )
+  const shouldCook =
+    cookLodSource !== false &&
+    (forceLodSource || !existsSync(colliderSourcePath))
+
+  if (shouldCook) {
+    const context = createRuntimeAssetCookContext({
+      appRoot,
+      repoRoot,
+      publicRoot,
+    })
+    const tier = tierConfigs.find(candidate => candidate.id === lodSourceTier)
+    cookRuntimeAssetVariant({
+      context,
+      sourceUrl: sourceAssetUrl,
+      tier,
+      force: Boolean(forceLodSource),
+    })
+  }
+
+  if (!existsSync(colliderSourcePath)) {
+    throw new Error(
+      `Collision LOD source ${colliderSourceAssetUrl} is missing; run runtime asset cooking or pass --lod-source-tier=source.`,
+    )
+  }
+
+  return {
+    colliderSourceAssetUrl,
+    colliderSourceTier: lodSourceTier,
+    cooked: shouldCook,
+  }
 }
 
 function toPublicUrl(publicRoot, path) {
@@ -165,6 +277,21 @@ function fingerprintFile(path) {
   }
 }
 
+function getFingerprintValue(fingerprint) {
+  return typeof fingerprint === 'string' ? fingerprint : fingerprint?.value ?? ''
+}
+
+function createColliderCacheKey(product) {
+  return [
+    product.generatorVersion,
+    getFingerprintValue(product.sourceMeshFingerprint),
+    getFingerprintValue(product.transformFingerprint),
+    getFingerprintValue(product.policyFingerprint),
+  ]
+    .filter(Boolean)
+    .join(':')
+}
+
 function toAssetLocalBounds(bounds) {
   if (!bounds?.min || !bounds?.max) return null
   return {
@@ -173,6 +300,34 @@ function toAssetLocalBounds(bounds) {
     size: bounds.size?.slice(0, 3),
     center: bounds.center?.slice(0, 3),
   }
+}
+
+function isUsableLocalBounds(bounds) {
+  if (
+    !bounds ||
+    !Array.isArray(bounds.size) ||
+    bounds.size.length !== 3 ||
+    !bounds.size.every(component => Number.isFinite(component))
+  ) {
+    return false
+  }
+
+  const largestExtent = Math.max(
+    ...bounds.size.map(component => Math.abs(component)),
+  )
+  return largestExtent > 0 && largestExtent < 1024
+}
+
+function getColliderLocalBounds({
+  colliderBounds,
+  colliderSourceBounds,
+  visualSourceBounds,
+}) {
+  return (
+    [colliderBounds, colliderSourceBounds, visualSourceBounds].find(
+      isUsableLocalBounds,
+    ) ?? colliderBounds
+  )
 }
 
 function createIdentityAssetLocalTransformMetadata({
@@ -354,8 +509,12 @@ function updateSceneNode({
   node,
   colliderUrl,
   metadataUrl,
+  sourceAssetUrl,
+  colliderSourceAssetUrl,
+  lodSourceTier,
   assetLocalTransform,
   triangleCount,
+  colliderCacheKey,
   triangleBudget,
   intent,
   channel,
@@ -365,23 +524,34 @@ function updateSceneNode({
     shape: 'trimesh',
     colliderUrl,
     colliderMetadataUrl: metadataUrl,
+    colliderCacheKey,
+    sourceAssetUrl,
+    colliderSourceAssetUrl,
     assetLocalTransform,
-    triangleBudget,
+    lodTier: lodSourceTier,
+    lodSourceTier: undefined,
+    maxTriangles: triangleBudget,
     intent,
     channel,
-    enabled: true,
+    mode: intent === 'trigger' ? 'trigger' : 'auto',
     triangleCount,
     sensor: intent === 'trigger' || intent === 'detailMesh',
     friction: node.collision?.friction ?? 0.7,
     restitution: node.collision?.restitution ?? 0,
+    generationStatus: 'ready',
+    generationLastError: undefined,
   }
   scene.updatedAt = new Date().toISOString()
   return {
     shape: node.collision.shape,
     colliderUrl: node.collision.colliderUrl,
     colliderMetadataUrl: node.collision.colliderMetadataUrl,
+    colliderCacheKey: node.collision.colliderCacheKey,
+    sourceAssetUrl: node.collision.sourceAssetUrl,
+    colliderSourceAssetUrl: node.collision.colliderSourceAssetUrl,
+    lodTier: node.collision.lodTier,
     assetLocalTransform: node.collision.assetLocalTransform,
-    triangleBudget,
+    maxTriangles: triangleBudget,
     triangleCount,
     intent,
     channel,
@@ -428,6 +598,20 @@ function main() {
   if (!existsSync(sourcePath)) {
     throw new Error(`Source asset file not found: ${sourceAssetUrl}`)
   }
+  const lodSourceTier = normalizeLodSourceTier(
+    getRequestedLodSourceTier(args, node),
+  )
+  const collisionSource = prepareCollisionSourceAsset({
+    publicRoot,
+    visualSourceAssetUrl: sourceAssetUrl,
+    lodSourceTier,
+    cookLodSource: args.cookLodSource,
+    forceLodSource: args.forceLodSource,
+  })
+  const colliderSourcePath = resolvePublicAssetPath(
+    publicRoot,
+    collisionSource.colliderSourceAssetUrl,
+  )
 
   const { intent, channel } = normalizeCollisionPolicy({
     intent: args.intent || node.collision?.intent,
@@ -435,18 +619,27 @@ function main() {
   })
   const triangleBudget = chooseBudget({
     requestedBudget:
-      args['triangle-budget'] ?? args['max-triangles'] ?? node.collision?.triangleBudget,
+      args['triangle-budget'] ??
+      args['max-triangles'] ??
+      node.collision?.maxTriangles ??
+      node.collision?.triangleBudget,
     intent,
   })
-  const sourceMetadata = readGltfAssetMetadata(sourcePath)
-  if (!sourceMetadata.valid) {
+  const visualSourceMetadata = readGltfAssetMetadata(sourcePath)
+  if (!visualSourceMetadata.valid) {
     throw new Error(
-      `Source asset metadata is invalid: ${sourceMetadata.errors.join(' ')}`,
+      `Source asset metadata is invalid: ${visualSourceMetadata.errors.join(' ')}`,
     )
   }
-  if (sourceMetadata.triangleCount > triangleBudget && !args.simplify) {
+  const colliderSourceMetadata = readGltfAssetMetadata(colliderSourcePath)
+  if (!colliderSourceMetadata.valid) {
     throw new Error(
-      `Source asset has ${sourceMetadata.triangleCount} triangles, exceeding budget ${triangleBudget}; enable simplification or author a simpler collision mesh.`,
+      `Collision source asset metadata is invalid: ${colliderSourceMetadata.errors.join(' ')}`,
+    )
+  }
+  if (colliderSourceMetadata.triangleCount > triangleBudget && !args.simplify) {
+    throw new Error(
+      `Collision source asset has ${colliderSourceMetadata.triangleCount} triangles, exceeding budget ${triangleBudget}; enable simplification or author a simpler collision mesh.`,
     )
   }
 
@@ -458,9 +651,9 @@ function main() {
   mkdirSync(directory, { recursive: true })
 
   const simplification = bakeColliderAsset({
-    sourcePath,
+    sourcePath: colliderSourcePath,
     outputPath: colliderPath,
-    sourceTriangleCount: sourceMetadata.triangleCount,
+    sourceTriangleCount: colliderSourceMetadata.triangleCount,
     triangleBudget,
     simplify: args.simplify,
     simplifyError: Number(args['simplify-error'] ?? defaultSimplifyError),
@@ -476,40 +669,88 @@ function main() {
   const metadataUrl = toPublicUrl(publicRoot, metadataPath)
   const generatedAt = new Date().toISOString()
   const sourceAssetFingerprint = fingerprintFile(sourcePath)
+  const colliderSourceAssetFingerprint = fingerprintFile(colliderSourcePath)
   const bakeConfig = {
     command: 'pnpm --dir apps/game bake:mesh-collider',
     levelId,
     nodeId,
     sourceAssetUrl,
+    colliderSourceAssetUrl: collisionSource.colliderSourceAssetUrl,
+    lodSourceTier,
     intent,
     channel,
     triangleBudget,
     simplify: Boolean(args.simplify),
     simplifyError: Number(args['simplify-error'] ?? defaultSimplifyError),
   }
+  const colliderLocalBounds = getColliderLocalBounds({
+    colliderBounds: colliderMetadata.bounds,
+    colliderSourceBounds: colliderSourceMetadata.bounds,
+    visualSourceBounds: visualSourceMetadata.bounds,
+  })
   const assetLocalTransform = createIdentityAssetLocalTransformMetadata({
     sourceAssetUrl,
     sourceNodeName: node.name || node.id,
-    visualLocalBounds: sourceMetadata.bounds,
-    colliderLocalBounds: colliderMetadata.bounds,
+    visualLocalBounds: visualSourceMetadata.bounds,
+    colliderLocalBounds,
   })
+  const productNode = {
+    ...node,
+    collision: {
+      ...(node.collision ?? {}),
+      shape: 'trimesh',
+      colliderUrl,
+      colliderMetadataUrl: metadataUrl,
+      sourceAssetUrl,
+      colliderSourceAssetUrl: collisionSource.colliderSourceAssetUrl,
+      lodTier: lodSourceTier,
+      maxTriangles: triangleBudget,
+      intent,
+      channel,
+      mode: intent === 'trigger' ? 'trigger' : 'auto',
+      triangleCount: colliderMetadata.triangleCount,
+      vertexCount: colliderMetadata.vertexCount,
+      sensor: intent === 'trigger' || intent === 'detailMesh',
+    },
+  }
+  const collisionProduct = createGeneratedCollisionProduct({
+    levelId,
+    node: productNode,
+    publicRoot,
+    metadata: {
+      generatedAt,
+      triangleCount: colliderMetadata.triangleCount,
+      vertexCount: colliderMetadata.vertexCount,
+      bounds: colliderLocalBounds,
+      colliderLocalBounds,
+    },
+    generatorVersion: meshCollisionGeneratorVersion,
+  })
+  const colliderCacheKey = createColliderCacheKey(collisionProduct)
   const artifactMetadata = {
-    schemaVersion: 2,
-    generatedBy: 'bake-mesh-collider',
+    schemaVersion: 3,
+    generatedBy: 'mesh-collision-manager',
     generatedAt,
+    generatorVersion: meshCollisionGeneratorVersion,
     sourceLevelId: levelId,
     sourceActorId: nodeId,
     sourceAssetUrl,
     sourceAssetPath: toRepoRelative(sourcePath),
     sourceAssetFingerprint,
+    colliderSourceAssetUrl: collisionSource.colliderSourceAssetUrl,
+    colliderSourceAssetPath: toRepoRelative(colliderSourcePath),
+    colliderSourceAssetFingerprint,
+    lodSourceTier,
     colliderUrl,
     colliderPath: toRepoRelative(colliderPath),
     metadataUrl,
+    colliderCacheKey,
     triangleCount: colliderMetadata.triangleCount,
     vertexCount: colliderMetadata.vertexCount,
-    bounds: colliderMetadata.bounds,
-    visualLocalBounds: sourceMetadata.bounds,
-    colliderLocalBounds: colliderMetadata.bounds,
+    bounds: colliderLocalBounds,
+    rawColliderBounds: colliderMetadata.bounds,
+    visualLocalBounds: visualSourceMetadata.bounds,
+    colliderLocalBounds,
     assetLocalTransform,
     provenance: {
       sourceActorId: nodeId,
@@ -517,6 +758,10 @@ function main() {
       sourceAssetUrl,
       sourceAssetPath: toRepoRelative(sourcePath),
       sourceAssetFingerprint,
+      colliderSourceAssetUrl: collisionSource.colliderSourceAssetUrl,
+      colliderSourceAssetPath: toRepoRelative(colliderSourcePath),
+      colliderSourceAssetFingerprint,
+      lodSourceTier,
       bakeConfig,
       generatedAt,
     },
@@ -525,7 +770,9 @@ function main() {
       intent,
       channel,
       triangleBudget,
+      lodSourceTier,
     },
+    collisionProduct,
     simplification,
   }
   writeJson(metadataPath, artifactMetadata)
@@ -535,8 +782,12 @@ function main() {
     node,
     colliderUrl,
     metadataUrl,
+    sourceAssetUrl,
+    colliderSourceAssetUrl: collisionSource.colliderSourceAssetUrl,
+    lodSourceTier,
     assetLocalTransform,
     triangleCount: colliderMetadata.triangleCount,
+    colliderCacheKey,
     triangleBudget,
     intent,
     channel,
@@ -551,6 +802,8 @@ function main() {
     levelId,
     nodeId,
     sourceAssetUrl,
+    colliderSourceAssetUrl: collisionSource.colliderSourceAssetUrl,
+    lodSourceTier,
     colliderUrl,
     metadataUrl,
     colliderPath: toRepoRelative(colliderPath),
@@ -558,10 +811,12 @@ function main() {
     scenePath: toRepoRelative(scenePath),
     sceneUpdated: Boolean(args.writeScene),
     collision,
+    colliderCacheKey,
     triangleCount: colliderMetadata.triangleCount,
     sourceAssetFingerprint,
+    colliderSourceAssetFingerprint,
     assetLocalTransform,
-    bounds: colliderMetadata.bounds,
+    bounds: colliderLocalBounds,
     simplification,
     message: `Baked collider for ${nodeId}: ${colliderMetadata.triangleCount} triangles.`,
   }

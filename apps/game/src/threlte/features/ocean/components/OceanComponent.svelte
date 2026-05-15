@@ -15,6 +15,8 @@ import { T } from '@threlte/core'
 import { Collider, RigidBody } from '@threlte/rapier'
 import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte'
 import * as THREE from 'three'
+import { applySceneAtmosphereMaterial } from '../../../atmosphere/atmosphereMaterialRegistry'
+import type { RuntimeAtmosphereDefinition } from '../../../atmosphere/runtimeAtmosphereTypes'
 import { TRIGGER_GROUP } from '../../../constants/physics'
 import {
   BaseLevelComponent,
@@ -25,6 +27,7 @@ import {
   type SystemMessage,
 } from '../../../core/LevelSystem'
 import { playerStateStore } from '../../../stores/gameStateStore'
+import { setRuntimeDiagnostic } from '../../../stores/runtimeDiagnosticsStore'
 import { runtimeDebugLog } from '../../../utils/runtimeLog'
 import { qualityLevelStore, qualitySettingsStore } from '../../performance'
 import UnderwaterEffect from '../effects/UnderwaterEffect.svelte'
@@ -40,7 +43,7 @@ export let opacity = 0.92
 export let position: [number, number, number] = [0, 0, 0]
 export let enableAnimation = true
 export let animationSpeed = 0.1
-export let segments = { width: 24, height: 24 } // Default ocean segments
+export let segments = { width: 128, height: 128 }
 
 // --- WATER LEVEL RISE SYSTEM (Modern Props) ---
 export let enableRising: boolean = false
@@ -55,13 +58,22 @@ export let underwaterFogDensity: number = 0.08 // How thick the underwater fog i
 export let underwaterFogColor: number = 0x0a1922 // Dark blue-gray fog color
 export let surfaceFogDensity: number = 0.003 // Normal surface fog density
 
+// --- RUNTIME ATMOSPHERE CONTRACT ---
+export let atmosphereFogColor = '#7b8797'
+export let atmosphereFogDensity = 0.001
+export let atmosphereHeightFogEnabled = false
+export let atmosphereHeightFogColor = '#7b8797'
+export let atmosphereHeightFogDensity = 0
+export let atmosphereHeightFogFloor = 0
+export let atmosphereHeightFogCeiling = 4
+
 // --- VISUAL ENHANCEMENT PROPS ---
 export let metalness = 0.02 // Very low metalness for water
-export let roughness = 0.025 // Smooth enough to carry star reflections
+export let roughness = 0.08 // Subtle star reflections without washing out dark water
 export let envMap: THREE.CubeTexture | null = null
-export let envMapIntensity = 1.7
-export let reflectionStrength = 1.35 // Reflection intensity tuning multiplier
-export let fresnelPower = 7.0 // Approximate fresnel bias for reflection-heavy water
+export let envMapIntensity = 0.85
+export let reflectionStrength = 0.8 // Reflection intensity tuning multiplier
+export let fresnelPower = 5.5 // Approximate fresnel bias for reflection-heavy water
 
 // --- PLANAR REFLECTIONS (optional) ---
 // MeshStandardMaterial + envMap reflects only the skybox/environment, not dynamic scene geometry.
@@ -86,6 +98,9 @@ let reflector: any = null
 let unsubscribeLighting: (() => void) | null = null
 let lastOceanQualityKey: string | null = null
 let pendingOceanRebuild = false
+let oceanAtmosphereDiagnosticSignature = ''
+
+const REFLECTOR_ATMOSPHERE_FOLLOW_UP = 'ATMOSPHERE-OCEAN-REFLECTOR-SHADER'
 
 // --- UNDERWATER DETECTION STATE ---
 let playerInWater = false
@@ -174,6 +189,135 @@ function getPlayerYPosition(collider: any): number {
   return y
 }
 
+function clamp01(value: number) {
+  return Math.max(0, Math.min(1, value))
+}
+
+function smoothstep(edge0: number, edge1: number, value: number) {
+  const t = clamp01((value - edge0) / Math.max(0.001, edge1 - edge0))
+  return t * t * (3 - 2 * t)
+}
+
+function getHeightFogWaterMask() {
+  if (!atmosphereHeightFogEnabled || atmosphereHeightFogDensity <= 0) {
+    return 0
+  }
+
+  return (
+    1 -
+    smoothstep(atmosphereHeightFogFloor, atmosphereHeightFogCeiling, waterLevel)
+  )
+}
+
+function getOceanAtmosphereDefinition(): RuntimeAtmosphereDefinition {
+  const heightFogEnabled =
+    atmosphereHeightFogEnabled && atmosphereHeightFogDensity > 0
+
+  return {
+    id: 'ocean-runtime-atmosphere',
+    enabled: true,
+    source: {
+      kind: 'scene-settings',
+      authored: {
+        distanceFog: true,
+        heightFog: true,
+        aerialPerspective: false,
+        mist: false,
+        bloom: false,
+        colorGrading: false,
+      },
+    },
+    distanceFog: {
+      enabled: atmosphereFogDensity > 0,
+      color: atmosphereFogColor,
+      density: Math.max(0, atmosphereFogDensity),
+    },
+    heightFog: {
+      enabled: heightFogEnabled,
+      color: atmosphereHeightFogColor,
+      density: Math.max(0, atmosphereHeightFogDensity),
+      floor: atmosphereHeightFogFloor,
+      ceiling: Math.max(
+        atmosphereHeightFogFloor + 0.001,
+        atmosphereHeightFogCeiling,
+      ),
+      falloff: 1,
+      colorInfluence: 1,
+    },
+    aerialPerspective: {
+      enabled: false,
+      skyParticipation: 0,
+      skyOcclusion: 0,
+      horizonBoost: 0,
+    },
+    mist: {
+      enabled: false,
+      color: atmosphereHeightFogColor,
+      opacity: 0,
+      layers: 0,
+      height: 0,
+      spacing: 0.44,
+      scale: 1,
+      driftSpeed: 0,
+    },
+    grading: {
+      saturation: 1,
+      contrast: 1,
+      brightness: 1,
+      warmth: 1,
+    },
+    bloom: {
+      intensity: 0,
+      threshold: 1,
+    },
+  }
+}
+
+function reportOceanAtmosphereDiagnostic(signature: string) {
+  if (signature === oceanAtmosphereDiagnosticSignature) return
+  oceanAtmosphereDiagnosticSignature = signature
+
+  const standardWaterParticipates =
+    !enablePlanarReflections &&
+    oceanMaterial instanceof THREE.MeshStandardMaterial
+  const reflectorWaterActive = enablePlanarReflections && Boolean(reflector)
+  const level = reflectorWaterActive
+    ? 'warning'
+    : standardWaterParticipates
+      ? 'ready'
+      : 'loading'
+
+  setRuntimeDiagnostic('oceanAtmosphere', {
+    label: 'Ocean Atmosphere',
+    level,
+    message: reflectorWaterActive
+      ? `Planar reflector water is active; its THREE Reflector shader does not consume runtime atmosphere yet. Follow-up: ${REFLECTOR_ATMOSPHERE_FOLLOW_UP}.`
+      : standardWaterParticipates
+        ? 'Standard ocean material consumes runtime distance fog, height haze, and atmosphere-damped environment reflections.'
+        : 'Ocean atmosphere participation is waiting for the ocean material.',
+    meta: {
+      path: enablePlanarReflections ? 'planar-reflector' : 'standard',
+      standardWaterParticipates,
+      reflectorWaterActive,
+      reflectorWaterParticipates: false,
+      reflectorFollowUp: reflectorWaterActive
+        ? REFLECTOR_ATMOSPHERE_FOLLOW_UP
+        : null,
+      atmosphereFogColor,
+      atmosphereFogDensity,
+      atmosphereHeightFogEnabled,
+      atmosphereHeightFogColor,
+      atmosphereHeightFogDensity,
+      atmosphereHeightFogFloor,
+      atmosphereHeightFogCeiling,
+      waterLevel,
+      heightFogWaterMask,
+      reflectionDamping: atmosphereReflectionDamping,
+      effectiveReflectionIntensity,
+    },
+  })
+}
+
 // --- REACTIVE OPTIMIZATION SETTINGS ---
 // Use reactive store instead of manual OptimizationManager calls
 $: textureSize = $qualitySettingsStore.textureResolution
@@ -182,11 +326,33 @@ $: textureSize = $qualitySettingsStore.textureResolution
 $: isMobileQuality =
   $qualityLevelStore === 'ultra_low' || $qualityLevelStore === 'low'
 $: optimizedSegments = {
-  width: isMobileQuality ? 16 : segments?.width || 24,
-  height: isMobileQuality ? 16 : segments?.height || 24,
+  width: isMobileQuality
+    ? Math.min(48, segments?.width || 128)
+    : segments?.width || 128,
+  height: isMobileQuality
+    ? Math.min(48, segments?.height || 128)
+    : segments?.height || 128,
 }
+$: oceanAtmosphereDefinition = getOceanAtmosphereDefinition()
+$: heightFogWaterMask = getHeightFogWaterMask()
+$: atmosphereReflectionDamping =
+  1 - clamp01(atmosphereHeightFogDensity * 900) * heightFogWaterMask * 0.35
 $: effectiveReflectionIntensity =
-  envMapIntensity * reflectionStrength * Math.max(0.25, fresnelPower / 5)
+  envMapIntensity *
+  reflectionStrength *
+  Math.max(0.25, fresnelPower / 5) *
+  atmosphereReflectionDamping
+$: atmosphereUnderwaterDensityBoost =
+  atmosphereFogDensity * 10 +
+  atmosphereHeightFogDensity * 64 * Math.max(0.35, heightFogWaterMask)
+$: effectiveUnderwaterFogDensity = Math.min(
+  0.35,
+  Math.max(0, underwaterFogDensity) + atmosphereUnderwaterDensityBoost,
+)
+$: effectiveSurfaceMistDensity = Math.max(
+  surfaceFogDensity,
+  atmosphereFogDensity + atmosphereHeightFogDensity * 2 * heightFogWaterMask,
+)
 
 // Single-sided rendering optimization based on underwater state
 $: if (
@@ -336,6 +502,7 @@ class OceanComponent extends BaseLevelComponent {
       // references null to skip standard mesh path.
       oceanGeometry = reflGeom
       oceanMaterial = reflector.material
+      applySceneAtmosphereMaterial(oceanMaterial, oceanAtmosphereDefinition)
     } else {
       oceanGeometry = new THREE.PlaneGeometry(
         size.width,
@@ -360,7 +527,7 @@ class OceanComponent extends BaseLevelComponent {
         map: textureData.colorTexture,
         normalMap: textureData.normalMap,
         displacementMap: textureData.displacementMap,
-        displacementScale: 0.35 + reflectionStrength * 0.15,
+        displacementScale: 0.16 + reflectionStrength * 0.07,
         normalScale: new THREE.Vector2(
           0.18 + Math.min(fresnelPower, 10) * 0.024,
           0.18 + Math.min(fresnelPower, 10) * 0.024,
@@ -374,6 +541,7 @@ class OceanComponent extends BaseLevelComponent {
         depthWrite: true, // Opaque objects write to depth buffer
         depthTest: true, // And test against it
       })
+      applySceneAtmosphereMaterial(oceanMaterial, oceanAtmosphereDefinition)
     }
 
     // Ocean setup complete
@@ -435,26 +603,36 @@ class OceanComponent extends BaseLevelComponent {
     colorTexture: THREE.CanvasTexture
   } {
     const size = textureSize
+    const textureRepeat = 2
+    const tau = Math.PI * 2
+    const baseColor = new THREE.Color(color)
+    const baseRed = Math.round(baseColor.r * 255)
+    const baseGreen = Math.round(baseColor.g * 255)
+    const baseBlue = Math.round(baseColor.b * 255)
+    const clampColor = (value: number) =>
+      Math.max(0, Math.min(255, Math.round(value)))
     // Texture generation (logging removed for performance)
 
     const layeredWaveNoise = (x: number, y: number, time = 0): number => {
+      const u = x / size
+      const v = y / size
       let value = 0
 
       // Large ocean swells
-      value += Math.sin(x * 0.02 + y * 0.01 + time * 0.5) * 0.4
-      value += Math.cos(x * 0.015 - y * 0.02 + time * 0.3) * 0.3
+      value += Math.sin(tau * (u + v) + time * 0.5) * 0.38
+      value += Math.cos(tau * (2 * u - v) + time * 0.3) * 0.28
 
       // Medium waves
-      value += Math.sin(x * 0.05 + y * 0.08 + time * 1.2) * 0.2
-      value += Math.cos(x * 0.08 - y * 0.05 + time * 0.8) * 0.15
+      value += Math.sin(tau * (3 * u + 5 * v) + time * 1.2) * 0.18
+      value += Math.cos(tau * (5 * u - 3 * v) + time * 0.8) * 0.14
 
       // Small ripples
-      value += Math.sin(x * 0.15 + y * 0.12 + time * 2.0) * 0.08
-      value += Math.cos(x * 0.18 - y * 0.15 + time * 1.5) * 0.06
+      value += Math.sin(tau * (9 * u + 7 * v) + time * 2.0) * 0.075
+      value += Math.cos(tau * (11 * u - 8 * v) + time * 1.5) * 0.055
 
       // Fine surface detail
-      value += Math.sin(x * 0.3 + y * 0.25 + time * 3.0) * 0.04
-      value += Math.cos(x * 0.35 - y * 0.3 + time * 2.5) * 0.03
+      value += Math.sin(tau * (17 * u + 13 * v) + time * 3.0) * 0.035
+      value += Math.cos(tau * (19 * u - 17 * v) + time * 2.5) * 0.025
 
       return (value + 1) / 2 // Normalize to 0-1 range
     }
@@ -489,10 +667,10 @@ class OceanComponent extends BaseLevelComponent {
 
         // Enhanced normal map calculation
         const height = heightMap[y][x]
-        const heightL = x > 0 ? heightMap[y][x - 1] : height
-        const heightR = x < size - 1 ? heightMap[y][x + 1] : height
-        const heightU = y > 0 ? heightMap[y - 1][x] : height
-        const heightD = y < size - 1 ? heightMap[y + 1][x] : height
+        const heightL = heightMap[y][(x - 1 + size) % size]
+        const heightR = heightMap[y][(x + 1) % size]
+        const heightU = heightMap[(y - 1 + size) % size][x]
+        const heightD = heightMap[(y + 1) % size][x]
 
         const dx = (heightR - heightL) * 2.0 // Enhanced normal strength
         const dy = (heightD - heightU) * 2.0
@@ -516,12 +694,13 @@ class OceanComponent extends BaseLevelComponent {
       for (let x = 0; x < size; x++) {
         const wave = heightMap[y][x]
 
-        // Layered water color values
-        const blueBase = 20
-        const greenBase = 50
-        const blue = Math.floor(blueBase + wave * 120)
-        const green = Math.floor(greenBase + wave * 100)
-        const red = Math.floor(10 + wave * 30)
+        // Keep ocean albedo close to the scene-authored water color and add
+        // only restrained blue-green variation for a dark cosmic-horror tone.
+        const shimmer = Math.max(0, wave - 0.25)
+        const highlight = Math.max(0, wave - 0.72)
+        const red = clampColor(baseRed + shimmer * 12 + highlight * 6)
+        const green = clampColor(baseGreen + shimmer * 28 + highlight * 16)
+        const blue = clampColor(baseBlue + shimmer * 42 + highlight * 28)
 
         const pixelIndex = (y * size + x) * 4
         colorPixels[pixelIndex] = red
@@ -541,7 +720,9 @@ class OceanComponent extends BaseLevelComponent {
       THREE.UnsignedByteType,
     )
     displacementTexture.wrapS = displacementTexture.wrapT = THREE.RepeatWrapping
-    displacementTexture.repeat.set(2, 2) // <-- CHANGED FROM 15
+    displacementTexture.repeat.set(textureRepeat, textureRepeat)
+    displacementTexture.magFilter = THREE.LinearFilter
+    displacementTexture.minFilter = THREE.LinearFilter
     displacementTexture.needsUpdate = true
 
     const normalTexture = new THREE.DataTexture(
@@ -552,12 +733,16 @@ class OceanComponent extends BaseLevelComponent {
       THREE.UnsignedByteType,
     )
     normalTexture.wrapS = normalTexture.wrapT = THREE.RepeatWrapping
-    normalTexture.repeat.set(2, 2) // <-- CHANGED FROM 15
+    normalTexture.repeat.set(textureRepeat, textureRepeat)
+    normalTexture.magFilter = THREE.LinearFilter
+    normalTexture.minFilter = THREE.LinearFilter
     normalTexture.needsUpdate = true
 
     const colorTexture = new THREE.CanvasTexture(canvas)
     colorTexture.wrapS = colorTexture.wrapT = THREE.RepeatWrapping
-    colorTexture.repeat.set(2, 2) // <-- CHANGED FROM 15
+    colorTexture.repeat.set(textureRepeat, textureRepeat)
+    colorTexture.colorSpace = THREE.SRGBColorSpace
+    colorTexture.anisotropy = 4
 
     return {
       displacementMap: displacementTexture,
@@ -601,14 +786,44 @@ onDestroy(() => {
   unsubscribeLighting?.()
   unsubscribeLighting = null
   component?.dispose()
+  setRuntimeDiagnostic('oceanAtmosphere', {
+    label: 'Ocean Atmosphere',
+    level: 'idle',
+    message: 'Ocean atmosphere consumer unmounted.',
+  })
 })
 
 // --- REACTIVE UPDATES for new props ---
+$: if (oceanMaterial) {
+  applySceneAtmosphereMaterial(oceanMaterial, oceanAtmosphereDefinition)
+}
+
 $: if (oceanMaterial instanceof THREE.MeshStandardMaterial) {
   oceanMaterial.envMapIntensity = effectiveReflectionIntensity
   oceanMaterial.metalness = metalness
   oceanMaterial.roughness = roughness
   if (envMap) oceanMaterial.envMap = envMap
+}
+
+$: oceanAtmosphereDiagnosticKey = [
+  enablePlanarReflections ? 'reflector' : 'standard',
+  Boolean(oceanMaterial),
+  Boolean(reflector),
+  atmosphereFogColor,
+  atmosphereFogDensity,
+  atmosphereHeightFogEnabled,
+  atmosphereHeightFogColor,
+  atmosphereHeightFogDensity,
+  atmosphereHeightFogFloor,
+  atmosphereHeightFogCeiling,
+  waterLevel,
+  heightFogWaterMask,
+  atmosphereReflectionDamping,
+  effectiveReflectionIntensity,
+].join('|')
+
+$: if (oceanAtmosphereDiagnosticKey) {
+  reportOceanAtmosphereDiagnostic(oceanAtmosphereDiagnosticKey)
 }
 
 // --- REACTIVE RECREATION when quality settings change ---
@@ -672,8 +887,15 @@ $: if (
       position={[0, 0, 0]}
       size={waterCollisionSize}
       fogColor={underwaterFogColor}
-      fogDensityScale={underwaterFogDensity}
-      surfaceMistDensity={surfaceFogDensity}
+      fogDensityScale={effectiveUnderwaterFogDensity}
+      surfaceMistDensity={effectiveSurfaceMistDensity}
+      {atmosphereFogColor}
+      {atmosphereFogDensity}
+      {atmosphereHeightFogEnabled}
+      {atmosphereHeightFogColor}
+      {atmosphereHeightFogDensity}
+      {atmosphereHeightFogFloor}
+      {atmosphereHeightFogCeiling}
     />
   </T.Group>
 {/if}

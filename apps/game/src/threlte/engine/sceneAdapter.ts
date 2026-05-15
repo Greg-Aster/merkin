@@ -3,21 +3,25 @@ import {
   hasMeshRenderSource,
 } from './actorRenderSource'
 import { resolveCollisionPolicy } from './collisionPolicy'
-import type {
-  SceneDocument,
-  SceneNode,
-  SceneNodeCollisionData,
-} from './sceneDocumentTypes'
+import type { SceneDocument, SceneNode } from './sceneDocumentTypes'
 import type {
   ActorDefinition,
   CollisionClassification,
-  CollisionShape,
+  GeneratedCollisionProduct,
   LevelDefinition,
   PhysicsBodyType,
   RenderCullingPolicy,
   RenderPhysicsAttachmentPolicy,
   Vec3,
 } from './types'
+
+export type GeneratedCollisionProductLookup =
+  | Map<string, GeneratedCollisionProduct>
+  | Record<string, GeneratedCollisionProduct | undefined>
+
+export interface SceneAdapterOptions {
+  generatedCollisionProductsByActorId?: GeneratedCollisionProductLookup
+}
 
 function getSpawn(scene: SceneDocument): Vec3 {
   const position = scene.settings?.level?.spawn?.position
@@ -98,12 +102,6 @@ function getRenderPhysicsAttachmentPolicy(
   )
 }
 
-function toCollisionShape(
-  shape: SceneNodeCollisionData['shape'],
-): CollisionShape {
-  return shape
-}
-
 function getPrimitiveMaterial(node: SceneNode) {
   if (!node.primitive)
     return node.material as Record<string, unknown> | undefined
@@ -134,6 +132,83 @@ function getPrimitiveMaterial(node: SceneNode) {
     thickness: node.material?.thickness,
     reflectivity: node.material?.reflectivity,
   } satisfies Record<string, unknown>
+}
+
+function getGeneratedProductFromLookup(
+  lookup: GeneratedCollisionProductLookup | undefined,
+  actorId: string,
+) {
+  if (!lookup) return null
+  if (lookup instanceof Map) return lookup.get(actorId) ?? null
+  return lookup[actorId] ?? null
+}
+
+function getCurrentNodeSourceUrl(node: SceneNode) {
+  return (
+    node.collision?.colliderSourceAssetUrl ??
+    node.collision?.sourceAssetUrl ??
+    node.asset?.url ??
+    null
+  )
+}
+
+function isGeneratedProductCompatibleWithNode(
+  product: GeneratedCollisionProduct,
+  node: SceneNode,
+) {
+  if (product.actorId !== node.id) return false
+  if (node.collision?.generationStatus === 'failed') return false
+  if (node.collision?.generationStatus === 'dirty') return false
+  if (node.collision?.generationStatus === 'generating') return false
+
+  if (product.sourceKind === 'none') return false
+
+  if (product.sourceKind === 'primitive') {
+    return Boolean(node.primitive)
+  }
+
+  if (product.sourceKind === 'asset') {
+    const currentSourceUrl = getCurrentNodeSourceUrl(node)
+    return Boolean(
+      node.asset &&
+        currentSourceUrl &&
+        product.sourceMeshUrl &&
+        product.sourceMeshUrl === currentSourceUrl,
+    )
+  }
+
+  if (product.sourceKind === 'prefab') {
+    const currentSourceUrl = getCurrentNodeSourceUrl(node)
+    return Boolean(
+      node.prefab &&
+        (!product.sourceMeshUrl ||
+          (currentSourceUrl && product.sourceMeshUrl === currentSourceUrl)),
+    )
+  }
+
+  if (product.sourceKind === 'terrain') {
+    return false
+  }
+
+  if (product.sourceMeshUrl) {
+    return product.sourceMeshUrl === getCurrentNodeSourceUrl(node)
+  }
+
+  return true
+}
+
+function getGeneratedProductForNode(
+  node: SceneNode,
+  options: SceneAdapterOptions,
+) {
+  const product = getGeneratedProductFromLookup(
+    options.generatedCollisionProductsByActorId,
+    node.id,
+  )
+  if (!product) return undefined
+  return isGeneratedProductCompatibleWithNode(product, node)
+    ? product
+    : undefined
 }
 
 function getCollisionClassification(input: {
@@ -167,6 +242,7 @@ function getCollisionClassification(input: {
 function toActor(
   scene: SceneDocument,
   node: SceneNode,
+  options: SceneAdapterOptions,
 ): {
   actor: ActorDefinition
   collisionSource: 'authored' | 'default' | 'none'
@@ -181,13 +257,12 @@ function toActor(
     bodyType: getPhysicsBodyType(node),
     primitiveGeometry: getCollisionPolicyPrimitiveGeometry(node),
     levelSettings: scene.settings,
-    authoredCollision: node.collision
-      ? {
-          ...node.collision,
-          shape: toCollisionShape(node.collision.shape),
-        }
-      : null,
+    authoredCollision: node.collision ?? null,
   })
+
+  const generatedProduct = collisionResult.collision
+    ? getGeneratedProductForNode(node, options)
+    : undefined
 
   const actor: ActorDefinition = {
     id: node.id,
@@ -199,27 +274,31 @@ function toActor(
       rotation: node.rotation,
       scale: node.scale,
     },
-    render:
-      hasMeshRenderSource(node)
-        ? {
-            visible: node.visible,
-            cullingPolicy: getRenderCullingPolicy(node),
-            physicsAttachment: getRenderPhysicsAttachmentPolicy(node),
-            primitive: node.primitive
-              ? {
-                  geometry: node.primitive.geometry,
-                  args: node.primitive.args,
-                }
-              : undefined,
-            asset: node.asset,
-            prefab: node.prefab,
-            material: getPrimitiveMaterial(node),
-          }
-        : undefined,
+    render: hasMeshRenderSource(node)
+      ? {
+          visible: node.visible,
+          cullingPolicy: getRenderCullingPolicy(node),
+          physicsAttachment: getRenderPhysicsAttachmentPolicy(node),
+          primitive: node.primitive
+            ? {
+                geometry: node.primitive.geometry,
+                args: node.primitive.args,
+              }
+            : undefined,
+          asset: node.asset,
+          prefab: node.prefab,
+          material: getPrimitiveMaterial(node),
+        }
+      : undefined,
     physics: collisionResult.collision
       ? {
           bodyType: getPhysicsBodyType(node),
-          collision: collisionResult.collision,
+          collision: generatedProduct
+            ? {
+                ...collisionResult.collision,
+                generatedProduct,
+              }
+            : collisionResult.collision,
           gravityScale: node.physics?.gravityScale,
           canSleep: node.physics?.canSleep,
           ccd: node.physics?.ccd,
@@ -282,6 +361,7 @@ function toActor(
 
 export function adaptSceneDocumentToLevelDefinition(
   scene: SceneDocument,
+  options: SceneAdapterOptions = {},
 ): LevelDefinition {
   return {
     id: scene.levelId,
@@ -292,7 +372,7 @@ export function adaptSceneDocumentToLevelDefinition(
       rotation: getSpawnRotation(scene),
     },
     settings: scene.settings as Record<string, unknown>,
-    actors: scene.nodes.map(node => toActor(scene, node).actor),
+    actors: scene.nodes.map(node => toActor(scene, node, options).actor),
   }
 }
 

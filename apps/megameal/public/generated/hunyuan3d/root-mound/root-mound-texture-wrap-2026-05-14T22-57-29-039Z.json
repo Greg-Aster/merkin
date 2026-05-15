@@ -1,0 +1,15 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.glb",
+  "sourceName": "Root Mound",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/root-mound-2026-05-14T22-53-27-694Z/reference/root-mound-reference-2026-05-14T22-55-40-563Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1778799340700-ein667",
+  "prompt": "object: large central root mound of raised earth and stone, a broad elevated mass supporting the main tree base. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "texture",
+  "shapeModel": null,
+  "paintModel": "hunyuan3d-paint-v2-0-turbo",
+  "generatedAt": "2026-05-14T22:57:31.290Z"
+}

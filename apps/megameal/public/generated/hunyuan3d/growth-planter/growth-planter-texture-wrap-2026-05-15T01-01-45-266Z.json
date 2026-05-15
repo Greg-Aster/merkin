@@ -1,0 +1,15 @@
+{
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+  "sourceName": "biomechanical growth planter",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/urd-root-shrine-2026-05-15T00-59-22-044Z/reference/urd-root-shrine-reference-2026-05-15T01-00-56-775Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1778806856839-uil5bg",
+  "prompt": "object: sacred planter or root shrine vessel containing ritual growth near a well. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "texture",
+  "shapeModel": null,
+  "paintModel": "hunyuan3d-paint-v2-0-turbo",
+  "generatedAt": "2026-05-15T01:01:46.780Z"
+}

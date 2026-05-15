@@ -114,6 +114,36 @@ async function runGltfTransform(args = []) {
   });
 }
 
+async function runStyleBakeAsset(args = []) {
+  return runProcess(process.execPath, [
+    path.join(REPO_ROOT, 'apps', 'game', 'scripts', 'bake-style-asset.mjs'),
+    ...args,
+  ], {
+    cwd: REPO_ROOT,
+  });
+}
+
+async function runBlenderStyleBakeAsset(args = []) {
+  const blenderExecutable = detectBlenderExecutable();
+  if (!blenderExecutable) {
+    return {
+      code: 127,
+      stdout: '',
+      stderr: 'Blender executable not found. Install Blender or set BLENDER_PATH to enable blender-geometry style bakes.',
+    };
+  }
+
+  return runProcess(blenderExecutable, [
+    '--background',
+    '--python',
+    path.join(REPO_ROOT, 'apps', 'game', 'scripts', 'blender-style-bake.py'),
+    '--',
+    ...args,
+  ], {
+    cwd: REPO_ROOT,
+  });
+}
+
 async function inspectGltfAsset(filePath) {
   const result = await runGltfTransform(['inspect', filePath, '--format', 'md']);
   if (result.code !== 0) {
@@ -325,6 +355,7 @@ function findLatestModelInDirectory(directory) {
 
   return {
     BLENDER_EXPORT_ROOT,
+    GENERATED_STYLE_LAB_ROOT,
     centerModelForSceneReplacement,
     clampNumber,
     copyModelToGlb,
@@ -340,7 +371,9 @@ function findLatestModelInDirectory(directory) {
     launchBlenderFile,
     resolveBlenderExportDirectory,
     resolveInspectableModelAsset,
+    runBlenderStyleBakeAsset,
     runGltfTransform,
+    runStyleBakeAsset,
     timestampKey,
   };
 }

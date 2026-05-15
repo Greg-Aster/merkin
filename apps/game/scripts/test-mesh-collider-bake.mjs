@@ -49,6 +49,16 @@ try {
             asset: {
               url: '/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.low.glb',
             },
+            collision: {
+              mode: 'auto',
+              quality: 'simplifiedMesh',
+              intent: 'blocker',
+              channel: 'worldStatic',
+              maxTriangles: 5000,
+              friction: 0.65,
+              restitution: 0.05,
+              sensor: false,
+            },
           },
         ],
         settings: {
@@ -107,8 +117,11 @@ try {
   assert.equal(payload.success, true)
   assert.equal(payload.colliderUrl, '/generated/runtime-game-assets/collision/fixture-level/fixture-asset.collider.glb')
   assert.equal(payload.metadataUrl, '/generated/runtime-game-assets/collision/fixture-level/fixture-asset.collider.meta.json')
+  assert.equal(typeof payload.colliderCacheKey, 'string')
+  assert.ok(payload.colliderCacheKey.length > 64)
   assert.ok(payload.triangleCount > 0)
   assert.ok(payload.triangleCount <= 5000)
+  assert.equal('originalCollision' in payload, false)
 
   const colliderPath = join(
     publicRoot,
@@ -128,15 +141,36 @@ try {
   assert.equal(node.collision.channel, 'worldStatic')
   assert.equal(node.collision.colliderUrl, payload.colliderUrl)
   assert.equal(node.collision.colliderMetadataUrl, payload.metadataUrl)
+  assert.equal(node.collision.colliderCacheKey, payload.colliderCacheKey)
+  assert.equal(node.collision.mode, 'auto')
+  assert.equal(node.collision.lodTier, 'low')
+  assert.equal(node.collision.colliderSourceAssetUrl, node.asset.url)
+  assert.equal(node.collision.maxTriangles, 5000)
+  assert.equal(node.collision.enabled, undefined)
+  assert.equal(node.collision.triangleBudget, undefined)
+  assert.equal(node.generation?.originalCollision, undefined)
 
   const metadata = JSON.parse(readFileSync(metadataPath, 'utf8'))
-  assert.equal(metadata.schemaVersion, 2)
+  assert.equal(metadata.schemaVersion, 3)
   assert.equal(metadata.sourceActorId, 'fixture-asset')
   assert.equal(metadata.sourceAssetUrl, node.asset.url)
+  assert.equal(metadata.colliderSourceAssetUrl, node.asset.url)
   assert.equal(metadata.sourceAssetFingerprint.algorithm, 'sha256')
   assert.equal(metadata.sourceAssetFingerprint.value.length, 64)
+  assert.equal(metadata.colliderSourceAssetFingerprint.algorithm, 'sha256')
+  assert.equal(metadata.colliderSourceAssetFingerprint.value.length, 64)
   assert.equal(metadata.colliderUrl, payload.colliderUrl)
   assert.equal(metadata.metadataUrl, payload.metadataUrl)
+  assert.equal(metadata.colliderCacheKey, payload.colliderCacheKey)
+  assert.equal(
+    payload.colliderCacheKey,
+    [
+      metadata.collisionProduct.generatorVersion,
+      metadata.collisionProduct.sourceMeshFingerprint.value,
+      metadata.collisionProduct.transformFingerprint.value,
+      metadata.collisionProduct.policyFingerprint.value,
+    ].join(':'),
+  )
   assert.ok(metadata.bounds?.min)
   assert.ok(metadata.visualLocalBounds?.min)
   assert.ok(metadata.colliderLocalBounds?.min)
@@ -158,8 +192,11 @@ try {
   )
   assert.equal(metadata.provenance.sourceActorId, 'fixture-asset')
   assert.equal(metadata.provenance.sourceAssetUrl, node.asset.url)
+  assert.equal(metadata.provenance.colliderSourceAssetUrl, node.asset.url)
   assert.equal(metadata.provenance.sourceAssetFingerprint.value, metadata.sourceAssetFingerprint.value)
+  assert.equal(metadata.provenance.colliderSourceAssetFingerprint.value, metadata.colliderSourceAssetFingerprint.value)
   assert.equal(metadata.provenance.bakeConfig.triangleBudget, 5000)
+  assert.equal(metadata.provenance.bakeConfig.lodSourceTier, 'low')
   assert.ok(metadata.simplification)
 
   console.log('Mesh collider bake fixture passed')

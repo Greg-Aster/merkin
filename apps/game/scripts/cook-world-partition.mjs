@@ -76,8 +76,9 @@ function getScenePath(level) {
 }
 
 function isCriticalNode(node) {
+  const collisionMode = getCollisionMode(node.collision)
   const collisionIntent =
-    node.collision?.enabled === false ? 'none' : node.collision?.intent
+    collisionMode === 'none' ? 'none' : node.collision?.intent
   const collisionIsRuntimeCritical =
     collisionIntent === 'walkable' || collisionIntent === 'trigger'
   const gameplayType = node.gameplay?.type
@@ -103,7 +104,15 @@ function isRenderableNode(node) {
 }
 
 function isCollisionNode(node) {
-  return Boolean(node.collision) && node.collision.enabled !== false
+  return getCollisionMode(node.collision) !== 'none'
+}
+
+function getCollisionMode(collision) {
+  if (!collision) return 'none'
+  if (collision.mode) return collision.mode
+  if (collision.enabled === false || collision.intent === 'none') return 'none'
+  if (collision.sensor || collision.intent === 'trigger') return 'trigger'
+  return 'auto'
 }
 
 function getNodeIdsByPredicate(nodes, predicate) {

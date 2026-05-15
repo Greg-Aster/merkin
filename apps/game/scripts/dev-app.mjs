@@ -4,17 +4,25 @@ import { spawn } from 'node:child_process'
 import { createServer } from 'node:net'
 import { fileURLToPath } from 'node:url'
 import {
-  getHealthyRuntimeOrigin,
+  clearRuntime,
+  probeOrigin,
   readRuntime,
+  writeRuntime,
 } from '../../../scripts/dev-runtime.mjs'
 
 const host = '127.0.0.1'
-const port = String(process.env.GAME_DEV_PORT || 4322)
-const appUrl = `http://${host}:${port}`
+const requestedPort = String(process.env.GAME_DEV_PORT || 4322)
+const autoPort =
+  process.env.GAME_DEV_AUTO_PORT === '1' ||
+  requestedPort.toLowerCase() === 'auto'
+let port =
+  requestedPort.toLowerCase() === 'auto'
+    ? String(process.env.GAME_DEV_PORT_BASE || 4322)
+    : requestedPort
+let appUrl = `http://${host}:${port}`
 const appRoot = fileURLToPath(new URL('..', import.meta.url))
 const repoRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const runtimeDir = path.join(repoRoot, '.dev-runtime')
-const startupLockDir = path.join(runtimeDir, 'game-startup.lock')
 const viteCacheDir = path.join(appRoot, 'node_modules', '.vite')
 const manualRefresh =
   process.env.GAME_DEV_MANUAL_REFRESH === '1' ||
@@ -30,6 +38,20 @@ const staleStartupLockMs = Number.parseInt(
   process.env.GAME_DEV_STALE_STARTUP_LOCK_MS || '120000',
   10,
 )
+const autoPortAttempts = Number.parseInt(
+  process.env.GAME_DEV_AUTO_PORT_ATTEMPTS || '25',
+  10,
+)
+
+function setAppPort(nextPort) {
+  port = String(nextPort)
+  appUrl = `http://${host}:${port}`
+}
+
+function getStartupLockDir() {
+  const safePort = String(port).replace(/[^a-zA-Z0-9_.-]/g, '_')
+  return path.join(runtimeDir, `game-startup-${safePort}.lock`)
+}
 
 function spawnCommand(command, args, options = {}) {
   const resolvedCommand =
@@ -54,9 +76,9 @@ async function delay(ms) {
   await new Promise(resolve => setTimeout(resolve, ms))
 }
 
-async function writeStartupLockOwner() {
+async function writeStartupLockOwner(lockDir) {
   await fs.writeFile(
-    path.join(startupLockDir, 'owner.json'),
+    path.join(lockDir, 'owner.json'),
     JSON.stringify(
       {
         pid: process.pid,
@@ -70,9 +92,42 @@ async function writeStartupLockOwner() {
   )
 }
 
-async function removeStaleStartupLock() {
+async function readStartupLockOwner(lockDir) {
   try {
-    const stats = await fs.stat(startupLockDir)
+    return JSON.parse(
+      await fs.readFile(path.join(lockDir, 'owner.json'), 'utf8'),
+    )
+  } catch {
+    return null
+  }
+}
+
+function isProcessAlive(pid) {
+  const numericPid = Number(pid)
+  if (!Number.isFinite(numericPid) || numericPid <= 0) {
+    return false
+  }
+
+  try {
+    process.kill(numericPid, 0)
+    return true
+  } catch (error) {
+    return error?.code === 'EPERM'
+  }
+}
+
+async function removeStaleStartupLock(lockDir) {
+  const owner = await readStartupLockOwner(lockDir)
+  if (owner?.pid && !isProcessAlive(owner.pid)) {
+    await removeIfPresent(lockDir)
+    console.warn(
+      `⚠️ Removed stale game dev startup lock for ${owner.origin ?? lockDir}; owner process ${owner.pid} is gone.`,
+    )
+    return true
+  }
+
+  try {
+    const stats = await fs.stat(lockDir)
     if (Date.now() - stats.mtimeMs < staleStartupLockMs) {
       return false
     }
@@ -80,22 +135,23 @@ async function removeStaleStartupLock() {
     return false
   }
 
-  await removeIfPresent(startupLockDir)
-  console.warn('⚠️ Removed stale game dev startup lock.')
+  await removeIfPresent(lockDir)
+  console.warn(`⚠️ Removed stale game dev startup lock at ${lockDir}.`)
   return true
 }
 
 async function acquireStartupLock() {
   await fs.mkdir(runtimeDir, { recursive: true })
+  const lockDir = getStartupLockDir()
   const startedAt = Date.now()
   let loggedWait = false
 
   while (true) {
     try {
-      await fs.mkdir(startupLockDir)
-      await writeStartupLockOwner()
+      await fs.mkdir(lockDir)
+      await writeStartupLockOwner(lockDir)
       return async () => {
-        await removeIfPresent(startupLockDir)
+        await removeIfPresent(lockDir)
       }
     } catch (error) {
       if (error?.code !== 'EEXIST') {
@@ -108,7 +164,10 @@ async function acquireStartupLock() {
       return null
     }
 
-    await removeStaleStartupLock()
+    if (await removeStaleStartupLock(lockDir)) {
+      loggedWait = false
+      continue
+    }
 
     if (!loggedWait) {
       console.log(
@@ -119,7 +178,7 @@ async function acquireStartupLock() {
 
     if (Date.now() - startedAt > startupLockTimeoutMs) {
       throw new Error(
-        `Timed out waiting for the game dev startup lock at ${startupLockDir}. If no agent is starting the server, remove that directory and retry.`,
+        `Timed out waiting for the game dev startup lock at ${lockDir}. If no agent is starting the server, remove that directory and retry.`,
       )
     }
 
@@ -127,17 +186,77 @@ async function acquireStartupLock() {
   }
 }
 
-async function assertRequestedPortAvailable() {
+async function checkPortAvailable(candidatePort) {
   await new Promise((resolve, reject) => {
     const server = createServer()
 
     server.once('error', error => {
       reject(error)
     })
-    server.listen(Number(port), host, () => {
+    server.listen(Number(candidatePort), host, () => {
       server.close(resolve)
     })
-  }).catch(error => {
+  })
+}
+
+async function isPortAvailable(candidatePort) {
+  try {
+    await checkPortAvailable(candidatePort)
+    return true
+  } catch (error) {
+    if (error?.code === 'EADDRINUSE') {
+      return false
+    }
+
+    throw error
+  }
+}
+
+async function selectAutoPortIfNeeded() {
+  if (!autoPort) return ''
+
+  const firstPort = Number.parseInt(port, 10)
+  if (!Number.isFinite(firstPort)) {
+    throw new Error(
+      `GAME_DEV_PORT must be numeric or "auto"; received ${JSON.stringify(port)}.`,
+    )
+  }
+
+  for (let offset = 0; offset < autoPortAttempts; offset += 1) {
+    const candidatePort = firstPort + offset
+    setAppPort(candidatePort)
+
+    const existingOrigin = await hasReusableAppServer()
+    if (existingOrigin) {
+      if (String(candidatePort) !== String(firstPort)) {
+        console.log(
+          `↪️ Game dev port ${firstPort} is occupied; reusing existing server at ${existingOrigin}.`,
+        )
+      }
+      return existingOrigin
+    }
+
+    if (await isPortAvailable(candidatePort)) {
+      if (String(candidatePort) !== String(firstPort)) {
+        console.log(
+          `↪️ Game dev port ${firstPort} is occupied; using next available port ${candidatePort}.`,
+        )
+      }
+      return ''
+    }
+  }
+
+  throw new Error(
+    `No available game dev port found from ${firstPort} through ${
+      firstPort + autoPortAttempts - 1
+    }. Stop an existing server or set GAME_DEV_PORT to a known free port.`,
+  )
+}
+
+async function assertRequestedPortAvailable() {
+  try {
+    await checkPortAvailable(port)
+  } catch (error) {
     if (error?.code === 'EADDRINUSE') {
       throw new Error(
         `Requested game dev port ${port} is already in use, but no reusable healthy game server is available at ${appUrl}. Stop the existing process or inspect why it is unhealthy before using another GAME_DEV_PORT intentionally.`,
@@ -145,7 +264,7 @@ async function assertRequestedPortAvailable() {
     }
 
     throw error
-  })
+  }
 }
 
 async function keepAliveForExistingApp(origin) {
@@ -165,19 +284,30 @@ async function keepAliveForExistingApp(origin) {
   })
 }
 
-async function hasReusableAppServer() {
-  const origin = await getHealthyRuntimeOrigin('game', appUrl)
+async function hasReusableAppServer({ allowMissingRuntimeMetadata = false } = {}) {
+  const runtime = await readRuntime('game')
+  let origin = ''
+
+  if (runtime?.origin === appUrl) {
+    if (await probeOrigin(runtime.origin)) {
+      origin = runtime.origin
+    } else {
+      await clearRuntime('game', runtime.pid ?? null)
+    }
+  } else if (runtime?.origin) {
+    if (!await probeOrigin(runtime.origin)) {
+      await clearRuntime('game', runtime.pid ?? null)
+    }
+  }
+
+  if (!origin && await probeOrigin(appUrl)) {
+    origin = appUrl
+  }
+
   if (!origin) {
     return ''
   }
-  if (origin !== appUrl) {
-    console.warn(
-      `⚠️ Ignoring existing game dev server at ${origin}; requested ${appUrl}.`,
-    )
-    return ''
-  }
 
-  const runtime = await readRuntime('game')
   if (runtime?.origin === origin) {
     const runtimeManualRefresh = runtime.manualRefresh === true
     if (runtimeManualRefresh !== manualRefresh) {
@@ -186,7 +316,7 @@ async function hasReusableAppServer() {
       )
       return ''
     }
-  } else if (manualRefresh) {
+  } else if (manualRefresh && !allowMissingRuntimeMetadata) {
     console.warn(
       `⚠️ Existing game dev server at ${origin} has no runtime mode metadata; requested ${devModeLabel}.`,
     )
@@ -217,11 +347,33 @@ async function hasReusableAppServer() {
   return origin
 }
 
+async function writeSpawnedRuntimeMetadata(pid) {
+  await writeRuntime('game', {
+    name: 'game',
+    pid,
+    host,
+    port: Number(port),
+    origin: appUrl,
+    manualRefresh,
+    hmr: !manualRefresh,
+    updatedAt: new Date().toISOString(),
+    source: 'dev-app',
+  })
+}
+
 async function main() {
-  const existingOrigin = await hasReusableAppServer()
-  if (existingOrigin) {
-    await keepAliveForExistingApp(existingOrigin)
-    return
+  if (autoPort) {
+    const autoPortExistingOrigin = await selectAutoPortIfNeeded()
+    if (autoPortExistingOrigin) {
+      await keepAliveForExistingApp(autoPortExistingOrigin)
+      return
+    }
+  } else {
+    const existingOrigin = await hasReusableAppServer()
+    if (existingOrigin) {
+      await keepAliveForExistingApp(existingOrigin)
+      return
+    }
   }
 
   const releaseStartupLock = await acquireStartupLock()
@@ -255,11 +407,13 @@ async function main() {
   const astroProcess = spawnCommand('pnpm', ['astro', 'dev', '--host', host, '--port', port], {
     env: {
       ...process.env,
+      GAME_DEV_PORT: port,
       GAME_DEV_MANUAL_REFRESH: manualRefresh ? '1' : '',
     },
   })
 
   astroProcess.on('exit', (code, signal) => {
+    void clearRuntime('game', astroProcess.pid ?? null)
     void releaseStartupLock?.()
 
     if (signal) {
@@ -282,8 +436,11 @@ async function main() {
   try {
     const startedAt = Date.now()
     while (Date.now() - startedAt <= startupLockTimeoutMs) {
-      const origin = await hasReusableAppServer()
+      const origin = await hasReusableAppServer({
+        allowMissingRuntimeMetadata: true,
+      })
       if (origin) {
+        await writeSpawnedRuntimeMetadata(astroProcess.pid ?? process.pid)
         await releaseStartupLock?.()
         return
       }

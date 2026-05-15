@@ -1,7 +1,8 @@
 {
-  "schemaVersion": 2,
-  "generatedBy": "bake-mesh-collider",
-  "generatedAt": "2026-05-13T01:03:49.044Z",
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:28:53.661Z",
+  "generatorVersion": "mesh-collision-manager-v1",
   "sourceLevelId": "solitude",
   "sourceActorId": "solitude-pillar-8",
   "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
@@ -13,28 +14,29 @@
   "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.meta.json",
-  "triangleCount": 19000,
-  "vertexCount": 12948,
+  "colliderCacheKey": "mesh-collision-manager-v1:2b251350dafe10c4891ed180721aff24eab4cde505fad41daf5876af6ea31791:c488adea2a71fea601613aeef38178895137ecfaaa3b4ac052b444791e034d6c:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+  "triangleCount": 4750,
+  "vertexCount": 4405,
   "bounds": {
     "min": [
-      -0.3966028690338135,
-      -1.0001206398010254,
-      -0.4122239053249359
+      -0.3959961235523224,
+      -1.00007963180542,
+      -0.41185587644577026
     ],
     "max": [
-      0.3706410229206085,
-      0.9736790657043457,
-      0.3860188126564026
+      0.3703550398349762,
+      0.9735575914382935,
+      0.38577237725257874
     ],
     "size": [
-      0.767243891954422,
-      1.973799705505371,
-      0.7982427179813385
+      0.7663511633872986,
+      1.9736372232437134,
+      0.797628253698349
     ],
     "center": [
-      -0.012980923056602478,
-      -0.013220787048339844,
-      -0.013102546334266663
+      -0.012820541858673096,
+      -0.013261020183563232,
+      -0.013041749596595764
     ]
   },
   "visualLocalBounds": {
@@ -61,24 +63,24 @@
   },
   "colliderLocalBounds": {
     "min": [
-      -0.3966028690338135,
-      -1.0001206398010254,
-      -0.4122239053249359
+      -0.3959961235523224,
+      -1.00007963180542,
+      -0.41185587644577026
     ],
     "max": [
-      0.3706410229206085,
-      0.9736790657043457,
-      0.3860188126564026
+      0.3703550398349762,
+      0.9735575914382935,
+      0.38577237725257874
     ],
     "size": [
-      0.767243891954422,
-      1.973799705505371,
-      0.7982427179813385
+      0.7663511633872986,
+      1.9736372232437134,
+      0.797628253698349
     ],
     "center": [
-      -0.012980923056602478,
-      -0.013220787048339844,
-      -0.013102546334266663
+      -0.012820541858673096,
+      -0.013261020183563232,
+      -0.013041749596595764
     ]
   },
   "assetLocalTransform": {
@@ -110,24 +112,24 @@
     },
     "colliderLocalBounds": {
       "min": [
-        -0.3966028690338135,
-        -1.0001206398010254,
-        -0.4122239053249359
+        -0.3959961235523224,
+        -1.00007963180542,
+        -0.41185587644577026
       ],
       "max": [
-        0.3706410229206085,
-        0.9736790657043457,
-        0.3860188126564026
+        0.3703550398349762,
+        0.9735575914382935,
+        0.38577237725257874
       ],
       "size": [
-        0.767243891954422,
-        1.973799705505371,
-        0.7982427179813385
+        0.7663511633872986,
+        1.9736372232437134,
+        0.797628253698349
       ],
       "center": [
-        -0.012980923056602478,
-        -0.013220787048339844,
-        -0.013102546334266663
+        -0.012820541858673096,
+        -0.013261020183563232,
+        -0.013041749596595764
       ]
     },
     "visualToPhysicsMatrix": [
@@ -183,24 +185,73 @@
       "sourceAssetUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
       "intent": "blocker",
       "channel": "worldStatic",
-      "triangleBudget": 20000,
+      "triangleBudget": 5000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-13T01:03:49.044Z"
+    "generatedAt": "2026-05-14T21:28:53.661Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
-    "triangleBudget": 20000
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "solitude-pillar-8",
+    "mode": "auto",
+    "productId": "solitude-pillar-8:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "generatedAt": "2026-05-14T21:28:53.661Z",
+    "sourceKind": "asset",
+    "sourceMeshUrl": "/generated/hunyuan3d/weathered-monolith-pillar/weathered-monolith-pillar-generated-2026-04-19T23-45-16-485Z.glb",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "2b251350dafe10c4891ed180721aff24eab4cde505fad41daf5876af6ea31791"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "c488adea2a71fea601613aeef38178895137ecfaaa3b4ac052b444791e034d6c"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+    },
+    "shape": "trimesh",
+    "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-pillar-8.collider.meta.json",
+    "localBounds": {
+      "min": [
+        -0.3959961235523224,
+        -1.00007963180542,
+        -0.41185587644577026
+      ],
+      "max": [
+        0.3703550398349762,
+        0.9735575914382935,
+        0.38577237725257874
+      ],
+      "size": [
+        0.7663511633872986,
+        1.9736372232437134,
+        0.797628253698349
+      ],
+      "center": [
+        -0.012820541858673096,
+        -0.013261020183563232,
+        -0.013041749596595764
+      ]
+    },
+    "triangleCount": 4750,
+    "vertexCount": 4405,
+    "triangleBudget": 5000
   },
   "simplification": {
     "requested": true,
     "applied": true,
     "sourceTriangleCount": 50000,
-    "targetTriangleBudget": 20000,
-    "ratio": 0.38,
+    "targetTriangleBudget": 5000,
+    "ratio": 0.095,
     "tool": "gltf-transform",
     "prepass": "weld",
     "error": 0.05

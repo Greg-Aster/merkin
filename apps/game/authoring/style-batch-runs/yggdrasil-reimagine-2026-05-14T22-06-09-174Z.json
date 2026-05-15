@@ -1,0 +1,17 @@
+{
+  "createdAt": "2026-05-14T22:06:09.174Z",
+  "write": true,
+  "preset": "yggdrasil-abyssal-neon",
+  "targetCount": 1,
+  "applied": [],
+  "generated": [],
+  "skipped": [],
+  "failed": [
+    {
+      "nodeId": "yggdrasil-arrival-column-left",
+      "nodeName": "Arrival Column Left",
+      "error": "Found ComfyUI with Hunyuan nodes at /home/greggles/ComfyUI, but this bridge only auto-launches the official Hunyuan3D-2 api_server.py right now. Set HUNYUAN3D_ROOT or HUNYUAN3D_START_COMMAND, or switch the bridge to a direct ComfyUI workflow."
+    }
+  ],
+  "finishedAt": "2026-05-14T22:06:55.115Z"
+}

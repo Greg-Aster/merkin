@@ -61,6 +61,13 @@ const DEFAULT_DIAGNOSTICS: Record<string, DiagnosticRecord> = {
     message: 'Physics not initialized.',
     updatedAt: 0,
   },
+  performancePressure: {
+    key: 'performancePressure',
+    label: 'Performance Pressure',
+    level: 'idle',
+    message: 'Runtime performance samples have not been collected yet.',
+    updatedAt: 0,
+  },
   worldLoading: {
     key: 'worldLoading',
     label: 'World Loading',
@@ -145,11 +152,25 @@ const DEFAULT_DIAGNOSTICS: Record<string, DiagnosticRecord> = {
     message: 'Scene persistence status unknown.',
     updatedAt: 0,
   },
+  atmosphere: {
+    key: 'atmosphere',
+    label: 'Atmosphere',
+    level: 'idle',
+    message: 'Runtime atmosphere has not been configured.',
+    updatedAt: 0,
+  },
   fog: {
     key: 'fog',
     label: 'Scene Fog',
     level: 'idle',
     message: 'Scene fog has not been configured.',
+    updatedAt: 0,
+  },
+  postProcessing: {
+    key: 'postProcessing',
+    label: 'Post Processing',
+    level: 'idle',
+    message: 'Post-processing participation has not been resolved.',
     updatedAt: 0,
   },
 }

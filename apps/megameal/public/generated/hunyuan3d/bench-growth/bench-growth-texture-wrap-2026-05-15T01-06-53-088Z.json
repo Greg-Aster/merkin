@@ -1,0 +1,15 @@
+{
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+  "sourceName": "overgrown haunted bench",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/hvergelmir-bench-2026-05-15T01-04-43-086Z/reference/hvergelmir-bench-reference-2026-05-15T01-06-10-024Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1778807170056-vw901a",
+  "prompt": "object: weathered sacred bench or seated shrine element with overgrowth. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "texture",
+  "shapeModel": null,
+  "paintModel": "hunyuan3d-paint-v2-0-turbo",
+  "generatedAt": "2026-05-15T01:06:54.710Z"
+}

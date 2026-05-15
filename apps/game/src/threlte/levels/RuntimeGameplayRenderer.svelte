@@ -34,7 +34,7 @@ let fireflyConversationSelected = false
 let fireflyInteractionSelected = false
 let fireflySelectionBlend = 0
 let fireflySelectionTimeoutId: ReturnType<typeof setTimeout> | null = null
-const gameplayPointLightScale = 0.22
+const gameplayPointLightScale = 0.16
 
 let fireflyPresentation = resolveRuntimeFireflyPresentation(node)
 
@@ -205,7 +205,7 @@ onDestroy(() => {
     {@const fireflyMotionOffset = getFireflyMotionOffset()}
     {@const baseLightIntensity = fireflyPresentation.lightIntensity}
     {@const baseSpriteIntensity = fireflyPresentation.spriteIntensity}
-    {@const lightDrivenSpriteIntensity = baseSpriteIntensity * Math.max(0.75, baseLightIntensity / 1.15)}
+    {@const lightDrivenSpriteIntensity = baseSpriteIntensity * Math.min(1.35, Math.max(0.72, baseLightIntensity / 3.2))}
     {@const selectionBlend = fireflySelectionBlend}
     {@const fireflySelected = selectionBlend > 0.01}
     {@const selectionLightMultiplier = 1 + selectionBlend * fireflyPresentation.selectionLightBoost}
@@ -224,7 +224,7 @@ onDestroy(() => {
     )}
     {@const baseSpriteOpacityIntensity = Math.min(1, baseSpriteVisualIntensity)}
     {@const baseSpriteGlowBoost = selectionGlowBoost * (1 + Math.max(0, baseSpriteVisualIntensity - 1) * 1.8)}
-    {@const shouldRenderFireflyPointLight = markerHovered || fireflySelected || shockwaveIgnition > 0.01 || lightBurstGlow > 0.01}
+    {@const shouldRenderFireflyPointLight = baseLightIntensity > 0 && fireflyPresentation.lightDistance > 0}
     {#if shouldRenderFireflyPointLight}
       <AdaptivePointLight
         position={fireflyMotionOffset}

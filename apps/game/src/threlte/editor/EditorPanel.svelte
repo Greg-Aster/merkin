@@ -24,6 +24,7 @@ import EditorMainToolbar from './EditorMainToolbar.svelte'
 import EditorOutputTabHost from './EditorOutputTabHost.svelte'
 import EditorPanelHeader from './EditorPanelHeader.svelte'
 import EditorPanelToolsDock from './EditorPanelToolsDock.svelte'
+import EditorPerformanceTabHost from './EditorPerformanceTabHost.svelte'
 import EditorSaveTabHost from './EditorSaveTabHost.svelte'
 import EditorSceneTabHost from './EditorSceneTabHost.svelte'
 import EditorSideStackHost from './EditorSideStackHost.svelte'
@@ -65,7 +66,10 @@ import {
   resolveSolitudePresetSettings,
   solitudeAtmospherePresets,
 } from './editorLevelPresets'
-import { mergeLevelSettings } from './editorLevelSetup'
+import {
+  mergeLevelSettings,
+  normalizeLevelSceneSettings,
+} from './editorLevelSetup'
 import {
   OUTLINER_MODE_OPTIONS,
   buildOutlinerItems,
@@ -124,6 +128,7 @@ import {
   editorSceneStore,
   editorStateStore,
   endSceneTransaction,
+  executeSceneCommands,
   exportSceneJson,
   getProtectedSceneNodeRemovalIds,
   groupNodes,
@@ -185,6 +190,13 @@ import {
   reconcileStyleBatchSelection,
   stylePresetOptions,
 } from './editorStyleBatchSelection'
+import type {
+  EditorStyleBakeBackend,
+  EditorStyleBakeOutputTier,
+  EditorStyleBakePreviewSnapshot,
+  EditorStyleBakeProduct,
+  EditorStyleBakeStatus,
+} from './editorStyleBakeTypes'
 import { createEditorStyleController } from './editorStyleController'
 import { isGeneratedHeightmapChunkTerrain } from './editorTerrainModeGuards'
 import {
@@ -288,6 +300,9 @@ let generatedVariantItems: Array<{
   url: string
   sourceLabel?: string
   isOriginalSource?: boolean
+  mode?: string
+  generatedAt?: string
+  metadataUrl?: string
 }> = []
 let generatedVariantLoading = false
 let generatedVariantError = ''
@@ -307,6 +322,8 @@ let comfyUiStatus =
   'ComfyUI powers local mesh workflows and can be started here.'
 let comfyUiBusy = false
 let comfyUiReady = false
+let comfyUiLowVramMode = false
+let aiPreferencesLoaded = false
 let comfyUiStatusKey = ''
 let comfyWorkflowEditorStatus = ''
 let hunyuanApiUrl = 'http://127.0.0.1:8080'
@@ -397,6 +414,25 @@ let styleWorkspaceManifestUrl = ''
 let styleWorkspaceSourceAssetUrl = ''
 let styleGeneratedReferenceImageUrl = ''
 let styleSimplifiedAssetUrl = ''
+let styleBakedAssetUrl = ''
+let styleBakeBackend: EditorStyleBakeBackend = 'procedural-material'
+let styleBakeTextureSize = 256
+let styleBakeLineStrength = 0.35
+let styleBakeBrushStrength = 0.25
+let styleBakeAoStrength = 0.8
+let styleBakeCavityStrength = 0.65
+let styleBakeCurvatureStrength = 0.45
+let styleBakeGeometrySimplification = 0
+let styleBakeOutputTier: EditorStyleBakeOutputTier = 'preview'
+let styleBakeForceRefresh = false
+let styleBakeCurrentSourceAssetUrl = ''
+let styleBakeProduct: EditorStyleBakeProduct | null = null
+let styleBakeProductStatus: EditorStyleBakeStatus = 'missing'
+let styleBakeLastError = ''
+let styleBakeLastSuccessfulAt = ''
+let styleBakeCanApply = false
+let styleBakeCanRevert = false
+let styleBakePreviewSnapshot: EditorStyleBakePreviewSnapshot | null = null
 let styleBlenderExportPath = ''
 let styleBlenderOpenCommand = ''
 let styleSimplifyRatio = 0.6
@@ -937,6 +973,120 @@ styleController = createEditorStyleController({
     set styleSimplifiedAssetUrl(value) {
       styleSimplifiedAssetUrl = value
     },
+    get styleBakedAssetUrl() {
+      return styleBakedAssetUrl
+    },
+    set styleBakedAssetUrl(value) {
+      styleBakedAssetUrl = value
+    },
+    get styleBakeBackend() {
+      return styleBakeBackend
+    },
+    set styleBakeBackend(value) {
+      styleBakeBackend = value
+    },
+    get styleBakeTextureSize() {
+      return styleBakeTextureSize
+    },
+    set styleBakeTextureSize(value) {
+      styleBakeTextureSize = Number(value)
+    },
+    get styleBakeLineStrength() {
+      return styleBakeLineStrength
+    },
+    set styleBakeLineStrength(value) {
+      styleBakeLineStrength = Number(value)
+    },
+    get styleBakeBrushStrength() {
+      return styleBakeBrushStrength
+    },
+    set styleBakeBrushStrength(value) {
+      styleBakeBrushStrength = Number(value)
+    },
+    get styleBakeAoStrength() {
+      return styleBakeAoStrength
+    },
+    set styleBakeAoStrength(value) {
+      styleBakeAoStrength = Number(value)
+    },
+    get styleBakeCavityStrength() {
+      return styleBakeCavityStrength
+    },
+    set styleBakeCavityStrength(value) {
+      styleBakeCavityStrength = Number(value)
+    },
+    get styleBakeCurvatureStrength() {
+      return styleBakeCurvatureStrength
+    },
+    set styleBakeCurvatureStrength(value) {
+      styleBakeCurvatureStrength = Number(value)
+    },
+    get styleBakeGeometrySimplification() {
+      return styleBakeGeometrySimplification
+    },
+    set styleBakeGeometrySimplification(value) {
+      styleBakeGeometrySimplification = Number(value)
+    },
+    get styleBakeOutputTier() {
+      return styleBakeOutputTier
+    },
+    set styleBakeOutputTier(value) {
+      styleBakeOutputTier = value
+    },
+    get styleBakeForceRefresh() {
+      return styleBakeForceRefresh
+    },
+    set styleBakeForceRefresh(value) {
+      styleBakeForceRefresh = Boolean(value)
+    },
+    get styleBakeCurrentSourceAssetUrl() {
+      return styleBakeCurrentSourceAssetUrl
+    },
+    set styleBakeCurrentSourceAssetUrl(value) {
+      styleBakeCurrentSourceAssetUrl = value
+    },
+    get styleBakeProduct() {
+      return styleBakeProduct
+    },
+    set styleBakeProduct(value) {
+      styleBakeProduct = value
+    },
+    get styleBakeProductStatus() {
+      return styleBakeProductStatus
+    },
+    set styleBakeProductStatus(value) {
+      styleBakeProductStatus = value
+    },
+    get styleBakeLastError() {
+      return styleBakeLastError
+    },
+    set styleBakeLastError(value) {
+      styleBakeLastError = value
+    },
+    get styleBakeLastSuccessfulAt() {
+      return styleBakeLastSuccessfulAt
+    },
+    set styleBakeLastSuccessfulAt(value) {
+      styleBakeLastSuccessfulAt = value
+    },
+    get styleBakeCanApply() {
+      return styleBakeCanApply
+    },
+    set styleBakeCanApply(value) {
+      styleBakeCanApply = Boolean(value)
+    },
+    get styleBakeCanRevert() {
+      return styleBakeCanRevert
+    },
+    set styleBakeCanRevert(value) {
+      styleBakeCanRevert = Boolean(value)
+    },
+    get styleBakePreviewSnapshot() {
+      return styleBakePreviewSnapshot
+    },
+    set styleBakePreviewSnapshot(value) {
+      styleBakePreviewSnapshot = value
+    },
     get styleBlenderExportPath() {
       return styleBlenderExportPath
     },
@@ -1032,6 +1182,12 @@ styleController = createEditorStyleController({
     },
     set comfyUiApiUrl(value) {
       comfyUiApiUrl = value
+    },
+    get comfyUiLowVramMode() {
+      return comfyUiLowVramMode
+    },
+    set comfyUiLowVramMode(value) {
+      comfyUiLowVramMode = Boolean(value)
     },
     get hunyuanApiUrl() {
       return hunyuanApiUrl
@@ -1170,6 +1326,12 @@ aiController = createEditorAiController({
     },
     set comfyUiApiUrl(value) {
       comfyUiApiUrl = value
+    },
+    get comfyUiLowVramMode() {
+      return comfyUiLowVramMode
+    },
+    set comfyUiLowVramMode(value) {
+      comfyUiLowVramMode = Boolean(value)
     },
     get selectedComfyWorkflowPath() {
       return selectedComfyWorkflowPath
@@ -1789,6 +1951,18 @@ const editorPanelTabs: Array<{
     description: 'Environment, terrain, atmosphere, audio, and player setup',
   },
   {
+    id: 'performance',
+    icon: '▥',
+    label: 'Performance',
+    description: 'Performance budgets, quality systems, and optimization tools',
+  },
+  {
+    id: 'bake',
+    icon: '◈',
+    label: 'Bake',
+    description: 'Style, collision, terrain, partition, and runtime bake controls',
+  },
+  {
     id: 'collision',
     icon: '◇',
     label: 'Collision',
@@ -1810,7 +1984,9 @@ const editorPanelTabs: Array<{
 
 function setActiveEditorTab(tab: EditorPanelTab) {
   activeEditorTab = tab
-  if (tab === 'ai') {
+  if (tab === 'bake') {
+    void ensureEditorStyleStudio()
+  } else if (tab === 'ai') {
     void ensureEditorAIMeshStudio()
     void ensureEditorStyleStudio()
   }
@@ -2100,8 +2276,98 @@ function setNestedValue<T>(
   return next
 }
 
+function isFiniteVec3Setting(value: unknown): value is [number, number, number] {
+  return (
+    Array.isArray(value) &&
+    value.length === 3 &&
+    value.every(component => Number.isFinite(component))
+  )
+}
+
+function isSpawnPositionSettingPath(path: Array<string | number>) {
+  return path[0] === 'spawn' && path[1] === 'position'
+}
+
+function getSpawnSupportActorId(settings: Record<string, any>) {
+  const actorId = settings.spawn?.supportActorId
+  return typeof actorId === 'string' && actorId.trim()
+    ? actorId.trim()
+    : null
+}
+
+function getLinkedSpawnSupportActorCommand(input: {
+  scene: EditorSceneDocument
+  previousLevelSettings: Record<string, any>
+  nextLevelSettings: Record<string, any>
+  path: Array<string | number>
+}) {
+  if (!isSpawnPositionSettingPath(input.path)) return null
+
+  const supportActorId =
+    getSpawnSupportActorId(input.nextLevelSettings) ??
+    getSpawnSupportActorId(input.previousLevelSettings)
+  if (!supportActorId) return null
+
+  const previousSpawn = input.previousLevelSettings.spawn?.position
+  const nextSpawn = input.nextLevelSettings.spawn?.position
+  if (!isFiniteVec3Setting(previousSpawn) || !isFiniteVec3Setting(nextSpawn)) {
+    return null
+  }
+
+  const supportActor = input.scene.nodes.find(node => node.id === supportActorId)
+  if (!supportActor || !isFiniteVec3Setting(supportActor.position)) return null
+
+  const delta = nextSpawn.map(
+    (component, index) => component - previousSpawn[index],
+  ) as [number, number, number]
+  if (delta.every(component => component === 0)) return null
+
+  const position = supportActor.position.map(
+    (component, index) => component + delta[index],
+  ) as [number, number, number]
+
+  return {
+    type: 'patch-node' as const,
+    nodeId: supportActor.id,
+    patch: {
+      position,
+    },
+  }
+}
+
 function updateLevelSetting(path: Array<string | number>, value: unknown) {
-  updateLevelSceneSettings(settings => setNestedValue(settings, path, value))
+  const scene = get(editorSceneStore)
+  if (!scene) {
+    updateLevelSceneSettings(settings => setNestedValue(settings, path, value))
+    return
+  }
+
+  const previousLevelSettings = structuredClone(
+    scene.settings?.level ?? {},
+  ) as Record<string, any>
+  const nextLevelSettings = setNestedValue(
+    previousLevelSettings,
+    path,
+    value,
+  ) as Record<string, any>
+  const nextSettings = normalizeLevelSceneSettings(scene.levelId, {
+    ...(scene.settings ?? {}),
+    level: nextLevelSettings,
+  })
+  const supportActorCommand = getLinkedSpawnSupportActorCommand({
+    scene,
+    previousLevelSettings,
+    nextLevelSettings,
+    path,
+  })
+
+  executeSceneCommands([
+    {
+      type: 'replace-settings',
+      settings: nextSettings,
+    },
+    ...(supportActorCommand ? [supportActorCommand] : []),
+  ])
 }
 
 function updateLevelNumericSetting(
@@ -2197,6 +2463,13 @@ $: if (typeof window !== 'undefined' && selectedComfyWorkflowPath) {
   window.localStorage.setItem(
     'merkin:selected-comfy-workflow-path',
     selectedComfyWorkflowPath,
+  )
+}
+
+$: if (typeof window !== 'undefined' && aiPreferencesLoaded) {
+  window.localStorage.setItem(
+    'merkin:comfy-ui-low-vram-mode',
+    comfyUiLowVramMode ? '1' : '0',
   )
 }
 
@@ -2595,6 +2868,12 @@ function openBuildOutput() {
   setActiveEditorTab('build')
 }
 
+function selectPerformanceNodes(nodeIds: string[], label: string) {
+  const selectedIds = Array.from(new Set(nodeIds)).filter(Boolean)
+  setSelectedNodes(selectedIds)
+  saveMessage = `${label}: ${selectedIds.length} selected`
+}
+
 function buildEditorCommands(): EditorCommand[] {
   const selected = selectionStatus()
   const deletion = deletionStatus()
@@ -2810,6 +3089,17 @@ function buildEditorCommands(): EditorCommand[] {
         openOwnerWorkspace('build')
         void cookWorldPartition()
       },
+    },
+    {
+      id: 'open-performance-tools',
+      label: 'Open Performance Tools',
+      description:
+        'Open scene performance diagnostics and budget management tools.',
+      category: 'Diagnostics',
+      ownerWorkspace: 'performance',
+      enabled: true,
+      status: 'ready',
+      run: () => openOwnerWorkspace('performance'),
     },
     {
       id: 'bake-mesh-collider',
@@ -3254,8 +3544,12 @@ function addLatestGeneratedAssetToScene() {
 }
 
 $: styleBatchResumeAvailable = !!styleBatchPendingResume && !styleBatchBusy
+function getStyleBatchModeLabel(mode: PersistedStyleBatchSession['mode']) {
+  if (mode === 'procedural-material') return 'procedural style bake'
+  return mode === 'generate' ? 'mesh reimagine' : 'texture'
+}
 $: styleBatchResumeSummary = styleBatchPendingResume
-  ? `Saved ${styleBatchPendingResume.mode === 'generate' ? 'mesh reimagine' : 'texture'} batch with ${styleBatchPendingResume.entries.length} objects from ${new Date(styleBatchPendingResume.updatedAt).toLocaleString()}`
+  ? `Saved ${getStyleBatchModeLabel(styleBatchPendingResume.mode)} batch with ${styleBatchPendingResume.entries.length} objects from ${new Date(styleBatchPendingResume.updatedAt).toLocaleString()}`
   : ''
 
 function updateTupleField(
@@ -3461,6 +3755,14 @@ $: {
     styleWorkspaceSourceAssetUrl = ''
     styleGeneratedReferenceImageUrl = ''
     styleSimplifiedAssetUrl = ''
+    styleBakeCurrentSourceAssetUrl = getAiSourceAssetUrl(selectedNode) ?? ''
+    styleBakeProduct = null
+    styleBakeProductStatus = 'missing'
+    styleBakeLastError = ''
+    styleBakeLastSuccessfulAt = ''
+    styleBakeCanApply = false
+    styleBakeCanRevert = false
+    styleBakePreviewSnapshot = null
     styleBlenderExportPath = ''
     styleBlenderOpenCommand = ''
 
@@ -3955,8 +4257,12 @@ async function reloadFromDisk() {
     )
     const payload = await response.json()
     if (payload?.success && payload.scene) {
-      setEditorScene(payload.scene)
-      saveMessage = 'Reloaded from disk'
+      const localScene = saveEditorSceneToLocalStorage(
+        activeSceneLevelId,
+        payload.scene,
+      )
+      setEditorScene(localScene)
+      saveMessage = 'Reloaded from disk and replaced local scene cache'
       return
     }
     saveMessage = 'No disk scene found'
@@ -4189,6 +4495,24 @@ $: editorPanelPropContext = {
   styleWorkspaceSourceAssetUrl,
   styleGeneratedReferenceImageUrl,
   styleSimplifiedAssetUrl,
+  styleBakedAssetUrl,
+  styleBakeBackend,
+  styleBakeTextureSize,
+  styleBakeLineStrength,
+  styleBakeBrushStrength,
+  styleBakeAoStrength,
+  styleBakeCavityStrength,
+  styleBakeCurvatureStrength,
+  styleBakeGeometrySimplification,
+  styleBakeOutputTier,
+  styleBakeForceRefresh,
+  styleBakeCurrentSourceAssetUrl,
+  styleBakeProduct,
+  styleBakeProductStatus,
+  styleBakeLastError,
+  styleBakeLastSuccessfulAt,
+  styleBakeCanApply,
+  styleBakeCanRevert,
   styleBlenderExportPath,
   styleBlenderOpenCommand,
   styleBatchBusy,
@@ -4200,6 +4524,7 @@ $: editorPanelPropContext = {
   comfyUiStatus,
   comfyUiBusy,
   comfyUiReady,
+  comfyUiLowVramMode,
   editorAIMeshStudioComponent,
   canUseStyleStudio,
   canUseAiMeshStudio,
@@ -4308,6 +4633,9 @@ onMount(() => {
     if (savedWorkflowPath) {
       selectedComfyWorkflowPath = savedWorkflowPath
     }
+    comfyUiLowVramMode =
+      window.localStorage.getItem('merkin:comfy-ui-low-vram-mode') === '1'
+    aiPreferencesLoaded = true
   }
   void assetController.loadAssetBrowser(assetBrowserPath)
   void assetController.loadWorkflowBrowser(workflowBrowserPath)
@@ -4334,7 +4662,7 @@ onMount(() => {
         styleController.persistStyleBatchSession(null)
       } else {
         styleBatchPendingResume = persistedStyleBatch
-        styleBatchStatus = `Found an interrupted ${persistedStyleBatch.mode === 'generate' ? 'mesh reimagine' : 'texture'} batch for ${persistedStyleBatch.entries.length} objects. Review prompts, then choose resume or discard.`
+        styleBatchStatus = `Found an interrupted ${getStyleBatchModeLabel(persistedStyleBatch.mode)} batch for ${persistedStyleBatch.entries.length} objects. Review prompts, then choose resume or discard.`
         saveMessage = styleBatchStatus
       }
     }
@@ -4567,6 +4895,24 @@ onDestroy(() => {
         </section>
       {/if}
 
+      {#if activeEditorTab === 'performance'}
+        <section class="editor-workspace" aria-label="Performance workspace">
+          <div class="editor-workspace-heading">
+            <div class="label">Performance Workspace</div>
+            <p>Budget diagnostics, runtime quality systems, and optimization selection tools.</p>
+          </div>
+          <EditorPerformanceTabHost
+            {levelId}
+            {editorScene}
+            {editorNodes}
+            {publishPipelineState}
+            onOpenBuildTools={() => openOwnerWorkspace('build')}
+            onOpenCollisionTools={() => openOwnerWorkspace('collision')}
+            onSelectNodes={selectPerformanceNodes}
+          />
+        </section>
+      {/if}
+
       {#if activeEditorTab === 'collision'}
         <section class="editor-workspace" aria-label="Collision workspace">
           <div class="editor-workspace-heading">
@@ -4574,6 +4920,49 @@ onDestroy(() => {
             <p>Collision policy, authoring, review, runtime overlay, and bake entry points.</p>
           </div>
           <EditorCollisionTabHost {...collisionTabProps} />
+        </section>
+      {/if}
+
+      {#if activeEditorTab === 'bake'}
+        <section class="editor-workspace" aria-label="Bake workspace">
+          <div class="editor-workspace-heading">
+            <div class="label">Bake Workspace</div>
+            <p>Style products, collision products, terrain products, actor partitions, runtime cook, and publish gates.</p>
+          </div>
+          <details class="editor-section" open>
+            <summary class="label">Style Bake</summary>
+            <EditorStyleTabHost
+              workspaceMode="bake"
+              {...styleTabProps}
+              bind:styleProfileName
+              bind:stylePrompt
+              bind:styleNegativePrompt
+              bind:styleLoraNotes
+              bind:styleControlNetNotes
+              bind:styleReferenceImageUrl
+              bind:styleSimplifyRatio
+              bind:styleSimplifyError
+              bind:styleBakeBackend
+              bind:styleBakeTextureSize
+              bind:styleBakeLineStrength
+              bind:styleBakeBrushStrength
+              bind:styleBakeAoStrength
+              bind:styleBakeCavityStrength
+              bind:styleBakeCurvatureStrength
+              bind:styleBakeGeometrySimplification
+              bind:styleBakeOutputTier
+              bind:styleBakeForceRefresh
+              bind:comfyUiLowVramMode
+            />
+          </details>
+          <details class="editor-section" open>
+            <summary class="label">Collision And Terrain Bake</summary>
+            <EditorCollisionTabHost {...collisionTabProps} />
+          </details>
+          <details class="editor-section" open>
+            <summary class="label">Runtime Cook And Publish Bake</summary>
+            <EditorWorkflowTabHost {...workflowTabProps} />
+          </details>
         </section>
       {/if}
 
@@ -4661,6 +5050,7 @@ onDestroy(() => {
             <p>Scope the run, set art direction, regenerate assets, review output, then save and validate.</p>
           </div>
           <EditorStyleTabHost
+            workspaceMode="generation"
             {...styleTabProps}
             bind:styleProfileName
             bind:stylePrompt
@@ -4670,13 +5060,25 @@ onDestroy(() => {
             bind:styleReferenceImageUrl
             bind:styleSimplifyRatio
             bind:styleSimplifyError
+            bind:styleBakeBackend
+            bind:styleBakeTextureSize
+            bind:styleBakeLineStrength
+            bind:styleBakeBrushStrength
+            bind:styleBakeAoStrength
+            bind:styleBakeCavityStrength
+            bind:styleBakeCurvatureStrength
+            bind:styleBakeGeometrySimplification
+            bind:styleBakeOutputTier
+            bind:styleBakeForceRefresh
+            bind:comfyUiLowVramMode
           />
           <details class="editor-section editor-advanced-block">
             <summary class="label">Advanced AI Tools</summary>
-            <div class="save-message">Legacy scratch generation, workflow-template browsing, direct Hunyuan job inspection, and manual apply controls live here.</div>
+            <div class="save-message">Scratch generation, workflow-template browsing, direct Hunyuan job inspection, and manual apply controls live here.</div>
             <EditorAiTabHost
               {...aiTabProps}
               bind:comfyUiApiUrl
+              bind:comfyUiLowVramMode
               bind:hunyuanApiUrl
               bind:selectedHunyuanJobId
               bind:hunyuanReferenceImageUrl

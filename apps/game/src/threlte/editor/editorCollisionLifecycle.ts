@@ -2,7 +2,6 @@ import {
   getDefaultCollisionChannel,
   getDefaultCollisionIntent,
   getDefaultCollisionShape,
-  getNodeVisualColliderSize,
   isEditorGeometryNode,
   shouldAuthorPrimitiveCollisionByDefault,
 } from './editorCollisionDefaults'
@@ -47,14 +46,13 @@ function getBaseCollision(
   settings?: EditorSceneSettings | null,
 ): Pick<
   EditorNodeCollisionData,
-  'intent' | 'channel' | 'enabled' | 'friction' | 'restitution' | 'sensor'
+  'intent' | 'channel' | 'friction' | 'restitution' | 'sensor'
 > {
   const intent = getCollisionIntent(node, settings)
   const sensor = node.collision?.sensor ?? intent === 'trigger'
   return {
     intent,
     channel: getCollisionChannel(node, settings),
-    enabled: true,
     friction: node.collision?.friction ?? 0.7,
     restitution: node.collision?.restitution ?? 0,
     sensor,
@@ -67,42 +65,89 @@ function createDefaultCollision(
 ): EditorNodeCollisionData {
   const shape = getDefaultCollisionShape(node)
   return {
-    shape,
     ...getBaseCollision(node, settings),
-    ...(shape === 'trimesh'
-      ? { triangleBudget: 5000 }
-      : { size: getNodeVisualColliderSize(node) }),
+    mode: 'auto',
+    quality: shape === 'trimesh' ? 'simplifiedMesh' : 'primitive',
   }
 }
 
-function hasFiniteVec3(value: unknown): value is [number, number, number] {
-  return (
-    Array.isArray(value) &&
-    value.length === 3 &&
-    value.every(component => Number.isFinite(component))
+function getCollisionMode(collision: EditorNodeCollisionData) {
+  if (collision.mode) return collision.mode
+  if (collision.enabled === false || collision.intent === 'none') return 'none'
+  if (collision.sensor || collision.intent === 'trigger') return 'trigger'
+  return 'auto'
+}
+
+function getCollisionQuality(collision: EditorNodeCollisionData) {
+  if (collision.quality) return collision.quality
+  return collision.shape === 'trimesh' ? 'trimesh' : 'primitive'
+}
+
+function hasGeneratedCollisionProduct(collision: EditorNodeCollisionData) {
+  return Boolean(
+    collision.colliderUrl ||
+      collision.colliderMetadataUrl ||
+      collision.colliderCacheKey ||
+      collision.sourceAssetUrl ||
+      collision.colliderSourceAssetUrl ||
+      Object.hasOwn(collision, 'assetLocalTransform') ||
+      collision.triangleCount !== undefined ||
+      collision.vertexCount !== undefined,
   )
 }
 
-export function preserveCollisionForVisualReplacement(
-  node: EditorSceneNode,
-  options: { visualScaleBakedIntoMesh?: boolean } = {},
-): EditorNodeCollisionData | undefined {
-  if (!node.collision) return undefined
+export function sanitizeEditorNodeCollisionPolicy(
+  collision: EditorNodeCollisionData,
+): EditorNodeCollisionData {
+  const mode = getCollisionMode(collision)
+  const intent =
+    mode === 'none'
+      ? 'none'
+      : mode === 'trigger'
+        ? 'trigger'
+        : (collision.intent ?? 'blocker')
 
-  const collision = structuredClone(node.collision) as EditorNodeCollisionData
-  if (
-    !options.visualScaleBakedIntoMesh ||
-    collision.shape === 'trimesh' ||
-    collision.enabled === false ||
-    collision.intent === 'none' ||
-    hasFiniteVec3(collision.size)
-  ) {
-    return collision
-  }
+  const productFields = hasGeneratedCollisionProduct(collision)
+    ? {
+        shape: 'trimesh' as const,
+        colliderUrl: collision.colliderUrl,
+        colliderMetadataUrl: collision.colliderMetadataUrl,
+        colliderCacheKey: collision.colliderCacheKey,
+        assetLocalTransform: collision.assetLocalTransform,
+        sourceAssetUrl: collision.sourceAssetUrl,
+        colliderSourceAssetUrl: collision.colliderSourceAssetUrl,
+        triangleCount: collision.triangleCount,
+        vertexCount: collision.vertexCount,
+      }
+    : {}
 
   return {
-    ...collision,
-    size: getNodeVisualColliderSize(node),
+    mode,
+    quality: getCollisionQuality(collision),
+    intent,
+    channel: collision.channel,
+    lodTier: collision.lodTier ?? collision.lodSourceTier,
+    friction: collision.friction,
+    restitution: collision.restitution,
+    sensor: mode === 'trigger' ? true : collision.sensor,
+    maxTriangles: collision.maxTriangles ?? collision.triangleBudget,
+    generationStatus: collision.generationStatus,
+    generationLastError: collision.generationLastError,
+    ...productFields,
+  }
+}
+
+function stripLegacyGenerationSource(
+  patch: EditorSceneNodePatch,
+): EditorSceneNodePatch {
+  if (!patch.generation || !('originalCollision' in patch.generation)) {
+    return patch
+  }
+  const { originalCollision: _originalCollision, ...generation } =
+    patch.generation
+  return {
+    ...patch,
+    generation,
   }
 }
 
@@ -149,13 +194,27 @@ export function applyCollisionLifecycleToPatch(
   patch: EditorSceneNodePatch,
   settings?: EditorSceneSettings | null,
 ): EditorSceneNodePatch {
-  if (patch.collision) return patch
+  patch = stripLegacyGenerationSource(patch)
+
+  if (patch.collision) {
+    return {
+      ...patch,
+      collision: sanitizeEditorNodeCollisionPolicy(patch.collision),
+    }
+  }
 
   if (didRenderAssetChange(currentNode, patch)) {
     const nextNode = {
       ...currentNode,
       ...patch,
     } as EditorSceneNode
+
+    if (currentNode.collision) {
+      return {
+        ...patch,
+        collision: sanitizeEditorNodeCollisionPolicy(currentNode.collision),
+      }
+    }
 
     if (
       !isEditorGeometryNode(nextNode) ||
@@ -171,12 +230,16 @@ export function applyCollisionLifecycleToPatch(
       return patch
     }
 
-    if (currentNode.collision) return patch
-
-    return {
-      ...patch,
-      collision: materializeEditorNodeCollision(nextNode, settings).collision,
-    }
+    const materializedCollision = materializeEditorNodeCollision(
+      nextNode,
+      settings,
+    ).collision
+    return materializedCollision
+      ? {
+          ...patch,
+          collision: sanitizeEditorNodeCollisionPolicy(materializedCollision),
+        }
+      : patch
   }
 
   return patch

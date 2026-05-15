@@ -52,40 +52,181 @@ function resolvePublicAssetPath(publicRoot, assetUrl = '') {
   return fs.existsSync(resolvedCandidate) ? resolvedCandidate : '';
 }
 
-function copyAssetToPackage({ node, packageRoot, publicRoot, repoRelative, copiedAssetByUrl }) {
-  const assetUrl = node.asset?.url || '';
-  if (!assetUrl) return null;
+function resolveRuntimeScenePath(publicRoot, levelId) {
+  if (!levelId) return '';
+  const candidate = path.join(
+    publicRoot,
+    'generated',
+    'runtime-game-assets',
+    'scenes',
+    `${levelId}.runtime-scene.json`,
+  );
+  return fs.existsSync(candidate) ? candidate : '';
+}
 
-  const sourcePath = resolvePublicAssetPath(publicRoot, assetUrl);
+function readJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
+function getRuntimeActorsById(publicRoot, levelId) {
+  const runtimeScenePath = resolveRuntimeScenePath(publicRoot, levelId);
+  if (!runtimeScenePath) {
+    return {
+      runtimeScenePath: '',
+      actorsById: new Map(),
+      warning: `Runtime scene manifest not found for ${levelId}; Blender package uses editor-authored collision.`,
+    };
+  }
+
+  const runtimeScene = readJson(runtimeScenePath);
+  const actors = Array.isArray(runtimeScene.levelDefinition?.actors)
+    ? runtimeScene.levelDefinition.actors
+    : [];
+  return {
+    runtimeScenePath,
+    actorsById: new Map(actors.map(actor => [actor.id, actor])),
+    warning: '',
+  };
+}
+
+function copyPublicFileToPackage({
+  url,
+  packageRoot,
+  publicRoot,
+  repoRelative,
+  copiedAssetByUrl,
+  subdirectory,
+  outputName,
+}) {
+  if (!url) return null;
+
+  const sourcePath = resolvePublicAssetPath(publicRoot, url);
   if (!sourcePath) {
     return {
-      url: assetUrl,
+      url,
       missing: true,
       reason: 'Asset URL could not be resolved under apps/megameal/public.',
     };
   }
 
-  if (copiedAssetByUrl.has(assetUrl)) return copiedAssetByUrl.get(assetUrl);
+  const cacheKey = `${subdirectory}:${url}`;
+  if (copiedAssetByUrl.has(cacheKey)) return copiedAssetByUrl.get(cacheKey);
 
   const extension = path.extname(sourcePath) || '.glb';
-  const assetDirectory = path.join(packageRoot, 'assets');
+  const assetDirectory = path.join(packageRoot, subdirectory);
   ensureDirectory(assetDirectory);
 
-  const outputName = `${slugify(node.name || node.id)}-${slugify(node.id)}${extension}`;
-  const outputPath = path.join(assetDirectory, outputName);
+  const outputPath = path.join(assetDirectory, `${outputName}${extension}`);
   fs.copyFileSync(sourcePath, outputPath);
 
   const asset = {
-    url: assetUrl,
+    url,
     sourcePath: repoRelative(sourcePath),
     packagePath: path.relative(packageRoot, outputPath).replace(/\\/g, '/'),
     sizeBytes: fs.statSync(outputPath).size,
   };
-  copiedAssetByUrl.set(assetUrl, asset);
+  copiedAssetByUrl.set(cacheKey, asset);
   return asset;
 }
 
-function buildPackageNode({ node, packageRoot, publicRoot, repoRelative, copiedAssetByUrl }) {
+function copyAssetToPackage({ node, packageRoot, publicRoot, repoRelative, copiedAssetByUrl }) {
+  return copyPublicFileToPackage({
+    url: node.asset?.url || '',
+    packageRoot,
+    publicRoot,
+    repoRelative,
+    copiedAssetByUrl,
+    subdirectory: 'assets',
+    outputName: `${slugify(node.name || node.id)}-${slugify(node.id)}`,
+  });
+}
+
+function copyCollisionFilesToPackage({
+  node,
+  collision,
+  packageRoot,
+  publicRoot,
+  repoRelative,
+  copiedAssetByUrl,
+}) {
+  if (!collision || collision.shape !== 'trimesh') {
+    return { collision, warnings: [] };
+  }
+
+  const warnings = [];
+  const collider = copyPublicFileToPackage({
+    url: collision.colliderUrl || '',
+    packageRoot,
+    publicRoot,
+    repoRelative,
+    copiedAssetByUrl,
+    subdirectory: 'collision',
+    outputName: `${slugify(node.name || node.id)}-${slugify(node.id)}.collider`,
+  });
+  const metadata = copyPublicFileToPackage({
+    url: collision.colliderMetadataUrl || '',
+    packageRoot,
+    publicRoot,
+    repoRelative,
+    copiedAssetByUrl,
+    subdirectory: 'collision',
+    outputName: `${slugify(node.name || node.id)}-${slugify(node.id)}.collider.meta`,
+  });
+
+  if (collider?.missing) warnings.push(`Collider asset: ${collider.reason}`);
+  if (metadata?.missing) warnings.push(`Collider metadata: ${metadata.reason}`);
+
+  return {
+    collision: {
+      ...collision,
+      colliderPackagePath: collider?.packagePath || '',
+      colliderMetadataPackagePath: metadata?.packagePath || '',
+    },
+    warnings,
+  };
+}
+
+function getRuntimeActorNodeData(node, runtimeActor, runtimeAuthoritative) {
+  const transform = runtimeActor?.transform ?? {};
+  const render = runtimeActor?.render ?? {};
+  return {
+    position: transform.position ?? node.position ?? [0, 0, 0],
+    rotation: transform.rotation ?? node.rotation ?? [0, 0, 0],
+    scale: transform.scale ?? node.scale ?? [1, 1, 1],
+    primitive: render.primitive ?? node.primitive ?? null,
+    material: render.material ?? node.material ?? null,
+    collision: runtimeAuthoritative
+      ? runtimeActor?.physics?.collision ?? null
+      : node.collision ?? null,
+    physics: runtimeActor?.physics
+      ? {
+          bodyType: runtimeActor.physics.bodyType,
+          gravityScale: runtimeActor.physics.gravityScale,
+          canSleep: runtimeActor.physics.canSleep,
+          ccd: runtimeActor.physics.ccd,
+          linearDamping: runtimeActor.physics.linearDamping,
+          angularDamping: runtimeActor.physics.angularDamping,
+          lockRotations: runtimeActor.physics.lockRotations,
+          lockTranslations: runtimeActor.physics.lockTranslations,
+        }
+      : node.physics,
+  };
+}
+
+function buildPackageNode({
+  node,
+  packageRoot,
+  publicRoot,
+  repoRelative,
+  copiedAssetByUrl,
+  runtimeActor = null,
+  runtimeAuthoritative = false,
+}) {
+  const runtimeData = getRuntimeActorNodeData(
+    node,
+    runtimeActor,
+    runtimeAuthoritative,
+  );
   const asset = node.kind === 'asset'
     ? copyAssetToPackage({
         node,
@@ -95,32 +236,50 @@ function buildPackageNode({ node, packageRoot, publicRoot, repoRelative, copiedA
         copiedAssetByUrl,
       })
     : null;
+  const collisionPackage = copyCollisionFilesToPackage({
+    node,
+    collision: runtimeData.collision,
+    packageRoot,
+    publicRoot,
+    repoRelative,
+    copiedAssetByUrl,
+  });
 
   return {
     id: node.id,
     name: node.name,
     kind: node.kind,
     parentId: node.parentId ?? null,
-    position: node.position ?? [0, 0, 0],
-    rotation: node.rotation ?? [0, 0, 0],
-    scale: node.scale ?? [1, 1, 1],
+    position: runtimeData.position,
+    rotation: runtimeData.rotation,
+    scale: runtimeData.scale,
     visible: node.visible !== false,
     locked: Boolean(node.locked),
     assetUrl: node.asset?.url || '',
     assetPackagePath: asset?.packagePath || '',
-    primitive: node.primitive || null,
+    primitive: runtimeData.primitive,
     light: node.light || null,
     prefab: node.prefab || null,
-    material: node.material || null,
-    collision: node.collision || null,
+    material: runtimeData.material,
+    physics: runtimeData.physics || null,
+    collision: collisionPackage.collision,
+    collisionSource: runtimeData.collision
+      ? runtimeAuthoritative
+        ? 'runtime-scene-rapier'
+        : 'editor-authored'
+      : 'none',
     gameplay: node.gameplay || null,
     generation: node.generation || null,
-    warnings: asset?.missing ? [asset.reason] : [],
+    warnings: [
+      ...(asset?.missing ? [asset.reason] : []),
+      ...collisionPackage.warnings,
+    ],
   };
 }
 
 function buildScenePackage({ scene, packageRoot, scenePath, publicRoot, repoRelative }) {
   const copiedAssetByUrl = new Map();
+  const runtimeCollision = getRuntimeActorsById(publicRoot, scene.levelId);
   const nodes = Array.isArray(scene.nodes)
     ? scene.nodes.map(node =>
         buildPackageNode({
@@ -129,6 +288,8 @@ function buildScenePackage({ scene, packageRoot, scenePath, publicRoot, repoRela
           publicRoot,
           repoRelative,
           copiedAssetByUrl,
+          runtimeActor: runtimeCollision.actorsById.get(node.id) ?? null,
+          runtimeAuthoritative: Boolean(runtimeCollision.runtimeScenePath),
         }),
       )
     : [];
@@ -139,15 +300,26 @@ function buildScenePackage({ scene, packageRoot, scenePath, publicRoot, repoRela
     levelId: scene.levelId,
     sceneVersion: scene.version ?? null,
     sourceScenePath: scenePath ? repoRelative(scenePath) : '',
+    runtimeScenePath: runtimeCollision.runtimeScenePath
+      ? repoRelative(runtimeCollision.runtimeScenePath)
+      : '',
+    collisionSource: runtimeCollision.runtimeScenePath
+      ? 'runtime-scene-rapier'
+      : 'editor-authored',
     sourceSceneUpdatedAt: scene.updatedAt || '',
     packageRoot: repoRelative(packageRoot),
     axisConversion: 'game-y-up-to-blender-z-up',
-    roundTripMode: 'transform-delta-v1',
+    roundTripMode: 'transform-and-collision-delta-v2',
     nodes,
     assets: [...copiedAssetByUrl.values()],
-    warnings: nodes.flatMap(node =>
-      node.warnings.map(message => ({ nodeId: node.id, message })),
-    ),
+    warnings: [
+      ...(runtimeCollision.warning
+        ? [{ nodeId: '', message: runtimeCollision.warning }]
+        : []),
+      ...nodes.flatMap(node =>
+        node.warnings.map(message => ({ nodeId: node.id, message })),
+      ),
+    ],
   };
 }
 

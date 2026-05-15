@@ -1,0 +1,21 @@
+{
+  "createdAt": "2026-05-14T22:00:12.415Z",
+  "write": true,
+  "preset": "yggdrasil-abyssal-neon",
+  "targetCount": 54,
+  "applied": [],
+  "generated": [],
+  "skipped": [],
+  "failed": [
+    {
+      "nodeId": "yggdrasil-arrival-column-left",
+      "nodeName": "Arrival Column Left",
+      "error": "Mesh generation needs a reference image, and automatic reference generation failed: ComfyUI finished, but the generated reference image could not be found."
+    },
+    {
+      "nodeId": "yggdrasil-arrival-column-right",
+      "nodeName": "Arrival Column Right",
+      "error": "Hunyuan run failed: resolveWorkspacePath is not defined"
+    }
+  ]
+}

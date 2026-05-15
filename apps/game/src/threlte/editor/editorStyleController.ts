@@ -18,6 +18,16 @@ import {
   simplifyStyleAsset,
 } from './editorStyleApi'
 import { createEditorStyleBatchSessionController } from './editorStyleBatchSession'
+import {
+  buildProceduralStyleBakeSettings,
+  createEditorStyleBakeManager,
+} from './editorStyleBakeManager'
+import type {
+  EditorStyleBakeBatchScope,
+  EditorStyleBakeProduct,
+  EditorStyleBakePreviewSnapshot,
+  EditorStyleBakeRunOptions,
+} from './editorStyleBakeTypes'
 
 interface EditorStyleControllerDeps {
   state: Record<string, any>
@@ -92,6 +102,97 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     }
   }
 
+  function cloneStyleBakeValue<T>(value: T): T {
+    if (value === undefined || value === null) return value
+    if (typeof structuredClone === 'function') return structuredClone(value)
+    return JSON.parse(JSON.stringify(value)) as T
+  }
+
+  function createStyleBakePreviewSnapshot(
+    node: EditorSceneNode,
+    previewAssetUrl: string,
+  ): EditorStyleBakePreviewSnapshot {
+    return {
+      nodeId: node.id,
+      previousKind: node.kind,
+      previousAsset: cloneStyleBakeValue(node.asset),
+      previousPrefab: cloneStyleBakeValue(node.prefab),
+      previousPrimitive: cloneStyleBakeValue(node.primitive),
+      previousScale: [...node.scale] as [number, number, number],
+      previousGeneration: cloneStyleBakeValue(node.generation),
+      previewAssetUrl,
+    }
+  }
+
+  function getStyleBakePreviewNode(
+    snapshot: EditorStyleBakePreviewSnapshot | null | undefined,
+  ) {
+    if (!snapshot) return null
+    return (
+      deps.getEditorNodes().find(node => node.id === snapshot.nodeId) ?? null
+    )
+  }
+
+  function getStyleBakeNodeAssetUrl(node: EditorSceneNode | null | undefined) {
+    return typeof node?.asset?.url === 'string' ? node.asset.url : ''
+  }
+
+  function numbersMatch(left: unknown, right: unknown) {
+    const leftNumber = Number(left)
+    const rightNumber = Number(right)
+    return (
+      Number.isFinite(leftNumber) &&
+      Number.isFinite(rightNumber) &&
+      Math.abs(leftNumber - rightNumber) < 0.000001
+    )
+  }
+
+  function isStyleBakeProductDirtyForCurrentControls(
+    product: EditorStyleBakeProduct | null | undefined,
+  ) {
+    if (!product) return false
+    const currentSourceAssetUrl = String(
+      state.styleBakeCurrentSourceAssetUrl ?? '',
+    ).trim()
+    return (
+      !numbersMatch(product.settings.textureSize, state.styleBakeTextureSize) ||
+      !numbersMatch(product.settings.lineStrength, state.styleBakeLineStrength) ||
+      !numbersMatch(product.settings.brushStrength, state.styleBakeBrushStrength) ||
+      !numbersMatch(product.settings.aoStrength, state.styleBakeAoStrength) ||
+      !numbersMatch(product.settings.cavityStrength, state.styleBakeCavityStrength) ||
+      !numbersMatch(
+        product.settings.curvatureStrength,
+        state.styleBakeCurvatureStrength,
+      ) ||
+      !numbersMatch(
+        product.settings.geometrySimplification,
+        state.styleBakeGeometrySimplification,
+      ) ||
+      product.settings.outputTier !== state.styleBakeOutputTier ||
+      (!!currentSourceAssetUrl &&
+        product.source.assetUrl !== currentSourceAssetUrl)
+    )
+  }
+
+  function getStyleBakeManager() {
+    return createEditorStyleBakeManager({
+      getSelectedNode: deps.getSelectedNode,
+      getEditorNodes: deps.getEditorNodes,
+      canUseStyleStudio: deps.canUseStyleStudio,
+      getActiveSceneLevelId: deps.getActiveSceneLevelId,
+      getDefaultStyleDescriptor: deps.getDefaultStyleDescriptor,
+      ensureSceneNodeSourceAsset: deps.ensureSceneNodeSourceAsset,
+      readJsonPayload: deps.readJsonPayload,
+      refreshGeneratedAssetLibrary: deps.refreshGeneratedAssetLibrary,
+      saveSceneDocumentToDisk: deps.saveSceneDocumentToDisk,
+      patchNode: deps.patchNode,
+      appendPipelineLog: deps.appendPipelineLog,
+      getSceneNodeVisualBounds,
+      inspectGeneratedAssetBounds: inspectAssetBounds,
+      getNodeTransformSnapshot,
+    })
+  }
+
   function setStyleBatchNodeStatus(nodeId: string, message: string) {
     state.styleBatchNodeStatusById = {
       ...state.styleBatchNodeStatusById,
@@ -131,9 +232,24 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       return 'Scene batch stopped with incomplete items. Generated assets that finished were applied, and the remaining session was kept for inspection or recovery.'
     }
 
+    if (
+      session.mode === 'procedural-material' ||
+      session.mode === 'blender-geometry'
+    ) {
+      return `${getStyleBatchModeLabel(session.mode)} batch finished for ${session.entries.length} object${session.entries.length === 1 ? '' : 's'}. The scene file was saved to disk.`
+    }
+
     return session.mode === 'texture'
       ? `Texture style batch finished for ${session.entries.length} object${session.entries.length === 1 ? '' : 's'}. The scene file was saved to disk.`
       : `Scene regeneration finished for ${session.entries.length} object${session.entries.length === 1 ? '' : 's'}. The scene file was saved to disk.`
+  }
+
+  function getStyleBatchModeLabel(
+    mode: PersistedStyleBatchSession['mode'],
+  ) {
+    if (mode === 'procedural-material') return 'procedural style bake'
+    if (mode === 'blender-geometry') return 'Blender geometry style bake'
+    return mode === 'texture' ? 'texture style' : 'mesh reimagine'
   }
 
   async function completeStyleBatchSession(
@@ -598,6 +714,7 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
           controlNetNotes: state.styleControlNetNotes.trim(),
           referenceImageUrl: state.styleReferenceImageUrl.trim(),
           comfyUiApiUrl: state.comfyUiApiUrl,
+          comfyUiLowVramMode: !!state.comfyUiLowVramMode,
           hunyuanApiUrl: state.hunyuanApiUrl,
           generateReferenceIfMissing: true,
         },
@@ -702,6 +819,191 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     } finally {
       state.styleBusy = false
     }
+  }
+
+  async function bakeSelectedAssetProceduralStyle() {
+    const selectedNode = deps.getSelectedNode()
+    if (!selectedNode || !deps.canUseStyleStudio(selectedNode)) {
+      state.styleStatus =
+        'Select a single geometry node before running a procedural style bake.'
+      return
+    }
+
+    const bakeBackend = state.styleBakeBackend
+    state.styleBusy = true
+    state.styleStatus =
+      bakeBackend === 'blender-geometry'
+        ? `Baking Blender geometry style for ${selectedNode.name}...`
+        : `Baking procedural style preview for ${selectedNode.name}...`
+    state.styleBakeLastError = ''
+    deps.appendPipelineLog('Starting style bake', {
+      nodeId: selectedNode.id,
+      nodeName: selectedNode.name,
+      backend: bakeBackend,
+      styleProfileName: state.styleProfileName,
+    })
+
+    try {
+      const descriptor = deps.getDefaultStyleDescriptor(selectedNode)
+      const styleBakeSettings = buildProceduralStyleBakeSettings({
+        styleProfileName: state.styleProfileName,
+        prompt: state.stylePrompt,
+        fallbackPrompt: descriptor,
+        textureSize: state.styleBakeTextureSize,
+        lineStrength: state.styleBakeLineStrength,
+        brushStrength: state.styleBakeBrushStrength,
+        aoStrength: state.styleBakeAoStrength,
+        cavityStrength: state.styleBakeCavityStrength,
+        curvatureStrength: state.styleBakeCurvatureStrength,
+        geometrySimplification: state.styleBakeGeometrySimplification,
+        outputTier: state.styleBakeOutputTier,
+      })
+      const styleBakeManager = getStyleBakeManager()
+      const result =
+        bakeBackend === 'blender-geometry'
+          ? await styleBakeManager.bakeBlenderGeometryStyleForNode(
+              selectedNode,
+              styleBakeSettings,
+              { force: !!state.styleBakeForceRefresh },
+            )
+          : await styleBakeManager.bakeProceduralStyleForNode(
+              selectedNode,
+              styleBakeSettings,
+              { force: !!state.styleBakeForceRefresh },
+            )
+
+      state.styleBakedAssetUrl = result.product.assetUrl
+      state.styleBakeCurrentSourceAssetUrl = result.product.source.assetUrl
+      state.styleBakeProduct = result.product
+      state.styleBakeProductStatus = 'dirty'
+      state.styleBakePreviewSnapshot = createStyleBakePreviewSnapshot(
+        selectedNode,
+        result.product.assetUrl,
+      )
+      state.styleBakeLastSuccessfulAt = result.product.generatedAt
+      state.styleBakeCanApply = true
+      state.styleBakeCanRevert = true
+      state.hunyuanLastFitReport = result.fitReport
+      state.styleInspectReport =
+        result.inspectReport ?? state.styleInspectReport
+      state.styleStatus = result.cached
+        ? 'Clean style bake cache reused. Preview is applied in the editor; apply to save it or revert to the previous asset.'
+        : bakeBackend === 'blender-geometry'
+          ? 'Blender geometry style bake finished. Preview is applied in the editor; apply to save it or revert to the previous asset.'
+          : 'Procedural style bake finished. Preview is applied in the editor; apply to save it or revert to the previous asset.'
+      state.saveMessage = state.styleStatus
+      state.selectedGeneratedVariantUrl = result.product.assetUrl
+    } catch (error) {
+      console.error('Style bake failed:', error)
+      state.styleBakeLastError =
+        error instanceof Error
+          ? error.message
+          : 'Style bake failed. Check the local editor API.'
+      state.styleBakeProductStatus = 'failed'
+      state.styleStatus = state.styleBakeLastError
+      state.saveMessage = state.styleStatus
+    } finally {
+      state.styleBusy = false
+    }
+  }
+
+  async function applyStyleBakePreviewForSelection() {
+    const product = state.styleBakeProduct as EditorStyleBakeProduct | null
+    const snapshot = state.styleBakePreviewSnapshot as
+      | EditorStyleBakePreviewSnapshot
+      | null
+      | undefined
+    const previewNode = getStyleBakePreviewNode(snapshot)
+
+    if (!product?.assetUrl || !state.styleBakeCanApply || !snapshot) {
+      state.styleStatus = 'Run a selected-object style bake before applying.'
+      return
+    }
+
+    if (isStyleBakeProductDirtyForCurrentControls(product)) {
+      state.styleBakeProductStatus = 'dirty'
+      state.styleBakeLastError =
+        'Bake settings changed after this preview was generated. Re-run the bake before applying.'
+      state.styleStatus = state.styleBakeLastError
+      state.saveMessage = state.styleStatus
+      return
+    }
+
+    if (
+      !previewNode ||
+      snapshot.previewAssetUrl !== product.assetUrl ||
+      getStyleBakeNodeAssetUrl(previewNode) !== product.assetUrl
+    ) {
+      state.styleBakeProductStatus = 'dirty'
+      state.styleBakeLastError =
+        'The preview asset no longer matches the current node. Re-run or revert before applying.'
+      state.styleStatus = state.styleBakeLastError
+      state.saveMessage = state.styleStatus
+      return
+    }
+
+    state.styleBusy = true
+    state.styleStatus = 'Applying style bake preview to the scene document...'
+    try {
+      await deps.saveSceneDocumentToDisk(deps.getActiveSceneLevelId())
+      state.styleBakeProductStatus = 'clean'
+      state.styleBakeCanApply = false
+      state.styleBakeLastError = ''
+      state.styleStatus = `Applied style bake product ${state.styleBakeProduct.assetUrl}.`
+      state.saveMessage = state.styleStatus
+    } catch (error) {
+      state.styleBakeLastError =
+        error instanceof Error
+          ? error.message
+          : 'Could not save the style bake preview.'
+      state.styleBakeProductStatus = 'failed'
+      state.styleStatus = state.styleBakeLastError
+      state.saveMessage = state.styleStatus
+    } finally {
+      state.styleBusy = false
+    }
+  }
+
+  function revertStyleBakePreviewForSelection() {
+    const snapshot = state.styleBakePreviewSnapshot as
+      | EditorStyleBakePreviewSnapshot
+      | null
+      | undefined
+    if (!snapshot || !state.styleBakeCanRevert) {
+      state.styleStatus = 'No style bake preview is available to revert.'
+      return
+    }
+
+    const previewNode = getStyleBakePreviewNode(snapshot)
+    if (
+      !previewNode ||
+      getStyleBakeNodeAssetUrl(previewNode) !== snapshot.previewAssetUrl
+    ) {
+      state.styleBakeProductStatus = 'dirty'
+      state.styleBakeLastError =
+        'The preview asset no longer matches the current node. Revert was skipped to avoid overwriting later edits.'
+      state.styleBakeCanApply = false
+      state.styleBakeCanRevert = false
+      state.styleBakePreviewSnapshot = null
+      state.styleStatus = state.styleBakeLastError
+      state.saveMessage = state.styleStatus
+      return
+    }
+
+    deps.patchNode(snapshot.nodeId, {
+      kind: snapshot.previousKind,
+      asset: snapshot.previousAsset,
+      prefab: snapshot.previousPrefab,
+      primitive: snapshot.previousPrimitive,
+      scale: snapshot.previousScale,
+      generation: snapshot.previousGeneration,
+    })
+    state.styleBakeProductStatus = 'missing'
+    state.styleBakeCanApply = false
+    state.styleBakeCanRevert = false
+    state.styleBakePreviewSnapshot = null
+    state.styleStatus = 'Reverted the style bake preview to the previous asset.'
+    state.saveMessage = state.styleStatus
   }
 
   async function exportSelectedAssetForBlender(options?: {
@@ -842,8 +1144,8 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       state.hunyuanLastOutputUrl &&
       state.hunyuanLastOutputUrl !== previousOutputUrl
         ? mode === 'texture'
-          ? 'Style bake finished. The selected node now points to a newly styled asset; collision preserved.'
-          : 'Mesh replacement finished. The selected node now points to a new AI-generated asset variant; collision preserved.'
+          ? 'Style bake finished. The selected node now points to a newly styled asset.'
+          : 'Mesh replacement finished. The selected node now points to a new AI-generated asset variant.'
         : state.hunyuanStatus
   }
 
@@ -871,8 +1173,7 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       {
         sourceAssetUrl: entry.sourceAssetUrl,
         descriptor: entry.descriptor,
-        logMessage:
-          'Applied style batch result with preserved transform and collision',
+        logMessage: 'Applied style batch result with preserved transform',
       },
     )
     state.hunyuanLastFitReport = applicationResult.fitReport
@@ -907,6 +1208,8 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
         controlNetNotes: session.styleControlNetNotes.trim(),
         referenceImageUrl: session.styleReferenceImageUrl.trim(),
         comfyUiApiUrl: session.comfyUiApiUrl,
+        comfyUiLowVramMode:
+          session.comfyUiLowVramMode ?? !!state.comfyUiLowVramMode,
         hunyuanApiUrl: session.hunyuanApiUrl,
         generateReferenceIfMissing: true,
       },
@@ -934,6 +1237,7 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       prompt,
       referenceImageUrl: resolvedWorkspaceReferenceImageUrl,
       workflowPath: session.workflowPath,
+      comfyUiLowVramMode: session.comfyUiLowVramMode ?? !!state.comfyUiLowVramMode,
     })
 
     state.selectedHunyuanJobId = queuedJob.id
@@ -952,12 +1256,121 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     return source.assetUrl
   }
 
+  function getProceduralStyleBatchCandidateIds(
+    scope: EditorStyleBakeBatchScope,
+  ) {
+    if (scope === 'selected-objects') {
+      const selectedNodes = deps.getSelectedNodes()
+      const nodes =
+        selectedNodes.length > 0
+          ? selectedNodes
+          : deps.getSelectedNode()
+            ? [deps.getSelectedNode() as EditorSceneNode]
+            : []
+      return nodes
+        .filter(node => canBakeSceneNode(node))
+        .map(node => node.id)
+    }
+
+    if (scope === 'visible') {
+      return deps
+        .getEditorNodes()
+        .filter(node => node.visible !== false && canBakeSceneNode(node))
+        .map(node => node.id)
+    }
+
+    if (scope === 'level') {
+      return deps
+        .getEditorNodes()
+        .filter(node => canBakeSceneNode(node))
+        .map(node => node.id)
+    }
+
+    return state.styleBatchSelectionIds.filter((id: string) =>
+      deps.getStyleSceneCandidates().some(candidate => candidate.id === id),
+    )
+  }
+
+  async function runDeterministicStyleBatchEntry(
+    session: PersistedStyleBatchSession,
+    entry: PersistedStyleBatchEntry,
+    node: EditorSceneNode,
+  ) {
+    const isBlenderBatch = session.mode === 'blender-geometry'
+    const descriptor = entry.descriptor || deps.getDefaultStyleDescriptor(node)
+    const settings = buildProceduralStyleBakeSettings({
+      styleProfileName: session.styleProfileName,
+      prompt: session.stylePrompt,
+      fallbackPrompt: descriptor,
+      textureSize: state.styleBakeTextureSize,
+      lineStrength: state.styleBakeLineStrength,
+      brushStrength: state.styleBakeBrushStrength,
+      aoStrength: state.styleBakeAoStrength,
+      cavityStrength: state.styleBakeCavityStrength,
+      curvatureStrength: state.styleBakeCurvatureStrength,
+      geometrySimplification: state.styleBakeGeometrySimplification,
+      outputTier: state.styleBakeOutputTier,
+    })
+
+    markStyleBatchEntry(
+      entry,
+      { status: 'running', error: undefined },
+      session.force
+        ? `Baking ${getStyleBatchModeLabel(session.mode)} with cache refresh…`
+        : `Checking ${getStyleBatchModeLabel(session.mode)} cache…`,
+    )
+
+    const styleBakeManager = getStyleBakeManager()
+    const result = isBlenderBatch
+      ? await styleBakeManager.bakeBlenderGeometryStyleForNode(node, settings, {
+          force: !!session.force,
+        })
+      : await styleBakeManager.bakeProceduralStyleForNode(node, settings, {
+          force: !!session.force,
+        })
+
+    markStyleBatchEntry(entry, {
+      sourceAssetUrl: result.product.source.assetUrl,
+      sourceAssetFingerprint: result.product.source.assetFingerprint,
+      settingsFingerprint: result.product.settingsFingerprint,
+      cacheKey: result.product.cacheKey,
+      outputAssetUrl: result.product.assetUrl,
+      metadataUrl: result.product.metadataUrl,
+      cached: result.cached,
+      status: 'succeeded',
+      error: undefined,
+    })
+
+    state.hunyuanLastFitReport = result.fitReport
+    state.styleBakedAssetUrl = result.product.assetUrl
+    state.selectedGeneratedVariantUrl = result.product.assetUrl
+    state.styleInspectReport = result.inspectReport ?? state.styleInspectReport
+
+    markStyleBatchEntry(
+      entry,
+      {
+        outputAssetUrl: result.product.assetUrl,
+        metadataUrl: result.product.metadataUrl,
+        cached: result.cached,
+        status: 'applied',
+      },
+      result.cached
+        ? `Reused clean cached product ${result.product.assetUrl}.`
+        : `Finished. Scene now uses ${result.product.assetUrl}.`,
+    )
+
+    const scene = deps.getCurrentScene()
+    if (scene && typeof window !== 'undefined') {
+      saveEditorSceneToLocalStorage(deps.getActiveSceneLevelId(), scene)
+    }
+  }
+
   async function resumeStyleBatchSession(session: PersistedStyleBatchSession) {
     state.styleBatchBusy = true
     state.styleBatchAbortRequested = false
     state.styleBatchStopIntent = null
     persistStyleBatchSession(session)
-    state.styleBatchStatus = `Resuming ${session.mode === 'texture' ? 'texture style' : 'mesh reimagine'} batch for ${session.entries.length} scene object${session.entries.length === 1 ? '' : 's'}…`
+    state.styleBatchStatus = `Resuming ${getStyleBatchModeLabel(session.mode)} batch for ${session.entries.length} scene object${session.entries.length === 1 ? '' : 's'}…`
     state.styleBatchSelectionIds = session.entries.map(entry => entry.nodeId)
     state.styleProfileName = session.styleProfileName
     state.stylePrompt = session.stylePrompt
@@ -965,6 +1378,8 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     state.styleLoraNotes = session.styleLoraNotes
     state.styleControlNetNotes = session.styleControlNetNotes
     state.styleReferenceImageUrl = session.styleReferenceImageUrl
+    state.comfyUiLowVramMode =
+      session.comfyUiLowVramMode ?? !!state.comfyUiLowVramMode
 
     try {
       for (const entry of session.entries) {
@@ -1006,56 +1421,84 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
           continue
         }
 
-        const prompt = buildNodeStylePrompt(node)
-        let sourceAssetUrl = entry.sourceAssetUrl ?? ''
+        try {
+          if (
+            session.mode === 'procedural-material' ||
+            session.mode === 'blender-geometry'
+          ) {
+            await runDeterministicStyleBatchEntry(session, entry, node)
+            continue
+          }
 
-        if (!entry.jobId && entry.status === 'pending') {
-          sourceAssetUrl = await queueStyleBatchEntryJob(
-            session,
-            entry,
-            node,
-            prompt,
-          )
-        }
+          const prompt = buildNodeStylePrompt(node)
+          let sourceAssetUrl = entry.sourceAssetUrl ?? ''
 
-        if (!entry.jobId) {
-          throw new Error(`Missing queued job id for ${entry.nodeName}.`)
-        }
-
-        const payload = await deps.waitForQueuedHunyuanJob(entry.jobId, {
-          onQueued: () => {
-            markStyleBatchEntry(
+          if (!entry.jobId && entry.status === 'pending') {
+            sourceAssetUrl = await queueStyleBatchEntryJob(
+              session,
               entry,
-              { status: 'queued' },
-              'Queued in ComfyUI + Hunyuan…',
+              node,
+              prompt,
             )
-          },
-          onRunning: () => {
-            markStyleBatchEntry(
-              entry,
-              { status: 'running' },
-              'Generating with ComfyUI + Hunyuan…',
-            )
-          },
-        })
+          }
 
-        markStyleBatchEntry(entry, {
-          sourceAssetUrl: sourceAssetUrl || entry.sourceAssetUrl,
-          outputAssetUrl: payload.assetUrl,
-          status: 'succeeded',
-          error: undefined,
-        })
+          if (!entry.jobId) {
+            throw new Error(`Missing queued job id for ${entry.nodeName}.`)
+          }
 
-        await applyStyleBatchEntryResult(entry, payload.assetUrl)
+          const payload = await deps.waitForQueuedHunyuanJob(entry.jobId, {
+            onQueued: () => {
+              markStyleBatchEntry(
+                entry,
+                { status: 'queued' },
+                'Queued in ComfyUI + Hunyuan…',
+              )
+            },
+            onRunning: () => {
+              markStyleBatchEntry(
+                entry,
+                { status: 'running' },
+                'Generating with ComfyUI + Hunyuan…',
+              )
+            },
+          })
 
-        markStyleBatchEntry(
-          entry,
-          {
+          markStyleBatchEntry(entry, {
+            sourceAssetUrl: sourceAssetUrl || entry.sourceAssetUrl,
             outputAssetUrl: payload.assetUrl,
-            status: 'applied',
-          },
-          `Finished. Scene now uses ${payload.assetUrl}.`,
-        )
+            status: 'succeeded',
+            error: undefined,
+          })
+
+          await applyStyleBatchEntryResult(entry, payload.assetUrl)
+
+          markStyleBatchEntry(
+            entry,
+            {
+              outputAssetUrl: payload.assetUrl,
+              status: 'applied',
+            },
+            `Finished. Scene now uses ${payload.assetUrl}.`,
+          )
+        } catch (entryError) {
+          if (state.styleBatchStopIntent) {
+            throw entryError
+          }
+          const message =
+            entryError instanceof Error
+              ? entryError.message
+              : `Style batch failed for ${entry.nodeName}.`
+          markStyleBatchEntry(
+            entry,
+            { status: 'failed', error: message },
+            message,
+          )
+          deps.appendPipelineLog('Style batch entry failed', {
+            nodeId: entry.nodeId,
+            nodeName: entry.nodeName,
+            message,
+          })
+        }
       }
 
       await completeStyleBatchSession(session)
@@ -1130,6 +1573,54 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     await state.styleBatchResumePromise
   }
 
+  async function runProceduralStyleBatch(
+    scope: EditorStyleBakeBatchScope,
+    options: EditorStyleBakeRunOptions = {},
+  ) {
+    const batchMode =
+      state.styleBakeBackend === 'blender-geometry'
+        ? 'blender-geometry'
+        : 'procedural-material'
+    const candidateIds = getProceduralStyleBatchCandidateIds(scope)
+    deps.appendPipelineLog('Starting deterministic style bake batch request', {
+      scope,
+      backend: batchMode,
+      force: !!options.force,
+      candidateCount: candidateIds.length,
+      styleProfileName: state.styleProfileName,
+      stylePrompt: state.stylePrompt,
+    })
+
+    if (candidateIds.length === 0) {
+      state.styleBatchStatus =
+        scope === 'selected-objects'
+          ? 'Select one or more geometry-backed objects before baking the selected scope.'
+          : 'No bakeable scene objects were found for this scope.'
+      return
+    }
+
+    state.styleBatchNodeStatusById = Object.fromEntries(
+      candidateIds.map((id: string) => [
+        id,
+        options.force
+          ? `Queued for ${getStyleBatchModeLabel(batchMode)} cache refresh.`
+          : `Queued for ${getStyleBatchModeLabel(batchMode)} cache check.`,
+      ]),
+    )
+    state.styleBatchStatus = `Preflighting ${candidateIds.length} object${candidateIds.length === 1 ? '' : 's'} for ${getStyleBatchModeLabel(batchMode)} (${scope.replace('-', ' ')}).`
+    const session = createStyleBatchSession(
+      batchMode,
+      candidateIds,
+      {
+        scope,
+        force: !!options.force,
+      },
+    )
+    persistStyleBatchSession(session)
+    state.styleBatchResumePromise = resumeStyleBatchSession(session)
+    await state.styleBatchResumePromise
+  }
+
   return {
     buildNodeStylePrompt,
     getNodeTransformSnapshot,
@@ -1146,12 +1637,16 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     prepareStyleWorkspace,
     ensureStyleWorkspaceReady,
     simplifySelectedAssetForStyle,
+    bakeSelectedAssetProceduralStyle,
+    applyStyleBakePreviewForSelection,
+    revertStyleBakePreviewForSelection,
     exportSelectedAssetForBlender,
     reimportLatestBlenderOutputForSelection,
     runStyleBake,
     applyStyleBatchEntryResult,
     resumeStyleBatchSession,
     runStyleBatch,
+    runProceduralStyleBatch,
     restoreLatestStyleWorkspaceForSelection,
   }
 }

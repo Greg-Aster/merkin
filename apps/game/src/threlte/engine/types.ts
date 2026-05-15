@@ -49,6 +49,79 @@ export type CollisionChannel =
   | 'trigger'
   | 'detail'
 
+export interface CollisionProductFingerprint {
+  algorithm: 'sha256'
+  value: string
+}
+
+export type CollisionPolicyMode = 'auto' | 'none' | 'trigger'
+export type CollisionGenerationQuality =
+  | 'primitive'
+  | 'convexHull'
+  | 'simplifiedMesh'
+  | 'trimesh'
+export type GeneratedCollisionShape =
+  | 'cuboid'
+  | 'cylinder'
+  | 'ball'
+  | 'capsule'
+  | 'convexHull'
+  | 'trimesh'
+
+export interface GeneratedCollisionProduct {
+  actorId: string
+  cacheKey?: string
+  mode?: CollisionPolicyMode
+  productId?: string
+  sourceDescriptor?: string
+  sourceKind?: 'asset' | 'prefab' | 'primitive' | 'terrain' | 'none'
+  sourceMeshUrl?: string
+  visualSourceMeshUrl?: string
+  sourceMeshFingerprint: CollisionProductFingerprint | string
+  transformFingerprint: CollisionProductFingerprint | string
+  policyFingerprint: CollisionProductFingerprint | string
+  shape: GeneratedCollisionShape
+  artifactUrl?: string
+  metadataUrl?: string
+  localBounds: {
+    min: Vec3
+    max: Vec3
+    size: Vec3
+    center: Vec3
+  }
+  triangleCount?: number
+  vertexCount?: number
+  triangleBudget?: number
+  generatedAt?: string
+  generatorVersion: string
+}
+
+export interface CollisionProductFingerprintInput {
+  sourceMeshFingerprint: CollisionProductFingerprint | string
+  transformFingerprint: CollisionProductFingerprint | string
+  policyFingerprint: CollisionProductFingerprint | string
+}
+
+function getCollisionProductFingerprintValue(
+  fingerprint: CollisionProductFingerprint | string,
+) {
+  return typeof fingerprint === 'string' ? fingerprint : fingerprint.value
+}
+
+export function isGeneratedCollisionProductStale(
+  product: GeneratedCollisionProduct,
+  expected: CollisionProductFingerprintInput,
+) {
+  return (
+    getCollisionProductFingerprintValue(product.sourceMeshFingerprint) !==
+      getCollisionProductFingerprintValue(expected.sourceMeshFingerprint) ||
+    getCollisionProductFingerprintValue(product.transformFingerprint) !==
+      getCollisionProductFingerprintValue(expected.transformFingerprint) ||
+    getCollisionProductFingerprintValue(product.policyFingerprint) !==
+      getCollisionProductFingerprintValue(expected.policyFingerprint)
+  )
+}
+
 export interface TransformComponent {
   position: Vec3
   rotation: Euler3
@@ -90,17 +163,25 @@ export interface CollisionComponent {
   intent: CollisionIntent
   channel: CollisionChannel
   shape: CollisionShape
+  quality?: 'primitive' | 'convexHull' | 'simplifiedMesh' | 'trimesh'
+  lodSourceTier?: 'source' | 'low' | 'medium' | 'high'
+  generationStatus?: 'ready' | 'dirty' | 'generating' | 'failed'
+  generationLastError?: string
   size?: Vec3
   colliderUrl?: string
   colliderMetadataUrl?: string
+  colliderCacheKey?: string
   assetLocalTransform?: AssetLocalTransformMetadata | null
   sourceAssetUrl?: string
+  colliderSourceAssetUrl?: string
+  lockToObject?: boolean
   friction?: number
   restitution?: number
   sensor?: boolean
   triangleBudget?: number
   triangleCount?: number
   vertexCount?: number
+  generatedProduct?: GeneratedCollisionProduct
 }
 
 export interface InteractionComponent {

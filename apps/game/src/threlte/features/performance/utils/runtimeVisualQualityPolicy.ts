@@ -1,3 +1,4 @@
+import type { RuntimeAtmosphereDefinition } from '../../../atmosphere/runtimeAtmosphereTypes'
 import type {
   BloomConfig,
   ToneMappingConfig,
@@ -7,6 +8,10 @@ import type { RuntimeVisualStyleSettings } from '../../../styles/runtimeVisualSt
 
 export interface RuntimePostProcessingPolicy {
   exposure: number
+  colorGradingEnabled: boolean
+  colorSaturation: number
+  colorContrast: number
+  colorWarmth: number
   bloomEnabled: boolean
   bloomStrength: number
   bloomRadius: number
@@ -29,14 +34,16 @@ export function resolveRuntimePostProcessingPolicy({
   bloom,
   toneMapping,
   renderProfile,
+  atmosphere,
 }: {
   baseExposure: number
   visualStyle: RuntimeVisualStyleSettings
   bloom: BloomConfig
   toneMapping: ToneMappingConfig
   renderProfile?: ResolvedRuntimeRenderProfile
+  atmosphere?: RuntimeAtmosphereDefinition
 }): RuntimePostProcessingPolicy {
-  const grading = visualStyle.colorGrading
+  const grading = atmosphere?.grading ?? visualStyle.colorGrading
   const profilePost = renderProfile?.postProcessing
   const allowedPasses = new Set(profilePost?.passes ?? [])
   const profileAllowsPost = profilePost?.enabled ?? true
@@ -48,14 +55,26 @@ export function resolveRuntimePostProcessingPolicy({
     !profilePost ||
     allowedPasses.size === 0 ||
     allowedPasses.has('tone-mapping')
+  const profileAllowsColorGrading =
+    !profilePost ||
+    allowedPasses.size === 0 ||
+    allowedPasses.has('color-grading')
   const profileAllowsAmbientOcclusion =
     !profilePost ||
     allowedPasses.size === 0 ||
     allowedPasses.has('ambient-occlusion')
+  const colorSaturation = clampNumber(grading.saturation, 0.35, 1.85)
+  const colorContrast = clampNumber(grading.contrast, 0.55, 1.65)
+  const colorWarmth = clampNumber(grading.warmth, 0.55, 1.45)
+  const colorGradingEnabled =
+    profileAllowsPost &&
+    profileAllowsColorGrading &&
+    (Math.abs(colorSaturation - 1) > 0.001 ||
+      Math.abs(colorContrast - 1) > 0.001 ||
+      Math.abs(colorWarmth - 1) > 0.001)
   const bloomEnabled =
     profileAllowsPost &&
     profileAllowsBloom &&
-    renderProfile?.tier !== 'desktop' &&
     bloom.enabled &&
     bloom.intensity > 0.01
   const ambientOcclusion = profilePost?.ambientOcclusion
@@ -63,10 +82,10 @@ export function resolveRuntimePostProcessingPolicy({
   const ambientOcclusionEnabled =
     profileAllowsPost &&
     profileAllowsAmbientOcclusion &&
-    renderProfile?.tier !== 'desktop' &&
     (ambientOcclusion?.enabled ?? false) &&
     ambientOcclusionIntensity > 0.01
-  const styleBloomIntensity = visualStyle.screenFx.bloomIntensity
+  const styleBloomIntensity =
+    atmosphere?.bloom.intensity ?? visualStyle.screenFx.bloomIntensity
   const bloomIntensityScale = profilePost?.bloom.intensity ?? 1
   const toneMappingExposure = profileAllowsToneMapping
     ? profilePost?.toneMappingExposure ?? 1
@@ -79,6 +98,10 @@ export function resolveRuntimePostProcessingPolicy({
       toneMapping.exposure *
       toneMappingExposure *
       clampNumber(grading.brightness, 0.82, 1.08),
+    colorGradingEnabled,
+    colorSaturation: colorGradingEnabled ? colorSaturation : 1,
+    colorContrast: colorGradingEnabled ? colorContrast : 1,
+    colorWarmth: colorGradingEnabled ? colorWarmth : 1,
     bloomEnabled,
     bloomStrength: bloomEnabled
       ? clampNumber(
@@ -89,7 +112,7 @@ export function resolveRuntimePostProcessingPolicy({
       : 0,
     bloomRadius: clampNumber(0.2 + styleBloomIntensity * 0.7, 0.18, 0.85),
     bloomThreshold: clampNumber(
-      (visualStyle.screenFx.bloomThreshold +
+      ((atmosphere?.bloom.threshold ?? visualStyle.screenFx.bloomThreshold) +
         bloom.threshold +
         (profilePost?.bloom.threshold ?? bloom.threshold)) /
         3,

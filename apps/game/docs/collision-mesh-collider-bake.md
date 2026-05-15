@@ -14,7 +14,8 @@ with:
   "nodeId": "selected-asset-node",
   "intent": "blocker",
   "channel": "worldStatic",
-  "triangleBudget": 5000
+  "triangleBudget": 5000,
+  "lodSourceTier": "low"
 }
 ```
 
@@ -38,6 +39,9 @@ by runtime collision and editor validation:
   "sourceActorId": "selected-asset-node",
   "sourceAssetUrl": "/generated/runtime-game-assets/source.glb",
   "sourceAssetFingerprint": { "algorithm": "sha256", "value": "..." },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/source.low.glb",
+  "colliderSourceAssetFingerprint": { "algorithm": "sha256", "value": "..." },
+  "lodSourceTier": "low",
   "visualLocalBounds": { "min": [0, 0, 0], "max": [1, 1, 1] },
   "colliderLocalBounds": { "min": [0, 0, 0], "max": [1, 1, 1] },
   "assetLocalTransform": {
@@ -57,11 +61,14 @@ cooked visual and collider products inside that actor. Legacy colliders without
 can be regenerated.
 
 Each `.collider.meta.json` is a provenance contract, not just an artifact note.
-New metadata uses `schemaVersion: 2` and records:
+New metadata uses `schemaVersion: 3` and records:
 
 - `sourceActorId`, `sourceActorName`, `sourceAssetUrl`, and
   `sourceAssetFingerprint` using a SHA-256 content hash of the public source
   asset.
+- `colliderSourceAssetUrl`, `colliderSourceAssetFingerprint`, and
+  `lodSourceTier`. Mesh collider bakes default to the `low` runtime LOD source
+  and will cook that LOD if it is missing.
 - `visualLocalBounds` from the exact scene asset URL and `colliderLocalBounds`
   from the cooked collider GLB.
 - `assetLocalTransform`, with `coordinateSpaceVersion: 1`,
@@ -75,8 +82,8 @@ New metadata uses `schemaVersion: 2` and records:
 The coordinate-space rule is: the actor transform places an instance in the
 world; `assetLocalTransform` aligns cooked visual and physics products inside
 that actor. The bake currently emits an identity
-`visualToPhysicsMatrix` because it cooks from the source visual asset without
-applying actor world transforms.
+`visualToPhysicsMatrix` because the collider source is an asset-local LOD mesh
+and the baker does not apply actor world transforms.
 If the source asset URL or SHA-256 fingerprint no longer matches the scene node,
 the collider should be treated as stale and regenerated. Legacy metadata without
 `assetLocalTransform` remains loadable, but validation should report it as

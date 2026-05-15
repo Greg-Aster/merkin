@@ -93,7 +93,6 @@ export let onSetCollisionReviewWalkable: (actorId: string) => void = () => {}
 export let onSetCollisionReviewTrigger: (actorId: string) => void = () => {}
 export let onSetCollisionReviewVisualOnly: (actorId: string) => void = () => {}
 export let onDisableCollisionReviewActor: (actorId: string) => void = () => {}
-export let onFitCollisionReviewCollider: (actorId: string) => void = () => {}
 export let onBakeCollisionReviewMeshCollider: (actorId: string) => void =
   () => {}
 
@@ -102,20 +101,6 @@ type Bounds = { min: Vec3; max: Vec3 }
 
 const VISIBLE_REVIEW_FINDINGS = 5
 const VISIBLE_REVIEW_ACTORS = 32
-
-const collisionLegendItems: Array<{
-  key: CollisionReviewActorRow['status']
-  label: string
-}> = [
-  { key: 'walkable', label: 'walkable' },
-  { key: 'blocker', label: 'blocker' },
-  { key: 'trigger', label: 'trigger' },
-  { key: 'detailMesh', label: 'detail mesh' },
-  { key: 'collisionOnly', label: 'collision-only' },
-  { key: 'disabled', label: 'disabled' },
-  { key: 'visualOnly', label: 'visual-only' },
-  { key: 'missingCollision', label: 'missing collision' },
-]
 
 function getHeightmapUrlFromManifestUrl(manifestUrl: string | undefined) {
   if (!manifestUrl) return ''
@@ -263,6 +248,44 @@ function canBakeMeshCollider(actor: CollisionReviewActorRow) {
   return actor.actorKind === 'asset' || actor.actorKind === 'prefab'
 }
 
+function createCollisionManagerCounts(actors: CollisionReviewActorRow[]) {
+  return actors.reduce(
+    (counts, actor) => {
+      if (actor.runtimeCollision) counts.enabled += 1
+      if (actor.status === 'dirty') counts.dirty += 1
+      if (actor.status === 'generating') counts.generating += 1
+      if (actor.status === 'failed') counts.failed += 1
+      if (actor.status === 'visualOnly' || actor.status === 'disabled') {
+        counts.disabled += 1
+      }
+      if (
+        actor.runtimeCollision &&
+        actor.status !== 'dirty' &&
+        actor.status !== 'generating' &&
+        actor.status !== 'failed' &&
+        actor.status !== 'missingCollision'
+      ) {
+        counts.ready += 1
+      }
+      return counts
+    },
+    {
+      enabled: 0,
+      ready: 0,
+      dirty: 0,
+      generating: 0,
+      failed: 0,
+      disabled: 0,
+    },
+  )
+}
+
+function getPublishReadinessLabel(summary: Record<string, number>) {
+  if ((summary.error ?? 0) > 0) return 'blocked'
+  if ((summary.warning ?? 0) > 0) return 'warnings'
+  return 'ready'
+}
+
 $: levelCollisionWorkflow = getLevelCollisionWorkflow(
   levelId,
   editorScene?.settings,
@@ -326,6 +349,7 @@ $: groundContractWarnings = [
 ].filter(Boolean)
 $: collisionReview = reviewCollisionContracts({ scene: editorScene })
 $: collisionReviewActors = collisionReview.actors
+$: collisionManagerCounts = createCollisionManagerCounts(collisionReviewActors)
 $: visibleCollisionReviewActors = collisionReviewActors.slice(
   0,
   VISIBLE_REVIEW_ACTORS,
@@ -386,9 +410,14 @@ $: selectedCollisionIntent =
 $: selectedCollisionSummary = selectedNode
   ? `${selectedNode.name}: ${selectedCollisionIntent}`
   : 'Select a scene actor to author or verify collision.'
+$: selectedCollisionReviewActor = selectedNode
+  ? collisionReviewActors.find(actor => actor.actorId === selectedNode.id) ??
+    null
+  : null
+$: collisionPublishReadiness = getPublishReadinessLabel(collisionReview.summary)
 $: requiredCollisionActions = [
   !collisionOverlayEnabled
-    ? 'Enable the collision overlay to verify results.'
+    ? 'Enable the Rapier collision overlay to verify results.'
     : '',
   collisionReview.summary.error + collisionReview.summary.warning > 0
     ? `${collisionReview.summary.error + collisionReview.summary.warning} blocker/warning item(s) need review.`
@@ -411,13 +440,45 @@ onDestroy(() => {
   <div class="editor-status-card">
     <div class="editor-status-title">{requiredCollisionActions[0] ?? 'Collision workflow ready'}</div>
     <div class="editor-chip-row">
-      <span class:ready={collisionOverlayEnabled} class:warn={!collisionOverlayEnabled} class="editor-chip">scene overlay {collisionOverlayEnabled ? 'on' : 'off'}</span>
-      <span class="editor-chip">authored collision only</span>
+      <span class:ready={collisionOverlayEnabled} class:warn={!collisionOverlayEnabled} class="editor-chip">Rapier overlay {collisionOverlayEnabled ? 'on' : 'off'}</span>
+      <span class="editor-chip">runtime colliders</span>
       <span class:warn={collisionReview.summary.error + collisionReview.summary.warning > 0} class:ready={collisionReview.summary.error + collisionReview.summary.warning === 0} class="editor-chip">
         {collisionReview.summary.error + collisionReview.summary.warning} blocker/warning item(s)
       </span>
+      <span class:ready={collisionPublishReadiness === 'ready'} class:warn={collisionPublishReadiness === 'warnings'} class:danger={collisionPublishReadiness === 'blocked'} class="editor-chip">publish {collisionPublishReadiness}</span>
+    </div>
+    <div class="collision-manager-grid" aria-label="Collision manager summary">
+      <div>
+        <span>Total enabled</span>
+        <strong>{collisionManagerCounts.enabled}</strong>
+      </div>
+      <div>
+        <span>Ready/generated</span>
+        <strong>{collisionManagerCounts.ready}</strong>
+      </div>
+      <div>
+        <span>Dirty</span>
+        <strong>{collisionManagerCounts.dirty}</strong>
+      </div>
+      <div>
+        <span>Generating</span>
+        <strong>{collisionManagerCounts.generating}</strong>
+      </div>
+      <div>
+        <span>Failed</span>
+        <strong>{collisionManagerCounts.failed}</strong>
+      </div>
+      <div>
+        <span>Disabled/visual-only</span>
+        <strong>{collisionManagerCounts.disabled}</strong>
+      </div>
     </div>
     <div class="save-message">Selected actor: {selectedCollisionSummary}</div>
+    {#if selectedCollisionReviewActor}
+      <div class="save-message">
+        Selected product: {selectedCollisionReviewActor.statusLabel}; {selectedCollisionReviewActor.detail}
+      </div>
+    {/if}
     {#each requiredCollisionActions.slice(1, 4) as action}
       <div class="save-message">Next: {action}</div>
     {/each}
@@ -426,22 +487,14 @@ onDestroy(() => {
 
 <div class="editor-section">
   <div class="label">Collision View</div>
-  <label class="checkbox"><input type="checkbox" checked={collisionOverlayEnabled} data-sfx-click="soft" on:change={(event) => onSetCollisionOverlayEnabled((event.currentTarget as HTMLInputElement).checked)} /> Scene Collision Overlay</label>
-  <div class="collision-legend" aria-label="Collision overlay legend">
-    {#each collisionLegendItems as item (item.key)}
-      <span class={`collision-legend-item ${item.key}`}>
-        <span></span>
-        {item.label}
-      </span>
-    {/each}
-  </div>
+  <label class="checkbox"><input type="checkbox" checked={collisionOverlayEnabled} data-sfx-click="soft" on:change={(event) => onSetCollisionOverlayEnabled((event.currentTarget as HTMLInputElement).checked)} /> Rapier Collision Overlay</label>
   <div class="collision-sublabel">Performance Budget</div>
   <div class="button-row compact-three-columns">
     <button class:active={collisionBudget === 'mobile'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionBudget('mobile')}>Mobile</button>
     <button class:active={collisionBudget === 'balanced'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionBudget('balanced')}>Balanced</button>
     <button class:active={collisionBudget === 'desktop'} data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionBudget('desktop')}>Desktop</button>
   </div>
-  <div class="save-message">Scene overlay uses authored runtime collision. Terrain heightmap overlay: {terrainCollisionSource === 'baked-heightmap' ? 'heightmap workflow' : 'inactive'}; runtime: {terrainRuntimeData}{terrainCollisionSettings?.dirty ? ' - bake needed' : ''}</div>
+  <div class="save-message">Overlay draws live Rapier debug geometry. Terrain heightmap overlay: {terrainCollisionSource === 'baked-heightmap' ? 'heightmap workflow' : 'inactive'}; runtime: {terrainRuntimeData}{terrainCollisionSettings?.dirty ? ' - bake needed' : ''}</div>
 </div>
 
 <div class="editor-section">
@@ -474,15 +527,14 @@ onDestroy(() => {
           <span class={`collision-review-status ${actor.status}`}>{actor.statusLabel}</span>
           <span class="collision-review-runtime">
             {actor.runtimeCollision ? actor.collisionIntent : 'none'}
-            <small>{actor.collisionSource}; {getActorFindingLabel(actor)}</small>
+            <small>{actor.collisionSource}; {actor.collisionQuality ?? actor.collisionShape ?? 'policy'}; {getActorFindingLabel(actor)}</small>
           </span>
           <span class="collision-review-actions">
             <button title="Set blocker collision" data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionReviewBlocker(actor.actorId)}>Blocker</button>
             <button title="Set walkable collision" data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionReviewWalkable(actor.actorId)}>Walkable</button>
             <button title="Set trigger collision" data-sfx-hover="hover-soft" data-sfx-click="select" on:click={() => onSetCollisionReviewTrigger(actor.actorId)}>Trigger</button>
-            <button title="Mark visual-only" data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={() => onSetCollisionReviewVisualOnly(actor.actorId)}>Visual</button>
+            <button title="Mark visual-only" data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={() => onSetCollisionReviewVisualOnly(actor.actorId)}>Visual Only</button>
             <button title="Disable collision without visual-only classification" data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={() => onDisableCollisionReviewActor(actor.actorId)}>Disable</button>
-            <button title="Fit collider to visual bounds" data-sfx-hover="hover-soft" data-sfx-click="soft" on:click={() => onFitCollisionReviewCollider(actor.actorId)}>Fit</button>
             <button disabled={!canBakeMeshCollider(actor)} title={canBakeMeshCollider(actor) ? 'Bake mesh collider' : 'Mesh collider bake needs an asset or prefab actor'} data-sfx-hover="hover-soft" data-sfx-click="confirm" on:click={() => onBakeCollisionReviewMeshCollider(actor.actorId)}>Bake</button>
           </span>
         </div>
@@ -700,98 +752,80 @@ onDestroy(() => {
     color: #7fa8c4;
   }
 
-  .collision-legend {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.3rem;
-    margin: 0.45rem 0 0.55rem;
-  }
-
-  .collision-legend-item {
-    display: inline-flex;
-    min-width: 0;
-    align-items: center;
-    gap: 0.35rem;
-    color: rgba(226, 244, 255, 0.72);
-    font-size: 0.68rem;
-    text-transform: uppercase;
-  }
-
-  .collision-legend-item span {
-    width: 0.55rem;
-    height: 0.55rem;
-    flex: 0 0 auto;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.32);
-    background: rgba(143, 150, 163, 0.72);
-  }
-
-  .collision-legend-item.walkable span,
   .collision-review-status.walkable {
     color: #55e68a;
   }
 
-  .collision-legend-item.walkable span {
-    background: #55e68a;
-  }
-
-  .collision-legend-item.blocker span,
   .collision-review-status.blocker {
     color: #ff8c63;
   }
 
-  .collision-legend-item.blocker span {
-    background: #ff8c63;
+  .collision-review-status.ready {
+    color: #55e68a;
   }
 
-  .collision-legend-item.trigger span,
+  .collision-review-status.dirty,
+  .collision-review-status.generating {
+    color: #ffd27a;
+  }
+
+  .collision-review-status.failed {
+    color: #ff5c70;
+  }
+
   .collision-review-status.trigger {
     color: #63b3ff;
   }
 
-  .collision-legend-item.trigger span {
-    background: #63b3ff;
-  }
-
-  .collision-legend-item.detailMesh span,
   .collision-review-status.detailMesh {
     color: #d6a3ff;
   }
 
-  .collision-legend-item.detailMesh span {
-    background: #d6a3ff;
-  }
-
-  .collision-legend-item.collisionOnly span,
   .collision-review-status.collisionOnly {
     color: #ffd27a;
   }
 
-  .collision-legend-item.collisionOnly span {
-    background: #ffd27a;
-  }
-
-  .collision-legend-item.visualOnly span,
   .collision-review-status.visualOnly {
     color: #90a4c8;
   }
 
-  .collision-legend-item.visualOnly span {
-    background: #90a4c8;
-  }
-
-  .collision-legend-item.missingCollision span,
   .collision-review-status.missingCollision {
     color: #ff5c70;
   }
 
-  .collision-legend-item.missingCollision span {
-    background: #ff5c70;
-  }
-
-  .collision-legend-item.disabled span,
   .collision-review-status.disabled {
     color: #8f96a3;
+  }
+
+  .collision-manager-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.4rem;
+    margin-top: 0.65rem;
+  }
+
+  .collision-manager-grid > div {
+    min-width: 0;
+    border: 1px solid rgba(126, 203, 255, 0.14);
+    border-radius: 0.4rem;
+    padding: 0.45rem 0.5rem;
+    background: rgba(5, 9, 20, 0.32);
+  }
+
+  .collision-manager-grid span,
+  .collision-manager-grid strong {
+    display: block;
+  }
+
+  .collision-manager-grid span {
+    font-size: 0.62rem;
+    color: #9bb2ca;
+  }
+
+  .collision-manager-grid strong {
+    margin-top: 0.15rem;
+    font-size: 1rem;
+    color: #eff6ff;
   }
 
   .editor-disclosure {

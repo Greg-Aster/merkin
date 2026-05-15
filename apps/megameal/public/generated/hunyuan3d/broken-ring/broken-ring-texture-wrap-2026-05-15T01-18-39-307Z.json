@@ -1,0 +1,15 @@
+{
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+  "sourceName": "broken ancient stone ring ruin",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/broken-root-ring-2026-05-15T01-16-20-727Z/reference/broken-root-ring-reference-2026-05-15T01-17-52-127Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1778807872173-wu3pxn",
+  "prompt": "object: broken sacred ring ruin placed in the lower Hvergelmir sub-area. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "texture",
+  "shapeModel": null,
+  "paintModel": "hunyuan3d-paint-v2-0-turbo",
+  "generatedAt": "2026-05-15T01:18:40.582Z"
+}

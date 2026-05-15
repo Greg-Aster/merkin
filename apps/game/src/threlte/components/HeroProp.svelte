@@ -3,6 +3,7 @@ import { T, useTask, useThrelte } from '@threlte/core'
 import { getContext } from 'svelte'
 import { createEventDispatcher, onDestroy } from 'svelte'
 import * as THREE from 'three'
+import { registerSceneAtmosphereObject } from '../atmosphere/atmosphereMaterialRegistry'
 import {
   getLevelRuntimeAssetTier,
   resolveRuntimeAssetUrl,
@@ -85,6 +86,8 @@ let currentCullDistance = 0
 let runtimeVisible = true
 let distanceCheckAccumulator = 0
 let appliedMaterialStyleKey = ''
+let atmosphereMaterialSignature = ''
+let unregisterAtmosphereObject: (() => void) | null = null
 const unsubscribe = editorMaterialOverrideStore?.subscribe(value => {
   editorMaterialOverride = value
 })
@@ -176,6 +179,47 @@ function disposeLoadedScene(object: THREE.Object3D | null) {
   disposeCachedGltfScene(object)
 }
 
+function clearAtmosphereRegistration() {
+  unregisterAtmosphereObject?.()
+  unregisterAtmosphereObject = null
+  atmosphereMaterialSignature = ''
+}
+
+function getAtmosphereMaterialSignature(root: THREE.Object3D) {
+  const materialUuids: string[] = []
+
+  root.traverse(child => {
+    if (!(child instanceof THREE.Mesh) || !child.material) return
+
+    if (Array.isArray(child.material)) {
+      child.material.forEach(material => materialUuids.push(material.uuid))
+    } else {
+      materialUuids.push(child.material.uuid)
+    }
+  })
+
+  return materialUuids.sort().join('|')
+}
+
+function syncAtmosphereRegistration() {
+  if (!scene) {
+    clearAtmosphereRegistration()
+    return
+  }
+
+  const nextSignature = getAtmosphereMaterialSignature(scene)
+  if (nextSignature === atmosphereMaterialSignature) return
+
+  clearAtmosphereRegistration()
+  atmosphereMaterialSignature = nextSignature
+  unregisterAtmosphereObject = registerSceneAtmosphereObject(scene, {
+    source: 'gltf',
+    renderPath: 'gltf-prop',
+    levelId,
+    objectName: scene.name || url,
+  })
+}
+
 function snapshotSceneMeshes(root: THREE.Group) {
   sceneMeshes = []
 
@@ -264,9 +308,15 @@ function applyRuntimePropBudget() {
 
 function applyRuntimeMaterialStyle() {
   if (!scene) return
-  const styleKey = String(
-    $runtimeVisualStyleStore.screenFx.accentGlowIntensity ?? 0,
-  )
+  const preserveAuthoredEnvMapIntensity =
+    effectiveMaterialOverride?.envMapIntensity !== undefined
+  const styleKey = JSON.stringify({
+    accentGlowIntensity:
+      $runtimeVisualStyleStore.screenFx.accentGlowIntensity ?? 0,
+    authoredEnvMapIntensity: preserveAuthoredEnvMapIntensity
+      ? effectiveMaterialOverride?.envMapIntensity
+      : null,
+  })
   if (styleKey === appliedMaterialStyleKey) return
   appliedMaterialStyleKey = styleKey
 
@@ -280,7 +330,10 @@ function applyRuntimeMaterialStyle() {
 
     const applyToMaterial = (material: THREE.Material) => {
       const standardMaterial = material as THREE.MeshStandardMaterial
-      if ('envMapIntensity' in standardMaterial) {
+      if (
+        'envMapIntensity' in standardMaterial &&
+        !preserveAuthoredEnvMapIntensity
+      ) {
         standardMaterial.envMapIntensity = Math.max(
           standardMaterial.envMapIntensity ?? 0,
           envBoost,
@@ -352,6 +405,10 @@ async function loadSceneFromUrl(nextUrl: string) {
     }
 
     const previousScene = scene
+    if (previousScene && previousScene !== nextScene) {
+      clearAtmosphereRegistration()
+      disposeLoadedScene(previousScene)
+    }
     scene = nextScene
     appliedMaterialStyleKey = ''
     loadErrorMessage = ''
@@ -376,10 +433,7 @@ async function loadSceneFromUrl(nextUrl: string) {
       syncObjectMaterialOverride(scene, materialOverride, materialOverrideState)
     }
     applyOverrideTexturesToScene()
-
-    if (previousScene && previousScene !== scene) {
-      disposeLoadedScene(previousScene)
-    }
+    syncAtmosphereRegistration()
 
     dispatch('load', { scene })
   } catch (error) {
@@ -456,6 +510,7 @@ $: if (scene) {
   applyOverrideTexturesToScene()
   applyRuntimePropBudget()
   applyRuntimeMaterialStyle()
+  syncAtmosphereRegistration()
 }
 
 $: {
@@ -498,6 +553,7 @@ onDestroy(() => {
   activeResolveToken += 1
   textureLoadToken += 1
   unsubscribe?.()
+  clearAtmosphereRegistration()
   disposeOverrideTextures()
   disposeObjectMaterialOverrideState(materialOverrideState)
   disposeLoadedScene(scene)

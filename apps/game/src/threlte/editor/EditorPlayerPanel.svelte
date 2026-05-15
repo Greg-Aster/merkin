@@ -8,9 +8,16 @@ export let updateLevelNumericSetting: (
   path: Array<string | number>,
   value: string,
 ) => void
+export let updateLevelSetting: (
+  path: Array<string | number>,
+  value: unknown,
+) => void
 
 const AXIS_LABELS = ['X', 'Y', 'Z']
 const ROTATION_LABELS = ['Pitch', 'Yaw', 'Roll']
+const DEFAULT_WALKABILITY_SUPPORT_XZ_PADDING = 0.15
+const DEFAULT_WALKABILITY_SUPPORT_MAX_DROP = 2
+const DEFAULT_WALKABILITY_SUPPORT_MAX_PENETRATION = 0.25
 
 function getSpawnPosition() {
   const position = levelSettings.spawn?.position
@@ -75,6 +82,54 @@ $: spawnPosition = getSpawnPosition()
           />
         </label>
       {/each}
+    </div>
+  </div>
+
+  <div class="tuple-group">
+    <div class="tuple-label">Spawn Support</div>
+    <div class="editor-field-grid editor-mt-sm">
+      <label class="editor-field">
+        <span class="editor-field-label">Support Actor</span>
+        <input
+          class="tuple-input"
+          type="text"
+          value={levelSettings.spawn?.supportActorId ?? ''}
+          on:change={(event) => updateLevelSetting(['spawn', 'supportActorId'], (event.currentTarget as HTMLInputElement).value.trim())}
+        />
+      </label>
+      <label class="editor-field">
+        <span class="editor-field-label">Max Drop</span>
+        <input
+          class="tuple-input"
+          type="number"
+          min="0"
+          step="0.1"
+          value={levelSettings.collision?.walkability?.supportMaxDrop ?? DEFAULT_WALKABILITY_SUPPORT_MAX_DROP}
+          on:change={(event) => updateLevelNumericSetting(['collision', 'walkability', 'supportMaxDrop'], (event.currentTarget as HTMLInputElement).value)}
+        />
+      </label>
+      <label class="editor-field">
+        <span class="editor-field-label">Penetration</span>
+        <input
+          class="tuple-input"
+          type="number"
+          min="0"
+          step="0.05"
+          value={levelSettings.collision?.walkability?.supportMaxPenetration ?? DEFAULT_WALKABILITY_SUPPORT_MAX_PENETRATION}
+          on:change={(event) => updateLevelNumericSetting(['collision', 'walkability', 'supportMaxPenetration'], (event.currentTarget as HTMLInputElement).value)}
+        />
+      </label>
+      <label class="editor-field">
+        <span class="editor-field-label">XZ Padding</span>
+        <input
+          class="tuple-input"
+          type="number"
+          min="0"
+          step="0.05"
+          value={levelSettings.collision?.walkability?.supportXzPadding ?? DEFAULT_WALKABILITY_SUPPORT_XZ_PADDING}
+          on:change={(event) => updateLevelNumericSetting(['collision', 'walkability', 'supportXzPadding'], (event.currentTarget as HTMLInputElement).value)}
+        />
+      </label>
     </div>
   </div>
 

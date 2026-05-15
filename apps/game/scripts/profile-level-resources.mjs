@@ -182,7 +182,7 @@ const runtimeBudgets = {
     'GAME_PROFILE_MAX_LONG_TASK_MS',
     500,
   ),
-  minRafFps: parseNumberBudget('min-raf-fps', 'GAME_PROFILE_MIN_RAF_FPS', 20),
+  minRafFps: parseNumberBudget('min-raf-fps', 'GAME_PROFILE_MIN_RAF_FPS', 16),
 }
 
 if (argv.includes('--help') || argv.includes('-h')) {

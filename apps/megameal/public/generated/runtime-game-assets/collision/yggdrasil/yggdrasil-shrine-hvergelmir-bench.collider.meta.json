@@ -1,0 +1,299 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-15T02:10:56.051Z",
+  "generatorVersion": "mesh-collision-manager-v2",
+  "sourceLevelId": "yggdrasil",
+  "sourceActorId": "yggdrasil-shrine-hvergelmir-bench",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "fe469e93caa54a9faa5e3b0cfdf2437a79e1bedab368e59c5dc299acead2325a"
+  },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "750918db2db2c9a2567c03aca7c940d339c66a1361364f379d25ffb14b5332fb"
+  },
+  "lodSourceTier": "low",
+  "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-bench.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-bench.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-bench.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v2:750918db2db2c9a2567c03aca7c940d339c66a1361364f379d25ffb14b5332fb:8e11b7f4618cde9d7dd5a67f9de60398d844a997d81baa3a7da05f6e871f5fbe:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "triangleCount": 319,
+  "vertexCount": 352,
+  "bounds": {
+    "min": [
+      -1.3949999809265137,
+      -1.3949999809265137,
+      -0.675000011920929
+    ],
+    "max": [
+      1.3949999809265137,
+      1.600000023841858,
+      0.30000001192092896
+    ],
+    "size": [
+      2.7899999618530273,
+      2.9950000047683716,
+      0.9750000238418579
+    ],
+    "center": [
+      0,
+      0.10250002145767212,
+      -0.1875
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -32767,
+      -32767,
+      -17378
+    ],
+    "max": [
+      32767,
+      32767,
+      17378
+    ],
+    "size": [
+      65534,
+      65534,
+      34756
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -1.3949999809265137,
+      -1.3949999809265137,
+      -0.675000011920929
+    ],
+    "max": [
+      1.3949999809265137,
+      1.600000023841858,
+      0.30000001192092896
+    ],
+    "size": [
+      2.7899999618530273,
+      2.9950000047683716,
+      0.9750000238418579
+    ],
+    "center": [
+      0,
+      0.10250002145767212,
+      -0.1875
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -1.3949999809265137,
+      -1.3949999809265137,
+      -0.675000011920929
+    ],
+    "max": [
+      1.3949999809265137,
+      1.600000023841858,
+      0.30000001192092896
+    ],
+    "size": [
+      2.7899999618530273,
+      2.9950000047683716,
+      0.9750000238418579
+    ],
+    "center": [
+      0,
+      0.10250002145767212,
+      -0.1875
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+    "sourceNodeName": "Hvergelmir Bench",
+    "visualLocalBounds": {
+      "min": [
+        -1.3949999809265137,
+        -1.3949999809265137,
+        -0.675000011920929
+      ],
+      "max": [
+        1.3949999809265137,
+        1.600000023841858,
+        0.30000001192092896
+      ],
+      "size": [
+        2.7899999618530273,
+        2.9950000047683716,
+        0.9750000238418579
+      ],
+      "center": [
+        0,
+        0.10250002145767212,
+        -0.1875
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -1.3949999809265137,
+        -1.3949999809265137,
+        -0.675000011920929
+      ],
+      "max": [
+        1.3949999809265137,
+        1.600000023841858,
+        0.30000001192092896
+      ],
+      "size": [
+        2.7899999618530273,
+        2.9950000047683716,
+        0.9750000238418579
+      ],
+      "center": [
+        0,
+        0.10250002145767212,
+        -0.1875
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "yggdrasil-shrine-hvergelmir-bench",
+    "sourceActorName": "Hvergelmir Bench",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "fe469e93caa54a9faa5e3b0cfdf2437a79e1bedab368e59c5dc299acead2325a"
+    },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "750918db2db2c9a2567c03aca7c940d339c66a1361364f379d25ffb14b5332fb"
+    },
+    "lodSourceTier": "low",
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "yggdrasil",
+      "nodeId": "yggdrasil-shrine-hvergelmir-bench",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.low.glb",
+      "lodSourceTier": "low",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-15T02:10:56.051Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
+  },
+  "collisionProduct": {
+    "actorId": "yggdrasil-shrine-hvergelmir-bench",
+    "cacheKey": "mesh-collision-manager-v2:750918db2db2c9a2567c03aca7c940d339c66a1361364f379d25ffb14b5332fb:8e11b7f4618cde9d7dd5a67f9de60398d844a997d81baa3a7da05f6e871f5fbe:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+    "mode": "auto",
+    "productId": "yggdrasil-shrine-hvergelmir-bench:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v2",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "750918db2db2c9a2567c03aca7c940d339c66a1361364f379d25ffb14b5332fb"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "8e11b7f4618cde9d7dd5a67f9de60398d844a997d81baa3a7da05f6e871f5fbe"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -1.3949999809265137,
+        -1.3949999809265137,
+        -0.675000011920929
+      ],
+      "max": [
+        1.3949999809265137,
+        1.600000023841858,
+        0.30000001192092896
+      ],
+      "size": [
+        2.7899999618530273,
+        2.9950000047683716,
+        0.9750000238418579
+      ],
+      "center": [
+        0,
+        0.10250002145767212,
+        -0.1875
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-bench.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-hvergelmir-bench.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.low.glb",
+    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+    "triangleCount": 319,
+    "vertexCount": 352,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 319,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

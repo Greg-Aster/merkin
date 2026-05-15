@@ -1,3 +1,8 @@
+import {
+  buildRuntimeAtmosphereFromLevelSettings,
+  runtimeAtmosphereToRuntimeVisualStylePatch,
+  runtimeVisualStyleToRuntimeAtmosphere,
+} from '../atmosphere/buildRuntimeAtmosphere'
 import type { SharedLevelEditorSettings } from '../engine/sceneDocumentTypes'
 import type { StylePreset } from './StylePalettes'
 import {
@@ -676,6 +681,14 @@ const solitudeAtmosphereProfileMap = new Map(
   solitudeAtmosphereProfileDefinitions.map(profile => [profile.id, profile]),
 )
 
+export function findSolitudeAtmosphereProfile(
+  id: string | null | undefined,
+): SolitudeAtmosphereProfileDefinition | null {
+  return (
+    solitudeAtmosphereProfileMap.get(id as SolitudeAtmosphereProfileId) ?? null
+  )
+}
+
 export function getSolitudeAtmosphereProfile(
   id: string | null | undefined,
 ): SolitudeAtmosphereProfileDefinition {
@@ -699,60 +712,16 @@ export function buildSolitudeRuntimeVisualStyle(
   })
 
   const stylePreset = settings?.style?.preset ?? profile.stylePreset
+  const atmosphere = buildRuntimeAtmosphereFromLevelSettings(settings, {
+    base: runtimeVisualStyleToRuntimeAtmosphere(withProfile, {
+      id: profile.id,
+    }),
+  })
+
   const runtime = mergeRuntimeVisualStyle(withProfile, {
     id: profile.id,
     palettePreset: stylePreset,
-    heightFog: settings?.style?.haze
-      ? {
-          color: settings.style.haze.color ?? withProfile.heightFog?.color,
-          density:
-            settings.style.haze.density ?? withProfile.heightFog?.density,
-          floor: settings.style.haze.floor ?? withProfile.heightFog?.floor,
-          ceiling:
-            settings.style.haze.ceiling ?? withProfile.heightFog?.ceiling,
-          mistOpacity:
-            settings.style.haze.mistOpacity ??
-            withProfile.heightFog?.mistOpacity,
-          mistLayers:
-            settings.style.haze.mistLayers ?? withProfile.heightFog?.mistLayers,
-          mistHeight:
-            settings.style.haze.mistHeight ?? withProfile.heightFog?.mistHeight,
-          mistSpacing:
-            settings.style.haze.mistSpacing ??
-            withProfile.heightFog?.mistSpacing,
-          mistScale:
-            settings.style.haze.mistScale ?? withProfile.heightFog?.mistScale,
-          mistDriftSpeed:
-            settings.style.haze.mistDriftSpeed ??
-            withProfile.heightFog?.mistDriftSpeed,
-        }
-      : undefined,
-    colorGrading: settings?.style?.colorGrading
-      ? {
-          saturation:
-            settings.style.colorGrading.saturation ??
-            withProfile.colorGrading.saturation,
-          contrast:
-            settings.style.colorGrading.contrast ??
-            withProfile.colorGrading.contrast,
-          brightness:
-            settings.style.colorGrading.brightness ??
-            withProfile.colorGrading.brightness,
-          warmth:
-            settings.style.colorGrading.warmth ??
-            withProfile.colorGrading.warmth,
-        }
-      : undefined,
-    screenFx: settings?.style?.bloom
-      ? {
-          bloomIntensity:
-            settings.style.bloom.intensity ??
-            withProfile.screenFx.bloomIntensity,
-          bloomThreshold:
-            settings.style.bloom.threshold ??
-            withProfile.screenFx.bloomThreshold,
-        }
-      : undefined,
+    ...runtimeAtmosphereToRuntimeVisualStylePatch(atmosphere),
   })
 
   return runtime
@@ -761,6 +730,10 @@ export function buildSolitudeRuntimeVisualStyle(
 export function buildRuntimeVisualStyleFromLevelSettings(
   settings: SharedLevelEditorSettings | null | undefined,
 ): RuntimeVisualStyleSettings {
+  if (findSolitudeAtmosphereProfile(settings?.presets?.atmosphere)) {
+    return buildSolitudeRuntimeVisualStyle(settings)
+  }
+
   const stylePreset =
     settings?.style?.preset ?? DEFAULT_RUNTIME_VISUAL_STYLE.palettePreset
   const base =
@@ -771,40 +744,18 @@ export function buildRuntimeVisualStyleFromLevelSettings(
         )
       : DEFAULT_RUNTIME_VISUAL_STYLE
 
+  const atmosphere = buildRuntimeAtmosphereFromLevelSettings(settings, {
+    base: runtimeVisualStyleToRuntimeAtmosphere(base, {
+      id:
+        typeof settings?.presets?.atmosphere === 'string' &&
+        settings.presets.atmosphere
+          ? settings.presets.atmosphere
+          : `level-${stylePreset}`,
+    }),
+  })
+
   return mergeRuntimeVisualStyle(base, {
-    id:
-      typeof settings?.presets?.atmosphere === 'string' &&
-      settings.presets.atmosphere
-        ? settings.presets.atmosphere
-        : `level-${stylePreset}`,
     palettePreset: stylePreset,
-    heightFog: settings?.style?.haze
-      ? {
-          color: settings.style.haze.color,
-          density: settings.style.haze.density,
-          floor: settings.style.haze.floor,
-          ceiling: settings.style.haze.ceiling,
-          mistOpacity: settings.style.haze.mistOpacity,
-          mistLayers: settings.style.haze.mistLayers,
-          mistHeight: settings.style.haze.mistHeight,
-          mistSpacing: settings.style.haze.mistSpacing,
-          mistScale: settings.style.haze.mistScale,
-          mistDriftSpeed: settings.style.haze.mistDriftSpeed,
-        }
-      : undefined,
-    colorGrading: settings?.style?.colorGrading
-      ? {
-          saturation: settings.style.colorGrading.saturation,
-          contrast: settings.style.colorGrading.contrast,
-          brightness: settings.style.colorGrading.brightness,
-          warmth: settings.style.colorGrading.warmth,
-        }
-      : undefined,
-    screenFx: settings?.style?.bloom
-      ? {
-          bloomIntensity: settings.style.bloom.intensity,
-          bloomThreshold: settings.style.bloom.threshold,
-        }
-      : undefined,
+    ...runtimeAtmosphereToRuntimeVisualStylePatch(atmosphere),
   })
 }

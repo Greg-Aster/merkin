@@ -11,6 +11,7 @@ import {
   type RuntimeSceneManifest,
   getBuildReportRequiredAssetUrls,
   getBuildReportRuntimeAssetUrls,
+  getRuntimeSceneRequiredRenderActorIds,
   getRuntimeSceneRequiredAssetUrls,
   getRuntimeSceneRuntimeAssetUrls,
   validateRuntimeSceneManifest,
@@ -28,6 +29,8 @@ import {
   type MeshColliderBakeMetadata,
   type RuntimeAssetCookManifest,
   type RuntimePrefabManifest,
+  type StyleBakeFingerprint,
+  type StyleBakeMetadata,
   createEmptyEditorPublishReadinessViewModel,
 } from './editorPublishReadinessContracts'
 import {
@@ -42,12 +45,21 @@ import type {
   SharedLevelGraphicsBudgetSettings,
 } from './editorTypes'
 
+const requiredRuntimeAssetLodTiers = ['high', 'medium', 'low'] as const
+
 function addUniqueCommand(
   commands: EditorPublishReadinessCommand[],
   command: EditorPublishReadinessCommand,
 ) {
   if (commands.some(existing => existing.command === command.command)) return
   commands.push(command)
+}
+
+function getCookRuntimeAssetsCommand(
+  viewModel: EditorPublishReadinessViewModel,
+  script = 'cook:runtime-assets',
+) {
+  return `pnpm --dir apps/game ${script} -- --level=${viewModel.levelId}`
 }
 
 function pushIssue(
@@ -74,6 +86,133 @@ function formatBytes(value: number | undefined) {
   if (value < 1024) return `${value} B`
   if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`
   return `${(value / 1024 / 1024).toFixed(1)} MB`
+}
+
+function normalizePublicUrl(url: string | undefined | null) {
+  const trimmed = String(url ?? '').trim()
+  if (!trimmed) return ''
+  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+}
+
+function getCompanionJsonUrl(assetUrl: string) {
+  return /\.(glb|gltf)$/i.test(assetUrl)
+    ? assetUrl.replace(/\.(glb|gltf)$/i, '.json')
+    : ''
+}
+
+function getNodeStyleBakeProduct(node: EditorSceneNode) {
+  return node.generation?.styleBakeProduct ?? null
+}
+
+export function getEditorStyleBakeMetadataUrl(node: EditorSceneNode) {
+  const product = getNodeStyleBakeProduct(node)
+  const explicit =
+    product?.metadataUrl ?? product?.generatedMetadataUrl ?? ''
+  if (explicit) return normalizePublicUrl(explicit)
+
+  const assetUrl =
+    product?.generatedAssetUrl ??
+    product?.assetUrl ??
+    node.asset?.url ??
+    node.generation?.lastBakedAssetUrl ??
+    ''
+  return getCompanionJsonUrl(normalizePublicUrl(assetUrl))
+}
+
+function isGeneratedStyleBakeUrl(url: string) {
+  return (
+    url.startsWith('/generated/style-lab/baked-style/') ||
+    /-style-baked\.glb$/i.test(url)
+  )
+}
+
+export function isEditorStyleBakeCandidate(node: EditorSceneNode) {
+  const product = getNodeStyleBakeProduct(node)
+  if (product?.mode === 'ai-texture-source') return false
+  const assetUrl = normalizePublicUrl(node.asset?.url)
+  return Boolean(
+    product ||
+      (assetUrl && isGeneratedStyleBakeUrl(assetUrl)),
+  )
+}
+
+function normalizeFingerprint(
+  value: StyleBakeFingerprint | string | Record<string, unknown> | null | undefined,
+): StyleBakeFingerprint | null {
+  if (!value) return null
+  if (typeof value === 'string') return { algorithm: 'sha256', value }
+  const fingerprintValue = value.value
+  return typeof fingerprintValue === 'string'
+    ? {
+        algorithm:
+          typeof value.algorithm === 'string' ? value.algorithm : 'sha256',
+        value: fingerprintValue,
+      }
+    : null
+}
+
+function fingerprintsMatch(
+  left: StyleBakeFingerprint | string | Record<string, unknown> | null | undefined,
+  right: StyleBakeFingerprint | string | Record<string, unknown> | null | undefined,
+) {
+  const leftFingerprint = normalizeFingerprint(left)
+  const rightFingerprint = normalizeFingerprint(right)
+  if (!leftFingerprint?.value || !rightFingerprint?.value) return null
+  return leftFingerprint.value === rightFingerprint.value
+}
+
+function getStyleMetadataSettingsFingerprint(metadata: StyleBakeMetadata | null) {
+  return (
+    metadata?.styleSettingsFingerprint ??
+    metadata?.settingsFingerprint ??
+    null
+  )
+}
+
+function getRuntimeStyleBakeStatus(
+  runtimeAssetManifest: RuntimeAssetCookManifest | null,
+  assetUrl: string,
+) {
+  return runtimeAssetManifest?.assets?.[assetUrl]?.styleBake ?? null
+}
+
+function getRuntimeAssetEntry(
+  runtimeAssetManifest: RuntimeAssetCookManifest | null,
+  assetUrl: string,
+) {
+  return runtimeAssetManifest?.assets?.[assetUrl] ?? null
+}
+
+function getStyleBakeSelectedTier(runtimeScene: RuntimeSceneManifest | null) {
+  const tier =
+    runtimeScene?.runtime.assetTierCap ??
+    ((runtimeScene?.levelDefinition.settings as any)?.level?.runtimeAssets
+      ?.maxTier as string | undefined)
+  return tier === 'high' || tier === 'low' || tier === 'medium'
+    ? tier
+    : 'medium'
+}
+
+function getVariantOversizedTextureCount(
+  asset: ReturnType<typeof getRuntimeAssetEntry>,
+  tier: 'high' | 'medium' | 'low',
+) {
+  const variant = asset?.qualityVariants?.[tier]
+  const textureLimit =
+    variant?.pipeline?.textureSize ??
+    asset?.lod?.tiers?.find(lodTier => lodTier.id === tier)?.textureSize
+  if (!Number.isFinite(textureLimit)) return 0
+
+  return (variant?.metadata?.textures ?? []).filter(texture => {
+    const width = texture.width
+    const height = texture.height
+    return (
+      Number.isFinite(width) &&
+      Number.isFinite(height) &&
+      (Number(width) > Number(textureLimit) ||
+        Number(height) > Number(textureLimit))
+    )
+  }).length
 }
 
 function asStringSet(values: string[] | undefined) {
@@ -138,6 +277,19 @@ function countLodMisses(runtimeAssetManifest: RuntimeAssetCookManifest | null) {
       sum +
       Object.values(asset.qualityVariants ?? {}).filter(
         variant => variant?.lodValidation?.meetsTarget === false,
+      ).length,
+    0,
+  )
+}
+
+function countMissingLodVariants(
+  runtimeAssetManifest: RuntimeAssetCookManifest | null,
+) {
+  return Object.values(runtimeAssetManifest?.assets ?? {}).reduce(
+    (sum, asset) =>
+      sum +
+      requiredRuntimeAssetLodTiers.filter(
+        tier => !asset.qualityVariants?.[tier]?.exists,
       ).length,
     0,
   )
@@ -287,7 +439,7 @@ function addManifestContractSection(
     })
     addUniqueCommand(viewModel.commands, {
       id: 'cook-runtime-assets',
-      command: 'pnpm --dir apps/game cook:runtime-assets',
+      command: getCookRuntimeAssetsCommand(viewModel),
       reason: 'Regenerate the runtime asset and scene manifests.',
     })
     return
@@ -367,7 +519,7 @@ function addRuntimeSceneSection(
     })
     addUniqueCommand(viewModel.commands, {
       id: 'cook-runtime-assets',
-      command: 'pnpm --dir apps/game cook:runtime-assets',
+      command: getCookRuntimeAssetsCommand(viewModel),
       reason: 'Create the missing cooked scene manifest.',
     })
     return
@@ -414,7 +566,7 @@ function addRuntimeSceneSection(
   if (blockerDetails.length) {
     addUniqueCommand(viewModel.commands, {
       id: 'cook-runtime-assets',
-      command: 'pnpm --dir apps/game cook:runtime-assets',
+      command: getCookRuntimeAssetsCommand(viewModel),
       reason:
         'Refresh cooked scene contracts so they match the authoring document.',
     })
@@ -431,8 +583,9 @@ function addRequiredAssetsSection(
   const missing = requiredAssetUrls.filter(url => {
     const asset = assets[url]
     if (!asset) return true
-    const variants = Object.values(asset.qualityVariants ?? {})
-    return variants.length > 0 && !variants.some(variant => variant?.exists)
+    return requiredRuntimeAssetLodTiers.some(
+      tier => !asset.qualityVariants?.[tier]?.exists,
+    )
   })
 
   addSection(viewModel, {
@@ -447,7 +600,7 @@ function addRequiredAssetsSection(
   if (missing.length) {
     addUniqueCommand(viewModel.commands, {
       id: 'cook-runtime-assets',
-      command: 'pnpm --dir apps/game cook:runtime-assets',
+      command: getCookRuntimeAssetsCommand(viewModel),
       reason: 'Cook missing required runtime assets.',
     })
   }
@@ -485,8 +638,301 @@ function addImportMetadataSection(
   if (missing.length || warnings.length) {
     addUniqueCommand(viewModel.commands, {
       id: 'cook-runtime-assets',
-      command: 'pnpm --dir apps/game cook:runtime-assets',
+      command: getCookRuntimeAssetsCommand(viewModel),
       reason: 'Validate runtime asset source import metadata.',
+    })
+  }
+}
+
+function addStyleBakeIssue(
+  viewModel: EditorPublishReadinessViewModel,
+  node: EditorSceneNode,
+  required: boolean,
+  detail: string,
+) {
+  pushIssue(viewModel, {
+    id: `style-bake-${node.id}-${viewModel.blockers.length + viewModel.warnings.length}`,
+    label: 'Style-Baked Asset',
+    severity: required ? 'blocker' : 'warning',
+    detail: `Actor "${node.id}": ${detail}`,
+  })
+}
+
+function addStyleBakeProductsSection(
+  viewModel: EditorPublishReadinessViewModel,
+  scene: EditorSceneDocument | null,
+  runtimeAssetManifest: RuntimeAssetCookManifest | null,
+  runtimeScene: RuntimeSceneManifest | null,
+  styleBakeMetadata: Record<string, LoadedManifest<StyleBakeMetadata>>,
+) {
+  const styleNodes = (scene?.nodes ?? []).filter(isEditorStyleBakeCandidate)
+  const sceneRequiredRenderActorIds = new Set([
+    ...getRuntimeSceneRequiredRenderActorIds(runtimeScene),
+    ...(scene?.settings?.level?.runtimeAssets?.requiredRenderActorIds ?? []),
+  ])
+  const requiredAssetUrls = new Set(getRuntimeSceneRequiredAssetUrls(runtimeScene))
+  const selectedTier = getStyleBakeSelectedTier(runtimeScene)
+  let cleanCount = 0
+  let needBakeCount = 0
+  let staleSourceCount = 0
+  let staleSettingsCount = 0
+  let missingGeneratedCount = 0
+  let missingMetadataCount = 0
+  let notCookedCount = 0
+  let overBudgetCount = 0
+  let unusedTextureCount = 0
+
+  for (const node of styleNodes) {
+    const product = getNodeStyleBakeProduct(node)
+    const assetUrl = normalizePublicUrl(
+      product?.generatedAssetUrl ??
+        product?.assetUrl ??
+        node.asset?.url ??
+        node.generation?.lastBakedAssetUrl,
+    )
+    const metadataUrl = getEditorStyleBakeMetadataUrl(node)
+    const loadedMetadata = metadataUrl ? styleBakeMetadata[metadataUrl] : null
+    const metadata = loadedMetadata?.value ?? null
+    const sourceAssetUrl = normalizePublicUrl(
+      product?.sourceAssetUrl ??
+        metadata?.sourceAssetUrl ??
+        node.generation?.originalAssetUrl,
+    )
+    const asset = getRuntimeAssetEntry(runtimeAssetManifest, assetUrl)
+    const runtimeStyleBake = getRuntimeStyleBakeStatus(
+      runtimeAssetManifest,
+      assetUrl,
+    )
+    const required = Boolean(
+      product?.required ||
+        sceneRequiredRenderActorIds.has(node.id) ||
+        requiredAssetUrls.has(assetUrl) ||
+        asset?.required,
+    )
+    const nodeIssuesBefore =
+      needBakeCount +
+      staleSourceCount +
+      staleSettingsCount +
+      missingGeneratedCount +
+      missingMetadataCount +
+      notCookedCount +
+      overBudgetCount +
+      unusedTextureCount
+
+    const productStatus = product?.state?.status ?? product?.status
+    const needsBake =
+      !assetUrl ||
+      assetUrl === sourceAssetUrl ||
+      assetUrl.startsWith('/generated/style-lab/sources/') ||
+      productStatus === 'dirty' ||
+      productStatus === 'stale' ||
+      productStatus === 'missing' ||
+      productStatus === 'failed'
+    if (needsBake) {
+      needBakeCount += 1
+      addStyleBakeIssue(
+        viewModel,
+        node,
+        required,
+        productStatus === 'failed'
+          ? `style bake failed${product?.state?.reason ? `: ${product.state.reason}` : ''}.`
+          : 'needs a generated style-baked GLB before publish.',
+      )
+    }
+
+    if (asset && asset.sourceExists === false) {
+      missingGeneratedCount += 1
+      addStyleBakeIssue(
+        viewModel,
+        node,
+        required,
+        `generated style asset is missing: ${assetUrl}.`,
+      )
+    } else if (!asset && assetUrl && runtimeAssetManifest) {
+      missingGeneratedCount += 1
+      addStyleBakeIssue(
+        viewModel,
+        node,
+        required,
+        `runtime asset cook manifest has no entry for generated style asset ${assetUrl}.`,
+      )
+    }
+
+    const metadataKnownByRuntime =
+      runtimeStyleBake &&
+      runtimeStyleBake.status !== 'missing-generated-metadata'
+    if (metadataUrl && !metadata && !metadataKnownByRuntime) {
+      missingMetadataCount += 1
+      addStyleBakeIssue(
+        viewModel,
+        node,
+        required,
+        `generated style metadata is unavailable: ${loadedMetadata?.error || metadataUrl}.`,
+      )
+    } else if (!metadataUrl && !runtimeStyleBake) {
+      missingMetadataCount += 1
+      addStyleBakeIssue(
+        viewModel,
+        node,
+        required,
+        'generated style metadata URL is missing.',
+      )
+    }
+
+    const sceneSourceFingerprint = normalizeFingerprint(
+      product?.sourceAssetFingerprint,
+    )
+    const metadataSourceFingerprint = normalizeFingerprint(
+      metadata?.sourceAssetFingerprint ??
+        runtimeStyleBake?.sourceAssetFingerprint,
+    )
+    const sourceMatch =
+      runtimeStyleBake?.sourceAssetFingerprintMatches === false
+        ? false
+        : fingerprintsMatch(sceneSourceFingerprint, metadataSourceFingerprint)
+    if (sourceMatch === false) {
+      staleSourceCount += 1
+      addStyleBakeIssue(
+        viewModel,
+        node,
+        required,
+        'source mesh fingerprint differs from the generated style metadata.',
+      )
+    }
+
+    const sceneSettingsFingerprint = normalizeFingerprint(
+      product?.settingsFingerprint,
+    )
+    const metadataSettingsFingerprint = normalizeFingerprint(
+      getStyleMetadataSettingsFingerprint(metadata) ??
+        runtimeStyleBake?.styleSettingsFingerprint,
+    )
+    const settingsMatch =
+      runtimeStyleBake?.styleSettingsFingerprintMatches === false
+        ? false
+        : fingerprintsMatch(
+            sceneSettingsFingerprint,
+            metadataSettingsFingerprint,
+          )
+    if (settingsMatch === false) {
+      staleSettingsCount += 1
+      addStyleBakeIssue(
+        viewModel,
+        node,
+        required,
+        'style settings fingerprint differs from the generated style metadata.',
+      )
+    }
+
+    const runtimeCooked =
+      runtimeStyleBake?.runtimeCooked ??
+      (asset
+        ? requiredRuntimeAssetLodTiers.every(
+            tier => asset.qualityVariants?.[tier]?.exists,
+          )
+        : false)
+    if (assetUrl && runtimeAssetManifest && !runtimeCooked) {
+      notCookedCount += 1
+      addStyleBakeIssue(
+        viewModel,
+        node,
+        required,
+        'runtime asset cook has not produced all required style-baked LOD variants.',
+      )
+    }
+
+    const selectedVariant = asset?.qualityVariants?.[selectedTier]
+    const selectedMetadata = selectedVariant?.metadata ?? asset?.metadata
+    const variantOversizedTextures = getVariantOversizedTextureCount(
+      asset,
+      selectedTier,
+    )
+    const sourceUnusedTextures = Number(asset?.metadata?.unusedTextureCount ?? 0)
+    const cookedUnusedTextures =
+      selectedMetadata && selectedMetadata !== asset?.metadata
+        ? Number(selectedMetadata.unusedTextureCount ?? 0)
+        : 0
+    const variantUnusedTextures = sourceUnusedTextures + cookedUnusedTextures
+    const styleBudgetOver =
+      runtimeStyleBake?.budget?.overBudget === true ||
+      variantOversizedTextures > 0
+    if (styleBudgetOver) {
+      overBudgetCount += 1
+      addStyleBakeIssue(
+        viewModel,
+        node,
+        false,
+        `${selectedTier} style-baked texture budget is exceeded${variantOversizedTextures ? ` by ${variantOversizedTextures} texture(s)` : ''}.`,
+      )
+    }
+    if (variantUnusedTextures > 0) {
+      unusedTextureCount += 1
+      addStyleBakeIssue(
+        viewModel,
+        node,
+        required,
+        `generated GLB contains ${variantUnusedTextures} unused texture payload(s) after prune/optimize.`,
+      )
+    }
+
+    const nodeIssuesAfter =
+      needBakeCount +
+      staleSourceCount +
+      staleSettingsCount +
+      missingGeneratedCount +
+      missingMetadataCount +
+      notCookedCount +
+      overBudgetCount +
+      unusedTextureCount
+    if (nodeIssuesAfter === nodeIssuesBefore) cleanCount += 1
+  }
+
+  const blockerCount = viewModel.blockers.filter(
+    item => item.label === 'Style-Baked Asset',
+  ).length
+  const warningCount = viewModel.warnings.filter(
+    item => item.label === 'Style-Baked Asset',
+  ).length
+  const issueCount = blockerCount + warningCount
+
+  addSection(viewModel, {
+    id: 'style-bake-products',
+    label: 'Style-Baked Runtime Assets',
+    severity: blockerCount ? 'blocker' : warningCount ? 'warning' : 'ready',
+    detail: styleNodes.length
+      ? issueCount
+        ? `${cleanCount} clean, ${needBakeCount} need style bake, ${staleSourceCount} stale source, ${staleSettingsCount} stale settings, ${missingGeneratedCount} missing generated GLB, ${missingMetadataCount} missing metadata, ${notCookedCount} not runtime-cooked, ${overBudgetCount} over budget.`
+        : `${cleanCount} style-baked object(s) have current metadata, cooked runtime products, and ${selectedTier} texture budgets.`
+      : 'No style-baked products are required by this scene.',
+  })
+
+  if (
+    needBakeCount ||
+    staleSourceCount ||
+    staleSettingsCount ||
+    missingGeneratedCount ||
+    missingMetadataCount ||
+    unusedTextureCount
+  ) {
+    addUniqueCommand(viewModel.commands, {
+      id: 'bake-style-assets',
+      command: 'Editor: run Style Bake for required stale objects',
+      reason:
+        'Regenerate missing, stale, dirty, or malformed style-baked products.',
+    })
+  }
+  if (notCookedCount || missingGeneratedCount) {
+    addUniqueCommand(viewModel.commands, {
+      id: 'cook-runtime-assets',
+      command: getCookRuntimeAssetsCommand(viewModel),
+      reason: 'Cook generated style-baked GLBs into runtime LOD products.',
+    })
+  }
+  if (overBudgetCount) {
+    addUniqueCommand(viewModel.commands, {
+      id: 'report-graphics-backlog',
+      command: 'pnpm --dir apps/game report:graphics-backlog',
+      reason: 'Inspect over-budget style-baked texture content.',
     })
   }
 }
@@ -494,6 +940,33 @@ function addImportMetadataSection(
 function isVisualOnlyActor(scene: EditorSceneDocument, nodeId: string) {
   const actorIds = scene.settings?.level?.collision?.roles?.visualOnlyActorIds
   return Array.isArray(actorIds) && actorIds.includes(nodeId)
+}
+
+function getCollisionMode(collision: EditorSceneNode['collision']) {
+  if (!collision) return 'none'
+  if (collision.mode) return collision.mode
+  if (collision.enabled === false || collision.intent === 'none') return 'none'
+  if (collision.sensor || collision.intent === 'trigger') return 'trigger'
+  return 'auto'
+}
+
+function isCollisionEnabled(collision: EditorSceneNode['collision']) {
+  return getCollisionMode(collision) !== 'none'
+}
+
+function requiresMeshColliderMetadata(node: EditorSceneNode) {
+  const collision = node.collision
+  if (node.kind !== 'asset' || !isCollisionEnabled(collision)) return false
+  return (
+    collision?.shape === 'trimesh' ||
+    collision?.quality === 'simplifiedMesh' ||
+    collision?.quality === 'trimesh' ||
+    collision?.quality === 'convexHull'
+  )
+}
+
+function getCollisionTriangleBudget(collision: EditorSceneNode['collision']) {
+  return collision?.maxTriangles ?? collision?.triangleBudget
 }
 
 function getCollisionValidationSeverity(node: EditorSceneNode) {
@@ -521,10 +994,7 @@ function addMeshColliderMetadataSection(
 ) {
   const assetCollisionNodes = (scene?.nodes ?? []).filter(
     node =>
-      node.kind === 'asset' &&
-      node.collision?.enabled !== false &&
-      node.collision?.intent !== 'none' &&
-      node.collision?.shape === 'trimesh' &&
+      requiresMeshColliderMetadata(node) &&
       !isVisualOnlyActor(scene!, node.id),
   )
   let validCount = 0
@@ -532,11 +1002,23 @@ function addMeshColliderMetadataSection(
   let staleCount = 0
   let driftCount = 0
   let missingCount = 0
+  let dirtyCount = 0
 
   for (const node of assetCollisionNodes) {
     const collision = node.collision
     if (!collision) continue
-    if (collision.shape !== 'trimesh') continue
+    const generationDirty =
+      collision.generationStatus === 'dirty' ||
+      collision.generationStatus === 'generating' ||
+      collision.generationStatus === 'failed'
+    if (generationDirty) {
+      dirtyCount += 1
+      pushColliderMetadataIssue(
+        viewModel,
+        node,
+        `generated collider status is ${collision.generationStatus}${collision.generationLastError ? `: ${collision.generationLastError}` : ''}.`,
+      )
+    }
     if (!collision.colliderUrl) {
       missingCount += 1
       pushColliderMetadataIssue(
@@ -622,27 +1104,30 @@ function addMeshColliderMetadataSection(
       )
     }
 
+    const triangleBudget = getCollisionTriangleBudget(collision)
     if (
       Number.isFinite(metadata.triangleCount) &&
-      Number.isFinite(collision.triangleBudget) &&
-      Number(metadata.triangleCount) > Number(collision.triangleBudget)
+      Number.isFinite(triangleBudget) &&
+      Number(metadata.triangleCount) > Number(triangleBudget)
     ) {
       pushColliderMetadataIssue(
         viewModel,
         node,
-        `collider has ${metadata.triangleCount} triangles, exceeding budget ${collision.triangleBudget}.`,
+        `collider has ${metadata.triangleCount} triangles, exceeding budget ${triangleBudget}.`,
       )
     }
 
     if (
       sourceAssetUrl === node.asset?.url &&
-      boundsComparison.withinTolerance
+      boundsComparison.withinTolerance &&
+      !generationDirty
     ) {
       validCount += 1
     }
   }
 
-  const issueCount = legacyCount + staleCount + driftCount + missingCount
+  const issueCount =
+    legacyCount + staleCount + driftCount + missingCount + dirtyCount
   addSection(viewModel, {
     id: 'mesh-collider-metadata',
     label: 'Mesh Collider Metadata',
@@ -654,15 +1139,16 @@ function addMeshColliderMetadataSection(
         ? 'warning'
         : 'ready',
     detail: issueCount
-      ? `${validCount} valid, ${legacyCount} legacy, ${staleCount} stale, ${driftCount} bounds drift, ${missingCount} missing or malformed.`
+      ? `${validCount} valid, ${legacyCount} legacy, ${staleCount} stale, ${driftCount} bounds drift, ${missingCount} missing or malformed, ${dirtyCount} dirty or failed.`
       : `${validCount} asset-local mesh collider contract(s) are valid.`,
   })
 
   if (issueCount) {
     addUniqueCommand(viewModel.commands, {
       id: 'bake-scene-mesh-colliders',
-      command: `pnpm --dir apps/game bake:scene-mesh-colliders -- --level=${viewModel.levelId} --force`,
-      reason: 'Regenerate stale or legacy mesh collider metadata.',
+      command: `pnpm --dir apps/game bake:scene-mesh-colliders -- --level=${viewModel.levelId}`,
+      reason:
+        'Regenerate dirty, stale, legacy, or missing mesh collider metadata.',
     })
   }
 }
@@ -877,7 +1363,7 @@ function addGraphicsSection(
   addSection(viewModel, {
     id: 'graphics-budget',
     label: 'Graphics Budget',
-    severity: overBudget.length ? 'blocker' : 'ready',
+    severity: overBudget.length ? 'warning' : 'ready',
     detail: overBudget.length
       ? `${overBudget.map(metric => metric.label).join(', ')} over budget.`
       : 'Runtime asset bytes, file size, draw calls, triangles, materials, and textures are within declared budgets.',
@@ -915,22 +1401,29 @@ function addMaterialAndLodSections(
         : 'No material blockers or approved exception backlog in the runtime manifest.',
   })
 
+  const missingLodVariants = countMissingLodVariants(runtimeAssetManifest)
   const lodMisses = countLodMisses(runtimeAssetManifest)
   const impostorCount = runtimeAssetManifest?.impostorAtlas?.entryCount ?? 0
+  const lodBlockers = missingLodVariants + lodMisses
   addSection(viewModel, {
     id: 'lod-impostors',
     label: 'LOD And Impostors',
-    severity: lodMisses ? 'blocker' : 'ready',
-    detail: lodMisses
-      ? `${lodMisses} LOD variant(s) miss target simplification policy.`
+    severity: lodBlockers ? 'blocker' : 'ready',
+    detail: missingLodVariants
+      ? `${missingLodVariants} cooked LOD variant(s) are missing.`
+      : lodMisses
+        ? `${lodMisses} LOD variant(s) miss target simplification policy.`
       : `${impostorCount} impostor atlas entr${impostorCount === 1 ? 'y' : 'ies'} and no LOD target misses.`,
   })
 
-  if (lodMisses) {
+  if (lodBlockers) {
     addUniqueCommand(viewModel.commands, {
       id: 'cook-runtime-assets-build',
-      command: 'pnpm --dir apps/game cook:runtime-assets:build',
-      reason: 'Regenerate runtime LOD variants and manifest metadata.',
+      command: getCookRuntimeAssetsCommand(
+        viewModel,
+        'cook:runtime-assets:build',
+      ),
+      reason: 'Generate every runtime LOD variant and manifest metadata.',
     })
   }
 }
@@ -987,6 +1480,7 @@ export function buildEditorPublishReadinessViewModel(input: {
   terrainSourceAssets?: EditorTerrainSourceAssetStatus[]
   missingTerrainSourceAssets?: EditorTerrainSourceAssetStatus[]
   colliderMetadata?: Record<string, LoadedManifest<MeshColliderBakeMetadata>>
+  styleBakeMetadata?: Record<string, LoadedManifest<StyleBakeMetadata>>
 }): EditorPublishReadinessViewModel {
   const viewModel = createEmptyEditorPublishReadinessViewModel(input.levelId)
   const authoringReport = addAuthoringSceneSection(viewModel, input.scene)
@@ -1016,6 +1510,13 @@ export function buildEditorPublishReadinessViewModel(input: {
     viewModel,
     input.scene,
     input.colliderMetadata ?? {},
+  )
+  addStyleBakeProductsSection(
+    viewModel,
+    input.scene,
+    input.runtimeAssetManifest,
+    input.runtimeScene,
+    input.styleBakeMetadata ?? {},
   )
   addSpawnSection(viewModel, input.scene, input.runtimeScene)
   addTerrainSection(

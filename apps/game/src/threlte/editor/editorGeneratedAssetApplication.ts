@@ -12,6 +12,7 @@ interface GeneratedAssetFitData {
   sourceVisualBounds: GeneratedAssetVisualBounds
   baseScale: Vector3Tuple
   descriptor: string
+  originalAssetUrl?: string
 }
 
 interface GeneratedAssetReplacementPlan {
@@ -172,8 +173,14 @@ export async function applyGeneratedAssetToNode(
     sourceAssetUrl?: string
     descriptor: string
     logMessage?: string
+    generationPatch?: Record<string, unknown>
   },
 ) {
+  const originalAssetUrl =
+    node.generation?.originalAssetUrl ??
+    (options.sourceAssetUrl?.startsWith('/generated/')
+      ? options.sourceAssetUrl
+      : undefined)
   const sourceVisualBounds = await deps.getSceneNodeVisualBounds(
     node,
     options.sourceAssetUrl || '',
@@ -186,7 +193,6 @@ export async function applyGeneratedAssetToNode(
     generatedAssetUrl,
     baseScale,
   )
-
   deps.patchNode(node.id, {
     kind: 'asset',
     asset: { url: generatedAssetUrl },
@@ -196,19 +202,20 @@ export async function applyGeneratedAssetToNode(
     generation: {
       ...(node.generation ?? {}),
       descriptor: options.descriptor,
+      ...(originalAssetUrl ? { originalAssetUrl } : {}),
       sourceVisualSize: sourceVisualBounds.size,
       lastBakedAssetUrl: generatedAssetUrl,
       lastBakedAt: new Date().toISOString(),
+      ...(options.generationPatch ?? {}),
     },
   })
 
   deps.appendPipelineLog(
     options.logMessage ??
-      'Applied generated asset with preserved transform and collision',
+      'Applied generated asset with preserved transform',
     {
       nodeId: node.id,
       assetUrl: generatedAssetUrl,
-      collisionPreserved: Boolean(node.collision),
       transform: deps.getNodeTransformSnapshot(node),
     },
   )
@@ -240,6 +247,11 @@ export async function prepareGeneratedAssetReplacementPlan(
           ),
           baseScale: [...node.scale] as Vector3Tuple,
           descriptor: deps.getDefaultStyleDescriptor(node),
+          originalAssetUrl:
+            node.generation?.originalAssetUrl ??
+            (targetAssetUrl.startsWith('/generated/')
+              ? targetAssetUrl
+              : undefined),
         }
       }),
     )
@@ -280,6 +292,7 @@ export async function applyGeneratedAssetReplacementPlan(
 
       return {
         nodeId,
+        node: plan.editorNodes.find(candidate => candidate.id === nodeId),
         patch: {
           kind: 'asset' as const,
           asset: { url: generatedAssetUrl },
@@ -292,6 +305,9 @@ export async function applyGeneratedAssetReplacementPlan(
             descriptor:
               fitData?.descriptor ??
               deps.getDefaultStyleDescriptor(plan.selectedNode),
+            ...(fitData?.originalAssetUrl
+              ? { originalAssetUrl: fitData.originalAssetUrl }
+              : {}),
             sourceVisualSize: fitData?.sourceVisualBounds?.size,
             lastBakedAssetUrl: generatedAssetUrl,
             lastBakedAt: new Date().toISOString(),
@@ -309,14 +325,13 @@ export async function applyGeneratedAssetReplacementPlan(
   }
 
   deps.appendPipelineLog(
-    'Replaced node(s) with generated asset using preserved transform and collision',
+    'Replaced node(s) with generated asset using preserved transform',
     {
       generatedAssetUrl,
       targets: plan.targetNodeIds.map(id => {
         const node = plan.editorNodes.find(candidate => candidate.id === id)
         return {
           id,
-          collisionPreserved: Boolean(node?.collision),
           transform: deps.getNodeTransformSnapshot(node ?? null),
         }
       }),

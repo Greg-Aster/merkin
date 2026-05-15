@@ -1,6 +1,9 @@
 <script lang="ts">
 import type { CollisionChannel, CollisionIntent } from '../engine/types'
 import type {
+  EditorCollisionLodSourceTier,
+  EditorCollisionMode,
+  EditorCollisionQuality,
   EditorMaterialData,
   EditorSceneNode,
   EditorSceneSettings,
@@ -63,7 +66,14 @@ export let onPrimitiveGeometryChange: (value: string) => void = () => {}
 export let onPrimitiveArgChange: (index: number, value: string) => void =
   () => {}
 export let onCollisionEnabledChange: (value: boolean) => void = () => {}
+export let onCollisionModeChange: (value: EditorCollisionMode) => void =
+  () => {}
 export let onCollisionShapeChange: (value: any) => void = () => {}
+export let onCollisionQualityChange: (value: EditorCollisionQuality) => void =
+  () => {}
+export let onCollisionLodSourceTierChange: (
+  value: EditorCollisionLodSourceTier,
+) => void = () => {}
 export let onCollisionIntentChange: (value: CollisionIntent) => void = () => {}
 export let onCollisionChannelChange: (value: CollisionChannel) => void =
   () => {}
@@ -72,19 +82,17 @@ export let onPhysicsNumericChange: (field: any, value: string) => void =
   () => {}
 export let onPhysicsBooleanChange: (field: any, value: boolean) => void =
   () => {}
-export let onCollisionSizeChange: (index: number, value: string) => void =
-  () => {}
 export let onCollisionNumericChange: (field: any, value: string) => void =
   () => {}
 export let onCollisionBooleanChange: (field: any, value: boolean) => void =
   () => {}
-export let onRecalculateCollision: () => void = () => {}
 export let onSetCollisionVisualOnly: () => void = () => {}
 export let onSetCollisionBlocker: () => void = () => {}
 export let onSetCollisionWalkable: () => void = () => {}
 export let onSetCollisionTrigger: () => void = () => {}
 export let onSetCollisionDetail: () => void = () => {}
 export let onBakeMeshCollider: () => void = () => {}
+export let onForceRegenerateCollision: () => void = () => {}
 export let onMaterialColorChange: (field: any, value: string) => void = () => {}
 export let onMaterialNumericChange: (field: any, value: string) => void =
   () => {}

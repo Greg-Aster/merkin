@@ -2,7 +2,9 @@ import type { AssetLocalTransformMetadata } from './assetLocalTransform'
 import type { RuntimePrefabType } from './runtimePrefabCatalog'
 import type {
   CollisionChannel,
+  CollisionGenerationQuality,
   CollisionIntent,
+  CollisionPolicyMode,
   LevelDefinition,
   PrimitiveGeometryKind,
   RenderCullingPolicy,
@@ -124,23 +126,72 @@ export interface EditorNodePhysicsData {
   lockTranslations?: boolean
 }
 
-export interface EditorNodeCollisionData {
-  shape: 'cuboid' | 'cylinder' | 'trimesh'
+export type EditorCollisionMode = CollisionPolicyMode
+export type EditorCollisionQuality = CollisionGenerationQuality
+export type EditorCollisionLodSourceTier = 'source' | 'high' | 'medium' | 'low'
+export type EditorCollisionGenerationStatus =
+  | 'ready'
+  | 'dirty'
+  | 'generating'
+  | 'failed'
+
+export interface EditorNodeCollisionPolicy {
+  mode?: EditorCollisionMode
   intent?: CollisionIntent
   channel?: CollisionChannel
-  enabled?: boolean
-  size?: [number, number, number]
-  colliderUrl?: string
-  colliderMetadataUrl?: string
-  assetLocalTransform?: AssetLocalTransformMetadata | null
-  sourceAssetUrl?: string
+  quality?: EditorCollisionQuality
+  lodTier?: EditorCollisionLodSourceTier
+  maxTriangles?: number
+  walkableSlopeLimitDeg?: number
   friction?: number
   restitution?: number
   sensor?: boolean
-  triangleBudget?: number
+  generationStatus?: EditorCollisionGenerationStatus
+  generationLastError?: string
+}
+
+export interface EditorNodeCollisionProductData {
+  /**
+   * Generated collider artifact metadata. Save validation allows these fields
+   * only for mesh-derived products; manual primitive collider geometry remains
+   * policy-derived.
+   */
+  shape?: 'cuboid' | 'cylinder' | 'trimesh'
+  colliderUrl?: string
+  colliderMetadataUrl?: string
+  colliderCacheKey?: string
+  assetLocalTransform?: AssetLocalTransformMetadata | null
+  sourceAssetUrl?: string
+  colliderSourceAssetUrl?: string
   triangleCount?: number
   vertexCount?: number
 }
+
+export interface EditorNodeLegacyCollisionCompatibility {
+  /**
+   * Legacy source inputs rejected by editor scene validation. Retained only so
+   * pre-migration editor/runtime adapters compile until the compatibility
+   * surface is deleted after scene data and controllers stop emitting it.
+   */
+  /** @deprecated Rejected legacy source input; author collision policy instead. */
+  enabled?: boolean
+  /** @deprecated Rejected legacy source input; use lodTier. */
+  lodSourceTier?: EditorCollisionLodSourceTier
+  /** @deprecated Rejected legacy source input; manual primitive geometry is policy-derived. */
+  size?: [number, number, number]
+  /** @deprecated Rejected legacy source input; see shape removal gate. */
+  sourceAssetFingerprint?: string
+  /** @deprecated Rejected legacy source input; see shape removal gate. */
+  assetLocalTransformFingerprint?: string
+  /** @deprecated Rejected legacy source input; see shape removal gate. */
+  lockToObject?: boolean
+  /** @deprecated Rejected legacy source input; see shape removal gate. */
+  triangleBudget?: number
+}
+
+export type EditorNodeCollisionData = EditorNodeCollisionPolicy &
+  EditorNodeCollisionProductData &
+  EditorNodeLegacyCollisionCompatibility
 
 export interface EditorGameplayData {
   type:
@@ -187,6 +238,35 @@ export interface EditorGenerationData {
   descriptor?: string
   family?: string
   styleBatch?: 'include' | 'exclude'
+  styleBakeProduct?: {
+    schemaVersion?: number
+    required?: boolean
+    sourceAssetUrl?: string
+    sourceAssetFingerprint?: Record<string, unknown>
+    levelId?: string
+    nodeId?: string
+    sourceNodeTransform?: Record<string, unknown>
+    sourceLocalBounds?: Record<string, unknown> | null
+    mode?: string
+    generatedAssetUrl?: string
+    generatedMetadataUrl?: string
+    generatedAt?: string
+    generatorName?: string
+    generatorVersion?: string
+    state?: {
+      status?: 'ready' | 'stale' | 'dirty' | 'missing' | 'failed'
+      reason?: string
+      errors?: string[]
+    }
+    assetUrl?: string
+    metadataUrl?: string
+    cacheKey?: string
+    settingsFingerprint?: string | Record<string, unknown>
+    status?: 'clean' | 'dirty' | 'missing' | 'failed'
+    source?: Record<string, unknown>
+    settings?: Record<string, unknown>
+    generator?: Record<string, unknown>
+  }
   originalAssetUrl?: string
   sourceVisualSize?: [number, number, number]
   lastBakedAssetUrl?: string
@@ -219,6 +299,7 @@ export interface SharedLevelSpawnSettings {
   spawn?: {
     position?: [number, number, number]
     rotation?: [number, number, number]
+    supportActorId?: string
   }
 }
 
@@ -256,6 +337,8 @@ export interface SharedLevelStyleSettings {
       density?: number
       floor?: number
       ceiling?: number
+      falloff?: number
+      colorInfluence?: number
       mistOpacity?: number
       mistLayers?: number
       mistHeight?: number
@@ -451,10 +534,7 @@ export type TerrainRuntimeComponentSource =
   | 'editor-manifest'
   | 'generated-heightmap'
 export type LevelCollisionBudget = 'mobile' | 'balanced' | 'desktop'
-export type LevelGroundMode =
-  | 'terrain-chunks'
-  | 'hybrid'
-  | 'scene-authored'
+export type LevelGroundMode = 'terrain-chunks' | 'hybrid' | 'scene-authored'
 export type TerrainRuntimeMode =
   | 'scene-authored'
   | 'heightfield-terrain'
@@ -585,6 +665,16 @@ export interface SharedLevelCollisionSettings {
     }
     workflow?: LevelCollisionWorkflowSettings
     roles?: LevelCollisionRoleSettings
+    walkability?: {
+      maxSlopeDegrees?: number
+      supportXzPadding?: number
+      supportMaxDrop?: number
+      supportMaxPenetration?: number
+      samples?: Array<{
+        id?: string
+        position?: [number, number, number]
+      }>
+    }
     defaults?: {
       primitiveCollisionByDefault?: boolean
       defaultFriction?: number
@@ -635,6 +725,11 @@ export interface SharedLevelPresetSettings {
 
 export interface SharedLevelSkyboxSettings {
   skyboxPreset?: 'observatory' | 'classic'
+  skybox?: {
+    backgroundIntensity?: number
+    backgroundBlurriness?: number
+    fogOpacity?: number
+  }
 }
 
 export interface SharedLevelRuntimeAssetSettings {

@@ -7,7 +7,6 @@ import {
 import {
   applyCollisionLifecycleToPatch,
   materializeEditorNodeCollision,
-  preserveCollisionForVisualReplacement,
 } from '../src/threlte/editor/editorCollisionLifecycle.ts'
 import { applyGeneratedAssetToNode } from '../src/threlte/editor/editorGeneratedAssetApplication.ts'
 import { normalizeLevelSceneSettings } from '../src/threlte/editor/editorLevelSetup.ts'
@@ -40,11 +39,12 @@ test('primitive blockout creation authors explicit fixed collision by default', 
   const materialized = materializeEditorNodeCollision(createPrimitiveNode())
 
   assert.equal(materialized.physics?.bodyType, 'fixed')
-  assert.equal(materialized.collision?.shape, 'cuboid')
+  assert.equal(materialized.collision?.mode, 'auto')
+  assert.equal(materialized.collision?.quality, 'primitive')
   assert.equal(materialized.collision?.intent, 'blocker')
   assert.equal(materialized.collision?.channel, 'worldStatic')
-  assert.equal(materialized.collision?.enabled, true)
-  assert.deepEqual(materialized.collision?.size, [4, 2, 0.5])
+  assert.equal(materialized.collision?.shape, undefined)
+  assert.equal(materialized.collision?.size, undefined)
 })
 
 test('primitive-only scene load materializes explicit collision when enabled', () => {
@@ -58,7 +58,7 @@ test('primitive-only scene load materializes explicit collision when enabled', (
     settings.level?.collision?.defaults?.primitiveCollisionByDefault,
     true,
   )
-  assert.equal(materialized.collision?.enabled, true)
+  assert.equal(materialized.collision?.mode, 'auto')
   assert.equal(resolveNodeCollision(materialized, settings)?.intent, 'blocker')
 })
 
@@ -116,7 +116,7 @@ test('visual-only role wins over primitive default collision', () => {
   assert.equal(resolveNodeCollision(materialized, settings), null)
 })
 
-test('collision lifecycle preserves authored collision when visual asset changes', () => {
+test('collision lifecycle keeps collision policy when visual asset changes', () => {
   const currentNode: EditorSceneDocument['nodes'][number] = {
     id: 'variant-asset',
     name: 'Variant Asset',
@@ -150,10 +150,15 @@ test('collision lifecycle preserves authored collision when visual asset changes
     },
   })
 
-  assert.equal(patch.collision, undefined)
+  assert.equal(patch.collision?.mode, 'auto')
+  assert.equal(patch.collision?.quality, 'primitive')
+  assert.equal(patch.collision?.intent, 'blocker')
+  assert.equal(patch.collision?.channel, 'worldStatic')
+  assert.equal(patch.collision?.size, undefined)
+  assert.equal(patch.generation?.originalCollision, undefined)
 })
 
-test('collision lifecycle does not rewrite authored collision on scale-only edits', () => {
+test('collision lifecycle strips legacy original collision snapshots', () => {
   const currentNode: EditorSceneDocument['nodes'][number] = {
     id: 'scaled-asset',
     name: 'Scaled Asset',
@@ -171,6 +176,119 @@ test('collision lifecycle does not rewrite authored collision on scale-only edit
       channel: 'worldStatic',
       enabled: true,
       size: [10, 4, 10],
+    },
+    generation: {
+      originalCollision: {
+        shape: 'cuboid',
+        intent: 'blocker',
+        channel: 'worldStatic',
+        enabled: true,
+        size: [10, 4, 10],
+      },
+    },
+  }
+
+  const patch = applyCollisionLifecycleToPatch(currentNode, {
+    scale: [4, 1, 2],
+  })
+
+  assert.equal(patch.collision, undefined)
+  assert.equal(patch.generation?.originalCollision, undefined)
+  assert.equal(patch.collision?.lockToObject, undefined)
+})
+
+test('collision lifecycle strips legacy original collision from incoming patches', () => {
+  const currentNode = createPrimitiveNode({
+    id: 'incoming-legacy-generation',
+    collision: {
+      mode: 'auto',
+      quality: 'primitive',
+      intent: 'blocker',
+      channel: 'worldStatic',
+    },
+  })
+
+  const patch = applyCollisionLifecycleToPatch(currentNode, {
+    generation: {
+      descriptor: 'updated visual descriptor',
+      originalCollision: {
+        shape: 'cuboid',
+        intent: 'blocker',
+        channel: 'worldStatic',
+        enabled: true,
+        size: [4, 2, 0.5],
+      },
+    },
+  })
+
+  assert.equal(patch.generation?.descriptor, 'updated visual descriptor')
+  assert.equal(patch.generation?.originalCollision, undefined)
+})
+
+test('collision lifecycle converts primitive resize to collision policy', () => {
+  const currentNode: EditorSceneDocument['nodes'][number] = {
+    id: 'resized-blockout',
+    name: 'Resized Blockout',
+    kind: 'primitive',
+    position: [0, 0, 0],
+    rotation: [0, 0, 0],
+    scale: [1, 1, 1],
+    visible: true,
+    primitive: {
+      geometry: 'box',
+      args: [4, 3, 0.4],
+    },
+    collision: {
+      shape: 'cuboid',
+      intent: 'blocker',
+      channel: 'worldStatic',
+      enabled: true,
+      size: [4, 3, 0.4],
+    },
+    generation: {
+      originalCollision: {
+        shape: 'cuboid',
+        intent: 'blocker',
+        channel: 'worldStatic',
+        enabled: true,
+        size: [4, 3, 0.4],
+      },
+    },
+  }
+
+  const patch = applyCollisionLifecycleToPatch(currentNode, {
+    primitive: {
+      geometry: 'box',
+      args: [8, 2, 0.5],
+    },
+  })
+
+  assert.equal(patch.collision?.mode, 'auto')
+  assert.equal(patch.collision?.quality, 'primitive')
+  assert.equal(patch.collision?.intent, 'blocker')
+  assert.equal(patch.collision?.size, undefined)
+  assert.equal(patch.generation?.originalCollision, undefined)
+})
+
+test('collision lifecycle leaves simple collision size alone when lock is disabled', () => {
+  const currentNode: EditorSceneDocument['nodes'][number] = {
+    id: 'unlocked-scaled-asset',
+    name: 'Unlocked Scaled Asset',
+    kind: 'asset',
+    position: [0, 0, 0],
+    rotation: [0, 0, 0],
+    scale: [2, 2, 2],
+    visible: true,
+    asset: {
+      url: '/generated/style-lab/asset.glb',
+    },
+    collision: {
+      shape: 'cuboid',
+      intent: 'blocker',
+      channel: 'worldStatic',
+      enabled: true,
+      size: [10, 4, 10],
+      lockToObject: false,
     },
   }
 
@@ -204,7 +322,7 @@ test('mesh assets without authored collision resolve no collider and report miss
   assert.match(status.detail, /no authored runtime collision/)
 })
 
-test('primitive visual replacement keeps authored cuboid blocker collision', () => {
+test('primitive visual replacement keeps authored blocker policy', () => {
   const currentNode: EditorSceneDocument['nodes'][number] = {
     id: 'blockout-wall',
     name: 'Blockout Wall',
@@ -233,7 +351,35 @@ test('primitive visual replacement keeps authored cuboid blocker collision', () 
   })
   const nextNode = { ...currentNode, ...patch }
 
-  assert.deepEqual(nextNode.collision, currentNode.collision)
+  assert.equal(nextNode.collision?.mode, 'auto')
+  assert.equal(nextNode.collision?.quality, 'primitive')
+  assert.equal(nextNode.collision?.intent, 'blocker')
+  assert.equal(nextNode.collision?.size, undefined)
+})
+
+test('primitive visual replacement materializes implicit blockout collision', () => {
+  const currentNode = createPrimitiveNode({
+    id: 'implicit-blockout-wall',
+    name: 'Implicit Blockout Wall',
+    primitive: {
+      geometry: 'box',
+      args: [5, 2, 0.5],
+    },
+  })
+
+  const patch = applyCollisionLifecycleToPatch(currentNode, {
+    kind: 'asset',
+    asset: { url: '/generated/runtime-game-assets/blockout-wall-final.glb' },
+    primitive: undefined,
+  })
+  const nextNode = { ...currentNode, ...patch }
+
+  assert.equal(nextNode.collision?.mode, 'auto')
+  assert.equal(nextNode.collision?.quality, 'primitive')
+  assert.equal(nextNode.collision?.intent, 'blocker')
+  assert.equal(nextNode.collision?.channel, 'worldStatic')
+  assert.equal(nextNode.collision?.size, undefined)
+  assert.equal(nextNode.generation?.originalCollision, undefined)
 })
 
 test('primitive visual replacement keeps walkable collision intent', () => {
@@ -266,7 +412,8 @@ test('primitive visual replacement keeps walkable collision intent', () => {
   const nextNode = { ...currentNode, ...patch }
 
   assert.equal(nextNode.collision?.intent, 'walkable')
-  assert.deepEqual(nextNode.collision, currentNode.collision)
+  assert.equal(nextNode.collision?.quality, 'primitive')
+  assert.equal(nextNode.collision?.size, undefined)
 })
 
 test('visual replacement keeps disabled collision disabled', () => {
@@ -293,8 +440,9 @@ test('visual replacement keeps disabled collision disabled', () => {
   })
   const nextNode = { ...currentNode, ...patch }
 
-  assert.equal(nextNode.collision?.enabled, false)
-  assert.deepEqual(nextNode.collision, currentNode.collision)
+  assert.equal(nextNode.collision?.mode, 'none')
+  assert.equal(nextNode.collision?.enabled, undefined)
+  assert.equal(nextNode.collision?.size, undefined)
 })
 
 test('visual replacement keeps visual-only role without adding collision', () => {
@@ -331,36 +479,7 @@ test('visual replacement keeps visual-only role without adding collision', () =>
   assert.equal(resolveNodeCollision(nextNode, settings), null)
 })
 
-test('primitive mesh conversion preserves collision world size when scale is baked', () => {
-  const currentNode: EditorSceneDocument['nodes'][number] = {
-    id: 'scaled-blockout',
-    name: 'Scaled Blockout',
-    kind: 'primitive',
-    position: [0, 0, 0],
-    rotation: [0, 0, 0],
-    scale: [2, 3, 4],
-    visible: true,
-    primitive: {
-      geometry: 'box',
-      args: [1, 1, 1],
-    },
-    collision: {
-      shape: 'cuboid',
-      intent: 'blocker',
-      channel: 'worldStatic',
-      enabled: true,
-    },
-  }
-
-  const collision = preserveCollisionForVisualReplacement(currentNode, {
-    visualScaleBakedIntoMesh: true,
-  })
-
-  assert.deepEqual(collision?.size, [2, 3, 4])
-  assert.equal(collision?.shape, 'cuboid')
-})
-
-test('generated AI replacement keeps authored collision through lifecycle', async () => {
+test('generated AI replacement leaves collision regeneration to lifecycle', async () => {
   const currentNode: EditorSceneDocument['nodes'][number] = {
     id: 'ai-target',
     name: 'AI Target',
@@ -409,9 +528,12 @@ test('generated AI replacement keeps authored collision through lifecycle', asyn
 
   assert.ok(capturedPatch)
   assert.equal(capturedPatch.collision, undefined)
+  assert.equal(capturedPatch.generation?.originalCollision, undefined)
   const patch = applyCollisionLifecycleToPatch(currentNode, capturedPatch)
   const nextNode = { ...currentNode, ...patch }
-  assert.deepEqual(nextNode.collision, currentNode.collision)
+  assert.equal(nextNode.collision?.mode, 'auto')
+  assert.equal(nextNode.collision?.quality, 'primitive')
+  assert.equal(nextNode.collision?.size, undefined)
 })
 
 test('collision review rows classify missing, visual-only, and collision-only actors', () => {

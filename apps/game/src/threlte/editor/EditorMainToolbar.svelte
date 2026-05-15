@@ -115,7 +115,6 @@ function runBakeCommand(command: EditorCommand) {
     </label>
   </div>
 
-  {#if viewportMode === 'edit'}
   <div class="toolbar-group mode-group">
     <label>
       Target
@@ -253,7 +252,6 @@ function runBakeCommand(command: EditorCommand) {
       {/if}
     </div>
   </details>
-  {/if}
 </div>
 
 <style>

@@ -246,7 +246,7 @@ $: terrainPipeline = describeEditorTerrainPipeline({
       <div class="editor-status-card">
         <div class="editor-status-title">Budget Issues</div>
         {#each budgetIssues as metric (metric.label)}
-          <div class="save-message error-message">{metric.label}: {metric.value} / {metric.budget ?? 'unknown'}</div>
+          <div class="save-message">{metric.label}: {metric.value} / {metric.budget ?? 'unknown'}</div>
         {/each}
       </div>
     {/if}

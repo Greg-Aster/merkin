@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:36:52.629Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "sci-fi-room",
+  "sourceActorId": "sci-fi-story-junk",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-junk.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-junk.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-junk.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+  "triangleCount": 604,
+  "vertexCount": 1812,
+  "bounds": {
+    "min": [
+      -0.36000001430511475,
+      -1.4901161415892261e-9,
+      -0.4688721001148224
+    ],
+    "max": [
+      0.4449999928474426,
+      0.21707090735435486,
+      0.47316426038742065
+    ],
+    "size": [
+      0.8050000071525574,
+      0.217070908844471,
+      0.942036360502243
+    ],
+    "center": [
+      0.04249998927116394,
+      0.10853545293211936,
+      0.0021460801362991333
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.36000001430511475,
+      -1.4901161415892261e-9,
+      -0.4688721001148224
+    ],
+    "max": [
+      0.4449999928474426,
+      0.21707090735435486,
+      0.47316426038742065
+    ],
+    "size": [
+      0.8050000071525574,
+      0.217070908844471,
+      0.942036360502243
+    ],
+    "center": [
+      0.04249998927116394,
+      0.10853545293211936,
+      0.0021460801362991333
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.36000001430511475,
+      -1.4901161415892261e-9,
+      -0.4688721001148224
+    ],
+    "max": [
+      0.4449999928474426,
+      0.21707090735435486,
+      0.47316426038742065
+    ],
+    "size": [
+      0.8050000071525574,
+      0.217070908844471,
+      0.942036360502243
+    ],
+    "center": [
+      0.04249998927116394,
+      0.10853545293211936,
+      0.0021460801362991333
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+    "sourceNodeName": "Story Marker Â· Junk Memory",
+    "visualLocalBounds": {
+      "min": [
+        -0.36000001430511475,
+        -1.4901161415892261e-9,
+        -0.4688721001148224
+      ],
+      "max": [
+        0.4449999928474426,
+        0.21707090735435486,
+        0.47316426038742065
+      ],
+      "size": [
+        0.8050000071525574,
+        0.217070908844471,
+        0.942036360502243
+      ],
+      "center": [
+        0.04249998927116394,
+        0.10853545293211936,
+        0.0021460801362991333
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.36000001430511475,
+        -1.4901161415892261e-9,
+        -0.4688721001148224
+      ],
+      "max": [
+        0.4449999928474426,
+        0.21707090735435486,
+        0.47316426038742065
+      ],
+      "size": [
+        0.8050000071525574,
+        0.217070908844471,
+        0.942036360502243
+      ],
+      "center": [
+        0.04249998927116394,
+        0.10853545293211936,
+        0.0021460801362991333
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "sci-fi-story-junk",
+    "sourceActorName": "Story Marker Â· Junk Memory",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "sci-fi-room",
+      "nodeId": "sci-fi-story-junk",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+      "intent": "trigger",
+      "channel": "trigger",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:36:52.629Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "trigger",
+    "channel": "trigger",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "sci-fi-story-junk",
+    "mode": "trigger",
+    "productId": "sci-fi-story-junk:trigger:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -0.36000001430511475,
+        -1.4901161415892261e-9,
+        -0.4688721001148224
+      ],
+      "max": [
+        0.4449999928474426,
+        0.21707090735435486,
+        0.47316426038742065
+      ],
+      "size": [
+        0.8050000071525574,
+        0.217070908844471,
+        0.942036360502243
+      ],
+      "center": [
+        0.04249998927116394,
+        0.10853545293211936,
+        0.0021460801362991333
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-junk.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-junk.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+    "generatedAt": "2026-05-14T21:36:52.629Z",
+    "triangleCount": 604,
+    "vertexCount": 1812,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 604,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

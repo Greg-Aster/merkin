@@ -5,6 +5,7 @@ import {
   type QualitySettings,
   optimizationManager,
 } from '../OptimizationManager'
+import { RUNTIME_TARGET_FPS } from '../utils/runtimeFrameRatePolicy'
 
 export interface MemoryInfo {
   geometries: number
@@ -39,8 +40,10 @@ type OptimizationLevelChangedEvent = CustomEvent<{
   qualitySettings: QualitySettings
 }>
 
-export const fpsStore: Writable<number> = writable(60)
-export const frameTimeStore: Writable<number> = writable(16.67) // 60fps = 16.67ms
+export const fpsStore: Writable<number> = writable(RUNTIME_TARGET_FPS)
+export const frameTimeStore: Writable<number> = writable(
+  1000 / RUNTIME_TARGET_FPS,
+)
 export const memoryStore: Writable<MemoryInfo> = writable({
   geometries: 0,
   textures: 0,

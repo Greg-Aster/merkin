@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:36:39.636Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "miranda",
+  "sourceActorId": "miranda-engine-note",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-engine-note.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/miranda/miranda-engine-note.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-engine-note.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+  "triangleCount": 604,
+  "vertexCount": 1812,
+  "bounds": {
+    "min": [
+      -0.36000001430511475,
+      -1.4901161415892261e-9,
+      -0.4688721001148224
+    ],
+    "max": [
+      0.4449999928474426,
+      0.21707090735435486,
+      0.47316426038742065
+    ],
+    "size": [
+      0.8050000071525574,
+      0.217070908844471,
+      0.942036360502243
+    ],
+    "center": [
+      0.04249998927116394,
+      0.10853545293211936,
+      0.0021460801362991333
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.36000001430511475,
+      -1.4901161415892261e-9,
+      -0.4688721001148224
+    ],
+    "max": [
+      0.4449999928474426,
+      0.21707090735435486,
+      0.47316426038742065
+    ],
+    "size": [
+      0.8050000071525574,
+      0.217070908844471,
+      0.942036360502243
+    ],
+    "center": [
+      0.04249998927116394,
+      0.10853545293211936,
+      0.0021460801362991333
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.36000001430511475,
+      -1.4901161415892261e-9,
+      -0.4688721001148224
+    ],
+    "max": [
+      0.4449999928474426,
+      0.21707090735435486,
+      0.47316426038742065
+    ],
+    "size": [
+      0.8050000071525574,
+      0.217070908844471,
+      0.942036360502243
+    ],
+    "center": [
+      0.04249998927116394,
+      0.10853545293211936,
+      0.0021460801362991333
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+    "sourceNodeName": "Story Marker Â· Engineering Memo",
+    "visualLocalBounds": {
+      "min": [
+        -0.36000001430511475,
+        -1.4901161415892261e-9,
+        -0.4688721001148224
+      ],
+      "max": [
+        0.4449999928474426,
+        0.21707090735435486,
+        0.47316426038742065
+      ],
+      "size": [
+        0.8050000071525574,
+        0.217070908844471,
+        0.942036360502243
+      ],
+      "center": [
+        0.04249998927116394,
+        0.10853545293211936,
+        0.0021460801362991333
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.36000001430511475,
+        -1.4901161415892261e-9,
+        -0.4688721001148224
+      ],
+      "max": [
+        0.4449999928474426,
+        0.21707090735435486,
+        0.47316426038742065
+      ],
+      "size": [
+        0.8050000071525574,
+        0.217070908844471,
+        0.942036360502243
+      ],
+      "center": [
+        0.04249998927116394,
+        0.10853545293211936,
+        0.0021460801362991333
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "miranda-engine-note",
+    "sourceActorName": "Story Marker Â· Engineering Memo",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "miranda",
+      "nodeId": "miranda-engine-note",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+      "intent": "trigger",
+      "channel": "trigger",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:36:39.636Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "trigger",
+    "channel": "trigger",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "miranda-engine-note",
+    "mode": "trigger",
+    "productId": "miranda-engine-note:trigger:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -0.36000001430511475,
+        -1.4901161415892261e-9,
+        -0.4688721001148224
+      ],
+      "max": [
+        0.4449999928474426,
+        0.21707090735435486,
+        0.47316426038742065
+      ],
+      "size": [
+        0.8050000071525574,
+        0.217070908844471,
+        0.942036360502243
+      ],
+      "center": [
+        0.04249998927116394,
+        0.10853545293211936,
+        0.0021460801362991333
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-engine-note.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-engine-note.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+    "generatedAt": "2026-05-14T21:36:39.636Z",
+    "triangleCount": 604,
+    "vertexCount": 1812,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 604,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

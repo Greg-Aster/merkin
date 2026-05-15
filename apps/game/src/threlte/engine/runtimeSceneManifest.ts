@@ -1,6 +1,11 @@
+import { getGeneratedCollisionProductMountError } from './generatedCollisionProductRuntime'
 import { getRuntimeGroundContract } from './groundContract'
 import type { SceneDocument } from './sceneDocumentTypes'
-import type { LevelBuildReport, LevelDefinition } from './types'
+import type {
+  GeneratedCollisionProduct,
+  LevelBuildReport,
+  LevelDefinition,
+} from './types'
 
 export const RUNTIME_SCENE_MANIFEST_SCHEMA_VERSION = 1
 export const RUNTIME_SCENE_MANIFEST_BASE_URL =
@@ -23,6 +28,7 @@ export interface RuntimeSceneManifest {
     requiredRenderActorIds: string[]
     requiredAssetUrls: string[]
     runtimeAssetUrls: string[]
+    generatedCollisionProducts?: GeneratedCollisionProduct[]
     assetTierCap?: 'low' | 'medium' | 'high'
     terrainManifestUrl?: string
     ground?: Record<string, unknown>
@@ -136,6 +142,11 @@ export function createRuntimeSceneManifest(input: {
   generatedAt?: string
   worldPartitionUrl?: string
 }): RuntimeSceneManifest {
+  const generatedCollisionProducts = input.levelDefinition.actors
+    .map(actor => actor.physics?.collision.generatedProduct)
+    .filter(
+      (product): product is GeneratedCollisionProduct => Boolean(product),
+    )
   return {
     schemaVersion: RUNTIME_SCENE_MANIFEST_SCHEMA_VERSION,
     generatedAt: input.generatedAt ?? new Date().toISOString(),
@@ -155,6 +166,7 @@ export function createRuntimeSceneManifest(input: {
       ),
       requiredAssetUrls: getBuildReportRequiredAssetUrls(input.buildReport),
       runtimeAssetUrls: getBuildReportRuntimeAssetUrls(input.buildReport),
+      generatedCollisionProducts,
       assetTierCap: getRuntimeAssetTierCap(input.levelDefinition),
       terrainManifestUrl: getTerrainManifestUrl(input.levelDefinition),
       ground: getRuntimeGroundContract(input.levelDefinition),
@@ -186,6 +198,48 @@ function isFiniteVec3(value: unknown): value is [number, number, number] {
     value.length === 3 &&
     value.every(component => Number.isFinite(component))
   )
+}
+
+function isGeneratedCollisionProduct(value: unknown) {
+  const product = value as GeneratedCollisionProduct
+  const hasFingerprint = (fingerprint: unknown) =>
+    typeof fingerprint === 'string' ||
+    (Boolean(fingerprint) &&
+      typeof (fingerprint as { value?: unknown }).value === 'string')
+  return (
+    Boolean(product) &&
+    typeof product.actorId === 'string' &&
+    hasFingerprint(product.sourceMeshFingerprint) &&
+    hasFingerprint(product.transformFingerprint) &&
+    hasFingerprint(product.policyFingerprint) &&
+    typeof product.shape === 'string' &&
+    typeof product.generatorVersion === 'string' &&
+    isFiniteVec3(product.localBounds?.min) &&
+    isFiniteVec3(product.localBounds?.max) &&
+    isFiniteVec3(product.localBounds?.size) &&
+    isFiniteVec3(product.localBounds?.center)
+  )
+}
+
+const artifactBackedGeneratedProductShapes = new Set(['convexHull', 'trimesh'])
+const meshDerivedCollisionQualities = new Set([
+  'convexHull',
+  'simplifiedMesh',
+  'trimesh',
+])
+
+function getExpectedGeneratedProductShape(
+  quality: unknown,
+): GeneratedCollisionProduct['shape'] | null {
+  if (quality === 'convexHull') return 'convexHull'
+  if (quality === 'simplifiedMesh' || quality === 'trimesh') return 'trimesh'
+  return null
+}
+
+function hasArtifactBackedGeneratedProductShape(
+  product: GeneratedCollisionProduct,
+) {
+  return artifactBackedGeneratedProductShapes.has(product.shape)
 }
 
 function sameStringSet(left: string[], right: string[]) {
@@ -272,12 +326,78 @@ export function validateRuntimeSceneManifest(
   if (!runtime.ground) {
     errors.push('Runtime ground contract is missing.')
   }
+  if (
+    runtime.generatedCollisionProducts !== undefined &&
+    !Array.isArray(runtime.generatedCollisionProducts)
+  ) {
+    errors.push('Runtime generatedCollisionProducts must be an array.')
+  }
+  for (const [index, product] of (
+    runtime.generatedCollisionProducts ?? []
+  ).entries()) {
+    if (!isGeneratedCollisionProduct(product)) {
+      errors.push(
+        `Runtime generated collision product ${index} is missing required fingerprints, bounds, or generator metadata.`,
+      )
+      continue
+    }
+    if (
+      hasArtifactBackedGeneratedProductShape(product) &&
+      typeof product.artifactUrl !== 'string'
+    ) {
+      errors.push(
+        `Runtime generated collision product ${index} is artifact-backed but has no artifactUrl.`,
+      )
+    }
+    if (
+      hasArtifactBackedGeneratedProductShape(product) &&
+      typeof product.metadataUrl !== 'string'
+    ) {
+      errors.push(
+        `Runtime generated collision product ${index} is artifact-backed but has no metadataUrl.`,
+      )
+    }
+  }
 
   for (const actor of manifest.levelDefinition.actors) {
     for (const field of forbiddenRuntimeActorFields) {
       if (Object.hasOwn(actor, field)) {
         errors.push(
           `Runtime actor "${actor.id}" contains forbidden field "${field}".`,
+        )
+      }
+    }
+    const collision = actor.physics?.collision
+    const generatedProduct = collision?.generatedProduct
+    if (collision) {
+      const mountError = getGeneratedCollisionProductMountError(
+        generatedProduct,
+        actor.id,
+      )
+      if (mountError) {
+        errors.push(
+          `Runtime actor "${actor.id}" collision generatedProduct is not mountable: ${mountError}`,
+        )
+      }
+    }
+    if (
+      generatedProduct &&
+      typeof collision?.quality === 'string' &&
+      meshDerivedCollisionQualities.has(collision.quality)
+    ) {
+      const expectedShape = getExpectedGeneratedProductShape(collision.quality)
+      if (expectedShape && generatedProduct.shape !== expectedShape) {
+        errors.push(
+          `Runtime actor "${actor.id}" generated collision product shape ${generatedProduct.shape} does not match ${collision?.quality} policy.`,
+        )
+      }
+      if (
+        expectedShape &&
+        artifactBackedGeneratedProductShapes.has(expectedShape) &&
+        typeof generatedProduct.artifactUrl !== 'string'
+      ) {
+        errors.push(
+          `Runtime actor "${actor.id}" mesh-derived generated collision product has no artifactUrl.`,
         )
       }
     }

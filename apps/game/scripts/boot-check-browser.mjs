@@ -30,9 +30,10 @@ function createEditorSmokeCheck(name, url) {
       })
       await page
         .locator('.editor-tab-rail')
-        .getByRole('button', { name: 'Save / Publish', exact: true })
+        .locator('button')
+        .filter({ hasText: /(?:Save \/ Publish|Build)/ })
         .click()
-      await page.getByText('Publish Readiness').waitFor({
+      await page.getByText('Publish Readiness', { exact: true }).waitFor({
         state: 'visible',
         timeout: 10000,
       })
@@ -112,83 +113,92 @@ const checks = [
   ...deployedLevelIds.map(createLevelSmokeCheck),
 ]
 
-const browser = await launchBrowser(browserName)
-
 const failures = []
 
 for (const check of checks) {
-  const page = await browser.newPage()
+  const browser = await launchBrowser(browserName)
+  let page = null
   let messages = []
   const consoleMessages = []
 
-  await page.addInitScript(() => {
-    window.localStorage.clear()
-    window.sessionStorage.clear()
-  })
+  try {
+    page = await browser.newPage()
+    await page.addInitScript(() => {
+      window.localStorage.clear()
+      window.sessionStorage.clear()
+    })
 
-  page.on('console', msg => {
-    const type = msg.type()
-    consoleMessages.push(`[${type}] ${msg.text()}`)
-    if (type === 'warning' || type === 'error') {
-      const text = msg.text()
-      if (shouldIgnoreConsoleMessage(text)) {
+    page.on('console', msg => {
+      const type = msg.type()
+      consoleMessages.push(`[${type}] ${msg.text()}`)
+      if (type === 'warning' || type === 'error') {
+        const text = msg.text()
+        if (shouldIgnoreConsoleMessage(text)) {
+          return
+        }
+        messages.push(`[${type}] ${text}`)
+      }
+    })
+
+    page.on('pageerror', error => {
+      messages.push(`[pageerror] ${error.message}`)
+    })
+
+    page.on('requestfailed', request => {
+      const url = request.url()
+      const errorText = request.failure()?.errorText || 'unknown error'
+      if (shouldIgnoreRequestFailure(url, errorText)) {
         return
       }
-      messages.push(`[${type}] ${text}`)
-    }
-  })
+      messages.push(`[requestfailed] ${request.method()} ${url} :: ${errorText}`)
+    })
 
-  page.on('pageerror', error => {
-    messages.push(`[pageerror] ${error.message}`)
-  })
+    async function runNavigation() {
+      try {
+        const response = await page.goto(check.url, {
+          waitUntil: 'domcontentloaded',
+          timeout: 30000,
+        })
 
-  page.on('requestfailed', request => {
-    const url = request.url()
-    const errorText = request.failure()?.errorText || 'unknown error'
-    if (shouldIgnoreRequestFailure(url, errorText)) {
-      return
-    }
-    messages.push(`[requestfailed] ${request.method()} ${url} :: ${errorText}`)
-  })
+        if (!response || !response.ok()) {
+          messages.push(
+            `[navigation] ${check.url} returned ${response?.status?.() ?? 'no response'}`,
+          )
+        }
 
-  async function runNavigation() {
-    try {
-      const response = await page.goto(check.url, {
-        waitUntil: 'domcontentloaded',
-        timeout: 30000,
-      })
-
-      if (!response || !response.ok()) {
+        await page.waitForTimeout(check.postLoadDelayMs)
+        if (check.interact) {
+          await check.interact(page, { consoleMessages })
+          await page.waitForTimeout(1000)
+        }
+      } catch (error) {
         messages.push(
-          `[navigation] ${check.url} returned ${response?.status?.() ?? 'no response'}`,
+          `[navigation-error] ${error instanceof Error ? error.message : String(error)}`,
         )
       }
-
-      await page.waitForTimeout(check.postLoadDelayMs)
-      if (check.interact) {
-        await check.interact(page, { consoleMessages })
-        await page.waitForTimeout(1000)
-      }
-    } catch (error) {
-      messages.push(
-        `[navigation-error] ${error instanceof Error ? error.message : String(error)}`,
-      )
     }
+
+    await runNavigation()
+
+    const hasTransientFailure = messages.some(message =>
+      isTransientConsoleMessage(message),
+    )
+
+    if (hasTransientFailure) {
+      messages = []
+      await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 })
+      await page.waitForTimeout(check.postLoadDelayMs)
+    }
+  } catch (error) {
+    messages.push(
+      `[check-error] ${error instanceof Error ? error.message : String(error)}`,
+    )
+  } finally {
+    if (page) {
+      await page.close().catch(() => {})
+    }
+    await browser.close().catch(() => {})
   }
-
-  await runNavigation()
-
-  const hasTransientFailure = messages.some(message =>
-    isTransientConsoleMessage(message),
-  )
-
-  if (hasTransientFailure) {
-    messages = []
-    await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 })
-    await page.waitForTimeout(check.postLoadDelayMs)
-  }
-
-  await page.close()
 
   if (messages.length > 0) {
     failures.push({
@@ -198,8 +208,6 @@ for (const check of checks) {
     })
   }
 }
-
-await browser.close()
 
 if (failures.length > 0) {
   for (const failure of failures) {

@@ -471,19 +471,7 @@ export class OptimizationManager {
 
   private buildQualitySettings(level: OptimizationLevel): QualitySettings {
     const baseSettings = this.baseQualityProfiles[level]
-    const profile = this.getRuntimeProfileOverride()
-    const profileSettings: Partial<QualitySettings> =
-      profile?.targetClass === 'desktop-high' &&
-      level === OptimizationLevel.HIGH
-        ? {
-            canvasScale: 0.25,
-            enableShadows: false,
-            enableDynamicLighting: false,
-            shadowMapSize: 0,
-          }
-        : {}
-
-    return { ...baseSettings, ...profileSettings } as QualitySettings
+    return { ...baseSettings } as QualitySettings
   }
 }
 

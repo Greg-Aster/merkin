@@ -1,0 +1,299 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-15T02:10:50.102Z",
+  "generatorVersion": "mesh-collision-manager-v2",
+  "sourceLevelId": "yggdrasil",
+  "sourceActorId": "yggdrasil-shrine-mimir-rig",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "9e418dd1d980c3dc2dc1ebf894f95f8f066b966205e32d05173a6e8faae3cc3f"
+  },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "4fb753799aa432851ff7abb4d76dff463c77e0d53f80cd09af8ab8d375d929bb"
+  },
+  "lodSourceTier": "low",
+  "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-rig.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-rig.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-rig.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v2:4fb753799aa432851ff7abb4d76dff463c77e0d53f80cd09af8ab8d375d929bb:bbc5f7ba99328f3181273a5558d66041fec68c9fa2b34bb78dd6e667dddd6da3:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "triangleCount": 82,
+  "vertexCount": 102,
+  "bounds": {
+    "min": [
+      4.827145576477051,
+      0.10000000894069672,
+      20.79096794128418
+    ],
+    "max": [
+      6.350229263305664,
+      2.999964475631714,
+      23.709701538085938
+    ],
+    "size": [
+      1.5230836868286133,
+      2.899964466691017,
+      2.918733596801758
+    ],
+    "center": [
+      5.588687419891357,
+      1.5499822422862053,
+      22.25033473968506
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -17098,
+      -32535,
+      -32767
+    ],
+    "max": [
+      17098,
+      32535,
+      32767
+    ],
+    "size": [
+      34196,
+      65070,
+      65534
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      4.827145576477051,
+      0.10000000894069672,
+      20.79096794128418
+    ],
+    "max": [
+      6.350229263305664,
+      2.999964475631714,
+      23.709701538085938
+    ],
+    "size": [
+      1.5230836868286133,
+      2.899964466691017,
+      2.918733596801758
+    ],
+    "center": [
+      5.588687419891357,
+      1.5499822422862053,
+      22.25033473968506
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      4.827145576477051,
+      0.10000000894069672,
+      20.79096794128418
+    ],
+    "max": [
+      6.350229263305664,
+      2.999964475631714,
+      23.709701538085938
+    ],
+    "size": [
+      1.5230836868286133,
+      2.899964466691017,
+      2.918733596801758
+    ],
+    "center": [
+      5.588687419891357,
+      1.5499822422862053,
+      22.25033473968506
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+    "sourceNodeName": "mimir Shrine Rig",
+    "visualLocalBounds": {
+      "min": [
+        4.827145576477051,
+        0.10000000894069672,
+        20.79096794128418
+      ],
+      "max": [
+        6.350229263305664,
+        2.999964475631714,
+        23.709701538085938
+      ],
+      "size": [
+        1.5230836868286133,
+        2.899964466691017,
+        2.918733596801758
+      ],
+      "center": [
+        5.588687419891357,
+        1.5499822422862053,
+        22.25033473968506
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        4.827145576477051,
+        0.10000000894069672,
+        20.79096794128418
+      ],
+      "max": [
+        6.350229263305664,
+        2.999964475631714,
+        23.709701538085938
+      ],
+      "size": [
+        1.5230836868286133,
+        2.899964466691017,
+        2.918733596801758
+      ],
+      "center": [
+        5.588687419891357,
+        1.5499822422862053,
+        22.25033473968506
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "yggdrasil-shrine-mimir-rig",
+    "sourceActorName": "mimir Shrine Rig",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "9e418dd1d980c3dc2dc1ebf894f95f8f066b966205e32d05173a6e8faae3cc3f"
+    },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "4fb753799aa432851ff7abb4d76dff463c77e0d53f80cd09af8ab8d375d929bb"
+    },
+    "lodSourceTier": "low",
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "yggdrasil",
+      "nodeId": "yggdrasil-shrine-mimir-rig",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.low.glb",
+      "lodSourceTier": "low",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-15T02:10:50.102Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
+  },
+  "collisionProduct": {
+    "actorId": "yggdrasil-shrine-mimir-rig",
+    "cacheKey": "mesh-collision-manager-v2:4fb753799aa432851ff7abb4d76dff463c77e0d53f80cd09af8ab8d375d929bb:bbc5f7ba99328f3181273a5558d66041fec68c9fa2b34bb78dd6e667dddd6da3:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+    "mode": "auto",
+    "productId": "yggdrasil-shrine-mimir-rig:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v2",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "4fb753799aa432851ff7abb4d76dff463c77e0d53f80cd09af8ab8d375d929bb"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "bbc5f7ba99328f3181273a5558d66041fec68c9fa2b34bb78dd6e667dddd6da3"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        4.827145576477051,
+        0.10000000894069672,
+        20.79096794128418
+      ],
+      "max": [
+        6.350229263305664,
+        2.999964475631714,
+        23.709701538085938
+      ],
+      "size": [
+        1.5230836868286133,
+        2.899964466691017,
+        2.918733596801758
+      ],
+      "center": [
+        5.588687419891357,
+        1.5499822422862053,
+        22.25033473968506
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-rig.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-mimir-rig.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.low.glb",
+    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+    "triangleCount": 82,
+    "vertexCount": 102,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 82,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

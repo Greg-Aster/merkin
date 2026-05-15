@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-05-14T23:52:38.248Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "Hvergelmir Basin Pool",
+  "sourceAssetUrl": "/generated/style-lab/sources/hvergelmir-basin-pool-2026-05-14T23-50-22-457Z/hvergelmir-basin-pool.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/style-lab/sources/hvergelmir-basin-pool-2026-05-14T23-50-22-457Z/hvergelmir-basin-pool.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/hvergelmir-basin-pool-2026-05-14T23-50-22-465Z/source/hvergelmir-basin-pool.glb",
+  "prompt": "object: hvergelmir basin pool, low circular sacred water basin or well pool. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/hvergelmir-basin-pool-reference-2026-05-14T23-52-38-208Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/hvergelmir-basin-pool-2026-05-14T23-50-22-465Z/reference/hvergelmir-basin-pool-reference-2026-05-14T23-52-38-208Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/hvergelmir-basin-pool-reference-2026-05-14T23-52-38-208Z.png"
+}

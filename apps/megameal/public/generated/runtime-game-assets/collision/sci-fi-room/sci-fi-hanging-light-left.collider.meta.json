@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:36:55.590Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "sci-fi-room",
+  "sourceActorId": "sci-fi-hanging-light-left",
+  "sourceAssetUrl": "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+  "sourceAssetPath": "apps/megameal/public/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "4d809194606f0862a08147df6408f2124ed7a5dbc90e4090c82a332efb3aa50d"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-hanging-light-left.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-hanging-light-left.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-hanging-light-left.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:4d809194606f0862a08147df6408f2124ed7a5dbc90e4090c82a332efb3aa50d:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+  "triangleCount": 4724,
+  "vertexCount": 5084,
+  "bounds": {
+    "min": [
+      -0.5802958011627197,
+      -0.7500965595245361,
+      -0.15747122466564178
+    ],
+    "max": [
+      0.581538200378418,
+      5.960464477539063e-8,
+      0.15742482244968414
+    ],
+    "size": [
+      1.1618340015411377,
+      0.7500966191291809,
+      0.3148960471153259
+    ],
+    "center": [
+      0.0006211996078491211,
+      -0.3750482499599457,
+      -0.0000232011079788208
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.5802958011627197,
+      -0.7500965595245361,
+      -0.15747122466564178
+    ],
+    "max": [
+      0.581538200378418,
+      5.960464477539063e-8,
+      0.15742482244968414
+    ],
+    "size": [
+      1.1618340015411377,
+      0.7500966191291809,
+      0.3148960471153259
+    ],
+    "center": [
+      0.0006211996078491211,
+      -0.3750482499599457,
+      -0.0000232011079788208
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.5802958011627197,
+      -0.7500965595245361,
+      -0.15747122466564178
+    ],
+    "max": [
+      0.581538200378418,
+      5.960464477539063e-8,
+      0.15742482244968414
+    ],
+    "size": [
+      1.1618340015411377,
+      0.7500966191291809,
+      0.3148960471153259
+    ],
+    "center": [
+      0.0006211996078491211,
+      -0.3750482499599457,
+      -0.0000232011079788208
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+    "sourceNodeName": "Hanging Light Left",
+    "visualLocalBounds": {
+      "min": [
+        -0.5802958011627197,
+        -0.7500965595245361,
+        -0.15747122466564178
+      ],
+      "max": [
+        0.581538200378418,
+        5.960464477539063e-8,
+        0.15742482244968414
+      ],
+      "size": [
+        1.1618340015411377,
+        0.7500966191291809,
+        0.3148960471153259
+      ],
+      "center": [
+        0.0006211996078491211,
+        -0.3750482499599457,
+        -0.0000232011079788208
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.5802958011627197,
+        -0.7500965595245361,
+        -0.15747122466564178
+      ],
+      "max": [
+        0.581538200378418,
+        5.960464477539063e-8,
+        0.15742482244968414
+      ],
+      "size": [
+        1.1618340015411377,
+        0.7500966191291809,
+        0.3148960471153259
+      ],
+      "center": [
+        0.0006211996078491211,
+        -0.3750482499599457,
+        -0.0000232011079788208
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "sci-fi-hanging-light-left",
+    "sourceActorName": "Hanging Light Left",
+    "sourceAssetUrl": "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+    "sourceAssetPath": "apps/megameal/public/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "4d809194606f0862a08147df6408f2124ed7a5dbc90e4090c82a332efb3aa50d"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "sci-fi-room",
+      "nodeId": "sci-fi-hanging-light-left",
+      "sourceAssetUrl": "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:36:55.590Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "sci-fi-hanging-light-left",
+    "mode": "auto",
+    "productId": "sci-fi-hanging-light-left:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "4d809194606f0862a08147df6408f2124ed7a5dbc90e4090c82a332efb3aa50d"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -0.5802958011627197,
+        -0.7500965595245361,
+        -0.15747122466564178
+      ],
+      "max": [
+        0.581538200378418,
+        5.960464477539063e-8,
+        0.15742482244968414
+      ],
+      "size": [
+        1.1618340015411377,
+        0.7500966191291809,
+        0.3148960471153259
+      ],
+      "center": [
+        0.0006211996078491211,
+        -0.3750482499599457,
+        -0.0000232011079788208
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-hanging-light-left.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-hanging-light-left.collider.meta.json",
+    "sourceMeshUrl": "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+    "generatedAt": "2026-05-14T21:36:55.590Z",
+    "triangleCount": 4724,
+    "vertexCount": 5084,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": true,
+    "applied": true,
+    "sourceTriangleCount": 22893,
+    "targetTriangleBudget": 5000,
+    "ratio": 0.20748700476128074,
+    "tool": "gltf-transform",
+    "prepass": "weld",
+    "error": 0.05
+  }
+}

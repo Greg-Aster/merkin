@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:37:01.507Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "sci-fi-room",
+  "sourceActorId": "sci-fi-courtyard-pylon-left",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "926093be737c7acdd87c8150ecdf5de2529e9b362ea10495e40275223784c430"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-courtyard-pylon-left.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-courtyard-pylon-left.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-courtyard-pylon-left.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:926093be737c7acdd87c8150ecdf5de2529e9b362ea10495e40275223784c430:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+  "triangleCount": 36,
+  "vertexCount": 108,
+  "bounds": {
+    "min": [
+      -0.2800000011920929,
+      -0.10000000149011612,
+      -0.2800000011920929
+    ],
+    "max": [
+      0.2800000011920929,
+      7.809999942779541,
+      0.2800000011920929
+    ],
+    "size": [
+      0.5600000023841858,
+      7.909999944269657,
+      0.5600000023841858
+    ],
+    "center": [
+      0,
+      3.8549999706447124,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.2800000011920929,
+      -0.10000000149011612,
+      -0.2800000011920929
+    ],
+    "max": [
+      0.2800000011920929,
+      7.809999942779541,
+      0.2800000011920929
+    ],
+    "size": [
+      0.5600000023841858,
+      7.909999944269657,
+      0.5600000023841858
+    ],
+    "center": [
+      0,
+      3.8549999706447124,
+      0
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.2800000011920929,
+      -0.10000000149011612,
+      -0.2800000011920929
+    ],
+    "max": [
+      0.2800000011920929,
+      7.809999942779541,
+      0.2800000011920929
+    ],
+    "size": [
+      0.5600000023841858,
+      7.909999944269657,
+      0.5600000023841858
+    ],
+    "center": [
+      0,
+      3.8549999706447124,
+      0
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+    "sourceNodeName": "Courtyard Pylon Left",
+    "visualLocalBounds": {
+      "min": [
+        -0.2800000011920929,
+        -0.10000000149011612,
+        -0.2800000011920929
+      ],
+      "max": [
+        0.2800000011920929,
+        7.809999942779541,
+        0.2800000011920929
+      ],
+      "size": [
+        0.5600000023841858,
+        7.909999944269657,
+        0.5600000023841858
+      ],
+      "center": [
+        0,
+        3.8549999706447124,
+        0
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.2800000011920929,
+        -0.10000000149011612,
+        -0.2800000011920929
+      ],
+      "max": [
+        0.2800000011920929,
+        7.809999942779541,
+        0.2800000011920929
+      ],
+      "size": [
+        0.5600000023841858,
+        7.909999944269657,
+        0.5600000023841858
+      ],
+      "center": [
+        0,
+        3.8549999706447124,
+        0
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "sci-fi-courtyard-pylon-left",
+    "sourceActorName": "Courtyard Pylon Left",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "926093be737c7acdd87c8150ecdf5de2529e9b362ea10495e40275223784c430"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "sci-fi-room",
+      "nodeId": "sci-fi-courtyard-pylon-left",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:37:01.507Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "sci-fi-courtyard-pylon-left",
+    "mode": "auto",
+    "productId": "sci-fi-courtyard-pylon-left:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "926093be737c7acdd87c8150ecdf5de2529e9b362ea10495e40275223784c430"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -0.2800000011920929,
+        -0.10000000149011612,
+        -0.2800000011920929
+      ],
+      "max": [
+        0.2800000011920929,
+        7.809999942779541,
+        0.2800000011920929
+      ],
+      "size": [
+        0.5600000023841858,
+        7.909999944269657,
+        0.5600000023841858
+      ],
+      "center": [
+        0,
+        3.8549999706447124,
+        0
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-courtyard-pylon-left.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-courtyard-pylon-left.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+    "generatedAt": "2026-05-14T21:37:01.507Z",
+    "triangleCount": 36,
+    "vertexCount": 108,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 36,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

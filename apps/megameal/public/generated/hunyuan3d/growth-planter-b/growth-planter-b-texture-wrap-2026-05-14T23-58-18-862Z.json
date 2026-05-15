@@ -1,0 +1,15 @@
+{
+  "sourceAssetUrl": "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
+  "sourceName": "Hvergelmir Basin Root Shrine",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/hvergelmir-basin-root-shrine-2026-05-14T23-54-50-721Z/reference/hvergelmir-basin-root-shrine-reference-2026-05-14T23-56-35-661Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1778802995696-jod3tw",
+  "prompt": "object: decorative sacred planter or root shrine object placed near a mythic well. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "texture",
+  "shapeModel": null,
+  "paintModel": "hunyuan3d-paint-v2-0-turbo",
+  "generatedAt": "2026-05-14T23:58:20.895Z"
+}

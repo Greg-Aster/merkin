@@ -50,6 +50,7 @@ const sceneAudit = auditSceneArchitecture({
 const reports = sceneAudit.reports
 const nonRuntimeSceneJsonFiles = sceneAudit.nonRuntimeSceneJsonFiles
 const failures = [...sceneAudit.failures]
+const warnings = [...sceneAudit.warnings]
 failures.push(
   ...auditSourceGuards({
     appRoot: process.cwd(),
@@ -147,6 +148,7 @@ const runtimeAssetManifestAudit = auditRuntimeAssetManifest({
 })
 const runtimeAssetManifestReport = runtimeAssetManifestAudit.report
 failures.push(...runtimeAssetManifestAudit.failures)
+warnings.push(...runtimeAssetManifestAudit.warnings)
 
 console.log('Engine architecture scene audit')
 console.log('================================')
@@ -426,6 +428,15 @@ if (terrainContractAudit.warnings.length > 0) {
   console.log('=====================================')
   for (const warning of terrainContractAudit.warnings) {
     console.log(`- ${warning}`)
+  }
+}
+
+if (warnings.length > 0) {
+  console.log('')
+  console.warn('Engine architecture audit warnings')
+  console.warn('==================================')
+  for (const warning of warnings) {
+    console.warn(`- ${warning}`)
   }
 }
 

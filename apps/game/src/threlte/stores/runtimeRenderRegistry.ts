@@ -41,9 +41,13 @@ type RuntimeRenderProfileDiagnosticRecord = {
 type RuntimePostProcessingDiagnosticRecord = {
   enabled: boolean
   profileId?: string
+  atmosphereId?: string
   passes: string[]
   ambientOcclusionEnabled?: boolean
   bloomEnabled?: boolean
+  colorGradingEnabled?: boolean
+  bloomReason?: string
+  colorGradingReason?: string
   reason?: string
 }
 

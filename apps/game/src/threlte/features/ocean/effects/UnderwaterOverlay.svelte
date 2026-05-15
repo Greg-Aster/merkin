@@ -15,6 +15,14 @@ import {
 
 // Props
 export let enabled = true
+export let underwaterFogColor: string | number = 0x0a1922
+export let atmosphereFogColor = '#7b8797'
+export let atmosphereFogDensity = 0
+export let atmosphereHeightFogEnabled = false
+export let atmosphereHeightFogColor = '#7b8797'
+export let atmosphereHeightFogDensity = 0
+export let atmosphereHeightFogFloor = 0
+export let atmosphereHeightFogCeiling = 4
 
 // Component state
 let overlayElement: HTMLDivElement
@@ -29,6 +37,97 @@ $: config = $underwaterConfigStore
 
 // Debug reactive changes
 $: shouldAnimate = enabled && (isUnderwater || transitionProgress > 0)
+
+type Rgb = [number, number, number]
+
+function clamp01(value: number) {
+  return Math.max(0, Math.min(1, value))
+}
+
+function colorToRgb(value: string | number | null | undefined, fallback: Rgb) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return [(value >> 16) & 255, (value >> 8) & 255, value & 255] as Rgb
+  }
+
+  if (typeof value !== 'string') return fallback
+
+  const hex = value.trim().replace(/^#/, '')
+  if (/^[0-9a-fA-F]{6}$/.test(hex)) {
+    const parsed = Number.parseInt(hex, 16)
+    return [(parsed >> 16) & 255, (parsed >> 8) & 255, parsed & 255] as Rgb
+  }
+
+  const rgbMatch = value.match(
+    /rgba?\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)/,
+  )
+  if (rgbMatch) {
+    return [
+      Number(rgbMatch[1]),
+      Number(rgbMatch[2]),
+      Number(rgbMatch[3]),
+    ] as Rgb
+  }
+
+  return fallback
+}
+
+function mixRgb(a: Rgb, b: Rgb, amount: number) {
+  const t = clamp01(amount)
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * t),
+    Math.round(a[1] + (b[1] - a[1]) * t),
+    Math.round(a[2] + (b[2] - a[2]) * t),
+  ] as Rgb
+}
+
+function rgba(color: Rgb, alpha: number) {
+  return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`
+}
+
+function getAtmosphereInfluence() {
+  const heightFogBand = Math.max(
+    0.001,
+    atmosphereHeightFogCeiling - atmosphereHeightFogFloor,
+  )
+  const heightFogBandFactor = atmosphereHeightFogEnabled
+    ? Math.min(1.5, Math.max(0.35, 6 / heightFogBand))
+    : 0
+
+  return clamp01(
+    0.28 +
+      atmosphereFogDensity * 70 +
+      atmosphereHeightFogDensity * 650 * heightFogBandFactor,
+  )
+}
+
+function getOverlayGradient() {
+  const waterColor = colorToRgb(underwaterFogColor, [10, 25, 34])
+  const atmosphereColor = colorToRgb(
+    atmosphereHeightFogEnabled ? atmosphereHeightFogColor : atmosphereFogColor,
+    [123, 135, 151],
+  )
+  const influence = getAtmosphereInfluence()
+  const depthFactor = clamp01(depth / Math.max(1, config.maxDepth))
+  const innerColor = mixRgb([45, 105, 130], atmosphereColor, influence * 0.35)
+  const midColor = mixRgb(waterColor, atmosphereColor, influence)
+  const outerColor = mixRgb(
+    [0, 10, 20],
+    atmosphereColor,
+    influence * (0.35 + depthFactor * 0.25),
+  )
+
+  return {
+    influence,
+    gradient: `
+        radial-gradient(
+          ellipse at center,
+          ${rgba(innerColor, 0.1 + depthFactor * 0.04)} 0%,
+          ${rgba(midColor, 0.3 + depthFactor * 0.08)} 70%,
+          ${rgba(outerColor, 0.5 + depthFactor * 0.12)} 100%
+        )
+      `,
+  }
+}
 
 onMount(() => {
   if (enabled) {
@@ -102,23 +201,13 @@ function updateOverlay() {
   if (!overlayElement) return
 
   if (isUnderwater && config.enableColorGrading) {
-    // FORCE dramatic underwater effect - always highly visible
-    const targetOpacity = 0.7 // Fixed 70% opacity when underwater - should be very visible!
+    const { gradient, influence } = getOverlayGradient()
+    const transitionFactor = Math.max(transitionProgress, 0.18)
+    const targetOpacity =
+      Math.min(0.82, 0.48 + intensity * 0.22 + influence * 0.14) *
+      transitionFactor
     overlayElement.style.opacity = targetOpacity.toString()
-
-    // Update color based on depth
-    const lightness = Math.max(20, 60 - depth * 2)
-    const hue = 200 // Blue hue
-    const saturation = Math.min(80, 60 + depth * 3)
-
-    overlayElement.style.background = `
-        radial-gradient(
-          ellipse at center,
-          hsla(${hue}, ${saturation}%, ${lightness + 20}%, 0.1) 0%,
-          hsla(${hue}, ${saturation}%, ${lightness}%, 0.3) 70%,
-          hsla(${hue}, ${saturation}%, ${lightness - 10}%, 0.5) 100%
-        )
-      `
+    overlayElement.style.background = gradient
 
     // Add subtle animation for underwater shimmer
     const shimmerOffset = Math.sin(Date.now() * 0.001) * 10

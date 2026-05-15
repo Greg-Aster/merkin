@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:36:45.300Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "sci-fi-room",
+  "sourceActorId": "sci-fi-anomaly-a",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "be5ebce7e68afb7e2426d65269945caba782d652689b0acb753d95a99b804de2"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-a.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-a.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-a.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:be5ebce7e68afb7e2426d65269945caba782d652689b0acb753d95a99b804de2:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+  "triangleCount": 808,
+  "vertexCount": 525,
+  "bounds": {
+    "min": [
+      -1.340000033378601,
+      -1.340000033378601,
+      -1
+    ],
+    "max": [
+      1.340000033378601,
+      1.340000033378601,
+      1
+    ],
+    "size": [
+      2.680000066757202,
+      2.680000066757202,
+      2
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -1.340000033378601,
+      -1.340000033378601,
+      -1
+    ],
+    "max": [
+      1.340000033378601,
+      1.340000033378601,
+      1
+    ],
+    "size": [
+      2.680000066757202,
+      2.680000066757202,
+      2
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -1.340000033378601,
+      -1.340000033378601,
+      -1
+    ],
+    "max": [
+      1.340000033378601,
+      1.340000033378601,
+      1
+    ],
+    "size": [
+      2.680000066757202,
+      2.680000066757202,
+      2
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+    "sourceNodeName": "Anomaly Cluster A",
+    "visualLocalBounds": {
+      "min": [
+        -1.340000033378601,
+        -1.340000033378601,
+        -1
+      ],
+      "max": [
+        1.340000033378601,
+        1.340000033378601,
+        1
+      ],
+      "size": [
+        2.680000066757202,
+        2.680000066757202,
+        2
+      ],
+      "center": [
+        0,
+        0,
+        0
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -1.340000033378601,
+        -1.340000033378601,
+        -1
+      ],
+      "max": [
+        1.340000033378601,
+        1.340000033378601,
+        1
+      ],
+      "size": [
+        2.680000066757202,
+        2.680000066757202,
+        2
+      ],
+      "center": [
+        0,
+        0,
+        0
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "sci-fi-anomaly-a",
+    "sourceActorName": "Anomaly Cluster A",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "be5ebce7e68afb7e2426d65269945caba782d652689b0acb753d95a99b804de2"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "sci-fi-room",
+      "nodeId": "sci-fi-anomaly-a",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:36:45.300Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "sci-fi-anomaly-a",
+    "mode": "auto",
+    "productId": "sci-fi-anomaly-a:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "be5ebce7e68afb7e2426d65269945caba782d652689b0acb753d95a99b804de2"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -1.340000033378601,
+        -1.340000033378601,
+        -1
+      ],
+      "max": [
+        1.340000033378601,
+        1.340000033378601,
+        1
+      ],
+      "size": [
+        2.680000066757202,
+        2.680000066757202,
+        2
+      ],
+      "center": [
+        0,
+        0,
+        0
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-a.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-a.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+    "generatedAt": "2026-05-14T21:36:45.300Z",
+    "triangleCount": 808,
+    "vertexCount": 525,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 808,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

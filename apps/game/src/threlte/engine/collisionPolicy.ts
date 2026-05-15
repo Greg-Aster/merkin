@@ -8,11 +8,39 @@ import type { SceneSettings } from './sceneDocumentTypes'
 import type {
   CollisionChannel,
   CollisionComponent,
+  CollisionGenerationQuality,
   CollisionIntent,
+  CollisionPolicyMode,
   CollisionShape,
   PhysicsBodyType,
   PrimitiveGeometryKind,
 } from './types'
+
+export interface AuthoredCollisionPolicy {
+  mode?: CollisionPolicyMode
+  intent?: CollisionIntent
+  channel?: CollisionChannel
+  quality?: CollisionGenerationQuality
+  lodTier?: 'source' | 'high' | 'medium' | 'low'
+  maxTriangles?: number
+  walkableSlopeLimitDeg?: number
+  friction?: number
+  restitution?: number
+  sensor?: boolean
+}
+
+export interface NormalizedCollisionPolicy extends AuthoredCollisionPolicy {
+  mode: CollisionPolicyMode
+}
+
+export function normalizeCollisionPolicy(
+  policy: AuthoredCollisionPolicy | null | undefined,
+): NormalizedCollisionPolicy {
+  return {
+    ...policy,
+    mode: policy?.mode ?? 'auto',
+  }
+}
 
 export interface CollisionPolicyInput {
   levelId?: string | null
@@ -23,23 +51,29 @@ export interface CollisionPolicyInput {
   hasGameplay?: boolean
   bodyType?: PhysicsBodyType
   primitiveGeometry?: PrimitiveGeometryKind
-  authoredCollision?: {
-    shape?: CollisionShape
-    intent?: CollisionIntent
-    channel?: CollisionChannel
-    enabled?: boolean
-    size?: [number, number, number]
-    colliderUrl?: string
-    colliderMetadataUrl?: string
-    assetLocalTransform?: AssetLocalTransformMetadata | null
-    sourceAssetUrl?: string
-    friction?: number
-    restitution?: number
-    sensor?: boolean
-    triangleBudget?: number
-    triangleCount?: number
-    vertexCount?: number
-  } | null
+  authoredCollision?:
+    | (AuthoredCollisionPolicy & {
+        shape?: CollisionShape
+        enabled?: boolean
+        lodSourceTier?: 'source' | 'low' | 'medium' | 'high'
+        generationStatus?: 'ready' | 'dirty' | 'generating' | 'failed'
+        generationLastError?: string
+        size?: [number, number, number]
+        colliderUrl?: string
+        colliderMetadataUrl?: string
+        colliderCacheKey?: string
+        assetLocalTransform?: AssetLocalTransformMetadata | null
+        sourceAssetUrl?: string
+        colliderSourceAssetUrl?: string
+        lockToObject?: boolean
+        friction?: number
+        restitution?: number
+        sensor?: boolean
+        triangleBudget?: number
+        triangleCount?: number
+        vertexCount?: number
+      })
+    | null
 }
 
 export interface CollisionPolicyResult {
@@ -67,8 +101,22 @@ export function getDefaultCollisionShape(
 function getAuthoredShape(input: CollisionPolicyInput): CollisionShape {
   const defaultShape = getDefaultCollisionShape(input)
   const authoredShape = input.authoredCollision?.shape
+  const quality = input.authoredCollision?.quality
 
   if (!authoredShape) {
+    if (
+      quality === 'convexHull' ||
+      quality === 'trimesh' ||
+      quality === 'simplifiedMesh'
+    ) {
+      return 'trimesh'
+    }
+    if (
+      quality !== 'primitive' &&
+      (input.actorKind === 'asset' || input.actorKind === 'prefab')
+    ) {
+      return 'trimesh'
+    }
     return input.authoredCollision?.colliderUrl ? 'trimesh' : defaultShape
   }
 
@@ -95,6 +143,9 @@ export function isTerrainVisualActor(
 }
 
 export function getDefaultCollisionIntent(input: CollisionPolicyInput) {
+  const authoredPolicy = input.authoredCollision
+    ? normalizeCollisionPolicy(input.authoredCollision)
+    : null
   const authoredShape = input.authoredCollision
     ? getAuthoredShape(input)
     : undefined
@@ -102,7 +153,7 @@ export function getDefaultCollisionIntent(input: CollisionPolicyInput) {
     actorId: input.actorId,
     levelId: input.levelId,
     settings: input.levelSettings,
-    sensor: input.authoredCollision?.sensor,
+    sensor: authoredPolicy?.sensor,
     shape: authoredShape,
   })
 
@@ -112,6 +163,9 @@ export function getDefaultCollisionIntent(input: CollisionPolicyInput) {
 export function resolveCollisionPolicy(
   input: CollisionPolicyInput,
 ): CollisionPolicyResult {
+  const authoredPolicy = input.authoredCollision
+    ? normalizeCollisionPolicy(input.authoredCollision)
+    : null
   const authoredShape = input.authoredCollision
     ? getAuthoredShape(input)
     : undefined
@@ -119,24 +173,27 @@ export function resolveCollisionPolicy(
     actorId: input.actorId,
     levelId: input.levelId,
     settings: input.levelSettings,
-    sensor: input.authoredCollision?.sensor,
+    sensor: authoredPolicy?.sensor,
     shape: authoredShape,
   })
   if (role === 'visualOnly') {
     return { collision: null, source: 'none' }
   }
 
-  if (input.authoredCollision?.enabled === false) {
+  if (
+    authoredPolicy?.mode === 'none' ||
+    input.authoredCollision?.enabled === false
+  ) {
     return { collision: null, source: 'none' }
   }
 
-  if (input.authoredCollision) {
+  if (input.authoredCollision && authoredPolicy) {
     const shape = authoredShape ?? getAuthoredShape(input)
     const intent =
-      input.authoredCollision.intent ??
-      (input.authoredCollision.sensor
+      authoredPolicy.mode === 'trigger'
         ? 'trigger'
-        : getCollisionIntentForRole(role))
+        : input.authoredCollision.intent ??
+          (authoredPolicy.sensor ? 'trigger' : getCollisionIntentForRole(role))
     if (intent === 'none') {
       return { collision: null, source: 'none' }
     }
@@ -151,17 +208,28 @@ export function resolveCollisionPolicy(
           authoredChannel: input.authoredCollision.channel,
         }),
         shape,
+        quality: input.authoredCollision.quality,
+        lodSourceTier:
+          input.authoredCollision.lodSourceTier ??
+          input.authoredCollision.lodTier,
+        generationStatus: input.authoredCollision.generationStatus,
+        generationLastError: input.authoredCollision.generationLastError,
         size: input.authoredCollision.size,
         colliderUrl: normalizeColliderUrl(input.authoredCollision.colliderUrl),
         colliderMetadataUrl: normalizeColliderUrl(
           input.authoredCollision.colliderMetadataUrl,
         ),
+        colliderCacheKey: input.authoredCollision.colliderCacheKey,
         assetLocalTransform: input.authoredCollision.assetLocalTransform,
         sourceAssetUrl: input.authoredCollision.sourceAssetUrl,
+        colliderSourceAssetUrl: input.authoredCollision.colliderSourceAssetUrl,
+        lockToObject: input.authoredCollision.lockToObject,
         friction: input.authoredCollision.friction,
         restitution: input.authoredCollision.restitution,
-        sensor: intent === 'trigger' ? true : input.authoredCollision.sensor,
-        triangleBudget: input.authoredCollision.triangleBudget,
+        sensor: intent === 'trigger' ? true : authoredPolicy.sensor,
+        triangleBudget:
+          input.authoredCollision.triangleBudget ??
+          input.authoredCollision.maxTriangles,
         triangleCount: input.authoredCollision.triangleCount,
         vertexCount: input.authoredCollision.vertexCount,
       },

@@ -4,7 +4,6 @@ import {
   exportSceneNodesToMergedGlb,
   getPrefabAssetUrl,
 } from './editorBakeSource'
-import { preserveCollisionForVisualReplacement } from './editorCollisionLifecycle'
 import {
   getCenteredGroupTransform,
   getSharedParentId,
@@ -67,6 +66,9 @@ type GeneratedVariantItem = {
   url: string
   sourceLabel?: string
   isOriginalSource?: boolean
+  mode?: string
+  generatedAt?: string
+  metadataUrl?: string
 }
 
 export function createEditorAssetController(deps: EditorAssetControllerDeps) {
@@ -131,6 +133,10 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     return name.replace(/\.(gltf|glb)$/i, '')
   }
 
+  function stripGeneratedAssetExtension(name: string) {
+    return name.replace(/\.(gltf|glb|png|jpe?g|webp)$/i, '')
+  }
+
   function getPathFileName(path: string) {
     return path.split('/').filter(Boolean).pop() ?? ''
   }
@@ -183,6 +189,30 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       .replace(/^-+|-+$/g, '')
   }
 
+  function normalizeReferenceImageLabel(value: string) {
+    return stripGeneratedAssetExtension(value)
+      .replace(/-reference-\d{4}-\d{2}-\d{2}t.+$/i, '')
+      .replace(/-\d{4}-\d{2}-\d{2}t.+$/i, '')
+      .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+  }
+
+  function getReferenceImageLabel(
+    metadata: Record<string, any> | null,
+    slugCandidates: string[],
+  ) {
+    const sourceReferenceImageUrl =
+      typeof metadata?.sourceReferenceImageUrl === 'string'
+        ? metadata.sourceReferenceImageUrl
+        : ''
+    const referenceFileName = getPathFileName(sourceReferenceImageUrl)
+    const referenceSlug = normalizeReferenceImageLabel(referenceFileName)
+    if (!referenceSlug || slugCandidates.includes(referenceSlug)) return ''
+    return referenceSlug.replace(/-/g, ' ')
+  }
+
   function getGeneratedVariantSlugCandidates(
     node: EditorSceneNode,
     assetUrl: string,
@@ -203,10 +233,19 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     directoryPath: string,
     sourceLabel: string,
     slugCandidates: string[],
+    metadata: Record<string, any> | null = null,
   ): GeneratedVariantItem {
     const fileLabel = stripModelExtension(entry.name)
     const directoryLabel = getPathDirectoryName(directoryPath)
     const normalizedFileLabel = normalizeGeneratedVariantLabel(fileLabel)
+    const url = resolvePublicAssetUrl(entry.path, entry.name)
+    const generatedAt =
+      typeof metadata?.generatedAt === 'string' ? metadata.generatedAt : ''
+    const mode = typeof metadata?.mode === 'string' ? metadata.mode : ''
+    const mismatchedReferenceLabel = getReferenceImageLabel(
+      metadata,
+      slugCandidates,
+    )
     const name = slugCandidates.includes(normalizedFileLabel)
       ? directoryLabel || entry.name
       : entry.name
@@ -214,9 +253,74 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     return {
       name,
       path: entry.path,
-      url: resolvePublicAssetUrl(entry.path, entry.name),
-      sourceLabel,
+      url,
+      sourceLabel: getGeneratedVariantSourceLabel(
+        sourceLabel,
+        mode,
+        generatedAt,
+        mismatchedReferenceLabel,
+      ),
+      mode,
+      generatedAt,
+      metadataUrl: metadata ? url.replace(/\.(glb|gltf)$/i, '.json') : '',
     }
+  }
+
+  function getGeneratedVariantSourceLabel(
+    fallback: string,
+    mode: string,
+    generatedAt: string,
+    mismatchedReferenceLabel: string,
+  ) {
+    const modeLabel =
+      mode === 'texture'
+        ? 'texture wrap'
+        : mode === 'generate'
+          ? 'replacement mesh'
+          : fallback
+    const dateLabel = generatedAt
+      ? generatedAt.slice(0, 16).replace('T', ' ')
+      : ''
+    return [
+      modeLabel,
+      dateLabel,
+      mismatchedReferenceLabel ? `ref ${mismatchedReferenceLabel}` : '',
+    ]
+      .filter(Boolean)
+      .join(' · ')
+  }
+
+  async function readGeneratedVariantMetadata(entry: EditorWorkspaceEntry) {
+    const assetUrl = resolvePublicAssetUrl(entry.path, entry.name)
+    const metadataUrl = assetUrl.replace(/\.(glb|gltf)$/i, '.json')
+    if (metadataUrl === assetUrl) return null
+
+    try {
+      const response = await fetch(metadataUrl)
+      if (!response.ok) return null
+      return (await response.json()) as Record<string, any>
+    } catch {
+      return null
+    }
+  }
+
+  function sortGeneratedVariantItems(
+    left: GeneratedVariantItem,
+    right: GeneratedVariantItem,
+  ) {
+    const leftTime = Date.parse(left.generatedAt ?? '')
+    const rightTime = Date.parse(right.generatedAt ?? '')
+    if (
+      Number.isFinite(leftTime) &&
+      Number.isFinite(rightTime) &&
+      leftTime !== rightTime
+    ) {
+      return rightTime - leftTime
+    }
+    if (Number.isFinite(leftTime) !== Number.isFinite(rightTime)) {
+      return Number.isFinite(rightTime) ? 1 : -1
+    }
+    return right.name.localeCompare(left.name)
   }
 
   async function loadGeneratedVariantDirectory(
@@ -225,17 +329,20 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     slugCandidates: string[],
   ) {
     const items = await browseWorkspaceEntries(directoryPath)
-    return items
-      .filter(isGeneratedModelFile)
-      .sort((left, right) => right.name.localeCompare(left.name))
-      .map(item =>
-        createGeneratedVariantItem(
-          item,
-          directoryPath,
-          sourceLabel,
-          slugCandidates,
+    const variantItems = await Promise.all(
+      items
+        .filter(isGeneratedModelFile)
+        .map(async item =>
+          createGeneratedVariantItem(
+            item,
+            directoryPath,
+            sourceLabel,
+            slugCandidates,
+            await readGeneratedVariantMetadata(item),
+          ),
         ),
-      )
+    )
+    return variantItems.sort(sortGeneratedVariantItems)
   }
 
   function addGeneratedVariantItem(
@@ -580,7 +687,7 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
     }
 
     deps.appendPipelineLog(
-      'Applied generated asset to selection with preserved transform and collision',
+      'Applied generated asset to selection with preserved transform',
       {
         assetUrl: state.hunyuanLastOutputUrl,
         targets: targetNodeIds.map(id => {
@@ -589,21 +696,20 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
             .find(candidate => candidate.id === id)
           return {
             id,
-            collisionPreserved: Boolean(node?.collision),
             transform: deps.getNodeTransformSnapshot(node ?? null),
           }
         }),
       },
     )
 
-    state.hunyuanStatus = `Applied generated asset to ${targetNodeIds.length} node${targetNodeIds.length === 1 ? '' : 's'}; collision preserved.`
+    state.hunyuanStatus = `Applied generated asset to ${targetNodeIds.length} node${targetNodeIds.length === 1 ? '' : 's'}.`
     state.hunyuanLastResultSummary = state.hunyuanStatus
     deps.setRuntimeDiagnostic('hunyuan', {
       level: 'ready',
       message: state.hunyuanStatus,
     })
     deps.setSaveMessage(
-      `AI asset applied; collision preserved: ${state.hunyuanLastOutputUrl}`,
+      `AI asset applied: ${state.hunyuanLastOutputUrl}`,
     )
 
     const selectedNode = deps.getSelectedNode()
@@ -770,16 +876,12 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       )
       const scaleWasBakedIntoMesh =
         !!selectedNode.primitive || (!!selectedNode.prefab && !prefabAssetUrl)
-      const collision = preserveCollisionForVisualReplacement(selectedNode, {
-        visualScaleBakedIntoMesh: scaleWasBakedIntoMesh,
-      })
       deps.patchNode(selectedNode.id, {
         kind: 'asset',
         asset: { url: source.assetUrl },
         primitive: undefined,
         prefab: undefined,
         scale: scaleWasBakedIntoMesh ? [1, 1, 1] : selectedNode.scale,
-        ...(collision ? { collision } : {}),
         generation: {
           ...(selectedNode.generation ?? {}),
           descriptor: deps.getDefaultStyleDescriptor(selectedNode),
@@ -790,11 +892,9 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       deps.appendPipelineLog('Replaced selected object visual source', {
         nodeId: selectedNode.id,
         assetUrl: source.assetUrl,
-        collisionPreserved: Boolean(collision),
-        collisionShape: collision?.shape,
       })
       deps.setSaveMessage(
-        `Replaced ${selectedNode.name} visual source; collision preserved`,
+        `Replaced ${selectedNode.name} visual source`,
       )
     } catch (error) {
       console.error('Replace visual source failed:', error)

@@ -1,24 +1,25 @@
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import {
-  getRuntimeGroundContract,
-  validateLevelGroundContract,
-} from '../../src/threlte/engine/groundContractCore.mjs'
+import { resolveCollisionChannel } from '../../src/threlte/engine/collisionChannelsCore.mjs'
 import {
   describeCollisionPolicyIssue,
   getCollisionPolicyIssues,
 } from '../../src/threlte/engine/collisionPolicyIssuesCore.mjs'
+import { actorSupportsWalkabilitySample } from '../../src/threlte/engine/collisionSpatialQueriesCore.mjs'
 import {
-  actorSupportsWalkabilitySample,
-} from '../../src/threlte/engine/collisionSpatialQueriesCore.mjs'
-import {
-  getLevelRuntimeContract,
-} from '../../src/threlte/engine/levelContractsCore.mjs'
+  getRuntimeGroundContract,
+  validateLevelGroundContract,
+} from '../../src/threlte/engine/groundContractCore.mjs'
+import { getLevelRuntimeContract } from '../../src/threlte/engine/levelContractsCore.mjs'
 import {
   createLevelRuntimeReadinessContract,
   getActorRuntimeAssetUrl as getActorRuntimeAssetUrlCore,
 } from '../../src/threlte/engine/levelRuntimeReadinessContractCore.mjs'
+import {
+  getMeshCollisionPolicyDescriptor,
+  validateGeneratedCollisionProduct,
+} from './meshCollisionProducts.mjs'
 const moduleDir = dirname(fileURLToPath(import.meta.url))
 const prefabCatalog = JSON.parse(
   readFileSync(
@@ -34,6 +35,11 @@ const degToRad = Math.PI / 180
 const generatedColliderRoot = '/generated/runtime-game-assets/collision/'
 const terrainColliderRoot = '/terrain/collision/'
 const colliderUrlSuffix = '.collider.glb'
+const meshDerivedCollisionQualities = new Set([
+  'convexHull',
+  'simplifiedMesh',
+  'trimesh',
+])
 
 function clone(value) {
   return value === undefined ? undefined : structuredClone(value)
@@ -63,6 +69,33 @@ function getColliderUrlConventionError(value) {
     return `collision.colliderUrl must end with ${colliderUrlSuffix}.`
   }
   return ''
+}
+
+function hasAuthoredColliderAsset(actor) {
+  return String(actor.physics?.collision?.colliderUrl ?? '').trim().length > 0
+}
+
+function isMeshDerivedCollision(collision) {
+  return Boolean(
+    collision?.generatedProduct ||
+      meshDerivedCollisionQualities.has(collision?.quality),
+  )
+}
+
+function hasMeshDerivedCollisionProduct(actor) {
+  return Boolean(actor.physics?.collision?.generatedProduct)
+}
+
+function getCollisionTriangleBudget(collision) {
+  return collision.triangleBudget ?? collision.generatedProduct?.triangleBudget
+}
+
+function requiresExplicitTriangleBudget(collision) {
+  return (
+    collision.intent === 'detailMesh' ||
+    collision.quality === 'trimesh' ||
+    !isMeshDerivedCollision(collision)
+  )
 }
 
 function mergeDeepRecords(base, overrides) {
@@ -198,29 +231,67 @@ function getActorRuntimeAssetUrl(actor) {
   })
 }
 
-function getCollision(node) {
-  if (!node.collision || node.collision.enabled === false) return null
+function getCollision(node, scene, options = {}) {
+  if (!node.collision) return null
+  const mode =
+    node.collision.mode ??
+    (node.collision.enabled === false || node.collision.intent === 'none'
+      ? 'none'
+      : node.collision.sensor || node.collision.intent === 'trigger'
+        ? 'trigger'
+        : 'auto')
+  if (mode === 'none') return null
+  const intent =
+    mode === 'trigger'
+      ? 'trigger'
+      : node.collision.intent && node.collision.intent !== 'none'
+        ? node.collision.intent
+        : 'blocker'
+  const channel = resolveCollisionChannel({
+    intent,
+    bodyType: node.physics?.bodyType ?? 'fixed',
+    authoredChannel: node.collision.channel,
+  })
+  const policy = getMeshCollisionPolicyDescriptor(node)
+  const productValidation = validateGeneratedCollisionProduct({
+    levelId: scene.levelId,
+    node,
+    publicRoot: options.publicRoot,
+    resolvePrefabAssetUrl: getRuntimePrefabAssetUrl,
+    requireCurrentMetadata: Boolean(options.requireCurrentGeneratedCollision),
+  })
+  options.collisionProductErrors?.push(...productValidation.errors)
+  const generatedProduct =
+    productValidation.errors.length === 0
+      ? productValidation.product ?? undefined
+      : undefined
 
   return {
-    intent: node.collision.intent,
-    channel: node.collision.channel,
-    shape: node.collision.shape,
+    intent,
+    channel,
+    shape: policy.shape,
+    quality: policy.quality,
+    lodSourceTier: node.collision.lodSourceTier ?? node.collision.lodTier,
     size: node.collision.size,
     colliderUrl: node.collision.colliderUrl,
     colliderMetadataUrl: node.collision.colliderMetadataUrl,
+    colliderCacheKey: node.collision.colliderCacheKey,
     assetLocalTransform: node.collision.assetLocalTransform,
     sourceAssetUrl: node.collision.sourceAssetUrl,
+    colliderSourceAssetUrl: node.collision.colliderSourceAssetUrl,
+    lockToObject: node.collision.lockToObject,
     friction: node.collision.friction,
     restitution: node.collision.restitution,
-    sensor: node.collision.sensor,
-    triangleBudget: node.collision.triangleBudget,
+    sensor: mode === 'trigger' ? true : policy.sensor,
+    triangleBudget: policy.maxTriangles ?? node.collision.triangleBudget,
     triangleCount: node.collision.triangleCount,
     vertexCount: node.collision.vertexCount,
+    generatedProduct,
   }
 }
 
-function toActor(node) {
-  const collision = getCollision(node)
+function toActor(scene, node, options = {}) {
+  const collision = getCollision(node, scene, options)
 
   return {
     id: node.id,
@@ -300,7 +371,7 @@ function toActor(node) {
   }
 }
 
-export function adaptSceneDocumentToLevelDefinition(scene) {
+export function adaptSceneDocumentToLevelDefinition(scene, options = {}) {
   const spawnPosition = scene.settings?.level?.spawn?.position
   if (!isFiniteVec3(spawnPosition)) {
     throw new Error(
@@ -323,7 +394,7 @@ export function adaptSceneDocumentToLevelDefinition(scene) {
       rotation: spawnRotation ?? [0, 0, 0],
     },
     settings: scene.settings,
-    actors: (scene.nodes ?? []).map(toActor),
+    actors: (scene.nodes ?? []).map(node => toActor(scene, node, options)),
   }
 }
 
@@ -373,6 +444,15 @@ function getMaxWalkableSlopeRadians(level) {
   return Math.max(0, Math.min(89, resolvedDegrees)) * degToRad
 }
 
+function getWalkableSupportOptions(level) {
+  const policy = level.settings?.level?.collision?.walkability
+  return {
+    xzPadding: policy?.supportXzPadding,
+    maxDrop: policy?.supportMaxDrop,
+    maxPenetration: policy?.supportMaxPenetration,
+  }
+}
+
 function getWalkabilitySamples(level) {
   const samples = [
     {
@@ -404,6 +484,7 @@ function getWalkabilityContractIssues(level, actors, runtimeReadinessContract) {
   const warnings = []
   const walkableActors = actors.filter(isWalkableActor)
   const maxSlopeRadians = getMaxWalkableSlopeRadians(level)
+  const supportOptions = getWalkableSupportOptions(level)
 
   for (const actor of walkableActors) {
     const [pitch = 0, , roll = 0] = actor.transform.rotation ?? []
@@ -418,7 +499,7 @@ function getWalkabilityContractIssues(level, actors, runtimeReadinessContract) {
   for (const sample of getWalkabilitySamples(level)) {
     if (!isFiniteVec3(sample.position)) continue
     const supportingActor = walkableActors.find(actor =>
-      actorSupportsWalkabilitySample(actor, sample.position),
+      actorSupportsWalkabilitySample(actor, sample.position, supportOptions),
     )
     if (!supportingActor) {
       if (runtimeReadinessContract.terrain.runtimeCollision) {
@@ -436,7 +517,7 @@ function getWalkabilityContractIssues(level, actors, runtimeReadinessContract) {
   return { errors, warnings }
 }
 
-export function createLevelBuildReport(level) {
+export function createLevelBuildReport(level, options = {}) {
   const contract = getLevelRuntimeContract(level.id)
   const runtimeReadinessContract = createLevelRuntimeReadinessContract(level, {
     resolvePrefabAssetUrl: getRuntimePrefabAssetUrl,
@@ -465,6 +546,7 @@ export function createLevelBuildReport(level) {
 
   if (!isFiniteVec3(level.spawn.player))
     errors.push('Player spawn must be a finite Vec3.')
+  errors.push(...(options.collisionProductErrors ?? []))
   if (Array.isArray(runtimeAssets?.requiredAssetActorIds)) {
     errors.push(
       'runtimeAssets.requiredAssetActorIds is no longer supported; use runtimeAssets.requiredRenderActorIds.',
@@ -504,7 +586,7 @@ export function createLevelBuildReport(level) {
     }
     if (actor.physics.collision.intent === 'detailMesh') {
       detailMeshActorCount += 1
-      if (actor.physics.collision.triangleBudget === undefined) {
+      if (getCollisionTriangleBudget(actor.physics.collision) === undefined) {
         errors.push(
           `Detail mesh actor "${actor.id}" has no explicit triangle budget.`,
         )
@@ -512,12 +594,23 @@ export function createLevelBuildReport(level) {
     }
     if (actor.physics.collision.shape === 'trimesh') {
       trimeshActorCount += 1
-      if (actor.physics.collision.triangleBudget === undefined) {
+      if (
+        requiresExplicitTriangleBudget(actor.physics.collision) &&
+        getCollisionTriangleBudget(actor.physics.collision) === undefined
+      ) {
         errors.push(
           `Trimesh actor "${actor.id}" has no explicit triangle budget.`,
         )
       }
-      if (actor.kind === 'asset') {
+      if (
+        actor.kind === 'asset' &&
+        !hasAuthoredColliderAsset(actor) &&
+        !hasMeshDerivedCollisionProduct(actor)
+      ) {
+        errors.push(
+          `Trimesh asset actor "${actor.id}" must use a generated collision product instead of deriving collision from the render mesh.`,
+        )
+      } else if (actor.kind === 'asset' && hasAuthoredColliderAsset(actor)) {
         const conventionError = getColliderUrlConventionError(
           actor.physics.collision.colliderUrl,
         )
@@ -562,9 +655,7 @@ export function createLevelBuildReport(level) {
       errors.push(`Required actor "${actorId}" is not walkable collision.`)
     }
   }
-  for (
-    const actorId of runtimeReadinessContract.missingRequiredWalkableActorIds
-  ) {
+  for (const actorId of runtimeReadinessContract.missingRequiredWalkableActorIds) {
     if (missingRequiredActorIdSet.has(actorId)) continue
     errors.push(`Required actor "${actorId}" is missing walkable collision.`)
   }
@@ -581,7 +672,7 @@ export function createLevelBuildReport(level) {
     )
   }
   if (trimeshActorCount > contract.maxTrimeshActors) {
-    errors.push(
+    warnings.push(
       `${trimeshActorCount} actors are using trimesh collision; contract allows ${contract.maxTrimeshActors}.`,
     )
   }
@@ -589,22 +680,22 @@ export function createLevelBuildReport(level) {
     runtimeReadinessContract.runtimeAssetUrls.length >
     contract.maxRuntimeAssetCount
   ) {
-    errors.push(
+    warnings.push(
       `${runtimeReadinessContract.runtimeAssetUrls.length} runtime assets exceed contract budget of ${contract.maxRuntimeAssetCount}.`,
     )
   }
   if (primitiveActorCount > contract.maxPrimitiveActorCount) {
-    errors.push(
+    warnings.push(
       `${primitiveActorCount} primitive render actors exceed contract budget of ${contract.maxPrimitiveActorCount}. Bake repeated primitives into runtime assets or chunks.`,
     )
   }
   if (neverCullActorCount > contract.maxNeverCullActorCount) {
-    errors.push(
+    warnings.push(
       `${neverCullActorCount} never-cull render actors exceed contract budget of ${contract.maxNeverCullActorCount}.`,
     )
   }
   if (gameplayFireflyActorCount > contract.maxGameplayFireflyCount) {
-    errors.push(
+    warnings.push(
       `${gameplayFireflyActorCount} firefly gameplay actors exceed contract budget of ${contract.maxGameplayFireflyCount}. Use chunked/pooled marker presentation.`,
     )
   }
@@ -650,6 +741,9 @@ function getRuntimeAssetTierCap(levelDefinition) {
 }
 
 export function createRuntimeSceneManifest(input) {
+  const generatedCollisionProducts = input.levelDefinition.actors
+    .map(actor => actor.physics?.collision?.generatedProduct)
+    .filter(Boolean)
   return {
     schemaVersion: 1,
     generatedAt: input.generatedAt ?? new Date().toISOString(),
@@ -666,10 +760,13 @@ export function createRuntimeSceneManifest(input) {
     runtime: {
       readinessContract: input.buildReport.runtimeReadinessContract,
       requiredRenderActorIds:
-        input.buildReport.runtimeReadinessContract.runtime.requiredRenderActorIds,
+        input.buildReport.runtimeReadinessContract.runtime
+          .requiredRenderActorIds,
       requiredAssetUrls:
         input.buildReport.runtimeReadinessContract.runtime.requiredAssetUrls,
-      runtimeAssetUrls: input.buildReport.runtimeReadinessContract.runtimeAssetUrls,
+      runtimeAssetUrls:
+        input.buildReport.runtimeReadinessContract.runtimeAssetUrls,
+      generatedCollisionProducts,
       assetTierCap: getRuntimeAssetTierCap(input.levelDefinition),
       terrainManifestUrl: getTerrainManifestUrl(input.levelDefinition),
       ground: getRuntimeGroundContract(input.levelDefinition),

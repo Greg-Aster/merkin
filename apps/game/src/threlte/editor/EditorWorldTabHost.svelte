@@ -41,7 +41,7 @@ export let playerTabProps: Record<string, unknown> = {}
 export let onCookWorldPartition: () => void = () => {}
 export let onBakeTerrain: () => void = () => {}
 
-let activeWorldSubflow: 'environment' | 'player' | 'terrain' | '' = ''
+let activeWorldSubflow: 'environment' | 'player' | 'terrain' | '' = 'environment'
 
 $: sceneNodes = editorScene?.nodes ?? []
 $: terrainSourceCount =

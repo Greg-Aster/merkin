@@ -533,6 +533,7 @@ function createEditorToolsRouteContext() {
       ensureDirectory,
       fileToBase64,
       normalizePath,
+      resolveWorkspacePath,
       resolvePublicAssetPath,
       toPublicAssetUrl,
     }),

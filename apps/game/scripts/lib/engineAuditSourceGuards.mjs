@@ -34,6 +34,9 @@ const allowedDefaultCameraFiles = new Set([
   'src/threlte/features/player/Player.svelte',
   'src/threlte/editor/EditorViewportControls.svelte',
 ])
+const allowedStyleBakeEndpointCallFiles = new Set([
+  'src/threlte/editor/editorStyleApi.ts',
+])
 
 function getSourceFiles(dir, prefix = '') {
   const files = []
@@ -87,6 +90,15 @@ export function auditSourceGuards({
           `${file}: retired tools endpoint ${endpoint} must not be called by the current editor/runtime`,
         )
       }
+    }
+
+    if (
+      source.includes('/api/style/bake-procedural') &&
+      !allowedStyleBakeEndpointCallFiles.has(file)
+    ) {
+      failures.push(
+        `${file}: direct /api/style/bake-procedural calls must go through editorStyleBakeManager, not component-local or ad hoc fetch code`,
+      )
     }
   }
 

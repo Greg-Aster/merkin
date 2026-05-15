@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:36:35.224Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "miranda",
+  "sourceActorId": "miranda-cockpit-console",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "0e6463bc36efb1a3e83688a3d279248a8dd838c298b665636e190ec0b71c4991"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-cockpit-console.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/miranda/miranda-cockpit-console.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-cockpit-console.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:0e6463bc36efb1a3e83688a3d279248a8dd838c298b665636e190ec0b71c4991:0412f33af9fc3ad71c4092b8c6bb410b417ab97e599c2ab24a4ee4dfab14378d:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+  "triangleCount": 804,
+  "vertexCount": 2388,
+  "bounds": {
+    "min": [
+      -1.365943431854248,
+      -0.5,
+      -1.3300000429153442
+    ],
+    "max": [
+      1.3300000429153442,
+      2.180000066757202,
+      1.3300000429153442
+    ],
+    "size": [
+      2.6959434747695923,
+      2.680000066757202,
+      2.6600000858306885
+    ],
+    "center": [
+      -0.017971694469451904,
+      0.8400000333786011,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -1.365943431854248,
+      -0.5,
+      -1.3300000429153442
+    ],
+    "max": [
+      1.3300000429153442,
+      2.180000066757202,
+      1.3300000429153442
+    ],
+    "size": [
+      2.6959434747695923,
+      2.680000066757202,
+      2.6600000858306885
+    ],
+    "center": [
+      -0.017971694469451904,
+      0.8400000333786011,
+      0
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -1.365943431854248,
+      -0.5,
+      -1.3300000429153442
+    ],
+    "max": [
+      1.3300000429153442,
+      2.180000066757202,
+      1.3300000429153442
+    ],
+    "size": [
+      2.6959434747695923,
+      2.680000066757202,
+      2.6600000858306885
+    ],
+    "center": [
+      -0.017971694469451904,
+      0.8400000333786011,
+      0
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+    "sourceNodeName": "Cockpit Console",
+    "visualLocalBounds": {
+      "min": [
+        -1.365943431854248,
+        -0.5,
+        -1.3300000429153442
+      ],
+      "max": [
+        1.3300000429153442,
+        2.180000066757202,
+        1.3300000429153442
+      ],
+      "size": [
+        2.6959434747695923,
+        2.680000066757202,
+        2.6600000858306885
+      ],
+      "center": [
+        -0.017971694469451904,
+        0.8400000333786011,
+        0
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -1.365943431854248,
+        -0.5,
+        -1.3300000429153442
+      ],
+      "max": [
+        1.3300000429153442,
+        2.180000066757202,
+        1.3300000429153442
+      ],
+      "size": [
+        2.6959434747695923,
+        2.680000066757202,
+        2.6600000858306885
+      ],
+      "center": [
+        -0.017971694469451904,
+        0.8400000333786011,
+        0
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "miranda-cockpit-console",
+    "sourceActorName": "Cockpit Console",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "0e6463bc36efb1a3e83688a3d279248a8dd838c298b665636e190ec0b71c4991"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "miranda",
+      "nodeId": "miranda-cockpit-console",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:36:35.224Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "miranda-cockpit-console",
+    "mode": "auto",
+    "productId": "miranda-cockpit-console:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "0e6463bc36efb1a3e83688a3d279248a8dd838c298b665636e190ec0b71c4991"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "0412f33af9fc3ad71c4092b8c6bb410b417ab97e599c2ab24a4ee4dfab14378d"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -1.365943431854248,
+        -0.5,
+        -1.3300000429153442
+      ],
+      "max": [
+        1.3300000429153442,
+        2.180000066757202,
+        1.3300000429153442
+      ],
+      "size": [
+        2.6959434747695923,
+        2.680000066757202,
+        2.6600000858306885
+      ],
+      "center": [
+        -0.017971694469451904,
+        0.8400000333786011,
+        0
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-cockpit-console.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-cockpit-console.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+    "generatedAt": "2026-05-14T21:36:35.224Z",
+    "triangleCount": 804,
+    "vertexCount": 2388,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 804,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

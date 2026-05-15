@@ -38,6 +38,9 @@ function emptyMetadata(path, error) {
     materialAuthoring: null,
     textureCount: 0,
     imageCount: 0,
+    unusedTextureCount: 0,
+    unusedImageCount: 0,
+    unusedTextureBytes: 0,
     textureBytes: 0,
     textures: [],
     compression: {
@@ -241,6 +244,17 @@ function collectTextureRoles(materials = []) {
   }
 
   return textureRoles
+}
+
+function collectUsedImageIndices(json, textures = []) {
+  const usedImageIndices = new Set()
+
+  for (const texture of textures) {
+    const imageIndex = getTextureSourceIndex(texture)
+    if (Number.isInteger(imageIndex)) usedImageIndices.add(imageIndex)
+  }
+
+  return usedImageIndices
 }
 
 function getTextureIndex(textureInfo) {
@@ -458,6 +472,7 @@ export function readGltfAssetMetadata(path) {
       : readGltf(path)
     const { json, bin, rootDir } = source
     const textureRoles = collectTextureRoles(json.materials)
+    const usedImageIndices = collectUsedImageIndices(json, json.textures ?? [])
     const textures = (json.textures ?? []).map((texture, index) => {
       const imageIndex = getTextureSourceIndex(texture)
       const image = Number.isInteger(imageIndex) ? json.images?.[imageIndex] ?? {} : {}
@@ -484,6 +499,17 @@ export function readGltfAssetMetadata(path) {
               : 'none',
       }
     })
+    const unusedTextureCount = textures.filter(
+      texture => texture.roles.length === 0,
+    ).length
+    const unusedTextureBytes = textures.reduce(
+      (sum, texture) =>
+        texture.roles.length === 0 ? sum + (texture.byteLength ?? 0) : sum,
+      0,
+    )
+    const unusedImageCount = (json.images ?? []).filter(
+      (_image, index) => !usedImageIndices.has(index),
+    ).length
     const meshPrimitiveCount = (json.meshes ?? []).reduce(
       (sum, mesh) => sum + (mesh.primitives?.length ?? 0),
       0,
@@ -529,6 +555,9 @@ export function readGltfAssetMetadata(path) {
       materialAuthoring: json.extras?.materialAuthoring ?? null,
       textureCount: json.textures?.length ?? 0,
       imageCount: json.images?.length ?? 0,
+      unusedTextureCount,
+      unusedImageCount,
+      unusedTextureBytes,
       textureBytes: textures.reduce(
         (sum, texture) => sum + (texture.byteLength ?? 0),
         0,

@@ -5,6 +5,8 @@ import {
 import {
   buildEditorPublishReadinessViewModel,
   getEditorPublishReadinessTerrainManifestUrl,
+  getEditorStyleBakeMetadataUrl,
+  isEditorStyleBakeCandidate,
 } from './editorPublishReadiness'
 import type {
   EditorPublishReadinessViewModel,
@@ -13,6 +15,7 @@ import type {
   MeshColliderBakeMetadata,
   RuntimeAssetCookManifest,
   RuntimePrefabManifest,
+  StyleBakeMetadata,
   TerrainManifest,
 } from './editorPublishReadinessContracts'
 import type { EditorTerrainSourceAssetStatus } from './editorTerrainPipeline'
@@ -120,6 +123,24 @@ export async function loadEditorPublishReadiness(
         ] as const,
     ),
   )
+  const styleBakeMetadataEntries = input.styleBakeMetadata
+    ? Object.entries(input.styleBakeMetadata)
+    : await Promise.all(
+        [
+          ...new Set(
+            (input.scene?.nodes ?? [])
+              .filter(isEditorStyleBakeCandidate)
+              .map(node => getEditorStyleBakeMetadataUrl(node))
+              .filter(Boolean),
+          ),
+        ].map(
+          async url =>
+            [
+              url,
+              await fetchJson<StyleBakeMetadata>(fetchImpl, url),
+            ] as const,
+        ),
+      )
 
   return buildEditorPublishReadinessViewModel({
     levelId: input.levelId,
@@ -135,5 +156,6 @@ export async function loadEditorPublishReadiness(
     terrainSourceAssets: terrainStatus.sourceAssets,
     missingTerrainSourceAssets: terrainStatus.missingSourceAssets,
     colliderMetadata: Object.fromEntries(colliderMetadataEntries),
+    styleBakeMetadata: Object.fromEntries(styleBakeMetadataEntries),
   })
 }

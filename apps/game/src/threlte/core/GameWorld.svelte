@@ -20,6 +20,7 @@ import {
   runtimeLoadedColliderUrlsStore,
 } from '../stores/runtimeCollisionRegistry'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
+import type { SceneSettings } from '../engine/sceneDocumentTypes'
 
 const dispatch = createEventDispatcher()
 
@@ -40,7 +41,6 @@ export let currentLevelRenderConfig: {
 export let physicsSystemComponent: any = null
 export let playerComponentClass: any = null
 export let multiplayerManagerComponent: any = null
-export let editorCollisionOverlayComponent: any = null
 export let editorSceneLayerComponent: any = null
 export let editorTerrainSculptLayerComponent: any = null
 export let editorViewportControlsComponent: any = null
@@ -93,6 +93,7 @@ let editorPlaytestStartRotation: PlayerLevelPositionDetail['rotation'] | null =
   null
 let editorPlaytestPlayerSettings: RuntimePlayerSettings =
   resolveRuntimePlayerSettings(null)
+let editorSceneSettingsOverride: SceneSettings | null = null
 
 function forward(type: string, detail: unknown) {
   dispatch(type, detail)
@@ -226,6 +227,14 @@ function handlePlayerPoseChange(detail: {
   editorPlaytestResumeRotation = detail.rotation ?? editorPlaytestResumeRotation
 }
 
+function handleEditorSceneSettingsChange(detail: {
+  levelId?: string
+  settings?: SceneSettings
+}) {
+  if (!editorEnabled || detail.levelId !== activeLevelKey) return
+  editorSceneSettingsOverride = detail.settings ?? null
+}
+
 function resetPhysicsReadiness() {
   staticWorldReady = false
   physicsReady = false
@@ -266,6 +275,7 @@ function resetWorldSession() {
   editorPlaytestStartPosition = null
   editorPlaytestStartRotation = null
   editorPlaytestPlayerSettings = resolveRuntimePlayerSettings(null)
+  editorSceneSettingsOverride = null
 }
 
 $: editorEditPlayerPosition =
@@ -362,6 +372,7 @@ $: if (
         dt: isMobile ? 1 / 30 : 1 / 60,
         minSolverIterations: isMobile ? 8 : 16
       }}
+      collisionDebugEnabled={collisionOverlayEnabled}
       on:physicsReady={() => {
         physicsReady = true
       }}
@@ -374,8 +385,8 @@ $: if (
           timelineEvents={parsedTimelineEvents}
           timelineEventsJson={timelineEventsPayload}
           interactionSystem={interactionSystemRef}
+          editorSceneSettingsOverride={editorEnabled ? editorSceneSettingsOverride : null}
           position={currentLevelRenderConfig.offset}
-          collisionDebugEnabled={editorEnabled && collisionOverlayEnabled}
           on:starSelected={(e) => forward('starSelected', e.detail)}
           on:telescopeInteraction={(e) => forward('telescopeInteraction', e.detail)}
           on:noteRead={(e) => forward('noteRead', e.detail)}
@@ -389,7 +400,8 @@ $: if (
       {#if editorEnabled && editorViewportControlsComponent}
         <svelte:component
           this={editorViewportControlsComponent}
-          enabled={!activeEditorPlaytestMode}
+          enabled={editorEnabled}
+          useActiveCamera={activeEditorPlaytestMode}
         />
       {/if}
 
@@ -426,7 +438,7 @@ $: if (
           <svelte:component
             this={editorSceneLayerComponent}
             levelId={currentLevel}
-            editorEnabled={!activeEditorPlaytestMode}
+            {editorEnabled}
             playtestEnabled={activeEditorPlaytestMode}
             playtestPlayerPosition={editorPlaytestResumePosition}
             playtestPlayerRotation={editorPlaytestResumeRotation}
@@ -435,12 +447,10 @@ $: if (
             on:noteRead={(e) => forward('noteRead', e.detail)}
             on:editorPlaytestSpawn={(e) => handleEditorPlaytestSpawn(e.detail)}
             on:editorPlaytestReady={(e) => handleEditorPlaytestReady(e.detail)}
+            on:editorSceneSettingsChange={(e) => handleEditorSceneSettingsChange(e.detail)}
           />
         {/if}
-        {#if editorEnabled && !activeEditorPlaytestMode && editorCollisionOverlayComponent}
-          <svelte:component this={editorCollisionOverlayComponent} levelId={currentLevel} />
-        {/if}
-        {#if editorEnabled && !activeEditorPlaytestMode && editorTerrainSculptLayerComponent}
+        {#if editorEnabled && editorTerrainSculptLayerComponent}
           <svelte:component this={editorTerrainSculptLayerComponent} levelId={currentLevel} />
         {/if}
       {/if}

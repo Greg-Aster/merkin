@@ -116,7 +116,6 @@ let physicsSystemComponent: any = null
 let playerComponentClass: any = null
 let editorPanelComponent: any = null
 let editorControlsOverlayComponent: any = null
-let editorCollisionOverlayComponent: any = null
 let editorCircleSelectOverlayComponent: any = null
 let editorMarqueeOverlayComponent: any = null
 let editorSceneLayerComponent: any = null
@@ -363,8 +362,6 @@ async function ensureEditorFeatures() {
     editorPanelComponent = editorFeatures.editorPanelComponent
     editorControlsOverlayComponent =
       editorFeatures.editorControlsOverlayComponent
-    editorCollisionOverlayComponent =
-      editorFeatures.editorCollisionOverlayComponent
     editorCircleSelectOverlayComponent =
       editorFeatures.editorCircleSelectOverlayComponent
     editorMarqueeOverlayComponent = editorFeatures.editorMarqueeOverlayComponent
@@ -795,7 +792,6 @@ onDestroy(() => {
         {physicsSystemComponent}
         {playerComponentClass}
         {multiplayerManagerComponent}
-        {editorCollisionOverlayComponent}
         {editorSceneLayerComponent}
         {editorTerrainSculptLayerComponent}
         {editorViewportControlsComponent}

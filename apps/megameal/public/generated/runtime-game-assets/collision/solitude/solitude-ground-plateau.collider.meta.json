@@ -1,7 +1,8 @@
 {
-  "schemaVersion": 2,
-  "generatedBy": "bake-mesh-collider",
-  "generatedAt": "2026-05-13T18:40:28.725Z",
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:29:59.740Z",
+  "generatorVersion": "mesh-collision-manager-v1",
   "sourceLevelId": "solitude",
   "sourceActorId": "solitude-ground-plateau",
   "sourceAssetUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
@@ -13,6 +14,7 @@
   "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:68f63130f6fa1763b9b2c888e91296a96c2f7f48c97268c997664f61d8e8a0cc:99f17c516af36ee43d130bf98c7135bd07b55caea21c4227644805ae461a285a:ab033e1df88e71c810b4fca94607cf6db3c0d51ef6db7838e001cc658da09d66",
   "triangleCount": 19000,
   "vertexCount": 22218,
   "bounds": {
@@ -187,12 +189,61 @@
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-13T18:40:28.725Z"
+    "generatedAt": "2026-05-14T21:29:59.740Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "walkable",
     "channel": "worldStatic",
+    "triangleBudget": 20000
+  },
+  "collisionProduct": {
+    "actorId": "solitude-ground-plateau",
+    "mode": "auto",
+    "productId": "solitude-ground-plateau:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "generatedAt": "2026-05-14T21:29:59.740Z",
+    "sourceKind": "asset",
+    "sourceMeshUrl": "/generated/hunyuan3d/solitude-plateau/solitude-plateau-generated-2026-04-19T18-12-34-007Z.glb",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "68f63130f6fa1763b9b2c888e91296a96c2f7f48c97268c997664f61d8e8a0cc"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "99f17c516af36ee43d130bf98c7135bd07b55caea21c4227644805ae461a285a"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "ab033e1df88e71c810b4fca94607cf6db3c0d51ef6db7838e001cc658da09d66"
+    },
+    "shape": "trimesh",
+    "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-plateau.collider.meta.json",
+    "localBounds": {
+      "min": [
+        -0.8996759057044983,
+        -1.0030039548873901,
+        -0.9492046236991882
+      ],
+      "max": [
+        0.8806980848312378,
+        0.97152179479599,
+        0.9208857417106628
+      ],
+      "size": [
+        1.780373990535736,
+        1.9745257496833801,
+        1.870090365409851
+      ],
+      "center": [
+        -0.009488910436630249,
+        -0.015741080045700073,
+        -0.014159440994262695
+      ]
+    },
+    "triangleCount": 19000,
+    "vertexCount": 22218,
     "triangleBudget": 20000
   },
   "simplification": {

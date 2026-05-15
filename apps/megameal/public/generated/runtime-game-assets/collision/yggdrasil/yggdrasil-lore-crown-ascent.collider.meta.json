@@ -1,0 +1,299 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-15T02:11:07.867Z",
+  "generatorVersion": "mesh-collision-manager-v2",
+  "sourceLevelId": "yggdrasil",
+  "sourceActorId": "yggdrasil-lore-crown-ascent",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78"
+  },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8"
+  },
+  "lodSourceTier": "low",
+  "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-lore-crown-ascent.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-lore-crown-ascent.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-lore-crown-ascent.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v2:3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8:945943fdb625942fcf22be908713f7c177d1439695316fe06fc801f719cbb055:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
+  "triangleCount": 267,
+  "vertexCount": 210,
+  "bounds": {
+    "min": [
+      -0.36000001430511475,
+      -1.4901161415892261e-9,
+      -0.4688721001148224
+    ],
+    "max": [
+      0.4449999928474426,
+      0.21707090735435486,
+      0.47316426038742065
+    ],
+    "size": [
+      0.8050000071525574,
+      0.217070908844471,
+      0.942036360502243
+    ],
+    "center": [
+      0.04249998927116394,
+      0.10853545293211936,
+      0.0021460801362991333
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -32767,
+      -7548,
+      -32767
+    ],
+    "max": [
+      32767,
+      7548,
+      32767
+    ],
+    "size": [
+      65534,
+      15096,
+      65534
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.36000001430511475,
+      -1.4901161415892261e-9,
+      -0.4688721001148224
+    ],
+    "max": [
+      0.4449999928474426,
+      0.21707090735435486,
+      0.47316426038742065
+    ],
+    "size": [
+      0.8050000071525574,
+      0.217070908844471,
+      0.942036360502243
+    ],
+    "center": [
+      0.04249998927116394,
+      0.10853545293211936,
+      0.0021460801362991333
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.36000001430511475,
+      -1.4901161415892261e-9,
+      -0.4688721001148224
+    ],
+    "max": [
+      0.4449999928474426,
+      0.21707090735435486,
+      0.47316426038742065
+    ],
+    "size": [
+      0.8050000071525574,
+      0.217070908844471,
+      0.942036360502243
+    ],
+    "center": [
+      0.04249998927116394,
+      0.10853545293211936,
+      0.0021460801362991333
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+    "sourceNodeName": "Ascent Chronicle",
+    "visualLocalBounds": {
+      "min": [
+        -0.36000001430511475,
+        -1.4901161415892261e-9,
+        -0.4688721001148224
+      ],
+      "max": [
+        0.4449999928474426,
+        0.21707090735435486,
+        0.47316426038742065
+      ],
+      "size": [
+        0.8050000071525574,
+        0.217070908844471,
+        0.942036360502243
+      ],
+      "center": [
+        0.04249998927116394,
+        0.10853545293211936,
+        0.0021460801362991333
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.36000001430511475,
+        -1.4901161415892261e-9,
+        -0.4688721001148224
+      ],
+      "max": [
+        0.4449999928474426,
+        0.21707090735435486,
+        0.47316426038742065
+      ],
+      "size": [
+        0.8050000071525574,
+        0.217070908844471,
+        0.942036360502243
+      ],
+      "center": [
+        0.04249998927116394,
+        0.10853545293211936,
+        0.0021460801362991333
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "yggdrasil-lore-crown-ascent",
+    "sourceActorName": "Ascent Chronicle",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78"
+    },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8"
+    },
+    "lodSourceTier": "low",
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "yggdrasil",
+      "nodeId": "yggdrasil-lore-crown-ascent",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+      "lodSourceTier": "low",
+      "intent": "trigger",
+      "channel": "trigger",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-15T02:11:07.867Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "trigger",
+    "channel": "trigger",
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
+  },
+  "collisionProduct": {
+    "actorId": "yggdrasil-lore-crown-ascent",
+    "cacheKey": "mesh-collision-manager-v2:3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8:945943fdb625942fcf22be908713f7c177d1439695316fe06fc801f719cbb055:2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80",
+    "mode": "trigger",
+    "productId": "yggdrasil-lore-crown-ascent:trigger:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v2",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "3846a53e1e02052c2f4df937b6142180403d8955c0b9e319aba78653af4fc3c8"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "945943fdb625942fcf22be908713f7c177d1439695316fe06fc801f719cbb055"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "2e229fcda9bfc30a84cc06fd39768d54d7bd5598dce4e8e693ae4cf2b1af1c80"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -0.36000001430511475,
+        -1.4901161415892261e-9,
+        -0.4688721001148224
+      ],
+      "max": [
+        0.4449999928474426,
+        0.21707090735435486,
+        0.47316426038742065
+      ],
+      "size": [
+        0.8050000071525574,
+        0.217070908844471,
+        0.942036360502243
+      ],
+      "center": [
+        0.04249998927116394,
+        0.10853545293211936,
+        0.0021460801362991333
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-lore-crown-ascent.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-lore-crown-ascent.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.low.glb",
+    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+    "triangleCount": 267,
+    "vertexCount": 210,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 267,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

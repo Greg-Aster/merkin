@@ -1,0 +1,299 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-15T02:10:54.306Z",
+  "generatorVersion": "mesh-collision-manager-v2",
+  "sourceLevelId": "yggdrasil",
+  "sourceActorId": "yggdrasil-shrine-urd-growth",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "28f078b578898fbca87fbfc83fa3bf7963afb8d9f6bbf353993c63efc46c7914"
+  },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12"
+  },
+  "lodSourceTier": "low",
+  "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v2:8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "triangleCount": 434,
+  "vertexCount": 449,
+  "bounds": {
+    "min": [
+      -0.5899999737739563,
+      -0.5899999737739563,
+      -0.5
+    ],
+    "max": [
+      0.5899999737739563,
+      2.950000047683716,
+      0.5
+    ],
+    "size": [
+      1.1799999475479126,
+      3.540000021457672,
+      1
+    ],
+    "center": [
+      0,
+      1.1800000369548798,
+      0
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -32767,
+      -32767,
+      -32767
+    ],
+    "max": [
+      32767,
+      32767,
+      32767
+    ],
+    "size": [
+      65534,
+      65534,
+      65534
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.5899999737739563,
+      -0.5899999737739563,
+      -0.5
+    ],
+    "max": [
+      0.5899999737739563,
+      2.950000047683716,
+      0.5
+    ],
+    "size": [
+      1.1799999475479126,
+      3.540000021457672,
+      1
+    ],
+    "center": [
+      0,
+      1.1800000369548798,
+      0
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.5899999737739563,
+      -0.5899999737739563,
+      -0.5
+    ],
+    "max": [
+      0.5899999737739563,
+      2.950000047683716,
+      0.5
+    ],
+    "size": [
+      1.1799999475479126,
+      3.540000021457672,
+      1
+    ],
+    "center": [
+      0,
+      1.1800000369548798,
+      0
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+    "sourceNodeName": "Urd Root Shrine",
+    "visualLocalBounds": {
+      "min": [
+        -0.5899999737739563,
+        -0.5899999737739563,
+        -0.5
+      ],
+      "max": [
+        0.5899999737739563,
+        2.950000047683716,
+        0.5
+      ],
+      "size": [
+        1.1799999475479126,
+        3.540000021457672,
+        1
+      ],
+      "center": [
+        0,
+        1.1800000369548798,
+        0
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.5899999737739563,
+        -0.5899999737739563,
+        -0.5
+      ],
+      "max": [
+        0.5899999737739563,
+        2.950000047683716,
+        0.5
+      ],
+      "size": [
+        1.1799999475479126,
+        3.540000021457672,
+        1
+      ],
+      "center": [
+        0,
+        1.1800000369548798,
+        0
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "yggdrasil-shrine-urd-growth",
+    "sourceActorName": "Urd Root Shrine",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "28f078b578898fbca87fbfc83fa3bf7963afb8d9f6bbf353993c63efc46c7914"
+    },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12"
+    },
+    "lodSourceTier": "low",
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "yggdrasil",
+      "nodeId": "yggdrasil-shrine-urd-growth",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
+      "lodSourceTier": "low",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-15T02:10:54.306Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
+  },
+  "collisionProduct": {
+    "actorId": "yggdrasil-shrine-urd-growth",
+    "cacheKey": "mesh-collision-manager-v2:8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12:b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+    "mode": "auto",
+    "productId": "yggdrasil-shrine-urd-growth:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v2",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "8bcd59ca5bd9571eef37a497038e9a1143d21e2bd6431b066cf0cb9f276f6b12"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "b61266f4c4a0e2c6802e322a24d32d275a8c544fda59a5f9e5f09547e931807a"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -0.5899999737739563,
+        -0.5899999737739563,
+        -0.5
+      ],
+      "max": [
+        0.5899999737739563,
+        2.950000047683716,
+        0.5
+      ],
+      "size": [
+        1.1799999475479126,
+        3.540000021457672,
+        1
+      ],
+      "center": [
+        0,
+        1.1800000369548798,
+        0
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-shrine-urd-growth.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.low.glb",
+    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/growth-planter/growth-planter.glb",
+    "triangleCount": 434,
+    "vertexCount": 449,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 434,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

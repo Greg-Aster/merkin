@@ -16,7 +16,9 @@ async function loadRuntimeSceneManifest(levelId: string) {
   const url = getRuntimeSceneManifestUrl(levelId)
 
   try {
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      cache: import.meta.env.DEV ? 'no-store' : 'default',
+    })
     if (!response.ok) return null
 
     const manifest = await response.json()

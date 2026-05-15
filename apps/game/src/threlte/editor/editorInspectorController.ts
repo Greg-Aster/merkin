@@ -1,14 +1,15 @@
 import { EDITOR_API_BASE } from '@config/editorApi'
 import { getPrefabAssetUrl } from './editorBakeSource'
-import {
-  getNodeVisualColliderSizeSource,
-  isEditorGeometryNode,
-} from './editorCollisionDefaults'
+import { isEditorGeometryNode } from './editorCollisionDefaults'
 import {
   type GeneratedAssetVisualBounds,
   fitGeneratedAssetToSource,
 } from './editorGeneratedAssetApplication'
+import { getDefaultChildPointLightPosition } from './editorLightPlacement'
 import type {
+  EditorCollisionLodSourceTier,
+  EditorCollisionMode,
+  EditorCollisionQuality,
   EditorNodeCollisionData,
   EditorPrimitiveData,
   EditorRigidBodyType,
@@ -127,15 +128,26 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
       .filter(node => idSet.has(node.id) && isEditorGeometryNode(node))
   }
 
-  function getCollisionSizeForShape(
-    node: EditorSceneNode,
-    shape: EditorNodeCollisionData['shape'],
-  ) {
-    return shape === 'trimesh'
-      ? {}
-      : {
-          size: node.collision?.size ?? deps.getNodeVisualColliderSize(node),
-        }
+  function clearCollisionArtifactFields(
+    collision: EditorNodeCollisionData,
+  ): EditorNodeCollisionData {
+    return {
+      ...collision,
+      shape: undefined,
+      enabled: undefined,
+      size: undefined,
+      colliderUrl: undefined,
+      colliderMetadataUrl: undefined,
+      colliderCacheKey: undefined,
+      assetLocalTransform: undefined,
+      sourceAssetUrl: undefined,
+      colliderSourceAssetUrl: undefined,
+      lockToObject: undefined,
+      lodSourceTier: undefined,
+      triangleBudget: undefined,
+      triangleCount: undefined,
+      vertexCount: undefined,
+    }
   }
 
   function updateVisualOnlyRoleForNodes(
@@ -199,20 +211,12 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     options: Partial<EditorNodeCollisionData> = {},
   ): EditorNodeCollisionData {
     const defaultShape = deps.getDefaultCollisionShape(node)
-    const previousShape =
+    const shape =
       options.shape ??
       (node.kind === 'asset' || node.kind === 'prefab'
         ? defaultShape
         : node.collision?.shape) ??
       defaultShape
-    const shape =
-      intent === 'detailMesh'
-        ? options.shape ??
-          (node.kind === 'asset' || node.kind === 'prefab'
-            ? defaultShape
-            : node.collision?.shape) ??
-          'trimesh'
-        : previousShape
     const channel =
       options.channel ??
       (intent === 'trigger'
@@ -220,23 +224,39 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
         : intent === 'detailMesh'
           ? 'detail'
           : 'worldStatic')
+    const quality =
+      options.quality ??
+      node.collision?.quality ??
+      (intent === 'detailMesh' || shape === 'trimesh'
+        ? 'simplifiedMesh'
+        : 'primitive')
+    const mode =
+      options.mode ??
+      (intent === 'trigger'
+        ? 'trigger'
+        : node.collision?.mode === 'none'
+          ? 'auto'
+          : node.collision?.mode ?? 'auto')
 
-    return {
+    return clearCollisionArtifactFields({
       ...(node.collision ?? {}),
-      shape,
       intent,
       channel,
-      enabled: true,
+      mode,
+      quality,
       sensor: options.sensor ?? intent === 'trigger',
       friction: options.friction ?? node.collision?.friction ?? 0.7,
       restitution: options.restitution ?? node.collision?.restitution ?? 0,
-      triangleBudget:
-        intent === 'detailMesh'
-          ? options.triangleBudget ?? node.collision?.triangleBudget ?? 0
-          : node.collision?.triangleBudget,
-      ...getCollisionSizeForShape(node, shape),
+      maxTriangles:
+        quality === 'primitive'
+          ? undefined
+          : options.maxTriangles ??
+            node.collision?.maxTriangles ??
+            (intent === 'detailMesh' ? 20000 : 5000),
+      generationStatus: quality === 'primitive' ? 'ready' : 'dirty',
+      generationLastError: undefined,
       ...options,
-    }
+    })
   }
 
   function applyCollisionPresetToSelection(
@@ -456,7 +476,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     deps.selectEditorNode(targetNode.id)
     deps.setAssetPickerTargetNodeId('')
     deps.setSaveMessage(
-      `Replaced ${targetNode.name} with ${selectedLibraryItem.name}; collision preserved`,
+      `Replaced ${targetNode.name} with ${selectedLibraryItem.name}`,
     )
     void deps.inspectSelectedAssetForHunyuan(url, targetNode.id)
   }
@@ -541,7 +561,6 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
       assetUrl,
       [...selectedNode.scale] as [number, number, number],
     )
-
     deps.patchNode(selectedNode.id, {
       kind: 'asset',
       asset: { url: assetUrl },
@@ -561,15 +580,12 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     deps.appendPipelineLog('Applied generated variant with visual fit', {
       nodeId: selectedNode.id,
       assetUrl,
-      collisionPreserved: Boolean(selectedNode.collision),
       fitReport: fitResult.report,
       transform: deps.getNodeTransformSnapshot(selectedNode),
     })
     deps.setSelectedGeneratedVariantUrl(assetUrl)
     deps.setHunyuanLastOutputUrl(assetUrl)
-    deps.setSaveMessage(
-      `Applied variant to ${selectedNode.name}; collision preserved`,
-    )
+    deps.setSaveMessage(`Applied variant to ${selectedNode.name}`)
     void deps.inspectSelectedAssetForHunyuan(assetUrl, selectedNode.id)
   }
 
@@ -673,42 +689,165 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
 
   function updateCollisionEnabled(value: boolean) {
     const selectedNode = deps.getSelectedNode()
-    if (!selectedNode) return
+    if (!selectedNode || !isEditorGeometryNode(selectedNode)) return
     const defaultShape = deps.getDefaultCollisionShape(selectedNode)
     const defaultIntent = deps.getDefaultCollisionIntent(selectedNode)
 
     if (value) {
       enableCollisionRoleForNodes([selectedNode])
     } else {
-      disableCollisionRoleForNodes([selectedNode])
+      enableCollisionRoleForNodes([selectedNode])
     }
 
     deps.patchNode(selectedNode.id, {
       collision: value
         ? {
-            shape: defaultShape,
             intent: selectedNode.collision?.intent ?? defaultIntent,
             channel:
               selectedNode.collision?.channel ??
               deps.getDefaultCollisionChannel(selectedNode),
-            enabled: true,
-            ...(defaultShape === 'trimesh'
-              ? {}
-              : {
-                  size:
-                    selectedNode.collision?.size ??
-                    deps.getNodeVisualColliderSize(selectedNode),
-                }),
+            mode:
+              selectedNode.collision?.mode === 'none'
+                ? 'auto'
+                : selectedNode.collision?.mode ?? 'auto',
+            quality:
+              selectedNode.collision?.quality ??
+              (defaultShape === 'trimesh' ? 'simplifiedMesh' : 'primitive'),
             friction: selectedNode.collision?.friction ?? 0.7,
             restitution: selectedNode.collision?.restitution ?? 0,
             sensor: selectedNode.collision?.sensor ?? false,
           }
         : {
-            shape: 'cuboid',
             intent: 'none',
             channel: 'worldStatic',
-            enabled: false,
+            mode: 'none',
           },
+    })
+  }
+
+  function getQualityShape(
+    node: EditorSceneNode,
+    quality: EditorCollisionQuality,
+  ): EditorNodeCollisionData['shape'] {
+    if (quality === 'primitive') return deps.getDefaultCollisionShape(node)
+    return 'trimesh'
+  }
+
+  function getGenerationStatusForQuality(
+    quality: EditorCollisionQuality,
+  ): EditorNodeCollisionData['generationStatus'] {
+    return quality === 'primitive' ? 'ready' : 'dirty'
+  }
+
+  function updateCollisionMode(value: EditorCollisionMode) {
+    const selectedNode = deps.getSelectedNode()
+    if (!selectedNode || !isEditorGeometryNode(selectedNode)) return
+
+    if (value === 'none') {
+      enableCollisionRoleForNodes([selectedNode])
+      deps.patchNode(selectedNode.id, {
+        collision: {
+          ...(selectedNode.collision ?? {
+            channel: deps.getDefaultCollisionChannel(selectedNode),
+          }),
+          mode: 'none',
+          intent: 'none',
+          generationStatus: undefined,
+          generationLastError: undefined,
+        },
+      })
+      deps.setSaveMessage(`Disabled collision for ${selectedNode.name}`)
+      return
+    }
+
+    const intent =
+      value === 'trigger'
+        ? 'trigger'
+        : selectedNode.collision?.intent &&
+            selectedNode.collision.intent !== 'none'
+          ? selectedNode.collision.intent
+          : deps.getDefaultCollisionIntent(selectedNode)
+    applyCollisionPresetToNodes(
+      [selectedNode],
+      intent,
+      value === 'trigger'
+        ? 'Set collision mode to trigger'
+        : 'Set collision mode to auto',
+      {
+        mode: value,
+        sensor: value === 'trigger',
+      },
+    )
+  }
+
+  function updateCollisionQuality(value: EditorCollisionQuality) {
+    const selectedNode = deps.getSelectedNode()
+    if (!selectedNode || !isEditorGeometryNode(selectedNode)) return
+
+    const shape = getQualityShape(selectedNode, value)
+    const intent =
+      selectedNode.collision?.intent && selectedNode.collision.intent !== 'none'
+        ? selectedNode.collision.intent
+        : deps.getDefaultCollisionIntent(selectedNode)
+    const mode =
+      selectedNode.collision?.mode && selectedNode.collision.mode !== 'none'
+        ? selectedNode.collision.mode
+        : intent === 'trigger'
+          ? 'trigger'
+          : 'auto'
+    const nextCollision: EditorNodeCollisionData = {
+      ...clearCollisionArtifactFields(
+        selectedNode.collision ??
+          buildCollisionPreset(selectedNode, intent, { shape }),
+      ),
+      mode,
+      quality: value,
+      intent,
+      channel:
+        selectedNode.collision?.channel ??
+        deps.getDefaultCollisionChannel(selectedNode),
+      generationStatus: getGenerationStatusForQuality(value),
+      generationLastError: undefined,
+      ...(shape === 'trimesh'
+        ? {
+            maxTriangles: selectedNode.collision?.maxTriangles ?? 5000,
+          }
+        : {
+            maxTriangles: undefined,
+          }),
+    }
+
+    enableCollisionRoleForNodes([selectedNode])
+    deps.patchNode(selectedNode.id, {
+      collision: nextCollision,
+      physics: {
+        ...(selectedNode.physics ?? {}),
+        bodyType: selectedNode.physics?.bodyType ?? 'fixed',
+      },
+    })
+    deps.setSaveMessage(
+      value === 'primitive'
+        ? `Set ${selectedNode.name} collision quality to primitive`
+        : `Set ${selectedNode.name} collision quality to ${value}; regeneration required`,
+    )
+  }
+
+  function updateCollisionLodSourceTier(value: EditorCollisionLodSourceTier) {
+    const selectedNode = deps.getSelectedNode()
+    if (!selectedNode || !isEditorGeometryNode(selectedNode)) return
+    enableCollisionRoleForNodes([selectedNode])
+    deps.patchNode(selectedNode.id, {
+      collision: {
+        ...(selectedNode.collision ?? {
+          intent: deps.getDefaultCollisionIntent(selectedNode),
+          channel: deps.getDefaultCollisionChannel(selectedNode),
+        }),
+        mode: selectedNode.collision?.mode ?? 'auto',
+        lodTier: value,
+        generationStatus:
+          selectedNode.collision?.quality === 'primitive' ? 'ready' : 'dirty',
+        generationLastError: undefined,
+      },
     })
   }
 
@@ -716,209 +855,215 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     const selectedNode = deps.getSelectedNode()
     if (!selectedNode || !isEditorGeometryNode(selectedNode)) return
     const requestedShape = value as EditorNodeCollisionData['shape']
-    const shape =
+    const quality =
       selectedNode.kind === 'asset' || selectedNode.kind === 'prefab'
-        ? 'trimesh'
-        : requestedShape
-    enableCollisionRoleForNodes([selectedNode])
-    const baseCollision =
+        ? 'simplifiedMesh'
+        : requestedShape === 'trimesh'
+          ? 'simplifiedMesh'
+          : 'primitive'
+    const intent =
+      selectedNode.collision?.intent && selectedNode.collision.intent !== 'none'
+        ? selectedNode.collision.intent
+        : deps.getDefaultCollisionIntent(selectedNode)
+    const baseCollision = clearCollisionArtifactFields(
       selectedNode.collision ??
-      buildCollisionPreset(
-        selectedNode,
-        deps.getDefaultCollisionIntent(selectedNode),
-        { shape },
-      )
+        buildCollisionPreset(selectedNode, intent, {
+          quality,
+          shape: requestedShape,
+        }),
+    )
+    const mode =
+      baseCollision.mode && baseCollision.mode !== 'none'
+        ? baseCollision.mode
+        : intent === 'trigger'
+          ? 'trigger'
+          : 'auto'
+
+    enableCollisionRoleForNodes([selectedNode])
 
     deps.patchNode(selectedNode.id, {
       collision: {
         ...baseCollision,
-        shape,
-        enabled: baseCollision.intent !== 'none',
-        ...(shape === 'trimesh'
-          ? { size: undefined }
-          : {
-              size:
-                selectedNode.collision?.size ??
-                deps.getNodeVisualColliderSize(selectedNode),
-            }),
+        mode,
+        intent,
+        channel:
+          baseCollision.channel ??
+          deps.getDefaultCollisionChannel(selectedNode),
+        quality,
+        maxTriangles:
+          quality === 'primitive'
+            ? undefined
+            : selectedNode.collision?.maxTriangles ?? 5000,
+        generationStatus: getGenerationStatusForQuality(quality),
+        generationLastError: undefined,
       },
     })
   }
 
   function updateCollisionIntent(value: string) {
     const selectedNode = deps.getSelectedNode()
-    if (!selectedNode) return
-    const defaultShape = deps.getDefaultCollisionShape(selectedNode)
-    const intent = value as EditorNodeCollisionData['intent']
+    if (!selectedNode || !isEditorGeometryNode(selectedNode)) return
+    const intent = value as NonNullable<EditorNodeCollisionData['intent']>
+    const baseCollision =
+      selectedNode.collision ??
+      buildCollisionPreset(
+        selectedNode,
+        intent === 'none'
+          ? deps.getDefaultCollisionIntent(selectedNode)
+          : intent,
+      )
 
     if (intent === 'none') {
-      disableCollisionRoleForNodes([selectedNode])
-    } else {
       enableCollisionRoleForNodes([selectedNode])
+      deps.patchNode(selectedNode.id, {
+        collision: {
+          ...baseCollision,
+          intent,
+          channel: baseCollision.channel ?? 'worldStatic',
+          mode: 'none',
+          sensor: false,
+          generationStatus: undefined,
+          generationLastError: undefined,
+        },
+      })
+      return
     }
 
+    enableCollisionRoleForNodes([selectedNode])
+    const mode =
+      intent === 'trigger'
+        ? 'trigger'
+        : selectedNode.collision?.mode === 'none'
+          ? 'auto'
+          : selectedNode.collision?.mode ?? 'auto'
+    const quality = baseCollision.quality ?? 'primitive'
+
     deps.patchNode(selectedNode.id, {
-      collision:
-        intent === 'none'
-          ? {
-              ...(selectedNode.collision ?? { shape: defaultShape }),
+      collision: {
+        ...baseCollision,
+        intent,
+        mode,
+        channel:
+          baseCollision.channel ??
+          deps.getDefaultCollisionChannel({
+            ...selectedNode,
+            collision: {
+              ...baseCollision,
               intent,
-              channel: selectedNode.collision?.channel ?? 'worldStatic',
-              enabled: false,
-            }
-          : {
-              ...(selectedNode.collision ?? {
-                shape: defaultShape,
-                ...(defaultShape === 'trimesh'
-                  ? {}
-                  : { size: deps.getNodeVisualColliderSize(selectedNode) }),
-              }),
-              intent,
-              channel:
-                selectedNode.collision?.channel ??
-                deps.getDefaultCollisionChannel({
-                  ...selectedNode,
-                  collision: {
-                    ...(selectedNode.collision ?? { shape: defaultShape }),
-                    intent,
-                  },
-                }),
-              enabled: true,
-              sensor: intent === 'trigger',
-              friction: selectedNode.collision?.friction ?? 0.7,
-              restitution: selectedNode.collision?.restitution ?? 0,
             },
+          }),
+        sensor: intent === 'trigger',
+        friction: baseCollision.friction ?? 0.7,
+        restitution: baseCollision.restitution ?? 0,
+        generationStatus:
+          quality === 'primitive'
+            ? 'ready'
+            : selectedNode.collision?.intent === intent
+              ? baseCollision.generationStatus
+              : 'dirty',
+        generationLastError:
+          quality === 'primitive' || selectedNode.collision?.intent !== intent
+            ? undefined
+            : baseCollision.generationLastError,
+      },
     })
   }
 
   function updateCollisionChannel(value: string) {
     const selectedNode = deps.getSelectedNode()
-    if (!selectedNode) return
-    const defaultShape = deps.getDefaultCollisionShape(selectedNode)
+    if (!selectedNode || !isEditorGeometryNode(selectedNode)) return
+    const baseCollision =
+      selectedNode.collision ??
+      buildCollisionPreset(
+        selectedNode,
+        deps.getDefaultCollisionIntent(selectedNode),
+      )
+    const quality = baseCollision.quality ?? 'primitive'
     enableCollisionRoleForNodes([selectedNode])
 
     deps.patchNode(selectedNode.id, {
       collision: {
-        ...(selectedNode.collision ?? {
-          shape: defaultShape,
-          intent: deps.getDefaultCollisionIntent(selectedNode),
-          ...(defaultShape === 'trimesh'
-            ? {}
-            : { size: deps.getNodeVisualColliderSize(selectedNode) }),
-        }),
+        ...baseCollision,
+        mode:
+          selectedNode.collision?.mode === 'none'
+            ? 'auto'
+            : selectedNode.collision?.mode ?? 'auto',
         channel: value as EditorNodeCollisionData['channel'],
-        enabled: selectedNode.collision?.intent !== 'none',
+        generationStatus:
+          quality === 'primitive'
+            ? 'ready'
+            : selectedNode.collision?.channel === value
+              ? baseCollision.generationStatus
+              : 'dirty',
+        generationLastError:
+          quality === 'primitive' || selectedNode.collision?.channel !== value
+            ? undefined
+            : baseCollision.generationLastError,
       },
     })
   }
 
   function updateCollisionNumericField(
-    field: 'friction' | 'restitution' | 'triangleBudget',
+    field: 'friction' | 'restitution' | 'maxTriangles',
     value: string,
   ) {
     const selectedNode = deps.getSelectedNode()
-    if (!selectedNode) return
+    if (!selectedNode || !isEditorGeometryNode(selectedNode)) return
     const numeric = Number(value)
     if (Number.isNaN(numeric)) return
-    const defaultShape = deps.getDefaultCollisionShape(selectedNode)
+    const baseCollision =
+      selectedNode.collision ??
+      buildCollisionPreset(
+        selectedNode,
+        deps.getDefaultCollisionIntent(selectedNode),
+      )
+    const quality = baseCollision.quality ?? 'primitive'
     enableCollisionRoleForNodes([selectedNode])
 
     deps.patchNode(selectedNode.id, {
       collision: {
-        ...(selectedNode.collision ?? {
-          shape: defaultShape,
-          intent: deps.getDefaultCollisionIntent(selectedNode),
-          channel: deps.getDefaultCollisionChannel(selectedNode),
-          ...(defaultShape === 'trimesh'
-            ? {}
-            : { size: deps.getNodeVisualColliderSize(selectedNode) }),
-        }),
-        enabled: true,
+        ...baseCollision,
+        mode:
+          selectedNode.collision?.mode === 'none'
+            ? 'auto'
+            : selectedNode.collision?.mode ?? 'auto',
+        ...(field === 'maxTriangles' && quality !== 'primitive'
+          ? {
+              generationStatus: 'dirty' as const,
+              generationLastError: undefined,
+            }
+          : {}),
         [field]: numeric,
-      },
-    })
-  }
-
-  function updateCollisionStringField(field: 'colliderUrl', value: string) {
-    const selectedNode = deps.getSelectedNode()
-    if (!selectedNode) return
-    const defaultShape = deps.getDefaultCollisionShape(selectedNode)
-    const normalized = value.trim()
-    enableCollisionRoleForNodes([selectedNode])
-
-    deps.patchNode(selectedNode.id, {
-      collision: {
-        ...(selectedNode.collision ?? {
-          shape: defaultShape,
-          intent: deps.getDefaultCollisionIntent(selectedNode),
-          channel: deps.getDefaultCollisionChannel(selectedNode),
-          ...(defaultShape === 'trimesh'
-            ? {}
-            : { size: deps.getNodeVisualColliderSize(selectedNode) }),
-        }),
-        enabled: true,
-        [field]: normalized || undefined,
-      },
-    })
-  }
-
-  function updateCollisionSize(index: number, value: string) {
-    const selectedNode = deps.getSelectedNode()
-    if (!selectedNode) return
-    const numeric = Number(value)
-    if (Number.isNaN(numeric)) return
-    enableCollisionRoleForNodes([selectedNode])
-    const size = [
-      ...(selectedNode.collision?.size ??
-        deps.getNodeVisualColliderSize(selectedNode)),
-    ] as [number, number, number]
-    size[index] = Math.max(0.05, numeric)
-
-    deps.patchNode(selectedNode.id, {
-      collision: {
-        ...(selectedNode.collision ?? {
-          shape: deps.getDefaultCollisionShape(selectedNode),
-          intent: deps.getDefaultCollisionIntent(selectedNode),
-          channel: deps.getDefaultCollisionChannel(selectedNode),
-        }),
-        enabled: true,
-        size,
       },
     })
   }
 
   function updateCollisionBooleanField(field: 'sensor', value: boolean) {
     const selectedNode = deps.getSelectedNode()
-    if (!selectedNode) return
-    const defaultShape = deps.getDefaultCollisionShape(selectedNode)
+    if (!selectedNode || !isEditorGeometryNode(selectedNode)) return
+    const baseCollision =
+      selectedNode.collision ??
+      buildCollisionPreset(
+        selectedNode,
+        deps.getDefaultCollisionIntent(selectedNode),
+      )
     enableCollisionRoleForNodes([selectedNode])
     deps.patchNode(selectedNode.id, {
       collision: {
-        ...(selectedNode.collision ?? {
-          shape: defaultShape,
-          intent: deps.getDefaultCollisionIntent(selectedNode),
-          channel: deps.getDefaultCollisionChannel(selectedNode),
-          ...(defaultShape === 'trimesh'
-            ? {}
-            : { size: deps.getNodeVisualColliderSize(selectedNode) }),
-        }),
-        enabled: true,
-        ...(field === 'sensor'
-          ? {
-              intent: value
-                ? 'trigger'
-                : selectedNode.collision?.intent === 'trigger'
-                  ? deps.getDefaultCollisionIntent(selectedNode)
-                  : selectedNode.collision?.intent,
-            }
-          : {}),
+        ...baseCollision,
+        intent: value
+          ? 'trigger'
+          : selectedNode.collision?.intent === 'trigger'
+            ? deps.getDefaultCollisionIntent(selectedNode)
+            : selectedNode.collision?.intent,
+        mode: value
+          ? 'trigger'
+          : selectedNode.collision?.mode === 'trigger'
+            ? 'auto'
+            : selectedNode.collision?.mode ?? 'auto',
         [field]: value,
       },
     })
-  }
-
-  function recalculateCollisionFromVisual() {
-    fitColliderToVisualBounds()
   }
 
   function setVisualOnlyForNodes(nodes: EditorSceneNode[]) {
@@ -930,11 +1075,13 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     for (const node of nodes) {
       deps.patchNode(node.id, {
         collision: {
-          ...(node.collision ?? { shape: deps.getDefaultCollisionShape(node) }),
+          ...clearCollisionArtifactFields(node.collision ?? {}),
           intent: 'none',
           channel: node.collision?.channel ?? 'worldStatic',
-          enabled: false,
+          mode: 'none',
           sensor: false,
+          generationStatus: undefined,
+          generationLastError: undefined,
         },
       })
     }
@@ -960,11 +1107,13 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     for (const node of nodes) {
       deps.patchNode(node.id, {
         collision: {
-          ...(node.collision ?? { shape: deps.getDefaultCollisionShape(node) }),
+          ...clearCollisionArtifactFields(node.collision ?? {}),
           intent: 'none',
           channel: node.collision?.channel ?? 'worldStatic',
-          enabled: false,
+          mode: 'none',
           sensor: false,
+          generationStatus: undefined,
+          generationLastError: undefined,
         },
       })
     }
@@ -1046,11 +1195,54 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
           ? 'detail'
           : 'worldStatic')
     const triangleBudget =
+      selectedNode.collision?.maxTriangles ??
       selectedNode.collision?.triangleBudget ??
       (intent === 'detailMesh' ? 20000 : 5000)
+    const quality = selectedNode.collision?.quality ?? 'simplifiedMesh'
+    const lodSourceTier = selectedNode.collision?.lodTier ?? 'low'
+
+    if (quality === 'convexHull') {
+      const message =
+        'Convex hull collision generation is not supported by the current mesh collider baker.'
+      enableCollisionRoleForNodes([selectedNode])
+      deps.patchNode(selectedNode.id, {
+        collision: {
+          ...clearCollisionArtifactFields(
+            selectedNode.collision ??
+              buildCollisionPreset(selectedNode, intent, { quality }),
+          ),
+          mode: intent === 'trigger' ? 'trigger' : 'auto',
+          quality,
+          lodTier: lodSourceTier,
+          intent,
+          channel,
+          maxTriangles: triangleBudget,
+          generationStatus: 'failed',
+          generationLastError: message,
+        },
+      })
+      deps.setSaveMessage(message)
+      return
+    }
 
     deps.setSaveMessage(`Baking mesh collider for ${selectedNode.name}...`)
     enableCollisionRoleForNodes([selectedNode])
+    deps.patchNode(selectedNode.id, {
+      collision: {
+        ...clearCollisionArtifactFields(
+          selectedNode.collision ??
+            buildCollisionPreset(selectedNode, intent, { quality }),
+        ),
+        mode: intent === 'trigger' ? 'trigger' : 'auto',
+        quality,
+        lodTier: lodSourceTier,
+        intent,
+        channel,
+        maxTriangles: triangleBudget,
+        generationStatus: 'generating',
+        generationLastError: undefined,
+      },
+    })
 
     try {
       const response = await fetch(
@@ -1067,6 +1259,8 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
             intent,
             channel,
             triangleBudget,
+            lodSourceTier,
+            simplify: quality !== 'trimesh',
           }),
         },
       )
@@ -1078,7 +1272,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
       const collision = payload.collision ?? {}
       deps.patchNode(selectedNode.id, {
         collision: {
-          ...(selectedNode.collision ?? {}),
+          ...clearCollisionArtifactFields(selectedNode.collision ?? {}),
           shape: 'trimesh',
           colliderUrl: payload.colliderUrl ?? collision.colliderUrl,
           colliderMetadataUrl:
@@ -1088,12 +1282,26 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
             payload.assetLocalTransform ??
             selectedNode.collision?.assetLocalTransform ??
             null,
-          triangleBudget: collision.triangleBudget ?? triangleBudget,
+          maxTriangles:
+            collision.maxTriangles ??
+            collision.triangleBudget ??
+            triangleBudget,
           triangleCount: collision.triangleCount ?? payload.triangleCount,
           intent: collision.intent ?? intent,
           channel: collision.channel ?? channel,
-          enabled: true,
+          mode: intent === 'trigger' ? 'trigger' : 'auto',
+          quality,
+          lodTier: collision.lodTier ?? payload.lodSourceTier ?? lodSourceTier,
+          generationStatus: 'ready',
+          generationLastError: undefined,
           sourceAssetUrl: assetUrl,
+          colliderSourceAssetUrl:
+            collision.colliderSourceAssetUrl ?? payload.colliderSourceAssetUrl,
+          colliderCacheKey:
+            payload.colliderCacheKey ??
+            payload.sourceAssetFingerprint?.value ??
+            payload.generatedAt ??
+            String(Date.now()),
           sensor:
             collision.sensor ??
             (intent === 'trigger' || intent === 'detailMesh'),
@@ -1109,14 +1317,34 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
       )
     } catch (error) {
       console.error('Mesh collider bake failed:', error)
-      deps.setSaveMessage(
-        error instanceof Error ? error.message : 'Mesh collider bake failed',
-      )
+      const message =
+        error instanceof Error ? error.message : 'Mesh collider bake failed'
+      deps.patchNode(selectedNode.id, {
+        collision: {
+          ...clearCollisionArtifactFields(
+            selectedNode.collision ??
+              buildCollisionPreset(selectedNode, intent, { quality }),
+          ),
+          mode: intent === 'trigger' ? 'trigger' : 'auto',
+          quality,
+          lodTier: lodSourceTier,
+          intent,
+          channel,
+          maxTriangles: triangleBudget,
+          generationStatus: 'failed',
+          generationLastError: message,
+        },
+      })
+      deps.setSaveMessage(message)
     }
   }
 
   async function bakeMeshColliderFromSelection() {
     await bakeMeshColliderForNode(deps.getSelectedNode())
+  }
+
+  async function forceRegenerateCollisionFromSelection() {
+    await bakeMeshColliderFromSelection()
   }
 
   async function bakeMeshColliderForNodeId(nodeId: string) {
@@ -1125,61 +1353,6 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
       .find(candidate => candidate.id === nodeId)
     deps.selectEditorNode(nodeId)
     await bakeMeshColliderForNode(node ?? null)
-  }
-
-  function fitColliderToVisualBoundsForNode(
-    selectedNode: EditorSceneNode | null,
-  ) {
-    if (!selectedNode || !isEditorGeometryNode(selectedNode)) return
-    const shape =
-      selectedNode.collision?.shape ??
-      deps.getDefaultCollisionShape(selectedNode)
-
-    if (shape === 'trimesh') {
-      deps.setSaveMessage(
-        'Trimesh collision uses a collider asset URL; no bounds were fitted',
-      )
-      return
-    }
-
-    const sizeSource = getNodeVisualColliderSizeSource(selectedNode)
-    const size = deps.getNodeVisualColliderSize(selectedNode)
-
-    deps.patchNode(selectedNode.id, {
-      collision: {
-        ...(selectedNode.collision ?? { shape }),
-        shape,
-        intent:
-          selectedNode.collision?.intent ??
-          deps.getDefaultCollisionIntent(selectedNode),
-        channel:
-          selectedNode.collision?.channel ??
-          deps.getDefaultCollisionChannel(selectedNode),
-        enabled: true,
-        size,
-        friction: selectedNode.collision?.friction ?? 0.7,
-        restitution: selectedNode.collision?.restitution ?? 0,
-        sensor: selectedNode.collision?.sensor ?? false,
-      },
-    })
-
-    deps.setSaveMessage(
-      sizeSource === 'transform-scale'
-        ? 'Matched collider to transform scale because visual bounds metadata is missing'
-        : 'Matched collider to visual bounds',
-    )
-  }
-
-  function fitColliderToVisualBounds() {
-    fitColliderToVisualBoundsForNode(deps.getSelectedNode())
-  }
-
-  function fitColliderToVisualBoundsForNodeId(nodeId: string) {
-    const node = deps
-      .getEditorNodes()
-      .find(candidate => candidate.id === nodeId)
-    deps.selectEditorNode(nodeId)
-    fitColliderToVisualBoundsForNode(node ?? null)
   }
 
   function setCollisionPresetForNodeId(
@@ -1298,6 +1471,28 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     })
   }
 
+  function placeSelectedLightAtParentBounds() {
+    const selectedNode = deps.getSelectedNode()
+    if (!selectedNode?.light) return
+
+    const parentId = selectedNode.parentId
+    if (!parentId) {
+      deps.setSaveMessage('Select a child light with a parent object')
+      return
+    }
+
+    const parentNode = deps.getEditorNodes().find(node => node.id === parentId)
+    if (!parentNode) {
+      deps.setSaveMessage('Light parent object was not found')
+      return
+    }
+
+    deps.patchNode(selectedNode.id, {
+      position: getDefaultChildPointLightPosition(parentNode),
+    })
+    deps.setSaveMessage(`Moved ${selectedNode.name} outside ${parentNode.name}`)
+  }
+
   function updateGameplayField(
     field:
       | 'title'
@@ -1392,14 +1587,14 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     updateNodeMaterialBooleanField,
     clearNodeMaterialOverrides,
     updateCollisionEnabled,
+    updateCollisionMode,
     updateCollisionShape,
+    updateCollisionQuality,
+    updateCollisionLodSourceTier,
     updateCollisionIntent,
     updateCollisionChannel,
     updateCollisionNumericField,
-    updateCollisionStringField,
-    updateCollisionSize,
     updateCollisionBooleanField,
-    recalculateCollisionFromVisual,
     setVisualOnly,
     setBlocker,
     setWalkable,
@@ -1426,9 +1621,8 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     setVisualOnlyForNodeId,
     disableCollisionForNodeId,
     bakeMeshColliderFromSelection,
+    forceRegenerateCollisionFromSelection,
     bakeMeshColliderForNodeId,
-    fitColliderToVisualBounds,
-    fitColliderToVisualBoundsForNodeId,
     updatePhysicsField,
     updatePhysicsNumericField,
     updatePhysicsBooleanField,
@@ -1436,6 +1630,7 @@ export function createEditorInspectorController(deps: InspectorControllerDeps) {
     updateAssetUrl,
     updateLightField,
     updateLightNumericField,
+    placeSelectedLightAtParentBounds,
     updateGameplayField,
     updateGameplayBooleanField,
     updateGameplayNumericField,

@@ -12,7 +12,12 @@ export type MeshColliderBakeMetadata = {
   generatedAt?: string
   sourceActorId?: string
   sourceAssetUrl?: string
+  colliderSourceAssetUrl?: string
   sourceAssetFingerprint?: {
+    algorithm?: string
+    value?: string
+  }
+  colliderSourceAssetFingerprint?: {
     algorithm?: string
     value?: string
   }
@@ -27,13 +32,49 @@ export type MeshColliderBakeMetadata = {
   provenance?: {
     sourceActorId?: string
     sourceAssetUrl?: string
+    colliderSourceAssetUrl?: string
     sourceAssetFingerprint?: {
+      algorithm?: string
+      value?: string
+    }
+    colliderSourceAssetFingerprint?: {
       algorithm?: string
       value?: string
     }
     bakeConfig?: Record<string, unknown>
     generatedAt?: string
   }
+}
+
+export type StyleBakeFingerprint = {
+  algorithm?: string
+  value?: string
+}
+
+export type StyleBakeMetadata = {
+  schemaVersion?: number
+  createdAt?: string
+  generatedAt?: string
+  generatedBy?: string
+  generator?: string
+  sourceAssetUrl?: string
+  sourceAssetPath?: string
+  outputAssetUrl?: string
+  outputAssetPath?: string
+  assetUrl?: string
+  metadataUrl?: string
+  sourceAssetFingerprint?: StyleBakeFingerprint | string | null
+  styleSettingsFingerprint?: StyleBakeFingerprint | string | null
+  settingsFingerprint?: StyleBakeFingerprint | string | null
+  styleProfileName?: string | null
+  prompt?: string | null
+  negativePrompt?: string | null
+  textureSize?: number | null
+  mode?: string | null
+  backend?: string | null
+  shapeModel?: string | null
+  paintModel?: string | null
+  sourceReferenceImageUrl?: string | null
 }
 
 export type RuntimeAssetCookManifest = RuntimeAssetManifest & {
@@ -181,6 +222,7 @@ export type EditorPublishBakeStep =
   | 'save-scene'
   | 'generate-heightmap'
   | 'bake-terrain-collision'
+  | 'bake-scene-mesh-colliders'
   | 'cook-terrain-chunks'
   | 'cook-terrain-glb-chunks'
   | 'cook-world-partition'
@@ -259,6 +301,7 @@ export interface LoadEditorPublishReadinessInput {
   scene: EditorSceneDocument | null
   terrainSourceAssets?: EditorTerrainSourceAssetStatus[]
   missingTerrainSourceAssets?: EditorTerrainSourceAssetStatus[]
+  styleBakeMetadata?: Record<string, LoadedManifest<StyleBakeMetadata>>
   fetchImpl?: typeof fetch
 }
 

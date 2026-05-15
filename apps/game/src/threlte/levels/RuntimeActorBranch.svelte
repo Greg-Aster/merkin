@@ -8,6 +8,7 @@ export let levelId = ''
 export let interactionSystem: any = null
 export let interactiveEnabled = false
 export let visibleActorIds: Set<string> | null = null
+export let collisionOnly = false
 
 $: childActors = actors.filter(child => {
   if (child.parentId !== actor.id) return false
@@ -21,6 +22,7 @@ $: childActors = actors.filter(child => {
   {levelId}
   {interactionSystem}
   {interactiveEnabled}
+  {collisionOnly}
   on:portalTransition
   on:noteRead
 >
@@ -32,6 +34,7 @@ $: childActors = actors.filter(child => {
       {interactionSystem}
       {interactiveEnabled}
       {visibleActorIds}
+      {collisionOnly}
       on:portalTransition
       on:noteRead
     />

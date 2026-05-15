@@ -20,7 +20,6 @@ import {
   underwaterFogDensity,
   underwaterIntensity,
   underwaterStateStore,
-  underwaterUtils,
 } from '../stores/underwaterStore'
 
 // Props
@@ -30,6 +29,13 @@ export let size: [number, number, number] = [100, 20, 100] // width, height, dep
 export let fogColor: number = 0x0a1922
 export let fogDensityScale = 1
 export let surfaceMistDensity = 0.003
+export let atmosphereFogColor = '#7b8797'
+export let atmosphereFogDensity = 0
+export let atmosphereHeightFogEnabled = false
+export let atmosphereHeightFogColor = '#7b8797'
+export let atmosphereHeightFogDensity = 0
+export let atmosphereHeightFogFloor = 0
+export let atmosphereHeightFogCeiling = 4
 
 // Component state
 let bubbleParticles: THREE.Points
@@ -44,8 +50,35 @@ $: transitionProgress = $underwaterStateStore.transitionProgress
 $: intensity = $underwaterIntensity
 $: fogDensity = $underwaterFogDensity
 $: config = $underwaterConfigStore
-$: effectiveFogDensity = fogDensity * fogDensityScale
-$: resolvedFogColor = new THREE.Color(fogColor)
+$: atmosphereColor = new THREE.Color(
+  atmosphereHeightFogEnabled ? atmosphereHeightFogColor : atmosphereFogColor,
+)
+$: atmosphereHeightFogBand = Math.max(
+  0.001,
+  atmosphereHeightFogCeiling - atmosphereHeightFogFloor,
+)
+$: atmosphereHeightFogBandFactor = atmosphereHeightFogEnabled
+  ? Math.min(1.5, Math.max(0.35, 6 / atmosphereHeightFogBand))
+  : 0
+$: atmosphereTintInfluence = Math.min(
+  0.7,
+  0.22 +
+    atmosphereFogDensity * 80 +
+    atmosphereHeightFogDensity * 700 * atmosphereHeightFogBandFactor,
+)
+$: atmosphereDensityBoost =
+  atmosphereFogDensity * 6 +
+  atmosphereHeightFogDensity * 36 * atmosphereHeightFogBandFactor
+$: effectiveFogDensity = fogDensity * fogDensityScale + atmosphereDensityBoost
+$: effectiveSurfaceMistDensity = Math.max(
+  surfaceMistDensity,
+  atmosphereFogDensity +
+    atmosphereHeightFogDensity * 2 * atmosphereHeightFogBandFactor,
+)
+$: resolvedFogColor = new THREE.Color(fogColor).lerp(
+  atmosphereColor,
+  atmosphereTintInfluence,
+)
 
 // Particle system setup
 let bubbleGeometry: THREE.BufferGeometry
@@ -140,7 +173,7 @@ function initializeParticleSystems() {
     color: resolvedFogColor,
     size: 2.0,
     transparent: true,
-    opacity: Math.max(0.05, surfaceMistDensity * 20),
+    opacity: Math.max(0.05, effectiveSurfaceMistDensity * 20),
     map: createMistTexture(),
     alphaTest: 0.05,
     depthWrite: false,

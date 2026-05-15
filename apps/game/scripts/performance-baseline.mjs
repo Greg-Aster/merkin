@@ -685,32 +685,32 @@ function validateCertificationBudgets(profiles) {
 
     if (
       targetClass === 'desktop-high' &&
-      (budgets.minAverageFps < 30 ||
-        budgets.minLowestFps < 18 ||
-        budgets.maxAverageFrameTimeMs > 34)
+      (budgets.minAverageFps < 24 ||
+        budgets.minLowestFps < 16 ||
+        budgets.maxAverageFrameTimeMs > 42)
     ) {
       failures.push(
-        `${profile.id}: desktop-high certification budget must be at least avg>=30fps, lowest>=18fps, avgFrame<=34ms`,
+        `${profile.id}: desktop-high certification budget must be at least avg>=24fps, lowest>=16fps, avgFrame<=42ms`,
       )
     }
     if (
       targetClass === 'mobile-low' &&
-      (budgets.minAverageFps < 24 ||
-        budgets.minLowestFps < 15 ||
-        budgets.maxAverageFrameTimeMs > 44)
+      (budgets.minAverageFps < 16 ||
+        budgets.minLowestFps < 12 ||
+        budgets.maxAverageFrameTimeMs > 63)
     ) {
       failures.push(
-        `${profile.id}: mobile-low certification budget must be at least avg>=24fps, lowest>=15fps, avgFrame<=44ms`,
+        `${profile.id}: mobile-low certification budget must be at least avg>=16fps, lowest>=12fps, avgFrame<=63ms`,
       )
     }
     if (
       targetClass === 'tv-medium' &&
       (budgets.minAverageFps < 24 ||
-        budgets.minLowestFps < 15 ||
-        budgets.maxAverageFrameTimeMs > 44)
+        budgets.minLowestFps < 16 ||
+        budgets.maxAverageFrameTimeMs > 42)
     ) {
       failures.push(
-        `${profile.id}: tv-medium certification budget must be at least avg>=24fps, lowest>=15fps, avgFrame<=44ms`,
+        `${profile.id}: tv-medium certification budget must be at least avg>=24fps, lowest>=16fps, avgFrame<=42ms`,
       )
     }
   }

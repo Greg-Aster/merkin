@@ -9,7 +9,6 @@ type EditorSessionState = {
 export type RuntimeEditorFeatureComponents = {
   editorPanelComponent: RuntimeComponent
   editorControlsOverlayComponent: RuntimeComponent
-  editorCollisionOverlayComponent: RuntimeComponent
   editorCircleSelectOverlayComponent: RuntimeComponent
   editorMarqueeOverlayComponent: RuntimeComponent
   editorSceneLayerComponent: RuntimeComponent
@@ -92,7 +91,6 @@ export function createGameEditorFeatureLoader() {
         editorFeaturesPromise = Promise.all([
           import('./EditorPanel.svelte'),
           import('./EditorControlsOverlay.svelte'),
-          import('./EditorCollisionOverlay.svelte'),
           import('./EditorCircleSelectOverlay.svelte'),
           import('./EditorMarqueeOverlay.svelte'),
           import('./EditorSceneLayer.svelte'),
@@ -104,7 +102,6 @@ export function createGameEditorFeatureLoader() {
             ([
               editorPanelModule,
               editorControlsOverlayModule,
-              editorCollisionOverlayModule,
               editorCircleSelectOverlayModule,
               editorMarqueeOverlayModule,
               editorSceneLayerModule,
@@ -120,10 +117,6 @@ export function createGameEditorFeatureLoader() {
                 editorControlsOverlayComponent: getModuleDefault(
                   editorControlsOverlayModule,
                   'editor controls overlay',
-                ),
-                editorCollisionOverlayComponent: getModuleDefault(
-                  editorCollisionOverlayModule,
-                  'editor collision overlay',
                 ),
                 editorCircleSelectOverlayComponent: getModuleDefault(
                   editorCircleSelectOverlayModule,

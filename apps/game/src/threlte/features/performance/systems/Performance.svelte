@@ -19,10 +19,18 @@ import {
   longTaskStore,
   markLongTaskSupport,
   memoryStore,
+  optimizationRecommendationsStore,
+  performanceGradeStore,
+  performanceScoreStore,
   recordLongTask,
   renderInfoStore,
   systemTimingsStore,
 } from '../stores/performanceStore'
+import {
+  classifyRuntimePerformancePressure,
+  summarizeRuntimePerformancePressure,
+} from '../utils/runtimePerformancePressure'
+import { getRuntimeFrameRatePolicy } from '../utils/runtimeFrameRatePolicy'
 
 // Props — matching what Game.svelte passes
 export let enablePerformanceMonitoring = true
@@ -48,8 +56,8 @@ let startupTime = 0
 let startupGraceDone = false
 
 // Hysteresis: require N consecutive bad/good samples before changing tier
-const DEGRADE_THRESHOLD = 4 // 4s consistently under target * 0.75 → step down
-const UPGRADE_THRESHOLD = 12 // 12s consistently over target * 1.15 → step up
+const DEGRADE_THRESHOLD = 4 // 4s consistently below the cinematic low floor -> step down
+const UPGRADE_THRESHOLD = 5 // 5s consistently over target * 1.15 -> step up
 let degradeCount = 0
 let upgradeCount = 0
 let longTaskObserver: PerformanceObserver | null = null
@@ -178,11 +186,11 @@ const TIER_ORDER: OptimizationLevel[] = [
 
 function getEffectiveTargetFPS(): number {
   if (targetFPS > 0) return targetFPS
-  const caps = optimizationManager.getDeviceCapabilities()
-  if (!caps) return 60
-  if (caps.deviceType === 'phone') return 30
-  if (caps.deviceType === 'tablet') return 45
-  return 60
+  return getRuntimeFrameRatePolicy().targetFps
+}
+
+function getEffectiveFrameRatePolicy() {
+  return getRuntimeFrameRatePolicy(getEffectiveTargetFPS())
 }
 
 function getProfileMinimumQualityLevel() {
@@ -329,6 +337,24 @@ useTask(() => {
       }
       memoryStore.set(memory)
       renderInfoStore.set(renderInfo)
+      const streaming = collectStreamingStats()
+      const gltfCache = getGltfCacheStats()
+      const frameRatePolicy = getEffectiveFrameRatePolicy()
+      const pressure = classifyRuntimePerformancePressure({
+        fps: currentFps,
+        frameTimeMs: currentFrameTime,
+        targetFps: frameRatePolicy.targetFps,
+        lowFps: frameRatePolicy.lowFps,
+        renderInfo,
+        memory,
+        longTasks: $longTaskStore,
+        streaming,
+        gltfCache,
+      })
+      const performanceSummary = summarizeRuntimePerformancePressure(pressure)
+      performanceScoreStore.set(performanceSummary.score)
+      performanceGradeStore.set(performanceSummary.grade)
+      optimizationRecommendationsStore.set(performanceSummary.recommendations)
       recordRuntimeProductionTelemetry({
         timestamp: Date.now(),
         fps: currentFps,
@@ -336,8 +362,8 @@ useTask(() => {
         quality: optimizationManager.getOptimizationLevel(),
         renderInfo,
         memory,
-        streaming: collectStreamingStats(),
-        gltfCache: getGltfCacheStats(),
+        streaming,
+        gltfCache,
       })
       setRuntimeDiagnostic('rendererFrame', {
         label: 'Renderer Frame',
@@ -349,6 +375,19 @@ useTask(() => {
           scene: collectSceneStats(),
         },
       })
+      setRuntimeDiagnostic('performancePressure', {
+        label: 'Performance Pressure',
+        level: pressure.level === 'ready' ? 'ready' : 'warning',
+        message:
+          pressure.level === 'critical'
+            ? `Critical: ${pressure.message}`
+            : pressure.message,
+        meta: {
+          pressure,
+          streaming,
+          gltfCache,
+        },
+      })
     }
   }
 
@@ -357,7 +396,8 @@ useTask(() => {
   if (fpsSamples.length > FPS_WINDOW) fpsSamples.shift()
   const avgFPS = fpsSamples.reduce((a, b) => a + b, 0) / fpsSamples.length
 
-  const effectiveTarget = getEffectiveTargetFPS()
+  const frameRatePolicy = getEffectiveFrameRatePolicy()
+  const effectiveTarget = frameRatePolicy.targetFps
 
   dispatch('performanceUpdate', {
     currentFPS: currentFps,
@@ -387,15 +427,15 @@ useTask(() => {
     fpsSamples.length >= 3
   ) {
     if (
-      avgFPS < effectiveTarget * 0.55 ||
-      currentFps < effectiveTarget * 0.45
+      avgFPS < frameRatePolicy.criticalFps ||
+      currentFps < frameRatePolicy.criticalFps
     ) {
       upgradeCount = 0
       degradeCount += 2
       if (degradeCount >= DEGRADE_THRESHOLD) {
         stepQualityDown()
       }
-    } else if (avgFPS < effectiveTarget * 0.75) {
+    } else if (avgFPS < frameRatePolicy.lowFps) {
       upgradeCount = 0
       degradeCount++
       if (degradeCount >= DEGRADE_THRESHOLD) {

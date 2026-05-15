@@ -40,6 +40,11 @@ const publishBuildStepCommands = {
     '--',
     `--level=${levelId}`,
   ],
+  'bake-scene-mesh-colliders': levelId => [
+    'bake:scene-mesh-colliders',
+    '--',
+    `--level=${levelId}`,
+  ],
   'cook-terrain-chunks': levelId => [
     'cook:terrain-chunks',
     '--',
@@ -57,7 +62,11 @@ const publishBuildStepCommands = {
     `--cell-size=${step.cellSize ?? 120}`,
     `--active-radius=${step.activeRadius ?? 1}`,
   ],
-  'cook-runtime-assets': () => ['cook:runtime-assets'],
+  'cook-runtime-assets': levelId => [
+    'cook:runtime-assets',
+    '--',
+    `--level=${levelId}`,
+  ],
   'audit-engine': () => ['audit:engine'],
 }
 
@@ -160,12 +169,20 @@ function runPublishBuildStep({
     })
     child.on('close', code => {
       const parsed = parseLastJsonLine(stdout) || {}
+      const sceneMeshColliderArtifacts = Array.isArray(parsed.reports)
+        ? parsed.reports.flatMap(report =>
+            Array.isArray(report.baked)
+              ? report.baked.map(baked => baked.colliderUrl).filter(Boolean)
+              : [],
+          )
+        : []
       const artifacts = [
         parsed.manifestPath,
         parsed.manifestUrl,
         parsed.chunksPath,
         parsed.collision?.url,
         parsed.collision?.metadataUrl,
+        ...sceneMeshColliderArtifacts,
       ].filter(Boolean)
       resolve({
         id: step.id,
@@ -358,14 +375,24 @@ function handleSceneRoutes(req, res, route, context) {
     req.method === 'POST'
   ) {
     readRequestBody(req, body => {
-      let levelId = 'current level'
+      let levelId = ''
       try {
         const payload = body ? JSON.parse(body) : {}
-        if (payload.levelId) levelId = String(payload.levelId)
+        levelId = String(payload.levelId || '')
+        if (!levelId) {
+          throw new Error('levelId is required')
+        }
 
-        const child = spawn(
+        assertSafeLevelId(levelId)
+        const child = (context.spawnImpl || spawn)(
           'pnpm',
-          ['--dir', 'apps/game', 'cook:runtime-assets'],
+          [
+            '--dir',
+            'apps/game',
+            'cook:runtime-assets',
+            '--',
+            `--level=${levelId}`,
+          ],
           {
             cwd: REPO_ROOT,
             stdio: 'pipe',

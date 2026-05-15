@@ -45,7 +45,7 @@ function handleCollisionRoutes(req, res, route, context) {
   readRequestBody(req, body => {
     try {
       const payload = body ? JSON.parse(body) : {};
-      const { levelId, nodeId, intent, channel, triangleBudget } = payload;
+      const { levelId, nodeId, intent, channel, triangleBudget, lodSourceTier } = payload;
 
       if (!levelId || !nodeId) {
         sendJson(res, 400, {
@@ -66,6 +66,7 @@ function handleCollisionRoutes(req, res, route, context) {
       appendArg(args, 'intent', intent);
       appendArg(args, 'channel', channel);
       appendArg(args, 'triangle-budget', triangleBudget);
+      appendArg(args, 'lod-source-tier', lodSourceTier);
       appendArg(args, 'asset-url', payload.assetUrl);
       if (payload.simplify === false) args.push('--no-simplify');
 

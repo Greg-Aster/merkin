@@ -5,6 +5,7 @@ import GameWorld from './core/GameWorld.svelte'
 import { qualitySettingsStore } from './features/performance/stores/performanceStore'
 import PerformanceSystem from './features/performance/systems/Performance.svelte'
 import { DEFAULT_LEVEL_ID } from './levels/levelRegistry'
+import { setRuntimeDiagnostic } from './stores/runtimeDiagnosticsStore'
 import {
   setRuntimePostProcessingDiagnostics,
   setRuntimeRenderLifecyclePhase,
@@ -38,7 +39,6 @@ export let audioSystemComponent: any = null
 export let physicsSystemComponent: any = null
 export let playerComponentClass: any = null
 export let multiplayerManagerComponent: any = null
-export let editorCollisionOverlayComponent: any = null
 export let editorSceneLayerComponent: any = null
 export let editorTerrainSculptLayerComponent: any = null
 export let editorViewportControlsComponent: any = null
@@ -89,12 +89,29 @@ $: if (postProcessingEligible && !postProcessingComponent) {
   void ensurePostProcessingComponent()
 }
 $: if (staticWorldReady && !postProcessingEligible) {
+  const disabledReason = $qualitySettingsStore.enablePostProcessing
+    ? 'waiting-for-gameplay-or-editor'
+    : 'quality-disabled'
   setRuntimePostProcessingDiagnostics(currentLevel, {
     enabled: false,
     passes: [],
-    reason: $qualitySettingsStore.enablePostProcessing
-      ? 'waiting-for-gameplay-or-editor'
-      : 'quality-disabled',
+    bloomEnabled: false,
+    colorGradingEnabled: false,
+    bloomReason: disabledReason,
+    colorGradingReason: disabledReason,
+    reason: disabledReason,
+  })
+  setRuntimeDiagnostic('postProcessing', {
+    label: 'Post Processing',
+    level: 'ready',
+    message: `${currentLevel}: bloom off (${disabledReason}); color grading off (${disabledReason}); post-processing component not mounted.`,
+    meta: {
+      levelId: currentLevel,
+      reason: disabledReason,
+      enablePostProcessing: $qualitySettingsStore.enablePostProcessing,
+      editorEnabled,
+      gameplayEnabled,
+    },
   })
   setRuntimeRenderLifecyclePhase({
     levelId: currentLevel,
@@ -160,7 +177,6 @@ $: if (staticWorldReady && !postProcessingEligible) {
         {physicsSystemComponent}
         {playerComponentClass}
         {multiplayerManagerComponent}
-        {editorCollisionOverlayComponent}
         {editorSceneLayerComponent}
         {editorTerrainSculptLayerComponent}
         {editorViewportControlsComponent}

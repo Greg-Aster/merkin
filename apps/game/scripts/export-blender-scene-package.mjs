@@ -8,6 +8,12 @@ const BLENDER_ROOT = path.join(REPO_ROOT, 'apps', 'blender')
 const PUBLIC_ROOT = path.join(REPO_ROOT, 'apps', 'megameal', 'public')
 const SCENE_ROOT = path.join(GAME_ROOT, 'src', 'threlte', 'editor', 'scenes')
 const EXPORT_ROOT = path.join(BLENDER_ROOT, 'scene-packages')
+const RUNTIME_SCENE_ROOT = path.join(
+  PUBLIC_ROOT,
+  'generated',
+  'runtime-game-assets',
+  'scenes',
+)
 const PACKAGE_SCHEMA = 'merkin.scenePackage.v1'
 
 function parseArgs(argv) {
@@ -70,6 +76,33 @@ function resolveScenePath(options) {
   return path.join(SCENE_ROOT, `${options.level}.scene.json`)
 }
 
+function resolveRuntimeScenePath(levelId) {
+  if (!levelId) return ''
+  const candidate = path.join(RUNTIME_SCENE_ROOT, `${levelId}.runtime-scene.json`)
+  return fs.existsSync(candidate) ? candidate : ''
+}
+
+function getRuntimeActorsById(levelId) {
+  const runtimeScenePath = resolveRuntimeScenePath(levelId)
+  if (!runtimeScenePath) {
+    return {
+      runtimeScenePath: '',
+      actorsById: new Map(),
+      warning: `Runtime scene manifest not found for ${levelId}; Blender package uses editor-authored collision.`,
+    }
+  }
+
+  const runtimeScene = readJson(runtimeScenePath)
+  const actors = Array.isArray(runtimeScene.levelDefinition?.actors)
+    ? runtimeScene.levelDefinition.actors
+    : []
+  return {
+    runtimeScenePath,
+    actorsById: new Map(actors.map(actor => [actor.id, actor])),
+    warning: '',
+  }
+}
+
 function resolvePublicAssetPath(assetUrl = '') {
   if (!assetUrl || /^https?:\/\//i.test(assetUrl)) return ''
   const normalized = assetUrl.replace(/^\/+/, '')
@@ -77,89 +110,214 @@ function resolvePublicAssetPath(assetUrl = '') {
   return fs.existsSync(candidate) ? candidate : ''
 }
 
-function copyAssetToPackage(node, packageRoot, copiedAssetByUrl) {
-  const assetUrl = node.asset?.url || ''
-  if (!assetUrl) return null
+function copyPublicFileToPackage({
+  url,
+  packageRoot,
+  copiedAssetByUrl,
+  subdirectory,
+  outputName,
+}) {
+  if (!url) return null
 
-  const sourcePath = resolvePublicAssetPath(assetUrl)
+  const sourcePath = resolvePublicAssetPath(url)
   if (!sourcePath) {
     return {
-      url: assetUrl,
+      url,
       missing: true,
       reason: 'Asset URL could not be resolved under apps/megameal/public.',
     }
   }
 
-  if (copiedAssetByUrl.has(assetUrl)) return copiedAssetByUrl.get(assetUrl)
+  const cacheKey = `${subdirectory}:${url}`
+  if (copiedAssetByUrl.has(cacheKey)) return copiedAssetByUrl.get(cacheKey)
 
   const extension = path.extname(sourcePath) || '.glb'
-  const assetDirectory = path.join(packageRoot, 'assets')
+  const assetDirectory = path.join(packageRoot, subdirectory)
   ensureDirectory(assetDirectory)
 
-  const outputName = `${slugify(node.name || node.id)}-${slugify(node.id)}${extension}`
-  const outputPath = path.join(assetDirectory, outputName)
+  const outputPath = path.join(assetDirectory, `${outputName}${extension}`)
   fs.copyFileSync(sourcePath, outputPath)
 
   const asset = {
-    url: assetUrl,
+    url,
     sourcePath: repoRelative(sourcePath),
     packagePath: path.relative(packageRoot, outputPath).replace(/\\/g, '/'),
     sizeBytes: fs.statSync(outputPath).size,
   }
-  copiedAssetByUrl.set(assetUrl, asset)
+  copiedAssetByUrl.set(cacheKey, asset)
   return asset
 }
 
-function getNodePackageData(node, packageRoot, options, copiedAssetByUrl) {
+function copyAssetToPackage(node, packageRoot, copiedAssetByUrl) {
+  const assetUrl = node.asset?.url || ''
+  return copyPublicFileToPackage({
+    url: assetUrl,
+    packageRoot,
+    copiedAssetByUrl,
+    subdirectory: 'assets',
+    outputName: `${slugify(node.name || node.id)}-${slugify(node.id)}`,
+  })
+}
+
+function copyCollisionFilesToPackage(node, collision, packageRoot, copiedAssetByUrl) {
+  if (!collision || collision.shape !== 'trimesh') return { collision, warnings: [] }
+
+  const warnings = []
+  const collider = copyPublicFileToPackage({
+    url: collision.colliderUrl || '',
+    packageRoot,
+    copiedAssetByUrl,
+    subdirectory: 'collision',
+    outputName: `${slugify(node.name || node.id)}-${slugify(node.id)}.collider`,
+  })
+  const metadata = copyPublicFileToPackage({
+    url: collision.colliderMetadataUrl || '',
+    packageRoot,
+    copiedAssetByUrl,
+    subdirectory: 'collision',
+    outputName: `${slugify(node.name || node.id)}-${slugify(node.id)}.collider.meta`,
+  })
+
+  if (collider?.missing) warnings.push(`Collider asset: ${collider.reason}`)
+  if (metadata?.missing) warnings.push(`Collider metadata: ${metadata.reason}`)
+
+  return {
+    collision: {
+      ...collision,
+      colliderPackagePath: collider?.packagePath || '',
+      colliderMetadataPackagePath: metadata?.packagePath || '',
+    },
+    warnings,
+  }
+}
+
+function getRuntimeActorNodeData(node, runtimeActor, runtimeAuthoritative) {
+  const transform = runtimeActor?.transform ?? {}
+  const render = runtimeActor?.render ?? {}
+  return {
+    position: transform.position ?? node.position ?? [0, 0, 0],
+    rotation: transform.rotation ?? node.rotation ?? [0, 0, 0],
+    scale: transform.scale ?? node.scale ?? [1, 1, 1],
+    primitive: render.primitive ?? node.primitive ?? null,
+    material: render.material ?? node.material ?? null,
+    collision: runtimeAuthoritative
+      ? runtimeActor?.physics?.collision ?? null
+      : node.collision ?? null,
+    physics: runtimeActor?.physics
+      ? {
+          bodyType: runtimeActor.physics.bodyType,
+          gravityScale: runtimeActor.physics.gravityScale,
+          canSleep: runtimeActor.physics.canSleep,
+          ccd: runtimeActor.physics.ccd,
+          linearDamping: runtimeActor.physics.linearDamping,
+          angularDamping: runtimeActor.physics.angularDamping,
+          lockRotations: runtimeActor.physics.lockRotations,
+          lockTranslations: runtimeActor.physics.lockTranslations,
+        }
+      : node.physics,
+  }
+}
+
+function getNodePackageData(
+  node,
+  packageRoot,
+  options,
+  copiedAssetByUrl,
+  runtimeActor = null,
+  runtimeAuthoritative = false,
+) {
+  const runtimeData = getRuntimeActorNodeData(
+    node,
+    runtimeActor,
+    runtimeAuthoritative,
+  )
   const asset = options.copyAssets && node.kind === 'asset'
     ? copyAssetToPackage(node, packageRoot, copiedAssetByUrl)
     : null
+  const collisionPackage = options.copyAssets
+    ? copyCollisionFilesToPackage(
+        node,
+        runtimeData.collision,
+        packageRoot,
+        copiedAssetByUrl,
+      )
+    : { collision: runtimeData.collision, warnings: [] }
 
   return {
     id: node.id,
     name: node.name,
     kind: node.kind,
     parentId: node.parentId ?? null,
-    position: node.position ?? [0, 0, 0],
-    rotation: node.rotation ?? [0, 0, 0],
-    scale: node.scale ?? [1, 1, 1],
+    position: runtimeData.position,
+    rotation: runtimeData.rotation,
+    scale: runtimeData.scale,
     visible: node.visible !== false,
     locked: Boolean(node.locked),
     assetUrl: node.asset?.url || '',
     assetPackagePath: asset?.packagePath || '',
-    primitive: node.primitive || null,
+    primitive: runtimeData.primitive,
     light: node.light || null,
     prefab: node.prefab || null,
-    material: node.material || null,
-    collision: node.collision || null,
+    material: runtimeData.material,
+    physics: runtimeData.physics || null,
+    collision: collisionPackage.collision,
+    collisionSource: runtimeData.collision
+      ? runtimeAuthoritative
+        ? 'runtime-scene-rapier'
+        : 'editor-authored'
+      : 'none',
     gameplay: node.gameplay || null,
     generation: node.generation || null,
-    warnings: asset?.missing ? [asset.reason] : [],
+    warnings: [
+      ...(asset?.missing ? [asset.reason] : []),
+      ...collisionPackage.warnings,
+    ],
   }
 }
 
 function buildPackage(scene, scenePath, packageRoot, options) {
   const copiedAssetByUrl = new Map()
+  const levelId = scene.levelId || options.level || path.basename(scenePath, '.scene.json')
+  const runtimeCollision = getRuntimeActorsById(levelId)
   const nodes = Array.isArray(scene.nodes)
     ? scene.nodes.map(node =>
-        getNodePackageData(node, packageRoot, options, copiedAssetByUrl),
+        getNodePackageData(
+          node,
+          packageRoot,
+          options,
+          copiedAssetByUrl,
+          runtimeCollision.actorsById.get(node.id) ?? null,
+          Boolean(runtimeCollision.runtimeScenePath),
+        ),
       )
     : []
 
   return {
     schema: PACKAGE_SCHEMA,
     createdAt: new Date().toISOString(),
-    levelId: scene.levelId || options.level || path.basename(scenePath, '.scene.json'),
+    levelId,
     sceneVersion: scene.version ?? null,
     sourceScenePath: repoRelative(scenePath),
+    runtimeScenePath: runtimeCollision.runtimeScenePath
+      ? repoRelative(runtimeCollision.runtimeScenePath)
+      : '',
+    collisionSource: runtimeCollision.runtimeScenePath
+      ? 'runtime-scene-rapier'
+      : 'editor-authored',
     sourceSceneUpdatedAt: scene.updatedAt || '',
     packageRoot: repoRelative(packageRoot),
     axisConversion: 'game-y-up-to-blender-z-up',
-    roundTripMode: 'transform-and-simple-collision-delta-v1',
+    roundTripMode: 'transform-and-collision-delta-v2',
     nodes,
     assets: [...copiedAssetByUrl.values()],
-    warnings: nodes
-      .flatMap(node => node.warnings.map(message => ({ nodeId: node.id, message }))),
+    warnings: [
+      ...(runtimeCollision.warning
+        ? [{ nodeId: '', message: runtimeCollision.warning }]
+        : []),
+      ...nodes.flatMap(node =>
+        node.warnings.map(message => ({ nodeId: node.id, message })),
+      ),
+    ],
   }
 }
 

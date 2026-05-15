@@ -29,6 +29,9 @@ export type EditorPublishBakePlanMetadata = {
   terrainChunksMissing?: boolean
   terrainSourceMissing?: boolean
   worldPartitionMissing?: boolean
+  styleBakeBlocked?: boolean
+  styleBakeNeedsBake?: boolean
+  styleBakeNeedsCook?: boolean
   authoringRuntimeAssetUrls?: string[]
   dirty?: {
     actorTransforms?: boolean
@@ -76,6 +79,12 @@ export function createEditorPublishBakePlanMetadataFromReadiness(
       'terrain-collision',
       /^Source asset missing:/,
     ),
+    styleBakeBlocked: hasSection('style-bake-products', 'blocker'),
+    styleBakeNeedsBake: hasCommand('bake-style-assets'),
+    styleBakeNeedsCook: hasSectionDetail(
+      'style-bake-products',
+      /not runtime-cooked|missing generated GLB/,
+    ),
     terrainChunksMissing:
       hasCommand('cook-terrain-chunks') ||
       hasCommand('cook-terrain-glb-chunks'),
@@ -91,6 +100,7 @@ export const EDITOR_PUBLISH_BAKE_STEPS: EditorPublishBakeStep[] = [
   'save-scene',
   'generate-heightmap',
   'bake-terrain-collision',
+  'bake-scene-mesh-colliders',
   'cook-terrain-chunks',
   'cook-terrain-glb-chunks',
   'cook-world-partition',
@@ -106,10 +116,11 @@ export const EDITOR_PUBLISH_BAKE_STEP_LABELS: Record<
   'save-scene': 'Save authoring scene',
   'generate-heightmap': 'Generate Heightmap',
   'bake-terrain-collision': 'Bake Terrain Collision',
+  'bake-scene-mesh-colliders': 'Bake Scene Mesh Colliders',
   'cook-terrain-chunks': 'Cook Heightfield Chunks',
   'cook-terrain-glb-chunks': 'Cook Source GLB Chunks',
   'cook-world-partition': 'Cook world partition',
-  'cook-runtime-assets': 'Cook runtime manifests',
+  'cook-runtime-assets': 'Cook runtime LODs and manifests',
   'audit-engine': 'Validate Terrain Contract',
   'deploy-registry': 'Publish Level',
 }
@@ -120,12 +131,15 @@ const SKIPPED_REASONS: Record<EditorPublishBakeStep, string> = {
     'Terrain source heightmap is current or the selected mode does not use heightmaps.',
   'bake-terrain-collision':
     'Terrain collision inputs do not require a fresh bake.',
+  'bake-scene-mesh-colliders':
+    'Scene mesh collider products are current or the scene has no mesh-derived collider work.',
   'cook-terrain-chunks': 'Heightfield visual chunks are already represented.',
   'cook-terrain-glb-chunks':
     'Source GLB visual chunks are already represented.',
   'cook-world-partition':
     'World partition settings are not enabled for this scene.',
-  'cook-runtime-assets': 'Runtime manifests are always cooked before publish.',
+  'cook-runtime-assets':
+    'Runtime LOD variants and manifests are always cooked before publish.',
   'audit-engine': 'Engine audit is always required before deploy.',
   'deploy-registry':
     'Registry deploy only runs after all required publish steps pass.',
@@ -136,6 +150,7 @@ function emptyReasons(): Record<EditorPublishBakeStep, string[]> {
     'save-scene': [],
     'generate-heightmap': [],
     'bake-terrain-collision': [],
+    'bake-scene-mesh-colliders': [],
     'cook-terrain-chunks': [],
     'cook-terrain-glb-chunks': [],
     'cook-world-partition': [],
@@ -319,6 +334,33 @@ export function computeEditorPublishBakePlan(
   } else {
     reasons['bake-terrain-collision'].push(
       SKIPPED_REASONS['bake-terrain-collision'],
+    )
+  }
+
+  if (commandIds.has('bake-scene-mesh-colliders')) {
+    steps.add('bake-scene-mesh-colliders')
+    reasons['bake-scene-mesh-colliders'].push(
+      'Publish readiness requires generated scene mesh colliders to be current before runtime manifests are cooked.',
+    )
+  } else {
+    reasons['bake-scene-mesh-colliders'].push(
+      SKIPPED_REASONS['bake-scene-mesh-colliders'],
+    )
+  }
+
+  if (metadata.styleBakeBlocked) {
+    blockers.push(
+      'Required style-baked assets are missing, stale, uncooked, or malformed.',
+    )
+  }
+  if (metadata.styleBakeNeedsBake || commandIds.has('bake-style-assets')) {
+    reasons['cook-runtime-assets'].push(
+      'Style-baked asset generation must be refreshed before runtime manifests are cooked.',
+    )
+  }
+  if (metadata.styleBakeNeedsCook) {
+    reasons['cook-runtime-assets'].push(
+      'Style-baked GLBs need cooked runtime LOD products before publish.',
     )
   }
 
@@ -533,7 +575,8 @@ export function computeEditorPublishBakePlan(
     metadata.dirty?.runtimeManifest ||
     metadata.dirty?.assetUrls ||
     commandIds.has('cook-runtime-assets') ||
-    commandIds.has('cook-runtime-assets-build')
+    commandIds.has('cook-runtime-assets-build') ||
+    commandIds.has('bake-style-assets')
   ) {
     reasons['cook-runtime-assets'].push(
       'Runtime asset or manifest dirty markers require a fresh cook.',
@@ -548,7 +591,7 @@ export function computeEditorPublishBakePlan(
     )
   }
   reasons['cook-runtime-assets'].push(
-    'Runtime scene manifests are cooked after scene, terrain, and partition outputs.',
+    'Runtime LOD variants and scene manifests are cooked after scene, terrain, mesh collider, and partition outputs.',
   )
 
   steps.add('audit-engine')

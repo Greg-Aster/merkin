@@ -2,10 +2,20 @@
 import { T } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount } from 'svelte'
 import { get } from 'svelte/store'
-import { Color, Group, Quaternion, Vector3 } from 'three'
+import { Group, Quaternion, Vector3 } from 'three'
+import SceneAtmosphereSystem from '../atmosphere/SceneAtmosphereSystem.svelte'
+import {
+  type RuntimeAtmosphereFogVolume,
+  buildRuntimeAtmosphereFromLevelSettings,
+  withRuntimeAtmosphereFogVolumes,
+} from '../atmosphere/buildRuntimeAtmosphere'
+import {
+  replaceRuntimeAtmosphere,
+  resetRuntimeAtmosphere,
+} from '../atmosphere/runtimeAtmosphereStore'
 import AmbientAudioRegions from '../components/AmbientAudioRegions.svelte'
 import AmbientParticleField from '../components/AmbientParticleField.svelte'
-import SceneFogExp2 from '../components/SceneFogExp2.svelte'
+import GroundMistLayer from '../components/GroundMistLayer.svelte'
 import StarNavigationSystem from '../components/StarNavigationSystem.svelte'
 import LevelManager from '../core/LevelManager.svelte'
 import type { PlayerLevelPositionDetail } from '../core/levelRuntimeEvents'
@@ -15,14 +25,8 @@ import {
   prefetchOptionalLevelRenderAssets,
   prepareRequiredLevelRenderAssets,
 } from '../engine/levelAssetPreloader'
-import { createLevelBuildReport } from '../engine/levelValidation'
 import { createLevelRuntimeReadinessContract } from '../engine/levelRuntimeReadinessContract'
-import {
-  getBuildReportRequiredAssetUrls,
-  getBuildReportRequiredRenderActorIds,
-  getBuildReportRuntimeAssetUrls,
-} from '../engine/runtimeSceneManifest'
-import type { LevelRuntimeReadinessContract } from '../engine/types'
+import { createLevelBuildReport } from '../engine/levelValidation'
 import {
   endLevelRuntimeAssetScope,
   getLevelRuntimeAssetTier,
@@ -35,6 +39,11 @@ import { resolveRuntimePlayerSettings } from '../engine/runtimePlayerSettings'
 import { getRuntimePrefabAssetUrl } from '../engine/runtimePrefabRegistry'
 import { loadRuntimeSceneDocument } from '../engine/runtimeSceneDocumentLoader'
 import {
+  getBuildReportRequiredAssetUrls,
+  getBuildReportRequiredRenderActorIds,
+  getBuildReportRuntimeAssetUrls,
+} from '../engine/runtimeSceneManifest'
+import {
   type RuntimeWorldPartition,
   type RuntimeWorldPartitionCell,
   type RuntimeWorldPartitionCellRuntimeState,
@@ -46,6 +55,7 @@ import type {
   RenderProfileVisualBookmark,
   SceneSettings,
 } from '../engine/sceneDocumentTypes'
+import type { LevelRuntimeReadinessContract } from '../engine/types'
 import type { ActorDefinition, LevelDefinition } from '../engine/types'
 import { Ocean as OceanComponent, UnderwaterOverlay } from '../features/ocean'
 import { underwaterStateStore } from '../features/ocean/stores/underwaterStore'
@@ -93,6 +103,7 @@ import {
 import RuntimeActorBranch from './RuntimeActorBranch.svelte'
 import SceneLighting from './SceneLighting.svelte'
 import { getSceneTerrainRuntimeRequest } from './sceneTerrainRuntime'
+import { resolveSkyboxPreset } from './skyboxPresets'
 
 type WorldPartitionSettings = {
   partitionUrl?: string
@@ -105,6 +116,7 @@ const dispatch = createEventDispatcher()
 export let levelId: string
 export let position: [number, number, number] = [0, 0, 0]
 export let editorEnabled = false
+export let editorSceneSettingsOverride: SceneSettings | null = null
 export let interactionSystem: any = null
 export let timelineEvents: any[] = []
 
@@ -134,35 +146,11 @@ let lastWorldPartitionEvictionKey = ''
 let selectedRuntimeAssetTier = 'medium'
 let requiredRuntimeAssetCount = 0
 let deferredOptionalRuntimeAssetCount = 0
+let lastAtmosphereDiagnosticKey = ''
 let worldPartitionCellStates = new Map<
   string,
   RuntimeWorldPartitionCellRuntimeState
 >()
-
-const SKYBOX_PRESETS = {
-  observatory: {
-    path: '/assets/hdri/skywip4-cubemap/',
-    files: [
-      'px.webp',
-      'nx.webp',
-      'py.webp',
-      'ny.webp',
-      'pz.webp',
-      'nz.webp',
-    ] as [string, string, string, string, string, string],
-  },
-  classic: {
-    path: '/assets/skyboxes/',
-    files: [
-      'px.webp',
-      'nx.webp',
-      'py.webp',
-      'ny.webp',
-      'pz.webp',
-      'nz.webp',
-    ] as [string, string, string, string, string, string],
-  },
-} as const
 
 function getWorldPartitionSettings(
   settings: SceneSettings,
@@ -473,6 +461,40 @@ function parseSceneColor(
   if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return fallback
 
   return Number.parseInt(normalized, 16)
+}
+
+function finiteNumberOrDefault(
+  value: number | null | undefined,
+  fallback: number,
+) {
+  return Number.isFinite(value) ? value : fallback
+}
+
+function clampNumber(
+  value: number | null | undefined,
+  min: number,
+  max: number,
+  fallback: number,
+) {
+  return Math.min(max, Math.max(min, finiteNumberOrDefault(value, fallback)))
+}
+
+function formatAtmosphereDiagnosticNumber(
+  value: number | null | undefined,
+  digits = 3,
+) {
+  return finiteNumberOrDefault(value, 0).toFixed(digits)
+}
+
+function renderProfileAllowsPostPass(
+  profile: ReturnType<typeof resolveRuntimeRenderProfile>,
+  pass: 'bloom' | 'color-grading',
+) {
+  if (!profile.postProcessing.enabled) return false
+  return (
+    profile.postProcessing.passes.length === 0 ||
+    profile.postProcessing.passes.includes(pass)
+  )
 }
 
 function resolveSpawnPosition(
@@ -1017,12 +1039,13 @@ async function loadSceneDocument(level: string, token: number) {
   }
 }
 
-$: levelSettings = (levelDefinition?.settings ?? {}) as SceneSettings
+$: levelSettings = (
+  editorEnabled && editorSceneSettingsOverride
+    ? editorSceneSettingsOverride
+    : levelDefinition?.settings ?? {}
+) as SceneSettings
 $: sharedLevelSettings = levelSettings.level ?? {}
-$: activeSkyboxPreset =
-  SKYBOX_PRESETS[
-    sharedLevelSettings.skyboxPreset as keyof typeof SKYBOX_PRESETS
-  ] ?? SKYBOX_PRESETS.observatory
+$: activeSkyboxPreset = resolveSkyboxPreset(sharedLevelSettings.skyboxPreset)
 $: authoredGameplayNodes = (() => {
   if (!levelDefinition) return []
   const getWorldMatrix = createActorWorldMatrixResolver(levelDefinition.actors)
@@ -1056,6 +1079,31 @@ $: authoredGameplayNodes = (() => {
       }
     })
 })()
+$: baseRuntimeAtmosphere = buildRuntimeAtmosphereFromLevelSettings(
+  sharedLevelSettings,
+  {
+    levelId,
+    source: editorEnabled ? 'editor-preview' : 'scene-settings',
+  },
+)
+$: authoredFogVolumes = authoredGameplayNodes
+  .filter(entry => entry.gameplay?.type === 'fog-volume')
+  .map(
+    (entry): RuntimeAtmosphereFogVolume => ({
+      position: entry.position,
+      scale: entry.scale,
+      color: entry.gameplay?.fogColor,
+      density: entry.gameplay?.fogDensity,
+      falloff: entry.gameplay?.regionFalloff,
+    }),
+  )
+$: runtimeAtmosphere = withRuntimeAtmosphereFogVolumes(baseRuntimeAtmosphere, {
+  fogVolumes: authoredFogVolumes,
+  playerPosition,
+})
+$: runtimeDistanceFog = runtimeAtmosphere.distanceFog
+$: runtimeHeightFog = runtimeAtmosphere.heightFog
+$: runtimeMist = runtimeAtmosphere.mist
 $: authoredAudioRegions = authoredGameplayNodes
   .filter(
     entry =>
@@ -1255,53 +1303,69 @@ $: if (renderActorsReady) {
     cellStateCounts: runtimeCellStateCounts,
   })
 }
-$: effectiveFog = (() => {
-  const fogVolumes = authoredGameplayNodes.filter(
-    entry => entry.gameplay?.type === 'fog-volume',
-  )
-  const baseColor = new Color(
-    sharedLevelSettings.style?.fog?.color ?? '#5f76a8',
-  )
-  const baseDensity = sharedLevelSettings.style?.fog?.density ?? 0.0012
-
-  let strongestInfluence = 0
-  let targetColor = baseColor.clone()
-  let targetDensity = baseDensity
-
-  for (const entry of fogVolumes) {
-    const [px, py, pz] = playerPosition
-    const [cx, cy, cz] = entry.position
-    const [sx, sy, sz] = entry.scale.map(value => Math.abs(value) / 2) as [
-      number,
-      number,
-      number,
-    ]
-    const dx = Math.max(Math.abs(px - cx) - sx, 0)
-    const dy = Math.max(Math.abs(py - cy) - sy, 0)
-    const dz = Math.max(Math.abs(pz - cz) - sz, 0)
-    const outsideDistance = Math.sqrt(dx * dx + dy * dy + dz * dz)
-    const falloff = entry.gameplay?.regionFalloff ?? 8
-    const influence =
-      outsideDistance <= 0.0001
-        ? 1
-        : outsideDistance >= falloff
-          ? 0
-          : 1 - outsideDistance / Math.max(0.001, falloff)
-
-    if (influence <= strongestInfluence) continue
-
-    strongestInfluence = influence
-    targetColor = new Color(entry.gameplay?.fogColor ?? '#dbe4ef')
-    targetDensity = entry.gameplay?.fogDensity ?? baseDensity
-  }
-
-  return {
-    color: baseColor.lerp(targetColor, strongestInfluence).getStyle(),
-    density: baseDensity + (targetDensity - baseDensity) * strongestInfluence,
-  }
-})()
-$: fogColor = effectiveFog.color
-$: fogDensity = effectiveFog.density
+$: fogColor = runtimeDistanceFog.color
+$: fogDensity =
+  runtimeAtmosphere.enabled && runtimeDistanceFog.enabled
+    ? runtimeDistanceFog.density
+    : 0
+$: heightFogFloor = finiteNumberOrDefault(runtimeHeightFog.floor, 0.6)
+$: heightFogCeiling = Math.max(
+  heightFogFloor + 0.001,
+  finiteNumberOrDefault(runtimeHeightFog.ceiling, heightFogFloor + 6),
+)
+$: heightFogDensity = runtimeHeightFog.enabled
+  ? Math.max(0, finiteNumberOrDefault(runtimeHeightFog.density, 0))
+  : 0
+$: heightFogEnabled =
+  runtimeHeightFog.enabled &&
+  heightFogDensity > 0 &&
+  heightFogCeiling > heightFogFloor
+$: globalMistOpacity = clampNumber(runtimeMist.opacity, 0, 1, 0)
+$: globalMistScale = Math.max(1, finiteNumberOrDefault(runtimeMist.scale, 320))
+$: globalMistFloor = heightFogFloor
+$: globalMistBaseHeight =
+  globalMistFloor + Math.max(0, finiteNumberOrDefault(runtimeMist.height, 0))
+$: globalMistCeiling = Math.max(
+  globalMistBaseHeight,
+  finiteNumberOrDefault(runtimeHeightFog.ceiling, globalMistBaseHeight),
+)
+$: globalMistSpacing = Math.max(
+  0.02,
+  finiteNumberOrDefault(runtimeMist.spacing, 0.44),
+)
+$: globalMistRequestedLayers = Math.max(
+  0,
+  Math.round(finiteNumberOrDefault(runtimeMist.layers, 0)),
+)
+$: globalMistLayerCap =
+  globalMistCeiling > globalMistBaseHeight
+    ? Math.max(
+        1,
+        Math.floor(
+          (globalMistCeiling - globalMistBaseHeight) / globalMistSpacing,
+        ) + 1,
+      )
+    : 1
+$: globalMistLayers = Math.min(globalMistRequestedLayers, globalMistLayerCap)
+$: globalMistEnabled =
+  runtimeMist.enabled &&
+  globalMistLayers > 0 &&
+  globalMistOpacity > 0.001 &&
+  globalMistScale > 1
+$: skyboxAerialPerspectiveBoost = clampNumber(
+  runtimeAtmosphere.aerialPerspective.horizonBoost,
+  0,
+  1,
+  0,
+)
+$: sceneAtmosphereRefreshKey = [
+  levelId,
+  levelDefinition?.actors.length ?? 0,
+  activeRenderableActorCount,
+  runtimeActiveCellKeys.join(','),
+  runtimeReadyCellKeys.join(','),
+  terrainRuntimeReady ? 1 : 0,
+].join('|')
 $: ambientIntensity = sharedLevelSettings.lighting?.ambientIntensity ?? 1.25
 $: keyLightIntensity =
   sharedLevelSettings.lighting?.keyLightIntensity ??
@@ -1331,7 +1395,97 @@ $: underwaterFogColor = parseSceneColor(
   waterSettings?.underwaterFogColor,
   0x0a1922,
 )
+$: atmosphereSourceProfile = runtimeAtmosphere.id || 'authored-settings'
+$: distanceFogEnabled = runtimeDistanceFog.enabled && fogDensity > 0
+$: skyBackgroundIntensity = Math.max(
+  0,
+  finiteNumberOrDefault(sharedLevelSettings.skybox?.backgroundIntensity, 1),
+)
+$: skyEnvironmentIntensity = Math.max(
+  0,
+  finiteNumberOrDefault(
+    resolvedRenderProfile.reflections.environmentIntensity,
+    1,
+  ),
+)
+$: skyAtmosphereParticipates =
+  skyBackgroundIntensity > 0 &&
+  runtimeAtmosphere.enabled &&
+  runtimeAtmosphere.aerialPerspective.enabled
+$: oceanAtmosphereLimited =
+  Boolean(waterEnabled && waterSettings) &&
+  resolvedRenderProfile.reflections.mode === 'planar'
+$: oceanAtmosphereStatus =
+  !waterEnabled || !waterSettings
+    ? 'ocean disabled'
+    : oceanAtmosphereLimited
+      ? 'ocean planar reflector limited; reflector shader support required'
+      : 'ocean surface participating'
+$: bloomProfileParticipates = renderProfileAllowsPostPass(
+  resolvedRenderProfile,
+  'bloom',
+)
+$: colorGradingProfileParticipates = renderProfileAllowsPostPass(
+  resolvedRenderProfile,
+  'color-grading',
+)
+$: atmosphereDiagnosticKey = [
+  levelId,
+  atmosphereSourceProfile,
+  fogColor,
+  formatAtmosphereDiagnosticNumber(fogDensity, 6),
+  Number(heightFogEnabled),
+  formatAtmosphereDiagnosticNumber(heightFogFloor),
+  formatAtmosphereDiagnosticNumber(heightFogCeiling),
+  formatAtmosphereDiagnosticNumber(heightFogDensity, 6),
+  sharedLevelSettings.skyboxPreset ?? 'observatory',
+  formatAtmosphereDiagnosticNumber(skyBackgroundIntensity),
+  formatAtmosphereDiagnosticNumber(skyEnvironmentIntensity),
+  formatAtmosphereDiagnosticNumber(skyboxAerialPerspectiveBoost),
+  oceanAtmosphereStatus,
+  resolvedRenderProfile.id,
+  resolvedRenderProfile.tier,
+  Number(bloomProfileParticipates),
+  Number(colorGradingProfileParticipates),
+].join('|')
+$: if (
+  levelDefinition &&
+  atmosphereDiagnosticKey !== lastAtmosphereDiagnosticKey
+) {
+  lastAtmosphereDiagnosticKey = atmosphereDiagnosticKey
+  setRuntimeDiagnostic('atmosphere', {
+    label: 'Atmosphere Integration',
+    level:
+      skyAtmosphereParticipates && !oceanAtmosphereLimited
+        ? 'ready'
+        : 'warning',
+    message: `${levelId}/${atmosphereSourceProfile}: distance fog ${distanceFogEnabled ? 'on' : 'off'} density ${formatAtmosphereDiagnosticNumber(fogDensity, 5)}; height fog ${heightFogEnabled ? 'on' : 'off'} floor ${formatAtmosphereDiagnosticNumber(heightFogFloor, 2)} ceiling ${formatAtmosphereDiagnosticNumber(heightFogCeiling, 2)} density ${formatAtmosphereDiagnosticNumber(heightFogDensity, 5)}; sky ${skyAtmosphereParticipates ? 'participating' : 'not participating'} preset ${sharedLevelSettings.skyboxPreset ?? 'observatory'} aerial ${formatAtmosphereDiagnosticNumber(skyboxAerialPerspectiveBoost, 2)} env ${formatAtmosphereDiagnosticNumber(skyEnvironmentIntensity, 2)}; mist ${runtimeMist.enabled ? 'participating' : 'disabled'}; ${oceanAtmosphereStatus}; post profile ${resolvedRenderProfile.id}/${resolvedRenderProfile.tier} bloom ${bloomProfileParticipates ? 'allowed' : 'disabled by profile or tier'} color grading ${colorGradingProfileParticipates ? 'allowed' : 'disabled by profile or tier'}.`,
+    meta: {
+      levelId,
+      sourceProfile: atmosphereSourceProfile,
+      distanceFogEnabled,
+      distanceFogDensity: fogDensity,
+      heightFogEnabled,
+      heightFogFloor,
+      heightFogCeiling,
+      heightFogDensity,
+      skyParticipates: skyAtmosphereParticipates,
+      skyboxPreset: sharedLevelSettings.skyboxPreset ?? 'observatory',
+      skyBackgroundIntensity,
+      skyEnvironmentIntensity,
+      skyAerialPerspectiveBoost: skyboxAerialPerspectiveBoost,
+      oceanParticipates: Boolean(waterEnabled && waterSettings),
+      oceanAtmosphereLimited,
+      oceanStatus: oceanAtmosphereStatus,
+      renderProfileId: resolvedRenderProfile.id,
+      renderProfileTier: resolvedRenderProfile.tier,
+      bloomProfileParticipates,
+      colorGradingProfileParticipates,
+    },
+  })
+}
 $: if (levelDefinition) {
+  replaceRuntimeAtmosphere(runtimeAtmosphere)
   replaceRuntimeVisualStyle(
     buildRuntimeVisualStyleFromLevelSettings(sharedLevelSettings),
   )
@@ -1372,6 +1526,7 @@ onDestroy(() => {
   activeRuntimeReadinessContract = null
   pendingSceneReady = false
   pendingSpawnPosition = null
+  resetRuntimeAtmosphere()
   resetRuntimeVisualStyle()
 })
 </script>
@@ -1381,9 +1536,28 @@ onDestroy(() => {
     <Skybox
       path={activeSkyboxPreset.path}
       files={activeSkyboxPreset.files}
+      backgroundIntensity={sharedLevelSettings.skybox?.backgroundIntensity ?? 1}
+      backgroundBlurriness={sharedLevelSettings.skybox?.backgroundBlurriness ?? 0}
+      environmentIntensity={resolvedRenderProfile.reflections.environmentIntensity}
+      aerialPerspectiveBoost={skyboxAerialPerspectiveBoost}
+      atmosphere={runtimeAtmosphere}
     />
 
-    <SceneFogExp2 color={fogColor} density={fogDensity} />
+    <SceneAtmosphereSystem
+      levelId={levelId}
+      atmosphere={runtimeAtmosphere}
+      refreshKey={sceneAtmosphereRefreshKey}
+    />
+    <GroundMistLayer
+      enabled={globalMistEnabled}
+      color={runtimeMist.color}
+      opacity={globalMistOpacity}
+      layers={globalMistLayers}
+      baseHeight={globalMistBaseHeight}
+      heightStep={globalMistSpacing}
+      scale={globalMistScale}
+      driftSpeed={finiteNumberOrDefault(runtimeMist.driftSpeed, 0.035)}
+    />
     <SceneLighting
       {ambientIntensity}
       {keyLightIntensity}
@@ -1423,7 +1597,14 @@ onDestroy(() => {
         ]}
         underwaterFogDensity={waterSettings.underwaterFogDensity ?? 0.08}
         underwaterFogColor={underwaterFogColor}
-        surfaceFogDensity={waterSettings.surfaceFogDensity ?? 0.001}
+        surfaceFogDensity={waterSettings.surfaceFogDensity ?? fogDensity}
+        atmosphereFogColor={fogColor}
+        atmosphereFogDensity={fogDensity}
+        atmosphereHeightFogEnabled={heightFogEnabled}
+        atmosphereHeightFogColor={runtimeHeightFog.color}
+        atmosphereHeightFogDensity={heightFogDensity}
+        atmosphereHeightFogFloor={heightFogFloor}
+        atmosphereHeightFogCeiling={heightFogCeiling}
         metalness={0.02}
         roughness={0.025}
         envMapIntensity={resolvedRenderProfile.reflections.environmentIntensity}
@@ -1433,7 +1614,16 @@ onDestroy(() => {
         reflectionTextureSize={resolvedRenderProfile.reflections.textureSize}
       />
       {#if $underwaterStateStore.isUnderwater || $underwaterStateStore.transitionProgress > 0}
-        <UnderwaterOverlay />
+        <UnderwaterOverlay
+          {underwaterFogColor}
+          atmosphereFogColor={fogColor}
+          atmosphereFogDensity={fogDensity}
+          atmosphereHeightFogEnabled={heightFogEnabled}
+          atmosphereHeightFogColor={runtimeHeightFog.color}
+          atmosphereHeightFogDensity={heightFogDensity}
+          atmosphereHeightFogFloor={heightFogFloor}
+          atmosphereHeightFogCeiling={heightFogCeiling}
+        />
       {/if}
     {/if}
 

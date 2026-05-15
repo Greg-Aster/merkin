@@ -20,6 +20,10 @@ import {
   getRuntimePrefabAssetUrl,
   normalizeRuntimeLevelSceneSettings,
 } from './runtimeSceneManifest.mjs'
+import {
+  getStyleBakeSettingsFingerprint,
+  normalizeStyleBakeSettings,
+} from './styleBakeProducts.mjs'
 
 const impostorAtlasTileSize = 256
 const impostorAtlasImageUrl =
@@ -56,7 +60,7 @@ const platformCertificationProfiles = {
   defaultProfile: 'desktop',
   profiles: {
     mobile: {
-      targetFps: 30,
+      targetFps: 16,
       defaultTier: 'low',
       maxRuntimeAssetBytes: 64 * 1024 * 1024,
       maxRuntimeAssetFileBytes: 12 * 1024 * 1024,
@@ -66,7 +70,7 @@ const platformCertificationProfiles = {
       maxCombinedTextureBytes: 96 * 1024 * 1024,
     },
     desktop: {
-      targetFps: 60,
+      targetFps: 24,
       defaultTier: 'high',
       maxRuntimeAssetBytes: 160 * 1024 * 1024,
       maxRuntimeAssetFileBytes: 40 * 1024 * 1024,
@@ -76,7 +80,7 @@ const platformCertificationProfiles = {
       maxCombinedTextureBytes: 256 * 1024 * 1024,
     },
     tv: {
-      targetFps: 30,
+      targetFps: 24,
       defaultTier: 'medium',
       maxRuntimeAssetBytes: 96 * 1024 * 1024,
       maxRuntimeAssetFileBytes: 24 * 1024 * 1024,
@@ -175,6 +179,106 @@ export function normalizePublicUrl(url) {
   return url.startsWith('/') ? url : `/${url}`
 }
 
+function getCompanionJsonUrl(sourceUrl) {
+  return /\.(glb|gltf)$/i.test(sourceUrl)
+    ? sourceUrl.replace(/\.(glb|gltf)$/i, '.json')
+    : ''
+}
+
+function fingerprintFile(path) {
+  if (!existsSync(path)) return null
+  return {
+    algorithm: 'sha256',
+    value: createHash('sha256').update(readFileSync(path)).digest('hex'),
+  }
+}
+
+function readJsonIfExists(path) {
+  if (!existsSync(path)) return null
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'))
+  } catch {
+    return null
+  }
+}
+
+function normalizeFingerprint(value) {
+  if (!value) return null
+  if (typeof value === 'string') {
+    return { algorithm: 'sha256', value }
+  }
+  return typeof value.value === 'string'
+    ? {
+        algorithm:
+          typeof value.algorithm === 'string' ? value.algorithm : 'sha256',
+        value: value.value,
+      }
+    : null
+}
+
+function fingerprintsMatch(left, right) {
+  const leftFingerprint = normalizeFingerprint(left)
+  const rightFingerprint = normalizeFingerprint(right)
+  if (!leftFingerprint?.value || !rightFingerprint?.value) return null
+  return leftFingerprint.value === rightFingerprint.value
+}
+
+function getStyleBakeSettings(metadata) {
+  const productSettings =
+    metadata?.product?.settings ?? metadata?.styleBakeProduct?.settings ?? {}
+  return normalizeStyleBakeSettings({
+    ...metadata,
+    ...productSettings,
+  })
+}
+
+function getStyleBakeMetadataMode(metadata) {
+  return String(
+    metadata?.mode ??
+      metadata?.product?.mode ??
+      metadata?.styleBakeProduct?.mode ??
+      '',
+  )
+}
+
+export function isStyleBakeMetadata(metadata) {
+  const mode = getStyleBakeMetadataMode(metadata)
+  const generator = String(
+    metadata?.generator ??
+      metadata?.generatedBy ??
+      metadata?.product?.generator ??
+      metadata?.product?.generatorName ??
+      metadata?.styleBakeProduct?.generator ??
+      metadata?.styleBakeProduct?.generatorName ??
+      '',
+  ).toLowerCase()
+  return Boolean(
+    (metadata?.sourceAssetUrl ||
+      metadata?.product?.source?.assetUrl ||
+      metadata?.product?.sourceAssetUrl ||
+      metadata?.styleBakeProduct?.source?.assetUrl ||
+      metadata?.styleBakeProduct?.sourceAssetUrl) &&
+      (mode === 'procedural' ||
+        mode === 'procedural-material' ||
+        mode === 'blender-geometry' ||
+        generator.includes('deterministic procedural style bake') ||
+        generator.includes('blender headless geometry style bake')),
+  )
+}
+
+function countOversizedTextures(metadata, maxTextureSize) {
+  if (!metadata?.valid || !Number.isFinite(maxTextureSize)) return 0
+  return (metadata.textures ?? []).filter(texture => {
+    const width = texture.width
+    const height = texture.height
+    return (
+      Number.isFinite(width) &&
+      Number.isFinite(height) &&
+      (width > maxTextureSize || height > maxTextureSize)
+    )
+  }).length
+}
+
 export function createRuntimeAssetCookContext({
   appRoot,
   repoRoot = join(appRoot, '..', '..'),
@@ -257,6 +361,18 @@ function createContentBuildFingerprint({ entries, runtimeScenes }) {
             sourceSizeBytes: entry.sourceSizeBytes,
             required: entry.required,
             importMetadata: entry.importMetadata ?? null,
+            styleBake: entry.styleBake
+              ? {
+                  status: entry.styleBake.status,
+                  sourceAssetUrl: entry.styleBake.sourceAssetUrl ?? null,
+                  sourceAssetFingerprint:
+                    entry.styleBake.currentSourceAssetFingerprint?.value ??
+                    entry.styleBake.sourceAssetFingerprint?.value ??
+                    null,
+                  styleSettingsFingerprint:
+                    entry.styleBake.styleSettingsFingerprint?.value ?? null,
+                }
+              : null,
             variants: Object.fromEntries(
               Object.entries(entry.qualityVariants ?? {}).map(
                 ([tier, variant]) => [
@@ -500,8 +616,18 @@ async function buildRuntimeSceneManifests(
         authoringScene.document.settings,
       ),
     }
-    const levelDefinition = adaptSceneDocumentToLevelDefinition(normalizedScene)
-    const buildReport = createLevelBuildReport(levelDefinition)
+    const collisionProductErrors = []
+    const requireCurrentGeneratedCollision =
+      normalizedScene.settings?.level?.collision?.workflow
+        ?.managerProductsRequired !== false
+    const levelDefinition = adaptSceneDocumentToLevelDefinition(normalizedScene, {
+      publicRoot: context.publicRoot,
+      collisionProductErrors,
+      requireCurrentGeneratedCollision,
+    })
+    const buildReport = createLevelBuildReport(levelDefinition, {
+      collisionProductErrors,
+    })
     const worldPartitionUrl = getWorldPartitionPublicUrl(authoringScene.levelId)
     const worldPartitionPath = resolvePublicPath(context, worldPartitionUrl)
 
@@ -715,6 +841,152 @@ function getMaterialCompliance({ sourceUrl, sourceMetadata, qualityVariants }) {
   }
 }
 
+function createStyleBakeProvenance({
+  context,
+  asset,
+  sourceExists,
+  sourceMetadata,
+  qualityVariants,
+}) {
+  const metadataUrl = getCompanionJsonUrl(asset.sourceUrl)
+  const metadataPath = metadataUrl ? resolvePublicPath(context, metadataUrl) : ''
+  const metadata = metadataPath ? readJsonIfExists(metadataPath) : null
+  const generatedAssetUrl = normalizePublicUrl(asset.sourceUrl)
+  const possibleStyleBake = generatedAssetUrl.startsWith(
+    '/generated/style-lab/baked-style/',
+  )
+
+  if (!metadata && !possibleStyleBake) return null
+
+  if (!metadata) {
+    return {
+      schemaVersion: 1,
+      status: sourceExists
+        ? 'missing-generated-metadata'
+        : 'missing-generated-asset',
+      runtimeCookRequired: true,
+      runtimeCooked: Object.values(qualityVariants).every(
+        variant => variant.exists,
+      ),
+      metadataUrl,
+      generatedAssetUrl,
+      diagnostics: ['generated style metadata is missing'],
+    }
+  }
+
+  if (!isStyleBakeMetadata(metadata)) return null
+
+  const styleSettings = getStyleBakeSettings(metadata)
+  const computedStyleSettingsFingerprint =
+    getStyleBakeSettingsFingerprint(styleSettings)
+  const recordedStyleSettingsFingerprint = normalizeFingerprint(
+    metadata.styleSettingsFingerprint ??
+      metadata.settingsFingerprint ??
+      metadata.product?.settingsFingerprint ??
+      metadata.styleBakeProduct?.settingsFingerprint,
+  )
+  const sourceAssetUrl = normalizePublicUrl(
+    metadata.sourceAssetUrl ??
+      metadata.product?.source?.assetUrl ??
+      metadata.product?.sourceAssetUrl ??
+      metadata.styleBakeProduct?.source?.assetUrl ??
+      metadata.styleBakeProduct?.sourceAssetUrl,
+  )
+  const sourceAssetPath = sourceAssetUrl
+    ? resolvePublicPath(context, sourceAssetUrl)
+    : ''
+  const currentSourceAssetFingerprint = sourceAssetPath
+    ? fingerprintFile(sourceAssetPath)
+    : null
+  const recordedSourceAssetFingerprint = normalizeFingerprint(
+    metadata.sourceAssetFingerprint ??
+      metadata.product?.source?.assetFingerprint ??
+      metadata.product?.sourceAssetFingerprint ??
+      metadata.styleBakeProduct?.source?.assetFingerprint ??
+      metadata.styleBakeProduct?.sourceAssetFingerprint,
+  )
+  const sourceAssetFingerprintMatches = fingerprintsMatch(
+    recordedSourceAssetFingerprint,
+    currentSourceAssetFingerprint,
+  )
+  const styleSettingsFingerprintMatches = recordedStyleSettingsFingerprint
+    ? fingerprintsMatch(
+        recordedStyleSettingsFingerprint,
+        computedStyleSettingsFingerprint,
+      )
+    : null
+  const selectedTier = 'medium'
+  const selectedVariant = qualityVariants[selectedTier]
+  const selectedTextureLimit =
+    selectedVariant?.pipeline?.textureSize ??
+    tierConfigs.find(tier => tier.id === selectedTier)?.textureSize ??
+    null
+  const selectedMetadata = selectedVariant?.metadata ?? sourceMetadata
+  const oversizedTextures = countOversizedTextures(
+    selectedMetadata,
+    selectedTextureLimit,
+  )
+  const sourceUnusedTextures = Number(sourceMetadata?.unusedTextureCount ?? 0)
+  const cookedUnusedTextures =
+    selectedVariant?.metadata && selectedVariant.metadata !== sourceMetadata
+      ? Number(selectedVariant.metadata.unusedTextureCount ?? 0)
+      : 0
+  const unusedTextureCount = sourceUnusedTextures + cookedUnusedTextures
+  const runtimeCooked = Object.values(qualityVariants).every(
+    variant => variant.exists,
+  )
+  const diagnostics = [
+    recordedSourceAssetFingerprint ? '' : 'source fingerprint missing from metadata',
+    recordedStyleSettingsFingerprint
+      ? ''
+      : 'style settings fingerprint missing from metadata',
+    currentSourceAssetFingerprint ? '' : 'source asset missing',
+  ].filter(Boolean)
+  const status = !sourceExists
+    ? 'missing-generated-asset'
+    : !metadata
+      ? 'missing-generated-metadata'
+      : sourceAssetUrl && !currentSourceAssetFingerprint
+        ? 'missing-source-asset'
+        : sourceAssetFingerprintMatches === false
+          ? 'stale-source'
+          : styleSettingsFingerprintMatches === false
+            ? 'stale-settings'
+            : !runtimeCooked
+              ? 'not-cooked'
+              : oversizedTextures > 0 || unusedTextureCount > 0
+                ? 'over-budget'
+                : 'clean'
+
+  return {
+    schemaVersion: 1,
+    status,
+    runtimeCookRequired: true,
+    runtimeCooked,
+    metadataUrl,
+    sourceAssetUrl,
+    generatedAssetUrl,
+    sourceAssetFingerprint: recordedSourceAssetFingerprint,
+    currentSourceAssetFingerprint,
+    sourceAssetFingerprintMatches,
+    styleSettings,
+    styleSettingsFingerprint:
+      recordedStyleSettingsFingerprint ?? computedStyleSettingsFingerprint,
+    expectedStyleSettingsFingerprint: computedStyleSettingsFingerprint,
+    styleSettingsFingerprintMatches,
+    budget: {
+      selectedTier,
+      maxTextureSize: selectedTextureLimit,
+      maxTextureCount: null,
+      textureCount: selectedMetadata?.textureCount ?? null,
+      oversizedTextures,
+      unusedTextureCount,
+      overBudget: oversizedTextures > 0 || unusedTextureCount > 0,
+    },
+    diagnostics,
+  }
+}
+
 function createManifestEntry(context, asset, runtimeScenes, importManifest) {
   const sourcePath = resolvePublicPath(context, asset.sourceUrl)
   const sourceExists = existsSync(sourcePath)
@@ -767,6 +1039,13 @@ function createManifestEntry(context, asset, runtimeScenes, importManifest) {
     manifest: importManifest,
     sourceUrl,
   })
+  const styleBake = createStyleBakeProvenance({
+    context,
+    asset,
+    sourceExists,
+    sourceMetadata,
+    qualityVariants,
+  })
 
   return {
     sourceUrl: asset.sourceUrl,
@@ -798,6 +1077,7 @@ function createManifestEntry(context, asset, runtimeScenes, importManifest) {
       qualityVariants,
     }),
     importMetadata,
+    styleBake,
     metadata: sourceMetadata,
     rawGeneratedRuntimeAsset: asset.sourceUrl.startsWith('/generated/'),
     qualityVariants,
@@ -883,6 +1163,14 @@ export async function buildRuntimeAssetManifest(context) {
   const impostorDescriptorCount = Object.values(entries).filter(
     entry => entry.impostor?.generated,
   ).length
+  const styleBakeAssetCount = Object.values(entries).filter(
+    entry => entry.styleBake,
+  ).length
+  const staleStyleBakeAssetCount = Object.values(entries).filter(
+    entry =>
+      entry.styleBake &&
+      !['clean', 'over-budget'].includes(entry.styleBake.status),
+  ).length
   const authoringSourceMetadata = getAuthoringSceneSourceMetadata(
     createAuthoringSceneSourceContext(context),
   )
@@ -935,6 +1223,8 @@ export async function buildRuntimeAssetManifest(context) {
       rawGeneratedRuntimeAssetCount: Object.values(entries).filter(
         entry => entry.rawGeneratedRuntimeAsset,
       ).length,
+      styleBakeAssetCount,
+      staleStyleBakeAssetCount,
       requiredAssetCount,
       optionalAssetCount: Object.keys(entries).length - requiredAssetCount,
       metadataAssetCount,
@@ -966,8 +1256,14 @@ export async function buildRuntimeAssetManifest(context) {
   }
 }
 
-export function getRuntimeSceneBuildErrors(manifest) {
-  return Object.values(manifest.runtimeScenes).flatMap(scene =>
+export function getRuntimeSceneBuildErrors(manifest, { levelId } = {}) {
+  const runtimeScenes = levelId
+    ? Object.entries(manifest.runtimeScenes ?? {})
+        .filter(([sceneLevelId]) => sceneLevelId === levelId)
+        .map(([, scene]) => scene)
+    : Object.values(manifest.runtimeScenes ?? {})
+
+  return runtimeScenes.flatMap(scene =>
     scene.buildErrors.map(error => `${scene.url}: ${error}`),
   )
 }

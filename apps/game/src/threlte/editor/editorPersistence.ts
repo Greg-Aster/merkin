@@ -9,9 +9,12 @@ export interface PersistedStyleBatchEntry {
   nodeId: string
   nodeName: string
   descriptor: string
-  mode: 'texture' | 'generate'
+  mode: 'texture' | 'generate' | 'procedural-material' | 'blender-geometry'
   sourceName: string
   sourceAssetUrl?: string
+  sourceAssetFingerprint?: string
+  settingsFingerprint?: string
+  cacheKey?: string
   workspaceReferenceImageUrl?: string
   jobId?: string
   status:
@@ -23,12 +26,16 @@ export interface PersistedStyleBatchEntry {
     | 'failed'
     | 'cancelled'
   outputAssetUrl?: string
+  metadataUrl?: string
+  cached?: boolean
   error?: string
 }
 
 export interface PersistedStyleBatchSession {
   levelId: string
-  mode: 'texture' | 'generate'
+  mode: 'texture' | 'generate' | 'procedural-material' | 'blender-geometry'
+  scope?: 'batch-selection' | 'selected-objects' | 'visible' | 'level'
+  force?: boolean
   createdAt: string
   updatedAt: string
   styleProfileName: string
@@ -38,6 +45,7 @@ export interface PersistedStyleBatchSession {
   styleControlNetNotes: string
   styleReferenceImageUrl: string
   comfyUiApiUrl: string
+  comfyUiLowVramMode?: boolean
   hunyuanApiUrl: string
   workflowPath: string
   entries: PersistedStyleBatchEntry[]

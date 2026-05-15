@@ -2,6 +2,8 @@ export type EditorPanelTab =
   | 'scene'
   | 'create'
   | 'world'
+  | 'performance'
+  | 'bake'
   | 'collision'
   | 'build'
   | 'ai'

@@ -2,9 +2,14 @@
 import type { CollisionChannel, CollisionIntent } from '../engine/types'
 import EditorPropertiesShelf from './EditorPropertiesShelf.svelte'
 import type {
+  EditorCollisionLodSourceTier,
+  EditorCollisionMode,
+  EditorCollisionQuality,
   EditorMaterialData,
   EditorSceneNode,
   EditorSceneSettings,
+  EditorViewportLightingMode,
+  EditorViewportShadingMode,
 } from './editorTypes'
 
 type TextureField =
@@ -14,6 +19,19 @@ type TextureField =
   | 'metalnessMapUrl'
   | 'emissiveMapUrl'
   | 'alphaMapUrl'
+
+type MaterialNumericField =
+  | 'emissiveIntensity'
+  | 'metalness'
+  | 'roughness'
+  | 'opacity'
+  | 'envMapIntensity'
+  | 'transmission'
+  | 'ior'
+  | 'clearcoat'
+  | 'clearcoatRoughness'
+  | 'thickness'
+  | 'reflectivity'
 
 type TextureBrowserItem = {
   name: string
@@ -33,6 +51,9 @@ type GeneratedVariantItem = {
   url: string
   sourceLabel?: string
   isOriginalSource?: boolean
+  mode?: string
+  generatedAt?: string
+  metadataUrl?: string
 }
 
 export let selectedNode: EditorSceneNode | null = null
@@ -46,6 +67,8 @@ export let selectedNodeMaterial: EditorMaterialData = {}
 export let selectedNodePreviewAssetUrl = ''
 export let selectedGeneratedVariantUrl = ''
 export let styleDescriptor = ''
+export let viewportLightingMode: EditorViewportLightingMode = 'authored'
+export let viewportShadingMode: EditorViewportShadingMode = 'rendered'
 export let assetPickerTargetNodeId = ''
 export let assetBrowserPath = ''
 export let assetBrowserItems: AssetBrowserItem[] = []
@@ -78,6 +101,12 @@ export let onOpenAiTab: () => void = () => {}
 export let onOpenCreateTab: () => void = () => {}
 export let onConvertSelectedToMesh: () => void = () => {}
 export let onReimagineSelected: () => void = () => {}
+export let onAddPointLightToSelection: () => void = () => {}
+export let onSetViewportLightingMode: (
+  mode: EditorViewportLightingMode,
+) => void = () => {}
+export let onSetViewportShadingMode: (mode: EditorViewportShadingMode) => void =
+  () => {}
 export let onDuplicate: () => void = () => {}
 export let onDelete: () => void = () => {}
 export let onVisibleChange: (value: boolean) => void = () => {}
@@ -104,6 +133,7 @@ export let onPrimitiveArgChange: (index: number, value: string) => void =
   () => {}
 export let onLightColorChange: (value: string) => void = () => {}
 export let onLightNumericChange: (field: any, value: string) => void = () => {}
+export let onPlaceLightAtParentBounds: () => void = () => {}
 export let onGameplayFieldChange: (field: any, value: string) => void = () => {}
 export let onGameplayNumericChange: (field: any, value: string) => void =
   () => {}
@@ -119,7 +149,7 @@ export let onMaterialColorChange: (
   value: string,
 ) => void = () => {}
 export let onMaterialNumericChange: (
-  field: 'metalness' | 'roughness' | 'opacity',
+  field: MaterialNumericField,
   value: string,
 ) => void = () => {}
 export let onMaterialTextureChange: (field: 'mapUrl', value: string) => void =
@@ -127,21 +157,26 @@ export let onMaterialTextureChange: (field: 'mapUrl', value: string) => void =
 export let onOpenTexturePicker: (field: TextureField) => void = () => {}
 export let onResetMaterialOverrides: () => void = () => {}
 export let onCollisionEnabledChange: (value: boolean) => void = () => {}
+export let onCollisionModeChange: (value: EditorCollisionMode) => void =
+  () => {}
 export let onCollisionShapeChange: (value: any) => void = () => {}
+export let onCollisionQualityChange: (value: EditorCollisionQuality) => void =
+  () => {}
+export let onCollisionLodSourceTierChange: (
+  value: EditorCollisionLodSourceTier,
+) => void = () => {}
 export let onCollisionIntentChange: (value: CollisionIntent) => void = () => {}
 export let onCollisionChannelChange: (value: CollisionChannel) => void =
   () => {}
-export let onColliderUrlChange: (value: string) => void = () => {}
-export let onPhysicsBodyTypeChange: (value: string) => void = () => {}
-export let onColliderSizeChange: (index: number, value: string) => void =
+export let onCollisionNumericChange: (field: any, value: string) => void =
   () => {}
-export let onRecalculateCollision: () => void = () => {}
+export let onPhysicsBodyTypeChange: (value: string) => void = () => {}
 export let onSetCollisionVisualOnly: () => void = () => {}
 export let onSetCollisionBlocker: () => void = () => {}
 export let onSetCollisionWalkable: () => void = () => {}
 export let onSetCollisionTrigger: () => void = () => {}
 export let onSetCollisionDetail: () => void = () => {}
-export let onBakeMeshCollider: () => void = () => {}
+export let onForceRegenerateCollision: () => void = () => {}
 export let onTextureBrowserUp: () => void = () => {}
 export let onTextureBrowserRefresh: () => void = () => {}
 export let onTextureBrowserOpenDirectory: (path: string) => void = () => {}
@@ -162,6 +197,8 @@ export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
       {selectedNodePreviewAssetUrl}
       bind:selectedGeneratedVariantUrl
       {styleDescriptor}
+      {viewportLightingMode}
+      {viewportShadingMode}
       {assetPickerTargetNodeId}
       {assetBrowserPath}
       {assetBrowserItems}
@@ -193,6 +230,9 @@ export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
       {onOpenCreateTab}
       {onConvertSelectedToMesh}
       {onReimagineSelected}
+      {onAddPointLightToSelection}
+      {onSetViewportLightingMode}
+      {onSetViewportShadingMode}
       {onDuplicate}
       {onDelete}
       {onVisibleChange}
@@ -214,6 +254,7 @@ export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
       {onPrimitiveArgChange}
       {onLightColorChange}
       {onLightNumericChange}
+      {onPlaceLightAtParentBounds}
       {onGameplayFieldChange}
       {onGameplayNumericChange}
       {onGameplayBooleanChange}
@@ -230,19 +271,20 @@ export let onTextureBrowserPick: (item: TextureBrowserItem) => void = () => {}
       {onOpenTexturePicker}
       {onResetMaterialOverrides}
       {onCollisionEnabledChange}
+      {onCollisionModeChange}
       {onCollisionShapeChange}
+      {onCollisionQualityChange}
+      {onCollisionLodSourceTierChange}
       {onCollisionIntentChange}
       {onCollisionChannelChange}
-      {onColliderUrlChange}
+      {onCollisionNumericChange}
       {onPhysicsBodyTypeChange}
-      {onColliderSizeChange}
-      {onRecalculateCollision}
       {onSetCollisionVisualOnly}
       {onSetCollisionBlocker}
       {onSetCollisionWalkable}
       {onSetCollisionTrigger}
       {onSetCollisionDetail}
-      {onBakeMeshCollider}
+      {onForceRegenerateCollision}
       {onTextureBrowserUp}
       {onTextureBrowserRefresh}
       {onTextureBrowserOpenDirectory}

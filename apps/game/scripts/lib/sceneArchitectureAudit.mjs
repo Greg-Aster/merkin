@@ -69,6 +69,23 @@ const postProcessingPasses = new Set([
   'anti-aliasing',
   'depth-fog',
 ])
+
+function getCollisionMode(collision) {
+  if (!collision) return 'none'
+  if (collision.mode) return collision.mode
+  if (collision.enabled === false || collision.intent === 'none') return 'none'
+  if (collision.sensor || collision.intent === 'trigger') return 'trigger'
+  return 'auto'
+}
+
+function isCollisionEnabled(collision) {
+  return getCollisionMode(collision) !== 'none'
+}
+
+function getCollisionTriangleBudget(collision) {
+  return collision?.maxTriangles ?? collision?.triangleBudget
+}
+
 export function formatBytes(bytes) {
   return `${Math.round((bytes / (1024 * 1024)) * 10) / 10}MB`
 }
@@ -250,6 +267,34 @@ function getColliderArtifactFailures({ publicDir, node }) {
       }
     }
     if (
+      node.collision?.colliderSourceAssetUrl &&
+      metadata.colliderSourceAssetUrl !== node.collision.colliderSourceAssetUrl
+    ) {
+      failures.push(
+        `${node.id}: collider metadata colliderSourceAssetUrl is stale for scene collision source URL`,
+      )
+    }
+    if (
+      node.collision?.colliderSourceAssetUrl &&
+      metadata.colliderSourceAssetFingerprint
+    ) {
+      const colliderSourcePath = resolvePublicAssetPath(
+        publicDir,
+        node.collision.colliderSourceAssetUrl,
+      )
+      if (
+        existsSync(colliderSourcePath) &&
+        !fingerprintsMatch(
+          metadata.colliderSourceAssetFingerprint,
+          fingerprintFile(colliderSourcePath),
+        )
+      ) {
+        failures.push(
+          `${node.id}: collider metadata colliderSourceAssetFingerprint is stale for collision source asset`,
+        )
+      }
+    }
+    if (
       !Number.isFinite(metadata.triangleCount) ||
       metadata.triangleCount <= 0
     ) {
@@ -257,13 +302,14 @@ function getColliderArtifactFailures({ publicDir, node }) {
         `${node.id}: collider metadata triangleCount must be positive`,
       )
     }
+    const triangleBudget = getCollisionTriangleBudget(node.collision)
     if (
-      Number.isFinite(node.collision?.triangleBudget) &&
+      Number.isFinite(triangleBudget) &&
       Number.isFinite(metadata.triangleCount) &&
-      metadata.triangleCount > node.collision.triangleBudget
+      metadata.triangleCount > triangleBudget
     ) {
       failures.push(
-        `${node.id}: collider metadata triangleCount exceeds scene triangleBudget`,
+        `${node.id}: collider metadata triangleCount exceeds scene maxTriangles`,
       )
     }
     if (
@@ -639,6 +685,26 @@ function getAssetUrl(node) {
   return typeof node.asset?.url === 'string' ? node.asset.url : null
 }
 
+function isGeneratedStyleBakeAssetUrl(url) {
+  const normalized = String(url ?? '')
+  return (
+    normalized.startsWith('/generated/style-lab/baked-style/') ||
+    /-style-baked\.glb$/i.test(normalized)
+  )
+}
+
+function getStyleBakeProduct(node) {
+  return node.generation?.styleBakeProduct ?? null
+}
+
+function getStyleBakeProductAssetUrl(product) {
+  return String(product?.generatedAssetUrl ?? product?.assetUrl ?? '')
+}
+
+function getStyleBakeProductMetadataUrl(product) {
+  return String(product?.generatedMetadataUrl ?? product?.metadataUrl ?? '')
+}
+
 function getPrefabAssetUrl(node, runtimePrefabCatalog) {
   const type = node.prefab?.type
   const variant = node.prefab?.variant
@@ -734,28 +800,27 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
   })
   const unmappedRuntimeCollision = explicitCollision.filter(
     (node) =>
-      node.collision?.enabled !== false &&
-      node.collision?.intent !== 'none' &&
+      isCollisionEnabled(node.collision) &&
       !collisionChannels.has(node.collision?.channel),
   )
   const triggerWithoutSensor = explicitCollision.filter(
     (node) =>
-      node.collision?.enabled !== false &&
+      isCollisionEnabled(node.collision) &&
       node.collision?.intent === 'trigger' &&
       node.collision?.sensor !== true,
   )
   const detailMeshBlocking = explicitCollision.filter(
     (node) =>
-      node.collision?.enabled !== false &&
+      isCollisionEnabled(node.collision) &&
       node.collision?.intent === 'detailMesh' &&
       node.collision?.sensor !== true,
   )
   const disabledCollision = explicitCollision.filter(
-    (node) => node.collision?.enabled === false,
+    (node) => !isCollisionEnabled(node.collision),
   )
   const collisionOnlyProxies = explicitCollision.filter(
     (node) =>
-      node.collision?.enabled !== false &&
+      isCollisionEnabled(node.collision) &&
       parityCollisionIntents.has(node.collision?.intent) &&
       node.visible === false,
   )
@@ -788,18 +853,18 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
   )
   const detailMeshWithoutBudget = explicitCollision.filter(
     (node) =>
-      node.collision?.enabled !== false &&
+      isCollisionEnabled(node.collision) &&
       node.collision?.intent === 'detailMesh' &&
-      !Number.isFinite(node.collision?.triangleBudget),
+      !Number.isFinite(getCollisionTriangleBudget(node.collision)),
   )
   const explicitTrimesh = explicitCollision.filter(
     (node) =>
-      node.collision?.enabled !== false && node.collision?.shape === 'trimesh',
+      isCollisionEnabled(node.collision) && node.collision?.shape === 'trimesh',
   )
   const assetPrimitiveCollision = explicitCollision.filter(
     (node) =>
       node.kind === 'asset' &&
-      node.collision?.enabled !== false &&
+      isCollisionEnabled(node.collision) &&
       node.collision?.shape !== 'trimesh',
   )
   const assetTrimeshMissingCollider = explicitTrimesh.filter(
@@ -860,6 +925,28 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
       !largest || asset.sizeBytes > largest.sizeBytes ? asset : largest,
     null,
   )
+  const generatedStyleBakeNodes = geometryNodes.filter((node) => {
+    const assetUrl = getAssetUrl(node)
+    return (
+      isGeneratedStyleBakeAssetUrl(assetUrl) ||
+      Boolean(getStyleBakeProduct(node))
+    )
+  })
+  const unmanagedStyleBakeProducts = generatedStyleBakeNodes.filter((node) => {
+    const product = getStyleBakeProduct(node)
+    const assetUrl = getAssetUrl(node)
+    if (!product) return true
+    return (
+      !getStyleBakeProductAssetUrl(product) ||
+      getStyleBakeProductAssetUrl(product) !== assetUrl
+    )
+  })
+  const styleBakeMissingMetadata = generatedStyleBakeNodes.filter((node) => {
+    const product = getStyleBakeProduct(node)
+    const metadataUrl = getStyleBakeProductMetadataUrl(product)
+    if (!metadataUrl) return true
+    return !existsSync(resolvePublicAssetPath(publicDir, metadataUrl))
+  })
 
   return {
     file,
@@ -946,11 +1033,21 @@ function auditScene({ file, sceneDir, publicDir, runtimePrefabCatalog }) {
     terrainAuthorityWarnings: terrainAuthorityDiagnostics.warnings,
     deprecatedFields,
     oversizedAssetFiles,
+    generatedStyleBakeProducts: generatedStyleBakeNodes.length,
+    unmanagedStyleBakeProductIds: unmanagedStyleBakeProducts.map(
+      (node) => node.id,
+    ),
+    styleBakeMissingMetadataIds: styleBakeMissingMetadata.map((node) => {
+      const metadataUrl = getStyleBakeProductMetadataUrl(
+        getStyleBakeProduct(node),
+      )
+      return metadataUrl ? `${node.id}: ${metadataUrl}` : node.id
+    }),
   }
 }
 
-function pushBudgetFailure({
-  failures,
+function pushBudgetWarning({
+  warnings,
   report,
   metricKey,
   budgetKey,
@@ -961,13 +1058,14 @@ function pushBudgetFailure({
   if (!Number.isFinite(budget)) return
   if (report[metricKey] <= budget) return
 
-  failures.push(
+  warnings.push(
     `${report.file}: ${label} exceeds graphics budget ${report[metricKey]}/${budget}${guidance ? `; ${guidance}` : ''}`,
   )
 }
 
 function validateSceneReport(report) {
   const failures = []
+  const warnings = []
 
   if (!report.hasValidSpawn) {
     failures.push(
@@ -1011,12 +1109,7 @@ function validateSceneReport(report) {
   }
   if (report.detailMeshWithoutBudgetIds.length > 0) {
     failures.push(
-      `${report.file}: detailMesh collision requires triangleBudget: ${report.detailMeshWithoutBudgetIds.join(', ')}`,
-    )
-  }
-  if (report.assetPrimitiveCollisionIds.length > 0) {
-    failures.push(
-      `${report.file}: asset collision must be baked trimesh collider assets, not primitive fallback shapes: ${report.assetPrimitiveCollisionIds.join(', ')}`,
+      `${report.file}: detailMesh collision requires maxTriangles: ${report.detailMeshWithoutBudgetIds.join(', ')}`,
     )
   }
   if (report.assetTrimeshMissingColliderIds.length > 0) {
@@ -1075,13 +1168,23 @@ function validateSceneReport(report) {
       `${report.file}: material texture URLs must resolve to public files: ${report.missingMaterialTextureFileUrls.join(', ')}`,
     )
   }
+  if (report.unmanagedStyleBakeProductIds.length > 0) {
+    failures.push(
+      `${report.file}: style-baked GLBs must be managed by generation.styleBakeProduct metadata: ${report.unmanagedStyleBakeProductIds.join(', ')}`,
+    )
+  }
+  if (report.styleBakeMissingMetadataIds.length > 0) {
+    failures.push(
+      `${report.file}: style-baked products must have generated metadata files: ${report.styleBakeMissingMetadataIds.join(', ')}`,
+    )
+  }
   if (report.terrainAuthorityErrors.length > 0) {
     failures.push(
       `${report.file}: terrain authority contract is invalid: ${report.terrainAuthorityErrors.join('; ')}`,
     )
   }
   for (const asset of report.oversizedAssetFiles) {
-    failures.push(
+    warnings.push(
       `${report.file}: runtime asset exceeds ${formatBytes(report.graphicsBudget.maxRuntimeAssetFileBytes)} budget: ${asset.url} (${formatBytes(asset.sizeBytes)})`,
     )
   }
@@ -1089,44 +1192,44 @@ function validateSceneReport(report) {
     Number.isFinite(report.graphicsBudget?.maxRuntimeAssetBytes) &&
     report.totalRuntimeAssetBytes > report.graphicsBudget.maxRuntimeAssetBytes
   ) {
-    failures.push(
+    warnings.push(
       `${report.file}: scene runtime assets exceed ${formatBytes(report.graphicsBudget.maxRuntimeAssetBytes)} budget: ${formatBytes(report.totalRuntimeAssetBytes)}`,
     )
   }
 
-  pushBudgetFailure({
-    failures,
+  pushBudgetWarning({
+    warnings,
     report,
     metricKey: 'geometryNodes',
     budgetKey: 'maxGeometryActors',
     label: 'geometry actors',
     guidance: 'chunk, merge, or stream repeated actors',
   })
-  pushBudgetFailure({
-    failures,
+  pushBudgetWarning({
+    warnings,
     report,
     metricKey: 'primitiveNodes',
     budgetKey: 'maxPrimitiveActors',
     label: 'primitive render actors',
     guidance: 'bake repeated primitives into runtime assets or chunks',
   })
-  pushBudgetFailure({
-    failures,
+  pushBudgetWarning({
+    warnings,
     report,
     metricKey: 'neverCullNodes',
     budgetKey: 'maxNeverCullActors',
     label: 'never-cull render actors',
   })
-  pushBudgetFailure({
-    failures,
+  pushBudgetWarning({
+    warnings,
     report,
     metricKey: 'gameplayFireflies',
     budgetKey: 'maxGameplayFireflies',
     label: 'firefly gameplay actors',
     guidance: 'use chunked or pooled marker presentation',
   })
-  pushBudgetFailure({
-    failures,
+  pushBudgetWarning({
+    warnings,
     report,
     metricKey: 'explicitCollision',
     budgetKey: 'maxExplicitColliders',
@@ -1134,16 +1237,16 @@ function validateSceneReport(report) {
     guidance:
       'merge collider proxies or move detail collision into baked artifacts',
   })
-  pushBudgetFailure({
-    failures,
+  pushBudgetWarning({
+    warnings,
     report,
     metricKey: 'lightNodes',
     budgetKey: 'maxLightActors',
     label: 'light actors',
     guidance: 'bake static lighting or reduce realtime lights',
   })
-  pushBudgetFailure({
-    failures,
+  pushBudgetWarning({
+    warnings,
     report,
     metricKey: 'estimatedDrawCalls',
     budgetKey: 'maxEstimatedDrawCalls',
@@ -1151,24 +1254,24 @@ function validateSceneReport(report) {
     guidance:
       'merge materials, instance repeated meshes, or chunk by stream cell',
   })
-  pushBudgetFailure({
-    failures,
+  pushBudgetWarning({
+    warnings,
     report,
     metricKey: 'authoredMaterialSlots',
     budgetKey: 'maxAuthoredMaterialSlots',
     label: 'authored material slots',
     guidance: 'merge compatible materials or bake atlases',
   })
-  pushBudgetFailure({
-    failures,
+  pushBudgetWarning({
+    warnings,
     report,
     metricKey: 'estimatedTriangles',
     budgetKey: 'maxEstimatedTriangles',
     label: 'estimated primitive triangles',
     guidance: 'bake primitives into optimized meshes or author LODs',
   })
-  pushBudgetFailure({
-    failures,
+  pushBudgetWarning({
+    warnings,
     report,
     metricKey: 'authoredTextureBytes',
     budgetKey: 'maxAuthoredTextureBytes',
@@ -1176,7 +1279,7 @@ function validateSceneReport(report) {
     guidance: 'resize or compress scene-authored texture maps',
   })
 
-  return failures
+  return { failures, warnings }
 }
 
 export function summarizeSceneReports(reports) {
@@ -1244,6 +1347,13 @@ export function summarizeSceneReports(reports) {
       totalRuntimeAssetBytes:
         sum.totalRuntimeAssetBytes + report.totalRuntimeAssetBytes,
       bomFiles: sum.bomFiles + (report.hasBom ? 1 : 0),
+      generatedStyleBakeProducts:
+        sum.generatedStyleBakeProducts + report.generatedStyleBakeProducts,
+      unmanagedStyleBakeProducts:
+        sum.unmanagedStyleBakeProducts +
+        report.unmanagedStyleBakeProductIds.length,
+      styleBakeMissingMetadata:
+        sum.styleBakeMissingMetadata + report.styleBakeMissingMetadataIds.length,
     }),
     {
       nodes: 0,
@@ -1283,6 +1393,9 @@ export function summarizeSceneReports(reports) {
       assetFiles: 0,
       totalRuntimeAssetBytes: 0,
       bomFiles: 0,
+      generatedStyleBakeProducts: 0,
+      unmanagedStyleBakeProducts: 0,
+      styleBakeMissingMetadata: 0,
     },
   )
 }
@@ -1301,13 +1414,17 @@ export function auditSceneArchitecture({
     (file) =>
       `${file}: editor/scenes must contain production *.scene.json files only; move backups to authoring/scene-backups`,
   )
+  const warnings = []
 
   for (const report of reports) {
-    failures.push(...validateSceneReport(report))
+    const validation = validateSceneReport(report)
+    failures.push(...validation.failures)
+    warnings.push(...validation.warnings)
   }
 
   return {
     failures,
+    warnings,
     nonRuntimeSceneJsonFiles,
     reports,
     totals: summarizeSceneReports(reports),

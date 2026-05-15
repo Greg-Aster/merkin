@@ -1,133 +1,164 @@
 {
-  "schemaVersion": 2,
-  "generatedBy": "bake-mesh-collider",
-  "generatedAt": "2026-05-13T22:29:29.849Z",
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-15T02:10:26.089Z",
+  "generatorVersion": "mesh-collision-manager-v2",
   "sourceLevelId": "yggdrasil",
   "sourceActorId": "yggdrasil-mound",
-  "sourceAssetUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
-  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+  "sourceAssetUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.glb",
   "sourceAssetFingerprint": {
     "algorithm": "sha256",
-    "value": "c9d366119a53875050e987d48d17432ade774064d465beb984130549bb81b596"
+    "value": "8c3094848bef300720c6ac2c98226ba75babe464a5e55b705ee43d88ffd5bd6e"
   },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "7733364a4493cf81944235f5f01d0508d39dca203afeb636fa7b7e25a0cd482e"
+  },
+  "lodSourceTier": "low",
   "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-mound.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-mound.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-mound.collider.meta.json",
-  "triangleCount": 19000,
-  "vertexCount": 16149,
+  "colliderCacheKey": "mesh-collision-manager-v2:7733364a4493cf81944235f5f01d0508d39dca203afeb636fa7b7e25a0cd482e:ab40c37603a10045f14ff39322a8f2530e387ebd7ed63288bb02cce302855285:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+  "triangleCount": 14000,
+  "vertexCount": 15104,
   "bounds": {
     "min": [
-      -0.9992300868034363,
-      -0.7572119832038879,
-      -0.9886918663978577
+      -0.9982271194458008,
+      -0.9227015972137451,
+      -0.9965185523033142
     ],
     "max": [
-      0.9740453362464905,
-      0.7266458868980408,
-      0.9725927710533142
+      0.9734020233154297,
+      0.8960287570953369,
+      0.9474106431007385
     ],
     "size": [
-      1.9732754230499268,
-      1.4838578701019287,
-      1.9612846374511719
+      1.9716291427612305,
+      1.818730354309082,
+      1.9439291954040527
     ],
     "center": [
-      -0.0125923752784729,
-      -0.015283048152923584,
-      -0.008049547672271729
+      -0.012412548065185547,
+      -0.013336420059204102,
+      -0.024553954601287842
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -32767,
+      -30271,
+      -32355
+    ],
+    "max": [
+      32767,
+      30271,
+      32355
+    ],
+    "size": [
+      65534,
+      60542,
+      64710
+    ],
+    "center": [
+      0,
+      0,
+      0
     ]
   },
   "visualLocalBounds": {
     "min": [
-      -0.9992300868034363,
-      -0.7572119832038879,
-      -0.9886918663978577
+      -0.9982271194458008,
+      -0.9227015972137451,
+      -0.9965185523033142
     ],
     "max": [
-      0.9740453362464905,
-      0.727324903011322,
-      0.9728116989135742
+      0.9734020233154297,
+      0.8960287570953369,
+      0.9474106431007385
     ],
     "size": [
-      1.9732754230499268,
-      1.48453688621521,
-      1.9615035653114319
+      1.9716291427612305,
+      1.818730354309082,
+      1.9439291954040527
     ],
     "center": [
-      -0.0125923752784729,
-      -0.014943540096282959,
-      -0.007940083742141724
+      -0.012412548065185547,
+      -0.013336420059204102,
+      -0.024553954601287842
     ]
   },
   "colliderLocalBounds": {
     "min": [
-      -0.9992300868034363,
-      -0.7572119832038879,
-      -0.9886918663978577
+      -0.9982271194458008,
+      -0.9227015972137451,
+      -0.9965185523033142
     ],
     "max": [
-      0.9740453362464905,
-      0.7266458868980408,
-      0.9725927710533142
+      0.9734020233154297,
+      0.8960287570953369,
+      0.9474106431007385
     ],
     "size": [
-      1.9732754230499268,
-      1.4838578701019287,
-      1.9612846374511719
+      1.9716291427612305,
+      1.818730354309082,
+      1.9439291954040527
     ],
     "center": [
-      -0.0125923752784729,
-      -0.015283048152923584,
-      -0.008049547672271729
+      -0.012412548065185547,
+      -0.013336420059204102,
+      -0.024553954601287842
     ]
   },
   "assetLocalTransform": {
     "schemaVersion": 1,
     "coordinateSpaceVersion": 1,
-    "sourceAssetUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.glb",
     "sourceNodeName": "Root Mound",
     "visualLocalBounds": {
       "min": [
-        -0.9992300868034363,
-        -0.7572119832038879,
-        -0.9886918663978577
+        -0.9982271194458008,
+        -0.9227015972137451,
+        -0.9965185523033142
       ],
       "max": [
-        0.9740453362464905,
-        0.727324903011322,
-        0.9728116989135742
+        0.9734020233154297,
+        0.8960287570953369,
+        0.9474106431007385
       ],
       "size": [
-        1.9732754230499268,
-        1.48453688621521,
-        1.9615035653114319
+        1.9716291427612305,
+        1.818730354309082,
+        1.9439291954040527
       ],
       "center": [
-        -0.0125923752784729,
-        -0.014943540096282959,
-        -0.007940083742141724
+        -0.012412548065185547,
+        -0.013336420059204102,
+        -0.024553954601287842
       ]
     },
     "colliderLocalBounds": {
       "min": [
-        -0.9992300868034363,
-        -0.7572119832038879,
-        -0.9886918663978577
+        -0.9982271194458008,
+        -0.9227015972137451,
+        -0.9965185523033142
       ],
       "max": [
-        0.9740453362464905,
-        0.7266458868980408,
-        0.9725927710533142
+        0.9734020233154297,
+        0.8960287570953369,
+        0.9474106431007385
       ],
       "size": [
-        1.9732754230499268,
-        1.4838578701019287,
-        1.9612846374511719
+        1.9716291427612305,
+        1.818730354309082,
+        1.9439291954040527
       ],
       "center": [
-        -0.0125923752784729,
-        -0.015283048152923584,
-        -0.008049547672271729
+        -0.012412548065185547,
+        -0.013336420059204102,
+        -0.024553954601287842
       ]
     },
     "visualToPhysicsMatrix": [
@@ -170,39 +201,99 @@
   "provenance": {
     "sourceActorId": "yggdrasil-mound",
     "sourceActorName": "Root Mound",
-    "sourceAssetUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
-    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+    "sourceAssetUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.glb",
     "sourceAssetFingerprint": {
       "algorithm": "sha256",
-      "value": "c9d366119a53875050e987d48d17432ade774064d465beb984130549bb81b596"
+      "value": "8c3094848bef300720c6ac2c98226ba75babe464a5e55b705ee43d88ffd5bd6e"
     },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "7733364a4493cf81944235f5f01d0508d39dca203afeb636fa7b7e25a0cd482e"
+    },
+    "lodSourceTier": "low",
     "bakeConfig": {
       "command": "pnpm --dir apps/game bake:mesh-collider",
       "levelId": "yggdrasil",
       "nodeId": "yggdrasil-mound",
-      "sourceAssetUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-41-26-944Z.glb",
+      "sourceAssetUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.low.glb",
+      "lodSourceTier": "low",
       "intent": "blocker",
       "channel": "worldStatic",
       "triangleBudget": 20000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-13T22:29:29.849Z"
+    "generatedAt": "2026-05-15T02:10:26.089Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
+    "triangleBudget": 20000,
+    "lodSourceTier": "low"
+  },
+  "collisionProduct": {
+    "actorId": "yggdrasil-mound",
+    "cacheKey": "mesh-collision-manager-v2:7733364a4493cf81944235f5f01d0508d39dca203afeb636fa7b7e25a0cd482e:ab40c37603a10045f14ff39322a8f2530e387ebd7ed63288bb02cce302855285:e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2",
+    "mode": "auto",
+    "productId": "yggdrasil-mound:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v2",
+    "sourceKind": "asset",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "7733364a4493cf81944235f5f01d0508d39dca203afeb636fa7b7e25a0cd482e"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "ab40c37603a10045f14ff39322a8f2530e387ebd7ed63288bb02cce302855285"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e761d057ceae4e59de134a718a5a1174b38d7fdcbcc5fdc414a1a94c8f55a0d2"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -0.9982271194458008,
+        -0.9227015972137451,
+        -0.9965185523033142
+      ],
+      "max": [
+        0.9734020233154297,
+        0.8960287570953369,
+        0.9474106431007385
+      ],
+      "size": [
+        1.9716291427612305,
+        1.818730354309082,
+        1.9439291954040527
+      ],
+      "center": [
+        -0.012412548065185547,
+        -0.013336420059204102,
+        -0.024553954601287842
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-mound.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-mound.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.low.glb",
+    "visualSourceMeshUrl": "/generated/hunyuan3d/root-mound/root-mound-generated-2026-04-19T16-18-52-077Z.glb",
+    "triangleCount": 14000,
+    "vertexCount": 15104,
     "triangleBudget": 20000
   },
   "simplification": {
-    "requested": true,
-    "applied": true,
-    "sourceTriangleCount": 50000,
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 14000,
     "targetTriangleBudget": 20000,
-    "ratio": 0.38,
+    "ratio": 1,
     "tool": "gltf-transform",
-    "prepass": "weld",
+    "prepass": "none",
     "error": 0.05
   }
 }

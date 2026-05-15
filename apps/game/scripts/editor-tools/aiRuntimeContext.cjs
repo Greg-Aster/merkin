@@ -24,6 +24,7 @@ function createAiRouteContext(deps) {
     ensureDirectory,
     fileToBase64,
     normalizePath,
+    resolveWorkspacePath,
     resolvePublicAssetPath,
     toPublicAssetUrl,
   } = deps;
@@ -339,11 +340,12 @@ function detectComfyUiHunyuanInstall() {
   return null;
 }
 
-function detectComfyUiLaunchSpec(apiUrl) {
+function detectComfyUiLaunchSpec(apiUrl, options = {}) {
   const parsedUrl = new URL(apiUrl || `http://127.0.0.1:${DEFAULT_COMFYUI_PORT}`);
   const port = parsedUrl.port || String(DEFAULT_COMFYUI_PORT);
   const explicitCommand = process.env.COMFYUI_START_COMMAND;
   const explicitRoot = process.env.COMFYUI_ROOT;
+  const lowVram = options.lowVram === true;
 
   if (explicitCommand) {
     return {
@@ -362,8 +364,9 @@ function detectComfyUiLaunchSpec(apiUrl) {
 
   const preferredScripts = [
     process.env.COMFYUI_START_SCRIPT,
+    ...(lowVram ? ['startup311-lowvram.sh'] : []),
     'startup311.sh',
-    'startup311-lowvram.sh',
+    ...(lowVram ? [] : ['startup311-lowvram.sh']),
     'startup_cu126.sh',
     'startup_cu130.sh',
     'startup_flux_stable.sh',
@@ -386,13 +389,16 @@ function detectComfyUiLaunchSpec(apiUrl) {
 
     const mainPath = path.join(root, 'main.py');
     if (fs.existsSync(mainPath)) {
+      const lowVramArgs = lowVram
+        ? ['--lowvram', '--reserve-vram', String(process.env.COMFYUI_LOWVRAM_RESERVE_GB || 3)]
+        : [];
       return {
         type: 'python-script',
         command: 'python3',
-        args: [mainPath, '--listen', '--port', port],
+        args: [mainPath, '--listen', '--port', port, ...lowVramArgs],
         cwd: root,
         env: {},
-        description: `ComfyUI main.py at ${root}`,
+        description: `ComfyUI main.py at ${root}${lowVram ? ' in low VRAM mode' : ''}`,
       };
     }
   }
@@ -400,13 +406,14 @@ function detectComfyUiLaunchSpec(apiUrl) {
   return null;
 }
 
-async function ensureComfyUiServer(apiUrl) {
+async function ensureComfyUiServer(apiUrl, options = {}) {
   const health = await getComfyUiHealth(apiUrl);
   if (health.available) {
     return { available: true, apiUrl: health.apiUrl, autoStarted: false, message: health.message };
   }
 
-  const launchSpec = detectComfyUiLaunchSpec(health.apiUrl);
+  const lowVram = options.lowVram === true;
+  const launchSpec = detectComfyUiLaunchSpec(health.apiUrl, { lowVram });
   if (!launchSpec) {
     return {
       available: false,
@@ -416,12 +423,22 @@ async function ensureComfyUiServer(apiUrl) {
     };
   }
 
+  const comfyUiLaunchWaitAttempts = Number(process.env.COMFYUI_START_TIMEOUT_SECONDS || 120);
+
   if (
     comfyUiServerProcess &&
     !comfyUiServerProcess.killed &&
     comfyUiServerLaunch?.apiUrl === health.apiUrl
   ) {
-    for (let attempt = 0; attempt < 20; attempt += 1) {
+    if (comfyUiServerLaunch?.lowVram !== lowVram) {
+      return {
+        available: false,
+        apiUrl: health.apiUrl,
+        autoStarted: true,
+        message: `ComfyUI is already starting in ${comfyUiServerLaunch?.lowVram ? 'low VRAM' : 'standard'} mode. Stop that process before switching launch mode.`,
+      };
+    }
+    for (let attempt = 0; attempt < comfyUiLaunchWaitAttempts; attempt += 1) {
       await delay(1000);
       const retryHealth = await getComfyUiHealth(health.apiUrl);
       if (retryHealth.available) {
@@ -453,6 +470,7 @@ async function ensureComfyUiServer(apiUrl) {
     comfyUiServerLaunch = {
       apiUrl: health.apiUrl,
       description: launchSpec.description,
+      lowVram,
     };
 
     comfyUiServerProcess.on('exit', () => {
@@ -460,7 +478,7 @@ async function ensureComfyUiServer(apiUrl) {
       comfyUiServerLaunch = null;
     });
 
-    for (let attempt = 0; attempt < 25; attempt += 1) {
+    for (let attempt = 0; attempt < comfyUiLaunchWaitAttempts; attempt += 1) {
       await delay(1000);
       const retryHealth = await getComfyUiHealth(health.apiUrl);
       if (retryHealth.available) {
@@ -607,7 +625,7 @@ function detectComfyUiHunyuanCapabilities(comfyUiRoot) {
   };
 }
 
-async function getHunyuanBackendStatus(apiUrl, comfyUiApiUrl, ensure = false) {
+async function getHunyuanBackendStatus(apiUrl, comfyUiApiUrl, ensure = false, options = {}) {
   const directStatus = ensure
     ? await ensureHunyuanServer(apiUrl)
     : await getHunyuanHealth(apiUrl);
@@ -622,17 +640,17 @@ async function getHunyuanBackendStatus(apiUrl, comfyUiApiUrl, ensure = false) {
   }
 
   const comfyStatus = ensure
-    ? await ensureComfyUiServer(comfyUiApiUrl)
+    ? await ensureComfyUiServer(comfyUiApiUrl, options)
     : await getComfyUiHealth(comfyUiApiUrl);
 
   if (!comfyStatus.available) {
     return {
       available: false,
-      apiUrl: directStatus.apiUrl,
+      apiUrl: comfyStatus.apiUrl || directStatus.apiUrl,
       backend: 'none',
       supportsReplacementGeneration: false,
       supportsTextureWrap: false,
-      message: directStatus.message,
+      message: comfyStatus.message || directStatus.message,
       directStatus,
       comfyStatus,
     };

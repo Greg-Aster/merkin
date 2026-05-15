@@ -2,12 +2,24 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
+import {
+  requiresGeneratedCollisionArtifact,
+  validateGeneratedCollisionProduct,
+} from './lib/meshCollisionProducts.mjs'
 
 const repoRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const appRoot = resolve(repoRoot, 'apps/game')
 const defaultSceneRoot = resolve(appRoot, 'src/threlte/editor/scenes')
 const defaultPublicRoot = resolve(repoRoot, 'apps/megameal/public')
 const bakeScript = resolve(appRoot, 'scripts/bake-mesh-collider.mjs')
+const prefabCatalog = JSON.parse(
+  readFileSync(
+    resolve(appRoot, 'src/threlte/engine/runtimePrefabCatalog.json'),
+    'utf8',
+  ),
+)
+const prefabAssetUrls = prefabCatalog.assetUrls ?? {}
+const prefabAssetVariants = prefabCatalog.assetVariants ?? {}
 
 const budgetByTier = {
   mobile: 5000,
@@ -73,6 +85,27 @@ function getVisualOnlyActorIds(scene) {
   )
 }
 
+function resolvePrefabAssetUrl(type, variant = null) {
+  if (
+    typeof type === 'string' &&
+    typeof variant === 'string' &&
+    typeof prefabAssetVariants[type]?.[variant] === 'string'
+  ) {
+    return prefabAssetVariants[type][variant]
+  }
+  return typeof type === 'string' && typeof prefabAssetUrls[type] === 'string'
+    ? prefabAssetUrls[type]
+    : ''
+}
+
+function getBakeSourceAssetUrl(node) {
+  if (node.kind === 'asset' && node.asset?.url) return node.asset.url
+  if (node.kind === 'prefab' && node.prefab?.type) {
+    return resolvePrefabAssetUrl(node.prefab.type, node.prefab.variant ?? null)
+  }
+  return ''
+}
+
 function getSceneBudget(scene, args) {
   const explicit = Number(args['triangle-budget'] ?? args['max-triangles'])
   if (Number.isFinite(explicit) && explicit > 0) return Math.floor(explicit)
@@ -95,30 +128,68 @@ function getCollisionChannel(intent, node) {
   return 'worldStatic'
 }
 
-function hasBakedTrimeshCollision(node) {
+function getCollisionLodSourceTier(node, args) {
+  if (args['lod-source-tier']) return String(args['lod-source-tier'])
+
+  const authoredTier = node.collision?.lodSourceTier ?? node.collision?.lodTier
+  return String(authoredTier === 'source' ? 'low' : authoredTier ?? 'low')
+}
+
+function hasCurrentGeneratedCollisionArtifact({ scene, node, publicRoot }) {
+  if (
+    node.collision?.generationStatus === 'dirty' ||
+    node.collision?.generationStatus === 'generating' ||
+    node.collision?.generationStatus === 'failed'
+  ) {
+    return false
+  }
+  if (
+    !(
+      node.collision?.enabled !== false &&
+      typeof node.collision?.colliderUrl === 'string' &&
+      node.collision.colliderUrl.trim().length > 0
+    )
+  ) {
+    return false
+  }
+  const validation = validateGeneratedCollisionProduct({
+    levelId: scene.levelId,
+    node,
+    publicRoot,
+    resolvePrefabAssetUrl,
+    requireCurrentMetadata: true,
+  })
   return (
-    node.collision?.enabled !== false &&
-    node.collision?.shape === 'trimesh' &&
-    typeof node.collision?.colliderUrl === 'string' &&
-    node.collision.colliderUrl.trim().length > 0
+    validation.product &&
+    validation.errors.length === 0
   )
 }
 
-function shouldBakeNode(node, visualOnlyActorIds, force) {
-  if (node.kind !== 'asset' || !node.asset?.url) return false
+function shouldBakeNode({ scene, node, visualOnlyActorIds, force, publicRoot }) {
+  if (!getBakeSourceAssetUrl(node)) return false
   if (node.visible === false) return false
   if (visualOnlyActorIds.has(node.id)) return false
   if (node.collision?.enabled === false || node.collision?.intent === 'none') {
     return false
   }
-  if (!force && hasBakedTrimeshCollision(node)) return false
+  if (!requiresGeneratedCollisionArtifact(node, { resolvePrefabAssetUrl })) {
+    return false
+  }
+  if (
+    !force &&
+    hasCurrentGeneratedCollisionArtifact({ scene, node, publicRoot })
+  ) {
+    return false
+  }
   return true
 }
 
 function runBake({ scenePath, scene, node, args, defaultTriangleBudget }) {
   const intent = getCollisionIntent(node)
   const triangleBudget = Number(
-    node.collision?.triangleBudget ?? defaultTriangleBudget,
+    node.collision?.maxTriangles ??
+      node.collision?.triangleBudget ??
+      defaultTriangleBudget,
   )
   const commandArgs = [
     bakeScript,
@@ -126,9 +197,11 @@ function runBake({ scenePath, scene, node, args, defaultTriangleBudget }) {
     `--node=${node.id}`,
     `--scene-path=${scenePath}`,
     `--public-root=${resolve(String(args['public-root'] || defaultPublicRoot))}`,
+    `--asset-url=${getBakeSourceAssetUrl(node)}`,
     `--intent=${intent}`,
     `--channel=${getCollisionChannel(intent, node)}`,
     `--triangle-budget=${Number.isFinite(triangleBudget) ? triangleBudget : defaultTriangleBudget}`,
+    `--lod-source-tier=${getCollisionLodSourceTier(node, args)}`,
   ]
   if (args.write === false) commandArgs.push('--dry-run')
   if (args['simplify-error']) {
@@ -165,8 +238,15 @@ function main() {
     const scene = readJson(scenePath)
     const visualOnlyActorIds = getVisualOnlyActorIds(scene)
     const defaultTriangleBudget = getSceneBudget(scene, args)
+    const publicRoot = resolve(String(args['public-root'] || defaultPublicRoot))
     const candidates = (scene.nodes ?? []).filter(node =>
-      shouldBakeNode(node, visualOnlyActorIds, args.force),
+      shouldBakeNode({
+        scene,
+        node,
+        visualOnlyActorIds,
+        force: args.force,
+        publicRoot,
+      }),
     )
     const sceneReport = {
       scenePath: scenePath.slice(repoRoot.length).replace(/^[\\/]+/, ''),
@@ -184,7 +264,9 @@ function main() {
           nodeId: node.id,
           colliderUrl: result.payload.colliderUrl,
           triangleCount: result.payload.triangleCount,
-          triangleBudget: result.payload.collision?.triangleBudget,
+          triangleBudget:
+            result.payload.collision?.maxTriangles ??
+            result.payload.collision?.triangleBudget,
         })
       } else {
         sceneReport.failed.push({

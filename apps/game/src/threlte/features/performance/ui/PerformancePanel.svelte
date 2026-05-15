@@ -15,13 +15,18 @@ import {
   renderInfoStore,
   systemTimingsStore,
 } from '../stores/performanceStore'
+import { getRuntimeFrameRatePolicy } from '../utils/runtimeFrameRatePolicy'
 
 export let visible = false
 export let position = 'top-right'
 export let compact = false
 
-let fps = 60
-let frameTime = 16.67
+const frameRatePolicy = getRuntimeFrameRatePolicy()
+const chartMaxFps = frameRatePolicy.targetFps * 2
+const chartMaxFrameTime = frameRatePolicy.criticalFrameTimeMs
+
+let fps = frameRatePolicy.targetFps
+let frameTime = frameRatePolicy.targetFrameTimeMs
 let memory = { geometries: 0, textures: 0, programs: 0 }
 let renderInfo: RenderInfo = { calls: 0, triangles: 0, points: 0, lines: 0 }
 let qualityLevel = 'medium'
@@ -178,17 +183,17 @@ onDestroy(() => {
       <!-- FPS Display -->
       <div class="metric-card fps-card">
         <div class="metric-label">FPS</div>
-        <div class="metric-value" class:good={fps >= 55} class:warning={fps >= 30 && fps < 55} class:critical={fps < 30}>
+        <div class="metric-value" class:good={fps >= frameRatePolicy.targetFps} class:warning={fps >= frameRatePolicy.lowFps && fps < frameRatePolicy.targetFps} class:critical={fps < frameRatePolicy.lowFps}>
           {fps}
         </div>
-        <div class="metric-target">Target: 60</div>
+        <div class="metric-target">Target: {frameRatePolicy.targetFps}</div>
       </div>
 
       <!-- Frame Time -->
       <div class="metric-card">
         <div class="metric-label">Frame Time</div>
         <div class="metric-value">{frameTime.toFixed(2)}ms</div>
-        <div class="metric-target">Target: 16.67ms</div>
+        <div class="metric-target">Target: {frameRatePolicy.targetFrameTimeMs.toFixed(2)}ms</div>
       </div>
 
       <!-- Performance Score -->
@@ -319,7 +324,7 @@ onDestroy(() => {
               <polyline
                 points={performanceHistory.map((entry, i) => {
                   const x = (i / (performanceHistory.length - 1)) * 300
-                  const y = 100 - (entry.fps / 80) * 100 // Scale to 80 FPS max
+                  const y = 100 - (entry.fps / chartMaxFps) * 100
                   return `${x},${Math.max(0, Math.min(100, y))}`
                 }).join(' ')}
                 fill="none"
@@ -333,7 +338,7 @@ onDestroy(() => {
               <polyline
                 points={performanceHistory.map((entry, i) => {
                   const x = (i / (performanceHistory.length - 1)) * 300
-                  const y = (entry.frameTime / 50) * 100 // Scale to 50ms max
+                  const y = (entry.frameTime / chartMaxFrameTime) * 100
                   return `${x},${Math.max(0, Math.min(100, y))}`
                 }).join(' ')}
                 fill="none"

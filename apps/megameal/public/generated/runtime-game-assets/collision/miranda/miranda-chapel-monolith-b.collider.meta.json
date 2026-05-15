@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:36:42.698Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "miranda",
+  "sourceActorId": "miranda-chapel-monolith-b",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-b.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-b.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-b.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:29c55a28f78ccbbc0bddc8f0e24c388f24d97549f58445228d1887a1b3caa758:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+  "triangleCount": 60,
+  "vertexCount": 180,
+  "bounds": {
+    "min": [
+      -0.7099999785423279,
+      -0.5,
+      -0.5
+    ],
+    "max": [
+      0.7099999785423279,
+      0.6399999856948853,
+      0.5400000214576721
+    ],
+    "size": [
+      1.4199999570846558,
+      1.1399999856948853,
+      1.0400000214576721
+    ],
+    "center": [
+      0,
+      0.06999999284744263,
+      0.02000001072883606
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -0.7099999785423279,
+      -0.5,
+      -0.5
+    ],
+    "max": [
+      0.7099999785423279,
+      0.6399999856948853,
+      0.5400000214576721
+    ],
+    "size": [
+      1.4199999570846558,
+      1.1399999856948853,
+      1.0400000214576721
+    ],
+    "center": [
+      0,
+      0.06999999284744263,
+      0.02000001072883606
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -0.7099999785423279,
+      -0.5,
+      -0.5
+    ],
+    "max": [
+      0.7099999785423279,
+      0.6399999856948853,
+      0.5400000214576721
+    ],
+    "size": [
+      1.4199999570846558,
+      1.1399999856948853,
+      1.0400000214576721
+    ],
+    "center": [
+      0,
+      0.06999999284744263,
+      0.02000001072883606
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+    "sourceNodeName": "Chapel Monolith B",
+    "visualLocalBounds": {
+      "min": [
+        -0.7099999785423279,
+        -0.5,
+        -0.5
+      ],
+      "max": [
+        0.7099999785423279,
+        0.6399999856948853,
+        0.5400000214576721
+      ],
+      "size": [
+        1.4199999570846558,
+        1.1399999856948853,
+        1.0400000214576721
+      ],
+      "center": [
+        0,
+        0.06999999284744263,
+        0.02000001072883606
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -0.7099999785423279,
+        -0.5,
+        -0.5
+      ],
+      "max": [
+        0.7099999785423279,
+        0.6399999856948853,
+        0.5400000214576721
+      ],
+      "size": [
+        1.4199999570846558,
+        1.1399999856948853,
+        1.0400000214576721
+      ],
+      "center": [
+        0,
+        0.06999999284744263,
+        0.02000001072883606
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "miranda-chapel-monolith-b",
+    "sourceActorName": "Chapel Monolith B",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "miranda",
+      "nodeId": "miranda-chapel-monolith-b",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:36:42.698Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "miranda-chapel-monolith-b",
+    "mode": "auto",
+    "productId": "miranda-chapel-monolith-b:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "29c55a28f78ccbbc0bddc8f0e24c388f24d97549f58445228d1887a1b3caa758"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -0.7099999785423279,
+        -0.5,
+        -0.5
+      ],
+      "max": [
+        0.7099999785423279,
+        0.6399999856948853,
+        0.5400000214576721
+      ],
+      "size": [
+        1.4199999570846558,
+        1.1399999856948853,
+        1.0400000214576721
+      ],
+      "center": [
+        0,
+        0.06999999284744263,
+        0.02000001072883606
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-b.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/miranda/miranda-chapel-monolith-b.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+    "generatedAt": "2026-05-14T21:36:42.698Z",
+    "triangleCount": 60,
+    "vertexCount": 180,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 60,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

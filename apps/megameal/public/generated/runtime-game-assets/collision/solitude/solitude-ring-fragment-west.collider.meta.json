@@ -1,7 +1,8 @@
 {
-  "schemaVersion": 2,
-  "generatedBy": "bake-mesh-collider",
-  "generatedAt": "2026-05-13T01:03:58.950Z",
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:29:02.825Z",
+  "generatorVersion": "mesh-collision-manager-v1",
   "sourceLevelId": "solitude",
   "sourceActorId": "solitude-ring-fragment-west",
   "sourceAssetUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
@@ -13,27 +14,28 @@
   "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-west.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-west.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-west.collider.meta.json",
-  "triangleCount": 19000,
-  "vertexCount": 16549,
+  "colliderCacheKey": "mesh-collision-manager-v1:f8465c10721bdda7c4ed3c3700037886ba09a38cc3b83d68e71a2ae98a908e3d:7c54bb49d13a20e6cb872c32fda32c68be4eab84d55a305028acc2f8067bac7e:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+  "triangleCount": 4750,
+  "vertexCount": 5561,
   "bounds": {
     "min": [
       -0.99843829870224,
-      -0.8751745223999023,
+      -0.8746134042739868,
       -0.9793640375137329
     ],
     "max": [
-      0.9737838506698608,
+      0.9737012386322021,
       0.8356838822364807,
       0.9003065228462219
     ],
     "size": [
-      1.9722221493721008,
-      1.710858404636383,
+      1.9721395373344421,
+      1.7102972865104675,
       1.8796705603599548
     ],
     "center": [
-      -0.012327224016189575,
-      -0.019745320081710815,
+      -0.012368530035018921,
+      -0.019464761018753052,
       -0.03952875733375549
     ]
   },
@@ -62,22 +64,22 @@
   "colliderLocalBounds": {
     "min": [
       -0.99843829870224,
-      -0.8751745223999023,
+      -0.8746134042739868,
       -0.9793640375137329
     ],
     "max": [
-      0.9737838506698608,
+      0.9737012386322021,
       0.8356838822364807,
       0.9003065228462219
     ],
     "size": [
-      1.9722221493721008,
-      1.710858404636383,
+      1.9721395373344421,
+      1.7102972865104675,
       1.8796705603599548
     ],
     "center": [
-      -0.012327224016189575,
-      -0.019745320081710815,
+      -0.012368530035018921,
+      -0.019464761018753052,
       -0.03952875733375549
     ]
   },
@@ -111,22 +113,22 @@
     "colliderLocalBounds": {
       "min": [
         -0.99843829870224,
-        -0.8751745223999023,
+        -0.8746134042739868,
         -0.9793640375137329
       ],
       "max": [
-        0.9737838506698608,
+        0.9737012386322021,
         0.8356838822364807,
         0.9003065228462219
       ],
       "size": [
-        1.9722221493721008,
-        1.710858404636383,
+        1.9721395373344421,
+        1.7102972865104675,
         1.8796705603599548
       ],
       "center": [
-        -0.012327224016189575,
-        -0.019745320081710815,
+        -0.012368530035018921,
+        -0.019464761018753052,
         -0.03952875733375549
       ]
     },
@@ -183,24 +185,73 @@
       "sourceAssetUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
       "intent": "blocker",
       "channel": "worldStatic",
-      "triangleBudget": 20000,
+      "triangleBudget": 5000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-13T01:03:58.950Z"
+    "generatedAt": "2026-05-14T21:29:02.825Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
-    "triangleBudget": 20000
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "solitude-ring-fragment-west",
+    "mode": "auto",
+    "productId": "solitude-ring-fragment-west:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "generatedAt": "2026-05-14T21:29:02.825Z",
+    "sourceKind": "asset",
+    "sourceMeshUrl": "/generated/hunyuan3d/ring-fragment-west/ring-fragment-west-generated-2026-04-20T00-06-05-730Z.glb",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "f8465c10721bdda7c4ed3c3700037886ba09a38cc3b83d68e71a2ae98a908e3d"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "7c54bb49d13a20e6cb872c32fda32c68be4eab84d55a305028acc2f8067bac7e"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+    },
+    "shape": "trimesh",
+    "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-west.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ring-fragment-west.collider.meta.json",
+    "localBounds": {
+      "min": [
+        -0.99843829870224,
+        -0.8746134042739868,
+        -0.9793640375137329
+      ],
+      "max": [
+        0.9737012386322021,
+        0.8356838822364807,
+        0.9003065228462219
+      ],
+      "size": [
+        1.9721395373344421,
+        1.7102972865104675,
+        1.8796705603599548
+      ],
+      "center": [
+        -0.012368530035018921,
+        -0.019464761018753052,
+        -0.03952875733375549
+      ]
+    },
+    "triangleCount": 4750,
+    "vertexCount": 5561,
+    "triangleBudget": 5000
   },
   "simplification": {
     "requested": true,
     "applied": true,
     "sourceTriangleCount": 50000,
-    "targetTriangleBudget": 20000,
-    "ratio": 0.38,
+    "targetTriangleBudget": 5000,
+    "ratio": 0.095,
     "tool": "gltf-transform",
     "prepass": "weld",
     "error": 0.05

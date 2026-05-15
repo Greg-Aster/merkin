@@ -7,9 +7,14 @@ export let updateLevelNumericSetting: (
   path: Array<string | number>,
   value: string,
 ) => void
+export let updateLevelSetting: (
+  path: Array<string | number>,
+  value: unknown,
+) => void
 </script>
 
 <EditorPlayerPanel
   {levelSettings}
+  {updateLevelSetting}
   {updateLevelNumericSetting}
 />

@@ -1,11 +1,15 @@
 {
   "levelId": "sci-fi-room",
   "version": 5,
-  "updatedAt": "2026-05-13T18:42:10.476Z",
+  "updatedAt": "2026-05-14T21:37:07.924Z",
   "settings": {
     "level": {
       "spawn": {
-        "position": [0, 1.5, 0]
+        "position": [
+          0,
+          1.5,
+          0
+        ]
       },
       "ground": {
         "mode": "scene-authored",
@@ -113,8 +117,16 @@
           "groundColor": "#202a34",
           "keyLightColor": "#e8f7ff",
           "fillLightColor": "#79d2ff",
-          "keyLightPosition": [10, 16, -8],
-          "fillLightPosition": [-12, 8, 14]
+          "keyLightPosition": [
+            10,
+            16,
+            -8
+          ],
+          "fillLightPosition": [
+            -12,
+            8,
+            14
+          ]
         },
         "shadows": {
           "enabled": true,
@@ -166,7 +178,10 @@
               "environmentIntensity": 0.85
             },
             "postProcessing": {
-              "passes": ["tone-mapping", "color-grading"],
+              "passes": [
+                "tone-mapping",
+                "color-grading"
+              ],
               "maxEnabledPasses": 2
             }
           },
@@ -233,9 +248,21 @@
           {
             "id": "spawn-default",
             "label": "Sci-fi room interior",
-            "playerPosition": [0, 3.31, 0],
-            "cameraPosition": [0, 4.91, 0],
-            "cameraTarget": [0, 3.8, -18],
+            "playerPosition": [
+              0,
+              3.31,
+              0
+            ],
+            "cameraPosition": [
+              0,
+              4.91,
+              0
+            ],
+            "cameraTarget": [
+              0,
+              3.8,
+              -18
+            ],
             "viewport": {
               "width": 1280,
               "height": 720
@@ -258,9 +285,21 @@
       "id": "sci-fi-floor-root",
       "name": "Floor Root",
       "kind": "group",
-      "position": [0, 0, 0],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true
     },
     {
@@ -268,9 +307,21 @@
       "name": "Interior Floor",
       "kind": "group",
       "parentId": "sci-fi-floor-root",
-      "position": [0, 0, 0],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true
     },
     {
@@ -278,13 +329,29 @@
       "name": "Interior Floor Slab",
       "kind": "primitive",
       "parentId": "sci-fi-floor-interior-group",
-      "position": [0, -0.56, 0],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        -0.56,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [21.56, 0.48, 18.52],
+        "args": [
+          21.56,
+          0.48,
+          18.52
+        ],
         "color": "#1a2630",
         "emissive": "#1a3d4a",
         "emissiveIntensity": 0.45,
@@ -295,13 +362,12 @@
         "descriptor": "interior floor slab"
       },
       "collision": {
-        "shape": "cuboid",
-        "size": [21.56, 0.48, 18.52],
-        "friction": 0.88,
+        "mode": "auto",
         "intent": "walkable",
-        "enabled": true,
         "channel": "worldStatic",
-        "sensor": false
+        "quality": "primitive",
+        "friction": 0.88,
+        "lodTier": "source"
       }
     },
     {
@@ -309,9 +375,21 @@
       "name": "Courtyard Floor",
       "kind": "group",
       "parentId": "sci-fi-floor-root",
-      "position": [0, 0, 0],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true
     },
     {
@@ -319,13 +397,29 @@
       "name": "Courtyard Floor Slab",
       "kind": "primitive",
       "parentId": "sci-fi-floor-courtyard-group",
-      "position": [0, -0.56, 21.52],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        -0.56,
+        21.52
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [25.871999999999996, 0.48, 25.871999999999996],
+        "args": [
+          25.871999999999996,
+          0.48,
+          25.871999999999996
+        ],
         "color": "#1a2d3a",
         "metalness": 0.42,
         "roughness": 0.54
@@ -334,13 +428,12 @@
         "descriptor": "courtyard floor slab"
       },
       "collision": {
-        "shape": "cuboid",
-        "size": [25.871999999999996, 0.48, 25.871999999999996],
-        "friction": 0.88,
+        "mode": "auto",
         "intent": "walkable",
-        "enabled": true,
         "channel": "worldStatic",
-        "sensor": false
+        "quality": "primitive",
+        "friction": 0.88,
+        "lodTier": "source"
       }
     },
     {
@@ -348,9 +441,21 @@
       "name": "Wasteland Floor",
       "kind": "group",
       "parentId": "sci-fi-floor-root",
-      "position": [0, 0, 0],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true
     },
     {
@@ -358,13 +463,29 @@
       "name": "Wasteland Tile",
       "kind": "primitive",
       "parentId": "sci-fi-floor-wasteland-group",
-      "position": [0.06343171812727633, -0.8057873524102024, 1.735961716105777],
-      "rotation": [0, 0, 0],
-      "scale": [9.36987728893793, 1, 9.487735836358526],
+      "position": [
+        0.06343171812727633,
+        -0.8057873524102024,
+        1.735961716105777
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        9.36987728893793,
+        1,
+        9.487735836358526
+      ],
       "visible": true,
       "primitive": {
         "geometry": "box",
-        "args": [21.56, 0.384, 21.56],
+        "args": [
+          21.56,
+          0.384,
+          21.56
+        ],
         "color": "#3a3a2a",
         "metalness": 0.12,
         "roughness": 0.92
@@ -380,22 +501,33 @@
         "descriptor": "wasteland tile"
       },
       "collision": {
-        "shape": "cuboid",
-        "size": [202.01455434950176, 0.384, 204.55558463188981],
-        "friction": 0.88,
+        "mode": "auto",
         "intent": "walkable",
-        "enabled": true,
         "channel": "worldStatic",
-        "sensor": false
+        "quality": "primitive",
+        "friction": 0.88,
+        "lodTier": "source"
       }
     },
     {
       "id": "sci-fi-anomaly-a",
       "name": "Anomaly Cluster A",
       "kind": "prefab",
-      "position": [-2.5, 1.48, 2],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        -2.5,
+        1.48,
+        2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "anomaly-cluster",
@@ -405,22 +537,128 @@
         "descriptor": "anomalous floating crystal cluster"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-a.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-a.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:be5ebce7e68afb7e2426d65269945caba782d652689b0acb753d95a99b804de2:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-magenta.glb",
+          "sourceNodeName": "Anomaly Cluster A",
+          "visualLocalBounds": {
+            "min": [
+              -1.340000033378601,
+              -1.340000033378601,
+              -1
+            ],
+            "max": [
+              1.340000033378601,
+              1.340000033378601,
+              1
+            ],
+            "size": [
+              2.680000066757202,
+              2.680000066757202,
+              2
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -1.340000033378601,
+              -1.340000033378601,
+              -1
+            ],
+            "max": [
+              1.340000033378601,
+              1.340000033378601,
+              1
+            ],
+            "size": [
+              2.680000066757202,
+              2.680000066757202,
+              2
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 808,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-anomaly-b",
       "name": "Anomaly Cluster B",
       "kind": "prefab",
-      "position": [2.8, 1.18, 1.5],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        2.8,
+        1.18,
+        1.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "anomaly-cluster",
@@ -430,22 +668,128 @@
         "descriptor": "anomalous floating crystal cluster"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-b.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-b.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:0f52ac35dbabb6e2541bf8dfc33c08ee4fc7c1643ec5274f25ffd4875d9132ca:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-green.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-green.glb",
+          "sourceNodeName": "Anomaly Cluster B",
+          "visualLocalBounds": {
+            "min": [
+              -1.340000033378601,
+              -1.340000033378601,
+              -0.4618802070617676
+            ],
+            "max": [
+              1.340000033378601,
+              1.340000033378601,
+              0.4618802070617676
+            ],
+            "size": [
+              2.680000066757202,
+              2.680000066757202,
+              0.9237604141235352
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -1.340000033378601,
+              -1.340000033378601,
+              -0.4618802070617676
+            ],
+            "max": [
+              1.340000033378601,
+              1.340000033378601,
+              0.4618802070617676
+            ],
+            "size": [
+              2.680000066757202,
+              2.680000066757202,
+              0.9237604141235352
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 804,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-anomaly-c",
       "name": "Anomaly Cluster C",
       "kind": "prefab",
-      "position": [-4.2, 1.98, 2.8],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        -4.2,
+        1.98,
+        2.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "anomaly-cluster",
@@ -455,22 +799,128 @@
         "descriptor": "anomalous floating crystal cluster"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-c.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-c.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:4c8d68b6e518d1e2a2526f1b169522e4914d9b426c88ec6e3bf02ced79d79551:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-cyan.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-cyan.glb",
+          "sourceNodeName": "Anomaly Cluster C",
+          "visualLocalBounds": {
+            "min": [
+              -1.340000033378601,
+              -1.340000033378601,
+              -0.7473378777503967
+            ],
+            "max": [
+              1.340000033378601,
+              1.340000033378601,
+              0.7473378777503967
+            ],
+            "size": [
+              2.680000066757202,
+              2.680000066757202,
+              1.4946757555007935
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -1.340000033378601,
+              -1.340000033378601,
+              -0.7473378777503967
+            ],
+            "max": [
+              1.340000033378601,
+              1.340000033378601,
+              0.7473378777503967
+            ],
+            "size": [
+              2.680000066757202,
+              2.680000066757202,
+              1.4946757555007935
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 836,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-anomaly-d",
       "name": "Anomaly Cluster D",
       "kind": "prefab",
-      "position": [4.6, 1.28, 2.1],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        4.6,
+        1.28,
+        2.1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "anomaly-cluster",
@@ -480,22 +930,128 @@
         "descriptor": "anomalous floating crystal cluster"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-d.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-anomaly-d.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:968aaf4671ee2fba71361f6737386d8a2d714096029790e79be05625c20574e0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/anomaly-cluster/anomaly-cluster-rose.glb",
+          "sourceNodeName": "Anomaly Cluster D",
+          "visualLocalBounds": {
+            "min": [
+              -1.340000033378601,
+              -1.340000033378601,
+              -0.5954555869102478
+            ],
+            "max": [
+              1.340000033378601,
+              1.340000033378601,
+              0.5954555869102478
+            ],
+            "size": [
+              2.680000066757202,
+              2.680000066757202,
+              1.1909111738204956
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -1.340000033378601,
+              -1.340000033378601,
+              -0.5954555869102478
+            ],
+            "max": [
+              1.340000033378601,
+              1.340000033378601,
+              0.5954555869102478
+            ],
+            "size": [
+              2.680000066757202,
+              2.680000066757202,
+              1.1909111738204956
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 820,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-console",
       "name": "Command Console",
       "kind": "prefab",
-      "position": [0, 0, 0],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "command-console"
@@ -504,22 +1060,128 @@
         "descriptor": "retro-futurist command console"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-console.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-console.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:0e6463bc36efb1a3e83688a3d279248a8dd838c298b665636e190ec0b71c4991:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-console/command-console.glb",
+          "sourceNodeName": "Command Console",
+          "visualLocalBounds": {
+            "min": [
+              -1.365943431854248,
+              -0.5,
+              -1.3300000429153442
+            ],
+            "max": [
+              1.3300000429153442,
+              2.180000066757202,
+              1.3300000429153442
+            ],
+            "size": [
+              2.6959434747695923,
+              2.680000066757202,
+              2.6600000858306885
+            ],
+            "center": [
+              -0.017971694469451904,
+              0.8400000333786011,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -1.365943431854248,
+              -0.5,
+              -1.3300000429153442
+            ],
+            "max": [
+              1.3300000429153442,
+              2.180000066757202,
+              1.3300000429153442
+            ],
+            "size": [
+              2.6959434747695923,
+              2.680000066757202,
+              2.6600000858306885
+            ],
+            "center": [
+              -0.017971694469451904,
+              0.8400000333786011,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 804,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-portal",
       "name": "Observatory Portal",
       "kind": "prefab",
-      "position": [-9.98, -0.32, -8.26],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        -9.98,
+        -0.32,
+        -8.26
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "portal-apparatus"
@@ -532,15 +1194,130 @@
       },
       "generation": {
         "descriptor": "occult portal apparatus"
+      },
+      "collision": {
+        "mode": "trigger",
+        "intent": "trigger",
+        "channel": "trigger",
+        "quality": "simplifiedMesh",
+        "sensor": true,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-portal.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-portal.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:8a17ad979b9128655a6f2494f5365f3eedb5e30afa82052af4a420250fddfbf0:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+          "sourceNodeName": "Observatory Portal",
+          "visualLocalBounds": {
+            "min": [
+              -1.6200000047683716,
+              -1.6200000047683716,
+              -1.4408957958221436
+            ],
+            "max": [
+              1.6200000047683716,
+              1.6213747262954712,
+              1.20192289352417
+            ],
+            "size": [
+              3.240000009536743,
+              3.2413747310638428,
+              2.6428186893463135
+            ],
+            "center": [
+              0,
+              0.0006873607635498047,
+              -0.11948645114898682
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -1.6200000047683716,
+              -1.6200000047683716,
+              -1.4408957958221436
+            ],
+            "max": [
+              1.6200000047683716,
+              1.6213747262954712,
+              1.20192289352417
+            ],
+            "size": [
+              3.240000009536743,
+              3.2413747310638428,
+              2.6428186893463135
+            ],
+            "center": [
+              0,
+              0.0006873607635498047,
+              -0.11948645114898682
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 3648,
+        "friction": 0.7,
+        "restitution": 0,
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-story-pillar",
       "name": "Story Marker Â· Pillar",
       "kind": "prefab",
-      "position": [3, 1.18, -2],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        3,
+        1.18,
+        -2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -558,15 +1335,130 @@
       },
       "generation": {
         "descriptor": "ritual story marker obelisk"
+      },
+      "collision": {
+        "mode": "trigger",
+        "intent": "trigger",
+        "channel": "trigger",
+        "quality": "simplifiedMesh",
+        "sensor": true,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-pillar.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-pillar.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:79d60df4e24b8ab6ba44f3c853d00263af0bf9d905aab0da6e4090e4a4e7d506:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-magenta.glb",
+          "sourceNodeName": "Story Marker Â· Pillar",
+          "visualLocalBounds": {
+            "min": [
+              -0.36000001430511475,
+              -1.4901161415892261e-9,
+              -0.4688721001148224
+            ],
+            "max": [
+              0.4449999928474426,
+              0.21707090735435486,
+              0.47316426038742065
+            ],
+            "size": [
+              0.8050000071525574,
+              0.217070908844471,
+              0.942036360502243
+            ],
+            "center": [
+              0.04249998927116394,
+              0.10853545293211936,
+              0.0021460801362991333
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.36000001430511475,
+              -1.4901161415892261e-9,
+              -0.4688721001148224
+            ],
+            "max": [
+              0.4449999928474426,
+              0.21707090735435486,
+              0.47316426038742065
+            ],
+            "size": [
+              0.8050000071525574,
+              0.217070908844471,
+              0.942036360502243
+            ],
+            "center": [
+              0.04249998927116394,
+              0.10853545293211936,
+              0.0021460801362991333
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 604,
+        "friction": 0.7,
+        "restitution": 0,
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-story-bench",
       "name": "Story Marker Â· Bench",
       "kind": "prefab",
-      "position": [0, 0.38, 19.52],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        0.38,
+        19.52
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -584,15 +1476,130 @@
       },
       "generation": {
         "descriptor": "ritual story marker obelisk"
+      },
+      "collision": {
+        "mode": "trigger",
+        "intent": "trigger",
+        "channel": "trigger",
+        "quality": "simplifiedMesh",
+        "sensor": true,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-bench.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-bench.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:8221c19606d096e33b1a4220f2dcea735645575e64b8f21f5cad99b7c549d7ea:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-amber.glb",
+          "sourceNodeName": "Story Marker Â· Bench",
+          "visualLocalBounds": {
+            "min": [
+              -0.36000001430511475,
+              -1.4901161415892261e-9,
+              -0.4688721001148224
+            ],
+            "max": [
+              0.4449999928474426,
+              0.21707090735435486,
+              0.47316426038742065
+            ],
+            "size": [
+              0.8050000071525574,
+              0.217070908844471,
+              0.942036360502243
+            ],
+            "center": [
+              0.04249998927116394,
+              0.10853545293211936,
+              0.0021460801362991333
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.36000001430511475,
+              -1.4901161415892261e-9,
+              -0.4688721001148224
+            ],
+            "max": [
+              0.4449999928474426,
+              0.21707090735435486,
+              0.47316426038742065
+            ],
+            "size": [
+              0.8050000071525574,
+              0.217070908844471,
+              0.942036360502243
+            ],
+            "center": [
+              0.04249998927116394,
+              0.10853545293211936,
+              0.0021460801362991333
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 604,
+        "friction": 0.7,
+        "restitution": 0,
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-story-fountain",
       "name": "Story Marker Â· Fountain",
       "kind": "prefab",
-      "position": [0, 0.6, 21.52],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        0.6,
+        21.52
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -610,15 +1617,130 @@
       },
       "generation": {
         "descriptor": "ritual story marker obelisk"
+      },
+      "collision": {
+        "mode": "trigger",
+        "intent": "trigger",
+        "channel": "trigger",
+        "quality": "simplifiedMesh",
+        "sensor": true,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-fountain.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-fountain.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:ed4ce6f97b8800151f88ec4a96120b1762e5ad55039335d1399e276ec273ce78:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-cyan.glb",
+          "sourceNodeName": "Story Marker Â· Fountain",
+          "visualLocalBounds": {
+            "min": [
+              -0.36000001430511475,
+              -1.4901161415892261e-9,
+              -0.4688721001148224
+            ],
+            "max": [
+              0.4449999928474426,
+              0.21707090735435486,
+              0.47316426038742065
+            ],
+            "size": [
+              0.8050000071525574,
+              0.217070908844471,
+              0.942036360502243
+            ],
+            "center": [
+              0.04249998927116394,
+              0.10853545293211936,
+              0.0021460801362991333
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.36000001430511475,
+              -1.4901161415892261e-9,
+              -0.4688721001148224
+            ],
+            "max": [
+              0.4449999928474426,
+              0.21707090735435486,
+              0.47316426038742065
+            ],
+            "size": [
+              0.8050000071525574,
+              0.217070908844471,
+              0.942036360502243
+            ],
+            "center": [
+              0.04249998927116394,
+              0.10853545293211936,
+              0.0021460801362991333
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 604,
+        "friction": 0.7,
+        "restitution": 0,
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-story-plant",
       "name": "Story Marker Â· Plant",
       "kind": "prefab",
-      "position": [3, 1.88, 25.52],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        3,
+        1.88,
+        25.52
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -636,15 +1758,130 @@
       },
       "generation": {
         "descriptor": "ritual story marker obelisk"
+      },
+      "collision": {
+        "mode": "trigger",
+        "intent": "trigger",
+        "channel": "trigger",
+        "quality": "simplifiedMesh",
+        "sensor": true,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-plant.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-plant.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:3d89e7a147964f8db34fb0692f8615a963bf2d67aba8886abfec1736e9324ca6:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-green.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-green.glb",
+          "sourceNodeName": "Story Marker Â· Plant",
+          "visualLocalBounds": {
+            "min": [
+              -0.36000001430511475,
+              -1.4901161415892261e-9,
+              -0.4688721001148224
+            ],
+            "max": [
+              0.4449999928474426,
+              0.21707090735435486,
+              0.47316426038742065
+            ],
+            "size": [
+              0.8050000071525574,
+              0.217070908844471,
+              0.942036360502243
+            ],
+            "center": [
+              0.04249998927116394,
+              0.10853545293211936,
+              0.0021460801362991333
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.36000001430511475,
+              -1.4901161415892261e-9,
+              -0.4688721001148224
+            ],
+            "max": [
+              0.4449999928474426,
+              0.21707090735435486,
+              0.47316426038742065
+            ],
+            "size": [
+              0.8050000071525574,
+              0.217070908844471,
+              0.942036360502243
+            ],
+            "center": [
+              0.04249998927116394,
+              0.10853545293211936,
+              0.0021460801362991333
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 604,
+        "friction": 0.7,
+        "restitution": 0,
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-story-junk",
       "name": "Story Marker Â· Junk Memory",
       "kind": "prefab",
-      "position": [-3.6, 1.48, 52.44],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        -3.6,
+        1.48,
+        52.44
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "story-marker",
@@ -662,15 +1899,130 @@
       },
       "generation": {
         "descriptor": "ritual story marker obelisk"
+      },
+      "collision": {
+        "mode": "trigger",
+        "intent": "trigger",
+        "channel": "trigger",
+        "quality": "simplifiedMesh",
+        "sensor": true,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-junk.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-story-junk.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:949f24d4a85a005ed45fe65245d08a593761ee44d4c13503b849ff384650284c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e25591e3af4d866f400d945539b5d511721e3e80e5d1731827dc17cd5646cfdf",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/story-marker/story-marker-red.glb",
+          "sourceNodeName": "Story Marker Â· Junk Memory",
+          "visualLocalBounds": {
+            "min": [
+              -0.36000001430511475,
+              -1.4901161415892261e-9,
+              -0.4688721001148224
+            ],
+            "max": [
+              0.4449999928474426,
+              0.21707090735435486,
+              0.47316426038742065
+            ],
+            "size": [
+              0.8050000071525574,
+              0.217070908844471,
+              0.942036360502243
+            ],
+            "center": [
+              0.04249998927116394,
+              0.10853545293211936,
+              0.0021460801362991333
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.36000001430511475,
+              -1.4901161415892261e-9,
+              -0.4688721001148224
+            ],
+            "max": [
+              0.4449999928474426,
+              0.21707090735435486,
+              0.47316426038742065
+            ],
+            "size": [
+              0.8050000071525574,
+              0.217070908844471,
+              0.942036360502243
+            ],
+            "center": [
+              0.04249998927116394,
+              0.10853545293211936,
+              0.0021460801362991333
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 604,
+        "friction": 0.7,
+        "restitution": 0,
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-command-fin-left",
       "name": "Command Fin Left",
       "kind": "prefab",
-      "position": [-4.8, 2.18, -3.8],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        -4.8,
+        2.18,
+        -3.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "command-fin"
@@ -679,22 +2031,128 @@
         "descriptor": "dark retro-futurist fin pillar"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-command-fin-left.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-command-fin-left.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:ecdf6052626fcc8cb38086663299ba582dbe7ec94f886d5367fe4e22767d2321:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
+          "sourceNodeName": "Command Fin Left",
+          "visualLocalBounds": {
+            "min": [
+              -0.10999999940395355,
+              -1.7999999523162842,
+              -0.699999988079071
+            ],
+            "max": [
+              0.10999999940395355,
+              1.7999999523162842,
+              0.699999988079071
+            ],
+            "size": [
+              0.2199999988079071,
+              3.5999999046325684,
+              1.399999976158142
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.10999999940395355,
+              -1.7999999523162842,
+              -0.699999988079071
+            ],
+            "max": [
+              0.10999999940395355,
+              1.7999999523162842,
+              0.699999988079071
+            ],
+            "size": [
+              0.2199999988079071,
+              3.5999999046325684,
+              1.399999976158142
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 12,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-command-fin-right",
       "name": "Command Fin Right",
       "kind": "prefab",
-      "position": [4.8, 2.18, -3.8],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        4.8,
+        2.18,
+        -3.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "command-fin"
@@ -703,22 +2161,128 @@
         "descriptor": "dark retro-futurist fin pillar"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-command-fin-right.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-command-fin-right.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:ecdf6052626fcc8cb38086663299ba582dbe7ec94f886d5367fe4e22767d2321:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/command-fin/command-fin.glb",
+          "sourceNodeName": "Command Fin Right",
+          "visualLocalBounds": {
+            "min": [
+              -0.10999999940395355,
+              -1.7999999523162842,
+              -0.699999988079071
+            ],
+            "max": [
+              0.10999999940395355,
+              1.7999999523162842,
+              0.699999988079071
+            ],
+            "size": [
+              0.2199999988079071,
+              3.5999999046325684,
+              1.399999976158142
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.10999999940395355,
+              -1.7999999523162842,
+              -0.699999988079071
+            ],
+            "max": [
+              0.10999999940395355,
+              1.7999999523162842,
+              0.699999988079071
+            ],
+            "size": [
+              0.2199999988079071,
+              3.5999999046325684,
+              1.399999976158142
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 12,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-hanging-light-left",
       "name": "Hanging Light Left",
       "kind": "prefab",
-      "position": [-3, 7.7, -0.9],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        -3,
+        7.7,
+        -0.9
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "hanging-light"
@@ -727,22 +2291,128 @@
         "descriptor": "ornate hanging industrial light"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-hanging-light-left.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-hanging-light-left.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:4d809194606f0862a08147df6408f2124ed7a5dbc90e4090c82a332efb3aa50d:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+          "sourceNodeName": "Hanging Light Left",
+          "visualLocalBounds": {
+            "min": [
+              -0.5802958011627197,
+              -0.7500965595245361,
+              -0.15747122466564178
+            ],
+            "max": [
+              0.581538200378418,
+              5.960464477539063e-8,
+              0.15742482244968414
+            ],
+            "size": [
+              1.1618340015411377,
+              0.7500966191291809,
+              0.3148960471153259
+            ],
+            "center": [
+              0.0006211996078491211,
+              -0.3750482499599457,
+              -0.0000232011079788208
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.5802958011627197,
+              -0.7500965595245361,
+              -0.15747122466564178
+            ],
+            "max": [
+              0.581538200378418,
+              5.960464477539063e-8,
+              0.15742482244968414
+            ],
+            "size": [
+              1.1618340015411377,
+              0.7500966191291809,
+              0.3148960471153259
+            ],
+            "center": [
+              0.0006211996078491211,
+              -0.3750482499599457,
+              -0.0000232011079788208
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 4724,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-hanging-light-right",
       "name": "Hanging Light Right",
       "kind": "prefab",
-      "position": [3, 7.7, -0.9],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        3,
+        7.7,
+        -0.9
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "hanging-light"
@@ -751,22 +2421,128 @@
         "descriptor": "ornate hanging industrial light"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-hanging-light-right.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-hanging-light-right.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:4d809194606f0862a08147df6408f2124ed7a5dbc90e4090c82a332efb3aa50d:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/models/polyhaven/caged_hanging_light/caged_hanging_light_1k.gltf",
+          "sourceNodeName": "Hanging Light Right",
+          "visualLocalBounds": {
+            "min": [
+              -0.5802958011627197,
+              -0.7500965595245361,
+              -0.15747122466564178
+            ],
+            "max": [
+              0.581538200378418,
+              5.960464477539063e-8,
+              0.15742482244968414
+            ],
+            "size": [
+              1.1618340015411377,
+              0.7500966191291809,
+              0.3148960471153259
+            ],
+            "center": [
+              0.0006211996078491211,
+              -0.3750482499599457,
+              -0.0000232011079788208
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.5802958011627197,
+              -0.7500965595245361,
+              -0.15747122466564178
+            ],
+            "max": [
+              0.581538200378418,
+              5.960464477539063e-8,
+              0.15742482244968414
+            ],
+            "size": [
+              1.1618340015411377,
+              0.7500966191291809,
+              0.3148960471153259
+            ],
+            "center": [
+              0.0006211996078491211,
+              -0.3750482499599457,
+              -0.0000232011079788208
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 4724,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-aircon-command",
       "name": "Command Aircon",
       "kind": "asset",
-      "position": [-10.23, 1.65, -1.3],
-      "rotation": [0, 1.5707963267948966, 0],
-      "scale": [0.00092, 0.00092, 0.00092],
+      "position": [
+        -10.23,
+        1.65,
+        -1.3
+      ],
+      "rotation": [
+        0,
+        1.5707963267948966,
+        0
+      ],
+      "scale": [
+        0.00092,
+        0.00092,
+        0.00092
+      ],
       "visible": true,
       "asset": {
         "url": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
@@ -775,16 +2551,19 @@
         "descriptor": "Command Aircon"
       },
       "collision": {
-        "shape": "trimesh",
-        "enabled": true,
-        "friction": 0.7,
-        "restitution": 0,
-        "sensor": false,
+        "mode": "auto",
         "intent": "blocker",
         "channel": "worldStatic",
+        "quality": "simplifiedMesh",
+        "maxTriangles": 20000,
+        "friction": 0.7,
+        "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-aircon-command.collider.meta.json",
-        "triangleBudget": 20000,
+        "colliderCacheKey": "mesh-collision-manager-v1:f19d85c76948903047c2846068aeaa376d5e956a410675268cb6cb6aac5d97c2:ae4fdee19ee91aa3ebf9ca987fdd677618a167ceb76c07fd5b5a026b34637a4f:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "sourceAssetUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -792,48 +2571,108 @@
           "sourceNodeName": "Command Aircon",
           "visualLocalBounds": {
             "min": [
-              -0.392697811126709, -0.32006561756134033, -0.21596616506576538
+              -0.392697811126709,
+              -0.32006561756134033,
+              -0.21596616506576538
             ],
             "max": [
-              0.4072735011577606, 0.6078314781188965, 0.15819303691387177
+              0.4072735011577606,
+              0.6078314781188965,
+              0.15819303691387177
             ],
             "size": [
-              0.7999713122844696, 0.9278970956802368, 0.37415920197963715
+              0.7999713122844696,
+              0.9278970956802368,
+              0.37415920197963715
             ],
             "center": [
-              0.007287845015525818, 0.14388293027877808, -0.028886564075946808
+              0.007287845015525818,
+              0.14388293027877808,
+              -0.028886564075946808
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.392697811126709, -0.32006561756134033, -0.21596616506576538
+              -0.3909999132156372,
+              -0.32005539536476135,
+              -0.21596616506576538
             ],
             "max": [
-              0.4072735011577606, 0.6078314781188965, 0.15819303691387177
+              0.4050728678703308,
+              0.6078314781188965,
+              0.15819303691387177
             ],
             "size": [
-              0.7999713122844696, 0.9278970956802368, 0.37415920197963715
+              0.796072781085968,
+              0.9278868734836578,
+              0.37415920197963715
             ],
             "center": [
-              0.007287845015525818, 0.14388293027877808, -0.028886564075946808
+              0.007036477327346802,
+              0.14388804137706757,
+              -0.028886564075946808
             ]
           },
           "visualToPhysicsMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ],
           "visualToPhysicsLocalMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ]
-        }
+        },
+        "triangleCount": 4616,
+        "sensor": false
       }
     },
     {
       "id": "sci-fi-support-column-a",
       "name": "Support Column A",
       "kind": "prefab",
-      "position": [-3.5, 3.68, -2],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        -3.5,
+        3.68,
+        -2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "support-column"
@@ -842,22 +2681,128 @@
         "descriptor": "retro-futurist support column"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-support-column-a.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-support-column-a.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+          "sourceNodeName": "Support Column A",
+          "visualLocalBounds": {
+            "min": [
+              -0.7400000095367432,
+              -3.7200000286102295,
+              -0.7400000095367432
+            ],
+            "max": [
+              0.7400000095367432,
+              4.199999809265137,
+              0.7400000095367432
+            ],
+            "size": [
+              1.4800000190734863,
+              7.919999837875366,
+              1.4800000190734863
+            ],
+            "center": [
+              0,
+              0.2399998903274536,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.7400000095367432,
+              -3.7200000286102295,
+              -0.7400000095367432
+            ],
+            "max": [
+              0.7400000095367432,
+              4.199999809265137,
+              0.7400000095367432
+            ],
+            "size": [
+              1.4800000190734863,
+              7.919999837875366,
+              1.4800000190734863
+            ],
+            "center": [
+              0,
+              0.2399998903274536,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 764,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-support-column-b",
       "name": "Support Column B",
       "kind": "prefab",
-      "position": [3.5, 3.68, 2],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        3.5,
+        3.68,
+        2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "support-column"
@@ -866,22 +2811,128 @@
         "descriptor": "retro-futurist support column"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-support-column-b.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-support-column-b.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+          "sourceNodeName": "Support Column B",
+          "visualLocalBounds": {
+            "min": [
+              -0.7400000095367432,
+              -3.7200000286102295,
+              -0.7400000095367432
+            ],
+            "max": [
+              0.7400000095367432,
+              4.199999809265137,
+              0.7400000095367432
+            ],
+            "size": [
+              1.4800000190734863,
+              7.919999837875366,
+              1.4800000190734863
+            ],
+            "center": [
+              0,
+              0.2399998903274536,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.7400000095367432,
+              -3.7200000286102295,
+              -0.7400000095367432
+            ],
+            "max": [
+              0.7400000095367432,
+              4.199999809265137,
+              0.7400000095367432
+            ],
+            "size": [
+              1.4800000190734863,
+              7.919999837875366,
+              1.4800000190734863
+            ],
+            "center": [
+              0,
+              0.2399998903274536,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 764,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-support-column-c",
       "name": "Support Column C",
       "kind": "prefab",
-      "position": [-3.5, 3.68, 2],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        -3.5,
+        3.68,
+        2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "support-column"
@@ -890,22 +2941,128 @@
         "descriptor": "retro-futurist support column"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-support-column-c.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-support-column-c.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+          "sourceNodeName": "Support Column C",
+          "visualLocalBounds": {
+            "min": [
+              -0.7400000095367432,
+              -3.7200000286102295,
+              -0.7400000095367432
+            ],
+            "max": [
+              0.7400000095367432,
+              4.199999809265137,
+              0.7400000095367432
+            ],
+            "size": [
+              1.4800000190734863,
+              7.919999837875366,
+              1.4800000190734863
+            ],
+            "center": [
+              0,
+              0.2399998903274536,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.7400000095367432,
+              -3.7200000286102295,
+              -0.7400000095367432
+            ],
+            "max": [
+              0.7400000095367432,
+              4.199999809265137,
+              0.7400000095367432
+            ],
+            "size": [
+              1.4800000190734863,
+              7.919999837875366,
+              1.4800000190734863
+            ],
+            "center": [
+              0,
+              0.2399998903274536,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 764,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-support-column-d",
       "name": "Support Column D",
       "kind": "prefab",
-      "position": [3.5, 3.68, -2],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        3.5,
+        3.68,
+        -2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "support-column"
@@ -914,22 +3071,128 @@
         "descriptor": "retro-futurist support column"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-support-column-d.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-support-column-d.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:fcf21dcbfc7971d4f618e09e5b3197810ab4828a0a80f19ea115fd9bc922c26c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/support-column/support-column.glb",
+          "sourceNodeName": "Support Column D",
+          "visualLocalBounds": {
+            "min": [
+              -0.7400000095367432,
+              -3.7200000286102295,
+              -0.7400000095367432
+            ],
+            "max": [
+              0.7400000095367432,
+              4.199999809265137,
+              0.7400000095367432
+            ],
+            "size": [
+              1.4800000190734863,
+              7.919999837875366,
+              1.4800000190734863
+            ],
+            "center": [
+              0,
+              0.2399998903274536,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.7400000095367432,
+              -3.7200000286102295,
+              -0.7400000095367432
+            ],
+            "max": [
+              0.7400000095367432,
+              4.199999809265137,
+              0.7400000095367432
+            ],
+            "size": [
+              1.4800000190734863,
+              7.919999837875366,
+              1.4800000190734863
+            ],
+            "center": [
+              0,
+              0.2399998903274536,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 764,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-interior-archway",
       "name": "Interior Archway",
       "kind": "prefab",
-      "position": [0, 0, 3.5],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        0,
+        3.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "interior-archway"
@@ -938,22 +3201,128 @@
         "descriptor": "ancient interior archway ruin"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-interior-archway.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-interior-archway.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:7d17c1eee87c34f0aeb6b8d439a63afe180d833f8899ef5d652366269e245a8a:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/interior-archway/interior-archway.glb",
+          "sourceNodeName": "Interior Archway",
+          "visualLocalBounds": {
+            "min": [
+              -1.9630868434906006,
+              -0.12000000476837158,
+              -0.3100000023841858
+            ],
+            "max": [
+              1.9630868434906006,
+              8.239999771118164,
+              0.3100000023841858
+            ],
+            "size": [
+              3.926173686981201,
+              8.359999775886536,
+              0.6200000047683716
+            ],
+            "center": [
+              0,
+              4.059999883174896,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -1.9630868434906006,
+              -0.12000000476837158,
+              -0.3100000023841858
+            ],
+            "max": [
+              1.9630868434906006,
+              8.239999771118164,
+              0.3100000023841858
+            ],
+            "size": [
+              3.926173686981201,
+              8.359999775886536,
+              0.6200000047683716
+            ],
+            "center": [
+              0,
+              4.059999883174896,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 144,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-courtyard-pylon-left",
       "name": "Courtyard Pylon Left",
       "kind": "prefab",
-      "position": [-1.2, 0, 18.52],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        -1.2,
+        0,
+        18.52
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "courtyard-pylon"
@@ -962,22 +3331,128 @@
         "descriptor": "weathered courtyard pylon"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-courtyard-pylon-left.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-courtyard-pylon-left.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:926093be737c7acdd87c8150ecdf5de2529e9b362ea10495e40275223784c430:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+          "sourceNodeName": "Courtyard Pylon Left",
+          "visualLocalBounds": {
+            "min": [
+              -0.2800000011920929,
+              -0.10000000149011612,
+              -0.2800000011920929
+            ],
+            "max": [
+              0.2800000011920929,
+              7.809999942779541,
+              0.2800000011920929
+            ],
+            "size": [
+              0.5600000023841858,
+              7.909999944269657,
+              0.5600000023841858
+            ],
+            "center": [
+              0,
+              3.8549999706447124,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.2800000011920929,
+              -0.10000000149011612,
+              -0.2800000011920929
+            ],
+            "max": [
+              0.2800000011920929,
+              7.809999942779541,
+              0.2800000011920929
+            ],
+            "size": [
+              0.5600000023841858,
+              7.909999944269657,
+              0.5600000023841858
+            ],
+            "center": [
+              0,
+              3.8549999706447124,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 36,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-courtyard-pylon-right",
       "name": "Courtyard Pylon Right",
       "kind": "prefab",
-      "position": [1.2, 0, 18.52],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        1.2,
+        0,
+        18.52
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "courtyard-pylon"
@@ -986,22 +3461,128 @@
         "descriptor": "weathered courtyard pylon"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-courtyard-pylon-right.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-courtyard-pylon-right.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:926093be737c7acdd87c8150ecdf5de2529e9b362ea10495e40275223784c430:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-pylon/courtyard-pylon.glb",
+          "sourceNodeName": "Courtyard Pylon Right",
+          "visualLocalBounds": {
+            "min": [
+              -0.2800000011920929,
+              -0.10000000149011612,
+              -0.2800000011920929
+            ],
+            "max": [
+              0.2800000011920929,
+              7.809999942779541,
+              0.2800000011920929
+            ],
+            "size": [
+              0.5600000023841858,
+              7.909999944269657,
+              0.5600000023841858
+            ],
+            "center": [
+              0,
+              3.8549999706447124,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.2800000011920929,
+              -0.10000000149011612,
+              -0.2800000011920929
+            ],
+            "max": [
+              0.2800000011920929,
+              7.809999942779541,
+              0.2800000011920929
+            ],
+            "size": [
+              0.5600000023841858,
+              7.909999944269657,
+              0.5600000023841858
+            ],
+            "center": [
+              0,
+              3.8549999706447124,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 36,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-wasteland-archway",
       "name": "Wasteland Archway",
       "kind": "prefab",
-      "position": [0, 0, 24.52],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        0,
+        24.52
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "wasteland-archway"
@@ -1010,22 +3591,128 @@
         "descriptor": "wasteland stone archway"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-wasteland-archway.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-wasteland-archway.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:615a1598f293233119865abc2743b600c77bb3a7d6a9a99f8fdeeda3d708a217:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+          "sourceNodeName": "Wasteland Archway",
+          "visualLocalBounds": {
+            "min": [
+              -1.649999976158142,
+              -0.1599999964237213,
+              -0.3100000023841858
+            ],
+            "max": [
+              1.649999976158142,
+              8.100000381469727,
+              0.3100000023841858
+            ],
+            "size": [
+              3.299999952316284,
+              8.260000377893448,
+              0.6200000047683716
+            ],
+            "center": [
+              0,
+              3.9700001925230026,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -1.649999976158142,
+              -0.1599999964237213,
+              -0.3100000023841858
+            ],
+            "max": [
+              1.649999976158142,
+              8.100000381469727,
+              0.3100000023841858
+            ],
+            "size": [
+              3.299999952316284,
+              8.260000377893448,
+              0.6200000047683716
+            ],
+            "center": [
+              0,
+              3.9700001925230026,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 96,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-fountain",
       "name": "Courtyard Fountain",
       "kind": "prefab",
-      "position": [0, -0.32, 21.52],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        -0.32,
+        21.52
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "courtyard-fountain"
@@ -1034,22 +3721,128 @@
         "descriptor": "strange luminous courtyard fountain"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-fountain.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-fountain.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:aed7d091f99136743a02b069652b1d267398531d8397baad376528b3d22183d9:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/courtyard-fountain/courtyard-fountain.glb",
+          "sourceNodeName": "Courtyard Fountain",
+          "visualLocalBounds": {
+            "min": [
+              -2.430000066757202,
+              -2.430000066757202,
+              -2.049999952316284
+            ],
+            "max": [
+              2.430000066757202,
+              2.430000066757202,
+              2.049999952316284
+            ],
+            "size": [
+              4.860000133514404,
+              4.860000133514404,
+              4.099999904632568
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -2.430000066757202,
+              -2.430000066757202,
+              -2.049999952316284
+            ],
+            "max": [
+              2.430000066757202,
+              2.430000066757202,
+              2.049999952316284
+            ],
+            "size": [
+              4.860000133514404,
+              4.860000133514404,
+              4.099999904632568
+            ],
+            "center": [
+              0,
+              0,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 2896,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-observation-rig",
       "name": "Observation Rig",
       "kind": "prefab",
-      "position": [0, 0, 0],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "observation-rig"
@@ -1058,22 +3851,128 @@
         "descriptor": "cosmic observation rig"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-observation-rig.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-observation-rig.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:9e418dd1d980c3dc2dc1ebf894f95f8f066b966205e32d05173a6e8faae3cc3f:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/observation-rig/observation-rig.glb",
+          "sourceNodeName": "Observation Rig",
+          "visualLocalBounds": {
+            "min": [
+              4.827145576477051,
+              0.10000000894069672,
+              20.79096794128418
+            ],
+            "max": [
+              6.350229263305664,
+              2.999964475631714,
+              23.709701538085938
+            ],
+            "size": [
+              1.5230836868286133,
+              2.899964466691017,
+              2.918733596801758
+            ],
+            "center": [
+              5.588687419891357,
+              1.5499822422862053,
+              22.25033473968506
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              4.827145576477051,
+              0.10000000894069672,
+              20.79096794128418
+            ],
+            "max": [
+              6.350229263305664,
+              2.999964475631714,
+              23.709701538085938
+            ],
+            "size": [
+              1.5230836868286133,
+              2.899964466691017,
+              2.918733596801758
+            ],
+            "center": [
+              5.588687419891357,
+              1.5499822422862053,
+              22.25033473968506
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 100,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-courtyard-aircon",
       "name": "Courtyard Utility Unit",
       "kind": "asset",
-      "position": [4.2, 0.03, 26.22],
-      "rotation": [0, -1.15, 0],
-      "scale": [0.0009, 0.0009, 0.0009],
+      "position": [
+        4.2,
+        0.03,
+        26.22
+      ],
+      "rotation": [
+        0,
+        -1.15,
+        0
+      ],
+      "scale": [
+        0.0009,
+        0.0009,
+        0.0009
+      ],
       "visible": true,
       "asset": {
         "url": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf"
@@ -1082,16 +3981,19 @@
         "descriptor": "Courtyard Utility Unit"
       },
       "collision": {
-        "shape": "trimesh",
-        "enabled": true,
-        "friction": 0.7,
-        "restitution": 0,
-        "sensor": false,
+        "mode": "auto",
         "intent": "blocker",
         "channel": "worldStatic",
+        "quality": "simplifiedMesh",
+        "maxTriangles": 20000,
+        "friction": 0.7,
+        "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-courtyard-aircon.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-courtyard-aircon.collider.meta.json",
-        "triangleBudget": 20000,
+        "colliderCacheKey": "mesh-collision-manager-v1:f19d85c76948903047c2846068aeaa376d5e956a410675268cb6cb6aac5d97c2:badcccc4bd85f29771a6929f562db811468140101f100cf41dbab68a09c9ec69:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "sourceAssetUrl": "/models/polyhaven/exterior_aircon_unit/exterior_aircon_unit_1k.gltf",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1099,48 +4001,108 @@
           "sourceNodeName": "Courtyard Utility Unit",
           "visualLocalBounds": {
             "min": [
-              -0.392697811126709, -0.32006561756134033, -0.21596616506576538
+              -0.392697811126709,
+              -0.32006561756134033,
+              -0.21596616506576538
             ],
             "max": [
-              0.4072735011577606, 0.6078314781188965, 0.15819303691387177
+              0.4072735011577606,
+              0.6078314781188965,
+              0.15819303691387177
             ],
             "size": [
-              0.7999713122844696, 0.9278970956802368, 0.37415920197963715
+              0.7999713122844696,
+              0.9278970956802368,
+              0.37415920197963715
             ],
             "center": [
-              0.007287845015525818, 0.14388293027877808, -0.028886564075946808
+              0.007287845015525818,
+              0.14388293027877808,
+              -0.028886564075946808
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.392697811126709, -0.32006561756134033, -0.21596616506576538
+              -0.3909999132156372,
+              -0.32005539536476135,
+              -0.21596616506576538
             ],
             "max": [
-              0.4072735011577606, 0.6078314781188965, 0.15819303691387177
+              0.4050728678703308,
+              0.6078314781188965,
+              0.15819303691387177
             ],
             "size": [
-              0.7999713122844696, 0.9278970956802368, 0.37415920197963715
+              0.796072781085968,
+              0.9278868734836578,
+              0.37415920197963715
             ],
             "center": [
-              0.007287845015525818, 0.14388293027877808, -0.028886564075946808
+              0.007036477327346802,
+              0.14388804137706757,
+              -0.028886564075946808
             ]
           },
           "visualToPhysicsMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ],
           "visualToPhysicsLocalMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ]
-        }
+        },
+        "triangleCount": 4616,
+        "sensor": false
       }
     },
     {
       "id": "sci-fi-planter-a",
       "name": "Growth Planter A",
       "kind": "asset",
-      "position": [-3, 0.6235367123297062, 25.52],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        -3,
+        0.6235367123297062,
+        25.52
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb"
@@ -1149,16 +4111,19 @@
         "descriptor": "Growth Planter A"
       },
       "collision": {
-        "shape": "trimesh",
-        "enabled": true,
-        "friction": 0.7,
-        "restitution": 0,
-        "sensor": false,
+        "mode": "auto",
         "intent": "blocker",
         "channel": "worldStatic",
+        "quality": "simplifiedMesh",
+        "maxTriangles": 20000,
+        "friction": 0.7,
+        "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-a.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-a.collider.meta.json",
-        "triangleBudget": 20000,
+        "colliderCacheKey": "mesh-collision-manager-v1:599e239c84fe9bbb781137a7774e640f1996c8e4b1bd5c97e1ef59c3bb2a9e06:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-38-02-192Z.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1166,42 +4131,108 @@
           "sourceNodeName": "Growth Planter A",
           "visualLocalBounds": {
             "min": [
-              -0.8443078994750977, -0.9999665021896362, -0.7100440859794617
+              -0.8443078994750977,
+              -0.9999665021896362,
+              -0.7100440859794617
             ],
-            "max": [0.8238810896873474, 0.9713085293769836, 0.6921294331550598],
-            "size": [1.668188989162445, 1.9712750315666199, 1.4021735191345215],
+            "max": [
+              0.8238810896873474,
+              0.9713085293769836,
+              0.6921294331550598
+            ],
+            "size": [
+              1.668188989162445,
+              1.9712750315666199,
+              1.4021735191345215
+            ],
             "center": [
-              -0.010213404893875122, -0.014328986406326294,
+              -0.010213404893875122,
+              -0.014328986406326294,
               -0.008957326412200928
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.8443078994750977, -0.9999299645423889, -0.7100440859794617
+              -0.8443078994750977,
+              -0.9995064735412598,
+              -0.7089349031448364
             ],
-            "max": [0.8238810896873474, 0.9713085293769836, 0.6921294331550598],
-            "size": [1.668188989162445, 1.9712384939193726, 1.4021735191345215],
+            "max": [
+              0.8238810896873474,
+              0.9683544635772705,
+              0.6904736757278442
+            ],
+            "size": [
+              1.668188989162445,
+              1.9678609371185303,
+              1.3994085788726807
+            ],
             "center": [
-              -0.010213404893875122, -0.014310717582702637,
-              -0.008957326412200928
+              -0.010213404893875122,
+              -0.015576004981994629,
+              -0.009230613708496094
             ]
           },
           "visualToPhysicsMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ],
           "visualToPhysicsLocalMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ]
-        }
+        },
+        "triangleCount": 4750,
+        "sensor": false
       }
     },
     {
       "id": "sci-fi-planter-b",
       "name": "Growth Planter B",
       "kind": "asset",
-      "position": [3, 0, 25.52],
-      "rotation": [0, 0.6, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        3,
+        0,
+        25.52
+      ],
+      "rotation": [
+        0,
+        0.6,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb"
@@ -1210,16 +4241,19 @@
         "descriptor": "Growth Planter B"
       },
       "collision": {
-        "shape": "trimesh",
-        "enabled": true,
-        "friction": 0.7,
-        "restitution": 0,
-        "sensor": false,
+        "mode": "auto",
         "intent": "blocker",
         "channel": "worldStatic",
+        "quality": "simplifiedMesh",
+        "maxTriangles": 20000,
+        "friction": 0.7,
+        "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-b.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-b.collider.meta.json",
-        "triangleBudget": 20000,
+        "colliderCacheKey": "mesh-collision-manager-v1:261c4684fdd40680b54b3bc633e9cc28c15271dd41f834e86273ad00098a637a:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "sourceAssetUrl": "/generated/hunyuan3d/growth-planter-b-generated-2026-04-18t01-36-15-986z/growth-planter-b-generated-2026-04-18t01-36-15-986z-texture-wrap-2026-04-18T01-38-19-536Z.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1227,44 +4261,108 @@
           "sourceNodeName": "Growth Planter B",
           "visualLocalBounds": {
             "min": [
-              -0.8023393750190735, -1.0004256963729858, -0.5317336916923523
+              -0.8023393750190735,
+              -1.0004256963729858,
+              -0.5317336916923523
             ],
-            "max": [0.7701928019523621, 0.9740477204322815, 0.5507553815841675],
+            "max": [
+              0.7701928019523621,
+              0.9740477204322815,
+              0.5507553815841675
+            ],
             "size": [
-              1.5725321769714355, 1.9744734168052673, 1.0824890732765198
+              1.5725321769714355,
+              1.9744734168052673,
+              1.0824890732765198
             ],
             "center": [
-              -0.016073286533355713, -0.013188987970352173, 0.009510844945907593
+              -0.016073286533355713,
+              -0.013188987970352173,
+              0.009510844945907593
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.8023393750190735, -1.0001178979873657, -0.5317336916923523
+              -0.8020637035369873,
+              -0.9963172078132629,
+              -0.5286492705345154
             ],
-            "max": [0.7701928019523621, 0.9740477204322815, 0.5507553815841675],
+            "max": [
+              0.7693175673484802,
+              0.9735920429229736,
+              0.5507553815841675
+            ],
             "size": [
-              1.5725321769714355, 1.9741656184196472, 1.0824890732765198
+              1.5713812708854675,
+              1.9699092507362366,
+              1.0794046521186829
             ],
             "center": [
-              -0.016073286533355713, -0.013035088777542114, 0.009510844945907593
+              -0.01637306809425354,
+              -0.011362582445144653,
+              0.01105305552482605
             ]
           },
           "visualToPhysicsMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ],
           "visualToPhysicsLocalMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ]
-        }
+        },
+        "triangleCount": 4750,
+        "sensor": false
       }
     },
     {
       "id": "sci-fi-planter-c",
       "name": "Growth Planter C",
       "kind": "asset",
-      "position": [-3, 0.5602743438210331, 23.52],
-      "rotation": [0, 1.1999999999999997, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        -3,
+        0.5602743438210331,
+        23.52
+      ],
+      "rotation": [
+        0,
+        1.1999999999999997,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb"
@@ -1273,16 +4371,19 @@
         "descriptor": "Growth Planter C"
       },
       "collision": {
-        "shape": "trimesh",
-        "enabled": true,
-        "friction": 0.7,
-        "restitution": 0,
-        "sensor": false,
+        "mode": "auto",
         "intent": "blocker",
         "channel": "worldStatic",
+        "quality": "simplifiedMesh",
+        "maxTriangles": 20000,
+        "friction": 0.7,
+        "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-c.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-c.collider.meta.json",
-        "triangleBudget": 20000,
+        "colliderCacheKey": "mesh-collision-manager-v1:e6091a80676c00090994d52260cdef6ee6b39f5d80996b7e396195ddb65a1d9c:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-42-42-855Z.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1290,42 +4391,108 @@
           "sourceNodeName": "Growth Planter C",
           "visualLocalBounds": {
             "min": [
-              -0.7556721568107605, -1.0000663995742798, -0.6454210877418518
+              -0.7556721568107605,
+              -1.0000663995742798,
+              -0.6454210877418518
             ],
-            "max": [0.7232809066772461, 0.9731586575508118, 0.6983928680419922],
-            "size": [1.4789530634880066, 1.9732250571250916, 1.343813955783844],
+            "max": [
+              0.7232809066772461,
+              0.9731586575508118,
+              0.6983928680419922
+            ],
+            "size": [
+              1.4789530634880066,
+              1.9732250571250916,
+              1.343813955783844
+            ],
             "center": [
-              -0.016195625066757202, -0.013453871011734009, 0.02648589015007019
+              -0.016195625066757202,
+              -0.013453871011734009,
+              0.02648589015007019
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.7556721568107605, -0.9996722340583801, -0.6453370451927185
+              -0.7545031905174255,
+              -0.9993595480918884,
+              -0.6434071063995361
             ],
-            "max": [0.7226167917251587, 0.9731417894363403, 0.6983928680419922],
+            "max": [
+              0.7220898270606995,
+              0.972334086894989,
+              0.6954999566078186
+            ],
             "size": [
-              1.4782889485359192, 1.9728140234947205, 1.3437299132347107
+              1.476593017578125,
+              1.9716936349868774,
+              1.3389070630073547
             ],
             "center": [
-              -0.016527682542800903, -0.013265222311019897, 0.02652791142463684
+              -0.016206681728363037,
+              -0.013512730598449707,
+              0.026046425104141235
             ]
           },
           "visualToPhysicsMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ],
           "visualToPhysicsLocalMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ]
-        }
+        },
+        "triangleCount": 4750,
+        "sensor": false
       }
     },
     {
       "id": "sci-fi-planter-d",
       "name": "Growth Planter D",
       "kind": "asset",
-      "position": [3, 0.6254496116841847, 23.52],
-      "rotation": [0, -0.39999999999999997, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        3,
+        0.6254496116841847,
+        23.52
+      ],
+      "rotation": [
+        0,
+        -0.39999999999999997,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "asset": {
         "url": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb"
@@ -1334,16 +4501,19 @@
         "descriptor": "Growth Planter D"
       },
       "collision": {
-        "shape": "trimesh",
-        "enabled": true,
-        "friction": 0.7,
-        "restitution": 0,
-        "sensor": false,
+        "mode": "auto",
         "intent": "blocker",
         "channel": "worldStatic",
+        "quality": "simplifiedMesh",
+        "maxTriangles": 20000,
+        "friction": 0.7,
+        "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-planter-d.collider.meta.json",
-        "triangleBudget": 20000,
+        "colliderCacheKey": "mesh-collision-manager-v1:f4681f68333eb9a21e779a3f24cdddc7c919763e3cdf4faf906f6ae54bcccbac:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "sourceAssetUrl": "/generated/hunyuan3d/biomechanical-growth-planter/biomechanical-growth-planter-generated-2026-04-18T02-10-29-603Z.glb",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1351,40 +4521,108 @@
           "sourceNodeName": "Growth Planter D",
           "visualLocalBounds": {
             "min": [
-              -0.6667150855064392, -1.0003488063812256, -0.5741834044456482
+              -0.6667150855064392,
+              -1.0003488063812256,
+              -0.5741834044456482
             ],
-            "max": [0.6377129554748535, 0.9705517292022705, 0.5826324820518494],
-            "size": [1.3044280409812927, 1.970900535583496, 1.1568158864974976],
+            "max": [
+              0.6377129554748535,
+              0.9705517292022705,
+              0.5826324820518494
+            ],
+            "size": [
+              1.3044280409812927,
+              1.970900535583496,
+              1.1568158864974976
+            ],
             "center": [
-              -0.014501065015792847, -0.014898538589477539, 0.004224538803100586
+              -0.014501065015792847,
+              -0.014898538589477539,
+              0.004224538803100586
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.6667150855064392, -1.0002450942993164, -0.5741834044456482
+              -0.6663235425949097,
+              -0.999711811542511,
+              -0.5741834044456482
             ],
-            "max": [0.6377129554748535, 0.9705517292022705, 0.5826324820518494],
-            "size": [1.3044280409812927, 1.970796823501587, 1.1568158864974976],
+            "max": [
+              0.6377129554748535,
+              0.9680868983268738,
+              0.5804874300956726
+            ],
+            "size": [
+              1.3040364980697632,
+              1.9677987098693848,
+              1.1546708345413208
+            ],
             "center": [
-              -0.014501065015792847, -0.01484668254852295, 0.004224538803100586
+              -0.014305293560028076,
+              -0.015812456607818604,
+              0.003152012825012207
             ]
           },
           "visualToPhysicsMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ],
           "visualToPhysicsLocalMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ]
-        }
+        },
+        "triangleCount": 4750,
+        "sensor": false
       }
     },
     {
       "id": "sci-fi-bench",
       "name": "Bench Growth",
       "kind": "prefab",
-      "position": [0, 0, 19.52],
-      "rotation": [0, 0, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        0,
+        0,
+        19.52
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "bench-growth"
@@ -1393,22 +4631,128 @@
         "descriptor": "overgrown haunted bench"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-bench.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-bench.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:fe469e93caa54a9faa5e3b0cfdf2437a79e1bedab368e59c5dc299acead2325a:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+          "sourceNodeName": "Bench Growth",
+          "visualLocalBounds": {
+            "min": [
+              -1.3949999809265137,
+              -1.3949999809265137,
+              -0.675000011920929
+            ],
+            "max": [
+              1.3949999809265137,
+              1.600000023841858,
+              0.30000001192092896
+            ],
+            "size": [
+              2.7899999618530273,
+              2.9950000047683716,
+              0.9750000238418579
+            ],
+            "center": [
+              0,
+              0.10250002145767212,
+              -0.1875
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -1.3949999809265137,
+              -1.3949999809265137,
+              -0.675000011920929
+            ],
+            "max": [
+              1.3949999809265137,
+              1.600000023841858,
+              0.30000001192092896
+            ],
+            "size": [
+              2.7899999618530273,
+              2.9950000047683716,
+              0.9750000238418579
+            ],
+            "center": [
+              0,
+              0.10250002145767212,
+              -0.1875
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 872,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-monolith-a",
       "name": "Monolith A",
       "kind": "prefab",
-      "position": [-8.5, 3.48, 53.54],
-      "rotation": [0, 0, 0],
-      "scale": [1.2, 7.6, 1],
+      "position": [
+        -8.5,
+        3.48,
+        53.54
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.2,
+        7.6,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "wasteland-monolith"
@@ -1417,22 +4761,128 @@
         "descriptor": "weathered monolith pillar"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-monolith-a.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-monolith-a.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:fc0c3f36da73aa720005d3a2550c427aabae724f14145aa3e31be9002dd64641:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+          "sourceNodeName": "Monolith A",
+          "visualLocalBounds": {
+            "min": [
+              -0.7099999785423279,
+              -0.5,
+              -0.5
+            ],
+            "max": [
+              0.7099999785423279,
+              0.6399999856948853,
+              0.5400000214576721
+            ],
+            "size": [
+              1.4199999570846558,
+              1.1399999856948853,
+              1.0400000214576721
+            ],
+            "center": [
+              0,
+              0.06999999284744263,
+              0.02000001072883606
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.7099999785423279,
+              -0.5,
+              -0.5
+            ],
+            "max": [
+              0.7099999785423279,
+              0.6399999856948853,
+              0.5400000214576721
+            ],
+            "size": [
+              1.4199999570846558,
+              1.1399999856948853,
+              1.0400000214576721
+            ],
+            "center": [
+              0,
+              0.06999999284744263,
+              0.02000001072883606
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 60,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-monolith-b",
       "name": "Monolith B",
       "kind": "prefab",
-      "position": [7.2, 4.28, 58.54],
-      "rotation": [0, 0, 0],
-      "scale": [1.5, 9.2, 1.2],
+      "position": [
+        7.2,
+        4.28,
+        58.54
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.5,
+        9.2,
+        1.2
+      ],
       "visible": true,
       "prefab": {
         "type": "wasteland-monolith"
@@ -1441,22 +4891,128 @@
         "descriptor": "weathered monolith pillar"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-monolith-b.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-monolith-b.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:e3858017f51ef3e34699792bb5412cf160bac77b606c32fbe6bb7e351d6075b4:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+          "sourceNodeName": "Monolith B",
+          "visualLocalBounds": {
+            "min": [
+              -0.7099999785423279,
+              -0.5,
+              -0.5
+            ],
+            "max": [
+              0.7099999785423279,
+              0.6399999856948853,
+              0.5400000214576721
+            ],
+            "size": [
+              1.4199999570846558,
+              1.1399999856948853,
+              1.0400000214576721
+            ],
+            "center": [
+              0,
+              0.06999999284744263,
+              0.02000001072883606
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.7099999785423279,
+              -0.5,
+              -0.5
+            ],
+            "max": [
+              0.7099999785423279,
+              0.6399999856948853,
+              0.5400000214576721
+            ],
+            "size": [
+              1.4199999570846558,
+              1.1399999856948853,
+              1.0400000214576721
+            ],
+            "center": [
+              0,
+              0.06999999284744263,
+              0.02000001072883606
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 60,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-monolith-c",
       "name": "Monolith C",
       "kind": "prefab",
-      "position": [-2.4, 2.78, 62.04],
-      "rotation": [0, 0, 0],
-      "scale": [0.9, 6.2, 0.9],
+      "position": [
+        -2.4,
+        2.78,
+        62.04
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9,
+        6.2,
+        0.9
+      ],
       "visible": true,
       "prefab": {
         "type": "wasteland-monolith"
@@ -1465,22 +5021,128 @@
         "descriptor": "weathered monolith pillar"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-monolith-c.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-monolith-c.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:afd3f14ec7bdc746c2c647363e4ec7645659e6f0fd2dd27ed59fd379af3fef0f:0892cfd5256b07cb6803bebef4d42ee86bf3ccea88861adabd41e9aa5eac02d4:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-monolith/wasteland-monolith.glb",
+          "sourceNodeName": "Monolith C",
+          "visualLocalBounds": {
+            "min": [
+              -0.7099999785423279,
+              -0.5,
+              -0.5
+            ],
+            "max": [
+              0.7099999785423279,
+              0.6399999856948853,
+              0.5400000214576721
+            ],
+            "size": [
+              1.4199999570846558,
+              1.1399999856948853,
+              1.0400000214576721
+            ],
+            "center": [
+              0,
+              0.06999999284744263,
+              0.02000001072883606
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -0.7099999785423279,
+              -0.5,
+              -0.5
+            ],
+            "max": [
+              0.7099999785423279,
+              0.6399999856948853,
+              0.5400000214576721
+            ],
+            "size": [
+              1.4199999570846558,
+              1.1399999856948853,
+              1.0400000214576721
+            ],
+            "center": [
+              0,
+              0.06999999284744263,
+              0.02000001072883606
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 60,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-broken-ring",
       "name": "Broken Ring",
       "kind": "prefab",
-      "position": [2.8, 3.78, 56.44],
-      "rotation": [0.28, 0.45, 0],
-      "scale": [1, 1, 1],
+      "position": [
+        2.8,
+        3.78,
+        56.44
+      ],
+      "rotation": [
+        0.28,
+        0.45,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
       "visible": true,
       "prefab": {
         "type": "broken-ring"
@@ -1489,22 +5151,128 @@
         "descriptor": "broken ancient stone ring ruin"
       },
       "collision": {
-        "shape": "cuboid",
-        "enabled": true,
+        "mode": "auto",
+        "intent": "blocker",
+        "channel": "worldStatic",
+        "quality": "simplifiedMesh",
         "friction": 0.7,
         "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
+        "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-broken-ring.collider.glb",
+        "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-broken-ring.collider.meta.json",
+        "colliderCacheKey": "mesh-collision-manager-v1:4391139b734ad56f9b5f59d74f5caff18244cd68e4e42da589018d90c6eee135:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+        "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+        "assetLocalTransform": {
+          "schemaVersion": 1,
+          "coordinateSpaceVersion": 1,
+          "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/broken-ring/broken-ring.glb",
+          "sourceNodeName": "Broken Ring",
+          "visualLocalBounds": {
+            "min": [
+              -2.8499999046325684,
+              0,
+              -0.24373197555541992
+            ],
+            "max": [
+              2.8499999046325684,
+              2.8499999046325684,
+              0.24373197555541992
+            ],
+            "size": [
+              5.699999809265137,
+              2.8499999046325684,
+              0.48746395111083984
+            ],
+            "center": [
+              0,
+              1.4249999523162842,
+              0
+            ]
+          },
+          "colliderLocalBounds": {
+            "min": [
+              -2.8499999046325684,
+              0,
+              -0.24373197555541992
+            ],
+            "max": [
+              2.8499999046325684,
+              2.8499999046325684,
+              0.24373197555541992
+            ],
+            "size": [
+              5.699999809265137,
+              2.8499999046325684,
+              0.48746395111083984
+            ],
+            "center": [
+              0,
+              1.4249999523162842,
+              0
+            ]
+          },
+          "visualToPhysicsMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "visualToPhysicsLocalMatrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "triangleCount": 784,
         "sensor": false,
-        "intent": "blocker",
-        "channel": "worldStatic"
+        "maxTriangles": 5000
       }
     },
     {
       "id": "sci-fi-barrel",
       "name": "Wasteland Barrel",
       "kind": "asset",
-      "position": [5.4, -0.3, 48.44],
-      "rotation": [0, -0.6, 0],
-      "scale": [0.001, 0.001, 0.001],
+      "position": [
+        5.4,
+        -0.3,
+        48.44
+      ],
+      "rotation": [
+        0,
+        -0.6,
+        0
+      ],
+      "scale": [
+        0.001,
+        0.001,
+        0.001
+      ],
       "visible": true,
       "asset": {
         "url": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf"
@@ -1513,16 +5281,19 @@
         "descriptor": "Wasteland Barrel"
       },
       "collision": {
-        "shape": "trimesh",
-        "enabled": true,
-        "friction": 0.7,
-        "restitution": 0,
-        "sensor": false,
+        "mode": "auto",
         "intent": "blocker",
         "channel": "worldStatic",
+        "quality": "simplifiedMesh",
+        "maxTriangles": 20000,
+        "friction": 0.7,
+        "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.meta.json",
-        "triangleBudget": 20000,
+        "colliderCacheKey": "mesh-collision-manager-v1:e084945dedd6a3379c6f3e97842cac89df7169797707e123a5e5b42c135d6888:2046b0a7205c6bb54729aadf507bbaba73b76ad819d001ea4fbf1d98bb81cf6f:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "sourceAssetUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1530,48 +5301,108 @@
           "sourceNodeName": "Wasteland Barrel",
           "visualLocalBounds": {
             "min": [
-              -0.2815175950527191, -0.006614277604967356, -0.28151750564575195
+              -0.2815175950527191,
+              -0.006614277604967356,
+              -0.28151750564575195
             ],
             "max": [
-              0.28151753544807434, 0.8733857274055481, 0.28151771426200867
+              0.28151753544807434,
+              0.8733857274055481,
+              0.28151771426200867
             ],
             "size": [
-              0.5630351305007935, 0.8800000050105155, 0.5630352199077606
+              0.5630351305007935,
+              0.8800000050105155,
+              0.5630352199077606
             ],
             "center": [
-              -2.9802322387695312e-8, 0.43338572490029037, 1.043081283569336e-7
+              -2.9802322387695312e-8,
+              0.43338572490029037,
+              1.043081283569336e-7
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.2815175950527191, -0.006614277604967356, -0.28151750564575195
+              -0.2815175950527191,
+              -0.006614277604967356,
+              -0.28151750564575195
             ],
             "max": [
-              0.28151753544807434, 0.8733857274055481, 0.28151771426200867
+              0.28151753544807434,
+              0.8733857274055481,
+              0.28151771426200867
             ],
             "size": [
-              0.5630351305007935, 0.8800000050105155, 0.5630352199077606
+              0.5630351305007935,
+              0.8800000050105155,
+              0.5630352199077606
             ],
             "center": [
-              -2.9802322387695312e-8, 0.43338572490029037, 1.043081283569336e-7
+              -2.9802322387695312e-8,
+              0.43338572490029037,
+              1.043081283569336e-7
             ]
           },
           "visualToPhysicsMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ],
           "visualToPhysicsLocalMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ]
-        }
+        },
+        "triangleCount": 2682,
+        "sensor": false
       }
     },
     {
       "id": "sci-fi-barrier",
       "name": "Concrete Barrier",
       "kind": "asset",
-      "position": [-5.8, -0.3, 54.64],
-      "rotation": [0, 0.35, 0],
-      "scale": [0.00108, 0.00108, 0.00108],
+      "position": [
+        -5.8,
+        -0.3,
+        54.64
+      ],
+      "rotation": [
+        0,
+        0.35,
+        0
+      ],
+      "scale": [
+        0.00108,
+        0.00108,
+        0.00108
+      ],
       "visible": true,
       "asset": {
         "url": "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf"
@@ -1580,16 +5411,19 @@
         "descriptor": "Concrete Barrier"
       },
       "collision": {
-        "shape": "trimesh",
-        "enabled": true,
-        "friction": 0.7,
-        "restitution": 0,
-        "sensor": false,
+        "mode": "auto",
         "intent": "blocker",
         "channel": "worldStatic",
+        "quality": "simplifiedMesh",
+        "maxTriangles": 20000,
+        "friction": 0.7,
+        "restitution": 0,
+        "lodTier": "source",
+        "shape": "trimesh",
         "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrier.collider.glb",
         "colliderMetadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrier.collider.meta.json",
-        "triangleBudget": 20000,
+        "colliderCacheKey": "mesh-collision-manager-v1:52d13b5105ce861db5dd1413a1a924ad5594dee5a8eb37dbe1a9df441fcd7caf:fd03f64338ca0560e7390b6fb954dfc198943f450c2ae67f1a336ec07b0af4a5:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
+        "sourceAssetUrl": "/models/polyhaven/concrete_road_barrier_02/concrete_road_barrier_02_1k.gltf",
         "assetLocalTransform": {
           "schemaVersion": 1,
           "coordinateSpaceVersion": 1,
@@ -1597,39 +5431,87 @@
           "sourceNodeName": "Concrete Barrier",
           "visualLocalBounds": {
             "min": [
-              -0.7761769890785217, -0.0027944163884967566, -0.2540489733219147
+              -0.7761769890785217,
+              -0.0027944163884967566,
+              -0.2540489733219147
             ],
             "max": [
-              0.7892323732376099, 1.1091585159301758, 0.18809300661087036
+              0.7892323732376099,
+              1.1091585159301758,
+              0.18809300661087036
             ],
             "size": [
-              1.5654093623161316, 1.1119529323186725, 0.44214197993278503
+              1.5654093623161316,
+              1.1119529323186725,
+              0.44214197993278503
             ],
             "center": [
-              0.006527692079544067, 0.5531820497708395, -0.032977983355522156
+              0.006527692079544067,
+              0.5531820497708395,
+              -0.032977983355522156
             ]
           },
           "colliderLocalBounds": {
             "min": [
-              -0.7761769890785217, -0.0027944163884967566, -0.2540489733219147
+              -0.775051474571228,
+              -0.0027944163884967566,
+              -0.2540489733219147
             ],
             "max": [
-              0.7892323732376099, 1.1091585159301758, 0.18809300661087036
+              0.7887017130851746,
+              1.1083526611328125,
+              0.18809300661087036
             ],
             "size": [
-              1.5654093623161316, 1.1119529323186725, 0.44214197993278503
+              1.5637531876564026,
+              1.1111470775213093,
+              0.44214197993278503
             ],
             "center": [
-              0.006527692079544067, 0.5531820497708395, -0.032977983355522156
+              0.006825119256973267,
+              0.5527791223721579,
+              -0.032977983355522156
             ]
           },
           "visualToPhysicsMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ],
           "visualToPhysicsLocalMatrix": [
-            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
           ]
-        }
+        },
+        "triangleCount": 4748,
+        "sensor": false
       }
     }
   ]

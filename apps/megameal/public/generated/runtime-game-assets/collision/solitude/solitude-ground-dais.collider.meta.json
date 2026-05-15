@@ -1,7 +1,8 @@
 {
-  "schemaVersion": 2,
-  "generatedBy": "bake-mesh-collider",
-  "generatedAt": "2026-05-13T18:40:12.802Z",
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:28:42.604Z",
+  "generatorVersion": "mesh-collision-manager-v1",
   "sourceLevelId": "solitude",
   "sourceActorId": "solitude-ground-dais",
   "sourceAssetUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
@@ -13,28 +14,29 @@
   "colliderUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.meta.json",
-  "triangleCount": 11400,
-  "vertexCount": 11036,
+  "colliderCacheKey": "mesh-collision-manager-v1:e68a3b4987c59e03667e641decde57d5039206d2b7322ec11b475df729d03580:34b339f63c9a9eb28c8e9bcdb82f80f6d29b79c1c852b3671d5f38820e1b4ed0:d7126a84503a79acc2b85e9d7dde4fda53d7eceb20271e49be0ad434841ae978",
+  "triangleCount": 4750,
+  "vertexCount": 5376,
   "bounds": {
     "min": [
-      -0.9581931829452515,
-      -0.9518071413040161,
-      -0.9956570267677307
+      -0.955689549446106,
+      -0.9478588104248047,
+      -0.9953939318656921
     ],
     "max": [
-      0.9329316020011902,
+      0.9321647882461548,
       0.9272300004959106,
-      0.9679255485534668
+      0.9637094140052795
     ],
     "size": [
-      1.8911247849464417,
-      1.8790371417999268,
-      1.9635825753211975
+      1.8878543376922607,
+      1.8750888109207153,
+      1.9591033458709717
     ],
     "center": [
-      -0.01263079047203064,
-      -0.012288570404052734,
-      -0.013865739107131958
+      -0.011762380599975586,
+      -0.010314404964447021,
+      -0.0158422589302063
     ]
   },
   "visualLocalBounds": {
@@ -61,24 +63,24 @@
   },
   "colliderLocalBounds": {
     "min": [
-      -0.9581931829452515,
-      -0.9518071413040161,
-      -0.9956570267677307
+      -0.955689549446106,
+      -0.9478588104248047,
+      -0.9953939318656921
     ],
     "max": [
-      0.9329316020011902,
+      0.9321647882461548,
       0.9272300004959106,
-      0.9679255485534668
+      0.9637094140052795
     ],
     "size": [
-      1.8911247849464417,
-      1.8790371417999268,
-      1.9635825753211975
+      1.8878543376922607,
+      1.8750888109207153,
+      1.9591033458709717
     ],
     "center": [
-      -0.01263079047203064,
-      -0.012288570404052734,
-      -0.013865739107131958
+      -0.011762380599975586,
+      -0.010314404964447021,
+      -0.0158422589302063
     ]
   },
   "assetLocalTransform": {
@@ -110,24 +112,24 @@
     },
     "colliderLocalBounds": {
       "min": [
-        -0.9581931829452515,
-        -0.9518071413040161,
-        -0.9956570267677307
+        -0.955689549446106,
+        -0.9478588104248047,
+        -0.9953939318656921
       ],
       "max": [
-        0.9329316020011902,
+        0.9321647882461548,
         0.9272300004959106,
-        0.9679255485534668
+        0.9637094140052795
       ],
       "size": [
-        1.8911247849464417,
-        1.8790371417999268,
-        1.9635825753211975
+        1.8878543376922607,
+        1.8750888109207153,
+        1.9591033458709717
       ],
       "center": [
-        -0.01263079047203064,
-        -0.012288570404052734,
-        -0.013865739107131958
+        -0.011762380599975586,
+        -0.010314404964447021,
+        -0.0158422589302063
       ]
     },
     "visualToPhysicsMatrix": [
@@ -183,24 +185,73 @@
       "sourceAssetUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
       "intent": "walkable",
       "channel": "worldStatic",
-      "triangleBudget": 12000,
+      "triangleBudget": 5000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-13T18:40:12.802Z"
+    "generatedAt": "2026-05-14T21:28:42.604Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "walkable",
     "channel": "worldStatic",
-    "triangleBudget": 12000
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "solitude-ground-dais",
+    "mode": "auto",
+    "productId": "solitude-ground-dais:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "generatedAt": "2026-05-14T21:28:42.604Z",
+    "sourceKind": "asset",
+    "sourceMeshUrl": "/generated/hunyuan3d/ruin-dais/ruin-dais-generated-2026-04-19T23-21-06-179Z.glb",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "e68a3b4987c59e03667e641decde57d5039206d2b7322ec11b475df729d03580"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "34b339f63c9a9eb28c8e9bcdb82f80f6d29b79c1c852b3671d5f38820e1b4ed0"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "d7126a84503a79acc2b85e9d7dde4fda53d7eceb20271e49be0ad434841ae978"
+    },
+    "shape": "trimesh",
+    "artifactUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/solitude/solitude-ground-dais.collider.meta.json",
+    "localBounds": {
+      "min": [
+        -0.955689549446106,
+        -0.9478588104248047,
+        -0.9953939318656921
+      ],
+      "max": [
+        0.9321647882461548,
+        0.9272300004959106,
+        0.9637094140052795
+      ],
+      "size": [
+        1.8878543376922607,
+        1.8750888109207153,
+        1.9591033458709717
+      ],
+      "center": [
+        -0.011762380599975586,
+        -0.010314404964447021,
+        -0.0158422589302063
+      ]
+    },
+    "triangleCount": 4750,
+    "vertexCount": 5376,
+    "triangleBudget": 5000
   },
   "simplification": {
     "requested": true,
     "applied": true,
     "sourceTriangleCount": 50000,
-    "targetTriangleBudget": 12000,
-    "ratio": 0.22799999999999998,
+    "targetTriangleBudget": 5000,
+    "ratio": 0.095,
     "tool": "gltf-transform",
     "prepass": "weld",
     "error": 0.05

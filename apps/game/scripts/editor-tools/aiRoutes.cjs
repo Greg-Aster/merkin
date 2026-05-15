@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { createHash } = require('crypto');
 
 function readRequestBody(req, callback) {
   let body = '';
@@ -12,6 +13,39 @@ function readRequestBody(req, callback) {
 function sendJson(res, status, payload) {
   res.writeHead(status, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(payload));
+}
+
+function queryFlag(value) {
+  return value === true || value === '1' || value === 'true' || value === 'yes';
+}
+
+function stableJson(value) {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
+  if (value && typeof value === 'object') {
+    return `{${Object.entries(value)
+      .filter(([, item]) => item !== undefined)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, item]) => `${JSON.stringify(key)}:${stableJson(item)}`)
+      .join(',')}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function fingerprintObject(value) {
+  return {
+    algorithm: 'sha256',
+    value: createHash('sha256').update(stableJson(value)).digest('hex'),
+  };
+}
+
+function fingerprintFile(filePath) {
+  if (!filePath || !fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+    return null;
+  }
+  return {
+    algorithm: 'sha256',
+    value: createHash('sha256').update(fs.readFileSync(filePath)).digest('hex'),
+  };
 }
 
 async function handleAiRoutes(req, res, route, context) {
@@ -75,7 +109,9 @@ async function handleAiRoutes(req, res, route, context) {
       const apiUrl = parsedUrl.query.apiUrl || `http://127.0.0.1:${DEFAULT_HUNYUAN_PORT}`;
       const comfyUiApiUrl = parsedUrl.query.comfyUiApiUrl || `http://127.0.0.1:${DEFAULT_COMFYUI_PORT}`;
       const ensure = parsedUrl.query.ensure === '1';
-      const status = await getHunyuanBackendStatus(apiUrl, comfyUiApiUrl, ensure);
+      const lowVram =
+        queryFlag(parsedUrl.query.lowVram) || queryFlag(parsedUrl.query.comfyUiLowVramMode);
+      const status = await getHunyuanBackendStatus(apiUrl, comfyUiApiUrl, ensure, { lowVram });
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true, status }));
     } catch (error) {
@@ -90,8 +126,10 @@ async function handleAiRoutes(req, res, route, context) {
     try {
       const apiUrl = parsedUrl.query.apiUrl || `http://127.0.0.1:${DEFAULT_COMFYUI_PORT}`;
       const ensure = parsedUrl.query.ensure === '1';
+      const lowVram =
+        queryFlag(parsedUrl.query.lowVram) || queryFlag(parsedUrl.query.comfyUiLowVramMode);
       const status = ensure
-        ? await ensureComfyUiServer(apiUrl)
+        ? await ensureComfyUiServer(apiUrl, { lowVram })
         : await getComfyUiHealth(apiUrl);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true, status }));
@@ -235,6 +273,8 @@ async function handleAiRoutes(req, res, route, context) {
           prompt = '',
           referenceImageUrl = '',
           workflowPath = '',
+          comfyUiLowVramMode = false,
+          lowVram = false,
           faceCount,
         } = JSON.parse(body);
 
@@ -256,9 +296,15 @@ async function handleAiRoutes(req, res, route, context) {
               supportsTextureWrap: false,
               supportsReplacementGeneration: true,
             };
+        const lowVramMode = queryFlag(comfyUiLowVramMode) || queryFlag(lowVram);
         let referenceUrl = referenceImageUrl || inspection.detectedReferenceImageUrl;
         let referencePath = referenceUrl ? resolvePublicAssetPath(referenceUrl) : '';
-        const serverState = await getHunyuanBackendStatus(apiUrl, comfyUiApiUrl, true);
+        const sourceAssetFingerprint = inspection.assetPath
+          ? fingerprintFile(inspection.assetPath)
+          : null;
+        const serverState = await getHunyuanBackendStatus(apiUrl, comfyUiApiUrl, true, {
+          lowVram: lowVramMode,
+        });
         if (!serverState.available) {
           res.writeHead(503, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({
@@ -451,16 +497,26 @@ async function handleAiRoutes(req, res, route, context) {
             JSON.stringify(
               {
                 sourceAssetUrl: assetUrl,
+                sourceAssetFingerprint,
                 sourceName: sourceName || inspection.assetName,
                 sourceReferenceImageUrl: referenceUrl || null,
                 backend: 'comfyui',
                 apiUrl: serverState.apiUrl,
                 comfyUiRoot,
+                comfyUiLowVramMode: lowVramMode,
                 promptId,
                 prompt: prompt.trim() || null,
                 mode,
                 shapeModel: chosenShapeModel,
                 paintModel: chosenPaintModel,
+                styleSettingsFingerprint: fingerprintObject({
+                  backend: 'comfyui',
+                  mode,
+                  prompt: prompt.trim() || null,
+                  referenceImageUrl: referenceUrl || null,
+                  shapeModel: chosenShapeModel,
+                  paintModel: chosenPaintModel,
+                }),
                 generatedAt: new Date().toISOString(),
               },
               null,
@@ -569,12 +625,21 @@ async function handleAiRoutes(req, res, route, context) {
           JSON.stringify(
             {
               sourceAssetUrl: assetUrl,
+              sourceAssetFingerprint,
               sourceName: sourceName || inspection.assetName,
               sourceReferenceImageUrl: referenceUrl || null,
               apiUrl: resolvedApiUrl,
               autoStartedServer: serverState.autoStarted,
+              comfyUiLowVramMode: lowVramMode,
               prompt: prompt.trim() || null,
               mode,
+              styleSettingsFingerprint: fingerprintObject({
+                backend: 'hunyuan-api',
+                mode,
+                prompt: prompt.trim() || null,
+                referenceImageUrl: referenceUrl || null,
+                apiUrl: resolvedApiUrl,
+              }),
               generatedAt: new Date().toISOString(),
             },
             null,

@@ -1,0 +1,299 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-15T02:10:41.250Z",
+  "generatorVersion": "mesh-collision-manager-v2",
+  "sourceLevelId": "yggdrasil",
+  "sourceActorId": "yggdrasil-arrival-arch",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "8a17ad979b9128655a6f2494f5365f3eedb5e30afa82052af4a420250fddfbf0"
+  },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148"
+  },
+  "lodSourceTier": "low",
+  "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-arch.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-arch.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-arch.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v2:f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148:bffd2fc67e3a14680f60fb9753764b5fe55ddc3dfbdf593963ddc9c567262c86:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "triangleCount": 1043,
+  "vertexCount": 756,
+  "bounds": {
+    "min": [
+      -1.6200000047683716,
+      -1.6200000047683716,
+      -1.4408957958221436
+    ],
+    "max": [
+      1.6200000047683716,
+      1.6213747262954712,
+      1.20192289352417
+    ],
+    "size": [
+      3.240000009536743,
+      3.2413747310638428,
+      2.6428186893463135
+    ],
+    "center": [
+      0,
+      0.0006873607635498047,
+      -0.11948645114898682
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -32767,
+      -32767,
+      -32767
+    ],
+    "max": [
+      32767,
+      32767,
+      32767
+    ],
+    "size": [
+      65534,
+      65534,
+      65534
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -1.6200000047683716,
+      -1.6200000047683716,
+      -1.4408957958221436
+    ],
+    "max": [
+      1.6200000047683716,
+      1.6213747262954712,
+      1.20192289352417
+    ],
+    "size": [
+      3.240000009536743,
+      3.2413747310638428,
+      2.6428186893463135
+    ],
+    "center": [
+      0,
+      0.0006873607635498047,
+      -0.11948645114898682
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -1.6200000047683716,
+      -1.6200000047683716,
+      -1.4408957958221436
+    ],
+    "max": [
+      1.6200000047683716,
+      1.6213747262954712,
+      1.20192289352417
+    ],
+    "size": [
+      3.240000009536743,
+      3.2413747310638428,
+      2.6428186893463135
+    ],
+    "center": [
+      0,
+      0.0006873607635498047,
+      -0.11948645114898682
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+    "sourceNodeName": "Bifrost Gate",
+    "visualLocalBounds": {
+      "min": [
+        -1.6200000047683716,
+        -1.6200000047683716,
+        -1.4408957958221436
+      ],
+      "max": [
+        1.6200000047683716,
+        1.6213747262954712,
+        1.20192289352417
+      ],
+      "size": [
+        3.240000009536743,
+        3.2413747310638428,
+        2.6428186893463135
+      ],
+      "center": [
+        0,
+        0.0006873607635498047,
+        -0.11948645114898682
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -1.6200000047683716,
+        -1.6200000047683716,
+        -1.4408957958221436
+      ],
+      "max": [
+        1.6200000047683716,
+        1.6213747262954712,
+        1.20192289352417
+      ],
+      "size": [
+        3.240000009536743,
+        3.2413747310638428,
+        2.6428186893463135
+      ],
+      "center": [
+        0,
+        0.0006873607635498047,
+        -0.11948645114898682
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "yggdrasil-arrival-arch",
+    "sourceActorName": "Bifrost Gate",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "8a17ad979b9128655a6f2494f5365f3eedb5e30afa82052af4a420250fddfbf0"
+    },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148"
+    },
+    "lodSourceTier": "low",
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "yggdrasil",
+      "nodeId": "yggdrasil-arrival-arch",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.low.glb",
+      "lodSourceTier": "low",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-15T02:10:41.250Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
+  },
+  "collisionProduct": {
+    "actorId": "yggdrasil-arrival-arch",
+    "cacheKey": "mesh-collision-manager-v2:f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148:bffd2fc67e3a14680f60fb9753764b5fe55ddc3dfbdf593963ddc9c567262c86:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+    "mode": "auto",
+    "productId": "yggdrasil-arrival-arch:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v2",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "f85d9740a226014ed36ccfb7d991c11c2456e24cf966b57a979ef12dd2b77148"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "bffd2fc67e3a14680f60fb9753764b5fe55ddc3dfbdf593963ddc9c567262c86"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -1.6200000047683716,
+        -1.6200000047683716,
+        -1.4408957958221436
+      ],
+      "max": [
+        1.6200000047683716,
+        1.6213747262954712,
+        1.20192289352417
+      ],
+      "size": [
+        3.240000009536743,
+        3.2413747310638428,
+        2.6428186893463135
+      ],
+      "center": [
+        0,
+        0.0006873607635498047,
+        -0.11948645114898682
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-arch.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-arrival-arch.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.low.glb",
+    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/portal-apparatus/portal-apparatus.glb",
+    "triangleCount": 1043,
+    "vertexCount": 756,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 1043,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

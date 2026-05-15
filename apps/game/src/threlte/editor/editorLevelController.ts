@@ -7,6 +7,7 @@ import type {
 } from '../levels/levelRegistry'
 import { createDefaultSceneForLevel } from './defaultScenes'
 import { stripEditorSceneRuntimeData } from './editorPersistence'
+import { sanitizeEditorNodeCollisionPolicy } from './editorCollisionLifecycle'
 import {
   EDITOR_PUBLISH_BAKE_STEP_LABELS,
   computeEditorPublishBakePlan,
@@ -173,11 +174,22 @@ export function createEditorLevelController(deps: EditorLevelControllerDeps) {
       deps.createEmptyScene(targetLevelId),
   ) {
     const clonedScene = structuredClone(sourceScene) as EditorSceneDocument
+    const sanitizedScene = {
+      ...clonedScene,
+      nodes: (clonedScene.nodes ?? []).map(node =>
+        node.collision
+          ? {
+              ...node,
+              collision: sanitizeEditorNodeCollisionPolicy(node.collision),
+            }
+          : node,
+      ),
+    }
 
     return stripEditorSceneRuntimeData(
       assertValidEditorSceneDocument(
         withEditorSceneEngineData({
-          ...clonedScene,
+          ...sanitizedScene,
           levelId: targetLevelId,
           updatedAt: new Date().toISOString(),
         }),

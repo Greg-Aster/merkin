@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-05-14T23:56:35.668Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "Hvergelmir Basin Root Shrine",
+  "sourceAssetUrl": "/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/growth-planter-b/growth-planter-b-generated-2026-04-18T01-36-15-986Z.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/hvergelmir-basin-root-shrine-2026-05-14T23-54-50-721Z/source/hvergelmir-basin-root-shrine.glb",
+  "prompt": "object: decorative sacred planter or root shrine object placed near a mythic well. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/hvergelmir-basin-root-shrine-reference-2026-05-14T23-56-35-661Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/hvergelmir-basin-root-shrine-2026-05-14T23-54-50-721Z/reference/hvergelmir-basin-root-shrine-reference-2026-05-14T23-56-35-661Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/hvergelmir-basin-root-shrine-reference-2026-05-14T23-56-35-661Z.png"
+}

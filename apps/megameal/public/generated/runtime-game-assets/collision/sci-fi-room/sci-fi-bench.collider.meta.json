@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:37:05.067Z",
+  "generatorVersion": "mesh-collision-manager-v1",
+  "sourceLevelId": "sci-fi-room",
+  "sourceActorId": "sci-fi-bench",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "fe469e93caa54a9faa5e3b0cfdf2437a79e1bedab368e59c5dc299acead2325a"
+  },
+  "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-bench.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-bench.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-bench.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:fe469e93caa54a9faa5e3b0cfdf2437a79e1bedab368e59c5dc299acead2325a:9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5:e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487",
+  "triangleCount": 872,
+  "vertexCount": 717,
+  "bounds": {
+    "min": [
+      -1.3949999809265137,
+      -1.3949999809265137,
+      -0.675000011920929
+    ],
+    "max": [
+      1.3949999809265137,
+      1.600000023841858,
+      0.30000001192092896
+    ],
+    "size": [
+      2.7899999618530273,
+      2.9950000047683716,
+      0.9750000238418579
+    ],
+    "center": [
+      0,
+      0.10250002145767212,
+      -0.1875
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -1.3949999809265137,
+      -1.3949999809265137,
+      -0.675000011920929
+    ],
+    "max": [
+      1.3949999809265137,
+      1.600000023841858,
+      0.30000001192092896
+    ],
+    "size": [
+      2.7899999618530273,
+      2.9950000047683716,
+      0.9750000238418579
+    ],
+    "center": [
+      0,
+      0.10250002145767212,
+      -0.1875
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -1.3949999809265137,
+      -1.3949999809265137,
+      -0.675000011920929
+    ],
+    "max": [
+      1.3949999809265137,
+      1.600000023841858,
+      0.30000001192092896
+    ],
+    "size": [
+      2.7899999618530273,
+      2.9950000047683716,
+      0.9750000238418579
+    ],
+    "center": [
+      0,
+      0.10250002145767212,
+      -0.1875
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+    "sourceNodeName": "Bench Growth",
+    "visualLocalBounds": {
+      "min": [
+        -1.3949999809265137,
+        -1.3949999809265137,
+        -0.675000011920929
+      ],
+      "max": [
+        1.3949999809265137,
+        1.600000023841858,
+        0.30000001192092896
+      ],
+      "size": [
+        2.7899999618530273,
+        2.9950000047683716,
+        0.9750000238418579
+      ],
+      "center": [
+        0,
+        0.10250002145767212,
+        -0.1875
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -1.3949999809265137,
+        -1.3949999809265137,
+        -0.675000011920929
+      ],
+      "max": [
+        1.3949999809265137,
+        1.600000023841858,
+        0.30000001192092896
+      ],
+      "size": [
+        2.7899999618530273,
+        2.9950000047683716,
+        0.9750000238418579
+      ],
+      "center": [
+        0,
+        0.10250002145767212,
+        -0.1875
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "sci-fi-bench",
+    "sourceActorName": "Bench Growth",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "fe469e93caa54a9faa5e3b0cfdf2437a79e1bedab368e59c5dc299acead2325a"
+    },
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "sci-fi-room",
+      "nodeId": "sci-fi-bench",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-14T21:37:05.067Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "sci-fi-bench",
+    "mode": "auto",
+    "productId": "sci-fi-bench:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "fe469e93caa54a9faa5e3b0cfdf2437a79e1bedab368e59c5dc299acead2325a"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "9ff04ed8087833e195da06f1aaf6453bcc2df1da7579d11f64e8e90429a9baf5"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "e2042c11fce5786c0f93f0be12c5fb459307f05ab03751d9498ec92b6df9c487"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -1.3949999809265137,
+        -1.3949999809265137,
+        -0.675000011920929
+      ],
+      "max": [
+        1.3949999809265137,
+        1.600000023841858,
+        0.30000001192092896
+      ],
+      "size": [
+        2.7899999618530273,
+        2.9950000047683716,
+        0.9750000238418579
+      ],
+      "center": [
+        0,
+        0.10250002145767212,
+        -0.1875
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-bench.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-bench.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/bench-growth/bench-growth.glb",
+    "generatedAt": "2026-05-14T21:37:05.067Z",
+    "triangleCount": 872,
+    "vertexCount": 717,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 872,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

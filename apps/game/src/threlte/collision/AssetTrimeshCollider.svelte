@@ -19,12 +19,12 @@ import {
 export let levelId = ''
 export let url = ''
 export let metadataUrl = ''
+export let cacheKey = ''
 export let assetLocalTransform: AssetLocalTransformMetadata | null = null
 export let friction = 0.7
 export let restitution = 0
 export let sensor = false
 export let collisionGroups: number | undefined = undefined
-export let scale: [number, number, number] = [1, 1, 1]
 
 let patches: MeshColliderPatch[] = []
 let disposed = false
@@ -38,11 +38,26 @@ function unregisterLoadedCollider() {
   registeredColliderUrl = ''
 }
 
+function getCanonicalUrl(nextUrl: string) {
+  return nextUrl.split('?')[0] ?? nextUrl
+}
+
 function registerLoadedCollider(nextUrl: string) {
-  if (!levelId || !nextUrl || registeredColliderUrl === nextUrl) return
+  const canonicalUrl = getCanonicalUrl(nextUrl)
+  if (!levelId || !canonicalUrl || registeredColliderUrl === canonicalUrl) {
+    return
+  }
   unregisterLoadedCollider()
-  registeredColliderUrl = nextUrl
-  markRuntimeColliderUrlLoaded(levelId, nextUrl)
+  registeredColliderUrl = canonicalUrl
+  markRuntimeColliderUrlLoaded(levelId, canonicalUrl)
+}
+
+function withCacheKey(nextUrl: string, nextCacheKey: string) {
+  const normalizedUrl = nextUrl.trim()
+  const normalizedCacheKey = nextCacheKey.trim()
+  if (!normalizedUrl || !normalizedCacheKey) return normalizedUrl
+  const separator = normalizedUrl.includes('?') ? '&' : '?'
+  return `${normalizedUrl}${separator}collisionRevision=${encodeURIComponent(normalizedCacheKey)}`
 }
 
 async function loadColliderPatches(
@@ -81,7 +96,6 @@ async function loadColliderPatches(
 
     patches = buildAssetTrimeshColliderPatches(gltf.scene, {
       assetLocalTransform: metadataValidation.metadata,
-      scale,
     })
     if (patches.length > 0) {
       registerLoadedCollider(nextUrl)
@@ -104,12 +118,17 @@ async function loadColliderPatches(
 $: inlineMatrix =
   assetLocalTransform?.visualToPhysicsLocalMatrix ??
   assetLocalTransform?.visualToPhysicsMatrix
-$: scaleKey = JSON.stringify(scale)
-$: loadKey = `${url}|${metadataUrl}|${inlineMatrix ? JSON.stringify(inlineMatrix) : ''}|${scaleKey}`
-$: if (url && loadKey !== loadedKey) {
+$: resolvedUrl = withCacheKey(url, cacheKey)
+$: resolvedMetadataUrl = withCacheKey(metadataUrl, cacheKey)
+$: loadKey = `${resolvedUrl}|${resolvedMetadataUrl}|${inlineMatrix ? JSON.stringify(inlineMatrix) : ''}`
+$: if (resolvedUrl && loadKey !== loadedKey) {
   loadedKey = loadKey
   unregisterLoadedCollider()
-  void loadColliderPatches(url, metadataUrl, assetLocalTransform)
+  void loadColliderPatches(
+    resolvedUrl,
+    resolvedMetadataUrl,
+    assetLocalTransform,
+  )
 }
 
 onDestroy(() => {

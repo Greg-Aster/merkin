@@ -1,0 +1,15 @@
+{
+  "sourceAssetUrl": "/generated/style-lab/sources/shore-ring-2026-05-14T22-44-56-215Z/shore-ring.glb",
+  "sourceName": "Shore Ring",
+  "sourceReferenceImageUrl": "/generated/style-lab/workspace/shore-ring-2026-05-14T22-44-56-336Z/reference/shore-ring-reference-2026-05-14T22-46-59-631Z.png",
+  "backend": "comfyui",
+  "apiUrl": "http://127.0.0.1:8188",
+  "comfyUiRoot": "/home/greggles/ComfyUI",
+  "comfyUiLowVramMode": true,
+  "promptId": "merkin-1778798819672-5xn8y4",
+  "prompt": "object: low circular shoreline perimeter ring made of eroded ritual stone, broad horizontal boundary element at the island edge. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "mode": "texture",
+  "shapeModel": null,
+  "paintModel": "hunyuan3d-paint-v2-0-turbo",
+  "generatedAt": "2026-05-14T22:47:45.650Z"
+}

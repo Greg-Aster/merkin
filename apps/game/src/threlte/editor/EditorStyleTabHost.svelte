@@ -1,9 +1,16 @@
 <script lang="ts">
 import type { EditorSceneNode } from './editorStore'
+import type {
+  EditorStyleBakeBackend,
+  EditorStyleBakeOutputTier,
+  EditorStyleBakeProduct,
+  EditorStyleBakeStatus,
+} from './editorStyleBakeTypes'
 
 export let editorStyleStudioComponent:
   | typeof import('./EditorStyleStudio.svelte').default
   | null = null
+export let workspaceMode: 'generation' | 'bake' = 'generation'
 
 export let styleProfileName = 'Painterly Storybook'
 export let stylePrompt = ''
@@ -22,6 +29,24 @@ export let styleWorkspaceManifestUrl = ''
 export let styleWorkspaceSourceAssetUrl = ''
 export let styleGeneratedReferenceImageUrl = ''
 export let styleSimplifiedAssetUrl = ''
+export let styleBakedAssetUrl = ''
+export let styleBakeBackend: EditorStyleBakeBackend = 'procedural-material'
+export let styleBakeTextureSize = 256
+export let styleBakeLineStrength = 0.35
+export let styleBakeBrushStrength = 0.25
+export let styleBakeAoStrength = 0.8
+export let styleBakeCavityStrength = 0.65
+export let styleBakeCurvatureStrength = 0.45
+export let styleBakeGeometrySimplification = 0
+export let styleBakeOutputTier: EditorStyleBakeOutputTier = 'preview'
+export let styleBakeForceRefresh = false
+export let styleBakeCurrentSourceAssetUrl = ''
+export let styleBakeProduct: EditorStyleBakeProduct | null = null
+export let styleBakeProductStatus: EditorStyleBakeStatus = 'missing'
+export let styleBakeLastError = ''
+export let styleBakeLastSuccessfulAt = ''
+export let styleBakeCanApply = false
+export let styleBakeCanRevert = false
 export let styleBlenderExportPath = ''
 export let styleBlenderOpenCommand = ''
 export let styleBatchBusy = false
@@ -34,6 +59,7 @@ export let runtimeAssetFailures: Array<any> = []
 export let comfyUiStatus = ''
 export let comfyUiBusy = false
 export let comfyUiReady = false
+export let comfyUiLowVramMode = false
 export let hunyuanBackendStatus = ''
 export let hunyuanBusy = false
 export let hunyuanServiceReady = false
@@ -51,6 +77,9 @@ export let onInspectAsset: () => void = () => {}
 export let onApplyStylePreset: (presetId: string) => void = () => {}
 export let onPrepareWorkspace: () => void = () => {}
 export let onSimplifyAsset: () => void = () => {}
+export let onBakeProceduralStyle: () => void = () => {}
+export let onApplyStyleBakePreview: () => void = () => {}
+export let onRevertStyleBakePreview: () => void = () => {}
 export let onExportBlender: () => void = () => {}
 export let onRunRetexture: () => void = () => {}
 export let onRunReimagine: () => void = () => {}
@@ -62,6 +91,8 @@ export let onResumeBatch: () => void = () => {}
 export let onDiscardBatch: () => void = () => {}
 export let onRunBatchRetexture: () => void = () => {}
 export let onRunBatchReimagine: () => void = () => {}
+export let onRunProceduralBatch: (scope: string, force: boolean) => void =
+  () => {}
 export let onToggleBatchCandidate: (
   candidateId: string,
   selected: boolean,
@@ -75,6 +106,7 @@ export let onUpdateBatchDescriptor: (
 {#if editorStyleStudioComponent}
   <svelte:component
     this={editorStyleStudioComponent}
+    {workspaceMode}
     bind:styleProfileName
     bind:stylePrompt
     bind:styleNegativePrompt
@@ -92,6 +124,24 @@ export let onUpdateBatchDescriptor: (
     {styleWorkspaceSourceAssetUrl}
     {styleGeneratedReferenceImageUrl}
     {styleSimplifiedAssetUrl}
+    {styleBakedAssetUrl}
+    bind:styleBakeBackend
+    bind:styleBakeTextureSize
+    bind:styleBakeLineStrength
+    bind:styleBakeBrushStrength
+    bind:styleBakeAoStrength
+    bind:styleBakeCavityStrength
+    bind:styleBakeCurvatureStrength
+    bind:styleBakeGeometrySimplification
+    bind:styleBakeOutputTier
+    bind:styleBakeForceRefresh
+    {styleBakeCurrentSourceAssetUrl}
+    {styleBakeProduct}
+    {styleBakeProductStatus}
+    {styleBakeLastError}
+    {styleBakeLastSuccessfulAt}
+    {styleBakeCanApply}
+    {styleBakeCanRevert}
     {styleBlenderExportPath}
     {styleBlenderOpenCommand}
     {styleBatchBusy}
@@ -104,6 +154,7 @@ export let onUpdateBatchDescriptor: (
     {comfyUiStatus}
     {comfyUiBusy}
     {comfyUiReady}
+    bind:comfyUiLowVramMode
     {hunyuanBackendStatus}
     {hunyuanBusy}
     {hunyuanServiceReady}
@@ -119,6 +170,9 @@ export let onUpdateBatchDescriptor: (
     on:applyStylePreset={(event) => onApplyStylePreset(event.detail.presetId)}
     on:prepareWorkspace={onPrepareWorkspace}
     on:simplifyAsset={onSimplifyAsset}
+    on:bakeProceduralStyle={onBakeProceduralStyle}
+    on:applyStyleBakePreview={onApplyStyleBakePreview}
+    on:revertStyleBakePreview={onRevertStyleBakePreview}
     on:exportBlender={onExportBlender}
     on:runRetexture={onRunRetexture}
     on:runReimagine={onRunReimagine}
@@ -130,6 +184,7 @@ export let onUpdateBatchDescriptor: (
     on:discardBatch={onDiscardBatch}
     on:runBatchRetexture={onRunBatchRetexture}
     on:runBatchReimagine={onRunBatchReimagine}
+    on:runProceduralBatch={(event) => onRunProceduralBatch(event.detail.scope, event.detail.force)}
     on:toggleBatchCandidate={(event) => onToggleBatchCandidate(event.detail.candidateId, event.detail.selected)}
     on:updateBatchDescriptor={(event) => onUpdateBatchDescriptor(event.detail.candidateId, event.detail.descriptor)}
   />

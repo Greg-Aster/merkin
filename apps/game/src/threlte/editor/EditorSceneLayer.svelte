@@ -2,8 +2,13 @@
 import { T } from '@threlte/core'
 import { createEventDispatcher, onDestroy, onMount, tick } from 'svelte'
 import { resolveRuntimePlayerSettings } from '../engine/runtimePlayerSettings'
+import { loadRuntimeSceneDocument } from '../engine/runtimeSceneDocumentLoader'
 import { adaptSceneDocumentToLevelDefinition } from '../engine/sceneAdapter'
-import type { ActorDefinition, LevelDefinition } from '../engine/types'
+import type {
+  ActorDefinition,
+  GeneratedCollisionProduct,
+  LevelDefinition,
+} from '../engine/types'
 import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 import EditorHeightmapSourceOverlay from './EditorHeightmapSourceOverlay.svelte'
 import EditorPlayerSpawnMarker from './EditorPlayerSpawnMarker.svelte'
@@ -44,11 +49,20 @@ let playtestActors: ActorDefinition[] = []
 let playtestRootActors: ActorDefinition[] = []
 let lastPlaytestScene: EditorSceneDocument | null = null
 let lastPlaytestEnabled = false
+let lastCollisionOverlayEnabled = false
 let lastPlaytestLevelId = ''
 let RuntimeActorBranchComponent: any = null
 let runtimeActorBranchComponentPromise: Promise<void> | null = null
+let runtimeCollisionProductsByActorId = new Map<
+  string,
+  GeneratedCollisionProduct
+>()
+let runtimeCollisionProductsLevelId = ''
+let runtimeCollisionProductsRequestLevelId = ''
+let runtimeCollisionProductsLoadToken = 0
 let selectedNodeId: string | null = null
 let selectedNodeIds: string[] = []
+let collisionOverlayEnabled = false
 let activeLoadToken = 0
 let playtestSpawnSignature = ''
 let playtestReadySignature = ''
@@ -61,6 +75,7 @@ const unsubscribeNodes = editorNodesStore.subscribe(value => {
 const unsubscribeState = editorStateStore.subscribe(state => {
   selectedNodeId = state.selectedNodeId
   selectedNodeIds = state.selectedNodeIds
+  collisionOverlayEnabled = Boolean(state.collisionOverlayEnabled)
 })
 
 const unsubscribeRoots = editorRootNodesStore.subscribe(value => {
@@ -172,6 +187,66 @@ function clearPlaytestRuntimeScene() {
   playtestReadyToken += 1
 }
 
+function collectGeneratedCollisionProducts(input: {
+  levelDefinition: LevelDefinition
+  runtimeProducts?: GeneratedCollisionProduct[]
+}) {
+  const products = new Map<string, GeneratedCollisionProduct>()
+
+  for (const product of input.runtimeProducts ?? []) {
+    products.set(product.actorId, product)
+  }
+
+  for (const actor of input.levelDefinition.actors) {
+    const product = actor.physics?.collision.generatedProduct
+    if (product) products.set(product.actorId, product)
+  }
+
+  return products
+}
+
+async function loadRuntimeCollisionProducts(level: string) {
+  const loadToken = ++runtimeCollisionProductsLoadToken
+
+  try {
+    const loadedScene = await loadRuntimeSceneDocument(level)
+    if (loadToken !== runtimeCollisionProductsLoadToken) return
+
+    runtimeCollisionProductsByActorId = collectGeneratedCollisionProducts({
+      levelDefinition: loadedScene.levelDefinition,
+      runtimeProducts:
+        loadedScene.runtimeManifest.runtime.generatedCollisionProducts,
+    })
+    runtimeCollisionProductsLevelId = level
+
+    if (runtimeCollisionProductsByActorId.size === 0) {
+      setRuntimeDiagnostic('editorCollisionProducts', {
+        label: 'Editor Collision Products',
+        level: 'warning',
+        message: `${level}: cooked runtime scene has no generated collision products; overlay/playtest will not mount fake colliders.`,
+        meta: { levelId: level, productCount: 0 },
+      })
+    }
+
+    syncPlaytestRuntimeScene()
+  } catch (error) {
+    if (loadToken !== runtimeCollisionProductsLoadToken) return
+
+    runtimeCollisionProductsByActorId = new Map()
+    runtimeCollisionProductsLevelId = ''
+    setRuntimeDiagnostic('editorCollisionProducts', {
+      label: 'Editor Collision Products',
+      level: 'warning',
+      message:
+        error instanceof Error
+          ? `${level}: generated collision products unavailable for editor overlay/playtest. ${error.message}`
+          : `${level}: generated collision products unavailable for editor overlay/playtest.`,
+      meta: { levelId: level },
+    })
+    syncPlaytestRuntimeScene()
+  }
+}
+
 async function waitForRuntimeActorMountGate(token: number) {
   await tick()
   await tick()
@@ -251,13 +326,25 @@ function loadRuntimeActorBranchComponent() {
 }
 
 function syncPlaytestRuntimeScene() {
-  if (!playtestEnabled || !editorScene || editorScene.levelId !== levelId) {
+  if (
+    (!playtestEnabled && !collisionOverlayEnabled) ||
+    !editorScene ||
+    editorScene.levelId !== levelId
+  ) {
     clearPlaytestRuntimeScene()
     return
   }
 
   try {
-    const nextLevelDefinition = adaptSceneDocumentToLevelDefinition(editorScene)
+    const nextLevelDefinition = adaptSceneDocumentToLevelDefinition(
+      editorScene,
+      {
+        generatedCollisionProductsByActorId:
+          runtimeCollisionProductsLevelId === levelId
+            ? runtimeCollisionProductsByActorId
+            : undefined,
+      },
+    )
     playtestLevelDefinition = nextLevelDefinition
     playtestActors = nextLevelDefinition.actors
     playtestRootActors = playtestActors.filter(actor => !actor.parentId)
@@ -271,6 +358,34 @@ function syncPlaytestRuntimeScene() {
         rootActorCount: playtestRootActors.length,
         sceneVersion: playtestLevelDefinition.version,
         updatedAt: playtestLevelDefinition.updatedAt,
+      },
+    })
+
+    const collisionActors = playtestActors.filter(
+      actor => actor.physics?.collision,
+    )
+    const missingGeneratedProductActorIds = collisionActors
+      .filter(actor => !actor.physics?.collision.generatedProduct)
+      .map(actor => actor.id)
+    const mountedGeneratedProductActorIds = collisionActors
+      .filter(actor => actor.physics?.collision.generatedProduct)
+      .map(actor => actor.id)
+
+    setRuntimeDiagnostic('editorCollisionProducts', {
+      label: 'Editor Collision Products',
+      level: missingGeneratedProductActorIds.length > 0 ? 'warning' : 'ready',
+      message:
+        missingGeneratedProductActorIds.length > 0
+          ? `${levelId}: ${missingGeneratedProductActorIds.length} collision actor(s) have no current generated product; overlay/playtest will not mount fake colliders.`
+          : `${levelId}: editor overlay/playtest using ${mountedGeneratedProductActorIds.length} generated collision product(s).`,
+      meta: {
+        levelId,
+        runtimeProductLevelId: runtimeCollisionProductsLevelId,
+        runtimeProductCount: runtimeCollisionProductsByActorId.size,
+        collisionActorCount: collisionActors.length,
+        mountedGeneratedProductActorIds,
+        missingGeneratedProductActorIds:
+          missingGeneratedProductActorIds.slice(0, 50),
       },
     })
   } catch (error) {
@@ -292,6 +407,9 @@ let previousLevelId: string | null = null
 $: if (levelId && levelId !== previousLevelId) {
   previousLevelId = levelId
   playtestSpawnSignature = ''
+  runtimeCollisionProductsRequestLevelId = ''
+  runtimeCollisionProductsLevelId = ''
+  runtimeCollisionProductsByActorId = new Map()
   void loadEditorScene(levelId)
 }
 
@@ -299,17 +417,28 @@ $: if (playtestEnabled && editorScene) {
   dispatchEditorPlaytestSpawn()
 }
 
-$: if (playtestEnabled && !RuntimeActorBranchComponent) {
+$: if ((playtestEnabled || collisionOverlayEnabled) && !RuntimeActorBranchComponent) {
   void loadRuntimeActorBranchComponent()
+}
+
+$: if (
+  (playtestEnabled || collisionOverlayEnabled) &&
+  levelId &&
+  levelId !== runtimeCollisionProductsRequestLevelId
+) {
+  runtimeCollisionProductsRequestLevelId = levelId
+  void loadRuntimeCollisionProducts(levelId)
 }
 
 $: if (
   editorScene !== lastPlaytestScene ||
   playtestEnabled !== lastPlaytestEnabled ||
+  collisionOverlayEnabled !== lastCollisionOverlayEnabled ||
   levelId !== lastPlaytestLevelId
 ) {
   lastPlaytestScene = editorScene
   lastPlaytestEnabled = playtestEnabled
+  lastCollisionOverlayEnabled = collisionOverlayEnabled
   lastPlaytestLevelId = levelId
   syncPlaytestRuntimeScene()
 }
@@ -326,6 +455,13 @@ $: if (
   playtestLevelDefinition
 ) {
   scheduleEditorPlaytestReady()
+}
+
+$: if (editorEnabled && editorScene?.levelId === levelId) {
+  dispatch('editorSceneSettingsChange', {
+    levelId,
+    settings: editorScene.settings ?? {},
+  })
 }
 
 onMount(() => {
@@ -347,11 +483,13 @@ onDestroy(() => {
   {#if editorEnabled}
     <T.GridHelper args={[200, 80, '#3a5266', '#243241']} position={[0, -0.01, 0]} />
     <T.AxesHelper args={[5]} position={[0, 0.02, 0]} />
-    <EditorPlayerSpawnMarker />
-    <EditorPlaytestPlayerMarker
-      position={playtestPlayerPosition}
-      rotation={playtestPlayerRotation}
-    />
+    {#if !playtestEnabled}
+      <EditorPlayerSpawnMarker />
+      <EditorPlaytestPlayerMarker
+        position={playtestPlayerPosition}
+        rotation={playtestPlayerRotation}
+      />
+    {/if}
   {/if}
 
   {#if playtestEnabled}
@@ -362,14 +500,33 @@ onDestroy(() => {
           {actor}
           actors={playtestActors}
           {levelId}
-          {interactionSystem}
-          interactiveEnabled={true}
+          interactionSystem={editorEnabled ? null : interactionSystem}
+          interactiveEnabled={!editorEnabled}
+          collisionOnly={editorEnabled}
           on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
           on:noteRead={(event) => dispatch('noteRead', event.detail)}
         />
       {/each}
     {/if}
-  {:else}
+  {/if}
+
+  {#if !playtestEnabled}
+    {#if collisionOverlayEnabled && RuntimeActorBranchComponent}
+      {#each playtestRootActors as actor (actor.id)}
+        <svelte:component
+          this={RuntimeActorBranchComponent}
+          {actor}
+          actors={playtestActors}
+          {levelId}
+          interactionSystem={null}
+          interactiveEnabled={false}
+          collisionOnly={true}
+        />
+      {/each}
+    {/if}
+  {/if}
+
+  {#if editorEnabled}
     {#each rootNodes as node (node.id)}
       <EditorSceneBranch
         node={node}
@@ -379,7 +536,7 @@ onDestroy(() => {
         {selectedNodeIds}
         sceneSettings={editorScene?.settings ?? null}
         {interactionSystem}
-        interactiveEnabled={!editorEnabled}
+        interactiveEnabled={playtestEnabled}
         on:portalTransition={(event) => dispatch('portalTransition', event.detail)}
         on:noteRead={(event) => dispatch('noteRead', event.detail)}
       />

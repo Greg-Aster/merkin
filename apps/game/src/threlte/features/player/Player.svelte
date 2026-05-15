@@ -95,6 +95,7 @@ let isMouseDown = false
 let lastMouseX = 0
 let lastMouseY = 0
 let cameraRotationX = 0
+let playerYaw = 0
 let accumulatedRotationX = 0
 let accumulatedRotationY = 0
 
@@ -123,15 +124,13 @@ let lastReportedPlayerReady = false
 let appliedLevelPositionKey = ''
 let inputBindingSignature = ''
 
-const tempAxisY = new Vector3(0, 1, 0)
 const tempDesiredTranslation = new Vector3()
 const tempHorizontalVelocity = new Vector3()
 const tempBodyPosition = new Vector3()
 const tempBodyRotation = new Quaternion()
-const tempDeltaRotation = new Quaternion()
 const tempSpawnRotation = new Quaternion()
 const tempSpawnEuler = new Euler()
-const tempPlayerPoseEuler = new Euler()
+const tempCameraPitchEuler = new Euler()
 const nextTranslation = { x: 0, y: 0, z: 0 }
 const keyboardMovement = { x: 0, z: 0 }
 const gamepadState = {
@@ -498,6 +497,19 @@ function getLightChargeInputActive(gamepadInput: typeof gamepadState) {
   )
 }
 
+function clampPitch(value: number) {
+  return Math.max(-Math.PI / 2, Math.min(Math.PI / 2, value))
+}
+
+function normalizeYaw(value: number) {
+  return THREE.MathUtils.euclideanModulo(value + Math.PI, Math.PI * 2) - Math.PI
+}
+
+function setYawQuaternion(target: Quaternion, yaw: number) {
+  tempSpawnEuler.set(0, yaw, 0)
+  target.setFromEuler(tempSpawnEuler)
+}
+
 function resolvePlayerSfxVolume(baseVolume: number) {
   return Math.min(
     1,
@@ -805,22 +817,11 @@ function spawnLightShockwave(
 function getCurrentPlayerPose() {
   if (!rigidBody) return null
   let currentPosition
-  let currentRotation
   try {
     currentPosition = rigidBody.translation()
-    currentRotation = rigidBody.rotation()
   } catch {
     return null
   }
-  tempPlayerPoseEuler.setFromQuaternion(
-    tempBodyRotation.set(
-      currentRotation.x,
-      currentRotation.y,
-      currentRotation.z,
-      currentRotation.w,
-    ),
-    'YXZ',
-  )
 
   return {
     position: [currentPosition.x, currentPosition.y, currentPosition.z] as [
@@ -828,11 +829,7 @@ function getCurrentPlayerPose() {
       number,
       number,
     ],
-    rotation: [
-      cameraRotationX,
-      tempPlayerPoseEuler.y,
-      tempPlayerPoseEuler.z,
-    ] as [number, number, number],
+    rotation: [cameraRotationX, playerYaw, 0] as [number, number, number],
   }
 }
 
@@ -882,13 +879,9 @@ function applyLevelPosition() {
   if (positionKey === appliedLevelPositionKey) return true
   appliedLevelPositionKey = positionKey
   const pos = { x, y, z }
-  const pitch = Math.max(
-    -Math.PI / 2,
-    Math.min(Math.PI / 2, spawnRotation[0] ?? 0),
-  )
-  const yaw = spawnRotation[1] ?? 0
-  tempSpawnEuler.set(0, yaw, 0)
-  tempSpawnRotation.setFromEuler(tempSpawnEuler)
+  const pitch = clampPitch(spawnRotation[0] ?? 0)
+  const yaw = normalizeYaw(spawnRotation[1] ?? 0)
+  setYawQuaternion(tempSpawnRotation, yaw)
   rigidBody.setTranslation(pos, true)
   rigidBody.setNextKinematicTranslation(pos)
   const groundedPos = resolveSpawnGrounding(pos)
@@ -910,8 +903,9 @@ function applyLevelPosition() {
     groundedPos.y,
     groundedPos.z,
   ])
-  gameActions.updatePlayerRotation([pitch, yaw, spawnRotation[2] ?? 0])
+  gameActions.updatePlayerRotation([pitch, yaw, 0])
   cameraRotationX = pitch
+  playerYaw = yaw
   accumulatedRotationX = 0
   accumulatedRotationY = 0
   if (visualGroup) {
@@ -919,7 +913,7 @@ function applyLevelPosition() {
     visualGroup.quaternion.copy(tempSpawnRotation)
   }
   if (cameraPivot) {
-    cameraPivot.quaternion.setFromEuler(tempSpawnEuler.set(pitch, 0, 0))
+    cameraPivot.quaternion.setFromEuler(tempCameraPitchEuler.set(pitch, 0, 0))
   }
   return true
 }
@@ -1095,7 +1089,8 @@ useTask(delta => {
       .filter(shockwave => shockwave.progress < 1)
   }
 
-  // 1. Handle Rotation (Left/Right Mouse Look) - This directly affects the physics body
+  // 1. Handle Rotation (Left/Right Mouse Look) - keep yaw separate from pitch
+  // so no roll can leak from the physics quaternion into the camera rig.
   if (isMobile && mobileLook && (mobileLook.x !== 0 || mobileLook.y !== 0)) {
     accumulatedRotationX = mobileLook.x * -0.00125
     accumulatedRotationY = mobileLook.y * -0.00125
@@ -1104,18 +1099,9 @@ useTask(delta => {
     accumulatedRotationX -= gamepadInput.lookX * GAMEPAD_LOOK_SPEED * delta
     accumulatedRotationY -= gamepadInput.lookY * GAMEPAD_LOOK_SPEED * delta
   }
-  if (accumulatedRotationX !== 0) {
-    const currentRotation = rigidBody.rotation()
-    tempDeltaRotation.setFromAxisAngle(tempAxisY, accumulatedRotationX)
-    tempBodyRotation.set(
-      currentRotation.x,
-      currentRotation.y,
-      currentRotation.z,
-      currentRotation.w,
-    )
-    tempBodyRotation.multiply(tempDeltaRotation)
-    rigidBody.setNextKinematicRotation(tempBodyRotation)
-  }
+  playerYaw = normalizeYaw(playerYaw + accumulatedRotationX)
+  setYawQuaternion(tempBodyRotation, playerYaw)
+  rigidBody.setNextKinematicRotation(tempBodyRotation)
   accumulatedRotationX = 0
 
   // 2. Handle Vertical Movement (Gravity & Jump)
@@ -1142,14 +1128,7 @@ useTask(delta => {
   if (isMobile)
     tempHorizontalVelocity.set(mobileMovement.x, 0, mobileMovement.z)
   if (tempHorizontalVelocity.lengthSq() > 0) {
-    const bodyRotation = rigidBody.rotation()
     tempHorizontalVelocity.normalize().multiplyScalar(moveSpeed)
-    tempBodyRotation.set(
-      bodyRotation.x,
-      bodyRotation.y,
-      bodyRotation.z,
-      bodyRotation.w,
-    )
     tempHorizontalVelocity.applyQuaternion(tempBodyRotation)
   }
 
@@ -1181,15 +1160,9 @@ useTask(delta => {
   // 6. Smoothly move the visual elements to the physics body's new position.
   // Use frame-rate independent exponential decay so camera speed is consistent at any FPS.
   const bodyPosition = rigidBody.translation()
-  const bodyRotation = rigidBody.rotation()
   const smoothAlpha = 1 - Math.pow(1 - CAMERA_SMOOTH_SPEED, delta * 60)
   tempBodyPosition.set(bodyPosition.x, bodyPosition.y, bodyPosition.z)
-  tempBodyRotation.set(
-    bodyRotation.x,
-    bodyRotation.y,
-    bodyRotation.z,
-    bodyRotation.w,
-  )
+  setYawQuaternion(tempBodyRotation, playerYaw)
   visualGroup.position.lerp(tempBodyPosition, smoothAlpha)
   visualGroup.quaternion.slerp(tempBodyRotation, smoothAlpha)
 
@@ -1200,7 +1173,9 @@ useTask(delta => {
     Math.min(Math.PI / 2, cameraRotationX),
   )
   if (cameraPivot) {
-    cameraPivot.quaternion.setFromEuler(new THREE.Euler(cameraRotationX, 0, 0))
+    cameraPivot.quaternion.setFromEuler(
+      tempCameraPitchEuler.set(cameraRotationX, 0, 0),
+    )
   }
   accumulatedRotationY = 0
 
@@ -1258,7 +1233,19 @@ onDestroy(() => {
   if (surfaceMoveHoldTimeout !== null) {
     window.clearTimeout(surfaceMoveHoldTimeout)
   }
-  characterController?.free?.()
+  const controller = characterController
+  characterController = null
+  if (controller) {
+    try {
+      if (typeof rapier.world?.removeCharacterController === 'function') {
+        rapier.world.removeCharacterController(controller)
+      } else {
+        controller.free?.()
+      }
+    } catch (error) {
+      console.debug('Player character controller cleanup skipped:', error)
+    }
+  }
   chargeAudioContext?.close?.()
   chargeAudioContext = null
   playerAudioOutputGain = null

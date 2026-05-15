@@ -1,7 +1,8 @@
 {
-  "schemaVersion": 2,
-  "generatedBy": "bake-mesh-collider",
-  "generatedAt": "2026-05-13T01:03:25.733Z",
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-14T21:28:37.990Z",
+  "generatorVersion": "mesh-collision-manager-v1",
   "sourceLevelId": "sci-fi-room",
   "sourceActorId": "sci-fi-barrel",
   "sourceAssetUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
@@ -13,6 +14,7 @@
   "colliderUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.glb",
   "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.glb",
   "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v1:e084945dedd6a3379c6f3e97842cac89df7169797707e123a5e5b42c135d6888:2046b0a7205c6bb54729aadf507bbaba73b76ad819d001ea4fbf1d98bb81cf6f:cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec",
   "triangleCount": 2682,
   "vertexCount": 2052,
   "bounds": {
@@ -183,23 +185,72 @@
       "sourceAssetUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
       "intent": "blocker",
       "channel": "worldStatic",
-      "triangleBudget": 20000,
+      "triangleBudget": 5000,
       "simplify": true,
       "simplifyError": 0.05
     },
-    "generatedAt": "2026-05-13T01:03:25.733Z"
+    "generatedAt": "2026-05-14T21:28:37.990Z"
   },
   "collision": {
     "shape": "trimesh",
     "intent": "blocker",
     "channel": "worldStatic",
-    "triangleBudget": 20000
+    "triangleBudget": 5000
+  },
+  "collisionProduct": {
+    "actorId": "sci-fi-barrel",
+    "mode": "auto",
+    "productId": "sci-fi-barrel:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v1",
+    "generatedAt": "2026-05-14T21:28:37.990Z",
+    "sourceKind": "asset",
+    "sourceMeshUrl": "/models/polyhaven/Barrel_01/Barrel_01_1k.gltf",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "e084945dedd6a3379c6f3e97842cac89df7169797707e123a5e5b42c135d6888"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "2046b0a7205c6bb54729aadf507bbaba73b76ad819d001ea4fbf1d98bb81cf6f"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "cbdbb2201fe892c8430264b8aaded549cee86f7c3973cfc327704d33930040ec"
+    },
+    "shape": "trimesh",
+    "artifactUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/sci-fi-room/sci-fi-barrel.collider.meta.json",
+    "localBounds": {
+      "min": [
+        -0.2815175950527191,
+        -0.006614277604967356,
+        -0.28151750564575195
+      ],
+      "max": [
+        0.28151753544807434,
+        0.8733857274055481,
+        0.28151771426200867
+      ],
+      "size": [
+        0.5630351305007935,
+        0.8800000050105155,
+        0.5630352199077606
+      ],
+      "center": [
+        -2.9802322387695312e-8,
+        0.43338572490029037,
+        1.043081283569336e-7
+      ]
+    },
+    "triangleCount": 2682,
+    "vertexCount": 2052,
+    "triangleBudget": 5000
   },
   "simplification": {
     "requested": false,
     "applied": false,
     "sourceTriangleCount": 2682,
-    "targetTriangleBudget": 20000,
+    "targetTriangleBudget": 5000,
     "ratio": 1,
     "tool": "gltf-transform",
     "prepass": "none",

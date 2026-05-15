@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-05-14T23:30:57.351Z",
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "sourceName": "Crown Halo",
+  "sourceAssetUrl": "/generated/style-lab/sources/crown-halo-2026-05-14T23-29-28-530Z/crown-halo.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/style-lab/sources/crown-halo-2026-05-14T23-29-28-530Z/crown-halo.glb",
+  "packagedSourceAssetUrl": "/generated/style-lab/workspace/crown-halo-2026-05-14T23-29-28-538Z/source/crown-halo.glb",
+  "prompt": "object: large circular halo or luminous ring suspended around the upper crown, a floating sacred ornament not a portal. preserve the object identity and overall silhouette; do not turn it into a different object class. style family: Abyssal Neon Cosmic Horror. style treatment: extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "negativePrompt": "daylight, cheerful fantasy, bright saturated rainbow everywhere, literal tree branches replacing everything, photorealistic bark noise, modern clean architecture, sci-fi panels, plastic surfaces, glossy toy materials, cluttered microdetail, cozy forest, warm pastoral fantasy, cute bioluminescence",
+  "loraNotes": "Favor blackened, abyssal, violet-magenta rune glow, cosmic dread, and monumental sacred",
+  "controlNetNotes": "Preserve silhouette, traversal readability, climbability, collision anchors, route legibility, and the overwhelming mass of the world-tree. Keep emissive accents selective so the magenta and violet lights feel rare and ominous.",
+  "referenceGenerationWarning": "",
+  "referenceImageUrl": "/generated/hunyuan3d/references/crown-halo-reference-2026-05-14T23-30-57-345Z.png",
+  "workspaceReferenceImageUrl": "/generated/style-lab/workspace/crown-halo-2026-05-14T23-29-28-538Z/reference/crown-halo-reference-2026-05-14T23-30-57-345Z.png",
+  "generatedReferenceImageUrl": "/generated/hunyuan3d/references/crown-halo-reference-2026-05-14T23-30-57-345Z.png"
+}

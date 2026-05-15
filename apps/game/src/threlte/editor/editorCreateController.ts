@@ -3,6 +3,10 @@ import {
   createWorldMatrixResolver,
   getLocalTransformForWorldMatrix,
 } from './editorHierarchyUtils'
+import {
+  canHostPointLight,
+  getDefaultChildPointLightPosition,
+} from './editorLightPlacement'
 import type { EditorPrefabType, EditorSceneNode } from './editorStore'
 
 interface EditorCreateControllerDeps {
@@ -11,7 +15,7 @@ interface EditorCreateControllerDeps {
   getEditorNodes: () => EditorSceneNode[]
   getActiveSceneLevelId: () => string
   setSaveMessage: (message: string) => void
-  addNode: (node: EditorSceneNode) => void
+  addNode: (node: EditorSceneNode) => string
   addEmptyNode: (name: string, parentId?: string | null) => void
   setSelectedNodes: (ids: string[], activeId: string | null) => void
   groupNodes: (ids: string[], name: string) => void
@@ -133,6 +137,54 @@ export function createEditorCreateController(deps: EditorCreateControllerDeps) {
     }
   }
 
+  function addPointLightToSelection() {
+    const selectedNodes = deps.getSelectedNodes()
+    const selectedNode = deps.getSelectedNode()
+    const candidates = selectedNodes.length
+      ? selectedNodes
+      : selectedNode
+        ? [selectedNode]
+        : []
+    const targetNodes = candidates.filter(canHostPointLight)
+
+    if (targetNodes.length === 0) {
+      deps.setSaveMessage(
+        'Select a scene object before adding a child point light',
+      )
+      return
+    }
+
+    const createdIds: string[] = []
+
+    for (const targetNode of targetNodes) {
+      const lightId = `light-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+
+      deps.addNode({
+        id: lightId,
+        name: `${targetNode.name} Point Light`,
+        kind: 'light',
+        parentId: targetNode.id,
+        position: getDefaultChildPointLightPosition(targetNode),
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+        visible: true,
+        light: {
+          color: '#8fc8ff',
+          intensity: 2.5,
+          distance: 8,
+          decay: 2,
+        },
+      })
+
+      createdIds.push(lightId)
+    }
+
+    deps.setSelectedNodes(createdIds, createdIds[0] ?? null)
+    deps.setSaveMessage(
+      `Added ${createdIds.length} child point light${createdIds.length === 1 ? '' : 's'}`,
+    )
+  }
+
   function addPrefabWithParent(
     name: string,
     type: EditorPrefabType,
@@ -204,6 +256,7 @@ export function createEditorCreateController(deps: EditorCreateControllerDeps) {
   return {
     addPrimitivePrefab,
     addFireflyToSelection,
+    addPointLightToSelection,
     addPrefabWithParent,
     addAssetPrefab,
     addEmpty,

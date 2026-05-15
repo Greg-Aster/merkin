@@ -131,32 +131,51 @@ export const DEFAULT_RUNTIME_VISUAL_STYLE: RuntimeVisualStyleSettings = {
   },
 }
 
+function definedPatch<T extends object>(patch: Partial<T> | undefined) {
+  const result: Partial<T> = {}
+
+  if (!patch) return result
+
+  for (const [key, value] of Object.entries(patch) as [
+    keyof T,
+    T[keyof T] | undefined,
+  ][]) {
+    if (value !== undefined) {
+      result[key] = value
+    }
+  }
+
+  return result
+}
+
 function mergeRuntimeVisualStyle(
   base: RuntimeVisualStyleSettings,
   overrides: RuntimeVisualStylePatch,
 ): RuntimeVisualStyleSettings {
+  const rootOverrides = definedPatch(overrides)
+
   return {
     ...base,
-    ...overrides,
+    ...rootOverrides,
     colorGrading: {
       ...base.colorGrading,
-      ...(overrides.colorGrading ?? {}),
+      ...definedPatch(overrides.colorGrading),
     },
     screenFx: {
       ...base.screenFx,
-      ...(overrides.screenFx ?? {}),
+      ...definedPatch(overrides.screenFx),
     },
     heightFog: {
       ...base.heightFog,
-      ...(overrides.heightFog ?? {}),
+      ...definedPatch(overrides.heightFog),
     },
     terrain: {
       ...base.terrain,
-      ...(overrides.terrain ?? {}),
+      ...definedPatch(overrides.terrain),
     },
     particles: {
       ...base.particles,
-      ...(overrides.particles ?? {}),
+      ...definedPatch(overrides.particles),
     },
   }
 }

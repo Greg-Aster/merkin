@@ -4,7 +4,6 @@
  */
 
 import { type Writable, derived, writable } from 'svelte/store'
-import { runtimeDebugLog } from '../utils/runtimeLog'
 
 // Quality level definitions (matches existing optimization system)
 export type QualityLevel = 'ultra_low' | 'low' | 'medium' | 'high' | 'ultra'
@@ -186,63 +185,6 @@ export function disableAdaptiveQuality() {
     ...config,
     adaptiveQuality: false,
   }))
-}
-
-// Performance-based quality adjustment
-export function adjustQualityForPerformance(
-  avgFPS: number,
-  targetFPS: number = 60,
-) {
-  if (avgFPS < targetFPS * 0.7) {
-    // Performance is poor, reduce quality
-    postProcessingStore.update(config => {
-      const currentIndex = [
-        'ultra_low',
-        'low',
-        'medium',
-        'high',
-        'ultra',
-      ].indexOf(config.qualityLevel)
-      const newIndex = Math.max(0, currentIndex - 1)
-      const newLevel = (
-        ['ultra_low', 'low', 'medium', 'high', 'ultra'] as QualityLevel[]
-      )[newIndex]
-
-      runtimeDebugLog(
-        `🔽 Reducing post-processing quality: ${config.qualityLevel} → ${newLevel}`,
-      )
-      return {
-        ...config,
-        qualityLevel: newLevel,
-      }
-    })
-  } else if (avgFPS > targetFPS * 1.2) {
-    // Performance is good, can increase quality
-    postProcessingStore.update(config => {
-      const currentIndex = [
-        'ultra_low',
-        'low',
-        'medium',
-        'high',
-        'ultra',
-      ].indexOf(config.qualityLevel)
-      const newIndex = Math.min(4, currentIndex + 1)
-      const newLevel = (
-        ['ultra_low', 'low', 'medium', 'high', 'ultra'] as QualityLevel[]
-      )[newIndex]
-
-      if (newLevel !== config.qualityLevel) {
-        runtimeDebugLog(
-          `🔼 Increasing post-processing quality: ${config.qualityLevel} → ${newLevel}`,
-        )
-        return {
-          ...config,
-          qualityLevel: newLevel,
-        }
-      }
-      return config
-    })
-  }
 }
 
 export function resetPostProcessingState() {

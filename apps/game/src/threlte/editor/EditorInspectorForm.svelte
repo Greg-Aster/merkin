@@ -6,6 +6,9 @@ import {
   resolveNodeCollision,
 } from './editorCollisionDefaults'
 import type {
+  EditorCollisionLodSourceTier,
+  EditorCollisionMode,
+  EditorCollisionQuality,
   EditorMaterialData,
   EditorNodeCollisionData,
   EditorSceneNode,
@@ -44,9 +47,7 @@ type PhysicsBooleanField =
   | 'ccd'
   | 'lockRotations'
   | 'lockTranslations'
-type CollisionNumericField = 'friction' | 'restitution' | 'triangleBudget'
-type CollisionStringField = 'colliderUrl'
-type CollisionBooleanField = 'sensor'
+type CollisionNumericField = 'friction' | 'restitution' | 'maxTriangles'
 type CollisionShape = EditorNodeCollisionData['shape']
 type LightNumericField = 'intensity' | 'distance' | 'decay'
 type GameplayField =
@@ -140,7 +141,14 @@ export let onPrimitiveGeometryChange: (value: string) => void = () => {}
 export let onPrimitiveArgChange: (index: number, value: string) => void =
   () => {}
 export let onCollisionEnabledChange: (value: boolean) => void = () => {}
+export let onCollisionModeChange: (value: EditorCollisionMode) => void =
+  () => {}
 export let onCollisionShapeChange: (value: CollisionShape) => void = () => {}
+export let onCollisionQualityChange: (value: EditorCollisionQuality) => void =
+  () => {}
+export let onCollisionLodSourceTierChange: (
+  value: EditorCollisionLodSourceTier,
+) => void = () => {}
 export let onCollisionIntentChange: (value: CollisionIntent) => void = () => {}
 export let onCollisionChannelChange: (value: CollisionChannel) => void =
   () => {}
@@ -153,27 +161,16 @@ export let onPhysicsBooleanChange: (
   field: PhysicsBooleanField,
   value: boolean,
 ) => void = () => {}
-export let onCollisionSizeChange: (index: number, value: string) => void =
-  () => {}
 export let onCollisionNumericChange: (
   field: CollisionNumericField,
   value: string,
 ) => void = () => {}
-export let onCollisionStringChange: (
-  field: CollisionStringField,
-  value: string,
-) => void = () => {}
-export let onCollisionBooleanChange: (
-  field: CollisionBooleanField,
-  value: boolean,
-) => void = () => {}
-export let onRecalculateCollision: () => void = () => {}
 export let onSetCollisionVisualOnly: () => void = () => {}
 export let onSetCollisionBlocker: () => void = () => {}
 export let onSetCollisionWalkable: () => void = () => {}
 export let onSetCollisionTrigger: () => void = () => {}
 export let onSetCollisionDetail: () => void = () => {}
-export let onBakeMeshCollider: () => void = () => {}
+export let onForceRegenerateCollision: () => void = () => {}
 
 $: effectiveCollision = resolveNodeCollision(selectedNode, sceneSettings)
 $: collisionSourceStatus = describeNodeCollisionSource(
@@ -239,11 +236,10 @@ const transformFields: Array<'position' | 'rotation' | 'scale'> = [
 ]
 const collisionIntentOptions: Array<{ value: CollisionIntent; label: string }> =
   [
-    { value: 'none', label: 'None' },
     { value: 'walkable', label: 'Walkable' },
     { value: 'blocker', label: 'Blocker' },
     { value: 'trigger', label: 'Trigger' },
-    { value: 'detailMesh', label: 'Detail Mesh' },
+    { value: 'detailMesh', label: 'Detail' },
   ]
 const collisionChannelOptions: Array<{
   value: CollisionChannel
@@ -255,10 +251,31 @@ const collisionChannelOptions: Array<{
   { value: 'trigger', label: 'Trigger' },
   { value: 'detail', label: 'Detail' },
 ]
-const collisionShapeOptions: Array<{ value: CollisionShape; label: string }> = [
-  { value: 'cuboid', label: 'Box' },
-  { value: 'cylinder', label: 'Cylinder' },
-  { value: 'trimesh', label: 'Baked Mesh' },
+const collisionModeOptions: Array<{
+  value: EditorCollisionMode
+  label: string
+}> = [
+  { value: 'auto', label: 'Auto' },
+  { value: 'trigger', label: 'Trigger' },
+  { value: 'none', label: 'Disabled' },
+]
+const collisionQualityOptions: Array<{
+  value: EditorCollisionQuality
+  label: string
+}> = [
+  { value: 'primitive', label: 'Primitive' },
+  { value: 'convexHull', label: 'Convex Hull' },
+  { value: 'simplifiedMesh', label: 'Simplified Mesh' },
+  { value: 'trimesh', label: 'Trimesh' },
+]
+const collisionLodSourceTierOptions: Array<{
+  value: EditorCollisionLodSourceTier
+  label: string
+}> = [
+  { value: 'source', label: 'Source' },
+  { value: 'high', label: 'High' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'low', label: 'Low' },
 ]
 
 $: hasSingleSelection = !!selectedNode && selectedNodes.length <= 1
@@ -271,26 +288,42 @@ $: hasGeometryNode = !!(
 $: canConvertSelectedToMesh = !!(
   selectedNode?.primitive || selectedNode?.prefab
 )
-$: canBakeSelectedMeshCollider = !!selectedNode?.asset?.url
+$: canBakeSelectedMeshCollider = !!(
+  selectedNode?.asset?.url || selectedNode?.prefab
+)
 $: selectedCollisionShape =
   selectedNode?.collision?.shape ??
   effectiveCollision?.shape ??
   (hasGeometryNode ? 'cuboid' : 'cuboid')
-$: collisionShapeOptionsForSelection = collisionShapeOptions
-$: collisionMode =
-  selectedNode?.renderPolicy?.runtimeStyle === 'skip' && effectiveCollision
-    ? 'proxy'
-    : effectiveCollision?.intent === 'walkable'
-      ? 'walkable'
-      : effectiveCollision?.intent === 'blocker'
-        ? 'blocker'
-        : effectiveCollision?.intent === 'trigger'
-          ? 'trigger'
-          : effectiveCollision?.intent === 'detailMesh'
-            ? 'detail'
-            : selectedNode?.visible === false
-              ? 'disabled'
-              : 'visualOnly'
+$: selectedCollisionMode =
+  selectedNode?.collision?.mode ??
+  (effectiveCollision?.intent === 'trigger'
+    ? 'trigger'
+    : effectiveCollision
+      ? 'auto'
+      : 'none')
+$: selectedCollisionIntent = (
+  selectedNode?.collision?.intent && selectedNode.collision.intent !== 'none'
+    ? selectedNode.collision.intent
+    : effectiveCollision?.intent && effectiveCollision.intent !== 'none'
+      ? effectiveCollision.intent
+      : 'blocker'
+) as CollisionIntent
+$: selectedCollisionQuality =
+  selectedNode?.collision?.quality ??
+  (selectedCollisionShape === 'trimesh' ? 'simplifiedMesh' : 'primitive')
+$: selectedCollisionLodSourceTier = selectedNode?.collision?.lodTier ?? 'source'
+$: selectedCollisionGenerationStatus =
+  selectedNode?.collision?.mode === 'none' || !effectiveCollision
+    ? 'disabled'
+    : selectedNode?.collision?.generationStatus ?? 'ready'
+$: selectedCollisionGenerationDetail =
+  selectedNode?.collision?.generationLastError ??
+  (selectedCollisionGenerationStatus === 'ready'
+    ? 'Generated product is ready for publish.'
+    : selectedCollisionGenerationStatus === 'disabled'
+      ? 'Collision is explicitly off for this visual object.'
+      : 'Collision product needs regeneration before publish.')
 $: filteredAssetBrowserItems = assetBrowserItems.filter(
   item =>
     !assetBrowserFilter.trim() ||
@@ -426,30 +459,30 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
         <div class="save-message" class:error-message={collisionSourceStatus.tone === 'warning'}>
           Collision Source: {collisionSourceStatus.label}. {collisionSourceStatus.detail}
         </div>
-        <div class="button-row compact editor-mb-sm">
-          <button class:active={collisionMode === 'visualOnly'} on:click={onSetCollisionVisualOnly}>Visual Only</button>
-          <button class:active={collisionMode === 'blocker'} on:click={onSetCollisionBlocker}>Blocker</button>
-          <button class:active={collisionMode === 'walkable'} on:click={onSetCollisionWalkable}>Walkable</button>
-          <button class:active={collisionMode === 'trigger'} on:click={onSetCollisionTrigger}>Trigger</button>
-          <button class:active={collisionMode === 'detail'} on:click={onSetCollisionDetail}>Detail</button>
-          {#if canBakeSelectedMeshCollider}
-            <button on:click={onBakeMeshCollider}>Bake Mesh Collider</button>
-          {/if}
-          <button class:active={collisionMode === 'disabled'} on:click={() => onCollisionEnabledChange(false)}>Disabled</button>
-        </div>
-        <label class="checkbox"><input type="checkbox" checked={!!effectiveCollision} on:change={(e) => onCollisionEnabledChange((e.currentTarget as HTMLInputElement).checked)} /> Collider Enabled</label>
-        <div class="save-message">Collision is independent from the visual source. Keep simple box or cylinder collision when replacing blockout meshes with GLB assets; use Baked Mesh only when the collider needs authored mesh detail.</div>
-        <select class="text-input" value={selectedCollisionShape} on:change={(e) => onCollisionShapeChange((e.currentTarget as HTMLSelectElement).value as CollisionShape)}>
-          {#each collisionShapeOptionsForSelection as option}
+        <select class="text-input" value={selectedCollisionMode} on:change={(e) => onCollisionModeChange((e.currentTarget as HTMLSelectElement).value as EditorCollisionMode)}>
+          {#each collisionModeOptions as option}
             <option value={option.value}>{option.label}</option>
           {/each}
         </select>
-        <select class="text-input" value={selectedNode.collision?.intent ?? effectiveCollision?.intent ?? 'none'} on:change={(e) => onCollisionIntentChange((e.currentTarget as HTMLSelectElement).value as CollisionIntent)}>
+        <div class="button-row compact">
+          <button on:click={onSetCollisionVisualOnly}>Visual Only</button>
+        </div>
+        <select class="text-input" value={selectedCollisionIntent} disabled={selectedCollisionMode === 'none'} on:change={(e) => onCollisionIntentChange((e.currentTarget as HTMLSelectElement).value as CollisionIntent)}>
           {#each collisionIntentOptions as option}
             <option value={option.value}>{option.label}</option>
           {/each}
         </select>
-        <select class="text-input" value={selectedNode.collision?.channel ?? effectiveCollision?.channel ?? 'worldStatic'} on:change={(e) => onCollisionChannelChange((e.currentTarget as HTMLSelectElement).value as CollisionChannel)}>
+        <select class="text-input" value={selectedCollisionQuality} disabled={selectedCollisionMode === 'none'} on:change={(e) => onCollisionQualityChange((e.currentTarget as HTMLSelectElement).value as EditorCollisionQuality)}>
+          {#each collisionQualityOptions as option}
+            <option value={option.value}>{option.label}</option>
+          {/each}
+        </select>
+        <select class="text-input" value={selectedCollisionLodSourceTier} disabled={selectedCollisionMode === 'none'} on:change={(e) => onCollisionLodSourceTierChange((e.currentTarget as HTMLSelectElement).value as EditorCollisionLodSourceTier)}>
+          {#each collisionLodSourceTierOptions as option}
+            <option value={option.value}>{option.label}</option>
+          {/each}
+        </select>
+        <select class="text-input" value={selectedNode.collision?.channel ?? effectiveCollision?.channel ?? 'worldStatic'} disabled={selectedCollisionMode === 'none'} on:change={(e) => onCollisionChannelChange((e.currentTarget as HTMLSelectElement).value as CollisionChannel)}>
           {#each collisionChannelOptions as option}
             <option value={option.value}>{option.label}</option>
           {/each}
@@ -472,37 +505,26 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
           <label class="checkbox"><input type="checkbox" checked={selectedNode.physics?.lockRotations ?? false} on:change={(e) => onPhysicsBooleanChange('lockRotations', (e.currentTarget as HTMLInputElement).checked)} /> Lock Rotations</label>
           <label class="checkbox"><input type="checkbox" checked={selectedNode.physics?.lockTranslations ?? false} on:change={(e) => onPhysicsBooleanChange('lockTranslations', (e.currentTarget as HTMLInputElement).checked)} /> Lock Translations</label>
         </div>
-        {#if effectiveCollision && effectiveCollision.shape !== 'trimesh'}
-          <div class="tuple-label">Collider Size</div>
-          <div class="tuple-row">
-            {#each [0, 1, 2] as index}
-              <input class="tuple-input" type="number" min="0.05" step="0.05" value={effectiveCollision.size?.[index] ?? selectedNodeColliderSize[index]} on:change={(e) => onCollisionSizeChange(index, (e.currentTarget as HTMLInputElement).value)} />
-            {/each}
-          </div>
+        {#if effectiveCollision}
+          <div class="tuple-label">Collision Product</div>
           <div class="tuple-row">
             <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.friction ?? 0.7} on:change={(e) => onCollisionNumericChange('friction', (e.currentTarget as HTMLInputElement).value)} />
             <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.restitution ?? 0} on:change={(e) => onCollisionNumericChange('restitution', (e.currentTarget as HTMLInputElement).value)} />
           </div>
-          <label class="checkbox"><input type="checkbox" checked={effectiveCollision.sensor ?? false} on:change={(e) => onCollisionBooleanChange('sensor', (e.currentTarget as HTMLInputElement).checked)} /> Sensor Only</label>
-          {#if effectiveCollision.intent === 'detailMesh'}
-            <div class="tuple-row">
-              <input class="tuple-input" type="number" min="0" step="1" value={effectiveCollision.triangleBudget ?? 0} on:change={(e) => onCollisionNumericChange('triangleBudget', (e.currentTarget as HTMLInputElement).value)} />
-            </div>
-          {/if}
-          <button on:click={onRecalculateCollision}>Match Collider To Visual</button>
-        {:else if effectiveCollision}
-          <div class="tuple-label">Collider Asset URL</div>
-          <input class="text-input" value={effectiveCollision.colliderUrl ?? ''} placeholder="/generated/collision/asset.collider.glb" on:change={(e) => onCollisionStringChange('colliderUrl', (e.currentTarget as HTMLInputElement).value)} />
           <div class="tuple-row">
-            <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.friction ?? 0.7} on:change={(e) => onCollisionNumericChange('friction', (e.currentTarget as HTMLInputElement).value)} />
-            <input class="tuple-input" type="number" min="0" step="0.05" value={effectiveCollision.restitution ?? 0} on:change={(e) => onCollisionNumericChange('restitution', (e.currentTarget as HTMLInputElement).value)} />
+            <input class="tuple-input" type="number" min="0" step="1" value={selectedNode.collision?.maxTriangles ?? effectiveCollision.triangleBudget ?? 0} on:change={(e) => onCollisionNumericChange('maxTriangles', (e.currentTarget as HTMLInputElement).value)} />
           </div>
-          <label class="checkbox"><input type="checkbox" checked={effectiveCollision.sensor ?? false} on:change={(e) => onCollisionBooleanChange('sensor', (e.currentTarget as HTMLInputElement).checked)} /> Sensor Only</label>
-          {#if effectiveCollision.intent === 'detailMesh'}
-            <div class="tuple-row">
-              <input class="tuple-input" type="number" min="0" step="1" value={effectiveCollision.triangleBudget ?? 0} on:change={(e) => onCollisionNumericChange('triangleBudget', (e.currentTarget as HTMLInputElement).value)} />
-            </div>
+          <div class="save-message" class:error-message={selectedCollisionGenerationStatus === 'failed'}>
+            Status: {selectedCollisionGenerationStatus}. {selectedCollisionGenerationDetail}
+          </div>
+          {#if effectiveCollision.triangleCount}
+            <div class="save-message">Generated triangles: {effectiveCollision.triangleCount.toLocaleString()}</div>
           {/if}
+          {#if canBakeSelectedMeshCollider}
+            <button on:click={onForceRegenerateCollision} disabled={selectedCollisionMode === 'none' || selectedCollisionQuality === 'primitive'}>Force Regenerate</button>
+          {/if}
+        {:else}
+          <div class="save-message">Status: disabled. Collision is explicitly off for this visual object.</div>
         {/if}
       </div>
 
@@ -615,11 +637,11 @@ $: filteredAssetBrowserItems = assetBrowserItems.filter(
     {#if selectedNode.light}
       <div class="tuple-group">
         <div class="tuple-label">Light Color</div>
-        <input class="text-input" value={selectedNode.light.color} on:input={(e) => onLightFieldChange('color', (e.currentTarget as HTMLInputElement).value)} />
+        <input class="text-input" type="color" value={selectedNode.light.color} on:input={(e) => onLightFieldChange('color', (e.currentTarget as HTMLInputElement).value)} />
       </div>
-      <div class="tuple-group"><div class="tuple-label">Light Intensity</div><input class="tuple-input" type="number" step="0.1" value={selectedNode.light.intensity} on:change={(e) => onLightNumericChange('intensity', (e.currentTarget as HTMLInputElement).value)} /></div>
-      <div class="tuple-group"><div class="tuple-label">Light Distance</div><input class="tuple-input" type="number" step="0.1" value={selectedNode.light.distance} on:change={(e) => onLightNumericChange('distance', (e.currentTarget as HTMLInputElement).value)} /></div>
-      <div class="tuple-group"><div class="tuple-label">Light Decay</div><input class="tuple-input" type="number" step="0.1" value={selectedNode.light.decay} on:change={(e) => onLightNumericChange('decay', (e.currentTarget as HTMLInputElement).value)} /></div>
+      <div class="tuple-group"><div class="tuple-label">Light Intensity</div><input class="tuple-input" type="number" min="0" step="0.1" value={selectedNode.light.intensity} on:input={(e) => onLightNumericChange('intensity', (e.currentTarget as HTMLInputElement).value)} /></div>
+      <div class="tuple-group"><div class="tuple-label">Light Distance</div><input class="tuple-input" type="number" min="0" step="0.1" value={selectedNode.light.distance} on:input={(e) => onLightNumericChange('distance', (e.currentTarget as HTMLInputElement).value)} /></div>
+      <div class="tuple-group"><div class="tuple-label">Light Decay</div><input class="tuple-input" type="number" min="0" step="0.1" value={selectedNode.light.decay} on:input={(e) => onLightNumericChange('decay', (e.currentTarget as HTMLInputElement).value)} /></div>
     {/if}
 
     {#if selectedNode.gameplay}

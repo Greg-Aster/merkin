@@ -1,0 +1,299 @@
+{
+  "schemaVersion": 3,
+  "generatedBy": "mesh-collision-manager",
+  "generatedAt": "2026-05-15T02:11:05.280Z",
+  "generatorVersion": "mesh-collision-manager-v2",
+  "sourceLevelId": "yggdrasil",
+  "sourceActorId": "yggdrasil-hvergelmir-depth-arch-2",
+  "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "615a1598f293233119865abc2743b600c77bb3a7d6a9a99f8fdeeda3d708a217"
+  },
+  "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.low.glb",
+  "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.low.glb",
+  "colliderSourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7"
+  },
+  "lodSourceTier": "low",
+  "colliderUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.glb",
+  "colliderPath": "apps/megameal/public/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.glb",
+  "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.meta.json",
+  "colliderCacheKey": "mesh-collision-manager-v2:71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7:25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+  "triangleCount": 96,
+  "vertexCount": 192,
+  "bounds": {
+    "min": [
+      -1.649999976158142,
+      -0.1599999964237213,
+      -0.3100000023841858
+    ],
+    "max": [
+      1.649999976158142,
+      8.100000381469727,
+      0.3100000023841858
+    ],
+    "size": [
+      3.299999952316284,
+      8.260000377893448,
+      0.6200000047683716
+    ],
+    "center": [
+      0,
+      3.9700001925230026,
+      0
+    ]
+  },
+  "rawColliderBounds": {
+    "min": [
+      -32767,
+      -32767,
+      -2516
+    ],
+    "max": [
+      32767,
+      32767,
+      2516
+    ],
+    "size": [
+      65534,
+      65534,
+      5032
+    ],
+    "center": [
+      0,
+      0,
+      0
+    ]
+  },
+  "visualLocalBounds": {
+    "min": [
+      -1.649999976158142,
+      -0.1599999964237213,
+      -0.3100000023841858
+    ],
+    "max": [
+      1.649999976158142,
+      8.100000381469727,
+      0.3100000023841858
+    ],
+    "size": [
+      3.299999952316284,
+      8.260000377893448,
+      0.6200000047683716
+    ],
+    "center": [
+      0,
+      3.9700001925230026,
+      0
+    ]
+  },
+  "colliderLocalBounds": {
+    "min": [
+      -1.649999976158142,
+      -0.1599999964237213,
+      -0.3100000023841858
+    ],
+    "max": [
+      1.649999976158142,
+      8.100000381469727,
+      0.3100000023841858
+    ],
+    "size": [
+      3.299999952316284,
+      8.260000377893448,
+      0.6200000047683716
+    ],
+    "center": [
+      0,
+      3.9700001925230026,
+      0
+    ]
+  },
+  "assetLocalTransform": {
+    "schemaVersion": 1,
+    "coordinateSpaceVersion": 1,
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+    "sourceNodeName": "Lower Root Arch 2",
+    "visualLocalBounds": {
+      "min": [
+        -1.649999976158142,
+        -0.1599999964237213,
+        -0.3100000023841858
+      ],
+      "max": [
+        1.649999976158142,
+        8.100000381469727,
+        0.3100000023841858
+      ],
+      "size": [
+        3.299999952316284,
+        8.260000377893448,
+        0.6200000047683716
+      ],
+      "center": [
+        0,
+        3.9700001925230026,
+        0
+      ]
+    },
+    "colliderLocalBounds": {
+      "min": [
+        -1.649999976158142,
+        -0.1599999964237213,
+        -0.3100000023841858
+      ],
+      "max": [
+        1.649999976158142,
+        8.100000381469727,
+        0.3100000023841858
+      ],
+      "size": [
+        3.299999952316284,
+        8.260000377893448,
+        0.6200000047683716
+      ],
+      "center": [
+        0,
+        3.9700001925230026,
+        0
+      ]
+    },
+    "visualToPhysicsMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "visualToPhysicsLocalMatrix": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "provenance": {
+    "sourceActorId": "yggdrasil-hvergelmir-depth-arch-2",
+    "sourceActorName": "Lower Root Arch 2",
+    "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+    "sourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "615a1598f293233119865abc2743b600c77bb3a7d6a9a99f8fdeeda3d708a217"
+    },
+    "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.low.glb",
+    "colliderSourceAssetPath": "apps/megameal/public/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.low.glb",
+    "colliderSourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7"
+    },
+    "lodSourceTier": "low",
+    "bakeConfig": {
+      "command": "pnpm --dir apps/game bake:mesh-collider",
+      "levelId": "yggdrasil",
+      "nodeId": "yggdrasil-hvergelmir-depth-arch-2",
+      "sourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+      "colliderSourceAssetUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.low.glb",
+      "lodSourceTier": "low",
+      "intent": "blocker",
+      "channel": "worldStatic",
+      "triangleBudget": 5000,
+      "simplify": true,
+      "simplifyError": 0.05
+    },
+    "generatedAt": "2026-05-15T02:11:05.280Z"
+  },
+  "collision": {
+    "shape": "trimesh",
+    "intent": "blocker",
+    "channel": "worldStatic",
+    "triangleBudget": 5000,
+    "lodSourceTier": "low"
+  },
+  "collisionProduct": {
+    "actorId": "yggdrasil-hvergelmir-depth-arch-2",
+    "cacheKey": "mesh-collision-manager-v2:71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7:25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f:61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41",
+    "mode": "auto",
+    "productId": "yggdrasil-hvergelmir-depth-arch-2:auto:simplifiedMesh",
+    "generatorVersion": "mesh-collision-manager-v2",
+    "sourceKind": "prefab",
+    "sourceMeshFingerprint": {
+      "algorithm": "sha256",
+      "value": "71fd6efae34b2ef13990643c3351b082a8bd16eee830e5887908f6318ad353f7"
+    },
+    "transformFingerprint": {
+      "algorithm": "sha256",
+      "value": "25df6432a40c9030fedeba9bc52b29b3990639dc6c004db1ed5a6739ebec021f"
+    },
+    "policyFingerprint": {
+      "algorithm": "sha256",
+      "value": "61e213d6749042d37b12c8fc321cfcc1fd72612e1097beddc8215216f7159c41"
+    },
+    "shape": "trimesh",
+    "localBounds": {
+      "min": [
+        -1.649999976158142,
+        -0.1599999964237213,
+        -0.3100000023841858
+      ],
+      "max": [
+        1.649999976158142,
+        8.100000381469727,
+        0.3100000023841858
+      ],
+      "size": [
+        3.299999952316284,
+        8.260000377893448,
+        0.6200000047683716
+      ],
+      "center": [
+        0,
+        3.9700001925230026,
+        0
+      ]
+    },
+    "artifactUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.glb",
+    "metadataUrl": "/generated/runtime-game-assets/collision/yggdrasil/yggdrasil-hvergelmir-depth-arch-2.collider.meta.json",
+    "sourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.low.glb",
+    "visualSourceMeshUrl": "/generated/runtime-game-assets/prefabs/wasteland-archway/wasteland-archway.glb",
+    "triangleCount": 96,
+    "vertexCount": 192,
+    "triangleBudget": 5000
+  },
+  "simplification": {
+    "requested": false,
+    "applied": false,
+    "sourceTriangleCount": 96,
+    "targetTriangleBudget": 5000,
+    "ratio": 1,
+    "tool": "gltf-transform",
+    "prepass": "none",
+    "error": 0.05
+  }
+}

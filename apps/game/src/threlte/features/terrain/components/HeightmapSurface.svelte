@@ -2,6 +2,7 @@
 import { T } from '@threlte/core'
 import { onDestroy } from 'svelte'
 import * as THREE from 'three'
+import { registerSceneAtmosphereMaterial } from '../../../atmosphere/atmosphereMaterialRegistry'
 import { runtimeVisualStyleStore } from '../../../styles/runtimeVisualStyleStore'
 
 export let heightData: Float32Array
@@ -20,6 +21,9 @@ let albedoTexture: THREE.CanvasTexture | null = null
 let roughnessTexture: THREE.CanvasTexture | null = null
 let normalTexture: THREE.CanvasTexture | null = null
 let normalScale = new THREE.Vector2(0.55, 0.55)
+let terrainMaterial: THREE.MeshStandardMaterial | undefined
+let registeredTerrainMaterial: THREE.Material | null = null
+let unregisterTerrainAtmosphere: (() => void) | null = null
 
 function disposeResources() {
   surfaceGeometry?.dispose()
@@ -228,11 +232,30 @@ function rebuildSurface() {
   )
 }
 
+function syncTerrainAtmosphereMaterial() {
+  const nextMaterial = terrainMaterial ?? null
+  if (nextMaterial === registeredTerrainMaterial) return
+
+  unregisterTerrainAtmosphere?.()
+  unregisterTerrainAtmosphere = null
+  registeredTerrainMaterial = nextMaterial
+
+  if (!nextMaterial) return
+
+  unregisterTerrainAtmosphere = registerSceneAtmosphereMaterial(nextMaterial, {
+    source: 'terrain-heightmap',
+    renderPath: 'terrain',
+    objectName: 'terrain-surface',
+  })
+}
+
 $: terrainStyleSignature = JSON.stringify($runtimeVisualStyleStore.terrain)
 
 $: if (heightData && resolution > 1 && terrainStyleSignature) {
   rebuildSurface()
 }
+
+$: syncTerrainAtmosphereMaterial()
 
 $: surfacePosition = bounds
   ? [
@@ -243,6 +266,7 @@ $: surfacePosition = bounds
   : [0, verticalOffset, 0]
 
 onDestroy(() => {
+  unregisterTerrainAtmosphere?.()
   disposeResources()
 })
 </script>
@@ -257,6 +281,7 @@ onDestroy(() => {
     receiveShadow
   >
     <T.MeshStandardMaterial
+      bind:ref={terrainMaterial}
       color="#ffffff"
       map={albedoTexture}
       bumpMap={albedoTexture}

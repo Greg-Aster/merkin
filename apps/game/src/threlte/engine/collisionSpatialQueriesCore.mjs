@@ -4,6 +4,28 @@ const WALKABLE_SUPPORT_XZ_PADDING = 0.15
 const WALKABLE_SUPPORT_MAX_DROP = 2
 const WALKABLE_SUPPORT_MAX_PENETRATION = 0.25
 
+function getFiniteNonNegative(value, fallback) {
+  const numeric = Number(value)
+  return Number.isFinite(numeric) && numeric >= 0 ? numeric : fallback
+}
+
+function resolveWalkableSupportOptions(options) {
+  return {
+    xzPadding: getFiniteNonNegative(
+      options?.xzPadding,
+      WALKABLE_SUPPORT_XZ_PADDING,
+    ),
+    maxDrop: getFiniteNonNegative(
+      options?.maxDrop,
+      WALKABLE_SUPPORT_MAX_DROP,
+    ),
+    maxPenetration: getFiniteNonNegative(
+      options?.maxPenetration,
+      WALKABLE_SUPPORT_MAX_PENETRATION,
+    ),
+  }
+}
+
 /**
  * @typedef {[number, number, number]} Vec3
  * @typedef {{ size?: unknown } | null} ColliderLocalBoundsLike
@@ -23,6 +45,11 @@ const WALKABLE_SUPPORT_MAX_PENETRATION = 0.25
  *   render?: RenderLike,
  *   transform: { position: Vec3, scale: Vec3 },
  * }} ActorSpatialQueryInput
+ * @typedef {{
+ *   xzPadding?: number,
+ *   maxDrop?: number,
+ *   maxPenetration?: number,
+ * }} WalkableSupportOptions
  * @typedef {{
  *   physics?: PhysicsLike,
  *   render?: RenderLike,
@@ -61,18 +88,24 @@ export function actorColliderAabbContainsPoint(actor, point) {
 /**
  * @param {ActorSpatialQueryInput} actor
  * @param {Vec3} samplePosition
+ * @param {WalkableSupportOptions} [options]
  */
-export function actorSupportsWalkabilitySample(actor, samplePosition) {
+export function actorSupportsWalkabilitySample(
+  actor,
+  samplePosition,
+  options = {},
+) {
   const collision = actor.physics?.collision
   if (!collision || collision.sensor || collision.intent !== 'walkable') {
     return false
   }
 
+  const supportOptions = resolveWalkableSupportOptions(options)
   const [x, y, z] = samplePosition
   const [width, height, depth] = getActorColliderWorldSize(actor)
   const [actorX, actorY, actorZ] = actor.transform.position
-  const halfWidth = width / 2 + WALKABLE_SUPPORT_XZ_PADDING
-  const halfDepth = depth / 2 + WALKABLE_SUPPORT_XZ_PADDING
+  const halfWidth = width / 2 + supportOptions.xzPadding
+  const halfDepth = depth / 2 + supportOptions.xzPadding
   const topY = actorY + height / 2
 
   if (collision.shape === 'cylinder') {
@@ -89,7 +122,7 @@ export function actorSupportsWalkabilitySample(actor, samplePosition) {
   }
 
   return (
-    y >= topY - WALKABLE_SUPPORT_MAX_PENETRATION &&
-    y <= topY + WALKABLE_SUPPORT_MAX_DROP
+    y >= topY - supportOptions.maxPenetration &&
+    y <= topY + supportOptions.maxDrop
   )
 }

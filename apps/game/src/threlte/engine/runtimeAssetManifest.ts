@@ -94,6 +94,11 @@ export interface RuntimeAssetTextureMetadata {
   compression: 'basisu' | 'webp' | 'none'
 }
 
+export interface RuntimeAssetFingerprint {
+  algorithm?: 'sha256' | string
+  value?: string
+}
+
 export interface RuntimeAssetMaterialPbrSlot {
   textureIndex: number | null
   hasTexture: boolean
@@ -157,6 +162,9 @@ export interface RuntimeAssetMetadata {
   }
   textureCount: number
   imageCount: number
+  unusedTextureCount?: number
+  unusedImageCount?: number
+  unusedTextureBytes?: number
   textureBytes: number
   textures: RuntimeAssetTextureMetadata[]
   compression: {
@@ -174,10 +182,68 @@ export interface RuntimeAssetMetadata {
   }
 }
 
+export interface RuntimeStyleBakeProvenance {
+  schemaVersion: 1
+  status:
+    | 'clean'
+    | 'missing-generated-asset'
+    | 'missing-generated-metadata'
+    | 'missing-source-asset'
+    | 'stale-source'
+    | 'stale-settings'
+    | 'not-cooked'
+    | 'over-budget'
+  runtimeCookRequired: boolean
+  runtimeCooked: boolean
+  metadataUrl: string
+  sourceAssetUrl?: string
+  generatedAssetUrl: string
+  sourceAssetFingerprint?: RuntimeAssetFingerprint | null
+  currentSourceAssetFingerprint?: RuntimeAssetFingerprint | null
+  sourceAssetFingerprintMatches?: boolean | null
+  styleSettings?: {
+    profileId?: string | null
+    styleProfileName?: string | null
+    prompt?: string | null
+    negativePrompt?: string | null
+    textureSize?: number | null
+    aoStrength?: number | null
+    cavityStrength?: number | null
+    curvatureStrength?: number | null
+    lineStrength?: number | null
+    brushStrength?: number | null
+    geometrySimplification?: number | null
+    outputTier?: string | null
+    bevelCleanup?: boolean | null
+    weightedNormalCleanup?: boolean | null
+    lineGeometry?: boolean | null
+    mode?: string | null
+    backend?: string | null
+    shapeModel?: string | null
+    paintModel?: string | null
+    referenceImageUrl?: string | null
+  } | null
+  styleSettingsFingerprint?: RuntimeAssetFingerprint | null
+  expectedStyleSettingsFingerprint?: RuntimeAssetFingerprint | null
+  styleSettingsFingerprintMatches?: boolean | null
+  budget?: {
+    selectedTier?: RuntimeAssetLodTier
+    maxTextureSize?: number | null
+    maxTextureCount?: number | null
+    textureCount?: number | null
+    oversizedTextures?: number
+    unusedTextureCount?: number
+    overBudget?: boolean
+  }
+  diagnostics?: string[]
+}
+
 export interface RuntimeAssetManifestEntry {
   sourceUrl: string
   status?: 'required' | 'optional'
   required?: boolean
+  sourceExists?: boolean
+  sourceSizeBytes?: number
   lod?: {
     strategy: 'mesh-simplification'
     sourceTier: 'source'
@@ -221,6 +287,7 @@ export interface RuntimeAssetManifestEntry {
     }>
   }
   importMetadata?: RuntimeAssetImportMetadata | null
+  styleBake?: RuntimeStyleBakeProvenance | null
   metadata?: RuntimeAssetMetadata
   qualityVariants?: Partial<
     Record<'low' | 'medium' | 'high', RuntimeAssetVariant>

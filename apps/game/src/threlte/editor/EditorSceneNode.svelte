@@ -8,12 +8,9 @@ import RuntimeGameplayRenderer from '../levels/RuntimeGameplayRenderer.svelte'
 import EditorNodeGizmos from './EditorNodeGizmos.svelte'
 import EditorNodePhysicsBody from './EditorNodePhysicsBody.svelte'
 import EditorNodeRenderContent from './EditorNodeRenderContent.svelte'
-import {
-  getNodeVisualColliderSize,
-  resolveNodeCollision,
-} from './editorCollisionDefaults'
+import { getNodeVisualColliderSize } from './editorCollisionDefaults'
 import { registerEditorObject, unregisterEditorObject } from './editorRegistry'
-import { editorNodeViewportStateStore, editorStateStore } from './editorStore'
+import { editorNodeViewportStateStore } from './editorStore'
 import type { EditorSceneNode } from './editorStore'
 import type { EditorSceneSettings } from './editorTypes'
 
@@ -29,7 +26,6 @@ let group: THREE.Group
 let viewportVisible = true
 let runtimeDistanceVisible = true
 let effectiveVisible = true
-let collisionOverlayVisible = false
 let groupVisible = true
 const nodeWorldPosition = new THREE.Vector3()
 let distanceCullAccumulator = 0
@@ -98,11 +94,7 @@ useTask(delta => {
 $: viewportVisible =
   $editorNodeViewportStateStore.get(node.id)?.effectiveVisible ?? node.visible
 $: effectiveVisible = viewportVisible && runtimeDistanceVisible
-$: collisionOverlayVisible =
-  editorEnabled &&
-  $editorStateStore.collisionOverlayEnabled &&
-  Boolean(resolveNodeCollision(node, sceneSettings))
-$: groupVisible = effectiveVisible || collisionOverlayVisible
+$: groupVisible = effectiveVisible
 
 $: if (group) {
   registerEditorObject(node.id, group)
@@ -122,7 +114,6 @@ onDestroy(() => {
     {node}
     {editorEnabled}
     {sceneSettings}
-    collisionOverlayEnabled={$editorStateStore.collisionOverlayEnabled}
   />
 {/if}
 
@@ -132,7 +123,6 @@ onDestroy(() => {
       {node}
       {editorEnabled}
       {sceneSettings}
-      collisionOverlayEnabled={$editorStateStore.collisionOverlayEnabled}
     >
       {#if effectiveVisible}
         <EditorNodeRenderContent {node} {editorEnabled} />
