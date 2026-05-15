@@ -76,12 +76,7 @@ export function resolveRuntimeFireflyPresentation(
     lightDistance: resolveFireflyNumberSetting(node, 'lightDistance', 4.6),
     lightDecay: resolveFireflyNumberSetting(node, 'lightDecay', 1.25),
     spriteIntensity: resolveFireflyNumberSetting(node, 'spriteIntensity', 1.15),
-    lightBurstBoost: resolveFireflyNumberSetting(
-      node,
-      'lightBurstBoost',
-      1,
-      0,
-    ),
+    lightBurstBoost: resolveFireflyNumberSetting(node, 'lightBurstBoost', 1, 0),
     twinkleSpeed: resolveFireflyNumberSetting(node, 'twinkleSpeed', 0.9),
     hoverHeight: resolveFireflyNumberSetting(node, 'hoverHeight', 0.28),
     bobAmplitude: resolveFireflyNumberSetting(node, 'bobAmplitude', 0.08),

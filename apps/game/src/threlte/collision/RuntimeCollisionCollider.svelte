@@ -3,8 +3,8 @@ import { Collider } from '@threlte/rapier'
 import AssetTrimeshCollider from './AssetTrimeshCollider.svelte'
 import PrimitiveTrimeshCollider from './PrimitiveTrimeshCollider.svelte'
 import {
-  getRapierColliderDescriptor,
   type CollisionManagerRapierProduct,
+  getRapierColliderDescriptor,
 } from './collisionManagerProduct'
 
 export let product: CollisionManagerRapierProduct

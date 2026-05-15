@@ -1,8 +1,4 @@
-const GROUND_MODES = new Set([
-  'terrain-chunks',
-  'hybrid',
-  'scene-authored',
-])
+const GROUND_MODES = new Set(['terrain-chunks', 'hybrid', 'scene-authored'])
 const GROUND_VISUAL_SOURCES = new Set([
   'scene-actors',
   'heightmap-surface',
@@ -485,7 +481,10 @@ export function validateLevelGroundContract(level, actorsById) {
     collisionSource === 'baked-heightfield' ||
     collisionSource === 'source-linked-terrain-collision'
   ) {
-    if (runtimeMode === 'glb-chunk-terrain' && collisionSource === 'baked-heightfield') {
+    if (
+      runtimeMode === 'glb-chunk-terrain' &&
+      collisionSource === 'baked-heightfield'
+    ) {
       errors.push(
         `${levelId}: glb-chunk-terrain must use source-linked terrain collision.`,
       )

@@ -182,6 +182,13 @@ import {
   ungroupNodes,
   updateLevelSceneSettings,
 } from './editorStore'
+import type {
+  EditorStyleBakeBackend,
+  EditorStyleBakeOutputTier,
+  EditorStyleBakePreviewSnapshot,
+  EditorStyleBakeProduct,
+  EditorStyleBakeStatus,
+} from './editorStyleBakeTypes'
 import {
   type EditorStyleSceneCandidate,
   buildStyleSceneCandidates,
@@ -190,13 +197,6 @@ import {
   reconcileStyleBatchSelection,
   stylePresetOptions,
 } from './editorStyleBatchSelection'
-import type {
-  EditorStyleBakeBackend,
-  EditorStyleBakeOutputTier,
-  EditorStyleBakePreviewSnapshot,
-  EditorStyleBakeProduct,
-  EditorStyleBakeStatus,
-} from './editorStyleBakeTypes'
 import { createEditorStyleController } from './editorStyleController'
 import { isGeneratedHeightmapChunkTerrain } from './editorTerrainModeGuards'
 import {
@@ -370,7 +370,10 @@ let metadataStarMapYear = 2100
 let metadataStarMapDescription = ''
 let metadataSourceKind: 'scene' = 'scene'
 let loadedMetadataLevelId = ''
+type BakeWorkspaceTab = 'style' | 'collision' | 'runtime'
+
 let activeEditorTab: EditorPanelTab = 'scene'
+let activeBakeWorkspaceTab: BakeWorkspaceTab = 'style'
 let hierarchyFilter = ''
 let outlinerDisplayMode: OutlinerDisplayMode = 'view-layer'
 let outlinerExpandedIdsByMode: Record<OutlinerDisplayMode, string[]> = {
@@ -1960,7 +1963,8 @@ const editorPanelTabs: Array<{
     id: 'bake',
     icon: '◈',
     label: 'Bake',
-    description: 'Style, collision, terrain, partition, and runtime bake controls',
+    description:
+      'Style, collision, terrain, partition, and runtime bake controls',
   },
   {
     id: 'collision',
@@ -1979,6 +1983,28 @@ const editorPanelTabs: Array<{
     icon: '✦',
     label: 'AI Lab',
     description: 'ComfyUI, Hunyuan jobs, generated outputs, and experiments',
+  },
+]
+
+const bakeWorkspaceTabs: Array<{
+  id: BakeWorkspaceTab
+  label: string
+  description: string
+}> = [
+  {
+    id: 'style',
+    label: 'Style Product',
+    description: 'Preview, compare, and accept object-preserving style bakes.',
+  },
+  {
+    id: 'collision',
+    label: 'Collision And Terrain',
+    description: 'Bake mesh colliders, terrain collision, and terrain chunks.',
+  },
+  {
+    id: 'runtime',
+    label: 'Runtime And Publish',
+    description: 'Cook world partition data and review publish bake gates.',
   },
 ]
 
@@ -2276,7 +2302,9 @@ function setNestedValue<T>(
   return next
 }
 
-function isFiniteVec3Setting(value: unknown): value is [number, number, number] {
+function isFiniteVec3Setting(
+  value: unknown,
+): value is [number, number, number] {
   return (
     Array.isArray(value) &&
     value.length === 3 &&
@@ -2290,9 +2318,7 @@ function isSpawnPositionSettingPath(path: Array<string | number>) {
 
 function getSpawnSupportActorId(settings: Record<string, any>) {
   const actorId = settings.spawn?.supportActorId
-  return typeof actorId === 'string' && actorId.trim()
-    ? actorId.trim()
-    : null
+  return typeof actorId === 'string' && actorId.trim() ? actorId.trim() : null
 }
 
 function getLinkedSpawnSupportActorCommand(input: {
@@ -2314,7 +2340,9 @@ function getLinkedSpawnSupportActorCommand(input: {
     return null
   }
 
-  const supportActor = input.scene.nodes.find(node => node.id === supportActorId)
+  const supportActor = input.scene.nodes.find(
+    node => node.id === supportActorId,
+  )
   if (!supportActor || !isFiniteVec3Setting(supportActor.position)) return null
 
   const delta = nextSpawn.map(
@@ -4927,10 +4955,34 @@ onDestroy(() => {
         <section class="editor-workspace" aria-label="Bake workspace">
           <div class="editor-workspace-heading">
             <div class="label">Bake Workspace</div>
-            <p>Style products, collision products, terrain products, actor partitions, runtime cook, and publish gates.</p>
+            <p>Choose one bake type, follow the steps, then move to the next production product.</p>
           </div>
-          <details class="editor-section" open>
-            <summary class="label">Style Bake</summary>
+
+          <section class="editor-section" aria-label="Bake type">
+            <div class="label">Bake Type</div>
+            <div class="button-row compact" role="tablist" aria-label="Bake workspace type">
+              {#each bakeWorkspaceTabs as tab (tab.id)}
+                <button
+                  class:active={activeBakeWorkspaceTab === tab.id}
+                  role="tab"
+                  aria-selected={activeBakeWorkspaceTab === tab.id}
+                  title={tab.description}
+                  data-sfx-hover="hover-soft"
+                  data-sfx-click="panel-open"
+                  on:click={() => {
+                    activeBakeWorkspaceTab = tab.id
+                  }}
+                >
+                  {tab.label}
+                </button>
+              {/each}
+            </div>
+            <div class="save-message">
+              {bakeWorkspaceTabs.find(tab => tab.id === activeBakeWorkspaceTab)?.description}
+            </div>
+          </section>
+
+          {#if activeBakeWorkspaceTab === 'style'}
             <EditorStyleTabHost
               workspaceMode="bake"
               {...styleTabProps}
@@ -4954,15 +5006,15 @@ onDestroy(() => {
               bind:styleBakeForceRefresh
               bind:comfyUiLowVramMode
             />
-          </details>
-          <details class="editor-section" open>
-            <summary class="label">Collision And Terrain Bake</summary>
+          {/if}
+
+          {#if activeBakeWorkspaceTab === 'collision'}
             <EditorCollisionTabHost {...collisionTabProps} />
-          </details>
-          <details class="editor-section" open>
-            <summary class="label">Runtime Cook And Publish Bake</summary>
+          {/if}
+
+          {#if activeBakeWorkspaceTab === 'runtime'}
             <EditorWorkflowTabHost {...workflowTabProps} />
-          </details>
+          {/if}
         </section>
       {/if}
 

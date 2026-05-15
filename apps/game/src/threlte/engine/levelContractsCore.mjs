@@ -81,7 +81,9 @@ const LEVEL_RUNTIME_CONTRACTS = {
 }
 
 export function getLevelRuntimeContract(levelId) {
-  const normalizedLevelId = String(levelId ?? '').trim().toLowerCase()
+  const normalizedLevelId = String(levelId ?? '')
+    .trim()
+    .toLowerCase()
   const contract = LEVEL_RUNTIME_CONTRACTS[normalizedLevelId] ?? {}
 
   return {

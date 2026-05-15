@@ -1,0 +1,202 @@
+{
+  "outputPath": "/home/greggles/Merkin/apps/megameal/public/generated/style-lab/baked-style/style-bake-procedural-material-7434963e4fe1ab21/style-bake-procedural-material-7434963e4fe1ab21-style-baked.glb",
+  "outputSizeBytes": 5411184,
+  "textureSize": 256,
+  "styleProfileName": "Abyssal Neon Cosmic Horror",
+  "profile": "ink",
+  "materialCount": 1,
+  "sourceFingerprint": "12cc11396672093509141ab2a7c489dbe40570e54341cfd80ba006efa2af55f0",
+  "generator": "Merkin deterministic procedural style bake",
+  "mode": "procedural-material",
+  "settings": {
+    "profileId": "Abyssal Neon Cosmic Horror",
+    "styleProfileName": "Abyssal Neon Cosmic Horror",
+    "prompt": "extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+    "textureSize": 256,
+    "aoStrength": 0.8,
+    "cavityStrength": 0.65,
+    "curvatureStrength": 0.45,
+    "lineStrength": 0.35,
+    "brushStrength": 0.25,
+    "geometrySimplification": 0,
+    "outputTier": "preview",
+    "bevelCleanup": false,
+    "weightedNormalCleanup": true,
+    "lineGeometry": false
+  },
+  "product": {
+    "schemaVersion": 1,
+    "sourceAssetUrl": "/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "12cc11396672093509141ab2a7c489dbe40570e54341cfd80ba006efa2af55f0"
+    },
+    "levelId": "yggdrasil",
+    "nodeId": "yggdrasil-ground",
+    "sourceNodeTransform": {
+      "position": [
+        0.923107507358691,
+        -0.5933118705835927,
+        -22.848748353482005
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        228.42547543541474,
+        17.83372093023256,
+        228.5806431989618
+      ]
+    },
+    "sourceLocalBounds": {
+      "size": [
+        450.90732,
+        7.36176,
+        450.90732
+      ],
+      "maxDimension": 450.90732
+    },
+    "mode": "procedural-material",
+    "settings": {
+      "profileId": "Abyssal Neon Cosmic Horror",
+      "styleProfileName": "Abyssal Neon Cosmic Horror",
+      "prompt": "extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+      "textureSize": 256,
+      "aoStrength": 0.8,
+      "cavityStrength": 0.65,
+      "curvatureStrength": 0.45,
+      "lineStrength": 0.35,
+      "brushStrength": 0.25,
+      "geometrySimplification": 0,
+      "outputTier": "preview",
+      "bevelCleanup": false,
+      "weightedNormalCleanup": true,
+      "lineGeometry": false
+    },
+    "settingsFingerprint": {
+      "algorithm": "fnv1a64",
+      "value": "874d38a517d726be"
+    },
+    "cacheKey": "style-bake:procedural-material:7434963e4fe1ab21",
+    "generatedAssetUrl": "/generated/style-lab/baked-style/style-bake-procedural-material-7434963e4fe1ab21/style-bake-procedural-material-7434963e4fe1ab21-style-baked.glb",
+    "generatedMetadataUrl": "/generated/style-lab/baked-style/style-bake-procedural-material-7434963e4fe1ab21/style-bake-procedural-material-7434963e4fe1ab21-style-baked.json",
+    "generatedAt": "2026-05-15T17:12:16.125Z",
+    "generatorName": "Merkin deterministic procedural style bake",
+    "generatorVersion": "procedural-material-v1",
+    "state": {
+      "status": "ready"
+    },
+    "assetUrl": "/generated/style-lab/baked-style/style-bake-procedural-material-7434963e4fe1ab21/style-bake-procedural-material-7434963e4fe1ab21-style-baked.glb",
+    "metadataUrl": "/generated/style-lab/baked-style/style-bake-procedural-material-7434963e4fe1ab21/style-bake-procedural-material-7434963e4fe1ab21-style-baked.json",
+    "source": {
+      "assetUrl": "/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
+      "assetPath": "apps/megameal/public/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
+      "assetFingerprint": "12cc11396672093509141ab2a7c489dbe40570e54341cfd80ba006efa2af55f0",
+      "nodeId": "yggdrasil-ground",
+      "levelId": "yggdrasil"
+    },
+    "generator": "Merkin deterministic procedural style bake",
+    "status": "clean",
+    "diagnostics": {}
+  },
+  "createdAt": "2026-05-15T17:12:16.125Z",
+  "sourceAssetUrl": "/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
+  "sourceAssetPath": "apps/megameal/public/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
+  "outputAssetUrl": "/generated/style-lab/baked-style/style-bake-procedural-material-7434963e4fe1ab21/style-bake-procedural-material-7434963e4fe1ab21-style-baked.glb",
+  "outputAssetPath": "apps/megameal/public/generated/style-lab/baked-style/style-bake-procedural-material-7434963e4fe1ab21/style-bake-procedural-material-7434963e4fe1ab21-style-baked.glb",
+  "sourceAssetFingerprint": {
+    "algorithm": "sha256",
+    "value": "12cc11396672093509141ab2a7c489dbe40570e54341cfd80ba006efa2af55f0"
+  },
+  "styleSettingsFingerprint": {
+    "algorithm": "fnv1a64",
+    "value": "874d38a517d726be"
+  },
+  "prompt": "extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+  "lineStrength": 0.35,
+  "brushStrength": 0.25,
+  "aoStrength": 0.8,
+  "cavityStrength": 0.65,
+  "curvatureStrength": 0.45,
+  "geometrySimplification": 0,
+  "outputTier": "preview",
+  "styleBakeProduct": {
+    "schemaVersion": 1,
+    "sourceAssetUrl": "/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
+    "sourceAssetFingerprint": {
+      "algorithm": "sha256",
+      "value": "12cc11396672093509141ab2a7c489dbe40570e54341cfd80ba006efa2af55f0"
+    },
+    "levelId": "yggdrasil",
+    "nodeId": "yggdrasil-ground",
+    "sourceNodeTransform": {
+      "position": [
+        0.923107507358691,
+        -0.5933118705835927,
+        -22.848748353482005
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        228.42547543541474,
+        17.83372093023256,
+        228.5806431989618
+      ]
+    },
+    "sourceLocalBounds": {
+      "size": [
+        450.90732,
+        7.36176,
+        450.90732
+      ],
+      "maxDimension": 450.90732
+    },
+    "mode": "procedural-material",
+    "settings": {
+      "profileId": "Abyssal Neon Cosmic Horror",
+      "styleProfileName": "Abyssal Neon Cosmic Horror",
+      "prompt": "extremely dark cosmic horror material, blackened ancient, abyssal rune-carved, magenta and violet neon fissures, cold pink-purple emissive veins, starless depth, drowned shrine surfaces, monumental age, painterly but legible, strong silhouette hierarchy, selective luminous accents only, uncanny sacred dread",
+      "textureSize": 256,
+      "aoStrength": 0.8,
+      "cavityStrength": 0.65,
+      "curvatureStrength": 0.45,
+      "lineStrength": 0.35,
+      "brushStrength": 0.25,
+      "geometrySimplification": 0,
+      "outputTier": "preview",
+      "bevelCleanup": false,
+      "weightedNormalCleanup": true,
+      "lineGeometry": false
+    },
+    "settingsFingerprint": {
+      "algorithm": "fnv1a64",
+      "value": "874d38a517d726be"
+    },
+    "cacheKey": "style-bake:procedural-material:7434963e4fe1ab21",
+    "generatedAssetUrl": "/generated/style-lab/baked-style/style-bake-procedural-material-7434963e4fe1ab21/style-bake-procedural-material-7434963e4fe1ab21-style-baked.glb",
+    "generatedMetadataUrl": "/generated/style-lab/baked-style/style-bake-procedural-material-7434963e4fe1ab21/style-bake-procedural-material-7434963e4fe1ab21-style-baked.json",
+    "generatedAt": "2026-05-15T17:12:16.125Z",
+    "generatorName": "Merkin deterministic procedural style bake",
+    "generatorVersion": "procedural-material-v1",
+    "state": {
+      "status": "ready"
+    },
+    "assetUrl": "/generated/style-lab/baked-style/style-bake-procedural-material-7434963e4fe1ab21/style-bake-procedural-material-7434963e4fe1ab21-style-baked.glb",
+    "metadataUrl": "/generated/style-lab/baked-style/style-bake-procedural-material-7434963e4fe1ab21/style-bake-procedural-material-7434963e4fe1ab21-style-baked.json",
+    "source": {
+      "assetUrl": "/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
+      "assetPath": "apps/megameal/public/generated/hunyuan3d/world-root-basin/world-root-basin-generated-2026-04-19T16-38-34-252Z.glb",
+      "assetFingerprint": "12cc11396672093509141ab2a7c489dbe40570e54341cfd80ba006efa2af55f0",
+      "nodeId": "yggdrasil-ground",
+      "levelId": "yggdrasil"
+    },
+    "generator": "Merkin deterministic procedural style bake",
+    "status": "clean",
+    "diagnostics": {}
+  }
+}

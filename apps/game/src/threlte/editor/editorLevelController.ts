@@ -6,8 +6,8 @@ import type {
   LevelRegistryEntry,
 } from '../levels/levelRegistry'
 import { createDefaultSceneForLevel } from './defaultScenes'
-import { stripEditorSceneRuntimeData } from './editorPersistence'
 import { sanitizeEditorNodeCollisionPolicy } from './editorCollisionLifecycle'
+import { stripEditorSceneRuntimeData } from './editorPersistence'
 import {
   EDITOR_PUBLISH_BAKE_STEP_LABELS,
   computeEditorPublishBakePlan,

@@ -26,11 +26,11 @@ import {
   renderInfoStore,
   systemTimingsStore,
 } from '../stores/performanceStore'
+import { getRuntimeFrameRatePolicy } from '../utils/runtimeFrameRatePolicy'
 import {
   classifyRuntimePerformancePressure,
   summarizeRuntimePerformancePressure,
 } from '../utils/runtimePerformancePressure'
-import { getRuntimeFrameRatePolicy } from '../utils/runtimeFrameRatePolicy'
 
 // Props — matching what Game.svelte passes
 export let enablePerformanceMonitoring = true

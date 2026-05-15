@@ -41,7 +41,9 @@ function getAuthoredRuntimeAssetContract(level) {
   const runtimeAssets = level?.settings?.level?.runtimeAssets
   return {
     requiredActorIds: toStringArray(runtimeAssets?.requiredActorIds),
-    requiredRenderActorIds: toStringArray(runtimeAssets?.requiredRenderActorIds),
+    requiredRenderActorIds: toStringArray(
+      runtimeAssets?.requiredRenderActorIds,
+    ),
     legacyRequiredAssetActorIds: toStringArray(
       runtimeAssets?.requiredAssetActorIds,
     ),
@@ -97,7 +99,14 @@ function isSatisfiedByRuntimeSystem(level, actorId, terrainRuntimeCollision) {
   return false
 }
 
-function createGate({ id, label, required = true, satisfied, evidence = {}, blocker }) {
+function createGate({
+  id,
+  label,
+  required = true,
+  satisfied,
+  evidence = {},
+  blocker,
+}) {
   return {
     id,
     label,
@@ -120,15 +129,13 @@ function getTerrainManifestUrl(level, options = {}) {
 }
 
 function getWorldPartitionRequiredInitialCellKeys(options = {}) {
-  return uniqueStrings(
-    [
-      ...toStringArray(options.requiredInitialCellKeys),
-      ...toStringArray(options.worldPartitionReadiness?.requiredInitialCellKeys),
-      ...toStringArray(
-        options.worldPartition?.readiness?.requiredInitialCellKeys,
-      ),
-    ],
-  ).sort()
+  return uniqueStrings([
+    ...toStringArray(options.requiredInitialCellKeys),
+    ...toStringArray(options.worldPartitionReadiness?.requiredInitialCellKeys),
+    ...toStringArray(
+      options.worldPartition?.readiness?.requiredInitialCellKeys,
+    ),
+  ]).sort()
 }
 
 function toSet(values) {
@@ -168,7 +175,9 @@ export function createLevelRuntimeReadinessContract(level, options = {}) {
     requiredWalkableActorIds.includes(terrainRuntimeActorId)
   const requiredCollisionActorIds = uniqueStrings([
     ...requiredWalkableActorIds,
-    ...requiredActorIds.filter(actorId => Boolean(actorsById.get(actorId)?.physics)),
+    ...requiredActorIds.filter(actorId =>
+      Boolean(actorsById.get(actorId)?.physics),
+    ),
   ])
   const requiredColliderUrls = uniqueStrings(
     requiredCollisionActorIds
@@ -225,7 +234,8 @@ export function createLevelRuntimeReadinessContract(level, options = {}) {
   )
 
   const spawnValid = isFiniteVec3(level?.spawn?.player)
-  const terrainRuntimeCollisionDeclared = !terrainRequired || terrainRuntimeCollision
+  const terrainRuntimeCollisionDeclared =
+    !terrainRequired || terrainRuntimeCollision
   const publishGates = [
     createGate({
       id: 'legacy-required-asset-actor-ids-absent',
@@ -358,9 +368,7 @@ export function createLevelRuntimeReadinessContract(level, options = {}) {
 }
 
 export function evaluateLevelRuntimeActivation(contract, state = {}) {
-  const requiredAssetUrls = toStringArray(
-    contract?.runtime?.requiredAssetUrls,
-  )
+  const requiredAssetUrls = toStringArray(contract?.runtime?.requiredAssetUrls)
   const requiredRenderActorIds = toStringArray(
     contract?.runtime?.requiredRenderActorIds,
   )
@@ -385,7 +393,10 @@ export function evaluateLevelRuntimeActivation(contract, state = {}) {
   )
   const renderActorsMounted = Boolean(
     state.requiredRenderActorsMounted ??
-      allRequiredStringsPresent(requiredRenderActorIds, state.mountedRenderActorIds),
+      allRequiredStringsPresent(
+        requiredRenderActorIds,
+        state.mountedRenderActorIds,
+      ),
   )
   const terrainCollisionMounted = Boolean(state.terrainCollisionMounted)
   const collisionActorIdsForRuntime = requiredCollisionActorIds.filter(
@@ -406,12 +417,15 @@ export function evaluateLevelRuntimeActivation(contract, state = {}) {
     ...activeInitialCellKeys,
     ...readyInitialCellKeys,
   ])
-  const failedRequiredInitialCellKeys = requiredInitialCellKeys.filter(cellKey =>
-    failedInitialCellKeys.includes(cellKey),
+  const failedRequiredInitialCellKeys = requiredInitialCellKeys.filter(
+    cellKey => failedInitialCellKeys.includes(cellKey),
   )
   const initialWorldPartitionCellsReady = Boolean(
     state.requiredInitialCellsActive ??
-      (allRequiredStringsPresent(requiredInitialCellKeys, observedInitialCellKeys) &&
+      (allRequiredStringsPresent(
+        requiredInitialCellKeys,
+        observedInitialCellKeys,
+      ) &&
         failedRequiredInitialCellKeys.length === 0),
   )
   const colliderAssetsLoaded = Boolean(

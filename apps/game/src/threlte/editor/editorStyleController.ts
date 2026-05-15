@@ -17,17 +17,17 @@ import {
   reimportStyleAssetFromBlender,
   simplifyStyleAsset,
 } from './editorStyleApi'
-import { createEditorStyleBatchSessionController } from './editorStyleBatchSession'
 import {
   buildProceduralStyleBakeSettings,
   createEditorStyleBakeManager,
 } from './editorStyleBakeManager'
 import type {
   EditorStyleBakeBatchScope,
-  EditorStyleBakeProduct,
   EditorStyleBakePreviewSnapshot,
+  EditorStyleBakeProduct,
   EditorStyleBakeRunOptions,
 } from './editorStyleBakeTypes'
+import { createEditorStyleBatchSessionController } from './editorStyleBatchSession'
 
 interface EditorStyleControllerDeps {
   state: Record<string, any>
@@ -156,10 +156,19 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
     ).trim()
     return (
       !numbersMatch(product.settings.textureSize, state.styleBakeTextureSize) ||
-      !numbersMatch(product.settings.lineStrength, state.styleBakeLineStrength) ||
-      !numbersMatch(product.settings.brushStrength, state.styleBakeBrushStrength) ||
+      !numbersMatch(
+        product.settings.lineStrength,
+        state.styleBakeLineStrength,
+      ) ||
+      !numbersMatch(
+        product.settings.brushStrength,
+        state.styleBakeBrushStrength,
+      ) ||
       !numbersMatch(product.settings.aoStrength, state.styleBakeAoStrength) ||
-      !numbersMatch(product.settings.cavityStrength, state.styleBakeCavityStrength) ||
+      !numbersMatch(
+        product.settings.cavityStrength,
+        state.styleBakeCavityStrength,
+      ) ||
       !numbersMatch(
         product.settings.curvatureStrength,
         state.styleBakeCurvatureStrength,
@@ -244,9 +253,7 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       : `Scene regeneration finished for ${session.entries.length} object${session.entries.length === 1 ? '' : 's'}. The scene file was saved to disk.`
   }
 
-  function getStyleBatchModeLabel(
-    mode: PersistedStyleBatchSession['mode'],
-  ) {
+  function getStyleBatchModeLabel(mode: PersistedStyleBatchSession['mode']) {
     if (mode === 'procedural-material') return 'procedural style bake'
     if (mode === 'blender-geometry') return 'Blender geometry style bake'
     return mode === 'texture' ? 'texture style' : 'mesh reimagine'
@@ -1237,7 +1244,8 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       prompt,
       referenceImageUrl: resolvedWorkspaceReferenceImageUrl,
       workflowPath: session.workflowPath,
-      comfyUiLowVramMode: session.comfyUiLowVramMode ?? !!state.comfyUiLowVramMode,
+      comfyUiLowVramMode:
+        session.comfyUiLowVramMode ?? !!state.comfyUiLowVramMode,
     })
 
     state.selectedHunyuanJobId = queuedJob.id
@@ -1267,9 +1275,7 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
           : deps.getSelectedNode()
             ? [deps.getSelectedNode() as EditorSceneNode]
             : []
-      return nodes
-        .filter(node => canBakeSceneNode(node))
-        .map(node => node.id)
+      return nodes.filter(node => canBakeSceneNode(node)).map(node => node.id)
     }
 
     if (scope === 'visible') {
@@ -1608,14 +1614,10 @@ export function createEditorStyleController(deps: EditorStyleControllerDeps) {
       ]),
     )
     state.styleBatchStatus = `Preflighting ${candidateIds.length} object${candidateIds.length === 1 ? '' : 's'} for ${getStyleBatchModeLabel(batchMode)} (${scope.replace('-', ' ')}).`
-    const session = createStyleBatchSession(
-      batchMode,
-      candidateIds,
-      {
-        scope,
-        force: !!options.force,
-      },
-    )
+    const session = createStyleBatchSession(batchMode, candidateIds, {
+      scope,
+      force: !!options.force,
+    })
     persistStyleBatchSession(session)
     state.styleBatchResumePromise = resumeStyleBatchSession(session)
     await state.styleBatchResumePromise

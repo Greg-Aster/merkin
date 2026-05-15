@@ -5,6 +5,11 @@ export type AtmosphereShaderParameters = Parameters<
 >[0]
 
 export type AtmosphereShaderUniformInput = {
+  distanceFog: {
+    enabled: boolean
+    color: THREE.Color
+    density: number
+  }
   heightFog: {
     enabled: boolean
     color: THREE.Color
@@ -31,7 +36,17 @@ export function setAtmosphereShaderUniforms(
   shader: AtmosphereShaderParameters,
   atmosphere: AtmosphereShaderUniformInput,
 ) {
-  const { heightFog } = atmosphere
+  const { distanceFog, heightFog } = atmosphere
+
+  shader.uniforms.merkinDistanceFogColor ??= {
+    value: distanceFog.color.clone(),
+  }
+  shader.uniforms.merkinDistanceFogDensity ??= {
+    value: distanceFog.density,
+  }
+  shader.uniforms.merkinDistanceFogEnabled ??= {
+    value: distanceFog.enabled ? 1 : 0,
+  }
 
   shader.uniforms.merkinHeightFogColor ??= {
     value: heightFog.color.clone(),
@@ -49,6 +64,9 @@ export function setAtmosphereShaderUniforms(
     value: heightFog.enabled ? 1 : 0,
   }
 
+  shader.uniforms.merkinDistanceFogColor.value.copy(distanceFog.color)
+  shader.uniforms.merkinDistanceFogDensity.value = distanceFog.density
+  shader.uniforms.merkinDistanceFogEnabled.value = distanceFog.enabled ? 1 : 0
   shader.uniforms.merkinHeightFogColor.value.copy(heightFog.color)
   shader.uniforms.merkinHeightFogDensity.value = heightFog.density
   shader.uniforms.merkinHeightFogFloor.value = heightFog.floor
@@ -118,6 +136,81 @@ float merkinHeightFogFactor = 1.0 - exp(
 merkinHeightFogFactor = clamp(merkinHeightFogFactor * merkinHeightFogMask, 0.0, 1.0);
 gl_FragColor.rgb = mix(gl_FragColor.rgb, merkinHeightFogColor, merkinHeightFogFactor);
 #endif
+      `.trim(),
+    )
+
+  return true
+}
+
+export function injectProjectiveAtmosphereShaderChunks(
+  shader: AtmosphereShaderParameters,
+) {
+  if (
+    !shader.vertexShader.includes('void main()') ||
+    !shader.fragmentShader.includes('gl_FragColor')
+  ) {
+    return false
+  }
+
+  shader.vertexShader = shader.vertexShader.replace(
+    'void main() {',
+    `
+varying vec3 vMerkinAtmosphereWorldPosition;
+varying float vMerkinAtmosphereDepth;
+
+void main() {
+  vec4 merkinAtmosphereWorldPosition = modelMatrix * vec4(position, 1.0);
+  vMerkinAtmosphereWorldPosition = merkinAtmosphereWorldPosition.xyz;
+  vMerkinAtmosphereDepth = max(-(viewMatrix * merkinAtmosphereWorldPosition).z, 0.0);
+    `.trim(),
+  )
+
+  shader.fragmentShader = shader.fragmentShader
+    .replace(
+      'void main() {',
+      `
+uniform vec3 merkinDistanceFogColor;
+uniform float merkinDistanceFogDensity;
+uniform float merkinDistanceFogEnabled;
+uniform vec3 merkinHeightFogColor;
+uniform float merkinHeightFogDensity;
+uniform float merkinHeightFogFloor;
+uniform float merkinHeightFogCeiling;
+uniform float merkinHeightFogEnabled;
+varying vec3 vMerkinAtmosphereWorldPosition;
+varying float vMerkinAtmosphereDepth;
+
+float merkinAtmosphereExp2FogFactor(float density, float depth) {
+  float safeDensity = max(density, 0.0);
+  float safeDepth = max(depth, 0.0);
+  return 1.0 - exp(-safeDensity * safeDensity * safeDepth * safeDepth);
+}
+
+void merkinApplyProjectiveSceneAtmosphere() {
+  float distanceFogFactor = merkinDistanceFogEnabled *
+    merkinAtmosphereExp2FogFactor(merkinDistanceFogDensity, vMerkinAtmosphereDepth);
+  float heightMask = 1.0 - smoothstep(
+    merkinHeightFogFloor,
+    merkinHeightFogCeiling,
+    vMerkinAtmosphereWorldPosition.y
+  );
+  float heightFogFactor = merkinHeightFogEnabled *
+    heightMask *
+    merkinAtmosphereExp2FogFactor(merkinHeightFogDensity, vMerkinAtmosphereDepth);
+  float fogFactor = clamp(max(distanceFogFactor, heightFogFactor), 0.0, 1.0);
+  float heightBlend = heightFogFactor / max(distanceFogFactor + heightFogFactor, 0.0001);
+  vec3 fogColor = mix(merkinDistanceFogColor, merkinHeightFogColor, heightBlend);
+  gl_FragColor.rgb = mix(gl_FragColor.rgb, fogColor, fogFactor);
+}
+
+void main() {
+      `.trim(),
+    )
+    .replace(
+      /gl_FragColor\s*=\s*([^;]+);/,
+      `
+gl_FragColor = $1;
+merkinApplyProjectiveSceneAtmosphere();
       `.trim(),
     )
 

@@ -693,6 +693,14 @@ async function assertStreamingTelemetry(page, levelId) {
 async function captureCanvasScreenshot(page, levelId) {
   const canvas = page.locator('canvas').first()
   await canvas.waitFor({ state: 'visible', timeout: 30000 })
+  await page.addStyleTag({
+    content: `
+      .game-debug-panel,
+      .runtime-diagnostics-panel {
+        display: none !important;
+      }
+    `,
+  })
   const buffer = await canvas.screenshot({ animations: 'disabled' })
 
   if (writeArtifacts) {

@@ -35,25 +35,28 @@ export const LEVEL_RUNTIME_ACTIVATION_GATE_IDS: readonly string[] =
 type CoreContractShape = ReturnType<
   typeof createLevelRuntimeReadinessContractCore
 >
-type CoreActivationShape = ReturnType<
-  typeof evaluateLevelRuntimeActivationCore
->
-type Equals<A, B> =
-  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
-    ? true
-    : false
+type CoreActivationShape = ReturnType<typeof evaluateLevelRuntimeActivationCore>
+type Equals<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B
+  ? 1
+  : 2
+  ? true
+  : false
 type AssertContractShapesMatch = Equals<
   CoreContractShape,
   LevelRuntimeReadinessContract
 > extends true
   ? true
-  : ['Drift between levelRuntimeReadinessContractCore.d.mts and LevelRuntimeReadinessContract in types.ts']
+  : [
+      'Drift between levelRuntimeReadinessContractCore.d.mts and LevelRuntimeReadinessContract in types.ts',
+    ]
 type AssertActivationShapesMatch = Equals<
   CoreActivationShape,
   LevelRuntimeActivationStatus
 > extends true
   ? true
-  : ['Drift between levelRuntimeReadinessContractCore.d.mts and LevelRuntimeActivationStatus in types.ts']
+  : [
+      'Drift between levelRuntimeReadinessContractCore.d.mts and LevelRuntimeActivationStatus in types.ts',
+    ]
 const _assertContractShapesMatch: AssertContractShapesMatch = true
 const _assertActivationShapesMatch: AssertActivationShapesMatch = true
 void _assertContractShapesMatch

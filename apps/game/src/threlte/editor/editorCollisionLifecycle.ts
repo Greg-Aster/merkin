@@ -105,7 +105,7 @@ export function sanitizeEditorNodeCollisionPolicy(
       ? 'none'
       : mode === 'trigger'
         ? 'trigger'
-        : (collision.intent ?? 'blocker')
+        : collision.intent ?? 'blocker'
 
   const productFields = hasGeneratedCollisionProduct(collision)
     ? {

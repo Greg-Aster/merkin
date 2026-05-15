@@ -163,7 +163,8 @@ export const runtimeStreamingTelemetrySummaryStore = derived(
   runtimeStreamingTelemetryStore,
   state => {
     const levels = Object.values(state.levels)
-    if (levels.length === 0) return createEmptyRuntimeStreamingTelemetrySummary()
+    if (levels.length === 0)
+      return createEmptyRuntimeStreamingTelemetrySummary()
 
     const latestLevel = [...levels].sort(
       (a, b) => b.lastUpdatedAt - a.lastUpdatedAt,

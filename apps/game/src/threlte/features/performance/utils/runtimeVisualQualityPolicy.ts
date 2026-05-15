@@ -43,7 +43,15 @@ export function resolveRuntimePostProcessingPolicy({
   renderProfile?: ResolvedRuntimeRenderProfile
   atmosphere?: RuntimeAtmosphereDefinition
 }): RuntimePostProcessingPolicy {
-  const grading = atmosphere?.grading ?? visualStyle.colorGrading
+  const atmosphereEnabled = atmosphere?.enabled ?? true
+  const grading = atmosphereEnabled
+    ? atmosphere?.grading ?? visualStyle.colorGrading
+    : {
+        saturation: 1,
+        contrast: 1,
+        brightness: 1,
+        warmth: 1,
+      }
   const profilePost = renderProfile?.postProcessing
   const allowedPasses = new Set(profilePost?.passes ?? [])
   const profileAllowsPost = profilePost?.enabled ?? true
@@ -72,11 +80,6 @@ export function resolveRuntimePostProcessingPolicy({
     (Math.abs(colorSaturation - 1) > 0.001 ||
       Math.abs(colorContrast - 1) > 0.001 ||
       Math.abs(colorWarmth - 1) > 0.001)
-  const bloomEnabled =
-    profileAllowsPost &&
-    profileAllowsBloom &&
-    bloom.enabled &&
-    bloom.intensity > 0.01
   const ambientOcclusion = profilePost?.ambientOcclusion
   const ambientOcclusionIntensity = ambientOcclusion?.intensity ?? 0
   const ambientOcclusionEnabled =
@@ -84,8 +87,16 @@ export function resolveRuntimePostProcessingPolicy({
     profileAllowsAmbientOcclusion &&
     (ambientOcclusion?.enabled ?? false) &&
     ambientOcclusionIntensity > 0.01
-  const styleBloomIntensity =
-    atmosphere?.bloom.intensity ?? visualStyle.screenFx.bloomIntensity
+  const styleBloomIntensity = atmosphereEnabled
+    ? atmosphere?.bloom.intensity ?? visualStyle.screenFx.bloomIntensity
+    : 0
+  const bloomEnabled =
+    profileAllowsPost &&
+    profileAllowsBloom &&
+    atmosphereEnabled &&
+    styleBloomIntensity > 0.001 &&
+    bloom.enabled &&
+    bloom.intensity > 0.01
   const bloomIntensityScale = profilePost?.bloom.intensity ?? 1
   const toneMappingExposure = profileAllowsToneMapping
     ? profilePost?.toneMappingExposure ?? 1

@@ -178,9 +178,11 @@ $: styleBakeSettingsDirty = !!(
   styleBakeProduct &&
   (styleBakeProduct.settings.textureSize !== Number(styleBakeTextureSize) ||
     styleBakeProduct.settings.lineStrength !== Number(styleBakeLineStrength) ||
-    styleBakeProduct.settings.brushStrength !== Number(styleBakeBrushStrength) ||
+    styleBakeProduct.settings.brushStrength !==
+      Number(styleBakeBrushStrength) ||
     styleBakeProduct.settings.aoStrength !== Number(styleBakeAoStrength) ||
-    styleBakeProduct.settings.cavityStrength !== Number(styleBakeCavityStrength) ||
+    styleBakeProduct.settings.cavityStrength !==
+      Number(styleBakeCavityStrength) ||
     styleBakeProduct.settings.curvatureStrength !==
       Number(styleBakeCurvatureStrength) ||
     styleBakeProduct.settings.geometrySimplification !==
@@ -221,7 +223,8 @@ $: selectedBakeableCount = selectedNodes.filter(node =>
   canUseStyleStudio(node),
 ).length
 $: selectedBakeableScopeCount =
-  selectedBakeableCount || (selectedNode && canUseStyleStudio(selectedNode) ? 1 : 0)
+  selectedBakeableCount ||
+  (selectedNode && canUseStyleStudio(selectedNode) ? 1 : 0)
 $: canBatchRetexture = selectedBatchCount > 0 && (hasReference || hasStyleBrief)
 $: canBatchReimagine = selectedBatchCount > 0 && hasStyleBrief
 $: canBatchProceduralStyle = totalBatchCount > 0
@@ -249,7 +252,9 @@ $: visibleStyleSceneCandidates = styleSceneCandidates.filter(candidate => {
     .includes(normalizedCandidateSearch)
 })
 $: focusedCandidate =
-  visibleStyleSceneCandidates.find(candidate => candidate.id === focusedCandidateId) ??
+  visibleStyleSceneCandidates.find(
+    candidate => candidate.id === focusedCandidateId,
+  ) ??
   visibleStyleSceneCandidates[0] ??
   null
 $: batchAppliedCount = styleSceneCandidates.filter(

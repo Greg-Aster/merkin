@@ -11,8 +11,8 @@ import {
   type RuntimeSceneManifest,
   getBuildReportRequiredAssetUrls,
   getBuildReportRuntimeAssetUrls,
-  getRuntimeSceneRequiredRenderActorIds,
   getRuntimeSceneRequiredAssetUrls,
+  getRuntimeSceneRequiredRenderActorIds,
   getRuntimeSceneRuntimeAssetUrls,
   validateRuntimeSceneManifest,
 } from '../engine/runtimeSceneManifest'
@@ -106,8 +106,7 @@ function getNodeStyleBakeProduct(node: EditorSceneNode) {
 
 export function getEditorStyleBakeMetadataUrl(node: EditorSceneNode) {
   const product = getNodeStyleBakeProduct(node)
-  const explicit =
-    product?.metadataUrl ?? product?.generatedMetadataUrl ?? ''
+  const explicit = product?.metadataUrl ?? product?.generatedMetadataUrl ?? ''
   if (explicit) return normalizePublicUrl(explicit)
 
   const assetUrl =
@@ -130,14 +129,16 @@ export function isEditorStyleBakeCandidate(node: EditorSceneNode) {
   const product = getNodeStyleBakeProduct(node)
   if (product?.mode === 'ai-texture-source') return false
   const assetUrl = normalizePublicUrl(node.asset?.url)
-  return Boolean(
-    product ||
-      (assetUrl && isGeneratedStyleBakeUrl(assetUrl)),
-  )
+  return Boolean(product || (assetUrl && isGeneratedStyleBakeUrl(assetUrl)))
 }
 
 function normalizeFingerprint(
-  value: StyleBakeFingerprint | string | Record<string, unknown> | null | undefined,
+  value:
+    | StyleBakeFingerprint
+    | string
+    | Record<string, unknown>
+    | null
+    | undefined,
 ): StyleBakeFingerprint | null {
   if (!value) return null
   if (typeof value === 'string') return { algorithm: 'sha256', value }
@@ -152,8 +153,18 @@ function normalizeFingerprint(
 }
 
 function fingerprintsMatch(
-  left: StyleBakeFingerprint | string | Record<string, unknown> | null | undefined,
-  right: StyleBakeFingerprint | string | Record<string, unknown> | null | undefined,
+  left:
+    | StyleBakeFingerprint
+    | string
+    | Record<string, unknown>
+    | null
+    | undefined,
+  right:
+    | StyleBakeFingerprint
+    | string
+    | Record<string, unknown>
+    | null
+    | undefined,
 ) {
   const leftFingerprint = normalizeFingerprint(left)
   const rightFingerprint = normalizeFingerprint(right)
@@ -161,11 +172,11 @@ function fingerprintsMatch(
   return leftFingerprint.value === rightFingerprint.value
 }
 
-function getStyleMetadataSettingsFingerprint(metadata: StyleBakeMetadata | null) {
+function getStyleMetadataSettingsFingerprint(
+  metadata: StyleBakeMetadata | null,
+) {
   return (
-    metadata?.styleSettingsFingerprint ??
-    metadata?.settingsFingerprint ??
-    null
+    metadata?.styleSettingsFingerprint ?? metadata?.settingsFingerprint ?? null
   )
 }
 
@@ -670,7 +681,9 @@ function addStyleBakeProductsSection(
     ...getRuntimeSceneRequiredRenderActorIds(runtimeScene),
     ...(scene?.settings?.level?.runtimeAssets?.requiredRenderActorIds ?? []),
   ])
-  const requiredAssetUrls = new Set(getRuntimeSceneRequiredAssetUrls(runtimeScene))
+  const requiredAssetUrls = new Set(
+    getRuntimeSceneRequiredAssetUrls(runtimeScene),
+  )
   const selectedTier = getStyleBakeSelectedTier(runtimeScene)
   let cleanCount = 0
   let needBakeCount = 0
@@ -847,7 +860,9 @@ function addStyleBakeProductsSection(
       asset,
       selectedTier,
     )
-    const sourceUnusedTextures = Number(asset?.metadata?.unusedTextureCount ?? 0)
+    const sourceUnusedTextures = Number(
+      asset?.metadata?.unusedTextureCount ?? 0,
+    )
     const cookedUnusedTextures =
       selectedMetadata && selectedMetadata !== asset?.metadata
         ? Number(selectedMetadata.unusedTextureCount ?? 0)
@@ -994,8 +1009,7 @@ function addMeshColliderMetadataSection(
 ) {
   const assetCollisionNodes = (scene?.nodes ?? []).filter(
     node =>
-      requiresMeshColliderMetadata(node) &&
-      !isVisualOnlyActor(scene!, node.id),
+      requiresMeshColliderMetadata(node) && !isVisualOnlyActor(scene!, node.id),
   )
   let validCount = 0
   let legacyCount = 0
@@ -1413,7 +1427,7 @@ function addMaterialAndLodSections(
       ? `${missingLodVariants} cooked LOD variant(s) are missing.`
       : lodMisses
         ? `${lodMisses} LOD variant(s) miss target simplification policy.`
-      : `${impostorCount} impostor atlas entr${impostorCount === 1 ? 'y' : 'ies'} and no LOD target misses.`,
+        : `${impostorCount} impostor atlas entr${impostorCount === 1 ? 'y' : 'ies'} and no LOD target misses.`,
   })
 
   if (lodBlockers) {

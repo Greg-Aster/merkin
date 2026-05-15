@@ -1,6 +1,6 @@
 import {
-  getRuntimeSceneRuntimeAssetUrls,
   type RuntimeSceneManifest,
+  getRuntimeSceneRuntimeAssetUrls,
 } from '../engine/runtimeSceneManifest'
 import type {
   EditorPublishReadinessItem,
@@ -244,8 +244,7 @@ export function addPublishReadinessWorkflow(
   addWorkflowStep(viewModel, {
     id: 'cook-runtime-assets',
     label: 'Cook runtime assets and manifests',
-    command:
-      `pnpm --dir apps/game cook:runtime-assets -- --level=${viewModel.levelId}`,
+    command: `pnpm --dir apps/game cook:runtime-assets -- --level=${viewModel.levelId}`,
     expectedOutput:
       'Runtime asset LOD GLBs, asset manifest, scene manifests, LOD metadata, and impostor atlas.',
     reason: commandIds.has('cook-runtime-assets')

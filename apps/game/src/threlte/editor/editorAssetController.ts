@@ -708,9 +708,7 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
       level: 'ready',
       message: state.hunyuanStatus,
     })
-    deps.setSaveMessage(
-      `AI asset applied: ${state.hunyuanLastOutputUrl}`,
-    )
+    deps.setSaveMessage(`AI asset applied: ${state.hunyuanLastOutputUrl}`)
 
     const selectedNode = deps.getSelectedNode()
     if (selectedNode && targetNodeIds.includes(selectedNode.id)) {
@@ -893,9 +891,7 @@ export function createEditorAssetController(deps: EditorAssetControllerDeps) {
         nodeId: selectedNode.id,
         assetUrl: source.assetUrl,
       })
-      deps.setSaveMessage(
-        `Replaced ${selectedNode.name} visual source`,
-      )
+      deps.setSaveMessage(`Replaced ${selectedNode.name} visual source`)
     } catch (error) {
       console.error('Replace visual source failed:', error)
       deps.setSaveMessage(

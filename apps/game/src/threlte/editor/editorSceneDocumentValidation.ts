@@ -178,7 +178,10 @@ function validateSceneShape(value: unknown) {
           node.collision,
           generatedCollisionProductFields,
         )
-        if (node.collision.shape !== 'trimesh' || generatedFields.length === 0) {
+        if (
+          node.collision.shape !== 'trimesh' ||
+          generatedFields.length === 0
+        ) {
           errors.push(
             `Node ${id || index} collision.shape is only allowed as generated mesh collision product metadata.`,
           )
@@ -205,7 +208,9 @@ function validateSceneShape(value: unknown) {
 
       if (
         node.collision.generationStatus !== undefined &&
-        !collisionGenerationStatuses.has(String(node.collision.generationStatus))
+        !collisionGenerationStatuses.has(
+          String(node.collision.generationStatus),
+        )
       ) {
         errors.push(
           `Node ${id || index} collision.generationStatus must be ready, dirty, generating, or failed.`,

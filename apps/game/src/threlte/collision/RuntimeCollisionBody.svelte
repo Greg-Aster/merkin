@@ -1,11 +1,11 @@
 <script lang="ts">
 import { T } from '@threlte/core'
 import { RigidBody } from '@threlte/rapier'
-import {
-  getCollisionProductMountKey,
-  type CollisionManagerRapierProduct,
-} from './collisionManagerProduct'
 import RuntimeCollisionCollider from './RuntimeCollisionCollider.svelte'
+import {
+  type CollisionManagerRapierProduct,
+  getCollisionProductMountKey,
+} from './collisionManagerProduct'
 
 export let physicsEnabled = true
 export let product: CollisionManagerRapierProduct | null = null

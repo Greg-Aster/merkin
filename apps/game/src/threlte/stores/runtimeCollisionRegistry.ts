@@ -13,9 +13,9 @@ declare global {
 
 const loadedColliderUrlsByLevel = new Map<string, Set<string>>()
 
-export const runtimeLoadedColliderUrlsStore = writable<Record<string, string[]>>(
-  {},
-)
+export const runtimeLoadedColliderUrlsStore = writable<
+  Record<string, string[]>
+>({})
 
 function toRecord() {
   return Object.fromEntries(
@@ -52,8 +52,7 @@ function publishRuntimeCollisionState(levelId: string) {
 export function markRuntimeColliderUrlLoaded(levelId: string, url: string) {
   if (!levelId || !url) return
 
-  const loadedUrls =
-    loadedColliderUrlsByLevel.get(levelId) ?? new Set<string>()
+  const loadedUrls = loadedColliderUrlsByLevel.get(levelId) ?? new Set<string>()
   loadedUrls.add(url)
   loadedColliderUrlsByLevel.set(levelId, loadedUrls)
   publishRuntimeCollisionState(levelId)

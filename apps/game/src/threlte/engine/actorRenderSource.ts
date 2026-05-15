@@ -18,7 +18,9 @@ export type MeshRenderSource =
     }
   | { kind: 'none' }
 
-export function getActorMeshRenderSource(actor: ActorDefinition): MeshRenderSource {
+export function getActorMeshRenderSource(
+  actor: ActorDefinition,
+): MeshRenderSource {
   const render = actor.render
   if (render?.asset) return { kind: 'asset', asset: render.asset }
   if (render?.prefab) return { kind: 'prefab', prefab: render.prefab }
@@ -28,7 +30,9 @@ export function getActorMeshRenderSource(actor: ActorDefinition): MeshRenderSour
   return { kind: 'none' }
 }
 
-export function getSceneNodeMeshRenderSource(node: EditorSceneNode): MeshRenderSource {
+export function getSceneNodeMeshRenderSource(
+  node: EditorSceneNode,
+): MeshRenderSource {
   if (node.asset) return { kind: 'asset', asset: node.asset }
   if (node.prefab) return { kind: 'prefab', prefab: node.prefab }
   if (node.primitive) return { kind: 'primitive', primitive: node.primitive }

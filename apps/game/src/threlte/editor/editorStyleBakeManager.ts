@@ -273,7 +273,9 @@ function getProductFromPayload(
 }
 
 function styleBakeValuesMatch(left: unknown, right: unknown) {
-  return stableStyleBakeJson(left ?? null) === stableStyleBakeJson(right ?? null)
+  return (
+    stableStyleBakeJson(left ?? null) === stableStyleBakeJson(right ?? null)
+  )
 }
 
 async function resolveCurrentStyleBakeTarget(

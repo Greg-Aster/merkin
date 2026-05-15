@@ -1226,7 +1226,12 @@ function handleKeyDown(event: KeyboardEvent) {
   const mod = event.metaKey || event.ctrlKey
   const key = event.key.toLowerCase()
 
-  if (useActiveCamera && !mod && !modalSession && ['w', 'a', 's', 'd'].includes(key)) {
+  if (
+    useActiveCamera &&
+    !mod &&
+    !modalSession &&
+    ['w', 'a', 's', 'd'].includes(key)
+  ) {
     return
   }
 
@@ -1268,10 +1273,7 @@ function handleKeyDown(event: KeyboardEvent) {
     undoScene()
     return
   }
-  if (
-    (mod && key === 'z' && event.shiftKey) ||
-    (mod && key === 'y')
-  ) {
+  if ((mod && key === 'z' && event.shiftKey) || (mod && key === 'y')) {
     event.preventDefault()
     redoScene()
     return

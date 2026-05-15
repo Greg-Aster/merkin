@@ -1,11 +1,16 @@
 <script lang="ts">
 import { Canvas } from '@threlte/core'
 import { createEventDispatcher } from 'svelte'
+import { runtimeAtmosphereStore } from './atmosphere/runtimeAtmosphereStore'
 import GameWorld from './core/GameWorld.svelte'
 import { qualitySettingsStore } from './features/performance/stores/performanceStore'
 import PerformanceSystem from './features/performance/systems/Performance.svelte'
 import { DEFAULT_LEVEL_ID } from './levels/levelRegistry'
 import { setRuntimeDiagnostic } from './stores/runtimeDiagnosticsStore'
+import {
+  type ResolvedRuntimeRenderProfile,
+  runtimeRenderProfileStore,
+} from './stores/runtimeRenderProfileStore'
 import {
   setRuntimePostProcessingDiagnostics,
   setRuntimeRenderLifecyclePhase,
@@ -56,8 +61,88 @@ export let normalizeLevelId: (levelId: string) => string = levelId => levelId
 let postProcessingComponent: any = null
 let postProcessingComponentPromise: Promise<any> | null = null
 
+type RuntimePostProcessingPass = 'bloom' | 'color-grading'
+
 function forward(type: string, detail: unknown) {
   dispatch(type, detail)
+}
+
+function profileAllowsPostProcessingPass(
+  profile: ResolvedRuntimeRenderProfile,
+  pass: RuntimePostProcessingPass,
+) {
+  if (!profile.postProcessing.enabled) return false
+  return (
+    profile.postProcessing.passes.length === 0 ||
+    profile.postProcessing.passes.includes(pass)
+  )
+}
+
+function getUnmountedPostProcessingReason(
+  profile: ResolvedRuntimeRenderProfile,
+  pass: RuntimePostProcessingPass,
+  mountReason: string,
+) {
+  if (!profile.postProcessing.enabled) return 'profile disabled'
+  if (!profileAllowsPostProcessingPass(profile, pass)) {
+    return `disabled by ${profile.tier} profile pass list`
+  }
+  return mountReason
+}
+
+function publishUnmountedPostProcessingDiagnostics(
+  levelId: string,
+  mountReason: string,
+  level: 'loading' | 'ready' | 'warning',
+  profile: ResolvedRuntimeRenderProfile,
+  atmosphereId: string,
+) {
+  const bloomReason = getUnmountedPostProcessingReason(
+    profile,
+    'bloom',
+    mountReason,
+  )
+  const colorGradingReason = getUnmountedPostProcessingReason(
+    profile,
+    'color-grading',
+    mountReason,
+  )
+  const passes = profile.postProcessing.enabled
+    ? profile.postProcessing.passes
+    : []
+
+  setRuntimePostProcessingDiagnostics(levelId, {
+    enabled: false,
+    profileId: profile.id,
+    passes,
+    atmosphereId,
+    bloomEnabled: false,
+    colorGradingEnabled: false,
+    bloomReason,
+    colorGradingReason,
+    reason: mountReason,
+  })
+  setRuntimeDiagnostic('postProcessing', {
+    label: 'Post Processing',
+    level,
+    message: `${levelId}/${profile.id}/${profile.tier}: bloom off (${bloomReason}); color grading off (${colorGradingReason}); passes ${profile.postProcessing.enabled ? profile.postProcessing.passes.join(', ') || 'all' : 'disabled'}; component not mounted (${mountReason}).`,
+    meta: {
+      levelId,
+      profileId: profile.id,
+      tier: profile.tier,
+      passes,
+      atmosphereId,
+      reason: mountReason,
+      enablePostProcessing: $qualitySettingsStore.enablePostProcessing,
+      editorEnabled,
+      gameplayEnabled,
+      staticWorldReady,
+      bloomEnabled: false,
+      bloomReason,
+      colorGradingEnabled: false,
+      colorGradingReason,
+    },
+  })
 }
 
 async function ensurePostProcessingComponent() {
@@ -88,41 +173,44 @@ $: postProcessingEligible =
 $: if (postProcessingEligible && !postProcessingComponent) {
   void ensurePostProcessingComponent()
 }
-$: if (staticWorldReady && !postProcessingEligible) {
-  const disabledReason = $qualitySettingsStore.enablePostProcessing
-    ? 'waiting-for-gameplay-or-editor'
-    : 'quality-disabled'
-  setRuntimePostProcessingDiagnostics(currentLevel, {
-    enabled: false,
-    passes: [],
-    bloomEnabled: false,
-    colorGradingEnabled: false,
-    bloomReason: disabledReason,
-    colorGradingReason: disabledReason,
-    reason: disabledReason,
-  })
-  setRuntimeDiagnostic('postProcessing', {
-    label: 'Post Processing',
-    level: 'ready',
-    message: `${currentLevel}: bloom off (${disabledReason}); color grading off (${disabledReason}); post-processing component not mounted.`,
-    meta: {
+$: if (isInitialized && (!postProcessingEligible || !postProcessingComponent)) {
+  const mountReason = postProcessingEligible
+    ? 'component-loading'
+    : !$qualitySettingsStore.enablePostProcessing
+      ? 'quality-disabled'
+      : !staticWorldReady
+        ? 'waiting-for-static-world'
+        : 'waiting-for-gameplay-or-editor'
+  const diagnosticLevel =
+    mountReason === 'waiting-for-static-world' ||
+    mountReason === 'component-loading'
+      ? 'loading'
+      : 'ready'
+  const activeRenderProfile = $runtimeRenderProfileStore
+  const activeAtmosphereId = $runtimeAtmosphereStore.id
+  const activeLevelId = currentLevel
+
+  publishUnmountedPostProcessingDiagnostics(
+    activeLevelId,
+    mountReason,
+    diagnosticLevel,
+    activeRenderProfile,
+    activeAtmosphereId,
+  )
+
+  if (staticWorldReady) {
+    setRuntimeRenderLifecyclePhase({
       levelId: currentLevel,
-      reason: disabledReason,
-      enablePostProcessing: $qualitySettingsStore.enablePostProcessing,
-      editorEnabled,
-      gameplayEnabled,
-    },
-  })
-  setRuntimeRenderLifecyclePhase({
-    levelId: currentLevel,
-    phase: 'post-processing-ready',
-    message: `${currentLevel}: post-processing disabled for current quality or activation state.`,
-    detail: {
-      enablePostProcessing: $qualitySettingsStore.enablePostProcessing,
-      editorEnabled,
-      gameplayEnabled,
-    },
-  })
+      phase: 'post-processing-ready',
+      message: `${currentLevel}: post-processing disabled for current quality or activation state.`,
+      detail: {
+        enablePostProcessing: $qualitySettingsStore.enablePostProcessing,
+        editorEnabled,
+        gameplayEnabled,
+        reason: mountReason,
+      },
+    })
+  }
 }
 </script>
 

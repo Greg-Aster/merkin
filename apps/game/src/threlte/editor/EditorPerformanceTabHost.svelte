@@ -10,11 +10,11 @@ import {
   qualityLevelStore,
   renderInfoStore,
 } from '../features/performance/stores/performanceStore'
+import { getRuntimeFrameRatePolicy } from '../features/performance/utils/runtimeFrameRatePolicy'
 import {
   classifyRuntimePerformancePressure,
   formatRuntimePressureBytes,
 } from '../features/performance/utils/runtimePerformancePressure'
-import { getRuntimeFrameRatePolicy } from '../features/performance/utils/runtimeFrameRatePolicy'
 import { runtimeStreamingTelemetrySummaryStore } from '../stores/runtimeStreamingTelemetry'
 import {
   type EditorPublishPipelineState,
@@ -38,8 +38,17 @@ export let onOpenBuildTools: () => void = () => {}
 export let onOpenCollisionTools: () => void = () => {}
 export let onSelectNodes: (nodeIds: string[], label: string) => void = () => {}
 
-const meshCollisionQualities = new Set(['convexHull', 'simplifiedMesh', 'trimesh'])
-const runtimeRenderableKinds = new Set(['asset', 'primitive', 'prefab', 'light'])
+const meshCollisionQualities = new Set([
+  'convexHull',
+  'simplifiedMesh',
+  'trimesh',
+])
+const runtimeRenderableKinds = new Set([
+  'asset',
+  'primitive',
+  'prefab',
+  'light',
+])
 
 function getBuildReport(scene: EditorSceneDocument | null) {
   if (!scene) return null
@@ -84,7 +93,8 @@ function isRuntimeRenderableNode(node: EditorSceneNode) {
 }
 
 function formatMetricValue(metric: PerformanceMetric) {
-  if (Number.isFinite(metric.budget)) return `${metric.value} / ${metric.budget}`
+  if (Number.isFinite(metric.budget))
+    return `${metric.value} / ${metric.budget}`
   return String(metric.value)
 }
 
@@ -100,11 +110,14 @@ $: dirtyCollisionNodes = editorNodes.filter(
 $: meshCollisionNodes = editorNodes.filter(isMeshCollisionNode)
 $: sourceLodCollisionNodes = editorNodes.filter(isSourceLodCollisionNode)
 $: neverCullNodes = editorNodes.filter(
-  node => isRuntimeRenderableNode(node) && node.renderPolicy?.cullingPolicy === 'never',
+  node =>
+    isRuntimeRenderableNode(node) &&
+    node.renderPolicy?.cullingPolicy === 'never',
 )
 $: runtimeBudgetNodes = editorNodes.filter(
   node =>
-    isRuntimeRenderableNode(node) && node.renderPolicy?.cullingPolicy !== 'never',
+    isRuntimeRenderableNode(node) &&
+    node.renderPolicy?.cullingPolicy !== 'never',
 )
 $: terrainRuntimeMode =
   editorScene?.settings?.level?.ground?.terrainRuntimeMode ??
@@ -166,7 +179,8 @@ $: performanceSystems = [
   {
     label: 'Runtime Asset LODs',
     state: 'Cooked',
-    detail: 'High, medium, and low mesh variants are part of the cook contract.',
+    detail:
+      'High, medium, and low mesh variants are part of the cook contract.',
   },
   {
     label: 'Terrain LOD',

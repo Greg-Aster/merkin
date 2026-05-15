@@ -15,10 +15,7 @@ function resolveWalkableSupportOptions(options) {
       options?.xzPadding,
       WALKABLE_SUPPORT_XZ_PADDING,
     ),
-    maxDrop: getFiniteNonNegative(
-      options?.maxDrop,
-      WALKABLE_SUPPORT_MAX_DROP,
-    ),
+    maxDrop: getFiniteNonNegative(options?.maxDrop, WALKABLE_SUPPORT_MAX_DROP),
     maxPenetration: getFiniteNonNegative(
       options?.maxPenetration,
       WALKABLE_SUPPORT_MAX_PENETRATION,

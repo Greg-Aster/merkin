@@ -38,6 +38,20 @@ function clampNumber(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
 }
 
+function resolveSkyOcclusion(
+  distanceFogDensity: number,
+  heightFogDensity: number,
+) {
+  return clampNumber(distanceFogDensity * 240 + heightFogDensity * 160, 0, 1)
+}
+
+function resolveHorizonBoost(
+  distanceFogDensity: number,
+  heightFogDensity: number,
+) {
+  return clampNumber(distanceFogDensity * 220 + heightFogDensity * 120, 0, 1)
+}
+
 function normalizeColor(value: string | undefined, fallback: string) {
   return typeof value === 'string' && value.length > 0 ? value : fallback
 }
@@ -91,6 +105,9 @@ export function runtimeVisualStyleToRuntimeAtmosphere(
     0,
     Math.round(finiteNumberOrDefault(heightFog.mistLayers, 0)),
   )
+  const aerialPerspectiveEnabled =
+    distanceFogDensity > 0 || heightFogDensity > 0
+  const skyParticipation = aerialPerspectiveEnabled ? 1 : 0
 
   return {
     id: options.id ?? visualStyle.id,
@@ -123,18 +140,10 @@ export function runtimeVisualStyleToRuntimeAtmosphere(
       ),
     },
     aerialPerspective: {
-      enabled: distanceFogDensity > 0 || heightFogDensity > 0,
-      skyParticipation: 0,
-      skyOcclusion: clampNumber(
-        distanceFogDensity * 240 + heightFogDensity * 160,
-        0,
-        1,
-      ),
-      horizonBoost: clampNumber(
-        distanceFogDensity * 220 + heightFogDensity * 120,
-        0,
-        1,
-      ),
+      enabled: aerialPerspectiveEnabled,
+      skyParticipation,
+      skyOcclusion: resolveSkyOcclusion(distanceFogDensity, heightFogDensity),
+      horizonBoost: resolveHorizonBoost(distanceFogDensity, heightFogDensity),
     },
     mist: {
       enabled: mistOpacity > 0.001 && mistLayers > 0,
@@ -215,17 +224,24 @@ export function buildRuntimeAtmosphereFromLevelSettings(
     0,
     Math.round(finiteNumberOrDefault(haze?.mistLayers, base.mist.layers)),
   )
-  const skyboxFogOpacity = clampNumber(
-    finiteNumberOrDefault(settings?.skybox?.fogOpacity, -1),
-    -1,
-    1,
-  )
   const hasAuthoredSkyParticipation =
     typeof settings?.skybox?.fogOpacity === 'number'
-  const skyParticipation = hasAuthoredSkyParticipation ? skyboxFogOpacity : 0
-  const horizonBoost = hasAuthoredSkyParticipation
-    ? skyboxFogOpacity
-    : clampNumber(distanceFogDensity * 220 + heightFogDensity * 120, 0, 1)
+  const skyParticipation = clampNumber(
+    finiteNumberOrDefault(
+      hasAuthoredSkyParticipation
+        ? settings?.skybox?.fogOpacity
+        : base.aerialPerspective.skyParticipation,
+      0,
+    ),
+    0,
+    1,
+  )
+  const skyOcclusion = resolveSkyOcclusion(distanceFogDensity, heightFogDensity)
+  const horizonBoost = resolveHorizonBoost(distanceFogDensity, heightFogDensity)
+  const aerialPerspectiveEnabled =
+    styleEnabled &&
+    skyParticipation > 0.001 &&
+    (distanceFogDensity > 0 || heightFogDensity > 0)
 
   return {
     id,
@@ -243,7 +259,8 @@ export function buildRuntimeAtmosphereFromLevelSettings(
         ...base.source.authored,
         distanceFog: Boolean(fog),
         heightFog: Boolean(haze),
-        aerialPerspective: hasAuthoredSkyParticipation,
+        aerialPerspective:
+          hasAuthoredSkyParticipation || base.source.authored.aerialPerspective,
         mist: Boolean(haze),
         bloom: Boolean(bloom),
         colorGrading: Boolean(grading),
@@ -280,13 +297,9 @@ export function buildRuntimeAtmosphereFromLevelSettings(
     },
     aerialPerspective: {
       ...base.aerialPerspective,
-      enabled: styleEnabled && (distanceFogDensity > 0 || heightFogDensity > 0),
+      enabled: aerialPerspectiveEnabled,
       skyParticipation,
-      skyOcclusion: clampNumber(
-        distanceFogDensity * 240 + heightFogDensity * 160,
-        0,
-        1,
-      ),
+      skyOcclusion,
       horizonBoost,
     },
     mist: {

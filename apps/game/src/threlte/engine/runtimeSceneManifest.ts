@@ -144,9 +144,7 @@ export function createRuntimeSceneManifest(input: {
 }): RuntimeSceneManifest {
   const generatedCollisionProducts = input.levelDefinition.actors
     .map(actor => actor.physics?.collision.generatedProduct)
-    .filter(
-      (product): product is GeneratedCollisionProduct => Boolean(product),
-    )
+    .filter((product): product is GeneratedCollisionProduct => Boolean(product))
   return {
     schemaVersion: RUNTIME_SCENE_MANIFEST_SCHEMA_VERSION,
     generatedAt: input.generatedAt ?? new Date().toISOString(),

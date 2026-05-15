@@ -179,9 +179,16 @@ function reportSkyAtmosphereDiagnostic(
     nextAtmosphere.enabled &&
     nextAtmosphere.heightFog.enabled &&
     nextAtmosphere.heightFog.density > 0
+  const skyParticipation = clampNumber(
+    nextAtmosphere.aerialPerspective.skyParticipation,
+    0,
+    1,
+    0,
+  )
   const aerialPerspectiveActive =
     nextAtmosphere.enabled &&
     nextAtmosphere.aerialPerspective.enabled &&
+    skyParticipation > 0.001 &&
     (distanceFogActive || heightFogActive)
 
   setRuntimeDiagnostic('skyAtmosphere', {
@@ -202,6 +209,7 @@ function reportSkyAtmosphereDiagnostic(
       heightFogDensity: nextAtmosphere.heightFog.density,
       heightFogFloor: nextAtmosphere.heightFog.floor,
       heightFogCeiling: nextAtmosphere.heightFog.ceiling,
+      skyParticipation,
       skyOcclusion: nextAtmosphere.aerialPerspective.skyOcclusion,
       horizonBoost: nextAtmosphere.aerialPerspective.horizonBoost,
       radius: currentRadius,

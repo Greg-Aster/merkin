@@ -3,6 +3,7 @@ import {
   ATMOSPHERE_SHADER_CACHE_KEY,
   type AtmosphereShaderParameters,
   injectAtmosphereShaderChunks,
+  injectProjectiveAtmosphereShaderChunks,
   setAtmosphereShaderUniforms,
 } from './atmosphereShaderChunks'
 import type { RuntimeAtmosphereDefinition } from './runtimeAtmosphereTypes'
@@ -55,6 +56,8 @@ export type SceneAtmosphereMaterialDiagnostics = {
   heightFogCapableMaterialCount: number
   distanceOnlyMaterialCount: number
   bypassedMaterialCount: number
+  warningBypassedMaterialCount: number
+  expectedBypassedMaterialCount: number
   renderPathCounts: Record<string, number>
   bypassedMaterials: Array<{
     uuid: string
@@ -63,16 +66,21 @@ export type SceneAtmosphereMaterialDiagnostics = {
     renderPath: string
     objectName: string
     reason: string
+    severity: 'info' | 'warning'
   }>
 }
 
 type FogCapableMaterial = THREE.Material & {
   fog?: boolean
   userData: THREE.Material['userData'] & {
+    atmosphereBypass?: boolean
+    atmosphereBypassReason?: string
+    atmosphereBypassSeverity?: 'info' | 'warning'
     merkinAtmospherePatched?: boolean
     merkinAtmosphereOriginalOnBeforeCompile?: THREE.Material['onBeforeCompile']
     merkinAtmosphereOriginalCustomProgramCacheKey?: THREE.Material['customProgramCacheKey']
     merkinAtmosphereShaderBypassReason?: string
+    merkinAtmosphereShaderMode?: 'projective-world'
   }
 }
 
@@ -84,12 +92,15 @@ type RegistryEntry = {
   levelId: string | null
   reason: string
   explicit: boolean
+  scanMetadata: SceneAtmosphereMaterialMetadata
+  explicitRegistrations: Map<symbol, SceneAtmosphereMaterialMetadata>
   lastScanGeneration: number
   fogCapable: boolean
   heightFogCapable: boolean
   distanceParticipant: boolean
   heightParticipant: boolean
   bypassReason: string | null
+  bypassSeverity: 'info' | 'warning'
 }
 
 const DEFAULT_DISTANCE_FOG_COLOR = '#7b8797'
@@ -246,6 +257,28 @@ function isHeightFogPatchableMaterial(material: THREE.Material) {
   )
 }
 
+function hasShaderFogUniforms(material: THREE.Material) {
+  return (
+    material instanceof THREE.ShaderMaterial &&
+    Boolean(material.uniforms?.fogColor && material.uniforms?.fogDensity)
+  )
+}
+
+function isProjectiveAtmosphereShaderMaterial(material: THREE.Material) {
+  return (
+    material instanceof THREE.ShaderMaterial &&
+    material.userData.merkinAtmosphereShaderMode === 'projective-world'
+  )
+}
+
+function isDistanceFogCapableMaterial(material: THREE.Material) {
+  return (
+    isHeightFogPatchableMaterial(material) ||
+    hasShaderFogUniforms(material) ||
+    isProjectiveAtmosphereShaderMaterial(material)
+  )
+}
+
 function updateAtmosphereShader(material: THREE.Material) {
   const shader = atmosphereShaders.get(material)
   if (!shader) return
@@ -271,7 +304,11 @@ function installAtmosphereShaderPatch(material: FogCapableMaterial) {
   material.onBeforeCompile = (shader, renderer) => {
     originalOnBeforeCompile.call(material, shader, renderer)
 
-    if (!injectAtmosphereShaderChunks(shader)) {
+    const injected = isProjectiveAtmosphereShaderMaterial(material)
+      ? injectProjectiveAtmosphereShaderChunks(shader)
+      : injectAtmosphereShaderChunks(shader)
+
+    if (!injected) {
       material.userData.merkinAtmosphereShaderBypassReason =
         'missing-fog-shader-chunks'
       return
@@ -290,8 +327,12 @@ function installAtmosphereShaderPatch(material: FogCapableMaterial) {
 function refreshEntryCapability(entry: RegistryEntry) {
   const material = entry.material as FogCapableMaterial
   const explicitBypass = Boolean(material.userData.atmosphereBypass)
-  const fogCapable = 'fog' in material
-  const heightFogCapable = fogCapable && isHeightFogPatchableMaterial(material)
+  const hasFogProperty = 'fog' in material
+  const fogCapable = hasFogProperty && isDistanceFogCapableMaterial(material)
+  const heightFogCapable =
+    fogCapable &&
+    (isHeightFogPatchableMaterial(material) ||
+      isProjectiveAtmosphereShaderMaterial(material))
   const shaderBypass = material.userData.merkinAtmosphereShaderBypassReason
 
   entry.fogCapable = fogCapable
@@ -300,14 +341,25 @@ function refreshEntryCapability(entry: RegistryEntry) {
   entry.heightParticipant = heightFogCapable && !explicitBypass
 
   if (explicitBypass) {
-    entry.bypassReason = 'explicit-atmosphere-bypass'
+    entry.bypassReason =
+      material.userData.atmosphereBypassReason ?? 'explicit-atmosphere-bypass'
+    entry.bypassSeverity =
+      material.userData.atmosphereBypassSeverity === 'warning'
+        ? 'warning'
+        : 'info'
+  } else if (hasFogProperty && !fogCapable) {
+    entry.bypassReason = 'custom-shader-missing-native-fog-uniforms'
+    entry.bypassSeverity = 'warning'
   } else if (!fogCapable) {
     entry.bypassReason = 'material-has-no-fog-property'
+    entry.bypassSeverity = 'warning'
   } else if (!heightFogCapable) {
     entry.bypassReason =
       shaderBypass ?? 'height-fog-not-supported-for-material-type'
+    entry.bypassSeverity = 'warning'
   } else {
     entry.bypassReason = null
+    entry.bypassSeverity = 'info'
   }
 }
 
@@ -331,41 +383,60 @@ function applyAtmosphereToRegisteredMaterial(entry: RegistryEntry) {
 
 function createRegistryEntry(
   material: THREE.Material,
-  metadata: SceneAtmosphereMaterialMetadata,
-  explicit: boolean,
+  metadata: SceneAtmosphereMaterialMetadata = {},
   scanGeneration = 0,
 ): RegistryEntry {
-  return {
+  const entry: RegistryEntry = {
     material,
     source: metadata.source ?? 'scene',
     renderPath: metadata.renderPath ?? 'unknown',
     objectName: metadata.objectName ?? '',
     levelId: metadata.levelId ?? null,
     reason: metadata.reason ?? '',
-    explicit,
+    explicit: false,
+    scanMetadata: metadata,
+    explicitRegistrations: new Map(),
     lastScanGeneration: scanGeneration,
     fogCapable: false,
     heightFogCapable: false,
     distanceParticipant: false,
     heightParticipant: false,
     bypassReason: null,
+    bypassSeverity: 'info',
   }
+  refreshRegistryEntryMetadata(entry)
+  return entry
 }
 
-function updateRegistryEntry(
+function getLatestExplicitRegistrationMetadata(entry: RegistryEntry) {
+  let latestMetadata: SceneAtmosphereMaterialMetadata | null = null
+  for (const metadata of entry.explicitRegistrations.values()) {
+    latestMetadata = metadata
+  }
+  return latestMetadata
+}
+
+function refreshRegistryEntryMetadata(entry: RegistryEntry) {
+  const metadata =
+    getLatestExplicitRegistrationMetadata(entry) ?? entry.scanMetadata
+  entry.explicit = entry.explicitRegistrations.size > 0
+  entry.source = metadata.source ?? 'scene'
+  entry.renderPath = metadata.renderPath ?? 'unknown'
+  entry.objectName = metadata.objectName ?? ''
+  entry.levelId = metadata.levelId ?? null
+  entry.reason = metadata.reason ?? ''
+}
+
+function deleteRegistryEntryIfUnownedAndUnscanned(
+  material: THREE.Material,
   entry: RegistryEntry,
-  metadata: SceneAtmosphereMaterialMetadata,
-  explicit: boolean,
-  scanGeneration = 0,
 ) {
-  entry.source = metadata.source ?? entry.source
-  entry.renderPath = metadata.renderPath ?? entry.renderPath
-  entry.objectName = metadata.objectName ?? entry.objectName
-  entry.levelId = metadata.levelId ?? entry.levelId
-  entry.reason = metadata.reason ?? entry.reason
-  entry.explicit = entry.explicit || explicit
-  if (scanGeneration > 0) {
-    entry.lastScanGeneration = scanGeneration
+  if (entry.explicit) return
+  if (
+    entry.lastScanGeneration === 0 ||
+    entry.lastScanGeneration !== sceneScanGeneration
+  ) {
+    materialRegistry.delete(material)
   }
 }
 
@@ -373,44 +444,24 @@ export function registerSceneAtmosphereMaterial(
   material: THREE.Material,
   metadata: SceneAtmosphereMaterialMetadata = {},
 ) {
+  const registrationToken = Symbol('scene-atmosphere-material')
   const existing = materialRegistry.get(material)
-  const entry =
-    existing ??
-    createRegistryEntry(material, metadata, true, sceneScanGeneration)
-  updateRegistryEntry(entry, metadata, true, sceneScanGeneration)
+  const entry = existing ?? createRegistryEntry(material)
+  entry.explicitRegistrations.set(registrationToken, metadata)
+  refreshRegistryEntryMetadata(entry)
   materialRegistry.set(material, entry)
   applyAtmosphereToRegisteredMaterial(entry)
 
+  let active = true
   return () => {
+    if (!active) return
+    active = false
     if (materialRegistry.get(material) === entry) {
-      materialRegistry.delete(material)
+      entry.explicitRegistrations.delete(registrationToken)
+      refreshRegistryEntryMetadata(entry)
+      deleteRegistryEntryIfUnownedAndUnscanned(material, entry)
     }
   }
-}
-
-export function applySceneAtmosphereMaterial(
-  material: THREE.Material,
-  atmosphereOrMetadata:
-    | RuntimeAtmosphereDefinition
-    | SceneAtmosphereMaterialMetadata = {},
-  metadata: SceneAtmosphereMaterialMetadata = {},
-) {
-  if ('distanceFog' in atmosphereOrMetadata) {
-    setSceneAtmosphereDefinition(
-      runtimeAtmosphereToSceneAtmosphereDefinition(atmosphereOrMetadata, {
-        levelId: metadata.levelId ?? undefined,
-      }),
-    )
-    return registerSceneAtmosphereMaterial(material, {
-      source: 'manual',
-      ...metadata,
-    })
-  }
-
-  return registerSceneAtmosphereMaterial(material, {
-    source: 'manual',
-    ...atmosphereOrMetadata,
-  })
 }
 
 export function registerSceneAtmosphereObject(
@@ -452,9 +503,10 @@ function scanSceneAtmosphereMaterial(
   generation: number,
 ) {
   const existing = materialRegistry.get(material)
-  const entry =
-    existing ?? createRegistryEntry(material, metadata, false, generation)
-  updateRegistryEntry(entry, metadata, false, generation)
+  const entry = existing ?? createRegistryEntry(material)
+  entry.scanMetadata = metadata
+  entry.lastScanGeneration = generation
+  refreshRegistryEntryMetadata(entry)
   materialRegistry.set(material, entry)
   applyAtmosphereToRegisteredMaterial(entry)
 }
@@ -505,6 +557,8 @@ export function getSceneAtmosphereMaterialDiagnostics(): SceneAtmosphereMaterial
   let heightFogCapableMaterialCount = 0
   let distanceOnlyMaterialCount = 0
   let bypassedMaterialCount = 0
+  let warningBypassedMaterialCount = 0
+  let expectedBypassedMaterialCount = 0
 
   for (const entry of entries) {
     refreshEntryCapability(entry)
@@ -517,7 +571,14 @@ export function getSceneAtmosphereMaterialDiagnostics(): SceneAtmosphereMaterial
     if (entry.distanceParticipant && !entry.heightParticipant) {
       distanceOnlyMaterialCount += 1
     }
-    if (entry.bypassReason) bypassedMaterialCount += 1
+    if (entry.bypassReason) {
+      bypassedMaterialCount += 1
+      if (entry.bypassSeverity === 'warning') {
+        warningBypassedMaterialCount += 1
+      } else {
+        expectedBypassedMaterialCount += 1
+      }
+    }
   }
 
   return {
@@ -528,6 +589,8 @@ export function getSceneAtmosphereMaterialDiagnostics(): SceneAtmosphereMaterial
     heightFogCapableMaterialCount,
     distanceOnlyMaterialCount,
     bypassedMaterialCount,
+    warningBypassedMaterialCount,
+    expectedBypassedMaterialCount,
     renderPathCounts,
     bypassedMaterials: entries
       .filter(entry => entry.bypassReason)
@@ -539,6 +602,7 @@ export function getSceneAtmosphereMaterialDiagnostics(): SceneAtmosphereMaterial
         renderPath: entry.renderPath,
         objectName: entry.objectName,
         reason: entry.bypassReason ?? 'unknown',
+        severity: entry.bypassSeverity,
       })),
   }
 }

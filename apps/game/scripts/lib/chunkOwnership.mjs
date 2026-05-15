@@ -74,8 +74,9 @@ export const localChunkOwnershipRules = [
     ],
   },
   {
-    chunk: 'style-runtime',
+    chunk: 'runtime-world',
     patterns: [
+      '/src/threlte/atmosphere/buildRuntimeAtmosphere.ts',
       '/src/threlte/styles/GameplayStyleProfiles.ts',
       '/src/threlte/styles/runtimeVisualStyleStore.ts',
       '/src/threlte/styles/StylePalettes.ts',

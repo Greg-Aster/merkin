@@ -35,6 +35,7 @@ function createSkyAtmosphereUniforms() {
     merkinSkyHeightFogFloor: { value: 0 },
     merkinSkyHeightFogCeiling: { value: 1 },
     merkinSkyAerialPerspectiveEnabled: { value: 0 },
+    merkinSkyAerialSkyParticipation: { value: 0 },
     merkinSkyAerialSkyOcclusion: { value: 1 },
     merkinSkyAerialHorizonBoost: { value: 0 },
     merkinSkyCameraPosition: { value: new THREE.Vector3() },
@@ -78,6 +79,7 @@ uniform float merkinSkyHeightFogDensity;
 uniform float merkinSkyHeightFogFloor;
 uniform float merkinSkyHeightFogCeiling;
 uniform float merkinSkyAerialPerspectiveEnabled;
+uniform float merkinSkyAerialSkyParticipation;
 uniform float merkinSkyAerialSkyOcclusion;
 uniform float merkinSkyAerialHorizonBoost;
 uniform vec3 merkinSkyCameraPosition;
@@ -89,10 +91,15 @@ float merkinSkyExp2FogFactor(float density, float depth) {
   return 1.0 - exp(-safeDensity * safeDensity * safeDepth * safeDepth);
 }
 
-float merkinSkyHeightMask(float worldY) {
+float merkinSkyRayHeightMask(vec3 rayDirection, float rayDepth) {
   float floorY = min(merkinSkyHeightFogFloor, merkinSkyHeightFogCeiling - 0.001);
   float ceilingY = max(merkinSkyHeightFogCeiling, floorY + 0.001);
-  return 1.0 - smoothstep(floorY, ceilingY, worldY);
+  float sampleDistance = min(rayDepth, max(merkinSkyRadius * 0.24, 1.0));
+  float sampleY = merkinSkyCameraPosition.y + rayDirection.y * sampleDistance;
+  float rayMask = 1.0 - smoothstep(floorY, ceilingY, sampleY);
+  float cameraBandMask = 1.0 - smoothstep(floorY, ceilingY, merkinSkyCameraPosition.y);
+  float horizonMask = 1.0 - smoothstep(0.04, 0.52, max(rayDirection.y, 0.0));
+  return max(rayMask, cameraBandMask * horizonMask);
 }
 
 vec3 merkinApplySkyAtmosphere(vec3 sourceColor) {
@@ -105,16 +112,17 @@ vec3 merkinApplySkyAtmosphere(vec3 sourceColor) {
   float skyDepth = max(max(length(skyVector), merkinSkyRadius), 0.001);
   float upwardness = clamp(skyDirection.y, 0.0, 1.0);
   float horizonFactor = 1.0 - smoothstep(0.08, 0.82, upwardness);
-  float horizonBoost = max(merkinSkyAerialHorizonBoost, 0.0);
+  float participation = clamp(merkinSkyAerialSkyParticipation, 0.0, 1.0);
+  float horizonBoost = max(merkinSkyAerialHorizonBoost, 0.0) * participation;
   float zenithDepthScale = 0.14;
   float horizonDepthScale = 1.0 + horizonBoost;
   float atmosphericDepth = skyDepth * mix(zenithDepthScale, horizonDepthScale, horizonFactor);
-  float occlusion = clamp(merkinSkyAerialSkyOcclusion, 0.0, 3.0);
+  float occlusion = clamp(merkinSkyAerialSkyOcclusion, 0.0, 3.0) * participation;
 
   float distanceFog = merkinSkyDistanceFogEnabled *
     merkinSkyExp2FogFactor(merkinSkyDistanceFogDensity, atmosphericDepth);
   float heightFog = merkinSkyHeightFogEnabled *
-    merkinSkyHeightMask(vMerkinSkyWorldPosition.y) *
+    merkinSkyRayHeightMask(skyDirection, atmosphericDepth) *
     merkinSkyExp2FogFactor(merkinSkyHeightFogDensity, atmosphericDepth);
 
   vec3 color = sourceColor;
@@ -187,9 +195,16 @@ export function updateSkyAtmosphereUniforms(
     atmosphere.enabled && atmosphere.distanceFog.enabled && distanceDensity > 0
   const heightFogEnabled =
     atmosphere.enabled && atmosphere.heightFog.enabled && heightDensity > 0
+  const skyParticipation = clampNumber(
+    atmosphere.aerialPerspective.skyParticipation,
+    0,
+    1,
+    0,
+  )
   const aerialPerspectiveEnabled =
     atmosphere.enabled &&
     atmosphere.aerialPerspective.enabled &&
+    skyParticipation > 0.001 &&
     (distanceFogEnabled || heightFogEnabled)
 
   material.uniforms.merkinSkyAtmosphereEnabled.value = atmosphere.enabled
@@ -211,6 +226,7 @@ export function updateSkyAtmosphereUniforms(
   material.uniforms.merkinSkyHeightFogCeiling.value = heightCeiling
   material.uniforms.merkinSkyAerialPerspectiveEnabled.value =
     aerialPerspectiveEnabled ? 1 : 0
+  material.uniforms.merkinSkyAerialSkyParticipation.value = skyParticipation
   material.uniforms.merkinSkyAerialSkyOcclusion.value = clampNumber(
     atmosphere.aerialPerspective.skyOcclusion,
     0,

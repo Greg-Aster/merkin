@@ -384,8 +384,10 @@ function syncPlaytestRuntimeScene() {
         runtimeProductCount: runtimeCollisionProductsByActorId.size,
         collisionActorCount: collisionActors.length,
         mountedGeneratedProductActorIds,
-        missingGeneratedProductActorIds:
-          missingGeneratedProductActorIds.slice(0, 50),
+        missingGeneratedProductActorIds: missingGeneratedProductActorIds.slice(
+          0,
+          50,
+        ),
       },
     })
   } catch (error) {
@@ -417,7 +419,10 @@ $: if (playtestEnabled && editorScene) {
   dispatchEditorPlaytestSpawn()
 }
 
-$: if ((playtestEnabled || collisionOverlayEnabled) && !RuntimeActorBranchComponent) {
+$: if (
+  (playtestEnabled || collisionOverlayEnabled) &&
+  !RuntimeActorBranchComponent
+) {
   void loadRuntimeActorBranchComponent()
 }
 

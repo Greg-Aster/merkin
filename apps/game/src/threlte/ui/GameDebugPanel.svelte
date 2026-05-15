@@ -6,7 +6,7 @@ export let runtimeDiagnosticsPanelComponent: any = null
 </script>
 
 <div
-  class="fixed top-4 right-4 rounded bg-black bg-opacity-80 p-4 text-white"
+  class="game-debug-panel fixed top-4 right-4 rounded bg-black bg-opacity-80 p-4 text-white"
   style="pointer-events: auto;"
 >
   <h3 class="font-bold">Debug Info</h3>

@@ -75,12 +75,18 @@ $: effectiveLayers = (() => {
   }
 })()
 $: resolvedEnabled = enabled && atmosphere.enabled && atmosphere.mist.enabled
-$: resolvedColor = atmosphere.mist.color ?? color
-$: resolvedOpacity = atmosphere.mist.opacity ?? opacity
-$: resolvedBaseHeight = atmosphere.heightFog.floor + atmosphere.mist.height
-$: resolvedHeightStep = atmosphere.mist.spacing ?? heightStep
-$: resolvedScale = atmosphere.mist.scale ?? scale
-$: resolvedDriftSpeed = atmosphere.mist.driftSpeed ?? driftSpeed
+$: resolvedColor = atmosphere.mist.enabled ? atmosphere.mist.color : color
+$: resolvedOpacity = atmosphere.mist.enabled ? atmosphere.mist.opacity : opacity
+$: resolvedBaseHeight = atmosphere.mist.enabled
+  ? atmosphere.heightFog.floor + atmosphere.mist.height
+  : baseHeight
+$: resolvedHeightStep = atmosphere.mist.enabled
+  ? atmosphere.mist.spacing
+  : heightStep
+$: resolvedScale = atmosphere.mist.enabled ? atmosphere.mist.scale : scale
+$: resolvedDriftSpeed = atmosphere.mist.enabled
+  ? atmosphere.mist.driftSpeed
+  : driftSpeed
 
 $: if (resolvedEnabled && !mistTexture && typeof document !== 'undefined') {
   mistTexture = createMistTexture()

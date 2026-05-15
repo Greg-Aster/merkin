@@ -1,3 +1,4 @@
+import { getSceneNodeMeshRenderSource } from '../engine/actorRenderSource'
 import {
   type ColliderArgs,
   getColliderLocalArgs,
@@ -10,7 +11,6 @@ import {
   isTerrainVisualActor,
   resolveCollisionPolicy,
 } from '../engine/collisionPolicy'
-import { getSceneNodeMeshRenderSource } from '../engine/actorRenderSource'
 import type {
   EditorNodeCollisionData,
   EditorSceneNode,

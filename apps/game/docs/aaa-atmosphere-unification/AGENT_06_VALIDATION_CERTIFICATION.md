@@ -52,3 +52,33 @@ GAME_NO_SERVER=1 GAME_DEV_PORT=4322 pnpm --dir apps/game smoke:boot
 
 If full smoke is blocked by unrelated existing failures, report the exact
 failure and run a Playwright browser smoke against the active dev server.
+
+## Certification Result
+
+Status: ready for review as of 2026-05-15.
+
+The runtime atmosphere system is unified around
+`RuntimeAtmosphereDefinition`/`runtimeAtmosphereStore`. The scene atmosphere
+system, material registry, sky/aerial perspective, ocean material, mist,
+underwater path, post-processing policy, and diagnostics consume the same
+runtime definition. `SceneFogExp2.svelte` and `sceneFogMaterialPatch.ts` were
+deleted.
+
+Visual smoke screenshots were written to:
+
+- `apps/game/.visual-smoke/atmosphere-certification/solitude.png`
+- `apps/game/.visual-smoke/atmosphere-certification/observatory.png`
+- `apps/game/.visual-smoke/atmosphere-certification/yggdrasil.png`
+
+Known limitations:
+
+- Full `pnpm --dir apps/game exec biome check src/threlte` is still blocked by
+  existing unrelated Biome formatting/import diagnostics outside the
+  atmosphere-owned files. The targeted atmosphere-owned file check passed.
+- Required `GAME_NO_SERVER=1 GAME_DEV_PORT=4322 pnpm --dir apps/game
+  smoke:boot` was blocked by an unhealthy occupied shared dev-server port.
+- Isolated `GAME_DEV_PORT=4330 pnpm --dir apps/game smoke:boot` also failed
+  after the dev server stopped mid-run, leaving connection refused errors for
+  editor/level routes and observatory terrain assets.
+- Standard ocean and planar reflector water paths participate in runtime
+  atmosphere. The reflector path uses the projective atmosphere shader mode.

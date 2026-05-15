@@ -4,9 +4,7 @@ export type StyleBakeMode =
   | 'blender-geometry'
   | 'ai-texture-source'
 
-export type EditorStyleBakeBackend =
-  | 'procedural-material'
-  | 'blender-geometry'
+export type EditorStyleBakeBackend = 'procedural-material' | 'blender-geometry'
 
 export type EditorStyleBakeOutputTier = 'preview' | 'runtime' | 'hero'
 
@@ -194,12 +192,7 @@ export function normalizeStyleBakeSettings(
     lineStrength: clampStyleBakeNumber(settings.lineStrength, 0, 1, 0.35),
     brushStrength: clampStyleBakeNumber(settings.brushStrength, 0, 1, 0.25),
     aoStrength: clampStyleBakeNumber(settings.aoStrength, 0, 2, 0.8),
-    cavityStrength: clampStyleBakeNumber(
-      settings.cavityStrength,
-      0,
-      2,
-      0.65,
-    ),
+    cavityStrength: clampStyleBakeNumber(settings.cavityStrength, 0, 2, 0.65),
     curvatureStrength: clampStyleBakeNumber(
       settings.curvatureStrength,
       0,
@@ -227,7 +220,9 @@ export function stableStyleBakeJson(value: unknown): string {
     return `{${Object.entries(value)
       .filter(([, item]) => item !== undefined)
       .sort(([left], [right]) => left.localeCompare(right))
-      .map(([key, item]) => `${JSON.stringify(key)}:${stableStyleBakeJson(item)}`)
+      .map(
+        ([key, item]) => `${JSON.stringify(key)}:${stableStyleBakeJson(item)}`,
+      )
       .join(',')}}`
   }
   return JSON.stringify(value)
@@ -290,8 +285,10 @@ function transformsMatch(
   right: StyleBakeTransformSnapshot,
 ) {
   return (
-    stableStyleBakeJson(left.position) === stableStyleBakeJson(right.position) &&
-    stableStyleBakeJson(left.rotation) === stableStyleBakeJson(right.rotation) &&
+    stableStyleBakeJson(left.position) ===
+      stableStyleBakeJson(right.position) &&
+    stableStyleBakeJson(left.rotation) ===
+      stableStyleBakeJson(right.rotation) &&
     stableStyleBakeJson(left.scale) === stableStyleBakeJson(right.scale)
   )
 }
@@ -315,7 +312,10 @@ export function getStyleBakeProductState(
     }
   }
 
-  if (current.nodeAssetUrl && current.nodeAssetUrl !== product.generatedAssetUrl) {
+  if (
+    current.nodeAssetUrl &&
+    current.nodeAssetUrl !== product.generatedAssetUrl
+  ) {
     return {
       status: 'stale',
       reason: 'The node no longer points at the generated style bake asset.',
@@ -338,7 +338,9 @@ export function getStyleBakeProductState(
     }
   }
 
-  if (!transformsMatch(product.sourceNodeTransform, current.sourceNodeTransform)) {
+  if (
+    !transformsMatch(product.sourceNodeTransform, current.sourceNodeTransform)
+  ) {
     return {
       status: 'dirty',
       reason: 'The node transform changed after the style bake was generated.',

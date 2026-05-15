@@ -1,7 +1,5 @@
 export const COLLISION_LAYERS: Readonly<Record<string, number>>
-export const COLLISION_GROUP_MATRIX: Readonly<
-  Record<string, readonly string[]>
->
+export const COLLISION_GROUP_MATRIX: Readonly<Record<string, readonly string[]>>
 
 export const PLAYER_GROUP: number
 export const WORLD_STATIC_GROUP: number

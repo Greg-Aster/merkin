@@ -1,4 +1,5 @@
 import {
+  type BuildRuntimeAtmosphereOptions,
   buildRuntimeAtmosphereFromLevelSettings,
   runtimeAtmosphereToRuntimeVisualStylePatch,
   runtimeVisualStyleToRuntimeAtmosphere,
@@ -681,6 +682,20 @@ const solitudeAtmosphereProfileMap = new Map(
   solitudeAtmosphereProfileDefinitions.map(profile => [profile.id, profile]),
 )
 
+function buildSolitudeRuntimeVisualStyleBase(
+  profile: SolitudeAtmosphereProfileDefinition,
+) {
+  const base = mergeRuntimeVisualStyle(
+    DEFAULT_RUNTIME_VISUAL_STYLE,
+    surrealSiteBaseRuntime,
+  )
+
+  return mergeRuntimeVisualStyle(base, {
+    palettePreset: profile.stylePreset,
+    ...profile.runtime,
+  })
+}
+
 export function findSolitudeAtmosphereProfile(
   id: string | null | undefined,
 ): SolitudeAtmosphereProfileDefinition | null {
@@ -702,20 +717,15 @@ export function buildSolitudeRuntimeVisualStyle(
   settings: SharedLevelEditorSettings | null | undefined,
 ): RuntimeVisualStyleSettings {
   const profile = getSolitudeAtmosphereProfile(settings?.presets?.atmosphere)
-  const base = mergeRuntimeVisualStyle(
-    DEFAULT_RUNTIME_VISUAL_STYLE,
-    surrealSiteBaseRuntime,
-  )
-  const withProfile = mergeRuntimeVisualStyle(base, {
-    palettePreset: profile.stylePreset,
-    ...profile.runtime,
-  })
+  const withProfile = buildSolitudeRuntimeVisualStyleBase(profile)
 
   const stylePreset = settings?.style?.preset ?? profile.stylePreset
   const atmosphere = buildRuntimeAtmosphereFromLevelSettings(settings, {
     base: runtimeVisualStyleToRuntimeAtmosphere(withProfile, {
       id: profile.id,
+      profileId: profile.id,
     }),
+    profileId: profile.id,
   })
 
   const runtime = mergeRuntimeVisualStyle(withProfile, {
@@ -725,6 +735,53 @@ export function buildSolitudeRuntimeVisualStyle(
   })
 
   return runtime
+}
+
+export function buildRuntimeAtmosphereFromGameplayStyleSettings(
+  settings: SharedLevelEditorSettings | null | undefined,
+  options: BuildRuntimeAtmosphereOptions = {},
+) {
+  const profile = findSolitudeAtmosphereProfile(settings?.presets?.atmosphere)
+
+  if (profile) {
+    const withProfile = buildSolitudeRuntimeVisualStyleBase(profile)
+
+    return buildRuntimeAtmosphereFromLevelSettings(settings, {
+      ...options,
+      profileId: profile.id,
+      base: runtimeVisualStyleToRuntimeAtmosphere(withProfile, {
+        id: profile.id,
+        levelId: options.levelId,
+        refreshKey: options.refreshKey,
+        source: options.source,
+        profileId: profile.id,
+      }),
+    })
+  }
+
+  const stylePreset =
+    settings?.style?.preset ?? DEFAULT_RUNTIME_VISUAL_STYLE.palettePreset
+  const base =
+    stylePreset === 'surreal-site'
+      ? mergeRuntimeVisualStyle(
+          DEFAULT_RUNTIME_VISUAL_STYLE,
+          surrealSiteBaseRuntime,
+        )
+      : DEFAULT_RUNTIME_VISUAL_STYLE
+
+  return buildRuntimeAtmosphereFromLevelSettings(settings, {
+    ...options,
+    base: runtimeVisualStyleToRuntimeAtmosphere(base, {
+      id:
+        typeof settings?.presets?.atmosphere === 'string' &&
+        settings.presets.atmosphere
+          ? settings.presets.atmosphere
+          : `level-${stylePreset}`,
+      levelId: options.levelId,
+      refreshKey: options.refreshKey,
+      source: options.source,
+    }),
+  })
 }
 
 export function buildRuntimeVisualStyleFromLevelSettings(

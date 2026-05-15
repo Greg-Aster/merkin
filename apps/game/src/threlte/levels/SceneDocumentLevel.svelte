@@ -6,7 +6,6 @@ import { Group, Quaternion, Vector3 } from 'three'
 import SceneAtmosphereSystem from '../atmosphere/SceneAtmosphereSystem.svelte'
 import {
   type RuntimeAtmosphereFogVolume,
-  buildRuntimeAtmosphereFromLevelSettings,
   withRuntimeAtmosphereFogVolumes,
 } from '../atmosphere/buildRuntimeAtmosphere'
 import {
@@ -88,7 +87,10 @@ import {
   clearRuntimeStreamingTelemetry,
   setRuntimeStreamingTelemetry,
 } from '../stores/runtimeStreamingTelemetry'
-import { buildRuntimeVisualStyleFromLevelSettings } from '../styles/GameplayStyleProfiles'
+import {
+  buildRuntimeAtmosphereFromGameplayStyleSettings,
+  buildRuntimeVisualStyleFromLevelSettings,
+} from '../styles/GameplayStyleProfiles'
 import {
   replaceRuntimeVisualStyle,
   resetRuntimeVisualStyle,
@@ -495,6 +497,17 @@ function renderProfileAllowsPostPass(
     profile.postProcessing.passes.length === 0 ||
     profile.postProcessing.passes.includes(pass)
   )
+}
+
+function getRenderProfilePostPassStatus(
+  profile: ReturnType<typeof resolveRuntimeRenderProfile>,
+  pass: 'bloom' | 'color-grading',
+) {
+  if (!profile.postProcessing.enabled) return 'disabled by profile'
+  if (!renderProfileAllowsPostPass(profile, pass)) {
+    return `disabled by ${profile.tier} profile pass list`
+  }
+  return 'allowed'
 }
 
 function resolveSpawnPosition(
@@ -1079,7 +1092,7 @@ $: authoredGameplayNodes = (() => {
       }
     })
 })()
-$: baseRuntimeAtmosphere = buildRuntimeAtmosphereFromLevelSettings(
+$: baseRuntimeAtmosphere = buildRuntimeAtmosphereFromGameplayStyleSettings(
   sharedLevelSettings,
   {
     levelId,
@@ -1352,8 +1365,14 @@ $: globalMistEnabled =
   globalMistLayers > 0 &&
   globalMistOpacity > 0.001 &&
   globalMistScale > 1
+$: skyAerialParticipation = clampNumber(
+  runtimeAtmosphere.aerialPerspective.skyParticipation,
+  0,
+  1,
+  0,
+)
 $: skyboxAerialPerspectiveBoost = clampNumber(
-  runtimeAtmosphere.aerialPerspective.horizonBoost,
+  runtimeAtmosphere.aerialPerspective.horizonBoost * skyAerialParticipation,
   0,
   1,
   0,
@@ -1395,7 +1414,11 @@ $: underwaterFogColor = parseSceneColor(
   waterSettings?.underwaterFogColor,
   0x0a1922,
 )
-$: atmosphereSourceProfile = runtimeAtmosphere.id || 'authored-settings'
+$: atmosphereSourceKind = runtimeAtmosphere.source.kind
+$: atmosphereSourceProfile =
+  runtimeAtmosphere.source.profileId ||
+  runtimeAtmosphere.id ||
+  'authored-settings'
 $: distanceFogEnabled = runtimeDistanceFog.enabled && fogDensity > 0
 $: skyBackgroundIntensity = Math.max(
   0,
@@ -1411,15 +1434,16 @@ $: skyEnvironmentIntensity = Math.max(
 $: skyAtmosphereParticipates =
   skyBackgroundIntensity > 0 &&
   runtimeAtmosphere.enabled &&
-  runtimeAtmosphere.aerialPerspective.enabled
-$: oceanAtmosphereLimited =
+  runtimeAtmosphere.aerialPerspective.enabled &&
+  skyAerialParticipation > 0.001
+$: oceanPlanarReflectorActive =
   Boolean(waterEnabled && waterSettings) &&
   resolvedRenderProfile.reflections.mode === 'planar'
 $: oceanAtmosphereStatus =
   !waterEnabled || !waterSettings
     ? 'ocean disabled'
-    : oceanAtmosphereLimited
-      ? 'ocean planar reflector limited; reflector shader support required'
+    : oceanPlanarReflectorActive
+      ? 'ocean planar reflector participating'
       : 'ocean surface participating'
 $: bloomProfileParticipates = renderProfileAllowsPostPass(
   resolvedRenderProfile,
@@ -1429,8 +1453,17 @@ $: colorGradingProfileParticipates = renderProfileAllowsPostPass(
   resolvedRenderProfile,
   'color-grading',
 )
+$: bloomProfileStatus = getRenderProfilePostPassStatus(
+  resolvedRenderProfile,
+  'bloom',
+)
+$: colorGradingProfileStatus = getRenderProfilePostPassStatus(
+  resolvedRenderProfile,
+  'color-grading',
+)
 $: atmosphereDiagnosticKey = [
   levelId,
+  atmosphereSourceKind,
   atmosphereSourceProfile,
   fogColor,
   formatAtmosphereDiagnosticNumber(fogDensity, 6),
@@ -1441,12 +1474,21 @@ $: atmosphereDiagnosticKey = [
   sharedLevelSettings.skyboxPreset ?? 'observatory',
   formatAtmosphereDiagnosticNumber(skyBackgroundIntensity),
   formatAtmosphereDiagnosticNumber(skyEnvironmentIntensity),
+  formatAtmosphereDiagnosticNumber(skyAerialParticipation),
+  formatAtmosphereDiagnosticNumber(
+    runtimeAtmosphere.aerialPerspective.skyOcclusion,
+  ),
+  formatAtmosphereDiagnosticNumber(
+    runtimeAtmosphere.aerialPerspective.horizonBoost,
+  ),
   formatAtmosphereDiagnosticNumber(skyboxAerialPerspectiveBoost),
   oceanAtmosphereStatus,
   resolvedRenderProfile.id,
   resolvedRenderProfile.tier,
   Number(bloomProfileParticipates),
   Number(colorGradingProfileParticipates),
+  bloomProfileStatus,
+  colorGradingProfileStatus,
 ].join('|')
 $: if (
   levelDefinition &&
@@ -1454,14 +1496,12 @@ $: if (
 ) {
   lastAtmosphereDiagnosticKey = atmosphereDiagnosticKey
   setRuntimeDiagnostic('atmosphere', {
-    label: 'Atmosphere Integration',
-    level:
-      skyAtmosphereParticipates && !oceanAtmosphereLimited
-        ? 'ready'
-        : 'warning',
-    message: `${levelId}/${atmosphereSourceProfile}: distance fog ${distanceFogEnabled ? 'on' : 'off'} density ${formatAtmosphereDiagnosticNumber(fogDensity, 5)}; height fog ${heightFogEnabled ? 'on' : 'off'} floor ${formatAtmosphereDiagnosticNumber(heightFogFloor, 2)} ceiling ${formatAtmosphereDiagnosticNumber(heightFogCeiling, 2)} density ${formatAtmosphereDiagnosticNumber(heightFogDensity, 5)}; sky ${skyAtmosphereParticipates ? 'participating' : 'not participating'} preset ${sharedLevelSettings.skyboxPreset ?? 'observatory'} aerial ${formatAtmosphereDiagnosticNumber(skyboxAerialPerspectiveBoost, 2)} env ${formatAtmosphereDiagnosticNumber(skyEnvironmentIntensity, 2)}; mist ${runtimeMist.enabled ? 'participating' : 'disabled'}; ${oceanAtmosphereStatus}; post profile ${resolvedRenderProfile.id}/${resolvedRenderProfile.tier} bloom ${bloomProfileParticipates ? 'allowed' : 'disabled by profile or tier'} color grading ${colorGradingProfileParticipates ? 'allowed' : 'disabled by profile or tier'}.`,
+    label: 'Atmosphere',
+    level: skyAtmosphereParticipates ? 'ready' : 'warning',
+    message: `${levelId}/${atmosphereSourceKind}/${atmosphereSourceProfile}: distance fog ${distanceFogEnabled ? 'on' : 'off'} density ${formatAtmosphereDiagnosticNumber(fogDensity, 5)}; height fog ${heightFogEnabled ? 'on' : 'off'} floor ${formatAtmosphereDiagnosticNumber(heightFogFloor, 2)} ceiling ${formatAtmosphereDiagnosticNumber(heightFogCeiling, 2)} density ${formatAtmosphereDiagnosticNumber(heightFogDensity, 5)}; sky ${skyAtmosphereParticipates ? 'participating' : 'not participating'} preset ${sharedLevelSettings.skyboxPreset ?? 'observatory'} aerial ${formatAtmosphereDiagnosticNumber(skyboxAerialPerspectiveBoost, 2)} env ${formatAtmosphereDiagnosticNumber(skyEnvironmentIntensity, 2)}; mist ${runtimeMist.enabled ? 'participating' : 'disabled'}; ${oceanAtmosphereStatus}; post profile ${resolvedRenderProfile.id}/${resolvedRenderProfile.tier} bloom ${bloomProfileStatus} color grading ${colorGradingProfileStatus}.`,
     meta: {
       levelId,
+      sourceKind: atmosphereSourceKind,
       sourceProfile: atmosphereSourceProfile,
       distanceFogEnabled,
       distanceFogDensity: fogDensity,
@@ -1473,14 +1513,19 @@ $: if (
       skyboxPreset: sharedLevelSettings.skyboxPreset ?? 'observatory',
       skyBackgroundIntensity,
       skyEnvironmentIntensity,
+      skyAerialParticipation,
+      skyAerialOcclusion: runtimeAtmosphere.aerialPerspective.skyOcclusion,
+      skyAerialHorizonBoost: runtimeAtmosphere.aerialPerspective.horizonBoost,
       skyAerialPerspectiveBoost: skyboxAerialPerspectiveBoost,
       oceanParticipates: Boolean(waterEnabled && waterSettings),
-      oceanAtmosphereLimited,
+      oceanPlanarReflector: oceanPlanarReflectorActive,
       oceanStatus: oceanAtmosphereStatus,
       renderProfileId: resolvedRenderProfile.id,
       renderProfileTier: resolvedRenderProfile.tier,
       bloomProfileParticipates,
       colorGradingProfileParticipates,
+      bloomProfileStatus,
+      colorGradingProfileStatus,
     },
   })
 }
@@ -1549,6 +1594,7 @@ onDestroy(() => {
       refreshKey={sceneAtmosphereRefreshKey}
     />
     <GroundMistLayer
+      atmosphere={runtimeAtmosphere}
       enabled={globalMistEnabled}
       color={runtimeMist.color}
       opacity={globalMistOpacity}
@@ -1598,13 +1644,7 @@ onDestroy(() => {
         underwaterFogDensity={waterSettings.underwaterFogDensity ?? 0.08}
         underwaterFogColor={underwaterFogColor}
         surfaceFogDensity={waterSettings.surfaceFogDensity ?? fogDensity}
-        atmosphereFogColor={fogColor}
-        atmosphereFogDensity={fogDensity}
-        atmosphereHeightFogEnabled={heightFogEnabled}
-        atmosphereHeightFogColor={runtimeHeightFog.color}
-        atmosphereHeightFogDensity={heightFogDensity}
-        atmosphereHeightFogFloor={heightFogFloor}
-        atmosphereHeightFogCeiling={heightFogCeiling}
+        atmosphere={runtimeAtmosphere}
         metalness={0.02}
         roughness={0.025}
         envMapIntensity={resolvedRenderProfile.reflections.environmentIntensity}
@@ -1616,13 +1656,7 @@ onDestroy(() => {
       {#if $underwaterStateStore.isUnderwater || $underwaterStateStore.transitionProgress > 0}
         <UnderwaterOverlay
           {underwaterFogColor}
-          atmosphereFogColor={fogColor}
-          atmosphereFogDensity={fogDensity}
-          atmosphereHeightFogEnabled={heightFogEnabled}
-          atmosphereHeightFogColor={runtimeHeightFog.color}
-          atmosphereHeightFogDensity={heightFogDensity}
-          atmosphereHeightFogFloor={heightFogFloor}
-          atmosphereHeightFogCeiling={heightFogCeiling}
+          atmosphere={runtimeAtmosphere}
         />
       {/if}
     {/if}

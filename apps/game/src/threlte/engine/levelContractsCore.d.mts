@@ -11,6 +11,4 @@ export interface LevelRuntimeContract {
   maxGameplayFireflyCount: number
 }
 
-export function getLevelRuntimeContract(
-  levelId: string,
-): LevelRuntimeContract
+export function getLevelRuntimeContract(levelId: string): LevelRuntimeContract

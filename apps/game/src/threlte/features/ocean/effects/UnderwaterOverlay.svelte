@@ -7,6 +7,8 @@
 
 <script lang="ts">
 import { onDestroy, onMount } from 'svelte'
+import { DEFAULT_RUNTIME_ATMOSPHERE } from '../../../atmosphere/buildRuntimeAtmosphere'
+import type { RuntimeAtmosphereDefinition } from '../../../atmosphere/runtimeAtmosphereTypes'
 import {
   underwaterConfigStore,
   underwaterIntensity,
@@ -16,13 +18,7 @@ import {
 // Props
 export let enabled = true
 export let underwaterFogColor: string | number = 0x0a1922
-export let atmosphereFogColor = '#7b8797'
-export let atmosphereFogDensity = 0
-export let atmosphereHeightFogEnabled = false
-export let atmosphereHeightFogColor = '#7b8797'
-export let atmosphereHeightFogDensity = 0
-export let atmosphereHeightFogFloor = 0
-export let atmosphereHeightFogCeiling = 4
+export let atmosphere: RuntimeAtmosphereDefinition = DEFAULT_RUNTIME_ATMOSPHERE
 
 // Component state
 let overlayElement: HTMLDivElement
@@ -34,6 +30,22 @@ $: depth = $underwaterStateStore.depth
 $: transitionProgress = $underwaterStateStore.transitionProgress
 $: intensity = $underwaterIntensity
 $: config = $underwaterConfigStore
+$: resolvedAtmosphereFogColor = atmosphere.distanceFog.color
+$: resolvedAtmosphereFogDensity =
+  atmosphere.enabled && atmosphere.distanceFog.enabled
+    ? Math.max(0, atmosphere.distanceFog.density)
+    : 0
+$: resolvedAtmosphereHeightFogEnabled =
+  atmosphere.enabled && atmosphere.heightFog.enabled
+$: resolvedAtmosphereHeightFogColor = atmosphere.heightFog.color
+$: resolvedAtmosphereHeightFogDensity = resolvedAtmosphereHeightFogEnabled
+  ? Math.max(0, atmosphere.heightFog.density)
+  : 0
+$: resolvedAtmosphereHeightFogFloor = atmosphere.heightFog.floor
+$: resolvedAtmosphereHeightFogCeiling = Math.max(
+  resolvedAtmosphereHeightFogFloor + 0.001,
+  atmosphere.heightFog.ceiling,
+)
 
 // Debug reactive changes
 $: shouldAnimate = enabled && (isUnderwater || transitionProgress > 0)
@@ -87,23 +99,25 @@ function rgba(color: Rgb, alpha: number) {
 function getAtmosphereInfluence() {
   const heightFogBand = Math.max(
     0.001,
-    atmosphereHeightFogCeiling - atmosphereHeightFogFloor,
+    resolvedAtmosphereHeightFogCeiling - resolvedAtmosphereHeightFogFloor,
   )
-  const heightFogBandFactor = atmosphereHeightFogEnabled
+  const heightFogBandFactor = resolvedAtmosphereHeightFogEnabled
     ? Math.min(1.5, Math.max(0.35, 6 / heightFogBand))
     : 0
 
   return clamp01(
     0.28 +
-      atmosphereFogDensity * 70 +
-      atmosphereHeightFogDensity * 650 * heightFogBandFactor,
+      resolvedAtmosphereFogDensity * 70 +
+      resolvedAtmosphereHeightFogDensity * 650 * heightFogBandFactor,
   )
 }
 
 function getOverlayGradient() {
   const waterColor = colorToRgb(underwaterFogColor, [10, 25, 34])
   const atmosphereColor = colorToRgb(
-    atmosphereHeightFogEnabled ? atmosphereHeightFogColor : atmosphereFogColor,
+    resolvedAtmosphereHeightFogEnabled
+      ? resolvedAtmosphereHeightFogColor
+      : resolvedAtmosphereFogColor,
     [123, 135, 151],
   )
   const influence = getAtmosphereInfluence()

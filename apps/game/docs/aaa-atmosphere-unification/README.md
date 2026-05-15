@@ -193,3 +193,70 @@ The work is complete only when:
   owner and deletion condition.
 - Runtime diagnostics list all participating atmosphere consumers.
 - A visual smoke proves ocean, skybox, terrain, and props respond consistently.
+
+## Agent 06 Certification Handoff
+
+Date: 2026-05-15.
+
+```txt
+Core contract:
+RuntimeAtmosphereDefinition, runtimeAtmosphereStore, and the scene atmosphere
+builder in apps/game/src/threlte/atmosphere are the runtime atmosphere authority.
+
+Runtime consumers:
+SceneAtmosphereSystem, atmosphereMaterialRegistry, sky aerial perspective,
+standard material fog integration, ocean material integration, ground mist,
+underwater effects, post-processing policy, and runtime diagnostics consume the
+same runtime atmosphere definition.
+
+Editor / authoring consumers:
+SceneDocumentLevel builds RuntimeAtmosphereDefinition from scene settings and
+authored fog volumes. GameplayStyleProfiles now maps style presets through the
+runtime atmosphere builder instead of reading runtime style haze, fog, bloom, or
+color grading fields directly.
+
+Manifest / generated data:
+No manifest, generated asset, runtime payload, collision, required asset, LOD,
+or streaming data changed.
+
+Validation and audits:
+pnpm --dir apps/game type-check passed.
+Targeted Biome check for atmosphere-owned files passed.
+pnpm --dir apps/game exec biome check src/threlte remains blocked by existing
+unrelated formatting/import diagnostics outside the atmosphere-owned files.
+Required smoke:boot on port 4322 was blocked by an unhealthy occupied shared
+port. Isolated boot smoke on port 4330 also failed when the dev server stopped
+mid-run, producing connection refused errors while loading observatory terrain.
+Visual smoke passed for yggdrasil, observatory, and solitude on an isolated
+server and wrote screenshots under
+apps/game/.visual-smoke/atmosphere-certification/.
+
+Compatibility code to delete:
+apps/game/src/threlte/components/SceneFogExp2.svelte deleted.
+apps/game/src/threlte/systems/sceneFogMaterialPatch.ts deleted.
+
+Compatibility code intentionally retained:
+none
+
+Out of scope:
+Unrelated src/threlte Biome cleanup, unrelated editor Svelte export warnings,
+terrain server stability, and asset/collision budget changes.
+```
+
+Certification searches:
+
+- `rg -n "style\\.(haze|fog|bloom|colorGrading)" apps/game/src/threlte`
+  returned no matches.
+- `rg -n "sceneFogMaterialPatch|SceneFogExp2|applySceneFogMaterial|resolveHeightFogSettings|fogDepthBoost" apps/game/src/threlte`
+  returned no matches.
+- `rg -n "skybox.*veil|veil|overlay" apps/game/src/threlte/atmosphere apps/game/src/threlte/systems/Skybox.svelte`
+  returned no matches.
+- `rg -n "ocean.*fog|fog.*ocean|waterFog|oceanFog" apps/game/src/threlte`
+  only found the retained underwater fog controls/path plus the new ocean
+  atmosphere diagnostic text.
+
+Visual smoke artifacts:
+
+- `apps/game/.visual-smoke/atmosphere-certification/solitude.png`
+- `apps/game/.visual-smoke/atmosphere-certification/observatory.png`
+- `apps/game/.visual-smoke/atmosphere-certification/yggdrasil.png`

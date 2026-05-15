@@ -135,10 +135,7 @@ export async function loadEditorPublishReadiness(
           ),
         ].map(
           async url =>
-            [
-              url,
-              await fetchJson<StyleBakeMetadata>(fetchImpl, url),
-            ] as const,
+            [url, await fetchJson<StyleBakeMetadata>(fetchImpl, url)] as const,
         ),
       )
 

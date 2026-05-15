@@ -9,23 +9,16 @@ import {
   createDisabledSceneAtmosphereDefinition,
   getSceneAtmosphereMaterialDiagnostics,
   refreshSceneAtmosphereParticipants,
-  resolveSceneAtmosphereDefinition,
   runtimeAtmosphereToSceneAtmosphereDefinition,
   setSceneAtmosphereDefinition,
 } from './atmosphereMaterialRegistry'
+import { DEFAULT_RUNTIME_ATMOSPHERE } from './buildRuntimeAtmosphere'
 import type { RuntimeAtmosphereDefinition } from './runtimeAtmosphereTypes'
 
 export let levelId = ''
-export let atmosphere: RuntimeAtmosphereDefinition | null = null
-export let color = '#7b8797'
-export let density = 0.001
-export let heightFogEnabled = false
-export let heightFogColor = '#7b8797'
-export let heightFogDensity = 0
-export let heightFogFloor = 0
-export let heightFogCeiling = 4
+export let atmosphere: RuntimeAtmosphereDefinition = DEFAULT_RUNTIME_ATMOSPHERE
 export let refreshKey = ''
-export let scanIntervalSeconds = 0.75
+export let scanIntervalSeconds = 5
 
 const { scene, invalidate } = useThrelte()
 
@@ -79,41 +72,43 @@ function syncSceneFog(atmosphere: SceneAtmosphereDefinition) {
 }
 
 function publishAtmosphereDiagnostic(
-  atmosphere: SceneAtmosphereDefinition,
+  sceneAtmosphere: SceneAtmosphereDefinition,
   reason: string,
 ) {
   const diagnostics = getSceneAtmosphereMaterialDiagnostics()
   const diagnosticSignature = JSON.stringify({
-    atmosphere: getAtmosphereKey(atmosphere),
+    atmosphere: getAtmosphereKey(sceneAtmosphere),
     diagnostics,
   })
   if (diagnosticSignature === lastDiagnosticSignature) return
   lastDiagnosticSignature = diagnosticSignature
 
-  const level = !atmosphere.enabled
+  const level = !sceneAtmosphere.enabled
     ? 'idle'
-    : diagnostics.bypassedMaterialCount > 0
+    : diagnostics.warningBypassedMaterialCount > 0
       ? 'warning'
       : diagnostics.heightParticipantCount > 0 ||
           diagnostics.distanceParticipantCount > 0
         ? 'ready'
         : 'warning'
 
-  const message = !atmosphere.enabled
+  const message = !sceneAtmosphere.enabled
     ? 'Scene atmosphere disabled.'
-    : `Distance fog ${atmosphere.distanceFog.enabled ? 'on' : 'off'} density ${atmosphere.distanceFog.density.toFixed(5)}; height fog ${atmosphere.heightFog.enabled ? 'on' : 'off'} floor ${atmosphere.heightFog.floor.toFixed(2)} ceiling ${atmosphere.heightFog.ceiling.toFixed(2)} density ${atmosphere.heightFog.density.toFixed(5)}; materials ${diagnostics.distanceParticipantCount} distance / ${diagnostics.heightParticipantCount} height participants, ${diagnostics.bypassedMaterialCount} bypassing.`
+    : `Distance fog ${sceneAtmosphere.distanceFog.enabled ? 'on' : 'off'} density ${sceneAtmosphere.distanceFog.density.toFixed(5)}; height fog ${sceneAtmosphere.heightFog.enabled ? 'on' : 'off'} floor ${sceneAtmosphere.heightFog.floor.toFixed(2)} ceiling ${sceneAtmosphere.heightFog.ceiling.toFixed(2)} density ${sceneAtmosphere.heightFog.density.toFixed(5)}; materials ${diagnostics.distanceParticipantCount} distance / ${diagnostics.heightParticipantCount} height participants, ${diagnostics.warningBypassedMaterialCount} warning bypasses, ${diagnostics.expectedBypassedMaterialCount} expected bypasses.`
 
   const meta = {
     levelId,
     reason,
-    distanceFogEnabled: atmosphere.distanceFog.enabled,
-    distanceFogColor: atmosphere.distanceFog.color.getHexString(),
-    distanceFogDensity: atmosphere.distanceFog.density,
-    heightFogEnabled: atmosphere.heightFog.enabled,
-    heightFogColor: atmosphere.heightFog.color.getHexString(),
-    heightFogDensity: atmosphere.heightFog.density,
-    heightFogFloor: atmosphere.heightFog.floor,
-    heightFogCeiling: atmosphere.heightFog.ceiling,
+    sourceKind: atmosphere.source.kind,
+    sourceProfile: atmosphere.source.profileId || atmosphere.id || 'authored',
+    distanceFogEnabled: sceneAtmosphere.distanceFog.enabled,
+    distanceFogColor: sceneAtmosphere.distanceFog.color.getHexString(),
+    distanceFogDensity: sceneAtmosphere.distanceFog.density,
+    heightFogEnabled: sceneAtmosphere.heightFog.enabled,
+    heightFogColor: sceneAtmosphere.heightFog.color.getHexString(),
+    heightFogDensity: sceneAtmosphere.heightFog.density,
+    heightFogFloor: sceneAtmosphere.heightFog.floor,
+    heightFogCeiling: sceneAtmosphere.heightFog.ceiling,
     ...diagnostics,
   }
 
@@ -162,22 +157,10 @@ useTask(delta => {
   refreshAtmosphereParticipants(activeAtmosphere, 'scheduled-scan')
 })
 
-$: activeAtmosphere = atmosphere
-  ? runtimeAtmosphereToSceneAtmosphereDefinition(atmosphere, {
-      levelId,
-      refreshKey,
-    })
-  : resolveSceneAtmosphereDefinition({
-      color,
-      density,
-      heightFogEnabled,
-      heightFogColor,
-      heightFogDensity,
-      heightFogFloor,
-      heightFogCeiling,
-      levelId,
-      refreshKey,
-    })
+$: activeAtmosphere = runtimeAtmosphereToSceneAtmosphereDefinition(atmosphere, {
+  levelId,
+  refreshKey,
+})
 
 $: {
   const atmosphereKey = getAtmosphereKey(activeAtmosphere)

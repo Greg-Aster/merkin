@@ -24,11 +24,10 @@ export const COLLISION_LAYERS = COLLISION_LAYERS_CORE as {
 }
 
 export type RuntimeCollisionLayer = keyof typeof COLLISION_LAYERS
-export const COLLISION_GROUP_MATRIX =
-  COLLISION_GROUP_MATRIX_CORE as Record<
-    RuntimeCollisionLayer,
-    readonly RuntimeCollisionLayer[]
-  >
+export const COLLISION_GROUP_MATRIX = COLLISION_GROUP_MATRIX_CORE as Record<
+  RuntimeCollisionLayer,
+  readonly RuntimeCollisionLayer[]
+>
 
 export const PLAYER_GROUP = PLAYER_GROUP_CORE
 export const WORLD_STATIC_GROUP = WORLD_STATIC_GROUP_CORE

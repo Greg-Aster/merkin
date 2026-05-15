@@ -2,6 +2,10 @@
 import { Collider } from '@threlte/rapier'
 import { onDestroy } from 'svelte'
 import type { AssetLocalTransformMetadata } from '../engine/assetLocalTransform'
+import {
+  markRuntimeColliderUrlLoaded,
+  unmarkRuntimeColliderUrlLoaded,
+} from '../stores/runtimeCollisionRegistry'
 import { loadCachedGltf } from '../utils/gltfAssetCache'
 import {
   type MeshColliderPatch,
@@ -11,10 +15,6 @@ import {
   loadAssetLocalTransformMetadata,
   validateInlineAssetLocalTransform,
 } from './assetTrimeshColliderMetadata'
-import {
-  markRuntimeColliderUrlLoaded,
-  unmarkRuntimeColliderUrlLoaded,
-} from '../stores/runtimeCollisionRegistry'
 
 export let levelId = ''
 export let url = ''

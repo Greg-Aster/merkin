@@ -185,6 +185,63 @@ Known blockers:
 Next handoff needed:
 ```
 
+```txt
+Agent: Agent 06 Validation, Visual Smoke, And Deletion
+Branch/worktree: local dirty Merkin worktree
+Status: ready-for-review
+Owned files:
+apps/game/docs/aaa-atmosphere-unification/README.md
+apps/game/docs/aaa-atmosphere-unification/AGENT_00_COORDINATION.md
+apps/game/docs/aaa-atmosphere-unification/AGENT_06_VALIDATION_CERTIFICATION.md
+Files touched outside ownership:
+apps/game/src/threlte/atmosphere/*
+apps/game/src/threlte/features/ocean/components/OceanComponent.svelte
+apps/game/src/threlte/components/GroundMistLayer.svelte
+apps/game/src/threlte/features/ocean/effects/UnderwaterEffect.svelte
+apps/game/src/threlte/features/ocean/effects/UnderwaterOverlay.svelte
+apps/game/src/threlte/features/performance/utils/runtimeVisualQualityPolicy.ts
+apps/game/src/threlte/levels/SceneDocumentLevel.svelte
+apps/game/src/threlte/stores/runtimeRenderRegistry.ts
+apps/game/src/threlte/styles/GameplayStyleProfiles.ts
+apps/game/src/threlte/systems/SimplePostProcessing.svelte
+apps/game/src/threlte/systems/Skybox.svelte
+Contract changes made:
+Final integration now routes scene settings, authored fog volumes, material
+fog, sky/aerial perspective, ocean material, mist, underwater, post-processing,
+and diagnostics through RuntimeAtmosphereDefinition/runtimeAtmosphereStore.
+Compatibility code deleted:
+apps/game/src/threlte/components/SceneFogExp2.svelte
+apps/game/src/threlte/systems/sceneFogMaterialPatch.ts
+Compatibility code retained:
+none
+Generated files changed:
+Visual smoke artifacts:
+apps/game/.visual-smoke/atmosphere-certification/solitude.png
+apps/game/.visual-smoke/atmosphere-certification/observatory.png
+apps/game/.visual-smoke/atmosphere-certification/yggdrasil.png
+Commands run:
+pnpm --dir apps/game type-check
+pnpm --dir apps/game exec biome check src/threlte
+pnpm --dir apps/game exec biome check src/threlte/atmosphere src/threlte/components/GroundMistLayer.svelte src/threlte/features/ocean/components/OceanComponent.svelte src/threlte/features/ocean/effects/UnderwaterEffect.svelte src/threlte/features/ocean/effects/UnderwaterOverlay.svelte src/threlte/features/performance/utils/runtimeVisualQualityPolicy.ts src/threlte/levels/SceneDocumentLevel.svelte src/threlte/styles/GameplayStyleProfiles.ts src/threlte/systems/SimplePostProcessing.svelte src/threlte/systems/Skybox.svelte src/threlte/stores/runtimeRenderRegistry.ts
+GAME_NO_SERVER=1 GAME_DEV_PORT=4322 pnpm --dir apps/game smoke:boot
+GAME_DEV_PORT=4330 pnpm --dir apps/game smoke:boot
+GAME_DEV_PORT=4330 pnpm --dir apps/game smoke:visual -- --level=yggdrasil,observatory,solitude --write-artifacts --skip-baselines --artifact-dir apps/game/.visual-smoke/atmosphere-certification
+GAME_DEV_PORT=4330 pnpm --dir apps/game smoke:visual -- --level=yggdrasil --write-artifacts --skip-baselines --artifact-dir apps/game/.visual-smoke/atmosphere-certification
+rg -n "style\\.(haze|fog|bloom|colorGrading)" apps/game/src/threlte
+rg -n "sceneFogMaterialPatch|SceneFogExp2|applySceneFogMaterial|resolveHeightFogSettings|fogDepthBoost" apps/game/src/threlte
+rg -n "skybox.*veil|veil|overlay" apps/game/src/threlte/atmosphere apps/game/src/threlte/systems/Skybox.svelte
+rg -n "ocean.*fog|fog.*ocean|waterFog|oceanFog" apps/game/src/threlte
+Known blockers:
+Full src/threlte Biome check is blocked by unrelated existing formatting and
+organize-import diagnostics outside atmosphere-owned files. Required port 4322
+boot smoke is blocked by an unhealthy occupied shared dev server. Isolated port
+4330 boot smoke failed after the dev server stopped mid-run, causing connection
+refused errors for editor/level routes and observatory terrain assets.
+Next handoff needed:
+Resolve unrelated Biome debt and shared dev-server stability, then rerun the
+full required boot smoke on port 4322.
+```
+
 ## Open Coordination Risks
 
 - Native Three.js `scene.background` does not participate in scene fog. The sky

@@ -480,16 +480,24 @@ function validateGeneratedProductForPolicy(
     errors.push('Generated product actor id does not match the actor.')
   }
   if (product.cacheKey !== context.cacheKey) {
-    errors.push('Generated product cache key does not match the requested generation.')
+    errors.push(
+      'Generated product cache key does not match the requested generation.',
+    )
   }
   if (product.sourceMeshFingerprint !== context.sourceFingerprint) {
-    errors.push('Generated product source fingerprint does not match the current source.')
+    errors.push(
+      'Generated product source fingerprint does not match the current source.',
+    )
   }
   if (product.transformFingerprint !== context.transformFingerprint) {
-    errors.push('Generated product transform fingerprint does not match the current transform.')
+    errors.push(
+      'Generated product transform fingerprint does not match the current transform.',
+    )
   }
   if (product.policyFingerprint !== context.policyFingerprint) {
-    errors.push('Generated product policy fingerprint does not match the current policy.')
+    errors.push(
+      'Generated product policy fingerprint does not match the current policy.',
+    )
   }
   if (product.shape !== expectedShape) {
     errors.push(

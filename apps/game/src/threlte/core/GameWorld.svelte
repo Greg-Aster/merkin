@@ -1,26 +1,24 @@
 <script lang="ts">
 import { createEventDispatcher } from 'svelte'
+import { evaluateLevelRuntimeActivation } from '../engine/levelRuntimeReadinessContract'
 import {
   type RuntimePlayerSettings,
   resolveRuntimePlayerSettings,
 } from '../engine/runtimePlayerSettings'
-import { evaluateLevelRuntimeActivation } from '../engine/levelRuntimeReadinessContract'
+import type { SceneSettings } from '../engine/sceneDocumentTypes'
 import type {
   LevelRuntimeActivationState,
   LevelRuntimeActivationStatus,
   LevelRuntimeReadinessContract,
 } from '../engine/types'
 import { DEFAULT_LEVEL_ID } from '../levels/levelRegistry'
+import { runtimeLoadedColliderUrlsStore } from '../stores/runtimeCollisionRegistry'
+import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
 import { runtimeDebugLog } from '../utils/runtimeLog'
 import type {
   PlayerLevelPositionDetail,
   StaticWorldReadyDetail,
 } from './levelRuntimeEvents'
-import {
-  runtimeLoadedColliderUrlsStore,
-} from '../stores/runtimeCollisionRegistry'
-import { setRuntimeDiagnostic } from '../stores/runtimeDiagnosticsStore'
-import type { SceneSettings } from '../engine/sceneDocumentTypes'
 
 const dispatch = createEventDispatcher()
 
@@ -342,8 +340,7 @@ $: gameplayActivationRequested = Boolean(
 $: runtimeActivationStatus = levelRuntimeReadinessContract
   ? evaluateLevelRuntimeActivation(levelRuntimeReadinessContract, {
       ...staticWorldRuntimeState,
-      loadedColliderUrls:
-        $runtimeLoadedColliderUrlsStore[activeLevelKey] ?? [],
+      loadedColliderUrls: $runtimeLoadedColliderUrlsStore[activeLevelKey] ?? [],
       physicsWorldReady: physicsReady,
       playerBodyReady: playerReady,
       gameplayEnabled: gameplayActivationRequested,

@@ -211,8 +211,7 @@ export async function applyGeneratedAssetToNode(
   })
 
   deps.appendPipelineLog(
-    options.logMessage ??
-      'Applied generated asset with preserved transform',
+    options.logMessage ?? 'Applied generated asset with preserved transform',
     {
       nodeId: node.id,
       assetUrl: generatedAssetUrl,

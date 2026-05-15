@@ -55,8 +55,14 @@ function createEditorSmokeCheck(name, url) {
       })
       await page
         .locator('.editor-tab-rail')
-        .getByRole('button', { name: 'Inspect', exact: true })
+        .locator('button')
+        .filter({ hasText: 'Scene' })
+        .first()
         .click()
+      await page.getByText('Inspector & Object Details').waitFor({
+        state: 'visible',
+        timeout: 10000,
+      })
       await page
         .locator('.editor-tools-panel .editor-tab-content')
         .getByText(
@@ -150,7 +156,9 @@ for (const check of checks) {
       if (shouldIgnoreRequestFailure(url, errorText)) {
         return
       }
-      messages.push(`[requestfailed] ${request.method()} ${url} :: ${errorText}`)
+      messages.push(
+        `[requestfailed] ${request.method()} ${url} :: ${errorText}`,
+      )
     })
 
     async function runNavigation() {

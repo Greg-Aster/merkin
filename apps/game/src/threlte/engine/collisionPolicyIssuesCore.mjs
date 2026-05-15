@@ -34,7 +34,10 @@ export function getCollisionPolicyIssues(input) {
       issues.push({ code: 'detail-not-sensor' })
     }
     if (collision.channel !== 'detail') {
-      issues.push({ code: 'detail-channel-mismatch', expectedChannel: 'detail' })
+      issues.push({
+        code: 'detail-channel-mismatch',
+        expectedChannel: 'detail',
+      })
     }
   }
 
@@ -71,7 +74,8 @@ export function describeCollisionPolicyIssue(issue, input) {
       return {
         reviewCode: 'trigger-blocks-player',
         reviewMessage: `Trigger actor "${actorName}" is not marked as a sensor.`,
-        reviewRecommendation: 'Set collision.sensor to true for trigger volumes.',
+        reviewRecommendation:
+          'Set collision.sensor to true for trigger volumes.',
         buildGateMessage: `Trigger actor "${actorId}" must be authored as a sensor.`,
       }
     case 'detail-not-sensor':

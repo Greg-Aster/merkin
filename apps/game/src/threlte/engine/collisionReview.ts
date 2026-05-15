@@ -1,15 +1,15 @@
+import { getSceneNodeMeshRenderSource } from './actorRenderSource'
 import { clampColliderSize, getCollisionVisualSize } from './colliderGeometry'
+import { resolveCollisionPolicy } from './collisionPolicy'
 import {
   describeCollisionPolicyIssue,
   getCollisionPolicyIssues,
 } from './collisionPolicyIssues'
-import { resolveCollisionPolicy } from './collisionPolicy'
 import {
   actorColliderAabbContainsPoint,
   actorSupportsWalkabilitySample,
 } from './collisionSpatialQueries'
 import type { WalkableSupportOptions } from './collisionSpatialQueries'
-import { getSceneNodeMeshRenderSource } from './actorRenderSource'
 import { requiresExplicitCollisionClassification } from './levelValidation'
 import { adaptSceneDocumentToLevelDefinition } from './sceneAdapter'
 import type { SceneDocument, SceneNode } from './sceneDocumentTypes'
