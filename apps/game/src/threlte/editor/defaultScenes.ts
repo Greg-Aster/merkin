@@ -64,7 +64,9 @@ function hasSourceGlbAssetContract(
   )
 }
 
-function getTerrainManifestUrl(settings: SharedLevelEditorSettings | undefined) {
+function getTerrainManifestUrl(
+  settings: SharedLevelEditorSettings | undefined,
+) {
   return (
     settings?.ground?.terrainManifestUrl ??
     settings?.collision?.terrain?.manifestUrl ??

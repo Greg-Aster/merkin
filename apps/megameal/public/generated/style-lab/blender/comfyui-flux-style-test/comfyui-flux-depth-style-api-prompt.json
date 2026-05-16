@@ -1,0 +1,197 @@
+{
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "merkin-yggdrasil-world-tree-source-composition.png"
+    }
+  },
+  "2": {
+    "class_type": "ImageScale",
+    "inputs": {
+      "image": [
+        "1",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "width": 1152,
+      "height": 672,
+      "crop": "disabled"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "2",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    }
+  },
+  "5": {
+    "class_type": "UnetLoaderGGUF",
+    "inputs": {
+      "unet_name": "FLUX1/flux1-dev-Q6_K.gguf"
+    }
+  },
+  "6": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "5",
+        0
+      ],
+      "lora_name": "flux1_dev_turbo.safetensors",
+      "strength_model": 1.0
+    }
+  },
+  "7": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "6",
+        0
+      ],
+      "lora_name": "Aquarelle_IV-8.safetensors",
+      "strength_model": 1.4
+    }
+  },
+  "8": {
+    "class_type": "DualCLIPLoader",
+    "inputs": {
+      "clip_name1": "flux/clip_l.safetensors",
+      "clip_name2": "t5/google_t5-v1_1-xxl_encoderonly-fp8_e4m3fn.safetensors",
+      "type": "flux"
+    }
+  },
+  "9": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "bright painted concept art render of the exact same low-poly world tree mesh, hand-painted albedo, broad opaque brush blocks, visible brush strokes, rich magenta canopy with rose, violet, and crimson color variation, dark twisted blue-black trunk with strong cyan and violet painted rim highlights, shaped light and shadow, expressive color script, painterly concept art materials, preserved silhouette, non-photorealistic",
+      "clip": [
+        "8",
+        0
+      ]
+    }
+  },
+  "10": {
+    "class_type": "FluxGuidance",
+    "inputs": {
+      "conditioning": [
+        "9",
+        0
+      ],
+      "guidance": 5.0
+    }
+  },
+  "11": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "photorealistic, toon shader, flat cel shading, plastic, noise overlay, low quality, blurry, text, watermark, extra objects, different tree silhouette",
+      "clip": [
+        "8",
+        0
+      ]
+    }
+  },
+  "12": {
+    "class_type": "DepthAnythingV2Preprocessor",
+    "inputs": {
+      "image": [
+        "2",
+        0
+      ],
+      "ckpt_name": "depth_anything_v2_vitl.pth",
+      "resolution": 1024
+    }
+  },
+  "13": {
+    "class_type": "ControlNetLoader",
+    "inputs": {
+      "control_net_name": "FLUX.1/flux-depth-controlnet-v3.safetensors"
+    }
+  },
+  "14": {
+    "class_type": "ControlNetApplyAdvanced",
+    "inputs": {
+      "positive": [
+        "10",
+        0
+      ],
+      "negative": [
+        "11",
+        0
+      ],
+      "control_net": [
+        "13",
+        0
+      ],
+      "image": [
+        "12",
+        0
+      ],
+      "strength": 0.48,
+      "start_percent": 0.0,
+      "end_percent": 0.72
+    }
+  },
+  "15": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "7",
+        0
+      ],
+      "seed": 24051601,
+      "steps": 22,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "positive": [
+        "14",
+        0
+      ],
+      "negative": [
+        "14",
+        1
+      ],
+      "latent_image": [
+        "4",
+        0
+      ],
+      "denoise": 0.86
+    }
+  },
+  "16": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "15",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    }
+  },
+  "17": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "16",
+        0
+      ],
+      "filename_prefix": "merkin/style-lab/yggdrasil-flux-depth-aquarelle-paint-test-strong"
+    }
+  }
+}
